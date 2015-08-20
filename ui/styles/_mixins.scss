@@ -1,0 +1,16 @@
+/* Rounded corners */
+ 
+@mixin rounded-corners() {
+  -webkit-border-radius: 2px;
+  -moz-border-radius:    2px;
+  -ms-border-radius:     2px;
+  border-radius:         2px;
+}
+ 
+@mixin dark-fill($opacity) {
+  background: rgba(0,0,0, $opacity);
+}
+
+@mixin light-fill($opacity) {
+  background: rgba(255,255,255, $opacity);
+}

@@ -1,0 +1,213 @@
+/* Menubar
+-------------------------------------------------- */
+
+.menubar {
+  height: 40px;
+  .menu-group {
+    float: left;
+    margin-left: 5px;
+  }
+
+  .pill {
+    font-weight: 600;
+    
+    padding: 0px 10px;
+    float: left;
+    margin: 5px;
+    height: 30px;
+    min-width: 30px;
+    text-align: center;
+    @include rounded-corners();
+
+    &:hover {
+      @include dark-fill(0.05);
+    }
+
+    &.active {
+      @include dark-fill(0.2);
+    }
+  }
+
+  &.dark .pill {
+    &.active, &:hover {
+      @include light-fill(0.1);  
+    }
+  }
+}
+
+
+/* Toolbar
+-------------------------------------------------- */
+ 
+.toolbar {
+  height: 40px;
+  
+  .tool-group {
+    float: left;
+    margin-right: 10px;
+  }
+
+  .tool {
+    line-height: normal;
+    margin: 5px;
+    float: left;
+    position: relative;
+  }
+  
+  /* Toolbar Tool
+  ---------------------------- */
+
+  input {
+    margin: 5px;
+    margin-left: 20px;
+    min-width: 600px;
+    border: none;
+  }
+
+  .button {
+    // float: left;
+    height: 30px;
+    min-width: 30px;
+    text-align: center;
+    color: inherit;
+  }
+
+  .button:hover {
+    @include dark-fill(0.05);
+  }
+
+  .button.disabled:hover {background: none; }
+
+  .button.active {
+    @include dark-fill(0.1);
+  }
+
+  /* Toolbar Dropdown
+  ---------------------------- */
+
+  .dropdown {
+    overflow: visible;
+    position: relative;
+    float: left;
+
+    .toggle {
+      height: 30px;
+      padding: 0px 10px;
+      line-height: 30px;
+      margin: 5px;
+
+      display: block;
+    }
+
+    &:not(.disabled) .toggle:after {
+      content: " \f0d7";
+      padding-left: 10px;
+
+      float: right;
+      font-family: FontAwesome;
+    }
+
+    .options {
+      display: none;
+      position: absolute;
+      top: 40px;
+      min-width: 150px;
+
+      .option {
+        display: block;
+        padding: 5px 10px;
+        width:100%; // needed to make buttons render like block elements
+      }
+
+      .option:hover {
+        @include dark-fill(0.05);
+      }
+    }
+
+    &.open .options {
+      display: block;
+    }
+  }
+
+  /* Toolbar Select
+  ---------------------------- */
+
+  .select {
+    @extend .dropdown;
+
+    .toggle {
+      background: white;
+      border: 1px solid $border-color;
+    }
+  }
+}
+
+
+/* Modal
+-------------------------------------------------- */
+
+.modal {
+  z-index: 500000;
+  position: fixed;
+  top: 0px;
+  left: 0px;
+  right: 0px;
+  bottom: 0px;
+  background: rgba(0,0,0,0.6);
+
+
+  .body {
+    position: absolute;
+
+    margin-left: auto;
+    margin-right: auto;
+    left: 30px;
+    right: 30px;
+
+    top: 30px;
+    bottom: 30px;
+    background: white;
+    box-shadow: 0 0 25px 0 rgba(0,0,0,0.8);
+
+
+    .header {
+      position: absolute;
+      left: 0px;
+      top: 0px;
+      right: 0px;
+      height: 40px;
+
+      // background: blue;
+      border-bottom: 1px solid #ddd;
+
+      .title {
+        line-height: 40px;
+        font-weight: 600;
+        padding-left: 20px;
+      }
+    }
+
+    .content {
+      position: absolute;
+      overflow: auto;
+      top: 40px;
+      left: 0px;
+      right: 0px;
+      bottom: 0px;
+    }
+  }
+
+  &.medium .body {
+    max-width: 800px;
+    // left: 200px;
+    // right: 200px;
+  }
+
+  // &.small {
+  //   .body {max-width: 400px; }
+  // }
+
+  // &.big {
+  //   .body {max-width: 1200px; }
+  // }
+}

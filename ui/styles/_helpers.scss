@@ -1,0 +1,56 @@
+/* Helpers
+-------------------------------------------------- */
+
+.pad { padding: 20px; }
+
+.limiter {
+  max-width:1000px;
+  margin-left:auto;
+  margin-right:auto;
+}
+
+.truncate {
+  text-overflow:ellipsis;
+  white-space:nowrap;
+  overflow:hidden;
+}
+
+.hidden { display: none !important; }
+ 
+/* Typography */
+.small { font-size: 14px; line-height: 17px; }
+.large { font-size: 17px; line-height: 20px; }
+.dark { color:#fff; } // typo on dark background
+ 
+/* Borders */
+.border { border: 1px solid $border-color; }
+.border-left { border-left: 1px solid $border-color;}
+.border-right { border-right: 1px solid $border-color; }
+.border-top { border-top: 1px solid $border-color; }
+.border-bottom { border-bottom: 1px solid $border-color; }
+ 
+/* Deemphasis */
+.quiet { color: rgba(0,0,0,.5); }
+.dark .quiet { color: rgba(255,255,255,.5); }
+ 
+/* Floating */
+.float-left { float: left !important; }
+.float-right { float: right !important; }
+ 
+/* Clearfix - see http://www.positioniseverything.net/easyclearing.html */
+.clearfix { display:block; }
+.clearfix:after {
+  content:'';
+  display:block;
+  height:0;
+  clear:both;
+  visibility:hidden;
+}
+
+/* Disabled style */
+.disabled {
+  opacity: 0.2;
+  cursor: default;
+}
+ 
+.shadow { box-shadow: 0 0 25px 0 rgba(0,0,0,0.15); }

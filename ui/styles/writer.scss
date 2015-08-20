@@ -1,0 +1,462 @@
+@import 'index';
+
+/* Layout stuff
+---------------------------------
+*/
+
+body,html {
+  overflow: hidden;
+}
+
+#container .panel-wrapper {
+  overflow: auto;
+}
+
+/* Writer Component
+-----------------------------------------------------*/
+
+.writer-component {
+  position: absolute;
+  left: 0px;
+  right: 0px;
+  overflow: hidden;
+  /*bottom: 25px;*/
+  bottom: 25px;
+  top: 0px;
+}
+
+.main-container {
+  float: left;
+  width: 60%;
+  height: 100%;
+  background: #fff;
+  position: relative;
+}
+
+.resource-container {
+  position: relative;
+  float: right;
+  border-left: 1px solid #ddd;
+  width: 40%;
+  height: 100%;
+  background-color: #fafafa;
+  box-shadow: inset 0 0 10px rgba(0,0,0,0.05);
+}
+
+.writer-component .context-toggles {
+  height: 40px;
+  border-bottom: 1px solid #ddd;
+}
+
+.writer-component .context-toggles a.toggle-context {
+  display: block;
+  float: left;
+  height: 40px;
+  line-height: 40px;
+  padding: 0px 20px;
+  color: #444;
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.writer-component .context-toggles .dialog {
+  float: right;
+  display: block;
+  height: 40px;
+  line-height: 40px;
+  padding: 0px 20px;
+  color: white;
+  font-size: 12px;
+  font-weight: 600;
+  background: #444;
+  color: white;
+  border-bottom: 1px solid rgba(0,0,0,0.2);
+}
+
+.writer-component .context-toggles .dialog.editSubjectReference {
+  background: rgba(145, 187, 4, 1);
+}
+
+.writer-component .context-toggles .dialog.tagentity {
+  background: rgba(11, 157, 217, 1);
+}
+
+.writer-component .context-toggles .dialog .close-dialog {
+  padding: 5px 10px;
+  color: rgba(255,255,255,0.4);
+}
+
+.writer-component .context-toggles .dialog .close-dialog:hover {
+  color: rgba(255,255,255, 1);
+}
+
+.writer-component .context-toggles a.toggle-context:hover {
+  background: #eee;
+  border-bottom: 1px solid #bbb;
+}
+
+.writer-component .context-toggles a.toggle-context.active {
+  background: #eee;
+  border-bottom: 1px solid #444;
+}
+
+/* Panels (Context panel)
+-----------------------------------------------------*/
+
+.panel {
+  position: absolute;
+  top: 40px;
+  bottom: 0px;
+  left: 0px;
+  right: 0px;
+}
+
+.panel .panel-content {
+  position: absolute;
+  top: 0px;
+  bottom: 0px;
+  left: 0px;
+  right: 0px;
+  overflow: auto;
+  line-height: 24px;
+}
+
+
+/* Dialog Panels (aka modal panels)
+-----------------------------------------------------*/
+
+.panel.dialog {
+  top: 0px;
+  background: #F8F8F8;
+}
+
+.panel.dialog .dialog-header {
+  position: absolute;
+  top: 0px;
+  left: 0px;
+  right: 0px;
+  overflow: hidden;
+  height: 40px;
+  border-bottom: 1px solid #ddd;
+}
+
+.panel.dialog .dialog-header .back {
+  padding-left: 20px;
+  display: block;
+  float: left;
+  line-height: 40px;
+  font-size: 16px;
+}
+
+.panel.dialog .dialog-header .label {
+  padding: 0px 20px;
+  font-size: 14px;
+  font-weight: 600;
+  line-height: 39px;
+  /*color: white;*/
+  float: left;
+}
+
+.panel.dialog .dialog-header .actions {
+  overflow: hidden;
+  float: right;
+}
+
+.panel.dialog .dialog-header .actions a {
+  display: block;
+  float: left;
+  font-weight: 600;
+  padding: 0px 4px;
+  font-size: 12px;
+  line-height: 40px;
+  margin-right: 20px;
+}
+
+.panel.dialog .panel-content {
+  top: 40px;
+}
+
+
+/* Content Tools
+-----------------------------------------------------*/
+
+.content-tools-component {
+  height: 40px;
+  border-bottom: 1px solid #ddd;
+  position: absolute;
+  z-index: 40000;
+  left: 0px;
+  right: 0px;
+  top: 0px;
+}
+
+
+/* Text Tool has individual styles */
+
+
+/* Text Tool styles
+-----------------------------------------------------*/
+
+
+.text-tool-component.select .toggle {
+  width: 140px;
+}
+
+/* Special styles */
+.content-tools-component .option.heading1 {
+  font-size: 24px;
+  font-weight: 600;
+}
+
+.content-tools-component .option.heading2 {
+  font-size: 20px;
+  font-weight: 600;
+}
+
+.content-tools-component .option.heading3 {
+  font-size: 16px;
+  font-weight: 600;
+}
+
+/* Generic Panel styles
+-----------------------------------------------------*/
+
+.content-panel-component .container-node.content {
+
+}
+
+.content-panel-component .panel-content-inner {
+  position: relative;
+  padding: 40px;
+  padding-right: 80px;
+}
+
+.content-panel-component .document-title {
+  padding-bottom: 40px;
+  font-size: 30px;
+  font-weight: 600;
+  line-height: 40px;
+}
+
+.content-panel-component .document-title .strong {
+  text-decoration: underline;
+}
+
+.content-node.paragraph {
+  padding-bottom: 20px;
+}
+
+.content-node.heading {
+  padding-bottom: 20px;
+  font-weight: 600;
+}
+
+.content-node.heading.level-1 {
+  font-size: 24px;
+  line-height: 28px;
+}
+
+.content-node.heading.level-2 {
+  font-size: 20px;
+}
+
+.content-node.heading.level-3 {
+  font-size: 16px;
+}
+
+
+/* Unsupported Nodes
+-----------------------------------------------------*/
+
+
+.unsupported {
+  cursor: not-allowed;
+  background: #eee;
+}
+
+/* Table nodes
+-----------------------------------------------------*/
+
+.table {
+  width: 100%;
+  margin: 10px 0px;
+  // border: 1px solid #eee;
+  border-collapse: collapse;
+  table-layout: fixed;
+}
+
+.table th, .table td {
+  border: 1px solid #efefef;
+}
+
+.table th {
+  font-weight: bold;
+  background: #eee;
+  text-align: center;
+}
+
+.table td {
+  padding: 2px 5px;
+}
+
+.table .selected {
+  background-color: cyan;
+}
+
+.table.table-editing-mode .text-property {
+  cursor: default;
+}
+
+
+/* For debugging purposes */
+
+.scanline {
+  position: absolute;
+  top: 50px;
+  left: 40px;
+  width: 10px;
+  height: 2px;
+  background: #ccc;
+}
+
+/* Content Editor
+-----------------------------------------------------*/
+
+.content-panel-component {
+  position: absolute;
+  top: 40px;
+  bottom: 0px;
+  left: 0px;
+  right: 0px;
+  padding: 20px;
+}
+
+/* Overrides .panel .panel-content */
+.content-panel-component .panel-content {
+  left: 20px;
+}
+
+/* Hide native scroll bar */
+.content-panel-component .panel-content::-webkit-scrollbar {
+  width: 0px;
+  height: 0px;
+}
+
+.content-panel-component .panel-content::-webkit-scrollbar-thumb {
+  background-color: rgba(0, 0, 0, 0);
+}
+
+
+/* Scrollbar component
+-----------------------------------------------------*/
+
+.scrollbar-component {
+  position: absolute;
+  left: 0px;
+  width: 20px;
+  top: 0px;
+  bottom: 0px;
+  background: #FAFAFA;
+  box-shadow: inset -4px 0 4px 0 rgba(25,25,25,0.04);
+}
+
+.scrollbar-component .thumb {
+  position: absolute;
+  top: 40px;
+  left: 0px;
+  right: 0px;
+  height: 80px;
+  z-index: 4000;
+  background-color: rgba(0,0,0, 0.2);
+}
+
+.scrollbar-component .highlight {
+  position: absolute;
+  width: 100%;
+  background-color: rgba(145, 187, 4, 1);
+}
+
+/* StatusBar Component
+-----------------------------------------------------*/
+
+.status-bar-component {
+  border-top: 1px solid #ddd;
+  position: fixed;
+  height: 25px;
+  bottom: 0px;
+  left: 0px;
+  right: 0px;
+  overflow: hidden;
+  line-height: 25px;
+  font-size: 12px;
+}
+
+.status-bar-component.error {
+  background: #F4E2E2;
+  color: rgb(200, 57, 57);
+}
+
+.status-bar-component.success {
+  background: #E3EAD6;
+  color: rgb(71, 98, 71);
+}
+
+.status-bar-component .document-status {
+  float: left;
+  padding: 0 20px;
+}
+
+.status-bar-component .icon {
+  float: right;
+  padding: 0 20px;
+}
+
+
+.status-bar-component .message {
+  float: right;
+}
+
+/* Node Components
+-----------------------------------------------------*/
+
+/* Text Node Component */
+
+.content-editor-component .content-node.text {
+  padding-bottom: 20px;
+}
+
+/* Text Annotations
+-----------------------------------------------------*/
+
+
+.annotation.strong {
+  font-weight: bold;
+}
+
+.annotation.emphasis {
+  font-style: italic;
+}
+
+/* Container Annotations
+-----------------------------------------------------*/
+
+.container-annotation.anchor {
+  position: relative;
+}
+
+.container-annotation.active.annotation-fragment {
+  background-color: rgba(145, 187, 4, 0.2);
+}
+
+/* Selection style sheets
+-----------------------------------------------------*/
+
+::selection {
+  background: rgba(0,0,0,0.1);
+}
+
+::-moz-selection {
+  background: rgba(0,0,0,0.1);
+}
+
+@import 'clipboard';

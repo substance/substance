@@ -1,0 +1,46 @@
+/**
+ * Substance List styles
+ * -------
+ * 
+ * Used for ordered lists
+ *
+ * Supports nesting only up to level-4
+ */
+
+.li.level-2 { margin-left: 20px; }
+.li.level-3 { margin-left: 40px; }
+.li.level-4 { margin-left: 60px; }
+
+/* Spacing */
+.li.list-start { padding-top: 20px; }
+.li.list-end { padding-bottom: 20px; }
+
+/**
+ * Unordered lists
+ * -------
+ */
+
+ .ul.li::before { content: "▪ "; }
+
+/**
+ * Ordered lists
+ * -------
+ * 
+ * Use CSS counters and support nesting up to level 4
+ */
+
+/* When a new list occurs counters are reset */
+
+.list-start { counter-reset: level1 level2 level3 level4 !important; }
+/* Resets for individual levels */
+
+.ol.li.level-1 { counter-reset: level2 level3 level4; }
+.ol.li.level-2 { counter-reset: level3 level4; }
+.ol.li.level-3 { counter-reset: level4; }
+
+/* Counter displays for levels 1-3 */
+
+.ol.li.level-1::before { counter-increment: level1; content: counter(level1) ". "; }
+.ol.li.level-2::before { counter-increment: level2; content: counter(level1) "." counter(level2) ". " ; }
+.ol.li.level-3::before { counter-increment: level3; content: counter(level1) "." counter(level2) "." counter(level3) ". "; }
+.ol.li.level-4::before { counter-increment: level4; content: counter(level1) "." counter(level2) "." counter(level3) "." counter(level4) ". "; }
