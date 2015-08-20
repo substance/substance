@@ -1,8 +1,6 @@
 /* Helpers
 -------------------------------------------------- */
 
-.pad { padding: 20px; }
-
 .limiter {
   max-width:1000px;
   margin-left:auto;
@@ -18,9 +16,13 @@
 .hidden { display: none !important; }
  
 /* Typography */
-.small { font-size: 14px; line-height: 17px; }
-.large { font-size: 17px; line-height: 20px; }
+.small { font-size: 14px; }
+.large { font-size: 20px; }
+.xlarge { font-size: 23px; }
+
 .dark { color:#fff; } // typo on dark background
+
+.center { text-align: center; }
  
 /* Borders */
 .border { border: 1px solid $border-color; }
@@ -47,10 +49,12 @@
   visibility:hidden;
 }
 
-/* Disabled style */
-.disabled {
-  opacity: 0.2;
-  cursor: default;
+// Add debug class to any parent element to debug layout
+.debug * {
+  outline: 1px solid pink;
 }
+
+/* Disabled style */
+.disabled {  opacity: 0.2; cursor: default; }
  
 .shadow { box-shadow: 0 0 25px 0 rgba(0,0,0,0.15); }

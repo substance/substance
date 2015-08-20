@@ -5,13 +5,13 @@ body,
 input,
 textarea {
   color:rgba(0,0,0,0.75);
-  font:16px/20px 'Source Sans Pro', Arial;
+  font: 17px 'Lato', Arial;
   min-height: 30px;
+  line-height: 1.5;
   -webkit-font-smoothing:antialiased;
 }
 
 h1, h2, h3, h4, h5, h6 {
-  font-family:'Source Sans Pro', Arial;
   font-weight: 600;
   margin:0;
 }
@@ -22,26 +22,28 @@ h1 {
 }
 
 h2 {
-  font-size:22px;
+  font-size:30px;
   line-height:30px;
-  padding-top: 5px;
-  padding-bottom:5px;
+  padding-top:20px;
+  padding-bottom:10px;
 }
 
 h3 {
-  font-size:15px;
+  font-size:22px;
   line-height:20px;
+  padding-top:10px;
+  padding-bottom:10px;
 }
 
 h4, h5, h6 {
-  font-size:12px;
+  font-size:15px;
   line-height:20px;
+  padding-bottom:10px;
 }
 
 p { margin-bottom:20px; }
 
 p:last-child { margin-bottom:0; }
-
 
 .strong,
 strong {
@@ -65,7 +67,6 @@ a.quiet { color:rgba(0,0,0,0.5); }
 a.quiet.active, a.quiet:hover { color:rgba(0,0,0,0.75); }
 .dark a.quiet, a.quiet.dark { color:white; }
 .dark a.quiet:hover, a.quiet.dark.active, a.quiet.dark:hover { color:rgba(255,255,255,0.5); }
-
 
 /* Buttons */
 // button:focus { box-shadow:inset 0 0 0 1px rgba(0,0,0,0.05); }
