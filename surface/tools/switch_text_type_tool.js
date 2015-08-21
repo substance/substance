@@ -2,17 +2,18 @@
 
 var Tool = require('../tool');
 
-var TEXT_NODE_TYPES = ["paragraph", "heading"];
+var TEXT_NODE_TYPES = ["paragraph", "heading", "blockquote", "codeblock"];
 
 var TEXT_TYPES = {
   "paragraph": {label: 'Paragraph', data: {type: "paragraph"}},
   "heading1": {label: 'Heading 1', data: {type: "heading", level: 1}},
   "heading2": {label: 'Heading 2', data: {type: "heading", level: 2}},
-  "heading3": {label: 'Heading 3', data: {type: "heading", level: 3}}
+  "heading3": {label: 'Heading 3', data: {type: "heading", level: 3}},
+  "blockquote": {label: 'Blockquote', data: {type: "blockquote"}},
+  "codeblock": {label: 'Codeblock', data: {type: "codeblock"}}
 };
 
 var TextTool = Tool.extend({
-
   name: "text",
 
   update: function(surface, sel) {
