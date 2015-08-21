@@ -8,9 +8,19 @@ var LinkTool = AnnotationTool.extend({
 
   getAnnotationData: function() {
     return {
-      url: "http://",
+      url: "",
       title: ""
     };
+  },
+
+  // Immediately switch to edit mode after link creation
+  // and make it show the edit prompt.
+  afterCreate: function(anno) {
+    var state = this.getToolState();
+    var newState = _.extend({}, state);
+    newState.mode = 'edit';
+    newState.showPrompt = true;
+    this.setToolState(newState);
   },
 
   update: function(surface, sel) {
@@ -40,7 +50,6 @@ var LinkTool = AnnotationTool.extend({
       newState.mode = "edit";
       newState.linkId = annos[0].id;
       newState.active = true;
-      // newState.showPopup = true;
     } else {
       return this.setDisabled();
     }
@@ -50,9 +59,17 @@ var LinkTool = AnnotationTool.extend({
   updateLink: function(linkAttrs) {
     var doc = this.getDocument();
     var link = this.getLink();
-    this.surface.transaction(function(tx) {
+    doc.transaction(function(tx) {
       tx.set([link.id, "url"], linkAttrs.url);
       tx.set([link.id, "title"], linkAttrs.title);
+    });
+  },
+
+  deleteLink: function() {
+    var doc = this.getDocument();
+    var link = this.getLink();
+    this.surface.transaction(function(tx) {
+      tx.delete(link.id);
     });
   },
 
@@ -64,9 +81,7 @@ var LinkTool = AnnotationTool.extend({
     var state = this.getToolState();
     var newState = _.extend({}, state);
     if (state.mode === "edit") {
-      // TODO: is this needed?
-      // this.emit('edit', this);
-      newState.showPrompt = true;
+      newState.showPrompt = !state.showPrompt;
       this.setToolState(newState);
     } else {
       AnnotationTool.prototype.performAction.call(this);

@@ -8,15 +8,6 @@
   font-size: 7px;
 }
 
-// .toolbar .tool.remove::before {
-//   content: " \f00d";
-//   font-family: FontAwesome;
-//   position: absolute;
-//   top: 3px;
-//   right: 3px;
-//   font-size: 7px;
-// }
-
 .toolbar .tool.edit::before {
   content: " \f013";
   font-family: FontAwesome;
@@ -26,28 +17,3 @@
   font-size: 7px;
 }
 
-// .toolbar .tool.create::before {
-//   content: " \f067";
-//   font-family: FontAwesome;
-//   position: absolute;
-//   top: 3px;
-//   right: 3px;
-//   font-size: 7px;
-// }
-
-// Link tool prompt
-
-.toolbar .tool .prompt {
-  position: absolute;
-  left: 0px;
-  z-index: 50000;
-  width: 300px;
-  height: 200px;
-}
-
-.toolbar .tool.link .prompt input {
-  display: block;
-  border: 1px solid #ddd;
-  width: 200px;
-  min-width: auto;
-}

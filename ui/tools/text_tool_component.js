@@ -49,7 +49,7 @@ TextToolComponent.Prototype = function() {
       label = 'No selection';
     }
     el.append($$('button')
-      .addClass("toggle").attr('href', "#")
+      .addClass("toggle small").attr('href', "#")
       .attr('title', this.props.title)
       .append(label)
       .on('mousedown', this.toggleAvailableTextTypes)

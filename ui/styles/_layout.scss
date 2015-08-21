@@ -53,6 +53,17 @@
     float: left;
     position: relative;
   }
+
+  .tool.active {
+    @include dark-fill(0.1);
+  }
+
+  .tool:hover {
+    // background: none;
+    @include dark-fill(0.1);
+  }
+
+  .tool.disabled:hover {background: none; }
   
   /* Toolbar Tool
   ---------------------------- */
@@ -72,15 +83,11 @@
     color: inherit;
   }
 
-  .button:hover {
-    @include dark-fill(0.05);
-  }
 
-  .button.disabled:hover {background: none; }
 
-  .button.active {
-    @include dark-fill(0.1);
-  }
+  
+
+
 
   /* Toolbar Dropdown
   ---------------------------- */
@@ -111,6 +118,7 @@
       display: none;
       position: absolute;
       top: 40px;
+      z-index: 5000;
       min-width: 150px;
 
       .option {

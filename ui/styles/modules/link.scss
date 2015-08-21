@@ -1,4 +1,46 @@
 .annotation.link {
-    color: #2079DC;
-    border-bottom: 1px solid #CEDFF3;
+  color: #2079DC;
+  border-bottom: 1px solid #CEDFF3;
 }
+
+// Link tool prompt
+
+.toolbar .tool.link .prompt {
+  padding: 15px;
+  padding-bottom: 0px;
+
+  position: absolute;
+  left: -150px;
+  top: 40px;
+  z-index: 50000;
+  width: 300px;
+
+  .prompt-title {
+    font-size: 16px;
+    font-weight: bold;
+  }
+
+  a.delete-link {
+    position: absolute;
+    top: 15px;
+    right: 15px;
+    font-size: 13px;
+    color: red;
+  }
+
+  input {
+    margin: 15px 0;
+    width: 100%;
+    font-size: 14px;
+    display: block;
+    border: 1px solid #ddd;
+
+    min-width: auto;
+    padding: 0 10px;
+  }
+
+}
+
+
+
+

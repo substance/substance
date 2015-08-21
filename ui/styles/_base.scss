@@ -82,7 +82,7 @@ a.quiet.active, a.quiet:hover { color:rgba(0,0,0,0.75); }
   text-align: center;
 
   &:hover {
-    @include dark-fill(0.2);
+    // @include dark-fill(0.1);
   }
 
   // Display in a linkish way

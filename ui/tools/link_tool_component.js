@@ -15,20 +15,28 @@ var EditLinkPrompt = Component.extend({
     });
   },
 
+  onDelete: function(e) {
+    e.preventDefault();
+    this.props.tool.deleteLink();
+  },
+
   render: function() {
     var link = this.props.link;
     var el = $$('div').addClass('prompt shadow border fill-white');
 
     el.append([
-      $$('input').attr({type: 'text', placeholder: 'http://your-website.com', value: link.url}).key('url'),
-      $$('input').attr({type: 'text', placeholder: 'Optional title', value: link.title}).key('title'),
-      $$('a').attr({href: '#'})
-             .addClass('save-link')
-             .on('click', this.onSave)
-             .append('Update link'),
+      $$('div').addClass('prompt-title').append('Hyperlink'),
+      $$('input').attr({type: 'text', placeholder: 'http://your-website.com', value: link.url})
+                 .key('url')
+                 .on('change', this.onSave),
+      $$('input').attr({type: 'text', placeholder: 'Optional title', value: link.title})
+                 .key('title')
+                 .on('change', this.onSave),
       $$('a').attr({href: '#'})
              .addClass('delete-link')
-             .append('Delete link')
+             .append('Delete')
+             .on('click', this.onDelete)
+
     ]);
     return el;
   }
@@ -49,7 +57,9 @@ var LinkToolComponent = ToolComponent.extend({
     if (this.state.disabled) {
       el.addClass('disabled');
     }
-    if (this.state.active) {
+
+    // el.addClass('active');
+    if (this.state.mode === 'edit') {
       el.addClass('active');
     }
     if (this.state.mode) {
