@@ -5,14 +5,14 @@ var Component = require('../component');
 var $$ = Component.$$;
 var TextProperty = require('../text_property_component');
 
-function Paragraph() {
+function Codeblock() {
   Component.apply(this, arguments);
 }
 
-Paragraph.Prototype = function() {
+Codeblock.Prototype = function() {
 
   this.getClassNames = function() {
-    return "content-node paragraph";
+    return "content-node codeblock";
   };
 
   this.render = function() {
@@ -28,6 +28,6 @@ Paragraph.Prototype = function() {
   };
 };
 
-OO.inherit(Paragraph, Component);
+OO.inherit(Codeblock, Component);
 
-module.exports = Paragraph;
+module.exports = Codeblock;

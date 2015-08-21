@@ -9,6 +9,10 @@ var ToolComponent = require('../tools/tool_component');
 var TextToolComponent = require('../tools/text_tool_component');
 var ContainerComponent = require('../nodes/container_node_component');
 var ParagraphComponent = require('../nodes/paragraph_component');
+
+var BlockquoteComponent = require('../nodes/blockquote_component');
+var CodeblockComponent = require('../nodes/codeblock_component');
+
 var HeadingComponent = require('../nodes/heading_component');
 var ListComponent = require('../nodes/list_component');
 var LinkComponent = require('../nodes/link_component');
@@ -23,8 +27,10 @@ var ContainerEditor = Surface.ContainerEditor;
 var components = {
   "paragraph": ParagraphComponent,
   "heading": HeadingComponent,
+  "blockquote": BlockquoteComponent,
+  "codeblock": CodeblockComponent,
   "list": ListComponent,
-  "link": LinkComponent
+  "link": LinkComponent,
 };
 
 var tools = Surface.Tools;

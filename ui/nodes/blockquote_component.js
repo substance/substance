@@ -5,14 +5,14 @@ var Component = require('../component');
 var $$ = Component.$$;
 var TextProperty = require('../text_property_component');
 
-function Paragraph() {
+function Blockquote() {
   Component.apply(this, arguments);
 }
 
-Paragraph.Prototype = function() {
+Blockquote.Prototype = function() {
 
   this.getClassNames = function() {
-    return "content-node paragraph";
+    return "content-node blockquote";
   };
 
   this.render = function() {
@@ -28,6 +28,6 @@ Paragraph.Prototype = function() {
   };
 };
 
-OO.inherit(Paragraph, Component);
+OO.inherit(Blockquote, Component);
 
-module.exports = Paragraph;
+module.exports = Blockquote;
