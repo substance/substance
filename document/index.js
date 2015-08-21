@@ -29,6 +29,8 @@ Document.ClipboardExporter = require('./clipboard_exporter');
 // Standard node implementations
 Document.Include = require('./nodes/include');
 Document.Paragraph = require('./nodes/paragraph');
+Document.Codeblock = require('./nodes/codeblock');
+Document.Blockquote = require('./nodes/blockquote');
 Document.Heading = require('./nodes/heading');
 Document.Emphasis = require('./nodes/emphasis');
 Document.Strong = require('./nodes/strong');

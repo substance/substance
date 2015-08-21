@@ -3,6 +3,8 @@
 var OO = require('../../basics/oo');
 var Document = require('../../document');
 var Paragraph = Document.Paragraph;
+var Codeblock = Document.Codeblock;
+var Blockquote = Document.Blockquote;
 var Heading = Document.Heading;
 var List = Document.List;
 var ListItem = Document.ListItem;
@@ -24,6 +26,8 @@ schema.getDefaultTextType = function() {
 
 schema.addNodes([
   Paragraph,
+  Codeblock,
+  Blockquote,
   Heading,
   List, ListItem,
   Emphasis,
