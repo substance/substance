@@ -122,6 +122,10 @@ var HtmlEditor = Component.extend({
     return this.doc.toHtml();
   },
 
+  getDocument: function() {
+    return this.doc;
+  },
+
   onSelectionChanged: function(sel, surface) {
     this.toolRegistry.each(function(tool) {
       tool.update(surface, sel);

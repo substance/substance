@@ -1,10 +1,13 @@
-# Substance
+# Substance - A JavaScript library for web-based content editing
 
-Substance is a JavaScript library for manipulating documents based on data. It enables you to build completely custom web-based editors. See Substance in action:
+Substance is a JavaScript library for manipulating documents based on data. It enables you to build custom web-based editors. See Substance in action:
 
 - **[Substance HTML Editor](http://cdn.substance.io/html-editor)** - A minimal HTML editor component based on Substance
 - **[Lens Writer](http://cdn.substance.io/lens-writer)** - A full-fledged scientific editor
+
+<!--
 - **[Archivist Writer](http://cdn.substance.io/archivist-composer)** - A modern interface for tagging entities and subjects in digital archives
+-->
 
 ## Motivation
 
@@ -21,26 +24,28 @@ With Substance you can:
 
 ## Getting started
 
-A good way to get started with Substance is checking out our fully customizable and highly reliable HTML Editor component. Unlike most web-based editors, Substance operates on a Javascript data model, and uses HTML just as an input and output format. You can inject the editor using `React.render`.
+We provide a ready to use [HTML Editor](https://github.com/substance/html-editor) component. It can be injected easily into an existing web application. 
 
 ```js
-var HtmlEditor = require('substance-html-editor');
-
-React.render(
-  $$(HtmlEditor, {
-    ref: 'htmlEditor',
-    content: '<p>Hello <strong>world</strong></p><p>Some <em>emphasized</em> text</p>',
-    toolbar: Toolbar,
-    enabledTools: ["text", "strong", "emphasis"],
-    onContentChanged: function(doc, change) {
-      console.log('new content', doc.toHtml());
-    }
-  }),
-  document.getElementById('editor_container')
-);
+var htmlEditor = Substance.HtmlEditor.init($('#editor_container'), {
+  content: '<p>Hello <strong>world</strong></p><p>Some <em>emphasized</em> text</p>'
+});
 ```
 
-Please see the [README](https://github.com/substance/html-editor) of HtmlEditor for configuration options.
+HtmlEditor takes HTML as an input and lets you access to edited content at any time.
+
+```js
+htmlEditor.getContent();
+```
+
+Behind the curtains, your document is converted to a Javascript document model, that guarantees you a reliable and sideffect-free editing experience. You have access to this data as well.
+
+```js
+htmlEditor.getDocument();
+```
+
+You may likely want to customize that editor a bit. For instance you want to restrict the supported content types and customize the toolbar accordingly. This is all possible by [patching your very own HtmlEditor](https://github.com/substance/html-editor).
+
 
 ## Defining custom article formats.
 
@@ -65,7 +70,7 @@ schema.getDefaultTextType = function() {
 schema.addNodes([Paragraph, Emphasis, Strong, Highlight]);
 ```
 
-A very simple one is the [HtmlArticle specification](https://github.com/substance/html-editor/blob/master/src/html_article.js) used by our HtmlEditor. Lens Writer defines a [scientific article](https://github.com/substance/lens-writer/tree/master/lib/article) including bib items and figures with captions etc.
+A very simple complete example is the [HtmlArticle](/ui/html-editor/html_article.js) specification used by HtmlEditor. Lens Writer defines a [scientific article](https://github.com/substance/lens-writer/tree/master/lib/article) including bib items and figures with captions etc.
 
 
 ## Manipulate documents programmatically
@@ -132,7 +137,7 @@ In order to build your own editor based on Substance we recommend that you poke 
 
 ### Editor initialization
 
-Editors to setup a bit of Substance infrastructure first, most importantly a Substance Surface, that maps DOM selections to internal document selections. Here's the most important parts from the initialization phase.
+Editors need to setup a bit of Substance infrastructure first, most importantly a Substance Surface, that maps DOM selections to internal document selections. Here's the most important parts from the initialization phase.
 
 ```js
 this.surfaceManager = new Substance.Surface.SurfaceManager(doc);
@@ -145,9 +150,7 @@ A Surface instance requires a `SurfaceManager`, which keeps track of multiple Su
 
 We also setup a registry for components (such as Paragraph) and tools (e.g. EmphasisTool, StrongTrool). Our editor will then be able to dynamically retrieve the right view component for a certain node type.
 
-### 2-column editing
 
-We provide a framework, that allows building 
 
 <!-- ## Getting started
 
@@ -408,12 +411,6 @@ doc.transaction(function(tx) {
   tx.set([text_node_1, "content"], updated); // updates content property of node text_node_1
 });
 ```
-
-## Rules that make your life easier:
-
-- Content tools must bind to mousedown instead of click to handle toggling.
-  That way we can prevent the blur event to be fired on the surface.
-- The root element of a Substance Surface must be set contenteditable
 
 -->
 
