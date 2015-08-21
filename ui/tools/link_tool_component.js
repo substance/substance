@@ -5,13 +5,15 @@ var _ = require('../../basics/helpers');
 var $$ = Component.$$;
 var ToolComponent = require('./tool_component');
 
+// We disabled editing of a link title for the time being, as it makes for a more mimal interface.
+
 var EditLinkPrompt = Component.extend({
 
   onSave: function(e) {
     e.preventDefault();
     this.props.tool.updateLink({
       url: this.refs.url.$el.val(),
-      title: this.refs.title.$el.val()
+      // title: this.refs.title.$el.val()
     });
   },
 
@@ -29,9 +31,9 @@ var EditLinkPrompt = Component.extend({
       $$('input').attr({type: 'text', placeholder: 'http://your-website.com', value: link.url})
                  .key('url')
                  .on('change', this.onSave),
-      $$('input').attr({type: 'text', placeholder: 'Optional title', value: link.title})
-                 .key('title')
-                 .on('change', this.onSave),
+      // $$('input').attr({type: 'text', placeholder: 'Optional title', value: link.title})
+      //            .key('title')
+      //            .on('change', this.onSave),
       $$('a').attr({href: '#'})
              .addClass('delete-link')
              .append('Delete')

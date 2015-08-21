@@ -22,7 +22,7 @@ var LinkTool = AnnotationTool.extend({
     newState.showPrompt = true;
     this.setToolState(newState);
   },
-
+  
   update: function(surface, sel) {
     this.surface = surface;
     if ( !surface.isEnabled() || sel.isNull() || sel.isContainerSelection() ) {
@@ -59,7 +59,12 @@ var LinkTool = AnnotationTool.extend({
   updateLink: function(linkAttrs) {
     var doc = this.getDocument();
     var link = this.getLink();
-    doc.transaction(function(tx) {
+    // this.surface.transaction causes the prompt to close. If you don't want that
+    // e.g. when re-enabling link title editing, switch to use doc.transaction.
+    // QUESTION: Is it possible to use this.surface.transaction without causing the
+    // prompt to close. -> Probably by changing the update implementation above
+    // to preserve the showPrompt variable
+    this.surface.transaction(function(tx) {
       tx.set([link.id, "url"], linkAttrs.url);
       tx.set([link.id, "title"], linkAttrs.title);
     });
