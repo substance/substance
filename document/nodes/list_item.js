@@ -5,7 +5,8 @@ var ListItem = Node.extend({
   properties: {
     parent: "id",
     level: "number",
-    content: "string",
+    ordered: "bool",
+    content: "string"
   },
 });
 
@@ -13,16 +14,14 @@ ListItem.static.components = ['content'];
 
 // HtmlImporter
 
-ListItem.static.matchElement = function($el) {
-  return $el.is('li');
-};
-
 ListItem.static.fromHtml = function($el, converter) {
   var level = $el.data('level') || 1;
   var id = converter.defaultId($el, 'li');
   var item = {
     id: id,
+    type: 'list-item',
     level: level,
+    ordered: false,
     content: ''
   };
   item.content = converter.annotatedText($el, [id, 'content']);

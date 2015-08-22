@@ -458,6 +458,15 @@ HtmlImporter.Prototype = function HtmlImporterPrototype() {
     return text;
   };
 
+
+  this.trimLeft = function(text) {
+    return text.replace(WS_LEFT, "");
+  };
+
+  this.trimRight = function(text) {
+    return text.replace(WS_RIGHT, "");
+  };
+
   // for error messages
   this.$toStr = function($el) {
     var $clone = $el.clone();
