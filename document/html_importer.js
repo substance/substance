@@ -253,6 +253,11 @@ HtmlImporter.Prototype = function HtmlImporterPrototype() {
         throw new Error("Contract: HtmlImporter.annotatedText() requires 'path' for non-reentrant call.", this.$toStr($el));
       }
     }
+    // IMO we should reset the last char, as it is only relevant within one
+    // annotated text property. This feature is mainly used to eat up
+    // whitespace in XML/HTML at tag boundaries, produced by pretty-printed XML/HTML.
+    this.state.lastChar = '';
+
     var iterator = new HtmlImporter.ChildNodeIterator($el[0]);
     var text = this._annotatedText(iterator);
     if (path) {
@@ -288,6 +293,34 @@ HtmlImporter.Prototype = function HtmlImporterPrototype() {
     // element in the HTML coming with that id
     // For now we use shas
     return Substance.uuid(prefix);
+  };
+
+  /**
+   * Removes any leading and trailing whitespaces from the content
+   * within the given element.
+   * Attention: this is not yet implemented fully. Atm, trimming is only done
+   * on the first and last text node (if they exist).
+   */
+  this.trimTextContent = function($el) {
+    var nodes = $el[0].childNodes;
+    var first = nodes[0];
+    var last = _.last(nodes);
+    if (first) {
+      // trim the first and last text
+      if (this._getDomNodeType(first) === "text") {
+        text = first.textContent;
+        trimmed = this.trimLeft(text);
+        first.textContent = trimmed;
+      }
+    }
+    if (last) {
+      if (this._getDomNodeType(last) === "text") {
+        text = last.textContent;
+        trimmed = this.trimRight(text);
+        last.textContent = trimmed;
+      }
+    }
+    return $el;
   };
 
   // TODO: maybe we want to capture warnings and errors in future
@@ -435,21 +468,23 @@ HtmlImporter.Prototype = function HtmlImporterPrototype() {
   var SPACE = " ";
   var TABS_OR_NL = /[\t\n\r]+/g;
 
+  // TODO: this needs to be tested and documented
   this._prepareText = function(state, text) {
     if (!state.trimWhitespaces) {
       return text;
     }
-    // EXPERIMENTAL: drop all 'formatting' white-spaces (e.g., tabs and new lines)
-    // (instead of doing so only at the left and right end)
-    //text = text.replace(ALL_WS_NOTSPACE_LEFT, "");
-    //text = text.replace(ALL_WS_NOTSPACE_RIGHT, "");
+    var repl = SPACE;
+    // replace multiple tabs and new-lines by one space
     text = text.replace(TABS_OR_NL, SPACE);
+    // TODO: the last char handling is only necessary for for nested calls
+    // i.e., when processing the content of an annotation, for instance
+    // we need to work out how we could control this with an inner state
     if (state.lastChar === SPACE) {
-      text = text.replace(WS_LEFT_ALL, SPACE);
+      text = text.replace(WS_LEFT_ALL, repl);
     } else {
-      text = text.replace(WS_LEFT, SPACE);
+      text = text.replace(WS_LEFT, repl);
     }
-    text = text.replace(WS_RIGHT, SPACE);
+    text = text.replace(WS_RIGHT, repl);
     // EXPERIMENTAL: also remove white-space within
     if (this.config.REMOVE_INNER_WS) {
       text = text.replace(WS_ALL, SPACE);

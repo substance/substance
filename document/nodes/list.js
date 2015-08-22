@@ -34,39 +34,6 @@ List.static.matchElement = function($el) {
   return $el.is('ul,ol');
 };
 
-
-// TODO: this needs to be fleshed out to be 100% robust
-function _normalizeListItem(converter, li) {
-  var segments = [[]];
-  var last = segments[0];
-  for(var child=li.firstChild; child; child = child.nextSibling) {
-    var type = converter._getDomNodeType(child);
-    if (type === "ol" || type === "ul") {
-      last = child;
-      segments.push(last);
-    } else {
-      if (/^\s*$/.exec($(child).text())) {
-        // skip fragments with only whitespace
-        continue;
-      }
-      if (!_.isArray(last)) {
-        last = [];
-        segments.push(last);
-      }
-      last.push(child);
-    }
-  }
-  if (segments[0][0]) {
-    // trim the first and last text
-    var first = segments[0][0];
-    if (converter._getDomNodeType(first) === "text") {
-      var $first = $(first);
-      $first.text(converter.trimLeft($first.text()));
-    }
-  }
-  return segments;
-}
-
 /**
  *
  * <ol>
@@ -94,6 +61,7 @@ function _normalizeListItem(converter, li) {
  *   - list-item[2,u,"Point A"]
  *   - list-item[2,u,"Point B"]
  */
+
 List.static.fromHtml = function($el, converter) {
   var id = converter.defaultId($el, 'list');
   var list = {
@@ -105,23 +73,45 @@ List.static.fromHtml = function($el, converter) {
   var level = 0;
   var types = [];
 
+  // TODO: this needs to be fleshed out to be 100% robust
+  function _normalizeListItem(converter, li) {
+    var segments = [[]];
+    var last = segments[0];
+    for(var child=li.firstChild; child; child = child.nextSibling) {
+      var type = converter._getDomNodeType(child);
+      if (type === "ol" || type === "ul") {
+        last = child;
+        segments.push(last);
+      } else {
+        if (/^\s*$/.exec($(child).text())) {
+          // skip fragments with only whitespace
+          continue;
+        }
+        if (!_.isArray(last)) {
+          last = [];
+          segments.push(last);
+        }
+        last.push(child);
+      }
+    }
+    return segments;
+  }
+
   function _convertListItem(li) {
     var ordered = (_.last(types) === "ol");
     // in our interpretation a list item may have leading annotated text
     // and trailing list element
     var fragments = _normalizeListItem(converter, li);
-    var trimWhitespaces = converter.state.trimWhitespaces;
     for (var i = 0; i < fragments.length; i++) {
       var fragment = fragments[i];
       if (_.isArray(fragment)) {
         // create a list item and use the fragment as annotated content
         var $wrapper = $('<span>').append(fragment);
-        converter.state.trimWhitespaces = true;
+        converter.trimTextContent($wrapper);
         var listItem = ListItem.static.fromHtml($wrapper, converter);
         listItem.ordered = ordered;
         listItem.level = level;
         converter.getDocument().create(listItem);
-        converter.state.trimWhitespaces = trimWhitespaces;
         list.items.push(listItem.id);
       } else {
         _convertList(fragment);
@@ -148,6 +138,16 @@ List.static.fromHtml = function($el, converter) {
   return list;
 };
 
+List.static.toHtml = function(list, converter) {
+  return List.static.render(list, {
+    createElement: function(tagName) {
+      return $('<' + tagName + '>');
+    },
+    createAnnotatedTextNode: function(path) {
+      return converter.annotatedText(path);
+    },
+  });
+};
 
 List.static.render = function(list, impl) {
   var tagName = list.ordered ? 'ol' : 'ul';
@@ -194,17 +194,6 @@ List.static.render = function(list, impl) {
     );
   }
   return el;
-};
-
-List.static.toHtml = function(list, converter) {
-  return List.static.render(list, {
-    createElement: function(tagName) {
-      return $('<' + tagName + '>');
-    },
-    createAnnotatedTextNode: function(path) {
-      return converter.annotatedText(path);
-    },
-  });
 };
 
 Object.defineProperties(List.prototype, {
