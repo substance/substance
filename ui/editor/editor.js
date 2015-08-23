@@ -2,50 +2,44 @@
 
 var _ = require("../../basics/helpers");
 var Component = require('../component');
+var $$ = Component.$$;
 var Surface = require('../../surface');
 var Registry = require('../../basics/registry');
-
-var ToolComponent = require('../tools/tool_component');
-var TextToolComponent = require('../tools/text_tool_component');
 var ContainerComponent = require('../nodes/container_node_component');
-var ParagraphComponent = require('../nodes/paragraph_component');
-
-var BlockquoteComponent = require('../nodes/blockquote_component');
-var CodeblockComponent = require('../nodes/codeblock_component');
-
-var HeadingComponent = require('../nodes/heading_component');
-var ListComponent = require('../nodes/list_component');
-var LinkComponent = require('../nodes/link_component');
-var HtmlArticle = require("./html_article");
+var SubstanceArticle = require("../../article");
 var DefaultToolbar = require('./default_toolbar');
 
-var $$ = Component.$$;
 var Clipboard = Surface.Clipboard;
 var SurfaceManager = Surface.SurfaceManager;
 var ContainerEditor = Surface.ContainerEditor;
 
-var components = {
-  "paragraph": ParagraphComponent,
-  "heading": HeadingComponent,
-  "blockquote": BlockquoteComponent,
-  "codeblock": CodeblockComponent,
-  "list": ListComponent,
-  "link": LinkComponent,
+var defaultComponents = {
+  "paragraph": require('../nodes/paragraph_component'),
+  "heading": require('../nodes/heading_component'),
+  "blockquote": require('../nodes/blockquote_component'),
+  "codeblock": require('../nodes/codeblock_component'),
+  "list": require('../nodes/list_component'),
+  "link": require('../nodes/link_component')
 };
+  
+var defaultTools = Surface.Tools;
 
-var tools = Surface.Tools;
-
-// HtmlEditor
+// Editor
 // ----------------
 //
 // A simple rich text editor implementation based on Substance
 
-var HtmlEditor = Component.extend({
+var Editor = Component.extend({
 
   initialize: function() {
+    if (!this.config) this.config = {};
 
-    // Document instance
-    this.doc = HtmlArticle.fromHtml(this.props.content);
+    var ArticleClass = this.config.article || SubstanceArticle;
+    var components = this.config.components || defaultComponents;
+    var tools = this.config.tools || defaultTools;
+
+    this.doc = new ArticleClass();
+    this.doc.loadHtml(this.props.content);
 
     // Editing Surface
     this.surfaceManager = new SurfaceManager(this.doc);
@@ -74,16 +68,14 @@ var HtmlEditor = Component.extend({
 
   render: function() {
     var el = $$('div').addClass('html-editor-component');
-    if (this.props.toolbar) {
-      var toolbar;
-      if (this.props.toolbar === "default") {
-        toolbar = $$(DefaultToolbar);
-      } else {
-        toolbar = $$(this.props.toolbar);
-      }
-      toolbar.key('toolbar');
-      el.append(toolbar);
-    }
+
+    // Toolbar
+    var ToolbarClass = this.config.toolbar || DefaultToolbar;
+    var toolbar = $$(ToolbarClass);
+    toolbar.key('toolbar');
+    el.append(toolbar);
+
+    // Content Container
     el.append($$(ContainerComponent)
       .key('bodyContainer')
       .attr({ contentEditable: true })
@@ -131,11 +123,6 @@ var HtmlEditor = Component.extend({
       tool.update(surface, sel);
     }, this);
   }
-
 });
 
-// Expose some more useful components
-HtmlEditor.ToolComponent = ToolComponent;
-HtmlEditor.TextToolComponent = TextToolComponent;
-
-module.exports = HtmlEditor;
+module.exports = Editor;

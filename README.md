@@ -1,6 +1,8 @@
 # Substance 
 
-Substance is a JavaScript library for web-based content editing. Build simple text editors or full-featured publishing systems. Substance provides you building blocks for your very custom editor. Here's some demos:
+Substance is a JavaScript library for web-based content editing. It provides building blocks for realizing custom text editors or full-featured publishing systems.
+
+See Substance in action:
 
 - **[Substance HTML Editor](http://cdn.substance.io/html-editor)** - A minimal HTML editor component based on Substance
 - **[Lens Writer](http://cdn.substance.io/lens-writer)** - A full-fledged scientific editor
@@ -78,10 +80,11 @@ A very simple complete example is the [HtmlArticle](/ui/html-editor/html_article
 Substance documents can be manipulated incrementally using simple operations. Let's grab an existing article implementation and create instances for it.
 
 ```js
-var doc = new RichTextArticle();
+var HtmlArticle = require('substance/ui/html-editor/html_article');
+var doc = new HtmlArticle();
 ```
 
-When you want to update a document, you should wrap your changes in a transaction, so you don't end up in inconsistent in-between states. The API is fairly easy. Let's create several paragraph nodes in one transaction
+When you want to update a document, you must wrap your changes in a transaction, to avoid inconsistent in-between states. The API is fairly easy. Let's create several paragraph nodes in one transaction.
 
 ```js
 doc.transaction(function(tx) {
@@ -98,14 +101,12 @@ doc.transaction(function(tx) {
   });
 });
 
-
 ```
 
 A Substance document works like an object store, you can create as many nodes as you wish and assign unique id's to them. However in order to show up as content, we need to show them on a container.
 
 ```js
 doc.transaction(function(tx) {
-  // Get the body container
   var body = tx.get('body');
 
   body.show('p1');
@@ -149,6 +150,9 @@ this.surface = new Surface(this.surfaceManager, doc, editor);
 A Surface instance requires a `SurfaceManager`, which keeps track of multiple Surfaces and dispatches to the currently active one. It also requires an editor. There are two kinds of editors: A ContainerEditor manages a sequence of nodes, including breaking and merging of text nodes. A FormEditor by contrast allows you to define a fixed structure of your editable content. Furthermore we initialized a clipboard instance and tie it to the Surface Manager.
 
 We also setup a registry for components (such as Paragraph) and tools (e.g. EmphasisTool, StrongTrool). Our editor will then be able to dynamically retrieve the right view component for a certain node type.
+
+
+
 
 
 
@@ -382,8 +386,6 @@ render() {
 ```
 
 Essentially what we do is iterating over all nodes of our body container, determining the ComponentClass and constructing a React.Element from it. We also provided a simple toolbar, that has annotation toggles. We will learn more about tools later when we implement a custom tool for our editor.
-
-
 
 
 ### Anatomy of a Substance Document
