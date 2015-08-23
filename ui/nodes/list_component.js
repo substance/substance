@@ -20,6 +20,28 @@ var ListComponent = Component.extend({
     });
   },
 
+  didMount: function() {
+    if (this.doc) {
+      this._dispose();
+    }
+    this.doc = this.props.doc;
+    this.doc.getEventProxy('path').add([this.props.node.id, 'items'], this, this.onItemsChanged);
+  },
+
+  willUnmount: function() {
+    this._dispose();
+  },
+
+  _dispose: function() {
+    this.doc.getEventProxy('path').remove([this.props.node.id, 'items'], this);
+    this.doc = null;
+  },
+
+  onItemsChanged: function() {
+    console.log('YAY');
+    this.rerender();
+  },
+
 });
 
 module.exports = ListComponent;

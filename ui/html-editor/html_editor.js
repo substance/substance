@@ -19,6 +19,8 @@ var LinkComponent = require('../nodes/link_component');
 var HtmlArticle = require("./html_article");
 var DefaultToolbar = require('./default_toolbar');
 
+var ListEditing = require('../../document/transformations/extensions/list_editing');
+
 var $$ = Component.$$;
 var Clipboard = Surface.Clipboard;
 var SurfaceManager = Surface.SurfaceManager;
@@ -33,6 +35,10 @@ var components = {
   "link": LinkComponent,
 };
 
+var editingBehavior = [
+  new ListEditing()
+];
+
 var tools = Surface.Tools;
 
 // HtmlEditor
@@ -41,6 +47,8 @@ var tools = Surface.Tools;
 // A simple rich text editor implementation based on Substance
 
 var HtmlEditor = Component.extend({
+
+  displayName: "HtmlEditor",
 
   initialize: function() {
 
@@ -51,6 +59,10 @@ var HtmlEditor = Component.extend({
     this.surfaceManager = new SurfaceManager(this.doc);
     this.clipboard = new Clipboard(this.surfaceManager, this.doc.getClipboardImporter(), this.doc.getClipboardExporter());
     this.editor = new ContainerEditor('body');
+    // TODO: think about how we want to configure editing extensions
+    _.each(editingBehavior, function(behavior) {
+      this.editor.extendBehavior(behavior);
+    }, this);
 
     // Component registry
     this.componentRegistry = new Registry();

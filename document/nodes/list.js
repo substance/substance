@@ -22,6 +22,19 @@ var List = DocumentNode.extend({
       return doc.get(id);
     }, this);
   },
+  removeItem: function(id) {
+    var doc = this.getDocument();
+    var offset = this.items.indexOf(id);
+    if (offset >= 0) {
+      doc.update([this.id, 'items'], { "delete": { offset: offset } });
+    } else {
+      throw new Error('List item is not a child of this list: ' + id);
+    }
+  },
+  insertItemAt: function(offset, id) {
+    var doc = this.getDocument();
+    doc.update([this.id, 'items'], { "insert": { offset: offset, value: id } });
+  },
 });
 
 List.static.components = ['items'];
