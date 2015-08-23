@@ -1,6 +1,6 @@
 'use strict';
 
-var Substance = require('../../basics');
+var uuid = require('../../basics/uuid');
 var deleteSelection = require('./delete_selection');
 var Annotations = require('../annotation_updates');
 
@@ -17,8 +17,7 @@ function breakNode(tx, args) {
     throw new Error("Argument 'containerId' is mandatory.");
   }
   if (!args.selection.isCollapsed()) {
-    var out = deleteSelection(tx, args);
-    args.selection = out.selection;
+    args = deleteSelection(tx, args);
   }
   var range = args.selection.getRange();
   var node = tx.get(range.start.path[0]);
@@ -47,7 +46,7 @@ function breakTextNode(tx, args) {
   var text = node.content;
   var container = tx.get(containerId);
   var nodePos = container.getPosition(node.id);
-  var id = Substance.uuid(node.type);
+  var id = uuid(node.type);
   var newPath = [id, 'content'];
   var newNode;
   // when breaking at the first position, a new node of the same
@@ -91,10 +90,9 @@ function breakTextNode(tx, args) {
       startOffset: 0
     });
   }
-  return {
-    selection: selection,
-    node: newNode
-  };
+  args.selection = selection;
+  args.node = newNode;
+  return args;
 }
 
 module.exports = breakNode;

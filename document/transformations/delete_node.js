@@ -52,6 +52,7 @@ function deleteNode(tx, args) {
   });
   // and then delete permanently
   tx.delete(nodeId);
+  return args;
 }
 
 module.exports = deleteNode;

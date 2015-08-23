@@ -13,6 +13,15 @@ var TextNode = Node.extend({
   properties: {
     content: 'string'
   },
+
+  getTextPath: function() {
+    return [this.id, 'content'];
+  },
+
+  getText: function() {
+    return this.content;
+  },
+
 });
 
 TextNode.static.components = ['content'];

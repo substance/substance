@@ -1,3 +1,5 @@
+'use strict';
+
 var _ = require('../../basics/helpers');
 var Annotations = require('../annotation_updates');
 var deleteSelection = require('./delete_selection');
@@ -18,8 +20,8 @@ var paste = function(tx, args) {
   }
   var pasteDoc = args.doc;
   if (!args.selection.isCollapsed()) {
-    var out = deleteSelection(tx, args);
-    args.selection = out.selection;
+    var tmp = deleteSelection(tx, args);
+    args.selection = tmp.selection;
   }
   var nodes = pasteDoc.get(CLIPBOARD_CONTAINER_ID).nodes;
   if (nodes.length > 0) {
@@ -64,9 +66,8 @@ var _pasteAnnotatedText = function(tx, args) {
     }
     tx.create(data);
   });
-  return {
-    selection: selection
-  };
+  args.selection = selection;
+  return args;
 };
 
 var _pasteDocument = function(tx, args) {
@@ -123,7 +124,7 @@ var _pasteDocument = function(tx, args) {
     }
   }
 
-  if (insertedNodes.length === 0) return;
+  if (insertedNodes.length === 0) return args;
 
   // set a new selection
   var lastId = _.last(insertedNodes).id;
@@ -150,9 +151,8 @@ var _pasteDocument = function(tx, args) {
       startOffset: lastLength
     });
   }
-  return {
-    selection: selection
-  };
+  args.selection = selection;
+  return args;
 };
 
 module.exports = paste;

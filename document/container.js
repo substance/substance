@@ -9,12 +9,13 @@ var ContainerAnnotation = require('./container_annotation');
 // Container
 // --------
 //
-// A Container in first place represents a list of node ids.
-// At the same time it bookkeeps a sequence of components which are the editable properties of
-// the nodes within this container.
-// While most editing occurs on a property level (such as editing text), other things
-// happen on a node level, e.g., breaking or mergin nodes, or spanning annotations or so called
-// ContainerAnnotations. A Container provides a bridge between those two worlds: nodes and properties.
+// A Container represents a list of node ids in first place.
+// At the same time it keeps a sequence of components which are the editable
+// properties of the nodes within this container.
+// While most editing occurs on a property level (such as editing text),
+// other things happen on a node level, e.g., breaking or mergin nodes,
+// or spanning annotations or so called ContainerAnnotations.
+// A Container provides a bridge between those two worlds: nodes and properties.
 //
 // Example:
 // A figure node might consist of a title, an image, and a caption.

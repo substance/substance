@@ -6,7 +6,6 @@ var breakNode = require('./break_node');
 function insertNode(tx, args) {
   var selection = args.selection;
   var node = args.node;
-
   if (!args.containerId) {
     throw new Error("containerId is mandatory");
   }
@@ -16,27 +15,31 @@ function insertNode(tx, args) {
   if (!args.node) {
     throw new Error("node is mandatory");
   }
-
   var containerId = args.containerId;
-
   var container = tx.get(containerId);
-  var result;
+  var tmp;
   if (!selection.isCollapsed()) {
-    result = deleteSelection(tx, args);
-    selection = result.selection;
+    tmp = deleteSelection(tx, args);
+    selection = tmp.selection;
   }
-  result = breakNode(tx, args);
-  selection = result.selection;
+  tmp = breakNode(tx, args);
+  selection = tmp.selection;
   if (!tx.get(node.id)) {
     node = tx.create(node);
   }
   var comp = container.getComponent(selection.start.path);
   var pos = container.getPosition(comp.rootId);
   container.show(node.id, pos);
-  // TODO: set cursor to first position of inserted node
-  return {
-    selection: null
-  };
+  // if possible set the selection to the first position in the inserted node
+  var comps = container.getComponentsForNode(node.id);
+  if (comps.length > 0) {
+    args.selection = tx.createSelection({
+      type: 'property',
+      path: comps[0].getPath(),
+      startOffset: 0
+    });
+  }
+  return args;
 }
 
 module.exports = insertNode;
