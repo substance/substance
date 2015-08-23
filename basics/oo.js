@@ -14,23 +14,29 @@ var _ = require('./helpers');
 var OO = {};
 
 var extend = function( parent, proto ) {
-  var ctor = function $$$() {
+  var Constructor = function ExtendedClass() {
+    this.__className__ = proto.displayName || proto.name;
     parent.apply(this, arguments);
     if (this.init) {
       this.init.apply(this, arguments);
     }
   };
-  OO.inherit(ctor, parent);
+  if (proto.displayName) {
+    Constructor.displayName = proto.displayName;
+  } else if (proto.name) {
+    Constructor.displayName = proto.name;
+  }
+  OO.inherit(Constructor, parent);
   for(var key in proto) {
     if (proto.hasOwnProperty(key)) {
       if (key === "name") {
         continue;
       }
-      ctor.prototype[key] = proto[key];
+      Constructor.prototype[key] = proto[key];
     }
   }
-  ctor.static.name = proto.name;
-  return ctor;
+  Constructor.static.name = proto.name;
+  return Constructor;
 };
 
 /**
