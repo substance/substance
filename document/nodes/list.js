@@ -11,11 +11,14 @@ var ListItem = require('./list_item');
 // The wrapping list node helps us to create a scope for rendering, and
 // import/export.
 var List = DocumentNode.extend({
+  displayName: "List",
   name: "list",
-  ordered: "boolean",
+
   properties: {
+    ordered: "boolean",
     items: ["array", "id"]
   },
+
   getItems: function() {
     var doc = this.getDocument();
     return _.map(this.items, function(id) {

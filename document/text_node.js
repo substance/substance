@@ -9,7 +9,9 @@ var Node = require('./node');
 // Prerendered, etc.
 
 var TextNode = Node.extend({
+  displayName: "TextNode",
   name: "text",
+
   properties: {
     content: 'string'
   },
@@ -21,7 +23,6 @@ var TextNode = Node.extend({
   getText: function() {
     return this.content;
   },
-
 });
 
 TextNode.static.components = ['content'];

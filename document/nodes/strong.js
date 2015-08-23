@@ -1,6 +1,7 @@
 var Annotation = require('../annotation');
 
 var Strong = Annotation.extend({
+  displayName: "Strong",
   name: "strong",
 
   // this means that it will annotate also when you have

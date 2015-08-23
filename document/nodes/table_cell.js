@@ -1,6 +1,7 @@
 var Node = require('../node');
 
 var TableCell = Node.extend({
+  displayName: "TableCell",
   name: "table-cell",
   properties: {
     "parent": "id",

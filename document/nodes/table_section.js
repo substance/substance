@@ -2,6 +2,7 @@ var Node = require('../node');
 var _ = require('../../basics/helpers');
 
 var TableSection = Node.extend({
+  displayName: "TableSection",
   name: "table-section",
   properties: {
     "parent": "id",

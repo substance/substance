@@ -2,6 +2,7 @@ var Node = require('../node');
 var _ = require('../../basics/helpers');
 
 var TableRow = Node.extend({
+  displayName: "TableRow",
   name: "table-row",
   properties: {
     "parent": "id",

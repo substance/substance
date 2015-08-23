@@ -1,6 +1,7 @@
 var TextNode = require('../text_node');
 
 var Paragraph = TextNode.extend({
+  displayName: "Paragraph",
   name: "paragraph"
 });
 

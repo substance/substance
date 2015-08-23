@@ -2,7 +2,7 @@ var Annotation = require('../annotation');
 
 var Emphasis = Annotation.extend({
   name: "emphasis",
-
+  displayName: "Emphasis",
   splitContainerSelections: true
 });
 

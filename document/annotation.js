@@ -17,6 +17,7 @@ var Node = require('./node');
 
 // TODO: in current terminology this is a PropertyAnnotation
 var Annotation = Node.extend({
+  displayName: "Annotation",
   name: "annotation",
 
   properties: {

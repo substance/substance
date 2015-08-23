@@ -4,7 +4,7 @@ var _ = require('../basics');
 var Data = require('../data');
 
 var Node = Data.Node.extend({
-
+  displayName: "DocumentNode",
   name: "node",
 
   attach: function(document) {
@@ -14,6 +14,9 @@ var Node = Data.Node.extend({
 
   detach: function() {
     var doc = this.document;
+    _.each(this.constructor.schema, function(type, propertyName) {
+      doc.getEventProxy('path').remove([this.id, propertyName], this);
+    });
     this.document = null;
     this.didDetach(doc);
   },
@@ -61,6 +64,32 @@ var Node = Data.Node.extend({
   // Note: children are provided for inline nodes only.
   toHtml: function(converter, children) {
     return this.constructor.static.toHtml(this, converter, children);
+  },
+
+  connect: function(ctx, handlers) {
+    _.each(handlers, function(func, name) {
+      var match = /([a-zA-Z_0-9]+):changed/.exec(name);
+      if (match) {
+        var propertyName = match[1];
+        if (this.constructor.static.schema[propertyName]) {
+          this.getDocument().getEventProxy('path').add([this.id, propertyName], this, this._onPropertyChange.bind(this, propertyName));
+        }
+      }
+    });
+    Data.Node.prototype.connect.apply(this, arguments);
+  },
+
+  disconnect: function() {
+    // TODO: right now do not unregister from the event proxy
+    // when there is no property listener left
+    // We would need to implement disconnect
+    Data.Node.prototype.disconnect.apply(this, arguments);
+  },
+
+  _onPropertyChange: function(propertyName) {
+    var args = [propertyName + ':changed']
+      .concat(Array.prototype.slice.call(arguments, 1));
+    this.emit.apply(this, args);
   },
 
 });

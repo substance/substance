@@ -8,6 +8,8 @@ var List = require('../../document/nodes/list');
 
 var ListComponent = Component.extend({
 
+  displayName: "ListComponent",
+
   render: function() {
     var doc = this.props.doc;
     return List.static.render(this.props.node, {

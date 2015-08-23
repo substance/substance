@@ -1,6 +1,7 @@
 var Node = require('../node');
 
 var ListItem = Node.extend({
+  displayName: "ListItem",
   name: "list-item",
   properties: {
     parent: "id",

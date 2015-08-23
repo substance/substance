@@ -9,6 +9,8 @@ var Icon = require('../font_awesome_icon');
 
 var DefaultToolbar = Component.extend({
 
+  displayName: "DefaultToolbar",
+
   render: function() {
     var el = $$("div").addClass("default-html-toolbar toolbar small fill-white");
     el.append(

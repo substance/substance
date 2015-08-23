@@ -4,7 +4,7 @@ var Node = require('../node');
 var TableMatrix = require('./table_matrix');
 
 var Table = Node.extend({
-
+  displayName: "Table",
   name: "table",
 
   matrix: null,

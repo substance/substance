@@ -1,6 +1,9 @@
 var AnnotationComponent = require('./annotation_component');
 
 var LinkComponent = AnnotationComponent.extend({
+
+  displayName: "LinkComponent",
+
   render: function() {
     var el = AnnotationComponent.prototype.render.call(this);
     var titleComps = [this.props.node.url];
