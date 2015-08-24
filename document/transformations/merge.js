@@ -58,7 +58,11 @@ var _mergeComponents = function(tx, args) {
     // most often a merge happens between two different nodes (e.g., 2 paragraphs)
     mergeTrafo = _getNodeMerger(args.editingBehavior, firstNode, secondNode);
     if (mergeTrafo) {
-      return mergeTrafo.call(this, tx, args);
+      return mergeTrafo.call(this, tx, _.extend(Object.create(args), {
+        containerId: args.containerId,
+        first: firstNode,
+        second: secondNode
+      }));
     }
   }
   return args;
