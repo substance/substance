@@ -1,7 +1,9 @@
 'use strict';
 
-var Substance = require('../basics');
-var EventEmitter = Substance.EventEmitter;
+var OO = require('../basics/oo');
+var _ = require('../basics/helpers');
+var uuid = require('../basics/uuid');
+var EventEmitter = require('../basics/event_emitter');
 
 /**
  * Base node implemention.
@@ -19,9 +21,9 @@ function Node( properties ) {
    * The internal storage for properties.
    * @property properties {Object}
    */
-  this.properties = Substance.extend({}, this.getDefaultProperties(), properties);
+  this.properties = _.extend({}, this.getDefaultProperties(), properties);
   this.properties.type = this.constructor.static.name;
-  this.properties.id = this.properties.id || Substance.uuid(this.properties.type);
+  this.properties.id = this.properties.id || uuid(this.properties.type);
 }
 
 Node.Prototype = function() {
@@ -87,7 +89,7 @@ Node.Prototype = function() {
 
 };
 
-Substance.inherit(Node, EventEmitter);
+OO.inherit(Node, EventEmitter);
 
 /**
  * Symbolic name for this model class. Must be set to a unique string by every subclass.
@@ -177,18 +179,20 @@ var prepareSchema = function(NodeClass) {
   var parentStatic = Object.getPrototypeOf(NodeClass.static);
   var parentSchema = parentStatic.schema;
   if (parentSchema) {
-    NodeClass.static.schema = Substance.extend(Object.create(parentSchema), schema);
+    NodeClass.static.schema = _.extend(Object.create(parentSchema), schema);
   }
 };
 
 var initNodeClass = function(NodeClass) {
   // add a extend method so that this class can be used to create child models.
-  NodeClass.extend = Substance.bind(extend, null, NodeClass);
+  NodeClass.extend = _.bind(extend, null, NodeClass);
   // define properties and so on
   defineProperties(NodeClass);
   prepareSchema(NodeClass);
   NodeClass.type = NodeClass.static.name;
 };
+
+// TODO: try to reuse OO.extend here. Will need some changes to OO.extend, though.
 
 extend = function( parent, modelSpec ) {
   var ctor = function NodeClass() {
@@ -197,7 +201,7 @@ extend = function( parent, modelSpec ) {
       this.init.apply(this, arguments);
     }
   };
-  Substance.inherit(ctor, parent);
+  OO.inherit(ctor, parent);
   for(var key in modelSpec) {
     if (modelSpec.hasOwnProperty(key)) {
       if (key === "name" || key === "properties") {
