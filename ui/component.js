@@ -953,6 +953,7 @@ Component.mount = function(data, $el) {
   if (_isInDocument($el[0])) {
     component.triggerDidMount();
   }
+  return component;
 };
 
 Component.VirtualTextNode = VirtualTextNode;

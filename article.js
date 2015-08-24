@@ -1,44 +1,43 @@
 'use strict';
 
-var OO = require('../../basics/oo');
-var Document = require('../../document');
-var Paragraph = Document.Paragraph;
-var Codeblock = Document.Codeblock;
-var Blockquote = Document.Blockquote;
-var Heading = Document.Heading;
-var List = Document.List;
-var ListItem = Document.ListItem;
-var Emphasis = Document.Emphasis;
-var Strong = Document.Strong;
-var Link = Document.Link;
+// Substance Article
+// ----------------
+// 
+// The default Article Implementation
+// 
+// Uses well-defined HTML exchange representation
 
+var OO = require('./basics/oo');
+var Document = require('./document');
 var HtmlImporter = Document.HtmlImporter;
 var HtmlExporter = Document.HtmlExporter;
 
-// Schema
+var defaultNodes = [
+  Document.Paragraph,
+  Document.Codeblock,
+  Document.Blockquote,
+  Document.Heading,
+  Document.List, Document.ListItem,
+  Document.Emphasis,
+  Document.Strong,
+  Document.Link
+];
+
+// Default Schema
 // ----------------
 
-var schema = new Document.Schema("html-article", "1.0.0");
+var defaultSchema = new Document.Schema("substance-article", "1.0.0");
 
-schema.getDefaultTextType = function() {
+defaultSchema.getDefaultTextType = function() {
   return "paragraph";
 };
 
-schema.addNodes([
-  Paragraph,
-  Codeblock,
-  Blockquote,
-  Heading,
-  List, ListItem,
-  Emphasis,
-  Strong,
-  Link
-]);
+defaultSchema.addNodes(defaultNodes);
 
 // Importer
 // ----------------
 
-function Importer() {
+function Importer(schema) {
   Importer.super.call(this, { schema: schema });
 }
 
@@ -55,7 +54,7 @@ OO.inherit(Importer, HtmlImporter);
 // Exporter
 // ----------------
 
-function Exporter() {
+function Exporter(schema) {
   Exporter.super.call(this, { schema: schema });
 }
 
@@ -74,14 +73,15 @@ Exporter.Prototype = function() {
 
 OO.inherit(Exporter, HtmlExporter);
 
+
 // Article Class
 // ----------------
 
-var HtmlArticle = function() {
-  Document.call(this, schema);
+var Article = function(schema) {
+  Document.call(this, schema || defaultSchema);
 };
 
-HtmlArticle.Prototype = function() {
+Article.Prototype = function() {
 
   this.initialize = function() {
     Document.prototype.initialize.apply(this, arguments);
@@ -94,37 +94,23 @@ HtmlArticle.Prototype = function() {
   };
 
   this.toHtml = function() {
-    return new Exporter().convert(this);
+    return new Exporter(this.schema).convert(this);
   };
 
   // replaces the content by loading from the given html
   this.loadHtml = function(html) {
     this.clear();
+
+    // Re-enable transaction for the importing step
+    this.FORCE_TRANSACTIONS = false;
     var $root = $('<div>'+html+'</div>');
-    new Importer().convert($root, this);
+    new Importer(this.schema).convert($root, this);
     this.documentDidLoad();
   };
-
 };
 
-OO.inherit(HtmlArticle, Document);
+OO.inherit(Article, Document);
+Article.schema = defaultSchema;
 
-HtmlArticle.schema = schema;
-
-HtmlArticle.fromJson = function(json) {
-  var doc = new HtmlArticle();
-  doc.loadSeed(json);
-  return doc;
-};
-
-HtmlArticle.fromHtml = function(html) {
-  var $root = $('<div>'+html+'</div>');
-  var doc = new HtmlArticle();
-  new Importer().convert($root, doc);
-  doc.documentDidLoad();
-  return doc;
-};
-
-HtmlArticle.Importer = Importer;
-
-module.exports = HtmlArticle;
+Article.Importer = Importer;
+module.exports = Article;
