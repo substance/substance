@@ -11,16 +11,32 @@ var ListItem = require('./list_item');
 // The wrapping list node helps us to create a scope for rendering, and
 // import/export.
 var List = DocumentNode.extend({
+  displayName: "List",
   name: "list",
-  ordered: "boolean",
+
   properties: {
+    ordered: "boolean",
     items: ["array", "id"]
   },
+
   getItems: function() {
     var doc = this.getDocument();
     return _.map(this.items, function(id) {
       return doc.get(id);
     }, this);
+  },
+  removeItem: function(id) {
+    var doc = this.getDocument();
+    var offset = this.items.indexOf(id);
+    if (offset >= 0) {
+      doc.update([this.id, 'items'], { "delete": { offset: offset } });
+    } else {
+      throw new Error('List item is not a child of this list: ' + id);
+    }
+  },
+  insertItemAt: function(offset, id) {
+    var doc = this.getDocument();
+    doc.update([this.id, 'items'], { "insert": { offset: offset, value: id } });
   },
 });
 

@@ -1,6 +1,7 @@
 var TextNode = require('../text_node');
 
 var Codeblock = TextNode.extend({
+  displayName: "Codeblock",
   name: "codeblock"
 });
 

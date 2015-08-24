@@ -2,6 +2,7 @@ var Annotation = require('../annotation');
 
 var Link = Annotation.extend({
   name: "link",
+  displayName: "Link",
   properties: {
     url: 'string',
     title: 'string'

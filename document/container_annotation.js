@@ -28,6 +28,7 @@ var PathAdapter = require('../basics/path_adapter');
 
 
 var ContainerAnnotation = Node.extend({
+  displayName: "ContainerAnnotation",
   name: "container_annotation",
 
   properties: {

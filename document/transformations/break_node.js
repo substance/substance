@@ -1,6 +1,6 @@
 'use strict';
 
-var Substance = require('../../basics');
+var uuid = require('../../basics/uuid');
 var deleteSelection = require('./delete_selection');
 var Annotations = require('../annotation_updates');
 
@@ -17,15 +17,16 @@ function breakNode(tx, args) {
     throw new Error("Argument 'containerId' is mandatory.");
   }
   if (!args.selection.isCollapsed()) {
-    var out = deleteSelection(tx, args);
-    args.selection = out.selection;
+    args = deleteSelection(tx, args);
   }
   var range = args.selection.getRange();
   var node = tx.get(range.start.path[0]);
-  // TODO: we want to allow custom break behaviors
-  // for that to happen we need to learn more
+  var behavior = args.editingBehavior;
   if (node.isInstanceOf('text')) {
     return breakTextNode(tx, args);
+  } else if (behavior && behavior.canBreak(node.type)) {
+    var breaker = behavior.getBreaker(node.type);
+    return breaker.call(breaker, tx, args);
   } else {
     console.info("Breaking is not supported for node type %s.", node.type);
     return args;
@@ -47,7 +48,7 @@ function breakTextNode(tx, args) {
   var text = node.content;
   var container = tx.get(containerId);
   var nodePos = container.getPosition(node.id);
-  var id = Substance.uuid(node.type);
+  var id = uuid(node.type);
   var newPath = [id, 'content'];
   var newNode;
   // when breaking at the first position, a new node of the same
@@ -91,10 +92,9 @@ function breakTextNode(tx, args) {
       startOffset: 0
     });
   }
-  return {
-    selection: selection,
-    node: newNode
-  };
+  args.selection = selection;
+  args.node = newNode;
+  return args;
 }
 
 module.exports = breakNode;

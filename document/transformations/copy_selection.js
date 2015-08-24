@@ -1,3 +1,5 @@
+'use strict';
+
 var _ = require('../../basics/helpers');
 var Annotations = require('../annotation_updates');
 

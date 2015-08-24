@@ -1,5 +1,6 @@
 'use strict';
 
+var _ = require('../../basics/helpers');
 var Annotations = require('../annotation_updates');
 
 /* jshint latedef: false */
@@ -14,56 +15,118 @@ var merge = function(tx, args) {
   }
   var container = tx.get(containerId);
   var component = container.getComponent(path);
+  var tmp;
   if (direction === 'right' && component.next) {
-     return _mergeComponents(tx, containerId, component, component.next);
+    tmp = _mergeComponents(tx, _.extend(Object.create(args), {
+      containerId: containerId,
+      first: component,
+      second: component.next
+    }));
+    args.selection = tmp.selection;
   } else if (direction === 'left' && component.previous) {
-    return _mergeComponents(tx, containerId, component.previous, component);
+    tmp = _mergeComponents(tx, _.extend(Object.create(args), {
+      containerId: containerId,
+      first: component.previous,
+      second: component
+    }));
+    args.selection = tmp.selection;
   } else {
     // No behavior defined for this merge
   }
+  return args;
 };
 
-var _mergeComponents = function(tx, containerId, firstComp, secondComp) {
+var _mergeComponents = function(tx, args) {
+  var firstComp = args.first;
+  var secondComp = args.second;
   var firstNode = tx.get(firstComp.parentNode.id);
   var secondNode = tx.get(secondComp.parentNode.id);
-  // TODO: it should be possible to extend the merge transformation by providing custom transformations
-  // for nodes anc components
-  var mergeTrafo = _getMergeTransformation(firstNode, secondNode);
-  if (mergeTrafo) {
-    return mergeTrafo.call(this, tx, containerId, firstComp, secondComp);
+  var behavior = args.editingBehavior;
+  var mergeTrafo;
+  // some components consist of multiple child components
+  // in this case, a custom editing behavior must have been defined
+  if (firstNode === secondNode) {
+    if (behavior && behavior.canMergeComponents(firstNode.type)) {
+      mergeTrafo = behavior.getComponentMerger(firstNode.type);
+      return mergeTrafo.call(this, tx, _.extend(Object.create(args), {
+        node: firstNode,
+        first: firstComp,
+        second: secondComp
+      }));
+    }
+  } else {
+    // most often a merge happens between two different nodes (e.g., 2 paragraphs)
+    mergeTrafo = _getNodeMerger(args.editingBehavior, firstNode, secondNode);
+    if (mergeTrafo) {
+      return mergeTrafo.call(this, tx, args);
+    }
   }
+  return args;
 };
 
-var _getMergeTransformation = function(node, otherNode) {
-  // TODO: we want to introduce a way to provide custom merge behavior
-  var trafo = null;
-  // if (merge[node.type] && merge[node.type][otherNode.type]) {
-  //   behavior = merge[node.type][otherNode.type];
-  // }
-  // special convenience to define behaviors when text nodes are involved
-  // E.g., you might want to define how to merge a text node into a figure
-  // else
+function _getNodeMerger(behavior, node, otherNode) {
+  if (behavior) {
+    if (behavior.canMerge(node.type, otherNode.type)) {
+      return behavior.getMerger(node.type, otherNode.type);
+    }
+    // Behaviors with text nodes involved
+    //
+    // 1. first textish, second custom
+    // Example:
+    //  <p>abc<p>
+    //  <ul>
+    //    <li>def</li>
+    //    <li>ghi</li>
+    //  </ul>
+    //
+    // could be transformed into
+    //
+    //  <p>abcdef<p>
+    //  <ul>
+    //    <li>ghi</li>
+    //  </ul>
+    else if (node.isInstanceOf('text') &&
+      behavior.canMerge('textish', otherNode.type)) {
+      return behavior.getMerger('textish', otherNode.type);
+    }
+    // 2. first custom, second textish
+    // Example:
+    //  <figure>
+    //     ...
+    //     <figcaption>abc</figcaption>
+    //  </figure>
+    //  <p>def</p>
+    //
+    //  could be transformed into
+    //
+    //  <figure>
+    //     ...
+    //     <figcaption>abcdef</figcaption>
+    //  </figure>
+    //
+    else if (otherNode.isInstanceOf('text') &&
+      behavior.canMerge(node.type, 'textish')) {
+      return behavior.getMerger(node.type, 'textish');
+    }
+  }
+  // Built-in behavior for textish nodes
   if (node.isInstanceOf('text') && otherNode.isInstanceOf('text')) {
-    trafo = _mergeTextNodes;
+    return _mergeTextNodes;
   }
-  // else if (node.isInstanceOf('text') && merge['text']) {
-  //   behavior = merge['text'][otherNode.type];
-  // } else if (otherNode.isInstanceOf('text') && merge[node.type]) {
-  //   behavior = merge[node.type]['text'];
-  // }
-  if (!trafo) {
-    console.info("No merge behavior defined for %s <- %s", node.type, otherNode.type);
-  }
-  return trafo;
-};
+  console.info("No merge behavior defined for %s <- %s", node.type, otherNode.type);
+  return null;
+}
 
-var _mergeTextNodes = function(tx, containerId, firstComp, secondComp) {
-  var firstPath = firstComp.path;
-  var firstText = tx.get(firstPath);
-  var firstLength = firstText.length;
-  var secondPath = secondComp.path;
-  var secondText = tx.get(secondPath);
+var _mergeTextNodes = function(tx, args) {
+  var containerId = args.containerId;
+  var first = args.first;
+  var second = args.second;
   var container = tx.get(containerId);
+  var firstPath = first.getTextPath();
+  var firstText = first.getText();
+  var firstLength = firstText.length;
+  var secondPath = second.getTextPath();
+  var secondText = second.getText();
   var selection;
   if (firstLength === 0) {
     // hide the second node
@@ -92,7 +155,8 @@ var _mergeTextNodes = function(tx, containerId, firstComp, secondComp) {
       startOffset: firstLength
     });
   }
-  return { selection: selection };
+  args.selection = selection;
+  return args;
 };
 
 module.exports = merge;

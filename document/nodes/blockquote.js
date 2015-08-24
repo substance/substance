@@ -1,6 +1,7 @@
 var TextNode = require('../text_node');
 
 var Blockquote = TextNode.extend({
+  displayName: "Blockquote",
   name: "blockquote"
 });
 

@@ -9,6 +9,9 @@ var LinkToolComponent = require('../tools/link_tool_component');
 var Icon = require('../font_awesome_icon');
 
 var DefaultToolbar = Component.extend({
+
+  displayName: "DefaultToolbar",
+
   render: function() {
     var el = $$('div').addClass('toolbar');
     el.append(

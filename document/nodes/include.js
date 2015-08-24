@@ -2,6 +2,7 @@ var DocumentNode = require('../node');
 
 var Include = DocumentNode.extend({
   name: "include",
+  displayName: "Include",
   properties: {
     "nodeType": "string",
     "nodeId": "id"

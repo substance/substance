@@ -4,6 +4,7 @@ var _ = require('../basics/helpers');
 var OO = require('../basics/oo');
 var Document = require('../document');
 var FormEditor = require('./form_editor');
+var EditingBehavior = require('../document/editing_behavior');
 var Annotations = Document.AnnotationUpdates;
 var Transformations = Document.Transformations;
 
@@ -11,9 +12,14 @@ function ContainerEditor(containerId) {
   if (!_.isString(containerId)) throw new Error("Illegal argument: Expecting container id.");
   FormEditor.call(this);
   this.containerId = containerId;
+  this.editingBehavior = new EditingBehavior();
 }
 
 ContainerEditor.Prototype = function() {
+
+  this.extendBehavior = function(extension) {
+    extension.register(this.editingBehavior);
+  };
 
   this.isContainerEditor = function() {
     return true;
@@ -27,26 +33,26 @@ ContainerEditor.Prototype = function() {
    * Performs a `deleteSelection` tr
    */
   this.delete = function(tx, args) {
-    args.containerId = this.containerId;
+    this._prepareArgs(args);
     return Transformations.deleteSelection(tx, args);
   };
 
   this.break = function(tx, args) {
-    args.containerId = this.containerId;
+    this._prepareArgs(args);
     if (args.selection.isPropertySelection() || args.selection.isContainerSelection()) {
       return Transformations.breakNode(tx, args);
     }
   };
 
   this.insertNode = function(tx, args) {
-    args.containerId = this.containerId;
+    this._prepareArgs(args);
     if (args.selection.isPropertySelection() || args.selection.isContainerSelection()) {
       return Transformations.insertNode(tx, args);
     }
   };
 
   this.switchType = function(tx, args) {
-    args.containerId = this.containerId;
+    this._prepareArgs(args);
     if (args.selection.isPropertySelection()) {
       return Transformations.switchTextType(tx, args);
     }
@@ -68,10 +74,15 @@ ContainerEditor.Prototype = function() {
   };
 
   this.paste = function(tx, args) {
-    args.containerId = this.containerId;
+    this._prepareArgs(args);
     if (args.selection.isPropertySelection() || args.selection.isContainerSelection()) {
       return Transformations.paste(tx, args);
     }
+  };
+
+  this._prepareArgs = function(args) {
+    args.containerId = this.containerId;
+    args.editingBehavior = this.editingBehavior;
   };
 
 };

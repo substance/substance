@@ -9,9 +9,19 @@ var Node = require('./node');
 // Prerendered, etc.
 
 var TextNode = Node.extend({
+  displayName: "TextNode",
   name: "text",
+
   properties: {
     content: 'string'
+  },
+
+  getTextPath: function() {
+    return [this.id, 'content'];
+  },
+
+  getText: function() {
+    return this.content;
   },
 });
 

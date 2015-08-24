@@ -1,5 +1,6 @@
 'use strict';
 
+var _ = require('../../basics/helpers');
 var Annotations = require('../annotation_updates');
 var merge = require('./merge');
 
@@ -20,13 +21,13 @@ var deleteCharacter = function(tx, args) {
   var prop = tx.get(range.start.path);
   if ((range.start.offset === 0 && direction === 'left') ||
       (range.start.offset === prop.length && direction === 'right')) {
-    var result = merge(tx, {
+    var tmp = merge(tx, _.extend(Object.create(args), {
       selection: selection,
       containerId: args.containerId,
       path: range.start.path,
       direction: direction
-    });
-    selection = result.selection;
+    }));
+    selection = tmp.selection;
   } else {
     // simple delete one character
     startChar = (direction === 'left') ? range.start.offset-1 : range.start.offset;
@@ -39,7 +40,8 @@ var deleteCharacter = function(tx, args) {
       startOffset: startChar
     });
   }
-  return { selection: selection };
+  args.selection = selection;
+  return args;
 };
 
 module.exports = deleteCharacter;

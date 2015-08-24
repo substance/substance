@@ -2,6 +2,7 @@ var TextNode = require('../text_node');
 
 var Heading = TextNode.extend({
   name: "heading",
+  displayName: "Heading",
   properties: {
     "level": "number"
   }
