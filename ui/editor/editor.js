@@ -35,7 +35,7 @@ var editingBehavior = [ new ListEditing() ];
 
 var Editor = Component.extend({
 
-  displayName: "HtmlEditor",
+  displayName: "Editor",
 
   didInitialize: function() {
     if (!this.config) this.config = {};
@@ -78,7 +78,7 @@ var Editor = Component.extend({
   },
 
   render: function() {
-    var el = $$('div').addClass('html-editor-component');
+    var el = $$('div').addClass('editor-component');
 
     // Toolbar
     var ToolbarClass = this.config.toolbar || DefaultToolbar;
