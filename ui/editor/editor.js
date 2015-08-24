@@ -37,7 +37,7 @@ var Editor = Component.extend({
 
   displayName: "HtmlEditor",
 
-  initialize: function() {
+  didInitialize: function() {
     if (!this.config) this.config = {};
 
     var ArticleClass = this.config.article || SubstanceArticle;

@@ -80,7 +80,11 @@ function Component(parent, params) {
   };
   this._setProps(params.props);
 
-  this.initialize();
+  if (this.initialize) {
+    console.warn("Component.initialize() has been deprecated. Use Component.didInitialize() instead.");
+    this.initialize();
+  }
+  this.didInitialize();
 
   this._setState(this.getInitialState());
 
@@ -101,7 +105,7 @@ Component.Prototype = function ComponentPrototype() {
     return this.childContext || {};
   };
 
-  this.initialize = function() {};
+  this.didInitialize = function() {};
 
   this.getInitialState = function() {
     return {};

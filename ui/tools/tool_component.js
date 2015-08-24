@@ -15,7 +15,7 @@ function ToolComponent() {
 
 ToolComponent.Prototype = function() {
 
-  this.initialize = function() {
+  this.didInitialize = function() {
     this._initializeTool();
   };
 
