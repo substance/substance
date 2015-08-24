@@ -41,6 +41,14 @@ EditingBehavior.Prototype = function() {
     return this;
   };
 
+  this.canBreak = function(nodeType) {
+    return this._break[nodeType];
+  };
+
+  this.getBreaker = function(nodeType) {
+    return this._break[nodeType];
+  };
+
 };
 
 OO.initClass(EditingBehavior);

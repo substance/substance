@@ -21,10 +21,12 @@ function breakNode(tx, args) {
   }
   var range = args.selection.getRange();
   var node = tx.get(range.start.path[0]);
-  // TODO: we want to allow custom break behaviors
-  // for that to happen we need to learn more
+  var behavior = args.editingBehavior;
   if (node.isInstanceOf('text')) {
     return breakTextNode(tx, args);
+  } else if (behavior && behavior.canBreak(node.type)) {
+    var breaker = behavior.getBreaker(node.type);
+    return breaker.call(breaker, tx, args);
   } else {
     console.info("Breaking is not supported for node type %s.", node.type);
     return args;
