@@ -184,6 +184,10 @@ Container.Prototype = function() {
         }
       }
     }
+    // HACK: this is for lists. We need to find a generalized way for hierarchical node types
+    else if (op.type === 'update' && op.path[1] === 'items') {
+      this.updateNode(op.path[0]);
+    }
   };
 
   // TODO: nested structures such as tables and lists should
