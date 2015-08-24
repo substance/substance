@@ -8,7 +8,7 @@ ListEditing.Prototype = function() {
 
   this.register = function(behavior) {
     behavior
-      .defineBreak('list', this.breakList)
+      .defineBreak('list-item', this.breakList)
       .defineMerge('list','list', this.mergeListWithList)
       .defineMerge('list','textish', this.mergeListWithTextish)
       .defineMerge('textish','list', this.mergeTextishWithList)
@@ -16,6 +16,7 @@ ListEditing.Prototype = function() {
   };
 
   this.breakList = function(tx, args) {
+    console.log("TODO: implement break list");
     return args;
   };
 
@@ -36,6 +37,7 @@ ListEditing.Prototype = function() {
    *        the second list node.
    */
   this.mergeListWithList = function(tx, args) {
+    console.log('TODO: implement merge list-list');
     return args;
   };
 
@@ -55,6 +57,7 @@ ListEditing.Prototype = function() {
    *        a textish node.
    */
   this.mergeListWithTextish = function(tx, args) {
+    console.log('TODO: implement merge list-text');
     return args;
   };
 
@@ -74,6 +77,7 @@ ListEditing.Prototype = function() {
    *        a textish node.
    */
   this.mergeTextishWithList = function(tx, args) {
+    console.log('TODO: implement merge text-list');
     return args;
   };
 
