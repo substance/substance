@@ -17,14 +17,14 @@ var merge = function(tx, args) {
   var component = container.getComponent(path);
   var tmp;
   if (direction === 'right' && component.next) {
-    tmp = _mergeComponents(tx, _.extend(Object.create(args), {
+    tmp = _mergeComponents(tx, _.extend({}, args, {
       containerId: containerId,
       first: component,
       second: component.next
     }));
     args.selection = tmp.selection;
   } else if (direction === 'left' && component.previous) {
-    tmp = _mergeComponents(tx, _.extend(Object.create(args), {
+    tmp = _mergeComponents(tx, _.extend({}, args, {
       containerId: containerId,
       first: component.previous,
       second: component
@@ -48,7 +48,7 @@ var _mergeComponents = function(tx, args) {
   if (firstNode === secondNode) {
     if (behavior && behavior.canMergeComponents(firstNode.type)) {
       mergeTrafo = behavior.getComponentMerger(firstNode.type);
-      return mergeTrafo.call(this, tx, _.extend(Object.create(args), {
+      return mergeTrafo.call(this, tx, _.extend({}, args, {
         node: firstNode,
         first: firstComp,
         second: secondComp
@@ -58,7 +58,7 @@ var _mergeComponents = function(tx, args) {
     // most often a merge happens between two different nodes (e.g., 2 paragraphs)
     mergeTrafo = _getNodeMerger(args.editingBehavior, firstNode, secondNode);
     if (mergeTrafo) {
-      return mergeTrafo.call(this, tx, _.extend(Object.create(args), {
+      return mergeTrafo.call(this, tx, _.extend({}, args, {
         containerId: args.containerId,
         first: firstNode,
         second: secondNode

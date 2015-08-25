@@ -18,7 +18,7 @@ var insertText = function(tx, args) {
   }
   var tmp;
   if (!selection.isCollapsed()) {
-    tmp = deleteSelection(tx, _.extend(Object.create(args), {
+    tmp = deleteSelection(tx, _.extend({}, args, {
       selection: selection,
       direction: 'right'
     }));

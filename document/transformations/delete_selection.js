@@ -58,11 +58,11 @@ function _deleteContainerSelection(tx, args) {
     nodeSel = nodeSels[idx];
     node = nodeSel.node;
     if (nodeSel.isFully) {
-      deleteNode(tx, _.extend(Object.create(args), {
+      deleteNode(tx, _.extend({}, args, {
         nodeId: node.id
       }));
     } else {
-      _deleteNodePartially(tx, _.extend(Object.create(args), {
+      _deleteNodePartially(tx, _.extend({}, args, {
         nodeSel: nodeSel
       }));
     }
@@ -116,7 +116,7 @@ function _deleteContainerSelection(tx, args) {
       // TODO: think about if we want to merge in those cases
     } else {
       var secondComp = _.last(lastSel.components);
-      var tmp = merge(tx, _.extend(Object.create(args), {
+      var tmp = merge(tx, _.extend({}, args, {
         selection: args.selection,
         containerId: containerId,
         path: secondComp.path,
@@ -160,7 +160,7 @@ function _deleteNodePartially(tx, args) {
     if (i === length-1) {
       endOffset = nodeSel.endOffset;
     }
-    _deletePropertySelection(tx, _.extend(Object.create(args), {
+    _deletePropertySelection(tx, _.extend({}, args, {
       selection: tx.createSelection({
         type: 'property',
         path: comp.path,
