@@ -149,7 +149,7 @@ A Surface instance requires a `SurfaceManager`, which keeps track of multiple Su
 
 We also setup a registry for components (such as Paragraph) and tools (e.g. EmphasisTool, StrongTrool). Our editor will then be able to dynamically retrieve the right view component for a certain node type.
 
-To learn how to build your own editor check out [this tutorial](https://github.com/substance/demos/tree/master/notepad) on how to build a Notepad editor with Substance.
+To learn how to build your own editor check out [this tutorial](https://github.com/substance/demos/tree/master/notepad) on creating a Notepad editor with Substance.
 
 <!--
 ### Anatomy of a Substance Document
