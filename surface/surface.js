@@ -463,6 +463,7 @@ Surface.Prototype = function() {
         direction: (e.keyCode === Surface.Keys.LEFT) ? 'left' : 'right'
       };
       self._updateModelSelection(options);
+      self.rerenderDomSelection();
     });
   };
 
@@ -475,6 +476,7 @@ Surface.Prototype = function() {
         direction: (e.keyCode === Surface.Keys.UP) ? 'left' : 'right'
       };
       self._updateModelSelection(options);
+      self.rerenderDomSelection();
     });
   };
 
