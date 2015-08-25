@@ -135,7 +135,7 @@ doc.transaction(function(tx) {
 
 ### Transformations
 
-Transformations are there to define higher level document operations that editor implementations can use. We implemented a range of useful [transformations](document/transformations) that editor implementations can use. However, you are encouraged to define your own.
+Transformations are there to define higher level document operations. We implemented a range of useful [transformations](document/transformations) that editor implementations can use. However, you should define your own as well.
 
 ```js
 function searchAndReplace(tx, args) {
