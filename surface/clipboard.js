@@ -68,11 +68,11 @@ Clipboard.Prototype = function() {
   };
 
   this.onCopy = function(event) {
-    console.log("Clipboard.onCopy", arguments);
+    // console.log("Clipboard.onCopy", arguments);
     this._copySelection();
     if (event.clipboardData && this._contentDoc) {
       var html = this.htmlExporter.convert(this._contentDoc);
-      console.log('Stored HTML in clipboard', html);
+      // console.log('Stored HTML in clipboard', html);
       this._contentDoc.__id__ = _.uuid();
       var data = this._contentDoc.toJSON();
       data.__id__ = this._contentDoc.__id__;
@@ -86,7 +86,7 @@ Clipboard.Prototype = function() {
   // nothing special for cut.
   this.onCut = function(e) {
     e.preventDefault();
-    console.log("Clipboard.onCut", arguments);
+    // console.log("Clipboard.onCut", arguments);
     this.onCopy(e);
     var surface = this.getSurface();
     if (!surface) return;
@@ -187,7 +187,7 @@ Clipboard.Prototype = function() {
 
     e.preventDefault();
     e.stopPropagation();
-    console.log('Available types', types);
+    // console.log('Available types', types);
 
     // use internal data if available
     if (types['application/substance']) {
@@ -241,7 +241,7 @@ Clipboard.Prototype = function() {
   this.beforePasteShim = function() {
     var surface = this.getSurface();
     if (!surface) return;
-    console.log("Paste before...");
+    // console.log("Paste before...");
     this.$el.focus();
     var range = document.createRange();
     range.selectNodeContents(this.el);
@@ -290,7 +290,7 @@ Clipboard.Prototype = function() {
   };
 
   this.handleCut = function() {
-    console.log("Cutting into Clipboard...");
+    // console.log("Cutting into Clipboard...");
     var wSel = window.getSelection();
     // TODO: deal with multiple ranges
     // first extract the selected content into the hidden element
@@ -302,7 +302,7 @@ Clipboard.Prototype = function() {
     var surface = this.getSurface();
     if (!surface) return;
     try {
-      console.log("...selection before deletion", surface.getSelection().toString());
+      // console.log("...selection before deletion", surface.getSelection().toString());
       surface.getEditor().delete();
     } catch (error) {
       console.error(error);
@@ -341,7 +341,7 @@ Clipboard.Prototype = function() {
       var wRange = wSel.getRangeAt(0);
       this._contentText = wRange.toString();
       this._contentDoc = editor.copy(doc, sel);
-      console.log("Clipboard._copySelection(): created a copy", this._contentDoc);
+      // console.log("Clipboard._copySelection(): created a copy", this._contentDoc);
     } else {
       this._contentDoc = null;
       this._contentText = "";
