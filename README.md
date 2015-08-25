@@ -15,7 +15,7 @@ Building a web editor is a hard task. Native browser support for text editing is
 With Substance you can:
 
 - Define a [custom article schema](https://github.com/substance/demos/blob/master/notepad/note.js)
-- Manipulate content and annotations using *operations* and *transactions*
+- Manipulate content and annotations using *operations* and *tranformations*
 - Define a custom HTML structure for your content and attach a `Substance Surface` on it to make it editable
 - Implement tools for any possible task like toggling annotations, inserting content or replacing text
 - Control *copy&paste* behavior by defining custom HTML converters
@@ -46,7 +46,7 @@ Behind the curtains, your document is converted to a Javascript document model, 
 proseEditor.getDocument();
 ```
 
-You may likely want to customize that editor a bit. For instance you want to restrict the supported content types and customize the toolbar accordingly. This is all possible by [patching your very own HtmlEditor](https://github.com/substance/demos/tree/master/notepad).
+You may want to restrict the supported content types and customize the toolbar a bit. Or you decide to define completely new content types. This is all possible by [patching your very own editor](https://github.com/substance/demos/tree/master/notepad).
 
 ## Defining custom article formats.
 
@@ -71,10 +71,9 @@ schema.getDefaultTextType = function() {
 schema.addNodes([Paragraph, Emphasis, Strong, Highlight]);
 ```
 
-We provide a reference implementation, the [Substance Article](article.js). Usually want to come up with your own schema and only borrow common node types such as paragraphs and headings. The Notepad demo implements a [nice example for reference](https://github.com/substance/demos/blob/master/notepad/note.js)
+We provide a reference implementation, the [Substance Article](article.js). Usually want to come up with your own schema and only borrow common node types such as paragraphs and headings. The Notepad demo implements a [nice example for reference](https://github.com/substance/demos/blob/master/notepad/note.js).
 
 <!--Lens Writer defines a [scientific article](https://github.com/substance/lens-writer/tree/master/lib/article) including bib items and figures with captions etc.-->
-
 
 ## Manipulate documents programmatically
 
@@ -135,11 +134,11 @@ doc.transaction(function(tx) {
 
 ### Transformations
 
-Transformations are there to define higher level document operations. We implemented a range of useful [transformations](document/transformations) that editor implementations can use. However, you should define your own as well.
+Transformations are there to define higher level document operations that editor implementations can use. We implemented a range of useful [transformations](document/transformations) that editor implementations can use. However, you are encouraged to define your own. Below is a shortened version of a possible searchAndReplace transformation.
 
 ```js
 function searchAndReplace(tx, args) {
-  // 1. verify arguments 
+  // 1. verify arguments args.searchStr, args.replaceStr, args.container
   // 2. implement your transformation using low level operations (e.g. tx.create)
   // ...
   var searchResult = search(tx, args);
@@ -161,7 +160,7 @@ function searchAndReplace(tx, args) {
 module.exports = searchAndReplace;
 ```
 
-Usage:
+Transformations always take 2 parameters: `tx` is a document transaction and `args` are the transformation's arguments. Transformations are combinable, so in a transformation you can call another transformation. You just need to be careful to always set the args properly. Here's how the transformation we just defined can be called in a transaction.
 
 ```js
 surface.transaction(function(tx, args) {
@@ -171,6 +170,7 @@ surface.transaction(function(tx, args) {
 });
 ```
 
+Using the transaction method on a Surface instance passes the current selection to the transformation automatically. So you will use surface transactions whenever some kind of selection is involved in your action. If the selection doesn't matter you can use the same transformation within a `document.transaction` call. Make sure that your transformations are robust for both scenarios. If you look at the above example under (3) we set the selection to the last matched element after search and replace. If something has been found.
 
 ## Developing editors
 
