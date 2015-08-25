@@ -462,7 +462,13 @@ Surface.Prototype = function() {
         direction: (e.keyCode === Surface.Keys.LEFT) ? 'left' : 'right'
       };
       self._updateModelSelection(options);
-      self.rerenderDomSelection();
+      // We could rerender the selection, to make sure the DOM is representing
+      // the model selection
+      // TODO: ATM, the SurfaceSelection is not good enough in doing this, e.g., there
+      // are situations where one can not use left/right navigation anymore, as
+      // SurfaceSelection will always decides to choose the initial positition,
+      // which means lockin.
+      // self.rerenderDomSelection();
     });
   };
 
@@ -475,7 +481,8 @@ Surface.Prototype = function() {
         direction: (e.keyCode === Surface.Keys.UP) ? 'left' : 'right'
       };
       self._updateModelSelection(options);
-      self.rerenderDomSelection();
+      // TODO: enable this when we are better, see comment above
+      //self.rerenderDomSelection();
     });
   };
 
