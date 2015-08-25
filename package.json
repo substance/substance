@@ -1,7 +1,7 @@
 {
   "name": "substance",
   "version": "1.0.0-beta",
-  "description": "A Javascript data representation library.",
+  "description": "A JavaScript library for web-based content editing",
   "repository" : {
     "type" : "git",
     "url" : "https://github.com/substance/substance.git"
