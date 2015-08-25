@@ -377,7 +377,7 @@ Surface.Prototype = function() {
     var afterState;
     // TODO: remove this clear here, and in future do it on document:willchange (not implemented yet)
     // Then cursor flickering will be gone for undo/redos too.
-    this.surfaceSelection.clear();
+    // this.surfaceSelection.clear();
     this.getDocument().transaction(beforeState, function(tx) {
       // A transformation receives a set of input arguments and should return a set of output arguments.
       var result = transformation.call(ctx, tx, { selection: beforeState.selection });
@@ -406,6 +406,8 @@ Surface.Prototype = function() {
     // necessary for handling dead keys properly
     this.skipNextObservation=true;
     this.transaction(function(tx, args) {
+      // trying to remove the DOM selection to reduce flickering
+      this.surfaceSelection.clear();
       return this.editor.insertText(tx, { selection: args.selection, text: e.data });
     }, this);
     this.rerenderDomSelection();
@@ -444,6 +446,8 @@ Surface.Prototype = function() {
     }
     if (character.length>0) {
       this.transaction(function(tx, args) {
+        // trying to remove the DOM selection to reduce flickering
+        this.surfaceSelection.clear();
         return this.editor.insertText(tx, { selection: args.selection, text: character });
       }, this);
       this.rerenderDomSelection();
@@ -493,6 +497,8 @@ Surface.Prototype = function() {
     e.preventDefault();
     e.stopPropagation();
     this.transaction(function(tx, args) {
+      // trying to remove the DOM selection to reduce flickering
+      this.surfaceSelection.clear();
       return this.editor.insertText(tx, { selection: args.selection, text: " " });
     }, this);
     this.rerenderDomSelection();
