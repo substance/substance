@@ -15,7 +15,7 @@ Building a web editor is a hard task. Native browser support for text editing is
 With Substance you can:
 
 - Define a [custom article schema](https://github.com/substance/demos/blob/master/notepad/note.js)
-- Manipulate content and annotations using *operations* and *transactions*
+- Manipulate content and annotations using *operations* and *tranformations*
 - Define a custom HTML structure for your content and attach a `Substance Surface` on it to make it editable
 - Implement tools for any possible task like toggling annotations, inserting content or replacing text
 - Control *copy&paste* behavior by defining custom HTML converters
@@ -46,7 +46,7 @@ Behind the curtains, your document is converted to a Javascript document model, 
 proseEditor.getDocument();
 ```
 
-You may likely want to customize that editor a bit. For instance you want to restrict the supported content types and customize the toolbar accordingly. This is all possible by [patching your very own HtmlEditor](https://github.com/substance/demos/tree/master/notepad).
+You may want to restrict the supported content types and customize the toolbar a bit. Or you decide to define completely new content types. This is all possible by [patching your very own editor](https://github.com/substance/demos/tree/master/notepad).
 
 ## Defining custom article formats.
 
