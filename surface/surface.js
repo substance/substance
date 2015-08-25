@@ -315,7 +315,6 @@ Surface.Prototype = function() {
   };
 
   this.undo = function() {
-    console.log('UNDO!');
     var doc = this.getDocument();
     if (doc.done.length>0) {
       doc.undo();
