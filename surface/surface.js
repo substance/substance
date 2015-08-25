@@ -375,6 +375,9 @@ Surface.Prototype = function() {
       ctx = arguments[2];
     }
     var afterState;
+    // TODO: remove this clear here, and in future do it on document:willchange (not implemented yet)
+    // Then cursor flickering will be gone for undo/redos too.
+    this.surfaceSelection.clear();
     this.getDocument().transaction(beforeState, function(tx) {
       // A transformation receives a set of input arguments and should return a set of output arguments.
       var result = transformation.call(ctx, tx, { selection: beforeState.selection });
