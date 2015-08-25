@@ -85,6 +85,8 @@ var Article = require('substance/article');
 var doc = new Article();
 ```
 
+### Transactions
+
 When you want to update a document, you must wrap your changes in a transaction, to avoid inconsistent in-between states. The API is fairly easy. Let's create several paragraph nodes in one transaction.
 
 ```js
@@ -130,6 +132,45 @@ doc.transaction(function(tx) {
   });
 });
 ```
+
+### Transformations
+
+Transformations are there to define higher level document operations that editor implementations can use. We implemented a range of useful [transformations](document/transformations) that editor implementations can use. However, you are encouraged to define your own.
+
+```js
+function searchAndReplace(tx, args) {
+  // 1. verify arguments 
+  // 2. implement your transformation using low level operations (e.g. tx.create)
+  // ...
+  var searchResult = search(tx, args);
+  
+  searchResult.matches.forEach(function(match) {
+    var replaceArgs = _.extend({}, args, {selection: match, replaceStr: args.replaceStr});
+    replaceText(tx, replaceArgs);
+  });
+  
+  // 3. set new selection
+  if (searchResult.matches.length > 0) {
+    var lastMatch = _.last(searchResult.matches);
+    args.selection = lastMatch;
+  }
+  
+  // 4. return args for the caller or transaction context
+  return args;
+}
+module.exports = searchAndReplace;
+```
+
+Usage:
+
+```js
+surface.transaction(function(tx, args) {
+  args.searchStr = "foo";
+  args.replaceStr = "bar";
+  return searchAndReplace(tx, args);
+});
+```
+
 
 ## Developing editors
 
