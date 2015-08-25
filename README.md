@@ -16,14 +16,14 @@ With Substance you can:
 
 - Define a [custom article schema](https://github.com/substance/demos/blob/master/notepad/note.js)
 - Manipulate content and annotations using *operations* and *transactions*
-- Define a custom HTML structure and attach a `Substance Surface` on it to make it editable
-- Implement custom tools for any possible task like toggling annotations, inserting content or replacing text
-- Control *undo/redo* behavior and *copy&paste*
+- Define a custom HTML structure for your content and attach a `Substance Surface` on it to make it editable
+- Implement tools for any possible task like toggling annotations, inserting content or replacing text
+- Control *copy&paste* behavior by defining custom HTML converters
 - and much more.
 
 ## Getting started
 
-Substance provides a ready to use [Editor](https://github.com/substance/demos/tree/master/prose-editor) component. It can be injected easily into an existing web application.
+Substance provides a ready to use [Editor](https://github.com/substance/demos/tree/master/prose-editor) component. It can be integrated easily into an existing web application.
 
 ```js
 var Editor = require('substance/ui/editor');
