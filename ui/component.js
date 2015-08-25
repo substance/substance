@@ -732,11 +732,12 @@ Component.Text = function(parent, text) {
 
 Component.Text.Prototype = function() {
   this._render = function() {
-    var el = document.createTextNode(this.text);
-    if (this.$el) {
-      this.$el.replaceWith(el);
+    if (!this.$el) {
+      var el = document.createTextNode(this.text);
+      this.$el = $(el);
+    } else {
+      this.$el[0].textContent = this.text;
     }
-    this.$el = $(el);
   };
 };
 
