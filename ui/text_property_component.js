@@ -66,10 +66,13 @@ TextPropertyComponent.Prototype = function() {
       } else {
         ViewClass = AnnotationComponent;
       }
-      var el = $$(ViewClass).addProps({
+      var el = $$(ViewClass, {
         doc: doc,
         node: node,
-      });
+      })
+      // adding keys here, enables preservative rerendering
+      // TODO: experiment, if this reduces cursor flickering, already...
+      .key(id + "@" + fragmentCounters[id]);
       // special support for container annotation fragments
       if (node.type === "container_annotation_fragment") {
         // TODO: this seems a bit messy
