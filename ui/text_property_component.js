@@ -72,7 +72,7 @@ TextPropertyComponent.Prototype = function() {
       })
       // adding keys here, enables preservative rerendering
       // TODO: experiment, if this reduces cursor flickering, already...
-      .key(id + "@" + fragmentCounters[id]);
+      // .key(id + "@" + fragmentCounters[id]);
       // special support for container annotation fragments
       if (node.type === "container_annotation_fragment") {
         // TODO: this seems a bit messy
