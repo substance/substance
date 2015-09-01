@@ -3,15 +3,16 @@
 var Component = require('../component');
 var $$ = Component.$$;
 
+var Icon = require('../font_awesome_icon');
+
 var UndoTool = require('../tools/undo_tool');
 var RedoTool = require('../tools/redo_tool');
-
 var TextTool = require('../tools/text_tool');
 var StrongTool = require('../tools/strong_tool');
 var EmphasisTool = require('../tools/emphasis_tool');
 var LinkTool = require('../tools/link_tool');
 
-var Icon = require('../font_awesome_icon');
+
 
 var DefaultToolbar = Component.extend({
   displayName: "DefaultToolbar",
