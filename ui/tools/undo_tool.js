@@ -1,13 +1,14 @@
-var Tool = require('../tool');
+'use strict';
 
-var UndoTool = Tool.extend({
+var DocumentTool = require('./document_tool');
+
+var UndoTool = DocumentTool.extend({
 
   name: "undo",
 
-  update: function(surface) {
-    this.surface = surface;
-    var doc = surface.getDocument();
-    if (!surface.isEnabled() || doc.done.length===0) {
+  update: function(change, info) {
+    var doc = this.getDocument();
+    if (doc.done.length===0) {
       this.setDisabled();
     } else {
       this.setEnabled();
@@ -20,7 +21,6 @@ var UndoTool = Tool.extend({
       doc.undo();
     }
   }
-
 });
 
 module.exports = UndoTool;

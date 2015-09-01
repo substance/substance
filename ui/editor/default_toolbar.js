@@ -3,32 +3,28 @@
 var Component = require('../component');
 var $$ = Component.$$;
 
-var ToolComponent = require('../tools/tool_component');
-var TextToolComponent = require('../tools/text_tool_component');
-var LinkToolComponent = require('../tools/link_tool_component');
+var UndoTool = require('../tools/undo_tool');
+var RedoTool = require('../tools/redo_tool');
+
+var TextTool = require('../tools/text_tool');
+var StrongTool = require('../tools/strong_tool');
+var EmphasisTool = require('../tools/emphasis_tool');
+var LinkTool = require('../tools/link_tool');
+
 var Icon = require('../font_awesome_icon');
 
 var DefaultToolbar = Component.extend({
-
   displayName: "DefaultToolbar",
 
   render: function() {
     var el = $$('div').addClass('toolbar');
     el.append(
-      $$(TextToolComponent, { tool: 'text', 'title': 'Switch text'}),
-      $$(ToolComponent, {tool: 'undo', 'title': 'Undo'})
-        .append($$(Icon, {icon: "fa-undo"})),
-      $$(ToolComponent, {tool: 'redo', 'title': 'Redo'})
-        .append($$(Icon, {icon: "fa-repeat"})),
-      $$(ToolComponent).addProps({tool: 'emphasis', 'title': 'Emphasis'})
-        .append($$(Icon).addProps({icon: "fa-italic"})),
-      $$(ToolComponent).addProps({tool: 'strong', 'title': 'Strong'})
-        .append($$(Icon).addProps({icon: "fa-bold"})),
-      $$(LinkToolComponent).addProps({
-        tool: 'link',
-        'title': 'Link',
-        children: [$$(Icon).addProps({icon: "fa-link"})]
-      }).addClass('tool')
+      $$(TextTool, {'title': 'Switch text'}),
+      $$(UndoTool).append($$(Icon, {icon: "fa-undo"})),
+      $$(RedoTool).append($$(Icon, {icon: "fa-repeat"})),
+      $$(StrongTool).append($$(Icon, {icon: "fa-bold"})),
+      $$(EmphasisTool).append($$(Icon, {icon: "fa-italic"})),
+      $$(LinkTool).append($$(Icon, {icon: "fa-link"}))
     );
     return el;
   }
