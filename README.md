@@ -71,7 +71,7 @@ schema.getDefaultTextType = function() {
 schema.addNodes([Paragraph, Emphasis, Strong, Highlight]);
 ```
 
-We provide a reference implementation, the [Substance Article](article.js). Usually want to come up with your own schema and only borrow common node types such as paragraphs and headings. The Notepad demo implements a [nice example for reference](https://github.com/substance/demos/blob/master/notepad/note.js).
+We provide a reference implementation, the [Substance Article](article.js). However, you may want to come up with your own schema and only borrow common node types such as paragraphs and headings. The Notepad demo implements a [nice example for reference](https://github.com/substance/demos/blob/master/notepad/note.js).
 
 <!--Lens Writer defines a [scientific article](https://github.com/substance/lens-writer/tree/master/lib/article) including bib items and figures with captions etc.-->
 
