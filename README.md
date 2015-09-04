@@ -4,7 +4,8 @@ Substance is a JavaScript library for web-based content editing. It provides bui
 
 See Substance in action:
 
-- **[Prose Editor](http://substance.io/demos/prose-editor)** - A minimal rich text editor component
+- **[Lens Writer](http://substance.io/lens-writer)** - A scientific writer component
+- **[Prose Editor](http://substance.io/demos/prose-editor)** - A minimal rich text editor
 - **[Notepad](http://substance.io/demos/notepad)** - A custom note editor
 - **[eLife Lens](http://lens.elifesciences.org/00778/)** - A novel scientific reader
 
