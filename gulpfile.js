@@ -32,7 +32,8 @@ gulp.task('lint', function() {
     './surface/**/*.js',
     './ui/**/*.js'
   ]).pipe(jshint())
-    .pipe(jshint.reporter('default'));
+    .pipe(jshint.reporter('default'))
+    .pipe(jshint.reporter("fail"));
 });
 
 gulp.task('build', ['lint'], function() {
