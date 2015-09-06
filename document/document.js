@@ -66,7 +66,7 @@ function Document(schema) {
   // so that handler priorities are considered correctly
   this.connect(this, {
     'document:changed': this.updateEventProxies
-  })
+  });
 }
 
 Document.Prototype = function() {

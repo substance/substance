@@ -15,14 +15,14 @@ var LinkTool = AnnotationTool.extend({
 
   // Immediately switch to edit mode after link creation
   // and make it show the edit prompt.
-  afterCreate: function(anno) {
+  afterCreate: function() {
     var state = this.getToolState();
     var newState = _.extend({}, state);
     newState.mode = 'edit';
     newState.showPrompt = true;
     this.setToolState(newState);
   },
-  
+
   update: function(surface, sel) {
     this.surface = surface;
     if ( !surface.isEnabled() || sel.isNull() || sel.isContainerSelection() ) {
@@ -30,7 +30,6 @@ var LinkTool = AnnotationTool.extend({
     }
     var doc = this.getDocument();
     var annos = doc.getAnnotationsForSelection(sel, { type: 'link' });
-    var oldState = this.getToolState();
     var newState = {
       surface: surface,
       disabled: false,
@@ -57,7 +56,6 @@ var LinkTool = AnnotationTool.extend({
   },
 
   updateLink: function(linkAttrs) {
-    var doc = this.getDocument();
     var link = this.getLink();
     // this.surface.transaction causes the prompt to close. If you don't want that
     // e.g. when re-enabling link title editing, switch to use doc.transaction.
@@ -71,7 +69,6 @@ var LinkTool = AnnotationTool.extend({
   },
 
   deleteLink: function() {
-    var doc = this.getDocument();
     var link = this.getLink();
     this.surface.transaction(function(tx) {
       tx.delete(link.id);

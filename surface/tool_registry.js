@@ -1,8 +1,8 @@
 "use strict";
 
 var Substance = require('../basics');
-var _ = Substance._;
 
+// TODO: this should be removed, when michaels tool refactor is done.
 var ToolRegistry = function() {
   Substance.Registry.call(this);
 };

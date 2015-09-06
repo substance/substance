@@ -62,7 +62,6 @@ ContainerAnnotationIndex.Prototype = function() {
   };
 
   this.recompute = function(containerId) {
-    var container = this.containers[containerId];
     var index = this.indexes[containerId] = new PathAdapter.Arrays();
     _.each(this.containerAnnotations, function(anno) {
       var fragments = anno.getFragments();

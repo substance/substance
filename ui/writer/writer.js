@@ -207,6 +207,7 @@ Writer.Prototype = function() {
   // FIXME: even if this seems to be very hacky,
   // it is quite useful to make transactions 'app-compatible'
   this.transactionStarted = function(tx) {
+    /* jshint unused: false */
     // // store the state so that it can be recovered when undo/redo
     // tx.before.state = this.state;
     // tx.before.selection = this.getSelection();

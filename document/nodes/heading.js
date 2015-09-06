@@ -33,7 +33,7 @@ Heading.static.fromHtml = function($el, converter) {
 
 Heading.static.toHtml = function(heading, converter) {
   var id = heading.id;
-  var $el = $('<h' + heading.level + '>')
+  var $el = $('<h' + heading.level + '>');
   $el.append(converter.annotatedText([id, 'content']));
   return $el;
 };

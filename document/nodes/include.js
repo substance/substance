@@ -31,7 +31,7 @@ Include.static.fromHtml = function($el, converter) {
   return inc;
 };
 
-Include.static.toHtml = function(inc, converter) {
+Include.static.toHtml = function(inc) {
   var id = inc.id;
   var $el = $('<include>')
     .attr('id', id)
