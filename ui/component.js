@@ -327,7 +327,10 @@ Component.Prototype = function ComponentPrototype() {
   };
 
   this.css = function(style) {
-    if (style) {
+    if (arguments.length === 2) {
+      this._data.css(arguments[0], arguments[1]);
+      this.$el.css(arguments[0], arguments[1]);
+    } else if (style) {
       this._data.css(style);
       this.$el.css(style);
     }
@@ -864,13 +867,21 @@ VirtualNode.Prototype = function() {
     if (!this.style) {
       this.style = {};
     }
-    _.extend(this.style, style);
+    if (arguments.length === 2) {
+      this.style[arguments[0]] = arguments[1];
+    } else {
+      _.extend(this.style, style);
+    }
     return this;
   };
   this.html = function(rawHtmlString) {
     this.children = [];
     this.children.push(new RawHtml(rawHtmlString));
     return this;
+  };
+
+  this._render = function() {
+    return Component._render(this);
   };
 };
 
@@ -956,7 +967,7 @@ _isInDocument = function(el) {
   return false;
 };
 
-Component.mount = function(data, $el) {
+Component._render = function(data) {
   var component;
   var scope = {
     context: null,
@@ -978,6 +989,11 @@ Component.mount = function(data, $el) {
     default:
       throw new Error('Illegal state.');
   }
+  return component;
+};
+
+Component.mount = function(data, $el) {
+  var component = Component._render(data);
   // TODO: some code replication of Component.prototype.mount()
   // however, we do not want to rerender right-away
   $el.append(component.$el);
