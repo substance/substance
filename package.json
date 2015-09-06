@@ -1,12 +1,11 @@
 {
   "name": "substance",
   "version": "1.0.0-beta",
-  "description": "A JavaScript library for web-based content editing",
-  "repository" : {
-    "type" : "git",
-    "url" : "https://github.com/substance/substance.git"
-  },
   "description": "",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/substance/substance.git"
+  },
   "main": "index.js",
   "scripts": {
     "test": "gulp build-test && gulp test",
@@ -38,6 +37,7 @@
     "karma-qunit": "^0.1.4",
     "node-qunit-phantomjs": "^1.2.1",
     "qunitjs": "^1.18.0",
+    "sinon": "^1.16.1",
     "vinyl-buffer": "^1.0.0",
     "vinyl-source-stream": "^1.1.0",
     "yargs": "^3.8.0"
