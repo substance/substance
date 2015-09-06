@@ -7,7 +7,7 @@ var __id__ = 0;
 var _isDocumentElement;
 var _isInDocument;
 var VirtualTextNode;
-
+var RawHtml;
 
 /**
  * A light-weight component implementation inspired by React and Ember.
@@ -451,17 +451,22 @@ Component.Prototype = function ComponentPrototype() {
       };
     }
     var oldData = this._data;
+
     // the first time we need to create the component element
+    // and can render from scratch
     if (!this.$el) {
       this.$el = this._createElement(data, scope);
-    } else {
-      // update the element
-      this._updateElement(data, oldData, scope);
+      this._renderFromScratch(data, scope);
+      return;
     }
-    // TODO: we can enable this simplification when the general implementation
-    // is stable
-    if (this._simple_) {
-      this._renderSimple(data, scope);
+
+    // update the element
+    this._updateElement(data, oldData, scope);
+
+    // when during the last render there where no 'keys'
+    // then we can just wipe and rerender
+    if (this._no_refs_) {
+      this._renderFromScratch(data, scope);
       return;
     }
 
@@ -613,9 +618,9 @@ Component.Prototype = function ComponentPrototype() {
     }
 
     if (Object.keys(scope.refs).length > 0) {
-      delete this._simple_;
+      delete this._no_refs_;
     } else {
-      this._simple_ = true;
+      this._no_refs_ = true;
     }
 
     this.children = children;
@@ -623,22 +628,29 @@ Component.Prototype = function ComponentPrototype() {
     this._data = data;
   };
 
-  this._renderSimple = function(data, scope) {
+  this._renderFromScratch = function(data, scope) {
     for (var i = 0; i < this.children.length; i++) {
       this.children[i].unmount();
     }
     var isMounted = _isInDocument(this.$el[0]);
     var children = [];
     for (var j = 0; j < data.children.length; j++) {
-      var comp = this._compileComponent(data.children[j], scope);
-      if (isMounted) comp.triggerDidMount();
-      this.$el.append(comp.$el);
-      children.push(comp);
+      // EXPERIMENTAL: supporting $$.html()
+      // basically it doesn't make sense to mix $$.html() with $$.append(), but...
+      if (data.children[j] instanceof RawHtml) {
+        this.$el.html(data.children[j].html);
+        children = [];
+      } else {
+        var comp = this._compileComponent(data.children[j], scope);
+        if (isMounted) comp.triggerDidMount();
+        this.$el.append(comp.$el);
+        children.push(comp);
+      }
     }
     if (Object.keys(scope.refs).length > 0) {
-      delete this._simple_;
+      delete this._no_refs_;
     } else {
-      this._simple_ = true;
+      this._no_refs_ = true;
     }
     this.refs = scope.refs;
     this.children = children;
@@ -665,11 +677,14 @@ Component.Prototype = function ComponentPrototype() {
         // However, it is also possible to provide children via append,
         // in the parent component's render method. Those handlers should be bound
         // to the parent. The same for refs.
-        // To solve this, $$ would need to be contextified, which is quite ugly.
+        // To solve this, $$ would need to be contextified, which is quite ugly to achieve.
         component._render(component.render());
         break;
+      case 'html':
+        // DON'T mix $$.html() with $$.append()
+        throw new Error('$$.html() can not be used in combination with other composition methods.');
       default:
-        throw new Error('Illegal state.');
+        throw new Error('Unsupported component type: ' + data.type);
     }
     if (data._key) {
       scope.refs[data._key] = component;
@@ -852,6 +867,11 @@ VirtualNode.Prototype = function() {
     _.extend(this.style, style);
     return this;
   };
+  this.html = function(rawHtmlString) {
+    this.children = [];
+    this.children.push(new RawHtml(rawHtmlString));
+    return this;
+  };
 };
 
 OO.initClass(VirtualNode);
@@ -884,6 +904,11 @@ VirtualTextNode = function VirtualTextNode(text) {
   VirtualNode.call(this);
   this.type = 'text';
   this.props = { text: text };
+};
+
+RawHtml = function RawHtml(html) {
+  this.type = 'html';
+  this.html = html;
 };
 
 Component.$$ = function() {
