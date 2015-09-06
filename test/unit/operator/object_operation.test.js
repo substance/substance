@@ -7,7 +7,7 @@ var ObjectOperation = Operator.ObjectOperation;
 var ArrayOperation = Operator.ArrayOperation;
 var TextOperation = Operator.TextOperation;
 
-QUnit.module('Unit/Substance.Operator/ObjectOperation');
+QUnit.module('Substance.Operator/ObjectOperation');
 
 QUnit.assert.checkObjectOperationTransform = function(a, b, input, expected) {
   var t = ObjectOperation.transform(a, b);

@@ -5,7 +5,7 @@ var containerSample = require('../../../fixtures/container_anno_sample');
 var Document = require('../../../../document');
 var deleteSelection = Document.Transformations.deleteSelection;
 
-QUnit.module('Unit/Substance.Document/Transformations/deleteSelection');
+QUnit.module('Substance.Document/Transformations/deleteSelection');
 
 QUnit.test("deleting a property selection", function(assert) {
   var doc = sample1();

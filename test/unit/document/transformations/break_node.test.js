@@ -5,7 +5,7 @@ var sample1 = require('../../../fixtures/sample1');
 var Document = require('../../../../document');
 var breakNode = Document.Transformations.breakNode;
 
-QUnit.module('Unit/Substance.Document/Transformations/breakNode');
+QUnit.module('Substance.Document/Transformations/breakNode');
 
 QUnit.test("Breaking a paragraph", function(assert) {
   var doc = sample1();

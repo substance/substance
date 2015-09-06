@@ -5,7 +5,7 @@ var sample1 = require('../../../fixtures/sample1');
 var Document = require('../../../../document');
 var merge = Document.Transformations.merge;
 
-QUnit.module('Unit/Substance.Document/Transformations/merge');
+QUnit.module('Substance.Document/Transformations/merge');
 
 QUnit.test("Merging two paragraphs", function(assert) {
   var doc = sample1();
