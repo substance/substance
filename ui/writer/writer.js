@@ -9,7 +9,6 @@ var EventEmitter = require('../../basics/event_emitter');
 var Registry = require('../../basics/registry');
 var SurfaceManager = require('../../surface/surface_manager');
 var Clipboard = require('../../surface/clipboard');
-var ToolRegistry = require('../../surface/tool_registry');
 
 var ExtensionManager = require('./extension_manager');
 var ContextToggles = require('./context_toggles');
@@ -25,13 +24,10 @@ function Writer() {
   EventEmitter.call(this);
 
   this.config = this.props.config || {};
-
   this.handleApplicationKeyCombos = this.handleApplicationKeyCombos.bind(this);
-  this.onSelectionChangedDebounced = _.debounce(this.onSelectionChanged, 50);
 
   this._registerExtensions();
   this._initializeComponentRegistry();
-  this._initializeToolRegistry();
 
   // action handlers
   this.actions({
@@ -55,7 +51,8 @@ Writer.Prototype = function() {
       getHighlightsForTextProperty: this.getHighlightsForTextProperty,
       componentRegistry: this.componentRegistry,
       toolRegistry: this.toolRegistry,
-      surfaceManager: this.surfaceManager
+      surfaceManager: this.surfaceManager,
+      document: this.props.doc
     };
   };
 
@@ -146,9 +143,9 @@ Writer.Prototype = function() {
         'transaction:started': this.transactionStarted,
         'document:changed': this.onDocumentChanged
       });
-      this.surfaceManager.connect(this, {
-        "selection:changed": this.onSelectionChangedDebounced
-      });
+      // this.surfaceManager.connect(this, {
+      //   "selection:changed": this.onSelectionChangedDebounced
+      // });
     }
   };
 
@@ -224,14 +221,6 @@ Writer.Prototype = function() {
     if (info.replay && change.after.state) {
       this.setState(change.after.state);
     }
-  };
-
-  this.onSelectionChanged = function(sel, surface) {
-    this.extensionManager.handleSelectionChange(sel);
-    this.toolRegistry.each(function(tool) {
-      tool.update(surface, sel);
-    }, this);
-    this.emit('selection:changed', sel);
   };
 
   this.saveDocument = function() {
@@ -325,19 +314,6 @@ Writer.Prototype = function() {
       });
     });
     this.componentRegistry = componentRegistry;
-  };
-
-  this._initializeToolRegistry = function() {
-    var toolRegistry = new ToolRegistry();
-    _.each(this.extensionManager.extensions, function(extension) {
-      _.each(extension.tools, function(ToolClass, name) {
-        // WARN: this could potentially get problematic, if React derives
-        // the current context differently.
-        var context = _.extend({}, this.context, this.getChildContext());
-        toolRegistry.add(name, new ToolClass(context));
-      }, this);
-    }, this);
-    this.toolRegistry = toolRegistry;
   };
 
   this._disposeDoc = function() {

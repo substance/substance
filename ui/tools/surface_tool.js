@@ -3,6 +3,7 @@
 var OO = require('../../basics/oo');
 var Component = require('../component');
 var Tool = require('./tool');
+var _ = require('substance/helpers');
 var $$ = Component.$$;
 
 /**
@@ -14,7 +15,9 @@ function SurfaceTool() {
   Tool.apply(this, arguments);
   
   this.surfaceManager = this.context.surfaceManager;
-  this.surfaceManager.on('selection:changed', this.update, this);
+
+  this.onUpdateDebounced = _.debounce(this.update, 50);
+  this.surfaceManager.on('selection:changed', this.onUpdateDebounced, this);
 }
 
 SurfaceTool.Prototype = function() {
