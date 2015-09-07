@@ -2,7 +2,6 @@
 
 var OO = require('../../basics/oo');
 var Component = require('../component');
-var $$ = Component.$$;
 
 function Tool() {
   Component.apply(this, arguments);

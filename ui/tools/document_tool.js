@@ -19,7 +19,7 @@ function DocumentTool() {
 
   this.doc.connect(this, {
     'document:changed': this.update
-  })
+  });
 }
 
 DocumentTool.Prototype = function() {
@@ -46,7 +46,7 @@ DocumentTool.Prototype = function() {
   };
 
 
-  this.update = function(change, info) {
+  this.update = function(/*change, info*/) {
     throw new Error('Must be defined by your tool implementation');
   };
 

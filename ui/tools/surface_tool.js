@@ -1,10 +1,8 @@
 'use strict';
 
 var OO = require('../../basics/oo');
-var Component = require('../component');
 var Tool = require('./tool');
 var _ = require('substance/helpers');
-var $$ = Component.$$;
 
 /**
  * Abstract class for tools that interact with the selection of active surface.
@@ -43,7 +41,7 @@ SurfaceTool.Prototype = function() {
    * @public
    */
 
-  this.update = function(sel, surface) {
+  this.update = function(/*sel, surface*/) {
     throw new Error('Must be defined by your tool implementation');
   };
 

@@ -61,7 +61,7 @@ LinkTool.Prototype = function() {
 
   // Immediately switch to edit mode after link creation
   // and make it show the edit prompt.
-  this.afterCreate = function(anno) {
+  this.afterCreate = function(/*anno*/) {
     var state = this.getState();
     var newState = _.extend({}, state);
     newState.mode = 'edit';
@@ -76,7 +76,6 @@ LinkTool.Prototype = function() {
     }
     var doc = this.getDocument();
     var annos = doc.getAnnotationsForSelection(sel, { type: 'link' });
-    var oldState = this.getState();
     var newState = {
       surface: surface,
       disabled: false,
@@ -103,7 +102,6 @@ LinkTool.Prototype = function() {
   };
 
   this.updateLink = function(linkAttrs) {
-    var doc = this.getDocument();
     var link = this.getLink();
     // this.surface.transaction causes the prompt to close. If you don't want that
     // e.g. when re-enabling link title editing, switch to use doc.transaction.
@@ -117,7 +115,6 @@ LinkTool.Prototype = function() {
   };
 
   this.deleteLink = function() {
-    var doc = this.getDocument();
     var link = this.getLink();
     this.getSurface().transaction(function(tx) {
       tx.delete(link.id);

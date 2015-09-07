@@ -6,7 +6,7 @@ var UndoTool = DocumentTool.extend({
 
   name: "undo",
 
-  update: function(change, info) {
+  update: function(/*change, info*/) {
     var doc = this.getDocument();
     if (doc.done.length===0) {
       this.setDisabled();
