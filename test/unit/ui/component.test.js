@@ -37,6 +37,12 @@ QUnit.test("Render an element with classes", function(assert) {
   assert.ok(comp.$el.hasClass('test'), 'Element should have class "test".');
 });
 
+QUnit.test("Render an element with custom html", function(assert) {
+  var comp = $$('div').html('Hello <b>World</b>')._render();
+  assert.ok(comp.$el.find('b').length, 'Element should have rendered HTML as content.');
+  assert.equal(comp.$el.find('b').text(), 'World','Rendered element should have right content.');
+});
+
 QUnit.test("Render a component", function(assert) {
   var comp = $$(SimpleComponent)._render();
   assert.equal(comp.$el[0].tagName.toLowerCase(), 'div', 'Element should be a "div".');
@@ -75,4 +81,31 @@ QUnit.test("Render a child with key", function(assert) {
     ._render();
   assert.ok(comp.refs.foo, 'Element should have a ref "foo".');
   assert.ok(comp.refs.foo.$el.hasClass('child'), 'Referenced component should have class "child".');
+});
+
+/** Differential rerendering **/
+
+QUnit.test("Preserve a child with key", function(assert) {
+  var comp = Component._render($$('div')
+    .append($$(SimpleComponent).key('foo')));
+  var child = comp.refs.foo;
+  var el = child.$el[0];
+  // rerender using the same virtual dom
+  comp._render($$('div')
+    .append($$(SimpleComponent).key('foo')));
+  assert.ok(comp.refs.foo === child, 'Child component should have been preserved.');
+  assert.ok(comp.refs.foo.$el[0] === el, 'Child element should have been preserved.');
+});
+
+QUnit.test("Wipe a child without key", function(assert) {
+  var comp = Component._render($$('div')
+    .append($$(SimpleComponent)));
+  var child = comp.children[0];
+  var el = child.$el[0];
+  // rerender using the same virtual dom
+  comp._render($$('div')
+    .append($$(SimpleComponent)));
+  // as we did not apply a key, the component simply gets rerendered from scratch
+  assert.ok(comp.children[0] !== child, 'Child component should have been preserved.');
+  assert.ok(comp.children[0].$el[0] !== el, 'Child element should have been preserved.');
 });
