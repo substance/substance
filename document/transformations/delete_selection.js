@@ -4,7 +4,7 @@ var _ = require('../../basics/helpers');
 var deleteCharacter = require('./delete_character');
 var deleteNode = require('./delete_node');
 var merge = require('./merge');
-var Annotations = require('../annotation_updates');
+var updateAnnotations = require('./update_annotations');
 
 /* jshint latedef:false */
 
@@ -32,8 +32,8 @@ function _deletePropertySelection(tx, args) {
   var path = range.start.path;
   var startOffset = range.start.offset;
   var endOffset = range.end.offset;
-  tx.update(path, { delete: { start: startOffset, end: endOffset } });
-  Annotations.deletedText(tx, path, startOffset, endOffset);
+  var op = tx.update(path, { delete: { start: startOffset, end: endOffset } });
+  updateAnnotations(tx, {op: op});
   args.selection = tx.createSelection({
     type: 'property',
     path: path,
