@@ -1,11 +1,11 @@
 "use strict";
 
-require('../../qunit_extensions');
-var sample1 = require('../../../fixtures/sample1');
-var Document = require('../../../../document');
+require('../qunit_extensions');
+var sample1 = require('../../fixtures/sample1');
+var Document = require('../../../document');
 var merge = Document.Transformations.merge;
 
-QUnit.module('Substance.Document/Transformations/merge');
+QUnit.module('Transformations/merge');
 
 QUnit.test("Merging two paragraphs", function(assert) {
   var doc = sample1();
