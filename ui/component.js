@@ -396,6 +396,11 @@ Component.Prototype = function ComponentPrototype() {
    */
   this.didReceiveProps = function() {};
 
+  /**
+   * Hook which is called after properties have been set.
+   */
+  this.didRender = function() {};
+
   /* API for incremental updates */
 
   /**
@@ -791,6 +796,8 @@ Component.Prototype = function ComponentPrototype() {
     this.children = children;
     this.refs = _.clone(scope.refs);
     this._data = data;
+
+    this.didRender();
   };
 
   this._renderFromScratch = function(data, scope) {
@@ -820,6 +827,8 @@ Component.Prototype = function ComponentPrototype() {
     this.refs = scope.refs;
     this.children = children;
     this._data = data;
+
+    this.didRender();
   };
 
   this._compileComponent = function(data, scope) {
