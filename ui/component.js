@@ -145,6 +145,7 @@ Component.Prototype = function ComponentPrototype() {
    * @return one VirtualNode created using Component.$$
    */
   this.render = function() {
+    /* istanbul ignore next */
     return Component.$$('div');
   };
 

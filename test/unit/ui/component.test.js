@@ -15,6 +15,12 @@ var SimpleComponent = Component.extend({
   }
 });
 
+QUnit.test("Every component should have a parent", function(assert) {
+  assert.throws(function() {
+    new Component();
+  }, "Should throw an exception when no parent is given.");
+});
+
 QUnit.test("Render an HTML element", function(assert) {
   var comp = $$('div')._render();
   assert.equal(comp.$el[0].tagName.toLowerCase(), 'div', 'Element should be a "div".');
@@ -49,7 +55,7 @@ QUnit.test("Render a component", function(assert) {
   assert.ok(comp.$el.hasClass('simple-component'), 'Element should have class "simple-component".');
 });
 
-QUnit.test("Render nested element", function(assert) {
+QUnit.test("Render nested elements", function(assert) {
   var comp = $$('div').addClass('parent')
     .append($$('div').addClass('child1'))
     .append($$('div').addClass('child2'))
@@ -108,4 +114,51 @@ QUnit.test("Wipe a child without key", function(assert) {
   // as we did not apply a key, the component simply gets rerendered from scratch
   assert.ok(comp.children[0] !== child, 'Child component should have been preserved.');
   assert.ok(comp.children[0].$el[0] !== el, 'Child element should have been preserved.');
+});
+
+QUnit.test("Don't do a deep rerender when only attributes/classes/styles change.", function(assert) {
+  var comp = Component._render($$('div')
+    .attr('data-foo', 'bar')
+    .addClass('foo')
+    .css('width', 100)
+    .append($$(SimpleComponent)));
+  var _render = sinon.spy(comp, 'render');
+  // rerender with changed attributes, classes and css styles
+  comp._render($$('div')
+    .attr('data-foo', 'baz')
+    .addClass('bar')
+    .css('width', 200)
+    .append($$(SimpleComponent)));
+  assert.equal(comp.$el.attr('data-foo'), 'baz', 'Data attribute should be up-to-date.');
+  assert.ok(!comp.$el.hasClass('foo') && comp.$el.hasClass('bar'), 'Element classes should be up-to-date.');
+  assert.equal(comp.$el.css('width'), "200px", "Element style should be up-to-date.");
+  assert.equal(_render.callCount, 0, "Component should not have been rerendered.");
+  // cleanup
+  _render.restore();
+});
+
+QUnit.test("Do deep rerender when properties have changed.", function(assert) {
+  var comp = Component._render($$(SimpleComponent, { foo: 'bar '}));
+  var _shouldRerender = sinon.spy(comp, 'shouldRerender');
+  var _render = sinon.spy(comp, 'render');
+  // rerender with changed attributes
+  comp.setProps({ foo: 'baz' });
+  assert.equal(_shouldRerender.callCount, 1, "Component should have been asked whether to rerender.");
+  assert.equal(_render.callCount, 1, "Component should have been rerendered.");
+  // cleanup
+  _shouldRerender.restore();
+  _render.restore();
+});
+
+QUnit.test("Do deep rerender when state has changed.", function(assert) {
+  var comp = Component._render($$(SimpleComponent));
+  var _shouldRerender = sinon.spy(comp, 'shouldRerender');
+  var _render = sinon.spy(comp, 'render');
+  // rerender with changed attributes
+  comp.setState({ foo: 'baz' });
+  assert.equal(_shouldRerender.callCount, 1, "Component should have been asked whether to rerender.");
+  assert.equal(_render.callCount, 1, "Component should have been rerendered.");
+  // cleanup
+  _shouldRerender.restore();
+  _render.restore();
 });
