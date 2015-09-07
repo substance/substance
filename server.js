@@ -12,6 +12,7 @@ app.get('/test/tmp/test.js', function (req, res, next) {
     } else {
       // console.log('Found test files:', testfiles);
       browserify({ debug: true })
+        .add(path.join(__dirname, 'test', 'test-globals.js'))
         .add(testfiles.map(function(file) {
           return path.join(__dirname, file);
         }))

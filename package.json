@@ -35,6 +35,7 @@
     "karma-coverage": "^0.4.2",
     "karma-jquery": "^0.1.0",
     "karma-qunit": "^0.1.4",
+    "karma-sinon": "^1.0.4",
     "node-qunit-phantomjs": "^1.2.1",
     "qunitjs": "^1.18.0",
     "sinon": "^1.16.1",

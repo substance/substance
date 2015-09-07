@@ -54,6 +54,7 @@ gulp.task('build', ['lint'], function() {
 gulp.task('build-test', function() {
   return glob("test/**/*.test.js", {}, function (err, testfiles) {
     browserify({ debug: true })
+    .add(path.join(__dirname, 'test', 'test-globals.js'))
     .add(testfiles.map(function(file) {
       return path.join(__dirname, file);
     }))

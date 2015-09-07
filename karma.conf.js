@@ -3,10 +3,11 @@
 module.exports = function(config) {
   config.set({
     basePath: '',
-    frameworks: ['qunit', 'commonjs', 'jquery-2.1.0'],
+    frameworks: ['qunit', 'commonjs', 'jquery-2.1.0', 'sinon'],
     plugins: [
       'karma-jquery',
       'karma-qunit',
+      'karma-sinon',
       'karma-chrome-launcher',
       'karma-commonjs',
       'karma-coverage'
