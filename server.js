@@ -10,7 +10,7 @@ app.get('/test/tmp/test.js', function (req, res, next) {
       console.error('No tests found.');
       res.send('500');
     } else {
-      console.log('Found test files:', testfiles);
+      // console.log('Found test files:', testfiles);
       browserify({ debug: true })
         .add(testfiles.map(function(file) {
           return path.join(__dirname, file);

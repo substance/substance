@@ -80,6 +80,7 @@ function Component(parent, params) {
   };
   this._setProps(params.props);
 
+  /* istanbul ignore if */
   if (this.initialize) {
     console.warn("Component.initialize() has been deprecated. Use Component.didInitialize() instead.");
     this.initialize();
@@ -1061,6 +1062,14 @@ RawHtml = function RawHtml(html) {
   this.html = html;
 };
 
+/**
+ * Create a virtual DOM representation which is used by Component
+ * for differential/reactive rendering.
+ *
+ * @param arg1 HTML tag name or Component class
+ * @param arg2 a properties object (optional)
+ * @return a virtual DOM
+ */
 Component.$$ = function() {
   var content = null;
   if (_.isString(arguments[0])) {
@@ -1110,9 +1119,12 @@ _isInDocument = function(el) {
  * Internal implementation, rendering a virtual component
  * created using the $$ operator.
  *
- * Don't us it. You should use
+ * Don't us it. You should use `Component.mount()` instead.
+ *
+ * @example
+ *
  * ```
- * Component.mount($$(...), $element);
+ * Component.mount($$(MyComponent), $('body'));
  * ```
  */
 Component._render = function(data, options) {
@@ -1156,6 +1168,16 @@ Component._render = function(data, options) {
   return component;
 };
 
+/**
+ * Mount a component onto a given jquery element.
+ *
+ * Mounting a component means, that the component gets rendered
+ * and then appended to the given element.
+ * If the element is in the DOM, all components receive an 'didMount' event.
+ *
+ * @param $el a jquery selected element
+ * @return the mounted component.
+ */
 Component.mount = function(data, $el) {
   var component = Component._render(data);
   // TODO: some code replication of Component.prototype.mount()
