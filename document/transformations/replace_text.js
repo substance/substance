@@ -2,7 +2,7 @@
 
 var _ = require('../../basics/helpers');
 var deleteSelection = require('./delete_selection');
-var Annotations = require('../annotation_updates');
+var updateAnnotations = require('./update_annotations');
 
 var _defaultReplace, _preservativeReplace;
 
@@ -28,8 +28,8 @@ _defaultReplace = function(tx, args) {
   var selection = out.selection;
   var range = selection.getRange();
   var text = args.text;
-  tx.update(range.start.path, { insert: { offset: range.start.offset, value: text } } );
-  Annotations.insertedText(tx, range.start, text.length);
+  var op = tx.update(range.start.path, { insert: { offset: range.start.offset, value: text } } );
+  updateAnnotations(tx, { op: op });
   args.selection = tx.createSelection({
     type: 'property',
     path: range.start.path,
@@ -44,16 +44,18 @@ _preservativeReplace = function(tx, args) {
   var path = range.start.path;
   var startOffset = range.start.offset;
   var endOffset = range.end.offset;
+  var newEndOffset = startOffset + text.length;
   // delete the text
-  tx.update(path, { delete: { start: startOffset, end: endOffset } });
+  var op = tx.update(path, { delete: { start: startOffset, end: endOffset } });
   // update annos but without deleting annos that cover the same range
   // as the selection
-  var preservedAnnos = Annotations.deletedText(tx, path, startOffset, endOffset, 'replaceText');
+  var tmp = updateAnnotations(tx, { op: op, 'replaceTextSupport': true });
+  var preservedAnnos = tmp.ignoredAnnotations;
   // insert text
-  tx.update(range.start.path, { insert: { offset: range.start.offset, value: text } } );
+  op = tx.update(range.start.path, { insert: { offset: range.start.offset, value: text } } );
   // update annos
-  var newEndOffset = startOffset + text.length;
-  Annotations.insertedText(tx, range.start, text.length, preservedAnnos);
+  updateAnnotations(tx, { op: op, ignoredAnnotations: preservedAnnos });
+  // update preserved annotations
   _.each(preservedAnnos, function(anno) {
     tx.set([anno.id, 'endOffset'], newEndOffset);
   });
