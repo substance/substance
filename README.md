@@ -4,7 +4,8 @@ Substance is a JavaScript library for web-based content editing. It provides bui
 
 See Substance in action:
 
-- **[Prose Editor](http://substance.io/demos/prose-editor)** - A minimal rich text editor component
+- **[Lens Writer](http://substance.io/lens-writer)** - A scientific writer component
+- **[Prose Editor](http://substance.io/demos/prose-editor)** - A minimal rich text editor
 - **[Notepad](http://substance.io/demos/notepad)** - A custom note editor
 - **[eLife Lens](http://lens.elifesciences.org/00778/)** - A novel scientific reader
 
@@ -71,7 +72,7 @@ schema.getDefaultTextType = function() {
 schema.addNodes([Paragraph, Emphasis, Strong, Highlight]);
 ```
 
-We provide a reference implementation, the [Substance Article](article.js). Usually want to come up with your own schema and only borrow common node types such as paragraphs and headings. The Notepad demo implements a [nice example for reference](https://github.com/substance/demos/blob/master/notepad/note.js).
+We provide a reference implementation, the [Substance Article](article.js). However, you may want to come up with your own schema and only borrow common node types such as paragraphs and headings. The Notepad demo implements a [nice example for reference](https://github.com/substance/demos/blob/master/notepad/note.js).
 
 <!--Lens Writer defines a [scientific article](https://github.com/substance/lens-writer/tree/master/lib/article) including bib items and figures with captions etc.-->
 

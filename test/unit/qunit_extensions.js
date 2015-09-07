@@ -12,6 +12,8 @@ QUnit.assert.isDefinedAndNotNull = function(a, msg) {
   this.push((a !== null)&&(a !== undefined), false, true, msg);
 };
 
+// NOTE: this is a shim, that makes sure that the qunit container is
+// present, which was not the case when run in karma.
 QUnit.uiModule = function(name) {
   var hooks = {
     beforeEach: function() {

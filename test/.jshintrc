@@ -1,0 +1,16 @@
+{
+  "esnext": true,
+  "node": true,
+  "jquery": true,
+  "devel": true,
+  "latedef": true,
+  "undef": true,
+  "unused": true,
+  "sub": true,
+  "predef": [
+    "window",
+    "document",
+    "QUnit",
+    "sinon"
+  ]
+}

@@ -14,7 +14,7 @@ Dual licensed under the MIT and GPL licenses.
  * @param {Number} [len] if provided a UUID with given length will be created.
  * @return A generated uuid.
  */
-module.exports = function uuid(prefix, len) {
+module.exports = function(prefix, len) {
   if (prefix && prefix[prefix.length-1] !== "_") {
     prefix = prefix.concat("_");
   }

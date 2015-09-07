@@ -75,8 +75,8 @@ ContentPanel.Prototype = function() {
 
   this.updateScrollbar = function() {
     if (!this.refs || !this.refs.scrollbar || !this.refs.panelContent) {
-      // something is fishy here
-      debugger;
+      // debugger;
+      console.error("something is fishy here");
     }
     var scrollbar = this.refs.scrollbar;
     var $panelContent = this.refs.panelContent.$el;

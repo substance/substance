@@ -1,8 +1,8 @@
 'use strict';
 
 var _ = require('../../basics/helpers');
-var Annotations = require('../annotation_updates');
 var merge = require('./merge');
+var updateAnnotations = require('./update_annotations');
 
 /**
  * The behavior when you press delete or backspace.
@@ -32,8 +32,8 @@ var deleteCharacter = function(tx, args) {
     // simple delete one character
     startChar = (direction === 'left') ? range.start.offset-1 : range.start.offset;
     endChar = startChar+1;
-    tx.update(range.start.path, { delete: { start: startChar, end: endChar } });
-    Annotations.deletedText(tx, range.start.path, startChar, endChar);
+    var op = tx.update(range.start.path, { delete: { start: startChar, end: endChar } });
+    updateAnnotations(tx, { op: op });
     selection = tx.createSelection({
       type: 'property',
       path: range.start.path,

@@ -1,7 +1,6 @@
 'use strict';
 
 var Substance = require('../basics');
-var _ = require('../basics/helpers');
 var Selection = require('./selection');
 
 function TableSelection(properties) {

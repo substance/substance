@@ -3,10 +3,11 @@
 module.exports = function(config) {
   config.set({
     basePath: '',
-    frameworks: ['qunit', 'commonjs', 'jquery-2.1.0'],
+    frameworks: ['qunit', 'commonjs', 'jquery-2.1.0', 'sinon'],
     plugins: [
       'karma-jquery',
       'karma-qunit',
+      'karma-sinon',
       'karma-chrome-launcher',
       'karma-commonjs',
       'karma-coverage'
@@ -15,8 +16,14 @@ module.exports = function(config) {
       'index.js',
       'helpers.js',
       'document.js',
+      'article.js',
       {pattern: 'test/public/jquery.js'},
-      {pattern: 'src/**/*.js'},
+      {pattern: 'basics/**/*.js'},
+      {pattern: 'data/**/*.js'},
+      {pattern: 'document/**/*.js'},
+      {pattern: 'operator/**/*.js'},
+      {pattern: 'surface/**/*.js'},
+      {pattern: 'ui/**/*.js'},
       {pattern: 'node_modules/lodash/**/*.js'},
       {pattern: 'test/fixtures/*.js'},
       {pattern: 'test/test_article/*.js'},
@@ -27,11 +34,14 @@ module.exports = function(config) {
     ],
     preprocessors: {
       "*.js": ["commonjs"],
-      "src/**/*.js": ["commonjs"],
+      'basics/**/*.js': ["commonjs"],
+      'data/**/*.js': ["commonjs", "coverage"],
+      'document/**/*.js': ["commonjs", "coverage"],
+      'operator/**/*.js': ["commonjs", "coverage"],
+      'surface/**/*.js': ["commonjs", "coverage"],
+      'ui/**/*.js': ["commonjs", "coverage"],
       "test/**/*.js": ["commonjs"],
       "node_modules/lodash/**/*.js": ["commonjs"],
-      // compute test coverage only for the real modules
-      "src/!(basics)/**/!(index).js": ["coverage"],
     },
     reporters: ['progress', 'coverage'],
     coverageReporter: {

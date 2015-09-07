@@ -3,7 +3,7 @@
 require('../qunit_extensions');
 var sample = require('../../fixtures/container_anno_sample');
 
-QUnit.module('Unit/Substance.Document/ContainerAnnotationIndex');
+QUnit.module('Substance.Document/ContainerAnnotationIndex');
 
 QUnit.test("Should index loaded container annotations", function(assert) {
   var doc = sample();

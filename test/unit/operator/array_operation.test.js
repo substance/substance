@@ -4,7 +4,7 @@ var _ = require('../../../helpers');
 var Operator = require('../../../operator');
 var ArrayOperation = Operator.ArrayOperation;
 
-QUnit.module('Unit/Substance.Operator/ArrayOperation');
+QUnit.module('Substance.Operator/ArrayOperation');
 
 QUnit.assert.checkArrayOperationTransform = function(a, b, input, expected) {
   var t = ArrayOperation.transform(a, b);
