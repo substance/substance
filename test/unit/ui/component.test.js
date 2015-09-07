@@ -162,3 +162,40 @@ QUnit.test("Do deep rerender when state has changed.", function(assert) {
   _shouldRerender.restore();
   _render.restore();
 });
+
+QUnit.test("Only call didMount once.", function(assert) {
+  var GrandChild = Component.extend({
+    render: function() {
+      return $$('div').append("Hello!");
+    },
+    didMount: function() {
+      if (!this.didMountCount) {
+        this.didMountCount = 1;
+      } else {
+        this.didMountCount++;
+      }
+    }
+  });
+  var Child = Component.extend({
+    render: function() {
+      if (this.props.loading) {
+        return $$('div').append('Loading...');
+      } else {
+        return $$('div').append(
+          $$(GrandChild).key('child')
+        );
+      }
+    },
+  });
+  var Parent = Component.extend({
+    render: function() {
+      return $$('div')
+        .append($$(Child).key('child').setProps({ loading: true}));
+    },
+    didMount: function() {
+      this.refs.child.setProps({ loading: false });
+    }
+  });
+  var comp = Component.mount($$(Parent), $('#qunit-fixture'));
+  assert.equal(comp.refs.child.refs.child.didMountCount, 1, "Child component's didMount should have been called only once.");
+});
