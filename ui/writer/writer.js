@@ -85,7 +85,7 @@ Writer.Prototype = function() {
           .append($$(ContextToggles).key("context-toggles")
             .setProps({
               panelOrder: this.config.panelOrder
-            }))
+            })
           .append(this.renderContextPanel())
         )
       );
