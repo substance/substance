@@ -7,7 +7,10 @@ QUnit.uiModule('Substance.Component');
 
 var SimpleComponent = Component.extend({
   didInitialize: function() {
+    // make some methods inspectable
     this.didMount = sinon.spy(this, 'didMount');
+    this.shouldRerender = sinon.spy(this, 'shouldRerender');
+    this.render = sinon.spy(this, 'render');
   },
   render: function() {
     var el = $$('div').addClass('simple-component');
@@ -125,7 +128,7 @@ QUnit.test("Don't do a deep rerender when only attributes/classes/styles change.
     .addClass('foo')
     .css('width', 100)
     .append($$(SimpleComponent)));
-  var _render = sinon.spy(comp, 'render');
+  var render = sinon.spy(comp, 'render');
   // rerender with changed attributes, classes and css styles
   comp._render($$('div')
     .attr('data-foo', 'baz')
@@ -135,36 +138,24 @@ QUnit.test("Don't do a deep rerender when only attributes/classes/styles change.
   assert.equal(comp.$el.attr('data-foo'), 'baz', 'Data attribute should be up-to-date.');
   assert.ok(!comp.$el.hasClass('foo') && comp.$el.hasClass('bar'), 'Element classes should be up-to-date.');
   assert.equal(comp.$el.css('width'), "200px", "Element style should be up-to-date.");
-  assert.equal(_render.callCount, 0, "Component should not have been rerendered.");
-  // cleanup
-  _render.restore();
+  assert.equal(render.callCount, 0, "Component should not have been rerendered.");
 });
 
 QUnit.test("Do deep rerender when properties have changed.", function(assert) {
   var comp = Component._render($$(SimpleComponent, { foo: 'bar '}));
-  var _shouldRerender = sinon.spy(comp, 'shouldRerender');
-  var _render = sinon.spy(comp, 'render');
   // rerender with changed attributes
   comp.setProps({ foo: 'baz' });
-  assert.equal(_shouldRerender.callCount, 1, "Component should have been asked whether to rerender.");
-  assert.equal(_render.callCount, 1, "Component should have been rerendered.");
-  // cleanup
-  _shouldRerender.restore();
-  _render.restore();
+  assert.equal(comp.shouldRerender.callCount, 1, "Component should have been asked whether to rerender.");
+  assert.equal(comp.render.callCount, 2, "Component should have been rerendered.");
 });
 
 QUnit.test("Do deep rerender when state has changed.", function(assert) {
   var comp = Component._render($$(SimpleComponent));
-  var _shouldRerender = sinon.spy(comp, 'shouldRerender');
-  var _render = sinon.spy(comp, 'render');
   // rerender with changed attributes
   comp.setState({ foo: 'baz' });
-  assert.equal(_shouldRerender.callCount, 1, "Component should have been asked whether to rerender.");
-  assert.equal(_render.callCount, 1, "Component should have been rerendered.");
-  // cleanup
-  _shouldRerender.restore();
-  _render.restore();
-});
+  assert.equal(comp.shouldRerender.callCount, 1, "Component should have been asked whether to rerender.");
+  assert.equal(comp.render.callCount, 2, "Component should have been rerendered.");
+ });
 
 QUnit.test("Only call didMount once.", function(assert) {
   var Child = Component.extend({
