@@ -370,6 +370,11 @@ Component.Prototype = function ComponentPrototype() {
     }
   };
 
+  this.extendProps = function(updatedProps) {
+    var newProps = _.extend({}, this.props, updatedProps);
+    this.setProps(newProps);
+  };
+
   /**
    * @return the current properties
    */
@@ -976,6 +981,14 @@ VirtualNode.Prototype = function() {
     return this;
   };
   this.addProps = function(props) {
+    _.extend(this.props, props);
+    return this;
+  };
+  this.setProps = function(props) {
+    this.props = props;
+    return this;
+  };
+  this.extendProps = function(props) {
     _.extend(this.props, props);
     return this;
   };
