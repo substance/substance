@@ -1,8 +1,7 @@
 "use strict";
 
-var Substance = require('substance');
-var OO = Substance.OO;
-var Component = Substance.Component;
+var OO = require('../../basics/oo');
+var Component = require('../component');
 var $$ = Component.$$;
 
 function OpenModalTool() {

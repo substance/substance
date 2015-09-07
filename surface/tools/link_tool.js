@@ -1,6 +1,6 @@
 'use strict';
 
-var _ = require('substance/helpers');
+var _ = require('../../basics/helpers');
 var AnnotationTool = require('../annotation_tool');
 var LinkTool = AnnotationTool.extend({
 
