@@ -20,7 +20,7 @@ ContentPanel.Prototype = function() {
     el.append(
       $$(Scrollbar).key("scrollbar")
         .attr('id', "content-scrollbar")
-        .addProps({ contextId: this.props.containerId })
+        .setProps({ contextId: this.props.containerId })
     );
     el.append(
       $$('div').key("scanline").addClass('scanline')
@@ -43,7 +43,7 @@ ContentPanel.Prototype = function() {
     var containerNode = doc.get(this.props.containerId);
     var ContentContainerClass = componentRegistry.get("content_editor");
     return $$(ContentContainerClass).key("contentEditor")
-      .addProps({
+      .setProps({
         doc: doc,
         node: containerNode
       });

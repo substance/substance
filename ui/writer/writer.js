@@ -61,8 +61,8 @@ Writer.Prototype = function() {
   };
 
   this.render = function() {
-    var el = $$('div')
-      .addClass('writer-component');
+    var el = $$('div').addClass('writer-component');
+    // Render a loading splash when there is no document
     if (!this.props.doc) {
       el.append($$('div').append('Loading'));
     } else {
@@ -72,7 +72,7 @@ Writer.Prototype = function() {
       el.append(
         $$('div').key('main-container').addClass("main-container").append(
           $$(ContentToolbar).key('toolbar'),
-          $$(ContentPanel).key('content').addProps({
+          $$(ContentPanel).key('content').setProps({
             doc: doc,
             containerId: this.config.containerId
           })
@@ -80,11 +80,13 @@ Writer.Prototype = function() {
       );
       // resource container
       el.append(
-        $$('div').key('resource-container').addClass("resource-container").append(
-          $$(ContextToggles).key("context-toggles").addProps({
-            panelOrder: this.config.panelOrder
-          }),
-          this.renderContextPanel()
+        $$('div').key('resource-container')
+          .addClass("resource-container")
+          .append($$(ContextToggles).key("context-toggles")
+            .setProps({
+              panelOrder: this.config.panelOrder
+            }))
+          .append(this.renderContextPanel())
         )
       );
       // modal panel
@@ -93,7 +95,7 @@ Writer.Prototype = function() {
       );
       // status bar
       el.append(
-        $$(StatusBar).key('statusBar').addProps({ doc: doc })
+        $$(StatusBar).key('statusBar').setProps({ doc: doc })
       );
       // clipboard
       el.append(
@@ -109,11 +111,11 @@ Writer.Prototype = function() {
       // Just render an empty div if no modal active available
       return $$('div');
     } else {
-      var el = $$(ModalPanel).key('modal-panel').addProps({
+      var el = $$(ModalPanel).key('modal-panel').setProps({
         panelElement: modalPanelElement
       });
       if (this.state.modal) {
-        el.addProps(this.state.modal);
+        el.extendProps(this.state.modal);
       }
       return el;
     }
@@ -335,7 +337,7 @@ Writer.Prototype = function() {
   this._getActivePanelElement = function() {
     if (this.componentRegistry.contains(this.state.contextId)) {
       var panelComponent = this.componentRegistry.get(this.state.contextId);
-      return $$(panelComponent).addProps(this._panelPropsFromState(this.state));
+      return $$(panelComponent).setProps(this._panelPropsFromState(this.state));
     } else {
       console.warn("Could not find component for contextId:", this.state.contextId);
     }
@@ -346,7 +348,7 @@ Writer.Prototype = function() {
     if (state.modal) {
       var modalPanelComponent = this.componentRegistry.get(state.modal.contextId);
       if (modalPanelComponent) {
-        return $$(modalPanelComponent).addProps(this._panelPropsFromState(state.modal));
+        return $$(modalPanelComponent).setProps(this._panelPropsFromState(state.modal));
       } else {
         console.warn("Could not find component for contextId:", state.modal.contextId);
       }
