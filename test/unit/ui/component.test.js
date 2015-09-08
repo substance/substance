@@ -2,6 +2,7 @@
 
 var Component = require('../../../ui/component');
 var $$ = Component.$$;
+var _ = require('../../../basics/helpers');
 
 QUnit.uiModule('Substance.Component');
 
@@ -54,7 +55,7 @@ QUnit.test("Render an element with classes", function(assert) {
 
 QUnit.test("Render an element with custom html", function(assert) {
   var comp = $$('div').html('Hello <b>World</b>')._render();
-  assert.ok(comp.$el.find('b').length, 'Element should have rendered HTML as content.');
+  assert.equal(comp.$el.find('b').length, 1, 'Element should have rendered HTML as content.');
   assert.equal(comp.$el.find('b').text(), 'World','Rendered element should have right content.');
 });
 
@@ -94,32 +95,30 @@ QUnit.test("Render a child with key", function(assert) {
   var comp = $$('div').addClass('parent')
     .append($$('div').addClass('child').key('foo'))
     ._render();
-  assert.ok(comp.refs.foo, 'Element should have a ref "foo".');
+  assert.ok(comp.refs.foo, 'Component should have a ref "foo".');
   assert.ok(comp.refs.foo.$el.hasClass('child'), 'Referenced component should have class "child".');
 });
 
 /** Differential rerendering **/
 
 QUnit.test("Preserve a child with key", function(assert) {
-  var comp = Component._render($$('div')
-    .append($$(SimpleComponent).key('foo')));
+  var virtualDom = $$('div').append($$(SimpleComponent).key('foo'));
+  var comp = Component._render(virtualDom);
   var child = comp.refs.foo;
   var el = child.$el[0];
   // rerender using the same virtual dom
-  comp._render($$('div')
-    .append($$(SimpleComponent).key('foo')));
+  comp._render(_.deepclone(virtualDom));
   assert.ok(comp.refs.foo === child, 'Child component should have been preserved.');
   assert.ok(comp.refs.foo.$el[0] === el, 'Child element should have been preserved.');
 });
 
 QUnit.test("Wipe a child without key", function(assert) {
-  var comp = Component._render($$('div')
-    .append($$(SimpleComponent)));
+  var virtualDom = $$('div').append($$(SimpleComponent));
+  var comp = Component._render(virtualDom);
   var child = comp.children[0];
   var el = child.$el[0];
   // rerender using the same virtual dom
-  comp._render($$('div')
-    .append($$(SimpleComponent)));
+  comp._render(_.deepclone(virtualDom));
   // as we did not apply a key, the component simply gets rerendered from scratch
   assert.ok(comp.children[0] !== child, 'Child component should have been preserved.');
   assert.ok(comp.children[0].$el[0] !== el, 'Child element should have been preserved.');
@@ -182,6 +181,6 @@ QUnit.test("Only call didMount once.", function(assert) {
     }
   });
   var comp = Component.mount($$(Parent), $('#qunit-fixture'));
-  assert.equal(comp.refs.child.didMount.callCount, 1, "Childrens' didMount should have been called only once.");
-  assert.equal(comp.refs.child.refs.child.didMount.callCount, 1, "Childrens' didMount should have been called only once.");
+  assert.equal(comp.refs.child.didMount.callCount, 1, "Child's didMount should have been called only once.");
+  assert.equal(comp.refs.child.refs.child.didMount.callCount, 1, "Grandchild's didMount should have been called only once.");
 });
