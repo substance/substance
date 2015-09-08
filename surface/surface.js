@@ -121,6 +121,11 @@ Surface.Prototype = function() {
     if (!element) {
       throw new Error('Illegal argument: Surface element is required. was ' + element);
     }
+
+    if (this.attached) {
+      throw new Error('Surface is already attached to element: ' + element);
+    }
+
     var doc = this.getDocument();
 
     // Initialization
