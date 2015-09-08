@@ -5,13 +5,16 @@ var $$ = Component.$$;
 
 QUnit.uiModule('Substance.Component');
 
-var SimpleComponent = Component.extend({
+var TestComponent = Component.extend({
   didInitialize: function() {
     // make some methods inspectable
     this.didMount = sinon.spy(this, 'didMount');
     this.shouldRerender = sinon.spy(this, 'shouldRerender');
     this.render = sinon.spy(this, 'render');
-  },
+  }
+});
+
+var SimpleComponent = TestComponent.extend({
   render: function() {
     var el = $$('div').addClass('simple-component');
     if (this.props.children) {
@@ -158,7 +161,7 @@ QUnit.test("Do deep rerender when state has changed.", function(assert) {
  });
 
 QUnit.test("Only call didMount once.", function(assert) {
-  var Child = Component.extend({
+  var Child = TestComponent.extend({
     render: function() {
       if (this.props.loading) {
         return $$('div').append('Loading...');
@@ -169,7 +172,7 @@ QUnit.test("Only call didMount once.", function(assert) {
       }
     },
   });
-  var Parent = Component.extend({
+  var Parent = TestComponent.extend({
     render: function() {
       return $$('div')
         .append($$(Child).key('child').setProps({ loading: true}));
@@ -179,5 +182,6 @@ QUnit.test("Only call didMount once.", function(assert) {
     }
   });
   var comp = Component.mount($$(Parent), $('#qunit-fixture'));
+  assert.equal(comp.refs.child.didMount.callCount, 1, "Childrens' didMount should have been called only once.");
   assert.equal(comp.refs.child.refs.child.didMount.callCount, 1, "Childrens' didMount should have been called only once.");
 });
