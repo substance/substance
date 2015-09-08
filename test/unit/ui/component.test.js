@@ -10,6 +10,7 @@ var TestComponent = Component.extend({
   didInitialize: function() {
     // make some methods inspectable
     this.didMount = sinon.spy(this, 'didMount');
+    this.willUnmount = sinon.spy(this, 'willUnmount');
     this.shouldRerender = sinon.spy(this, 'shouldRerender');
     this.render = sinon.spy(this, 'render');
   }
@@ -157,9 +158,9 @@ QUnit.test("Do deep rerender when state has changed.", function(assert) {
   comp.setState({ foo: 'baz' });
   assert.equal(comp.shouldRerender.callCount, 1, "Component should have been asked whether to rerender.");
   assert.equal(comp.render.callCount, 2, "Component should have been rerendered.");
- });
+});
 
-QUnit.test("Only call didMount once.", function(assert) {
+QUnit.test("Only call didMount once for childs and grandchilds when setProps is called during mounting process.", function(assert) {
   var Child = TestComponent.extend({
     render: function() {
       if (this.props.loading) {
@@ -180,7 +181,16 @@ QUnit.test("Only call didMount once.", function(assert) {
       this.refs.child.setProps({ loading: false });
     }
   });
+  
   var comp = Component.mount($$(Parent), $('#qunit-fixture'));
-  assert.equal(comp.refs.child.didMount.callCount, 1, "Child's didMount should have been called only once.");
-  assert.equal(comp.refs.child.refs.child.didMount.callCount, 1, "Grandchild's didMount should have been called only once.");
+  var childComp = comp.refs.child;
+  var grandChildComp = childComp.refs.child;
+  assert.equal(childComp.didMount.callCount, 1, "Child's didMount should have been called only once.");
+  assert.equal(grandChildComp.didMount.callCount, 1, "Grandchild's didMount should have been called only once.");
+  
+  comp.empty();
+  assert.equal(childComp.willUnmount.callCount, 1, "Child's willUnmount should have been called once.");
+  assert.equal(grandChildComp.willUnmount.callCount, 1, "Grandchild's willUnmount should have been called once.");
+
+  // TODO: can/should we somehow dispose the references to childComp and grandChildComp now?
 });

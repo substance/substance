@@ -4,7 +4,6 @@ var OO = require('../basics/oo');
 var _ = require('../basics/helpers');
 
 var __id__ = 0;
-var _isDocumentElement;
 var _isInDocument;
 var VirtualTextNode;
 var RawHtml;
@@ -209,7 +208,10 @@ Component.Prototype = function ComponentPrototype() {
    * ```
    */
   this.triggerDidMount = function() {
-    this.didMount();
+    if (!this.__mounted__) {
+      this.__mounted__ = true;
+      this.didMount();
+    }
     _.each(this.children, function(child) {
       child.triggerDidMount();
     });
@@ -237,6 +239,7 @@ Component.Prototype = function ComponentPrototype() {
   this.unmount = function() {
     this.triggerWillUnmount();
     this.$el.remove();
+    this.__mounted__ = false;
     // TODO: do we need to remove this from parents children
     // right now it feels like that it doesn't make a great difference
     // because most often this method is called by the parent during rerendering
@@ -1123,14 +1126,17 @@ Component.$$.prepareChildren = function(children) {
   }
 };
 
-_isDocumentElement = function(el) {
-  // Node.DOCUMENT_NODE = 9
-  return (el.nodeType === 9);
-};
+/**
+ * Checks whether a given element has been injected in the document already
+ *
+ * We traverse up the DOM until we find the document root element. We return true
+ * if we can find it.
+ */
 
 _isInDocument = function(el) {
   while(el) {
-    if (_isDocumentElement(el)) {
+    // Node.DOCUMENT_NODE = 9;
+    if (el.nodeType === 9) {
       return true;
     }
     el = el.parentNode;
