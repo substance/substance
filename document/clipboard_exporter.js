@@ -1,5 +1,6 @@
+"use strict";
+
 var OO = require('../basics/oo');
-var ClipboardImporter = require('./clipboard_importer');
 var HtmlExporter = require('./html_exporter');
 
 function ClipboardExporter() {

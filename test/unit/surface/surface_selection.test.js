@@ -2,7 +2,7 @@
 
 var SurfaceSelection = require('../../../surface/surface_selection');
 
-QUnit.uiModule('Unit/Substance.Surface/Selection');
+QUnit.uiModule('Substance.Surface/Selection');
 
 // Fixtures
 var singlePropertyFixture = [

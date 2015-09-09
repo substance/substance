@@ -1,7 +1,6 @@
 'use strict';
 
 var OO = require('../basics/oo');
-var _ = require('../basics/helpers');
 var Surface = require('./surface');
 var EventEmitter = require('../basics/event_emitter');
 
@@ -85,7 +84,7 @@ SurfaceManager.Prototype = function() {
     var state = {
       surface: this.focusedSurface,
       selection: null
-    }
+    };
     if (this.focusedSurface) {
       state.selection = this.focusedSurface.getSelection();
     }

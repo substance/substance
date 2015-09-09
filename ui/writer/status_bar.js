@@ -16,17 +16,17 @@ var ICONS_FOR_TYPE = {
 
 function StatusBar() {
   Component.apply(this, arguments);
-
   this.handleNotificationUpdate = this.handleNotificationUpdate.bind(this);
 }
 
 StatusBar.Prototype = function() {
 
   this.render = function() {
+    var meta = this.props.doc.getDocumentMeta();
+    var title = meta ? meta.title : 'Untitled';
+
     var el = $$('div').addClass("status-bar-component fill-light");
-    var statusEl = $$("div").addClass("document-status").append(
-      this.props.doc.getDocumentMeta().title
-    );
+    var statusEl = $$("div").addClass("document-status").append(title);
     var message = this.state.message;
     if (message) {
       el.addClass(message.type);

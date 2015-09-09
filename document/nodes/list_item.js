@@ -34,7 +34,7 @@ ListItem.static.toHtml = function(item, converter) {
   var $el = $('<li>')
     .attr('id', item.id)
     .data('level', item.level)
-    .append(converter.annotatedText([id, 'content']))
+    .append(converter.annotatedText([id, 'content']));
   return $el;
 };
 

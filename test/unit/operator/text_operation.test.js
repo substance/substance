@@ -4,7 +4,7 @@ var _ = require('../../../helpers');
 var Operator = require('../../../operator');
 var TextOperation = Operator.TextOperation;
 
-QUnit.module('Unit/Substance.Operator/TextOperation');
+QUnit.module('Substance.Operator/TextOperation');
 
 QUnit.assert.checkTextTransform = function(a, b, input, expected) {
   var t = TextOperation.transform(a, b);

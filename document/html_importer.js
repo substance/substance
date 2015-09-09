@@ -305,6 +305,7 @@ HtmlImporter.Prototype = function HtmlImporterPrototype() {
     var nodes = $el[0].childNodes;
     var first = nodes[0];
     var last = _.last(nodes);
+    var text, trimmed;
     if (first) {
       // trim the first and last text
       if (this._getDomNodeType(first) === "text") {
@@ -335,7 +336,7 @@ HtmlImporter.Prototype = function HtmlImporterPrototype() {
   this.defaultId = function($el, type) {
     var id = $el.attr('id') || this.nextId(type);
     while (this.state.doc.get(id)) {
-      id = this.nextId(type)
+      id = this.nextId(type);
     }
     // TODO: check for collisions
     return id;

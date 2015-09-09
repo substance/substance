@@ -4,7 +4,7 @@ var sample1 = require('../../fixtures/sample1');
 var Document = require('../../../document');
 var _ = require('../../../helpers');
 
-QUnit.module('Unit/Substance.Document/Transactions');
+QUnit.module('Substance.Document/Transactions');
 
 QUnit.test("Before and after state.", function(assert) {
   var doc = sample1();

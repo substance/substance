@@ -126,7 +126,7 @@ var ContainerAnnotation = Node.extend({
       if (!fragment) {
         fragment = new ContainerAnnotation.Fragment(this, startAnchor.path, "property");
         this._fragments.set(fragment.path, fragment);
-      } else if (!fragment.mode === "property") {
+      } else if (fragment.mode !== "property") {
         fragment.mode = "property";
       }
       fragments.push(fragment);

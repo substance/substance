@@ -23,8 +23,6 @@ var defaultComponents = {
   "link": require('../nodes/link_component')
 };
 
-var defaultTools = Surface.Tools;
-
 // TODO: discuss how to organize editor extensions
 var editingBehavior = [ new ListEditing() ];
 
@@ -42,7 +40,6 @@ var Editor = Component.extend({
 
     var ArticleClass = this.config.article || SubstanceArticle;
     var components = this.config.components || defaultComponents;
-    var tools = this.config.tools || defaultTools;
 
     this.doc = new ArticleClass();
     this.doc.loadHtml(this.props.content);
@@ -63,17 +60,11 @@ var Editor = Component.extend({
       this.componentRegistry.add(name, ComponentClass);
     }, this);
 
-    // Tool registry
-    this.toolRegistry = new Registry();
-    _.each(tools, function(ToolClass) {
-      this.toolRegistry.add(ToolClass.static.name, new ToolClass());
-    }, this);
-
     // Dependency Injection
     this.childContext = {
       componentRegistry: this.componentRegistry,
-      toolRegistry: this.toolRegistry,
-      surfaceManager: this.surfaceManager
+      surfaceManager: this.surfaceManager,
+      document: this.doc
     };
   },
 
@@ -106,7 +97,6 @@ var Editor = Component.extend({
   },
 
   didMount: function() {
-    this.surfaceManager.on('selection:changed', this.onSelectionChanged, this);
     this.clipboard.attach(this.$el[0]);
   },
 
@@ -127,12 +117,6 @@ var Editor = Component.extend({
 
   getDocument: function() {
     return this.doc;
-  },
-
-  onSelectionChanged: function(sel, surface) {
-    this.toolRegistry.each(function(tool) {
-      tool.update(surface, sel);
-    }, this);
   }
 });
 

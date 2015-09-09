@@ -4,10 +4,9 @@ var OO = require('../basics/oo');
 var _ = require('../basics/helpers');
 
 var __id__ = 0;
-var _isDocumentElement;
 var _isInDocument;
 var VirtualTextNode;
-
+var RawHtml;
 
 /**
  * A light-weight component implementation inspired by React and Ember.
@@ -80,6 +79,7 @@ function Component(parent, params) {
   };
   this._setProps(params.props);
 
+  /* istanbul ignore if */
   if (this.initialize) {
     console.warn("Component.initialize() has been deprecated. Use Component.didInitialize() instead.");
     this.initialize();
@@ -101,35 +101,71 @@ function Component(parent, params) {
 
 Component.Prototype = function ComponentPrototype() {
 
+  /**
+   * Provides the context which is delivered to every child component.
+   *
+   * @return object the child context
+   */
   this.getChildContext = function() {
     return this.childContext || {};
   };
 
+  /**
+   * Hook which is called after the component has been initialized.
+   */
   this.didInitialize = function() {};
 
+  /**
+   * Provide the initial component state.
+   *
+   * @return object the initial state
+   */
   this.getInitialState = function() {
     return {};
   };
 
+  /**
+   * Provides the parent of this component.
+   *
+   * @return object the parent component or "root" if this component does not have a parent.
+   */
   this.getParent = function() {
     return this.parent;
   };
 
   /**
-   * Renders the component.
+   * Render the component.
    *
-   * Note: actually it does not create a DOM presentation directly
-   * but a virtual representation which is compiled into a DOM element.
+   * ATTENTION: this does not create a DOM presentation but
+   * a virtual representation which is compiled into a DOM element later.
+   *
+   * Every Component should override this method.
+   *
+   * @return one VirtualNode created using Component.$$
    */
   this.render = function() {
+    /* istanbul ignore next */
     return Component.$$('div');
   };
 
+  /**
+   * Determines if Component.rerender() should be run after
+   * changing props or state.
+   *
+   * The default implementation performs a deep equal check.
+   *
+   * @return a boolean indicating whether rerender() should be run.
+   */
   this.shouldRerender = function(newProps, newState) {
     /* jshint unused: false */
     return !_.isEqual(newProps, this.props) || !_.isEqual(newState, this.state);
   };
 
+  /**
+   * Rerenders the component.
+   *
+   * Call this to manually trigger a rerender.
+   */
   this.rerender = function() {
     this._render(this.render());
   };
@@ -139,6 +175,8 @@ Component.Prototype = function ComponentPrototype() {
    *
    * If the element is in the DOM already, triggers `component.didMount()`
    * on this component and all of its children.
+   *
+   * @chainable
    */
   this.mount = function($el) {
     this._render(this.render());
@@ -170,7 +208,10 @@ Component.Prototype = function ComponentPrototype() {
    * ```
    */
   this.triggerDidMount = function() {
-    this.didMount();
+    if (!this.__mounted__) {
+      this.__mounted__ = true;
+      this.didMount();
+    }
     _.each(this.children, function(child) {
       child.triggerDidMount();
     });
@@ -192,10 +233,13 @@ Component.Prototype = function ComponentPrototype() {
 
   /**
    * Removes this component from its parent.
+   *
+   * @chainable
    */
   this.unmount = function() {
     this.triggerWillUnmount();
     this.$el.remove();
+    this.__mounted__ = false;
     // TODO: do we need to remove this from parents children
     // right now it feels like that it doesn't make a great difference
     // because most often this method is called by the parent during rerendering
@@ -203,6 +247,9 @@ Component.Prototype = function ComponentPrototype() {
     return this;
   };
 
+  /**
+   * @return a boolean indicating if this component is mounted.
+   */
   this.isMounted = function() {
     if (this.$el) {
       return _isInDocument(this.$el[0]);
@@ -210,6 +257,9 @@ Component.Prototype = function ComponentPrototype() {
     return false;
   };
 
+  /**
+   * Triggers willUnmount handlers recursively.
+   */
   this.triggerWillUnmount = function() {
     _.each(this.children, function(child) {
       child.triggerWillUnmount();
@@ -217,10 +267,17 @@ Component.Prototype = function ComponentPrototype() {
     this.willUnmount();
   };
 
-  this.willUnmount = function() {
-    // console.log('Will unmount', this);
-  };
+  /**
+   * A hook which is called when the component is unmounted, i.e. removed from DOM.
+   */
+  this.willUnmount = function() {};
 
+  /**
+   * Send an action request to the parent component, bubbling up the component
+   * hierarchy until an action handler is found.
+   * @param action the name of the action
+   * @param ... arbitrary number of arguments
+   */
   this.send = function(action) {
     var comp = this;
     while(comp) {
@@ -232,6 +289,22 @@ Component.Prototype = function ComponentPrototype() {
     throw new Error('No component handled action: ' + action);
   };
 
+  /**
+   * Define action handlers.
+   *
+   * Call this during construction/initialization of a component.
+   *
+   * @example
+   * ```
+   * function MyComponent() {
+   *   Component.apply(this, arguments);
+   *   ...
+   *   this.actions({
+   *     "foo": this.handleFoo
+   *   });
+   * }
+   * ```
+   */
   this.actions = function(actions) {
     _.each(actions, function(method, action) {
       var handler = method.bind(this);
@@ -239,6 +312,11 @@ Component.Prototype = function ComponentPrototype() {
     }, this);
   };
 
+  /**
+   * Sets the state of this component, potentially leading to a rerender.
+   *
+   * Usually this is used by the component itself.
+   */
   this.setState = function(newState) {
     var needRerender = this.shouldRerender(this.getProps(), newState);
     this.willUpdateState(newState);
@@ -249,21 +327,42 @@ Component.Prototype = function ComponentPrototype() {
     }
   };
 
+  /**
+   * This is similar to `setState()` but does not replace the state.
+   *
+   * @param newState an object with a partial update.
+   */
   this.extendState = function(newState) {
     newState = _.extend({}, this.state, newState);
     this.setState(newState);
   };
 
+  /**
+   * @return the current state
+   */
   this.getState = function() {
     return this.state;
   };
 
+  /**
+   * Hook which is called before the state is changed.
+   *
+   * Use this to dispose objects which will be replaced during state change.
+   */
   this.willUpdateState = function(newState) {
     /* jshint unused: false */
   };
 
+  /**
+   * Hook which is called after the state is changed.
+   */
   this.didUpdateState = function() {};
 
+  /**
+   * Sets the properties of this component, potentially leading to a rerender.
+   *
+   * @param an object with properties
+   */
   this.setProps = function(newProps) {
     var needRerender = this.shouldRerender(newProps, this.getState());
     this.willReceiveProps(newProps);
@@ -274,18 +373,44 @@ Component.Prototype = function ComponentPrototype() {
     }
   };
 
+  this.extendProps = function(updatedProps) {
+    var newProps = _.extend({}, this.props, updatedProps);
+    this.setProps(newProps);
+  };
+
+  /**
+   * @return the current properties
+   */
   this.getProps = function() {
     return this.props;
   };
 
+  /**
+   * Hook which is called before properties are updated.
+   *
+   * Use this to dispose objects which will be replaced when properties change.
+   */
   this.willReceiveProps = function(newProps) {
     /* jshint unused: false */
   };
 
+  /**
+   * Hook which is called after properties have been set.
+   */
   this.didReceiveProps = function() {};
+
+  /**
+   * Hook which is called after properties have been set.
+   */
+  this.didRender = function() {};
 
   /* API for incremental updates */
 
+  /**
+   * Add a class.
+   *
+   * Part of the incremental updating API.
+   */
   this.addClass = function(className) {
     this._data.addClass(className);
     if (this.$el) {
@@ -294,6 +419,11 @@ Component.Prototype = function ComponentPrototype() {
     return this;
   };
 
+  /**
+   * Remove a class.
+   *
+   * Part of the incremental updating API.
+   */
   this.removeClass = function(className) {
     this._data.removeClass(className);
     if (this.$el) {
@@ -302,6 +432,11 @@ Component.Prototype = function ComponentPrototype() {
     return this;
   };
 
+  /**
+   * Toggle a class.
+   *
+   * Part of the incremental updating API.
+   */
   this.toggleClass = function(className) {
     this._data.toggleClass(className);
     if (this.$el) {
@@ -310,6 +445,11 @@ Component.Prototype = function ComponentPrototype() {
     return this;
   };
 
+  /**
+   * Add a attributes.
+   *
+   * Part of the incremental updating API.
+   */
   this.attr = function() {
     this._data.attr.apply(this._data, arguments);
     if (this.$el) {
@@ -318,6 +458,11 @@ Component.Prototype = function ComponentPrototype() {
     return this;
   };
 
+  /**
+   * Remove an attribute.
+   *
+   * Part of the incremental updating API.
+   */
   this.removeAttr = function() {
     this._data.removeAttr.apply(this._data, arguments);
     if (this.$el) {
@@ -326,14 +471,27 @@ Component.Prototype = function ComponentPrototype() {
     return this;
   };
 
+  /**
+   * Add css styles.
+   *
+   * Part of the incremental updating API.
+   */
   this.css = function(style) {
-    if (style) {
+    if (arguments.length === 2) {
+      this._data.css(arguments[0], arguments[1]);
+      this.$el.css(arguments[0], arguments[1]);
+    } else if (style) {
       this._data.css(style);
       this.$el.css(style);
     }
     return this;
   };
 
+  /**
+   * Append a child component created using Component.$$.
+   *
+   * Part of the incremental updating API.
+   */
   this.append = function(child) {
     var isMounted = this.isMounted();
     var comp = this._compileComponent(child, {
@@ -346,6 +504,11 @@ Component.Prototype = function ComponentPrototype() {
     return this;
   };
 
+  /**
+   * Insert a child component created using Component.$$ at a given position.
+   *
+   * Part of the incremental updating API.
+   */
   this.insertAt = function(pos, child) {
     var isMounted = this.isMounted();
     var comp = this._compileComponent(child, {
@@ -358,12 +521,22 @@ Component.Prototype = function ComponentPrototype() {
     return this;
   };
 
+  /**
+   * Remove(/unmount) the child component at a given position.
+   *
+   * Part of the incremental updating API.
+   */
   this.removeAt = function(pos) {
     this._data.removeAt(pos);
     this.children[pos].unmount();
     return this;
   };
 
+  /**
+   * Remove(/unmount) all child components.
+   *
+   * Part of the incremental updating API.
+   */
   this.empty = function() {
     this._data.children = [];
     this.$el.empty();
@@ -451,17 +624,22 @@ Component.Prototype = function ComponentPrototype() {
       };
     }
     var oldData = this._data;
+
     // the first time we need to create the component element
+    // and can render from scratch
     if (!this.$el) {
       this.$el = this._createElement(data, scope);
-    } else {
-      // update the element
-      this._updateElement(data, oldData, scope);
+      this._renderFromScratch(data, scope);
+      return;
     }
-    // TODO: we can enable this simplification when the general implementation
-    // is stable
-    if (this._simple_) {
-      this._renderSimple(data, scope);
+
+    // update the element
+    this._updateElement(data, oldData, scope);
+
+    // when during the last render there where no 'keys'
+    // then we can just wipe and rerender
+    if (this._no_refs_) {
+      this._renderFromScratch(data, scope);
       return;
     }
 
@@ -613,68 +791,51 @@ Component.Prototype = function ComponentPrototype() {
     }
 
     if (Object.keys(scope.refs).length > 0) {
-      delete this._simple_;
+      delete this._no_refs_;
     } else {
-      this._simple_ = true;
+      this._no_refs_ = true;
     }
 
     this.children = children;
     this.refs = _.clone(scope.refs);
     this._data = data;
+
+    this.didRender();
   };
 
-  this._renderSimple = function(data, scope) {
+  this._renderFromScratch = function(data, scope) {
     for (var i = 0; i < this.children.length; i++) {
       this.children[i].unmount();
     }
     var isMounted = _isInDocument(this.$el[0]);
     var children = [];
     for (var j = 0; j < data.children.length; j++) {
-      var comp = this._compileComponent(data.children[j], scope);
-      if (isMounted) comp.triggerDidMount();
-      this.$el.append(comp.$el);
-      children.push(comp);
+      // EXPERIMENTAL: supporting $$.html()
+      // basically it doesn't make sense to mix $$.html() with $$.append(), but...
+      if (data.children[j] instanceof RawHtml) {
+        this.$el.html(data.children[j].html);
+        children = [];
+      } else {
+        var comp = this._compileComponent(data.children[j], scope);
+        if (isMounted) comp.triggerDidMount();
+        this.$el.append(comp.$el);
+        children.push(comp);
+      }
     }
     if (Object.keys(scope.refs).length > 0) {
-      delete this._simple_;
+      delete this._no_refs_;
     } else {
-      this._simple_ = true;
+      this._no_refs_ = true;
     }
     this.refs = scope.refs;
     this.children = children;
     this._data = data;
+
+    this.didRender();
   };
 
   this._compileComponent = function(data, scope) {
-    var component;
-    switch(data.type) {
-      case 'text':
-        component = new Component.Text(this, data.props.text);
-        component._render();
-        break;
-      case 'element':
-        component = new Component.HtmlElement(this, data.tagName, data);
-        component._render(data, scope);
-        break;
-      case 'component':
-        component = new data.ComponentClass(this, data);
-        // TODO: we have a problem here: basically this is the place
-        // where we descend into a child component implementation.
-        // The component's render implementation would expect e.g. that handlers are
-        // bound to it, and also refs created within that component.
-        // However, it is also possible to provide children via append,
-        // in the parent component's render method. Those handlers should be bound
-        // to the parent. The same for refs.
-        // To solve this, $$ would need to be contextified, which is quite ugly.
-        component._render(component.render());
-        break;
-      default:
-        throw new Error('Illegal state.');
-    }
-    if (data._key) {
-      scope.refs[data._key] = component;
-    }
-    return component;
+    return Component._render(data, { scope: scope, context: this });
   };
 
   this._getContext = function() {
@@ -759,6 +920,21 @@ VirtualNode.Prototype = function() {
     return this;
   };
   this.append = function(/* ...children */) {
+    if (this.type === "component") {
+      // As a custom component does have a render method, it is not clear
+      // how an appended child should be treated.
+      // Thus, we decided to deprecate this.
+      // Instead you should use the properties to provide children and render them explicitly.
+      // Example:
+      // $$(MyComponent, { children: [...] });
+      // ...
+      // render: function() {
+      //   ...
+      //   someEl.append(this.props.children);
+      //   ...
+      // }
+      console.error('DEPRECATED: Appending elements to custom components is not recommended. Provide children as properties and render them explicitly.');
+    }
     var children;
     var _children = this._getChildren();
     if (arguments.length === 1) {
@@ -820,6 +996,14 @@ VirtualNode.Prototype = function() {
     _.extend(this.props, props);
     return this;
   };
+  this.setProps = function(props) {
+    this.props = props;
+    return this;
+  };
+  this.extendProps = function(props) {
+    _.extend(this.props, props);
+    return this;
+  };
   this.attr = function(attr) {
     if (arguments.length === 2) {
       this.attributes[arguments[0]] = arguments[1];
@@ -849,8 +1033,21 @@ VirtualNode.Prototype = function() {
     if (!this.style) {
       this.style = {};
     }
-    _.extend(this.style, style);
+    if (arguments.length === 2) {
+      this.style[arguments[0]] = arguments[1];
+    } else {
+      _.extend(this.style, style);
+    }
     return this;
+  };
+  this.html = function(rawHtmlString) {
+    this.children = [];
+    this.children.push(new RawHtml(rawHtmlString));
+    return this;
+  };
+
+  this._render = function() {
+    return Component._render(this);
   };
 };
 
@@ -886,6 +1083,19 @@ VirtualTextNode = function VirtualTextNode(text) {
   this.props = { text: text };
 };
 
+RawHtml = function RawHtml(html) {
+  this.type = 'html';
+  this.html = html;
+};
+
+/**
+ * Create a virtual DOM representation which is used by Component
+ * for differential/reactive rendering.
+ *
+ * @param arg1 HTML tag name or Component class
+ * @param arg2 a properties object (optional)
+ * @return a virtual DOM
+ */
 Component.$$ = function() {
   var content = null;
   if (_.isString(arguments[0])) {
@@ -916,14 +1126,17 @@ Component.$$.prepareChildren = function(children) {
   }
 };
 
-_isDocumentElement = function(el) {
-  // Node.DOCUMENT_NODE = 9
-  return (el.nodeType === 9);
-};
+/**
+ * Checks whether a given element has been injected in the document already
+ *
+ * We traverse up the DOM until we find the document root element. We return true
+ * if we can find it.
+ */
 
 _isInDocument = function(el) {
   while(el) {
-    if (_isDocumentElement(el)) {
+    // Node.DOCUMENT_NODE = 9;
+    if (el.nodeType === 9) {
       return true;
     }
     el = el.parentNode;
@@ -931,28 +1144,71 @@ _isInDocument = function(el) {
   return false;
 };
 
-Component.mount = function(data, $el) {
+/**
+ * Internal implementation, rendering a virtual component
+ * created using the $$ operator.
+ *
+ * Don't us it. You should use `Component.mount()` instead.
+ *
+ * @example
+ *
+ * ```
+ * Component.mount($$(MyComponent), $('body'));
+ * ```
+ */
+Component._render = function(data, options) {
   var component;
-  var scope = {
+  options = options || {};
+  var scope = options.scope || {
     context: null,
     refs: {}
   };
+  var parent = options.context || "root";
   switch(data.type) {
     case 'text':
-      component = new Component.Text("root", data.props.text);
+      component = new Component.Text(parent, data.props.text);
       component._render();
       break;
     case 'element':
-      component = new Component.HtmlElement("root", data.tagName, data);
+      component = new Component.HtmlElement(parent, data.tagName, data);
       component._render(data, scope);
       break;
     case 'component':
-      component = new data.ComponentClass("root", data);
+      component = new data.ComponentClass(parent, data);
+      // TODO: we have a problem here: basically this is the place
+      // where we descend into a child component implementation.
+      // The component's render implementation would expect e.g. that handlers are
+      // bound to it, and also refs created within that component.
+      // However, it is also possible to provide children via append,
+      // in the parent component's render method. Those handlers should be bound
+      // to the parent. The same for refs.
+      // To solve this, $$ would need to be contextified, which is quite ugly to achieve.
       component._render(component.render());
       break;
+    case 'html':
+      // DON'T mix $$.html() with $$.append()
+      throw new Error('$$.html() can not be used in combination with other composition methods.');
     default:
-      throw new Error('Illegal state.');
+      throw new Error('Unsupported component type: ' + data.type);
   }
+  if (data._key) {
+    scope.refs[data._key] = component;
+  }
+  return component;
+};
+
+/**
+ * Mount a component onto a given jquery element.
+ *
+ * Mounting a component means, that the component gets rendered
+ * and then appended to the given element.
+ * If the element is in the DOM, all components receive an 'didMount' event.
+ *
+ * @param $el a jquery selected element
+ * @return the mounted component.
+ */
+Component.mount = function(data, $el) {
+  var component = Component._render(data);
   // TODO: some code replication of Component.prototype.mount()
   // however, we do not want to rerender right-away
   $el.append(component.$el);

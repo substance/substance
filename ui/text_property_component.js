@@ -52,7 +52,7 @@ TextPropertyComponent.Prototype = function() {
       var el = $$(ViewClass, {
         doc: doc,
         node: node,
-      })
+      });
       // adding keys here, enables preservative rerendering
       // TODO: experiment, if this reduces cursor flickering, already...
       // .key(id + "@" + fragmentCounters[id]);

@@ -1,8 +1,7 @@
 'use strict';
 
-var _ = require('../../basics/helpers');
-var deleteSelection = require('./delete_selection');
-var Annotations = require('../annotation_updates');
+var replaceText = require('./replace_text');
+var updateAnnotations = require('./update_annotations');
 
 var insertText = function(tx, args) {
   var selection = args.selection;
@@ -16,13 +15,9 @@ var insertText = function(tx, args) {
   if (!(selection.isPropertySelection() || selection.isContainerSelection())) {
     throw new Error('Selection must be property or container selection.');
   }
-  var tmp;
+  // Extra transformation for replacing text, as there are edge cases
   if (!selection.isCollapsed()) {
-    tmp = deleteSelection(tx, _.extend({}, args, {
-      selection: selection,
-      direction: 'right'
-    }));
-    selection = tmp.selection;
+    return replaceText(tx, args);
   }
   var range = selection.getRange();
   // HACK(?): if the string property is not initialized yet we do it here
@@ -30,15 +25,13 @@ var insertText = function(tx, args) {
   if (tx.get(range.start.path) === undefined) {
     tx.set(range.start.path, "");
   }
-  tx.update(range.start.path, { insert: { offset: range.start.offset, value: text } } );
-  Annotations.insertedText(tx, range.start, text.length);
-
+  var op = tx.update(range.start.path, { insert: { offset: range.start.offset, value: text } } );
+  updateAnnotations(tx, {op: op});
   args.selection = tx.createSelection({
     type: 'property',
     path: range.start.path,
     startOffset: range.start.offset + text.length
   });
-
   return args;
 };
 

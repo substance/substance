@@ -24,9 +24,16 @@ gulp.task('doc', function() {
 });
 
 gulp.task('lint', function() {
-  return gulp.src('./src/**/*.js')
-    .pipe(jshint())
-    .pipe(jshint.reporter('default'));
+  return gulp.src([
+    './basics/**/*.js',
+    './data/**/*.js',
+    './document/**/*.js',
+    './operator/**/*.js',
+    './surface/**/*.js',
+    './ui/**/*.js'
+  ]).pipe(jshint())
+    .pipe(jshint.reporter('default'))
+    .pipe(jshint.reporter("fail"));
 });
 
 gulp.task('build', ['lint'], function() {
@@ -47,6 +54,7 @@ gulp.task('build', ['lint'], function() {
 gulp.task('build-test', function() {
   return glob("test/**/*.test.js", {}, function (err, testfiles) {
     browserify({ debug: true })
+    .add(path.join(__dirname, 'test', 'test-globals.js'))
     .add(testfiles.map(function(file) {
       return path.join(__dirname, file);
     }))
@@ -60,9 +68,11 @@ gulp.task('build-test', function() {
   });
 });
 
-gulp.task('test', ['build-test'], function() {
+gulp.task('qunit', ['build-test'], function() {
   return gulp.src('./test/index.html')
     .pipe(qunit());
 });
+
+gulp.task('test', ['lint', 'qunit']);
 
 gulp.task('default', ['build']);

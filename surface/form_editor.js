@@ -2,8 +2,6 @@
 
 var Substance = require('../basics');
 var Document = require('../document');
-var Selection = Document.Selection;
-var Annotations = Document.AnnotationUpdates;
 var Transformations = Document.Transformations;
 
 function FormEditor() {}

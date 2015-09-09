@@ -62,7 +62,7 @@ Scrollbar.Prototype = function() {
     var scrollTop = panel.getScrollPosition();
     // Needed for scrollbar interaction
     this.factor = (contentHeight / panelHeight);
-    var highlights = [];
+    // var highlights = [];
     // Compute highlights
 
     // FIXME: This needs to be reworked...

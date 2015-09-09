@@ -66,7 +66,7 @@ function Document(schema) {
   // so that handler priorities are considered correctly
   this.connect(this, {
     'document:changed': this.updateEventProxies
-  })
+  });
 }
 
 Document.Prototype = function() {
@@ -218,12 +218,12 @@ Document.Prototype = function() {
       throw new Error('Use a transaction!');
     }
     if (this.isTransacting) {
-      this.stage.set(path, value);
+      return this.stage.set(path, value);
     } else {
       if (this.stage) {
         this.stage.set(path, value);
       }
-      this._set(path, value);
+      return this._set(path, value);
     }
   };
 
@@ -232,12 +232,12 @@ Document.Prototype = function() {
       throw new Error('Use a transaction!');
     }
     if (this.isTransacting) {
-      this.stage.update(path, diff);
+      return this.stage.update(path, diff);
     } else {
-      this._update(path, diff);
       if (this.stage) {
         this.stage.update(path, diff);
       }
+      return this._update(path, diff);
     }
   };
 

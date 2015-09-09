@@ -170,7 +170,6 @@ Clipboard.Prototype = function() {
     var surface = this.getSurface();
     if (!surface) return;
     var editor = surface.getEditor();
-    var logger = surface.getLogger();
     var types = {};
     for (var i = 0; i < clipboardData.types.length; i++) {
       types[clipboardData.types[i]] = true;

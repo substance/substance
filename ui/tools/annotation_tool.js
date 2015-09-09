@@ -1,12 +1,26 @@
-var _ = require("../basics/helpers");
-var OO = require("../basics/oo");
-var Tool = require('./tool');
+'use strict';
 
-function AnnotationTool(context) {
-  Tool.call(this, context);
+var OO = require('../../basics/oo');
+var Component = require('../component');
+var $$ = Component.$$;
+var SurfaceTool = require('./surface_tool');
+var _ = require('../../basics/helpers');
+
+/**
+ * Abstract class for annotation tools like StrongTool, EmphasisTool
+ * 
+ * Implements the SurfaceTool API.
+ */
+
+function AnnotationTool() {
+  SurfaceTool.apply(this, arguments);
 }
 
 AnnotationTool.Prototype = function() {
+
+  // Tool Logic
+  // --------------------------
+
   // blacklist of modes; one of 'create', 'remove', 'truncate', 'expand', 'fusion'
   this.disabledModes = [];
 
@@ -63,15 +77,15 @@ AnnotationTool.Prototype = function() {
     return (sel.isLeftAlignedWith(annoSel) || sel.isRightAlignedWith(annoSel)) && !sel.equals(annoSel) && !sel.isCollapsed();
   };
 
-  this.update = function(surface, sel) {
-    this.surface = surface;
-    if ( (this.needsEnabledSurface && !surface.isEnabled()) ||
-          sel.isNull() ) {
+  this.update = function(sel, surface) {
+    
+    if ((!surface.isEnabled()) || sel.isNull() ) {
       return this.setDisabled();
     }
     var doc = this.getDocument();
     var annotationType = this.getAnnotationType();
     var isContainerAnno = this.isContainerAnno();
+
     // Extract range and matching annos of current selection
     var annos;
     if (isContainerAnno) {
@@ -116,12 +130,13 @@ AnnotationTool.Prototype = function() {
     if (!newState.mode || _.includes(this.disabledModes, newState.mode)) {
       return this.setDisabled();
     } else {
-      this.setToolState(newState);
+      this.setState(newState);
     }
   };
 
   this.performAction = function() {
-    var state = this.getToolState();
+    var state = this.getState();
+
     // TODO: is this really necessary? better just check if the toolstate does not have a proper mode
     if (!state.sel || !state.mode || state.sel.isNull()) return;
     switch (state.mode) {
@@ -143,7 +158,7 @@ AnnotationTool.Prototype = function() {
     var anno;
 
     if (sel.isNull()) return;
-    this.surface.transaction({ selection: sel }, function(tx, args) {
+    this.getSurface().transaction({ selection: sel }, function(tx, args) {
       anno = this.createAnnotationForSelection(tx, sel);
       return args;
     }, this);
@@ -197,7 +212,7 @@ AnnotationTool.Prototype = function() {
 
       // Assuming that this branch only gets reached when the surface has a container
       // editor attached, we can ask this editor for the containerId
-      var containerId = this.surface.getEditor().getContainerId();
+      var containerId = this.getSurface().getEditor().getContainerId();
       if (!containerId) throw "Container could not be determined";
       anno.container = containerId;
     } else if (sel.isPropertySelection()) {
@@ -213,7 +228,7 @@ AnnotationTool.Prototype = function() {
 
   this.handleFusion = function(state) {
     var sel = state.sel;
-    this.surface.transaction({ selection: sel }, function(tx, args) {
+    this.getSurface().transaction({ selection: sel }, function(tx, args) {
       _.each(state.annos, function(anno) {
         sel = sel.expand(anno.getSelection());
       });
@@ -229,7 +244,7 @@ AnnotationTool.Prototype = function() {
 
   this.handleRemove = function(state) {
     var sel = state.sel;
-    this.surface.transaction({ selection: sel }, function(tx, args) {
+    this.getSurface().transaction({ selection: sel }, function(tx, args) {
       var annoId = state.annos[0].id;
       tx.delete(annoId);
       this.afterRemove();
@@ -239,7 +254,7 @@ AnnotationTool.Prototype = function() {
 
   this.handleTruncate = function(state) {
     var sel = state.sel;
-    this.surface.transaction({ selection: sel }, function(tx, args) {
+    this.getSurface().transaction({ selection: sel }, function(tx, args) {
       var anno = state.annos[0];
       var annoSel = anno.getSelection();
       var newAnnoSel = annoSel.truncate(sel);
@@ -251,7 +266,7 @@ AnnotationTool.Prototype = function() {
 
   this.handleExpand = function(state) {
     var sel = state.sel;
-    this.surface.transaction({ selection: sel }, function(tx, args) {
+    this.getSurface().transaction({ selection: sel }, function(tx, args) {
       var anno = state.annos[0];
       var annoSel = anno.getSelection();
       var newAnnoSel = annoSel.expand(sel);
@@ -260,8 +275,51 @@ AnnotationTool.Prototype = function() {
       return args;
     }, this);
   };
+
+
+  // UI-specific
+  // --------------------------
+
+  this.render = function() {
+    var title = this.props.title || _.capitalize(this.getAnnotationType());
+
+    if (this.state.mode) {
+      title = [_.capitalize(this.state.mode), title].join(' ');
+    }
+
+    var el = $$("button")
+      .attr('title', title)
+      .addClass('button tool')
+      .on('mousedown', this.onMouseDown)
+      .on('click', this.onClick);
+
+    if (this.state.disabled) {
+      el.addClass('disabled');
+    }
+    if (this.state.active) {
+      el.addClass('active');
+    }
+    if (this.state.mode) {
+      el.addClass(this.state.mode);
+    }
+
+    el.append(this.props.children);
+    return el;
+  };
+
+  this.onClick = function(e) {
+    e.preventDefault();
+  };
+
+  this.onMouseDown = function(e) {
+    e.preventDefault();
+    if (this.state.disabled) {
+      return;
+    }
+    this.performAction();
+  };
 };
 
-OO.inherit(AnnotationTool, Tool);
+OO.inherit(AnnotationTool, SurfaceTool);
 
 module.exports = AnnotationTool;

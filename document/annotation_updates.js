@@ -2,16 +2,21 @@
 
 var _ = require('../basics/helpers');
 
+// TODO: this should be implemented as transformations
+
 // A collection of methods to update annotations
 // --------
 //
 // As we treat annotations as overlay of plain text we need to keep them up-to-date during editing.
 
-var insertedText = function(doc, coordinate, length) {
+var insertedText = function(doc, coordinate, length, ignoredAnnos) {
   if (!length) return;
   var index = doc.getIndex('annotations');
   var annotations = index.get(coordinate.path);
   _.each(annotations, function(anno) {
+    if (ignoredAnnos && ignoredAnnos[anno.id]) {
+      return;
+    }
     var pos = coordinate.offset;
     var start = anno.startOffset;
     var end = anno.endOffset;
@@ -52,11 +57,16 @@ var insertedText = function(doc, coordinate, length) {
   });
 };
 
-var deletedText = function(doc, path, startOffset, endOffset) {
+// TODO: clean up replaceText support hackz
+var deletedText = function(doc, path, startOffset, endOffset, replaceTextSupport) {
   if (startOffset === endOffset) return;
   var index = doc.getIndex('annotations');
   var annotations = index.get(path);
   var length = endOffset - startOffset;
+  var result;
+  if (replaceTextSupport) {
+    result = {};
+  }
   _.each(annotations, function(anno) {
     var pos1 = startOffset;
     var pos2 = endOffset;
@@ -78,7 +88,11 @@ var deletedText = function(doc, path, startOffset, endOffset) {
       }
       // delete the annotation if it has collapsed by this delete
       if (start !== end && newStart === newEnd) {
-        doc.delete(anno.id);
+        if (replaceTextSupport && pos1===startOffset && pos2===endOffset) {
+          result[anno.id] = anno;
+        } else {
+          doc.delete(anno.id);
+        }
       } else {
         if (start !== newStart) {
           doc.set([anno.id, 'startOffset'], newStart);
@@ -125,6 +139,8 @@ var deletedText = function(doc, path, startOffset, endOffset) {
       doc.delete(id);
     }
   });
+
+  return result;
 };
 
 // used when breaking a node to transfer annotations to the new property

@@ -40,7 +40,7 @@ function TableMatrix(tableNode) {
   // Use the accessor methods instead.
   this._matrix = null;
   this._rowNodes = null;
-};
+}
 
 TableMatrix.Prototype = function() {
   /**
