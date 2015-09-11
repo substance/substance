@@ -10,6 +10,7 @@ var TestComponent = Component.extend({
   didInitialize: function() {
     // make some methods inspectable
     this.didMount = sinon.spy(this, 'didMount');
+    this.didRender = sinon.spy(this, 'didRender');
     this.willUnmount = sinon.spy(this, 'willUnmount');
     this.shouldRerender = sinon.spy(this, 'shouldRerender');
     this.render = sinon.spy(this, 'render');
@@ -30,6 +31,35 @@ QUnit.test("Every component should have a parent", function(assert) {
   assert.throws(function() {
     new Component();
   }, "Should throw an exception when no parent is given.");
+});
+
+QUnit.test("Throw error when render method is not returning an element", function(assert) {
+  var MyComponent = TestComponent.extend({
+    displayName: 'MyComponent',
+    render: function() {}
+  });
+  assert.throws(function() {
+    $$(MyComponent)._render();
+  }, "Should throw an exception when render does not return an element");
+});
+
+QUnit.test("Different mount scenarios", function(assert) {
+  // Mount to a detached element
+  var el = $('<div>')[0];
+  var comp = Component.mount($$(SimpleComponent), el);
+  assert.equal(comp.didMount.callCount, 0, "didMount must not be called when mounting to detached elements");
+  assert.equal(comp.didRender.callCount, 1, "didRender must have been called once");
+  assert.ok(comp.$el);
+
+  // Mount to an existing DOM element (this time we pass a jQuery element which is also supported)
+  comp = Component.mount($$(SimpleComponent), $('#qunit-fixture'));
+  assert.equal(comp.didMount.callCount, 1, "didMount must not be called when mounting to attached elements");
+  assert.equal(comp.didRender.callCount, 1, "didRender must have been called once");
+  assert.ok(comp.$el);  
+
+  // Mount, passing a Component instance instead of a VirtualComponent
+  comp = new SimpleComponent("root");
+  Component.mount(comp, $('#qunit-fixture')[0]);
 });
 
 QUnit.test("Render an HTML element", function(assert) {
@@ -59,6 +89,7 @@ QUnit.test("Render an element with custom html", function(assert) {
   assert.equal(comp.$el.find('b').length, 1, 'Element should have rendered HTML as content.');
   assert.equal(comp.$el.find('b').text(), 'World','Rendered element should have right content.');
 });
+
 
 QUnit.test("Render a component", function(assert) {
   var comp = $$(SimpleComponent)._render();
@@ -191,6 +222,123 @@ QUnit.test("Only call didMount once for childs and grandchilds when setProps is 
   comp.empty();
   assert.equal(childComp.willUnmount.callCount, 1, "Child's willUnmount should have been called once.");
   assert.equal(grandChildComp.willUnmount.callCount, 1, "Grandchild's willUnmount should have been called once.");
-
-  // TODO: can/should we somehow dispose the references to childComp and grandChildComp now?
 });
+
+// TODO: The next test case covers most of this, so maybe we can remove it in the future
+QUnit.test("Propagate properties to child components when setProps called on parent", function(assert) {
+  var ItemComponent = TestComponent.extend({
+    render: function() {
+      return $$('div').append(this.props.name);
+    }
+  });
+
+  var CompositeComponent = TestComponent.extend({
+    render: function() {
+      var el = $$('div').addClass('composite-component');
+      this.props.items.forEach(function(item) {
+        el.append($$(ItemComponent, item));
+      });
+      return el;
+    }
+  });
+
+  var comp = $$(CompositeComponent, {
+    items: [
+      {name: 'A'},
+      {name: 'B'}
+    ]
+  })._render();
+
+  assert.equal(comp.children.length, 2, 'Component should have two children.');
+  assert.equal(comp.children[0].$el.text(), 'A', 'First child should have text A');
+  assert.equal(comp.children[1].$el.text(), 'B', 'First child should have text B');
+
+  // Now we are gonna set new props
+  comp.setProps({
+    items: [
+      {name: 'X'},
+      {name: 'Y'}
+    ]
+  });
+
+  assert.equal(comp.children.length, 2, 'Component should have two children.');
+  assert.equal(comp.children[0].$el.text(), 'X', 'First child should have text X');
+  assert.equal(comp.children[1].$el.text(), 'Y', 'First child should have text Y');
+});
+
+
+QUnit.test("Preserve components when key matches, and rerender when props changed", function(assert) {
+  var ItemComponent = TestComponent.extend({
+    shouldRerender: function(nextProps) {
+      return !_.isEqual(nextProps, this.props);
+    },
+    render: function() {
+      return $$('div').append(this.props.name);
+    }
+  });
+
+  var CompositeComponent = TestComponent.extend({
+    render: function() {
+      var el = $$('div').addClass('composite-component');
+      this.props.items.forEach(function(item) {
+        el.append($$(ItemComponent, item).key(item.key));
+      });
+      return el;
+    }
+  });
+
+  // Initial mount
+  var comp = Component.mount($$(CompositeComponent, {
+    items: [
+      {key: 'a', name: 'A'},
+      {key: 'b', name: 'B'},
+      {key: 'c', name: 'C'}
+    ]
+  }), $('#qunit-fixture'));
+
+  var a = comp.refs.a;
+  var b = comp.refs.b;
+  var c = comp.refs.c;
+  var aEl = a.$el[0];
+  var bEl = b.$el[0];
+
+  assert.equal(comp.children.length, 3, 'Component should have three children.');
+  assert.equal(comp.children[0].$el.text(), 'A', 'First child should have text A');
+  assert.equal(comp.children[1].$el.text(), 'B', 'First child should have text B');
+  assert.equal(comp.children[2].$el.text(), 'C', 'First child should have text C');
+
+  // Props update that preserves some of our components, drops some others
+  // and adds some new
+  comp.setProps({
+    items: [
+      {key: 'a', name: 'X'}, // preserved (props changed)
+      {key: 'd', name: 'Y'}, // new
+      {key: 'b', name: 'B'}, // preserved (same props)
+      {key: 'e', name: 'Z'}  // new
+    ]
+  });
+
+  // a and b should have been preserved
+  assert.equal(a, comp.children[0], 'a should be the same instance');
+  assert.equal(b, comp.children[2], 'b should be the same component instance');  
+
+  // c should be gone
+  assert.equal(c.willUnmount.callCount, 1, 'c should have been unmounted');
+
+  // a should have been rerendered (different props) while b should not (same props)
+  assert.equal(a.render.callCount, 2, 'Component with key a should have been rendered twice');
+  assert.equal(b.render.callCount, 1, 'Component with key b should have been rendered once');
+
+  assert.equal(comp.children.length, 4, 'Component should have 4 children.');
+  assert.equal(comp.children[0].$el.text(), 'X', 'First child should have text X');
+  assert.equal(comp.children[1].$el.text(), 'Y', 'First child should have text Y');
+  assert.equal(comp.children[2].$el.text(), 'B', 'First child should have text Y');
+  assert.equal(comp.children[3].$el.text(), 'Z', 'First child should have text Z');
+
+  // Actually I don't have the full understanding yet, why aEl is the same after rerender.
+  // It means that the rerender is smart enough to reuse the element. What if the tag had changed?
+  assert.equal(aEl, comp.children[0].$el[0], 'DOM element for a should be the same after rerender');
+  assert.equal(bEl, comp.children[2].$el[0], 'DOM element for b should be the same, since there was no rerender');
+});
+
+

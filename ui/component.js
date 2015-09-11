@@ -4,7 +4,6 @@ var OO = require('../basics/oo');
 var _ = require('../basics/helpers');
 
 var __id__ = 0;
-var _isInDocument;
 var VirtualTextNode;
 var RawHtml;
 
@@ -158,7 +157,7 @@ Component.Prototype = function ComponentPrototype() {
    */
   this.shouldRerender = function(newProps, newState) {
     /* jshint unused: false */
-    return !_.isEqual(newProps, this.props) || !_.isEqual(newState, this.state);
+    return true;
   };
 
   /**
@@ -171,24 +170,6 @@ Component.Prototype = function ComponentPrototype() {
   };
 
   /**
-   * Renders and appends this component to a given element.
-   *
-   * If the element is in the DOM already, triggers `component.didMount()`
-   * on this component and all of its children.
-   *
-   * @chainable
-   */
-  this.mount = function($el) {
-    this._render(this.render());
-    $el.append(this.$el);
-    // trigger didMount automatically if the given element is already in the DOM
-    if (_isInDocument($el[0])) {
-      this.triggerDidMount();
-    }
-    return this;
-  };
-
-  /**
    * Triggers didMount handlers recursively.
    *
    * Gets called when using `component.mount(el)` on an element being
@@ -196,25 +177,40 @@ Component.Prototype = function ComponentPrototype() {
    *
    * If this is not possible because you want to do things differently, make sure
    * you call 'component.triggerDidMount()' on root components.
-   *
+   * 
+   * @param isMounted an optional param for optimization, it's used mainly internally
+   * 
    * @example
    * ```
    * var frag = document.createDocumentFragment();
-   * var component = new MyComponent();
-   * component.mount(frag);
+   * var comp = Component.mount($$(MyComponent), frag);
    * ...
    * $('body').append(frag);
-   * component.triggerDidMount();
+   * comp.triggerDidMount();
    * ```
    */
-  this.triggerDidMount = function() {
-    if (!this.__mounted__) {
-      this.__mounted__ = true;
-      this.didMount();
+  this.triggerDidMount = function(isMounted) {
+    if (!isMounted) {
+      isMounted = Component.isMounted(this);
     }
-    _.each(this.children, function(child) {
-      child.triggerDidMount();
-    });
+
+    // Check if actually mounted, otherwise we can skip
+    if (isMounted) {
+      // Trigger didMount for the children first
+      this.children.forEach(function(child) {
+        // We pass isMounted=true to save costly calls to Component.isMounted
+        // for each child / grandchild
+        child.triggerDidMount(true);
+      });
+
+      // To prevent from multiple calls to didRender, which can happen under
+      // specific circumstances we use a guard.
+      // See `test/unit/ui/component.test.js` where didMount is tested
+      if (!this.__didMountTriggered__) {
+        this.didMount();
+        this.__didMountTriggered__ = true;
+      }
+    }
   };
 
   /**
@@ -239,11 +235,14 @@ Component.Prototype = function ComponentPrototype() {
   this.unmount = function() {
     this.triggerWillUnmount();
     this.$el.remove();
-    this.__mounted__ = false;
-    // TODO: do we need to remove this from parents children
-    // right now it feels like that it doesn't make a great difference
-    // because most often this method is called by the parent during rerendering
-    // and on other cases it would be gone after the next parent rerender.
+
+    // Make sure that, if the component survives, on next mount, didMount will
+    // be called.
+    this.__didMountTriggered__ = false;
+    // TODO: do we need to remove this from parents children right now it feels
+    // like that it doesn't make a great difference because most often this
+    // method is called by the parent duringrerendering and on other cases it
+    // would be gone after the next parent rerender.
     return this;
   };
 
@@ -251,10 +250,7 @@ Component.Prototype = function ComponentPrototype() {
    * @return a boolean indicating if this component is mounted.
    */
   this.isMounted = function() {
-    if (this.$el) {
-      return _isInDocument(this.$el[0]);
-    }
-    return false;
+    return Component.isMounted(this);
   };
 
   /**
@@ -275,6 +271,7 @@ Component.Prototype = function ComponentPrototype() {
   /**
    * Send an action request to the parent component, bubbling up the component
    * hierarchy until an action handler is found.
+   * 
    * @param action the name of the action
    * @param ... arbitrary number of arguments
    */
@@ -493,14 +490,13 @@ Component.Prototype = function ComponentPrototype() {
    * Part of the incremental updating API.
    */
   this.append = function(child) {
-    var isMounted = this.isMounted();
     var comp = this._compileComponent(child, {
       refs: this.refs
     });
     this._data.append(child);
-    if (isMounted) comp.triggerDidMount();
     this.$el.append(comp.$el);
     this.children.push(comp);
+    comp.triggerDidMount();
     return this;
   };
 
@@ -510,14 +506,13 @@ Component.Prototype = function ComponentPrototype() {
    * Part of the incremental updating API.
    */
   this.insertAt = function(pos, child) {
-    var isMounted = this.isMounted();
     var comp = this._compileComponent(child, {
       refs: this.refs
     });
     this._data.insertAt(pos, child);
-    if (isMounted) comp.triggerDidMount();
     comp.$el.insertBefore(this.children[pos].$el);
     this.children.splice(pos, 0, comp);
+    comp.triggerDidMount();
     return this;
   };
 
@@ -611,9 +606,13 @@ Component.Prototype = function ComponentPrototype() {
   };
 
   this._render = function(data, scope) {
+    if (!data) {
+      throw new Error('Nothing to render. Make sure your render method returns a virtual element: %s', this.displayName);
+    }
+
     if (data.type !== 'element') {
       if (data instanceof $) {
-        throw new Error("Your render() method accidently return a jQuery instance instead of a VirtualComponent created $$.");
+        throw new Error('Your render() method accidently return a jQuery instance instead of a VirtualComponent created $$.');
       }
       throw new Error("Component.render() must return one html element: e.g., $$('div')");
     }
@@ -644,7 +643,7 @@ Component.Prototype = function ComponentPrototype() {
     }
 
     var el = this.$el[0];
-    var isMounted = _isInDocument(el);
+    var isMounted = Component.isMounted(this);
 
     var oldContent = oldData.children;
     var newContent = data.children;
@@ -692,9 +691,9 @@ Component.Prototype = function ComponentPrototype() {
       if (!_old) {
         for (var i = newPos; i < newContent.length; i++) {
           comp = this._compileComponent(newContent[i], scope);
-          if (isMounted) comp.triggerDidMount();
           this.$el.append(comp.$el);
           children.push(comp);
+          comp.triggerDidMount(isMounted);
         }
         break;
       }
@@ -725,14 +724,14 @@ Component.Prototype = function ComponentPrototype() {
         else if (!oldComps[newKey] && newComps[oldKey]) {
           comp = this._compileComponent(_new, scope);
           comp.$el.insertBefore(node);
-          if (isMounted) comp.triggerDidMount();
+          comp.triggerDidMount(isMounted);
           pos++; newPos++;
         }
         // old component has been replaced
         else if (!oldComps[newKey] && !newComps[oldKey]) {
           comp = this._compileComponent(_new, scope);
           _replace(oldComp, comp);
-          if (isMounted) comp.triggerDidMount();
+          comp.triggerDidMount(isMounted);
           pos++; newPos++; oldPos++;
         }
         // a component has been removed
@@ -759,7 +758,7 @@ Component.Prototype = function ComponentPrototype() {
         else {
           comp = this._compileComponent(_new, scope);
           _replace(oldComp, comp);
-          if (isMounted) comp.triggerDidMount();
+          comp.triggerDidMount(isMounted);
           pos++; oldPos++; newPos++;
         }
       } else if (oldKey) {
@@ -770,7 +769,7 @@ Component.Prototype = function ComponentPrototype() {
           _replace(oldComp, comp);
           oldPos++;
         }
-        if (isMounted) comp.triggerDidMount();
+        comp.triggerDidMount(isMounted);
         pos++; newPos++;
       } else {
         // do not replace text components if they are equal
@@ -780,7 +779,7 @@ Component.Prototype = function ComponentPrototype() {
         } else {
           comp = this._compileComponent(_new, scope);
           _replace(oldComp, comp);
-          if (isMounted) comp.triggerDidMount();
+          comp.triggerDidMount(isMounted);
         }
         pos++; oldPos++; newPos++;
       }
@@ -799,7 +798,6 @@ Component.Prototype = function ComponentPrototype() {
     this.children = children;
     this.refs = _.clone(scope.refs);
     this._data = data;
-
     this.didRender();
   };
 
@@ -807,7 +805,7 @@ Component.Prototype = function ComponentPrototype() {
     for (var i = 0; i < this.children.length; i++) {
       this.children[i].unmount();
     }
-    var isMounted = _isInDocument(this.$el[0]);
+    var isMounted = Component.isMounted(this);
     var children = [];
     for (var j = 0; j < data.children.length; j++) {
       // EXPERIMENTAL: supporting $$.html()
@@ -817,7 +815,7 @@ Component.Prototype = function ComponentPrototype() {
         children = [];
       } else {
         var comp = this._compileComponent(data.children[j], scope);
-        if (isMounted) comp.triggerDidMount();
+        comp.triggerDidMount(isMounted);
         this.$el.append(comp.$el);
         children.push(comp);
       }
@@ -830,7 +828,6 @@ Component.Prototype = function ComponentPrototype() {
     this.refs = scope.refs;
     this.children = children;
     this._data = data;
-
     this.didRender();
   };
 
@@ -919,6 +916,7 @@ VirtualNode.Prototype = function() {
     this._key = key;
     return this;
   };
+
   this.append = function(/* ...children */) {
     if (this.type === "component") {
       // As a custom component does have a render method, it is not clear
@@ -1127,24 +1125,6 @@ Component.$$.prepareChildren = function(children) {
 };
 
 /**
- * Checks whether a given element has been injected in the document already
- *
- * We traverse up the DOM until we find the document root element. We return true
- * if we can find it.
- */
-
-_isInDocument = function(el) {
-  while(el) {
-    // Node.DOCUMENT_NODE = 9;
-    if (el.nodeType === 9) {
-      return true;
-    }
-    el = el.parentNode;
-  }
-  return false;
-};
-
-/**
  * Internal implementation, rendering a virtual component
  * created using the $$ operator.
  *
@@ -1202,20 +1182,52 @@ Component._render = function(data, options) {
  *
  * Mounting a component means, that the component gets rendered
  * and then appended to the given element.
- * If the element is in the DOM, all components receive an 'didMount' event.
+ * If the element is in the DOM, all components receive a 'didMount' event.
  *
- * @param $el a jquery selected element
- * @return the mounted component.
+ * @param {Component,VirtualComponent} component to be mounted
+ * @param el a DOM or jQuery element
+ * @return {Component} the mounted component
  */
-Component.mount = function(data, $el) {
-  var component = Component._render(data);
-  // TODO: some code replication of Component.prototype.mount()
-  // however, we do not want to rerender right-away
-  $el.append(component.$el);
-  if (_isInDocument($el[0])) {
-    component.triggerDidMount();
+Component.mount = function(component, el) {
+
+  // Usually a virtual component is passeed
+  // only low-level people will pass a bare metal component here
+  if (component instanceof VirtualComponent) {
+    component = Component._render(component);
+  } else if (component instanceof Component) {
+    component._render(component.render());
+  } else {
+    throw new Error('component must be of type Component or VirtualComponent');
   }
+  if (!el) throw new Error('An element is needed for mounting.');
+
+  $(el).append(component.$el);
+  component.triggerDidMount();
   return component;
+};
+
+/**
+ * Checks whether a given element has been injected in the document already
+ *
+ * We traverse up the DOM until we find the document root element. We return true
+ * if we can find it.
+ */
+
+Component.isMounted = function(comp) {
+  var el;
+
+  // Not rendered yet, so can not be mounted
+  if (!comp.$el) return false;
+
+  el = comp.$el[0];
+  while(el) {
+    // Node.DOCUMENT_NODE = 9;
+    if (el.nodeType === 9) {
+      return true;
+    }
+    el = el.parentNode;
+  }
+  return false;
 };
 
 Component.VirtualTextNode = VirtualTextNode;
