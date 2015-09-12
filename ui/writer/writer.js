@@ -70,9 +70,9 @@ Writer.Prototype = function() {
       var ContentToolbar = this.componentRegistry.get('content_toolbar');
       // main container
       el.append(
-        $$('div').key('main-container').addClass("main-container").append(
-          $$(ContentToolbar).key('toolbar'),
-          $$(ContentPanel).key('content').setProps({
+        $$('div').ref('main-container').addClass("main-container").append(
+          $$(ContentToolbar).ref('toolbar'),
+          $$(ContentPanel).ref('content').setProps({
             doc: doc,
             containerId: this.config.containerId
           })
@@ -80,9 +80,9 @@ Writer.Prototype = function() {
       );
       // resource container
       el.append(
-        $$('div').key('resource-container')
+        $$('div').ref('resource-container')
           .addClass("resource-container")
-          .append($$(ContextToggles).key("context-toggles")
+          .append($$(ContextToggles).ref("context-toggles")
             .setProps({
               panelOrder: this.config.panelOrder
             })
@@ -95,11 +95,11 @@ Writer.Prototype = function() {
       );
       // status bar
       el.append(
-        $$(StatusBar).key('statusBar').setProps({ doc: doc })
+        $$(StatusBar).ref('statusBar').setProps({ doc: doc })
       );
       // clipboard
       el.append(
-        $$('div').key('clipboard').addClass("clipboard")
+        $$('div').ref('clipboard').addClass("clipboard")
       );
     }
     return el;
@@ -111,7 +111,7 @@ Writer.Prototype = function() {
       // Just render an empty div if no modal active available
       return $$('div');
     } else {
-      var el = $$(ModalPanel).key('modal-panel').setProps({
+      var el = $$(ModalPanel).ref('modal-panel').setProps({
         panelElement: modalPanelElement
       });
       if (this.state.modal) {
@@ -126,7 +126,7 @@ Writer.Prototype = function() {
     if (!panelElement) {
       return $$('div').append("No panels are registered");
     } else {
-      return $$('div').key('context-panel').append(panelElement);
+      return $$('div').ref('context-panel').append(panelElement);
     }
   };
 

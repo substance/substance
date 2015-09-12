@@ -35,11 +35,11 @@ var RawHtml;
  * Using `setState` the component can change its internal state, which leads to a rerendering if the state
  * changes.
  *
- * ### The `key` property
+ * ### The `ref` property
  *
- * A child component with a `key` id will be reused on rerender. All others will be wiped and rerender from scratch.
- * If you want to preserve a grand-child (or lower), then make sure that all anchestors have a key id.
- * After rendering the child will be accessible via `this.refs[key]`.
+ * A child component with a `ref` id will be reused on rerender. All others will be wiped and rerender from scratch.
+ * If you want to preserve a grand-child (or lower), then make sure that all anchestors have a ref id.
+ * After rendering the child will be accessible via `this.refs[ref]`.
  *
  * ### Actions
  *
@@ -70,7 +70,11 @@ function Component(parent, params) {
   // get context from parent (dependency injection)
   this.context = this._getContext();
 
-  this._key = params._key;
+  // TODO: This is maybe not a good idea. If we want to do it, we could allow
+  // ref (without the underscore) being passed but remove it from the params
+  // afterwards so we don't pullute the props.
+  this._ref = params._ref;
+
   this._htmlProps = {
     classNames: params.classNames || "",
     attributes: params.attributes || {},
@@ -543,13 +547,13 @@ Component.Prototype = function ComponentPrototype() {
 
   /* Internal API */
 
-  var _indexByKey = function(children) {
+  var _indexByRef = function(children) {
     var index = {};
     for (var i = 0; i < children.length; i++) {
       var child = children[i];
-      var key = child._key;
-      if (key) {
-        index[key] = child;
+      var ref = child._ref;
+      if (ref) {
+        index[ref] = child;
       }
     }
     return index;
@@ -654,8 +658,8 @@ Component.Prototype = function ComponentPrototype() {
       return;
     }
 
-    var oldComps = _indexByKey(oldData.children, "old");
-    var newComps = _indexByKey(data.children);
+    var oldComps = _indexByRef(oldData.children, "old");
+    var newComps = _indexByRef(data.children);
 
     var pos = 0;
     var oldPos = 0;
@@ -711,45 +715,45 @@ Component.Prototype = function ComponentPrototype() {
       }
 
       // Note: if the key property is set the component is treated preservatively
-      var newKey = _new._key;
-      var oldKey = _old._key;
-      if (oldKey && newKey) {
+      var newRef = _new._ref;
+      var oldRef = _old._ref;
+      if (oldRef && newRef) {
         // the component is in the right place already
-        if (oldKey === newKey) {
+        if (oldRef === newRef) {
           comp = oldComp;
           _update(comp, _new);
           pos++; oldPos++; newPos++;
         }
         // a new component has been inserted
-        else if (!oldComps[newKey] && newComps[oldKey]) {
+        else if (!oldComps[newRef] && newComps[oldRef]) {
           comp = this._compileComponent(_new, scope);
           comp.$el.insertBefore(node);
           comp.triggerDidMount(isMounted);
           pos++; newPos++;
         }
         // old component has been replaced
-        else if (!oldComps[newKey] && !newComps[oldKey]) {
+        else if (!oldComps[newRef] && !newComps[oldRef]) {
           comp = this._compileComponent(_new, scope);
           _replace(oldComp, comp);
           comp.triggerDidMount(isMounted);
           pos++; newPos++; oldPos++;
         }
         // a component has been removed
-        else if (oldComps[newKey] && !newComps[oldKey]) {
+        else if (oldComps[newRef] && !newComps[oldRef]) {
           oldComp.unmount();
           oldPos++;
           // continueing as we did not insert a component
           continue;
         }
         // component has been moved to a different position
-        else if (oldComps[newKey] && newComps[oldKey]) {
+        else if (oldComps[newRef] && newComps[oldRef]) {
           throw new Error('Swapping positions of persisted components not supported!');
         }
         else {
           throw new Error('Assertion failed: should not reach this statement.');
         }
-      } else if (newKey) {
-        if (oldComps[newKey]) {
+      } else if (newRef) {
+        if (oldComps[newRef]) {
           oldComp.unmount();
           oldPos++;
           // continueing as we did not insert a component
@@ -761,9 +765,9 @@ Component.Prototype = function ComponentPrototype() {
           comp.triggerDidMount(isMounted);
           pos++; oldPos++; newPos++;
         }
-      } else if (oldKey) {
+      } else if (oldRef) {
         comp = this._compileComponent(_new, scope);
-        if (newComps[oldKey]) {
+        if (newComps[oldRef]) {
           comp.$el.insertBefore(node);
         } else {
           _replace(oldComp, comp);
@@ -783,8 +787,8 @@ Component.Prototype = function ComponentPrototype() {
         }
         pos++; oldPos++; newPos++;
       }
-      if (comp._key) {
-        scope.refs[comp._key] = comp;
+      if (comp._ref) {
+        scope.refs[comp._ref] = comp;
       }
       children.push(comp);
     }
@@ -912,27 +916,25 @@ function VirtualNode() {
 }
 
 VirtualNode.Prototype = function() {
+  /**
+   * Remove an attribute.
+   *
+   * Part of the incremental updating API.
+   * @chainable
+   */
   this.key = function(key) {
-    this._key = key;
+    console.info('DEPRECATED: Use ref instead. Note that when you assign a ref, the component do incremental rerendering.');
+    // this._key = key;
+    return this.ref(key);
+    // return this;
+  };
+
+  this.ref = function(ref) {
+    this._ref = ref;
     return this;
   };
 
   this.append = function(/* ...children */) {
-    if (this.type === "component") {
-      // As a custom component does have a render method, it is not clear
-      // how an appended child should be treated.
-      // Thus, we decided to deprecate this.
-      // Instead you should use the properties to provide children and render them explicitly.
-      // Example:
-      // $$(MyComponent, { children: [...] });
-      // ...
-      // render: function() {
-      //   ...
-      //   someEl.append(this.props.children);
-      //   ...
-      // }
-      console.error('DEPRECATED: Appending elements to custom components is not recommended. Provide children as properties and render them explicitly.');
-    }
     var children;
     var _children = this._getChildren();
     if (arguments.length === 1) {
@@ -1171,8 +1173,8 @@ Component._render = function(data, options) {
     default:
       throw new Error('Unsupported component type: ' + data.type);
   }
-  if (data._key) {
-    scope.refs[data._key] = component;
+  if (data._ref) {
+    scope.refs[data._ref] = component;
   }
   return component;
 };

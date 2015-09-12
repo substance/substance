@@ -74,12 +74,12 @@ var Editor = Component.extend({
     // Toolbar
     var ToolbarClass = this.config.toolbar || DefaultToolbar;
     var toolbar = $$(ToolbarClass);
-    toolbar.key('toolbar');
+    toolbar.ref('toolbar');
     el.append(toolbar);
 
     // Content Container
     el.append($$(ContainerComponent)
-      .key('bodyContainer')
+      .ref('bodyContainer')
       .attr({ contentEditable: true })
       .addProps({
         doc: this.doc,

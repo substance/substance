@@ -138,7 +138,7 @@ TextTool.Prototype = function() {
     // dropdown options
     var options = $$('div').addClass("options shadow border fill-white");
     _.each(textTypes, function(textType, textTypeId) {
-      var button = $$('button').key(textTypeId)
+      var button = $$('button')
           .addClass('option '+textTypeId)
           .attr("data-type", textTypeId)
           .append(textType.label)

@@ -18,15 +18,15 @@ ContentPanel.Prototype = function() {
     var el = $$('div')
       .addClass("panel content-panel-component");
     el.append(
-      $$(Scrollbar).key("scrollbar")
+      $$(Scrollbar).ref("scrollbar")
         .attr('id', "content-scrollbar")
         .setProps({ contextId: this.props.containerId })
     );
     el.append(
-      $$('div').key("scanline").addClass('scanline')
+      $$('div').ref("scanline").addClass('scanline')
     );
     el.append(
-      $$('div').key("panelContent").addClass("panel-content")
+      $$('div').ref("panelContent").addClass("panel-content")
         .css({
           position: 'absolute',
           overflow: 'auto'
@@ -42,7 +42,7 @@ ContentPanel.Prototype = function() {
     var doc = this.props.doc;
     var containerNode = doc.get(this.props.containerId);
     var ContentContainerClass = componentRegistry.get("content_editor");
-    return $$(ContentContainerClass).key("contentEditor")
+    return $$(ContentContainerClass).ref("contentEditor")
       .setProps({
         doc: doc,
         node: containerNode

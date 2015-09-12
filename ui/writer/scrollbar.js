@@ -31,7 +31,7 @@ Scrollbar.Prototype = function() {
       .addClass('scrollbar-component '+this.props.contextId)
       .on('mousedown', this.onMouseDown);
     el.append(
-      $$('div').key("thumb")
+      $$('div').ref("thumb")
         .addClass("thumb")
         .css({
           top: this.state.thumb.top,
@@ -39,7 +39,7 @@ Scrollbar.Prototype = function() {
         })
     );
     var highlightEls = this.state.highlights.map(function(h) {
-      return $$('div').key(h.id)
+      return $$('div').ref(h.id)
         .addClass('highlight')
         .css({
           top: h.top,
@@ -47,7 +47,7 @@ Scrollbar.Prototype = function() {
         });
     });
     el.append(
-      $$('div').key('highlights')
+      $$('div').ref('highlights')
         .addClass('highlights')
         .append(highlightEls)
     );

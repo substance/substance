@@ -28,7 +28,7 @@ var EditLinkPrompt = Component.extend({
     el.append([
       $$('div').addClass('prompt-title').append('Hyperlink'),
       $$('input').attr({type: 'text', placeholder: 'http://your-website.com', value: link.url})
-                 .key('url')
+                 .ref('url')
                  .on('change', this.onSave),
       $$('a').attr({href: '#'})
              .addClass('delete-link')

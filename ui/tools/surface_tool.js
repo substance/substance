@@ -2,7 +2,6 @@
 
 var OO = require('../../basics/oo');
 var Tool = require('./tool');
-var _ = require('../../basics/helpers');
 
 /**
  * Abstract class for tools that interact with the selection of active surface.
