@@ -61,11 +61,12 @@ LinkTool.Prototype = function() {
 
   // Immediately switch to edit mode after link creation
   // and make it show the edit prompt.
-  this.afterCreate = function(/*anno*/) {
+  this.afterCreate = function(anno) {
     var state = this.getState();
     var newState = _.extend({}, state);
     newState.mode = 'edit';
     newState.showPrompt = true;
+    newState.linkId = anno.id;
     this.setState(newState);
   };
   
@@ -76,6 +77,7 @@ LinkTool.Prototype = function() {
     }
     var doc = this.getDocument();
     var annos = doc.getAnnotationsForSelection(sel, { type: 'link' });
+
     var newState = {
       surface: surface,
       disabled: false,
@@ -93,7 +95,7 @@ LinkTool.Prototype = function() {
       newState.mode = "expand";
     } else if (annos.length === 1) {
       newState.mode = "edit";
-      newState.linkId = annos[0].id;
+      newState.linkId = annos[0].id;      
       newState.active = true;
     } else {
       return this.setDisabled();
