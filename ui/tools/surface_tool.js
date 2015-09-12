@@ -13,9 +13,14 @@ function SurfaceTool() {
   Tool.apply(this, arguments);
   
   this.surfaceManager = this.context.surfaceManager;
-
-  this.onUpdateDebounced = _.debounce(this.update, 50);
-  this.surfaceManager.on('selection:changed', this.onUpdateDebounced, this);
+  
+  // NOTE: We were doing this in a debounced way but that leads to edge cases.
+  // E.g. When toggling a new link, the tool state gets immediately updated
+  // to show the edit prompt, but afterwards the delayed selection:change event
+  // immediately leads to a close of the prompt. We will observe tool performance
+  // propagating each selection:changed event immediately.
+  // We could also throttle
+  this.surfaceManager.on('selection:changed', this.update, this);
 }
 
 SurfaceTool.Prototype = function() {
