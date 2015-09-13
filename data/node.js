@@ -24,6 +24,8 @@ function Node( properties ) {
   this.properties = _.extend({}, this.getDefaultProperties(), properties);
   this.properties.type = this.constructor.static.name;
   this.properties.id = this.properties.id || uuid(this.properties.type);
+
+  this.didInitialize();
 }
 
 Node.Prototype = function() {
@@ -37,6 +39,8 @@ Node.Prototype = function() {
     type: 'string',
     id: 'string'
   };
+
+  this.didInitialize = function() {};
 
   /**
    * Serialize to JSON.
