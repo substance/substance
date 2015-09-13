@@ -182,14 +182,14 @@ QUnit.test("Preserve a child with ref", function(assert) {
   assert.ok(comp.refs.foo.el === el, 'Child element should have been preserved.');
 });
 
-QUnit.test("Wipe a child without key", function(assert) {
+QUnit.test("Wipe a child without ref", function(assert) {
   var virtualDom = $$('div').append($$(SimpleComponent));
   var comp = Component._render(virtualDom);
   var child = comp.children[0];
   var el = child.el;
   // rerender using the same virtual dom
   comp._render(_.deepclone(virtualDom));
-  // as we did not apply a key, the component simply gets rerendered from scratch
+  // as we did not apply a ref, the component simply gets rerendered from scratch
   assert.ok(comp.children[0] !== child, 'Child component should have been preserved.');
   assert.ok(comp.children[0].el !== el, 'Child element should have been preserved.');
 });
@@ -236,7 +236,7 @@ QUnit.test("Only call didMount once for childs and grandchilds when setProps is 
         return $$('div').append('Loading...');
       } else {
         return $$('div').append(
-          $$(SimpleComponent).key('child')
+          $$(SimpleComponent).ref('child')
         );
       }
     },
@@ -244,7 +244,7 @@ QUnit.test("Only call didMount once for childs and grandchilds when setProps is 
   var Parent = TestComponent.extend({
     render: function() {
       return $$('div')
-        .append($$(Child).key('child').setProps({ loading: true}));
+        .append($$(Child).ref('child').setProps({ loading: true}));
     },
     didMount: function() {
       this.refs.child.setProps({ loading: false });
@@ -305,7 +305,7 @@ QUnit.test("Propagate properties to child components when setProps called on par
 });
 
 
-QUnit.test("Preserve components when key matches, and rerender when props changed", function(assert) {
+QUnit.test("Preserve components when ref matches, and rerender when props changed", function(assert) {
   var ItemComponent = TestComponent.extend({
     shouldRerender: function(nextProps) {
       return !_.isEqual(nextProps, this.props);
@@ -319,7 +319,7 @@ QUnit.test("Preserve components when key matches, and rerender when props change
     render: function() {
       var el = $$('div').addClass('composite-component');
       this.props.items.forEach(function(item) {
-        el.append($$(ItemComponent, item).key(item.key));
+        el.append($$(ItemComponent, item).ref(item.ref));
       });
       return el;
     }
@@ -328,9 +328,9 @@ QUnit.test("Preserve components when key matches, and rerender when props change
   // Initial mount
   var comp = Component.mount($$(CompositeComponent, {
     items: [
-      {key: 'a', name: 'A'},
-      {key: 'b', name: 'B'},
-      {key: 'c', name: 'C'}
+      {ref: 'a', name: 'A'},
+      {ref: 'b', name: 'B'},
+      {ref: 'c', name: 'C'}
     ]
   }), $('#qunit-fixture'));
 
@@ -349,10 +349,10 @@ QUnit.test("Preserve components when key matches, and rerender when props change
   // and adds some new
   comp.setProps({
     items: [
-      {key: 'a', name: 'X'}, // preserved (props changed)
-      {key: 'd', name: 'Y'}, // new
-      {key: 'b', name: 'B'}, // preserved (same props)
-      {key: 'e', name: 'Z'}  // new
+      {ref: 'a', name: 'X'}, // preserved (props changed)
+      {ref: 'd', name: 'Y'}, // new
+      {ref: 'b', name: 'B'}, // preserved (same props)
+      {ref: 'e', name: 'Z'}  // new
     ]
   });
 
@@ -364,14 +364,14 @@ QUnit.test("Preserve components when key matches, and rerender when props change
   assert.equal(c.willUnmount.callCount, 1, 'c should have been unmounted');
 
   // a should have been rerendered (different props) while b should not (same props)
-  assert.equal(a.render.callCount, 2, 'Component with key a should have been rendered twice');
-  assert.equal(b.render.callCount, 1, 'Component with key b should have been rendered once');
+  assert.equal(a.render.callCount, 2, 'Component with ref a should have been rendered twice');
+  assert.equal(b.render.callCount, 1, 'Component with ref b should have been rendered once');
 
   assert.equal(comp.children.length, 4, 'Component should have 4 children.');
-  assert.equal(comp.children[0].$el.text(), 'X', 'First child should have text X');
-  assert.equal(comp.children[1].$el.text(), 'Y', 'First child should have text Y');
-  assert.equal(comp.children[2].$el.text(), 'B', 'First child should have text Y');
-  assert.equal(comp.children[3].$el.text(), 'Z', 'First child should have text Z');
+  assert.equal(comp.children[0].text(), 'X', 'First child should have text X');
+  assert.equal(comp.children[1].text(), 'Y', 'First child should have text Y');
+  assert.equal(comp.children[2].text(), 'B', 'First child should have text Y');
+  assert.equal(comp.children[3].text(), 'Z', 'First child should have text Z');
 
   // Actually I don't have the full understanding yet, why aEl is the same after rerender.
   // It means that the rerender is smart enough to reuse the element. What if the tag had changed?
