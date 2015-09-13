@@ -93,6 +93,10 @@ function Component(parent, params) {
 
   this.actionHandlers = {};
 
+  // will be set after first render
+  this.$el = null;
+  this.el = null;
+
   this._data = {
     attributes: {},
     style: {},
@@ -710,6 +714,7 @@ Component.Prototype = function ComponentPrototype() {
     // and can render from scratch
     if (!this.$el) {
       this.$el = this._createElement(data, scope);
+      this.el = this.$el[0];
       this._renderFromScratch(data, scope);
       return;
     }
@@ -974,6 +979,7 @@ Component.Text.Prototype = function() {
   this._render = function() {
     if (!this.$el) {
       var el = document.createTextNode(this.text);
+      this.el = el;
       this.$el = $(el);
     } else {
       this.$el[0].textContent = this.text;
