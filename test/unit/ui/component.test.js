@@ -49,13 +49,13 @@ QUnit.test("Different mount scenarios", function(assert) {
   var comp = Component.mount($$(SimpleComponent), el);
   assert.equal(comp.didMount.callCount, 0, "didMount must not be called when mounting to detached elements");
   assert.equal(comp.didRender.callCount, 1, "didRender must have been called once");
-  assert.ok(comp.$el);
+  assert.isDefinedAndNotNull(comp.el);
 
   // Mount to an existing DOM element (this time we pass a jQuery element which is also supported)
   comp = Component.mount($$(SimpleComponent), $('#qunit-fixture'));
   assert.equal(comp.didMount.callCount, 1, "didMount must not be called when mounting to attached elements");
   assert.equal(comp.didRender.callCount, 1, "didRender must have been called once");
-  assert.ok(comp.$el);
+  assert.isDefinedAndNotNull(comp.el);
 
   // Mount, passing a Component instance instead of a VirtualComponent
   comp = new SimpleComponent("root");
@@ -64,9 +64,9 @@ QUnit.test("Different mount scenarios", function(assert) {
 
 QUnit.test("Render an HTML element", function(assert) {
   var comp = $$('div')._render();
-  assert.equal(comp.$el[0].tagName.toLowerCase(), 'div', 'Element should be a "div".');
+  assert.equal(comp.el.tagName.toLowerCase(), 'div', 'Element should be a "div".');
   comp = $$('span')._render();
-  assert.equal(comp.$el[0].tagName.toLowerCase(), 'span', 'Element should be a "span".');
+  assert.equal(comp.el.tagName.toLowerCase(), 'span', 'Element should be a "span".');
 });
 
 QUnit.test("Render an element with attributes", function(assert) {
@@ -104,7 +104,7 @@ QUnit.test("Render an element with custom html", function(assert) {
 
 QUnit.test("Render a component", function(assert) {
   var comp = $$(SimpleComponent)._render();
-  assert.equal(comp.$el[0].tagName.toLowerCase(), 'div', 'Element should be a "div".');
+  assert.equal(comp.el.tagName.toLowerCase(), 'div', 'Element should be a "div".');
   assert.ok(comp.$el.hasClass('simple-component'), 'Element should have class "simple-component".');
 });
 
@@ -134,39 +134,64 @@ QUnit.test("Render a component with children", function(assert) {
   assert.ok(comp.children[1].$el.hasClass('child2'), 'Second child should have class "child2".');
 });
 
-QUnit.test("Render a child with key", function(assert) {
+QUnit.test("Render a child with ref", function(assert) {
   var comp = $$('div').addClass('parent')
-    .append($$('div').addClass('child').key('foo'))
+    .append($$('div').addClass('child').ref('foo'))
     ._render();
-  assert.ok(comp.refs.foo, 'Component should have a ref "foo".');
+  assert.isDefinedAndNotNull(comp.refs.foo, 'Component should have a ref "foo".');
   assert.ok(comp.refs.foo.$el.hasClass('child'), 'Referenced component should have class "child".');
 });
 
+/** JQuery style API for accessing HTML data **/
 
+QUnit.test("Accessing an attribute via comp.attr()", function(assert) {
+  var comp = $$('div').attr('data-id', 'foo')._render();
+  assert.equal(comp.attr('data-id'), 'foo', 'Element should be have data-id="foo".');
+});
+
+QUnit.test("Checking a class via comp.hasClass()", function(assert) {
+  var comp = $$('div').addClass('foo')._render();
+  assert.ok(comp.hasClass('foo'), 'Element should have class "foo".');
+});
+
+QUnit.test("Accessing a HTML property via comp.htmlProp()", function(assert) {
+  var comp = $$('input').htmlProp('type', 'text')._render();
+  assert.equal(comp.htmlProp('type'), 'text', 'Input field should be of type "text".');
+});
+
+QUnit.test("Accessing the HTML value via comp.val()", function(assert) {
+  var comp = $$('input').htmlProp('type', 'text').val('foo')._render();
+  assert.equal(comp.val(), 'foo', 'Input field should have value "foo".');
+});
+
+QUnit.test("Getting plain text via comp.text()", function(assert) {
+  var comp = $$('div').append('foo')._render();
+  assert.equal(comp.text(), 'foo', 'Element should have text "foo".');
+});
 
 /** Differential rerendering **/
 
-QUnit.test("Preserve a child with key", function(assert) {
-  var virtualDom = $$('div').append($$(SimpleComponent).key('foo'));
+QUnit.test("Preserve a child with ref", function(assert) {
+  var virtualDom = $$('div').append($$(SimpleComponent).ref('foo'));
   var comp = Component._render(virtualDom);
   var child = comp.refs.foo;
-  var el = child.$el[0];
+  var el = child.el;
   // rerender using the same virtual dom
   comp._render(_.deepclone(virtualDom));
   assert.ok(comp.refs.foo === child, 'Child component should have been preserved.');
-  assert.ok(comp.refs.foo.$el[0] === el, 'Child element should have been preserved.');
+  assert.ok(comp.refs.foo.el === el, 'Child element should have been preserved.');
 });
 
 QUnit.test("Wipe a child without key", function(assert) {
   var virtualDom = $$('div').append($$(SimpleComponent));
   var comp = Component._render(virtualDom);
   var child = comp.children[0];
-  var el = child.$el[0];
+  var el = child.el;
   // rerender using the same virtual dom
   comp._render(_.deepclone(virtualDom));
   // as we did not apply a key, the component simply gets rerendered from scratch
   assert.ok(comp.children[0] !== child, 'Child component should have been preserved.');
-  assert.ok(comp.children[0].$el[0] !== el, 'Child element should have been preserved.');
+  assert.ok(comp.children[0].el !== el, 'Child element should have been preserved.');
 });
 
 QUnit.test("Don't do a deep rerender when only attributes/classes/styles change.", function(assert) {
@@ -350,28 +375,6 @@ QUnit.test("Preserve components when key matches, and rerender when props change
 
   // Actually I don't have the full understanding yet, why aEl is the same after rerender.
   // It means that the rerender is smart enough to reuse the element. What if the tag had changed?
-  assert.equal(aEl, comp.children[0].$el[0], 'DOM element for a should be the same after rerender');
-  assert.equal(bEl, comp.children[2].$el[0], 'DOM element for b should be the same, since there was no rerender');
-});
-
-/** JQuery style API for accessing HTML data **/
-
-QUnit.test("Accessing an attribute via comp.attr()", function(assert) {
-  var comp = $$('div').attr('data-id', 'foo')._render();
-  assert.equal(comp.attr('data-id'), 'foo', 'Element should be have data-id="foo".');
-});
-
-QUnit.test("Checking a class via comp.hasClass()", function(assert) {
-  var comp = $$('div').addClass('foo')._render();
-  assert.ok(comp.hasClass('foo'), 'Element should have class "foo".');
-});
-
-QUnit.test("Accessing a HTML property via comp.htmlProp()", function(assert) {
-  var comp = $$('input').htmlProp('type', 'text')._render();
-  assert.equal(comp.htmlProp('type'), 'text', 'Input field should be of type "text".');
-});
-
-QUnit.test("Accessing the HTML value via comp.val()", function(assert) {
-  var comp = $$('input').htmlProp('type', 'text').val('foo')._render();
-  assert.equal(comp.val(), 'foo', 'Input field should have value "foo".');
+  assert.equal(aEl, comp.children[0].el, 'DOM element for a should be the same after rerender');
+  assert.equal(bEl, comp.children[2].el, 'DOM element for b should be the same, since there was no rerender');
 });
