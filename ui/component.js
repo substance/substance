@@ -74,10 +74,10 @@ function Component(parent, params) {
   // ref (without the underscore) being passed but remove it from the params
   // afterwards so we don't pullute the props.
   this._ref = params._ref;
-
-  this._htmlProps = {
+  this._htmlParams = {
     classNames: params.classNames || "",
     attributes: params.attributes || {},
+    props: params.htmlProps || {},
     style: params.style || {},
   };
   this._setProps(params.props);
@@ -92,6 +92,10 @@ function Component(parent, params) {
   this._setState(this.getInitialState());
 
   this.actionHandlers = {};
+
+  // will be set after first render
+  this.$el = null;
+  this.el = null;
 
   this._data = {
     attributes: {},
@@ -181,9 +185,9 @@ Component.Prototype = function ComponentPrototype() {
    *
    * If this is not possible because you want to do things differently, make sure
    * you call 'component.triggerDidMount()' on root components.
-   * 
+   *
    * @param isMounted an optional param for optimization, it's used mainly internally
-   * 
+   *
    * @example
    * ```
    * var frag = document.createDocumentFragment();
@@ -275,7 +279,7 @@ Component.Prototype = function ComponentPrototype() {
   /**
    * Send an action request to the parent component, bubbling up the component
    * hierarchy until an action handler is found.
-   * 
+   *
    * @param action the name of the action
    * @param ... arbitrary number of arguments
    */
@@ -452,11 +456,15 @@ Component.Prototype = function ComponentPrototype() {
    * Part of the incremental updating API.
    */
   this.attr = function() {
-    this._data.attr.apply(this._data, arguments);
-    if (this.$el) {
-      this.$el.attr.apply(this.$el, arguments);
+    if (arguments.length === 1 && _.isString(arguments[0])) {
+      return this.$el.attr(arguments[0]);
+    } else {
+      this._data.attr.apply(this._data, arguments);
+      if (this.$el) {
+        this.$el.attr.apply(this.$el, arguments);
+      }
+      return this;
     }
-    return this;
   };
 
   /**
@@ -468,6 +476,74 @@ Component.Prototype = function ComponentPrototype() {
     this._data.removeAttr.apply(this._data, arguments);
     if (this.$el) {
       this.$el.removeAttr.apply(this.$el, arguments);
+    }
+    return this;
+  };
+
+  this.val = function(val) {
+    if (arguments.length === 0) {
+      return this.$el.val();
+    } else {
+      this._data.val(val);
+      if (this.$el) {
+        this.$el.val(val);
+      }
+    }
+  };
+
+  this.hasClass = function(className) {
+    if (this.$el) {
+      return this.$el.hasClass(className);
+    }
+    return false;
+  };
+
+  this.text = function() {
+    if (arguments.length === 0) {
+      if (this.$el) {
+        return this.$el.text();
+      } else {
+        return "";
+      }
+    } else {
+      // EXPERIMENTAL do we want this?
+      this.empty();
+      this.append(arguments[0]);
+    }
+  };
+
+  /**
+   * Get or set HTML properties.
+   *
+   * See http://api.jquery.com/prop
+   *
+   * > Note: we can't follow jquery here, as it brings a semantical conflict/confusion
+   *   with the component's setProps API.
+   *   $.prop is used less often, thus it should be acceptable to deviate from jquery.
+   *   In fact, we have not used $.prop at all so far, as we haven't made use
+   *   of input fields and such where you have a lot of html properties.
+   */
+  this.htmlProp = function() {
+    if (arguments.length === 1 && _.isString(arguments[0])) {
+      return this.$el.prop(arguments[0]);
+    } else {
+      this._data.htmlProp.apply(this._data, arguments);
+      if (this.$el) {
+        this.$el.prop.apply(this.$el, arguments);
+      }
+      return this;
+    }
+  };
+
+  /**
+   * Remove HTML properties.
+   *
+   * See http://api.jquery.com/removeProp/
+   */
+  this.removeHtmlProp = function() {
+    this._data.removeHtmlProp.apply(this._data, arguments);
+    if (this.$el) {
+      this.$el.removeProp.apply(this.$el, arguments);
     }
     return this;
   };
@@ -561,14 +637,21 @@ Component.Prototype = function ComponentPrototype() {
 
   this._createElement = function(data, scope) {
     var $el = $('<' + data.tagName + '>');
-    $el.addClass(this._htmlProps.classNames);
+    // $.addClass
+    $el.addClass(this._htmlParams.classNames);
     $el.addClass(data.classNames);
-    $el.attr(this._htmlProps.attributes);
+    // $.attr
+    $el.attr(this._htmlParams.attributes);
     $el.attr(data.attributes);
-    $el.css(this._htmlProps.style);
+    // $.prop
+    $el.prop(this._htmlParams.props);
+    $el.prop(data.htmlProps);
+    // $.css
+    $el.css(this._htmlParams.style);
     if(data.style) {
       $el.css(data.style);
     }
+    // $.on
     _.each(data.handlers, function(handler, event) {
       // console.log('Binding to', event, 'in', scope.owner);
       $el.on(event, handler.bind(scope.owner));
@@ -578,12 +661,14 @@ Component.Prototype = function ComponentPrototype() {
 
   this._updateElement = function(data, oldData, scope) {
     var $el = this.$el;
+    // $.addClass / $.removeClass
     var oldClassNames = oldData.classNames;
     var newClassNames = data.classNames;
     if (oldClassNames !== newClassNames) {
       $el.removeClass(oldClassNames);
       $el.addClass(newClassNames);
     }
+    // $.attr / $.removeAttr
     var oldAttributes = oldData.attributes;
     var newAttributes = data.attributes;
     // TODO: this could be done more incrementally by using difference
@@ -592,12 +677,23 @@ Component.Prototype = function ComponentPrototype() {
       $el.removeAttr(oldAttrNames.join(" "));
       $el.attr(newAttributes);
     }
+    // $.prop / $.removeProp
+    var oldHtmlProps = oldData.htmlProps;
+    var newHtmlProps = data.htmlProps;
+    // TODO: this could be done more incrementally by using difference
+    if (!_.isEqual(oldHtmlProps, newHtmlProps)) {
+      var oldPropNames = Object.keys(oldHtmlProps);
+      $el.removeProp(oldPropNames.join(" "));
+      $el.prop(newHtmlProps);
+    }
+    // $.css
     // css styles must be overwritten explicitly (there is no '$.removeCss')
     if (!_.isEqual(oldData.style, data.style)) {
       if (data.style) {
         $el.css(data.style);
       }
     }
+    // $.on / $.off
     if (!_.isEqual(oldData.handlers, data.handlers)) {
       _.each(oldData.handlers, function(handler, event) {
         $el.off(event);
@@ -632,6 +728,7 @@ Component.Prototype = function ComponentPrototype() {
     // and can render from scratch
     if (!this.$el) {
       this.$el = this._createElement(data, scope);
+      this.el = this.$el[0];
       this._renderFromScratch(data, scope);
       return;
     }
@@ -896,6 +993,7 @@ Component.Text.Prototype = function() {
   this._render = function() {
     if (!this.$el) {
       var el = document.createTextNode(this.text);
+      this.el = el;
       this.$el = $(el);
     } else {
       this.$el[0].textContent = this.text;
@@ -908,7 +1006,9 @@ OO.inherit(Component.Text, Component);
 /* Virtual Components */
 
 function VirtualNode() {
+  this._ref = null;
   this.attributes = {};
+  this.htmlProps = {};
   this.style = {};
   this.handlers = {};
   this.props = {};
@@ -965,6 +1065,7 @@ VirtualNode.Prototype = function() {
     this.children.splice(pos, 0, child);
     return this;
   };
+  // NOTE: we need this for incremental updates
   this.removeAt = function(pos) {
     this.children.splice(pos, 1);
     return this;
@@ -976,12 +1077,14 @@ VirtualNode.Prototype = function() {
     this.classNames += " " + className;
     return this;
   };
+  // NOTE: we need this for incremental updates
   this.removeClass = function(className) {
     var classes = this.classNames.split(/\s+/);
     classes = _.without(classes, className);
     this.classNames = classes.join(' ');
     return this;
   };
+  // NOTE: we need this for incremental updates
   this.toggleClass = function(className) {
     var classes = this.classNames.split(/\s+/);
     if (classes.indexOf(className) >= 0) {
@@ -993,6 +1096,7 @@ VirtualNode.Prototype = function() {
     return this;
   };
   this.addProps = function(props) {
+    console.log('DEPRECATED: Use setProps() or extendProps()');
     _.extend(this.props, props);
     return this;
   };
@@ -1004,16 +1108,17 @@ VirtualNode.Prototype = function() {
     _.extend(this.props, props);
     return this;
   };
-  this.attr = function(attr) {
+  this.attr = function(attributes) {
     if (arguments.length === 2) {
       this.attributes[arguments[0]] = arguments[1];
     } else {
       // TODO we could treat HTML attributes as special props
       // then we do need to fish attributes from custom props
-      _.extend(this.attributes, attr);
+      _.extend(this.attributes, attributes);
     }
     return this;
   };
+  // NOTE: we need this for incremental updates
   this.removeAttr = function(attr) {
     if (_.isString(attr)) {
       delete this.attributes[attr];
@@ -1022,11 +1127,44 @@ VirtualNode.Prototype = function() {
     }
     return this;
   };
+  this.htmlProp = function(properties) {
+    if (arguments.length === 2) {
+      this.htmlProps[arguments[0]] = arguments[1];
+    } else {
+      // TODO we could treat HTML attributes as special props
+      // then we do need to fish attributes from custom props
+      _.extend(this.htmlProps, properties);
+    }
+    return this;
+  };
+  // NOTE: we need this for incremental updates
+  this.removeHtmlProp = function() {
+    if (_.isString(arguments[0])) {
+      delete this.htmlProps[arguments[0]];
+    } else {
+      this.htmlProps = _.omit(this.htmlProps, arguments[0]);
+    }
+    return this;
+  };
+  this.val = function(value) {
+    this.htmlProps['value'] = value;
+    return this;
+  };
+  // TODO: this not exactly correct. IMO in jquery you can register multiple
+  // handlers for the same event. But actually we do not do this. Fix when needed.
   this.on = function(event, handler) {
     if (arguments.length !== 2 || !_.isString(event) || !_.isFunction(handler)) {
       throw new Error('Illegal arguments for $$.on(event, handler).');
     }
     this.handlers[event] = handler;
+    return this;
+  };
+  // TODO: see above.
+  this.off = function(event, handler) {
+    if (arguments.length !== 2 || !_.isString(event) || !_.isFunction(handler)) {
+      throw new Error('Illegal arguments for $$.on(event, handler).');
+    }
+    delete this.handlers[event];
     return this;
   };
   this.css = function(style) {
