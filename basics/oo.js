@@ -18,10 +18,15 @@ var defaultKeyProps = {'name': true, 'displayName': true};
 var _inherit;
 
 var extend = function(parent, keyProps, afterHook, proto) {
+  if (arguments.length > 4) {
+    var args = Array.prototype.slice.apply(arguments, 3);
+    proto = _.extend.apply(null, args);
+  }
   var Constructor = function ExtendedClass() {
     this.__className__ = proto.displayName || proto.name;
     parent.apply(this, arguments);
     if (this.init) {
+      console.log('DEPRECATED: we want to drop this built-in hook in favor of a custom hook.');
       this.init.apply(this, arguments);
     }
   };
