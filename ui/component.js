@@ -498,6 +498,20 @@ Component.Prototype = function ComponentPrototype() {
     return false;
   };
 
+  this.text = function() {
+    if (arguments.length === 0) {
+      if (this.$el) {
+        return this.$el.text();
+      } else {
+        return "";
+      }
+    } else {
+      // EXPERIMENTAL do we want this?
+      this.empty();
+      this.append(arguments[0]);
+    }
+  };
+
   /**
    * Get or set HTML properties.
    *
@@ -992,6 +1006,7 @@ OO.inherit(Component.Text, Component);
 /* Virtual Components */
 
 function VirtualNode() {
+  this._ref = null;
   this.attributes = {};
   this.htmlProps = {};
   this.style = {};
