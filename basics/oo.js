@@ -15,6 +15,8 @@ var OO = {};
 
 var defaultKeyProps = {'name': true, 'displayName': true};
 
+var _inherit;
+
 var extend = function(parent, keyProps, afterHook, proto) {
   var Constructor = function ExtendedClass() {
     this.__className__ = proto.displayName || proto.name;
@@ -28,7 +30,8 @@ var extend = function(parent, keyProps, afterHook, proto) {
   } else if (proto.name) {
     Constructor.displayName = proto.name;
   }
-  OO.inherit(Constructor, parent);
+  // calling 'silently' so that afterHook doesn't get called too early
+  _inherit(Constructor, parent);
   for(var key in proto) {
     if (proto.hasOwnProperty(key)) {
       if (key in keyProps) {
@@ -50,11 +53,22 @@ function makeExtensible(clazz, keyProps, afterHook) {
   }
   clazz.static._makeExtendFunction = function(parentClazz) {
     return _.bind(extend, null, parentClazz, keyProps, afterHook);
+  };
+  if (afterHook) {
+    clazz.static._afterClassInitHook = afterHook;
   }
   clazz.extend = clazz.static._makeExtendFunction(clazz);
-};
+}
 
 OO.makeExtensible = makeExtensible;
+
+var _initClass = function(clazz) {
+  if (clazz.Prototype && !(clazz.prototype instanceof clazz.Prototype)) {
+    clazz.prototype = new clazz.Prototype();
+    clazz.prototype.constructor = clazz;
+  }
+  clazz.static = clazz.static || {};
+};
 
 /**
  * Initialize a class.
@@ -63,23 +77,11 @@ OO.makeExtensible = makeExtensible;
  * @method initClass
  */
 OO.initClass = function(clazz) {
-  if (clazz.Prototype && !(clazz.prototype instanceof clazz.Prototype)) {
-    clazz.prototype = new clazz.Prototype();
-    clazz.prototype.constructor = clazz;
-  }
-  clazz.static = clazz.static || {};
+  _initClass(clazz);
   makeExtensible(clazz, defaultKeyProps);
 };
 
-/**
- * Inherit from a parent class.
- *
- * @param clazz {Constructor} class constructor
- * @param parentClazz {Constructor} parent constructor
- *
- * @method inherit
- */
-OO.inherit =  function(clazz, parentClazz) {
+_inherit =  function(clazz, parentClazz) {
   if (clazz.prototype instanceof parentClazz) {
     throw new Error('Target already inherits from origin');
   }
@@ -107,12 +109,27 @@ OO.inherit =  function(clazz, parentClazz) {
   // provide a shortcut to the parent prototype
   clazz.prototype.super = parentClazz.prototype;
   // Extend static properties - always initialize both sides
-  OO.initClass( parentClazz );
+  _initClass(parentClazz);
   clazz.static = Object.create(parentClazz.static);
   if (clazz.static._makeExtendFunction) {
     clazz.extend = clazz.static._makeExtendFunction(clazz);
   } else {
     makeExtensible(clazz, defaultKeyProps);
+  }
+};
+
+/**
+ * Inherit from a parent class.
+ *
+ * @param clazz {Constructor} class constructor
+ * @param parentClazz {Constructor} parent constructor
+ *
+ * @method inherit
+ */
+OO.inherit =  function(clazz, parentClazz) {
+  _inherit(clazz, parentClazz);
+  if (clazz.static._afterClassInitHook) {
+    clazz.static._afterClassInitHook(clazz);
   }
 };
 

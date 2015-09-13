@@ -94,8 +94,6 @@ var Node = Data.Node.extend({
 
 });
 
-Node.initNodeClass = Data.Node.initNodeClass;
-
 // default HTML serialization
 Node.static.toHtml = function(node, converter) {
   var $el = $('<div itemscope>')

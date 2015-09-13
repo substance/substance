@@ -41,6 +41,10 @@ function Container() {
 
 Container.Prototype = function() {
 
+  this.properties = {
+    nodes: ["array", "string"]
+  };
+
   this.didAttach = function() {
     this.reset();
   };
@@ -320,13 +324,6 @@ Container.Prototype = function() {
 OO.inherit(Container, Node);
 
 Container.static.name = "container";
-
-Container.static.schema = {
-  nodes: ["array", "string"]
-};
-
-// HACK: ATM we do a lot of Node initialization, but we only do it using Node.extend(..)
-Node.initNodeClass(Container);
 
 Container.Component = function Component(path, rootId) {
   this.path = path;

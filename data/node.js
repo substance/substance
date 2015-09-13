@@ -29,6 +29,16 @@ function Node( properties ) {
 Node.Prototype = function() {
 
   /**
+   * The node's schema.
+   *
+   * @property properties {Object}
+   */
+  this.properties = {
+    type: 'string',
+    id: 'string'
+  };
+
+  /**
    * Serialize to JSON.
    *
    * @method toJSON
@@ -89,14 +99,6 @@ Node.Prototype = function() {
 
 };
 
-// This makes a customized Node.extend() implementation, by overriding default
-// key property names, and adding a post-processing hook.
-// All subclasses will use this configuration.
-OO.makeExtensible(Node,
-  { "name": true, "displayName": true, "properties": true },
-  Node.initNodeClass
-);
-
 OO.inherit(Node, EventEmitter);
 
 /**
@@ -107,22 +109,14 @@ OO.inherit(Node, EventEmitter);
 Node.static.name = "node";
 
 /**
- * The node schema.
- *
- * @property schema {Object}
- * @static
- */
-Node.static.schema = {
-  type: 'string',
-  id: 'string'
-};
-
-/**
  * Read-only properties.
  *
  * @property readOnlyProperties {Array}
  * @static
  */
+// FIXME: this is not working. We can't rely on static attributes
+// for defining node properties, as they will be defined when inherited
+// If you really need it, make sure you call Node.static.initNodeClass(NodeClazz) afterwards
 Node.static.readOnlyProperties = ['type', 'id'];
 
 /**
@@ -189,11 +183,32 @@ var prepareSchema = function(NodeClass) {
   }
 };
 
-Node.initNodeClass = function(NodeClass, proto) {
-  ctor.static.schema = proto.properties;
+var initNodeClass = function(NodeClass, proto) {
+  // when called via Node.extend we auto-magically copy the
+  // properties into the static scope
+  if (proto) {
+    if (proto.properties) {
+      NodeClass.static.schema = proto.properties;
+    }
+  } else {
+    if (NodeClass.prototype.hasOwnProperty('properties')) {
+      NodeClass.static.schema = NodeClass.prototype.properties;
+    }
+  }
   defineProperties(NodeClass);
   prepareSchema(NodeClass);
   NodeClass.type = NodeClass.static.name;
 };
+
+Node.static.initNodeClass = initNodeClass;
+
+// This makes a customized Node.extend() implementation, by overriding default
+// key property names, and adding a post-processing hook.
+// All subclasses will use this configuration.
+OO.makeExtensible(Node, { "name": true, "displayName": true, "properties": true },
+  initNodeClass
+);
+
+initNodeClass(Node);
 
 module.exports = Node;
