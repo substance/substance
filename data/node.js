@@ -89,6 +89,14 @@ Node.Prototype = function() {
 
 };
 
+// This makes a customized Node.extend() implementation, by overriding default
+// key property names, and adding a post-processing hook.
+// All subclasses will use this configuration.
+OO.makeExtensible(Node,
+  { "name": true, "displayName": true, "properties": true },
+  Node.initNodeClass
+);
+
 OO.inherit(Node, EventEmitter);
 
 /**
@@ -172,8 +180,6 @@ var defineProperties = function(NodeClass) {
   }
 };
 
-var extend;
-
 var prepareSchema = function(NodeClass) {
   var schema = NodeClass.static.schema;
   var parentStatic = Object.getPrototypeOf(NodeClass.static);
@@ -183,41 +189,11 @@ var prepareSchema = function(NodeClass) {
   }
 };
 
-var initNodeClass = function(NodeClass) {
-  // add a extend method so that this class can be used to create child models.
-  NodeClass.extend = _.bind(extend, null, NodeClass);
-  // define properties and so on
+Node.initNodeClass = function(NodeClass, proto) {
+  ctor.static.schema = proto.properties;
   defineProperties(NodeClass);
   prepareSchema(NodeClass);
   NodeClass.type = NodeClass.static.name;
 };
-
-// TODO: try to reuse OO.extend here. Will need some changes to OO.extend, though.
-
-extend = function( parent, modelSpec ) {
-  var ctor = function NodeClass() {
-    parent.apply(this, arguments);
-    if (this.init) {
-      this.init.apply(this, arguments);
-    }
-  };
-  OO.inherit(ctor, parent);
-  for(var key in modelSpec) {
-    if (modelSpec.hasOwnProperty(key)) {
-      if (key === "name" || key === "properties") {
-        continue;
-      }
-      ctor.prototype[key] = modelSpec[key];
-    }
-  }
-  ctor.static.name = modelSpec.name;
-  ctor.static.schema = modelSpec.properties;
-  initNodeClass(ctor);
-  return ctor;
-};
-
-initNodeClass(Node);
-
-Node.initNodeClass = initNodeClass;
 
 module.exports = Node;

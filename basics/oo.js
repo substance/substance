@@ -13,7 +13,9 @@ var _ = require('./helpers');
  */
 var OO = {};
 
-var extend = function( parent, proto ) {
+var defaultKeyProps = {'name': true, 'displayName': true};
+
+var extend = function(parent, keyProps, afterHook, proto) {
   var Constructor = function ExtendedClass() {
     this.__className__ = proto.displayName || proto.name;
     parent.apply(this, arguments);
@@ -29,15 +31,30 @@ var extend = function( parent, proto ) {
   OO.inherit(Constructor, parent);
   for(var key in proto) {
     if (proto.hasOwnProperty(key)) {
-      if (key === "name") {
+      if (key in keyProps) {
         continue;
       }
       Constructor.prototype[key] = proto[key];
     }
   }
   Constructor.static.name = proto.name;
+  if (afterHook) {
+    afterHook(Constructor, proto);
+  }
   return Constructor;
 };
+
+function makeExtensible(clazz, keyProps, afterHook) {
+  if (!clazz.static) {
+    OO.initClass(clazz);
+  }
+  clazz.static._makeExtendFunction = function(parentClazz) {
+    return _.bind(extend, null, parentClazz, keyProps, afterHook);
+  }
+  clazz.extend = clazz.static._makeExtendFunction(clazz);
+};
+
+OO.makeExtensible = makeExtensible;
 
 /**
  * Initialize a class.
@@ -51,7 +68,7 @@ OO.initClass = function(clazz) {
     clazz.prototype.constructor = clazz;
   }
   clazz.static = clazz.static || {};
-  clazz.extend = clazz.extend || _.bind(extend, null, clazz);
+  makeExtensible(clazz, defaultKeyProps);
 };
 
 /**
@@ -92,7 +109,11 @@ OO.inherit =  function(clazz, parentClazz) {
   // Extend static properties - always initialize both sides
   OO.initClass( parentClazz );
   clazz.static = Object.create(parentClazz.static);
-  clazz.extend = _.bind(extend, null, clazz);
+  if (clazz.static._makeExtendFunction) {
+    clazz.extend = clazz.static._makeExtendFunction(clazz);
+  } else {
+    makeExtensible(clazz, defaultKeyProps);
+  }
 };
 
 /**
