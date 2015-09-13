@@ -55,7 +55,7 @@ QUnit.test("Different mount scenarios", function(assert) {
   comp = Component.mount($$(SimpleComponent), $('#qunit-fixture'));
   assert.equal(comp.didMount.callCount, 1, "didMount must not be called when mounting to attached elements");
   assert.equal(comp.didRender.callCount, 1, "didRender must have been called once");
-  assert.ok(comp.$el);  
+  assert.ok(comp.$el);
 
   // Mount, passing a Component instance instead of a VirtualComponent
   comp = new SimpleComponent("root");
@@ -84,12 +84,23 @@ QUnit.test("Render an element with classes", function(assert) {
   assert.ok(comp.$el.hasClass('test'), 'Element should have class "test".');
 });
 
+QUnit.test("Render an element with properties", function(assert) {
+  var comp = $$('input').htmlProp({ type: 'text', value: 'foo' })._render();
+  assert.equal(comp.$el.prop('tagName').toLowerCase(), 'input', 'Element should be an input element.');
+  assert.equal(comp.$el.prop('type'), 'text', '... with type "text"');
+  assert.equal(comp.$el.prop('value'), 'foo', '... and value "foo"');
+});
+
+QUnit.test("Render an element with value", function(assert) {
+  var comp = $$('input').htmlProp({ type: 'text'}).val('foo')._render();
+  assert.equal(comp.$el.val(), 'foo', 'Value should be set.');
+});
+
 QUnit.test("Render an element with custom html", function(assert) {
   var comp = $$('div').html('Hello <b>World</b>')._render();
   assert.equal(comp.$el.find('b').length, 1, 'Element should have rendered HTML as content.');
   assert.equal(comp.$el.find('b').text(), 'World','Rendered element should have right content.');
 });
-
 
 QUnit.test("Render a component", function(assert) {
   var comp = $$(SimpleComponent)._render();
@@ -130,6 +141,8 @@ QUnit.test("Render a child with key", function(assert) {
   assert.ok(comp.refs.foo, 'Component should have a ref "foo".');
   assert.ok(comp.refs.foo.$el.hasClass('child'), 'Referenced component should have class "child".');
 });
+
+
 
 /** Differential rerendering **/
 
@@ -212,13 +225,13 @@ QUnit.test("Only call didMount once for childs and grandchilds when setProps is 
       this.refs.child.setProps({ loading: false });
     }
   });
-  
+
   var comp = Component.mount($$(Parent), $('#qunit-fixture'));
   var childComp = comp.refs.child;
   var grandChildComp = childComp.refs.child;
   assert.equal(childComp.didMount.callCount, 1, "Child's didMount should have been called only once.");
   assert.equal(grandChildComp.didMount.callCount, 1, "Grandchild's didMount should have been called only once.");
-  
+
   comp.empty();
   assert.equal(childComp.willUnmount.callCount, 1, "Child's willUnmount should have been called once.");
   assert.equal(grandChildComp.willUnmount.callCount, 1, "Grandchild's willUnmount should have been called once.");
@@ -320,7 +333,7 @@ QUnit.test("Preserve components when key matches, and rerender when props change
 
   // a and b should have been preserved
   assert.equal(a, comp.children[0], 'a should be the same instance');
-  assert.equal(b, comp.children[2], 'b should be the same component instance');  
+  assert.equal(b, comp.children[2], 'b should be the same component instance');
 
   // c should be gone
   assert.equal(c.willUnmount.callCount, 1, 'c should have been unmounted');
@@ -341,4 +354,24 @@ QUnit.test("Preserve components when key matches, and rerender when props change
   assert.equal(bEl, comp.children[2].$el[0], 'DOM element for b should be the same, since there was no rerender');
 });
 
+/** JQuery style API for accessing HTML data **/
 
+QUnit.test("Accessing an attribute via comp.attr()", function(assert) {
+  var comp = $$('div').attr('data-id', 'foo')._render();
+  assert.equal(comp.attr('data-id'), 'foo', 'Element should be have data-id="foo".');
+});
+
+QUnit.test("Checking a class via comp.hasClass()", function(assert) {
+  var comp = $$('div').addClass('foo')._render();
+  assert.ok(comp.hasClass('foo'), 'Element should have class "foo".');
+});
+
+QUnit.test("Accessing a HTML property via comp.htmlProp()", function(assert) {
+  var comp = $$('input').htmlProp('type', 'text')._render();
+  assert.equal(comp.htmlProp('type'), 'text', 'Input field should be of type "text".');
+});
+
+QUnit.test("Accessing the HTML value via comp.val()", function(assert) {
+  var comp = $$('input').htmlProp('type', 'text').val('foo')._render();
+  assert.equal(comp.val(), 'foo', 'Input field should have value "foo".');
+});
