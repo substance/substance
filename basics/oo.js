@@ -19,7 +19,7 @@ var _inherit;
 
 var extend = function(parent, keyProps, afterHook, proto) {
   if (arguments.length > 4) {
-    var args = Array.prototype.slice.apply(arguments, 3);
+    var args = Array.prototype.slice.call(arguments, 3);
     proto = _.extend.apply(null, args);
   }
   var Constructor = function ExtendedClass() {
