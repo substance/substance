@@ -24,9 +24,23 @@ function Node( properties ) {
   this.properties = _.extend({}, this.getDefaultProperties(), properties);
   this.properties.type = this.constructor.static.name;
   this.properties.id = this.properties.id || uuid(this.properties.type);
+
+  this.didInitialize();
 }
 
 Node.Prototype = function() {
+
+  /**
+   * The node's schema.
+   *
+   * @property properties {Object}
+   */
+  this.properties = {
+    type: 'string',
+    id: 'string'
+  };
+
+  this.didInitialize = function() {};
 
   /**
    * Serialize to JSON.
@@ -99,22 +113,14 @@ OO.inherit(Node, EventEmitter);
 Node.static.name = "node";
 
 /**
- * The node schema.
- *
- * @property schema {Object}
- * @static
- */
-Node.static.schema = {
-  type: 'string',
-  id: 'string'
-};
-
-/**
  * Read-only properties.
  *
  * @property readOnlyProperties {Array}
  * @static
  */
+// FIXME: this is not working. We can't rely on static attributes
+// for defining node properties, as they will be defined when inherited
+// If you really need it, make sure you call Node.static.initNodeClass(NodeClazz) afterwards
 Node.static.readOnlyProperties = ['type', 'id'];
 
 /**
@@ -172,8 +178,6 @@ var defineProperties = function(NodeClass) {
   }
 };
 
-var extend;
-
 var prepareSchema = function(NodeClass) {
   var schema = NodeClass.static.schema;
   var parentStatic = Object.getPrototypeOf(NodeClass.static);
@@ -183,41 +187,32 @@ var prepareSchema = function(NodeClass) {
   }
 };
 
-var initNodeClass = function(NodeClass) {
-  // add a extend method so that this class can be used to create child models.
-  NodeClass.extend = _.bind(extend, null, NodeClass);
-  // define properties and so on
+var initNodeClass = function(NodeClass, proto) {
+  // when called via Node.extend we auto-magically copy the
+  // properties into the static scope
+  if (proto) {
+    if (proto.properties) {
+      NodeClass.static.schema = proto.properties;
+    }
+  } else {
+    if (NodeClass.prototype.hasOwnProperty('properties')) {
+      NodeClass.static.schema = NodeClass.prototype.properties;
+    }
+  }
   defineProperties(NodeClass);
   prepareSchema(NodeClass);
   NodeClass.type = NodeClass.static.name;
 };
 
-// TODO: try to reuse OO.extend here. Will need some changes to OO.extend, though.
+Node.static.initNodeClass = initNodeClass;
 
-extend = function( parent, modelSpec ) {
-  var ctor = function NodeClass() {
-    parent.apply(this, arguments);
-    if (this.init) {
-      this.init.apply(this, arguments);
-    }
-  };
-  OO.inherit(ctor, parent);
-  for(var key in modelSpec) {
-    if (modelSpec.hasOwnProperty(key)) {
-      if (key === "name" || key === "properties") {
-        continue;
-      }
-      ctor.prototype[key] = modelSpec[key];
-    }
-  }
-  ctor.static.name = modelSpec.name;
-  ctor.static.schema = modelSpec.properties;
-  initNodeClass(ctor);
-  return ctor;
-};
+// This makes a customized Node.extend() implementation, by overriding default
+// key property names, and adding a post-processing hook.
+// All subclasses will use this configuration.
+OO.makeExtensible(Node, { "name": true, "displayName": true, "properties": true },
+  initNodeClass
+);
 
 initNodeClass(Node);
-
-Node.initNodeClass = initNodeClass;
 
 module.exports = Node;
