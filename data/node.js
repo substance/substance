@@ -195,6 +195,7 @@ var initNodeClass = function(NodeClass, proto) {
       NodeClass.static.schema = proto.properties;
     }
   } else {
+    // TODO: we should use static.properties for sake of consistency
     if (NodeClass.prototype.hasOwnProperty('properties')) {
       NodeClass.static.schema = NodeClass.prototype.properties;
     }
