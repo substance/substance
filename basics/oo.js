@@ -13,11 +13,11 @@ var _ = require('./helpers');
  */
 var OO = {};
 
-var defaultKeyProps = {'name': true, 'displayName': true};
+var defaultStaticProps = {'name': true, 'displayName': true};
 
 var _inherit;
 
-var extend = function(parent, keyProps, afterHook, proto) {
+var extend = function(parent, staticProps, afterHook, proto) {
   if (arguments.length > 4) {
     var args = Array.prototype.slice.call(arguments, 3);
     proto = _.extend.apply(null, args);
@@ -39,29 +39,53 @@ var extend = function(parent, keyProps, afterHook, proto) {
   _inherit(Constructor, parent);
   for(var key in proto) {
     if (proto.hasOwnProperty(key)) {
-      if (key in keyProps) {
+      // built-in: extend class.static with prototype.static
+      if (key === 'static') {
+        _.extend(Constructor.static, proto.static);
         continue;
       }
-      Constructor.prototype[key] = proto[key];
+      if (key in staticProps) {
+        Constructor.static[key] = proto[key];
+      } else {
+        Constructor.prototype[key] = proto[key];
+      }
     }
   }
-  Constructor.static.name = proto.name;
   if (afterHook) {
     afterHook(Constructor, proto);
   }
   return Constructor;
 };
 
-function makeExtensible(clazz, keyProps, afterHook) {
+function makeExtensible(clazz, staticProps, afterHook) {
+  staticProps = staticProps || {};
   if (!clazz.static) {
     OO.initClass(clazz);
   }
   clazz.static._makeExtendFunction = function(parentClazz) {
-    return _.bind(extend, null, parentClazz, keyProps, afterHook);
+    return _.bind(extend, null, parentClazz, staticProps, afterHook);
   };
-  if (afterHook) {
-    clazz.static._afterClassInitHook = afterHook;
-  }
+  // add a hook that moves static properties to clazz.static
+  clazz.static._afterClassInitHook = function(childClazz) {
+    var proto = childClazz.prototype;
+    for(var key in proto) {
+      if (!proto.hasOwnProperty(key)) continue;
+      // built-in: extend class.static with prototype.static
+      if (key === 'static') {
+        _.extend(childClazz.static, proto.static);
+        continue;
+      }
+      // move over all static properties to class.static
+      if (proto.hasOwnProperty(key)) {
+        if (key in staticProps) {
+          childClazz.static[key] = proto[key];
+        }
+      }
+    }
+    if (afterHook) {
+      afterHook(childClazz);
+    }
+  };
   clazz.extend = clazz.static._makeExtendFunction(clazz);
 }
 
@@ -83,7 +107,7 @@ var _initClass = function(clazz) {
  */
 OO.initClass = function(clazz) {
   _initClass(clazz);
-  makeExtensible(clazz, defaultKeyProps);
+  makeExtensible(clazz, defaultStaticProps);
 };
 
 _inherit =  function(clazz, parentClazz) {
@@ -119,7 +143,7 @@ _inherit =  function(clazz, parentClazz) {
   if (clazz.static._makeExtendFunction) {
     clazz.extend = clazz.static._makeExtendFunction(clazz);
   } else {
-    makeExtensible(clazz, defaultKeyProps);
+    makeExtensible(clazz, defaultStaticProps);
   }
 };
 
