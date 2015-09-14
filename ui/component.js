@@ -1248,7 +1248,7 @@ Component.$$ = function() {
     content = new VirtualComponent(arguments[0]);
     // EXPERIMENTAL: to reduce boilerplate, we want to allow to specifiy props as 2nd argument of $$
     if (arguments.length === 2) {
-      content.addProps(arguments[1]);
+      content.setProps(arguments[1]);
     }
   } else {
     throw new Error('Illegal usage of Component.$$.');
