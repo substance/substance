@@ -18,24 +18,6 @@ function AnnotationTool() {
 
 AnnotationTool.Prototype = function() {
 
-  this.getToolName = function() {
-    var toolName = this.constructor.static.name;
-    if (toolName) {
-      return toolName;
-    } else {
-      throw new Error('Contract: AnnotationTool.static.name should have a value to describe the tool');
-    }
-  };
-
-  this.getCommand = function() {
-    var commandName = this.constructor.static.command;
-    if (commandName) {
-      return this.getSurface().getCommand(commandName);
-    } else {
-      throw new Error('Contract: AnnotationTool.static.command should be associated to a supported command.');
-    }
-  };
-
 
   // When update is called we can be sure the Surface is active
   this.update = function(sel, surface) {
@@ -61,10 +43,6 @@ AnnotationTool.Prototype = function() {
     // selection is a container selection
     if (command.isDisabled(annos, sel)) {
       this.setDisabled();
-    } else if (command.canEdit(annos, sel)) {
-      newState.mode = "edit";
-      newState.annotationId = annos[0].id;
-      newState.active = true;
     } else if (command.canCreate(annos, sel)) {
       newState.mode = "create";
     } else if (command.canFuse(annos, sel)) {
@@ -72,11 +50,15 @@ AnnotationTool.Prototype = function() {
     } else if (command.canTruncate(annos, sel)) {
       newState.active = true;
       newState.mode = "truncate";
+    } else if (command.canExpand(annos, sel)) {
+      newState.mode = "expand";
+    } else if (command.canEdit(annos, sel)) {
+      newState.mode = "edit";
+      newState.annotationId = annos[0].id;
+      newState.active = true;
     } else if (command.canDelete(annos, sel)) {
       newState.active = true;
       newState.mode = "delete";
-    } else if (command.canExpand(annos, sel)) {
-      newState.mode = "expand";
     } else {
       newState.disabled = true;
     }
@@ -95,7 +77,7 @@ AnnotationTool.Prototype = function() {
   // --------------------------
 
   this.render = function() {
-    var title = this.props.title || _.capitalize(this.getToolName());
+    var title = this.props.title || _.capitalize(this.getName());
 
     if (this.state.mode) {
       title = [_.capitalize(this.state.mode), title].join(' ');
@@ -119,18 +101,6 @@ AnnotationTool.Prototype = function() {
 
     el.append(this.props.children);
     return el;
-  };
-
-  this.onClick = function(e) {
-    e.preventDefault();
-  };
-
-  this.onMouseDown = function(e) {
-    e.preventDefault();
-    if (this.state.disabled) {
-      return;
-    }
-    this.performAction();
   };
 };
 

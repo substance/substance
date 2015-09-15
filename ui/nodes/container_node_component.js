@@ -85,7 +85,8 @@ ContainerNodeComponent.Prototype = function() {
     var editor = this.props.editor;
     var options = {
       name: this.props.node.id,
-      logger: this.context.notifications
+      logger: this.context.notifications,
+      commands: this.props.commands
     };
     this.surface = new Surface(this.context.surfaceManager, doc, editor, options);
   };

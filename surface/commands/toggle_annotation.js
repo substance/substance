@@ -99,18 +99,18 @@ ToggleAnnotationCommand.Prototype = function() {
     var annos = this.getAnnotationsForSelection();
     var sel = this.getSelection();
 
-    if (this.canEdit(annos, sel)) {
-      this.executeEdit(annos, sel);
-    } else if (this.canCreate(annos, sel)) {
+    if (this.canCreate(annos, sel)) {
       this.executeCreate();
     } else if (this.canFuse(annos, sel)) {
       this.executeFusion();
     } else if (this.canTruncate(annos, sel)) {
       this.executeTruncate();
-    } else if (this.canDelete(annos, sel)) {
-      this.executeDelete();
     } else if (this.canExpand(annos, sel)) {
       this.executeExpand();
+    } else if (this.canEdit(annos, sel)) {
+      this.executeEdit(annos, sel);
+    } else if (this.canDelete(annos, sel)) {
+      this.executeDelete();
     }
   };
 

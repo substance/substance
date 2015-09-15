@@ -110,7 +110,7 @@ LinkTool.Prototype = function() {
 
 
   this.render = function() {
-    var title = this.props.title || _.capitalize(this.getToolName());
+    var title = this.props.title || _.capitalize(this.getName());
 
     if (this.state.mode) {
       title = [_.capitalize(this.state.mode), title].join(' ');

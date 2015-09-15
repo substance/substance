@@ -10,7 +10,21 @@ function Tool() {
 Tool.Prototype = function() {
 
   this.getName = function() {
-    return this.constructor.static.name;
+    var toolName = this.constructor.static.name;
+    if (toolName) {
+      return toolName;
+    } else {
+      throw new Error('Contract: AnnotationTool.static.name should have a value to describe the tool');
+    }
+  };
+
+  this.getCommand = function() {
+    var commandName = this.constructor.static.command;
+    if (commandName) {
+      return this.getSurface().getCommand(commandName);
+    } else {
+      throw new Error('Contract: AnnotationTool.static.command should be associated to a supported command.');
+    }
   };
 
   this.isEnabled = function() {

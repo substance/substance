@@ -2,6 +2,9 @@
 
 var OO = require('../../basics/oo');
 var Tool = require('./tool');
+var _ = require('../../basics/helpers');
+var Component = require('../component');
+var $$ = Component.$$;
 
 /**
  * Abstract class for tools that interact with the selection of active surface.
@@ -10,7 +13,7 @@ var Tool = require('./tool');
 
 function SurfaceTool() {
   Tool.apply(this, arguments);
-    
+  
   // NOTE: We were doing this in a debounced way but that leads to edge cases.
   // E.g. When toggling a new link, the tool state gets immediately updated
   // to show the edit prompt, but afterwards the delayed selection:change event
@@ -81,6 +84,41 @@ SurfaceTool.Prototype = function() {
     if (surface) {
       return surface.getContainer();
     }
+  };
+
+  this.onClick = function(e) {
+    e.preventDefault();
+  };
+
+  this.onMouseDown = function(e) {
+    e.preventDefault();
+    if (this.state.disabled) {
+      return;
+    }
+    this.performAction();
+  };
+
+  this.render = function() {
+    var title = this.props.title || _.capitalize(this.getName());
+
+    if (this.state.mode) {
+      title = [_.capitalize(this.state.mode), title].join(' ');
+    }
+
+    var el = $$("button")
+      .attr('title', title)
+      .addClass('button tool')
+      .on('mousedown', this.onMouseDown)
+      .on('click', this.onClick);
+
+    if (this.state.disabled) {
+      el.addClass('disabled');
+    }
+    if (this.state.active) {
+      el.addClass('active');
+    }
+    el.append(this.props.children);
+    return el;
   };
 };
 

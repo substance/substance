@@ -41,6 +41,7 @@ var Editor = Component.extend({
     var ArticleClass = this.config.article || SubstanceArticle;
     var components = this.config.components || defaultComponents;
 
+
     this.doc = new ArticleClass();
     this.doc.loadHtml(this.props.content);
 
@@ -78,14 +79,15 @@ var Editor = Component.extend({
     el.append(toolbar);
 
     // Content Container
-    el.append($$(ContainerComponent)
-      .ref('bodyContainer')
-      .attr({ contentEditable: true })
-      .addProps({
+    el.append(
+      $$(ContainerComponent, {
         doc: this.doc,
         node: this.doc.get('body'),
-        editor: this.editor
+        editor: this.editor,
+        commands: this.config.commands
       })
+      .ref('bodyContainer')
+      .attr({ contentEditable: true })
     );
     return el;
   },
