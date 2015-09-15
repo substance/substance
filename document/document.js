@@ -265,56 +265,6 @@ Document.Prototype = function() {
     }
   };
 
-  // sel: PropertySelection
-  // options:
-  //   container: container instance
-  //   type: string (annotation type filter)
-  //
-  // WARNING: Returns an empty array when selection is a container selection
-  this.getAnnotationsForSelection = function(sel, options) {
-    options = options || {};
-    var annotations;
-    var path, startOffset, endOffset;
-
-    if (sel.isPropertySelection()) {
-      path = sel.getPath();
-      startOffset = sel.getStartOffset();
-      endOffset = sel.getEndOffset();
-    } else {
-      return [];
-    }
-    annotations = this.annotationIndex.get(path, startOffset, endOffset);
-    if (options.type) {
-      annotations = _.filter(annotations, AnnotationIndex.filterByType(options.type));
-    }
-    return annotations;
-  };
-
-  // Attention: looking for container annotations is not as efficient
-  // as property selections, as we do not have an index that has
-  // notion of the spatial extend of an annotation
-  // (which would depend on a model-side implementation of Container).
-  // Opposed to that, common annotations are bound to properties which make it easy to lookup.
-  this.getContainerAnnotationsForSelection = function(sel, container, options) {
-    if (!container) {
-      // Fail more silently
-      return [];
-      // throw new Error('Container required.');
-    }
-    var annotations;
-    // Also look for container annotations if a Container instance is given
-    if (options.type) {
-      annotations = this.getIndex('type').get(options.type);
-    } else {
-      annotations = this.getIndex('container-annotation-anchors').byId;
-    }
-    annotations = _.filter(annotations, function(anno) {
-      var annoSel = anno.getSelection();
-      return sel.overlaps(annoSel);
-    });
-    return annotations;
-  };
-
   this.getDocumentMeta = function() {
     return this.get('document');
   };

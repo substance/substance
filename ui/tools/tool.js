@@ -54,8 +54,10 @@ Tool.Prototype = function() {
   this.render = function() {
     throw new Error('render is abstract.');
   };
-
 };
 
+
 OO.inherit(Tool, Component);
+
+
 module.exports = Tool;

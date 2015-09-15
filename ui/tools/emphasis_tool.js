@@ -3,7 +3,10 @@
 var AnnotationTool = require('./annotation_tool');
 
 var EmphasisTool = AnnotationTool.extend({
-  name: "emphasis"
+  static: {
+    name: 'emphasis',
+    command: 'toggleEmphasis'
+  }
 });
 
 module.exports = EmphasisTool;

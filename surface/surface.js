@@ -7,6 +7,8 @@ var SurfaceSelection = require('./surface_selection');
 var Document = require('../document');
 var Selection = Document.Selection;
 
+var defaultCommands = require('../surface/commands');
+
 var __id__ = 0;
 
 function Surface(surfaceManager, doc, editor, options) {
@@ -17,6 +19,8 @@ function Surface(surfaceManager, doc, editor, options) {
   }
 
   options = options || {};
+
+  this.registerCommands(options.commands || defaultCommands);
 
   this.__id__ = __id__++;
   this.name = options.name || this.__id__;
@@ -83,6 +87,41 @@ function Surface(surfaceManager, doc, editor, options) {
 
 Surface.Prototype = function() {
 
+  // Used by TextTool
+  this.getTextCommands = function() {
+    var textCommands = {};
+
+    _.each(this.commands, function(command) {
+      // TODO: Use a more explicit indicator to detect a switch text command
+      if (command.constructor.static.textTypeName) {
+        textCommands[command.constructor.static.name] = command;
+      }
+    });
+    return textCommands;
+  };
+
+  this.registerCommands = function(commands) {
+    this.commands = {};
+    _.each(commands, function(CommandClass) {
+      var cmd = new CommandClass(this);
+      this.commands[CommandClass.static.name] = cmd;
+    }, this);
+  };
+
+  this.getCommand = function(commandName) {
+    return this.commands[commandName];
+  };
+
+  this.executeCommand = function(commandName) {
+    var cmd = this.getCommand(commandName);
+    if (!cmd) {
+      console.warn('command', commandName, 'not registered on Surface');
+      return;
+    }
+    // Run command
+    cmd.execute();
+  };
+
   this.getName = function() {
     return this.name;
   };
@@ -92,6 +131,11 @@ Surface.Prototype = function() {
   };
 
   this.getContainerName = function() {
+    console.warn('DEPRECATED: Use getContainerId()');
+    return this.getContainerId();
+  };
+
+  this.getContainerId = function() {
     if (this.editor.isContainerEditor()) {
       return this.editor.getContainerId();
     }
@@ -310,6 +354,21 @@ Surface.Prototype = function() {
       } else {
         this.undo();
       }
+      handled = true;
+    }
+    // Toggle strong: cmd+b ctrl+b
+    else if (e.keyCode === 66 && (e.metaKey||e.ctrlKey)) {
+      this.executeCommand('toggleStrong');
+      handled = true;
+    }
+    // Toggle emphasis: cmd+i ctrl+i
+    else if (e.keyCode === 73 && (e.metaKey||e.ctrlKey)) {
+      this.executeCommand('toggleEmphasis');
+      handled = true;
+    }
+    // Toggle link: cmd+l ctrl+l
+    else if (e.keyCode === 76 && (e.metaKey||e.ctrlKey)) {
+      this.executeCommand('toggleLink');
       handled = true;
     }
 
@@ -698,13 +757,13 @@ Surface.Prototype = function() {
   this.getAnnotationsForProperty = function(path) {
     var doc = this.getDocument();
     var annotations = doc.getIndex('annotations').get(path);
-    var containerName = this.getContainerName();
-    if (containerName) {
+    var containerId = this.getContainerId();
+    if (containerId) {
       // Anchors
-      var anchors = doc.getIndex('container-annotation-anchors').get(path, containerName);
+      var anchors = doc.getIndex('container-annotation-anchors').get(path, containerId);
       annotations = annotations.concat(anchors);
       // Fragments
-      var fragments = doc.containerAnnotationIndex.getFragments(path, containerName);
+      var fragments = doc.containerAnnotationIndex.getFragments(path, containerId);
       annotations = annotations.concat(fragments);
     }
     return annotations;

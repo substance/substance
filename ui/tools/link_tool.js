@@ -6,7 +6,6 @@ var $$ = Component.$$;
 var AnnotationTool = require('./annotation_tool');
 var _ = require('../../basics/helpers');
 
-
 var EditLinkPrompt = Component.extend({
 
   onSave: function(e) {
@@ -14,6 +13,15 @@ var EditLinkPrompt = Component.extend({
     this.props.tool.updateLink({
       url: this.refs.url.$el.val()
     });
+  },
+
+  // Tried setting .htmlProp('autofocus', true) in render
+  // But this only worked for the first time
+  didMount: function() {
+    var $el = this.refs.url.$el;
+    _.delay(function() {
+      $el.focus();
+    }, 0);
   },
 
   onDelete: function(e) {
@@ -29,6 +37,9 @@ var EditLinkPrompt = Component.extend({
       $$('div').addClass('prompt-title').append('Hyperlink'),
       $$('input').attr({type: 'text', placeholder: 'http://your-website.com', value: link.url})
                  .ref('url')
+                 // This only works on the first load. Why?
+                 // Is this element even preserved when unmounted and rerendered?
+                 .htmlProp('autofocus', true)
                  .on('change', this.onSave),
       $$('a').attr({href: '#'})
              .addClass('delete-link')
@@ -38,7 +49,6 @@ var EditLinkPrompt = Component.extend({
     return el;
   }
 });
-
 
 /**
  * LinkTool
@@ -52,54 +62,25 @@ function LinkTool() {
 
 LinkTool.Prototype = function() {
 
-  this.getAnnotationData = function() {
-    return {
-      url: "",
-      title: ""
-    };
+  this.static = {
+    name: 'link',
+    command: 'toggleLink'
   };
 
-  // Immediately switch to edit mode after link creation
-  // and make it show the edit prompt.
-  this.afterCreate = function(anno) {
-    var state = this.getState();
-    var newState = _.extend({}, state);
-    newState.mode = 'edit';
-    newState.showPrompt = true;
-    newState.linkId = anno.id;
-    this.setState(newState);
-  };
-  
-  this.update = function(sel, surface) {
-    // this.surface = surface;
-    if ( !surface.isEnabled() || sel.isNull() || sel.isContainerSelection() ) {
-      return this.setDisabled();
-    }
+  this.didInitialize = function() {
     var doc = this.getDocument();
-    var annos = doc.getAnnotationsForSelection(sel, { type: 'link' });
+    doc.connect(this, {
+      'app:edit:link': this.togglePrompt
+    });
+  };
 
-    var newState = {
-      surface: surface,
-      disabled: false,
-      active: false,
-      mode: null,
-      sel: sel,
-      annos: annos
-    };
-    if (this.canCreate(annos, sel)) {
-      newState.mode = "create";
-    } else if (this.canTruncate(annos, sel)) {
-      newState.mode = "truncate";
-      newState.active = true;
-    } else if (this.canExpand(annos, sel)) {
-      newState.mode = "expand";
-    } else if (annos.length === 1) {
-      newState.mode = "edit";
-      newState.linkId = annos[0].id;      
-      newState.active = true;
-    } else {
-      return this.setDisabled();
-    }
+  this.willUnmount = function() {
+    var doc = this.getDocument();
+    doc.disconnect(this);
+  };
+
+  this.togglePrompt = function() {
+    var newState = _.extend({}, this.state, {showPrompt: !this.state.showPrompt});
     this.setState(newState);
   };
 
@@ -124,22 +105,12 @@ LinkTool.Prototype = function() {
   };
 
   this.getLink = function() {
-    return this.getDocument().get(this.state.linkId);
+    return this.getDocument().get(this.state.annotationId);
   };
 
-  this.performAction = function() {
-    var state = this.getState();
-    var newState = _.extend({}, state);
-    if (state.mode === "edit") {
-      newState.showPrompt = !state.showPrompt;
-      this.setState(newState);
-    } else {
-      AnnotationTool.prototype.performAction.call(this);
-    }
-  };
 
   this.render = function() {
-    var title = this.props.title;
+    var title = this.props.title || _.capitalize(this.getToolName());
 
     if (this.state.mode) {
       title = [_.capitalize(this.state.mode), title].join(' ');
@@ -155,6 +126,7 @@ LinkTool.Prototype = function() {
     if (this.state.mode === 'edit') {
       el.addClass('active');
     }
+
     if (this.state.mode) {
       el.addClass(this.state.mode);
     }
@@ -166,7 +138,6 @@ LinkTool.Prototype = function() {
       .on('click', this.onClick);
 
     button.append(this.props.children);
-
     el.append(button);
 
     // When we are in edit mode showing the edit prompt
@@ -175,14 +146,10 @@ LinkTool.Prototype = function() {
       var prompt = $$(EditLinkPrompt, {link: link, tool: this});
       el.append(prompt);
     }
-
     return el;
   };
 };
 
-
 OO.inherit(LinkTool, AnnotationTool);
-
-LinkTool.static.name = 'link';
 
 module.exports = LinkTool;

@@ -3,7 +3,10 @@
 var AnnotationTool = require('./annotation_tool');
 
 var StrongTool = AnnotationTool.extend({
-  name: "strong"
+  static: {
+    name: 'strong',
+    command: 'toggleStrong'
+  }
 });
 
 module.exports = StrongTool;

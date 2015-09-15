@@ -10,16 +10,14 @@ var Tool = require('./tool');
 
 function SurfaceTool() {
   Tool.apply(this, arguments);
-  
-  this.surfaceManager = this.context.surfaceManager;
-  
+    
   // NOTE: We were doing this in a debounced way but that leads to edge cases.
   // E.g. When toggling a new link, the tool state gets immediately updated
   // to show the edit prompt, but afterwards the delayed selection:change event
   // immediately leads to a close of the prompt. We will observe tool performance
   // propagating each selection:changed event immediately.
   // We could also throttle
-  this.surfaceManager.on('selection:changed', this.update, this);
+  this.context.surfaceManager.on('selection:changed', this.update, this);
 }
 
 SurfaceTool.Prototype = function() {
@@ -31,7 +29,7 @@ SurfaceTool.Prototype = function() {
    */
 
   this.willUnmount = function() {
-    this.surfaceManager.off('selection:changed', this.update);
+    this.context.surfaceManager.off('selection:changed', this.update);
   };
 
   /**
@@ -57,7 +55,7 @@ SurfaceTool.Prototype = function() {
    */
 
   this.getSurface = function() {
-    return this.surfaceManager.getFocusedSurface();
+    return this.context.surfaceManager.getFocusedSurface();
   };
 
   /**
@@ -68,10 +66,7 @@ SurfaceTool.Prototype = function() {
    */
 
   this.getDocument = function() {
-    var surface = this.getSurface();
-    if (surface) {
-      return surface.getDocument();
-    }
+    return this.context.surfaceManager.getDocument();
   };
 
   /**
