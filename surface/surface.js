@@ -38,16 +38,15 @@ function Surface(surfaceManager, doc, editor, options) {
 
   this.logger = options.logger || window.console;
 
-  // TODO: VE make jquery injectable
   this.$ = $;
-  this.$window = this.$( window );
-  this.$document = this.$( window.document );
+  this.$window = this.$(window);
+  this.$document = this.$(window.document);
 
   this.dragging = false;
 
-  this._onMouseUp = _.bind( this.onMouseUp, this );
-  this._onMouseDown = _.bind( this.onMouseDown, this );
-  this._onMouseMove = _.bind( this.onMouseMove, this );
+  this._onMouseUp = _.bind(this.onMouseUp, this);
+  this._onMouseDown = _.bind(this.onMouseDown, this);
+  this._onMouseMove = _.bind(this.onMouseMove, this);
 
   this._onKeyDown = _.bind(this.onKeyDown, this);
   this._onTextInput = _.bind(this.onTextInput, this);
@@ -176,10 +175,6 @@ Surface.Prototype = function() {
     this.element = element;
     this.$element = $(element);
 
-    // We leave this now to the view implementation, because readers don't have ce on.
-    // if (this.enableContentEditable) {
-    //   this.$element.prop('contentEditable', 'true');
-    // }
     this.surfaceSelection = new SurfaceSelection(element, doc, this.getContainer());
 
     this.$element.addClass('surface');
@@ -336,8 +331,10 @@ Surface.Prototype = function() {
         break;
     }
 
-    // Built-in key combos
+    // Note: when adding a new handler you might want to enable this log to see keyCodes etc.
     // console.log('####', e.keyCode, e.metaKey, e.ctrlKey, e.shiftKey);
+
+    // Built-in key combos
     // Ctrl+A: select all
     var handled = false;
     if ( (e.ctrlKey||e.metaKey) && e.keyCode === 65 ) {
@@ -645,6 +642,8 @@ Surface.Prototype = function() {
     //  - Context-menu:
     //      - Delete
     //      - Note: copy, cut, paste work just fine
+    //  - dragging selected text
+    //  - spell correction
     console.info("We want to enable a DOM MutationObserver which catches all changes made by native interfaces (such as spell corrections, etc). Lookout for this message and try to set Surface.skipNextObservation=true when you know that you will mutate the DOM.");
   };
 
@@ -679,7 +678,7 @@ Surface.Prototype = function() {
     if (this.surfaceSelection) {
       var surfaceSelection = this.surfaceSelection;
       var sel = this.getSelection();
-      // IMO this delay was just necessary in case of async rerendering, e.g., with react.
+      // This delay was just necessary in case of async rerendering, e.g., with react.
       // without it, the observed DOM selection flickering seems much better.
       // setTimeout(function() {
       surfaceSelection.setSelection(sel);
@@ -711,6 +710,9 @@ Surface.Prototype = function() {
     return this.logger;
   };
 
+  // EXPERIMENTAL:
+  // Adds a span at the current cursor position. This way it is possible to
+  // layout a popup relative to the cursor.
   this.placeCaretElement = function() {
     var sel = this.getSelection();
     if (sel.isNull()) {
@@ -813,6 +815,5 @@ Surface.detectIE = function() {
   // other browser
   return false;
 };
-
 
 module.exports = Surface;
