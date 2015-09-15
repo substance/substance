@@ -7,7 +7,7 @@ var SurfaceTool = require('./surface_tool');
 var _ = require('../../basics/helpers');
 
 /**
- * Abstract class for annotation tools like StrongTool, EmphasisTool
+ * Abstract class for annotation tools like StrongTool, EmphasisTool, LinkTool
  * 
  * Implements the SurfaceTool API.
  */
@@ -36,11 +36,13 @@ AnnotationTool.Prototype = function() {
     }
   };
 
+
   // When update is called we can be sure the Surface is active
   this.update = function(sel, surface) {
-    if ((!surface.isEnabled()) || sel.isNull() ) {
+    if ((!surface.isEnabled()) || sel.isNull()) {
       return this.setDisabled();
     }
+
     var command = this.getCommand();
     if (!command) {
       console.log('Command', this.constructor.static.command, 'not registered on Surface');
@@ -51,8 +53,7 @@ AnnotationTool.Prototype = function() {
     var newState = {
       disabled: false,
       active: false,
-      mode: null,
-      annos: annos
+      mode: null
     };
 
     // We can skip all checking if a disabled condition is met
@@ -60,6 +61,10 @@ AnnotationTool.Prototype = function() {
     // selection is a container selection
     if (command.isDisabled(annos, sel)) {
       this.setDisabled();
+    } else if (command.canEdit(annos, sel)) {
+      newState.mode = "edit";
+      newState.annotationId = annos[0].id;
+      newState.active = true;
     } else if (command.canCreate(annos, sel)) {
       newState.mode = "create";
     } else if (command.canFuse(annos, sel)) {
@@ -72,14 +77,11 @@ AnnotationTool.Prototype = function() {
       newState.mode = "delete";
     } else if (command.canExpand(annos, sel)) {
       newState.mode = "expand";
+    } else {
+      newState.disabled = true;
     }
 
-    // Verifies if the detected mode has been disabled by the concrete implementation
-    if (!newState.mode) {
-      return this.setDisabled();
-    } else {
-      this.setState(newState);
-    }
+    this.setState(newState);
   };
 
   // This should go into some command abstraction so we can reuse this with keybindings

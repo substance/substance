@@ -15,12 +15,10 @@ HeadingComponent.Prototype = function() {
     return $$('div')
       .addClass("content-node heading level-"+this.props.node.level)
       .attr("data-id", this.props.node.id)
-      .append($$(TextProperty)
-        .addProps({
-          doc: this.props.doc,
-          path: [ this.props.node.id, "content"]
-        })
-      );
+      .append($$(TextProperty, {
+        doc: this.props.doc,
+        path: [ this.props.node.id, "content"]
+      }));
   };
 };
 

@@ -49,6 +49,11 @@ ToggleAnnotationCommand.Prototype = function() {
     return !helpers.isContainerAnnotation(doc, annotationType) && !sel.isPropertySelection();
   };
 
+  // Not implemented by default
+  this.canEdit = function(/*annos, sel*/) {
+    return false;
+  };
+
   // When there's no existing annotation overlapping, we create a new one.
   this.canCreate = function(annos, sel) {
     return (annos.length === 0 && !sel.isCollapsed());
@@ -89,12 +94,14 @@ ToggleAnnotationCommand.Prototype = function() {
     return annos;
   };
 
-  // Execute command and trigger 
+  // Execute command and trigger transformations
   this.execute = function() {
     var annos = this.getAnnotationsForSelection();
     var sel = this.getSelection();
 
-    if (this.canCreate(annos, sel)) {
+    if (this.canEdit(annos, sel)) {
+      this.executeEdit(annos, sel);
+    } else if (this.canCreate(annos, sel)) {
       this.executeCreate();
     } else if (this.canFuse(annos, sel)) {
       this.executeFusion();
@@ -126,6 +133,10 @@ ToggleAnnotationCommand.Prototype = function() {
     }, this);
 
     return result;
+  };
+
+  this.executeEdit = function() {
+    throw new Error('Contract: executeEdit must be imlemented by command');
   };
 
   this.executeCreate = function() {

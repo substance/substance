@@ -11,13 +11,17 @@ var SurfaceManager = function(doc) {
   this.focusedSurface = null;
   this.stack = [];
   doc.connect(this, { 'document:changed': this.onDocumentChange }, {
-    //lower priority so that everyting is up2date
-    //when we render the selection
+    // Use lower priority so that everyting is up2date
+    // when we render the selection
     priority: -1
   });
 };
 
 SurfaceManager.Prototype = function() {
+
+  this.getDocument = function() {
+    return this.doc;
+  };
 
   this.dispose = function() {
     this.doc.disconnect(this);
