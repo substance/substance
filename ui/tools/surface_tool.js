@@ -13,17 +13,25 @@ var $$ = Component.$$;
 
 function SurfaceTool() {
   Tool.apply(this, arguments);
-  
-  // NOTE: We were doing this in a debounced way but that leads to edge cases.
-  // E.g. When toggling a new link, the tool state gets immediately updated
-  // to show the edit prompt, but afterwards the delayed selection:change event
-  // immediately leads to a close of the prompt. We will observe tool performance
-  // propagating each selection:changed event immediately.
-  // We could also throttle
-  this.context.surfaceManager.on('selection:changed', this.update, this);
 }
 
 SurfaceTool.Prototype = function() {
+
+  /**
+   * Binds event handler after getting mounted.
+   *
+   * Custom tool implementation must do a super call.
+   */
+
+  this.didMount = function() {
+    // NOTE: We were doing this in a debounced way but that leads to edge cases.
+    // E.g. When toggling a new link, the tool state gets immediately updated
+    // to show the edit prompt, but afterwards the delayed selection:change event
+    // immediately leads to a close of the prompt. We will observe tool performance
+    // propagating each selection:changed event immediately.
+    // We could also throttle
+    this.context.surfaceManager.on('selection:changed', this.update, this);
+  };
 
   /**
    * Unbinds event handler before getting unmounted.
@@ -40,19 +48,20 @@ SurfaceTool.Prototype = function() {
    *
    * This must be overwritten by the tool implementation, analyzing the
    * selection and updating the tool state appropriately.
-   * 
+   *
    * @param {Selection} sel
    * @param {Surface} surface
    * @public
    */
 
-  this.update = function(/*sel, surface*/) {
+  this.update = function(sel, surface) {
+    /* jshint unused:false*/
     throw new Error('Must be defined by your tool implementation');
   };
 
   /**
    * Return the currently focused surface
-   * 
+   *
    * @return {Surface}
    * @public
    */
@@ -63,7 +72,7 @@ SurfaceTool.Prototype = function() {
 
   /**
    * Return the document associated with the focused surface.
-   * 
+   *
    * @return {Document}
    * @public
    */
@@ -74,7 +83,7 @@ SurfaceTool.Prototype = function() {
 
   /**
    * Return the currently active container
-   * 
+   *
    * @return {Document.Container}
    * @public
    */
