@@ -9,7 +9,6 @@ Surface.Clipboard = require('./clipboard');
 
 Surface.NodeView = require('./node_view');
 Surface.AnnotationView = require('./annotation_view');
-Surface.TextProperty = require('./text_property');
 
 Surface.Panel = require('./panel');
 

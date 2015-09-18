@@ -964,7 +964,6 @@ Component.Prototype = function ComponentPrototype() {
 
   this._setProps = function(props) {
     this.props = props || {};
-
     // freezing state to 'enforce' immutability
     Object.freeze(this.props);
   };

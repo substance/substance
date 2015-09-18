@@ -6,6 +6,7 @@ var Substance = require('../basics');
 var SurfaceSelection = require('./surface_selection');
 var Document = require('../document');
 var Selection = Document.Selection;
+var TextPropertyManager = require('../document/text_property_manager');
 
 var defaultCommands = require('../surface/commands');
 
@@ -26,6 +27,12 @@ function Surface(surfaceManager, doc, editor, options) {
   this.name = options.name || this.__id__;
   this.doc = doc;
   this.surfaceManager = surfaceManager;
+
+  if (editor.isContainerEditor()) {
+    this.textPropertyManager = new TextPropertyManager(doc, editor.getContainerId());
+  } else {
+    this.textPropertyManager = new TextPropertyManager(doc);
+  }
 
   this.selection = Document.nullSelection;
 
@@ -755,22 +762,9 @@ Surface.Prototype = function() {
     this.placeCaretElement();
   };
 
-  // API for TextProperties
-  this.getAnnotationsForProperty = function(path) {
-    var doc = this.getDocument();
-    var annotations = doc.getIndex('annotations').get(path);
-    var containerId = this.getContainerId();
-    if (containerId) {
-      // Anchors
-      var anchors = doc.getIndex('container-annotation-anchors').get(path, containerId);
-      annotations = annotations.concat(anchors);
-      // Fragments
-      var fragments = doc.containerAnnotationIndex.getFragments(path, containerId);
-      annotations = annotations.concat(fragments);
-    }
-    return annotations;
+  this.getTextPropertyManager = function() {
+    return this.textPropertyManager;
   };
-
 };
 
 OO.inherit(Surface, Substance.EventEmitter);

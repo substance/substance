@@ -47,6 +47,10 @@ AbstractDocument.Prototype = function() {
     return this.data.getIndex(name);
   };
 
+  this.getNodes = function() {
+    return this.data.nodes;
+  };
+
   /**
    * Enable or disable auto-attaching of nodes.
    * When this is enabled (default), a created node
@@ -249,7 +253,7 @@ AbstractDocument.Prototype = function() {
     if (this.AUTO_ATTACH) {
       // create the node from schema
       node.attach(this);
-    } 
+    }
   };
 
   this._didDeleteNode = function(node) {

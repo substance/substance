@@ -94,6 +94,11 @@ Helpers.extend = require('lodash/object/extend');
  * @method omit
  */
 Helpers.omit = require('lodash/object/omit');
+/**
+ * See https://lodash.com/docs#values
+ * @method values
+ */
+Helpers.values = require('lodash/object/values');
 
 // Array helpers
 
