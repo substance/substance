@@ -112,6 +112,10 @@ Container.Prototype = function() {
     return address;
   };
 
+  this.getPath = function(address) {
+    return this.getPathForAddress(address);
+  };
+
   this._getNodeChain = function(address) {
     var doc = this.getDocument();
     if (address.length < 2) {
@@ -168,7 +172,7 @@ Container.Prototype = function() {
       } else {
         if (address[0] < this.nodes.length-1) {
           nodeId = this.nodes[address[0]+1];
-          return [address[0]+1].concat(this.getFirstAddress(doc.get(nodeId)));
+          return [address[0]+1].concat(this._getFirstAddress(doc.get(nodeId)));
         } else {
           return null;
         }
@@ -201,7 +205,7 @@ Container.Prototype = function() {
         }
         var nextIndex = childIndex+1;
         var sibling = parent.getChildAt(nextIndex);
-        var tail = this.getFirstAddress(sibling);
+        var tail = this._getFirstAddress(sibling);
         newAddress = address.slice(0, i).concat([nextIndex]).concat(tail);
         return newAddress;
       }
@@ -218,7 +222,7 @@ Container.Prototype = function() {
       } else if (address[0] > 0) {
         nodeId = this.nodes[address[0]-1];
         node = doc.get(nodeId);
-        return [address[0]-1].concat(this.getLastAddress(node));
+        return [address[0]-1].concat(this._getLastAddress(node));
       } else {
         return null;
       }
@@ -247,14 +251,16 @@ Container.Prototype = function() {
         var parent = nodes[i];
         var prevIndex = address[i]-1;
         var sibling = parent.getChildAt(prevIndex);
-        var tail = this.getLastAddress(sibling);
+        var tail = this._getLastAddress(sibling);
         newAddress = address.slice(0, i).concat([prevIndex]).concat(tail);
         return newAddress;
       }
     }
   };
 
-  this.getFirstAddress = function(node) {
+  // Note: this is internal as it does provide address partials
+  // i.e., when called for nested nodes
+  this._getFirstAddress = function(node) {
     var address = [];
     while (node.hasChildren()) {
       address.push(0);
@@ -265,7 +271,7 @@ Container.Prototype = function() {
     return address;
   };
 
-  this.getLastAddress = function(node) {
+  this._getLastAddress = function(node) {
     var address = [];
     while (node.hasChildren()) {
       var childIndex = node.getChildCount()-1;
@@ -275,6 +281,16 @@ Container.Prototype = function() {
     // last property
     address.push(node.getComponents().length-1);
     return address;
+  };
+
+  this.getFirstAddress = function(topLevelNode) {
+    var pos = this.getChildIndex(topLevelNode);
+    return [pos].concat(this._getFirstAddress(topLevelNode));
+  };
+
+  this.getLastAddress = function(topLevelNode) {
+    var pos = this.getChildIndex(topLevelNode);
+    return [pos].concat(this._getLastAddress(topLevelNode));
   };
 
   this.getAddressRange = function(startAddress, endAddress) {
@@ -304,8 +320,8 @@ Container.Prototype = function() {
 
   this.getAddressesForNode = function(node) {
     var pos = this.getChildIndex(node);
-    var first = [pos].concat(this.getFirstAddress(node));
-    var last = [pos].concat(this.getLastAddress(node));
+    var first = [pos].concat(this._getFirstAddress(node));
+    var last = [pos].concat(this._getLastAddress(node));
     return this.getAddressRange(first, last);
   };
 
@@ -578,6 +594,17 @@ Container.Prototype = function() {
 OO.inherit(Container, Node);
 
 Container.static.name = "container";
+
+Object.defineProperties(Container.prototype, {
+  length: {
+    get: function() {
+      return this.nodes.length;
+    },
+    set: function() {
+      throw new Error('container.length is read-only.');
+    }
+  }
+});
 
 Container.Component = function Component(path, rootId) {
   this.path = path;
