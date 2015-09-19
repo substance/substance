@@ -54,6 +54,22 @@ var ContainerAnnotation = Node.extend({
     return this._endAnchor;
   },
 
+  getStartPath: function() {
+    return this.startPath;
+  },
+
+  getEndPath: function() {
+    return this.endPath;
+  },
+
+  getStartOffset: function() {
+    return this.startOffset;
+  },
+
+  getEndOffset: function() {
+    return this.endOffset;
+  },
+
   // Provide a selection which has the same range as this annotation.
   getSelection: function() {
     var doc = this.getDocument();
