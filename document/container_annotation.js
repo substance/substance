@@ -120,7 +120,7 @@ var ContainerAnnotation = Node.extend({
     var endAnchor = this.getEndAnchor();
     var container = doc.get(this.container);
     var fragment;
-    var paths = container.getPropertiesForRange(this.startPath, this.endPath);
+    var paths = container.getPathRange(this.startPath, this.endPath);
     if (paths.length === 1) {
       fragments.push(new ContainerAnnotation.Fragment(this, paths[0], "property"));
     } else if (paths.length > 1) {

@@ -169,7 +169,7 @@ ContainerSelection.Prototype = function() {
     var sels = [];
     var container = this.getContainer();
     var range = this.range;
-    var paths = container.getPropertiesForRange(range.start.path, range.end.path);
+    var paths = container.getPathRange(range.start.path, range.end.path);
     var doc = container.getDocument();
     for (var i = 0; i < paths.length; i++) {
       var path = paths[i];
@@ -212,12 +212,12 @@ ContainerSelection.Prototype = function() {
     }
     var container = this.getContainer();
     var range = sel.getRange();
-    var startAddress = container.getPropertyAddress(range.start.path);
+    var startAddress = container.getAddress(range.start.path);
     var endAddress;
     if (sel.isCollapsed()) {
       endAddress = startAddress;
     } else {
-      endAddress = container.getPropertyAddress(range.end.path);
+      endAddress = container.getAddress(range.end.path);
     }
     var containerRange = {
       start: {

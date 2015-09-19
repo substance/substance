@@ -84,7 +84,7 @@ Container.Prototype = function() {
     EXPERIMENTAL: numerical addressing
   */
 
-  this.getPropertyAddress = function(path) {
+  this.getAddress = function(path) {
     var doc = this.getDocument();
     var nodeId = path[0];
     var property = path[1];
@@ -155,7 +155,7 @@ Container.Prototype = function() {
     return path;
   };
 
-  this.getNextPropertyAddress = function(address) {
+  this.getNextAddress = function(address) {
     var nodeId, node, properties;
     var doc = this.getDocument();
     // extra implementation for the most common case
@@ -168,7 +168,7 @@ Container.Prototype = function() {
       } else {
         if (address[0] < this.nodes.length-1) {
           nodeId = this.nodes[address[0]+1];
-          return [address[0]+1].concat(this._getFirstAddress(doc.get(nodeId)));
+          return [address[0]+1].concat(this.getFirstAddress(doc.get(nodeId)));
         } else {
           return null;
         }
@@ -201,14 +201,14 @@ Container.Prototype = function() {
         }
         var nextIndex = childIndex+1;
         var sibling = parent.getChildAt(nextIndex);
-        var tail = this._getFirstAddress(sibling);
+        var tail = this.getFirstAddress(sibling);
         newAddress = address.slice(0, i).concat([nextIndex]).concat(tail);
         return newAddress;
       }
     }
   };
 
-  this.getPreviousPropertyAddress = function(address) {
+  this.getPreviousAddress = function(address) {
     var nodeId, node;
     var doc = this.getDocument();
     // extra implementation for the most common case
@@ -218,7 +218,7 @@ Container.Prototype = function() {
       } else if (address[0] > 0) {
         nodeId = this.nodes[address[0]-1];
         node = doc.get(nodeId);
-        return [address[0]-1].concat(this._getLastAddress(node));
+        return [address[0]-1].concat(this.getLastAddress(node));
       } else {
         return null;
       }
@@ -247,14 +247,14 @@ Container.Prototype = function() {
         var parent = nodes[i];
         var prevIndex = address[i]-1;
         var sibling = parent.getChildAt(prevIndex);
-        var tail = this._getLastAddress(sibling);
+        var tail = this.getLastAddress(sibling);
         newAddress = address.slice(0, i).concat([prevIndex]).concat(tail);
         return newAddress;
       }
     }
   };
 
-  this._getFirstAddress = function(node) {
+  this.getFirstAddress = function(node) {
     var address = [];
     while (node.hasChildren()) {
       address.push(0);
@@ -265,7 +265,7 @@ Container.Prototype = function() {
     return address;
   };
 
-  this._getLastAddress = function(node) {
+  this.getLastAddress = function(node) {
     var address = [];
     while (node.hasChildren()) {
       var childIndex = node.getChildCount()-1;
@@ -277,30 +277,45 @@ Container.Prototype = function() {
     return address;
   };
 
-  this.getPropertiesForRange = function(startPath, endPath) {
-    // TODO: this implementation could be optimized
-    var startAddress = this.getPropertyAddress(startPath);
-    var endAddress = this.getPropertyAddress(endPath);
-    var paths = [startPath];
+  this.getAddressRange = function(startAddress, endAddress) {
     if (endAddress < startAddress) {
       var tmp = startAddress;
       startAddress = endAddress;
       endAddress = tmp;
-      paths = [endPath];
     }
+    var addresses = [startAddress];
     if (startAddress < endAddress) {
       var address = startAddress;
-      var path;
       while (address < endAddress) {
-        address = this.getNextPropertyAddress(address);
-        path = this.getPathForAddress(address);
-        paths.push(path);
+        address = this.getNextAddress(address);
+        addresses.push(address);
       }
     }
-    return paths;
+    return addresses;
+  };
+
+  this.getPathRange = function(startPath, endPath) {
+    // TODO: this implementation could be optimized
+    var startAddress = this.getAddress(startPath);
+    var endAddress = this.getAddress(endPath);
+    var addresses = this.getAddressRange(startAddress, endAddress);
+    return _.map(addresses, this.getPathForAddress, this);
+  };
+
+  this.getAdressesForNode = function(node) {
+    var first = this.getFirstAddress(node);
+    var last = this.getLastAddress(node);
+    return getAddressRange(first, last);
+  };
+
+  this.getPathsForNode = function(node) {
+    var addresses = this.getAdressesForNode(node);
+    return _.map(addresses, this.getPathForAddress, this);
   };
 
   /** END: numerical addressing */
+
+
 
   this.getComponents = function() {
     console.error('DEPRECATED: this API will be removed.');
