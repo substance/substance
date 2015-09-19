@@ -5,6 +5,7 @@ var OO = require('../basics/oo');
 var PathAdapter = require('../basics/path_adapter');
 var Node = require('./node');
 var ContainerAnnotation = require('./container_annotation');
+var ParentNodeMixin = require('./parent_node_mixin');
 
 // Container
 // --------
@@ -34,6 +35,10 @@ var ContainerAnnotation = require('./container_annotation');
 //
 function Container() {
   Node.apply(this, arguments);
+
+  // mixin
+  ParentNodeMixin.call(this, 'nodes');
+
   this.components = [];
   this.nodeComponents = {};
   this.byPath = new PathAdapter({});
@@ -41,8 +46,10 @@ function Container() {
 
 Container.Prototype = function() {
 
+  _.extend(this, ParentNodeMixin.prototype);
+
   this.properties = {
-    nodes: ["array", "string"]
+    nodes: ["array", "id"]
   };
 
   this.didAttach = function() {
@@ -105,35 +112,46 @@ Container.Prototype = function() {
     return address;
   };
 
-  this.getPathForAddress = function(address) {
-    var nodeId, node, properties, propertyName, path;
+  this._getNodeChain = function(address) {
+    var doc = this.getDocument();
     if (address.length < 2) {
       throw new Error('Property addresses have a length of >= 2');
     }
-    var doc = this.getDocument();
+    var nodes = [];
+    var node;
+    var nodeId = this.nodes[address[0]];
     // simple and structured nodes
     if (address.length === 2) {
-      nodeId = this.nodes[address[0]];
       node = doc.get(nodeId);
-      properties = node.getComponents();
-      propertyName = properties[address[1]];
-      path = [nodeId, propertyName];
+      nodes.push(node);
     }
     // nested nodes
     else {
-      nodeId = this.nodes[address[0]];
       node = doc.get(nodeId);
-      for (var i = 1; i < address.length-1; i++) {
+      nodes.push(node);
+      for (var i = 1; node && i<address.length-1; i++) {
         node = node.getChildAt(address[i]);
-        nodeId = node.id;
+        nodes.push(node);
       }
-      properties = node.getComponents();
-      propertyName = properties[address[address.length-1]];
-      path = [nodeId, propertyName];
     }
-    if (!path[0]||!path[1]) {
-      throw new Error('Could not map address to a path: ' + address.toString());
+    if (nodes.length === 0) {
+      throw new Error('Could not resolve address: ' + address.toString());
     }
+    return nodes;
+  };
+
+  this._getNodeForAddress = function(address) {
+    return _.last(this._getNodeChain(address));
+  };
+
+  this.getPathForAddress = function(address) {
+    var node = this._getNodeForAddress(address);
+    var properties = node.getComponents();
+    var propertyName = properties[_.last(address)];
+    if (!propertyName) {
+      throw new Error('No property with index ' + _.last(address) + ' in node ' + JSON.stringify(node.toJSON()));
+    }
+    var path = [node.id, propertyName];
     return path;
   };
 
@@ -156,15 +174,32 @@ Container.Prototype = function() {
         }
       }
     }
-    // TODO: implementation with hierarchical nodes involved
     else {
-      nodeId = this.nodes[address[0]];
-      node = doc.get(nodeId);
+      var nodes = this._getNodeChain(address);
+      node = _.last(nodes);
       properties = node.getComponents();
-      if (properties.length > 1 && address[1] < properties.length - 1) {
-        return [address[0], address[1] + 1];
+      var newAddress;
+      if (properties.length > 1 && _.last(address) < properties.length-1) {
+        newAddress = address.slice(0);
+        newAddress[newAddress.length-1]++;
+        return newAddress;
       } else {
-        throw new Error('Not implemented.');
+        // find the first ancestor with a next sibling
+        // and take the first, deepest child
+        var parent, childIndex;
+        nodes.unshift(this);
+        for (var i = nodes.length-2; i >= 0; i--) {
+          parent = nodes[i];
+          childIndex = address[i];
+          if (childIndex < parent.getChildCount()-1) {
+            break;
+          }
+          node = parent;
+        }
+        var sibling = parent.getChildAt(childIndex+1);
+        var tail = this._getFirstAddress(sibling);
+        newAddress = address.slice(0, i).concat([childIndex+1]).concat(tail);
+        return newAddress;
       }
     }
   };

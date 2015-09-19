@@ -43,6 +43,43 @@ QUnit.test("Numerical address for deeply nested nodes (table cells)", function(a
   assert.deepEqual(container.getPropertyAddress(['td6', 'content']), [6,0,1,2,0], "Address of 'td6.content'.");
 });
 
+QUnit.test("Getting next address for simple nodes", function(assert) {
+  var doc = sample();
+  var container = doc.get('main');
+  var next = container.getNextPropertyAddress([0,0]);
+  assert.deepEqual(next, [1,0]);
+  next = container.getNextPropertyAddress(next);
+  assert.deepEqual(next, [2,0]);
+});
+
+QUnit.test("Getting next address for structured nodes", function(assert) {
+  var doc = sample();
+  var container = doc.get('main');
+  var next = container.getNextPropertyAddress([1,0]);
+  assert.deepEqual(next, [2,0]);
+  next = container.getNextPropertyAddress(next);
+  assert.deepEqual(next, [2,1]);
+  next = container.getNextPropertyAddress(next);
+  assert.deepEqual(next, [2,2]);
+  next = container.getNextPropertyAddress(next);
+  assert.deepEqual(next, [3,0]);
+});
+
+QUnit.test("Getting next address for nested nodes (list items)", function(assert) {
+  var doc = sample();
+  var container = doc.get('main');
+  var next = container.getNextPropertyAddress([3,0]);
+  assert.deepEqual(next, [4,0,0]);
+  next = container.getNextPropertyAddress(next);
+  assert.deepEqual(next, [4,1,0]);
+  next = container.getNextPropertyAddress(next);
+  assert.deepEqual(next, [4,2,0]);
+  next = container.getNextPropertyAddress(next);
+  assert.deepEqual(next, [4,3,0]);
+  next = container.getNextPropertyAddress(next);
+  assert.deepEqual(next, [5,0]);
+});
+
 QUnit.test("Property range with simple nodes", function(assert) {
   var doc = simpleSample();
   var container = doc.get('main');
