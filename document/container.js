@@ -302,20 +302,22 @@ Container.Prototype = function() {
     return _.map(addresses, this.getPathForAddress, this);
   };
 
-  this.getAdressesForNode = function(node) {
-    var first = this.getFirstAddress(node);
-    var last = this.getLastAddress(node);
-    return getAddressRange(first, last);
+  this.getAddressesForNode = function(node) {
+    var pos = this.getChildIndex(node);
+    var first = [pos].concat(this.getFirstAddress(node));
+    var last = [pos].concat(this.getLastAddress(node));
+    return this.getAddressRange(first, last);
   };
 
   this.getPathsForNode = function(node) {
-    var addresses = this.getAdressesForNode(node);
+    var addresses = this.getAddressesForNode(node);
     return _.map(addresses, this.getPathForAddress, this);
   };
 
   /** END: numerical addressing */
 
 
+  // THE API BELOW WILL BE REMOVED SOON
 
   this.getComponents = function() {
     console.error('DEPRECATED: this API will be removed.');

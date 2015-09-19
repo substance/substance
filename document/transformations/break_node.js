@@ -47,7 +47,7 @@ function breakTextNode(tx, args) {
   // split the text property and create a new paragraph node with trailing text and annotations transferred
   var text = node.content;
   var container = tx.get(containerId);
-  var nodePos = container.getPosition(node.id);
+  var nodePos = container.getChildIndex(node);
   var id = uuid(node.type);
   var newPath = [id, 'content'];
   var newNode;
