@@ -30,18 +30,26 @@ function deleteNode(tx, args) {
     // Note: during the course of this loop we might have deleted the node already
     // so, don't do it again
     if (!tx.get(anchor.id)) continue;
-    var comp = container.getComponent(anchor.path);
+
+    var address = container.getAddress(anchor.path);
+    var pos = address[0];
+
     if (anchor.isStart) {
-      if (comp.hasNext()) {
-        tx.set([anchor.id, 'startPath'], comp.next.path);
+      if (pos < container.length-1) {
+        var nextNode = container.getChildAt(pos+1);
+        var nextAddress = container.getFirstAddress(nextNode);
+        tx.set([anchor.id, 'startPath'], container.getPath(nextAddress));
         tx.set([anchor.id, 'startOffset'], 0);
       } else {
         tx.delete(anchor.id);
       }
     } else {
-      if (comp.hasPrevious()) {
-        var prevLength = tx.get(comp.previous.path).length;
-        tx.set([anchor.id, 'endPath'], comp.previous.path);
+      if (pos > 0) {
+        var previousNode = container.getChildAt(pos-1);
+        var previousAddress = container.getLastAddress(previousNode);
+        var previousPath = container.getPath(previousAddress);
+        var prevLength = tx.get(previousPath).length;
+        tx.set([anchor.id, 'endPath'], previousPath);
         tx.set([anchor.id, 'endOffset'], prevLength);
       } else {
         tx.delete(anchor.id);
