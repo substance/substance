@@ -1,0 +1,65 @@
+"use strict";
+
+require('../qunit_extensions');
+var containerAnnoSample = require('../../fixtures/container_anno_sample');
+var deleteNode = require('../../../document/transformations/delete_node');
+
+QUnit.module('Transformations/deleteNode');
+
+QUnit.test("DeleteNode usage", function(assert) {
+  var doc = containerAnnoSample();
+  assert.throws(function() {
+    deleteNode(doc, {});
+  });
+});
+
+QUnit.test("Delete a plain node", function(assert) {
+  var doc = containerAnnoSample();
+  doc.transaction(function(tx, args) {
+    args.nodeId = "p4";
+    deleteNode(tx, args);
+  });
+  assert.isNullOrUndefined(doc.get('p4'), "Node should have been deleted.");
+});
+
+QUnit.test("Delete annotations when deleting a node", function(assert) {
+  var doc = containerAnnoSample();
+  doc.transaction(function(tx, args) {
+    tx.create({
+      id: "test-anno",
+      type: "annotation",
+      path: ["p4", "content"],
+      startOffset: 0, endOffset: 5
+    });
+  });
+  assert.isDefinedAndNotNull(doc.get("test-anno"));
+
+  doc.transaction(function(tx, args) {
+    args.nodeId = "p4";
+    deleteNode(tx, args);
+  });
+  assert.isNullOrUndefined(doc.get("test-anno"), "Annotation should have been deleted too.");
+});
+
+QUnit.test("Move startAnchor of container annotation to next node.", function(assert) {
+  var doc = containerAnnoSample();
+  doc.transaction(function(tx, args) {
+    args.nodeId = "p1";
+    deleteNode(tx, args);
+  });
+  var anno = doc.get('a1');
+  assert.deepEqual(anno.getStartPath(), ["p2", "content"], "Start anchor should now be on second paragraph.");
+  assert.equal(anno.getStartOffset(), 0);
+});
+
+QUnit.test("Move endAnchor of container annotation to previous node.", function(assert) {
+  var doc = containerAnnoSample();
+  doc.transaction(function(tx, args) {
+    args.nodeId = "p3";
+    deleteNode(tx, args);
+  });
+  var anno = doc.get('a1');
+  var p2 = doc.get('p2');
+  assert.deepEqual(anno.getEndPath(), ["p2", "content"], "End anchor should now be on second paragraph.");
+  assert.equal(anno.getEndOffset(), p2.content.length);
+});
