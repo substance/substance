@@ -196,9 +196,13 @@ Container.Prototype = function() {
           }
           node = parent;
         }
-        var sibling = parent.getChildAt(childIndex+1);
+        if (i<0) {
+          return null;
+        }
+        var nextIndex = childIndex+1;
+        var sibling = parent.getChildAt(nextIndex);
         var tail = this._getFirstAddress(sibling);
-        newAddress = address.slice(0, i).concat([childIndex+1]).concat(tail);
+        newAddress = address.slice(0, i).concat([nextIndex]).concat(tail);
         return newAddress;
       }
     }
@@ -221,7 +225,32 @@ Container.Prototype = function() {
     }
     // TODO: implementation with hierarchical nodes involved
     else {
-      throw new Error('Not implemented.');
+      var nodes = this._getNodeChain(address);
+      node = _.last(nodes);
+      var newAddress;
+      if (_.last(address) > 0) {
+        newAddress = address.slice(0);
+        newAddress[newAddress.length-1]--;
+        return newAddress;
+      } else {
+        // find the first ancestor with a previous sibling
+        // and take the first, deepest child
+        nodes.unshift(this);
+        for (var i = nodes.length-2; i >= 0; i--) {
+          if (address[i] > 0) {
+            break;
+          }
+        }
+        if (i<0) {
+          return null;
+        }
+        var parent = nodes[i];
+        var prevIndex = address[i]-1;
+        var sibling = parent.getChildAt(prevIndex);
+        var tail = this._getLastAddress(sibling);
+        newAddress = address.slice(0, i).concat([prevIndex]).concat(tail);
+        return newAddress;
+      }
     }
   };
 

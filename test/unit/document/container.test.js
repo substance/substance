@@ -80,6 +80,114 @@ QUnit.test("Getting next address for nested nodes (list items)", function(assert
   assert.deepEqual(next, [5,0]);
 });
 
+QUnit.test("Getting next address for deeply nested nodes (table items)", function(assert) {
+  var doc = sample();
+  var container = doc.get('main');
+  var next = container.getNextPropertyAddress([5,0]);
+  assert.deepEqual(next, [6,0,0,0,0]);
+  next = container.getNextPropertyAddress(next);
+  assert.deepEqual(next, [6,0,0,1,0]);
+  next = container.getNextPropertyAddress(next);
+  assert.deepEqual(next, [6,0,0,2,0]);
+  next = container.getNextPropertyAddress(next);
+  assert.deepEqual(next, [6,0,1,0,0]);
+  next = container.getNextPropertyAddress(next);
+  assert.deepEqual(next, [6,0,1,1,0]);
+  next = container.getNextPropertyAddress(next);
+  assert.deepEqual(next, [6,0,1,2,0]);
+  next = container.getNextPropertyAddress(next);
+  assert.deepEqual(next, [7,0]);
+});
+
+QUnit.test("Should return null if there is no next address", function(assert) {
+  var doc = sample();
+  // the last is a simple/structured node
+  var container = doc.get('main');
+  var next = container.getNextPropertyAddress([7,0]);
+  assert.equal(next, null);
+  // the last is a nested node
+  doc.transaction(function(tx) {
+    tx.get('main').hide('p5');
+  });
+  var next = container.getNextPropertyAddress([6,0,1,2,0]);
+  assert.equal(next, null);
+});
+
+QUnit.test("Getting previous address for simple nodes", function(assert) {
+  var doc = sample();
+  var container = doc.get('main');
+  var previous = container.getPreviousPropertyAddress([2,0]);
+  assert.deepEqual(previous, [1,0]);
+  previous = container.getPreviousPropertyAddress(previous);
+  assert.deepEqual(previous, [0,0]);
+});
+
+QUnit.test("Getting previous address for structured nodes", function(assert) {
+  var doc = sample();
+  var container = doc.get('main');
+  var previous = container.getPreviousPropertyAddress([3,0]);
+  assert.deepEqual(previous, [2,2]);
+  previous = container.getPreviousPropertyAddress(previous);
+  assert.deepEqual(previous, [2,1]);
+  previous = container.getPreviousPropertyAddress(previous);
+  assert.deepEqual(previous, [2,0]);
+  previous = container.getPreviousPropertyAddress(previous);
+  assert.deepEqual(previous, [1,0]);
+});
+
+QUnit.test("Getting previous address for nested nodes (list items)", function(assert) {
+  var doc = sample();
+  var container = doc.get('main');
+  var previous = container.getPreviousPropertyAddress([5,0]);
+  assert.deepEqual(previous, [4,3,0]);
+  previous = container.getPreviousPropertyAddress(previous);
+  assert.deepEqual(previous, [4,2,0]);
+  previous = container.getPreviousPropertyAddress(previous);
+  assert.deepEqual(previous, [4,1,0]);
+  previous = container.getPreviousPropertyAddress(previous);
+  assert.deepEqual(previous, [4,0,0]);
+  previous = container.getPreviousPropertyAddress(previous);
+  assert.deepEqual(previous, [3,0]);
+});
+
+QUnit.test("Getting previous address for deeply nested nodes (table items)", function(assert) {
+  var doc = sample();
+  var container = doc.get('main');
+  var previous = container.getPreviousPropertyAddress([7,0]);
+  assert.deepEqual(previous, [6,0,1,2,0]);
+  previous = container.getPreviousPropertyAddress(previous);
+  assert.deepEqual(previous, [6,0,1,1,0]);
+  previous = container.getPreviousPropertyAddress(previous);
+  assert.deepEqual(previous, [6,0,1,0,0]);
+  previous = container.getPreviousPropertyAddress(previous);
+  assert.deepEqual(previous, [6,0,0,2,0]);
+  previous = container.getPreviousPropertyAddress(previous);
+  assert.deepEqual(previous, [6,0,0,1,0]);
+  previous = container.getPreviousPropertyAddress(previous);
+  assert.deepEqual(previous, [6,0,0,0,0]);
+  previous = container.getPreviousPropertyAddress(previous);
+  assert.deepEqual(previous, [5,0]);
+});
+
+QUnit.test("Should return null if there is no previous address", function(assert) {
+  var doc = sample();
+  // the first is a simple/structured node
+  var container = doc.get('main');
+  var previous = container.getPreviousPropertyAddress([0,0]);
+  assert.equal(previous, null);
+  // the first is a nested node
+  doc.transaction(function(tx) {
+    tx.get('main').hide('p1');
+    tx.get('main').hide('p2');
+    tx.get('main').hide('sn1');
+    tx.get('main').hide('p3');
+    tx.get('main').hide('list1');
+    tx.get('main').hide('p4');
+  });
+  var previous = container.getPreviousPropertyAddress([0,0,0,0,0]);
+  assert.equal(previous, null);
+});
+
 QUnit.test("Property range with simple nodes", function(assert) {
   var doc = simpleSample();
   var container = doc.get('main');
