@@ -5,17 +5,18 @@ var OO = require('../../basics/oo');
 var _ = require('../../basics/helpers');
 var Node = require('../node');
 var TableMatrix = require('./table_matrix');
+var ParentNodeMixin = require('../parent_node_mixin');
 
-var Table = Node.extend({
+var Table = Node.extend(ParentNodeMixin.prototype, {
   displayName: "Table",
   name: "table",
-
   matrix: null,
-
   properties: {
     "sections": ["array", "id"],
   },
-
+  didInitialize: function() {
+    ParentNodeMixin.call(this, 'sections');
+  },
   getSections: function() {
     var doc = this.getDocument();
     return _.map(this.sections, function(id) {
@@ -71,6 +72,10 @@ var Table = Node.extend({
 });
 
 Table.static.components = ['sections'];
+
+Table.static.defaultProperties = {
+  sections: []
+};
 
 // HtmlImporter
 

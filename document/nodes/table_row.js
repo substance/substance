@@ -3,13 +3,17 @@
 var $ = require('../../basics/jquery');
 var Node = require('../node');
 var _ = require('../../basics/helpers');
+var ParentNodeMixin = require('../parent_node_mixin');
 
-var TableRow = Node.extend({
+var TableRow = Node.extend(ParentNodeMixin.prototype, {
   displayName: "TableRow",
   name: "table-row",
   properties: {
     "parent": "id",
     "cells": ["array", "id"]
+  },
+  didInitialize: function() {
+    ParentNodeMixin.call(this, 'cells');
   },
   getCells: function() {
     var doc = this.getDocument();
@@ -30,6 +34,9 @@ var TableRow = Node.extend({
 
 TableRow.static.components = ['cells'];
 
+TableRow.static.defaultProperties = {
+  cells: []
+};
 
 // HtmlImporter
 

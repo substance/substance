@@ -42,6 +42,24 @@ var Node = Data.Node.extend({
     return this.document.get(this.parent);
   },
 
+  hasChildren: function() {
+    return false;
+  },
+
+  getChildIndex: function(child) {
+    /* jshint unused:false */
+    return -1;
+  },
+
+  getChildAt: function(idx) {
+    /* jshint unused:false */
+    return null;
+  },
+
+  getChildCount: function() {
+    return 0;
+  },
+
   getRoot: function() {
     var node = this;
     while (node.hasParent()) {
