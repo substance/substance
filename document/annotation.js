@@ -62,15 +62,7 @@ var Annotation = Node.extend({
     }
     var text = doc.get(this.path);
     return text.substring(this.startOffset, this.endOffset);
-  },
-
-  // volatile property necessary to render highlighted annotations differently
-  setActive: function(val) {
-    if (this.active !== val) {
-      this.active = val;
-      this.emit('active', val);
-    }
-  },
+  }
 
 });
 

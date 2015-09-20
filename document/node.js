@@ -57,6 +57,14 @@ var Node = Data.Node.extend({
     return componentNames;
   },
 
+  // volatile property necessary to render highlighted node differently
+  setHighlighted: function(highlighted) {
+    if (this.highlighted !== highlighted) {
+      this.highlighted = highlighted;
+      this.emit('highlighted', highlighted);
+    }
+  },
+
   isExternal: function() {
     return this.constructor.static.external;
   },

@@ -20,8 +20,9 @@ TocPanel.Prototype = function() {
     var state = this.state;
     _.each(state.tocNodes, function(node) {
       var level = node.level;
-      var tocEntry = $$('a').key(node.id)
-        .addClass("toc-entry", "level-"+level)
+      var tocEntry = $$('a')
+        .addClass('toc-entry')
+        .addClass('level-'+level)
         .attr({
           href: "#",
           "data-id": node.id,
@@ -103,7 +104,6 @@ TocPanel.Prototype = function() {
 
   this.handleClick = function(e) {
     var nodeId = e.currentTarget.dataset.id;
-    console.log('clicked', nodeId);
     e.preventDefault();
     var doc = this.getDocument();
     doc.emit("toc:entry-selected", nodeId);

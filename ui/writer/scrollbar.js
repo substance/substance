@@ -4,8 +4,6 @@ var OO = require('../../basics/oo');
 var Component = require('../component');
 var $$ = Component.$$;
 
-var THUMB_MIN_HEIGHT = 7;
-
 // A rich scrollbar implementation that supports highlights
 // ----------------
 
@@ -19,85 +17,105 @@ function Scrollbar() {
 
 Scrollbar.Prototype = function() {
 
-  this.getInitialState = function() {
-    return {
-      thumb: {top: 0, height: 20}, // just render at the top
-      highlights: [] // no highlights until state derived
-    };
-  };
-
   this.render = function() {
+
     var el = $$('div')
       .addClass('scrollbar-component '+this.props.contextId)
       .on('mousedown', this.onMouseDown);
     el.append(
       $$('div').ref("thumb")
         .addClass("thumb")
-        .css({
-          top: this.state.thumb.top,
-          height: Math.max(this.state.thumb.height, THUMB_MIN_HEIGHT)
-        })
     );
-    var highlightEls = this.state.highlights.map(function(h) {
-      return $$('div').ref(h.id)
-        .addClass('highlight')
-        .css({
-          top: h.top,
-          height: h.height
-        });
-    });
-    el.append(
-      $$('div').ref('highlights')
-        .addClass('highlights')
-        .append(highlightEls)
-    );
+
+    if (this.props.highlights) {
+      var highlightEls = this.props.highlights.map(function(h) {
+        return $$('div').ref(h)
+          .addClass('highlight');
+      });
+      el.append(
+        $$('div').ref('highlights')
+          .addClass('highlights')
+          .append(highlightEls)
+      );      
+    }
     return el;
   };
 
-  this.update = function(panelContentEl, panel) {
-    // var self = this;
-    this.panelContentEl = panelContentEl;
+  // TODO: This is actually a place where we could need didUpdate or
+  // didRerender when we know the component has already been mounted
+  this.didRender = function() {
+    if (this.isMounted()) {
+      this.updatePositions();
+    }
+  };
+
+  this.didMount = function() {
+    setTimeout(function() {
+      this.updatePositions();
+    }.bind(this));
+
+    // Install global event handlers
+    $(window).on('resize', this.rerender.bind(this));
+
+    var panel = this.props.panel;
+    var panelContentEl = panel.getPanelContentElement();
+    $(panelContentEl).on('scroll', this.onScroll.bind(this));
+  };
+
+  this.onScroll = function() {
+    this.updatePositions();
+  };
+
+  this.willUnmount = function() {
+    $(window).off('resize');
+  };
+
+  this.updatePositions = function() {
+    // Nothing to do if there are no highlights
+
+    var panel = this.props.panel;
+    var panelContentEl = panel.getPanelContentElement();
     var contentHeight = panel.getContentHeight();
     var panelHeight = panel.getPanelHeight();
     var scrollTop = panel.getScrollPosition();
+
     // Needed for scrollbar interaction
     this.factor = (contentHeight / panelHeight);
-    // var highlights = [];
-    // Compute highlights
 
-    // FIXME: This needs to be reworked...
-    // why not using component.setProps() when new hihglights should be displayed?
-
-    // this.props.highlights().forEach(function(nodeId) {
-    //   var nodeEl = $(self.panelContentEl).find('*[data-id='+nodeId+']');
-    //   if (!nodeEl.length) return;
-    //   var top = nodeEl.position().top / self.factor;
-    //   var height = nodeEl.outerHeight(true) / self.factor;
-    //   // HACK: make all highlights at least 3 pxls high
-    //   if (height < Scrollbar.overlayMinHeight) {
-    //     height = Scrollbar.overlayMinHeight;
-    //   }
-    //   var data = {
-    //     id: nodeId,
-    //     top: top,
-    //     height: height
-    //   };
-    //   highlights.push(data);
-    // });
-
-    // NOTE: it is not very smart to use heavy weight rerendering
-    // when we only want to change css styles.
-    // this.setState({
-    //   thumb: thumbProps,
-    //   highlights: highlights
-    // });
-    // ... Substance.Component provides incremental API to do that
+    // Update thumb
     this.refs.thumb.css({
       top: scrollTop / this.factor,
       height: panelHeight / this.factor
     });
-    // TODO: bring back some mechanism to show highlights
+
+    // If we have highlights, update them as well
+    if (this.props.highlights) {
+      // Compute highlights
+      this.props.highlights.forEach(function(nodeId) {
+        var nodeEl = $(panelContentEl).find('*[data-id='+nodeId+']');
+        if (!nodeEl.length) return;
+        var top = nodeEl.position().top / this.factor;
+        var height = nodeEl.outerHeight(true) / this.factor;
+
+        // Use specified minHeight for highlights
+        if (height < Scrollbar.overlayMinHeight) {
+          height = Scrollbar.overlayMinHeight;
+        }
+
+        var highlight = this.refs[nodeId];
+        if (highlight) {
+          this.refs[nodeId].css({
+            top: top,
+            height: height
+          });        
+        } else {
+          console.warn('no ref found for highlight', nodeId);
+        }
+
+      }.bind(this));      
+    }
   };
+
 
   this.onMouseDown = function(e) {
     e.stopPropagation();
@@ -113,7 +131,7 @@ Scrollbar.Prototype = function() {
     var $thumbEl = this.refs.thumb.$el;
     if (e.target !== $thumbEl[0]) {
       // Jump to mousedown position
-      this.offset = $thumbEl.height()/2;
+      this.offset = $thumbEl.height() / 2;
       this.onMouseMove(e);
     } else {
       this.offset = y - $thumbEl.position().top;
@@ -150,6 +168,6 @@ Scrollbar.Prototype = function() {
 
 OO.inherit(Scrollbar, Component);
 
-Scrollbar.overlayMinHeight = 5;
+Scrollbar.overlayMinHeight = 1;
 
 module.exports = Scrollbar;

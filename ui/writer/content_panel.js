@@ -18,9 +18,12 @@ ContentPanel.Prototype = function() {
     var el = $$('div')
       .addClass("panel content-panel-component");
     el.append(
-      $$(Scrollbar).ref("scrollbar")
+      $$(Scrollbar, {
+        panel: this,
+        contextId: this.props.containerId,
+        highlights: this.props.doc.getHighlights()
+      }).ref("scrollbar")
         .attr('id', "content-scrollbar")
-        .setProps({ contextId: this.props.containerId })
     );
     el.append(
       $$('div').ref("scanline").addClass('scanline')
@@ -42,53 +45,44 @@ ContentPanel.Prototype = function() {
     var doc = this.props.doc;
     var containerNode = doc.get(this.props.containerId);
     var ContentContainerClass = componentRegistry.get("content_editor");
-    return $$(ContentContainerClass).ref("contentEditor")
-      .setProps({
-        doc: doc,
-        node: containerNode
-      });
+    return $$(ContentContainerClass, {
+      doc: doc,
+      node: containerNode
+    }).ref("contentEditor");
   };
 
   // Since component gets rendered multiple times we need to update
   // the scrollbar and reattach the scroll event
   this.didMount = function() {
-    this.updateScrollbar();
-    $(window).on('resize', this.updateScrollbar);
     this.props.doc.connect(this, {
       'document:changed': this.onDocumentChange,
-      'toc:entry-selected': this.onTocEntrySelected
+      'toc:entry-selected': this.onTocEntrySelected,
+      'highlights:updated': this.onHighlightsUpdated
     }, -1);
   };
 
+  this.onHighlightsUpdated = function(highlights) {
+    // Triggers a rerender
+    this.refs.scrollbar.extendProps({highlights: highlights});
+  };
+
   this.willUnmount = function() {
-    $(window).off('resize');
     this.props.doc.disconnect(this);
   };
 
+  // Should we do this from inside the scrollbar
+  // Actually we should check if the scrollbar is actually affected
   this.onDocumentChange = function() {
-    this.updateScrollbar();
+    this.refs.scrollbar.updatePositions();
   };
 
   this.onTocEntrySelected = function(nodeId) {
     this.scrollToNode(nodeId);
   };
 
-  this.updateScrollbar = function() {
-    if (!this.refs || !this.refs.scrollbar || !this.refs.panelContent) {
-      // debugger;
-      console.error("something is fishy here");
-    }
-    var scrollbar = this.refs.scrollbar;
-    var $panelContent = this.refs.panelContent.$el;
-    // We need to await next repaint, otherwise dimensions will be wrong
-    _.delay(function() {
-      scrollbar.update($panelContent[0], this);
-    }.bind(this),0);
-  };
+
 
   this.onScroll = function() {
-    var $panelContent = this.refs.panelContent.$el;
-    this.refs.scrollbar.update($panelContent[0], this);
     this.markActiveTOCEntry();
   };
 

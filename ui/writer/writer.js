@@ -2,19 +2,13 @@
 
 var OO = require('../../basics/oo');
 var Component = require('../component');
-var $$ = Component.$$;
-
 var _ = require("../../basics/helpers");
 var EventEmitter = require('../../basics/event_emitter');
 var Registry = require('../../basics/registry');
 var SurfaceManager = require('../../surface/surface_manager');
 var Clipboard = require('../../surface/clipboard');
 
-var ExtensionManager = require('./extension_manager');
-var ContextToggles = require('./context_toggles');
-var ContentPanel = require("./content_panel");
-var StatusBar = require("./status_bar");
-var ModalPanel = require('./modal_panel');
+var $$ = Component.$$;
 
 // TODO: re-establish a means to set which tools are enabled for which surface
 
@@ -25,18 +19,13 @@ function Writer() {
 
   this.config = this.props.config || {};
   this.handleApplicationKeyCombos = this.handleApplicationKeyCombos.bind(this);
-
-  this._registerExtensions();
   this._initializeComponentRegistry();
 
   // action handlers
   this.actions({
-    "switch-state": this.switchState,
-    "switch-context": this.switchContext,
-    "open-modal": this.openModal,
-    "close-modal": this.closeModal,
-    "request-save": this.requestSave,
-    "execute-command": this.executeCommand,
+    "switchState": this.switchState,
+    "switchContext": this.switchContext,
+    "requestSave": this.requestSave
   });
 }
 
@@ -52,83 +41,15 @@ Writer.Prototype = function() {
       componentRegistry: this.componentRegistry,
       toolRegistry: this.toolRegistry,
       surfaceManager: this.surfaceManager,
-      document: this.props.doc
+      document: this.props.doc,
+      commands: this.config.commands
     };
   };
 
-  this.getInitialState = function() {
-    return {"contextId": this.props.contextId || "toc"};
+  this.getDocument = function() {
+    return this.props.doc;
   };
 
-  this.render = function() {
-    var el = $$('div').addClass('writer-component');
-    // Render a loading splash when there is no document
-    if (!this.props.doc) {
-      el.append($$('div').append('Loading'));
-    } else {
-      var doc = this.props.doc;
-      var ContentToolbar = this.componentRegistry.get('content_toolbar');
-      // main container
-      el.append(
-        $$('div').ref('main-container').addClass("main-container").append(
-          $$(ContentToolbar).ref('toolbar'),
-          $$(ContentPanel).ref('content').setProps({
-            doc: doc,
-            containerId: this.config.containerId
-          })
-        )
-      );
-      // resource container
-      el.append(
-        $$('div').ref('resource-container')
-          .addClass("resource-container")
-          .append($$(ContextToggles).ref("context-toggles")
-            .setProps({
-              panelOrder: this.config.panelOrder
-            })
-          .append(this.renderContextPanel())
-        )
-      );
-      // modal panel
-      el.append(
-        this.renderModalPanel()
-      );
-      // status bar
-      el.append(
-        $$(StatusBar).ref('statusBar').setProps({ doc: doc })
-      );
-      // clipboard
-      el.append(
-        $$('div').ref('clipboard').addClass("clipboard")
-      );
-    }
-    return el;
-  };
-
-  this.renderModalPanel = function() {
-    var modalPanelElement = this._getActiveModalPanelElement();
-    if (!modalPanelElement) {
-      // Just render an empty div if no modal active available
-      return $$('div');
-    } else {
-      var el = $$(ModalPanel).ref('modal-panel').setProps({
-        panelElement: modalPanelElement
-      });
-      if (this.state.modal) {
-        el.extendProps(this.state.modal);
-      }
-      return el;
-    }
-  };
-
-  this.renderContextPanel = function() {
-    var panelElement = this._getActivePanelElement();
-    if (!panelElement) {
-      return $$('div').append("No panels are registered");
-    } else {
-      return $$('div').ref('context-panel').append(panelElement);
-    }
-  };
 
   this.willReceiveProps = function(newProps) {
     if (this.props.doc && newProps.doc !== this.props.doc) {
@@ -136,27 +57,49 @@ Writer.Prototype = function() {
     }
   };
 
-  this.didReceiveProps = function() {
-    if (this.props.doc) {
-      var doc = this.props.doc;
-      this.surfaceManager = new SurfaceManager(doc);
-      this.clipboard = new Clipboard(this.surfaceManager, doc.getClipboardImporter(), doc.getClipboardExporter());
-      doc.connect(this, {
-        'transaction:started': this.transactionStarted,
-        'document:changed': this.onDocumentChanged
-      });
-      // this.surfaceManager.connect(this, {
-      //   "selection:changed": this.onSelectionChangedDebounced
-      // });
-    }
+  this.onSelectionChanged = function(/*sel, surface*/) {
+    // no-op, should be overridden by custom writer
+  };
+
+  this.didInitialize = function(props, state) {
+    // Initialize doc stuff
+    // if (this.props.doc) {
+    var doc = this.props.doc;
+    this.surfaceManager = new SurfaceManager(doc);
+    this.clipboard = new Clipboard(this.surfaceManager, doc.getClipboardImporter(), doc.getClipboardExporter());
+
+    doc.connect(this, {
+      'transaction:started': this.transactionStarted,
+      'document:changed': this.onDocumentChanged
+    });
+
+    this.surfaceManager.connect(this, {
+      "selection:changed": this.onSelectionChanged
+    });
+
+    // Now handle state update for the initial state
+    this.handleStateUpdate(state);
+  };
+
+  this.getSurface = function() {
+    return this.surfaceManager.getFocusedSurface();
   };
 
   this.willUpdateState = function(newState) {
-    this.extensionManager.handleStateChange(newState, this.state);
+    this.handleStateUpdate(newState);
+  };
+
+  this.handleStateUpdate = function() {
+    // no-op, should be overridden by custom writer
   };
 
   this.didMount = function() {
     this.$el.on('keydown', this.handleApplicationKeyCombos);
+
+    // Handle the initial state
+    // We do this after mount which actually triggers some rerenders
+    // A better place would be to do this 
+    // this.handleStateUpdate(newState);
   };
 
   this.willUnmount = function() {
@@ -177,18 +120,8 @@ Writer.Prototype = function() {
   this.handleApplicationKeyCombos = function(e) {
     // console.log('####', e.keyCode, e.metaKey, e.ctrlKey, e.shiftKey);
     var handled = false;
-    // TODO: we could make this configurable via extensions
-    // Undo/Redo: cmd+z, cmd+shift+z
-    if (e.keyCode === 90 && (e.metaKey||e.ctrlKey)) {
-      if (e.shiftKey) {
-        this.redo();
-      } else {
-        this.undo();
-      }
-      handled = true;
-    }
-    // Reset to default state
-    else if (e.keyCode === 27) {
+
+    if (e.keyCode === 27) {
       this.setState(this.getInitialState());
       handled = true;
     }
@@ -197,9 +130,11 @@ Writer.Prototype = function() {
       this.saveDocument();
       handled = true;
     }
+
     if (handled) {
       e.preventDefault();
       e.stopPropagation();
+      return true;
     }
   };
 
@@ -268,53 +203,30 @@ Writer.Prototype = function() {
     this.setState({ contextId: contextId });
   };
 
-  this.openModal = function(modalState) {
-    var newState = _.cloneDeep(this.state);
-    newState.modal = modalState;
-    this.setState(newState);
-  };
-
-  // handles 'close-modal'
-  this.closeModal = function() {
-    var newState = _.cloneDeep(this.state);
-    delete newState.modal;
-    this.setState(newState);
-  };
-
   this.requestSave = function() {
     this.saveDocument();
   };
 
-  // handles 'execute-command'
-  this.executeCommand = function(actionName) {
-    return this.extensionManager.handleAction(actionName);
+  // Pass writer start 
+  this._panelPropsFromState = function (state) {
+    var props = _.omit(state, 'contextId');
+    props.doc = this.props.doc;
+    return props;
   };
 
-  // Internal Methods
-  // ----------------------
-
-  this._registerExtensions = function() {
-    // Note: we are treating basics as extension internally
-    var config = this.config;
-    var basics = {
-      name: "_basics",
-      components: this.config.components || {},
-      stateHandlers: config.stateHandlers || {},
-      tools: config.tools || []
-    };
-    var extensions = [basics];
-    if (config.extensions) {
-      extensions = extensions.concat(config.extensions);
+  this.getActivePanelElement = function() {
+    if (this.componentRegistry.contains(this.state.contextId)) {
+      var panelComponent = this.componentRegistry.get(this.state.contextId);
+      return $$(panelComponent).setProps(this._panelPropsFromState(this.state));
+    } else {
+      console.warn("Could not find component for contextId:", this.state.contextId);
     }
-    this.extensionManager = new ExtensionManager(extensions, this);
   };
 
   this._initializeComponentRegistry = function() {
     var componentRegistry = new Registry();
-    _.each(this.extensionManager.extensions, function(extension) {
-      _.each(extension.components, function(ComponentClass, name) {
-        componentRegistry.add(name, ComponentClass);
-      });
+    _.each(this.config.components, function(ComponentClass, name) {
+      componentRegistry.add(name, ComponentClass);
     });
     this.componentRegistry = componentRegistry;
   };
@@ -328,32 +240,6 @@ Writer.Prototype = function() {
     this.clipboard = null;
   };
 
-  this._panelPropsFromState = function (state) {
-    var props = _.omit(state, 'contextId');
-    props.doc = this.props.doc;
-    return props;
-  };
-
-  this._getActivePanelElement = function() {
-    if (this.componentRegistry.contains(this.state.contextId)) {
-      var panelComponent = this.componentRegistry.get(this.state.contextId);
-      return $$(panelComponent).setProps(this._panelPropsFromState(this.state));
-    } else {
-      console.warn("Could not find component for contextId:", this.state.contextId);
-    }
-  };
-
-  this._getActiveModalPanelElement = function() {
-    var state = this.state;
-    if (state.modal) {
-      var modalPanelComponent = this.componentRegistry.get(state.modal.contextId);
-      if (modalPanelComponent) {
-        return $$(modalPanelComponent).setProps(this._panelPropsFromState(state.modal));
-      } else {
-        console.warn("Could not find component for contextId:", state.modal.contextId);
-      }
-    }
-  };
 };
 
 OO.inherit(Writer, Component);

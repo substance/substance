@@ -46,8 +46,8 @@ ExtensionManager.Prototype = function() {
   };
 
 
-  this.handleSelectionChange = function(sel) {
-    return this.handle("handleSelectionChange", sel);
+  this.handleSelectionChange = function(sel, surface) {
+    return this.handle("handleSelectionChange", sel, surface);
   };
 
   this.handleAction = function(actionName) {

@@ -134,7 +134,8 @@ HtmlImporter.Prototype = function HtmlImporterPrototype() {
     // create annotations afterwards so that the targeted nodes
     // exist for sure
     for (var i = 0; i < this.state.inlineNodes.length; i++) {
-      doc.create(this.state.inlineNodes[i]);
+      var anno = this.state.inlineNodes[i];
+      doc.create(anno);
     }
   };
 
@@ -406,7 +407,7 @@ HtmlImporter.Prototype = function HtmlImporterPrototype() {
         // in the mean time the offset will probably have changed to reentrant calls
         var endOffset = context.offset;
         inlineNode.type = inlineType.static.name;
-        inlineNode.id = inlineType.id || this.nextId(inlineNode.type);
+        inlineNode.id = inlineNode.id || this.nextId(inlineNode.type);
         inlineNode.startOffset = startOffset;
         inlineNode.endOffset = endOffset;
         inlineNode.path = context.path.slice(0);
