@@ -20,7 +20,7 @@ Helpers.isContainerAnnotation = function(doc, type) {
  * @param {Document} doc
  * @param {Document.Selection} sel
  * @return An array of property annotations
- * 
+ *
  * WARNING: Returns an empty array when selection is a container selection
  */
 
@@ -53,7 +53,7 @@ Helpers.getPropertyAnnotationsForSelection = function(doc, sel, options) {
  * @param {Document.Container} container
  * @param {object} options
  * @return An array of container annotations
- * 
+ *
  * ATTENTION: looking for container annotations is not as efficient as property
  * selections, as we do not have an index that has notion of the spatial extend
  * of an annotation (which would depend on a model-side implementation of
@@ -92,10 +92,10 @@ Helpers.getContainerAnnotationsForSelection = function(doc, sel, container, opti
  * @return {Array} all matching annotations
  */
 
-Helpers.getAnnotationsForSelection = function(doc, sel, annotationType, containerId) {  
+Helpers.getAnnotationsForSelection = function(doc, sel, annotationType, containerId) {
   var annos;
   var isContainerAnno = Helpers.isContainerAnnotation(doc, annotationType);
-  
+
   if (isContainerAnno) {
     var container = doc.get(containerId);
     annos = Helpers.getContainerAnnotationsForSelection(doc, sel, container, {
@@ -122,19 +122,20 @@ Helpers.getTextForSelection = function(doc, sel) {
   if (!sel || sel.isNull()) {
     return "";
   } else if (sel.isPropertySelection()) {
-    text = doc.get(sel.start.path);
+    text = this.get(sel.start.path);
     result.push(text.substring(sel.start.offset, sel.end.offset));
   } else if (sel.isContainerSelection()) {
-    var container = doc.get(sel.containerId);
-    var components = container.getComponentsForRange(sel.range);
-    for (var i = 0; i < components.length; i++) {
-      var comp = components[i];
-      text = doc.get(comp.path);
-      if (components.length === 1) {
+    var container = this.get(sel.containerId);
+    var range = sel.range;
+    var paths = container.getPathRange(range.start.path, range.end.path);
+    for (var i = 0; i < paths.length; i++) {
+      var path = paths[i];
+      text = this.get(path);
+      if (paths.length === 1) {
         result.push(text.substring(sel.start.offset, sel.end.offset));
       } else if (i===0) {
         result.push(text.substring(sel.start.offset));
-      } else if (i===components.length-1) {
+      } else if (i===paths.length-1) {
         result.push(text.substring(0, sel.end.offset));
       } else {
         result.push(text);
