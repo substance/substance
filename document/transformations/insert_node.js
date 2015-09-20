@@ -24,6 +24,8 @@ function insertNode(tx, args) {
   }
   tmp = breakNode(tx, args);
   selection = tmp.selection;
+  // create the node if it does not exist yet
+  // notice, that it is also allowed to insert an existing node
   if (!tx.get(node.id)) {
     node = tx.create(node);
   }
