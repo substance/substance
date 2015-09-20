@@ -288,9 +288,27 @@ Container.Prototype = function() {
     return [pos].concat(this._getFirstAddress(topLevelNode));
   };
 
+  this.getFirstPath = function(topLevelNode) {
+    var address = this.getFirstAddress(topLevelNode);
+    if (address) {
+      return this.getPath(address);
+    } else {
+      return null;
+    }
+  };
+
   this.getLastAddress = function(topLevelNode) {
     var pos = this.getChildIndex(topLevelNode);
     return [pos].concat(this._getLastAddress(topLevelNode));
+  };
+
+  this.getLastPath = function(topLevelNode) {
+    var address = this.getLastAddress(topLevelNode);
+    if (address) {
+      return this.getPath(address);
+    } else {
+      return null;
+    }
   };
 
   this.getAddressRange = function(startAddress, endAddress) {
