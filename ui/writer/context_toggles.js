@@ -21,7 +21,7 @@ ContextToggles.Prototype = function() {
     var el = $$('div').addClass("context-toggles");
     _.each(panelOrder, function(panelId) {
       var panelClass = componentRegistry.get(panelId);
-      var toggle = $$('a').key(panelClass.contextId)
+      var toggle = $$('a')
         .addClass("toggle-context")
         .attr({
           href: "#",
@@ -38,7 +38,7 @@ ContextToggles.Prototype = function() {
         $$('span').addClass('label').append(panelClass.displayName)
       );
       el.append(toggle);
-    });
+    }, this);
     return el;
   };
 

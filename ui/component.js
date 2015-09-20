@@ -83,9 +83,14 @@ function Component(parent, params) {
     console.warn("Component.initialize() has been deprecated. Use Component.didInitialize() instead.");
     this.initialize();
   }
-  this.didInitialize();
-
+  
   this._setState(this.getInitialState());
+
+  // This was originally called before _setState, but in the Writer we need
+  // a hook after both props and state have been initialized,
+  // so we can trigger state handlers for the initial state transition
+  // before something is rendered actually
+  this.didInitialize(this.props, this.state);
 
   this.actionHandlers = {};
 
@@ -130,10 +135,14 @@ Component.Prototype = function ComponentPrototype() {
   /**
    * Provides the parent of this component.
    *
-   * @return object the parent component or "root" if this component does not have a parent.
+   * @return object the parent component or null if this component does not have a parent.
    */
   this.getParent = function() {
-    return this.parent;
+    if (this.parent !== "root") {
+      return this.parent;
+    } else {
+      return null;
+    }
   };
 
   /**
@@ -707,7 +716,7 @@ Component.Prototype = function ComponentPrototype() {
 
   this._render = function(data, scope) {
     if (!data) {
-      throw new Error('Nothing to render. Make sure your render method returns a virtual element: %s', this.displayName);
+      throw new Error('Nothing to render. Make sure your render method returns a virtual element: '+this.displayName);
     }
 
     if (data.type !== 'element') {
@@ -943,12 +952,14 @@ Component.Prototype = function ComponentPrototype() {
 
   this._getContext = function() {
     var parent = this.getParent();
-    var parentContext = parent.context || {};
-    if (parent.getChildContext) {
-      return _.extend(parentContext, parent.getChildContext());
-    } else {
-      return parentContext;
+    var context = {};
+    if (parent) {
+      context = parent.context || {};
+      if (parent.getChildContext) {
+        return _.extend(context, parent.getChildContext());
+      }
     }
+    return context;
   };
 
   this._setProps = function(props) {

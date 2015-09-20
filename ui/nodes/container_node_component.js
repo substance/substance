@@ -86,8 +86,9 @@ ContainerNodeComponent.Prototype = function() {
     var options = {
       name: this.props.node.id,
       logger: this.context.notifications,
-      commands: this.props.commands
+      commands: this.props.commands || this.context.commands
     };
+
     this.surface = new Surface(this.context.surfaceManager, doc, editor, options);
   };
 };

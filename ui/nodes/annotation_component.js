@@ -14,8 +14,8 @@ AnnotationComponent.Prototype = function() {
     var el = $$('span')
       .attr("data-id", this.props.node.id)
       .addClass(this.getClassNames());
-    if (this.props.node.active) {
-      el.addClass('active');
+    if (this.props.node.highlighted) {
+      el.addClass('highlighted');
     }
     el.append(this.props.children);
     return el;
@@ -33,7 +33,7 @@ AnnotationComponent.Prototype = function() {
   this.didMount = function() {
     var node = this.props.node;
     node.connect(this, {
-      'active': this.onActiveChanged
+      'highlighted': this.onHighlightedChanged
     });
   };
 
@@ -42,11 +42,11 @@ AnnotationComponent.Prototype = function() {
     node.disconnect(this);
   };
 
-  this.onActiveChanged = function() {
-    if (this.props.node.active) {
-      this.$el.addClass('active');
+  this.onHighlightedChanged = function() {
+    if (this.props.node.highlighted) {
+      this.$el.addClass('highlighted');
     } else {
-      this.$el.removeClass('active');
+      this.$el.removeClass('highlighted');
     }
   };
 };

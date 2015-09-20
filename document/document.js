@@ -277,6 +277,33 @@ Document.Prototype = function() {
     return new ClipboardExporter();
   };
 
+  this.getHighlights = function() {
+    return this._highlights;
+  };
+
+  // Set higlights on a document
+  this.setHighlights = function(highlights) {
+    var oldHighlights = this._highlights;
+
+    if (oldHighlights) {
+      _.each(oldHighlights, function(nodeId) {
+        var node = this.get(nodeId);
+        // Node could in the meanwhile have been deleted
+        if (node) {
+          node.setHighlighted(false);  
+        }
+      }, this);
+    }
+
+    _.each(highlights, function(nodeId) {
+      var node = this.get(nodeId);
+      node.setHighlighted(true);
+    }, this);
+
+    this._highlights = highlights;
+    this.emit('highlights:updated', highlights);
+  };
+
   /**
    * Enable or disable auto-attaching of nodes.
    * When this is enabled (default), a created node
@@ -289,7 +316,6 @@ Document.Prototype = function() {
     Document.super.prototype._setAutoAttach.call(this, val);
     this.stage._setAutoAttach(val);
   };
-
 
   this._saveTransaction = function(beforeState, afterState, info) {
     // var time = Date.now();
