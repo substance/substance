@@ -378,3 +378,57 @@ QUnit.test("Preserve components when ref matches, and rerender when props change
   assert.equal(aEl, comp.children[0].el, 'DOM element for a should be the same after rerender');
   assert.equal(bEl, comp.children[2].el, 'DOM element for b should be the same, since there was no rerender');
 });
+
+QUnit.test("Cascaded updates of HTML attributes.", function(assert) {
+  var Child = TestComponent.extend({
+    render: function() {
+      return $$('input').htmlProp('type', 'text');
+    }
+  });
+  var Parent = TestComponent.extend({
+    render: function() {
+      var el = $$('div');
+      var child = $$(Child).ref('child');
+      if (this.props.childAttr) {
+        child.attr(this.props.childAttr);
+      }
+      if (this.props.childClass) {
+        child.addClass(this.props.childClass);
+      }
+      if (this.props.childHtmlProps) {
+        child.htmlProp(this.props.childHtmlProps);
+      }
+      if (this.props.childCss) {
+        child.css(this.props.childCss);
+      }
+      return el.append(child);
+    },
+  });
+  var comp = $$(Parent)._render();
+  comp.setProps({ childAttr: { "data-id": "child" } });
+  assert.equal(comp.refs.child.attr('data-id'), 'child', "Child component should have updated attribute.");
+  comp.setProps({ childClass: "child" });
+  assert.ok(comp.refs.child.hasClass('child'), "Child component should have updated class.");
+  comp.setProps({ childHtmlProps: { "value": "child" } });
+  assert.equal(comp.refs.child.val(), "child", "Child component should have updated html property.");
+  comp.setProps({ childCss: { "width": 50 } });
+  assert.equal(comp.refs.child.el.style.width, "50px", "Child component should have updated css style.");
+});
+
+QUnit.test("Refs in grand child components.", function(assert) {
+  var Parent = TestComponent.extend({
+    render: function() {
+      var el = $$('div');
+      var child = $$('div').ref('child');
+      var grandChild = $$('div');
+      if (this.props.grandChildRef) {
+        grandChild.ref(this.props.grandChildRef);
+      }
+      return el.append(child.append(grandChild));
+    },
+  });
+  var comp = $$(Parent, {grandChildRef: "foo"})._render();
+  assert.isDefinedAndNotNull(comp.refs.foo);
+  comp.setProps({ grandChildRef: "bar" });
+  assert.isDefinedAndNotNull(comp.refs.bar);
+});
