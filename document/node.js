@@ -76,6 +76,11 @@ var Node = Data.Node.extend({
     return componentNames;
   },
 
+  getPropertyNameAt: function(idx) {
+    var propertyNames = this.constructor.static.components || [];
+    return propertyNames[idx];
+  },
+
   // volatile property necessary to render highlighted node differently
   setHighlighted: function(highlighted) {
     if (this.highlighted !== highlighted) {
