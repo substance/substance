@@ -269,7 +269,6 @@ QUnit.test("Propagate properties to child components when setProps called on par
       return $$('div').append(this.props.name);
     }
   });
-
   var CompositeComponent = TestComponent.extend({
     render: function() {
       var el = $$('div').addClass('composite-component');
@@ -281,24 +280,16 @@ QUnit.test("Propagate properties to child components when setProps called on par
   });
 
   var comp = $$(CompositeComponent, {
-    items: [
-      {name: 'A'},
-      {name: 'B'}
-    ]
+    items: [ {name: 'A'}, {name: 'B'} ]
   })._render();
-
   assert.equal(comp.children.length, 2, 'Component should have two children.');
   assert.equal(comp.children[0].$el.text(), 'A', 'First child should have text A');
   assert.equal(comp.children[1].$el.text(), 'B', 'First child should have text B');
 
   // Now we are gonna set new props
   comp.setProps({
-    items: [
-      {name: 'X'},
-      {name: 'Y'}
-    ]
+    items: [ {name: 'X'}, {name: 'Y'} ]
   });
-
   assert.equal(comp.children.length, 2, 'Component should have two children.');
   assert.equal(comp.children[0].$el.text(), 'X', 'First child should have text X');
   assert.equal(comp.children[1].$el.text(), 'Y', 'First child should have text Y');
@@ -314,7 +305,6 @@ QUnit.test("Preserve components when ref matches, and rerender when props change
       return $$('div').append(this.props.name);
     }
   });
-
   var CompositeComponent = TestComponent.extend({
     render: function() {
       var el = $$('div').addClass('composite-component');
@@ -379,6 +369,24 @@ QUnit.test("Preserve components when ref matches, and rerender when props change
   assert.equal(bEl, comp.children[2].el, 'DOM element for b should be the same, since there was no rerender');
 });
 
+QUnit.test("Refs in grand child components.", function(assert) {
+  var Parent = TestComponent.extend({
+    render: function() {
+      var el = $$('div');
+      var child = $$('div').ref('child');
+      var grandChild = $$('div');
+      if (this.props.grandChildRef) {
+        grandChild.ref(this.props.grandChildRef);
+      }
+      return el.append(child.append(grandChild));
+    },
+  });
+  var comp = $$(Parent, {grandChildRef: "foo"})._render();
+  assert.isDefinedAndNotNull(comp.refs.foo, "Ref 'foo' should be set.");
+  comp.setProps({ grandChildRef: "bar" });
+  assert.isDefinedAndNotNull(comp.refs.bar, "Ref 'bar' should be set.");
+});
+
 QUnit.test("Cascaded updates of HTML attributes.", function(assert) {
   var Child = TestComponent.extend({
     render: function() {
@@ -413,22 +421,4 @@ QUnit.test("Cascaded updates of HTML attributes.", function(assert) {
   assert.equal(comp.refs.child.val(), "child", "Child component should have updated html property.");
   comp.setProps({ childCss: { "width": 50 } });
   assert.equal(comp.refs.child.el.style.width, "50px", "Child component should have updated css style.");
-});
-
-QUnit.test("Refs in grand child components.", function(assert) {
-  var Parent = TestComponent.extend({
-    render: function() {
-      var el = $$('div');
-      var child = $$('div').ref('child');
-      var grandChild = $$('div');
-      if (this.props.grandChildRef) {
-        grandChild.ref(this.props.grandChildRef);
-      }
-      return el.append(child.append(grandChild));
-    },
-  });
-  var comp = $$(Parent, {grandChildRef: "foo"})._render();
-  assert.isDefinedAndNotNull(comp.refs.foo);
-  comp.setProps({ grandChildRef: "bar" });
-  assert.isDefinedAndNotNull(comp.refs.bar);
 });

@@ -6,6 +6,7 @@ var _ = require('../basics/helpers');
 var __id__ = 0;
 var VirtualTextNode;
 var RawHtml;
+var _htmlParams;
 
 /**
  * A light-weight component implementation inspired by React and Ember.
@@ -74,12 +75,7 @@ function Component(parent, params) {
   // ref (without the underscore) being passed but remove it from the params
   // afterwards so we don't pullute the props.
   this._ref = params._ref;
-  this._htmlParams = {
-    classNames: params.classNames || "",
-    attributes: params.attributes || {},
-    props: params.htmlProps || {},
-    style: params.style || {},
-  };
+  this._htmlParams = _htmlParams(params);
   this._setProps(params.props);
 
   /* istanbul ignore if */
@@ -644,7 +640,7 @@ Component.Prototype = function ComponentPrototype() {
     $el.attr(this._htmlParams.attributes);
     $el.attr(data.attributes);
     // $.prop
-    $el.prop(this._htmlParams.props);
+    $el.prop(this._htmlParams.htmlProps);
     $el.prop(data.htmlProps);
     // $.css
     $el.css(this._htmlParams.style);
@@ -661,6 +657,10 @@ Component.Prototype = function ComponentPrototype() {
 
   this._updateElement = function(data, oldData, scope) {
     var $el = this.$el;
+
+    // TODO: we should make sure that html parameters given from
+    // parent are preserved
+
     // $.addClass / $.removeClass
     var oldClassNames = oldData.classNames;
     var newClassNames = data.classNames;
@@ -771,10 +771,15 @@ Component.Prototype = function ComponentPrototype() {
     }
 
     function _update(comp, data) {
+      // Note: when updating a HTML element we provide the same ref scope
       if (comp instanceof Component.Container) {
         comp._render(data, scope);
       } else {
-        // TODO: we probably need to propagate updates for attr, style, handlers, too
+        // HACK: propagating HTML element data and setting props (including lifecycle hooks)
+        // is currently not available. This is ugly, and should be repaired.
+        var htmlParams = _htmlParams(data);
+        comp._updateElement(htmlParams, comp._htmlParams);
+        comp._htmlParams = htmlParams;
         comp.setProps(data.props);
       }
     }
@@ -962,6 +967,15 @@ Component.Prototype = function ComponentPrototype() {
 };
 
 OO.initClass(Component);
+
+_htmlParams = function(data) {
+  return {
+    classNames: data.classNames || "",
+    attributes: data.attributes || {},
+    htmlProps: data.htmlProps || {},
+    style: data.style || {},
+  };
+};
 
 /* Built-in components */
 
