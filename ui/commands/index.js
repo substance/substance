@@ -1,4 +1,6 @@
 module.exports = [
+  require('./undo'),
+  require('./redo'),
   require('./make_paragraph'),
   require('./make_heading1'),
   require('./make_heading2'),

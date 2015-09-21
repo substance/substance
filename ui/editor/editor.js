@@ -2,17 +2,14 @@
 
 var _ = require("../../basics/helpers");
 var Component = require('../component');
-var Surface = require('../../surface');
-var Registry = require('../../basics/registry');
 var ContainerComponent = require('../nodes/container_node_component');
 var SubstanceArticle = require("../../article");
 var DefaultToolbar = require('./default_toolbar');
 var ListEditing = require('../../document/transformations/extensions/list_editing');
 
 var $$ = Component.$$;
-var Clipboard = Surface.Clipboard;
-var SurfaceManager = Surface.SurfaceManager;
-var ContainerEditor = Surface.ContainerEditor;
+var Controller = require('../controller');
+var ContainerEditor = require('../surface/container_editor');
 
 var defaultComponents = {
   "paragraph": require('../nodes/paragraph_component'),
@@ -39,15 +36,16 @@ var Editor = Component.extend({
     if (!this.config) this.config = {};
 
     var ArticleClass = this.config.article || SubstanceArticle;
-    var components = this.config.components || defaultComponents;
-
 
     this.doc = new ArticleClass();
     this.doc.loadHtml(this.props.content);
 
-    // Editing Surface
-    this.surfaceManager = new SurfaceManager(this.doc);
-    this.clipboard = new Clipboard(this.surfaceManager, this.doc.getClipboardImporter(), this.doc.getClipboardExporter());
+    // Initialize controller
+    this.controller = new Controller(this.doc, {
+      components: this.config.components || defaultComponents,
+      commands: this.config.commands
+    });
+
     this.editor = new ContainerEditor('body');
 
     // Editing behavior
@@ -55,17 +53,9 @@ var Editor = Component.extend({
       this.editor.extendBehavior(behavior);
     }, this);
 
-    // Component registry
-    this.componentRegistry = new Registry();
-    _.each(components, function(ComponentClass, name) {
-      this.componentRegistry.add(name, ComponentClass);
-    }, this);
-
     // Dependency Injection
     this.childContext = {
-      componentRegistry: this.componentRegistry,
-      surfaceManager: this.surfaceManager,
-      document: this.doc
+      controller: this.controller
     };
   },
 
@@ -99,7 +89,7 @@ var Editor = Component.extend({
   },
 
   didMount: function() {
-    this.clipboard.attach(this.$el[0]);
+    this.controller.clipboard.attach(this.$el[0]);
   },
 
   willUnmount: function() {
@@ -107,10 +97,9 @@ var Editor = Component.extend({
   },
 
   dispose: function() {
-    var clipboard = this.clipboard;
-    var surfaceManager = this.surfaceManager;
+    var clipboard = this.controller.clipboard;
     if (clipboard) clipboard.detach(this.$el[0]);
-    if (surfaceManager) surfaceManager.dispose();
+    this.controller.dispose();
   },
 
   getContent: function() {

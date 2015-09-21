@@ -2,8 +2,11 @@
 
 var DocumentTool = require('./document_tool');
 
-var UndoTool = DocumentTool.extend({
-  name: "redo",
+var RedoTool = DocumentTool.extend({
+  static: {
+    name: 'redo',
+    command: 'redo'  
+  },
 
   update: function(surface) {
     this.surface = surface;
@@ -13,14 +16,7 @@ var UndoTool = DocumentTool.extend({
     } else {
       this.setEnabled();
     }
-  },
-
-  performAction: function() {
-    var doc = this.getDocument();
-    if (this.isEnabled() && doc.undone.length>0) {
-      doc.redo();
-    }
   }
 });
 
-module.exports = UndoTool;
+module.exports = RedoTool;

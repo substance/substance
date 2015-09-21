@@ -9,6 +9,10 @@ function Tool() {
 
 Tool.Prototype = function() {
 
+  this.getController = function() {
+    return this.context.controller;
+  };
+
   this.getName = function() {
     var toolName = this.constructor.static.name;
     if (toolName) {
@@ -19,9 +23,10 @@ Tool.Prototype = function() {
   };
 
   this.getCommand = function() {
+    var ctrl = this.getController();
     var commandName = this.constructor.static.command;
     if (commandName) {
-      return this.getSurface().getCommand(commandName);
+      return ctrl.getCommand(commandName);
     } else {
       throw new Error('Contract: AnnotationTool.static.command should be associated to a supported command.');
     }
@@ -65,13 +70,15 @@ Tool.Prototype = function() {
     };
   };
 
+  this.performAction = function() {
+    var command = this.getCommand();
+    command.execute();
+  };
+
   this.render = function() {
     throw new Error('render is abstract.');
   };
 };
 
-
 OO.inherit(Tool, Component);
-
-
 module.exports = Tool;

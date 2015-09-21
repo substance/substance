@@ -15,9 +15,9 @@ var _ = require('../../basics/helpers');
 
 function DocumentTool() {
   Tool.apply(this, arguments);
-  this.doc = this.context.document;
 
-  this.doc.connect(this, {
+  var doc = this.context.controller.getDocument();
+  doc.connect(this, {
     'document:changed': this.update
   });
 }
@@ -42,7 +42,7 @@ DocumentTool.Prototype = function() {
    */
 
   this.getDocument = function() {
-    return this.doc;
+    return this.context.controller.getDocument();
   };
 
 

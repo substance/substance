@@ -1,7 +1,7 @@
 'use strict';
 
-var Substance = require('../basics');
-var Document = require('../document');
+var Substance = require('../../basics');
+var Document = require('../../document');
 var Transformations = Document.Transformations;
 
 function FormEditor() {}

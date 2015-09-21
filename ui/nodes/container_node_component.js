@@ -4,7 +4,7 @@ var OO = require('../../basics/oo');
 var Component = require('../component');
 var $$ = Component.$$;
 var UnsupporedNode = require('./unsupported_node');
-var Surface = require('../../surface');
+var Surface = require('../surface');
 
 function ContainerNodeComponent() {
   Component.apply(this, arguments);
@@ -34,16 +34,15 @@ ContainerNodeComponent.Prototype = function() {
 
   this.renderComponents = function() {
     var doc = this.props.doc;
+    var ctrl = this.context.controller;
     var containerNode = this.props.node;
-    var componentRegistry = this.context.componentRegistry;
     return containerNode.nodes.map(function(nodeId) {
       var node = doc.get(nodeId);
-      var ComponentClass = componentRegistry.get(node.type);
+      var ComponentClass = ctrl.getComponent(node.type);
       if (!ComponentClass) {
         console.error('Could not resolve a component for type: ' + node.type);
         ComponentClass = UnsupporedNode;
       }
-
       return $$(ComponentClass, {
         doc: doc,
         node: node
@@ -81,15 +80,14 @@ ContainerNodeComponent.Prototype = function() {
   };
 
   this._initialize = function() {
-    var doc = this.props.doc;
+    var ctrl = this.context.controller;
     var editor = this.props.editor;
     var options = {
       name: this.props.node.id,
-      logger: this.context.notifications,
-      commands: this.props.commands || this.context.commands
+      logger: ctrl.getLogger()
     };
 
-    this.surface = new Surface(this.context.surfaceManager, doc, editor, options);
+    this.surface = new Surface(ctrl, editor, options);
   };
 };
 

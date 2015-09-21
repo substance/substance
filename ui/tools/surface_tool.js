@@ -30,7 +30,10 @@ SurfaceTool.Prototype = function() {
     // immediately leads to a close of the prompt. We will observe tool performance
     // propagating each selection:changed event immediately.
     // We could also throttle
-    this.context.surfaceManager.on('selection:changed', this.update, this);
+    var ctrl = this.getController();
+    ctrl.connect(this, {
+      'selection:changed': this.update
+    });
   };
 
   /**
@@ -40,7 +43,8 @@ SurfaceTool.Prototype = function() {
    */
 
   this.willUnmount = function() {
-    this.context.surfaceManager.off('selection:changed', this.update);
+    var ctrl = this.getController();
+    ctrl.disconnect(this);
   };
 
   /**
@@ -67,7 +71,7 @@ SurfaceTool.Prototype = function() {
    */
 
   this.getSurface = function() {
-    return this.context.surfaceManager.getFocusedSurface();
+    return this.getController().getSurface();
   };
 
   /**
@@ -78,7 +82,7 @@ SurfaceTool.Prototype = function() {
    */
 
   this.getDocument = function() {
-    return this.context.surfaceManager.getDocument();
+    return this.getController().getDocument();
   };
 
   /**

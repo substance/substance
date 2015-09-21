@@ -2,18 +2,22 @@
 
 var Substance = require('../../basics');
 
-var Command = function(surface) {
-  this.surface = surface;
+var Command = function(controller) {
+  this.controller = controller;
 };
 
 Command.Prototype = function() {
 
   this.getSurface = function() {
-    return this.surface;
+    return this.controller.getSurface();
+  };
+
+  this.getController = function() {
+    return this.controller;
   };
 
   this.getDocument = function() {
-    return this.surface.getDocument();
+    return this.controller.getDocument();
   };
 
   this.execute = function() {

@@ -1,15 +1,32 @@
 'use strict';
 
 var OO = require('../basics/oo');
-var Surface = require('./surface');
+var Surface = require('./surface/surface');
 var EventEmitter = require('../basics/event_emitter');
+var _ = require('../basics/helpers');
+var Clipboard = require('./surface/clipboard');
+var Registry = require('../basics/registry');
 
-var SurfaceManager = function(doc) {
+var defaultCommands = require('./commands');
+
+var Controller = function(doc, config) {
   EventEmitter.call(this);
+
+  if (!doc) throw new Error('Controller requires a Substance document instance');
+
   this.doc = doc;
+  this.config = config;
   this.surfaces = {};
   this.focusedSurface = null;
   this.stack = [];
+
+  // Initialize registries
+  this._initializeComponentRegistry();
+  this._initializeCommandRegistry();
+
+  // Initialize clipboard
+  this.clipboard = new Clipboard(this, doc.getClipboardImporter(), doc.getClipboardExporter());
+
   doc.connect(this, { 'document:changed': this.onDocumentChange }, {
     // Use lower priority so that everyting is up2date
     // when we render the selection
@@ -17,15 +34,70 @@ var SurfaceManager = function(doc) {
   });
 };
 
-SurfaceManager.Prototype = function() {
+Controller.Prototype = function() {
+
+  this._initializeComponentRegistry = function() {
+    var componentRegistry = new Registry();
+    _.each(this.config.components, function(ComponentClass, name) {
+      componentRegistry.add(name, ComponentClass);
+    });
+    this.componentRegistry = componentRegistry;
+  };
+
+  this._initializeCommandRegistry = function() {
+    var commands = this.config.commands || defaultCommands;
+
+    var commandRegistry = new Registry();
+    _.each(commands, function(CommandClass) {
+      var cmd = new CommandClass(this);
+      commandRegistry.add(CommandClass.static.name, cmd);
+    }, this);
+    this.commandRegistry = commandRegistry;
+  };
+
+  // Command API
+  // ----------------
+
+  this.getCommand = function(commandName) {
+    return this.commandRegistry.get(commandName);
+  };
+
+  this.executeCommand = function(commandName) {
+    var cmd = this.getCommand(commandName);
+    if (!cmd) {
+      console.warn('command', commandName, 'not registered on controller');
+      return;
+    }
+    // Run command
+    cmd.execute();
+  };
+
+  // Component API
+  // ----------------
+
+  this.getComponent = function(name) {
+    return this.componentRegistry.get(name);
+  };
+
+  this.getClipboard = function() {
+    return this.clipboard;
+  };
+
+  // console is the default logger
+  this.getLogger = function() {
+    return console;
+  };
 
   this.getDocument = function() {
     return this.doc;
   };
 
-  this.dispose = function() {
-    this.doc.disconnect(this);
-    this.surfaces = {};
+  this.getSurface = function(name) {
+    if (name) {
+      return this.surfaces[name];
+    } else {
+      return this.focusedSurface;  
+    }
   };
 
   this.createSurface = function(editor, options) {
@@ -59,7 +131,8 @@ SurfaceManager.Prototype = function() {
   };
 
   this.getFocusedSurface = function() {
-    return this.focusedSurface;
+    console.warn('.getFocusedSurface is deprecated: Use .getSurface instead');
+    return this.getSurface();
   };
 
   this.onDocumentChange = function(change, info) {
@@ -104,8 +177,13 @@ SurfaceManager.Prototype = function() {
     }
   };
 
+  this.dispose = function() {
+    this.doc.disconnect(this);
+    this.surfaces = {};
+    this.clipboard = null;
+  };
 };
 
-OO.inherit(SurfaceManager, EventEmitter);
+OO.inherit(Controller, EventEmitter);
 
-module.exports = SurfaceManager;
+module.exports = Controller;

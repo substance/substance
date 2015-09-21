@@ -15,13 +15,15 @@ var ToggleLink = AnnotationCommand.extend({
   },
 
   // When there's some overlap with only a single annotation we do an expand
-  canEdit: function(annos/*, sel*/) {
+  canEdit: function(annos, sel) {
+    // jshint unused: false
     return annos.length === 1;
   },
 
   executeEdit: function() {
-    var doc = this.getDocument();
-    doc.emit('app:edit:link');
+    var ctrl = this.getController();
+    // Tells the link tool to show the edit prompt
+    ctrl.emit('edit:link');
   },
 
   static: {

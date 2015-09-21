@@ -27,8 +27,10 @@ TextPropertyComponent.Prototype = function() {
   };
 
   this.render = function() {
-    var componentRegistry = this.context.componentRegistry;
+    
+
     var doc = this.getDocument();
+    var ctrl = this.getController();
     var path = this.getPath();
     var text = doc.get(path) || "";
     var annotations = this.getAnnotations();
@@ -57,13 +59,13 @@ TextPropertyComponent.Prototype = function() {
         fragmentCounters[id] = 0;
       }
       fragmentCounters[id] = fragmentCounters[id]+1;
-      var ViewClass;
-      if (componentRegistry.contains(node.type)) {
-        ViewClass = componentRegistry.get(node.type);
-      } else {
-        ViewClass = AnnotationComponent;
+      var ComponentClass = ctrl.getComponent(node.type);
+
+      if (!ComponentClass) {
+        ComponentClass = AnnotationComponent;
       }
-      var el = $$(ViewClass, {
+
+      var el = $$(ComponentClass, {
         doc: doc,
         node: node,
       });
@@ -103,6 +105,10 @@ TextPropertyComponent.Prototype = function() {
 
   this.getContainer = function() {
     return this.getSurface().getContainer();
+  };
+
+  this.getController = function() {
+    return this.context.controller;
   };
 
   this.getDocument = function() {

@@ -4,22 +4,38 @@ var OO = require('../../basics/oo');
 var Component = require('../component');
 var _ = require("../../basics/helpers");
 var EventEmitter = require('../../basics/event_emitter');
-var Registry = require('../../basics/registry');
-var SurfaceManager = require('../../surface/surface_manager');
-var Clipboard = require('../../surface/clipboard');
+var Controller = require('../../ui/controller');
 
 var $$ = Component.$$;
 
-// TODO: re-establish a means to set which tools are enabled for which surface
-
 function Writer() {
   Component.apply(this, arguments);
-  // Mixin
+
+  // Mixin EventEmitter API
   EventEmitter.call(this);
 
   this.config = this.props.config || {};
   this.handleApplicationKeyCombos = this.handleApplicationKeyCombos.bind(this);
-  this._initializeComponentRegistry();
+
+  var doc = this.props.doc;
+
+  // Initialize controller
+  this.controller = new Controller(doc, {
+    components: this.config.components,
+    commands: this.config.commands
+  });
+
+  // Register event handlers
+  // -----------------
+
+  doc.connect(this, {
+    'transaction:started': this.onTransactionStarted,
+    'document:changed': this.onDocumentChanged
+  });
+
+  this.controller.connect(this, {
+    "selection:changed": this.onSelectionChanged
+  });
 
   // action handlers
   this.actions({
@@ -31,25 +47,18 @@ function Writer() {
 
 Writer.Prototype = function() {
 
-  // mix-in
+  // Mixin EventEmitter API
   _.extend(this, EventEmitter.prototype);
 
   this.getChildContext = function() {
     return {
-      getHighlightedNodes: this.getHighlightedNodes,
-      getHighlightsForTextProperty: this.getHighlightsForTextProperty,
-      componentRegistry: this.componentRegistry,
-      toolRegistry: this.toolRegistry,
-      surfaceManager: this.surfaceManager,
-      document: this.props.doc,
-      commands: this.config.commands
+      controller: this.controller,
     };
   };
 
   this.getDocument = function() {
     return this.props.doc;
   };
-
 
   this.willReceiveProps = function(newProps) {
     if (this.props.doc && newProps.doc !== this.props.doc) {
@@ -62,27 +71,14 @@ Writer.Prototype = function() {
   };
 
   this.didInitialize = function(props, state) {
-    // Initialize doc stuff
-    // if (this.props.doc) {
-    var doc = this.props.doc;
-    this.surfaceManager = new SurfaceManager(doc);
-    this.clipboard = new Clipboard(this.surfaceManager, doc.getClipboardImporter(), doc.getClipboardExporter());
-
-    doc.connect(this, {
-      'transaction:started': this.transactionStarted,
-      'document:changed': this.onDocumentChanged
-    });
-
-    this.surfaceManager.connect(this, {
-      "selection:changed": this.onSelectionChanged
-    });
-
+    /* jshint unused: false */
     // Now handle state update for the initial state
     this.handleStateUpdate(state);
   };
 
-  this.getSurface = function() {
-    return this.surfaceManager.getFocusedSurface();
+  // If no name is provided focused surface is returned
+  this.getSurface = function(name) {
+    return this.controller.getSurface(name);
   };
 
   this.willUpdateState = function(newState) {
@@ -95,11 +91,9 @@ Writer.Prototype = function() {
 
   this.didMount = function() {
     this.$el.on('keydown', this.handleApplicationKeyCombos);
-
-    // Handle the initial state
-    // We do this after mount which actually triggers some rerenders
-    // A better place would be to do this 
-    // this.handleStateUpdate(newState);
+    // Attach clipboard
+    var clipboard = this.controller.getClipboard();
+    clipboard.attach(this.$el[0]);
   };
 
   this.willUnmount = function() {
@@ -140,7 +134,7 @@ Writer.Prototype = function() {
 
   // FIXME: even if this seems to be very hacky,
   // it is quite useful to make transactions 'app-compatible'
-  this.transactionStarted = function(tx) {
+  this.onTransactionStarted = function(tx) {
     /* jshint unused: false */
     // // store the state so that it can be recovered when undo/redo
     // tx.before.state = this.state;
@@ -215,29 +209,20 @@ Writer.Prototype = function() {
   };
 
   this.getActivePanelElement = function() {
-    if (this.componentRegistry.contains(this.state.contextId)) {
-      var panelComponent = this.componentRegistry.get(this.state.contextId);
-      return $$(panelComponent).setProps(this._panelPropsFromState(this.state));
+    var ComponentClass = this.controller.getComponent(this.state.contextId);
+
+    if (ComponentClass) {
+      return $$(ComponentClass).setProps(this._panelPropsFromState(this.state));
     } else {
       console.warn("Could not find component for contextId:", this.state.contextId);
     }
   };
 
-  this._initializeComponentRegistry = function() {
-    var componentRegistry = new Registry();
-    _.each(this.config.components, function(ComponentClass, name) {
-      componentRegistry.add(name, ComponentClass);
-    });
-    this.componentRegistry = componentRegistry;
-  };
-
   this._disposeDoc = function() {
     this.props.doc.disconnect(this);
-    this.surfaceManager.dispose();
-    this.clipboard.detach(this.$el[0]);
-    this.surfaceManager.dispose();
-    this.surfaceManager = null;
-    this.clipboard = null;
+    var clipboard = this.controller.getClipboard();
+    clipboard.detach(this.$el[0]);
+    this.controller.dispose();
   };
 
 };
