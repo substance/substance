@@ -6,6 +6,7 @@ var EventEmitter = require('../basics/event_emitter');
 var _ = require('../basics/helpers');
 var Clipboard = require('./surface/clipboard');
 var Registry = require('../basics/registry');
+var Logger = require ('../basics/logger');
 
 var defaultCommands = require('./commands');
 
@@ -20,6 +21,8 @@ var Controller = function(doc, config) {
   this.focusedSurface = null;
   this.stack = [];
 
+  this.logger = new Logger();
+
   // Initialize registries
   this._initializeComponentRegistry();
   this._initializeCommandRegistry();
@@ -27,7 +30,10 @@ var Controller = function(doc, config) {
   // Initialize clipboard
   this.clipboard = new Clipboard(this, doc.getClipboardImporter(), doc.getClipboardExporter());
 
-  doc.connect(this, { 'document:changed': this.onDocumentChange }, {
+  doc.connect(this, {
+    'document:changed': this.onDocumentChanged,
+    'transaction:started': this.onTransactionStarted
+  }, {
     // Use lower priority so that everyting is up2date
     // when we render the selection
     priority: -1
@@ -72,6 +78,11 @@ Controller.Prototype = function() {
     cmd.execute();
   };
 
+
+  this.getLogger = function() {
+    return this.logger;
+  };
+
   // Component API
   // ----------------
 
@@ -83,15 +94,11 @@ Controller.Prototype = function() {
     return this.clipboard;
   };
 
-  // console is the default logger
-  this.getLogger = function() {
-    return console;
-  };
-
   this.getDocument = function() {
     return this.doc;
   };
 
+  // If no name is provided, the focused surface is returned
   this.getSurface = function(name) {
     if (name) {
       return this.surfaces[name];
@@ -135,7 +142,22 @@ Controller.Prototype = function() {
     return this.getSurface();
   };
 
-  this.onDocumentChange = function(change, info) {
+
+  // FIXME: even if this seems to be very hacky,
+  // it is quite useful to make transactions 'app-compatible'
+  this.onTransactionStarted = function(tx) {
+    /* jshint unused: false */
+    // // store the state so that it can be recovered when undo/redo
+    // tx.before.state = this.state;
+    // tx.before.selection = this.getSelection();
+  };
+
+
+  this.onDocumentChanged = function(change, info) {
+
+    // On undo/redo
+    // ----------
+
     if (info.replay) {
       var selection = change.after.selection;
       var surfaceId = change.after.surfaceId;
@@ -151,6 +173,14 @@ Controller.Prototype = function() {
         }
       }
     }
+
+    // Save logic
+    // ----------
+
+    var doc = this.getDocument();
+    doc.__dirty = true;
+    var logger = this.getLogger();
+    logger.info('Unsaved changes');
   };
 
   this.onSelectionChanged = function(sel, surface) {
@@ -174,6 +204,33 @@ Controller.Prototype = function() {
     if (state && state.surface) {
       state.surface.setFocused(true);
       state.surface.setSelection(state.selection);
+    }
+  };
+  
+  this.saveDocument = function() {
+    var doc = this.getDocument();
+    var logger = this.getLogger();
+
+    if (doc.__dirty && !doc.__isSaving) {
+      logger.info('Saving ...');
+      doc.__isSaving = true;
+      // Pass saving logic to the user defined callback if available
+      if (this.config.onDocumentSave) {
+        // TODO: calculate changes since last save
+        var changes = [];
+        this.config.onDocumentSave(doc, changes, function(err) {
+          doc.__isSaving = false;
+          if (err) {
+            logger.error(err.message || err.toString());
+          } else {
+            doc.__dirty = false;
+            this.emit('document:saved');
+            logger.info('No changes');
+          }
+        }.bind(this));
+      } else {
+        logger.error('Document saving is not handled at the moment. Make sure onDocumentSave is passed in the config object');
+      }
     }
   };
 

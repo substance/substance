@@ -22,14 +22,15 @@ function Writer() {
   // Initialize controller
   this.controller = new Controller(doc, {
     components: this.config.components,
-    commands: this.config.commands
+    commands: this.config.commands,
+    // Pass custom save handling to controller
+    onDocumentSave: this.props.onDocumentSave
   });
 
   // Register event handlers
   // -----------------
 
   doc.connect(this, {
-    'transaction:started': this.onTransactionStarted,
     'document:changed': this.onDocumentChanged
   });
 
@@ -40,8 +41,7 @@ function Writer() {
   // action handlers
   this.actions({
     "switchState": this.switchState,
-    "switchContext": this.switchContext,
-    "requestSave": this.requestSave
+    "switchContext": this.switchContext
   });
 }
 
@@ -107,6 +107,11 @@ Writer.Prototype = function() {
     return this.props.doc;
   };
 
+  // Delegate to controller
+  this.executeCommand = function(commandName) {
+    return this.controller.executeCommand(commandName);
+  };
+
   // Event handlers
   // --------------
 
@@ -121,7 +126,7 @@ Writer.Prototype = function() {
     }
     // Save: cmd+s
     else if (e.keyCode === 83 && (e.metaKey||e.ctrlKey)) {
-      this.saveDocument();
+      this.executeCommand('save');
       handled = true;
     }
 
@@ -132,55 +137,10 @@ Writer.Prototype = function() {
     }
   };
 
-  // FIXME: even if this seems to be very hacky,
-  // it is quite useful to make transactions 'app-compatible'
-  this.onTransactionStarted = function(tx) {
-    /* jshint unused: false */
-    // // store the state so that it can be recovered when undo/redo
-    // tx.before.state = this.state;
-    // tx.before.selection = this.getSelection();
-  };
-
   this.onDocumentChanged = function(change, info) {
-    var doc = this.getDocument();
-    doc.__dirty = true;
-    var notifications = this.context.notifications;
-    notifications.addMessage({
-      type: "info",
-      message: "Unsaved changes"
-    });
     // after undo/redo, also recover the stored writer state
     if (info.replay && change.after.state) {
       this.setState(change.after.state);
-    }
-  };
-
-  this.saveDocument = function() {
-    var doc = this.props.doc;
-    var backend = this.context.backend;
-    var notifications = this.context.notifications;
-    if (doc.__dirty && !doc.__isSaving) {
-      notifications.addMessage({
-        type: "info",
-        message: "Saving ..."
-      });
-      doc.__isSaving = true;
-      backend.saveDocument(doc, function(err) {
-        doc.__isSaving = false;
-        if (err) {
-          notifications.addMessage({
-            type: "error",
-            message: err.message || err.toString()
-          });
-        } else {
-          doc.emit('document:saved');
-          notifications.addMessage({
-            type: "info",
-            message: "No changes"
-          });
-          doc.__dirty = false;
-        }
-      });
     }
   };
 
@@ -197,10 +157,6 @@ Writer.Prototype = function() {
     this.setState({ contextId: contextId });
   };
 
-  this.requestSave = function() {
-    this.saveDocument();
-  };
-
   // Pass writer start 
   this._panelPropsFromState = function (state) {
     var props = _.omit(state, 'contextId');
@@ -210,7 +166,6 @@ Writer.Prototype = function() {
 
   this.getActivePanelElement = function() {
     var ComponentClass = this.controller.getComponent(this.state.contextId);
-
     if (ComponentClass) {
       return $$(ComponentClass).setProps(this._panelPropsFromState(this.state));
     } else {
