@@ -19,7 +19,7 @@ function TextPropertyManager(doc, containerId) {
 
   this.doc.connect(this, {
     "document:changed": this.onDocumentChange
-  });
+  }, { priority: -1 });
 
   this._initialize();
 }
@@ -214,7 +214,7 @@ TextPropertyManager.Prototype = function() {
       var change = changes[path];
       var record = this.records[path];
       if (!record) {
-        console.warn("TextPropertyManager: something is fishy here. Saw a change, but don't know the property.");
+        console.warn("TextPropertyManager: something is fishy here. Saw a change, but don't know property:", path);
         continue;
       }
       var fragmentsChanged = false;
