@@ -32,7 +32,6 @@ function _textProp3() {
 QUnit.module('Substance.Document/TextPropertManager', {
   beforeEach: function() {
     doc = sample();
-    TextPropertyManager.prototype.onDocumentChange = sinon.spy(TextPropertyManager.prototype.onDocumentChange);
     manager = new TextPropertyManager(doc, 'main');
     _textProp1();
   },
@@ -127,6 +126,12 @@ QUnit.test("Set fragments when a container annotation has been created.", functi
 // after they could register.
 // TODO: this seems a bit hacky still
 QUnit.test("TextPropertyManager is updated after other Components.", function(assert) {
+  // create a custom manager where onDocumentCHange is inspectable
+  manager.dispose();
+  TextPropertyManager.prototype.onDocumentChange = sinon.spy(TextPropertyManager.prototype.onDocumentChange);
+  manager = new TextPropertyManager(doc, 'main');
+  _textProp1();
+
   var other = sinon.spy();
   // registering another listener, which could be another component, such as ContainerNode
   doc.on('document:changed', other);
@@ -158,6 +163,7 @@ QUnit.test("Issue #66: do not update deleted properties.", function(assert) {
     // when deleting a node, the property will unregister itself
     manager.unregisterProperty(textProp1);
     // now we delete the annotation, hide the node, and remove it
+    tx.set(['s1', 'startOffset'], 2);
     tx.delete('s1');
     tx.get('main').hide(id);
     tx.delete(id);
