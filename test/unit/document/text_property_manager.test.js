@@ -136,3 +136,34 @@ QUnit.test("TextPropertyManager is updated after other Components.", function(as
   });
   assert.ok(other.calledBefore(manager.onDocumentChange), "TextPropertyManager should have been called later.");
 });
+
+
+// Issue #66: a bug in TextPropertyManager._recordChanges() records
+// changes on already deleted nodes
+// This happened when there was a node with annotations got deleted
+// i.e. the deletion of the annotation was taken as sign to rerender the
+// text property
+QUnit.test("Issue #66: do not update deleted properties.", function(assert) {
+  doc.transaction(function(tx) {
+    tx.create({
+      id: 's1',
+      type: 'strong',
+      path: textProp1.path,
+      startOffset: 0,
+      endOffset: 5
+    });
+  });
+  doc.transaction(function(tx) {
+    var id = textProp1.path[0];
+    // when deleting a node, the property will unregister itself
+    manager.unregisterProperty(textProp1);
+    // now we delete the annotation, hide the node, and remove it
+    tx.delete('s1');
+    tx.get('main').hide(id);
+    tx.delete(id);
+  });
+  // before #66 was fixed this crashed, as TextPropertyManager
+  // was recording the annotation change for the deleted node
+  // and trying to update the already removed component.
+  assert.ok(true, 'Should not crash.');
+});
