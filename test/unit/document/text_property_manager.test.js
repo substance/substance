@@ -32,6 +32,7 @@ function _textProp3() {
 QUnit.module('Substance.Document/TextPropertManager', {
   beforeEach: function() {
     doc = sample();
+    TextPropertyManager.prototype.onDocumentChange = sinon.spy(TextPropertyManager.prototype.onDocumentChange);
     manager = new TextPropertyManager(doc, 'main');
     _textProp1();
   },
@@ -119,4 +120,19 @@ QUnit.test("Set fragments when a container annotation has been created.", functi
   assert.equal(textProp1.setFragments.args[0][0].length, 2, "Second property should have received two fragments.");
   assert.equal(textProp3.setFragments.callCount, 1, "third.setFragments should have been called.");
   assert.equal(textProp1.setFragments.args[0][0].length, 2, "Second property should have received two fragments.");
+});
+
+// For instance, updating a ContainerNode might lead to new rendered
+// properties. TextPropertyManager should not process changes for those
+// after they could register.
+// TODO: this seems a bit hacky still
+QUnit.test("TextPropertyManager is updated after other Components.", function(assert) {
+  var other = sinon.spy();
+  // registering another listener, which could be another component, such as ContainerNode
+  doc.on('document:changed', other);
+  // debugger;
+  doc.transaction(function(tx) {
+    tx.update(textProp1.path, { "insert": { offset: 0, value: 'a' } } );
+  });
+  assert.ok(other.calledBefore(manager.onDocumentChange), "TextPropertyManager should have been called later.");
 });
