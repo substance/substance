@@ -7,7 +7,6 @@ var AbstractDocument = require('./abstract_document');
 
 var AnnotationIndex = require('./annotation_index');
 var AnchorIndex = require('./anchor_index');
-var ContainerAnnotationIndex = require('./container_annotation_index');
 
 var TransactionDocument = require('./transaction_document');
 var DocumentChange = require('./document_change');
@@ -32,11 +31,6 @@ function Document(schema) {
 
   // special index for (contaoiner-scoped) annotations
   this.anchorIndex = this.addIndex('container-annotation-anchors', new AnchorIndex());
-
-  // HACK: ATM we can't register this as Data.Index, as it depends on Containers to be up2date,
-  // but containers are updated after indexes.
-  // This must not be used from within transactions.
-  this.containerAnnotationIndex = new ContainerAnnotationIndex(this);
 
   this.done = [];
   this.undone = [];
@@ -89,7 +83,6 @@ Document.Prototype = function() {
   this.documentDidLoad = function() {
     // HACK: need to reset the stage
     this.stage.reset();
-    this.containerAnnotationIndex.reset();
     this.done = [];
     // do not allow non-transactional changes after that
     this.FORCE_TRANSACTIONS = true;
@@ -362,11 +355,6 @@ Document.Prototype = function() {
 
   this._notifyChangeListeners = function(documentChange, info) {
     info = info || {};
-    // HACK: update the container annotation index first
-    // TODO: we should have a better concept to define the order of listeners
-    // However, ContainerAnnotationIndex should be treated as an index
-    // this order would suffice: [containers, indexes, ]
-    this.containerAnnotationIndex.onDocumentChange(documentChange);
     this.emit('document:changed', documentChange, info, this);
   };
 

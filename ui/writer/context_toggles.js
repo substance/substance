@@ -16,11 +16,11 @@ ContextToggles.Prototype = function() {
   this.render = function() {
     var panelOrder = this.props.panelOrder;
     var contextId = this.props.contextId;
-    var componentRegistry = this.context.componentRegistry;
+    var ctrl = this.context.controller;
 
     var el = $$('div').addClass("context-toggles");
     _.each(panelOrder, function(panelId) {
-      var panelClass = componentRegistry.get(panelId);
+      var panelClass = ctrl.getComponent(panelId);
       var toggle = $$('a')
         .addClass("toggle-context")
         .attr({

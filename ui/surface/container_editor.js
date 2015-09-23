@@ -1,10 +1,10 @@
 'use strict';
 
-var _ = require('../basics/helpers');
-var OO = require('../basics/oo');
-var Document = require('../document');
+var _ = require('../../basics/helpers');
+var OO = require('../../basics/oo');
+var Document = require('../../document');
 var FormEditor = require('./form_editor');
-var EditingBehavior = require('../document/editing_behavior');
+var EditingBehavior = require('../../document/editing_behavior');
 var Transformations = Document.Transformations;
 
 function ContainerEditor(containerId) {

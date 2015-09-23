@@ -66,12 +66,6 @@ AnnotationTool.Prototype = function() {
     this.setState(newState);
   };
 
-  // This should go into some command abstraction so we can reuse this with keybindings
-  // Command ToggleAnnotation
-  this.performAction = function() {
-    var command = this.getCommand();
-    command.execute();
-  };
 
   // UI-specific
   // --------------------------

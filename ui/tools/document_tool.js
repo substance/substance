@@ -9,15 +9,15 @@ var _ = require('../../basics/helpers');
 /**
  * Abstract class for tools tools that interact with a document.
  * For example UndoTool or RedoTool.
- * 
+ *
  * A document context must be provided via dependency injection
  */
 
 function DocumentTool() {
   Tool.apply(this, arguments);
-  this.doc = this.context.document;
 
-  this.doc.connect(this, {
+  var doc = this.context.controller.getDocument();
+  doc.connect(this, {
     'document:changed': this.update
   });
 }
@@ -36,17 +36,18 @@ DocumentTool.Prototype = function() {
 
   /**
    * Return the document provided by the current context
-   * 
+   *
    * @return {Document}
    * @public
    */
 
   this.getDocument = function() {
-    return this.doc;
+    return this.context.controller.getDocument();
   };
 
 
-  this.update = function(/*change, info*/) {
+  this.update = function(change, info) {
+    /* jshint unused:false */
     throw new Error('Must be defined by your tool implementation');
   };
 
@@ -88,4 +89,5 @@ DocumentTool.Prototype = function() {
 };
 
 OO.inherit(DocumentTool, Tool);
+
 module.exports = DocumentTool;

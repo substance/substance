@@ -1,31 +1,36 @@
 'use strict';
 
-var _ = require('../basics/helpers');
-var OO = require('../basics/oo');
-var Substance = require('../basics');
+var _ = require('../../basics/helpers');
+var OO = require('../../basics/oo');
+var Substance = require('../../basics');
 var SurfaceSelection = require('./surface_selection');
-var Document = require('../document');
+var Document = require('../../document');
 var Selection = Document.Selection;
-
-var defaultCommands = require('../surface/commands');
+var TextPropertyManager = require('../../document/text_property_manager');
 
 var __id__ = 0;
 
-function Surface(surfaceManager, doc, editor, options) {
+function Surface(controller, editor, options) {
   Substance.EventEmitter.call(this);
 
-  if (!doc) {
-    throw new Error('Illegal argument: document is required. was ' + doc);
+  if (!controller) {
+    throw new Error('Illegal argument: controller is required. was ' + controller);
   }
+
+  var doc = controller.getDocument();
 
   options = options || {};
 
-  this.registerCommands(options.commands || defaultCommands);
-
   this.__id__ = __id__++;
   this.name = options.name || this.__id__;
-  this.doc = doc;
-  this.surfaceManager = surfaceManager;
+  
+  this.controller = controller;
+
+  if (editor.isContainerEditor()) {
+    this.textPropertyManager = new TextPropertyManager(doc, editor.getContainerId());
+  } else {
+    this.textPropertyManager = new TextPropertyManager(doc);
+  }
 
   this.selection = Document.nullSelection;
 
@@ -80,45 +85,30 @@ function Surface(surfaceManager, doc, editor, options) {
     this.enableContentEditable = true;
   }
 
-  this.surfaceManager.registerSurface(this);
+  this.controller.registerSurface(this);
   /*jshint eqnull:false */
 }
 
 Surface.Prototype = function() {
 
   // Used by TextTool
+  // TODO: Filter by enabled commands for this Surface
   this.getTextCommands = function() {
     var textCommands = {};
-
-    _.each(this.commands, function(command) {
-      // TODO: Use a more explicit indicator to detect a switch text command
-      if (command.constructor.static.textTypeName) {
-        textCommands[command.constructor.static.name] = command;
+    this.controller.commandRegistry.each(function(cmd) {
+      if (cmd.constructor.static.textTypeName) {
+        textCommands[cmd.constructor.static.name] = cmd;
       }
     });
     return textCommands;
   };
 
-  this.registerCommands = function(commands) {
-    this.commands = {};
-    _.each(commands, function(CommandClass) {
-      var cmd = new CommandClass(this);
-      this.commands[CommandClass.static.name] = cmd;
-    }, this);
-  };
-
   this.getCommand = function(commandName) {
-    return this.commands[commandName];
+    return this.controller.getCommand(commandName);
   };
 
   this.executeCommand = function(commandName) {
-    var cmd = this.getCommand(commandName);
-    if (!cmd) {
-      console.warn('command', commandName, 'not registered on Surface');
-      return;
-    }
-    // Run command
-    cmd.execute();
+    return this.controller.executeCommand(commandName);
   };
 
   this.getName = function() {
@@ -142,7 +132,7 @@ Surface.Prototype = function() {
 
   this.getContainer = function() {
     if (this.editor.isContainerEditor()) {
-      return this.doc.get(this.editor.getContainerId());
+      return this.getDocument().get(this.editor.getContainerId());
     }
   };
 
@@ -151,13 +141,13 @@ Surface.Prototype = function() {
   };
 
   this.getDocument = function() {
-    return this.doc;
+    return this.controller.getDocument();
   };
 
   this.dispose = function() {
     this.setSelection(null);
     this.detach();
-    this.surfaceManager.unregisterSurface(this);
+    this.controller.unregisterSurface(this);
   };
 
   this.attach = function(element) {
@@ -347,9 +337,9 @@ Surface.Prototype = function() {
     // Undo/Redo: cmd+z, cmd+shift+z
     else if (this.undoEnabled && e.keyCode === 90 && (e.metaKey||e.ctrlKey)) {
       if (e.shiftKey) {
-        this.redo();
+        this.executeCommand('redo');
       } else {
-        this.undo();
+        this.executeCommand('undo');
       }
       handled = true;
     }
@@ -372,20 +362,6 @@ Surface.Prototype = function() {
     if (handled) {
       e.preventDefault();
       e.stopPropagation();
-    }
-  };
-
-  this.undo = function() {
-    var doc = this.getDocument();
-    if (doc.done.length>0) {
-      doc.undo();
-    }
-  };
-
-  this.redo = function() {
-    var doc = this.getDocument();
-    if (doc.undone.length>0) {
-      doc.redo();
     }
   };
 
@@ -621,7 +597,7 @@ Surface.Prototype = function() {
   this.setFocused = function(val) {
     this.isFocused = val;
     if (this.isFocused) {
-      this.surfaceManager.didFocus(this);
+      this.controller.didFocus(this);
     }
   };
 
@@ -755,22 +731,9 @@ Surface.Prototype = function() {
     this.placeCaretElement();
   };
 
-  // API for TextProperties
-  this.getAnnotationsForProperty = function(path) {
-    var doc = this.getDocument();
-    var annotations = doc.getIndex('annotations').get(path);
-    var containerId = this.getContainerId();
-    if (containerId) {
-      // Anchors
-      var anchors = doc.getIndex('container-annotation-anchors').get(path, containerId);
-      annotations = annotations.concat(anchors);
-      // Fragments
-      var fragments = doc.containerAnnotationIndex.getFragments(path, containerId);
-      annotations = annotations.concat(fragments);
-    }
-    return annotations;
+  this.getTextPropertyManager = function() {
+    return this.textPropertyManager;
   };
-
 };
 
 OO.inherit(Surface, Substance.EventEmitter);

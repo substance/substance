@@ -1,6 +1,6 @@
-var OO = require('../basics/oo');
-var Document = require('../document');
-var _ = require('../basics/helpers');
+var OO = require('../../basics/oo');
+var Document = require('../../document');
+var _ = require('../../basics/helpers');
 var Range = Document.Range;
 var Coordinate = Document.Coordinate;
 

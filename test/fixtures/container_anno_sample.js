@@ -34,6 +34,13 @@ module.exports = function() {
     endPath: ['p3', 'content'],
     endOffset: 4,
   });
+  article.create({
+    type: 'annotation',
+    id: 'a2',
+    path: ['p1', 'content'],
+    startOffset: 0,
+    endOffset: 2,
+  });
   var main = article.get('main');
   main.show('p1');
   main.show('p2');

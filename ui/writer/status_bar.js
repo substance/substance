@@ -16,7 +16,13 @@ var ICONS_FOR_TYPE = {
 
 function StatusBar() {
   Component.apply(this, arguments);
-  this.handleNotificationUpdate = this.handleNotificationUpdate.bind(this);
+
+  var ctrl = this.context.controller;
+  var logger = ctrl.getLogger();
+  
+  logger.connect(this, {
+    'messages:updated': this.handleStatusUpdate
+  });
 }
 
 StatusBar.Prototype = function() {
@@ -24,41 +30,31 @@ StatusBar.Prototype = function() {
   this.render = function() {
     var meta = this.props.doc.getDocumentMeta();
     var title = meta ? meta.title : 'Untitled';
+    var message = this.state.message;
 
     var el = $$('div').addClass("status-bar-component fill-light");
-    var statusEl = $$("div").addClass("document-status").append(title);
-    var message = this.state.message;
+    el.append($$("div").addClass("document-status").append(title));
+
     if (message) {
       el.addClass(message.type);
-      statusEl.append(
+      el.append(
         $$('div').addClass('notifications').append(
           $$("div").addClass("icon").append(
             $$('i').addClass('fa '+ICONS_FOR_TYPE[message.type])
           )
-        )
-      );
-      statusEl.append(
+        ),
         $$('div').addClass('message').append(message.message)
       );
     }
-    el.append(statusEl);
     return el;
   };
 
-  this.didMount = function() {
-    var notifications = this.context.notifications;
-    notifications.connect(this, {
-      'messages:updated': this.handleNotificationUpdate
-    });
-  };
-
-  this.handleNotificationUpdate = function(messages) {
+  this.handleStatusUpdate = function(messages) {
     var currentMessage = messages.pop();
     this.setState({
       message: currentMessage
     });
   };
-
 };
 
 OO.inherit(StatusBar, Component);

@@ -68,15 +68,15 @@ LinkTool.Prototype = function() {
   };
 
   this.didInitialize = function() {
-    var doc = this.getDocument();
-    doc.connect(this, {
-      'app:edit:link': this.togglePrompt
+    var ctrl = this.getController();
+    ctrl.connect(this, {
+      'edit:link': this.togglePrompt
     });
   };
 
   this.willUnmount = function() {
-    var doc = this.getDocument();
-    doc.disconnect(this);
+    var ctrl = this.getController();
+    ctrl.disconnect(this);
   };
 
   this.togglePrompt = function() {

@@ -41,10 +41,11 @@ ContentPanel.Prototype = function() {
   };
 
   this.renderContentEditor = function() {
-    var componentRegistry = this.context.componentRegistry;
+    var ctrl = this.getController();
     var doc = this.props.doc;
     var containerNode = doc.get(this.props.containerId);
-    var ContentContainerClass = componentRegistry.get("content_editor");
+    var ContentContainerClass = ctrl.getComponent('content_editor');
+
     return $$(ContentContainerClass, {
       doc: doc,
       node: containerNode

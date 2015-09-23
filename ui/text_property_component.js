@@ -12,9 +12,25 @@ function TextPropertyComponent() {
 
 TextPropertyComponent.Prototype = function() {
 
+  this.didInitialize = function() {
+    this.getTextPropertyManager().registerProperty(this);
+  };
+
+  this.getInitialState = function() {
+    return {
+      fragments: this.getTextPropertyManager().getFragments(this.props.path)
+    };
+  };
+
+  this.willUnmount = function() {
+    this.getTextPropertyManager().unregisterProperty(this);
+  };
+
   this.render = function() {
-    var componentRegistry = this.context.componentRegistry;
+    
+
     var doc = this.getDocument();
+    var ctrl = this.getController();
     var path = this.getPath();
     var text = doc.get(path) || "";
     var annotations = this.getAnnotations();
@@ -43,13 +59,13 @@ TextPropertyComponent.Prototype = function() {
         fragmentCounters[id] = 0;
       }
       fragmentCounters[id] = fragmentCounters[id]+1;
-      var ViewClass;
-      if (componentRegistry.contains(node.type)) {
-        ViewClass = componentRegistry.get(node.type);
-      } else {
-        ViewClass = AnnotationComponent;
+      var ComponentClass = ctrl.getComponent(node.type);
+
+      if (!ComponentClass) {
+        ComponentClass = AnnotationComponent;
       }
-      var el = $$(ViewClass, {
+
+      var el = $$(ComponentClass, {
         doc: doc,
         node: node,
       });
@@ -79,35 +95,20 @@ TextPropertyComponent.Prototype = function() {
     return el;
   };
 
-  this.didMount = function() {
-    var doc = this.props.doc;
-    doc.getEventProxy('path').add(this.props.path, this, this.textPropertyDidChange);
-  };
-
-  this.willUnmount = function() {
-    var doc = this.props.doc;
-    doc.getEventProxy('path').remove(this.props.path, this);
-  };
-
   this.getAnnotations = function() {
-    return this.context.surface.getAnnotationsForProperty(this.props.path);
-  };
-
-  // Annotations that are active (not just visible)
-  this.getHighlights = function() {
-    if (this.context.getHighlightedNodes) {
-      return this.context.getHighlightedNodes();
-    } else {
-      return [];
+    var annotations = this.props.doc.getIndex('annotations').get(this.props.path);
+    if (this.state.fragments) {
+      annotations = annotations.concat(this.state.fragments);
     }
-  };
-
-  this.textPropertyDidChange = function() {
-    this.rerender();
+    return annotations;
   };
 
   this.getContainer = function() {
     return this.getSurface().getContainer();
+  };
+
+  this.getController = function() {
+    return this.context.controller;
   };
 
   this.getDocument = function() {
@@ -125,6 +126,23 @@ TextPropertyComponent.Prototype = function() {
   this.getSurface = function() {
     return this.context.surface;
   };
+
+  // TextPropertyManager API
+
+  this.setFragments = function(fragments) {
+    this.extendState({
+      fragments: fragments
+    });
+  };
+
+  this.update = function() {
+    this.rerender();
+  };
+
+  this.getTextPropertyManager = function() {
+    return this.getSurface().getTextPropertyManager();
+  };
+
 };
 
 OO.inherit(TextPropertyComponent, Component);

@@ -70,10 +70,6 @@ Registry.Prototype = function() {
    */
   this.get = function(name) {
     var res = this.entries[name];
-
-    if (!res) {
-      console.error("No entry with name", name);
-    }
     return res;
   };
 

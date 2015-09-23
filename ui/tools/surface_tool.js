@@ -13,17 +13,28 @@ var $$ = Component.$$;
 
 function SurfaceTool() {
   Tool.apply(this, arguments);
-  
-  // NOTE: We were doing this in a debounced way but that leads to edge cases.
-  // E.g. When toggling a new link, the tool state gets immediately updated
-  // to show the edit prompt, but afterwards the delayed selection:change event
-  // immediately leads to a close of the prompt. We will observe tool performance
-  // propagating each selection:changed event immediately.
-  // We could also throttle
-  this.context.surfaceManager.on('selection:changed', this.update, this);
 }
 
 SurfaceTool.Prototype = function() {
+
+  /**
+   * Binds event handler after getting mounted.
+   *
+   * Custom tool implementation must do a super call.
+   */
+
+  this.didMount = function() {
+    // NOTE: We were doing this in a debounced way but that leads to edge cases.
+    // E.g. When toggling a new link, the tool state gets immediately updated
+    // to show the edit prompt, but afterwards the delayed selection:change event
+    // immediately leads to a close of the prompt. We will observe tool performance
+    // propagating each selection:changed event immediately.
+    // We could also throttle
+    var ctrl = this.getController();
+    ctrl.connect(this, {
+      'selection:changed': this.update
+    });
+  };
 
   /**
    * Unbinds event handler before getting unmounted.
@@ -32,7 +43,8 @@ SurfaceTool.Prototype = function() {
    */
 
   this.willUnmount = function() {
-    this.context.surfaceManager.off('selection:changed', this.update);
+    var ctrl = this.getController();
+    ctrl.disconnect(this);
   };
 
   /**
@@ -40,41 +52,42 @@ SurfaceTool.Prototype = function() {
    *
    * This must be overwritten by the tool implementation, analyzing the
    * selection and updating the tool state appropriately.
-   * 
+   *
    * @param {Selection} sel
    * @param {Surface} surface
    * @public
    */
 
-  this.update = function(/*sel, surface*/) {
+  this.update = function(sel, surface) {
+    /* jshint unused:false*/
     throw new Error('Must be defined by your tool implementation');
   };
 
   /**
    * Return the currently focused surface
-   * 
+   *
    * @return {Surface}
    * @public
    */
 
   this.getSurface = function() {
-    return this.context.surfaceManager.getFocusedSurface();
+    return this.getController().getSurface();
   };
 
   /**
    * Return the document associated with the focused surface.
-   * 
+   *
    * @return {Document}
    * @public
    */
 
   this.getDocument = function() {
-    return this.context.surfaceManager.getDocument();
+    return this.getController().getDocument();
   };
 
   /**
    * Return the currently active container
-   * 
+   *
    * @return {Document.Container}
    * @public
    */

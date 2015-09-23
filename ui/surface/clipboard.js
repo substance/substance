@@ -1,12 +1,12 @@
 "use strict";
 
-var _ = require('../basics/helpers');
-var OO = require('../basics/oo');
+var _ = require('../../basics/helpers');
+var OO = require('../../basics/oo');
 
 // context must have a getSurface() method.
-var Clipboard = function(surfaceManager, htmlImporter, htmlExporter) {
+var Clipboard = function(controller, htmlImporter, htmlExporter) {
 
-  this.surfaceManager = surfaceManager;
+  this.controller = controller;
   this.htmlImporter = htmlImporter;
   this.htmlExporter = htmlExporter;
 
@@ -32,7 +32,7 @@ var Clipboard = function(surfaceManager, htmlImporter, htmlExporter) {
 Clipboard.Prototype = function() {
 
   this.getSurface = function() {
-    return this.surfaceManager.getFocusedSurface();
+    return this.controller.getSurface();
   };
 
   this.attach = function(rootElement) {

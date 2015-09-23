@@ -21,6 +21,10 @@ Panel.Prototype = function() {
       );
   };
 
+  this.getController = function() {
+    return this.context.controller;
+  };
+
   this.getDocument = function() {
     return this.props.doc;
   };
