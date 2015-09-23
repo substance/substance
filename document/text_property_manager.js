@@ -121,8 +121,15 @@ TextPropertyManager.Prototype = function() {
 
       // property anno created/deleted/changed
       // HACK: doing a lazy check for property annotations assuming a property 'path'
-      if ( ( (op.type === "create" || op.type === "delete") && op.val.path ) ||
-           ( (op.type === "set") &&
+      if ( (op.type === "create" || op.type === "delete") && op.val.path ) {
+        // ignore annotations on deleted nodes
+        if (!change.deleted[op.val.path[0]]) {
+          this._recordAnnoChange(changes, op);
+        }
+        continue;
+      }
+
+      if ( ( (op.type === "set") &&
              (op.path[1] === 'path' || op.path[1] === 'startOffset' ||
               op.path[1] === 'endOffset') ) ) {
         this._recordAnnoChange(changes, op);
