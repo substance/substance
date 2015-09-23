@@ -33,13 +33,6 @@ ToggleAnnotationCommand.Prototype = function() {
     return {};
   };
 
-  // No-op hook implementations
-  this.afterCreate = function() {};
-  this.afterFuse = function() {};
-  this.afterDelete = function() {};
-  this.afterTruncate = function() {};
-  this.afterExpand = function() {};
-
   // TODO: We had a concept when we allowed this situation by splitting the
   // container selection into multiple property selection
   // We would this now to be a concept on command level
@@ -100,19 +93,19 @@ ToggleAnnotationCommand.Prototype = function() {
     var sel = this.getSelection();
 
     if (this.isDisabled(annos, sel)) {
-      // DO nothing
+      return false;
     } else if (this.canCreate(annos, sel)) {
-      this.executeCreate();
+      return this.executeCreate();
     } else if (this.canFuse(annos, sel)) {
-      this.executeFusion();
+      return this.executeFusion();
     } else if (this.canTruncate(annos, sel)) {
-      this.executeTruncate();
+      return this.executeTruncate();
     } else if (this.canExpand(annos, sel)) {
-      this.executeExpand();
+      return this.executeExpand();
     } else if (this.canEdit(annos, sel)) {
-      this.executeEdit(annos, sel);
+      return this.executeEdit(annos, sel);
     } else if (this.canDelete(annos, sel)) {
-      this.executeDelete();
+      return this.executeDelete();
     }
   };
 
@@ -138,33 +131,55 @@ ToggleAnnotationCommand.Prototype = function() {
   };
 
   this.executeEdit = function() {
-    throw new Error('Contract: executeEdit must be imlemented by command');
+    var annos = this.getAnnotationsForSelection();
+    console.log('executing edit');
+    return {
+      mode: "edit",
+      anno: annos[0],
+      readyOnly: true
+    };
   };
 
   this.executeCreate = function() {
     var anno = this.applyTransform(createAnnotation);
-    this.afterCreate(anno);
+    return {
+      mode: 'create',
+      anno: anno
+    };
   };
 
   this.executeFuse = function() {
     var anno = this.applyTransform(fuseAnnotation);
-    this.afterFuse(anno);
+    return {
+      mode: 'fuse',
+      anno: anno
+    };
   };
 
   this.executeTruncate = function() {
     var anno = this.applyTransform(truncateAnnotation);
-    this.afterTruncate(anno);
-  };
-
-  this.executeDelete = function() {
-    var annoId = this.applyTransform(deleteAnnotation);
-    this.afterDelete(annoId);
+    return {
+      mode: 'truncate',
+      anno: anno
+    };
   };
 
   this.executeExpand = function() {
     var anno = this.applyTransform(expandAnnotation);
-    this.afterExpand(anno);
+    return {
+      mode: 'expand',
+      anno: anno
+    };
   };
+
+  this.executeDelete = function() {
+    var annoId = this.applyTransform(deleteAnnotation);
+    return {
+      mode: 'delete',
+      annoId: annoId
+    };
+  };
+
 };
 
 OO.inherit(ToggleAnnotationCommand, Command);

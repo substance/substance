@@ -74,8 +74,19 @@ Controller.Prototype = function() {
       console.warn('command', commandName, 'not registered on controller');
       return;
     }
+
     // Run command
-    cmd.execute();
+    var info = cmd.execute();
+
+    if (info) {
+      console.log('command:executed', info);
+      this.emit('command:executed', info, commandName);
+      // TODO: We want to replace this with a more specific, scoped event
+      // but for that we need an improved EventEmitter API
+      // this.emit('command:executed', 'commandName', info, commandName);
+    } else if (info === undefined) {
+      console.warn('command ', commandName, 'must return either an info object or true when handled or false when not handled');
+    }
   };
 
 

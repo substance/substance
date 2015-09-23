@@ -3,10 +3,6 @@
 var AnnotationCommand = require('./toggle_annotation');
 
 var ToggleLink = AnnotationCommand.extend({
-  afterCreate: function() {
-    this.executeEdit();
-  },
-
   getAnnotationData: function() {
     return {
       url: "",
@@ -18,12 +14,6 @@ var ToggleLink = AnnotationCommand.extend({
   canEdit: function(annos, sel) {
     // jshint unused: false
     return annos.length === 1;
-  },
-
-  executeEdit: function() {
-    var ctrl = this.getController();
-    // Tells the link tool to show the edit prompt
-    ctrl.emit('edit:link');
   },
 
   static: {

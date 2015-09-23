@@ -39,6 +39,8 @@ SwitchTextType.Prototype = function() {
       args.data = nodeData;
       return editor.switchType(tx, args);
     });
+
+    return nodeData;
   };
 };
 

@@ -69,9 +69,19 @@ LinkTool.Prototype = function() {
 
   this.didInitialize = function() {
     var ctrl = this.getController();
+
     ctrl.connect(this, {
-      'edit:link': this.togglePrompt
+      'command:executed': this.onCommandExecuted
     });
+  };
+  
+  this.onCommandExecuted = function(info, commandName) {
+    if (commandName === this.static.command) {
+      // Toggle the edit prompt when either edit is requested or a new link has been created
+      if (_.includes(['edit','create'], info.mode)) {
+        this.togglePrompt();
+      }
+    }
   };
 
   this.willUnmount = function() {
