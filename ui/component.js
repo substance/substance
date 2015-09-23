@@ -952,14 +952,14 @@ Component.Prototype = function ComponentPrototype() {
 
   this._getContext = function() {
     var parent = this.getParent();
-    var context = {};
     if (parent) {
-      context = parent.context || {};
+      var context = _.extend({}, parent.context);
       if (parent.getChildContext) {
         return _.extend(context, parent.getChildContext());
       }
+      return context;
     }
-    return context;
+    return {};
   };
 
   this._setProps = function(props) {
