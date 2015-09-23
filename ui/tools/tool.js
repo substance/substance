@@ -71,8 +71,8 @@ Tool.Prototype = function() {
   };
 
   this.performAction = function() {
-    var command = this.getCommand();
-    command.execute();
+    var ctrl = this.getController();
+    ctrl.executeCommand(this.constructor.static.command);
   };
 
   this.render = function() {

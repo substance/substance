@@ -42,7 +42,7 @@ AnnotationTool.Prototype = function() {
     // E.g. we don't allow toggling of property annotations when current
     // selection is a container selection
     if (command.isDisabled(annos, sel)) {
-      this.setDisabled();
+      newState.disabled = true;
     } else if (command.canCreate(annos, sel)) {
       newState.mode = "create";
     } else if (command.canFuse(annos, sel)) {
