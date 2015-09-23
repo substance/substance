@@ -77,9 +77,7 @@ Controller.Prototype = function() {
 
     // Run command
     var info = cmd.execute();
-
     if (info) {
-      console.log('command:executed', info);
       this.emit('command:executed', info, commandName);
       // TODO: We want to replace this with a more specific, scoped event
       // but for that we need an improved EventEmitter API
@@ -88,7 +86,6 @@ Controller.Prototype = function() {
       console.warn('command ', commandName, 'must return either an info object or true when handled or false when not handled');
     }
   };
-
 
   this.getLogger = function() {
     return this.logger;
@@ -195,6 +192,11 @@ Controller.Prototype = function() {
   };
 
   this.onSelectionChanged = function(sel, surface) {
+    // Skip if the selection has not really changed
+    if (sel.equals(this.__prevSelection)) {
+      return;
+    }
+    this.__prevSelection = sel;
     this.emit('selection:changed', sel, surface);
   };
 
