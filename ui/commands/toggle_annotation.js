@@ -99,7 +99,9 @@ ToggleAnnotationCommand.Prototype = function() {
     var annos = this.getAnnotationsForSelection();
     var sel = this.getSelection();
 
-    if (this.canCreate(annos, sel)) {
+    if (this.isDisabled(annos, sel)) {
+      // DO nothing
+    } else if (this.canCreate(annos, sel)) {
       this.executeCreate();
     } else if (this.canFuse(annos, sel)) {
       this.executeFusion();
