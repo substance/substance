@@ -109,9 +109,11 @@ LinkTool.Prototype = function() {
 
   this.deleteLink = function() {
     var link = this.getLink();
+
     this.getSurface().transaction(function(tx) {
       tx.delete(link.id);
     });
+    this.togglePrompt();
   };
 
   this.getLink = function() {
