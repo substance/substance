@@ -685,6 +685,7 @@ Surface.Prototype = function() {
   this.onNativeFocus = function() {
     console.log('Focusing surface', this.__id__);
     this.textPropertyManager.removeSelection();
+    this.rerenderDomSelection();
   };
 
   /**
