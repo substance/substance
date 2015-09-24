@@ -99,12 +99,15 @@ var ContainerAnnotation = Node.extend({
     }
   },
 
-  setActive: function(val) {
-    if (this.active !== val) {
-      this.active = val;
-      this.emit('active', val);
+
+  setHighlighted: function(highlighted) {
+
+    if (this.highlighted !== highlighted) {
+      this.highlighted = highlighted;
+      this.emit('highlighted', highlighted);
+
       _.each(this.fragments, function(frag) {
-        frag.emit('active', val);
+        frag.emit('highlighted', highlighted);
       });
     }
   },
@@ -237,9 +240,9 @@ Object.defineProperties(ContainerAnnotation.Fragment.prototype, {
     },
     set: function() { throw new Error('Immutable!'); }
   },
-  active: {
+  highlighted: {
     get: function() {
-      return this.anno.active;
+      return this.anno.highlighted;
     },
     set: function() { throw new Error('Immutable!'); }
   }

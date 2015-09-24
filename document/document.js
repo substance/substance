@@ -283,7 +283,7 @@ Document.Prototype = function() {
         var node = this.get(nodeId);
         // Node could in the meanwhile have been deleted
         if (node) {
-          node.setHighlighted(false);  
+          node.setHighlighted(false);
         }
       }, this);
     }
