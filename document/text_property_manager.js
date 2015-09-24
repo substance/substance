@@ -2,6 +2,7 @@
 
 var OO = require('../basics/oo');
 var _ = require('../basics/helpers');
+var ContainerAnnotation = require('./container_annotation');
 var TextOperation = require('../operator/text_operation');
 // var ArrayOperation = require('../operator/array_operation');
 
@@ -146,21 +147,16 @@ TextPropertyManager.Prototype = function() {
         this._recordTextChange(changes, op);
         continue;
       }
-
       // property anno created/deleted/changed
       // HACK: doing a lazy check for property annotations assuming a property 'path'
       if ( (op.type === "create" || op.type === "delete") && op.val.path ) {
         this._recordAnnoChange(changes, op);
         continue;
       }
-
-      if ( ( (op.type === "set") &&
-             (op.path[1] === 'path' || op.path[1] === 'startOffset' ||
-              op.path[1] === 'endOffset') ) ) {
+      if ( ( op.type === "set" && op.path[1] === 'path' ) ) {
         this._recordAnnoChange(changes, op);
         continue;
       }
-
       // container anno changed
       // HACK: doing a lazy check for container annotations assuming a property 'startPath'|'endPath'
       if ( ( (op.type === "create" || op.type === "delete") && op.val.startPath ) ||
@@ -169,18 +165,36 @@ TextPropertyManager.Prototype = function() {
         this._recordContainerAnnoChange(changes, op);
         continue;
       }
+      // both type of annotations do have start and end offset
+      if ( (op.type === "update" || op.type === "set") &&
+           (op.path[1] === 'startOffset' || op.path[1] === 'endOffset') ) {
+        this._recordMixedAnnoChange(changes, op);
+        continue;
+      }
 
       // container change
       // TODO
       // listen to any array update on a node which is either the container
       // or a node which has the container as root
     }
-
     return changes;
   };
 
   this._recordTextChange = function(changes, op) {
     changes.get(op.path).rerender = true;
+  };
+
+  this._recordMixedAnnoChange = function(changes, op) {
+    var doc = this.doc;
+    var anno = doc.get(op.path[0]);
+    if (!anno) {
+      return;
+    }
+    if (anno instanceof ContainerAnnotation) {
+      this._recordContainerAnnoChange(changes, op);
+    } else {
+      this._recordAnnoChange(changes, op);
+    }
   };
 
   this._recordAnnoChange = function(changes, op) {
@@ -221,7 +235,7 @@ TextPropertyManager.Prototype = function() {
       // all fragments for sake of simplicity
       if (op.path[1] === 'startPath' || 'endPath') {
         anno = doc.get(op.path[0]);
-        fragments = this.fragments[anno.id];
+        fragments = this.fragments[anno.id] || [];
         for (i = 0; i < fragments.length; i++) {
           change = changes.get(fragments[i].path);
           change.didRemoveFragment(fragments[i]);
