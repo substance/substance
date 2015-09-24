@@ -468,22 +468,31 @@ body,html {
 /* Selection style sheets
 -----------------------------------------------------*/
 
-::selection {
-  background: rgba(0,0,0,0.1);
-}
+// ::selection {
+//   background: rgba(0,0,0,0.1);
+// }
 
-::-moz-selection {
-  background: rgba(0,0,0,0.1);
-}
+// ::-moz-selection {
+//   background: rgba(0,0,0,0.1);
+// }
 
 /* Custom selection
 ----------------------------------------------------*/
 
 .cursor {
+  display: inline-block;
+  position: relative;
+  width: 0px;
+}
+
+.inner-cursor {
   position: absolute;
-  left: -2;
-  height: 20px;
-  border-left: solid #000 1px;
+  top: -20px;
+  // bottom: 0px;
+  height: 25px;
+  background: #999;
+  width: 1px;
+  // border-left: solid #000 1px;
 }
 
 .selection-fragment {

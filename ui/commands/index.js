@@ -10,5 +10,6 @@ module.exports = [
   require('./make_codeblock'),
   require('./toggle_strong'),
   require('./toggle_emphasis'),
-  require('./toggle_link')
+  require('./toggle_link'),
+  require('./select_all')
 ];
