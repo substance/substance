@@ -59,6 +59,22 @@ var Editor = Component.extend({
     };
   },
 
+  getController: function() {
+    return this.controller;
+  },
+
+  selectAll: function() {
+    // Make sure the surface is focussed
+    var surface = this.getController().getSurface('body');
+    surface.setFocused(true);
+    // Then send selectAll command
+    this.executeCommand('selectAll');
+  },
+
+  executeCommand: function(commandName) {
+    return this.controller.executeCommand(commandName);
+  },
+
   render: function() {
     var el = $$('div').addClass('editor-component');
 

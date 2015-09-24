@@ -335,10 +335,7 @@ Surface.Prototype = function() {
     // Ctrl+A: select all
     var handled = false;
     if ( (e.ctrlKey||e.metaKey) && e.keyCode === 65 ) {
-      var newSelection = this.editor.selectAll(this.getDocument(), this.getSelection());
-      this.setSelection(newSelection);
-      this.surfaceSelection.setSelection(newSelection);
-      this.emit('selection:changed', newSelection, this);
+      this.executeCommand('selectAll');
       handled = true;
     }
     // Undo/Redo: cmd+z, cmd+shift+z
