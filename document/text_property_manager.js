@@ -57,6 +57,31 @@ TextPropertyManager.Prototype = function() {
     return !!this.containerId;
   };
 
+  this.renderSelection = function(sel) {
+    var fragments = sel.getFragments();
+    _.each(fragments, function(frag) {
+      var record = this.records[frag.path];
+      record.fragments['selection'] = frag;
+      if (record.property) {
+        record.property.setFragments(_.values(record.fragments));
+      }
+    }, this);
+    console.log('setting selection fragments', fragments);
+    this.selectionFragments = fragments;
+  };
+
+  this.removeSelection = function() {
+    _.each(this.selectionFragments, function(frag) {
+      var record = this.records[frag.path];
+      delete record.fragments['selection'];
+      if (record.property) {
+        record.property.setFragments(_.values(record.fragments));
+      }
+    }, this);
+    console.log('Clearing selection fragments');
+    this.selectionFragments = [];
+  };
+
   this.registerProperty = function(property) {
     var path = property.getPath();
     var record = this.records[path];
