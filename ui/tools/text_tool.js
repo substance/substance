@@ -134,7 +134,7 @@ TextTool.Prototype = function() {
           .addClass('option '+commandName)
           .attr("data-type", commandName)
           .append(textCommand.constructor.static.textTypeName)
-          .on('click', this.handleClick)
+          .on('click', this.handleClick);
       options.append(button);
     }, this);
 

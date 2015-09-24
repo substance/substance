@@ -20,9 +20,7 @@ AnnotationTool.Prototype = function() {
 
 
   // When update is called we can be sure the Surface is active
-  this.update = function(sel, surface) {
-
-
+  this.update = function(sel) {
     var command = this.getCommand();
     if (!command) {
       console.log('Command', this.constructor.static.command, 'not registered on Surface');
@@ -96,5 +94,4 @@ AnnotationTool.Prototype = function() {
 };
 
 OO.inherit(AnnotationTool, SurfaceTool);
-
 module.exports = AnnotationTool;
