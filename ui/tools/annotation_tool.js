@@ -78,7 +78,6 @@ AnnotationTool.Prototype = function() {
     var el = $$("button")
       .attr('title', title)
       .addClass('button tool')
-      .on('mousedown', this.onMouseDown)
       .on('click', this.onClick);
 
     if (this.state.disabled) {
