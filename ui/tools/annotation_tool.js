@@ -20,11 +20,7 @@ AnnotationTool.Prototype = function() {
 
 
   // When update is called we can be sure the Surface is active
-  this.update = function(sel, surface) {
-    if ((!surface.isEnabled()) || sel.isNull()) {
-      return this.setDisabled();
-    }
-
+  this.update = function(sel) {
     var command = this.getCommand();
     if (!command) {
       console.log('Command', this.constructor.static.command, 'not registered on Surface');
@@ -80,7 +76,6 @@ AnnotationTool.Prototype = function() {
     var el = $$("button")
       .attr('title', title)
       .addClass('button tool')
-      .on('mousedown', this.onMouseDown)
       .on('click', this.onClick);
 
     if (this.state.disabled) {
@@ -99,5 +94,4 @@ AnnotationTool.Prototype = function() {
 };
 
 OO.inherit(AnnotationTool, SurfaceTool);
-
 module.exports = AnnotationTool;

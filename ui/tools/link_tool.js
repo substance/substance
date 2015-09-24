@@ -109,9 +109,11 @@ LinkTool.Prototype = function() {
 
   this.deleteLink = function() {
     var link = this.getLink();
+
     this.getSurface().transaction(function(tx) {
       tx.delete(link.id);
     });
+    this.togglePrompt();
   };
 
   this.getLink = function() {
@@ -121,7 +123,7 @@ LinkTool.Prototype = function() {
 
   this.render = function() {
     var title = this.props.title || _.capitalize(this.getName());
-
+    
     if (this.state.mode) {
       title = [_.capitalize(this.state.mode), title].join(' ');
     }
@@ -144,7 +146,6 @@ LinkTool.Prototype = function() {
     var button = $$("button")
       .addClass('button')
       .attr('title', title)
-      .on('mousedown', this.onMouseDown)
       .on('click', this.onClick);
 
     button.append(this.props.children);

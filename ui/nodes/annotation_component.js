@@ -22,7 +22,10 @@ AnnotationComponent.Prototype = function() {
   };
 
   this.getClassNames = function() {
-    var typeNames = this.props.node.getTypeNames();
+    var typeNames = [];
+    if (this.props.node.getTypeNames) {
+      typeNames = this.props.node.getTypeNames();
+    }
     var classNames = typeNames.join(' ');
     if (this.props.classNames) {
       classNames += " " + this.props.classNames.join(' ');

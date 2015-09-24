@@ -27,7 +27,7 @@ TextPropertyComponent.Prototype = function() {
   };
 
   this.render = function() {
-    
+
 
     var doc = this.getDocument();
     var ctrl = this.getController();
@@ -80,6 +80,10 @@ TextPropertyComponent.Prototype = function() {
         el.addClass(node.anno.getTypeNames().join(' ').replace(/_/g, "-"));
         el.addClass("anchor");
         el.addClass(node.isStart?"start-anchor":"end-anchor");
+      } else if (node.type === "cursor") {
+        el.addClass('cursor');
+      } else if (node.type === "selection-fragment") {
+        el.addClass('selection-fragment');
       }
       return el;
     };

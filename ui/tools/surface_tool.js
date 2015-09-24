@@ -101,10 +101,6 @@ SurfaceTool.Prototype = function() {
 
   this.onClick = function(e) {
     e.preventDefault();
-  };
-
-  this.onMouseDown = function(e) {
-    e.preventDefault();
     if (this.state.disabled) {
       return;
     }
@@ -121,7 +117,6 @@ SurfaceTool.Prototype = function() {
     var el = $$("button")
       .attr('title', title)
       .addClass('button tool')
-      .on('mousedown', this.onMouseDown)
       .on('click', this.onClick);
 
     if (this.state.disabled) {

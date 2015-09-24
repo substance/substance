@@ -28,8 +28,7 @@ DropdownComponent.Prototype = function() {
         .addClass('toggle')
         .attr('title', this.props.title)
         .append(this.props.label)
-        .on('mousedown', this.handleDropdownToggle)
-        .on('click', this.handleClick),
+        .on('click', this.handleDropdownToggle),
       $$('div').key('options')
         .addClass('options shadow border fill-white')
         .append(this.props.children)
@@ -49,7 +48,7 @@ DropdownComponent.Prototype = function() {
     if (open) return;
     this.setState({open: !this.state.open});
     setTimeout(function() {
-      $(window).one('mousedown', function(e) {
+      $(window).one('click', function(e) {
         /*jshint unused: false */
         // e.preventDefault();
         // e.stopPropagation();

@@ -23,7 +23,7 @@ function Surface(controller, editor, options) {
 
   this.__id__ = __id__++;
   this.name = options.name || this.__id__;
-  
+
   this.controller = controller;
 
   if (editor.isContainerEditor()) {
@@ -62,6 +62,9 @@ function Surface(controller, editor, options) {
   this.domObserver = new window.MutationObserver(this._onDomMutations);
   this.domObserverConfig = { subtree: true, characterData: true };
   this.skipNextObservation = false;
+
+  this._onNativeFocus = _.bind(this.onNativeFocus, this);
+  this._onNativeBlur = _.bind(this.onNativeBlur, this);
 
   // set when editing is enabled
   this.enabled = true;
@@ -179,6 +182,10 @@ Surface.Prototype = function() {
 
     // disable drag'n'drop
     this.$element.on('dragstart', this.onDragStart);
+
+    // we will react on this to render a custom selection
+    this.$element.on('focus', this._onNativeFocus);
+    this.$element.on('blur', this._onNativeBlur);
 
     // Document Change Events
     //
@@ -668,6 +675,16 @@ Surface.Prototype = function() {
 
   this._updateModelSelection = function(options) {
     this._setModelSelection(this.surfaceSelection.getSelection(options));
+  };
+
+  this.onNativeBlur = function() {
+    console.log('Blurring surface', this.__id__);
+    this.textPropertyManager.renderSelection(this.selection);
+  };
+
+  this.onNativeFocus = function() {
+    console.log('Focusing surface', this.__id__);
+    this.textPropertyManager.removeSelection();
   };
 
   /**

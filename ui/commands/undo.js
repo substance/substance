@@ -11,7 +11,9 @@ var Undo = Command.extend({
     var doc = this.getDocument();
     if (doc.done.length>0) {
       doc.undo();
+      return true;
     }
+    return false;
   }
 });
 

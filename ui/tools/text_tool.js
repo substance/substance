@@ -124,8 +124,7 @@ TextTool.Prototype = function() {
       .addClass("toggle small").attr('href', "#")
       .attr('title', this.props.title)
       .append(label)
-      .on('mousedown', this.toggleAvailableTextTypes)
-      .on('click', this.handleClick)
+      .on('click', this.toggleAvailableTextTypes)
     );
 
     // dropdown options
@@ -135,8 +134,7 @@ TextTool.Prototype = function() {
           .addClass('option '+commandName)
           .attr("data-type", commandName)
           .append(textCommand.constructor.static.textTypeName)
-          .on('click', this.handleClick)
-          .on('mousedown', this.handleMouseDown);
+          .on('click', this.handleClick);
       options.append(button);
     }, this);
 
@@ -144,12 +142,9 @@ TextTool.Prototype = function() {
     return el;
   };
 
-  this.handleClick = function(e) {
-    e.preventDefault();
-    e.stopPropagation();
-  };
 
-  this.handleMouseDown = function(e) {
+  this.handleClick = function(e) {
+
     e.preventDefault();
     // Modifies the tool's state so that state.open is undefined, which is nice
     // because it means the dropdown will be closed automatically
@@ -164,6 +159,7 @@ TextTool.Prototype = function() {
     e.preventDefault();
     e.stopPropagation();
     if (this.isDisabled()) return;
+
     // HACK: This only updates the view state state.open is not set on the tool itself
     // That way the dropdown automatically closes when the selection changes
     this.toggleDropdown();

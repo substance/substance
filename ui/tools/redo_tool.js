@@ -8,8 +8,7 @@ var RedoTool = DocumentTool.extend({
     command: 'redo'  
   },
 
-  update: function(surface) {
-    this.surface = surface;
+  update: function() {
     var doc = this.getDocument();
     if (doc.undone.length===0) {
       this.setDisabled();

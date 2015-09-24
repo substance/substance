@@ -475,3 +475,17 @@ body,html {
 ::-moz-selection {
   background: rgba(0,0,0,0.1);
 }
+
+/* Custom selection
+----------------------------------------------------*/
+
+.cursor {
+  position: absolute;
+  left: -2;
+  height: 20px;
+  border-left: solid #000 1px;
+}
+
+.selection-fragment {
+  background-color: #ddd;
+}

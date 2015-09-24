@@ -193,6 +193,15 @@ ContainerSelection.Prototype = function() {
     return sels;
   };
 
+  this.getFragments = function() {
+    var sels = this.splitIntoPropertySelections();
+    var fragments = _.map(sels, function(sel) {
+      return new Selection.Fragment('selection-fragment', sel.path,
+        sel.startOffset, sel.endOffset);
+    });
+    return fragments;
+  };
+
   this._coordinates = function(sel) {
     if (sel._internal.containerRange) {
       return sel._internal.containerRange;
