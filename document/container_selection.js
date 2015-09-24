@@ -196,14 +196,9 @@ ContainerSelection.Prototype = function() {
   this.getFragments = function() {
     var sels = this.splitIntoPropertySelections();
     var fragments = _.map(sels, function(sel) {
-      return [new Selection.Fragment('selection-fragment', sel.path,
-        sel.startOffset, sel.endOffset)];
+      return new Selection.Fragment('selection-fragment', sel.path,
+        sel.startOffset, sel.endOffset);
     });
-    if (this.isReverse()) {
-      fragments.push(new Selection.Fragment('cursor', sel.path, sel.endOffset));
-    } else {
-      fragments.push(new Selection.Fragment('cursor', sel.path, sel.startOffset));
-    }
     return fragments;
   };
 
