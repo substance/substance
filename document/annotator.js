@@ -119,7 +119,10 @@ Annotator.Prototype = function() {
         entries.push({ pos: a.offset, mode: ENTER_EXIT, id: a.id, level: Number.MAX_VALUE, type: 'anchor', node: a });
       } else {
         // use a weak default level when not given
-        var l = a.constructor.static.level || 1000;
+        var l = 1000;
+        if (a.constructor.static && a.constructor.static.level) {
+          l = a.constructor.static.level;
+        }
         entries.push({ pos : a.startOffset, mode: ENTER, level: l, id: a.id, type: a.type, node: a });
         entries.push({ pos : a.endOffset, mode: EXIT, level: l, id: a.id, type: a.type, node: a });
       }
