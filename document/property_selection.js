@@ -225,6 +225,14 @@ PropertySelection.Prototype = function() {
   this._coordinates = function() {
     return this;
   };
+
+  this.getFragments = function() {
+    if (this.isCollapsed()) {
+      return [new Selection.Fragment('cursor', this.path, this.startOffset)];
+    } else {
+      return [new Selection.Fragment('selection-fragment', this.path, this.startOffset, this.endOffset)];
+    }
+  };
 };
 
 OO.inherit(PropertySelection, Selection);
