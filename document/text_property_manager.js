@@ -26,6 +26,10 @@ function TextPropertyManager(doc, containerId) {
 
 TextPropertyManager.Prototype = function() {
 
+  this.dispose = function() {
+    this.doc.disconnect(this);
+  };
+
   this._initializeFragment = function(fragment) {
     var path = fragment.path;
     var record = this.records[path];
@@ -90,7 +94,7 @@ TextPropertyManager.Prototype = function() {
 
   this.onDocumentChange = function(change) {
     var _changes = this._record(change);
-    this._dispatch(_changes);
+    this._dispatch(_changes, change);
   };
 
   function _createChanges() {
@@ -98,7 +102,7 @@ TextPropertyManager.Prototype = function() {
       get: function(path) {
         var change = changes[path];
         if (!change) {
-          change = new Change();
+          change = new Change(path);
           changes[path] = change;
         }
         return change;
@@ -107,11 +111,10 @@ TextPropertyManager.Prototype = function() {
     return changes;
   }
 
-  this._record = function(change) {
+  this._record = function(documentChange) {
     var changes = _createChanges();
-    for (var i = 0; i < change.ops.length; i++) {
-      var op = change.ops[i];
-
+    for (var i = 0; i < documentChange.ops.length; i++) {
+      var op = documentChange.ops[i];
       // text changed
       if ( (op.type === "update" && op.diff instanceof TextOperation) ||
            (op.type === "set" && _.isString(op.val)) ) {
@@ -122,10 +125,7 @@ TextPropertyManager.Prototype = function() {
       // property anno created/deleted/changed
       // HACK: doing a lazy check for property annotations assuming a property 'path'
       if ( (op.type === "create" || op.type === "delete") && op.val.path ) {
-        // ignore annotations on deleted nodes
-        if (!change.deleted[op.val.path[0]]) {
-          this._recordAnnoChange(changes, op);
-        }
+        this._recordAnnoChange(changes, op);
         continue;
       }
 
@@ -168,7 +168,10 @@ TextPropertyManager.Prototype = function() {
     } else if (op.type === "set" &&
       (op.path[1] === "startOffset" || op.path[1] === "endOffset") ) {
       var anno = doc.get(op.path[0]);
-      changes.get(anno.path).rerender = true;
+      // make sure that the anno is still there
+      if (anno) {
+        changes.get(anno.path).rerender = true;
+      }
     }
   };
 
@@ -213,12 +216,16 @@ TextPropertyManager.Prototype = function() {
     }
   };
 
-  this._dispatch = function(changes) {
+  this._dispatch = function(changes, documentChange) {
     for (var path in changes) {
       if (!changes.hasOwnProperty(path)) {
         continue;
       }
       var change = changes[path];
+      // skip updates on nodes which already have been deleted
+      if (documentChange.deleted[change.path[0]]) {
+        continue;
+      }
       var record = this.records[path];
       if (!record) {
         console.warn("TextPropertyManager: something is fishy here. Saw a change, but don't know property:", path);
@@ -258,7 +265,8 @@ var Record = function(path) {
 
 OO.initClass(Record);
 
-var Change = function() {
+var Change = function(path) {
+  this.path = path;
   this.rerender = false;
   this.addedFragments = null;
   this.removedFragments = null;
