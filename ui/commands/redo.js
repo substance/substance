@@ -11,6 +11,9 @@ var Redo = Command.extend({
     var doc = this.getDocument();
     if (doc.undone.length>0) {
       doc.redo();
+      return true;
+    } else {
+      return false;
     }
   }
 });

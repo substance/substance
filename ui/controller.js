@@ -36,7 +36,7 @@ var Controller = function(doc, config) {
   }, {
     // Use lower priority so that everyting is up2date
     // when we render the selection
-    priority: -1
+    priority: -10
   });
 };
 
@@ -193,10 +193,10 @@ Controller.Prototype = function() {
 
   this.onSelectionChanged = function(sel, surface) {
     // Skip if the selection has not really changed
-    if (sel.equals(this.__prevSelection)) {
-      return;
-    }
-    this.__prevSelection = sel;
+    // if (sel.equals(this.__prevSelection)) {
+    //   return;
+    // }
+    // this.__prevSelection = sel;
     this.emit('selection:changed', sel, surface);
   };
 

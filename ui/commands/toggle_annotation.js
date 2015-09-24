@@ -33,10 +33,12 @@ ToggleAnnotationCommand.Prototype = function() {
     return {};
   };
 
-  // TODO: We had a concept when we allowed this situation by splitting the
-  // container selection into multiple property selection
-  // We would this now to be a concept on command level
   this.isDisabled = function(annos, sel) {
+    var surface = this.getSurface();
+    if ((!surface.isEnabled()) || sel.isNull()) {
+      return true;
+    }
+
     var annotationType = this.getAnnotationType();
     var doc = this.getDocument();
     return !helpers.isContainerAnnotation(doc, annotationType) && !sel.isPropertySelection();
@@ -132,7 +134,6 @@ ToggleAnnotationCommand.Prototype = function() {
 
   this.executeEdit = function() {
     var annos = this.getAnnotationsForSelection();
-    console.log('executing edit');
     return {
       mode: "edit",
       anno: annos[0],

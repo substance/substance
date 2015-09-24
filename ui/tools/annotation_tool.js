@@ -21,9 +21,7 @@ AnnotationTool.Prototype = function() {
 
   // When update is called we can be sure the Surface is active
   this.update = function(sel, surface) {
-    if ((!surface.isEnabled()) || sel.isNull()) {
-      return this.setDisabled();
-    }
+
 
     var command = this.getCommand();
     if (!command) {
