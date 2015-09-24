@@ -59,10 +59,15 @@ TextPropertyComponent.Prototype = function() {
         fragmentCounters[id] = 0;
       }
       fragmentCounters[id] = fragmentCounters[id]+1;
+
       var ComponentClass = ctrl.getComponent(node.type);
 
       if (!ComponentClass) {
         ComponentClass = AnnotationComponent;
+      }
+
+      if (node.type === 'cursor') {
+        return $$('div').addClass('cursor').append($$('div').addClass('inner-cursor'));
       }
 
       var el = $$(ComponentClass, {
@@ -71,7 +76,7 @@ TextPropertyComponent.Prototype = function() {
       });
       // adding keys here, enables preservative rerendering
       // TODO: experiment, if this reduces cursor flickering, already...
-      // .key(id + "@" + fragmentCounters[id]);
+      // el.ref(id + "@" + fragmentCounters[id]);
       // special support for container annotation fragments
       if (node.type === "container_annotation_fragment") {
         el.addClass(node.anno.getTypeNames().join(' ').replace(/_/g, "-"));
