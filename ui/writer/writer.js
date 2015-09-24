@@ -60,6 +60,11 @@ Writer.Prototype = function() {
     return this.props.doc;
   };
 
+  // Do we want to expose the controller publicly?
+  this.getController = function() {
+    return this.controller;
+  };
+
   this.willReceiveProps = function(newProps) {
     if (this.props.doc && newProps.doc !== this.props.doc) {
       this._disposeDoc();
@@ -148,13 +153,24 @@ Writer.Prototype = function() {
   // ---------------
 
   // handles 'switch-state'
-  this.switchState = function(newState) {
+  this.switchState = function(newState, options) {
     this.setState(newState);
+    if (options.restoreSelection) {
+      this.restoreSelection();  
+    }
   };
 
   // handles 'switch-context'
-  this.switchContext = function(contextId) {
+  this.switchContext = function(contextId, options) {
     this.setState({ contextId: contextId });
+    if (options.restoreSelection) {
+      this.restoreSelection();  
+    }
+  };
+
+  this.restoreSelection = function() {
+    var surface = this.controller.getSurface('body');
+    surface.rerenderDomSelection();
   };
 
   // Pass writer start 
