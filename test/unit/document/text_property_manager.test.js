@@ -173,3 +173,14 @@ QUnit.test("Issue #66: do not update deleted properties.", function(assert) {
   // and trying to update the already removed component.
   assert.ok(true, 'Should not crash.');
 });
+
+// Issue #79: TextPropertyManager._recordChanges()  does not record
+// changes to ContainerAnnotations correclty
+QUnit.test("Issue #79: update on ContainerAnnotation changes.", function(assert) {
+  _textProp2();
+  _textProp3();
+  doc.transaction(function(tx) {
+    tx.set(["a1", "startOffset"], 3);
+  });
+  assert.equal(textProp1.setFragments.callCount, 1, "First property should have been updated.");
+});
