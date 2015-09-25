@@ -9,6 +9,14 @@ var helpers = require('../../document/helpers');
 function deleteAnnotation(tx, args) {
   var sel = args.selection;
 
+  if (!sel) {
+    throw new Error('selection is required.');
+  }
+
+  if (sel.isContainerSelection() && !args.containerId) {
+    throw new Error('containerId must be provided for container selections');
+  }
+
   // HACK: container annotations indexes are not available on tx, so we pass the original document
   var annos = helpers.getAnnotationsForSelection(tx.document, sel, args.annotationType, args.containerId);
   var annoId = annos[0].id;

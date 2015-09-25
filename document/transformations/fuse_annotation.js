@@ -11,12 +11,25 @@ var createAnnotation = require('./create_annotation');
 function fuseAnnotation(tx, args) {
   var sel = args.selection;
 
+  if (!sel) {
+    throw new Error('selection is required.');
+  }
+
+  if (!args.annotationType) {
+    throw new Error('annotationType is required');
+  }
+
+  if (sel.isContainerSelection() && !args.containerId) {
+    throw new Error('containerId must be provided for container selections');
+  }
+
   // HACK: container annotations indexes are not available on tx, so we pass the original document
   var annos = helpers.getAnnotationsForSelection(tx.document, sel, args.annotationType, args.containerId);
 
   _.each(annos, function(anno) {
     sel = sel.expand(anno.getSelection());
   });
+
   _.each(annos, function(anno) {
     tx.delete(anno.id);
   });
