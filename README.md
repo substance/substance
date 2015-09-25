@@ -2,29 +2,62 @@
 
 Substance is a JavaScript library for web-based content editing. It provides building blocks for realizing custom text editors and web-based publishing systems.
 
-See Substance in action:
-
-- **[Lens Writer](http://substance.io/lens-writer)** - A scientific writer component
-- **[Archivist](https://medium.com/@_daniel/publish-interactive-historical-documents-with-archivist-7019f6408ee6)** - A platform for publishing interactive interview transcriptions
-- **[eLife Lens](http://lens.elifesciences.org/00778/)** - A novel scientific reader
-
 Demos:
 
 - **[Prose Editor](http://substance.io/demos/prose-editor)** - A minimal rich text editor
 - **[Notepad](http://substance.io/demos/notepad)** - A custom note editor
 
+In the wild:
+
+- **[Lens Writer](http://substance.io/lens-writer)** - A scientific writer component
+- **[Archivist](https://medium.com/@_daniel/publish-interactive-historical-documents-with-archivist-7019f6408ee6)** - A platform for publishing interactive interview transcriptions
+- **[eLife Lens](http://lens.elifesciences.org/00778/)** - A novel scientific reader
+
+
 ## Motivation
 
 Building a web editor is a hard task. Native browser support for text editing is [limited and not reliable](https://medium.com/medium-eng/why-contenteditable-is-terrible-122d8a40e480). There are many pitfalls such as handling selections, copy&paste or undo/redo. Substance was developed to solve the common problems of web-editing and provides API's for building custom editors.
 
-With Substance you can:
+## Features
 
-- Define a [custom article schema](https://github.com/substance/demos/blob/master/notepad/note.js)
-- Manipulate content and annotations using *operations* and *tranformations*
-- Define a custom HTML structure for your content and attach a `Substance Surface` on it to make it editable
-- Implement tools for any possible task like toggling annotations, inserting content or replacing text
-- Control *copy&paste* behavior by defining custom HTML converters
-- and much more.
+Features                                                                    | State
+--------------------------------------------------------------------------- | :------------:
+Custom document schemas                                                     | ✓ 
+Custom converters (XML, HTML, etc.)                                         | ✓
+Custom HTML Rendering                                                       | ✓
+Annotations that can span over multiple nodes                               | ✓
+Annotations can hold information (e.g. a comment)                           | ✓
+Incremental document updates (undoable operations)                          | ✓
+Transformations for document manipulation                                   | ✓
+Custom editing toolbars                                                     | ✓
+Commands for controlling the editor                                         | Beta 2
+Realtime collaboration                                                      | Beta 3
+Full Unicode support                                                        | Beta 3
+Plugins                                                                     | Beta 3
+Persistence API for documents                                               | Beta 4
+                                                                            |
+**UI Widgets**                                                              |
+Ready-to-use [Editor](http://substance.io/demos/prose-editor)               | ✓
+Writer interface for building full-fledged custom editing apps              | Beta 2
+                                                                            |
+**Predefined content types**                                                |
+Paragraph                                                                   | ✓ 
+Heading                                                                     | ✓
+Blockquote                                                                  | ✓
+Codeblock                                                                   | ✓
+Resource (image, video, tweet etc.)                                         | Beta 2
+List                                                                        | Beta 2
+Table                                                                       | Beta 3
+Figure (including upload)                                                   | Beta 4
+                                                                            |
+**Predefined annotation types**                                             |
+Strong                                                                      | ✓ 
+Emphasis                                                                    | ✓ 
+Link                                                                        | ✓ 
+Subscript                                                                   | Beta 2
+Superscript                                                                 | Beta 2
+Comment                                                                     | Beta 3
+
 
 ## Getting started
 
@@ -78,7 +111,7 @@ schema.addNodes([Paragraph, Emphasis, Strong, Highlight]);
 
 We provide a reference implementation, the [Substance Article](article.js). However, you may want to come up with your own schema and only borrow common node types such as paragraphs and headings. The Notepad demo implements a [nice example for reference](https://github.com/substance/demos/blob/master/notepad/note.js).
 
-<!--Lens Writer defines a [scientific article](https://github.com/substance/lens-writer/tree/master/lib/article) including bib items and figures with captions etc.-->
+Lens Writer defines a [scientific article](https://github.com/substance/lens-writer/tree/master/lib/article) including bib items and figures with captions etc.
 
 ## Manipulate documents programmatically
 
@@ -198,16 +231,6 @@ We also setup a registry for components (such as Paragraph) and tools (e.g. Emph
 
 To learn how to build your own editor check out [this tutorial](https://github.com/substance/demos/tree/master/notepad) on creating a Notepad editor with Substance.
 
-<!--
-### Anatomy of a Substance Document
-
-TODO: describe
-
-- Nodes
-- Properties
-- Containers
-
--->
 
 ## Development
 
@@ -234,3 +257,42 @@ $ npm run karma
 ```
 
 The report will be stored in the `coverage` folder.
+
+
+## Roadmap
+
+### Beta 2
+
+*ETA: November 1 2015*
+
+- Support for nested nodes
+- Editing of lists
+- Resource node type (image, video, tweet etc.)
+- CSS modularization: one css file per UI component
+- Automatically published API docs
+- Writer interface for building full-fledged custom editing apps
+- Improved stability, documentation and tests
+
+### Beta 3
+
+- Automatically generated performance report
+- Table node
+- Novel Writer demo
+- Plugins
+- Realtime collaboration
+- Improved Unicode support
+- Improved stability, documentation and tests
+
+### Beta 4
+
+- Modules for server-side integration
+  - Persistence API for documents
+  - Figure upload
+- Server-side realtime collaboration infrastructure
+- Full-stack platform example
+
+### 1.0 Final
+
+- Complete documentation
+- Full test coverage
+- Final versions of API's
