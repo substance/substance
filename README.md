@@ -31,6 +31,7 @@ Incremental document updates (undoable operations)                          | �
 Transformations for document manipulation                                   | ✓
 Custom editing toolbars                                                     | ✓
 Commands for controlling the editor                                         | Beta 2
+Key bindings                                                                | Beta 2
 Realtime collaboration                                                      | Beta 3
 Full Unicode support                                                        | Beta 3
 Plugins                                                                     | Beta 3
@@ -266,6 +267,8 @@ The report will be stored in the `coverage` folder.
 *ETA: November 1 2015*
 
 - Support for nested nodes
+- Commands for controlling the editor
+- Key bindings
 - Editing of lists
 - Resource node type (image, video, tweet etc.)
 - CSS modularization: one css file per UI component
