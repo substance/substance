@@ -8,6 +8,8 @@ var Document = require('../../document');
 var Selection = Document.Selection;
 var TextPropertyManager = require('../../document/text_property_manager');
 
+var defaultKeybindings = require('./default_keybindings');
+
 var __id__ = 0;
 
 function Surface(controller, editor, options) {
@@ -31,6 +33,8 @@ function Surface(controller, editor, options) {
   } else {
     this.textPropertyManager = new TextPropertyManager(doc);
   }
+
+  this.keybindings = options.keybindings || defaultKeybindings;
 
   this.selection = Document.nullSelection;
 
@@ -195,7 +199,27 @@ Surface.Prototype = function() {
   };
 
   this.attachKeyboard = function() {
+    var self = this;
     this.$element.on('keydown', this._onKeyDown);
+
+    // Register keybindings
+    // ---------------
+
+    var mousetrap = new Mousetrap(this.element);
+    
+    var _commandHandler = function(commandName) {
+      return function(e, combo) {
+        self.executeCommand(commandName);
+        console.log('executing command');
+        e.preventDefault();
+        e.stopPropagation();
+      };
+    };
+    
+    _.each(this.keybindings, function(binding) {
+      mousetrap.bind(binding.keys, _commandHandler(binding.command));
+    });
+
     // OSX specific handling of dead-keys
     if (this.element.addEventListener) {
       this.element.addEventListener('compositionstart', this._onCompositionStart, false);
@@ -328,45 +352,46 @@ Surface.Prototype = function() {
         break;
     }
 
+
     // Note: when adding a new handler you might want to enable this log to see keyCodes etc.
     // console.log('####', e.keyCode, e.metaKey, e.ctrlKey, e.shiftKey);
 
     // Built-in key combos
     // Ctrl+A: select all
-    var handled = false;
-    if ( (e.ctrlKey||e.metaKey) && e.keyCode === 65 ) {
-      this.executeCommand('selectAll');
-      handled = true;
-    }
-    // Undo/Redo: cmd+z, cmd+shift+z
-    else if (this.undoEnabled && e.keyCode === 90 && (e.metaKey||e.ctrlKey)) {
-      if (e.shiftKey) {
-        this.executeCommand('redo');
-      } else {
-        this.executeCommand('undo');
-      }
-      handled = true;
-    }
-    // Toggle strong: cmd+b ctrl+b
-    else if (e.keyCode === 66 && (e.metaKey||e.ctrlKey)) {
-      this.executeCommand('toggleStrong');
-      handled = true;
-    }
-    // Toggle emphasis: cmd+i ctrl+i
-    else if (e.keyCode === 73 && (e.metaKey||e.ctrlKey)) {
-      this.executeCommand('toggleEmphasis');
-      handled = true;
-    }
-    // Toggle link: cmd+l ctrl+l
-    else if (e.keyCode === 76 && (e.metaKey||e.ctrlKey)) {
-      this.executeCommand('toggleLink');
-      handled = true;
-    }
+    // var handled = false;
+    // if ( (e.ctrlKey||e.metaKey) && e.keyCode === 65 ) {
+    //   this.executeCommand('selectAll');
+    //   handled = true;
+    // }
+    // // Undo/Redo: cmd+z, cmd+shift+z
+    // else if (this.undoEnabled && e.keyCode === 90 && (e.metaKey||e.ctrlKey)) {
+    //   if (e.shiftKey) {
+    //     this.executeCommand('redo');
+    //   } else {
+    //     this.executeCommand('undo');
+    //   }
+    //   handled = true;
+    // }
+    // // Toggle strong: cmd+b ctrl+b
+    // else if (e.keyCode === 66 && (e.metaKey||e.ctrlKey)) {
+    //   this.executeCommand('toggleStrong');
+    //   handled = true;
+    // }
+    // // Toggle emphasis: cmd+i ctrl+i
+    // else if (e.keyCode === 73 && (e.metaKey||e.ctrlKey)) {
+    //   this.executeCommand('toggleEmphasis');
+    //   handled = true;
+    // }
+    // // Toggle link: cmd+l ctrl+l
+    // else if (e.keyCode === 76 && (e.metaKey||e.ctrlKey)) {
+    //   this.executeCommand('toggleLink');
+    //   handled = true;
+    // }
 
-    if (handled) {
-      e.preventDefault();
-      e.stopPropagation();
-    }
+    // if (handled) {
+    //   e.preventDefault();
+    //   e.stopPropagation();
+    // }
   };
 
   /**
