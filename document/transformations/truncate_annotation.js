@@ -20,7 +20,7 @@ function truncateAnnotation(tx, args) {
   }
 
   // HACK: container annotations indexes are not available on tx, so we pass the original document
-  var annos = helpers.getAnnotationsForSelection(tx.document, sel, args.annotationType, args.containerId);
+  var annos = helpers.getAnnotationsForSelection(tx, sel, args.annotationType, args.containerId);
   
   // TODO: should we throw when more than one anno has been found?
   var anno = annos[0];

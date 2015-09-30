@@ -1,6 +1,5 @@
 'use strict';
 
-require('../qunit_extensions');
 var sample1 = require('../../fixtures/sample1');
 
 var createAnnotation = require('../../../document/transformations/create_annotation'); 

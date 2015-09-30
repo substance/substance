@@ -94,6 +94,8 @@ ContainerSelection.Prototype = function() {
       newCoors.end.offset = c2e.offset;
     } else if (c1e.pos === c2e.pos) {
       newCoors.end.offset = Math.max(c1e.offset, c2e.offset);
+    } else {
+      throw new Error('Could not determine coordinates for expand. Check input');
     }
     return _createNewSelection(this, newCoors);
   };
@@ -102,6 +104,7 @@ ContainerSelection.Prototype = function() {
   this.truncate = function(other) {
     var c1 = this._coordinates(this);
     var c2 = this._coordinates(other);
+
     var newCoors = {};
     if (_isBefore(c2.start, c1.start, 'strict')) {
       newCoors.start = c1.start;
@@ -119,6 +122,8 @@ ContainerSelection.Prototype = function() {
     } else if (_isEqual(c1.end, c2.end)) {
       newCoors.start = c1.start;
       newCoors.end = c2.start;
+    } else {
+      throw new Error('Could not determine coordinates for truncate. Check input');
     }
     return _createNewSelection(this, newCoors);
   };

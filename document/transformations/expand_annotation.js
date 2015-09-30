@@ -22,7 +22,7 @@ function expandAnnotation(tx, args) {
   }
 
   // HACK: container annotations indexes are not available on tx, so we pass the original document
-  var annos = helpers.getAnnotationsForSelection(tx.document, sel, args.annotationType, args.containerId);
+  var annos = helpers.getAnnotationsForSelection(tx, sel, args.annotationType, args.containerId);
 
   var anno = annos[0];
   var annoSel = anno.getSelection();
