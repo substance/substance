@@ -106,6 +106,6 @@ Helpers.getTextForSelection = function(doc, sel) {
     }
   }
   return result.join('');
-}
+};
 
 module.exports = Helpers;

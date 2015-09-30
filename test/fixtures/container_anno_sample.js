@@ -35,7 +35,7 @@ module.exports = function() {
     endOffset: 4,
   });
   article.create({
-    type: 'annotation',
+    type: 'strong',
     id: 'a2',
     path: ['p1', 'content'],
     startOffset: 0,
