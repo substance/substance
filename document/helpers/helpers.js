@@ -79,4 +79,33 @@ Helpers.getAnnotationsForSelection = function(doc, sel, annotationType, containe
   return annos;
 };
 
+// For a given selection, get the corresponding text string
+Helpers.getTextForSelection = function(doc, sel) {
+  var result = [];
+  var text;
+  if (!sel || sel.isNull()) {
+    return "";
+  } else if (sel.isPropertySelection()) {
+    text = doc.get(sel.start.path);
+    result.push(text.substring(sel.start.offset, sel.end.offset));
+  } else if (sel.isContainerSelection()) {
+    var container = doc.get(sel.containerId);
+    var components = container.getComponentsForRange(sel.range);
+    for (var i = 0; i < components.length; i++) {
+      var comp = components[i];
+      text = doc.get(comp.path);
+      if (components.length === 1) {
+        result.push(text.substring(sel.start.offset, sel.end.offset));
+      } else if (i===0) {
+        result.push(text.substring(sel.start.offset));
+      } else if (i===components.length-1) {
+        result.push(text.substring(0, sel.end.offset));
+      } else {
+        result.push(text);
+      }
+    }
+  }
+  return result.join('');
+}
+
 module.exports = Helpers;
