@@ -37,7 +37,7 @@ Helpers.getPropertyAnnotationsForSelection = function(doc, sel, options) {
     return [];
   }
 
-  annotations = doc.annotationIndex.get(path, startOffset, endOffset);
+  annotations = doc.getIndex('annotations').get(path, startOffset, endOffset);
   if (options.type) {
     annotations = _.filter(annotations, AnnotationIndex.filterByType(options.type));
   }

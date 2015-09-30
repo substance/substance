@@ -11,15 +11,11 @@ var expandAnnotation = require('../../document/transformations/expand_annotation
 var truncateAnnotation = require('../../document/transformations/truncate_annotation');
 var deleteAnnotation = require('../../document/transformations/delete_annotation');
 
-var ToggleAnnotationCommand = function(surface) {
-  Command.call(this, surface);
+var ToggleAnnotationCommand = function(controller) {
+  Command.call(this, controller);
 };
 
 ToggleAnnotationCommand.Prototype = function() {
-
-  this.getSelection = function() {
-    return this.getSurface().getSelection();
-  };
 
   this.getAnnotationType = function() {
     if (this.constructor.static.annotationType) {
@@ -34,10 +30,15 @@ ToggleAnnotationCommand.Prototype = function() {
   };
 
   this.isDisabled = function(annos, sel) {
-    var surface = this.getSurface();
-    if ((!surface.isEnabled()) || sel.isNull()) {
-      return true;
-    }
+
+    // var surface = this.getSurface();
+    // if ((!surface.isEnabled()) || sel.isNull()) {
+    //   return true;
+    // }
+
+    // if (sel.isNull()) {
+    //   return true;
+    // }
 
     var annotationType = this.getAnnotationType();
     var doc = this.getDocument();
@@ -80,10 +81,9 @@ ToggleAnnotationCommand.Prototype = function() {
   };
 
   this.getAnnotationsForSelection = function() {
-    var surface = this.getSurface();
-    var sel = surface.getSelection();
+    var sel = this.getSelection();
     var doc = this.getDocument();
-    var containerId = this.getSurface().getEditor().getContainerId();
+    var containerId = this.getContainerId();
     var annotationType = this.getAnnotationType();
     var annos = helpers.getAnnotationsForSelection(doc, sel, annotationType, containerId);
     return annos;
@@ -113,21 +113,27 @@ ToggleAnnotationCommand.Prototype = function() {
 
   // Helper to trigger an annotation transformation
   this.applyTransform = function(transformFn) {
-    var surface = this.getSurface();
-    var sel = surface.getSelection();
+    var sel = this.getSelection();
+    var doc = this.getDocument();
+    var self = this;
+
     var result; // to store transform result
     if (sel.isNull()) return;
 
-    surface.transaction({ selection: sel }, function(tx, args) {
-      args.annotationType = this.getAnnotationType();
-      args.annotationData = this.getAnnotationData();
+    // VERIFY: When the transform function to this there's an error with PhantomJS
+    // E.g. like this: function(tx.args) {}.bind(this)
+    // We use a self reference for now.
+    doc.transaction({ selection: sel }, function(tx, args) {
+      args.annotationType = self.getAnnotationType();
+      args.annotationData = self.getAnnotationData();
       args.splitContainerSelections = false;
-      args.containerId = surface.getContainerId();
+      args.containerId = self.getContainerId();
 
       args = transformFn(tx, args);
       result = args.result;
       return args;
-    }, this);
+    });
+
 
     return result;
   };
