@@ -36,6 +36,14 @@ PropertySelection.Prototype = function() {
     };
   };
 
+  this.getDocument = function() {
+    var doc = this._internal.doc;
+    if (!doc) {
+      throw new Error('Selection is not attached to a document.');
+    }
+    return doc;
+  };
+
   this.attach = function(doc) {
     this._internal.doc = doc;
     return this;

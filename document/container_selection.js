@@ -60,13 +60,6 @@ ContainerSelection.Prototype = function() {
     return "ContainerSelection("+ JSON.stringify(this.range.start.path) + ":" + this.range.start.offset + " -> " +  JSON.stringify(this.range.end.path) + ":" + this.range.end.offset + (this.reverse ? ", reverse" : "") + ")";
   };
 
-  this.getDocument = function() {
-    var doc = this._internal.doc;
-    if (!doc) {
-      throw new Error('Selection is not attached to a document.');
-    }
-    return doc;
-  };
 
   this.getContainer = function() {
     return this.getDocument().get(this.containerId);
@@ -94,8 +87,6 @@ ContainerSelection.Prototype = function() {
       newCoors.end.offset = c2e.offset;
     } else if (c1e.pos === c2e.pos) {
       newCoors.end.offset = Math.max(c1e.offset, c2e.offset);
-    } else {
-      throw new Error('Could not determine coordinates for expand. Check input');
     }
     return _createNewSelection(this, newCoors);
   };
@@ -256,13 +247,23 @@ ContainerSelection.Prototype = function() {
     var container = containerSel.getContainer();
     newCoors.start.path = container.getComponentAt(newCoors.start.pos).path;
     newCoors.end.path = container.getComponentAt(newCoors.end.pos).path;
-    return new ContainerSelection({
+    var newSel = new ContainerSelection({
       containerId: containerSel.containerId,
       startPath: newCoors.start.path,
       startOffset: newCoors.start.offset,
       endPath: newCoors.end.path,
       endOffset: newCoors.end.offset
     });
+
+    // HACK: We must not loose the document on the way if any is attached.
+    var doc = containerSel._internal.doc;
+    if (doc) {
+      newSel.attach(doc);  
+    } else {
+      console.warn('No document attached to selection');
+    }
+
+    return newSel;
   };
 };
 
