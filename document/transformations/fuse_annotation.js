@@ -23,7 +23,6 @@ function fuseAnnotation(tx, args) {
     throw new Error('containerId must be provided for container selections');
   }
 
-  // HACK: container annotations indexes are not available on tx, so we pass the original document
   var annos = helpers.getAnnotationsForSelection(tx, sel, args.annotationType, args.containerId);
 
   _.each(annos, function(anno) {
