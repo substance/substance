@@ -1,10 +1,11 @@
 var _ = require('../../basics/helpers');
 var AnnotationIndex = require('../../document/annotation_index');
-
 var Helpers = {};
 
 /**
  * Returns true if given type is a container selection
+ * @param {Document} doc
+ * @param {string} type
  */
 
 Helpers.isContainerAnnotation = function(doc, type) {
@@ -12,12 +13,17 @@ Helpers.isContainerAnnotation = function(doc, type) {
   return schema.isInstanceOf(type, "container_annotation");
 };
 
-// sel: PropertySelection
-// options:
-//   container: container instance
-//   type: string (annotation type filter)
-//
-// WARNING: Returns an empty array when selection is a container selection
+/**
+ * For a given selection get all property annotations
+ *
+ * @method getPropertyAnnotationsForSelection
+ * @param {Document} doc
+ * @param {Document.Selection} sel
+ * @return An array of property annotations
+ * 
+ * WARNING: Returns an empty array when selection is a container selection
+ */
+
 Helpers.getPropertyAnnotationsForSelection = function(doc, sel, options) {
   options = options || {};
   var annotations;
@@ -38,11 +44,23 @@ Helpers.getPropertyAnnotationsForSelection = function(doc, sel, options) {
   return annotations;
 };
 
-// Attention: looking for container annotations is not as efficient
-// as property selections, as we do not have an index that has
-// notion of the spatial extend of an annotation
-// (which would depend on a model-side implementation of Container).
-// Opposed to that, common annotations are bound to properties which make it easy to lookup.
+/**
+ * For a given selection get all container annotations
+ *
+ * @method getContainerAnnotationsForSelection
+ * @param {Document} doc
+ * @param {Document.Selection} sel
+ * @param {Document.Container} container
+ * @param {object} options
+ * @return An array of container annotations
+ * 
+ * ATTENTION: looking for container annotations is not as efficient as property
+ * selections, as we do not have an index that has notion of the spatial extend
+ * of an annotation (which would depend on a model-side implementation of
+ * Container). Opposed to that, common annotations are bound to properties
+ * which make it easy to lookup.
+ */
+
 Helpers.getContainerAnnotationsForSelection = function(doc, sel, container, options) {
   if (!container) {
     // Fail more silently
@@ -63,7 +81,17 @@ Helpers.getContainerAnnotationsForSelection = function(doc, sel, container, opti
   return annotations;
 };
 
-// For the current selection get matching annotations
+/**
+ * For a given selection, get annotations of a certain type
+ *
+ * @method getAnnotationsForSelection
+ * @param {Document} doc
+ * @param {Document.Selection} sel
+ * @param {String} annotationType
+ * @param {String} containerId (only needed when type is a container annotation)
+ * @return {Array} all matching annotations
+ */
+
 Helpers.getAnnotationsForSelection = function(doc, sel, annotationType, containerId) {  
   var annos;
   var isContainerAnno = Helpers.isContainerAnnotation(doc, annotationType);
@@ -79,7 +107,15 @@ Helpers.getAnnotationsForSelection = function(doc, sel, annotationType, containe
   return annos;
 };
 
-// For a given selection, get the corresponding text string
+/**
+ * For a given selection, get the corresponding text string
+ *
+ * @method getTextForSelection
+ * @param {Document} doc
+ * @param {Document.Selection} sel
+ * @return {String} text enclosed by the annotation
+ */
+
 Helpers.getTextForSelection = function(doc, sel) {
   var result = [];
   var text;
