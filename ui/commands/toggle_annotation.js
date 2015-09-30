@@ -99,7 +99,7 @@ ToggleAnnotationCommand.Prototype = function() {
     } else if (this.canCreate(annos, sel)) {
       return this.executeCreate();
     } else if (this.canFuse(annos, sel)) {
-      return this.executeFusion();
+      return this.executeFuse();
     } else if (this.canTruncate(annos, sel)) {
       return this.executeTruncate();
     } else if (this.canExpand(annos, sel)) {
