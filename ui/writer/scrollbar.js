@@ -1,4 +1,4 @@
-"use strict";
+'use strict';
 
 var OO = require('../../basics/oo');
 var Component = require('../component');
@@ -22,10 +22,7 @@ Scrollbar.Prototype = function() {
     var el = $$('div')
       .addClass('scrollbar-component '+this.props.contextId)
       .on('mousedown', this.onMouseDown);
-    el.append(
-      $$('div').ref("thumb")
-        .addClass("thumb")
-    );
+    el.append($$('div').ref("thumb").addClass("thumb"));
 
     if (this.props.highlights) {
       var highlightEls = this.props.highlights.map(function(h) {
@@ -36,7 +33,7 @@ Scrollbar.Prototype = function() {
         $$('div').ref('highlights')
           .addClass('highlights')
           .append(highlightEls)
-      );      
+      );
     }
     return el;
   };
@@ -71,8 +68,6 @@ Scrollbar.Prototype = function() {
   };
 
   this.updatePositions = function() {
-    // Nothing to do if there are no highlights
-
     var panel = this.props.panel;
     var panelContentEl = panel.getPanelContentElement();
     var contentHeight = panel.getContentHeight();
@@ -116,11 +111,11 @@ Scrollbar.Prototype = function() {
     }
   };
 
-
   this.onMouseDown = function(e) {
     e.stopPropagation();
     e.preventDefault();
     this._mouseDown = true;
+
     // temporarily, we bind to events on window level
     // because could leave the this element's area while dragging
     $(window).on('mousemove', this.onMouseMove);
@@ -153,21 +148,23 @@ Scrollbar.Prototype = function() {
   // -----------------
   //
   // Handle scroll event
-  // .visible-area handle
+  // .thumb element
 
   this.onMouseMove = function(e) {
     if (this._mouseDown) {
+      var panel = this.props.panel;
+      var panelContentEl = panel.getPanelContentElement();
       var scrollBarOffset = this.$el.offset().top;
       var y = e.pageY - scrollBarOffset;
+
       // find offset to visible-area.top
       var scroll = (y-this.offset)*this.factor;
-      this.scrollTop = $(this.panelContentEl).scrollTop(scroll);
+      this.scrollTop = $(panelContentEl).scrollTop(scroll);
     }
   };
 };
 
 OO.inherit(Scrollbar, Component);
-
 Scrollbar.overlayMinHeight = 1;
 
 module.exports = Scrollbar;
