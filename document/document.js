@@ -22,15 +22,15 @@ function Document(schema) {
   this.__id__ = __id__++;
 
   // all by type
-  this.nodeIndex = this.addIndex('type', Data.Index.create({
+  this.addIndex('type', Data.Index.create({
     property: "type"
   }));
 
   // special index for (property-scoped) annotations
-  this.annotationIndex = this.addIndex('annotations', new AnnotationIndex());
+  this.addIndex('annotations', new AnnotationIndex());
 
   // special index for (contaoiner-scoped) annotations
-  this.anchorIndex = this.addIndex('container-annotation-anchors', new AnchorIndex());
+  this.addIndex('container-annotation-anchors', new AnchorIndex());
 
   this.done = [];
   this.undone = [];
@@ -133,9 +133,11 @@ Document.Prototype = function() {
     } else {
       eventData = eventData || {};
     }
+
     if (!_.isFunction(transformation)) {
       throw new Error('Document.transaction() requires a transformation function.');
     }
+
     // var time = Date.now();
     // HACK: ATM we can't deep clone as we do not have a deserialization
     // for selections.
@@ -143,7 +145,7 @@ Document.Prototype = function() {
     // console.log('Starting the transaction took', Date.now() - time);
     try {
       // time = Date.now();
-      var result = transformation(tx);
+      var result = transformation(tx, beforeState);
       // console.log('Executing the transformation took', Date.now() - time);
       var afterState = {};
       // only keys that are in the beforeState can be in the afterState

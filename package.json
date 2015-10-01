@@ -29,7 +29,7 @@
     "gulp-uglify": "^1.2.0",
     "gulp-util": "^3.0.4",
     "gulp-yuidoc": "^0.1.2",
-    "karma": "^0.12.36",
+    "karma": "^0.13.10",
     "karma-chrome-launcher": "^0.1.12",
     "karma-commonjs": "oliver----/karma-commonjs#patched",
     "karma-coverage": "^0.4.2",
