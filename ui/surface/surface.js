@@ -23,7 +23,6 @@ function Surface(doc, editor, config) {
   config = config || {};
 
   // Initialize registries
-  // this._initializeComponentRegistry(config.components);
   this._initializeCommandRegistry(config.commands || defaultCommands);
 
   // Initialize clipboard
@@ -133,14 +132,6 @@ Surface.Prototype = function() {
     }
   };
 
-  // this._initializeComponentRegistry = function(components) {
-  //   var componentRegistry = new Registry();
-  //   _.each(components, function(ComponentClass, name) {
-  //     componentRegistry.add(name, ComponentClass);
-  //   });
-  //   this.componentRegistry = componentRegistry;
-  // };
-
   this._initializeCommandRegistry = function(commands) {
     var commandRegistry = new Registry();
     _.each(commands, function(CommandClass) {
@@ -150,9 +141,6 @@ Surface.Prototype = function() {
     this.commandRegistry = commandRegistry;
   };
 
-  // this.getComponent = function(name) {
-  //   return this.componentRegistry.get(name);
-  // };
 
   this.getClipboard = function() {
     return this.clipboard;
