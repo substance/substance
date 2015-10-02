@@ -30,15 +30,14 @@ ToggleAnnotationCommand.Prototype = function() {
   };
 
   this.isDisabled = function(annos, sel) {
-
     // var surface = this.getSurface();
     // if ((!surface.isEnabled()) || sel.isNull()) {
     //   return true;
     // }
 
-    // if (sel.isNull()) {
-    //   return true;
-    // }
+    if (sel.isNull()) {
+      return true;
+    }
 
     var annotationType = this.getAnnotationType();
     var doc = this.getDocument();

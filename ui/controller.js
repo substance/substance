@@ -250,7 +250,7 @@ Controller.Prototype = function() {
             logger.error(err.message || err.toString());
           } else {
             doc.__dirty = false;
-            this.emit('document:saved');
+            this.emit('document:saved', doc);
             logger.info('No changes');
           }
         }.bind(this));
