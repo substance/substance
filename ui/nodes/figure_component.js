@@ -12,9 +12,7 @@ function FigureComponent() {
 FigureComponent.Prototype = function() {
 
   this.render = function() {
-    var componentRegistry = this.context.componentRegistry;
     var contentNode = this.props.node.getContentNode();
-
     var ctrl = this.context.controller;    
     var ContentComponentClass = ctrl.getComponent(contentNode.type);
 
