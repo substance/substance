@@ -4,7 +4,6 @@ var OO = require('../../basics/oo');
 var Component = require('../component');
 var $$ = Component.$$;
 var UnsupporedNode = require('./unsupported_node');
-var Surface = require('../surface');
 
 function ContainerNodeComponent() {
   Component.apply(this, arguments);
