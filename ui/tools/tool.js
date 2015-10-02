@@ -9,8 +9,12 @@ function Tool() {
 
 Tool.Prototype = function() {
 
-  this.getController = function() {
-    return this.context.controller;
+  this.getSurface = function() {
+    return this.context.surface;
+  };
+
+  this.getDocument = function() {
+    return this.getSurface().getDocument();
   };
 
   this.getName = function() {
@@ -23,10 +27,10 @@ Tool.Prototype = function() {
   };
 
   this.getCommand = function() {
-    var ctrl = this.getController();
+    var surface = this.getSurface();
     var commandName = this.constructor.static.command;
     if (commandName) {
-      return ctrl.getCommand(commandName);
+      return surface.getCommand(commandName);
     } else {
       throw new Error('Contract: AnnotationTool.static.command should be associated to a supported command.');
     }
@@ -71,8 +75,8 @@ Tool.Prototype = function() {
   };
 
   this.performAction = function() {
-    var ctrl = this.getController();
-    ctrl.executeCommand(this.constructor.static.command);
+    var surface = this.getSurface();
+    return surface.executeCommand(this.constructor.static.command);
   };
 
   this.render = function() {

@@ -27,10 +27,8 @@ TextPropertyComponent.Prototype = function() {
   };
 
   this.render = function() {
-
-
     var doc = this.getDocument();
-    var ctrl = this.getController();
+    var componentRegistry = this.context.componentRegistry;
     var path = this.getPath();
     var text = doc.get(path) || "";
     var annotations = this.getAnnotations();
@@ -60,7 +58,7 @@ TextPropertyComponent.Prototype = function() {
       }
       fragmentCounters[id] = fragmentCounters[id]+1;
 
-      var ComponentClass = ctrl.getComponent(node.type);
+      var ComponentClass = componentRegistry.get(node.type);
 
       if (!ComponentClass) {
         ComponentClass = AnnotationComponent;

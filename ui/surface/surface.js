@@ -8,23 +8,29 @@ var Document = require('../../document');
 var Selection = Document.Selection;
 var TextPropertyManager = require('../../document/text_property_manager');
 
+var Registry = require('../../basics/registry');
+var Clipboard = require('./clipboard');
+
+var defaultCommands = require('../commands');
+
 var __id__ = 0;
 
-function Surface(controller, editor, options) {
+function Surface(doc, editor, config) {
   Substance.EventEmitter.call(this);
 
-  if (!controller) {
-    throw new Error('Illegal argument: controller is required. was ' + controller);
-  }
+  this.doc = doc;
 
-  var doc = controller.getDocument();
+  config = config || {};
 
-  options = options || {};
+  // Initialize registries
+  // this._initializeComponentRegistry(config.components);
+  this._initializeCommandRegistry(config.commands || defaultCommands);
+
+  // Initialize clipboard
+  this.clipboard = new Clipboard(this, doc.getClipboardImporter(), doc.getClipboardExporter());
 
   this.__id__ = __id__++;
-  this.name = options.name || this.__id__;
-
-  this.controller = controller;
+  this.name = config.name || this.__id__;
 
   if (editor.isContainerEditor()) {
     this.textPropertyManager = new TextPropertyManager(doc, editor.getContainerId());
@@ -41,7 +47,7 @@ function Surface(controller, editor, options) {
 
   this.surfaceSelection = null;
 
-  this.logger = options.logger || window.console;
+  this.logger = config.logger || window.console;
 
   this.$ = $;
   this.$window = this.$(window);
@@ -79,39 +85,115 @@ function Surface(controller, editor, options) {
   this.undoEnabled = true;
 
   /*jshint eqnull:true */
-  if (options.undoEnabled != null) {
-    this.undoEnabled = options.undoEnabled;
+  if (config.undoEnabled != null) {
+    this.undoEnabled = config.undoEnabled;
   }
-  if (options.contentEditable != null) {
-    this.enableContentEditable = options.contentEditable;
+  if (config.contentEditable != null) {
+    this.enableContentEditable = config.contentEditable;
   } else {
     this.enableContentEditable = true;
   }
 
-  this.controller.registerSurface(this);
   /*jshint eqnull:false */
+
+  this.doc.connect(this, {
+    'document:changed': this.onDocumentChanged,
+    'transaction:started': this.onTransactionStarted
+  }, {
+    // Use lower priority so that everyting is up2date
+    // when we render the selection
+    priority: -10
+  });
 }
 
 Surface.Prototype = function() {
+
+  // FIXME: even if this seems to be very hacky,
+  // it is quite useful to make transactions 'app-compatible'
+  this.onTransactionStarted = function(tx) {
+    /* jshint unused: false */
+    // // store the state so that it can be recovered when undo/redo
+    // tx.before.state = this.state;
+    // tx.before.selection = this.getSelection();
+  };
+
+  this.onDocumentChanged = function(change, info) {
+
+    // On undo/redo
+    // ----------
+
+    if (info.replay) {
+      var selection = change.after.selection;
+      var surfaceId = change.after.surfaceId;
+
+      if (surfaceId === this.__id__) {
+        // Will be focused automatically
+        this.setSelection(selection);
+      }
+    }
+  };
+
+  // this._initializeComponentRegistry = function(components) {
+  //   var componentRegistry = new Registry();
+  //   _.each(components, function(ComponentClass, name) {
+  //     componentRegistry.add(name, ComponentClass);
+  //   });
+  //   this.componentRegistry = componentRegistry;
+  // };
+
+  this._initializeCommandRegistry = function(commands) {
+    var commandRegistry = new Registry();
+    _.each(commands, function(CommandClass) {
+      var cmd = new CommandClass(this);
+      commandRegistry.add(CommandClass.static.name, cmd);
+    }, this);
+    this.commandRegistry = commandRegistry;
+  };
+
+  // this.getComponent = function(name) {
+  //   return this.componentRegistry.get(name);
+  // };
+
+  this.getClipboard = function() {
+    return this.clipboard;
+  };
+
+  // Command API
+  // ----------------
+
+  this.getCommand = function(commandName) {
+    return this.commandRegistry.get(commandName);
+  };
+
+  this.executeCommand = function(commandName) {
+    var cmd = this.getCommand(commandName);
+    if (!cmd) {
+      console.warn('command', commandName, 'not registered on surface');
+      return;
+    }
+
+    // Run command
+    var info = cmd.execute();
+    if (info) {
+      this.emit('command:executed', info, commandName);
+      // TODO: We want to replace this with a more specific, scoped event
+      // but for that we need an improved EventEmitter API
+      // this.emit('command:executed', 'commandName', info, commandName);
+    } else if (info === undefined) {
+      console.warn('command ', commandName, 'must return either an info object or true when handled or false when not handled');
+    }
+  };
 
   // Used by TextTool
   // TODO: Filter by enabled commands for this Surface
   this.getTextCommands = function() {
     var textCommands = {};
-    this.controller.commandRegistry.each(function(cmd) {
+    this.commandRegistry.each(function(cmd) {
       if (cmd.constructor.static.textTypeName) {
         textCommands[cmd.constructor.static.name] = cmd;
       }
     });
     return textCommands;
-  };
-
-  this.getCommand = function(commandName) {
-    return this.controller.getCommand(commandName);
-  };
-
-  this.executeCommand = function(commandName) {
-    return this.controller.executeCommand(commandName);
   };
 
   this.getName = function() {
@@ -144,13 +226,14 @@ Surface.Prototype = function() {
   };
 
   this.getDocument = function() {
-    return this.controller.getDocument();
+    return this.doc;
   };
 
   this.dispose = function() {
     this.setSelection(null);
     this.detach();
-    this.controller.unregisterSurface(this);
+    
+    this.clipboard.detach(this.$el[0]);
   };
 
   this.attach = function(element) {
@@ -600,9 +683,6 @@ Surface.Prototype = function() {
 
   this.setFocused = function(val) {
     this.isFocused = val;
-    if (this.isFocused) {
-      this.controller.didFocus(this);
-    }
   };
 
   this.onMouseMove = function() {

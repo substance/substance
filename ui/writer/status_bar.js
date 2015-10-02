@@ -17,12 +17,12 @@ var ICONS_FOR_TYPE = {
 function StatusBar() {
   Component.apply(this, arguments);
 
-  var ctrl = this.context.controller;
-  var logger = ctrl.getLogger();
+  // var ctrl = this.context.controller;
+  // var logger = ctrl.getLogger();
   
-  logger.connect(this, {
-    'messages:updated': this.handleStatusUpdate
-  });
+  // logger.connect(this, {
+  //   'messages:updated': this.handleStatusUpdate
+  // });
 }
 
 StatusBar.Prototype = function() {

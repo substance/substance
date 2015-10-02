@@ -43,7 +43,7 @@ DocumentTool.Prototype = function() {
    */
 
   this.getDocument = function() {
-    return this.context.controller.getDocument();
+    return this.context.surface.getDocument();
   };
 
 

@@ -68,9 +68,9 @@ LinkTool.Prototype = function() {
   };
 
   this.didInitialize = function() {
-    var ctrl = this.getController();
+    var surface = this.getSurface();
 
-    ctrl.connect(this, {
+    surface.connect(this, {
       'command:executed': this.onCommandExecuted
     });
   };
