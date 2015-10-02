@@ -14,7 +14,10 @@ FigureComponent.Prototype = function() {
   this.render = function() {
     var componentRegistry = this.context.componentRegistry;
     var contentNode = this.props.node.getContentNode();
-    var ContentComponentClass = componentRegistry.get(contentNode.type);
+
+    var ctrl = this.context.controller;    
+    var ContentComponentClass = ctrl.getComponent(contentNode.type);
+
     var el = $$('div')
       .addClass("content-node figure clearfix "+this.props.node.type)
       .attr("data-id", this.props.node.id);
