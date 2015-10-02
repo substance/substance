@@ -4,7 +4,9 @@ var OO = require('../../basics/oo');
 var Component = require('../component');
 var _ = require("../../basics/helpers");
 var EventEmitter = require('../../basics/event_emitter');
-var Controller = require('../../ui/controller');
+var Surface = require('../../ui/surface');
+var ContainerEditor = require('../../ui/surface/container_editor');
+var Registry = require('../../basics/registry');
 
 var $$ = Component.$$;
 
@@ -16,15 +18,15 @@ function Writer() {
 
   this.config = this.props.config || {};
   this.handleApplicationKeyCombos = this.handleApplicationKeyCombos.bind(this);
+  this._initializeComponentRegistry(this.config.components);
+  var doc = this.props.doc;  
+  var editor = new ContainerEditor(this.config.containerId);
 
-  var doc = this.props.doc;
-
-  // Initialize controller
-  this.controller = new Controller(doc, {
+  // The main editor
+  this.surface = new Surface(doc, editor, {
     components: this.config.components,
     commands: this.config.commands,
-    // Pass custom save handling to controller
-    onDocumentSave: this.props.onDocumentSave
+    name: 'mainEditor'
   });
 
   // Register event handlers
@@ -34,7 +36,7 @@ function Writer() {
     'document:changed': this.onDocumentChanged
   });
 
-  this.controller.connect(this, {
+  this.surface.connect(this, {
     "selection:changed": this.onSelectionChanged
   });
 
@@ -47,12 +49,21 @@ function Writer() {
 
 Writer.Prototype = function() {
 
+  this._initializeComponentRegistry = function(components) {
+    var componentRegistry = new Registry();
+    _.each(components, function(ComponentClass, name) {
+      componentRegistry.add(name, ComponentClass);
+    });
+    this.componentRegistry = componentRegistry;
+  };
+
   // Mixin EventEmitter API
   _.extend(this, EventEmitter.prototype);
 
   this.getChildContext = function() {
     return {
-      controller: this.controller,
+      surface: this.surface,
+      componentRegistry: this.componentRegistry
     };
   };
 
@@ -60,10 +71,6 @@ Writer.Prototype = function() {
     return this.props.doc;
   };
 
-  // Do we want to expose the controller publicly?
-  this.getController = function() {
-    return this.controller;
-  };
 
   this.willReceiveProps = function(newProps) {
     if (this.props.doc && newProps.doc !== this.props.doc) {
@@ -97,7 +104,7 @@ Writer.Prototype = function() {
   this.didMount = function() {
     this.$el.on('keydown', this.handleApplicationKeyCombos);
     // Attach clipboard
-    var clipboard = this.controller.getClipboard();
+    var clipboard = this.surface.getClipboard();
     clipboard.attach(this.$el[0]);
   };
 
@@ -181,7 +188,7 @@ Writer.Prototype = function() {
   };
 
   this.getActivePanelElement = function() {
-    var ComponentClass = this.controller.getComponent(this.state.contextId);
+    var ComponentClass = this.componentRegistry.get(this.state.contextId);
     if (ComponentClass) {
       return $$(ComponentClass).setProps(this._panelPropsFromState(this.state));
     } else {
@@ -191,9 +198,7 @@ Writer.Prototype = function() {
 
   this._disposeDoc = function() {
     this.props.doc.disconnect(this);
-    var clipboard = this.controller.getClipboard();
-    clipboard.detach(this.$el[0]);
-    this.controller.dispose();
+    // this.controller.dispose();
   };
 
 };

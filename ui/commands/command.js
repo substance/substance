@@ -2,31 +2,27 @@
 
 var Substance = require('../../basics');
 
-var Command = function(controller) {
-  this.controller = controller;
+var Command = function(surface) {
+  this.surface = surface;
 };
 
 Command.Prototype = function() {
 
   this.getSurface = function() {
-    return this.controller.getSurface();
+    return this.surface;
   };
 
   this.getSelection = function() {
-    return this.controller.getSelection();
+    return this.surface.getSelection();
   };
 
   // Needed for container annos
   this.getContainerId = function() {
-    return this.controller.getContainerId();
-  };
-
-  this.getController = function() {
-    return this.controller;
+    return this.surface.getContainerId();
   };
 
   this.getDocument = function() {
-    return this.controller.getDocument();
+    return this.surface.getDocument();
   };
 
   this.execute = function() {

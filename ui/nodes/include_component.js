@@ -23,7 +23,7 @@ IncludeComponent.Prototype = function() {
     return $$('div')
       .addClass("content-node include")
       .attr("data-id", this.props.node.id)
-      .append($$(ComponentClass).key(node.id).addProps({ doc: doc, node: node }));
+      .append($$(ComponentClass, { doc: doc, node: node }).ref(node.id));
   };
 };
 

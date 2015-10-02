@@ -4,9 +4,9 @@ var _ = require('../../basics/helpers');
 var OO = require('../../basics/oo');
 
 // context must have a getSurface() method.
-var Clipboard = function(controller, htmlImporter, htmlExporter) {
+var Clipboard = function(surface, htmlImporter, htmlExporter) {
 
-  this.controller = controller;
+  this.surface = surface;
   this.htmlImporter = htmlImporter;
   this.htmlExporter = htmlExporter;
 
@@ -32,7 +32,7 @@ var Clipboard = function(controller, htmlImporter, htmlExporter) {
 Clipboard.Prototype = function() {
 
   this.getSurface = function() {
-    return this.controller.getSurface();
+    return this.surface;
   };
 
   this.attach = function(rootElement) {

@@ -36,9 +36,9 @@ ToggleAnnotationCommand.Prototype = function() {
     //   return true;
     // }
 
-    // if (sel.isNull()) {
-    //   return true;
-    // }
+    if (sel.isNull()) {
+      return true;
+    }
 
     var annotationType = this.getAnnotationType();
     var doc = this.getDocument();
