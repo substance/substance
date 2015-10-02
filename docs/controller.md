@@ -28,6 +28,13 @@ var MyEditor = Component.extend({
       require('substance/ui/commands/toggle_emphasis')
     ];
 
+    // A set of custom key bindings to extend / override the default ones
+    var keyBindings = [
+      "surface": [
+        {"keys": ["ctrl+e"], "command": "toggleEmphasis"}
+      ]
+    ];
+
     var ctrl = new Controller(this.doc, {
       components: components,
       commands: commands

@@ -3,8 +3,8 @@
 var OO = require('../../basics/oo');
 var Command = require('./command');
 
-var SwitchTextType = function(surface) {
-  Command.call(this, surface);
+var SwitchTextType = function(controller) {
+  Command.call(this, controller);
 };
 
 SwitchTextType.Prototype = function() {
