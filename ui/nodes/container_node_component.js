@@ -87,7 +87,7 @@ ContainerNodeComponent.Prototype = function() {
       logger: ctrl.getLogger()
     };
 
-    this.surface = new Surface(ctrl, editor, options);
+    this.surface = ctrl.createSurface(editor, options);
   };
 };
 
