@@ -53,6 +53,7 @@ Writer.Prototype = function() {
   this.getChildContext = function() {
     return {
       controller: this.controller,
+      componentRegistry: this.controller.componentRegistry
     };
   };
 
@@ -99,6 +100,7 @@ Writer.Prototype = function() {
     // Attach clipboard
     var clipboard = this.controller.getClipboard();
     clipboard.attach(this.$el[0]);
+
   };
 
   this.willUnmount = function() {
