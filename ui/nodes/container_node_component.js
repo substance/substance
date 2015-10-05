@@ -9,6 +9,8 @@ var Surface = require('../surface');
 function ContainerNodeComponent() {
   Component.apply(this, arguments);
 
+  this._renderNode = this._renderNode.bind(this);
+
   // calling this here for initialization
   this._initialize();
 }
@@ -28,26 +30,8 @@ ContainerNodeComponent.Prototype = function() {
         spellCheck: false,
         "data-id": this.props.node.id
       });
-    el.append(this.renderComponents());
+    el.append(this._renderComponents());
     return el;
-  };
-
-  this.renderComponents = function() {
-    var doc = this.props.doc;
-    var ctrl = this.context.controller;
-    var containerNode = this.props.node;
-    return containerNode.nodes.map(function(nodeId) {
-      var node = doc.get(nodeId);
-      var ComponentClass = ctrl.getComponent(node.type);
-      if (!ComponentClass) {
-        console.error('Could not resolve a component for type: ' + node.type);
-        ComponentClass = UnsupporedNode;
-      }
-      return $$(ComponentClass, {
-        doc: doc,
-        node: node
-      }).ref(node.id);
-    });
   };
 
   this.willReceiveProps = function(newProps) {
@@ -73,9 +57,18 @@ ContainerNodeComponent.Prototype = function() {
   };
 
   this.onDocumentChange = function(change) {
-    // TODO: update the DOM element incrementally
     if (change.isAffected([this.props.node.id, 'nodes'])) {
-      this.rerender();
+      for (var i = 0; i < change.ops.length; i++) {
+        var op = change.ops[i];
+        if (op.type === "update" && op.path[0] === this.props.node.id) {
+          var diff = op.diff;
+          if (diff.type === "insert") {
+            this._insertNodeAt(diff.getOffset(), diff.getValue());
+          } else if (diff.type === "delete") {
+            this._removeNodeAt(diff.getOffset());
+          }
+        }
+      }
     }
   };
 
@@ -89,6 +82,38 @@ ContainerNodeComponent.Prototype = function() {
 
     this.surface = new Surface(ctrl, editor, options);
   };
+
+  this._renderComponents = function() {
+    var containerNode = this.props.node;
+    return containerNode.nodes.map(this._renderNode);
+  };
+
+  this._insertNodeAt = function(pos, nodeId) {
+    console.log('ContainerNodeComponent: inserting node %s at %s', nodeId, pos);
+    var comp = this._renderNode(nodeId);
+    this.insertAt(pos, comp);
+  };
+
+  this._removeNodeAt = function(pos) {
+    console.log('ContainerNodeComponent: removing node component at %s', pos);
+    this.removeAt(pos);
+  };
+
+  this._renderNode = function(nodeId) {
+    var doc = this.props.doc;
+    var node = doc.get(nodeId);
+    var ctrl = this.context.controller;
+    var ComponentClass = ctrl.getComponent(node.type);
+    if (!ComponentClass) {
+      console.error('Could not resolve a component for type: ' + node.type);
+      ComponentClass = UnsupporedNode;
+    }
+    return $$(ComponentClass, {
+      doc: doc,
+      node: node
+    });
+  };
+
 };
 
 OO.inherit(ContainerNodeComponent, Component);
