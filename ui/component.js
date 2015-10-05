@@ -595,7 +595,7 @@ Component.Prototype = function ComponentPrototype() {
       refs: this.refs
     });
     this._data.insertAt(pos, child);
-    if (pos >= this.children.length-1) {
+    if (pos > this.children.length-1) {
       this.$el.append(comp.$el);
       this.children.push(comp);
     } else {
