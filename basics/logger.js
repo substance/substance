@@ -1,13 +1,14 @@
 "use strict";
 
-var Substance = require("substance");
+var EventEmitter = require("./event_emitter");
+var OO = require("./oo");
 
 // Logger
 // ----------------
 //
 
 var Logger = function() {
-  Substance.EventEmitter.call(this);
+  EventEmitter.call(this);
 
   this.messages = [];
 };
@@ -42,6 +43,6 @@ Logger.Prototype = function() {
   };
 };
 
-Substance.inherit(Logger, Substance.EventEmitter);
+OO.inherit(Logger, EventEmitter);
 
 module.exports = Logger;
