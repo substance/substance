@@ -595,8 +595,13 @@ Component.Prototype = function ComponentPrototype() {
       refs: this.refs
     });
     this._data.insertAt(pos, child);
-    comp.$el.insertBefore(this.children[pos].$el);
-    this.children.splice(pos, 0, comp);
+    if (pos >= this.children.length-1) {
+      this.$el.append(comp.$el);
+      this.children.push(comp);
+    } else {
+      comp.$el.insertBefore(this.children[pos].$el);
+      this.children.splice(pos, 0, comp);
+    }
     comp.triggerDidMount();
     return this;
   };
