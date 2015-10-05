@@ -14,29 +14,7 @@ function Writer() {
   // Mixin EventEmitter API
   EventEmitter.call(this);
 
-  this.config = this.props.config || {};
   this.handleApplicationKeyCombos = this.handleApplicationKeyCombos.bind(this);
-
-  var doc = this.props.doc;
-
-  // Initialize controller
-  this.controller = new Controller(doc, {
-    components: this.config.components,
-    commands: this.config.commands,
-    // Pass custom save handling to controller
-    onDocumentSave: this.props.onDocumentSave
-  });
-
-  // Register event handlers
-  // -----------------
-
-  doc.connect(this, {
-    'document:changed': this.onDocumentChanged
-  });
-
-  this.controller.connect(this, {
-    "selection:changed": this.onSelectionChanged
-  });
 
   // action handlers
   this.actions({
@@ -68,7 +46,10 @@ Writer.Prototype = function() {
 
   this.willReceiveProps = function(newProps) {
     if (this.props.doc && newProps.doc !== this.props.doc) {
-      this._disposeDoc();
+      console.log('got new props(doc) clearing the whole thing');
+      this._dispose();
+      this.empty();
+      this._initialize(newProps);
     }
   };
 
@@ -78,6 +59,7 @@ Writer.Prototype = function() {
 
   this.didInitialize = function(props, state) {
     /* jshint unused: false */
+    this._initialize(props);
     // Now handle state update for the initial state
     this.handleStateUpdate(state);
   };
@@ -106,7 +88,7 @@ Writer.Prototype = function() {
   this.willUnmount = function() {
     this.$el.off('keydown');
     if (this.props.doc) {
-      this._disposeDoc();
+      this._dispose();
     }
   };
 
@@ -158,7 +140,7 @@ Writer.Prototype = function() {
   this.switchState = function(newState, options) {
     this.setState(newState);
     if (options.restoreSelection) {
-      this.restoreSelection();  
+      this.restoreSelection();
     }
   };
 
@@ -166,7 +148,7 @@ Writer.Prototype = function() {
   this.switchContext = function(contextId, options) {
     this.setState({ contextId: contextId });
     if (options.restoreSelection) {
-      this.restoreSelection();  
+      this.restoreSelection();
     }
   };
 
@@ -175,7 +157,7 @@ Writer.Prototype = function() {
     surface.rerenderDomSelection();
   };
 
-  // Pass writer start 
+  // Pass writer start
   this._panelPropsFromState = function (state) {
     var props = _.omit(state, 'contextId');
     props.doc = this.props.doc;
@@ -191,11 +173,33 @@ Writer.Prototype = function() {
     }
   };
 
-  this._disposeDoc = function() {
+  this._initialize = function(props) {
+    var doc = props.doc;
+    this.config = props.config || this.config || {};
+    // Initialize controller
+    this.controller = new Controller(doc, {
+      components: this.config.components,
+      commands: this.config.commands,
+      // Pass custom save handling to controller
+      onDocumentSave: props.onDocumentSave
+    });
+    // Register event handlers
+    // -----------------
+    doc.connect(this, {
+      'document:changed': this.onDocumentChanged
+    });
+    this.controller.connect(this, {
+      "selection:changed": this.onSelectionChanged
+    });
+  };
+
+  this._dispose = function() {
     this.props.doc.disconnect(this);
     var clipboard = this.controller.getClipboard();
     clipboard.detach(this.$el[0]);
+    this.controller.disconnect(this);
     this.controller.dispose();
+    this.controller = null;
   };
 
 };
