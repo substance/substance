@@ -89,13 +89,11 @@ ContainerNodeComponent.Prototype = function() {
   };
 
   this._insertNodeAt = function(pos, nodeId) {
-    console.log('ContainerNodeComponent: inserting node %s at %s', nodeId, pos);
     var comp = this._renderNode(nodeId);
     this.insertAt(pos, comp);
   };
 
   this._removeNodeAt = function(pos) {
-    console.log('ContainerNodeComponent: removing node component at %s', pos);
     this.removeAt(pos);
   };
 
