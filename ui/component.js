@@ -83,7 +83,7 @@ function Component(parent, params) {
     console.warn("Component.initialize() has been deprecated. Use Component.didInitialize() instead.");
     this.initialize();
   }
-  
+
   this._setState(this.getInitialState());
 
   // This was originally called before _setState, but in the Writer we need
@@ -609,6 +609,7 @@ Component.Prototype = function ComponentPrototype() {
   this.removeAt = function(pos) {
     this._data.removeAt(pos);
     this.children[pos].unmount();
+    this.children.splice(pos, 1);
     return this;
   };
 
@@ -623,6 +624,7 @@ Component.Prototype = function ComponentPrototype() {
     for (var i = 0; i < this.children.length; i++) {
       this.children[i].unmount();
     }
+    this.children = [];
     return this;
   };
 
