@@ -2,12 +2,15 @@
 
 var OO = require('../../basics/oo');
 var Component = require('../component');
+var _ = require('../../basics/helpers');
 var $$ = Component.$$;
 var UnsupporedNode = require('./unsupported_node');
 var Surface = require('../surface');
 
 function ContainerNodeComponent() {
   Component.apply(this, arguments);
+
+  this._renderNode = this._renderNode.bind(this);
 
   // calling this here for initialization
   this._initialize();
@@ -22,32 +25,21 @@ ContainerNodeComponent.Prototype = function() {
   };
 
   this.render = function() {
+    var containerNode = this.props.node;
+
     var el = $$("div")
-      .addClass("container-node " + this.props.node.id)
+      .addClass("container-node " + containerNode.id)
       .attr({
         spellCheck: false,
-        "data-id": this.props.node.id
+        "data-id": containerNode.id
       });
-    el.append(this.renderComponents());
-    return el;
-  };
 
-  this.renderComponents = function() {
-    var doc = this.props.doc;
-    var ctrl = this.context.controller;
-    var containerNode = this.props.node;
-    return containerNode.nodes.map(function(nodeId) {
-      var node = doc.get(nodeId);
-      var ComponentClass = ctrl.getComponent(node.type);
-      if (!ComponentClass) {
-        console.error('Could not resolve a component for type: ' + node.type);
-        ComponentClass = UnsupporedNode;
-      }
-      return $$(ComponentClass, {
-        doc: doc,
-        node: node
-      }).ref(node.id);
-    });
+    // node components
+    _.each(containerNode.nodes, function(nodeId) {
+      el.append(this._renderNode(nodeId));
+    }, this);
+
+    return el;
   };
 
   this.willReceiveProps = function(newProps) {
@@ -73,9 +65,18 @@ ContainerNodeComponent.Prototype = function() {
   };
 
   this.onDocumentChange = function(change) {
-    // TODO: update the DOM element incrementally
     if (change.isAffected([this.props.node.id, 'nodes'])) {
-      this.rerender();
+      for (var i = 0; i < change.ops.length; i++) {
+        var op = change.ops[i];
+        if (op.type === "update" && op.path[0] === this.props.node.id) {
+          var diff = op.diff;
+          if (diff.type === "insert") {
+            this._insertNodeAt(diff.getOffset(), diff.getValue());
+          } else if (diff.type === "delete") {
+            this._removeNodeAt(diff.getOffset());
+          }
+        }
+      }
     }
   };
 
@@ -89,6 +90,31 @@ ContainerNodeComponent.Prototype = function() {
 
     this.surface = new Surface(ctrl, editor, options);
   };
+
+  this._insertNodeAt = function(pos, nodeId) {
+    var comp = this._renderNode(nodeId);
+    this.insertAt(pos, comp);
+  };
+
+  this._removeNodeAt = function(pos) {
+    this.removeAt(pos);
+  };
+
+  this._renderNode = function(nodeId) {
+    var doc = this.props.doc;
+    var node = doc.get(nodeId);
+    var ctrl = this.context.controller;
+    var ComponentClass = ctrl.getComponent(node.type);
+    if (!ComponentClass) {
+      console.error('Could not resolve a component for type: ' + node.type);
+      ComponentClass = UnsupporedNode;
+    }
+    return $$(ComponentClass, {
+      doc: doc,
+      node: node
+    });
+  };
+
 };
 
 OO.inherit(ContainerNodeComponent, Component);

@@ -181,7 +181,9 @@ TextPropertyManager.Prototype = function() {
   };
 
   this._recordTextChange = function(changes, op) {
-    changes.get(op.path).rerender = true;
+    if (this.records[op.path]) {
+      changes.get(op.path).rerender = true;
+    }
   };
 
   this._recordMixedAnnoChange = function(changes, op) {
