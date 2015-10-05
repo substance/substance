@@ -599,6 +599,17 @@ Surface.Prototype = function() {
   };
 
   this.setFocused = function(val) {
+    // in both cases when the surface gets focused or blurred, a persisted
+    // selection will be removed
+    this.textPropertyManager.removeSelection();
+    // NOTE: there are situation where focus is triggered by the native
+    // focus events. When this gets called, we already taking care of it
+    this._handleNativeFocus = false;
+    // if (!this.isFocused && val) {
+    //   console.log('Surface focus:', this.__id__);
+    // } else if (this.isFocused && !val) {
+    //   console.log('Surface blur:', this.__id__);
+    // }
     this.isFocused = val;
     if (this.isFocused) {
       this.controller.didFocus(this);
@@ -675,13 +686,28 @@ Surface.Prototype = function() {
   };
 
   this.onNativeBlur = function() {
-    console.log('Blurring surface', this.__id__);
+    // console.log('Native blur on surface', this.__id__);
     this.textPropertyManager.renderSelection(this.selection);
   };
 
   this.onNativeFocus = function() {
-    console.log('Focusing surface', this.__id__);
-    this.textPropertyManager.removeSelection();
+    // console.log('Native focus on surface', this.__id__);
+    this._handleNativeFocus = true;
+    // ARRR: native focus event is triggered before the DOM selection is there
+    window.setTimeout(function() {
+      // when focus is handled via mouse selection
+      // then everything is done already, and we do not need to handle it.
+      if (!this._handleNativeFocus) return;
+      if (this.isFocused){
+        this.textPropertyManager.removeSelection();
+        this.rerenderDomSelection();
+      } else {
+        // console.log('...Handling native focus on surface', this.__id__);
+        var sel = this.surfaceSelection.getSelection();
+        this.setFocused(true);
+        this.setSelection(sel);
+      }
+    }.bind(this));
   };
 
   /**

@@ -17,6 +17,7 @@ function TextPropertyManager(doc, containerId) {
 
   this.records = {};
   this.fragments = {};
+  this.selectionFragments = [];
 
   this.doc.connect(this, {
     "document:changed": this.onDocumentChange
@@ -67,11 +68,12 @@ TextPropertyManager.Prototype = function() {
         record.property.setFragments(_.values(record.fragments));
       }
     }, this);
-    console.log('setting selection fragments', fragments);
+    // console.log('Setting selection fragments', fragments);
     this.selectionFragments = fragments;
   };
 
   this.removeSelection = function() {
+    if (this.selectionFragments.length === 0) return;
     _.each(this.selectionFragments, function(frag) {
       var record = this.records[frag.path];
       delete record.fragments[frag.type];
@@ -79,7 +81,7 @@ TextPropertyManager.Prototype = function() {
         record.property.setFragments(_.values(record.fragments));
       }
     }, this);
-    console.log('Clearing selection fragments');
+    // console.log('Clearing selection fragments');
     this.selectionFragments = [];
   };
 
@@ -181,9 +183,7 @@ TextPropertyManager.Prototype = function() {
   };
 
   this._recordTextChange = function(changes, op) {
-    if (this.records[op.path]) {
-      changes.get(op.path).rerender = true;
-    }
+    changes.get(op.path).rerender = true;
   };
 
   this._recordMixedAnnoChange = function(changes, op) {
@@ -259,7 +259,7 @@ TextPropertyManager.Prototype = function() {
 
   this._dispatch = function(changes, documentChange) {
     for (var path in changes) {
-      if (!changes.hasOwnProperty(path)) {
+      if (!changes.hasOwnProperty(path) || !this.records[path]) {
         continue;
       }
       var change = changes[path];
