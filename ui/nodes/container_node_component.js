@@ -2,6 +2,7 @@
 
 var OO = require('../../basics/oo');
 var Component = require('../component');
+var _ = require('../../basics/helpers');
 var $$ = Component.$$;
 var UnsupporedNode = require('./unsupported_node');
 var Surface = require('../surface');
@@ -24,13 +25,20 @@ ContainerNodeComponent.Prototype = function() {
   };
 
   this.render = function() {
+    var containerNode = this.props.node;
+
     var el = $$("div")
-      .addClass("container-node " + this.props.node.id)
+      .addClass("container-node " + containerNode.id)
       .attr({
         spellCheck: false,
-        "data-id": this.props.node.id
+        "data-id": containerNode.id
       });
-    el.append(this._renderComponents());
+
+    // node components
+    _.each(containerNode.nodes, function(nodeId) {
+      el.append(this._renderNode(nodeId));
+    }, this);
+
     return el;
   };
 
@@ -81,11 +89,6 @@ ContainerNodeComponent.Prototype = function() {
     };
 
     this.surface = new Surface(ctrl, editor, options);
-  };
-
-  this._renderComponents = function() {
-    var containerNode = this.props.node;
-    return containerNode.nodes.map(this._renderNode);
   };
 
   this._insertNodeAt = function(pos, nodeId) {
