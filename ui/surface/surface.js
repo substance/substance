@@ -432,7 +432,6 @@ Surface.Prototype = function() {
       afterState.surfaceId = beforeState.surfaceId;
       return afterState;
     });
-
     this.setSelection(afterState.selection);
   };
 
@@ -659,6 +658,12 @@ Surface.Prototype = function() {
       sel = Selection.nullSelection;
     } else if (_.isObject(sel) && !(sel instanceof Selection)) {
       sel = this.getDocument().createSelection(sel);
+    }
+    // Since we allow the surface be blurred natively when clicking
+    // on tools we now need to make sure that the element is focused natively
+    // when we set the selection
+    if (!sel.isNull() && this.$element) {
+      this.$element.focus();
     }
     if (this._setModelSelection(sel)) {
       this.rerenderDomSelection();
