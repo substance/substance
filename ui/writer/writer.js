@@ -181,7 +181,7 @@ Writer.Prototype = function() {
       components: this.config.components,
       commands: this.config.commands,
       // Pass custom save handling to controller
-      onDocumentSave: props.onDocumentSave
+      onSave: props.onSave
     });
     // Register event handlers
     // -----------------
