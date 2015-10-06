@@ -79,19 +79,7 @@ function Component(parent, params) {
   this._htmlParams = _htmlParams(params);
   this._setProps(params.props);
 
-  /* istanbul ignore if */
-  if (this.initialize) {
-    console.warn("Component.initialize() has been deprecated. Use Component.didInitialize() instead.");
-    this.initialize();
-  }
-
   this._setState(this.getInitialState());
-
-  // This was originally called before _setState, but in the Writer we need
-  // a hook after both props and state have been initialized,
-  // so we can trigger state handlers for the initial state transition
-  // before something is rendered actually
-  this.didInitialize(this.props, this.state);
 
   this.actionHandlers = {};
 
@@ -106,6 +94,19 @@ function Component(parent, params) {
     props: {},
     children: []
   };
+
+  // This was originally called before _setState, but in the Writer we need
+  // a hook after both props and state have been initialized,
+  // so we can trigger state handlers for the initial state transition
+  // before something is rendered actually
+
+  if (this.didInitialize) {
+    // console.warn("Component.didInitialize() has been deprecated. Use Component.willMount() instead.");
+    this.didInitialize(this.props, this.state);
+  }
+
+  this.willMount(this.props, this.state);
+
 }
 
 Component.Prototype = function ComponentPrototype() {
@@ -120,9 +121,11 @@ Component.Prototype = function ComponentPrototype() {
   };
 
   /**
-   * Hook which is called after the component has been initialized.
+   * Hook which is called before the component is rendered/mounted.
    */
-  this.didInitialize = function() {};
+  this.willMount = function(props, state) {
+    /* jshint unused: false */
+  };
 
   /**
    * Provide the initial component state.
