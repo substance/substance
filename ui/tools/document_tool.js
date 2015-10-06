@@ -4,7 +4,6 @@ var OO = require('../../basics/oo');
 var Component = require('../component');
 var Tool = require('./tool');
 var $$ = Component.$$;
-var _ = require('../../basics/helpers');
 
 /**
  * Abstract class for tools tools that interact with a document.

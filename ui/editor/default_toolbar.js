@@ -18,7 +18,7 @@ var DefaultToolbar = Component.extend({
   render: function() {
     var el = $$('div').addClass('toolbar');
     el.append(
-      $$(TextTool, {'title': this.i18.t('switch_text'}),
+      $$(TextTool, {'title': this.i18.t('switch_text')}),
       $$(UndoTool).append($$(Icon, {icon: "fa-undo"})),
       $$(RedoTool).append($$(Icon, {icon: "fa-repeat"})),
       $$(StrongTool).append($$(Icon, {icon: "fa-bold"})),
