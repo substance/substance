@@ -113,6 +113,7 @@ ToggleAnnotationCommand.Prototype = function() {
 
   // Helper to trigger an annotation transformation
   this.applyTransform = function(transformFn) {
+    var surface = this.getSurface();
     var sel = this.getSelection();
     var doc = this.getDocument();
     var self = this;
@@ -123,7 +124,7 @@ ToggleAnnotationCommand.Prototype = function() {
     // VERIFY: When the transform function to this there's an error with PhantomJS
     // E.g. like this: function(tx.args) {}.bind(this)
     // We use a self reference for now.
-    doc.transaction({ selection: sel }, function(tx, args) {
+    surface.transaction({ selection: sel }, function(tx, args) {
       args.annotationType = self.getAnnotationType();
       args.annotationData = self.getAnnotationData();
       args.splitContainerSelections = false;
