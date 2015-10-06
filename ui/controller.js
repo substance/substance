@@ -111,7 +111,7 @@ Controller.Prototype = function() {
     if (name) {
       return this.surfaces[name];
     } else {
-      return this.focusedSurface;  
+      return this.focusedSurface || this.surfaces[this.config.defaultSurface];
     }
   };
 
@@ -163,6 +163,16 @@ Controller.Prototype = function() {
     return this.getSurface();
   };
 
+  // For now just delegate to the current surface
+  // TODO: We should use a document transaction here but attach all app-relevant
+  // information (e.g. app state)
+  this.transaction = function() {
+    var surface = this.getSurface();
+    if (!surface) {
+      throw new Error('No focused surface!');
+    }
+    surface.transaction.apply(surface, arguments);
+  };
 
   // FIXME: even if this seems to be very hacky,
   // it is quite useful to make transactions 'app-compatible'
@@ -172,7 +182,6 @@ Controller.Prototype = function() {
     // tx.before.state = this.state;
     // tx.before.selection = this.getSelection();
   };
-
 
   this.onDocumentChanged = function(change, info) {
 
@@ -241,10 +250,10 @@ Controller.Prototype = function() {
       logger.info('Saving ...');
       doc.__isSaving = true;
       // Pass saving logic to the user defined callback if available
-      if (this.config.onDocumentSave) {
+      if (this.config.onSave) {
         // TODO: calculate changes since last save
         var changes = [];
-        this.config.onDocumentSave(doc, changes, function(err) {
+        this.config.onSave(doc, changes, function(err) {
           doc.__isSaving = false;
           if (err) {
             logger.error(err.message || err.toString());

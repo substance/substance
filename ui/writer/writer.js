@@ -1,4 +1,4 @@
-"use strict";
+'use strict';
 
 var OO = require('../../basics/oo');
 var Component = require('../component');
@@ -138,6 +138,7 @@ Writer.Prototype = function() {
 
   // handles 'switch-state'
   this.switchState = function(newState, options) {
+    options = options || {};
     this.setState(newState);
     if (options.restoreSelection) {
       this.restoreSelection();
@@ -146,6 +147,7 @@ Writer.Prototype = function() {
 
   // handles 'switch-context'
   this.switchContext = function(contextId, options) {
+    options = options || {};
     this.setState({ contextId: contextId });
     if (options.restoreSelection) {
       this.restoreSelection();
@@ -178,10 +180,12 @@ Writer.Prototype = function() {
     this.config = props.config || this.config || {};
     // Initialize controller
     this.controller = new Controller(doc, {
+      // HACK: until we have moved commands into surface scope
+      defaultSurface: 'main',
       components: this.config.components,
       commands: this.config.commands,
       // Pass custom save handling to controller
-      onDocumentSave: props.onDocumentSave
+      onSave: props.onSave
     });
     // Register event handlers
     // -----------------

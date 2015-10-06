@@ -30,15 +30,14 @@ ToggleAnnotationCommand.Prototype = function() {
   };
 
   this.isDisabled = function(annos, sel) {
-
     // var surface = this.getSurface();
     // if ((!surface.isEnabled()) || sel.isNull()) {
     //   return true;
     // }
 
-    // if (sel.isNull()) {
-    //   return true;
-    // }
+    if (sel.isNull()) {
+      return true;
+    }
 
     var annotationType = this.getAnnotationType();
     var doc = this.getDocument();
@@ -108,6 +107,8 @@ ToggleAnnotationCommand.Prototype = function() {
       return this.executeEdit(annos, sel);
     } else if (this.canDelete(annos, sel)) {
       return this.executeDelete();
+    } else {
+      console.warn('ToggleAnnotation.execute: Case not handled.');
     }
   };
 
