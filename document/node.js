@@ -83,7 +83,7 @@ var Node = Data.Node.extend({
           this.getDocument().getEventProxy('path').add([this.id, propertyName], this, this._onPropertyChange.bind(this, propertyName));
         }
       }
-    });
+    }, this);
     Data.Node.prototype.connect.apply(this, arguments);
   },
 

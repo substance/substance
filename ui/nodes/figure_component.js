@@ -23,18 +23,18 @@ FigureComponent.Prototype = function() {
       .addClass('label').attr("contentEditable", false)
       .append(this.props.node.label)
     );
-    el.append($$(TextProperty)
-      .addClass('title')
-      .addProps({
+    el.append(
+      $$(TextProperty, {
         tagName: 'div',
         doc: this.props.doc,
         path: [this.props.node.id, "title"]
       })
+      .addClass('title')
     );
     el.append($$('div')
       .addClass('figure-content')
-      .append($$(ContentComponentClass)
-        .addProps({
+      .append(
+        $$(ContentComponentClass, {
           doc: this.props.doc,
           node: contentNode
         })
@@ -42,13 +42,13 @@ FigureComponent.Prototype = function() {
     );
     el.append($$('div')
       .addClass('description small')
-      .append($$(TextProperty)
-        .addClass('caption')
-        .addProps({
+      .append(
+        $$(TextProperty, {
           tagName: 'div',
           doc: this.props.doc,
           path: [this.props.node.id, "caption"]
         })
+        .addClass('caption')
       )
     );
     return el;
