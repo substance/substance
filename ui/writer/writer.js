@@ -1,4 +1,4 @@
-"use strict";
+'use strict';
 
 var OO = require('../../basics/oo');
 var Component = require('../component');
