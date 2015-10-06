@@ -82,8 +82,6 @@ ContentPanel.Prototype = function() {
     this.scrollToNode(nodeId);
   };
 
-
-
   this.onScroll = function() {
     this.markActiveTOCEntry();
   };

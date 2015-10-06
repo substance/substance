@@ -12,15 +12,13 @@ var StrongTool = require('../tools/strong_tool');
 var EmphasisTool = require('../tools/emphasis_tool');
 var LinkTool = require('../tools/link_tool');
 
-
-
 var DefaultToolbar = Component.extend({
   displayName: "DefaultToolbar",
 
   render: function() {
     var el = $$('div').addClass('toolbar');
     el.append(
-      $$(TextTool, {'title': 'Switch text'}),
+      $$(TextTool, {'title': this.i18.t('switch_text')}),
       $$(UndoTool).append($$(Icon, {icon: "fa-undo"})),
       $$(RedoTool).append($$(Icon, {icon: "fa-repeat"})),
       $$(StrongTool).append($$(Icon, {icon: "fa-bold"})),

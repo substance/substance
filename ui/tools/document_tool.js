@@ -4,7 +4,6 @@ var OO = require('../../basics/oo');
 var Component = require('../component');
 var Tool = require('./tool');
 var $$ = Component.$$;
-var _ = require('../../basics/helpers');
 
 /**
  * Abstract class for tools tools that interact with a document.
@@ -62,7 +61,7 @@ DocumentTool.Prototype = function() {
   };
 
   this.render = function() {
-    var title = this.props.title || _.capitalize(this.constructor.static.name);
+    var title = this.props.title || this.i18n.t(this.constructor.static.name);
 
     var el = $$("button")
       .attr('title', title)
