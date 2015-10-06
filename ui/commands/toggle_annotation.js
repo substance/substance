@@ -115,7 +115,6 @@ ToggleAnnotationCommand.Prototype = function() {
   this.applyTransform = function(transformFn) {
     var surface = this.getSurface();
     var sel = this.getSelection();
-    var doc = this.getDocument();
     var self = this;
 
     var result; // to store transform result
