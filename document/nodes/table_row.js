@@ -1,3 +1,6 @@
+'use strict';
+
+var $ = require('../../basics/jquery');
 var Node = require('../node');
 var _ = require('../../basics/helpers');
 

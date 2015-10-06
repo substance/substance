@@ -1,3 +1,5 @@
+'use strict';
+
 var Annotation = require('../annotation');
 
 var Emphasis = Annotation.extend({

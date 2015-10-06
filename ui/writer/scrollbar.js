@@ -1,5 +1,6 @@
 'use strict';
 
+var $ = require('../../basics/jquery');
 var OO = require('../../basics/oo');
 var Component = require('../component');
 var $$ = Component.$$;
@@ -102,12 +103,12 @@ Scrollbar.Prototype = function() {
           this.refs[nodeId].css({
             top: top,
             height: height
-          });        
+          });
         } else {
           console.warn('no ref found for highlight', nodeId);
         }
 
-      }.bind(this));      
+      }.bind(this));
     }
   };
 

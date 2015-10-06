@@ -1,3 +1,6 @@
+'use strict';
+
+var $ = require('../../basics/jquery');
 var TextNode = require('../text_node');
 
 var Codeblock = TextNode.extend({

@@ -1,6 +1,6 @@
 'use strict';
 
-var Substance = require('../basics');
+var OO = require('../basics/oo');
 var Selection = require('./selection');
 
 function TableSelection(properties) {
@@ -59,7 +59,7 @@ TableSelection.Prototype = function() {
 
 };
 
-Substance.inherit(TableSelection, Selection);
+OO.inherit(TableSelection, Selection);
 
 Object.defineProperties(TableSelection.prototype, {
   startRow: {

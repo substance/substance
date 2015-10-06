@@ -4,6 +4,7 @@ var Substance = require('../basics');
 var Annotator = require('./annotator');
 
 var inBrowser = (typeof window !== 'undefined');
+var $ = require('../basics/jquery');
 
 function HtmlExporter(config) {
   this.config = config || {};

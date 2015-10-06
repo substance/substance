@@ -22,4 +22,7 @@ Basics.Registry = require('./registry');
 Basics.Factory = require('./factory');
 _.extend(Basics, require('./timer'));
 
+Basics.jQuery = require('./jquery');
+Basics.$ = Basics.jQuery;
+
 module.exports = Basics;

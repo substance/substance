@@ -1,5 +1,6 @@
 'use strict';
 
+var $ = require('../../basics/jquery');
 var _ = require('../../basics/helpers');
 var DocumentNode = require('../node');
 var ListItem = require('./list_item');

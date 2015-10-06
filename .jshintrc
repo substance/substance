@@ -1,7 +1,6 @@
 {
   "esnext": true,
   "node": true,
-  "jquery": true,
   "devel": true,
   "latedef": true,
   "undef": true,
