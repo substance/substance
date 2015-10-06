@@ -241,10 +241,10 @@ Controller.Prototype = function() {
       logger.info('Saving ...');
       doc.__isSaving = true;
       // Pass saving logic to the user defined callback if available
-      if (this.config.onDocumentSave) {
+      if (this.config.onSave) {
         // TODO: calculate changes since last save
         var changes = [];
-        this.config.onDocumentSave(doc, changes, function(err) {
+        this.config.onSave(doc, changes, function(err) {
           doc.__isSaving = false;
           if (err) {
             logger.error(err.message || err.toString());
