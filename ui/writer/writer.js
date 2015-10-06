@@ -138,6 +138,7 @@ Writer.Prototype = function() {
 
   // handles 'switch-state'
   this.switchState = function(newState, options) {
+    options = options || {};
     this.setState(newState);
     if (options.restoreSelection) {
       this.restoreSelection();
@@ -146,6 +147,7 @@ Writer.Prototype = function() {
 
   // handles 'switch-context'
   this.switchContext = function(contextId, options) {
+    options = options || {};
     this.setState({ contextId: contextId });
     if (options.restoreSelection) {
       this.restoreSelection();
