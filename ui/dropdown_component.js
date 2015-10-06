@@ -25,12 +25,12 @@ DropdownComponent.Prototype = function() {
       el.addClass('open');
     }
     el.append(
-      $$('button').key('toggle')
+      $$('button')//.ref('toggle')
         .addClass('toggle')
         .attr('title', this.props.title)
         .append(this.props.label)
         .on('click', this.handleDropdownToggle),
-      $$('div').key('options')
+      $$('div')// .ref('options')
         .addClass('options shadow border fill-white')
         .append(this.props.children)
     );
