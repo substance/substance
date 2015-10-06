@@ -108,7 +108,7 @@ SurfaceTool.Prototype = function() {
   };
 
   this.render = function() {
-    var title = this.props.title || _.capitalize(this.getName());
+    var title = this.props.title || this.i18n.t(this.getName());
 
     if (this.state.mode) {
       title = [_.capitalize(this.state.mode), title].join(' ');

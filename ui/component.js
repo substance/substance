@@ -3,6 +3,7 @@
 var $ = require('../basics/jquery');
 var OO = require('../basics/oo');
 var _ = require('../basics/helpers');
+var I18n = require('./i18n');
 
 var __id__ = 0;
 var VirtualTextNode;
@@ -985,6 +986,12 @@ Component.Prototype = function ComponentPrototype() {
 };
 
 OO.initClass(Component);
+
+/**
+ * Adding a property which is providing an i18n service
+ * which should be received via depency injection.
+ */
+I18n.mixin(Component);
 
 _htmlParams = function(data) {
   return {

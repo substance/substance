@@ -34,7 +34,7 @@ var EditLinkPrompt = Component.extend({
     var el = $$('div').addClass('prompt shadow border fill-white');
 
     el.append([
-      $$('div').addClass('prompt-title').append('Hyperlink'),
+      $$('div').addClass('prompt-title').append(this.i18n.t('hyperlink')),
       $$('input').attr({type: 'text', placeholder: 'http://your-website.com', value: link.url})
                  .ref('url')
                  // This only works on the first load. Why?
@@ -43,7 +43,7 @@ var EditLinkPrompt = Component.extend({
                  .on('change', this.onSave),
       $$('a').attr({href: '#'})
              .addClass('delete-link')
-             .append('Delete')
+             .append(this.i18n.t('delete'))
              .on('click', this.onDelete)
     ]);
     return el;
@@ -52,7 +52,7 @@ var EditLinkPrompt = Component.extend({
 
 /**
  * LinkTool
- * 
+ *
  * Implements the SurfaceTool API.
  */
 
@@ -74,7 +74,7 @@ LinkTool.Prototype = function() {
       'command:executed': this.onCommandExecuted
     });
   };
-  
+
   this.onCommandExecuted = function(info, commandName) {
     if (commandName === this.static.command) {
       // Toggle the edit prompt when either edit is requested or a new link has been created
@@ -123,7 +123,7 @@ LinkTool.Prototype = function() {
 
   this.render = function() {
     var title = this.props.title || _.capitalize(this.getName());
-    
+
     if (this.state.mode) {
       title = [_.capitalize(this.state.mode), title].join(' ');
     }
