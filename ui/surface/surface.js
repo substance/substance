@@ -669,11 +669,7 @@ Surface.Prototype = function() {
     if (this.surfaceSelection) {
       var surfaceSelection = this.surfaceSelection;
       var sel = this.getSelection();
-      // This delay was just necessary in case of async rerendering, e.g., with react.
-      // without it, the observed DOM selection flickering seems much better.
-      // setTimeout(function() {
       surfaceSelection.setSelection(sel);
-      // });
     }
   };
 
