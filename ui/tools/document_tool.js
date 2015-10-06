@@ -62,7 +62,7 @@ DocumentTool.Prototype = function() {
   };
 
   this.render = function() {
-    var title = this.props.title || _.capitalize(this.constructor.static.name);
+    var title = this.props.title || this.i18n.t(this.constructor.static.name);
 
     var el = $$("button")
       .attr('title', title)

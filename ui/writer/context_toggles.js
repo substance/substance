@@ -36,7 +36,7 @@ ContextToggles.Prototype = function() {
         $$(Icon, { icon: panelClass.icon })
       );
       toggle.append(
-        $$('span').addClass('label').append(panelClass.displayName)
+        $$('span').addClass('label').append(this.i18n.t(panelId))
       );
       el.append(toggle);
     }, this);

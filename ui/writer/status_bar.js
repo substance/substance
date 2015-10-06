@@ -19,7 +19,7 @@ function StatusBar() {
 
   var ctrl = this.context.controller;
   var logger = ctrl.getLogger();
-  
+
   logger.connect(this, {
     'messages:updated': this.handleStatusUpdate
   });
@@ -29,7 +29,7 @@ StatusBar.Prototype = function() {
 
   this.render = function() {
     var meta = this.props.doc.getDocumentMeta();
-    var title = meta ? meta.title : 'Untitled';
+    var title = meta ? meta.title : this.i18n.t('untitled');
     var message = this.state.message;
 
     var el = $$('div').addClass("status-bar-component fill-light");
