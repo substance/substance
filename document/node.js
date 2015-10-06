@@ -1,5 +1,6 @@
 'use strict';
 
+var $ = require('../basics/jquery');
 var _ = require('../basics');
 var Data = require('../data');
 

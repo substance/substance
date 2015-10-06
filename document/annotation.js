@@ -1,7 +1,8 @@
 'use strict';
 
-var Substance = require('../basics');
+var $ = require('../basics/jquery');
 var Node = require('./node');
+var _ = require('../basics/helpers');
 
 // Annotation
 // --------
@@ -43,7 +44,7 @@ var Annotation = Node.extend({
     if (!sel.isPropertySelection()) {
       throw new Error('Cannot change to ContainerAnnotation.');
     }
-    if (!Substance.isEqual(this.startPath, sel.start.path)) {
+    if (!_.isEqual(this.startPath, sel.start.path)) {
       tx.set([this.id, 'path'], sel.start.path);
     }
     if (this.startOffset !== sel.start.offset) {

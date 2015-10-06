@@ -1,3 +1,6 @@
+'use strict';
+
+var $ = require('../basics/jquery');
 var _ = require('../basics/helpers');
 var OO = require('../basics/oo');
 var HtmlImporter = require('./html_importer');

@@ -1,5 +1,8 @@
-var Substance = require('../basics');
-var _ = Substance;
+'use strict';
+
+var $ = require('../basics/jquery');
+var _ = require('../basics/helpers');
+var uuid = require('../basics/uuid');
 
 var inBrowser = (typeof window !== 'undefined');
 
@@ -97,7 +100,7 @@ HtmlImporter.Prototype = function HtmlImporterPrototype() {
           throw new Error("Contract: a Node's fromHtml() method must return a node", this.$toStr($el));
         } else {
           node.type = blockType.static.name;
-          node.id = node.id || $el.attr('id') || Substance.uuid(node.type);
+          node.id = node.id || $el.attr('id') || uuid(node.type);
           doc.create(node);
           containerNode.show(node.id);
         }
@@ -293,7 +296,7 @@ HtmlImporter.Prototype = function HtmlImporterPrototype() {
     // however we would need to be careful as there might be another
     // element in the HTML coming with that id
     // For now we use shas
-    return Substance.uuid(prefix);
+    return uuid(prefix);
   };
 
   /**

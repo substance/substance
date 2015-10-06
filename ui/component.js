@@ -1,5 +1,6 @@
 'use strict';
 
+var $ = require('../basics/jquery');
 var OO = require('../basics/oo');
 var _ = require('../basics/helpers');
 
