@@ -3,6 +3,7 @@
 var containerAnnoSample = require('../../fixtures/container_anno_sample');
 var ToggleAnnotationCommand = require('../../../ui/commands/toggle_annotation');
 var docHelpers = require('../../../document/helpers');
+var StubController = require('../ui/stub_controller');
 
 QUnit.module('Commands/toggleAnnotation');
 
@@ -23,28 +24,12 @@ var ToggleContainerAnnoCommand = ToggleAnnotationCommand.extend({
   }
 });
 
-// Prepare a controller that just provides the getSelection method
-// which is all we need. We always operate on the 'main' container in this test
-function SelectionControllerStub(doc, sel) {
-  this.getSelection = function() {
-    return sel;
-  };
-
-  this.getDocument = function() {
-    return doc;
-  };
-
-  this.getContainerId = function() {
-    return 'main';
-  };
-}
-
 function sample() {
   var doc = containerAnnoSample();
 
   // For reference (those are part of the fixture)
   // --------
-  // 
+  //
   // doc.create({
   //   type: 'test-container-anno',
   //   id: 'a1',
@@ -87,7 +72,7 @@ QUnit.test("Property Annotation: Toggle on", function(assert) {
     endOffset: 6
   });
 
-  var ctrl = new SelectionControllerStub(doc, sel);
+  var ctrl = new StubController(doc, sel);
   var cmd = new ToggleStrongCommand(ctrl);
 
   // Execute against the provided selection context
@@ -114,7 +99,7 @@ QUnit.test("Property Annotation: Toggle off", function(assert) {
     endOffset: 7
   });
 
-  var ctrl = new SelectionControllerStub(doc, sel);
+  var ctrl = new StubController(doc, sel);
   var cmd = new ToggleStrongCommand(ctrl);
 
   // Execute against the provided selection context
@@ -137,7 +122,7 @@ QUnit.test("Container Annotation: Toggle on", function(assert) {
     endOffset: 3,
   });
 
-  var ctrl = new SelectionControllerStub(doc, sel);
+  var ctrl = new StubController(doc, sel);
   var cmd = new ToggleContainerAnnoCommand(ctrl);
 
   // Execute against the provided selection context
@@ -164,7 +149,7 @@ QUnit.test("Container Annotation: Toggle off", function(assert) {
     endOffset: 2,
   });
 
-  var ctrl = new SelectionControllerStub(doc, sel);
+  var ctrl = new StubController(doc, sel);
   var cmd = new ToggleContainerAnnoCommand(ctrl);
 
   // Execute against the provided selection context
@@ -177,8 +162,6 @@ QUnit.test("Container Annotation: Toggle off", function(assert) {
   var annos = docHelpers.getAnnotationsForSelection(doc, sel, 'test-container-anno', 'main');
   assert.equal(annos.length, 0, 'Number of annos should be 0');
 });
-
-
 
 QUnit.test("Container Annotation: Fuse annos", function(assert) {
   var doc = sample();
@@ -204,7 +187,7 @@ QUnit.test("Container Annotation: Fuse annos", function(assert) {
     endOffset: 4,
   });
 
-  var ctrl = new SelectionControllerStub(doc, sel);
+  var ctrl = new StubController(doc, sel);
   var cmd = new ToggleContainerAnnoCommand(ctrl);
 
   // Execute against the provided selection context
