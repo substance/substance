@@ -63,9 +63,11 @@ TextPropertyManager.Prototype = function() {
     var fragments = sel.getFragments();
     _.each(fragments, function(frag) {
       var record = this.records[frag.path];
-      record.fragments[frag.type] = frag;
-      if (record.property) {
-        record.property.setFragments(_.values(record.fragments));
+      if (record) {
+        record.fragments[frag.type] = frag;
+        if (record.property) {
+          record.property.setFragments(_.values(record.fragments));
+        }
       }
     }, this);
     // console.log('Setting selection fragments', fragments);
@@ -76,9 +78,11 @@ TextPropertyManager.Prototype = function() {
     if (this.selectionFragments.length === 0) return;
     _.each(this.selectionFragments, function(frag) {
       var record = this.records[frag.path];
-      delete record.fragments[frag.type];
-      if (record.property) {
-        record.property.setFragments(_.values(record.fragments));
+      if (record) {
+        delete record.fragments[frag.type];
+        if (record.property) {
+          record.property.setFragments(_.values(record.fragments));
+        }
       }
     }, this);
     // console.log('Clearing selection fragments');
