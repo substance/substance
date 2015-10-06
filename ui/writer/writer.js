@@ -178,6 +178,8 @@ Writer.Prototype = function() {
     this.config = props.config || this.config || {};
     // Initialize controller
     this.controller = new Controller(doc, {
+      // HACK: until we have moved commands into surface scope
+      defaultSurface: 'main',
       components: this.config.components,
       commands: this.config.commands,
       // Pass custom save handling to controller

@@ -111,7 +111,7 @@ Controller.Prototype = function() {
     if (name) {
       return this.surfaces[name];
     } else {
-      return this.focusedSurface;  
+      return this.focusedSurface || this.surfaces[this.config.defaultSurface];
     }
   };
 
