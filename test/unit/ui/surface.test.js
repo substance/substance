@@ -1,5 +1,6 @@
 "use strict";
 
+require('../phantomjs_shims');
 var Surface = require('../../../ui/surface/surface');
 var ContainerEditor = require('../../../ui/surface/container_editor');
 var Controller = require('../../../ui/controller');
