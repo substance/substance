@@ -122,15 +122,15 @@ Helpers.getTextForSelection = function(doc, sel) {
   if (!sel || sel.isNull()) {
     return "";
   } else if (sel.isPropertySelection()) {
-    text = this.get(sel.start.path);
+    text = doc.get(sel.start.path);
     result.push(text.substring(sel.start.offset, sel.end.offset));
   } else if (sel.isContainerSelection()) {
-    var container = this.get(sel.containerId);
+    var container = doc.get(sel.containerId);
     var range = sel.range;
     var paths = container.getPathRange(range.start.path, range.end.path);
     for (var i = 0; i < paths.length; i++) {
       var path = paths[i];
-      text = this.get(path);
+      text = doc.get(path);
       if (paths.length === 1) {
         result.push(text.substring(sel.start.offset, sel.end.offset));
       } else if (i===0) {
