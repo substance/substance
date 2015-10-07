@@ -22,7 +22,7 @@ Building a web editor is a hard task. Native browser support for text editing is
 
 Features                                                                    | State
 --------------------------------------------------------------------------- | :------------:
-Custom document schemas                                                     | ✓ 
+Custom document schemas                                                     | ✓
 Custom converters (XML, HTML, etc.)                                         | ✓
 Custom HTML Rendering                                                       | ✓
 Annotations that can span over multiple nodes                               | ✓
@@ -32,6 +32,7 @@ Transformations for document manipulation                                   | �
 Custom editing toolbars                                                     | ✓
 Commands for controlling the editor                                         | Beta 2
 Key bindings                                                                | Beta 2
+I18N support                                                                | Beta 2
 Realtime collaboration                                                      | Beta 3
 Full Unicode support                                                        | Beta 3
 Plugins                                                                     | Beta 3
@@ -42,7 +43,7 @@ Ready-to-use [Editor](http://substance.io/demos/prose-editor)               | �
 Writer interface for building full-fledged custom editing apps              | Beta 2
                                                                             |
 **Predefined content types**                                                |
-Paragraph                                                                   | ✓ 
+Paragraph                                                                   | ✓
 Heading                                                                     | ✓
 Blockquote                                                                  | ✓
 Codeblock                                                                   | ✓
@@ -52,9 +53,9 @@ Table                                                                       | Be
 Figure (including upload)                                                   | Beta 4
                                                                             |
 **Predefined annotation types**                                             |
-Strong                                                                      | ✓ 
-Emphasis                                                                    | ✓ 
-Link                                                                        | ✓ 
+Strong                                                                      | ✓
+Emphasis                                                                    | ✓
+Link                                                                        | ✓
 Subscript                                                                   | Beta 2
 Superscript                                                                 | Beta 2
 Comment                                                                     | Beta 3
@@ -89,7 +90,7 @@ You may want to restrict the supported content types and customize the toolbar a
 
 ## Defining custom article formats.
 
-Substance allows you to define completely custom article formats. 
+Substance allows you to define completely custom article formats.
 
 ```js
 var Paragraph = Substance.Document.Paragraph;
@@ -181,18 +182,18 @@ function searchAndReplace(tx, args) {
   // 2. implement your transformation using low level operations (e.g. tx.create)
   // ...
   var searchResult = search(tx, args);
-  
+
   searchResult.matches.forEach(function(match) {
     var replaceArgs = _.extend({}, args, {selection: match, replaceStr: args.replaceStr});
     replaceText(tx, replaceArgs);
   });
-  
+
   // 3. set new selection
   if (searchResult.matches.length > 0) {
     var lastMatch = _.last(searchResult.matches);
     args.selection = lastMatch;
   }
-  
+
   // 4. return args for the caller or transaction context
   return args;
 }
@@ -217,7 +218,7 @@ Look at our [reference implementation](https://github.com/substance/substance/bl
 
 ### Editor initialization
 
-Editors need to setup a bit of Substance infrastructure first, most importantly a Substance Surface, that maps DOM selections to internal document selections. 
+Editors need to setup a bit of Substance infrastructure first, most importantly a Substance Surface, that maps DOM selections to internal document selections.
 
 ```js
 this.surfaceManager = new Substance.Surface.SurfaceManager(doc);
@@ -275,6 +276,7 @@ The report will be stored in the `coverage` folder.
 - Automatically published API docs
 - Writer interface for building full-fledged custom editing apps
 - Improved stability, documentation and tests
+- I18n
 
 ### Beta 3
 
