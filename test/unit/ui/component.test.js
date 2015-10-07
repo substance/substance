@@ -7,11 +7,11 @@ var _ = require('../../../basics/helpers');
 QUnit.uiModule('Substance.Component');
 
 var TestComponent = Component.extend({
-  didInitialize: function() {
+  initialize: function() {
     // make some methods inspectable
     this.didMount = sinon.spy(this, 'didMount');
     this.didRender = sinon.spy(this, 'didRender');
-    this.willUnmount = sinon.spy(this, 'willUnmount');
+    this.dispose = sinon.spy(this, 'dispose');
     this.shouldRerender = sinon.spy(this, 'shouldRerender');
     this.render = sinon.spy(this, 'render');
   }
@@ -258,8 +258,8 @@ QUnit.test("Only call didMount once for childs and grandchilds when setProps is 
   assert.equal(grandChildComp.didMount.callCount, 1, "Grandchild's didMount should have been called only once.");
 
   comp.empty();
-  assert.equal(childComp.willUnmount.callCount, 1, "Child's willUnmount should have been called once.");
-  assert.equal(grandChildComp.willUnmount.callCount, 1, "Grandchild's willUnmount should have been called once.");
+  assert.equal(childComp.dispose.callCount, 1, "Child's dispose should have been called once.");
+  assert.equal(grandChildComp.dispose.callCount, 1, "Grandchild's dispose should have been called once.");
 });
 
 // TODO: The next test case covers most of this, so maybe we can remove it in the future
@@ -351,7 +351,7 @@ QUnit.test("Preserve components when ref matches, and rerender when props change
   assert.equal(b, comp.children[2], 'b should be the same component instance');
 
   // c should be gone
-  assert.equal(c.willUnmount.callCount, 1, 'c should have been unmounted');
+  assert.equal(c.dispose.callCount, 1, 'c should have been unmounted');
 
   // a should have been rerendered (different props) while b should not (same props)
   assert.equal(a.render.callCount, 2, 'Component with ref a should have been rendered twice');

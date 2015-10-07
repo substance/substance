@@ -9,6 +9,16 @@ function ImageComponent() {
 }
 
 ImageComponent.Prototype = function() {
+  
+  this.initialize = function() {
+    var doc = this.props.doc;
+    doc.connect(this, { 'document:changed': this.handleDocumentChange });
+  };
+
+  this.dispose = function() {
+    var doc = this.props.doc;
+    doc.disconnect(this);
+  };
 
   this.render = function() {
     return $$('img')
@@ -18,16 +28,6 @@ ImageComponent.Prototype = function() {
         contentEditable: false,
         src: this.props.node.src,
       });
-  };
-
-  this.didMount = function() {
-    var doc = this.props.doc;
-    doc.connect(this, { 'document:changed': this.handleDocumentChange });
-  };
-
-  this.willUnmount = function() {
-    var doc = this.props.doc;
-    doc.disconnect(this);
   };
 
   this.handleDocumentChange = function(change) {

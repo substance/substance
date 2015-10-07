@@ -10,9 +10,17 @@ var $$ = Component.$$;
 
 function TableComponent() {
   Component.apply(this, arguments);
+
+  this.context.surface.connect(this, {
+    "selection:changed": this.onSelectionChange
+  });
 }
 
 TableComponent.Prototype = function() {
+
+  this.dispose = function() {
+    this.context.surface.disconnect(this);
+  };
 
   this.getInitialState = function() {
     return { mode: 'table' };
@@ -73,16 +81,6 @@ TableComponent.Prototype = function() {
       content.push(secEl);
     }, this);
     return content;
-  };
-
-  this.didMount = function() {
-    this.context.surface.connect(this, {
-      "selection:changed": this.onSelectionChange
-    });
-  };
-
-  this.willUnmount = function() {
-    this.context.surface.disconnect(this);
   };
 
   this.onDoubleClick = function(e) {

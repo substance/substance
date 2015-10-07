@@ -1,6 +1,7 @@
 'use strict';
 
 var DocumentTool = require('./document_tool');
+
 var SaveTool = DocumentTool.extend({
 
   static: {
@@ -8,7 +9,7 @@ var SaveTool = DocumentTool.extend({
     command: 'save'
   },
 
-  didInitialize: function() {
+  initialize: function() {
     var ctrl = this.getController();
     ctrl.connect(this, {
       'document:saved': this.update

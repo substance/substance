@@ -13,28 +13,20 @@ var $$ = Component.$$;
 
 function SurfaceTool() {
   Tool.apply(this, arguments);
+
+  // NOTE: We were doing this in a debounced way but that leads to edge cases.
+  // E.g. When toggling a new link, the tool state gets immediately updated
+  // to show the edit prompt, but afterwards the delayed selection:change event
+  // immediately leads to a close of the prompt. We will observe tool performance
+  // propagating each selection:changed event immediately.
+  // We could also throttle
+  var ctrl = this.getController();
+  ctrl.connect(this, {
+    'selection:changed': this.update
+  });
 }
 
 SurfaceTool.Prototype = function() {
-
-  /**
-   * Binds event handler after getting mounted.
-   *
-   * Custom tool implementation must do a super call.
-   */
-
-  this.didMount = function() {
-    // NOTE: We were doing this in a debounced way but that leads to edge cases.
-    // E.g. When toggling a new link, the tool state gets immediately updated
-    // to show the edit prompt, but afterwards the delayed selection:change event
-    // immediately leads to a close of the prompt. We will observe tool performance
-    // propagating each selection:changed event immediately.
-    // We could also throttle
-    var ctrl = this.getController();
-    ctrl.connect(this, {
-      'selection:changed': this.update
-    });
-  };
 
   /**
    * Unbinds event handler before getting unmounted.
@@ -42,7 +34,7 @@ SurfaceTool.Prototype = function() {
    * Custom tool implementation must do a super call.
    */
 
-  this.willUnmount = function() {
+  this.dispose = function() {
     var ctrl = this.getController();
     ctrl.disconnect(this);
   };

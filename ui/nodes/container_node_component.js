@@ -59,7 +59,7 @@ ContainerNodeComponent.Prototype = function() {
     this.surface.attach(this.$el[0]);
   };
 
-  this.willUnmount = function() {
+  this.dispose = function() {
     this.props.doc.disconnect(this);
     this.surface.detach();
   };

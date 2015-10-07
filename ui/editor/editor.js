@@ -32,7 +32,7 @@ var Editor = Component.extend({
 
   displayName: "Editor",
 
-  didInitialize: function() {
+  initialize: function() {
     if (!this.config) this.config = {};
 
     var ArticleClass = this.config.article || SubstanceArticle;
@@ -57,6 +57,22 @@ var Editor = Component.extend({
     this.childContext = {
       controller: this.controller
     };
+  },
+
+  didMount: function() {
+    this.controller.clipboard.attach(this.$el[0]);
+  },
+
+  didReceiveProps: function() {
+    if (this.doc.toHtml() !== this.props.content) {
+      this.doc.loadHtml(this.props.content);
+    }
+  },
+
+  dispose: function() {
+    var clipboard = this.controller.clipboard;
+    if (clipboard) clipboard.detach(this.$el[0]);
+    this.controller.dispose();
   },
 
   getController: function() {
@@ -96,26 +112,6 @@ var Editor = Component.extend({
       .attr({ contentEditable: true })
     );
     return el;
-  },
-
-  didReceiveProps: function() {
-    if (this.doc.toHtml() !== this.props.content) {
-      this.doc.loadHtml(this.props.content);
-    }
-  },
-
-  didMount: function() {
-    this.controller.clipboard.attach(this.$el[0]);
-  },
-
-  willUnmount: function() {
-    this.dispose();
-  },
-
-  dispose: function() {
-    var clipboard = this.controller.clipboard;
-    if (clipboard) clipboard.detach(this.$el[0]);
-    this.controller.dispose();
   },
 
   getContent: function() {
