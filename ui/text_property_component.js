@@ -12,8 +12,12 @@ function TextPropertyComponent() {
 
 TextPropertyComponent.Prototype = function() {
 
-  this.didInitialize = function() {
+  this.initialize = function() {
     this.getTextPropertyManager().registerProperty(this);
+  };
+
+  this.dispose = function() {
+    this.getTextPropertyManager().unregisterProperty(this);
   };
 
   this.getInitialState = function() {
@@ -22,13 +26,7 @@ TextPropertyComponent.Prototype = function() {
     };
   };
 
-  this.willUnmount = function() {
-    this.getTextPropertyManager().unregisterProperty(this);
-  };
-
   this.render = function() {
-
-
     var doc = this.getDocument();
     var ctrl = this.getController();
     var path = this.getPath();

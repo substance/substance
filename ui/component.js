@@ -102,12 +102,11 @@ function Component(parent, params) {
   // before something is rendered actually
 
   if (this.didInitialize) {
-    // console.warn("Component.didInitialize() has been deprecated. Use Component.willMount() instead.");
+    console.warn("Component.didInitialize() has been deprecated. Use Component.initialize() instead.");
     this.didInitialize(this.props, this.state);
   }
 
-  this.willMount(this.props, this.state);
-
+  this.initialize();
 }
 
 Component.Prototype = function ComponentPrototype() {
@@ -124,7 +123,7 @@ Component.Prototype = function ComponentPrototype() {
   /**
    * Hook which is called before the component is rendered/mounted.
    */
-  this.willMount = function(props, state) {
+  this.initialize = function(props, state) {
     /* jshint unused: false */
   };
 
@@ -251,7 +250,7 @@ Component.Prototype = function ComponentPrototype() {
    * @chainable
    */
   this.unmount = function() {
-    this.triggerWillUnmount();
+    this.triggerDispose();
     this.$el.remove();
 
     // Make sure that, if the component survives, on next mount, didMount will
@@ -272,19 +271,19 @@ Component.Prototype = function ComponentPrototype() {
   };
 
   /**
-   * Triggers willUnmount handlers recursively.
+   * Triggers dispose handlers recursively.
    */
-  this.triggerWillUnmount = function() {
+  this.triggerDispose = function() {
     _.each(this.children, function(child) {
-      child.triggerWillUnmount();
+      child.triggerDispose();
     });
-    this.willUnmount();
+    this.dispose();
   };
 
   /**
-   * A hook which is called when the component is unmounted, i.e. removed from DOM.
+   * A hook which is called when the component is unmounted, i.e. removed from DOM, hence disposed
    */
-  this.willUnmount = function() {};
+  this.dispose = function() {};
 
   /**
    * Send an action request to the parent component, bubbling up the component
@@ -787,7 +786,7 @@ Component.Prototype = function ComponentPrototype() {
     var children = [];
 
     function _replace(oldComp, newComp) {
-      oldComp.triggerWillUnmount();
+      oldComp.triggerDispose();
       oldComp.$el.replaceWith(newComp.$el[0]);
     }
 

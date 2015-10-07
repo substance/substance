@@ -13,14 +13,16 @@ var _ = require('../../basics/helpers');
  */
 
 function AnnotationTool() {
-  SurfaceTool.apply(this, arguments);
+  SurfaceTool.apply(this, arguments);  
 }
 
 AnnotationTool.Prototype = function() {
+  this.getInitialState = function() {
+    var sel = this.context.controller.getSelection();
+    return this.computeState(sel);
+  };
 
-
-  // When update is called we can be sure the Surface is active
-  this.update = function(sel) {
+  this.computeState = function(sel) {
     var command = this.getCommand();
     if (!command) {
       console.log('Command', this.constructor.static.command, 'not registered on Surface');
@@ -58,10 +60,14 @@ AnnotationTool.Prototype = function() {
     } else {
       newState.disabled = true;
     }
-
-    this.setState(newState);
+    return newState;
   };
 
+  // When update is called we can be sure the Surface is active
+  this.update = function(sel) {
+    var newState = this.computeState(sel);
+    this.setState(newState);
+  };
 
   // UI-specific
   // --------------------------

@@ -8,9 +8,29 @@ var Panel = require('./panel');
 
 function TocPanel() {
   Panel.apply(this, arguments);
+
+  var doc = this.getDocument();
+  doc.connect(this, {
+    'app:toc-entry:changed': this.setActiveTocEntry,
+    'document:changed': this.handleDocumentChange
+  });
 }
 
 TocPanel.Prototype = function() {
+
+  this.getInitialState = function() {
+    var doc = this.props.doc;
+    var tocNodes = doc.getTOCNodes();
+    return {
+      tocNodes: tocNodes,
+      activeNode: tocNodes.length > 0 ? tocNodes[0].id : null
+    };
+  };
+
+  this.dispose = function() {
+    var doc = this.getDocument();
+    doc.disconnect(this);
+  };
 
   this.render = function() {
     var el = $$("div")
@@ -36,28 +56,6 @@ TocPanel.Prototype = function() {
     }, this);
     el.append(tocEntries);
     return el;
-  };
-
-  this.getInitialState = function() {
-    var doc = this.props.doc;
-    var tocNodes = doc.getTOCNodes();
-    return {
-      tocNodes: tocNodes,
-      activeNode: tocNodes.length > 0 ? tocNodes[0].id : null
-    };
-  };
-
-  this.didMount = function() {
-    var doc = this.getDocument();
-    doc.connect(this, {
-      'app:toc-entry:changed': this.setActiveTocEntry,
-      'document:changed': this.handleDocumentChange
-    });
-  };
-
-  this.willUnmount = function() {
-    var doc = this.getDocument();
-    doc.disconnect(this);
   };
 
   this.handleDocumentChange = function(change) {

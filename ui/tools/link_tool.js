@@ -58,6 +58,11 @@ var EditLinkPrompt = Component.extend({
 
 function LinkTool() {
   AnnotationTool.apply(this, arguments);
+
+  var ctrl = this.getController();
+  ctrl.connect(this, {
+    'command:executed': this.onCommandExecuted
+  });
 }
 
 LinkTool.Prototype = function() {
@@ -67,12 +72,9 @@ LinkTool.Prototype = function() {
     command: 'toggleLink'
   };
 
-  this.didInitialize = function() {
+  this.dispose = function() {
     var ctrl = this.getController();
-
-    ctrl.connect(this, {
-      'command:executed': this.onCommandExecuted
-    });
+    ctrl.disconnect(this);
   };
 
   this.onCommandExecuted = function(info, commandName) {
@@ -82,11 +84,6 @@ LinkTool.Prototype = function() {
         this.togglePrompt();
       }
     }
-  };
-
-  this.willUnmount = function() {
-    var ctrl = this.getController();
-    ctrl.disconnect(this);
   };
 
   this.togglePrompt = function() {

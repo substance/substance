@@ -22,8 +22,8 @@ var LinkComponent = AnnotationComponent.extend({
     this.doc.getEventProxy('path').add([node.id, 'url'], this, this.rerender);
   },
 
-  willUnmount: function() {
-    AnnotationComponent.prototype.willUnmount.call(this);
+  dispose: function() {
+    AnnotationComponent.prototype.dispose.call(this);
     this.doc.getEventProxy('path').remove([this.props.node.id, 'title'], this);
     this.doc.getEventProxy('path').remove([this.props.node.id, 'url'], this);
   }

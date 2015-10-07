@@ -24,10 +24,6 @@ ModalPanel.Prototype = function() {
     return el;
   };
 
-  this.willUnmount = function() {
-    this.$el.off('click');
-  };
-
   this.preventBubbling = function(e) {
     e.stopPropagation();
     e.preventDefault();

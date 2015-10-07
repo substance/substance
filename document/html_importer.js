@@ -18,7 +18,7 @@ function HtmlImporter( config ) {
       this.defineNodeImporter(NodeClass);
     }, this);
   }
-  this.$ = global.$;
+  this.$ = $;
 }
 
 HtmlImporter.Prototype = function HtmlImporterPrototype() {

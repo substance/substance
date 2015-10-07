@@ -18,6 +18,31 @@ function Scrollbar() {
 
 Scrollbar.Prototype = function() {
 
+  this.didMount = function() {
+    setTimeout(function() {
+      this.updatePositions();
+    }.bind(this));
+
+    // Install global event handlers
+    $(window).on('resize', this.rerender.bind(this));
+
+    var panel = this.props.panel;
+    var panelContentEl = panel.getPanelContentElement();
+    $(panelContentEl).on('scroll', this.onScroll.bind(this));
+  };
+
+  this.dispose = function() {
+    $(window).off('resize');
+  };
+
+  // TODO: This is actually a place where we could need didUpdate or
+  // didRerender when we know the component has already been mounted
+  this.didRender = function() {
+    if (this.isMounted()) {
+      this.updatePositions();
+    }
+  };
+
   this.render = function() {
 
     var el = $$('div')
@@ -39,33 +64,8 @@ Scrollbar.Prototype = function() {
     return el;
   };
 
-  // TODO: This is actually a place where we could need didUpdate or
-  // didRerender when we know the component has already been mounted
-  this.didRender = function() {
-    if (this.isMounted()) {
-      this.updatePositions();
-    }
-  };
-
-  this.didMount = function() {
-    setTimeout(function() {
-      this.updatePositions();
-    }.bind(this));
-
-    // Install global event handlers
-    $(window).on('resize', this.rerender.bind(this));
-
-    var panel = this.props.panel;
-    var panelContentEl = panel.getPanelContentElement();
-    $(panelContentEl).on('scroll', this.onScroll.bind(this));
-  };
-
   this.onScroll = function() {
     this.updatePositions();
-  };
-
-  this.willUnmount = function() {
-    $(window).off('resize');
   };
 
   this.updatePositions = function() {

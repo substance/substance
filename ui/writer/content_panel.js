@@ -11,9 +11,19 @@ var Scrollbar = require("./scrollbar");
 
 function ContentPanel() {
   Panel.apply(this, arguments);
+
+  this.props.doc.connect(this, {
+    'document:changed': this.onDocumentChange,
+    'toc:entry-selected': this.onTocEntrySelected,
+    'highlights:updated': this.onHighlightsUpdated
+  }, -1);
 }
 
 ContentPanel.Prototype = function() {
+
+  this.dispose = function() {
+    this.props.doc.disconnect(this);
+  };
 
   this.render = function() {
     var el = $$('div')
@@ -53,23 +63,9 @@ ContentPanel.Prototype = function() {
     }).ref("contentEditor");
   };
 
-  // Since component gets rendered multiple times we need to update
-  // the scrollbar and reattach the scroll event
-  this.didMount = function() {
-    this.props.doc.connect(this, {
-      'document:changed': this.onDocumentChange,
-      'toc:entry-selected': this.onTocEntrySelected,
-      'highlights:updated': this.onHighlightsUpdated
-    }, -1);
-  };
-
   this.onHighlightsUpdated = function(highlights) {
     // Triggers a rerender
     this.refs.scrollbar.extendProps({highlights: highlights});
-  };
-
-  this.willUnmount = function() {
-    this.props.doc.disconnect(this);
   };
 
   // Should we do this from inside the scrollbar

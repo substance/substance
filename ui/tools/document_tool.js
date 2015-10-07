@@ -29,7 +29,7 @@ DocumentTool.Prototype = function() {
    * Custom tool implementation must do a super call.
    */
 
-  this.willUnmount = function() {
+  this.dispose = function() {
     var doc = this.getDocument();
     doc.disconnect(this);
   };

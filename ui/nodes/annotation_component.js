@@ -40,7 +40,7 @@ AnnotationComponent.Prototype = function() {
     });
   };
 
-  this.willUnmount = function() {
+  this.dispose = function() {
     var node = this.props.node;
     node.disconnect(this);
   };
