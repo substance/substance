@@ -666,14 +666,18 @@ Surface.Prototype = function() {
     } else if (_.isObject(sel) && !(sel instanceof Selection)) {
       sel = this.getDocument().createSelection(sel);
     }
+
+    if (this._setModelSelection(sel)) {
+      this.rerenderDomSelection();
+    }
+
     // Since we allow the surface be blurred natively when clicking
     // on tools we now need to make sure that the element is focused natively
     // when we set the selection
+    // This is actually only a problem on FF, other proses set the focus implicitly
+    // when a new DOM selection is set.
     if (!sel.isNull() && this.$element) {
       this.$element.focus();
-    }
-    if (this._setModelSelection(sel)) {
-      this.rerenderDomSelection();
     }
   };
 
