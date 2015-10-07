@@ -579,6 +579,12 @@ Surface.Prototype = function() {
     if ( e.which !== 1 ) {
       return;
     }
+    // console.log('MouseDown on Surface %s', this.__id__);
+    // 'mouseDown' is triggered before 'focus' so we tell
+    // our focus handler that we are already dealing with it
+    // The opposite situation, when the surface gets focused e.g. using keyboard
+    // then the handler needs to kick in and recover a persisted selection or such
+    this.skipNextFocusEvent = true;
     // Bind mouseup to the whole document in case of dragging out of the surface
     this.dragging = true;
     this.$document.one( 'mouseup', this._onMouseUp );
@@ -593,23 +599,23 @@ Surface.Prototype = function() {
     setTimeout(function() {
       if (self.surfaceSelection) {
         var sel = self.surfaceSelection.getSelection();
+        self.textPropertyManager.removeSelection();
         self.setSelection(sel);
       }
     });
   };
 
   this.setFocused = function(val) {
-    // in both cases when the surface gets focused or blurred, a persisted
-    // selection will be removed
-    this.textPropertyManager.removeSelection();
-    // NOTE: there are situation where focus is triggered by the native
-    // focus events. When this gets called, we already taking care of it
-    this._handleNativeFocus = false;
-    // if (!this.isFocused && val) {
-    //   console.log('Surface focus:', this.__id__);
-    // } else if (this.isFocused && !val) {
-    //   console.log('Surface blur:', this.__id__);
-    // }
+    // transition: blurred -> focused
+    if (!this.isFocused && val) {
+      // console.log('Surface focus:', this.__id__);
+    }
+    // transition: focused -> blurred
+    else if (this.isFocused && !val) {
+      // console.log('Surface blur:', this.__id__);
+      // when a surface gets blurred a persisted selection will be removed
+      this.textPropertyManager.removeSelection();
+    }
     this.isFocused = val;
     if (this.isFocused) {
       this.controller.didFocus(this);
@@ -690,21 +696,21 @@ Surface.Prototype = function() {
   this.onNativeBlur = function() {
     // console.log('Native blur on surface', this.__id__);
     this.textPropertyManager.renderSelection(this.selection);
+    this.skipNextFocusEvent = false;
   };
 
   this.onNativeFocus = function() {
     // console.log('Native focus on surface', this.__id__);
-    this._handleNativeFocus = true;
     // ARRR: native focus event is triggered before the DOM selection is there
     window.setTimeout(function() {
       // when focus is handled via mouse selection
       // then everything is done already, and we do not need to handle it.
-      if (!this._handleNativeFocus) return;
+      if (this.skipNextFocusEvent) return;
+      // console.log('... handling native focus on surface', this.__id__);
       if (this.isFocused){
         this.textPropertyManager.removeSelection();
         this.rerenderDomSelection();
       } else {
-        // console.log('...Handling native focus on surface', this.__id__);
         var sel = this.surfaceSelection.getSelection();
         this.setFocused(true);
         this.setSelection(sel);
