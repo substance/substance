@@ -7,7 +7,7 @@ var _ = require('../basics/helpers');
 var Clipboard = require('./surface/clipboard');
 var Registry = require('../basics/registry');
 var Logger = require ('../basics/logger');
-
+var Selection = require('../document/selection');
 var defaultCommands = require('./commands');
 
 var Controller = function(doc, config) {
@@ -118,14 +118,21 @@ Controller.Prototype = function() {
   // Get selection of currently focused surface
   this.getSelection = function() {
     var surface = this.getSurface();
-    return surface.getSelection();
+    if (surface) {
+      return surface.getSelection();  
+    } else {
+      return Selection.nullSelection;
+    }
+    
   };
 
   // Get containerId for currently focused surface
   // Returns undefined for non-container-editors
   this.getContainerId = function() {
     var surface = this.getSurface();
-    return surface.getContainerId();
+    if (surface) {
+      return surface.getContainerId();  
+    }
   };
 
   this.createSurface = function(editor, options) {
