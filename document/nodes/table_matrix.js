@@ -254,7 +254,7 @@ TableMatrix.Prototype = function() {
   /**
    * Provides a tuple with number of rows and columns.
    *
-   * @return {Number[2]} (number of rows) X (number of columns)
+   * @return {Number} (number of rows) X (number of columns)
    */
   this.getSize = function () {
     var matrix = this.getMatrix();
