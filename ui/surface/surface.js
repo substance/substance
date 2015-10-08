@@ -8,6 +8,8 @@ var SurfaceSelection = require('./surface_selection');
 var Document = require('../../document');
 var Selection = Document.Selection;
 var TextPropertyManager = require('../../document/text_property_manager');
+var Registry = require('../../basics/registry');
+
 
 var __id__ = 0;
 
@@ -89,30 +91,54 @@ function Surface(controller, editor, options) {
     this.enableContentEditable = true;
   }
 
+  this._initializeCommandRegistry(options.commands);
   this.controller.registerSurface(this);
   /*jshint eqnull:false */
 }
 
 Surface.Prototype = function() {
 
+  this._initializeCommandRegistry = function(commands) {
+    var commandRegistry = new Registry();
+    _.each(commands, function(CommandClass) {
+      var cmd = new CommandClass(this);
+      commandRegistry.add(CommandClass.static.name, cmd);
+    }, this);
+    this.commandRegistry = commandRegistry;
+  };
+
+  this.getCommand = function(commandName) {
+    return this.commandRegistry.get(commandName);
+  };
+
+  this.executeCommand = function(commandName) {
+    var cmd = this.getCommand(commandName);
+    if (!cmd) {
+      console.warn('command', commandName, 'not registered on controller');
+      return;
+    }
+
+    // Run command
+    var info = cmd.execute();
+    if (info) {
+      this.emit('command:executed', info, commandName, cmd);
+      // TODO: We want to replace this with a more specific, scoped event
+      // but for that we need an improved EventEmitter API
+    } else if (info === undefined) {
+      console.warn('command ', commandName, 'must return either an info object or true when handled or false when not handled');
+    }
+  };
+
   // Used by TextTool
   // TODO: Filter by enabled commands for this Surface
   this.getTextCommands = function() {
     var textCommands = {};
-    this.controller.commandRegistry.each(function(cmd) {
+    this.commandRegistry.each(function(cmd) {
       if (cmd.constructor.static.textTypeName) {
         textCommands[cmd.constructor.static.name] = cmd;
       }
     });
     return textCommands;
-  };
-
-  this.getCommand = function(commandName) {
-    return this.controller.getCommand(commandName);
-  };
-
-  this.executeCommand = function(commandName) {
-    return this.controller.executeCommand(commandName);
   };
 
   this.getName = function() {

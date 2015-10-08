@@ -1,7 +1,7 @@
 'use strict';
 
 var OO = require('../../basics/oo');
-var Command = require('./command');
+var SurfaceCommand = require('./surface_command');
 var helpers = require('../../document/helpers');
 
 // Annotation transformations
@@ -12,7 +12,7 @@ var truncateAnnotation = require('../../document/transformations/truncate_annota
 var deleteAnnotation = require('../../document/transformations/delete_annotation');
 
 var ToggleAnnotationCommand = function(controller) {
-  Command.call(this, controller);
+  SurfaceCommand.call(this, controller);
 };
 
 ToggleAnnotationCommand.Prototype = function() {
@@ -190,6 +190,6 @@ ToggleAnnotationCommand.Prototype = function() {
 
 };
 
-OO.inherit(ToggleAnnotationCommand, Command);
+OO.inherit(ToggleAnnotationCommand, SurfaceCommand);
 
 module.exports = ToggleAnnotationCommand;

@@ -22,10 +22,18 @@ AnnotationTool.Prototype = function() {
     return this.computeState(sel);
   };
 
+  this.willReceiveProps = function() {
+    console.log('receiving new props...');
+  };
+
+  this.willUpdateState = function(newState) {
+    console.log('receiving new state...', newState);
+  };
+
   this.computeState = function(sel) {
     var command = this.getCommand();
     if (!command) {
-      console.log('Command', this.constructor.static.command, 'not registered on Surface');
+      // console.log('Command', this.constructor.static.command, 'not registered on Surface');
       return this.setDisabled();
     }
     var annos = command.getAnnotationsForSelection();
@@ -73,6 +81,8 @@ AnnotationTool.Prototype = function() {
   // --------------------------
 
   this.render = function() {
+    console.log('render', this.constructor.static.command, this.state);
+    debugger;
     var title = this.props.title || _.capitalize(this.getName());
 
     if (this.state.mode) {

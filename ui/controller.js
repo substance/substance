@@ -78,10 +78,9 @@ Controller.Prototype = function() {
     // Run command
     var info = cmd.execute();
     if (info) {
-      this.emit('command:executed', info, commandName);
+      this.emit('command:executed', info, commandName, cmd);
       // TODO: We want to replace this with a more specific, scoped event
       // but for that we need an improved EventEmitter API
-      // this.emit('command:executed', 'commandName', info, commandName);
     } else if (info === undefined) {
       console.warn('command ', commandName, 'must return either an info object or true when handled or false when not handled');
     }
@@ -111,8 +110,13 @@ Controller.Prototype = function() {
     if (name) {
       return this.surfaces[name];
     } else {
+      // console.warn('Deprecated: Use getFocusedSurface. Always provide a name for getSurface otherwise.');
       return this.focusedSurface || this.surfaces[this.config.defaultSurface];
     }
+  };
+
+  this.getFocusedSurface = function() {
+    return this.getSurface();
   };
 
   // Get selection of currently focused surface
@@ -123,7 +127,6 @@ Controller.Prototype = function() {
     } else {
       return Selection.nullSelection;
     }
-    
   };
 
   // Get containerId for currently focused surface
@@ -165,10 +168,6 @@ Controller.Prototype = function() {
     this.focusedSurface = surface;
   };
 
-  this.getFocusedSurface = function() {
-    console.warn('.getFocusedSurface is deprecated: Use .getSurface instead');
-    return this.getSurface();
-  };
 
   // For now just delegate to the current surface
   // TODO: We should use a document transaction here but attach all app-relevant

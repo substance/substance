@@ -28,6 +28,19 @@ function SurfaceTool() {
 
 SurfaceTool.Prototype = function() {
 
+  this.getCommand = function() {
+    var ctrl = this.getController();
+    var surface = ctrl.getFocusedSurface();
+    if (!surface) return;
+
+    var commandName = this.constructor.static.command;
+    if (commandName) {
+      return surface.getCommand(commandName);
+    } else {
+      throw new Error('Contract: AnnotationTool.static.command should be associated to a supported command.');
+    }
+  };
+
   /**
    * Unbinds event handler before getting unmounted.
    *
@@ -97,6 +110,11 @@ SurfaceTool.Prototype = function() {
       return;
     }
     this.performAction();
+  };
+
+  this.performAction = function() {
+    var surface = this.getSurface();
+    surface.executeCommand(this.constructor.static.command);
   };
 
   this.render = function() {

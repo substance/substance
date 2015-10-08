@@ -49,7 +49,6 @@ Writer.Prototype = function() {
 
   this.willReceiveProps = function(newProps) {
     if (this.props.doc && newProps.doc !== this.props.doc) {
-      console.log('got new props(doc) clearing the whole thing');
       this._dispose();
       this.empty();
       this._initialize(newProps);
@@ -64,10 +63,12 @@ Writer.Prototype = function() {
       // HACK: until we have moved commands into surface scope
       defaultSurface: 'main',
       components: this.config.components,
-      commands: this.config.commands,
+      // Init controller commands like undo/redo/save
+      commands: this.config.commands.controller,
       // Pass custom save handling to controller
       onSave: props.onSave
     });
+
     // Register event handlers
     // -----------------
     doc.connect(this, {
@@ -89,6 +90,7 @@ Writer.Prototype = function() {
 
   this.getChildContext = function() {
     return {
+      config: this.config,
       controller: this.controller,
       componentRegistry: this.controller.componentRegistry
     };
@@ -107,6 +109,10 @@ Writer.Prototype = function() {
     // no-op, should be overridden by custom writer
   };
 
+  this.handleStateUpdate = function() {
+    // no-op, should be overridden by custom writer
+  };
+
   // If no name is provided focused surface is returned
   this.getSurface = function(name) {
     return this.controller.getSurface(name);
@@ -114,10 +120,6 @@ Writer.Prototype = function() {
 
   this.willUpdateState = function(newState) {
     this.handleStateUpdate(newState);
-  };
-
-  this.handleStateUpdate = function() {
-    // no-op, should be overridden by custom writer
   };
 
   this.getDocument = function() {
