@@ -153,7 +153,21 @@ _inherit =  function(clazz, parentClazz) {
  * @instance
  * @param clazz {Constructor} class constructor
  * @param parentClazz {Constructor} parent constructor
+ * @example
+ * 
+ * var OO = require('substance/basics/oo');
+ * var Parent = function() {};
+ * Parent.Prototype = function() {
+ *   this.foo = function() { return 'foo'; } 
+ * }
+ * var Child = function() {
+ *   Parent.apply(this, arguments);
+ * }
+ * OO.inherit(Child, Parent);
+ * 
+ * 
  */
+
 OO.inherit =  function(clazz, parentClazz) {
   _inherit(clazz, parentClazz);
   if (clazz.static._afterClassInitHook) {
