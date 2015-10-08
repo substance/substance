@@ -5,6 +5,7 @@ var Surface = require('./surface/surface');
 var EventEmitter = require('../basics/event_emitter');
 var _ = require('../basics/helpers');
 var Clipboard = require('./surface/clipboard');
+var ToolManager = require('./tool_manager');
 var Registry = require('../basics/registry');
 var Logger = require ('../basics/logger');
 var Selection = require('../document/selection');
@@ -30,6 +31,8 @@ var Controller = function(doc, config) {
   // Initialize clipboard
   this.clipboard = new Clipboard(this, doc.getClipboardImporter(), doc.getClipboardExporter());
 
+  this.toolManager = new ToolManager(this);
+
   doc.connect(this, {
     'document:changed': this.onDocumentChanged,
     'transaction:started': this.onTransactionStarted
@@ -41,6 +44,10 @@ var Controller = function(doc, config) {
 };
 
 Controller.Prototype = function() {
+
+  this.getToolManager = function() {
+    return this.toolManager;
+  };
 
   this._initializeComponentRegistry = function() {
     var componentRegistry = new Registry();
@@ -170,8 +177,7 @@ Controller.Prototype = function() {
 
 
   // For now just delegate to the current surface
-  // TODO: We should use a document transaction here but attach all app-relevant
-  // information (e.g. app state)
+  // TODO: remove!
   this.transaction = function() {
     var surface = this.getSurface();
     if (!surface) {

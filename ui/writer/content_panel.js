@@ -60,7 +60,6 @@ ContentPanel.Prototype = function() {
     return $$(ContentContainerClass, {
       doc: doc,
       node: containerNode,
-      commands: this.context.config.commands[this.props.containerId]
     }).ref("contentEditor");
   };
 

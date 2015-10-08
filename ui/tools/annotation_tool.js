@@ -13,76 +13,25 @@ var _ = require('../../basics/helpers');
  */
 
 function AnnotationTool() {
-  SurfaceTool.apply(this, arguments);  
+  SurfaceTool.apply(this, arguments);
+
+  this.context.toolManager.registerTool(this);
 }
 
 AnnotationTool.Prototype = function() {
   this.getInitialState = function() {
-    var sel = this.context.controller.getSelection();
-    return this.computeState(sel);
+    var state = this.context.toolManager.getCommandState(this);
+    return state;
   };
 
-  this.willReceiveProps = function() {
-    console.log('receiving new props...');
-  };
-
-  this.willUpdateState = function(newState) {
-    console.log('receiving new state...', newState);
-  };
-
-  this.computeState = function(sel) {
-    var command = this.getCommand();
-    if (!command) {
-      // console.log('Command', this.constructor.static.command, 'not registered on Surface');
-      return this.setDisabled();
-    }
-    var annos = command.getAnnotationsForSelection();
-
-    var newState = {
-      disabled: false,
-      active: false,
-      mode: null
-    };
-
-    // We can skip all checking if a disabled condition is met
-    // E.g. we don't allow toggling of property annotations when current
-    // selection is a container selection
-    if (command.isDisabled(annos, sel)) {
-      newState.disabled = true;
-    } else if (command.canCreate(annos, sel)) {
-      newState.mode = "create";
-    } else if (command.canFuse(annos, sel)) {
-      newState.mode = "fusion";
-    } else if (command.canTruncate(annos, sel)) {
-      newState.active = true;
-      newState.mode = "truncate";
-    } else if (command.canExpand(annos, sel)) {
-      newState.mode = "expand";
-    } else if (command.canEdit(annos, sel)) {
-      newState.mode = "edit";
-      newState.annotationId = annos[0].id;
-      newState.active = true;
-    } else if (command.canDelete(annos, sel)) {
-      newState.active = true;
-      newState.mode = "delete";
-    } else {
-      newState.disabled = true;
-    }
-    return newState;
-  };
-
-  // When update is called we can be sure the Surface is active
-  this.update = function(sel) {
-    var newState = this.computeState(sel);
-    this.setState(newState);
+  this.dispose = function() {
+    this.context.toolManager.unregisterTool(this);
   };
 
   // UI-specific
   // --------------------------
 
   this.render = function() {
-    console.log('render', this.constructor.static.command, this.state);
-    debugger;
     var title = this.props.title || _.capitalize(this.getName());
 
     if (this.state.mode) {

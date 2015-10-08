@@ -10,7 +10,7 @@ var SurfaceCommand = function(surface) {
 SurfaceCommand.Prototype = function() {
 
   this.getSurface = function() {
-    return this.getSurface();
+    return this.surface;
   };
 
   this.getSelection = function() {

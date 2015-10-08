@@ -20,10 +20,10 @@ function SurfaceTool() {
   // immediately leads to a close of the prompt. We will observe tool performance
   // propagating each selection:changed event immediately.
   // We could also throttle
-  var ctrl = this.getController();
-  ctrl.connect(this, {
-    'selection:changed': this.update
-  });
+  // var ctrl = this.getController();
+  // ctrl.connect(this, {
+  //   'selection:changed': this.update
+  // });
 }
 
 SurfaceTool.Prototype = function() {
@@ -63,10 +63,10 @@ SurfaceTool.Prototype = function() {
    * @public
    */
 
-  this.update = function(sel, surface) {
-    /* jshint unused:false*/
-    throw new Error('Must be defined by your tool implementation');
-  };
+  // this.update = function(sel, surface) {
+  //   /* jshint unused:false*/
+  //   throw new Error('Must be defined by your tool implementation');
+  // };
 
   /**
    * Return the currently focused surface

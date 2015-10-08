@@ -90,6 +90,7 @@ ToggleAnnotationCommand.Prototype = function() {
 
   // Execute command and trigger transformations
   this.execute = function() {
+
     var annos = this.getAnnotationsForSelection();
     var sel = this.getSelection();
 
@@ -110,6 +111,43 @@ ToggleAnnotationCommand.Prototype = function() {
     } else {
       console.warn('ToggleAnnotation.execute: Case not handled.');
     }
+  };
+
+  this.getCommandState = function() {
+    var sel = this.getSelection();
+    var annos = this.getAnnotationsForSelection();
+
+    var newState = {
+      disabled: false,
+      active: false,
+      mode: null
+    };
+
+    // We can skip all checking if a disabled condition is met
+    // E.g. we don't allow toggling of property annotations when current
+    // selection is a container selection
+    if (this.isDisabled(annos, sel)) {
+      newState.disabled = true;
+    } else if (this.canCreate(annos, sel)) {
+      newState.mode = "create";
+    } else if (this.canFuse(annos, sel)) {
+      newState.mode = "fusion";
+    } else if (this.canTruncate(annos, sel)) {
+      newState.active = true;
+      newState.mode = "truncate";
+    } else if (this.canExpand(annos, sel)) {
+      newState.mode = "expand";
+    } else if (this.canEdit(annos, sel)) {
+      newState.mode = "edit";
+      newState.annotationId = annos[0].id;
+      newState.active = true;
+    } else if (this.canDelete(annos, sel)) {
+      newState.active = true;
+      newState.mode = "delete";
+    } else {
+      newState.disabled = true;
+    }
+    return newState;
   };
 
   // Helper to trigger an annotation transformation

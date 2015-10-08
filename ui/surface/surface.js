@@ -91,7 +91,7 @@ function Surface(controller, editor, options) {
     this.enableContentEditable = true;
   }
 
-  this._initializeCommandRegistry(options.commands);
+  this._initializeCommandRegistry(options.commands);  
   this.controller.registerSurface(this);
   /*jshint eqnull:false */
 }
@@ -368,9 +368,9 @@ Surface.Prototype = function() {
     // Undo/Redo: cmd+z, cmd+shift+z
     else if (this.undoEnabled && e.keyCode === 90 && (e.metaKey||e.ctrlKey)) {
       if (e.shiftKey) {
-        this.executeCommand('redo');
+        this.controller.executeCommand('redo');
       } else {
-        this.executeCommand('undo');
+        this.controller.executeCommand('undo');
       }
       handled = true;
     }

@@ -92,7 +92,8 @@ Writer.Prototype = function() {
     return {
       config: this.config,
       controller: this.controller,
-      componentRegistry: this.controller.componentRegistry
+      componentRegistry: this.controller.componentRegistry,
+      toolManager: this.controller.toolManager
     };
   };
 
