@@ -28,5 +28,5 @@ node_modules
 .lock-wscript
 
 dist
-doc
+dist/doc
 test/tmp

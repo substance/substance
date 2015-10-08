@@ -9,7 +9,8 @@
   "main": "index.js",
   "scripts": {
     "test": "gulp build-test && gulp test",
-    "karma": "./node_modules/.bin/karma start"
+    "karma": "./node_modules/.bin/karma start",
+    "doc": "./node_modules/.bin/jsdoc -r -c .jsdoc -d ./dist/doc ./data ./basics doc/index.md"
   },
   "author": "",
   "license": "MIT",
@@ -31,6 +32,7 @@
     "gulp-uglify": "^1.2.0",
     "gulp-util": "^3.0.4",
     "gulp-yuidoc": "^0.1.2",
+    "jsdoc": "^3.3.3",
     "karma": "^0.13.10",
     "karma-chrome-launcher": "^0.1.12",
     "karma-commonjs": "oliver----/karma-commonjs#patched",

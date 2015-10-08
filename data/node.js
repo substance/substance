@@ -8,19 +8,15 @@ var EventEmitter = require('../basics/event_emitter');
 /**
  * Base node implemention.
  *
- * @class Data.Node
+ * @class Node
  * @extends EventEmitter
- * @constructor
  * @param {Object} properties
- * @module Data
+ *
+ * @memberof module:Data
  */
 function Node( properties ) {
   EventEmitter.call(this);
 
-  /**
-   * The internal storage for properties.
-   * @property properties {Object}
-   */
   this.properties = _.extend({}, this.getDefaultProperties(), properties);
   this.properties.type = this.constructor.static.name;
   this.properties.id = this.properties.id || uuid(this.properties.type);
@@ -34,6 +30,8 @@ Node.Prototype = function() {
    * The node's schema.
    *
    * @property properties {Object}
+   *
+   * @memberof module:Data.Node.prototype
    */
   this.properties = {
     type: 'string',
@@ -47,6 +45,8 @@ Node.Prototype = function() {
    *
    * @method toJSON
    * @return Plain object.
+   *
+   * @memberof module:Data.Node.prototype
    */
   this.toJSON = function() {
     return this.properties;
@@ -59,6 +59,8 @@ Node.Prototype = function() {
    *
    * @method getDefaultProperties
    * @return An object containing default properties.
+   *
+   * @memberof module:Data.Node.prototype
    */
   this.getDefaultProperties = function() {};
 
@@ -68,6 +70,8 @@ Node.Prototype = function() {
    * @method isInstanceOf
    * @param {String} typeName
    * @return true if the node has a parent with given type, false otherwise.
+   *
+   * @memberof module:Data.Node.prototype
    */
   this.isInstanceOf = function(typeName) {
     return Node.isInstanceOf(this.constructor, typeName);
@@ -78,6 +82,8 @@ Node.Prototype = function() {
    *
    * @method getTypeNames
    * @return An array of type names.
+   *
+   * @memberof module:Data.Node.prototype
    */
   this.getTypeNames = function() {
     var typeNames = [];
@@ -95,6 +101,8 @@ Node.Prototype = function() {
    * @method getPropertyType
    * @param {String} propertyName
    * @return The property's type.
+   *
+   * @memberof module:Data.Node.prototype
    */
   this.getPropertyType = function(propertyName) {
     var schema = this.constructor.static.schema;
@@ -109,6 +117,8 @@ OO.inherit(Node, EventEmitter);
  * Symbolic name for this model class. Must be set to a unique string by every subclass.
  * @static
  * @property name {String}
+ *
+ * @memberof module:Data.Node
  */
 Node.static.name = "node";
 
@@ -117,6 +127,8 @@ Node.static.name = "node";
  *
  * @property readOnlyProperties {Array}
  * @static
+ *
+ * @memberof module:Data.Node
  */
 // FIXME: this is not working. We can't rely on static attributes
 // for defining node properties, as they will be defined when inherited
@@ -129,6 +141,8 @@ Node.static.readOnlyProperties = ['type', 'id'];
  * @method isInstanceOf
  * @static
  * @private
+ *
+ * @memberof module:Data.Node
  */
  Node.isInstanceOf = function(NodeClass, typeName) {
   var staticData = NodeClass.static;

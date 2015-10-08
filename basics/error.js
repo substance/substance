@@ -7,8 +7,8 @@ var OO = require('./oo');
  *
  * @class SubstanceError
  * @extends Error
- * @constructor
- * @module Basics
+ *
+ * @memberof module:Basics
  */
 function SubstanceError() {
   Error.apply(this, arguments);

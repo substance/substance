@@ -6,8 +6,7 @@ var oo = require('./oo');
  * Simple registry implementation.
  *
  * @class Registry
- * @constructor
- * @module Basics
+ * @memberof module:Basics
  */
 function Registry() {
   this.entries = {};
@@ -22,6 +21,7 @@ Registry.Prototype = function() {
    *
    * @param {String} name
    * @method contains
+   * @memberof module:Basics.Registry.prototype
    */
   this.contains = function(name) {
     return !!this.entries[name];
@@ -33,6 +33,7 @@ Registry.Prototype = function() {
    * @param {String} name
    * @param {Object} entry
    * @method add
+   * @memberof module:Basics.Registry.prototype
    */
   this.add = function(name, entry) {
     if (this.contains(name)) {
@@ -47,6 +48,7 @@ Registry.Prototype = function() {
    *
    * @param {String} name
    * @method remove
+   * @memberof module:Basics.Registry.prototype
    */
   this.remove = function(name) {
     var pos = this.names.indexOf(name);
@@ -56,6 +58,10 @@ Registry.Prototype = function() {
     delete this.entries[name];
   };
 
+  /**
+   * @method clear
+   * @memberof module:Basics.Registry.prototype
+   */
   this.clear = function() {
     this.names = [];
     this.entries = [];
@@ -67,6 +73,7 @@ Registry.Prototype = function() {
    * @param {String} name
    * @return The registered entry
    * @method get
+   * @memberof module:Basics.Registry.prototype
    */
   this.get = function(name) {
     var res = this.entries[name];
@@ -79,6 +86,7 @@ Registry.Prototype = function() {
    * @param {Function} callback with signature function(entry, name)
    * @param {Object} execution context
    * @method each
+   * @memberof module:Basics.Registry.prototype
    */
   this.each = function(callback, ctx) {
     for (var i = 0; i < this.names.length; i++) {

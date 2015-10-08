@@ -8,8 +8,7 @@ var OO = require("./oo");
  * Inspired by VisualEditor's EventEmitter class.
  *
  * @class EventEmitter
- * @constructor
- * @module Basics
+ * @memberof module:Basics
  */
 function EventEmitter() {
   this.__events__ = {};
@@ -45,6 +44,8 @@ EventEmitter.Prototype = function() {
    * @param {String} event
    * @param {Function} method
    * @param {Object} context
+   * @private
+   * @memberof module:Basics.EventEmitter.prototype
    */
   this._on = function ( event, method, context, priority) {
     var bindings;
@@ -72,6 +73,8 @@ EventEmitter.Prototype = function() {
    * @param {Function} method
    * @param {Object} context
    * @chainable
+   * @private
+   * @memberof module:Basics.EventEmitter.prototype
    */
   this._off = function ( event, method, context ) {
     var i, bindings;
@@ -104,6 +107,13 @@ EventEmitter.Prototype = function() {
     return this;
   };
 
+  /**
+   * Internal implementation of connect.
+   *
+   * @method _connect
+   * @private
+   * @memberof module:Basics.EventEmitter.prototype
+   */
   this._connect = function (obj, methods, options) {
     var priority = 0;
     if (arguments.length === 3) {
@@ -117,6 +127,13 @@ EventEmitter.Prototype = function() {
     return this;
   };
 
+  /**
+   * Internal implementation of disconnect.
+   *
+   * @method _disconnect
+   * @private
+   * @memberof module:Basics.EventEmitter.prototype
+   */
   this._disconnect = function(context) {
     var i, event, bindings;
     // Remove all connections to the context
@@ -138,6 +155,7 @@ EventEmitter.Prototype = function() {
    * Emit an event.
    *
    * @method emit
+   * @memberof module:Basics.EventEmitter.prototype
    * @param {String} event
    * @param ...arguments
    * @return true if a listener was notified, false otherwise.
@@ -172,6 +190,7 @@ EventEmitter.Prototype = function() {
    * priority earlier.
    *
    * @method emit
+   * @memberof module:Basics.EventEmitter.prototype
    * @param {Object} listener
    * @param {Object} hash with event as keys, and handler functions as values.
    * @param {Number} hash with `priority` as ordering hint (default is 0).
@@ -186,6 +205,7 @@ EventEmitter.Prototype = function() {
    * Disconnect a listener (all bindings).
    *
    * @method disconnect
+   * @memberof module:Basics.EventEmitter.prototype
    * @param {Object} listener
    * @chainable
    */
@@ -193,6 +213,15 @@ EventEmitter.Prototype = function() {
     return this._disconnect(listener);
   };
 
+  /**
+   * Subscribe a listener to a event.
+   *
+   * @param {String} event
+   * @param {Function} method
+   * @param {Object} context
+   * @param {Object} options
+   * @memberof module:Basics.EventEmitter.prototype
+   */
   this.on = function(event, method, context, options) {
     var priority = 0;
     if (arguments.length === 4) {
@@ -202,6 +231,15 @@ EventEmitter.Prototype = function() {
     this.__events__[event].sort(byPriorityDescending);
   };
 
+  /**
+   * Unsubscrive a listener from an event.
+   *
+   * @param {String} event
+   * @param {Function} method
+   * @param {Object} context
+   * @param {Object} options
+   * @memberof module:Basics.EventEmitter.prototype
+   */
   this.off = function(event, method, context) {
     /* jshint unused:false */
     // TODO: we could add sugar to be able to be able to just use

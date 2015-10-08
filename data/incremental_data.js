@@ -12,12 +12,12 @@ var TextOperation = Operator.TextOperation;
 /**
  * Incremental data storage implemention.
  *
- * @class Data.Incremental
+ * @class IncrementalData
  * @extends Data
- * @constructor
  * @param {Schema} schema
  * @param {Object} [options]
- * @module Data
+ *
+ * @memberof module:Data
  */
 var IncrementalData = function(schema, options) {
   IncrementalData.super.call(this, schema, options);
@@ -31,6 +31,8 @@ IncrementalData.Prototype = function() {
    * @method create
    * @param {Object} nodeData
    * @return The applied operation.
+   *
+   * @memberof module:Data.IncrementalData.prototype
    */
   this.create = function(nodeData) {
     var op = ObjectOperation.Create([nodeData.id], nodeData);
@@ -42,8 +44,11 @@ IncrementalData.Prototype = function() {
    * Delete a node.
    *
    * @method delete
+   * @instance
    * @param {String} nodeId
    * @return The applied operation.
+   *
+   * @memberof module:Data.IncrementalData.prototype
    */
   this.delete = function(nodeId) {
     var op = null;
@@ -71,6 +76,8 @@ IncrementalData.Prototype = function() {
    * @param {Array} path
    * @param {Object} diff
    * @return The applied operation.
+   *
+   * @memberof module:Data.IncrementalData.prototype
    */
   this.update = function(path, diff) {
     var diffOp = this._getDiffOp(path, diff);
@@ -86,6 +93,8 @@ IncrementalData.Prototype = function() {
    * @param {Array} path
    * @param {Object} newValue
    * @return The applied operation.
+   *
+   * @memberof module:Data.IncrementalData.prototype
    */
   this.set = function(path, newValue) {
     var oldValue = this.get(path);
@@ -99,6 +108,8 @@ IncrementalData.Prototype = function() {
    *
    * @method apply
    * @param {ObjectOperation} op
+   *
+   * @memberof module:Data.IncrementalData.prototype
    */
   this.apply = function(op) {
     if (op.type === ObjectOperation.NOP) return;

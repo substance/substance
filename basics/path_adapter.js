@@ -7,8 +7,7 @@ var oo = require('./oo');
  * An adapter to access an object via path.
  *
  * @class PathAdapter
- * @module Basics
- * @constructor
+ * @memberof module:Basics
  */
 function PathAdapter(obj) {
   if (obj) {

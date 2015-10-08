@@ -3,9 +3,9 @@
 /**
  * Mostly taken from lodash.
  *
- * @class Helpers
+ * @module Basics/Helpers
  * @static
- * @module Basics
+ * @memberof module:Basics
  */
 var Helpers = {};
 

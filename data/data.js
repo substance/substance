@@ -10,10 +10,10 @@ var EventEmitter = Substance.EventEmitter;
  *
  * @class Data
  * @extends EventEmitter
- * @constructor
  * @param {Schema} schema
  * @param {Object} [options]
- * @module Data
+ *
+ * @memberof module:Data
  */
 function Data(schema, options) {
   EventEmitter.call(this);
@@ -36,6 +36,8 @@ Data.Prototype = function() {
    * @method get
    * @param {String|Array} path node id or path to property.
    * @return a Node instance, a value or undefined if not found.
+   *
+   * @memberof module:Data.Data.prototype
    */
   this.get = function(path) {
     if (!path) {
@@ -49,6 +51,8 @@ Data.Prototype = function() {
    *
    * @method getNodes
    * @return The internal node storage.
+   *
+   * @memberof module:Data.Data.prototype
    */
   this.getNodes = function() {
     return this.nodes;
@@ -59,6 +63,8 @@ Data.Prototype = function() {
    *
    * @method create
    * @return {Node} The created node.
+   *
+   * @memberof module:Data.Data.prototype
    */
   this.create = function(nodeData) {
     var node = this.schema.getNodeFactory().create(nodeData.type, nodeData);
@@ -87,6 +93,8 @@ Data.Prototype = function() {
    * @method delete
    * @param {String} nodeId
    * @return {Node} The deleted node.
+   *
+   * @memberof module:Data.Data.prototype
    */
   this.delete = function(nodeId) {
     var node = this.nodes[nodeId];
@@ -107,6 +115,8 @@ Data.Prototype = function() {
    * @param {Array} property path
    * @param {Object} newValue
    * @return {Node} The deleted node.
+   *
+   * @memberof module:Data.Data.prototype
    */
   this.set = function(path, newValue) {
     var node = this.get(path[0]);
@@ -120,6 +130,15 @@ Data.Prototype = function() {
     return oldValue;
   };
 
+  /**
+   * Update a property incrementally.
+   *
+   * @method update
+   * @param {Array} property path
+   * @param {Object} diff
+   *
+   * @memberof module:Data.Data.prototype
+   */
   // TODO: do we really want this incremental implementation here?
   this.update = function(path, diff) {
     var oldValue = this.nodes.get(path);
@@ -175,6 +194,8 @@ Data.Prototype = function() {
    *
    * @method toJSON
    * @return {Object} Plain content.
+   *
+   * @memberof module:Data.Data.prototype
    */
   this.toJSON = function() {
     return {
@@ -188,6 +209,8 @@ Data.Prototype = function() {
    *
    * @method contains
    * @return {Boolean} `true` if a node with id exists, `false` otherwise.
+   *
+   * @memberof module:Data.Data.prototype
    */
   this.contains = function(id) {
     return (!!this.nodes[id]);
@@ -197,6 +220,8 @@ Data.Prototype = function() {
    * Clear nodes.
    *
    * @method reset
+   *
+   * @memberof module:Data.Data.prototype
    */
   this.reset = function() {
     this.nodes = new PathAdapter();
@@ -208,6 +233,8 @@ Data.Prototype = function() {
    * @method addIndex
    * @param {String} name
    * @param {NodeIndex} index
+   *
+   * @memberof module:Data.Data.prototype
    */
   this.addIndex = function(name, index) {
     if (this.indexes[name]) {
@@ -224,6 +251,8 @@ Data.Prototype = function() {
    * @method getIndex
    * @param {String} name
    * @return The node index.
+   *
+   * @memberof module:Data.Data.prototype
    */
   this.getIndex = function(name) {
     return this.indexes[name];

@@ -10,8 +10,7 @@ var Registry = require('./registry');
  *
  * @class Factory
  * @extends Registry
- * @constructor
- * @module Basics
+ * @memberof module:Basics
  */
 function Factory() {
   Factory.super.call(this);
@@ -25,6 +24,7 @@ Factory.Prototype = function() {
    * @param {String} name
    * @return A new instance.
    * @method create
+   * @memberof module:Basics.Factory.prototype
    */
   this.create = function ( name ) {
     var clazz = this.get(name);
