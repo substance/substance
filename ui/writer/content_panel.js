@@ -59,7 +59,7 @@ ContentPanel.Prototype = function() {
 
     return $$(ContentContainerClass, {
       doc: doc,
-      node: containerNode
+      node: containerNode,
     }).ref("contentEditor");
   };
 

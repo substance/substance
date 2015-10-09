@@ -166,6 +166,6 @@ Scrollbar.Prototype = function() {
 };
 
 OO.inherit(Scrollbar, Component);
-Scrollbar.overlayMinHeight = 1;
+Scrollbar.overlayMinHeight = 2;
 
 module.exports = Scrollbar;
