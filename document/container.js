@@ -74,15 +74,18 @@ Container.Prototype = function() {
   };
 
   this.getComponents = function() {
+    console.error('DEPRECATED: this API will be removed.');
     return this.components;
   };
 
   this.getComponent = function(path) {
+    console.error('DEPRECATED: this API will be removed.');
     var comp = this.byPath.get(path);
     return comp;
   };
 
   this.getComponentsForRange = function(range) {
+    console.error('DEPRECATED: this API will be removed.');
     var comps = [];
     var startComp = this.byPath.get(range.start.path);
     var endComp = this.byPath.get(range.end.path);
@@ -96,18 +99,22 @@ Container.Prototype = function() {
   };
 
   this.getComponentAt = function(idx) {
+    console.error('DEPRECATED: this API will be removed.');
     return this.components[idx];
   };
 
   this.getFirstComponent = function() {
+    console.error('DEPRECATED: this API will be removed.');
     return this.components[0];
   };
 
   this.getLastComponent = function() {
+    console.error('DEPRECATED: this API will be removed.');
     return _.last(this.components);
   };
 
   this.getComponentsForNode = function(nodeId) {
+    console.error('DEPRECATED: this API will be removed.');
     var nodeComponent = this.nodeComponents[nodeId];
     if (nodeComponent) {
       return nodeComponent.components.slice(0);
@@ -115,6 +122,7 @@ Container.Prototype = function() {
   };
 
   this.getNodeForComponentPath = function(path) {
+    console.error('DEPRECATED: this API will be removed.');
     var comp = this.getComponent(path);
     if (!comp) return null;
     var nodeId = comp.rootId;
