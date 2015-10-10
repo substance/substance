@@ -1,8 +1,9 @@
 var Surface = require('../../../ui/surface');
 
-function StubSurface(surfaceId, doc, sel) {
+function StubSurface(doc, sel, containerId) {
 
-  this.name = surfaceId;
+  this.containerId = containerId || 'main';
+  this.name = 'test_surface';
   this.selection = sel;
 
   this.getName = function() {
@@ -19,6 +20,10 @@ function StubSurface(surfaceId, doc, sel) {
 
   this.setSelection = function(sel) {
     this.selection = sel;
+  };
+
+  this.getContainerId = function() {
+    return this.containerId;
   };
 
   this.transaction = Surface.prototype.transaction;

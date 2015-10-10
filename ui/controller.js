@@ -1,36 +1,36 @@
 'use strict';
 
 var OO = require('../basics/oo');
-var Surface = require('./surface/surface');
-var EventEmitter = require('../basics/event_emitter');
 var _ = require('../basics/helpers');
+var Component = require('./component');
+
 var Clipboard = require('./surface/clipboard');
+var ToolManager = require('./tool_manager');
 var Registry = require('../basics/registry');
 var Logger = require ('../basics/logger');
 var Selection = require('../document/selection');
-var defaultCommands = require('./commands');
 
-var Controller = function(doc, config) {
-  EventEmitter.call(this);
 
-  if (!doc) throw new Error('Controller requires a Substance document instance');
+function Controller() {
+  Component.apply(this, arguments);
+ 
+  if (!this.props.doc) throw new Error('Controller requires a Substance document instance');
 
-  this.doc = doc;
-  this.config = config;
   this.surfaces = {};
   this.focusedSurface = null;
   this.stack = [];
-
   this.logger = new Logger();
 
   // Initialize registries
-  this._initializeComponentRegistry();
-  this._initializeCommandRegistry();
+  this._initializeComponentRegistry(this.props.config.components);
+  this._initializeCommandRegistry(this.props.config.commands.controller);
 
   // Initialize clipboard
-  this.clipboard = new Clipboard(this, doc.getClipboardImporter(), doc.getClipboardExporter());
+  this.clipboard = new Clipboard(this, this.props.doc.getClipboardImporter(), this.props.doc.getClipboardExporter());
 
-  doc.connect(this, {
+  this.toolManager = new ToolManager(this);
+
+  this.props.doc.connect(this, {
     'document:changed': this.onDocumentChanged,
     'transaction:started': this.onTransactionStarted
   }, {
@@ -38,21 +38,32 @@ var Controller = function(doc, config) {
     // when we render the selection
     priority: -10
   });
-};
+}
 
 Controller.Prototype = function() {
 
-  this._initializeComponentRegistry = function() {
+  this.getChildContext = function() {
+    return {
+      config: this.props.config,
+      controller: this,
+      componentRegistry: this.componentRegistry,
+      toolManager: this.toolManager
+    };
+  };
+
+  this.getToolManager = function() {
+    return this.toolManager;
+  };
+
+  this._initializeComponentRegistry = function(components) {
     var componentRegistry = new Registry();
-    _.each(this.config.components, function(ComponentClass, name) {
+    _.each(components, function(ComponentClass, name) {
       componentRegistry.add(name, ComponentClass);
     });
     this.componentRegistry = componentRegistry;
   };
 
-  this._initializeCommandRegistry = function() {
-    var commands = this.config.commands || defaultCommands;
-
+  this._initializeCommandRegistry = function(commands) {
     var commandRegistry = new Registry();
     _.each(commands, function(CommandClass) {
       var cmd = new CommandClass(this);
@@ -78,10 +89,9 @@ Controller.Prototype = function() {
     // Run command
     var info = cmd.execute();
     if (info) {
-      this.emit('command:executed', info, commandName);
+      this.emit('command:executed', info, commandName, cmd);
       // TODO: We want to replace this with a more specific, scoped event
       // but for that we need an improved EventEmitter API
-      // this.emit('command:executed', 'commandName', info, commandName);
     } else if (info === undefined) {
       console.warn('command ', commandName, 'must return either an info object or true when handled or false when not handled');
     }
@@ -91,19 +101,12 @@ Controller.Prototype = function() {
     return this.logger;
   };
 
-  // Component API
-  // ----------------
-
-  this.getComponent = function(name) {
-    return this.componentRegistry.get(name);
-  };
-
   this.getClipboard = function() {
     return this.clipboard;
   };
 
   this.getDocument = function() {
-    return this.doc;
+    return this.props.doc;
   };
 
   // If no name is provided, the focused surface is returned
@@ -111,8 +114,13 @@ Controller.Prototype = function() {
     if (name) {
       return this.surfaces[name];
     } else {
-      return this.focusedSurface || this.surfaces[this.config.defaultSurface];
+      // console.warn('Deprecated: Use getFocusedSurface. Always provide a name for getSurface otherwise.');
+      return this.focusedSurface || this.surfaces[this.props.config.defaultSurface];
     }
+  };
+
+  this.getFocusedSurface = function() {
+    return this.getSurface();
   };
 
   // Get selection of currently focused surface
@@ -123,7 +131,6 @@ Controller.Prototype = function() {
     } else {
       return Selection.nullSelection;
     }
-    
   };
 
   // Get containerId for currently focused surface
@@ -135,13 +142,10 @@ Controller.Prototype = function() {
     }
   };
 
-  this.createSurface = function(editor, options) {
-    return new Surface(this, editor, options);
-  };
-
   this.registerSurface = function(surface) {
+
     surface.connect(this, {
-      'selection:changed': this.onSelectionChanged
+      'selection:changed': this._onSelectionChanged
     });
     this.surfaces[surface.getName()] = surface;
   };
@@ -165,14 +169,9 @@ Controller.Prototype = function() {
     this.focusedSurface = surface;
   };
 
-  this.getFocusedSurface = function() {
-    console.warn('.getFocusedSurface is deprecated: Use .getSurface instead');
-    return this.getSurface();
-  };
 
   // For now just delegate to the current surface
-  // TODO: We should use a document transaction here but attach all app-relevant
-  // information (e.g. app state)
+  // TODO: remove!
   this.transaction = function() {
     var surface = this.getSurface();
     if (!surface) {
@@ -220,7 +219,7 @@ Controller.Prototype = function() {
     logger.info('Unsaved changes');
   };
 
-  this.onSelectionChanged = function(sel, surface) {
+  this._onSelectionChanged = function(sel, surface) {
     // Skip if the selection has not really changed
     // if (sel.equals(this.__prevSelection)) {
     //   return;
@@ -257,10 +256,10 @@ Controller.Prototype = function() {
       logger.info('Saving ...');
       doc.__isSaving = true;
       // Pass saving logic to the user defined callback if available
-      if (this.config.onSave) {
+      if (this.props.config.onSave) {
         // TODO: calculate changes since last save
         var changes = [];
-        this.config.onSave(doc, changes, function(err) {
+        this.props.config.onSave(doc, changes, function(err) {
           doc.__isSaving = false;
           if (err) {
             logger.error(err.message || err.toString());
@@ -281,8 +280,8 @@ Controller.Prototype = function() {
     this.surfaces = {};
     this.clipboard = null;
   };
+
 };
 
-OO.inherit(Controller, EventEmitter);
-
+OO.inherit(Controller, Component);
 module.exports = Controller;

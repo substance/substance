@@ -22,16 +22,6 @@ Tool.Prototype = function() {
     }
   };
 
-  this.getCommand = function() {
-    var ctrl = this.getController();
-    var commandName = this.constructor.static.command;
-    if (commandName) {
-      return ctrl.getCommand(commandName);
-    } else {
-      throw new Error('Contract: AnnotationTool.static.command should be associated to a supported command.');
-    }
-  };
-
   this.isEnabled = function() {
     return !this.state.disabled;
   };

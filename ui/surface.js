@@ -1,48 +1,48 @@
 'use strict';
 
-var $ = require('../../basics/jquery');
-var _ = require('../../basics/helpers');
-var OO = require('../../basics/oo');
-var Substance = require('../../basics');
-var SurfaceSelection = require('./surface_selection');
-var Document = require('../../document');
+var $ = require('../basics/jquery');
+var _ = require('../basics/helpers');
+var OO = require('../basics/oo');
+var Substance = require('../basics');
+var SurfaceSelection = require('./surface/surface_selection');
+var Document = require('../document');
 var Selection = Document.Selection;
-var TextPropertyManager = require('../../document/text_property_manager');
+var Component = require('./component');
 
-var __id__ = 0;
+var Registry = require('../basics/registry');
 
-function Surface(controller, editor, options) {
-  Substance.EventEmitter.call(this);
+function Surface() {
+  Component.apply(this, arguments);
 
+  var controller = this.context.controller;
+  var doc = this.props.doc;
+  
   if (!controller) {
-    throw new Error('Illegal argument: controller is required. was ' + controller);
+    throw new Error('Surface needs a controller');
   }
 
-  var doc = controller.getDocument();
+  if (!doc) {
+    throw new Error('No doc provided');
+  }
 
-  options = options || {};
+  if (!this.props.name) {
+    throw new Error('No name provided');
+  }
 
-  this.__id__ = __id__++;
-  this.name = options.name || this.__id__;
-
+  this.name = this.props.name;
+  this.doc = doc;
   this.controller = controller;
-
-  if (editor.isContainerEditor()) {
-    this.textPropertyManager = new TextPropertyManager(doc, editor.getContainerId());
-  } else {
-    this.textPropertyManager = new TextPropertyManager(doc);
-  }
 
   this.selection = Document.nullSelection;
 
   // this.element must be set via surface.attach(element)
   this.element = null;
   this.$element = null;
-  this.editor = editor;
+  // this.editor = editor;
 
   this.surfaceSelection = null;
 
-  this.logger = options.logger || window.console;
+  // this.logger = options.logger || window.console;
 
   this.$ = $;
   this.$window = this.$(window);
@@ -80,39 +80,77 @@ function Surface(controller, editor, options) {
   this.undoEnabled = true;
 
   /*jshint eqnull:true */
-  if (options.undoEnabled != null) {
-    this.undoEnabled = options.undoEnabled;
-  }
-  if (options.contentEditable != null) {
-    this.enableContentEditable = options.contentEditable;
-  } else {
-    this.enableContentEditable = true;
-  }
+  // if (options.undoEnabled != null) {
+  //   this.undoEnabled = options.undoEnabled;
+  // }
+  // if (options.contentEditable != null) {
+  //   this.enableContentEditable = options.contentEditable;
+  // } else {
+  //   this.enableContentEditable = true;
+  // }
 
-  this.controller.registerSurface(this);
+  this._initializeCommandRegistry(this.props.commands);  
+  controller.registerSurface(this);
   /*jshint eqnull:false */
 }
 
 Surface.Prototype = function() {
 
+  this.didMount = function() {
+    this.attach(this.el);
+  };
+
+  this.dispose = function() {
+    this.detach();
+  };
+
+  this.getChildContext = function() {
+    return {
+      surface: this
+    };
+  };
+
+  this._initializeCommandRegistry = function(commands) {
+    var commandRegistry = new Registry();
+    _.each(commands, function(CommandClass) {
+      var cmd = new CommandClass(this);
+      commandRegistry.add(CommandClass.static.name, cmd);
+    }, this);
+    this.commandRegistry = commandRegistry;
+  };
+
+  this.getCommand = function(commandName) {
+    return this.commandRegistry.get(commandName);
+  };
+
+  this.executeCommand = function(commandName) {
+    var cmd = this.getCommand(commandName);
+    if (!cmd) {
+      console.warn('command', commandName, 'not registered on controller');
+      return;
+    }
+
+    // Run command
+    var info = cmd.execute();
+    if (info) {
+      this.emit('command:executed', info, commandName, cmd);
+      // TODO: We want to replace this with a more specific, scoped event
+      // but for that we need an improved EventEmitter API
+    } else if (info === undefined) {
+      console.warn('command ', commandName, 'must return either an info object or true when handled or false when not handled');
+    }
+  };
+
   // Used by TextTool
   // TODO: Filter by enabled commands for this Surface
   this.getTextCommands = function() {
     var textCommands = {};
-    this.controller.commandRegistry.each(function(cmd) {
+    this.commandRegistry.each(function(cmd) {
       if (cmd.constructor.static.textTypeName) {
         textCommands[cmd.constructor.static.name] = cmd;
       }
     });
     return textCommands;
-  };
-
-  this.getCommand = function(commandName) {
-    return this.controller.getCommand(commandName);
-  };
-
-  this.executeCommand = function(commandName) {
-    return this.controller.executeCommand(commandName);
   };
 
   this.getName = function() {
@@ -145,7 +183,7 @@ Surface.Prototype = function() {
   };
 
   this.getDocument = function() {
-    return this.controller.getDocument();
+    return this.props.doc;
   };
 
   this.dispose = function() {
@@ -342,9 +380,9 @@ Surface.Prototype = function() {
     // Undo/Redo: cmd+z, cmd+shift+z
     else if (this.undoEnabled && e.keyCode === 90 && (e.metaKey||e.ctrlKey)) {
       if (e.shiftKey) {
-        this.executeCommand('redo');
+        this.controller.executeCommand('redo');
       } else {
-        this.executeCommand('undo');
+        this.controller.executeCommand('undo');
       }
       handled = true;
     }
@@ -788,7 +826,7 @@ Surface.Prototype = function() {
   };
 };
 
-OO.inherit(Surface, Substance.EventEmitter);
+OO.inherit(Surface, Component);
 
 Surface.Keys =  {
   UNDEFINED: 0,
