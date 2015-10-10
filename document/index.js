@@ -1,5 +1,13 @@
 'use strict';
 
+/**
+ * Substance.Document
+ * ==================
+ *
+ * TODO: add more description here
+ *
+ * @module Document
+ */
 var Document = require('./document');
 
 Document.Schema = require('./document_schema');

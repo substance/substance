@@ -9,6 +9,13 @@ var ContainerSelection = require('./container_selection');
 var TableSelection = require('./table_selection');
 var docHelpers = require('./helpers');
 
+/**
+ * AbstractDocument
+ * ----------------
+ *
+ * @class AbstractDocument
+ * @memberof module:Document
+ */
 function AbstractDocument(schema) {
   Substance.EventEmitter.call(this);
   this.schema = schema;
