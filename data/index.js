@@ -7,7 +7,6 @@
  * support for OT based incremental manipulations, etc.
  *
  * @module Data
- * @main Data
  */
 
 var Data = require('./data');

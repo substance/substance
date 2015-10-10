@@ -1368,7 +1368,7 @@ Component._render = function(data, options) {
  * and then appended to the given element.
  * If the element is in the DOM, all components receive a 'didMount' event.
  *
- * @param {Component,VirtualComponent} component to be mounted
+ * @param {Component|VirtualComponent} component to be mounted
  * @param el a DOM or jQuery element
  * @return {Component} the mounted component
  */

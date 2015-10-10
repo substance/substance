@@ -7,9 +7,7 @@ var _ = require('./helpers');
  *
  * Inspired by VisualEditor's OO module.
  *
- * @class OO
- * @static
- * @module Basics
+ * @module Basics/OO
  */
 var OO = {};
 
@@ -102,8 +100,9 @@ var _initClass = function(clazz) {
 /**
  * Initialize a class.
  *
- * @param {Constructor} clazz
  * @method initClass
+ * @instance
+ * @param {Constructor} clazz
  */
 OO.initClass = function(clazz) {
   _initClass(clazz);
@@ -150,11 +149,25 @@ _inherit =  function(clazz, parentClazz) {
 /**
  * Inherit from a parent class.
  *
+ * @method inherit
+ * @instance
  * @param clazz {Constructor} class constructor
  * @param parentClazz {Constructor} parent constructor
- *
- * @method inherit
+ * @example
+ * 
+ * var OO = require('substance/basics/oo');
+ * var Parent = function() {};
+ * Parent.Prototype = function() {
+ *   this.foo = function() { return 'foo'; } 
+ * }
+ * var Child = function() {
+ *   Parent.apply(this, arguments);
+ * }
+ * OO.inherit(Child, Parent);
+ * 
+ * 
  */
+
 OO.inherit =  function(clazz, parentClazz) {
   _inherit(clazz, parentClazz);
   if (clazz.static._afterClassInitHook) {
@@ -163,9 +176,10 @@ OO.inherit =  function(clazz, parentClazz) {
 };
 
 /**
+ * @method mixin
+ * @instance
  * @param clazz {Constructor} class constructor
  * @param mixinClazz {Constructor} parent constructor
- * @method mixin
  */
 OO.mixin = function(clazz, mixinClazz) {
   var key;

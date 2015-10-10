@@ -7,10 +7,10 @@ var Factory = Substance.Factory;
 /**
  * Factory for Nodes.
  *
- * @class Data.NodeFactory
+ * @class NodeFactory
  * @extends Factory
- * @constructor
- * @module Data
+ *
+ * @memberof module:Data
  */
 function NodeFactory() {
   Factory.call(this);
@@ -22,6 +22,8 @@ NodeFactory.Prototype = function() {
    *
    * @method register
    * @param {Class} nodeClass
+   *
+   * @memberof module:Data.NodeFactory.prototype
    */
   this.register = function ( nodeClazz ) {
     var name = nodeClazz.static && nodeClazz.static.name;

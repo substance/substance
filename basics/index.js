@@ -8,13 +8,18 @@ var _ = require('./helpers');
  * A collection of helpers pulled together from different sources, such as lodash.
  *
  * @module Basics
- * @main Basics
  */
 var Basics = {};
 
 _.extend(Basics, require('./helpers'));
 _.extend(Basics, require('./oo'));
+
+/**
+ * @property {object} OO helper functions for object-oriented programming.
+ * @memberof module:Basics
+ */
 Basics.OO = require('./oo');
+
 Basics.PathAdapter = require('./path_adapter');
 Basics.EventEmitter = require('./event_emitter');
 Basics.Error = require('./error');

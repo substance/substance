@@ -9,15 +9,18 @@ var PathAdapter = Substance.PathAdapter;
  * Node indexes are first-class citizens in Substance.Data.
  * I.e., they are updated after each operation.
  *
- * @class Data.NodeIndex
- * @constructor
- * @module Data
+ * @class NodeIndex
+ *
+ * @memberof module:Data
  */
 var NodeIndex = function() {
   /**
    * Internal storage.
+   *
    * @property {PathAdapter} index
    * @private
+   *
+   * @instance module:Data.NodeIndex
    */
   this.index = new PathAdapter();
 };
@@ -29,6 +32,8 @@ NodeIndex.Prototype = function() {
    *
    * @method reset
    * @private
+   *
+   * @memberof module:Data.NodeIndex.prototype
    */
   this.reset = function(data) {
     this.index.clear();
@@ -48,6 +53,8 @@ NodeIndex.Prototype = function() {
    *
    * @property {String} property
    * @protected
+   *
+   * @memberof module:Data.NodeIndex.prototype
    */
   this.property = "id";
 
@@ -58,6 +65,8 @@ NodeIndex.Prototype = function() {
    *
    * @method select
    * @protected
+   *
+   * @memberof module:Data.NodeIndex.prototype
    */
   this.select = function(node) {
     if(!this.type) {
@@ -73,6 +82,8 @@ NodeIndex.Prototype = function() {
    * @method get
    * @param {Array} path
    * @return A node or an object with ids and nodes as values.
+   *
+   * @memberof module:Data.NodeIndex.prototype
    */
   // TODO: what is the correct return value. We have arrays at some places.
   this.get = function(path) {
@@ -86,6 +97,8 @@ NodeIndex.Prototype = function() {
    *
    * @method getAll
    * @return An object with ids as keys and nodes as values.
+   *
+   * @memberof module:Data.NodeIndex.prototype
    */
   // TODO: is that true?
   this.getAll = function() {
@@ -104,6 +117,8 @@ NodeIndex.Prototype = function() {
    * @method create
    * @param {Node} node
    * @protected
+   *
+   * @memberof module:Data.NodeIndex.prototype
    */
   this.create = function(node) {
     var values = node[this.property];
@@ -123,6 +138,8 @@ NodeIndex.Prototype = function() {
    * @method delete
    * @param {Node} node
    * @protected
+   *
+   * @memberof module:Data.NodeIndex.prototype
    */
   this.delete = function(node) {
     var values = node[this.property];
@@ -142,6 +159,8 @@ NodeIndex.Prototype = function() {
    * @method update
    * @param {Node} node
    * @protected
+   *
+   * @memberof module:Data.NodeIndex.prototype
    */
   this.update = function(node, path, newValue, oldValue) {
     if (!this.select(node) || path[1] !== this.property) return;
@@ -166,6 +185,8 @@ NodeIndex.Prototype = function() {
    *
    * @method clone
    * @return A cloned NodeIndex.
+   *
+   * @memberof module:Data.NodeIndex.prototype
    */
   this.clone = function() {
     var NodeIndexClass = this.constructor;
@@ -183,6 +204,8 @@ Substance.initClass( NodeIndex );
  * @param {Object} prototype
  * @static
  * @return A customized NodeIndex.
+ *
+ * @memberof module:Data.NodeIndex
  */
 NodeIndex.create = function(prototype) {
   var index = Substance.extend(new NodeIndex(), prototype);

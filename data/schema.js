@@ -9,28 +9,36 @@ var NodeFactory = require('./node_factory');
  * Data Schema.
  *
  * @class Data.Schema
- * @constructor
  * @param {String} name
  * @param {String} version
- * @module Data
+ *
+ * @memberof module:Data
  */
 function Schema(name, version) {
   /**
    * @property {String} name
+   * @memberof module:Data.Schema
+   * @instance
    */
   this.name = name;
   /**
    * @property {String} version
+   * @memberof module:Data.Schema
+   * @instance
    */
   this.version = version;
   /**
    * @property {NodeFactory} nodeFactory
    * @private
+   * @memberof module:Data.Schema
+   * @instance
    */
   this.nodeFactory = new NodeFactory();
   /**
    * @property {Array} _tocTypes all Node classes which have `Node.static.tocType = true`
    * @private
+   * @memberof module:Data.Schema
+   * @instance
    */
   this.tocTypes = [];
 
@@ -45,6 +53,8 @@ Schema.Prototype = function() {
    *
    * @method addNodes
    * @param {Array} nodes Array of Node classes
+   *
+   * @memberof module:Data.Schema.prototype
    */
   this.addNodes = function(nodes) {
     if (!nodes) return;
@@ -62,6 +72,8 @@ Schema.Prototype = function() {
    *
    * @method getNodeClass
    * @param {String} name
+   *
+   * @memberof module:Data.Schema.prototype
    */
   this.getNodeClass = function(name) {
     return this.nodeFactory.get(name);
@@ -73,6 +85,8 @@ Schema.Prototype = function() {
    * @method getNodeFactory
    * @return A NodeFactory instance.
    * @deprecated Use `this.createNode(type, data)` instead.
+   *
+   * @memberof module:Data.Schema.prototype
    */
   this.getNodeFactory = function() {
     return this.nodeFactory;
@@ -92,6 +106,8 @@ Schema.Prototype = function() {
    *
    * @method toJSON
    * @return A plain object describing the schema.
+   *
+   * @memberof module:Data.Schema.prototype
    */
   // TODO: what is this used for? IMO this is not necessary anymore
   this.toJSON = function() {
@@ -113,6 +129,8 @@ Schema.Prototype = function() {
    * @param {String} type
    * @param {Object} properties
    * @return A new Node instance.
+   *
+   * @memberof module:Data.Schema.prototype
    */
   this.createNode = function(type, properties) {
     var node = this.nodeFactory.create(type, properties);
@@ -127,6 +145,8 @@ Schema.Prototype = function() {
    * @method getBuiltIns
    * @protected
    * @return An array of Node classes.
+   *
+   * @memberof module:Data.Schema.prototype
    */
   this.getBuiltIns = function() {
     return [ Node ];
@@ -139,6 +159,8 @@ Schema.Prototype = function() {
    * @param {String} type
    * @param {String} parentType
    * @return True if type instanceof parentType.
+   *
+   * @memberof module:Data.Schema.prototype
    */
   this.isInstanceOf = function(type, parentType) {
     var NodeClass = this.getNodeClass(type);
@@ -156,6 +178,8 @@ Schema.Prototype = function() {
    * @method each
    * @param {Function} callback
    * @param {Object} context
+   *
+   * @memberof module:Data.Schema.prototype
    */
   this.each = function() {
     this.nodeFactory.each.apply(this.nodeFactory, arguments);
@@ -164,11 +188,19 @@ Schema.Prototype = function() {
   /**
    * @method getTocTypes
    * @return list of types that should appear in a TOC
+   *
+   * @memberof module:Data.Schema.prototype
    */
   this.getTocTypes = function() {
     return this.tocTypes;
   };
 
+  /**
+   * @method detDefaultTextType
+   * @return the name of the default textish node (e.g. 'paragraph')
+   *
+   * @memberof module:Data.Schema.prototype
+   */
   this.getDefaultTextType = function() {
     throw new Error('Schmema.prototype.getDefaultTextType() must be overridden.');
   };
