@@ -19,7 +19,6 @@ function StatusBar() {
 
   var ctrl = this.context.controller;
   var logger = ctrl.getLogger();
-
   logger.connect(this, {
     'messages:updated': this.handleStatusUpdate
   });

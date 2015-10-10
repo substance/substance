@@ -13,20 +13,22 @@ var $$ = Component.$$;
 
 function SurfaceTool() {
   Tool.apply(this, arguments);
-
-  // NOTE: We were doing this in a debounced way but that leads to edge cases.
-  // E.g. When toggling a new link, the tool state gets immediately updated
-  // to show the edit prompt, but afterwards the delayed selection:change event
-  // immediately leads to a close of the prompt. We will observe tool performance
-  // propagating each selection:changed event immediately.
-  // We could also throttle
-  var ctrl = this.getController();
-  ctrl.connect(this, {
-    'selection:changed': this.update
-  });
 }
 
 SurfaceTool.Prototype = function() {
+
+  this.getCommand = function() {
+    var ctrl = this.getController();
+    var surface = ctrl.getFocusedSurface();
+    if (!surface) return;
+
+    var commandName = this.constructor.static.command;
+    if (commandName) {
+      return surface.getCommand(commandName);
+    } else {
+      throw new Error('Contract: AnnotationTool.static.command should be associated to a supported command.');
+    }
+  };
 
   /**
    * Unbinds event handler before getting unmounted.
@@ -37,22 +39,6 @@ SurfaceTool.Prototype = function() {
   this.dispose = function() {
     var ctrl = this.getController();
     ctrl.disconnect(this);
-  };
-
-  /**
-   * Updates the tool state when the selection changed.
-   *
-   * This must be overwritten by the tool implementation, analyzing the
-   * selection and updating the tool state appropriately.
-   *
-   * @param {Selection} sel
-   * @param {Surface} surface
-   * @public
-   */
-
-  this.update = function(sel, surface) {
-    /* jshint unused:false*/
-    throw new Error('Must be defined by your tool implementation');
   };
 
   /**
@@ -97,6 +83,11 @@ SurfaceTool.Prototype = function() {
       return;
     }
     this.performAction();
+  };
+
+  this.performAction = function() {
+    var surface = this.getSurface();
+    surface.executeCommand(this.constructor.static.command);
   };
 
   this.render = function() {

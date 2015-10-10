@@ -3,7 +3,8 @@
 var containerAnnoSample = require('../../fixtures/container_anno_sample');
 var ToggleAnnotationCommand = require('../../../ui/commands/toggle_annotation');
 var docHelpers = require('../../../document/helpers');
-var StubController = require('../ui/stub_controller');
+
+var StubSurface = require('../ui/stub_surface');
 
 QUnit.module('Commands/toggleAnnotation');
 
@@ -72,8 +73,8 @@ QUnit.test("Property Annotation: Toggle on", function(assert) {
     endOffset: 6
   });
 
-  var ctrl = new StubController(doc, sel);
-  var cmd = new ToggleStrongCommand(ctrl);
+  var surface = new StubSurface(doc, sel);
+  var cmd = new ToggleStrongCommand(surface);
 
   // Execute against the provided selection context
 
@@ -99,8 +100,8 @@ QUnit.test("Property Annotation: Toggle off", function(assert) {
     endOffset: 7
   });
 
-  var ctrl = new StubController(doc, sel);
-  var cmd = new ToggleStrongCommand(ctrl);
+  var surface = new StubSurface(doc, sel);
+  var cmd = new ToggleStrongCommand(surface);
 
   // Execute against the provided selection context
   var res = cmd.execute();
@@ -122,8 +123,9 @@ QUnit.test("Container Annotation: Toggle on", function(assert) {
     endOffset: 3,
   });
 
-  var ctrl = new StubController(doc, sel);
-  var cmd = new ToggleContainerAnnoCommand(ctrl);
+
+  var surface = new StubSurface(doc, sel);
+  var cmd = new ToggleContainerAnnoCommand(surface);
 
   // Execute against the provided selection context
   var res = cmd.execute();
@@ -149,8 +151,8 @@ QUnit.test("Container Annotation: Toggle off", function(assert) {
     endOffset: 2,
   });
 
-  var ctrl = new StubController(doc, sel);
-  var cmd = new ToggleContainerAnnoCommand(ctrl);
+  var surface = new StubSurface(doc, sel);
+  var cmd = new ToggleContainerAnnoCommand(surface);
 
   // Execute against the provided selection context
   var res = cmd.execute();
@@ -187,8 +189,8 @@ QUnit.test("Container Annotation: Fuse annos", function(assert) {
     endOffset: 4,
   });
 
-  var ctrl = new StubController(doc, sel);
-  var cmd = new ToggleContainerAnnoCommand(ctrl);
+  var surface = new StubSurface(doc, sel);
+  var cmd = new ToggleContainerAnnoCommand(surface);
 
   // Execute against the provided selection context
 

@@ -3,16 +3,12 @@
 var OO = require('../../basics/oo');
 var Component = require('../component');
 var _ = require("../../basics/helpers");
-var EventEmitter = require('../../basics/event_emitter');
 var Controller = require('../../ui/controller');
 
 var $$ = Component.$$;
 
 function Writer() {
-  Component.apply(this, arguments);
-
-  // Mixin EventEmitter API
-  EventEmitter.call(this);
+  Controller.apply(this, arguments);
 
   this.handleApplicationKeyCombos = this.handleApplicationKeyCombos.bind(this);
 
@@ -30,13 +26,10 @@ function Writer() {
 
 Writer.Prototype = function() {
 
-  // Mixin EventEmitter API
-  _.extend(this, EventEmitter.prototype);
-
   this.didMount = function() {
     this.$el.on('keydown', this.handleApplicationKeyCombos);
     // Attach clipboard
-    var clipboard = this.controller.getClipboard();
+    var clipboard = this.getClipboard();
     clipboard.attach(this.$el[0]);
   };
 
@@ -49,7 +42,6 @@ Writer.Prototype = function() {
 
   this.willReceiveProps = function(newProps) {
     if (this.props.doc && newProps.doc !== this.props.doc) {
-      console.log('got new props(doc) clearing the whole thing');
       this._dispose();
       this.empty();
       this._initialize(newProps);
@@ -58,39 +50,31 @@ Writer.Prototype = function() {
   
   this._initialize = function(props) {
     var doc = props.doc;
-    this.config = props.config || this.config || {};
-    // Initialize controller
-    this.controller = new Controller(doc, {
-      // HACK: until we have moved commands into surface scope
-      defaultSurface: 'main',
-      components: this.config.components,
-      commands: this.config.commands,
-      // Pass custom save handling to controller
-      onSave: props.onSave
-    });
+
     // Register event handlers
     // -----------------
     doc.connect(this, {
       'document:changed': this.onDocumentChanged
     });
-    this.controller.connect(this, {
+    this.connect(this, {
       "selection:changed": this.onSelectionChanged
     });
   };
 
   this._dispose = function() {
     this.props.doc.disconnect(this);
-    var clipboard = this.controller.getClipboard();
+    var clipboard = this.getClipboard();
     clipboard.detach(this.$el[0]);
-    this.controller.disconnect(this);
-    this.controller.dispose();
-    this.controller = null;
+    this.disconnect(this);
+    this.dispose();
   };
 
   this.getChildContext = function() {
     return {
-      controller: this.controller,
-      componentRegistry: this.controller.componentRegistry
+      config: this.props.config,
+      controller: this,
+      componentRegistry: this.componentRegistry,
+      toolManager: this.toolManager
     };
   };
 
@@ -98,35 +82,16 @@ Writer.Prototype = function() {
     return this.props.doc;
   };
 
-  // Do we want to expose the controller publicly?
-  this.getController = function() {
-    return this.controller;
-  };
-
   this.onSelectionChanged = function(/*sel, surface*/) {
     // no-op, should be overridden by custom writer
-  };
-
-  // If no name is provided focused surface is returned
-  this.getSurface = function(name) {
-    return this.controller.getSurface(name);
-  };
-
-  this.willUpdateState = function(newState) {
-    this.handleStateUpdate(newState);
   };
 
   this.handleStateUpdate = function() {
     // no-op, should be overridden by custom writer
   };
 
-  this.getDocument = function() {
-    return this.props.doc;
-  };
-
-  // Delegate to controller
-  this.executeCommand = function(commandName) {
-    return this.controller.executeCommand(commandName);
+  this.willUpdateState = function(newState) {
+    this.handleStateUpdate(newState);
   };
 
   // Event handlers
@@ -183,7 +148,7 @@ Writer.Prototype = function() {
   };
 
   this.restoreSelection = function() {
-    var surface = this.controller.getSurface('body');
+    var surface = this.getSurface('body');
     surface.rerenderDomSelection();
   };
 
@@ -195,7 +160,7 @@ Writer.Prototype = function() {
   };
 
   this.getActivePanelElement = function() {
-    var ComponentClass = this.controller.getComponent(this.state.contextId);
+    var ComponentClass = this.componentRegistry.get(this.state.contextId);
     if (ComponentClass) {
       return $$(ComponentClass).setProps(this._panelPropsFromState(this.state));
     } else {
@@ -205,6 +170,6 @@ Writer.Prototype = function() {
 
 };
 
-OO.inherit(Writer, Component);
+OO.inherit(Writer, Controller);
 
 module.exports = Writer;

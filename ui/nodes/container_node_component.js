@@ -85,7 +85,8 @@ ContainerNodeComponent.Prototype = function() {
     var editor = this.props.editor;
     var options = {
       name: this.props.node.id,
-      logger: ctrl.getLogger()
+      logger: ctrl.getLogger(),
+      commands: this.props.commands
     };
 
     this.surface = new Surface(ctrl, editor, options);
@@ -103,8 +104,8 @@ ContainerNodeComponent.Prototype = function() {
   this._renderNode = function(nodeId) {
     var doc = this.props.doc;
     var node = doc.get(nodeId);
-    var ctrl = this.context.controller;
-    var ComponentClass = ctrl.getComponent(node.type);
+    var componentRegistry = this.context.componentRegistry;
+    var ComponentClass = componentRegistry.get(node.type);
     if (!ComponentClass) {
       console.error('Could not resolve a component for type: ' + node.type);
       ComponentClass = UnsupporedNode;

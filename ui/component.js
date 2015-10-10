@@ -4,6 +4,7 @@ var $ = require('../basics/jquery');
 var OO = require('../basics/oo');
 var _ = require('../basics/helpers');
 var I18n = require('./i18n');
+var EventEmitter = require('../basics/event_emitter');
 
 var __id__ = 0;
 var VirtualTextNode;
@@ -58,6 +59,8 @@ var _htmlParams;
  * which is typically done in the constructor.
  */
 function Component(parent, params) {
+  EventEmitter.call(this);
+
   if (!parent && parent !== "root") {
     throw new Error("Contract: every component needs to have a parent.");
   }
@@ -987,7 +990,7 @@ Component.Prototype = function ComponentPrototype() {
 
 };
 
-OO.initClass(Component);
+OO.inherit(Component, EventEmitter);
 
 /**
  * Adding a property which is providing an i18n service
