@@ -336,6 +336,26 @@ Container.Prototype = function() {
     return _.map(addresses, this.getPathForAddress, this);
   };
 
+  this.getNextPath = function(path) {
+    var address = this.getAddress(path);
+    var nextAddress = this.getNextAddress(address);
+    if (nextAddress) {
+      return this.getPath(nextAddress);
+    } else {
+      return null;
+    }
+  };
+
+  this.getPreviousPath = function(path) {
+    var address = this.getAddress(path);
+    var previousAddress = this.getPreviousAddress(address);
+    if (previousAddress) {
+      return this.getPath(previousAddress);
+    } else {
+      return null;
+    }
+  };
+
   this.getAddressesForNode = function(node) {
     var pos = this.getChildIndex(node);
     var first = [pos].concat(this._getFirstAddress(node));
