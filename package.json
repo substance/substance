@@ -10,7 +10,7 @@
   "scripts": {
     "test": "gulp build-test && gulp test",
     "karma": "./node_modules/.bin/karma start",
-    "doc": "./node_modules/.bin/jsdoc -r -c .jsdoc -d ./dist/doc ./data ./basics ./document doc/index.md"
+    "doc": "./node_modules/.bin/jsdoc -r -c .jsdoc -d ./dist/doc ./data ./basics ./document ./ui doc/index.md"
   },
   "author": "",
   "license": "MIT",

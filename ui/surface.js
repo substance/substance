@@ -11,12 +11,21 @@ var Component = require('./component');
 
 var Registry = require('../basics/registry');
 
+/**
+ * Surface
+ * -------
+ *
+ * TODO: add description
+ *
+ * @class Surface
+ * @memberof module:UI
+ */
 function Surface() {
   Component.apply(this, arguments);
 
   var controller = this.context.controller;
   var doc = this.props.doc;
-  
+
   if (!controller) {
     throw new Error('Surface needs a controller');
   }
@@ -89,7 +98,7 @@ function Surface() {
   //   this.enableContentEditable = true;
   // }
 
-  this._initializeCommandRegistry(this.props.commands);  
+  this._initializeCommandRegistry(this.props.commands);
   controller.registerSurface(this);
   /*jshint eqnull:false */
 }
