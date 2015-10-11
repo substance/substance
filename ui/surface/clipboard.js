@@ -110,16 +110,16 @@ Clipboard.Prototype = function() {
       var pasteContent = content.get('clipboard_content');
       // TODO: try to get rid of that here.
       // we need a document.toPlainText() for that
-      if (pasteContent.nodes.length > 0) {
-        var first = pasteContent.getFirstComponent();
-        var last = pasteContent.getLastComponent();
-        var lastLength = content.get(last.path).length;
+      if (pasteContent.length > 0) {
+        var firstPath = pasteContent.getFirstPath();
+        var lastPath = pasteContent.getLastPath();
+        var lastLength = content.get(lastPath).length;
         var sel = doc.createSelection({
           type: 'container',
           containerId: 'clipboard_content',
-          startPath: first.path,
+          startPath: firstPath,
           startOffset: 0,
-          endPath: last.path,
+          endPath: lastPath,
           endOffset: lastLength
         });
         plainText = content.getTextForSelection(sel);

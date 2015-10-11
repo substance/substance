@@ -284,7 +284,14 @@ Container.Prototype = function() {
   };
 
   this.getFirstAddress = function(topLevelNode) {
+    if (!topLevelNode) {
+      topLevelNode = this.getChildAt(0);
+    }
     var pos = this.getChildIndex(topLevelNode);
+    if (pos < 0) {
+      console.warn("Container.getLastAddress(): Illegal argument. Could not find node position.");
+      return null;
+    }
     return [pos].concat(this._getFirstAddress(topLevelNode));
   };
 
@@ -298,7 +305,14 @@ Container.Prototype = function() {
   };
 
   this.getLastAddress = function(topLevelNode) {
+    if (!topLevelNode) {
+      topLevelNode = this.getChildAt(this.length-1);
+    }
     var pos = this.getChildIndex(topLevelNode);
+    if (pos < 0) {
+      console.warn("Container.getLastAddress(): Illegal argument. Could not find node position.");
+      return null;
+    }
     return [pos].concat(this._getLastAddress(topLevelNode));
   };
 
