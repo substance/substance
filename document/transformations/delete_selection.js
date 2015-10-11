@@ -53,7 +53,6 @@ function _deleteContainerSelection(tx, args) {
   // apply deletion backwards so that we do not to recompute array positions
   var container = tx.get(containerId);
   var firstNodePos = container.getPosition(nodeSels[0].node.id);
-
   for (var idx = nodeSels.length - 1; idx >= 0; idx--) {
     nodeSel = nodeSels[idx];
     node = nodeSel.node;
@@ -83,7 +82,7 @@ function _deleteContainerSelection(tx, args) {
       if (!nodeSel.isFully) {
         args.selection = tx.createSelection({
           type: 'property',
-          path: nodeSel.components[0].path,
+          path: nodeSel.paths[0],
           startOffset: 0
         });
         break;
@@ -115,11 +114,11 @@ function _deleteContainerSelection(tx, args) {
     if (firstSel.isFully || lastSel.isFully) {
       // TODO: think about if we want to merge in those cases
     } else {
-      var secondComp = _.last(lastSel.components);
+      var secondPath = _.last(lastSel.paths);
       var tmp = merge(tx, _.extend({}, args, {
         selection: args.selection,
         containerId: containerId,
-        path: secondComp.path,
+        path: secondPath,
         direction: 'left'
       }));
       args.selection = tmp.selection;
@@ -148,12 +147,12 @@ function _deleteContainerSelection(tx, args) {
 function _deleteNodePartially(tx, args) {
   // Just go through all components and apply a property deletion
   var nodeSel = args.nodeSel;
-  var components = nodeSel.components;
-  var length = components.length;
+  var paths = nodeSel.paths;
+  var length = paths.length;
   for (var i = 0; i < length; i++) {
-    var comp = components[i];
+    var path = paths[i];
     var startOffset = 0;
-    var endOffset = tx.get(comp.path).length;
+    var endOffset = tx.get(path).length;
     if (i === 0) {
       startOffset = nodeSel.startOffset;
     }
@@ -163,7 +162,7 @@ function _deleteNodePartially(tx, args) {
     _deletePropertySelection(tx, _.extend({}, args, {
       selection: tx.createSelection({
         type: 'property',
-        path: comp.path,
+        path: path,
         startOffset: startOffset,
         endOffset: endOffset
       })
@@ -180,10 +179,11 @@ function _getNodeSelection(doc, containerSelection) {
   var groups = {};
   var range = containerSelection.getRange();
   var container = doc.get(containerSelection.containerId);
-  var components = container.getComponentsForRange(range);
-  for (var i = 0; i < components.length; i++) {
-    var comp = components[i];
-    var node = doc.get(comp.rootId);
+  var addresses = container.getAddressRange(container.getAddress(range.start.path),
+    container.getAddress(range.end.path));
+  for (var i = 0; i < addresses.length; i++) {
+    var address = addresses[i];
+    var node = container.getChildAt(address[0]);
     if (!node) {
       throw new Error('Illegal state: expecting a component to have a proper root node id set.');
     }
@@ -193,24 +193,28 @@ function _getNodeSelection(doc, containerSelection) {
       nodeGroup = {
         node: node,
         isFully: true,
-        components: []
+        addresses: [],
+        paths: []
       };
       groups[nodeId] = nodeGroup;
       result.push(nodeGroup);
     }
     nodeGroup = groups[nodeId];
-    nodeGroup.components.push(comp);
+    nodeGroup.addresses.push(address);
+    nodeGroup.paths.push(container.getPath(address));
   }
   // finally we analyze the first and last node-selection
   // if these
-  var startComp = components[0];
-  var endComp = components[components.length-1];
+  var startAddress = addresses[0];
+  var endAddress = addresses[addresses.length-1];
+  var previousAddress = container.getPreviousAddress(startAddress);
+  var nextAddress = container.getPreviousAddress(endAddress);
   var startNodeSel = result[0];
   var endNodeSel = result[result.length-1];
-  var startLen = doc.get(startComp.path).length;
-  var endLen = doc.get(endComp.path).length;
+  var startLen = doc.get(container.getPath(startAddress)).length;
+  var endLen = doc.get(container.getPath(endAddress)).length;
   if (range.start.offset > 0 ||
-    (startComp.hasPrevious() && startComp.getPrevious().rootId === startComp.rootId))
+    (previousAddress && previousAddress[0] === startAddress[0]))
   {
     startNodeSel.isFully = false;
     startNodeSel.startOffset = range.start.offset;
@@ -222,7 +226,7 @@ function _getNodeSelection(doc, containerSelection) {
   }
   if (result.length > 1 &&
       (range.end.offset < endLen ||
-        (endComp.hasNext() && endComp.getNext().rootId === endComp.rootId))
+        (nextAddress && nextAddress[0] === endAddress[0]))
      ) {
     endNodeSel.isFully = false;
     endNodeSel.startOffset = 0;
