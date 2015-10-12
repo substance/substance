@@ -1,11 +1,9 @@
+/* jshint latedef: false */
 'use strict';
 
 var _ = require('../../basics/helpers');
 var Annotations = require('../annotation_updates');
 
-/* jshint latedef: false */
-
-// low-level merge implementation
 var merge = function(tx, args) {
   var containerId = args.containerId;
   var path = args.path;
@@ -14,22 +12,28 @@ var merge = function(tx, args) {
     throw new Error('Insufficient arguments! mandatory fields: `containerId`, `path`, `direction`');
   }
   var container = tx.get(containerId);
-  var component = container.getComponent(path);
+  var address = container.getAddress(path);
   var tmp;
-  if (direction === 'right' && component.next) {
-    tmp = _mergeComponents(tx, _.extend({}, args, {
-      containerId: containerId,
-      first: component,
-      second: component.next
-    }));
-    args.selection = tmp.selection;
-  } else if (direction === 'left' && component.previous) {
-    tmp = _mergeComponents(tx, _.extend({}, args, {
-      containerId: containerId,
-      first: component.previous,
-      second: component
-    }));
-    args.selection = tmp.selection;
+  if (direction === 'right') {
+    var nextAddress = container.getNextAddress(address);
+    if (nextAddress) {
+      tmp = _mergeComponents(tx, _.extend({}, args, {
+        containerId: containerId,
+        firstAddress: address,
+        secondAddress: nextAddress
+      }));
+      args.selection = tmp.selection;
+    }
+  } else if (direction === 'left') {
+    var previousAdress = container.getPreviousAddress(address);
+    if (previousAdress) {
+      tmp = _mergeComponents(tx, _.extend({}, args, {
+        containerId: containerId,
+        firstAddress: previousAdress,
+        secondAddress: address
+      }));
+      args.selection = tmp.selection;
+    }
   } else {
     // No behavior defined for this merge
   }
@@ -37,10 +41,11 @@ var merge = function(tx, args) {
 };
 
 var _mergeComponents = function(tx, args) {
-  var firstComp = args.first;
-  var secondComp = args.second;
-  var firstNode = tx.get(firstComp.parentNode.id);
-  var secondNode = tx.get(secondComp.parentNode.id);
+  var container = tx.get(args.containerId);
+  var firstAddress = args.firstAddress;
+  var secondAddress = args.secondAddress;
+  var firstNode = container.getChildAt(firstAddress[0]);
+  var secondNode = container.getChildAt(secondAddress[0]);
   var behavior = args.editingBehavior;
   var mergeTrafo;
   // some components consist of multiple child components
@@ -50,8 +55,8 @@ var _mergeComponents = function(tx, args) {
       mergeTrafo = behavior.getComponentMerger(firstNode.type);
       return mergeTrafo.call(this, tx, _.extend({}, args, {
         node: firstNode,
-        first: firstComp,
-        second: secondComp
+        firstAddress: firstAddress,
+        secondAddress: secondAddress
       }));
     }
   } else {

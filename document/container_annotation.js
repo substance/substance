@@ -5,8 +5,6 @@ var OO = require('../basics/oo');
 var EventEmitter = require('../basics/event_emitter');
 var Node = require('./node');
 var Selection = require('./selection');
-var PathAdapter = require('../basics/path_adapter');
-
 
 // Container Annotation
 // ----------------
@@ -52,6 +50,22 @@ var ContainerAnnotation = Node.extend({
       this._endAnchor = new ContainerAnnotation.Anchor(this);
     }
     return this._endAnchor;
+  },
+
+  getStartPath: function() {
+    return this.startPath;
+  },
+
+  getEndPath: function() {
+    return this.endPath;
+  },
+
+  getStartOffset: function() {
+    return this.startOffset;
+  },
+
+  getEndOffset: function() {
+    return this.endOffset;
   },
 
   // Provide a selection which has the same range as this annotation.
@@ -114,66 +128,19 @@ var ContainerAnnotation = Node.extend({
 
   // FIXME: this implementation will not prune old fragments
   getFragments: function() {
-    if (!this._fragments) {
-      this._fragments = new PathAdapter();
-    }
     var fragments = [];
     var doc = this.getDocument();
-    var startAnchor = this.getStartAnchor();
-    var endAnchor = this.getEndAnchor();
     var container = doc.get(this.container);
-    var fragment;
-    // if start and end anchors are on the same property, then there is only one fragment
-    if (_.isEqual(startAnchor.path, endAnchor.path)) {
-      fragment = this._fragments.get(startAnchor.path);
-      if (!fragment) {
-        fragment = new ContainerAnnotation.Fragment(this, startAnchor.path, "property");
-        this._fragments.set(fragment.path, fragment);
-      } else if (fragment.mode !== "property") {
-        fragment.mode = "property";
+    var paths = container.getPathRange(this.startPath, this.endPath);
+    if (paths.length === 1) {
+      fragments.push(new ContainerAnnotation.Fragment(this, paths[0], "property"));
+    } else if (paths.length > 1) {
+      fragments.push(new ContainerAnnotation.Fragment(this, paths[0], "start"));
+      fragments.push(new ContainerAnnotation.Fragment(this, _.last(paths), "end"));
+      for (var i = 1; i < paths.length-1; i++) {
+        fragments.push(new ContainerAnnotation.Fragment(this, paths[i], "inner"));
       }
-      fragments.push(fragment);
     }
-    // otherwise create a trailing fragment for the property of the start anchor,
-    // full-spanning fragments for inner properties,
-    // and one for the property containing the end anchor.
-    else {
-      var text = doc.get(startAnchor.path);
-      var startComp = container.getComponent(startAnchor.path);
-      var endComp = container.getComponent(endAnchor.path);
-      if (!startComp || !endComp) {
-        throw new Error('Could not find components of AbstractContainerAnnotation');
-      }
-      fragment = this._fragments.get(startAnchor.path);
-      if (!fragment) {
-        fragment = new ContainerAnnotation.Fragment(this, startAnchor.path, "start");
-        this._fragments.set(fragment.path, fragment);
-      } else if (fragment.mode !== "start") {
-        fragment.mode = "start";
-      }
-      fragments.push(fragment);
-      for (var idx = startComp.idx + 1; idx < endComp.idx; idx++) {
-        var comp = container.getComponentAt(idx);
-        text = doc.get(comp.path);
-        fragment = this._fragments.get(comp.path);
-        if (!fragment) {
-          fragment = new ContainerAnnotation.Fragment(this, comp.path, "inner");
-          this._fragments.set(fragment.path, fragment);
-        } else if (fragment.mode !== "inner") {
-          fragment.mode = "inner";
-        }
-        fragments.push(fragment);
-      }
-      fragment = this._fragments.get(endAnchor.path);
-      if (!fragment) {
-        fragment = new ContainerAnnotation.Fragment(this, endAnchor.path, "end");
-        this._fragments.set(fragment.path, fragment);
-      } else if (fragment.mode !== "end") {
-        fragment.mode = "end";
-      }
-      fragments.push(fragment);
-    }
-    this.fragments = fragments;
     return fragments;
   },
 

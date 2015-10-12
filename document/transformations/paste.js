@@ -1,6 +1,7 @@
 'use strict';
 
 var _ = require('../../basics/helpers');
+var uuid = require('../../basics/uuid');
 var Annotations = require('../annotation_updates');
 var deleteSelection = require('./delete_selection');
 var insertText = require('./insert_text');
@@ -62,7 +63,7 @@ var _pasteAnnotatedText = function(tx, args) {
     data.startOffset += offset;
     data.endOffset += offset;
     if (tx.get(data.id)) {
-      data.id = _.uuid(data.type);
+      data.id = uuid(data.type);
     }
     tx.create(data);
   });
@@ -76,19 +77,20 @@ var _pasteDocument = function(tx, args) {
   var selection = args.selection;
   var container = tx.get(containerId);
 
+  var startPath = selection.start.path;
+  var startAddress = container.getAddress(startPath);
+  var nextAddress = container.getNextAddress(startAddress);
+  var insertPos;
   // Break, unless we are at the last character of a node,
   // then we can simply insert after the node
-  var startComp = container.getComponent(selection.start.path);
-  var startNodeComp = startComp.parentNode;
-  var insertPos;
-  if ( startComp === _.last(startNodeComp.components) &&
-    tx.get(startComp.path).length === selection.start.offset )
+  if ( (!nextAddress || nextAddress[0] !== startAddress[0]) &&
+    tx.get(startPath).length === selection.start.offset )
   {
-    insertPos = container.getPosition(selection.start.path[0]) + 1;
+    insertPos = startAddress[0] + 1;
   } else {
     var result = breakNode(tx, args);
     selection = result.selection;
-    insertPos = container.getPosition(selection.start.path[0]);
+    insertPos = startAddress[0];
   }
   if (insertPos < 0) {
     console.error('Could not find insertion position in ContainerNode.');
@@ -103,7 +105,7 @@ var _pasteDocument = function(tx, args) {
     var node = pasteDoc.get(nodeId).toJSON();
     // create a new id if the node exists already
     if (tx.get(nodeId)) {
-      node.id = _.uuid(node.type);
+      node.id = uuid(node.type);
     }
     tx.create(node);
     container.show(node.id, insertPos++);
@@ -118,7 +120,7 @@ var _pasteDocument = function(tx, args) {
         data.path[0] = node.id;
       }
       if (tx.get(data.id)) {
-        data.id = _.uuid(data.type);
+        data.id = uuid(data.type);
       }
       tx.create(data);
     }
@@ -127,27 +129,25 @@ var _pasteDocument = function(tx, args) {
   if (insertedNodes.length === 0) return args;
 
   // set a new selection
-  var lastId = _.last(insertedNodes).id;
-  var lastComp = _.last(container.getComponentsForNode(lastId));
-  var lastLength = tx.get(lastComp.path).length;
+  var lastPath = container.getLastPath(_.last(insertedNodes));
+  var lastLength = tx.get(lastPath).length;
   // This version turned out to be useful in some situations
   // as it hightlights the pasted content
   // we leave it here for debugging
   if (false) {
-    var firstId = insertedNodes[0].id;
-    var firstComp = container.getComponentsForNode(firstId)[0];
+    var firstPath = container.getFirstPath(insertedNodes[0]);
     selection = tx.createSelection({
       type: 'container',
       containerId: container.id,
-      startPath: firstComp.path,
+      startPath: firstPath,
       startOffset: 0,
-      endPath: lastComp.path,
+      endPath: lastPath,
       endOffset: lastLength
     });
   } else {
     selection = tx.createSelection({
       type: 'property',
-      path: lastComp.path,
+      path: lastPath,
       startOffset: lastLength
     });
   }

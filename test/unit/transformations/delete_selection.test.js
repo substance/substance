@@ -7,7 +7,7 @@ var deleteSelection = Document.Transformations.deleteSelection;
 
 QUnit.module('Transformations/deleteSelection');
 
-QUnit.test("deleting a property selection", function(assert) {
+QUnit.test("Deleting a property selection", function(assert) {
   var doc = sample1();
   var sel = doc.createSelection({
     type: 'property',
@@ -21,7 +21,7 @@ QUnit.test("deleting a property selection", function(assert) {
   assert.equal(args.selection.start.offset, 10, 'Selection should be collapsed to the left');
 });
 
-QUnit.test("deleting a property selection before annotation", function(assert) {
+QUnit.test("Deleting a property selection before annotation", function(assert) {
   var doc = sample1();
   var sel = doc.createSelection({
     type: 'property',
@@ -38,7 +38,7 @@ QUnit.test("deleting a property selection before annotation", function(assert) {
   assert.equal(anno.endOffset, oldEndOffset-4, 'Annotation end should be shifted left.');
 });
 
-QUnit.test("deleting a property selection overlapping annotation start", function(assert) {
+QUnit.test("Deleting a property selection overlapping annotation start", function(assert) {
   var doc = sample1();
   var sel = doc.createSelection({
     type: 'property',
@@ -53,7 +53,7 @@ QUnit.test("deleting a property selection overlapping annotation start", functio
   assert.equal(anno.endOffset, 15, 'Annotation end should be shifted left.');
 });
 
-QUnit.test("deleting a property selection overlapping annotation end", function(assert) {
+QUnit.test("Deleting a property selection overlapping annotation end", function(assert) {
   var doc = sample1();
   var sel = doc.createSelection({
     type: 'property',
@@ -68,7 +68,7 @@ QUnit.test("deleting a property selection overlapping annotation end", function(
   assert.equal(anno.endOffset, 20, 'Annotation end should be shifted left.');
 });
 
-QUnit.test("deleting a container selection", function(assert) {
+QUnit.test("Deleting a container selection", function(assert) {
   var doc = sample1();
   var sel = doc.createSelection({
     type: 'container',
@@ -90,19 +90,66 @@ QUnit.test("deleting a container selection", function(assert) {
   assert.deepEqual([anno.startOffset, anno.endOffset], [13, 23], 'Annotation should have been placed correctly.');
 });
 
-// QUnit.test("deleting the full document", function(assert) {
-//   var doc = sample1();
-//   var sel = doc.createSelection({
-//     type: 'container',
-//     containerId: 'main',
-//     startPath: ['h1', 'content'],
-//     startOffset: 0,
-//     endPath: ['p3', 'content'],
-//     endOffset: 11
-//   });
-//   var args = { selection: sel, containerId: 'main' };
-//   var out = deleteSelection(doc, args);
-// });
+QUnit.test("Deleting all", function(assert) {
+  var doc = sample1();
+  var sel = doc.createSelection({
+    type: 'container',
+    containerId: 'main',
+    startPath: ['h1', 'content'],
+    startOffset: 0,
+    endPath: ['p3', 'content'],
+    endOffset: 11
+  });
+  var args = { selection: sel, containerId: 'main' };
+  var out = deleteSelection(doc, args);
+  // there should be an empty paragraph now
+  var container = doc.get('main');
+  assert.equal(container.nodes.length, 1, "There should be one empty paragraph");
+  var first = container.getChildAt(0);
+  var defaultTextType = doc.getSchema().getDefaultTextType();
+  assert.equal(first.type, defaultTextType, "Node should be a default text node");
+  var path = out.selection.getPath();
+  var address = container.getAddress(path);
+  assert.ok(out.selection.isCollapsed(), "Selection should be collapsed (Cursor).");
+  assert.deepEqual(address, [0,0], "Cursor should be in empty text node.");
+  assert.equal(out.selection.start.offset, 0, "Cursor should be at first position.");
+});
+
+QUnit.test("Deleting partially", function(assert) {
+  var doc = sample1();
+  var structuredNode;
+  doc.transaction(function(tx) {
+    structuredNode = tx.create({
+      id: "sn1",
+      type: "structured-node",
+      title: "0123456789",
+      body: "0123456789",
+      caption: "0123456789"
+    });
+    tx.get('main').show(structuredNode.id, 1);
+  });
+  var sel = doc.createSelection({
+    type: 'container',
+    containerId: 'main',
+    startPath: ['h1', 'content'],
+    startOffset: 0,
+    endPath: [structuredNode.id, 'body'],
+    endOffset: 5
+  });
+  var args = { selection: sel, containerId: 'main' };
+  var out = deleteSelection(doc, args);
+  var container = doc.get('main');
+  var first = container.getChildAt(0);
+  assert.equal(first.id, structuredNode.id, "First node should have been deleted.");
+  assert.equal(first.title, "", "Node's title should have been deleted.");
+  assert.equal(first.body, "56789", "Node's body should have been truncated.");
+  // Check selection
+  var path = out.selection.getPath();
+  var address = container.getAddress(path);
+  assert.ok(out.selection.isCollapsed(), "Selection should be collapsed (Cursor).");
+  assert.deepEqual(address, [0,0], "Cursor should be in empty text node.");
+  assert.equal(out.selection.start.offset, 0, "Cursor should be at first position.");
+});
 
 QUnit.test("Edge case: delete container selection spaning multiple nodes containing container annotations", function(assert) {
   // the annotation spans over three nodes

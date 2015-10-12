@@ -146,6 +146,8 @@ Document.Prototype = function() {
     try {
       // time = Date.now();
       var result = transformation(tx, beforeState);
+      // being robust to transformation not returning a result
+      if (!result) result = {};
       // console.log('Executing the transformation took', Date.now() - time);
       var afterState = {};
       // only keys that are in the beforeState can be in the afterState

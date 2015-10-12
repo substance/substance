@@ -56,68 +56,84 @@ var _copyPropertySelection = function(doc, selection) {
   return copy;
 };
 
+// TODO: copying nested nodes is not straight-forward,
+// as it is not clear if the node is valid to be created just partially
+// Basically this needs to be implemented for each nested node.
+// The default implementation ignores partially selected nested nodes.
 var _copyContainerSelection = function(doc, selection) {
   var copy = doc.newInstance();
   copy._setForClipboard(true);
   var annotationIndex = doc.getIndex('annotations');
   var container = doc.get(selection.containerId);
-  var startComp = container.getComponent(selection.start.path);
-  var endComp = container.getComponent(selection.end.path);
+  // create a new container
   var containerNode = copy.create({
     type: 'container',
     id: copySelection.CLIPBOARD_CONTAINER_ID,
     nodes: []
   });
-  // 1. Copy nodes and annotations.
-  var i, comp;
+  // copy nodes and annotations.
+  var i, node;
   var created = {};
-  for (i = startComp.getIndex(); i <= endComp.getIndex(); i++) {
-    comp = container.getComponentAt(i);
-    var nodeId = comp.parentNode.id;
-    var node = doc.get(nodeId);
+  var startAddress = container.getAddress(selection.start.path);
+  var endAddress = container.getAddress(selection.end.path);
+  for (i = startAddress[0]; i <= endAddress[0]; i++) {
+    node = container.getChildAt(i);
+    var nodeId = node.id;
+    // skip created nodes
     if (!created[nodeId]) {
       created[nodeId] = copy.create(node.toJSON());
       containerNode.show(nodeId);
     }
-    var annotations = annotationIndex.get(comp.path);
-    for (var j = 0; j < annotations.length; j++) {
-      copy.create(_.deepclone(annotations[j].toJSON()));
+    // nested nodes should provide a custom implementation
+    if (node.hasChildren()) {
+      // TODO: call a customized implementation for nested nodes
+      // and continue, to skip the default implementation
+    }
+    var paths = container.getPathsForNode(node);
+    for (var j = 0; j < paths.length; j++) {
+      var annotations = annotationIndex.get(paths[j]);
+      for (var k = 0; k < annotations.length; k++) {
+        copy.create(_.deepclone(annotations[k].toJSON()));
+      }
     }
   }
   // 2. Truncate properties according to the selection.
   // TODO: we need a more sophisticated concept when we introduce dynamic structures
   // such as lists or tables
-  var startNodeComponent = startComp.parentNode;
-  var text;
-  for (i = 0; i < startNodeComponent.components.length; i++) {
-    comp = startNodeComponent.components[i];
-    if (comp === startComp) {
+  var text, path;
+  node = container.getChildAt(startAddress[0]);
+  var addresses = container.getAddressesForNode(node);
+  for (i = 0; i < addresses.length; i++) {
+    if (addresses[i] < startAddress) {
+      path = container.getPathForAddress(addresses[i]);
+      copy.set(path, "");
+    } else {
       if (selection.start.offset > 0) {
-        text = doc.get(comp.path);
-        copy.update(comp.path, {
+        path = container.getPathForAddress(addresses[i]);
+        text = doc.get(path);
+        copy.update(path, {
           delete: { start: 0, end: selection.start.offset }
         });
-        Annotations.deletedText(copy, comp.path, 0, selection.start.offset);
+        Annotations.deletedText(copy, path, 0, selection.start.offset);
       }
       break;
-    } else {
-      copy.set(comp.path, "");
     }
   }
-  var endNodeComponent = endComp.parentNode;
-  for (i = 0; i < endNodeComponent.components.length; i++) {
-    comp = endNodeComponent.components[i];
-    if (comp === endComp) {
-      text = doc.get(comp.path);
-      if (selection.end.offset < text.length) {
-        copy.update(comp.path, {
+
+  node = container.getChildAt(endAddress[0]);
+  addresses = container.getAddressesForNode(node);
+  for (i = addresses.length - 1; i >= 0; i--) {
+    path = container.getPathForAddress(addresses[i]);
+    if (addresses[i] > endAddress) {
+      copy.set(path, "");
+    } else {
+      text = doc.get(path); if (selection.end.offset < text.length) {
+        copy.update(path, {
           delete: { start: selection.end.offset, end: text.length }
         });
-        Annotations.deletedText(copy, comp.path, selection.end.offset, text.length);
+        Annotations.deletedText(copy, path, selection.end.offset, text.length);
       }
       break;
-    } else {
-      copy.set(comp.path, "");
     }
   }
   return copy;

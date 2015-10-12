@@ -4,6 +4,7 @@ var Document = require('../../document');
 var MetaNode = require('./test_article_meta');
 var TestNode = require('./test_node');
 var TestContainerAnnotation = require('./test_container_annotation');
+var TestStructuredNode = require('./test_structured_node');
 
 var schema = new Document.Schema("test-article", "1.0.0");
 
@@ -25,7 +26,8 @@ schema.addNodes([
   Document.List,
   Document.ListItem,
   TestNode,
-  TestContainerAnnotation
+  TestContainerAnnotation,
+  TestStructuredNode
 ]);
 
 module.exports = schema;

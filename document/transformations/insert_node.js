@@ -24,18 +24,23 @@ function insertNode(tx, args) {
   }
   tmp = breakNode(tx, args);
   selection = tmp.selection;
+  // create the node if it does not exist yet
+  // notice, that it is also allowed to insert an existing node
   if (!tx.get(node.id)) {
     node = tx.create(node);
   }
-  var comp = container.getComponent(selection.start.path);
-  var pos = container.getPosition(comp.rootId);
+  // make sure we have the real node, not just its data
+  node = tx.get(node.id);
+  // insert the new node after the node where the cursor was
+  var address = container.getAddress(selection.start.path);
+  var pos = address[0];
   container.show(node.id, pos);
   // if possible set the selection to the first position in the inserted node
-  var comps = container.getComponentsForNode(node.id);
-  if (comps.length > 0) {
+  var firstPath = container.getFirstPath(node);
+  if (firstPath) {
     args.selection = tx.createSelection({
       type: 'property',
-      path: comps[0].getPath(),
+      path: firstPath,
       startOffset: 0
     });
   }

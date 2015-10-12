@@ -59,15 +59,15 @@ ContainerEditor.Prototype = function() {
 
   this.selectAll = function(doc) {
     var container = doc.get(this.containerId);
-    var first = container.getFirstComponent();
-    var last = container.getLastComponent();
-    var lastText = doc.get(last.path);
+    var firstPath = container.getFirstPath();
+    var lastPath = container.getLastPath();
+    var lastText = doc.get(lastPath);
     return doc.createSelection({
       type: 'container',
       containerId: this.containerId,
-      startPath: first.path,
+      startPath: firstPath,
       startOffset: 0,
-      endPath: last.path,
+      endPath: lastPath,
       endOffset: lastText.length
     });
   };

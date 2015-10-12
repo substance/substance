@@ -73,19 +73,23 @@ ContainerSelection.Prototype = function() {
     var c1e = c1.end;
     var c2e = c2.end;
     var newCoors = {
-      start: { pos: c1s.pos, offset: c1s.offset },
-      end: { pos: c1e.pos, offset: c1e.offset }
+      start: { address: c1s.address, offset: c1s.offset },
+      end: { address: c1e.address, offset: c1e.offset }
     };
-    if (c1s.pos > c2s.pos) {
-      newCoors.start.pos = c2s.pos;
+    if (c1s.address > c2s.address) {
+      newCoors.start.address = c2s.address;
       newCoors.start.offset = c2s.offset;
-    } else if (c1s.pos === c2s.pos) {
+    } else if (c1s.address < c2s.address) {
+      // note leaving this here as '==' is not working on array w/o deep check
+    } else /* if (c1s.address == c2s.address) */ {
       newCoors.start.offset = Math.min(c1s.offset, c2s.offset);
     }
-    if (c1e.pos < c2e.pos) {
-      newCoors.end.pos = c2e.pos;
+    if (c1e.address < c2e.address) {
+      newCoors.end.address = c2e.address;
       newCoors.end.offset = c2e.offset;
-    } else if (c1e.pos === c2e.pos) {
+    } else if (c1e.address > c2e.address) {
+      // note leaving this here as '==' is not working on array w/o deep check
+    } else /* if (c1e.address === c2e.address) */ {
       newCoors.end.offset = Math.max(c1e.offset, c2e.offset);
     }
     return _createNewSelection(this, newCoors);
@@ -164,24 +168,25 @@ ContainerSelection.Prototype = function() {
   this.splitIntoPropertySelections = function() {
     var sels = [];
     var container = this.getContainer();
-    var comps = container.getComponentsForRange(this.range);
+    var range = this.range;
+    var paths = container.getPathRange(range.start.path, range.end.path);
     var doc = container.getDocument();
-    for (var i = 0; i < comps.length; i++) {
-      var comp = comps[i];
+    for (var i = 0; i < paths.length; i++) {
+      var path = paths[i];
       var startOffset, endOffset;
       if (i===0) {
         startOffset = this.startOffset;
       } else {
         startOffset = 0;
       }
-      if (i===comps.length-1) {
+      if (i === paths.length-1) {
         endOffset = this.endOffset;
       } else {
-        endOffset = doc.get(comp.path).length;
+        endOffset = doc.get(path).length;
       }
       sels.push(doc.createSelection({
         type: 'property',
-        path: comp.path,
+        path: path,
         startOffset: startOffset,
         endOffset: endOffset
       }));
@@ -199,25 +204,28 @@ ContainerSelection.Prototype = function() {
   };
 
   this._coordinates = function(sel) {
+    // EXPERIMENTAL: caching the internal address based range
+    // as we use it very often.
+    // However, this bears the danger, that this can get invalid by a change
     if (sel._internal.containerRange) {
       return sel._internal.containerRange;
     }
     var container = this.getContainer();
     var range = sel.getRange();
-    var startPos = container.getComponent(range.start.path).getIndex();
-    var endPos;
+    var startAddress = container.getAddress(range.start.path);
+    var endAddress;
     if (sel.isCollapsed()) {
-      endPos = startPos;
+      endAddress = startAddress;
     } else {
-      endPos = container.getComponent(range.end.path).getIndex();
+      endAddress = container.getAddress(range.end.path);
     }
     var containerRange = {
       start: {
-        pos: startPos,
+        address: startAddress,
         offset: range.start.offset,
       },
       end: {
-        pos: endPos,
+        address: endAddress,
         offset: range.end.offset
       }
     };
@@ -228,25 +236,22 @@ ContainerSelection.Prototype = function() {
   };
 
   var _isBefore = function(c1, c2, strict) {
-    if (strict) {
-      if (c1.pos >= c2.pos) return false;
-      if (c1.pos == c2.pos && c1.offset >= c2.offset) return false;
-      return true;
-    } else {
-      if (c1.pos > c2.pos) return false;
-      if (c1.pos == c2.pos && c1.offset > c2.offset) return false;
-      return true;
-    }
+    if (c1.address < c2.address) return true;
+    if (c1.address > c2.address) return false;
+    // now addresses are equal and we need to check offsets
+    if (c1.offset > c2.offset) return false;
+    if (strict && (c1.offset === c2.offset)) return false;
+    return true;
   };
 
   var _isEqual = function(c1, c2) {
-    return (c1.pos === c2.pos && c1.offset === c2.offset);
+    return (_.isEqual(c1.address, c2.address) && c1.offset === c2.offset);
   };
 
   var _createNewSelection = function(containerSel, newCoors) {
     var container = containerSel.getContainer();
-    newCoors.start.path = container.getComponentAt(newCoors.start.pos).path;
-    newCoors.end.path = container.getComponentAt(newCoors.end.pos).path;
+    newCoors.start.path = container.getPathForAddress(newCoors.start.address);
+    newCoors.end.path = container.getPathForAddress(newCoors.end.address);
     var newSel = new ContainerSelection({
       containerId: containerSel.containerId,
       startPath: newCoors.start.path,
@@ -258,7 +263,7 @@ ContainerSelection.Prototype = function() {
     // HACK: We must not loose the document on the way if any is attached.
     var doc = containerSel._internal.doc;
     if (doc) {
-      newSel.attach(doc);  
+      newSel.attach(doc);
     } else {
       console.warn('No document attached to selection');
     }

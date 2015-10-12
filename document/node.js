@@ -42,6 +42,24 @@ var Node = Data.Node.extend({
     return this.document.get(this.parent);
   },
 
+  hasChildren: function() {
+    return false;
+  },
+
+  getChildIndex: function(child) {
+    /* jshint unused:false */
+    return -1;
+  },
+
+  getChildAt: function(idx) {
+    /* jshint unused:false */
+    return null;
+  },
+
+  getChildCount: function() {
+    return 0;
+  },
+
   getRoot: function() {
     var node = this;
     while (node.hasParent()) {
@@ -56,6 +74,11 @@ var Node = Data.Node.extend({
       console.warn('Contract: a node must define its editable properties.', this.constructor.static.name);
     }
     return componentNames;
+  },
+
+  getPropertyNameAt: function(idx) {
+    var propertyNames = this.constructor.static.components || [];
+    return propertyNames[idx];
   },
 
   // volatile property necessary to render highlighted node differently
