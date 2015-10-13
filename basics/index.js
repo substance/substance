@@ -20,7 +20,13 @@ _.extend(Basics, require('./oo'));
  */
 Basics.OO = require('./oo');
 
+/**
+ * @property {class} An adapter to access an object via path
+ * @memberof module:Basics
+ */
 Basics.PathAdapter = require('./path_adapter');
+
+
 Basics.EventEmitter = require('./event_emitter');
 Basics.Error = require('./error');
 Basics.Registry = require('./registry');
