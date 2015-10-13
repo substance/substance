@@ -19,7 +19,6 @@ var Coordinate = Document.Coordinate;
  * @class SurfaceSelection
  * @constructor
  * @param {Element} rootElement
- * @module Surface
  */
 function SurfaceSelection(rootElement, doc, container) {
   this.element = rootElement;

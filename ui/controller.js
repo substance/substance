@@ -3,33 +3,31 @@
 var OO = require('../basics/oo');
 var _ = require('../basics/helpers');
 var Component = require('./component');
-
 var Clipboard = require('./surface/clipboard');
 var ToolManager = require('./tool_manager');
 var Registry = require('../basics/registry');
 var Logger = require ('../basics/logger');
 var Selection = require('../document/selection');
 
+/**
+ * Controls Substance infrastructure. Needs to be supplied as a top level instance
+ * to serve editors, commands and tools as a context.
+ * 
+ * @class
+ * @memberof module:ui
+ */
 
 function Controller() {
   Component.apply(this, arguments);
- 
   if (!this.props.doc) throw new Error('Controller requires a Substance document instance');
-
   this.surfaces = {};
   this.focusedSurface = null;
   this.stack = [];
   this.logger = new Logger();
-
-  // Initialize registries
   this._initializeComponentRegistry(this.props.config.components);
   this._initializeCommandRegistry(this.props.config.commands.controller);
-
-  // Initialize clipboard
   this.clipboard = new Clipboard(this, this.props.doc.getClipboardImporter(), this.props.doc.getClipboardExporter());
-
   this.toolManager = new ToolManager(this);
-
   this.props.doc.connect(this, {
     'document:changed': this.onDocumentChanged,
     'transaction:started': this.onTransactionStarted
@@ -41,7 +39,13 @@ function Controller() {
 }
 
 Controller.Prototype = function() {
-
+  /**
+   * Defines the child context
+   * 
+   * @return {object} the child context
+   * @method getChildContext
+   * @memberof module:ui.Controller.prototype
+   */
   this.getChildContext = function() {
     return {
       config: this.props.config,
@@ -51,6 +55,13 @@ Controller.Prototype = function() {
     };
   };
 
+  /**
+   * Get the associated ToolManager instance
+   * 
+   * @return {module:ui.ToolManager} the ToolManager instance
+   * @method getToolManager
+   * @memberof module:ui.Controller.prototype
+   */
   this.getToolManager = function() {
     return this.toolManager;
   };
@@ -72,20 +83,32 @@ Controller.Prototype = function() {
     this.commandRegistry = commandRegistry;
   };
 
-  // Command API
-  // ----------------
-
+  /**
+   * Get registered controller command by name
+   * 
+   * @param commandName {String} the command name
+   * @return {module:ui.commands.ControllerCommand} A controller command
+   * @method getCommand
+   * @memberof module:ui.Controller.prototype
+   */
   this.getCommand = function(commandName) {
     return this.commandRegistry.get(commandName);
   };
 
+  /**
+   * Execute command with given name if registered
+   * 
+   * @param commandName {String} the command name
+   * @return {module:ui.commands.ControllerCommand} A controller command
+   * @method getCommand
+   * @memberof module:ui.Controller.prototype
+   */
   this.executeCommand = function(commandName) {
     var cmd = this.getCommand(commandName);
     if (!cmd) {
       console.warn('command', commandName, 'not registered on controller');
       return;
     }
-
     // Run command
     var info = cmd.execute();
     if (info) {
@@ -105,11 +128,25 @@ Controller.Prototype = function() {
     return this.clipboard;
   };
 
+  /**
+   * Get document instance
+   *
+   * @return {module:document.Document} The document instance owned by the controller
+   * @method getDocument
+   * @memberof module:ui.Controller.prototype
+   */
   this.getDocument = function() {
     return this.props.doc;
   };
 
-  // If no name is provided, the focused surface is returned
+  /**
+   * Get Surface instance
+   *
+   * @method getSurface
+   * @param name {String} Name under which the surface is registered
+   * @return {module:ui.surface.Surface} The surface instance
+   * @memberof module:ui.Controller.prototype
+   */
   this.getSurface = function(name) {
     if (name) {
       return this.surfaces[name];
@@ -119,11 +156,25 @@ Controller.Prototype = function() {
     }
   };
 
+  /**
+   * Get the currently focused Surface
+   *
+   * @method getFocusedSurface
+   * @return {module:ui.surface.Surface} The surface instance
+   * @memberof module:ui.Controller.prototype
+   */
   this.getFocusedSurface = function() {
     return this.getSurface();
   };
 
-  // Get selection of currently focused surface
+  /**
+   * Get selection of currently focused surface. We recomment to use getSelection on Surface
+   * instances directly when possible.
+   *
+   * @method getSelection
+   * @return {module:document.Document.Selection} the current Document.Selection derived from the surface.
+   * @memberof module:ui.Controller.prototype
+   */
   this.getSelection = function() {
     var surface = this.getSurface();
     if (surface) {
@@ -133,8 +184,13 @@ Controller.Prototype = function() {
     }
   };
 
-  // Get containerId for currently focused surface
-  // Returns undefined for non-container-editors
+  /**
+   * Get containerId for currently focused surface
+   *
+   * @method getContainerId
+   * @return {String|undefined} container id for currently focused surface, or undefined
+   * @memberof module:ui.Controller.prototype
+   */
   this.getContainerId = function() {
     var surface = this.getSurface();
     if (surface) {
@@ -142,14 +198,27 @@ Controller.Prototype = function() {
     }
   };
 
+  /**
+   * Register a surface
+   *
+   * @method registerSurface
+   * @param surface {Surface} A new surface instance to register
+   * @memberof module:ui.Controller.prototype
+   */
   this.registerSurface = function(surface) {
-
     surface.connect(this, {
       'selection:changed': this._onSelectionChanged
     });
     this.surfaces[surface.getName()] = surface;
   };
 
+  /**
+   * Unregister a surface
+   *
+   * @method unregisterSurface
+   * @param surface {Surface} A surface instance to unregister
+   * @memberof module:ui.Controller.prototype
+   */
   this.unregisterSurface = function(surface) {
     surface.disconnect(this);
     delete this.surfaces[surface.getName()];
@@ -158,10 +227,25 @@ Controller.Prototype = function() {
     }
   };
 
+  /**
+   * Check if there are any surfaces registered
+   *
+   * @method hasSurface
+   * @return {true|false} true if surface count > 0
+   * @memberof module:ui.Controller.prototype
+   */
   this.hasSurfaces = function() {
     return Object.keys(this.surfaces).length > 0;
   };
 
+  /**
+   * Called whenever a surface has been focused. 
+   * 
+   * TOOD: Should this really be a public method?
+   *
+   * @method didFocus
+   * @memberof module:ui.Controller.prototype
+   */
   this.didFocus = function(surface) {
     if (this.focusedSurface && surface !== this.focusedSurface) {
       this.focusedSurface.setFocused(false);
@@ -169,9 +253,9 @@ Controller.Prototype = function() {
     this.focusedSurface = surface;
   };
 
-
   // For now just delegate to the current surface
-  // TODO: remove!
+  // TODO: Remove. Let's only allow Document.transaction and Surface.transaction to
+  // avoid confusion
   this.transaction = function() {
     var surface = this.getSurface();
     if (!surface) {
@@ -192,8 +276,6 @@ Controller.Prototype = function() {
   this.onDocumentChanged = function(change, info) {
 
     // On undo/redo
-    // ----------
-
     if (info.replay) {
       var selection = change.after.selection;
       var surfaceId = change.after.surfaceId;
@@ -210,9 +292,7 @@ Controller.Prototype = function() {
       }
     }
 
-    // Save logic
-    // ----------
-
+    // Save logic related
     var doc = this.getDocument();
     doc.__dirty = true;
     var logger = this.getLogger();
@@ -220,14 +300,15 @@ Controller.Prototype = function() {
   };
 
   this._onSelectionChanged = function(sel, surface) {
-    // Skip if the selection has not really changed
-    // if (sel.equals(this.__prevSelection)) {
-    //   return;
-    // }
-    // this.__prevSelection = sel;
     this.emit('selection:changed', sel, surface);
   };
 
+  /**
+   * Push surface state
+   * 
+   * @method pushState
+   * @memberof module:ui.Controller.prototype
+   */
   this.pushState = function() {
     var state = {
       surface: this.focusedSurface,
@@ -240,6 +321,12 @@ Controller.Prototype = function() {
     this.stack.push(state);
   };
 
+  /**
+   * Pop surface state
+   * 
+   * @method popState
+   * @memberof module:ui.Controller.prototype
+   */
   this.popState = function() {
     var state = this.stack.pop();
     if (state && state.surface) {
@@ -248,6 +335,12 @@ Controller.Prototype = function() {
     }
   };
   
+  /**
+   * Start document save workflow
+   * 
+   * @method saveDocument
+   * @memberof module:ui.Controller.prototype
+   */
   this.saveDocument = function() {
     var doc = this.getDocument();
     var logger = this.getLogger();
@@ -275,12 +368,31 @@ Controller.Prototype = function() {
     }
   };
 
+  /**
+   * Render method of the controller component. This needs to be implemented by the
+   * custom Controller class.
+   * 
+   * @return {VirtualNode} VirtualNode created using Component.$$
+   * @method render
+   * @abstract
+   * @memberof module:ui.Controller.prototype
+   */
+  this.render = function() {
+    throw new Error('Controller.prototype.render is abstract. You need to define your own controller component');
+  };
+
+  /**
+   * Dispose component when component life ends. If you need to implement dispose
+   * in your custom Controller class, don't forget the super call.
+   * 
+   * @method dispose
+   * @memberof module:ui.Controller.prototype
+   */
   this.dispose = function() {
     this.doc.disconnect(this);
     this.surfaces = {};
     this.clipboard = null;
   };
-
 };
 
 OO.inherit(Controller, Component);

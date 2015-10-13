@@ -4,7 +4,14 @@ var $ = require('../../basics/jquery');
 var _ = require('../../basics/helpers');
 var OO = require('../../basics/oo');
 
-// context must have a getSurface() method.
+/**
+ * Surface Clipboard is owned by a module:ui/surface.FormEditor.
+ * 
+ *
+ * @class
+ * @memberof module:ui/surface
+ */
+
 var Clipboard = function(controller, htmlImporter, htmlExporter) {
 
   this.controller = controller;
@@ -347,7 +354,6 @@ Clipboard.Prototype = function() {
       this._contentText = "";
     }
   };
-
 };
 
 OO.initClass(Clipboard);

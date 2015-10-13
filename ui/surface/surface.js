@@ -1,24 +1,20 @@
 'use strict';
 
-var $ = require('../basics/jquery');
-var _ = require('../basics/helpers');
-var OO = require('../basics/oo');
-var Substance = require('../basics');
-var SurfaceSelection = require('./surface/surface_selection');
-var Document = require('../document');
+var $ = require('../../basics/jquery');
+var _ = require('../../basics/helpers');
+var OO = require('../../basics/oo');
+var Registry = require('../../basics/registry');
+var Substance = require('../../basics');
+var SurfaceSelection = require('./surface_selection');
+var Document = require('../../document');
 var Selection = Document.Selection;
-var Component = require('./component');
-
-var Registry = require('../basics/registry');
+var Component = require('../component');
 
 /**
- * Surface
- * -------
- *
- * TODO: add description
- *
- * @class Surface
- * @memberof module:UI
+ * Abstract interface for editing components. Dances with contenteditable, so you don't have to.
+ * 
+ * @class
+ * @memberof module:ui/surface
  */
 function Surface() {
   Component.apply(this, arguments);
@@ -47,7 +43,6 @@ function Surface() {
   // this.element must be set via surface.attach(element)
   this.element = null;
   this.$element = null;
-  // this.editor = editor;
 
   this.surfaceSelection = null;
 
@@ -170,27 +165,6 @@ Surface.Prototype = function() {
     return this.element;
   };
 
-  this.getContainerName = function() {
-    console.warn('DEPRECATED: Use getContainerId()');
-    return this.getContainerId();
-  };
-
-  this.getContainerId = function() {
-    if (this.editor.isContainerEditor()) {
-      return this.editor.getContainerId();
-    }
-  };
-
-  this.getContainer = function() {
-    if (this.editor.isContainerEditor()) {
-      return this.getDocument().get(this.editor.getContainerId());
-    }
-  };
-
-  this.getEditor = function() {
-    return this.editor;
-  };
-
   this.getDocument = function() {
     return this.props.doc;
   };
@@ -216,6 +190,8 @@ Surface.Prototype = function() {
     this.element = element;
     this.$element = $(element);
 
+    var container;
+
     this.surfaceSelection = new SurfaceSelection(element, doc, this.getContainer());
 
     this.$element.addClass('surface');
@@ -238,9 +214,12 @@ Surface.Prototype = function() {
     // Document Change Events
     //
     this.domObserver.observe(element, this.domObserverConfig);
-
     this.attached = true;
   };
+
+  // Must be implemented by container surfaces
+  this.getContainer = function() {};
+  this.getContainerId = function() {};
 
   this.attachKeyboard = function() {
     this.$element.on('keydown', this._onKeyDown);
@@ -282,7 +261,6 @@ Surface.Prototype = function() {
     this.element = null;
     this.$element = null;
     this.surfaceSelection = null;
-
     this.attached = false;
   };
 
@@ -497,7 +475,7 @@ Surface.Prototype = function() {
     this.transaction(function(tx, args) {
       // trying to remove the DOM selection to reduce flickering
       this.surfaceSelection.clear();
-      return this.editor.insertText(tx, { selection: args.selection, text: e.data });
+      return this.insertText(tx, { selection: args.selection, text: e.data });
     }, this);
     this.rerenderDomSelection();
   };
@@ -537,7 +515,7 @@ Surface.Prototype = function() {
       this.transaction(function(tx, args) {
         // trying to remove the DOM selection to reduce flickering
         this.surfaceSelection.clear();
-        return this.editor.insertText(tx, { selection: args.selection, text: character });
+        return this.insertText(tx, { selection: args.selection, text: character });
       }, this);
       this.rerenderDomSelection();
       e.preventDefault();
@@ -588,7 +566,7 @@ Surface.Prototype = function() {
     this.transaction(function(tx, args) {
       // trying to remove the DOM selection to reduce flickering
       this.surfaceSelection.clear();
-      return this.editor.insertText(tx, { selection: args.selection, text: " " });
+      return this.insertText(tx, { selection: args.selection, text: " " });
     }, this);
     this.rerenderDomSelection();
   };
@@ -597,11 +575,11 @@ Surface.Prototype = function() {
     e.preventDefault();
     if (e.shiftKey) {
       this.transaction(function(tx, args) {
-        return this.editor.softBreak(tx, args);
+        return this.softBreak(tx, args);
       }, this);
     } else {
       this.transaction(function(tx, args) {
-        return this.editor.break(tx, args);
+        return this.break(tx, args);
       }, this);
     }
     this.rerenderDomSelection();
@@ -611,7 +589,7 @@ Surface.Prototype = function() {
     e.preventDefault();
     var direction = (e.keyCode === Surface.Keys.BACKSPACE) ? 'left' : 'right';
     this.transaction(function(tx, args) {
-      return this.editor.delete(tx, { selection: args.selection, direction: direction });
+      return this.delete(tx, { selection: args.selection, direction: direction });
     }, this);
     this.rerenderDomSelection();
   };

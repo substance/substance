@@ -3,11 +3,17 @@
 var OO = require('../basics/oo');
 var _ = require('../basics/helpers');
 
-
 var DEFAULT_TOOLSTATE = {
   disabled: true,
   active: false
 };
+
+/**
+ * Listens to changes on the document and selection and updates registered tools accordingly.
+ * 
+ * @class
+ * @memberof module:ui
+ */
 
 function ToolManager(controller) {
   if (!controller) {

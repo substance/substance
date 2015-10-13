@@ -1,20 +1,20 @@
 /**
- * Substance.UI
- * ============
- *
- * TODO: add module description
- *
- * @module UI
+ * Reusable UI components for building editing apps.
+ * 
+ * @module ui
  */
-var UI = {};
 
-UI.Component = require('./component');
-UI.I18n = require('./i18n');
+var ui = {};
 
-UI.Controller = require('./controller');
-UI.Surface = require('./surface');
-UI.ContainerEditor = require('./container_editor');
-UI.TextPropertyComponent = require('./text_property_component');
-UI.ToolManager = require('./tool_manager');
+/* Sub modules */
+ui.surface = require('./surface');
+ui.commands = require('./commands');
 
-module.exports = UI;
+/* Properties */
+ui.Component = require('./component');
+ui.I18n = require('./i18n');
+ui.ToolManager = require('./tool_manager');
+ui.Controller = require('./controller');
+ui.TextPropertyComponent = require('./text_property_component');
+
+module.exports = ui;

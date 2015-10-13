@@ -6,10 +6,13 @@ var Tool = require('./tool');
 var $$ = Component.$$;
 
 /**
- * Abstract class for tools tools that interact with a document.
- * For example UndoTool or RedoTool.
+ * Abstract class for tools tools that interact with a document. E.g. UndoTool or RedoTool.
+ * 
+ * Requires a Controller context.
  *
- * A document context must be provided via dependency injection
+ * @class
+ * @extends module:ui/tools.Tool
+ * @memberof module:ui/tools
  */
 
 function DocumentTool() {
@@ -24,31 +27,26 @@ function DocumentTool() {
 DocumentTool.Prototype = function() {
 
   /**
-   * Unbinds event handler before getting unmounted.
-   *
-   * Custom tool implementation must do a super call.
+   * Dispose tool when component life ends. If you need to implement dispose
+   * in your custom tool class, don't forget the super call.
+   * 
+   * @method dispose
+   * @memberof module:ui/tools.DocumentTool.prototype
    */
-
   this.dispose = function() {
     var doc = this.getDocument();
     doc.disconnect(this);
   };
 
   /**
-   * Return the document provided by the current context
+   * Get document instance
    *
-   * @return {Document}
-   * @public
+   * @method getDocument
+   * @return {module:document.Document} The document instance owned by the controller
+   * @memberof module:ui/tools.DocumentTool.prototype
    */
-
   this.getDocument = function() {
     return this.context.controller.getDocument();
-  };
-
-
-  this.update = function(change, info) {
-    /* jshint unused:false */
-    throw new Error('Must be defined by your tool implementation');
   };
 
 

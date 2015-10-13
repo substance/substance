@@ -12,9 +12,6 @@ var RawHtml;
 var _htmlParams;
 
 /**
- * Component
- * ---------
- *
  * A light-weight component implementation inspired by React and Ember.
  * In contrast to the large frameworks it does much less things automagically
  * in favour of a simple and synchronous life-cyle.
@@ -62,7 +59,7 @@ var _htmlParams;
  * which is typically done in the constructor.
  *
  * @class Component
- * @memberof module:UI
+ * @memberof module:ui
  */
 function Component(parent, params) {
   EventEmitter.call(this);
@@ -166,7 +163,7 @@ Component.Prototype = function ComponentPrototype() {
    *
    * Every Component should override this method.
    *
-   * @return one VirtualNode created using Component.$$
+   * @return {VirtualNode} VirtualNode created using Component.$$
    */
   this.render = function() {
     /* istanbul ignore next */
