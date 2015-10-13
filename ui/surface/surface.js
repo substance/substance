@@ -189,9 +189,6 @@ Surface.Prototype = function() {
     // Initialization
     this.element = element;
     this.$element = $(element);
-
-    var container;
-
     this.surfaceSelection = new SurfaceSelection(element, doc, this.getContainer());
 
     this.$element.addClass('surface');

@@ -1,7 +1,7 @@
 "use strict";
 
 require('../phantomjs_shims');
-var ContainerEditor = require('../../../ui/container_editor');
+var ContainerEditor = require('../../../ui/surface/container_editor');
 var Component = require('../../../ui/component');
 var $$ = Component.$$;
 var Controller = require('../../../ui/controller');
