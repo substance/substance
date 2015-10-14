@@ -9,6 +9,10 @@ var Registry = require('../basics/registry');
 var Logger = require ('../basics/logger');
 var Selection = require('../document/selection');
 
+// Setup default I18n
+var I18n = require('./i18n');
+I18n.instance.load(require('./i18n/en'));
+
 /**
  * Controls Substance infrastructure. Needs to be supplied as a top level instance
  * to serve editors, commands and tools as a context.
@@ -24,8 +28,11 @@ function Controller() {
   this.focusedSurface = null;
   this.stack = [];
   this.logger = new Logger();
-  this._initializeComponentRegistry(this.props.config.components);
-  this._initializeCommandRegistry(this.props.config.commands.controller);
+
+  var config = this.getConfig();
+
+  this._initializeComponentRegistry(config.controller.components);
+  this._initializeCommandRegistry(config.controller.commands);
   this.clipboard = new Clipboard(this, this.props.doc.getClipboardImporter(), this.props.doc.getClipboardExporter());
   this.toolManager = new ToolManager(this);
   this.props.doc.connect(this, {
@@ -39,6 +46,12 @@ function Controller() {
 }
 
 Controller.Prototype = function() {
+
+  // Use static config if available, otherwise try to fetch it from props
+  this.getConfig = function() {
+    return this.constructor.static.config || this.props.config;
+  };
+
   /**
    * Defines the child context
    * 
@@ -48,10 +61,11 @@ Controller.Prototype = function() {
    */
   this.getChildContext = function() {
     return {
-      config: this.props.config,
+      config: this.getConfig(),
       controller: this,
       componentRegistry: this.componentRegistry,
-      toolManager: this.toolManager
+      toolManager: this.toolManager,
+      i18n: I18n.instance
     };
   };
 
@@ -151,8 +165,8 @@ Controller.Prototype = function() {
     if (name) {
       return this.surfaces[name];
     } else {
-      // console.warn('Deprecated: Use getFocusedSurface. Always provide a name for getSurface otherwise.');
-      return this.focusedSurface || this.surfaces[this.props.config.defaultSurface];
+      console.warn('Deprecated: Use getFocusedSurface. Always provide a name for getSurface otherwise.');
+      return this.getFocusedSurface();
     }
   };
 
@@ -164,7 +178,7 @@ Controller.Prototype = function() {
    * @memberof module:ui.Controller.prototype
    */
   this.getFocusedSurface = function() {
-    return this.getSurface();
+    return this.focusedSurface;
   };
 
   /**
