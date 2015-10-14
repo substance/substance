@@ -126,6 +126,9 @@ ContainerEditor.Prototype = function() {
     extension.register(this.editingBehavior);
   };
 
+  // Used by Clipboard
+  // TODO: maybe rather check against the class type so we don't need this
+  // rather dumb method
   this.isContainerEditor = function() {
     return true;
   };
@@ -191,7 +194,7 @@ ContainerEditor.Prototype = function() {
   };
 
   this._prepareArgs = function(args) {
-    args.containerId = this.containerId;
+    args.containerId = this.getContainerId();
     args.editingBehavior = this.editingBehavior;
   };
 
