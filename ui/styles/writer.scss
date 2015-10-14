@@ -13,8 +13,8 @@
 @import 'modules/text_tool';
 @import 'modules/annotation_tool';
 
-// Clipboard
-@import 'clipboard';
+// Editing related (clipboard and cursor/selection styles)
+@import 'editing';
 
 
 /* Layout stuff
@@ -476,25 +476,3 @@ body,html {
 //   background: rgba(0,0,0,0.1);
 // }
 
-/* Custom selection
-----------------------------------------------------*/
-
-.cursor {
-  display: inline-block;
-  position: relative;
-  width: 0px;
-}
-
-.inner-cursor {
-  position: absolute;
-  top: -20px;
-  // bottom: 0px;
-  height: 25px;
-  background: #999;
-  width: 1px;
-  // border-left: solid #000 1px;
-}
-
-.selection-fragment {
-  background-color: #ddd;
-}
