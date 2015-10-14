@@ -37,6 +37,7 @@ TextTool.Prototype = function() {
     return isTextType;
   };
 
+  
   this.update = function(sel, surface) {
     // Set disabled when not a property selection
     if (!surface.isEnabled() || sel.isNull()) {

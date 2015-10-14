@@ -49,7 +49,7 @@ SurfaceTool.Prototype = function() {
    */
 
   this.getSurface = function() {
-    return this.getController().getSurface();
+    return this.getController().getFocusedSurface();
   };
 
   /**
