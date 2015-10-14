@@ -35,17 +35,62 @@ function Controller() {
   this._initializeCommandRegistry(config.controller.commands);
   this.clipboard = new Clipboard(this, this.props.doc.getClipboardImporter(), this.props.doc.getClipboardExporter());
   this.toolManager = new ToolManager(this);
-  this.props.doc.connect(this, {
-    'document:changed': this.onDocumentChanged,
-    'transaction:started': this.onTransactionStarted
-  }, {
-    // Use lower priority so that everyting is up2date
-    // when we render the selection
-    priority: -10
-  });
+
+  this._initialize(this.props);
+
+  this.handleStateUpdate(this.state);
 }
 
 Controller.Prototype = function() {
+
+  this.didMount = function() {
+    this.$el.on('keydown', this.handleApplicationKeyCombos);
+    // Attach clipboard
+    this.clipboard.attach(this.$el[0]);
+  };
+
+  /**
+   * Dispose component when component life ends. If you need to implement dispose
+   * in your custom Controller class, don't forget the super call.
+   * 
+   * @method dispose
+   * @memberof module:ui.Controller.prototype
+   */
+  this.dispose = function() {
+    this.$el.off('keydown');
+    if (this.props.doc) {
+      this._dispose();
+    }
+  };
+
+  this._dispose = function() {
+    this.props.doc.disconnect(this);
+    this.clipboard.detach(this.$el[0]);
+  };
+
+  this.willReceiveProps = function(newProps) {
+    if (this.props.doc && newProps.doc !== this.props.doc) {
+      this._dispose();
+      this.empty();
+      this._initialize(newProps);
+    }
+  };
+  
+  this._initialize = function(props) {
+    var doc = props.doc;
+
+    // Register event handlers
+    // -----------------
+
+    doc.connect(this, {
+      'document:changed': this.onDocumentChanged,
+      'transaction:started': this.onTransactionStarted
+    }, {
+      // Use lower priority so that everyting is up2date
+      // when we receive the update
+      priority: -20
+    });
+  };
 
   // Use static config if available, otherwise try to fetch it from props
   this.getConfig = function() {
@@ -287,6 +332,36 @@ Controller.Prototype = function() {
     // tx.before.selection = this.getSelection();
   };
 
+  // return true when you handled a key combo
+  this.handleApplicationKeyCombos = function(e) {
+    // console.log('####', e.keyCode, e.metaKey, e.ctrlKey, e.shiftKey);
+    var handled = false;
+
+    if (e.keyCode === 27) {
+      this.setState(this.getInitialState());
+      handled = true;
+    }
+    // Save: cmd+s
+    else if (e.keyCode === 83 && (e.metaKey||e.ctrlKey)) {
+      this.executeCommand('save');
+      handled = true;
+    }
+
+    if (handled) {
+      e.preventDefault();
+      e.stopPropagation();
+      return true;
+    }
+  };
+
+  this.handleStateUpdate = function() {
+    // no-op, should be overridden by custom writer
+  };
+
+  this.willUpdateState = function(newState) {
+    this.handleStateUpdate(newState);
+  };
+
   this.onDocumentChanged = function(change, info) {
 
     // On undo/redo
@@ -304,6 +379,11 @@ Controller.Prototype = function() {
           console.warn('No surface with name', surfaceId);
         }
       }
+
+      // after undo/redo, also recover the stored controller state
+      if (change.after.state) {
+        this.setState(change.after.state);
+      }
     }
 
     // Save logic related
@@ -313,8 +393,14 @@ Controller.Prototype = function() {
     logger.info('Unsaved changes');
   };
 
+  this.onSelectionChanged = function(sel, surface) {
+    /* jshint unused: false */
+    // No-op: Please override in custom controller class
+  };
+
   this._onSelectionChanged = function(sel, surface) {
     this.emit('selection:changed', sel, surface);
+    this.onSelectionChanged(sel, surface);
   };
 
   /**
@@ -395,18 +481,6 @@ Controller.Prototype = function() {
     throw new Error('Controller.prototype.render is abstract. You need to define your own controller component');
   };
 
-  /**
-   * Dispose component when component life ends. If you need to implement dispose
-   * in your custom Controller class, don't forget the super call.
-   * 
-   * @method dispose
-   * @memberof module:ui.Controller.prototype
-   */
-  this.dispose = function() {
-    this.doc.disconnect(this);
-    this.surfaces = {};
-    this.clipboard = null;
-  };
 };
 
 OO.inherit(Controller, Component);

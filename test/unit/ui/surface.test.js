@@ -34,8 +34,10 @@ QUnit.test("Set the selection after creating annotation.", function(assert) {
   var app = Component.mount($$(MyApp, {
     doc: doc,
     config: {
-      components: components,
-      commands: [],
+      controller: {
+        components: components,
+        commands: [],
+      }
     }
   }), $('#qunit-fixture'));
 
