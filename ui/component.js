@@ -1126,6 +1126,9 @@ VirtualNode.Prototype = function() {
   };
   // NOTE: we need this for incremental updates
   this.removeClass = function(className) {
+    if (!this.classNames) {
+      this.classNames = "";
+    }
     var classes = this.classNames.split(/\s+/);
     classes = _.without(classes, className);
     this.classNames = classes.join(' ');

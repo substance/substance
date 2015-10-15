@@ -17,6 +17,9 @@ var Save = ControllerCommand.extend({
 
   execute: function() {
     this.getController().saveDocument();
+    return {
+      status: 'saving-process-started'
+    };
   }
 });
 

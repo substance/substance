@@ -17,7 +17,6 @@ var DEFAULT_TOOLSTATE = {
  * @class
  * @memberof module:ui
  */
-
 function ToolManager(controller) {
   if (!controller) {
     throw new Error('Illegal arguments: controller is mandatory.');
@@ -33,7 +32,8 @@ function ToolManager(controller) {
   }, { priority: -2 });
 
   this.controller.connect(this, {
-    'selection:changed': this.updateTools
+    'selection:changed': this.updateTools,
+    'document:saved': this.updateTools
   });
 }
 
@@ -71,7 +71,7 @@ ToolManager.Prototype = function() {
 
     if (tool instanceof SurfaceTool) {
       var surface = this.controller.getFocusedSurface();
-      return surface ? surface.getCommand(commandName) : undefined;
+      return surface ? surface.getCommand(commandName) : false;
     } else if (tool instanceof ControllerTool) {
       return this.controller.getCommand(commandName);
     }
@@ -85,7 +85,12 @@ ToolManager.Prototype = function() {
         var state = cmd.getCommandState();
         tool.extendState(state);
       } else {
-        console.warn('Command', tool.constructor.static.command, 'not found for tool', tool.constructor.static.tool);
+        // this.getCommand returns false if there is no focused Surface, which is a case 
+        // where we don't need to print a warning for.
+        if (cmd === undefined) {
+          console.warn('Command', tool.constructor.static.command, 
+            'not found for tool', tool.constructor.static.tool);
+        }
         tool.extendState(DEFAULT_TOOLSTATE);
       }
     }, this);

@@ -316,7 +316,7 @@ Controller.Prototype = function() {
   // TODO: Remove. Let's only allow Document.transaction and Surface.transaction to
   // avoid confusion
   this.transaction = function() {
-    var surface = this.getSurface();
+    var surface = this.getFocusedSurface();
     if (!surface) {
       throw new Error('No focused surface!');
     }
@@ -449,10 +449,10 @@ Controller.Prototype = function() {
       logger.info('Saving ...');
       doc.__isSaving = true;
       // Pass saving logic to the user defined callback if available
-      if (this.props.config.onSave) {
+      if (this.props.onSave) {
         // TODO: calculate changes since last save
         var changes = [];
-        this.props.config.onSave(doc, changes, function(err) {
+        this.props.onSave(doc, changes, function(err) {
           doc.__isSaving = false;
           if (err) {
             logger.error(err.message || err.toString());
@@ -463,7 +463,7 @@ Controller.Prototype = function() {
           }
         }.bind(this));
       } else {
-        logger.error('Document saving is not handled at the moment. Make sure onDocumentSave is passed in the config object');
+        logger.error('Document saving is not handled at the moment. Make sure onSave is passed in the props');
       }
     }
   };
