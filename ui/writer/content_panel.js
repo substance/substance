@@ -25,12 +25,14 @@ ContentPanel.Prototype = function() {
   };
 
   this.render = function() {
+    var controller = this.context.controller;
+
     var el = $$('div')
       .addClass("panel content-panel-component");
     el.append(
       $$(Scrollbar, {
         panel: this,
-        contextId: this.props.containerId,
+        contextId: controller.state.contextId,
         highlights: this.props.doc.getHighlights()
       }).ref("scrollbar")
         .attr('id', "content-scrollbar")
@@ -63,8 +65,12 @@ ContentPanel.Prototype = function() {
   };
 
   this.onHighlightsUpdated = function(highlights) {
+    var controller = this.context.controller;
     // Triggers a rerender
-    this.refs.scrollbar.extendProps({highlights: highlights});
+    this.refs.scrollbar.extendProps({
+      highlights: highlights,
+      contextId: controller.state.contextId
+    });
   };
 
   // Should we do this from inside the scrollbar

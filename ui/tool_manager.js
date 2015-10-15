@@ -83,7 +83,7 @@ ToolManager.Prototype = function() {
       var cmd = this.getCommand(tool);
       if (cmd) {
         var state = cmd.getCommandState();
-        tool.extendState(state);
+        tool.setState(state);
       } else {
         // this.getCommand returns false if there is no focused Surface, which is a case 
         // where we don't need to print a warning for.
@@ -91,7 +91,7 @@ ToolManager.Prototype = function() {
         //   console.warn('Command', tool.constructor.static.command, 
         //     'not found for tool', tool.constructor.static.name);
         // }
-        tool.extendState(DEFAULT_TOOLSTATE);
+        tool.setState(DEFAULT_TOOLSTATE);
       }
     }, this);
   };

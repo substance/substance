@@ -266,7 +266,8 @@ Controller.Prototype = function() {
    */
   this.registerSurface = function(surface) {
     surface.connect(this, {
-      'selection:changed': this._onSelectionChanged
+      'selection:changed': this._onSelectionChanged,
+      'command:executed': this._onCommandExecuted
     });
     this.surfaces[surface.getName()] = surface;
   };
@@ -363,7 +364,6 @@ Controller.Prototype = function() {
   };
 
   this.onDocumentChanged = function(change, info) {
-
     // On undo/redo
     if (info.replay) {
       var selection = change.after.selection;
@@ -398,9 +398,19 @@ Controller.Prototype = function() {
     // No-op: Please override in custom controller class
   };
 
+  this.onCommandExecuted = function(info, commandName, cmd) {
+    /* jshint unused: false */
+    // No-op: Please override in custom controller class
+  };
+
   this._onSelectionChanged = function(sel, surface) {
     this.emit('selection:changed', sel, surface);
     this.onSelectionChanged(sel, surface);
+  };
+
+  this._onCommandExecuted = function(info, commandName, cmd) {
+    this.emit('command:executed', info, commandName, cmd);
+    this.onCommandExecuted(info, commandName, cmd);
   };
 
   /**

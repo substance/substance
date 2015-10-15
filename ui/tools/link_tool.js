@@ -18,10 +18,10 @@ var EditLinkPrompt = Component.extend({
   // Tried setting .htmlProp('autofocus', true) in render
   // But this only worked for the first time
   didMount: function() {
-    var $el = this.refs.url.$el;
-    _.delay(function() {
-      $el.focus();
-    }, 0);
+    // var $el = this.refs.url.$el;
+    // _.delay(function() {
+    //   $el.focus();
+    // }, 0);
   },
 
   onDelete: function(e) {
@@ -78,6 +78,7 @@ LinkTool.Prototype = function() {
   };
 
   this.onCommandExecuted = function(info, commandName) {
+    console.log('on command executed');
     if (commandName === this.static.command) {
       // Toggle the edit prompt when either edit is requested or a new link has been created
       if (_.includes(['edit','create'], info.mode)) {
@@ -148,6 +149,7 @@ LinkTool.Prototype = function() {
     button.append(this.props.children);
     el.append(button);
 
+    console.log('LinkTool.render', this.state);
     // When we are in edit mode showing the edit prompt
     if (this.state.mode === 'edit' && this.state.showPrompt) {
       var link = this.getLink();
