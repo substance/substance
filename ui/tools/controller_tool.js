@@ -17,26 +17,10 @@ var $$ = Component.$$;
 
 function ControllerTool() {
   Tool.apply(this, arguments);
-
-  var doc = this.getDocument();
-  // doc.connect(this, {
-  //   'document:changed': this.update
-  // });
+  if (!this.context.controller) throw new Error('No controller context found.');
 }
 
 ControllerTool.Prototype = function() {
-
-  /**
-   * Dispose tool when component life ends. If you need to implement dispose
-   * in your custom tool class, don't forget the super call.
-   * 
-   * @method dispose
-   * @memberof module:ui/tools.ControllerTool.prototype
-   */
-  // this.dispose = function() {
-  //   var doc = this.getDocument();
-  //   doc.disconnect(this);
-  // };
 
   /**
    * Get document instance
