@@ -1,20 +1,11 @@
 'use strict';
 
-var DocumentTool = require('./document_tool');
+var ControllerTool = require('./controller_tool');
 
-var RedoTool = DocumentTool.extend({
+var RedoTool = ControllerTool.extend({
   static: {
     name: 'redo',
     command: 'redo'  
-  },
-
-  update: function() {
-    var doc = this.getDocument();
-    if (doc.undone.length===0) {
-      this.setDisabled();
-    } else {
-      this.setEnabled();
-    }
   }
 });
 

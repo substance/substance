@@ -5,9 +5,19 @@ var Component = require('../component');
 
 function Tool() {
   Component.apply(this, arguments);
+  this.context.toolManager.registerTool(this);
 }
 
 Tool.Prototype = function() {
+
+  this.getInitialState = function() {
+    var state = this.context.toolManager.getCommandState(this);
+    return state;
+  };
+
+  this.dispose = function() {
+    this.context.toolManager.unregisterTool(this);
+  };
 
   this.getController = function() {
     return this.context.controller;
@@ -18,46 +28,8 @@ Tool.Prototype = function() {
     if (toolName) {
       return toolName;
     } else {
-      throw new Error('Contract: AnnotationTool.static.name should have a value to describe the tool');
+      throw new Error('Contract: Tool.static.name must have a value');
     }
-  };
-
-  this.isEnabled = function() {
-    return !this.state.disabled;
-  };
-
-  this.isDisabled = function() {
-    return this.state.disabled;
-  };
-
-  this.setEnabled = function() {
-    this.setState({
-      disabled: false,
-      active: false
-    });
-  };
-
-  this.setDisabled = function() {
-    this.setState({
-      disabled: true,
-      active: false
-    });
-  };
-
-  this.setActive = function() {
-    this.setToolState({
-      disabled: false,
-      active: true
-    });
-  };
-
-  this.getInitialState = function() {
-    return {
-      // we disable tools by default
-      disabled: true,
-      // if the tool is turned on / toggled on
-      active: false
-    };
   };
 
   this.performAction = function() {
