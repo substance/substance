@@ -78,7 +78,6 @@ LinkTool.Prototype = function() {
   };
 
   this.onCommandExecuted = function(info, commandName) {
-    console.log('on command executed');
     if (commandName === this.static.command) {
       // Toggle the edit prompt when either edit is requested or a new link has been created
       if (_.includes(['edit','create'], info.mode)) {
@@ -149,7 +148,6 @@ LinkTool.Prototype = function() {
     button.append(this.props.children);
     el.append(button);
 
-    console.log('LinkTool.render', this.state);
     // When we are in edit mode showing the edit prompt
     if (this.state.mode === 'edit' && this.state.showPrompt) {
       var link = this.getLink();
