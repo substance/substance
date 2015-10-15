@@ -11,6 +11,7 @@ var OO = require('./basics/oo');
 var Document = require('./document');
 var HtmlImporter = Document.HtmlImporter;
 var HtmlExporter = Document.HtmlExporter;
+var $ = require('./basics/jquery');
 
 var defaultNodes = [
   Document.Paragraph,
@@ -99,12 +100,23 @@ Article.Prototype = function() {
 
   // replaces the content by loading from the given html
   this.loadHtml = function(html) {
+    // Deletes all nodes (including container node 'body')
     this.clear();
 
-    // Re-enable transaction for the importing step
+    // Disable transaction enforcement until the import is finished
     this.FORCE_TRANSACTIONS = false;
+
+    // Recreate body container
+    // TODO: find a better solution
+    this.create({
+      type: "container",
+      id: "body",
+      nodes: []
+    });
+
     var $root = $('<div>'+html+'</div>');
     new Importer(this.schema).convert($root, this);
+    // sets this.FORCE_TRANSACTIONS = true again
     this.documentDidLoad();
   };
 };

@@ -1,18 +1,16 @@
 'use strict';
 
-var Command = require('./command');
+var SurfaceCommand = require('./surface_command');
 
-var SelectAll = Command.extend({
+var SelectAll = SurfaceCommand.extend({
   static: {
     name: 'selectAll'
   },
 
   execute: function() {
-    var ctrl = this.getController();
-    var surface = ctrl.getSurface();
+    var surface = this.getSurface();
     if (surface) {
-      var editor = ctrl.getSurface().getEditor();
-      var newSelection = editor.selectAll(ctrl.getDocument(), surface.getSelection());
+      var newSelection = surface.selectAll(surface.getDocument(), surface.getSelection());
       surface.setSelection(newSelection);
       return true;
     } else {

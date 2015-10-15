@@ -1,8 +1,8 @@
 'use strict';
 
-var Command = require('./controller_command');
+var ControllerCommand = require('./controller_command');
 
-var Undo = Command.extend({
+var Undo = ControllerCommand.extend({
   static: {
     name: 'undo'
   },

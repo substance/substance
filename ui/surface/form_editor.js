@@ -1,16 +1,57 @@
 'use strict';
 
-var Substance = require('../../basics');
+var OO = require('../../basics/oo');
+var _ = require('../../basics/helpers');
+var Surface = require('./surface');
 var Document = require('../../document');
 var Transformations = Document.Transformations;
+var TextPropertyManager = require('../../document/text_property_manager');
+var Component = require('../component');
+var $$ = Component.$$;
 
-function FormEditor() {}
+/**
+ * FormEditor
+ *
+ * @class FormEditor
+ * @memberof module:ui/surface
+ * @extends module:ui/surface.Surface
+ */
+function FormEditor() {
+  Surface.apply(this, arguments);
+  this.textPropertyManager = new TextPropertyManager(this.props.doc);
+}
 
 FormEditor.Prototype = function() {
+
+  this.dispose = function() {
+    Surface.prototype.dispose.call(this);
+  };
 
   this.isContainerEditor = function() {
     return false;
   };
+  
+  this.render = function() {
+    var doc = this.props.doc;
+    var containerNode = doc.get(this.props.containerId);
+
+    var el = $$("div")
+      .addClass("container-node " + containerNode.id)
+      .attr({
+        spellCheck: false,
+        "data-id": containerNode.id,
+        "contenteditable": true
+      });
+
+    // node components
+    _.each(containerNode.nodes, function(nodeId) {
+      el.append(this._renderNode(nodeId));
+    }, this);
+
+    return el;
+  };
+
+  /* Editing behavior */
 
   // Selects the current property.
   this.selectAll = function(doc, selection) {
@@ -63,9 +104,7 @@ FormEditor.Prototype = function() {
       return this.insertText(tx, args);
     }
   };
-
 };
 
-Substance.initClass(FormEditor);
-
+OO.inherit(FormEditor, Surface);
 module.exports = FormEditor;

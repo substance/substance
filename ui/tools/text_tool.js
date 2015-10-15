@@ -14,9 +14,20 @@ var _ = require('../../basics/helpers');
 
 function TextTool() {
   SurfaceTool.apply(this, arguments);
+  this.context.toolManager.registerTool(this);
 }
 
 TextTool.Prototype = function() {
+
+  this.static = {
+    name: 'switchTextType',
+    command: 'switchTextType'
+  };
+
+  this.getInitialState = function() {
+    var state = this.context.toolManager.getCommandState(this);
+    return state;
+  };
 
   this.getTextCommands = function() {
     var surface = this.getSurface();
@@ -26,75 +37,14 @@ TextTool.Prototype = function() {
     return this.textCommands || {};
   };
 
-  this.isTextType = function(type) {
-    var isTextType = false;
-    var textCommands = this.getTextCommands();
-    _.each(textCommands, function(cmd) {
-      if (cmd.constructor.static.nodeData.type === type) {
-        isTextType = true;
-      }
-    });
-    return isTextType;
-  };
-
-  this.update = function(sel, surface) {
-    // Set disabled when not a property selection
-    if (!surface.isEnabled() || sel.isNull()) {
-      return this.setDisabled();
-    }
-
-    if (sel.isTableSelection()) {
-      return this.setState({
-        disabled: true,
-        currentContext: 'table'
-      });
-    } else if (sel.isContainerSelection()) {
-      return this.setState({
-        disabled: true,
-        currentContext: 'container'
-      });
-    }
-
-    var doc = this.getDocument();
-    var path = sel.getPath();
-    var node = doc.get(path[0]);
-    var commandName = this.getCommandName(node);
-    var parentNode = node.getRoot();
-    var currentContext = this.getContext(parentNode, path);
-
-    var newState = {
-      sel: sel,
-      disabled: !commandName,
-      currentCommand: commandName,
-      currentContext: currentContext,
-    };
-
-    this.setState(newState);
-  };
-
-  this.getContext = function(parentNode, path) {
-    if (parentNode.id === path[0]) {
-      return path[1];
-    } else {
-      return parentNode.type;
-    }
-  };
-
-  this.getCommandName = function(node) {
-    if (this.isTextType(node.type)) {
-      var textType = "make"+_.capitalize(node.type);
-      if (node.type === "heading") {
-        textType += node.level;
-      }
-      return textType;
-    }
+  this.dispose = function() {
+    this.context.toolManager.unregisterTool(this);
   };
 
   // UI Specific parts
   // ----------------
 
   this.render = function() {
-
     // Available text commands
     var textCommands = this.getTextCommands();
 
@@ -109,21 +59,10 @@ TextTool.Prototype = function() {
       el.addClass('disabled');
     }
 
-    // label/dropdown button
-    var isTextContext = textCommands[this.state.currentCommand];
-    var label;
-    if (isTextContext) {
-      label = textCommands[this.state.currentCommand].constructor.static.textTypeName;
-    } else if (this.state.currentContext) {
-      label = this.state.currentContext;
-    } else {
-      label = 'No selection';
-    }
-
     el.append($$('button')
       .addClass("toggle small").attr('href', "#")
       .attr('title', this.props.title)
-      .append(label)
+      .append(this.state.label)
       .on('click', this.toggleAvailableTextTypes)
     );
 
@@ -144,7 +83,6 @@ TextTool.Prototype = function() {
 
 
   this.handleClick = function(e) {
-
     e.preventDefault();
     // Modifies the tool's state so that state.open is undefined, which is nice
     // because it means the dropdown will be closed automatically

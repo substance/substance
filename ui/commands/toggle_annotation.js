@@ -90,7 +90,6 @@ ToggleAnnotationCommand.Prototype = function() {
 
   // Execute command and trigger transformations
   this.execute = function() {
-
     var annos = this.getAnnotationsForSelection();
     var sel = this.getSelection();
 
@@ -172,7 +171,6 @@ ToggleAnnotationCommand.Prototype = function() {
       result = args.result;
       return args;
     });
-
 
     return result;
   };

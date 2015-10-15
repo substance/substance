@@ -1,8 +1,8 @@
 'use strict';
 
-var Command = require('./controller_command');
+var ControllerCommand = require('./controller_command');
 
-var Redo = Command.extend({
+var Redo = ControllerCommand.extend({
   static: {
     name: 'redo'
   },

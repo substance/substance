@@ -7,8 +7,13 @@ var oo = require('./oo');
  * An adapter to access an object via path.
  *
  * @class PathAdapter
+ * @param {object} [obj] An object to operate on
  * @memberof module:Basics
+ * @example
+ * 
+ * var pathAdapter = new PathAdapter({a: "aVal", b: {b1: 'b1Val', b2: 'b2Val'}});
  */
+
 function PathAdapter(obj) {
   if (obj) {
     this.root = obj;
@@ -30,6 +35,16 @@ PathAdapter.Prototype = function() {
   // }
   this.childrenScope = false;
 
+  /**
+   * Get root object of the path adapter
+   *
+   * @return {object} The root object
+   * @method getRoot
+   * @memberof module:Basics.PathAdapter.prototype
+   * @example
+   * 
+   * pathAdapter.getRoot();
+   */
   this.getRoot = function() {
     return this.root || this;
   };
@@ -57,6 +72,17 @@ PathAdapter.Prototype = function() {
     return context;
   };
 
+  /**
+   * Get value at path
+   *
+   * @return {object} The root object
+   * @method getRoot
+   * @memberof module:Basics.PathAdapter.prototype
+   * @example
+   * 
+   * pathAdapter.get(['b', 'b1']);
+   * // => b1Val
+   */
   this.get = function(path) {
     if (_.isString(path)) {
       return this[path];
@@ -121,7 +147,7 @@ PathAdapter.Prototype = function() {
 
 };
 
-oo.initClass( PathAdapter );
+oo.initClass(PathAdapter);
 
 PathAdapter.Arrays = function() {
   PathAdapter.apply(this, arguments);

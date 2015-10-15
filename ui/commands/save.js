@@ -1,8 +1,8 @@
 'use strict';
 
-var Command = require('./command');
+var ControllerCommand = require('./controller_command');
 
-var Save = Command.extend({
+var Save = ControllerCommand.extend({
   static: {
     name: 'save'
   },

@@ -4,7 +4,14 @@ var $ = require('../../basics/jquery');
 var _ = require('../../basics/helpers');
 var OO = require('../../basics/oo');
 
-// context must have a getSurface() method.
+/**
+ * Surface Clipboard is owned by a module:ui/surface.FormEditor.
+ * 
+ *
+ * @class
+ * @memberof module:ui/surface
+ */
+
 var Clipboard = function(controller, htmlImporter, htmlExporter) {
 
   this.controller = controller;
@@ -27,13 +34,12 @@ var Clipboard = function(controller, htmlImporter, htmlExporter) {
   } else {
     this._onPaste = _.bind(this.onPaste, this);
   }
-
 };
 
 Clipboard.Prototype = function() {
 
   this.getSurface = function() {
-    return this.controller.getSurface();
+    return this.controller.getFocusedSurface();
   };
 
   this.attach = function(rootElement) {
@@ -91,16 +97,14 @@ Clipboard.Prototype = function() {
     this.onCopy(e);
     var surface = this.getSurface();
     if (!surface) return;
-    var editor = surface.getEditor();
     surface.transaction(function(tx, args) {
-      return editor.delete(tx, args);
+      return surface.delete(tx, args);
     });
   };
 
   this.pasteSubstanceData = function(data) {
     var surface = this.getSurface();
     if (!surface) return;
-    var editor = surface.getEditor();
     var doc = surface.getDocument();
     // try {
       var content = doc.newInstance();
@@ -127,7 +131,7 @@ Clipboard.Prototype = function() {
       surface.transaction(function(tx, args) {
         args.text = plainText;
         args.doc = content;
-        return editor.paste(tx, args);
+        return surface.paste(tx, args);
       });
     // } catch (error) {
     //   console.error(error);
@@ -138,7 +142,6 @@ Clipboard.Prototype = function() {
   this.pasteHtml = function(htmlDoc) {
     var surface = this.getSurface();
     if (!surface) return;
-    var editor = surface.getEditor();
     var logger = surface.getLogger();
     var doc = surface.getDocument();
     try {
@@ -157,7 +160,7 @@ Clipboard.Prototype = function() {
       surface.transaction(function(tx, args) {
         args.text = htmlDoc.body.textContent;
         args.doc = content;
-        return editor.paste(tx, args);
+        return surface.paste(tx, args);
       });
     } catch (error) {
       console.error(error);
@@ -170,7 +173,6 @@ Clipboard.Prototype = function() {
     var clipboardData = e.clipboardData;
     var surface = this.getSurface();
     if (!surface) return;
-    var editor = surface.getEditor();
     var types = {};
     for (var i = 0; i < clipboardData.types.length; i++) {
       types[clipboardData.types[i]] = true;
@@ -205,7 +207,7 @@ Clipboard.Prototype = function() {
     }
     // Fallback to plain-text in other cases
     var plainText = clipboardData.getData('text/plain');
-    if (surface.getEditor().isContainerEditor()) {
+    if (surface.isContainerEditor()) {
       var doc = surface.getDocument();
       var defaultTextType = doc.getSchema().getDefaultTextType();
       surface.transaction(function(tx, args) {
@@ -228,12 +230,12 @@ Clipboard.Prototype = function() {
           container.show(paragraph.id);
         }
         args.doc = pasteDoc;
-        return editor.paste(tx, args);
+        return surface.paste(tx, args);
       });
     } else {
       surface.transaction(function(tx, args) {
         args.text = plainText.split('').join('');
-        return editor.insertText(tx, args);
+        return surface.insertText(tx, args);
       });
     }
   };
@@ -303,7 +305,7 @@ Clipboard.Prototype = function() {
     if (!surface) return;
     try {
       // console.log("...selection before deletion", surface.getSelection().toString());
-      surface.getEditor().delete();
+      surface.delete();
     } catch (error) {
       console.error(error);
       this.logger.error(error);
@@ -335,19 +337,17 @@ Clipboard.Prototype = function() {
     this._contentDoc = null;
     var surface = this.getSurface();
     var sel = surface.getSelection();
-    var editor = surface.getEditor();
     var doc = surface.getDocument();
     if (wSel.rangeCount > 0 && !sel.isCollapsed()) {
       var wRange = wSel.getRangeAt(0);
       this._contentText = wRange.toString();
-      this._contentDoc = editor.copy(doc, sel);
+      this._contentDoc = surface.copy(doc, sel);
       // console.log("Clipboard._copySelection(): created a copy", this._contentDoc);
     } else {
       this._contentDoc = null;
       this._contentText = "";
     }
   };
-
 };
 
 OO.initClass(Clipboard);

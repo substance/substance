@@ -6,15 +6,17 @@ var $$ = Component.$$;
 var SurfaceTool = require('./surface_tool');
 var _ = require('../../basics/helpers');
 
+
 /**
- * Abstract class for annotation tools like StrongTool, EmphasisTool, LinkTool
- * 
- * Implements the SurfaceTool API.
+ * Abstract class for annotation tools like StrongTool, EmphasisTool, LinkTool.
+ *
+ * @class
+ * @extends module:ui/tools.SurfaceTool
+ * @memberof module:ui/tools
  */
 
 function AnnotationTool() {
   SurfaceTool.apply(this, arguments);
-
   this.context.toolManager.registerTool(this);
 }
 

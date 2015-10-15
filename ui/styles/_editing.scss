@@ -1,0 +1,32 @@
+/* The invisible incredible Clipboard element
+-----------------------------------------------------*/
+
+.clipboard {
+  position: fixed;
+  opacity: 0.0;
+  bottom: -1000px;
+}
+
+
+/* Custom selection and cursor
+----------------------------------------------------*/
+
+.cursor {
+  display: inline-block;
+  position: relative;
+  width: 0px;
+}
+
+.inner-cursor {
+  position: absolute;
+  top: -20px;
+  // bottom: 0px;
+  height: 25px;
+  background: #999;
+  width: 1px;
+  // border-left: solid #000 1px;
+}
+
+.selection-fragment {
+  background-color: #ddd;
+}

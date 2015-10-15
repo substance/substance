@@ -1,7 +1,7 @@
 "use strict";
 
 require('../phantomjs_shims');
-var ContainerEditor = require('../../../ui/container_editor');
+var ContainerEditor = require('../../../ui/surface/container_editor');
 var Component = require('../../../ui/component');
 var $$ = Component.$$;
 var Controller = require('../../../ui/controller');
@@ -34,8 +34,10 @@ QUnit.test("Set the selection after creating annotation.", function(assert) {
   var app = Component.mount($$(MyApp, {
     doc: doc,
     config: {
-      components: components,
-      commands: [],
+      controller: {
+        components: components,
+        commands: [],
+      }
     }
   }), $('#qunit-fixture'));
 

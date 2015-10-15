@@ -91,8 +91,8 @@ Document.Prototype = function() {
   this.clear = function() {
     var self = this;
     this.transaction(function(tx) {
-      _.each(self.data.nodes, function(id) {
-        tx.delete(id);
+      _.each(self.data.nodes, function(node) {
+        tx.delete(node.id);
       });
     });
     this.documentDidLoad();
