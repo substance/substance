@@ -9,5 +9,5 @@ module.exports = {
   'save': 'Save',
   'untitled': 'Untitled',
   'manage': 'Manage',
-  'toc': 'Table Of Contents'
+  'toc': 'Contents'
 };
