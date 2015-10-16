@@ -108,7 +108,8 @@ ToggleAnnotationCommand.Prototype = function() {
     } else if (this.canDelete(annos, sel)) {
       return this.executeDelete();
     } else {
-      console.warn('ToggleAnnotation.execute: Case not handled.');
+      // console.warn('ToggleAnnotation.execute: Case not handled.');
+      return false;
     }
   };
 
