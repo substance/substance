@@ -17,18 +17,9 @@ var _ = require('../../basics/helpers');
 
 function AnnotationTool() {
   SurfaceTool.apply(this, arguments);
-  this.context.toolManager.registerTool(this);
 }
 
 AnnotationTool.Prototype = function() {
-  this.getInitialState = function() {
-    var state = this.context.toolManager.getCommandState(this);
-    return state;
-  };
-
-  this.dispose = function() {
-    this.context.toolManager.unregisterTool(this);
-  };
 
   // UI-specific
   // --------------------------

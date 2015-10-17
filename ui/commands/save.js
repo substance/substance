@@ -7,8 +7,19 @@ var Save = ControllerCommand.extend({
     name: 'save'
   },
 
+  getCommandState: function() {
+    var doc = this.getDocument();
+    return {
+      disabled: !doc.__dirty,
+      active: false
+    };
+  },
+
   execute: function() {
     this.getController().saveDocument();
+    return {
+      status: 'saving-process-started'
+    };
   }
 });
 

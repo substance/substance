@@ -36,7 +36,7 @@ ContextToggles.Prototype = function() {
         $$(Icon, { icon: panelClass.icon })
       );
       toggle.append(
-        $$('span').addClass('label').append(this.i18n.t(panelId))
+        $$('span').addClass('label').append(' '+this.i18n.t(panelId))
       );
       el.append(toggle);
     }, this);
@@ -46,7 +46,7 @@ ContextToggles.Prototype = function() {
   this.onContextToggleClick = function(e) {
     e.preventDefault();
     var newContext = $(e.currentTarget).attr("data-id");
-    this.send('switch-context', newContext);
+    this.send('switchContext', newContext);
   };
 };
 

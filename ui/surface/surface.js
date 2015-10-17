@@ -165,6 +165,10 @@ Surface.Prototype = function() {
     return this.element;
   };
 
+  this.getController = function() {
+    return this.controller;
+  };
+
   this.getDocument = function() {
     return this.props.doc;
   };

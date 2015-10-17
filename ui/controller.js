@@ -266,7 +266,8 @@ Controller.Prototype = function() {
    */
   this.registerSurface = function(surface) {
     surface.connect(this, {
-      'selection:changed': this._onSelectionChanged
+      'selection:changed': this._onSelectionChanged,
+      'command:executed': this._onCommandExecuted
     });
     this.surfaces[surface.getName()] = surface;
   };
@@ -316,7 +317,7 @@ Controller.Prototype = function() {
   // TODO: Remove. Let's only allow Document.transaction and Surface.transaction to
   // avoid confusion
   this.transaction = function() {
-    var surface = this.getSurface();
+    var surface = this.getFocusedSurface();
     if (!surface) {
       throw new Error('No focused surface!');
     }
@@ -363,7 +364,6 @@ Controller.Prototype = function() {
   };
 
   this.onDocumentChanged = function(change, info) {
-
     // On undo/redo
     if (info.replay) {
       var selection = change.after.selection;
@@ -398,9 +398,19 @@ Controller.Prototype = function() {
     // No-op: Please override in custom controller class
   };
 
+  this.onCommandExecuted = function(info, commandName, cmd) {
+    /* jshint unused: false */
+    // No-op: Please override in custom controller class
+  };
+
   this._onSelectionChanged = function(sel, surface) {
     this.emit('selection:changed', sel, surface);
     this.onSelectionChanged(sel, surface);
+  };
+
+  this._onCommandExecuted = function(info, commandName, cmd) {
+    this.emit('command:executed', info, commandName, cmd);
+    this.onCommandExecuted(info, commandName, cmd);
   };
 
   /**
@@ -449,10 +459,10 @@ Controller.Prototype = function() {
       logger.info('Saving ...');
       doc.__isSaving = true;
       // Pass saving logic to the user defined callback if available
-      if (this.props.config.onSave) {
+      if (this.props.onSave) {
         // TODO: calculate changes since last save
         var changes = [];
-        this.props.config.onSave(doc, changes, function(err) {
+        this.props.onSave(doc, changes, function(err) {
           doc.__isSaving = false;
           if (err) {
             logger.error(err.message || err.toString());
@@ -463,7 +473,7 @@ Controller.Prototype = function() {
           }
         }.bind(this));
       } else {
-        logger.error('Document saving is not handled at the moment. Make sure onDocumentSave is passed in the config object');
+        logger.error('Document saving is not handled at the moment. Make sure onSave is passed in the props');
       }
     }
   };

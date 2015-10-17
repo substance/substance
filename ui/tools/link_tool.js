@@ -18,10 +18,10 @@ var EditLinkPrompt = Component.extend({
   // Tried setting .htmlProp('autofocus', true) in render
   // But this only worked for the first time
   didMount: function() {
-    var $el = this.refs.url.$el;
-    _.delay(function() {
-      $el.focus();
-    }, 0);
+    // var $el = this.refs.url.$el;
+    // _.delay(function() {
+    //   $el.focus();
+    // }, 0);
   },
 
   onDelete: function(e) {

@@ -70,7 +70,6 @@ SwitchTextType.Prototype = function() {
   };
 
   this.getCommandState = function() {
-    console.log('get command state');
     var sel = this.getSelection();
     var surface = this.getSurface();
 

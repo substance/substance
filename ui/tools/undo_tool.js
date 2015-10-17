@@ -1,22 +1,11 @@
 'use strict';
 
-var DocumentTool = require('./document_tool');
+var ControllerTool = require('./controller_tool');
 
-var UndoTool = DocumentTool.extend({
-
+var UndoTool = ControllerTool.extend({
   static: {
     name: 'undo',
     command: 'undo'
-  },
-
-  update: function(change, info) {
-    /* jshint unused:false */
-    var doc = this.getDocument();
-    if (doc.done.length===0) {
-      this.setDisabled();
-    } else {
-      this.setEnabled();
-    }
   }
 });
 

@@ -96,7 +96,7 @@ TextTool.Prototype = function() {
   this.toggleAvailableTextTypes = function(e) {
     e.preventDefault();
     e.stopPropagation();
-    if (this.isDisabled()) return;
+    if (this.state.disabled) return;
 
     // HACK: This only updates the view state state.open is not set on the tool itself
     // That way the dropdown automatically closes when the selection changes

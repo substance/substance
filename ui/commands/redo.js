@@ -7,6 +7,15 @@ var Redo = ControllerCommand.extend({
     name: 'redo'
   },
 
+  getCommandState: function() {
+    var doc = this.getDocument();
+
+    return {
+      disabled: doc.undone.length === 0,
+      active: false
+    };
+  },
+
   execute: function() {
     var doc = this.getDocument();
     if (doc.undone.length>0) {
