@@ -127,7 +127,7 @@ Surface.Prototype = function() {
     return this.commandRegistry.get(commandName);
   };
 
-  this.executeCommand = function(commandName) {
+  this.executeCommand = function(commandName, args) {
     var cmd = this.getCommand(commandName);
     if (!cmd) {
       console.warn('command', commandName, 'not registered on controller');
@@ -135,7 +135,7 @@ Surface.Prototype = function() {
     }
 
     // Run command
-    var info = cmd.execute();
+    var info = cmd.execute(args);
     if (info) {
       this.emit('command:executed', info, commandName, cmd);
       // TODO: We want to replace this with a more specific, scoped event
