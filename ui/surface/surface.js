@@ -727,10 +727,12 @@ Surface.Prototype = function() {
   this.onNativeBlur = function() {
     // console.log('Native blur on surface', this.__id__);
     this.textPropertyManager.renderSelection(this.selection);
+    this.isNativeFocused = false;
     this.skipNextFocusEvent = false;
   };
 
   this.onNativeFocus = function() {
+    this.isNativeFocused = true;
     // console.log('Native focus on surface', this.__id__);
     // ARRR: native focus event is triggered before the DOM selection is there
     window.setTimeout(function() {

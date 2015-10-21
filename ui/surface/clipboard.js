@@ -172,7 +172,8 @@ Clipboard.Prototype = function() {
   this.onPaste = function(e) {
     var clipboardData = e.clipboardData;
     var surface = this.getSurface();
-    if (!surface) return;
+
+    if (!surface || !surface.isNativeFocused) return;
     var types = {};
     for (var i = 0; i < clipboardData.types.length; i++) {
       types[clipboardData.types[i]] = true;
