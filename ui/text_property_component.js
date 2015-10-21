@@ -66,9 +66,8 @@ TextPropertyComponent.Prototype = function() {
       }
 
       if (node.type === 'cursor') {
-        return $$('div')
-          .addClass('cursor')
-          .append($$('div').addClass('inner-cursor'));
+        return $$('span')
+          .addClass('cursor');
       }
 
       var el = $$(ComponentClass, {
