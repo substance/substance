@@ -20,7 +20,7 @@ FigureComponent.Prototype = function() {
       .attr("data-id", this.props.node.id);
 
     el.append($$('div')
-      .addClass('label').attr("contentEditable", false)
+      .addClass('label').attr("contenteditable", false)
       .append(this.props.node.label)
     );
     el.append(
@@ -33,6 +33,7 @@ FigureComponent.Prototype = function() {
     );
     el.append($$('div')
       .addClass('figure-content')
+      .attr('contenteditable', false)
       .append(
         $$(ContentComponentClass, {
           doc: this.props.doc,

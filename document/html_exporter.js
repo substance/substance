@@ -125,6 +125,10 @@ HtmlExporter.Prototype = function() {
     }
   };
 
+  this.getDocument = function() {
+    return this.state.doc;
+  };
+
   this.createXmlDocument = function() {
     // We provide xmlns="http://www.w3.org/1999/xhtml" so we don't get the whole doc
     // polluted with xmlns attributes

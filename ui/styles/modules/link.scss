@@ -3,9 +3,9 @@
   border-bottom: 1px solid #CEDFF3;
 }
 
-// Link tool prompt
+// Link tool prompt (also used for Embeds)
 
-.toolbar .tool.link .prompt {
+.toolbar .tool.prompt .prompt {
   padding: 15px;
   padding-bottom: 0px;
 
@@ -38,9 +38,4 @@
     min-width: auto;
     padding: 0 10px;
   }
-
 }
-
-
-
-

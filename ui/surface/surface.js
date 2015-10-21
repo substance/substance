@@ -127,7 +127,7 @@ Surface.Prototype = function() {
     return this.commandRegistry.get(commandName);
   };
 
-  this.executeCommand = function(commandName) {
+  this.executeCommand = function(commandName, args) {
     var cmd = this.getCommand(commandName);
     if (!cmd) {
       console.warn('command', commandName, 'not registered on controller');
@@ -135,7 +135,7 @@ Surface.Prototype = function() {
     }
 
     // Run command
-    var info = cmd.execute();
+    var info = cmd.execute(args);
     if (info) {
       this.emit('command:executed', info, commandName, cmd);
       // TODO: We want to replace this with a more specific, scoped event
@@ -727,10 +727,12 @@ Surface.Prototype = function() {
   this.onNativeBlur = function() {
     // console.log('Native blur on surface', this.__id__);
     this.textPropertyManager.renderSelection(this.selection);
+    this.isNativeFocused = false;
     this.skipNextFocusEvent = false;
   };
 
   this.onNativeFocus = function() {
+    this.isNativeFocused = true;
     // console.log('Native focus on surface', this.__id__);
     // ARRR: native focus event is triggered before the DOM selection is there
     window.setTimeout(function() {

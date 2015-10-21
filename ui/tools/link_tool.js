@@ -126,7 +126,7 @@ LinkTool.Prototype = function() {
     }
 
     var el = $$('div')
-      .addClass('link tool');
+      .addClass('link tool prompt');
 
     if (this.state.disabled) {
       el.addClass('disabled');
