@@ -19,18 +19,18 @@ ContextToggles.Prototype = function() {
     var contextId = this.props.contextId;
     var componentRegistry = this.context.componentRegistry;
 
-    var el = $$('div').addClass("context-toggles context-toggles-component");
+    var el = $$('div').addClass("sc-context-toggles");
     _.each(panelOrder, function(panelId) {
       var panelClass = componentRegistry.get(panelId);
       var toggle = $$('a')
-        .addClass("toggle-context")
+        .addClass("se-context-toggle")
         .attr({
           href: "#",
           "data-id": panelClass.contextId,
         })
         .on('click', this.onContextToggleClick);
       if (panelClass.contextId === contextId) {
-        toggle.addClass("active");
+        toggle.addClass("sm-active");
       }
       toggle.append(
         $$(Icon, { icon: panelClass.icon })

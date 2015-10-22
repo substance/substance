@@ -1,56 +1,25 @@
-.context-toggles-component {
+.sc-context-toggles {
   height: 40px;
   border-bottom: 1px solid #ddd;
-}
 
-.context-toggles-component a.toggle-context {
-  display: block;
-  float: left;
-  height: 40px;
-  line-height: 40px;
-  padding: 0px 20px;
-  color: #444;
-  font-size: 12px;
-  font-weight: 600;
-}
+  .se-context-toggle {
+    display: block;
+    float: left;
+    height: 40px;
+    line-height: 40px;
+    padding: 0px 20px;
+    color: #444;
+    font-size: 12px;
+    font-weight: 600;
 
-.context-toggles-component .dialog {
-  float: right;
-  display: block;
-  height: 40px;
-  line-height: 40px;
-  padding: 0px 20px;
-  color: white;
-  font-size: 12px;
-  font-weight: 600;
-  background: #444;
-  color: white;
-  border-bottom: 1px solid rgba(0,0,0,0.2);
-}
+    &:hover {
+      background: #eee;
+      border-bottom: 1px solid #bbb;
+    }
 
-.context-toggles-component .dialog.editSubjectReference {
-  background: rgba(145, 187, 4, 1);
-}
-
-.context-toggles-component .dialog.tagentity {
-  background: rgba(11, 157, 217, 1);
-}
-
-.context-toggles-component .dialog .close-dialog {
-  padding: 5px 10px;
-  color: rgba(255,255,255,0.4);
-}
-
-.context-toggles-component .dialog .close-dialog:hover {
-  color: rgba(255,255,255, 1);
-}
-
-.context-toggles-component a.toggle-context:hover {
-  background: #eee;
-  border-bottom: 1px solid #bbb;
-}
-
-.context-toggles-component a.toggle-context.active {
-  background: #eee;
-  border-bottom: 1px solid #444;
+    &.sm-active {
+      background: #eee;
+      border-bottom: 1px solid #444;
+    }
+  }
 }
