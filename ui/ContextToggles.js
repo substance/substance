@@ -6,7 +6,7 @@ var OO = require('../basics/oo');
 
 var Component = require('./component');
 var $$ = Component.$$;
-var Icon = require('./font_awesome_icon');
+var Icon = require('./FontAwesomeIcon');
 
 function ContextToggles() {
   Component.apply(this, arguments);

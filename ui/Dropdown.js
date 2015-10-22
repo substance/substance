@@ -5,11 +5,11 @@ var OO = require('../basics/oo');
 var Component = require('./component');
 var $$ = Component.$$;
 
-function DropdownComponent() {
+function Dropdown() {
   Component.apply(this, arguments);
 }
 
-DropdownComponent.Prototype = function() {
+Dropdown.Prototype = function() {
 
   this.getInitialState = function() {
     return {
@@ -65,6 +65,6 @@ DropdownComponent.Prototype = function() {
   };
 };
 
-OO.inherit(DropdownComponent, Component);
+OO.inherit(Dropdown, Component);
 
-module.exports = DropdownComponent;
+module.exports = Dropdown;
