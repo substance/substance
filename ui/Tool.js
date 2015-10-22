@@ -1,7 +1,7 @@
 'use strict';
 
-var OO = require('../../basics/oo');
-var Component = require('../component');
+var OO = require('../basics/oo');
+var Component = require('./component');
 
 function Tool() {
   Component.apply(this, arguments);

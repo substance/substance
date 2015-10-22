@@ -1,8 +1,8 @@
 'use strict';
 
-var OO = require('../../basics/oo');
-var Component = require('../component');
-var Tool = require('./tool');
+var OO = require('../basics/oo');
+var Component = require('./component');
+var Tool = require('./Tool');
 var $$ = Component.$$;
 
 /**

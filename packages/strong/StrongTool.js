@@ -1,6 +1,6 @@
 'use strict';
 
-var AnnotationTool = require('./annotation_tool');
+var AnnotationTool = require('../../ui/AnnotationTool');
 
 var StrongTool = AnnotationTool.extend({
   static: {

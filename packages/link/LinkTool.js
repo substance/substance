@@ -1,9 +1,9 @@
 'use strict';
 
 var OO = require('../../basics/oo');
-var Component = require('../component');
+var Component = require('../../ui/component');
 var $$ = Component.$$;
-var AnnotationTool = require('./annotation_tool');
+var AnnotationTool = require('../../ui/AnnotationTool');
 var _ = require('../../basics/helpers');
 
 var EditLinkPrompt = Component.extend({

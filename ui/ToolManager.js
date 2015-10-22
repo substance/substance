@@ -1,8 +1,8 @@
 'use strict';
 
 var OO = require('../basics/oo');
-var ControllerTool = require('./tools/controller_tool');
-var SurfaceTool = require('./tools/surface_tool');
+var ControllerTool = require('./ControllerTool');
+var SurfaceTool = require('./SurfaceTool');
 var without = require('lodash/array/without');
 
 var DEFAULT_TOOLSTATE = {

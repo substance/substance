@@ -1,6 +1,6 @@
-var SurfaceTool = require('./surface_tool');
-var _ = require('substance/basics/helpers');
-var Component = require('../component');
+var SurfaceTool = require('../../ui/SurfaceTool');
+var _ = require('../../basics/helpers');
+var Component = require('../../ui/component');
 var $$ = Component.$$;
 
 

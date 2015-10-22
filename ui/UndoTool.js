@@ -1,6 +1,6 @@
 'use strict';
 
-var ControllerTool = require('./controller_tool');
+var ControllerTool = require('./ControllerTool');
 
 var UndoTool = ControllerTool.extend({
   static: {
