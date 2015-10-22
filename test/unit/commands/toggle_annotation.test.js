@@ -1,7 +1,7 @@
 'use strict';
 
 var containerAnnoSample = require('../../fixtures/container_anno_sample');
-var ToggleAnnotationCommand = require('../../../ui/commands/toggle_annotation');
+var AnnotationCommand = require('../../../ui/AnnotationCommand');
 var docHelpers = require('../../../document/helpers');
 
 var StubSurface = require('../ui/stub_surface');
@@ -11,14 +11,14 @@ QUnit.module('Commands/toggleAnnotation');
 // Setup
 // -----------------------
 
-var ToggleStrongCommand = ToggleAnnotationCommand.extend({
+var ToggleStrongCommand = AnnotationCommand.extend({
   static: {
     name: 'toggleStrong',
     annotationType: 'strong'
   }
 });
 
-var ToggleContainerAnnoCommand = ToggleAnnotationCommand.extend({
+var ToggleContainerAnnoCommand = AnnotationCommand.extend({
   static: {
     name: 'toggleContainerAnno',
     annotationType: 'test-container-anno'

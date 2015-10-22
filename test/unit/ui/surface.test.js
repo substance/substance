@@ -9,7 +9,7 @@ var simple = require('../../fixtures/simple');
 var createAnnotation = require('../../../document/transformations/create_annotation');
 
 var components = {
-  "paragraph": require('../../../ui/nodes/paragraph_component')
+  "paragraph": require('../../../packages/paragraph/ParagraphComponent')
 };
 
 QUnit.uiModule('Surface');
