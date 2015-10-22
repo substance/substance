@@ -1,4 +1,4 @@
-"use strict";
+'use strict';
 
 var OO = require('../basics/oo');
 var Component = require('./component');
@@ -34,7 +34,7 @@ TextPropertyComponent.Prototype = function() {
     var annotations = this.getAnnotations();
 
     var el = $$(this.props.tagName || 'span')
-      .addClass("text-property")
+      .addClass('sc-text-property')
       .attr({
         "data-path": this.props.path.join('.'),
         spellCheck: false,
@@ -58,16 +58,13 @@ TextPropertyComponent.Prototype = function() {
       }
       fragmentCounters[id] = fragmentCounters[id]+1;
 
-      
       var ComponentClass = componentRegistry.get(node.type);
-
       if (!ComponentClass) {
         ComponentClass = AnnotationComponent;
       }
 
       if (node.type === 'cursor') {
-        return $$('span')
-          .addClass('cursor');
+        return $$('span').addClass('se-cursor')
       }
 
       var el = $$(ComponentClass, {
@@ -80,15 +77,15 @@ TextPropertyComponent.Prototype = function() {
       // special support for container annotation fragments
       if (node.type === "container_annotation_fragment") {
         el.addClass(node.anno.getTypeNames().join(' ').replace(/_/g, "-"));
-        el.addClass("annotation-fragment");
+        el.addClass("se-annotation-fragment");
       } else if (node.type === "container-annotation-anchor") {
         el.addClass(node.anno.getTypeNames().join(' ').replace(/_/g, "-"));
-        el.addClass("anchor");
+        el.addClass("se-anchor");
         el.addClass(node.isStart?"start-anchor":"end-anchor");
       } else if (node.type === "cursor") {
-        el.addClass('cursor');
+        el.addClass('se-cursor');
       } else if (node.type === "selection-fragment") {
-        el.addClass('selection-fragment');
+        el.addClass('se-selection-fragment');
       }
       return el;
     };

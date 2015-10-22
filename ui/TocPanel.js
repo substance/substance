@@ -1,10 +1,10 @@
 "use strict";
 
-var _ = require('../../basics/helpers');
-var OO = require('../../basics/oo');
-var Component = require('../component');
+var _ = require('../basics/helpers');
+var OO = require('../basics/oo');
+var Component = require('./component');
 var $$ = Component.$$;
-var Panel = require('./panel');
+var Panel = require('./Panel');
 
 function TocPanel() {
   Panel.apply(this, arguments);

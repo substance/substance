@@ -1,12 +1,12 @@
 'use strict';
 
-var $ = require('../../basics/jquery');
-var _ = require('../../basics/helpers');
-var OO = require('../../basics/oo');
+var $ = require('../basics/jquery');
+var _ = require('../basics/helpers');
+var OO = require('../basics/oo');
 
-var Component = require('../component');
+var Component = require('./component');
 var $$ = Component.$$;
-var Icon = require('../font_awesome_icon');
+var Icon = require('./font_awesome_icon');
 
 function ContextToggles() {
   Component.apply(this, arguments);
@@ -19,7 +19,7 @@ ContextToggles.Prototype = function() {
     var contextId = this.props.contextId;
     var componentRegistry = this.context.componentRegistry;
 
-    var el = $$('div').addClass("context-toggles");
+    var el = $$('div').addClass("context-toggles context-toggles-component");
     _.each(panelOrder, function(panelId) {
       var panelClass = componentRegistry.get(panelId);
       var toggle = $$('a')

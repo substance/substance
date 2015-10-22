@@ -1,0 +1,13 @@
+.sc-text-property {
+  .se-cursor {
+    outline: 1px solid #999;
+  }
+
+  .se-selection-fragment {
+    background-color: #ddd;
+  }
+
+  .se-container-annotation.se-anchor {
+    position: relative;
+  }
+}

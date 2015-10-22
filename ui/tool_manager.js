@@ -1,10 +1,9 @@
 'use strict';
 
 var OO = require('../basics/oo');
-var _ = require('../basics/helpers');
-
 var ControllerTool = require('./tools/controller_tool');
 var SurfaceTool = require('./tools/surface_tool');
+var without = require('lodash/array/without');
 
 var DEFAULT_TOOLSTATE = {
   disabled: true,
@@ -46,14 +45,12 @@ ToolManager.Prototype = function() {
   };
 
   this.getCommandState = function(tool) {
-    var commandName = tool.constructor.static.command;
+    var cmd = this.getCommand(tool);
 
-    var surface = this.controller.getFocusedSurface();
-    if (surface) {
-      var cmd = surface.getCommand(commandName);
-      return cmd.getCommandState();
+    if (cmd) {
+      return cmd.getCommandState();  
     } else {
-      return DEFAULT_TOOLSTATE;
+      return DEFAULT_TOOLSTATE;  
     }
   };
 
@@ -62,7 +59,7 @@ ToolManager.Prototype = function() {
   };
 
   this.unregisterTool = function(tool) {
-    this.tools = _.without(this.tools, tool);
+    this.tools = without(this.tools, tool);
   };
 
   // Get command for a certain tool
@@ -79,21 +76,10 @@ ToolManager.Prototype = function() {
 
   // Just updates all tool states
   this.updateTools = function() {
-    _.each(this.tools, function(tool) {
-      var cmd = this.getCommand(tool);
-      if (cmd) {
-        var state = cmd.getCommandState();
-        tool.setState(state);
-      } else {
-        // this.getCommand returns false if there is no focused Surface, which is a case 
-        // where we don't need to print a warning for.
-        // if (cmd === undefined) {
-        //   console.warn('Command', tool.constructor.static.command, 
-        //     'not found for tool', tool.constructor.static.name);
-        // }
-        tool.setState(DEFAULT_TOOLSTATE);
-      }
-    }, this);
+    this.tools.forEach(function(tool) {
+      var state = this.getCommandState(tool);
+      tool.setState(state);
+    }.bind(this));
   };
 };
 

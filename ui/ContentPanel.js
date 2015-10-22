@@ -1,12 +1,12 @@
 'use strict';
 
-var $ = require('../../basics/jquery');
-var _ = require('../../basics/helpers');
-var OO = require('../../basics/oo');
-var Component = require('../component');
+var $ = require('../basics/jquery');
+var _ = require('../basics/helpers');
+var OO = require('../basics/oo');
+var Component = require('./component');
 var $$ = Component.$$;
-var Panel = require("./panel");
-var Scrollbar = require("./scrollbar");
+var Panel = require("./Panel");
+var Scrollbar = require("./Scrollbar");
 
 function ContentPanel() {
   Panel.apply(this, arguments);

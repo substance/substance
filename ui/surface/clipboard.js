@@ -45,7 +45,7 @@ Clipboard.Prototype = function() {
   this.attach = function(rootElement) {
     this.el = window.document.createElement('div');
     this.$el = $(this.el);
-    this.$el.prop("contentEditable", "true").addClass('clipboard');
+    this.$el.prop('contenteditable', 'true').addClass('clipboard');
     rootElement.appendChild(this.el);
 
     rootElement.addEventListener('keydown', this._onKeyDown, false);

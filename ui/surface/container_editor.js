@@ -66,7 +66,7 @@ ContainerEditor.Prototype = function() {
     var containerNode = doc.get(this.props.containerId);
 
     var el = $$("div")
-      .addClass("container-node " + containerNode.id)
+      .addClass('surface container-node ' + containerNode.id)
       .attr({
         spellCheck: false,
         "data-id": containerNode.id,

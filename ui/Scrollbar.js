@@ -1,8 +1,8 @@
 'use strict';
 
-var $ = require('../../basics/jquery');
-var OO = require('../../basics/oo');
-var Component = require('../component');
+var $ = require('../basics/jquery');
+var OO = require('../basics/oo');
+var Component = require('./component');
 var $$ = Component.$$;
 
 // A rich scrollbar implementation that supports highlights
