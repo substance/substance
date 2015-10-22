@@ -9,7 +9,6 @@
   "main": "index.js",
   "scripts": {
     "test": "gulp build-test && gulp test",
-    "karma": "./node_modules/.bin/karma start",
     "doc": "./node_modules/.bin/jsdoc -r -c .jsdoc -d ./dist/doc ./data ./basics ./document ./ui doc/index.md"
   },
   "author": "",
@@ -33,13 +32,6 @@
     "gulp-util": "^3.0.4",
     "gulp-yuidoc": "^0.1.2",
     "jsdoc": "^3.3.3",
-    "karma": "^0.13.10",
-    "karma-chrome-launcher": "^0.1.12",
-    "karma-commonjs": "oliver----/karma-commonjs#patched",
-    "karma-coverage": "^0.4.2",
-    "karma-jquery": "^0.1.0",
-    "karma-qunit": "^0.1.4",
-    "karma-sinon": "^1.0.4",
     "node-qunit-phantomjs": "^1.2.1",
     "qunitjs": "^1.18.0",
     "sinon": "^1.16.1",
