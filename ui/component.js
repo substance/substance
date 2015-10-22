@@ -1300,6 +1300,8 @@ Component.$$ = function() {
     if (arguments.length === 2) {
       content.setProps(arguments[1]);
     }
+  } else if (arguments[0] === undefined) {
+    throw new Error('Provided Component was undefined.')
   } else {
     throw new Error('Illegal usage of Component.$$.');
   }
