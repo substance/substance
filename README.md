@@ -252,13 +252,13 @@ $ npm start
 
 Then open http://localhost:4201/test in your browser.
 
-3. Running test-suite using Karma to generate a code coverage report.
+3. Creating a test coverage report.
 
 ```
-$ npm run karma
+$ npm run coverage
 ```
 
-The report will be stored in the `coverage` folder.
+The report is stored in the `coverage` folder.
 
 
 ## Roadmap

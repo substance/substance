@@ -12,8 +12,10 @@ var yuidoc =  require('gulp-yuidoc');
 var browserify = require('browserify');
 var uglify = require('gulp-uglify');
 var sourcemaps = require('gulp-sourcemaps');
-// var qunit = require('node-qunit-phantomjs');
-var qunit = require('gulp-qunit');
+var qunit = require('node-qunit-phantomjs');
+// var qunit = require('gulp-qunit');
+var istanbul = require('browserify-istanbul');
+var istanbulReport = require('gulp-istanbul-report');
 
 gulp.task('doc', function() {
   return gulp.src(["index.js", "./src/**/*.js"])
@@ -51,10 +53,13 @@ gulp.task('build', ['lint'], function() {
     .pipe(gulp.dest('./dist'));
 });
 
-gulp.task('build-test', function() {
-  return glob("test/**/*.test.js", {}, function (err, testfiles) {
-    browserify({ debug: true })
-    .add(path.join(__dirname, 'test', 'test-globals.js'))
+var _buildTestBundle = function(testfiles, options) {
+  options = options || {};
+  var b = browserify({ debug: true });
+  if (options.withInstrumentaion) {
+    b = b.transform(istanbul);
+  }
+  return b.add(path.join(__dirname, 'test', 'test-globals.js'))
     .add(testfiles.map(function(file) {
       return path.join(__dirname, file);
     }))
@@ -65,14 +70,31 @@ gulp.task('build-test', function() {
     .on('error', gutil.log)
     .pipe(sourcemaps.write('./'))
     .pipe(gulp.dest('./test/tmp'));
+}
+
+gulp.task('build:test', ['lint'], function() {
+  var testfiles = glob.sync("test/**/*.test.js");
+  return _buildTestBundle(testfiles);
+});
+
+gulp.task('build:coverage', function() {
+  var testfiles = glob.sync("test/**/*.test.js");
+  return _buildTestBundle(testfiles, { withInstrumentaion: true });
+});
+
+gulp.task('test', ['build:test'], function() {
+  return qunit('./test/index.html');
+});
+
+gulp.task('coverage', ['build:coverage'], function() {
+  qunit('./test/index.html', {
+    customRunner: path.join(__dirname, 'test/run-phantomjs.js')
+  }, function() {
+    gulp.src('./coverage/coverage.json')
+    .pipe(istanbulReport({
+      reporters: ['html']
+    }));
   });
 });
-
-gulp.task('qunit', ['build-test'], function() {
-  return gulp.src('./test/index.html')
-    .pipe(qunit());
-});
-
-gulp.task('test', ['lint', 'qunit']);
 
 gulp.task('default', ['build']);
