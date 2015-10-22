@@ -11,7 +11,7 @@ var Selection = require('../document/selection');
 
 // Setup default I18n
 var I18n = require('./i18n');
-I18n.instance.load(require('./i18n/en'));
+I18n.instance.load(require('../i18n/en'));
 
 /**
  * Controls Substance infrastructure. Needs to be supplied as a top level instance

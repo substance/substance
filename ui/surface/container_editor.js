@@ -4,7 +4,7 @@ var OO = require('../../basics/oo');
 var _ = require('../../basics/helpers');
 var Component = require('../component');
 var FormEditor = require('./form_editor');
-var UnsupporedNode = require('../nodes/unsupported_node');
+var UnsupportedNode = require('../UnsupportedNode');
 var TextPropertyManager = require('../../document/text_property_manager');
 var Document = require('../../document');
 var EditingBehavior = require('../../document/editing_behavior');
@@ -113,7 +113,7 @@ ContainerEditor.Prototype = function() {
     var ComponentClass = componentRegistry.get(node.type);
     if (!ComponentClass) {
       console.error('Could not resolve a component for type: ' + node.type);
-      ComponentClass = UnsupporedNode;
+      ComponentClass = UnsupportedNode;
     }
     return $$(ComponentClass, {
       doc: doc,

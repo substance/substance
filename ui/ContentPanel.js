@@ -46,22 +46,22 @@ ContentPanel.Prototype = function() {
           position: 'absolute',
           overflow: 'auto'
         })
-        .append(this.renderContentEditor())
+        .append(this.renderContentContainer())
         .on('scroll', this.onScroll)
     );
     return el;
   };
 
-  this.renderContentEditor = function() {
+  this.renderContentContainer = function() {
     var doc = this.props.doc;
     var containerNode = doc.get(this.props.containerId);
     var componentRegistry = this.context.componentRegistry;
-    var ContentContainerClass = componentRegistry.get('content_editor');
+    var ContentContainerClass = componentRegistry.get('content-container');
 
     return $$(ContentContainerClass, {
       doc: doc,
       node: containerNode,
-    }).ref("contentEditor");
+    }).ref("contentContainer");
   };
 
   this.onHighlightsUpdated = function(highlights) {
