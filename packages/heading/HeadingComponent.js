@@ -13,7 +13,7 @@ HeadingComponent.Prototype = function() {
 
   this.render = function() {
     return $$('div')
-      .addClass("content-node heading level-"+this.props.node.level)
+      .addClass("sc-heading sm-level-"+this.props.node.level)
       .attr("data-id", this.props.node.id)
       .append($$(TextProperty, {
         doc: this.props.doc,
