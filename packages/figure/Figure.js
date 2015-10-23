@@ -1,10 +1,11 @@
-var Substance = require('substance');
-var $ = Substance.$;
+
+var $ = require('../../util/jquery');
+var DocumentNode = require('../../model/DocumentNode');
 
 // Abstract interface
 // There are ImageFigures, TableFigures, VideoFigures
 
-var Figure = Substance.Document.Node.extend({
+var Figure = DocumentNode.extend({
   name: "figure",
   properties: {
     "title": "string",

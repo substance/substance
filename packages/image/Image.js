@@ -1,7 +1,7 @@
-var Substance = require('substance');
-var $ = require('substance/basics/jquery');
+var $ = require('../../util/jquery');
+var DocumentNode = require('../../model/DocumentNode');
 
-var Image = Substance.Document.Node.extend({
+var Image = DocumentNode.extend({
   name: "image",
   properties: {
     "src": "string",
@@ -28,7 +28,7 @@ Image.static.fromHtml = function($el, converter) {
 
 // HtmlExporter
 
-Image.static.toHtml = function(image, converter) {
+Image.static.toHtml = function(image) {
   var $el = $('<img>')
     .attr('id', image.id)
     .attr('src', image.src)
