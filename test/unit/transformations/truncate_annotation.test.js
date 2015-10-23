@@ -1,7 +1,7 @@
 'use strict';
 
 var containerAnnoSample = require('../../fixtures/container_anno_sample');
-var truncateAnnotation = require('../../../model/transformations/truncateAnnotation');
+var truncateAnnotation = require('../../../model/transform/truncateAnnotation');
 
 QUnit.module('Transformations/truncateAnnotation');
 

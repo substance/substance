@@ -2,7 +2,7 @@
 
 require('../qunit_extensions');
 var containerAnnoSample = require('../../fixtures/container_anno_sample');
-var deleteNode = require('../../../model/transformations/deleteNode');
+var deleteNode = require('../../../model/transform/deleteNode');
 
 QUnit.module('Transformations/deleteNode');
 

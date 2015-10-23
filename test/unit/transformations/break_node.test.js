@@ -2,7 +2,7 @@
 
 require('../qunit_extensions');
 var sample1 = require('../../fixtures/sample1');
-var breakNode = require('../../../model/transformations/breakNode');
+var breakNode = require('../../../model/transform/breakNode');
 
 QUnit.module('Transformations/breakNode');
 

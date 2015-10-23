@@ -2,7 +2,7 @@
 
 require('../qunit_extensions');
 var sample1 = require('../../fixtures/sample1');
-var copySelection = require('../../../model/transformations/copySelection');
+var copySelection = require('../../../model/transform/copySelection');
 
 QUnit.module('Transformations/copySelection');
 

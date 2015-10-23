@@ -7,11 +7,11 @@ var FormEditor = require('./FormEditor');
 var UnsupportedNode = require('./UnsupportedNode');
 var TextPropertyManager = require('../model/TextPropertyManager');
 var EditingBehavior = require('../model/EditingBehavior');
-var deleteSelection = require('../model/transformations/deleteSelection');
-var breakNode = require('../model/transformations/breakNode');
-var insertNode = require('../model/transformations/insertNode');
-var switchTextType = require('../model/transformations/switchTextType');
-var paste = require('../model/transformations/paste');
+var deleteSelection = require('../model/transform/deleteSelection');
+var breakNode = require('../model/transform/breakNode');
+var insertNode = require('../model/transform/insertNode');
+var switchTextType = require('../model/transform/switchTextType');
+var paste = require('../model/transform/paste');
 var $$ = Component.$$;
 
 /**

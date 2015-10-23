@@ -2,7 +2,7 @@
 
 require('../qunit_extensions');
 var sample1 = require('../../fixtures/sample1');
-var merge = require('../../../model/transformations/merge');
+var merge = require('../../../model/transform/merge');
 
 QUnit.module('Transformations/merge');
 
