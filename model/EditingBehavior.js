@@ -1,6 +1,6 @@
 "use strict";
 
-var OO = require('../util/oo');
+var oo = require('../util/oo');
 
 function EditingBehavior() {
   this._merge = {};
@@ -53,6 +53,6 @@ EditingBehavior.Prototype = function() {
 
 };
 
-OO.initClass(EditingBehavior);
+oo.initClass(EditingBehavior);
 
 module.exports = EditingBehavior;

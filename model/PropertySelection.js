@@ -1,7 +1,7 @@
 'use strict';
 
 var _ = require('../util/helpers');
-var OO = require('../util/oo');
+var oo = require('../util/oo');
 var Selection = require('./Selection');
 var Coordinate = require('./Coordinate');
 var Range = require('./Range');
@@ -243,7 +243,7 @@ PropertySelection.Prototype = function() {
   };
 };
 
-OO.inherit(PropertySelection, Selection);
+oo.inherit(PropertySelection, Selection);
 
 Object.defineProperties(PropertySelection.prototype, {
   start: {

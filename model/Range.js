@@ -1,6 +1,6 @@
 'use strict';
 
-var OO = require('../util/oo');
+var oo = require('../util/oo');
 
 var Range = function(start, end) {
   this.start = start;
@@ -21,6 +21,6 @@ Range.Prototype = function() {
 
 };
 
-OO.initClass(Range);
+oo.initClass(Range);
 
 module.exports = Range;

@@ -1,6 +1,6 @@
 'use strict';
 
-var OO = require('../util/oo');
+var oo = require('../util/oo');
 var _ = require('../util/helpers');
 
 function I18n() {
@@ -20,7 +20,7 @@ I18n.Prototype = function() {
   };
 };
 
-OO.initClass(I18n);
+oo.initClass(I18n);
 
 I18n.mixin = function(ComponentClass) {
   Object.defineProperty(ComponentClass.prototype, 'i18n', {

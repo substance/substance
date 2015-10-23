@@ -1,6 +1,6 @@
 'use strict';
 
-var OO = require('../util/oo');
+var oo = require('../util/oo');
 var _ = require('../util/helpers');
 var Component = require('./Component');
 var Clipboard = require('./Clipboard');
@@ -493,5 +493,5 @@ Controller.Prototype = function() {
 
 };
 
-OO.inherit(Controller, Component);
+oo.inherit(Controller, Component);
 module.exports = Controller;

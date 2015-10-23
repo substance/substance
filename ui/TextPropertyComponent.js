@@ -1,6 +1,6 @@
 'use strict';
 
-var OO = require('../util/oo');
+var oo = require('../util/oo');
 var Component = require('./Component');
 var $$ = Component.$$;
 var Annotator = require('../model/Annotator');
@@ -151,6 +151,6 @@ TextPropertyComponent.Prototype = function() {
 
 };
 
-OO.inherit(TextPropertyComponent, Component);
+oo.inherit(TextPropertyComponent, Component);
 
 module.exports = TextPropertyComponent;

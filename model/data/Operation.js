@@ -1,6 +1,6 @@
 'use strict';
 
-var OO = require('../../util/oo');
+var oo = require('../../util/oo');
 
 function Operation() {
 
@@ -10,6 +10,6 @@ Operation.Prototype = function() {
   this.isOperation = true;
 };
 
-OO.initClass(Operation);
+oo.initClass(Operation);
 
 module.exports = Operation;

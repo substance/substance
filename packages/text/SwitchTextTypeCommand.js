@@ -1,6 +1,6 @@
 'use strict';
 
-var OO = require('../../util/oo');
+var oo = require('../../util/oo');
 var SurfaceCommand = require('../../ui/SurfaceCommand');
 var _ = require('../../util/helpers');
 
@@ -133,6 +133,6 @@ SwitchTextType.Prototype = function() {
   };
 };
 
-OO.inherit(SwitchTextType, SurfaceCommand);
+oo.inherit(SwitchTextType, SurfaceCommand);
 
 module.exports = SwitchTextType;

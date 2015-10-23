@@ -1,6 +1,6 @@
 'use strict';
 
-var OO = require('../util/oo');
+var oo = require('../util/oo');
 var Command = require('./Command');
 
 /**
@@ -65,6 +65,6 @@ ControllerCommand.Prototype = function() {
   };
 };
 
-OO.inherit(ControllerCommand, Command);
+oo.inherit(ControllerCommand, Command);
 
 module.exports = ControllerCommand;

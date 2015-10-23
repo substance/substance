@@ -1,7 +1,7 @@
 'use strict';
 
 var _ = require('../util/helpers');
-var OO = require('../util/oo');
+var oo = require('../util/oo');
 var PathAdapter = require('../util/PathAdapter');
 
 var NotifyByPathProxy = function(doc) {
@@ -100,6 +100,6 @@ NotifyByPathProxy.Prototype = function() {
 
 };
 
-OO.initClass(NotifyByPathProxy);
+oo.initClass(NotifyByPathProxy);
 
 module.exports = NotifyByPathProxy;

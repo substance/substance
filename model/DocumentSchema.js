@@ -1,6 +1,6 @@
 'use strict';
 
-var OO = require('../util/oo');
+var oo = require('../util/oo');
 var Schema = require('./data/Schema');
 var Node = require('./DocumentNode');
 var Annotation = require('./Annotation');
@@ -28,6 +28,6 @@ DocumentSchema.Prototype = function() {
 
 };
 
-OO.inherit(DocumentSchema, Schema);
+oo.inherit(DocumentSchema, Schema);
 
 module.exports = DocumentSchema;

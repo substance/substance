@@ -1,6 +1,6 @@
 'use strict';
 
-var OO = require('../util/oo');
+var oo = require('../util/oo');
 var Component = require('./Component');
 
 function Tool() {
@@ -42,5 +42,5 @@ Tool.Prototype = function() {
   };
 };
 
-OO.inherit(Tool, Component);
+oo.inherit(Tool, Component);
 module.exports = Tool;

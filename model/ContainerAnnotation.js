@@ -1,7 +1,7 @@
 'use strict';
 
 var _ = require('../util/helpers');
-var OO = require('../util/oo');
+var oo = require('../util/oo');
 var EventEmitter = require('../util/EventEmitter');
 var Node = require('./DocumentNode');
 var Selection = require('./Selection');
@@ -168,7 +168,7 @@ ContainerAnnotation.Anchor.Prototype = function() {
   };
 };
 
-OO.initClass(ContainerAnnotation.Anchor);
+oo.initClass(ContainerAnnotation.Anchor);
 
 ContainerAnnotation.Fragment = function Fragment(anno, path, mode) {
   EventEmitter.call(this);
@@ -189,7 +189,7 @@ ContainerAnnotation.Fragment.Prototype = function() {
   };
 };
 
-OO.initClass(ContainerAnnotation.Fragment);
+oo.initClass(ContainerAnnotation.Fragment);
 
 Object.defineProperties(ContainerAnnotation.Fragment.prototype, {
   startOffset: {

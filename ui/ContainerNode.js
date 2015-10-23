@@ -1,6 +1,6 @@
 'use strict';
 
-var OO = require('../util/oo');
+var oo = require('../util/oo');
 var _ = require('../util/helpers');
 var Component = require('./Component');
 var $$ = Component.$$;
@@ -118,6 +118,6 @@ ContainerNodeComponent.Prototype = function() {
 
 };
 
-OO.inherit(ContainerNodeComponent, Component);
+oo.inherit(ContainerNodeComponent, Component);
 
 module.exports = ContainerNodeComponent;

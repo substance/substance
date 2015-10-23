@@ -1,7 +1,7 @@
 'use strict';
 
 var _ = require('../../util/helpers');
-var OO = require('../../util/oo');
+var oo = require('../../util/oo');
 var Operation = require('./Operation');
 var Conflict = require('./Conflict');
 
@@ -113,7 +113,7 @@ TextOperation.Prototype = function() {
   };
 };
 
-OO.inherit(TextOperation, Operation);
+oo.inherit(TextOperation, Operation);
 
 hasConflict = function(a, b) {
   // Insert vs Insert:

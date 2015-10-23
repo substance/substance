@@ -2,7 +2,7 @@
 
 var _ = require('../util/helpers');
 var EventEmitter = require('../util/EventEmitter');
-var OO = require('../util/oo');
+var oo = require('../util/oo');
 var IncrementalData = require('./data/IncrementalData');
 var Selection = require('./Selection');
 var PropertySelection = require('./PropertySelection');
@@ -254,6 +254,6 @@ AbstractDocument.Prototype = function() {
   };
 };
 
-OO.inherit(AbstractDocument, EventEmitter);
+oo.inherit(AbstractDocument, EventEmitter);
 
 module.exports = AbstractDocument;

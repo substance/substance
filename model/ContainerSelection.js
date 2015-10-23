@@ -1,6 +1,6 @@
 'use strict';
 
-var OO = require('../util/oo');
+var oo = require('../util/oo');
 var _ = require('../util/helpers');
 var PropertySelection = require('./PropertySelection');
 var Selection = require('./Selection');
@@ -272,7 +272,7 @@ ContainerSelection.Prototype = function() {
   };
 };
 
-OO.inherit(ContainerSelection, PropertySelection);
+oo.inherit(ContainerSelection, PropertySelection);
 
 Object.defineProperties(ContainerSelection.prototype, {
   path: {

@@ -1,6 +1,6 @@
 'use strict';
 
-var OO = require('../../util/oo');
+var oo = require('../../util/oo');
 var Component = require('../../ui/Component');
 var $$ = Component.$$;
 var AnnotationTool = require('../../ui/AnnotationTool');
@@ -158,6 +158,6 @@ LinkTool.Prototype = function() {
   };
 };
 
-OO.inherit(LinkTool, AnnotationTool);
+oo.inherit(LinkTool, AnnotationTool);
 
 module.exports = LinkTool;

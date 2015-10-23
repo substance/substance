@@ -1,6 +1,6 @@
 "use strict";
 
-var OO = require('../util/oo');
+var oo = require('../util/oo');
 var Annotator = require('./Annotator');
 
 var inBrowser = (typeof window !== 'undefined');
@@ -146,6 +146,6 @@ HtmlExporter.Prototype = function() {
   };
 };
 
-OO.initClass(HtmlExporter);
+oo.initClass(HtmlExporter);
 
 module.exports = HtmlExporter;

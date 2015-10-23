@@ -1,6 +1,6 @@
 'use strict';
 
-var OO = require("./oo");
+var oo = require("./oo");
 
 /**
  * Event support.
@@ -249,6 +249,6 @@ EventEmitter.Prototype = function() {
   };
 };
 
-OO.initClass( EventEmitter );
+oo.initClass( EventEmitter );
 
 module.exports = EventEmitter;

@@ -1,6 +1,6 @@
 'use strict';
 
-var OO = require('../util/oo');
+var oo = require('../util/oo');
 var Component = require('./Component');
 var $$ = Component.$$;
 
@@ -30,6 +30,6 @@ ModalPanel.Prototype = function() {
   };
 };
 
-OO.inherit(ModalPanel, Component);
+oo.inherit(ModalPanel, Component);
 
 module.exports = ModalPanel;

@@ -1,7 +1,7 @@
 'use strict';
 
 var $ = require('../util/jquery');
-var OO = require('../util/oo');
+var oo = require('../util/oo');
 var Component = require('./Component');
 var $$ = Component.$$;
 
@@ -65,6 +65,6 @@ Dropdown.Prototype = function() {
   };
 };
 
-OO.inherit(Dropdown, Component);
+oo.inherit(Dropdown, Component);
 
 module.exports = Dropdown;

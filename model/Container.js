@@ -1,7 +1,7 @@
 'use strict';
 
 var _ = require('../util/helpers');
-var OO = require('../util/oo');
+var oo = require('../util/oo');
 var PathAdapter = require('../util/PathAdapter');
 var Node = require('./DocumentNode');
 var ContainerAnnotation = require('./ContainerAnnotation');
@@ -643,7 +643,7 @@ Container.Prototype = function() {
   };
 };
 
-OO.inherit(Container, Node);
+oo.inherit(Container, Node);
 
 Container.static.name = "container";
 
@@ -699,13 +699,13 @@ Container.Component.Prototype = function() {
   };
 };
 
-OO.initClass(Container.Component);
+oo.initClass(Container.Component);
 
 Container.NodeComponent = function NodeComponent(id) {
   this.id = id;
   this.components = [];
 };
 
-OO.initClass(Container.NodeComponent);
+oo.initClass(Container.NodeComponent);
 
 module.exports = Container;

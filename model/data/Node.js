@@ -1,6 +1,6 @@
 'use strict';
 
-var OO = require('../../util/oo');
+var oo = require('../../util/oo');
 var _ = require('../../util/helpers');
 var uuid = require('../../util/uuid');
 var EventEmitter = require('../../util/EventEmitter');
@@ -111,7 +111,7 @@ Node.Prototype = function() {
 
 };
 
-OO.inherit(Node, EventEmitter);
+oo.inherit(Node, EventEmitter);
 
 /**
  * Symbolic name for this model class. Must be set to a unique string by every subclass.
@@ -224,7 +224,7 @@ Node.static.initNodeClass = initNodeClass;
 // This makes a customized Node.extend() implementation, by overriding default
 // key property names, and adding a post-processing hook.
 // All subclasses will use this configuration.
-OO.makeExtensible(Node, { "name": true, "displayName": true, "properties": true },
+oo.makeExtensible(Node, { "name": true, "displayName": true, "properties": true },
   initNodeClass
 );
 

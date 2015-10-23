@@ -1,7 +1,7 @@
 'use strict';
 
 var $ = require('../util/jquery');
-var OO = require('../util/oo');
+var oo = require('../util/oo');
 var _ = require('../util/helpers');
 var I18n = require('./i18n');
 var EventEmitter = require('../util/EventEmitter');
@@ -993,7 +993,7 @@ Component.Prototype = function ComponentPrototype() {
 
 };
 
-OO.inherit(Component, EventEmitter);
+oo.inherit(Component, EventEmitter);
 
 /**
  * Adding a property which is providing an i18n service
@@ -1015,21 +1015,21 @@ _htmlParams = function(data) {
 Component.Root = function(params) {
   Component.call(this, "root", params);
 };
-OO.inherit(Component.Root, Component);
+oo.inherit(Component.Root, Component);
 
 Component.Container = function(parent, params) {
   Component.call(this, parent, params);
 };
 Component.Container.Prototype = function() {
 };
-OO.inherit(Component.Container, Component);
+oo.inherit(Component.Container, Component);
 
 Component.HtmlElement = function(parent, tagName, params) {
   this.tagName = tagName;
   Component.Container.call(this, parent, params);
 };
 
-OO.inherit(Component.HtmlElement, Component.Container);
+oo.inherit(Component.HtmlElement, Component.Container);
 
 Component.Text = function(parent, text) {
   Component.call(this, parent);
@@ -1048,7 +1048,7 @@ Component.Text.Prototype = function() {
   };
 };
 
-OO.inherit(Component.Text, Component);
+oo.inherit(Component.Text, Component);
 
 /* Virtual Components */
 
@@ -1239,14 +1239,14 @@ VirtualNode.Prototype = function() {
   };
 };
 
-OO.initClass(VirtualNode);
+oo.initClass(VirtualNode);
 
 function VirtualElement(tagName) {
   VirtualNode.call(this);
   this.type = 'element';
   this.tagName = tagName;
 }
-OO.inherit(VirtualElement, VirtualNode);
+oo.inherit(VirtualElement, VirtualNode);
 
 function VirtualComponent(ComponentClass) {
   VirtualNode.call(this);
@@ -1263,7 +1263,7 @@ VirtualComponent.Prototype = function() {
     return this.props.children;
   };
 };
-OO.inherit(VirtualComponent, VirtualNode);
+oo.inherit(VirtualComponent, VirtualNode);
 
 VirtualTextNode = function VirtualTextNode(text) {
   VirtualNode.call(this);

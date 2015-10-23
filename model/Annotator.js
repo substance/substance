@@ -1,7 +1,7 @@
 "use strict";
 
 var _ = require('../util/helpers');
-var OO = require('../util/oo');
+var oo = require('../util/oo');
 
 var ENTER = 1;
 var EXIT = -1;
@@ -211,6 +211,6 @@ Annotator.Prototype = function() {
 
 };
 
-OO.initClass( Annotator );
+oo.initClass( Annotator );
 
 module.exports = Annotator;

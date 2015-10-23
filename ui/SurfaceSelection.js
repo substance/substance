@@ -2,7 +2,7 @@
 
 var _ = require('../util/helpers');
 var $ = require('../util/jquery');
-var OO = require('../util/oo');
+var oo = require('../util/oo');
 var Document = require('../model/Document');
 var Range = require('../model/Range');
 var Coordinate = require('../model/Coordinate');
@@ -394,7 +394,7 @@ SurfaceSelection.Prototype = function() {
   };
 };
 
-OO.initClass(SurfaceSelection);
+oo.initClass(SurfaceSelection);
 
 SurfaceSelection.State = function(collapsed, reverse, start, end) {
   this.collapsed = collapsed;

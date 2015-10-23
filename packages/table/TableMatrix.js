@@ -1,4 +1,4 @@
-var OO = require('../../util/oo');
+var oo = require('../../util/oo');
 
 /**
  * A helper class that allows random access to the table cells
@@ -306,7 +306,7 @@ TableMatrix.Prototype = function() {
   };
 };
 
-OO.initClass(TableMatrix);
+oo.initClass(TableMatrix);
 
 /**
  * An object wrapping a table cell node, augmenting it with row and column indexes.
@@ -346,7 +346,7 @@ TableMatrix.Placeholder = function PlaceHolder( owner, row, col ) {
   this.owner = owner;
 };
 
-OO.inherit(TableMatrix.Placeholder, TableMatrix.Cell);
+oo.inherit(TableMatrix.Placeholder, TableMatrix.Cell);
 
 /**
  * An object describing a rectangular selection in a table matrix.

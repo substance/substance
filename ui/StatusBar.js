@@ -1,6 +1,6 @@
 "use strict";
 
-var OO = require('../util/oo');
+var oo = require('../util/oo');
 var Component = require('./Component');
 var $$ = Component.$$;
 
@@ -56,6 +56,6 @@ StatusBar.Prototype = function() {
   };
 };
 
-OO.inherit(StatusBar, Component);
+oo.inherit(StatusBar, Component);
 
 module.exports = StatusBar;

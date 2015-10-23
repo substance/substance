@@ -1,6 +1,6 @@
 'use strict';
 
-var OO = require('../util/oo');
+var oo = require('../util/oo');
 var PathAdapter = require('../util/PathAdapter');
 var uuid = require('../util/uuid');
 
@@ -88,6 +88,6 @@ DocumentChange.Prototype = function() {
 
 };
 
-OO.initClass(DocumentChange);
+oo.initClass(DocumentChange);
 
 module.exports = DocumentChange;

@@ -1,6 +1,6 @@
 'use strict';
 
-var OO = require('./oo');
+var oo = require('./oo');
 var Registry = require('./Registry');
 
 /**
@@ -40,6 +40,6 @@ Factory.Prototype = function() {
 
 };
 
-OO.inherit(Factory, Registry);
+oo.inherit(Factory, Registry);
 
 module.exports = Factory;

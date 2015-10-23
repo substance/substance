@@ -1,7 +1,7 @@
 'use strict';
 
 var _ = require('../util/helpers');
-var OO = require('../util/oo');
+var oo = require('../util/oo');
 var PathAdapter = require('../util/PathAdapter');
 var ContainerAnnotation = require('./ContainerAnnotation');
 var NodeIndex = require('./data/NodeIndex');
@@ -77,6 +77,6 @@ ContainerAnnotationAnchorIndex.Prototype = function() {
 
 };
 
-OO.inherit(ContainerAnnotationAnchorIndex, NodeIndex);
+oo.inherit(ContainerAnnotationAnchorIndex, NodeIndex);
 
 module.exports = ContainerAnnotationAnchorIndex;

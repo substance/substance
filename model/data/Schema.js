@@ -1,7 +1,7 @@
 'use strict';
 
 var _ = require('../../util/helpers');
-var OO = require('../../util/oo');
+var oo = require('../../util/oo');
 var Node = require('./Node');
 var NodeFactory = require('./NodeFactory');
 
@@ -207,6 +207,6 @@ Schema.Prototype = function() {
 
 };
 
-OO.initClass(Schema);
+oo.initClass(Schema);
 
 module.exports = Schema;

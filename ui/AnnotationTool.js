@@ -1,6 +1,6 @@
 'use strict';
 
-var OO = require('../util/oo');
+var oo = require('../util/oo');
 var Component = require('./Component');
 var $$ = Component.$$;
 var SurfaceTool = require('./SurfaceTool');
@@ -50,5 +50,5 @@ AnnotationTool.Prototype = function() {
   };
 };
 
-OO.inherit(AnnotationTool, SurfaceTool);
+oo.inherit(AnnotationTool, SurfaceTool);
 module.exports = AnnotationTool;

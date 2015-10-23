@@ -1,6 +1,6 @@
 'use strict';
 
-var OO = require('../util/oo');
+var oo = require('../util/oo');
 var ControllerTool = require('./ControllerTool');
 var SurfaceTool = require('./SurfaceTool');
 var without = require('lodash/array/without');
@@ -83,6 +83,6 @@ ToolManager.Prototype = function() {
   };
 };
 
-OO.initClass(ToolManager);
+oo.initClass(ToolManager);
 
 module.exports = ToolManager;

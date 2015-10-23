@@ -1,7 +1,7 @@
 'use strict';
 
 var _ = require('../../util/helpers');
-var OO = require('../../util/oo');
+var oo = require('../../util/oo');
 var PathAdapter = require('../../util/PathAdapter');
 
 /**
@@ -196,7 +196,7 @@ NodeIndex.Prototype = function() {
   };
 };
 
-OO.initClass( NodeIndex );
+oo.initClass( NodeIndex );
 
 /**
  * Create a new NodeIndex using the given prototype as mixin.

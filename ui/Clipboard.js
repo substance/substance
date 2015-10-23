@@ -2,7 +2,7 @@
 
 var $ = require('../util/jquery');
 var _ = require('../util/helpers');
-var OO = require('../util/oo');
+var oo = require('../util/oo');
 
 /**
  * Surface Clipboard is owned by a module:ui/FormEditor.
@@ -351,6 +351,6 @@ Clipboard.Prototype = function() {
   };
 };
 
-OO.initClass(Clipboard);
+oo.initClass(Clipboard);
 
 module.exports = Clipboard;

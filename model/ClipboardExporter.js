@@ -1,6 +1,6 @@
 "use strict";
 
-var OO = require('../util/oo');
+var oo = require('../util/oo');
 var HtmlExporter = require('./HtmlExporter');
 
 function ClipboardExporter() {
@@ -26,6 +26,6 @@ ClipboardExporter.Prototype = function() {
 
 };
 
-OO.inherit(ClipboardExporter, HtmlExporter);
+oo.inherit(ClipboardExporter, HtmlExporter);
 
 module.exports = ClipboardExporter;

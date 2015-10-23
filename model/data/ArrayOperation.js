@@ -1,7 +1,7 @@
 'use strict';
 
 var _ = require('../../util/helpers');
-var OO = require('../../util/oo');
+var oo = require('../../util/oo');
 var Operation = require('./Operation');
 var Conflict = require('./Conflict');
 
@@ -118,7 +118,7 @@ ArrayOperation.Prototype = function() {
   };
 };
 
-OO.inherit(ArrayOperation, Operation);
+oo.inherit(ArrayOperation, Operation);
 
 var hasConflict = function(a, b) {
   if (a.type === NOP || b.type === NOP) return false;

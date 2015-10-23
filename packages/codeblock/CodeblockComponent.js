@@ -1,6 +1,6 @@
 'use strict';
 
-var OO = require('../../util/oo');
+var oo = require('../../util/oo');
 var Component = require('../../ui/Component');
 var $$ = Component.$$;
 var TextProperty = require('../../ui/TextPropertyComponent');
@@ -26,6 +26,6 @@ Codeblock.Prototype = function() {
   };
 };
 
-OO.inherit(Codeblock, Component);
+oo.inherit(Codeblock, Component);
 
 module.exports = Codeblock;

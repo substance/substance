@@ -1,7 +1,7 @@
 'use strict';
 
 var $ = require('../util/jquery');
-var OO = require('../util/oo');
+var oo = require('../util/oo');
 var Component = require('./Component');
 var $$ = Component.$$;
 
@@ -165,7 +165,7 @@ Scrollbar.Prototype = function() {
   };
 };
 
-OO.inherit(Scrollbar, Component);
+oo.inherit(Scrollbar, Component);
 Scrollbar.overlayMinHeight = 2;
 
 module.exports = Scrollbar;

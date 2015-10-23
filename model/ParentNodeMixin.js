@@ -1,6 +1,6 @@
 "use strict";
 
-var OO = require('../util/oo');
+var oo = require('../util/oo');
 
 /**
  * Mix-in for parent nodes.
@@ -32,6 +32,6 @@ ParentNodeMixin.Prototype = function() {
 
 };
 
-OO.initClass(ParentNodeMixin);
+oo.initClass(ParentNodeMixin);
 
 module.exports = ParentNodeMixin;

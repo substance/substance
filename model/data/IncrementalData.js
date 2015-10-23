@@ -1,6 +1,6 @@
 'use strict';
 
-var OO = require('../../util/oo');
+var oo = require('../../util/oo');
 var _ = require('../../util/helpers');
 var Data = require('./Data');
 var ObjectOperation = require('./ObjectOperation');
@@ -184,6 +184,6 @@ IncrementalData.Prototype = function() {
 
 };
 
-OO.inherit(IncrementalData, Data);
+oo.inherit(IncrementalData, Data);
 
 module.exports = IncrementalData;

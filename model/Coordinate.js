@@ -1,6 +1,6 @@
 'use strict';
 
-var OO = require('../util/oo');
+var oo = require('../util/oo');
 var _ = require('../util/helpers');
 
 // path: the address of a property, such as ['text_1', 'content']
@@ -54,6 +54,6 @@ Coordinate.Prototype = function() {
 
 };
 
-OO.initClass( Coordinate );
+oo.initClass( Coordinate );
 
 module.exports = Coordinate;

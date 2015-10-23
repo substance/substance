@@ -1,7 +1,7 @@
 'use strict';
 
 var _ = require('../util/helpers');
-var OO = require('../util/oo');
+var oo = require('../util/oo');
 var PathAdapter = require('../util/PathAdapter');
 var Annotation = require('./Annotation');
 var NodeIndex = require('./data/NodeIndex');
@@ -86,7 +86,7 @@ AnnotationIndex.Prototype = function() {
 
 };
 
-OO.inherit(AnnotationIndex, NodeIndex);
+oo.inherit(AnnotationIndex, NodeIndex);
 
 AnnotationIndex.filterByRange = function(start, end) {
   return function(anno) {

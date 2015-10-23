@@ -2,7 +2,7 @@
 
 var $ = require('../util/jquery');
 var _ = require('../util/helpers');
-var OO = require('../util/oo');
+var oo = require('../util/oo');
 var HtmlImporter = require('./HtmlImporter');
 
 // Note: sharing the symbol with the transformation
@@ -65,6 +65,6 @@ ClipboardImporter.Prototype = function() {
 
 };
 
-OO.inherit(ClipboardImporter, HtmlImporter);
+oo.inherit(ClipboardImporter, HtmlImporter);
 
 module.exports = ClipboardImporter;

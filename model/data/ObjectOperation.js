@@ -1,7 +1,7 @@
 'use strict';
 
 var _ = require('../../util/helpers');
-var OO = require('../../util/oo');
+var oo = require('../../util/oo');
 var PathAdapter = require('../../util/PathAdapter');
 var Operation = require('./Operation');
 var TextOperation = require('./TextOperation');
@@ -229,7 +229,7 @@ ObjectOperation.Prototype = function() {
   };
 };
 
-OO.inherit(ObjectOperation, Operation);
+oo.inherit(ObjectOperation, Operation);
 
 /* Low level implementation */
 

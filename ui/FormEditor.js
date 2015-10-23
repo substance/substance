@@ -1,6 +1,6 @@
 'use strict';
 
-var OO = require('../util/oo');
+var oo = require('../util/oo');
 var _ = require('../util/helpers');
 var Surface = require('./Surface');
 var TextPropertyManager = require('../model/TextPropertyManager');
@@ -107,5 +107,5 @@ FormEditor.Prototype = function() {
   };
 };
 
-OO.inherit(FormEditor, Surface);
+oo.inherit(FormEditor, Surface);
 module.exports = FormEditor;

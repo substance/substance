@@ -1,7 +1,7 @@
 'use strict';
 
 var _ = require('../../util/helpers');
-var OO = require('../../util/oo');
+var oo = require('../../util/oo');
 var PathAdapter = require('../../util/PathAdapter');
 var EventEmitter = require('../../util/EventEmitter');
 
@@ -260,6 +260,6 @@ Data.Prototype = function() {
 
 };
 
-OO.inherit(Data, EventEmitter);
+oo.inherit(Data, EventEmitter);
 
 module.exports = Data;

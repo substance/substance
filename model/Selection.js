@@ -1,7 +1,7 @@
 'use strict';
 
 var _ = require('../util/helpers');
-var OO = require('../util/oo');
+var oo = require('../util/oo');
 var EventEmitter = require('../util/EventEmitter');
 
 function Selection() {}
@@ -58,7 +58,7 @@ Selection.Prototype = function() {
 
 };
 
-OO.initClass(Selection);
+oo.initClass(Selection);
 
 var NullSelection = function() {};
 NullSelection.Prototype = function() {
@@ -66,7 +66,7 @@ NullSelection.Prototype = function() {
     return true;
   };
 };
-OO.inherit(NullSelection, Selection);
+oo.inherit(NullSelection, Selection);
 Selection.nullSelection = Object.freeze(new NullSelection());
 
 Selection.Fragment = function(type, path, startOffset, endOffset) {
@@ -81,6 +81,6 @@ Selection.Fragment.Prototype = function() {
   _.extend(this, EventEmitter.prototype);
 };
 
-OO.initClass(Selection.Fragment);
+oo.initClass(Selection.Fragment);
 
 module.exports = Selection;

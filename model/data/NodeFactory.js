@@ -1,6 +1,6 @@
 'use strict';
 
-var OO = require('../../util/oo');
+var oo = require('../../util/oo');
 var Factory = require('../../util/Factory');
 var Node = require('./Node');
 
@@ -42,6 +42,6 @@ NodeFactory.Prototype = function() {
   };
 };
 
-OO.inherit(NodeFactory, Factory);
+oo.inherit(NodeFactory, Factory);
 
 module.exports = NodeFactory;

@@ -1,6 +1,6 @@
 'use strict';
 
-var OO = require('../util/oo');
+var oo = require('../util/oo');
 var _ = require('../util/helpers');
 var Component = require('./Component');
 var FormEditor = require('./FormEditor');
@@ -203,5 +203,5 @@ ContainerEditor.Prototype = function() {
 
 };
 
-OO.inherit(ContainerEditor, FormEditor);
+oo.inherit(ContainerEditor, FormEditor);
 module.exports = ContainerEditor;

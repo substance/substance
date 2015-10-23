@@ -1,6 +1,6 @@
 'use strict';
 
-var OO = require('../../util/oo');
+var oo = require('../../util/oo');
 var Component = require('../../ui/Component');
 var $$ = Component.$$;
 var SurfaceTool = require('../../ui/SurfaceTool');
@@ -110,6 +110,6 @@ TextTool.Prototype = function() {
   };
 };
 
-OO.inherit(TextTool, SurfaceTool);
+oo.inherit(TextTool, SurfaceTool);
 
 module.exports = TextTool;

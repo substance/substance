@@ -1,7 +1,7 @@
 "use strict";
 
 var _ = require('../util/helpers');
-var OO = require('../util/oo');
+var oo = require('../util/oo');
 var Component = require('./Component');
 var $$ = Component.$$;
 var Panel = require('./Panel');
@@ -108,7 +108,7 @@ TocPanel.Prototype = function() {
   };
 };
 
-OO.inherit(TocPanel, Panel);
+oo.inherit(TocPanel, Panel);
 
 // Panel Configuration
 // -----------------

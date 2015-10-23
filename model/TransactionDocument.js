@@ -1,7 +1,7 @@
 'use strict';
 
 var _ = require('../util/helpers');
-var OO = require('../util/oo');
+var oo = require('../util/oo');
 var AbstractDocument = require('./AbstractDocument');
 
 var __id__ = 0;
@@ -135,6 +135,6 @@ TransactionDocument.Prototype = function() {
 
 };
 
-OO.inherit(TransactionDocument, AbstractDocument);
+oo.inherit(TransactionDocument, AbstractDocument);
 
 module.exports = TransactionDocument;

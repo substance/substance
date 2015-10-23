@@ -1,6 +1,6 @@
 'use strict';
 
-var OO = require('../../util/oo');
+var oo = require('../../util/oo');
 var Document = require('../../model/Document');
 var schema = require('./test_schema');
 
@@ -40,7 +40,7 @@ TestArticle.Prototype = function() {
   };
 };
 
-OO.inherit(TestArticle, Document);
+oo.inherit(TestArticle, Document);
 
 TestArticle.fromHtml = function(html) {
   var $root;

@@ -1,7 +1,7 @@
 'use strict';
 
 var _ = require('../util/helpers');
-var OO = require('../util/oo');
+var oo = require('../util/oo');
 var AbstractDocument = require('./AbstractDocument');
 var NodeIndex = require('./data/NodeIndex');
 var AnnotationIndex = require('./AnnotationIndex');
@@ -368,7 +368,7 @@ Document.Prototype = function() {
   };
 };
 
-OO.inherit(Document, AbstractDocument);
+oo.inherit(Document, AbstractDocument);
 
 Object.defineProperty(Document.prototype, 'id', {
   get: function() {

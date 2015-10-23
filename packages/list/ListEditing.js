@@ -1,4 +1,4 @@
-var OO = require('../../../util/oo');
+var oo = require('../../../util/oo');
 
 var annotationHelpers = require('../../annotationHelpers');
 
@@ -126,6 +126,6 @@ ListEditing.Prototype = function() {
 
 };
 
-OO.initClass(ListEditing);
+oo.initClass(ListEditing);
 
 module.exports = ListEditing;

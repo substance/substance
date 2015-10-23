@@ -1,6 +1,6 @@
 'use strict';
 
-var OO = require('../util/oo');
+var oo = require('../util/oo');
 var SurfaceCommand = require('./SurfaceCommand');
 var helpers = require('../model/documentHelpers');
 
@@ -227,6 +227,6 @@ AnnotationCommand.Prototype = function() {
 
 };
 
-OO.inherit(AnnotationCommand, SurfaceCommand);
+oo.inherit(AnnotationCommand, SurfaceCommand);
 
 module.exports = AnnotationCommand;

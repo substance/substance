@@ -2,7 +2,7 @@
 
 var _ = require('../../util/helpers');
 var $ = require('../../util/jquery');
-var OO = require('../../util/oo');
+var oo = require('../../util/oo');
 var Component = require('../../ui/Component');
 var TextProperty = require('../../ui/TextPropertyComponent');
 var TableSelection = require('../../model/TableSelection');
@@ -203,6 +203,6 @@ TableComponent.Prototype = function() {
   };
 };
 
-OO.inherit(TableComponent, Component);
+oo.inherit(TableComponent, Component);
 
 module.exports = TableComponent;

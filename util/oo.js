@@ -3,13 +3,13 @@
 var _ = require('./helpers');
 
 /**
- * Helpers for OO programming.
+ * Helpers for oo programming.
  *
- * Inspired by VisualEditor's OO module.
+ * Inspired by VisualEditor's oo module.
  *
- * @module Basics/OO
+ * @module util/oo
  */
-var OO = {};
+var oo = {};
 
 var defaultStaticProps = {'name': true, 'displayName': true};
 
@@ -58,7 +58,7 @@ var extend = function(parent, staticProps, afterHook, proto) {
 function makeExtensible(clazz, staticProps, afterHook) {
   staticProps = staticProps || {};
   if (!clazz.static) {
-    OO.initClass(clazz);
+    oo.initClass(clazz);
   }
   clazz.static._makeExtendFunction = function(parentClazz) {
     return _.bind(extend, null, parentClazz, staticProps, afterHook);
@@ -87,7 +87,7 @@ function makeExtensible(clazz, staticProps, afterHook) {
   clazz.extend = clazz.static._makeExtendFunction(clazz);
 }
 
-OO.makeExtensible = makeExtensible;
+oo.makeExtensible = makeExtensible;
 
 var _initClass = function(clazz) {
   if (clazz.Prototype && !(clazz.prototype instanceof clazz.Prototype)) {
@@ -104,7 +104,7 @@ var _initClass = function(clazz) {
  * @instance
  * @param {Constructor} clazz
  */
-OO.initClass = function(clazz) {
+oo.initClass = function(clazz) {
   _initClass(clazz);
   makeExtensible(clazz, defaultStaticProps);
 };
@@ -154,21 +154,21 @@ _inherit =  function(clazz, parentClazz) {
  * @param clazz {Constructor} class constructor
  * @param parentClazz {Constructor} parent constructor
  * @example
- * 
- * var OO = require('substance/basics/oo');
+ *
+ * var oo = require('substance/basics/oo');
  * var Parent = function() {};
  * Parent.Prototype = function() {
- *   this.foo = function() { return 'foo'; } 
+ *   this.foo = function() { return 'foo'; }
  * }
  * var Child = function() {
  *   Parent.apply(this, arguments);
  * }
- * OO.inherit(Child, Parent);
- * 
- * 
+ * oo.inherit(Child, Parent);
+ *
+ *
  */
 
-OO.inherit =  function(clazz, parentClazz) {
+oo.inherit =  function(clazz, parentClazz) {
   _inherit(clazz, parentClazz);
   if (clazz.static._afterClassInitHook) {
     clazz.static._afterClassInitHook(clazz);
@@ -181,7 +181,7 @@ OO.inherit =  function(clazz, parentClazz) {
  * @param clazz {Constructor} class constructor
  * @param mixinClazz {Constructor} parent constructor
  */
-OO.mixin = function(clazz, mixinClazz) {
+oo.mixin = function(clazz, mixinClazz) {
   var key;
   var prototype = mixinClazz.prototype;
   if (mixinClazz.Prototype) {
@@ -194,7 +194,7 @@ OO.mixin = function(clazz, mixinClazz) {
     }
   }
   // make sure the clazz is initialized
-  OO.initClass(clazz);
+  oo.initClass(clazz);
   // Copy static properties
   if ( mixinClazz.static ) {
     for ( key in mixinClazz.static ) {
@@ -203,8 +203,8 @@ OO.mixin = function(clazz, mixinClazz) {
       }
     }
   } else {
-    OO.initClass(mixinClazz);
+    oo.initClass(mixinClazz);
   }
 };
 
-module.exports = OO;
+module.exports = oo;

@@ -1,6 +1,6 @@
 'use strict';
 
-var OO = require('../util/oo');
+var oo = require('../util/oo');
 var _ = require('../util/helpers');
 var ContainerAnnotation = require('./ContainerAnnotation');
 var TextOperation = require('./data/TextOperation');
@@ -299,7 +299,7 @@ TextPropertyManager.Prototype = function() {
   };
 };
 
-OO.initClass(TextPropertyManager);
+oo.initClass(TextPropertyManager);
 
 var Record = function(path) {
   this.path = path;
@@ -307,7 +307,7 @@ var Record = function(path) {
   this.fragments = {};
 };
 
-OO.initClass(Record);
+oo.initClass(Record);
 
 var Change = function(path) {
   this.path = path;
@@ -331,6 +331,6 @@ Change.Prototype = function() {
   };
 };
 
-OO.initClass(Change);
+oo.initClass(Change);
 
 module.exports = TextPropertyManager;

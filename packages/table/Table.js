@@ -1,7 +1,7 @@
 'use strict';
 
 var $ = require('../../util/jquery');
-var OO = require('../../util/oo');
+var oo = require('../../util/oo');
 var _ = require('../../util/helpers');
 var Node = require('../../model/DocumentNode');
 var TableMatrix = require('./TableMatrix');
@@ -215,6 +215,6 @@ Table.CellIterator.Prototype = function() {
     }
   };
 };
-OO.initClass(Table.CellIterator);
+oo.initClass(Table.CellIterator);
 
 module.exports = Table;
