@@ -2,7 +2,7 @@
 
 var _ = require('../util/helpers');
 var OO = require('../util/oo');
-var PathAdapter = require('../util/path_adapter');
+var PathAdapter = require('../util/PathAdapter');
 var ContainerAnnotation = require('./container_annotation');
 var NodeIndex = require('./data/node_index');
 

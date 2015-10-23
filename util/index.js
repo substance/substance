@@ -24,12 +24,11 @@ util.OO = require('./oo');
  * @property {class} An adapter to access an object via path
  * @memberof module:util
  */
-util.PathAdapter = require('./path_adapter');
-
+util.PathAdapter = require('./PathAdapter');
 
 util.EventEmitter = require('./EventEmitter');
-util.Registry = require('./registry');
-util.Factory = require('./factory');
+util.Registry = require('./Registry');
+util.Factory = require('./Factory');
 _.extend(util, require('./timer'));
 
 util.jQuery = require('./jquery');

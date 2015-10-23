@@ -2,7 +2,7 @@
 
 var _ = require('../../util/helpers');
 var OO = require('../../util/oo');
-var PathAdapter = require('../../util/path_adapter');
+var PathAdapter = require('../../util/PathAdapter');
 var Operation = require('./operation');
 var TextOperation = require('./text_operation');
 var ArrayOperation = require('./array_operation');
