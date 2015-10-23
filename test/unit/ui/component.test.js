@@ -1,8 +1,8 @@
 "use strict";
 
-var Component = require('../../../ui/component');
+var _ = require('../../../util/helpers');
+var Component = require('../../../ui/Component');
 var $$ = Component.$$;
-var _ = require('../../../basics/helpers');
 
 QUnit.uiModule('Substance.Component');
 

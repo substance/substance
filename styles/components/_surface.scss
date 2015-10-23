@@ -1,0 +1,9 @@
+/* This actually happens inside a Surface
+----------------------------------------------------*/
+
+.sc-surface {
+  /* Non-Editables should have a regular cursor */
+  *[contenteditable="false"] {
+    cursor: default;
+  }
+}

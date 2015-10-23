@@ -2,8 +2,8 @@
 
 var sample1 = require('../../fixtures/sample1');
 
-var createAnnotation = require('../../../document/transformations/create_annotation'); 
-var docHelpers = require('../../../document/helpers'); 
+var createAnnotation = require('../../../model/transform/createAnnotation');
+var docHelpers = require('../../../model/documentHelpers');
 
 QUnit.module('Transformations/createAnnotation');
 

@@ -2,7 +2,6 @@
 
 require('../qunit_extensions');
 var sample1 = require('../../fixtures/sample1');
-var Document = require('../../../document');
 
 QUnit.module('Substance.Document/EventProxy');
 

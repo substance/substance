@@ -1,7 +1,7 @@
 'use strict';
 
 var containerAnnoSample = require('../../fixtures/container_anno_sample');
-var deleteAnnotation = require('../../../document/transformations/delete_annotation');
+var deleteAnnotation = require('../../../model/transform/deleteAnnotation');
 
 QUnit.module('Transformations/deleteAnnotation');
 

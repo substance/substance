@@ -1,0 +1,25 @@
+.sc-context-toggles {
+  height: 40px;
+  border-bottom: 1px solid #ddd;
+
+  .se-context-toggle {
+    display: block;
+    float: left;
+    height: 40px;
+    line-height: 40px;
+    padding: 0px 20px;
+    color: #444;
+    font-size: 12px;
+    font-weight: 600;
+
+    &:hover {
+      background: #eee;
+      border-bottom: 1px solid #bbb;
+    }
+
+    &.sm-active {
+      background: #eee;
+      border-bottom: 1px solid #444;
+    }
+  }
+}

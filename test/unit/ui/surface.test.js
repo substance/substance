@@ -1,15 +1,16 @@
 "use strict";
 
 require('../phantomjs_shims');
-var ContainerEditor = require('../../../ui/surface/container_editor');
-var Component = require('../../../ui/component');
-var $$ = Component.$$;
-var Controller = require('../../../ui/controller');
+
+var ContainerEditor = require('../../../ui/ContainerEditor');
+var Component = require('../../../ui/Component');
+var Controller = require('../../../ui/Controller');
 var simple = require('../../fixtures/simple');
-var createAnnotation = require('../../../document/transformations/create_annotation');
+var createAnnotation = require('../../../model/transform/createAnnotation');
+var $$ = Component.$$;
 
 var components = {
-  "paragraph": require('../../../ui/nodes/paragraph_component')
+  "paragraph": require('../../../packages/paragraph/ParagraphComponent')
 };
 
 QUnit.uiModule('Surface');

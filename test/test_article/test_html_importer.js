@@ -1,10 +1,8 @@
 'use strict';
 
-var OO = require('../../basics/oo');
-var Document = require('../../document');
+var oo = require('../../util/oo');
+var HtmlImporter = require('../../model/HtmlImporter');
 var schema = require('./test_schema');
-
-var HtmlImporter = Document.HtmlImporter;
 
 function TestHtmlImporter() {
   TestHtmlImporter.super.call(this, { schema: schema });
@@ -54,6 +52,6 @@ TestHtmlImporter.Prototype = function() {
 
 };
 
-OO.inherit(TestHtmlImporter, HtmlImporter);
+oo.inherit(TestHtmlImporter, HtmlImporter);
 
 module.exports = TestHtmlImporter;

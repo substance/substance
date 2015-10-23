@@ -1,12 +1,12 @@
 "use strict";
 
-var OO = require('../../../basics/oo');
+var oo = require('../../../util/oo');
 
-QUnit.module('Substance.OO');
+QUnit.module('Substance.oo');
 
-QUnit.test("OO.extend and OO.inherit should propagate static properties", function(assert) {
+QUnit.test("oo.extend and oo.inherit should propagate static properties", function(assert) {
   function A() {}
-  OO.makeExtensible(A, {'name': true});
+  oo.makeExtensible(A, {'name': true});
 
   var B = A.extend({
     name: "foo"
@@ -17,13 +17,13 @@ QUnit.test("OO.extend and OO.inherit should propagate static properties", functi
   C.Prototype = function() {
     this.name = "foo";
   };
-  OO.inherit(C, A);
+  oo.inherit(C, A);
   assert.equal(C.static.name, 'foo', 'C should have static name "foo".');
 });
 
-QUnit.test("OO.extend and OO.inherit should use proto.static", function(assert) {
+QUnit.test("oo.extend and oo.inherit should use proto.static", function(assert) {
   function A() {}
-  OO.makeExtensible(A);
+  oo.makeExtensible(A);
 
   var B = A.extend({
     static: {
@@ -38,6 +38,6 @@ QUnit.test("OO.extend and OO.inherit should use proto.static", function(assert) 
       foo: "bar"
     };
   };
-  OO.inherit(C, A);
+  oo.inherit(C, A);
   assert.equal(C.static.foo, 'bar', 'C should have static property "foo".');
 });

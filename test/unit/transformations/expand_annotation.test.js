@@ -1,7 +1,7 @@
 'use strict';
 
 var containerAnnoSample = require('../../fixtures/container_anno_sample');
-var expandAnnotation = require('../../../document/transformations/expand_annotation');
+var expandAnnotation = require('../../../model/transform/expandAnnotation');
 
 QUnit.module('Transformations/expandAnnotation');
 
@@ -44,7 +44,7 @@ QUnit.test("Expand-right of container annotation for a given property selection"
   var args = {selection: sel, containerId: 'main', annotationType: 'test-container-anno'};
   var out = expandAnnotation(doc, args);
   var a1 = out.result;
-  
+
   assert.ok(a1, 'a1 should have been returned as a result');
   assert.equal(a1.endOffset, 6, 'a1.endOffset should be 6');
 });
@@ -66,7 +66,7 @@ QUnit.test("Expand-right of container annotation for a given container selection
   var args = {selection: sel, containerId: 'main', annotationType: 'test-container-anno'};
   var out = expandAnnotation(doc, args);
   var a1 = out.result;
-  
+
   assert.ok(a1, 'a1 should have been returned as a result');
   assert.deepEqual(a1.endPath, ['p3', 'content'], 'a1.endPath should be p2.content');
   assert.equal(a1.endOffset, 6, 'a1.endOffset should be 6');

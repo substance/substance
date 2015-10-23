@@ -2,8 +2,7 @@
 
 require('../qunit_extensions');
 var sample1 = require('../../fixtures/sample1');
-var Document = require('../../../document');
-var breakNode = Document.Transformations.breakNode;
+var breakNode = require('../../../model/transform/breakNode');
 
 QUnit.module('Transformations/breakNode');
 
@@ -76,7 +75,6 @@ QUnit.test("Breaking a paragraph before annotation", function(assert) {
   var args = {selection: sel, containerId: 'main'};
   var out = breakNode(doc, args);
   var newNodeId = out.node.id;
-  var selection = out.selection;
   var anno = doc.get('em1');
   var annoIndex = doc.getIndex('annotations');
   var oldAnnos = annoIndex.get(['p2', 'content']);
@@ -96,12 +94,11 @@ QUnit.test("Breaking a paragraph inside an annotation", function(assert) {
   var args = {selection: sel, containerId: 'main'};
   var out = breakNode(doc, args);
   var newNodeId = out.node.id;
-  var selection = out.selection;
   var annoIndex = doc.getIndex('annotations');
   var oldAnnos = annoIndex.get(['p2', 'content']);
   var newAnnos = annoIndex.get([newNodeId, 'content']);
-  assert.equal(oldAnnos.length, 1, 'There should be one annotation left on the old node.')
-  assert.equal(newAnnos.length, 1, 'And there should be a split off on the new node.')
+  assert.equal(oldAnnos.length, 1, 'There should be one annotation left on the old node.');
+  assert.equal(newAnnos.length, 1, 'And there should be a split off on the new node.');
   var annoPart1 = oldAnnos[0];
   var annoPart2 = newAnnos[0];
   assert.deepEqual([annoPart1.startOffset, annoPart1.endOffset], [15, 20], "Original annotation should have been truncated.");

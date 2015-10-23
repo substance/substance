@@ -1,8 +1,7 @@
 "use strict";
 
-var _ = require('../../../helpers');
-var Operator = require('../../../operator');
-var TextOperation = Operator.TextOperation;
+var _ = require('../../../util/helpers');
+var TextOperation = require('../../../model/data/TextOperation');
 
 QUnit.module('Substance.Operator/TextOperation');
 
@@ -207,7 +206,7 @@ QUnit.test("Transformation: a=Insert, b=Delete, overlap", function(assert) {
 });
 
 QUnit.test("Transformations can be done inplace (optimzation for internal use)", function(assert) {
-  var input = "Lorem ipsum";
+  // var input = "Lorem ipsum";
   var a = TextOperation.Insert(6, "bla ");
   var b = TextOperation.Insert(6, "blupp ");
   var t = TextOperation.transform(a, b, {inplace: true});

@@ -67,7 +67,7 @@ Substance provides a ready to use [Editor](https://github.com/substance/demos/tr
 
 ```js
 var Editor = require('substance/ui/editor');
-var Component = require('substance/ui/component');
+var Component = require('substance/ui/Component');
 var $$ = Component.$$;
 var proseEditor = Component.mount($$(Editor, {
   content: '<p>hello world</p>'

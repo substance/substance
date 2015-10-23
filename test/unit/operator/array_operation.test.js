@@ -1,8 +1,7 @@
 "use strict";
 
-var _ = require('../../../helpers');
-var Operator = require('../../../operator');
-var ArrayOperation = Operator.ArrayOperation;
+var _ = require('../../../util/helpers');
+var ArrayOperation = require('../../../model/data/ArrayOperation');
 
 QUnit.module('Substance.Operator/ArrayOperation');
 
@@ -199,7 +198,7 @@ QUnit.test("Transformation: a=Insert, b=Delete (3), a == b", function(assert) {
 });
 
 QUnit.test("Transformation: a=NOP || b=NOP", function(assert) {
-  var input = [1,2,3];
+  // var input = [1,2,3];
   var a = new ArrayOperation.Insert(1, 4);
   var b = new ArrayOperation({type: ArrayOperation.NOP});
   var t = ArrayOperation.transform(a, b);
@@ -228,7 +227,7 @@ QUnit.test("Inverting operations", function(assert) {
 });
 
 QUnit.test("Transformations can be done inplace (optimzation for internal use)", function(assert) {
-  var input = "Lorem ipsum";
+  // var input = "Lorem ipsum";
   var a = ArrayOperation.Insert(2, 3);
   var b = ArrayOperation.Insert(2, 3);
   var t = ArrayOperation.transform(a, b, {inplace: true});

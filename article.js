@@ -2,16 +2,16 @@
 
 // Substance Article
 // ----------------
-// 
+//
 // The default Article Implementation
-// 
+//
 // Uses well-defined HTML exchange representation
 
-var OO = require('./basics/oo');
+var $ = require('./util/jquery');
+var OO = require('./util/oo');
 var Document = require('./document');
 var HtmlImporter = Document.HtmlImporter;
 var HtmlExporter = Document.HtmlExporter;
-var $ = require('./basics/jquery');
 
 var defaultNodes = [
   Document.Paragraph,
