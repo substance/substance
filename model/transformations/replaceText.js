@@ -2,8 +2,8 @@
 'use strict';
 
 var _ = require('../../util/helpers');
-var deleteSelection = require('./delete_selection');
-var updateAnnotations = require('./update_annotations');
+var deleteSelection = require('./deleteSelection');
+var updateAnnotations = require('./updateAnnotations');
 
 /**
  * TODO: there is a use-case where this implementation does not suffice:

@@ -2,7 +2,7 @@
 
 var _ = require('../../util/helpers');
 var merge = require('./merge');
-var updateAnnotations = require('./update_annotations');
+var updateAnnotations = require('./updateAnnotations');
 
 /**
  * The behavior when you press delete or backspace.

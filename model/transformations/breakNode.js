@@ -1,7 +1,7 @@
 'use strict';
 
 var uuid = require('../../util/uuid');
-var deleteSelection = require('./delete_selection');
+var deleteSelection = require('./deleteSelection');
 var annotationHelpers = require('../annotationHelpers');
 
 /* jshint latedef: false */

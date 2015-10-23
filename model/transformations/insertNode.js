@@ -1,7 +1,7 @@
 'use strict';
 
-var deleteSelection = require('./delete_selection');
-var breakNode = require('./break_node');
+var deleteSelection = require('./deleteSelection');
+var breakNode = require('./breakNode');
 
 function insertNode(tx, args) {
   var selection = args.selection;

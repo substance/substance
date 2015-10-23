@@ -6,7 +6,7 @@ var ContainerEditor = require('../../../ui/ContainerEditor');
 var Component = require('../../../ui/Component');
 var Controller = require('../../../ui/Controller');
 var simple = require('../../fixtures/simple');
-var createAnnotation = require('../../../model/transformations/create_annotation');
+var createAnnotation = require('../../../model/transformations/createAnnotation');
 var $$ = Component.$$;
 
 var components = {

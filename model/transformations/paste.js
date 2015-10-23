@@ -3,10 +3,10 @@
 var _ = require('../../util/helpers');
 var uuid = require('../../util/uuid');
 var annotationHelpers = require('../annotationHelpers');
-var deleteSelection = require('./delete_selection');
-var insertText = require('./insert_text');
-var breakNode = require('./break_node');
-var CLIPBOARD_CONTAINER_ID = require('./copy_selection').CLIPBOARD_CONTAINER_ID;
+var deleteSelection = require('./deleteSelection');
+var insertText = require('./insertText');
+var breakNode = require('./breakNode');
+var CLIPBOARD_CONTAINER_ID = require('./copySelection').CLIPBOARD_CONTAINER_ID;
 
 /* jshint latedef: false */
 

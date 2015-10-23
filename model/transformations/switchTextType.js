@@ -2,7 +2,7 @@
 
 var _ = require('../../util/helpers');
 var annotationHelpers = require('../annotationHelpers');
-var deleteNode = require('./delete_node');
+var deleteNode = require('./deleteNode');
 
 // TODO: needs to be overhauled should work without a given container
 // Working without a container does not really make really sense.

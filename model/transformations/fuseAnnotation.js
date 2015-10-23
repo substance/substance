@@ -2,7 +2,7 @@
 
 var _ = require('../../util/helpers');
 var helpers = require('../documentHelpers');
-var createAnnotation = require('./create_annotation');
+var createAnnotation = require('./createAnnotation');
 
 // Args:
 // - selection: current document selection

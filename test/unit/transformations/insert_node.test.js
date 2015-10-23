@@ -2,7 +2,7 @@
 
 require('../qunit_extensions');
 var simple = require('../../fixtures/simple');
-var insertNode = require('../../../model/transformations/insert_node');
+var insertNode = require('../../../model/transformations/insertNode');
 
 QUnit.module('Transformations/insertNode');
 

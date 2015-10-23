@@ -4,9 +4,9 @@ var OO = require('../util/oo');
 var _ = require('../util/helpers');
 var Surface = require('./Surface');
 var TextPropertyManager = require('../model/TextPropertyManager');
-var insertText = require('../model/transformations/insert_text');
-var deleteSelection = require('../model/transformations/delete_selection');
-var copySelection = require('../model/transformations/copy_selection');
+var insertText = require('../model/transformations/insertText');
+var deleteSelection = require('../model/transformations/deleteSelection');
+var copySelection = require('../model/transformations/copySelection');
 var Component = require('./Component');
 var $$ = Component.$$;
 

@@ -6,7 +6,7 @@ var OO = require('../util/oo');
 var HtmlImporter = require('./HtmlImporter');
 
 // Note: sharing the symbol with the transformation
-var CLIPBOARD_CONTAINER_ID = require('./transformations/copy_selection').CLIPBOARD_CONTAINER_ID;
+var CLIPBOARD_CONTAINER_ID = require('./transformations/copySelection').CLIPBOARD_CONTAINER_ID;
 
 function ClipboardImporter(config) {
   if (!config.schema) {

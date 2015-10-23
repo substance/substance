@@ -1,7 +1,7 @@
 'use strict';
 
 var containerAnnoSample = require('../../fixtures/container_anno_sample');
-var expandAnnotation = require('../../../model/transformations/expand_annotation');
+var expandAnnotation = require('../../../model/transformations/expandAnnotation');
 
 QUnit.module('Transformations/expandAnnotation');
 

@@ -1,7 +1,7 @@
 'use strict';
 
-var replaceText = require('./replace_text');
-var updateAnnotations = require('./update_annotations');
+var replaceText = require('./replaceText');
+var updateAnnotations = require('./updateAnnotations');
 
 var insertText = function(tx, args) {
   var selection = args.selection;

@@ -1,10 +1,10 @@
 'use strict';
 
 var _ = require('../../util/helpers');
-var deleteCharacter = require('./delete_character');
-var deleteNode = require('./delete_node');
+var deleteCharacter = require('./deleteCharacter');
+var deleteNode = require('./deleteNode');
 var merge = require('./merge');
-var updateAnnotations = require('./update_annotations');
+var updateAnnotations = require('./updateAnnotations');
 
 /* jshint latedef:false */
 

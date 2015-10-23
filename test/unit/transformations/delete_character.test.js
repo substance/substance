@@ -1,7 +1,7 @@
 "use strict";
 
 var sample1 = require('../../fixtures/sample1');
-var deleteCharacter = require('../../../model/transformations/delete_character');
+var deleteCharacter = require('../../../model/transformations/deleteCharacter');
 
 QUnit.module('Transformations/deleteCharacter');
 
