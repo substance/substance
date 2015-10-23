@@ -11,9 +11,9 @@
 
 var Data = require('./data');
 
-Data.Incremental = require('./incremental_data');
+Data.Incremental = require('./IncrementalData');
 Data.Node = require('./node');
 Data.Schema = require('./schema');
-Data.Index = require('./node_index');
+Data.Index = require('./NodeIndex');
 
 module.exports = Data;

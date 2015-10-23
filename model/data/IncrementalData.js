@@ -3,9 +3,9 @@
 var OO = require('../../util/oo');
 var _ = require('../../util/helpers');
 var Data = require('./data');
-var ObjectOperation = require('./object_operation');
-var ArrayOperation = require('./array_operation');
-var TextOperation = require('./text_operation');
+var ObjectOperation = require('./ObjectOperation');
+var ArrayOperation = require('./ArrayOperation');
+var TextOperation = require('./TextOperation');
 
 /**
  * Incremental data storage implemention.

@@ -27,7 +27,7 @@ Document.ContainerSelection = require('./ContainerSelection');
 Document.TableSelection = require('./TableSelection');
 
 Document.Annotator = require('./Annotator');
-Document.AnnotationUpdates = require('./annotation_updates');
+Document.annotationHelpers = require('./annotationHelpers');
 
 Document.HtmlImporter = require('./HtmlImporter');
 Document.HtmlExporter = require('./HtmlExporter');

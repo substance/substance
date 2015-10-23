@@ -3,7 +3,7 @@
 var _ = require('../util/helpers');
 var OO = require('../util/oo');
 var AbstractDocument = require('./AbstractDocument');
-var NodeIndex = require('./data/node_index');
+var NodeIndex = require('./data/NodeIndex');
 var AnnotationIndex = require('./AnnotationIndex');
 var AnchorIndex = require('./AnchorIndex');
 

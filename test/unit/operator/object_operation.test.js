@@ -2,9 +2,9 @@
 
 var _ = require('../../../util/helpers');
 var PathAdapter = require('../../../util/PathAdapter');
-var ObjectOperation = require('../../../model/data/object_operation');
-var ArrayOperation = require('../../../model/data/array_operation');
-var TextOperation = require('../../../model/data/text_operation');
+var ObjectOperation = require('../../../model/data/ObjectOperation');
+var ArrayOperation = require('../../../model/data/ArrayOperation');
+var TextOperation = require('../../../model/data/TextOperation');
 
 QUnit.module('Substance.Operator/ObjectOperation');
 

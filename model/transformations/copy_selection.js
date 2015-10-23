@@ -1,7 +1,7 @@
 'use strict';
 
 var _ = require('../../util/helpers');
-var Annotations = require('../annotation_updates');
+var annotationHelpers = require('../annotationHelpers');
 
 /* jshint latedef: false */
 
@@ -114,7 +114,7 @@ var _copyContainerSelection = function(doc, selection) {
         copy.update(path, {
           delete: { start: 0, end: selection.start.offset }
         });
-        Annotations.deletedText(copy, path, 0, selection.start.offset);
+        annotationHelpers.deletedText(copy, path, 0, selection.start.offset);
       }
       break;
     }
@@ -131,7 +131,7 @@ var _copyContainerSelection = function(doc, selection) {
         copy.update(path, {
           delete: { start: selection.end.offset, end: text.length }
         });
-        Annotations.deletedText(copy, path, selection.end.offset, text.length);
+        annotationHelpers.deletedText(copy, path, selection.end.offset, text.length);
       }
       break;
     }

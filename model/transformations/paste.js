@@ -2,7 +2,7 @@
 
 var _ = require('../../util/helpers');
 var uuid = require('../../util/uuid');
-var Annotations = require('../annotation_updates');
+var annotationHelpers = require('../annotationHelpers');
 var deleteSelection = require('./delete_selection');
 var insertText = require('./insert_text');
 var breakNode = require('./break_node');
@@ -50,7 +50,7 @@ var _pasteAnnotatedText = function(tx, args) {
   var path = selection.start.path;
   var offset = selection.start.offset;
   tx.update(path, { insert: { offset: offset, value: text } } );
-  Annotations.insertedText(tx, selection.start, text.length);
+  annotationHelpers.insertedText(tx, selection.start, text.length);
   selection = tx.createSelection({
     type: 'property',
     path: selection.start.path,

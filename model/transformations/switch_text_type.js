@@ -1,7 +1,7 @@
 'use strict';
 
 var _ = require('../../util/helpers');
-var Annotations = require('../annotation_updates');
+var annotationHelpers = require('../annotationHelpers');
 var deleteNode = require('./delete_node');
 
 // TODO: needs to be overhauled should work without a given container
@@ -34,7 +34,7 @@ function switchTextType(tx, args) {
   }, data);
   var newPath = [newNode.id, 'content'];
   tx.create(newNode);
-  Annotations.transferAnnotations(tx, path, 0, newPath, 0);
+  annotationHelpers.transferAnnotations(tx, path, 0, newPath, 0);
 
   // TODO: should work without a given container
   // _.each(tx.getContainers(), function(container) {

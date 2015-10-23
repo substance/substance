@@ -1,6 +1,6 @@
 var OO = require('../../../util/oo');
 
-var Annotations = require('../../annotation_updates');
+var annotationHelpers = require('../../annotationHelpers');
 
 function ListEditing() {}
 
@@ -109,7 +109,7 @@ ListEditing.Prototype = function() {
       // to a new location
       // append the second text and transfer annotations
       tx.update(firstPath, { insert: { offset: firstText.length, value: secondText } });
-      Annotations.transferAnnotations(tx, secondPath, 0, firstPath, firstText.length);
+      annotationHelpers.transferAnnotations(tx, secondPath, 0, firstPath, firstText.length);
       // remove the second item from the list and delete it from the document
       list.removeItem(secondPath[0]);
       tx.delete(secondPath[0]);

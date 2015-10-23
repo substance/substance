@@ -3,7 +3,7 @@
 var OO = require('../util/oo');
 var _ = require('../util/helpers');
 var ContainerAnnotation = require('./ContainerAnnotation');
-var TextOperation = require('./data/text_operation');
+var TextOperation = require('./data/TextOperation');
 
 var Record, Change;
 

@@ -2,7 +2,7 @@
 'use strict';
 
 var _ = require('../../util/helpers');
-var Annotations = require('../annotation_updates');
+var annotationHelpers = require('../annotationHelpers');
 
 var merge = function(tx, args) {
   var containerId = args.containerId;
@@ -152,7 +152,7 @@ var _mergeTextNodes = function(tx, args) {
     // append the second text
     tx.update(firstPath, { insert: { offset: firstLength, value: secondText } });
     // transfer annotations
-    Annotations.transferAnnotations(tx, secondPath, 0, firstPath, firstLength);
+    annotationHelpers.transferAnnotations(tx, secondPath, 0, firstPath, firstLength);
     // hide the second node
     container.hide(secondPath[0]);
     // delete the second node

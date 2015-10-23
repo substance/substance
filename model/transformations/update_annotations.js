@@ -1,7 +1,7 @@
 /* jshint latedef: false */
 "use strict";
 
-var Annotations = require('../annotation_updates');
+var annotationHelpers = require('../annotationHelpers');
 var Coordinate = require('../Coordinate');
 
 function updateAnnotations(tx, args) {
@@ -22,14 +22,14 @@ function updateAnnotations(tx, args) {
 function _upateAfterInsert(tx, args) {
   var op = args.op;
   var diff = op.diff;
-  Annotations.insertedText(tx, new Coordinate(op.getPath(), diff.pos), diff.getLength(), args.ignoredAnnotations);
+  annotationHelpers.insertedText(tx, new Coordinate(op.getPath(), diff.pos), diff.getLength(), args.ignoredAnnotations);
   return args;
 }
 
 function _updateAfterDelete(tx, args) {
   var op = args.op;
   var diff = op.diff;
-  var result = Annotations.deletedText(tx, op.getPath(), diff.pos, diff.pos + diff.getLength(), args.replaceTextSupport);
+  var result = annotationHelpers.deletedText(tx, op.getPath(), diff.pos, diff.pos + diff.getLength(), args.replaceTextSupport);
   if (args.replaceTextSupport) {
     args.ignoredAnnotations = result;
   }

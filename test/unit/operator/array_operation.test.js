@@ -1,7 +1,7 @@
 "use strict";
 
 var _ = require('../../../util/helpers');
-var ArrayOperation = require('../../../model/data/array_operation');
+var ArrayOperation = require('../../../model/data/ArrayOperation');
 
 QUnit.module('Substance.Operator/ArrayOperation');
 
