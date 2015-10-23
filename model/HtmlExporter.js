@@ -1,7 +1,7 @@
 "use strict";
 
 var OO = require('../util/oo');
-var Annotator = require('./annotator');
+var Annotator = require('./Annotator');
 
 var inBrowser = (typeof window !== 'undefined');
 var $ = require('../util/jquery');

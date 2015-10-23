@@ -3,8 +3,8 @@
 var _ = require('../util/helpers');
 var OO = require('../util/oo');
 var EventEmitter = require('../util/EventEmitter');
-var Node = require('./node');
-var Selection = require('./selection');
+var Node = require('./DocumentNode');
+var Selection = require('./Selection');
 
 // Container Annotation
 // ----------------

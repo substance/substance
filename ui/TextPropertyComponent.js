@@ -3,7 +3,7 @@
 var OO = require('../util/oo');
 var Component = require('./Component');
 var $$ = Component.$$;
-var Annotator = require('../model/annotator');
+var Annotator = require('../model/Annotator');
 var AnnotationComponent = require('./AnnotationComponent');
 
 function TextPropertyComponent() {

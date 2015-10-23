@@ -3,9 +3,9 @@
 var OO = require('../util/oo');
 var _ = require('../util/helpers');
 var PropertySelection = require('./PropertySelection');
-var Selection = require('./selection');
-var Range = require('./range');
-var Coordinate = require('./coordinate');
+var Selection = require('./Selection');
+var Range = require('./Range');
+var Coordinate = require('./Coordinate');
 
 function ContainerSelection(properties) {
   // Note: not calling the super ctor as it freezes the instance

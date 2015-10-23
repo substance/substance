@@ -2,7 +2,7 @@
 
 var _ = require('../../util/helpers');
 var $ = require('../../util/jquery');
-var DocumentNode = require('../../model/node');
+var DocumentNode = require('../../model/DocumentNode');
 var ListItem = require('./ListItem');
 var ParentNodeMixin = require('../../model/ParentNodeMixin');
 

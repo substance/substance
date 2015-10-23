@@ -2,9 +2,9 @@
 
 var OO = require('../util/oo');
 var Schema = require('./data/schema');
-var Node = require('./node');
-var Annotation = require('./annotation');
-var Container = require('./container');
+var Node = require('./DocumentNode');
+var Annotation = require('./Annotation');
+var Container = require('./Container');
 var ContainerAnnotation = require('./ContainerAnnotation');
 
 function DocumentSchema(name, version) {

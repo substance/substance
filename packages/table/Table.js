@@ -3,7 +3,7 @@
 var $ = require('../../util/jquery');
 var OO = require('../../util/oo');
 var _ = require('../../util/helpers');
-var Node = require('../../model/node');
+var Node = require('../../model/DocumentNode');
 var TableMatrix = require('./TableMatrix');
 var ParentNodeMixin = require('../../model/ParentNodeMixin');
 

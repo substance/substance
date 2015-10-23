@@ -1,7 +1,7 @@
 'use strict';
 
 var $ = require('../../util/jquery');
-var DocumentNode = require('../../model/node');
+var DocumentNode = require('../../model/DocumentNode');
 
 var Embed = DocumentNode.extend({
   displayName: "Embed",

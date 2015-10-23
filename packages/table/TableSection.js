@@ -2,7 +2,7 @@
 
 var _ = require('../../util/helpers');
 var $ = require('../../util/jquery');
-var Node = require('../../model/node');
+var Node = require('../../model/DocumentNode');
 var ParentNodeMixin = require('../../model/ParentNodeMixin');
 
 var TableSection = Node.extend(ParentNodeMixin.prototype, {

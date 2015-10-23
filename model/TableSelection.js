@@ -1,7 +1,7 @@
 'use strict';
 
 var OO = require('../util/oo');
-var Selection = require('./selection');
+var Selection = require('./Selection');
 
 function TableSelection(properties) {
   this.tableId = properties.tableId;

@@ -5,8 +5,8 @@ var $ = require('../util/jquery');
 var OO = require('../util/oo');
 var Registry = require('../util/Registry');
 var SurfaceSelection = require('./SurfaceSelection');
-var Document = require('../model/document');
-var Selection = require('../model/selection');
+var Document = require('../model/Document');
+var Selection = require('../model/Selection');
 var Component = require('./Component');
 
 /**

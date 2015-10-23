@@ -1,6 +1,6 @@
 'use strict';
 
-var Node = require('./node');
+var Node = require('./DocumentNode');
 
 // Text Node
 // ---------

@@ -8,25 +8,25 @@
  *
  * @module Document
  */
-var Document = require('./document');
+var Document = require('./Document');
 
 Document.Schema = require('./DocumentSchema');
 
-Document.Node = require('./node');
-Document.Annotation = require('./annotation');
-Document.Container = require('./container');
+Document.Node = require('./DocumentNode');
+Document.Annotation = require('./Annotation');
+Document.Container = require('./Container');
 Document.ContainerAnnotation = require('./ContainerAnnotation');
 Document.TextNode = require('./TextNode');
 
-Document.Coordinate = require('./coordinate');
-Document.Range = require('./range');
-Document.Selection = require('./selection');
+Document.Coordinate = require('./Coordinate');
+Document.Range = require('./Range');
+Document.Selection = require('./Selection');
 Document.nullSelection = Document.Selection.nullSelection;
 Document.PropertySelection = require('./PropertySelection');
 Document.ContainerSelection = require('./ContainerSelection');
 Document.TableSelection = require('./TableSelection');
 
-Document.Annotator = require('./annotator');
+Document.Annotator = require('./Annotator');
 Document.AnnotationUpdates = require('./annotation_updates');
 
 Document.HtmlImporter = require('./HtmlImporter');

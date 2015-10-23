@@ -2,7 +2,7 @@
 "use strict";
 
 var Annotations = require('../annotation_updates');
-var Coordinate = require('../coordinate');
+var Coordinate = require('../Coordinate');
 
 function updateAnnotations(tx, args) {
   var op = args.op;

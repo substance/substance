@@ -2,9 +2,9 @@
 
 var _ = require('../util/helpers');
 var OO = require('../util/oo');
-var Selection = require('./selection');
-var Coordinate = require('./coordinate');
-var Range = require('./range');
+var Selection = require('./Selection');
+var Coordinate = require('./Coordinate');
+var Range = require('./Range');
 
 function PropertySelection(properties) {
   var path = properties.path;

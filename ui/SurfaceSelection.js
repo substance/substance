@@ -3,9 +3,9 @@
 var _ = require('../util/helpers');
 var $ = require('../util/jquery');
 var OO = require('../util/oo');
-var Document = require('../model/document');
-var Range = require('../model/range');
-var Coordinate = require('../model/coordinate');
+var Document = require('../model/Document');
+var Range = require('../model/Range');
+var Coordinate = require('../model/Coordinate');
 
 /**
  * A class that maps DOM selections to model selections.

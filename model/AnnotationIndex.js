@@ -3,7 +3,7 @@
 var _ = require('../util/helpers');
 var OO = require('../util/oo');
 var PathAdapter = require('../util/PathAdapter');
-var Annotation = require('./annotation');
+var Annotation = require('./Annotation');
 var NodeIndex = require('./data/node_index');
 
 // Annotation Index

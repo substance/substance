@@ -7,7 +7,7 @@ var Clipboard = require('./Clipboard');
 var ToolManager = require('./ToolManager');
 var Registry = require('../util/Registry');
 var Logger = require ('../util/Logger');
-var Selection = require('../model/selection');
+var Selection = require('../model/Selection');
 
 // Setup default I18n
 var I18n = require('./i18n');
