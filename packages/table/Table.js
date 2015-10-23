@@ -3,9 +3,9 @@
 var $ = require('../../basics/jquery');
 var OO = require('../../basics/oo');
 var _ = require('../../basics/helpers');
-var Node = require('../../document/node');
+var Node = require('../../model/node');
 var TableMatrix = require('./TableMatrix');
-var ParentNodeMixin = require('../../document/parent_node_mixin');
+var ParentNodeMixin = require('../../model/parent_node_mixin');
 
 var Table = Node.extend(ParentNodeMixin.prototype, {
   displayName: "Table",

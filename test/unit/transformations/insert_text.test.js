@@ -1,7 +1,7 @@
 "use strict";
 
 var sample1 = require('../../fixtures/sample1');
-var insertText = require('../../../document/transformations/insert_text');
+var insertText = require('../../../model/transformations/insert_text');
 
 QUnit.module('Transformations/insertText');
 

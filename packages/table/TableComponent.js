@@ -1,11 +1,11 @@
 'use strict';
 
-var $ = require('../../basics/jquery');
 var _ = require('../../basics/helpers');
+var $ = require('../../basics/jquery');
 var OO = require('../../basics/oo');
 var Component = require('../../ui/Component');
 var TextProperty = require('../../ui/TextPropertyComponent');
-var TableSelection = require('../../document/table_selection');
+var TableSelection = require('../../model/table_selection');
 var $$ = Component.$$;
 
 function TableComponent() {

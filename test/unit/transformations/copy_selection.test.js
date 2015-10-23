@@ -2,8 +2,7 @@
 
 require('../qunit_extensions');
 var sample1 = require('../../fixtures/sample1');
-var Document = require('../../../document');
-var copySelection = Document.Transformations.copySelection;
+var copySelection = require('../../../model/transformations/copy_selection');
 
 QUnit.module('Transformations/copySelection');
 
@@ -34,7 +33,6 @@ QUnit.test("Copying a property selection with annotated text", function(assert) 
   var args = {selection: sel};
   var out = copySelection(doc, args);
   var copy = out.doc;
-  var textNode = copy.get('text');
   assert.equal(copy.get(['text', 'content']), 'with anno', 'Selected text should be copied.');
   var annos = copy.getIndex('annotations').get(['text', 'content']);
   assert.equal(annos.length, 1, 'There should be one annotation on copied text.');

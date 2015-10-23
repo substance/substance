@@ -1,10 +1,8 @@
 'use strict';
 
 var OO = require('../../basics/oo');
-var Document = require('../../document');
+var HtmlImporter = require('../../model/html_importer');
 var schema = require('./test_schema');
-
-var HtmlImporter = Document.HtmlImporter;
 
 function TestHtmlImporter() {
   TestHtmlImporter.super.call(this, { schema: schema });

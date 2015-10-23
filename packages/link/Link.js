@@ -1,4 +1,6 @@
-var Annotation = require('../../document/annotation');
+'use strict';
+
+var Annotation = require('../../model/annotation');
 
 var Link = Annotation.extend({
   name: "link",

@@ -2,7 +2,7 @@
 
 var containerAnnoSample = require('../../fixtures/container_anno_sample');
 var AnnotationCommand = require('../../../ui/AnnotationCommand');
-var docHelpers = require('../../../document/helpers');
+var docHelpers = require('../../../model/document_helpers');
 
 var StubSurface = require('../ui/stub_surface');
 

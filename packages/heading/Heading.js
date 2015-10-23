@@ -1,7 +1,7 @@
 'use strict';
 
 var $ = require('../../basics/jquery');
-var TextNode = require('../../document/text_node');
+var TextNode = require('../../model/text_node');
 
 var Heading = TextNode.extend({
   name: "heading",

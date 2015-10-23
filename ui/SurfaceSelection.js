@@ -1,11 +1,11 @@
 'use strict';
 
+var _ = require('../basics/helpers');
 var $ = require('../basics/jquery');
 var OO = require('../basics/oo');
-var Document = require('../document');
-var _ = require('../basics/helpers');
-var Range = Document.Range;
-var Coordinate = Document.Coordinate;
+var Document = require('../model/document');
+var Range = require('../model/range');
+var Coordinate = require('../model/coordinate');
 
 /**
  * A class that maps DOM selections to model selections.

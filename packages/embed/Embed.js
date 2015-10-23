@@ -1,7 +1,7 @@
 'use strict';
 
 var $ = require('../../basics/jquery');
-var DocumentNode = require('../../document/node');
+var DocumentNode = require('../../model/node');
 
 var Embed = DocumentNode.extend({
   displayName: "Embed",
@@ -26,7 +26,7 @@ Embed.static.fromHtml = function($el, converter) {
     id: id,
     src: $el.attr('src'),
     html: $el.html()
-  };  
+  };
   return embed;
 };
 
