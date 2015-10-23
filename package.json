@@ -10,7 +10,7 @@
   "scripts": {
     "test": "gulp test",
     "coverage": "gulp coverage",
-    "doc": "./node_modules/.bin/jsdoc -r -c .jsdoc -d ./dist/doc ./data ./basics ./document ./ui doc/index.md"
+    "doc": "./node_modules/.bin/jsdoc -r -c .jsdoc/config.json -d ./dist/doc ./model ./ui ./util ./packages .jsdoc/index.md"
   },
   "author": "",
   "license": "MIT",
