@@ -4,7 +4,7 @@ var $ = require('../basics/jquery');
 var _ = require('../basics/helpers');
 var OO = require('../basics/oo');
 
-var Component = require('./component');
+var Component = require('./Component');
 var $$ = Component.$$;
 var Icon = require('./FontAwesomeIcon');
 

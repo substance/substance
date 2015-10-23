@@ -1,6 +1,6 @@
 "use strict";
 
-var Component = require('../../../ui/component');
+var Component = require('../../../ui/Component');
 var $$ = Component.$$;
 var _ = require('../../../basics/helpers');
 

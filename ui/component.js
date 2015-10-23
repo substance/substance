@@ -228,7 +228,7 @@ Component.Prototype = function ComponentPrototype() {
 
       // To prevent from multiple calls to didRender, which can happen under
       // specific circumstances we use a guard.
-      // See `test/unit/ui/component.test.js` where didMount is tested
+      // See `test/unit/ui/Component.test.js` where didMount is tested
       if (!this.__didMountTriggered__) {
         this.didMount();
         this.__didMountTriggered__ = true;

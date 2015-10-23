@@ -2,7 +2,7 @@
 
 var OO = require('../../basics/oo');
 var _ = require('../../basics/helpers');
-var Component = require('../component');
+var Component = require('../Component');
 var FormEditor = require('./form_editor');
 var UnsupportedNode = require('../UnsupportedNode');
 var TextPropertyManager = require('../../document/text_property_manager');
@@ -24,7 +24,7 @@ var $$ = Component.$$;
  * @example
  * 
  * var ContainerEditor = require('substance/ui/surface').ContainerEditor;
- * var Component = require('substance/ui/component');
+ * var Component = require('substance/ui/Component');
  * var ToggleStrong = require('substance/ui/commands').ToggleStrong
  * 
  * var MyEditor = Component.extend({

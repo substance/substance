@@ -1,9 +1,9 @@
 'use strict';
 
 var OO = require('../../basics/oo');
-var Component = require('../../ui/component');
+var Component = require('../../ui/Component');
 var $$ = Component.$$;
-var TextProperty = require('../../ui/text_property_component');
+var TextProperty = require('../../ui/TextPropertyComponent');
 
 function ParagraphComponent() {
   Component.apply(this, arguments);

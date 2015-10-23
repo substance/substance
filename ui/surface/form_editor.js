@@ -6,7 +6,7 @@ var Surface = require('./surface');
 var Document = require('../../document');
 var Transformations = Document.Transformations;
 var TextPropertyManager = require('../../document/text_property_manager');
-var Component = require('../component');
+var Component = require('../Component');
 var $$ = Component.$$;
 
 /**

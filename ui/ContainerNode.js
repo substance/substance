@@ -2,7 +2,7 @@
 
 var OO = require('../basics/oo');
 var _ = require('../basics/helpers');
-var Component = require('./component');
+var Component = require('./Component');
 var $$ = Component.$$;
 var UnsupportedNode = require('./UnsupportedNode');
 var Surface = require('./surface');

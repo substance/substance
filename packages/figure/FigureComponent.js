@@ -1,8 +1,8 @@
 'use strict';
 
 var OO = require('../../basics/oo');
-var Component = require('../../ui/component');
-var TextProperty = require('../../ui/text_property_component');
+var Component = require('../../ui/Component');
+var TextProperty = require('../../ui/TextPropertyComponent');
 var $$ = Component.$$;
 
 function FigureComponent() {

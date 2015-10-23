@@ -3,8 +3,8 @@
 var $ = require('../../basics/jquery');
 var _ = require('../../basics/helpers');
 var OO = require('../../basics/oo');
-var Component = require('../../ui/component');
-var TextProperty = require('../../ui/text_property_component');
+var Component = require('../../ui/Component');
+var TextProperty = require('../../ui/TextPropertyComponent');
 var TableSelection = require('../../document/table_selection');
 var $$ = Component.$$;
 

@@ -1,7 +1,7 @@
 'use strict';
 
 var OO = require('../../basics/oo');
-var Component = require('../../ui/component');
+var Component = require('../../ui/Component');
 var $$ = Component.$$;
 var AnnotationTool = require('../../ui/AnnotationTool');
 var _ = require('../../basics/helpers');

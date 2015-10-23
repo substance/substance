@@ -8,7 +8,7 @@ var Substance = require('../../basics');
 var SurfaceSelection = require('./surface_selection');
 var Document = require('../../document');
 var Selection = Document.Selection;
-var Component = require('../component');
+var Component = require('../Component');
 
 /**
  * Abstract interface for editing components. Dances with contenteditable, so you don't have to.

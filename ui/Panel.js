@@ -2,7 +2,7 @@
 
 var $ = require('../basics/jquery');
 var OO = require('../basics/oo');
-var Component = require('./component');
+var Component = require('./Component');
 var $$ = Component.$$;
 
 function Panel() {

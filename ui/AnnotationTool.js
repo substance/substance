@@ -1,7 +1,7 @@
 'use strict';
 
 var OO = require('../basics/oo');
-var Component = require('./component');
+var Component = require('./Component');
 var $$ = Component.$$;
 var SurfaceTool = require('./SurfaceTool');
 var _ = require('../basics/helpers');

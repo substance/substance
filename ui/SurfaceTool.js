@@ -3,7 +3,7 @@
 var OO = require('../basics/oo');
 var Tool = require('./Tool');
 var _ = require('../basics/helpers');
-var Component = require('./component');
+var Component = require('./Component');
 var $$ = Component.$$;
 
 /**
