@@ -1,7 +1,7 @@
 'use strict';
 
 var OO = require('./oo');
-var Registry = require('./registry');
+var Registry = require('./Registry');
 
 /**
  * Factory
