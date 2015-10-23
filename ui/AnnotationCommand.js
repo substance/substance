@@ -2,7 +2,7 @@
 
 var OO = require('../util/oo');
 var SurfaceCommand = require('./SurfaceCommand');
-var helpers = require('../model/document_helpers');
+var helpers = require('../model/documentHelpers');
 
 // Annotation transformations
 var createAnnotation = require('../model/transformations/create_annotation');

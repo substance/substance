@@ -1,7 +1,7 @@
 "use strict";
 
 var _ = require('../util/helpers');
-var AnnotationIndex = require('./annotation_index');
+var AnnotationIndex = require('./AnnotationIndex');
 
 var Helpers = {};
 
@@ -13,7 +13,7 @@ var Helpers = {};
 
 Helpers.isContainerAnnotation = function(doc, type) {
   var schema = doc.getSchema();
-  return schema.isInstanceOf(type, "container_annotation");
+  return schema.isInstanceOf(type, "container-annotation");
 };
 
 /**

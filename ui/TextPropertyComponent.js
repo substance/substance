@@ -75,7 +75,7 @@ TextPropertyComponent.Prototype = function() {
       // TODO: experiment, if this reduces cursor flickering, already...
       // el.ref(id + "@" + fragmentCounters[id]);
       // special support for container annotation fragments
-      if (node.type === "container_annotation_fragment") {
+      if (node.type === "container-annotation-fragment") {
         el.addClass(node.anno.getTypeNames().join(' ').replace(/_/g, "-"));
         el.addClass("se-annotation-fragment");
       } else if (node.type === "container-annotation-anchor") {

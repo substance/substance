@@ -10,29 +10,29 @@
  */
 var Document = require('./document');
 
-Document.Schema = require('./document_schema');
+Document.Schema = require('./DocumentSchema');
 
 Document.Node = require('./node');
 Document.Annotation = require('./annotation');
 Document.Container = require('./container');
-Document.ContainerAnnotation = require('./container_annotation');
-Document.TextNode = require('./text_node');
+Document.ContainerAnnotation = require('./ContainerAnnotation');
+Document.TextNode = require('./TextNode');
 
 Document.Coordinate = require('./coordinate');
 Document.Range = require('./range');
 Document.Selection = require('./selection');
 Document.nullSelection = Document.Selection.nullSelection;
-Document.PropertySelection = require('./property_selection');
-Document.ContainerSelection = require('./container_selection');
-Document.TableSelection = require('./table_selection');
+Document.PropertySelection = require('./PropertySelection');
+Document.ContainerSelection = require('./ContainerSelection');
+Document.TableSelection = require('./TableSelection');
 
 Document.Annotator = require('./annotator');
 Document.AnnotationUpdates = require('./annotation_updates');
 
-Document.HtmlImporter = require('./html_importer');
-Document.HtmlExporter = require('./html_exporter');
-Document.ClipboardImporter = require('./clipboard_importer');
-Document.ClipboardExporter = require('./clipboard_exporter');
+Document.HtmlImporter = require('./HtmlImporter');
+Document.HtmlExporter = require('./HtmlExporter');
+Document.ClipboardImporter = require('./ClipboardImporter');
+Document.ClipboardExporter = require('./ClipboardExporter');
 
 Document.Transformations = require('./transformations');
 

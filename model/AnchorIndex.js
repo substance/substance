@@ -3,7 +3,7 @@
 var _ = require('../util/helpers');
 var OO = require('../util/oo');
 var PathAdapter = require('../util/PathAdapter');
-var ContainerAnnotation = require('./container_annotation');
+var ContainerAnnotation = require('./ContainerAnnotation');
 var NodeIndex = require('./data/node_index');
 
 var ContainerAnnotationAnchorIndex = function(doc) {

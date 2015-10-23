@@ -2,7 +2,7 @@
 
 var OO = require('../util/oo');
 var _ = require('../util/helpers');
-var ContainerAnnotation = require('./container_annotation');
+var ContainerAnnotation = require('./ContainerAnnotation');
 var TextOperation = require('./data/text_operation');
 
 var Record, Change;
@@ -44,7 +44,7 @@ TextPropertyManager.Prototype = function() {
   this._initialize = function() {
     if (this.hasContainer()) {
       _.each(this.doc.getNodes(), function(node) {
-        if (node.isInstanceOf('container_annotation')) {
+        if (node.isInstanceOf('container-annotation')) {
           if (node.container === this.containerId) {
             var anno = node;
             _.each(anno.getFragments(), this._initializeFragment, this);

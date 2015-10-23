@@ -3,7 +3,7 @@
 var $ = require('../util/jquery');
 var _ = require('../util/helpers');
 var OO = require('../util/oo');
-var HtmlImporter = require('./html_importer');
+var HtmlImporter = require('./HtmlImporter');
 
 // Note: sharing the symbol with the transformation
 var CLIPBOARD_CONTAINER_ID = require('./transformations/copy_selection').CLIPBOARD_CONTAINER_ID;

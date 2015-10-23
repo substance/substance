@@ -5,7 +5,7 @@ var $ = require('../../util/jquery');
 var OO = require('../../util/oo');
 var Component = require('../../ui/Component');
 var TextProperty = require('../../ui/TextPropertyComponent');
-var TableSelection = require('../../model/table_selection');
+var TableSelection = require('../../model/TableSelection');
 var $$ = Component.$$;
 
 function TableComponent() {

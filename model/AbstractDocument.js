@@ -5,10 +5,10 @@ var EventEmitter = require('../util/EventEmitter');
 var OO = require('../util/oo');
 var IncrementalData = require('./data/incremental_data');
 var Selection = require('./selection');
-var PropertySelection = require('./property_selection');
-var ContainerSelection = require('./container_selection');
-var TableSelection = require('./table_selection');
-var docHelpers = require('./document_helpers');
+var PropertySelection = require('./PropertySelection');
+var ContainerSelection = require('./ContainerSelection');
+var TableSelection = require('./TableSelection');
+var docHelpers = require('./documentHelpers');
 
 /**
  * AbstractDocument

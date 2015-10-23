@@ -1,7 +1,7 @@
 'use strict';
 
 var $ = require('../../util/jquery');
-var TextNode = require('../../model/text_node');
+var TextNode = require('../../model/TextNode');
 
 var Blockquote = TextNode.extend({
   displayName: "Blockquote",

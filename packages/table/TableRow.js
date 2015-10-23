@@ -3,7 +3,7 @@
 var _ = require('../../util/helpers');
 var $ = require('../../util/jquery');
 var Node = require('../../model/node');
-var ParentNodeMixin = require('../../model/parent_node_mixin');
+var ParentNodeMixin = require('../../model/ParentNodeMixin');
 
 var TableRow = Node.extend(ParentNodeMixin.prototype, {
   displayName: "TableRow",

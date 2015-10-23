@@ -1,7 +1,7 @@
 'use strict';
 
 var OO = require('../../util/oo');
-var HtmlImporter = require('../../model/html_importer');
+var HtmlImporter = require('../../model/HtmlImporter');
 var schema = require('./test_schema');
 
 function TestHtmlImporter() {

@@ -2,17 +2,17 @@
 
 var _ = require('../util/helpers');
 var OO = require('../util/oo');
-var AbstractDocument = require('./abstract_document');
+var AbstractDocument = require('./AbstractDocument');
 var NodeIndex = require('./data/node_index');
-var AnnotationIndex = require('./annotation_index');
-var AnchorIndex = require('./anchor_index');
+var AnnotationIndex = require('./AnnotationIndex');
+var AnchorIndex = require('./AnchorIndex');
 
-var TransactionDocument = require('./transaction_document');
-var DocumentChange = require('./document_change');
+var TransactionDocument = require('./TransactionDocument');
+var DocumentChange = require('./DocumentChange');
 
-var PathEventProxy = require('./path_event_proxy');
-var ClipboardImporter = require('./clipboard_importer');
-var ClipboardExporter = require('./clipboard_exporter');
+var PathEventProxy = require('./PathEventProxy');
+var ClipboardImporter = require('./ClipboardImporter');
+var ClipboardExporter = require('./ClipboardExporter');
 
 var __id__ = 0;
 

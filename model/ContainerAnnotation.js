@@ -27,7 +27,7 @@ var Selection = require('./selection');
 
 var ContainerAnnotation = Node.extend({
   displayName: "ContainerAnnotation",
-  name: "container_annotation",
+  name: "container-annotation",
 
   properties: {
     // id of container node
@@ -173,7 +173,7 @@ OO.initClass(ContainerAnnotation.Anchor);
 ContainerAnnotation.Fragment = function Fragment(anno, path, mode) {
   EventEmitter.call(this);
 
-  this.type = "container_annotation_fragment";
+  this.type = "container-annotation-fragment";
   this.anno = anno;
   // HACK: id is necessary for Annotator
   this.id = anno.id;

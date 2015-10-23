@@ -1,7 +1,7 @@
 'use strict';
 
 var _ = require('../../util/helpers');
-var helpers = require('../document_helpers');
+var helpers = require('../documentHelpers');
 var createAnnotation = require('./create_annotation');
 
 // Args:

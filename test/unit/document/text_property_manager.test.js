@@ -1,6 +1,6 @@
 "use strict";
 
-var TextPropertyManager = require('../../../model/text_property_manager');
+var TextPropertyManager = require('../../../model/TextPropertyManager');
 var sample = require('../../fixtures/container_anno_sample');
 
 var manager;

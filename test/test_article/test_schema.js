@@ -1,7 +1,7 @@
 'use strict';
 
 var Document = require('../../model/document');
-var Schema = require('../../model/document_schema');
+var Schema = require('../../model/DocumentSchema');
 var MetaNode = require('./test_article_meta');
 var TestNode = require('./test_node');
 var TestContainerAnnotation = require('./test_container_annotation');

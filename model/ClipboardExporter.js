@@ -1,7 +1,7 @@
 "use strict";
 
 var OO = require('../util/oo');
-var HtmlExporter = require('./html_exporter');
+var HtmlExporter = require('./HtmlExporter');
 
 function ClipboardExporter() {
   ClipboardExporter.super.call(this);

@@ -1,6 +1,6 @@
 'use strict';
 
-var helpers = require('../document_helpers');
+var helpers = require('../documentHelpers');
 
 // Args:
 // - selection: current document selection

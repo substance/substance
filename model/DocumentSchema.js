@@ -5,7 +5,7 @@ var Schema = require('./data/schema');
 var Node = require('./node');
 var Annotation = require('./annotation');
 var Container = require('./container');
-var ContainerAnnotation = require('./container_annotation');
+var ContainerAnnotation = require('./ContainerAnnotation');
 
 function DocumentSchema(name, version) {
   DocumentSchema.super.call(this, name, version);

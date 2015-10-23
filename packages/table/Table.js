@@ -5,7 +5,7 @@ var OO = require('../../util/oo');
 var _ = require('../../util/helpers');
 var Node = require('../../model/node');
 var TableMatrix = require('./TableMatrix');
-var ParentNodeMixin = require('../../model/parent_node_mixin');
+var ParentNodeMixin = require('../../model/ParentNodeMixin');
 
 var Table = Node.extend(ParentNodeMixin.prototype, {
   displayName: "Table",

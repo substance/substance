@@ -2,7 +2,7 @@
 
 var OO = require('../util/oo');
 var _ = require('../util/helpers');
-var PropertySelection = require('./property_selection');
+var PropertySelection = require('./PropertySelection');
 var Selection = require('./selection');
 var Range = require('./range');
 var Coordinate = require('./coordinate');
