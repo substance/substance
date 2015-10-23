@@ -1,7 +1,7 @@
 'use strict';
 
 var containerAnnoSample = require('../../fixtures/container_anno_sample');
-var truncateAnnotation = require('../../../document/transformations/truncate_annotation');
+var truncateAnnotation = require('../../../model/transformations/truncate_annotation');
 
 QUnit.module('Transformations/truncateAnnotation');
 
@@ -44,7 +44,7 @@ QUnit.test("Truncate container annotation for a given property selection", funct
   var args = {selection: sel, containerId: 'main', annotationType: 'test-container-anno'};
   var out = truncateAnnotation(doc, args);
   var a1 = out.result;
-  
+
   assert.ok(a1, 'a1', 'a1 should have been returned as a result');
   assert.equal(a1.endOffset, 1, 'a1.endOffset should be 1');
 });
@@ -66,7 +66,7 @@ QUnit.test("Truncate container annotation for a given container selection", func
   var args = {selection: sel, containerId: 'main', annotationType: 'test-container-anno'};
   var out = truncateAnnotation(doc, args);
   var a1 = out.result;
-  
+
   assert.ok(a1, 'a1', 'a1 should have been returned as a result');
   assert.deepEqual(a1.endPath, ['p2', 'content'], 'a1.endPath should be p2.content');
   assert.equal(a1.endOffset, 1, 'a1.endOffset should be 1');

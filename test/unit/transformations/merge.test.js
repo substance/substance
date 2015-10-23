@@ -2,8 +2,7 @@
 
 require('../qunit_extensions');
 var sample1 = require('../../fixtures/sample1');
-var Document = require('../../../document');
-var merge = Document.Transformations.merge;
+var merge = require('../../../model/transformations/merge');
 
 QUnit.module('Transformations/merge');
 

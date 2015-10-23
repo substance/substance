@@ -1,9 +1,9 @@
 'use strict';
 
 var Component = require('../../ui/Component');
-var $$ = Component.$$;
 var TextProperty = require('../../ui/TextPropertyComponent');
-var List = require('../../document/nodes/list');
+var List = require('../../model/nodes/list');
+var $$ = Component.$$;
 
 var ListComponent = Component.extend({
 
@@ -18,7 +18,7 @@ var ListComponent = Component.extend({
     this.doc.getEventProxy('path').remove([this.props.node.id, 'items'], this);
     this.doc = null;
   },
-  
+
   render: function() {
     var doc = this.props.doc;
     return List.static.render(this.props.node, {

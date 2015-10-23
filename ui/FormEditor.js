@@ -3,9 +3,10 @@
 var OO = require('../basics/oo');
 var _ = require('../basics/helpers');
 var Surface = require('./Surface');
-var Document = require('../document');
-var Transformations = Document.Transformations;
-var TextPropertyManager = require('../document/text_property_manager');
+var TextPropertyManager = require('../model/text_property_manager');
+var insertText = require('../model/transformations/insert_text');
+var deleteSelection = require('../model/transformations/delete_selection');
+var copySelection = require('../model/transformations/copy_selection');
 var Component = require('./Component');
 var $$ = Component.$$;
 
@@ -30,7 +31,7 @@ FormEditor.Prototype = function() {
   this.isContainerEditor = function() {
     return false;
   };
-  
+
   this.render = function() {
     var doc = this.props.doc;
     var containerNode = doc.get(this.props.containerId);
@@ -71,13 +72,13 @@ FormEditor.Prototype = function() {
 
   this.insertText = function(tx, args) {
     if (args.selection.isPropertySelection() || args.selection.isContainerSelection()) {
-      return Transformations.insertText(tx, args);
+      return insertText(tx, args);
     }
   };
 
   // implements backspace and delete
   this.delete = function(tx, args) {
-    return Transformations.deleteSelection(tx, args);
+    return deleteSelection(tx, args);
   };
 
   // no breaking
@@ -92,7 +93,7 @@ FormEditor.Prototype = function() {
 
   // create a document instance containing only the selected content
   this.copy = function(doc, selection) {
-    var result = Transformations.copySelection(doc, { selection: selection });
+    var result = copySelection(doc, { selection: selection });
     return result.doc;
   };
 

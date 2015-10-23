@@ -1,8 +1,8 @@
 'use strict';
 
-var Document = require('../../document');
+var ContainerAnnotation = require('../../model/container_annotation');
 
-var TestContainerAnnotation = Document.ContainerAnnotation.extend({
+var TestContainerAnnotation = ContainerAnnotation.extend({
   name: 'test-container-anno',
 });
 

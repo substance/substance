@@ -1,9 +1,9 @@
 'use strict';
 
-var $ = require('../../basics/jquery');
-var Node = require('../../document/node');
 var _ = require('../../basics/helpers');
-var ParentNodeMixin = require('../../document/parent_node_mixin');
+var $ = require('../../basics/jquery');
+var Node = require('../../model/node');
+var ParentNodeMixin = require('../../model/parent_node_mixin');
 
 var TableRow = Node.extend(ParentNodeMixin.prototype, {
   displayName: "TableRow",

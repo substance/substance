@@ -1,6 +1,6 @@
 'use strict';
 
-var DocumentNode = require('../../document/node');
+var DocumentNode = require('../../model/node');
 
 var TestNode = DocumentNode.extend({
   name: "test-node",

@@ -1,7 +1,7 @@
 'use strict';
 
 var $ = require('../../basics/jquery');
-var Node = require('../../document/node');
+var Node = require('../../model/node');
 
 var TableCell = Node.extend({
   displayName: "TableCell",

@@ -1,6 +1,7 @@
 'use strict';
 
-var Document = require('../../document');
+var Document = require('../../model/document');
+var Schema = require('../../model/document_schema');
 var MetaNode = require('./test_article_meta');
 var TestNode = require('./test_node');
 var TestContainerAnnotation = require('./test_container_annotation');
@@ -17,7 +18,7 @@ var TableCell = require('../../packages/table/TableCell');
 var List = require('../../packages/list/List');
 var ListItem = require('../../packages/list/ListItem');
 
-var schema = new Document.Schema("test-article", "1.0.0");
+var schema = new Schema("test-article", "1.0.0");
 
 schema.getDefaultTextType = function() {
   return 'paragraph';

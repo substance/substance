@@ -2,14 +2,14 @@
 
 var OO = require('../basics/oo');
 var SurfaceCommand = require('./SurfaceCommand');
-var helpers = require('../document/helpers');
+var helpers = require('../model/document_helpers');
 
 // Annotation transformations
-var createAnnotation = require('../document/transformations/create_annotation');
-var fuseAnnotation = require('../document/transformations/fuse_annotation');
-var expandAnnotation = require('../document/transformations/expand_annotation');
-var truncateAnnotation = require('../document/transformations/truncate_annotation');
-var deleteAnnotation = require('../document/transformations/delete_annotation');
+var createAnnotation = require('../model/transformations/create_annotation');
+var fuseAnnotation = require('../model/transformations/fuse_annotation');
+var expandAnnotation = require('../model/transformations/expand_annotation');
+var truncateAnnotation = require('../model/transformations/truncate_annotation');
+var deleteAnnotation = require('../model/transformations/delete_annotation');
 
 var AnnotationCommand = function(surface) {
   SurfaceCommand.call(this, surface);

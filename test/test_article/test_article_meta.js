@@ -1,8 +1,8 @@
 'use strict';
 
-var Document = require('../../document');
+var DocumentNode = require('../../model/node');
 
-var MetaNode = Document.Node.extend({
+var MetaNode = DocumentNode.extend({
   name: "meta",
   properties: {
     "title": "string"

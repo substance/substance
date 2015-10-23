@@ -1,6 +1,6 @@
 'use strict';
 
-var Annotation = require('../../document/annotation');
+var Annotation = require('../../model/annotation');
 
 var Emphasis = Annotation.extend({
   name: "emphasis",

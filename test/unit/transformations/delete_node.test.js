@@ -2,7 +2,7 @@
 
 require('../qunit_extensions');
 var containerAnnoSample = require('../../fixtures/container_anno_sample');
-var deleteNode = require('../../../document/transformations/delete_node');
+var deleteNode = require('../../../model/transformations/delete_node');
 
 QUnit.module('Transformations/deleteNode');
 
@@ -24,7 +24,7 @@ QUnit.test("Delete a plain node", function(assert) {
 
 QUnit.test("Delete annotations when deleting a node", function(assert) {
   var doc = containerAnnoSample();
-  doc.transaction(function(tx, args) {
+  doc.transaction(function(tx) {
     tx.create({
       id: "test-anno",
       type: "annotation",

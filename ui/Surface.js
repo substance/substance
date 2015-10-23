@@ -1,18 +1,18 @@
 'use strict';
 
-var $ = require('../basics/jquery');
 var _ = require('../basics/helpers');
+var $ = require('../basics/jquery');
 var OO = require('../basics/oo');
 var Registry = require('../basics/registry');
 var Substance = require('../basics');
 var SurfaceSelection = require('./SurfaceSelection');
-var Document = require('../document');
-var Selection = Document.Selection;
+var Document = require('../model/document');
+var Selection = require('../model/selection');
 var Component = require('./Component');
 
 /**
  * Abstract interface for editing components. Dances with contenteditable, so you don't have to.
- * 
+ *
  * @class
  * @memberof module:ui
  */

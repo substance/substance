@@ -7,7 +7,7 @@ var Clipboard = require('./Clipboard');
 var ToolManager = require('./ToolManager');
 var Registry = require('../basics/registry');
 var Logger = require ('../basics/logger');
-var Selection = require('../document/selection');
+var Selection = require('../model/selection');
 
 // Setup default I18n
 var I18n = require('./i18n');
@@ -16,7 +16,7 @@ I18n.instance.load(require('../i18n/en'));
 /**
  * Controls Substance infrastructure. Needs to be supplied as a top level instance
  * to serve editors, commands and tools as a context.
- * 
+ *
  * @class
  * @memberof module:ui
  */
@@ -52,7 +52,7 @@ Controller.Prototype = function() {
   /**
    * Dispose component when component life ends. If you need to implement dispose
    * in your custom Controller class, don't forget the super call.
-   * 
+   *
    * @method dispose
    * @memberof module:ui.Controller.prototype
    */
@@ -75,7 +75,7 @@ Controller.Prototype = function() {
       this._initialize(newProps);
     }
   };
-  
+
   this._initialize = function(props) {
     var doc = props.doc;
 
@@ -99,7 +99,7 @@ Controller.Prototype = function() {
 
   /**
    * Defines the child context
-   * 
+   *
    * @return {object} the child context
    * @method getChildContext
    * @memberof module:ui.Controller.prototype
@@ -116,7 +116,7 @@ Controller.Prototype = function() {
 
   /**
    * Get the associated ToolManager instance
-   * 
+   *
    * @return {module:ui.ToolManager} the ToolManager instance
    * @method getToolManager
    * @memberof module:ui.Controller.prototype
@@ -144,7 +144,7 @@ Controller.Prototype = function() {
 
   /**
    * Get registered controller command by name
-   * 
+   *
    * @param commandName {String} the command name
    * @return {module:ui.commands.ControllerCommand} A controller command
    * @method getCommand
@@ -156,7 +156,7 @@ Controller.Prototype = function() {
 
   /**
    * Execute command with given name if registered
-   * 
+   *
    * @param commandName {String} the command name
    * @return {module:ui.commands.ControllerCommand} A controller command
    * @method getCommand
@@ -237,7 +237,7 @@ Controller.Prototype = function() {
   this.getSelection = function() {
     var surface = this.getSurface();
     if (surface) {
-      return surface.getSelection();  
+      return surface.getSelection();
     } else {
       return Selection.nullSelection;
     }
@@ -253,7 +253,7 @@ Controller.Prototype = function() {
   this.getContainerId = function() {
     var surface = this.getSurface();
     if (surface) {
-      return surface.getContainerId();  
+      return surface.getContainerId();
     }
   };
 
@@ -299,8 +299,8 @@ Controller.Prototype = function() {
   };
 
   /**
-   * Called whenever a surface has been focused. 
-   * 
+   * Called whenever a surface has been focused.
+   *
    * TOOD: Should this really be a public method?
    *
    * @method didFocus
@@ -415,7 +415,7 @@ Controller.Prototype = function() {
 
   /**
    * Push surface state
-   * 
+   *
    * @method pushState
    * @memberof module:ui.Controller.prototype
    */
@@ -433,7 +433,7 @@ Controller.Prototype = function() {
 
   /**
    * Pop surface state
-   * 
+   *
    * @method popState
    * @memberof module:ui.Controller.prototype
    */
@@ -444,10 +444,10 @@ Controller.Prototype = function() {
       state.surface.setSelection(state.selection);
     }
   };
-  
+
   /**
    * Start document save workflow
-   * 
+   *
    * @method saveDocument
    * @memberof module:ui.Controller.prototype
    */
@@ -481,7 +481,7 @@ Controller.Prototype = function() {
   /**
    * Render method of the controller component. This needs to be implemented by the
    * custom Controller class.
-   * 
+   *
    * @return {VirtualNode} VirtualNode created using Component.$$
    * @method render
    * @abstract

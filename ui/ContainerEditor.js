@@ -5,10 +5,13 @@ var _ = require('../basics/helpers');
 var Component = require('./Component');
 var FormEditor = require('./FormEditor');
 var UnsupportedNode = require('./UnsupportedNode');
-var TextPropertyManager = require('../document/text_property_manager');
-var Document = require('../document');
-var EditingBehavior = require('../document/editing_behavior');
-var Transformations = Document.Transformations;
+var TextPropertyManager = require('../model/text_property_manager');
+var EditingBehavior = require('../model/editing_behavior');
+var deleteSelection = require('../model/transformations/delete_selection');
+var breakNode = require('../model/transformations/break_node');
+var insertNode = require('../model/transformations/insert_node');
+var switchTextType = require('../model/transformations/switch_text_type');
+var paste = require('../model/transformations/paste');
 var $$ = Component.$$;
 
 /**
@@ -22,11 +25,11 @@ var $$ = Component.$$;
  * @extends module:ui/Surface
  * @memberof module:ui
  * @example
- * 
+ *
  * var ContainerEditor = require('substance/ui/ContainerEditor');
  * var Component = require('substance/ui/Component');
  * var ToggleStrong = require('substance/packages/strong/ToggleStrong');
- * 
+ *
  * var MyEditor = Component.extend({
  *   render: function() {
  *     var editor = $$(ContainerEditor, {
@@ -38,12 +41,12 @@ var $$ = Component.$$;
  *     return $$('div').addClass('my-editor').append(editor);
  *   }
  * });
- * 
+ *
  */
 
 function ContainerEditor() {
   FormEditor.apply(this, arguments);
-  
+
   if (!_.isString(this.props.containerId)) throw new Error("Illegal argument: Expecting containerId.");
 
   this.editingBehavior = new EditingBehavior();
@@ -147,27 +150,27 @@ ContainerEditor.Prototype = function() {
    */
   this.delete = function(tx, args) {
     this._prepareArgs(args);
-    return Transformations.deleteSelection(tx, args);
+    return deleteSelection(tx, args);
   };
 
   this.break = function(tx, args) {
     this._prepareArgs(args);
     if (args.selection.isPropertySelection() || args.selection.isContainerSelection()) {
-      return Transformations.breakNode(tx, args);
+      return breakNode(tx, args);
     }
   };
 
   this.insertNode = function(tx, args) {
     this._prepareArgs(args);
     if (args.selection.isPropertySelection() || args.selection.isContainerSelection()) {
-      return Transformations.insertNode(tx, args);
+      return insertNode(tx, args);
     }
   };
 
   this.switchType = function(tx, args) {
     this._prepareArgs(args);
     if (args.selection.isPropertySelection()) {
-      return Transformations.switchTextType(tx, args);
+      return switchTextType(tx, args);
     }
   };
 
@@ -189,7 +192,7 @@ ContainerEditor.Prototype = function() {
   this.paste = function(tx, args) {
     this._prepareArgs(args);
     if (args.selection.isPropertySelection() || args.selection.isContainerSelection()) {
-      return Transformations.paste(tx, args);
+      return paste(tx, args);
     }
   };
 
