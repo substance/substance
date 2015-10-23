@@ -2,8 +2,8 @@
 
 var _ = require('../../util/helpers');
 var OO = require('../../util/oo');
-var Operation = require('./operation');
-var Conflict = require('./conflict');
+var Operation = require('./Operation');
+var Conflict = require('./Conflict');
 
 var INS = "+";
 var DEL = "-";

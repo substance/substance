@@ -3,10 +3,10 @@
 var _ = require('../../util/helpers');
 var OO = require('../../util/oo');
 var PathAdapter = require('../../util/PathAdapter');
-var Operation = require('./operation');
+var Operation = require('./Operation');
 var TextOperation = require('./TextOperation');
 var ArrayOperation = require('./ArrayOperation');
-var Conflict = require('./conflict');
+var Conflict = require('./Conflict');
 
 var NOP = "NOP";
 var CREATE = "create";

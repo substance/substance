@@ -1,7 +1,7 @@
 'use strict';
 
 var OO = require('../util/oo');
-var Schema = require('./data/schema');
+var Schema = require('./data/Schema');
 var Node = require('./DocumentNode');
 var Annotation = require('./Annotation');
 var Container = require('./Container');

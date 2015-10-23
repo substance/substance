@@ -9,11 +9,11 @@
  * @module Data
  */
 
-var Data = require('./data');
+var Data = require('./Data');
 
 Data.Incremental = require('./IncrementalData');
-Data.Node = require('./node');
-Data.Schema = require('./schema');
+Data.Node = require('./Node');
+Data.Schema = require('./Schema');
 Data.Index = require('./NodeIndex');
 
 module.exports = Data;

@@ -2,7 +2,7 @@
 
 var OO = require('../../util/oo');
 var _ = require('../../util/helpers');
-var Data = require('./data');
+var Data = require('./Data');
 var ObjectOperation = require('./ObjectOperation');
 var ArrayOperation = require('./ArrayOperation');
 var TextOperation = require('./TextOperation');

@@ -2,7 +2,7 @@
 
 var OO = require('../../util/oo');
 var Factory = require('../../util/Factory');
-var Node = require('./node');
+var Node = require('./Node');
 
 /**
  * Factory for Nodes.

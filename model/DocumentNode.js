@@ -2,7 +2,7 @@
 
 var $ = require('../util/jquery');
 var _ = require('../util/helpers');
-var DataNode = require('./data/node');
+var DataNode = require('./data/Node');
 
 var DocumentNode = DataNode.extend({
   displayName: "DocumentNode",
