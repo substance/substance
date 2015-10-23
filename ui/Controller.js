@@ -5,8 +5,8 @@ var _ = require('../util/helpers');
 var Component = require('./Component');
 var Clipboard = require('./Clipboard');
 var ToolManager = require('./ToolManager');
-var Registry = require('../util/registry');
-var Logger = require ('../util/logger');
+var Registry = require('../util/Registry');
+var Logger = require ('../util/Logger');
 var Selection = require('../model/selection');
 
 // Setup default I18n

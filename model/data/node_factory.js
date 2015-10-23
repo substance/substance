@@ -1,7 +1,7 @@
 'use strict';
 
 var OO = require('../../util/oo');
-var Factory = require('../../util/factory');
+var Factory = require('../../util/Factory');
 var Node = require('./node');
 
 /**
