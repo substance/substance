@@ -1,7 +1,7 @@
 'use strict';
 
-var _ = require('../../basics/helpers');
-var $ = require('../../basics/jquery');
+var _ = require('../../util/helpers');
+var $ = require('../../util/jquery');
 var DocumentNode = require('../../model/node');
 var ListItem = require('./ListItem');
 var ParentNodeMixin = require('../../model/parent_node_mixin');

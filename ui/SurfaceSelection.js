@@ -1,8 +1,8 @@
 'use strict';
 
-var _ = require('../basics/helpers');
-var $ = require('../basics/jquery');
-var OO = require('../basics/oo');
+var _ = require('../util/helpers');
+var $ = require('../util/jquery');
+var OO = require('../util/oo');
 var Document = require('../model/document');
 var Range = require('../model/range');
 var Coordinate = require('../model/coordinate');

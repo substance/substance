@@ -1,7 +1,7 @@
 "use strict";
 
-var _ = require('../basics/helpers');
-var OO = require('../basics/oo');
+var _ = require('../util/helpers');
+var OO = require('../util/oo');
 
 var ENTER = 1;
 var EXIT = -1;

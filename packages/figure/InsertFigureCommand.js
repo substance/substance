@@ -1,8 +1,8 @@
 'use strict';
 
-var uuid = require('../../basics/uuid');
+var uuid = require('../../util/uuid');
 var SurfaceCommand = require('../../ui/SurfaceCommand');
-var $ = require('../../basics/jquery');
+var $ = require('../../util/jquery');
 
 var InsertFigureCommand = SurfaceCommand.extend({
 
@@ -54,7 +54,7 @@ var InsertFigureCommand = SurfaceCommand.extend({
             id: uuid("image"),
             type: "image",
             src: figureUrl,
-            previewSrc: figureUrl,            
+            previewSrc: figureUrl,
           });
 
           var newFigure = {
@@ -62,15 +62,15 @@ var InsertFigureCommand = SurfaceCommand.extend({
             type: "image_figure",
             content: newImage.id,
             title: "Enter title",
-            caption: "Enter caption"            
+            caption: "Enter caption"
           };
-          
+
           // Note: returning the result which will contain an updated selection
           return surface.insertNode(tx, { selection: args.selection, node: newFigure });
         });
       });
     }.bind(this));
-  
+
     return {
       status: 'file-upload-process-started'
     };

@@ -1,7 +1,7 @@
 /* jshint latedef: false */
 'use strict';
 
-var _ = require('../../basics/helpers');
+var _ = require('../../util/helpers');
 var deleteSelection = require('./delete_selection');
 var updateAnnotations = require('./update_annotations');
 

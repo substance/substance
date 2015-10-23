@@ -1,6 +1,6 @@
 'use strict';
 
-var OO = require('../basics/oo');
+var OO = require('../util/oo');
 var Schema = require('./data/schema');
 var Node = require('./node');
 var Annotation = require('./annotation');

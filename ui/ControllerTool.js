@@ -1,13 +1,13 @@
 'use strict';
 
-var OO = require('../basics/oo');
+var OO = require('../util/oo');
 var Component = require('./Component');
 var Tool = require('./Tool');
 var $$ = Component.$$;
 
 /**
  * Abstract class for tools tools that interact with a document. E.g. UndoTool or RedoTool.
- * 
+ *
  * Requires a Controller context.
  *
  * @class

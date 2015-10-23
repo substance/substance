@@ -1,7 +1,7 @@
 'use strict';
 
-var OO = require('../basics/oo');
-var _ = require('../basics/helpers');
+var OO = require('../util/oo');
+var _ = require('../util/helpers');
 var Component = require('./Component');
 var FormEditor = require('./FormEditor');
 var UnsupportedNode = require('./UnsupportedNode');

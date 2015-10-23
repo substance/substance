@@ -1,8 +1,8 @@
 'use strict';
 
-var _ = require('../basics/helpers');
-var OO = require('../basics/oo');
-var PathAdapter = require('../basics/path_adapter');
+var _ = require('../util/helpers');
+var OO = require('../util/oo');
+var PathAdapter = require('../util/path_adapter');
 var Node = require('./node');
 var ContainerAnnotation = require('./container_annotation');
 var ParentNodeMixin = require('./parent_node_mixin');

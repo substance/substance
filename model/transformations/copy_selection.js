@@ -1,6 +1,6 @@
 'use strict';
 
-var _ = require('../../basics/helpers');
+var _ = require('../../util/helpers');
 var Annotations = require('../annotation_updates');
 
 /* jshint latedef: false */

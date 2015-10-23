@@ -1,6 +1,6 @@
 'use strict';
 
-var uuid = require('../../basics/uuid');
+var uuid = require('../../util/uuid');
 var deleteSelection = require('./delete_selection');
 var Annotations = require('../annotation_updates');
 

@@ -1,6 +1,6 @@
 'use strict';
 
-var OO = require('../../basics/oo');
+var OO = require('../../util/oo');
 var Component = require('../../ui/Component');
 var $$ = Component.$$;
 
@@ -9,7 +9,7 @@ function ImageComponent() {
 }
 
 ImageComponent.Prototype = function() {
-  
+
   this.initialize = function() {
     var doc = this.props.doc;
     doc.connect(this, { 'document:changed': this.handleDocumentChange });

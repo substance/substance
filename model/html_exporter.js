@@ -1,10 +1,10 @@
 "use strict";
 
-var OO = require('../basics/oo');
+var OO = require('../util/oo');
 var Annotator = require('./annotator');
 
 var inBrowser = (typeof window !== 'undefined');
-var $ = require('../basics/jquery');
+var $ = require('../util/jquery');
 
 function HtmlExporter(config) {
   this.config = config || {};

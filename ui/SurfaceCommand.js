@@ -1,6 +1,6 @@
 'use strict';
 
-var OO = require('../basics/oo');
+var OO = require('../util/oo');
 var Command = require('./Command');
 
 /**
@@ -12,13 +12,13 @@ var Command = require('./Command');
  * @extends module:ui/commands.Command
  * @memberof module:ui/commands
  * @example
- * 
+ *
  * var ControllerCommand = require('substance/ui/commands').ControllerCommand;
  * var Save = Command.extend({
  *   static: {
  *     name: 'save'
  *   },
- * 
+ *
  *   execute: function() {
  *     this.getController().saveDocument();
  *   }
@@ -69,7 +69,7 @@ SurfaceCommand.Prototype = function() {
    *
    * @method getDocument
    * @return {module:document.Document} the container id
-   * @memberof module:ui/commands.SurfaceCommand.prototype 
+   * @memberof module:ui/commands.SurfaceCommand.prototype
    */
   this.getDocument = function() {
     var surface = this.getSurface();

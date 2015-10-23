@@ -1,10 +1,10 @@
 'use strict';
 
-var oo = require('../basics/oo');
+var oo = require('../util/oo');
 
 /**
  * Abstract interface for commands.
- * 
+ *
  * @class
  * @memberof module:ui/commands
  */

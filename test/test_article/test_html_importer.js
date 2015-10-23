@@ -1,6 +1,6 @@
 'use strict';
 
-var OO = require('../../basics/oo');
+var OO = require('../../util/oo');
 var HtmlImporter = require('../../model/html_importer');
 var schema = require('./test_schema');
 

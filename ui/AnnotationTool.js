@@ -1,10 +1,10 @@
 'use strict';
 
-var OO = require('../basics/oo');
+var OO = require('../util/oo');
 var Component = require('./Component');
 var $$ = Component.$$;
 var SurfaceTool = require('./SurfaceTool');
-var _ = require('../basics/helpers');
+var _ = require('../util/helpers');
 
 /**
  * Abstract class for annotation tools like StrongTool, EmphasisTool, LinkTool.

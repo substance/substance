@@ -1,8 +1,8 @@
 'use strict';
 
-var $ = require('../basics/jquery');
-var _ = require('../basics/helpers');
-var uuid = require('../basics/uuid');
+var $ = require('../util/jquery');
+var _ = require('../util/helpers');
+var uuid = require('../util/uuid');
 
 var inBrowser = (typeof window !== 'undefined');
 

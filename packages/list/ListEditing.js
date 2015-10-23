@@ -1,4 +1,4 @@
-var OO = require('../../../basics/oo');
+var OO = require('../../../util/oo');
 
 var Annotations = require('../../annotation_updates');
 

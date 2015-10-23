@@ -1,6 +1,6 @@
 'use strict';
 
-var uuid = require('../../basics/uuid');
+var uuid = require('../../util/uuid');
 var SurfaceCommand = require('../../ui/SurfaceCommand');
 
 var EmbedCommand = SurfaceCommand.extend({
@@ -43,7 +43,7 @@ var EmbedCommand = SurfaceCommand.extend({
         title: "Enter title",
         caption: "Enter caption"
       };
-      
+
       // Note: returning the result which will contain an updated selection
       return surface.insertNode(tx, { selection: args.selection, node: newFigure });
     });

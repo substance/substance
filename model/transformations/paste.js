@@ -1,7 +1,7 @@
 'use strict';
 
-var _ = require('../../basics/helpers');
-var uuid = require('../../basics/uuid');
+var _ = require('../../util/helpers');
+var uuid = require('../../util/uuid');
 var Annotations = require('../annotation_updates');
 var deleteSelection = require('./delete_selection');
 var insertText = require('./insert_text');

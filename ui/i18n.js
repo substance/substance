@@ -1,7 +1,7 @@
 'use strict';
 
-var OO = require('../basics/oo');
-var _ = require('../basics/helpers');
+var OO = require('../util/oo');
+var _ = require('../util/helpers');
 
 function I18n() {
   this.map = {};

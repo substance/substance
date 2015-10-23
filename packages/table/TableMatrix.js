@@ -1,4 +1,4 @@
-var OO = require('../../basics/oo');
+var OO = require('../../util/oo');
 
 /**
  * A helper class that allows random access to the table cells

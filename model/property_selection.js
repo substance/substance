@@ -1,7 +1,7 @@
 'use strict';
 
-var _ = require('../basics/helpers');
-var OO = require('../basics/oo');
+var _ = require('../util/helpers');
+var OO = require('../util/oo');
 var Selection = require('./selection');
 var Coordinate = require('./coordinate');
 var Range = require('./range');

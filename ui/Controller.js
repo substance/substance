@@ -1,12 +1,12 @@
 'use strict';
 
-var OO = require('../basics/oo');
-var _ = require('../basics/helpers');
+var OO = require('../util/oo');
+var _ = require('../util/helpers');
 var Component = require('./Component');
 var Clipboard = require('./Clipboard');
 var ToolManager = require('./ToolManager');
-var Registry = require('../basics/registry');
-var Logger = require ('../basics/logger');
+var Registry = require('../util/registry');
+var Logger = require ('../util/logger');
 var Selection = require('../model/selection');
 
 // Setup default I18n

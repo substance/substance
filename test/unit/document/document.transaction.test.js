@@ -1,6 +1,6 @@
 'use strict';
 
-var _ = require('../../../basics/helpers');
+var _ = require('../../../util/helpers');
 var sample1 = require('../../fixtures/sample1');
 
 QUnit.module('Substance.Document/Transactions');

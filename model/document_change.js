@@ -1,8 +1,8 @@
 'use strict';
 
-var OO = require('../basics/oo');
-var PathAdapter = require('../basics/path_adapter');
-var uuid = require('../basics/uuid');
+var OO = require('../util/oo');
+var PathAdapter = require('../util/path_adapter');
+var uuid = require('../util/uuid');
 
 function DocumentChange(ops, before, after) {
   this.id = uuid();

@@ -1,6 +1,6 @@
 'use strict';
 
-var _ = require('../../basics/helpers');
+var _ = require('../../util/helpers');
 var deleteCharacter = require('./delete_character');
 var deleteNode = require('./delete_node');
 var merge = require('./merge');

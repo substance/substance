@@ -1,7 +1,7 @@
 'use strict';
 
-var $ = require('../basics/jquery');
-var OO = require('../basics/oo');
+var $ = require('../util/jquery');
+var OO = require('../util/oo');
 var Component = require('./Component');
 var $$ = Component.$$;
 

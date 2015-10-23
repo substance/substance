@@ -1,7 +1,7 @@
 "use strict";
 
 var _ = require('../../../helpers');
-var PathAdapter = require('../../../basics/path_adapter');
+var PathAdapter = require('../../../util/path_adapter');
 var ObjectOperation = require('../../../model/data/object_operation');
 var ArrayOperation = require('../../../model/data/array_operation');
 var TextOperation = require('../../../model/data/text_operation');

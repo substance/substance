@@ -1,9 +1,9 @@
 'use strict';
 
-var _ = require('../../basics/helpers');
-var OO = require('../../basics/oo');
-var PathAdapter = require('../../basics/path_adapter');
-var EventEmitter = require('../../basics/event_emitter');
+var _ = require('../../util/helpers');
+var OO = require('../../util/oo');
+var PathAdapter = require('../../util/path_adapter');
+var EventEmitter = require('../../util/event_emitter');
 
 /**
  * A data storage implemention.

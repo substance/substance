@@ -1,8 +1,8 @@
 'use strict';
 
-var _ = require('../basics/helpers');
-var EventEmitter = require('../basics/event_emitter');
-var OO = require('../basics/oo');
+var _ = require('../util/helpers');
+var EventEmitter = require('../util/event_emitter');
+var OO = require('../util/oo');
 var IncrementalData = require('./data/incremental_data');
 var Selection = require('./selection');
 var PropertySelection = require('./property_selection');

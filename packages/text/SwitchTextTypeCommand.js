@@ -1,8 +1,8 @@
 'use strict';
 
-var OO = require('../../basics/oo');
+var OO = require('../../util/oo');
 var SurfaceCommand = require('../../ui/SurfaceCommand');
-var _ = require('../../basics/helpers');
+var _ = require('../../util/helpers');
 
 var SwitchTextType = function(surface) {
   SurfaceCommand.call(this, surface);
@@ -19,7 +19,7 @@ SwitchTextType.Prototype = function() {
   };
 
   // Example result
-  // 
+  //
   // {
   //   "type": "heading",
   //   "level": 2,
@@ -29,7 +29,7 @@ SwitchTextType.Prototype = function() {
   };
 
   // Example result
-  // 
+  //
   // 'Codeblock'
   this.getTextTypeName = function() {
     return this.constructor.static.textTypeName;
@@ -111,7 +111,7 @@ SwitchTextType.Prototype = function() {
         }
         newState.label = label;
         newState.currentContext = currentContext;
-        newState.currentCommand = currentCommand;        
+        newState.currentCommand = currentCommand;
       } else {
         newState.disabled = true;
       }
@@ -120,7 +120,7 @@ SwitchTextType.Prototype = function() {
     return newState;
   };
 
-  // Execute command and trigger 
+  // Execute command and trigger
   this.execute = function() {
     var nodeData = this.getNodeData();
     var surface = this.getSurface();

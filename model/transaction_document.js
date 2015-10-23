@@ -1,7 +1,7 @@
 'use strict';
 
-var _ = require('../basics/helpers');
-var OO = require('../basics/oo');
+var _ = require('../util/helpers');
+var OO = require('../util/oo');
 var AbstractDocument = require('./abstract_document');
 
 var __id__ = 0;

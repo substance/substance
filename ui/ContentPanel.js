@@ -1,8 +1,8 @@
 'use strict';
 
-var $ = require('../basics/jquery');
-var _ = require('../basics/helpers');
-var OO = require('../basics/oo');
+var $ = require('../util/jquery');
+var _ = require('../util/helpers');
+var OO = require('../util/oo');
 var Component = require('./Component');
 var $$ = Component.$$;
 var Panel = require("./Panel");

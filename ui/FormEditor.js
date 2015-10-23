@@ -1,7 +1,7 @@
 'use strict';
 
-var OO = require('../basics/oo');
-var _ = require('../basics/helpers');
+var OO = require('../util/oo');
+var _ = require('../util/helpers');
 var Surface = require('./Surface');
 var TextPropertyManager = require('../model/text_property_manager');
 var insertText = require('../model/transformations/insert_text');

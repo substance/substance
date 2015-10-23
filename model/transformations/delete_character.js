@@ -1,6 +1,6 @@
 'use strict';
 
-var _ = require('../../basics/helpers');
+var _ = require('../../util/helpers');
 var merge = require('./merge');
 var updateAnnotations = require('./update_annotations');
 

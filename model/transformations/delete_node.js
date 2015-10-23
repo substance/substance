@@ -1,6 +1,6 @@
 'use strict';
 
-var _ = require('../../basics/helpers');
+var _ = require('../../util/helpers');
 
 /**
  * Delete a node and all annotations attached to it,

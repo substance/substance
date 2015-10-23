@@ -1,6 +1,6 @@
 'use strict';
 
-var $ = require('../../basics/jquery');
+var $ = require('../../util/jquery');
 var Node = require('../../model/node');
 
 var ListItem = Node.extend({

@@ -1,7 +1,7 @@
 'use strict';
 
-var OO = require('../basics/oo');
-var _ = require('../basics/helpers');
+var OO = require('../util/oo');
+var _ = require('../util/helpers');
 
 // path: the address of a property, such as ['text_1', 'content']
 // offset: the position in the property

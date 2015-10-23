@@ -1,6 +1,6 @@
 'use strict';
 
-var OO = require('../basics/oo');
+var OO = require('../util/oo');
 var ControllerTool = require('./ControllerTool');
 var SurfaceTool = require('./SurfaceTool');
 var without = require('lodash/array/without');
@@ -12,7 +12,7 @@ var DEFAULT_TOOLSTATE = {
 
 /**
  * Listens to changes on the document and selection and updates registered tools accordingly.
- * 
+ *
  * @class
  * @memberof module:ui
  */
@@ -48,9 +48,9 @@ ToolManager.Prototype = function() {
     var cmd = this.getCommand(tool);
 
     if (cmd) {
-      return cmd.getCommandState();  
+      return cmd.getCommandState();
     } else {
-      return DEFAULT_TOOLSTATE;  
+      return DEFAULT_TOOLSTATE;
     }
   };
 

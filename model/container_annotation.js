@@ -1,8 +1,8 @@
 'use strict';
 
-var _ = require('../basics/helpers');
-var OO = require('../basics/oo');
-var EventEmitter = require('../basics/event_emitter');
+var _ = require('../util/helpers');
+var OO = require('../util/oo');
+var EventEmitter = require('../util/event_emitter');
 var Node = require('./node');
 var Selection = require('./selection');
 

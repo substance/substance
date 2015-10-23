@@ -1,9 +1,9 @@
 'use strict';
 
-var OO = require('../../basics/oo');
-var _ = require('../../basics/helpers');
-var uuid = require('../../basics/uuid');
-var EventEmitter = require('../../basics/event_emitter');
+var OO = require('../../util/oo');
+var _ = require('../../util/helpers');
+var uuid = require('../../util/uuid');
+var EventEmitter = require('../../util/event_emitter');
 
 /**
  * Base node implemention.

@@ -1,10 +1,10 @@
 'use strict';
 
-var $ = require('../basics/jquery');
-var OO = require('../basics/oo');
-var _ = require('../basics/helpers');
+var $ = require('../util/jquery');
+var OO = require('../util/oo');
+var _ = require('../util/helpers');
 var I18n = require('./i18n');
-var EventEmitter = require('../basics/event_emitter');
+var EventEmitter = require('../util/event_emitter');
 
 var __id__ = 0;
 var VirtualTextNode;

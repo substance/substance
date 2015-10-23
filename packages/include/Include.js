@@ -1,6 +1,6 @@
 'use strict';
 
-var $ = require('../../basics/jquery');
+var $ = require('../../util/jquery');
 var DocumentNode = require('../node');
 
 var Include = DocumentNode.extend({

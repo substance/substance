@@ -1,8 +1,8 @@
 'use strict';
 
-var _ = require('../../basics/helpers');
-var $ = require('../../basics/jquery');
-var OO = require('../../basics/oo');
+var _ = require('../../util/helpers');
+var $ = require('../../util/jquery');
+var OO = require('../../util/oo');
 var Component = require('../../ui/Component');
 var TextProperty = require('../../ui/TextPropertyComponent');
 var TableSelection = require('../../model/table_selection');

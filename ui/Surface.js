@@ -1,10 +1,10 @@
 'use strict';
 
-var _ = require('../basics/helpers');
-var $ = require('../basics/jquery');
-var OO = require('../basics/oo');
-var Registry = require('../basics/registry');
-var Substance = require('../basics');
+var _ = require('../util/helpers');
+var $ = require('../util/jquery');
+var OO = require('../util/oo');
+var Registry = require('../util/registry');
+var Substance = require('../util');
 var SurfaceSelection = require('./SurfaceSelection');
 var Document = require('../model/document');
 var Selection = require('../model/selection');

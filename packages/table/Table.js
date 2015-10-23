@@ -1,8 +1,8 @@
 'use strict';
 
-var $ = require('../../basics/jquery');
-var OO = require('../../basics/oo');
-var _ = require('../../basics/helpers');
+var $ = require('../../util/jquery');
+var OO = require('../../util/oo');
+var _ = require('../../util/helpers');
 var Node = require('../../model/node');
 var TableMatrix = require('./TableMatrix');
 var ParentNodeMixin = require('../../model/parent_node_mixin');

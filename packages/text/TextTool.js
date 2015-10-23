@@ -1,14 +1,14 @@
 'use strict';
 
-var OO = require('../../basics/oo');
+var OO = require('../../util/oo');
 var Component = require('../../ui/Component');
 var $$ = Component.$$;
 var SurfaceTool = require('../../ui/SurfaceTool');
-var _ = require('../../basics/helpers');
+var _ = require('../../util/helpers');
 
 /**
  * Abstract class for text types
- * 
+ *
  * Implements the SurfaceTool API.
  */
 
@@ -32,7 +32,7 @@ TextTool.Prototype = function() {
   this.getTextCommands = function() {
     var surface = this.getSurface();
     if (!this.textCommands && surface) {
-      this.textCommands = surface.getTextCommands();  
+      this.textCommands = surface.getTextCommands();
     }
     return this.textCommands || {};
   };

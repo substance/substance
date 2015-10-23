@@ -1,10 +1,10 @@
 'use strict';
 
-var OO = require('../../basics/oo');
+var OO = require('../../util/oo');
 var Component = require('../../ui/Component');
 var $$ = Component.$$;
 var AnnotationTool = require('../../ui/AnnotationTool');
-var _ = require('../../basics/helpers');
+var _ = require('../../util/helpers');
 
 var EditLinkPrompt = Component.extend({
 
