@@ -3,7 +3,7 @@
 var _ = require('../../util/helpers');
 var OO = require('../../util/oo');
 var PathAdapter = require('../../util/path_adapter');
-var EventEmitter = require('../../util/event_emitter');
+var EventEmitter = require('../../util/EventEmitter');
 
 /**
  * A data storage implemention.

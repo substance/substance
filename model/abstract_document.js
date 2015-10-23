@@ -1,7 +1,7 @@
 'use strict';
 
 var _ = require('../util/helpers');
-var EventEmitter = require('../util/event_emitter');
+var EventEmitter = require('../util/EventEmitter');
 var OO = require('../util/oo');
 var IncrementalData = require('./data/incremental_data');
 var Selection = require('./selection');

@@ -3,7 +3,7 @@
 var OO = require('../../util/oo');
 var _ = require('../../util/helpers');
 var uuid = require('../../util/uuid');
-var EventEmitter = require('../../util/event_emitter');
+var EventEmitter = require('../../util/EventEmitter');
 
 /**
  * Base node implemention.

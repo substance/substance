@@ -2,7 +2,7 @@
 
 var _ = require('../util/helpers');
 var OO = require('../util/oo');
-var EventEmitter = require('../util/event_emitter');
+var EventEmitter = require('../util/EventEmitter');
 
 function Selection() {}
 

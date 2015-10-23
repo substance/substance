@@ -1,6 +1,6 @@
 "use strict";
 
-var EventEmitter = require("./event_emitter");
+var EventEmitter = require("./EventEmitter");
 var OO = require("./oo");
 
 // Logger

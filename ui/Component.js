@@ -4,7 +4,7 @@ var $ = require('../util/jquery');
 var OO = require('../util/oo');
 var _ = require('../util/helpers');
 var I18n = require('./i18n');
-var EventEmitter = require('../util/event_emitter');
+var EventEmitter = require('../util/EventEmitter');
 
 var __id__ = 0;
 var VirtualTextNode;
