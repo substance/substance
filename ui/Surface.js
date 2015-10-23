@@ -4,7 +4,6 @@ var _ = require('../util/helpers');
 var $ = require('../util/jquery');
 var OO = require('../util/oo');
 var Registry = require('../util/Registry');
-var Substance = require('../util');
 var SurfaceSelection = require('./SurfaceSelection');
 var Document = require('../model/document');
 var Selection = require('../model/selection');
@@ -757,7 +756,7 @@ Surface.Prototype = function() {
    * Used internally if we derive the model selection from the DOM selcection.
    */
   this._setModelSelection = function(sel) {
-    sel = sel || Substance.Document.nullSelection;
+    sel = sel || Document.nullSelection;
     this.selection = sel;
     this.emit('selection:changed', sel, this);
     return true;

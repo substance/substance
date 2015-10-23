@@ -1,7 +1,7 @@
 'use strict';
 
 var $ = require('../util/jquery');
-var _ = require('../util');
+var _ = require('../util/helpers');
 var DataNode = require('./data/node');
 
 var DocumentNode = DataNode.extend({

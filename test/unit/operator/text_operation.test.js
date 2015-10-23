@@ -1,6 +1,6 @@
 "use strict";
 
-var _ = require('../../../helpers');
+var _ = require('../../../util/helpers');
 var TextOperation = require('../../../model/data/text_operation');
 
 QUnit.module('Substance.Operator/TextOperation');
