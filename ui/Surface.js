@@ -1,20 +1,20 @@
 'use strict';
 
-var $ = require('../../basics/jquery');
-var _ = require('../../basics/helpers');
-var OO = require('../../basics/oo');
-var Registry = require('../../basics/registry');
-var Substance = require('../../basics');
-var SurfaceSelection = require('./surface_selection');
-var Document = require('../../document');
+var $ = require('../basics/jquery');
+var _ = require('../basics/helpers');
+var OO = require('../basics/oo');
+var Registry = require('../basics/registry');
+var Substance = require('../basics');
+var SurfaceSelection = require('./SurfaceSelection');
+var Document = require('../document');
 var Selection = Document.Selection;
-var Component = require('../Component');
+var Component = require('./Component');
 
 /**
  * Abstract interface for editing components. Dances with contenteditable, so you don't have to.
  * 
  * @class
- * @memberof module:ui/surface
+ * @memberof module:ui
  */
 function Surface() {
   Component.apply(this, arguments);

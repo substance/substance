@@ -1,15 +1,15 @@
 "use strict";
 
-var $ = require('../../basics/jquery');
-var _ = require('../../basics/helpers');
-var OO = require('../../basics/oo');
+var $ = require('../basics/jquery');
+var _ = require('../basics/helpers');
+var OO = require('../basics/oo');
 
 /**
- * Surface Clipboard is owned by a module:ui/surface.FormEditor.
+ * Surface Clipboard is owned by a module:ui/FormEditor.
  * 
  *
  * @class
- * @memberof module:ui/surface
+ * @memberof module:ui
  */
 
 var Clipboard = function(controller, htmlImporter, htmlExporter) {

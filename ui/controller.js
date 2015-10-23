@@ -3,7 +3,7 @@
 var OO = require('../basics/oo');
 var _ = require('../basics/helpers');
 var Component = require('./Component');
-var Clipboard = require('./surface/clipboard');
+var Clipboard = require('./Clipboard');
 var ToolManager = require('./ToolManager');
 var Registry = require('../basics/registry');
 var Logger = require ('../basics/logger');

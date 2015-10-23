@@ -1,9 +1,9 @@
 'use strict';
 
-var $ = require('../../basics/jquery');
-var OO = require('../../basics/oo');
-var Document = require('../../document');
-var _ = require('../../basics/helpers');
+var $ = require('../basics/jquery');
+var OO = require('../basics/oo');
+var Document = require('../document');
+var _ = require('../basics/helpers');
 var Range = Document.Range;
 var Coordinate = Document.Coordinate;
 
@@ -392,7 +392,6 @@ SurfaceSelection.Prototype = function() {
     sel.removeAllRanges();
     this.state = null;
   };
-
 };
 
 OO.initClass(SurfaceSelection);

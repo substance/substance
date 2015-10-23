@@ -1,4 +1,4 @@
-var Surface = require('../../../ui/surface/surface');
+var Surface = require('../../../ui/Surface');
 
 function StubSurface(doc, sel, containerId) {
 

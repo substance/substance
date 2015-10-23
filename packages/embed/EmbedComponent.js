@@ -11,7 +11,7 @@ function Embed() {
 Embed.Prototype = function() {
 
   this.getClassNames = function() {
-    return "content-node embed";
+    return "content-node sc-embed";
   };
 
   this.render = function() {

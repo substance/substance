@@ -1,31 +1,31 @@
 'use strict';
 
-var OO = require('../../basics/oo');
-var _ = require('../../basics/helpers');
-var Component = require('../Component');
-var FormEditor = require('./form_editor');
-var UnsupportedNode = require('../UnsupportedNode');
-var TextPropertyManager = require('../../document/text_property_manager');
-var Document = require('../../document');
-var EditingBehavior = require('../../document/editing_behavior');
+var OO = require('../basics/oo');
+var _ = require('../basics/helpers');
+var Component = require('./Component');
+var FormEditor = require('./FormEditor');
+var UnsupportedNode = require('./UnsupportedNode');
+var TextPropertyManager = require('../document/text_property_manager');
+var Document = require('../document');
+var EditingBehavior = require('../document/editing_behavior');
 var Transformations = Document.Transformations;
 var $$ = Component.$$;
 
 /**
  * Represents a flow editor that manages a sequence of nodes in a container. Instantiate
  * this editor using `Component.$$` within the render method of a component. Needs to be
- * instantiated within a {@link module:ui/surface.FormEditor} context.
+ * instantiated within a {@link module:ui/FormEditor} context.
  *
  * @constructor
  * @class
- * @extends module:ui/surface.FormEditor
- * @extends module:ui/surface.Surface
- * @memberof module:ui/surface
+ * @extends module:ui/FormEditor
+ * @extends module:ui/Surface
+ * @memberof module:ui
  * @example
  * 
- * var ContainerEditor = require('substance/ui/surface').ContainerEditor;
+ * var ContainerEditor = require('substance/ui/ContainerEditor');
  * var Component = require('substance/ui/Component');
- * var ToggleStrong = require('substance/ui/commands').ToggleStrong
+ * var ToggleStrong = require('substance/packages/strong/ToggleStrong');
  * 
  * var MyEditor = Component.extend({
  *   render: function() {

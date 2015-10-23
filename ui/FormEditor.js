@@ -1,12 +1,12 @@
 'use strict';
 
-var OO = require('../../basics/oo');
-var _ = require('../../basics/helpers');
-var Surface = require('./surface');
-var Document = require('../../document');
+var OO = require('../basics/oo');
+var _ = require('../basics/helpers');
+var Surface = require('./Surface');
+var Document = require('../document');
 var Transformations = Document.Transformations;
-var TextPropertyManager = require('../../document/text_property_manager');
-var Component = require('../Component');
+var TextPropertyManager = require('../document/text_property_manager');
+var Component = require('./Component');
 var $$ = Component.$$;
 
 /**

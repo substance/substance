@@ -5,7 +5,7 @@ var _ = require('../basics/helpers');
 var Component = require('./Component');
 var $$ = Component.$$;
 var UnsupportedNode = require('./UnsupportedNode');
-var Surface = require('./surface');
+var Surface = require('./Surface');
 
 function ContainerNodeComponent() {
   Component.apply(this, arguments);
