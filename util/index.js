@@ -29,7 +29,6 @@ util.PathAdapter = require('./PathAdapter');
 util.EventEmitter = require('./EventEmitter');
 util.Registry = require('./Registry');
 util.Factory = require('./Factory');
-_.extend(util, require('./timer'));
 
 util.jQuery = require('./jquery');
 util.$ = util.jQuery;
