@@ -21,20 +21,20 @@ ContextToggles.Prototype = function() {
 
     var el = $$('div').addClass("sc-context-toggles");
     _.each(panelOrder, function(panelId) {
-      var panelClass = componentRegistry.get(panelId);
+      // var panelClass = componentRegistry.get(panelId);
       var toggle = $$('a')
         .addClass("se-context-toggle")
         .attr({
           href: "#",
-          "data-id": panelClass.contextId,
+          "data-id": panelId,
         })
         .on('click', this.onContextToggleClick);
-      if (panelClass.contextId === contextId) {
+      if (panelId === contextId) {
         toggle.addClass("sm-active");
       }
-      toggle.append(
-        $$(Icon, { icon: panelClass.icon })
-      );
+      // toggle.append(
+      //   $$(Icon, { icon: panelClass.icon })
+      // );
       toggle.append(
         $$('span').addClass('label').append(' '+this.i18n.t(panelId))
       );
