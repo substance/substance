@@ -44,7 +44,7 @@ function ContainerAnnotator() {
 ContainerAnnotator.Prototype = function() {
 
   this.render = function() {
-    var doc = this.props.doc;
+    var doc = this.getDocument();
     var containerNode = doc.get(this.props.containerId);
 
     var el = $$("div")
