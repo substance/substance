@@ -47,12 +47,14 @@ var $$ = Component.$$;
 function ContainerEditor() {
   FormEditor.apply(this, arguments);
 
+  var doc = this.getDocument();
+
   if (!_.isString(this.props.containerId)) throw new Error("Illegal argument: Expecting containerId.");
-
   this.editingBehavior = new EditingBehavior();
-  this.textPropertyManager = new TextPropertyManager(this.props.doc, this.props.containerId);
+  this.textPropertyManager = new TextPropertyManager(doc, this.props.containerId);
 
-  this.props.doc.connect(this, {
+  
+  doc.connect(this, {
     'document:changed': this.onDocumentChange
   });
 }
@@ -61,11 +63,12 @@ ContainerEditor.Prototype = function() {
 
   this.dispose = function() {
     FormEditor.prototype.dispose.call(this);
-    this.props.doc.disconnect(this);
+    var doc = this.getDocument();
+    doc.disconnect(this);
   };
 
   this.render = function() {
-    var doc = this.props.doc;
+    var doc = this.getDocument();
     var containerNode = doc.get(this.props.containerId);
 
     var el = $$("div")
@@ -110,7 +113,7 @@ ContainerEditor.Prototype = function() {
   };
 
   this._renderNode = function(nodeId) {
-    var doc = this.props.doc;
+    var doc = this.getDocument();
     var node = doc.get(nodeId);
     var componentRegistry = this.context.componentRegistry;
     var ComponentClass = componentRegistry.get(node.type);

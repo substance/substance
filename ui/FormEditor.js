@@ -19,10 +19,12 @@ var $$ = Component.$$;
  */
 function FormEditor() {
   Surface.apply(this, arguments);
-  this.textPropertyManager = new TextPropertyManager(this.props.doc);
+  var doc = this.getDocument();
+  this.textPropertyManager = new TextPropertyManager(doc);
 }
 
 FormEditor.Prototype = function() {
+
 
   this.dispose = function() {
     Surface.prototype.dispose.call(this);
@@ -33,7 +35,7 @@ FormEditor.Prototype = function() {
   };
 
   this.render = function() {
-    var doc = this.props.doc;
+    var doc = this.getDocument();
     var containerNode = doc.get(this.props.containerId);
 
     var el = $$("div")

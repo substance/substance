@@ -32,7 +32,6 @@ var ListComponent = Component.extend({
   },
 
   onItemsChanged: function() {
-    console.log('YAY');
     this.rerender();
   },
 

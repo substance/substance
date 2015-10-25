@@ -11,7 +11,8 @@ var Scrollbar = require("./Scrollbar");
 function ContentPanel() {
   Panel.apply(this, arguments);
 
-  this.props.doc.connect(this, {
+  var doc = this.getDocument();
+  doc.connect(this, {
     'document:changed': this.onDocumentChange,
     'toc:entry-selected': this.onTocEntrySelected,
     'highlights:updated': this.onHighlightsUpdated
@@ -21,11 +22,17 @@ function ContentPanel() {
 ContentPanel.Prototype = function() {
 
   this.dispose = function() {
-    this.props.doc.disconnect(this);
+    var doc = this.getDocument();
+    doc.disconnect(this);
+  };
+
+  this.getDocument = function() {
+    return this.context.controller.getDocument();
   };
 
   this.render = function() {
     var controller = this.context.controller;
+    var doc = this.getDocument();
 
     var el = $$('div')
       .addClass("panel content-panel-component");
@@ -33,7 +40,7 @@ ContentPanel.Prototype = function() {
       $$(Scrollbar, {
         panel: this,
         contextId: controller.state.contextId,
-        highlights: this.props.doc.getHighlights()
+        highlights: doc.getHighlights()
       }).ref("scrollbar")
         .attr('id', "content-scrollbar")
     );
@@ -42,27 +49,32 @@ ContentPanel.Prototype = function() {
     );
     el.append(
       $$('div').ref("panelContent").addClass("panel-content")
-        .css({
-          position: 'absolute',
-          overflow: 'auto'
-        })
-        .append(this.renderContentContainer())
+        // .css({
+        //   position: 'absolute',
+        //   overflow: 'auto'
+        // })
+        .append(
+          $$('div').addClass('panel-content-inner').append(
+            this.props.children
+          )
+        )
         .on('scroll', this.onScroll)
     );
     return el;
   };
 
-  this.renderContentContainer = function() {
-    var doc = this.props.doc;
-    var containerNode = doc.get(this.props.containerId);
-    var componentRegistry = this.context.componentRegistry;
-    var ContentContainerClass = componentRegistry.get('content-container');
+  // this.renderContentContainer = function() {
+  //   var doc = this.props.doc;
+  //   var containerNode = doc.get(this.props.containerId);
+  //   // var componentRegistry = this.context.componentRegistry;
+  //   // var 
+  //   // var ContentContainerClass = componentRegistry.get('content-container');
 
-    return $$(ContentContainerClass, {
-      doc: doc,
-      node: containerNode,
-    }).ref("contentContainer");
-  };
+  //   return $$(ContentContainerClass, {
+  //     doc: doc,
+  //     node: containerNode,
+  //   }).ref("contentContainer");
+  // };
 
   this.onHighlightsUpdated = function(highlights) {
     var controller = this.context.controller;
