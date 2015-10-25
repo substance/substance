@@ -433,3 +433,37 @@ QUnit.test("Component.append() should support appending text.", function(assert)
   comp.append('XXX');
   assert.equal(comp.text(), 'XXX');
 });
+
+
+QUnit.test("Should wipe a referenced component when class changes", function(assert) {
+  var ComponentA = TestComponent.extend({
+    render: function() {
+      return $$('div').addClass('component-a');
+    }
+  });
+
+  var ComponentB = TestComponent.extend({
+    render: function() {
+      return $$('div').addClass('component-b');
+    }
+  });
+
+  var MainComponent = TestComponent.extend({
+    render: function() {
+      var el = $$('div').addClass('context');
+      var ContextClass;
+      if (this.props.context ==='A') {
+        ContextClass = ComponentA;
+      } else {
+        ContextClass = ComponentB;
+      }
+      el.append($$(ContextClass).ref('context'));
+      return el;
+    }
+  });
+
+  var comp = Component.mount($$(MainComponent, {context: 'A'}), $('#qunit-fixture'));
+  assert.ok(comp.refs.context instanceof ComponentA, 'Context should be of instance ComponentA');
+  comp.setProps({context: 'B'});
+  assert.ok(comp.refs.context instanceof ComponentB, 'Context should be of instance ComponentB');
+});
