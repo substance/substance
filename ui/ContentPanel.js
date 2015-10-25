@@ -49,10 +49,6 @@ ContentPanel.Prototype = function() {
     );
     el.append(
       $$('div').ref("panelContent").addClass("panel-content")
-        // .css({
-        //   position: 'absolute',
-        //   overflow: 'auto'
-        // })
         .append(
           $$('div').addClass('panel-content-inner').append(
             this.props.children
@@ -62,19 +58,6 @@ ContentPanel.Prototype = function() {
     );
     return el;
   };
-
-  // this.renderContentContainer = function() {
-  //   var doc = this.props.doc;
-  //   var containerNode = doc.get(this.props.containerId);
-  //   // var componentRegistry = this.context.componentRegistry;
-  //   // var 
-  //   // var ContentContainerClass = componentRegistry.get('content-container');
-
-  //   return $$(ContentContainerClass, {
-  //     doc: doc,
-  //     node: containerNode,
-  //   }).ref("contentContainer");
-  // };
 
   this.onHighlightsUpdated = function(highlights) {
     var controller = this.context.controller;
