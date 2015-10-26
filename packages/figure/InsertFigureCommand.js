@@ -58,8 +58,8 @@ var InsertFigureCommand = SurfaceCommand.extend({
           });
 
           var newFigure = {
-            id: uuid("image_figure"),
-            type: "image_figure",
+            id: uuid("image-figure"),
+            type: "image-figure",
             content: newImage.id,
             title: "Enter title",
             caption: "Enter caption"

@@ -3,19 +3,17 @@ var _ = require('../../util/helpers');
 var Component = require('../../ui/Component');
 var $$ = Component.$$;
 
-
 var UrlPrompt = Component.extend({
   onSave: function(e) {
     e.preventDefault();
-
     this.props.tool.createEmbed(this.refs.url.$el.val());
   },
 
   render: function() {
     var el = $$('div').addClass('prompt shadow border fill-white');
     el.append([
-      $$('div').addClass('prompt-title').append(this.i18n.t('embed_src')),
-      $$('input').attr({type: 'text', placeholder: 'https://vimeo.com/142254284', value: 'https://vimeo.com/14225428'})
+      $$('div').addClass('prompt-title').append(this.i18n.t('embed-src')),
+      $$('input').attr({type: 'text', placeholder: 'https://vimeo.com/142254284', value: ''})
                  .ref('url')
                  .on('change', this.onSave)
     ]);

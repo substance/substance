@@ -5,7 +5,8 @@ body,
 input,
 textarea {
   color:rgba(0,0,0,0.75);
-  font: 16px 'Lato', Arial;
+  font-family: -apple-system, ".SFNSText-Regular", "San Francisco", "Roboto", "Segoe UI", "Helvetica Neue", "Arial", sans-serif;
+  font-weight: 16px;
   min-height: 30px;
   line-height: 1.5;
   -webkit-font-smoothing:antialiased;
