@@ -25,7 +25,6 @@ function FormEditor() {
 
 FormEditor.Prototype = function() {
 
-
   this.dispose = function() {
     Surface.prototype.dispose.call(this);
   };

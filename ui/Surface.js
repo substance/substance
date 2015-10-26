@@ -102,7 +102,10 @@ Surface.Prototype = function() {
   };
 
   this.dispose = function() {
+    this.setSelection(null);
+    this.textPropertyManager.dispose();
     this.detach();
+    this.getController().unregisterSurface(this);
   };
 
   this.getChildContext = function() {
@@ -168,12 +171,6 @@ Surface.Prototype = function() {
 
   this.getDocument = function() {
     return this.context.controller.getDocument();
-  };
-
-  this.dispose = function() {
-    this.setSelection(null);
-    this.detach();
-    this.getController().unregisterSurface(this);
   };
 
   this.attach = function(element) {

@@ -47,12 +47,16 @@ var $$ = Component.$$;
 function ContainerEditor() {
   FormEditor.apply(this, arguments);
 
+  // TODO: We should inherit from Surface, not FormEditor so we don't need to 'replace'
+  // an existing textPropertyManager
+  this.textPropertyManager.dispose();
+
   var doc = this.getDocument();
 
   if (!_.isString(this.props.containerId)) throw new Error("Illegal argument: Expecting containerId.");
   this.editingBehavior = new EditingBehavior();
-  this.textPropertyManager = new TextPropertyManager(doc, this.props.containerId);
 
+  this.textPropertyManager = new TextPropertyManager(doc, this.props.containerId);
   
   doc.connect(this, {
     'document:changed': this.onDocumentChange
