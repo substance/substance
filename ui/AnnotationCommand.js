@@ -159,9 +159,6 @@ AnnotationCommand.Prototype = function() {
     var result; // to store transform result
     if (sel.isNull()) return;
 
-    // VERIFY: When the transform function to this there's an error with PhantomJS
-    // E.g. like this: function(tx.args) {}.bind(this)
-    // We use a self reference for now.
     surface.transaction({ selection: sel }, function(tx, args) {
       args.annotationType = self.getAnnotationType();
       args.annotationData = self.getAnnotationData();
