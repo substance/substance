@@ -70,8 +70,7 @@ TableComponent.Prototype = function() {
               cellEl.attr('contentEditable', true);
             }
           }
-          cellEl.append($$(TextProperty).addProps({
-            doc: this.props.doc,
+          cellEl.append($$(TextProperty, {
             path: [ cell.id, "content"]
           }));
           rowEl.append(cellEl);

@@ -26,7 +26,6 @@ FigureComponent.Prototype = function() {
     el.append(
       $$(TextProperty, {
         tagName: 'div',
-        doc: this.props.doc,
         path: [this.props.node.id, "title"]
       })
       .addClass('title')
@@ -46,7 +45,6 @@ FigureComponent.Prototype = function() {
       .append(
         $$(TextProperty, {
           tagName: 'div',
-          doc: this.props.doc,
           path: [this.props.node.id, "caption"]
         })
         .addClass('caption')

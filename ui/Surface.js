@@ -18,11 +18,11 @@ var Component = require('./Component');
 function Surface() {
   Component.apply(this, arguments);
 
-  var controller = this.context.controller;
-  var doc = this.props.doc;
+  var controller = this.getController();
+  var doc = this.getDocument();
 
   if (!controller) {
-    throw new Error('Surface needs a controller');
+    throw new Error('Surface needs a valid controller');
   }
 
   if (!doc) {
@@ -34,8 +34,6 @@ function Surface() {
   }
 
   this.name = this.props.name;
-  this.doc = doc;
-  this.controller = controller;
 
   this.selection = Document.nullSelection;
 
@@ -104,7 +102,10 @@ Surface.Prototype = function() {
   };
 
   this.dispose = function() {
+    this.setSelection(null);
+    this.textPropertyManager.dispose();
     this.detach();
+    this.getController().unregisterSurface(this);
   };
 
   this.getChildContext = function() {
@@ -165,17 +166,11 @@ Surface.Prototype = function() {
   };
 
   this.getController = function() {
-    return this.controller;
+    return this.context.controller;
   };
 
   this.getDocument = function() {
-    return this.props.doc;
-  };
-
-  this.dispose = function() {
-    this.setSelection(null);
-    this.detach();
-    this.controller.unregisterSurface(this);
+    return this.context.controller.getDocument();
   };
 
   this.attach = function(element) {
@@ -367,9 +362,9 @@ Surface.Prototype = function() {
     // Undo/Redo: cmd+z, cmd+shift+z
     else if (this.undoEnabled && e.keyCode === 90 && (e.metaKey||e.ctrlKey)) {
       if (e.shiftKey) {
-        this.controller.executeCommand('redo');
+        this.getController().executeCommand('redo');
       } else {
-        this.controller.executeCommand('undo');
+        this.getController().executeCommand('undo');
       }
       handled = true;
     }
@@ -644,7 +639,7 @@ Surface.Prototype = function() {
     }
     this.isFocused = val;
     if (this.isFocused) {
-      this.controller.didFocus(this);
+      this.getController().didFocus(this);
     }
   };
 

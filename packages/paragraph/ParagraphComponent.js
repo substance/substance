@@ -19,12 +19,9 @@ ParagraphComponent.Prototype = function() {
     return $$('div')
       .addClass(this.getClassNames())
       .attr("data-id", this.props.node.id)
-      .append($$(TextProperty)
-        .setProps({
-          doc: this.props.doc,
-          path: [ this.props.node.id, "content"]
-        })
-      );
+      .append($$(TextProperty, {
+        path: [ this.props.node.id, "content"]
+      }));
   };
 };
 

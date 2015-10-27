@@ -16,7 +16,6 @@ HeadingComponent.Prototype = function() {
       .addClass("sc-heading sm-level-"+this.props.node.level)
       .attr("data-id", this.props.node.id)
       .append($$(TextProperty, {
-        doc: this.props.doc,
         path: [ this.props.node.id, "content"]
       }));
   };

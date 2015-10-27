@@ -102,7 +102,8 @@ TextPropertyComponent.Prototype = function() {
   };
 
   this.getAnnotations = function() {
-    var annotations = this.props.doc.getIndex('annotations').get(this.props.path);
+    var doc = this.getDocument();
+    var annotations = doc.getIndex('annotations').get(this.props.path);
     if (this.state.fragments) {
       annotations = annotations.concat(this.state.fragments);
     }
@@ -118,7 +119,7 @@ TextPropertyComponent.Prototype = function() {
   };
 
   this.getDocument = function() {
-    return this.props.doc;
+    return this.getController().getDocument();
   };
 
   this.getPath = function() {

@@ -20,7 +20,6 @@ Blockquote.Prototype = function() {
       .addClass(this.getClassNames())
       .attr("data-id", this.props.node.id)
       .append($$(TextProperty, {
-        doc: this.props.doc,
         path: [ this.props.node.id, "content"]
       }));
   };
