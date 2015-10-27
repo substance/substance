@@ -69,7 +69,7 @@ LinkTool.Prototype = function() {
 
   this.static = {
     name: 'link',
-    command: 'toggleLink'
+    command: 'link'
   };
 
   this.dispose = function() {

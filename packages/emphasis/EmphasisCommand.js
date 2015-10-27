@@ -3,7 +3,7 @@
 var AnnotationCommand = require('../../ui/AnnotationCommand');
 var ToggleEmphasis = AnnotationCommand.extend({
   static: {
-    name: 'toggleEmphasis',
+    name: 'emphasis',
     annotationType: 'emphasis'
   }
 });

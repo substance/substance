@@ -4,7 +4,7 @@ var AnnotationCommand = require('../../ui/AnnotationCommand');
 
 var StrongCommand = AnnotationCommand.extend({
   static: {
-    name: 'toggleStrong',
+    name: 'strong',
     annotationType: 'strong'
   }
 });

@@ -370,17 +370,17 @@ Surface.Prototype = function() {
     }
     // Toggle strong: cmd+b ctrl+b
     else if (e.keyCode === 66 && (e.metaKey||e.ctrlKey)) {
-      this.executeCommand('toggleStrong');
+      this.executeCommand('strong');
       handled = true;
     }
     // Toggle emphasis: cmd+i ctrl+i
     else if (e.keyCode === 73 && (e.metaKey||e.ctrlKey)) {
-      this.executeCommand('toggleEmphasis');
+      this.executeCommand('emphasis');
       handled = true;
     }
     // Toggle link: cmd+l ctrl+l
     else if (e.keyCode === 76 && (e.metaKey||e.ctrlKey)) {
-      this.executeCommand('toggleLink');
+      this.executeCommand('link');
       handled = true;
     }
 
