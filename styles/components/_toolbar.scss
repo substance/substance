@@ -1,0 +1,130 @@
+/* Toolbar
+-------------------------------------------------- */
+ 
+.sc-toolbar {
+  height: 40px;
+  overflow: visible;
+  border-bottom: 1px solid #ddd;
+  font-size: 13px; // make generic
+  
+  /* Toolbar group
+  ---------------------------- */
+
+  .se-toolbar-group {
+    float: left;
+
+    .se-tool {
+      line-height: normal;
+
+      float: left;
+      position: relative;
+
+      button {
+        position: relative;
+        margin: 5px;
+        color: inherit;
+        height: 30px;
+        min-width: 30px;
+        text-align: center;
+      }
+
+      // This is so commonly used that we decided
+      // to put this into main toolbar styles
+      &.expand button::before, &.truncate button::before {
+        content: " \f07e";
+        font-family: FontAwesome;
+        position: absolute;
+        top: 3px;
+        right: 3px;
+        font-size: 7px;
+      }
+
+      &.edit button::before {
+        content: " \f013";
+        font-family: FontAwesome;
+        position: absolute;
+        top: 3px;
+        right: 3px;
+        font-size: 7px;
+      }
+
+      &.sm-active button {
+        @include dark-fill(0.1);
+      }
+
+      button:hover {
+        @include dark-fill(0.1);
+      }
+
+      &.sm-disabled {
+        opacity: 0.2;
+        cursor: default;
+
+        button:hover {
+          background: none; 
+        }
+      }
+    }
+  }
+
+  /* ???
+  ---------------------------- */
+  
+  input {
+    margin: 5px;
+    margin-left: 20px;
+    min-width: 600px;
+    border: none;
+  }
+  
+  /* Toolbar Dropdown
+  ---------------------------- */
+
+  .se-toolbar-dropdown {
+    overflow: visible;
+    position: relative;
+    float: left;
+
+    .se-toggle {
+      height: 30px;
+      padding: 0px 10px;
+      line-height: 30px;
+      margin: 5px;
+      display: block;
+    }
+
+    &:not(.sm-disabled) .se-toggle:after {
+      content: " \f0d7";
+      padding-left: 10px;
+
+      float: right;
+      font-family: FontAwesome;
+    }
+
+    .se-options {
+      display: none;
+      position: absolute;
+      background: white;
+      top: 40px;
+      z-index: 5000;
+      min-width: 150px;
+
+      @include shadow;
+      @include border;
+
+      .se-tool {
+        display: block;
+        padding: 5px 10px;
+        width:100%; // needed to make buttons render like block elements
+
+        &:hover {
+          @include dark-fill(0.05);
+        }
+      }
+    }
+
+    &.sm-open .se-options {
+      display: block;
+    }
+  }
+}

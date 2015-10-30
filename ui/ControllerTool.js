@@ -1,9 +1,7 @@
 'use strict';
 
 var oo = require('../util/oo');
-var Component = require('./Component');
 var Tool = require('./Tool');
-var $$ = Component.$$;
 
 /**
  * Abstract class for tools tools that interact with a document. E.g. UndoTool or RedoTool.
@@ -33,36 +31,11 @@ ControllerTool.Prototype = function() {
     return this.context.controller.getDocument();
   };
 
-
-  this.onClick = function(e) {
-    e.preventDefault();
-    if (this.state.disabled) {
-      return;
-    }
-    this.performAction();
+  this.performAction = function() {
+    var ctrl = this.getController();
+    ctrl.executeCommand(this.constructor.static.command);
   };
 
-  this.render = function() {
-    var title = this.props.title || this.i18n.t(this.constructor.static.name);
-
-    var el = $$("button")
-      .attr('title', title)
-      .addClass('button tool')
-      .on('click', this.onClick);
-
-    if (this.state.disabled) {
-      el.addClass('disabled');
-    }
-    if (this.state.active) {
-      el.addClass('active');
-    }
-    if (this.state.mode) {
-      el.addClass(this.state.mode);
-    }
-
-    el.append(this.props.children);
-    return el;
-  };
 };
 
 oo.inherit(ControllerTool, Tool);

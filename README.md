@@ -13,7 +13,6 @@ In the wild:
 - **[Archivist](https://medium.com/@_daniel/publish-interactive-historical-documents-with-archivist-7019f6408ee6)** - A platform for publishing interactive interview transcriptions
 - **[eLife Lens](http://lens.elifesciences.org/00778/)** - A novel scientific reader
 
-
 ## Motivation
 
 Building a web editor is a hard task. Native browser support for text editing is [limited and not reliable](https://medium.com/medium-eng/why-contenteditable-is-terrible-122d8a40e480). There are many pitfalls such as handling selections, copy&paste or undo/redo. Substance was developed to solve the common problems of web-editing and provides API's for building custom editors.
@@ -32,7 +31,7 @@ Transformations for document manipulation                                   | âœ
 Custom editing toolbars                                                     | âœ“
 Commands for controlling the editor                                         | Beta 2
 Key bindings                                                                | Beta 2
-I18N support                                                                | Beta 2
+I18N support                                                                | Beta 3
 Realtime collaboration                                                      | Beta 3
 Full Unicode support                                                        | Beta 3
 Plugins                                                                     | Beta 3
@@ -265,11 +264,10 @@ The report is stored in the `coverage` folder.
 
 ### Beta 2
 
-*ETA: November 1 2015*
+*ETA: November 15 2015*
 
 - Support for nested nodes
 - Commands for controlling the editor
-- Key bindings
 - Editing of lists
 - Resource node type (image, video, tweet etc.)
 - CSS modularization: one css file per UI component
@@ -283,6 +281,7 @@ The report is stored in the `coverage` folder.
 - Automatically generated performance report
 - Table node
 - Novel Writer demo
+- Key bindings
 - Plugins
 - Realtime collaboration
 - Improved Unicode support

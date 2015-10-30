@@ -3,13 +3,15 @@
 var oo = require('../../util/oo');
 var SurfaceCommand = require('../../ui/SurfaceCommand');
 var _ = require('../../util/helpers');
+var _isMatch = require('lodash/lang/isMatch');
+var _find = require('lodash/collection/find');
+var TextNode = require('../../model/TextNode');
 
 var SwitchTextType = function(surface) {
   SurfaceCommand.call(this, surface);
 };
 
 SwitchTextType.Prototype = function() {
-
   this.static = {
     name: 'switchTextType'
   };
@@ -18,55 +20,40 @@ SwitchTextType.Prototype = function() {
     return this.getSurface().getSelection();
   };
 
-  // Example result
-  //
-  // {
-  //   "type": "heading",
-  //   "level": 2,
-  // }
-  this.getNodeData = function() {
-    return this.constructor.static.nodeData;
+  // Available text types on the surface
+  this.getTextTypes = function() {
+    return this.getSurface().getTextTypes();
   };
 
-  // Example result
-  //
-  // 'Codeblock'
-  this.getTextTypeName = function() {
-    return this.constructor.static.textTypeName;
+  this.getTextType = function(textTypeName) {
+    var textTypes = this.getTextTypes();
+    return _find(textTypes, function(t) {
+      return t.name === textTypeName;
+    });
   };
 
-  this.getTextCommands = function() {
-    var surface = this.getSurface();
-    return surface.getTextCommands();
-  };
-
-  this.isTextType = function(type) {
-    var isTextType = false;
-    var textCommands = this.getTextCommands();
-    _.each(textCommands, function(cmd) {
-      if (cmd.constructor.static.nodeData.type === type) {
-        isTextType = true;
+  // Search which textType matches the current node
+  // E.g. {type: 'heading', level: 1} => heading1
+  this.getCurrentTextType = function(node) {
+    var textTypes = this.getTextTypes();
+    var currentTextType;
+    textTypes.forEach(function(textType) {
+      if (_isMatch(node.properties, textType.data)) {
+        currentTextType = textType;
       }
     });
-    return isTextType;
+    return currentTextType;
   };
 
-  this.getContext = function(parentNode, path) {
-    if (parentNode.id === path[0]) {
-      return path[1];
-    } else {
-      return parentNode.type;
-    }
+  // Block nodes are all nodes that are listed in a container
+  // Thus have no parent
+  this.isBlock = function(node) {
+    // TODO: this needs a better checker
+    return !node.hasParent();
   };
 
-  this.getCommandName = function(node) {
-    if (this.isTextType(node.type)) {
-      var textType = "make"+_.capitalize(node.type);
-      if (node.type === "heading") {
-        textType += node.level;
-      }
-      return textType;
-    }
+  this.isText = function(node) {
+    return node instanceof TextNode;
   };
 
   this.getCommandState = function() {
@@ -75,7 +62,8 @@ SwitchTextType.Prototype = function() {
 
     var newState = {
       disabled: false,
-      sel: sel
+      sel: sel,
+      textTypes: this.getTextTypes()
     };
 
     // Set disabled when not a property selection
@@ -83,48 +71,33 @@ SwitchTextType.Prototype = function() {
       newState.disabled = true;
     } else if (sel.isTableSelection()) {
       newState.disabled = true;
-      newState.currentContext = 'table';
+      // newState.currentContext = 'table';
     } else if (sel.isContainerSelection()) {
       newState.disabled = true;
-      newState.currentContext = 'container';
+      // newState.currentContext = 'container';
     } else {
       var doc = this.getDocument();
       var path = sel.getPath();
       var node = doc.get(path[0]);
 
-      if (node) {
-        var currentCommand = this.getCommandName(node);
-        var parentNode = node.getRoot();
-        var currentContext = this.getContext(parentNode, path);
-
-        // label/dropdown button
-        // this is redundant, thus slow!
-        var textCommands = this.getTextCommands();
-        var isTextContext = textCommands[currentCommand];
-        var label;
-        if (isTextContext) {
-          label = textCommands[currentCommand].constructor.static.textTypeName;
-        } else if (currentContext) {
-          label = currentContext;
-        } else {
-          label = 'No selection';
+      if (node && this.isBlock(node) && this.isText(node)) {
+        newState.currentTextType = this.getCurrentTextType(node);
+        if (!newState.currentTextType) {
+          newState.disabled = true;
         }
-        newState.label = label;
-        newState.currentContext = currentContext;
-        newState.currentCommand = currentCommand;
       } else {
         newState.disabled = true;
       }
-
     }
     return newState;
   };
 
   // Execute command and trigger
-  this.execute = function() {
-    var nodeData = this.getNodeData();
-    var surface = this.getSurface();
+  this.execute = function(textTypeName) {
+    var textType = this.getTextType(textTypeName);
 
+    var nodeData = textType.data;
+    var surface = this.getSurface();
     surface.transaction(function(tx, args) {
       args.data = nodeData;
       return surface.switchType(tx, args);

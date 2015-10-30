@@ -31,10 +31,10 @@ var EditLinkPrompt = Component.extend({
 
   render: function() {
     var link = this.props.link;
-    var el = $$('div').addClass('prompt shadow border fill-white');
+    var el = $$('div').addClass('se-prompt');
 
     el.append([
-      $$('div').addClass('prompt-title').append(this.i18n.t('hyperlink')),
+      $$('div').addClass('se-prompt-title').append(this.i18n.t('hyperlink')),
       $$('input').attr({type: 'text', placeholder: 'http://your-website.com', value: link.url})
                  .ref('url')
                  // This only works on the first load. Why?
@@ -42,7 +42,7 @@ var EditLinkPrompt = Component.extend({
                  .htmlProp('autofocus', true)
                  .on('change', this.onSave),
       $$('a').attr({href: '#'})
-             .addClass('delete-link')
+             .addClass('se-delete-link')
              .append(this.i18n.t('delete'))
              .on('click', this.onDelete)
     ]);
@@ -126,24 +126,22 @@ LinkTool.Prototype = function() {
     }
 
     var el = $$('div')
-      .addClass('link tool prompt');
+      .addClass('sc-link-tool se-tool')
+      .attr('title', title);
 
     if (this.state.disabled) {
-      el.addClass('disabled');
+      el.addClass('sm-disabled');
     }
 
     if (this.state.mode === 'edit') {
-      el.addClass('active');
+      el.addClass('sm-active');
     }
 
     if (this.state.mode) {
       el.addClass(this.state.mode);
     }
 
-    var button = $$("button")
-      .addClass('button')
-      .attr('title', title)
-      .on('click', this.onClick);
+    var button = $$("button").on('click', this.onClick);
 
     button.append(this.props.children);
     el.append(button);

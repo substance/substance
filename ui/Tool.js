@@ -2,6 +2,8 @@
 
 var oo = require('../util/oo');
 var Component = require('./Component');
+var _ = require('../util/helpers');
+var $$ = Component.$$;
 
 function Tool() {
   Component.apply(this, arguments);
@@ -32,13 +34,43 @@ Tool.Prototype = function() {
     }
   };
 
-  this.performAction = function() {
-    var ctrl = this.getController();
-    ctrl.executeCommand(this.constructor.static.command);
+  this.onClick = function(e) {
+    e.preventDefault();
+    if (this.state.disabled) {
+      return;
+    }
+    this.performAction();
   };
 
   this.render = function() {
-    throw new Error('render is abstract.');
+    var title = this.props.title || this.i18n.t(this.getName());
+
+    // Used only by annotation tool so far
+    if (this.state.mode) {
+      title = [_.capitalize(this.state.mode), title].join(' ');
+    }
+
+    var el = $$('div')
+      .attr('title', title)
+      .addClass('se-tool');
+
+    el.append(
+      $$("button").on('click', this.onClick)
+                  .append(this.props.children)
+    );
+
+    if (this.state.disabled) {
+      el.addClass('sm-disabled');
+    }
+    if (this.state.mode) {
+      el.addClass(this.state.mode);
+    }
+    if (this.state.active) {
+      el.addClass('sm-active');
+    }
+
+    
+    return el;
   };
 };
 

@@ -1,9 +1,29 @@
 'use strict';
 
-var $ = require('../util/jquery');
 var oo = require('../util/oo');
 var Component = require('./Component');
 var $$ = Component.$$;
+var $ = require('../util/jquery');
+
+// Toolbar
+// ----------------------
+
+function Toolbar() {
+  Component.apply(this, arguments);
+}
+
+Toolbar.Prototype = function() {
+  this.render = function() {
+    var el = $$("div").addClass("sc-toolbar");
+    el.append(this.props.children);
+    return el;
+  };
+};
+
+oo.inherit(Toolbar, Component);
+
+// Dropdown
+// ----------------------
 
 function Dropdown() {
   Component.apply(this, arguments);
@@ -20,18 +40,18 @@ Dropdown.Prototype = function() {
   // Note: It's important that all children tools are rendered (even if not shown)
   // because only that way we can keep the disabled states accurate
   this.render = function() {
-    var el = $$('div').addClass('dropdown');
+    var el = $$('div').addClass('se-toolbar-dropdown');
     if (this.state.open) {
-      el.addClass('open');
+      el.addClass('sm-open');
     }
     el.append(
       $$('button').ref('toggle')
-        .addClass('toggle')
+        .addClass('se-toggle')
         .attr('title', this.props.title)
         .append(this.props.label)
         .on('click', this.handleDropdownToggle),
       $$('div').ref('options')
-        .addClass('options shadow border fill-white')
+        .addClass('se-options')
         .append(this.props.children)
     );
     return el;
@@ -45,15 +65,13 @@ Dropdown.Prototype = function() {
   this.handleDropdownToggle = function(e) {
     e.preventDefault();
     var open = this.state.open;
-    var self = this;
+    var ctx = this;
     if (open) return;
     this.setState({open: !this.state.open});
     setTimeout(function() {
       $(window).one('click', function(e) {
         /*jshint unused: false */
-        // e.preventDefault();
-        // e.stopPropagation();
-        self.close();
+        ctx.close();
       });
     }, 0);
   };
@@ -67,4 +85,25 @@ Dropdown.Prototype = function() {
 
 oo.inherit(Dropdown, Component);
 
-module.exports = Dropdown;
+// Group
+// ----------------------
+
+function Group() {
+  Component.apply(this, arguments);
+}
+
+Group.Prototype = function() {
+  this.render = function() {
+    var el = $$('div').addClass('se-toolbar-group');
+    el.append(this.props.children);
+    return el;
+  };
+};
+
+oo.inherit(Group, Component);
+
+
+Toolbar.Group = Group;
+Toolbar.Dropdown = Dropdown;
+
+module.exports = Toolbar;
