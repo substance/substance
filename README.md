@@ -30,8 +30,8 @@ Incremental document updates (undoable operations)                          | �
 Transformations for document manipulation                                   | ✓
 Custom editing toolbars                                                     | ✓
 Commands for controlling the editor                                         | Beta 2
-Key bindings                                                                | Beta 2
-I18N support                                                                | Beta 3
+Key bindings                                                                | Beta 3
+I18N support                                                                | Beta 2
 Realtime collaboration                                                      | Beta 3
 Full Unicode support                                                        | Beta 3
 Plugins                                                                     | Beta 3
