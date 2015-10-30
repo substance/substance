@@ -80,6 +80,8 @@ function Surface() {
 
   this.undoEnabled = true;
 
+  this.textTypes = this.props.textTypes;
+
   /*jshint eqnull:true */
   // if (options.undoEnabled != null) {
   //   this.undoEnabled = options.undoEnabled;
@@ -125,6 +127,10 @@ Surface.Prototype = function() {
 
   this.getCommand = function(commandName) {
     return this.commandRegistry.get(commandName);
+  };
+
+  this.getTextTypes = function() {
+    return this.textTypes;
   };
 
   this.executeCommand = function(commandName, args) {

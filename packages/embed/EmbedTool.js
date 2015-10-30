@@ -10,10 +10,10 @@ var UrlPrompt = Component.extend({
   },
 
   render: function() {
-    var el = $$('div').addClass('prompt shadow border fill-white');
+    var el = $$('div').addClass('se-prompt');
     el.append([
-      $$('div').addClass('prompt-title').append(this.i18n.t('embed-src')),
-      $$('input').attr({type: 'text', placeholder: 'https://vimeo.com/142254284', value: ''})
+      $$('div').addClass('se-prompt-title').append(this.i18n.t('embed-src')),
+      $$('input').attr({type: 'text', placeholder: 'https://vimeo.com/...', value: ''})
                  .ref('url')
                  .on('change', this.onSave)
     ]);
@@ -52,10 +52,10 @@ var EmbedTool = SurfaceTool.extend({
     }
 
     var el = $$('div')
-      .addClass('embed prompt tool');
+      .addClass('sc-embed-tool se-tool');
 
     if (this.state.disabled) {
-      el.addClass('disabled');
+      el.addClass('sm-disabled');
     }
 
     var button = $$("button")

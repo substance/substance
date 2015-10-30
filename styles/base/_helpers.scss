@@ -56,10 +56,5 @@
 
 /* Disabled style */
 .disabled {  opacity: 0.2; cursor: default; }
- 
 .shadow { box-shadow: 0 0 25px 0 rgba(0,0,0,0.15); }
 
-// Abstract classes, that can be mixed in at various places
-%small-font { font-size: 14px; }
-%large-font { font-size: 20px; }
-%padding { padding: 20px; }

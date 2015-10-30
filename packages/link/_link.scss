@@ -5,37 +5,44 @@
 
 // Link tool prompt (also used for Embeds)
 
-.toolbar .tool.prompt .prompt {
-  padding: 15px;
-  padding-bottom: 0px;
+.sc-link-tool {
 
-  position: absolute;
-  left: -150px;
-  top: 40px;
-  z-index: 50000;
-  width: 300px;
+  .se-prompt {
+    padding: 15px;
+    padding-bottom: 0px;
 
-  .prompt-title {
-    font-size: 16px;
-    font-weight: bold;
-  }
-
-  a.delete-link {
+    background: white;
+    @include shadow;
+    @include border;
+    
     position: absolute;
-    top: 15px;
-    right: 15px;
-    font-size: 13px;
-    color: red;
-  }
+    left: -150px;
+    top: 40px;
+    z-index: 50000;
+    width: 300px;
 
-  input {
-    margin: 15px 0;
-    width: 100%;
-    font-size: 14px;
-    display: block;
-    border: 1px solid #ddd;
+    .se-prompt-title {
+      font-size: 16px;
+      font-weight: bold;
+    }
 
-    min-width: auto;
-    padding: 0 10px;
+    a.se-delete-link {
+      position: absolute;
+      top: 15px;
+      right: 15px;
+      font-size: 13px;
+      color: red;
+    }
+
+    input {
+      margin: 15px 0;
+      width: 100%;
+      font-size: 14px;
+      display: block;
+      border: 1px solid #ddd;
+
+      min-width: auto;
+      padding: 0 10px;
+    }
   }
 }

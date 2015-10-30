@@ -2,9 +2,6 @@
 
 var oo = require('../util/oo');
 var Tool = require('./Tool');
-var _ = require('../util/helpers');
-var Component = require('./Component');
-var $$ = Component.$$;
 
 /**
  * Abstract class for tools that interact with the selection of active surface.
@@ -77,40 +74,11 @@ SurfaceTool.Prototype = function() {
     }
   };
 
-  this.onClick = function(e) {
-    e.preventDefault();
-    if (this.state.disabled) {
-      return;
-    }
-    this.performAction();
-  };
-
   this.performAction = function() {
     var surface = this.getSurface();
     surface.executeCommand(this.constructor.static.command);
   };
 
-  this.render = function() {
-    var title = this.props.title || this.i18n.t(this.getName());
-
-    if (this.state.mode) {
-      title = [_.capitalize(this.state.mode), title].join(' ');
-    }
-
-    var el = $$("button")
-      .attr('title', title)
-      .addClass('button tool')
-      .on('click', this.onClick);
-
-    if (this.state.disabled) {
-      el.addClass('disabled');
-    }
-    if (this.state.active) {
-      el.addClass('active');
-    }
-    el.append(this.props.children);
-    return el;
-  };
 };
 
 oo.inherit(SurfaceTool, Tool);

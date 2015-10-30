@@ -12,12 +12,12 @@ var _ = require('../../util/helpers');
  * Implements the SurfaceTool API.
  */
 
-function TextTool() {
+function SwitchTextType() {
   SurfaceTool.apply(this, arguments);
   this.context.toolManager.registerTool(this);
 }
 
-TextTool.Prototype = function() {
+SwitchTextType.Prototype = function() {
 
   this.static = {
     name: 'switchTextType',
@@ -45,34 +45,35 @@ TextTool.Prototype = function() {
   // ----------------
 
   this.render = function() {
-    // Available text commands
-    var textCommands = this.getTextCommands();
+    var textTypeName = '-';
 
-    var el = $$("div")
-      .addClass('text-tool-component select');
+    if (this.state.currentTextType) {
+      textTypeName = this.state.currentTextType.name;
+    }
+    var el = $$("div").addClass('sc-switch-text-type');
 
     // Note: this is a view internal state for opening the select dropdown
     if (this.state.open) {
-      el.addClass('open');
+      el.addClass('sm-open');
     }
     if (this.state.disabled) {
-      el.addClass('disabled');
+      el.addClass('sm-disabled');
     }
 
     el.append($$('button')
-      .addClass("toggle small").attr('href', "#")
+      .addClass('se-toggle').attr('href', "#")
       .attr('title', this.props.title)
-      .append(this.state.label)
+      .append(this.i18n.t(textTypeName))
       .on('click', this.toggleAvailableTextTypes)
     );
 
     // dropdown options
-    var options = $$('div').addClass("options shadow border fill-white");
-    _.each(textCommands, function(textCommand, commandName) {
+    var options = $$('div').addClass("se-options");
+    _.each(this.state.textTypes, function(textType) {
       var button = $$('button')
-          .addClass('option '+commandName)
-          .attr("data-type", commandName)
-          .append(textCommand.constructor.static.textTypeName)
+          .addClass('se-option sm-'+textType.name)
+          .attr("data-type", textType.name)
+          .append(this.i18n.t(textType.name))
           .on('click', this.handleClick);
       options.append(button);
     }, this);
@@ -81,7 +82,6 @@ TextTool.Prototype = function() {
     return el;
   };
 
-
   this.handleClick = function(e) {
     e.preventDefault();
     // Modifies the tool's state so that state.open is undefined, which is nice
@@ -89,8 +89,8 @@ TextTool.Prototype = function() {
     this.executeCommand(e.currentTarget.dataset.type);
   };
 
-  this.executeCommand = function(commandName) {
-    this.getSurface().executeCommand(commandName);
+  this.executeCommand = function(textType) {
+    this.getSurface().executeCommand('switchTextType', textType);
   };
 
   this.toggleAvailableTextTypes = function(e) {
@@ -110,6 +110,6 @@ TextTool.Prototype = function() {
   };
 };
 
-oo.inherit(TextTool, SurfaceTool);
+oo.inherit(SwitchTextType, SurfaceTool);
 
-module.exports = TextTool;
+module.exports = SwitchTextType;
