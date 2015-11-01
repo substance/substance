@@ -370,13 +370,4 @@ Document.Prototype = function() {
 
 oo.inherit(Document, AbstractDocument);
 
-Object.defineProperty(Document.prototype, 'id', {
-  get: function() {
-    return this.getDocumentMeta().guid;
-  },
-  set: function() {
-    throw new Error("Id is an immutable property.");
-  }
-});
-
 module.exports = Document;
