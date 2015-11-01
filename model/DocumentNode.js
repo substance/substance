@@ -69,11 +69,11 @@ var DocumentNode = DataNode.extend({
   },
 
   getComponents: function() {
-    var componentNames = this.constructor.static.components || [];
-    if (componentNames.length === 0) {
+    var componentNames = this.constructor.static.components;
+    if (!componentNames) {
       console.warn('Contract: a node must define its editable properties.', this.constructor.static.name);
     }
-    return componentNames;
+    return componentNames || [];
   },
 
   getPropertyNameAt: function(idx) {
