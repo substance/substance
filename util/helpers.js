@@ -8,6 +8,7 @@
  * @memberof module:Basics
  */
 var Helpers = {};
+var $ = require('./jquery');
 
 // Lang helpers
 
@@ -268,5 +269,11 @@ Helpers.getRelativeOffset = function ( $element, $ancestor ) {
 };
 
 Helpers.uuid = require('./uuid');
+
+Helpers.serializeDOMElement = function($el) {
+  var $tmp = $('<div>');
+  $tmp.append($el.clone());
+  return $tmp.html();
+};
 
 module.exports = Helpers;
