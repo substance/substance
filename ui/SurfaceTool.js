@@ -3,7 +3,7 @@
 var oo = require('../util/oo');
 var Tool = require('./Tool');
 
-/**
+/*
  * Abstract class for tools that interact with the selection of active surface.
  * A surfaceManager context must be provided via dependency injection.
  */
@@ -27,7 +27,7 @@ SurfaceTool.Prototype = function() {
     }
   };
 
-  /**
+  /*
    * Unbinds event handler before getting unmounted.
    *
    * Custom tool implementation must do a super call.
@@ -38,7 +38,7 @@ SurfaceTool.Prototype = function() {
     ctrl.disconnect(this);
   };
 
-  /**
+  /*
    * Return the currently focused surface
    *
    * @return {Surface}
@@ -49,7 +49,7 @@ SurfaceTool.Prototype = function() {
     return this.getController().getFocusedSurface();
   };
 
-  /**
+  /*
    * Return the document associated with the focused surface.
    *
    * @return {Document}
@@ -60,7 +60,7 @@ SurfaceTool.Prototype = function() {
     return this.getController().getDocument();
   };
 
-  /**
+  /*
    * Return the currently active container
    *
    * @return {Document.Container}

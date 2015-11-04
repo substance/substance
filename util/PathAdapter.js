@@ -3,7 +3,7 @@
 var _ = require('./helpers');
 var oo = require('./oo');
 
-/**
+/*
  * An adapter to access an object via path.
  *
  * @class PathAdapter

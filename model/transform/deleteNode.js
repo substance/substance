@@ -2,7 +2,7 @@
 
 var _ = require('../../util/helpers');
 
-/**
+/*
  * Delete a node and all annotations attached to it,
  * and removes the node from all containers.
  *

@@ -3,7 +3,7 @@
 var _ = require('../../util/helpers');
 var helpers = require('../documentHelpers');
 
-/**
+/*
  * For a given container selection create property selections of a given type
  *
  * @param tx a transaction document
@@ -38,7 +38,7 @@ function _createPropertyAnnotations(tx, args) {
 }
 
 
-/**
+/*
  * For a given selection create a new annotation
  *
  * @param tx a transaction document

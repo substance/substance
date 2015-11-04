@@ -2,7 +2,7 @@
 
 var oo = require('./oo');
 
-/**
+/*
  * Simple registry implementation.
  *
  * @class Registry

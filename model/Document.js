@@ -16,6 +16,16 @@ var ClipboardExporter = require('./ClipboardExporter');
 
 var __id__ = 0;
 
+/*
+  Represents a Substance Document. This is an abstract class that your custom
+  Article implementation can inherit from.
+  
+  @constructor
+  @class
+  @abstract
+  @memberof module:model
+*/
+
 function Document(schema) {
   AbstractDocument.call(this, schema);
   this.__id__ = __id__++;
@@ -105,21 +115,23 @@ Document.Prototype = function() {
   //
 
   /**
-   * @param beforeState object which will be used as before start of transaction
-   * @param eventData object which will be used as payload for the emitted change event
-   * @param transformation a function(tx) that performs actions on the transaction document tx
-   *
-   * @example
-   * ```
-   *   doc.transaction({ selection: sel }, {'event-hack': true}, function(tx, args) {
-   *     tx.update(...);
-   *     ...
-   *     return {
-   *       selection: newSelection
-   *     };
-   *   })
-   * ```
-   */
+    Start a transaction to manipulate the document
+
+    @param beforeState object which will be used as before start of transaction
+    @param eventData object which will be used as payload for the emitted change event
+    @param transformation a function(tx) that performs actions on the transaction document tx
+    @memberof module:model.Document.prototype
+    
+    @example
+
+    doc.transaction({ selection: sel }, {'event-hack': true}, function(tx, args) {
+      tx.update(...);
+      ...
+      return {
+        selection: newSelection
+      };
+    })
+  */
   this.transaction = function(beforeState, eventData, transformation) {
     if (arguments.length === 1) {
       transformation = arguments[0];

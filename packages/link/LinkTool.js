@@ -50,11 +50,6 @@ var EditLinkPrompt = Component.extend({
   }
 });
 
-/**
- * LinkTool
- *
- * Implements the SurfaceTool API.
- */
 
 function LinkTool() {
   AnnotationTool.apply(this, arguments);

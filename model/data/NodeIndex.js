@@ -4,7 +4,7 @@ var _ = require('../../util/helpers');
 var oo = require('../../util/oo');
 var PathAdapter = require('../../util/PathAdapter');
 
-/**
+/*
  * Index for Nodes.
  *
  * Node indexes are first-class citizens in Substance.Data.

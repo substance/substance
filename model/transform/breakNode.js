@@ -7,7 +7,13 @@ var annotationHelpers = require('../annotationHelpers');
 /* jshint latedef: false */
 
 /**
+ * Break node
+ * 
+ * Used when you hit ENTER inside a paragraph
+ * 
+ * @function
  * @params args object with fields `selection`, `containerId`
+ * @memberof module:model/transform
  */
 function breakNode(tx, args) {
   if (!args.selection) {

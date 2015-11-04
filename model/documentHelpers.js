@@ -1,33 +1,46 @@
-"use strict";
+'use strict';
 
 var _ = require('../util/helpers');
 var AnnotationIndex = require('./AnnotationIndex');
 
-var Helpers = {};
+// HACK: this is actually not a class thus @class is wrong, but I did not find
+//  any other way to associate a function collection to a module.
 
 /**
- * Returns true if given type is a container selection
- * @param {Document} doc
- * @param {string} type
- */
+  @class documentHelpers
+  @memberof module:model
+  @example
 
-Helpers.isContainerAnnotation = function(doc, type) {
+  var documentHelpers = require('substance/model/documentHelpers');
+  documentHelpers.isContainerAnnotation  
+*/
+var documentHelpers = {};
+
+/**
+  Returns true if given type is a container selection
+  
+  @static
+  @memberof module:model
+  @param {Document} doc
+  @param {string} type
+*/
+documentHelpers.isContainerAnnotation = function(doc, type) {
   var schema = doc.getSchema();
-  return schema.isInstanceOf(type, "container-annotation");
+  return schema.isInstanceOf(type, 'container-annotation');
 };
 
 /**
- * For a given selection get all property annotations
- *
- * @method getPropertyAnnotationsForSelection
- * @param {Document} doc
- * @param {Document.Selection} sel
- * @return An array of property annotations
- *
- * WARNING: Returns an empty array when selection is a container selection
- */
+  For a given selection get all property annotations
 
-Helpers.getPropertyAnnotationsForSelection = function(doc, sel, options) {
+  @static
+  @memberof module:model
+  @param {Document} doc
+  @param {Document.Selection} sel
+  @return An array of property annotations
+  
+  WARNING: Returns an empty array when selection is a container selection
+*/
+documentHelpers.getPropertyAnnotationsForSelection = function(doc, sel, options) {
   options = options || {};
   var annotations;
   var path, startOffset, endOffset;
@@ -48,23 +61,23 @@ Helpers.getPropertyAnnotationsForSelection = function(doc, sel, options) {
 };
 
 /**
- * For a given selection get all container annotations
- *
- * @method getContainerAnnotationsForSelection
- * @param {Document} doc
- * @param {Document.Selection} sel
- * @param {Document.Container} container
- * @param {object} options
- * @return An array of container annotations
- *
- * ATTENTION: looking for container annotations is not as efficient as property
- * selections, as we do not have an index that has notion of the spatial extend
- * of an annotation (which would depend on a model-side implementation of
- * Container). Opposed to that, common annotations are bound to properties
- * which make it easy to lookup.
- */
+  For a given selection get all container annotations
 
-Helpers.getContainerAnnotationsForSelection = function(doc, sel, container, options) {
+  @static
+  @memberof module:model
+  @param {Document} doc
+  @param {Document.Selection} sel
+  @param {Document.Container} container
+  @param {object} options
+  @return An array of container annotations
+  
+  ATTENTION: looking for container annotations is not as efficient as property
+  selections, as we do not have an index that has notion of the spatial extend
+  of an annotation (which would depend on a model-side implementation of
+  Container). Opposed to that, common annotations are bound to properties
+  which make it easy to lookup.
+*/
+documentHelpers.getContainerAnnotationsForSelection = function(doc, sel, container, options) {
   if (!container) {
     // Fail more silently
     return [];
@@ -85,17 +98,17 @@ Helpers.getContainerAnnotationsForSelection = function(doc, sel, container, opti
 };
 
 /**
- * For a given selection, get annotations of a certain type
- *
- * @method getAnnotationsForSelection
- * @param {Document} doc
- * @param {Document.Selection} sel
- * @param {String} annotationType
- * @param {String} containerId (only needed when type is a container annotation)
- * @return {Array} all matching annotations
- */
-
-Helpers.getAnnotationsForSelection = function(doc, sel, annotationType, containerId) {
+  For a given selection, get annotations of a certain type
+  
+  @static
+  @memberof module:model
+  @param {Document} doc
+  @param {Document.Selection} sel
+  @param {String} annotationType
+  @param {String} containerId (only needed when type is a container annotation)
+  @return {Array} all matching annotations
+*/
+documentHelpers.getAnnotationsForSelection = function(doc, sel, annotationType, containerId) {
   var annos;
   var isContainerAnno = Helpers.isContainerAnnotation(doc, annotationType);
 
@@ -111,15 +124,16 @@ Helpers.getAnnotationsForSelection = function(doc, sel, annotationType, containe
 };
 
 /**
- * For a given selection, get the corresponding text string
- *
- * @method getTextForSelection
- * @param {Document} doc
- * @param {Document.Selection} sel
- * @return {String} text enclosed by the annotation
- */
+  For a given selection, get the corresponding text string
+  
+  @static
+  @memberof module:model
+  @param {Document} doc
+  @param {Document.Selection} sel
+  @return {String} text enclosed by the annotation
+*/
 
-Helpers.getTextForSelection = function(doc, sel) {
+documentHelpers.getTextForSelection = function(doc, sel) {
   var result = [];
   var text;
   if (!sel || sel.isNull()) {
@@ -148,4 +162,4 @@ Helpers.getTextForSelection = function(doc, sel) {
   return result.join('');
 };
 
-module.exports = Helpers;
+module.exports = documentHelpers;

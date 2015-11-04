@@ -10,7 +10,7 @@ var DEFAULT_TOOLSTATE = {
   active: false
 };
 
-/**
+/*
  * Listens to changes on the document and selection and updates registered tools accordingly.
  *
  * @class

@@ -5,7 +5,7 @@ var oo = require('../../util/oo');
 var PathAdapter = require('../../util/PathAdapter');
 var EventEmitter = require('../../util/EventEmitter');
 
-/**
+/*
  * A data storage implemention.
  *
  * @class Data

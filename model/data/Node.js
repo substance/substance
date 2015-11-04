@@ -5,7 +5,7 @@ var _ = require('../../util/helpers');
 var uuid = require('../../util/uuid');
 var EventEmitter = require('../../util/EventEmitter');
 
-/**
+/*
  * Base node implemention.
  *
  * @class Node

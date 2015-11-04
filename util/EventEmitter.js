@@ -2,14 +2,13 @@
 
 var oo = require("./oo");
 
-/**
- * Event support.
- *
- * Inspired by VisualEditor's EventEmitter class.
+/** 
+ * Event support, inspired by VisualEditor's EventEmitter class.
  *
  * @class EventEmitter
- * @memberof module:Basics
+ * @memberof module:util
  */
+
 function EventEmitter() {
   this.__events__ = {};
 }
@@ -45,7 +44,7 @@ EventEmitter.Prototype = function() {
    * @param {Function} method
    * @param {Object} context
    * @private
-   * @memberof module:Basics.EventEmitter.prototype
+   * @memberof module:util.EventEmitter.prototype
    */
   this._on = function ( event, method, context, priority) {
     var bindings;
@@ -68,13 +67,13 @@ EventEmitter.Prototype = function() {
   /**
    * Remove a listener.
    *
-   * @method off
+   * @method _off
    * @param {String} event
    * @param {Function} method
    * @param {Object} context
    * @chainable
    * @private
-   * @memberof module:Basics.EventEmitter.prototype
+   * @memberof module:util.EventEmitter.prototype
    */
   this._off = function ( event, method, context ) {
     var i, bindings;
@@ -111,8 +110,8 @@ EventEmitter.Prototype = function() {
    * Internal implementation of connect.
    *
    * @method _connect
+   * @memberof module:util.EventEmitter.prototype
    * @private
-   * @memberof module:Basics.EventEmitter.prototype
    */
   this._connect = function (obj, methods, options) {
     var priority = 0;
@@ -131,8 +130,8 @@ EventEmitter.Prototype = function() {
    * Internal implementation of disconnect.
    *
    * @method _disconnect
+   * @memberof module:util.EventEmitter.prototype
    * @private
-   * @memberof module:Basics.EventEmitter.prototype
    */
   this._disconnect = function(context) {
     var i, event, bindings;
@@ -155,7 +154,7 @@ EventEmitter.Prototype = function() {
    * Emit an event.
    *
    * @method emit
-   * @memberof module:Basics.EventEmitter.prototype
+   * @memberof module:util.EventEmitter.prototype
    * @param {String} event
    * @param ...arguments
    * @return true if a listener was notified, false otherwise.
@@ -190,7 +189,7 @@ EventEmitter.Prototype = function() {
    * priority earlier.
    *
    * @method emit
-   * @memberof module:Basics.EventEmitter.prototype
+   * @memberof module:util.EventEmitter.prototype
    * @param {Object} listener
    * @param {Object} hash with event as keys, and handler functions as values.
    * @param {Number} hash with `priority` as ordering hint (default is 0).
@@ -205,7 +204,7 @@ EventEmitter.Prototype = function() {
    * Disconnect a listener (all bindings).
    *
    * @method disconnect
-   * @memberof module:Basics.EventEmitter.prototype
+   * @memberof module:util.EventEmitter.prototype
    * @param {Object} listener
    * @chainable
    */
@@ -216,11 +215,12 @@ EventEmitter.Prototype = function() {
   /**
    * Subscribe a listener to a event.
    *
+   * @method on
+   * @memberof module:util.EventEmitter.prototype
    * @param {String} event
    * @param {Function} method
    * @param {Object} context
    * @param {Object} options
-   * @memberof module:Basics.EventEmitter.prototype
    */
   this.on = function(event, method, context, options) {
     var priority = 0;
@@ -234,11 +234,12 @@ EventEmitter.Prototype = function() {
   /**
    * Unsubscrive a listener from an event.
    *
+   * @method off
    * @param {String} event
    * @param {Function} method
    * @param {Object} context
    * @param {Object} options
-   * @memberof module:Basics.EventEmitter.prototype
+   * @memberof module:util.EventEmitter.prototype
    */
   this.off = function(event, method, context) {
     /* jshint unused:false */

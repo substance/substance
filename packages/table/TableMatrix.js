@@ -1,6 +1,6 @@
 var oo = require('../../util/oo');
 
-/**
+/*
  * A helper class that allows random access to the table cells
  * and introduces place-holders for fields occupied by spanning cells,
  * making it a non-sparse representation of the sparse HTML model.
@@ -308,7 +308,7 @@ TableMatrix.Prototype = function() {
 
 oo.initClass(TableMatrix);
 
-/**
+/*
  * An object wrapping a table cell node, augmenting it with row and column indexes.
  *
  * @class
@@ -330,7 +330,7 @@ TableMatrix.Cell.sortDescending = function( a, b ) {
   return b.col - a.col;
 };
 
-/**
+/*
  * An object representing a cell which is occupied by another cell with 'rowspan' or 'colspan' attribute.
  * Placeholders are used to create a dense representation of the sparse HTML table model.
  *
@@ -348,7 +348,7 @@ TableMatrix.Placeholder = function PlaceHolder( owner, row, col ) {
 
 oo.inherit(TableMatrix.Placeholder, TableMatrix.Cell);
 
-/**
+/*
  * An object describing a rectangular selection in a table matrix.
  * It has two properties, 'start' and 'end', which both are objects with
  * properties 'row' and 'col'. 'start' describes the upper-left, and

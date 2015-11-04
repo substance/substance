@@ -5,7 +5,7 @@ var oo = require('../../util/oo');
 var Node = require('./Node');
 var NodeFactory = require('./NodeFactory');
 
-/**
+/*
  * Data Schema.
  *
  * @class Data.Schema

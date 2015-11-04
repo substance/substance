@@ -4,7 +4,7 @@ var $ = require('../util/jquery');
 var _ = require('../util/helpers');
 var oo = require('../util/oo');
 
-/**
+/*
  * Surface Clipboard is owned by a module:ui/FormEditor.
  *
  *
