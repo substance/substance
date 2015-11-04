@@ -162,78 +162,35 @@ surface.transaction(function(tx, args) {
 });
 ```
 
-Using the transaction method on a Surface instance passes the current selection to the transformation automatically. So you will use surface transactions whenever some kind of selection is involved in your action. However you could also provide the selection manually and call `transaction()` on the document or app controller instance. Make sure that your transformations are robust for both scenarios. If you look at the above example under (3) we set the selection to the last matched element after search and replace. If something has been found.
+Using the transaction method on a Surface instance passes the current selection to the transformation automatically. So you will use surface transactions whenever some kind of selection is involved in your action. However, you could also provide the selection manually and call `transaction()` on the document or app controller instance. Make sure that your transformations are robust for both scenarios. If you look at the above example under (3) we set the selection to the last matched element after search and replace. If something has been found.
 
 ### Building an editor UI
 
-```js
-// Customized Controller
-// --------------
-// 
-// Extending from ui.Controller creates a context for editing components,
-// such as ContainerEditor, TextProperty etc.
-// Controller also keeps track of the focused editing surface etc.
-// Customize by modifying the config object
+Let's look at a complete example of a simple ProseEditor implementation. The `render` function is the heart of our custom `ProseEditor` component. It contains a bit of custom markup and utilizes predefined UI components, such as a `Toolbar` including tools like the `UndoTool` and a configured `ContainerEditor`, which will do the actual editing work. 
 
+```js
 var ProseEditor = Controller.extend({
   // Editor configuration
   static: {
-    config: {
-      // Controller specific configuration (required!)
-      controller: {
-        // Controller commands
-        commands: [
-          require('substance/ui/commands/undo'),
-          require('substance/ui/commands/redo'),
-          require('substance/ui/commands/save')
-        ],
-        // Component registry
-        components: {
-          "paragraph": require('substance/ui/nodes/paragraph_component'),
-          "heading": require('substance/ui/nodes/heading_component'),
-          "blockquote": require('substance/ui/nodes/blockquote_component'),
-          "codeblock": require('substance/ui/nodes/codeblock_component'),
-          "link": require('substance/ui/nodes/link_component')
-        }
-      },
-      // Custom configuration (required!)
-      bodyEditor: {
-        commands: [
-          // Used to determine the text tool state (is never executed)
-          require('substance/ui/commands/switch_text_type'),
-          require('substance/ui/commands/make_paragraph'),
-          require('substance/ui/commands/make_heading1'),
-          require('substance/ui/commands/make_heading2'),
-          require('substance/ui/commands/make_heading3'),
-          require('substance/ui/commands/make_blockquote'),
-          require('substance/ui/commands/make_codeblock'),
-          require('substance/ui/commands/toggle_strong'),
-          require('substance/ui/commands/toggle_emphasis'),
-          require('substance/ui/commands/toggle_link'),
-          require('substance/ui/commands/select_all')
-        ]
-      }
-    },
+    config: CONFIG,
   },
-
   // Custom Render method for your editor
   render: function() {
-    var config = this.constructor.static.config;
-
-    return $$('div').addClass('editor-component').append(
-      $$('div').addClass('toolbar').append(
-        $$(TextTool, {'title': this.i18n.t('switch_text')}),
-        $$(UndoTool).append($$(Icon, {icon: "fa-undo"})),
-        $$(RedoTool).append($$(Icon, {icon: "fa-repeat"})),
-        $$(StrongTool).append($$(Icon, {icon: "fa-bold"})),
-        $$(EmphasisTool).append($$(Icon, {icon: "fa-italic"})),
-        $$(LinkTool).append($$(Icon, {icon: "fa-link"}))
+    var config = getConfig();
+    return $$('div').addClass('sc-prose-editor').append(
+      $$(Toolbar).append(
+        $$(Toolbar.Group).append(
+          $$(TextTool, {'title': this.i18n.t('switch_text')}),
+          $$(UndoTool).append($$(Icon, {icon: "fa-undo"})),
+          $$(RedoTool).append($$(Icon, {icon: "fa-repeat"})),
+          $$(StrongTool).append($$(Icon, {icon: "fa-bold"})),
+          $$(EmphasisTool).append($$(Icon, {icon: "fa-italic"}))
+        )
       ),
       $$(ContainerEditor, {
         doc: this.props.doc,
         containerId: 'body',
         name: 'bodyEditor',
-        // Use default surface commands
         commands: config.bodyEditor.commands
       }).ref('bodyEditor')
     );
@@ -241,23 +198,42 @@ var ProseEditor = Controller.extend({
 });
 ```
 
+There's also a config object that is essential for the editor to work. The following configuration sets up a component registry that assigns a visual component to each content node type. It also defines which commands should be supported on the controller level (undo, redo, save) and for the editor (strong, emphasis, link). Furthermore we need to setup which text types the editor should support.
 
-Substance Surface, that maps DOM selections to internal document selections.
+Let's now look at the config object;
 
 ```js
-this.surfaceManager = new Substance.Surface.SurfaceManager(doc);
-this.clipboard = new Substance.Surface.Clipboard(this.surfaceManager, doc.getClipboardImporter(), doc.getClipboardExporter());
-var editor = new Substance.Surface.ContainerEditor('body');
-this.surface = new Surface(this.surfaceManager, doc, editor);
+var CONFIG = {
+  // Controller specific configuration
+  controller: {
+    // Component registry
+    components: {
+      'paragraph': require('substance/packages/paragraph/ParagraphComponent'),
+      'heading': require('substance/packages/heading/HeadingComponent'),
+      'link': require('substance/packages/link/LinkComponent')
+    },
+    // Controller commands
+    commands: [
+      require('substance/ui/commands/undo'),
+      require('substance/ui/commands/redo'),
+      require('substance/ui/commands/save')
+    ]
+  },
+  // Body editor configuration
+  bodyEditor: {
+    // Surface commands
+    commands: [
+      require('substance/packages/text/SwitchTextTypeCommand'),
+      require('substance/packages/strong/StrongCommand'),
+      require('substance/packages/emphasis/EmphasisCommand'),
+      require('substance/packages/link/LinkCommand')
+    ],
+    // Text types available in the switch text type dropdown
+    textTypes: [
+      {name: 'paragraph', data: {type: 'paragraph'}},
+      {name: 'heading1',  data: {type: 'heading', level: 1}},
+      {name: 'codeblock', data: {type: 'codeblock'}}
+    ]
+  }
+};
 ```
-
-A Surface instance requires a `SurfaceManager`, which keeps track of multiple Surfaces and dispatches to the currently active one. It also requires an editor. There are two kinds of editors: A ContainerEditor manages a sequence of nodes, including breaking and merging of text nodes. A FormEditor by contrast allows you to define a fixed structure of your editable content. Furthermore we initialized a clipboard instance and tie it to the Surface Manager.
-
-We also setup a registry for components (such as Paragraph) and tools (e.g. EmphasisTool, StrongTrool). Our editor will then be able to dynamically retrieve the right view component for a certain node type.
-
-To learn how to build your own editor check out [this tutorial](https://github.com/substance/demos/tree/master/notepad) on creating a Notepad editor with Substance.
-
-
-TODO:
-- add a narrative introduction to Subtance modules
-- there also seems to be some support for adding assets (via configuration `staticFiles`)
