@@ -14,13 +14,24 @@ var I18n = require('./i18n');
 I18n.instance.load(require('../i18n/en'));
 
 /**
- * Controls Substance infrastructure. Needs to be supplied as a top level instance
- * to serve editors, commands and tools as a context.
- *
- * @class
- * @memberof module:ui
- */
+  Controls Substance infrastructure. Needs to be supplied as a top level instance
+  to serve editors, commands and tools as a context.
 
+  In order to construct a controller, you need to have a document instance ready,
+  as well as a set of components and commands that you want your app to support.
+  A controller can manage one or more editing surfaces.
+  
+  The controller is the interface for your app to trigger editor actions. For
+  instance from any component, not only from a predefined toolbar commands 
+  can be executed on the controller to update the document.
+
+  @class
+  @memberof module:ui
+
+  @fires module:ui.Controller#command:executed
+  @fires module:ui.Controller#selection:changed
+  @fires module:ui.Controller#document:saved
+*/
 function Controller() {
   Component.apply(this, arguments);
   if (!this.props.doc) throw new Error('Controller requires a Substance document instance');
@@ -28,16 +39,12 @@ function Controller() {
   this.focusedSurface = null;
   this.stack = [];
   this.logger = new Logger();
-
   var config = this.getConfig();
-
   this._initializeComponentRegistry(config.controller.components);
   this._initializeCommandRegistry(config.controller.commands);
   this.clipboard = new Clipboard(this, this.props.doc.getClipboardImporter(), this.props.doc.getClipboardExporter());
   this.toolManager = new ToolManager(this);
-
   this._initialize(this.props);
-
   this.handleStateUpdate(this.state);
 }
 
@@ -115,12 +122,12 @@ Controller.Prototype = function() {
   };
 
   /**
-   * Get the associated ToolManager instance
-   *
-   * @return {module:ui.ToolManager} the ToolManager instance
-   * @method getToolManager
-   * @memberof module:ui.Controller.prototype
-   */
+    Get the associated ToolManager instance
+    
+    @return {module:ui.ToolManager} the ToolManager instance
+    @method getToolManager
+    @memberof module:ui.Controller.prototype
+  */
   this.getToolManager = function() {
     return this.toolManager;
   };
@@ -143,25 +150,29 @@ Controller.Prototype = function() {
   };
 
   /**
-   * Get registered controller command by name
-   *
-   * @param commandName {String} the command name
-   * @return {module:ui.commands.ControllerCommand} A controller command
-   * @method getCommand
-   * @memberof module:ui.Controller.prototype
-   */
+    Get registered controller command by name
+    
+    @param commandName {String} the command name
+    @return {module:ui.commands.ControllerCommand} A controller command
+    @method getCommand
+    @memberof module:ui.Controller.prototype
+  */
   this.getCommand = function(commandName) {
     return this.commandRegistry.get(commandName);
   };
 
   /**
-   * Execute command with given name if registered
-   *
-   * @param commandName {String} the command name
-   * @return {module:ui.commands.ControllerCommand} A controller command
-   * @method getCommand
-   * @memberof module:ui.Controller.prototype
-   */
+    Execute command with given name if registered. In most cases this triggers a document transformation and
+    corresponding UI updates. For instance when pressing `ctrl+b` the
+    `toggleStrong` command is executed. Each implemented command returns a custom
+    info object, describing the action that has been performed.
+    After execution a `command:executed` event is emitted on the controller.
+    
+    @param commandName {String} the command name
+    @return {module:ui.commands.ControllerCommand} A controller command
+    @method executeCommand
+    @memberof module:ui.Controller.prototype
+  */
   this.executeCommand = function(commandName) {
     var cmd = this.getCommand(commandName);
     if (!cmd) {
@@ -172,8 +183,8 @@ Controller.Prototype = function() {
     var info = cmd.execute();
     if (info) {
       this.emit('command:executed', info, commandName, cmd);
-      // TODO: We want to replace this with a more specific, scoped event
-      // but for that we need an improved EventEmitter API
+      /* TODO: We want to replace this with a more specific, scoped event
+        but for that we need an improved EventEmitter API */
     } else if (info === undefined) {
       console.warn('command ', commandName, 'must return either an info object or true when handled or false when not handled');
     }
@@ -206,6 +217,7 @@ Controller.Prototype = function() {
    * @return {module:ui.surface.Surface} The surface instance
    * @memberof module:ui.Controller.prototype
    */
+
   this.getSurface = function(name) {
     if (name) {
       return this.surfaces[name];
@@ -490,8 +502,56 @@ Controller.Prototype = function() {
   this.render = function() {
     throw new Error('Controller.prototype.render is abstract. You need to define your own controller component');
   };
-
 };
+
+/**
+  Emitted after a command has been executed. Since we did not allow command
+  implementations to access UI components, UI components can listen to
+  the `command:executed` event and perform necessary action then.
+  
+  @event module:ui.Controller#command:executed
+
+  @param info {object} information about the command execution
+  @param commandName {String} the command name (e.g. 'strong', 'emphasis')
+  @param cmd {module:ui.Command} the command instance
+  @example
+
+  LinkTool.Prototype = function() {
+    this.didInitialize = function() {
+      var ctrl = this.getController();
+
+      ctrl.connect(this, {
+        'command:executed': this.onCommandExecuted
+      });
+    };
+    
+    this.onCommandExecuted = function(info, commandName) {
+      if (commandName === this.static.command) {
+        // Toggle the edit prompt when either edit is
+        // requested or a new link has been created
+        if (_.includes(['edit','create'], info.mode)) {
+          this.togglePrompt();
+        }
+      }
+    };
+    ...
+  };
+*/
+
+/**
+  Emitted when the active selection has changed, e.g. through cursor movement.
+  Transports `sel` a DocumentSelection that can be expected but also the
+  surface in which the selection change happened.
+
+  @event module:ui.Controller#selection:changed
+  @param cmd {module:ui.Command} the command instance
+*/
+
+/**
+  Emitted when a save workflow has been completed successfully.
+
+  @event module:ui.Controller#document:saved
+*/
 
 oo.inherit(Controller, Component);
 module.exports = Controller;
