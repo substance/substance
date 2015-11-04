@@ -3,10 +3,12 @@
 var oo = require('../util/oo');
 var _ = require('../util/helpers');
 var Component = require('./Component');
-var FormEditor = require('./FormEditor');
+var Surface = require('./Surface');
 var UnsupportedNode = require('./UnsupportedNode');
 var TextPropertyManager = require('../model/TextPropertyManager');
 var EditingBehavior = require('../model/EditingBehavior');
+var insertText = require('../model/transform/insertText');
+var copySelection = require('../model/transform/copySelection');
 var deleteSelection = require('../model/transform/deleteSelection');
 var breakNode = require('../model/transform/breakNode');
 var insertNode = require('../model/transform/insertNode');
@@ -17,11 +19,10 @@ var $$ = Component.$$;
 /**
  * Represents a flow editor that manages a sequence of nodes in a container. Instantiate
  * this editor using `Component.$$` within the render method of a component. Needs to be
- * instantiated within a {@link module:ui/FormEditor} context.
+ * instantiated within a {@link module:ui/Controller} context.
  *
  * @constructor
  * @class
- * @extends module:ui/FormEditor
  * @extends module:ui/Surface
  * @memberof module:ui
  * @example
@@ -45,17 +46,12 @@ var $$ = Component.$$;
  */
 
 function ContainerEditor() {
-  FormEditor.apply(this, arguments);
-
-  // TODO: We should inherit from Surface, not FormEditor so we don't need to 'replace'
-  // an existing textPropertyManager
-  this.textPropertyManager.dispose();
+  Surface.apply(this, arguments);
 
   var doc = this.getDocument();
 
   if (!_.isString(this.props.containerId)) throw new Error("Illegal argument: Expecting containerId.");
   this.editingBehavior = new EditingBehavior();
-
   this.textPropertyManager = new TextPropertyManager(doc, this.props.containerId);
   
   doc.connect(this, {
@@ -66,7 +62,7 @@ function ContainerEditor() {
 ContainerEditor.Prototype = function() {
 
   this.dispose = function() {
-    FormEditor.prototype.dispose.call(this);
+    Surface.prototype.dispose.call(this);
     var doc = this.getDocument();
     doc.disconnect(this);
   };
@@ -181,14 +177,15 @@ ContainerEditor.Prototype = function() {
     }
   };
 
-  this.selectAll = function(doc) {
-    var container = doc.get(this.containerId);
+  this.selectAll = function() {
+    var doc = this.getDocument();
+    var container = doc.get(this.getContainerId());
     var firstPath = container.getFirstPath();
     var lastPath = container.getLastPath();
     var lastText = doc.get(lastPath);
     return doc.createSelection({
       type: 'container',
-      containerId: this.containerId,
+      containerId: container.id,
       startPath: firstPath,
       startOffset: 0,
       endPath: lastPath,
@@ -208,7 +205,24 @@ ContainerEditor.Prototype = function() {
     args.editingBehavior = this.editingBehavior;
   };
 
+  this.insertText = function(tx, args) {
+    if (args.selection.isPropertySelection() || args.selection.isContainerSelection()) {
+      return insertText(tx, args);
+    }
+  };
+
+  this.softBreak = function(tx, args) {
+    args.text = "\n";
+    return this.insertText(tx, args);
+  };
+
+  // create a document instance containing only the selected content
+  this.copy = function(doc, selection) {
+    var result = copySelection(doc, { selection: selection });
+    return result.doc;
+  };
+
 };
 
-oo.inherit(ContainerEditor, FormEditor);
+oo.inherit(ContainerEditor, Surface);
 module.exports = ContainerEditor;

@@ -1,29 +1,28 @@
 'use strict';
 
 var oo = require('../util/oo');
-var _ = require('../util/helpers');
 var Surface = require('./Surface');
 var TextPropertyManager = require('../model/TextPropertyManager');
 var insertText = require('../model/transform/insertText');
 var deleteSelection = require('../model/transform/deleteSelection');
 var copySelection = require('../model/transform/copySelection');
 var Component = require('./Component');
+var TextProperty = require('./TextPropertyComponent');
 var $$ = Component.$$;
 
 /**
- * FormEditor
+ * TextPropertyEditor
  *
- * @class FormEditor
- * @memberof module:ui/surface
- * @extends module:ui/surface.Surface
+ * @memberof module:ui
+ * @extends module:ui/Surface
  */
-function FormEditor() {
+function TextPropertyEditor() {
   Surface.apply(this, arguments);
   var doc = this.getDocument();
   this.textPropertyManager = new TextPropertyManager(doc);
 }
 
-FormEditor.Prototype = function() {
+TextPropertyEditor.Prototype = function() {
 
   this.dispose = function() {
     Surface.prototype.dispose.call(this);
@@ -34,30 +33,27 @@ FormEditor.Prototype = function() {
   };
 
   this.render = function() {
-    var doc = this.getDocument();
-    var containerNode = doc.get(this.props.containerId);
-
-    var el = $$("div")
-      .addClass("container-node " + containerNode.id)
+    var el = $$(this.props.tagName || 'div')
+      .addClass("sc-text-property-editor")
       .attr({
-        spellCheck: false,
-        "data-id": containerNode.id,
-        "contenteditable": true
-      });
-
-    // node components
-    _.each(containerNode.nodes, function(nodeId) {
-      el.append(this._renderNode(nodeId));
-    }, this);
-
+        spellcheck: false,
+        contenteditable: true
+      })
+      .append(
+        $$(TextProperty, {
+          tagName: "div",
+          path: this.props.path
+        })
+      );
     return el;
   };
 
   /* Editing behavior */
 
   // Selects the current property.
-  this.selectAll = function(doc, selection) {
-    var sel = selection;
+  this.selectAll = function() {
+    var doc = this.getDocument();
+    var sel = this.getSelection();
     if (sel.isNull()) return;
     if (sel.isPropertySelection()) {
       var path = sel.start.path;
@@ -108,5 +104,5 @@ FormEditor.Prototype = function() {
   };
 };
 
-oo.inherit(FormEditor, Surface);
-module.exports = FormEditor;
+oo.inherit(TextPropertyEditor, Surface);
+module.exports = TextPropertyEditor;

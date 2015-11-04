@@ -13,11 +13,17 @@ function TextPropertyComponent() {
 TextPropertyComponent.Prototype = function() {
 
   this.initialize = function() {
-    this.getTextPropertyManager().registerProperty(this);
+    // Only register Property when inside a surface context
+    if (this.getSurface()) {
+      this.getTextPropertyManager().registerProperty(this);  
+    }
   };
 
   this.dispose = function() {
-    this.getTextPropertyManager().unregisterProperty(this);
+    // Only register Property when inside a surface context
+    if (this.getSurface()) {
+      this.getTextPropertyManager().unregisterProperty(this);  
+    }
   };
 
   this.getInitialState = function() {

@@ -120,6 +120,15 @@
         &:hover {
           @include dark-fill(0.05);
         }
+
+        &.sm-disabled {
+          opacity: 0.2;
+          cursor: default;
+
+          button:hover {
+            background: none; 
+          }
+        }
       }
     }
 
