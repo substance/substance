@@ -6,7 +6,7 @@ var $$ = Component.$$;
 var SurfaceTool = require('../../ui/SurfaceTool');
 var _ = require('../../util/helpers');
 
-/**
+/*
  * Abstract class for text types
  *
  * Implements the SurfaceTool API.

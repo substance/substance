@@ -11,7 +11,7 @@ var VirtualTextNode;
 var RawHtml;
 var _htmlParams;
 
-/**
+/*
  * A light-weight component implementation inspired by React and Ember.
  * In contrast to the large frameworks it does much less things automagically
  * in favour of a simple and synchronous life-cyle.

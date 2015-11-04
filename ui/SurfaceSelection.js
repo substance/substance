@@ -7,7 +7,7 @@ var Document = require('../model/Document');
 var Range = require('../model/Range');
 var Coordinate = require('../model/Coordinate');
 
-/**
+/*
  * A class that maps DOM selections to model selections.
  *
  * There are some difficulties with mapping model selections:

@@ -3,7 +3,7 @@
 var oo = require('../util/oo');
 var Tool = require('./Tool');
 
-/**
+/*
  * Abstract class for tools tools that interact with a document. E.g. UndoTool or RedoTool.
  *
  * Requires a Controller context.
@@ -20,7 +20,7 @@ function ControllerTool() {
 
 ControllerTool.Prototype = function() {
 
-  /**
+  /*
    * Get document instance
    *
    * @method getDocument

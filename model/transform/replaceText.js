@@ -5,7 +5,7 @@ var _ = require('../../util/helpers');
 var deleteSelection = require('./deleteSelection');
 var updateAnnotations = require('./updateAnnotations');
 
-/**
+/*
  * TODO: there is a use-case where this implementation does not suffice:
  * When the text of an annotation is selected fully, instead of deleting
  * the text and the annotation, the annotation should be preserved and adapted

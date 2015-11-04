@@ -2,12 +2,11 @@
 
 var _ = require('./helpers');
 
-/**
+/*
  * Helpers for oo programming.
  *
  * Inspired by VisualEditor's oo module.
  *
- * @module util/oo
  */
 var oo = {};
 
@@ -97,7 +96,7 @@ var _initClass = function(clazz) {
   clazz.static = clazz.static || {};
 };
 
-/**
+/*
  * Initialize a class.
  *
  * @method initClass
@@ -146,7 +145,7 @@ _inherit =  function(clazz, parentClazz) {
   }
 };
 
-/**
+/*
  * Inherit from a parent class.
  *
  * @method inherit
@@ -175,7 +174,7 @@ oo.inherit =  function(clazz, parentClazz) {
   }
 };
 
-/**
+/*
  * @method mixin
  * @instance
  * @param clazz {Constructor} class constructor

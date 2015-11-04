@@ -3,14 +3,12 @@
 var oo = require('./oo');
 var Registry = require('./Registry');
 
-/**
- * Factory
- * -------
+/*
  * Simple factory implementation.
  *
  * @class Factory
  * @extends Registry
- * @memberof module:Basics
+ * @memberof module:util
  */
 function Factory() {
   Factory.super.call(this);

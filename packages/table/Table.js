@@ -46,7 +46,7 @@ var Table = Node.extend(ParentNodeMixin.prototype, {
     return this.matrix;
   },
 
-  /**
+  /*
    * Provides a cell iterator that allows convenient traversal regardless of
    * the structure with respect to sections.
    *
@@ -56,8 +56,6 @@ var Table = Node.extend(ParentNodeMixin.prototype, {
     return new Table.CellIterator(this);
   },
 
-  /**
-   */
   getSize: function ( dimension ) {
     var dim = this.matrix.getSize();
     if ( dimension === 'row' ) {
@@ -139,7 +137,7 @@ Object.defineProperties(Table.prototype, {
   }
 });
 
-/**
+/*
  * A helper class to iterate over the cells of a table node.
  *
  * It provides a unified interface to iterate cells in presence of table sections,

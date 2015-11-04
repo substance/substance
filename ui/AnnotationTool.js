@@ -3,7 +3,7 @@
 var oo = require('../util/oo');
 var SurfaceTool = require('./SurfaceTool');
 
-/**
+/*
  * Abstract class for annotation tools like StrongTool, EmphasisTool, LinkTool.
  *
  * @class

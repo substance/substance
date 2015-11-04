@@ -2,7 +2,7 @@
 
 var oo = require('../util/oo');
 
-/**
+/*
  * Mix-in for parent nodes.
  *
  * ParentNodes are nodes which have children nodes,
@@ -29,7 +29,6 @@ ParentNodeMixin.Prototype = function() {
   this.getChildCount = function() {
     return this[this._childrenProperty].length;
   };
-
 };
 
 oo.initClass(ParentNodeMixin);

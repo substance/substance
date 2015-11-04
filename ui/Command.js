@@ -2,7 +2,7 @@
 
 var oo = require('../util/oo');
 
-/**
+/*
  * Abstract interface for commands.
  *
  * @class

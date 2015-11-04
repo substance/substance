@@ -7,7 +7,7 @@ var ObjectOperation = require('./ObjectOperation');
 var ArrayOperation = require('./ArrayOperation');
 var TextOperation = require('./TextOperation');
 
-/**
+/*
  * Incremental data storage implemention.
  *
  * @class IncrementalData
