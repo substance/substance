@@ -2,20 +2,7 @@
 
 Substance is a JavaScript library for web-based content editing. It provides building blocks for realizing custom text editors and web-based publishing systems.
 
-Demos:
-
-- **[Prose Editor](http://substance.io/demos/prose-editor)** - A minimal rich text editor
-- **[Notepad](http://substance.io/demos/notepad)** - A custom note editor
-
-In the wild:
-
-- **[Lens Writer](http://substance.io/lens-writer)** - A scientific writer component
-- **[Archivist](https://medium.com/@_daniel/publish-interactive-historical-documents-with-archivist-7019f6408ee6)** - A platform for publishing interactive interview transcriptions
-- **[eLife Lens](http://lens.elifesciences.org/00778/)** - A novel scientific reader
-
-## Motivation
-
-Building a web editor is a hard task. Native browser support for text editing is [limited and not reliable](https://medium.com/medium-eng/why-contenteditable-is-terrible-122d8a40e480). There are many pitfalls such as handling selections, copy&paste or undo/redo. Substance was developed to solve the common problems of web-editing and provides API's for building custom editors.
+Check the [project website](http://substance.io) the [documentation](http://substance.io/docs) and the [official demos](http://substance.io/demos).
 
 ## Features
 
@@ -58,8 +45,6 @@ Link                                                                        | âœ
 Subscript                                                                   | Beta 2
 Superscript                                                                 | Beta 2
 Comment                                                                     | Beta 3
-
-
 
 
 ## Development
