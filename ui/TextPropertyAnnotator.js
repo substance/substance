@@ -32,10 +32,6 @@ TextPropertyAnnotator.Prototype = function() {
   this.render = function() {
     var el = $$(this.props.tagName || 'div')
       .addClass("sc-text-property-annotator")
-      .attr({
-        spellcheck: false,
-        contenteditable: true
-      })
       .append(
         $$(TextProperty, {
           tagName: "div",

@@ -362,10 +362,10 @@ Surface.Prototype = function() {
     // Ctrl+A: select all
     var handled = false;
     if ( (e.ctrlKey||e.metaKey) && e.keyCode === 65 ) {
-      // this.executeCommand('selectAll');
-      
-      console.log('TODO: selectAll behaves funny, needs to be verified');
-      this.selectAll();
+      var newSelection = this.selectAll();
+      if (newSelection) {
+        this.setSelection(newSelection);  
+      }
       handled = true;
     }
     // Undo/Redo: cmd+z, cmd+shift+z
