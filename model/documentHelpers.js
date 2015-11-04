@@ -110,15 +110,15 @@ documentHelpers.getContainerAnnotationsForSelection = function(doc, sel, contain
 */
 documentHelpers.getAnnotationsForSelection = function(doc, sel, annotationType, containerId) {
   var annos;
-  var isContainerAnno = Helpers.isContainerAnnotation(doc, annotationType);
+  var isContainerAnno = documentHelpers.isContainerAnnotation(doc, annotationType);
 
   if (isContainerAnno) {
     var container = doc.get(containerId);
-    annos = Helpers.getContainerAnnotationsForSelection(doc, sel, container, {
+    annos = documentHelpers.getContainerAnnotationsForSelection(doc, sel, container, {
       type: annotationType
     });
   } else {
-    annos = Helpers.getPropertyAnnotationsForSelection(doc, sel, { type: annotationType });
+    annos = documentHelpers.getPropertyAnnotationsForSelection(doc, sel, { type: annotationType });
   }
   return annos;
 };
