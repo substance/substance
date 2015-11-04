@@ -2,7 +2,7 @@
 
 Substance is a JavaScript library for web-based content editing. It provides building blocks for realizing custom text editors and web-based publishing systems.
 
-Check the [project website](http://substance.io) the [documentation](http://substance.io/docs) and the [official demos](http://substance.io/demos).
+Check the [project website](http://substance.io), the [documentation](http://substance.io/docs) and the [demos](http://substance.io/demos).
 
 ## Features
 
@@ -44,6 +44,7 @@ Emphasis                                                                    | âœ
 Link                                                                        | âœ“
 Subscript                                                                   | Beta 2
 Superscript                                                                 | Beta 2
+Code                                                                        | Beta 2
 Comment                                                                     | Beta 3
 
 
@@ -72,7 +73,6 @@ $ npm run coverage
 ```
 
 The report is stored in the `coverage` folder.
-
 
 ## Roadmap
 
