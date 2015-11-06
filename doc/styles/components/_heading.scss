@@ -1,0 +1,32 @@
+  .sc-heading {
+    font-size: 18px;
+    position: relative;
+
+    .se-name {
+      font-weight: bold;
+    }
+
+    .se-node-type {
+      position: absolute;
+      font-size: 13px;
+      top: 0px;
+      right: 0px;
+      
+      color: #888;
+      // text-transform: uppercase;
+      font-weight: bold;
+      padding: 0px 10px;
+
+      &.function {
+        color: darkblue;
+      }
+
+      &.class {
+        color: orange;
+      }
+
+      &.module {
+        color: grey;
+      }
+    }
+  }
