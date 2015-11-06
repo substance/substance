@@ -16,10 +16,12 @@ module.exports = function generate(config) {
     if (!node.isDefault) return;
 
     var nsId = path.dirname(node.id);
+    var name = path.basename(nsId);
     if (!namespaces[nsId]) {
       namespaces[nsId] = {
         type: "namespace",
         id: nsId,
+        name: name,
         description: nsDocs[nsId],
         members: []
       };
