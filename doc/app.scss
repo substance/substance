@@ -28,6 +28,9 @@
 @import './styles/components/_params';
 @import './styles/components/_method';
 
+// Code highlighting
+@import '../node_modules/highlight.js/styles/default';
+
 body {
   font-size: 15px;
 }
