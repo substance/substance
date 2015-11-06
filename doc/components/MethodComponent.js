@@ -42,8 +42,8 @@ MethodComponent.Prototype = function() {
       .addClass('sc-method')
       .attr("data-id", this.props.node.id)
       .append(
-        $$('div').addClass('se-description').html(this.props.node.description),
         this.renderSignature(),
+        $$('div').addClass('se-description').html(this.props.node.description),
         $$(Params, {params: this.props.node.params})
       );
   };
