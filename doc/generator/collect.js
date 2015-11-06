@@ -44,12 +44,14 @@ function collect(config) {
   // Methods and properties and added to their container
   // Each file is classified either as Class, Object, or Function depending on export tags.
   // If no export tags are found, the one entity is assumed as default export which has the same name as the file
+  var nodes = [];
   each(files, function(file) {
-    var nodes = processFile(file);
-    each(nodes, function(node) {
-      console.log('Exported node:', JSON.stringify(node, null, 2));
-    });
+    nodes = nodes.concat(processFile(file));
   });
+
+  // TODO: add namespace nodes derived from found nodes.
+
+  return nodes;
 }
 
 module.exports = collect;
