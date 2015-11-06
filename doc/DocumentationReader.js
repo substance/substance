@@ -17,7 +17,7 @@ var importDocumentation = require('./model/importDocumentation');
 var _loadDocument = function(cb) {
   _.request('GET', '/doc/documentation.json', null, function(err, rawDoc) {
     if (err) { console.error(err); cb(err); }
-    var doc = importDocumentation(rawDoc);  
+    var doc = importDocumentation(rawDoc);
     window.doc = doc;
     console.log('LE DOC', doc);
     cb(null, doc);
@@ -91,7 +91,7 @@ var DocumentationReader = DocumentationController.extend({
 });
 
 
-$(function() { 
+$(function() {
   var doc = new Documentation();
   window.doc = doc;
 
@@ -113,7 +113,7 @@ $(function() {
   // });
 
   // body.show('model');
-  
+
   // doc.create({
   //   id: 'model/Document',
   //   type: 'class',

@@ -28,13 +28,11 @@ function DocumentationController(parent, params) {
 
 DocumentationController.Prototype = function() {
 
-
   // Some things should go into controller
   this.getChildContext = function() {
     var childContext = Controller.prototype.getChildContext.call(this);
-
     return _.extend(childContext, {
-      i18n: I18n.instance
+      i18n: I18n.instance,
     });
   };
 
@@ -103,7 +101,7 @@ DocumentationController.Prototype = function() {
     var doc = this.getDocument();
 
     function getActiveNodes(state) {
-      if (state.contextId === 'editSource') { 
+      if (state.contextId === 'editSource') {
         return [ state.nodeId ];
       }
       return [];
@@ -113,7 +111,7 @@ DocumentationController.Prototype = function() {
     // HACK: updates the highlights when state
     // transition has finished
     setTimeout(function() {
-      doc.setHighlights(activeAnnos);  
+      doc.setHighlights(activeAnnos);
     }, 0);
   };
 

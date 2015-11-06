@@ -24,9 +24,6 @@ ClassComponent.Prototype = function() {
   };
 
   this.render = function() {
-
-    console.log('class', this.props.node.name, 'params', this.props.node.params);
-    // Constructor params
     return $$('div')
       .addClass('sc-class')
       .attr("data-id", this.props.node.id)
