@@ -15,10 +15,6 @@
 @import '../styles/components/_annotation_tool';
 
 // Nodes
-@import '../packages/heading/_heading';
-@import '../packages/blockquote/_blockquote';
-@import '../packages/codeblock/_codeblock';
-@import '../packages/list/_list';
 @import '../packages/link/_link';
 @import '../packages/embed/_embed';
 @import '../packages/table/_table';
@@ -26,8 +22,14 @@
 @import '../packages/strong/_strong';
 
 // Components
+@import './styles/components/_namespace';
+@import './styles/components/_class';
+@import './styles/components/_heading';
+@import './styles/components/_params';
 
-@import './styles/components/namespace';
+body {
+  font-size: 15px;
+}
 
 .sc-documentation-reader {
   position: absolute;
