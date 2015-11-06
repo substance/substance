@@ -11,9 +11,6 @@ var TableSelection = require('./TableSelection');
 var docHelpers = require('./documentHelpers');
 
 /*
- * AbstractDocument
- * ----------------
- *
  * @class AbstractDocument
  * @memberof module:Document
  */

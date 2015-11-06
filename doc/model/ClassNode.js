@@ -8,6 +8,7 @@ var ClassNode = Node.extend({
     name: 'string',
     members: ['array', 'id'],
     namespace: 'string',
+    params: ['array', 'object'],
     // methods: ['array', 'method'],
     // Can not be named 'properties because of name conflict'
     // props: ['array', 'property'],

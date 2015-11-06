@@ -24,6 +24,8 @@ ClassComponent.Prototype = function() {
   };
 
   this.render = function() {
+
+    console.log('class', this.props.node.name, 'params', this.props.node.params);
     // Constructor params
     return $$('div')
       .addClass('sc-class')
@@ -32,7 +34,7 @@ ClassComponent.Prototype = function() {
         $$(Heading, {node: this.props.node}),
         $$('div').addClass('se-description').html(this.props.node.description),
         this.renderSignature(),
-        // $$(Params, {params: this.props.node.params})
+        $$(Params, {params: this.props.node.params}),
         $$('div').addClass('se-members').append(this._renderMembers())
       );
   };
