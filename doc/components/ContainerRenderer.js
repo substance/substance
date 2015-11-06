@@ -3,7 +3,8 @@
 var oo = require('../../util/oo');
 var _ = require('../../util/helpers');
 var Component = require('../../ui/Component');
-var UnsupportedNode = require('../../ui/UnsupportedNode');
+var ContainerNodeMixin = require('../../ui/ContainerNodeMixin');
+
 var $$ = Component.$$;
 
 function ContainerRenderer() {
@@ -12,20 +13,7 @@ function ContainerRenderer() {
 
 ContainerRenderer.Prototype = function() {
 
-  this._renderNode = function(nodeId) {
-    var doc = this.context.doc;
-    var node = doc.get(nodeId);
-    var componentRegistry = this.context.componentRegistry;
-    var ComponentClass = componentRegistry.get(node.type);
-    if (!ComponentClass) {
-      console.error('Could not resolve a component for type: ' + node.type);
-      ComponentClass = UnsupportedNode;
-    }
-    return $$(ComponentClass, {
-      doc: doc,
-      node: node
-    });
-  };
+  _.extend(this, ContainerNodeMixin.prototype);
 
   this.render = function() {
     var doc = this.context.doc;

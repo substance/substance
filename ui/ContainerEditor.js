@@ -4,7 +4,6 @@ var oo = require('../util/oo');
 var _ = require('../util/helpers');
 var Component = require('./Component');
 var Surface = require('./Surface');
-var UnsupportedNode = require('./UnsupportedNode');
 var TextPropertyManager = require('../model/TextPropertyManager');
 var EditingBehavior = require('../model/EditingBehavior');
 var insertText = require('../model/transform/insertText');
@@ -15,6 +14,8 @@ var insertNode = require('../model/transform/insertNode');
 var switchTextType = require('../model/transform/switchTextType');
 var paste = require('../model/transform/paste');
 var $$ = Component.$$;
+
+var ContainerNodeMixin = require('./ContainerNodeMixin');
 
 /**
  * Represents a flow editor that manages a sequence of nodes in a container. Instantiate
@@ -60,6 +61,8 @@ function ContainerEditor() {
 }
 
 ContainerEditor.Prototype = function() {
+
+  _.extend(this, ContainerNodeMixin.prototype);
 
   this.dispose = function() {
     Surface.prototype.dispose.call(this);
@@ -110,21 +113,6 @@ ContainerEditor.Prototype = function() {
 
   this._removeNodeAt = function(pos) {
     this.removeAt(pos);
-  };
-
-  this._renderNode = function(nodeId) {
-    var doc = this.getDocument();
-    var node = doc.get(nodeId);
-    var componentRegistry = this.context.componentRegistry;
-    var ComponentClass = componentRegistry.get(node.type);
-    if (!ComponentClass) {
-      console.error('Could not resolve a component for type: ' + node.type);
-      ComponentClass = UnsupportedNode;
-    }
-    return $$(ComponentClass, {
-      doc: doc,
-      node: node
-    });
   };
 
   /* Editor API */
