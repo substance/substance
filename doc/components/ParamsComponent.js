@@ -11,12 +11,17 @@ function ParamsComponent() {
 ParamsComponent.Prototype = function() {
   this.render = function() {
     var params = this.props.params;
-    var paramsEl = $$('div').addClass('se-constructor-params');
+
+    var paramsEl = $$('div').addClass('sc-params');
+    paramsEl.append($$('div').addClass('se-label').append('Parameters'));
     params.forEach(function(param) {
+
       paramsEl.append(
-        $$('span').addClass('se-param-name').append(param.name),
-        $$('span').addClass('se-param-type').append(param.type),
-        $$('span').addClass('se-param-description').append(param.description)
+        $$('div').addClass('se-param').append(
+          $$('span').addClass('se-param-name').append(param.name),
+          $$('span').addClass('se-param-type').append(param.type),
+          $$('span').addClass('se-param-description').html(param.description)
+        )
       );
     });
     return paramsEl;

@@ -1,0 +1,26 @@
+.sc-params {
+  
+  .se-label {
+    font-size: 13px;
+    padding-bottom: 10px;
+  }
+
+  .se-param {
+    font-size: 13px;
+    font-family: Consolas, 'Liberation Mono', Menlo, Courier, monospace;
+    margin-left: 20px;
+
+    .se-param-name {
+      padding-right: 20px;
+    }
+
+    .se-param-type {
+      padding-right: 20px;
+      color: #999;
+    }
+
+    .se-param-description p {
+      display: inline;
+    }
+  }
+}
