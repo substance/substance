@@ -6,6 +6,8 @@ var ClassNode = Node.extend({
   name: 'class',
   properties: {
     name: 'string',
+    methods: ['array', 'method'],
+    properties: ['array', 'property'],
     description: 'string' // HTML
   }
 });

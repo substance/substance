@@ -6,12 +6,11 @@ var MethodNode = Node.extend({
   name: 'method',
   properties: {
     name: 'string',
-    params: ['array', 'object'],
+    static: 'boolean',
+    params: ['array', 'param'], // [{name: 'doc', type: 'model/Document', description: 'A Substance document instance'}]
     description: 'string', // HTML
     returns: 'object' // {type: 'model/Document', description: 'The updated document'}
   }
 });
-
-MethodNode.static.blockType = true;
 
 module.exports = MethodNode;
