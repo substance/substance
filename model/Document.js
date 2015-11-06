@@ -16,16 +16,13 @@ var ClipboardExporter = require('./ClipboardExporter');
 
 var __id__ = 0;
 
-/*
-  Represents a Substance Document. This is an abstract class that your custom
-  Article implementation can inherit from.
-  
-  @constructor
-  @class
-  @abstract
-  @memberof module:model
-*/
-
+/**
+ * Represents a Substance Document. This is an abstract class that your custom
+ * Article implementation can inherit from.
+ *
+ * @class
+ * @param {model/Schema} schema The document schema.
+ */
 function Document(schema) {
   AbstractDocument.call(this, schema);
   this.__id__ = __id__++;
@@ -121,7 +118,7 @@ Document.Prototype = function() {
     @param eventData object which will be used as payload for the emitted change event
     @param transformation a function(tx) that performs actions on the transaction document tx
     @memberof module:model.Document.prototype
-    
+
     @example
 
     doc.transaction({ selection: sel }, {'event-hack': true}, function(tx, args) {
