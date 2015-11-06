@@ -13,6 +13,7 @@ var $$ = Component.$$;
 /**
  * TextPropertyEditor
  *
+ * @class
  * @memberof module:ui
  * @extends module:ui/Surface
  */

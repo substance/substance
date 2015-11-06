@@ -1322,10 +1322,7 @@ Component.$$.prepareChildren = function(children) {
  *
  * Don't us it. You should use `Component.mount()` instead.
  *
- * @example
- *
- * ```
- * Component.mount($$(MyComponent), $('body'));
+ * @private
  * ```
  */
 Component._render = function(data, options) {
@@ -1379,6 +1376,11 @@ Component._render = function(data, options) {
  * @param {Component|VirtualComponent} component to be mounted
  * @param el a DOM or jQuery element
  * @return {Component} the mounted component
+ *
+ * @example
+ *
+ * ```
+ * Component.mount($$(MyComponent), $('body'));
  */
 Component.mount = function(component, el) {
 
