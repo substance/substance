@@ -22,6 +22,9 @@ function processFile(module) {
 
   // in the first pass we create nested structure containing all available information
   each(module.dox, function(entity) {
+    // skip private variables/methods
+    if (entity.isPrivate) return;
+
     if (entity.ctx) {
       entity.type = entity.ctx.type;
     }
