@@ -130,6 +130,7 @@ function convertEntities(_module, exportedEntities) {
 
   function convertModule(entity, node) {
     node.type = "module";
+    node.description = entity.description.full;
     node.members = [];
     each(entity.members, function(member) {
       var memberNode = {

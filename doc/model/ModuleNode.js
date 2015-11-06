@@ -6,6 +6,7 @@ var ModuleNode = Node.extend({
   name: 'module',
   properties: {
     name: 'string',
+    namespace: 'string',
     members: ['array', 'property'], // ['model/documentHelpers.getAllAnnotations']
     description: 'string', // HTML
   }

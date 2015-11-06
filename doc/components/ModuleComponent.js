@@ -2,28 +2,29 @@
 
 var oo = require('../../util/oo');
 var Component = require('../../ui/Component');
-var Heading = require('./HeadingComponent');
 var $$ = Component.$$;
 
+var DocumentationNodeComponent = require('./DocumentationNodeComponent');
+var Heading = require('./HeadingComponent');
+
 function ModuleComponent() {
-  Component.apply(this, arguments);
+  DocumentationNodeComponent.apply(this, arguments);
 }
 
 ModuleComponent.Prototype = function() {
 
   this.render = function() {
-    // Constructor params
     return $$('div')
       .addClass('sc-module')
       .attr("data-id", this.props.node.id)
       .append(
         $$(Heading, {node: this.props.node}),
-        $$('div').addClass('se-description').html(this.props.node.description)
-        // $$(Params, {params: this.props.node.params})
+        $$('div').addClass('se-description').html(this.props.node.description),
+        $$('div').addClass('se-members').append(this._renderMembers())
       );
   };
 };
 
-oo.inherit(ModuleComponent, Component);
+oo.inherit(ModuleComponent, DocumentationNodeComponent);
 
 module.exports = ModuleComponent;
