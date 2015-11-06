@@ -47,7 +47,7 @@ function collect(config) {
   each(files, function(file) {
     var nodes = processFile(file);
     each(nodes, function(node) {
-      console.log('Exported node:', node.type, node.id);
+      console.log('Exported node:', JSON.stringify(node, null, 2));
     });
   });
 }

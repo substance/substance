@@ -112,6 +112,9 @@ function convertEntities(module, exportedEntities) {
     var node = {
       id: module.id + "." + entity.ctx.name
     };
+    if (exportedEntities.length === 1) {
+      node.id = module.id;
+    }
     nodes.push(node);
     if (entity.type === "function") {
       convertFunction(entity, node);
@@ -126,10 +129,6 @@ function convertEntities(module, exportedEntities) {
       return;
     }
   });
-
-  if (exportedEntities.length === 1) {
-    nodes[0].id = module.id;
-  }
 
   return nodes;
 }
