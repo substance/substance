@@ -47,7 +47,9 @@ var DocumentationReader = DocumentationController.extend({
       },
       panelOrder: ['toc'],
       containerId: 'body',
-      isEditable: false
+      isEditable: false,
+      skipAbstractClasses: true,
+      skipPrivateMethods: true
     }
   },
 
