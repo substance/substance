@@ -1,10 +1,14 @@
 .sc-namespace {
-  > .se-name {
+
+  &> .se-name {
     font-size: 12px;
     color: #777;
     border-bottom: 1px solid #ddd;
     margin-bottom: 20px;
   }
 
-  padding: 20px 0px;
+  &> .se-description {
+    padding-bottom: 20px;
+  }
+
 }

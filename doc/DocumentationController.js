@@ -11,7 +11,7 @@ var $$ = Component.$$;
 // Thus, we configure I18n statically as opposed to loading
 // language files for the current locale
 var I18n = require('../ui/i18n');
-I18n.instance.load(require('../i18n/en'));
+I18n.instance.load(require('./i18n/en'));
 
 
 function DocumentationController(parent, params) {

@@ -14,7 +14,7 @@ var ClassNode = Node.extend({
     // props: ['array', 'property'],
     description: 'string', // HTML
     isAbstract: 'boolean',
-    'extends': 'id',
+    parentClass: 'id',
   }
 });
 

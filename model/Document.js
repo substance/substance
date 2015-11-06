@@ -317,6 +317,7 @@ Document.Prototype = function() {
    * Otherwise you need to take care of that yourself.
    *
    * Used internally e.g., by AbstractDocument.prototype.loadSeed()
+   * @private
    */
   this._setAutoAttach = function(val) {
     Document.super.prototype._setAutoAttach.call(this, val);

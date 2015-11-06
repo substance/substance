@@ -10,10 +10,10 @@ var Selection = require('../model/Selection');
 var Component = require('./Component');
 
 /**
- * Abstract interface for editing components. Dances with contenteditable, so you don't have to.
+ * Abstract interface for editing components.
+ * Dances with contenteditable, so you don't have to.
  *
  * @class
- * @memberof module:ui
  */
 function Surface() {
   Component.apply(this, arguments);
@@ -364,7 +364,7 @@ Surface.Prototype = function() {
     if ( (e.ctrlKey||e.metaKey) && e.keyCode === 65 ) {
       var newSelection = this.selectAll();
       if (newSelection) {
-        this.setSelection(newSelection);  
+        this.setSelection(newSelection);
       }
       handled = true;
     }
@@ -409,27 +409,27 @@ Surface.Prototype = function() {
    *
    * @example
    *
-   *   ```
-   *   surface.transaction(function(tx, args) {
-   *     var selection = args.selection;
-   *     ...
-   *     selection = tx.createSelection(...);
-   *     return {
-   *       selection: selection
-   *     };
-   *   });
+   * ```js
+   * surface.transaction(function(tx, args) {
+   *   var selection = args.selection;
+   *   ...
+   *   selection = tx.createSelection(...);
+   *   return {
+   *     selection: selection
+   *   };
+   * });
    *
-   *   surface.transaction(function(tx, args) {
-   *     ...
-   *     this.foo();
-   *     ...
-   *     return args;
-   *   }, this);
+   * surface.transaction(function(tx, args) {
+   *   ...
+   *   this.foo();
+   *   ...
+   *   return args;
+   * }, this);
    *
-   *   surface.transaction(beforeState, function(tx, args) {
-   *     ...
-   *   });
-   *   ```
+   * surface.transaction(beforeState, function(tx, args) {
+   *   ...
+   * });
+   * ```
    */
   this.transaction = function(transformation, ctx) {
     // `beforeState` is saved with the document operation and will be used

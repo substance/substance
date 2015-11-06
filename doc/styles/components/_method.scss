@@ -1,14 +1,37 @@
 .sc-method {
 
-  .se-signature {
-    // background: #2B303B;
-    // background: #eee;
-    // color: rgba(255,255,255,0.9);
-    padding: 10px 0px;;
-    font-size: 13px;
+  &> .se-signature {
+    font-size: 16px;
+    font-weight: bold;
     font-family: Consolas, 'Liberation Mono', Menlo, Courier, monospace;
-    margin-bottom: 10px;    
+
+    padding-bottom: 5px;
+    border-bottom: solid 1px #eee;
+    margin-bottom: 10px;
+
+    .se-context {
+      color: #333;
+      font-weight: normal;
+    }
   }
 
+  &> .sc-params {
+    // background: #eee;
+    // padding: 10px;
+  }
+
+  .se-inherited-from {
+    font-size: 10px;
+
+    .se-label {
+      margin-right: 5px;
+    }
+  }
+
+  .se-description {
+    margin-top: 10px;
+  }
+
+  padding-top: 10px;
   margin-bottom: 20px;
 }
