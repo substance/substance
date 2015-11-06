@@ -14,7 +14,7 @@ var _supportedTypes = {
  * Either entities are exported explicitly using an '@export' tag,
  * or implicitly when their name equals the file name as it is the case for most of our classes or functions (e.g. transforms).
  */
-function processFile(module) {
+function processFile(_module) {
 
   var entities = {};
   var currentClass = null;
@@ -24,6 +24,7 @@ function processFile(module) {
   function prepareEntity(entity) {
     if (entity.ctx) {
       entity.type = entity.ctx.type;
+      entity.name = entity.ctx.name;
     }
     each(entity.tags, function(tag) {
       if (tag.type === "export") {
@@ -41,7 +42,7 @@ function processFile(module) {
   }
 
   // in the first pass we create nested structure containing all available information
-  each(module.dox, function(entity) {
+  each(_module.dox, function(entity) {
     // skip private variables/methods
     if (entity.isPrivate) return;
 
@@ -67,7 +68,7 @@ function processFile(module) {
     }
     // the main entity of a module is that one which has the same name as the entry
     // e.g. the class 'Component' in file 'Component.js' would be assumed to be exported
-    if (entity.ctx && !entity.ctx.receiver && entity.ctx.name === module.name) {
+    if (entity.ctx && !entity.ctx.receiver && entity.ctx.name === _module.name) {
       mainEntity = entity;
     }
 
@@ -89,17 +90,19 @@ function processFile(module) {
     mainEntity.isDefault = true;
   }
 
-  return convertEntities(module, exported);
+  return convertEntities(_module, exported);
 }
 
-function convertEntities(module, exportedEntities) {
+function convertEntities(_module, exportedEntities) {
   var nodes = [];
 
   function convertClass(entity, node) {
     node.type = "class";
     node.members = [];
     each(entity.members, function(member) {
-      var memberNode = {};
+      var memberNode = {
+        name: member.name
+      };
       if (member.isStatic) {
         memberNode.id = node.id + "." + member.ctx.name;
         memberNode['static'] = true;
@@ -125,9 +128,10 @@ function convertEntities(module, exportedEntities) {
     node.type = "module";
     node.members = [];
     each(entity.members, function(member) {
-      var memberNode = {};
-      memberNode.id = node.id + "." + member.ctx.name;
-      memberNode['static'] = true;
+      var memberNode = {
+        id: node.id + "." + member.name,
+        name: member.name
+      };
       if (member.type === 'method') {
         convertMethod(member, memberNode);
       } else if (member.type === "property") {
@@ -179,11 +183,15 @@ function convertEntities(module, exportedEntities) {
 
   each(exportedEntities, function(entity) {
     var node = {
-      id: module.id + "." + entity.ctx.name,
+      id: _module.id + "." + entity.name,
       isDefault: entity.isDefault,
+      name: entity.name
     };
+    if (entity.isDefault) {
+      node.namespace = _module.folder;
+    }
     if (exportedEntities.length === 1) {
-      node.id = module.id;
+      node.id = _module.id;
     }
     nodes.push(node);
     if (entity.type === "function") {

@@ -3,8 +3,8 @@ var config = require('../config.json');
 var generate = require('../generator/generate');
 var each = require('lodash/collection/each');
 
-var documentation = generate(config);
+var nodes = generate(config);
 
-each(documentation.getNodes(), function(node) {
+each(nodes, function(node) {
   console.log(JSON.stringify(node, null, 2));
 });
