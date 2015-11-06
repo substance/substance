@@ -1,0 +1,6 @@
+#!/env/node
+var config = require('../config.json');
+var generate = require('../generator/generate');
+
+generate(config);
+
