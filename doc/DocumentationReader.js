@@ -139,7 +139,8 @@ $(function() {
     id: 'ui',
     type: 'namespace',
     name: 'ui',
-    description: 'UI Components for making up your <strong>editor</strong>.'
+    description: 'UI Components for making up your <strong>editor</strong>.',
+    members: []
   });
   body.show('ui');
 

@@ -25,6 +25,9 @@
 @import '../packages/emphasis/_emphasis';
 @import '../packages/strong/_strong';
 
+// Components
+
+@import './styles/components/namespace';
 
 .sc-documentation-reader {
   position: absolute;

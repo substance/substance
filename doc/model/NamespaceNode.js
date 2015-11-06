@@ -10,8 +10,8 @@ var Node = require('../../model/DocumentNode');
 
 var NamespaceNode = Node.extend({
   name: 'namespace',
-  members: ['array', 'id'],
   properties: {
+    members: ['array', 'id'],
     name: 'string',
     description: 'string' // HTML
   }
