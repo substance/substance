@@ -95,7 +95,25 @@ function convertEntities(module, exportedEntities) {
   function convertFunction(entity, node) {
     node.type = "function";
     node.description = entity.description.full;
-    node.params = [];
+    node['params'] = [];
+
+    each(entity.tags, function(tag) {
+      if (tag.type === "return") {
+        // TODO: in dox a type can have multiple entries
+        var returnVal = {
+          type: tag.types.join('|'),
+          description: tag.description
+        };
+        node['return'] = returnVal;
+      } else if (tag.type == "param") {
+        var param = {
+          type: tag.types.join('|'),
+          name: tag.name,
+          description: tag.description
+        };
+        node.params.push(param);
+      }
+    });
   }
 
   function convertMethod(entity, node) {
