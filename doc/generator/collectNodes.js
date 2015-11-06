@@ -5,6 +5,22 @@ var dox = require('dox');
 var each = require('lodash/collection/each');
 var processFile = require('./processFile');
 
+// HACK: overriding the type parser entry point
+// to workaround a syntax error thrown by jsdoctypeparser for
+// when using paths in type strings `{model/Document}` without `module:` prefix.
+var _parseTagTypes = dox.parseTagTypes;
+dox.parseTagTypes = function(str, tag) {
+  if (/\{\w+(\/\w+)\}/.exec(str)) {
+    str = str.replace('/', '_SEP_');
+    var types = _parseTagTypes(str, tag);
+    for (var i = 0; i < types.length; i++) {
+      types[i] = types[i].replace('_SEP_', '/');
+    }
+  } else {
+    return _parseTagTypes(str, tag);
+  }
+};
+
 function collectNodes(config) {
 
   // collect all js files
