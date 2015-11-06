@@ -5,7 +5,7 @@ var dox = require('dox');
 var each = require('lodash/collection/each');
 var processFile = require('./processFile');
 
-function collect(config) {
+function collectNodes(config) {
 
   // collect all js files
   var jsFiles = [];
@@ -17,7 +17,7 @@ function collect(config) {
   })
 
   // EXPERIMENTAL
-  // patterns = ["ui/Controller.js"];
+  // patterns = ["util/oo.js"];
 
   each(patterns, function(pattern) {
     jsFiles = jsFiles.concat(glob.sync(pattern));
@@ -54,4 +54,4 @@ function collect(config) {
   return nodes;
 }
 
-module.exports = collect;
+module.exports = collectNodes;

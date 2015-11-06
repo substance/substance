@@ -7,6 +7,7 @@ var _ = require('./helpers');
  *
  * Inspired by VisualEditor's oo module.
  *
+ * @module
  */
 var oo = {};
 

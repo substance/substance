@@ -1,6 +1,14 @@
 /* jshint latedef: false */
 var each = require('lodash/collection/each');
 
+var _supportedTypes = {
+  "class": true,
+  "module": true,
+  "function": true,
+  "method": true,
+  "property": true,
+};
+
 /**
  * A 'module' will be classified either as Object (classical module), Class, or Function.
  * Either entities are exported explicitly using an '@export' tag,
@@ -13,11 +21,23 @@ function processFile(module) {
   var exported = [];
   var mainEntity = null;
 
-  function isExported(entity) {
-    for (var i = 0; i < entity.tags.length; i++) {
-      if (entity.tags[i].type === "export") return true;
+  function prepareEntity(entity) {
+    if (entity.ctx) {
+      entity.type = entity.ctx.type;
     }
-    return false;
+    each(entity.tags, function(tag) {
+      if (tag.type === "export") {
+        entity.isExported = true;
+      } else if (tag.type === "class") {
+        entity.isClass = true;
+        entity.type = "class";
+        entity.members = [];
+      } else if (tag.type === "module") {
+        entity.isModule = true;
+        entity.type = "module";
+        entity.members = [];
+      }
+    });
   }
 
   // in the first pass we create nested structure containing all available information
@@ -25,13 +45,22 @@ function processFile(module) {
     // skip private variables/methods
     if (entity.isPrivate) return;
 
-    if (entity.ctx) {
-      entity.type = entity.ctx.type;
+    prepareEntity(entity);
+
+    // only let through supported entities
+    if (!_supportedTypes[entity.type]) {
+      return;
     }
-    if (isExported(entity)) {
+
+    if (entity.isClass) {
+      currentClass = entity;
+    }
+
+    if (entity.isExported) {
       exported.push(entity);
     }
-    // entitys with no receiving context are on module scope and considered as candidates for export
+
+    // entities with no receiving context are on module scope and considered as candidates for export
     // Attention: this assumption is not necessarily correct but in our world we don't do such
     if (entity.ctx && !entity.ctx.receiver) {
       entities[entity.ctx.name] = entity;
@@ -41,14 +70,9 @@ function processFile(module) {
     if (entity.ctx && !entity.ctx.receiver && entity.ctx.name === module.name) {
       mainEntity = entity;
     }
-    // classes
-    if (entity.isClass) {
-      entity.type = 'class';
-      entity.members = [];
-      currentClass = entity;
-    }
+
     if (entity.ctx && entity.ctx.receiver) {
-      if (entities[entity.ctx.receiver] && entities[entity.ctx.receiver].type === 'class') {
+      if (entities[entity.ctx.receiver] && entities[entity.ctx.receiver].members) {
         entities[entity.ctx.receiver].members.push(entity);
         entity.isStatic = true;
       } else if (entity.ctx.receiver === "this") {
@@ -57,10 +81,12 @@ function processFile(module) {
         }
       }
     }
+
   });
 
   if (exported.length === 0 && mainEntity) {
     exported.push(mainEntity);
+    mainEntity.isDefault = true;
   }
 
   return convertEntities(module, exported);
@@ -69,16 +95,16 @@ function processFile(module) {
 function convertEntities(module, exportedEntities) {
   var nodes = [];
 
-  function convertClass(entity, classNode) {
-    classNode.type = "class";
-    classNode.properties = [];
+  function convertClass(entity, node) {
+    node.type = "class";
+    node.members = [];
     each(entity.members, function(member) {
       var memberNode = {};
-      if (entity.isStatic) {
-        memberNode.id = classNode.id + "." + member.ctx.name;
+      if (member.isStatic) {
+        memberNode.id = node.id + "." + member.ctx.name;
         memberNode['static'] = true;
       } else {
-        memberNode.id = classNode.id + "#" + member.ctx.name;
+        memberNode.id = node.id + "#" + member.ctx.name;
       }
       if (member.type === 'method') {
         convertMethod(member, memberNode);
@@ -91,7 +117,29 @@ function convertEntities(module, exportedEntities) {
         return;
       }
       nodes.push(memberNode);
-      classNode.properties.push(memberNode.id);
+      node.members.push(memberNode.id);
+    });
+  }
+
+  function convertModule(entity, node) {
+    node.type = "module";
+    node.members = [];
+    each(entity.members, function(member) {
+      var memberNode = {};
+      memberNode.id = node.id + "." + member.ctx.name;
+      memberNode['static'] = true;
+      if (member.type === 'method') {
+        convertMethod(member, memberNode);
+      } else if (member.type === "property") {
+        convertProperty(member, memberNode);
+      } else if (member.type === "class") {
+        convertClass(member, memberNode);
+      } else {
+        console.error('Not implemented yet: converter for class member', member.ctx);
+        return;
+      }
+      nodes.push(memberNode);
+      node.members.push(memberNode.id);
     });
   }
 
@@ -107,7 +155,7 @@ function convertEntities(module, exportedEntities) {
           type: tag.types.join('|'),
           description: tag.description
         };
-        node['return'] = returnVal;
+        node['returns'] = returnVal;
       } else if (tag.type == "param") {
         var param = {
           type: tag.types.join('|'),
@@ -131,7 +179,8 @@ function convertEntities(module, exportedEntities) {
 
   each(exportedEntities, function(entity) {
     var node = {
-      id: module.id + "." + entity.ctx.name
+      id: module.id + "." + entity.ctx.name,
+      isDefault: entity.isDefault,
     };
     if (exportedEntities.length === 1) {
       node.id = module.id;
@@ -145,6 +194,8 @@ function convertEntities(module, exportedEntities) {
       node['static'] = true;
     } else if (entity.type === "class") {
       convertClass(entity, node);
+    } else if (entity.type === "module") {
+      convertModule(entity, node);
     } else {
       console.error('FIXME: convert to node', entity.ctx);
       return;
