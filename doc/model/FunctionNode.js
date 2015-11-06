@@ -6,6 +6,7 @@ var FunctionNode = Node.extend({
   name: 'function',
   properties: {
     name: 'string',
+    namespace: 'string',
     static: 'boolean',
     params: ['array', 'object'], // [{name: 'doc', type: 'model/Document', description: 'A Substance document instance'}]
     description: 'string', // HTML String

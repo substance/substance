@@ -97,8 +97,12 @@ function convertEntities(_module, exportedEntities) {
   var nodes = [];
 
   function convertClass(entity, node) {
+    // reuse the function converter to extract ctor arguments
+    convertFunction(entity, node);
+
     node.type = "class";
     node.members = [];
+
     each(entity.members, function(member) {
       var memberNode = {
         name: member.name
