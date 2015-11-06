@@ -3,7 +3,7 @@ var Documentation = require('./model/Documentation');
 var ContentPanel = require("../ui/ContentPanel");
 var StatusBar = require("../ui/StatusBar");
 var ContextToggles = require('../ui/ContextToggles');
-// var ContainerAnnotator = require('../ui/ContainerAnnotator');
+var ContainerRenderer = require('./components/ContainerRenderer');
 
 var Component = require('../ui/Component');
 var $$ = Component.$$;
@@ -21,6 +21,13 @@ var DocumentationReader = DocumentationController.extend({
       controller: {
         // Component registry
         components: {
+          'class': require('./components/ClassComponent'),
+          'namespace': require('./components/NamespaceComponent'),
+          'function': require('./components/FunctionComponent'),
+          'method': require('./components/MethodComponent'),
+          'module': require('./components/ModuleComponent'),
+          'component': require('./components/ComponentComponent'),
+          'property': require('./components/PropertyComponent'),
           'toc': require('../ui/TocPanel')
         }
       },
@@ -41,15 +48,11 @@ var DocumentationReader = DocumentationController.extend({
         $$('div').ref('main').addClass("se-main").append(
           $$(ContentPanel).append(
             // The main container
-            $$("div").ref('main').addClass('document-content').append(
-              'HELLO SUBSTANCE DOCS'
-              // $$(ContainerAnnotator, {
-              //   name: 'main',
-              //   containerId: 'main',
-              //   editable: false,
-              //   commands: config.main.commands
-              // }).ref('mainAnnotator')
-            )
+            // $$("div").ref('main').addClass('document-content').append(
+            $$(ContainerRenderer, {
+              containerId: config.containerId
+            }).ref('mainAnnotator')
+            // )
           ).ref('content')
         ),
         // Resource (right column)
@@ -77,20 +80,24 @@ $(function() {
   var doc = new Documentation();
   window.doc = doc;
 
+  var body = doc.get('body');
+
   // Initial data seed
   doc.create({
     id: 'model',
     type: 'namespace',
     name: 'model',
+    members: ['model/Document', 'model/documentHelpers'],
     description: 'The model module provides utilities to define custom article models and manipulate them.'
   });
+
+  body.show('model');
   
   doc.create({
     id: 'model/Document',
     type: 'class',
     name: 'Document',
-    methods: ['model/Document#create'],
-    props: ['model/Document#stage'],
+    members: ['model/Document#create', 'model/Document#stage'],
     description: 'Abstract Substance Document class.'
   });
 
@@ -98,6 +105,7 @@ $(function() {
     id: 'model/Document#create',
     type: 'method',
     name: 'create',
+    params: [],
     description: 'Create a new node for the document'
   });
 
@@ -111,9 +119,9 @@ $(function() {
 
   doc.create({
     id: 'model/documentHelpers',
-    type: 'object',
+    type: 'module',
     name: 'documentHelpers',
-    properties: ['model/documentHelpers.isContainerAnnotation']
+    members: ['model/documentHelpers.isContainerAnnotation']
   });
 
   doc.create({
@@ -133,6 +141,7 @@ $(function() {
     name: 'ui',
     description: 'UI Components for making up your <strong>editor</strong>.'
   });
+  body.show('ui');
 
   console.log('Documentation instance', doc);
 

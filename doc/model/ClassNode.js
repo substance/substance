@@ -6,9 +6,10 @@ var ClassNode = Node.extend({
   name: 'class',
   properties: {
     name: 'string',
-    methods: ['array', 'method'],
+    members: ['array', 'id'],
+    // methods: ['array', 'method'],
     // Can not be named 'properties because of name conflict'
-    props: ['array', 'property'],
+    // props: ['array', 'property'],
     description: 'string' // HTML
   }
 });

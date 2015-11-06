@@ -6,7 +6,8 @@ var ComponentNode = Node.extend({
   name: 'component',
   properties: {
     name: 'string',
-    props: ['array', 'object'], // [{name: 'doc', type: 'model/Document', description: 'A Substance document instance'}]
+    members: ['array', 'id'],
+    // props: ['array', 'object'], // [{name: 'doc', type: 'model/Document', description: 'A Substance document instance'}]
     description: 'string' // HTML
   }
 });

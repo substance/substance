@@ -114,6 +114,7 @@ Controller.Prototype = function() {
   this.getChildContext = function() {
     return {
       config: this.getConfig(),
+      doc: this.props.doc,
       controller: this,
       componentRegistry: this.componentRegistry,
       toolManager: this.toolManager,

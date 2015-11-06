@@ -13,7 +13,7 @@ schema.addNodes([
   require('./PropertyNode'),
   require('./MetaNode'),
   require('./ComponentNode'),
-  require('./ObjectNode')
+  require('./ModuleNode')
 ]);
 
 var Documentation = function() {
