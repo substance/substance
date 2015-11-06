@@ -4,6 +4,8 @@ var glob = require('glob');
 var dox = require('dox');
 var each = require('lodash/collection/each');
 var processFile = require('./processFile');
+var markdown = require('marked');
+var highlightjs = require('highlight.js');
 
 // HACK: overriding the type parser entry point
 // to workaround a syntax error thrown by jsdoctypeparser for
@@ -20,6 +22,32 @@ dox.parseTagTypes = function(str, tag) {
     return _parseTagTypes(str, tag);
   }
 };
+
+
+var renderer = new markdown.Renderer();
+renderer.heading = function (text, level) {
+  return '<h' + level + '>' + text + '</h' + level + '>\n';
+};
+renderer.paragraph = function (text) {
+  return '<p>' + text + '</p>';
+};
+renderer.br = function () {
+  return '<br />';
+};
+
+dox.setMarkedOptions({
+  renderer: renderer,
+  gfm: true,
+  tables: true,
+  breaks: true,
+  pedantic: false,
+  sanitize: false,
+  smartLists: true,
+  smartypants: false,
+  highlight: function (code) {
+    return highlightjs.highlightAuto(code).value;
+  },
+});
 
 function collectNodes(config) {
 
