@@ -10,9 +10,11 @@ var ContainerSelection = require('./ContainerSelection');
 var TableSelection = require('./TableSelection');
 var docHelpers = require('./documentHelpers');
 
-/*
- * @class AbstractDocument
- * @memberof module:Document
+/**
+ * Abstract Document implementation.
+ *
+ * @class
+ * @abstract
  */
 function AbstractDocument(schema) {
   EventEmitter.call(this);
@@ -64,6 +66,8 @@ AbstractDocument.Prototype = function() {
    * Otherwise you need to take care of that yourself.
    *
    * Used internally e.g., by AbstractDocument.prototype.loadSeed()
+   *
+   * @private
    */
   this._setAutoAttach = function(val) {
     this.AUTO_ATTACH = val;
@@ -111,22 +115,43 @@ AbstractDocument.Prototype = function() {
     return this.schema;
   };
 
+  /**
+   * @see model.data.Data#get
+   * @skip
+   */
   this.get = function(path) {
     return this.data.get(path);
   };
 
+  /**
+   * @see model.data.Data#getNodes
+   * @skip
+   */
   this.getNodes = function() {
     return this.data.getNodes();
   };
 
+  /**
+   * @see model.data.Data#addIndex
+   * @skip
+   */
   this.addIndex = function(name, index) {
     return this.data.addIndex(name, index);
   };
 
+  /**
+   * @see model.data.Data#getIndex
+   * @skip
+   */
   this.getIndex = function(name) {
     return this.data.getIndex(name);
   };
 
+  /**
+   * @depricated We will drop support as this should be done in a more
+   *             controlled fashion using an importer.
+   * @skip
+   */
   this.loadSeed = function(seed) {
     // Attention: order of nodes may be 'invalid'
     // so that we should not attach the doc a created note
@@ -152,10 +177,18 @@ AbstractDocument.Prototype = function() {
     this.documentDidLoad();
   };
 
+  /**
+   * @see model/docHelpers.getTextForSelection
+   * @skip
+   */
   this.getTextForSelection = function(sel) {
     return docHelpers.getTextForSelection(this, sel);
   };
 
+  /**
+   * @depricated We should use a dedicated exported instead.
+   * @skip
+   */
   this.toJSON = function() {
     var nodes = {};
     _.each(this.getNodes(), function(node) {
@@ -187,7 +220,14 @@ AbstractDocument.Prototype = function() {
     throw new Error('Method is abstract.');
   };
 
+  /**
+   * Sets the text of a property together with annotations.
+   *
+   * @param {String[]} path Path to the text property.
+   */
   this.setText = function(path, text, annotations) {
+    // TODO: this should not be here, if really necessary it should go into
+    // document helpers.
     var idx;
     var oldAnnos = this.getIndex('annotations').get(path);
     // TODO: what to do with container annotations
@@ -205,7 +245,8 @@ AbstractDocument.Prototype = function() {
    * Every selection implementation provides its own
    * parameter format which is basically a JSON representation.
    *
-   * @param an object describing the selection.
+   * @param {model/Selection} sel An object describing the selection.
+   *
    * @example
    *   doc.createSelection({
    *     type: 'property',

@@ -37,16 +37,27 @@ function processFile(_module) {
         entity.isModule = true;
         entity.type = "module";
         entity.members = [];
+      } else if (tag.type === "abstract") {
+        entity.isAbstract = true;
+      } else if (tag.type === "extends") {
+        entity.extends = tag.string;
+      } else if (tag.type === "skip") {
+        entity.skip = true;
+      } else if (tag.type === "see") {
+        // TODO: for delegators it would make sense to show the documentation
+        // of the target
+        entity.see = tag.string;
       }
     });
   }
 
   // in the first pass we create nested structure containing all available information
   each(_module.dox, function(entity) {
-    // skip private variables/methods
-    if (entity.isPrivate) return;
-
     prepareEntity(entity);
+
+    if (entity.skip) {
+      return;
+    }
 
     // only let through supported entities
     if (!_supportedTypes[entity.type]) {
@@ -101,6 +112,7 @@ function convertEntities(_module, exportedEntities) {
     convertFunction(entity, node);
 
     node.type = "class";
+    node.isAbstract = entity.isAbstract;
     node.members = [];
 
     each(entity.members, function(member) {
@@ -109,7 +121,7 @@ function convertEntities(_module, exportedEntities) {
       };
       if (member.isStatic) {
         memberNode.id = node.id + "." + member.ctx.name;
-        memberNode['static'] = true;
+        memberNode.isStatic = true;
       } else {
         memberNode.id = node.id + "#" + member.ctx.name;
       }
@@ -183,6 +195,7 @@ function convertEntities(_module, exportedEntities) {
   function convertMethod(entity, node) {
     convertFunction(entity, node);
     node.type = "method";
+    node.isPrivate = entity.isPrivate;
   }
 
   function convertProperty(entity, node) {
@@ -205,10 +218,10 @@ function convertEntities(_module, exportedEntities) {
     nodes.push(node);
     if (entity.type === "function") {
       convertFunction(entity, node);
-      node['static'] = true;
+      node.isStatic = true;
     } else if (entity.type === "property") {
       convertProperty(entity, node);
-      node['static'] = true;
+      node.isStatic = true;
     } else if (entity.type === "class") {
       convertClass(entity, node);
     } else if (entity.type === "module") {

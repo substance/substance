@@ -6,9 +6,10 @@ var MethodNode = Node.extend({
   name: 'method',
   properties: {
     name: 'string',
-    static: 'boolean',
     params: ['array', 'param'], // [{name: 'doc', type: 'model/Document', description: 'A Substance document instance'}]
     description: 'string', // HTML
+    isStatic: 'boolean',
+    isPrivate: 'boolean',
     returns: 'object' // {type: 'model/Document', description: 'The updated document'}
   }
 });

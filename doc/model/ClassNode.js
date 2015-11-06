@@ -12,7 +12,9 @@ var ClassNode = Node.extend({
     // methods: ['array', 'method'],
     // Can not be named 'properties because of name conflict'
     // props: ['array', 'property'],
-    description: 'string' // HTML
+    description: 'string', // HTML
+    isAbstract: 'boolean',
+    'extends': 'id',
   }
 });
 
