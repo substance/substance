@@ -170,6 +170,10 @@ function convertEntities(_module, exportedEntities) {
           name: tag.name,
           description: tag.description
         };
+        if (tag.optional) {
+          param.name = param.name.replace(/[\[\]]/g, '');
+          param.optional = true;
+        }
         node.params.push(param);
       }
     });
