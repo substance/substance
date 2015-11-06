@@ -7,7 +7,8 @@ var ClassNode = Node.extend({
   properties: {
     name: 'string',
     methods: ['array', 'method'],
-    properties: ['array', 'property'],
+    // Can not be named 'properties because of name conflict'
+    props: ['array', 'property'],
     description: 'string' // HTML
   }
 });
@@ -15,3 +16,4 @@ var ClassNode = Node.extend({
 ClassNode.static.blockType = true;
 
 module.exports = ClassNode;
+

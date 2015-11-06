@@ -6,7 +6,7 @@ var PropertyNode = Node.extend({
   name: 'property',
   properties: {
     name: 'string',
-    type: 'string',
+    dataType: 'string',
     static: 'boolean',
     description: 'string', // HTML
   }

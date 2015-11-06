@@ -6,7 +6,7 @@ var ObjectNode = Node.extend({
   name: 'object',
   properties: {
     name: 'string',
-    properties: ['array', 'property'], // ['model/documentHelpers.getAllAnnotations']
+    props: ['array', 'property'], // ['model/documentHelpers.getAllAnnotations']
     description: 'string', // HTML
   }
 });

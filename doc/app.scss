@@ -1,0 +1,68 @@
+// Substance base styles
+@import '../styles/base/index';
+
+// UI Components used
+@import '../styles/components/_controller';
+@import '../styles/components/_surface';
+@import '../styles/components/_panel';
+@import '../styles/components/_content_panel';
+@import '../styles/components/_context_toggles';
+@import '../styles/components/_toc_panel';
+@import '../styles/components/_scrollbar';
+@import '../styles/components/_toc_panel';
+@import '../styles/components/_status_bar';
+@import '../styles/components/_text_property';
+@import '../styles/components/_annotation_tool';
+
+// Nodes
+@import '../packages/heading/_heading';
+@import '../packages/blockquote/_blockquote';
+@import '../packages/codeblock/_codeblock';
+@import '../packages/list/_list';
+@import '../packages/link/_link';
+@import '../packages/embed/_embed';
+@import '../packages/table/_table';
+@import '../packages/emphasis/_emphasis';
+@import '../packages/strong/_strong';
+
+
+.sc-documentation-reader {
+  position: absolute;
+  top: 0px;
+  left: 0px;
+  right: 0px;
+  bottom: 0px;
+
+  // Lens Layout
+  .se-workspace {
+    position: absolute;
+    left: 0px;
+    right: 0px;
+    overflow: hidden;
+    bottom: 25px;
+    top: 0px;
+
+    .se-main {
+      float: left;
+      height: 100%;
+      background: #fff;
+      position: relative;
+      width: 65%;
+      z-index: 30;
+
+      .content-panel-component {
+        top: 0px;
+      }
+    }
+
+    .se-resource {
+      position: relative;
+      float: right;
+      border-left: 1px solid #ddd;
+      height: 100%;
+      background-color: #fafafa;
+      box-shadow: inset 0 0 10px rgba(0,0,0,0.05);
+      width: 35%;
+    }
+  }
+}

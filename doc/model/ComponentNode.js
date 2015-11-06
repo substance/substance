@@ -3,7 +3,7 @@
 var Node = require('../../model/DocumentNode');
 
 var ComponentNode = Node.extend({
-  name: 'class',
+  name: 'component',
   properties: {
     name: 'string',
     props: ['array', 'object'], // [{name: 'doc', type: 'model/Document', description: 'A Substance document instance'}]
