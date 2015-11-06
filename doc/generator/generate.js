@@ -1,8 +1,8 @@
 var each = require('lodash/collection/each');
+var map = require('lodash/collection/map');
 var collectNodes = require('./collectNodes');
 var collectNamespaceDocs = require('./collectNamespaceDocs');
 var path = require('path');
-var Documentation = require('../model/Documentation');
 
 module.exports = function generate(config) {
 
@@ -21,21 +21,13 @@ module.exports = function generate(config) {
         type: "namespace",
         id: nsId,
         description: nsDocs[nsId],
-        items: []
+        members: []
       };
     }
-    namespaces[nsId].items.push(node.id);
+    namespaces[nsId].members.push(node.id);
   });
 
-  var documentation = new Documentation();
-  each(nodes, function(node) {
-    documentation.create(node);
-  });
-  var body = documentation.get('body');
-  each(namespaces, function(ns) {
-    documentation.create(ns);
-    body.show(ns.id);
-  });
 
-  return documentation;
+  var result = nodes.concat(map(namespaces));
+  return result;
 };
