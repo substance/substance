@@ -27,7 +27,8 @@
 
 // Components
 
-@import './styles/components/namespace';
+@import './styles/components/_namespace';
+@import './styles/components/_class';
 
 .sc-documentation-reader {
   position: absolute;
