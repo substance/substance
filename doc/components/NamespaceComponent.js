@@ -12,14 +12,13 @@ function NamespaceComponent() {
 NamespaceComponent.Prototype = function() {
 
   this.render = function() {
-    var members = this._renderMembers();
     return $$('div')
-      .addClass('sc-class')
+      .addClass('sc-namespace')
       .attr("data-id", this.props.node.id)
       .append(
-        $$('div').addClass('name').html(this.props.node.description),
-        $$('div').addClass('description').html(this.props.node.description),
-        $$('div').addClass('members').append(members)
+        $$('div').addClass('se-name').html(this.props.node.id),
+        $$('div').addClass('se-description').html(this.props.node.description),
+        $$('div').addClass('se-members').append(this._renderMembers())
       );
   };
 };
