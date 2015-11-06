@@ -7,6 +7,9 @@ var oo = require('../util/oo');
  *
  * ParentNodes are nodes which have children nodes,
  * such as List, Table, TableSection, TableRow.
+ *
+ * @class
+ * @mixin
  */
 function ParentNodeMixin(childrenProperty) {
   this._childrenProperty = childrenProperty;

@@ -21,6 +21,7 @@ var __id__ = 0;
  * Article implementation can inherit from.
  *
  * @class
+ * @extends model/AbstractDocument
  * @param {model/Schema} schema The document schema.
  */
 function Document(schema) {
