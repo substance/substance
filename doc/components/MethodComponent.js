@@ -1,11 +1,10 @@
 'use strict';
 
 var oo = require('../../util/oo');
-var Component = require('../../ui/Component');
-var Params = require('./ParamsComponent');
 var pluck = require('lodash/collection/pluck');
-
+var Component = require('../../ui/Component');
 var $$ = Component.$$;
+var Params = require('./ParamsComponent');
 
 function MethodComponent() {
   Component.apply(this, arguments);
@@ -15,8 +14,15 @@ MethodComponent.Prototype = function() {
 
   this.renderSignature = function() {
     var paramSig = pluck(this.props.node.params, 'name').join(', ');
-    var sig = [this.props.node.name, '(', paramSig, ')'];
+
+    var parentName = this.props.parentNode.name;
+    var sig = ['.', this.props.node.name, '(', paramSig, ')'];
+    if (!this.props.node.static) {
+      sig.unshift('.prototype');
+    }
+
     return $$('div').addClass('se-signature').append(
+      $$('span').addClass('se-parent-name').append(parentName),
       $$('span').append(sig)
     );
   };

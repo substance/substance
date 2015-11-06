@@ -13,17 +13,19 @@ ParamsComponent.Prototype = function() {
     var params = this.props.params;
 
     var paramsEl = $$('div').addClass('sc-params');
-    paramsEl.append($$('div').addClass('se-label').append('Parameters'));
-    params.forEach(function(param) {
 
-      paramsEl.append(
-        $$('div').addClass('se-param').append(
-          $$('span').addClass('se-param-name').append(param.name),
-          $$('span').addClass('se-param-type').append(param.type),
-          $$('span').addClass('se-param-description').html(param.description)
-        )
-      );
-    });
+    if (params.length > 0) {
+      paramsEl.append($$('div').addClass('se-label').append('Parameters'));
+      params.forEach(function(param) {
+        paramsEl.append(
+          $$('div').addClass('se-param').append(
+            $$('span').addClass('se-param-name').append(param.name),
+            $$('span').addClass('se-param-type').append(param.type),
+            $$('span').addClass('se-param-description').html(param.description)
+          )
+        );
+      });
+    }
     return paramsEl;
   };
 };
