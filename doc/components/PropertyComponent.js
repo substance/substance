@@ -21,5 +21,4 @@ PropertyComponent.Prototype = function() {
 };
 
 oo.inherit(PropertyComponent, Component);
-
 module.exports = PropertyComponent;

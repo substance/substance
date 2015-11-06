@@ -12,7 +12,6 @@ ParamsComponent.Prototype = function() {
   this.render = function() {
     var params = this.props.params;
     var paramsEl = $$('div').addClass('se-constructor-params');
-
     params.forEach(function(param) {
       paramsEl.append(
         $$('span').addClass('se-param-name').append(param.name),
@@ -20,11 +19,9 @@ ParamsComponent.Prototype = function() {
         $$('span').addClass('se-param-description').append(param.description)
       );
     });
-
     return paramsEl;
   };
 };
 
 oo.inherit(ParamsComponent, Component);
-
 module.exports = ParamsComponent;

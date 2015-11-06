@@ -2,6 +2,7 @@
 
 var oo = require('../../util/oo');
 var Component = require('../../ui/Component');
+var DocumentationNodeComponent = require('./DocumentationNodeComponent');
 var $$ = Component.$$;
 var pluck = require('lodash/collection/pluck');
 
@@ -9,7 +10,7 @@ var Params = require('./ParamsComponent');
 var Heading = require('./HeadingComponent');
 
 function ClassComponent() {
-  Component.apply(this, arguments);
+  DocumentationNodeComponent.apply(this, arguments);
 }
 
 ClassComponent.Prototype = function() {
@@ -30,12 +31,13 @@ ClassComponent.Prototype = function() {
       .append(
         $$(Heading, {node: this.props.node}),
         $$('div').addClass('se-description').html(this.props.node.description),
-        this.renderSignature()
+        this.renderSignature(),
         // $$(Params, {params: this.props.node.params})
+        $$('div').addClass('se-members').append(this._renderMembers())
       );
   };
 };
 
-oo.inherit(ClassComponent, Component);
+oo.inherit(ClassComponent, DocumentationNodeComponent);
 
 module.exports = ClassComponent;
