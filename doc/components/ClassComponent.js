@@ -17,6 +17,38 @@ function ClassComponent() {
 
 ClassComponent.Prototype = function() {
 
+  this.render = function() {
+    var node = this.props.node;
+    var el = $$('div')
+      .addClass('sc-class')
+      .attr("data-id", this.props.node.id);
+    // class header
+    el.append($$(Heading, {node: node}));
+    // the description
+    if(node.description) {
+      el.append(
+        $$('div').addClass('se-description').html(node.description)
+      );
+    }
+    // constructor signature and parameter desciption
+    el.append(
+      $$('div').addClass('se-constructor sc-method')
+        .append(this.renderSignature())
+        .append($$(Params, {params: node.params}))
+    );
+    // class members
+    el.append(
+      $$('div').addClass('se-members')
+        .append(this._renderMembers())
+        .append(this.renderInheritedMembers(el))
+    );
+    // example
+    if (node.example) {
+      el.append($$('div').addClass('se-example').html(node.example));
+    }
+    return el;
+  };
+
   this.renderSignature = function() {
     var paramSig = pluck(this.props.node.params, 'name').join(', ');
     var sig = ['new ', this.props.node.name, '(', paramSig, ')'];
@@ -26,43 +58,11 @@ ClassComponent.Prototype = function() {
     );
   };
 
-  this.render = function() {
-    var el = $$('div')
-      .addClass('sc-class')
-      .attr("data-id", this.props.node.id);
-
-    // class header
-    el.append($$(Heading, {node: this.props.node}));
-
-    // if available, the description
-    if(this.props.node.description) {
-      el.append(
-        $$('div').addClass('se-description').html(this.props.node.description)
-      );
-    }
-
-    // constructor signature and parameter desciption
-    el.append(
-      $$('div').addClass('se-constructor sc-method')
-        .append(this.renderSignature())
-        .append($$(Params, {params: this.props.node.params}))
-    );
-
-    // class members
-    el.append(
-      $$('div').addClass('se-members')
-        .append(this._renderMembers())
-        .append(this.renderInheritedMembers(el))
-    );
-
-    return el;
-  };
-
   this.renderInheritedMembers = function() {
-
-    if (!this.props.node.parentClass) return;
-
     var node = this.props.node;
+
+    if (!node.parentClass) return;
+
     var doc = node.getDocument();
     var parent = doc.get(node.parentClass);
     if (!parent) return;

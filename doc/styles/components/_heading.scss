@@ -1,5 +1,5 @@
   .sc-heading {
-    font-size: 18px;
+    font-size: $font-size-large;
     position: relative;
 
     .se-name {
@@ -11,7 +11,7 @@
       font-size: 13px;
       top: 0px;
       right: 0px;
-      
+
       color: #888;
       // text-transform: uppercase;
       font-weight: bold;

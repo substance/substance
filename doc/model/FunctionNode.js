@@ -7,10 +7,10 @@ var FunctionNode = Node.extend({
   properties: {
     name: 'string',
     namespace: 'string',
-    static: 'boolean',
     params: ['array', 'object'], // [{name: 'doc', type: 'model/Document', description: 'A Substance document instance'}]
+    returns: 'object', // {type: 'model/Document', description: 'The updated document'}
     description: 'string', // HTML String
-    returns: 'object' // {type: 'model/Document', description: 'The updated document'}
+    example: 'string' // HTML
   }
 });
 

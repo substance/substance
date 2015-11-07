@@ -5,6 +5,7 @@ var pluck = require('lodash/collection/pluck');
 var Component = require('../../ui/Component');
 var $$ = Component.$$;
 var Params = require('./ParamsComponent');
+var Example = require('./ExampleComponent');
 
 function MethodComponent() {
   Component.apply(this, arguments);
@@ -13,49 +14,33 @@ function MethodComponent() {
 MethodComponent.Prototype = function() {
 
   this.renderSignature = function() {
-    var paramSig = pluck(this.props.node.params, 'name').join(', ');
-
+    var node = this.props.node;
+    var paramSig = pluck(node.params, 'name').join(', ');
     var parentNode = this.props.parentNode;
-    var contextName = parentNode.name + '.';
-    var sig = [this.props.node.name, '(', paramSig, ')'];
-
-    if (parentNode.type === 'class' && !this.props.node.static) {
-      contextName += 'prototype.';
+    // signature such as `foo(a, b)`
+    var sig = [node.name, '(', paramSig, ')'];
+    // context is either the class or module id
+    // while the context for (non-static) instance methods is `MyClass.prototype`
+    var context = parentNode.name + '.';
+    if (parentNode.type === 'class' && !node.static) {
+      context += 'prototype.';
     }
-
     return $$('div').addClass('se-signature').append(
-      $$('span').addClass('se-context').append(contextName),
+      $$('span').addClass('se-context').append(context),
       $$('span').append(sig)
     );
   };
 
-  // this.render = function() {
-
-  //   console.log('class', this.props.node.name, 'params', this.props.node.params);
-  //   // Constructor params
-  //   return $$('div')
-  //     .addClass('sc-class')
-  //     .attr("data-id", this.props.node.id)
-  //     .append(
-  //       $$(Heading, {node: this.props.node}),
-  //       $$('div').addClass('se-description').html(this.props.node.description),
-  //       this.renderSignature(),
-  //       $$(Params, {params: this.props.node.params}),
-  //       $$('div').addClass('se-members').append(this._renderMembers())
-  //     );
-  // };
-
   this.render = function() {
+    var node = this.props.node;
     var el = $$('div')
       .addClass('sc-method')
-      .attr("data-id", this.props.node.id);
+      .attr("data-id", node.id);
 
     // the method signature, such as Document.prototype.getNodes()
-    el.append(this.renderSignature());
-
-    // argument description
     el.append(
-      $$(Params, {params: this.props.node.params})
+      this.renderSignature(),
+      $$(Params, {params: node.params})
     );
 
     // if given a message indicating that this method has been inherited
@@ -73,8 +58,12 @@ MethodComponent.Prototype = function() {
 
     // the description
     el.append(
-      $$('div').addClass('se-description').html(this.props.node.description)
+      $$('div').addClass('se-description').html(node.description)
     );
+
+    if (node.example) {
+      el.append($$(Example, {node:node}));
+    }
 
     return el;
   };

@@ -1,7 +1,7 @@
 .sc-method {
 
   &> .se-signature {
-    font-size: 16px;
+    font-size: $font-size-normal;
     font-weight: bold;
     font-family: Consolas, 'Liberation Mono', Menlo, Courier, monospace;
 
@@ -21,7 +21,7 @@
   }
 
   .se-inherited-from {
-    font-size: 10px;
+    font-size: $font-size-small;
 
     .se-label {
       margin-right: 5px;

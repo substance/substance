@@ -5,6 +5,8 @@ var path = require('path');
 var each = require('lodash/collection/each');
 var dox = require('dox');
 var markedOptions = require('./markedOptions');
+var markdown = require('marked');
+markdown.setOptions(markedOptions);
 
 /**
  * Parses a javascript file and extracts nodes as JSON objects
@@ -116,7 +118,8 @@ _Parser.Prototype = function() {
       var node = {
         id: this.id + "." + entity.name,
         isDefault: entity.isDefault,
-        name: entity.name
+        name: entity.name,
+        example: entity.example
       };
       if (entity.isDefault) {
         node.namespace = this.folder;
@@ -178,6 +181,10 @@ _Parser.Prototype = function() {
         entity.see = tag.string;
       } else if (tag.type === "export") {
         entity.isExported = true;
+      } else if (tag.type === "example") {
+        entity.example = _extractExample(tag.string);
+      } else if (tag.type === "type") {
+        entity.dataType = tag.string;
       }
     });
     var id = "";
@@ -209,6 +216,7 @@ _Parser.Prototype = function() {
         id: node.id + "." + member.name,
         parent: node.id,
         name: member.name,
+        example: member.example
       };
       if (member.type === 'method') {
         convertMethod(member, memberNode);
@@ -237,7 +245,8 @@ _Parser.Prototype = function() {
     each(entity.members, function(member) {
       var memberNode = {
         name: member.name,
-        parent: node.id
+        parent: node.id,
+        example: member.example
       };
       if (member.isStatic) {
         memberNode.id = node.id + "." + member.ctx.name;
@@ -297,6 +306,21 @@ _Parser.Prototype = function() {
   function _convertProperty(entity, node) {
     node.type = "property";
     node.description = entity.description.full;
+    node.dataType = entity.dataType;
+  }
+
+  function _extractExample(str) {
+    var firstLineBreak = str.indexOf("\n");
+    var header, body;
+    if (firstLineBreak > 0) {
+      header = str.slice(0, firstLineBreak).trim();
+      body = str.slice(firstLineBreak);
+      body = dox.trimIndentation(body);
+    } else {
+      header = undefined;
+      body = str.trim();
+    }
+    return markdown(body);
   }
 
 };

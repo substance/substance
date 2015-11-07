@@ -30,9 +30,10 @@
 @import './styles/components/_heading';
 @import './styles/components/_params';
 @import './styles/components/_method';
+@import './styles/components/_example';
 
 // Code highlighting
-@import '../node_modules/highlight.js/styles/default';
+@import '../node_modules/highlight.js/styles/github';
 
 body {
   font-size: 15px;

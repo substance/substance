@@ -1,0 +1,11 @@
+.sc-example {
+
+  & > .se-heading {
+    font-size: $font-size-normal;
+    font-weight: 600;
+    font-style: italic;
+    margin-bottom: 10px;
+  }
+
+  margin-top: 20px;
+}

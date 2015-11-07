@@ -399,27 +399,37 @@ Surface.Prototype = function() {
    *
    * @example
    *
-   * ```js
-   * surface.transaction(function(tx, args) {
-   *   var selection = args.selection;
-   *   ...
-   *   selection = tx.createSelection(...);
-   *   return {
-   *     selection: selection
-   *   };
-   * });
+   * - Returning a new selection:
    *
-   * surface.transaction(function(tx, args) {
-   *   ...
-   *   this.foo();
-   *   ...
-   *   return args;
-   * }, this);
+   *   ```js
+   *   surface.transaction(function(tx, args) {
+   *     var selection = args.selection;
+   *     ...
+   *     selection = tx.createSelection(...);
+   *     return {
+   *       selection: selection
+   *     };
+   *   });
+   *   ```
    *
-   * surface.transaction(beforeState, function(tx, args) {
-   *   ...
-   * });
-   * ```
+   * - Reusing the current selection:
+   *
+   *   ```js
+   *   surface.transaction(function(tx, args) {
+   *     ...
+   *     this.foo();
+   *     ...
+   *     return args;
+   *   }, this);
+   *   ```
+   *
+   * - Adding custom information to the transaction:
+   *
+   *   ```js
+   *   surface.transaction(beforeState, function(tx, args) {
+   *     ...
+   *   });
+   *   ```
    */
   this.transaction = function(transformation, ctx) {
     // `beforeState` is saved with the document operation and will be used

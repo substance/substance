@@ -1,3 +1,4 @@
 module.exports = {
-  'inherited-from': 'Inherited from'
+  'inherited-from': 'Inherited from',
+  'example': 'Example',
 };

@@ -12,6 +12,20 @@ renderer.br = function () {
   return '<br />';
 };
 
+renderer.code = function(code, lang){
+  var html;
+  if (lang) {
+    html = highlightjs.highlight(lang, code).value;
+  } else {
+    html = highlightjs.highlightAuto(code).value;
+  }
+  return [
+    '<pre><code class="hljs lang-'+lang+'">',
+      html,
+    '</code></pre>'
+  ].join('');
+};
+
 var markedOptions = {
   renderer: renderer,
   gfm: true,
@@ -20,10 +34,7 @@ var markedOptions = {
   pedantic: false,
   sanitize: false,
   smartLists: true,
-  smartypants: false,
-  highlight: function (code) {
-    return highlightjs.highlightAuto(code).value;
-  },
+  smartypants: false
 };
 
 module.exports = markedOptions;

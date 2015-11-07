@@ -3,7 +3,7 @@
 var Node = require('../../model/DocumentNode');
 
 // Corresponds to a folder in substance
-// 
+//
 // - model
 // - model/transform
 // - ui

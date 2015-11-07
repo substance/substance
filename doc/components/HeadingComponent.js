@@ -10,13 +10,14 @@ function HeadingComponent() {
 
 HeadingComponent.Prototype = function() {
   this.render = function() {
+    var node = this.props.node;
     return $$('div').addClass('sc-heading').append(
-      $$('span').addClass('se-namespace').append(this.props.node.namespace+' / '),
-      $$('span').addClass('se-name').append(this.props.node.name),
+      $$('span').addClass('se-namespace').append(node.namespace + ' / '),
+      $$('span').addClass('se-name').append(node.name),
       $$('div')
         .addClass('se-node-type')
-        .addClass(this.props.node.type)
-        .append(this.props.node.type)
+        .addClass(node.type)
+        .append(node.type)
     );
   };
 };

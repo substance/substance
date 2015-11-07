@@ -122,6 +122,7 @@ Document.Prototype = function() {
 
     @example
 
+    ```js
     doc.transaction({ selection: sel }, {'event-hack': true}, function(tx, args) {
       tx.update(...);
       ...
@@ -129,6 +130,7 @@ Document.Prototype = function() {
         selection: newSelection
       };
     })
+    ```
   */
   this.transaction = function(beforeState, eventData, transformation) {
     if (arguments.length === 1) {

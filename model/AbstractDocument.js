@@ -18,6 +18,11 @@ var docHelpers = require('./documentHelpers');
  */
 function AbstractDocument(schema) {
   EventEmitter.call(this);
+
+  /**
+   * The schema.
+   * @type {model/DocumentSchema}
+   */
   this.schema = schema;
 
   this.AUTO_ATTACH = true;

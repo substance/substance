@@ -1,6 +1,7 @@
 'use strict';
 
 var oo = require('../../util/oo');
+var pluck = require('lodash/collection/pluck');
 var Component = require('../../ui/Component');
 var Heading = require('./HeadingComponent');
 var $$ = Component.$$;
@@ -10,17 +11,38 @@ function FunctionComponent() {
 }
 
 FunctionComponent.Prototype = function() {
+
   this.render = function() {
+    var node = this.props.node;
+
     // Constructor params
-    return $$('div')
+    var el = $$('div')
       .addClass('sc-function')
-      .attr("data-id", this.props.node.id)
+      .attr("data-id", node.id);
+    // header
+    el.append($$(Heading, {node: node}));
+    //signature
+    el.append(this.renderSignature());
+    // description
+    el.append($$('div').addClass('se-description').html(node.description));
+    // example
+    if (node.example) {
+      el.append($$('div').addClass('se-example').html(node.example));
+    }
+    return el;
+  };
+
+  this.renderSignature = function() {
+    var node = this.props.node;
+    var paramSig = pluck(node.params, 'name').join(', ');
+    var signature = [node.name, '(', paramSig, ')'];
+    return $$('div').addClass('se-signature')
       .append(
-        $$(Heading, {node: this.props.node}),
-        $$('div').addClass('se-description').html(this.props.node.description)
-        // $$(Params, {params: this.props.node.params})
+        $$('span').addClass('se-context').append(node.id + "/"),
+        $$('span').append(signature)
       );
   };
+
 };
 
 oo.inherit(FunctionComponent, Component);

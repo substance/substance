@@ -21,25 +21,21 @@ function collectNodes(config) {
     patterns.push(folder + "/**/*.js");
   });
 
-  // EXPERIMENTAL
-  // patterns = ["ui/Surface.js"];
+  // patterns = ["model/Document.js"];
 
   each(patterns, function(pattern) {
     jsFiles = jsFiles.concat(glob.sync(pattern));
   });
-  // console.log(jsFiles);
 
   // run dox on every js file
   var nodes = [];
   each(jsFiles, function(jsFile) {
     nodes = nodes.concat(parseFile(jsFile));
   });
-  // console.log('Doxified:', doxified);
-
 
   // generate namespaces for all nodes where have documentation
   var namespaces = {};
-  var nsDocs = collectNamespaceDocs(config);
+  var nsDocs = _collectNamespaceDocs(config);
   each(nodes, function(node) {
     // only add nodes which are module defaults to the namespace
     if (!node.isDefault) return;
@@ -62,7 +58,7 @@ function collectNodes(config) {
   return nodes;
 }
 
-function collectNamespaceDocs(config) {
+function _collectNamespaceDocs(config) {
 
   // collect all js files
   var mdFiles = [];
