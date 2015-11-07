@@ -143,7 +143,7 @@ Controller.Prototype = function() {
   /**
     Get registered controller command by name
 
-    @param commandName {String} the command name
+    @param {String} commandName the command name
     @return {ui/ControllerCommand} A controller command
   */
   this.getCommand = function(commandName) {
@@ -454,7 +454,7 @@ Controller.Prototype = function() {
    * custom Controller class.
    *
    * @abstract
-   * @return {ui.Component.VirtualNode} VirtualNode created using Component.$$
+   * @return {ui/Component.VirtualNode} VirtualNode created using Component.$$
    */
   this.render = function() {
     throw new Error('Controller.prototype.render is abstract. You need to define your own controller component');

@@ -259,7 +259,7 @@ function convertEntities(_module, exportedEntities) {
 // when using paths in type strings `{model/Document}` without `module:` prefix.
 var _parseTagTypes = dox.parseTagTypes;
 dox.parseTagTypes = function(str, tag) {
-  if (/\{\w+(\/\w+)\}/.exec(str)) {
+  if (/\{\w+(\/\w+)+([.#]\w+)*\}/.exec(str)) {
     str = str.replace('/', '_SEP_');
     var types = _parseTagTypes(str, tag);
     for (var i = 0; i < types.length; i++) {
