@@ -1,43 +1,148 @@
 /* jshint latedef: false */
+var oo = require('../../util/oo');
 var fs = require('fs');
 var path = require('path');
 var each = require('lodash/collection/each');
 var dox = require('dox');
 var markedOptions = require('./markedOptions');
 
-var _supportedTypes = {
-  "class": true,
-  "module": true,
-  "function": true,
-  "method": true,
-  "property": true,
-};
+/**
+ * Parses a javascript file and extracts nodes as JSON objects
+ * which can be used to create a {doc/model/Documentation} instance.
+ */
+function parseFile(jsFile) {
+  var parser = new _Parser(jsFile);
+  var nodes = parser.parse();
+  return nodes;
+}
 
 /**
- * A 'module' will be classified either as Object (classical module), Class, or Function.
- * Either entities are exported explicitly using an '@export' tag,
- * or implicitly when their name equals the file name as it is the case for most of our classes or functions (e.g. transforms).
+ * Helper class for controlling the parsing process.
+ *
+ * @private
+ * @class
  */
-function processFile(jsFile) {
+function _Parser(jsFile) {
+  this.file = jsFile;
+  this.folder = path.dirname(jsFile);
+  this.name = path.basename(jsFile, '.js');
+  this.id = jsFile.slice(0,-3);
+}
 
-  var js = fs.readFileSync(jsFile, 'utf8');
-  var folder = path.dirname(jsFile);
-  var name = path.basename(jsFile, '.js');
-  var id = jsFile.slice(0,-3);
+_Parser.Prototype = function() {
 
-  var _module = {
-    id: id,
-    folder: folder,
-    name: name,
-    dox: dox.parseComments(js, { skipSingleStar: true })
+  this.parse = function() {
+    var js = fs.readFileSync(this.file, 'utf8');
+    var doxified = dox.parseComments(js, { skipSingleStar: true });
+    var exported = this.extractExports(doxified);
+    var nodes = this.convert(exported);
+    return nodes;
   };
 
-  var entities = {};
-  var currentClass = null;
-  var exported = [];
-  var mainEntity = null;
+  /**
+   * Extracts exported entities.
+   * Children of classes and modules are aggregated.
+   */
+  this.extractExports = function(doxified) {
+    var entities = {};
+    var currentClass = null;
+    var exported = [];
+    var mainEntity = null;
 
-  function prepareEntity(entity) {
+    // in the first pass we create nested structure containing all available information
+    each(doxified, function(entity) {
+      // preparations, such as setting flags if certain tags are present
+      this._prepareEntity(entity);
+      // skip blocks with a @skip tag
+      if (entity.skip) {
+        return;
+      }
+      // only let through supported entities
+      if (!this._supportedTypes[entity.type]) {
+        return;
+      }
+      if (entity.isClass) {
+        currentClass = entity;
+      }
+      if (entity.isExported) {
+        exported.push(entity);
+      }
+      // entities with no receiving context are on module scope and considered as candidates for export
+      // Attention: this assumption is not necessarily correct but in our world we don't do such
+      if (entity.ctx && !entity.ctx.receiver) {
+        entities[entity.ctx.name] = entity;
+      }
+      // the main entity of a module is that one which has the same name as the entry
+      // e.g. the class 'Component' in file 'Component.js' would be assumed to be exported
+      if (entity.ctx && !entity.ctx.receiver && entity.ctx.name === this.name) {
+        mainEntity = entity;
+      }
+
+      if (entity.ctx && entity.ctx.receiver) {
+        if (entities[entity.ctx.receiver] && entities[entity.ctx.receiver].members) {
+          entities[entity.ctx.receiver].members.push(entity);
+          entity.isStatic = true;
+        } else if (entity.ctx.receiver === "this") {
+          if (currentClass) {
+            currentClass.members.push(entity);
+          }
+        }
+      }
+    }, this);
+
+    if (exported.length === 0 && mainEntity) {
+      exported.push(mainEntity);
+      mainEntity.isDefault = true;
+    }
+
+    return exported;
+  };
+
+  /**
+   * Converts entities to nodes.
+   */
+  this.convert = function(entities) {
+    var nodes = [];
+
+    each(entities, function(entity) {
+      var node = {
+        id: this.id + "." + entity.name,
+        isDefault: entity.isDefault,
+        name: entity.name
+      };
+      if (entity.isDefault) {
+        node.namespace = this.folder;
+      }
+      if (entities.length === 1) {
+        node.id = this.id;
+      }
+      nodes.push(node);
+      if (entity.type === "function") {
+        _convertFunction(entity, node);
+        node.isStatic = true;
+      } else if (entity.type === "property") {
+        _convertProperty(entity, node);
+        node.isStatic = true;
+      } else if (entity.type === "class") {
+        _convertClass(nodes, entity, node);
+      } else if (entity.type === "module") {
+        _convertModule(nodes, entity, node);
+      } else {
+        console.error('FIXME: convert to node', entity.ctx);
+        return;
+      }
+    }, this);
+
+    return nodes;
+  };
+
+  /**
+   * Prepares a parsed block/entity.
+   * For instance, it sets flags when certain tags are present.
+   *
+   * @private
+   */
+  this._prepareEntity = function(entity) {
     if (entity.ctx) {
       entity.type = entity.ctx.type;
       entity.name = entity.ctx.name;
@@ -65,67 +170,43 @@ function processFile(jsFile) {
         entity.see = tag.string;
       }
     });
-  }
+  };
 
-  // in the first pass we create nested structure containing all available information
-  each(_module.dox, function(entity) {
-    prepareEntity(entity);
+  this._supportedTypes = {
+    "class": true,
+    "module": true,
+    "function": true,
+    "method": true,
+    "property": true,
+  };
 
-    if (entity.skip) {
-      return;
-    }
-
-    // only let through supported entities
-    if (!_supportedTypes[entity.type]) {
-      return;
-    }
-
-    if (entity.isClass) {
-      currentClass = entity;
-    }
-
-    if (entity.isExported) {
-      exported.push(entity);
-    }
-
-    // entities with no receiving context are on module scope and considered as candidates for export
-    // Attention: this assumption is not necessarily correct but in our world we don't do such
-    if (entity.ctx && !entity.ctx.receiver) {
-      entities[entity.ctx.name] = entity;
-    }
-    // the main entity of a module is that one which has the same name as the entry
-    // e.g. the class 'Component' in file 'Component.js' would be assumed to be exported
-    if (entity.ctx && !entity.ctx.receiver && entity.ctx.name === _module.name) {
-      mainEntity = entity;
-    }
-
-    if (entity.ctx && entity.ctx.receiver) {
-      if (entities[entity.ctx.receiver] && entities[entity.ctx.receiver].members) {
-        entities[entity.ctx.receiver].members.push(entity);
-        entity.isStatic = true;
-      } else if (entity.ctx.receiver === "this") {
-        if (currentClass) {
-          currentClass.members.push(entity);
-        }
+  function _convertModule(nodes, entity, node) {
+    node.type = "module";
+    node.description = entity.description.full;
+    node.members = [];
+    each(entity.members, function(member) {
+      var memberNode = {
+        id: node.id + "." + member.name,
+        name: member.name
+      };
+      if (member.type === 'method') {
+        convertMethod(member, memberNode);
+      } else if (member.type === "property") {
+        _convertProperty(member, memberNode);
+      } else if (member.type === "class") {
+        _convertClass(nodes, member, memberNode);
+      } else {
+        console.error('Not implemented yet: converter for class member', member.ctx);
+        return;
       }
-    }
-
-  });
-
-  if (exported.length === 0 && mainEntity) {
-    exported.push(mainEntity);
-    mainEntity.isDefault = true;
+      nodes.push(memberNode);
+      node.members.push(memberNode.id);
+    });
   }
 
-  return convertEntities(_module, exported);
-}
-
-function convertEntities(_module, exportedEntities) {
-  var nodes = [];
-
-  function convertClass(entity, node) {
+  function _convertClass(nodes, entity, node) {
     // reuse the function converter to extract ctor arguments
-    convertFunction(entity, node);
+    _convertFunction(entity, node);
 
     node.type = "class";
     node.isAbstract = entity.isAbstract;
@@ -145,9 +226,9 @@ function convertEntities(_module, exportedEntities) {
       if (member.type === 'method') {
         convertMethod(member, memberNode);
       } else if (member.type === "property") {
-        convertProperty(member, memberNode);
+        _convertProperty(member, memberNode);
       } else if (member.type === "class") {
-        convertClass(member, memberNode);
+        _convertClass(nodes, member, memberNode);
       } else {
         console.error('Not implemented yet: converter for class member', member.ctx);
         return;
@@ -157,31 +238,7 @@ function convertEntities(_module, exportedEntities) {
     });
   }
 
-  function convertModule(entity, node) {
-    node.type = "module";
-    node.description = entity.description.full;
-    node.members = [];
-    each(entity.members, function(member) {
-      var memberNode = {
-        id: node.id + "." + member.name,
-        name: member.name
-      };
-      if (member.type === 'method') {
-        convertMethod(member, memberNode);
-      } else if (member.type === "property") {
-        convertProperty(member, memberNode);
-      } else if (member.type === "class") {
-        convertClass(member, memberNode);
-      } else {
-        console.error('Not implemented yet: converter for class member', member.ctx);
-        return;
-      }
-      nodes.push(memberNode);
-      node.members.push(memberNode.id);
-    });
-  }
-
-  function convertFunction(entity, node) {
+  function _convertFunction(entity, node) {
     node.type = "function";
     node.description = entity.description.full;
     node['params'] = [];
@@ -210,47 +267,20 @@ function convertEntities(_module, exportedEntities) {
   }
 
   function convertMethod(entity, node) {
-    convertFunction(entity, node);
+    _convertFunction(entity, node);
     node.type = "method";
     node.isPrivate = entity.isPrivate;
   }
 
-  function convertProperty(entity, node) {
+  function _convertProperty(entity, node) {
     node.type = "property";
     node.description = entity.description.full;
   }
 
-  each(exportedEntities, function(entity) {
-    var node = {
-      id: _module.id + "." + entity.name,
-      isDefault: entity.isDefault,
-      name: entity.name
-    };
-    if (entity.isDefault) {
-      node.namespace = _module.folder;
-    }
-    if (exportedEntities.length === 1) {
-      node.id = _module.id;
-    }
-    nodes.push(node);
-    if (entity.type === "function") {
-      convertFunction(entity, node);
-      node.isStatic = true;
-    } else if (entity.type === "property") {
-      convertProperty(entity, node);
-      node.isStatic = true;
-    } else if (entity.type === "class") {
-      convertClass(entity, node);
-    } else if (entity.type === "module") {
-      convertModule(entity, node);
-    } else {
-      console.error('FIXME: convert to node', entity.ctx);
-      return;
-    }
-  });
+};
 
-  return nodes;
-}
+oo.initClass(_Parser);
+
 
 // DOX configuration
 
@@ -272,4 +302,4 @@ dox.parseTagTypes = function(str, tag) {
 
 dox.setMarkedOptions(markedOptions);
 
-module.exports = processFile;
+module.exports = parseFile;
