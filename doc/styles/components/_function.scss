@@ -1,22 +1,10 @@
-.sc-class {
+.sc-function {
 
   &> .sc-heading {
     font-size: 20px;
     padding-bottom: 10px;
     border-bottom: solid 1px #ccc;
     margin-bottom: 20px;
-  }
-
-  &> .se-description {
-    margin-bottom: 10px;
-  }
-
-
-  &> .se-constructor .se-signature {
-  }
-
-  &> .sc-params {
-    margin-bottom: 10px;
   }
 
   margin-bottom: $subsection-margin-bottom;

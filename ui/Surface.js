@@ -15,6 +15,7 @@ var Component = require('./Component');
  *
  * @class
  */
+
 function Surface() {
   Component.apply(this, arguments);
 
@@ -82,19 +83,8 @@ function Surface() {
 
   this.textTypes = this.props.textTypes;
 
-  /*jshint eqnull:true */
-  // if (options.undoEnabled != null) {
-  //   this.undoEnabled = options.undoEnabled;
-  // }
-  // if (options.contentEditable != null) {
-  //   this.enableContentEditable = options.contentEditable;
-  // } else {
-  //   this.enableContentEditable = true;
-  // }
-
   this._initializeCommandRegistry(this.props.commands);
   controller.registerSurface(this);
-  /*jshint eqnull:false */
 }
 
 Surface.Prototype = function() {

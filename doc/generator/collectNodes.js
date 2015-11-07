@@ -1,53 +1,14 @@
+/* jshint latedef: false */
 var fs = require('fs');
 var path = require('path');
 var glob = require('glob');
-var dox = require('dox');
 var each = require('lodash/collection/each');
-var processFile = require('./processFile');
+var map = require('lodash/collection/map');
+var parseFile = require('./parseFile');
+
 var markdown = require('marked');
-var highlightjs = require('highlight.js');
-
-// HACK: overriding the type parser entry point
-// to workaround a syntax error thrown by jsdoctypeparser for
-// when using paths in type strings `{model/Document}` without `module:` prefix.
-var _parseTagTypes = dox.parseTagTypes;
-dox.parseTagTypes = function(str, tag) {
-  if (/\{\w+(\/\w+)\}/.exec(str)) {
-    str = str.replace('/', '_SEP_');
-    var types = _parseTagTypes(str, tag);
-    for (var i = 0; i < types.length; i++) {
-      types[i] = types[i].replace('_SEP_', '/');
-    }
-  } else {
-    return _parseTagTypes(str, tag);
-  }
-};
-
-
-var renderer = new markdown.Renderer();
-renderer.heading = function (text, level) {
-  return '<h' + level + '>' + text + '</h' + level + '>\n';
-};
-renderer.paragraph = function (text) {
-  return '<p>' + text + '</p>';
-};
-renderer.br = function () {
-  return '<br />';
-};
-
-dox.setMarkedOptions({
-  renderer: renderer,
-  gfm: true,
-  tables: true,
-  breaks: true,
-  pedantic: false,
-  sanitize: false,
-  smartLists: true,
-  smartypants: false,
-  highlight: function (code) {
-    return highlightjs.highlightAuto(code).value;
-  },
-});
+var markedOptions = require('./markedOptions');
+markdown.setOptions(markedOptions);
 
 function collectNodes(config) {
 
@@ -57,11 +18,11 @@ function collectNodes(config) {
 
   var patterns = [];
   each(folders, function(folder) {
-    patterns.push(folder + "/**/*.js")
-  })
+    patterns.push(folder + "/**/*.js");
+  });
 
   // EXPERIMENTAL
-  // patterns = ["util/oo.js"];
+  // patterns = ["ui/Surface.js"];
 
   each(patterns, function(pattern) {
     jsFiles = jsFiles.concat(glob.sync(pattern));
@@ -69,33 +30,62 @@ function collectNodes(config) {
   // console.log(jsFiles);
 
   // run dox on every js file
-  var files = {};
+  var nodes = [];
   each(jsFiles, function(jsFile) {
-    var js = fs.readFileSync(jsFile, 'utf8');
-    var folder = path.dirname(jsFile);
-    var name = path.basename(jsFile, '.js');
-    var id = jsFile.slice(0,-3);
-    files[id] = {
-      id: id,
-      folder: folder,
-      name: name,
-      dox: dox.parseComments(js)
-    };
+    nodes = nodes.concat(parseFile(jsFile));
   });
   // console.log('Doxified:', doxified);
 
-  // expand and aggregate
-  // Methods and properties and added to their container
-  // Each file is classified either as Class, Object, or Function depending on export tags.
-  // If no export tags are found, the one entity is assumed as default export which has the same name as the file
-  var nodes = [];
-  each(files, function(file) {
-    nodes = nodes.concat(processFile(file));
-  });
 
-  // TODO: add namespace nodes derived from found nodes.
+  // generate namespaces for all nodes where have documentation
+  var namespaces = {};
+  var nsDocs = collectNamespaceDocs(config);
+  each(nodes, function(node) {
+    // only add nodes which are module defaults to the namespace
+    if (!node.isDefault) return;
+
+    var nsId = path.dirname(node.id);
+    var name = path.basename(nsId);
+    if (!namespaces[nsId]) {
+      namespaces[nsId] = {
+        type: "namespace",
+        id: nsId,
+        name: name,
+        description: nsDocs[nsId],
+        members: []
+      };
+    }
+    namespaces[nsId].members.push(node.id);
+  });
+  nodes = nodes.concat(map(namespaces));
 
   return nodes;
+}
+
+function collectNamespaceDocs(config) {
+
+  // collect all js files
+  var mdFiles = [];
+  var folders = config.folders || [];
+
+  var patterns = [];
+  each(folders, function(folder) {
+    patterns.push(folder + "/**/index.md");
+  });
+
+  each(patterns, function(pattern) {
+    mdFiles = mdFiles.concat(glob.sync(pattern));
+  });
+
+  var docs = {};
+  each(mdFiles, function(mdFile) {
+    var folder = path.dirname(mdFile);
+    var id = folder;
+    var data = fs.readFileSync(mdFile, 'utf8');
+    docs[id] = markdown(data);
+  });
+
+  return docs;
 }
 
 module.exports = collectNodes;

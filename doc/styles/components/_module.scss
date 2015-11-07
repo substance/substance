@@ -1,8 +1,12 @@
 .sc-module {
 
+  &> .sc-heading {
+    font-size: 20px;
+  }
+
   &> .se-description {
     margin-bottom: 10px;
   }
 
-  margin-bottom: 20px;
+  margin-bottom: $subsection-margin-bottom;
 }

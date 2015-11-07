@@ -1,5 +1,9 @@
 /* jshint latedef: false */
+var fs = require('fs');
+var path = require('path');
 var each = require('lodash/collection/each');
+var dox = require('dox');
+var markedOptions = require('./markedOptions');
 
 var _supportedTypes = {
   "class": true,
@@ -14,7 +18,19 @@ var _supportedTypes = {
  * Either entities are exported explicitly using an '@export' tag,
  * or implicitly when their name equals the file name as it is the case for most of our classes or functions (e.g. transforms).
  */
-function processFile(_module) {
+function processFile(jsFile) {
+
+  var js = fs.readFileSync(jsFile, 'utf8');
+  var folder = path.dirname(jsFile);
+  var name = path.basename(jsFile, '.js');
+  var id = jsFile.slice(0,-3);
+
+  var _module = {
+    id: id,
+    folder: folder,
+    name: name,
+    dox: dox.parseComments(js, { skipSingleStar: true })
+  };
 
   var entities = {};
   var currentClass = null;
@@ -235,5 +251,25 @@ function convertEntities(_module, exportedEntities) {
 
   return nodes;
 }
+
+// DOX configuration
+
+// HACK: overriding the type parser entry point
+// to workaround a syntax error thrown by jsdoctypeparser for
+// when using paths in type strings `{model/Document}` without `module:` prefix.
+var _parseTagTypes = dox.parseTagTypes;
+dox.parseTagTypes = function(str, tag) {
+  if (/\{\w+(\/\w+)\}/.exec(str)) {
+    str = str.replace('/', '_SEP_');
+    var types = _parseTagTypes(str, tag);
+    for (var i = 0; i < types.length; i++) {
+      types[i] = types[i].replace('_SEP_', '/');
+    }
+  } else {
+    return _parseTagTypes(str, tag);
+  }
+};
+
+dox.setMarkedOptions(markedOptions);
 
 module.exports = processFile;
