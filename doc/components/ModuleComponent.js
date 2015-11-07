@@ -6,6 +6,7 @@ var $$ = Component.$$;
 
 var DocumentationNodeComponent = require('./DocumentationNodeComponent');
 var Heading = require('./HeadingComponent');
+var Example = require('./ExampleComponent');
 
 function ModuleComponent() {
   DocumentationNodeComponent.apply(this, arguments);
@@ -14,14 +15,27 @@ function ModuleComponent() {
 ModuleComponent.Prototype = function() {
 
   this.render = function() {
-    return $$('div')
+    var node = this.props.node;
+    var el = $$('div')
       .addClass('sc-module')
-      .attr("data-id", this.props.node.id)
-      .append(
-        $$(Heading, {node: this.props.node}),
-        $$('div').addClass('se-description').html(this.props.node.description),
-        $$('div').addClass('se-members').append(this._renderMembers())
-      );
+      .attr("data-id", node.id)
+
+    // heading
+    el.append($$(Heading, {node: node}));
+    // description
+    el.append(
+      $$('div').addClass('se-description').html(node.description)
+    );
+    // members
+    el.append(
+      $$('div').addClass('se-members').append(this._renderMembers())
+    );
+    // example
+    if (node.example) {
+      el.append($$(Example, {node:node}));
+    }
+
+    return el;
   };
 };
 

@@ -1,13 +1,13 @@
 .sc-method {
 
   &> .se-signature {
-    font-size: $font-size-normal;
+    font-size: $font-size-level-2;
     font-weight: bold;
     font-family: Consolas, 'Liberation Mono', Menlo, Courier, monospace;
 
     padding-bottom: 5px;
     border-bottom: solid 1px #eee;
-    margin-bottom: 10px;
+    margin-bottom: $node-margin-bottom;
 
     .se-context {
       color: #333;
@@ -16,8 +16,7 @@
   }
 
   &> .sc-params {
-    // background: #eee;
-    // padding: 10px;
+    margin-bottom: $node-margin-bottom;
   }
 
   .se-inherited-from {
@@ -28,10 +27,5 @@
     }
   }
 
-  .se-description {
-    margin-top: 10px;
-  }
-
-  padding-top: 10px;
-  margin-bottom: 20px;
+  margin-bottom: $node-margin-bottom;
 }

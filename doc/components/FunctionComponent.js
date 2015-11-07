@@ -3,8 +3,10 @@
 var oo = require('../../util/oo');
 var pluck = require('lodash/collection/pluck');
 var Component = require('../../ui/Component');
-var Heading = require('./HeadingComponent');
 var $$ = Component.$$;
+
+var Heading = require('./HeadingComponent');
+var Example = require('./ExampleComponent');
 
 function FunctionComponent() {
   Component.apply(this, arguments);
@@ -27,7 +29,7 @@ FunctionComponent.Prototype = function() {
     el.append($$('div').addClass('se-description').html(node.description));
     // example
     if (node.example) {
-      el.append($$('div').addClass('se-example').html(node.example));
+      el.append($$(Example, {node: node}));
     }
     return el;
   };

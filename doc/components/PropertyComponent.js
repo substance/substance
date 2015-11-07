@@ -16,6 +16,7 @@ PropertyComponent.Prototype = function() {
     var el = $$('div')
       .addClass('sc-class')
       .attr("data-id", node.id);
+
     // heading
     el.append($$(Heading, {node: node}));
     // description
@@ -24,8 +25,9 @@ PropertyComponent.Prototype = function() {
     }
     // example
     if (node.example) {
-      el.append($$('div').addClass('se-example').html(node.example));
+      el.append($$(Example, {node: node}));
     }
+
     return el;
   };
 

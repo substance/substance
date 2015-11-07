@@ -4,8 +4,8 @@
     font-size: $font-size-normal;
     font-weight: 600;
     font-style: italic;
-    margin-bottom: 10px;
+    margin-bottom: $node-margin-bottom;
   }
 
-  margin-top: 20px;
+  margin-top: $node-margin-bottom;
 }

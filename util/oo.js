@@ -151,6 +151,7 @@ _inherit =  function(clazz, parentClazz) {
  *
  * @example
  *
+ * ```js
  * var oo = require('substance/basics/oo');
  * var Parent = function() {};
  * Parent.Prototype = function() {
@@ -160,6 +161,7 @@ _inherit =  function(clazz, parentClazz) {
  *   Parent.apply(this, arguments);
  * }
  * oo.inherit(Child, Parent);
+ * ```
  */
 oo.inherit =  function(clazz, parentClazz) {
   _inherit(clazz, parentClazz);

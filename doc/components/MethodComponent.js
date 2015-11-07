@@ -4,6 +4,7 @@ var oo = require('../../util/oo');
 var pluck = require('lodash/collection/pluck');
 var Component = require('../../ui/Component');
 var $$ = Component.$$;
+
 var Params = require('./ParamsComponent');
 var Example = require('./ExampleComponent');
 

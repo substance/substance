@@ -10,14 +10,13 @@ function ParamsComponent() {
 
 ParamsComponent.Prototype = function() {
   this.render = function() {
+    var el = $$('div').addClass('sc-params');
     var params = this.props.params;
 
-    var paramsEl = $$('div').addClass('sc-params');
-
     if (params.length > 0) {
-      paramsEl.append($$('div').addClass('se-label').append('Parameters'));
+      el.append($$('div').addClass('se-label').append(this.i18n.t('parameters')));
       params.forEach(function(param) {
-        paramsEl.append(
+        el.append(
           $$('div').addClass('se-param').append(
             $$('span').addClass('se-param-name').append(param.name),
             $$('span').addClass('se-param-type').append(param.type),
@@ -26,7 +25,7 @@ ParamsComponent.Prototype = function() {
         );
       });
     }
-    return paramsEl;
+    return el;
   };
 };
 
