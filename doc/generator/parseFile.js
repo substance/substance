@@ -19,8 +19,8 @@ function parseFile(jsFile) {
 /**
  * Helper class for controlling the parsing process.
  *
- * @private
  * @class
+ * @private
  */
 function _Parser(jsFile) {
   this.file = jsFile;
@@ -67,11 +67,8 @@ _Parser.Prototype = function() {
       if (entity.isExported) {
         exported.push(entity);
       }
-      // entities with no receiving context are on module scope and considered as candidates for export
-      // Attention: this assumption is not necessarily correct but in our world we don't do such
-      if (entity.ctx && !entity.ctx.receiver) {
-        entities[entity.ctx.name] = entity;
-      }
+      entities[entity.id] = entity;
+
       // the main entity of a module is that one which has the same name as the entry
       // e.g. the class 'Component' in file 'Component.js' would be assumed to be exported
       if (entity.ctx && !entity.ctx.receiver && entity.ctx.name === this.name) {
@@ -79,13 +76,24 @@ _Parser.Prototype = function() {
       }
 
       if (entity.ctx && entity.ctx.receiver) {
-        if (entities[entity.ctx.receiver] && entities[entity.ctx.receiver].members) {
-          entities[entity.ctx.receiver].members.push(entity);
+        var receiver = entity.ctx.receiver;
+        if (entities[receiver] && entities[receiver].members) {
+          entities[receiver].members.push(entity);
           entity.isStatic = true;
-        } else if (entity.ctx.receiver === "this") {
+          return;
+        }
+        if (receiver === "this") {
           if (currentClass) {
             currentClass.members.push(entity);
           }
+          return;
+        }
+      }
+      if (entity.ctx && entity.type === "method" && entity.ctx.constructor) {
+        var clazz = entity.ctx.constructor;
+        if (entities[clazz] && entities[clazz].type === "class") {
+          entities[clazz].members.push(entity);
+          return;
         }
       }
     }, this);
@@ -168,8 +176,20 @@ _Parser.Prototype = function() {
         // TODO: for delegators it would make sense to show the documentation
         // of the target
         entity.see = tag.string;
+      } else if (tag.type === "export") {
+        entity.isExported = true;
       }
     });
+    var id = "";
+    if (entity.ctx) {
+      if (entity.ctx.receiver) {
+        id = entity.ctx.receiver + ".";
+      } else if (entity.ctx.hasOwnProperty('constructor')) {
+        id = entity.ctx.constructor + ".prototype.";
+      }
+    }
+    id += entity.name;
+    entity.id = id;
   };
 
   this._supportedTypes = {
