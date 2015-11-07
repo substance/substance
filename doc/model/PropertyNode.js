@@ -5,9 +5,10 @@ var Node = require('../../model/DocumentNode');
 var PropertyNode = Node.extend({
   name: 'property',
   properties: {
+    parent: 'id', // id of parent class or module
     name: 'string',
     dataType: 'string',
-    static: 'boolean',
+    isStatic: 'boolean',
     description: 'string', // HTML
   }
 });

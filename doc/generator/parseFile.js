@@ -187,7 +187,8 @@ _Parser.Prototype = function() {
     each(entity.members, function(member) {
       var memberNode = {
         id: node.id + "." + member.name,
-        name: member.name
+        parent: node.id,
+        name: member.name,
       };
       if (member.type === 'method') {
         convertMethod(member, memberNode);
@@ -215,7 +216,8 @@ _Parser.Prototype = function() {
 
     each(entity.members, function(member) {
       var memberNode = {
-        name: member.name
+        name: member.name,
+        parent: node.id
       };
       if (member.isStatic) {
         memberNode.id = node.id + "." + member.ctx.name;
