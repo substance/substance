@@ -10,25 +10,35 @@ function HeadingComponent() {
 
 HeadingComponent.Prototype = function() {
   this.render = function() {
-    var namespace = this.props.namespace;
-    var name = this.props.name;
-    var type = this.props.type;
+    var namespace = this.props.node.namespace;
+    var name = this.props.node.name;
+    var type = this.props.node.type;
     var el = $$('div').addClass('sc-heading');
-
+    var headerEl = $$('div').addClass('se-header');
+    
     // namespace
-    el.append(
+    headerEl.append(
       $$('span').addClass('se-namespace').append(namespace.split('/').join(' / ') + ' / ')
     );
     // name
-    el.append(
+    headerEl.append(
       $$('span').addClass('se-name').append(name)
     );
     // type
     if (type) {
-      el.append(
+      headerEl.append(
         $$('div').addClass('se-node-type').addClass(type).append(type)
       );
     }
+
+    var sourceEl = $$('div').addClass('se-source').append(
+      $$('strong').append(type),
+      $$('span').append(' defined in '),
+      $$('a').attr({href: '#'}).append('model/Foo.js#41')
+    );
+
+    el.append(headerEl, sourceEl);
+
     return el;
   };
 };

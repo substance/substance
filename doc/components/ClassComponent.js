@@ -23,7 +23,7 @@ ClassComponent.Prototype = function() {
       .addClass('sc-class')
       .attr("data-id", this.props.node.id);
     // class header
-    el.append($$(Heading, {namespace: node.namespace, name: node.name, type: node.type}));
+    el.append($$(Heading, {node: node}));
     // the description
     el.append(
       $$('div').addClass('se-description').html(node.description)

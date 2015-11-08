@@ -24,7 +24,7 @@ FunctionComponent.Prototype = function() {
       .attr("data-id", node.id);
 
     // header
-    el.append($$(Heading, {namespace: node.namespace, name: node.name + "()", type: node.type}));
+    el.append($$(Heading, {node: node}));
 
     //signature
     el.append($$(Signature, {node: node}));
