@@ -3,7 +3,7 @@
 var oo = require('../../util/oo');
 var Document = require('../../model/Document');
 var Schema = require('../../model/DocumentSchema');
-var schema = new Schema("substance-documentation", "0.1.0");
+var schema = new Schema('substance-documentation', '0.1.0');
 
 schema.addNodes([
   require('./ClassNode'),
@@ -20,8 +20,8 @@ var Documentation = function() {
   Document.call(this, schema);
 
   this.create({
-    type: "container",
-    id: "body",
+    type: 'container',
+    id: 'body',
     nodes: []
   });
 };
@@ -71,17 +71,20 @@ Documentation.getNodeInfo = function(node) {
     isClassMember: false,
     isModuleMember: false,
     isConstructor: false,
-    storage: ""
-  }
+    storage: '',
+    typeDescr: ''
+  };
+
   var hasParent = node.hasParent();
   var parent;
   if (hasParent) {
     parent = node.getParent();
-    info.isClassMember = (parent.type === "class");
-    info.isModuleMember = (parent.type === "module");
-  } else if (node.type === "class") {
+    info.isClassMember = (parent.type === 'class');
+    info.isModuleMember = (parent.type === 'module');
+  } else if (node.type === 'class') {
     info.isConstructor = true;
   }
+  // Derive storage
   if (node.isStatic) {
     info.storage = 'static ';
   } else if (info.isClassMember) {
@@ -89,7 +92,18 @@ Documentation.getNodeInfo = function(node) {
   } else if (info.isModuleMember) {
     info.storage = parent.name + '.';
   } else if (info.isConstructor) {
-    info.storage = "new ";
+    info.storage = 'new ';
+  }
+
+  // Derive typeDescr
+  if (info.isConstructor) {
+    info.typeDescr = 'Constructor';
+  } else if (info.isClassMember || info.isModuleMember) {
+    if (info.isStatic) {
+      info.typeDescr = 'Static Method';  
+    } else {
+      info.typeDescr = 'Method';
+    }
   }
   return info;
 };

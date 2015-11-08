@@ -1,0 +1,1 @@
+Provides model-related functionality from defining an article format to manipulating it through transformations.

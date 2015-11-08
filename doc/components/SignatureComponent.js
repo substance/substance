@@ -20,7 +20,7 @@ SignatureComponent.Prototype = function() {
     var params = node.params;
 
     var info = Documentation.getNodeInfo(node);
-    var visibility = node.isPrivate ? "private " : "";
+    var visibility = node.isPrivate ? 'private ' : '';
     var args = pluck(params, 'name').join(', ');
 
     el.append(
@@ -30,7 +30,13 @@ SignatureComponent.Prototype = function() {
         .append($$('span').addClass('se-name').append(node.name))
         .append('(')
         .append($$('span').addClass('se-arguments').append(args))
-        .append(')')
+        .append(')'),
+      $$('div').addClass('se-source').append(
+        $$('strong').append(info.typeDescr),
+        $$('span').append(' defined in '),
+        // TODO: add actual file url
+        $$('a').attr({href: '#'}).append('model/Foo.js#41')
+      )
     );
 
     // param description

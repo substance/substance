@@ -35,23 +35,23 @@ MethodComponent.Prototype = function() {
     return el;
   };
 
-  this.renderSignature = function() {
-    var node = this.props.node;
-    var paramSig = pluck(node.params, 'name').join(', ');
-    var parentNode = this.props.parentNode;
-    // signature such as `foo(a, b)`
-    var sig = [node.name, '(', paramSig, ')'];
-    // context is either the class or module id
-    // while the context for (non-static) instance methods is `MyClass.prototype`
-    var context = parentNode.name + '.';
-    if (parentNode.type === 'class' && !node.isStatic) {
-      context += 'prototype.';
-    }
-    return $$('div').addClass('se-signature').append(
-      // $$('span').addClass('se-context').append(context),
-      $$('span').append(sig)
-    );
-  };
+  // this.renderSignature = function() {
+  //   var node = this.props.node;
+  //   var paramSig = pluck(node.params, 'name').join(', ');
+  //   var parentNode = this.props.parentNode;
+  //   // signature such as `foo(a, b)`
+  //   var sig = [node.name, '(', paramSig, ')'];
+  //   // context is either the class or module id
+  //   // while the context for (non-static) instance methods is `MyClass.prototype`
+  //   var context = parentNode.name + '.';
+  //   if (parentNode.type === 'class' && !node.isStatic) {
+  //     context += 'prototype.';
+  //   }
+  //   return $$('div').addClass('se-signature').append(
+  //     // $$('span').addClass('se-context').append(context),
+  //     $$('span').append(sig)
+  //   );
+  // };
 
 };
 

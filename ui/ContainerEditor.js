@@ -20,7 +20,7 @@ var ContainerNodeMixin = require('./ContainerNodeMixin');
 /**
  * Represents a flow editor that manages a sequence of nodes in a container. Instantiate
  * this editor using `Component.$$` within the render method of a component. Needs to be
- * instantiated within a {@link module:ui/Controller} context.
+ * instantiated within a [ui/Controller](ui/Controller) context.
  *
  * @constructor
  * @class

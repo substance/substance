@@ -15,15 +15,18 @@ ParamsComponent.Prototype = function() {
 
     if (params.length > 0) {
       el.append($$('div').addClass('se-label').append(this.i18n.t('parameters')));
+
+      var paramsTable = $$('table').addClass('se-params-table');
       params.forEach(function(param) {
-        el.append(
-          $$('div').addClass('se-param').append(
-            $$('span').addClass('se-param-name').append(param.name),
-            $$('span').addClass('se-param-type').append(param.type),
-            $$('span').addClass('se-param-description').html(param.description)
+        paramsTable.append(
+          $$('tr').addClass('se-param').append(
+            $$('td').addClass('se-param-name').append(param.name),
+            $$('td').addClass('se-param-type').append(param.type),
+            $$('td').addClass('se-param-description').html(param.description)
           )
         );
       });
+      el.append(paramsTable);
     }
     return el;
   };

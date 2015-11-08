@@ -1,20 +1,24 @@
 .sc-signature {
 
-  // border: 1px solid #ddd;
-  // border-left: 3px solid #ddd;
-  // padding-left: 20px;
+  border-top: 1px solid #ddd;
+  padding-top: 10px;
 
-  &> .se-declaration {
+  > .se-declaration {
     font-size: $font-size-level-2;
     font-weight: bold;
     font-family: Consolas, 'Liberation Mono', Menlo, Courier, monospace;
-    padding-bottom: 5px;
-    margin-bottom: $element-margin-bottom;
 
     .se-context {
       color: #333;
       font-weight: normal;
     }
+  }
+
+  > .se-source {
+    padding-bottom: 10px;
+    line-height: 15px;
+    font-size: $font-size-small;
+    border-bottom: 1px solid #ddd;
   }
 
   .se-inherited-from {
@@ -24,5 +28,4 @@
       margin-right: 5px;
     }
   }
-
 }

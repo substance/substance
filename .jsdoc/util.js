@@ -1,4 +1,0 @@
-/**
- * Util module
- * @module util
- */

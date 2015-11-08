@@ -115,10 +115,9 @@ Document.Prototype = function() {
   /**
     Start a transaction to manipulate the document
 
-    @param beforeState object which will be used as before start of transaction
-    @param eventData object which will be used as payload for the emitted change event
-    @param transformation a function(tx) that performs actions on the transaction document tx
-    @memberof module:model.Document.prototype
+    @param {object} beforeState object which will be used as before start of transaction
+    @param {object} eventData object which will be used as payload for the emitted change event
+    @param {function} transformation a function(tx) that performs actions on the transaction document tx
 
     @example
 
