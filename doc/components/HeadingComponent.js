@@ -10,15 +10,26 @@ function HeadingComponent() {
 
 HeadingComponent.Prototype = function() {
   this.render = function() {
-    var node = this.props.node;
-    return $$('div').addClass('sc-heading').append(
-      $$('span').addClass('se-namespace').append(node.namespace.split('/').join(' / ') + ' / '),
-      $$('span').addClass('se-name').append(node.name),
-      $$('div')
-        .addClass('se-node-type')
-        .addClass(node.type)
-        .append(node.type)
+    var namespace = this.props.namespace;
+    var name = this.props.name;
+    var type = this.props.type;
+    var el = $$('div').addClass('sc-heading');
+
+    // namespace
+    el.append(
+      $$('span').addClass('se-namespace').append(namespace.split('/').join(' / ') + ' / ')
     );
+    // name
+    el.append(
+      $$('span').addClass('se-name').append(name)
+    );
+    // type
+    if (type) {
+      el.append(
+        $$('div').addClass('se-node-type').addClass(type).append(type)
+      );
+    }
+    return el;
   };
 };
 

@@ -18,7 +18,7 @@ PropertyComponent.Prototype = function() {
       .attr("data-id", node.id);
 
     // heading
-    el.append($$(Heading, {node: node}));
+    el.append($$(Heading, {namespace: node.namespace, name: node.name, type: node.type}));
     // description
     if(node.description) {
       el.append($$('div').addClass('se-description').html(node.description));
