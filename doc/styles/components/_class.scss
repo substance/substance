@@ -11,6 +11,10 @@
     margin-bottom: $node-margin-bottom;
   }
 
+  &> .se-constructor {
+    margin-bottom: $node-margin-bottom;
+  }
+
   &> .sc-example {
     margin-bottom: $subsection-margin-bottom;
   }

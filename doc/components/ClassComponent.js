@@ -29,10 +29,6 @@ ClassComponent.Prototype = function() {
     el.append(
       $$('div').addClass('se-description').html(node.description)
     );
-    // example
-    if (node.example) {
-      el.append($$(Example, {node: node}));
-    }
 
     var constructorEl = $$('div')
       .addClass('se-constructor sc-method')
@@ -43,6 +39,11 @@ ClassComponent.Prototype = function() {
     }
 
     el.append(constructorEl);
+
+    // example
+    if (node.example) {
+      el.append($$(Example, {node: node}));
+    }
 
     // class members
     el.append(
