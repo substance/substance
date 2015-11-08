@@ -90,8 +90,9 @@ _Parser.Prototype = function() {
           return;
         }
       }
-      if (entity.ctx && entity.type === "method" && entity.ctx.constructor) {
-        var clazz = entity.ctx.constructor;
+      // for prototype members dox extracts the constructor name
+      if (entity.ctx && entity.ctx.cons) {
+        var clazz = entity.ctx.cons;
         if (entities[clazz] && entities[clazz].type === "class") {
           entities[clazz].members.push(entity);
           return;
@@ -190,8 +191,8 @@ _Parser.Prototype = function() {
     if (entity.ctx) {
       if (entity.ctx.receiver) {
         id = entity.ctx.receiver + ".";
-      } else if (entity.ctx.hasOwnProperty('constructor')) {
-        id = entity.ctx.constructor + ".prototype.";
+      } else if (entity.ctx.cons) {
+        id = entity.ctx.cons + ".prototype.";
       }
     }
     id += entity.name;
