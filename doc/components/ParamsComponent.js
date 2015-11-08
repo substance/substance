@@ -12,6 +12,7 @@ ParamsComponent.Prototype = function() {
   this.render = function() {
     var el = $$('div').addClass('sc-params');
     var params = this.props.params;
+    var returns = this.props.returns;
 
     if (params.length > 0) {
       el.append($$('div').addClass('se-label').append(this.i18n.t('parameters')));
@@ -27,6 +28,17 @@ ParamsComponent.Prototype = function() {
         );
       });
       el.append(paramsTable);
+    }
+    if (returns) {
+      el.append($$('div').addClass('se-returns se-label').append(this.i18n.t('returns')));
+      el.append(
+        $$('table').addClass('se-params-table').append(
+          $$('tr').addClass('se-param').append(
+            $$('td').addClass('se-param-type').append(returns.type),
+            $$('td').addClass('se-param-description').html(returns.description)
+          )
+        )
+      );
     }
     return el;
   };

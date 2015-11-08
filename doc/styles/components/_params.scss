@@ -7,9 +7,9 @@
     font-weight: bold;
   }
 
-  .se-params-table {
+  > .se-params-table {
     font-size: $font-size-small;
-    
+
     margin-left: 20px;
 
     .se-param-name {
@@ -22,5 +22,9 @@
       padding-right: 20px;
       color: #999;
     }
+  }
+
+  > .se-params-table + .se-returns {
+    margin-top: 10px;
   }
 }

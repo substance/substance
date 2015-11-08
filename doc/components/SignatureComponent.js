@@ -40,8 +40,8 @@ SignatureComponent.Prototype = function() {
     );
 
     // param description
-    if (node.params.length > 0) {
-      el.append($$(Params, {params: node.params}));
+    if (node.params.length > 0 || node.returns) {
+      el.append($$(Params, {params: node.params, returns: node.returns}));
     }
 
     // // if given a message indicating that this method has been inherited
