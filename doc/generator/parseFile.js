@@ -4,9 +4,8 @@ var fs = require('fs');
 var path = require('path');
 var each = require('lodash/collection/each');
 var dox = require('dox');
-var markedOptions = require('./markedOptions');
-var markdown = require('marked');
-markdown.setOptions(markedOptions);
+var markdown = require('./markdownConverter');
+dox.setMarkdownConverter(markdown);
 
 /**
  * Parses a javascript file and extracts nodes as JSON objects
@@ -312,7 +311,7 @@ _Parser.Prototype = function() {
   function _extractExample(str) {
     var firstLineBreak = str.indexOf("\n");
     var header, body;
-    if (firstLineBreak > 0) {
+    if (firstLineBreak >= 0) {
       header = str.slice(0, firstLineBreak).trim();
       body = str.slice(firstLineBreak);
       body = dox.trimIndentation(body);
@@ -320,7 +319,7 @@ _Parser.Prototype = function() {
       header = undefined;
       body = str.trim();
     }
-    return markdown(body);
+    return markdown.toHtml(body);
   }
 
 };
@@ -345,7 +344,5 @@ dox.parseTagTypes = function(str, tag) {
     return _parseTagTypes(str, tag);
   }
 };
-
-dox.setMarkedOptions(markedOptions);
 
 module.exports = parseFile;

@@ -390,46 +390,45 @@ Surface.Prototype = function() {
   };
 
   /**
-   * Run a transformation as a transaction properly configured for this surface.
-   * @param beforeState (optional) use this to override the default before-state (e.g. to use a different the initial selection).
-   * @param transformation a (surface) transformation function(tx, args) which receives
-   *                       the selection the transaction was started with, and should return
-   *                       output arguments containing a selection, as well.
-   * @param ctx (optional) will be used as `this` object when calling the transformation.
-   *
-   * @example
-   *
-   * - Returning a new selection:
-   *
-   *   ```js
-   *   surface.transaction(function(tx, args) {
-   *     var selection = args.selection;
-   *     ...
-   *     selection = tx.createSelection(...);
-   *     return {
-   *       selection: selection
-   *     };
-   *   });
-   *   ```
-   *
-   * - Reusing the current selection:
-   *
-   *   ```js
-   *   surface.transaction(function(tx, args) {
-   *     ...
-   *     this.foo();
-   *     ...
-   *     return args;
-   *   }, this);
-   *   ```
-   *
-   * - Adding custom information to the transaction:
-   *
-   *   ```js
-   *   surface.transaction(beforeState, function(tx, args) {
-   *     ...
-   *   });
-   *   ```
+    Run a transformation as a transaction properly configured for this surface.
+
+    @param beforeState (optional) use this to override the default before-state (e.g. to use a different the initial selection).
+    @param transformation a (surface) transformation function(tx, args) which receives
+                          the selection the transaction was started with, and should return
+                          output arguments containing a selection, as well.
+    @param ctx (optional) will be used as `this` object when calling the transformation.
+
+    @example
+
+    Returning a new selection:
+    ```js
+    surface.transaction(function(tx, args) {
+      var selection = args.selection;
+      ...
+      selection = tx.createSelection(...);
+      return {
+        selection: selection
+      };
+    });
+    ```
+
+    Reusing the current selection:
+    ```js
+    surface.transaction(function(tx, args) {
+      ...
+      this.foo();
+      ...
+      return args;
+    }, this);
+    ```
+
+    Adding custom information to the transaction:
+
+    ```js
+    surface.transaction(beforeState, function(tx, args) {
+      ...
+    });
+    ```
    */
   this.transaction = function(transformation, ctx) {
     // `beforeState` is saved with the document operation and will be used

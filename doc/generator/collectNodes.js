@@ -6,9 +6,7 @@ var each = require('lodash/collection/each');
 var map = require('lodash/collection/map');
 var parseFile = require('./parseFile');
 
-var markdown = require('marked');
-var markedOptions = require('./markedOptions');
-markdown.setOptions(markedOptions);
+var markdown = require('./markdownConverter');
 
 function collectNodes(config) {
 
@@ -78,7 +76,7 @@ function _collectNamespaceDocs(config) {
     var folder = path.dirname(mdFile);
     var id = folder;
     var data = fs.readFileSync(mdFile, 'utf8');
-    docs[id] = markdown(data);
+    docs[id] = markdown.toHtml(data);
   });
 
   return docs;

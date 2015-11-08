@@ -24,10 +24,10 @@ var $$ = Component.$$;
   var MyAnnotator = Component.extend({
     render: function() {
       var annotator = $$(ContainerAnnotator, {
-      name: 'main',
-      containerId: 'main',
-      doc: doc,
-      commands: [ToggleStrong]
+        name: 'main',
+        containerId: 'main',
+        doc: doc,
+        commands: [ToggleStrong]
       }).ref('annotator');
       return $$('div').addClass('my-annotator').append(annotator);
     }
