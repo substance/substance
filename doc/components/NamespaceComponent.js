@@ -19,7 +19,10 @@ NamespaceComponent.Prototype = function() {
       .append(
         $$('div').addClass('se-name').html(node.id),
         $$('div').addClass('se-description').html(node.description),
-        $$('div').addClass('se-members').append(this._renderMembers())
+        $$('div').addClass('se-members').append(this._renderMembers()),
+        $$('div').addClass('se-node-type')
+          .addClass(node.type)
+          .append('namespace')
       );
   };
 };
