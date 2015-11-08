@@ -1,0 +1,28 @@
+.sc-signature {
+
+  // border: 1px solid #ddd;
+  // border-left: 3px solid #ddd;
+  // padding-left: 20px;
+
+  &> .se-declaration {
+    font-size: $font-size-level-2;
+    font-weight: bold;
+    font-family: Consolas, 'Liberation Mono', Menlo, Courier, monospace;
+    padding-bottom: 5px;
+    margin-bottom: $element-margin-bottom;
+
+    .se-context {
+      color: #333;
+      font-weight: normal;
+    }
+  }
+
+  .se-inherited-from {
+    font-size: $font-size-small;
+
+    .se-label {
+      margin-right: 5px;
+    }
+  }
+
+}

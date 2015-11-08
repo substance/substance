@@ -66,4 +66,32 @@ Documentation.Prototype = function() {
 oo.inherit(Documentation, Document);
 Documentation.schema = schema;
 
+Documentation.getNodeInfo = function(node) {
+  var info = {
+    isClassMember: false,
+    isModuleMember: false,
+    isConstructor: false,
+    storage: ""
+  }
+  var hasParent = node.hasParent();
+  var parent;
+  if (hasParent) {
+    parent = node.getParent();
+    info.isClassMember = (parent.type === "class");
+    info.isModuleMember = (parent.type === "module");
+  } else if (node.type === "class") {
+    info.isConstructor = true;
+  }
+  if (node.isStatic) {
+    info.storage = 'static ';
+  } else if (info.isClassMember) {
+    info.storage = 'this.';
+  } else if (info.isModuleMember) {
+    info.storage = parent.name + '.';
+  } else if (info.isConstructor) {
+    info.storage = "new ";
+  }
+  return info;
+};
+
 module.exports = Documentation;

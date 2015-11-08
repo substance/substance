@@ -7,21 +7,12 @@
     margin-bottom: $node-margin-bottom;
   }
 
-  &> .se-api {
-
-    border-left: 3px solid #ddd;
-    padding-left: 20px;
+  &> .sc-signature {
     margin-bottom: $node-margin-bottom;
+  }
 
-    &> .se-signature {
-
-      font-size: $font-size-level-2;
-      font-weight: bold;
-      font-family: Consolas, 'Liberation Mono', Menlo, Courier, monospace;
-      padding-bottom: 5px;
-
-    }
-
+  &> .se-description {
+    margin-bottom: $node-margin-bottom;
   }
 
   margin-bottom: $subsection-margin-bottom;

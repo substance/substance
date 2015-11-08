@@ -11,7 +11,7 @@ var PropertyNode = Node.extend({
     isStatic: 'boolean',
     description: 'string', // HTML
     example: 'string' // HTML
-  }
+  },
 });
 
 module.exports = PropertyNode;

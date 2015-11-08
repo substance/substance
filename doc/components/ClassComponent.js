@@ -4,10 +4,9 @@ var oo = require('../../util/oo');
 var Component = require('../../ui/Component');
 var DocumentationNodeComponent = require('./DocumentationNodeComponent');
 var $$ = Component.$$;
-var pluck = require('lodash/collection/pluck');
 var each = require('lodash/collection/each');
 
-var Params = require('./ParamsComponent');
+var Signature = require('./SignatureComponent');
 var Heading = require('./HeadingComponent');
 var Example = require('./ExampleComponent');
 var MethodComponent = require('./MethodComponent');
@@ -29,22 +28,15 @@ ClassComponent.Prototype = function() {
     el.append(
       $$('div').addClass('se-description').html(node.description)
     );
-
-    var constructorEl = $$('div')
-      .addClass('se-constructor sc-method')
-      .append(this.renderSignature());
-
-    if (node.params.length > 0) {
-      constructorEl.append($$(Params, {params: node.params}));
-    }
-
-    el.append(constructorEl);
-
+    // constructor
+    el.append(
+      $$('div').addClass('se-constructor sc-method')
+        .append($$(Signature, {node: node}))
+    );
     // example
     if (node.example) {
       el.append($$(Example, {node: node}));
     }
-
     // class members
     el.append(
       $$('div').addClass('se-members')
@@ -54,14 +46,6 @@ ClassComponent.Prototype = function() {
     return el;
   };
 
-  this.renderSignature = function() {
-    var paramSig = pluck(this.props.node.params, 'name').join(', ');
-    var sig = ['new ', this.props.node.name, '(', paramSig, ')'];
-    return $$('div').addClass('se-signature').append(
-      $$('span').addClass('se-context').append('Constructor: '),
-      $$('span').append(sig)
-    );
-  };
 
   this.renderInheritedMembers = function() {
     var node = this.props.node;

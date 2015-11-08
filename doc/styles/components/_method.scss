@@ -1,38 +1,14 @@
 .sc-method {
 
-  border-left: 3px solid #ddd;
-  // border: 1px solid #ddd;
+  border-left: 1px solid #ddd;
   padding-left: 20px;
 
-  &> .se-signature {
-    font-size: $font-size-level-2;
-    font-weight: bold;
-    font-family: Consolas, 'Liberation Mono', Menlo, Courier, monospace;
-    // font-size: 15px;
-    padding-bottom: 5px;
-    // border-bottom: solid 1px #eee;
-    // margin-bottom: 10px;
-
-    .se-context {
-      color: #333;
-      font-weight: normal;
-    }
+  &> .sc-signature {
+    margin-bottom: $node-margin-bottom;
   }
 
   &> .se-description {
     margin-bottom: $node-margin-bottom;
-  }
-
-  &> .sc-params {
-    margin-bottom: $node-margin-bottom;
-  }
-
-  .se-inherited-from {
-    font-size: $font-size-small;
-
-    .se-label {
-      margin-right: 5px;
-    }
   }
 
   margin-bottom: $node-margin-bottom;

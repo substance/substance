@@ -14,7 +14,6 @@ var DEFAULT_TOOLSTATE = {
  * Listens to changes on the document and selection and updates registered tools accordingly.
  *
  * @class
- * @memberof module:ui
  */
 function ToolManager(controller) {
   if (!controller) {

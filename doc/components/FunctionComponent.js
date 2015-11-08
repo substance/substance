@@ -6,7 +6,7 @@ var Component = require('../../ui/Component');
 var $$ = Component.$$;
 
 var Heading = require('./HeadingComponent');
-var Params = require('./ParamsComponent');
+var Signature = require('./SignatureComponent');
 var Example = require('./ExampleComponent');
 
 function FunctionComponent() {
@@ -27,12 +27,7 @@ FunctionComponent.Prototype = function() {
     el.append($$(Heading, {namespace: node.namespace, name: node.name + "()", type: node.type}));
 
     //signature
-    var api = $$('div').addClass('se-api')
-      .append(this.renderSignature());
-    if (node.params.length > 0) {
-      api.append($$(Params, {params: node.params}));
-    }
-    el.append(api);
+    el.append($$(Signature, {node: node}));
 
     // description
     el.append($$('div').addClass('se-description').html(node.description));

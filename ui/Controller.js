@@ -44,6 +44,11 @@ function Controller() {
   this._initializeCommandRegistry(config.controller.commands);
   this.clipboard = new Clipboard(this, this.props.doc.getClipboardImporter(), this.props.doc.getClipboardExporter());
 
+  /**
+   * Manages tools.
+   *
+   * @type ui.ToolManager
+   */
   this.toolManager = new ToolManager(this);
   this._initialize(this.props);
   this.handleStateUpdate(this.state);
@@ -465,7 +470,7 @@ Controller.Prototype = function() {
 
 /**
   Controller static method. This is just to test documentation
-    
+
   @param {String} a a string
   @param {String} b another string
   @static
