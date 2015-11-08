@@ -1,8 +1,8 @@
 .sc-method {
 
   // border-left: 3px solid #eee;
-  border: 1px solid #ddd;
-  padding: 20px;
+  // border: 1px solid #ddd;
+  // padding: 20px;
 
 
   &> .se-signature {
@@ -12,7 +12,7 @@
     font-size: 15px;
     padding-bottom: 5px;
     // border-bottom: solid 1px #eee;
-    margin-bottom: $node-margin-bottom;
+    // margin-bottom: $node-margin-bottom;
 
     .se-context {
       color: #333;
