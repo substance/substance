@@ -26,6 +26,8 @@ PropertyComponent.Prototype = function() {
         .append($$('span').addClass('se-visibility').append(visibility))
         .append($$('span').addClass('se-storage').append(info.storage))
         .append($$('span').addClass('se-name').append(node.name))
+        .append(': ')
+        .append($$('span').addClass('se-type').append(node.dataType))
     );
     // description
     el.append($$('div').addClass('se-description').html(node.description));
