@@ -157,7 +157,7 @@ Controller.Prototype = function() {
     info object, describing the action that has been performed.
     After execution a `command:executed` event is emitted on the controller.
 
-    @param commandName {String} the command name
+    @param {String} commandName the command name
     @return {ui/ControllerCommand} A controller command
   */
   this.executeCommand = function(commandName) {

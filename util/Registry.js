@@ -6,7 +6,7 @@ var oo = require('./oo');
  * Simple registry implementation.
  *
  * @class Registry
- * @memberof module:Basics
+ * @private
  */
 function Registry() {
   this.entries = {};

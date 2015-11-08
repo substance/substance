@@ -24,10 +24,9 @@ var ContainerNodeMixin = require('./ContainerNodeMixin');
  *
  * @constructor
  * @class
- * @extends module:ui/Surface
- * @memberof module:ui
  * @example
- *
+ * 
+ * ```
  * var ContainerEditor = require('substance/ui/ContainerEditor');
  * var Component = require('substance/ui/Component');
  * var ToggleStrong = require('substance/packages/strong/ToggleStrong');
@@ -43,6 +42,7 @@ var ContainerNodeMixin = require('./ContainerNodeMixin');
  *     return $$('div').addClass('my-editor').append(editor);
  *   }
  * });
+ * ```
  *
  */
 

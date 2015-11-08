@@ -34,12 +34,15 @@ ClassComponent.Prototype = function() {
       el.append($$(Example, {node: node}));
     }
 
-    // constructor signature and parameter desciption
-    el.append(
-      $$('div').addClass('se-constructor sc-method')
-        .append(this.renderSignature())
-        .append($$(Params, {params: node.params}))
-    );
+    var constructorEl = $$('div')
+      .addClass('se-constructor sc-method')
+      .append(this.renderSignature());
+
+    if (node.params.length > 0) {
+      constructorEl.append($$(Params, {params: node.params}));
+    }
+
+    el.append(constructorEl);
 
     // class members
     el.append(
