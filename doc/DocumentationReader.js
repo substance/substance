@@ -19,7 +19,7 @@ var _loadDocument = function(cb) {
     if (err) { console.error(err); cb(err); }
     var doc = importDocumentation(rawDoc);
     window.doc = doc;
-    console.log('LE DOC', doc);
+    // console.log('LE DOC', doc);
     cb(null, doc);
   });
 };
@@ -42,7 +42,7 @@ var DocumentationReader = DocumentationController.extend({
           'module': require('./components/ModuleComponent'),
           'component': require('./components/ComponentComponent'),
           'property': require('./components/PropertyComponent'),
-          'toc': require('../ui/TocPanel')
+          'toc': require('./components/DocumentationTocPanel')
         }
       },
       panelOrder: ['toc'],

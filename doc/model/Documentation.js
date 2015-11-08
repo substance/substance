@@ -18,7 +18,7 @@ schema.addNodes([
 
 var Documentation = function() {
   Document.call(this, schema);
-  
+
   this.create({
     type: "container",
     id: "body",
@@ -27,16 +27,39 @@ var Documentation = function() {
 };
 
 Documentation.Prototype = function() {
-this.getTOCNodes = function() {
+
+  this.getTOCNodes = function() {
     var tocNodes = [];
+    var doc = this;
     var contentNodes = this.get('body').nodes;
-    contentNodes.forEach(function(nodeId) {
-      var node = this.get(nodeId);
-      if (node.type === "heading") {
-        tocNodes.push(node);
-      }
+    contentNodes.forEach(function(nsId) {
+      var ns = this.get(nsId);
+      tocNodes.push(ns);
+
+      var nsMembers = doc.getMembers(ns);
+      nsMembers.forEach(function(member) {
+        tocNodes.push(member);
+        if (member.type === "class" || member.type === "module") {
+          tocNodes = tocNodes.concat(doc.getMembers(member));
+        }
+      });
+
     }.bind(this));
     return tocNodes;
+  };
+
+  this.getMembers = function(node) {
+    var members = [];
+    if (node.members) {
+      var doc = this;
+      node.members.forEach(function(memberId) {
+        var member = doc.get(memberId);
+        if (member) {
+          members.push(member);
+        }
+      });
+    }
+    return members;
   };
 };
 

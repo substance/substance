@@ -14,9 +14,11 @@ var NamespaceNode = Node.extend({
     members: ['array', 'id'],
     name: 'string',
     description: 'string' // HTML
-  }
+  },
 });
 
 NamespaceNode.static.blockType = true;
+NamespaceNode.static.components = [];
+
 
 module.exports = NamespaceNode;
