@@ -4,8 +4,11 @@ var oo = require('../util/oo');
 var Tool = require('./Tool');
 
 /*
+ * 
  * Abstract class for tools that interact with the selection of active surface.
  * A surfaceManager context must be provided via dependency injection.
+ * 
+ * @class
  */
 
 function SurfaceTool() {

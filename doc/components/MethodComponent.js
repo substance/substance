@@ -40,9 +40,12 @@ MethodComponent.Prototype = function() {
 
     // the method signature, such as Document.prototype.getNodes()
     el.append(
-      this.renderSignature(),
-      $$(Params, {params: node.params})
+      this.renderSignature()
     );
+
+    if (node.params.length > 0) {
+      el.append($$(Params, {params: node.params}));
+    }
 
     // if given a message indicating that this method has been inherited
     if (this.props.inheritedFrom) {

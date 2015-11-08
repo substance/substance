@@ -12,7 +12,7 @@ HeadingComponent.Prototype = function() {
   this.render = function() {
     var node = this.props.node;
     return $$('div').addClass('sc-heading').append(
-      $$('span').addClass('se-namespace').append(node.namespace + ' / '),
+      $$('span').addClass('se-namespace').append(node.namespace.split('/').join(' / ') + ' / '),
       $$('span').addClass('se-name').append(node.name),
       $$('div')
         .addClass('se-node-type')

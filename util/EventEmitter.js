@@ -3,10 +3,11 @@
 var oo = require("./oo");
 
 /**
- * Event support.
- *
- * @class
- */
+  Event support.
+ 
+  @class
+  @private
+*/
 function EventEmitter() {
   this.__events__ = {};
 }

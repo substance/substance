@@ -35,6 +35,12 @@
 // Code highlighting
 @import '../node_modules/highlight.js/styles/github';
 
+pre {
+  font-size: 12px;
+  font-family: Consolas, 'Liberation Mono', Menlo, Courier, monospace;
+}
+
+
 body {
   font-size: 15px;
 }
