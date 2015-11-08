@@ -43,10 +43,6 @@ MethodComponent.Prototype = function() {
       this.renderSignature()
     );
 
-    if (node.params.length > 0) {
-      el.append($$(Params, {params: node.params}));
-    }
-
     // if given a message indicating that this method has been inherited
     if (this.props.inheritedFrom) {
       el.append(
@@ -64,6 +60,10 @@ MethodComponent.Prototype = function() {
     el.append(
       $$('div').addClass('se-description').html(node.description)
     );
+
+    if (node.params.length > 0) {
+      el.append($$(Params, {params: node.params}));
+    }
 
     if (node.example) {
       el.append($$(Example, {node:node}));
