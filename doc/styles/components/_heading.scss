@@ -2,6 +2,11 @@
     font-size: $font-size-level-1;
     position: relative;
 
+    padding-bottom: 10px;
+    padding-top: 10px;
+    border-bottom: solid 1px #ccc;
+    margin-bottom: $node-margin-bottom;
+
     .se-name {
       font-weight: bold;
     }
@@ -9,7 +14,7 @@
     .se-node-type {
       position: absolute;
       font-size: 13px;
-      top: 0px;
+      top: 10px;
       right: 0px;
 
       color: #888;
