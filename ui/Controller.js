@@ -197,7 +197,7 @@ Controller.Prototype = function() {
   /**
    * Get Surface instance
    *
-   * @param name {String} Name under which the surface is registered
+   * @param {String} name Name under which the surface is registered
    * @return {ui/Surface} The surface instance
    */
 
