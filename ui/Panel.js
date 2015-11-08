@@ -78,7 +78,7 @@ Panel.Prototype = function() {
     var panelContentEl = this.getScrollableContainer();
 
     // Node we want to scroll to
-    var targetNode = $(panelContentEl).find("*[data-id="+nodeId+"]")[0];
+    var targetNode = $(panelContentEl).find('*[data-id="'+nodeId+'"]')[0];
 
     if (targetNode) {
       $(panelContentEl).scrollTop(this.getPanelOffsetForElement(targetNode));
