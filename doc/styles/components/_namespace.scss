@@ -3,9 +3,10 @@
   position: relative;
 
   &> .se-name {
-    font-size: $font-size-normal;
-    color: #777;
-    border-bottom: 1px solid #ddd;
+    font-size: $font-size-level-0;
+    // color: #777;
+    font-weight: bold;
+    // border-bottom: 1px solid #ddd;
     margin-bottom: 20px;
   }
 

@@ -8,12 +8,17 @@ $subsection-margin-bottom: 20px;
 // after a regular nodes (i.e., after a class method)
 // or places where we want to have the same effect
 $node-margin-bottom: 20px;
-
+// For namespace titles
+$font-size-level-0: 27px;
 // font-size for heading 1 and alike
 $font-size-level-1: 20px;
 // font-size for heading 2  and alike
 $font-size-level-2: 17px;
 // font-size for normal text
-$font-size-normal: 15px;
+$font-size-normal: 14px;
 // font-size for small text
 $font-size-small: 10px;
+// font-size for example codes
+$font-size-codeblock: 12px;
+// code-font
+$font-family-code: Consolas, 'Liberation Mono', Menlo, Courier, monospace;

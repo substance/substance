@@ -34,6 +34,7 @@ I18n.instance.load(require('../i18n/en'));
 function Controller() {
   Component.apply(this, arguments);
   if (!this.props.doc) throw new Error('Controller requires a Substance document instance');
+
   this.surfaces = {};
   this.focusedSurface = null;
   this.stack = [];
@@ -42,6 +43,7 @@ function Controller() {
   this._initializeComponentRegistry(config.controller.components);
   this._initializeCommandRegistry(config.controller.commands);
   this.clipboard = new Clipboard(this, this.props.doc.getClipboardImporter(), this.props.doc.getClipboardExporter());
+
   this.toolManager = new ToolManager(this);
   this._initialize(this.props);
   this.handleStateUpdate(this.state);
@@ -459,6 +461,18 @@ Controller.Prototype = function() {
   this.render = function() {
     throw new Error('Controller.prototype.render is abstract. You need to define your own controller component');
   };
+};
+
+/**
+  Controller static method. This is just to test documentation
+    
+  @param {String} a a string
+  @param {String} b another string
+  @static
+  @return {String} The result of the static method
+*/
+Controller.concatStrings = function(a, b) {
+  return a.concat(b);
 };
 
 /**

@@ -37,13 +37,13 @@
 @import '../node_modules/highlight.js/styles/github';
 
 pre {
-  font-size: 12px;
-  font-family: Consolas, 'Liberation Mono', Menlo, Courier, monospace;
+  font-size: $font-size-codeblock;
+  font-family: $font-family-code;
 }
 
 
 body {
-  font-size: 15px;
+  font-size: $font-size-normal;
 }
 
 .sc-documentation-reader {
