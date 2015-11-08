@@ -6,6 +6,7 @@ var Component = require('../../ui/Component');
 var $$ = Component.$$;
 
 var Heading = require('./HeadingComponent');
+var Params = require('./ParamsComponent');
 var Example = require('./ExampleComponent');
 
 function FunctionComponent() {
@@ -21,10 +22,18 @@ FunctionComponent.Prototype = function() {
     var el = $$('div')
       .addClass('sc-function')
       .attr("data-id", node.id);
+
     // header
-    el.append($$(Heading, {node: node}));
+    el.append($$(Heading, {namespace: node.namespace, name: node.name + "()", type: node.type}));
+
     //signature
-    el.append(this.renderSignature());
+    var api = $$('div').addClass('se-api')
+      .append(this.renderSignature());
+    if (node.params.length > 0) {
+      api.append($$(Params, {params: node.params}));
+    }
+    el.append(api);
+
     // description
     el.append($$('div').addClass('se-description').html(node.description));
     // example
@@ -38,11 +47,7 @@ FunctionComponent.Prototype = function() {
     var node = this.props.node;
     var paramSig = pluck(node.params, 'name').join(', ');
     var signature = [node.name, '(', paramSig, ')'];
-    return $$('div').addClass('se-signature')
-      .append(
-        $$('span').addClass('se-context').append(node.id + "/"),
-        $$('span').append(signature)
-      );
+    return $$('div').addClass('se-signature').append(signature);
   };
 
 };

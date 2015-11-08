@@ -7,13 +7,11 @@ var annotationHelpers = require('../annotationHelpers');
 /* jshint latedef: false */
 
 /**
- * Break node
- * 
- * Used when you hit ENTER inside a paragraph
- * 
- * @function
- * @params args object with fields `selection`, `containerId`
- * @memberof module:model/transform
+  A transformation that breaks a node at the current position,
+  e.g.,Used when you hit ENTER inside a paragraph
+
+  @param {model/TransactionDocument} tx the document instance
+  @param {Object} args object with fields `selection`, `containerId`
  */
 function breakNode(tx, args) {
   if (!args.selection) {
