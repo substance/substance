@@ -23,7 +23,7 @@ MethodComponent.Prototype = function() {
     // context is either the class or module id
     // while the context for (non-static) instance methods is `MyClass.prototype`
     var context = parentNode.name + '.';
-    if (parentNode.type === 'class' && !node.static) {
+    if (parentNode.type === 'class' && !node.isStatic) {
       context += 'prototype.';
     }
     return $$('div').addClass('se-signature').append(
