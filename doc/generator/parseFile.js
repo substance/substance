@@ -3,6 +3,7 @@ var oo = require('../../util/oo');
 var fs = require('fs');
 var path = require('path');
 var each = require('lodash/collection/each');
+var extend = require('lodash/object/extend');
 var dox = require('dox');
 var markdown = require('./markdownConverter');
 dox.setMarkdownConverter(markdown);
@@ -137,6 +138,8 @@ _Parser.Prototype = function() {
         _convertClass(this, nodes, entity, node);
       } else if (entity.type === "module") {
         _convertModule(this, nodes, entity, node);
+      } else if (entity.type === "event") {
+        _convertEvent(this, nodes, entity, node);
       } else {
         console.error('FIXME: convert to node', entity.ctx);
         return;
@@ -157,6 +160,9 @@ _Parser.Prototype = function() {
       entity.type = entity.ctx.type;
       entity.name = entity.ctx.name;
     }
+    // in most cases, we use the source line of the associated code (first code line after comment block)
+    entity.sourceLine = entity.codeStart;
+
     each(entity.tags, function(tag) {
       if (tag.type === "export") {
         entity.isExported = true;
@@ -168,6 +174,11 @@ _Parser.Prototype = function() {
         entity.isModule = true;
         entity.type = "module";
         entity.members = [];
+      } else if (tag.type === "event") {
+        entity.type = "event";
+        // there is no code location we can associate, so we take the comment location.
+        entity.sourceLine = entity.line;
+        extend(entity, _extractEventInfo(this, tag));
       } else if (tag.type === "abstract") {
         entity.isAbstract = true;
       } else if (tag.type === "extends") {
@@ -185,17 +196,19 @@ _Parser.Prototype = function() {
       } else if (tag.type === "type") {
         entity.dataType = tag.string;
       }
-    });
-    var id = "";
-    if (entity.ctx) {
-      if (entity.ctx.receiver) {
-        id = entity.ctx.receiver + ".";
-      } else if (entity.ctx.cons) {
-        id = entity.ctx.cons + ".prototype.";
+    }, this);
+    if (!entity.id) {
+      var id = "";
+      if (entity.ctx) {
+        if (entity.ctx.receiver) {
+          id = entity.ctx.receiver + ".";
+        } else if (entity.ctx.cons) {
+          id = entity.ctx.cons + ".prototype.";
+        }
       }
+      id += entity.name;
+      entity.id = id;
     }
-    id += entity.name;
-    entity.id = id;
   };
 
   this._supportedTypes = {
@@ -204,13 +217,14 @@ _Parser.Prototype = function() {
     "function": true,
     "method": true,
     "property": true,
+    "event": true
   };
 
   function _createNode(self, entity, node) {
     node.name = entity.name;
     node.example = entity.example;
     node.sourceFile = self.file;
-    node.sourceLine = entity.codeStart;
+    node.sourceLine = entity.sourceLine;
     return node;
   }
 
@@ -223,16 +237,9 @@ _Parser.Prototype = function() {
         id: node.id + "." + member.name,
         parent: node.id,
       });
-      if (member.type === 'method') {
-        convertMethod(self, member, memberNode);
-      } else if (member.type === "property") {
-        _convertProperty(self, member, memberNode);
-      } else if (member.type === "class") {
-        _convertClass(self, nodes, member, memberNode);
-      } else {
-        console.error('Not implemented yet: converter for class member', member.ctx);
-        return;
-      }
+
+      _convertMember(self, nodes, member, memberNode);
+
       nodes.push(memberNode);
       node.members.push(memberNode.id);
     });
@@ -251,25 +258,37 @@ _Parser.Prototype = function() {
       var memberNode = _createNode(self, member, {
         parent: node.id,
       });
-      if (member.isStatic) {
-        memberNode.id = node.id + "." + member.ctx.name;
+      var sep;
+      if (member.isEvent) {
+        sep = "@";
+      } else if (member.isStatic) {
+        sep = ".";
         memberNode.isStatic = true;
       } else {
-        memberNode.id = node.id + "#" + member.ctx.name;
+        sep = "#";
       }
-      if (member.type === 'method') {
-        convertMethod(self, member, memberNode);
-      } else if (member.type === "property") {
-        _convertProperty(self, member, memberNode);
-      } else if (member.type === "class") {
-        _convertClass(self, nodes, member, memberNode);
-      } else {
-        console.error('Not implemented yet: converter for class member', member.ctx);
-        return;
-      }
+      memberNode.id = node.id + sep + member.name;
+
+      _convertMember(self, nodes, member, memberNode);
+
       nodes.push(memberNode);
       node.members.push(memberNode.id);
     });
+  }
+
+  function _convertMember(self, nodes, member, memberNode) {
+    if (member.type === 'method') {
+      _convertMethod(self, member, memberNode);
+    } else if (member.type === "property") {
+      _convertProperty(self, member, memberNode);
+    } else if (member.type === "event") {
+      _convertEvent(self, member, memberNode);
+    } else if (member.type === "class") {
+      _convertClass(self, nodes, member, memberNode);
+    } else {
+      console.error('Not implemented yet: converter for class member', member.ctx);
+      return;
+    }
   }
 
   function _convertFunction(self, entity, node) {
@@ -300,10 +319,15 @@ _Parser.Prototype = function() {
     });
   }
 
-  function convertMethod(self, entity, node) {
+  function _convertMethod(self, entity, node) {
     _convertFunction(self, entity, node);
     node.type = "method";
     node.isPrivate = entity.isPrivate;
+  }
+
+  function _convertEvent(self, entity, node) {
+    _convertFunction(self, entity, node);
+    node.type = "event";
   }
 
   function _convertProperty(self, entity, node) {
@@ -324,6 +348,26 @@ _Parser.Prototype = function() {
       body = str.trim();
     }
     return markdown.toHtml(body);
+  }
+
+  function _extractEventInfo(self, tag) {
+    var eventId = tag.string;
+    var parts = eventId.split('@');
+    var name = parts[1];
+    var receiver = parts[0];
+    // support global ids, i.e., `ui/Controller@command:executed`
+    var match = new RegExp("^"+self.folder+"/(.+)$").exec(receiver);
+    if (match) {
+      receiver = match[1];
+    }
+    var ctx = {
+      receiver: receiver
+    };
+    return {
+      id: eventId,
+      name: name,
+      ctx: ctx
+    };
   }
 
 };

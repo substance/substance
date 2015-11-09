@@ -6,6 +6,7 @@ module.exports = {
   'function': 'Function',
   'method': 'Method',
   'module': 'Module',
+  'event': 'Event',
   'defined_in': 'defined in',
   'returns': 'Returns',
   'extends': 'inherits from',

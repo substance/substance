@@ -26,10 +26,6 @@ I18n.instance.load(require('../i18n/en'));
   can be executed on the controller to update the document.
 
   @class
-
-  @fires ui/Controller#command:executed
-  @fires ui/Controller#selection:changed
-  @fires ui/Controller#document:saved
 */
 function Controller() {
   Component.apply(this, arguments);
@@ -485,13 +481,14 @@ Controller.concatStrings = function(a, b) {
   implementations to access UI components, UI components can listen to
   the `command:executed` event and perform necessary action then.
 
-  @event ui/Controller#command:executed
+  @event ui/Controller@command:executed
 
   @param info {object} information about the command execution
   @param commandName {String} the command name (e.g. 'strong', 'emphasis')
   @param cmd {ui/Command} the command instance
   @example
 
+  ```js
   LinkTool.Prototype = function() {
     this.didInitialize = function() {
       var ctrl = this.getController();
@@ -512,6 +509,7 @@ Controller.concatStrings = function(a, b) {
     };
     ...
   };
+  ```
 */
 
 /**
@@ -519,14 +517,14 @@ Controller.concatStrings = function(a, b) {
   Transports `sel` a DocumentSelection that can be expected but also the
   surface in which the selection change happened.
 
-  @event ui/Controller#selection:changed
+  @event ui/Controller@selection:changed
   @param cmd {ui/Command} the command instance
 */
 
 /**
   Emitted when a save workflow has been completed successfully.
 
-  @event ui/Controller#document:saved
+  @event ui/Controller@document:saved
 */
 
 oo.inherit(Controller, Component);

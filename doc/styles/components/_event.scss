@@ -1,0 +1,15 @@
+.sc-event {
+
+  &> .sc-heading {
+    font-size: $font-size-level-1;
+    padding-bottom: 10px;
+    // border-bottom: solid 1px #ccc;
+    margin-bottom: $node-margin-bottom;
+  }
+
+  &> .se-description {
+    margin-bottom: $node-margin-bottom;
+  }
+
+  margin-bottom: $subsection-margin-bottom;
+}

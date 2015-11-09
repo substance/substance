@@ -42,6 +42,7 @@ var DocumentationReader = DocumentationController.extend({
           'module': require('./components/ModuleComponent'),
           'component': require('./components/ComponentComponent'),
           'property': require('./components/PropertyComponent'),
+          'event': require('./components/EventComponent'),
           'toc': require('./components/DocumentationTocPanel')
         }
       },

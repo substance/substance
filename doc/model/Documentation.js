@@ -6,14 +6,15 @@ var Schema = require('../../model/DocumentSchema');
 var schema = new Schema('substance-documentation', '0.1.0');
 
 schema.addNodes([
+  require('./MetaNode'),
+  require('./NamespaceNode'),
+  require('./ModuleNode'),
+  require('./FunctionNode'),
   require('./ClassNode'),
   require('./MethodNode'),
-  require('./FunctionNode'),
-  require('./NamespaceNode'),
   require('./PropertyNode'),
-  require('./MetaNode'),
+  require('./EventNode'),
   require('./ComponentNode'),
-  require('./ModuleNode')
 ]);
 
 var Documentation = function() {
@@ -85,7 +86,7 @@ Documentation.getNodeInfo = function(node) {
     info.isConstructor = true;
   }
   // Derive storage
-  if (info.isClassMember) {
+  if (info.isClassMember && !node.isStatic) {
     info.storage = 'this.';
   } else if (info.isModuleMember) {
     info.storage = parent.name + '.';
