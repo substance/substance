@@ -8,8 +8,10 @@ var each = require('lodash/collection/each');
 
 var Signature = require('./SignatureComponent');
 var Heading = require('./HeadingComponent');
+var Params = require('./ParamsComponent');
 var Example = require('./ExampleComponent');
 var MethodComponent = require('./MethodComponent');
+
 
 function ClassComponent() {
   DocumentationNodeComponent.apply(this, arguments);
@@ -33,6 +35,10 @@ ClassComponent.Prototype = function() {
       $$('div').addClass('se-constructor sc-method')
         .append($$(Signature, {node: node}))
     );
+    // params
+    if (node.params.length > 0 || node.returns) {
+      el.append($$(Params, {params: node.params, returns: node.returns}));
+    }
     // example
     if (node.example) {
       el.append($$(Example, {node: node}));
@@ -45,7 +51,6 @@ ClassComponent.Prototype = function() {
     );
     return el;
   };
-
 
   this.renderInheritedMembers = function() {
     var node = this.props.node;

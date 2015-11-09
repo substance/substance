@@ -23,13 +23,18 @@ FunctionComponent.Prototype = function() {
       .addClass('sc-function')
       .attr("data-id", node.id);
     // header
-    el.append($$(Heading, {node: node}));
+    var args = pluck(node.params, 'name').join(', ');
+    var headingName = [node.name, '(', args, ')'];
+    el.append($$(Heading, {node: node, name: headingName}));
     //signature
-    el.append($$(Signature, {node: node}));
+    // el.append($$(Signature, {node: node}));
     // description
     el.append($$('div').addClass('se-description').html(node.description));
     // params
-    el.append($$(Params, {params: node.params, returns: node.returns}));
+    if (node.params.length > 0 || node.returns) {
+      el.append($$(Params, {params: node.params, returns: node.returns}));
+    }
+
     // example
     if (node.example) {
       el.append($$(Example, {node: node}));
