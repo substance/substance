@@ -5,9 +5,9 @@ var Node = require('../../model/DocumentNode');
 var MetaNode = Node.extend({
   name: 'meta',
   properties: {
-    title: 'string',
-    authors: ['array', 'string'],
-    abstract: 'string'
+    description: 'string', // HTML
+    repository: 'string', // https://github.com/substance/substance
+    sha: 'string',
   }
 });
 

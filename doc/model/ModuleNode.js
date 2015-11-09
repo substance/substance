@@ -9,7 +9,9 @@ var ModuleNode = Node.extend({
     namespace: 'string',
     members: ['array', 'property'], // ['model/documentHelpers.getAllAnnotations']
     description: 'string', // HTML
-  }
+    sourceFile: 'string', // util/oo.js
+    sourceLine: 'number'
+}
 });
 
 ModuleNode.static.blockType = true;

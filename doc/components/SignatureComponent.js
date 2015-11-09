@@ -7,6 +7,7 @@ var $$ = Component.$$;
 var Documentation = require('../model/Documentation');
 
 var Params = require('./ParamsComponent');
+var SourceLink = require('./SourceLinkComponent');
 
 function SignatureComponent() {
   Component.apply(this, arguments);
@@ -34,8 +35,7 @@ SignatureComponent.Prototype = function() {
       $$('div').addClass('se-source').append(
         $$('strong').append(info.typeDescr),
         $$('span').append(' defined in '),
-        // TODO: add actual file url
-        $$('a').attr({href: '#'}).append('model/Foo.js#41')
+        $$(SourceLink, {node: node})
       )
     );
 

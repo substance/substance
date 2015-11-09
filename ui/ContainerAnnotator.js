@@ -8,8 +8,8 @@ var $$ = Component.$$;
 
 /**
   Represents a flow annotator that manages a sequence of nodes in a container. Instantiate
-  this class using `Component.$$` within the render method of a component. Needs to be
-  instantiated within a {@link module:ui/Controller} context.
+  this class using {@link ui/Component.$$} within the render method of a component. Needs to be
+  instantiated within a {@link ui/Controller} context.
 
   @class
   @extends ui/ContainerEditor

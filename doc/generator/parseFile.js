@@ -115,12 +115,11 @@ _Parser.Prototype = function() {
     var nodes = [];
 
     each(entities, function(entity) {
-      var node = {
+      var node = _createNode(this, entity, {
         id: this.id + "." + entity.name,
         isDefault: entity.isDefault,
-        name: entity.name,
-        example: entity.example
-      };
+      });
+
       if (entity.isDefault) {
         node.namespace = this.folder;
       }
@@ -129,15 +128,15 @@ _Parser.Prototype = function() {
       }
       nodes.push(node);
       if (entity.type === "function") {
-        _convertFunction(entity, node);
+        _convertFunction(this, entity, node);
         node.isStatic = true;
       } else if (entity.type === "property") {
-        _convertProperty(entity, node);
+        _convertProperty(this, entity, node);
         node.isStatic = true;
       } else if (entity.type === "class") {
-        _convertClass(nodes, entity, node);
+        _convertClass(this, nodes, entity, node);
       } else if (entity.type === "module") {
-        _convertModule(nodes, entity, node);
+        _convertModule(this, nodes, entity, node);
       } else {
         console.error('FIXME: convert to node', entity.ctx);
         return;
@@ -207,23 +206,29 @@ _Parser.Prototype = function() {
     "property": true,
   };
 
-  function _convertModule(nodes, entity, node) {
+  function _createNode(self, entity, node) {
+    node.name = entity.name;
+    node.example = entity.example;
+    node.sourceFile = self.file;
+    node.sourceLine = entity.codeStart;
+    return node;
+  }
+
+  function _convertModule(self, nodes, entity, node) {
     node.type = "module";
     node.description = entity.description.full;
     node.members = [];
     each(entity.members, function(member) {
-      var memberNode = {
+      var memberNode = _createNode(self, member, {
         id: node.id + "." + member.name,
         parent: node.id,
-        name: member.name,
-        example: member.example
-      };
+      });
       if (member.type === 'method') {
-        convertMethod(member, memberNode);
+        convertMethod(self, member, memberNode);
       } else if (member.type === "property") {
-        _convertProperty(member, memberNode);
+        _convertProperty(self, member, memberNode);
       } else if (member.type === "class") {
-        _convertClass(nodes, member, memberNode);
+        _convertClass(self, nodes, member, memberNode);
       } else {
         console.error('Not implemented yet: converter for class member', member.ctx);
         return;
@@ -233,9 +238,9 @@ _Parser.Prototype = function() {
     });
   }
 
-  function _convertClass(nodes, entity, node) {
+  function _convertClass(self, nodes, entity, node) {
     // reuse the function converter to extract ctor arguments
-    _convertFunction(entity, node);
+    _convertFunction(self, entity, node);
 
     node.type = "class";
     node.isAbstract = entity.isAbstract;
@@ -243,11 +248,9 @@ _Parser.Prototype = function() {
     node.members = [];
 
     each(entity.members, function(member) {
-      var memberNode = {
-        name: member.name,
+      var memberNode = _createNode(self, member, {
         parent: node.id,
-        example: member.example
-      };
+      });
       if (member.isStatic) {
         memberNode.id = node.id + "." + member.ctx.name;
         memberNode.isStatic = true;
@@ -255,11 +258,11 @@ _Parser.Prototype = function() {
         memberNode.id = node.id + "#" + member.ctx.name;
       }
       if (member.type === 'method') {
-        convertMethod(member, memberNode);
+        convertMethod(self, member, memberNode);
       } else if (member.type === "property") {
-        _convertProperty(member, memberNode);
+        _convertProperty(self, member, memberNode);
       } else if (member.type === "class") {
-        _convertClass(nodes, member, memberNode);
+        _convertClass(self, nodes, member, memberNode);
       } else {
         console.error('Not implemented yet: converter for class member', member.ctx);
         return;
@@ -269,7 +272,7 @@ _Parser.Prototype = function() {
     });
   }
 
-  function _convertFunction(entity, node) {
+  function _convertFunction(self, entity, node) {
     node.type = "function";
     node.description = entity.description.full;
     node['params'] = [];
@@ -297,13 +300,13 @@ _Parser.Prototype = function() {
     });
   }
 
-  function convertMethod(entity, node) {
-    _convertFunction(entity, node);
+  function convertMethod(self, entity, node) {
+    _convertFunction(self, entity, node);
     node.type = "method";
     node.isPrivate = entity.isPrivate;
   }
 
-  function _convertProperty(entity, node) {
+  function _convertProperty(self, entity, node) {
     node.type = "property";
     node.description = entity.description.full;
     node.dataType = entity.dataType;
@@ -326,7 +329,6 @@ _Parser.Prototype = function() {
 };
 
 oo.initClass(_Parser);
-
 
 // DOX configuration
 

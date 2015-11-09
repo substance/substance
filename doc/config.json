@@ -1,3 +1,4 @@
 {
-  "folders": ["model", "ui", "util"]
+  "folders": ["model", "ui", "util"],
+  "repository": "https://github.com/substance/substance"
 }

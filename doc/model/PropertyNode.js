@@ -10,7 +10,9 @@ var PropertyNode = Node.extend({
     dataType: 'string',
     isStatic: 'boolean',
     description: 'string', // HTML
-    example: 'string' // HTML
+    example: 'string', // HTML
+    sourceFile: 'string', // ui/Component.js
+    sourceLine: 'number',
   },
 });
 

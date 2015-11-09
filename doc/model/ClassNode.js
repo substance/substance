@@ -15,7 +15,9 @@ var ClassNode = Node.extend({
     // Can not be named 'properties because of name conflict'
     // props: ['array', 'property'],
     description: 'string', // HTML
-    example: 'string' // HTML
+    example: 'string', // HTML
+    sourceFile: 'string', // ui/Component.js
+    sourceLine: 'number'
   }
 });
 

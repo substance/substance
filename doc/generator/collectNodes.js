@@ -2,6 +2,7 @@
 var fs = require('fs');
 var path = require('path');
 var glob = require('glob');
+var child_process = require('child_process');
 var each = require('lodash/collection/each');
 var map = require('lodash/collection/map');
 var parseFile = require('./parseFile');
@@ -53,6 +54,18 @@ function collectNodes(config) {
   });
   nodes = nodes.concat(map(namespaces));
 
+  var mainDoc = _loadDoc('index.md') || "";
+  var meta = {
+    type: "meta",
+    id: "meta",
+    description: mainDoc,
+    repository: config.repository,
+    sha: "master"
+  };
+  var out = child_process.execSync('git rev-parse HEAD');
+  meta.sha = out.toString().trim();
+  nodes.push(meta);
+
   return nodes;
 }
 
@@ -73,13 +86,18 @@ function _collectNamespaceDocs(config) {
 
   var docs = {};
   each(mdFiles, function(mdFile) {
-    var folder = path.dirname(mdFile);
-    var id = folder;
-    var data = fs.readFileSync(mdFile, 'utf8');
-    docs[id] = markdown.toHtml(data);
+    var id = path.dirname(mdFile);
+    docs[id] = _loadDoc(mdFile);
   });
 
   return docs;
+}
+
+function _loadDoc(mdFile) {
+  var data = fs.readFileSync(mdFile, 'utf8');
+  if (data) {
+    return markdown.toHtml(data);
+  }
 }
 
 module.exports = collectNodes;

@@ -3,7 +3,9 @@
 var oo = require('../../util/oo');
 var Component = require('../../ui/Component');
 var $$ = Component.$$;
+
 var Example = require('./ExampleComponent');
+var SourceLink = require('./SourceLinkComponent');
 var Documentation = require('../model/Documentation');
 
 function PropertyComponent() {
@@ -26,9 +28,15 @@ PropertyComponent.Prototype = function() {
         .append($$('span').addClass('se-visibility').append(visibility))
         .append($$('span').addClass('se-storage').append(info.storage))
         .append($$('span').addClass('se-name').append(node.name))
-        .append(': ')
-        .append($$('span').addClass('se-type').append(node.dataType))
     );
+    el.append(
+      $$('div').addClass('se-source').append(
+        $$('strong').append('Property'),
+        $$('span').append(' defined in '),
+        $$(SourceLink, {node: node})
+      )
+    );
+
     // description
     el.append($$('div').addClass('se-description').html(node.description));
     // example

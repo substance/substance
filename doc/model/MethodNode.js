@@ -12,8 +12,9 @@ var MethodNode = Node.extend({
     isStatic: 'boolean',
     isPrivate: 'boolean',
     description: 'string', // HTML
-    example: 'string' // HTML
-  }
+    example: 'string', // HTML
+    sourceFile: 'string', // ui/Component.js
+    sourceLine: 'number',  }
 });
 
 module.exports = MethodNode;

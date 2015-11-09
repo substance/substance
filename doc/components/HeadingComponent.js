@@ -3,6 +3,7 @@
 var oo = require('../../util/oo');
 var Component = require('../../ui/Component');
 var $$ = Component.$$;
+var SourceLink = require('./SourceLinkComponent');
 
 function HeadingComponent() {
   Component.apply(this, arguments);
@@ -10,12 +11,13 @@ function HeadingComponent() {
 
 HeadingComponent.Prototype = function() {
   this.render = function() {
-    var namespace = this.props.node.namespace;
-    var name = this.props.node.name;
-    var type = this.props.node.type;
+    var node = this.props.node;
+    var namespace = node.namespace;
+    var name = node.name;
+    var type = node.type;
     var el = $$('div').addClass('sc-heading');
     var headerEl = $$('div').addClass('se-header');
-    
+
     // namespace
     headerEl.append(
       $$('span').addClass('se-namespace').append(namespace.split('/').join(' / ') + ' / ')
@@ -32,9 +34,9 @@ HeadingComponent.Prototype = function() {
     }
 
     var sourceEl = $$('div').addClass('se-source').append(
-      $$('strong').append(type),
-      $$('span').append(' defined in '),
-      $$('a').attr({href: '#'}).append('model/Foo.js#41')
+      $$('strong').append(this.i18n.t(type)),
+      $$('span').append(' ' + this.i18n.t('defined_in') + ' '),
+      $$(SourceLink, {node: node})
     );
 
     el.append(headerEl, sourceEl);
