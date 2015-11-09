@@ -56,7 +56,9 @@ var DocumentationReader = DocumentationController.extend({
   render: function() {
     var doc = this.props.doc;
     var config = this.getConfig();
-    var el = $$('div').addClass('sc-documentation-reader sc-controller');
+    var el = $$('div').addClass('sc-documentation-reader sc-controller')
+      // TODO: we need to support event delegation
+      .on('click', this.onClickCrossLink);
 
     el.append(
       $$('div').ref('workspace').addClass('se-workspace').append(
@@ -89,7 +91,19 @@ var DocumentationReader = DocumentationController.extend({
       $$(StatusBar, {doc: doc}).ref('statusBar')
     );
     return el;
-  }
+  },
+
+  onClickCrossLink: function(e) {
+    var $target = $(e.target);
+    if ($target.is('a[data-type="cross-link"]')) {
+      e.preventDefault();
+      e.stopPropagation();
+      var nodeId = $target.attr('data-refid');
+      // console.log('Scroll to cross-linked entity.');
+      this.props.doc.emit("toc:entry-selected", nodeId);
+    }
+  },
+
 });
 
 
