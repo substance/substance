@@ -1,12 +1,12 @@
 'use strict';
 
 var oo = require('../../util/oo');
-var pluck = require('lodash/collection/pluck');
 var Component = require('../../ui/Component');
 var $$ = Component.$$;
 
 var Signature = require('./SignatureComponent');
 var Example = require('./ExampleComponent');
+var Params = require('./ParamsComponent');
 
 function MethodComponent() {
   Component.apply(this, arguments);
@@ -27,6 +27,11 @@ MethodComponent.Prototype = function() {
     el.append(
       $$('div').addClass('se-description').html(node.description)
     );
+
+    // param description
+    if (node.params.length > 0 || node.returns) {
+      el.append($$(Params, {params: node.params, returns: node.returns}));
+    }
 
     if (node.example) {
       el.append($$(Example, {node:node}));

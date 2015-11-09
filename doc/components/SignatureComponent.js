@@ -6,7 +6,7 @@ var Component = require('../../ui/Component');
 var $$ = Component.$$;
 var Documentation = require('../model/Documentation');
 
-var Params = require('./ParamsComponent');
+// var Params = require('./ParamsComponent');
 var SourceLink = require('./SourceLinkComponent');
 
 function SignatureComponent() {
@@ -39,10 +39,10 @@ SignatureComponent.Prototype = function() {
       )
     );
 
-    // param description
-    if (node.params.length > 0 || node.returns) {
-      el.append($$(Params, {params: node.params, returns: node.returns}));
-    }
+    // // param description
+    // if (node.params.length > 0 || node.returns) {
+    //   el.append($$(Params, {params: node.params, returns: node.returns}));
+    // }
 
     // // if given a message indicating that this method has been inherited
     // if (this.props.inheritedFrom) {
