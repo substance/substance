@@ -17,7 +17,7 @@ $$(TextPropertyEditor, {
 })
 ```
 
-Create a full-fledged `ContainerEditor` for the `body` container of a document. Allow Allow Strong and Emphasis annotations and to switch text types between paragraph and heading at level 1.
+Create a full-fledged `ContainerEditor` for the `body` container of a document. Allow Strong and Emphasis annotations and to switch text types between paragraph and heading at level 1.
 
 ```js
 $$(ContainerEditor, {
