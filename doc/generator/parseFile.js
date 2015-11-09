@@ -171,7 +171,7 @@ _Parser.Prototype = function() {
       } else if (tag.type === "abstract") {
         entity.isAbstract = true;
       } else if (tag.type === "extends") {
-        entity.parentClass = tag.string;
+        entity.superClass = tag.string;
       } else if (tag.type === "skip") {
         entity.skip = true;
       } else if (tag.type === "see") {
@@ -244,7 +244,7 @@ _Parser.Prototype = function() {
 
     node.type = "class";
     node.isAbstract = entity.isAbstract;
-    node.parentClass = entity.parentClass;
+    node.superClass = entity.superClass;
     node.members = [];
 
     each(entity.members, function(member) {

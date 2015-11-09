@@ -7,5 +7,6 @@ module.exports = {
   'method': 'Method',
   'module': 'Module',
   'defined_in': 'defined in',
-  'returns': 'Returns'
+  'returns': 'Returns',
+  'extends': 'inherits from',
 };

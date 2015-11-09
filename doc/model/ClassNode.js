@@ -17,7 +17,8 @@ var ClassNode = Node.extend({
     description: 'string', // HTML
     example: 'string', // HTML
     sourceFile: 'string', // ui/Component.js
-    sourceLine: 'number'
+    sourceLine: 'number',
+    superClass: 'id', // when @extends is defined
   }
 });
 

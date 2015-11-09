@@ -22,7 +22,6 @@ FunctionComponent.Prototype = function() {
     var el = $$('div')
       .addClass('sc-function')
       .attr("data-id", node.id);
-
     // header
     var args = pluck(node.params, 'name').join(', ');
     var headingName = [node.name, '(', args, ')'];
@@ -35,6 +34,7 @@ FunctionComponent.Prototype = function() {
     if (node.params.length > 0 || node.returns) {
       el.append($$(Params, {params: node.params, returns: node.returns}));
     }
+
     // example
     if (node.example) {
       el.append($$(Example, {node: node}));
