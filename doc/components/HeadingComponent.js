@@ -4,6 +4,7 @@ var oo = require('../../util/oo');
 var Component = require('../../ui/Component');
 var $$ = Component.$$;
 var SourceLink = require('./SourceLinkComponent');
+var CrossLink = require('./CrossLinkComponent');
 
 function HeadingComponent() {
   Component.apply(this, arguments);
@@ -32,14 +33,24 @@ HeadingComponent.Prototype = function() {
         $$('div').addClass('se-node-type').addClass(type).append(type)
       );
     }
-
-    var sourceEl = $$('div').addClass('se-source').append(
-      $$('strong').append(this.i18n.t(type)),
-      $$('span').append(' ' + this.i18n.t('defined_in') + ' '),
-      $$(SourceLink, {node: node})
+    // details: a line saying something like Class defined in '...', extends '...'
+    var details = $$('div').addClass('se-details')
+      .append($$('strong').addClass('se-type').append(this.i18n.t(type)));
+    details.append(
+      $$('span').addClass('se-source').append(
+        $$('span').append(' ' + this.i18n.t('defined_in') + ' '),
+        $$(SourceLink, {node: node})
+      )
     );
-
-    el.append(headerEl, sourceEl);
+    if (node.type === "class" && node.superClass) {
+      details.append(
+        $$('span').addClass('se-extends').append(
+          $$('span').append(' ' + this.i18n.t('extends') + ' '),
+          $$(CrossLink, {nodeId: node.superClass})
+        )
+      );
+    }
+    el.append(headerEl, details);
 
     return el;
   };
