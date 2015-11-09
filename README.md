@@ -62,7 +62,7 @@ Run the dev server.
 npm start
 ```
 
-Navigate to http://localhost:4201/doc for the docs and http://localhost:4201/test for the test suite.
+Navigate to `http://localhost:4201/doc` for the docs and `http://localhost:4201/test` for the test suite.
 
 To run the test-suite headless (using Phantom.js)
 
@@ -74,7 +74,7 @@ To create a test coverate report run:
 
 ```
 $ npm run coverage
-``
+```
 
 The report is stored in the `coverage` folder.
 
