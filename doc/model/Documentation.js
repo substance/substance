@@ -85,9 +85,7 @@ Documentation.getNodeInfo = function(node) {
     info.isConstructor = true;
   }
   // Derive storage
-  if (node.isStatic) {
-    info.storage = 'static ';
-  } else if (info.isClassMember) {
+  if (info.isClassMember) {
     info.storage = 'this.';
   } else if (info.isModuleMember) {
     info.storage = parent.name + '.';
@@ -99,8 +97,8 @@ Documentation.getNodeInfo = function(node) {
   if (info.isConstructor) {
     info.typeDescr = 'Constructor';
   } else if (info.isClassMember || info.isModuleMember) {
-    if (info.isStatic) {
-      info.typeDescr = 'Static Method';  
+    if (node.isStatic) {
+      info.typeDescr = 'Static Method';
     } else {
       info.typeDescr = 'Method';
     }
