@@ -8,11 +8,13 @@ var annotationHelpers = require('../annotationHelpers');
 
 /**
   A transformation that breaks a node at the current position,
-  e.g.,Used when you hit ENTER inside a paragraph
+  e.g. used when you hit ENTER inside a paragraph.
+
+  @function
 
   @param {model/TransactionDocument} tx the document instance
   @param {Object} args object with fields `selection`, `containerId`
- */
+*/
 function breakNode(tx, args) {
   if (!args.selection) {
     throw new Error("Argument 'selection' is mandatory.");
