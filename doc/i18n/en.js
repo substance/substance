@@ -8,5 +8,5 @@ module.exports = {
   'module': 'Module',
   'defined_in': 'defined in',
   'returns': 'Returns',
-  'extends': 'extends',
+  'extends': 'inherits from',
 };
