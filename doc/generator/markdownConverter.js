@@ -1,51 +1,40 @@
-var oo = require('../../util/oo');
+/* jshint latedef:false */
 var commonmark = require('commonmark');
 var reader = new commonmark.Parser();
 var highlightjs = require('highlight.js');
-
-function HtmlRenderer() {
-  commonmark.HtmlRenderer.apply(this, arguments);
-}
-
-HtmlRenderer.Prototype = function() {
-  this.codeblock = function(node, attrs) {
-    var classes = ['hljs'];
-    var info_words = node.info ? node.info.split(/\s+/) : [];
-    var lang;
-    if (info_words.length > 0 && info_words[0].length > 0) {
-      lang = this.escape(info_words[0], true);
-      classes.push('language-' + lang);
-    }
-    attrs.push(['class', classes.join(' ')]);
-    this.cr();
-    // this.out(this.tag('pre') + this.tag('code', attrs));
-    // this.out(this.escape(node.literal, false));
-    // this.out(this.tag('/code') + this.tag('/pre'));
-
-    // code highlighting
-    var code = highlightjs.highlightAuto(node.literal).value;
-
-    var codeblock = [
-      this.tag('pre') + this.tag('code', attrs),
-      // this.escape(code, false),
-      code,
-      this.tag('/code') + this.tag('/pre')
-    ].join('');
-
-    this.out(codeblock);
-    this.cr();
-  };
-};
-
-oo.inherit(HtmlRenderer, commonmark.HtmlRenderer);
-
-var writer = new HtmlRenderer();
+var writer = new commonmark.HtmlRenderer();
 
 var converter = {
   toHtml: function(text) {
     var parsed = reader.parse(text);
+    highlightCodeblocks(parsed);
     return writer.render(parsed);
   }
 };
 
+function highlightCodeblocks(parsed) {
+  var walker = parsed.walker();
+  var event, node;
+  while ((event = walker.next())) {
+    node = event.node;
+    if (node.type === 'CodeBlock') {
+      var info = node.info ? node.info.split(/\s+/) : [];
+      var lang = info[0];
+      var highlighted;
+      var classes = ['hljs'];
+
+      if (lang) {
+        highlighted = highlightjs.highlight(lang, node.literal).value;
+        classes.push('lang-'+lang);
+      } else {
+        highlighted = highlightjs.highlightAuto(node.literal).value;
+      }
+
+      var htmlBlock = new commonmark.Node('HtmlBlock', node.sourcepos);
+      htmlBlock.literal = ['<pre>', '<code class="'+classes.join(' ')+'">', highlighted, '</code>', '<pre>'].join('');
+      node.insertBefore(htmlBlock);
+      node.unlink();
+    }
+  }
+}
 module.exports = converter;
