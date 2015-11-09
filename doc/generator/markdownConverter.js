@@ -64,7 +64,7 @@ function convertCodeLinks(parsed) {
         var pre = new commonmark.Node('Text', sourceposPre);
         pre.literal = node.literal.slice(0, match.index);
         var link = new commonmark.Node('Html', sourceposLink);
-        link.literal = ['<a href="#'+id+'" data-type="cross-link" data-refid="'+id+'">', id,'</a>'].join('');
+        link.literal = ['<a href="#'+id+'" data-type="cross-link" data-node-id="'+id+'">', id,'</a>'].join('');
         var post = new commonmark.Node('Text', sourceposPost);
         post.literal = node.literal.slice(match.index+match[0].length);
         node.insertBefore(pre);

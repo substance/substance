@@ -98,7 +98,7 @@ var DocumentationReader = DocumentationController.extend({
     if ($target.is('a[data-type="cross-link"]')) {
       e.preventDefault();
       e.stopPropagation();
-      var nodeId = $target.attr('data-refid');
+      var nodeId = $target.attr('data-node-id');
       // console.log('Scroll to cross-linked entity.');
       this.props.doc.emit("toc:entry-selected", nodeId);
     }

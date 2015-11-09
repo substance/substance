@@ -15,8 +15,8 @@ var documentHelpers = {};
 /**
   Returns true if given type is a container selection
 
-  @param {Document} doc
-  @param {string} type
+  @param {model/Document} doc
+  @param {String} type
 */
 documentHelpers.isContainerAnnotation = function(doc, type) {
   var schema = doc.getSchema();
@@ -26,11 +26,10 @@ documentHelpers.isContainerAnnotation = function(doc, type) {
 /**
   For a given selection get all property annotations
 
-  @param {Document} doc
-  @param {Document.Selection} sel
-  @return An array of property annotations
-
-  WARNING: Returns an empty array when selection is a container selection
+  @param {model/Document} doc
+  @param {model/Selection} sel
+  @return An array of property annotations.
+          Returns an empty array when selection is a container selection.
 */
 documentHelpers.getPropertyAnnotationsForSelection = function(doc, sel, options) {
   options = options || {};

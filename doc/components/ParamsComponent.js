@@ -4,6 +4,8 @@ var oo = require('../../util/oo');
 var Component = require('../../ui/Component');
 var $$ = Component.$$;
 
+var CrossLink = require('./CrossLinkComponent');
+
 function ParamsComponent() {
   Component.apply(this, arguments);
 }
@@ -22,7 +24,7 @@ ParamsComponent.Prototype = function() {
         paramsTable.append(
           $$('tr').addClass('se-param').append(
             $$('td').addClass('se-param-name').append(param.name),
-            $$('td').addClass('se-param-type').append(param.type),
+            $$('td').addClass('se-param-type').append($$(CrossLink, {nodeId: param.type})),
             $$('td').addClass('se-param-description').html(param.description)
           )
         );
@@ -34,7 +36,7 @@ ParamsComponent.Prototype = function() {
       el.append(
         $$('table').addClass('se-params-table').append(
           $$('tr').addClass('se-param').append(
-            $$('td').addClass('se-param-type').append(returns.type),
+            $$('td').addClass('se-param-type').append($$(CrossLink, {nodeId: returns.type})),
             $$('td').addClass('se-param-description').html(returns.description)
           )
         )
