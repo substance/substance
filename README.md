@@ -50,27 +50,31 @@ Comment                                                                     | Be
 
 ## Development
 
-### Testing
+Install the dev dependencies.
 
-1. Running the test-suite headless (using Phantom.js)
+```
+npm install
+```
+
+Run the dev server.
+
+```
+npm start
+```
+
+Navigate to http://localhost:4201/doc for the docs and http://localhost:4201/test for the test suite.
+
+To run the test-suite headless (using Phantom.js)
 
 ```
 $ npm test
 ```
 
-2. Running the test-suite in a browser for debugging:
-
-```
-$ npm start
-```
-
-Then open http://localhost:4201/test in your browser.
-
-3. Creating a test coverage report.
+To create a test coverate report run:
 
 ```
 $ npm run coverage
-```
+``
 
 The report is stored in the `coverage` folder.
 
