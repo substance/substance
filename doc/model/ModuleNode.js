@@ -1,17 +1,14 @@
 'use strict';
 
-var Node = require('../../model/DocumentNode');
+var DocumentedNode = require('./DocumentedNode');
 
-var ModuleNode = Node.extend({
+var ModuleNode = DocumentedNode.extend({
   name: 'module',
   properties: {
     name: 'string',
     namespace: 'string',
     members: ['array', 'property'], // ['model/documentHelpers.getAllAnnotations']
-    description: 'string', // HTML
-    sourceFile: 'string', // util/oo.js
-    sourceLine: 'number'
-}
+  }
 });
 
 ModuleNode.static.blockType = true;

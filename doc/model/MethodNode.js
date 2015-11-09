@@ -1,8 +1,8 @@
 'use strict';
 
-var Node = require('../../model/DocumentNode');
+var DocumentedNode = require('./DocumentedNode');
 
-var MethodNode = Node.extend({
+var MethodNode = DocumentedNode.extend({
   name: 'method',
   properties: {
     parent: 'id', // id of parent class or module
@@ -11,10 +11,7 @@ var MethodNode = Node.extend({
     returns: 'object', // {type: 'model/Document', description: 'The updated document'}
     isStatic: 'boolean',
     isPrivate: 'boolean',
-    description: 'string', // HTML
-    example: 'string', // HTML
-    sourceFile: 'string', // ui/Component.js
-    sourceLine: 'number',  }
+  }
 });
 
 module.exports = MethodNode;

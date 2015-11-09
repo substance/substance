@@ -1,17 +1,13 @@
 'use strict';
 
-var Node = require('../../model/DocumentNode');
+var DocumentedNode = require('./DocumentedNode');
 
-var EventNode = Node.extend({
+var EventNode = DocumentedNode.extend({
   name: 'event',
   properties: {
     name: 'string',
     namespace: 'string',
     params: ['array', 'object'], // [{name: 'doc', type: 'model/Document', description: 'A Substance document instance'}]
-    description: 'string', // HTML String
-    example: 'string', // HTML
-    sourceFile: 'string', // model/transform/breakNode.js
-    sourceLine: 'number',
   }
 });
 

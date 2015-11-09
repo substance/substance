@@ -14,7 +14,6 @@ schema.addNodes([
   require('./MethodNode'),
   require('./PropertyNode'),
   require('./EventNode'),
-  require('./ComponentNode'),
 ]);
 
 var Documentation = function() {
