@@ -8,7 +8,7 @@ var AnnotationIndex = require('./AnnotationIndex');
   @example
 
   var documentHelpers = require('substance/model/documentHelpers');
-  documentHelpers.isContainerAnnotation
+  documentHelpers.isContainerAnnotation(doc, 'comment')
 */
 var documentHelpers = {};
 
@@ -54,19 +54,18 @@ documentHelpers.getPropertyAnnotationsForSelection = function(doc, sel, options)
 /**
   For a given selection get all container annotations
 
-  @param {Document} doc
-  @param {Document.Selection} sel
-  @param {Document.Container} container
+  @param {model/Document} doc
+  @param {model/Selection} sel
+  @param {model/Container} container
   @param {object} options
-  @return An array of container annotations
-
-  ATTENTION: looking for container annotations is not as efficient as property
-  selections, as we do not have an index that has notion of the spatial extend
-  of an annotation (which would depend on a model-side implementation of
-  Container). Opposed to that, common annotations are bound to properties
-  which make it easy to lookup.
+  @return {Array} An array of container annotations
 */
 documentHelpers.getContainerAnnotationsForSelection = function(doc, sel, container, options) {
+  // ATTENTION: looking for container annotations is not as efficient as property
+  // selections, as we do not have an index that has notion of the spatial extend
+  // of an annotation (which would depend on a model-side implementation of
+  // Container). Opposed to that, common annotations are bound to properties
+  // which make it easy to lookup.
   if (!container) {
     // Fail more silently
     return [];
