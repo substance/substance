@@ -24,7 +24,7 @@ HeadingComponent.Prototype = function() {
     );
     // name
     headerEl.append(
-      $$('span').addClass('se-name').append(name)
+      $$('span').addClass('se-name').append(this.props.name || name)
     );
     // type
     if (type) {

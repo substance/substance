@@ -39,7 +39,7 @@ SignatureComponent.Prototype = function() {
       )
     );
 
-    // // param description
+    // param description
     // if (node.params.length > 0 || node.returns) {
     //   el.append($$(Params, {params: node.params, returns: node.returns}));
     // }

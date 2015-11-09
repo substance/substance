@@ -1,13 +1,10 @@
 .sc-method {
 
-  // border-left: 1px solid #ddd;
-  // padding-left: 20px;
-
-  &> .sc-signature {
+  > .sc-signature {
     margin-bottom: $node-margin-bottom;
   }
 
-  &> .se-description {
+  > .se-description {
     margin-bottom: $node-margin-bottom;
   }
 

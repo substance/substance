@@ -1,17 +1,10 @@
 .sc-function {
 
-  &> .sc-heading {
-    font-size: $font-size-level-1;
-    padding-bottom: 10px;
-    // border-bottom: solid 1px #ccc;
+  > .sc-signature {
     margin-bottom: $node-margin-bottom;
   }
 
-  &> .sc-signature {
-    margin-bottom: $node-margin-bottom;
-  }
-
-  &> .se-description {
+  > .se-description {
     margin-bottom: $node-margin-bottom;
   }
 
