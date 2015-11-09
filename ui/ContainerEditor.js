@@ -24,6 +24,7 @@ var ContainerNodeMixin = require('./ContainerNodeMixin');
  *
  * @constructor
  * @class
+ * @extends ui/Surface
  * @example
  * 
  * ```
