@@ -9,5 +9,12 @@ module.exports = {
   'save': 'Save',
   'untitled': 'Untitled',
   'manage': 'Manage',
-  'toc': 'Contents'
+  'toc': 'Contents',
+  'embed-src': 'Embed URL',
+  'paragraph': 'Paragraph',
+  'heading1': 'Heading 1',
+  'heading2': 'Heading 2',
+  'heading3': 'Heading 3',
+  'codeblock': 'Codeblock',
+  'blockquote': 'Blockquote'
 };
