@@ -22,9 +22,9 @@
   "devDependencies": {
     "browserify": "^10.1.3",
     "browserify-istanbul": "^0.2.1",
+    "commonmark": "^0.22.0",
     "dox": "substance/dox#custom-converter",
     "express": "^4.12.3",
-    "commonmark.js": "substance/commonmark.js#customized",
     "glob": "^5.0.15",
     "gulp": "^3.8.11",
     "gulp-if": "^1.2.5",
