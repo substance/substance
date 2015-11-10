@@ -470,7 +470,7 @@ Surface.Prototype = function() {
       var sel = afterState.selection;
       this._setSelection(sel, "silent");
       doc._notifyChangeListeners(change);
-      this.emit('selection:changed', sel);
+      this.emit('selection:changed', sel, this);
       this.rerenderDomSelection();
     }
   };

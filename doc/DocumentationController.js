@@ -6,6 +6,7 @@ var oo = require('../util/oo');
 var Controller = require("../ui/Controller");
 var Component = require('../ui/Component');
 var $$ = Component.$$;
+var Router = require('../ui/Router');
 
 // Substance is i18n ready, but by now we did not need it
 // Thus, we configure I18n statically as opposed to loading
@@ -22,11 +23,18 @@ function DocumentationController(parent, params) {
   // action handlers
   this.actions({
     "switchState": this.switchState,
-    "switchContext": this.switchContext
+    "extendState": this.extendState,
+    "switchContext": this.switchContext,
   });
 }
 
 DocumentationController.Prototype = function() {
+
+  this.getInitialContext = function() {
+    return {
+      router: new Router(this)
+    };
+  };
 
   // Some things should go into controller
   this.getChildContext = function() {
@@ -59,6 +67,10 @@ DocumentationController.Prototype = function() {
     if (options.restoreSelection) {
       this.restoreSelection();
     }
+  };
+
+  this.jumpToNode = function(nodeId) {
+    this.props.doc.emit("toc:entry-selected", nodeId);
   };
 
   this.restoreSelection = function() {

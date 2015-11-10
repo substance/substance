@@ -83,10 +83,16 @@ function Component(parent, params) {
   // ref (without the underscore) being passed but remove it from the params
   // afterwards so we don't pullute the props.
   this._ref = params._ref;
+
+  this._isOnRoute = params._isOnRoute;
+  if (parent === "root") {
+    this._isOnRoute = true;
+  }
+
   this._htmlParams = _htmlParams(params);
   this._setProps(params.props);
 
-  this._setState(this.getInitialState());
+  this._setState(this._getInitialState());
 
   this.actionHandlers = {};
 
@@ -116,6 +122,20 @@ function Component(parent, params) {
 }
 
 Component.Prototype = function ComponentPrototype() {
+
+  this._getInitialState = function() {
+    if (this.context.router) {
+      var state = this.context.router.getInitialState(this);
+      if (state) {
+        return state;
+      }
+    }
+    return this.getInitialState();
+  };
+
+  this.getInitialContext = function() {
+    return {};
+  };
 
   /**
    * Provides the context which is delivered to every child component.
@@ -297,16 +317,18 @@ Component.Prototype = function ComponentPrototype() {
    *
    * @param action the name of the action
    * @param ... arbitrary number of arguments
+   * @returns {Boolean} true if the action was handled, false otherwise
    */
   this.send = function(action) {
     var comp = this;
     while(comp) {
       if (comp.actionHandlers[action]) {
-        return comp.actionHandlers[action].apply(comp, Array.prototype.slice.call(arguments, 1));
+        comp.actionHandlers[action].apply(comp, Array.prototype.slice.call(arguments, 1));
+        return true;
       }
       comp = comp.getParent();
     }
-    throw new Error('No component handled action: ' + action);
+    return false;
   };
 
   /**
@@ -342,10 +364,60 @@ Component.Prototype = function ComponentPrototype() {
     this.willUpdateState(newState);
     this._setState(newState);
     this.didUpdateState();
+
+    // TODO: we need a better way, to inhibit recurrent updates
+    // of the router after state updates by the router itself
+    var router = this.context.router;
+    if (router && router.isActive()) {
+      router.truncateState(this);
+    }
+
     if (needRerender) {
       this.rerender();
     }
+
+    if (router && router.isActive()) {
+      var routeState = getRouteState(this);
+      if (routeState) {
+        router.updateState(routeState);
+      }
+    }
   };
+
+  // EXPERIMENTAL: routing implementation
+  //
+  // If a setState is called on a component which is on the route
+  // i.e., has been rendered using $$.route()
+  // then we extract the states of all components on the route
+  // and send an action to the application which can then update the browsers URL.
+
+
+  function getRouteState(target) {
+    var states = [target.getState()];
+    // app states are route states
+    if (target.parent === "root") {
+      return states;
+    }
+    if (!target._isOnRoute) {
+      return false;
+    }
+    // collect all components and their state
+    // on the route
+    var comp = target.getParent();
+    var lastOnRoute = target;
+    while(comp && comp !== "root") {
+      if (comp.route) {
+        if (comp.route !== lastOnRoute) {
+          console.error('Route is broken!');
+          return false;
+        }
+        states.unshift(comp.getState());
+        lastOnRoute = comp;
+      }
+      comp = comp.getParent();
+    }
+    return states;
+  }
 
   /**
    * This is similar to `setState()` but does not replace the state.
@@ -918,6 +990,13 @@ Component.Prototype = function ComponentPrototype() {
       if (comp._ref) {
         scope.refs[comp._ref] = comp;
       }
+      if (comp._isOnRoute) {
+        // TODO: probably this raises false alarms.
+        if (scope.owner.route) {
+          console.warn('Route is already defined in this scope. In every render() implementation there must be only one routed component.');
+        }
+        scope.owner.route = comp;
+      }
       children.push(comp);
     }
 
@@ -947,9 +1026,9 @@ Component.Prototype = function ComponentPrototype() {
         children = [];
       } else {
         var comp = this._compileComponent(data.children[j], scope);
-        comp.triggerDidMount(isMounted);
         this.$el.append(comp.$el);
         children.push(comp);
+        comp.triggerDidMount(isMounted);
       }
     }
     if (Object.keys(scope.refs).length > 0) {
@@ -969,14 +1048,15 @@ Component.Prototype = function ComponentPrototype() {
 
   this._getContext = function() {
     var parent = this.getParent();
+    var context = this.getInitialContext();
     if (parent) {
-      var context = _.extend({}, parent.context);
+      context = _.extend({}, parent.context, context);
       if (parent.getChildContext) {
         return _.extend(context, parent.getChildContext());
       }
       return context;
     }
-    return {};
+    return context;
   };
 
   this._setProps = function(props) {
@@ -1054,6 +1134,7 @@ oo.inherit(Component.Text, Component);
 
 function VirtualNode() {
   this._ref = null;
+  this._isOnRoute = false;
   this.attributes = {};
   this.htmlProps = {};
   this.style = {};
@@ -1078,6 +1159,11 @@ VirtualNode.Prototype = function() {
 
   this.ref = function(ref) {
     this._ref = ref;
+    return this;
+  };
+
+  this.route = function() {
+    this._isOnRoute = true;
     return this;
   };
 
@@ -1233,7 +1319,6 @@ VirtualNode.Prototype = function() {
     this.children.push(new RawHtml(rawHtmlString));
     return this;
   };
-
   this._render = function() {
     return Component._render(this);
   };
@@ -1362,6 +1447,14 @@ Component._render = function(data, options) {
   }
   if (data._ref) {
     scope.refs[data._ref] = component;
+  }
+  if (data._isOnRoute) {
+    // TODO: probably I have to make sure that the route cleared before
+    // rerendering, so that this check does not give a false alarm
+    if (scope.owner.route) {
+      console.warn('Route is already defined in this scope. Only one route is allowed in each render() implementation.');
+    }
+    scope.owner.route = component;
   }
   return component;
 };
