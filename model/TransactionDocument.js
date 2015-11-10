@@ -161,6 +161,8 @@ TransactionDocument.Prototype = function() {
       if (!this._isSaved) {
         this.cancel();
       }
+      // HACK: making sure that the state is reset when an exception has occurred
+      this.document.isTransacting = false;
     }
   };
 
