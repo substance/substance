@@ -96,6 +96,12 @@ DocumentationTocPanel.Prototype = function() {
     return tocEntry;
   };
 
+  this.handleClick = function(e) {
+    e.preventDefault();
+    var nodeId = e.currentTarget.dataset.id;
+    this.send('extendState', {nodeId: nodeId});
+  };
+
 };
 
 oo.inherit(DocumentationTocPanel, TocPanel);

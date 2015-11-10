@@ -94,14 +94,27 @@ var DocumentationReader = DocumentationController.extend({
     return el;
   },
 
+  didMount: function() {
+    if (this.state.nodeId) {
+      this.jumpToNode(this.state.nodeId);
+    }
+  },
+
+  didRender: function() {
+    if (this.state.nodeId) {
+      this.jumpToNode(this.state.nodeId);
+    }
+  },
+
   onClickCrossLink: function(e) {
     var $target = $(e.target);
     if ($target.is('a[data-type="cross-link"]')) {
       e.preventDefault();
       e.stopPropagation();
       var nodeId = $target.attr('data-node-id');
-      // console.log('Scroll to cross-linked entity.');
-      this.props.doc.emit("toc:entry-selected", nodeId);
+      this.extendState({
+        nodeId: nodeId
+      });
     }
   },
 
