@@ -13,7 +13,7 @@ var generate = require('./doc/generator/generate');
 app.use('/doc', express.static(path.join(__dirname, 'doc/assets')));
 app.use('/i18n', express.static(path.join(__dirname, 'i18n')));
 
-app.get('/documentation.json', function(req, res) {
+app.get('/doc/documentation.json', function(req, res) {
   var nodes = generate(config);
   res.json(nodes);
 });
