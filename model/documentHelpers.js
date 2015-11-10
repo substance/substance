@@ -6,9 +6,11 @@ var AnnotationIndex = require('./AnnotationIndex');
 /**
   @module
   @example
-
+  
+  ```js
   var documentHelpers = require('substance/model/documentHelpers');
   documentHelpers.isContainerAnnotation(doc, 'comment')
+  ```
 */
 var documentHelpers = {};
 

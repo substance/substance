@@ -23,6 +23,7 @@
 
 // Components
 @import './styles/_variables';
+@import './styles/_globals';
 @import './styles/components/_namespace';
 @import './styles/components/_class';
 @import './styles/components/_module';
@@ -35,6 +36,7 @@
 @import './styles/components/_params';
 @import './styles/components/_example';
 @import './styles/components/_toc';
+@import './styles/components/_cover';
 
 // Code highlighting
 @import '../node_modules/highlight.js/styles/github';

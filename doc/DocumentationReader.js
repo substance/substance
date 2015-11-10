@@ -6,6 +6,7 @@ var Component = require('../ui/Component');
 var $$ = Component.$$;
 var DocumentationController = require('./DocumentationController');
 var $ = require('../util/jquery');
+var Cover = require('./components/CoverComponent');
 
 var DocumentationReader = DocumentationController.extend({
   // Editor configuration
@@ -36,6 +37,7 @@ var DocumentationReader = DocumentationController.extend({
 
   render: function() {
     var doc = this.props.doc;
+    var meta = doc.get('meta');
     var config = this.getConfig();
     var el = $$('div').addClass('sc-documentation-reader sc-controller')
       // TODO: we need to support event delegation
@@ -46,12 +48,10 @@ var DocumentationReader = DocumentationController.extend({
         // Main (left column)
         $$('div').ref('main').addClass("se-main").append(
           $$(ContentPanel).append(
-            // The main container
-            // $$("div").ref('main').addClass('document-content').append(
+            $$(Cover, {node: meta}),
             $$(ContainerRenderer, {
               containerId: config.containerId
             }).ref('mainAnnotator')
-            // )
           ).ref('content')
         ),
         // Resource (right column)
