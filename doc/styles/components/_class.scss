@@ -1,16 +1,19 @@
 .sc-class {
 
-
-  &> .se-description {
+  > .se-description {
     margin-bottom: $node-margin-bottom;
   }
 
-  &> .se-constructor {
+  > .se-constructor {
     margin-bottom: $node-margin-bottom;
   }
 
-  &> .sc-example {
+  > .sc-example {
     margin-bottom: $subsection-margin-bottom;
+  }
+
+  > .sc-params {
+    margin-bottom: $node-margin-bottom;
   }
 
   margin-bottom: $subsection-margin-bottom;

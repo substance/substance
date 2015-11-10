@@ -18,33 +18,27 @@ var $$ = Component.$$;
 var ContainerNodeMixin = require('./ContainerNodeMixin');
 
 /**
- * Represents a flow editor that manages a sequence of nodes in a container. Instantiate
- * this editor using `Component.$$` within the render method of a component. Needs to be
- * instantiated within a {@link ui/Controller} context.
- *
- * @constructor
- * @class
- * @extends ui/Surface
- * @example
- * 
- * ```
- * var ContainerEditor = require('substance/ui/ContainerEditor');
- * var Component = require('substance/ui/Component');
- * var ToggleStrong = require('substance/packages/strong/ToggleStrong');
- *
- * var MyEditor = Component.extend({
- *   render: function() {
- *     var editor = $$(ContainerEditor, {
- *     name: 'main',
- *     containerId: 'main',
- *     doc: doc,
- *     commands: [ToggleStrong]
- *     }).ref('editor');
- *     return $$('div').addClass('my-editor').append(editor);
- *   }
- * });
- * ```
- *
+  Represents a flow editor that manages a sequence of nodes in a container. Needs to be
+  instantiated inside a {@link ui/Controller} context.
+  
+  @constructor
+  @class
+  @extends ui/Surface
+  @example
+  
+  Create a full-fledged `ContainerEditor` for the `body` container of a document. Allow Strong and Emphasis annotations and to switch text types between paragraph and heading at level 1.
+
+  ```js
+  $$(ContainerEditor, {
+    name: 'bodyEditor',
+    containerId: 'body',
+    textTypes: [
+      {name: 'paragraph', data: {type: 'paragraph'}},
+      {name: 'heading1',  data: {type: 'heading', level: 1}}
+    ],
+    commands: [StrongCommand, EmphasisCommand, SwitchTextTypeCommand],
+  })
+  ```
  */
 
 function ContainerEditor() {

@@ -102,7 +102,7 @@ Controller.Prototype = function() {
   };
 
   /**
-   * Defines the child context
+   * Defines the child context. You should override this to provide your own contexts.
    *
    * @return {object} the child context
    */
@@ -214,9 +214,9 @@ Controller.Prototype = function() {
   };
 
   /**
-   * Get the currently focused Surface
+   * Get the currently focused Surface.
    *
-   * @return {ui/Surface} The surface instance
+   * @return {ui/Surface} Surface instance
    */
   this.getFocusedSurface = function() {
     return this.focusedSurface;
@@ -483,9 +483,9 @@ Controller.concatStrings = function(a, b) {
 
   @event ui/Controller@command:executed
 
-  @param info {object} information about the command execution
-  @param commandName {String} the command name (e.g. 'strong', 'emphasis')
-  @param cmd {ui/Command} the command instance
+  @param {object} info information about the command execution
+  @param {String} commandName the command name (e.g. 'strong', 'emphasis')
+  @param {ui/Command} cmd the command instance
   @example
 
   ```js
@@ -518,7 +518,7 @@ Controller.concatStrings = function(a, b) {
   surface in which the selection change happened.
 
   @event ui/Controller@selection:changed
-  @param cmd {ui/Command} the command instance
+  @param {ui/Command} cmd the command instance
 */
 
 /**

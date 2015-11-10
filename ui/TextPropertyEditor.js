@@ -11,12 +11,25 @@ var TextProperty = require('./TextPropertyComponent');
 var $$ = Component.$$;
 
 /**
- * TextPropertyEditor
- *
- * @class
- * @memberof module:ui
- * @extends module:ui/Surface
- */
+  Editor for a text property (annotated string. Needs to be
+  instantiated inside a {@link ui/Controller} context.
+  
+  @class
+  @memberof module:ui
+  @extends module:ui/Surface
+  
+  @example
+  
+  Create a `TextPropertyEditor` for the `name` property of an author object. Allow emphasis annotations.
+
+  ```js
+  $$(TextPropertyEditor, {
+    name: 'authorNameEditor',
+    path: ['author_1', 'name'],
+    commands: [EmphasisCommand]
+  })
+  ```
+*/
 function TextPropertyEditor() {
   Surface.apply(this, arguments);
   var doc = this.getDocument();

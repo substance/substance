@@ -246,20 +246,23 @@ AbstractDocument.Prototype = function() {
   };
 
   /**
-   * Creates a selection which is attached to this document.
-   * Every selection implementation provides its own
-   * parameter format which is basically a JSON representation.
-   *
-   * @param {model/Selection} sel An object describing the selection.
-   *
-   * @example
-   *   doc.createSelection({
-   *     type: 'property',
-   *     path: [ 'text1', 'content'],
-   *     startOffset: 10,
-   *     endOffset: 20
-   *   })
-   */
+    Creates a selection which is attached to this document.
+    Every selection implementation provides its own
+    parameter format which is basically a JSON representation.
+    
+    @param {model/Selection} sel An object describing the selection.
+    
+    @example
+
+    ```js
+    doc.createSelection({
+      type: 'property',
+      path: [ 'text1', 'content'],
+      startOffset: 10,
+      endOffset: 20
+    })
+    ```
+  */
   this.createSelection = function(sel) {
     if (!sel) {
       return Selection.nullSelection;

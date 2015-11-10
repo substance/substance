@@ -6,7 +6,7 @@
   > .se-declaration {
     font-size: $font-size-level-2;
     font-weight: bold;
-    font-family: Consolas, 'Liberation Mono', Menlo, Courier, monospace;
+    font-family: $font-family-code;
   }
 
   > .se-source {

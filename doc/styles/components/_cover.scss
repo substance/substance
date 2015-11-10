@@ -2,7 +2,10 @@
 
   .se-title {
     font-size: 40px;
-    padding-bottom: 40px;
+    margin-bottom: $subsection-margin-bottom;
   }
 
+  .se-description {
+    margin-bottom: $subsection-margin-bottom;
+  }
 }
