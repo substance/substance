@@ -2,6 +2,8 @@ Provides all UI-related functionality. At the heart there is a Component impleme
 
 Let's look at a complete example of a simple ProseEditor implementation. The `render` function is the heart of our custom `ProseEditor` component. It contains a bit of custom markup and utilizes predefined UI components, such as a `Toolbar` including tools like the `UndoTool` and a configured `ContainerEditor`, which will do the actual editing work. 
 
+There's also a config object that is essential for the editor to work. The following configuration sets up a component registry that assigns a visual component to each content node type. It also defines which commands should be supported on the controller level (undo, redo, save) and for the editor (strong, emphasis, link). Furthermore we need to setup which text types the editor should support. 
+
 ```js
 var ProseEditor = Controller.extend({
   // Editor configuration
@@ -30,13 +32,6 @@ var ProseEditor = Controller.extend({
     );
   }
 });
-```
-
-There's also a config object that is essential for the editor to work. The following configuration sets up a component registry that assigns a visual component to each content node type. It also defines which commands should be supported on the controller level (undo, redo, save) and for the editor (strong, emphasis, link). Furthermore we need to setup which text types the editor should support. 
-
-Let's now look at the config object:
-
-```js
 var CONFIG = {
   // Controller specific configuration
   controller: {

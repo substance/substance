@@ -1,6 +1,4 @@
 var ContentPanel = require("../ui/ContentPanel");
-var StatusBar = require("../ui/StatusBar");
-var ContextToggles = require('../ui/ContextToggles');
 var ContainerRenderer = require('./components/ContainerRenderer');
 var Component = require('../ui/Component');
 var $$ = Component.$$;
@@ -58,19 +56,11 @@ var DocumentationReader = DocumentationController.extend({
         $$('div').ref('resource')
           .addClass("se-resource")
           .append(
-            $$(ContextToggles, {
-              panelOrder: config.panelOrder,
-              contextId: this.state.contextId
-            }).ref("context-toggles"),
             this.renderContextPanel()
           )
       )
     );
 
-    // Status bar
-    el.append(
-      $$(StatusBar, {doc: doc}).ref('statusBar')
-    );
     return el;
   },
 

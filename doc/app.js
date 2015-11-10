@@ -7,7 +7,7 @@ var _ = require('../util/helpers');
 var importDocumentation = require('./model/importDocumentation');
 
 var _loadDocument = function(cb) {
-  _.request('GET', '/documentation.json', null, function(err, rawDoc) {
+  _.request('GET', './documentation.json', null, function(err, rawDoc) {
     if (err) { console.error(err); cb(err); }
     var doc = importDocumentation(rawDoc);
     window.doc = doc;

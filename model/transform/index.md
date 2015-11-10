@@ -1,5 +1,9 @@
 
-Transformations are there to define higher level document operations that editor implementations can use. We implemented a range of useful transformations and made them available in the `model/transform` module. However, you are encouraged to define your own functions. Below is a shortened version of a possible searchAndReplace transformation.
+Transformations are there to define higher level document operations that editor implementations can use. We implemented a range of useful transformations and made them available in the `model/transform` module. However, you are encouraged to define your own functions. Below is a shortened version of a possible searchAndReplace transformation. 
+
+Transformations always take 2 parameters: `tx` is a `TransactionDocument` and `args` are the transformation's arguments. Transformations can be composed, so in a transformation you can call another transformation. You just need to be careful to always set the args properly. 
+
+Using the transaction method on a {@link ui/Surface} instance passes the current selection to the transformation automatically. So you will use surface transactions whenever some kind of selection is involved in your action. However, you could also provide the selection manually and call `transaction()` on the document or app controller instance. Make sure that your transformations are robust for both scenarios. If you look at the above example under (3) we set the selection to the last matched element after search and replace. If something has been found.
 
 ```js
 function searchAndReplace(tx, args) {
@@ -22,11 +26,8 @@ function searchAndReplace(tx, args) {
   // 4. return args for the caller or transaction context
   return args;
 }
-```
 
-Transformations always take 2 parameters: `tx` is a `TransactionDocument` and `args` are the transformation's arguments. Transformations can be composed, so in a transformation you can call another transformation. You just need to be careful to always set the args properly. Here's how the transformation we just defined can be called in a transaction.
-
-```js
+// Usage
 surface.transaction(function(tx, args) {
   args.searchStr = "foo";
   args.replaceStr = "bar";
@@ -34,4 +35,3 @@ surface.transaction(function(tx, args) {
 });
 ```
 
-Using the transaction method on a Surface instance passes the current selection to the transformation automatically. So you will use surface transactions whenever some kind of selection is involved in your action. However, you could also provide the selection manually and call `transaction()` on the document or app controller instance. Make sure that your transformations are robust for both scenarios. If you look at the above example under (3) we set the selection to the last matched element after search and replace. If something has been found.
