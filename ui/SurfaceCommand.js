@@ -8,7 +8,7 @@ var Command = require('./Command');
   level. See the example below to learn how to define a custom `SurfaceCommand`.
 
   @class
-  @param {ui/Surface} surface The surface the command will operate on
+  @param {ui/Surface} surface surface the command will operate on
   @extends ui/Command
 
   @example

@@ -11,7 +11,7 @@ var TextProperty = require('./TextPropertyComponent');
 var $$ = Component.$$;
 
 /**
-  Editor for a text property (annotated string. Needs to be
+  Editor for a text property (annotated string). Needs to be
   instantiated inside a {@link ui/Controller} context.
   
   @class
