@@ -1,0 +1,1 @@
+Provides all UI-related functionality. At the heart there is a Component implementation, which implements reactive rendering engine.

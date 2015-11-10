@@ -6,24 +6,26 @@ var EventEmitter = require('../util/EventEmitter');
 var Node = require('./DocumentNode');
 var Selection = require('./Selection');
 
-// Container Annotation
-// ----------------
-//
-// Describes an annotation sticking on a container that can span over multiple
-// nodes.
-//
-// Here's an example:
-//
-// {
-//   "id": "subject_reference_1",
-//   "type": "subject_reference",
-//   "container": "content",
-//   "startPath": ["text_2", "content"],
-//   "startOffset": 100,
-//   "endPath": ["text_4", "content"],
-//   "endOffset": 40
-// }
+/**
+  Describes an annotation sticking on a container that can span over multiple
+  nodes.
 
+  @class
+
+  @example
+
+  ```js
+  {
+    "id": "subject_reference_1",
+    "type": "subject_reference",
+    "container": "content",
+    "startPath": ["text_2", "content"],
+    "startOffset": 100,
+    "endPath": ["text_4", "content"],
+    "endOffset": 40
+  }
+  ```
+ */
 
 var ContainerAnnotation = Node.extend({
   displayName: "ContainerAnnotation",

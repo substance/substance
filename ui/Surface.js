@@ -10,11 +10,12 @@ var Selection = require('../model/Selection');
 var Component = require('./Component');
 
 /**
- * Abstract interface for editing components. Dances with contenteditable, so you don't have to.
+ * Abstract interface for editing components.
+ * Dances with contenteditable, so you don't have to.
  *
  * @class
- * @memberof module:ui
  */
+
 function Surface() {
   Component.apply(this, arguments);
 
@@ -82,19 +83,8 @@ function Surface() {
 
   this.textTypes = this.props.textTypes;
 
-  /*jshint eqnull:true */
-  // if (options.undoEnabled != null) {
-  //   this.undoEnabled = options.undoEnabled;
-  // }
-  // if (options.contentEditable != null) {
-  //   this.enableContentEditable = options.contentEditable;
-  // } else {
-  //   this.enableContentEditable = true;
-  // }
-
   this._initializeCommandRegistry(this.props.commands);
   controller.registerSurface(this);
-  /*jshint eqnull:false */
 }
 
 Surface.Prototype = function() {
@@ -364,7 +354,7 @@ Surface.Prototype = function() {
     if ( (e.ctrlKey||e.metaKey) && e.keyCode === 65 ) {
       var newSelection = this.selectAll();
       if (newSelection) {
-        this.setSelection(newSelection);  
+        this.setSelection(newSelection);
       }
       handled = true;
     }
@@ -400,36 +390,45 @@ Surface.Prototype = function() {
   };
 
   /**
-   * Run a transformation as a transaction properly configured for this surface.
-   * @param beforeState (optional) use this to override the default before-state (e.g. to use a different the initial selection).
-   * @param transformation a (surface) transformation function(tx, args) which receives
-   *                       the selection the transaction was started with, and should return
-   *                       output arguments containing a selection, as well.
-   * @param ctx (optional) will be used as `this` object when calling the transformation.
-   *
-   * @example
-   *
-   *   ```
-   *   surface.transaction(function(tx, args) {
-   *     var selection = args.selection;
-   *     ...
-   *     selection = tx.createSelection(...);
-   *     return {
-   *       selection: selection
-   *     };
-   *   });
-   *
-   *   surface.transaction(function(tx, args) {
-   *     ...
-   *     this.foo();
-   *     ...
-   *     return args;
-   *   }, this);
-   *
-   *   surface.transaction(beforeState, function(tx, args) {
-   *     ...
-   *   });
-   *   ```
+    Run a transformation as a transaction properly configured for this surface.
+
+    @param beforeState (optional) use this to override the default before-state (e.g. to use a different the initial selection).
+    @param transformation a (surface) transformation function(tx, args) which receives
+                          the selection the transaction was started with, and should return
+                          output arguments containing a selection, as well.
+    @param ctx (optional) will be used as `this` object when calling the transformation.
+
+    @example
+
+    Returning a new selection:
+    ```js
+    surface.transaction(function(tx, args) {
+      var selection = args.selection;
+      ...
+      selection = tx.createSelection(...);
+      return {
+        selection: selection
+      };
+    });
+    ```
+
+    Reusing the current selection:
+    ```js
+    surface.transaction(function(tx, args) {
+      ...
+      this.foo();
+      ...
+      return args;
+    }, this);
+    ```
+
+    Adding custom information to the transaction:
+
+    ```js
+    surface.transaction(beforeState, function(tx, args) {
+      ...
+    });
+    ```
    */
   this.transaction = function(transformation, ctx) {
     // `beforeState` is saved with the document operation and will be used

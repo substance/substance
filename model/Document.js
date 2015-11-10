@@ -16,16 +16,14 @@ var ClipboardExporter = require('./ClipboardExporter');
 
 var __id__ = 0;
 
-/*
-  Represents a Substance Document. This is an abstract class that your custom
-  Article implementation can inherit from.
-  
-  @constructor
-  @class
-  @abstract
-  @memberof module:model
-*/
-
+/**
+ * Represents a Substance Document. This is an abstract class that your custom
+ * Article implementation can inherit from.
+ *
+ * @class
+ * @extends model/AbstractDocument
+ * @param {model/Schema} schema The document schema.
+ */
 function Document(schema) {
   AbstractDocument.call(this, schema);
   this.__id__ = __id__++;
@@ -117,13 +115,13 @@ Document.Prototype = function() {
   /**
     Start a transaction to manipulate the document
 
-    @param beforeState object which will be used as before start of transaction
-    @param eventData object which will be used as payload for the emitted change event
-    @param transformation a function(tx) that performs actions on the transaction document tx
-    @memberof module:model.Document.prototype
-    
+    @param {object} beforeState object which will be used as before start of transaction
+    @param {object} eventData object which will be used as payload for the emitted change event
+    @param {function} transformation a function(tx) that performs actions on the transaction document tx
+
     @example
 
+    ```js
     doc.transaction({ selection: sel }, {'event-hack': true}, function(tx, args) {
       tx.update(...);
       ...
@@ -131,6 +129,7 @@ Document.Prototype = function() {
         selection: newSelection
       };
     })
+    ```
   */
   this.transaction = function(beforeState, eventData, transformation) {
     if (arguments.length === 1) {
@@ -319,6 +318,7 @@ Document.Prototype = function() {
    * Otherwise you need to take care of that yourself.
    *
    * Used internally e.g., by AbstractDocument.prototype.loadSeed()
+   * @private
    */
   this._setAutoAttach = function(val) {
     Document.super.prototype._setAutoAttach.call(this, val);

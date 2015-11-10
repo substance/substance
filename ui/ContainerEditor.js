@@ -4,7 +4,6 @@ var oo = require('../util/oo');
 var _ = require('../util/helpers');
 var Component = require('./Component');
 var Surface = require('./Surface');
-var UnsupportedNode = require('./UnsupportedNode');
 var TextPropertyManager = require('../model/TextPropertyManager');
 var EditingBehavior = require('../model/EditingBehavior');
 var insertText = require('../model/transform/insertText');
@@ -16,17 +15,19 @@ var switchTextType = require('../model/transform/switchTextType');
 var paste = require('../model/transform/paste');
 var $$ = Component.$$;
 
+var ContainerNodeMixin = require('./ContainerNodeMixin');
+
 /**
  * Represents a flow editor that manages a sequence of nodes in a container. Instantiate
  * this editor using `Component.$$` within the render method of a component. Needs to be
- * instantiated within a {@link module:ui/Controller} context.
+ * instantiated within a {@link ui/Controller} context.
  *
  * @constructor
  * @class
- * @extends module:ui/Surface
- * @memberof module:ui
+ * @extends ui/Surface
  * @example
- *
+ * 
+ * ```
  * var ContainerEditor = require('substance/ui/ContainerEditor');
  * var Component = require('substance/ui/Component');
  * var ToggleStrong = require('substance/packages/strong/ToggleStrong');
@@ -42,6 +43,7 @@ var $$ = Component.$$;
  *     return $$('div').addClass('my-editor').append(editor);
  *   }
  * });
+ * ```
  *
  */
 
@@ -61,6 +63,8 @@ function ContainerEditor() {
 
 ContainerEditor.Prototype = function() {
 
+  _.extend(this, ContainerNodeMixin.prototype);
+
   this.dispose = function() {
     Surface.prototype.dispose.call(this);
     var doc = this.getDocument();
@@ -72,7 +76,7 @@ ContainerEditor.Prototype = function() {
     var containerNode = doc.get(this.props.containerId);
 
     var el = $$("div")
-      .addClass('surface container-node ' + containerNode.id)
+      .addClass('surface sc-container-editor container-node ' + containerNode.id)
       .attr({
         spellCheck: false,
         "data-id": containerNode.id,
@@ -110,21 +114,6 @@ ContainerEditor.Prototype = function() {
 
   this._removeNodeAt = function(pos) {
     this.removeAt(pos);
-  };
-
-  this._renderNode = function(nodeId) {
-    var doc = this.getDocument();
-    var node = doc.get(nodeId);
-    var componentRegistry = this.context.componentRegistry;
-    var ComponentClass = componentRegistry.get(node.type);
-    if (!ComponentClass) {
-      console.error('Could not resolve a component for type: ' + node.type);
-      ComponentClass = UnsupportedNode;
-    }
-    return $$(ComponentClass, {
-      doc: doc,
-      node: node
-    });
   };
 
   /* Editor API */

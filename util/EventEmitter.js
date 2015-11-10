@@ -2,13 +2,12 @@
 
 var oo = require("./oo");
 
-/** 
- * Event support, inspired by VisualEditor's EventEmitter class.
- *
- * @class EventEmitter
- * @memberof module:util
- */
-
+/**
+  Event support.
+ 
+  @class
+  @private
+*/
 function EventEmitter() {
   this.__events__ = {};
 }
@@ -44,7 +43,6 @@ EventEmitter.Prototype = function() {
    * @param {Function} method
    * @param {Object} context
    * @private
-   * @memberof module:util.EventEmitter.prototype
    */
   this._on = function ( event, method, context, priority) {
     var bindings;
@@ -67,13 +65,10 @@ EventEmitter.Prototype = function() {
   /**
    * Remove a listener.
    *
-   * @method _off
    * @param {String} event
    * @param {Function} method
    * @param {Object} context
-   * @chainable
    * @private
-   * @memberof module:util.EventEmitter.prototype
    */
   this._off = function ( event, method, context ) {
     var i, bindings;
@@ -109,8 +104,6 @@ EventEmitter.Prototype = function() {
   /**
    * Internal implementation of connect.
    *
-   * @method _connect
-   * @memberof module:util.EventEmitter.prototype
    * @private
    */
   this._connect = function (obj, methods, options) {
@@ -129,8 +122,6 @@ EventEmitter.Prototype = function() {
   /**
    * Internal implementation of disconnect.
    *
-   * @method _disconnect
-   * @memberof module:util.EventEmitter.prototype
    * @private
    */
   this._disconnect = function(context) {
@@ -153,8 +144,6 @@ EventEmitter.Prototype = function() {
   /**
    * Emit an event.
    *
-   * @method emit
-   * @memberof module:util.EventEmitter.prototype
    * @param {String} event
    * @param ...arguments
    * @return true if a listener was notified, false otherwise.
@@ -188,8 +177,6 @@ EventEmitter.Prototype = function() {
    * A lower priority will make the listener be called later, a higher
    * priority earlier.
    *
-   * @method emit
-   * @memberof module:util.EventEmitter.prototype
    * @param {Object} listener
    * @param {Object} hash with event as keys, and handler functions as values.
    * @param {Number} hash with `priority` as ordering hint (default is 0).
@@ -215,8 +202,6 @@ EventEmitter.Prototype = function() {
   /**
    * Subscribe a listener to a event.
    *
-   * @method on
-   * @memberof module:util.EventEmitter.prototype
    * @param {String} event
    * @param {Function} method
    * @param {Object} context
@@ -234,12 +219,10 @@ EventEmitter.Prototype = function() {
   /**
    * Unsubscrive a listener from an event.
    *
-   * @method off
    * @param {String} event
    * @param {Function} method
    * @param {Object} context
    * @param {Object} options
-   * @memberof module:util.EventEmitter.prototype
    */
   this.off = function(event, method, context) {
     /* jshint unused:false */
@@ -250,6 +233,6 @@ EventEmitter.Prototype = function() {
   };
 };
 
-oo.initClass( EventEmitter );
+oo.initClass(EventEmitter);
 
 module.exports = EventEmitter;

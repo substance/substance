@@ -20,21 +20,17 @@ I18n.instance.load(require('../i18n/en'));
   In order to construct a controller, you need to have a document instance ready,
   as well as a set of components and commands that you want your app to support.
   A controller can manage one or more editing surfaces.
-  
+
   The controller is the interface for your app to trigger editor actions. For
-  instance from any component, not only from a predefined toolbar commands 
+  instance from any component, not only from a predefined toolbar commands
   can be executed on the controller to update the document.
 
   @class
-  @memberof module:ui
-
-  @fires module:ui.Controller#command:executed
-  @fires module:ui.Controller#selection:changed
-  @fires module:ui.Controller#document:saved
 */
 function Controller() {
   Component.apply(this, arguments);
   if (!this.props.doc) throw new Error('Controller requires a Substance document instance');
+
   this.surfaces = {};
   this.focusedSurface = null;
   this.stack = [];
@@ -43,6 +39,12 @@ function Controller() {
   this._initializeComponentRegistry(config.controller.components);
   this._initializeCommandRegistry(config.controller.commands);
   this.clipboard = new Clipboard(this, this.props.doc.getClipboardImporter(), this.props.doc.getClipboardExporter());
+
+  /**
+   * Manages tools.
+   *
+   * @type ui.ToolManager
+   */
   this.toolManager = new ToolManager(this);
   this._initialize(this.props);
   this.handleStateUpdate(this.state);
@@ -59,9 +61,6 @@ Controller.Prototype = function() {
   /**
    * Dispose component when component life ends. If you need to implement dispose
    * in your custom Controller class, don't forget the super call.
-   *
-   * @method dispose
-   * @memberof module:ui.Controller.prototype
    */
   this.dispose = function() {
     this.$el.off('keydown');
@@ -87,8 +86,6 @@ Controller.Prototype = function() {
     var doc = props.doc;
 
     // Register event handlers
-    // -----------------
-
     doc.connect(this, {
       'document:changed': this.onDocumentChanged,
       'transaction:started': this.onTransactionStarted
@@ -108,12 +105,11 @@ Controller.Prototype = function() {
    * Defines the child context
    *
    * @return {object} the child context
-   * @method getChildContext
-   * @memberof module:ui.Controller.prototype
    */
   this.getChildContext = function() {
     return {
       config: this.getConfig(),
+      doc: this.props.doc,
       controller: this,
       componentRegistry: this.componentRegistry,
       toolManager: this.toolManager,
@@ -123,10 +119,8 @@ Controller.Prototype = function() {
 
   /**
     Get the associated ToolManager instance
-    
-    @return {module:ui.ToolManager} the ToolManager instance
-    @method getToolManager
-    @memberof module:ui.Controller.prototype
+
+    @return {ui/ToolManager} the ToolManager instance
   */
   this.getToolManager = function() {
     return this.toolManager;
@@ -151,11 +145,9 @@ Controller.Prototype = function() {
 
   /**
     Get registered controller command by name
-    
-    @param commandName {String} the command name
-    @return {module:ui.commands.ControllerCommand} A controller command
-    @method getCommand
-    @memberof module:ui.Controller.prototype
+
+    @param {String} commandName the command name
+    @return {ui/ControllerCommand} A controller command
   */
   this.getCommand = function(commandName) {
     return this.commandRegistry.get(commandName);
@@ -167,11 +159,9 @@ Controller.Prototype = function() {
     `toggleStrong` command is executed. Each implemented command returns a custom
     info object, describing the action that has been performed.
     After execution a `command:executed` event is emitted on the controller.
-    
-    @param commandName {String} the command name
-    @return {module:ui.commands.ControllerCommand} A controller command
-    @method executeCommand
-    @memberof module:ui.Controller.prototype
+
+    @param {String} commandName the command name
+    @return {ui/ControllerCommand} A controller command
   */
   this.executeCommand = function(commandName) {
     var cmd = this.getCommand(commandName);
@@ -201,9 +191,7 @@ Controller.Prototype = function() {
   /**
    * Get document instance
    *
-   * @return {module:document.Document} The document instance owned by the controller
-   * @method getDocument
-   * @memberof module:ui.Controller.prototype
+   * @return {model/Document} The document instance owned by the controller
    */
   this.getDocument = function() {
     return this.props.doc;
@@ -212,10 +200,8 @@ Controller.Prototype = function() {
   /**
    * Get Surface instance
    *
-   * @method getSurface
-   * @param name {String} Name under which the surface is registered
-   * @return {module:ui.surface.Surface} The surface instance
-   * @memberof module:ui.Controller.prototype
+   * @param {String} name Name under which the surface is registered
+   * @return {ui/Surface} The surface instance
    */
 
   this.getSurface = function(name) {
@@ -230,9 +216,7 @@ Controller.Prototype = function() {
   /**
    * Get the currently focused Surface
    *
-   * @method getFocusedSurface
-   * @return {module:ui.surface.Surface} The surface instance
-   * @memberof module:ui.Controller.prototype
+   * @return {ui/Surface} The surface instance
    */
   this.getFocusedSurface = function() {
     return this.focusedSurface;
@@ -242,9 +226,7 @@ Controller.Prototype = function() {
    * Get selection of currently focused surface. We recomment to use getSelection on Surface
    * instances directly when possible.
    *
-   * @method getSelection
-   * @return {module:document.Document.Selection} the current Document.Selection derived from the surface.
-   * @memberof module:ui.Controller.prototype
+   * @return {model/Selection} the current selection derived from the surface.
    */
   this.getSelection = function() {
     var surface = this.getSurface();
@@ -258,9 +240,7 @@ Controller.Prototype = function() {
   /**
    * Get containerId for currently focused surface
    *
-   * @method getContainerId
    * @return {String|undefined} container id for currently focused surface, or undefined
-   * @memberof module:ui.Controller.prototype
    */
   this.getContainerId = function() {
     var surface = this.getSurface();
@@ -272,9 +252,7 @@ Controller.Prototype = function() {
   /**
    * Register a surface
    *
-   * @method registerSurface
-   * @param surface {Surface} A new surface instance to register
-   * @memberof module:ui.Controller.prototype
+   * @param surface {ui/Surface} A new surface instance to register
    */
   this.registerSurface = function(surface) {
     surface.connect(this, {
@@ -287,9 +265,7 @@ Controller.Prototype = function() {
   /**
    * Unregister a surface
    *
-   * @method unregisterSurface
-   * @param surface {Surface} A surface instance to unregister
-   * @memberof module:ui.Controller.prototype
+   * @param surface {ui/Surface} A surface instance to unregister
    */
   this.unregisterSurface = function(surface) {
     surface.disconnect(this);
@@ -302,9 +278,7 @@ Controller.Prototype = function() {
   /**
    * Check if there are any surfaces registered
    *
-   * @method hasSurface
    * @return {true|false} true if surface count > 0
-   * @memberof module:ui.Controller.prototype
    */
   this.hasSurfaces = function() {
     return Object.keys(this.surfaces).length > 0;
@@ -313,10 +287,7 @@ Controller.Prototype = function() {
   /**
    * Called whenever a surface has been focused.
    *
-   * TOOD: Should this really be a public method?
-   *
-   * @method didFocus
-   * @memberof module:ui.Controller.prototype
+   * @TODO Should this really be a public method?
    */
   this.didFocus = function(surface) {
     if (this.focusedSurface && surface !== this.focusedSurface) {
@@ -427,9 +398,6 @@ Controller.Prototype = function() {
 
   /**
    * Push surface state
-   *
-   * @method pushState
-   * @memberof module:ui.Controller.prototype
    */
   this.pushState = function() {
     var state = {
@@ -445,9 +413,6 @@ Controller.Prototype = function() {
 
   /**
    * Pop surface state
-   *
-   * @method popState
-   * @memberof module:ui.Controller.prototype
    */
   this.popState = function() {
     var state = this.stack.pop();
@@ -459,9 +424,6 @@ Controller.Prototype = function() {
 
   /**
    * Start document save workflow
-   *
-   * @method saveDocument
-   * @memberof module:ui.Controller.prototype
    */
   this.saveDocument = function() {
     var doc = this.getDocument();
@@ -494,10 +456,8 @@ Controller.Prototype = function() {
    * Render method of the controller component. This needs to be implemented by the
    * custom Controller class.
    *
-   * @return {VirtualNode} VirtualNode created using Component.$$
-   * @method render
    * @abstract
-   * @memberof module:ui.Controller.prototype
+   * @return {ui/Component.VirtualNode} VirtualNode created using Component.$$
    */
   this.render = function() {
     throw new Error('Controller.prototype.render is abstract. You need to define your own controller component');
@@ -505,17 +465,30 @@ Controller.Prototype = function() {
 };
 
 /**
+  Controller static method. This is just to test documentation
+
+  @param {String} a a string
+  @param {String} b another string
+  @static
+  @return {String} The result of the static method
+*/
+Controller.concatStrings = function(a, b) {
+  return a.concat(b);
+};
+
+/**
   Emitted after a command has been executed. Since we did not allow command
   implementations to access UI components, UI components can listen to
   the `command:executed` event and perform necessary action then.
-  
-  @event module:ui.Controller#command:executed
+
+  @event ui/Controller@command:executed
 
   @param info {object} information about the command execution
   @param commandName {String} the command name (e.g. 'strong', 'emphasis')
-  @param cmd {module:ui.Command} the command instance
+  @param cmd {ui/Command} the command instance
   @example
 
+  ```js
   LinkTool.Prototype = function() {
     this.didInitialize = function() {
       var ctrl = this.getController();
@@ -524,7 +497,7 @@ Controller.Prototype = function() {
         'command:executed': this.onCommandExecuted
       });
     };
-    
+
     this.onCommandExecuted = function(info, commandName) {
       if (commandName === this.static.command) {
         // Toggle the edit prompt when either edit is
@@ -536,6 +509,7 @@ Controller.Prototype = function() {
     };
     ...
   };
+  ```
 */
 
 /**
@@ -543,14 +517,14 @@ Controller.Prototype = function() {
   Transports `sel` a DocumentSelection that can be expected but also the
   surface in which the selection change happened.
 
-  @event module:ui.Controller#selection:changed
-  @param cmd {module:ui.Command} the command instance
+  @event ui/Controller@selection:changed
+  @param cmd {ui/Command} the command instance
 */
 
 /**
   Emitted when a save workflow has been completed successfully.
 
-  @event module:ui.Controller#document:saved
+  @event ui/Controller@document:saved
 */
 
 oo.inherit(Controller, Component);

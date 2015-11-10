@@ -3,7 +3,6 @@
 var $ = require('../util/jquery');
 var _ = require('../util/helpers');
 var uuid = require('../util/uuid');
-
 var inBrowser = (typeof window !== 'undefined');
 
 function HtmlImporter( config ) {
@@ -32,7 +31,7 @@ HtmlImporter.Prototype = function HtmlImporterPrototype() {
     this.nodeTypesByName[NodeClass.static.name] = NodeClass;
     if (NodeClass.static.blockType) {
       this.blockTypes.push(NodeClass);
-    } else if (NodeClass.static.isInline){
+    } else if (NodeClass.static.isInline) {
       this.inlineTypes.push(NodeClass);
     }
   };

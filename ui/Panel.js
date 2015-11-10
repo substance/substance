@@ -63,13 +63,26 @@ Panel.Prototype = function() {
     return $(panelContentEl).scrollTop();
   };
 
-  // Get the current coordinates of the first element in the
-  // set of matched elements, relative to the offset parent
-  // Please be aware that it looks up until it finds a parent that has
-  // position: relative|absolute set. So for now never set relative somewhere in your panel
   this.getPanelOffsetForElement = function(el) {
-    var offsetTop = $(el).position().top;
-    return offsetTop;
+    // initial offset
+    var offset = $(el).position().top;
+
+    // Now look at the parents
+    function addParentOffset(el) {
+      var parentEl = el.parentNode;
+
+      // Reached the panel or the document body. We are done.
+      if ($(el).hasClass('panel-content-inner') || !parentEl) return;
+
+      // Found positioned element (calculate offset!)
+      if ($(el).css('position') === 'absolute' || $(el).css('position') === 'relative') {
+        offset += $(el).position().top;
+      }
+      addParentOffset(parentEl);
+    }
+
+    addParentOffset(el.parentNode);
+    return offset;
   };
 
   this.scrollToNode = function(nodeId) {
@@ -78,7 +91,7 @@ Panel.Prototype = function() {
     var panelContentEl = this.getScrollableContainer();
 
     // Node we want to scroll to
-    var targetNode = $(panelContentEl).find("*[data-id="+nodeId+"]")[0];
+    var targetNode = $(panelContentEl).find('*[data-id="'+nodeId+'"]')[0];
 
     if (targetNode) {
       $(panelContentEl).scrollTop(this.getPanelOffsetForElement(targetNode));
