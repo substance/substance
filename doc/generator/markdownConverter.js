@@ -32,7 +32,7 @@ function highlightCodeblocks(parsed) {
       }
 
       var htmlBlock = new commonmark.Node('HtmlBlock', node.sourcepos);
-      htmlBlock.literal = ['<pre>', '<code class="'+classes.join(' ')+'">', highlighted, '</code>', '<pre>'].join('');
+      htmlBlock.literal = ['<pre>', '<code class="'+classes.join(' ')+'">', highlighted, '</code>', '</pre>'].join('');
       node.insertBefore(htmlBlock);
       node.unlink();
     }
