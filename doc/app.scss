@@ -52,6 +52,10 @@ body {
   overflow: hidden;
 }
 
+.sc-documentation-toc-panel {
+  top: 0px;
+}
+
 .sc-documentation-reader {
   position: absolute;
   top: 0px;
@@ -65,7 +69,7 @@ body {
     left: 0px;
     right: 0px;
     overflow: hidden;
-    bottom: 25px;
+    bottom: 0px;
     top: 0px;
 
     .se-main {
