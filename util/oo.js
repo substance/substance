@@ -146,8 +146,8 @@ _inherit =  function(clazz, parentClazz) {
 /**
  * Inherit from a parent class.
  *
- * @param clazz {Constructor} class constructor
- * @param parentClazz {Constructor} parent constructor
+ * @param {Constructor} clazz class constructor
+ * @param {Constructor} parentClazz parent constructor
  *
  * @example
  *
