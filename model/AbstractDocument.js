@@ -10,7 +10,7 @@ var ContainerSelection = require('./ContainerSelection');
 var TableSelection = require('./TableSelection');
 var docHelpers = require('./documentHelpers');
 
-/**
+/*
  * Abstract Document implementation.
  *
  * @class

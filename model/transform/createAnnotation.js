@@ -37,19 +37,14 @@ function _createPropertyAnnotations(tx, args) {
   }
 }
 
+/**
+  For a given container selection create property selections of a given type
 
-/*
- * For a given selection create a new annotation
- *
- * @param tx a transaction document
- * @param args
- *         - selection (Property or Container selection)
- *         - containerId (needed for container annotations)
- *         - annotationType (type of annotation e.g. 'strong')
- *         - annotationData (optional) data that should stick to the new anno)
- *         - splitContainerSelections (optional)
- */
+  @function
 
+  @param {model/TransactionDocument} tx the document instance
+  @param {Object} args object with fields `selection`, `containerId`, `annotationType`, `[annotationData]`
+*/
 function createAnnotation(tx, args) {
   var sel = args.selection;
   var annoType = args.annotationType;
