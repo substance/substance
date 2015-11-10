@@ -3,6 +3,7 @@
 var _ = require('../util/helpers');
 var oo = require('../util/oo');
 var AbstractDocument = require('./AbstractDocument');
+var DocumentChange = require('./DocumentChange');
 
 var __id__ = 0;
 
@@ -76,30 +77,9 @@ TransactionDocument.Prototype = function() {
     return op;
   };
 
-  this.save = function(afterState, info) {
-    var before = this.before;
-    var after = _.extend({}, before, afterState);
-    this.document._saveTransaction(before, after, info);
-    // reset after finishing
-    this.reset();
-  };
-
   this.cancel = function() {
-    // revert all recorded changes
-    for (var i = this.ops.length - 1; i >= 0; i--) {
-      this.data.apply(this.ops[i].invert());
-    }
-    this.document._cancelTransaction();
-    this.reset();
+    this._cancelTransaction();
   };
-
-  this.finish = function() {
-    if (this.document.isTransacting) {
-      this.cancel();
-    }
-  };
-
-  this.cleanup = this.finish;
 
   this.getOperations = function() {
     return this.ops;
@@ -131,6 +111,106 @@ TransactionDocument.Prototype = function() {
 
   this.getSchema = function() {
     return this.schema;
+  };
+
+  this._transaction = function(beforeState, eventData, transformation) {
+    if (arguments.length === 1) {
+      transformation = arguments[0];
+      eventData = {};
+      beforeState = {};
+    }
+    if (arguments.length === 2) {
+      transformation = arguments[1];
+      eventData = {};
+    } else {
+      eventData = eventData || {};
+    }
+
+    if (!_.isFunction(transformation)) {
+      throw new Error('Document.transaction() requires a transformation function.');
+    }
+
+    // var time = Date.now();
+    // HACK: ATM we can't deep clone as we do not have a deserialization
+    // for selections.
+    this._startTransaction(_.clone(beforeState));
+    // console.log('Starting the transaction took', Date.now() - time);
+    try {
+      // time = Date.now();
+      var result = transformation(this, beforeState);
+      // being robust to transformation not returning a result
+      if (!result) result = {};
+      // console.log('Executing the transformation took', Date.now() - time);
+      var afterState = {};
+      // only keys that are in the beforeState can be in the afterState
+      // TODO: maybe this is to sharp?
+      // we could also just merge the transformation result with beforeState
+      // but then we might have non-state related information in the after state.
+      for (var key in beforeState) {
+        if (result[key]) {
+          afterState[key] = result[key];
+        } else {
+          afterState[key] = beforeState[key];
+        }
+      }
+      // save automatically if not _isCancelled
+      if (!this._isCancelled) {
+        return this._saveTransaction(afterState, eventData);
+      }
+    } finally {
+      if (!this._isSaved) {
+        this.cancel();
+      }
+    }
+  };
+
+  this._startTransaction = function(beforeState) {
+    // TODO: maybe we need to prepare the stage
+    this.before = beforeState || {};
+    this._isCancelled = false;
+    this._isSaved = false;
+    this.document.emit('transaction:started', this);
+  };
+
+  this._saveTransaction = function(afterState, info) {
+    if (this._isCancelled) {
+      return;
+    }
+    var doc = this.document;
+    var beforeState = this.before;
+    afterState = _.extend({}, beforeState, afterState);
+    var ops = this.ops;
+    var change;
+    if (ops.length > 0) {
+      change = new DocumentChange(ops, beforeState, afterState);
+      // apply the change
+      doc._apply(change, 'saveTransaction');
+      // push to undo queue and wipe the redo queue
+      doc.done.push(change);
+      doc.undone = [];
+      // console.log('Document._saveTransaction took %s ms', (Date.now() - time));
+      // time = Date.now();
+      if (!info.silent) {
+        // TODO: I would like to wrap this with a try catch.
+        // however, debugging gets inconvenient as caught exceptions don't trigger a breakpoint
+        // by default, and other libraries such as jquery throw noisily.
+        doc._notifyChangeListeners(change, info);
+      }
+      // console.log('Notifying change listener took %s ms', (Date.now() - time));
+    }
+    this._isSaved = true;
+    this.reset();
+    return change;
+  };
+
+  this._cancelTransaction = function() {
+    // revert all recorded changes
+    for (var i = this.ops.length - 1; i >= 0; i--) {
+      this.data.apply(this.ops[i].invert());
+    }
+    // update state
+    this._isCancelled = true;
+    this.reset();
   };
 
 };

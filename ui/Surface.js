@@ -448,7 +448,10 @@ Surface.Prototype = function() {
     // TODO: remove this clear here, and in future do it on document:willchange (not implemented yet)
     // Then cursor flickering will be gone for undo/redos too.
     // this.surfaceSelection.clear();
-    this.getDocument().transaction(beforeState, function(tx, args) {
+    var doc = this.getDocument();
+    // Making the doc transaction silent, so that the document:changed event does not
+    // get emitted before the selection has been updated.
+    var change = doc.transaction(beforeState, {silent: true}, function(tx, args) {
       args.selection = beforeState.selection;
       // A transformation receives a set of input arguments and should return a set of output arguments.
       var result = transformation.call(ctx, tx, args);
@@ -462,7 +465,14 @@ Surface.Prototype = function() {
       afterState.surfaceId = beforeState.surfaceId;
       return afterState;
     });
-    this.setSelection(afterState.selection);
+    if (change) {
+      // set the selection before notifying any listeners
+      var sel = afterState.selection;
+      this._setSelection(sel, "silent");
+      doc._notifyChangeListeners(change);
+      this.emit('selection:changed', sel);
+      this.rerenderDomSelection();
+    }
   };
 
   this.onTextInput = function(e) {
@@ -690,16 +700,22 @@ Surface.Prototype = function() {
    * Set the model selection and update the DOM selection accordingly
    */
   this.setSelection = function(sel) {
+    this._setSelection(sel);
+  };
+
+  this._setSelection = function(sel, silent) {
     if (!sel) {
       sel = Selection.nullSelection;
     } else if (_.isObject(sel) && !(sel instanceof Selection)) {
       sel = this.getDocument().createSelection(sel);
     }
-
-    if (this._setModelSelection(sel)) {
-      this.rerenderDomSelection();
+    if (silent) {
+      this._setModelSelection(sel, silent);
+    } else {
+      if (this._setModelSelection(sel)) {
+        this.rerenderDomSelection();
+      }
     }
-
     // Since we allow the surface be blurred natively when clicking
     // on tools we now need to make sure that the element is focused natively
     // when we set the selection
@@ -758,10 +774,12 @@ Surface.Prototype = function() {
    *
    * Used internally if we derive the model selection from the DOM selcection.
    */
-  this._setModelSelection = function(sel) {
+  this._setModelSelection = function(sel, silent) {
     sel = sel || Document.nullSelection;
     this.selection = sel;
-    this.emit('selection:changed', sel, this);
+    if (!silent) {
+      this.emit('selection:changed', sel, this);
+    }
     return true;
   };
 

@@ -21,12 +21,20 @@ function StubSurface(doc, sel, containerId) {
   };
 
   this.setSelection = function(sel) {
+    this._setSelection(sel);
+  };
+
+  this._setSelection = function(sel) {
     this.selection = sel;
   };
 
   this.getContainerId = function() {
     return this.containerId;
   };
+
+  this.emit = function() {};
+
+  this.rerenderDomSelection = function() {}
 
   this.transaction = Surface.prototype.transaction;
 }

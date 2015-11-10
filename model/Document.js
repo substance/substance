@@ -8,7 +8,6 @@ var AnnotationIndex = require('./AnnotationIndex');
 var AnchorIndex = require('./AnchorIndex');
 
 var TransactionDocument = require('./TransactionDocument');
-var DocumentChange = require('./DocumentChange');
 
 var PathEventProxy = require('./PathEventProxy');
 var ClipboardImporter = require('./ClipboardImporter');
@@ -132,63 +131,14 @@ Document.Prototype = function() {
     ```
   */
   this.transaction = function(beforeState, eventData, transformation) {
-    if (arguments.length === 1) {
-      transformation = arguments[0];
-      eventData = {};
-      beforeState = {};
-    }
-    if (arguments.length === 2) {
-      transformation = arguments[1];
-      eventData = {};
-    } else {
-      eventData = eventData || {};
-    }
-
-    if (!_.isFunction(transformation)) {
-      throw new Error('Document.transaction() requires a transformation function.');
-    }
-
-    // var time = Date.now();
-    // HACK: ATM we can't deep clone as we do not have a deserialization
-    // for selections.
-    var tx = this.startTransaction(_.clone(beforeState));
-    // console.log('Starting the transaction took', Date.now() - time);
-    try {
-      // time = Date.now();
-      var result = transformation(tx, beforeState);
-      // being robust to transformation not returning a result
-      if (!result) result = {};
-      // console.log('Executing the transformation took', Date.now() - time);
-      var afterState = {};
-      // only keys that are in the beforeState can be in the afterState
-      // TODO: maybe this is to sharp?
-      // we could also just merge the transformation result with beforeState
-      // but then we might have non-state related information in the after state.
-      for (var key in beforeState) {
-        if (result[key]) {
-          afterState[key] = result[key];
-        } else {
-          afterState[key] = beforeState[key];
-        }
-      }
-      // save automatically if not yet saved or cancelled
-      if (this.isTransacting) {
-        tx.save(afterState, eventData);
-      }
-    } finally {
-      tx.finish();
-    }
-  };
-
-  this.startTransaction = function(beforeState) {
+    /* jshint unused: false */
     if (this.isTransacting) {
       throw new Error('Nested transactions are not supported.');
     }
     this.isTransacting = true;
-    // TODO: maybe we need to prepare the stage
-    this.stage.before = beforeState || {};
-    this.emit('transaction:started', this.stage);
-    return this.stage;
+    var change = this.stage._transaction.apply(this.stage, arguments);
+    this.isTransacting = false;
+    return change;
   };
 
   this.create = function(nodeData) {
@@ -325,40 +275,13 @@ Document.Prototype = function() {
     this.stage._setAutoAttach(val);
   };
 
-  this._saveTransaction = function(beforeState, afterState, info) {
-    // var time = Date.now();
-    if (!this.isTransacting) {
-      throw new Error('Not in a transaction.');
-    }
-    this.isTransacting = false;
-    var ops = this.stage.getOperations();
-    if (ops.length > 0) {
-      var documentChange = new DocumentChange(ops, beforeState, afterState);
-      // apply the change
-      this._apply(documentChange, 'skipStage');
-      // push to undo queue and wipe the redo queue
-      this.done.push(documentChange);
-      this.undone = [];
-      // console.log('Document._saveTransaction took %s ms', (Date.now() - time));
-      // time = Date.now();
-      this._notifyChangeListeners(documentChange, info);
-      // console.log('Notifying change listener took %s ms', (Date.now() - time));
-    }
-  };
-
-  this._cancelTransaction = function() {
-    if (!this.isTransacting) {
-      throw new Error('Not in a transaction.');
-    }
-    this.isTransacting = false;
-  };
-
   this._apply = function(documentChange, mode) {
-    if (this.isTransacting) {
-      throw new Error('Can not replay a document change during transaction.');
-    }
-    // Note: we apply everything doubled, to keep the staging clone up2date.
-    if (mode !== 'skipStage') {
+    if (mode !== 'saveTransaction') {
+      if (this.isTransacting) {
+        throw new Error('Can not replay a document change during transaction.');
+      }
+      // in case of playback we apply the change to the
+      // stage (i.e. transaction clone) to keep it updated on the fly
       this.stage.apply(documentChange);
     }
     _.each(documentChange.ops, function(op) {
