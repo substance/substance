@@ -69,11 +69,15 @@ var _buildTestBundle = function(testfiles, options) {
     .pipe(sourcemaps.init({loadMaps: true}))
     .on('error', gutil.log)
     .pipe(sourcemaps.write('./'))
-    .pipe(gulp.dest('./test/tmp'));
+    .pipe(gulp.dest('./tmp/test/'));
 }
 
 gulp.task('build:test', ['lint'], function() {
   var testfiles = glob.sync("test/**/*.test.js");
+  gulp.src(['./test/index.html'])
+   .pipe(gulp.dest('./tmp/test/'));
+  gulp.src(['./test/lib/jquery.js', './test/lib/qunit.js'])
+   .pipe(gulp.dest('./tmp/test/lib/'));
   return _buildTestBundle(testfiles);
 });
 
@@ -83,11 +87,11 @@ gulp.task('build:coverage', function() {
 });
 
 gulp.task('test', ['build:test'], function() {
-  return qunit('./test/index.html');
+  return qunit('./tmp/test/index.html');
 });
 
 gulp.task('coverage', ['build:coverage'], function() {
-  qunit('./test/index.html', {
+  qunit('./tmp/test/index.html', {
     customRunner: path.join(__dirname, 'test/run-phantomjs.js')
   }, function() {
     gulp.src('./coverage/coverage.json')

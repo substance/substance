@@ -15,7 +15,7 @@ app.use(express.static(__dirname));
 app.use('/doc', express.static(path.join(__dirname, 'doc')));
 app.use('/i18n', express.static(path.join(__dirname, 'i18n')));
 
-app.get('/doc/documentation.json', function(req, res) {  
+app.get('/doc/documentation.json', function(req, res) {
   var nodes = generate(config);
   res.json(nodes);
 });
@@ -64,7 +64,7 @@ app.get('/doc/app.css.map', function(req, res) {
 });
 
 // Test suite
-app.get('/test/tmp/test.js', function (req, res, next) {
+app.get('/test/test.js', function (req, res, next) {
   glob("test/**/*.test.js", {}, function (er, testfiles) {
     if (er || !testfiles || testfiles.length === 0) {
       console.error('No tests found.');
