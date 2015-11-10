@@ -1,31 +1,11 @@
-var Documentation = require('./model/Documentation');
-
 var ContentPanel = require("../ui/ContentPanel");
 var StatusBar = require("../ui/StatusBar");
 var ContextToggles = require('../ui/ContextToggles');
 var ContainerRenderer = require('./components/ContainerRenderer');
-
 var Component = require('../ui/Component');
 var $$ = Component.$$;
 var DocumentationController = require('./DocumentationController');
 var $ = require('../util/jquery');
-var _ = require('../util/helpers');
-
-var importDocumentation = require('./model/importDocumentation');
-
-
-var _loadDocument = function(cb) {
-  _.request('GET', '/doc/documentation.json', null, function(err, rawDoc) {
-    if (err) { console.error(err); cb(err); }
-    var doc = importDocumentation(rawDoc);
-    window.doc = doc;
-    // console.log('LE DOC', doc);
-    cb(null, doc);
-  });
-};
-
-// Tools
-// --------------
 
 var DocumentationReader = DocumentationController.extend({
   // Editor configuration
@@ -116,86 +96,7 @@ var DocumentationReader = DocumentationController.extend({
         nodeId: nodeId
       });
     }
-  },
-
+  }
 });
 
-
-$(function() {
-  var doc = new Documentation();
-  window.doc = doc;
-
-  _loadDocument(function(err, doc) {
-
-    Component.mount($$(DocumentationReader, {
-      doc: doc
-    }), $('body'));
-
-  });
-
-  // Initial data seed
-  // doc.create({
-  //   id: 'model',
-  //   type: 'namespace',
-  //   name: 'model',
-  //   members: ['model/Document', 'model/documentHelpers'],
-  //   description: 'The model module provides utilities to define custom article models and manipulate them.'
-  // });
-
-  // body.show('model');
-
-  // doc.create({
-  //   id: 'model/Document',
-  //   type: 'class',
-  //   name: 'Document',
-  //   members: ['model/Document#create', 'model/Document#stage'],
-  //   description: 'Abstract Substance Document class.'
-  // });
-
-  // doc.create({
-  //   id: 'model/Document#create',
-  //   type: 'method',
-  //   name: 'create',
-  //   params: [],
-  //   description: 'Create a new node for the document'
-  // });
-
-  // doc.create({
-  //   id: 'model/Document#stage',
-  //   type: 'property',
-  //   name: 'create',
-  //   dataType: 'TransactionDocument',
-  //   description: 'Create a new node for the document'
-  // });
-
-  // doc.create({
-  //   id: 'model/documentHelpers',
-  //   type: 'module',
-  //   name: 'documentHelpers',
-  //   members: ['model/documentHelpers.isContainerAnnotation']
-  // });
-
-  // doc.create({
-  //   id: 'model/documentHelpers.isContainerAnnotation',
-  //   type: 'function',
-  //   static: true,
-  //   name: 'isContainerAnnotation',
-  //   params: [
-  //     {name: 'doc', type: 'model/Document', description: 'The document instance'},
-  //     {name: 'type', type: 'String', description: 'Container annotation type'}
-  //   ]
-  // });
-
-  // doc.create({
-  //   id: 'ui',
-  //   type: 'namespace',
-  //   name: 'ui',
-  //   description: 'UI Components for making up your <strong>editor</strong>.',
-  //   members: []
-  // });
-  // body.show('ui');
-
-  // console.log('Documentation instance', doc);
-
-
-});
+module.exports = DocumentationReader;

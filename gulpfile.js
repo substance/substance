@@ -8,22 +8,55 @@ var argv = require('yargs').argv;
 var gulpif = require('gulp-if');
 var rename = require('gulp-rename');
 var jshint = require('gulp-jshint');
-var yuidoc =  require('gulp-yuidoc');
 var browserify = require('browserify');
 var uglify = require('gulp-uglify');
 var sourcemaps = require('gulp-sourcemaps');
 var qunit = require('node-qunit-phantomjs');
-// var qunit = require('gulp-qunit');
 var istanbul = require('browserify-istanbul');
 var istanbulReport = require('gulp-istanbul-report');
+var generate = require('./doc/generator/generate');
+var config = require('./doc/config.json');
+var sass = require('gulp-sass');
+var through2 = require('through2');
+var fs = require('fs');
 
-gulp.task('doc', function() {
-  return gulp.src(["index.js", "./src/**/*.js"])
-    .pipe(yuidoc.parser())
-    .pipe(yuidoc.reporter())
-    .pipe(yuidoc.generator())
-    .pipe(gulp.dest('./doc/api'));
+gulp.task('doc:sass', function() {
+  gulp.src('./doc/app.scss')
+    .pipe(sass().on('error', sass.logError))
+    .pipe(gulp.dest('./dist'));
 });
+
+gulp.task('doc:assets', function () {
+  gulp.src('./doc/assets/**/*', {base:"./doc/assets"})
+    .pipe(gulp.dest('dist'));
+});
+
+gulp.task('doc:data', function () {
+  console.log('generating documentation... and saving to ./dist/documentation.json');
+  var nodes = generate(config);
+  fs.writeFileSync('./dist/documentation.json', JSON.stringify(nodes, null, '  '));
+});
+
+gulp.task('doc:bundle', function () {
+  console.log('bunlding DocumentationReader... and saving to ./dist');
+  return gulp.src('./doc/app.js')
+    .pipe(through2.obj(function (file, enc, next) {
+      browserify(file.path)
+        .bundle(function (err, res) {
+          if (err) { return next(err); }
+          file.contents = res;
+          next(null, file);
+        });
+    }))
+    .on('error', function (error) {
+      console.log(error.stack);
+      this.emit('end');
+    })
+    .pipe(uglify())
+    .pipe(gulp.dest('./dist'));
+});
+
+gulp.task('doc', ['doc:sass', 'doc:bundle', 'doc:assets', 'doc:data']);
 
 gulp.task('lint', function() {
   return gulp.src([
@@ -70,7 +103,7 @@ var _buildTestBundle = function(testfiles, options) {
     .on('error', gutil.log)
     .pipe(sourcemaps.write('./'))
     .pipe(gulp.dest('./tmp/test/'));
-}
+};
 
 gulp.task('build:test', ['lint'], function() {
   var testfiles = glob.sync("test/**/*.test.js");

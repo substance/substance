@@ -9,20 +9,18 @@ var app = express();
 var config = require('./doc/config.json');
 var generate = require('./doc/generator/generate');
 
-
 // use static server
-app.use(express.static(__dirname));
-app.use('/doc', express.static(path.join(__dirname, 'doc')));
+app.use('/doc', express.static(path.join(__dirname, 'doc/assets')));
 app.use('/i18n', express.static(path.join(__dirname, 'i18n')));
 
-app.get('/doc/documentation.json', function(req, res) {
+app.get('/documentation.json', function(req, res) {
   var nodes = generate(config);
   res.json(nodes);
 });
 
 app.get('/doc/app.js', function (req, res) {
   browserify({ debug: true, cache: false })
-    .add(path.join(__dirname, 'doc', 'DocumentationReader.js'))
+    .add(path.join(__dirname, 'doc', 'app.js'))
     .bundle()
     .on('error', function(err){
       console.error(err.message);

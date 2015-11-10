@@ -70,13 +70,19 @@ To run the test-suite headless (using Phantom.js)
 $ npm test
 ```
 
-To create a test coverate report run:
+To create a test coverate report:
 
 ```
 $ npm run coverage
 ```
 
 The report is stored in the `coverage` folder.
+
+To bundle the docs into a distribution:
+
+```
+$ npm run doc
+```
 
 ## Roadmap
 
