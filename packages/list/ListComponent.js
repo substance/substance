@@ -2,7 +2,7 @@
 
 var Component = require('../../ui/Component');
 var TextProperty = require('../../ui/TextPropertyComponent');
-var List = require('../../model/nodes/list');
+var List = require('./List');
 var $$ = Component.$$;
 
 var ListComponent = Component.extend({
