@@ -81,16 +81,18 @@ Documentation.getNodeInfo = function(node) {
     parent = node.getParent();
     info.isClassMember = (parent.type === 'class');
     info.isModuleMember = (parent.type === 'module');
-  } else if (node.type === 'class') {
+  }
+  if (node.type === 'class') {
     info.isConstructor = true;
   }
+
   // Derive storage
-  if (info.isClassMember && !node.isStatic) {
+  if (info.isConstructor) {
+    info.storage = 'new ';
+  } else if (info.isClassMember && !node.isStatic) {
     info.storage = 'this.';
   } else if (info.isModuleMember) {
     info.storage = parent.name + '.';
-  } else if (info.isConstructor) {
-    info.storage = 'new ';
   }
 
   // Derive typeDescr
