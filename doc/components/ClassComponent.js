@@ -30,6 +30,10 @@ ClassComponent.Prototype = function() {
     el.append(
       $$('div').addClass('se-description').html(node.description)
     );
+    // example
+    if (node.example) {
+      el.append($$(Example, {node: node}));
+    }
     // constructor
     el.append(
       $$('div').addClass('se-constructor sc-method')
@@ -38,10 +42,6 @@ ClassComponent.Prototype = function() {
     // params
     if (node.params.length > 0 || node.returns) {
       el.append($$(Params, {params: node.params, returns: node.returns}));
-    }
-    // example
-    if (node.example) {
-      el.append($$(Example, {node: node}));
     }
     // class members
     el.append(
