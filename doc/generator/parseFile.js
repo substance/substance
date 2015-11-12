@@ -122,7 +122,7 @@ _Parser.Prototype = function() {
       });
 
       if (entity.isDefault) {
-        node.namespace = this.folder;
+        node.parent = this.folder;
       }
       if (entities.length === 1) {
         node.id = this.id;
@@ -235,9 +235,8 @@ _Parser.Prototype = function() {
     each(entity.members, function(member) {
       var memberNode = _createNode(self, member, {
         id: node.id + "." + member.name,
-        parent: node.id,
+        parent: node.id
       });
-
       _convertMember(self, nodes, member, memberNode);
 
       nodes.push(memberNode);
