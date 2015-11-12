@@ -197,7 +197,7 @@ var prepareSchema = function(NodeClass) {
   var parentStatic = Object.getPrototypeOf(NodeClass.static);
   var parentSchema = parentStatic.schema;
   if (parentSchema) {
-    NodeClass.static.schema = _.extend(Object.create(parentSchema), schema);
+    NodeClass.static.schema = _.extend({}, parentSchema, schema);
   }
 };
 
