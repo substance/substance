@@ -11,7 +11,7 @@ var Heading = require('./HeadingComponent');
 var Params = require('./ParamsComponent');
 var Example = require('./ExampleComponent');
 var MethodComponent = require('./MethodComponent');
-
+var MemberIndexComponent = require('./MemberIndexComponent');
 
 function ClassComponent() {
   DocumentationNodeComponent.apply(this, arguments);
@@ -43,6 +43,8 @@ ClassComponent.Prototype = function() {
     if (node.params.length > 0 || node.returns) {
       el.append($$(Params, {params: node.params, returns: node.returns}));
     }
+    // member index
+    el.append($$(MemberIndexComponent, {node: node}));
     // class members
     el.append(
       $$('div').addClass('se-members')
