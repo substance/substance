@@ -4,6 +4,7 @@ var oo = require('../../util/oo');
 var Document = require('../../model/Document');
 var Schema = require('../../model/DocumentSchema');
 var schema = new Schema('substance-documentation', '0.1.0');
+var MemberIndex = require('./MemberIndex');
 
 schema.addNodes([
   require('./MetaNode'),
@@ -18,6 +19,8 @@ schema.addNodes([
 
 var Documentation = function() {
   Document.call(this, schema);
+
+  this.addIndex('members', new MemberIndex());
 
   this.create({
     type: 'container',
