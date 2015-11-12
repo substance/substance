@@ -170,6 +170,12 @@ _Parser.Prototype = function() {
         entity.isClass = true;
         entity.type = "class";
         entity.members = [];
+        // overloaded receiver
+        if (tag.string) {
+          var ctx = _extractClassCtx(this, tag.string);
+          entity.ctx = extend({}, entity.ctx, ctx);
+          entity.name = ctx.name;
+        }
       } else if (tag.type === "module") {
         entity.isModule = true;
         entity.type = "module";
@@ -366,6 +372,18 @@ _Parser.Prototype = function() {
       id: eventId,
       name: name,
       ctx: ctx
+    };
+  }
+
+  function _extractClassCtx(self, classStr) {
+    // remove the namespace prefix to support global ids, i.e., `ui/Component.VirtualElement`
+    classStr = classStr.replace(new RegExp("^"+self.folder+"/"), '');
+    var idComponents = classStr.split('.');
+    var name = idComponents.pop();
+    var receiver = idComponents.join('.');
+    return {
+      name: name,
+      receiver: receiver
     };
   }
 
