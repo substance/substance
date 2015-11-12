@@ -43,14 +43,16 @@ ClassComponent.Prototype = function() {
     if (node.params.length > 0 || node.returns) {
       el.append($$(Params, {params: node.params, returns: node.returns}));
     }
-    // member index
-    el.append($$(MemberIndexComponent, {node: node}));
-    // class members
-    el.append(
-      $$('div').addClass('se-members')
-        .append(this._renderMembers())
-        .append(this.renderInheritedMembers(el))
-    );
+    if (node.members && node.members.length > 0) {
+      // member index
+      el.append($$(MemberIndexComponent, {node: node}));
+      // class members
+      el.append(
+        $$('div').addClass('se-members')
+          .append(this._renderMembers())
+          .append(this.renderInheritedMembers(el))
+      );
+    }
     return el;
   };
 
