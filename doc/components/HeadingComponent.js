@@ -13,15 +13,25 @@ function HeadingComponent() {
 HeadingComponent.Prototype = function() {
   this.render = function() {
     var node = this.props.node;
-    var namespace = node.namespace;
+
     var name = node.name;
     var type = node.type;
     var el = $$('div').addClass('sc-heading');
     var headerEl = $$('div').addClass('se-header');
 
     // namespace
+    var parent = node.getParent();
+    var namespace = "";
+    if (parent) {
+      namespace = parent.id.replace('/', ' / ');
+      if (parent.type === 'namespace') {
+        namespace += " / ";
+      } else {
+        namespace += " . ";
+      }
+    }
     headerEl.append(
-      $$('span').addClass('se-namespace').append(namespace.split('/').join(' / ') + ' / ')
+      $$('span').addClass('se-namespace').append(namespace.replace('/',' / '))
     );
     // name
     headerEl.append(
