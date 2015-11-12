@@ -36,7 +36,6 @@ var _htmlParams;
   components until one handles it. 
   
   @class
-  @component
   @abstract
   @example
   
@@ -226,8 +225,9 @@ Component.Prototype = function ComponentPrototype() {
    * you call 'component.triggerDidMount()' on root components.
    *
    * @param isMounted an optional param for optimization, it's used mainly internally
-   *
+   * @private
    * @example
+   * 
    * ```
    * var frag = document.createDocumentFragment();
    * var comp = Component.mount($$(MyComponent), frag);
@@ -267,6 +267,7 @@ Component.Prototype = function ComponentPrototype() {
    * which is already in the DOM.
    *
    * @example
+   *
    * ```
    * var component = new MyComponent();
    * component.mount($('body')[0])
@@ -278,6 +279,7 @@ Component.Prototype = function ComponentPrototype() {
    * Removes this component from its parent.
    *
    * @chainable
+   * @private
    */
   this.unmount = function() {
     this.triggerDispose();
@@ -302,6 +304,8 @@ Component.Prototype = function ComponentPrototype() {
 
   /**
    * Triggers dispose handlers recursively.
+   *
+   * @private
    */
   this.triggerDispose = function() {
     _.each(this.children, function(child) {
@@ -424,7 +428,6 @@ Component.Prototype = function ComponentPrototype() {
 
   /**
     This is similar to `setState()` but extends the existing state instead of replacing it.
-    
     @param {object} newState an object with a partial update.
   */
   this.extendState = function(newState) {
@@ -472,15 +475,16 @@ Component.Prototype = function ComponentPrototype() {
 
   /**
     Get the current properties
+
     @return {Object} the current state
   */
-
   this.getProps = function() {
     return this.props;
   };
 
   /**
     Get the current component state
+
     @return {Object} the current state
   */
   this.getState = function() {
@@ -488,30 +492,26 @@ Component.Prototype = function ComponentPrototype() {
   };
 
   /**
-   * Hook which is called before properties are updated.
-   *
-   * Use this to dispose objects which will be replaced when properties change.
-   */
+    Hook which is called before properties are updated. Use this to dispose objects which will be replaced when properties change.
+  */
   this.willReceiveProps = function(newProps) {
-    /* jshint unused: false */
+     // jshint unused: false 
   };
 
   /**
-   * Hook which is called after properties have been set.
-   */
+    Hook which is called after properties have been set.
+  */
   this.didReceiveProps = function() {};
 
   /**
-   * Hook which is called after properties have been set.
-   */
+    Hook which is called after properties have been set.
+  */
   this.didRender = function() {};
-
-  /* API for incremental updates */
 
   /**
    * Add a class.
    *
-   * Part of the incremental updating API.
+   * Part of the incremental updating API
    */
   this.addClass = function(className) {
     this._data.addClass(className);
@@ -577,6 +577,12 @@ Component.Prototype = function ComponentPrototype() {
     return this;
   };
 
+  /**
+   * Set or get a value of form elements, analog to jQuery.val()
+   *
+   * Part of the incremental updating API.
+   * @param {String} val the elements value
+   */
   this.val = function(val) {
     if (arguments.length === 0) {
       return this.$el.val();
@@ -588,6 +594,9 @@ Component.Prototype = function ComponentPrototype() {
     }
   };
 
+  /**
+    Check if a component has a class set.
+  */
   this.hasClass = function(className) {
     if (this.$el) {
       return this.$el.hasClass(className);
@@ -595,6 +604,9 @@ Component.Prototype = function ComponentPrototype() {
     return false;
   };
 
+  /**
+    Get text of an element.
+  */  
   this.text = function() {
     if (arguments.length === 0) {
       if (this.$el) {
@@ -610,15 +622,13 @@ Component.Prototype = function ComponentPrototype() {
   };
 
   /**
-   * Get or set HTML properties.
+   * Get or set HTML properties analog to [jQuery.prop](http://api.jquery.com/prop).
    *
-   * See http://api.jquery.com/prop
-   *
-   * > Note: we can't follow jquery here, as it brings a semantical conflict/confusion
-   *   with the component's setProps API.
-   *   $.prop is used less often, thus it should be acceptable to deviate from jquery.
-   *   In fact, we have not used $.prop at all so far, as we haven't made use
-   *   of input fields and such where you have a lot of html properties.
+   * Note: we can't follow jquery's method name here, as it brings a semantical
+   * conflict/confusion with the component's setProps API.
+   * `$.prop` is used less often, thus it should be acceptable to deviate from jquery.
+   * In fact, we have not used `$.prop` at all so far, as we haven't made use
+   * of input fields and such where you have a lot of html properties.
    */
   this.htmlProp = function() {
     if (arguments.length === 1 && _.isString(arguments[0])) {
@@ -633,10 +643,8 @@ Component.Prototype = function ComponentPrototype() {
   };
 
   /**
-   * Remove HTML properties.
-   *
-   * See http://api.jquery.com/removeProp/
-   */
+    Remove HTML properties analog to [jQuery.removeProp](http://api.jquery.com/removeProp/)
+  */
   this.removeHtmlProp = function() {
     this._data.removeHtmlProp.apply(this._data, arguments);
     if (this.$el) {
@@ -649,6 +657,8 @@ Component.Prototype = function ComponentPrototype() {
    * Add css styles.
    *
    * Part of the incremental updating API.
+   *
+   * @param {Object} style an object containing CSS property: value pairs.
    */
   this.css = function(style) {
     if (arguments.length === 2) {
@@ -662,9 +672,11 @@ Component.Prototype = function ComponentPrototype() {
   };
 
   /**
-   * Append a child component created using Component.$$.
+   * Append a child component created using {@link ui/Component.$$}.
    *
    * Part of the incremental updating API.
+   *
+   * @param {ui/Component.VirtualNode} child the child component
    */
   this.append = function(child) {
     var comp = this._compileComponent(child, {
@@ -1140,7 +1152,12 @@ Component.Text.Prototype = function() {
 
 oo.inherit(Component.Text, Component);
 
-/* Virtual Components */
+/** 
+  Virtual Components. An abstract class for Virtual components, created via Component.$$.
+
+  @class Component.VirtualNode
+  @abstract
+*/
 
 function VirtualNode() {
   this._ref = null;
