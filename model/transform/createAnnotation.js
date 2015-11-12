@@ -43,8 +43,13 @@ function _createPropertyAnnotations(tx, args) {
   @function
 
   @param {model/TransactionDocument} tx the document instance
-  @param {Object} args object with fields `selection`, `containerId`, `annotationType`, `[annotationData]`
+  @param {Object} args object with transformation arguments
+  @param {model/Selection} args.selection A document selection
+  @scopedparam {String} args.containerId a valid container id
+  @scopedparam {String} args.annotationType type of the new annotation
+  @scopedparam {Object} [args.annotationData] additional data that should be stored on the object
 */
+
 function createAnnotation(tx, args) {
   var sel = args.selection;
   var annoType = args.annotationType;
