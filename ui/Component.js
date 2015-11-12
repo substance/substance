@@ -11,56 +11,57 @@ var VirtualTextNode;
 var RawHtml;
 var _htmlParams;
 
-/*
- * A light-weight component implementation inspired by React and Ember.
- * In contrast to the large frameworks it does much less things automagically
- * in favour of a simple and synchronous life-cyle.
- *
- * Features:
- * - light-weight but simplified rerendering
- * - minimalistic life-cycle with hooks
- * - up-tree communication (send action)
- * - dependency injection
- *
- * ## Concepts
- *
- * ### `props`
- *
- * Props are provided by a parent component. There is a set of built-in properties,
- * such as `data` attributes or `classNames`.
- * An initial set of properties is provided via constructor. After that, the parent
- * component can call `setProps` to update these properties which triggers rerendering if the properties
- * change.
- *
- * ### `state`
- *
- * The component state is a set of flags and values which are used to control how the component
- * gets rendered give the current props.
- * Using `setState` the component can change its internal state, which leads to a rerendering if the state
- * changes.
- *
- * ### The `ref` property
- *
- * A child component with a `ref` id will be reused on rerender. All others will be wiped and rerender from scratch.
- * If you want to preserve a grand-child (or lower), then make sure that all anchestors have a ref id.
- * After rendering the child will be accessible via `this.refs[ref]`.
- *
- * ### Actions
- *
- * A component can send actions via `send` which are bubbled up through all parent components
- * until one handles it.
- * To register an action handler, a component must register like this
- * ```
- *   this.actions({
- *     "open-modal": this.openModal,
- *     "close-modal": this.closeModal
- *   });
- * ```
- * which is typically done in the constructor.
- *
- * @class Component
- * @memberof module:ui
- */
+/**
+  A light-weight component implementation inspired by React and Ember. In contrast to the
+  large frameworks it does much less things automagically in favour of synchronous
+  rendering and a minimalistic life-cycle. It also provides *up-tree*
+  communication and *dependency injection*.
+  
+  Concepts:
+  
+  - `props` are provided by a parent component.  An initial set of properties is provided
+  via constructor. After that, the parent component can call `setProps` or `extendProps`
+  to update these properties which triggers rerendering if the properties change.
+  
+  - `state` is a set of flags and values which are used to control how the component
+  gets rendered given the current props. Using `setState` the component can change
+  its internal state, which leads to a rerendering if the state changes.
+  
+  - A child component with a `ref` id will be reused on rerender. All others will be
+  wiped and rerender from scratch. If you want to preserve a grand-child (or lower), then
+  make sure that all anchestors have a ref id. After rendering the child will be
+  accessible via `this.refs[ref]`.
+  
+  - A component can send actions via `send` which are bubbled up through all parent
+  components until one handles it. 
+  
+  @class
+  @component
+  @abstract
+  @example
+  
+  Define a component:
+
+  ```
+  var HelloMessage = Component.extend({
+    render: function() {
+      return $$('div').append(
+        'Hello ',
+        this.props.name
+      );
+    }
+  });
+  ```
+  
+  And mount it to a DOM Element:
+  
+  ```
+  Component.mount(
+    $$(HelloMessage, {name: 'John'}),
+    document.body
+  );
+  ```
+*/
 function Component(parent, params) {
   EventEmitter.call(this);
 
@@ -112,7 +113,6 @@ function Component(parent, params) {
   // a hook after both props and state have been initialized,
   // so we can trigger state handlers for the initial state transition
   // before something is rendered actually
-
   if (this.didInitialize) {
     console.warn("Component.didInitialize() has been deprecated. Use Component.initialize() instead.");
     this.didInitialize(this.props, this.state);
@@ -133,40 +133,44 @@ Component.Prototype = function ComponentPrototype() {
     return this.getInitialState();
   };
 
+  // Experimental (we need this to initialize the Router)
   this.getInitialContext = function() {
     return {};
   };
 
   /**
-   * Provides the context which is delivered to every child component.
-   *
-   * @return object the child context
-   */
+    Provides the context which is delivered to every child component. Override if you want to
+    provide your own child context.
+
+    @return object the child context
+  */
   this.getChildContext = function() {
     return this.childContext || {};
   };
 
   /**
-   * Hook which is called before the component is rendered/mounted.
-   */
+    Hook which is called in the construction phase before the component is rendered.
+    Use this in conjunction with {@link ui/Component.extend}. You don't want to use this if you
+    provide your own constructor function and {@link util/oo.inherit}
+  */
   this.initialize = function(props, state) {
-    /* jshint unused: false */
+    // jshint unused: false
   };
 
   /**
-   * Provide the initial component state.
-   *
-   * @return object the initial state
-   */
+    Provide the initial component state.
+    
+    @return object the initial state
+  */
   this.getInitialState = function() {
     return {};
   };
 
   /**
-   * Provides the parent of this component.
-   *
-   * @return object the parent component or null if this component does not have a parent.
-   */
+    Provides the parent of this component.
+    
+    @return object the parent component or null if this component does not have a parent.
+  */
   this.getParent = function() {
     if (this.parent !== "root") {
       return this.parent;
@@ -307,18 +311,19 @@ Component.Prototype = function ComponentPrototype() {
   };
 
   /**
-   * A hook which is called when the component is unmounted, i.e. removed from DOM, hence disposed
+    A hook which is called when the component is unmounted, i.e. removed from DOM, hence disposed
    */
   this.dispose = function() {};
 
   /**
-   * Send an action request to the parent component, bubbling up the component
-   * hierarchy until an action handler is found.
-   *
-   * @param action the name of the action
-   * @param ... arbitrary number of arguments
-   * @returns {Boolean} true if the action was handled, false otherwise
-   */
+    Send an action request to the parent component, bubbling up the component
+    hierarchy until an action handler is found.
+    
+    @param action the name of the action
+    @param ... arbitrary number of arguments
+    @returns {Boolean} true if the action was handled, false otherwise
+    @example
+  */
   this.send = function(action) {
     var comp = this;
     while(comp) {
@@ -332,21 +337,20 @@ Component.Prototype = function ComponentPrototype() {
   };
 
   /**
-   * Define action handlers.
-   *
-   * Call this during construction/initialization of a component.
-   *
-   * @example
-   * ```
-   * function MyComponent() {
-   *   Component.apply(this, arguments);
-   *   ...
-   *   this.actions({
-   *     "foo": this.handleFoo
-   *   });
-   * }
-   * ```
-   */
+    Define action handlers. Call this during construction/initialization of a component.
+    
+    @example
+    ```
+    function MyComponent() {
+      Component.apply(this, arguments);
+      ...
+      this.actions({
+       'openPrompt': this.openPrompt,
+       'closePrompt': this.closePrompt
+      });
+    }
+    ```
+  */
   this.actions = function(actions) {
     _.each(actions, function(method, action) {
       var handler = method.bind(this);
@@ -355,10 +359,10 @@ Component.Prototype = function ComponentPrototype() {
   };
 
   /**
-   * Sets the state of this component, potentially leading to a rerender.
-   *
-   * Usually this is used by the component itself.
-   */
+    Sets the state of this component, potentially leading to a rerender.
+    
+    Usually this is used by the component itself.
+  */
   this.setState = function(newState) {
     var needRerender = this.shouldRerender(this.getProps(), newState);
     this.willUpdateState(newState);
@@ -391,7 +395,6 @@ Component.Prototype = function ComponentPrototype() {
   // then we extract the states of all components on the route
   // and send an action to the application which can then update the browsers URL.
 
-
   function getRouteState(target) {
     var states = [target.getState()];
     // app states are route states
@@ -420,41 +423,33 @@ Component.Prototype = function ComponentPrototype() {
   }
 
   /**
-   * This is similar to `setState()` but does not replace the state.
-   *
-   * @param newState an object with a partial update.
-   */
+    This is similar to `setState()` but extends the existing state instead of replacing it.
+    
+    @param {object} newState an object with a partial update.
+  */
   this.extendState = function(newState) {
     newState = _.extend({}, this.state, newState);
     this.setState(newState);
   };
 
   /**
-   * @return the current state
-   */
-  this.getState = function() {
-    return this.state;
-  };
-
-  /**
-   * Hook which is called before the state is changed.
-   *
-   * Use this to dispose objects which will be replaced during state change.
-   */
+    Hook which is called before the state is changed.
+    Use this to dispose objects which will be replaced during a state change.
+  */
   this.willUpdateState = function(newState) {
-    /* jshint unused: false */
+    // jshint unused: false
   };
 
   /**
-   * Hook which is called after the state is changed.
-   */
+    Hook which is called after the state has updated.
+  */
   this.didUpdateState = function() {};
 
   /**
-   * Sets the properties of this component, potentially leading to a rerender.
-   *
-   * @param an object with properties
-   */
+    Sets the properties of this component, potentially leading to a rerender.
+    
+    @param {object} an object with properties
+  */
   this.setProps = function(newProps) {
     var needRerender = this.shouldRerender(newProps, this.getState());
     this.willReceiveProps(newProps);
@@ -465,16 +460,31 @@ Component.Prototype = function ComponentPrototype() {
     }
   };
 
+  /**
+    Extends the properties of the component, without reppotentially leading to a rerender.
+    
+    @param {object} an object with properties
+  */
   this.extendProps = function(updatedProps) {
     var newProps = _.extend({}, this.props, updatedProps);
     this.setProps(newProps);
   };
 
   /**
-   * @return the current properties
-   */
+    Get the current properties
+    @return {Object} the current state
+  */
+
   this.getProps = function() {
     return this.props;
+  };
+
+  /**
+    Get the current component state
+    @return {Object} the current state
+  */
+  this.getState = function() {
+    return this.state;
   };
 
   /**
