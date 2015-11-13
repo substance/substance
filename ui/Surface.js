@@ -10,11 +10,12 @@ var Selection = require('../model/Selection');
 var Component = require('./Component');
 
 /**
- * Abstract interface for editing components.
- * Dances with contenteditable, so you don't have to.
- *
- * @class
- */
+   Abstract interface for editing components.
+   Dances with contenteditable, so you don't have to.
+   
+   @class
+   @abstract
+*/
 
 function Surface() {
   Component.apply(this, arguments);
