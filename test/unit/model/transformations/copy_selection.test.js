@@ -1,10 +1,10 @@
 "use strict";
 
-require('../qunit_extensions');
-var sample1 = require('../../fixtures/sample1');
-var copySelection = require('../../../model/transform/copySelection');
+require('../../qunit_extensions');
+var sample1 = require('../../../fixtures/sample1');
+var copySelection = require('../../../../model/transform/copySelection');
 
-QUnit.module('Transformations/copySelection');
+QUnit.module('model/transform/copySelection');
 
 QUnit.test("Copying a property selection", function(assert) {
   var doc = sample1();

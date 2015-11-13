@@ -1,9 +1,9 @@
 "use strict";
 
-var _ = require('../../../util/helpers');
-var ArrayOperation = require('../../../model/data/ArrayOperation');
+var _ = require('../../../../util/helpers');
+var ArrayOperation = require('../../../../model/data/ArrayOperation');
 
-QUnit.module('Substance.Operator/ArrayOperation');
+QUnit.module('model/data/ArrayOperation');
 
 QUnit.assert.checkArrayOperationTransform = function(a, b, input, expected) {
   var t = ArrayOperation.transform(a, b);

@@ -1,12 +1,12 @@
 "use strict";
 
-var _ = require('../../../util/helpers');
-var PathAdapter = require('../../../util/PathAdapter');
-var ObjectOperation = require('../../../model/data/ObjectOperation');
-var ArrayOperation = require('../../../model/data/ArrayOperation');
-var TextOperation = require('../../../model/data/TextOperation');
+var _ = require('../../../../util/helpers');
+var PathAdapter = require('../../../../util/PathAdapter');
+var ObjectOperation = require('../../../../model/data/ObjectOperation');
+var ArrayOperation = require('../../../../model/data/ArrayOperation');
+var TextOperation = require('../../../../model/data/TextOperation');
 
-QUnit.module('Substance.Operator/ObjectOperation');
+QUnit.module('model/data/ObjectOperation');
 
 QUnit.assert.checkObjectOperationTransform = function(a, b, input, expected) {
   var t = ObjectOperation.transform(a, b);

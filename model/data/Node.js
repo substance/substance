@@ -29,9 +29,7 @@ Node.Prototype = function() {
   /**
    * The node's schema.
    *
-   * @property properties {Object}
-   *
-   * @memberof module:Data.Node.prototype
+   * @type {Object}
    */
   this.properties = {
     type: 'string',

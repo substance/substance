@@ -1,11 +1,11 @@
 'use strict';
 
-var sample1 = require('../../fixtures/sample1');
+var sample1 = require('../../../fixtures/sample1');
 
-var createAnnotation = require('../../../model/transform/createAnnotation');
-var docHelpers = require('../../../model/documentHelpers');
+var createAnnotation = require('../../../../model/transform/createAnnotation');
+var docHelpers = require('../../../../model/documentHelpers');
 
-QUnit.module('Transformations/createAnnotation');
+QUnit.module('model/transform/createAnnotation');
 
 QUnit.test("Create property annotation for a given property selection", function(assert) {
   var doc = sample1();

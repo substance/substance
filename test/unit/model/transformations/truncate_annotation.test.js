@@ -1,9 +1,9 @@
 'use strict';
 
-var containerAnnoSample = require('../../fixtures/container_anno_sample');
-var truncateAnnotation = require('../../../model/transform/truncateAnnotation');
+var containerAnnoSample = require('../../../fixtures/container_anno_sample');
+var truncateAnnotation = require('../../../../model/transform/truncateAnnotation');
 
-QUnit.module('Transformations/truncateAnnotation');
+QUnit.module('model/transform/truncateAnnotation');
 
 QUnit.test("Truncate property annotation for a given property selection", function(assert) {
   var doc = containerAnnoSample();
