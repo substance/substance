@@ -10,6 +10,7 @@ var ClassNode = DocumentedNode.extend({
     members: ['array', 'id'],
     params: ['array', 'object'],
     isAbstract: 'boolean',
+    isStatic: 'boolean',
     superClass: 'id', // when @extends is defined
   }
 });
