@@ -1,6 +1,5 @@
 'use strict';
 
-var $ = require('../../util/jquery');
 var DocumentNode = require('../../model/DocumentNode');
 
 var Include = DocumentNode.extend({
@@ -16,31 +15,8 @@ var Include = DocumentNode.extend({
   },
 });
 
-Include.static.components = ['nodeId'];
+Include.static.components = [];
 
 Include.static.blockType = true;
-
-Include.static.matchElement = function($el) {
-  return $el.is('include');
-};
-
-Include.static.fromHtml = function($el, converter) {
-  var id = converter.defaultId($el, 'include');
-  var inc = {
-    id: id,
-    nodeId: $el.attr('data-rid'),
-    nodeType: $el.attr('data-rtype'),
-  };
-  return inc;
-};
-
-Include.static.toHtml = function(inc) {
-  var id = inc.id;
-  var $el = $('<include>')
-    .attr('id', id)
-    .attr('data-rtype', inc.nodeType)
-    .attr('data-rid', inc.nodeId);
-  return $el;
-};
 
 module.exports = Include;

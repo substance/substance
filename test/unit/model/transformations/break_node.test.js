@@ -1,10 +1,10 @@
 "use strict";
 
-require('../qunit_extensions');
-var sample1 = require('../../fixtures/sample1');
-var breakNode = require('../../../model/transform/breakNode');
+require('../../qunit_extensions');
+var sample1 = require('../../../fixtures/sample1');
+var breakNode = require('../../../../model/transform/breakNode');
 
-QUnit.module('Transformations/breakNode');
+QUnit.module('model/transform/breakNode');
 
 QUnit.test("Breaking a paragraph", function(assert) {
   var doc = sample1();

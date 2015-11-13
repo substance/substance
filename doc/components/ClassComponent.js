@@ -11,7 +11,7 @@ var Heading = require('./HeadingComponent');
 var Params = require('./ParamsComponent');
 var Example = require('./ExampleComponent');
 var MethodComponent = require('./MethodComponent');
-
+var MemberIndexComponent = require('./MemberIndexComponent');
 
 function ClassComponent() {
   DocumentationNodeComponent.apply(this, arguments);
@@ -30,6 +30,10 @@ ClassComponent.Prototype = function() {
     el.append(
       $$('div').addClass('se-description').html(node.description)
     );
+    // example
+    if (node.example) {
+      el.append($$(Example, {node: node}));
+    }
     // constructor
     el.append(
       $$('div').addClass('se-constructor sc-method')
@@ -39,16 +43,16 @@ ClassComponent.Prototype = function() {
     if (node.params.length > 0 || node.returns) {
       el.append($$(Params, {params: node.params, returns: node.returns}));
     }
-    // example
-    if (node.example) {
-      el.append($$(Example, {node: node}));
+    if (node.members && node.members.length > 0) {
+      // member index
+      el.append($$(MemberIndexComponent, {node: node}));
+      // class members
+      el.append(
+        $$('div').addClass('se-members')
+          .append(this._renderMembers())
+          .append(this.renderInheritedMembers(el))
+      );
     }
-    // class members
-    el.append(
-      $$('div').addClass('se-members')
-        .append(this._renderMembers())
-        .append(this.renderInheritedMembers(el))
-    );
     return el;
   };
 

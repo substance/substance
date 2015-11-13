@@ -122,7 +122,7 @@ _Parser.Prototype = function() {
       });
 
       if (entity.isDefault) {
-        node.namespace = this.folder;
+        node.parent = this.folder;
       }
       if (entities.length === 1) {
         node.id = this.id;
@@ -170,6 +170,12 @@ _Parser.Prototype = function() {
         entity.isClass = true;
         entity.type = "class";
         entity.members = [];
+        // overloaded receiver
+        if (tag.string) {
+          var ctx = _extractClassCtx(this, tag.string);
+          entity.ctx = extend({}, entity.ctx, ctx);
+          entity.name = ctx.name;
+        }
       } else if (tag.type === "module") {
         entity.isModule = true;
         entity.type = "module";
@@ -235,9 +241,8 @@ _Parser.Prototype = function() {
     each(entity.members, function(member) {
       var memberNode = _createNode(self, member, {
         id: node.id + "." + member.name,
-        parent: node.id,
+        parent: node.id
       });
-
       _convertMember(self, nodes, member, memberNode);
 
       nodes.push(memberNode);
@@ -311,7 +316,7 @@ _Parser.Prototype = function() {
           description: tag.description
         };
         if (tag.optional) {
-          param.name = param.name.replace(/[\[\]]/g, '');
+          // param.name = param.name.replace(/[\[\]]/g, '');
           param.optional = true;
         }
         node.params.push(param);
@@ -370,6 +375,18 @@ _Parser.Prototype = function() {
     };
   }
 
+  function _extractClassCtx(self, classStr) {
+    // remove the namespace prefix to support global ids, i.e., `ui/Component.VirtualElement`
+    classStr = classStr.replace(new RegExp("^"+self.folder+"/"), '');
+    var idComponents = classStr.split('.');
+    var name = idComponents.pop();
+    var receiver = idComponents.join('.');
+    return {
+      name: name,
+      receiver: receiver
+    };
+  }
+
 };
 
 oo.initClass(_Parser);
@@ -382,10 +399,10 @@ oo.initClass(_Parser);
 var _parseTagTypes = dox.parseTagTypes;
 dox.parseTagTypes = function(str, tag) {
   if (/\{\w+(\/\w+)+([.#]\w+)*\}/.exec(str)) {
-    str = str.replace('/', '_SEP_');
+    str = str.replace(/\//g, '_SEP_');
     var types = _parseTagTypes(str, tag);
     for (var i = 0; i < types.length; i++) {
-      types[i] = types[i].replace('_SEP_', '/');
+      types[i] = types[i].replace(/_SEP_/g, '/');
     }
   } else {
     return _parseTagTypes(str, tag);

@@ -1,9 +1,9 @@
 'use strict';
 
-var containerAnnoSample = require('../../fixtures/container_anno_sample');
-var fuseAnnotation = require('../../../model/transform/fuseAnnotation');
+var containerAnnoSample = require('../../../fixtures/container_anno_sample');
+var fuseAnnotation = require('../../../../model/transform/fuseAnnotation');
 
-QUnit.module('Transformations/fuseAnnotation');
+QUnit.module('model/transform/fuseAnnotation');
 
 function sample() {
   var doc = containerAnnoSample();

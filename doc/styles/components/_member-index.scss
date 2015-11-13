@@ -1,0 +1,13 @@
+.sc-member-index {
+  font-size: $font-size-small;
+  .se-label {
+    font-weight: bold;
+  }
+  .se-members {
+    
+    a {
+      padding-right: 10px;
+    }
+  }
+  margin-bottom: $node-margin-bottom;
+}

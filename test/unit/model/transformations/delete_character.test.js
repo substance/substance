@@ -1,9 +1,9 @@
 "use strict";
 
-var sample1 = require('../../fixtures/sample1');
-var deleteCharacter = require('../../../model/transform/deleteCharacter');
+var sample1 = require('../../../fixtures/sample1');
+var deleteCharacter = require('../../../../model/transform/deleteCharacter');
 
-QUnit.module('Transformations/deleteCharacter');
+QUnit.module('model/transform/deleteCharacter');
 
 QUnit.test("Backspacing", function(assert) {
   var doc = sample1();

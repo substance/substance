@@ -9,11 +9,11 @@ var ContainerAnnotation = require('./ContainerAnnotation');
 
 /**
   Used to define custom article formats. Predefined node types can be combined with custom ones.
-  
+
   @class
   @param {String} name schema identifier
   @param {String} schema schema version
-  
+
   @example
 
   ```js

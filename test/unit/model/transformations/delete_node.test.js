@@ -1,10 +1,10 @@
 "use strict";
 
-require('../qunit_extensions');
-var containerAnnoSample = require('../../fixtures/container_anno_sample');
-var deleteNode = require('../../../model/transform/deleteNode');
+require('../../qunit_extensions');
+var containerAnnoSample = require('../../../fixtures/container_anno_sample');
+var deleteNode = require('../../../../model/transform/deleteNode');
 
-QUnit.module('Transformations/deleteNode');
+QUnit.module('model/transform/deleteNode');
 
 QUnit.test("DeleteNode usage", function(assert) {
   var doc = containerAnnoSample();

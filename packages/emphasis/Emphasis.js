@@ -3,15 +3,7 @@
 var Annotation = require('../../model/Annotation');
 
 var Emphasis = Annotation.extend({
-  name: "emphasis",
-  displayName: "Emphasis",
-  splitContainerSelections: true
+  name: "emphasis"
 });
-
-Emphasis.static.tagName = "em";
-
-Emphasis.static.matchElement = function($el) {
-  return $el.is("em,i");
-};
 
 module.exports = Emphasis;

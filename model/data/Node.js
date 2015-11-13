@@ -29,9 +29,7 @@ Node.Prototype = function() {
   /**
    * The node's schema.
    *
-   * @property properties {Object}
-   *
-   * @memberof module:Data.Node.prototype
+   * @type {Object}
    */
   this.properties = {
     type: 'string',
@@ -197,7 +195,7 @@ var prepareSchema = function(NodeClass) {
   var parentStatic = Object.getPrototypeOf(NodeClass.static);
   var parentSchema = parentStatic.schema;
   if (parentSchema) {
-    NodeClass.static.schema = _.extend(Object.create(parentSchema), schema);
+    NodeClass.static.schema = _.extend({}, parentSchema, schema);
   }
 };
 

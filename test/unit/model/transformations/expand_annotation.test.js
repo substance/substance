@@ -1,9 +1,9 @@
 'use strict';
 
-var containerAnnoSample = require('../../fixtures/container_anno_sample');
-var expandAnnotation = require('../../../model/transform/expandAnnotation');
+var containerAnnoSample = require('../../../fixtures/container_anno_sample');
+var expandAnnotation = require('../../../../model/transform/expandAnnotation');
 
-QUnit.module('Transformations/expandAnnotation');
+QUnit.module('model/transform/expandAnnotation');
 
 QUnit.test("Expand-right of property annotation for a given property selection", function(assert) {
   var doc = containerAnnoSample();
