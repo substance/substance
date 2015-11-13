@@ -159,11 +159,11 @@ DOMElement.Prototype = function() {
 
     @returns {Boolean} true if the element is of type `Node.ELEMENT_NODE`
    */
-  this.isElementNode = function(el) {
+  this.isElementNode = function() {
     if (inBrowser) {
-      return (el.nodeType === window.Node.ELEMENT_NODE);
+      return (this.el.nodeType === window.Node.ELEMENT_NODE);
     } else {
-      return el.type === "tag";
+      return this.el.type === "tag";
     }
   };
 
@@ -172,11 +172,11 @@ DOMElement.Prototype = function() {
 
     @returns {Boolean} true if the element is of type `Node.COMMENT_NODE`
    */
-  this.isCommentNode = function(el) {
+  this.isCommentNode = function() {
     if (inBrowser) {
-      return (el.nodeType === window.Node.COMMENT_NODE);
+      return (this.el.nodeType === window.Node.COMMENT_NODE);
     } else {
-      return el.type === "comment";
+      return this.el.type === "comment";
     }
   };
 

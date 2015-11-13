@@ -64,18 +64,7 @@ HtmlImporter.Prototype = function HtmlImporterPrototype() {
     // converting to JSON first
     var htmlDoc = DOMElement.parseHtmlDocument(html);
     this.convertHtmlDocument(htmlDoc);
-    // creating all nodes
-    var doc = this.createDocument();
-    each(this.state.nodes, function(node) {
-      doc.create(node);
-    });
-    // creating annotations afterwards so that the targeted nodes exist for sure
-    each(this.state.inlineNodes, function(inlineNode) {
-      doc.create(inlineNode);
-    });
-    // filling the container
-    doc.set([this.state.containerId, 'nodes'], this.state.container);
-
+    var doc = this.generateDocument();
     return doc;
   };
 
@@ -123,7 +112,7 @@ HtmlImporter.Prototype = function HtmlImporterPrototype() {
   this.createDocument = function() {
     var doc = this._createDocument();
     var containerId = this.state.containerId;
-    var container = doc.get();
+    var container = doc.get(containerId);
     if (!container) {
       doc.create({
         type: 'container',
@@ -131,6 +120,21 @@ HtmlImporter.Prototype = function HtmlImporterPrototype() {
         nodes: []
       });
     }
+    return doc;
+  };
+
+  this.generateDocument = function() {
+    // creating all nodes
+    var doc = this.createDocument();
+    each(this.state.nodes, function(node) {
+      doc.create(node);
+    });
+    // creating annotations afterwards so that the targeted nodes exist for sure
+    each(this.state.inlineNodes, function(inlineNode) {
+      doc.create(inlineNode);
+    });
+    // filling the container
+    doc.set([this.state.containerId, 'nodes'], this.state.container);
     return doc;
   };
 
@@ -149,9 +153,9 @@ HtmlImporter.Prototype = function HtmlImporterPrototype() {
   this.convertContainer = function(containerEl) {
     var state = this.state;
     state.container = [];
-    var childIterator = containerEl.getChildIterator();
-    while(childIterator.hasNext()) {
-      var el = childIterator.next();
+    var iterator = containerEl.getChildNodeIterator();
+    while(iterator.hasNext()) {
+      var el = iterator.next();
       var blockTypeConverter = this._getBlockTypeConverterForElement(el);
       var node;
       if (blockTypeConverter) {
@@ -166,8 +170,8 @@ HtmlImporter.Prototype = function HtmlImporterPrototype() {
           if (/^\s*$/.exec(text)) continue;
           // If we find text nodes on the block level we wrap
           // it into a paragraph element (or what is configured as default block level element)
-          childIterator.back();
-          this._wrapInlineElementsIntoBlockElement(childIterator);
+          iterator.back();
+          this._wrapInlineElementsIntoBlockElement(iterator);
         } else if (el.isElementNode()) {
           var inlineTypeConverter = this._getInlineTypeConverterForElement(el);
           // NOTE: hard to tell if unsupported nodes on this level
@@ -176,8 +180,8 @@ HtmlImporter.Prototype = function HtmlImporterPrototype() {
           // that collects inline elements and wraps into a paragraph.
           // TODO: maybe this should be the default?
           if (inlineTypeConverter || this._getTagName(el) === "span") {
-            childIterator.back();
-            this._wrapInlineElementsIntoBlockElement(childIterator);
+            iterator.back();iterator
+            this._wrapInlineElementsIntoBlockElement(iterator);
           } else {
             this._createDefaultBlockElement(el);
           }
@@ -193,13 +197,15 @@ HtmlImporter.Prototype = function HtmlImporterPrototype() {
     @returns {object} the created node as JSON
    */
   this.convertElement = function(el) {
-    var converter = this._getNodeConverterForElement(el);
-    if (!converter) {
-      throw new Error("Could not find a node class associated to element:" + el.outerHtml);
+    var converter = this._getBlockTypeConverterForElement(el);
+    var node;
+    if (converter) {
+      var node = this._nodeData(el, converter.type);
+      node = converter.import(el, node, this) || node;
+      this.createNode(node);
+    } else {
+      throw new Error('HtmlImporter#convertElement() currently only supports block-type nodes.');
     }
-    var node = this._nodeData(el, converter.type);
-    node = converter.import(el, node, this) || node;
-    this.createNode(node);
     return node;
   };
 
@@ -211,13 +217,13 @@ HtmlImporter.Prototype = function HtmlImporterPrototype() {
     this.state.nodes.push(node);
   };
 
-  this.showNode = function(node) {
+  this.show = function(node) {
     this.state.container.push(node.id);
   };
 
-  this._createAndShowNode = function(node) {
+  this._createAndShow = function(node) {
     this.createNode(node);
-    this.showNode(node);
+    this.show(node);
   };
 
   this._nodeData = function(el, type) {
@@ -480,7 +486,7 @@ HtmlImporter.Prototype = function HtmlImporterPrototype() {
         throw new Error('Contract: Html.defaultConverter() must return a node with type.');
       }
       node.id = node.id || this.nextId(node.type);
-      this._createAndShowNode(node);
+      this._createAndShow(node);
     }
     return node;
   };

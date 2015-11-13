@@ -3,6 +3,7 @@
 var oo = require('../../util/oo');
 var HtmlImporter = require('../../model/HtmlImporter');
 var schema = require('./test_schema');
+var TestArticle = require('./test_article');
 
 var converters = [
   require('../../packages/paragraph/ParagraphHtmlConverter'),
@@ -19,7 +20,12 @@ var converters = [
 ]
 
 function TestHtmlImporter() {
-  TestHtmlImporter.super.call(this, { schema: schema, converters: converters, containerId: 'main'});
+  TestHtmlImporter.super.call(this, {
+    schema: schema,
+    converters: converters,
+    DocumentClass: TestArticle,
+    containerId: 'main'
+  });
 }
 
 TestHtmlImporter.Prototype = function() {
