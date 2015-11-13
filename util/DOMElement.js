@@ -228,6 +228,8 @@ DOMElement.Prototype = function() {
   };
 };
 
+oo.initClass(DOMElement);
+
 /**
  */
 DOMElement.create = function(str) {
@@ -239,6 +241,17 @@ DOMElement.create = function(str) {
 };
 
 Object.defineProperties(DOMElement.prototype, {
+  /**
+    @property {String} util/DOMElement#tagName
+   */
+  'tagName': {
+    get: function() {
+      return this.getTagName();
+    },
+    set: function(text) {
+      throw new Error('util/DOMElement#tagName is readonly.');
+    }
+  },
   /**
     @property {String} util/DOMElement#textContent
    */
@@ -336,7 +349,7 @@ DOMElement.ChildNodeIterator.Prototype = function() {
    */
   this.next = function() {
     this.pos += 1;
-    return this.nodes[this.pos];
+    return new DOMElement($(this.nodes[this.pos]));
   };
 
   /**

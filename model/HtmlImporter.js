@@ -3,6 +3,7 @@
 var each = require('lodash/collection/each');
 var last = require('lodash/array/last');
 var extend = require('lodash/object/extend');
+var bind = require('lodash/function/bind');
 var oo = require('../util/oo');
 var uuid = require('../util/uuid');
 var DOMElement = require('../util/DOMElement');
@@ -14,7 +15,7 @@ var DOMElement = require('../util/DOMElement');
   @param {Object} config
  */
 function HtmlImporter(config) {
-  this.config = config || {};
+  this.config = extend({ idAttribute: 'data-id' }, config );
 
   this.schema = config.schema;
   this.state = null;
@@ -26,16 +27,23 @@ function HtmlImporter(config) {
   var schema = this.schema;
   var defaultTextType = schema.getDefaultTextType();
   each(config.converters, function(converter) {
-    if (!converter.name || converter.matchElement) {
-      console.error('Converter must provide the name of the associated node.', converter);
+    if (!converter.type) {
+      console.error('Converter must provide the type of the associated node.', converter);
       return;
     }
-    var NodeClass = schema.getNodeClass(converter.name);
+    if (!converter.matchElement && !converter.tagName) {
+      console.error('Converter must provide a matchElement function or a tagName property.', converter);
+      return;
+    }
+    if (!converter.matchElement) {
+      converter.matchElement = bind(this._defaultElementMatcher, converter);
+    }
+    var NodeClass = schema.getNodeClass(converter.type);
     if (!NodeClass) {
-      console.warn('No node type registered for name', converter.name);
+      console.warn('No node type registered for name', converter.type);
       return;
     }
-    if (defaultTextType === converter.name) {
+    if (defaultTextType === converter.type) {
       this._defaultBlockTypeConverter = converter;
     }
     if (NodeClass.static.blockType) {
@@ -45,13 +53,14 @@ function HtmlImporter(config) {
     }
 
   }, this);
+  this._initState();
 }
 
 HtmlImporter.Prototype = function HtmlImporterPrototype() {
 
   this.importDocument = function(html) {
     // initialization
-    this._initState();
+    this.reset();
     // converting to JSON first
     var htmlDoc = DOMElement.parseHtmlDocument(html);
     this.convertHtmlDocument(htmlDoc);
@@ -102,6 +111,7 @@ HtmlImporter.Prototype = function HtmlImporterPrototype() {
       nodes: [],
       inlineNodes: [],
       container: [],
+      ids: {},
       // stack of contexts to handle reentrant calls
       stack: [],
       lastChar: "",
@@ -149,16 +159,16 @@ HtmlImporter.Prototype = function HtmlImporterPrototype() {
         node = blockTypeConverter.import(el, node, this) || node;
         this._createAndShow(node);
       } else {
-        if (this.isCommentNode(el)) {
+        if (el.isCommentNode()) {
           // skip HTML comment nodes on block level
-        } else if (this.isTextNode(el)) {
+        } else if (el.isTextNode()) {
           var text = el.textContent;
           if (/^\s*$/.exec(text)) continue;
           // If we find text nodes on the block level we wrap
           // it into a paragraph element (or what is configured as default block level element)
           childIterator.back();
           this._wrapInlineElementsIntoBlockElement(childIterator);
-        } else if (this.isElementNode(el)) {
+        } else if (el.isElementNode()) {
           var inlineTypeConverter = this._getInlineTypeConverterForElement(el);
           // NOTE: hard to tell if unsupported nodes on this level
           // should be treated as inline or not.
@@ -194,6 +204,10 @@ HtmlImporter.Prototype = function HtmlImporterPrototype() {
   };
 
   this.createNode = function(node) {
+    if (this.state.ids[node.id]) {
+      throw new Error('Node with id alread exists:' + node.id);
+    }
+    this.state.ids[node.id] = true;
     this.state.nodes.push(node);
   };
 
@@ -315,11 +329,11 @@ HtmlImporter.Prototype = function HtmlImporterPrototype() {
   };
 
   this.getIdForElement = function(el, type) {
-    var id = el.getAttribute('id') || this.nextId(type);
+    var id = el.getAttribute(this.config.idAttribute) || this.nextId(type);
     // TODO: check for collisions
-    // while (this.state.doc.get(id)) {
-    //   id = this.nextId(type);
-    // }
+    while (this.state.ids[id]) {
+      id = this.nextId(type);
+    }
     return id;
   };
 
@@ -336,6 +350,10 @@ HtmlImporter.Prototype = function HtmlImporterPrototype() {
     return node;
   };
 
+  this._defaultElementMatcher = function(el) {
+    return el.is(this.tagName);
+  };
+
   // Internal function for parsing annotated text
   // --------------------------------------------
   //
@@ -349,7 +367,7 @@ HtmlImporter.Prototype = function HtmlImporterPrototype() {
       var el = iterator.next();
       var text = "";
       // Plain text nodes...
-      if (this.isTextNode(el)) {
+      if (el.isTextNode()) {
         text = this._prepareText(state, el.textContent);
         if (text.length) {
           // Note: text is not merged into the reentrant state
@@ -357,10 +375,10 @@ HtmlImporter.Prototype = function HtmlImporterPrototype() {
           context.text = context.text.concat(text);
           context.offset += text.length;
         }
-      } else if (this.isCommentNode(el)) {
+      } else if (el.isCommentNode()) {
         // skip comment nodes
         continue;
-      } else if (this.isElementNode(el)) {
+      } else if (el.isElementNode()) {
         var inlineTypeConverter = this._getInlineTypeConverterForElement(el);
         if (!inlineTypeConverter) {
           var blockTypeConverter = this._getBlockTypeConverterForElement(el);
@@ -376,7 +394,7 @@ HtmlImporter.Prototype = function HtmlImporterPrototype() {
         // it will either call us back (this.annotatedText) or give us a finished
         // node instantly (self-managed)
         var startOffset = context.offset;
-        var inlineType = inlineTypeConverter.name;
+        var inlineType = inlineTypeConverter.type;
         var inlineNode = this._nodeData(el, inlineType);
         if (inlineTypeConverter.import) {
           // push a new context so we can deal with reentrant calls
