@@ -34,56 +34,60 @@ ClassComponent.Prototype = function() {
     if (node.example) {
       el.append($$(Example, {node: node}));
     }
-    // constructor
-    el.append(
-      $$('div').addClass('se-constructor sc-method')
-        .append($$(Signature, {node: node}))
-    );
-    // params
-    if (node.params.length > 0 || node.returns) {
-      el.append($$(Params, {params: node.params, returns: node.returns}));
-    }
+
+    // member index
     if (node.members && node.members.length > 0) {
-      // member index
       el.append($$(MemberIndexComponent, {node: node}));
+    }
+
+    // Display constructor
+    // TODO: this should go into a dedicated constructor node and
+    // show up as a member
+    //
+    // el.append(
+    //   $$('div').addClass('se-constructor sc-method')
+    //     .append($$(Signature, {node: node}))
+    // );
+    // if (node.params.length > 0 || node.returns) {
+    //   el.append($$(Params, {params: node.params, returns: node.returns}));
+    // }
+
+    if (node.members && node.members.length > 0) {
       // class members
       el.append(
         $$('div').addClass('se-members')
           .append(this._renderMembers())
-          .append(this.renderInheritedMembers(el))
+          // .append(this.renderInheritedMembers(el))
       );
     }
     return el;
   };
 
-  this.renderInheritedMembers = function() {
-    var node = this.props.node;
+  // We don't render inherited members for now, to save space
+  // this.renderInheritedMembers = function() {
+  //   var node = this.props.node;
+  //   if (!node.parentClass) return;
+  //   var doc = node.getDocument();
+  //   var parent = doc.get(node.parentClass);
+  //   if (!parent) return;
 
-    if (!node.parentClass) return;
-
-    var doc = node.getDocument();
-    var parent = doc.get(node.parentClass);
-    if (!parent) return;
-
-    var result = [];
-    each(parent.members, function(id) {
-      var member = doc.get(id);
-      if (member.type === "method" && !member.isPrivate) {
-        result.push(
-          $$('div').addClass('se-inherited-method')
-          .append($$(MethodComponent, {
-            node: member,
-            parentNode: node,
-            inheritedFrom: parent.id
-          }))
-        );
-      }
-    });
-    return result;
-  };
-
+  //   var result = [];
+  //   each(parent.members, function(id) {
+  //     var member = doc.get(id);
+  //     if (member.type === "method" && !member.isPrivate) {
+  //       result.push(
+  //         $$('div').addClass('se-inherited-method')
+  //         .append($$(MethodComponent, {
+  //           node: member,
+  //           parentNode: node,
+  //           inheritedFrom: parent.id
+  //         }))
+  //       );
+  //     }
+  //   });
+  //   return result;
+  // };
 };
 
 oo.inherit(ClassComponent, DocumentationNodeComponent);
-
 module.exports = ClassComponent;
