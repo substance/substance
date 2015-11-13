@@ -16,7 +16,7 @@ var components = {
 QUnit.uiModule('Surface');
 
 // This test was added to cover issue #82
-QUnit.test("Set the selection after creating annotation.", function(assert) {
+QUnit.uiTest("Set the selection after creating annotation.", function(assert) {
   var doc = simple();
 
   // TODO: We should find a way to test a surface without the extra infrastructure

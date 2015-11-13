@@ -11,6 +11,8 @@ var VirtualTextNode;
 var RawHtml;
 var _htmlParams;
 
+var inBrowser = (typeof window !== 'undefined');
+
 /**
   A light-weight component implementation inspired by React and Ember. In contrast to the
   large frameworks it does much less things automagically in favour of synchronous
@@ -1141,11 +1143,15 @@ Component.Text = function(parent, text) {
 Component.Text.Prototype = function() {
   this._render = function() {
     if (!this.$el) {
-      var el = document.createTextNode(this.text);
-      this.el = el;
-      this.$el = $(el);
+      if (inBrowser) {
+        this.el = window.document.createTextNode(this.text);
+      } else {
+        // HACK: using custom factory method for cheerio's native text node
+        this.el = $._createTextNode(this.text);
+      }
+      this.$el = $(this.el);
     } else {
-      this.$el[0].textContent = this.text;
+      this.$el.text(this.text);
     }
   };
 };
