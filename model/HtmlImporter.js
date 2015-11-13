@@ -15,7 +15,7 @@ var DOMElement = require('../util/DOMElement');
   @param {Object} config
  */
 function HtmlImporter(config) {
-  this.config = extend({ idAttribute: 'data-id' }, config );
+  this.config = extend({idAttribute: 'data-id'}, config);
 
   this.schema = config.schema;
   this.state = null;
@@ -62,18 +62,14 @@ HtmlImporter.Prototype = function HtmlImporterPrototype() {
     // initialization
     this.reset();
     // converting to JSON first
-    var htmlDoc = DOMElement.parseHtmlDocument(html);
-    this.convertHtmlDocument(htmlDoc);
+    var elements = DOMElement.parseHtml(html);
+    this.convertDocument(elements);
     var doc = this.generateDocument();
     return doc;
   };
 
-  this.convertHtmlDocument = function(htmlDoc) {
-    var body = htmlDoc.find('body');
-    if (!body) {
-      throw new Error('Could not find body element.');
-    }
-    this.convertContainer(body);
+  this.convertDocument = function(elements) {
+    this.convertContainer(elements);
   };
 
   this._initState = function() {
@@ -150,10 +146,10 @@ HtmlImporter.Prototype = function HtmlImporterPrototype() {
     @param {util/DOMElement} containerEl An element representing a container node.
     @param {String} containerId The id of the target container node.
    */
-  this.convertContainer = function(containerEl) {
+  this.convertContainer = function(nodes) {
     var state = this.state;
     state.container = [];
-    var iterator = containerEl.getChildNodeIterator();
+    var iterator = new DOMElement.NodeIterator(nodes);
     while(iterator.hasNext()) {
       var el = iterator.next();
       var blockTypeConverter = this._getBlockTypeConverterForElement(el);
@@ -180,7 +176,7 @@ HtmlImporter.Prototype = function HtmlImporterPrototype() {
           // that collects inline elements and wraps into a paragraph.
           // TODO: maybe this should be the default?
           if (inlineTypeConverter || this._getTagName(el) === "span") {
-            iterator.back();iterator
+            iterator.back();
             this._wrapInlineElementsIntoBlockElement(iterator);
           } else {
             this._createDefaultBlockElement(el);
@@ -200,7 +196,7 @@ HtmlImporter.Prototype = function HtmlImporterPrototype() {
     var converter = this._getBlockTypeConverterForElement(el);
     var node;
     if (converter) {
-      var node = this._nodeData(el, converter.type);
+      node = this._nodeData(el, converter.type);
       node = converter.import(el, node, this) || node;
       this.createNode(node);
     } else {
