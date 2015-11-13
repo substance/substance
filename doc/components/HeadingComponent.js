@@ -37,15 +37,16 @@ HeadingComponent.Prototype = function() {
     headerEl.append(
       $$('span').addClass('se-name').append(this.props.name || name)
     );
-    // type
-    // if (type) {
-    //   headerEl.append(
-    //     $$('div').addClass('se-node-type').addClass(type).append(type)
-    //   );
-    // }
+
     // details: a line saying something like Class defined in '...', extends '...'
-    var details = $$('div').addClass('se-details')
-      .append($$('strong').addClass('se-type').append(this.i18n.t(type)));
+    var details = $$('div').addClass('se-details').addClass(type);
+    var detailsLabel = $$('strong').addClass('se-type');
+    if (node.isAbstract) {
+      detailsLabel.append('Abstract ');
+    }
+    detailsLabel.append(this.i18n.t(type));
+    details.append(detailsLabel);
+
     details.append(
       $$('span').addClass('se-source').append(
         $$('span').append(' ' + this.i18n.t('defined_in') + ' '),

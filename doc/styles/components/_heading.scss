@@ -4,39 +4,26 @@
 
     padding-bottom: 10px;
     padding-top: 10px;
-    // margin-bottom: $node-margin-bottom;
 
     > .se-details {
       padding-bottom: 10px;
       line-height: 15px;
       font-size: $font-size-small;
+
+      &.function .se-type {
+        color: #283CE6;
+      }
+
+      &.class .se-type {
+        color: #BF8418;
+      }
+
+      &.module .se-type {
+        color: #598859;
+      }
     }
 
     .se-name {
       font-weight: bold;
-    }
-
-    .se-node-type {
-      position: absolute;
-      font-size: 13px;
-      top: 10px;
-      right: 0px;
-
-      color: #888;
-      // text-transform: uppercase;
-      font-weight: bold;
-      padding: 0px 10px;
-
-      &.function {
-        color: darkblue;
-      }
-
-      &.class {
-        color: orange;
-      }
-
-      &.module {
-        color: darkgreen;
-      }
     }
   }
