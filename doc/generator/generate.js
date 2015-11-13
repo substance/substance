@@ -9,7 +9,15 @@ module.exports = function generate(config) {
   // make the nodes conform to the schema
   nodes = map(nodes, function(node) {
     var nodeSchema = schema.getNodeSchema(node.type);
-    return pick(node, Object.keys(nodeSchema));
+    node = pick(node, Object.keys(nodeSchema));
+    if (node.members) {
+      node.members.sort();
+    }
+    return node;
+  });
+
+  nodes.sort(function(a,b) {
+    return a.id - b.id;
   });
 
   return nodes;
