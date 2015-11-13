@@ -9,6 +9,7 @@ var $$ = Component.$$;
 var CATEGORIES = [
   {name: 'instance-methods', path: ['instance', 'method']},
   {name: 'instance-properties', path: ['instance', 'property']},
+  {name: 'instance-events', path: ['instance', 'event']},
 
   {name: 'class-methods', path: ['class', 'method']},
   {name: 'class-properties', path: ['class', 'property']},

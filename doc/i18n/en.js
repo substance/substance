@@ -14,5 +14,6 @@ module.exports = {
   'class-properties': 'Class properties',
   'class-methods': 'Class methods',
   'instance-methods': 'Methods',
-  'instance-properties': 'Properties'
+  'instance-properties': 'Properties',
+  'instance-events': 'Events'
 };
