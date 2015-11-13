@@ -31,10 +31,6 @@ TestArticle.Prototype = function() {
     return new TestHtmlImporter().convert(this);
   };
 
-  this.propertyToHtml = function(path) {
-    // return new TestHtmlExporter().convertProperty(this, path);
-  };
-
   this.getDocumentMeta = function() {
     return this.get('meta');
   };

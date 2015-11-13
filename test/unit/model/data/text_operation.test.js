@@ -1,9 +1,9 @@
 "use strict";
 
-var _ = require('../../../util/helpers');
-var TextOperation = require('../../../model/data/TextOperation');
+var _ = require('../../../../util/helpers');
+var TextOperation = require('../../../../model/data/TextOperation');
 
-QUnit.module('Substance.Operator/TextOperation');
+QUnit.module('model/data/TextOperation');
 
 QUnit.assert.checkTextTransform = function(a, b, input, expected) {
   var t = TextOperation.transform(a, b);

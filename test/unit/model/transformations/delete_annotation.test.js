@@ -1,9 +1,9 @@
 'use strict';
 
-var containerAnnoSample = require('../../fixtures/container_anno_sample');
-var deleteAnnotation = require('../../../model/transform/deleteAnnotation');
+var containerAnnoSample = require('../../../fixtures/container_anno_sample');
+var deleteAnnotation = require('../../../../model/transform/deleteAnnotation');
 
-QUnit.module('Transformations/deleteAnnotation');
+QUnit.module('model/transform/deleteAnnotation');
 
 QUnit.test("Delete property annotation for a given property selection", function(assert) {
   var doc = containerAnnoSample();

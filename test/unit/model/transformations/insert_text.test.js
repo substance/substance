@@ -1,9 +1,9 @@
 "use strict";
 
-var sample1 = require('../../fixtures/sample1');
-var insertText = require('../../../model/transform/insertText');
+var sample1 = require('../../../fixtures/sample1');
+var insertText = require('../../../../model/transform/insertText');
 
-QUnit.module('Transformations/insertText');
+QUnit.module('model/transform/insertText');
 
 QUnit.test("insert text at cursor position", function(assert) {
   var doc = sample1();

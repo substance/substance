@@ -1,10 +1,10 @@
 "use strict";
 
-require('../qunit_extensions');
-var simple = require('../../fixtures/simple');
-var insertNode = require('../../../model/transform/insertNode');
+require('../../qunit_extensions');
+var simple = require('../../../fixtures/simple');
+var insertNode = require('../../../../model/transform/insertNode');
 
-QUnit.module('Transformations/insertNode');
+QUnit.module('model/transform/insertNode');
 
 var testNode = {
   type: "paragraph",

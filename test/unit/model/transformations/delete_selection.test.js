@@ -1,10 +1,10 @@
 "use strict";
 
-var sample1 = require('../../fixtures/sample1');
-var containerSample = require('../../fixtures/container_anno_sample');
-var deleteSelection = require('../../../model/transform/deleteSelection');
+var sample1 = require('../../../fixtures/sample1');
+var containerSample = require('../../../fixtures/container_anno_sample');
+var deleteSelection = require('../../../../model/transform/deleteSelection');
 
-QUnit.module('Transformations/deleteSelection');
+QUnit.module('model/transform/deleteSelection');
 
 QUnit.test("Deleting a property selection", function(assert) {
   var doc = sample1();

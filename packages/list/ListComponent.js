@@ -1,9 +1,9 @@
 'use strict';
 
 var Component = require('../../ui/Component');
-var TextProperty = require('../../ui/TextPropertyComponent');
-var List = require('../../model/nodes/list');
 var $$ = Component.$$;
+var ListHtmlConverter = require('./ListHtmlConverter');
+var ListItemComponent = require('./ListItemComponent');
 
 var ListComponent = Component.extend({
 
@@ -20,13 +20,15 @@ var ListComponent = Component.extend({
   },
 
   render: function() {
-    var doc = this.props.doc;
-    return List.static.render(this.props.node, {
-      createElement: function(tagName) {
-        return $$(tagName);
+    return ListHtmlConverter.render(this.props.node, {
+      createListElement: function(list) {
+        var tagName = list.ordered ? 'ol' : 'ul';
+        return $$(tagName)
+          .attr('data-id', list.id)
+          .addClass('sc-list');
       },
-      createAnnotatedTextNode: function(path) {
-        return $$(TextProperty, { doc: doc, path: path });
+      renderListItem: function(item) {
+        return $$(ListItemComponent, {node: item});
       }
     });
   },
