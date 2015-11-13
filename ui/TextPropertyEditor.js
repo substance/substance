@@ -15,8 +15,7 @@ var $$ = Component.$$;
   instantiated inside a {@link ui/Controller} context.
   
   @class
-  @memberof module:ui
-  @extends module:ui/Surface
+  @extends ui/Surface
   
   @example
   

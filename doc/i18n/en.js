@@ -10,4 +10,10 @@ module.exports = {
   'defined_in': 'defined in',
   'returns': 'Returns',
   'extends': 'inherits from',
+  'inner-classes': 'Inner Classes',
+  'class-properties': 'Class properties',
+  'class-methods': 'Class methods',
+  'instance-methods': 'Methods',
+  'instance-properties': 'Properties',
+  'instance-events': 'Events'
 };

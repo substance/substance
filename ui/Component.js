@@ -344,6 +344,7 @@ Component.Prototype = function ComponentPrototype() {
     Define action handlers. Call this during construction/initialization of a component.
     
     @example
+
     ```
     function MyComponent() {
       Component.apply(this, arguments);
@@ -1353,12 +1354,28 @@ VirtualNode.Prototype = function() {
 
 oo.initClass(VirtualNode);
 
+/** 
+  This represents virtual HTML elements.
+
+  @class Component.VirtualElement
+  @extends ui/Component.VirtualNode
+  @abstract
+*/
+
+/**
+  Used only internally. Use $$ to create virutal elements.
+
+  @param {String} tagname tagname e.g. 'div'
+*/
+
 function VirtualElement(tagName) {
   VirtualNode.call(this);
   this.type = 'element';
   this.tagName = tagName;
 }
 oo.inherit(VirtualElement, VirtualNode);
+
+
 
 function VirtualComponent(ComponentClass) {
   VirtualNode.call(this);
@@ -1376,6 +1393,7 @@ VirtualComponent.Prototype = function() {
   };
 };
 oo.inherit(VirtualComponent, VirtualNode);
+
 
 VirtualTextNode = function VirtualTextNode(text) {
   VirtualNode.call(this);
@@ -1429,14 +1447,14 @@ Component.$$.prepareChildren = function(children) {
 };
 
 /**
- * Internal implementation, rendering a virtual component
- * created using the $$ operator.
- *
- * Don't us it. You should use `Component.mount()` instead.
- *
- * @private
- * ```
- */
+  Internal implementation, rendering a virtual component
+  created using the $$ operator.
+  
+  Don't us it. You should use `Component.mount()` instead.
+  
+  @private
+  ```
+*/
 Component._render = function(data, options) {
   var component;
   options = options || {};
@@ -1487,21 +1505,21 @@ Component._render = function(data, options) {
 };
 
 /**
- * Mount a component onto a given jquery element.
- *
- * Mounting a component means, that the component gets rendered
- * and then appended to the given element.
- * If the element is in the DOM, all components receive a 'didMount' event.
- *
- * @param {Component|VirtualComponent} component to be mounted
- * @param el a DOM or jQuery element
- * @return {Component} the mounted component
- *
- * @example
- *
- * ```
- * Component.mount($$(MyComponent), $('body'));
- */
+  Mount a component onto a given DOM or jquery element.
+  
+  Mounting a component means, that the component gets rendered
+  and then appended to the given element.
+  If the element is in the DOM, all components receive a 'didMount' event.
+  
+  @param {Component|VirtualComponent} component to be mounted
+  @param el a DOM or jQuery element
+  @return {Component} the mounted component
+  
+  @example
+  
+  ```
+  Component.mount($$(MyComponent), $('body'));
+*/
 Component.mount = function(component, el) {
 
   // Usually a virtual component is passeed
@@ -1521,11 +1539,11 @@ Component.mount = function(component, el) {
 };
 
 /**
- * Checks whether a given element has been injected in the document already
- *
- * We traverse up the DOM until we find the document root element. We return true
- * if we can find it.
- */
+  Checks whether a given element has been injected in the document already
+  
+  We traverse up the DOM until we find the document root element. We return true
+  if we can find it.
+*/
 
 Component.isMounted = function(comp) {
   var el;

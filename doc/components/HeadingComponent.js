@@ -38,11 +38,11 @@ HeadingComponent.Prototype = function() {
       $$('span').addClass('se-name').append(this.props.name || name)
     );
     // type
-    if (type) {
-      headerEl.append(
-        $$('div').addClass('se-node-type').addClass(type).append(type)
-      );
-    }
+    // if (type) {
+    //   headerEl.append(
+    //     $$('div').addClass('se-node-type').addClass(type).append(type)
+    //   );
+    // }
     // details: a line saying something like Class defined in '...', extends '...'
     var details = $$('div').addClass('se-details')
       .append($$('strong').addClass('se-type').append(this.i18n.t(type)));
