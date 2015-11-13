@@ -3,8 +3,10 @@
 var _ = require('../../../util/helpers');
 var Component = require('../../../ui/Component');
 var $$ = Component.$$;
+var $ = require('../../../util/jquery');
+var inBrowser = (typeof window !== 'undefined');
 
-QUnit.uiModule('Substance.Component');
+QUnit.uiModule('ui/Component');
 
 var TestComponent = Component.extend({
   initialize: function() {
@@ -43,7 +45,7 @@ QUnit.test("Throw error when render method is not returning an element", functio
   }, "Should throw an exception when render does not return an element");
 });
 
-QUnit.test("Different mount scenarios", function(assert) {
+QUnit.uiTest("Different mount scenarios", function(assert) {
   // Mount to a detached element
   var el = $('<div>')[0];
   var comp = Component.mount($$(SimpleComponent), el);
@@ -74,7 +76,7 @@ QUnit.test("Render an element with attributes", function(assert) {
   assert.equal(comp.$el.attr('data-id'), 'foo', 'Element should be have data-id="foo".');
 });
 
-QUnit.test("Render an element with css styles", function(assert) {
+QUnit.uiTest("Render an element with css styles", function(assert) {
   var comp = $$('div').css('width', 100)._render();
   assert.equal(comp.$el.css('width'), "100px", 'Element should have a css width of 100px.');
 });
@@ -84,7 +86,7 @@ QUnit.test("Render an element with classes", function(assert) {
   assert.ok(comp.$el.hasClass('test'), 'Element should have class "test".');
 });
 
-QUnit.test("Render an element with properties", function(assert) {
+QUnit.uiTest("Render an element with properties", function(assert) {
   var comp = $$('input').htmlProp({ type: 'text', value: 'foo' })._render();
   assert.equal(comp.$el.prop('tagName').toLowerCase(), 'input', 'Element should be an input element.');
   assert.equal(comp.$el.prop('type'), 'text', '... with type "text"');
@@ -198,14 +200,14 @@ QUnit.test("Don't do a deep rerender when only attributes/classes/styles change.
   var comp = Component._render($$('div')
     .attr('data-foo', 'bar')
     .addClass('foo')
-    .css('width', 100)
+    .css('width', "100px")
     .append($$(SimpleComponent)));
   var render = sinon.spy(comp, 'render');
   // rerender with changed attributes, classes and css styles
   comp._render($$('div')
     .attr('data-foo', 'baz')
     .addClass('bar')
-    .css('width', 200)
+    .css('width', "200px")
     .append($$(SimpleComponent)));
   assert.equal(comp.$el.attr('data-foo'), 'baz', 'Data attribute should be up-to-date.');
   assert.ok(!comp.$el.hasClass('foo') && comp.$el.hasClass('bar'), 'Element classes should be up-to-date.');
@@ -229,7 +231,7 @@ QUnit.test("Do deep rerender when state has changed.", function(assert) {
   assert.equal(comp.render.callCount, 2, "Component should have been rerendered.");
 });
 
-QUnit.test("Only call didMount once for childs and grandchilds when setProps is called during mounting process.", function(assert) {
+QUnit.uiTest("Only call didMount once for childs and grandchilds when setProps is called during mounting process.", function(assert) {
   var Child = TestComponent.extend({
     render: function() {
       if (this.props.loading) {
@@ -419,6 +421,6 @@ QUnit.test("Cascaded updates of HTML attributes.", function(assert) {
   assert.ok(comp.refs.child.hasClass('child'), "Child component should have updated class.");
   comp.setProps({ childHtmlProps: { "value": "child" } });
   assert.equal(comp.refs.child.val(), "child", "Child component should have updated html property.");
-  comp.setProps({ childCss: { "width": 50 } });
-  assert.equal(comp.refs.child.el.style.width, "50px", "Child component should have updated css style.");
+  comp.setProps({ childCss: { "width": "50px" } });
+  assert.equal(comp.refs.child.$el.css('width'), "50px", "Child component should have updated css style.");
 });
