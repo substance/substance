@@ -5,9 +5,12 @@ var $ = require('./jquery');
 var map = require('lodash/collection/map');
 var inBrowser = (typeof window !== 'undefined');
 
-function DOMElement($el) {
-  this.$el = $el;
-  this.el = $el[0];
+function DOMElement(el) {
+  if (!el) {
+    throw new Error('Illegal argument: el is null');
+  }
+  this.el = el;
+  this.$el = $(el);
   Object.freeze(this);
 }
 
@@ -33,7 +36,7 @@ DOMElement.Prototype = function() {
   this.find = function(cssSelector) {
     var $result = this.$el.find(cssSelector);
     if ($result.length > 0) {
-      return new DOMElement($($result[0]));
+      return new DOMElement($result[0]);
     } else {
       return null;
     }
@@ -48,7 +51,7 @@ DOMElement.Prototype = function() {
   this.findAll = function(cssSelector) {
     var $result = this.$el.find(cssSelector);
     return map($result, function(el) {
-      return new DOMElement($(el));
+      return new DOMElement(el);
     });
   };
 
@@ -90,7 +93,7 @@ DOMElement.Prototype = function() {
 
   this.clone = function() {
     var $clone = this.$el.clone();
-    return new DOMElement($clone);
+    return new DOMElement($clone[0]);
   };
 
   /**
@@ -122,7 +125,7 @@ DOMElement.Prototype = function() {
   };
 
   this.getChildNodeIterator = function() {
-    return new DOMElement.ChildNodeIterator(this);
+    return new DOMElement.NodeIterator(this.el.childNodes);
   };
 
   this.getChildNodes = function() {
@@ -131,12 +134,13 @@ DOMElement.Prototype = function() {
     while (iterator.hasNext()) {
       childNodes.push(iterator.next());
     }
+    return childNodes;
   };
 
   this.getChildren = function() {
     var children = this.$el.children();
     return map(children, function(child) {
-      return new DOMElement($(child));
+      return new DOMElement(child);
     });
   };
 
@@ -237,7 +241,9 @@ DOMElement.create = function(str) {
   if (str[0] !== '<') {
     str = '<' + str + '>';
   }
-  return new DOMElement($(str));
+  var el;
+  el = $(str)[0];
+  return new DOMElement(el);
 };
 
 Object.defineProperties(DOMElement.prototype, {
@@ -248,7 +254,7 @@ Object.defineProperties(DOMElement.prototype, {
     get: function() {
       return this.getTagName();
     },
-    set: function(text) {
+    set: function() {
       throw new Error('util/DOMElement#tagName is readonly.');
     }
   },
@@ -327,13 +333,13 @@ Object.defineProperties(DOMElement.prototype, {
   @class
   @param {util/DOMElement} el
  */
-DOMElement.ChildNodeIterator = function(element) {
-  this.nodes = element.el.childNodes;
+DOMElement.NodeIterator = function(nodes) {
+  this.nodes = nodes;
   this.length = this.nodes.length;
   this.pos = -1;
 };
 
-DOMElement.ChildNodeIterator.Prototype = function() {
+DOMElement.NodeIterator.Prototype = function() {
 
   /**
     @returns {Boolean} true if there is another child node left.
@@ -349,7 +355,11 @@ DOMElement.ChildNodeIterator.Prototype = function() {
    */
   this.next = function() {
     this.pos += 1;
-    return new DOMElement($(this.nodes[this.pos]));
+    var next = this.nodes[this.pos];
+    if (next instanceof DOMElement) {
+      return next;
+    }
+    return new DOMElement(next);
   };
 
   /**
@@ -363,18 +373,20 @@ DOMElement.ChildNodeIterator.Prototype = function() {
   };
 };
 
-oo.initClass(DOMElement.ChildNodeIterator);
+oo.initClass(DOMElement.NodeIterator);
 
-DOMElement.parseHtmlDocument = function(html) {
-  var $root;
+DOMElement.parseHtml = function(html) {
   if (inBrowser) {
     var parser = new window.DOMParser();
-    var doc = parser.parseFromString(html, 'text/html');
-    $root = $(doc);
-  } else {
-    $root = $(html)
+    var htmlDoc = parser.parseFromString(html, 'text/html');
+    if (htmlDoc) {
+      var root = htmlDoc.querySelector('body');
+      return new DOMElement(root).childNodes;
+    }
   }
-  return new DOMElement($root);
+  return map($(html), function(el) {
+    return new DOMElement(el);
+  });
 };
 
 module.exports = DOMElement;
