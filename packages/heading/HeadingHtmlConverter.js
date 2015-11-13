@@ -12,20 +12,14 @@ module.exports = {
   },
 
   import: function(el, node, converter) {
-    var id = converter.defaultId(el, 'heading');
-    var heading = {
-      id: id,
-      level: parseInt(''+el.tagName[1], 10),
-      content: ''
-    };
-    heading.content = converter.annotatedText(el, [id, 'content']);
-    return heading;
+    node.level = parseInt(''+el.tagName[1], 10);
+    node.content = converter.annotatedText(el, [node.id, 'content']);
   },
 
   export: function(node, el, converter) {
     el.tagName = 'h' + node.level;
     el.append(
-      converter.annotatedText([id, 'content'])
+      converter.annotatedText([node.id, 'content'])
     );
   }
 

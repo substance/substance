@@ -3,7 +3,7 @@
 var $$ = require('../../ui/Component').$$;
 
 /*
- * HTML converter for Paragraphs.
+ * HTML converter for Paragraph.
  */
 module.exports = {
 
