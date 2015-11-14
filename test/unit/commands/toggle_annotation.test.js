@@ -3,7 +3,6 @@
 var containerAnnoSample = require('../../fixtures/container_anno_sample');
 var AnnotationCommand = require('../../../ui/AnnotationCommand');
 var docHelpers = require('../../../model/documentHelpers');
-
 var StubSurface = require('../ui/stub_surface');
 
 QUnit.module('Commands/toggleAnnotation');
@@ -63,6 +62,25 @@ function sample() {
 // Actual tests
 // -----------------------
 
+QUnit.test("PropertyAnnotation: cmd.canTrucate", function(assert) {
+  var doc = sample();
+  
+  var sel = doc.createSelection({
+    type: 'property',
+    path: ['p1', 'content'],
+    startOffset: 3,
+    endOffset: 8
+  });
+
+  var surface = new StubSurface(doc, sel);
+  var cmd = new ToggleStrongCommand(surface);
+  var cmdState = cmd.getCommandState();
+
+  assert.ok(true, 'yo');
+  assert.equal(cmdState.mode, 'expand', "Mode should be 'expand'");
+});
+
+
 QUnit.test("Property Annotation: Toggle on", function(assert) {
   var doc = sample();
 
@@ -109,6 +127,7 @@ QUnit.test("Property Annotation: Toggle off", function(assert) {
   assert.equal(res.annoId, 'a3', 'a3 should have been affected by the toggle');
   assert.isNullOrUndefined(doc.get('a3'), 'a3 should be gone.');
 });
+
 
 QUnit.test("Container Annotation: Toggle on", function(assert) {
   var doc = sample();

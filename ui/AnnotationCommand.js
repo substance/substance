@@ -76,7 +76,10 @@ AnnotationCommand.Prototype = function() {
   this.canTruncate = function(annos, sel) {
     if (annos.length !== 1) return false;
     var annoSel = annos[0].getSelection();
-    return (sel.isLeftAlignedWith(annoSel) || sel.isRightAlignedWith(annoSel)) && !sel.equals(annoSel) && !sel.isCollapsed();
+
+    return (sel.isLeftAlignedWith(annoSel) || sel.isRightAlignedWith(annoSel)) &&
+           !sel.contains(annoSel) &&
+           !sel.isCollapsed();
   };
 
   this.getAnnotationsForSelection = function() {
