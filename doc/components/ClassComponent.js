@@ -42,7 +42,7 @@ ClassComponent.Prototype = function() {
   };
 
   var MEMBER_CATEGORIES = [
-    {name: 'constructors', path: ['class', 'ctor']},
+    {name: 'ctor', path: ['class', 'ctor']},
     {name: 'instance-methods', path: ['instance', 'method']},
     {name: 'instance-properties', path: ['instance', 'property']},
     {name: 'instance-events', path: ['instance', 'event']},

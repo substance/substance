@@ -5,7 +5,6 @@ module.exports = {
   'class': 'Class',
   'classes': 'Classes',
   'ctor': 'Constructor',
-  'constructors': 'Constructors',
   'function': 'Function',
   'functions': 'Functions',
   'method': 'Method',
@@ -17,6 +16,9 @@ module.exports = {
   'inner-classes': 'Inner Classes',
   'class-properties': 'Class properties',
   'class-methods': 'Class methods',
+  'classes': 'Classes',
+  'methods': 'Methods',
+  'properties': 'Properties',
   'instance-methods': 'Methods',
   'instance-properties': 'Properties',
   'instance-events': 'Events'
