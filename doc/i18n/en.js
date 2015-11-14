@@ -4,6 +4,8 @@ module.exports = {
   'parameters': 'Parameters',
   'class': 'Class',
   'classes': 'Classes',
+  'ctor': 'Constructor',
+  'constructors': 'Constructors',
   'function': 'Function',
   'functions': 'Functions',
   'method': 'Method',
