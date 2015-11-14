@@ -1,6 +1,5 @@
 'use strict';
 
-var _ = require('../../util/helpers');
 var oo = require('../../util/oo');
 var Node = require('./Node');
 var NodeFactory = require('./NodeFactory');
