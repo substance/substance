@@ -54,7 +54,7 @@ var DocumentationReader = DocumentationController.extend({
         ),
         // Resource (right column)
         $$('div').ref('resource')
-          .addClass("se-resource")
+          .addClass('se-resource')
           .append(
             this.renderContextPanel()
           )
@@ -70,21 +70,21 @@ var DocumentationReader = DocumentationController.extend({
     }
   },
 
-  didRender: function() {
+  didUpdateState: function() {
     if (this.state.nodeId) {
       this.jumpToNode(this.state.nodeId);
     }
   },
 
+  // TODO: we can get rid of this, if we use
+  // send('focusNode', nodeId) in all child components
   onClickCrossLink: function(e) {
     var $target = $(e.target);
     if ($target.is('a[data-type="cross-link"]')) {
       e.preventDefault();
       e.stopPropagation();
       var nodeId = $target.attr('data-node-id');
-      this.extendState({
-        nodeId: nodeId
-      });
+      this.focusNode(nodeId);
     }
   }
 });
