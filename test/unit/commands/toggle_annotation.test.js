@@ -75,8 +75,7 @@ QUnit.test("PropertyAnnotation: cmd.canTrucate", function(assert) {
   var surface = new StubSurface(doc, sel);
   var cmd = new ToggleStrongCommand(surface);
   var cmdState = cmd.getCommandState();
-
-  assert.ok(true, 'yo');
+  
   assert.equal(cmdState.mode, 'expand', "Mode should be 'expand'");
 });
 
