@@ -1,66 +1,43 @@
 'use strict';
 
 var oo = require('../../util/oo');
-var Component = require('../../ui/Component');
-var _map = require('lodash/collection/map');
-var $$ = Component.$$;
-
-
-var CATEGORIES = [
-  {name: 'instance-methods', path: ['instance', 'method']},
-  {name: 'instance-properties', path: ['instance', 'property']},
-  {name: 'instance-events', path: ['instance', 'event']},
-
-  {name: 'class-methods', path: ['class', 'method']},
-  {name: 'class-properties', path: ['class', 'property']},
-  {name: 'inner-classes', path: ['class', 'class']}
-];
+var $$ = require('../../ui/Component').$$;
+var MemberContainerComponent = require('./MemberContainerComponent');
 
 function MemberIndexComponent() {
-  Component.apply(this, arguments);
+  MemberContainerComponent.apply(this, arguments);
 }
 
 MemberIndexComponent.Prototype = function() {
-  this._getMembersByType = function(type, subType) {
-    var node = this.props.node;
-    var doc = node.getDocument();
-    var membersByType = doc.getIndex('members').get(node.id);
-
-    var members = [];
-    if (membersByType[type]) {
-      members = _map(membersByType[type][subType]);
-    }
-    return members;
-  };
 
   this.render = function() {
     var el = $$('div').addClass('sc-member-index');
-
-    CATEGORIES.forEach(function(cat) {
-      var catMembers = this._getMembersByType.apply(this, cat.path);
-
-      if (catMembers.length > 0) {
-        var members = $$('div').addClass('se-members');
-        catMembers.forEach(function(member) {
-          members.append($$('a').attr({
-            'data-type': 'cross-link',
-            'data-node-id': member.id,
-            href: '#',
-          }).append(member.name, ' '));
-        });
-
-        // Label
-        el.append($$('span').addClass('se-label').append(
-          this.i18n.t(cat.name))
-        );
-        el.append(members);
-      }
-    }.bind(this));
-
+    el.append(this._renderMembers());
     return el;
   };
+
+  this._renderMemberCategory = function(cat) {
+    var catEl = MemberIndexComponent.super.prototype._renderMemberCategory.apply(this, arguments);
+    catEl.insertAt(0,
+      $$('span').addClass('se-label').append(this.i18n.t(cat.name))
+    );
+    return catEl;
+  };
+
+  this._renderMember = function(memberNode) {
+    return $$('a').attr({
+        'data-type': 'cross-link',
+        'data-node-id': memberNode.id,
+        'href': '#',
+      }).append(memberNode.name, ' ');
+  };
+
+  this.getMemberCategories = function() {
+    return this.props.categories;
+  };
+
 };
 
-oo.inherit(MemberIndexComponent, Component);
+oo.inherit(MemberIndexComponent, MemberContainerComponent);
 
 module.exports = MemberIndexComponent;

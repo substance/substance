@@ -4,13 +4,13 @@ var oo = require('../../util/oo');
 var Component = require('../../ui/Component');
 var $$ = Component.$$;
 
-var DocumentationNodeComponent = require('./DocumentationNodeComponent');
+var MemberContainerComponent = require('./MemberContainerComponent');
 var Heading = require('./HeadingComponent');
 var Example = require('./ExampleComponent');
 var MemberIndexComponent = require('./MemberIndexComponent');
 
 function ModuleComponent() {
-  DocumentationNodeComponent.apply(this, arguments);
+  MemberContainerComponent.apply(this, arguments);
 }
 
 ModuleComponent.Prototype = function() {
@@ -36,17 +36,26 @@ ModuleComponent.Prototype = function() {
     // members
     if (node.members && node.members.length > 0) {
       // member index
-      el.append($$(MemberIndexComponent, {node: node}));
+      el.append($$(MemberIndexComponent, {node: node, categories: this.getMemberCategories()}));
       // members
-      el.append(
-        $$('div').addClass('se-members').append(this._renderMembers())
-      );
+      el.append(this._renderMembers());
     }
 
     return el;
   };
+
+  var MEMBER_CATEGORIES = [
+    {name: 'classes', path: ['class']},
+    {name: 'methods', path: ['method']},
+    {name: 'properties', path: ['property']},
+  ];
+
+  this.getMemberCategories = function() {
+    return MEMBER_CATEGORIES;
+  };
+
 };
 
-oo.inherit(ModuleComponent, DocumentationNodeComponent);
+oo.inherit(ModuleComponent, MemberContainerComponent);
 
 module.exports = ModuleComponent;
