@@ -5,8 +5,9 @@ var Component = require('./Component');
 var $$ = Component.$$;
 var $ = require('../util/jquery');
 
-// Toolbar
-// ----------------------
+/**
+  @class
+*/
 
 function Toolbar() {
   Component.apply(this, arguments);
@@ -22,8 +23,13 @@ Toolbar.Prototype = function() {
 
 oo.inherit(Toolbar, Component);
 
-// Dropdown
-// ----------------------
+/**
+  @class Toolbar.Dropdown
+*/
+
+/**
+  @constructor Toolbar.Dropdown
+*/
 
 function Dropdown() {
   Component.apply(this, arguments);
@@ -85,8 +91,13 @@ Dropdown.Prototype = function() {
 
 oo.inherit(Dropdown, Component);
 
-// Group
-// ----------------------
+/**
+  @class Toolbar.Group
+*/
+
+/**
+  @constructor Toolbar.Group
+*/
 
 function Group() {
   Component.apply(this, arguments);
