@@ -3,7 +3,6 @@ module.exports = {
   'example': 'Example',
   'parameters': 'Parameters',
   'class': 'Class',
-  'classes': 'Classes',
   'ctor': 'Constructor',
   'function': 'Function',
   'functions': 'Functions',
