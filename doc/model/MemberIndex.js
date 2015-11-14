@@ -6,9 +6,10 @@ var PathAdapter = require('../../util/PathAdapter');
 /**
   @class
  */
-function MemberIndex() {
+function MemberIndex(doc) {
   NodeIndex.apply(this, arguments);
 
+  this.doc = doc;
   this.index = new PathAdapter();
 }
 
@@ -25,14 +26,25 @@ MemberIndex.Prototype = function() {
     return node.hasParent();
   };
 
-  function _getPath(node, parentId) {
-    var parentId = parentId || node.parent;
+  this._getPath = function(node, parentId) {
+    var doc = this.doc;
+    parentId = parentId || node.parent;
     var type = node.type;
+    var parent = doc.get(parentId);
 
-    if (node.isStatic) {
-      return [parentId, 'class', type, node.name];
+    if (!parent) {
+      console.error('Could not retrieve parent node of member.');
+      return [parentId, type, node.name];
+    }
+
+    if (parent.type === "class") {
+      if (node.isStatic || type === "ctor") {
+        return [parentId, 'class', type, node.name];
+      } else {
+        return [parentId, 'instance', type, node.name];
+      }
     } else {
-      return [parentId, 'instance', type, node.name];
+      return [parentId, type, node.name];
     }
   };
 
@@ -43,7 +55,7 @@ MemberIndex.Prototype = function() {
     @param {Node} node
    */
   this.create = function(node) {
-    this.index.set(_getPath(node), node);
+    this.index.set(this._getPath(node), node);
   };
 
   /**
@@ -53,7 +65,7 @@ MemberIndex.Prototype = function() {
     @param {Node} node
    */
   this.delete = function(node) {
-    this.index.delete(_getPath(node));
+    this.index.delete(this._getPath(node));
   };
 
   /**
@@ -64,8 +76,12 @@ MemberIndex.Prototype = function() {
    */
   this.update = function(node, path, newValue, oldValue) {
     if (!this.select(node) || path[1] !== 'parent') return;
-    this.index.delete(_getPath(node, oldValue));
-    this.index.set(_getPath(node, newValue), node);
+    this.index.delete(this._getPath(node, oldValue));
+    this.index.set(this._getPath(node, newValue), node);
+  };
+
+  this.clone = function() {
+    return new MemberIndex(this.doc);
   };
 
 };

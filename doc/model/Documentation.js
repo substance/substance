@@ -12,6 +12,7 @@ schema.addNodes([
   require('./ModuleNode'),
   require('./FunctionNode'),
   require('./ClassNode'),
+  require('./ConstructorNode'),
   require('./MethodNode'),
   require('./PropertyNode'),
   require('./EventNode'),
@@ -20,7 +21,7 @@ schema.addNodes([
 var Documentation = function() {
   Document.call(this, schema);
 
-  this.addIndex('members', new MemberIndex());
+  this.addIndex('members', new MemberIndex(this));
 
   this.create({
     type: 'container',
