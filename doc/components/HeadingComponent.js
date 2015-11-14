@@ -11,13 +11,20 @@ function HeadingComponent() {
 }
 
 HeadingComponent.Prototype = function() {
+  this.onClick = function(e) {
+    e.preventDefault();
+    e.stopPropagation();
+    this.send('focusNode', this.props.node.id);
+  };
+
   this.render = function() {
     var node = this.props.node;
 
     var name = node.name;
     var type = node.type;
     var el = $$('div').addClass('sc-heading');
-    var headerEl = $$('div').addClass('se-header');
+    var headerEl = $$('a').attr({href: '#'}).addClass('se-header')
+        .on('click', this.onClick);
 
     // namespace
     var parent = node.getParent();
@@ -31,7 +38,7 @@ HeadingComponent.Prototype = function() {
       }
     }
     headerEl.append(
-      $$('span').addClass('se-namespace').append(namespace.replace('/',' / '))
+      $$('span').addClass('se-namespace').append(namespace)
     );
     // name
     headerEl.append(

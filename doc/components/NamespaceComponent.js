@@ -11,16 +11,24 @@ function NamespaceComponent() {
 
 NamespaceComponent.Prototype = function() {
 
+  this.onClick = function(e) {
+    e.preventDefault();
+    e.stopPropagation();
+    this.send('focusNode', this.props.node.id);
+  };
+
   this.render = function() {
     var node = this.props.node;
     return $$('div')
       .addClass('sc-namespace')
       .attr("data-id", node.id)
       .append(
-        $$('div').addClass('se-name').html(node.id),
+        $$('a').addClass('se-name')
+          .html(node.id)
+          .on('click', this.onClick)
+          .attr({href: '#'}),
         $$('div').addClass('se-description').html(node.description),
-        $$('div').addClass('se-members').append(this._renderMembers()),
-        $$('div').addClass('se-node-type').addClass('namespace').append('namespace')
+        $$('div').addClass('se-members').append(this._renderMembers())
       );
   };
 };
