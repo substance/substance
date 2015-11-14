@@ -141,6 +141,10 @@ NodeIndex.Prototype = function() {
     }, this);
   };
 
+  this.set = function(node, path, newValue, oldValue) {
+    this.update(node, path, newValue, oldValue);
+  };
+
   /**
    * Reset the index using a Data instance.
    *
