@@ -17,7 +17,7 @@ var converters = [
   require('../../packages/table/TableCellHtmlConverter'),
   require('../../packages/list/ListHtmlConverter'),
   require('../../packages/list/ListItemHtmlConverter'),
-]
+];
 
 function TestHtmlImporter() {
   TestHtmlImporter.super.call(this, {

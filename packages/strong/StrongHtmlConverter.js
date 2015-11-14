@@ -1,7 +1,7 @@
 'use strict';
 
 /*
- * HTML converter for Blockquote.
+ * HTML converter for Strong.
  */
 module.exports = {
 
