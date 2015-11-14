@@ -1411,13 +1411,27 @@ RawHtml = function RawHtml(html) {
 };
 
 /**
- * Create a virtual DOM representation which is used by Component
- * for differential/reactive rendering.
- *
- * @param arg1 HTML tag name or Component class
- * @param arg2 a properties object (optional)
- * @return a virtual DOM
- */
+  Create a virtual DOM representation which is used by Component
+  for differential/reactive rendering.
+  
+  @param elementType HTML tag name or Component class
+  @param [props] a properties object for Component classes
+  @return {VirtualNode} a virtual DOM node
+  
+  @example
+  
+  Create a virtual DOM Element
+
+  ```
+  $$('a').attr({href: './foo'}).addClass('se-nav-item')
+  ```
+
+  Create a virtual Component
+
+  ```
+  $$(HelloMessage, {name: 'John'})
+  ```
+*/
 Component.$$ = function() {
   var content = null;
   if (_.isString(arguments[0])) {
