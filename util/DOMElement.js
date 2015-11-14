@@ -91,6 +91,10 @@ DOMElement.Prototype = function() {
     return this;
   };
 
+  this.hasClass = function(className) {
+    return this.$el.hasClass(className);
+  };
+
   this.clone = function() {
     var $clone = this.$el.clone();
     return new DOMElement($clone[0]);
