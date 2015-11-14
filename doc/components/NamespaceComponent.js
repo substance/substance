@@ -35,10 +35,6 @@ NamespaceComponent.Prototype = function() {
     el.append(
       $$('div').addClass('se-description').html(node.description)
     );
-    // badge
-    el.append(
-      $$('div').addClass('se-node-type').addClass('namespace').append('namespace')
-    );
     if (node.members.length > 0) {
       // member index
       el.append($$(MemberIndexComponent, {node: node, categories: this.getMemberCategories()}));
