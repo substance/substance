@@ -7,7 +7,7 @@
  * Supports nesting only up to level-4
  */
 
-.sc-li
+.sc-li {
   &.level-2 { margin-left: 20px; }
   &.level-3 { margin-left: 40px; }
   &.level-4 { margin-left: 60px; }
