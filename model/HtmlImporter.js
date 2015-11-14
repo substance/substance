@@ -175,7 +175,8 @@ HtmlImporter.Prototype = function HtmlImporterPrototype() {
           // ATM we only support spans as entry to the catch-all implementation
           // that collects inline elements and wraps into a paragraph.
           // TODO: maybe this should be the default?
-          if (inlineTypeConverter || this._getTagName(el) === "span") {
+
+          if (inlineTypeConverter || el.tagName === "span") {
             iterator.back();
             this._wrapInlineElementsIntoBlockElement(iterator);
           } else {
