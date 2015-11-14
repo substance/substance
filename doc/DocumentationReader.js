@@ -14,9 +14,10 @@ var DocumentationReader = DocumentationController.extend({
       controller: {
         // Component registry
         components: {
-          'class': require('./components/ClassComponent'),
           'namespace': require('./components/NamespaceComponent'),
           'function': require('./components/FunctionComponent'),
+          'class': require('./components/ClassComponent'),
+          'ctor': require('./components/ConstructorComponent'),
           'method': require('./components/MethodComponent'),
           'module': require('./components/ModuleComponent'),
           'component': require('./components/ComponentComponent'),

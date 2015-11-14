@@ -1,6 +1,5 @@
 'use strict';
 
-var _ = require('../../util/helpers');
 var oo = require('../../util/oo');
 var Node = require('./Node');
 var NodeFactory = require('./NodeFactory');
@@ -175,6 +174,10 @@ Schema.Prototype = function() {
 
   this.getNodeSchema = function(type) {
     var NodeClass = this.getNodeClass(type);
+    if (!NodeClass) {
+      console.error('Unknown node type ', type);
+      return null;
+    }
     return _getNodeSchema(NodeClass);
   };
 

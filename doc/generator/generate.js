@@ -9,6 +9,10 @@ module.exports = function generate(config) {
   // make the nodes conform to the schema
   nodes = map(nodes, function(node) {
     var nodeSchema = schema.getNodeSchema(node.type);
+    if (!nodeSchema) {
+      return node;
+    }
+    // pick only properties which are defined in node schema
     node = pick(node, Object.keys(nodeSchema));
     if (node.members) {
       node.members.sort();

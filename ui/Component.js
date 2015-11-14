@@ -16,29 +16,29 @@ var _htmlParams;
   large frameworks it does much less things automagically in favour of synchronous
   rendering and a minimalistic life-cycle. It also provides *up-tree*
   communication and *dependency injection*.
-  
+
   Concepts:
-  
+
   - `props` are provided by a parent component.  An initial set of properties is provided
   via constructor. After that, the parent component can call `setProps` or `extendProps`
   to update these properties which triggers rerendering if the properties change.
-  
+
   - `state` is a set of flags and values which are used to control how the component
   gets rendered given the current props. Using `setState` the component can change
   its internal state, which leads to a rerendering if the state changes.
-  
+
   - A child component with a `ref` id will be reused on rerender. All others will be
   wiped and rerender from scratch. If you want to preserve a grand-child (or lower), then
   make sure that all anchestors have a ref id. After rendering the child will be
   accessible via `this.refs[ref]`.
-  
+
   - A component can send actions via `send` which are bubbled up through all parent
-  components until one handles it. 
-  
+  components until one handles it.
+
   @class
   @abstract
   @example
-  
+
   Define a component:
 
   ```
@@ -51,9 +51,9 @@ var _htmlParams;
     }
   });
   ```
-  
+
   And mount it to a DOM Element:
-  
+
   ```
   Component.mount(
     $$(HelloMessage, {name: 'John'}),
@@ -158,7 +158,7 @@ Component.Prototype = function ComponentPrototype() {
 
   /**
     Provide the initial component state.
-    
+
     @return object the initial state
   */
   this.getInitialState = function() {
@@ -167,7 +167,7 @@ Component.Prototype = function ComponentPrototype() {
 
   /**
     Provides the parent of this component.
-    
+
     @return object the parent component or null if this component does not have a parent.
   */
   this.getParent = function() {
@@ -227,7 +227,7 @@ Component.Prototype = function ComponentPrototype() {
    * @param isMounted an optional param for optimization, it's used mainly internally
    * @private
    * @example
-   * 
+   *
    * ```
    * var frag = document.createDocumentFragment();
    * var comp = Component.mount($$(MyComponent), frag);
@@ -322,7 +322,7 @@ Component.Prototype = function ComponentPrototype() {
   /**
     Send an action request to the parent component, bubbling up the component
     hierarchy until an action handler is found.
-    
+
     @param action the name of the action
     @param ... arbitrary number of arguments
     @returns {Boolean} true if the action was handled, false otherwise
@@ -342,7 +342,7 @@ Component.Prototype = function ComponentPrototype() {
 
   /**
     Define action handlers. Call this during construction/initialization of a component.
-    
+
     @example
 
     ```
@@ -365,7 +365,7 @@ Component.Prototype = function ComponentPrototype() {
 
   /**
     Sets the state of this component, potentially leading to a rerender.
-    
+
     Usually this is used by the component itself.
   */
   this.setState = function(newState) {
@@ -451,7 +451,7 @@ Component.Prototype = function ComponentPrototype() {
 
   /**
     Sets the properties of this component, potentially leading to a rerender.
-    
+
     @param {object} an object with properties
   */
   this.setProps = function(newProps) {
@@ -466,7 +466,7 @@ Component.Prototype = function ComponentPrototype() {
 
   /**
     Extends the properties of the component, without reppotentially leading to a rerender.
-    
+
     @param {object} an object with properties
   */
   this.extendProps = function(updatedProps) {
@@ -496,7 +496,7 @@ Component.Prototype = function ComponentPrototype() {
     Hook which is called before properties are updated. Use this to dispose objects which will be replaced when properties change.
   */
   this.willReceiveProps = function(newProps) {
-     // jshint unused: false 
+     // jshint unused: false
   };
 
   /**
@@ -607,7 +607,7 @@ Component.Prototype = function ComponentPrototype() {
 
   /**
     Get text of an element.
-  */  
+  */
   this.text = function() {
     if (arguments.length === 0) {
       if (this.$el) {
@@ -1153,13 +1153,18 @@ Component.Text.Prototype = function() {
 
 oo.inherit(Component.Text, Component);
 
-/** 
+/**
   Virtual Components. An abstract class for Virtual components, created via Component.$$.
 
   @class Component.VirtualNode
   @abstract
 */
 
+/**
+  Virtual Components. An abstract class for Virtual components, created via Component.$$.
+
+  @constructor Component.VirtualNode
+*/
 function VirtualNode() {
   this._ref = null;
   this._isOnRoute = false;
@@ -1354,7 +1359,7 @@ VirtualNode.Prototype = function() {
 
 oo.initClass(VirtualNode);
 
-/** 
+/**
   This represents virtual HTML elements.
 
   @class Component.VirtualElement
@@ -1365,6 +1370,7 @@ oo.initClass(VirtualNode);
 /**
   Used only internally. Use $$ to create virutal elements.
 
+  @constructor Component.VirtualElement
   @param {String} tagname tagname e.g. 'div'
 */
 
@@ -1374,8 +1380,6 @@ function VirtualElement(tagName) {
   this.tagName = tagName;
 }
 oo.inherit(VirtualElement, VirtualNode);
-
-
 
 function VirtualComponent(ComponentClass) {
   VirtualNode.call(this);
@@ -1407,13 +1411,27 @@ RawHtml = function RawHtml(html) {
 };
 
 /**
- * Create a virtual DOM representation which is used by Component
- * for differential/reactive rendering.
- *
- * @param arg1 HTML tag name or Component class
- * @param arg2 a properties object (optional)
- * @return a virtual DOM
- */
+  Create a virtual DOM representation which is used by Component
+  for differential/reactive rendering.
+  
+  @param elementType HTML tag name or Component class
+  @param [props] a properties object for Component classes
+  @return {VirtualNode} a virtual DOM node
+  
+  @example
+  
+  Create a virtual DOM Element
+
+  ```
+  $$('a').attr({href: './foo'}).addClass('se-nav-item')
+  ```
+
+  Create a virtual Component
+
+  ```
+  $$(HelloMessage, {name: 'John'})
+  ```
+*/
 Component.$$ = function() {
   var content = null;
   if (_.isString(arguments[0])) {
@@ -1449,9 +1467,9 @@ Component.$$.prepareChildren = function(children) {
 /**
   Internal implementation, rendering a virtual component
   created using the $$ operator.
-  
+
   Don't us it. You should use `Component.mount()` instead.
-  
+
   @private
   ```
 */
@@ -1506,17 +1524,17 @@ Component._render = function(data, options) {
 
 /**
   Mount a component onto a given DOM or jquery element.
-  
+
   Mounting a component means, that the component gets rendered
   and then appended to the given element.
   If the element is in the DOM, all components receive a 'didMount' event.
-  
+
   @param {Component|VirtualComponent} component to be mounted
   @param el a DOM or jQuery element
   @return {Component} the mounted component
-  
+
   @example
-  
+
   ```
   Component.mount($$(MyComponent), $('body'));
 */
@@ -1540,7 +1558,7 @@ Component.mount = function(component, el) {
 
 /**
   Checks whether a given element has been injected in the document already
-  
+
   We traverse up the DOM until we find the document root element. We return true
   if we can find it.
 */

@@ -6,7 +6,6 @@ var Component = require('../../ui/Component');
 var $$ = Component.$$;
 
 var Heading = require('./HeadingComponent');
-var Signature = require('./SignatureComponent');
 var Params = require('./ParamsComponent');
 var Example = require('./ExampleComponent');
 
