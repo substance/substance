@@ -73,7 +73,7 @@ _Parser.Prototype = function() {
 
       // the main entity of a module is that one which has the same name as the entry
       // e.g. the class 'Component' in file 'Component.js' would be assumed to be exported
-      if (entity.ctx && !entity.ctx.receiver && entity.ctx.name === this.name) {
+      if (this._exportableTypes[entity.type] && (entity.id === this.name)) {
         mainEntity = entity;
       }
 
@@ -176,6 +176,9 @@ _Parser.Prototype = function() {
           entity.ctx = extend({}, entity.ctx, ctx);
           entity.name = ctx.name;
         }
+      } else if (tag.type === "constructor") {
+        entity.type = "ctor";
+        extend(entity, _extractConstructorInfo(this, tag, entity));
       } else if (tag.type === "module") {
         entity.isModule = true;
         entity.type = "module";
@@ -219,12 +222,20 @@ _Parser.Prototype = function() {
 
   this._supportedTypes = {
     "class": true,
+    "ctor": true,
     "module": true,
     "function": true,
     "method": true,
     "property": true,
     "event": true
   };
+
+  this._exportableTypes = {
+    "class": true,
+    "module": true,
+    "function": true
+  };
+
 
   function _createNode(self, entity, node) {
     node.name = entity.name;
@@ -265,7 +276,10 @@ _Parser.Prototype = function() {
       });
       var sep;
       if (member.isEvent) {
+        sep = "!";
+      } else if (member.isConstructor) {
         sep = "@";
+        member.isStatic = true;
       } else if (member.isStatic) {
         sep = ".";
         memberNode.isStatic = true;
@@ -282,7 +296,9 @@ _Parser.Prototype = function() {
   }
 
   function _convertMember(self, nodes, member, memberNode) {
-    if (member.type === 'method') {
+    if (member.type === 'ctor') {
+      _convertConstructor(self, member, memberNode);
+    } else if (member.type === 'method') {
       _convertMethod(self, member, memberNode);
     } else if (member.type === "property") {
       _convertProperty(self, member, memberNode);
@@ -335,6 +351,12 @@ _Parser.Prototype = function() {
     node.type = "event";
   }
 
+  function _convertConstructor(self, entity, node) {
+    _convertFunction(self, entity, node);
+    node.type = "ctor";
+    node.isPrivate = entity.isPrivate;
+  }
+
   function _convertProperty(self, entity, node) {
     node.type = "property";
     node.description = entity.description.full;
@@ -357,7 +379,7 @@ _Parser.Prototype = function() {
 
   function _extractEventInfo(self, tag) {
     var eventId = tag.string;
-    var parts = eventId.split('@');
+    var parts = eventId.split('!');
     var name = parts[1];
     var receiver = parts[0];
     // support global ids, i.e., `ui/Controller@command:executed`
@@ -372,6 +394,22 @@ _Parser.Prototype = function() {
       id: eventId,
       name: name,
       ctx: ctx
+    };
+  }
+
+  function _extractConstructorInfo(self, tag, entity) {
+    var name = entity.ctx.name;
+    var receiver = tag.string || name;
+    // support global ids, i.e., `model/MyClass.`
+    var match = new RegExp("^"+self.folder+"/(.+)$").exec(receiver);
+    if (match) {
+      receiver = match[1];
+    }
+    var id = receiver + "@" + name;
+    return {
+      id: id,
+      name: name,
+      ctx: { receiver: receiver }
     };
   }
 
