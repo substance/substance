@@ -86,7 +86,8 @@ Documentation.getNodeInfo = function(node) {
     info.isClassMember = (parent.type === 'class');
     info.isModuleMember = (parent.type === 'module');
   }
-  if (node.type === 'class') {
+
+  if (node.type === 'ctor') {
     info.isConstructor = true;
   }
 
