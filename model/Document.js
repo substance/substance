@@ -18,10 +18,9 @@ var __id__ = 0;
 /**
   Abstract class used for deriving a custom article implementation.
 
-  @class
+  @class Document
   @abstract
   @extends model/AbstractDocument
-  @param {model/Schema} schema The document schema.
   @example
 
   ```js
@@ -40,7 +39,11 @@ var __id__ = 0;
 
   OO.inherit(Article, Document);
   ```
+*/
 
+/**
+  @constructor Document
+  @param {model/Schema} schema The document schema.
 */
 
 function Document(schema) {
