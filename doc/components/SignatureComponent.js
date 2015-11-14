@@ -14,6 +14,11 @@ function SignatureComponent() {
 }
 
 SignatureComponent.Prototype = function() {
+  this.onClick = function(e) {
+    e.preventDefault();
+    e.stopPropagation();
+    this.send('focusNode', this.props.node.id);
+  };
 
   this.render = function() {
     var el = $$('div').addClass('sc-signature');
@@ -25,7 +30,9 @@ SignatureComponent.Prototype = function() {
     var args = pluck(params, 'name').join(', ');
 
     el.append(
-      $$('div').addClass('se-declaration')
+      $$('a').addClass('se-declaration')
+        .attr({href: '#'})
+        .on('click', this.onClick)
         .append($$('span').addClass('se-visibility').append(visibility))
         .append($$('span').addClass('se-storage').append(info.storage))
         .append($$('span').addClass('se-name').append(node.name))

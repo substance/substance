@@ -1,11 +1,14 @@
 .sc-namespace {
 
   position: relative;
+  padding-top: 10px;
 
   > .se-name {
     font-size: $font-size-level-0;
     font-weight: bold;
     margin-bottom: 20px;
+    color: inherit;
+    padding-top: 20px;
   }
 
   > .se-description {

@@ -4,6 +4,7 @@ var oo = require('../../util/oo');
 var Document = require('../../model/Document');
 var Schema = require('../../model/DocumentSchema');
 var schema = new Schema('substance-documentation', '0.1.0');
+var MemberIndex = require('./MemberIndex');
 
 schema.addNodes([
   require('./MetaNode'),
@@ -11,6 +12,7 @@ schema.addNodes([
   require('./ModuleNode'),
   require('./FunctionNode'),
   require('./ClassNode'),
+  require('./ConstructorNode'),
   require('./MethodNode'),
   require('./PropertyNode'),
   require('./EventNode'),
@@ -18,6 +20,8 @@ schema.addNodes([
 
 var Documentation = function() {
   Document.call(this, schema);
+
+  this.addIndex('members', new MemberIndex(this));
 
   this.create({
     type: 'container',
@@ -81,16 +85,19 @@ Documentation.getNodeInfo = function(node) {
     parent = node.getParent();
     info.isClassMember = (parent.type === 'class');
     info.isModuleMember = (parent.type === 'module');
-  } else if (node.type === 'class') {
+  }
+
+  if (node.type === 'ctor') {
     info.isConstructor = true;
   }
+
   // Derive storage
-  if (info.isClassMember && !node.isStatic) {
+  if (info.isConstructor) {
+    info.storage = 'new ';
+  } else if (info.isClassMember && !node.isStatic) {
     info.storage = 'this.';
   } else if (info.isModuleMember) {
     info.storage = parent.name + '.';
-  } else if (info.isConstructor) {
-    info.storage = 'new ';
   }
 
   // Derive typeDescr

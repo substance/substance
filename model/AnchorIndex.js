@@ -13,7 +13,6 @@ var ContainerAnnotationAnchorIndex = function(doc) {
 };
 
 ContainerAnnotationAnchorIndex.Prototype = function() {
-
   this.select = function(node) {
     return (node instanceof ContainerAnnotation);
   };

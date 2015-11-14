@@ -2,7 +2,6 @@
 
 var oo = require('../../util/oo');
 var SurfaceCommand = require('../../ui/SurfaceCommand');
-var _ = require('../../util/helpers');
 var _isMatch = require('lodash/lang/isMatch');
 var _find = require('lodash/collection/find');
 var TextNode = require('../../model/TextNode');

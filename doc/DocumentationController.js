@@ -25,10 +25,18 @@ function DocumentationController(parent, params) {
     "switchState": this.switchState,
     "extendState": this.extendState,
     "switchContext": this.switchContext,
+    'focusNode': this.focusNode
   });
 }
 
 DocumentationController.Prototype = function() {
+  
+  this.focusNode = function(nodeId) {
+    console.log('focussing node', nodeId);
+    this.extendState({
+      nodeId: nodeId
+    });
+  };
 
   this.getInitialContext = function() {
     return {

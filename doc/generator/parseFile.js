@@ -73,7 +73,7 @@ _Parser.Prototype = function() {
 
       // the main entity of a module is that one which has the same name as the entry
       // e.g. the class 'Component' in file 'Component.js' would be assumed to be exported
-      if (entity.ctx && !entity.ctx.receiver && entity.ctx.name === this.name) {
+      if (this._exportableTypes[entity.type] && (entity.id === this.name)) {
         mainEntity = entity;
       }
 
@@ -122,7 +122,7 @@ _Parser.Prototype = function() {
       });
 
       if (entity.isDefault) {
-        node.namespace = this.folder;
+        node.parent = this.folder;
       }
       if (entities.length === 1) {
         node.id = this.id;
@@ -170,6 +170,15 @@ _Parser.Prototype = function() {
         entity.isClass = true;
         entity.type = "class";
         entity.members = [];
+        // overloaded receiver
+        if (tag.string) {
+          var ctx = _extractClassCtx(this, tag.string);
+          entity.ctx = extend({}, entity.ctx, ctx);
+          entity.name = ctx.name;
+        }
+      } else if (tag.type === "constructor") {
+        entity.type = "ctor";
+        extend(entity, _extractConstructorInfo(this, tag, entity));
       } else if (tag.type === "module") {
         entity.isModule = true;
         entity.type = "module";
@@ -213,12 +222,20 @@ _Parser.Prototype = function() {
 
   this._supportedTypes = {
     "class": true,
+    "ctor": true,
     "module": true,
     "function": true,
     "method": true,
     "property": true,
     "event": true
   };
+
+  this._exportableTypes = {
+    "class": true,
+    "module": true,
+    "function": true
+  };
+
 
   function _createNode(self, entity, node) {
     node.name = entity.name;
@@ -235,9 +252,8 @@ _Parser.Prototype = function() {
     each(entity.members, function(member) {
       var memberNode = _createNode(self, member, {
         id: node.id + "." + member.name,
-        parent: node.id,
+        parent: node.id
       });
-
       _convertMember(self, nodes, member, memberNode);
 
       nodes.push(memberNode);
@@ -260,7 +276,10 @@ _Parser.Prototype = function() {
       });
       var sep;
       if (member.isEvent) {
+        sep = "!";
+      } else if (member.isConstructor) {
         sep = "@";
+        member.isStatic = true;
       } else if (member.isStatic) {
         sep = ".";
         memberNode.isStatic = true;
@@ -277,7 +296,9 @@ _Parser.Prototype = function() {
   }
 
   function _convertMember(self, nodes, member, memberNode) {
-    if (member.type === 'method') {
+    if (member.type === 'ctor') {
+      _convertConstructor(self, member, memberNode);
+    } else if (member.type === 'method') {
       _convertMethod(self, member, memberNode);
     } else if (member.type === "property") {
       _convertProperty(self, member, memberNode);
@@ -311,7 +332,7 @@ _Parser.Prototype = function() {
           description: tag.description
         };
         if (tag.optional) {
-          param.name = param.name.replace(/[\[\]]/g, '');
+          // param.name = param.name.replace(/[\[\]]/g, '');
           param.optional = true;
         }
         node.params.push(param);
@@ -328,6 +349,12 @@ _Parser.Prototype = function() {
   function _convertEvent(self, entity, node) {
     _convertFunction(self, entity, node);
     node.type = "event";
+  }
+
+  function _convertConstructor(self, entity, node) {
+    _convertFunction(self, entity, node);
+    node.type = "ctor";
+    node.isPrivate = entity.isPrivate;
   }
 
   function _convertProperty(self, entity, node) {
@@ -352,7 +379,7 @@ _Parser.Prototype = function() {
 
   function _extractEventInfo(self, tag) {
     var eventId = tag.string;
-    var parts = eventId.split('@');
+    var parts = eventId.split('!');
     var name = parts[1];
     var receiver = parts[0];
     // support global ids, i.e., `ui/Controller@command:executed`
@@ -370,6 +397,34 @@ _Parser.Prototype = function() {
     };
   }
 
+  function _extractConstructorInfo(self, tag, entity) {
+    var name = entity.ctx.name;
+    var receiver = tag.string || name;
+    // support global ids, i.e., `model/MyClass.`
+    var match = new RegExp("^"+self.folder+"/(.+)$").exec(receiver);
+    if (match) {
+      receiver = match[1];
+    }
+    var id = receiver + "@" + name;
+    return {
+      id: id,
+      name: name,
+      ctx: { receiver: receiver }
+    };
+  }
+
+  function _extractClassCtx(self, classStr) {
+    // remove the namespace prefix to support global ids, i.e., `ui/Component.VirtualElement`
+    classStr = classStr.replace(new RegExp("^"+self.folder+"/"), '');
+    var idComponents = classStr.split('.');
+    var name = idComponents.pop();
+    var receiver = idComponents.join('.');
+    return {
+      name: name,
+      receiver: receiver
+    };
+  }
+
 };
 
 oo.initClass(_Parser);
@@ -382,10 +437,10 @@ oo.initClass(_Parser);
 var _parseTagTypes = dox.parseTagTypes;
 dox.parseTagTypes = function(str, tag) {
   if (/\{\w+(\/\w+)+([.#]\w+)*\}/.exec(str)) {
-    str = str.replace('/', '_SEP_');
+    str = str.replace(/\//g, '_SEP_');
     var types = _parseTagTypes(str, tag);
     for (var i = 0; i < types.length; i++) {
-      types[i] = types[i].replace('_SEP_', '/');
+      types[i] = types[i].replace(/_SEP_/g, '/');
     }
   } else {
     return _parseTagTypes(str, tag);

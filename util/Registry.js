@@ -2,6 +2,8 @@
 
 var oo = require('./oo');
 
+var _obj = {};
+
 /*
  * Simple registry implementation.
  *
@@ -24,7 +26,7 @@ Registry.Prototype = function() {
    * @memberof module:Basics.Registry.prototype
    */
   this.contains = function(name) {
-    return !!this.entries[name];
+    return this.entries.hasOwnProperty(name);
   };
 
   /**
@@ -36,6 +38,9 @@ Registry.Prototype = function() {
    * @memberof module:Basics.Registry.prototype
    */
   this.add = function(name, entry) {
+    if (_obj[name]) {
+      throw new Error('Illegal key: "'+name+'" is a property of Object which is thus not allowed as a key.');
+    }
     if (this.contains(name)) {
       this.remove(name);
     }
@@ -64,7 +69,7 @@ Registry.Prototype = function() {
    */
   this.clear = function() {
     this.names = [];
-    this.entries = [];
+    this.entries = {};
   };
 
   /**
@@ -76,8 +81,7 @@ Registry.Prototype = function() {
    * @memberof module:Basics.Registry.prototype
    */
   this.get = function(name) {
-    var res = this.entries[name];
-    return res;
+    return this.entries[name];
   };
 
   /**

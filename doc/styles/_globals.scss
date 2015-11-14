@@ -8,3 +8,8 @@ code {
   padding: 1px 3px;
   font-family: Consolas, 'Liberation Mono', Menlo, Courier, monospace;
 }
+
+blockquote {
+  margin-left: 20px;
+  font-size: $font-size-small;
+}

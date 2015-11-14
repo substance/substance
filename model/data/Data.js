@@ -8,12 +8,9 @@ var EventEmitter = require('../../util/EventEmitter');
 /*
  * A data storage implemention.
  *
- * @class Data
- * @extends EventEmitter
+ * @extends util/EventEmitter
  * @param {Schema} schema
  * @param {Object} [options]
- *
- * @memberof module:Data
  */
 function Data(schema, options) {
   EventEmitter.call(this);
@@ -26,6 +23,11 @@ function Data(schema, options) {
   // For example in Substance.Document this is used to attach and detach a document from a node.
   this.didCreateNode = options.didCreateNode || function() {};
   this.didDeleteNode = options.didDeleteNode || function() {};
+
+  // Sometimes necessary to resolve issues with updating indexes in presence
+  // of cyclic dependencies
+  this.__QUEUE_INDEXING__ = false;
+  this.queue = [];
 }
 
 Data.Prototype = function() {
@@ -78,33 +80,44 @@ Data.Prototype = function() {
       throw new Error("Node id and type are mandatory.");
     }
     this.nodes[node.id] = node;
-    _.each(this.indexes, function(index) {
-      if (index.select(node)) {
-        index.create(node);
-      }
-    });
     this.didCreateNode(node);
+
+    var change = {
+      type: 'create',
+      node: node
+    };
+
+    if (this.__QUEUE_INDEXING__) {
+      this.queue.push(change);
+    } else {
+      this.updateIndexes(change);
+    }
+
     return node;
   };
 
   /**
    * Delete the node with given id.
    *
-   * @method delete
    * @param {String} nodeId
    * @return {Node} The deleted node.
-   *
-   * @memberof module:Data.Data.prototype
    */
   this.delete = function(nodeId) {
     var node = this.nodes[nodeId];
     delete this.nodes[nodeId];
     this.didDeleteNode(node);
-    _.each(this.indexes, function(index) {
-      if (index.select(node)) {
-        index.delete(node);
-      }
-    });
+
+    var change = {
+      type: 'delete',
+      node: node,
+    };
+
+    if (this.__QUEUE_INDEXING__) {
+      this.queue.push(change);
+    } else {
+      this.updateIndexes(change);
+    }
+
     return node;
   };
 
@@ -122,11 +135,21 @@ Data.Prototype = function() {
     var node = this.get(path[0]);
     var oldValue = this.nodes.get(path);
     this.nodes.set(path, newValue);
-    _.each(this.indexes, function(index) {
-      if (index.select(node)) {
-        index.update(node, path, newValue, oldValue);
-      }
-    });
+
+    var change = {
+      type: 'set',
+      node: node,
+      path: path,
+      newValue: newValue,
+      oldValue: oldValue
+    };
+
+    if (this.__QUEUE_INDEXING__) {
+      this.queue.push(change);
+    } else {
+      this.updateIndexes(change);
+    }
+
     return oldValue;
   };
 
@@ -181,11 +204,21 @@ Data.Prototype = function() {
     }
     this.nodes.set(path, newValue);
     var node = this.get(path[0]);
-    _.each(this.indexes, function(index) {
-      if (index.select(node)) {
-        index.update(node, path, oldValue, newValue);
-      }
-    });
+
+    var change = {
+      type: 'update',
+      node: node,
+      path: path,
+      newValue: newValue,
+      oldValue: oldValue
+    };
+
+    if (this.__QUEUE_INDEXING__) {
+      this.queue.push(change);
+    } else {
+      this.updateIndexes(change);
+    }
+
     return oldValue;
   };
 
@@ -256,6 +289,30 @@ Data.Prototype = function() {
    */
   this.getIndex = function(name) {
     return this.indexes[name];
+  };
+
+  this.updateIndexes = function(change) {
+    if (!change || this.__QUEUE_INDEXING__) return;
+    _.each(this.indexes, function(index) {
+      if (index.select(change.node)) {
+        if (!index[change.type]) {
+          console.error('Contract: every NodeIndex must implement ' + change.type);
+        }
+        index[change.type](change.node, change.path, change.newValue, change.oldValue);
+      }
+    });
+  };
+
+  this.stopIndexing = function() {
+    this.__QUEUE_INDEXING__ = true;
+  };
+
+  this.startIndexing = function() {
+    this.__QUEUE_INDEXING__ = false;
+    while(this.queue.length >0) {
+      var change = this.queue.shift();
+      this.updateIndexes(change);
+    }
   };
 
 };
