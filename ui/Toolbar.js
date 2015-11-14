@@ -6,6 +6,8 @@ var $$ = Component.$$;
 var $ = require('../util/jquery');
 
 /**
+  A simple container holding editing tools.
+  
   @class
 */
 
