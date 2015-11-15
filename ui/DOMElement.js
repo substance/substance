@@ -110,7 +110,7 @@ DOMElement.Prototype = function() {
 
     @abstract
     @private
-    @note Considered as private API, in favor of the property {ui/DOMElement.prototype.innerHTML}
+    @note Considered as private API, in favor of the property {ui/DOMElement.prototype.tagName}
     @returns {String} the tag name in lower-case.
    */
   this.getTagName = function() {
@@ -122,7 +122,7 @@ DOMElement.Prototype = function() {
 
     @abstract
     @private
-    @note Considered as private API, in favor of the property {ui/DOMElement.prototype.innerHTML}
+    @note Considered as private API, in favor of the property {ui/DOMElement.prototype.tagName}
     @param {String} tagName the new tag name
     @returns {this}
   */
