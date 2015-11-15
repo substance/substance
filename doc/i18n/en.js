@@ -20,5 +20,7 @@ module.exports = {
   'properties': 'Properties',
   'instance-methods': 'Methods',
   'instance-properties': 'Properties',
-  'instance-events': 'Events'
+  'instance-events': 'Events',
+  'props': 'Props',
+  'state': 'State'
 };

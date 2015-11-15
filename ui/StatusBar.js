@@ -12,6 +12,9 @@ var ICONS_FOR_TYPE = {
 };
 
 /**
+  A simple StatusBar implementation that displays a document's title and 
+  renders messages.
+
   @class
   @component
 
