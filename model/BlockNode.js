@@ -3,14 +3,14 @@
 var oo = require('../util/oo');
 var DocumentNode = require('./DocumentNode');
 
-var BlockNode = function() {
+function BlockNode() {
   DocumentNode.apply(this, arguments);
 }
 
 BlockNode.Prototype = function() {
 };
 
-oo.inherit(BlockNode, TextNode);
+oo.inherit(BlockNode, DocumentNode);
 
 BlockNode.static.blockType = true;
 

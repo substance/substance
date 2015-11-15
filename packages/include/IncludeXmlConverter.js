@@ -8,7 +8,7 @@ module.exports = {
   type: 'include',
   tagName: 'include',
 
-  import: function(el, node, converter) {
+  import: function(el, node) {
     node.nodeId = el.attr('data-rid');
     node.nodeType = el.attr('data-rtype');
   },

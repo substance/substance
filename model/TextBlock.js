@@ -3,8 +3,8 @@
 var oo = require('../util/oo');
 var TextNode = require('./TextNode');
 
-var TextBlock = function() {
-  TextNode.apply(this, arguments)
+function TextBlock() {
+  TextNode.apply(this, arguments);
 }
 
 TextBlock.Prototype = function() {};

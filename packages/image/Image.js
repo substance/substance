@@ -1,4 +1,3 @@
-var $ = require('../../util/jquery');
 var DocumentNode = require('../../model/DocumentNode');
 
 var Image = DocumentNode.extend({

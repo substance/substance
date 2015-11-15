@@ -1,9 +1,7 @@
 'use strict';
 
 var _ = require('../../util/helpers');
-var $ = require('../../util/jquery');
 var DocumentNode = require('../../model/DocumentNode');
-var ListItem = require('./ListItem');
 var ParentNodeMixin = require('../../model/ParentNodeMixin');
 
 // Note: we have chosen a semi-hierarchical model for lists

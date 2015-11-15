@@ -1,7 +1,5 @@
 'use strict';
 
-var $$ = require('../../ui/Component').$$;
-
 /*
  * HTML converter for Paragraph.
  */

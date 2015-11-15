@@ -1,6 +1,5 @@
 'use strict';
 
-var $ = require('../../util/jquery');
 var DocumentNode = require('../../model/DocumentNode');
 
 // Abstract interface
