@@ -1,6 +1,5 @@
 var Documentation = require('./Documentation');
 var each = require('lodash/collection/each');
-var find = require('lodash/collection/find');
 
 function importDocumentation(nodes) {
   var documentation = new Documentation();

@@ -12,6 +12,7 @@ var $$ = Component.$$;
   instantiated within a {@link ui/Controller} context.
 
   @class
+  @component
   @extends ui/ContainerEditor
 
   @example

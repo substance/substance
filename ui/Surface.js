@@ -14,6 +14,7 @@ var Component = require('./Component');
    Dances with contenteditable, so you don't have to.
    
    @class
+   @component
    @abstract
 */
 
