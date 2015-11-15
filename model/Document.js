@@ -17,11 +17,10 @@ var __id__ = 0;
 
 /**
   Abstract class used for deriving a custom article implementation.
-  
-  @class
+
+  @class Document
   @abstract
   @extends model/AbstractDocument
-  @param {model/Schema} schema The document schema.
   @example
 
   ```js
@@ -40,7 +39,11 @@ var __id__ = 0;
 
   OO.inherit(Article, Document);
   ```
+*/
 
+/**
+  @constructor Document
+  @param {model/Schema} schema The document schema.
 */
 
 function Document(schema) {
@@ -159,6 +162,52 @@ Document.Prototype = function() {
     var change = this.stage._transaction.apply(this.stage, arguments);
     this.isTransacting = false;
     return change;
+  };
+
+  /**
+    Creates a context like a transaction for importing nodes.
+    This is important in presence of cyclic dependencies.
+    Indexes will not be updated during the import but will afterwards
+    when all nodes are have been created.
+
+    @private
+    @param {Function} importer a `function(doc)`, where with `doc` is a `model/AbstractDocument`
+
+    @example
+
+    Consider the following example from our documentation generator:
+    We want to have a member index, which keeps track of members of namespaces, modules, and classes.
+    grouped by type, and in the case of classes, also grouped by 'instance' and 'class'.
+
+    ```
+    ui
+      - class
+        - ui/Component
+    ui/Component
+      - class
+        - method
+          - mount
+      - instance
+        - method
+          - render
+    ```
+
+    To decide which grouping to apply, the parent type of a member needs to be considered.
+    Using an incremental approach, this leads to the problem, that the parent must exist
+    before the child. At the same time, e.g. when deserializing, the parent has already
+    a field with all children ids. This cyclic dependency is best address, by turning
+    off all listeners (such as indexes) until the data is consistent.
+
+  */
+  this.import = function(importer) {
+    try {
+      this.data.stopIndexing();
+      importer(this);
+      this.data.startIndexing();
+    } finally {
+      this.data.queue = [];
+      this.data.startIndexing();
+    }
   };
 
   this.create = function(nodeData) {

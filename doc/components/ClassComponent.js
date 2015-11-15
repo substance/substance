@@ -2,19 +2,15 @@
 
 var oo = require('../../util/oo');
 var Component = require('../../ui/Component');
-var DocumentationNodeComponent = require('./DocumentationNodeComponent');
+var MemberContainerComponent = require('./MemberContainerComponent');
 var $$ = Component.$$;
-var each = require('lodash/collection/each');
 
-var Signature = require('./SignatureComponent');
 var Heading = require('./HeadingComponent');
-var Params = require('./ParamsComponent');
 var Example = require('./ExampleComponent');
-var MethodComponent = require('./MethodComponent');
-
+var MemberIndexComponent = require('./MemberIndexComponent');
 
 function ClassComponent() {
-  DocumentationNodeComponent.apply(this, arguments);
+  MemberContainerComponent.apply(this, arguments);
 }
 
 ClassComponent.Prototype = function() {
@@ -30,56 +26,37 @@ ClassComponent.Prototype = function() {
     el.append(
       $$('div').addClass('se-description').html(node.description)
     );
-    // constructor
-    el.append(
-      $$('div').addClass('se-constructor sc-method')
-        .append($$(Signature, {node: node}))
-    );
-    // params
-    if (node.params.length > 0 || node.returns) {
-      el.append($$(Params, {params: node.params, returns: node.returns}));
-    }
     // example
     if (node.example) {
       el.append($$(Example, {node: node}));
     }
-    // class members
-    el.append(
-      $$('div').addClass('se-members')
-        .append(this._renderMembers())
-        .append(this.renderInheritedMembers(el))
-    );
+
+    if (node.members && node.members.length > 0) {
+      // member index
+      el.append($$(MemberIndexComponent, {node: node, categories: this.getMemberCategories()}));
+      // members
+      el.append(this._renderMembers());
+    }
+
     return el;
   };
 
-  this.renderInheritedMembers = function() {
-    var node = this.props.node;
+  var MEMBER_CATEGORIES = [
+    {name: 'ctor', path: ['class', 'ctor']},
+    {name: 'instance-methods', path: ['instance', 'method']},
+    {name: 'instance-properties', path: ['instance', 'property']},
+    {name: 'instance-events', path: ['instance', 'event']},
 
-    if (!node.parentClass) return;
+    {name: 'class-methods', path: ['class', 'method']},
+    {name: 'class-properties', path: ['class', 'property']},
+    {name: 'inner-classes', path: ['class', 'class']}
+  ];
 
-    var doc = node.getDocument();
-    var parent = doc.get(node.parentClass);
-    if (!parent) return;
-
-    var result = [];
-    each(parent.members, function(id) {
-      var member = doc.get(id);
-      if (member.type === "method" && !member.isPrivate) {
-        result.push(
-          $$('div').addClass('se-inherited-method')
-          .append($$(MethodComponent, {
-            node: member,
-            parentNode: node,
-            inheritedFrom: parent.id
-          }))
-        );
-      }
-    });
-    return result;
+  this.getMemberCategories = function() {
+    return MEMBER_CATEGORIES;
   };
 
 };
-
-oo.inherit(ClassComponent, DocumentationNodeComponent);
+oo.inherit(ClassComponent, MemberContainerComponent);
 
 module.exports = ClassComponent;

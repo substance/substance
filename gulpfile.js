@@ -60,12 +60,11 @@ gulp.task('doc', ['doc:sass', 'doc:bundle', 'doc:assets', 'doc:data']);
 
 gulp.task('lint', function() {
   return gulp.src([
-    './basics/**/*.js',
-    './data/**/*.js',
-    './document/**/*.js',
-    './operator/**/*.js',
-    './surface/**/*.js',
-    './ui/**/*.js'
+    './doc/**/*.js',
+    './model/**/*.js',
+    './packages/**/*.js',
+    './ui/**/*.js',
+    './util/**/*.js'
   ]).pipe(jshint())
     .pipe(jshint.reporter('default'))
     .pipe(jshint.reporter("fail"));

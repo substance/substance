@@ -73,7 +73,7 @@ _Parser.Prototype = function() {
 
       // the main entity of a module is that one which has the same name as the entry
       // e.g. the class 'Component' in file 'Component.js' would be assumed to be exported
-      if (entity.ctx && !entity.ctx.receiver && entity.ctx.name === this.name) {
+      if (this._exportableTypes[entity.type] && (entity.id === this.name)) {
         mainEntity = entity;
       }
 
@@ -118,11 +118,11 @@ _Parser.Prototype = function() {
     each(entities, function(entity) {
       var node = _createNode(this, entity, {
         id: this.id + "." + entity.name,
-        isDefault: entity.isDefault,
+        isDefault: entity.isDefault
       });
 
       if (entity.isDefault) {
-        node.namespace = this.folder;
+        node.parent = this.folder;
       }
       if (entities.length === 1) {
         node.id = this.id;
@@ -163,13 +163,38 @@ _Parser.Prototype = function() {
     // in most cases, we use the source line of the associated code (first code line after comment block)
     entity.sourceLine = entity.codeStart;
 
+    var refinedTags = [];
+    entity.params = [];
     each(entity.tags, function(tag) {
-      if (tag.type === "export") {
-        entity.isExported = true;
-      } else if (tag.type === "class") {
+      // NOTE: we want to pass through tags. However, to reduce the footprint of the
+      // generated JSON, for now we only pass through 'custom' tags
+      // built-in tags are covered by this implementation
+      // TODO: we could introduce a configuration to control this behavior
+      if (tag.type === "class") {
         entity.isClass = true;
         entity.type = "class";
         entity.members = [];
+        // overloaded receiver
+        if (tag.string) {
+          var ctx = _extractClassCtx(this, tag.string);
+          entity.ctx = extend({}, entity.ctx, ctx);
+          entity.name = ctx.name;
+        }
+      } else if (tag.type === "param") {
+        var param = _prepareParam(tag);
+        refinedTags.push({ type: 'param', value: param });
+        entity.params.push(param);
+      } else if (tag.type === "return") {
+        // TODO: in dox a type can have multiple entries
+        var returnVal = {
+          type: tag.types.join('|'),
+          description: tag.description
+        };
+        refinedTags.push({ type: 'returns', value: returnVal });
+        entity.returns = returnVal;
+      } else if (tag.type === "constructor") {
+        entity.type = "ctor";
+        extend(entity, _extractConstructorInfo(this, tag, entity));
       } else if (tag.type === "module") {
         entity.isModule = true;
         entity.type = "module";
@@ -181,22 +206,38 @@ _Parser.Prototype = function() {
         extend(entity, _extractEventInfo(this, tag));
       } else if (tag.type === "abstract") {
         entity.isAbstract = true;
+      } else if (tag.type === "private") {
+        entity.isPrivate = true;
+      } else if (tag.type === "static") {
+        entity.isStatic = true;
       } else if (tag.type === "extends") {
         entity.superClass = tag.string;
       } else if (tag.type === "skip") {
         entity.skip = true;
       } else if (tag.type === "see") {
-        // TODO: for delegators it would make sense to show the documentation
-        // of the target
         entity.see = tag.string;
-      } else if (tag.type === "export") {
-        entity.isExported = true;
       } else if (tag.type === "example") {
         entity.example = _extractExample(tag.string);
       } else if (tag.type === "type") {
         entity.dataType = tag.string;
+      } else if (tag.type === "export") {
+        entity.isExported = true;
+      } else {
+        var typeDescription = _typeTagMatcher.exec(tag.string);
+        if (typeDescription) {
+          tag.name = typeDescription[2];
+          tag.description = typeDescription[3];
+          dox.parseTagTypes(typeDescription[1], tag);
+          var customParam = _prepareParam(tag);
+          refinedTags.push({ type: tag.type, value: customParam });
+        } else {
+          refinedTags.push({ type: tag.type, value: tag.string });
+        }
       }
     }, this);
+
+    entity.tags = refinedTags;
+
     if (!entity.id) {
       var id = "";
       if (entity.ctx) {
@@ -213,6 +254,7 @@ _Parser.Prototype = function() {
 
   this._supportedTypes = {
     "class": true,
+    "ctor": true,
     "module": true,
     "function": true,
     "method": true,
@@ -220,11 +262,34 @@ _Parser.Prototype = function() {
     "event": true
   };
 
+  this._exportableTypes = {
+    "class": true,
+    "module": true,
+    "function": true
+  };
+
+  var _typeTagMatcher = /^\s*(\{[^{]+\})\s+([\w\/]+)\s+(.+)/;
+
+  function _prepareParam(tag) {
+    var param = {
+      type: tag.types.join('|'),
+      name: tag.name,
+      description: markdown.toHtml(tag.description)
+    };
+    if (tag.optional) {
+      // param.name = param.name.replace(/[\[\]]/g, '');
+      param.optional = true;
+    }
+    return param;
+  }
+
+
   function _createNode(self, entity, node) {
     node.name = entity.name;
     node.example = entity.example;
     node.sourceFile = self.file;
     node.sourceLine = entity.sourceLine;
+    node.tags = entity.tags;
     return node;
   }
 
@@ -235,9 +300,8 @@ _Parser.Prototype = function() {
     each(entity.members, function(member) {
       var memberNode = _createNode(self, member, {
         id: node.id + "." + member.name,
-        parent: node.id,
+        parent: node.id
       });
-
       _convertMember(self, nodes, member, memberNode);
 
       nodes.push(memberNode);
@@ -246,9 +310,6 @@ _Parser.Prototype = function() {
   }
 
   function _convertClass(self, nodes, entity, node) {
-    // reuse the function converter to extract ctor arguments
-    _convertFunction(self, entity, node);
-
     node.type = "class";
     node.isAbstract = entity.isAbstract;
     node.superClass = entity.superClass;
@@ -260,7 +321,10 @@ _Parser.Prototype = function() {
       });
       var sep;
       if (member.isEvent) {
+        sep = "!";
+      } else if (member.isConstructor) {
         sep = "@";
+        member.isStatic = true;
       } else if (member.isStatic) {
         sep = ".";
         memberNode.isStatic = true;
@@ -277,7 +341,9 @@ _Parser.Prototype = function() {
   }
 
   function _convertMember(self, nodes, member, memberNode) {
-    if (member.type === 'method') {
+    if (member.type === 'ctor') {
+      _convertConstructor(self, member, memberNode);
+    } else if (member.type === 'method') {
       _convertMethod(self, member, memberNode);
     } else if (member.type === "property") {
       _convertProperty(self, member, memberNode);
@@ -294,28 +360,11 @@ _Parser.Prototype = function() {
   function _convertFunction(self, entity, node) {
     node.type = "function";
     node.description = entity.description.full;
-    node['params'] = [];
-
-    each(entity.tags, function(tag) {
-      if (tag.type === "return") {
-        // TODO: in dox a type can have multiple entries
-        var returnVal = {
-          type: tag.types.join('|'),
-          description: tag.description
-        };
-        node['returns'] = returnVal;
-      } else if (tag.type == "param") {
-        var param = {
-          type: tag.types.join('|'),
-          name: tag.name,
-          description: tag.description
-        };
-        if (tag.optional) {
-          param.name = param.name.replace(/[\[\]]/g, '');
-          param.optional = true;
-        }
-        node.params.push(param);
-      }
+    node.params = entity.params;
+    node.returns = entity.returns;
+    // To reduce redundancy remove the params from tags
+    node.tags = node.tags.filter(function(tag) {
+      return (tag.type !== "param" && tag.type !== "returns");
     });
   }
 
@@ -328,6 +377,12 @@ _Parser.Prototype = function() {
   function _convertEvent(self, entity, node) {
     _convertFunction(self, entity, node);
     node.type = "event";
+  }
+
+  function _convertConstructor(self, entity, node) {
+    _convertFunction(self, entity, node);
+    node.type = "ctor";
+    node.isPrivate = entity.isPrivate;
   }
 
   function _convertProperty(self, entity, node) {
@@ -352,14 +407,10 @@ _Parser.Prototype = function() {
 
   function _extractEventInfo(self, tag) {
     var eventId = tag.string;
-    var parts = eventId.split('@');
+    var parts = eventId.split('!');
     var name = parts[1];
     var receiver = parts[0];
-    // support global ids, i.e., `ui/Controller@command:executed`
-    var match = new RegExp("^"+self.folder+"/(.+)$").exec(receiver);
-    if (match) {
-      receiver = match[1];
-    }
+    receiver = _normalizeReceiver(self, receiver);
     var ctx = {
       receiver: receiver
     };
@@ -367,6 +418,38 @@ _Parser.Prototype = function() {
       id: eventId,
       name: name,
       ctx: ctx
+    };
+  }
+
+  function _extractConstructorInfo(self, tag, entity) {
+    var name = entity.ctx.name;
+    var receiver = tag.string || name;
+    receiver = _normalizeReceiver(self, receiver);
+    var id = receiver + "@" + name;
+    return {
+      id: id,
+      name: name,
+      ctx: { receiver: receiver }
+    };
+  }
+
+  function _normalizeReceiver(self, receiver) {
+    if (receiver) {
+      // support global ids, i.e., `model/MyClass.`
+      return receiver.replace(new RegExp("^"+self.folder+"/"), '');
+    } else {
+      return '';
+    }
+  }
+
+  function _extractClassCtx(self, classStr) {
+    classStr = _normalizeReceiver(self, classStr);
+    var idComponents = classStr.split('.');
+    var name = idComponents.pop();
+    var receiver = idComponents.join('.');
+    return {
+      name: name,
+      receiver: receiver
     };
   }
 
@@ -382,10 +465,10 @@ oo.initClass(_Parser);
 var _parseTagTypes = dox.parseTagTypes;
 dox.parseTagTypes = function(str, tag) {
   if (/\{\w+(\/\w+)+([.#]\w+)*\}/.exec(str)) {
-    str = str.replace('/', '_SEP_');
+    str = str.replace(/\//g, '_SEP_');
     var types = _parseTagTypes(str, tag);
     for (var i = 0; i < types.length; i++) {
-      types[i] = types[i].replace('_SEP_', '/');
+      types[i] = types[i].replace(/_SEP_/g, '/');
     }
   } else {
     return _parseTagTypes(str, tag);

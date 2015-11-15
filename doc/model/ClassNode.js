@@ -5,12 +5,11 @@ var DocumentedNode = require('./DocumentedNode');
 var ClassNode = DocumentedNode.extend({
   name: 'class',
   properties: {
-    parent: 'id', // only set for nested classes, or classes of a module
+    parent: 'id',
     name: 'string',
-    namespace: 'string',
     members: ['array', 'id'],
-    params: ['array', 'object'],
     isAbstract: 'boolean',
+    isStatic: 'boolean',
     superClass: 'id', // when @extends is defined
   }
 });

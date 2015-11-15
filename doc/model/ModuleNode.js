@@ -5,8 +5,8 @@ var DocumentedNode = require('./DocumentedNode');
 var ModuleNode = DocumentedNode.extend({
   name: 'module',
   properties: {
+    parent: 'id',
     name: 'string',
-    namespace: 'string',
     members: ['array', 'property'], // ['model/documentHelpers.getAllAnnotations']
   }
 });

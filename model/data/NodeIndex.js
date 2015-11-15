@@ -29,62 +29,10 @@ var NodeIndex = function() {
 NodeIndex.Prototype = function() {
 
   /**
-   * Reset the index using a Data instance.
-   *
-   * @method reset
-   * @private
-   *
-   * @memberof module:Data.NodeIndex.prototype
-   */
-  this.reset = function(data) {
-    this.index.clear();
-    this._initialize(data);
-  };
-
-  this._initialize = function(data) {
-    _.each(data.getNodes(), function(node) {
-      if (this.select(node)) {
-        this.create(node);
-      }
-    }, this);
-  };
-
-  /**
-   * The property used for indexing.
-   *
-   * @property {String} property
-   * @protected
-   *
-   * @memberof module:Data.NodeIndex.prototype
-   */
-  this.property = "id";
-
-  /**
-   * Check if a node should be indexed.
-   *
-   * Used internally only. Override this in subclasses to achieve a custom behavior.
-   *
-   * @method select
-   * @protected
-   *
-   * @memberof module:Data.NodeIndex.prototype
-   */
-  this.select = function(node) {
-    if(!this.type) {
-      return true;
-    } else {
-      return node.isInstanceOf(this.type);
-    }
-  };
-
-  /**
    * Get all indexed nodes for a given path.
    *
-   * @method get
    * @param {Array} path
-   * @return A node or an object with ids and nodes as values.
-   *
-   * @memberof module:Data.NodeIndex.prototype
+   * @returns A node or an object with ids and nodes as values.
    */
   // TODO: what is the correct return value. We have arrays at some places.
   this.get = function(path) {
@@ -96,12 +44,8 @@ NodeIndex.Prototype = function() {
   /**
    * Collects all indexed nodes.
    *
-   * @method getAll
-   * @return An object with ids as keys and nodes as values.
-   *
-   * @memberof module:Data.NodeIndex.prototype
+   * @returns An object with ids as keys and nodes as values.
    */
-  // TODO: is that true?
   this.getAll = function() {
     var result = {};
     _.each(this.index, function(values) {
@@ -111,15 +55,37 @@ NodeIndex.Prototype = function() {
   };
 
   /**
+   * The property used for indexing.
+   *
+   * @private
+   * @type {String}
+   */
+  this.property = "id";
+
+  /**
+   * Check if a node should be indexed.
+   *
+   * Used internally only. Override this in subclasses to achieve a custom behavior.
+   *
+   * @private
+   * @param {model/data/Node}
+   * @returns {Boolean} true if the given node should be added to the index.
+   */
+  this.select = function(node) {
+    if(!this.type) {
+      return true;
+    } else {
+      return node.isInstanceOf(this.type);
+    }
+  };
+
+  /**
    * Called when a node has been created.
    *
    * Override this in subclasses for customization.
    *
-   * @method create
+   * @private
    * @param {Node} node
-   * @protected
-   *
-   * @memberof module:Data.NodeIndex.prototype
    */
   this.create = function(node) {
     var values = node[this.property];
@@ -136,11 +102,8 @@ NodeIndex.Prototype = function() {
    *
    * Override this in subclasses for customization.
    *
-   * @method delete
+   * @private
    * @param {Node} node
-   * @protected
-   *
-   * @memberof module:Data.NodeIndex.prototype
    */
   this.delete = function(node) {
     var values = node[this.property];
@@ -157,11 +120,8 @@ NodeIndex.Prototype = function() {
    *
    * Override this in subclasses for customization.
    *
-   * @method update
+   * @private
    * @param {Node} node
-   * @protected
-   *
-   * @memberof module:Data.NodeIndex.prototype
    */
   this.update = function(node, path, newValue, oldValue) {
     if (!this.select(node) || path[1] !== this.property) return;
@@ -181,6 +141,20 @@ NodeIndex.Prototype = function() {
     }, this);
   };
 
+  this.set = function(node, path, newValue, oldValue) {
+    this.update(node, path, newValue, oldValue);
+  };
+
+  /**
+   * Reset the index using a Data instance.
+   *
+   * @private
+   */
+  this.reset = function(data) {
+    this.index.clear();
+    this._initialize(data);
+  };
+
   /**
    * Clone this index.
    *
@@ -194,6 +168,15 @@ NodeIndex.Prototype = function() {
     var clone = new NodeIndexClass();
     return clone;
   };
+
+  this._initialize = function(data) {
+    _.each(data.getNodes(), function(node) {
+      if (this.select(node)) {
+        this.create(node);
+      }
+    }, this);
+  };
+
 };
 
 oo.initClass( NodeIndex );

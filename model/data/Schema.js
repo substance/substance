@@ -1,6 +1,5 @@
 'use strict';
 
-var _ = require('../../util/helpers');
 var oo = require('../../util/oo');
 var Node = require('./Node');
 var NodeFactory = require('./NodeFactory');
@@ -70,10 +69,8 @@ Schema.Prototype = function() {
   /**
    * Get the node class for a type name.
    *
-   * @method getNodeClass
    * @param {String} name
-   *
-   * @memberof module:Data.Schema.prototype
+   * @returns {Class}
    */
   this.getNodeClass = function(name) {
     return this.nodeFactory.get(name);
@@ -90,36 +87,6 @@ Schema.Prototype = function() {
    */
   this.getNodeFactory = function() {
     return this.nodeFactory;
-  };
-
-  function getJsonForNodeClass(nodeClass) {
-    var nodeSchema = {};
-    if (nodeClass.static.hasOwnProperty('schema')) {
-      nodeSchema.properties = _.clone(nodeClass.static.schema);
-    }
-    // add 'parent' attribute if the nodeClass has a parent
-    return nodeSchema;
-  }
-
-  /**
-   * Serialize to JSON.
-   *
-   * @method toJSON
-   * @return A plain object describing the schema.
-   *
-   * @memberof module:Data.Schema.prototype
-   */
-  // TODO: what is this used for? IMO this is not necessary anymore
-  this.toJSON = function() {
-    var data = {
-      id: this.name,
-      version: this.version,
-      types: {}
-    };
-    this.nodeFactory.each(function(nodeClass, name) {
-      data.types[name] = getJsonForNodeClass(nodeClass);
-    });
-    return data;
   };
 
   /**
@@ -203,6 +170,19 @@ Schema.Prototype = function() {
    */
   this.getDefaultTextType = function() {
     throw new Error('Schmema.prototype.getDefaultTextType() must be overridden.');
+  };
+
+  this.getNodeSchema = function(type) {
+    var NodeClass = this.getNodeClass(type);
+    if (!NodeClass) {
+      console.error('Unknown node type ', type);
+      return null;
+    }
+    return _getNodeSchema(NodeClass);
+  };
+
+  var _getNodeSchema = function(NodeClass) {
+    return NodeClass.static.schema;
   };
 
 };

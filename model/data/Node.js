@@ -1,7 +1,8 @@
 'use strict';
 
 var oo = require('../../util/oo');
-var _ = require('../../util/helpers');
+var each = require('lodash/collection/each');
+var extend = require('lodash/object/extend');
 var uuid = require('../../util/uuid');
 var EventEmitter = require('../../util/EventEmitter');
 
@@ -17,7 +18,7 @@ var EventEmitter = require('../../util/EventEmitter');
 function Node( properties ) {
   EventEmitter.call(this);
 
-  this.properties = _.extend({}, this.getDefaultProperties(), properties);
+  this.properties = extend({}, this.getDefaultProperties(), properties);
   this.properties.type = this.constructor.static.name;
   this.properties.id = this.properties.id || uuid(this.properties.type);
 
@@ -181,15 +182,23 @@ var defineProperty = function(prototype, property, readonly) {
 
 var defineProperties = function(NodeClass) {
   var prototype = NodeClass.prototype;
+
+
+  // any property will cause problems for which new Object[name] !== undefined
+  var obj = {};
+
   if (!NodeClass.static.schema) return;
-  var properties = Object.keys(NodeClass.static.schema);
-  for (var i = 0; i < properties.length; i++) {
-    var property = properties[i];
-    if (prototype.hasOwnProperty(property)) continue;
+
+  each(NodeClass.static.schema, function(type, property) {
+    // check if the property name clashes with a Javascript Object property
+    // which would cause problems
+    if (obj[property]) {
+      throw new Error('Property with name ' + property + ' is not allowed.');
+    }
     var readonly = ( NodeClass.static.readOnlyProperties &&
       NodeClass.static.readOnlyProperties.indexOf(property) > 0 );
     defineProperty(prototype, property, readonly);
-  }
+  });
 };
 
 var prepareSchema = function(NodeClass) {
@@ -197,7 +206,7 @@ var prepareSchema = function(NodeClass) {
   var parentStatic = Object.getPrototypeOf(NodeClass.static);
   var parentSchema = parentStatic.schema;
   if (parentSchema) {
-    NodeClass.static.schema = _.extend(Object.create(parentSchema), schema);
+    NodeClass.static.schema = extend({}, parentSchema, schema);
   }
 };
 
