@@ -2,14 +2,14 @@
 
 require('../qunit_extensions');
 
-var TestHtmlImporter = require('../../test_article/TestHtmlImporter');
+var TestHTMLImporter = require('../../test_article/TestHTMLImporter');
 var DOMElement = require('../../../util/DOMElement');
 
 var importer;
 
-QUnit.module('model/HtmlImporter', {
+QUnit.module('model/HTMLImporter', {
   beforeEach: function() {
-    importer = new TestHtmlImporter();
+    importer = new TestHTMLImporter();
   },
   afterEach: function() {
     importer = null;

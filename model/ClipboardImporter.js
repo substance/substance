@@ -3,7 +3,7 @@
 var $ = require('../util/jquery');
 var _ = require('../util/helpers');
 var oo = require('../util/oo');
-var HtmlImporter = require('./HtmlImporter');
+var HTMLImporter = require('./HTMLImporter');
 
 // Note: sharing the symbol with the transformation
 var CLIPBOARD_CONTAINER_ID = require('./transform/copySelection').CLIPBOARD_CONTAINER_ID;
@@ -66,6 +66,6 @@ ClipboardImporter.Prototype = function() {
 
 };
 
-oo.inherit(ClipboardImporter, HtmlImporter);
+oo.inherit(ClipboardImporter, HTMLImporter);
 
 module.exports = ClipboardImporter;

@@ -1,7 +1,7 @@
 'use strict';
 
 var oo = require('../../util/oo');
-var HtmlImporter = require('../../model/HtmlImporter');
+var HTMLImporter = require('../../model/HTMLImporter');
 var schema = require('./test_schema');
 var TestArticle = require('./test_article');
 
@@ -19,8 +19,8 @@ var converters = [
   require('../../packages/list/ListItemHtmlConverter'),
 ];
 
-function TestHtmlImporter() {
-  TestHtmlImporter.super.call(this, {
+function TestHTMLImporter() {
+  TestHTMLImporter.super.call(this, {
     schema: schema,
     converters: converters,
     DocumentClass: TestArticle,
@@ -28,9 +28,9 @@ function TestHtmlImporter() {
   });
 }
 
-TestHtmlImporter.Prototype = function() {
+TestHTMLImporter.Prototype = function() {
 };
 
-oo.inherit(TestHtmlImporter, HtmlImporter);
+oo.inherit(TestHTMLImporter, HTMLImporter);
 
-module.exports = TestHtmlImporter;
+module.exports = TestHTMLImporter;

@@ -10,7 +10,7 @@
 var $ = require('./util/jquery');
 var OO = require('./util/oo');
 var Document = require('./document');
-var HtmlImporter = Document.HtmlImporter;
+var HTMLImporter = Document.HTMLImporter;
 var HtmlExporter = Document.HtmlExporter;
 
 var defaultNodes = [
@@ -50,7 +50,7 @@ Importer.Prototype = function() {
   };
 };
 
-OO.inherit(Importer, HtmlImporter);
+OO.inherit(Importer, HTMLImporter);
 
 // Exporter
 // ----------------
