@@ -6,7 +6,8 @@ var extend = require('lodash/object/extend');
 var bind = require('lodash/function/bind');
 var oo = require('../util/oo');
 var uuid = require('../util/uuid');
-var DOMElement = require('../util/DOMElement');
+var DefaultDOMElement = require('../ui/DefaultDOMElement');
+var $$ = DefaultDOMElement.createElement;
 
 /**
   A generic base implementation for HTML importers.
@@ -15,6 +16,10 @@ var DOMElement = require('../util/DOMElement');
   @param {Object} config
  */
 function DOMImporter(config) {
+  if (!config.converters) {
+    throw new Error('config.converters is mandatory');
+  }
+
   this.config = extend({idAttribute: 'data-id'}, config);
 
   this.schema = config.schema;
@@ -26,7 +31,8 @@ function DOMImporter(config) {
 
   var schema = this.schema;
   var defaultTextType = schema.getDefaultTextType();
-  each(config.converters, function(converter) {
+
+  config.converters.forEach(function(converter) {
     if (!converter.type) {
       console.error('Converter must provide the type of the associated node.', converter);
       return;
@@ -52,7 +58,8 @@ function DOMImporter(config) {
       this._inlineTypeConverters.push(converter);
     }
 
-  }, this);
+  }.bind(this));
+
   this._initState();
 }
 
@@ -62,7 +69,7 @@ DOMImporter.Prototype = function DOMImporterPrototype() {
     // initialization
     this.reset();
     // converting to JSON first
-    var elements = DOMElement.parseHtml(html);
+    var elements = DefaultDOMElement.parseHtml(html);
     this.convertDocument(elements);
     var doc = this.generateDocument();
     return doc;
@@ -143,13 +150,13 @@ DOMImporter.Prototype = function DOMImporterPrototype() {
   /**
     Converts and shows all children of a given element.
 
-    @param {util/DOMElement} containerEl An element representing a container node.
+    @param {ui/DOMElement} containerEl An element representing a container node.
     @param {String} containerId The id of the target container node.
    */
   this.convertContainer = function(nodes) {
     var state = this.state;
     state.container = [];
-    var iterator = new DOMElement.NodeIterator(nodes);
+    var iterator = new DefaultDOMElement.NodeIterator(nodes);
     while(iterator.hasNext()) {
       var el = iterator.next();
       var blockTypeConverter = this._getBlockTypeConverterForElement(el);
@@ -190,7 +197,7 @@ DOMImporter.Prototype = function DOMImporterPrototype() {
   /**
     Converts a single HTML element and creates a node in the current document.
 
-    @param {util/DOMElement} el the HTML element
+    @param {ui/DOMElement} el the HTML element
     @returns {object} the created node as JSON
    */
   this.convertElement = function(el) {
@@ -243,7 +250,7 @@ DOMImporter.Prototype = function DOMImporterPrototype() {
   //   // We should see if we really need this.
   //   // And we should give it a better naming.
   //   var doc = this.getDocument();
-  //   var el = DOMElement.create('div').setInnerHtml(html);
+  //   var el = $$('div').setInnerHtml(html);
   //   var text = this.annotatedText(el, path);
   //   doc.setText(path, text, this.state.inlineNodes);
   // };
@@ -253,7 +260,7 @@ DOMImporter.Prototype = function DOMImporterPrototype() {
 
     Make sure you call this method only for elements where `this.isParagraphish(elements) === true`.
 
-    @param {util/DOMElement} el
+    @param {ui/DOMElement} el
     @param {String[]} path The target property where the extracted text (plus annotations) should be stored.
     @returns {String} The converted text as plain-text
    */
@@ -261,12 +268,12 @@ DOMImporter.Prototype = function DOMImporterPrototype() {
     var state = this.state;
     if (path) {
       if (state.stack.length>0) {
-        throw new Error('Contract: it is not allowed to bind a new call annotatedText to a path while the previous has not been completed.', el.outerHtml);
+        throw new Error('Contract: it is not allowed to bind a new call annotatedText to a path while the previous has not been completed.', el.outerHTML);
       }
       state.stack = [{ path: path, offset: 0, text: ""}];
     } else {
       if (state.stack.length===0) {
-        throw new Error("Contract: DOMImporter.annotatedText() requires 'path' for non-reentrant call.", el.outerHtml);
+        throw new Error("Contract: DOMImporter.annotatedText() requires 'path' for non-reentrant call.", el.outerHTML);
       }
     }
     // IMO we should reset the last char, as it is only relevant within one
@@ -285,7 +292,7 @@ DOMImporter.Prototype = function DOMImporterPrototype() {
   /**
     Converts the given element as plain-text.
 
-    @param {util/DOMElement} el
+    @param {ui/DOMElement} el
     @returns {String} The plain text
    */
   this.plainText = function(el) {
@@ -342,7 +349,7 @@ DOMImporter.Prototype = function DOMImporterPrototype() {
 
   this.defaultConverter = function(el, converter) {
     /* jshint unused:false */
-    console.warn('This element is not handled by the converters you provided. This is the default implementation which just skips conversion. Override DOMImporter.defaultConverter(el, converter) to change this behavior.', el.outerHtml);
+    console.warn('This element is not handled by the converters you provided. This is the default implementation which just skips conversion. Override DOMImporter.defaultConverter(el, converter) to change this behavior.', el.outerHTML);
     var defaultTextType = this.schema.getDefaultTextType();
     var defaultConverter = this._defaultBlockTypeConverter;
     if (!defaultConverter) {
@@ -386,9 +393,9 @@ DOMImporter.Prototype = function DOMImporterPrototype() {
         if (!inlineTypeConverter) {
           var blockTypeConverter = this._getBlockTypeConverterForElement(el);
           if (blockTypeConverter) {
-            throw new Error('Expected inline element. Found block element:', el.outerHtml);
+            throw new Error('Expected inline element. Found block element:', el.outerHTML);
           }
-          console.warn('Unsupported inline element. We will not create an annotation for it, but process its children to extract annotated text.', el.outerHtml);
+          console.warn('Unsupported inline element. We will not create an annotation for it, but process its children to extract annotated text.', el.outerHTML);
           // Note: this will store the result into the current context
           this.annotatedText(el);
           continue;
@@ -421,7 +428,7 @@ DOMImporter.Prototype = function DOMImporterPrototype() {
         inlineNode.path = context.path.slice(0);
         state.inlineNodes.push(inlineNode);
       } else {
-        console.warn('Unknown element type. Taking plain text.', el.outerHtml);
+        console.warn('Unknown element type. Taking plain text.', el.outerHTML);
         text = this._prepareText(state, el.textContent);
         context.text = context.text.concat(text);
         context.offset += text.length;
@@ -467,7 +474,7 @@ DOMImporter.Prototype = function DOMImporterPrototype() {
     @returns {model/DocumentNode}
    */
   this._wrapInlineElementsIntoBlockElement = function(childIterator) {
-    var wrapper = DOMElement.create('div');
+    var wrapper = $$('div');
     while(childIterator.hasNext()) {
       var el = childIterator.next();
       var blockTypeConverter = this._getBlockTypeConverterForElement(el);
@@ -492,14 +499,14 @@ DOMImporter.Prototype = function DOMImporterPrototype() {
     Converts an element into a default block level node.
 
     @private
-    @param {util/DOMElement} $el
+    @param {ui/DOMElement} $el
     @returns {model/DocumentNode}
    */
   this._createDefaultBlockElement = function(el) {
     var node = this.defaultConverter(el, this);
     if (node) {
       if (!node.type) {
-        throw new Error('Contract: Html.defaultConverter() must return a node with type.', el.outerHtml);
+        throw new Error('Contract: Html.defaultConverter() must return a node with type.', el.outerHTML);
       }
       node.id = node.id || this.defaultId(el, node.type);
       this._createAndShow(node);

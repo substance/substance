@@ -538,19 +538,6 @@ Component.Prototype = function ComponentPrototype() {
   };
 
   /**
-   * Toggle a class.
-   *
-   * Part of the incremental updating API.
-   */
-  this.toggleClass = function(className) {
-    this._data.toggleClass(className);
-    if (this.$el) {
-      this.$el.toggleClass(className);
-    }
-    return this;
-  };
-
-  /**
    * Add a attributes.
    *
    * Part of the incremental updating API.
@@ -1129,12 +1116,12 @@ Component.Container.Prototype = function() {
 };
 oo.inherit(Component.Container, Component);
 
-Component.HtmlElement = function(parent, tagName, params) {
+Component.HTMLElement = function(parent, tagName, params) {
   this.tagName = tagName;
   Component.Container.call(this, parent, params);
 };
 
-oo.inherit(Component.HtmlElement, Component.Container);
+oo.inherit(Component.HTMLElement, Component.Container);
 
 Component.Text = function(parent, text) {
   Component.call(this, parent);
@@ -1158,263 +1145,6 @@ Component.Text.Prototype = function() {
 };
 
 oo.inherit(Component.Text, Component);
-
-/**
-  Virtual Components. An abstract class for Virtual components, created via Component.$$.
-
-  @class Component.VirtualNode
-  @abstract
-*/
-
-/**
-  Virtual Components. An abstract class for Virtual components, created via Component.$$.
-
-  @constructor Component.VirtualNode
-*/
-function VirtualNode() {
-  this._ref = null;
-  this._isOnRoute = false;
-  this.attributes = {};
-  this.htmlProps = {};
-  this.style = {};
-  this.handlers = {};
-  this.props = {};
-  this.children = [];
-}
-
-VirtualNode.Prototype = function() {
-  /**
-   * Remove an attribute.
-   *
-   * Part of the incremental updating API.
-   * @chainable
-   */
-  this.key = function(key) {
-    console.info('DEPRECATED: Use ref instead. Note that when you assign a ref, the component do incremental rerendering.');
-    // this._key = key;
-    return this.ref(key);
-    // return this;
-  };
-
-  this.ref = function(ref) {
-    this._ref = ref;
-    return this;
-  };
-
-  this.route = function() {
-    this._isOnRoute = true;
-    return this;
-  };
-
-  this.append = function(/* ...children */) {
-    var children;
-    var _children = this._getChildren();
-    if (arguments.length === 1) {
-      var child = arguments[0];
-      if (!child) {
-        return this;
-      }
-      if (_.isArray(child)) {
-        children = child;
-        Component.$$.prepareChildren(children);
-        Array.prototype.push.apply(_children, children);
-      } else if (_.isString(child)) {
-        _children.push(new VirtualTextNode(child));
-      } else {
-        _children.push(child);
-      }
-    } else {
-      children = Array.prototype.slice.call(arguments,0);
-      Component.$$.prepareChildren(children);
-      Array.prototype.push.apply(_children, children);
-    }
-    return this;
-  };
-  this._getChildren = function() {
-    return this.children;
-  };
-  this.insertAt = function(pos, child) {
-    this.children.splice(pos, 0, child);
-    return this;
-  };
-  // NOTE: we need this for incremental updates
-  this.removeAt = function(pos) {
-    this.children.splice(pos, 1);
-    return this;
-  };
-  this.addClass = function(className) {
-    if (!this.classNames) {
-      this.classNames = "";
-    }
-    this.classNames += " " + className;
-    return this;
-  };
-  // NOTE: we need this for incremental updates
-  this.removeClass = function(className) {
-    if (!this.classNames) {
-      this.classNames = "";
-    }
-    var classes = this.classNames.split(/\s+/);
-    classes = _.without(classes, className);
-    this.classNames = classes.join(' ');
-    return this;
-  };
-  // NOTE: we need this for incremental updates
-  this.toggleClass = function(className) {
-    var classes = this.classNames.split(/\s+/);
-    if (classes.indexOf(className) >= 0) {
-      classes = _.without(classes, className);
-    } else {
-      classes.push(className);
-    }
-    this.classNames = classes.join(' ');
-    return this;
-  };
-  this.addProps = function(props) {
-    console.log('DEPRECATED: Use setProps() or extendProps()');
-    _.extend(this.props, props);
-    return this;
-  };
-  this.setProps = function(props) {
-    this.props = props;
-    return this;
-  };
-  this.extendProps = function(props) {
-    _.extend(this.props, props);
-    return this;
-  };
-  this.attr = function(attributes) {
-    if (arguments.length === 2) {
-      this.attributes[arguments[0]] = arguments[1];
-    } else {
-      // TODO we could treat HTML attributes as special props
-      // then we do need to fish attributes from custom props
-      _.extend(this.attributes, attributes);
-    }
-    return this;
-  };
-  // NOTE: we need this for incremental updates
-  this.removeAttr = function(attr) {
-    if (_.isString(attr)) {
-      delete this.attributes[attr];
-    } else {
-      this.attributes = _.omit(this.attributes, attr);
-    }
-    return this;
-  };
-  this.htmlProp = function(properties) {
-    if (arguments.length === 2) {
-      this.htmlProps[arguments[0]] = arguments[1];
-    } else {
-      // TODO we could treat HTML attributes as special props
-      // then we do need to fish attributes from custom props
-      _.extend(this.htmlProps, properties);
-    }
-    return this;
-  };
-  // NOTE: we need this for incremental updates
-  this.removeHtmlProp = function() {
-    if (_.isString(arguments[0])) {
-      delete this.htmlProps[arguments[0]];
-    } else {
-      this.htmlProps = _.omit(this.htmlProps, arguments[0]);
-    }
-    return this;
-  };
-  this.val = function(value) {
-    this.htmlProps['value'] = value;
-    return this;
-  };
-  // TODO: this not exactly correct. IMO in jquery you can register multiple
-  // handlers for the same event. But actually we do not do this. Fix when needed.
-  this.on = function(event, handler) {
-    if (arguments.length !== 2 || !_.isString(event) || !_.isFunction(handler)) {
-      throw new Error('Illegal arguments for $$.on(event, handler).');
-    }
-    this.handlers[event] = handler;
-    return this;
-  };
-  // TODO: see above.
-  this.off = function(event, handler) {
-    if (arguments.length !== 2 || !_.isString(event) || !_.isFunction(handler)) {
-      throw new Error('Illegal arguments for $$.on(event, handler).');
-    }
-    delete this.handlers[event];
-    return this;
-  };
-  this.css = function(style) {
-    if (!this.style) {
-      this.style = {};
-    }
-    if (arguments.length === 2) {
-      this.style[arguments[0]] = arguments[1];
-    } else {
-      _.extend(this.style, style);
-    }
-    return this;
-  };
-  this.html = function(rawHtmlString) {
-    this.children = [];
-    this.children.push(new RawHtml(rawHtmlString));
-    return this;
-  };
-  this._render = function() {
-    return Component._render(this);
-  };
-};
-
-oo.initClass(VirtualNode);
-
-/**
-  This represents virtual HTML elements.
-
-  @class Component.VirtualElement
-  @extends ui/Component.VirtualNode
-  @abstract
-*/
-
-/**
-  Used only internally. Use $$ to create virutal elements.
-
-  @constructor Component.VirtualElement
-  @param {String} tagname tagname e.g. 'div'
-*/
-
-function VirtualElement(tagName) {
-  VirtualNode.call(this);
-  this.type = 'element';
-  this.tagName = tagName;
-}
-oo.inherit(VirtualElement, VirtualNode);
-
-function VirtualComponent(ComponentClass) {
-  VirtualNode.call(this);
-  this.type = 'component';
-  this.ComponentClass = ComponentClass;
-}
-VirtualComponent.Prototype = function() {
-  // Note: for VirtualComponents we put children into props
-  // so that the render method of ComponentClass can place it.
-  this._getChildren = function() {
-    if (!this.props.children) {
-      this.props.children = [];
-    }
-    return this.props.children;
-  };
-};
-oo.inherit(VirtualComponent, VirtualNode);
-
-
-VirtualTextNode = function VirtualTextNode(text) {
-  VirtualNode.call(this);
-  this.type = 'text';
-  this.props = { text: text };
-};
-
-RawHtml = function RawHtml(html) {
-  this.type = 'html';
-  this.html = html;
-};
 
 /**
   Create a virtual DOM representation which is used by Component
@@ -1493,7 +1223,7 @@ Component._render = function(data, options) {
       component._render();
       break;
     case 'element':
-      component = new Component.HtmlElement(parent, data.tagName, data);
+      component = new Component.HTMLElement(parent, data.tagName, data);
       component._render(data, scope);
       break;
     case 'component':

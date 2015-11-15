@@ -3,12 +3,27 @@
 var oo = require('../util/oo');
 var each = require('lodash/collection/each');
 var Annotator = require('./Annotator');
-var DOMElement = require('../util/DOMElement');
+var DOMElement = require('../ui/DefaultDOMElement');
+var Registry = require('../util/Registry');
 var $$ = require('../ui/Component').$$;
 
 function HtmlExporter(config) {
-  this.config = config || {};
-  this.state = null;
+  if (!config.converters) {
+    throw new Error('config.converters is mandatory');
+  }
+
+  this.converters = new Registry();
+  this.state = {
+    doc: null
+  };
+
+  config.converters.forEach(function(converter) {
+    if (!converter.type) {
+      console.error('Converter must provide the type of the associated node.', converter);
+      return;
+    }
+    this.converters.add(converter.type, converter);
+  }.bind(this));
 }
 
 HtmlExporter.Prototype = function() {
@@ -32,14 +47,7 @@ HtmlExporter.Prototype = function() {
   };
 
   this.getNodeConverter = function(node) {
-    return node.constructor;
-  };
-
-  this.convertProperty = function(doc, path, options) {
-    this.initialize(doc, options);
-    var wrapper = DOMElement.create('div')
-      .append(this.annotatedText(path));
-    return wrapper.innerHtml;
+    return this.converters.get(node.type);
   };
 
   this.initialize = function(doc, options) {
@@ -51,6 +59,8 @@ HtmlExporter.Prototype = function() {
   };
 
   this.convertNode = function(node) {
+    // always make sure that we have the doc in our state
+    this.state.doc = node.getDocument();
     var converter = this.getNodeConverter(node);
     var el;
     if (converter.tagName) {
@@ -59,7 +69,15 @@ HtmlExporter.Prototype = function() {
       el = $$('div');
     }
     el.attr('data-id', node.id);
-    return converter.export(node, el, this);
+    el = converter.export(node, el, this) || el;
+    return el;
+  };
+
+  this.convertProperty = function(doc, path, options) {
+    this.initialize(doc, options);
+    var wrapper = $$('div')
+      .append(this.annotatedText(path));
+    return wrapper.innerHTML;
   };
 
   this.convertContainer = function(containerNode) {
@@ -83,9 +101,7 @@ HtmlExporter.Prototype = function() {
   this.defaultInlineNodeExporter = function(anno, converter, children) {
     var id = anno.id;
     var tagName = anno.constructor.static.tagName || 'span';
-    var el = DOMElement.create(tagName)
-      .attr('id', id)
-      .append(children);
+    var el = $$(tagName).attr('id', id).append(children);
     return el;
   };
 
@@ -95,11 +111,11 @@ HtmlExporter.Prototype = function() {
 
   // default HTML serialization
   this.defaultBlockNodeExporter = function(node, converter) {
-    var el = DOMElement.create('<div itemscope>')
+    var el = $$('div')
       .attr('data-id', node.id)
       .attr('data-type', node.type);
     each(node.properties, function(value, name) {
-      var prop = DOMElement.create('div').attr('itemprop', name);
+      var prop = $$('div').attr('property', name);
       if (node.getPropertyType === 'string') {
         prop.append(converter.annotatedText([node.id, name]));
       } else {

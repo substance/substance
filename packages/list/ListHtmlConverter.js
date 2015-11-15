@@ -4,7 +4,7 @@ var $$ = require('../../ui/Component').$$;
 var each = require('lodash/collection/each');
 var isArray = require('lodash/lang/isArray');
 var last = require('lodash/array/last');
-var DOMElement = require('../../util/DOMElement');
+var DOMElement = require('../../ui/DefaultDOMElement');
 
 /*
  * HTML converter for List.
