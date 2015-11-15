@@ -1,7 +1,7 @@
 'use strict';
 
 var oo = require('../../util/oo');
-var map = require('lodash/collection/map');
+var filter = require('lodash/collection/filter');
 var Component = require('../../ui/Component');
 var $$ = Component.$$;
 var UnsupportedNode = require('../../ui/UnsupportedNode');
@@ -18,17 +18,8 @@ MemberContainerComponent.Prototype = function() {
 
   this._renderMembers = function() {
     var el = $$('div');
-    var config = this.context.config;
     this.getMemberCategories().forEach(function(cat) {
-      var catMembers = this._getMembersByType(cat.path);
-      catMembers = catMembers.filter(function(memberNode) {
-        // skip nodes according to configuration
-        if ((memberNode.type === "method" && memberNode.isPrivate && config.skipPrivateMethods) ||
-          (memberNode.type === "class" && memberNode.isAbstract && config.skipAbstractClasses)) {
-          return false;
-        }
-        return true;
-      });
+      var catMembers = this._getCategoryMembers(cat);
       if (catMembers.length > 0) {
         el.append(this._renderMemberCategory(cat, catMembers));
       }
@@ -62,17 +53,29 @@ MemberContainerComponent.Prototype = function() {
     });
   };
 
-  this._getMembersByType = function(path) {
+  this._getCategoryMembers = function(cat) {
+    var config = this.context.config;
     var node = this.props.node;
-    var doc = node.getDocument();
-    var memberIndex = doc.getIndex('members');
-    var members = memberIndex.get([node.id].concat(path));
-    members = map(members);
-    return members;
+    return MemberContainerComponent.getCategoryMembers(config, node, cat);
   };
 
 };
 
 oo.inherit(MemberContainerComponent, Component);
+
+MemberContainerComponent.getCategoryMembers = function(config, node, cat) {
+  var doc = node.getDocument();
+  var memberIndex = doc.getIndex('members');
+  var members = memberIndex.get([node.id].concat(cat.path));
+  members = filter(members, function(memberNode) {
+    // skip nodes according to configuration
+    if ((memberNode.type === "method" && memberNode.isPrivate && config.skipPrivateMethods) ||
+      (memberNode.type === "class" && memberNode.isAbstract && config.skipAbstractClasses)) {
+      return false;
+    }
+    return true;
+  });
+  return members;
+};
 
 module.exports = MemberContainerComponent;

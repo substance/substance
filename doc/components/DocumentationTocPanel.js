@@ -4,6 +4,8 @@ var oo = require('../../util/oo');
 var TocPanel = require('../../ui/TocPanel');
 var Component = require('../../ui/Component');
 var $$ = Component.$$;
+var MemberContainerComponent = require('./MemberContainerComponent');
+var NamespaceComponent = require('./NamespaceComponent');
 
 function DocumentationTocPanel() {
   TocPanel.apply(this, arguments);
@@ -21,41 +23,26 @@ DocumentationTocPanel.Prototype = function() {
     var contentNodes = doc.get('body').nodes;
 
     var tocEntry;
-    var self = this;
     contentNodes.forEach(function(nsId) {
       var ns = doc.get(nsId);
-      tocEntry = self.renderTocNode(ns);
+      tocEntry = this.renderTocNode(ns);
       if (!tocEntry) {
         return;
       } else {
         tocEntries.append(tocEntry);
       }
 
-      var nsMembers = doc.getMembers(ns);
+      // get the namespace members in the same order as rendered in the NamespaceComponent
+      var nsMembers = this._getNamespaceMembers(ns);
       nsMembers.forEach(function(member) {
-        tocEntry = self.renderTocNode(member);
+        tocEntry = this.renderTocNode(member);
         if (!tocEntry) {
           return;
         } else {
           tocEntries.append(tocEntry);
         }
-
-        // we could, but should we?
-        // if (member.type === "class" || member.type === "module") {
-        //   var children = doc.getMembers(member);
-        //   children.forEach(function(child) {
-        //     tocEntry = self.renderTocNode(child);
-        //     if (!tocEntry) {
-        //       return;
-        //     } else {
-        //       tocEntries.append(tocEntry);
-        //     }
-        //   });
-        // }
-      });
-    });
-
-
+      }.bind(this));
+    }.bind(this));
 
     el.append(tocEntries);
     return el;
@@ -102,6 +89,15 @@ DocumentationTocPanel.Prototype = function() {
     this.send('extendState', {nodeId: nodeId});
   };
 
+  this._getNamespaceMembers = function(ns) {
+    var members = [];
+    var config = this.context.config;
+    NamespaceComponent.MEMBER_CATEGORIES.forEach(function(cat) {
+      var catMembers = MemberContainerComponent.getCategoryMembers(config, ns, cat);
+      members = members.concat(catMembers);
+    });
+    return members;
+  };
 };
 
 oo.inherit(DocumentationTocPanel, TocPanel);
