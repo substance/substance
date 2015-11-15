@@ -223,7 +223,16 @@ _Parser.Prototype = function() {
       } else if (tag.type === "export") {
         entity.isExported = true;
       } else {
-        refinedTags.push({ type: tag.type, value: tag.string });
+        var typeDescription = _typeTagMatcher.exec(tag.string);
+        if (typeDescription) {
+          tag.name = typeDescription[2];
+          tag.description = typeDescription[3];
+          dox.parseTagTypes(typeDescription[1], tag);
+          var customParam = _prepareParam(tag);
+          refinedTags.push({ type: tag.type, value: customParam });
+        } else {
+          refinedTags.push({ type: tag.type, value: tag.string });
+        }
       }
     }, this);
 
@@ -259,11 +268,13 @@ _Parser.Prototype = function() {
     "function": true
   };
 
+  var _typeTagMatcher = /^\s*(\{[^{]+\})\s+([\w\/]+)\s+(.+)/;
+
   function _prepareParam(tag) {
     var param = {
       type: tag.types.join('|'),
       name: tag.name,
-      description: tag.description
+      description: markdown.toHtml(tag.description)
     };
     if (tag.optional) {
       // param.name = param.name.replace(/[\[\]]/g, '');
