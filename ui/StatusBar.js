@@ -11,8 +11,15 @@ var ICONS_FOR_TYPE = {
   "success": "fa-check-circle",
 };
 
-// The Status Bar
-// ----------------
+/**
+  @class StatusBar
+  @component
+*/
+
+/**
+  @constructor StatusBar.$$
+  @param {model/Document} doc The document instance
+*/
 
 function StatusBar() {
   Component.apply(this, arguments);
