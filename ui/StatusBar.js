@@ -12,13 +12,12 @@ var ICONS_FOR_TYPE = {
 };
 
 /**
-  @class StatusBar
+  @class
   @component
-*/
 
-/**
-  @constructor StatusBar.$$
-  @param {model/Document} doc The document instance
+  @prop {model/Document} doc The document instance
+
+  @state {String} message The message displayed in the status bar.
 */
 
 function StatusBar() {
