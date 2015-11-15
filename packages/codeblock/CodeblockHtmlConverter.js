@@ -13,16 +13,16 @@ module.exports = {
   import: function(el, node, converter) {
     var codeEl = el.find('code');
     if (codeEl) {
-      node.content = converter.annotatedText(codeEl, [id, 'content']);
+      node.content = converter.annotatedText(codeEl, [node.id, 'content']);
     }
   },
 
   export: function(node, el, converter) {
     el.append(
       $$('code').append(
-        converter.annotatedText([id, 'content'])
+        converter.annotatedText([node.id, 'content'])
       )
     );
-  },
+  }
 
 };
