@@ -1,6 +1,9 @@
 'use strict';
 
-var _ = require('../../util/helpers');
+var isNumber = require('lodash/lang/isNumber');
+var isEqual = require('lodash/lang/isEqual');
+var cloneDeep = require('lodash/lang/cloneDeep');
+
 var oo = require('../../util/oo');
 var Operation = require('./Operation');
 var Conflict = require('./Conflict');
@@ -27,7 +30,7 @@ var ArrayOperation = function(data) {
   this.pos = data.pos;
   // the value to insert or delete
   this.val = data.val;
-  if (!_.isNumber(this.pos) || this.pos < 0) {
+  if (!isNumber(this.pos) || this.pos < 0) {
     throw new Error("Illegal argument: expecting positive number as pos.");
   }
 };
@@ -54,7 +57,7 @@ ArrayOperation.Prototype = function() {
       if (array.length < this.pos) {
         throw new Error("Provided array is too small.");
       }
-      if (!_.isEqual(array[this.pos], this.val)) {
+      if (!isEqual(array[this.pos], this.val)) {
         throw Error("Unexpected value at position " + this.pos + ". Expected " + this.val + ", found " + array[this.pos]);
       }
       array.splice(this.pos, 1);
@@ -66,7 +69,7 @@ ArrayOperation.Prototype = function() {
     var data = {
       type: this.type,
       pos: this.pos,
-      val: _.deepclone(this.val)
+      val: cloneDeep(this.val)
     };
     return new ArrayOperation(data);
   };
@@ -89,7 +92,7 @@ ArrayOperation.Prototype = function() {
     };
     if (this.type === NOP) return result;
     result.pos = this.pos;
-    result.val = _.deepclone(this.val);
+    result.val = cloneDeep(this.val);
     return result;
   };
 

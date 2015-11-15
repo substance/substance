@@ -1,8 +1,8 @@
-var _ = require('../../util/helpers');
 var inBrowser = (typeof window !== 'undefined');
+var isEmpty = require('lodash/lang/isEmpty');
 
 QUnit.assert.isEmpty = function(a, msg) {
-  this.push(_.isEmpty(a), false, true, msg);
+  this.push(isEmpty(a), false, true, msg);
 };
 
 QUnit.assert.isNullOrUndefined = function(a, msg) {
