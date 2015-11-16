@@ -3,8 +3,8 @@
 var oo = require('../util/oo');
 var Schema = require('./data/Schema');
 var Node = require('./DocumentNode');
-var Annotation = require('./Annotation');
 var Container = require('./Container');
+var PropertyAnnotation = require('./PropertyAnnotation');
 var ContainerAnnotation = require('./ContainerAnnotation');
 
 /**
@@ -20,9 +20,9 @@ var ContainerAnnotation = require('./ContainerAnnotation');
   var Paragraph = require('substance/packages/paragraph/Paragraph');
   var Emphasis = require('substance/packages/emphasis/Emphasis');
   var Strong = require('substance/packages/emphasis/Strong');
-  var Annotation = require('substance/ui/Annotation');
+  var PropertyAnnotation = require('substance/ui/PropertyAnnotation');
 
-  var Comment = Annotation.extend({
+  var Comment = PropertyAnnotation.extend({
     name: 'comment',
     properties: {
       content: 'string'
@@ -57,11 +57,11 @@ DocumentSchema.Prototype = function() {
 
   this.isAnnotationType = function(type) {
     var nodeClass = this.getNodeClass(type);
-    return (nodeClass && nodeClass.prototype instanceof Annotation);
+    return (nodeClass && nodeClass.prototype instanceof PropertyAnnotation);
   };
 
   this.getBuiltIns = function() {
-    return [Node, Annotation, Container, ContainerAnnotation];
+    return [Node, PropertyAnnotation, Container, ContainerAnnotation];
   };
 
 };

@@ -3,20 +3,17 @@
 var _ = require('../util/helpers');
 var Node = require('./DocumentNode');
 
-// Annotation
-// --------
-//
-// An annotation can be used to overlay text and give it a special meaning.
-// Annotations only work on text properties. If you want to annotate multiple
-// nodes you have to use a ContainerAnnotation.
-//
-// Properties:
-//   - path: Identifies a text property in the document (e.g. ["text_1", "content"])
-//   - startOffset: the character where the annoation starts
-//   - endOffset: the character where the annoation starts
+/**
+   An annotation can be used to overlay text and give it a special meaning.
+   Annotations only work on text properties. If you want to annotate multiple
+   nodes you have to use a ContainerAnnotation.
 
-// TODO: in current terminology this is a PropertyAnnotation
-var Annotation = Node.extend({
+  @prop {String} path Identifies a text property in the document (e.g. ["text_1", "content"])
+  @prop {Number} startOffset the character where the annoation starts
+  @prop {Number} endOffset: the character where the annoation starts
+**/
+
+var PropertyAnnotation = Node.extend({
   name: "annotation",
 
   properties: {
@@ -60,7 +57,7 @@ var Annotation = Node.extend({
   getText: function() {
     var doc = this.getDocument();
     if (!doc) {
-      console.warn('Trying to use an Annotation which is not attached to the document.');
+      console.warn('Trying to use an PropertyAnnotation which is not attached to the document.');
       return "";
     }
     var text = doc.get(this.path);
@@ -69,7 +66,7 @@ var Annotation = Node.extend({
 
 });
 
-Object.defineProperties(Annotation.prototype, {
+Object.defineProperties(PropertyAnnotation.prototype, {
   startPath: {
     get: function() {
       return this.path;
@@ -82,4 +79,4 @@ Object.defineProperties(Annotation.prototype, {
   }
 });
 
-module.exports = Annotation;
+module.exports = PropertyAnnotation;

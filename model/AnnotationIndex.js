@@ -3,10 +3,10 @@
 var _ = require('../util/helpers');
 var oo = require('../util/oo');
 var PathAdapter = require('../util/PathAdapter');
-var Annotation = require('./Annotation');
+var PropertyAnnotation = require('./PropertyAnnotation');
 var NodeIndex = require('./data/NodeIndex');
 
-// Annotation Index
+// PropertyAnnotation Index
 // ----------------
 //
 // Lets us look up existing annotations by path and type
@@ -30,7 +30,7 @@ AnnotationIndex.Prototype = function() {
   this.property = "path";
 
   this.select = function(node) {
-    return (node instanceof Annotation);
+    return (node instanceof PropertyAnnotation);
   };
 
   this.reset = function(data) {

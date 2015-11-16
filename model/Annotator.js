@@ -17,7 +17,7 @@ var ENTER_EXIT = -2;
 // can partially be overlapping. However this is not allowed in general for DOM elements
 // or other hierarchical structures.
 //
-// Example: For the Annotation use casec consider a 'comment' spanning partially
+// Example: For the annotation use case consider a 'comment' spanning partially
 // over an 'emphasis' annotation.
 // 'The <comment>quick brown <bold>fox</comment> jumps over</bold> the lazy dog.'
 // We want to be able to create a valid XML structure:
