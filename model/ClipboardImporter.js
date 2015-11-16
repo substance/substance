@@ -8,6 +8,8 @@ var HTMLImporter = require('./HTMLImporter');
 // Note: sharing the symbol with the transformation
 var CLIPBOARD_CONTAINER_ID = require('./transform/copySelection').CLIPBOARD_CONTAINER_ID;
 
+var converters = [];
+
 function ClipboardImporter(config) {
   if (!config.schema) {
     throw new Error('Missing argument: config.schema is required.');
@@ -15,7 +17,8 @@ function ClipboardImporter(config) {
   _.extend(config, {
     trimWhitespaces: true,
     REMOVE_INNER_WS: true,
-    containerId: CLIPBOARD_CONTAINER_ID
+    containerId: CLIPBOARD_CONTAINER_ID,
+    converters: converters
   });
   ClipboardImporter.super.call(this, config);
 }
@@ -67,5 +70,7 @@ ClipboardImporter.Prototype = function() {
 };
 
 oo.inherit(ClipboardImporter, HTMLImporter);
+
+ClipboardImporter.converters = converters;
 
 module.exports = ClipboardImporter;

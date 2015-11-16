@@ -2,9 +2,12 @@
 
 var oo = require('../util/oo');
 var HtmlExporter = require('./HtmlExporter');
+var converters = require('./ClipboardImporter').converters;
 
 function ClipboardExporter() {
-  ClipboardExporter.super.call(this);
+  ClipboardExporter.super.call(this, {
+    converters: converters
+  });
 }
 
 ClipboardExporter.Prototype = function() {
