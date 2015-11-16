@@ -2,6 +2,17 @@
 
 var DocumentedNode = require('./DocumentedNode');
 
+var MEMBER_CATEGORIES = [
+  {name: 'ctor', path: ['class', 'ctor']},
+  {name: 'instance-methods', path: ['instance', 'method']},
+  {name: 'instance-properties', path: ['instance', 'property']},
+  {name: 'instance-events', path: ['instance', 'event']},
+
+  {name: 'class-methods', path: ['class', 'method']},
+  {name: 'class-properties', path: ['class', 'property']},
+  {name: 'inner-classes', path: ['class', 'class']}
+];
+
 var ClassNode = DocumentedNode.extend({
   name: 'class',
   properties: {
@@ -15,6 +26,13 @@ var ClassNode = DocumentedNode.extend({
   getSpecificType: function() {
     if (this.isAbstract) return 'abstract-class';
     return 'class';
+  },
+  getTocLevel: function() {
+    return 2;
+  },
+
+  getMemberCategories: function() {
+    return MEMBER_CATEGORIES;
   }
 });
 

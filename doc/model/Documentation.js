@@ -4,6 +4,7 @@ var oo = require('../../util/oo');
 var Document = require('../../model/Document');
 var Schema = require('../../model/DocumentSchema');
 var schema = new Schema('substance-documentation', '0.1.0');
+
 var MemberIndex = require('./MemberIndex');
 
 schema.addNodes([
@@ -22,6 +23,10 @@ schema.getDefaultTextType = function() {
   return null;
 };
 
+schema.getTocTypes = function() {
+  return ['namespace', 'class', 'function', 'module'];
+};
+
 var Documentation = function() {
   Document.call(this, schema);
 
@@ -35,40 +40,23 @@ var Documentation = function() {
 
 Documentation.Prototype = function() {
 
-  this.getTOCNodes = function() {
+  // Takes a config object from the app context
+  this.getTOCNodes = function(config) {
+    config = config || {};
     var tocNodes = [];
-    var doc = this;
     var contentNodes = this.get('body').nodes;
     contentNodes.forEach(function(nsId) {
       var ns = this.get(nsId);
       tocNodes.push(ns);
-
-      var nsMembers = doc.getMembers(ns);
-      nsMembers.forEach(function(member) {
-        tocNodes.push(member);
-        if (member.type === "class" || member.type === "module") {
-          tocNodes = tocNodes.concat(doc.getMembers(member));
-        }
+      ns.getMemberCategories().forEach(function(cat) {
+        var catMembers = ns.getCategoryMembers(cat, config);
+        tocNodes = tocNodes.concat(catMembers);
       });
-
     }.bind(this));
     return tocNodes;
   };
-
-  this.getMembers = function(node) {
-    var members = [];
-    if (node.members) {
-      var doc = this;
-      node.members.forEach(function(memberId) {
-        var member = doc.get(memberId);
-        if (member) {
-          members.push(member);
-        }
-      });
-    }
-    return members;
-  };
 };
+
 
 oo.inherit(Documentation, Document);
 Documentation.schema = schema;
@@ -115,5 +103,6 @@ Documentation.getNodeInfo = function(node) {
   }
   return info;
 };
+
 
 module.exports = Documentation;

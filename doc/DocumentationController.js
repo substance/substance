@@ -96,7 +96,8 @@ DocumentationController.Prototype = function() {
   this.getActivePanelElement = function() {
     var ComponentClass = this.componentRegistry.get(this.state.contextId);
     if (ComponentClass) {
-      return $$(ComponentClass, this._panelPropsFromState(this.state)).ref('contextPanel');
+      // I set ref to the current contextId so we don't run into #173
+      return $$(ComponentClass, this._panelPropsFromState(this.state)).ref(this.state.contextId);
     } else {
       console.warn("Could not find component for contextId:", this.state.contextId);
     }

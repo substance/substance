@@ -33,13 +33,13 @@ TocPanel.Prototype = function() {
   };
 
   this.render = function() {
-    var el = $$("div")
-      .addClass("panel toc-panel-component");
     var tocEntries = $$("div")
-      .addClass("toc-entries");
+      .addClass("toc-entries")
+      .ref('tocEntries');
+
     var state = this.state;
     _.each(state.tocNodes, function(node) {
-      var level = node.level;
+      var level = node.getTocLevel();
       var tocEntry = $$('a')
         .addClass('toc-entry')
         .addClass('level-'+level)
@@ -48,13 +48,22 @@ TocPanel.Prototype = function() {
           "data-id": node.id,
         })
         .on('click', this.handleClick)
-        .append(node.content);
+        .append(node.getTocName());
       if (state.activeNode === node.id) {
         tocEntry.addClass("active");
       }
       tocEntries.append(tocEntry);
     }, this);
-    el.append(tocEntries);
+
+    var el = $$("div")
+      .addClass("panel toc-panel-component");
+
+    var panelContent = $$('div')
+      .addClass('panel-content')
+      .ref('panelContent');
+
+    panelContent.append(tocEntries);
+    el.append(panelContent);
     return el;
   };
 
@@ -95,7 +104,7 @@ TocPanel.Prototype = function() {
   };
 
   this.setActiveTocEntry = function(nodeId) {
-    this.setState({
+    this.extendState({
       activeNode: nodeId
     });
   };
