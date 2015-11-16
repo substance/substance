@@ -6,7 +6,6 @@ var $$ = Component.$$;
 var MemberContainerComponent = require('./MemberContainerComponent');
 var MemberIndexComponent = require('./MemberIndexComponent');
 
-
 function NamespaceComponent() {
   MemberContainerComponent.apply(this, arguments);
 }

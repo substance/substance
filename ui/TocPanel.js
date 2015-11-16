@@ -34,7 +34,9 @@ TocPanel.Prototype = function() {
 
   this.render = function() {
     var tocEntries = $$("div")
-      .addClass("toc-entries");
+      .addClass("toc-entries")
+      .ref('tocEntries');
+
     var state = this.state;
     _.each(state.tocNodes, function(node) {
       var level = node.getTocLevel();
@@ -55,7 +57,10 @@ TocPanel.Prototype = function() {
 
     var el = $$("div")
       .addClass("panel toc-panel-component");
-    var panelContent = $$('div').addClass('panel-content');
+
+    var panelContent = $$('div')
+      .addClass('panel-content')
+      .ref('panelContent');
 
     panelContent.append(tocEntries);
     el.append(panelContent);
