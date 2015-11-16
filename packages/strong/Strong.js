@@ -1,8 +1,8 @@
 'use strict';
 
-var Annotation = require('../../model/Annotation');
+var PropertyAnnotation = require('../../model/PropertyAnnotation');
 
-var Strong = Annotation.extend({
+var Strong = PropertyAnnotation.extend({
   name: "strong"
 });
 
