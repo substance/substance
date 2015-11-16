@@ -33,4 +33,6 @@ TestHTMLImporter.Prototype = function() {
 
 oo.inherit(TestHTMLImporter, HTMLImporter);
 
+TestHTMLImporter.converters = converters;
+
 module.exports = TestHTMLImporter;
