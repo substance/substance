@@ -93,6 +93,8 @@ function Component(parent, params) {
 
   this.parent = parent;
   // the children, private as they are managed by rendering
+  // ATTENTION: while this is defined as '_children' we should never access it directly
+  // so that we can override it via getChildren()
   this._children = [];
 
   // context from parent (dependency injection)
@@ -248,7 +250,7 @@ Component.Prototype = function ComponentPrototype() {
     // Check if actually mounted, otherwise we can skip
     if (isMounted) {
       // Trigger didMount for the children first
-      this._children.forEach(function(child) {
+      this.children.forEach(function(child) {
         // We pass isMounted=true to save costly calls to Component.isMounted
         // for each child / grandchild
         child.triggerDidMount(true);
@@ -312,7 +314,7 @@ Component.Prototype = function ComponentPrototype() {
    * @private
    */
   this.triggerDispose = function() {
-    each(this._children, function(child) {
+    each(this.children, function(child) {
       child.triggerDispose();
     });
     this.dispose();
@@ -670,12 +672,12 @@ Component.Prototype = function ComponentPrototype() {
   };
 
   this.getChildNodes = function() {
-    return this._children;
+    return this.children;
   };
 
   this.getChildren = function() {
     // TODO: in DOMElement only real elements are provided
-    return this._children;
+    return this.children;
   };
 
   this.clone = function() {
@@ -714,7 +716,7 @@ Component.Prototype = function ComponentPrototype() {
     });
     this._data.append(child);
     this.$el.append(comp.$el);
-    this._children.push(comp);
+    this.children.push(comp);
     comp.triggerDidMount();
     return this;
   };
@@ -729,12 +731,12 @@ Component.Prototype = function ComponentPrototype() {
       refs: this.refs
     });
     this._data.insertAt(pos, child);
-    if (pos > this._children.length-1) {
+    if (pos > this.children.length-1) {
       this.$el.append(comp.$el);
-      this._children.push(comp);
+      this.children.push(comp);
     } else {
-      comp.$el.insertBefore(this._children[pos].$el);
-      this._children.splice(pos, 0, comp);
+      comp.$el.insertBefore(this.children[pos].$el);
+      this.children.splice(pos, 0, comp);
     }
     comp.triggerDidMount();
     return this;
@@ -747,8 +749,8 @@ Component.Prototype = function ComponentPrototype() {
    */
   this.removeAt = function(pos) {
     this._data.removeAt(pos);
-    this._children[pos].unmount();
-    this._children.splice(pos, 1);
+    this.children[pos].unmount();
+    this.children.splice(pos, 1);
     return this;
   };
 
@@ -760,10 +762,10 @@ Component.Prototype = function ComponentPrototype() {
   this.empty = function() {
     this._data._children = [];
     this.$el.empty();
-    for (var i = 0; i < this._children.length; i++) {
-      this._children[i].unmount();
+    for (var i = 0; i < this.children.length; i++) {
+      this.children[i].unmount();
     }
-    this._children = [];
+    this.children = [];
     return this;
   };
 
@@ -916,7 +918,7 @@ Component.Prototype = function ComponentPrototype() {
     var oldPos = 0;
     var newPos = 0;
 
-    var oldChildren = this._children;
+    var oldChildren = this.children;
     var children = [];
 
     function _replace(oldComp, newComp) {
@@ -1062,15 +1064,15 @@ Component.Prototype = function ComponentPrototype() {
       this._no_refs_ = true;
     }
 
-    this._children = children;
+    this.children = children;
     this.refs = clone(scope.refs);
     this._data = data;
     this.didRender();
   };
 
   this._renderFromScratch = function(data, scope) {
-    for (var i = 0; i < this._children.length; i++) {
-      this._children[i].unmount();
+    for (var i = 0; i < this.children.length; i++) {
+      this.children[i].unmount();
     }
     var isMounted = Component.isMounted(this);
     var children = [];
@@ -1093,7 +1095,7 @@ Component.Prototype = function ComponentPrototype() {
       this._no_refs_ = true;
     }
     this.refs = scope.refs;
-    this._children = children;
+    this.children = children;
     this._data = data;
     this.didRender();
   };

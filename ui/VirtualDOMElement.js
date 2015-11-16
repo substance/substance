@@ -140,8 +140,8 @@ VirtualDOMElement.Prototype = function() {
   };
 
   this.setTextContent = function(text) {
-    this._children = [];
-    this._children.push(new VirtualTextNode(text));
+    this.children = [];
+    this.children.push(new VirtualTextNode(text));
     return this;
   };
 
@@ -151,8 +151,8 @@ VirtualDOMElement.Prototype = function() {
   };
 
   this.setInnerHtml = function(rawHtmlString) {
-    this._children = [];
-    this._children.push(new RawHtml(rawHtmlString));
+    this.children = [];
+    this.children.push(new RawHtml(rawHtmlString));
     return this;
   };
 
@@ -171,11 +171,11 @@ VirtualDOMElement.Prototype = function() {
   };
 
   this.getChildNodes = function() {
-    return this._children;
+    return this.children;
   };
 
   this.getChildren = function() {
-    return this._children.filter(function(child) {
+    return this.children.filter(function(child) {
       return child.getNodeType() !== "text";
     });
   };
@@ -194,7 +194,7 @@ VirtualDOMElement.Prototype = function() {
 
   this.append = function() {
     var children;
-    var _children = this._children;
+    var _children = this.children;
     if (arguments.length === 1) {
       var child = arguments[0];
       if (!child) {
@@ -218,17 +218,17 @@ VirtualDOMElement.Prototype = function() {
   };
 
   this.insertAt = function(pos, child) {
-    this._children.splice(pos, 0, child);
+    this.children.splice(pos, 0, child);
     return this;
   };
 
   this.removeAt = function(pos) {
-    this._children.splice(pos, 1);
+    this.children.splice(pos, 1);
     return this;
   };
 
   this.empty = function() {
-    this._children = [];
+    this.children = [];
     return this;
   };
 
@@ -300,6 +300,7 @@ Object.defineProperties(VirtualDOMElement.prototype, {
     @property {Array<ui/DOMElement>} ui/DOMElement#children children elements
    */
   'children': {
+    configurable: true,
     get: function() {
       return this._children;
     },
@@ -374,11 +375,8 @@ function VirtualComponentElement(ComponentClass) {
 VirtualComponentElement.Prototype = function() {
   // Note: for VirtualComponentElement we put children into props
   // so that the render method of ComponentClass can place it.
-  this._getChildren = function() {
-    if (!this.props.children) {
-      this.props.children = [];
-    }
-    return this.props.children;
+  this.getChildren = function() {
+
   };
 
   this.getNodeType = function() {
@@ -388,10 +386,28 @@ VirtualComponentElement.Prototype = function() {
   this.isElementNode = function() {
     return true;
   };
-
 };
 
 oo.inherit(VirtualComponentElement, VirtualDOMElement);
+
+Object.defineProperties(VirtualComponentElement.prototype, {
+  /**
+    @property {Array<ui/DOMElement>} ui/DOMElement#children children elements
+   */
+  'children': {
+    configurable: true,
+    get: function() {
+      if (!this.props.children) {
+        this.props.children = [];
+      }
+      return this.props.children;
+    },
+    set: function(children) {
+      this.props.children = children;
+    }
+  },
+});
+
 
 /*
   A virtual text node.
