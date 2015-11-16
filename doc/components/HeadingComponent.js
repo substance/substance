@@ -22,6 +22,7 @@ HeadingComponent.Prototype = function() {
 
     var name = node.name;
     var type = node.type;
+    var specificType = node.getSpecificType();
     var el = $$('div').addClass('sc-heading');
     var headerEl = $$('a').attr({href: '#'}).addClass('se-header')
         .on('click', this.onClick);
@@ -44,19 +45,15 @@ HeadingComponent.Prototype = function() {
     headerEl.append(
       $$('span').addClass('se-name').append(this.props.name || name)
     );
-
     // details: a line saying something like Class defined in '...', extends '...'
     var details = $$('div').addClass('se-details').addClass(type);
     var detailsLabel = $$('strong').addClass('se-type');
-    if (node.isAbstract) {
-      detailsLabel.append('Abstract ');
-    }
-    detailsLabel.append(this.i18n.t(type));
+    detailsLabel.append(this.i18n.t(specificType));
     details.append(detailsLabel);
 
     details.append(
       $$('span').addClass('se-source').append(
-        $$('span').append(' ' + this.i18n.t('defined_in') + ' '),
+        $$('span').append(' ' + this.i18n.t('defined-in') + ' '),
         $$(SourceLink, {node: node})
       )
     );

@@ -290,12 +290,14 @@ _Parser.Prototype = function() {
     node.sourceFile = self.file;
     node.sourceLine = entity.sourceLine;
     node.tags = entity.tags;
+    if (entity.description.full) {
+      node.description = entity.description.full;
+    }
     return node;
   }
 
   function _convertModule(self, nodes, entity, node) {
     node.type = "module";
-    node.description = entity.description.full;
     node.members = [];
     each(entity.members, function(member) {
       var memberNode = _createNode(self, member, {
@@ -359,7 +361,6 @@ _Parser.Prototype = function() {
 
   function _convertFunction(self, entity, node) {
     node.type = "function";
-    node.description = entity.description.full;
     node.params = entity.params;
     node.returns = entity.returns;
     // To reduce redundancy remove the params from tags
@@ -387,7 +388,6 @@ _Parser.Prototype = function() {
 
   function _convertProperty(self, entity, node) {
     node.type = "property";
-    node.description = entity.description.full;
     node.dataType = entity.dataType;
   }
 

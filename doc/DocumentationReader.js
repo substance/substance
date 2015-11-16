@@ -16,7 +16,7 @@ var DocumentationReader = DocumentationController.extend({
         components: {
           'namespace': require('./components/NamespaceComponent'),
           'function': require('./components/FunctionComponent'),
-          'class': require('./components/ClassComponent'),
+          'class': require('./components/SubstanceClassComponent'),
           'ctor': require('./components/ConstructorComponent'),
           'method': require('./components/MethodComponent'),
           'module': require('./components/ModuleComponent'),

@@ -10,6 +10,11 @@ var DocumentedNode = Node.extend({
     sourceFile: 'string', // ui/Component.js
     sourceLine: 'number',
     tags: ['array', 'object'], // [ { name: 'type', string: '...', html: '...'}]
+  },
+
+  // Defaults to the regular type property
+  getSpecificType: function() {
+    return this.type;
   }
 });
 

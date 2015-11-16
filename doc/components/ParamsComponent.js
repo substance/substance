@@ -17,7 +17,7 @@ ParamsComponent.Prototype = function() {
     var returns = this.props.returns;
 
     if (params.length > 0) {
-      el.append($$('div').addClass('se-label').append(this.i18n.t('parameters')));
+      el.append($$('div').addClass('se-label').append(this.i18n.t(this.props.label || 'parameters')));
 
       var paramsTable = $$('table').addClass('se-params-table');
       params.forEach(function(param) {

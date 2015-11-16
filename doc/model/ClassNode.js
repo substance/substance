@@ -11,6 +11,10 @@ var ClassNode = DocumentedNode.extend({
     isAbstract: 'boolean',
     isStatic: 'boolean',
     superClass: 'id', // when @extends is defined
+  },
+  getSpecificType: function() {
+    if (this.isAbstract) return 'abstract-class';
+    return 'class';
   }
 });
 
