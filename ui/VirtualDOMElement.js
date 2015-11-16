@@ -3,7 +3,6 @@
 var isFunction = require('lodash/lang/isFunction');
 var isString = require('lodash/lang/isString');
 var isArray = require('lodash/lang/isArray');
-var isObject = require('lodash/lang/isObject');
 var extend = require('lodash/object/extend');
 var omit = require('lodash/object/omit');
 var without = require('lodash/array/without');
@@ -116,19 +115,6 @@ VirtualDOMElement.Prototype = function() {
   //   return this;
   // };
 
-  this.attr = function() {
-    if (arguments.length === 1) {
-      if (isString(arguments[0])) {
-        return this.getAttribute(arguments[0]);
-      } else if (isObject(arguments[0])) {
-        extend(this.attributes, arguments[0]);
-      }
-    } else if (arguments.length === 2) {
-      this.setAttribute(arguments[0], arguments[1]);
-    }
-    return this;
-  };
-
   this.removeAttr = function(attr) {
     if (isString(attr)) {
       delete this.attributes[attr];
@@ -172,7 +158,7 @@ VirtualDOMElement.Prototype = function() {
 
   this.getOuterHtml = function() {
     var el = this._compile();
-    return el.outerHtml;
+    return el.outerHTML;
   };
 
   this.getValue = function() {

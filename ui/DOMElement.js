@@ -1,6 +1,9 @@
 'use strict';
 
 var oo = require('../util/oo');
+var isString = require('lodash/lang/isString');
+var isObject = require('lodash/lang/isObject');
+var each = require('lodash/collection/each');
 
 /**
   A unified interface for DOM elements used by Substance.
@@ -69,8 +72,19 @@ DOMElement.Prototype = function() {
     @param {String} [value] if present the attribute will be set
     @returns {String|this} if used as getter the attribute value, otherwise this element for chaining
    */
-  this.attr = function(name, value) {
-    throw new Error('This method is abstract.');
+  this.attr = function() {
+    if (arguments.length === 1) {
+      if (isString(arguments[0])) {
+        return this.getAttribute(arguments[0]);
+      } else if (isObject(arguments[0])) {
+        each(arguments[0], function(value, name) {
+          this.setAttribute(name, value);
+        }, this);
+      }
+    } else if (arguments.length === 2) {
+      this.setAttribute(arguments[0], arguments[1]);
+    }
+    return this;
   };
 
   /**

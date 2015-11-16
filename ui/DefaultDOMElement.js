@@ -87,7 +87,7 @@ DefaultDOMElement.Prototype = function() {
     } else {
       // TODO: this seems a bit awkward, but with jQuery there is no better
       // way... maybe using low-level cheerio API?
-      return DefaultDOMElement.create('div').append(this.clone()).html();
+      return DefaultDOMElement.createElement('div').append(this.clone()).html();
     }
   };
 
@@ -110,26 +110,6 @@ DefaultDOMElement.Prototype = function() {
     } else {
       throw new Error("Unknown node type");
     }
-  };
-
-  this.getChildNodes = function() {
-    var childNodes = [];
-    var iterator = this.getChildNodeIterator();
-    while (iterator.hasNext()) {
-      childNodes.push(iterator.next());
-    }
-    return childNodes;
-  };
-
-  this.getChildren = function() {
-    var children = this.$el.children();
-    return map(children, function(child) {
-      return new DefaultDOMElement(child);
-    });
-  };
-
-  this.getChildNodeIterator = function() {
-    return new DefaultDOMElement.NodeIterator(this.el.childNodes);
   };
 
   this.isTextNode = function() {
@@ -155,6 +135,26 @@ DefaultDOMElement.Prototype = function() {
     } else {
       return this.el.type === "comment";
     }
+  };
+
+  this.getChildNodes = function() {
+    var childNodes = [];
+    var iterator = this.getChildNodeIterator();
+    while (iterator.hasNext()) {
+      childNodes.push(iterator.next());
+    }
+    return childNodes;
+  };
+
+  this.getChildren = function() {
+    var children = this.$el.children();
+    return map(children, function(child) {
+      return new DefaultDOMElement(child);
+    });
+  };
+
+  this.getChildNodeIterator = function() {
+    return new DefaultDOMElement.NodeIterator(this.el.childNodes);
   };
 
   this.clone = function() {

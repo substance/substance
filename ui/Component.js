@@ -9,7 +9,7 @@ var extend = require('lodash/object/extend');
 var each = require('lodash/collection/each');
 var I18n = require('./i18n');
 var EventEmitter = require('../util/EventEmitter');
-var DOMElement = require('./DOMElement');
+var DefaultDOMElement = require('./DefaultDOMElement');
 var VirtualDOMElement = require('./VirtualDOMElement');
 
 var __id__ = 0;
@@ -525,21 +525,13 @@ Component.Prototype = function ComponentPrototype() {
 
   // ### ui/DOMElement API
 
-  this.find = function(cssSelector) {
-    /* jshint unused:false */
-    throw new Error('Not implemented.');
+  this.hasClass = function(className) {
+    if (this.$el) {
+      return this.$el.hasClass(className);
+    }
+    return false;
   };
 
-  this.findAll = function(cssSelector) {
-    /* jshint unused:false */
-    throw new Error('Not implemented.');
-  };
-
-  /**
-   * Add a class.
-   *
-   * Part of the incremental updating API
-   */
   this.addClass = function(className) {
     this._data.addClass(className);
     if (this.$el) {
@@ -548,11 +540,6 @@ Component.Prototype = function ComponentPrototype() {
     return this;
   };
 
-  /**
-   * Remove a class.
-   *
-   * Part of the incremental updating API.
-   */
   this.removeClass = function(className) {
     this._data.removeClass(className);
     if (this.$el) {
@@ -561,28 +548,6 @@ Component.Prototype = function ComponentPrototype() {
     return this;
   };
 
-  /**
-   * Add a attributes.
-   *
-   * Part of the incremental updating API.
-   */
-  this.attr = function() {
-    if (arguments.length === 1 && isString(arguments[0])) {
-      return this.$el.attr(arguments[0]);
-    } else {
-      this._data.attr.apply(this._data, arguments);
-      if (this.$el) {
-        this.$el.attr.apply(this.$el, arguments);
-      }
-      return this;
-    }
-  };
-
-  /**
-   * Remove an attribute.
-   *
-   * Part of the incremental updating API.
-   */
   this.removeAttr = function() {
     this._data.removeAttr.apply(this._data, arguments);
     if (this.$el) {
@@ -591,8 +556,59 @@ Component.Prototype = function ComponentPrototype() {
     return this;
   };
 
-  this.getValue = function() {
-    return this.$el.val();
+  this.getAttribute = function(name) {
+    return this.$el.attr(name);
+  };
+
+  this.setAttribute = function(name, value) {
+    this._data.attr(name, value);
+    if (this.$el) {
+      this.$el.attr(name, value);
+    }
+    return this;
+  };
+
+  this.setTagName = function() {
+    throw new Error('Not supported.');
+  };
+
+  this.getTextContent = function() {
+    if (!this.$el) {
+      return "";
+    } else {
+      return this.$el.text();
+    }
+  };
+
+  this.setTextContent = function(text) {
+    this.empty();
+    this.append(text);
+    return this;
+  };
+
+  this.getInnerHtml = function() {
+    if (!this.$el) {
+      return "";
+    } else {
+      return this.$el.html();
+    }
+  };
+
+  this.setInnerHtml = function() {
+    // not supported yet, as we don't know how to derive a virtual representation for
+    // the given raw HTML
+    throw new Error('Not supported.');
+  };
+
+  // TODO: get rid of it by reusing DefaultDOMElement as element impl
+  this.getOuterHtml = function() {
+    if (inBrowser) {
+      return this.el.outerHTML;
+    } else {
+      // TODO: this seems a bit awkward, but with jQuery there is no better
+      // way... maybe using low-level cheerio API?
+      return $('<div>').append(this.$el.clone()).html();
+    }
   };
 
   this.setValue = function(value) {
@@ -601,27 +617,6 @@ Component.Prototype = function ComponentPrototype() {
       this.$el.val(value);
     }
     return this;
-  };
-
-  this.hasClass = function(className) {
-    if (this.$el) {
-      return this.$el.hasClass(className);
-    }
-    return false;
-  };
-
-  this.text = function() {
-    if (arguments.length === 0) {
-      if (this.$el) {
-        return this.$el.text();
-      } else {
-        return "";
-      }
-    } else {
-      // EXPERIMENTAL do we want this?
-      this.empty();
-      this.append(arguments[0]);
-    }
   };
 
   /**
@@ -672,6 +667,38 @@ Component.Prototype = function ComponentPrototype() {
       this.$el.css(style);
     }
     return this;
+  };
+
+  this.getChildNodes = function() {
+    return this._children;
+  };
+
+  this.getChildren = function() {
+    // TODO: in DOMElement only real elements are provided
+    return this._children;
+  };
+
+  this.clone = function() {
+    throw new Error('Not supported.');
+  };
+
+  this.is = function(cssSelector) {
+    if (this.$el) {
+      return this.$el.is(cssSelector);
+    } else {
+      throw new Error('Invalid state: you can use this after the component has been rendered.');
+    }
+    return false;
+  };
+
+  this.find = function(cssSelector) {
+    /* jshint unused:false */
+    throw new Error('Not supported.');
+  };
+
+  this.findAll = function(cssSelector) {
+    /* jshint unused:false */
+    throw new Error('Not supported.');
   };
 
   /**
@@ -738,6 +765,10 @@ Component.Prototype = function ComponentPrototype() {
     }
     this._children = [];
     return this;
+  };
+
+  this.remove = function() {
+    this.unmount();
   };
 
   /* Internal API */
@@ -1098,9 +1129,9 @@ Component.Prototype = function ComponentPrototype() {
 
 };
 
-oo.inherit(Component, DOMElement);
+oo.inherit(Component, DefaultDOMElement);
 
-Object.defineProperties(DOMElement.prototype, {
+Object.defineProperties(Component.prototype, {
   /**
     @property {Array<ui/DOMElement>} ui/DOMElement#children children elements
    */
