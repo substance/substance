@@ -3,11 +3,10 @@
 var oo = require('../util/oo');
 var each = require('lodash/collection/each');
 var Annotator = require('./Annotator');
-var DOMElement = require('../ui/DefaultDOMElement');
 var Registry = require('../util/Registry');
 var $$ = require('../ui/Component').$$;
 
-function HtmlExporter(config) {
+function DOMExporter(config) {
   if (!config.converters) {
     throw new Error('config.converters is mandatory');
   }
@@ -26,7 +25,7 @@ function HtmlExporter(config) {
   }.bind(this));
 }
 
-HtmlExporter.Prototype = function() {
+DOMExporter.Prototype = function() {
 
   /**
    * @param doc Substance.Document instance
@@ -96,7 +95,7 @@ HtmlExporter.Prototype = function() {
   // Attention: there is a difference between the implementation
   // of toHtml for annotations and general nodes.
   // Annotations are modeled as overlays, so they do not 'own' their content.
-  // Thus, during conversion HtmlExporter serves the content as a prepared
+  // Thus, during conversion DOMExporter serves the content as a prepared
   // array of children element which just need to be wrapped (or can be manipulated).
   this.defaultInlineNodeExporter = function(anno, converter, children) {
     var id = anno.id;
@@ -196,6 +195,6 @@ HtmlExporter.Prototype = function() {
   // };
 };
 
-oo.initClass(HtmlExporter);
+oo.initClass(DOMExporter);
 
-module.exports = HtmlExporter;
+module.exports = DOMExporter;

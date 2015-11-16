@@ -2,13 +2,17 @@
 
 var $ = require('../util/jquery');
 var oo = require('../util/oo');
-var _ = require('../util/helpers');
+var isString = require('lodash/lang/isString');
+var isEqual = require('lodash/lang/isEqual');
+var clone = require('lodash/lang/clone');
+var extend = require('lodash/object/extend');
+var each = require('lodash/collection/each');
 var I18n = require('./i18n');
 var EventEmitter = require('../util/EventEmitter');
+var DOMElement = require('./DOMElement');
+var VirtualDOMElement = require('./VirtualDOMElement');
 
 var __id__ = 0;
-var VirtualTextNode;
-var RawHtml;
 var _htmlParams;
 
 var inBrowser = (typeof window !== 'undefined');
@@ -39,6 +43,9 @@ var inBrowser = (typeof window !== 'undefined');
 
   @class
   @abstract
+  @extends ui/DefaultDOMElement
+  @implements util/EventEmitter
+
   @example
 
   Define a component:
@@ -71,20 +78,25 @@ function Component(parent, params) {
   }
 
   this.__id__ = __id__++;
+
+  // will be set after first render
+  this.$el = null;
+  this.el = null;
+
   params = params || {};
 
   this.refs = {};
-
-  this.parent = parent;
-  this.children = [];
-
-  // get context from parent (dependency injection)
-  this.context = this._getContext();
-
   // TODO: This is maybe not a good idea. If we want to do it, we could allow
   // ref (without the underscore) being passed but remove it from the params
   // afterwards so we don't pullute the props.
   this._ref = params._ref;
+
+  this.parent = parent;
+  // the children, private as they are managed by rendering
+  this._children = [];
+
+  // context from parent (dependency injection)
+  this.context = this._getContext();
 
   this._isOnRoute = params._isOnRoute;
   if (parent === "root") {
@@ -97,10 +109,6 @@ function Component(parent, params) {
   this._setState(this._getInitialState());
 
   this.actionHandlers = {};
-
-  // will be set after first render
-  this.$el = null;
-  this.el = null;
 
   this._data = {
     attributes: {},
@@ -124,15 +132,7 @@ function Component(parent, params) {
 
 Component.Prototype = function ComponentPrototype() {
 
-  this._getInitialState = function() {
-    if (this.context.router) {
-      var state = this.context.router.getInitialState(this);
-      if (state) {
-        return state;
-      }
-    }
-    return this.getInitialState();
-  };
+  extend(this, EventEmitter.prototype);
 
   // Experimental (we need this to initialize the Router)
   this.getInitialContext = function() {
@@ -181,16 +181,18 @@ Component.Prototype = function ComponentPrototype() {
   };
 
   /**
-   * Render the component.
-   *
-   * ATTENTION: this does not create a DOM presentation but
-   * a virtual representation which is compiled into a DOM element later.
-   *
-   * Every Component should override this method.
-   *
-   * @return {VirtualNode} VirtualNode created using Component.$$
+    Render the component.
+
+    ATTENTION: this does not create a DOM presentation but
+    a virtual representation which is compiled into a DOM element later.
+
+    Every Component should override this method.
+
+    @abstract
+    @return {VirtualNode} VirtualNode created using Component.$$
    */
   this.render = function() {
+    // TODO: maybe we should force implementation by throwing?
     /* istanbul ignore next */
     return Component.$$('div');
   };
@@ -246,7 +248,7 @@ Component.Prototype = function ComponentPrototype() {
     // Check if actually mounted, otherwise we can skip
     if (isMounted) {
       // Trigger didMount for the children first
-      this.children.forEach(function(child) {
+      this._children.forEach(function(child) {
         // We pass isMounted=true to save costly calls to Component.isMounted
         // for each child / grandchild
         child.triggerDidMount(true);
@@ -310,7 +312,7 @@ Component.Prototype = function ComponentPrototype() {
    * @private
    */
   this.triggerDispose = function() {
-    _.each(this.children, function(child) {
+    each(this._children, function(child) {
       child.triggerDispose();
     });
     this.dispose();
@@ -359,7 +361,7 @@ Component.Prototype = function ComponentPrototype() {
     ```
   */
   this.actions = function(actions) {
-    _.each(actions, function(method, action) {
+    each(actions, function(method, action) {
       var handler = method.bind(this);
       this.actionHandlers[action] = handler;
     }, this);
@@ -434,7 +436,7 @@ Component.Prototype = function ComponentPrototype() {
     @param {object} newState an object with a partial update.
   */
   this.extendState = function(newState) {
-    newState = _.extend({}, this.state, newState);
+    newState = extend({}, this.state, newState);
     this.setState(newState);
   };
 
@@ -472,7 +474,7 @@ Component.Prototype = function ComponentPrototype() {
     @param {object} an object with properties
   */
   this.extendProps = function(updatedProps) {
-    var newProps = _.extend({}, this.props, updatedProps);
+    var newProps = extend({}, this.props, updatedProps);
     this.setProps(newProps);
   };
 
@@ -511,6 +513,28 @@ Component.Prototype = function ComponentPrototype() {
   */
   this.didRender = function() {};
 
+  this._getInitialState = function() {
+    if (this.context.router) {
+      var state = this.context.router.getInitialState(this);
+      if (state) {
+        return state;
+      }
+    }
+    return this.getInitialState();
+  };
+
+  // ### ui/DOMElement API
+
+  this.find = function(cssSelector) {
+    /* jshint unused:false */
+    throw new Error('Not implemented.');
+  };
+
+  this.findAll = function(cssSelector) {
+    /* jshint unused:false */
+    throw new Error('Not implemented.');
+  };
+
   /**
    * Add a class.
    *
@@ -543,7 +567,7 @@ Component.Prototype = function ComponentPrototype() {
    * Part of the incremental updating API.
    */
   this.attr = function() {
-    if (arguments.length === 1 && _.isString(arguments[0])) {
+    if (arguments.length === 1 && isString(arguments[0])) {
       return this.$el.attr(arguments[0]);
     } else {
       this._data.attr.apply(this._data, arguments);
@@ -567,26 +591,18 @@ Component.Prototype = function ComponentPrototype() {
     return this;
   };
 
-  /**
-   * Set or get a value of form elements, analog to jQuery.val()
-   *
-   * Part of the incremental updating API.
-   * @param {String} val the elements value
-   */
-  this.val = function(val) {
-    if (arguments.length === 0) {
-      return this.$el.val();
-    } else {
-      this._data.val(val);
-      if (this.$el) {
-        this.$el.val(val);
-      }
-    }
+  this.getValue = function() {
+    return this.$el.val();
   };
 
-  /**
-    Check if a component has a class set.
-  */
+  this.setValue = function(value) {
+    this._data.val(value);
+    if (this.$el) {
+      this.$el.val(value);
+    }
+    return this;
+  };
+
   this.hasClass = function(className) {
     if (this.$el) {
       return this.$el.hasClass(className);
@@ -594,9 +610,6 @@ Component.Prototype = function ComponentPrototype() {
     return false;
   };
 
-  /**
-    Get text of an element.
-  */
   this.text = function() {
     if (arguments.length === 0) {
       if (this.$el) {
@@ -621,7 +634,7 @@ Component.Prototype = function ComponentPrototype() {
    * of input fields and such where you have a lot of html properties.
    */
   this.htmlProp = function() {
-    if (arguments.length === 1 && _.isString(arguments[0])) {
+    if (arguments.length === 1 && isString(arguments[0])) {
       return this.$el.prop(arguments[0]);
     } else {
       this._data.htmlProp.apply(this._data, arguments);
@@ -674,7 +687,7 @@ Component.Prototype = function ComponentPrototype() {
     });
     this._data.append(child);
     this.$el.append(comp.$el);
-    this.children.push(comp);
+    this._children.push(comp);
     comp.triggerDidMount();
     return this;
   };
@@ -689,12 +702,12 @@ Component.Prototype = function ComponentPrototype() {
       refs: this.refs
     });
     this._data.insertAt(pos, child);
-    if (pos > this.children.length-1) {
+    if (pos > this._children.length-1) {
       this.$el.append(comp.$el);
-      this.children.push(comp);
+      this._children.push(comp);
     } else {
-      comp.$el.insertBefore(this.children[pos].$el);
-      this.children.splice(pos, 0, comp);
+      comp.$el.insertBefore(this._children[pos].$el);
+      this._children.splice(pos, 0, comp);
     }
     comp.triggerDidMount();
     return this;
@@ -707,8 +720,8 @@ Component.Prototype = function ComponentPrototype() {
    */
   this.removeAt = function(pos) {
     this._data.removeAt(pos);
-    this.children[pos].unmount();
-    this.children.splice(pos, 1);
+    this._children[pos].unmount();
+    this._children.splice(pos, 1);
     return this;
   };
 
@@ -718,12 +731,12 @@ Component.Prototype = function ComponentPrototype() {
    * Part of the incremental updating API.
    */
   this.empty = function() {
-    this._data.children = [];
+    this._data._children = [];
     this.$el.empty();
-    for (var i = 0; i < this.children.length; i++) {
-      this.children[i].unmount();
+    for (var i = 0; i < this._children.length; i++) {
+      this._children[i].unmount();
     }
-    this.children = [];
+    this._children = [];
     return this;
   };
 
@@ -742,7 +755,7 @@ Component.Prototype = function ComponentPrototype() {
   };
 
   this._createElement = function(data, scope) {
-    var $el = $('<' + data.tagName + '>');
+    var $el = $('<' + data._tagName + '>');
     // $.addClass
     $el.addClass(this._htmlParams.classNames);
     $el.addClass(data.classNames);
@@ -758,7 +771,7 @@ Component.Prototype = function ComponentPrototype() {
       $el.css(data.style);
     }
     // $.on
-    _.each(data.handlers, function(handler, event) {
+    each(data.handlers, function(handler, event) {
       // console.log('Binding to', event, 'in', scope.owner);
       $el.on(event, handler.bind(scope.owner));
     }, this);
@@ -782,7 +795,7 @@ Component.Prototype = function ComponentPrototype() {
     var oldAttributes = oldData.attributes;
     var newAttributes = data.attributes;
     // TODO: this could be done more incrementally by using difference
-    if (!_.isEqual(oldAttributes, newAttributes)) {
+    if (!isEqual(oldAttributes, newAttributes)) {
       var oldAttrNames = Object.keys(oldAttributes);
       $el.removeAttr(oldAttrNames.join(" "));
       $el.attr(newAttributes);
@@ -791,24 +804,24 @@ Component.Prototype = function ComponentPrototype() {
     var oldHtmlProps = oldData.htmlProps;
     var newHtmlProps = data.htmlProps;
     // TODO: this could be done more incrementally by using difference
-    if (!_.isEqual(oldHtmlProps, newHtmlProps)) {
+    if (!isEqual(oldHtmlProps, newHtmlProps)) {
       var oldPropNames = Object.keys(oldHtmlProps);
       $el.removeProp(oldPropNames.join(" "));
       $el.prop(newHtmlProps);
     }
     // $.css
     // css styles must be overwritten explicitly (there is no '$.removeCss')
-    if (!_.isEqual(oldData.style, data.style)) {
+    if (!isEqual(oldData.style, data.style)) {
       if (data.style) {
         $el.css(data.style);
       }
     }
     // $.on / $.off
-    if (!_.isEqual(oldData.handlers, data.handlers)) {
-      _.each(oldData.handlers, function(handler, event) {
+    if (!isEqual(oldData.handlers, data.handlers)) {
+      each(oldData.handlers, function(handler, event) {
         $el.off(event);
       });
-      _.each(data.handlers, function(handler, event) {
+      each(data.handlers, function(handler, event) {
         $el.on(event, handler.bind(scope.owner));
       }, this);
     }
@@ -856,23 +869,23 @@ Component.Prototype = function ComponentPrototype() {
     var el = this.$el[0];
     var isMounted = Component.isMounted(this);
 
-    var oldContent = oldData.children;
-    var newContent = data.children;
+    var oldContent = oldData._children;
+    var newContent = data._children;
 
-    if (_.isEqual(oldContent, newContent)) {
+    if (isEqual(oldContent, newContent)) {
       // console.log('-----');
       this._data = data;
       return;
     }
 
-    var oldComps = _indexByRef(oldData.children, "old");
-    var newComps = _indexByRef(data.children);
+    var oldComps = _indexByRef(oldData._children, "old");
+    var newComps = _indexByRef(data._children);
 
     var pos = 0;
     var oldPos = 0;
     var newPos = 0;
 
-    var oldChildren = this.children;
+    var oldChildren = this._children;
     var children = [];
 
     function _replace(oldComp, newComp) {
@@ -1018,26 +1031,26 @@ Component.Prototype = function ComponentPrototype() {
       this._no_refs_ = true;
     }
 
-    this.children = children;
-    this.refs = _.clone(scope.refs);
+    this._children = children;
+    this.refs = clone(scope.refs);
     this._data = data;
     this.didRender();
   };
 
   this._renderFromScratch = function(data, scope) {
-    for (var i = 0; i < this.children.length; i++) {
-      this.children[i].unmount();
+    for (var i = 0; i < this._children.length; i++) {
+      this._children[i].unmount();
     }
     var isMounted = Component.isMounted(this);
     var children = [];
-    for (var j = 0; j < data.children.length; j++) {
+    for (var j = 0; j < data._children.length; j++) {
       // EXPERIMENTAL: supporting $$.html()
       // basically it doesn't make sense to mix $$.html() with $$.append(), but...
-      if (data.children[j] instanceof RawHtml) {
-        this.$el.html(data.children[j].html);
+      if (data._children[j] instanceof VirtualDOMElement.RawHtml) {
+        this.$el.html(data._children[j].html);
         children = [];
       } else {
-        var comp = this._compileComponent(data.children[j], scope);
+        var comp = this._compileComponent(data._children[j], scope);
         this.$el.append(comp.$el);
         children.push(comp);
         comp.triggerDidMount(isMounted);
@@ -1049,7 +1062,7 @@ Component.Prototype = function ComponentPrototype() {
       this._no_refs_ = true;
     }
     this.refs = scope.refs;
-    this.children = children;
+    this._children = children;
     this._data = data;
     this.didRender();
   };
@@ -1062,9 +1075,9 @@ Component.Prototype = function ComponentPrototype() {
     var parent = this.getParent();
     var context = this.getInitialContext();
     if (parent) {
-      context = _.extend({}, parent.context, context);
+      context = extend({}, parent.context, context);
       if (parent.getChildContext) {
-        return _.extend(context, parent.getChildContext());
+        return extend(context, parent.getChildContext());
       }
       return context;
     }
@@ -1085,7 +1098,22 @@ Component.Prototype = function ComponentPrototype() {
 
 };
 
-oo.inherit(Component, EventEmitter);
+oo.inherit(Component, DOMElement);
+
+Object.defineProperties(DOMElement.prototype, {
+  /**
+    @property {Array<ui/DOMElement>} ui/DOMElement#children children elements
+   */
+  'children': {
+    get: function() {
+      return this._children;
+    },
+    set: function(children) {
+      this._children = children;
+    }
+  },
+});
+
 
 /**
  * Adding a property which is providing an i18n service
@@ -1112,93 +1140,37 @@ oo.inherit(Component.Root, Component);
 Component.Container = function(parent, params) {
   Component.call(this, parent, params);
 };
-Component.Container.Prototype = function() {
-};
 oo.inherit(Component.Container, Component);
 
 Component.HTMLElement = function(parent, tagName, params) {
-  this.tagName = tagName;
+  this._tagName = tagName;
   Component.Container.call(this, parent, params);
 };
-
 oo.inherit(Component.HTMLElement, Component.Container);
 
 Component.Text = function(parent, text) {
   Component.call(this, parent);
-  this.text = text;
+  this._text = text;
 };
-
 Component.Text.Prototype = function() {
   this._render = function() {
     if (!this.$el) {
       if (inBrowser) {
-        this.el = window.document.createTextNode(this.text);
+        this.el = window.document.createTextNode(this._text);
       } else {
         // HACK: using custom factory method for cheerio's native text node
-        this.el = $._createTextNode(this.text);
+        this.el = $._createTextNode(this._text);
       }
       this.$el = $(this.el);
     } else {
-      this.$el.text(this.text);
+      this.$el.text(this._text);
     }
   };
 };
-
 oo.inherit(Component.Text, Component);
 
-/**
-  Create a virtual DOM representation which is used by Component
-  for differential/reactive rendering.
-
-  @param elementType HTML tag name or Component class
-  @param [props] a properties object for Component classes
-  @return {VirtualNode} a virtual DOM node
-
-  @example
-
-  Create a virtual DOM Element
-
-  ```
-  $$('a').attr({href: './foo'}).addClass('se-nav-item')
-  ```
-
-  Create a virtual Component
-
-  ```
-  $$(HelloMessage, {name: 'John'})
-  ```
-*/
-Component.$$ = function() {
-  var content = null;
-  if (_.isString(arguments[0])) {
-    if (arguments.length !== 1) {
-      throw new Error('Illegal usage of Component.$$.');
-    }
-    content = new VirtualElement(arguments[0]);
-  } else if (_.isFunction(arguments[0]) && arguments[0].prototype instanceof Component) {
-    if (arguments.length < 1 || arguments.length > 2) {
-      throw new Error('Illegal usage of Component.$$.');
-    }
-    content = new VirtualComponent(arguments[0]);
-    // EXPERIMENTAL: to reduce boilerplate, we want to allow to specifiy props as 2nd argument of $$
-    if (arguments.length === 2) {
-      content.setProps(arguments[1]);
-    }
-  } else if (arguments[0] === undefined) {
-    throw new Error('Provided Component was undefined.');
-  } else {
-    throw new Error('Illegal usage of Component.$$.');
-  }
-  return content;
-};
-
-Component.$$.prepareChildren = function(children) {
-  for (var i = 0; i < children.length; i++) {
-    if(_.isString(children[i])) {
-      children[i] = new VirtualTextNode(children[i]);
-    }
-  }
-};
+Component.createElement = VirtualDOMElement.createElement;
+Component.$$ = Component.createElement;
 
 /**
   Internal implementation, rendering a virtual component
@@ -1207,7 +1179,6 @@ Component.$$.prepareChildren = function(children) {
   Don't us it. You should use `Component.mount()` instead.
 
   @private
-  ```
 */
 Component._render = function(data, options) {
   var component;
@@ -1223,7 +1194,7 @@ Component._render = function(data, options) {
       component._render();
       break;
     case 'element':
-      component = new Component.HTMLElement(parent, data.tagName, data);
+      component = new Component.HTMLElement(parent, data._tagName, data);
       component._render(data, scope);
       break;
     case 'component':
@@ -1275,10 +1246,9 @@ Component._render = function(data, options) {
   Component.mount($$(MyComponent), $('body'));
 */
 Component.mount = function(component, el) {
-
-  // Usually a virtual component is passeed
-  // only low-level people will pass a bare metal component here
-  if (component instanceof VirtualComponent) {
+  if (component instanceof Component) {
+    component._render(component.render());
+  } else if (component instanceof VirtualDOMElement) {
     component = Component._render(component);
   } else if (component instanceof Component) {
     component._render(component.render());
@@ -1315,7 +1285,5 @@ Component.isMounted = function(comp) {
   }
   return false;
 };
-
-Component.VirtualTextNode = VirtualTextNode;
 
 module.exports = Component;

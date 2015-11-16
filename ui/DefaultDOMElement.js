@@ -1,7 +1,7 @@
 'use strict';
 
-var oo = require('./oo');
-var $ = require('./jquery');
+var oo = require('../util/oo');
+var $ = require('../util/jquery');
 var map = require('lodash/collection/map');
 var inBrowser = (typeof window !== 'undefined');
 var DOMElement = require('./DOMElement');
@@ -16,6 +16,151 @@ function DefaultDOMElement(el) {
 }
 
 DefaultDOMElement.Prototype = function() {
+
+  this.hasClass = function(className) {
+    return this.$el.hasClass(className);
+  };
+
+  this.addClass = function(classString) {
+    this.$el.addClass(classString);
+    return this;
+  };
+
+  this.removeClass = function(classString) {
+    this.$el.removeClass(classString);
+    return this;
+  };
+
+  this.attr = function(name, value) {
+    if (arguments.length === 1) {
+      return this.getAttribute(name);
+    } else {
+      return this.setAttribute(name, value);
+    }
+  };
+
+  this.removeAttr = function(name) {
+    this.$el.removeAttr(name);
+    return this;
+  };
+
+  this.getAttribute = function(name) {
+    return this.$el.attr(name);
+  };
+
+  this.setAttribute = function(name, value) {
+    this.$el.attr(name, value);
+    return this;
+  };
+
+  this.getTagName = function() {
+    if (!this.el.tagName) {
+      return "";
+    } else {
+      return this.el.tagName.toLowerCase();
+    }
+  };
+
+  this.setTagName = function() {
+    throw new Error('tagName is readonly.');
+  };
+
+  this.getTextContent = function() {
+    return this.$el.text();
+  };
+
+  this.setTextContent = function(text) {
+    this.$el.text(text);
+  };
+
+  this.getInnerHtml = function() {
+    return this.$el.html();
+  };
+
+  this.setInnerHtml = function(html) {
+    this.$el.html(html);
+  };
+
+  this.getOuterHtml = function() {
+    if (inBrowser) {
+      return this.el.outerHTML;
+    } else {
+      // TODO: this seems a bit awkward, but with jQuery there is no better
+      // way... maybe using low-level cheerio API?
+      return DefaultDOMElement.create('div').append(this.clone()).html();
+    }
+  };
+
+  this.getValue = function() {
+    return this.$el.val();
+  };
+
+  this.setValue = function(value) {
+    this.$el.val(value);
+    return this;
+  };
+
+  this.getNodeType = function() {
+    if (this.isTextNode()) {
+      return "text";
+    } else if (this.isCommentNode()) {
+      return "comment";
+    } else if (this.el.tagName) {
+      return this.tagName;
+    } else {
+      throw new Error("Unknown node type");
+    }
+  };
+
+  this.getChildNodes = function() {
+    var childNodes = [];
+    var iterator = this.getChildNodeIterator();
+    while (iterator.hasNext()) {
+      childNodes.push(iterator.next());
+    }
+    return childNodes;
+  };
+
+  this.getChildren = function() {
+    var children = this.$el.children();
+    return map(children, function(child) {
+      return new DefaultDOMElement(child);
+    });
+  };
+
+  this.getChildNodeIterator = function() {
+    return new DefaultDOMElement.NodeIterator(this.el.childNodes);
+  };
+
+  this.isTextNode = function() {
+    if (inBrowser) {
+      return (this.el.nodeType === window.Node.TEXT_NODE);
+    } else {
+      // cheerio text node
+      return this.el.type === "text";
+    }
+  };
+
+  this.isElementNode = function() {
+    if (inBrowser) {
+      return (this.el.nodeType === window.Node.ELEMENT_NODE);
+    } else {
+      return this.el.type === "tag";
+    }
+  };
+
+  this.isCommentNode = function() {
+    if (inBrowser) {
+      return (this.el.nodeType === window.Node.COMMENT_NODE);
+    } else {
+      return this.el.type === "comment";
+    }
+  };
+
+  this.clone = function() {
+    var $clone = this.$el.clone();
+    return new DefaultDOMElement($clone[0]);
+  };
 
   this.is = function(cssSelector) {
     return this.$el.is(cssSelector);
@@ -46,149 +191,21 @@ DefaultDOMElement.Prototype = function() {
     return this;
   };
 
-  this.html = function(html) {
-    if (arguments.length === 0) {
-      return this.getInnerHtml();
-    } else {
-      return this.setInnerHtml(html);
-    }
+  this.insertAt = function(pos, child) {
+    /* jshint unused:false */
+    throw new Error('This method is abstract.');
   };
 
-  this.text = function(text) {
-    if (arguments.length === 0) {
-      return this.getTextContent();
-    } else {
-      return this.setTextContent(text);
-    }
+  this.removeAt = function(pos) {
+    /* jshint unused:false */
+    throw new Error('This method is abstract.');
   };
 
-  this.addClass = function(classString) {
-    this.$el.addClass(classString);
+  this.empty = function() {
+    this.$el.empty();
     return this;
   };
 
-  this.hasClass = function(className) {
-    return this.$el.hasClass(className);
-  };
-
-
-  this.clone = function() {
-    var $clone = this.$el.clone();
-    return new DefaultDOMElement($clone[0]);
-  };
-
-  this.attr = function(name, value) {
-    if (arguments.length === 1) {
-      return this.getAttribute(name);
-    } else {
-      return this.setAttribute(name, value);
-    }
-  };
-
-  this.getTagName = function() {
-    if (!this.el.tagName) {
-      return "";
-    } else {
-      return this.el.tagName.toLowerCase();
-    }
-  };
-
-  this.getChildNodeIterator = function() {
-    return new DefaultDOMElement.NodeIterator(this.el.childNodes);
-  };
-
-  this.getChildNodes = function() {
-    var childNodes = [];
-    var iterator = this.getChildNodeIterator();
-    while (iterator.hasNext()) {
-      childNodes.push(iterator.next());
-    }
-    return childNodes;
-  };
-
-  this.getChildren = function() {
-    var children = this.$el.children();
-    return map(children, function(child) {
-      return new DefaultDOMElement(child);
-    });
-  };
-
-  this.isTextNode = function() {
-    if (inBrowser) {
-      return (this.el.nodeType === window.Node.TEXT_NODE);
-    } else {
-      // cheerio text node
-      return this.el.type === "text";
-    }
-  };
-
-  this.isElementNode = function() {
-    if (inBrowser) {
-      return (this.el.nodeType === window.Node.ELEMENT_NODE);
-    } else {
-      return this.el.type === "tag";
-    }
-  };
-
-  this.isCommentNode = function() {
-    if (inBrowser) {
-      return (this.el.nodeType === window.Node.COMMENT_NODE);
-    } else {
-      return this.el.type === "comment";
-    }
-  };
-
-  this.getTextContent = function() {
-    return this.$el.text();
-  };
-
-  this.setTextContent = function(text) {
-    this.$el.text(text);
-  };
-
-  this.getInnerHtml = function() {
-    return this.$el.html();
-  };
-
-  this.setInnerHtml = function(html) {
-    this.$el.html(html);
-  };
-
-  this.getOuterHtml = function() {
-    // TODO: this is a bit awkward, maybe there is a smarter way to do it?
-    debugger;
-    if (inBrowser) {
-      return this.el.outerHTML;
-    } else {
-      return DefaultDOMElement.create('div').append(this.clone()).html();
-    }
-  };
-
-  this.getAttribute = function(name) {
-    return this.$el.attr(name);
-  };
-
-  this.setAttribute = function(name, value) {
-    this.$el.attr(name, value);
-    return this;
-  };
-
-  this.setAttributes = function(attributes) {
-    this.$el.attr(attributes);
-    return this;
-  };
-
-  this.getNodeType = function() {
-    if (this.isTextNode()) {
-      return "text";
-    } else if (this.isCommentNode()) {
-      return "comment";
-    } else if (this.el.tagName) {
-      return this.tagName;
-    } else {
-      throw new Error("Unknown node type");
-    }
-  };
 };
 
 oo.inherit(DefaultDOMElement, DOMElement);
@@ -200,6 +217,17 @@ DefaultDOMElement.createElement = function(str) {
   }
   var el;
   el = $(str)[0];
+  return new DefaultDOMElement(el);
+};
+
+DefaultDOMElement.createTextNode = function(text) {
+  var el;
+  if (inBrowser) {
+    el = window.document.createTextNode(text);
+  } else {
+    // HACK: using custom factory method for cheerio's native text node
+    el = $._createTextNode(text);
+  }
   return new DefaultDOMElement(el);
 };
 

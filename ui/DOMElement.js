@@ -1,11 +1,11 @@
 'use strict';
 
-var oo = require('./oo');
+var oo = require('../util/oo');
 
 /**
   A unified interface for DOM elements used by Substance.
 
-  There are three different implementations implementing this interface:
+  There are three different implementations of this interface:
   - {@link ui/DefaultDOMElement}
   - {@link ui/VirtualDOMElement}
   - {@link ui/Component}
@@ -138,7 +138,11 @@ DOMElement.Prototype = function() {
     @returns {String|this} The text content if used as a getter, `this` otherwise
   */
   this.text = function(text) {
-    throw new Error('This method is abstract.');
+    if (arguments.length === 0) {
+      return this.getTextContent();
+    } else {
+      return this.setTextContent(text);
+    }
   };
 
   /**
@@ -174,7 +178,11 @@ DOMElement.Prototype = function() {
     @returns {String|this} the inner html if used as a getter, `this` otherwise
    */
   this.html = function(html) {
-    throw new Error('This method is abstract.');
+    if (arguments.length === 0) {
+      return this.getInnerHtml();
+    } else {
+      return this.setInnerHtml(html);
+    }
   };
 
   /**
@@ -221,7 +229,20 @@ DOMElement.Prototype = function() {
     @param {String} [val] The value to set.
     @returns {String|this} the value if used as a getter, `this` otherwise
   */
-  this.val = function(val) {
+  this.val = function(value) {
+    if (arguments.length === 0) {
+      return this.getValue();
+    } else {
+      this.setValue(value);
+      return this;
+    }
+  };
+
+  this.getValue = function() {
+    throw new Error('This method is abstract.');
+  };
+
+  this.setValue = function(value) {
     throw new Error('This method is abstract.');
   };
 
@@ -290,6 +311,16 @@ DOMElement.Prototype = function() {
   };
 
   /**
+    Creates a clone of the current element.
+
+    @abstract
+    @returns {ui/DOMElement} A clone of this element.
+  */
+  this.clone = function() {
+    throw new Error('This method is abstract.');
+  };
+
+  /**
     Checks if a given CSS selector matches for this element.
 
     **Attention**
@@ -301,16 +332,6 @@ DOMElement.Prototype = function() {
     @returns {Boolean}
    */
   this.is = function(cssSelector) {
-    throw new Error('This method is abstract.');
-  };
-
-  /**
-    Creates a clone of the current element.
-
-    @abstract
-    @returns {ui/DOMElement} A clone of this element.
-  */
-  this.clone = function() {
     throw new Error('This method is abstract.');
   };
 
@@ -389,6 +410,16 @@ DOMElement.Prototype = function() {
     throw new Error('This method is abstract.');
   };
 
+  /**
+    Removes this element from its parent.
+
+    @abstract
+    @returns {this}
+  */
+  this.remove = function() {
+    throw new Error('This method is abstract.');
+  };
+
 };
 
 oo.initClass(DOMElement);
@@ -398,6 +429,7 @@ Object.defineProperties(DOMElement.prototype, {
     @property {String} ui/DOMElement#tagName
    */
   'tagName': {
+    configurable: true,
     get: function() {
       return this.getTagName();
     },
@@ -409,6 +441,7 @@ Object.defineProperties(DOMElement.prototype, {
     @property {String} ui/DOMElement#textContent
    */
   'textContent': {
+    configurable: true,
     get: function() {
       return this.getTextContent();
     },
@@ -420,6 +453,7 @@ Object.defineProperties(DOMElement.prototype, {
     @property {String} ui/DOMElement#innerHTML
    */
   'innerHTML': {
+    configurable: true,
     get: function() {
       return this.getInnerHtml();
     },
@@ -431,6 +465,7 @@ Object.defineProperties(DOMElement.prototype, {
     @property {String} ui/DOMElement#outerHTML
    */
   'outerHTML': {
+    configurable: true,
     get: function() {
       return this.getOuterHtml();
     },
@@ -442,6 +477,7 @@ Object.defineProperties(DOMElement.prototype, {
     @property {String} ui/DOMElement#nodeType
    */
   'nodeType': {
+    configurable: true,
     get: function() {
       return this.getNodeType();
     },
@@ -453,6 +489,7 @@ Object.defineProperties(DOMElement.prototype, {
     @property {Array<ui/DOMElement>} ui/DOMElement#children children elements
    */
   'children': {
+    configurable: true,
     get: function() {
       return this.getChildren();
     },
@@ -464,6 +501,7 @@ Object.defineProperties(DOMElement.prototype, {
     @property {Array<ui/DOMElement>} ui/DOMElement#children child nodes
    */
   'childNodes': {
+    configurable: true,
     get: function() {
       return this.getChildNodes();
     },
