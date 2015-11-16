@@ -2,14 +2,20 @@
 
 var $ = require('../util/jquery');
 var oo = require('../util/oo');
-var _ = require('../util/helpers');
+var isString = require('lodash/lang/isString');
+var isEqual = require('lodash/lang/isEqual');
+var clone = require('lodash/lang/clone');
+var extend = require('lodash/object/extend');
+var each = require('lodash/collection/each');
 var I18n = require('./i18n');
 var EventEmitter = require('../util/EventEmitter');
+var DefaultDOMElement = require('./DefaultDOMElement');
+var VirtualDOMElement = require('./VirtualDOMElement');
 
 var __id__ = 0;
-var VirtualTextNode;
-var RawHtml;
 var _htmlParams;
+
+var inBrowser = (typeof window !== 'undefined');
 
 /**
   A light-weight component implementation inspired by React and Ember. In contrast to the
@@ -37,6 +43,9 @@ var _htmlParams;
 
   @class
   @abstract
+  @extends ui/DefaultDOMElement
+  @implements util/EventEmitter
+
   @example
 
   Define a component:
@@ -69,20 +78,27 @@ function Component(parent, params) {
   }
 
   this.__id__ = __id__++;
+
+  // will be set after first render
+  this.$el = null;
+  this.el = null;
+
   params = params || {};
 
   this.refs = {};
-
-  this.parent = parent;
-  this.children = [];
-
-  // get context from parent (dependency injection)
-  this.context = this._getContext();
-
   // TODO: This is maybe not a good idea. If we want to do it, we could allow
   // ref (without the underscore) being passed but remove it from the params
   // afterwards so we don't pullute the props.
   this._ref = params._ref;
+
+  this.parent = parent;
+  // the children, private as they are managed by rendering
+  // ATTENTION: while this is defined as '_children' we should never access it directly
+  // so that we can override it via getChildren()
+  this._children = [];
+
+  // context from parent (dependency injection)
+  this.context = this._getContext();
 
   this._isOnRoute = params._isOnRoute;
   if (parent === "root") {
@@ -95,10 +111,6 @@ function Component(parent, params) {
   this._setState(this._getInitialState());
 
   this.actionHandlers = {};
-
-  // will be set after first render
-  this.$el = null;
-  this.el = null;
 
   this._data = {
     attributes: {},
@@ -122,15 +134,7 @@ function Component(parent, params) {
 
 Component.Prototype = function ComponentPrototype() {
 
-  this._getInitialState = function() {
-    if (this.context.router) {
-      var state = this.context.router.getInitialState(this);
-      if (state) {
-        return state;
-      }
-    }
-    return this.getInitialState();
-  };
+  extend(this, EventEmitter.prototype);
 
   // Experimental (we need this to initialize the Router)
   this.getInitialContext = function() {
@@ -179,16 +183,18 @@ Component.Prototype = function ComponentPrototype() {
   };
 
   /**
-   * Render the component.
-   *
-   * ATTENTION: this does not create a DOM presentation but
-   * a virtual representation which is compiled into a DOM element later.
-   *
-   * Every Component should override this method.
-   *
-   * @return {VirtualNode} VirtualNode created using Component.$$
+    Render the component.
+
+    ATTENTION: this does not create a DOM presentation but
+    a virtual representation which is compiled into a DOM element later.
+
+    Every Component should override this method.
+
+    @abstract
+    @return {VirtualNode} VirtualNode created using Component.$$
    */
   this.render = function() {
+    // TODO: maybe we should force implementation by throwing?
     /* istanbul ignore next */
     return Component.$$('div');
   };
@@ -308,7 +314,7 @@ Component.Prototype = function ComponentPrototype() {
    * @private
    */
   this.triggerDispose = function() {
-    _.each(this.children, function(child) {
+    each(this.children, function(child) {
       child.triggerDispose();
     });
     this.dispose();
@@ -357,7 +363,7 @@ Component.Prototype = function ComponentPrototype() {
     ```
   */
   this.actions = function(actions) {
-    _.each(actions, function(method, action) {
+    each(actions, function(method, action) {
       var handler = method.bind(this);
       this.actionHandlers[action] = handler;
     }, this);
@@ -432,7 +438,7 @@ Component.Prototype = function ComponentPrototype() {
     @param {object} newState an object with a partial update.
   */
   this.extendState = function(newState) {
-    newState = _.extend({}, this.state, newState);
+    newState = extend({}, this.state, newState);
     this.setState(newState);
   };
 
@@ -470,7 +476,7 @@ Component.Prototype = function ComponentPrototype() {
     @param {object} an object with properties
   */
   this.extendProps = function(updatedProps) {
-    var newProps = _.extend({}, this.props, updatedProps);
+    var newProps = extend({}, this.props, updatedProps);
     this.setProps(newProps);
   };
 
@@ -509,11 +515,25 @@ Component.Prototype = function ComponentPrototype() {
   */
   this.didRender = function() {};
 
-  /**
-   * Add a class.
-   *
-   * Part of the incremental updating API
-   */
+  this._getInitialState = function() {
+    if (this.context.router) {
+      var state = this.context.router.getInitialState(this);
+      if (state) {
+        return state;
+      }
+    }
+    return this.getInitialState();
+  };
+
+  // ### ui/DOMElement API
+
+  this.hasClass = function(className) {
+    if (this.$el) {
+      return this.$el.hasClass(className);
+    }
+    return false;
+  };
+
   this.addClass = function(className) {
     this._data.addClass(className);
     if (this.$el) {
@@ -522,11 +542,6 @@ Component.Prototype = function ComponentPrototype() {
     return this;
   };
 
-  /**
-   * Remove a class.
-   *
-   * Part of the incremental updating API.
-   */
   this.removeClass = function(className) {
     this._data.removeClass(className);
     if (this.$el) {
@@ -535,41 +550,6 @@ Component.Prototype = function ComponentPrototype() {
     return this;
   };
 
-  /**
-   * Toggle a class.
-   *
-   * Part of the incremental updating API.
-   */
-  this.toggleClass = function(className) {
-    this._data.toggleClass(className);
-    if (this.$el) {
-      this.$el.toggleClass(className);
-    }
-    return this;
-  };
-
-  /**
-   * Add a attributes.
-   *
-   * Part of the incremental updating API.
-   */
-  this.attr = function() {
-    if (arguments.length === 1 && _.isString(arguments[0])) {
-      return this.$el.attr(arguments[0]);
-    } else {
-      this._data.attr.apply(this._data, arguments);
-      if (this.$el) {
-        this.$el.attr.apply(this.$el, arguments);
-      }
-      return this;
-    }
-  };
-
-  /**
-   * Remove an attribute.
-   *
-   * Part of the incremental updating API.
-   */
   this.removeAttr = function() {
     this._data.removeAttr.apply(this._data, arguments);
     if (this.$el) {
@@ -578,48 +558,67 @@ Component.Prototype = function ComponentPrototype() {
     return this;
   };
 
-  /**
-   * Set or get a value of form elements, analog to jQuery.val()
-   *
-   * Part of the incremental updating API.
-   * @param {String} val the elements value
-   */
-  this.val = function(val) {
-    if (arguments.length === 0) {
-      return this.$el.val();
-    } else {
-      this._data.val(val);
-      if (this.$el) {
-        this.$el.val(val);
-      }
-    }
+  this.getAttribute = function(name) {
+    return this.$el.attr(name);
   };
 
-  /**
-    Check if a component has a class set.
-  */
-  this.hasClass = function(className) {
+  this.setAttribute = function(name, value) {
+    this._data.attr(name, value);
     if (this.$el) {
-      return this.$el.hasClass(className);
+      this.$el.attr(name, value);
     }
-    return false;
+    return this;
   };
 
-  /**
-    Get text of an element.
-  */
-  this.text = function() {
-    if (arguments.length === 0) {
-      if (this.$el) {
-        return this.$el.text();
-      } else {
-        return "";
-      }
+  this.setTagName = function() {
+    throw new Error('Not supported.');
+  };
+
+  this.getTextContent = function() {
+    if (!this.$el) {
+      return "";
     } else {
-      // EXPERIMENTAL do we want this?
-      this.empty();
-      this.append(arguments[0]);
+      return this.$el.text();
     }
+  };
+
+  this.setTextContent = function(text) {
+    this.empty();
+    this.append(text);
+    return this;
+  };
+
+  this.getInnerHtml = function() {
+    if (!this.$el) {
+      return "";
+    } else {
+      return this.$el.html();
+    }
+  };
+
+  this.setInnerHtml = function() {
+    // not supported yet, as we don't know how to derive a virtual representation for
+    // the given raw HTML
+    throw new Error('Not supported.');
+  };
+
+  // TODO: get rid of it by reusing DefaultDOMElement as element impl
+  this.getOuterHtml = function() {
+    if (inBrowser) {
+      return this.el.outerHTML;
+    } else {
+      // TODO: this seems a bit awkward, but with jQuery there is no better
+      // way... maybe using low-level cheerio API?
+      return $('<div>').append(this.$el.clone()).html();
+    }
+  };
+
+  this.setValue = function(value) {
+    this._data.val(value);
+    if (this.$el) {
+      this.$el.val(value);
+    }
+    return this;
   };
 
   /**
@@ -632,7 +631,7 @@ Component.Prototype = function ComponentPrototype() {
    * of input fields and such where you have a lot of html properties.
    */
   this.htmlProp = function() {
-    if (arguments.length === 1 && _.isString(arguments[0])) {
+    if (arguments.length === 1 && isString(arguments[0])) {
       return this.$el.prop(arguments[0]);
     } else {
       this._data.htmlProp.apply(this._data, arguments);
@@ -670,6 +669,38 @@ Component.Prototype = function ComponentPrototype() {
       this.$el.css(style);
     }
     return this;
+  };
+
+  this.getChildNodes = function() {
+    return this.children;
+  };
+
+  this.getChildren = function() {
+    // TODO: in DOMElement only real elements are provided
+    return this.children;
+  };
+
+  this.clone = function() {
+    throw new Error('Not supported.');
+  };
+
+  this.is = function(cssSelector) {
+    if (this.$el) {
+      return this.$el.is(cssSelector);
+    } else {
+      throw new Error('Invalid state: you can use this after the component has been rendered.');
+    }
+    return false;
+  };
+
+  this.find = function(cssSelector) {
+    /* jshint unused:false */
+    throw new Error('Not supported.');
+  };
+
+  this.findAll = function(cssSelector) {
+    /* jshint unused:false */
+    throw new Error('Not supported.');
   };
 
   /**
@@ -729,13 +760,17 @@ Component.Prototype = function ComponentPrototype() {
    * Part of the incremental updating API.
    */
   this.empty = function() {
-    this._data.children = [];
+    this._data._children = [];
     this.$el.empty();
     for (var i = 0; i < this.children.length; i++) {
       this.children[i].unmount();
     }
     this.children = [];
     return this;
+  };
+
+  this.remove = function() {
+    this.unmount();
   };
 
   /* Internal API */
@@ -753,7 +788,7 @@ Component.Prototype = function ComponentPrototype() {
   };
 
   this._createElement = function(data, scope) {
-    var $el = $('<' + data.tagName + '>');
+    var $el = $('<' + data._tagName + '>');
     // $.addClass
     $el.addClass(this._htmlParams.classNames);
     $el.addClass(data.classNames);
@@ -769,7 +804,7 @@ Component.Prototype = function ComponentPrototype() {
       $el.css(data.style);
     }
     // $.on
-    _.each(data.handlers, function(handler, event) {
+    each(data.handlers, function(handler, event) {
       // console.log('Binding to', event, 'in', scope.owner);
       $el.on(event, handler.bind(scope.owner));
     }, this);
@@ -793,7 +828,7 @@ Component.Prototype = function ComponentPrototype() {
     var oldAttributes = oldData.attributes;
     var newAttributes = data.attributes;
     // TODO: this could be done more incrementally by using difference
-    if (!_.isEqual(oldAttributes, newAttributes)) {
+    if (!isEqual(oldAttributes, newAttributes)) {
       var oldAttrNames = Object.keys(oldAttributes);
       $el.removeAttr(oldAttrNames.join(" "));
       $el.attr(newAttributes);
@@ -802,24 +837,24 @@ Component.Prototype = function ComponentPrototype() {
     var oldHtmlProps = oldData.htmlProps;
     var newHtmlProps = data.htmlProps;
     // TODO: this could be done more incrementally by using difference
-    if (!_.isEqual(oldHtmlProps, newHtmlProps)) {
+    if (!isEqual(oldHtmlProps, newHtmlProps)) {
       var oldPropNames = Object.keys(oldHtmlProps);
       $el.removeProp(oldPropNames.join(" "));
       $el.prop(newHtmlProps);
     }
     // $.css
     // css styles must be overwritten explicitly (there is no '$.removeCss')
-    if (!_.isEqual(oldData.style, data.style)) {
+    if (!isEqual(oldData.style, data.style)) {
       if (data.style) {
         $el.css(data.style);
       }
     }
     // $.on / $.off
-    if (!_.isEqual(oldData.handlers, data.handlers)) {
-      _.each(oldData.handlers, function(handler, event) {
+    if (!isEqual(oldData.handlers, data.handlers)) {
+      each(oldData.handlers, function(handler, event) {
         $el.off(event);
       });
-      _.each(data.handlers, function(handler, event) {
+      each(data.handlers, function(handler, event) {
         $el.on(event, handler.bind(scope.owner));
       }, this);
     }
@@ -867,17 +902,17 @@ Component.Prototype = function ComponentPrototype() {
     var el = this.$el[0];
     var isMounted = Component.isMounted(this);
 
-    var oldContent = oldData.children;
-    var newContent = data.children;
+    var oldContent = oldData._children;
+    var newContent = data._children;
 
-    if (_.isEqual(oldContent, newContent)) {
+    if (isEqual(oldContent, newContent)) {
       // console.log('-----');
       this._data = data;
       return;
     }
 
-    var oldComps = _indexByRef(oldData.children, "old");
-    var newComps = _indexByRef(data.children);
+    var oldComps = _indexByRef(oldData._children, "old");
+    var newComps = _indexByRef(data._children);
 
     var pos = 0;
     var oldPos = 0;
@@ -1030,7 +1065,7 @@ Component.Prototype = function ComponentPrototype() {
     }
 
     this.children = children;
-    this.refs = _.clone(scope.refs);
+    this.refs = clone(scope.refs);
     this._data = data;
     this.didRender();
   };
@@ -1041,14 +1076,14 @@ Component.Prototype = function ComponentPrototype() {
     }
     var isMounted = Component.isMounted(this);
     var children = [];
-    for (var j = 0; j < data.children.length; j++) {
+    for (var j = 0; j < data._children.length; j++) {
       // EXPERIMENTAL: supporting $$.html()
       // basically it doesn't make sense to mix $$.html() with $$.append(), but...
-      if (data.children[j] instanceof RawHtml) {
-        this.$el.html(data.children[j].html);
+      if (data._children[j] instanceof VirtualDOMElement.RawHtml) {
+        this.$el.html(data._children[j].html);
         children = [];
       } else {
-        var comp = this._compileComponent(data.children[j], scope);
+        var comp = this._compileComponent(data._children[j], scope);
         this.$el.append(comp.$el);
         children.push(comp);
         comp.triggerDidMount(isMounted);
@@ -1073,9 +1108,9 @@ Component.Prototype = function ComponentPrototype() {
     var parent = this.getParent();
     var context = this.getInitialContext();
     if (parent) {
-      context = _.extend({}, parent.context, context);
+      context = extend({}, parent.context, context);
       if (parent.getChildContext) {
-        return _.extend(context, parent.getChildContext());
+        return extend(context, parent.getChildContext());
       }
       return context;
     }
@@ -1096,7 +1131,22 @@ Component.Prototype = function ComponentPrototype() {
 
 };
 
-oo.inherit(Component, EventEmitter);
+oo.inherit(Component, DefaultDOMElement);
+
+Object.defineProperties(Component.prototype, {
+  /**
+    @property {Array<ui/DOMElement>} ui/DOMElement#children children elements
+   */
+  'children': {
+    get: function() {
+      return this._children;
+    },
+    set: function(children) {
+      this._children = children;
+    }
+  },
+});
+
 
 /**
  * Adding a property which is providing an i18n service
@@ -1123,346 +1173,37 @@ oo.inherit(Component.Root, Component);
 Component.Container = function(parent, params) {
   Component.call(this, parent, params);
 };
-Component.Container.Prototype = function() {
-};
 oo.inherit(Component.Container, Component);
 
-Component.HtmlElement = function(parent, tagName, params) {
-  this.tagName = tagName;
+Component.HTMLElement = function(parent, tagName, params) {
+  this._tagName = tagName;
   Component.Container.call(this, parent, params);
 };
-
-oo.inherit(Component.HtmlElement, Component.Container);
+oo.inherit(Component.HTMLElement, Component.Container);
 
 Component.Text = function(parent, text) {
   Component.call(this, parent);
-  this.text = text;
+  this._text = text;
 };
-
 Component.Text.Prototype = function() {
   this._render = function() {
     if (!this.$el) {
-      var el = document.createTextNode(this.text);
-      this.el = el;
-      this.$el = $(el);
+      if (inBrowser) {
+        this.el = window.document.createTextNode(this._text);
+      } else {
+        // HACK: using custom factory method for cheerio's native text node
+        this.el = $._createTextNode(this._text);
+      }
+      this.$el = $(this.el);
     } else {
-      this.$el[0].textContent = this.text;
+      this.$el.text(this._text);
     }
   };
 };
-
 oo.inherit(Component.Text, Component);
 
-/**
-  Virtual Components. An abstract class for Virtual components, created via Component.$$.
-
-  @class Component.VirtualNode
-  @abstract
-*/
-
-/**
-  Virtual Components. An abstract class for Virtual components, created via Component.$$.
-
-  @constructor Component.VirtualNode
-*/
-function VirtualNode() {
-  this._ref = null;
-  this._isOnRoute = false;
-  this.attributes = {};
-  this.htmlProps = {};
-  this.style = {};
-  this.handlers = {};
-  this.props = {};
-  this.children = [];
-}
-
-VirtualNode.Prototype = function() {
-  /**
-   * Remove an attribute.
-   *
-   * Part of the incremental updating API.
-   * @chainable
-   */
-  this.key = function(key) {
-    console.info('DEPRECATED: Use ref instead. Note that when you assign a ref, the component do incremental rerendering.');
-    // this._key = key;
-    return this.ref(key);
-    // return this;
-  };
-
-  this.ref = function(ref) {
-    this._ref = ref;
-    return this;
-  };
-
-  this.route = function() {
-    this._isOnRoute = true;
-    return this;
-  };
-
-  this.append = function(/* ...children */) {
-    var children;
-    var _children = this._getChildren();
-    if (arguments.length === 1) {
-      var child = arguments[0];
-      if (!child) {
-        return this;
-      }
-      if (_.isArray(child)) {
-        children = child;
-        Component.$$.prepareChildren(children);
-        Array.prototype.push.apply(_children, children);
-      } else if (_.isString(child)) {
-        _children.push(new VirtualTextNode(child));
-      } else {
-        _children.push(child);
-      }
-    } else {
-      children = Array.prototype.slice.call(arguments,0);
-      Component.$$.prepareChildren(children);
-      Array.prototype.push.apply(_children, children);
-    }
-    return this;
-  };
-  this._getChildren = function() {
-    return this.children;
-  };
-  this.insertAt = function(pos, child) {
-    this.children.splice(pos, 0, child);
-    return this;
-  };
-  // NOTE: we need this for incremental updates
-  this.removeAt = function(pos) {
-    this.children.splice(pos, 1);
-    return this;
-  };
-  this.addClass = function(className) {
-    if (!this.classNames) {
-      this.classNames = "";
-    }
-    this.classNames += " " + className;
-    return this;
-  };
-  // NOTE: we need this for incremental updates
-  this.removeClass = function(className) {
-    if (!this.classNames) {
-      this.classNames = "";
-    }
-    var classes = this.classNames.split(/\s+/);
-    classes = _.without(classes, className);
-    this.classNames = classes.join(' ');
-    return this;
-  };
-  // NOTE: we need this for incremental updates
-  this.toggleClass = function(className) {
-    var classes = this.classNames.split(/\s+/);
-    if (classes.indexOf(className) >= 0) {
-      classes = _.without(classes, className);
-    } else {
-      classes.push(className);
-    }
-    this.classNames = classes.join(' ');
-    return this;
-  };
-  this.addProps = function(props) {
-    console.log('DEPRECATED: Use setProps() or extendProps()');
-    _.extend(this.props, props);
-    return this;
-  };
-  this.setProps = function(props) {
-    this.props = props;
-    return this;
-  };
-  this.extendProps = function(props) {
-    _.extend(this.props, props);
-    return this;
-  };
-  this.attr = function(attributes) {
-    if (arguments.length === 2) {
-      this.attributes[arguments[0]] = arguments[1];
-    } else {
-      // TODO we could treat HTML attributes as special props
-      // then we do need to fish attributes from custom props
-      _.extend(this.attributes, attributes);
-    }
-    return this;
-  };
-  // NOTE: we need this for incremental updates
-  this.removeAttr = function(attr) {
-    if (_.isString(attr)) {
-      delete this.attributes[attr];
-    } else {
-      this.attributes = _.omit(this.attributes, attr);
-    }
-    return this;
-  };
-  this.htmlProp = function(properties) {
-    if (arguments.length === 2) {
-      this.htmlProps[arguments[0]] = arguments[1];
-    } else {
-      // TODO we could treat HTML attributes as special props
-      // then we do need to fish attributes from custom props
-      _.extend(this.htmlProps, properties);
-    }
-    return this;
-  };
-  // NOTE: we need this for incremental updates
-  this.removeHtmlProp = function() {
-    if (_.isString(arguments[0])) {
-      delete this.htmlProps[arguments[0]];
-    } else {
-      this.htmlProps = _.omit(this.htmlProps, arguments[0]);
-    }
-    return this;
-  };
-  this.val = function(value) {
-    this.htmlProps['value'] = value;
-    return this;
-  };
-  // TODO: this not exactly correct. IMO in jquery you can register multiple
-  // handlers for the same event. But actually we do not do this. Fix when needed.
-  this.on = function(event, handler) {
-    if (arguments.length !== 2 || !_.isString(event) || !_.isFunction(handler)) {
-      throw new Error('Illegal arguments for $$.on(event, handler).');
-    }
-    this.handlers[event] = handler;
-    return this;
-  };
-  // TODO: see above.
-  this.off = function(event, handler) {
-    if (arguments.length !== 2 || !_.isString(event) || !_.isFunction(handler)) {
-      throw new Error('Illegal arguments for $$.on(event, handler).');
-    }
-    delete this.handlers[event];
-    return this;
-  };
-  this.css = function(style) {
-    if (!this.style) {
-      this.style = {};
-    }
-    if (arguments.length === 2) {
-      this.style[arguments[0]] = arguments[1];
-    } else {
-      _.extend(this.style, style);
-    }
-    return this;
-  };
-  this.html = function(rawHtmlString) {
-    this.children = [];
-    this.children.push(new RawHtml(rawHtmlString));
-    return this;
-  };
-  this._render = function() {
-    return Component._render(this);
-  };
-};
-
-oo.initClass(VirtualNode);
-
-/**
-  This represents virtual HTML elements.
-
-  @class Component.VirtualElement
-  @extends ui/Component.VirtualNode
-  @abstract
-*/
-
-/**
-  Used only internally. Use $$ to create virutal elements.
-
-  @constructor Component.VirtualElement
-  @param {String} tagname tagname e.g. 'div'
-*/
-
-function VirtualElement(tagName) {
-  VirtualNode.call(this);
-  this.type = 'element';
-  this.tagName = tagName;
-}
-oo.inherit(VirtualElement, VirtualNode);
-
-function VirtualComponent(ComponentClass) {
-  VirtualNode.call(this);
-  this.type = 'component';
-  this.ComponentClass = ComponentClass;
-}
-VirtualComponent.Prototype = function() {
-  // Note: for VirtualComponents we put children into props
-  // so that the render method of ComponentClass can place it.
-  this._getChildren = function() {
-    if (!this.props.children) {
-      this.props.children = [];
-    }
-    return this.props.children;
-  };
-};
-oo.inherit(VirtualComponent, VirtualNode);
-
-
-VirtualTextNode = function VirtualTextNode(text) {
-  VirtualNode.call(this);
-  this.type = 'text';
-  this.props = { text: text };
-};
-
-RawHtml = function RawHtml(html) {
-  this.type = 'html';
-  this.html = html;
-};
-
-/**
-  Create a virtual DOM representation which is used by Component
-  for differential/reactive rendering.
-  
-  @param elementType HTML tag name or Component class
-  @param [props] a properties object for Component classes
-  @return {VirtualNode} a virtual DOM node
-  
-  @example
-  
-  Create a virtual DOM Element
-
-  ```
-  $$('a').attr({href: './foo'}).addClass('se-nav-item')
-  ```
-
-  Create a virtual Component
-
-  ```
-  $$(HelloMessage, {name: 'John'})
-  ```
-*/
-Component.$$ = function() {
-  var content = null;
-  if (_.isString(arguments[0])) {
-    if (arguments.length !== 1) {
-      throw new Error('Illegal usage of Component.$$.');
-    }
-    content = new VirtualElement(arguments[0]);
-  } else if (_.isFunction(arguments[0]) && arguments[0].prototype instanceof Component) {
-    if (arguments.length < 1 || arguments.length > 2) {
-      throw new Error('Illegal usage of Component.$$.');
-    }
-    content = new VirtualComponent(arguments[0]);
-    // EXPERIMENTAL: to reduce boilerplate, we want to allow to specifiy props as 2nd argument of $$
-    if (arguments.length === 2) {
-      content.setProps(arguments[1]);
-    }
-  } else if (arguments[0] === undefined) {
-    throw new Error('Provided Component was undefined.');
-  } else {
-    throw new Error('Illegal usage of Component.$$.');
-  }
-  return content;
-};
-
-Component.$$.prepareChildren = function(children) {
-  for (var i = 0; i < children.length; i++) {
-    if(_.isString(children[i])) {
-      children[i] = new VirtualTextNode(children[i]);
-    }
-  }
-};
+Component.createElement = VirtualDOMElement.createElement;
+Component.$$ = Component.createElement;
 
 /**
   Internal implementation, rendering a virtual component
@@ -1471,7 +1212,6 @@ Component.$$.prepareChildren = function(children) {
   Don't us it. You should use `Component.mount()` instead.
 
   @private
-  ```
 */
 Component._render = function(data, options) {
   var component;
@@ -1487,7 +1227,7 @@ Component._render = function(data, options) {
       component._render();
       break;
     case 'element':
-      component = new Component.HtmlElement(parent, data.tagName, data);
+      component = new Component.HTMLElement(parent, data._tagName, data);
       component._render(data, scope);
       break;
     case 'component':
@@ -1539,10 +1279,9 @@ Component._render = function(data, options) {
   Component.mount($$(MyComponent), $('body'));
 */
 Component.mount = function(component, el) {
-
-  // Usually a virtual component is passeed
-  // only low-level people will pass a bare metal component here
-  if (component instanceof VirtualComponent) {
+  if (component instanceof Component) {
+    component._render(component.render());
+  } else if (component instanceof VirtualDOMElement) {
     component = Component._render(component);
   } else if (component instanceof Component) {
     component._render(component.render());
@@ -1579,7 +1318,5 @@ Component.isMounted = function(comp) {
   }
   return false;
 };
-
-Component.VirtualTextNode = VirtualTextNode;
 
 module.exports = Component;

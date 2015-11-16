@@ -1,104 +1,101 @@
 'use strict';
 
-var $ = require('../util/jquery');
 var _ = require('../util/helpers');
+var oo = require('../util/oo');
 var DataNode = require('./data/Node');
 
-var DocumentNode = DataNode.extend({
-  displayName: "DocumentNode",
-  name: "node",
+function DocumentNode() {
+  DataNode.apply(this, arguments);
+}
 
-  attach: function(document) {
+DocumentNode.Prototype = function() {
+
+  this.attach = function(document) {
     this.document = document;
     this.didAttach(document);
-  },
+  };
 
-  detach: function() {
+  this.detach = function() {
     var doc = this.document;
     _.each(this.constructor.schema, function(type, propertyName) {
       doc.getEventProxy('path').remove([this.id, propertyName], this);
     });
     this.document = null;
     this.didDetach(doc);
-  },
+  };
 
-  didAttach: function() {},
+  this.didAttach = function() {};
 
-  didDetach: function() {},
+  this.didDetach = function() {};
 
-  isAttached: function() {
+  this.isAttached = function() {
     return this.document !== null;
-  },
+  };
 
-  getDocument: function() {
+  this.getDocument = function() {
     return this.document;
-  },
+  };
 
-  hasParent: function() {
+  this.hasParent = function() {
     return !!this.parent;
-  },
+  };
 
-  getParent: function() {
+  this.getParent = function() {
     return this.document.get(this.parent);
-  },
+  };
 
-  hasChildren: function() {
+  this.hasChildren = function() {
     return false;
-  },
+  };
 
-  getChildIndex: function(child) {
+  this.getChildIndex = function(child) {
     /* jshint unused:false */
     return -1;
-  },
+  };
 
-  getChildAt: function(idx) {
+  this.getChildAt = function(idx) {
     /* jshint unused:false */
     return null;
-  },
+  };
 
-  getChildCount: function() {
+  this.getChildCount = function() {
     return 0;
-  },
+  };
 
-  getRoot: function() {
+  this.getRoot = function() {
     var node = this;
     while (node.hasParent()) {
       node = node.getParent();
     }
     return node;
-  },
+  };
 
-  getComponents: function() {
+  this.getComponents = function() {
     var componentNames = this.constructor.static.components;
     if (!componentNames) {
       console.warn('Contract: a node must define its editable properties.', this.constructor.static.name);
     }
     return componentNames || [];
-  },
+  };
 
-  getPropertyNameAt: function(idx) {
+  this.getPropertyNameAt = function(idx) {
     var propertyNames = this.constructor.static.components || [];
     return propertyNames[idx];
-  },
+  };
 
   // volatile property necessary to render highlighted node differently
-  setHighlighted: function(highlighted) {
+  this.setHighlighted = function(highlighted) {
     if (this.highlighted !== highlighted) {
       this.highlighted = highlighted;
       this.emit('highlighted', highlighted);
     }
-  },
+  };
 
-  isExternal: function() {
+  this.isExternal = function() {
     return this.constructor.static.external;
-  },
+  };
 
-  // Note: children are provided for inline nodes only.
-  toHtml: function(converter, children) {
-    return this.constructor.static.toHtml(this, converter, children);
-  },
-
-  connect: function(ctx, handlers) {
+  this.connect = function(ctx, handlers) {
     _.each(handlers, function(func, name) {
       var match = /([a-zA-Z_0-9]+):changed/.exec(name);
       if (match) {
@@ -109,39 +106,26 @@ var DocumentNode = DataNode.extend({
       }
     }, this);
     DataNode.prototype.connect.apply(this, arguments);
-  },
+  };
 
-  disconnect: function() {
+  this.disconnect = function() {
     // TODO: right now do not unregister from the event proxy
     // when there is no property listener left
     // We would need to implement disconnect
     DataNode.prototype.disconnect.apply(this, arguments);
-  },
+  };
 
-  _onPropertyChange: function(propertyName) {
+  this._onPropertyChange = function(propertyName) {
     var args = [propertyName + ':changed']
       .concat(Array.prototype.slice.call(arguments, 1));
     this.emit.apply(this, args);
-  },
+  };
 
-});
-
-// default HTML serialization
-DocumentNode.static.toHtml = function(node, converter) {
-  var $el = $('<div itemscope>')
-    .attr('data-id', node.id)
-    .attr('data-type', node.type);
-  _.each(node.properties, function(value, name) {
-    var $prop = $('<div>').attr('itemprop', name);
-    if (node.getPropertyType === 'string') {
-      $prop[0].appendChild(converter.annotatedText([node.id, name]));
-    } else {
-      $prop.text(value);
-    }
-    $el.append($prop);
-  });
-  return $el;
 };
+
+oo.inherit(DocumentNode, DataNode);
+
+DocumentNode.static.name = "document-node";
 
 DocumentNode.static.external = false;
 

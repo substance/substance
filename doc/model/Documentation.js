@@ -18,6 +18,10 @@ schema.addNodes([
   require('./EventNode'),
 ]);
 
+schema.getDefaultTextType = function() {
+  return null;
+};
+
 var Documentation = function() {
   Document.call(this, schema);
 

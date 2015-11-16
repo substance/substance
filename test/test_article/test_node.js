@@ -21,8 +21,6 @@ TestNode.static.defaultProperties = {
 
 TestNode.static.components = [];
 
-// HtmlImporter
-
 TestNode.static.blockType = true;
 
 TestNode.static.matchElement = function($el) {

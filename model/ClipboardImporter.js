@@ -3,10 +3,12 @@
 var $ = require('../util/jquery');
 var _ = require('../util/helpers');
 var oo = require('../util/oo');
-var HtmlImporter = require('./HtmlImporter');
+var HTMLImporter = require('./HTMLImporter');
 
 // Note: sharing the symbol with the transformation
 var CLIPBOARD_CONTAINER_ID = require('./transform/copySelection').CLIPBOARD_CONTAINER_ID;
+
+var converters = [];
 
 function ClipboardImporter(config) {
   if (!config.schema) {
@@ -15,6 +17,8 @@ function ClipboardImporter(config) {
   _.extend(config, {
     trimWhitespaces: true,
     REMOVE_INNER_WS: true,
+    containerId: CLIPBOARD_CONTAINER_ID,
+    converters: converters
   });
   ClipboardImporter.super.call(this, config);
 }
@@ -65,6 +69,8 @@ ClipboardImporter.Prototype = function() {
 
 };
 
-oo.inherit(ClipboardImporter, HtmlImporter);
+oo.inherit(ClipboardImporter, HTMLImporter);
+
+ClipboardImporter.converters = converters;
 
 module.exports = ClipboardImporter;

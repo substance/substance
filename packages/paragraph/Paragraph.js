@@ -1,39 +1,9 @@
 'use strict';
 
-var $ = require('../../util/jquery');
-var TextNode = require('../../model/TextNode');
+var TextBlock = require('../../model/TextBlock');
 
-var Paragraph = TextNode.extend({
-  displayName: "Paragraph",
+var Paragraph = TextBlock.extend({
   name: "paragraph"
 });
-
-// HtmlImporter
-
-Paragraph.static.blockType = true;
-
-Paragraph.static.matchElement = function($el) {
-  return $el.is('p');
-};
-
-Paragraph.static.fromHtml = function($el, converter) {
-  var id = converter.defaultId($el, 'p');
-  var paragraph = {
-    id: id,
-    content: ''
-  };
-  paragraph.content = converter.annotatedText($el, [id, 'content']);
-  return paragraph;
-};
-
-// HtmlExporter
-
-Paragraph.static.toHtml = function(paragraph, converter) {
-  var id = paragraph.id;
-  var $el = $('<p>')
-    .attr('id', id);
-  $el.append(converter.annotatedText([id, 'content']));
-  return $el;
-};
 
 module.exports = Paragraph;

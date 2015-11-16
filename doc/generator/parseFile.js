@@ -268,7 +268,7 @@ _Parser.Prototype = function() {
     "function": true
   };
 
-  var _typeTagMatcher = /^\s*(\{[^{]+\})\s+([\w\/]+)\s+(.+)/;
+  var _typeTagMatcher = /^\s*(\{[^@][^{]+\})\s+([\w\/]+)\s+(.+)/;
 
   function _prepareParam(tag) {
     var param = {
@@ -464,7 +464,7 @@ oo.initClass(_Parser);
 // when using paths in type strings `{model/Document}` without `module:` prefix.
 var _parseTagTypes = dox.parseTagTypes;
 dox.parseTagTypes = function(str, tag) {
-  if (/\{\w+(\/\w+)+([.#]\w+)*\}/.exec(str)) {
+  if (/\{[^{]+\}/.exec(str)) {
     str = str.replace(/\//g, '_SEP_');
     var types = _parseTagTypes(str, tag);
     for (var i = 0; i < types.length; i++) {

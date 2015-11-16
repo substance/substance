@@ -1,6 +1,5 @@
 'use strict';
 
-var $ = require('../../util/jquery');
 var oo = require('../../util/oo');
 var _ = require('../../util/helpers');
 var Node = require('../../model/DocumentNode');
@@ -8,15 +7,17 @@ var TableMatrix = require('./TableMatrix');
 var ParentNodeMixin = require('../../model/ParentNodeMixin');
 
 var Table = Node.extend(ParentNodeMixin.prototype, {
-  displayName: "Table",
+
   name: "table",
   matrix: null,
   properties: {
     "sections": ["array", "id"],
   },
+
   didInitialize: function() {
     ParentNodeMixin.call(this, 'sections');
   },
+
   getSections: function() {
     var doc = this.getDocument();
     return _.map(this.sections, function(id) {
@@ -69,66 +70,6 @@ var Table = Node.extend(ParentNodeMixin.prototype, {
 
 });
 
-Table.static.components = ['sections'];
-
-Table.static.defaultProperties = {
-  sections: []
-};
-
-// HtmlImporter
-
-Table.static.blockType = true;
-
-Table.static.matchElement = function($el) {
-  return $el.is("table");
-};
-
-Table.static.fromHtml = function($el, converter) {
-  var id = converter.defaultId($el, 'table');
-  var table = {
-    id: id,
-    sections: []
-  };
-  // either we find thead, tbody, tfoot
-  // or we take the rows right away
-  _.each(["thead", "tbody", "tfoot"], function(name) {
-    var $tsec = $el.find(name);
-    if ($tsec.length) {
-      var sectionNode = converter.convertElement($tsec, { parent: id });
-      table.sections.push(sectionNode.id);
-    }
-  });
-
-  if (table.sections.length === 0) {
-    var sectionNode = {
-      id: converter.nextId('tbody'),
-      parent: id,
-      type: "table-section",
-      sectionType: "body",
-      rows: []
-    };
-    $el.find('tr').each(function() {
-      var $row = $(this);
-      var rowNode = converter.convertElement($row, { parent: id });
-      sectionNode.rows.push(rowNode.id);
-    });
-    converter.getDocument().create(sectionNode);
-    table.sections.push(sectionNode.id);
-  }
-
-  return table;
-};
-
-Table.static.toHtml = function(table, converter) {
-  var id = table.id;
-  var $el = $('<table>')
-    .attr('id', id);
-  _.each(table.getSections(), function(sec) {
-    $el.append(sec.toHtml(converter));
-  });
-  return $el;
-};
-
 Object.defineProperties(Table.prototype, {
   rowNodes: {
     'get': function() {
@@ -137,6 +78,15 @@ Object.defineProperties(Table.prototype, {
   }
 });
 
+
+Table.static.components = ['sections'];
+
+Table.static.defaultProperties = {
+  sections: []
+};
+
+Table.static.blockType = true;
+
 /*
  * A helper class to iterate over the cells of a table node.
  *
@@ -144,7 +94,7 @@ Object.defineProperties(Table.prototype, {
  * e.g., providing consecutive row indexes.
  *
  * @class
- * @constructor
+ * @private
  * @param {ve.dm.TableNode} [tableNode]
  */
 Table.CellIterator = function(tableNode) {
