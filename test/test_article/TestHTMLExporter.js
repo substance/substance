@@ -4,7 +4,8 @@ var converters = require('./TestHTMLImporter').converters;
 
 function TestHTMLExporter() {
   TestHTMLExporter.super.call(this, {
-    converters: converters
+    converters: converters,
+    containerId: 'main'
   });
 }
 
