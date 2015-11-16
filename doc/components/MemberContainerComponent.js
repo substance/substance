@@ -1,7 +1,7 @@
 'use strict';
 
 var oo = require('../../util/oo');
-var filter = require('lodash/collection/filter');
+
 var Component = require('../../ui/Component');
 var $$ = Component.$$;
 var UnsupportedNode = require('../../ui/UnsupportedNode');
@@ -12,13 +12,10 @@ function MemberContainerComponent() {
 
 MemberContainerComponent.Prototype = function() {
 
-  this.getMemberCategories = function() {
-    throw new Error('Is abstract');
-  };
-
   this._renderMembers = function() {
+    var node = this.props.node;
     var el = $$('div');
-    this.getMemberCategories().forEach(function(cat) {
+    node.getMemberCategories().forEach(function(cat) {
       var catMembers = this._getCategoryMembers(cat);
       if (catMembers.length > 0) {
         el.append(this._renderMemberCategory(cat, catMembers));
@@ -56,26 +53,11 @@ MemberContainerComponent.Prototype = function() {
   this._getCategoryMembers = function(cat) {
     var config = this.context.config;
     var node = this.props.node;
-    return MemberContainerComponent.getCategoryMembers(config, node, cat);
+    return node.getCategoryMembers(cat, config);
   };
 
 };
 
 oo.inherit(MemberContainerComponent, Component);
-
-MemberContainerComponent.getCategoryMembers = function(config, node, cat) {
-  var doc = node.getDocument();
-  var memberIndex = doc.getIndex('members');
-  var members = memberIndex.get([node.id].concat(cat.path));
-  members = filter(members, function(memberNode) {
-    // skip nodes according to configuration
-    if ((memberNode.type === "method" && memberNode.isPrivate && config.skipPrivateMethods) ||
-      (memberNode.type === "class" && memberNode.isAbstract && config.skipAbstractClasses)) {
-      return false;
-    }
-    return true;
-  });
-  return members;
-};
 
 module.exports = MemberContainerComponent;

@@ -20,10 +20,9 @@ var DocumentationReader = DocumentationController.extend({
           'ctor': require('./components/ConstructorComponent'),
           'method': require('./components/MethodComponent'),
           'module': require('./components/ModuleComponent'),
-          'component': require('./components/ComponentComponent'),
           'property': require('./components/PropertyComponent'),
           'event': require('./components/EventComponent'),
-          'toc': require('./components/DocumentationTocPanel')
+          'toc': require('../ui/TocPanel')
         }
       },
       panelOrder: ['toc'],

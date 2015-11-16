@@ -83,8 +83,9 @@ ContentPanel.Prototype = function() {
   };
 
   this.markActiveTOCEntry = function() {
-    var $panelContent = this.refs.panelContent.$el;
+    var doc = this.getDocument();
 
+    var $panelContent = this.refs.panelContent.$el;
     var contentHeight = this.getContentHeight();
     var panelHeight = this.getPanelHeight();
     var scrollTop = this.getScrollPosition();
@@ -94,22 +95,30 @@ ContentPanel.Prototype = function() {
     var smartScanline = 2 * scrollBottom - contentHeight;
     var scanline = Math.max(regularScanline, smartScanline);
 
+    // For debugging purposes
+    // To activate remove display:none for .scanline in the CSS
     $('.scanline').css({
       top: (scanline - scrollTop)+'px'
     });
-    // TODO: this should be generic
-    var headings = $panelContent.find('.content-node.heading');
-    if (headings.length === 0) return;
-    // Use first heading as default
-    var activeNode = _.first(headings).dataset.id;
-    headings.each(function() {
-      if (scanline >= $(this).position().top) {
-        activeNode = this.dataset.id;
-      }
-    });
+  
+    var tocNodes = doc.getTOCNodes();
+    if (tocNodes.length === 0) return;
 
-    var doc = this.getDocument();
-    doc.emit('toc:entry-focused', activeNode);
+    // Use first heading as default
+    var activeNode = _.first(tocNodes).id;
+    tocNodes.forEach(function(tocNode) {
+      var nodeEl = $panelContent.find('[data-id="'+tocNode.id+'"]')[0];
+      if (!nodeEl) {
+        console.warn('Not found in Content panel', tocNode.id);
+        return;
+      }
+      var panelOffset = this.getPanelOffsetForElement(nodeEl);
+      if (scanline >= panelOffset) {
+        activeNode = tocNode.id;
+      }
+    }.bind(this));
+
+    doc.emit('app:toc-entry:changed', activeNode);
   };
 };
 

@@ -9,6 +9,10 @@ var FunctionNode = DocumentedNode.extend({
     name: 'string',
     params: ['array', 'object'], // [{name: 'doc', type: 'model/Document', description: 'A Substance document instance'}]
     returns: 'object', // {type: 'model/Document', description: 'The updated document'}
+  },
+
+  getTocLevel: function() {
+    return 2;
   }
 });
 

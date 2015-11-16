@@ -32,26 +32,15 @@ ModuleComponent.Prototype = function() {
     if (node.example) {
       el.append($$(Example, {node:node}));
     }
-
     // members
     if (node.members && node.members.length > 0) {
       // member index
-      el.append($$(MemberIndexComponent, {node: node, categories: this.getMemberCategories()}));
+      el.append($$(MemberIndexComponent, {node: node, categories: node.getMemberCategories()}));
       // members
       el.append(this._renderMembers());
     }
 
     return el;
-  };
-
-  var MEMBER_CATEGORIES = [
-    {name: 'classes', path: ['class']},
-    {name: 'methods', path: ['method']},
-    {name: 'properties', path: ['property']},
-  ];
-
-  this.getMemberCategories = function() {
-    return MEMBER_CATEGORIES;
   };
 
 };

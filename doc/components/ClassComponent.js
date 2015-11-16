@@ -45,27 +45,12 @@ ClassComponent.Prototype = function() {
 
     if (node.members && node.members.length > 0) {
       // member index
-      el.append($$(MemberIndexComponent, {node: node, categories: this.getMemberCategories()}));
+      el.append($$(MemberIndexComponent, {node: node, categories: node.getMemberCategories()}));
       // members
       el.append(this._renderMembers());
     }
 
     return el;
-  };
-
-  var MEMBER_CATEGORIES = [
-    {name: 'ctor', path: ['class', 'ctor']},
-    {name: 'instance-methods', path: ['instance', 'method']},
-    {name: 'instance-properties', path: ['instance', 'property']},
-    {name: 'instance-events', path: ['instance', 'event']},
-
-    {name: 'class-methods', path: ['class', 'method']},
-    {name: 'class-properties', path: ['class', 'property']},
-    {name: 'inner-classes', path: ['class', 'class']}
-  ];
-
-  this.getMemberCategories = function() {
-    return MEMBER_CATEGORIES;
   };
 
 };

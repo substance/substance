@@ -6,11 +6,6 @@ var $$ = Component.$$;
 var MemberContainerComponent = require('./MemberContainerComponent');
 var MemberIndexComponent = require('./MemberIndexComponent');
 
-var MEMBER_CATEGORIES = [
-  {name: 'modules', path: ['module']},
-  {name: 'classes', path: ['class']},
-  {name: 'functions', path: ['function']},
-];
 
 function NamespaceComponent() {
   MemberContainerComponent.apply(this, arguments);
@@ -43,7 +38,7 @@ NamespaceComponent.Prototype = function() {
     );
     if (node.members.length > 0) {
       // member index
-      el.append($$(MemberIndexComponent, {node: node, categories: this.getMemberCategories()}));
+      el.append($$(MemberIndexComponent, {node: node, categories: node.getMemberCategories()}));
       // members
       el.append(this._renderMembers());
     }
@@ -51,14 +46,8 @@ NamespaceComponent.Prototype = function() {
     return el;
   };
 
-  this.getMemberCategories = function() {
-    return MEMBER_CATEGORIES;
-  };
-
 };
 
 oo.inherit(NamespaceComponent, MemberContainerComponent);
-
-NamespaceComponent.MEMBER_CATEGORIES = MEMBER_CATEGORIES;
 
 module.exports = NamespaceComponent;
