@@ -87,7 +87,6 @@ DOMImporter.Prototype = function DOMImporterPrototype() {
       throw new Error('Container id must be specified: either via config.containerId, or via schema.getBodyContainer()');
     }
     state.containerId = containerId;
-
     this.state = state;
     this.reset();
     return state;
@@ -127,12 +126,12 @@ DOMImporter.Prototype = function DOMImporterPrototype() {
     each(this.state.nodes, function(node) {
       doc.create(node);
     });
+    // filling the container
+    doc.set([this.state.containerId, 'nodes'], this.state.container);
     // creating annotations afterwards so that the targeted nodes exist for sure
     each(this.state.inlineNodes, function(inlineNode) {
       doc.create(inlineNode);
     });
-    // filling the container
-    doc.set([this.state.containerId, 'nodes'], this.state.container);
     return doc;
   };
 
