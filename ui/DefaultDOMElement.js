@@ -299,10 +299,7 @@ DefaultDOMElement.parseHtml = function(html) {
   }
 
   // This is not tested to work with Cheerio!  
-  return new DefaultDOMElement($(html)[0]);
-  // return map($(html), function(el) {
-  //   return new DefaultDOMElement(el);
-  // });
+  return new DefaultDOMElement($('<html><body>'+html+'</body></html>')[0]);
 };
 
 // Always returns a 
