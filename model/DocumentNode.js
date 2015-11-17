@@ -4,33 +4,15 @@ var _ = require('../util/helpers');
 var oo = require('../util/oo');
 var DataNode = require('./data/Node');
 
-function DocumentNode() {
-  DataNode.apply(this, arguments);
+function DocumentNode(doc, props) {
+  DataNode.call(this, props);
+  if (!doc) {
+    throw new Error('Document instance is mandatory.');
+  }
+  this.document = doc;
 }
 
 DocumentNode.Prototype = function() {
-
-  this.attach = function(document) {
-    this.document = document;
-    this.didAttach(document);
-  };
-
-  this.detach = function() {
-    var doc = this.document;
-    _.each(this.constructor.schema, function(type, propertyName) {
-      doc.getEventProxy('path').remove([this.id, propertyName], this);
-    });
-    this.document = null;
-    this.didDetach(doc);
-  };
-
-  this.didAttach = function() {};
-
-  this.didDetach = function() {};
-
-  this.isAttached = function() {
-    return this.document !== null;
-  };
 
   this.getDocument = function() {
     return this.document;
@@ -125,7 +107,7 @@ DocumentNode.Prototype = function() {
 
 oo.inherit(DocumentNode, DataNode);
 
-DocumentNode.static.name = "document-node";
+DocumentNode.static.name = "node";
 
 DocumentNode.static.external = false;
 

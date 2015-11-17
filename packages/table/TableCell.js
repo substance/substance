@@ -2,30 +2,24 @@
 
 var Node = require('../../model/DocumentNode');
 
-var TableCell = Node.extend({
-  displayName: "TableCell",
-  name: "table-cell",
-  properties: {
-    "parent": "id",
-    "cellType": "string", // "head" or "data"
-    "colspan": "number",
-    "rowspan": "number",
-    "content": "string"
-  },
-  getSpan: function(dim) {
-    if (dim === "col") {
-      return this.colspan || 1;
-    } else if (dim === "row") {
-      return this.rowspan || 1;
-    }
+var TableCell = Node.extend();
+
+TableCell.static.name = "table-cell";
+
+TableCell.static.schema = {
+  "parent": { type: "id" },
+  "cellType": { type: "string", 'default': 'td' }, // "head" or "data"
+  "colspan": { type: "number" },
+  "rowspan": { type: "number" },
+  "content": { type: "text", 'default': ''}
+};
+
+TableCell.prototype.getSpan = function(dim) {
+  if (dim === "col") {
+    return this.colspan || 1;
+  } else if (dim === "row") {
+    return this.rowspan || 1;
   }
-});
-
-TableCell.static.components = ['content'];
-
-TableCell.static.defaultProperties = {
-  cellType: "td",
-  content: ""
 };
 
 Object.defineProperties(TableCell.prototype, {

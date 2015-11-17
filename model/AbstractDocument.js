@@ -4,6 +4,7 @@ var _ = require('../util/helpers');
 var EventEmitter = require('../util/EventEmitter');
 var oo = require('../util/oo');
 var IncrementalData = require('./data/IncrementalData');
+var NodeFactory = require('./data/NodeFactory');
 var Selection = require('./Selection');
 var PropertySelection = require('./PropertySelection');
 var ContainerSelection = require('./ContainerSelection');
@@ -29,8 +30,7 @@ function AbstractDocument(schema) {
   this.FOR_CLIPBOARD = false;
 
   this.data = new IncrementalData(schema, {
-    didCreateNode: _.bind(this._didCreateNode, this),
-    didDeleteNode: _.bind(this._didDeleteNode, this),
+    nodeFactory: new AbstractDocument.NodeFactory(this)
   });
 }
 
@@ -64,56 +64,6 @@ AbstractDocument.Prototype = function() {
     return this.data.nodes;
   };
 
-  /**
-   * Enable or disable auto-attaching of nodes.
-   * When this is enabled (default), a created node
-   * gets attached to the document instantly.
-   * Otherwise you need to take care of that yourself.
-   *
-   * Used internally e.g., by AbstractDocument.prototype.loadSeed()
-   *
-   * @private
-   */
-  this._setAutoAttach = function(val) {
-    this.AUTO_ATTACH = val;
-  };
-
-  this._setForClipboard = function(val) {
-    this.FOR_CLIPBOARD = val;
-  };
-
-  this._resetContainers = function() {
-    var containers = this.getIndex('type').get('container');
-    // reset containers initially
-    _.each(containers, function(container) {
-      container.reset();
-    });
-  };
-
-  this._create = function(nodeData) {
-    var op = this.data.create(nodeData);
-    this._updateContainers(op);
-    return op;
-  };
-
-  this._delete = function(nodeId) {
-    var op = this.data.delete(nodeId);
-    this._updateContainers(op);
-    return op;
-  };
-
-  this._update = function(path, diff) {
-    var op = this.data.update(path, diff);
-    this._updateContainers(op);
-    return op;
-  };
-
-  this._set = function(path, value) {
-    var op = this.data.set(path, value);
-    this._updateContainers(op);
-    return op;
-  };
-
   this.documentDidLoad = function() {};
 
   this.getSchema = function() {
@@ -121,7 +71,7 @@ AbstractDocument.Prototype = function() {
   };
 
   /**
-   * @see model.data.Data#get
+   * @see model/data/Data#get
    * @skip
    */
   this.get = function(path) {
@@ -129,7 +79,7 @@ AbstractDocument.Prototype = function() {
   };
 
   /**
-   * @see model.data.Data#getNodes
+   * @see model/data/Data#getNodes
    * @skip
    */
   this.getNodes = function() {
@@ -137,7 +87,7 @@ AbstractDocument.Prototype = function() {
   };
 
   /**
-   * @see model.data.Data#addIndex
+   * @see model/data/Data#addIndex
    * @skip
    */
   this.addIndex = function(name, index) {
@@ -145,7 +95,7 @@ AbstractDocument.Prototype = function() {
   };
 
   /**
-   * @see model.data.Data#getIndex
+   * @see model/data/Data#getIndex
    * @skip
    */
   this.getIndex = function(name) {
@@ -153,7 +103,7 @@ AbstractDocument.Prototype = function() {
   };
 
   /**
-   * @depricated We will drop support as this should be done in a more
+   * @deprecated We will drop support as this should be done in a more
    *             controlled fashion using an importer.
    * @skip
    */
@@ -249,9 +199,9 @@ AbstractDocument.Prototype = function() {
     Creates a selection which is attached to this document.
     Every selection implementation provides its own
     parameter format which is basically a JSON representation.
-    
+
     @param {model/Selection} sel An object describing the selection.
-    
+
     @example
 
     ```js
@@ -279,17 +229,40 @@ AbstractDocument.Prototype = function() {
     }
   };
 
-  // Called back by Substance.Data after a node instance has been created
-  this._didCreateNode = function(node) {
-    if (this.AUTO_ATTACH) {
-      // create the node from schema
-      node.attach(this);
-    }
+  this._setForClipboard = function(val) {
+    this.FOR_CLIPBOARD = val;
   };
 
-  this._didDeleteNode = function(node) {
-    // create the node from schema
-    node.detach(this);
+  this._resetContainers = function() {
+    var containers = this.getIndex('type').get('container');
+    // reset containers initially
+    _.each(containers, function(container) {
+      container.reset();
+    });
+  };
+
+  this._create = function(nodeData) {
+    var op = this.data.create(nodeData);
+    this._updateContainers(op);
+    return op;
+  };
+
+  this._delete = function(nodeId) {
+    var op = this.data.delete(nodeId);
+    this._updateContainers(op);
+    return op;
+  };
+
+  this._update = function(path, diff) {
+    var op = this.data.update(path, diff);
+    this._updateContainers(op);
+    return op;
+  };
+
+  this._set = function(path, value) {
+    var op = this.data.set(path, value);
+    this._updateContainers(op);
+    return op;
   };
 
   this._updateContainers = function(op) {
@@ -301,5 +274,13 @@ AbstractDocument.Prototype = function() {
 };
 
 oo.inherit(AbstractDocument, EventEmitter);
+
+AbstractDocument.NodeFactory = function(doc) {
+  NodeFactory.call(this);
+  this.doc = doc;
+  doc.schema.each(function(NodeClass) {
+    this.register(NodeClass);
+  }.bind(this));
+};
 
 module.exports = AbstractDocument;

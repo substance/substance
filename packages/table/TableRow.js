@@ -1,25 +1,23 @@
 'use strict';
 
-var _ = require('../../util/helpers');
-var Node = require('../../model/DocumentNode');
+var oo = require('../../util/oo');
+var DocumentNode = require('../../model/DocumentNode');
 var ParentNodeMixin = require('../../model/ParentNodeMixin');
 
-var TableRow = Node.extend(ParentNodeMixin.prototype, {
-  name: "table-row",
-  properties: {
-    "parent": "id",
-    "cells": ["array", "id"]
-  },
-  didInitialize: function() {
-    ParentNodeMixin.call(this, 'cells');
-  },
-  getCells: function() {
+function TableRow() {
+  TableRow.super.apply(this, arguments);
+
+  ParentNodeMixin.call(this, 'cells');
+}
+
+TableRow.Prototype = function() {
+  this.getCells = function() {
     var doc = this.getDocument();
-    return _.map(this.cells, function(id) {
+    return this.cells.map(function(id) {
       return doc.get(id);
-    }, this);
-  },
-  getCellAt: function(cellIdx) {
+    }.bind(this));
+  };
+  this.getCellAt = function(cellIdx) {
     var doc = this.getDocument();
     var cellId = this.cells[cellIdx];
     if (cellId) {
@@ -27,20 +25,23 @@ var TableRow = Node.extend(ParentNodeMixin.prototype, {
     } else {
       return null;
     }
-  }
-});
-
-TableRow.static.components = ['cells'];
-
-TableRow.static.defaultProperties = {
-  cells: []
+  };
 };
 
-Object.defineProperties(TableRow.prototype, {
-  cellNodes: {
-    'get': function() {
-      return this.getCells();
-    }
+oo.inherit(TableRow, DocumentNode);
+
+oo.mixin(TableRow, ParentNodeMixin);
+
+TableRow.static.name = "table-row";
+
+TableRow.static.schema = {
+  "parent": { type: "id", mandatory: true },
+  "cells": { type: ["array", "id"], default: [] }
+};
+
+Object.defineProperty(TableRow.prototype, 'cellNodes', {
+  'get': function() {
+    return this.getCells();
   }
 });
 

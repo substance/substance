@@ -1,44 +1,36 @@
 'use strict';
 
 var oo = require('../../util/oo');
+var Registry = require('../../util/Registry');
 var Node = require('./Node');
-var NodeFactory = require('./NodeFactory');
 
-/*
- * Data Schema.
- *
- * @class Data.Schema
- * @param {String} name
- * @param {String} version
- *
- * @memberof module:Data
+/**
+  @class Schema
  */
+
+/**
+  @consructor
+  @param {String} name
+  @param {String} version
+*/
 function Schema(name, version) {
   /**
-   * @property {String} name
-   * @memberof module:Data.Schema
-   * @instance
-   */
+    @type {String}
+  */
   this.name = name;
   /**
-   * @property {String} version
-   * @memberof module:Data.Schema
-   * @instance
-   */
+    @type {String}
+  */
   this.version = version;
   /**
-   * @property {NodeFactory} nodeFactory
-   * @private
-   * @memberof module:Data.Schema
-   * @instance
-   */
-  this.nodeFactory = new NodeFactory();
+    @type {util/Registry}
+    @private
+  */
+  this.nodeRegistry = new Registry();
   /**
-   * @property {Array} _tocTypes all Node classes which have `Node.static.tocType = true`
-   * @private
-   * @memberof module:Data.Schema
-   * @instance
-   */
+    @type {Array} all Node classes which have `Node.static.tocType = true`
+    @private
+  */
   this.tocTypes = [];
 
   // add built-in node classes
@@ -48,18 +40,15 @@ function Schema(name, version) {
 Schema.Prototype = function() {
 
   /**
-   * Add nodes to the schema.
-   *
-   * @method addNodes
-   * @param {Array} nodes Array of Node classes
-   *
-   * @memberof module:Data.Schema.prototype
-   */
+    Add nodes to the schema.
+
+    @param {Array} nodes Array of Node classes
+  */
   this.addNodes = function(nodes) {
     if (!nodes) return;
     for (var i = 0; i < nodes.length; i++) {
       var NodeClass = nodes[i];
-      this.nodeFactory.register(NodeClass);
+      this.nodeRegistry.register(NodeClass);
       if (NodeClass.static.tocType) {
         this.tocTypes.push(NodeClass.static.name);
       }
@@ -67,68 +56,32 @@ Schema.Prototype = function() {
   };
 
   /**
-   * Get the node class for a type name.
-   *
-   * @param {String} name
-   * @returns {Class}
-   */
+    Get the node class for a type name.
+
+    @param {String} name
+    @returns {Class}
+  */
   this.getNodeClass = function(name) {
-    return this.nodeFactory.get(name);
+    return this.nodeRegistry.get(name);
   };
 
   /**
-   * Provide the node factory.
-   *
-   * @method getNodeFactory
-   * @return A NodeFactory instance.
-   * @deprecated Use `this.createNode(type, data)` instead.
-   *
-   * @memberof module:Data.Schema.prototype
-   */
-  this.getNodeFactory = function() {
-    return this.nodeFactory;
-  };
+    Provide all built-in node classes.
 
-  /**
-   * Create a node instance.
-   *
-   * @method createNode
-   * @param {String} type
-   * @param {Object} properties
-   * @return A new Node instance.
-   *
-   * @memberof module:Data.Schema.prototype
-   */
-  this.createNode = function(type, properties) {
-    var node = this.nodeFactory.create(type, properties);
-    return node;
-  };
-
-  /**
-   * Provide all built-in node classes.
-   *
-   * Used internally.
-   *
-   * @method getBuiltIns
-   * @protected
-   * @return An array of Node classes.
-   *
-   * @memberof module:Data.Schema.prototype
-   */
+    @private
+    @returns {Node[]} An array of Node classes.
+  */
   this.getBuiltIns = function() {
     return [ Node ];
   };
 
   /**
-   * Check if a given type is of given parent type.
-   *
-   * @method isInstanceOf
-   * @param {String} type
-   * @param {String} parentType
-   * @return True if type instanceof parentType.
-   *
-   * @memberof module:Data.Schema.prototype
-   */
+    Checks if a given type is of given parent type.
+
+    @param {String} type
+    @param {String} parentType
+    @returns {Boolean} true if `(type instanceof parentType)`.
+  */
   this.isInstanceOf = function(type, parentType) {
     var NodeClass = this.getNodeClass(type);
     if (NodeClass) {
@@ -138,36 +91,27 @@ Schema.Prototype = function() {
   };
 
   /**
-   * Iterate over all registered node classes.
-   *
-   * See {{#crossLink "Registry/each:method"}}Registry.each{{/crossLink}}
-   *
-   * @method each
-   * @param {Function} callback
-   * @param {Object} context
-   *
-   * @memberof module:Data.Schema.prototype
-   */
+    Iterate over all registered node classes.
+
+    See {@link util/Registry#each}
+
+    @param {Function} callback
+    @param {Object} context
+  */
   this.each = function() {
-    this.nodeFactory.each.apply(this.nodeFactory, arguments);
+    this.nodeRegistry.each.apply(this.nodeRegistry, arguments);
   };
 
   /**
-   * @method getTocTypes
-   * @return list of types that should appear in a TOC
-   *
-   * @memberof module:Data.Schema.prototype
-   */
+    @returns {Array<model/data/Node} list of types that should appear in a TOC
+  */
   this.getTocTypes = function() {
     return this.tocTypes;
   };
 
   /**
-   * @method detDefaultTextType
-   * @return the name of the default textish node (e.g. 'paragraph')
-   *
-   * @memberof module:Data.Schema.prototype
-   */
+    @returns {String} the name of the default textish node (e.g. 'paragraph')
+  */
   this.getDefaultTextType = function() {
     throw new Error('Schmema.prototype.getDefaultTextType() must be overridden.');
   };

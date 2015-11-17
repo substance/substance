@@ -14,6 +14,10 @@ var DELETE = 'delete';
 var UPDATE = 'update';
 var SET = 'set';
 
+/*
+  @class
+  @extends Operation
+*/
 var ObjectOperation = function(data) {
   Operation.call(this);
   if (!data) {

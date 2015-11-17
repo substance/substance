@@ -1,6 +1,6 @@
 'use strict';
 
-var _ = require('./helpers');
+var extend = require('lodash/object/extend');
 
 /**
  * Helpers for oo programming.
@@ -16,7 +16,10 @@ var _inherit;
 var extend = function(parent, staticProps, afterHook, proto) {
   if (arguments.length > 4) {
     var args = Array.prototype.slice.call(arguments, 3);
-    proto = _.extend.apply(null, args);
+    args.unshift({});
+    proto = extend.apply(null, args);
+  } else if (arguments.length === 3) {
+    proto = {};
   }
   var Constructor = function ExtendedClass() {
     this.__className__ = proto.displayName || proto.name;
@@ -37,7 +40,7 @@ var extend = function(parent, staticProps, afterHook, proto) {
     if (proto.hasOwnProperty(key)) {
       // built-in: extend class.static with prototype.static
       if (key === 'static') {
-        _.extend(Constructor.static, proto.static);
+        extend(Constructor.static, proto.static);
         continue;
       }
       if (key in staticProps) {
@@ -59,7 +62,7 @@ function makeExtensible(clazz, staticProps, afterHook) {
     oo.initClass(clazz);
   }
   clazz.static._makeExtendFunction = function(parentClazz) {
-    return _.bind(extend, null, parentClazz, staticProps, afterHook);
+    return extend.bind(null, parentClazz, staticProps, afterHook);
   };
   // add a hook that moves static properties to clazz.static
   clazz.static._afterClassInitHook = function(childClazz) {
@@ -68,7 +71,7 @@ function makeExtensible(clazz, staticProps, afterHook) {
       if (!proto.hasOwnProperty(key)) continue;
       // built-in: extend class.static with prototype.static
       if (key === 'static') {
-        _.extend(childClazz.static, proto.static);
+        extend(childClazz.static, proto.static);
         continue;
       }
       // move over all static properties to class.static

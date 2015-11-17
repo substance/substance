@@ -1,13 +1,13 @@
 'use strict';
 
-var TextNode = require('../../model/TextNode');
+var oo = require('../../util/oo');
+var TextBlock = require('../../model/TextBlock');
 
-var Heading = TextNode.extend({
-  name: "heading",
-  displayName: "Heading",
-  properties: {
-    "level": "number"
-  },
+function Heading() {
+  Heading.super.apply(this, arguments);
+}
+
+Heading.Prototype = function() {
 
   getTocLevel: function() {
     return this.level;
@@ -16,11 +16,19 @@ var Heading = TextNode.extend({
   getTocName: function() {
     return this.content;
   }
+
+};
+
+oo.inherit(Heading, TextBlock);
+
+Heading.static.name = "heading";
+
+Heading.static.defineSchema({
+  "level": "number"
 });
 
-// HtmlImporter
-
 Heading.static.blockType = true;
+
 Heading.static.tocType = true;
 
 module.exports = Heading;

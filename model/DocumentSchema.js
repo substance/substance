@@ -2,7 +2,7 @@
 
 var oo = require('../util/oo');
 var Schema = require('./data/Schema');
-var Node = require('./DocumentNode');
+var DocumentNode = require('./DocumentNode');
 var Container = require('./Container');
 var PropertyAnnotation = require('./PropertyAnnotation');
 var ContainerAnnotation = require('./ContainerAnnotation');
@@ -61,7 +61,7 @@ DocumentSchema.Prototype = function() {
   };
 
   this.getBuiltIns = function() {
-    return [Node, PropertyAnnotation, Container, ContainerAnnotation];
+    return [DocumentNode, PropertyAnnotation, Container, ContainerAnnotation];
   };
 
 };
