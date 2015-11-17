@@ -32,13 +32,14 @@ function ContainerAnnotation() {
 }
 
 var name = "container-annotation";
+
 var schema = {
   // id of container node
-  container: 'string',
-  startPath: ['array', 'string'],
-  startOffset: 'number',
-  endPath: ['array', 'string'],
-  endOffset: 'number'
+  container: "container",
+  startPath: ["string"],
+  startOffset: "number",
+  endPath: ["string"],
+  endOffset: "number"
 };
 
 ContainerAnnotation.Prototype = function() {
@@ -153,7 +154,7 @@ oo.inherit(ContainerAnnotation, DocumentNode);
 
 ContainerAnnotation.static.name = name;
 
-ContainerAnnotation.static.schema = schema;
+ContainerAnnotation.static.defineSchema(schema);
 
 /**
   @class

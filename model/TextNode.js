@@ -29,7 +29,7 @@ oo.inherit(TextNode, DocumentNode);
 
 TextNode.static.name = "text-node";
 
-TextNode.static.schema = {
+TextNode.static.defineSchema({
   content: { type: 'text', 'default': '' }
 };
 

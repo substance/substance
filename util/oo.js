@@ -14,6 +14,7 @@ var defaultStaticProps = {'name': true, 'displayName': true};
 var _inherit;
 
 var extend = function(parent, staticProps, afterHook, proto) {
+  console.warn('DEPRECATED: oo.extend() will be dropped. It is going into a wrong direction considering ES6. Instead you should take the oo.inherit() approach.')
   if (arguments.length > 4) {
     var args = Array.prototype.slice.call(arguments, 3);
     args.unshift({});
@@ -95,7 +96,9 @@ var _initClass = function(clazz) {
     clazz.prototype = new clazz.Prototype();
     clazz.prototype.constructor = clazz;
   }
-  clazz.static = clazz.static || {};
+  clazz.static = clazz.static || Object.create({
+    __class__: clazz
+  };
 };
 
 /**
@@ -139,6 +142,7 @@ _inherit =  function(clazz, parentClazz) {
   // Extend static properties - always initialize both sides
   _initClass(parentClazz);
   clazz.static = Object.create(parentClazz.static);
+  clazz.static.__class__ = clazz;
   if (clazz.static._makeExtendFunction) {
     clazz.extend = clazz.static._makeExtendFunction(clazz);
   } else {

@@ -68,4 +68,23 @@ DocumentSchema.Prototype = function() {
 
 oo.inherit(DocumentSchema, Schema);
 
+
+// Schema types
+
+/*
+  Type for (editable) text properties
+*/
+DocumentSchema.Text = function() {
+  Text.super.apply(this, arguments);
+};
+
+oo.inherit(Text, String);
+
+DocumentSchema.Text.default = '';
+
+/*
+  Type for path properties
+*/
+DocumentSchema.Path = function() {};
+
 module.exports = DocumentSchema;

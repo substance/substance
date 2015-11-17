@@ -4,6 +4,7 @@ var _ = require('../util/helpers');
 var oo = require('../util/oo');
 var DocumentNode = require('./DocumentNode');
 var ParentNodeMixin = require('./ParentNodeMixin');
+var Schema = require('./DocumentSchema');
 
 /**
   A Container represents a list of node ids in first place.
@@ -41,13 +42,13 @@ function Container() {
   ParentNodeMixin.call(this, 'nodes');
 }
 
+var name = "container";
+
 var schema = {
-  nodes: { type: ["array", "id"], default: [] }
+  nodes: { type: [ Schema.Id ], default: [] }
 };
 
 Container.Prototype = function() {
-
-  _.extend(this, ParentNodeMixin.prototype);
 
   this.getPosition = function(nodeId) {
     var pos = this.nodes.indexOf(nodeId);
@@ -374,10 +375,11 @@ Container.Prototype = function() {
 };
 
 oo.inherit(Container, DocumentNode);
+oo.mixin(Container, ParentNodeMixin);
 
-Container.static.name = "container";
+Container.static.name = name;
 
-Container.static.schema = schema;
+Container.static.defineSchema(schema);
 
 Object.defineProperties(Container.prototype, {
   length: {

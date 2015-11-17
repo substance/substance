@@ -2,7 +2,11 @@
 
 var TextBlock = require('../../model/TextBlock');
 
-var Codeblock = TextBlock.extend();
+function Codeblock() {
+  Codeblock.super.apply(thism arguments);
+}
+
+oo.inherit(Codeblock, TextBlock);
 
 Codeblock.static.name = "codeblock";
 

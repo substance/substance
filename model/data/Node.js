@@ -22,20 +22,6 @@ function Node(properties) {
     throw new Error('Every NodeClass must provide a static property "name".');
   }
 
-  // but it is only done once, the first time a node class of a specific type is used.
-  if (!NodeClass.__DOCUMENT_NODE__) {
-    // iterates over all properties in the schema and defines the property using Object.defineProperty
-    _defineProperties(NodeClass);
-    // collects a full schema considering the schemas of parent class
-    // we will use the unfolded schema, check integrity of the given props (mandatory, readonly)
-    // or fill in default values for undefined properties.
-    NodeClass.unfoldedSchema = _unfoldedSchema(NodeClass);
-    // computes the set of default properties only once
-    NodeClass.defaultProps = _extractDefaultProps(NodeClass.unfoldedSchema);
-    // after that we set a guard preventing multiple initialization
-    NodeClass.__DOCUMENT_NODE__ = true;
-  }
-
   // integrity check for provided props
   each(NodeClass.static.schema, function(prop, name) {
     // mandatory properties
@@ -90,6 +76,19 @@ Node.Prototype = function() {
 
 oo.inherit(Node, EventEmitter);
 
+Node.static.defineSchema = function(schema) {
+  // in ES6 we would just `this` which is bound to the class
+  var NodeClass = this.__class__;
+  // iterates over all properties in the schema and defines the property using Object.defineProperty
+  _defineProperties(NodeClass);
+  // collects a full schema considering the schemas of parent class
+  // we will use the unfolded schema, check integrity of the given props (mandatory, readonly)
+  // or fill in default values for undefined properties.
+  NodeClass.static.unfoldedSchema = _unfoldedSchema(NodeClass);
+  // computes the set of default properties only once
+  NodeClass.static.defaultProps = _extractDefaultProps(NodeClass.unfoldedSchema);
+};
+
 /**
  * Symbolic name for this model class. Must be set to a unique string by every subclass.
  *
@@ -101,9 +100,9 @@ Node.static.name = "node";
 /**
   @prop {String} id an id that is unique within this data
 */
-Node.static.schema = {
-  id: { type: 'string', mandatory: true, readonly: true }
-};
+Node.static.defineSchema({
+  id: { type: 'string', required: true, readonly: true }
+});
 
 Object.defineProperty(Node.prototype, type, {
   configurable: false,
@@ -140,22 +139,22 @@ function _defineProperties(NodeClass) {
     if (name === "type") {
       throw new Error("Property 'type' can not be used.");
     }
-    var descriptor = {
-      configurable: true,
-    };
-    descriptor.get = function() {
-      return this.props[name];
-    };
+    // check if there is a name clash with prototype props
+    if (NodeClass.prototype[name] !== undefined) {
+      throw new Error('Name collision! ' + name);
+    }
     if (prop.readonly) {
+      var descriptor = {
+        configurable: true,
+      };
+      descriptor.get = function() {
+        return this.props[name];
+      };
       descriptor.set = function() {
         throw new Error('Property ' + name + ' of node type ' + NodeClass.static.name + ' is read-only.');
       };
-    } else {
-      descriptor.set = function(val) {
-        this.props[name] = val;
-      };
+      Object.defineProperty(NodeClass.prototype, name, descriptor);
     }
-    Object.defineProperty(NodeClass.prototype, name, descriptor);
   });
 }
 

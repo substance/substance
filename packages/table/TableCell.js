@@ -1,18 +1,23 @@
 'use strict';
 
-var Node = require('../../model/DocumentNode');
+var DocumentNode = require('../../model/DocumentNode');
+var Schema = require('../../model/DocumentSchema');
 
-var TableCell = Node.extend();
+function TableCell() {
+  TableCell.super.apply(this, arguments);
+};
+
+oo.inherit(TableCell, DocumentNode);
 
 TableCell.static.name = "table-cell";
 
-TableCell.static.schema = {
-  "parent": { type: "id" },
-  "cellType": { type: "string", 'default': 'td' }, // "head" or "data"
-  "colspan": { type: "number" },
-  "rowspan": { type: "number" },
-  "content": { type: "text", 'default': ''}
-};
+TableCell.static.defineSchema({
+  parent: { type: Schema.Id, required: true },
+  cellType: { type: String, 'default': 'td' }, // "head" or "data"
+  colspan: Number,
+  rowspan: Number,
+  content: Schema.Text
+});
 
 TableCell.prototype.getSpan = function(dim) {
   if (dim === "col") {
