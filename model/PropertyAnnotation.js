@@ -1,7 +1,9 @@
 'use strict';
 
-var _ = require('../util/helpers');
-var Node = require('./DocumentNode');
+var isEqual = require('lodash/lang/isEqual');
+var oo = require('../util/oo');
+var DocumentNode = require('./DocumentNode');
+var Schema = require('./DocumentSchema');
 
 /**
    An annotation can be used to overlay text and give it a special meaning.
@@ -13,37 +15,38 @@ var Node = require('./DocumentNode');
   @prop {Number} endOffset: the character where the annoation starts
 **/
 
-var PropertyAnnotation = Node.extend({
-  name: "annotation",
+function PropertyAnnotation() {
+  PropertyAnnotation.super.apply(this, arguments);
+}
 
-  properties: {
-    path: ['array', 'string'],
-    startOffset: 'number',
-    endOffset: 'number'
-  },
+var name = "annotation";
 
-  static: {
-    isInline: true
-  },
+var schema = {
+  path: ["string"],
+  startOffset: "number",
+  endOffset: "number"
+};
 
-  canSplit: function() {
+PropertyAnnotation.Prototype = function() {
+
+  this.canSplit = function() {
     return true;
-  },
+  };
 
-  getSelection: function() {
+  this.getSelection = function() {
     return this.getDocument().createSelection({
       type: 'property',
       path: this.path,
       startOffset: this.startOffset,
       endOffset: this.endOffset
     });
-  },
+  };
 
-  updateRange: function(tx, sel) {
+  this.updateRange = function(tx, sel) {
     if (!sel.isPropertySelection()) {
       throw new Error('Cannot change to ContainerAnnotation.');
     }
-    if (!_.isEqual(this.startPath, sel.start.path)) {
+    if (!isEqual(this.startPath, sel.start.path)) {
       tx.set([this.id, 'path'], sel.start.path);
     }
     if (this.startOffset !== sel.start.offset) {
@@ -52,9 +55,9 @@ var PropertyAnnotation = Node.extend({
     if (this.endOffset !== sel.end.offset) {
       tx.set([this.id, 'endOffset'], sel.end.offset);
     }
-  },
+  };
 
-  getText: function() {
+  this.getText = function() {
     var doc = this.getDocument();
     if (!doc) {
       console.warn('Trying to use an PropertyAnnotation which is not attached to the document.');
@@ -62,9 +65,17 @@ var PropertyAnnotation = Node.extend({
     }
     var text = doc.get(this.path);
     return text.substring(this.startOffset, this.endOffset);
-  },
+  };
 
-});
+};
+
+oo.inherit(PropertyAnnotation, DocumentNode);
+
+PropertyAnnotation.static.name = name;
+
+PropertyAnnotation.static.defineSchema(schema);
+
+PropertyAnnotation.static.isInline = true;
 
 Object.defineProperties(PropertyAnnotation.prototype, {
   startPath: {

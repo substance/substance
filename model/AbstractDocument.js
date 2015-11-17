@@ -1,9 +1,10 @@
 'use strict';
 
-var _ = require('../util/helpers');
-var EventEmitter = require('../util/EventEmitter');
 var oo = require('../util/oo');
+var each = require('lodash/collection/each');
+var EventEmitter = require('../util/EventEmitter');
 var IncrementalData = require('./data/IncrementalData');
+var DocumentNodeFactory = require('./DocumentNodeFactory');
 var Selection = require('./Selection');
 var PropertySelection = require('./PropertySelection');
 var ContainerSelection = require('./ContainerSelection');
@@ -28,9 +29,10 @@ function AbstractDocument(schema) {
   this.AUTO_ATTACH = true;
   this.FOR_CLIPBOARD = false;
 
+  this.nodeFactory = new DocumentNodeFactory(this);
+
   this.data = new IncrementalData(schema, {
-    didCreateNode: _.bind(this._didCreateNode, this),
-    didDeleteNode: _.bind(this._didDeleteNode, this),
+    nodeFactory: this.nodeFactory
   });
 }
 
@@ -64,56 +66,6 @@ AbstractDocument.Prototype = function() {
     return this.data.nodes;
   };
 
-  /**
-   * Enable or disable auto-attaching of nodes.
-   * When this is enabled (default), a created node
-   * gets attached to the document instantly.
-   * Otherwise you need to take care of that yourself.
-   *
-   * Used internally e.g., by AbstractDocument.prototype.loadSeed()
-   *
-   * @private
-   */
-  this._setAutoAttach = function(val) {
-    this.AUTO_ATTACH = val;
-  };
-
-  this._setForClipboard = function(val) {
-    this.FOR_CLIPBOARD = val;
-  };
-
-  this._resetContainers = function() {
-    var containers = this.getIndex('type').get('container');
-    // reset containers initially
-    _.each(containers, function(container) {
-      container.reset();
-    });
-  };
-
-  this._create = function(nodeData) {
-    var op = this.data.create(nodeData);
-    this._updateContainers(op);
-    return op;
-  };
-
-  this._delete = function(nodeId) {
-    var op = this.data.delete(nodeId);
-    this._updateContainers(op);
-    return op;
-  };
-
-  this._update = function(path, diff) {
-    var op = this.data.update(path, diff);
-    this._updateContainers(op);
-    return op;
-  };
-
-  this._set = function(path, value) {
-    var op = this.data.set(path, value);
-    this._updateContainers(op);
-    return op;
-  };
-
   this.documentDidLoad = function() {};
 
   this.getSchema = function() {
@@ -121,7 +73,7 @@ AbstractDocument.Prototype = function() {
   };
 
   /**
-   * @see model.data.Data#get
+   * @see model/data/Data#get
    * @skip
    */
   this.get = function(path) {
@@ -129,7 +81,7 @@ AbstractDocument.Prototype = function() {
   };
 
   /**
-   * @see model.data.Data#getNodes
+   * @see model/data/Data#getNodes
    * @skip
    */
   this.getNodes = function() {
@@ -137,7 +89,7 @@ AbstractDocument.Prototype = function() {
   };
 
   /**
-   * @see model.data.Data#addIndex
+   * @see model/data/Data#addIndex
    * @skip
    */
   this.addIndex = function(name, index) {
@@ -145,7 +97,7 @@ AbstractDocument.Prototype = function() {
   };
 
   /**
-   * @see model.data.Data#getIndex
+   * @see model/data/Data#getIndex
    * @skip
    */
   this.getIndex = function(name) {
@@ -153,7 +105,7 @@ AbstractDocument.Prototype = function() {
   };
 
   /**
-   * @depricated We will drop support as this should be done in a more
+   * @deprecated We will drop support as this should be done in a more
    *             controlled fashion using an importer.
    * @skip
    */
@@ -165,17 +117,17 @@ AbstractDocument.Prototype = function() {
     // Thus we disable AUTO_ATTACH when creating nodes
 
     // 1. clear all existing nodes (as they should be there in the seed)
-    _.each(this.data.nodes, function(node) {
+    each(this.data.nodes, function(node) {
       this.delete(node.id);
     }, this);
     // 2. create nodes with AUTO_ATTACH disabled
-    this._setAutoAttach(false);
-    _.each(seed.nodes, function(nodeData) {
+    // this._setAutoAttach(false);
+    each(seed.nodes, function(nodeData) {
       this.create(nodeData);
     }, this);
-    this._setAutoAttach(true);
+    // this._setAutoAttach(true);
     // 3. attach all nodes
-    _.each(this.data.nodes, function(node) {
+    each(this.data.nodes, function(node) {
       node.attach(this);
     }, this);
 
@@ -196,7 +148,7 @@ AbstractDocument.Prototype = function() {
    */
   this.toJSON = function() {
     var nodes = {};
-    _.each(this.getNodes(), function(node) {
+    each(this.getNodes(), function(node) {
       nodes[node.id] = node.toJSON();
     });
     return {
@@ -249,9 +201,9 @@ AbstractDocument.Prototype = function() {
     Creates a selection which is attached to this document.
     Every selection implementation provides its own
     parameter format which is basically a JSON representation.
-    
+
     @param {model/Selection} sel An object describing the selection.
-    
+
     @example
 
     ```js
@@ -279,24 +231,36 @@ AbstractDocument.Prototype = function() {
     }
   };
 
-  // Called back by Substance.Data after a node instance has been created
-  this._didCreateNode = function(node) {
-    if (this.AUTO_ATTACH) {
-      // create the node from schema
-      node.attach(this);
-    }
+  this._setForClipboard = function(val) {
+    this.FOR_CLIPBOARD = val;
   };
 
-  this._didDeleteNode = function(node) {
-    // create the node from schema
-    node.detach(this);
-  };
-
-  this._updateContainers = function(op) {
+  this._resetContainers = function() {
     var containers = this.getIndex('type').get('container');
-    _.each(containers, function(container) {
-      container.update(op);
+    // reset containers initially
+    each(containers, function(container) {
+      container.reset();
     });
+  };
+
+  this._create = function(nodeData) {
+    var op = this.data.create(nodeData);
+    return op;
+  };
+
+  this._delete = function(nodeId) {
+    var op = this.data.delete(nodeId);
+    return op;
+  };
+
+  this._update = function(path, diff) {
+    var op = this.data.update(path, diff);
+    return op;
+  };
+
+  this._set = function(path, value) {
+    var op = this.data.set(path, value);
+    return op;
   };
 };
 

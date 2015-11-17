@@ -4,15 +4,14 @@ var _ = require('../../util/helpers');
 var oo = require('../../util/oo');
 var PathAdapter = require('../../util/PathAdapter');
 
-/*
- * Index for Nodes.
- *
- * Node indexes are first-class citizens in Substance.Data.
- * I.e., they are updated after each operation.
- *
- * @class NodeIndex
- *
- * @memberof module:Data
+/**
+  Index for Nodes.
+
+  Node indexes are first-class citizens in {@link model/data/Data}.
+  I.e., they are updated after each operation, and before any other listener is notified.
+
+  @class
+  @abstract
  */
 var NodeIndex = function() {
   /**
@@ -20,8 +19,6 @@ var NodeIndex = function() {
    *
    * @property {PathAdapter} index
    * @private
-   *
-   * @instance module:Data.NodeIndex
    */
   this.index = new PathAdapter();
 };
@@ -31,11 +28,11 @@ NodeIndex.Prototype = function() {
   /**
    * Get all indexed nodes for a given path.
    *
-   * @param {Array} path
+   * @param {Array<String>} path
    * @returns A node or an object with ids and nodes as values.
    */
-  // TODO: what is the correct return value. We have arrays at some places.
   this.get = function(path) {
+    // TODO: what is the correct return value. We have arrays at some places.
     // HACK: unwrap objects on the index when method is called without a path
     if (!path) return this.getAll();
     return this.index.get(path) || {};
@@ -85,7 +82,7 @@ NodeIndex.Prototype = function() {
    * Override this in subclasses for customization.
    *
    * @private
-   * @param {Node} node
+   * @param {model/data/Node} node
    */
   this.create = function(node) {
     var values = node[this.property];
@@ -103,7 +100,7 @@ NodeIndex.Prototype = function() {
    * Override this in subclasses for customization.
    *
    * @private
-   * @param {Node} node
+   * @param {model/data/Node} node
    */
   this.delete = function(node) {
     var values = node[this.property];
@@ -121,7 +118,7 @@ NodeIndex.Prototype = function() {
    * Override this in subclasses for customization.
    *
    * @private
-   * @param {Node} node
+   * @param {model/data/Node} node
    */
   this.update = function(node, path, newValue, oldValue) {
     if (!this.select(node) || path[1] !== this.property) return;
@@ -158,10 +155,7 @@ NodeIndex.Prototype = function() {
   /**
    * Clone this index.
    *
-   * @method clone
    * @return A cloned NodeIndex.
-   *
-   * @memberof module:Data.NodeIndex.prototype
    */
   this.clone = function() {
     var NodeIndexClass = this.constructor;
@@ -184,12 +178,9 @@ oo.initClass( NodeIndex );
 /**
  * Create a new NodeIndex using the given prototype as mixin.
  *
- * @method create
  * @param {Object} prototype
  * @static
- * @return A customized NodeIndex.
- *
- * @memberof module:Data.NodeIndex
+ * @returns {model/data/NodeIndex} A customized NodeIndex.
  */
 NodeIndex.create = function(prototype) {
   var index = _.extend(new NodeIndex(), prototype);

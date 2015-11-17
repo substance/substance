@@ -1,10 +1,12 @@
 'use strict';
 
+var extend = require('lodash/object/extend');
+var includes = require('lodash/collection/includes');
+var capitalize = require('lodash/string/capitalize');
 var oo = require('../../util/oo');
 var Component = require('../../ui/Component');
 var $$ = Component.$$;
 var AnnotationTool = require('../../ui/AnnotationTool');
-var _ = require('../../util/helpers');
 
 var EditLinkPrompt = Component.extend({
 
@@ -75,14 +77,14 @@ LinkTool.Prototype = function() {
   this.onCommandExecuted = function(info, commandName) {
     if (commandName === this.static.command) {
       // Toggle the edit prompt when either edit is requested or a new link has been created
-      if (_.includes(['edit','create'], info.mode)) {
+      if (includes(['edit','create'], info.mode)) {
         this.togglePrompt();
       }
     }
   };
 
   this.togglePrompt = function() {
-    var newState = _.extend({}, this.state, {showPrompt: !this.state.showPrompt});
+    var newState = extend({}, this.state, {showPrompt: !this.state.showPrompt});
     this.setState(newState);
   };
 
@@ -114,10 +116,10 @@ LinkTool.Prototype = function() {
 
 
   this.render = function() {
-    var title = this.props.title || _.capitalize(this.getName());
+    var title = this.props.title || capitalize(this.getName());
 
     if (this.state.mode) {
-      title = [_.capitalize(this.state.mode), title].join(' ');
+      title = [capitalize(this.state.mode), title].join(' ');
     }
 
     var el = $$('div')

@@ -1,31 +1,33 @@
 'use strict';
 
 var oo = require('../../util/oo');
-var _ = require('../../util/helpers');
-var Node = require('../../model/DocumentNode');
+var map = require('lodash/collection/map');
+var DocumentNode = require('../../model/DocumentNode');
 var TableMatrix = require('./TableMatrix');
 var ParentNodeMixin = require('../../model/ParentNodeMixin');
 
-var Table = Node.extend(ParentNodeMixin.prototype, {
+function Table() {
+  Table.super.apply(this, arguments);
 
-  name: "table",
-  matrix: null,
-  properties: {
-    "sections": ["array", "id"],
-  },
+  ParentNodeMixin.call(this, 'sections');
 
-  didInitialize: function() {
+  this.matrix = null;
+}
+
+Table.Prototype = function() {
+
+  this.didInitialize = function() {
     ParentNodeMixin.call(this, 'sections');
-  },
+  };
 
-  getSections: function() {
+  this.getSections = function() {
     var doc = this.getDocument();
-    return _.map(this.sections, function(id) {
+    return map(this.sections, function(id) {
       return doc.get(id);
     }, this);
-  },
+  };
 
-  getSectionAt: function(secIdx) {
+  this.getSectionAt = function(secIdx) {
     var doc = this.getDocument();
     var secId = this.sections[secIdx];
     if (secId) {
@@ -33,19 +35,15 @@ var Table = Node.extend(ParentNodeMixin.prototype, {
     } else {
       return null;
     }
-  },
+  };
 
-  attach: function() {
-    this.super.attach.apply(this, arguments);
-  },
-
-  getMatrix: function() {
+  this.getMatrix = function() {
     if (!this.matrix) {
       this.matrix = new TableMatrix(this);
       this.matrix.update();
     }
     return this.matrix;
-  },
+  };
 
   /*
    * Provides a cell iterator that allows convenient traversal regardless of
@@ -53,11 +51,11 @@ var Table = Node.extend(ParentNodeMixin.prototype, {
    *
    * @return {ve.dm.TableNode.CellIterator}
    */
-  getIterator: function() {
+  this.getIterator = function() {
     return new Table.CellIterator(this);
-  },
+  };
 
-  getSize: function ( dimension ) {
+  this.getSize = function ( dimension ) {
     var dim = this.matrix.getSize();
     if ( dimension === 'row' ) {
       return dim[0];
@@ -66,9 +64,12 @@ var Table = Node.extend(ParentNodeMixin.prototype, {
     } else {
       return dim;
     }
-  }
+  };
 
-});
+};
+
+oo.inherit(Table, DocumentNode);
+oo.mixin(Table, ParentNodeMixin);
 
 Object.defineProperties(Table.prototype, {
   rowNodes: {
@@ -78,12 +79,11 @@ Object.defineProperties(Table.prototype, {
   }
 });
 
+Table.static.name = "table";
 
-Table.static.components = ['sections'];
-
-Table.static.defaultProperties = {
-  sections: []
-};
+Table.static.defineSchema({
+  "sections": { type: ["id"], 'default': [] }
+});
 
 Table.static.blockType = true;
 

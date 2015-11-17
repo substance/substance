@@ -7,8 +7,6 @@ function TextBlock() {
   TextNode.apply(this, arguments);
 }
 
-TextBlock.Prototype = function() {};
-
 oo.inherit(TextBlock, TextNode);
 
 TextBlock.static.blockType = true;

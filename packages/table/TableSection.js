@@ -1,27 +1,24 @@
 'use strict';
 
-var _ = require('../../util/helpers');
-var Node = require('../../model/DocumentNode');
+var oo = require('../../util/oo');
+var DocumentNode = require('../../model/DocumentNode');
 var ParentNodeMixin = require('../../model/ParentNodeMixin');
 
-var TableSection = Node.extend(ParentNodeMixin.prototype, {
-  displayName: "TableSection",
-  name: "table-section",
-  properties: {
-    "parent": "id",
-    "rows": ["array", "id"],
-    "sectionType": "string",
-  },
-  didInitialize: function() {
-    ParentNodeMixin.call(this, 'rows');
-  },
-  getRows: function() {
+function TableSection() {
+  TableSection.super.apply(this, arguments);
+
+  ParentNodeMixin.call(this, 'rows');
+}
+
+TableSection.Prototype = function() {
+
+  this.getRows = function() {
     var doc = this.getDocument();
-    return _.map(this.rows, function(id) {
+    return this.rows.map(function(id) {
       return doc.get(id);
-    }, this);
-  },
-  getRowAt: function(rowIdx) {
+    }.bind(this));
+  };
+  this.getRowAt = function(rowIdx) {
     var doc = this.getDocument();
     var rowId = this.rows[rowIdx];
     if (rowId) {
@@ -29,15 +26,19 @@ var TableSection = Node.extend(ParentNodeMixin.prototype, {
     } else {
       return null;
     }
-  },
-});
-
-TableSection.static.components = ['rows'];
-
-TableSection.static.defaultProperties = {
-  sectionType: 'tbody',
-  rows: []
+  };
 };
+
+oo.inherit(TableSection, DocumentNode);
+oo.mixin(TableSection, ParentNodeMixin);
+
+TableSection.static.name = "table-section";
+
+TableSection.static.defineSchema({
+  "parent": "id",
+  "rows": { type: ["id"], default: [] },
+  "sectionType": { type: "string", default: 'tbody'},
+});
 
 Object.defineProperties(TableSection.prototype, {
   cellNodes: {

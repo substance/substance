@@ -12,6 +12,10 @@ var NOP = "NOP";
 var DEL = "delete";
 var INS = "insert";
 
+/*
+  @class
+  @extends Operation
+*/
 var ArrayOperation = function(data) {
   Operation.call(this);
 

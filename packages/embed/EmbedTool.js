@@ -1,5 +1,8 @@
+'use strict';
+
+var extend = require('lodash/object/extend');
+var capitalize = require('lodash/string/capitalize');
 var SurfaceTool = require('../../ui/SurfaceTool');
-var _ = require('../../util/helpers');
 var Component = require('../../ui/Component');
 var $$ = Component.$$;
 
@@ -28,7 +31,7 @@ var EmbedTool = SurfaceTool.extend({
   },
 
   onClick: function() {
-    var newState = _.extend({}, this.state, {showPrompt: !this.state.showPrompt});
+    var newState = extend({}, this.state, {showPrompt: !this.state.showPrompt});
     this.setState(newState);
   },
 
@@ -45,10 +48,10 @@ var EmbedTool = SurfaceTool.extend({
   },
 
   render: function() {
-    var title = this.props.title || _.capitalize(this.getName());
+    var title = this.props.title || capitalize(this.getName());
 
     if (this.state.mode) {
-      title = [_.capitalize(this.state.mode), title].join(' ');
+      title = [capitalize(this.state.mode), title].join(' ');
     }
 
     var el = $$('div')

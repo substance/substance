@@ -1,88 +1,74 @@
+/* jshint latedef:nofunc */
+
 'use strict';
 
 var oo = require('../../util/oo');
+var isBoolean = require('lodash/lang/isBoolean');
+var isNumber = require('lodash/lang/isNumber');
+var isString = require('lodash/lang/isString');
+var isArray = require('lodash/lang/isArray');
+var isObject = require('lodash/lang/isObject');
+var cloneDeep = require('lodash/lang/cloneDeep');
 var each = require('lodash/collection/each');
 var extend = require('lodash/object/extend');
-var uuid = require('../../util/uuid');
 var EventEmitter = require('../../util/EventEmitter');
 
-/*
- * Base node implemention.
- *
- * @class Node
- * @extends EventEmitter
- * @param {Object} properties
- *
- * @memberof module:Data
+/**
+  Base node implementation.
+
+  @class Node
+  @node
+  @extends EventEmitter
+  @param {Object} properties
+
+  @prop {String} id an id that is unique within this data
+
  */
-function Node( properties ) {
+function Node(props) {
   EventEmitter.call(this);
 
-  this.properties = extend({}, this.getDefaultProperties(), properties);
-  this.properties.type = this.constructor.static.name;
-  this.properties.id = this.properties.id || uuid(this.properties.type);
+  var NodeClass = this.constructor;
 
-  this.didInitialize();
+  if (!NodeClass.static.name) {
+    throw new Error('Every NodeClass must provide a static property "name".');
+  }
+
+  each(NodeClass.static.schema, function(prop, name) {
+    // check integrity
+    // TODO: more! e.g. type check
+    // mandatory properties
+    var propIsGiven = props.hasOwnProperty(name);
+    var hasDefault = prop.hasOwnProperty('default');
+    var isOptional = prop.optional;
+    if ( (!isOptional && !hasDefault) && !propIsGiven) {
+      throw new Error('Property ' + name + ' is mandatory for node type ' + this.type);
+    }
+    if (propIsGiven) {
+      this[name] = _checked(prop, props[name]);
+    } else if (hasDefault) {
+      this[name] = cloneDeep(_checked(prop, prop.default));
+    } else {
+      // property is optional
+    }
+  }, this);
 }
 
 Node.Prototype = function() {
 
   /**
-   * The node's schema.
-   *
-   * @type {Object}
-   */
-  this.properties = {
-    type: 'string',
-    id: 'string'
-  };
+    Check if the node is of a given type.
 
-  this.didInitialize = function() {};
-
-  /**
-   * Serialize to JSON.
-   *
-   * @method toJSON
-   * @return Plain object.
-   *
-   * @memberof module:Data.Node.prototype
-   */
-  this.toJSON = function() {
-    return this.properties;
-  };
-
-  /**
-   * Get default properties.
-   *
-   * Stub implementation.
-   *
-   * @method getDefaultProperties
-   * @return An object containing default properties.
-   *
-   * @memberof module:Data.Node.prototype
-   */
-  this.getDefaultProperties = function() {};
-
-  /**
-   * Check if the node is of a given type.
-   *
-   * @method isInstanceOf
-   * @param {String} typeName
-   * @return true if the node has a parent with given type, false otherwise.
-   *
-   * @memberof module:Data.Node.prototype
-   */
+    @param {String} typeName
+    @returns {Boolean} true if the node has a parent with given type, false otherwise.
+  */
   this.isInstanceOf = function(typeName) {
     return Node.isInstanceOf(this.constructor, typeName);
   };
 
   /**
-   * Get a the list of all polymorphic types.
-   *
-   * @method getTypeNames
-   * @return An array of type names.
-   *
-   * @memberof module:Data.Node.prototype
+    Get a the list of all polymorphic types.
+
+    @returns {String[]} An array of type names.
    */
   this.getTypeNames = function() {
     var typeNames = [];
@@ -97,15 +83,12 @@ Node.Prototype = function() {
   /**
    * Get the type of a property.
    *
-   * @method getPropertyType
    * @param {String} propertyName
-   * @return The property's type.
-   *
-   * @memberof module:Data.Node.prototype
+   * @returns The property's type.
    */
   this.getPropertyType = function(propertyName) {
     var schema = this.constructor.static.schema;
-    return schema[propertyName];
+    return schema[propertyName].type;
   };
 
 };
@@ -114,34 +97,38 @@ oo.inherit(Node, EventEmitter);
 
 /**
  * Symbolic name for this model class. Must be set to a unique string by every subclass.
- * @static
- * @property name {String}
  *
- * @memberof module:Data.Node
+ * @static
+ * @type {String}
  */
 Node.static.name = "node";
 
-/**
- * Read-only properties.
- *
- * @property readOnlyProperties {Array}
- * @static
- *
- * @memberof module:Data.Node
- */
-// FIXME: this is not working. We can't rely on static attributes
-// for defining node properties, as they will be defined when inherited
-// If you really need it, make sure you call Node.static.initNodeClass(NodeClazz) afterwards
-Node.static.readOnlyProperties = ['type', 'id'];
+Node.static.defineSchema = function(schema) {
+  // in ES6 we would just `this` which is bound to the class
+  var NodeClass = this.__class__;
+  _defineSchema(NodeClass, schema);
+};
+
+Node.static.defineSchema({
+  id: 'string'
+});
+
+Object.defineProperty(Node.prototype, 'type', {
+  configurable: false,
+  get: function() {
+    return this.constructor.static.name;
+  },
+  set: function() {
+    throw new Error('Property "type" is read-only.');
+  }
+});
 
 /**
- * Internal implementation of Node.prototype.isInstanceOf.
- *
- * @method isInstanceOf
- * @static
- * @private
- *
- * @memberof module:Data.Node
+  Internal implementation of Node.prototype.isInstanceOf.
+
+  @static
+  @private
+  @returns {Boolean}
  */
  Node.isInstanceOf = function(NodeClass, typeName) {
   var staticData = NodeClass.static;
@@ -156,85 +143,88 @@ Node.static.readOnlyProperties = ['type', 'id'];
 
 Node.static.isInstanceOf = Node.isInstanceOf;
 
-var defineProperty = function(prototype, property, readonly) {
-  var getter, setter;
-  getter = function() {
-    return this.properties[property];
-  };
-  if (readonly) {
-    setter = function() {
-      throw new Error("Property " + property + " is readonly!");
-    };
-  } else {
-    setter = function(val) {
-      this.properties[property] = val;
-      return this;
-    };
-  }
-  var spec = {
-    get: getter,
-    set: setter
-  };
-  Object.defineProperty(prototype, property, spec);
-};
+// ### Internal implementation
 
-var defineProperties = function(NodeClass) {
-  var prototype = NodeClass.prototype;
+function _defineSchema(NodeClass, schema) {
+  var compiledSchema = _compileSchema(schema);
+  // collects a full schema considering the schemas of parent class
+  // we will use the unfolded schema, check integrity of the given props (mandatory, readonly)
+  // or fill in default values for undefined properties.
+  NodeClass.static.schema = _unfoldedSchema(NodeClass, compiledSchema);
+  // computes the set of default properties only once
+  NodeClass.static.defaultProps = _extractDefaultProps(NodeClass);
+}
 
-
-  // any property will cause problems for which new Object[name] !== undefined
-  var obj = {};
-
-  if (!NodeClass.static.schema) return;
-
-  each(NodeClass.static.schema, function(type, property) {
-    // check if the property name clashes with a Javascript Object property
-    // which would cause problems
-    if (obj[property]) {
-      throw new Error('Property with name ' + property + ' is not allowed.');
+function _compileSchema(schema) {
+  var compiledSchema = {};
+  each(schema, function(definition, name) {
+    if (isString(definition) || isArray(definition)) {
+      definition = { type: definition };
     }
-    var readonly = ( NodeClass.static.readOnlyProperties &&
-      NodeClass.static.readOnlyProperties.indexOf(property) > 0 );
-    defineProperty(prototype, property, readonly);
+    definition = _compileDefintion(definition);
+    compiledSchema[name] = definition;
   });
-};
+  return compiledSchema;
+}
 
-var prepareSchema = function(NodeClass) {
-  var schema = NodeClass.static.schema;
-  var parentStatic = Object.getPrototypeOf(NodeClass.static);
-  var parentSchema = parentStatic.schema;
-  if (parentSchema) {
-    NodeClass.static.schema = extend({}, parentSchema, schema);
+function _compileDefintion(definition) {
+  var result = definition;
+  if (isArray(definition.type) && definition[0] !== "array") {
+    definition.type = [ "array", definition.type[0] ];
+  } else if (definition.type === 'text') {
+    result = {
+      type: "string",
+      role: "text",
+      default: ''
+    };
   }
-};
+  return result;
+}
 
-var initNodeClass = function(NodeClass, proto) {
-  // when called via Node.extend we auto-magically copy the
-  // properties into the static scope
-  if (proto) {
-    if (proto.properties) {
-      NodeClass.static.schema = proto.properties;
+function _unfoldedSchema(NodeClass, compiledSchema) {
+  var schemas = [compiledSchema];
+  var clazz = NodeClass;
+  while(clazz) {
+    var parentProto = Object.getPrototypeOf(clazz.prototype);
+    if (!parentProto) {
+      break;
     }
+    clazz = parentProto.constructor;
+    if (clazz && clazz.static && clazz.static.schema) {
+      schemas.unshift(clazz.static.schema);
+    }
+  }
+  schemas.unshift({});
+  return extend.apply(null, schemas);
+}
+
+function _extractDefaultProps(NodeClass) {
+  var unfoldedSchema = NodeClass.static.unfoldedSchema;
+  var defaultProps = {};
+  each(unfoldedSchema, function(prop, name) {
+    if (prop.hasOwnProperty('default')) {
+      defaultProps[name] = prop['default'];
+    }
+  });
+  return defaultProps;
+}
+
+function _checked(prop, value) {
+  var type;
+  if (isArray(prop.type)) {
+    type = "array";
   } else {
-    // TODO: we should use static.properties for sake of consistency
-    if (NodeClass.prototype.hasOwnProperty('properties')) {
-      NodeClass.static.schema = NodeClass.prototype.properties;
-    }
+    type = prop.type;
   }
-  defineProperties(NodeClass);
-  prepareSchema(NodeClass);
-  NodeClass.type = NodeClass.static.name;
-};
-
-Node.static.initNodeClass = initNodeClass;
-
-// This makes a customized Node.extend() implementation, by overriding default
-// key property names, and adding a post-processing hook.
-// All subclasses will use this configuration.
-oo.makeExtensible(Node, { "name": true, "displayName": true, "properties": true },
-  initNodeClass
-);
-
-initNodeClass(Node);
+  if (type === "string" && !isString(value) ||
+      type === "boolean" && !isBoolean(value) ||
+      type === "number" && !isNumber(value) ||
+      type === "array" && !isArray(value) ||
+      type === "id" && !isString(value) ||
+      type === "object" && !isObject(value)) {
+    throw new Error('Illegal value type for property ' + prop.name + ': expected ' + type + ', was ' + (typeof value));
+  }
+  return value;
+}
 
 module.exports = Node;
