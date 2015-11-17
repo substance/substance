@@ -292,9 +292,24 @@ DefaultDOMElement.parseHtml = function(html) {
       return new DefaultDOMElement(root).childNodes;
     }
   }
+
   return map($(html), function(el) {
     return new DefaultDOMElement(el);
   });
+};
+
+DefaultDOMElement.parseXML = function(xml) {
+  if (inBrowser) {
+    var parser = new window.DOMParser();
+    var xmlDoc = parser.parseFromString(xml, 'text/xml');
+
+    if (xmlDoc) {
+      return new DefaultDOMElement(xmlDoc);
+    }
+  }
+
+  // This is not tested to work with Cheerio!
+  return new DefaultDOMElement($(html)[0]);
 };
 
 module.exports = DefaultDOMElement;

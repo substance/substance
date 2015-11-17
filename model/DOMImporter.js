@@ -21,7 +21,6 @@ function DOMImporter(config) {
   }
 
   this.config = extend({idAttribute: 'data-id'}, config);
-
   this.schema = config.schema;
   this.state = null;
 
@@ -32,7 +31,15 @@ function DOMImporter(config) {
   var schema = this.schema;
   var defaultTextType = schema.getDefaultTextType();
 
-  config.converters.forEach(function(converter) {
+  config.converters.forEach(function(Converter) {
+    var converter;
+    if (typeof Converter === 'function') {
+      console.log('installing converter', Converter);
+      converter = new Converter();
+    } else {
+      converter = Converter;
+    }
+
     if (!converter.type) {
       console.error('Converter must provide the type of the associated node.', converter);
       return;
@@ -52,10 +59,12 @@ function DOMImporter(config) {
     if (defaultTextType === converter.type) {
       this._defaultBlockTypeConverter = converter;
     }
-    if (NodeClass.static.blockType) {
-      this._blockTypeConverters.push(converter);
-    } else if (NodeClass.static.isInline) {
+
+    // Defaults to _blockTypeConverters
+    if (NodeClass.static.isInline) {
       this._inlineTypeConverters.push(converter);
+    } else {
+      this._blockTypeConverters.push(converter);
     }
 
   }.bind(this));
@@ -64,20 +73,6 @@ function DOMImporter(config) {
 }
 
 DOMImporter.Prototype = function DOMImporterPrototype() {
-
-  this.importDocument = function(html) {
-    // initialization
-    this.reset();
-    // converting to JSON first
-    var elements = DefaultDOMElement.parseHtml(html);
-    this.convertDocument(elements);
-    var doc = this.generateDocument();
-    return doc;
-  };
-
-  this.convertDocument = function(elements) {
-    this.convertContainer(elements);
-  };
 
   this._initState = function() {
     var state = {
@@ -208,7 +203,7 @@ DOMImporter.Prototype = function DOMImporterPrototype() {
       node = converter.import(el, node, this) || node;
       this.createNode(node);
     } else {
-      throw new Error('DOMImporter#convertElement() currently only supports block-type nodes.');
+      throw new Error('No converter found for '+el.tagName);
     }
     return node;
   };
@@ -410,8 +405,12 @@ DOMImporter.Prototype = function DOMImporterPrototype() {
           // push a new context so we can deal with reentrant calls
           state.stack.push({ path: context.path, offset: startOffset, text: ""});
           inlineNode = inlineTypeConverter.import(el, inlineNode, this) || inlineNode;
+
+          var NodeClass = this.schema.getNodeClass(inlineType);
+
+          // TODO: this should be called 'inline in future'
           // external nodes are attached to an invisible character
-          if (this.schema.isExternal(inlineType)) {
+          if (NodeClass.static.external) {
             this.customText("\u200B");
           }
           // ... and transfer the result into the current context
@@ -463,7 +462,6 @@ DOMImporter.Prototype = function DOMImporterPrototype() {
     }
     return converter;
   };
-
 
   /**
     Wraps the remaining (inline) elements of a node iterator into a default

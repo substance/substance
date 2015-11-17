@@ -7,13 +7,20 @@ var Heading = TextNode.extend({
   displayName: "Heading",
   properties: {
     "level": "number"
+  },
+
+  getTocLevel: function() {
+    return this.level;
+  },
+
+  getTocName: function() {
+    return this.name;
   }
 });
 
 // HtmlImporter
 
 Heading.static.blockType = true;
-
 Heading.static.tocType = true;
 
 module.exports = Heading;

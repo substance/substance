@@ -8,43 +8,30 @@ var each = require('lodash/collection/each');
  */
 module.exports = {
 
-  type: "figure",
+  type: 'figure',
+  tagName: 'figure',
 
-  matchElement: function(el) {
-    return el.is('figure');
-  },
-
-  import: function(el, converter) {
-    var id = converter.defaultId(el, 'fig');
-    var figure = {
-      type: this.type,
-      id: id,
-      title: "",
-      caption: ""
-    };
+  import: function(el, node, converter) {
     each(el.children, function(child) {
       var tagName = child.tagName;
       switch(tagName) {
         case 'title':
         case 'caption':
-          figure[tagName] = converter.annotatedText(child, [id, tagName]);
+          node[tagName] = converter.annotatedText(child, [node.id, tagName]);
           break;
       }
     });
-    return figure;
   },
 
-  export: function(node, converter) {
-    var id = node.id;
-    var el = $$('figure').attr('id', id);
+  export: function(node, el, converter) {
     el.append($$('title').append(
-      converter.annotatedText([id, 'title']))
+      converter.annotatedText([node.id, 'title']))
     );
     el.append(
       converter.exportElement(node.getContentNode())
     );
     el.append($$('caption').append(
-      converter.annotatedText([id, 'caption']))
+      converter.annotatedText([node.id, 'caption']))
     );
     return el;
   },
