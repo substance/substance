@@ -14,7 +14,7 @@ var Heading = TextNode.extend({
   },
 
   getTocName: function() {
-    return this.name;
+    return this.content;
   }
 });
 
