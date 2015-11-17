@@ -17,9 +17,9 @@ QUnit.module('model/HTMLImporter', {
 });
 
 function parseHtmlElement(html) {
-  var els = DOMElement.parseHtml(html);
-  return els[0];
-};
+  var docEl = DOMElement.parseHtml(html);
+  return docEl.find('body').children[0];
+}
 
 var CONTENT = '0123456789';
 

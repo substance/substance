@@ -8,12 +8,17 @@ function HTMLImporter() {
 
 HTMLImporter.Prototype = function() {
 
+  this.convertDocument = function(documentEl) {
+    var bodyEl = documentEl.find('body');
+    this.convertContainer(bodyEl.children, this.config.containerId);
+  };
+
   this.importDocument = function(html) {
     // initialization
     this.reset();
     // converting to JSON first
-    var elements = DefaultDOMElement.parseHtml(html);
-    this.convertDocument(elements);
+    var documentEl = DefaultDOMElement.parseHtml(html);
+    this.convertDocument(documentEl);
     var doc = this.generateDocument();
     return doc;
   };

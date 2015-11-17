@@ -283,21 +283,29 @@ DefaultDOMElement.NodeIterator.Prototype = function() {
 
 oo.initClass(DefaultDOMElement.NodeIterator);
 
+
+// Contract:
+// Always returns a document element that has a
+// body element inside
+// 
+// Custom converter then picks information from there
 DefaultDOMElement.parseHtml = function(html) {
   if (inBrowser) {
     var parser = new window.DOMParser();
     var htmlDoc = parser.parseFromString(html, 'text/html');
     if (htmlDoc) {
-      var root = htmlDoc.querySelector('body');
-      return new DefaultDOMElement(root).childNodes;
+      return new DefaultDOMElement(htmlDoc);
     }
   }
 
-  return map($(html), function(el) {
-    return new DefaultDOMElement(el);
-  });
+  // This is not tested to work with Cheerio!  
+  return new DefaultDOMElement($(html)[0]);
+  // return map($(html), function(el) {
+  //   return new DefaultDOMElement(el);
+  // });
 };
 
+// Always returns a 
 DefaultDOMElement.parseXML = function(xml) {
   if (inBrowser) {
     var parser = new window.DOMParser();
@@ -309,7 +317,7 @@ DefaultDOMElement.parseXML = function(xml) {
   }
 
   // This is not tested to work with Cheerio!
-  return new DefaultDOMElement($(html)[0]);
+  return new DefaultDOMElement($(xml)[0]);
 };
 
 module.exports = DefaultDOMElement;
