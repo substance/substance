@@ -4,7 +4,7 @@ var oo = require('../util/oo');
 var each = require('lodash/collection/each');
 var Annotator = require('./Annotator');
 var Registry = require('../util/Registry');
-var $$ = require('../ui/Component').$$;
+var $$ = require('../ui/VirtualDOMElement').createElement;
 
 function DOMExporter(config) {
   if (!config.converters) {
@@ -15,6 +15,7 @@ function DOMExporter(config) {
     doc: null
   };
   this.config = config;
+  this.$$ = $$;
   config.converters.forEach(function(converter) {
     if (!converter.type) {
       console.error('Converter must provide the type of the associated node.', converter);

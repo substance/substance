@@ -1,6 +1,5 @@
 'use strict';
 
-var $$ = require('../../ui/Component').$$;
 var each = require('lodash/collection/each');
 var isArray = require('lodash/lang/isArray');
 var last = require('lodash/array/last');
@@ -57,6 +56,7 @@ var ListHtmlConverter = {
   },
 
   export: function(node, el, converter) {
+    var $$ = converter.$$;
     return this.render(node, {
       createListElement: function(list) {
         var tagName = list.ordered ? 'ol' : 'ul';
@@ -85,10 +85,9 @@ var ListHtmlConverter = {
         // nothing to change
       } else if (item.level > level) {
         // push structure
-        var _tagName = item.ordered ? 'ol' : 'ul';
         for (j = level; j < item.level; j++) {
           // create a list element and wrap it into a 'li'
-          var listEl = $$(_tagName);
+          var listEl = impl.createListElement(item);
           current.append(listEl);
           // update level and stack
           current = listEl;

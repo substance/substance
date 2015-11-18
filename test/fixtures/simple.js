@@ -1,6 +1,6 @@
 'use strict';
 
-var Article = require('../test_article');
+var Article = require('../model/TestArticle');
 
 module.exports = function simple() {
   var article = new Article();
