@@ -1,3 +1,5 @@
+'use strict';
+
 var oo = require('../../util/oo');
 var HTMLExporter = require('../../model/HTMLExporter');
 var converters = require('./TestHTMLImporter').converters;

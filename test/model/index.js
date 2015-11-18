@@ -1,5 +1,5 @@
 'use strict';
 
-var TestArticle = require('./test_article');
+var TestArticle = require('./TestArticle');
 
 module.exports = TestArticle;
