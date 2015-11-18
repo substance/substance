@@ -52,16 +52,13 @@ DocumentNode.Prototype = function() {
     return node;
   };
 
-  this.getComponents = function() {
-    var componentNames = this.constructor.static.components;
-    if (!componentNames) {
-      console.warn('Contract: a node must define its editable properties.', this.constructor.static.name);
-    }
-    return componentNames || [];
+  this.getAddressablePropertyNames = function() {
+    var addressablePropertyNames = this.constructor.static.addressablePropertyNames;
+    return addressablePropertyNames || [];
   };
 
   this.getPropertyNameAt = function(idx) {
-    var propertyNames = this.constructor.static.components || [];
+    var propertyNames = this.constructor.static.addressablePropertyNames || [];
     return propertyNames[idx];
   };
 
