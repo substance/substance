@@ -283,26 +283,47 @@ DefaultDOMElement.NodeIterator.Prototype = function() {
 
 oo.initClass(DefaultDOMElement.NodeIterator);
 
+/*
+  TODO: discuss
 
-// Contract:
-// Always returns a document element that has a
-// body element inside
-// 
-// Custom converter then picks information from there
+  @param {String} html
+  @returns {DOMElement|DOMElement[]}
+*/
 DefaultDOMElement.parseHtml = function(html) {
+  var isFullDoc = (html.search('<html>')>=0);
+  var nativeEls = [];
+
   if (inBrowser) {
     var parser = new window.DOMParser();
     var htmlDoc = parser.parseFromString(html, 'text/html');
-    if (htmlDoc) {
-      return new DefaultDOMElement(htmlDoc);
+    if (!htmlDoc) {
+      console.error('DOMParser.parseFromString failed. Falling back to jQuery based parsing.');
+      nativeEls = $(html);
+    } else {
+      if (isFullDoc) {
+        nativeEls = [htmlDoc];
+      } else {
+        // the provided html is just a partial
+        var body = htmlDoc.querySelector('body');
+        nativeEls = body.childNodes;
+      }
     }
+  } else {
+    nativeEls = $(html);
   }
 
-  // This is not tested to work with Cheerio!  
-  return new DefaultDOMElement($('<html><body>'+html+'</body></html>')[0]);
+  var elements = [];
+  for (var i = 0; i < nativeEls.length; i++) {
+    elements.push(new DefaultDOMElement(nativeEls[i]));
+  }
+  if (elements.length === 1) {
+    return elements[0];
+  } else {
+    return elements;
+  }
 };
 
-// Always returns a 
+// Always returns a
 DefaultDOMElement.parseXML = function(xml) {
   if (inBrowser) {
     var parser = new window.DOMParser();

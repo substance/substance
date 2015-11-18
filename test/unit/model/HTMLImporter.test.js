@@ -16,16 +16,11 @@ QUnit.module('model/HTMLImporter', {
   }
 });
 
-function parseHtmlElement(html) {
-  var docEl = DOMElement.parseHtml(html);
-  return docEl.find('body').children[0];
-}
-
 var CONTENT = '0123456789';
 
 QUnit.test("Importing paragraph", function(assert) {
   var html = '<p data-id="p1">' + CONTENT + '</p>';
-  var el = parseHtmlElement(html);
+  var el = DOMElement.parseHtml(html);
   var node = importer.convertElement(el);
   assert.deepEqual(node, {
     id: "p1",
@@ -36,13 +31,18 @@ QUnit.test("Importing paragraph", function(assert) {
 
 QUnit.test("Importing paragraph with strong", function(assert) {
   var html = '<p data-id="p1">0123<strong data-id="s1">456</strong>789</p>';
-  var doc = importer.importDocument(html);
-  assert.equal(CONTENT, doc.get(['p1', 'content']));
+  var el = DOMElement.parseHtml(html);
+  importer.convertElement(el);
+  var doc = importer.generateDocument();
+  var p1 = doc.get('p1');
+  var s1 = doc.get('s1');
+  assert.equal(CONTENT, p1.content);
+  assert.equal('456', s1.getText());
 });
 
 QUnit.test("Importing h1", function(assert) {
   var html = '<h1 data-id="h1">' + CONTENT + '</h1>';
-  var el = parseHtmlElement(html);
+  var el = DOMElement.parseHtml(html);
   var node = importer.convertElement(el);
   assert.deepEqual(node, {
     id: "h1",
@@ -54,7 +54,7 @@ QUnit.test("Importing h1", function(assert) {
 
 QUnit.test("Importing h2", function(assert) {
   var html = '<h2 data-id="h2">' + CONTENT + '</h2>';
-  var el = parseHtmlElement(html);
+  var el = DOMElement.parseHtml(html);
   var node = importer.convertElement(el);
   assert.deepEqual(node, {
     id: "h2",

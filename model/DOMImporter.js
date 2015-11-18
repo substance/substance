@@ -147,10 +147,10 @@ DOMImporter.Prototype = function DOMImporterPrototype() {
     @param {ui/DOMElement} containerEl An element representing a container node.
     @param {String} containerId The id of the target container node.
    */
-  this.convertContainer = function(nodes) {
+  this.convertContainer = function(elements) {
     var state = this.state;
     state.container = [];
-    var iterator = new DefaultDOMElement.NodeIterator(nodes);
+    var iterator = new DefaultDOMElement.NodeIterator(elements);
     while(iterator.hasNext()) {
       var el = iterator.next();
       var blockTypeConverter = this._getBlockTypeConverterForElement(el);
