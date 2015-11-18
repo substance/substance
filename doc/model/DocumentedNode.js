@@ -2,7 +2,6 @@
 
 var oo = require('../../util/oo');
 var Node = require('../../model/DocumentNode');
-var filter = require('lodash/collection/filter');
 
 function DocumentedNode() {
   DocumentedNode.super.apply(this, arguments);

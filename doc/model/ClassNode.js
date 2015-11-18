@@ -32,7 +32,7 @@ ClassNode.Prototype = function() {
   this.getMemberCategories = function() {
     return MEMBER_CATEGORIES;
   };
-}
+};
 
 oo.inherit(ClassNode, DocumentedNode);
 oo.mixin(ClassNode, MemberContainerMixin);

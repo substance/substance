@@ -118,7 +118,6 @@ TransactionDocument.Prototype = function() {
   this.apply = function(documentChange) {
     _.each(documentChange.ops, function(op) {
       this.data.apply(op);
-      this._updateContainers(op);
     }, this);
   };
 

@@ -12,17 +12,12 @@ var ParentNodeMixin = require('../../model/ParentNodeMixin');
 // import/export.
 function List() {
   List.super.apply(this, arguments);
-
-  ParentNodeMixin.call(this, 'items');
 }
 
 List.Prototype = function() {
 
-  this.getItems = function() {
-    var doc = this.getDocument();
-    return this.items.map(function(id) {
-      return doc.get(id);
-    }.bind(this));
+  this.getChildrenProperty = function() {
+    return 'items';
   };
 
   this.removeItem = function(id) {
@@ -43,20 +38,13 @@ List.Prototype = function() {
 };
 
 oo.inherit(List, BlockNode);
+oo.mixin(List, ParentNodeMixin);
 
 List.static.name = "list";
 
 List.static.defineSchema({
   ordered: { type: "boolean", default: false },
-  items: ["id"]
-});
-
-Object.defineProperties(List.prototype, {
-  itemNodes: {
-    'get': function() {
-      return this.getItems();
-    }
-  }
+  items: { type: ["id"], defaut: [] }
 });
 
 module.exports = List;

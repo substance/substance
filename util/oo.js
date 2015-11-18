@@ -3,6 +3,7 @@
 'use strict';
 
 var extend = require('lodash/object/extend');
+var bind = require('lodash/function/bind');
 
 /**
  * Helpers for oo programming.
@@ -69,7 +70,7 @@ oo.mixin = function(clazz, mixinClazz) {
     if ( key === 'constructor' ||
          !mixinProto.hasOwnProperty(key) ||
          // don't overwrite existing prototype members
-         clazz.hasOwnProperty(key) ) {
+         classProto.hasOwnProperty(key) ) {
       continue;
     }
     classProto[key] = mixinProto[key];
@@ -153,7 +154,6 @@ function _copyStaticProps(staticProps, parentStaticProps) {
 }
 
 function _extendClass(parent, staticProps, afterHook, proto) {
-  console.warn('DEPRECATED: oo.extend() will be dropped. It is going into a wrong direction considering ES6. Instead you should take the oo.inherit() approach.');
   if (arguments.length > 4) {
     var args = Array.prototype.slice.call(arguments, 3);
     args.unshift({});
@@ -202,7 +202,7 @@ function _makeExtensible(clazz, staticProps, afterHook) {
     oo.initClass(clazz);
   }
   clazz.static._makeExtendFunction = function(parentClazz) {
-    return _extendClass.bind(null, parentClazz, staticProps, afterHook);
+    return bind(_extendClass, null, parentClazz, staticProps, afterHook);
   };
   // add a hook that moves static properties to clazz.static
   clazz.static._afterClassInitHook = function(childClazz) {

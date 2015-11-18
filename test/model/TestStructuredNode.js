@@ -1,51 +1,22 @@
 'use strict';
 
+var oo = require('../../util/oo');
 var DocumentNode = require('../../model/DocumentNode');
 
-var StructuredNode = DocumentNode.extend({
-  name: "structured-node",
-  properties: {
-    title: "string",
-    body: "string",
-    caption: "string"
-  },
+function StructuredNode() {
+  StructuredNode.super.apply(this, arguments);
+}
+
+oo.inherit(StructuredNode, DocumentNode);
+
+StructuredNode.static.name = "structured-node";
+
+StructuredNode.static.defineSchema({
+  title: "text",
+  body: "text",
+  caption: "text"
 });
 
-StructuredNode.static.defaultProperties = {
-  title: "",
-  body: "",
-  caption: ""
-};
-
-StructuredNode.static.components = ['title', 'body', 'caption'];
-
 StructuredNode.static.blockType = true;
-
-StructuredNode.static.matchElement = function($el) {
-  return $el.is('div[typeof=structured-node]');
-};
-
-StructuredNode.static.fromHtml = function($el, converter) {
-  var id = converter.defaultId($el, 'structured-node');
-  var node = { id: id };
-  node.title = converter.annotatedText($el.find('span[property=title]'), [id, 'title']);
-  node.body = converter.annotatedText($el.find('span[property=body]'), [id, 'body']);
-  node.caption = converter.annotatedText($el.find('span[property=caption]'), [id, 'caption']);
-  return node;
-};
-
-StructuredNode.static.toHtml = function(node, converter) {
-  var id = node.id;
-  var $el = ('<div>')
-    .attr('id', id);
-
-  ['title', 'body', 'caption'].forEach(function(name) {
-    var $child = $('<span property="' + name + '">')
-      .append(converter.annotatedText([id, name]));
-    $el.append($child);
-  });
-
-  return $el;
-};
 
 module.exports = StructuredNode;

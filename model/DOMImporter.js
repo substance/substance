@@ -24,6 +24,8 @@ function DOMImporter(config) {
   this.schema = config.schema;
   this.state = null;
 
+  this.$$ = $$;
+
   this._defaultBlockTypeConverter = null;
   this._blockTypeConverters = [];
   this._inlineTypeConverters = [];
@@ -587,5 +589,7 @@ DOMImporter.Prototype = function DOMImporterPrototype() {
 
 };
 oo.initClass(DOMImporter);
+
+DOMImporter.$$ = require('../ui/VirtualDOMElement').createElement;
 
 module.exports = DOMImporter;

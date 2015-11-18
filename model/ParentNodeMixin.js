@@ -11,9 +11,7 @@ var oo = require('../util/oo');
  * @class
  * @mixin
  */
-function ParentNodeMixin(childrenProperty) {
-  this._childrenProperty = childrenProperty;
-}
+function ParentNodeMixin() {}
 
 ParentNodeMixin.Prototype = function() {
 
@@ -21,20 +19,36 @@ ParentNodeMixin.Prototype = function() {
     return true;
   };
 
+  this.getChildrenProperty = function() {
+    throw new Error('ParentNodeMixin.getChildrenProperty is abstract and must be implemented in ' + this.constructor.name + '.');
+  };
+
   this.getChildIndex = function(child) {
-    return this[this._childrenProperty].indexOf(child.id);
+    return this[this.getChildrenProperty()].indexOf(child.id);
+  };
+
+  this.getChildren = function() {
+    var doc = this.getDocument();
+    var childrenIds = this[this.getChildrenProperty()];
+    return childrenIds.map(function(id) {
+      return doc.get(id);
+    }.bind(this));
   };
 
   this.getChildAt = function(idx) {
-    return this.getDocument().get(this[this._childrenProperty][idx]);
+    var children = this[this.getChildrenProperty()];
+    if (idx < 0 || idx >= children.length) {
+      throw new Error('Array index out of bounds: ' + idx + ", " + children.length);
+    }
+    return this.getDocument().get(children[idx]);
   };
 
   this.getChildCount = function() {
-    return this[this._childrenProperty].length;
+    return this[this.getChildrenProperty()].length;
   };
 
   this.getAddressablePropertyNames = function() {
-    return [this._childrenProperty];
+    return [this.getChildrenProperty()];
   };
 
 };

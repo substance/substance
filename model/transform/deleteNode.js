@@ -35,7 +35,7 @@ function deleteNode(tx, args) {
     var pos = address[0];
 
     if (anchor.isStart) {
-      if (pos < container.length-1) {
+      if (pos < container.getLength()-1) {
         var nextNode = container.getChildAt(pos+1);
         var nextAddress = container.getFirstAddress(nextNode);
         tx.set([anchor.id, 'startPath'], container.getPath(nextAddress));

@@ -91,6 +91,16 @@ Node.Prototype = function() {
     return schema[propertyName].type;
   };
 
+  this.toJSON = function() {
+    var data = {
+      type: this.constructor.static.name
+    };
+    each(this.constructor.static.schema, function(prop, name) {
+      data[prop.name] = this[name];
+    }, this);
+    return data;
+  };
+
 };
 
 oo.inherit(Node, EventEmitter);

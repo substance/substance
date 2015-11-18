@@ -5,7 +5,7 @@ var AnnotationCommand = require('../../../ui/AnnotationCommand');
 var docHelpers = require('../../../model/documentHelpers');
 var StubSurface = require('./StubSurface');
 
-QUnit.module('Commands/toggleAnnotation');
+QUnit.module('ui/AnnotationCommand');
 
 // Setup
 // -----------------------
