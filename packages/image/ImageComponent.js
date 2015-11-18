@@ -22,7 +22,7 @@ ImageComponent.Prototype = function() {
 
   this.render = function() {
     return $$('img')
-      .addClass('image')
+      .addClass('sc-image')
       .attr({
         "data-id": this.props.node.id,
         contentEditable: false,

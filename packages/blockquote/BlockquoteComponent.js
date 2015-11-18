@@ -12,7 +12,7 @@ function Blockquote() {
 Blockquote.Prototype = function() {
 
   this.getClassNames = function() {
-    return 'content-node sc-blockquote';
+    return 'sc-blockquote';
   };
 
   this.render = function() {

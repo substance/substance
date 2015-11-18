@@ -5,6 +5,7 @@ var oo = require('../util/oo');
 var Component = require('./Component');
 var $$ = Component.$$;
 var Panel = require('./Panel');
+var Icon = require('./FontAwesomeIcon');
 
 function TocPanel() {
   Panel.apply(this, arguments);
@@ -48,7 +49,11 @@ TocPanel.Prototype = function() {
           "data-id": node.id,
         })
         .on('click', this.handleClick)
-        .append(node.getTocName());
+        .append(
+          $$(Icon, {icon: 'fa-chevron-right'}),
+          ' ',
+          node.getTocName()
+        );
       if (state.activeNode === node.id) {
         tocEntry.addClass("sm-active");
       }

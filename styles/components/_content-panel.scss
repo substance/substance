@@ -5,8 +5,10 @@
 
   .se-panel-content-inner {
     position: relative;
-    padding: 40px;
-    padding-right: 40px;
+  }
+
+  .se-panel-content {
+    left: 20px;
   }
 
   /* For debugging purposes */

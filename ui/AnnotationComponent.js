@@ -22,15 +22,7 @@ AnnotationComponent.Prototype = function() {
   };
 
   this.getClassNames = function() {
-    var typeNames = [];
-    if (this.props.node.getTypeNames) {
-      typeNames = this.props.node.getTypeNames();
-    }
-    var classNames = typeNames.join(' ');
-    if (this.props.classNames) {
-      classNames += " " + this.props.classNames.join(' ');
-    }
-    return classNames.replace(/_/g, '-');
+    return 'sc-'+this.props.node.type;
   };
 
   this.didMount = function() {

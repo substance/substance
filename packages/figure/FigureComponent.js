@@ -16,11 +16,11 @@ FigureComponent.Prototype = function() {
     var contentNode = this.props.node.getContentNode();
     var ContentComponentClass = componentRegistry.get(contentNode.type);
     var el = $$('div')
-      .addClass("content-node figure clearfix "+this.props.node.type)
+      .addClass('sc-figure') // this.props.node.type
       .attr("data-id", this.props.node.id);
 
     el.append($$('div')
-      .addClass('label').attr("contenteditable", false)
+      .addClass('se-label').attr("contenteditable", false)
       .append(this.props.node.label)
     );
     el.append(
@@ -28,10 +28,10 @@ FigureComponent.Prototype = function() {
         tagName: 'div',
         path: [this.props.node.id, "title"]
       })
-      .addClass('title')
+      .addClass('se-title')
     );
     el.append($$('div')
-      .addClass('figure-content')
+      .addClass('se-figure-content')
       .attr('contenteditable', false)
       .append(
         $$(ContentComponentClass, {
@@ -41,13 +41,13 @@ FigureComponent.Prototype = function() {
       )
     );
     el.append($$('div')
-      .addClass('description small')
+      .addClass('se-description')
       .append(
         $$(TextProperty, {
           tagName: 'div',
           path: [this.props.node.id, "caption"]
         })
-        .addClass('caption')
+        .addClass('se-caption')
       )
     );
     return el;

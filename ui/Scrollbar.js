@@ -44,23 +44,23 @@ Scrollbar.Prototype = function() {
   };
 
   this.render = function() {
-
     var el = $$('div')
-      .addClass('scrollbar-component '+this.props.contextId)
+      .addClass('sc-scrollbar '+this.props.contextId)
       .on('mousedown', this.onMouseDown);
-    el.append($$('div').ref("thumb").addClass("thumb"));
-
+    
     if (this.props.highlights) {
       var highlightEls = this.props.highlights.map(function(h) {
         return $$('div').ref(h)
-          .addClass('highlight');
+          .addClass('se-highlight');
       });
       el.append(
         $$('div').ref('highlights')
-          .addClass('highlights')
+          .addClass('se-highlights')
           .append(highlightEls)
       );
     }
+
+    el.append($$('div').ref('thumb').addClass('se-thumb'));
     return el;
   };
 
