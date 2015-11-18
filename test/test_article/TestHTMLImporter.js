@@ -29,6 +29,12 @@ function TestHTMLImporter() {
 }
 
 TestHTMLImporter.Prototype = function() {
+
+  this.convertDocument = function(documentEl) {
+    var bodyEl = documentEl.find('body');
+    this.convertContainer(bodyEl.children, this.config.containerId);
+  };
+
 };
 
 oo.inherit(TestHTMLImporter, HTMLImporter);

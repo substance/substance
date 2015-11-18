@@ -8,11 +8,6 @@ function HTMLImporter() {
 
 HTMLImporter.Prototype = function() {
 
-  this.convertDocument = function(documentEl) {
-    var bodyEl = documentEl.find('body');
-    this.convertContainer(bodyEl.children, this.config.containerId);
-  };
-
   this.importDocument = function(html) {
     // initialization
     this.reset();
@@ -22,6 +17,33 @@ HTMLImporter.Prototype = function() {
     var doc = this.generateDocument();
     return doc;
   };
+
+  /**
+    Orchestrates conversion of a whole document.
+
+    This method should be overridden by custom importers to reflect the structure
+    of a custom HTML document, and to control where things go to within the document.
+
+    @abstract
+    @param {ui/DOMElement} documentEl the document element.
+
+    @example
+
+    The most simple implementation would take the body and convert its children to store
+    them e.g. into the 'main' container.
+
+    ```
+      this.convertDocument = function(documentEl) {
+        var bodyEl = documentEl.find('body');
+        this.convertContainer(bodyEl.children, 'main');
+      };
+    ```
+  */
+  this.convertDocument = function(documentEl) {
+    /* jshint unused:false */
+    throw new Error('This method is abstract');
+  };
+
 };
 
 oo.inherit(HTMLImporter, DOMImporter);
