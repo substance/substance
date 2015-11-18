@@ -289,21 +289,28 @@ function _parseXML(str, format) {
   if (inBrowser) {
     var parser = new window.DOMParser();
     var doc;
+    var isFullDoc;
     if (format === 'html') {
+      isFullDoc = (str.search('<html>')>=0);
       doc = parser.parseFromString(str, 'text/html');
     } else if (format === 'xml') {
       doc = parser.parseFromString(str, 'text/xml');
     }
     if (!doc) {
-      console.error('DOMParser.parseFromString failed. Falling back to jQuery based parsing.');
-      if (format === 'html') {
-        nativeEls = $(str);
-      } else {
+      // console.error('DOMParser.parseFromString failed. Falling back to jQuery based parsing.');
+      if (format === "html") {
+        if (isFullDoc) {
+          doc = $.parseXML(str);
+          nativeEls = doc.childNodes;
+        } else {
+          nativeEls = $.parseHTML(str);
+        }
+      } else if (format === "xml") {
         doc = $.parseXML(str);
+        nativeEls = doc.childNodes;
       }
     } else {
       if (format === 'html') {
-        var isFullDoc = (str.search('<html>')>=0);
         if (isFullDoc) {
           nativeEls = [doc];
         } else {
