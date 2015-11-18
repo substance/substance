@@ -558,4 +558,9 @@ DOMElement.parseHtml = function(html) {
   return DefaultDOMElement.parseHtml(html);
 };
 
+DOMElement.parseXML = function(xml) {
+  var DefaultDOMElement = require('./DefaultDOMElement');
+  return DefaultDOMElement.parseXML(xml);
+};
+
 module.exports = DOMElement;

@@ -105,10 +105,10 @@ DefaultDOMElement.Prototype = function() {
       return "text";
     } else if (this.isCommentNode()) {
       return "comment";
-    } else if (this.el.tagName) {
-      return this.tagName;
+    } else if (this.isElementNode()) {
+      return "element";
     } else {
-      throw new Error("Unknown node type");
+      throw new Error("Unsupported node type");
     }
   };
 
@@ -283,33 +283,45 @@ DefaultDOMElement.NodeIterator.Prototype = function() {
 
 oo.initClass(DefaultDOMElement.NodeIterator);
 
-/*
-  TODO: discuss
-
-  @param {String} html
-  @returns {DOMElement|DOMElement[]}
-*/
-DefaultDOMElement.parseHtml = function(html) {
-  var isFullDoc = (html.search('<html>')>=0);
+function _parseXML(str, format) {
   var nativeEls = [];
 
   if (inBrowser) {
     var parser = new window.DOMParser();
-    var htmlDoc = parser.parseFromString(html, 'text/html');
-    if (!htmlDoc) {
+    var doc;
+    if (format === 'html') {
+      doc = parser.parseFromString(str, 'text/html');
+    } else if (format === 'xml') {
+      doc = parser.parseFromString(str, 'text/xml');
+    }
+    if (!doc) {
       console.error('DOMParser.parseFromString failed. Falling back to jQuery based parsing.');
-      nativeEls = $(html);
-    } else {
-      if (isFullDoc) {
-        nativeEls = [htmlDoc];
+      if (format === 'html') {
+        nativeEls = $(str);
       } else {
-        // the provided html is just a partial
-        var body = htmlDoc.querySelector('body');
-        nativeEls = body.childNodes;
+        doc = $.parseXML(str);
+      }
+    } else {
+      if (format === 'html') {
+        var isFullDoc = (str.search('<html>')>=0);
+        if (isFullDoc) {
+          nativeEls = [doc];
+        } else {
+          // if the provided html is just a partial
+          // then DOMParser still creates a full document
+          // thus we pick the body and provide its content
+          var body = doc.querySelector('body');
+          nativeEls = body.childNodes;
+        }
+      } else if (format === 'xml') {
+        // Note: as XML parser we always get a document with childNodes representing
+        // the content
+        // TODO: is it ok just to provide the 'content', not the XML meta info?
+        nativeEls = doc.childNodes;
       }
     }
   } else {
-    nativeEls = $(html);
+    nativeEls = $(str);
   }
 
   var elements = [];
@@ -321,21 +333,22 @@ DefaultDOMElement.parseHtml = function(html) {
   } else {
     return elements;
   }
+}
+
+/*
+  @param {String} html
+  @returns {DOMElement|DOMElement[]}
+*/
+DefaultDOMElement.parseHtml = function(html) {
+  return _parseXML(html, 'html');
 };
 
-// Always returns a
+/*
+  @param {String} xml
+  @returns {DOMElement|DOMElement[]}
+*/
 DefaultDOMElement.parseXML = function(xml) {
-  if (inBrowser) {
-    var parser = new window.DOMParser();
-    var xmlDoc = parser.parseFromString(xml, 'text/xml');
-
-    if (xmlDoc) {
-      return new DefaultDOMElement(xmlDoc);
-    }
-  }
-
-  // This is not tested to work with Cheerio!
-  return new DefaultDOMElement($(xml)[0]);
+  return _parseXML(xml, 'xml');
 };
 
 module.exports = DefaultDOMElement;
