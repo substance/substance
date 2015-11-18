@@ -17,7 +17,7 @@ HTMLImporter.Prototype = function() {
     // initialization
     this.reset();
     // converting to JSON first
-    var documentEl = DefaultDOMElement.parseHtml(html);
+    var documentEl = DefaultDOMElement.parseHTML(html);
     this.convertDocument(documentEl);
     var doc = this.generateDocument();
     return doc;

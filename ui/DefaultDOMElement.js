@@ -346,7 +346,7 @@ function _parseXML(str, format) {
   @param {String} html
   @returns {DOMElement|DOMElement[]}
 */
-DefaultDOMElement.parseHtml = function(html) {
+DefaultDOMElement.parseHTML = function(html) {
   return _parseXML(html, 'html');
 };
 
