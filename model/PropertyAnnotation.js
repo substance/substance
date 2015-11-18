@@ -3,7 +3,6 @@
 var isEqual = require('lodash/lang/isEqual');
 var oo = require('../util/oo');
 var DocumentNode = require('./DocumentNode');
-var Schema = require('./DocumentSchema');
 
 /**
    An annotation can be used to overlay text and give it a special meaning.
