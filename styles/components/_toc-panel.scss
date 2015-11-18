@@ -10,10 +10,12 @@
       font-weight: 600;
       letter-spacing: $heading-letterspacing;
       display: block;
-      padding: 5px 0px;
-      vertical-align: center;
+      padding: 2px 0px;
+      line-height: 30px;
+      height: 30px;
 
       i.fa {
+        padding-right: 5px;
         font-size: 12px;
         visibility: hidden;
       }
@@ -32,17 +34,17 @@
 
       &.sm-level-1 {
         font-size: 16px;
-        padding-left: 15px;
+        padding-left: 20px;
       }
 
       &.sm-level-2 {
         font-size: 14px;
-        padding-left: 30px;
+        padding-left: 40px;
       }
 
       &.sm-level-3 {
         font-size: 12px;
-        padding-left: 45px;
+        padding-left: 60px;
       }
     }
   }

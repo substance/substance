@@ -50,7 +50,7 @@ TocPanel.Prototype = function() {
         })
         .on('click', this.handleClick)
         .append(
-          $$(Icon, {icon: 'fa-chevron-right'}),
+          $$(Icon, {icon: 'fa-caret-right'}),
           ' ',
           node.getTocName()
         );
