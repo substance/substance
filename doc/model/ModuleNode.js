@@ -1,6 +1,8 @@
 'use strict';
 
+var oo = require('../../util/oo');
 var DocumentedNode = require('./DocumentedNode');
+var MemberContainerMixin = require('./MemberContainerMixin');
 
 var MEMBER_CATEGORIES = [
   {name: 'classes', path: ['class']},
@@ -8,21 +10,31 @@ var MEMBER_CATEGORIES = [
   {name: 'properties', path: ['property']},
 ];
 
-var ModuleNode = DocumentedNode.extend({
-  name: 'module',
-  properties: {
-    parent: 'id',
-    name: 'string',
-    members: ['array', 'property'], // ['model/documentHelpers.getAllAnnotations']
-  },
+function ModuleNode() {
+  ModuleNode.super.apply(this, arguments);
+}
 
-  getTocLevel: function() {
+ModuleNode.Prototype = function() {
+
+  this.getTocLevel = function() {
     return 2;
-  },
+  };
 
-  getMemberCategories: function() {
+  this.getMemberCategories = function() {
     return MEMBER_CATEGORIES;
-  }
+  };
+
+};
+
+oo.inherit(ModuleNode, DocumentedNode);
+oo.mixin(ModuleNode, MemberContainerMixin);
+
+ModuleNode.static.name = 'module';
+
+ModuleNode.static.defineSchema({
+  parent: 'id',
+  name: 'string',
+  members: { type: ['array', 'property'], default: [] }, // ['model/documentHelpers.getAllAnnotations']
 });
 
 ModuleNode.static.blockType = true;

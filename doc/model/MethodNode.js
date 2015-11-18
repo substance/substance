@@ -1,17 +1,23 @@
 'use strict';
 
+var oo = require('../../util/oo');
 var DocumentedNode = require('./DocumentedNode');
 
-var MethodNode = DocumentedNode.extend({
-  name: 'method',
-  properties: {
-    parent: 'id', // id of parent class or module
-    name: 'string',
-    params: ['array', 'object'], // [{name: 'doc', type: 'model/Document', description: 'A Substance document instance'}]
-    returns: 'object', // {type: 'model/Document', description: 'The updated document'}
-    isStatic: 'boolean',
-    isPrivate: 'boolean',
-  }
+function MethodNode() {
+  MethodNode.super.apply(this, arguments);
+}
+
+oo.inherit(MethodNode, DocumentedNode);
+
+MethodNode.static.name = 'method';
+
+MethodNode.static.defineSchema({
+  parent: 'id', // id of parent class or module
+  name: 'string',
+  params: { type: ['array', 'object'], default: [] }, // [{name: 'doc', type: 'model/Document', description: 'A Substance document instance'}]
+  returns: { type: 'object', optional: true }, // {type: 'model/Document', description: 'The updated document'}
+  isStatic: { type: 'boolean', default: false },
+  isPrivate: { type: 'boolean', default: false },
 });
 
 module.exports = MethodNode;
