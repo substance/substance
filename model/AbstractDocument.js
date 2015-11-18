@@ -235,14 +235,6 @@ AbstractDocument.Prototype = function() {
     this.FOR_CLIPBOARD = val;
   };
 
-  this._resetContainers = function() {
-    var containers = this.getIndex('type').get('container');
-    // reset containers initially
-    each(containers, function(container) {
-      container.reset();
-    });
-  };
-
   this._create = function(nodeData) {
     var op = this.data.create(nodeData);
     return op;

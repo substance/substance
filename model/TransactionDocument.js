@@ -52,7 +52,6 @@ TransactionDocument.Prototype = function() {
   this.reset = function() {
     this.ops = [];
     this.before = {};
-    this._resetContainers();
   };
 
   /**
