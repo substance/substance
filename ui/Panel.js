@@ -14,10 +14,10 @@ Panel.Prototype = function() {
   // This method must be overriden with your panel implementation
   this.render = function() {
     return $$("div")
-      .addClass("panel")
+      .addClass("sc-panel sc-my-panel")
       .append(
         $$('div')
-          .addClass('panel-content')
+          .addClass('se-panel-content')
           .append('YOUR_PANEL_CONTENT')
       );
   };
@@ -72,7 +72,7 @@ Panel.Prototype = function() {
       var parentEl = el.parentNode;
 
       // Reached the panel or the document body. We are done.
-      if ($(el).hasClass('panel-content-inner') || $(el).hasClass('panel-content') || !parentEl) return;
+      if ($(el).hasClass('se-panel-content-inner') || $(el).hasClass('se-panel-content') || !parentEl) return;
 
       // Found positioned element (calculate offset!)
       if ($(el).css('position') === 'absolute' || $(el).css('position') === 'relative') {

@@ -34,15 +34,15 @@ TocPanel.Prototype = function() {
 
   this.render = function() {
     var tocEntries = $$("div")
-      .addClass("toc-entries")
+      .addClass("se-toc-entries")
       .ref('tocEntries');
 
     var state = this.state;
     _.each(state.tocNodes, function(node) {
       var level = node.getTocLevel();
       var tocEntry = $$('a')
-        .addClass('toc-entry')
-        .addClass('level-'+level)
+        .addClass('se-toc-entry')
+        .addClass('sm-level-'+level)
         .attr({
           href: "#",
           "data-id": node.id,
@@ -50,16 +50,16 @@ TocPanel.Prototype = function() {
         .on('click', this.handleClick)
         .append(node.getTocName());
       if (state.activeNode === node.id) {
-        tocEntry.addClass("active");
+        tocEntry.addClass("sm-active");
       }
       tocEntries.append(tocEntry);
     }, this);
 
     var el = $$("div")
-      .addClass("panel toc-panel-component");
+      .addClass('sc-toc-panel sc-panel');
 
     var panelContent = $$('div')
-      .addClass('panel-content')
+      .addClass('se-panel-content')
       .ref('panelContent');
 
     panelContent.append(tocEntries);

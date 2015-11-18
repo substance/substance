@@ -1,75 +1,85 @@
 /* Panels (Context panel)
 -----------------------------------------------------*/
 
-/* this should go out of here! as it's layout ! */
-.panel {
-  position: absolute;
-  top: 0px;
-  bottom: 0px;
-  left: 0px;
-  right: 0px;
+.sc-panel {
+
+  .se-panel-content {
+    position: absolute;
+    top: 0px;
+    bottom: 0px;
+    left: 0px;
+    right: 0px;
+    overflow: auto;
+    line-height: 24px;
+  }
+
+  &.sm-dialog {
+
+    .se-panel-content {
+      top: 40px;
+    }
+
+    // top: 0px;
+    background: #F8F8F8;
+
+    .se-dialog-header {
+      position: absolute;
+      top: 0px;
+      left: 0px;
+      right: 0px;
+      overflow: hidden;
+      height: 40px;
+      border-bottom: 1px solid #ddd;
+
+
+      .se-back {
+        padding-left: 20px;
+        display: block;
+        float: left;
+        line-height: 40px;
+        font-size: 16px;
+      }
+
+      .se-label {
+        padding: 0px 20px;
+        font-size: 14px;
+        font-weight: 600;
+        line-height: 39px;
+        /*color: white;*/
+        float: left;
+      }
+
+      .se-actions {
+        overflow: hidden;
+        float: right;
+
+        a {
+          display: block;
+          float: left;
+          font-weight: 600;
+          padding: 0px 4px;
+          font-size: 12px;
+          line-height: 40px;
+          margin-right: 20px;
+        }
+      }
+    }
+  }
 }
 
-.panel .panel-content {
-  position: absolute;
-  top: 0px;
-  bottom: 0px;
-  left: 0px;
-  right: 0px;
-  overflow: auto;
-  line-height: 24px;
-}
+
+/* this should go out of here! as it's layout ! */
+// .panel {
+//   position: absolute;
+//   top: 0px;
+//   bottom: 0px;
+//   left: 0px;
+//   right: 0px;
+// }
 
 /* Dialog Panels (aka modal panels)
 -----------------------------------------------------*/
 
-.panel.dialog {
-  top: 0px;
-  background: #F8F8F8;
-}
-
-.panel.dialog .dialog-header {
-  position: absolute;
-  top: 0px;
-  left: 0px;
-  right: 0px;
-  overflow: hidden;
-  height: 40px;
-  border-bottom: 1px solid #ddd;
-}
-
-.panel.dialog .dialog-header .back {
-  padding-left: 20px;
-  display: block;
-  float: left;
-  line-height: 40px;
-  font-size: 16px;
-}
-
-.panel.dialog .dialog-header .label {
-  padding: 0px 20px;
-  font-size: 14px;
-  font-weight: 600;
-  line-height: 39px;
-  /*color: white;*/
-  float: left;
-}
-
-.panel.dialog .dialog-header .actions {
-  overflow: hidden;
-  float: right;
-}
-
-.panel.dialog .dialog-header .actions a {
-  display: block;
-  float: left;
-  font-weight: 600;
-  padding: 0px 4px;
-  font-size: 12px;
-  line-height: 40px;
-  margin-right: 20px;
-}
-
-.panel.dialog .panel-content {
-  top: 40px;
-}
+// .panel.dialog .panel-content {
+//   top: 40px;
+// }

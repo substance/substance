@@ -26,15 +26,3 @@
   width: 100%;
   background-color: #2B303B;
 }
-
-/* For debugging purposes */
-
-.scanline {
-  position: absolute;
-  display: none;
-  top: 50px;
-  left: 40px;
-  width: 10px;
-  height: 2px;
-  background: #ccc;
-}
