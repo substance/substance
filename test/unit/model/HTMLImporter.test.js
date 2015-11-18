@@ -2,7 +2,7 @@
 
 require('../qunit_extensions');
 
-var TestHTMLImporter = require('../../test_article/TestHTMLImporter');
+var TestHTMLImporter = require('../../model/TestHTMLImporter');
 var DOMElement = require('../../../ui/DefaultDOMElement');
 
 var importer;

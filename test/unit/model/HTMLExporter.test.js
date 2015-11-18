@@ -2,8 +2,8 @@
 
 require('../qunit_extensions');
 
-var TestHTMLExporter = require('../../test_article/TestHTMLExporter');
-var TestArticle = require('../../test_article/test_article');
+var TestHTMLExporter = require('../../model/TestHTMLExporter');
+var TestArticle = require('../../model/TestArticle');
 var simpleDoc = require('../../fixtures/simple');
 
 var exporter;

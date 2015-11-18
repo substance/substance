@@ -2,18 +2,18 @@
 
 var DocumentNode = require('../../model/DocumentNode');
 
-var MetaNode = DocumentNode.extend({
+var TestMetaNode = DocumentNode.extend({
   name: "meta",
   properties: {
     "title": "string"
   }
 });
 
-MetaNode.static.matchElement = function($el) {
+TestMetaNode.static.matchElement = function($el) {
   return $el.attr('typeof') === 'meta';
 };
 
-MetaNode.static.fromHtml = function($el, converter) {
+TestMetaNode.static.fromHtml = function($el, converter) {
   var id = 'meta';
   var meta = {
     id: id,
@@ -23,12 +23,12 @@ MetaNode.static.fromHtml = function($el, converter) {
   if ($title.length) {
     meta.title = converter.annotatedText($title, [id, 'title']);
   } else {
-    converter.warning('MetaNode: no title found.');
+    converter.warning('TestMetaNode: no title found.');
   }
   return meta;
 };
 
-MetaNode.static.toHtml = function(articleMeta, converter) {
+TestMetaNode.static.toHtml = function(articleMeta, converter) {
   var id = articleMeta.id;
   var $el = $('<div>')
     .attr('typeof', 'meta')
@@ -41,4 +41,4 @@ MetaNode.static.toHtml = function(articleMeta, converter) {
   return $el.append($title);
 };
 
-module.exports = MetaNode;
+module.exports = TestMetaNode;

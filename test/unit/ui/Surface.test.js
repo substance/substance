@@ -13,7 +13,7 @@ var components = {
   "paragraph": require('../../../packages/paragraph/ParagraphComponent')
 };
 
-QUnit.uiModule('Surface');
+QUnit.uiModule('ui/Surface');
 
 // This test was added to cover issue #82
 QUnit.uiTest("Set the selection after creating annotation.", function(assert) {
