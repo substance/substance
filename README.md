@@ -24,9 +24,13 @@ Full Unicode support                                                        | Be
 Plugins                                                                     | Beta 3
 Persistence API for documents                                               | Beta 4
                                                                             |
-**UI Widgets**                                                              |
-Ready-to-use [Editor](http://substance.io/demos/prose-editor)               | ✓
-Writer interface for building full-fledged custom editing apps              | Beta 2
+**UI Components**                                                           |
+TextPropertyEditor for editing annotated text                               | ✓
+ContainerEditor for in-flow-editing                                         | ✓
+Scrollable ContentPanel with Support for highlights                         | ✓
+Customizable Toolbar                                                        | ✓
+Interactive Scrollbar                                                       | ✓
+Interactive TOCPanel                                                        | ✓
                                                                             |
 **Predefined content types**                                                |
 Paragraph                                                                   | ✓
