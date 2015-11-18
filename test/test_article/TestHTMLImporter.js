@@ -6,17 +6,17 @@ var schema = require('./test_schema');
 var TestArticle = require('./test_article');
 
 var converters = [
-  require('../../packages/paragraph/ParagraphHtmlConverter'),
-  require('../../packages/heading/HeadingHtmlConverter'),
-  require('../../packages/emphasis/EmphasisHtmlConverter'),
-  require('../../packages/strong/StrongHtmlConverter'),
-  require('../../packages/link/LinkHtmlConverter'),
-  require('../../packages/table/TableHtmlConverter'),
-  require('../../packages/table/TableSectionHtmlConverter'),
-  require('../../packages/table/TableRowHtmlConverter'),
-  require('../../packages/table/TableCellHtmlConverter'),
-  require('../../packages/list/ListHtmlConverter'),
-  require('../../packages/list/ListItemHtmlConverter'),
+  require('../../packages/paragraph/ParagraphHTMLConverter'),
+  require('../../packages/heading/HeadingHTMLConverter'),
+  require('../../packages/emphasis/EmphasisHTMLConverter'),
+  require('../../packages/strong/StrongHTMLConverter'),
+  require('../../packages/link/LinkHTMLConverter'),
+  require('../../packages/table/TableHTMLConverter'),
+  require('../../packages/table/TableSectionHTMLConverter'),
+  require('../../packages/table/TableRowHTMLConverter'),
+  require('../../packages/table/TableCellHTMLConverter'),
+  require('../../packages/list/ListHTMLConverter'),
+  require('../../packages/list/ListItemHTMLConverter'),
 ];
 
 function TestHTMLImporter() {
@@ -29,6 +29,12 @@ function TestHTMLImporter() {
 }
 
 TestHTMLImporter.Prototype = function() {
+
+  this.convertDocument = function(documentEl) {
+    var bodyEl = documentEl.find('body');
+    this.convertContainer(bodyEl.children, this.config.containerId);
+  };
+
 };
 
 oo.inherit(TestHTMLImporter, HTMLImporter);

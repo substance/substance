@@ -553,9 +553,14 @@ DOMElement.$$ = DOMElement.createElement;
   @param {String} html HTML string
   @returns {Array<ui/DefaultDOMElement>} parsed elements
 */
-DOMElement.parseHtml = function(html) {
+DOMElement.parseHTML = function(html) {
   var DefaultDOMElement = require('./DefaultDOMElement');
-  return DefaultDOMElement.parseHtml(html);
+  return DefaultDOMElement.parseHTML(html);
+};
+
+DOMElement.parseXML = function(xml) {
+  var DefaultDOMElement = require('./DefaultDOMElement');
+  return DefaultDOMElement.parseXML(xml);
 };
 
 module.exports = DOMElement;

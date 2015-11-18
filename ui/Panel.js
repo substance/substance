@@ -72,7 +72,7 @@ Panel.Prototype = function() {
       var parentEl = el.parentNode;
 
       // Reached the panel or the document body. We are done.
-      if ($(el).hasClass('panel-content-inner') || !parentEl) return;
+      if ($(el).hasClass('panel-content-inner') || $(el).hasClass('panel-content') || !parentEl) return;
 
       // Found positioned element (calculate offset!)
       if ($(el).css('position') === 'absolute' || $(el).css('position') === 'relative') {
