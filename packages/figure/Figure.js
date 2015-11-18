@@ -12,29 +12,38 @@ function Figure() {
   this.guid = this.id;
 }
 
+var name = "figure";
+
+var schema = {
+  "title": "text",
+  "content": "id",
+  "caption": "text",
+  "guid": { type: "id", volatile: true }
+};
+
+Figure.Prototype = function() {
+
+  this.setLabel = function(label) {
+    this.label = label;
+    this.emit('label', label);
+  };
+
+    // Set compiled text representation
+    // E.g. useful for print output
+  this.setText = function(compiledText) {
+    this.text = compiledText;
+  };
+
+  this.getContentNode =  function() {
+    return this.document.get(this.content);
+  };
+
+};
+
 oo.inherit(Figure, DocumentNode);
 
-Figure.static.name = "figure";
+Figure.static.name = name;
 
-Figure.static.schema = {
-  "title": { type: "text" },
-  "content": { type: "id" },
-  "caption": { type: "text" }
-};
-
-Figure.prototype.setLabel = function(label) {
-  this.label = label;
-  this.emit('label', label);
-};
-
-  // Set compiled text representation
-  // E.g. useful for print output
-Figure.prototype.setText = function(compiledText) {
-  this.text = compiledText;
-};
-
-Figure.prototype.getContentNode =  function() {
-  return this.document.get(this.content);
-};
+Figure.static.defineSchema(schema);
 
 module.exports = Figure;

@@ -87,7 +87,6 @@ TransactionDocument.Prototype = function() {
   this.set = function(path, value) {
     var op = this.data.set(path, value);
     if (!op) return;
-    this._updateContainers(op);
     if (this.document.isTransacting) {
       this.ops.push(op);
     }
@@ -100,7 +99,6 @@ TransactionDocument.Prototype = function() {
   this.update = function(path, diffOp) {
     var op = this.data.update(path, diffOp);
     if (!op) return;
-    this._updateContainers(op);
     if (this.document.isTransacting) {
       this.ops.push(op);
     }

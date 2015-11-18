@@ -1,16 +1,21 @@
 'use strict';
 
+var oo = require('../../util/oo');
 var DocumentNode = require('../../model/DocumentNode');
 
-var ListItem = DocumentNode.extend();
+function ListItem() {
+  ListItem.super.apply(this, arguments);
+}
+
+oo.inherit(ListItem, DocumentNode);
 
 ListItem.static.name = "list-item";
 
-ListItem.static.schema = {
-  parent: { type: "id" },
-  level: { type: "number", 'default': 1 },
-  ordered: { type: "bool", 'default': false },
-  content: { type: "text", 'default': '' }
-};
+ListItem.static.defineSchema({
+  parent: "id",
+  level: { type: "number", default: 1 },
+  ordered: { type: "bool", default: false },
+  content: "text"
+});
 
 module.exports = ListItem;

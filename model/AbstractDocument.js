@@ -1,10 +1,10 @@
 'use strict';
 
-var _ = require('../util/helpers');
-var EventEmitter = require('../util/EventEmitter');
 var oo = require('../util/oo');
+var each = require('lodash/collection/each');
+var EventEmitter = require('../util/EventEmitter');
 var IncrementalData = require('./data/IncrementalData');
-var NodeFactory = require('./data/NodeFactory');
+var DocumentNodeFactory = require('./DocumentNodeFactory');
 var Selection = require('./Selection');
 var PropertySelection = require('./PropertySelection');
 var ContainerSelection = require('./ContainerSelection');
@@ -29,8 +29,10 @@ function AbstractDocument(schema) {
   this.AUTO_ATTACH = true;
   this.FOR_CLIPBOARD = false;
 
+  this.nodeFactory = new DocumentNodeFactory(this);
+
   this.data = new IncrementalData(schema, {
-    nodeFactory: new AbstractDocument.NodeFactory(this)
+    nodeFactory: this.nodeFactory
   });
 }
 
@@ -115,17 +117,17 @@ AbstractDocument.Prototype = function() {
     // Thus we disable AUTO_ATTACH when creating nodes
 
     // 1. clear all existing nodes (as they should be there in the seed)
-    _.each(this.data.nodes, function(node) {
+    each(this.data.nodes, function(node) {
       this.delete(node.id);
     }, this);
     // 2. create nodes with AUTO_ATTACH disabled
-    this._setAutoAttach(false);
-    _.each(seed.nodes, function(nodeData) {
+    // this._setAutoAttach(false);
+    each(seed.nodes, function(nodeData) {
       this.create(nodeData);
     }, this);
-    this._setAutoAttach(true);
+    // this._setAutoAttach(true);
     // 3. attach all nodes
-    _.each(this.data.nodes, function(node) {
+    each(this.data.nodes, function(node) {
       node.attach(this);
     }, this);
 
@@ -146,7 +148,7 @@ AbstractDocument.Prototype = function() {
    */
   this.toJSON = function() {
     var nodes = {};
-    _.each(this.getNodes(), function(node) {
+    each(this.getNodes(), function(node) {
       nodes[node.id] = node.toJSON();
     });
     return {
@@ -236,51 +238,32 @@ AbstractDocument.Prototype = function() {
   this._resetContainers = function() {
     var containers = this.getIndex('type').get('container');
     // reset containers initially
-    _.each(containers, function(container) {
+    each(containers, function(container) {
       container.reset();
     });
   };
 
   this._create = function(nodeData) {
     var op = this.data.create(nodeData);
-    this._updateContainers(op);
     return op;
   };
 
   this._delete = function(nodeId) {
     var op = this.data.delete(nodeId);
-    this._updateContainers(op);
     return op;
   };
 
   this._update = function(path, diff) {
     var op = this.data.update(path, diff);
-    this._updateContainers(op);
     return op;
   };
 
   this._set = function(path, value) {
     var op = this.data.set(path, value);
-    this._updateContainers(op);
     return op;
-  };
-
-  this._updateContainers = function(op) {
-    var containers = this.getIndex('type').get('container');
-    _.each(containers, function(container) {
-      container.update(op);
-    });
   };
 };
 
 oo.inherit(AbstractDocument, EventEmitter);
-
-AbstractDocument.NodeFactory = function(doc) {
-  NodeFactory.call(this);
-  this.doc = doc;
-  doc.schema.each(function(NodeClass) {
-    this.register(NodeClass);
-  }.bind(this));
-};
 
 module.exports = AbstractDocument;

@@ -1,7 +1,7 @@
 'use strict';
 
 var oo = require('../../util/oo');
-var Registry = require('../../util/Registry');
+var NodeRegistry = require('./NodeRegistry');
 var Node = require('./Node');
 
 /**
@@ -23,10 +23,10 @@ function Schema(name, version) {
   */
   this.version = version;
   /**
-    @type {util/Registry}
+    @type {NodeRegistry}
     @private
   */
-  this.nodeRegistry = new Registry();
+  this.nodeRegistry = new NodeRegistry();
   /**
     @type {Array} all Node classes which have `Node.static.tocType = true`
     @private
@@ -48,10 +48,19 @@ Schema.Prototype = function() {
     if (!nodes) return;
     for (var i = 0; i < nodes.length; i++) {
       var NodeClass = nodes[i];
-      this.nodeRegistry.register(NodeClass);
-      if (NodeClass.static.tocType) {
-        this.tocTypes.push(NodeClass.static.name);
+      // FIXME: there is some rubish coming in
+      if (!NodeClass.static) {
+        console.log('AAAAAAA', NodeClass);
+        continue;
       }
+      this.addNode(NodeClass);
+    }
+  };
+
+  this.addNode = function(NodeClass) {
+    this.nodeRegistry.register(NodeClass);
+    if (NodeClass.static.tocType) {
+      this.tocTypes.push(NodeClass.static.name);
     }
   };
 
@@ -103,7 +112,7 @@ Schema.Prototype = function() {
   };
 
   /**
-    @returns {Array<model/data/Node} list of types that should appear in a TOC
+    @returns {Node[]} list of types that should appear in a TOC
   */
   this.getTocTypes = function() {
     return this.tocTypes;

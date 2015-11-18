@@ -45,7 +45,7 @@ function Container() {
 var name = "container";
 
 var schema = {
-  nodes: { type: [ Schema.Id ], default: [] }
+  nodes: { type: ['id'], default: [] }
 };
 
 Container.Prototype = function() {

@@ -33,11 +33,12 @@ oo.inherit(TableSection, DocumentNode);
 oo.mixin(TableSection, ParentNodeMixin);
 
 TableSection.static.name = "table-section";
-TableSection.static.schema = {
-  "parent": { type: "id", mandatory: true },
-  "rows": { type: ["array", "id"], 'default': [] },
-  "sectionType": { type: "string", 'default': 'tbody'},
-};
+
+TableSection.static.defineSchema({
+  "parent": "id",
+  "rows": { type: ["id"], default: [] },
+  "sectionType": { type: "string", default: 'tbody'},
+});
 
 Object.defineProperties(TableSection.prototype, {
   cellNodes: {

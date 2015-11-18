@@ -1,20 +1,21 @@
 'use strict';
 
 var oo = require('../../util/oo');
-var Factory = require('../../util/Factory');
+var Registry = require('../../util/Registry');
 var Node = require('./Node');
 
 /**
-  Factory for Nodes.
+  Registry for Nodes.
 
-  @class NodeFactory
-  @extends Factory
+  @class NodeRegistry
+  @extends util/Registry
  */
-function NodeFactory() {
-  Factory.call(this);
+function NodeRegistry() {
+  Registry.call(this);
 }
 
-NodeFactory.Prototype = function() {
+NodeRegistry.Prototype = function() {
+
   /**
     Register a Node class.
 
@@ -33,8 +34,9 @@ NodeFactory.Prototype = function() {
     }
     this.add(name, nodeClazz);
   };
+
 };
 
-oo.inherit(NodeFactory, Factory);
+oo.inherit(NodeRegistry, Registry);
 
-module.exports = NodeFactory;
+module.exports = NodeRegistry;

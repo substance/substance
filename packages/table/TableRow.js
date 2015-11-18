@@ -34,10 +34,10 @@ oo.mixin(TableRow, ParentNodeMixin);
 
 TableRow.static.name = "table-row";
 
-TableRow.static.schema = {
-  "parent": { type: "id", mandatory: true },
-  "cells": { type: ["array", "id"], default: [] }
-};
+TableRow.static.defineSchema({
+  "parent": "id",
+  "cells": { type: ["id"], default: [] }
+});
 
 Object.defineProperty(TableRow.prototype, 'cellNodes', {
   'get': function() {

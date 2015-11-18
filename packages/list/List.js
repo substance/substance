@@ -46,10 +46,10 @@ oo.inherit(List, BlockNode);
 
 List.static.name = "list";
 
-List.static.schema = {
-  ordered: { type: "boolean" },
-  items: { type: ["array", "id"] }
-};
+List.static.defineSchema({
+  ordered: { type: "boolean", default: false },
+  items: ["id"]
+});
 
 Object.defineProperties(List.prototype, {
   itemNodes: {

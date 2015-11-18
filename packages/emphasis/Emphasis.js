@@ -1,8 +1,13 @@
 'use strict';
 
+var oo = require('../../util/oo');
 var PropertyAnnotation = require('../../model/PropertyAnnotation');
 
-var Emphasis = PropertyAnnotation.extend();
+function Emphasis() {
+  Emphasis.super.apply(this, arguments);
+}
+
+oo.inherit(Emphasis, PropertyAnnotation);
 
 Emphasis.static.name = "emphasis";
 

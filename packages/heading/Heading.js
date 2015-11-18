@@ -9,13 +9,13 @@ function Heading() {
 
 Heading.Prototype = function() {
 
-  getTocLevel: function() {
+  this.getTocLevel = function() {
     return this.level;
-  },
+  };
 
-  getTocName: function() {
+  this.getTocName = function() {
     return this.content;
-  }
+  };
 
 };
 

@@ -1,19 +1,30 @@
+/* jshint latedef:nofunc */
+
 'use strict';
 
 var oo = require('../../util/oo');
+var isBoolean = require('lodash/lang/isBoolean');
+var isNumber = require('lodash/lang/isNumber');
+var isString = require('lodash/lang/isString');
+var isArray = require('lodash/lang/isArray');
+var isObject = require('lodash/lang/isObject');
+var cloneDeep = require('lodash/lang/cloneDeep');
 var each = require('lodash/collection/each');
 var extend = require('lodash/object/extend');
-var uuid = require('../../util/uuid');
 var EventEmitter = require('../../util/EventEmitter');
 
 /**
   Base node implementation.
 
   @class Node
+  @node
   @extends EventEmitter
   @param {Object} properties
+
+  @prop {String} id an id that is unique within this data
+
  */
-function Node(properties) {
+function Node(props) {
   EventEmitter.call(this);
 
   var NodeClass = this.constructor;
@@ -22,16 +33,24 @@ function Node(properties) {
     throw new Error('Every NodeClass must provide a static property "name".');
   }
 
-  // integrity check for provided props
   each(NodeClass.static.schema, function(prop, name) {
+    // check integrity
+    // TODO: more! e.g. type check
     // mandatory properties
-    if (prop.mandatory && !props.hasOwnProperty(name)) {
+    var propIsGiven = props.hasOwnProperty(name);
+    var hasDefault = prop.hasOwnProperty('default');
+    var isOptional = prop.optional;
+    if ( (!isOptional && !hasDefault) && !propIsGiven) {
       throw new Error('Property ' + name + ' is mandatory for node type ' + this.type);
     }
+    if (propIsGiven) {
+      this[name] = _checked(prop, props[name]);
+    } else if (hasDefault) {
+      this[name] = cloneDeep(_checked(prop, prop.default));
+    } else {
+      // property is optional
+    }
   }, this);
-
-  // filling in default values for properties which are not provided
-  this.props = extend({}, NodeClass.defaultProps, props);
 }
 
 Node.Prototype = function() {
@@ -76,19 +95,6 @@ Node.Prototype = function() {
 
 oo.inherit(Node, EventEmitter);
 
-Node.static.defineSchema = function(schema) {
-  // in ES6 we would just `this` which is bound to the class
-  var NodeClass = this.__class__;
-  // iterates over all properties in the schema and defines the property using Object.defineProperty
-  _defineProperties(NodeClass);
-  // collects a full schema considering the schemas of parent class
-  // we will use the unfolded schema, check integrity of the given props (mandatory, readonly)
-  // or fill in default values for undefined properties.
-  NodeClass.static.unfoldedSchema = _unfoldedSchema(NodeClass);
-  // computes the set of default properties only once
-  NodeClass.static.defaultProps = _extractDefaultProps(NodeClass.unfoldedSchema);
-};
-
 /**
  * Symbolic name for this model class. Must be set to a unique string by every subclass.
  *
@@ -97,17 +103,20 @@ Node.static.defineSchema = function(schema) {
  */
 Node.static.name = "node";
 
-/**
-  @prop {String} id an id that is unique within this data
-*/
+Node.static.defineSchema = function(schema) {
+  // in ES6 we would just `this` which is bound to the class
+  var NodeClass = this.__class__;
+  _defineSchema(NodeClass, schema);
+};
+
 Node.static.defineSchema({
-  id: { type: 'string', required: true, readonly: true }
+  id: 'string'
 });
 
-Object.defineProperty(Node.prototype, type, {
+Object.defineProperty(Node.prototype, 'type', {
   configurable: false,
   get: function() {
-    return this.constructor.name;
+    return this.constructor.static.name;
   },
   set: function() {
     throw new Error('Property "type" is read-only.');
@@ -134,48 +143,63 @@ Object.defineProperty(Node.prototype, type, {
 
 Node.static.isInstanceOf = Node.isInstanceOf;
 
-function _defineProperties(NodeClass) {
-  each(NodeClass.static.schema, function(prop, name) {
-    if (name === "type") {
-      throw new Error("Property 'type' can not be used.");
-    }
-    // check if there is a name clash with prototype props
-    if (NodeClass.prototype[name] !== undefined) {
-      throw new Error('Name collision! ' + name);
-    }
-    if (prop.readonly) {
-      var descriptor = {
-        configurable: true,
-      };
-      descriptor.get = function() {
-        return this.props[name];
-      };
-      descriptor.set = function() {
-        throw new Error('Property ' + name + ' of node type ' + NodeClass.static.name + ' is read-only.');
-      };
-      Object.defineProperty(NodeClass.prototype, name, descriptor);
-    }
-  });
+// ### Internal implementation
+
+function _defineSchema(NodeClass, schema) {
+  var compiledSchema = _compileSchema(schema);
+  // collects a full schema considering the schemas of parent class
+  // we will use the unfolded schema, check integrity of the given props (mandatory, readonly)
+  // or fill in default values for undefined properties.
+  NodeClass.static.schema = _unfoldedSchema(NodeClass, compiledSchema);
+  // computes the set of default properties only once
+  NodeClass.static.defaultProps = _extractDefaultProps(NodeClass);
 }
 
-function _unfoldedSchema(NodeClass) {
-  var schemas = [];
+function _compileSchema(schema) {
+  var compiledSchema = {};
+  each(schema, function(definition, name) {
+    if (isString(definition) || isArray(definition)) {
+      definition = { type: definition };
+    }
+    definition = _compileDefintion(definition);
+    compiledSchema[name] = definition;
+  });
+  return compiledSchema;
+}
+
+function _compileDefintion(definition) {
+  var result = definition;
+  if (isArray(definition.type) && definition[0] !== "array") {
+    definition.type = [ "array", definition.type[0] ];
+  } else if (definition.type === 'text') {
+    result = {
+      type: "string",
+      role: "text",
+      default: ''
+    };
+  }
+  return result;
+}
+
+function _unfoldedSchema(NodeClass, compiledSchema) {
+  var schemas = [compiledSchema];
   var clazz = NodeClass;
   while(clazz) {
-    if (clazz.static.schema) {
-      schemas.unshift(clazz.static.schema);
-    }
     var parentProto = Object.getPrototypeOf(clazz.prototype);
     if (!parentProto) {
       break;
     }
     clazz = parentProto.constructor;
+    if (clazz && clazz.static && clazz.static.schema) {
+      schemas.unshift(clazz.static.schema);
+    }
   }
   schemas.unshift({});
   return extend.apply(null, schemas);
 }
 
-function _extractDefaultProps(unfoldedSchema) {
+function _extractDefaultProps(NodeClass) {
+  var unfoldedSchema = NodeClass.static.unfoldedSchema;
   var defaultProps = {};
   each(unfoldedSchema, function(prop, name) {
     if (prop.hasOwnProperty('default')) {
@@ -183,6 +207,24 @@ function _extractDefaultProps(unfoldedSchema) {
     }
   });
   return defaultProps;
+}
+
+function _checked(prop, value) {
+  var type;
+  if (isArray(prop.type)) {
+    type = "array";
+  } else {
+    type = prop.type;
+  }
+  if (type === "string" && !isString(value) ||
+      type === "boolean" && !isBoolean(value) ||
+      type === "number" && !isNumber(value) ||
+      type === "array" && !isArray(value) ||
+      type === "id" && !isString(value) ||
+      type === "object" && !isObject(value)) {
+    throw new Error('Illegal value type for property ' + prop.name + ': expected ' + type + ', was ' + (typeof value));
+  }
+  return value;
 }
 
 module.exports = Node;

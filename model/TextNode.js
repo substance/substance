@@ -16,6 +16,7 @@ function TextNode() {
 }
 
 TextNode.Prototype = function() {
+
   this.getTextPath = function() {
     return [this.id, 'content'];
   };
@@ -30,7 +31,7 @@ oo.inherit(TextNode, DocumentNode);
 TextNode.static.name = "text-node";
 
 TextNode.static.defineSchema({
-  content: { type: 'text', 'default': '' }
-};
+  content: 'text'
+});
 
 module.exports = TextNode;

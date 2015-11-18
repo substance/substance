@@ -1,7 +1,7 @@
 'use strict';
 
 var oo = require('../../util/oo');
-var _ = require('../../util/helpers');
+var map = require('lodash/collection/map');
 var DocumentNode = require('../../model/DocumentNode');
 var TableMatrix = require('./TableMatrix');
 var ParentNodeMixin = require('../../model/ParentNodeMixin');
@@ -22,7 +22,7 @@ Table.Prototype = function() {
 
   this.getSections = function() {
     var doc = this.getDocument();
-    return _.map(this.sections, function(id) {
+    return map(this.sections, function(id) {
       return doc.get(id);
     }, this);
   };
@@ -81,9 +81,9 @@ Object.defineProperties(Table.prototype, {
 
 Table.static.name = "table";
 
-Table.static.schema = {
-  "sections": { type: ["array", "id"], 'default': [] }
-};
+Table.static.defineSchema({
+  "sections": { type: ["id"], 'default': [] }
+});
 
 Table.static.blockType = true;
 
