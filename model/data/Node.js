@@ -153,6 +153,17 @@ function _defineSchema(NodeClass, schema) {
   NodeClass.static.schema = _unfoldedSchema(NodeClass, compiledSchema);
   // computes the set of default properties only once
   NodeClass.static.defaultProps = _extractDefaultProps(NodeClass);
+
+  // still we need that for container, hopefully we find a better approach soon
+  if (!NodeClass.static.hasOwnProperty('addressablePropertyNames')) {
+    var addressablePropertyNames = [];
+    each(NodeClass.static.schema, function(prop, name) {
+      if (prop.type === "string" && prop.addressable === true) {
+        addressablePropertyNames.push(name);
+      }
+    });
+    NodeClass.static.addressablePropertyNames = addressablePropertyNames;
+  }
 }
 
 function _compileSchema(schema) {
@@ -162,6 +173,7 @@ function _compileSchema(schema) {
       definition = { type: definition };
     }
     definition = _compileDefintion(definition);
+    definition.name = name;
     compiledSchema[name] = definition;
   });
   return compiledSchema;
@@ -174,7 +186,7 @@ function _compileDefintion(definition) {
   } else if (definition.type === 'text') {
     result = {
       type: "string",
-      role: "text",
+      addressable: true,
       default: ''
     };
   }

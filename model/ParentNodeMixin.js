@@ -32,6 +32,11 @@ ParentNodeMixin.Prototype = function() {
   this.getChildCount = function() {
     return this[this._childrenProperty].length;
   };
+
+  this.getAddressablePropertyNames = function() {
+    return [this._childrenProperty];
+  };
+
 };
 
 oo.initClass(ParentNodeMixin);

@@ -79,7 +79,7 @@ Container.Prototype = function() {
     var nodeId = path[0];
     var property = path[1];
     var node = doc.get(nodeId);
-    var propIndex = node.getComponents().indexOf(property);
+    var propIndex = node.getAddressablePropertyNames().indexOf(property);
     if (propIndex < 0) {
       throw new Error('Can not resolve index for property ' + property);
     }
@@ -140,7 +140,7 @@ Container.Prototype = function() {
 
   this.getPathForAddress = function(address) {
     var node = this._getNodeForAddress(address);
-    var properties = node.getComponents();
+    var properties = node.getAddressablePropertyNames();
     var propertyName = properties[_.last(address)];
     if (!propertyName) {
       throw new Error('No property with index ' + _.last(address) + ' in node ' + JSON.stringify(node.toJSON()));
@@ -156,7 +156,7 @@ Container.Prototype = function() {
     if (address.length === 2) {
       nodeId = this.nodes[address[0]];
       node = doc.get(nodeId);
-      properties = node.getComponents();
+      properties = node.getAddressablePropertyNames();
       if (properties.length > 1 && address[1] < properties.length - 1) {
         return [address[0], address[1] + 1];
       } else {
@@ -171,7 +171,7 @@ Container.Prototype = function() {
     else {
       var nodes = this._getNodeChain(address);
       node = _.last(nodes);
-      properties = node.getComponents();
+      properties = node.getAddressablePropertyNames();
       var newAddress;
       if (properties.length > 1 && _.last(address) < properties.length-1) {
         newAddress = address.slice(0);
@@ -269,7 +269,7 @@ Container.Prototype = function() {
       node = node.getChildAt(childIndex);
     }
     // last property
-    address.push(node.getComponents().length-1);
+    address.push(node.getAddressablePropertyNames().length-1);
     return address;
   };
 
