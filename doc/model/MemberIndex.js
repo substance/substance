@@ -1,3 +1,4 @@
+'use strict';
 
 var oo = require('../../util/oo');
 var NodeIndex = require('../../model/data/NodeIndex');
