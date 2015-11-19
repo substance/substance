@@ -202,7 +202,7 @@ function _extendClass(ParentClass) {
   // but never overwrite
   // like with lodash/object/extend, the mixin later in the args list 'wins'
   for (var i = mixins.length - 1; i >= 0; i--) {
-    _mixin(ChildClass, mixins[i])
+    _mixin(ChildClass, mixins[i]);
   }
 
   return ChildClass;
@@ -223,7 +223,7 @@ function _mixin(Clazz, mixin) {
       }
     }
   }
-};
+}
 
 function _makeExtensible(clazz) {
   if (!clazz.static) {

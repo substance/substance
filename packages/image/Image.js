@@ -2,8 +2,6 @@
 
 var DocumentNode = require('../../model/DocumentNode');
 
-var oo = require('../../util/oo');
-
 function Image() {
   Image.super.apply(this, arguments);
 }

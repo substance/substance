@@ -12,7 +12,7 @@ BlockNode.extend(Include, function IncludePrototype() {
     return this.getDocument().get(this.nodeId);
   };
 
-};
+});
 
 Include.static.name = "include";
 
