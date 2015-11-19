@@ -4,6 +4,11 @@
 
 var isObject = require('lodash/lang/isObject');
 var isFunction = require('lodash/lang/isFunction');
+// WORKAROUND: using the phantomjs Function.prototype.bind polyfill
+// the implementation in this file does not work strangely.
+// it works however if we are using lodash bind here
+// For whatever reason, the polyfill works alright in other places.
+var bind = require('lodash/function/bind');
 
 /**
  * Helpers for oo programming.
@@ -91,10 +96,10 @@ oo.mixin = function(clazz, mixinClazz) {
   }
 };
 
-
 // ### Internal implementations
 
 function _initClass(clazz) {
+  if (clazz.__is_initialized__) return;
   if (clazz.Prototype && !(clazz.prototype instanceof clazz.Prototype)) {
     clazz.prototype = new clazz.Prototype();
     clazz.prototype.constructor = clazz;
@@ -144,13 +149,11 @@ function _inherit(ChildClass, ParentClass) {
 }
 
 /*
-  Parent.extend([...mixins], [ChildClass], [prototype|Prototype])
-
-  Parent.extend(Child) -> (Function)
-  Parent.extend(EventEmitter, Child) -> (..., Function)
-  Parent.extend(Child, ChildPrototype)
-  Parent.extend(EventEmitter, Child, ChildPrototype)
-
+  extend() -> lazy inheritance without a proto
+  extend({...}) -> lazy inheritance with a proto
+  extend(Function) -> inheritance without a proto
+  extend(Function, {}) -> inherit with a proto
+  extend(Function, Function) -> inheritance with prototype function
 */
 function _extendClass(ParentClass) {
 
@@ -158,14 +161,6 @@ function _extendClass(ParentClass) {
   function AnonymousClass() {
     ParentClass.apply(this, arguments);
   }
-
-  /*
-    extend() -> lazy inheritance without a proto
-    extend({...}) -> lazy inheritance with a proto
-    extend(Function) -> inheritance without a proto
-    extend(Function, {}) -> inherit with a proto
-    extend(Function, Function) -> inheritance with prototype function
-  */
 
   var args = Array.prototype.slice.call(arguments, 1);
   //var childOrProto = args[args.length-1];
@@ -205,7 +200,7 @@ function _extendClass(ParentClass) {
 
   // from right to left copy all mixins into the prototype
   // but never overwrite
-  // in like with lodash extend, the more right in the args list the more important
+  // like with lodash/object/extend, the mixin later in the args list 'wins'
   var proto = ChildClass.prototype;
   for (var i = mixins.length - 1; i >= 0; i--) {
     var mixin = mixins[i];
@@ -232,7 +227,7 @@ function _makeExtensible(clazz) {
     oo.initClass(clazz);
   }
   clazz.static._makeExtendFunction = function(parentClazz) {
-    return _extendClass.bind(null, parentClazz);
+    return bind(_extendClass, clazz, parentClazz);
   };
   clazz.extend = clazz.static._makeExtendFunction(clazz);
 }
