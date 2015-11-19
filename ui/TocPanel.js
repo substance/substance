@@ -51,7 +51,6 @@ TocPanel.Prototype = function() {
         .on('click', this.handleClick)
         .append(
           $$(Icon, {icon: 'fa-caret-right'}),
-          ' ',
           node.getTocName()
         );
       if (state.activeNode === node.id) {
