@@ -19,7 +19,6 @@
       top: 40px;
     }
 
-    // top: 0px;
     background: #F8F8F8;
 
     .se-dialog-header {
@@ -30,7 +29,6 @@
       overflow: hidden;
       height: 40px;
       border-bottom: 1px solid #ddd;
-
 
       .se-back {
         padding-left: 20px;
@@ -45,7 +43,6 @@
         font-size: 14px;
         font-weight: 600;
         line-height: 39px;
-        /*color: white;*/
         float: left;
       }
 
@@ -66,20 +63,3 @@
     }
   }
 }
-
-
-/* this should go out of here! as it's layout ! */
-// .panel {
-//   position: absolute;
-//   top: 0px;
-//   bottom: 0px;
-//   left: 0px;
-//   right: 0px;
-// }
-
-/* Dialog Panels (aka modal panels)
------------------------------------------------------*/
-
-// .panel.dialog .panel-content {
-//   top: 40px;
-// }
