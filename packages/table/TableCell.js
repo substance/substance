@@ -1,13 +1,12 @@
 'use strict';
 
-var oo = require('../../util/oo');
 var DocumentNode = require('../../model/DocumentNode');
 
 function TableCell() {
   TableCell.super.apply(this, arguments);
 }
 
-TableCell.Prototype = function() {
+DocumentNode.extend(TableCell, function TableCellPrototype() {
 
   this.getSpan = function(dim) {
     if (dim === "col") {
@@ -21,9 +20,7 @@ TableCell.Prototype = function() {
     return this.cellType === "data";
   };
 
-};
-
-oo.inherit(TableCell, DocumentNode);
+});
 
 TableCell.static.name = "table-cell";
 

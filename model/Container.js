@@ -1,7 +1,7 @@
 'use strict';
 
-var _ = require('../util/helpers');
-var oo = require('../util/oo');
+var last = require('lodash/array/last');
+var map = require('lodash/collection/map');
 var DocumentNode = require('./DocumentNode');
 var ParentNodeMixin = require('./ParentNodeMixin');
 
@@ -38,7 +38,7 @@ function Container() {
   Container.super.apply(this, arguments);
 }
 
-Container.Prototype = function() {
+DocumentNode.extend(Container, ParentNodeMixin, function() {
 
   this.getChildrenProperty = function() {
     return 'nodes';
@@ -142,15 +142,15 @@ Container.Prototype = function() {
   };
 
   this._getNodeForAddress = function(address) {
-    return _.last(this._getNodeChain(address));
+    return last(this._getNodeChain(address));
   };
 
   this.getPathForAddress = function(address) {
     var node = this._getNodeForAddress(address);
     var properties = node.getAddressablePropertyNames();
-    var propertyName = properties[_.last(address)];
+    var propertyName = properties[last(address)];
     if (!propertyName) {
-      throw new Error('No property with index ' + _.last(address) + ' in node ' + JSON.stringify(node.toJSON()));
+      throw new Error('No property with index ' + last(address) + ' in node ' + JSON.stringify(node.toJSON()));
     }
     var path = [node.id, propertyName];
     return path;
@@ -177,10 +177,10 @@ Container.Prototype = function() {
     }
     else {
       var nodes = this._getNodeChain(address);
-      node = _.last(nodes);
+      node = last(nodes);
       properties = node.getAddressablePropertyNames();
       var newAddress;
-      if (properties.length > 1 && _.last(address) < properties.length-1) {
+      if (properties.length > 1 && last(address) < properties.length-1) {
         newAddress = address.slice(0);
         newAddress[newAddress.length-1]++;
         return newAddress;
@@ -227,9 +227,9 @@ Container.Prototype = function() {
     // TODO: implementation with hierarchical nodes involved
     else {
       var nodes = this._getNodeChain(address);
-      node = _.last(nodes);
+      node = last(nodes);
       var newAddress;
-      if (_.last(address) > 0) {
+      if (last(address) > 0) {
         newAddress = address.slice(0);
         newAddress[newAddress.length-1]--;
         return newAddress;
@@ -344,7 +344,7 @@ Container.Prototype = function() {
     var startAddress = this.getAddress(startPath);
     var endAddress = this.getAddress(endPath);
     var addresses = this.getAddressRange(startAddress, endAddress);
-    return _.map(addresses, this.getPathForAddress, this);
+    return map(addresses, this.getPathForAddress, this);
   };
 
   this.getNextPath = function(path) {
@@ -376,13 +376,10 @@ Container.Prototype = function() {
 
   this.getPathsForNode = function(node) {
     var addresses = this.getAddressesForNode(node);
-    return _.map(addresses, this.getPathForAddress, this);
+    return map(addresses, this.getPathForAddress, this);
   };
 
-};
-
-oo.inherit(Container, DocumentNode);
-oo.mixin(Container, ParentNodeMixin);
+});
 
 Container.static.name = "container";
 

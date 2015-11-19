@@ -1,13 +1,12 @@
 'use strict';
 
-var oo = require('../../util/oo');
 var DocumentNode = require('../../model/DocumentNode');
 
 function StructuredNode() {
   StructuredNode.super.apply(this, arguments);
 }
 
-oo.inherit(StructuredNode, DocumentNode);
+DocumentNode.extend(StructuredNode);
 
 StructuredNode.static.name = "structured-node";
 

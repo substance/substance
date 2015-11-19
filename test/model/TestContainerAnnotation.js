@@ -1,13 +1,12 @@
 'use strict';
 
-var oo = require('../../util/oo');
 var ContainerAnnotation = require('../../model/ContainerAnnotation');
 
 function TestContainerAnnotation() {
   TestContainerAnnotation.super.apply(this, arguments);
 }
 
-oo.inherit(TestContainerAnnotation, ContainerAnnotation);
+ContainerAnnotation.extend(TestContainerAnnotation);
 
 TestContainerAnnotation.static.name = 'test-container-anno';
 

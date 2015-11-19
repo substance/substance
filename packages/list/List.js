@@ -1,6 +1,5 @@
 'use strict';
 
-var oo = require('../../util/oo');
 var BlockNode = require('../../model/BlockNode');
 var ParentNodeMixin = require('../../model/ParentNodeMixin');
 
@@ -14,7 +13,7 @@ function List() {
   List.super.apply(this, arguments);
 }
 
-List.Prototype = function() {
+BlockNode.extend(List, ParentNodeMixin, function ListPrototype() {
 
   this.getChildrenProperty = function() {
     return 'items';
@@ -35,10 +34,7 @@ List.Prototype = function() {
     doc.update([this.id, 'items'], { "insert": { offset: offset, value: id } });
   };
 
-};
-
-oo.inherit(List, BlockNode);
-oo.mixin(List, ParentNodeMixin);
+});
 
 List.static.name = "list";
 

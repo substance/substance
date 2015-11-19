@@ -1,6 +1,5 @@
 'use strict';
 
-var oo = require('../../util/oo');
 var DocumentNode = require('../../model/DocumentNode');
 var ParentNodeMixin = require('../../model/ParentNodeMixin');
 
@@ -8,7 +7,7 @@ function TableRow() {
   TableRow.super.apply(this, arguments);
 }
 
-TableRow.Prototype = function() {
+DocumentNode.extend(TableRow, ParentNodeMixin, function TableRowPrototype() {
 
   this.getChildrenProperty = function() {
     return 'cells';
@@ -21,11 +20,7 @@ TableRow.Prototype = function() {
   this.getCellAt = function(cellIdx) {
     return this.getChildAt(cellIdx);
   };
-};
-
-oo.inherit(TableRow, DocumentNode);
-
-oo.mixin(TableRow, ParentNodeMixin);
+});
 
 TableRow.static.name = "table-row";
 

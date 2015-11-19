@@ -1,6 +1,5 @@
 'use strict';
 
-var oo = require('../../util/oo');
 var BlockNode = require('../../model/BlockNode');
 var ParentNodeMixin = require('../../model/ParentNodeMixin');
 var TableMatrix = require('./TableMatrix');
@@ -12,7 +11,7 @@ function Table() {
   this.matrix = null;
 }
 
-Table.Prototype = function() {
+BlockNode.extend(Table, ParentNodeMixin, function Table() {
 
   this.getChildrenProperty = function() {
     return 'sections';
@@ -55,10 +54,7 @@ Table.Prototype = function() {
     }
   };
 
-};
-
-oo.inherit(Table, BlockNode);
-oo.mixin(Table, ParentNodeMixin);
+});
 
 Table.static.name = "table";
 
