@@ -68,6 +68,9 @@ SwitchTextType.Prototype = function() {
     // Set disabled when not a property selection
     if (!surface.isEnabled() || sel.isNull()) {
       newState.disabled = true;
+    } else if (sel.isContainerSelection()) {
+      newState.disabled = true;
+      newState.currentTextType = {name: 'container-selection'};
     } else {
       var doc = this.getDocument();
       var path = sel.getPath();
@@ -97,7 +100,6 @@ SwitchTextType.Prototype = function() {
   */
   this.execute = function(textTypeName) {
     var textType = this.getTextType(textTypeName);
-
     var nodeData = textType.data;
     var surface = this.getSurface();
     surface.transaction(function(tx, args) {
