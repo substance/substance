@@ -35,7 +35,7 @@ ContentPanel.Prototype = function() {
     var doc = this.getDocument();
 
     var el = $$('div')
-      .addClass("panel content-panel-component");
+      .addClass("sc-panel sc-content-panel");
     el.append(
       $$(Scrollbar, {
         panel: this,
@@ -45,12 +45,12 @@ ContentPanel.Prototype = function() {
         .attr('id', "content-scrollbar")
     );
     el.append(
-      $$('div').ref("scanline").addClass('scanline')
+      $$('div').ref("scanline").addClass('se-scanline')
     );
     el.append(
-      $$('div').ref("panelContent").addClass("panel-content")
+      $$('div').ref("panelContent").addClass('se-panel-content')
         .append(
-          $$('div').addClass('panel-content-inner').append(
+          $$('div').addClass('se-panel-content-inner').append(
             this.props.children
           )
         )
@@ -97,7 +97,7 @@ ContentPanel.Prototype = function() {
 
     // For debugging purposes
     // To activate remove display:none for .scanline in the CSS
-    $('.scanline').css({
+    $('.se-scanline').css({
       top: (scanline - scrollTop)+'px'
     });
   

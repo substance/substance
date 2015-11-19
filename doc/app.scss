@@ -5,14 +5,12 @@
 @import '../styles/components/_controller';
 @import '../styles/components/_surface';
 @import '../styles/components/_panel';
-@import '../styles/components/_content_panel';
-@import '../styles/components/_context_toggles';
-@import '../styles/components/_toc_panel';
+@import '../styles/components/_content-panel';
+@import '../styles/components/_context-toggles';
+@import '../styles/components/_toc-panel';
 @import '../styles/components/_scrollbar';
-@import '../styles/components/_toc_panel';
-@import '../styles/components/_status_bar';
-@import '../styles/components/_text_property';
-@import '../styles/components/_annotation_tool';
+@import '../styles/components/_status-bar';
+@import '../styles/components/_text-property';
 
 // Nodes
 @import '../packages/link/_link';
@@ -35,7 +33,6 @@
 @import './styles/components/_signature';
 @import './styles/components/_params';
 @import './styles/components/_example';
-@import './styles/components/_toc';
 @import './styles/components/_cover';
 @import './styles/components/_member-index';
 
@@ -80,10 +77,21 @@ body {
       background: #fff;
       position: relative;
       width: 65%;
-      z-index: 30;
-
       .content-panel-component {
         top: 0px;
+      }
+    }
+
+    // Position content-panel
+    .sc-content-panel {
+      position: absolute;
+      top: 0px;
+      bottom: 0px;
+      left: 0px;
+      right: 0px;
+
+      .se-panel-content-inner {
+        padding: 40px;
       }
     }
 

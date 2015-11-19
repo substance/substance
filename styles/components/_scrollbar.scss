@@ -1,7 +1,4 @@
-/* Scrollbar component
------------------------------------------------------*/
-
-.scrollbar-component {
+.sc-scrollbar {
   position: absolute;
   left: 0px;
   width: 20px;
@@ -9,32 +6,19 @@
   bottom: 0px;
   background: #FAFAFA;
   box-shadow: inset -4px 0 4px 0 rgba(25,25,25,0.04);
-}
 
-.scrollbar-component .thumb {
-  position: absolute;
-  top: 40px;
-  left: 0px;
-  right: 0px;
-  height: 0px;
-  z-index: 4000;
-  background-color: rgba(0,0,0, 0.2);
-}
+  .se-thumb {
+    position: absolute;
+    top: 40px;
+    left: 0px;
+    right: 0px;
+    height: 0px;
+    background-color: rgba(0,0,0, 0.2);
+  }
 
-.scrollbar-component .highlight {
-  position: absolute;
-  width: 100%;
-  background-color: #2B303B;
-}
-
-/* For debugging purposes */
-
-.scanline {
-  position: absolute;
-  display: none;
-  top: 50px;
-  left: 40px;
-  width: 10px;
-  height: 2px;
-  background: #ccc;
+  .se-highlight {
+    position: absolute;
+    width: 100%;
+    background-color: #2B303B;
+  }
 }

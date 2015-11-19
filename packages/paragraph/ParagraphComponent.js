@@ -12,7 +12,7 @@ function ParagraphComponent() {
 ParagraphComponent.Prototype = function() {
 
   this.getClassNames = function() {
-    return "content-node paragraph";
+    return 'sc-paragraph';
   };
 
   this.render = function() {

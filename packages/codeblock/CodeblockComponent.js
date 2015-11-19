@@ -12,7 +12,7 @@ function Codeblock() {
 Codeblock.Prototype = function() {
 
   this.getClassNames = function() {
-    return "content-node sc-codeblock";
+    return "sc-codeblock";
   };
 
   this.render = function() {

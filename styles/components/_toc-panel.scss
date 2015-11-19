@@ -1,0 +1,51 @@
+/* TOC Panel
+-----------------------------------------------------*/
+
+.sc-toc-panel {
+  .se-toc-entries {
+    padding: 20px 0px;
+
+    .se-toc-entry {
+      color: #777;
+      font-weight: 600;
+      letter-spacing: $heading-letterspacing;
+      display: block;
+      padding: 2px 0px;
+      line-height: 30px;
+      height: 30px;
+
+      i.fa {
+        padding-right: 5px;
+        font-size: 12px;
+        visibility: hidden;
+      }
+
+      &.sm-active {
+
+        i.fa {
+          visibility: visible;
+        }
+        color: #222;
+      }
+
+      &:hover {
+        color: #222;
+      }
+
+      &.sm-level-1 {
+        font-size: 16px;
+        padding-left: 20px;
+      }
+
+      &.sm-level-2 {
+        font-size: 14px;
+        padding-left: 40px;
+      }
+
+      &.sm-level-3 {
+        font-size: 12px;
+        padding-left: 60px;
+      }
+    }
+  }
+}
