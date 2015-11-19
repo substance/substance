@@ -37,22 +37,21 @@ var Schema = require('./DocumentSchema');
 */
 function Container() {
   Container.super.apply(this, arguments);
-
-  // mixin
-  ParentNodeMixin.call(this, 'nodes');
 }
 
-var name = "container";
-
-var schema = {
-  nodes: { type: ['id'], default: [] }
-};
-
 Container.Prototype = function() {
+
+  this.getChildrenProperty = function() {
+    return 'nodes';
+  };
 
   this.getPosition = function(nodeId) {
     var pos = this.nodes.indexOf(nodeId);
     return pos;
+  };
+
+  this.getLength = function() {
+    return this.nodes.length;
   };
 
   this.show = function(nodeId, pos) {
@@ -79,6 +78,9 @@ Container.Prototype = function() {
     var nodeId = path[0];
     var property = path[1];
     var node = doc.get(nodeId);
+    if (!node) {
+      throw new Error('Can not find node ' + nodeId);
+    }
     var propIndex = node.getAddressablePropertyNames().indexOf(property);
     if (propIndex < 0) {
       throw new Error('Can not resolve index for property ' + property);
@@ -117,11 +119,17 @@ Container.Prototype = function() {
     // simple and structured nodes
     if (address.length === 2) {
       node = doc.get(nodeId);
+      if (!node) {
+        throw new Error('Can not find node ' + nodeId);
+      }
       nodes.push(node);
     }
     // nested nodes
     else {
       node = doc.get(nodeId);
+      if (!node) {
+        throw new Error('Can not find node ' + nodeId);
+      }
       nodes.push(node);
       for (var i = 1; node && i<address.length-1; i++) {
         node = node.getChildAt(address[i]);
@@ -377,18 +385,16 @@ Container.Prototype = function() {
 oo.inherit(Container, DocumentNode);
 oo.mixin(Container, ParentNodeMixin);
 
-Container.static.name = name;
+Container.static.name = "container";
 
-Container.static.defineSchema(schema);
+Container.static.defineSchema({
+  nodes: { type: ['id'], default: [] }
+});
 
-Object.defineProperties(Container.prototype, {
-  length: {
-    get: function() {
-      return this.props.nodes.length;
-    },
-    set: function() {
-      throw new Error('container.length is read-only.');
-    }
+Object.defineProperty(Container.prototype, 'length', {
+  get: function() {
+    console.warn('DEPRECATED: want to get rid of unnecessary properties. Use this.getLength() instead.');
+    return this.nodes.length;
   }
 });
 

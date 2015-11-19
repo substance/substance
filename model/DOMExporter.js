@@ -94,7 +94,11 @@ DOMExporter.Prototype = function() {
   // default HTML serialization
   this.defaultBlockNodeExporter = function(node, el, converter) {
     el.attr('data-type', node.type);
-    each(node.properties, function(value, name) {
+    var properties = node.toJSON();
+    each(properties, function(value, name) {
+      if (name === 'id' || name === 'type') {
+        return;
+      }
       var prop = $$('div').attr('property', name);
       if (node.getPropertyType() === 'string') {
         prop.append(converter.annotatedText([node.id, name]));

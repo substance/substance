@@ -7,6 +7,22 @@ function TableCell() {
   TableCell.super.apply(this, arguments);
 }
 
+TableCell.Prototype = function() {
+
+  this.getSpan = function(dim) {
+    if (dim === "col") {
+      return this.colspan || 1;
+    } else if (dim === "row") {
+      return this.rowspan || 1;
+    }
+  };
+
+  this.isData = function() {
+    return this.cellType === "data";
+  };
+
+};
+
 oo.inherit(TableCell, DocumentNode);
 
 TableCell.static.name = "table-cell";
@@ -17,22 +33,6 @@ TableCell.static.defineSchema({
   colspan: { type: "number", optional: true },
   rowspan: { type: "number", optional: true },
   content: "text"
-});
-
-TableCell.prototype.getSpan = function(dim) {
-  if (dim === "col") {
-    return this.colspan || 1;
-  } else if (dim === "row") {
-    return this.rowspan || 1;
-  }
-};
-
-Object.defineProperties(TableCell.prototype, {
-  isData: {
-    'get': function() {
-      return this.cellType === "data";
-    }
-  }
 });
 
 module.exports = TableCell;

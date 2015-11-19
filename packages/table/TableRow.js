@@ -6,25 +6,20 @@ var ParentNodeMixin = require('../../model/ParentNodeMixin');
 
 function TableRow() {
   TableRow.super.apply(this, arguments);
-
-  ParentNodeMixin.call(this, 'cells');
 }
 
 TableRow.Prototype = function() {
-  this.getCells = function() {
-    var doc = this.getDocument();
-    return this.cells.map(function(id) {
-      return doc.get(id);
-    }.bind(this));
+
+  this.getChildrenProperty = function() {
+    return 'cells';
   };
+
+  this.getCells = function() {
+    return this.getChildren();
+  };
+
   this.getCellAt = function(cellIdx) {
-    var doc = this.getDocument();
-    var cellId = this.cells[cellIdx];
-    if (cellId) {
-      return doc.get(cellId);
-    } else {
-      return null;
-    }
+    return this.getChildAt(cellIdx);
   };
 };
 
@@ -37,12 +32,6 @@ TableRow.static.name = "table-row";
 TableRow.static.defineSchema({
   "parent": "id",
   "cells": { type: ["id"], default: [] }
-});
-
-Object.defineProperty(TableRow.prototype, 'cellNodes', {
-  'get': function() {
-    return this.getCells();
-  }
 });
 
 module.exports = TableRow;

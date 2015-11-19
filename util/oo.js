@@ -69,7 +69,7 @@ oo.mixin = function(clazz, mixinClazz) {
     if ( key === 'constructor' ||
          !mixinProto.hasOwnProperty(key) ||
          // don't overwrite existing prototype members
-         clazz.hasOwnProperty(key) ) {
+         classProto.hasOwnProperty(key) ) {
       continue;
     }
     classProto[key] = mixinProto[key];

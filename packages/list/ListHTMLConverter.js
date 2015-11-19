@@ -71,7 +71,7 @@ var ListHtmlConverter = {
   },
 
   render: function(list, impl) {
-    var children = list.getItems();
+    var children = list.getChildren();
     var el = impl.createListElement(list);
 
     var j;

@@ -28,7 +28,7 @@ TextNode.Prototype = function() {
 
 oo.inherit(TextNode, DocumentNode);
 
-TextNode.static.name = "text-node";
+TextNode.static.name = "text";
 
 TextNode.static.defineSchema({
   content: 'text'
