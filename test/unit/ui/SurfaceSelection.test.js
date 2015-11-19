@@ -1,4 +1,5 @@
 "use strict";
+require('../qunit_extensions');
 
 var SurfaceSelection = require('../../../ui/SurfaceSelection');
 

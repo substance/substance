@@ -1,6 +1,6 @@
 'use strict';
-
 require('../qunit_extensions');
+
 var sample = require('../../fixtures/container_sample');
 var simpleSample = require('../../fixtures/sample1');
 

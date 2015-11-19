@@ -1,6 +1,5 @@
 "use strict";
-
-require('../phantomjs_shims');
+require('../qunit_extensions');
 
 var ContainerEditor = require('../../../ui/ContainerEditor');
 var Component = require('../../../ui/Component');

@@ -1,4 +1,5 @@
 "use strict";
+require('../../qunit_extensions');
 
 var _ = require('../../../../util/helpers');
 var PathAdapter = require('../../../../util/PathAdapter');

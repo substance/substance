@@ -1,6 +1,6 @@
 "use strict";
-
 require('../../qunit_extensions');
+
 var simple = require('../../../fixtures/simple');
 var insertNode = require('../../../../model/transform/insertNode');
 
