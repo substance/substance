@@ -2,9 +2,10 @@
 
 var oo = require('../../util/oo');
 
-function Operation() {
-
-}
+/*
+  @class
+*/
+function Operation() {}
 
 Operation.Prototype = function() {
   this.isOperation = true;

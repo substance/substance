@@ -3,9 +3,9 @@
 var containerAnnoSample = require('../../fixtures/container_anno_sample');
 var AnnotationCommand = require('../../../ui/AnnotationCommand');
 var docHelpers = require('../../../model/documentHelpers');
-var StubSurface = require('../ui/stub_surface');
+var StubSurface = require('./StubSurface');
 
-QUnit.module('Commands/toggleAnnotation');
+QUnit.module('ui/AnnotationCommand');
 
 // Setup
 // -----------------------
@@ -64,7 +64,7 @@ function sample() {
 
 QUnit.test("PropertyAnnotation: cmd.canTrucate", function(assert) {
   var doc = sample();
-  
+
   var sel = doc.createSelection({
     type: 'property',
     path: ['p1', 'content'],
@@ -75,7 +75,7 @@ QUnit.test("PropertyAnnotation: cmd.canTrucate", function(assert) {
   var surface = new StubSurface(doc, sel);
   var cmd = new ToggleStrongCommand(surface);
   var cmdState = cmd.getCommandState();
-  
+
   assert.equal(cmdState.mode, 'expand', "Mode should be 'expand'");
 });
 

@@ -3,7 +3,7 @@
 var _ = require('../util/helpers');
 var oo = require('../util/oo');
 var EventEmitter = require('../util/EventEmitter');
-var Node = require('./DocumentNode');
+var DocumentNode = require('./DocumentNode');
 var Selection = require('./Selection');
 
 /**
@@ -27,51 +27,55 @@ var Selection = require('./Selection');
   ```
  */
 
-var ContainerAnnotation = Node.extend({
-  displayName: "ContainerAnnotation",
-  name: "container-annotation",
+function ContainerAnnotation() {
+  ContainerAnnotation.super.apply(this, arguments);
+}
 
-  properties: {
-    // id of container node
-    container: 'string',
-    startPath: ['array', 'string'],
-    startOffset: 'number',
-    endPath: ['array', 'string'],
-    endOffset: 'number'
-  },
+var name = "container-annotation";
 
-  getStartAnchor: function() {
+var schema = {
+  // id of container node
+  container: "container",
+  startPath: ["string"],
+  startOffset: "number",
+  endPath: ["string"],
+  endOffset: "number"
+};
+
+ContainerAnnotation.Prototype = function() {
+
+  this.getStartAnchor = function() {
     if (!this._startAnchor) {
       this._startAnchor = new ContainerAnnotation.Anchor(this, 'isStart');
     }
     return this._startAnchor;
-  },
+  };
 
-  getEndAnchor: function() {
+  this.getEndAnchor = function() {
     if (!this._endAnchor) {
       this._endAnchor = new ContainerAnnotation.Anchor(this);
     }
     return this._endAnchor;
-  },
+  };
 
-  getStartPath: function() {
+  this.getStartPath = function() {
     return this.startPath;
-  },
+  };
 
-  getEndPath: function() {
+  this.getEndPath = function() {
     return this.endPath;
-  },
+  };
 
-  getStartOffset: function() {
+  this.getStartOffset = function() {
     return this.startOffset;
-  },
+  };
 
-  getEndOffset: function() {
+  this.getEndOffset = function() {
     return this.endOffset;
-  },
+  };
 
   // Provide a selection which has the same range as this annotation.
-  getSelection: function() {
+  this.getSelection = function() {
     var doc = this.getDocument();
     // Guard: when this is called while this node has been detached already.
     if (!doc) {
@@ -86,18 +90,18 @@ var ContainerAnnotation = Node.extend({
       endPath: this.endPath,
       endOffset: this.endOffset
     });
-  },
+  };
 
-  getText: function() {
+  this.getText = function() {
     var doc = this.getDocument();
     if (!doc) {
       console.warn('Trying to use a ContainerAnnotation which is not attached to the document.');
       return "";
     }
     return doc.getTextForSelection(this.getSelection());
-  },
+  };
 
-  updateRange: function(tx, sel) {
+  this.updateRange = function(tx, sel) {
     if (!sel.isContainerSelection()) {
       throw new Error('Cannot change to ContainerAnnotation.');
     }
@@ -113,10 +117,9 @@ var ContainerAnnotation = Node.extend({
     if (this.endOffset !== sel.end.offset) {
       tx.set([this.id, 'endOffset'], sel.end.offset);
     }
-  },
+  };
 
-
-  setHighlighted: function(highlighted) {
+  this.setHighlighted = function(highlighted) {
 
     if (this.highlighted !== highlighted) {
       this.highlighted = highlighted;
@@ -126,10 +129,9 @@ var ContainerAnnotation = Node.extend({
         frag.emit('highlighted', highlighted);
       });
     }
-  },
+  };
 
-  // FIXME: this implementation will not prune old fragments
-  getFragments: function() {
+  this.getFragments = function() {
     var fragments = [];
     var doc = this.getDocument();
     var container = doc.get(this.container);
@@ -144,10 +146,20 @@ var ContainerAnnotation = Node.extend({
       }
     }
     return fragments;
-  },
+  };
 
-});
+};
 
+oo.inherit(ContainerAnnotation, DocumentNode);
+
+ContainerAnnotation.static.name = name;
+
+ContainerAnnotation.static.defineSchema(schema);
+
+/**
+  @class
+  @private
+*/
 ContainerAnnotation.Anchor = function Anchor(anno, isStart) {
   EventEmitter.call(this);
   this.type = "container-annotation-anchor";
@@ -172,6 +184,10 @@ ContainerAnnotation.Anchor.Prototype = function() {
 
 oo.initClass(ContainerAnnotation.Anchor);
 
+/**
+  @class
+  @private
+*/
 ContainerAnnotation.Fragment = function Fragment(anno, path, mode) {
   EventEmitter.call(this);
 
@@ -216,7 +232,6 @@ Object.defineProperties(ContainerAnnotation.Fragment.prototype, {
     set: function() { throw new Error('Immutable!'); }
   }
 });
-
 
 ContainerAnnotation.Fragment.static.level = Number.MAX_VALUE;
 

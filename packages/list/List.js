@@ -1,7 +1,7 @@
 'use strict';
 
-var _ = require('../../util/helpers');
-var DocumentNode = require('../../model/DocumentNode');
+var oo = require('../../util/oo');
+var BlockNode = require('../../model/BlockNode');
 var ParentNodeMixin = require('../../model/ParentNodeMixin');
 
 // Note: we have chosen a semi-hierarchical model for lists
@@ -10,26 +10,17 @@ var ParentNodeMixin = require('../../model/ParentNodeMixin');
 // This will make life easier for editing.
 // The wrapping list node helps us to create a scope for rendering, and
 // import/export.
-var List = DocumentNode.extend(ParentNodeMixin.prototype, {
-  displayName: "List",
-  name: "list",
-  properties: {
-    ordered: "boolean",
-    items: ["array", "id"]
-  },
-  didInitialize: function() {
-    // call mix-in initializer
-    ParentNodeMixin.call(this, 'items');
-  },
+function List() {
+  List.super.apply(this, arguments);
+}
 
-  getItems: function() {
-    var doc = this.getDocument();
-    return _.map(this.items, function(id) {
-      return doc.get(id);
-    }, this);
-  },
+List.Prototype = function() {
 
-  removeItem: function(id) {
+  this.getChildrenProperty = function() {
+    return 'items';
+  };
+
+  this.removeItem = function(id) {
     var doc = this.getDocument();
     var offset = this.items.indexOf(id);
     if (offset >= 0) {
@@ -37,26 +28,23 @@ var List = DocumentNode.extend(ParentNodeMixin.prototype, {
     } else {
       throw new Error('List item is not a child of this list: ' + id);
     }
-  },
-  insertItemAt: function(offset, id) {
+  };
+
+  this.insertItemAt = function(offset, id) {
     var doc = this.getDocument();
     doc.update([this.id, 'items'], { "insert": { offset: offset, value: id } });
-  },
+  };
 
-});
+};
 
-List.static.components = ['items'];
+oo.inherit(List, BlockNode);
+oo.mixin(List, ParentNodeMixin);
 
-// HtmlImporter
+List.static.name = "list";
 
-List.static.blockType = true;
-
-Object.defineProperties(List.prototype, {
-  itemNodes: {
-    'get': function() {
-      return this.getItems();
-    }
-  }
+List.static.defineSchema({
+  ordered: { type: "boolean", default: false },
+  items: { type: ["id"], defaut: [] }
 });
 
 module.exports = List;

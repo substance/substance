@@ -6,6 +6,9 @@ var Selection = require('./Selection');
 var Coordinate = require('./Coordinate');
 var Range = require('./Range');
 
+/**
+  A selection which is bound to a property.
+*/
 function PropertySelection(properties) {
   var path = properties.path;
   var startOffset = properties.startOffset;
@@ -246,36 +249,54 @@ PropertySelection.Prototype = function() {
 oo.inherit(PropertySelection, Selection);
 
 Object.defineProperties(PropertySelection.prototype, {
+  /**
+    @property {Coordinate} PropertySelection.start
+  */
   start: {
     get: function() {
       return this.range.start;
     },
     set: function() { throw new Error('immutable.'); }
   },
+  /**
+    @property {Coordinate} PropertySelection.end
+  */
   end: {
     get: function() {
       return this.range.end;
     },
     set: function() { throw new Error('immutable.'); }
   },
+  /**
+    @property {String[]} PropertySelection.path
+  */
   path: {
     get: function() {
       return this.range.start.path;
     },
     set: function() { throw new Error('immutable.'); }
   },
+  /**
+    @property {Number} PropertySelection.startOffset
+  */
   startOffset: {
     get: function() {
       return this.range.start.offset;
     },
     set: function() { throw new Error('immutable.'); }
   },
+  /**
+    @property {Number} PropertySelection.endOffset
+  */
   endOffset: {
     get: function() {
       return this.range.end.offset;
     },
     set: function() { throw new Error('immutable.'); }
   },
+  /**
+    @property {Boolean} PropertySelection.collapsed
+  */
   collapsed: {
     get: function() {
       return this.isCollapsed();

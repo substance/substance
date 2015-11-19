@@ -2,7 +2,7 @@
 
 var oo = require('../../util/oo');
 var Document = require('../../model/Document');
-var schema = require('./test_schema');
+var schema = require('./TestSchema');
 
 var TestArticle = function() {
   TestArticle.super.call(this, schema);

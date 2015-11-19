@@ -1,22 +1,27 @@
 'use strict';
 
-var DocumentNode = require('../../model/DocumentNode');
+var oo = require('../../util/oo');
+var BlockNode = require('../../model/BlockNode');
 
-var Include = DocumentNode.extend({
-  name: "include",
-  displayName: "Include",
-  properties: {
-    "nodeType": "string",
-    "nodeId": "id"
-  },
+function Include() {
+  Include.apply(this, arguments);
+}
 
-  getIncludedNode: function() {
+Include.Prototype = function() {
+
+  this.getIncludedNode = function() {
     return this.getDocument().get(this.nodeId);
-  },
+  };
+
+};
+
+oo.inherit(Include, BlockNode);
+
+Include.static.name = "include";
+
+Include.static.defineSchema({
+  "nodeType": "string",
+  "nodeId": "id"
 });
-
-Include.static.components = [];
-
-Include.static.blockType = true;
 
 module.exports = Include;
