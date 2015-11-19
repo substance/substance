@@ -1,6 +1,9 @@
 module.exports = {
   'switch_text': 'Switch text',
   'hyperlink': 'Hyperlink',
+  'subscript': 'Subscript',
+  'superscript': 'Superscript',
+  'code': 'Code',
   'delete': 'Delete',
   'emphasis': 'Emphasis',
   'strong': 'Strong',
