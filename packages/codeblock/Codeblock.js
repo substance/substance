@@ -1,9 +1,14 @@
 'use strict';
 
+var oo = require('../../util/oo');
 var TextBlock = require('../../model/TextBlock');
 
-var Codeblock = TextBlock.extend({
-  name: "codeblock"
-});
+function Codeblock() {
+  Codeblock.super.apply(this, arguments);
+}
+
+oo.inherit(Codeblock, TextBlock);
+
+Codeblock.static.name = "codeblock";
 
 module.exports = Codeblock;

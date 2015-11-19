@@ -2,7 +2,7 @@
 
 var oo = require('../../../util/oo');
 
-QUnit.module('Substance.oo');
+QUnit.module('util/oo');
 
 QUnit.test("oo.extend and oo.inherit should propagate static properties", function(assert) {
   function A() {}

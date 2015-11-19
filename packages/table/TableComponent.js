@@ -1,6 +1,6 @@
 'use strict';
 
-var _ = require('../../util/helpers');
+var each = require('lodash/collection/each');
 var $ = require('../../util/jquery');
 var oo = require('../../util/oo');
 var Component = require('../../ui/Component');
@@ -46,11 +46,11 @@ TableComponent.Prototype = function() {
 
   this.renderTableContent = function() {
     var content = [];
-    _.each(this.props.node.getSections(), function(sec) {
+    each(this.props.node.getSections(), function(sec) {
       var secEl = $$("t"+sec.sectionType).key(sec.id);
-      _.each(sec.getRows(), function(row) {
+      each(sec.getRows(), function(row) {
         var rowEl = $$("tr").attr({"data-id": row.id, contentEditable:false});
-        _.each(row.getCells(), function(cell) {
+        each(row.getCells(), function(cell) {
           var cellEl = $$((cell.cellType === 'head') ? 'th' : 'td')
             .attr({
               "data-id": cell.id,

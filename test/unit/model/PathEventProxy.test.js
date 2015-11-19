@@ -3,7 +3,7 @@
 require('../qunit_extensions');
 var sample1 = require('../../fixtures/sample1');
 
-QUnit.module('Substance.Document/EventProxy');
+QUnit.module('model/PathEventProxy');
 
 QUnit.test("Updating a property", function(assert) {
   var doc = sample1();

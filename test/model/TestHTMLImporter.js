@@ -2,8 +2,8 @@
 
 var oo = require('../../util/oo');
 var HTMLImporter = require('../../model/HTMLImporter');
-var schema = require('./test_schema');
-var TestArticle = require('./test_article');
+var schema = require('./TestSchema');
+var TestArticle = require('./TestArticle');
 
 var converters = [
   require('../../packages/paragraph/ParagraphHTMLConverter'),

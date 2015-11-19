@@ -118,7 +118,10 @@ TocPanel.Prototype = function() {
     var nodeId = e.currentTarget.dataset.id;
     e.preventDefault();
     var doc = this.getDocument();
+    // TODO: we are UI land, so why not sending an action?
+    // abusing document events is hacky
     doc.emit("toc:entry-selected", nodeId);
+    this.send('tocEntrySelected', nodeId);
   };
 };
 

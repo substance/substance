@@ -29,7 +29,7 @@ function _textProp3() {
   manager.registerProperty(textProp3);
 }
 
-QUnit.module('Substance.Document/TextPropertManager', {
+QUnit.module('model/TextPropertManager', {
   beforeEach: function() {
     doc = sample();
     manager = new TextPropertyManager(doc, 'main');

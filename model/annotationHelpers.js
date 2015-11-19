@@ -1,6 +1,8 @@
 "use strict";
 
-var _ = require('../util/helpers');
+var each = require('lodash/collection/each');
+var uniq = require('lodash/array/uniq');
+var uuid = require('../util/uuid');
 
 // TODO: this should be implemented as transformations
 
@@ -13,7 +15,7 @@ var insertedText = function(doc, coordinate, length, ignoredAnnos) {
   if (!length) return;
   var index = doc.getIndex('annotations');
   var annotations = index.get(coordinate.path);
-  _.each(annotations, function(anno) {
+  each(annotations, function(anno) {
     if (ignoredAnnos && ignoredAnnos[anno.id]) {
       return;
     }
@@ -41,7 +43,7 @@ var insertedText = function(doc, coordinate, length, ignoredAnnos) {
   // same for container annotation anchors
   index = doc.getIndex('container-annotation-anchors');
   var anchors = index.get(coordinate.path);
-  _.each(anchors, function(anchor) {
+  each(anchors, function(anchor) {
     var pos = coordinate.offset;
     var start = anchor.offset;
     var changed = false;
@@ -67,7 +69,7 @@ var deletedText = function(doc, path, startOffset, endOffset, replaceTextSupport
   if (replaceTextSupport) {
     result = {};
   }
-  _.each(annotations, function(anno) {
+  each(annotations, function(anno) {
     var pos1 = startOffset;
     var pos2 = endOffset;
     var start = anno.startOffset;
@@ -107,7 +109,7 @@ var deletedText = function(doc, path, startOffset, endOffset, replaceTextSupport
   index = doc.getIndex('container-annotation-anchors');
   var anchors = index.get(path);
   var containerAnnoIds = [];
-  _.each(anchors, function(anchor) {
+  each(anchors, function(anchor) {
     containerAnnoIds.push(anchor.id);
     var pos1 = startOffset;
     var pos2 = endOffset;
@@ -131,7 +133,7 @@ var deletedText = function(doc, path, startOffset, endOffset, replaceTextSupport
     }
   });
   // check all anchors after that if they have collapsed and remove the annotation in that case
-  _.each(_.uniq(containerAnnoIds), function(id) {
+  each(uniq(containerAnnoIds), function(id) {
     var anno = doc.get(id);
     var annoSel = anno.getSelection();
     if(annoSel.isCollapsed()) {
@@ -147,7 +149,7 @@ var deletedText = function(doc, path, startOffset, endOffset, replaceTextSupport
 var transferAnnotations = function(doc, path, offset, newPath, newOffset) {
   var index = doc.getIndex('annotations');
   var annotations = index.get(path, offset);
-  _.each(annotations, function(a) {
+  each(annotations, function(a) {
     var isInside = (offset > a.startOffset && offset < a.endOffset);
     var start = a.startOffset;
     var end = a.endOffset;
@@ -156,8 +158,8 @@ var transferAnnotations = function(doc, path, offset, newPath, newOffset) {
     if (isInside) {
       // create a new annotation if the annotation is splittable
       if (a.canSplit()) {
-        var newAnno = _.clone(a.properties);
-        newAnno.id = _.uuid(a.type + "_");
+        var newAnno = a.toJSON();
+        newAnno.id = uuid(a.type + "_");
         newAnno.startOffset = newOffset;
         newAnno.endOffset = newOffset + a.endOffset - offset;
         newAnno.path = newPath;
@@ -195,7 +197,7 @@ var transferAnnotations = function(doc, path, offset, newPath, newOffset) {
   index = doc.getIndex('container-annotation-anchors');
   var anchors = index.get(path);
   var containerAnnoIds = [];
-  _.each(anchors, function(anchor) {
+  each(anchors, function(anchor) {
     containerAnnoIds.push(anchor.id);
     var start = anchor.offset;
     if (offset <= start) {
@@ -206,7 +208,7 @@ var transferAnnotations = function(doc, path, offset, newPath, newOffset) {
     }
   });
   // check all anchors after that if they have collapsed and remove the annotation in that case
-  _.each(_.uniq(containerAnnoIds), function(id) {
+  each(uniq(containerAnnoIds), function(id) {
     var anno = doc.get(id);
     var annoSel = anno.getSelection();
     if(annoSel.isCollapsed()) {

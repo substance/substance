@@ -3,7 +3,7 @@
 require('../qunit_extensions');
 var sample = require('../../fixtures/container_anno_sample');
 
-QUnit.module('Substance.Document/ContainerSelection');
+QUnit.module('model/ContainerSelection');
 
 QUnit.test("Expand with PropertySelection", function(assert) {
   var doc = sample();

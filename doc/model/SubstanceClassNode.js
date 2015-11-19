@@ -1,11 +1,17 @@
 'use strict';
 
+var oo = require('../../util/oo');
 var ClassNode = require('./ClassNode');
 var find = require('lodash/collection/find');
 
-var SubstanceClassNode = ClassNode.extend({
+function SubstanceClassNode() {
+  SubstanceClassNode.super.apply(this, arguments);
+}
+
+SubstanceClassNode.Prototype = function() {
+
   // Defaults to the regular type property
-  getSpecificType: function() {
+  this.getSpecificType = function() {
     var isComponent = false;
     if (this.tags.length > 0) {
       isComponent = !!find(this.tags, 'type', 'component');
@@ -16,7 +22,10 @@ var SubstanceClassNode = ClassNode.extend({
     } else {
       return ClassNode.prototype.getSpecificType.call(this);
     }
-  }
-});
+  };
+
+};
+
+oo.inherit(SubstanceClassNode, ClassNode);
 
 module.exports = SubstanceClassNode;

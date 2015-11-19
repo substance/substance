@@ -2,10 +2,10 @@
 
 var Document = require('../../model/Document');
 var Schema = require('../../model/DocumentSchema');
-var MetaNode = require('./test_article_meta');
-var TestNode = require('./test_node');
-var TestContainerAnnotation = require('./test_container_annotation');
-var TestStructuredNode = require('./test_structured_node');
+var MetaNode = require('./TestMetaNode');
+var TestNode = require('./TestNode');
+var TestContainerAnnotation = require('./TestContainerAnnotation');
+var TestStructuredNode = require('./TestStructuredNode');
 var Paragraph = require('../../packages/paragraph/Paragraph');
 var Heading = require('../../packages/heading/Heading');
 var Emphasis = require('../../packages/emphasis/Emphasis');

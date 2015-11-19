@@ -10,6 +10,10 @@ var DEL = "-";
 
 var hasConflict;
 
+/*
+  @class
+  @extends Operation
+*/
 function TextOperation(data) {
   Operation.call(this);
   if (!data || data.type === undefined || data.pos === undefined || data.str === undefined) {

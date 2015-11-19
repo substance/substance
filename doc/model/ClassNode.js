@@ -1,6 +1,8 @@
 'use strict';
 
+var oo = require('../../util/oo');
 var DocumentedNode = require('./DocumentedNode');
+var MemberContainerMixin = require('./MemberContainerMixin');
 
 var MEMBER_CATEGORIES = [
   {name: 'ctor', path: ['class', 'ctor']},
@@ -13,27 +15,37 @@ var MEMBER_CATEGORIES = [
   {name: 'inner-classes', path: ['class', 'class']}
 ];
 
-var ClassNode = DocumentedNode.extend({
-  name: 'class',
-  properties: {
-    parent: 'id',
-    name: 'string',
-    members: ['array', 'id'],
-    isAbstract: 'boolean',
-    isStatic: 'boolean',
-    superClass: 'id', // when @extends is defined
-  },
-  getSpecificType: function() {
+function ClassNode() {
+  ClassNode.super.apply(this, arguments);
+}
+
+ClassNode.Prototype = function() {
+  this.getSpecificType = function() {
     if (this.isAbstract) return 'abstract-class';
     return 'class';
-  },
-  getTocLevel: function() {
-    return 2;
-  },
+  };
 
-  getMemberCategories: function() {
+  this.getTocLevel = function() {
+    return 2;
+  };
+
+  this.getMemberCategories = function() {
     return MEMBER_CATEGORIES;
-  }
+  };
+}
+
+oo.inherit(ClassNode, DocumentedNode);
+oo.mixin(ClassNode, MemberContainerMixin);
+
+ClassNode.static.name = 'class';
+
+ClassNode.static.defineSchema({
+  parent: 'id',
+  name: 'string',
+  members: { type: ['array', 'id'], default: [] },
+  isAbstract: { type: 'boolean', default: false },
+  isStatic: { type: 'boolean', default: false },
+  superClass: { type: 'id', optional: true }, // only when @extends is defined
 });
 
 ClassNode.static.blockType = true;

@@ -35,7 +35,10 @@ _Parser.Prototype = function() {
 
   this.parse = function() {
     var js = fs.readFileSync(this.file, 'utf8');
+
+    dox.parseTagTypes = this._parseTagTypes.bind(this);
     var doxified = dox.parseComments(js, { skipSingleStar: true });
+
     var exported = this.extractExports(doxified);
     var nodes = this.convert(exported);
     return nodes;
@@ -453,26 +456,29 @@ _Parser.Prototype = function() {
     };
   }
 
+  // HACK: overriding the type parser entry point
+  // to workaround a syntax error thrown by jsdoctypeparser for
+  // when using paths in type strings `{model/Document}` without `module:` prefix.
+  // keep a reference to original dox.parseTagTypes
+  var dox_parseTagTypes = dox.parseTagTypes;
+  this._parseTagTypes = function(str, tag) {
+    if (/\{[^{]+\}/.exec(str)) {
+      str = str.replace(/\//g, '_SEP_');
+      try {
+        var types = dox_parseTagTypes(str, tag);
+        for (var i = 0; i < types.length; i++) {
+          types[i] = types[i].replace(/_SEP_/g, '/');
+        }
+      } catch (err) {
+        throw new Error('Could not parse jsdoc expression found in ' + this.file + "\n" + err.message);
+      }
+    } else {
+      return dox_parseTagTypes(str, tag);
+    }
+  };
+
 };
 
 oo.initClass(_Parser);
-
-// DOX configuration
-
-// HACK: overriding the type parser entry point
-// to workaround a syntax error thrown by jsdoctypeparser for
-// when using paths in type strings `{model/Document}` without `module:` prefix.
-var _parseTagTypes = dox.parseTagTypes;
-dox.parseTagTypes = function(str, tag) {
-  if (/\{[^{]+\}/.exec(str)) {
-    str = str.replace(/\//g, '_SEP_');
-    var types = _parseTagTypes(str, tag);
-    for (var i = 0; i < types.length; i++) {
-      types[i] = types[i].replace(/_SEP_/g, '/');
-    }
-  } else {
-    return _parseTagTypes(str, tag);
-  }
-};
 
 module.exports = parseFile;

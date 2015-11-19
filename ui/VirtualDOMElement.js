@@ -482,6 +482,9 @@ VirtualDOMElement.prepareChildren = function(children) {
     if(isString(children[i])) {
       children[i] = new VirtualTextNode(children[i]);
     }
+    if (!children[i]) {
+      throw new Error('Illegal child element', children, i);
+    }
   }
 };
 

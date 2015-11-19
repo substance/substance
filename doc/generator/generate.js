@@ -13,7 +13,7 @@ module.exports = function generate(config) {
       return node;
     }
     // pick only properties which are defined in node schema
-    node = pick(node, Object.keys(nodeSchema));
+    node = pick(node, ['type'].concat(Object.keys(nodeSchema)));
     if (node.members) {
       node.members.sort();
     }

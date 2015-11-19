@@ -1,41 +1,49 @@
 'use strict';
 
+var oo = require('../../util/oo');
 var DocumentNode = require('../../model/DocumentNode');
 
 // Abstract interface
 // There are ImageFigures, TableFigures, VideoFigures
 
-var Figure = DocumentNode.extend({
-  name: "figure",
-  properties: {
-    "title": "string",
-    "caption": "string",
-    "content": "id"
-  },
+function Figure() {
+  Figure.super.apply(this, arguments);
 
-  setLabel: function(label) {
+  this.guid = this.id;
+}
+
+var name = "figure";
+
+var schema = {
+  "title": "text",
+  "content": "id",
+  "caption": "text",
+  "guid": { type: "id", volatile: true }
+};
+
+Figure.Prototype = function() {
+
+  this.setLabel = function(label) {
     this.label = label;
     this.emit('label', label);
-  },
+  };
 
-  // Set compiled text representation
-  // E.g. useful for print output
-  setText: function(compiledText) {
+    // Set compiled text representation
+    // E.g. useful for print output
+  this.setText = function(compiledText) {
     this.text = compiledText;
-  },
+  };
 
-  // For compatibility with Collection interface
-  didInitialize: function() {
-    this.guid = this.id;
-  },
-
-  getContentNode: function() {
+  this.getContentNode =  function() {
     return this.document.get(this.content);
-  },
+  };
 
-});
+};
 
-// declare editable components, so that we can enable ContainerEditor features
-Figure.static.components = ['title', 'caption'];
+oo.inherit(Figure, DocumentNode);
+
+Figure.static.name = name;
+
+Figure.static.defineSchema(schema);
 
 module.exports = Figure;
