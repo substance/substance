@@ -19,5 +19,6 @@ module.exports = {
   'heading2': 'Heading 2',
   'heading3': 'Heading 3',
   'codeblock': 'Codeblock',
-  'blockquote': 'Blockquote'
+  'blockquote': 'Blockquote',
+  'container-selection': 'Multiple Elements'
 };
