@@ -11,9 +11,7 @@ var oo = require('../util/oo');
  * @class
  * @mixin
  */
-function ParentNodeMixin() {}
-
-ParentNodeMixin.Prototype = function() {
+function ParentNodeMixin() {
 
   this.hasChildren = function() {
     return true;
@@ -51,7 +49,7 @@ ParentNodeMixin.Prototype = function() {
     return [this.getChildrenProperty()];
   };
 
-};
+}
 
 oo.initClass(ParentNodeMixin);
 
