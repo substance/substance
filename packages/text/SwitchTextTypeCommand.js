@@ -68,12 +68,6 @@ SwitchTextType.Prototype = function() {
     // Set disabled when not a property selection
     if (!surface.isEnabled() || sel.isNull()) {
       newState.disabled = true;
-    } else if (sel.isTableSelection()) {
-      newState.disabled = true;
-      // newState.currentContext = 'table';
-    } else if (sel.isContainerSelection()) {
-      newState.disabled = true;
-      // newState.currentContext = 'container';
     } else {
       var doc = this.getDocument();
       var path = sel.getPath();
@@ -84,14 +78,23 @@ SwitchTextType.Prototype = function() {
         if (!newState.currentTextType) {
           newState.disabled = true;
         }
-      } else {
+      }
+      if (!newState.currentTextType) {
+        // We 'abuse' the currentTextType field by providing a property
+        // identifier that is translated into a name using an i18n resolve.
+        // E.g. this.i18n('figure.caption') -> Figre Caption
+        newState.currentTextType = {name: [node.type, path[1]].join('.')};
         newState.disabled = true;
       }
     }
     return newState;
   };
 
-  // Execute command and trigger
+  /**
+    Trigger a switchTextType transaction
+
+    @param {String} textTypeName identifier (e.g. heading1)
+  */
   this.execute = function(textTypeName) {
     var textType = this.getTextType(textTypeName);
 
