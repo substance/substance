@@ -55,45 +55,22 @@ oo.inherit =  function(clazz, parentClazz) {
   _afterClassInitHook(clazz);
 };
 
-function _afterClassInitHook(childClazz) {
-  var proto = childClazz.prototype;
-  for(var key in proto) {
-    if (key === "constructor" ||
-        key === "__class__" ||
-        !proto.hasOwnProperty(key)) continue;
-    // built-in: extend class.static with prototype.static
-    if (key === 'static') {
-      _copyStaticProps(childClazz.static, proto.static);
-      continue;
-    }
-  }
-}
-
 /*
  * @param clazz {Constructor} class constructor
  * @param mixinClazz {Constructor} parent constructor
  */
-oo.mixin = function(clazz, mixinClazz) {
-  if (!clazz.__is_initialized__) {
-    oo.initClass(clazz);
+oo.mixin = function(Clazz, mixin) {
+  if (!Clazz.__is_initialized__) {
+    oo.initClass(Clazz);
   }
-  var key;
-  var mixinProto = mixinClazz.prototype;
-  var classProto = clazz.prototype;
-  // Copy prototype properties
-  for ( key in mixinProto ) {
-    if ( key === 'constructor' ||
-         !mixinProto.hasOwnProperty(key) ||
-         // don't overwrite existing prototype members
-         classProto.hasOwnProperty(key) ) {
-      continue;
+  if (isFunction(mixin)) {
+    if (mixin.length !== 0) {
+      throw new Error('Mixins must have a no-arg constructor.');
     }
-    classProto[key] = mixinProto[key];
+    var Mixin = mixin;
+    mixin = new Mixin();
   }
-  // Copy static properties
-  if ( mixinClazz.static ) {
-    _copyStaticProps(clazz.static, mixinClazz.static);
-  }
+  _mixin(Clazz, mixin);
 };
 
 // ### Internal implementations
@@ -148,6 +125,20 @@ function _inherit(ChildClass, ParentClass) {
   }
 }
 
+function _afterClassInitHook(childClazz) {
+  var proto = childClazz.prototype;
+  for(var key in proto) {
+    if (key === "constructor" ||
+        key === "__class__" ||
+        !proto.hasOwnProperty(key)) continue;
+    // built-in: extend class.static with prototype.static
+    if (key === 'static') {
+      _copyStaticProps(childClazz.static, proto.static);
+      continue;
+    }
+  }
+}
+
 /*
   extend() -> lazy inheritance without a proto
   extend({...}) -> lazy inheritance with a proto
@@ -179,6 +170,15 @@ function _extendClass(ParentClass) {
   // the last argument may be a prototype constructor function.
   for (; idx < args.length; idx++) {
     if (isFunction(args[idx])) {
+      // mixins can also be defined as
+      if (idx !== args.length-1) {
+        var Mixin = args[idx];
+        if (Mixin.length !== 0) {
+          throw new Error('Mixins must have a no-arg constructor.');
+        }
+        mixins.push(new Mixin());
+        continue;
+      }
       if (ChildClass.hasOwnProperty('Prototype')) {
         throw new Error('Class ' + ChildClass.name + ' has defined ' + ChildClass.name +
          '.Prototype which would be overwritten by Class.extend().\n' +
@@ -201,26 +201,29 @@ function _extendClass(ParentClass) {
   // from right to left copy all mixins into the prototype
   // but never overwrite
   // like with lodash/object/extend, the mixin later in the args list 'wins'
-  var proto = ChildClass.prototype;
   for (var i = mixins.length - 1; i >= 0; i--) {
-    var mixin = mixins[i];
-    for(var key in mixin) {
-      if (mixin.hasOwnProperty(key)) {
-        // built-in: extend class.static with prototype.static
-        if (key === 'static') {
-          _copyStaticProps(ChildClass.static, mixin.static);
-          continue;
-        } else {
-          if (!proto.hasOwnProperty(key)) {
-            proto[key] = mixin[key];
-          }
-        }
-      }
-    }
+    _mixin(ChildClass, mixins[i])
   }
 
   return ChildClass;
 }
+
+function _mixin(Clazz, mixin) {
+  var proto = Clazz.prototype;
+  for(var key in mixin) {
+    if (mixin.hasOwnProperty(key)) {
+      // built-in: extend class.static with prototype.static
+      if (key === 'static') {
+        _copyStaticProps(Clazz.static, mixin.static);
+        continue;
+      } else {
+        if (!proto.hasOwnProperty(key)) {
+          proto[key] = mixin[key];
+        }
+      }
+    }
+  }
+};
 
 function _makeExtensible(clazz) {
   if (!clazz.static) {
