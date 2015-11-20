@@ -408,10 +408,8 @@ DOMImporter.Prototype = function DOMImporterPrototype() {
           inlineNode = inlineTypeConverter.import(el, inlineNode, this) || inlineNode;
 
           var NodeClass = this.schema.getNodeClass(inlineType);
-
-          // TODO: this should be called 'inline in future'
-          // external nodes are attached to an invisible character
-          if (NodeClass.static.external) {
+          // inline nodes are attached to an invisible character
+          if (NodeClass.static.isInline) {
             this.customText("\u200B");
           }
           // ... and transfer the result into the current context

@@ -71,10 +71,6 @@ DocumentNode.Prototype = function() {
     }
   };
 
-  this.isExternal = function() {
-    return this.constructor.static.external;
-  };
-
   this.connect = function(ctx, handlers) {
     each(handlers, function(func, name) {
       var match = /([a-zA-Z_0-9]+):changed/.exec(name);

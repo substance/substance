@@ -30,7 +30,7 @@ var insertedText = function(doc, coordinate, length, ignoredAnnos) {
     }
     // Node: external nodes do not expand automatically
     if ( (pos < end) ||
-         (pos === end && !anno.isExternal()) ) {
+         (pos === end && !anno.isInline()) ) {
       newEnd += length;
     }
     if (newStart !== start) {
