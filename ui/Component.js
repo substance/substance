@@ -464,10 +464,13 @@ Component.Prototype = function ComponentPrototype() {
     var needRerender = this.shouldRerender(newProps, this.getState());
     this.willReceiveProps(newProps);
     this._setProps(newProps);
-    this.didReceiveProps();
     if (needRerender) {
       this.rerender();
     }
+    // Important to call this after rerender, so within the hook you can interact
+    // with the updated DOM. However we still observe that sometimes the DOM is
+    // not ready at that point.
+    this.didReceiveProps();
   };
 
   /**
