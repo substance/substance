@@ -36,7 +36,7 @@ Figure.static.defineSchema({
   "title": "text",
   "content": "id",
   "caption": "text",
-  "guid": { type: "id", volatile: true }
+  "guid": { type: "id", optional: true }
 });
 
 module.exports = Figure;

@@ -124,11 +124,6 @@ EventEmitter.extend(AbstractDocument, function AbstractDocumentPrototype() {
     each(seed.nodes, function(nodeData) {
       this.create(nodeData);
     }, this);
-    // this._setAutoAttach(true);
-    // 3. attach all nodes
-    each(this.data.nodes, function(node) {
-      node.attach(this);
-    }, this);
 
     this.documentDidLoad();
   };
