@@ -1,22 +1,26 @@
 'use strict';
 
-var oo = require('../../util/oo');
-var _ = require('../../util/helpers');
+var isString = require('lodash/lang/isString');
+var isArray = require('lodash/lang/isArray');
+var cloneDeep = require('lodash/lang/cloneDeep');
 var Data = require('./Data');
 var ObjectOperation = require('./ObjectOperation');
 var ArrayOperation = require('./ArrayOperation');
 var TextOperation = require('./TextOperation');
 
-/*
- * Incremental data storage implemention.
- *
- * @class IncrementalData
- * @extends Data
- * @param {Schema} schema
- * @param {Object} [options]
- *
- * @memberof module:Data
+/**
+  Incremental data storage implemention.
+
+  @class IncrementalData
+  @extends Data
+  @private
  */
+
+/**
+  @constructor
+  @param {Schema} schema
+  @param {Object} [options]
+*/
 var IncrementalData = function(schema, options) {
   IncrementalData.super.call(this, schema, options);
 };
@@ -24,13 +28,10 @@ var IncrementalData = function(schema, options) {
 IncrementalData.Prototype = function() {
 
   /**
-   * Create a new node.
-   *
-   * @method create
-   * @param {Object} nodeData
-   * @return The applied operation.
-   *
-   * @memberof module:Data.IncrementalData.prototype
+    Create a new node.
+
+    @param {Object} nodeData
+    @returns {ObjectOperation} The applied operation.
    */
   this.create = function(nodeData) {
     var op = ObjectOperation.Create([nodeData.id], nodeData);
@@ -39,14 +40,10 @@ IncrementalData.Prototype = function() {
   };
 
   /**
-   * Delete a node.
-   *
-   * @method delete
-   * @instance
-   * @param {String} nodeId
-   * @return The applied operation.
-   *
-   * @memberof module:Data.IncrementalData.prototype
+    Delete a node.
+
+    @param {String} nodeId
+    @returns {ObjectOperation} The applied operation.
    */
   this.delete = function(nodeId) {
     var op = null;
@@ -60,23 +57,20 @@ IncrementalData.Prototype = function() {
   };
 
   /**
-   * Update a property incrementally.
-   *
-   * The diff can be of the following forms (depending on the updated property type):
-   *   - String:
-   *     - `{ insert: { offset: Number, value: Object } }`
-   *     - `{ delete: { start: Number, end: Number } }`
-   *   - Array:
-   *     - `{ insert: { offset: Number, value: Object } }`
-   *     - `{ delete: { offset: Number } }`
-   *
-   * @method update
-   * @param {Array} path
-   * @param {Object} diff
-   * @return The applied operation.
-   *
-   * @memberof module:Data.IncrementalData.prototype
-   */
+    Update a property incrementally.
+
+    The diff can be of the following forms (depending on the updated property type):
+      - String:
+        - `{ insert: { offset: Number, value: Object } }`
+        - `{ delete: { start: Number, end: Number } }`
+      - Array:
+        - `{ insert: { offset: Number, value: Object } }`
+        - `{ delete: { offset: Number } }`
+
+    @param {Array} path
+    @param {Object} diff
+    @returns {ObjectOperation} The applied operation.
+  */
   this.update = function(path, diff) {
     var diffOp = this._getDiffOp(path, diff);
     var op = ObjectOperation.Update(path, diffOp);
@@ -85,14 +79,11 @@ IncrementalData.Prototype = function() {
   };
 
   /**
-   * Set a property to a new value
-   *
-   * @method set
-   * @param {Array} path
-   * @param {Object} newValue
-   * @return The applied operation.
-   *
-   * @memberof module:Data.IncrementalData.prototype
+    Set a property to a new value
+
+    @param {Array} path
+    @param {Object} newValue
+    @returns {ObjectOperation} The applied operation.
    */
   this.set = function(path, newValue) {
     var oldValue = this.get(path);
@@ -102,18 +93,15 @@ IncrementalData.Prototype = function() {
   };
 
   /**
-   * Apply a given operation.
-   *
-   * @method apply
-   * @param {ObjectOperation} op
-   *
-   * @memberof module:Data.IncrementalData.prototype
+    Apply a given operation.
+
+    @param {ObjectOperation} op
    */
   this.apply = function(op) {
     if (op.type === ObjectOperation.NOP) return;
     else if (op.type === ObjectOperation.CREATE) {
       // clone here as the operations value must not be changed
-      this.super.create.call(this, _.deepclone(op.val));
+      this.super.create.call(this, cloneDeep(op.val));
     } else if (op.type === ObjectOperation.DELETE) {
       this.super.delete.call(this, op.val.id);
     } else if (op.type === ObjectOperation.UPDATE) {
@@ -151,7 +139,7 @@ IncrementalData.Prototype = function() {
       var start, end, pos, val;
       if (value === null || value === undefined) {
         throw new Error('Property has not been initialized: ' + JSON.stringify(path));
-      } else if (_.isString(value)) {
+      } else if (isString(value)) {
         if (diff['delete']) {
           // { delete: [2, 5] }
           start = diff['delete'].start;
@@ -163,7 +151,7 @@ IncrementalData.Prototype = function() {
           val = diff['insert'].value;
           diffOp = TextOperation.Insert(pos, val);
         }
-      } else if (_.isArray(value)) {
+      } else if (isArray(value)) {
         if (diff['delete']) {
           // { delete: 2 }
           pos = diff['delete'].offset;
@@ -184,6 +172,6 @@ IncrementalData.Prototype = function() {
 
 };
 
-oo.inherit(IncrementalData, Data);
+Data.extend(IncrementalData);
 
 module.exports = IncrementalData;

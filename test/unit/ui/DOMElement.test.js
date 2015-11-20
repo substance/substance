@@ -1,7 +1,6 @@
 'use strict';
 
 require('../qunit_extensions');
-
 var DOMElement = require('../../../ui/DefaultDOMElement');
 
 QUnit.module('ui/DOMElement');

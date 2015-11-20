@@ -2,12 +2,17 @@
 
 var BlockNode = require('../../model/BlockNode');
 
-var Embed = BlockNode.extend({
-  name: "embed",
-  properties: {
-    src: 'string',
-    html: 'string' // Generated HTML
-  }
+function Embed() {
+  Embed.super.apply(this, arguments);
+}
+
+BlockNode.extend(Embed);
+
+Embed.static.name = "embed";
+
+Embed.static.defineSchema({
+  src: 'string',
+  html: { type: 'string', 'volatile': true }  // Generated HTML
 });
 
 module.exports = Embed;

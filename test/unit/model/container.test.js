@@ -4,7 +4,7 @@ require('../qunit_extensions');
 var sample = require('../../fixtures/container_sample');
 var simpleSample = require('../../fixtures/sample1');
 
-QUnit.module('Substance.Document/Container');
+QUnit.module('model/Container');
 
 QUnit.test("Numerical address for simple nodes", function(assert) {
   var doc = sample();

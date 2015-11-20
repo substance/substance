@@ -1,6 +1,6 @@
 'use strict';
 
-var Article = require('../test_article');
+var Article = require('../model/TestArticle');
 
 /**
  * This fixture contains different kind of nodes:

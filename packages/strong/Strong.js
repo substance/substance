@@ -2,8 +2,12 @@
 
 var PropertyAnnotation = require('../../model/PropertyAnnotation');
 
-var Strong = PropertyAnnotation.extend({
-  name: "strong"
-});
+function Strong() {
+  Strong.super.apply(this, arguments);
+}
+
+PropertyAnnotation.extend(Strong);
+
+Strong.static.name = "strong";
 
 module.exports = Strong;

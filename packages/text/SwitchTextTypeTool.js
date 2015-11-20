@@ -1,10 +1,10 @@
 'use strict';
 
+var each = require('lodash/collection/each');
 var oo = require('../../util/oo');
 var Component = require('../../ui/Component');
 var $$ = Component.$$;
 var SurfaceTool = require('../../ui/SurfaceTool');
-var _ = require('../../util/helpers');
 
 /*
  * Abstract class for text types
@@ -69,7 +69,7 @@ SwitchTextType.Prototype = function() {
 
     // dropdown options
     var options = $$('div').addClass("se-options");
-    _.each(this.state.textTypes, function(textType) {
+    each(this.state.textTypes, function(textType) {
       var button = $$('button')
           .addClass('se-option sm-'+textType.name)
           .attr("data-type", textType.name)

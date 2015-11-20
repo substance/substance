@@ -1,12 +1,11 @@
-var oo = require('../util/oo');
+'use strict';
+
 var DOMExporter = require('./DOMExporter');
 
 function XMLExporter() {
   DOMExporter.apply(this, arguments);
 }
 
-XMLExporter.Prototype = function() {};
-
-oo.inherit(XMLExporter, DOMExporter);
+DOMExporter.extend(XMLExporter);
 
 module.exports = XMLExporter;

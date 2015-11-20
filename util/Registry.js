@@ -2,6 +2,8 @@
 
 var oo = require('./oo');
 
+// just as a reference to detect name collisions
+// with native Object properties
 var _obj = {};
 
 /*

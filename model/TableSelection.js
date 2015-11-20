@@ -1,9 +1,10 @@
 'use strict';
 
-var oo = require('../util/oo');
 var Selection = require('./Selection');
 
 function TableSelection(properties) {
+  TableSelection.super.apply(this, arguments);
+
   this.tableId = properties.tableId;
   if (properties.rectangle) {
     this.rectangle = properties.rectangle;
@@ -59,7 +60,7 @@ TableSelection.Prototype = function() {
 
 };
 
-oo.inherit(TableSelection, Selection);
+Selection.extend(TableSelection);
 
 Object.defineProperties(TableSelection.prototype, {
   startRow: {

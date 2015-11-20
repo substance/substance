@@ -1,28 +1,32 @@
 'use strict';
 
-var _ = require('../../util/helpers');
-var oo = require('../../util/oo');
+var isString = require('lodash/lang/isString');
+var isArray = require('lodash/lang/isArray');
+var cloneDeep = require('lodash/lang/cloneDeep');
+var each = require('lodash/collection/each');
 var PathAdapter = require('../../util/PathAdapter');
 var EventEmitter = require('../../util/EventEmitter');
 
-/*
- * A data storage implemention.
- *
- * @extends util/EventEmitter
- * @param {Schema} schema
- * @param {Object} [options]
+/**
+  A data storage implemention.
+
+  @class Data
+  @extends util/EventEmitter
  */
+
+/**
+  @constructor
+  @param {Schema} schema
+  @param {Object} [options]
+*/
 function Data(schema, options) {
   EventEmitter.call(this);
 
   this.schema = schema;
   this.nodes = new PathAdapter();
   this.indexes = {};
-  // Handlers that are called after a node was created or deleted
-  options = options || {};
-  // For example in Substance.Document this is used to attach and detach a document from a node.
-  this.didCreateNode = options.didCreateNode || function() {};
-  this.didDeleteNode = options.didDeleteNode || function() {};
+  this.options = options || {};
+  this.nodeFactory = options.nodeFactory || schema.getNodeFactory();
 
   // Sometimes necessary to resolve issues with updating indexes in presence
   // of cyclic dependencies
@@ -33,13 +37,10 @@ function Data(schema, options) {
 Data.Prototype = function() {
 
   /**
-   * Get a node or value via path.
-   *
-   * @method get
-   * @param {String|Array} path node id or path to property.
-   * @return a Node instance, a value or undefined if not found.
-   *
-   * @memberof module:Data.Data.prototype
+    Get a node or value via path.
+
+    @param {String|String[]} path node id or path to property.
+    @returns {Node|Object|Primitive|undefined} a Node instance, a value or undefined if not found.
    */
   this.get = function(path) {
     if (!path) {
@@ -49,27 +50,21 @@ Data.Prototype = function() {
   };
 
   /**
-   * Get the internal storage for nodes.
-   *
-   * @method getNodes
-   * @return The internal node storage.
-   *
-   * @memberof module:Data.Data.prototype
+    Get the internal storage for nodes.
+
+    @return The internal node storage.
    */
   this.getNodes = function() {
     return this.nodes;
   };
 
   /**
-   * Create a node from the given data.
-   *
-   * @method create
-   * @return {Node} The created node.
-   *
-   * @memberof module:Data.Data.prototype
+    Create a node from the given data.
+
+    @return {Node} The created node.
    */
   this.create = function(nodeData) {
-    var node = this.schema.getNodeFactory().create(nodeData.type, nodeData);
+    var node = this.nodeFactory.create(nodeData.type, nodeData);
     if (!node) {
       throw new Error('Illegal argument: could not create node for data:', nodeData);
     }
@@ -80,7 +75,6 @@ Data.Prototype = function() {
       throw new Error("Node id and type are mandatory.");
     }
     this.nodes[node.id] = node;
-    this.didCreateNode(node);
 
     var change = {
       type: 'create',
@@ -97,15 +91,14 @@ Data.Prototype = function() {
   };
 
   /**
-   * Delete the node with given id.
-   *
-   * @param {String} nodeId
-   * @return {Node} The deleted node.
+    Delete the node with given id.
+
+    @param {String} nodeId
+    @returns {Node} The deleted node.
    */
   this.delete = function(nodeId) {
     var node = this.nodes[nodeId];
     delete this.nodes[nodeId];
-    this.didDeleteNode(node);
 
     var change = {
       type: 'delete',
@@ -122,14 +115,11 @@ Data.Prototype = function() {
   };
 
   /**
-   * Set a property to a new value.
-   *
-   * @method set
-   * @param {Array} property path
-   * @param {Object} newValue
-   * @return {Node} The deleted node.
-   *
-   * @memberof module:Data.Data.prototype
+    Set a property to a new value.
+
+    @param {Array} property path
+    @param {Object} newValue
+    @returns {Node} The deleted node.
    */
   this.set = function(path, newValue) {
     var node = this.get(path[0]);
@@ -154,23 +144,20 @@ Data.Prototype = function() {
   };
 
   /**
-   * Update a property incrementally.
-   *
-   * @method update
-   * @param {Array} property path
-   * @param {Object} diff
-   *
-   * @memberof module:Data.Data.prototype
+    Update a property incrementally.
+
+    @param {Array} property path
+    @param {Object} diff
    */
-  // TODO: do we really want this incremental implementation here?
   this.update = function(path, diff) {
+    // TODO: do we really want this incremental implementation here?
     var oldValue = this.nodes.get(path);
     var newValue;
     if (diff.isOperation) {
       newValue = diff.apply(oldValue);
     } else {
       var start, end, pos, val;
-      if (_.isString(oldValue)) {
+      if (isString(oldValue)) {
         if (diff['delete']) {
           // { delete: [2, 5] }
           start = diff['delete'].start;
@@ -184,7 +171,7 @@ Data.Prototype = function() {
         } else {
           throw new Error('Diff is not supported:', JSON.stringify(diff));
         }
-      } else if (_.isArray(oldValue)) {
+      } else if (isArray(oldValue)) {
         newValue = oldValue.slice(0);
         if (diff['delete']) {
           // { delete: 2 }
@@ -223,51 +210,38 @@ Data.Prototype = function() {
   };
 
   /**
-   * Convert to JSON.
-   *
-   * @method toJSON
-   * @return {Object} Plain content.
-   *
-   * @memberof module:Data.Data.prototype
+    Convert to JSON.
+
+    @returns {Object} Plain content.
    */
   this.toJSON = function() {
     return {
       schema: [this.schema.id, this.schema.version],
-      nodes: _.deepclone(this.nodes)
+      nodes: cloneDeep(this.nodes)
     };
   };
 
   /**
-   * Check if this storage contains a node with given id.
-   *
-   * @method contains
-   * @return {Boolean} `true` if a node with id exists, `false` otherwise.
-   *
-   * @memberof module:Data.Data.prototype
+    Check if this storage contains a node with given id.
+
+    @returns {Boolean} `true` if a node with id exists, `false` otherwise.
    */
   this.contains = function(id) {
     return (!!this.nodes[id]);
   };
 
   /**
-   * Clear nodes.
-   *
-   * @method reset
-   *
-   * @memberof module:Data.Data.prototype
+    Clear nodes.
    */
   this.reset = function() {
     this.nodes = new PathAdapter();
   };
 
   /**
-   * Add a node index.
-   *
-   * @method addIndex
-   * @param {String} name
-   * @param {NodeIndex} index
-   *
-   * @memberof module:Data.Data.prototype
+    Add a node index.
+
+    @param {String} name
+    @param {NodeIndex} index
    */
   this.addIndex = function(name, index) {
     if (this.indexes[name]) {
@@ -279,13 +253,10 @@ Data.Prototype = function() {
   };
 
   /**
-   * Get the node index with given name.
-   *
-   * @method getIndex
-   * @param {String} name
-   * @return The node index.
-   *
-   * @memberof module:Data.Data.prototype
+    Get the node index with given name.
+
+    @param {String} name
+    @returns {NodeIndex} The node index.
    */
   this.getIndex = function(name) {
     return this.indexes[name];
@@ -293,7 +264,7 @@ Data.Prototype = function() {
 
   this.updateIndexes = function(change) {
     if (!change || this.__QUEUE_INDEXING__) return;
-    _.each(this.indexes, function(index) {
+    each(this.indexes, function(index) {
       if (index.select(change.node)) {
         if (!index[change.type]) {
           console.error('Contract: every NodeIndex must implement ' + change.type);
@@ -317,6 +288,6 @@ Data.Prototype = function() {
 
 };
 
-oo.inherit(Data, EventEmitter);
+EventEmitter.extend(Data);
 
 module.exports = Data;

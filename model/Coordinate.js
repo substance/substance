@@ -1,7 +1,9 @@
 'use strict';
 
+var isArray = require('lodash/lang/isArray');
+var isNumber = require('lodash/lang/isNumber');
+var isArrayEqual = require('../util/isArrayEqual');
 var oo = require('../util/oo');
-var _ = require('../util/helpers');
 
 // path: the address of a property, such as ['text_1', 'content']
 // offset: the position in the property
@@ -16,10 +18,10 @@ function Coordinate(path, offset, after) {
   this.path = path;
   this.offset = offset;
   this.after = after;
-  if (!_.isArray(path)) {
+  if (!isArray(path)) {
     throw new Error('Invalid arguments: path should be an array.');
   }
-  if (!_.isNumber(offset) || offset < 0) {
+  if (!isNumber(offset) || offset < 0) {
     throw new Error('Invalid arguments: offset must be a positive number.');
   }
   // make sure that path can't be changed afterwards
@@ -33,7 +35,7 @@ Coordinate.Prototype = function() {
 
   this.equals = function(other) {
     return (other === this ||
-      (_.isArrayEqual(other.path, this.path) && other.offset === this.offset) );
+      (isArrayEqual(other.path, this.path) && other.offset === this.offset) );
   };
 
   this.withCharPos = function(offset) {
@@ -54,6 +56,6 @@ Coordinate.Prototype = function() {
 
 };
 
-oo.initClass( Coordinate );
+oo.initClass(Coordinate);
 
 module.exports = Coordinate;

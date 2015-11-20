@@ -1,39 +1,35 @@
 'use strict';
 
-var Node = require('../../model/DocumentNode');
+var DocumentNode = require('../../model/DocumentNode');
 
-var TableCell = Node.extend({
-  displayName: "TableCell",
-  name: "table-cell",
-  properties: {
-    "parent": "id",
-    "cellType": "string", // "head" or "data"
-    "colspan": "number",
-    "rowspan": "number",
-    "content": "string"
-  },
-  getSpan: function(dim) {
+function TableCell() {
+  TableCell.super.apply(this, arguments);
+}
+
+DocumentNode.extend(TableCell, function TableCellPrototype() {
+
+  this.getSpan = function(dim) {
     if (dim === "col") {
       return this.colspan || 1;
     } else if (dim === "row") {
       return this.rowspan || 1;
     }
-  }
+  };
+
+  this.isData = function() {
+    return this.cellType === "data";
+  };
+
 });
 
-TableCell.static.components = ['content'];
+TableCell.static.name = "table-cell";
 
-TableCell.static.defaultProperties = {
-  cellType: "td",
-  content: ""
-};
-
-Object.defineProperties(TableCell.prototype, {
-  isData: {
-    'get': function() {
-      return this.cellType === "data";
-    }
-  }
+TableCell.static.defineSchema({
+  parent: "id",
+  cellType: { type: "string", 'default': 'td' }, // "head" or "data"
+  colspan: { type: "number", optional: true },
+  rowspan: { type: "number", optional: true },
+  content: "text"
 });
 
 module.exports = TableCell;

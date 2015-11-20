@@ -1,12 +1,32 @@
 'use strict';
 
-var _ = require('../util/helpers');
-var oo = require('../util/oo');
+var clone = require('lodash/lang/clone');
+var isFunction = require('lodash/lang/isFunction');
+var extend = require('lodash/object/extend');
+var each = require('lodash/collection/each');
 var AbstractDocument = require('./AbstractDocument');
 var DocumentChange = require('./DocumentChange');
 
 var __id__ = 0;
 
+/**
+  A {@link model/Document} instance that is used during transaction.
+
+  During editing a TransactionDocument is kept up-to-date with the real one.
+  Whenever a transaction is started on the document, a TransactionDocument is used to
+  record changes, which are applied en-bloc when the transaction is saved.
+
+  @example
+
+  To start a transaction run
+
+  ```
+  doc.transaction(function(tx) {
+    // use tx to record changes
+  });
+  ```
+
+*/
 function TransactionDocument(document) {
   AbstractDocument.call(this, document.schema);
   this.__id__ = "TX_"+__id__++;
@@ -18,7 +38,7 @@ function TransactionDocument(document) {
   // when calling undo
   this.before = {};
   // HACK: copying all indexes
-  _.each(document.data.indexes, function(index, name) {
+  each(document.data.indexes, function(index, name) {
     this.data.addIndex(name, index.clone());
   }, this);
 
@@ -34,9 +54,11 @@ TransactionDocument.Prototype = function() {
   this.reset = function() {
     this.ops = [];
     this.before = {};
-    this._resetContainers();
   };
 
+  /**
+    @include model/AbstractDocument#set
+  */
   this.create = function(nodeData) {
     var op = this.data.create(nodeData);
     if (!op) return;
@@ -48,6 +70,9 @@ TransactionDocument.Prototype = function() {
     return this.data.get(nodeData.id);
   };
 
+  /**
+    @include model/AbstractDocument#set
+  */
   this.delete = function(nodeId) {
     var op = this.data.delete(nodeId);
     if (!op) return;
@@ -57,26 +82,33 @@ TransactionDocument.Prototype = function() {
     return op;
   };
 
+  /**
+    @include model/AbstractDocument#set
+  */
   this.set = function(path, value) {
     var op = this.data.set(path, value);
     if (!op) return;
-    this._updateContainers(op);
     if (this.document.isTransacting) {
       this.ops.push(op);
     }
     return op;
   };
 
+  /**
+    @include model/AbstractDocument#set
+  */
   this.update = function(path, diffOp) {
     var op = this.data.update(path, diffOp);
     if (!op) return;
-    this._updateContainers(op);
     if (this.document.isTransacting) {
       this.ops.push(op);
     }
     return op;
   };
 
+  /**
+    Cancels the current transaction, discarding all changes recorded so far.
+  */
   this.cancel = function() {
     this._cancelTransaction();
   };
@@ -86,23 +118,13 @@ TransactionDocument.Prototype = function() {
   };
 
   this.apply = function(documentChange) {
-    _.each(documentChange.ops, function(op) {
+    each(documentChange.ops, function(op) {
       this.data.apply(op);
-      this._updateContainers(op);
     }, this);
   };
 
   this.getIndex = function(name) {
     return this.data.getIndex(name);
-  };
-
-  // Called back by Substance.Data after a node instance has been created
-  this._didCreateNode = function(node) {
-    node.document = this;
-  };
-
-  this._didDeleteNode = function(node) {
-    node.document = null;
   };
 
   this.createSelection = function() {
@@ -126,14 +148,14 @@ TransactionDocument.Prototype = function() {
       eventData = eventData || {};
     }
 
-    if (!_.isFunction(transformation)) {
+    if (!isFunction(transformation)) {
       throw new Error('Document.transaction() requires a transformation function.');
     }
 
     // var time = Date.now();
     // HACK: ATM we can't deep clone as we do not have a deserialization
     // for selections.
-    this._startTransaction(_.clone(beforeState));
+    this._startTransaction(clone(beforeState));
     // console.log('Starting the transaction took', Date.now() - time);
     try {
       // time = Date.now();
@@ -180,7 +202,7 @@ TransactionDocument.Prototype = function() {
     }
     var doc = this.document;
     var beforeState = this.before;
-    afterState = _.extend({}, beforeState, afterState);
+    afterState = extend({}, beforeState, afterState);
     var ops = this.ops;
     var change;
     if (ops.length > 0) {
@@ -217,6 +239,6 @@ TransactionDocument.Prototype = function() {
 
 };
 
-oo.inherit(TransactionDocument, AbstractDocument);
+AbstractDocument.extend(TransactionDocument);
 
 module.exports = TransactionDocument;

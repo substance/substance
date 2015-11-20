@@ -1,6 +1,8 @@
 'use strict';
 
-var _ = require('../../util/helpers');
+var isEqual = require('lodash/lang/isEqual');
+var cloneDeep = require('lodash/lang/cloneDeep');
+var each = require('lodash/collection/each');
 var annotationHelpers = require('../annotationHelpers');
 
 /* jshint latedef: false */
@@ -12,7 +14,7 @@ var copySelection = function(doc, args) {
     args.doc = null;
   }
   // return a simplified version if only a piece of text is selected
-  else if (selection.isPropertySelection() || _.isEqual(selection.start.path, selection.end.path)) {
+  else if (selection.isPropertySelection() || isEqual(selection.start.path, selection.end.path)) {
     args.doc = _copyPropertySelection(doc, selection);
   }
   else if (selection.isContainerSelection()) {
@@ -46,8 +48,8 @@ var _copyPropertySelection = function(doc, selection) {
   });
   containerNode.show('text');
   var annotations = doc.getIndex('annotations').get(path, offset, endOffset);
-  _.each(annotations, function(anno) {
-    var data = _.deepclone(anno.toJSON());
+  each(annotations, function(anno) {
+    var data = cloneDeep(anno.toJSON());
     data.path = ['text', 'content'];
     data.startOffset = Math.max(offset, anno.startOffset)-offset;
     data.endOffset = Math.min(endOffset, anno.endOffset)-offset;
@@ -93,7 +95,7 @@ var _copyContainerSelection = function(doc, selection) {
     for (var j = 0; j < paths.length; j++) {
       var annotations = annotationIndex.get(paths[j]);
       for (var k = 0; k < annotations.length; k++) {
-        copy.create(_.deepclone(annotations[k].toJSON()));
+        copy.create(cloneDeep(annotations[k].toJSON()));
       }
     }
   }

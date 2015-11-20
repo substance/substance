@@ -1,7 +1,5 @@
 'use strict';
 
-var $$ = require('../../ui/Component').$$;
-
 /*
  * HTML converter for Codeblock.
  */
@@ -18,6 +16,7 @@ module.exports = {
   },
 
   export: function(node, el, converter) {
+    var $$ = converter.$$;
     el.append(
       $$('code').append(
         converter.annotatedText([node.id, 'content'])

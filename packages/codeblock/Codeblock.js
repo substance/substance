@@ -2,8 +2,12 @@
 
 var TextBlock = require('../../model/TextBlock');
 
-var Codeblock = TextBlock.extend({
-  name: "codeblock"
-});
+function Codeblock() {
+  Codeblock.super.apply(this, arguments);
+}
+
+TextBlock.extend(Codeblock);
+
+Codeblock.static.name = "codeblock";
 
 module.exports = Codeblock;

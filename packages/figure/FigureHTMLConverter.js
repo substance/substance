@@ -1,7 +1,5 @@
 'use strict';
 
-var $$ = require('../../ui/Component').$$;
-
 /*
  * HTML converter for Blockquote.
  */
@@ -24,6 +22,7 @@ module.exports = {
   },
 
   export: function(node, el, converter) {
+    var $$ = converter.$$;
     // title
     el.append(
       $$('p')

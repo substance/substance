@@ -1,6 +1,6 @@
 'use strict';
 
-var _ = require('../../util/helpers');
+var each = require('lodash/collection/each');
 
 /*
  * Delete a node and all annotations attached to it,
@@ -35,7 +35,7 @@ function deleteNode(tx, args) {
     var pos = address[0];
 
     if (anchor.isStart) {
-      if (pos < container.length-1) {
+      if (pos < container.getLength()-1) {
         var nextNode = container.getChildAt(pos+1);
         var nextAddress = container.getFirstAddress(nextNode);
         tx.set([anchor.id, 'startPath'], container.getPath(nextAddress));
@@ -56,7 +56,7 @@ function deleteNode(tx, args) {
       }
     }
   }
-  _.each(tx.getIndex('type').get('container'), function(container) {
+  each(tx.getIndex('type').get('container'), function(container) {
     // remove from view first
     container.hide(nodeId);
   });

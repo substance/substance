@@ -2,8 +2,12 @@
 
 var TextBlock = require('../../model/TextBlock');
 
-var Blockquote = TextBlock.extend({
-  name: "blockquote"
-});
+function Blockquote() {
+  Blockquote.super.apply(this, arguments);
+}
+
+TextBlock.extend(Blockquote);
+
+Blockquote.static.name = "blockquote";
 
 module.exports = Blockquote;

@@ -1,6 +1,6 @@
 'use strict';
 
-var _ = require('../../util/helpers');
+var extend = require('lodash/object/extend');
 var merge = require('./merge');
 var updateAnnotations = require('./updateAnnotations');
 
@@ -21,7 +21,7 @@ var deleteCharacter = function(tx, args) {
   var prop = tx.get(range.start.path);
   if ((range.start.offset === 0 && direction === 'left') ||
       (range.start.offset === prop.length && direction === 'right')) {
-    var tmp = merge(tx, _.extend({}, args, {
+    var tmp = merge(tx, extend({}, args, {
       selection: selection,
       containerId: args.containerId,
       path: range.start.path,

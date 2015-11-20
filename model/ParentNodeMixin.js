@@ -1,39 +1,51 @@
 "use strict";
 
-var oo = require('../util/oo');
+/**
+  Mix-in for parent nodes.
 
-/*
- * Mix-in for parent nodes.
- *
- * ParentNodes are nodes which have children nodes,
- * such as List, Table, TableSection, TableRow.
- *
- * @class
- * @mixin
- */
-function ParentNodeMixin(childrenProperty) {
-  this._childrenProperty = childrenProperty;
-}
+  ParentNodes are nodes which have children nodes,
+  such as List, Table, TableSection, TableRow.
 
-ParentNodeMixin.Prototype = function() {
+  @mixin
+*/
+var ParentNodeMixin = {
 
-  this.hasChildren = function() {
+  hasChildren: function() {
     return true;
-  };
+  },
 
-  this.getChildIndex = function(child) {
-    return this[this._childrenProperty].indexOf(child.id);
-  };
+  getChildrenProperty: function() {
+    throw new Error('ParentNodeMixin.getChildrenProperty is abstract and must be implemented in ' + this.constructor.name + '.');
+  },
 
-  this.getChildAt = function(idx) {
-    return this.getDocument().get(this[this._childrenProperty][idx]);
-  };
+  getChildIndex: function(child) {
+    return this[this.getChildrenProperty()].indexOf(child.id);
+  },
 
-  this.getChildCount = function() {
-    return this[this._childrenProperty].length;
-  };
+  getChildren: function() {
+    var doc = this.getDocument();
+    var childrenIds = this[this.getChildrenProperty()];
+    return childrenIds.map(function(id) {
+      return doc.get(id);
+    }.bind(this));
+  },
+
+  getChildAt: function(idx) {
+    var children = this[this.getChildrenProperty()];
+    if (idx < 0 || idx >= children.length) {
+      throw new Error('Array index out of bounds: ' + idx + ", " + children.length);
+    }
+    return this.getDocument().get(children[idx]);
+  },
+
+  getChildCount: function() {
+    return this[this.getChildrenProperty()].length;
+  },
+
+  getAddressablePropertyNames: function() {
+    return [this.getChildrenProperty()];
+  },
+
 };
-
-oo.initClass(ParentNodeMixin);
 
 module.exports = ParentNodeMixin;

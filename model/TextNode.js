@@ -1,30 +1,36 @@
 'use strict';
 
-var Node = require('./DocumentNode');
+var DocumentNode = require('./DocumentNode');
 
-// Text Node
-// ---------
-//
-// A base class for all text-ish nodes, such as Paragraphs, Headings,
-// Prerendered, etc.
+/**
+  A base class for all text-ish nodes, such as Paragraphs, Headings,
+  Prerendered, etc.
 
-var TextNode = Node.extend({
-  displayName: "TextNode",
-  name: "text",
+  @class
+  @abstract
+*/
 
-  properties: {
-    content: 'string'
-  },
+function TextNode() {
+  TextNode.super.apply(this, arguments);
+}
 
-  getTextPath: function() {
+TextNode.Prototype = function() {
+
+  this.getTextPath = function() {
     return [this.id, 'content'];
-  },
+  };
 
-  getText: function() {
+  this.getText = function() {
     return this.content;
-  },
-});
+  };
+};
 
-TextNode.static.components = ['content'];
+DocumentNode.extend(TextNode);
+
+TextNode.static.name = "text";
+
+TextNode.static.defineSchema({
+  content: 'text'
+});
 
 module.exports = TextNode;

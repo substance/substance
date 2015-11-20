@@ -1,58 +1,35 @@
 'use strict';
 
+var oo = require('../../util/oo');
 var Node = require('../../model/DocumentNode');
-var filter = require('lodash/collection/filter');
 
-var DocumentedNode = Node.extend({
-  name: 'source-code',
-  properties: {
-    description: 'string', // HTML
-    example: 'string', // HTML
-    sourceFile: 'string', // ui/Component.js
-    sourceLine: 'number',
-    tags: ['array', 'object'], // [ { name: 'type', string: '...', html: '...'}]
-  },
+function DocumentedNode() {
+  DocumentedNode.super.apply(this, arguments);
+}
+
+DocumentedNode.Prototype = function() {
 
   // Defaults to the regular type property
-  getSpecificType: function() {
+  this.getSpecificType = function() {
     return this.type;
-  },
-  
-  getTocName: function() {
+  };
+
+  this.getTocName = function() {
     return this.name;
-  },
+  };
 
-  // ContainerNode API
-  // ---------------------
-  // 
-  // Nodes that have a members property
+};
 
-  getMembers: function(config) {
-    config = config || {};
-    var members = [];
+oo.inherit(DocumentedNode, Node);
 
-    this.getMemberCategories().forEach(function(cat) {
-      var catMembers = this.getCategoryMembers(cat, config);
-      members = members.concat(catMembers);
-    }.bind(this));
-    return members;
-  },
+DocumentedNode.static.name = 'source-code';
 
-  getCategoryMembers: function(cat, config) {
-    var doc = this.getDocument();
-    var memberIndex = doc.getIndex('members');
-    var members = memberIndex.get([this.id].concat(cat.path));
-    members = filter(members, function(memberNode) {
-      // skip nodes according to configuration
-      if ((memberNode.type === "method" && memberNode.isPrivate && config.skipPrivateMethods) ||
-        (memberNode.type === "class" && memberNode.isAbstract && config.skipAbstractClasses)) {
-        return false;
-      }
-      return true;
-    });
-    return members;
-  }
-  
+DocumentedNode.static.defineSchema({
+  description: { type: 'string', optional: true }, // HTML
+  example: { type: 'string', optional: true }, // HTML
+  sourceFile: 'string', // ui/Component.js
+  sourceLine: 'number',
+  tags: { type: ['array', 'object'], default: [] }, // [ { name: 'type', string: '...', html: '...'}]
 });
 
 DocumentedNode.static.blockType = true;

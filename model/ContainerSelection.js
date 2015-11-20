@@ -1,20 +1,39 @@
 'use strict';
 
-var oo = require('../util/oo');
-var _ = require('../util/helpers');
+var isNumber = require('lodash/lang/isNumber');
+var isEqual = require('lodash/lang/isEqual');
+var map = require('lodash/collection/map');
 var PropertySelection = require('./PropertySelection');
 var Selection = require('./Selection');
 var Range = require('./Range');
 var Coordinate = require('./Coordinate');
 
+/**
+  A selection spanning multiple nodes.
+*/
 function ContainerSelection(properties) {
   // Note: not calling the super ctor as it freezes the instance
+  /**
+    @type {String}
+  */
   var containerId = properties.containerId;
+  /**
+    @type {String[]}
+  */
   var startPath = properties.startPath;
+  /**
+    @type {String[]}
+  */
   var endPath = properties.endPath || properties.startPath;
+  /**
+    @type {Number}
+  */
   var startOffset = properties.startOffset;
+  /**
+    @type {Number}
+  */
   var endOffset = properties.endOffset || properties.startOffset;
-  if (!containerId || !startPath || !_.isNumber(startOffset)) {
+  if (!containerId || !startPath || !isNumber(startOffset)) {
     throw new Error('Invalid arguments: `containerId`, `startPath` and `startOffset` are mandatory');
   }
 
@@ -60,11 +79,15 @@ ContainerSelection.Prototype = function() {
     return "ContainerSelection("+ JSON.stringify(this.range.start.path) + ":" + this.range.start.offset + " -> " +  JSON.stringify(this.range.end.path) + ":" + this.range.end.offset + (this.reverse ? ", reverse" : "") + ")";
   };
 
-
   this.getContainer = function() {
     return this.getDocument().get(this.containerId);
   };
 
+  /**
+    Expands this selection to include another selection.
+    @param {Selection} other
+    @returns {Selection} a new selection
+  */
   this.expand = function(other) {
     var c1 = this._coordinates(this);
     var c2 = this._coordinates(other);
@@ -95,7 +118,12 @@ ContainerSelection.Prototype = function() {
     return _createNewSelection(this, newCoors);
   };
 
-  // There should be exactly one
+  /**
+    Creates a new selection by truncating this one by another selection.
+
+    @param {Selection} other
+    @returns {Selection} a new selection
+  */
   this.truncate = function(other) {
     var c1 = this._coordinates(this);
     var c2 = this._coordinates(other);
@@ -123,6 +151,13 @@ ContainerSelection.Prototype = function() {
     return _createNewSelection(this, newCoors);
   };
 
+  /**
+    Checks if this selection is inside another one.
+
+    @param {Selection} other
+    @param {Boolean} [strict] true if should check that it is strictly inside the other
+    @returns {Boolean}
+  */
   this.isInsideOf = function(other, strict) {
     if (other.isNull()) return false;
     var c1 = this._coordinates(this);
@@ -130,14 +165,26 @@ ContainerSelection.Prototype = function() {
     return (_isBefore(c2.start, c1.start, strict) && _isBefore(c1.end, c2.end, strict));
   };
 
+  /**
+    Checks if this selection contains another one.
+
+    @param {Selection} other
+    @returns {Boolean}
+  */
   this.contains = function(other) {
     var c1 = this._coordinates(this);
     var c2 = this._coordinates(other);
     return (_isBefore(c1.start, c2.start) && _isBefore(c2.end, c1.end));
   };
 
-  // includes and at least one boundary
+  /**
+    Checks if this selection contains another but has at least one boundary in common.
+
+    @param {Selection} other
+    @returns {Boolean}
+  */
   this.includesWithOneBoundary = function(other) {
+    // includes and at least one boundary
     var c1 = this._coordinates(this);
     var c2 = this._coordinates(other);
     return (
@@ -146,6 +193,12 @@ ContainerSelection.Prototype = function() {
     );
   };
 
+  /**
+    Checks if this selection overlaps another one.
+
+    @param {Selection} other
+    @returns {Boolean}
+  */
   this.overlaps = function(other) {
     var c1 = this._coordinates(this);
     var c2 = this._coordinates(other);
@@ -153,18 +206,33 @@ ContainerSelection.Prototype = function() {
     return !(_isBefore(c1.end, c2.start) || _isBefore(c2.end, c1.start));
   };
 
+  /**
+    Checks if this selection has the left boundary in common with another one.
+
+    @param {Selection} other
+    @returns {Boolean}
+  */
   this.isLeftAlignedWith = function(other) {
     var c1 = this._coordinates(this);
     var c2 = this._coordinates(other);
     return _isEqual(c1.start, c2.start);
   };
 
+  /**
+    Checks if this selection has the right boundary in common with another one.
+
+    @param {Selection} other
+    @returns {Boolean}
+  */
   this.isRightAlignedWith = function(other) {
     var c1 = this._coordinates(this);
     var c2 = this._coordinates(other);
     return _isEqual(c1.end, c2.end);
   };
 
+  /**
+    @returns {PropertySelection[]}
+  */
   this.splitIntoPropertySelections = function() {
     var sels = [];
     var container = this.getContainer();
@@ -194,9 +262,13 @@ ContainerSelection.Prototype = function() {
     return sels;
   };
 
+  /**
+    @returns {Selection.Fragment[]}
+  */
   this.getFragments = function() {
+    // TODO: document what this is exactly used for
     var sels = this.splitIntoPropertySelections();
-    var fragments = _.map(sels, function(sel) {
+    var fragments = map(sels, function(sel) {
       return new Selection.Fragment('selection-fragment', sel.path,
         sel.startOffset, sel.endOffset);
     });
@@ -245,7 +317,7 @@ ContainerSelection.Prototype = function() {
   };
 
   var _isEqual = function(c1, c2) {
-    return (_.isEqual(c1.address, c2.address) && c1.offset === c2.offset);
+    return (isEqual(c1.address, c2.address) && c1.offset === c2.offset);
   };
 
   var _createNewSelection = function(containerSel, newCoors) {
@@ -272,7 +344,7 @@ ContainerSelection.Prototype = function() {
   };
 };
 
-oo.inherit(ContainerSelection, PropertySelection);
+PropertySelection.extend(ContainerSelection);
 
 Object.defineProperties(ContainerSelection.prototype, {
   path: {

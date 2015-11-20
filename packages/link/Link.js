@@ -2,13 +2,17 @@
 
 var PropertyAnnotation = require('../../model/PropertyAnnotation');
 
-var Link = PropertyAnnotation.extend({
-  name: "link",
-  displayName: "Link",
-  properties: {
-    url: 'string',
-    title: 'string'
-  }
+function Link() {
+  Link.super.apply(this, arguments);
+}
+
+PropertyAnnotation.extend(Link);
+
+Link.static.name = "link";
+
+Link.static.defineSchema({
+  title: 'text',
+  url: { type: 'string', 'default': 'http://'}
 });
 
 module.exports = Link;

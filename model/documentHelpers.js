@@ -1,12 +1,12 @@
 'use strict';
 
-var _ = require('../util/helpers');
+var filter = require('lodash/collection/filter');
 var AnnotationIndex = require('./AnnotationIndex');
 
 /**
   @module
   @example
-  
+
   ```js
   var documentHelpers = require('substance/model/documentHelpers');
   documentHelpers.isContainerAnnotation(doc, 'comment')
@@ -48,7 +48,7 @@ documentHelpers.getPropertyAnnotationsForSelection = function(doc, sel, options)
 
   annotations = doc.getIndex('annotations').get(path, startOffset, endOffset);
   if (options.type) {
-    annotations = _.filter(annotations, AnnotationIndex.filterByType(options.type));
+    annotations = filter(annotations, AnnotationIndex.filterByType(options.type));
   }
   return annotations;
 };
@@ -80,7 +80,7 @@ documentHelpers.getContainerAnnotationsForSelection = function(doc, sel, contain
   } else {
     annotations = doc.getIndex('container-annotation-anchors').byId;
   }
-  annotations = _.filter(annotations, function(anno) {
+  annotations = filter(annotations, function(anno) {
     var annoSel = anno.getSelection();
     return sel.overlaps(annoSel);
   });

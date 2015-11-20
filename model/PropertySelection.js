@@ -1,16 +1,21 @@
 'use strict';
 
-var _ = require('../util/helpers');
-var oo = require('../util/oo');
+var isEqual = require('lodash/lang/isEqual');
+var isNumber = require('lodash/lang/isNumber');
 var Selection = require('./Selection');
 var Coordinate = require('./Coordinate');
 var Range = require('./Range');
 
+/**
+  A selection which is bound to a property.
+*/
 function PropertySelection(properties) {
+  PropertySelection.super.apply(this);
+
   var path = properties.path;
   var startOffset = properties.startOffset;
   var endOffset = properties.endOffset || properties.startOffset;
-  if (!path || !_.isNumber(startOffset)) {
+  if (!path || !isNumber(startOffset)) {
     throw new Error('Invalid arguments: `path` and `startOffset` are mandatory');
   }
   this.range = new Range(
@@ -23,8 +28,6 @@ function PropertySelection(properties) {
 }
 
 PropertySelection.Prototype = function() {
-
-  _.extend(this, Selection.prototype);
 
   this.toJSON = function() {
     return {
@@ -127,11 +130,11 @@ PropertySelection.Prototype = function() {
       return other.contains(this);
     }
     if (strict) {
-      return (_.isEqual(this.path, other.path) &&
+      return (isEqual(this.path, other.path) &&
         this.start.offset > other.start.offset &&
         this.end.offset < other.end.offset);
     } else {
-      return (_.isEqual(this.path, other.path) &&
+      return (isEqual(this.path, other.path) &&
         this.start.offset >= other.start.offset &&
         this.end.offset <= other.end.offset);
     }
@@ -144,11 +147,11 @@ PropertySelection.Prototype = function() {
       return other.isInsideOf(this);
     }
     if (strict) {
-      return (_.isEqual(this.path, other.path) &&
+      return (isEqual(this.path, other.path) &&
         this.start.offset < other.start.offset &&
         this.end.offset > other.end.offset);
     } else {
-      return (_.isEqual(this.path, other.path) &&
+      return (isEqual(this.path, other.path) &&
         this.start.offset <= other.start.offset &&
         this.end.offset >= other.end.offset);
     }
@@ -160,7 +163,7 @@ PropertySelection.Prototype = function() {
       // console.log('PropertySelection.overlaps: delegating to ContainerSelection.overlaps...');
       return other.overlaps(this);
     }
-    if (!_.isEqual(this.getPath(), other.getPath())) return false;
+    if (!isEqual(this.getPath(), other.getPath())) return false;
     if (strict) {
       return (! (this.startOffset>=other.endOffset||this.endOffset<=other.startOffset) );
     } else {
@@ -174,7 +177,7 @@ PropertySelection.Prototype = function() {
       // console.log('PropertySelection.isRightAlignedWith: delegating to ContainerSelection.isRightAlignedWith...');
       return other.isRightAlignedWith(this);
     }
-    return (_.isEqual(this.getPath(), other.getPath()) &&
+    return (isEqual(this.getPath(), other.getPath()) &&
       this.getEndOffset() === other.getEndOffset());
   };
 
@@ -184,7 +187,7 @@ PropertySelection.Prototype = function() {
       // console.log('PropertySelection.isLeftAlignedWith: delegating to ContainerSelection.isLeftAlignedWith...');
       return other.isLeftAlignedWith(this);
     }
-    return (_.isEqual(this.getPath(), other.getPath()) &&
+    return (isEqual(this.getPath(), other.getPath()) &&
       this.getStartOffset() === other.getStartOffset());
   };
 
@@ -194,7 +197,7 @@ PropertySelection.Prototype = function() {
       // console.log('PropertySelection.expand: delegating to ContainerSelection.expand...');
       return other.expand(this);
     }
-    if (!_.isEqual(this.path, other.path)) {
+    if (!isEqual(this.path, other.path)) {
       throw new Error('Can not expand PropertySelection to a different property.');
     }
     var newStartOffset = Math.min(this.startOffset, other.startOffset);
@@ -214,8 +217,8 @@ PropertySelection.Prototype = function() {
     if (other.isNull()) return this;
     // Checking that paths are ok
     // doing that in a generalized manner so that other can even be a ContainerSelection
-    if (!_.isEqual(this.start.path, other.start.path) ||
-      !_.isEqual(this.end.path, other.end.path)) {
+    if (!isEqual(this.start.path, other.start.path) ||
+      !isEqual(this.end.path, other.end.path)) {
       throw new Error('Can not expand PropertySelection to a different property.');
     }
     var newStartOffset;
@@ -243,39 +246,57 @@ PropertySelection.Prototype = function() {
   };
 };
 
-oo.inherit(PropertySelection, Selection);
+Selection.extend(PropertySelection);
 
 Object.defineProperties(PropertySelection.prototype, {
+  /**
+    @property {Coordinate} PropertySelection.start
+  */
   start: {
     get: function() {
       return this.range.start;
     },
     set: function() { throw new Error('immutable.'); }
   },
+  /**
+    @property {Coordinate} PropertySelection.end
+  */
   end: {
     get: function() {
       return this.range.end;
     },
     set: function() { throw new Error('immutable.'); }
   },
+  /**
+    @property {String[]} PropertySelection.path
+  */
   path: {
     get: function() {
       return this.range.start.path;
     },
     set: function() { throw new Error('immutable.'); }
   },
+  /**
+    @property {Number} PropertySelection.startOffset
+  */
   startOffset: {
     get: function() {
       return this.range.start.offset;
     },
     set: function() { throw new Error('immutable.'); }
   },
+  /**
+    @property {Number} PropertySelection.endOffset
+  */
   endOffset: {
     get: function() {
       return this.range.end.offset;
     },
     set: function() { throw new Error('immutable.'); }
   },
+  /**
+    @property {Boolean} PropertySelection.collapsed
+  */
   collapsed: {
     get: function() {
       return this.isCollapsed();

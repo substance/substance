@@ -1,7 +1,8 @@
 'use strict';
 
-var _ = require('../../util/helpers');
-var oo = require('../../util/oo');
+var isString = require('lodash/lang/isString');
+var isEqual = require('lodash/lang/isEqual');
+var cloneDeep = require('lodash/lang/cloneDeep');
 var PathAdapter = require('../../util/PathAdapter');
 var Operation = require('./Operation');
 var TextOperation = require('./TextOperation');
@@ -14,6 +15,10 @@ var DELETE = 'delete';
 var UPDATE = 'update';
 var SET = 'set';
 
+/*
+  @class
+  @extends Operation
+*/
 var ObjectOperation = function(data) {
   Operation.call(this);
   if (!data) {
@@ -59,7 +64,7 @@ var ObjectOperation = function(data) {
 };
 
 ObjectOperation.fromJSON = function(data) {
-  data = _.deepclone(data);
+  data = cloneDeep(data);
   if (data.type === "update") {
     switch (data.propertyType) {
     case "string":
@@ -87,7 +92,7 @@ ObjectOperation.Prototype = function() {
       adapter = new PathAdapter(obj);
     }
     if (this.type === CREATE) {
-      adapter.set(this.path, _.deepclone(this.val));
+      adapter.set(this.path, cloneDeep(this.val));
       return obj;
     }
     if (this.type === DELETE) {
@@ -106,7 +111,7 @@ ObjectOperation.Prototype = function() {
     }
     else /* if (this.type === SET) */ {
       // clone here as the operations value must not be changed
-      adapter.set(this.path, _.deepclone(this.val));
+      adapter.set(this.path, cloneDeep(this.val));
     }
     return obj;
   };
@@ -117,7 +122,7 @@ ObjectOperation.Prototype = function() {
       path: this.path,
     };
     if (this.val) {
-      data.val = _.deepclone(this.val);
+      data.val = cloneDeep(this.val);
     }
     if (this.diff) {
       data.diff = this.diff.clone();
@@ -229,13 +234,13 @@ ObjectOperation.Prototype = function() {
   };
 };
 
-oo.inherit(ObjectOperation, Operation);
+Operation.extend(ObjectOperation);
 
 /* Low level implementation */
 
 var hasConflict = function(a, b) {
   if (a.type === NOP || b.type === NOP) return false;
-  return _.isEqual(a.path, b.path);
+  return isEqual(a.path, b.path);
 };
 
 var transform_delete_delete = function(a, b) {
@@ -359,7 +364,7 @@ var transform = function(a, b, options) {
   if (a.isNOP() || b.isNOP()) {
     return [a, b];
   }
-  var sameProp = _.isEqual(a.path, b.path);
+  var sameProp = isEqual(a.path, b.path);
   // without conflict: a' = a, b' = b
   if (sameProp) {
     __transform__[CODE[a.type] | CODE[b.type]](a,b);
@@ -374,7 +379,7 @@ ObjectOperation.hasConflict = hasConflict;
 
 ObjectOperation.Create = function(idOrPath, val) {
   var path;
-  if (_.isString(idOrPath)) {
+  if (isString(idOrPath)) {
     path = [idOrPath];
   } else {
     path = idOrPath;
@@ -384,7 +389,7 @@ ObjectOperation.Create = function(idOrPath, val) {
 
 ObjectOperation.Delete = function(idOrPath, val) {
   var path;
-  if (_.isString(idOrPath)) {
+  if (isString(idOrPath)) {
     path = [idOrPath];
   } else {
     path = idOrPath;
@@ -414,8 +419,8 @@ ObjectOperation.Set = function(path, oldVal, newVal) {
   return new ObjectOperation({
     type: SET,
     path: path,
-    val: _.deepclone(newVal),
-    original: _.deepclone(oldVal)
+    val: cloneDeep(newVal),
+    original: cloneDeep(oldVal)
   });
 };
 

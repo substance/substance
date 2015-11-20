@@ -1,6 +1,8 @@
 'use strict';
 
-var _ = require('../../util/helpers');
+var extend = require('lodash/object/extend');
+var last = require('lodash/array/last');
+var uuid = require('../../util/uuid');
 var deleteCharacter = require('./deleteCharacter');
 var deleteNode = require('./deleteNode');
 var merge = require('./merge');
@@ -58,11 +60,11 @@ function _deleteContainerSelection(tx, args) {
     nodeSel = nodeSels[idx];
     node = nodeSel.node;
     if (nodeSel.isFully) {
-      deleteNode(tx, _.extend({}, args, {
+      deleteNode(tx, extend({}, args, {
         nodeId: node.id
       }));
     } else {
-      _deleteNodePartially(tx, _.extend({}, args, {
+      _deleteNodePartially(tx, extend({}, args, {
         nodeSel: nodeSel
       }));
     }
@@ -96,7 +98,7 @@ function _deleteContainerSelection(tx, args) {
       type = tx.getSchema().getDefaultTextType();
       node = {
         type: type,
-        id: _.uuid(type),
+        id: uuid(type),
         content: ""
       };
       tx.create(node);
@@ -115,8 +117,8 @@ function _deleteContainerSelection(tx, args) {
     if (firstSel.isFully || lastSel.isFully) {
       // TODO: think about if we want to merge in those cases
     } else {
-      var secondPath = _.last(lastSel.paths);
-      var tmp = merge(tx, _.extend({}, args, {
+      var secondPath = last(lastSel.paths);
+      var tmp = merge(tx, extend({}, args, {
         selection: args.selection,
         containerId: containerId,
         path: secondPath,
@@ -131,7 +133,7 @@ function _deleteContainerSelection(tx, args) {
     type = tx.getSchema().getDefaultTextType();
     node = {
       type: type,
-      id: _.uuid(type),
+      id: uuid(type),
       content: ""
     };
     tx.create(node);
@@ -160,7 +162,7 @@ function _deleteNodePartially(tx, args) {
     if (i === length-1) {
       endOffset = nodeSel.endOffset;
     }
-    _deletePropertySelection(tx, _.extend({}, args, {
+    _deletePropertySelection(tx, extend({}, args, {
       selection: tx.createSelection({
         type: 'property',
         path: path,

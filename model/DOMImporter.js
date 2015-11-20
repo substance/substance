@@ -1,10 +1,10 @@
 'use strict';
 
+var oo = require('../util/oo');
 var each = require('lodash/collection/each');
 var last = require('lodash/array/last');
 var extend = require('lodash/object/extend');
 var bind = require('lodash/function/bind');
-var oo = require('../util/oo');
 var uuid = require('../util/uuid');
 var DefaultDOMElement = require('../ui/DefaultDOMElement');
 var $$ = DefaultDOMElement.createElement;
@@ -23,6 +23,8 @@ function DOMImporter(config) {
   this.config = extend({idAttribute: 'data-id'}, config);
   this.schema = config.schema;
   this.state = null;
+
+  this.$$ = $$;
 
   this._defaultBlockTypeConverter = null;
   this._blockTypeConverters = [];
@@ -587,5 +589,7 @@ DOMImporter.Prototype = function DOMImporterPrototype() {
 
 };
 oo.initClass(DOMImporter);
+
+DOMImporter.$$ = require('../ui/VirtualDOMElement').createElement;
 
 module.exports = DOMImporter;

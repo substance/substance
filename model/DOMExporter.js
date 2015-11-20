@@ -4,7 +4,7 @@ var oo = require('../util/oo');
 var each = require('lodash/collection/each');
 var Annotator = require('./Annotator');
 var Registry = require('../util/Registry');
-var $$ = require('../ui/Component').$$;
+var $$ = require('../ui/VirtualDOMElement').createElement;
 
 function DOMExporter(config) {
   if (!config.converters) {
@@ -15,6 +15,7 @@ function DOMExporter(config) {
     doc: null
   };
   this.config = config;
+  this.$$ = $$;
   config.converters.forEach(function(converter) {
     if (!converter.type) {
       console.error('Converter must provide the type of the associated node.', converter);
@@ -93,7 +94,11 @@ DOMExporter.Prototype = function() {
   // default HTML serialization
   this.defaultBlockNodeExporter = function(node, el, converter) {
     el.attr('data-type', node.type);
-    each(node.properties, function(value, name) {
+    var properties = node.toJSON();
+    each(properties, function(value, name) {
+      if (name === 'id' || name === 'type') {
+        return;
+      }
       var prop = $$('div').attr('property', name);
       if (node.getPropertyType() === 'string') {
         prop.append(converter.annotatedText([node.id, name]));

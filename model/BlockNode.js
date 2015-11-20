@@ -1,16 +1,11 @@
 'use strict';
 
-var oo = require('../util/oo');
 var DocumentNode = require('./DocumentNode');
 
 function BlockNode() {
-  DocumentNode.apply(this, arguments);
+  BlockNode.super.apply(this, arguments);
 }
-
-BlockNode.Prototype = function() {
-};
-
-oo.inherit(BlockNode, DocumentNode);
+DocumentNode.extend(BlockNode);
 
 BlockNode.static.blockType = true;
 

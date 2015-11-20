@@ -1,7 +1,10 @@
 'use strict';
 
 var oo = require('../util/oo');
-var _ = require('../util/helpers');
+var isString = require('lodash/lang/isString');
+var each = require('lodash/collection/each');
+var values = require('lodash/object/values');
+var extend = require('lodash/object/extend');
 var ContainerAnnotation = require('./ContainerAnnotation');
 var TextOperation = require('./data/TextOperation');
 
@@ -43,11 +46,11 @@ TextPropertyManager.Prototype = function() {
 
   this._initialize = function() {
     if (this.hasContainer()) {
-      _.each(this.doc.getNodes(), function(node) {
+      each(this.doc.getNodes(), function(node) {
         if (node.isInstanceOf('container-annotation')) {
           if (node.container === this.containerId) {
             var anno = node;
-            _.each(anno.getFragments(), this._initializeFragment, this);
+            each(anno.getFragments(), this._initializeFragment, this);
           }
         }
       }, this);
@@ -60,12 +63,12 @@ TextPropertyManager.Prototype = function() {
 
   this.renderSelection = function(sel) {
     var fragments = sel.getFragments();
-    _.each(fragments, function(frag) {
+    each(fragments, function(frag) {
       var record = this.records[frag.path];
       if (record) {
         record.fragments[frag.type] = frag;
         if (record.property) {
-          record.property.setFragments(_.values(record.fragments));
+          record.property.setFragments(values(record.fragments));
         }
       }
     }, this);
@@ -75,12 +78,12 @@ TextPropertyManager.Prototype = function() {
 
   this.removeSelection = function() {
     if (this.selectionFragments.length === 0) return;
-    _.each(this.selectionFragments, function(frag) {
+    each(this.selectionFragments, function(frag) {
       var record = this.records[frag.path];
       if (record) {
         delete record.fragments[frag.type];
         if (record.property) {
-          record.property.setFragments(_.values(record.fragments));
+          record.property.setFragments(values(record.fragments));
         }
       }
     }, this);
@@ -117,7 +120,7 @@ TextPropertyManager.Prototype = function() {
   this.getFragments = function(path) {
     var record = this.records[path];
     if (record) {
-      return _.values(record.fragments);
+      return values(record.fragments);
     } else {
       return [];
     }
@@ -148,7 +151,7 @@ TextPropertyManager.Prototype = function() {
       var op = documentChange.ops[i];
       // text changed
       if ( (op.type === "update" && op.diff instanceof TextOperation) ||
-           (op.type === "set" && _.isString(op.val)) ) {
+           (op.type === "set" && isString(op.val)) ) {
         this._recordTextChange(changes, op);
         continue;
       }
@@ -277,7 +280,7 @@ TextPropertyManager.Prototype = function() {
       }
       var fragmentsChanged = false;
       var oldFragments = record.fragments;
-      var newFragments = _.extend({}, oldFragments);
+      var newFragments = extend({}, oldFragments);
       if (change.removedFragments) {
         for (var id in change.removedFragments) {
           delete newFragments[id];
@@ -286,12 +289,12 @@ TextPropertyManager.Prototype = function() {
         fragmentsChanged = true;
       }
       if (change.addedFragments) {
-        _.extend(newFragments, change.addedFragments);
+        extend(newFragments, change.addedFragments);
         record.fragments = newFragments;
         fragmentsChanged = true;
       }
       if (fragmentsChanged) {
-        record.property.setFragments(_.values(record.fragments));
+        record.property.setFragments(values(record.fragments));
       } else if (change.rerender) {
         record.property.update();
       }

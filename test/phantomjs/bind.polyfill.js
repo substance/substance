@@ -1,8 +1,8 @@
 if (!Function.prototype.bind) {
-  Function.prototype.bind = Function.prototype.bind || function (thisp) {
+  Function.prototype.bind = Function.prototype.bind || function (self) {
     var fn = this;
     return function () {
-      return fn.apply(thisp, arguments);
+      return fn.apply(self, arguments);
     };
   };
 }
