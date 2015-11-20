@@ -48,7 +48,7 @@ ClassNode.static.defineSchema({
   superClass: { type: 'id', optional: true }, // only when @extends is defined
 });
 
-ClassNode.static.blockType = true;
+ClassNode.static.isBlock = true;
 
 module.exports = ClassNode;
 

@@ -50,6 +50,6 @@ NamespaceNode.static.defineSchema({
   members: { type: ['array', 'id'], default: [] },
 });
 
-NamespaceNode.static.blockType = true;
+NamespaceNode.static.isBlock = true;
 
 module.exports = NamespaceNode;

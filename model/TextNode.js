@@ -28,6 +28,7 @@ TextNode.Prototype = function() {
 DocumentNode.extend(TextNode);
 
 TextNode.static.name = "text";
+TextNode.static.isText = true;
 
 TextNode.static.defineSchema({
   content: 'text'

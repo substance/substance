@@ -26,6 +26,6 @@ FunctionNode.static.defineSchema({
   returns: { type: 'object', optional: true }, // {type: 'model/Document', description: 'The updated document'}
 });
 
-FunctionNode.static.blockType = true;
+FunctionNode.static.isBlock = true;
 
 module.exports = FunctionNode;

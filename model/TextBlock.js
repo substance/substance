@@ -8,6 +8,6 @@ function TextBlock() {
 
 TextNode.extend(TextBlock);
 
-TextBlock.static.blockType = true;
+TextBlock.static.isBlock = true;
 
 module.exports = TextBlock;

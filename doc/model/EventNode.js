@@ -17,6 +17,6 @@ EventNode.static.defineSchema({
   params: { type: ['array', 'object'], default: [] } // [{name: 'doc', type: 'model/Document', description: 'A Substance document instance'}]
 });
 
-EventNode.static.blockType = true;
+EventNode.static.isBlock = true;
 
 module.exports = EventNode;

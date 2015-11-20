@@ -32,6 +32,6 @@ DocumentedNode.static.defineSchema({
   tags: { type: ['array', 'object'], default: [] }, // [ { name: 'type', string: '...', html: '...'}]
 });
 
-DocumentedNode.static.blockType = true;
+DocumentedNode.static.isBlock = true;
 
 module.exports = DocumentedNode;

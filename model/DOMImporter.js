@@ -26,9 +26,9 @@ function DOMImporter(config) {
 
   this.$$ = $$;
 
-  this._defaultBlockTypeConverter = null;
-  this._blockTypeConverters = [];
-  this._inlineTypeConverters = [];
+  this._defaultBlockConverter = null;
+  this._blockConverters = [];
+  this._propertyAnnotationConverters = [];
 
   var schema = this.schema;
   var defaultTextType = schema.getDefaultTextType();
@@ -59,14 +59,14 @@ function DOMImporter(config) {
       return;
     }
     if (defaultTextType === converter.type) {
-      this._defaultBlockTypeConverter = converter;
+      this._defaultBlockConverter = converter;
     }
 
-    // Defaults to _blockTypeConverters
-    if (NodeClass.static.isInline) {
-      this._inlineTypeConverters.push(converter);
+    // Defaults to _blockConverters
+    if (NodeClass.static.isPropertyAnnotation) {
+      this._propertyAnnotationConverters.push(converter);
     } else {
-      this._blockTypeConverters.push(converter);
+      this._blockConverters.push(converter);
     }
 
   }.bind(this));
@@ -155,7 +155,7 @@ DOMImporter.Prototype = function DOMImporterPrototype() {
     var iterator = new DefaultDOMElement.NodeIterator(elements);
     while(iterator.hasNext()) {
       var el = iterator.next();
-      var blockTypeConverter = this._getBlockTypeConverterForElement(el);
+      var blockTypeConverter = this._getBlockConverterForElement(el);
       var node;
       if (blockTypeConverter) {
         node = this._nodeData(el, blockTypeConverter.type);
@@ -172,7 +172,7 @@ DOMImporter.Prototype = function DOMImporterPrototype() {
           iterator.back();
           this._wrapInlineElementsIntoBlockElement(iterator);
         } else if (el.isElementNode()) {
-          var inlineTypeConverter = this._getInlineTypeConverterForElement(el);
+          var inlineTypeConverter = this._getPropertyAnnotationConverterForElement(el);
           // NOTE: hard to tell if unsupported nodes on this level
           // should be treated as inline or not.
           // ATM we only support spans as entry to the catch-all implementation
@@ -197,7 +197,7 @@ DOMImporter.Prototype = function DOMImporterPrototype() {
     @returns {object} the created node as JSON
    */
   this.convertElement = function(el) {
-    var converter = this._getBlockTypeConverterForElement(el);
+    var converter = this._getBlockConverterForElement(el);
     var node;
     if (converter) {
       node = this._nodeData(el, converter.type);
@@ -347,7 +347,7 @@ DOMImporter.Prototype = function DOMImporterPrototype() {
     /* jshint unused:false */
     console.warn('This element is not handled by the converters you provided. This is the default implementation which just skips conversion. Override DOMImporter.defaultConverter(el, converter) to change this behavior.', el.outerHTML);
     var defaultTextType = this.schema.getDefaultTextType();
-    var defaultConverter = this._defaultBlockTypeConverter;
+    var defaultConverter = this._defaultBlockConverter;
     if (!defaultConverter) {
       throw new Error('Could not find converter for default type ', defaultTextType);
     }
@@ -385,9 +385,9 @@ DOMImporter.Prototype = function DOMImporterPrototype() {
         // skip comment nodes
         continue;
       } else if (el.isElementNode()) {
-        var inlineTypeConverter = this._getInlineTypeConverterForElement(el);
+        var inlineTypeConverter = this._getPropertyAnnotationConverterForElement(el);
         if (!inlineTypeConverter) {
-          var blockTypeConverter = this._getBlockTypeConverterForElement(el);
+          var blockTypeConverter = this._getBlockConverterForElement(el);
           if (blockTypeConverter) {
             throw new Error('Expected inline element. Found block element:', el.outerHTML);
           }
@@ -438,28 +438,28 @@ DOMImporter.Prototype = function DOMImporterPrototype() {
     return context.text;
   };
 
-  this._getBlockTypeConverterForElement = function(el) {
+  this._getBlockConverterForElement = function(el) {
     // HACK: tagName does not exist for prmitive nodes such as DOM TextNode.
     if (!el.tagName) return null;
-    for (var i = 0; i < this._blockTypeConverters.length; i++) {
-      if (this._blockTypeConverters[i].matchElement(el)) {
-        return this._blockTypeConverters[i];
+    for (var i = 0; i < this._blockConverters.length; i++) {
+      if (this._blockConverters[i].matchElement(el)) {
+        return this._blockConverters[i];
       }
     }
   };
 
-  this._getInlineTypeConverterForElement = function(el) {
-    for (var i = 0; i < this._inlineTypeConverters.length; i++) {
-      if (this._inlineTypeConverters[i].matchElement(el)) {
-        return this._inlineTypeConverters[i];
+  this._getPropertyAnnotationConverterForElement = function(el) {
+    for (var i = 0; i < this._propertyAnnotationConverters.length; i++) {
+      if (this._propertyAnnotationConverters[i].matchElement(el)) {
+        return this._propertyAnnotationConverters[i];
       }
     }
   };
 
   this._getNodeConverterForElement = function(el) {
-    var converter = this._getBlockTypeConverterForElement(el);
+    var converter = this._getBlockConverterForElement(el);
     if (!converter) {
-      converter = this._getInlineTypeConverterForElement(el);
+      converter = this._getPropertyAnnotationConverterForElement(el);
     }
     return converter;
   };
@@ -476,7 +476,7 @@ DOMImporter.Prototype = function DOMImporterPrototype() {
     var wrapper = $$('div');
     while(childIterator.hasNext()) {
       var el = childIterator.next();
-      var blockTypeConverter = this._getBlockTypeConverterForElement(el);
+      var blockTypeConverter = this._getBlockConverterForElement(el);
       if (blockTypeConverter) {
         childIterator.back();
         break;

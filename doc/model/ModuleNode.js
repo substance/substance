@@ -37,6 +37,6 @@ ModuleNode.static.defineSchema({
   members: { type: ['array', 'property'], default: [] }, // ['model/documentHelpers.getAllAnnotations']
 });
 
-ModuleNode.static.blockType = true;
+ModuleNode.static.isBlock = true;
 
 module.exports = ModuleNode;
