@@ -1,13 +1,10 @@
 'use strict';
 
-var oo = require('../../util/oo');
 var filter = require('lodash/collection/filter');
 
-function MemberContainerMixin() {}
+var MemberContainerMixin = {
 
-MemberContainerMixin.Prototype = function() {
-
-  this.getMembers = function(config) {
+  getMembers: function(config) {
     config = config || {};
     var members = [];
 
@@ -16,9 +13,9 @@ MemberContainerMixin.Prototype = function() {
       members = members.concat(catMembers);
     }.bind(this));
     return members;
-  };
+  },
 
-  this.getCategoryMembers = function(cat, config) {
+  getCategoryMembers: function(cat, config) {
     var doc = this.getDocument();
     var memberIndex = doc.getIndex('members');
     var members = memberIndex.get([this.id].concat(cat.path));
@@ -31,10 +28,7 @@ MemberContainerMixin.Prototype = function() {
       return true;
     });
     return members;
-  };
-
+  },
 };
-
-oo.initClass(MemberContainerMixin);
 
 module.exports = MemberContainerMixin;
