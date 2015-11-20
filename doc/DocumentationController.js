@@ -107,11 +107,12 @@ DocumentationController.Prototype = function() {
   this.renderContextPanel = function() {
     var panelElement = this.getActivePanelElement();
     if (!panelElement) {
-      return $$('div').append("No panels are registered");
+      return $$('div').append('No panels are registered');
     } else {
-      return $$('div').append(panelElement);
+      return panelElement;
     }
   };
+
 
   // Hande Writer state change updates
   // --------------

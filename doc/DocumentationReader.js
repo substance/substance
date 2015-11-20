@@ -46,11 +46,11 @@ var DocumentationReader = DocumentationController.extend({
         // Main (left column)
         $$('div').ref('main').addClass("se-main").append(
           $$(ContentPanel).append(
-            $$(Cover, {node: meta}),
+            $$(Cover, {node: meta}).ref('cover'),
             $$(ContainerRenderer, {
               containerId: config.containerId
             }).ref('mainAnnotator')
-          ).ref('content')
+          ).ref('contentPanel')
         ),
         // Resource (right column)
         $$('div').ref('resource')
