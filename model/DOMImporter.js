@@ -1,10 +1,10 @@
 'use strict';
 
+var oo = require('../util/oo');
 var each = require('lodash/collection/each');
 var last = require('lodash/array/last');
 var extend = require('lodash/object/extend');
 var bind = require('lodash/function/bind');
-var oo = require('../util/oo');
 var uuid = require('../util/uuid');
 var DefaultDOMElement = require('../ui/DefaultDOMElement');
 var $$ = DefaultDOMElement.createElement;

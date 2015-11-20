@@ -1,7 +1,7 @@
 'use strict';
 
-var _ = require('../util/helpers');
-var oo = require('../util/oo');
+var isArray = require('lodash/lang/isArray');
+var filter = require('lodash/collection/filter');
 var PathAdapter = require('../util/PathAdapter');
 var ContainerAnnotation = require('./ContainerAnnotation');
 var NodeIndex = require('./data/NodeIndex');
@@ -12,7 +12,7 @@ var ContainerAnnotationAnchorIndex = function(doc) {
   this.byId = {};
 };
 
-ContainerAnnotationAnchorIndex.Prototype = function() {
+NodeIndex.extend(ContainerAnnotationAnchorIndex, function() {
   this.select = function(node) {
     return (node instanceof ContainerAnnotation);
   };
@@ -25,7 +25,7 @@ ContainerAnnotationAnchorIndex.Prototype = function() {
 
   this.get = function(path, containerName) {
     var anchors = this.byPath.get(path) || [];
-    if (!_.isArray(anchors)) {
+    if (!isArray(anchors)) {
       var _anchors = [];
       this.byPath._traverse(anchors, [], function(path, anchors) {
         _anchors = _anchors.concat(anchors);
@@ -33,7 +33,7 @@ ContainerAnnotationAnchorIndex.Prototype = function() {
       anchors = _anchors;
     }
     if (containerName) {
-      return _.filter(anchors, function(anchor) {
+      return filter(anchors, function(anchor) {
         return (anchor.container === containerName);
       });
     } else {
@@ -74,8 +74,6 @@ ContainerAnnotationAnchorIndex.Prototype = function() {
     }
   };
 
-};
-
-oo.inherit(ContainerAnnotationAnchorIndex, NodeIndex);
+});
 
 module.exports = ContainerAnnotationAnchorIndex;

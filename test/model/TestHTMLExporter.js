@@ -1,6 +1,5 @@
 'use strict';
 
-var oo = require('../../util/oo');
 var HTMLExporter = require('../../model/HTMLExporter');
 var converters = require('./TestHTMLImporter').converters;
 
@@ -11,8 +10,6 @@ function TestHTMLExporter() {
   });
 }
 
-TestHTMLExporter.Prototype = function() {};
-
-oo.inherit(TestHTMLExporter, HTMLExporter);
+HTMLExporter.extend(TestHTMLExporter);
 
 module.exports = TestHTMLExporter;

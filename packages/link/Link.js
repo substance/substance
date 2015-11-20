@@ -1,13 +1,12 @@
 'use strict';
 
-var oo = require('../../util/oo');
 var PropertyAnnotation = require('../../model/PropertyAnnotation');
 
 function Link() {
   Link.super.apply(this, arguments);
 }
 
-oo.inherit(Link, PropertyAnnotation);
+PropertyAnnotation.extend(Link);
 
 Link.static.name = "link";
 

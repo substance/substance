@@ -2,7 +2,6 @@
 
 'use strict';
 
-var oo = require('../../util/oo');
 var isBoolean = require('lodash/lang/isBoolean');
 var isNumber = require('lodash/lang/isNumber');
 var isString = require('lodash/lang/isString');
@@ -103,7 +102,7 @@ Node.Prototype = function() {
 
 };
 
-oo.inherit(Node, EventEmitter);
+EventEmitter.extend(Node);
 
 /**
  * Symbolic name for this model class. Must be set to a unique string by every subclass.

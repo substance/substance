@@ -1,7 +1,6 @@
 'use strict';
 
 var isEqual = require('lodash/lang/isEqual');
-var oo = require('../util/oo');
 var DocumentNode = require('./DocumentNode');
 
 /**
@@ -68,7 +67,7 @@ PropertyAnnotation.Prototype = function() {
 
 };
 
-oo.inherit(PropertyAnnotation, DocumentNode);
+DocumentNode.extend(PropertyAnnotation);
 
 PropertyAnnotation.static.name = name;
 

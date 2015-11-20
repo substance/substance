@@ -1,7 +1,6 @@
 'use strict';
 
-var _ = require('../util/helpers');
-var oo = require('../util/oo');
+var each = require('lodash/collection/each');
 var DataNode = require('./data/Node');
 
 function DocumentNode(doc, props) {
@@ -75,7 +74,7 @@ DocumentNode.Prototype = function() {
   };
 
   this.connect = function(ctx, handlers) {
-    _.each(handlers, function(func, name) {
+    each(handlers, function(func, name) {
       var match = /([a-zA-Z_0-9]+):changed/.exec(name);
       if (match) {
         var propertyName = match[1];
@@ -102,7 +101,7 @@ DocumentNode.Prototype = function() {
 
 };
 
-oo.inherit(DocumentNode, DataNode);
+DataNode.extend(DocumentNode);
 
 DocumentNode.static.name = "node";
 

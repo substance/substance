@@ -1,7 +1,8 @@
 'use strict';
 
-var oo = require('../../util/oo');
-var _ = require('../../util/helpers');
+var isString = require('lodash/lang/isString');
+var isArray = require('lodash/lang/isArray');
+var cloneDeep = require('lodash/lang/cloneDeep');
 var Data = require('./Data');
 var ObjectOperation = require('./ObjectOperation');
 var ArrayOperation = require('./ArrayOperation');
@@ -100,7 +101,7 @@ IncrementalData.Prototype = function() {
     if (op.type === ObjectOperation.NOP) return;
     else if (op.type === ObjectOperation.CREATE) {
       // clone here as the operations value must not be changed
-      this.super.create.call(this, _.deepclone(op.val));
+      this.super.create.call(this, cloneDeep(op.val));
     } else if (op.type === ObjectOperation.DELETE) {
       this.super.delete.call(this, op.val.id);
     } else if (op.type === ObjectOperation.UPDATE) {
@@ -138,7 +139,7 @@ IncrementalData.Prototype = function() {
       var start, end, pos, val;
       if (value === null || value === undefined) {
         throw new Error('Property has not been initialized: ' + JSON.stringify(path));
-      } else if (_.isString(value)) {
+      } else if (isString(value)) {
         if (diff['delete']) {
           // { delete: [2, 5] }
           start = diff['delete'].start;
@@ -150,7 +151,7 @@ IncrementalData.Prototype = function() {
           val = diff['insert'].value;
           diffOp = TextOperation.Insert(pos, val);
         }
-      } else if (_.isArray(value)) {
+      } else if (isArray(value)) {
         if (diff['delete']) {
           // { delete: 2 }
           pos = diff['delete'].offset;
@@ -171,6 +172,6 @@ IncrementalData.Prototype = function() {
 
 };
 
-oo.inherit(IncrementalData, Data);
+Data.extend(IncrementalData);
 
 module.exports = IncrementalData;

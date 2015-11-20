@@ -1,7 +1,8 @@
 'use strict';
 
-var _ = require('../util/helpers');
-var oo = require('../util/oo');
+var isEqual = require('lodash/lang/isEqual');
+var each = require('lodash/collection/each');
+var last = require('lodash/array/last');
 var EventEmitter = require('../util/EventEmitter');
 var DocumentNode = require('./DocumentNode');
 var Selection = require('./Selection');
@@ -105,13 +106,13 @@ ContainerAnnotation.Prototype = function() {
     if (!sel.isContainerSelection()) {
       throw new Error('Cannot change to ContainerAnnotation.');
     }
-    if (!_.isEqual(this.startPath, sel.start.path)) {
+    if (!isEqual(this.startPath, sel.start.path)) {
       tx.set([this.id, 'startPath'], sel.start.path);
     }
     if (this.startOffset !== sel.start.offset) {
       tx.set([this.id, 'startOffset'], sel.start.offset);
     }
-    if (!_.isEqual(this.endPath, sel.end.path)) {
+    if (!isEqual(this.endPath, sel.end.path)) {
       tx.set([this.id, 'endPath'], sel.end.path);
     }
     if (this.endOffset !== sel.end.offset) {
@@ -125,7 +126,7 @@ ContainerAnnotation.Prototype = function() {
       this.highlighted = highlighted;
       this.emit('highlighted', highlighted);
 
-      _.each(this.fragments, function(frag) {
+      each(this.fragments, function(frag) {
         frag.emit('highlighted', highlighted);
       });
     }
@@ -140,7 +141,7 @@ ContainerAnnotation.Prototype = function() {
       fragments.push(new ContainerAnnotation.Fragment(this, paths[0], "property"));
     } else if (paths.length > 1) {
       fragments.push(new ContainerAnnotation.Fragment(this, paths[0], "start"));
-      fragments.push(new ContainerAnnotation.Fragment(this, _.last(paths), "end"));
+      fragments.push(new ContainerAnnotation.Fragment(this, last(paths), "end"));
       for (var i = 1; i < paths.length-1; i++) {
         fragments.push(new ContainerAnnotation.Fragment(this, paths[i], "inner"));
       }
@@ -150,7 +151,7 @@ ContainerAnnotation.Prototype = function() {
 
 };
 
-oo.inherit(ContainerAnnotation, DocumentNode);
+DocumentNode.extend(ContainerAnnotation);
 
 ContainerAnnotation.static.name = name;
 
@@ -173,7 +174,6 @@ ContainerAnnotation.Anchor = function Anchor(anno, isStart) {
 };
 
 ContainerAnnotation.Anchor.Prototype = function() {
-  _.extend(this, EventEmitter.prototype);
 
   this.zeroWidth = true;
 
@@ -182,7 +182,7 @@ ContainerAnnotation.Anchor.Prototype = function() {
   };
 };
 
-oo.initClass(ContainerAnnotation.Anchor);
+EventEmitter.extend(ContainerAnnotation.Anchor);
 
 /**
   @class
@@ -200,14 +200,13 @@ ContainerAnnotation.Fragment = function Fragment(anno, path, mode) {
 };
 
 ContainerAnnotation.Fragment.Prototype = function() {
-  _.extend(this, EventEmitter.prototype);
 
   this.getTypeNames = function() {
     return [this.type];
   };
 };
 
-oo.initClass(ContainerAnnotation.Fragment);
+EventEmitter.extend(ContainerAnnotation.Fragment);
 
 Object.defineProperties(ContainerAnnotation.Fragment.prototype, {
   startOffset: {

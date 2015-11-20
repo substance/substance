@@ -1,6 +1,7 @@
 'use strict';
 
-var _ = require('../../util/helpers');
+var extend = require('lodash/object/extend');
+var uuid = require('../../util/uuid');
 var annotationHelpers = require('../annotationHelpers');
 var deleteNode = require('./deleteNode');
 
@@ -27,8 +28,8 @@ function switchTextType(tx, args) {
     return args;
   }
   // create a new node and transfer annotations
-  var newNode = _.extend({
-    id: _.uuid(data.type),
+  var newNode = extend({
+    id: uuid(data.type),
     type: data.type,
     content: node.content
   }, data);

@@ -1,6 +1,5 @@
 'use strict';
 
-var oo = require('../../util/oo');
 var Document = require('../../model/Document');
 var schema = require('./TestSchema');
 
@@ -19,12 +18,10 @@ var TestArticle = function() {
   });
 };
 
-TestArticle.Prototype = function() {
+Document.extend(TestArticle, function TestArticlePrototype() {
   this.getDocumentMeta = function() {
     return this.get('meta');
   };
-};
-
-oo.inherit(TestArticle, Document);
+});
 
 module.exports = TestArticle;

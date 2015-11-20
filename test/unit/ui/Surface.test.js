@@ -1,12 +1,12 @@
 "use strict";
 
-require('../phantomjs_shims');
-
+require('../qunit_extensions');
 var ContainerEditor = require('../../../ui/ContainerEditor');
 var Component = require('../../../ui/Component');
 var Controller = require('../../../ui/Controller');
 var simple = require('../../fixtures/simple');
 var createAnnotation = require('../../../model/transform/createAnnotation');
+var $ = require('../../../util/jquery');
 var $$ = Component.$$;
 
 var components = {

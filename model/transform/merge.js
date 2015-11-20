@@ -1,7 +1,7 @@
 /* jshint latedef: false */
 'use strict';
 
-var _ = require('../../util/helpers');
+var extend = require('lodash/object/extend');
 var annotationHelpers = require('../annotationHelpers');
 
 var merge = function(tx, args) {
@@ -17,7 +17,7 @@ var merge = function(tx, args) {
   if (direction === 'right') {
     var nextAddress = container.getNextAddress(address);
     if (nextAddress) {
-      tmp = _mergeComponents(tx, _.extend({}, args, {
+      tmp = _mergeComponents(tx, extend({}, args, {
         containerId: containerId,
         firstAddress: address,
         secondAddress: nextAddress
@@ -27,7 +27,7 @@ var merge = function(tx, args) {
   } else if (direction === 'left') {
     var previousAdress = container.getPreviousAddress(address);
     if (previousAdress) {
-      tmp = _mergeComponents(tx, _.extend({}, args, {
+      tmp = _mergeComponents(tx, extend({}, args, {
         containerId: containerId,
         firstAddress: previousAdress,
         secondAddress: address
@@ -53,7 +53,7 @@ var _mergeComponents = function(tx, args) {
   if (firstNode === secondNode) {
     if (behavior && behavior.canMergeComponents(firstNode.type)) {
       mergeTrafo = behavior.getComponentMerger(firstNode.type);
-      return mergeTrafo.call(this, tx, _.extend({}, args, {
+      return mergeTrafo.call(this, tx, extend({}, args, {
         node: firstNode,
         firstAddress: firstAddress,
         secondAddress: secondAddress
@@ -63,7 +63,7 @@ var _mergeComponents = function(tx, args) {
     // most often a merge happens between two different nodes (e.g., 2 paragraphs)
     mergeTrafo = _getNodeMerger(args.editingBehavior, firstNode, secondNode);
     if (mergeTrafo) {
-      return mergeTrafo.call(this, tx, _.extend({}, args, {
+      return mergeTrafo.call(this, tx, extend({}, args, {
         containerId: args.containerId,
         first: firstNode,
         second: secondNode

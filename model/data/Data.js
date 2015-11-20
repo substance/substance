@@ -1,7 +1,9 @@
 'use strict';
 
-var _ = require('../../util/helpers');
-var oo = require('../../util/oo');
+var isString = require('lodash/lang/isString');
+var isArray = require('lodash/lang/isArray');
+var cloneDeep = require('lodash/lang/cloneDeep');
+var each = require('lodash/collection/each');
 var PathAdapter = require('../../util/PathAdapter');
 var EventEmitter = require('../../util/EventEmitter');
 
@@ -155,7 +157,7 @@ Data.Prototype = function() {
       newValue = diff.apply(oldValue);
     } else {
       var start, end, pos, val;
-      if (_.isString(oldValue)) {
+      if (isString(oldValue)) {
         if (diff['delete']) {
           // { delete: [2, 5] }
           start = diff['delete'].start;
@@ -169,7 +171,7 @@ Data.Prototype = function() {
         } else {
           throw new Error('Diff is not supported:', JSON.stringify(diff));
         }
-      } else if (_.isArray(oldValue)) {
+      } else if (isArray(oldValue)) {
         newValue = oldValue.slice(0);
         if (diff['delete']) {
           // { delete: 2 }
@@ -215,7 +217,7 @@ Data.Prototype = function() {
   this.toJSON = function() {
     return {
       schema: [this.schema.id, this.schema.version],
-      nodes: _.deepclone(this.nodes)
+      nodes: cloneDeep(this.nodes)
     };
   };
 
@@ -262,7 +264,7 @@ Data.Prototype = function() {
 
   this.updateIndexes = function(change) {
     if (!change || this.__QUEUE_INDEXING__) return;
-    _.each(this.indexes, function(index) {
+    each(this.indexes, function(index) {
       if (index.select(change.node)) {
         if (!index[change.type]) {
           console.error('Contract: every NodeIndex must implement ' + change.type);
@@ -286,6 +288,6 @@ Data.Prototype = function() {
 
 };
 
-oo.inherit(Data, EventEmitter);
+EventEmitter.extend(Data);
 
 module.exports = Data;

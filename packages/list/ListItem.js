@@ -1,13 +1,12 @@
 'use strict';
 
-var oo = require('../../util/oo');
 var DocumentNode = require('../../model/DocumentNode');
 
 function ListItem() {
   ListItem.super.apply(this, arguments);
 }
 
-oo.inherit(ListItem, DocumentNode);
+DocumentNode.extend(ListItem);
 
 ListItem.static.name = "list-item";
 

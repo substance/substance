@@ -1,13 +1,12 @@
 'use strict';
 
-var oo = require('../../util/oo');
 var TextBlock = require('../../model/TextBlock');
 
 function Heading() {
   Heading.super.apply(this, arguments);
 }
 
-Heading.Prototype = function() {
+TextBlock.extend(Heading, function HeadingPrototype() {
 
   this.getTocLevel = function() {
     return this.level;
@@ -17,9 +16,7 @@ Heading.Prototype = function() {
     return this.content;
   };
 
-};
-
-oo.inherit(Heading, TextBlock);
+});
 
 Heading.static.name = "heading";
 

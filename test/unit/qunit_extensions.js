@@ -1,3 +1,5 @@
+require('../phantomjs/shims');
+
 var inBrowser = (typeof window !== 'undefined');
 var isEmpty = require('lodash/lang/isEmpty');
 

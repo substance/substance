@@ -1,7 +1,7 @@
 'use strict';
 
-var _ = require('../../util/helpers');
-var oo = require('../../util/oo');
+var isString = require('lodash/lang/isString');
+var isNumber = require('lodash/lang/isNumber');
 var Operation = require('./Operation');
 var Conflict = require('./Conflict');
 
@@ -29,10 +29,10 @@ function TextOperation(data) {
   if(!this.isInsert() && !this.isDelete()) {
     throw new Error("Illegal type.");
   }
-  if (!_.isString(this.str)) {
+  if (!isString(this.str)) {
     throw new Error("Illegal argument: expecting string.");
   }
-  if (!_.isNumber(this.pos) || this.pos < 0) {
+  if (!isNumber(this.pos) || this.pos < 0) {
     throw new Error("Illegal argument: expecting positive number as pos.");
   }
 }
@@ -117,7 +117,7 @@ TextOperation.Prototype = function() {
   };
 };
 
-oo.inherit(TextOperation, Operation);
+Operation.extend(TextOperation);
 
 hasConflict = function(a, b) {
   // Insert vs Insert:

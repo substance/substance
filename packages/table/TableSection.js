@@ -1,6 +1,5 @@
 'use strict';
 
-var oo = require('../../util/oo');
 var DocumentNode = require('../../model/DocumentNode');
 var ParentNodeMixin = require('../../model/ParentNodeMixin');
 
@@ -8,7 +7,7 @@ function TableSection() {
   TableSection.super.apply(this, arguments);
 }
 
-TableSection.Prototype = function() {
+DocumentNode.extend(TableSection, ParentNodeMixin, function TableSectionPrototype() {
 
   this.getChildrenProperty = function() {
     return 'rows';
@@ -21,10 +20,7 @@ TableSection.Prototype = function() {
   this.getRowAt = function(rowIdx) {
     return this.getChildAt(rowIdx);
   };
-};
-
-oo.inherit(TableSection, DocumentNode);
-oo.mixin(TableSection, ParentNodeMixin);
+});
 
 TableSection.static.name = "table-section";
 

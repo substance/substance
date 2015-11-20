@@ -1,7 +1,8 @@
 "use strict";
 
-var _ = require('../util/helpers');
 var oo = require('../util/oo');
+var extend = require('lodash/object/extend');
+var each = require('lodash/collection/each');
 
 var ENTER = 1;
 var EXIT = -1;
@@ -38,7 +39,7 @@ var ENTER_EXIT = -2;
 // Currently, in such cases the first element that is opened earlier is preserved.
 
 var Annotator = function(options) {
-  _.extend(this, options);
+  extend(this, options);
 };
 
 Annotator.Prototype = function() {
@@ -114,7 +115,7 @@ Annotator.Prototype = function() {
 
   var extractEntries = function(annotations) {
     var entries = [];
-    _.each(annotations, function(a) {
+    each(annotations, function(a) {
       // special treatment for zero-width annos such as ContainerAnnotation.Anchors
       if (a.zeroWidth) {
         entries.push({ pos: a.offset, mode: ENTER_EXIT, id: a.id, level: Number.MAX_VALUE, type: 'anchor', node: a });
@@ -211,6 +212,6 @@ Annotator.Prototype = function() {
 
 };
 
-oo.initClass( Annotator );
+oo.initClass(Annotator);
 
 module.exports = Annotator;

@@ -1,13 +1,12 @@
 'use strict';
 
-var oo = require('../../util/oo');
 var BlockNode = require('../../model/BlockNode');
 
 function Embed() {
   Embed.super.apply(this, arguments);
 }
 
-oo.inherit(Embed, BlockNode);
+BlockNode.extend(Embed);
 
 Embed.static.name = "embed";
 

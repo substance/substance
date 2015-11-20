@@ -1,7 +1,8 @@
 /* jshint latedef: false */
 'use strict';
 
-var _ = require('../../util/helpers');
+var each = require('lodash/collection/each');
+var extend = require('lodash/object/extend');
 var deleteSelection = require('./deleteSelection');
 var updateAnnotations = require('./updateAnnotations');
 
@@ -21,7 +22,7 @@ function replaceText(tx, args) {
 }
 
 function _defaultReplace(tx, args) {
-  var out = deleteSelection(tx, _.extend({}, args, {
+  var out = deleteSelection(tx, extend({}, args, {
     direction: 'right'
   }));
   var selection = out.selection;
@@ -55,7 +56,7 @@ function _preservativeReplace(tx, args) {
   // update annos
   updateAnnotations(tx, { op: op, ignoredAnnotations: preservedAnnos });
   // update preserved annotations
-  _.each(preservedAnnos, function(anno) {
+  each(preservedAnnos, function(anno) {
     tx.set([anno.id, 'endOffset'], newEndOffset);
   });
   args.selection = tx.createSelection({

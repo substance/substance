@@ -1,6 +1,7 @@
 "use strict";
 
-var _ = require('../../../../util/helpers');
+require('../../qunit_extensions');
+var isEqual = require('lodash/lang/isEqual');
 var ArrayOperation = require('../../../../model/data/ArrayOperation');
 
 QUnit.module('model/data/ArrayOperation');
@@ -8,9 +9,9 @@ QUnit.module('model/data/ArrayOperation');
 QUnit.assert.checkArrayOperationTransform = function(a, b, input, expected) {
   var t = ArrayOperation.transform(a, b);
   var output = t[1].apply(a.apply(input.slice(0)));
-  this.push(_.isEqual(expected, output), output, expected, "(b' o a)('"+JSON.stringify(input)+"') == '" + JSON.stringify(expected) + "' with a="+a.toString()+", b'="+t[1].toString());
+  this.push(isEqual(expected, output), output, expected, "(b' o a)('"+JSON.stringify(input)+"') == '" + JSON.stringify(expected) + "' with a="+a.toString()+", b'="+t[1].toString());
   output = t[0].apply(b.apply(input.slice(0)));
-  this.push(_.isEqual(expected, output), output, expected, "(a' o b)('"+JSON.stringify(input)+"') == '" + JSON.stringify(expected) + "' with b="+b.toString()+", a'="+t[0].toString());
+  this.push(isEqual(expected, output), output, expected, "(a' o b)('"+JSON.stringify(input)+"') == '" + JSON.stringify(expected) + "' with b="+b.toString()+", a'="+t[0].toString());
 };
 
 QUnit.test("Insert element", function(assert) {

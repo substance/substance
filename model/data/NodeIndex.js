@@ -1,7 +1,9 @@
 'use strict';
 
-var _ = require('../../util/helpers');
 var oo = require('../../util/oo');
+var isArray = require('lodash/lang/isArray');
+var each = require('lodash/collection/each');
+var extend = require('lodash/object/extend');
 var PathAdapter = require('../../util/PathAdapter');
 
 /**
@@ -45,8 +47,8 @@ NodeIndex.Prototype = function() {
    */
   this.getAll = function() {
     var result = {};
-    _.each(this.index, function(values) {
-      _.extend(result, values);
+    each(this.index, function(values) {
+      extend(result, values);
     });
     return result;
   };
@@ -86,10 +88,10 @@ NodeIndex.Prototype = function() {
    */
   this.create = function(node) {
     var values = node[this.property];
-    if (!_.isArray(values)) {
+    if (!isArray(values)) {
       values = [values];
     }
-    _.each(values, function(value) {
+    each(values, function(value) {
       this.index.set([value, node.id], node);
     }, this);
   };
@@ -104,10 +106,10 @@ NodeIndex.Prototype = function() {
    */
   this.delete = function(node) {
     var values = node[this.property];
-    if (!_.isArray(values)) {
+    if (!isArray(values)) {
       values = [values];
     }
-    _.each(values, function(value) {
+    each(values, function(value) {
       this.index.delete([value, node.id]);
     }, this);
   };
@@ -123,17 +125,17 @@ NodeIndex.Prototype = function() {
   this.update = function(node, path, newValue, oldValue) {
     if (!this.select(node) || path[1] !== this.property) return;
     var values = oldValue;
-    if (!_.isArray(values)) {
+    if (!isArray(values)) {
       values = [values];
     }
-    _.each(values, function(value) {
+    each(values, function(value) {
       this.index.delete([value, node.id]);
     }, this);
     values = newValue;
-    if (!_.isArray(values)) {
+    if (!isArray(values)) {
       values = [values];
     }
-    _.each(values, function(value) {
+    each(values, function(value) {
       this.index.set([value, node.id], node);
     }, this);
   };
@@ -164,7 +166,7 @@ NodeIndex.Prototype = function() {
   };
 
   this._initialize = function(data) {
-    _.each(data.getNodes(), function(node) {
+    each(data.getNodes(), function(node) {
       if (this.select(node)) {
         this.create(node);
       }
@@ -183,7 +185,7 @@ oo.initClass( NodeIndex );
  * @returns {model/data/NodeIndex} A customized NodeIndex.
  */
 NodeIndex.create = function(prototype) {
-  var index = _.extend(new NodeIndex(), prototype);
+  var index = extend(new NodeIndex(), prototype);
   index.clone = function() {
     return NodeIndex.create(prototype);
   };

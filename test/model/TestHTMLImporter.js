@@ -1,6 +1,5 @@
 'use strict';
 
-var oo = require('../../util/oo');
 var HTMLImporter = require('../../model/HTMLImporter');
 var schema = require('./TestSchema');
 var TestArticle = require('./TestArticle');
@@ -28,16 +27,14 @@ function TestHTMLImporter() {
   });
 }
 
-TestHTMLImporter.Prototype = function() {
+HTMLImporter.extend(TestHTMLImporter, function() {
 
   this.convertDocument = function(documentEl) {
     var bodyEl = documentEl.find('body');
     this.convertContainer(bodyEl.children, this.config.containerId);
   };
 
-};
-
-oo.inherit(TestHTMLImporter, HTMLImporter);
+});
 
 TestHTMLImporter.converters = converters;
 

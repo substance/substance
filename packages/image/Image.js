@@ -1,12 +1,12 @@
-var DocumentNode = require('../../model/DocumentNode');
+'use strict';
 
-var oo = require('../../util/oo');
+var DocumentNode = require('../../model/DocumentNode');
 
 function Image() {
   Image.super.apply(this, arguments);
 }
 
-oo.inherit(Image, DocumentNode);
+DocumentNode.extend(Image);
 
 Image.static.name = "image";
 

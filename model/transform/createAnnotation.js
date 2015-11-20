@@ -1,6 +1,7 @@
 "use strict";
 
-var _ = require('../../util/helpers');
+var extend = require('lodash/object/extend');
+var uuid = require('../../util/uuid');
 var helpers = require('../documentHelpers');
 
 /*
@@ -26,10 +27,10 @@ function _createPropertyAnnotations(tx, args) {
 
   for (var i = 0; i < sels.length; i++) {
     var anno = {
-      id: _.uuid(annoType),
+      id: uuid(annoType),
       type: annoType
     };
-    _.extend(anno, annoData);
+    extend(anno, annoData);
     anno.path = sels[i].getPath();
     anno.startOffset = sels[i].getStartOffset();
     anno.endOffset = sels[i].getEndOffset();
@@ -75,10 +76,10 @@ function createAnnotation(tx, args) {
   }
 
   var anno = {
-    id: _.uuid(annoType),
+    id: uuid(annoType),
     type: annoType,
   };
-  _.extend(anno, annoData);
+  extend(anno, annoData);
 
   if (helpers.isContainerAnnotation(tx, annoType)) {
     anno.startPath = sel.start.path;

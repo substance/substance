@@ -1,6 +1,7 @@
 "use strict";
 
-var _ = require('../../../../util/helpers');
+require('../../qunit_extensions');
+var isEqual = require('lodash/lang/isEqual');
 var TextOperation = require('../../../../model/data/TextOperation');
 
 QUnit.module('model/data/TextOperation');
@@ -8,9 +9,9 @@ QUnit.module('model/data/TextOperation');
 QUnit.assert.checkTextTransform = function(a, b, input, expected) {
   var t = TextOperation.transform(a, b);
   var s = t[1].apply(a.apply(input));
-  this.push(_.isEqual(expected, s), s, expected, "(b' o a)('"+input+"') == '" + expected + "' with a="+a.toString()+", b'="+t[1].toString());
+  this.push(isEqual(expected, s), s, expected, "(b' o a)('"+input+"') == '" + expected + "' with a="+a.toString()+", b'="+t[1].toString());
   s = t[0].apply(b.apply(input));
-  this.push(_.isEqual(expected, s), s, expected, "(a' o b)('"+input+"') == '" + expected + "' with b="+b.toString()+", a'="+t[0].toString());
+  this.push(isEqual(expected, s), s, expected, "(a' o b)('"+input+"') == '" + expected + "' with b="+b.toString()+", a'="+t[0].toString());
 };
 
 QUnit.test("Insert string", function(assert) {

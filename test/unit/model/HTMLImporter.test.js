@@ -1,7 +1,6 @@
 'use strict';
 
 require('../qunit_extensions');
-
 var TestHTMLImporter = require('../../model/TestHTMLImporter');
 var DOMElement = require('../../../ui/DefaultDOMElement');
 

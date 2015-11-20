@@ -1,13 +1,12 @@
 'use strict';
 
-var oo = require('../../util/oo');
 var PropertyAnnotation = require('../../model/PropertyAnnotation');
 
 function Strong() {
   Strong.super.apply(this, arguments);
 }
 
-oo.inherit(Strong, PropertyAnnotation);
+PropertyAnnotation.extend(Strong);
 
 Strong.static.name = "strong";
 

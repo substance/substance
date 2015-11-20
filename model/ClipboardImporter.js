@@ -1,8 +1,7 @@
 'use strict';
 
+var extend = require('lodash/object/extend');
 var $ = require('../util/jquery');
-var _ = require('../util/helpers');
-var oo = require('../util/oo');
 var HTMLImporter = require('./HTMLImporter');
 
 // Note: sharing the symbol with the transformation
@@ -14,7 +13,7 @@ function ClipboardImporter(config) {
   if (!config.schema) {
     throw new Error('Missing argument: config.schema is required.');
   }
-  _.extend(config, {
+  extend(config, {
     trimWhitespaces: true,
     REMOVE_INNER_WS: true,
     containerId: CLIPBOARD_CONTAINER_ID,
@@ -23,7 +22,7 @@ function ClipboardImporter(config) {
   ClipboardImporter.super.call(this, config);
 }
 
-ClipboardImporter.Prototype = function() {
+HTMLImporter.extend(ClipboardImporter, function() {
 
   this.convert = function($rootEl, doc) {
     this.initialize(doc, $rootEl);
@@ -67,9 +66,7 @@ ClipboardImporter.Prototype = function() {
     return false;
   };
 
-};
-
-oo.inherit(ClipboardImporter, HTMLImporter);
+});
 
 ClipboardImporter.converters = converters;
 
