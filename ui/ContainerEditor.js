@@ -21,12 +21,14 @@ var ContainerNodeMixin = require('./ContainerNodeMixin');
   Represents a flow editor that manages a sequence of nodes in a container. Needs to be
   instantiated inside a {@link ui/Controller} context.
   
-  @constructor
-  @class
+  @class ContainerEditor
+  @component
   @extends ui/Surface
   @example
   
-  Create a full-fledged `ContainerEditor` for the `body` container of a document. Allow Strong and Emphasis annotations and to switch text types between paragraph and heading at level 1.
+  Create a full-fledged `ContainerEditor` for the `body` container of a document.
+  Allow Strong and Emphasis annotations and to switch text types between paragraph
+  and heading at level 1.
 
   ```js
   $$(ContainerEditor, {

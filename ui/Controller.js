@@ -26,6 +26,66 @@ I18n.instance.load(require('../i18n/en'));
   can be executed on the controller to update the document.
 
   @class
+  @component
+  @abstract
+  
+  @example
+
+  We utilize a custom {@link ui/Toolbar} and a configured {@link ui/ContainerEditor}. 
+  Check out the [examples](http://gitub.com/substance/examples) for complete usage.
+
+   as a `Toolbar` including tools like the `UndoTool` and a configured `ContainerEditor`, which will do the actual editing work. 
+
+  ```js
+  var ProseEditor = Controller.extend({
+    // Editor configuration
+    static: {
+      config: CONFIG,
+    },
+    // Custom Render method for your editor
+    render: function() {
+      var config = getConfig();
+      return $$('div').addClass('sc-prose-editor').append(
+        $$(Toolbar).append(
+          $$(Toolbar.Group).append(
+            $$(TextTool, {'title': this.i18n.t('switch_text')}),
+            $$(EmphasisTool).append($$(Icon, {icon: "fa-italic"}))
+          )
+        ),
+        $$(ContainerEditor, {
+          doc: this.props.doc,
+          containerId: 'body',
+          name: 'bodyEditor',
+          commands: config.bodyEditor.commands
+        }).ref('bodyEditor')
+      );
+    }
+  });
+  ```
+
+  There's also a config object that is essential for the editor to work. The following
+  configuration sets up a component registry that assigns a visual component to each
+  content node type and defines which commands should be supported on the contorller
+  level.
+
+  ```js
+  var CONFIG = {
+    controller: {
+      // Component registry
+      components: {
+        'paragraph': require('substance/packages/paragraph/ParagraphComponent'),
+        ...
+      },
+      // Controller commands
+      commands: [
+        require('substance/ui/commands/undo'),
+        require('substance/ui/commands/redo'),
+        require('substance/ui/commands/save')
+      ]
+    },
+    // Add custom configuration to this object
+  };
+  ```
 */
 function Controller() {
   Component.apply(this, arguments);

@@ -11,7 +11,7 @@ var $$ = Component.$$;
   this class using {@link ui/Component.$$} within the render method of a component. Needs to be
   instantiated within a {@link ui/Controller} context.
 
-  @class
+  @class ContainerAnnotator
   @component
   @extends ui/ContainerEditor
 

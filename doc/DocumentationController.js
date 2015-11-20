@@ -33,7 +33,6 @@ function DocumentationController(parent, params) {
 DocumentationController.Prototype = function() {
 
   this.focusNode = function(nodeId) {
-    console.log('focussing node', nodeId);
     this.extendState({
       nodeId: nodeId
     });
