@@ -117,7 +117,7 @@ var _pasteDocument = function(tx, args) {
     if (tx.get(nodeId)) {
       node.id = uuid(node.type);
     }
-    tx.create(node);
+    node = tx.create(node);
     container.show(node.id, insertPos++);
     insertedNodes.push(node);
 

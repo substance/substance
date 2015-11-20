@@ -14,8 +14,12 @@ function ClipboardExporter() {
 
 ClipboardExporter.Prototype = function() {
 
-  this.convertDocument = function() {
-    return this.convertContainer(CLIPBOARD_CONTAINER_ID);
+  this.convertDocument = function(doc) {
+    var content = doc.get(CLIPBOARD_CONTAINER_ID);
+    if (!content) {
+      throw new Error('Illegal clipboard document: could not find container "' + CLIPBOARD_CONTAINER_ID + '"');
+    }
+    return this.convertContainer(content);
   };
 
 };

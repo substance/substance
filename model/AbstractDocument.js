@@ -141,6 +141,8 @@ EventEmitter.extend(AbstractDocument, function AbstractDocumentPrototype() {
    * @skip
    */
   this.toJSON = function() {
+    // TODO: deprecate this
+    // console.warn('DEPRECATED: Document.toJSON(). Use model/JSONConverter instead.');
     var nodes = {};
     each(this.getNodes(), function(node) {
       nodes[node.id] = node.toJSON();

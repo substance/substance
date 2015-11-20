@@ -4,6 +4,8 @@ var $ = require('../util/jquery');
 var oo = require('../util/oo');
 var uuid = require('../util/uuid');
 var DefaultDOMElement = require('./DefaultDOMElement');
+var JSONConverter = require('../model/JSONConverter');
+var CLIPBOARD_CONTAINER_ID = require('../model/transform/copySelection').CLIPBOARD_CONTAINER_ID;
 
 /*
   Surface Clipboard is owned by a module:ui/FormEditor.
@@ -77,7 +79,7 @@ Clipboard.Prototype = function() {
     // console.log("Clipboard.onCopy", arguments);
     this._copySelection();
     if (event.clipboardData && this._contentDoc) {
-      var elements = this.htmlExporter.exportDocument(this._contentDoc);
+      var elements = this.htmlExporter.convertDocument(this._contentDoc);
       var html = [];
       var text = [];
       elements.forEach(function(el) {
@@ -88,7 +90,8 @@ Clipboard.Prototype = function() {
       text = text.join('');
       console.log('Stored HTML in clipboard', html);
       this._contentDoc.__id__ = uuid();
-      var data = this._contentDoc.toJSON();
+      var converter = new JSONConverter();
+      var data = converter.exportDocument(this._contentDoc);
       data.__id__ = this._contentDoc.__id__;
       event.clipboardData.setData('application/substance', JSON.stringify(data));
       event.clipboardData.setData('text/plain', text);
@@ -116,9 +119,10 @@ Clipboard.Prototype = function() {
     // try {
       var content = doc.newInstance();
       content._setForClipboard(true);
-      content.loadSeed(JSON.parse(data));
+      var converter = new JSONConverter();
+      converter.importDocument(content, JSON.parse(data));
       var plainText = "";
-      var pasteContent = content.get('clipboard_content');
+      var pasteContent = content.get(CLIPBOARD_CONTAINER_ID);
       // TODO: try to get rid of that here.
       // we need a document.toPlainText() for that
       if (pasteContent.length > 0) {
@@ -127,7 +131,7 @@ Clipboard.Prototype = function() {
         var lastLength = content.get(lastPath).length;
         var sel = doc.createSelection({
           type: 'container',
-          containerId: 'clipboard_content',
+          containerId: CLIPBOARD_CONTAINER_ID,
           startPath: firstPath,
           startOffset: 0,
           endPath: lastPath,

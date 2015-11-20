@@ -1,6 +1,9 @@
 "use strict";
 
 var oo = require('../util/oo');
+var isBoolean = require('lodash/lang/isBoolean');
+var isNumber = require('lodash/lang/isNumber');
+var isString = require('lodash/lang/isString');
 var each = require('lodash/collection/each');
 var Annotator = require('./Annotator');
 var Registry = require('../util/Registry');
@@ -23,16 +26,16 @@ function DOMExporter(config) {
     }
     this.converters.add(converter.type, converter);
   }.bind(this));
-
-  this.initialize();
 }
 
 DOMExporter.Prototype = function() {
 
-  this.initialize = function(doc) {
-    this.state = {
-      doc: doc
-    };
+  this.exportDocument = function(doc) {
+    // TODO: this is no left without much functionality
+    // still, it would be good to have a consistent top-level API
+    // i.e. converter.importDocument(el) and converter.exportDocument(doc)
+    // On the other side, the 'internal' API methods are named this.convert*.
+    return this.convertDocument(doc);
   };
 
   /**
@@ -40,37 +43,30 @@ DOMExporter.Prototype = function() {
     @returns {DOMElement|DOMElement[]} The exported document as DOM or an array of elements
              if exported as partial, which depends on the actual implementation
              of `this.convertDocument()`.
-  */
-  this.exportDocument = function(doc) {
-    // TODO: maybe the return value of this method should be DOMElement?
-    // Sometimes it
-    this.initialize(doc);
-    return this.convertDocument();
-  };
 
-  /*
     @abstract
     @example
 
-    this.convertDocument = function() {
-      var elements = this.convertContainer(this.state.containerId);
+    this.convertDocument = function(doc) {
+      var elements = this.convertContainer(doc, this.state.containerId);
       var out = elements.map(function(el) {
         return el.outerHTML;
       });
       return out.join('');
     };
   */
-  this.convertDocument = function() {
+  this.convertDocument = function(doc) {
+    /* jshint unused:false */
     throw new Error('This method is abstract');
   };
 
-  this.convertContainer = function(containerId) {
-    var doc = this.state.doc;
-    var elements = [];
-    var container = doc.get(containerId);
+  this.convertContainer = function(container) {
     if (!container) {
-      throw new Error('Could not find container with id ' + containerId);
+      throw new Error('Illegal arguments: container is mandatory.');
     }
+    var doc = container.getDocument();
+    this.state.doc = doc;
+    var elements = [];
     container.nodes.forEach(function(id) {
       var node = doc.get(id);
       var nodeEl = this.convertNode(node);
@@ -82,7 +78,10 @@ DOMExporter.Prototype = function() {
   this.convertNode = function(node) {
     // always make sure that we have the doc in our state
     this.state.doc = node.getDocument();
-    var converter = this._getNodeConverter(node);
+    var converter = this.getNodeConverter(node);
+    if (!converter) {
+      converter = this.getDefaultBlockConverter();
+    }
     var el;
     if (converter.tagName) {
       el = $$(converter.tagName);
@@ -93,7 +92,7 @@ DOMExporter.Prototype = function() {
     if (converter.export) {
       el = converter.export(node, el, this) || el;
     } else {
-      el = this.defaultBlockNodeExporter(node, el, this) || el;
+      el = this.getDefaultBlockConverter().export(node, el, this) || el;
     }
     return el;
   };
@@ -103,25 +102,6 @@ DOMExporter.Prototype = function() {
     var wrapper = $$('div')
       .append(this.annotatedText(path));
     return wrapper.innerHTML;
-  };
-
-
-  // default HTML serialization
-  this.defaultBlockNodeExporter = function(node, el, converter) {
-    el.attr('data-type', node.type);
-    var properties = node.toJSON();
-    each(properties, function(value, name) {
-      if (name === 'id' || name === 'type') {
-        return;
-      }
-      var prop = $$('div').attr('property', name);
-      if (node.getPropertyType() === 'string') {
-        prop.append(converter.annotatedText([node.id, name]));
-      } else {
-        prop.text(value);
-      }
-      el.append(prop);
-    });
   };
 
   this.annotatedText = function(path) {
@@ -143,7 +123,10 @@ DOMExporter.Prototype = function() {
     };
     annotator.onExit = function(entry, context, parentContext) {
       var anno = context.annotation;
-      var converter = self._getNodeConverter(anno);
+      var converter = self.getNodeConverter(anno);
+      if (!converter) {
+        converter = self.getDefaultPropertyAnnotationConverter();
+      }
       var el;
       if (converter.tagName) {
         el = $$(converter.tagName);
@@ -152,7 +135,6 @@ DOMExporter.Prototype = function() {
       }
       el.attr('data-id', anno.id);
       el.append(context.children);
-      //
       if (converter.export) {
         converter.export(anno, el, self);
       }
@@ -163,45 +145,60 @@ DOMExporter.Prototype = function() {
     return wrapper.children;
   };
 
-  this._getNodeConverter = function(node) {
+  this.getNodeConverter = function(node) {
     return this.converters.get(node.type);
   };
 
-  // this.createHtmlDocument = function() {
-  //   var EMPTY_DOC = '<!DOCTYPE html><html><head></head><body></body></html>';
-  //   if (inBrowser) {
-  //     var parser = new window.DOMParser();
-  //     var doc = parser.parseFromString(EMPTY_DOC, "text/html");
-  //     return $(doc);
-  //   } else {
-  //     // creating document using cheerio
-  //     var $root = $.load(EMPTY_DOC).root();
-  //     return $root;
-  //   }
-  // };
+  this.getDefaultBlockConverter = function() {
+    return DOMExporter.defaultBlockConverter;
+  };
+
+  this.getDefaultPropertyAnnotationConverter = function() {
+    return DOMExporter.defaultPropertyAnnotationConverter;
+  };
 
   this.getDocument = function() {
     return this.state.doc;
   };
 
-  // this.createXmlDocument = function() {
-  //   // We provide xmlns="http://www.w3.org/1999/xhtml" so we don't get the whole doc
-  //   // polluted with xmlns attributes
-  //   // See: http://stackoverflow.com/questions/8084175/how-do-i-prevent-jquery-from-inserting-the-xmlns-attribute-in-an-xml-object
-  //   var EMPTY_DOC = '<article xmlns="http://www.w3.org/1999/xhtml"></article>';
-  //   if (inBrowser) {
-  //     var parser = new window.DOMParser();
-  //     var doc = parser.parseFromString(EMPTY_DOC, "text/xml");
-  //     return $(doc);
-  //   } else {
-  //     // creating document using cheerio
-  //     var $root = $.load(EMPTY_DOC).root();
-  //     return $root;
-  //   }
-  // };
-
 };
 
 oo.initClass(DOMExporter);
+
+DOMExporter.defaultBlockConverter = {
+  export: function(node, el, converter) {
+    el.attr('data-type', node.type);
+    var properties = node.toJSON();
+    each(properties, function(value, name) {
+      if (name === 'id' || name === 'type') {
+        return;
+      }
+      var prop = $$('div').attr('property', name);
+      if (node.getPropertyType() === 'string') {
+        prop.append(converter.annotatedText([node.id, name]));
+      } else {
+        prop.text(value);
+      }
+      el.append(prop);
+    });
+  }
+};
+
+DOMExporter.defaultPropertyAnnotationConverter = {
+  export: function(node, el) {
+    el.tagName = 'span';
+    el.attr('data-type', node.type);
+    var properties = node.toJSON();
+    each(properties, function(value, name) {
+      if (name === 'id' || name === 'type') {
+        return;
+      }
+      if (isString(value) || isNumber(value) || isBoolean(value)) {
+        el.attr('data-'+name, value);
+      }
+    });
+  }
+};
+
 
 module.exports = DOMExporter;
