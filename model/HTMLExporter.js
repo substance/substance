@@ -1,4 +1,5 @@
-var oo = require('../util/oo');
+'use strict';
+
 var DOMExporter = require('./DOMExporter');
 
 function HTMLExporter() {
@@ -7,6 +8,6 @@ function HTMLExporter() {
 
 HTMLExporter.Prototype = function() {};
 
-oo.inherit(HTMLExporter, DOMExporter);
+DOMExporter.extend(HTMLExporter);
 
 module.exports = HTMLExporter;

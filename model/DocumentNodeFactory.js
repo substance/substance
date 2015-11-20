@@ -1,6 +1,5 @@
 'use strict';
 
-var oo = require('../util/oo');
 var NodeRegistry = require('./data/NodeRegistry');
 
 function DocumentNodeFactory(doc) {
@@ -25,6 +24,6 @@ DocumentNodeFactory.Prototype = function() {
 
 };
 
-oo.inherit(DocumentNodeFactory, NodeRegistry);
+NodeRegistry.extend(DocumentNodeFactory);
 
 module.exports = DocumentNodeFactory;

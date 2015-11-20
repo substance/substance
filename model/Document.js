@@ -1,7 +1,6 @@
 'use strict';
 
-var _ = require('../util/helpers');
-var oo = require('../util/oo');
+var each = require('lodash/collection/each');
 var AbstractDocument = require('./AbstractDocument');
 var NodeIndex = require('./data/NodeIndex');
 var AnnotationIndex = require('./AnnotationIndex');
@@ -120,7 +119,7 @@ Document.Prototype = function() {
   this.clear = function() {
     var self = this;
     this.transaction(function(tx) {
-      _.each(self.data.nodes, function(node) {
+      each(self.data.nodes, function(node) {
         tx.delete(node.id);
       });
     });
@@ -312,7 +311,7 @@ Document.Prototype = function() {
     var oldHighlights = this._highlights;
 
     if (oldHighlights) {
-      _.each(oldHighlights, function(nodeId) {
+      each(oldHighlights, function(nodeId) {
         var node = this.get(nodeId);
         // Node could in the meanwhile have been deleted
         if (node) {
@@ -321,7 +320,7 @@ Document.Prototype = function() {
       }, this);
     }
 
-    _.each(highlights, function(nodeId) {
+    each(highlights, function(nodeId) {
       var node = this.get(nodeId);
       node.setHighlighted(true);
     }, this);
@@ -353,7 +352,7 @@ Document.Prototype = function() {
       // stage (i.e. transaction clone) to keep it updated on the fly
       this.stage.apply(documentChange);
     }
-    _.each(documentChange.ops, function(op) {
+    each(documentChange.ops, function(op) {
       this.data.apply(op);
       this.emit('operation:applied', op);
     }, this);
@@ -365,12 +364,12 @@ Document.Prototype = function() {
   };
 
   this.updateEventProxies = function(documentChange, info) {
-    _.each(this.eventProxies, function(proxy) {
+    each(this.eventProxies, function(proxy) {
       proxy.onDocumentChanged(documentChange, info, this);
     }, this);
   };
 };
 
-oo.inherit(Document, AbstractDocument);
+AbstractDocument.extend(Document);
 
 module.exports = Document;

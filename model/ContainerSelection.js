@@ -1,7 +1,8 @@
 'use strict';
 
-var oo = require('../util/oo');
-var _ = require('../util/helpers');
+var isNumber = require('lodash/lang/isNumber');
+var isEqual = require('lodash/lang/isEqual');
+var map = require('lodash/collection/map');
 var PropertySelection = require('./PropertySelection');
 var Selection = require('./Selection');
 var Range = require('./Range');
@@ -32,7 +33,7 @@ function ContainerSelection(properties) {
     @type {Number}
   */
   var endOffset = properties.endOffset || properties.startOffset;
-  if (!containerId || !startPath || !_.isNumber(startOffset)) {
+  if (!containerId || !startPath || !isNumber(startOffset)) {
     throw new Error('Invalid arguments: `containerId`, `startPath` and `startOffset` are mandatory');
   }
 
@@ -267,7 +268,7 @@ ContainerSelection.Prototype = function() {
   this.getFragments = function() {
     // TODO: document what this is exactly used for
     var sels = this.splitIntoPropertySelections();
-    var fragments = _.map(sels, function(sel) {
+    var fragments = map(sels, function(sel) {
       return new Selection.Fragment('selection-fragment', sel.path,
         sel.startOffset, sel.endOffset);
     });
@@ -316,7 +317,7 @@ ContainerSelection.Prototype = function() {
   };
 
   var _isEqual = function(c1, c2) {
-    return (_.isEqual(c1.address, c2.address) && c1.offset === c2.offset);
+    return (isEqual(c1.address, c2.address) && c1.offset === c2.offset);
   };
 
   var _createNewSelection = function(containerSel, newCoors) {
@@ -343,7 +344,7 @@ ContainerSelection.Prototype = function() {
   };
 };
 
-oo.inherit(ContainerSelection, PropertySelection);
+PropertySelection.extend(ContainerSelection);
 
 Object.defineProperties(ContainerSelection.prototype, {
   path: {

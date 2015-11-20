@@ -1,6 +1,6 @@
 'use strict';
 
-var _ = require('../../util/helpers');
+var each = require('lodash/collection/each');
 var helpers = require('../documentHelpers');
 var createAnnotation = require('./createAnnotation');
 
@@ -25,11 +25,11 @@ function fuseAnnotation(tx, args) {
 
   var annos = helpers.getAnnotationsForSelection(tx, sel, args.annotationType, args.containerId);
 
-  _.each(annos, function(anno) {
+  each(annos, function(anno) {
     sel = sel.expand(anno.getSelection());
   });
 
-  _.each(annos, function(anno) {
+  each(annos, function(anno) {
     tx.delete(anno.id);
   });
 

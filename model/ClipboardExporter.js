@@ -1,6 +1,5 @@
 "use strict";
 
-var oo = require('../util/oo');
 var HtmlExporter = require('./HTMLExporter');
 var converters = require('./ClipboardImporter').converters;
 
@@ -16,6 +15,6 @@ ClipboardExporter.Prototype = function() {
 
 };
 
-oo.inherit(ClipboardExporter, HtmlExporter);
+HtmlExporter.extend(ClipboardExporter);
 
 module.exports = ClipboardExporter;

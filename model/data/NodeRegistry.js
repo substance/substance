@@ -1,6 +1,5 @@
 'use strict';
 
-var oo = require('../../util/oo');
 var Registry = require('../../util/Registry');
 var Node = require('./Node');
 
@@ -37,6 +36,6 @@ NodeRegistry.Prototype = function() {
 
 };
 
-oo.inherit(NodeRegistry, Registry);
+Registry.extend(NodeRegistry);
 
 module.exports = NodeRegistry;

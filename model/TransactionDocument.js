@@ -1,7 +1,9 @@
 'use strict';
 
-var _ = require('../util/helpers');
-var oo = require('../util/oo');
+var clone = require('lodash/lang/clone');
+var isFunction = require('lodash/lang/isFunction');
+var extend = require('lodash/object/extend');
+var each = require('lodash/collection/each');
 var AbstractDocument = require('./AbstractDocument');
 var DocumentChange = require('./DocumentChange');
 
@@ -36,7 +38,7 @@ function TransactionDocument(document) {
   // when calling undo
   this.before = {};
   // HACK: copying all indexes
-  _.each(document.data.indexes, function(index, name) {
+  each(document.data.indexes, function(index, name) {
     this.data.addIndex(name, index.clone());
   }, this);
 
@@ -116,7 +118,7 @@ TransactionDocument.Prototype = function() {
   };
 
   this.apply = function(documentChange) {
-    _.each(documentChange.ops, function(op) {
+    each(documentChange.ops, function(op) {
       this.data.apply(op);
     }, this);
   };
@@ -146,14 +148,14 @@ TransactionDocument.Prototype = function() {
       eventData = eventData || {};
     }
 
-    if (!_.isFunction(transformation)) {
+    if (!isFunction(transformation)) {
       throw new Error('Document.transaction() requires a transformation function.');
     }
 
     // var time = Date.now();
     // HACK: ATM we can't deep clone as we do not have a deserialization
     // for selections.
-    this._startTransaction(_.clone(beforeState));
+    this._startTransaction(clone(beforeState));
     // console.log('Starting the transaction took', Date.now() - time);
     try {
       // time = Date.now();
@@ -200,7 +202,7 @@ TransactionDocument.Prototype = function() {
     }
     var doc = this.document;
     var beforeState = this.before;
-    afterState = _.extend({}, beforeState, afterState);
+    afterState = extend({}, beforeState, afterState);
     var ops = this.ops;
     var change;
     if (ops.length > 0) {
@@ -237,6 +239,6 @@ TransactionDocument.Prototype = function() {
 
 };
 
-oo.inherit(TransactionDocument, AbstractDocument);
+AbstractDocument.extend(TransactionDocument);
 
 module.exports = TransactionDocument;

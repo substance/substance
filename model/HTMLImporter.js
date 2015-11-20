@@ -1,4 +1,5 @@
-var oo = require('../util/oo');
+'use strict';
+
 var DOMImporter = require('./DOMImporter');
 var DefaultDOMElement = require('../ui/DefaultDOMElement');
 
@@ -46,6 +47,6 @@ HTMLImporter.Prototype = function() {
 
 };
 
-oo.inherit(HTMLImporter, DOMImporter);
+DOMImporter.extend(HTMLImporter);
 
 module.exports = HTMLImporter;

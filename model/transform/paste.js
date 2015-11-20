@@ -1,6 +1,7 @@
 'use strict';
 
-var _ = require('../../util/helpers');
+var last = require('lodash/array/last');
+var each = require('lodash/collection/each');
 var uuid = require('../../util/uuid');
 var annotationHelpers = require('../annotationHelpers');
 var deleteSelection = require('./deleteSelection');
@@ -57,7 +58,7 @@ var _pasteAnnotatedText = function(tx, args) {
     startOffset: selection.start.offset+text.length
   });
   // copy annotations
-  _.each(annotations, function(anno) {
+  each(annotations, function(anno) {
     var data = anno.toJSON();
     data.path = path.slice(0);
     data.startOffset += offset;
@@ -129,7 +130,7 @@ var _pasteDocument = function(tx, args) {
   if (insertedNodes.length === 0) return args;
 
   // set a new selection
-  var lastPath = container.getLastPath(_.last(insertedNodes));
+  var lastPath = container.getLastPath(last(insertedNodes));
   var lastLength = tx.get(lastPath).length;
   // This version turned out to be useful in some situations
   // as it hightlights the pasted content

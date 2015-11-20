@@ -1,6 +1,6 @@
 'use strict';
 
-var _ = require('../../util/helpers');
+var each = require('lodash/collection/each');
 
 /*
  * Delete a node and all annotations attached to it,
@@ -56,7 +56,7 @@ function deleteNode(tx, args) {
       }
     }
   }
-  _.each(tx.getIndex('type').get('container'), function(container) {
+  each(tx.getIndex('type').get('container'), function(container) {
     // remove from view first
     container.hide(nodeId);
   });

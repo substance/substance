@@ -1,7 +1,9 @@
 'use strict';
 
-var _ = require('../util/helpers');
-var oo = require('../util/oo');
+var isString = require('lodash/lang/isString');
+var each = require('lodash/collection/each');
+var map = require('lodash/collection/map');
+var filter = require('lodash/collection/filter');
 var PathAdapter = require('../util/PathAdapter');
 var PropertyAnnotation = require('./PropertyAnnotation');
 var NodeIndex = require('./data/NodeIndex');
@@ -25,7 +27,7 @@ var AnnotationIndex = function() {
   this.byType = new PathAdapter();
 };
 
-AnnotationIndex.Prototype = function() {
+NodeIndex.extend(AnnotationIndex, function() {
 
   this.property = "path";
 
@@ -42,27 +44,27 @@ AnnotationIndex.Prototype = function() {
   // TODO: use object interface? so we can combine filters (path and type)
   this.get = function(path, start, end, type) {
     var annotations = this.byPath.get(path) || {};
-    if (_.isString(path) || path.length === 1) {
+    if (isString(path) || path.length === 1) {
       // flatten annotations if this is called via node id
       var _annos = annotations;
       annotations = [];
-      _.each(_annos, function(level) {
-        annotations = annotations.concat(_.map(level, function(anno) {
+      each(_annos, function(level) {
+        annotations = annotations.concat(map(level, function(anno) {
           return anno;
         }));
       });
     } else {
-      annotations = _.map(annotations, function(anno) {
+      annotations = map(annotations, function(anno) {
         return anno;
       });
     }
     /* jshint eqnull:true */
     // null check for null or undefined
     if (start != null) {
-      annotations = _.filter(annotations, AnnotationIndex.filterByRange(start, end));
+      annotations = filter(annotations, AnnotationIndex.filterByRange(start, end));
     }
     if (type) {
-      annotations = _.filter(annotations, AnnotationIndex.filterByType(type));
+      annotations = filter(annotations, AnnotationIndex.filterByType(type));
     }
     return annotations;
   };
@@ -84,9 +86,7 @@ AnnotationIndex.Prototype = function() {
     }
   };
 
-};
-
-oo.inherit(AnnotationIndex, NodeIndex);
+});
 
 AnnotationIndex.filterByRange = function(start, end) {
   return function(anno) {

@@ -1,6 +1,5 @@
 'use strict';
 
-var oo = require('../util/oo');
 var each = require('lodash/collection/each');
 var EventEmitter = require('../util/EventEmitter');
 var IncrementalData = require('./data/IncrementalData');
@@ -36,7 +35,7 @@ function AbstractDocument(schema) {
   });
 }
 
-AbstractDocument.Prototype = function() {
+EventEmitter.extend(AbstractDocument, function AbstractDocumentPrototype() {
 
   this.isTransaction = function() {
     return false;
@@ -254,8 +253,6 @@ AbstractDocument.Prototype = function() {
     var op = this.data.set(path, value);
     return op;
   };
-};
-
-oo.inherit(AbstractDocument, EventEmitter);
+});
 
 module.exports = AbstractDocument;

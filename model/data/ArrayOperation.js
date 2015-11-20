@@ -4,7 +4,6 @@ var isNumber = require('lodash/lang/isNumber');
 var isEqual = require('lodash/lang/isEqual');
 var cloneDeep = require('lodash/lang/cloneDeep');
 
-var oo = require('../../util/oo');
 var Operation = require('./Operation');
 var Conflict = require('./Conflict');
 
@@ -125,7 +124,7 @@ ArrayOperation.Prototype = function() {
   };
 };
 
-oo.inherit(ArrayOperation, Operation);
+Operation.extend(ArrayOperation);
 
 var hasConflict = function(a, b) {
   if (a.type === NOP || b.type === NOP) return false;

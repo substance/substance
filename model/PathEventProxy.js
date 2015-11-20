@@ -1,7 +1,7 @@
 'use strict';
 
-var _ = require('../util/helpers');
 var oo = require('../util/oo');
+var each = require('lodash/collection/each');
 var PathAdapter = require('../util/PathAdapter');
 
 var NotifyByPathProxy = function(doc) {
@@ -31,7 +31,7 @@ NotifyByPathProxy.Prototype = function() {
       }
     }
 
-    _.each(change.ops, function(op) {
+    each(change.ops, function(op) {
       if ( (op.type === "create" || op.type === "delete") && (op.val.path || op.val.startPath)) {
         if (op.val.path) {
           _updated(op.val.path, op);
@@ -57,7 +57,7 @@ NotifyByPathProxy.Prototype = function() {
     change.traverse(function(path) {
       var key = path.concat(['listeners']);
       var scopedListeners = listeners.get(key);
-      _.each(scopedListeners, function(entry) {
+      each(scopedListeners, function(entry) {
         entry.method.call(entry.listener, change, info, doc);
       });
     }, this);

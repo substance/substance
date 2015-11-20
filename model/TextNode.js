@@ -1,6 +1,5 @@
 'use strict';
 
-var oo = require('../util/oo');
 var DocumentNode = require('./DocumentNode');
 
 /**
@@ -26,7 +25,7 @@ TextNode.Prototype = function() {
   };
 };
 
-oo.inherit(TextNode, DocumentNode);
+DocumentNode.extend(TextNode);
 
 TextNode.static.name = "text";
 
