@@ -1,7 +1,6 @@
 'use strict';
 
 require('../qunit_extensions');
-
 var TestHTMLExporter = require('../../model/TestHTMLExporter');
 var TestArticle = require('../../model/TestArticle');
 var simpleDoc = require('../../fixtures/simple');

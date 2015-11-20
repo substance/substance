@@ -1,6 +1,6 @@
 "use strict";
-require('../../qunit_extensions');
 
+require('../../qunit_extensions');
 var sample1 = require('../../../fixtures/sample1');
 var containerSample = require('../../../fixtures/container_anno_sample');
 var deleteSelection = require('../../../../model/transform/deleteSelection');

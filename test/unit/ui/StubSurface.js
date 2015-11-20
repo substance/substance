@@ -1,6 +1,6 @@
 'use strict';
-require('../qunit_extensions');
 
+require('../qunit_extensions');
 var Surface = require('../../../ui/Surface');
 
 function StubSurface(doc, sel, containerId) {
@@ -35,7 +35,7 @@ function StubSurface(doc, sel, containerId) {
 
   this.emit = function() {};
 
-  this.rerenderDomSelection = function() {}
+  this.rerenderDomSelection = function() {};
 
   this.transaction = Surface.prototype.transaction;
 }

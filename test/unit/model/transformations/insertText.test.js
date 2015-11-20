@@ -1,6 +1,6 @@
 "use strict";
-require('../../qunit_extensions');
 
+require('../../qunit_extensions');
 var sample1 = require('../../../fixtures/sample1');
 var insertText = require('../../../../model/transform/insertText');
 

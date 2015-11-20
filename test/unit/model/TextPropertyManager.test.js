@@ -1,6 +1,6 @@
 "use strict";
-require('../qunit_extensions');
 
+require('../qunit_extensions');
 var TextPropertyManager = require('../../../model/TextPropertyManager');
 var sample = require('../../fixtures/container_anno_sample');
 

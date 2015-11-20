@@ -1,6 +1,6 @@
 'use strict';
-require('../qunit_extensions');
 
+require('../qunit_extensions');
 var cloneDeep = require('lodash/lang/cloneDeep');
 var sample = require('../../fixtures/container_sample');
 var sample1 = require('../../fixtures/sample1');

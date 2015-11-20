@@ -1,6 +1,6 @@
 "use strict";
-require('../qunit_extensions');
 
+require('../qunit_extensions');
 var oo = require('../../../util/oo');
 
 QUnit.module('util/oo');

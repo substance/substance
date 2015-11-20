@@ -1,9 +1,7 @@
 'use strict';
 
 require('../../qunit_extensions');
-
 var sample1 = require('../../../fixtures/sample1');
-
 var createAnnotation = require('../../../../model/transform/createAnnotation');
 var docHelpers = require('../../../../model/documentHelpers');
 

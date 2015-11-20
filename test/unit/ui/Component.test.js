@@ -1,11 +1,12 @@
 "use strict";
+
 require('../qunit_extensions');
 
-var _ = require('../../../util/helpers');
+var cloneDeep = require('lodash/lang/cloneDeep');
+var isEqual = require('lodash/lang/isEqual');
 var Component = require('../../../ui/Component');
 var $$ = Component.$$;
 var $ = require('../../../util/jquery');
-var inBrowser = (typeof window !== 'undefined');
 
 QUnit.uiModule('ui/Component');
 
@@ -180,7 +181,7 @@ QUnit.test("Preserve a child with ref", function(assert) {
   var child = comp.refs.foo;
   var el = child.el;
   // rerender using the same virtual dom
-  comp._render(_.deepclone(virtualDom));
+  comp._render(cloneDeep(virtualDom));
   assert.ok(comp.refs.foo === child, 'Child component should have been preserved.');
   assert.ok(comp.refs.foo.el === el, 'Child element should have been preserved.');
 });
@@ -191,7 +192,7 @@ QUnit.test("Wipe a child without ref", function(assert) {
   var child = comp.children[0];
   var el = child.el;
   // rerender using the same virtual dom
-  comp._render(_.deepclone(virtualDom));
+  comp._render(cloneDeep(virtualDom));
   // as we did not apply a ref, the component simply gets rerendered from scratch
   assert.ok(comp.children[0] !== child, 'Child component should have been preserved.');
   assert.ok(comp.children[0].el !== el, 'Child element should have been preserved.');
@@ -302,7 +303,7 @@ QUnit.test("Propagate properties to child components when setProps called on par
 QUnit.test("Preserve components when ref matches, and rerender when props changed", function(assert) {
   var ItemComponent = TestComponent.extend({
     shouldRerender: function(nextProps) {
-      return !_.isEqual(nextProps, this.props);
+      return !isEqual(nextProps, this.props);
     },
     render: function() {
       return $$('div').append(this.props.name);

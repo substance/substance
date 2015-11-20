@@ -1,7 +1,9 @@
 "use strict";
-require('../../qunit_extensions');
 
-var _ = require('../../../../util/helpers');
+require('../../qunit_extensions');
+var isEqual = require('lodash/lang/isEqual');
+var cloneDeep = require('lodash/lang/cloneDeep');
+
 var PathAdapter = require('../../../../util/PathAdapter');
 var ObjectOperation = require('../../../../model/data/ObjectOperation');
 var ArrayOperation = require('../../../../model/data/ArrayOperation');
@@ -11,10 +13,10 @@ QUnit.module('model/data/ObjectOperation');
 
 QUnit.assert.checkObjectOperationTransform = function(a, b, input, expected) {
   var t = ObjectOperation.transform(a, b);
-  var output = t[1].apply(a.apply(_.deepclone(input)));
-  this.push(_.isEqual(expected, output), output, expected, "(b' o a)('"+JSON.stringify(input)+"') == '" + JSON.stringify(expected) + "' with a="+a.toString()+", b'="+t[1].toString());
-  output = t[0].apply(b.apply(_.deepclone(input)));
-  this.push(_.isEqual(expected, output), output, expected, "(a' o b)('"+JSON.stringify(input)+"') == '" + JSON.stringify(expected) + "' with b="+b.toString()+", a'="+t[0].toString());
+  var output = t[1].apply(a.apply(cloneDeep(input)));
+  this.push(isEqual(expected, output), output, expected, "(b' o a)('"+JSON.stringify(input)+"') == '" + JSON.stringify(expected) + "' with a="+a.toString()+", b'="+t[1].toString());
+  output = t[0].apply(b.apply(cloneDeep(input)));
+  this.push(isEqual(expected, output), output, expected, "(a' o b)('"+JSON.stringify(input)+"') == '" + JSON.stringify(expected) + "' with b="+b.toString()+", a'="+t[0].toString());
 };
 
 QUnit.test("Creating values.", function(assert) {
