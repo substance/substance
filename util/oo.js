@@ -18,10 +18,154 @@ var bind = require('lodash/function/bind');
 var oo = {};
 
 /**
- * Initialize a class.
- *
- * @param {Constructor} clazz
- */
+  Initialize a class.
+
+  After initializing a class it has a `static` scope which should be used for static properties
+  and functions, which will be available in subclasses as well. This way we are as close as
+  possible to ES6.
+
+  Also, an initialized class has an `extend` function which can be used to derive subclasses.
+
+  @param {Constructor} clazz
+
+  @example
+
+  ```
+  function MyClass() {
+    ...
+  }
+  oo.initClass(MyClass);
+  ```
+
+  The simplest way to create a subclass is
+
+  ```
+    var Foo = MyClass.extend()
+  ```
+
+  This is the disadvantage, that the created class is anonymous, i.e., in a debugger it
+  does not have a senseful name.
+
+  The preferred way is to extend a subclass this way:
+
+  ```
+    function Foo() {
+      Foo.super.apply(this, arguments);
+    }
+    MyClass.extend(Foo);
+  ```
+
+  This correnponds to what would do in ES6 with
+
+  ```
+    class Foo extends MyClass {}
+  ```
+
+  It is also possible to derive a class and provide a prototype as an object:
+
+  ```
+    var Foo = MyClass.extend({
+      bla: function() { return "bla"; }
+    });
+  ```
+
+  Again the result is an anonymous class, without the ability to show a meaningful name in a
+  debugger.
+
+  If you want to define a prototype, the preferred way is extending an already defined class:
+
+  ```
+    function Foo() {
+      Foo.super.apply(this, arguments);
+    }
+    MyClass.extend(Foo, {
+      bla: function() { return "bla"; }
+    });
+  ```
+
+  If you prefer to write prototypes as functions you should do it this way:
+
+  ```
+    function Foo() {
+      Foo.super.apply(this, arguments);
+    }
+    MyClass.extend(Foo, function() {
+      this.bla = function() { return "bla"; };
+    });
+  ```
+
+  In that case the protoype is an anonymous class, i.e. it won't have a meaningful name in the debugger.
+
+  To overcome this you can give the prototype function a name:
+
+  ```
+    function Foo() {
+      Foo.super.apply(this, arguments);
+    }
+    MyClass.extend(Foo, function FooPrototype() {
+      this.bla = function() { return "bla"; };
+    });
+  ```
+
+  **Static variables**
+
+  Static variables can either be set directly on the `static` scope:
+
+  ```
+    var Foo = MyClass.extend();
+    Foo.static.foo = "foo"
+  ```
+
+  Or with a prototype you can provide them in a `static` object property of the prototype:
+
+  ```
+    MyClass.extend({
+      static: {
+        foo: "foo"
+      }
+    });
+    MyClass.static.foo -> "foo"
+  ```
+
+  A static scope of a class comes with a reference to its owning class. I.e.,
+
+  ```
+    MyClass.static.__class__
+  ```
+
+  Gives gives access to `MyClass`.
+
+
+  **Mix-ins**
+
+  Mixins must be plain objects. They get merged into the created prototype.
+
+  ```
+    var MyMixin = {
+      foo: "foo";
+    };
+    function Foo() {
+      Foo.super.apply(this, arguments);
+    }
+    MyClass.extend(Foo, MyMixin);
+  ```
+
+  This is also possible in combination with prototype functions.
+
+  ```
+    var MyMixin = {
+      foo: "foo";
+      bar: "bar";
+    };
+    function Foo() {
+      Foo.super.apply(this, arguments);
+    }
+    MyClass.extend(Foo, MyMixin, function() {
+      this.bar = "this wins"
+    });
+  ```
+  Mixins never override existing prototype functions, or already other mixed in members.
+*/
 oo.initClass = function(clazz) {
   _initClass(clazz);
   _makeExtensible(clazz);
