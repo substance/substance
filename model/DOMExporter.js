@@ -29,28 +29,43 @@ function DOMExporter(config) {
 
 DOMExporter.Prototype = function() {
 
-  this.initialize = function() {
-    var containerId = this.config.containerId;
-    if (!containerId) {
-      throw new Error('Container id must be specified: provide config.containerId');
-    }
-    this.state.containerId = containerId;
+  this.initialize = function(doc) {
+    this.state = {
+      doc: doc
+    };
   };
 
+  /**
+    @param {Document}
+    @returns {DOMElement|DOMElement[]} The exported document as DOM or an array of elements
+             if exported as partial, which depends on the actual implementation
+             of `this.convertDocument()`.
+  */
   this.exportDocument = function(doc) {
-    this.state.doc = doc;
-    var elements = this.convertContainer(doc, this.state.containerId);
-    var out = elements.map(function(el) {
-      return el.outerHTML;
-    });
-    return out.join('');
+    // TODO: maybe the return value of this method should be DOMElement?
+    // Sometimes it
+    this.initialize(doc);
+    return this.convertDocument();
   };
 
-  this._initState = function() {
-    // get the target containerId from config or schema
+  /*
+    @abstract
+    @example
+
+    this.convertDocument = function() {
+      var elements = this.convertContainer(this.state.containerId);
+      var out = elements.map(function(el) {
+        return el.outerHTML;
+      });
+      return out.join('');
+    };
+  */
+  this.convertDocument = function() {
+    throw new Error('This method is abstract');
   };
 
-  this.convertContainer = function(doc, containerId) {
+  this.convertContainer = function(containerId) {
+    var doc = this.state.doc;
     var elements = [];
     var container = doc.get(containerId);
     if (!container) {

@@ -55,7 +55,8 @@ QUnit.test("Exporting h2", function(assert) {
 
 QUnit.test("Exporting simple document", function(assert) {
   var doc = simpleDoc();
-  var actual = exporter.exportDocument(doc);
+  var body = exporter.exportDocument(doc);
+  var actual = body.html();
   var expected = [
     '<p data-id="p1">' + CONTENT + '</p>',
     '<p data-id="p2">' + CONTENT + '</p>',

@@ -10,6 +10,16 @@ function TestHTMLExporter() {
   });
 }
 
-HTMLExporter.extend(TestHTMLExporter);
+HTMLExporter.extend(TestHTMLExporter, function() {
+
+  this.convertDocument = function() {
+    var element = this.$$('body');
+    element.append(
+      this.convertContainer(this.state.containerId)
+    );
+    return element;
+  };
+
+});
 
 module.exports = TestHTMLExporter;

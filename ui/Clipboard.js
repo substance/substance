@@ -1,15 +1,14 @@
 "use strict";
 
 var $ = require('../util/jquery');
-var _ = require('../util/helpers');
 var oo = require('../util/oo');
+var uuid = require('../util/uuid');
+var DefaultDOMElement = require('./DefaultDOMElement');
 
 /*
- * Surface Clipboard is owned by a module:ui/FormEditor.
- *
- *
- * @class
- * @memberof module:ui
+  Surface Clipboard is owned by a module:ui/FormEditor.
+
+  @class
  */
 
 var Clipboard = function(controller, htmlImporter, htmlExporter) {
@@ -21,18 +20,18 @@ var Clipboard = function(controller, htmlImporter, htmlExporter) {
   this._contentDoc = null;
   this._contentText = "";
 
-  this._onKeyDown = _.bind(this.onKeyDown, this);
-  this._onCopy = _.bind(this.onCopy, this);
-  this._onCut = _.bind(this.onCut, this);
+  this._onKeyDown = this.onKeyDown.bind(this);
+  this._onCopy = this.onCopy.bind(this);
+  this._onCut = this.onCut.bind(this);
 
   this.isIe = (window.navigator.userAgent.toLowerCase().indexOf("msie") != -1 || window.navigator.userAgent.toLowerCase().indexOf("trident") != -1);
   this.isFF = window.navigator.userAgent.toLowerCase().indexOf('firefox') > -1;
 
   if (this.isIe) {
-    this._beforePasteShim = _.bind(this.beforePasteShim, this);
-    this._pasteShim = _.bind(this.pasteShim, this);
+    this._beforePasteShim = this.beforePasteShim.bind(this);
+    this._pasteShim = this.pasteShim.bind(this);
   } else {
-    this._onPaste = _.bind(this.onPaste, this);
+    this._onPaste = this.onPaste.bind(this);
   }
 };
 
@@ -78,13 +77,21 @@ Clipboard.Prototype = function() {
     // console.log("Clipboard.onCopy", arguments);
     this._copySelection();
     if (event.clipboardData && this._contentDoc) {
-      var html = this.htmlExporter.convert(this._contentDoc);
-      // console.log('Stored HTML in clipboard', html);
-      this._contentDoc.__id__ = _.uuid();
+      var elements = this.htmlExporter.exportDocument(this._contentDoc);
+      var html = [];
+      var text = [];
+      elements.forEach(function(el) {
+        html.push(el.outerHTML);
+        text.push(el.text());
+      });
+      html = html.join('');
+      text = text.join('');
+      console.log('Stored HTML in clipboard', html);
+      this._contentDoc.__id__ = uuid();
       var data = this._contentDoc.toJSON();
       data.__id__ = this._contentDoc.__id__;
       event.clipboardData.setData('application/substance', JSON.stringify(data));
-      event.clipboardData.setData('text/plain', $(html).text());
+      event.clipboardData.setData('text/plain', text);
       event.clipboardData.setData('text/html', html);
       event.preventDefault();
     }
@@ -139,26 +146,16 @@ Clipboard.Prototype = function() {
     // }
   };
 
-  this.pasteHtml = function(htmlDoc) {
+  this.pasteHtml = function(docElement) {
     var surface = this.getSurface();
     if (!surface) return;
     var logger = surface.getLogger();
-    var doc = surface.getDocument();
     try {
-      var content = doc.newInstance();
-      content._setForClipboard(true);
       // TODO: the clipboard importer should make sure
       // that the container exists
-      if (!content.get('clipboard_content')) {
-        content.create({
-          id: 'clipboard_content',
-          type: 'container',
-          nodes: []
-        });
-      }
-      this.htmlImporter.convert($(htmlDoc), content);
+      var content = this.htmlImporter.importDocument(docElement);
       surface.transaction(function(tx, args) {
-        args.text = htmlDoc.body.textContent;
+        args.text = docElement.find('body').text();
         args.doc = content;
         return surface.paste(tx, args);
       });
@@ -201,14 +198,14 @@ Clipboard.Prototype = function() {
     // and fallback to plain text import if it's bad
     if (types['text/html']) {
       var html = clipboardData.getData('text/html');
-      var htmlDoc = new window.DOMParser().parseFromString(html, "text/html");
-      if (this.htmlImporter.checkQuality($(htmlDoc))) {
+      var htmlDoc = DefaultDOMElement.parseHTML(html);
+      if (this.htmlImporter.checkQuality(htmlDoc)) {
         return this.pasteHtml(htmlDoc);
       }
     }
     // Fallback to plain-text in other cases
     var plainText = clipboardData.getData('text/plain');
-    
+
     if (surface.isContainerEditor()) {
       var doc = surface.getDocument();
       var defaultTextType = doc.getSchema().getDefaultTextType();
@@ -225,7 +222,7 @@ Clipboard.Prototype = function() {
         });
         for (var i = 0; i < paraText.length; i++) {
           var paragraph = pasteDoc.create({
-            id: _.uuid(defaultTextType),
+            id: uuid(defaultTextType),
             type: defaultTextType,
             content: paraText[i]
           });
