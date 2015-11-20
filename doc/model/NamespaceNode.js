@@ -31,7 +31,7 @@ NamespaceNode.Prototype = function() {
   };
 
   this.getTocName = function() {
-    return this.name;
+    return this.id;
   };
 
 };
