@@ -64,16 +64,14 @@ PropertyAnnotation.Prototype = function() {
     var text = doc.get(this.path);
     return text.substring(this.startOffset, this.endOffset);
   };
-
 };
 
 DocumentNode.extend(PropertyAnnotation);
 
+
 PropertyAnnotation.static.name = name;
-
 PropertyAnnotation.static.defineSchema(schema);
-
-PropertyAnnotation.static.isInline = true;
+PropertyAnnotation.static.isPropertyAnnotation = true;
 
 Object.defineProperties(PropertyAnnotation.prototype, {
   startPath: {

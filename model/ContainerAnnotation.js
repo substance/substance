@@ -156,6 +156,7 @@ DocumentNode.extend(ContainerAnnotation);
 ContainerAnnotation.static.name = name;
 
 ContainerAnnotation.static.defineSchema(schema);
+ContainerAnnotation.static.isContainerAnnotation = true;
 
 /**
   @class

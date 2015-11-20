@@ -3,6 +3,8 @@
 var each = require('lodash/collection/each');
 var DataNode = require('./data/Node');
 
+
+
 function DocumentNode(doc, props) {
   DataNode.call(this, props);
   if (!doc) {
@@ -99,12 +101,54 @@ DocumentNode.Prototype = function() {
     this.emit.apply(this, args);
   };
 
+  // Node categories
+  // --------------------
+
+  /**
+    Returns true if node is a block node (e.g. Paragraph, Figure, List, Table)
+  */
+  this.isBlock = function() {
+    return this.constructor.static.isBlock;
+  };
+
+  /**
+    Returns true if node is a text node (e.g. Paragraph, Codebock)
+  */
+  this.isText = function() {
+    return this.constructor.static.isText;
+  };
+
+  /**
+    Returns true if node is an annotation node (e.g. Strong)
+  */
+  this.isPropertyAnnotation = function() {
+    return this.constructor.static.isPropertyAnnotation;
+  };
+
+  /**
+    Returns true if node is an inline node (e.g. Citation)
+  */
+  this.isInline = function() {
+    return this.constructor.static.isInline;
+  };
+
+  /**
+    Returns true if node is a container annotation (e.g. multiparagraph comment)
+  */
+  this.isContainerAnnotation = function() {
+    return this.constructor.static.isContainerAnnotation;
+  };
+
 };
 
 DataNode.extend(DocumentNode);
 
-DocumentNode.static.name = "node";
+DocumentNode.static.name = 'node';
+DocumentNode.static.isBlock = false;
+DocumentNode.static.isText = false;
+DocumentNode.static.isPropertyAnnotation = false;
+DocumentNode.static.isContainerAnnotation = false;
+DocumentNode.static.isInline = false;
 
-DocumentNode.static.external = false;
 
 module.exports = DocumentNode;

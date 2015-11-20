@@ -17,6 +17,6 @@ TestNode.static.defineSchema({
   objectVal: { type: "object", default: {} },
 });
 
-TestNode.static.blockType = true;
+TestNode.static.isBlock = true;
 
 module.exports = TestNode;

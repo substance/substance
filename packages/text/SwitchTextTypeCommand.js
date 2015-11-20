@@ -4,7 +4,7 @@ var oo = require('../../util/oo');
 var SurfaceCommand = require('../../ui/SurfaceCommand');
 var _isMatch = require('lodash/lang/isMatch');
 var _find = require('lodash/collection/find');
-var TextNode = require('../../model/TextNode');
+var _clone = require('lodash/lang/clone');
 
 var SwitchTextType = function(surface) {
   SurfaceCommand.call(this, surface);
@@ -36,23 +36,16 @@ SwitchTextType.Prototype = function() {
   this.getCurrentTextType = function(node) {
     var textTypes = this.getTextTypes();
     var currentTextType;
+
     textTypes.forEach(function(textType) {
-      if (_isMatch(node.properties, textType.data)) {
+      var nodeProps = _clone(textType.data);
+      delete nodeProps.type;
+
+      if (_isMatch(node, nodeProps) && node.type === textType.data.type) {
         currentTextType = textType;
       }
     });
     return currentTextType;
-  };
-
-  // Block nodes are all nodes that are listed in a container
-  // Thus have no parent
-  this.isBlock = function(node) {
-    // TODO: this needs a better checker
-    return !node.hasParent();
-  };
-
-  this.isText = function(node) {
-    return node instanceof TextNode;
   };
 
   this.getCommandState = function() {
@@ -76,7 +69,7 @@ SwitchTextType.Prototype = function() {
       var path = sel.getPath();
       var node = doc.get(path[0]);
 
-      if (node && this.isBlock(node) && this.isText(node)) {
+      if (node.isText() && node.isBlock()) {
         newState.currentTextType = this.getCurrentTextType(node);
         if (!newState.currentTextType) {
           newState.disabled = true;

@@ -24,8 +24,6 @@ Heading.static.defineSchema({
   "level": "number"
 });
 
-Heading.static.blockType = true;
-
 Heading.static.tocType = true;
 
 module.exports = Heading;
