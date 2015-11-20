@@ -1,16 +1,10 @@
 'use strict';
 
 var AnnotationCommand = require('../../ui/AnnotationCommand');
-var oo = require('../../util/oo');
 
-function CodeCommand() {
-  AnnotationCommand.apply(this, arguments);
-}
-oo.inherit(CodeCommand, AnnotationCommand);
+var CodeCommand = AnnotationCommand.extend();
 
-CodeCommand.static = {
-  name: 'code',
-  annotationType: 'code' 
-};
+CodeCommand.static.name = 'code';
+CodeCommand.static.annotationType = 'code';
 
 module.exports = CodeCommand;

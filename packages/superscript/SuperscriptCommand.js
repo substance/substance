@@ -1,16 +1,10 @@
 'use strict';
 
 var AnnotationCommand = require('../../ui/AnnotationCommand');
-var oo = require('../../util/oo');
 
-function SuperscriptCommand() {
-  AnnotationCommand.apply(this, arguments);
-}
-oo.inherit(SuperscriptCommand, AnnotationCommand);
+var SuperscriptCommand = AnnotationCommand.extend();
 
-SuperscriptCommand.static = {
-  name: 'superscript',
-  annotationType: 'superscript' 
-};
+SuperscriptCommand.static.name = 'superscript';
+SuperscriptCommand.static.annotationType = 'superscript';
 
 module.exports = SuperscriptCommand;

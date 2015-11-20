@@ -1,16 +1,10 @@
 'use strict';
 
 var AnnotationCommand = require('../../ui/AnnotationCommand');
-var oo = require('../../util/oo');
 
-function SubscriptCommand() {
-  AnnotationCommand.apply(this, arguments);
-}
-oo.inherit(SubscriptCommand, AnnotationCommand);
+var SubscriptCommand = AnnotationCommand.extend();
 
-SubscriptCommand.static = {
-  name: 'subscript',
-  annotationType: 'subscript' 
-};
+SubscriptCommand.static.name = 'subscript';
+SubscriptCommand.static.annotationType = 'subscript';
 
 module.exports = SubscriptCommand;
