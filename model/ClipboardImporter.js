@@ -2,7 +2,6 @@
 
 var extend = require('lodash/object/extend');
 var HTMLImporter = require('./HTMLImporter');
-var DefaultDOMElement = require('../ui/DefaultDOMElement');
 
 // Note: sharing the symbol with the transformation
 var CLIPBOARD_CONTAINER_ID = require('./transform/copySelection').CLIPBOARD_CONTAINER_ID;
@@ -38,7 +37,6 @@ HTMLImporter.extend(ClipboardImporter, function() {
 
 
   this.importDocument = function(documentEl) {
-    debugger;
     this.reset();
     this.convertDocument(documentEl);
     var doc = this.generateDocument();
@@ -90,8 +88,8 @@ HTMLImporter.extend(ClipboardImporter, function() {
   this.createDocument = function() {
     var doc = this._createDocument();
     doc._setForClipboard(true);
-    if (!content.get(CLIPBOARD_CONTAINER_ID)) {
-      content.create({
+    if (!doc.get(CLIPBOARD_CONTAINER_ID)) {
+      doc.create({
         type: 'container',
         id: CLIPBOARD_CONTAINER_ID,
         nodes: []
