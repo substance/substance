@@ -63,13 +63,6 @@ oo.mixin = function(Clazz, mixin) {
   if (!Clazz.__is_initialized__) {
     oo.initClass(Clazz);
   }
-  if (isFunction(mixin)) {
-    if (mixin.length !== 0) {
-      throw new Error('Mixins must have a no-arg constructor.');
-    }
-    var Mixin = mixin;
-    mixin = new Mixin();
-  }
   _mixin(Clazz, mixin);
 };
 
@@ -170,14 +163,8 @@ function _extendClass(ParentClass) {
   // the last argument may be a prototype constructor function.
   for (; idx < args.length; idx++) {
     if (isFunction(args[idx])) {
-      // mixins can also be defined as
       if (idx !== args.length-1) {
-        var Mixin = args[idx];
-        if (Mixin.length !== 0) {
-          throw new Error('Mixins must have a no-arg constructor.');
-        }
-        mixins.push(new Mixin());
-        continue;
+        throw new Error('Illegal use of Class.extend(): Prototype function must be last argument.');
       }
       if (ChildClass.hasOwnProperty('Prototype')) {
         throw new Error('Class ' + ChildClass.name + ' has defined ' + ChildClass.name +
@@ -185,9 +172,6 @@ function _extendClass(ParentClass) {
          'You provided a prototype function when calling Class.extend().');
       } else {
         ChildClass.Prototype = args[idx];
-      }
-      if (idx < args.length-1) {
-        throw new Error('Illegal use of Class.extend(): Prototype function must be last argument.');
       }
       break;
     } else if (isObject(args[idx])) {
