@@ -11,12 +11,16 @@ var __id__ = 0;
 
 /**
   A {@link model/Document} instance that is used during transaction.
-
+  
   During editing a TransactionDocument is kept up-to-date with the real one.
   Whenever a transaction is started on the document, a TransactionDocument is used to
   record changes, which are applied en-bloc when the transaction is saved.
 
+  @class
+  @extends model/AbstractDocument
   @example
+
+  @param {model/Document} document a document instance
 
   To start a transaction run
 
@@ -25,7 +29,6 @@ var __id__ = 0;
     // use tx to record changes
   });
   ```
-
 */
 function TransactionDocument(document) {
   AbstractDocument.call(this, document.schema);

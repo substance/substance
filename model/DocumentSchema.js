@@ -30,7 +30,7 @@ var ContainerAnnotation = require('./ContainerAnnotation');
 
   var schema = new Document.Schema('my-article', '1.0.0');
   schema.getDefaultTextType = function() {
-    return "paragraph";
+    return 'paragraph';
   };
   schema.addNodes([Paragraph, Emphasis, Strong, Comment]);
   ```
