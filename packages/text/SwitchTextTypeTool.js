@@ -45,7 +45,7 @@ SwitchTextType.Prototype = function() {
   // ----------------
 
   this.render = function() {
-    var textTypeName = '-';
+    var textTypeName = 'No selection';
 
     if (this.state.currentTextType) {
       textTypeName = this.state.currentTextType.name;

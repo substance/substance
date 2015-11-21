@@ -40,6 +40,9 @@ function Controller() {
   this._initializeCommandRegistry(config.controller.commands);
   this.clipboard = new Clipboard(this, this.props.doc.getClipboardImporter(), this.props.doc.getClipboardExporter());
 
+  if (config.i18n) {
+    I18n.instance.load(config.i18n);
+  }
   /**
    * Manages tools.
    *
