@@ -2,11 +2,13 @@
 
 var AnnotationTool = require('../../ui/AnnotationTool');
 
-var EmphasisTool = AnnotationTool.extend({
-  static: {
-    name: 'emphasis',
-    command: 'emphasis'
-  }
-});
+function EmphasisTool() {
+  EmphasisTool.super.apply(this, arguments);
+}
+
+AnnotationTool.extend(EmphasisTool);
+
+EmphasisTool.static.name = 'emphasis';
+EmphasisTool.static.command = 'emphasis';
 
 module.exports = EmphasisTool;
