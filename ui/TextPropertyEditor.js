@@ -15,8 +15,13 @@ var $$ = Component.$$;
   instantiated inside a {@link ui/Controller} context.
   
   @class
+  @component
   @extends ui/Surface
   
+  @prop {String} name unique editor name
+  @prop {String[]} path to a text property
+  @prop {ui/SurfaceCommand[]} commands array of command classes to be available
+
   @example
   
   Create a `TextPropertyEditor` for the `name` property of an author object. Allow emphasis annotations.
@@ -29,6 +34,7 @@ var $$ = Component.$$;
   })
   ```
 */
+
 function TextPropertyEditor() {
   Surface.apply(this, arguments);
   var doc = this.getDocument();
@@ -63,7 +69,9 @@ TextPropertyEditor.Prototype = function() {
 
   /* Editing behavior */
 
-  // Selects the current property.
+  /**
+    Selects all text
+  */
   this.selectAll = function() {
     var doc = this.getDocument();
     var sel = this.getSelection();
@@ -80,33 +88,47 @@ TextPropertyEditor.Prototype = function() {
     }
   };
 
+  /**
+    Performs an {@link model/transform/insertText} transformation
+  */
   this.insertText = function(tx, args) {
     if (args.selection.isPropertySelection() || args.selection.isContainerSelection()) {
       return insertText(tx, args);
     }
   };
 
-  // implements backspace and delete
+  /**
+    Performs a {@link model/transform/deleteSelection} transformation
+  */
   this.delete = function(tx, args) {
     return deleteSelection(tx, args);
   };
 
-  // no breaking
+  // No breaking here, inserts softbreak instead
   this.break = function(tx, args) {
     return this.softBreak(tx, args);
   };
 
+  /**
+    Inserts a soft break
+  */
   this.softBreak = function(tx, args) {
     args.text = "\n";
     return this.insertText(tx, args);
   };
 
-  // create a document instance containing only the selected content
+  /**
+    Copy the current selection. Performs a {@link model/transform/copySelection}
+    transformation.
+  */
   this.copy = function(doc, selection) {
     var result = copySelection(doc, { selection: selection });
     return result.doc;
   };
 
+  /**
+    Performs a {@link model/transform/paste} transformation
+  */
   this.paste = function(tx, args) {
     // TODO: for now only plain text is inserted
     // We could do some stitching however, preserving the annotations

@@ -135,7 +135,7 @@ ContainerEditor.Prototype = function() {
   };
 
   /**
-    Performs a `deleteSelection` transformation
+    Performs a {@link model/transform/deleteSelection} transformation
   */
   this.delete = function(tx, args) {
     this._prepareArgs(args);
