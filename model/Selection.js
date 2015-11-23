@@ -98,17 +98,36 @@ Selection.Prototype = function() {
 
 oo.initClass(Selection);
 
-var NullSelection = function() {};
+/**
+  Class to represent null selections.
+  
+  @class
+*/
 
-NullSelection.Prototype = function() {
+Selection.NullSelection = function() {};
+
+Selection.NullSelection.Prototype = function() {
   this.isNull = function() {
     return true;
   };
 };
 
-Selection.extend(NullSelection);
+Selection.extend(Selection.NullSelection);
 
-Selection.nullSelection = Object.freeze(new NullSelection());
+/**
+  We use a singleton to represent NullSelections.
+  @type {model/Selection.NullSelection}
+*/
+
+Selection.nullSelection = Object.freeze(new Selection.NullSelection());
+
+
+/**
+  A selection fragment. Used when we need to break down a {@link model/ContainerAnnotation}
+  into their fragments, each corresponding to a property selection.
+  
+  @class Selection.Fragment
+*/
 
 Selection.Fragment = function(type, path, startOffset, endOffset) {
   EventEmitter.call(this);

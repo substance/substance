@@ -17,7 +17,7 @@ var ICONS_FOR_TYPE = {
 
   @class
   @component
-
+  
   @prop {model/Document} doc The document instance
 
   @state {String} message The message displayed in the status bar.

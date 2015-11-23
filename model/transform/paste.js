@@ -11,6 +11,14 @@ var CLIPBOARD_CONTAINER_ID = require('./copySelection').CLIPBOARD_CONTAINER_ID;
 
 /* jshint latedef: false */
 
+/**
+  Pastes clipboard content at the current selection
+
+  @param {Object} args object with `selection` and `doc` for Substance content or 
+  `text` for external HTML content
+  @return {Object} with updated `selection`
+*/
+
 var paste = function(tx, args) {
   if (args.selection.isNull()) {
     console.error("Can not paste, without selection.");
@@ -20,6 +28,7 @@ var paste = function(tx, args) {
   if (args.text && !args.doc) {
     return insertText(tx, args);
   }
+
   var pasteDoc = args.doc;
   if (!args.selection.isCollapsed()) {
     var tmp = deleteSelection(tx, args);
