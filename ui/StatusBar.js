@@ -11,7 +11,7 @@ var ICONS_FOR_TYPE = {
   "success": "fa-check-circle",
 };
 
-/**
+/*
   A simple StatusBar implementation that displays a document's title and 
   renders messages.
 
