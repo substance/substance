@@ -1,16 +1,25 @@
 'use strict';
 
-var oo = require('../util/oo');
 var Tool = require('./Tool');
 
-/*
- * Abstract class for tools tools that interact with a document. E.g. UndoTool or RedoTool.
- *
- * Requires a Controller context.
- *
- * @class
- * @extends module:ui/tools.Tool
- * @memberof module:ui/tools
+/**
+  Abstract class for tools tools that interact with a document. E.g. UndoTool or
+  RedoTool. Needs to be instantiated inside a {@link ui/Controller} context.
+  
+  @class
+  @extends ui/Tool
+  
+  @example
+
+  ```js
+  var ControllerTool = require('substance/ui/ControllerTool');
+  function SaveTool() {
+    SaveTool.super.apply(this, arguments);
+  }
+  ControllerTool.extend(SaveTool);
+  SaveTool.static.name = 'save';
+  SaveTool.static.command = 'save';
+  ```
  */
 
 function ControllerTool() {
@@ -21,23 +30,22 @@ function ControllerTool() {
 ControllerTool.Prototype = function() {
 
   /*
-   * Get document instance
-   *
-   * @method getDocument
-   * @return {module:document.Document} The document instance owned by the controller
-   * @memberof module:ui/tools.ControllerTool.prototype
-   */
+    Get document instance
+    
+    @return {model/Document} The document instance owned by the controller
+  */
   this.getDocument = function() {
     return this.context.controller.getDocument();
   };
 
+  /**
+    Executes the associated command
+  */
   this.performAction = function() {
     var ctrl = this.getController();
     ctrl.executeCommand(this.constructor.static.command);
   };
-
 };
 
-oo.inherit(ControllerTool, Tool);
-
+Tool.extend(ControllerTool);
 module.exports = ControllerTool;

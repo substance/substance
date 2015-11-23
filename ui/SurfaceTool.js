@@ -4,22 +4,35 @@ var oo = require('../util/oo');
 var Tool = require('./Tool');
 
 /**
- * 
- * Abstract class for tools that interact with the selection of active surface.
- * A surfaceManager context must be provided via dependency injection.
- * 
- * @class
- * @component
- * @abstract
- * @extends ui/Tool
- */
+  Abstract class for tools that interact with the selection of active surface.
+  Needs to be instantiated inside a {@link ui/Controller} context.
+  
+  @class
+  @component
+  @abstract
+  @extends ui/Tool
 
+  @example
+  
+  ```js
+  var SurfaceTool = require('substance/ui/SurfaceTool');
+  function InsertImageTool() {
+    InsertImageTool.super.apply(this, arguments);
+  }
+  SurfaceTool.extend(InsertImageTool);
+  InsertImageTool.static.name = 'insertImage';
+  InsertImageTool.static.command = 'insertImage';
+  ```
+*/
 function SurfaceTool() {
   Tool.apply(this, arguments);
 }
 
 SurfaceTool.Prototype = function() {
 
+  /**
+    Get command associated with the tool, based on the focused surface
+  */
   this.getCommand = function() {
     var ctrl = this.getController();
     var surface = ctrl.getFocusedSurface();
@@ -34,45 +47,39 @@ SurfaceTool.Prototype = function() {
   };
 
   /**
-   * Unbinds event handler before getting unmounted.
-   *
-   * Custom tool implementation must do a super call.
-   */
-
+    Unbinds event handler before getting unmounted.
+    
+    Custom tool implementation must do a super call.
+  */
   this.dispose = function() {
     var ctrl = this.getController();
     ctrl.disconnect(this);
   };
 
   /**
-   * Return the currently focused surface
-   *
-   * @return {Surface}
-   * @public
-   */
-
+    Return the currently focused surface
+    
+    @return {ui/Surface}
+  */
   this.getSurface = function() {
     return this.getController().getFocusedSurface();
   };
 
   /**
-   * Return the document associated with the focused surface.
-   *
-   * @return {Document}
-   * @public
-   */
-
+    Return the document associated with the focused surface.
+    
+    @return {model/Document}
+  */
   this.getDocument = function() {
     return this.getController().getDocument();
   };
 
   /**
-   * Return the currently active container
-   *
-   * @return {Document.Container}
-   * @public
-   */
-
+    Return the currently active container
+    
+    @return {Document.Container}
+    @public
+  */
   this.getContainer = function() {
     var surface = this.getSurface();
     if (surface) {
@@ -80,11 +87,13 @@ SurfaceTool.Prototype = function() {
     }
   };
 
+  /**
+    Executes the associated command
+  */
   this.performAction = function() {
     var surface = this.getSurface();
     surface.executeCommand(this.constructor.static.command);
   };
-
 };
 
 oo.inherit(SurfaceTool, Tool);
