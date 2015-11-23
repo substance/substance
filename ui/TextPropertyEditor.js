@@ -19,7 +19,7 @@ var $$ = Component.$$;
   @extends ui/Surface
   
   @prop {String} name unique editor name
-  @prop {String[]} path to a text property
+  @prop {String[]} path path to a text property
   @prop {ui/SurfaceCommand[]} commands array of command classes to be available
 
   @example
