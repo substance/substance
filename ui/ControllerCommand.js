@@ -1,33 +1,31 @@
 'use strict';
 
-var oo = require('../util/oo');
 var Command = require('./Command');
 
 /**
-  A class for commands intended to be executed on the {@link module:ui.Controller}
+  A class for commands intended to be executed on the {@link ui/Controller}
   level. See the example below to learn how to define a custom `ControllerCommand`.
 
   @class
+  @abstract
   @extends ui/Command
-
-  @constructor
-  @param {ui/Controller} controller The controller the command will operate on
 
   @example
 
   ```js
-  var ControllerCommand = require('substance/ui/commands').ControllerCommand;
-  var Save = Command.extend({
-    static: {
-      name: 'save'
-    },
-
-    execute: function() {
+  var ControllerCommand = require('substance/ui/ControllerCommand');
+  function SaveCommand() {
+    ControllerCommand.apply(this, arguments);
+  }
+  SaveCommand.Prototype = function() {
+    this.execute = function() {
       this.getController().saveDocument();
     }
-  });
+  };
+  ControllerCommand.extend(SaveCommand);
+  SaveCommand.static.name = 'save';
   ```
- */
+*/
 var ControllerCommand = function(controller) {
   this.controller = controller;
 };
@@ -37,7 +35,7 @@ ControllerCommand.Prototype = function() {
   /**
     Get controller instance
 
-    @return {ui/Controller} The controller instance
+    @return {ui/Controller} controller instance
    */
   this.getController = function() {
     return this.controller;
@@ -46,7 +44,7 @@ ControllerCommand.Prototype = function() {
   /**
     Get document instance
 
-    @return {data/Document} The document instance owned by the controller
+    @return {data/Document} document instance owned by the controller
    */
   this.getDocument = function() {
     return this.controller.getDocument();
@@ -62,6 +60,6 @@ ControllerCommand.Prototype = function() {
   };
 };
 
-oo.inherit(ControllerCommand, Command);
+Command.extend(ControllerCommand);
 
 module.exports = ControllerCommand;
