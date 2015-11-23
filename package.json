@@ -25,6 +25,7 @@
     "browserify-istanbul": "^0.2.1",
     "commonmark": "^0.22.0",
     "dox": "substance/dox#substance",
+    "font-awesome": "4.x",
     "express": "^4.12.3",
     "glob": "^5.0.15",
     "gulp": "^3.8.11",

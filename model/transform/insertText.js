@@ -3,6 +3,13 @@
 var replaceText = require('./replaceText');
 var updateAnnotations = require('./updateAnnotations');
 
+/**
+  Inserts text at the given selection.
+
+  @param {Object} args object with `selection`, `text`
+  @return {Object} with updated `selection`
+*/
+
 var insertText = function(tx, args) {
   var selection = args.selection;
   var text = args.text;

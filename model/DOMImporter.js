@@ -10,7 +10,7 @@ var DefaultDOMElement = require('../ui/DefaultDOMElement');
 var $$ = DefaultDOMElement.createElement;
 
 /**
-  A generic base implementation for HTML importers.
+  A generic base implementation for XML/HTML importers.
 
   @class
   @param {Object} config

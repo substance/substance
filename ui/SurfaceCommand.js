@@ -4,26 +4,48 @@ var oo = require('../util/oo');
 var Command = require('./Command');
 
 /**
-  A class for commands intended to be executed on the {@link module:ui.surface.Surface}
+  A class for commands intended to be executed on the {@link ui/Surface}
   level. See the example below to learn how to define a custom `SurfaceCommand`.
 
   @class
-  @param {ui/Surface} surface surface the command will operate on
+  @abstract
   @extends ui/Command
 
   @example
 
   ```js
-  var ControllerCommand = require('substance/ui/commands').ControllerCommand;
-  var Save = Command.extend({
-    static: {
-      name: 'save'
-    },
+  var SurfaceCommand = require('substance/ui/SurfaceCommand');
+  var uuid = require('substance/util/uuid');
+  function InsertImageCommand() {
+    SurfaceCommand.apply(this, arguments);
+  }
+  InsertImageCommand.Prototype = function() {
+    this.getCommandState = function() {
+      var sel = this.getSelection();
+      var newState = { disabled: true, active: false };
+      if (sel && !sel.isNull() && sel.isPropertySelection()) {
+        newState.disabled = false;
+      }
+      return newState;
+    };
 
-    execute: function() {
-      this.getController().saveDocument();
-    }
-  });
+    this.execute = function(imageSrc) {
+      var surface = this.getSurface();
+
+      surface.transaction(function(tx, args) {
+        var newImage = {
+          id: uuid("image"),
+          type: "image",
+          src: imageSrc
+        };
+        // Note: returning the result which will contain an updated selection
+        return surface.insertNode(tx, { selection: args.selection, node: newImage });
+      });
+    };
+
+  };
+  SurfaceCommand.extend(InsertImageCommand);
+  InsertImageCommand.static.name = 'insertImage';
   ```
 */
 var SurfaceCommand = function(surface) {
@@ -35,7 +57,7 @@ SurfaceCommand.Prototype = function() {
     Get Surface instance
 
     @return {ui/Surface} The surface instance
-   */
+  */
   this.getSurface = function() {
     return this.surface;
   };
@@ -43,8 +65,8 @@ SurfaceCommand.Prototype = function() {
   /**
     Get current selection of surface bound to the command
 
-    @return {model/Selection} the current Document.Selection derived from the surface.
-   */
+    @return {model/Selection} the current document selection derived from the surface.
+  */
   this.getSelection = function() {
     var surface = this.getSurface();
     return surface.getSelection();
@@ -64,7 +86,7 @@ SurfaceCommand.Prototype = function() {
     Get the current document
 
     @return {data/Document} the container id
-   */
+  */
   this.getDocument = function() {
     var surface = this.getSurface();
     return surface.getDocument();
@@ -75,7 +97,7 @@ SurfaceCommand.Prototype = function() {
 
     @abstract
     @return {data/Document} The document instance owned by the controller
-   */
+  */
   this.execute = function() {
     throw new Error('execute must be implemented by custom commands');
   };

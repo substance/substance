@@ -7,32 +7,27 @@ var ContainerEditor = require('./ContainerEditor');
 var $$ = Component.$$;
 
 /**
-  Represents a flow annotator that manages a sequence of nodes in a container. Instantiate
-  this class using {@link ui/Component.$$} within the render method of a component. Needs to be
-  instantiated within a {@link ui/Controller} context.
+  Represents a flow annotator that manages a sequence of nodes in a container. Needs to
+  be instantiated within a ui/Controller context. Works like a {@link ui/ContainerEditor}
+  but you can only annotate, not edit.
 
-  @class
+  @class ContainerAnnotator
   @component
   @extends ui/ContainerEditor
+
+  @prop {String} name unique editor name
+  @prop {String} containerId container id
+  @prop {ui/SurfaceCommand[]} commands array of command classes to be available
 
   @example
 
   ```js
-  var ContainerAnnotator = require('substance/ui/ContainerAnnotator');
-  var Component = require('substance/ui/Component');
-  var ToggleStrong = require('substance/packages/strong/ToggleStrong');
-
-  var MyAnnotator = Component.extend({
-    render: function() {
-      var annotator = $$(ContainerAnnotator, {
-        name: 'main',
-        containerId: 'main',
-        doc: doc,
-        commands: [ToggleStrong]
-      }).ref('annotator');
-      return $$('div').addClass('my-annotator').append(annotator);
-    }
-  });
+  $$(ContainerAnnotator, {
+    name: 'bodySurface',
+    containerId: 'main',
+    doc: doc,
+    commands: [ToggleStrong]
+  })
   ```
  */
 

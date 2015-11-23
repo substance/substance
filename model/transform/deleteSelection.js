@@ -10,11 +10,11 @@ var updateAnnotations = require('./updateAnnotations');
 
 /* jshint latedef:false */
 
-/*
+/**
   Deletes a given selection.
 
-  @param args object with `selection`
-  @return object with updated `selection`
+  @param {Object} args object with `selection`
+  @return {Object} with updated `selection`
 */
 
 function deleteSelection(tx, args) {

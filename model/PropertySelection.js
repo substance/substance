@@ -7,7 +7,20 @@ var Coordinate = require('./Coordinate');
 var Range = require('./Range');
 
 /**
-  A selection which is bound to a property.
+  A selection which is bound to a property. Implements {@link model/Selection}.
+
+  @class
+  @example  
+  
+  ```js
+  var propSel = doc.createSelection({
+    type: 'property',
+    path: ['p1', 'content'],
+    startOffset: 3,
+    endOffset: 6
+  });
+
+
 */
 function PropertySelection(properties) {
   PropertySelection.super.apply(this);
@@ -122,6 +135,7 @@ PropertySelection.Prototype = function() {
       ")"
     ].join('');
   };
+
 
   this.isInsideOf = function(other, strict) {
     if (other.isNull()) return false;

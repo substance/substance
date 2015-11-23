@@ -14,19 +14,26 @@ var insertNode = require('../model/transform/insertNode');
 var switchTextType = require('../model/transform/switchTextType');
 var paste = require('../model/transform/paste');
 var $$ = Component.$$;
-
 var ContainerNodeMixin = require('./ContainerNodeMixin');
 
 /**
   Represents a flow editor that manages a sequence of nodes in a container. Needs to be
   instantiated inside a {@link ui/Controller} context.
   
-  @constructor
-  @class
+  @class ContainerEditor
+  @component
   @extends ui/Surface
+
+  @prop {String} name unique editor name
+  @prop {String} containerId container id
+  @prop {Object[]} textTypes array of textType definition objects
+  @prop {ui/SurfaceCommand[]} commands array of command classes to be available
+
   @example
-  
-  Create a full-fledged `ContainerEditor` for the `body` container of a document. Allow Strong and Emphasis annotations and to switch text types between paragraph and heading at level 1.
+
+  Create a full-fledged `ContainerEditor` for the `body` container of a document.
+  Allow Strong and Emphasis annotations and to switch text types between paragraph
+  and heading at level 1.
 
   ```js
   $$(ContainerEditor, {
@@ -101,16 +108,9 @@ ContainerEditor.Prototype = function() {
     }
   };
 
-  this._insertNodeAt = function(pos, nodeId) {
-    var comp = this._renderNode(nodeId);
-    this.insertAt(pos, comp);
-  };
-
-  this._removeNodeAt = function(pos) {
-    this.removeAt(pos);
-  };
-
-  /* Editor API */
+  /**
+    Register custom editor behavior using this method
+  */
   this.extendBehavior = function(extension) {
     extension.register(this.editingBehavior);
   };
@@ -122,23 +122,29 @@ ContainerEditor.Prototype = function() {
     return true;
   };
 
+  /**
+    Returns the containerId the editor is bound to
+  */
   this.getContainerId = function() {
     return this.props.containerId;
   };
 
-  // TODO: do we really need this?
+  // TODO: do we really need this in addition to getContainerId?
   this.getContainer = function() {
     return this.getDocument().get(this.getContainerId());
   };
 
   /**
-   * Performs a `deleteSelection` tr
-   */
+    Performs a {@link model/transform/deleteSelection} transformation
+  */
   this.delete = function(tx, args) {
     this._prepareArgs(args);
     return deleteSelection(tx, args);
   };
 
+  /**
+    Performs a {@link model/transform/breakNode} transformation
+  */
   this.break = function(tx, args) {
     this._prepareArgs(args);
     if (args.selection.isPropertySelection() || args.selection.isContainerSelection()) {
@@ -146,6 +152,9 @@ ContainerEditor.Prototype = function() {
     }
   };
 
+  /**
+    Performs an {@link model/transform/insertNode} transformation
+  */
   this.insertNode = function(tx, args) {
     this._prepareArgs(args);
     if (args.selection.isPropertySelection() || args.selection.isContainerSelection()) {
@@ -153,6 +162,9 @@ ContainerEditor.Prototype = function() {
     }
   };
 
+  /**
+   * Performs a {@link model/transform/switchTextType} transformation
+   */
   this.switchType = function(tx, args) {
     this._prepareArgs(args);
     if (args.selection.isPropertySelection()) {
@@ -160,6 +172,9 @@ ContainerEditor.Prototype = function() {
     }
   };
 
+  /**
+    Selects all content in the container
+  */
   this.selectAll = function() {
     var doc = this.getDocument();
     var container = doc.get(this.getContainerId());
@@ -176,6 +191,9 @@ ContainerEditor.Prototype = function() {
     });
   };
 
+  /**
+    Performs a {@link model/transform/paste} transformation
+  */
   this.paste = function(tx, args) {
     this._prepareArgs(args);
     if (args.selection.isPropertySelection() || args.selection.isContainerSelection()) {
@@ -183,26 +201,44 @@ ContainerEditor.Prototype = function() {
     }
   };
 
-  this._prepareArgs = function(args) {
-    args.containerId = this.getContainerId();
-    args.editingBehavior = this.editingBehavior;
-  };
-
+  /**
+    Performs an {@link model/transform/insertText} transformation
+  */
   this.insertText = function(tx, args) {
     if (args.selection.isPropertySelection() || args.selection.isContainerSelection()) {
       return insertText(tx, args);
     }
   };
 
+  /**
+    Inserts a soft break
+  */
   this.softBreak = function(tx, args) {
     args.text = "\n";
     return this.insertText(tx, args);
   };
 
-  // create a document instance containing only the selected content
+  /**
+    Copy the current selection. Performs a {@link model/transform/copySelection}
+    transformation.
+  */
   this.copy = function(doc, selection) {
     var result = copySelection(doc, { selection: selection });
     return result.doc;
+  };
+
+  this._prepareArgs = function(args) {
+    args.containerId = this.getContainerId();
+    args.editingBehavior = this.editingBehavior;
+  };
+
+  this._insertNodeAt = function(pos, nodeId) {
+    var comp = this._renderNode(nodeId);
+    this.insertAt(pos, comp);
+  };
+
+  this._removeNodeAt = function(pos) {
+    this.removeAt(pos);
   };
 
 };

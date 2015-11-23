@@ -6,6 +6,26 @@ var $$ = Component.$$;
 var Annotator = require('../model/Annotator');
 var AnnotationComponent = require('./AnnotationComponent');
 
+
+/**
+  Renders a text property. Used internally by different components (e.g. ui/TextPropertyEditor)
+  
+  @class
+  @component
+  @extends ui/Component
+  
+  @prop {String[]} path path to a text property
+  @prop {String} [tagName] specifies which tag should be used - defaults to `div`
+
+  @example
+
+  ```js
+  $$(TextProperty, {
+    path: [ 'paragraph-1', 'content']
+  })
+  ```
+*/
+
 function TextPropertyComponent() {
   Component.apply(this, arguments);
 }

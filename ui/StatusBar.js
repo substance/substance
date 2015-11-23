@@ -11,13 +11,13 @@ var ICONS_FOR_TYPE = {
   "success": "fa-check-circle",
 };
 
-/**
+/*
   A simple StatusBar implementation that displays a document's title and 
   renders messages.
 
   @class
   @component
-
+  
   @prop {model/Document} doc The document instance
 
   @state {String} message The message displayed in the status bar.

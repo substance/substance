@@ -9,7 +9,21 @@ var Range = require('./Range');
 var Coordinate = require('./Coordinate');
 
 /**
-  A selection spanning multiple nodes.
+  A selection spanning multiple nodes. Implements {@link model/Selection}.
+
+  @class
+  @example  
+  
+  ```js
+  var containerSel = doc.createSelection({
+    type: 'container',
+    containerId: 'body',
+    startPath: ['p1', 'content'],
+    startOffset: 5,
+    endPath: ['p3', 'content'],
+    endOffset: 4,
+  });
+  ```
 */
 function ContainerSelection(properties) {
   // Note: not calling the super ctor as it freezes the instance

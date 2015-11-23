@@ -1,42 +1,9 @@
 "use strict";
+/* jshint latedef: false */
 
 var extend = require('lodash/object/extend');
 var uuid = require('../../util/uuid');
 var helpers = require('../documentHelpers');
-
-/*
- * For a given container selection create property selections of a given type
- *
- * @param tx a transaction document
- * @param args
- *         - selection (Property or Container selection)
- *         - annotationType (type of annotation e.g. 'strong')
- *         - annotationData (data that should stick to the new anno)
- */
-function _createPropertyAnnotations(tx, args) {
-  var sel = args.selection;
-  var annoType = args.annotationType;
-  var annoData = args.annotationData;
-
-  var sels;
-  if (sel.isPropertySelection()) {
-    sels = []; // we just do nothing in the property selection case? why?
-  } else if (sel.isContainerSelection()) {
-    sels = sel.splitIntoPropertySelections();
-  }
-
-  for (var i = 0; i < sels.length; i++) {
-    var anno = {
-      id: uuid(annoType),
-      type: annoType
-    };
-    extend(anno, annoData);
-    anno.path = sels[i].getPath();
-    anno.startOffset = sels[i].getStartOffset();
-    anno.endOffset = sels[i].getEndOffset();
-    tx.create(anno);
-  }
-}
 
 /**
   For a given container selection create property selections of a given type
@@ -44,11 +11,22 @@ function _createPropertyAnnotations(tx, args) {
   @function
 
   @param {model/TransactionDocument} tx the document instance
-  @param {Object} args object with transformation arguments
-  @param {model/Selection} args.selection A document selection
+  @param {Object} args object with transformation arguments `selection`, `containerId`, `annotationType` and `annotationData`
+  @scopedparam {model/Selection} args.selection A document selection
   @scopedparam {String} args.containerId a valid container id
   @scopedparam {String} args.annotationType type of the new annotation
   @scopedparam {Object} [args.annotationData] additional data that should be stored on the object
+
+  @example
+
+  ```js
+  createAnnotation(tx, {
+    selection: bodyEditor.getSelection(),
+    annoType: 'link',
+    containerId: bodyEditor.getContainerId(),
+    annoData: {url: 'http://example.com'}
+  });
+  ```
 */
 
 function createAnnotation(tx, args) {
@@ -96,5 +74,31 @@ function createAnnotation(tx, args) {
   args.result = tx.create(anno);
   return args;
 }
+
+function _createPropertyAnnotations(tx, args) {
+  var sel = args.selection;
+  var annoType = args.annotationType;
+  var annoData = args.annotationData;
+
+  var sels;
+  if (sel.isPropertySelection()) {
+    sels = []; // we just do nothing in the property selection case? why?
+  } else if (sel.isContainerSelection()) {
+    sels = sel.splitIntoPropertySelections();
+  }
+
+  for (var i = 0; i < sels.length; i++) {
+    var anno = {
+      id: uuid(annoType),
+      type: annoType
+    };
+    extend(anno, annoData);
+    anno.path = sels[i].getPath();
+    anno.startOffset = sels[i].getStartOffset();
+    anno.endOffset = sels[i].getEndOffset();
+    tx.create(anno);
+  }
+}
+
 
 module.exports = createAnnotation;

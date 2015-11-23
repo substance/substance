@@ -28,13 +28,16 @@ gulp.task('doc:sass', function() {
 
 gulp.task('doc:assets', function () {
   gulp.src('./doc/assets/**/*', {base:"./doc/assets"})
-    .pipe(gulp.dest('dist'));
+    .pipe(gulp.dest('./dist'));
+
+  gulp.src('node_modules/font-awesome/fonts/*')
+    .pipe(gulp.dest('./dist/fonts'));
 });
 
 gulp.task('doc:data', function () {
   console.log('generating documentation... and saving to ./dist/documentation.json');
   var nodes = generate(config);
-  fs.writeFileSync('./dist/documentation.json', JSON.stringify(nodes, null, '  '));
+  fs.writeFileSync(__dirname+'/dist/documentation.json', JSON.stringify(nodes, null, '  '));
 });
 
 gulp.task('doc:bundle', function () {

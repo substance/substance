@@ -16,19 +16,21 @@ var __id__ = 0;
 
 /**
   Abstract class used for deriving a custom article implementation.
+  Requires a {@link model/DocumentSchema} to be provided on construction.
 
   @class Document
   @abstract
   @extends model/AbstractDocument
   @example
-
+  
   ```js
   var Document = require('substance/model/Document');
-  var Article = function(schema) {
-    Document.call(schema);
+  var articleSchema = require('./myArticleSchema');
+  var Article = function() {
+    Document.call(articleSchema);
 
     // We set up a container that holds references to
-    // block nodes (in our example paragraphs)
+    // block nodes (e.g. paragraphs and figures)
     this.create({
       type: "container",
       id: "body",
@@ -136,8 +138,8 @@ Document.Prototype = function() {
   /**
     Start a transaction to manipulate the document
 
-    @param {object} beforeState object which will be used as before start of transaction
-    @param {object} eventData object which will be used as payload for the emitted change event
+    @param {object} [beforeState] object which will be used as before start of transaction
+    @param {object} [eventData] object which will be used as payload for the emitted document:change event
     @param {function} transformation a function(tx) that performs actions on the transaction document tx
 
     @example
@@ -209,6 +211,21 @@ Document.Prototype = function() {
     }
   };
 
+  /**
+    Creates a new {@link model/DocumentNode}. Use this API on a {@link model/TransactionDocument} to ensure consistency.
+
+    @example
+
+    ```js
+    doc.transaction(function(tx) {
+      tx.create({
+        id: 'p1',
+        type: 'paragraph',
+        content: 'Hi I am a Substance paragraph.'
+      });
+    });
+    ```
+  */
   this.create = function(nodeData) {
     if (this.FORCE_TRANSACTIONS) {
       throw new Error('Use a transaction!');

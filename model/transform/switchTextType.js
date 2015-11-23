@@ -5,13 +5,12 @@ var uuid = require('../../util/uuid');
 var annotationHelpers = require('../annotationHelpers');
 var deleteNode = require('./deleteNode');
 
-// TODO: needs to be overhauled should work without a given container
-// Working without a container does not really make really sense.
-// Non-container editing situations are typically form-editors, where no notion
-// of nodes exist actually, but only properties. Changing a node type is not necessary
-// The only interesting thing is, to iterate over all containers
-// so that a switched node gets replaced in all occurrences automatically.
-// However, we don't have a use-case for it right now.
+/**
+  Switch text type for a given node. E.g. from `paragraph` to `heading`.
+
+  @param {Object} args object with `selection`, `containerId` and `data` with new node data
+  @return {Object} with updated `selection`
+*/
 
 function switchTextType(tx, args) {
   var selection = args.selection;

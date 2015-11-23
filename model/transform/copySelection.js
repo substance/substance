@@ -7,7 +7,14 @@ var annotationHelpers = require('../annotationHelpers');
 
 /* jshint latedef: false */
 
-// create a document instance containing only the selected content
+
+/**
+  Creates a new document instance containing only the selected content
+
+  @param {Object} args object with `selection`
+  @return {Object} with a `doc` property that has a fresh doc with the copied content
+*/
+
 var copySelection = function(doc, args) {
   var selection = args.selection;
   if (selection.isNull()) {

@@ -10,15 +10,17 @@ var config = require('./doc/config.json');
 var generate = require('./doc/generator/generate');
 
 // use static server
-app.use('/doc', express.static(path.join(__dirname, 'doc/assets')));
+app.use('/docs', express.static(path.join(__dirname, 'doc/assets')));
+app.use('/docs/fonts', express.static(path.join(__dirname, 'node_modules/font-awesome/fonts')));
+
 app.use('/i18n', express.static(path.join(__dirname, 'i18n')));
 
-app.get('/doc/documentation.json', function(req, res) {
+app.get('/docs/documentation.json', function(req, res) {
   var nodes = generate(config);
   res.json(nodes);
 });
 
-app.get('/doc/app.js', function (req, res) {
+app.get('/docs/app.js', function (req, res) {
   browserify({ debug: true, cache: false })
     .add(path.join(__dirname, 'doc', 'app.js'))
     .bundle()
@@ -42,10 +44,8 @@ var renderSass = function(cb) {
   }, cb);
 };
 
-// use static server
-app.use(express.static(__dirname));
 
-app.get('/doc/app.css', function(req, res) {
+app.get('/docs/app.css', function(req, res) {
   renderSass(function(err, result) {
     if (err) return handleError(err, res);
     res.set('Content-Type', 'text/css');
@@ -53,7 +53,7 @@ app.get('/doc/app.css', function(req, res) {
   });
 });
 
-app.get('/doc/app.css.map', function(req, res) {
+app.get('/docs/app.css.map', function(req, res) {
   renderSass(function(err, result) {
     if (err) return handleError(err, res);
     res.set('Content-Type', 'text/css');
@@ -84,8 +84,11 @@ app.get('/test/test.js', function (req, res, next) {
     }
   });
 });
-app.use(express.static(__dirname));
+
+// Provide FontAwesome fonts
+// app.use(express.static(__dirname));
+
 app.listen(PORT);
 console.log('Server is listening on %s', PORT);
-console.log('To view the docs go to http://localhost:%s/doc', PORT);
+console.log('To view the docs go to http://localhost:%s/docs', PORT);
 console.log('To run the test suite go to http://localhost:%s/test', PORT);
