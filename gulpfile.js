@@ -28,7 +28,10 @@ gulp.task('doc:sass', function() {
 
 gulp.task('doc:assets', function () {
   gulp.src('./doc/assets/**/*', {base:"./doc/assets"})
-    .pipe(gulp.dest('dist'));
+    .pipe(gulp.dest('./dist'));
+
+  gulp.src('node_modules/font-awesome/fonts/*')
+    .pipe(gulp.dest('./dist/fonts'));
 });
 
 gulp.task('doc:data', function () {
