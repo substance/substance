@@ -2,7 +2,7 @@
 
 Substance is a JavaScript library for web-based content editing. It provides building blocks for realizing custom text editors and web-based publishing systems.
 
-Check the [project website](http://substance.io), the [documentation](http://substance.io/docs) and the [demos](http://substance.io/demos).
+Check the [project website](http://substance.io), the [examples](https://github.com/substance/examples) and the [API documentation](http://substance.io/docs).
 
 ## Features
 
