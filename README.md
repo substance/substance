@@ -16,9 +16,9 @@ Annotations can hold information (e.g. a comment)                           | �
 Incremental document updates (undoable operations)                          | ✓
 Transformations for document manipulation                                   | ✓
 Custom editing toolbars                                                     | ✓
-Commands for controlling the editor                                         | Beta 2
+Commands for controlling the editor                                         | ✓
 Key bindings                                                                | Beta 3
-I18N support                                                                | Beta 2
+I18N support                                                                | ✓
 Realtime collaboration                                                      | Beta 3
 Full Unicode support                                                        | Beta 3
 Plugins                                                                     | Beta 3
@@ -37,8 +37,9 @@ Paragraph                                                                   | �
 Heading                                                                     | ✓
 Blockquote                                                                  | ✓
 Codeblock                                                                   | ✓
-Resource (image, video, tweet etc.)                                         | Beta 2
-List                                                                        | Beta 2
+Imgage                                                                      | ✓
+Embed (image, video, tweet etc.)                                            | ✓
+List                                                                        | ✓
 Table                                                                       | Beta 3
 Figure (including upload)                                                   | Beta 4
                                                                             |
@@ -46,9 +47,9 @@ Figure (including upload)                                                   | Be
 Strong                                                                      | ✓
 Emphasis                                                                    | ✓
 Link                                                                        | ✓
-Subscript                                                                   | Beta 2
-Superscript                                                                 | Beta 2
-Code                                                                        | Beta 2
+Subscript                                                                   | ✓
+Superscript                                                                 | ✓
+Code                                                                        | ✓
 Comment                                                                     | Beta 3
 
 
@@ -90,25 +91,13 @@ $ npm run doc
 
 ## Roadmap
 
-### Beta 2
-
-*ETA: November 15 2015*
-
-- Support for nested nodes
-- Commands for controlling the editor
-- Editing of lists
-- Resource node type (image, video, tweet etc.)
-- CSS modularization: one css file per UI component
-- Automatically published API docs
-- Writer interface for building full-fledged custom editing apps
-- Improved stability, documentation and tests
-- I18n
-
 ### Beta 3
+
+*ETA: January 2015*
 
 - Automatically generated performance report
 - Table node
-- Novel Writer demo
+- Editing of lists
 - Key bindings
 - Plugins
 - Realtime collaboration
