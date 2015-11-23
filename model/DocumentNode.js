@@ -3,7 +3,15 @@
 var each = require('lodash/collection/each');
 var DataNode = require('./data/Node');
 
+/**
+  Base node type for document nodes.
 
+  @class
+  @abstract
+
+  @param {model/Document} doc A document instance
+  @param {object} node properties
+*/
 
 function DocumentNode(doc, props) {
   DataNode.call(this, props);
