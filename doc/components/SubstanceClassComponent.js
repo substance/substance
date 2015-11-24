@@ -1,6 +1,5 @@
 'use strict';
 
-var oo = require('../../util/oo');
 var Component = require('../../ui/Component');
 var ClassComponent = require('./ClassComponent');
 var Params = require('./ParamsComponent');
@@ -45,5 +44,5 @@ SubstanceClassComponent.Prototype = function() {
   };
 };
 
-oo.inherit(SubstanceClassComponent, ClassComponent);
+ClassComponent.extend(SubstanceClassComponent);
 module.exports = SubstanceClassComponent;

@@ -27,7 +27,7 @@ var __id__ = 0;
   var Document = require('substance/model/Document');
   var articleSchema = require('./myArticleSchema');
   var Article = function() {
-    Document.call(articleSchema);
+    Article.super.call(articleSchema);
 
     // We set up a container that holds references to
     // block nodes (e.g. paragraphs and figures)
@@ -37,8 +37,8 @@ var __id__ = 0;
       nodes: []
     });
   };
-
-  OO.inherit(Article, Document);
+  
+  Document.extend(Article);
   ```
 */
 

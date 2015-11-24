@@ -1,6 +1,5 @@
 'use strict';
 
-var oo = require('../../util/oo');
 var Component = require('../../ui/Component');
 var $$ = Component.$$;
 
@@ -56,6 +55,6 @@ EventComponent.Prototype = function() {
 
 };
 
-oo.inherit(EventComponent, Component);
+Component.extend(EventComponent);
 
 module.exports = EventComponent;

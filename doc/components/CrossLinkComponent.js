@@ -1,6 +1,5 @@
 'use strict';
 
-var oo = require('../../util/oo');
 var Component = require('../../ui/Component');
 var $$ = Component.$$;
 
@@ -24,6 +23,6 @@ CrossLinkComponent.Prototype = function() {
   };
 };
 
-oo.inherit(CrossLinkComponent, Component);
+Component.extend(CrossLinkComponent);
 
 module.exports = CrossLinkComponent;

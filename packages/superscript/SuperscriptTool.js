@@ -1,17 +1,12 @@
 'use strict';
 
-var AnnotationTool = require('../../ui/AnnotationTool');
-var oo = require('../../util/oo');
+var SurfaceTool = require('../../ui/SurfaceTool');
 
 function SuperscriptTool() {
-  AnnotationTool.apply(this, arguments);
+  SuperscriptTool.super.apply(this, arguments);
 }
-
-oo.inherit(SuperscriptTool, AnnotationTool);
-
-SuperscriptTool.static = {
-  name: 'superscript',
-  command: 'superscript' 
-};
+SurfaceTool.extend(SuperscriptTool);
+SuperscriptTool.static.name = 'superscript';
+SuperscriptTool.static.command = 'superscript';
 
 module.exports = SuperscriptTool;

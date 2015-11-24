@@ -1,6 +1,5 @@
 'use strict';
 
-var oo = require('../../util/oo');
 var pluck = require('lodash/collection/pluck');
 var Component = require('../../ui/Component');
 var $$ = Component.$$;
@@ -47,9 +46,8 @@ FunctionComponent.Prototype = function() {
     var signature = [node.name, '(', paramSig, ')'];
     return $$('div').addClass('se-signature').append(signature);
   };
-
 };
 
-oo.inherit(FunctionComponent, Component);
+Component.extend(FunctionComponent);
 
 module.exports = FunctionComponent;

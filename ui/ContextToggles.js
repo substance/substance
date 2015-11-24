@@ -2,7 +2,6 @@
 
 var $ = require('../util/jquery');
 var _ = require('../util/helpers');
-var oo = require('../util/oo');
 
 var Component = require('./Component');
 var $$ = Component.$$;
@@ -44,6 +43,6 @@ ContextToggles.Prototype = function() {
   };
 };
 
-oo.inherit(ContextToggles, Component);
+Component.extend(ContextToggles);
 
 module.exports = ContextToggles;

@@ -1,6 +1,5 @@
 'use strict';
 
-var oo = require('../../util/oo');
 var Component = require('../../ui/Component');
 var $$ = Component.$$;
 var TextProperty = require('../../ui/TextPropertyComponent');
@@ -21,6 +20,6 @@ HeadingComponent.Prototype = function() {
   };
 };
 
-oo.inherit(HeadingComponent, Component);
+Component.extend(HeadingComponent);
 
 module.exports = HeadingComponent;

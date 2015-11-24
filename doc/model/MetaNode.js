@@ -1,13 +1,12 @@
 'use strict';
 
-var oo = require('../../util/oo');
 var Node = require('../../model/DocumentNode');
 
 function MetaNode() {
   MetaNode.super.apply(this, arguments);
 }
 
-oo.inherit(MetaNode, Node);
+Node.extend(MetaNode);
 
 MetaNode.static.name = 'meta';
 

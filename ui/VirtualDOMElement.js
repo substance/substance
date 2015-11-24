@@ -6,7 +6,6 @@ var isArray = require('lodash/lang/isArray');
 var extend = require('lodash/object/extend');
 var omit = require('lodash/object/omit');
 var without = require('lodash/array/without');
-var oo = require('../util/oo');
 var DOMElement = require('./DOMElement');
 
 /**
@@ -293,7 +292,7 @@ VirtualDOMElement.Prototype = function() {
 
 };
 
-oo.inherit(VirtualDOMElement, DOMElement);
+DOMElement.extend(VirtualDOMElement);
 
 Object.defineProperties(VirtualDOMElement.prototype, {
   /**
@@ -343,7 +342,7 @@ VirtualElement.Prototype = function() {
   };
 };
 
-oo.inherit(VirtualElement, VirtualDOMElement);
+VirtualDOMElement.extend(VirtualElement);
 
 Object.defineProperties(VirtualElement.prototype, {
   /**
@@ -388,7 +387,7 @@ VirtualComponentElement.Prototype = function() {
   };
 };
 
-oo.inherit(VirtualComponentElement, VirtualDOMElement);
+VirtualDOMElement.extend(VirtualComponentElement);
 
 Object.defineProperties(VirtualComponentElement.prototype, {
   /**
@@ -449,7 +448,7 @@ VirtualTextNode.Prototype = function() {
 
 };
 
-oo.inherit(VirtualTextNode, VirtualDOMElement);
+VirtualDOMElement.extend(VirtualTextNode);
 
 /*
   A virtual node containing raw html.
@@ -475,7 +474,7 @@ RawHtml.Prototype = function() {
 
 };
 
-oo.inherit(RawHtml, VirtualDOMElement);
+VirtualDOMElement.extend(RawHtml);
 
 VirtualDOMElement.prepareChildren = function(children) {
   for (var i = 0; i < children.length; i++) {

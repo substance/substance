@@ -2,7 +2,6 @@
 
 var each = require('lodash/collection/each');
 var $ = require('../../util/jquery');
-var oo = require('../../util/oo');
 var Component = require('../../ui/Component');
 var TextProperty = require('../../ui/TextPropertyComponent');
 var TableSelection = require('../../model/TableSelection');
@@ -202,6 +201,6 @@ TableComponent.Prototype = function() {
   };
 };
 
-oo.inherit(TableComponent, Component);
+Component.extend(TableComponent);
 
 module.exports = TableComponent;

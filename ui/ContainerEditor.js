@@ -1,6 +1,5 @@
 'use strict';
 
-var oo = require('../util/oo');
 var _ = require('../util/helpers');
 var Component = require('./Component');
 var Surface = require('./Surface');
@@ -63,8 +62,6 @@ function ContainerEditor() {
 }
 
 ContainerEditor.Prototype = function() {
-
-  _.extend(this, ContainerNodeMixin.prototype);
 
   this.dispose = function() {
     Surface.prototype.dispose.call(this);
@@ -240,8 +237,7 @@ ContainerEditor.Prototype = function() {
   this._removeNodeAt = function(pos) {
     this.removeAt(pos);
   };
-
 };
 
-oo.inherit(ContainerEditor, Surface);
+Surface.extend(ContainerEditor, ContainerNodeMixin);
 module.exports = ContainerEditor;

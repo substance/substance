@@ -1,7 +1,6 @@
 'use strict';
 
 var $ = require('../util/jquery');
-var oo = require('../util/oo');
 var Component = require('./Component');
 var $$ = Component.$$;
 
@@ -101,6 +100,6 @@ Panel.Prototype = function() {
   };
 };
 
-oo.inherit(Panel, Component);
+Component.extend(Panel);
 
 module.exports = Panel;

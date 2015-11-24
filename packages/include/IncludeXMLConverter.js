@@ -1,8 +1,8 @@
 'use strict';
 
 /*
- * HTML converter for Paragraphs.
- */
+  HTML converter for Includes.
+*/
 module.exports = {
 
   type: 'include',

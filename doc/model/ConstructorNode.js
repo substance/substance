@@ -1,13 +1,12 @@
 'use strict';
 
-var oo = require('../../util/oo');
 var DocumentedNode = require('./DocumentedNode');
 
 function ConstructorNode() {
   ConstructorNode.super.apply(this, arguments);
 }
 
-oo.inherit(ConstructorNode, DocumentedNode);
+DocumentedNode.extend(ConstructorNode);
 
 // ATTENTION: we have to use 'ctor' has constructor is a key property of
 // every object

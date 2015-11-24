@@ -1,7 +1,5 @@
 'use strict';
 
-var oo = require('../../util/oo');
-
 var Component = require('../../ui/Component');
 var $$ = Component.$$;
 var UnsupportedNode = require('../../ui/UnsupportedNode');
@@ -58,6 +56,6 @@ MemberContainerComponent.Prototype = function() {
 
 };
 
-oo.inherit(MemberContainerComponent, Component);
+Component.extend(MemberContainerComponent);
 
 module.exports = MemberContainerComponent;

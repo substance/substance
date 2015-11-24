@@ -1,6 +1,5 @@
 'use strict';
 
-var oo = require('../../util/oo');
 var ClassNode = require('./ClassNode');
 var find = require('lodash/collection/find');
 
@@ -26,6 +25,6 @@ SubstanceClassNode.Prototype = function() {
 
 };
 
-oo.inherit(SubstanceClassNode, ClassNode);
+ClassNode.extend(SubstanceClassNode);
 
 module.exports = SubstanceClassNode;

@@ -1,6 +1,5 @@
 'use strict';
 
-var oo = require('../util/oo');
 var _ = require('../util/helpers');
 var Component = require('./Component');
 var Clipboard = require('./Clipboard');
@@ -590,5 +589,5 @@ Controller.concatStrings = function(a, b) {
   @event ui/Controller@document:saved
 */
 
-oo.inherit(Controller, Component);
+Component.extend(Controller);
 module.exports = Controller;

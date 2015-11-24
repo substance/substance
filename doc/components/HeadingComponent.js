@@ -1,6 +1,5 @@
 'use strict';
 
-var oo = require('../../util/oo');
 var Component = require('../../ui/Component');
 var $$ = Component.$$;
 var SourceLink = require('./SourceLinkComponent');
@@ -71,6 +70,6 @@ HeadingComponent.Prototype = function() {
   };
 };
 
-oo.inherit(HeadingComponent, Component);
+Component.extend(HeadingComponent);
 
 module.exports = HeadingComponent;

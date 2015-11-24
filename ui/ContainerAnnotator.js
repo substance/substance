@@ -1,6 +1,5 @@
 'use strict';
 
-var oo = require('../util/oo');
 var _ = require('../util/helpers');
 var Component = require('./Component');
 var ContainerEditor = require('./ContainerEditor');
@@ -59,5 +58,5 @@ ContainerAnnotator.Prototype = function() {
 
 };
 
-oo.inherit(ContainerAnnotator, ContainerEditor);
+ContainerEditor.extend(ContainerAnnotator);
 module.exports = ContainerAnnotator;

@@ -1,6 +1,5 @@
 'use strict';
 
-var oo = require('../util/oo');
 var Command = require('./Command');
 
 /**
@@ -103,6 +102,6 @@ SurfaceCommand.Prototype = function() {
   };
 };
 
-oo.inherit(SurfaceCommand, Command);
+Command.extend(SurfaceCommand);
 
 module.exports = SurfaceCommand;

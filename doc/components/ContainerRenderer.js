@@ -1,6 +1,5 @@
 'use strict';
 
-var oo = require('../../util/oo');
 var _ = require('../../util/helpers');
 var Component = require('../../ui/Component');
 var ContainerNodeMixin = require('../../ui/ContainerNodeMixin');
@@ -36,5 +35,6 @@ ContainerRenderer.Prototype = function() {
 
 };
 
-oo.inherit(ContainerRenderer, Component);
+Component.extend(ContainerRenderer, ContainerNodeMixin);
+
 module.exports = ContainerRenderer;

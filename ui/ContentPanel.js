@@ -2,7 +2,6 @@
 
 var $ = require('../util/jquery');
 var _ = require('../util/helpers');
-var oo = require('../util/oo');
 var Component = require('./Component');
 var $$ = Component.$$;
 var Panel = require("./Panel");
@@ -122,6 +121,6 @@ ContentPanel.Prototype = function() {
   };
 };
 
-oo.inherit(ContentPanel, Panel);
+Panel.extend(ContentPanel);
 
 module.exports = ContentPanel;

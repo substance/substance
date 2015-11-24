@@ -1,13 +1,12 @@
 'use strict';
 
-var oo = require('../../util/oo');
 var DocumentedNode = require('./DocumentedNode');
 
 function MethodNode() {
   MethodNode.super.apply(this, arguments);
 }
 
-oo.inherit(MethodNode, DocumentedNode);
+DocumentedNode.extend(MethodNode);
 
 MethodNode.static.name = 'method';
 

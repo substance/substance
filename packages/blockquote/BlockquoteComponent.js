@@ -1,6 +1,5 @@
 'use strict';
 
-var oo = require('../../util/oo');
 var Component = require('../../ui/Component');
 var $$ = Component.$$;
 var TextProperty = require('../../ui/TextPropertyComponent');
@@ -25,6 +24,6 @@ Blockquote.Prototype = function() {
   };
 };
 
-oo.inherit(Blockquote, Component);
+Component.extend(Blockquote);
 
 module.exports = Blockquote;

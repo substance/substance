@@ -1,6 +1,5 @@
 'use strict';
 
-var oo = require('../../util/oo');
 var Component = require('../Component');
 var $$ = Component.$$;
 var TextProperty = require('../../ui/TextPropertyComponent');
@@ -21,6 +20,6 @@ ListItemComponent.Prototype = function() {
   };
 };
 
-oo.inherit(ListItemComponent, Component);
+Component.extend(ListItemComponent);
 
 module.exports = ListItemComponent;

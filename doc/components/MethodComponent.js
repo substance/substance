@@ -1,6 +1,5 @@
 'use strict';
 
-var oo = require('../../util/oo');
 var Component = require('../../ui/Component');
 var $$ = Component.$$;
 
@@ -42,6 +41,6 @@ MethodComponent.Prototype = function() {
 
 };
 
-oo.inherit(MethodComponent, Component);
+Component.extend(MethodComponent);
 
 module.exports = MethodComponent;

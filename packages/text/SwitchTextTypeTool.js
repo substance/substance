@@ -1,16 +1,16 @@
 'use strict';
 
 var each = require('lodash/collection/each');
-var oo = require('../../util/oo');
 var Component = require('../../ui/Component');
 var $$ = Component.$$;
 var SurfaceTool = require('../../ui/SurfaceTool');
 
 /*
- * Abstract class for text types
- *
- * Implements the SurfaceTool API.
- */
+  Abstract class for text types. Implements the SurfaceTool API.
+
+  @class
+  @component
+*/
 
 function SwitchTextType() {
   SurfaceTool.apply(this, arguments);
@@ -18,11 +18,6 @@ function SwitchTextType() {
 }
 
 SwitchTextType.Prototype = function() {
-
-  this.static = {
-    name: 'switchTextType',
-    command: 'switchTextType'
-  };
 
   this.getInitialState = function() {
     var state = this.context.toolManager.getCommandState(this);
@@ -110,6 +105,9 @@ SwitchTextType.Prototype = function() {
   };
 };
 
-oo.inherit(SwitchTextType, SurfaceTool);
+SurfaceTool.extend(SwitchTextType);
+
+SwitchTextType.static.name = 'switchTextType';
+SwitchTextType.static.command = 'switchTextType';
 
 module.exports = SwitchTextType;

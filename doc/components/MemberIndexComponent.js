@@ -1,6 +1,5 @@
 'use strict';
 
-var oo = require('../../util/oo');
 var $$ = require('../../ui/Component').$$;
 var MemberContainerComponent = require('./MemberContainerComponent');
 
@@ -38,6 +37,6 @@ MemberIndexComponent.Prototype = function() {
 
 };
 
-oo.inherit(MemberIndexComponent, MemberContainerComponent);
+MemberContainerComponent.extend(MemberIndexComponent);
 
 module.exports = MemberIndexComponent;

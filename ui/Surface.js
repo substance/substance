@@ -2,7 +2,6 @@
 
 var _ = require('../util/helpers');
 var $ = require('../util/jquery');
-var oo = require('../util/oo');
 var Registry = require('../util/Registry');
 var SurfaceSelection = require('./SurfaceSelection');
 var Document = require('../model/Document');
@@ -839,7 +838,7 @@ Surface.Prototype = function() {
   };
 };
 
-oo.inherit(Surface, Component);
+Component.extend(Surface);
 
 Surface.Keys =  {
   UNDEFINED: 0,

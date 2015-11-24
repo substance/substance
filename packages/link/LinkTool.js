@@ -3,35 +3,39 @@
 var extend = require('lodash/object/extend');
 var includes = require('lodash/collection/includes');
 var capitalize = require('lodash/string/capitalize');
-var oo = require('../../util/oo');
 var Component = require('../../ui/Component');
 var $$ = Component.$$;
-var AnnotationTool = require('../../ui/AnnotationTool');
 
-var EditLinkPrompt = Component.extend({
+var SurfaceTool = require('../../ui/SurfaceTool');
 
-  onSave: function(e) {
+function EditLinkPrompt() {
+  Component.apply(this, arguments);
+}
+
+EditLinkPrompt.Prototype = function() {
+
+  this.onSave = function(e) {
     e.preventDefault();
     this.props.tool.updateLink({
       url: this.refs.url.$el.val()
     });
-  },
+  };
 
   // Tried setting .htmlProp('autofocus', true) in render
   // But this only worked for the first time
-  didMount: function() {
+  this.didMount = function() {
     // var $el = this.refs.url.$el;
     // _.delay(function() {
     //   $el.focus();
     // }, 0);
-  },
+  };
 
-  onDelete: function(e) {
+  this.onDelete = function(e) {
     e.preventDefault();
     this.props.tool.deleteLink();
-  },
+  };
 
-  render: function() {
+  this.render = function() {
     var link = this.props.link;
     var el = $$('div').addClass('se-prompt');
 
@@ -49,12 +53,13 @@ var EditLinkPrompt = Component.extend({
              .on('click', this.onDelete)
     ]);
     return el;
-  }
-});
+  };
+};
 
+Component.extend(EditLinkPrompt);
 
 function LinkTool() {
-  AnnotationTool.apply(this, arguments);
+  SurfaceTool.apply(this, arguments);
 
   var ctrl = this.getController();
   ctrl.connect(this, {
@@ -64,18 +69,13 @@ function LinkTool() {
 
 LinkTool.Prototype = function() {
 
-  this.static = {
-    name: 'link',
-    command: 'link'
-  };
-
   this.dispose = function() {
     var ctrl = this.getController();
     ctrl.disconnect(this);
   };
 
   this.onCommandExecuted = function(info, commandName) {
-    if (commandName === this.static.command) {
+    if (commandName === this.constructor.static.command) {
       // Toggle the edit prompt when either edit is requested or a new link has been created
       if (includes(['edit','create'], info.mode)) {
         this.togglePrompt();
@@ -153,6 +153,9 @@ LinkTool.Prototype = function() {
   };
 };
 
-oo.inherit(LinkTool, AnnotationTool);
+SurfaceTool.extend(LinkTool);
+
+LinkTool.static.name = 'link';
+LinkTool.static.command = 'link';
 
 module.exports = LinkTool;

@@ -1,6 +1,5 @@
 'use strict';
 
-var oo = require('../../util/oo');
 var DocumentedNode = require('./DocumentedNode');
 
 function FunctionNode() {
@@ -15,7 +14,7 @@ FunctionNode.Prototype = function() {
 
 };
 
-oo.inherit(FunctionNode, DocumentedNode);
+DocumentedNode.extend(FunctionNode);
 
 FunctionNode.static.name = 'function';
 

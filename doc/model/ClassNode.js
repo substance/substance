@@ -1,6 +1,5 @@
 'use strict';
 
-var oo = require('../../util/oo');
 var DocumentedNode = require('./DocumentedNode');
 var MemberContainerMixin = require('./MemberContainerMixin');
 
@@ -34,11 +33,9 @@ ClassNode.Prototype = function() {
   };
 };
 
-oo.inherit(ClassNode, DocumentedNode);
-oo.mixin(ClassNode, MemberContainerMixin);
+DocumentedNode.extend(ClassNode, MemberContainerMixin);
 
 ClassNode.static.name = 'class';
-
 ClassNode.static.defineSchema({
   parent: 'id',
   name: 'string',

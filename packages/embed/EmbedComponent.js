@@ -1,6 +1,5 @@
 'use strict';
 
-var oo = require('../../util/oo');
 var Component = require('../../ui/Component');
 var $$ = Component.$$;
 
@@ -36,6 +35,6 @@ Embed.Prototype = function() {
   };
 };
 
-oo.inherit(Embed, Component);
+Component.extend(Embed);
 
 module.exports = Embed;

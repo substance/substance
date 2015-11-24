@@ -1,11 +1,9 @@
-
-var oo = require('../../util/oo');
 var MethodComponent = require('./MethodComponent');
 
 function ConstructorComponent() {
   MethodComponent.apply(this, arguments);
 }
 
-oo.inherit(ConstructorComponent, MethodComponent);
+MethodComponent.extend(ConstructorComponent);
 
 module.exports = ConstructorComponent;

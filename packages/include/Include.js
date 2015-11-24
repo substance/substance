@@ -7,11 +7,9 @@ function Include() {
 }
 
 BlockNode.extend(Include, function IncludePrototype() {
-
   this.getIncludedNode = function() {
     return this.getDocument().get(this.nodeId);
   };
-
 });
 
 Include.static.name = "include";

@@ -1,6 +1,5 @@
 'use strict';
 
-var oo = require('../util/oo');
 var Surface = require('./Surface');
 var TextPropertyManager = require('../model/TextPropertyManager');
 var insertText = require('../model/transform/insertText');
@@ -139,5 +138,5 @@ TextPropertyEditor.Prototype = function() {
   };
 };
 
-oo.inherit(TextPropertyEditor, Surface);
+Surface.extend(TextPropertyEditor);
 module.exports = TextPropertyEditor;

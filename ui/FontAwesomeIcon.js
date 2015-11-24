@@ -1,6 +1,5 @@
 'use strict';
 
-var oo = require('../util/oo');
 var Component = require('./Component');
 var $$ = Component.$$;
 
@@ -14,6 +13,6 @@ FontAwesomeIcon.Prototype = function() {
   };
 };
 
-oo.inherit(FontAwesomeIcon, Component.Container);
+Component.Container.extend(FontAwesomeIcon);
 
 module.exports = FontAwesomeIcon;

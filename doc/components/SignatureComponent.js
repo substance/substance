@@ -1,6 +1,5 @@
 'use strict';
 
-var oo = require('../../util/oo');
 var pluck = require('lodash/collection/pluck');
 var Component = require('../../ui/Component');
 var $$ = Component.$$;
@@ -68,5 +67,5 @@ SignatureComponent.Prototype = function() {
 };
 
 
-oo.inherit(SignatureComponent, Component);
+Component.extend(SignatureComponent);
 module.exports = SignatureComponent;
