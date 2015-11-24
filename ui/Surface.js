@@ -8,7 +8,7 @@ var Selection = require('../model/Selection');
 var Component = require('./Component');
 var Clipboard = require('./Clipboard');
 var $$ = Component.$$;
-
+var $ = require('../util/jquery');
 
 /**
    Abstract interface for editing components.
@@ -41,6 +41,12 @@ function Surface() {
   // this.element must be set via surface.attach(element)
   this.element = null;
   this.$element = null;
+
+  // HACK: we need to listen to mousup on document
+  this.$document = $(window.document);
+  // this event is triggered by $document
+  this.onMouseUp = this.onMouseUp.bind(this);
+
   this.surfaceSelection = null;
   this.dragging = false;
   this.onDomMutations = this.onDomMutations.bind(this);
@@ -114,15 +120,6 @@ Surface.Prototype = function() {
     return {
       surface: this
     };
-  };
-
-  this._initializeCommandRegistry = function(commands) {
-    var commandRegistry = new Registry();
-    _.each(commands, function(CommandClass) {
-      var cmd = new CommandClass(this);
-      commandRegistry.add(CommandClass.static.name, cmd);
-    }, this);
-    this.commandRegistry = commandRegistry;
   };
 
   this.getCommand = function(commandName) {
@@ -200,79 +197,6 @@ Surface.Prototype = function() {
       this.$element.removeAttr('contentEditable');
     }
     this.enabled = false;
-  };
-
-  /**
-   * Handle document key down events.
-   */
-  this.onKeyDown = function( e ) {
-    if (this.frozen) {
-      return;
-    }
-    if ( e.which === 229 ) {
-      // ignore fake IME events (emitted in IE and Chromium)
-      return;
-    }
-    switch ( e.keyCode ) {
-      case Surface.Keys.LEFT:
-      case Surface.Keys.RIGHT:
-        return this.handleLeftOrRightArrowKey(e);
-      case Surface.Keys.UP:
-      case Surface.Keys.DOWN:
-        return this.handleUpOrDownArrowKey(e);
-      case Surface.Keys.ENTER:
-        return this.handleEnterKey(e);
-      case Surface.Keys.SPACE:
-        return this.handleSpaceKey(e);
-      case Surface.Keys.BACKSPACE:
-      case Surface.Keys.DELETE:
-        return this.handleDeleteKey(e);
-      default:
-        break;
-    }
-
-    // Note: when adding a new handler you might want to enable this log to see keyCodes etc.
-    // console.log('####', e.keyCode, e.metaKey, e.ctrlKey, e.shiftKey);
-
-    // Built-in key combos
-    // Ctrl+A: select all
-    var handled = false;
-    if ( (e.ctrlKey||e.metaKey) && e.keyCode === 65 ) {
-      var newSelection = this.selectAll();
-      if (newSelection) {
-        this.setSelection(newSelection);
-      }
-      handled = true;
-    }
-    // Undo/Redo: cmd+z, cmd+shift+z
-    else if (this.undoEnabled && e.keyCode === 90 && (e.metaKey||e.ctrlKey)) {
-      if (e.shiftKey) {
-        this.getController().executeCommand('redo');
-      } else {
-        this.getController().executeCommand('undo');
-      }
-      handled = true;
-    }
-    // Toggle strong: cmd+b ctrl+b
-    else if (e.keyCode === 66 && (e.metaKey||e.ctrlKey)) {
-      this.executeCommand('strong');
-      handled = true;
-    }
-    // Toggle emphasis: cmd+i ctrl+i
-    else if (e.keyCode === 73 && (e.metaKey||e.ctrlKey)) {
-      this.executeCommand('emphasis');
-      handled = true;
-    }
-    // Toggle link: cmd+l ctrl+l
-    else if (e.keyCode === 76 && (e.metaKey||e.ctrlKey)) {
-      this.executeCommand('link');
-      handled = true;
-    }
-
-    if (handled) {
-      e.preventDefault();
-      e.stopPropagation();
-    }
   };
 
   /**
@@ -361,20 +285,145 @@ Surface.Prototype = function() {
     }
   };
 
-  this.onTextInput = function(e) {
+  this.setFocused = function(val) {
+    // transition: blurred -> focused
+    if (!this.isFocused && val) {
+      // console.log('Surface focus:', this.__id__);
+    }
+    // transition: focused -> blurred
+    else if (this.isFocused && !val) {
+      // console.log('Surface blur:', this.__id__);
+      // when a surface gets blurred a persisted selection will be removed
+      this.textPropertyManager.removeSelection();
+    }
+    this.isFocused = val;
+    if (this.isFocused) {
+      this.getController().didFocus(this);
+    }
+  };
+
+  this.getSelection = function() {
+    return this.selection;
+  };
+
+  /**
+   * Set the model selection and update the DOM selection accordingly
+   */
+  this.setSelection = function(sel) {
+    this._setSelection(sel);
+  };
+
+  this.rerenderDomSelection = function() {
+    if (this.surfaceSelection) {
+      var surfaceSelection = this.surfaceSelection;
+      var sel = this.getSelection();
+      surfaceSelection.setSelection(sel);
+    }
+  };
+
+  this.getDomNodeForId = function(nodeId) {
+    return this.element.querySelector('*[data-id='+nodeId+']');
+  };
+
+  this.getLogger = function() {
+    return this.logger;
+  };
+
+  this.getTextPropertyManager = function() {
+    return this.textPropertyManager;
+  };
+
+  // ### event handlers
+
+  /*
+   * Handle document key down events.
+   */
+  this.onKeyDown = function(event) {
+    // we use $ internally, this unwrapping to get the native event
+    event = event.originalEvent;
+
     if (this.frozen) {
       return;
     }
-    if (!e.data) return;
-    // console.log("TextInput:", e);
-    e.preventDefault();
-    e.stopPropagation();
+    if ( event.which === 229 ) {
+      // ignore fake IME events (emitted in IE and Chromium)
+      return;
+    }
+    switch ( event.keyCode ) {
+      case Surface.Keys.LEFT:
+      case Surface.Keys.RIGHT:
+        return this._handleLeftOrRightArrowKey(event);
+      case Surface.Keys.UP:
+      case Surface.Keys.DOWN:
+        return this._handleUpOrDownArrowKey(event);
+      case Surface.Keys.ENTER:
+        return this._handleEnterKey(event);
+      case Surface.Keys.SPACE:
+        return this._handleSpaceKey(event);
+      case Surface.Keys.BACKSPACE:
+      case Surface.Keys.DELETE:
+        return this._handleDeleteKey(event);
+      default:
+        break;
+    }
+
+    // Note: when adding a new handler you might want to enable this log to see keyCodes etc.
+    // console.log('####', event.keyCode, event.metaKey, event.ctrlKey, event.shiftKey);
+
+    // Built-in key combos
+    // Ctrl+A: select all
+    var handled = false;
+    if ( (event.ctrlKey||event.metaKey) && event.keyCode === 65 ) {
+      var newSelection = this.selectAll();
+      if (newSelection) {
+        this.setSelection(newSelection);
+      }
+      handled = true;
+    }
+    // Undo/Redo: cmd+z, cmd+shift+z
+    else if (this.undoEnabled && event.keyCode === 90 && (event.metaKey||event.ctrlKey)) {
+      if (event.shiftKey) {
+        this.getController().executeCommand('redo');
+      } else {
+        this.getController().executeCommand('undo');
+      }
+      handled = true;
+    }
+    // Toggle strong: cmd+b ctrl+b
+    else if (event.keyCode === 66 && (event.metaKey||event.ctrlKey)) {
+      this.executeCommand('strong');
+      handled = true;
+    }
+    // Toggle emphasis: cmd+i ctrl+i
+    else if (event.keyCode === 73 && (event.metaKey||event.ctrlKey)) {
+      this.executeCommand('emphasis');
+      handled = true;
+    }
+    // Toggle link: cmd+l ctrl+l
+    else if (event.keyCode === 76 && (event.metaKey||event.ctrlKey)) {
+      this.executeCommand('link');
+      handled = true;
+    }
+
+    if (handled) {
+      event.preventDefault();
+      event.stopPropagation();
+    }
+  };
+
+  this.onTextInput = function(event) {
+    event = event.originalEvent;
+
+    if (!event.data) return;
+    // console.log("TextInput:", event);
+    event.preventDefault();
+    event.stopPropagation();
     // necessary for handling dead keys properly
     this.skipNextObservation=true;
     this.transaction(function(tx, args) {
       // trying to remove the DOM selection to reduce flickering
       this.surfaceSelection.clear();
-      args.text = e.data;
+      args.text = event.data;
       return this.insertText(tx, args);
     }, this);
     this.rerenderDomSelection();
@@ -388,9 +437,9 @@ Surface.Prototype = function() {
 
   // a shim for textInput events based on keyPress and a horribly dangerous dance with the CE
   this.onTextInputShim = function(event) {
-    if (this.frozen) {
-      return;
-    }
+    // we use $ internally, this unwrapping to get the native event
+    event = event.originalEvent;
+
     // Filter out non-character keys. Doing this prevents:
     // * Unexpected content deletion when selection is not collapsed and the user presses, for
     //   example, the Home key (Firefox fires 'keypress' for it)
@@ -428,79 +477,10 @@ Surface.Prototype = function() {
     }
   };
 
-  this.handleLeftOrRightArrowKey = function (event) {
-    var self = this;
-    // Note: we need this timeout so that CE updates the DOM selection first
-    // before we map the DOM selection
-    window.setTimeout(function() {
-      var options = {
-        direction: (event.keyCode === Surface.Keys.LEFT) ? 'left' : 'right'
-      };
-      self._updateModelSelection(options);
-      // We could rerender the selection, to make sure the DOM is representing
-      // the model selection
-      // TODO: ATM, the SurfaceSelection is not good enough in doing this, event.g., there
-      // are situations where one can not use left/right navigation anymore, as
-      // SurfaceSelection will always decides to choose the initial positition,
-      // which means lockin.
-      // self.rerenderDomSelection();
-    });
-  };
-
-  this.handleUpOrDownArrowKey = function (event) {
-    var self = this;
-    // Note: we need this timeout so that CE updates the DOM selection first
-    // before we map the DOM selection
-    window.setTimeout(function() {
-      var options = {
-        direction: (event.keyCode === Surface.Keys.UP) ? 'left' : 'right'
-      };
-      self._updateModelSelection(options);
-      // TODO: enable this when we are better, see comment above
-      //self.rerenderDomSelection();
-    });
-  };
-
-  this.handleSpaceKey = function(event) {
-    event.preventDefault();
-    event.stopPropagation();
-    this.transaction(function(tx, args) {
-      // trying to remove the DOM selection to reduce flickering
-      this.surfaceSelection.clear();
-      args.text = " ";
-      return this.insertText(tx, args);
-    }, this);
-    this.rerenderDomSelection();
-  };
-
-  this.handleEnterKey = function(event) {
-    event.preventDefault();
-    if (event.shiftKey) {
-      this.transaction(function(tx, args) {
-        return this.softBreak(tx, args);
-      }, this);
-    } else {
-      this.transaction(function(tx, args) {
-        return this.break(tx, args);
-      }, this);
-    }
-    this.rerenderDomSelection();
-  };
-
-  this.handleDeleteKey = function (event) {
-    event.preventDefault();
-    var direction = (event.keyCode === Surface.Keys.BACKSPACE) ? 'left' : 'right';
-    this.transaction(function(tx, args) {
-      args.direction = direction;
-      return this.delete(tx, args);
-    }, this);
-    this.rerenderDomSelection();
-  };
-
   this.onMouseDown = function(event) {
-    if (this.frozen) {
-      this.unfreeze();
-    }
+    // we use $ internally, this unwrapping to get the native event
+    event = event.originalEvent;
+
     if ( event.which !== 1 ) {
       return;
     }
@@ -512,7 +492,7 @@ Surface.Prototype = function() {
     this.skipNextFocusEvent = true;
     // Bind mouseup to the whole document in case of dragging out of the surface
     this.dragging = true;
-    this.$document.one( 'mouseup', this._onMouseUp );
+    this.$document.one( 'mouseup', this.onMouseUp );
   };
 
   this.onMouseUp = function() {
@@ -528,23 +508,6 @@ Surface.Prototype = function() {
         self.setSelection(sel);
       }
     });
-  };
-
-  this.setFocused = function(val) {
-    // transition: blurred -> focused
-    if (!this.isFocused && val) {
-      // console.log('Surface focus:', this.__id__);
-    }
-    // transition: focused -> blurred
-    else if (this.isFocused && !val) {
-      // console.log('Surface blur:', this.__id__);
-      // when a surface gets blurred a persisted selection will be removed
-      this.textPropertyManager.removeSelection();
-    }
-    this.isFocused = val;
-    if (this.isFocused) {
-      this.getController().didFocus(this);
-    }
   };
 
   this.onMouseMove = function() {
@@ -570,58 +533,11 @@ Surface.Prototype = function() {
   };
 
   this.onDragStart = function(event) {
+    // we use $ internally, this unwrapping to get the native event
+    event = event.originalEvent;
+
     event.preventDefault();
     event.stopPropagation();
-  };
-
-  this.getSelection = function() {
-    return this.selection;
-  };
-
-  /**
-   * Set the model selection and update the DOM selection accordingly
-   */
-  this.setSelection = function(sel) {
-    this._setSelection(sel);
-  };
-
-  this._setSelection = function(sel, silent) {
-    if (!sel) {
-      sel = Selection.nullSelection;
-    } else if (_.isObject(sel) && !(sel instanceof Selection)) {
-      sel = this.getDocument().createSelection(sel);
-    }
-    if (silent) {
-      this._setModelSelection(sel, silent);
-    } else {
-      if (this._setModelSelection(sel)) {
-        this.rerenderDomSelection();
-      }
-    }
-    // Since we allow the surface be blurred natively when clicking
-    // on tools we now need to make sure that the element is focused natively
-    // when we set the selection
-    // This is actually only a problem on FF, other proses set the focus implicitly
-    // when a new DOM selection is set.
-    if (!sel.isNull() && this.$element) {
-      this.$element.focus();
-    }
-  };
-
-  this.rerenderDomSelection = function() {
-    if (this.surfaceSelection) {
-      var surfaceSelection = this.surfaceSelection;
-      var sel = this.getSelection();
-      surfaceSelection.setSelection(sel);
-    }
-  };
-
-  this.getDomNodeForId = function(nodeId) {
-    return this.element.querySelector('*[data-id='+nodeId+']');
-  };
-
-  this._updateModelSelection = function(options) {
-    this._setModelSelection(this.surfaceSelection.getSelection(options));
   };
 
   this.onNativeBlur = function() {
@@ -652,6 +568,113 @@ Surface.Prototype = function() {
     }.bind(this));
   };
 
+  // ## internal implementations
+
+  this._initializeCommandRegistry = function(commands) {
+    var commandRegistry = new Registry();
+    _.each(commands, function(CommandClass) {
+      var cmd = new CommandClass(this);
+      commandRegistry.add(CommandClass.static.name, cmd);
+    }, this);
+    this.commandRegistry = commandRegistry;
+  };
+
+  this._handleLeftOrRightArrowKey = function (event) {
+    var self = this;
+    // Note: we need this timeout so that CE updates the DOM selection first
+    // before we map the DOM selection
+    window.setTimeout(function() {
+      var options = {
+        direction: (event.keyCode === Surface.Keys.LEFT) ? 'left' : 'right'
+      };
+      self._updateModelSelection(options);
+      // We could rerender the selection, to make sure the DOM is representing
+      // the model selection
+      // TODO: ATM, the SurfaceSelection is not good enough in doing this, event.g., there
+      // are situations where one can not use left/right navigation anymore, as
+      // SurfaceSelection will always decides to choose the initial positition,
+      // which means lockin.
+      // self.rerenderDomSelection();
+    });
+  };
+
+  this._handleUpOrDownArrowKey = function (event) {
+    var self = this;
+    // Note: we need this timeout so that CE updates the DOM selection first
+    // before we map the DOM selection
+    window.setTimeout(function() {
+      var options = {
+        direction: (event.keyCode === Surface.Keys.UP) ? 'left' : 'right'
+      };
+      self._updateModelSelection(options);
+      // TODO: enable this when we are better, see comment above
+      //self.rerenderDomSelection();
+    });
+  };
+
+  this._handleSpaceKey = function(event) {
+    event.preventDefault();
+    event.stopPropagation();
+    this.transaction(function(tx, args) {
+      // trying to remove the DOM selection to reduce flickering
+      this.surfaceSelection.clear();
+      args.text = " ";
+      return this.insertText(tx, args);
+    }, this);
+    this.rerenderDomSelection();
+  };
+
+  this._handleEnterKey = function(event) {
+    event.preventDefault();
+    if (event.shiftKey) {
+      this.transaction(function(tx, args) {
+        return this.softBreak(tx, args);
+      }, this);
+    } else {
+      this.transaction(function(tx, args) {
+        return this.break(tx, args);
+      }, this);
+    }
+    this.rerenderDomSelection();
+  };
+
+  this._handleDeleteKey = function (event) {
+    event.preventDefault();
+    var direction = (event.keyCode === Surface.Keys.BACKSPACE) ? 'left' : 'right';
+    this.transaction(function(tx, args) {
+      args.direction = direction;
+      return this.delete(tx, args);
+    }, this);
+    this.rerenderDomSelection();
+  };
+
+  this._setSelection = function(sel, silent) {
+    if (!sel) {
+      sel = Selection.nullSelection;
+    } else if (_.isObject(sel) && !(sel instanceof Selection)) {
+      sel = this.getDocument().createSelection(sel);
+    }
+    if (silent) {
+      this._setModelSelection(sel, silent);
+    } else {
+      if (this._setModelSelection(sel)) {
+        this.rerenderDomSelection();
+      }
+    }
+    // Since we allow the surface be blurred natively when clicking
+    // on tools we now need to make sure that the element is focused natively
+    // when we set the selection
+    // This is actually only a problem on FF, other proses set the focus implicitly
+    // when a new DOM selection is set.
+    if (!sel.isNull() && this.$element) {
+      this.$element.focus();
+    }
+  };
+
+  this._updateModelSelection = function(options) {
+    this._setModelSelection(this.surfaceSelection.getSelection(options));
+  };
+
   /**
    * Set the model selection only (without DOM selection update).
    *
@@ -664,14 +687,6 @@ Surface.Prototype = function() {
       this.emit('selection:changed', sel, this);
     }
     return true;
-  };
-
-  this.getLogger = function() {
-    return this.logger;
-  };
-
-  this.getTextPropertyManager = function() {
-    return this.textPropertyManager;
   };
 };
 
