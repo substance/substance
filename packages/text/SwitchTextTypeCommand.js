@@ -1,6 +1,5 @@
 'use strict';
 
-var oo = require('../../util/oo');
 var SurfaceCommand = require('../../ui/SurfaceCommand');
 var _isMatch = require('lodash/lang/isMatch');
 var _find = require('lodash/collection/find');
@@ -11,9 +10,6 @@ var SwitchTextType = function(surface) {
 };
 
 SwitchTextType.Prototype = function() {
-  this.static = {
-    name: 'switchTextType'
-  };
 
   this.getSelection = function() {
     return this.getSurface().getSelection();
@@ -103,6 +99,7 @@ SwitchTextType.Prototype = function() {
   };
 };
 
-oo.inherit(SwitchTextType, SurfaceCommand);
+SurfaceCommand.extend(SwitchTextType);
+SwitchTextType.static.name = 'switchTextType';
 
 module.exports = SwitchTextType;

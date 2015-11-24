@@ -58,6 +58,6 @@ MemberContainerComponent.Prototype = function() {
 
 };
 
-oo.inherit(MemberContainerComponent, Component);
+Component.extend(MemberContainerComponent);
 
 module.exports = MemberContainerComponent;

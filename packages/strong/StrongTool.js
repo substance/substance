@@ -6,7 +6,7 @@ function StrongTool() {
   StrongTool.super.apply(this, arguments);
 }
 SurfaceTool.extend(StrongTool);
-StrongTool.static.name = 'emphasis';
-StrongTool.static.command = 'emphasis';
+StrongTool.static.name = 'strong';
+StrongTool.static.command = 'strong';
 
 module.exports = StrongTool;

@@ -71,6 +71,6 @@ HeadingComponent.Prototype = function() {
   };
 };
 
-oo.inherit(HeadingComponent, Component);
+Component.extend(HeadingComponent);
 
 module.exports = HeadingComponent;

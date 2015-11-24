@@ -1,6 +1,5 @@
 'use strict';
 
-var oo = require('../../util/oo');
 var Component = require('../../ui/Component');
 var $$ = Component.$$;
 
@@ -27,6 +26,6 @@ SourceLinkComponent.Prototype = function() {
   };
 };
 
-oo.inherit(SourceLinkComponent, Component);
+Component.extend(SourceLinkComponent);
 
 module.exports = SourceLinkComponent;
