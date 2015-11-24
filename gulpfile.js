@@ -34,7 +34,7 @@ gulp.task('doc:assets', function () {
     .pipe(gulp.dest('./dist/fonts'));
 });
 
-gulp.task('doc:data', function () {
+gulp.task('doc:data', ['doc:bundle'], function () {
   console.log('generating documentation... and saving to ./dist/documentation.json');
   var nodes = generate(config);
   fs.writeFileSync(__dirname+'/dist/documentation.json', JSON.stringify(nodes, null, '  '));
