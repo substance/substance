@@ -2,7 +2,6 @@
 
 var _ = require('../util/helpers');
 
-var oo = require('../util/oo');
 var Controller = require("../ui/Controller");
 var Component = require('../ui/Component');
 var $$ = Component.$$;
@@ -139,6 +138,6 @@ DocumentationController.Prototype = function() {
 
 };
 
-oo.inherit(DocumentationController, Controller);
+Controller.extend(DocumentationController);
 
 module.exports = DocumentationController;

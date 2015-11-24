@@ -36,5 +36,6 @@ ContainerRenderer.Prototype = function() {
 
 };
 
-oo.inherit(ContainerRenderer, Component);
+Component.extend(ContainerRenderer, ContainerNodeMixin);
+
 module.exports = ContainerRenderer;
