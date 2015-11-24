@@ -650,22 +650,9 @@ Component.Prototype = function ComponentPrototype() {
     return this;
   };
 
-  /**
-   * Add css styles.
-   *
-   * Part of the incremental updating API.
-   *
-   * @param {Object} style an object containing CSS property: value pairs.
-   */
-  this.css = function(style) {
-    if (arguments.length === 2) {
-      this._data.css(arguments[0], arguments[1]);
-      this.$el.css(arguments[0], arguments[1]);
-    } else if (style) {
-      this._data.css(style);
-      this.$el.css(style);
-    }
-    return this;
+  this.setStyle = function(name, value) {
+    this._data.setStyle(name, value);
+    this.$el.css(name, value);
   };
 
   this.getChildNodes = function() {
@@ -673,12 +660,16 @@ Component.Prototype = function ComponentPrototype() {
   };
 
   this.getChildren = function() {
-    // TODO: in DOMElement only real elements are provided
+    // TODO: this should return only real elements (i.e., without TextNodes and Comments)
     return this.children;
   };
 
+  this.createElement = function() {
+    throw new Error('Not supported yet.');
+  };
+
   this.clone = function() {
-    throw new Error('Not supported.');
+    throw new Error('Not supported yet.');
   };
 
   this.is = function(cssSelector) {
@@ -801,9 +792,13 @@ Component.Prototype = function ComponentPrototype() {
       $el.css(data.style);
     }
     // $.on
-    each(data.handlers, function(handler, event) {
+    each(data.handlers, function(handlerSpec, eventName) {
       // console.log('Binding to', event, 'in', scope.owner);
-      $el.on(event, handler.bind(scope.owner));
+      if (handlerSpec.selector) {
+        $el.on(eventName, handlerSpec.selector, handlerSpec.handler.bind(scope.owner));
+      } else {
+        $el.on(eventName, handlerSpec.handler.bind(scope.owner));
+      }
     }, this);
     return $el;
   };
@@ -848,11 +843,15 @@ Component.Prototype = function ComponentPrototype() {
     }
     // $.on / $.off
     if (!isEqual(oldData.handlers, data.handlers)) {
-      each(oldData.handlers, function(handler, event) {
-        $el.off(event);
+      each(oldData.handlers, function(handler, eventName) {
+        $el.off(eventName);
       });
-      each(data.handlers, function(handler, event) {
-        $el.on(event, handler.bind(scope.owner));
+      each(data.handlers, function(handlerSpec, eventName) {
+        if (handlerSpec.selector) {
+          $el.on(eventName, handlerSpec.selector, handlerSpec.handler.bind(scope.owner));
+        } else {
+          $el.on(eventName, handlerSpec.handler.bind(scope.owner));
+        }
       }, this);
     }
     return $el;

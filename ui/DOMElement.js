@@ -1,8 +1,9 @@
 'use strict';
 
 var oo = require('../util/oo');
-var isString = require('lodash/lang/isString');
+var isFunction = require('lodash/lang/isFunction');
 var isObject = require('lodash/lang/isObject');
+var isString = require('lodash/lang/isString');
 var each = require('lodash/collection/each');
 
 /**
@@ -240,7 +241,7 @@ DOMElement.Prototype = function() {
     jQuery style getter and setter for the *value* of an element.
 
     @abstract
-    @param {String} [val] The value to set.
+    @param {String} [value] The value to set.
     @returns {String|this} the value if used as a getter, `this` otherwise
   */
   this.val = function(value) {
@@ -257,6 +258,85 @@ DOMElement.Prototype = function() {
   };
 
   this.setValue = function(value) {
+    throw new Error('This method is abstract.');
+  };
+
+  /**
+    jQuery style method to set or get inline CSS styles.
+
+    @param {String} name the style name
+    @param {String} [value] the style value
+    @returns {String|this} the style value or this if used as a setter
+  */
+  this.css = function() {
+    if (arguments.length === 1) {
+      if (isString(arguments[0])) {
+        return this.getStyle(arguments[0]);
+      } else if (isObject(arguments[0])) {
+        each(arguments[0], function(value, name) {
+          this.setStyle(name, value);
+        }, this);
+      } else {
+        throw new Error('Illegal arguments.');
+      }
+    } else if (arguments.length === 2) {
+      this.setStyle(arguments[0], arguments[1]);
+    } else {
+      throw new Error('Illegal arguments.');
+    }
+    return this;
+  };
+
+  this.getStyle = function(name) {
+    throw new Error('This method is abstract.');
+  };
+
+  this.setStyle = function(name, value) {
+    throw new Error('This method is abstract.');
+  };
+
+  /**
+    Registers an Element event handler.
+
+    @param {String} event The event name.
+    @param {String} [selector] A css selector which is used to filter events by evaluating `event.target.is(selector)`.
+    @param {Function} handler The handler function.
+    @returns {this}
+  */
+  this.on = function(eventName, selector, handler) {
+    if (!isString(eventName)) {
+      throw new Error('Illegal argument: "event" must be a String.');
+    }
+    if (arguments.length === 2) {
+      handler = arguments[1];
+      selector = null;
+    }
+    if (selector && !isString(selector)) {
+      throw new Error('Illegal argument: selector must be a string.');
+    }
+    if (!handler || !isFunction(handler)) {
+      throw new Error('Illegal argument: invalid handler function for event ' + eventName);
+    }
+    this._addHandler(eventName, selector, handler);
+    return this;
+  };
+
+  /**
+    Unregisters the handler of a given event.
+
+    @param {String} event The event name.
+    @returns {this}
+  */
+  this.off = function(eventName) {
+    this._removeHandler(eventName);
+    return this;
+  };
+
+  this.addHandler = function(eventName, selector, handler) {
+    throw new Error('This method is abstract.');
+  };
+
+  this.removeHandler = function(eventName) {
     throw new Error('This method is abstract.');
   };
 
@@ -335,6 +415,16 @@ DOMElement.Prototype = function() {
   };
 
   /**
+    Creates a DOMElement of the same type.
+
+    @param {String} str a tag name or an HTML element as string.
+    @returns {ui/DOMElement}
+  */
+  this.createElement = function(str) {
+    throw new Error('This method is abstract.');
+  };
+
+  /**
     Checks if a given CSS selector matches for this element.
 
     **Attention**
@@ -346,6 +436,28 @@ DOMElement.Prototype = function() {
     @returns {Boolean}
    */
   this.is = function(cssSelector) {
+    throw new Error('This method is abstract.');
+  };
+
+  /**
+    Get the parent element of this element.
+
+    @abstract
+    @returns {ui/DOMElement} the parent element
+   */
+  this.getParent = function() {
+    throw new Error('This method is abstract.');
+  };
+
+  /**
+    Get the root ancestor element of this element.
+
+    In the browser this is the `window.document`.
+
+    @abstract
+    @returns {ui/DOMElement} the root element
+   */
+  this.getRoot = function() {
     throw new Error('This method is abstract.');
   };
 

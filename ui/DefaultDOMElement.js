@@ -12,6 +12,7 @@ function DefaultDOMElement(el) {
   }
   this.el = el;
   this.$el = $(el);
+  this._handlers = {};
   Object.freeze(this);
 }
 
@@ -100,6 +101,36 @@ DefaultDOMElement.Prototype = function() {
     return this;
   };
 
+  this.getStyle = function(name) {
+    return this.$el.css(name);
+  };
+
+  this.setStyle = function(name, value) {
+    this.$el.css(name, value);
+  };
+
+  this.addHandler = function(eventName, selector, handler) {
+    if (this._handlers[eventName]) {
+      throw new Error('Handler for event "' + eventName + '" has already been registered.');
+    }
+    this._handlers[eventName] = {
+      selector: selector,
+      handler: handler
+    };
+    if (inBrowser) {
+      this.$el.on(eventName, selector, handler);
+    }
+    // not supported in cheerio
+  };
+
+  this.removeHandler = function(eventName) {
+    delete this._handlers[eventName];
+    if (inBrowser) {
+      this.$el.off(eventName);
+    }
+    // not supported in cheerio
+  };
+
   this.getNodeType = function() {
     if (this.isTextNode()) {
       return "text";
@@ -157,6 +188,10 @@ DefaultDOMElement.Prototype = function() {
     return new DefaultDOMElement.NodeIterator(this.el.childNodes);
   };
 
+  this.createElement = function(str) {
+    return DefaultDOMElement.createElement(str);
+  };
+
   this.clone = function() {
     var $clone = this.$el.clone();
     return new DefaultDOMElement($clone[0]);
@@ -164,6 +199,35 @@ DefaultDOMElement.Prototype = function() {
 
   this.is = function(cssSelector) {
     return this.$el.is(cssSelector);
+  };
+
+  this.getParent = function() {
+    var parent;
+    if (inBrowser) {
+      parent = this.el.parentNode;
+    } else {
+      parent = this.el.parent;
+    }
+    if (parent) {
+      return new DefaultDOMElement(parent);
+    } else {
+      return null;
+    }
+  };
+
+  this.getRoot = function() {
+    var root;
+    if (inBrowser) {
+      root = this.el.ownerDocument;
+    } else {
+      root = this.el.root;
+    }
+    if (root) {
+      return new DefaultDOMElement(root);
+    } else {
+      return null;
+    }
+    return new DefaultDOMElement(root);
   };
 
   this.find = function(cssSelector) {
