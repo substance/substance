@@ -60,17 +60,30 @@ Clipboard.Prototype = function() {
     @private
     @param {util/jquery} a jQuery wrapped element
   */
-  this.attach = function(rootElement) {
+  this.attach = function(el) {
     // TODO: we want to use ui/DOMElement instead of $
     // However, we need to inject an element into document.body, which can't be accessed via
     // DOMElement API atm.
 
+    el.addEventListener('copy', null, this.onCopy, this);
+    el.addEventListener('cut', null, this.onCut, this);
+
+    if (this.isIe) {
+      el.addEventListener('beforepaste', null, this.onBeforePasteShim, this);
+      el.addEventListener('paste', null, this.onPasteShim, this);
+    } else {
+      el.addEventListener('paste', null, this.onPaste, this);
+    }
+  };
+
+  this.didMount = function() {
+    var el = this.surface;
     // Note: we need a hidden content-editable element to be able to intercept native pasting.
     // We put this element into document.body and share it among all Clipboard instances.
     // This element must be content-editable, thus it must not have `display:none` or `visibility:hidden`,
     // To hide it from the view we use a zero width and position it outside of the screen.
     if (!Clipboard._sharedPasteElement) {
-      var root = rootElement.getRoot();
+      var root = el.getRoot();
       var body = root.find('body');
       if (body) {
         var _sharedPasteElement = root.createElement('div')
@@ -86,16 +99,6 @@ Clipboard.Prototype = function() {
       }
     }
     this.el = Clipboard._sharedPasteElement;
-
-    rootElement.on('copy', this.onCopy);
-    rootElement.on('cut', this.onCut);
-
-    if (this.isIe) {
-      rootElement.on('beforepaste', this.onBeforePasteShim);
-      rootElement.on('paste', this.onPasteShim);
-    } else {
-      rootElement.on('paste', this.onPaste);
-    }
   };
 
   this.detach = function(rootElement) {
@@ -110,6 +113,9 @@ Clipboard.Prototype = function() {
   };
 
   this.onCopy = function(event) {
+    // we use $ internally, this unwrapping to get the native event
+    event = event.originalEvent;
+
     // console.log("Clipboard.onCopy", arguments);
     var clipboardData = this._copy();
     // in the case that browser doesn't provide event.clipboardData
@@ -120,7 +126,7 @@ Clipboard.Prototype = function() {
       event.preventDefault();
       // convert the copied document to json
       var converter = new JSONConverter();
-      var json = converter.exportDocument(this.clipboardDoc);
+      var json = converter.exportDocument(clipboardData.doc);
       json.__id__ = clipboardData.doc.__id__;
       // store as json, plain text, and html
       event.clipboardData.setData('application/substance', JSON.stringify(json));
@@ -130,6 +136,9 @@ Clipboard.Prototype = function() {
   };
 
   this.onCut = function(event) {
+    // we use $ internally, this unwrapping to get the native event
+    event = event.originalEvent;
+
     // preventing default behavior to avoid that contenteditable
     // destroys our DOM
     event.preventDefault();
@@ -143,8 +152,11 @@ Clipboard.Prototype = function() {
   };
 
   // Works on Safari/Chrome/FF
-  this.onPaste = function(e) {
-    var clipboardData = e.clipboardData;
+  this.onPaste = function(event) {
+    // we use $ internally, this unwrapping to get the native event
+    event = event.originalEvent;
+
+    var clipboardData = event.clipboardData;
     var surface = this.getSurface();
 
     // FIXME: it seems, that in order to share the clipboard among
@@ -169,8 +181,8 @@ Clipboard.Prototype = function() {
       return;
     }
 
-    e.preventDefault();
-    e.stopPropagation();
+    event.preventDefault();
+    event.stopPropagation();
     // console.log('Available types', types);
 
     var json;
@@ -229,27 +241,6 @@ Clipboard.Prototype = function() {
     }
   };
 
-  this._copy = function() {
-    var wSel = window.getSelection();
-    var surface = this.getSurface();
-    var sel = surface.getSelection();
-    var doc = surface.getDocument();
-    var clipboardDoc = null;
-    var clipboardText = "";
-    var clipboardHtml = "";
-    if (wSel.rangeCount > 0 && !sel.isCollapsed()) {
-      var wRange = wSel.getRangeAt(0);
-      this.clipboardText = wRange.toString();
-      this.clipboardDoc = surface.copy(doc, sel);
-      // console.log("Clipboard._copy(): created a copy", this.clipboardDoc);
-    }
-    return {
-      doc: clipboardDoc,
-      html: clipboardHtml,
-      text: clipboardText
-    };
-  };
-
   this.onBeforePasteShim = function() {
     var surface = this.getSurface();
     if (!surface) return;
@@ -273,6 +264,27 @@ Clipboard.Prototype = function() {
       var docEl = DOMElement.parseHTML(html);
       return this._pasteHtml(docEl);
     }.bind(this));
+  };
+
+  this._copy = function() {
+    var wSel = window.getSelection();
+    var surface = this.getSurface();
+    var sel = surface.getSelection();
+    var doc = surface.getDocument();
+    var clipboardDoc = null;
+    var clipboardText = "";
+    var clipboardHtml = "";
+    if (wSel.rangeCount > 0 && !sel.isCollapsed()) {
+      var wRange = wSel.getRangeAt(0);
+      clipboardText = wRange.toString();
+      clipboardDoc = surface.copy(doc, sel);
+      // console.log("Clipboard._copy(): created a copy", this.clipboardDoc);
+    }
+    return {
+      doc: clipboardDoc,
+      html: clipboardHtml,
+      text: clipboardText
+    };
   };
 
   this._pasteSubstanceData = function(json, text) {

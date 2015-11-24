@@ -286,17 +286,18 @@ VirtualDOMElement.Prototype = function() {
     this.style[name] = value;
   };
 
-  this.addHandler = function(eventName, selector, handler) {
+  this.addEventListener = function(eventName, selector, handler, context) {
     if (this.handlers[eventName]) {
       throw new Error('Handler for event "' + eventName + '" has already been registered.');
     }
     this.handlers[eventName] = {
       selector: selector,
-      handler: handler
+      handler: handler,
+      context: context
     };
   };
 
-  this.removeHandler = function(eventName) {
+  this.removeEventListener = function(eventName) {
     delete this.handlers[eventName];
   };
 

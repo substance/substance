@@ -38,14 +38,12 @@ function Surface() {
   this.name = this.props.name;
   this.selection = Document.nullSelection;
   this.clipboard = new Clipboard(this, doc.getClipboardImporter(), doc.getClipboardExporter());
-  // this.element must be set via surface.attach(element)
-  this.element = null;
-  this.$element = null;
 
   // HACK: we need to listen to mousup on document
+  // to catch events outside the surface, mouseup event must be listened on $document
   this.$document = $(window.document);
-  // this event is triggered by $document
   this.onMouseUp = this.onMouseUp.bind(this);
+  // <----
 
   this.surfaceSelection = null;
   this.dragging = false;
@@ -92,13 +90,15 @@ Surface.Prototype = function() {
     el.on('focus', this.onNativeFocus);
     el.on('blur', this.onNativeBlur);
 
+    this.clipboard.attach(el);
+
     return el;
   };
 
   this.didMount = function() {
     var doc = this.getDocument();
     this.surfaceSelection = new SurfaceSelection(this.el, doc, this.getContainer());
-    this.clipboard.attach(this);
+    this.clipboard.didMount();
     // Document Change Events
     this.domObserver.observe(this.el, this.domObserverConfig);
   };
@@ -194,7 +194,7 @@ Surface.Prototype = function() {
 
   this.disable = function() {
     if (this.enableContentEditable) {
-      this.$element.removeAttr('contentEditable');
+      this.el.removeAttr('contentEditable');
     }
     this.enabled = false;
   };
@@ -666,8 +666,8 @@ Surface.Prototype = function() {
     // when we set the selection
     // This is actually only a problem on FF, other proses set the focus implicitly
     // when a new DOM selection is set.
-    if (!sel.isNull() && this.$element) {
-      this.$element.focus();
+    if (!sel.isNull() && this.el) {
+      this.el.focus();
     }
   };
 

@@ -317,7 +317,7 @@ DOMElement.Prototype = function() {
     if (!handler || !isFunction(handler)) {
       throw new Error('Illegal argument: invalid handler function for event ' + eventName);
     }
-    this.addHandler(eventName, selector, handler);
+    this.addEventListener(eventName, selector, handler);
     return this;
   };
 
@@ -328,16 +328,25 @@ DOMElement.Prototype = function() {
     @returns {this}
   */
   this.off = function(eventName) {
-    this.removeHandler(eventName);
+    this.removeEventListener(eventName);
     return this;
   };
 
-  this.addHandler = function(eventName, selector, handler) {
+  this.addEventListener = function(eventName, selector, handler, context) {
     throw new Error('This method is abstract.');
   };
 
-  this.removeHandler = function(eventName) {
+  this.removeEventListener = function(eventName) {
     throw new Error('This method is abstract.');
+  };
+
+  /**
+    Focusses this element.
+
+    **Attention: this makes only sense for elements which are rendered in the browser**
+
+  */
+  this.focus = function() {
   };
 
   /**

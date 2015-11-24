@@ -793,12 +793,7 @@ Component.Prototype = function ComponentPrototype() {
     }
     // $.on
     each(data.handlers, function(handlerSpec, eventName) {
-      // console.log('Binding to', event, 'in', scope.owner);
-      if (handlerSpec.selector) {
-        $el.on(eventName, handlerSpec.selector, handlerSpec.handler.bind(scope.owner));
-      } else {
-        $el.on(eventName, handlerSpec.handler.bind(scope.owner));
-      }
+      this._bindHandler($el, scope, eventName, handlerSpec);
     }, this);
     return $el;
   };
@@ -847,11 +842,7 @@ Component.Prototype = function ComponentPrototype() {
         $el.off(eventName);
       });
       each(data.handlers, function(handlerSpec, eventName) {
-        if (handlerSpec.selector) {
-          $el.on(eventName, handlerSpec.selector, handlerSpec.handler.bind(scope.owner));
-        } else {
-          $el.on(eventName, handlerSpec.handler.bind(scope.owner));
-        }
+        this._bindHandler($el, scope, eventName, handlerSpec);
       }, this);
     }
     return $el;
@@ -1123,6 +1114,21 @@ Component.Prototype = function ComponentPrototype() {
     this.state = state || {};
     // freezing state to 'enforce' immutability
     Object.freeze(this.state);
+  };
+
+  this._bindHandler = function($el, scope, eventName, handlerSpec) {
+    // console.log('Binding to', event, 'in', scope.owner);
+    var handler;
+    if (handlerSpec.context) {
+      handler = handlerSpec.handler.bind(handlerSpec.context);
+    } else {
+      handler = handlerSpec.handler.bind(scope.owner);
+    }
+    if (handlerSpec.selector) {
+      $el.on(eventName, handlerSpec.selector, handler);
+    } else {
+      $el.on(eventName, handler);
+    }
   };
 };
 

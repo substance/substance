@@ -109,27 +109,39 @@ DefaultDOMElement.Prototype = function() {
     this.$el.css(name, value);
   };
 
-  this.addHandler = function(eventName, selector, handler) {
+  this.addEventListener = function(eventName, selector, handler, context) {
     if (this._handlers[eventName]) {
       throw new Error('Handler for event "' + eventName + '" has already been registered.');
     }
     this._handlers[eventName] = {
       selector: selector,
-      handler: handler
+      handler: handler,
+      context: context
     };
     if (inBrowser) {
-      this.$el.on(eventName, selector, handler);
+      if (context) {
+        this.$el.on(eventName, selector, handler.bind(context));
+      } else {
+        this.$el.on(eventName, selector, handler);
+      }
     }
     // not supported in cheerio
   };
 
-  this.removeHandler = function(eventName) {
+  this.removeEventListener = function(eventName) {
     delete this._handlers[eventName];
     if (inBrowser) {
       this.$el.off(eventName);
     }
     // not supported in cheerio
   };
+
+  this.focus = function() {
+    if (inBrowser) {
+      this.$el.focus();
+    }
+  };
+
 
   this.getNodeType = function() {
     if (this.isTextNode()) {
