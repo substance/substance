@@ -1,6 +1,5 @@
 'use strict';
 
-var oo = require('../util/oo');
 var Surface = require('./Surface');
 var TextPropertyManager = require('../model/TextPropertyManager');
 var Component = require('./Component');
@@ -59,5 +58,5 @@ TextPropertyAnnotator.Prototype = function() {
   };
 };
 
-oo.inherit(TextPropertyAnnotator, Surface);
+Surface.extend(TextPropertyAnnotator);
 module.exports = TextPropertyAnnotator;

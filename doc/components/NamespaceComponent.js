@@ -1,6 +1,5 @@
 'use strict';
 
-var oo = require('../../util/oo');
 var Component = require('../../ui/Component');
 var $$ = Component.$$;
 var MemberContainerComponent = require('./MemberContainerComponent');
@@ -47,6 +46,6 @@ NamespaceComponent.Prototype = function() {
 
 };
 
-oo.inherit(NamespaceComponent, MemberContainerComponent);
+MemberContainerComponent.extend(NamespaceComponent);
 
 module.exports = NamespaceComponent;

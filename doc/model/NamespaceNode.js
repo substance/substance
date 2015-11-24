@@ -1,6 +1,5 @@
 'use strict';
 
-var oo = require('../../util/oo');
 var Node = require('../../model/DocumentNode');
 var MemberContainerMixin = require('./MemberContainerMixin');
 
@@ -36,8 +35,7 @@ NamespaceNode.Prototype = function() {
 
 };
 
-oo.inherit(NamespaceNode, Node);
-oo.mixin(NamespaceNode, MemberContainerMixin);
+Node.extend(NamespaceNode, MemberContainerMixin);
 
 NamespaceNode.static.name = 'namespace';
 

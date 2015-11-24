@@ -1,7 +1,6 @@
 "use strict";
 
 var _ = require('../util/helpers');
-var oo = require('../util/oo');
 var Component = require('./Component');
 var $$ = Component.$$;
 var Panel = require('./Panel');
@@ -124,12 +123,12 @@ TocPanel.Prototype = function() {
   };
 };
 
-oo.inherit(TocPanel, Panel);
+Panel.extend(TocPanel);
 
 // Panel Configuration
 // -----------------
 
-TocPanel.contextId = "toc";
-TocPanel.icon = "fa-align-left";
+TocPanel.contextId = 'toc';
+TocPanel.icon = 'fa-align-left';
 
 module.exports = TocPanel;

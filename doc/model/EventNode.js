@@ -1,13 +1,12 @@
 'use strict';
 
-var oo = require('../../util/oo');
 var DocumentedNode = require('./DocumentedNode');
 
 function EventNode() {
   EventNode.super.apply(this, arguments);
 }
 
-oo.inherit(EventNode, DocumentedNode);
+DocumentedNode.extend(EventNode);
 
 EventNode.static.name = 'event';
 

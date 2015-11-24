@@ -1,6 +1,5 @@
 'use strict';
 
-var oo = require('../../util/oo');
 var DocumentedNode = require('./DocumentedNode');
 var MemberContainerMixin = require('./MemberContainerMixin');
 
@@ -26,8 +25,7 @@ ModuleNode.Prototype = function() {
 
 };
 
-oo.inherit(ModuleNode, DocumentedNode);
-oo.mixin(ModuleNode, MemberContainerMixin);
+DocumentedNode.extend(ModuleNode, MemberContainerMixin);
 
 ModuleNode.static.name = 'module';
 

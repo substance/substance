@@ -1,6 +1,5 @@
 'use strict';
 
-var oo = require('../../util/oo');
 var Document = require('../../model/Document');
 var Schema = require('../../model/DocumentSchema');
 var schema = new Schema('substance-documentation', '0.1.0');
@@ -58,7 +57,7 @@ Documentation.Prototype = function() {
 };
 
 
-oo.inherit(Documentation, Document);
+Document.extend(Documentation);
 Documentation.schema = schema;
 
 Documentation.getNodeInfo = function(node) {

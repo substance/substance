@@ -1,7 +1,6 @@
 'use strict';
 
 var $ = require('../util/jquery');
-var oo = require('../util/oo');
 var isString = require('lodash/lang/isString');
 var isEqual = require('lodash/lang/isEqual');
 var clone = require('lodash/lang/clone');
@@ -151,11 +150,6 @@ Component.Prototype = function ComponentPrototype() {
     return this.childContext || {};
   };
 
-  /**
-    Hook which is called in the construction phase before the component is rendered.
-    Use this in conjunction with {@link ui/Component.extend}. You don't want to use this if you
-    provide your own constructor function and {@link util/oo.inherit}
-  */
   this.initialize = function(props, state) {
     // jshint unused: false
   };
@@ -1131,10 +1125,9 @@ Component.Prototype = function ComponentPrototype() {
     // freezing state to 'enforce' immutability
     Object.freeze(this.state);
   };
-
 };
 
-oo.inherit(Component, DefaultDOMElement);
+DefaultDOMElement.extend(Component);
 
 Object.defineProperties(Component.prototype, {
   /**
@@ -1171,18 +1164,19 @@ _htmlParams = function(data) {
 Component.Root = function(params) {
   Component.call(this, "root", params);
 };
-oo.inherit(Component.Root, Component);
+Component.extend(Component.Root);
 
 Component.Container = function(parent, params) {
   Component.call(this, parent, params);
 };
-oo.inherit(Component.Container, Component);
+Component.extend(Component.Container);
 
 Component.HTMLElement = function(parent, tagName, params) {
   this._tagName = tagName;
   Component.Container.call(this, parent, params);
 };
-oo.inherit(Component.HTMLElement, Component.Container);
+
+Component.Container.extend(Component.HTMLElement);
 
 Component.Text = function(parent, text) {
   Component.call(this, parent);
@@ -1203,7 +1197,7 @@ Component.Text.Prototype = function() {
     }
   };
 };
-oo.inherit(Component.Text, Component);
+Component.extend(Component.Text);
 
 Component.createElement = VirtualDOMElement.createElement;
 Component.$$ = Component.createElement;

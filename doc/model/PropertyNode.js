@@ -1,13 +1,12 @@
 'use strict';
 
-var oo = require('../../util/oo');
 var DocumentedNode = require('./DocumentedNode');
 
 function PropertyNode() {
   PropertyNode.super.apply(this, arguments);
 }
 
-oo.inherit(PropertyNode, DocumentedNode);
+DocumentedNode.extend(PropertyNode);
 
 PropertyNode.static.name = 'property';
 

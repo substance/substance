@@ -1,7 +1,6 @@
 "use strict";
 
 var EventEmitter = require("./EventEmitter");
-var oo = require("./oo");
 
 // Logger
 // ----------------
@@ -43,6 +42,6 @@ Logger.Prototype = function() {
   };
 };
 
-oo.inherit(Logger, EventEmitter);
+EventEmitter.extend(Logger);
 
 module.exports = Logger;

@@ -327,6 +327,8 @@ TableMatrix.Cell = function Cell(node, row, col) {
   this.key = row + '_' + col;
 };
 
+oo.initClass(TableMatrix.Cell);
+
 TableMatrix.Cell.sortDescending = function( a, b ) {
   if (a.row !== b.row) return b.row - a.row;
   return b.col - a.col;
@@ -348,7 +350,7 @@ TableMatrix.Placeholder = function PlaceHolder( owner, row, col ) {
   this.owner = owner;
 };
 
-oo.inherit(TableMatrix.Placeholder, TableMatrix.Cell);
+TableMatrix.Cell.extend(TableMatrix.Placeholder);
 
 /*
  * An object describing a rectangular selection in a table matrix.

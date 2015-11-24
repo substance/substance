@@ -208,7 +208,7 @@ DefaultDOMElement.Prototype = function() {
 
 };
 
-oo.inherit(DefaultDOMElement, DOMElement);
+DOMElement.extend(DefaultDOMElement);
 
 DefaultDOMElement.createElement = function(str) {
   str = str.trim();

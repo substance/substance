@@ -1,6 +1,5 @@
 'use strict';
 
-var oo = require('../../util/oo');
 var NodeIndex = require('../../model/data/NodeIndex');
 var PathAdapter = require('../../util/PathAdapter');
 
@@ -87,6 +86,6 @@ MemberIndex.Prototype = function() {
 
 };
 
-oo.inherit(MemberIndex, NodeIndex);
+NodeIndex.extend(MemberIndex);
 
 module.exports = MemberIndex;

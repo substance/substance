@@ -213,6 +213,6 @@ PathAdapter.Arrays.Prototype = function() {
 
 };
 
-oo.inherit(PathAdapter.Arrays, PathAdapter);
+PathAdapter.extend(PathAdapter.Arrays);
 
 module.exports = PathAdapter;
