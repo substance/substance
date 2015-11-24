@@ -1,17 +1,13 @@
 'use strict';
 
-var AnnotationTool = require('../../ui/AnnotationTool');
-var oo = require('../../util/oo');
+var SurfaceTool = require('../../ui/SurfaceTool');
 
 function CodeTool() {
-  AnnotationTool.apply(this, arguments);
+  SurfaceTool.apply(this, arguments);
 }
 
-oo.inherit(CodeTool, AnnotationTool);
-
-CodeTool.static = {
-  name: 'code',
-  command: 'code' 
-};
+SurfaceTool.extend(CodeTool);
+CodeTool.static.name = 'code';
+CodeTool.static.command = 'code';
 
 module.exports = CodeTool;

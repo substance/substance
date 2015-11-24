@@ -2,24 +2,30 @@
 
 var AnnotationCommand = require('../../ui/AnnotationCommand');
 
-var LinkCommand = AnnotationCommand.extend({
-  getAnnotationData: function() {
+function LinkCommand() {
+  LinkCommand.super.apply(this, arguments);
+}
+
+LinkCommand.Prototype = function() {
+
+  this.getAnnotationData = function() {
     return {
       url: "",
       title: ""
     };
-  },
+  };
 
   // When there's some overlap with only a single annotation we do an expand
-  canEdit: function(annos, sel) {
+  this.canEdit = function(annos, sel) {
     // jshint unused: false
     return annos.length === 1;
-  },
+  };
 
-  static: {
-    name: 'link',
-    annotationType: 'link'
-  }
-});
+};
+
+AnnotationCommand.extend(LinkCommand);
+
+LinkCommand.static.name = 'link';
+LinkCommand.static.annotationType = 'link';
 
 module.exports = LinkCommand;

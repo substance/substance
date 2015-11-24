@@ -2,8 +2,9 @@
 
 var PropertyAnnotation = require('../../model/PropertyAnnotation');
 
-var Code = PropertyAnnotation.extend();
-
-Code.static.name = "code";
-
+function Code() {
+  Code.super.apply(this, arguments);
+}
+PropertyAnnotation.extend(Code);
+Code.static.name = 'code';
 module.exports = Code;

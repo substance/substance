@@ -1,6 +1,5 @@
 'use strict';
 
-var oo = require('../util/oo');
 var Tool = require('./Tool');
 
 /**
@@ -96,5 +95,5 @@ SurfaceTool.Prototype = function() {
   };
 };
 
-oo.inherit(SurfaceTool, Tool);
+Tool.extend(SurfaceTool);
 module.exports = SurfaceTool;

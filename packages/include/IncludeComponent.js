@@ -1,6 +1,5 @@
 'use strict';
 
-var oo = require('../../util/oo');
 var Component = require('../Component');
 var UnsupportedNode = require('./unsupported_node');
 var $$ = Component.$$;
@@ -27,6 +26,6 @@ IncludeComponent.Prototype = function() {
   };
 };
 
-oo.inherit(IncludeComponent, Component);
+Component.extend(IncludeComponent);
 
 module.exports = IncludeComponent;

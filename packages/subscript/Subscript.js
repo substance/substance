@@ -2,8 +2,10 @@
 
 var PropertyAnnotation = require('../../model/PropertyAnnotation');
 
-var Subscript = PropertyAnnotation.extend();
+function Subscript() {
+  Subscript.super.apply(this, arguments);
+}
 
+PropertyAnnotation.extend(Subscript);
 Subscript.static.name = 'subscript';
-
 module.exports = Subscript;

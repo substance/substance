@@ -2,8 +2,10 @@
 
 var PropertyAnnotation = require('../../model/PropertyAnnotation');
 
-var Superscript = PropertyAnnotation.extend();
+function Superscript() {
+  Superscript.super.apply(this, arguments);
+}
 
+PropertyAnnotation.extend(Superscript);
 Superscript.static.name = 'superscript';
-
 module.exports = Superscript;
