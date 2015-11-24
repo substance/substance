@@ -23,26 +23,26 @@ var fs = require('fs');
 gulp.task('doc:sass', function() {
   gulp.src('./doc/app.scss')
     .pipe(sass().on('error', sass.logError))
-    .pipe(gulp.dest('./dist'));
+    .pipe(gulp.dest('./master/dist'));
 });
 
 gulp.task('doc:assets', function () {
   gulp.src('./doc/assets/**/*', {base:"./doc/assets"})
-    .pipe(gulp.dest('./dist'));
+    .pipe(gulp.dest('./dist/master'));
 
   gulp.src('node_modules/font-awesome/fonts/*')
-    .pipe(gulp.dest('./dist/fonts'));
+    .pipe(gulp.dest('./dist/master/fonts'));
 });
 
 gulp.task('doc:data', ['doc:bundle'], function () {
   console.log('generating documentation... and saving to ./dist/documentation.json');
   var nodes = generate(config);
-  fs.writeFileSync(__dirname+'/dist/documentation.json', JSON.stringify(nodes, null, '  '));
+  fs.writeFileSync(__dirname+'/dist/master/documentation.json', JSON.stringify(nodes, null, '  '));
 });
 
 gulp.task('doc:bundle', function () {
-  console.log('bunlding DocumentationReader... and saving to ./dist');
-  return gulp.src('./doc/app.js')
+  console.log('bunlding DocumentationReader... and saving to ./dist/master');
+  return gulp.src('./doc/master/app.js')
     .pipe(through2.obj(function (file, enc, next) {
       browserify(file.path)
         .bundle(function (err, res) {
