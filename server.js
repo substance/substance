@@ -86,7 +86,7 @@ app.get('/test/test.js', function (req, res, next) {
 });
 
 // Provide FontAwesome fonts
-// app.use(express.static(__dirname));
+app.use(express.static(__dirname));
 
 app.listen(PORT);
 console.log('Server is listening on %s', PORT);
