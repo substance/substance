@@ -23,7 +23,7 @@ var fs = require('fs');
 gulp.task('doc:sass', function() {
   gulp.src('./doc/app.scss')
     .pipe(sass().on('error', sass.logError))
-    .pipe(gulp.dest('./master/dist'));
+    .pipe(gulp.dest('./dist/master'));
 });
 
 gulp.task('doc:assets', function () {
@@ -42,7 +42,7 @@ gulp.task('doc:data', ['doc:bundle'], function () {
 
 gulp.task('doc:bundle', function () {
   console.log('bunlding DocumentationReader... and saving to ./dist/master');
-  return gulp.src('./doc/master/app.js')
+  return gulp.src('./doc/app.js')
     .pipe(through2.obj(function (file, enc, next) {
       browserify(file.path)
         .bundle(function (err, res) {
@@ -56,7 +56,7 @@ gulp.task('doc:bundle', function () {
       this.emit('end');
     })
     .pipe(uglify())
-    .pipe(gulp.dest('./dist'));
+    .pipe(gulp.dest('./dist/master'));
 });
 
 gulp.task('doc', ['doc:sass', 'doc:bundle', 'doc:assets', 'doc:data']);
