@@ -1,6 +1,5 @@
 'use strict';
 
-var oo = require('../util/oo');
 var Component = require('./Component');
 var $$ = Component.$$;
 var $ = require('../util/jquery');
@@ -9,6 +8,17 @@ var $ = require('../util/jquery');
   A simple container holding editing tools.
   
   @class
+  @component
+
+  @example
+  
+  ```js
+  $$(Toolbar).append(
+    $$(Toolbar.Group).append(
+      $$(UndoTool).append($$(Icon, {icon: 'fa-undo'}))
+    )
+  )
+  ```
 */
 
 function Toolbar() {
@@ -23,14 +33,20 @@ Toolbar.Prototype = function() {
   };
 };
 
-oo.inherit(Toolbar, Component);
+Component.extend(Toolbar);
 
 /**
   @class Toolbar.Dropdown
-*/
-
-/**
-  @constructor Toolbar.Dropdown
+  @component
+  
+  @prop {ui/VirtualDOMElement} name unique editor name
+  @example
+  
+  ```
+  $$(Toolbar.Dropdown, {label: $$(Icon, {icon: 'fa-image'}),}).append(
+    $$(InsertFigureTool).append(this.i18n.t('insert'))
+  )
+  ```
 */
 
 function Dropdown() {
@@ -91,14 +107,21 @@ Dropdown.Prototype = function() {
   };
 };
 
-oo.inherit(Dropdown, Component);
+Component.extend(Dropdown);
 
 /**
   @class Toolbar.Group
-*/
+  @component
 
-/**
-  @constructor Toolbar.Group
+  @prop {ui/VirtualDOMElement} name unique editor name
+
+  @example
+    
+  ```js
+  $$(Toolbar.Group).append(
+    $$(StrongTool).append($$(Icon, {icon: 'fa-bold'}))
+  )
+  ```
 */
 
 function Group() {
@@ -113,7 +136,7 @@ Group.Prototype = function() {
   };
 };
 
-oo.inherit(Group, Component);
+Component.extend(Group);
 
 
 Toolbar.Group = Group;
