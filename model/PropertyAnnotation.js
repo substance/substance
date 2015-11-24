@@ -11,13 +11,15 @@ var DocumentNode = require('./DocumentNode');
   @class
   @abstract
 
-  @prop {String} path Identifies a text property in the document (e.g. ["text_1", "content"])
+  @prop {String[]} path Identifies a text property in the document (e.g. `['text_1', 'content']`)
   @prop {Number} startOffset the character where the annoation starts
   @prop {Number} endOffset: the character where the annoation starts
   
   @example
 
-  Here's how a **strong** annotation is created. In Substance annotations are stored separately from the text. Annotations are just regular nodes in the document. They refer to a certain range (`startOffset, endOffset`) in a text property (`path`).
+  Here's how a **strong** annotation is created. In Substance annotations are stored
+  separately from the text. Annotations are just regular nodes in the document.
+  They refer to a certain range (`startOffset, endOffset`) in a text property (`path`).
 
   ```js
   doc.transaction(function(tx) {
