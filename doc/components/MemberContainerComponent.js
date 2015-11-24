@@ -1,7 +1,5 @@
 'use strict';
 
-var oo = require('../../util/oo');
-
 var Component = require('../../ui/Component');
 var $$ = Component.$$;
 var UnsupportedNode = require('../../ui/UnsupportedNode');
