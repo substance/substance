@@ -1,110 +1,140 @@
 "use strict";
 
-var $ = require('../util/jquery');
 var oo = require('../util/oo');
 var uuid = require('../util/uuid');
+var DOMElement = require('./DefaultDOMElement');
 var DefaultDOMElement = require('./DefaultDOMElement');
 var JSONConverter = require('../model/JSONConverter');
-var CLIPBOARD_CONTAINER_ID = require('../model/transform/copySelection').CLIPBOARD_CONTAINER_ID;
 
-/*
-  Surface Clipboard is owned by a module:ui/FormEditor.
+/**
+  The Clipboard is a Component which should be rendered as a sibling component
+  of one or multiple Surfaces.
 
-  @class
- */
+  It uses the JSONImporter and JSONExporter for internal copy'n'pasting,
+  i.e., within one window or between two instances with the same DocumentSchema.
 
-var Clipboard = function(controller, htmlImporter, htmlExporter) {
+  For inter-application copy'n'paste, the ClipboardImporter and ClipboardExporter is used.
+  For HTML coming from the clipboard we support a fixed set of content types:
 
-  this.controller = controller;
+    - Paragraph
+    - Heading
+    - Strong/Bold
+    - Emphasis/Italic
+    - Link
+    - Table
+    - List
+
+  To make this work for a custom schema, you must include the default nodes into your schema.
+  Otherwise, only plain text will be copied. If `Paragraph` is not present in your schema,
+  `schema.getDefaultTextType()` is used instead.
+*/
+var Clipboard = function(surface, htmlImporter, htmlExporter) {
+
+  this.surface = surface;
   this.htmlImporter = htmlImporter;
   this.htmlExporter = htmlExporter;
 
-  this._contentDoc = null;
-  this._contentText = "";
-
-  this._onKeyDown = this.onKeyDown.bind(this);
-  this._onCopy = this.onCopy.bind(this);
-  this._onCut = this.onCut.bind(this);
+  this.onCopy = this.onCopy.bind(this);
+  this.onCut = this.onCut.bind(this);
 
   this.isIe = (window.navigator.userAgent.toLowerCase().indexOf("msie") != -1 || window.navigator.userAgent.toLowerCase().indexOf("trident") != -1);
   this.isFF = window.navigator.userAgent.toLowerCase().indexOf('firefox') > -1;
 
   if (this.isIe) {
-    this._beforePasteShim = this.beforePasteShim.bind(this);
-    this._pasteShim = this.pasteShim.bind(this);
+    this.onBeforePasteShim = this.onBeforePasteShim.bind(this);
+    this.onPasteShim = this.onPasteShim.bind(this);
   } else {
-    this._onPaste = this.onPaste.bind(this);
+    this.onPaste = this.onPaste.bind(this);
   }
 };
 
 Clipboard.Prototype = function() {
 
   this.getSurface = function() {
-    return this.controller.getFocusedSurface();
+    return this.surface;
   };
 
-  this.attach = function(rootElement) {
-    this.el = window.document.createElement('div');
-    this.$el = $(this.el);
-    this.$el.prop('contenteditable', 'true').addClass('se-clipboard');
-    rootElement.appendChild(this.el);
+  /*
+    Called by to enable clipboard handling on a given root element.
 
-    rootElement.addEventListener('keydown', this._onKeyDown, false);
-    rootElement.addEventListener('copy', this._onCopy, false);
-    rootElement.addEventListener('cut', this._onCut, false);
+    @private
+    @param {util/jquery} a jQuery wrapped element
+  */
+  this.attach = function(rootElement) {
+    // TODO: we want to use ui/DOMElement instead of $
+    // However, we need to inject an element into document.body, which can't be accessed via
+    // DOMElement API atm.
+
+    // Note: we need a hidden content-editable element to be able to intercept native pasting.
+    // We put this element into document.body and share it among all Clipboard instances.
+    // This element must be content-editable, thus it must not have `display:none` or `visibility:hidden`,
+    // To hide it from the view we use a zero width and position it outside of the screen.
+    if (!Clipboard._sharedPasteElement) {
+      var root = rootElement.getRoot();
+      var body = root.find('body');
+      if (body) {
+        var _sharedPasteElement = root.createElement('div')
+          .attr('contenteditable', true)
+          .css({
+            position: 'fixed',
+            opacity: '0.0',
+            bottom: '-1000px',
+            width: '0px'
+          });
+        Clipboard._sharedPasteElement = _sharedPasteElement;
+        body.append(_sharedPasteElement);
+      }
+    }
+    this.el = Clipboard._sharedPasteElement;
+
+    rootElement.on('copy', this.onCopy);
+    rootElement.on('cut', this.onCut);
 
     if (this.isIe) {
-      rootElement.addEventListener('beforepaste', this._beforePasteShim, false);
-      rootElement.addEventListener('paste', this._pasteShim, false);
+      rootElement.on('beforepaste', this.onBeforePasteShim);
+      rootElement.on('paste', this.onPasteShim);
     } else {
-      rootElement.addEventListener('paste', this._onPaste, false);
+      rootElement.on('paste', this.onPaste);
     }
   };
 
   this.detach = function(rootElement) {
-    this.$el.remove();
-
-    rootElement.removeEventListener('keydown', this._onKeyDown, false);
-    rootElement.removeEventListener('copy', this._onCopy, false);
-    rootElement.removeEventListener('cut', this._onCut, false);
+    rootElement.off('copy', this.onCopy);
+    rootElement.off('cut', this.onCut);
     if (this.isIe) {
-      rootElement.removeEventListener('beforepaste', this._beforePasteShim, false);
-      rootElement.removeEventListener('paste', this._pasteShim, false);
+      rootElement.off('beforepaste', this.onBeforePasteShim);
+      rootElement.off('paste', this.onPasteShim);
     } else {
-      rootElement.removeEventListener('paste', this._onPaste, false);
+      rootElement.off('paste', this.onPaste);
     }
   };
 
   this.onCopy = function(event) {
     // console.log("Clipboard.onCopy", arguments);
-    this._copySelection();
-    if (event.clipboardData && this._contentDoc) {
-      var elements = this.htmlExporter.convertDocument(this._contentDoc);
-      var html = [];
-      var text = [];
-      elements.forEach(function(el) {
-        html.push(el.outerHTML);
-        text.push(el.text());
-      });
-      html = html.join('');
-      text = text.join('');
-      console.log('Stored HTML in clipboard', html);
-      this._contentDoc.__id__ = uuid();
-      var converter = new JSONConverter();
-      var data = converter.exportDocument(this._contentDoc);
-      data.__id__ = this._contentDoc.__id__;
-      event.clipboardData.setData('application/substance', JSON.stringify(data));
-      event.clipboardData.setData('text/plain', text);
-      event.clipboardData.setData('text/html', html);
+    var clipboardData = this._copy();
+    // in the case that browser doesn't provide event.clipboardData
+    // we keep the copied data for internal use.
+    // Then we have copy'n'paste at least within one app
+    Clipboard.clipboardData = clipboardData;
+    if (event.clipboardData && clipboardData.doc) {
       event.preventDefault();
+      // convert the copied document to json
+      var converter = new JSONConverter();
+      var json = converter.exportDocument(this.clipboardDoc);
+      json.__id__ = clipboardData.doc.__id__;
+      // store as json, plain text, and html
+      event.clipboardData.setData('application/substance', JSON.stringify(json));
+      event.clipboardData.setData('text/plain', clipboardData.text);
+      event.clipboardData.setData('text/html', clipboardData.html);
     }
   };
 
-  // nothing special for cut.
-  this.onCut = function(e) {
-    e.preventDefault();
+  this.onCut = function(event) {
+    // preventing default behavior to avoid that contenteditable
+    // destroys our DOM
+    event.preventDefault();
     // console.log("Clipboard.onCut", arguments);
-    this.onCopy(e);
+    this.onCopy(event);
     var surface = this.getSurface();
     if (!surface) return;
     surface.transaction(function(tx, args) {
@@ -112,69 +142,19 @@ Clipboard.Prototype = function() {
     });
   };
 
-  this.pasteSubstanceData = function(data) {
-    var surface = this.getSurface();
-    if (!surface) return;
-    var doc = surface.getDocument();
-    // try {
-      var content = doc.newInstance();
-      content._setForClipboard(true);
-      var converter = new JSONConverter();
-      converter.importDocument(content, JSON.parse(data));
-      var plainText = "";
-      var pasteContent = content.get(CLIPBOARD_CONTAINER_ID);
-      // TODO: try to get rid of that here.
-      // we need a document.toPlainText() for that
-      if (pasteContent.length > 0) {
-        var firstPath = pasteContent.getFirstPath();
-        var lastPath = pasteContent.getLastPath();
-        var lastLength = content.get(lastPath).length;
-        var sel = doc.createSelection({
-          type: 'container',
-          containerId: CLIPBOARD_CONTAINER_ID,
-          startPath: firstPath,
-          startOffset: 0,
-          endPath: lastPath,
-          endOffset: lastLength
-        });
-        plainText = content.getTextForSelection(sel);
-      }
-      surface.transaction(function(tx, args) {
-        args.text = plainText;
-        args.doc = content;
-        return surface.paste(tx, args);
-      });
-    // } catch (error) {
-    //   console.error(error);
-    //   logger.error(error);
-    // }
-  };
-
-  this.pasteHtml = function(docElement) {
-    var surface = this.getSurface();
-    if (!surface) return;
-    var logger = surface.getLogger();
-    try {
-      // TODO: the clipboard importer should make sure
-      // that the container exists
-      var content = this.htmlImporter.importDocument(docElement);
-      surface.transaction(function(tx, args) {
-        args.text = docElement.find('body').text();
-        args.doc = content;
-        return surface.paste(tx, args);
-      });
-    } catch (error) {
-      console.error(error);
-      logger.error(error);
-    }
-  };
-
   // Works on Safari/Chrome/FF
   this.onPaste = function(e) {
     var clipboardData = e.clipboardData;
     var surface = this.getSurface();
 
+    // FIXME: it seems, that in order to share the clipboard among
+    // surfaces we attach it to a higher level element.
+    // But why not just have one clipboard for each?
+    // Even if it seems inconvenient to use the native clipboard as shared
+    // data store, it would be more consistent regarding the responsibility
+    // of the clipboard. However, then we need reliable native clipboard support.
     if (!surface || !surface.isNativeFocused) return;
+
     var types = {};
     for (var i = 0; i < clipboardData.types.length; i++) {
       types[clipboardData.types[i]] = true;
@@ -183,9 +163,9 @@ Clipboard.Prototype = function() {
     // HACK: FF does not provide HTML coming in from other applications
     // so fall back to the paste shim
     if (this.isFF && !types['application/substance'] && !types['text/html']) {
-      this.beforePasteShim();
+      this.onBeforePasteShim();
       surface.rerenderSelection();
-      this.pasteShim();
+      this.onPasteShim();
       return;
     }
 
@@ -193,23 +173,30 @@ Clipboard.Prototype = function() {
     e.stopPropagation();
     // console.log('Available types', types);
 
+    var json;
+    var docEl;
+    var html;
+    var plainText = clipboardData.getData('text/plain');
+
     // use internal data if available
     if (types['application/substance']) {
-      return this.pasteSubstanceData(clipboardData.getData('application/substance'));
+      json = clipboardData.getData('application/substance');
+      return this._pasteSubstanceData(json, plainText);
     }
 
     // if we have content given as HTML we let the importer assess the quality first
     // and fallback to plain text import if it's bad
     if (types['text/html']) {
-      var html = clipboardData.getData('text/html');
-      var htmlDoc = DefaultDOMElement.parseHTML(html);
-      if (this.htmlImporter.checkQuality(htmlDoc)) {
-        return this.pasteHtml(htmlDoc);
+      html = clipboardData.getData('text/html');
+      docEl = DefaultDOMElement.parseHTML(html);
+      // check the quality of the HTML first and
+      // fall back to plain-text pasting if it is not
+      // compatible.
+      if (this.htmlImporter.checkQuality(docEl)) {
+        return this._pasteHtml(docEl, plainText);
       }
     }
     // Fallback to plain-text in other cases
-    var plainText = clipboardData.getData('text/plain');
-
     if (surface.isContainerEditor()) {
       var doc = surface.getDocument();
       var defaultTextType = doc.getSchema().getDefaultTextType();
@@ -218,7 +205,6 @@ Clipboard.Prototype = function() {
         // instead the 'paste' transformation should be able to do it.
         var paraText = plainText.split(/\s*\n\s*\n/);
         var pasteDoc = doc.newInstance();
-        pasteDoc._setForClipboard(true);
         var container = pasteDoc.create({
           type: 'container',
           id: 'clipboard_content',
@@ -243,11 +229,32 @@ Clipboard.Prototype = function() {
     }
   };
 
-  this.beforePasteShim = function() {
+  this._copy = function() {
+    var wSel = window.getSelection();
+    var surface = this.getSurface();
+    var sel = surface.getSelection();
+    var doc = surface.getDocument();
+    var clipboardDoc = null;
+    var clipboardText = "";
+    var clipboardHtml = "";
+    if (wSel.rangeCount > 0 && !sel.isCollapsed()) {
+      var wRange = wSel.getRangeAt(0);
+      this.clipboardText = wRange.toString();
+      this.clipboardDoc = surface.copy(doc, sel);
+      // console.log("Clipboard._copy(): created a copy", this.clipboardDoc);
+    }
+    return {
+      doc: clipboardDoc,
+      html: clipboardHtml,
+      text: clipboardText
+    };
+  };
+
+  this.onBeforePasteShim = function() {
     var surface = this.getSurface();
     if (!surface) return;
     // console.log("Paste before...");
-    this.$el.focus();
+    this.el.focus();
     var range = document.createRange();
     range.selectNodeContents(this.el);
     var selection = window.getSelection();
@@ -255,104 +262,66 @@ Clipboard.Prototype = function() {
     selection.addRange(range);
   };
 
-  this.pasteShim = function() {
-    this.$el.empty();
-    var self = this;
-    var surface = this.getSurface();
-    if (!surface) return;
-    var sel = surface.getSelection();
-    setTimeout(function() {
-      surface.selection = sel;
-      var html = self.$el.html();
-      html = ['<html><head></head><body>', html, '</body></html>'].join('');
-      self.$el.empty();
-      var htmlDoc = new window.DOMParser().parseFromString(html, "text/html");
-      // if (self.htmlImporter.checkQuality($(htmlDoc))) {
-        return self.pasteHtml(htmlDoc);
-      // }
-    }, 0);
-  };
-
-  this.onKeyDown = function(e) {
-    if (e.keyCode === 88 && (e.metaKey||e.ctrlKey)) {
-      // console.log('Handle cut');
-      // this.handleCut();
-      // e.preventDefault();
-      // e.stopPropagation();
-    }
-    else if (e.keyCode === 86 && (e.metaKey||e.ctrlKey)) {
-      // console.log('Handle paste');
-      this.handlePaste();
-      // e.preventDefault();
-      // e.stopPropagation();
-    }
-    else if (e.keyCode === 67 && (e.metaKey||e.ctrlKey)) {
-      // console.log('Handle copy');
-      // this.handleCopy(e);
-      // e.preventDefault();
-      // e.stopPropagation();
-    }
-  };
-
-  this.handleCut = function() {
-    // console.log("Cutting into Clipboard...");
-    var wSel = window.getSelection();
-    // TODO: deal with multiple ranges
-    // first extract the selected content into the hidden element
-    var wRange = wSel.getRangeAt(0);
-    var frag = wRange.cloneContents();
-    this.el.innerHTML = "";
-    this.el.appendChild(frag);
-    this._copySelection();
-    var surface = this.getSurface();
-    if (!surface) return;
-    try {
-      // console.log("...selection before deletion", surface.getSelection().toString());
-      surface.delete();
-    } catch (error) {
-      console.error(error);
-      this.logger.error(error);
-      return;
-    }
-    // select the copied content
-    var wRangeNew = window.document.createRange();
-    wRangeNew.selectNodeContents(this.el);
-    wSel.removeAllRanges();
-    wSel.addRange(wRangeNew);
-
-    // hacky way to reset the selection which gets lost otherwise
+  this.onPasteShim = function() {
+    this.el.empty();
+    var sel = this.surface.getSelection();
     window.setTimeout(function() {
-      // console.log("...restoring the selection");
-      surface.rerenderDomSelection();
-    }, 10);
+      this.surface.selection = sel;
+      var html = this.el.html();
+      this.el.empty();
+      html = ['<html><head></head><body>', html, '</body></html>'].join('');
+      var docEl = DOMElement.parseHTML(html);
+      return this._pasteHtml(docEl);
+    }.bind(this));
   };
 
-  this.handlePaste = function() {
-  };
-
-  this.handleCopy = function() {
-    // Nothing here
-  };
-
-  this._copySelection = function() {
-    var wSel = window.getSelection();
-    this._contentText = "";
-    this._contentDoc = null;
+  this._pasteSubstanceData = function(json, text) {
     var surface = this.getSurface();
-    var sel = surface.getSelection();
+    if (!surface) return;
     var doc = surface.getDocument();
-    if (wSel.rangeCount > 0 && !sel.isCollapsed()) {
-      var wRange = wSel.getRangeAt(0);
-      this._contentText = wRange.toString();
-      this._contentDoc = surface.copy(doc, sel);
-      // console.log("Clipboard._copySelection(): created a copy", this._contentDoc);
-    } else {
-      this._contentDoc = null;
-      this._contentText = "";
-    }
+
+    var content = doc.newInstance();
+    var converter = new JSONConverter();
+    converter.importDocument(content, JSON.parse(json));
+
+    surface.transaction(function(tx, args) {
+      args.text = text;
+      args.doc = content;
+      return surface.paste(tx, args);
+    });
   };
+
+  /*
+    Pastes a given parsed html document into the surface.
+
+    @param {ui/DOMElement} docElement
+    @param {String} text plain text representation used as a fallback
+  */
+  this._pasteHtml = function(docElement, text) {
+    var surface = this.getSurface();
+    if (!surface) return;
+    // TODO: the clipboard importer should make sure
+    // that the container exists
+    var content = this.htmlImporter.importDocument(docElement);
+    surface.transaction(function(tx, args) {
+      args.text = text;
+      args.doc = content;
+      return surface.paste(tx, args);
+    });
+  };
+
 };
 
 oo.initClass(Clipboard);
+
+/*
+  A shim for browsers with an unsupported native clipboard.
+*/
+Clipboard.clipboardData = {
+  doc: null,
+  html: "",
+  text: ""
+};
+
 
 module.exports = Clipboard;

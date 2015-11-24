@@ -26,7 +26,6 @@ function AbstractDocument(schema) {
   this.schema = schema;
 
   this.AUTO_ATTACH = true;
-  this.FOR_CLIPBOARD = false;
 
   this.nodeFactory = new DocumentNodeFactory(this);
 
@@ -39,10 +38,6 @@ EventEmitter.extend(AbstractDocument, function AbstractDocumentPrototype() {
 
   this.isTransaction = function() {
     return false;
-  };
-
-  this.isClipboard = function() {
-    return this.FOR_CLIPBOARD;
   };
 
   this.newInstance = function() {
@@ -225,10 +220,6 @@ EventEmitter.extend(AbstractDocument, function AbstractDocumentPrototype() {
       default:
         throw new Error('Unsupported selection type', sel.type);
     }
-  };
-
-  this._setForClipboard = function(val) {
-    this.FOR_CLIPBOARD = val;
   };
 
   this._create = function(nodeData) {

@@ -174,7 +174,7 @@ DOMExporter.defaultBlockConverter = {
         return;
       }
       var prop = $$('div').attr('property', name);
-      if (node.getPropertyType() === 'string') {
+      if (node.getPropertyType(name) === 'string') {
         prop.append(converter.annotatedText([node.id, name]));
       } else {
         prop.text(value);

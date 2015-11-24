@@ -7,11 +7,12 @@ var SurfaceSelection = require('./SurfaceSelection');
 var Document = require('../model/Document');
 var Selection = require('../model/Selection');
 var Component = require('./Component');
+var Clipboard = require('./Clipboard');
 
 /**
    Abstract interface for editing components.
    Dances with contenteditable, so you don't have to.
-   
+
    @class
    @component
    @abstract
@@ -38,6 +39,7 @@ function Surface() {
   this.name = this.props.name;
 
   this.selection = Document.nullSelection;
+  this.clipboard = new Clipboard(this, doc.getClipboardImporter(), doc.getClipboardExporter());
 
   // this.element must be set via surface.attach(element)
   this.element = null;
@@ -91,7 +93,9 @@ function Surface() {
 Surface.Prototype = function() {
 
   this.didMount = function() {
+    // TODO: both should be done during render()
     this.attach(this.el);
+    this.clipboard.attach(this);
   };
 
   this.dispose = function() {
@@ -185,8 +189,6 @@ Surface.Prototype = function() {
     this.element = element;
     this.$element = $(element);
     this.surfaceSelection = new SurfaceSelection(element, doc, this.getContainer());
-
-    this.$element.addClass('surface');
 
     // Keyboard Events
     //
@@ -489,7 +491,8 @@ Surface.Prototype = function() {
     this.transaction(function(tx, args) {
       // trying to remove the DOM selection to reduce flickering
       this.surfaceSelection.clear();
-      return this.insertText(tx, { selection: args.selection, text: e.data });
+      args.text = e.data;
+      return this.insertText(tx, args);
     }, this);
     this.rerenderDomSelection();
   };
@@ -529,7 +532,8 @@ Surface.Prototype = function() {
       this.transaction(function(tx, args) {
         // trying to remove the DOM selection to reduce flickering
         this.surfaceSelection.clear();
-        return this.insertText(tx, { selection: args.selection, text: character });
+        args.text = character;
+        return this.insertText(tx, args);
       }, this);
       this.rerenderDomSelection();
       e.preventDefault();
@@ -580,7 +584,8 @@ Surface.Prototype = function() {
     this.transaction(function(tx, args) {
       // trying to remove the DOM selection to reduce flickering
       this.surfaceSelection.clear();
-      return this.insertText(tx, { selection: args.selection, text: " " });
+      args.text = " ";
+      return this.insertText(tx, args);
     }, this);
     this.rerenderDomSelection();
   };
@@ -603,7 +608,8 @@ Surface.Prototype = function() {
     e.preventDefault();
     var direction = (e.keyCode === Surface.Keys.BACKSPACE) ? 'left' : 'right';
     this.transaction(function(tx, args) {
-      return this.delete(tx, { selection: args.selection, direction: direction });
+      args.direction = direction;
+      return this.delete(tx, args);
     }, this);
     this.rerenderDomSelection();
   };
@@ -753,7 +759,8 @@ Surface.Prototype = function() {
   this.onNativeFocus = function() {
     this.isNativeFocused = true;
     // console.log('Native focus on surface', this.__id__);
-    // ARRR: native focus event is triggered before the DOM selection is there
+    // ATTENTION: native focus event is triggered before the DOM selection is there
+    // Thus we need to delay this, unfortunately.
     window.setTimeout(function() {
       // when focus is handled via mouse selection
       // then everything is done already, and we do not need to handle it.

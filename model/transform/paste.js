@@ -14,7 +14,7 @@ var CLIPBOARD_CONTAINER_ID = require('./copySelection').CLIPBOARD_CONTAINER_ID;
 /**
   Pastes clipboard content at the current selection
 
-  @param {Object} args object with `selection` and `doc` for Substance content or 
+  @param {Object} args object with `selection` and `doc` for Substance content or
   `text` for external HTML content
   @return {Object} with updated `selection`
 */
@@ -24,12 +24,21 @@ var paste = function(tx, args) {
     console.error("Can not paste, without selection.");
     return args;
   }
-  // if paste dataplain text paste is simple
-  if (args.text && !args.doc) {
-    return insertText(tx, args);
-  }
-
+  // TODO: is there a better way to detect that this paste is happening within a
+  // container?
+  var inContainer = !!args.containerId;
   var pasteDoc = args.doc;
+
+  // when we are in a container, we interpret line-breaks
+  // and create a document with multiple paragraphs
+  // in a PropertyEditor we paste the text as is
+  if (args.text && !pasteDoc) {
+    if (inContainer) {
+      pasteDoc = _convertPlainTextToDocument(tx, args);
+    } else {
+      return insertText(tx, args);
+    }
+  }
   if (!args.selection.isCollapsed()) {
     var tmp = deleteSelection(tx, args);
     args.selection = tmp.selection;
@@ -48,7 +57,28 @@ var paste = function(tx, args) {
   return args;
 };
 
-var _pasteAnnotatedText = function(tx, args) {
+function _convertPlainTextToDocument(tx, args) {
+  var defaultTextType = tx.getSchema().getDefaultTextType();
+
+  var paraText = args.text.split(/\s*\n\s*\n/);
+  var pasteDoc = tx.newInstance();
+  var container = pasteDoc.create({
+    type: 'container',
+    id: CLIPBOARD_CONTAINER_ID,
+    nodes: []
+  });
+  for (var i = 0; i < paraText.length; i++) {
+    var paragraph = pasteDoc.create({
+      id: uuid(defaultTextType),
+      type: defaultTextType,
+      content: paraText[i]
+    });
+    container.show(paragraph.id);
+  }
+  return pasteDoc;
+}
+
+function _pasteAnnotatedText(tx, args) {
   var copy = args.doc;
   var selection = args.selection;
 
@@ -79,9 +109,9 @@ var _pasteAnnotatedText = function(tx, args) {
   });
   args.selection = selection;
   return args;
-};
+}
 
-var _pasteDocument = function(tx, args) {
+function _pasteDocument(tx, args) {
   var pasteDoc = args.doc;
   var containerId = args.containerId;
   var selection = args.selection;
@@ -163,6 +193,6 @@ var _pasteDocument = function(tx, args) {
   }
   args.selection = selection;
   return args;
-};
+}
 
 module.exports = paste;
