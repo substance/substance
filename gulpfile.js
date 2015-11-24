@@ -35,7 +35,7 @@ gulp.task('doc:assets', function () {
 });
 
 gulp.task('doc:data', ['doc:bundle'], function () {
-  console.log('generating documentation... and saving to ./dist/documentation.json');
+  console.log('generating documentation... and saving to ./dist/master/documentation.json');
   var nodes = generate(config);
   fs.writeFileSync(__dirname+'/dist/master/documentation.json', JSON.stringify(nodes, null, '  '));
 });
