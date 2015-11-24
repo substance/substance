@@ -1,7 +1,6 @@
 'use strict';
 
 var _ = require('../util/helpers');
-var Component = require('./Component');
 var Surface = require('./Surface');
 var TextPropertyManager = require('../model/TextPropertyManager');
 var EditingBehavior = require('../model/EditingBehavior');
@@ -12,13 +11,12 @@ var breakNode = require('../model/transform/breakNode');
 var insertNode = require('../model/transform/insertNode');
 var switchTextType = require('../model/transform/switchTextType');
 var paste = require('../model/transform/paste');
-var $$ = Component.$$;
 var ContainerNodeMixin = require('./ContainerNodeMixin');
 
 /**
   Represents a flow editor that manages a sequence of nodes in a container. Needs to be
   instantiated inside a {@link ui/Controller} context.
-  
+
   @class ContainerEditor
   @component
   @extends ui/Surface
@@ -55,7 +53,7 @@ function ContainerEditor() {
   if (!_.isString(this.props.containerId)) throw new Error("Illegal argument: Expecting containerId.");
   this.editingBehavior = new EditingBehavior();
   this.textPropertyManager = new TextPropertyManager(doc, this.props.containerId);
-  
+
   doc.connect(this, {
     'document:changed': this.onDocumentChange
   });
@@ -63,18 +61,13 @@ function ContainerEditor() {
 
 ContainerEditor.Prototype = function() {
 
-  this.dispose = function() {
-    Surface.prototype.dispose.call(this);
-    var doc = this.getDocument();
-    doc.disconnect(this);
-  };
-
   this.render = function() {
+    var el = Surface.prototype.render.call(this);
+
     var doc = this.getDocument();
     var containerNode = doc.get(this.props.containerId);
 
-    var el = $$("div")
-      .addClass('surface sc-container-editor container-node ' + containerNode.id)
+    el.addClass('sc-container-editor container-node ' + containerNode.id)
       .attr({
         spellCheck: false,
         "data-id": containerNode.id,

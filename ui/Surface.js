@@ -1,13 +1,14 @@
 'use strict';
 
 var _ = require('../util/helpers');
-var $ = require('../util/jquery');
 var Registry = require('../util/Registry');
 var SurfaceSelection = require('./SurfaceSelection');
 var Document = require('../model/Document');
 var Selection = require('../model/Selection');
 var Component = require('./Component');
 var Clipboard = require('./Clipboard');
+var $$ = Component.$$;
+
 
 /**
    Abstract interface for editing components.
@@ -27,81 +28,85 @@ function Surface() {
   if (!controller) {
     throw new Error('Surface needs a valid controller');
   }
-
   if (!doc) {
     throw new Error('No doc provided');
   }
-
   if (!this.props.name) {
     throw new Error('No name provided');
   }
 
   this.name = this.props.name;
-
   this.selection = Document.nullSelection;
   this.clipboard = new Clipboard(this, doc.getClipboardImporter(), doc.getClipboardExporter());
-
   // this.element must be set via surface.attach(element)
   this.element = null;
   this.$element = null;
-
   this.surfaceSelection = null;
-
-  // this.logger = options.logger || window.console;
-
-  this.$ = $;
-  this.$window = this.$(window);
-  this.$document = this.$(window.document);
-
   this.dragging = false;
-
-  this._onMouseUp = _.bind(this.onMouseUp, this);
-  this._onMouseDown = _.bind(this.onMouseDown, this);
-  this._onMouseMove = _.bind(this.onMouseMove, this);
-
-  this._onKeyDown = _.bind(this.onKeyDown, this);
-  this._onTextInput = _.bind(this.onTextInput, this);
-  this._onTextInputShim = _.bind( this.onTextInputShim, this );
-  this._onCompositionStart = _.bind( this.onCompositionStart, this );
-
-  this._onDomMutations = _.bind(this.onDomMutations, this);
-  this.domObserver = new window.MutationObserver(this._onDomMutations);
+  this.onDomMutations = this.onDomMutations.bind(this);
+  this.domObserver = new window.MutationObserver(this.onDomMutations);
   this.domObserverConfig = { subtree: true, characterData: true };
   this.skipNextObservation = false;
 
-  this._onNativeFocus = _.bind(this.onNativeFocus, this);
-  this._onNativeBlur = _.bind(this.onNativeBlur, this);
-
   // set when editing is enabled
   this.enabled = true;
-
-  // surface usually gets frozen while showing a popup
-  this.frozen = false;
-  this.$caret = $('<span>').addClass('surface-caret');
-
   this.isIE = Surface.detectIE();
   this.isFF = window.navigator.userAgent.toLowerCase().indexOf('firefox') > -1;
-
   this.undoEnabled = true;
-
   this.textTypes = this.props.textTypes;
-
   this._initializeCommandRegistry(this.props.commands);
   controller.registerSurface(this);
 }
 
 Surface.Prototype = function() {
 
+  this.render = function() {
+    var el = $$("div")
+      .addClass('surface')
+      .attr('spellCheck', false);
+    // Keyboard Events
+    el.on('keydown', this.onKeyDown);
+    // OSX specific handling of dead-keys
+    if (!this.isIE) {
+      el.on('compositionstart', this.onCompositionStart);
+    }
+    if (!this.isIE) {
+      el.on('textInput', this.onTextInput);
+    } else {
+      el.on('keypress', this.onTextInputShim);
+    }
+
+    // Mouse Events
+    el.on('mousedown', this.onMouseDown);
+
+    // disable drag'n'drop
+    el.on('dragstart', this.onDragStart);
+
+    // we will react on this to render a custom selection
+    el.on('focus', this.onNativeFocus);
+    el.on('blur', this.onNativeBlur);
+
+    return el;
+  };
+
   this.didMount = function() {
-    // TODO: both should be done during render()
-    this.attach(this.el);
+    var doc = this.getDocument();
+    this.surfaceSelection = new SurfaceSelection(this.el, doc, this.getContainer());
     this.clipboard.attach(this);
+    // Document Change Events
+    this.domObserver.observe(this.el, this.domObserverConfig);
   };
 
   this.dispose = function() {
+    var doc = this.getDocument();
     this.setSelection(null);
     this.textPropertyManager.dispose();
-    this.detach();
+    this.domObserver.disconnect();
+    // Document Change Events
+    doc.disconnect(this);
+    // Clean-up
+    this.surfaceSelection = null;
+    // unregister from controller
     this.getController().unregisterSurface(this);
   };
 
@@ -174,109 +179,14 @@ Surface.Prototype = function() {
     return this.context.controller.getDocument();
   };
 
-  this.attach = function(element) {
-    if (!element) {
-      throw new Error('Illegal argument: Surface element is required. was ' + element);
-    }
-
-    if (this.attached) {
-      throw new Error('Surface is already attached to element: ' + element);
-    }
-
-    var doc = this.getDocument();
-
-    // Initialization
-    this.element = element;
-    this.$element = $(element);
-    this.surfaceSelection = new SurfaceSelection(element, doc, this.getContainer());
-
-    // Keyboard Events
-    //
-    this.attachKeyboard();
-
-    // Mouse Events
-    //
-    this.$element.on('mousedown', this._onMouseDown);
-
-    // disable drag'n'drop
-    this.$element.on('dragstart', this.onDragStart);
-
-    // we will react on this to render a custom selection
-    this.$element.on('focus', this._onNativeFocus);
-    this.$element.on('blur', this._onNativeBlur);
-
-    // Document Change Events
-    //
-    this.domObserver.observe(element, this.domObserverConfig);
-    this.attached = true;
-  };
-
   // Must be implemented by container surfaces
   this.getContainer = function() {};
+
   this.getContainerId = function() {};
-
-  this.attachKeyboard = function() {
-    this.$element.on('keydown', this._onKeyDown);
-    // OSX specific handling of dead-keys
-    if (this.element.addEventListener) {
-      this.element.addEventListener('compositionstart', this._onCompositionStart, false);
-    }
-    if (window.TextEvent && !this.isIE) {
-      this.element.addEventListener('textInput', this._onTextInput, false);
-    } else {
-      this.$element.on('keypress', this._onTextInputShim);
-    }
-  };
-
-  this.detach = function() {
-    var doc = this.getDocument();
-
-    this.domObserver.disconnect();
-
-    // Document Change Events
-    //
-    doc.disconnect(this);
-
-    // Mouse Events
-    //
-    this.$element.off('mousedown', this._onMouseDown );
-
-    // enable drag'n'drop
-    this.$element.off('dragstart', this.onDragStart);
-
-    // Keyboard Events
-    //
-    this.detachKeyboard();
-
-    this.$element.removeClass('surface');
-
-    // Clean-up
-    //
-    this.element = null;
-    this.$element = null;
-    this.surfaceSelection = null;
-    this.attached = false;
-  };
-
-  this.detachKeyboard = function() {
-    this.$element.off('keydown', this._onKeyDown);
-    if (this.element.addEventListener) {
-      this.element.removeEventListener('compositionstart', this._onCompositionStart, false);
-    }
-    if (window.TextEvent && !this.isIE) {
-      this.element.removeEventListener('textInput', this._onTextInput, false);
-    } else {
-      this.$element.off('keypress', this._onTextInputShim);
-    }
-  };
-
-  this.isAttached = function() {
-    return this.attached;
-  };
 
   this.enable = function() {
     if (this.enableContentEditable) {
-      this.$element.prop('contentEditable', 'true');
+      this.el.prop('contentEditable', 'true');
     }
     this.enabled = true;
   };
@@ -291,33 +201,6 @@ Surface.Prototype = function() {
     }
     this.enabled = false;
   };
-
-  this.freeze = function() {
-    console.log('Freezing surface...');
-    if (this.enableContentEditable) {
-      this.$element.removeAttr('contentEditable');
-    }
-    this.$element.addClass('frozen');
-    this.domObserver.disconnect();
-    this.frozen = true;
-  };
-
-  this.unfreeze = function() {
-    if (!this.frozen) {
-      return;
-    }
-    console.log('Unfreezing surface...');
-    if (this.enableContentEditable) {
-      this.$element.prop('contentEditable', 'true');
-    }
-    this.$element.removeClass('frozen');
-    this.domObserver.observe(this.element, this.domObserverConfig);
-    this.frozen = false;
-  };
-
-  // ###########################################
-  // Keyboard Handling
-  //
 
   /**
    * Handle document key down events.
@@ -504,7 +387,7 @@ Surface.Prototype = function() {
   };
 
   // a shim for textInput events based on keyPress and a horribly dangerous dance with the CE
-  this.onTextInputShim = function( e ) {
+  this.onTextInputShim = function(event) {
     if (this.frozen) {
       return;
     }
@@ -515,17 +398,17 @@ Surface.Prototype = function() {
     //   elsewhere and doesn't produce any text, for example Escape
     if (
       // Catches most keys that don't produce output (charCode === 0, thus no character)
-      e.which === 0 || e.charCode === 0 ||
+      event.which === 0 || event.charCode === 0 ||
       // Opera 12 doesn't always adhere to that convention
-      e.keyCode === Surface.Keys.TAB || e.keyCode === Surface.Keys.ESCAPE ||
+      event.keyCode === Surface.Keys.TAB || event.keyCode === Surface.Keys.ESCAPE ||
       // prevent combinations with meta keys, but not alt-graph which is represented as ctrl+alt
-      !!(e.metaKey) || (!!e.ctrlKey^!!e.altKey)
+      !!(event.metaKey) || (!!event.ctrlKey^!!event.altKey)
     ) {
       return;
     }
-    var character = String.fromCharCode(e.which);
+    var character = String.fromCharCode(event.which);
     this.skipNextObservation=true;
-    if (!e.shiftKey) {
+    if (!event.shiftKey) {
       character = character.toLowerCase();
     }
     if (character.length>0) {
@@ -536,27 +419,27 @@ Surface.Prototype = function() {
         return this.insertText(tx, args);
       }, this);
       this.rerenderDomSelection();
-      e.preventDefault();
-      e.stopPropagation();
+      event.preventDefault();
+      event.stopPropagation();
       return;
     } else {
-      e.preventDefault();
-      e.stopPropagation();
+      event.preventDefault();
+      event.stopPropagation();
     }
   };
 
-  this.handleLeftOrRightArrowKey = function ( e ) {
+  this.handleLeftOrRightArrowKey = function (event) {
     var self = this;
     // Note: we need this timeout so that CE updates the DOM selection first
     // before we map the DOM selection
     window.setTimeout(function() {
       var options = {
-        direction: (e.keyCode === Surface.Keys.LEFT) ? 'left' : 'right'
+        direction: (event.keyCode === Surface.Keys.LEFT) ? 'left' : 'right'
       };
       self._updateModelSelection(options);
       // We could rerender the selection, to make sure the DOM is representing
       // the model selection
-      // TODO: ATM, the SurfaceSelection is not good enough in doing this, e.g., there
+      // TODO: ATM, the SurfaceSelection is not good enough in doing this, event.g., there
       // are situations where one can not use left/right navigation anymore, as
       // SurfaceSelection will always decides to choose the initial positition,
       // which means lockin.
@@ -564,13 +447,13 @@ Surface.Prototype = function() {
     });
   };
 
-  this.handleUpOrDownArrowKey = function ( e ) {
+  this.handleUpOrDownArrowKey = function (event) {
     var self = this;
     // Note: we need this timeout so that CE updates the DOM selection first
     // before we map the DOM selection
     window.setTimeout(function() {
       var options = {
-        direction: (e.keyCode === Surface.Keys.UP) ? 'left' : 'right'
+        direction: (event.keyCode === Surface.Keys.UP) ? 'left' : 'right'
       };
       self._updateModelSelection(options);
       // TODO: enable this when we are better, see comment above
@@ -578,9 +461,9 @@ Surface.Prototype = function() {
     });
   };
 
-  this.handleSpaceKey = function( e ) {
-    e.preventDefault();
-    e.stopPropagation();
+  this.handleSpaceKey = function(event) {
+    event.preventDefault();
+    event.stopPropagation();
     this.transaction(function(tx, args) {
       // trying to remove the DOM selection to reduce flickering
       this.surfaceSelection.clear();
@@ -590,9 +473,9 @@ Surface.Prototype = function() {
     this.rerenderDomSelection();
   };
 
-  this.handleEnterKey = function( e ) {
-    e.preventDefault();
-    if (e.shiftKey) {
+  this.handleEnterKey = function(event) {
+    event.preventDefault();
+    if (event.shiftKey) {
       this.transaction(function(tx, args) {
         return this.softBreak(tx, args);
       }, this);
@@ -604,9 +487,9 @@ Surface.Prototype = function() {
     this.rerenderDomSelection();
   };
 
-  this.handleDeleteKey = function ( e ) {
-    e.preventDefault();
-    var direction = (e.keyCode === Surface.Keys.BACKSPACE) ? 'left' : 'right';
+  this.handleDeleteKey = function (event) {
+    event.preventDefault();
+    var direction = (event.keyCode === Surface.Keys.BACKSPACE) ? 'left' : 'right';
     this.transaction(function(tx, args) {
       args.direction = direction;
       return this.delete(tx, args);
@@ -614,21 +497,17 @@ Surface.Prototype = function() {
     this.rerenderDomSelection();
   };
 
-  // ###########################################
-  // Mouse Handling
-  //
-
-  this.onMouseDown = function(e) {
+  this.onMouseDown = function(event) {
     if (this.frozen) {
       this.unfreeze();
     }
-    if ( e.which !== 1 ) {
+    if ( event.which !== 1 ) {
       return;
     }
     // console.log('MouseDown on Surface %s', this.__id__);
     // 'mouseDown' is triggered before 'focus' so we tell
     // our focus handler that we are already dealing with it
-    // The opposite situation, when the surface gets focused e.g. using keyboard
+    // The opposite situation, when the surface gets focused event.g. using keyboard
     // then the handler needs to kick in and recover a persisted selection or such
     this.skipNextFocusEvent = true;
     // Bind mouseup to the whole document in case of dragging out of the surface
@@ -636,7 +515,7 @@ Surface.Prototype = function() {
     this.$document.one( 'mouseup', this._onMouseUp );
   };
 
-  this.onMouseUp = function(/*e*/) {
+  this.onMouseUp = function() {
     // ... and unbind the temporary handler
     this.dragging = false;
     this.setFocused(true);
@@ -690,14 +569,10 @@ Surface.Prototype = function() {
     console.info("We want to enable a DOM MutationObserver which catches all changes made by native interfaces (such as spell corrections, etc). Lookout for this message and try to set Surface.skipNextObservation=true when you know that you will mutate the DOM.");
   };
 
-  this.onDragStart = function(e) {
-    e.preventDefault();
-    e.stopPropagation();
+  this.onDragStart = function(event) {
+    event.preventDefault();
+    event.stopPropagation();
   };
-
-  // ###########################################
-  // Document and Selection Changes
-  //
 
   this.getSelection = function() {
     return this.selection;
@@ -793,51 +668,6 @@ Surface.Prototype = function() {
 
   this.getLogger = function() {
     return this.logger;
-  };
-
-  // EXPERIMENTAL:
-  // Adds a span at the current cursor position. This way it is possible to
-  // layout a popup relative to the cursor.
-  this.placeCaretElement = function() {
-    var sel = this.getSelection();
-    if (sel.isNull()) {
-      throw new Error('Selection is null.');
-    }
-    var $caret = this.$caret;
-    $caret.empty().remove();
-    var pos = this.surfaceSelection._findDomPosition(sel.start.path, sel.start.offset);
-    if (pos.node.nodeType === window.Node.TEXT_NODE) {
-      var textNode = pos.node;
-      if (textNode.length === pos.offset) {
-        $caret.insertAfter(textNode);
-      } else {
-        // split the text node into two pieces
-        var wsel = window.getSelection();
-        var wrange = window.document.createRange();
-        var text = textNode.textContent;
-        var frag = window.document.createDocumentFragment();
-        var textFrag = window.document.createTextNode(text.substring(0, pos.offset));
-        frag.appendChild(textFrag);
-        frag.appendChild($caret[0]);
-        frag.appendChild(document.createTextNode(text.substring(pos.offset)));
-        $(textNode).replaceWith(frag);
-        wrange.setStart(textFrag, pos.offset);
-        wsel.removeAllRanges();
-        wsel.addRange(wrange);
-      }
-    } else {
-      pos.node.appendChild($caret[0]);
-    }
-    return $caret;
-  };
-
-  this.removeCaretElement = function() {
-    this.$caret.remove();
-  };
-
-  this.updateCaretElement = function() {
-    this.$caret.remove();
-    this.placeCaretElement();
   };
 
   this.getTextPropertyManager = function() {

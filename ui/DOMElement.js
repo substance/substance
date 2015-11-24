@@ -317,7 +317,7 @@ DOMElement.Prototype = function() {
     if (!handler || !isFunction(handler)) {
       throw new Error('Illegal argument: invalid handler function for event ' + eventName);
     }
-    this._addHandler(eventName, selector, handler);
+    this.addHandler(eventName, selector, handler);
     return this;
   };
 
@@ -328,7 +328,7 @@ DOMElement.Prototype = function() {
     @returns {this}
   */
   this.off = function(eventName) {
-    this._removeHandler(eventName);
+    this.removeHandler(eventName);
     return this;
   };
 
