@@ -3,6 +3,7 @@
 require('../../qunit_extensions');
 var sample1 = require('../../../fixtures/sample1');
 var copySelection = require('../../../../model/transform/copySelection');
+var CLIPBOARD_PROPERTY_ID = copySelection.CLIPBOARD_PROPERTY_ID;
 
 QUnit.module('model/transform/copySelection');
 
@@ -17,9 +18,9 @@ QUnit.test("Copying a property selection", function(assert) {
   var args = {selection: sel};
   var out = copySelection(doc, args);
   var copy = out.doc;
-  var textNode = copy.get('text');
-  assert.isDefinedAndNotNull(textNode, 'There should be a node with id "text".');
-  assert.equal(copy.get(['text', 'content']), 'graph', 'Selected text should be copied.');
+  var textNode = copy.get(CLIPBOARD_PROPERTY_ID);
+  assert.isDefinedAndNotNull(textNode, 'There should be a text node for the property fragment.');
+  assert.equal(textNode.content, 'graph', 'Selected text should be copied.');
 });
 
 QUnit.test("Copying a property selection with annotated text", function(assert) {
@@ -33,8 +34,8 @@ QUnit.test("Copying a property selection with annotated text", function(assert) 
   var args = {selection: sel};
   var out = copySelection(doc, args);
   var copy = out.doc;
-  assert.equal(copy.get(['text', 'content']), 'with anno', 'Selected text should be copied.');
-  var annos = copy.getIndex('annotations').get(['text', 'content']);
+  assert.equal(copy.get([CLIPBOARD_PROPERTY_ID, 'content']), 'with anno', 'Selected text should be copied.');
+  var annos = copy.getIndex('annotations').get([CLIPBOARD_PROPERTY_ID, 'content']);
   assert.equal(annos.length, 1, 'There should be one annotation on copied text.');
   var anno = annos[0];
   assert.equal(anno.type, "emphasis", "The annotation should be 'emphasis'.");

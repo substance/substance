@@ -197,6 +197,8 @@ EventEmitter.extend(AbstractDocument, function AbstractDocumentPrototype() {
 
     @example
 
+    Creating a PropertySelection:
+
     ```js
     doc.createSelection({
       type: 'property',
@@ -205,8 +207,37 @@ EventEmitter.extend(AbstractDocument, function AbstractDocumentPrototype() {
       endOffset: 20
     })
     ```
+
+    Creating a ContainerSelection:
+
+    ```js
+    doc.createSelection({
+      type: 'container',
+      containerId: 'main',
+      startPath: [ 'p1', 'content'],
+      startOffset: 10,
+      startPath: [ 'p2', 'content'],
+      endOffset: 20
+    })
+    ```
+
+    Creating a NullSelection:
+
+    ```js
+    doc.createSelection(null);
+    ```
   */
   this.createSelection = function(sel) {
+    /*
+     TODO: maybe we want a simpler DSL in addition to the JSON spec?
+      ```
+      doc.createSelection(null);
+      doc.createSelection(['p1','content'], 0, 5);
+        -> PropertySelection
+      doc.createSelection(['p1','content'], 0, ['p2', 'content'], 5);
+        -> ContainerSelection
+      ```
+    */
     if (!sel) {
       return Selection.nullSelection;
     }

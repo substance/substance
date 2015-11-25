@@ -4,6 +4,7 @@ var HtmlExporter = require('./HTMLExporter');
 var ClipboardImporter = require('./ClipboardImporter');
 var converters = ClipboardImporter.converters;
 var CLIPBOARD_CONTAINER_ID = ClipboardImporter.CLIPBOARD_CONTAINER_ID;
+var CLIPBOARD_PROPERTY_ID = ClipboardImporter.CLIPBOARD_PROPERTY_ID;
 
 // FIXME: this is not working yet
 function ClipboardExporter() {
@@ -13,6 +14,17 @@ function ClipboardExporter() {
 }
 
 ClipboardExporter.Prototype = function() {
+
+  this.exportDocument = function(doc) {
+    var elements = this.convertDocument(doc);
+    if (elements.length === 1 && elements[0].attr('data-id') === CLIPBOARD_PROPERTY_ID) {
+      return elements[0].innerHTML;
+    } else {
+      return elements.map(function(el) {
+        return el.outerHTML;
+      }).join('');
+    }
+  };
 
   this.convertDocument = function(doc) {
     var content = doc.get(CLIPBOARD_CONTAINER_ID);

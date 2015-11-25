@@ -5,6 +5,7 @@ var HTMLImporter = require('./HTMLImporter');
 
 // Note: sharing the symbol with the transformation
 var CLIPBOARD_CONTAINER_ID = require('./transform/copySelection').CLIPBOARD_CONTAINER_ID;
+var CLIPBOARD_PROPERTY_ID = require('./transform/copySelection').CLIPBOARD_PROPERTY_ID;
 
 var converters = [
   require('../packages/paragraph/ParagraphHTMLConverter'),
@@ -106,5 +107,6 @@ HTMLImporter.extend(ClipboardImporter, function() {
 
 ClipboardImporter.converters = converters;
 ClipboardImporter.CLIPBOARD_CONTAINER_ID = CLIPBOARD_CONTAINER_ID;
+ClipboardImporter.CLIPBOARD_PROPERTY_ID = CLIPBOARD_PROPERTY_ID;
 
 module.exports = ClipboardImporter;

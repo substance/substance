@@ -133,6 +133,14 @@ VirtualDOMElement.Prototype = function() {
     return this;
   };
 
+  this.getId = function() {
+    return this.getAttribute('id');
+  };
+
+  this.setId = function(id) {
+    return this.setAttribute('id', id);
+  };
+
   this.getTextContent = function() {
     // TODO: we could traverse children directly, and just collecting text nodes
     var el = this._compile();
@@ -291,9 +299,9 @@ VirtualDOMElement.Prototype = function() {
       throw new Error('Handler for event "' + eventName + '" has already been registered.');
     }
     this.handlers[eventName] = {
-      selector: selector,
       handler: handler,
-      context: context
+      context: context,
+      selector: selector
     };
   };
 

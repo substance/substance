@@ -5,6 +5,7 @@ var uuid = require('../util/uuid');
 var DOMElement = require('./DefaultDOMElement');
 var DefaultDOMElement = require('./DefaultDOMElement');
 var JSONConverter = require('../model/JSONConverter');
+var documentHelpers = require('../model/documentHelpers');
 
 /**
   The Clipboard is a Component which should be rendered as a sibling component
@@ -113,9 +114,6 @@ Clipboard.Prototype = function() {
   };
 
   this.onCopy = function(event) {
-    // we use $ internally, this unwrapping to get the native event
-    event = event.originalEvent;
-
     // console.log("Clipboard.onCopy", arguments);
     var clipboardData = this._copy();
     // in the case that browser doesn't provide event.clipboardData
@@ -136,9 +134,6 @@ Clipboard.Prototype = function() {
   };
 
   this.onCut = function(event) {
-    // we use $ internally, this unwrapping to get the native event
-    event = event.originalEvent;
-
     // preventing default behavior to avoid that contenteditable
     // destroys our DOM
     event.preventDefault();
@@ -153,9 +148,6 @@ Clipboard.Prototype = function() {
 
   // Works on Safari/Chrome/FF
   this.onPaste = function(event) {
-    // we use $ internally, this unwrapping to get the native event
-    event = event.originalEvent;
-
     var clipboardData = event.clipboardData;
     var surface = this.getSurface();
 
@@ -267,18 +259,16 @@ Clipboard.Prototype = function() {
   };
 
   this._copy = function() {
-    var wSel = window.getSelection();
     var surface = this.getSurface();
     var sel = surface.getSelection();
     var doc = surface.getDocument();
     var clipboardDoc = null;
     var clipboardText = "";
     var clipboardHtml = "";
-    if (wSel.rangeCount > 0 && !sel.isCollapsed()) {
-      var wRange = wSel.getRangeAt(0);
-      clipboardText = wRange.toString();
+    if (!sel.isCollapsed()) {
+      clipboardText = documentHelpers.getTextForSelection(doc, sel);
       clipboardDoc = surface.copy(doc, sel);
-      // console.log("Clipboard._copy(): created a copy", this.clipboardDoc);
+      clipboardHtml = this.htmlExporter.exportDocument(clipboardDoc);
     }
     return {
       doc: clipboardDoc,

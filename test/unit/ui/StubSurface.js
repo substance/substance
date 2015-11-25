@@ -38,6 +38,9 @@ function StubSurface(doc, sel, containerId) {
   this.rerenderDomSelection = function() {};
 
   this.transaction = Surface.prototype.transaction;
+
+  this.copy = Surface.prototype.copy;
+
 }
 
 module.exports = StubSurface;

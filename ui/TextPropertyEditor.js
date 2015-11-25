@@ -4,7 +4,6 @@ var Surface = require('./Surface');
 var TextPropertyManager = require('../model/TextPropertyManager');
 var insertText = require('../model/transform/insertText');
 var deleteSelection = require('../model/transform/deleteSelection');
-var copySelection = require('../model/transform/copySelection');
 var Component = require('./Component');
 var TextProperty = require('./TextPropertyComponent');
 var $$ = Component.$$;
@@ -111,15 +110,6 @@ TextPropertyEditor.Prototype = function() {
   this.softBreak = function(tx, args) {
     args.text = "\n";
     return this.insertText(tx, args);
-  };
-
-  /**
-    Copy the current selection. Performs a {@link model/transform/copySelection}
-    transformation.
-  */
-  this.copy = function(doc, selection) {
-    var result = copySelection(doc, { selection: selection });
-    return result.doc;
   };
 
   /**

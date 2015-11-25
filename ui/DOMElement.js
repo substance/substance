@@ -146,6 +146,31 @@ DOMElement.Prototype = function() {
   };
 
   /**
+    Get the id of this element.
+
+    @abstract
+    @private
+    @note Considered as private API, in favor of the property {ui/DOMElement.prototype.id}
+    @returns {String} the id.
+   */
+  this.getId = function() {
+    throw new Error('This method is abstract.');
+  };
+
+  /**
+    Set the id of this element.
+
+    @abstract
+    @private
+    @note Considered as private API, in favor of the property {ui/DOMElement.prototype.id}
+    @param {String} id the new id
+    @returns {this}
+  */
+  this.setId = function(id) {
+    throw new Error('This method is abstract.');
+  };
+
+  /**
     Gets or sets the text content of an element.
 
     @abstract
@@ -570,6 +595,18 @@ Object.defineProperties(DOMElement.prototype, {
     },
     set: function(tagName) {
       this.setTagName(tagName);
+    }
+  },
+  /**
+    @property {String} ui/DOMElement#id
+   */
+  'id': {
+    configurable: true,
+    get: function() {
+      return this.getId();
+    },
+    set: function(id) {
+      this.setId(id);
     }
   },
   /**

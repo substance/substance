@@ -66,6 +66,15 @@ DefaultDOMElement.Prototype = function() {
     throw new Error('tagName is readonly.');
   };
 
+  this.getId = function() {
+    return this.el.id;
+  };
+
+  this.setId = function(id) {
+    this.el.id = id;
+    return this;
+  };
+
   this.getTextContent = function() {
     return this.$el.text();
   };
@@ -113,27 +122,34 @@ DefaultDOMElement.Prototype = function() {
     if (this._handlers[eventName]) {
       throw new Error('Handler for event "' + eventName + '" has already been registered.');
     }
-    this._handlers[eventName] = {
-      selector: selector,
-      handler: handler,
-      context: context
-    };
     if (inBrowser) {
       if (context) {
-        this.$el.on(eventName, selector, handler.bind(context));
-      } else {
-        this.$el.on(eventName, selector, handler);
+        handler = handler.bind(context);
       }
+      if (selector) {
+        var _handler = handler;
+        handler = function(event) {
+          if ($(event.target).is(selector)) {
+            _handler(event);
+          }
+        };
+      }
+      this.addEventListener(eventName, selector, handler);
+      this._handlers[eventName] = handler;
+    } else {
+      // not supported in cheerio
     }
-    // not supported in cheerio
   };
 
   this.removeEventListener = function(eventName) {
+    var handler = this._handlers[eventName];
+    if (!handler) return;
     delete this._handlers[eventName];
     if (inBrowser) {
-      this.$el.off(eventName);
+      this.el.removeEventListener(eventName, handler);
+    } else {
+      // not supported in cheerio
     }
-    // not supported in cheerio
   };
 
   this.focus = function() {

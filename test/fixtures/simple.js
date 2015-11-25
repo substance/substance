@@ -2,6 +2,17 @@
 
 var Article = require('../model/TestArticle');
 
+/*
+  Creates a document with the following content
+
+  ```
+  main:
+    p1: '0123456789'
+    p2: '0123456789'
+    p3: '0123456789'
+    p4: '0123456789'
+  ```
+*/
 module.exports = function simple() {
   var article = new Article();
   article.set(['meta', 'title'], 'Simple');

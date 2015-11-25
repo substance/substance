@@ -7,7 +7,9 @@ var annotationHelpers = require('../annotationHelpers');
 var deleteSelection = require('./deleteSelection');
 var insertText = require('./insertText');
 var breakNode = require('./breakNode');
+
 var CLIPBOARD_CONTAINER_ID = require('./copySelection').CLIPBOARD_CONTAINER_ID;
+var CLIPBOARD_PROPERTY_ID = require('./copySelection').CLIPBOARD_PROPERTY_ID;
 
 /* jshint latedef: false */
 
@@ -47,8 +49,8 @@ var paste = function(tx, args) {
   if (nodes.length > 0) {
     var first = pasteDoc.get(nodes[0]);
     // copy of a property selection creates a doc containing
-    // one default text node with id 'text'
-    if (nodes.length === 1 && first.isInstanceOf("text")) {
+    // one default text node with a specific id
+    if (nodes.length === 1 && first.id === CLIPBOARD_PROPERTY_ID) {
       return _pasteAnnotatedText(tx, args);
     } else {
       return _pasteDocument(tx, args);

@@ -9,6 +9,7 @@ var Component = require('./Component');
 var Clipboard = require('./Clipboard');
 var $$ = Component.$$;
 var $ = require('../util/jquery');
+var copySelection = require('../model/transform/copySelection');
 
 /**
    Abstract interface for editing components.
@@ -118,7 +119,8 @@ Surface.Prototype = function() {
 
   this.getChildContext = function() {
     return {
-      surface: this
+      surface: this,
+      doc: this.getDocument()
     };
   };
 
@@ -169,11 +171,13 @@ Surface.Prototype = function() {
   };
 
   this.getController = function() {
-    return this.context.controller;
+    return (this.context.controller ||
+      // used in test-suite
+      this.props.controller);
   };
 
   this.getDocument = function() {
-    return this.context.controller.getDocument();
+    return this.props.doc;
   };
 
   // Must be implemented by container surfaces
@@ -333,18 +337,21 @@ Surface.Prototype = function() {
     return this.textPropertyManager;
   };
 
+  /**
+    Copy the current selection. Performs a {@link model/transform/copySelection}
+    transformation.
+  */
+  this.copy = function(doc, selection) {
+    var result = copySelection(doc, { selection: selection });
+    return result.doc;
+  };
+
   // ### event handlers
 
   /*
    * Handle document key down events.
    */
   this.onKeyDown = function(event) {
-    // we use $ internally, this unwrapping to get the native event
-    event = event.originalEvent;
-
-    if (this.frozen) {
-      return;
-    }
     if ( event.which === 229 ) {
       // ignore fake IME events (emitted in IE and Chromium)
       return;
@@ -412,8 +419,6 @@ Surface.Prototype = function() {
   };
 
   this.onTextInput = function(event) {
-    event = event.originalEvent;
-
     if (!event.data) return;
     // console.log("TextInput:", event);
     event.preventDefault();
@@ -437,9 +442,6 @@ Surface.Prototype = function() {
 
   // a shim for textInput events based on keyPress and a horribly dangerous dance with the CE
   this.onTextInputShim = function(event) {
-    // we use $ internally, this unwrapping to get the native event
-    event = event.originalEvent;
-
     // Filter out non-character keys. Doing this prevents:
     // * Unexpected content deletion when selection is not collapsed and the user presses, for
     //   example, the Home key (Firefox fires 'keypress' for it)
@@ -478,9 +480,6 @@ Surface.Prototype = function() {
   };
 
   this.onMouseDown = function(event) {
-    // we use $ internally, this unwrapping to get the native event
-    event = event.originalEvent;
-
     if ( event.which !== 1 ) {
       return;
     }
@@ -533,9 +532,6 @@ Surface.Prototype = function() {
   };
 
   this.onDragStart = function(event) {
-    // we use $ internally, this unwrapping to get the native event
-    event = event.originalEvent;
-
     event.preventDefault();
     event.stopPropagation();
   };
