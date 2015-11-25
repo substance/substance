@@ -120,14 +120,14 @@ documentHelpers.getAnnotationsForSelection = function(doc, sel, annotationType, 
 */
 
 documentHelpers.getTextForSelection = function(doc, sel) {
-  var result = [];
   var text;
   if (!sel || sel.isNull()) {
     return "";
   } else if (sel.isPropertySelection()) {
     text = doc.get(sel.start.path);
-    result.push(text.substring(sel.start.offset, sel.end.offset));
+    return text.substring(sel.start.offset, sel.end.offset);
   } else if (sel.isContainerSelection()) {
+    var result = [];
     var container = doc.get(sel.containerId);
     var range = sel.range;
     var paths = container.getPathRange(range.start.path, range.end.path);
@@ -144,8 +144,8 @@ documentHelpers.getTextForSelection = function(doc, sel) {
         result.push(text);
       }
     }
+    return result.join('\n');
   }
-  return result.join('');
 };
 
 module.exports = documentHelpers;

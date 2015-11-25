@@ -377,13 +377,22 @@ DOMElement.Prototype = function() {
   /**
     Gets the type of this element in lower-case.
 
-    @abstract
     @private
     @note Considered as private API, in favor of the property {@link ui/DOMElement.prototype.nodeType}
     @returns {String}
   */
   this.getNodeType = function() {
-    throw new Error('This method is abstract.');
+    if (this.isTextNode()) {
+      return "text";
+    } else if (this.isCommentNode()) {
+      return "comment";
+    } else if (this.isElementNode()) {
+      return "element";
+    } else if (this.isDocumentNode()) {
+      return "document";
+    } else {
+      throw new Error("Unsupported node type");
+    }
   };
 
   /**
@@ -435,6 +444,16 @@ DOMElement.Prototype = function() {
     @returns {Boolean} true if the element is of type `Node.COMMENT_NODE`
    */
   this.isCommentNode = function() {
+    throw new Error('This method is abstract.');
+  };
+
+  /**
+    Checks if the element is a DocumentNode.
+
+    @abstract
+    @returns {Boolean} true if the element is of type `Node.DOCUMENT_NODE`
+   */
+  this.isDocumentNode = function() {
     throw new Error('This method is abstract.');
   };
 

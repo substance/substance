@@ -16,14 +16,16 @@ function ClipboardExporter() {
 ClipboardExporter.Prototype = function() {
 
   this.exportDocument = function(doc) {
+    var html;
     var elements = this.convertDocument(doc);
     if (elements.length === 1 && elements[0].attr('data-id') === CLIPBOARD_PROPERTY_ID) {
-      return elements[0].innerHTML;
+      html = elements[0].innerHTML;
     } else {
-      return elements.map(function(el) {
+      html = elements.map(function(el) {
         return el.outerHTML;
       }).join('');
     }
+    return '<html><body>' + html + '</body></html>';
   };
 
   this.convertDocument = function(doc) {

@@ -36,7 +36,7 @@ var paste = function(tx, args) {
   // in a PropertyEditor we paste the text as is
   if (args.text && !pasteDoc) {
     if (inContainer) {
-      pasteDoc = _convertPlainTextToDocument(tx, args);
+      args.doc = pasteDoc = _convertPlainTextToDocument(tx, args);
     } else {
       return insertText(tx, args);
     }
@@ -59,23 +59,35 @@ var paste = function(tx, args) {
   return args;
 };
 
+/*
+  Splits plain text by lines and puts them into paragraphs.
+*/
 function _convertPlainTextToDocument(tx, args) {
   var defaultTextType = tx.getSchema().getDefaultTextType();
-
-  var paraText = args.text.split(/\s*\n\s*\n/);
+  var lines = args.text.split(/\s*\n\s*\n/);
   var pasteDoc = tx.newInstance();
   var container = pasteDoc.create({
     type: 'container',
     id: CLIPBOARD_CONTAINER_ID,
     nodes: []
   });
-  for (var i = 0; i < paraText.length; i++) {
-    var paragraph = pasteDoc.create({
-      id: uuid(defaultTextType),
+  var node;
+  if (lines.length === 1) {
+    node = pasteDoc.create({
+      id: CLIPBOARD_PROPERTY_ID,
       type: defaultTextType,
-      content: paraText[i]
+      content: lines[0]
     });
-    container.show(paragraph.id);
+    container.show(node.id);
+  } else {
+    for (var i = 0; i < lines.length; i++) {
+      node = pasteDoc.create({
+        id: uuid(defaultTextType),
+        type: defaultTextType,
+        content: lines[i]
+      });
+      container.show(node.id);
+    }
   }
   return pasteDoc;
 }

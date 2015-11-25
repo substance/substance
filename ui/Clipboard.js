@@ -1,7 +1,6 @@
 "use strict";
 
 var oo = require('../util/oo');
-var uuid = require('../util/uuid');
 var DOMElement = require('./DefaultDOMElement');
 var DefaultDOMElement = require('./DefaultDOMElement');
 var JSONConverter = require('../model/JSONConverter');
@@ -201,36 +200,10 @@ Clipboard.Prototype = function() {
       }
     }
     // Fallback to plain-text in other cases
-    if (surface.isContainerEditor()) {
-      var doc = surface.getDocument();
-      var defaultTextType = doc.getSchema().getDefaultTextType();
-      surface.transaction(function(tx, args) {
-        // TODO: this implementation should not do this
-        // instead the 'paste' transformation should be able to do it.
-        var paraText = plainText.split(/\s*\n\s*\n/);
-        var pasteDoc = doc.newInstance();
-        var container = pasteDoc.create({
-          type: 'container',
-          id: 'clipboard_content',
-          nodes: []
-        });
-        for (var i = 0; i < paraText.length; i++) {
-          var paragraph = pasteDoc.create({
-            id: uuid(defaultTextType),
-            type: defaultTextType,
-            content: paraText[i]
-          });
-          container.show(paragraph.id);
-        }
-        args.doc = pasteDoc;
-        return surface.paste(tx, args);
-      });
-    } else {
-      surface.transaction(function(tx, args) {
-        args.text = plainText.split('').join('');
-        return surface.insertText(tx, args);
-      });
-    }
+    surface.transaction(function(tx, args) {
+      args.text = plainText;
+      return surface.paste(tx, args);
+    });
   };
 
   this.onBeforePasteShim = function() {

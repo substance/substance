@@ -200,6 +200,10 @@ VirtualDOMElement.Prototype = function() {
     return false;
   };
 
+  this.isDocumentNode = function() {
+    return false;
+  };
+
   this.createElement = function(str) {
     return VirtualDOMElement.createElement(str);
   };

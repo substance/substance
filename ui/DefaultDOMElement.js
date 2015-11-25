@@ -158,19 +158,6 @@ DefaultDOMElement.Prototype = function() {
     }
   };
 
-
-  this.getNodeType = function() {
-    if (this.isTextNode()) {
-      return "text";
-    } else if (this.isCommentNode()) {
-      return "comment";
-    } else if (this.isElementNode()) {
-      return "element";
-    } else {
-      throw new Error("Unsupported node type");
-    }
-  };
-
   this.isTextNode = function() {
     if (inBrowser) {
       return (this.el.nodeType === window.Node.TEXT_NODE);
@@ -193,6 +180,14 @@ DefaultDOMElement.Prototype = function() {
       return (this.el.nodeType === window.Node.COMMENT_NODE);
     } else {
       return this.el.type === "comment";
+    }
+  };
+
+  this.isDocumentNode = function() {
+    if (inBrowser) {
+      return (this.el.nodeType === window.Node.DOCUMENT_NODE);
+    } else {
+      return this.el === this.el.root;
     }
   };
 

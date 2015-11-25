@@ -47,10 +47,10 @@ var ContainerNodeMixin = require('./ContainerNodeMixin');
 
 function ContainerEditor() {
   Surface.apply(this, arguments);
+  if (!_.isString(this.props.containerId)) throw new Error("Illegal argument: Expecting containerId.");
 
   var doc = this.getDocument();
 
-  if (!_.isString(this.props.containerId)) throw new Error("Illegal argument: Expecting containerId.");
   this.editingBehavior = new EditingBehavior();
   this.textPropertyManager = new TextPropertyManager(doc, this.props.containerId);
 
@@ -233,4 +233,5 @@ ContainerEditor.Prototype = function() {
 };
 
 Surface.extend(ContainerEditor, ContainerNodeMixin);
+
 module.exports = ContainerEditor;

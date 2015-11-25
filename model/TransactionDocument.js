@@ -11,7 +11,7 @@ var __id__ = 0;
 
 /**
   A {@link model/Document} instance that is used during transaction.
-  
+
   During editing a TransactionDocument is kept up-to-date with the real one.
   Whenever a transaction is started on the document, a TransactionDocument is used to
   record changes, which are applied en-bloc when the transaction is saved.
@@ -238,6 +238,10 @@ TransactionDocument.Prototype = function() {
     // update state
     this._isCancelled = true;
     this.reset();
+  };
+
+  this.newInstance = function() {
+    return this.document.newInstance();
   };
 
 };

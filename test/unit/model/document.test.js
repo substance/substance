@@ -34,7 +34,7 @@ QUnit.test("Get text for container selection.", function(assert) {
     endPath: ["p2", "content"],
     endOffset: 5
   });
-  assert.equal(doc.getTextForSelection(sel), "5678901234");
+  assert.equal(doc.getTextForSelection(sel), "56789\n01234");
 });
 
 
