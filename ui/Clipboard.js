@@ -184,7 +184,12 @@ Clipboard.Prototype = function() {
     // use internal data if available
     if (types['application/substance']) {
       json = clipboardData.getData('application/substance');
-      return this._pasteSubstanceData(json, plainText);
+      json = JSON.parse(json);
+      var schema = surface.getDocument().getSchema();
+      // only paste via JSON if the schema is correct
+      if (json.schema.name === schema.name && json.schema.version === schema.version) {
+        return this._pasteSubstanceData(json, plainText);
+      }
     }
 
     // if we have content given as HTML we let the importer assess the quality first
@@ -257,7 +262,7 @@ Clipboard.Prototype = function() {
 
     var content = doc.newInstance();
     var converter = new JSONConverter();
-    converter.importDocument(content, JSON.parse(json));
+    converter.importDocument(content, json);
 
     surface.transaction(function(tx, args) {
       args.text = text;

@@ -92,7 +92,7 @@ QUnit.uiTest("Copying a property selection", function(assert) {
   var htmlDoc = DOMElement.parseHTML(clipboardData.data['text/html']);
   var body = htmlDoc.find('body');
   var childNodes = body.childNodes;
-  assert.equal(childNodes.length, 1, "There should be only one element")
+  assert.equal(childNodes.length, 1, "There should be only one element");
   var el = childNodes[0];
   assert.equal(el.nodeType, 'text', "HTML element should be a text node.");
   assert.equal(el.text(), TEXT, "HTML text should be correct.");
@@ -160,13 +160,7 @@ function _containerEditorSample() {
       }
     }
   }), $('#qunit-fixture'));
-
-  return app.refs.editor;
-}
-
-QUnit.uiTest("Pasting text into ContainerEditor using 'text/plain'.", function(assert) {
-  var editor = _containerEditorSample();
-  var doc = editor.getDocument();
+  var editor = app.refs.editor;
   var sel = doc.createSelection({
     type: 'property',
     path: ['p1', 'content'],
@@ -177,6 +171,12 @@ QUnit.uiTest("Pasting text into ContainerEditor using 'text/plain'.", function(a
   editor.isNativeFocused = true;
   editor.setSelection(sel);
 
+  return editor;
+}
+
+QUnit.uiTest("Pasting text into ContainerEditor using 'text/plain'.", function(assert) {
+  var editor = _containerEditorSample();
+  var doc = editor.getDocument();
   var event = new ClipboardEvent();
   event.clipboardData.setData('text/plain', 'XXX');
   editor.clipboard.onPaste(event);
@@ -186,20 +186,50 @@ QUnit.uiTest("Pasting text into ContainerEditor using 'text/plain'.", function(a
 QUnit.uiTest("Pasting text into ContainerEditor using 'text/html'.", function(assert) {
   var editor = _containerEditorSample();
   var doc = editor.getDocument();
-  var sel = doc.createSelection({
-    type: 'property',
-    path: ['p1', 'content'],
-    startOffset: 1
-  });
-  editor.setFocused(true);
-  // HACK faking that the element is focused natively
-  editor.isNativeFocused = true;
-  editor.setSelection(sel);
-
   var TEXT = 'XXX';
   var event = new ClipboardEvent();
   event.clipboardData.setData('text/plain', TEXT);
   event.clipboardData.setData('text/html', TEXT);
   editor.clipboard.onPaste(event);
   assert.equal(doc.get(['p1', 'content']), '0XXX123456789', "Plain text should be correct.");
+});
+
+QUnit.uiTest("Pasting text into ContainerEditor using json.", function(assert) {
+  var editor = _containerEditorSample();
+  var doc = editor.getDocument();
+  var schema = doc.getSchema();
+
+  var TEXT = 'XXX';
+  var json = {
+    schema: {
+      name: schema.name,
+      version: schema.version
+    },
+    nodes: [
+      { type: 'paragraph',  id: CLIPBOARD_PROPERTY_ID, content: TEXT},
+      { type: 'container', id: CLIPBOARD_CONTAINER_ID, nodes: [CLIPBOARD_PROPERTY_ID] }
+    ]
+  };
+  var event = new ClipboardEvent();
+  // Note: intentionally setting a different plain-text data
+  // to make sure that pasting has been done via json
+  event.clipboardData.setData('text/plain', 'ZZZ');
+  event.clipboardData.setData('application/substance', JSON.stringify(json));
+  editor.clipboard.onPaste(event);
+  assert.equal(doc.get(['p1', 'content']), '0XXX123456789', "Text should be have been inserted correctly.");
+});
+
+QUnit.uiTest("Pasting using json with wrong schema.", function(assert) {
+  var editor = _containerEditorSample();
+  var doc = editor.getDocument();
+  var json = {
+    schema: { name: 'WRONG SCHEMA', version: '1.0.0' },
+    nodes: []
+  };
+  var event = new ClipboardEvent();
+  event.clipboardData.setData('text/plain', 'XXX');
+  event.clipboardData.setData('application/substance', JSON.stringify(json));
+
+  editor.clipboard.onPaste(event);
+  assert.equal(doc.get(['p1', 'content']), '0XXX123456789', "Pasting should have fallen back to plain-text pasting.");
 });
