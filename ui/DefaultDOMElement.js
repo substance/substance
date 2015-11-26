@@ -2,6 +2,7 @@
 
 var oo = require('../util/oo');
 var $ = require('../util/jquery');
+var isArray = require('lodash/lang/isArray');
 var map = require('lodash/collection/map');
 var inBrowser = (typeof window !== 'undefined');
 var DOMElement = require('./DOMElement');
@@ -270,7 +271,11 @@ DefaultDOMElement.Prototype = function() {
   };
 
   this.append = function(child) {
-    if (child instanceof DefaultDOMElement) {
+    if (isArray(child)) {
+      child.forEach(function(node) {
+        this.append(node);
+      }.bind(this));
+    } else if (child instanceof DefaultDOMElement) {
       this.$el.append(child.$el);
     } else {
       this.$el.append(child);

@@ -474,6 +474,7 @@ DOMImporter.Prototype = function DOMImporterPrototype() {
     var wrapper = $$('div');
     while(childIterator.hasNext()) {
       var el = childIterator.next();
+      // if there is a block node we finish this wrapper
       var blockTypeConverter = this._getBlockConverterForElement(el);
       if (blockTypeConverter) {
         childIterator.back();
@@ -486,7 +487,6 @@ DOMImporter.Prototype = function DOMImporterPrototype() {
       if (!node.type) {
         throw new Error('Contract: Html.defaultConverter() must return a node with type.');
       }
-      node.id = node.id || this.nextId(node.type);
       this._createAndShow(node);
     }
     return node;

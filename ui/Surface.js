@@ -38,7 +38,7 @@ function Surface() {
 
   this.name = this.props.name;
   this.selection = Document.nullSelection;
-  this.clipboard = new Clipboard(this, doc.getClipboardImporter(), doc.getClipboardExporter());
+  this.clipboard = new Clipboard(this);
 
   // HACK: we need to listen to mousup on document
   // to catch events outside the surface, mouseup event must be listened on $document

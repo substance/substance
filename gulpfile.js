@@ -111,6 +111,8 @@ gulp.task('build:test', ['lint'], function() {
   var testfiles = glob.sync("test/**/*.test.js");
   gulp.src(['./test/index.html'])
    .pipe(gulp.dest('./tmp/test/'));
+  gulp.src(['./test/fixtures/clipboard/*'])
+   .pipe(gulp.dest('./tmp/test/fixtures/clipboard/'));
   gulp.src(['./test/lib/jquery.js', './test/lib/qunit.js'])
    .pipe(gulp.dest('./tmp/test/lib/'));
   return _buildTestBundle(testfiles);

@@ -1,6 +1,6 @@
 "use strict";
 
-var HtmlExporter = require('./HTMLExporter');
+var HtmlExporter = require('../model/HTMLExporter');
 var ClipboardImporter = require('./ClipboardImporter');
 var converters = ClipboardImporter.converters;
 var CLIPBOARD_CONTAINER_ID = ClipboardImporter.CLIPBOARD_CONTAINER_ID;

@@ -15,6 +15,7 @@ var CLIPBOARD_PROPERTY_ID = copySelection.CLIPBOARD_PROPERTY_ID;
 var StubSurface = require('./StubSurface');
 var $ = require('../../../util/jquery');
 var $$ = VirtualDOMElement.createElement;
+var load = require('../load');
 
 var TestContainerEditor = require('./TestContainerEditor');
 var components = {
@@ -52,7 +53,7 @@ function ClipboardEvent() {
 QUnit.uiTest("Copying a JSON, HTML, and plain text", function(assert) {
   var doc = simple();
   var surface = new StubSurface(doc, null, 'main');
-  var clipboard = new Clipboard(surface, doc.getClipboardImporter(), doc.getClipboardExporter());
+  var clipboard = new Clipboard(surface);
   var sel = doc.createSelection({ type: 'property', path: ['p1', 'content'], startOffset: 0, endOffset: 5 });
   surface.setSelection(sel);
   var event = new ClipboardEvent();
@@ -78,7 +79,7 @@ QUnit.uiTest("Copying a property selection", function(assert) {
   var doc = simple();
   var schema = doc.getSchema();
   var surface = new StubSurface(doc, null, 'main');
-  var clipboard = new Clipboard(surface, doc.getClipboardImporter(), doc.getClipboardExporter());
+  var clipboard = new Clipboard(surface);
   var sel = doc.createSelection({ type: 'property', path: ['p1', 'content'], startOffset: 0, endOffset: 5 });
   surface.setSelection(sel);
   var TEXT = '01234';
@@ -113,7 +114,7 @@ QUnit.uiTest("Copying a property selection", function(assert) {
 QUnit.uiTest("Copying a container selection", function(assert) {
   var doc = simple();
   var surface = new StubSurface(doc, null, 'main');
-  var clipboard = new Clipboard(surface, doc.getClipboardImporter(), doc.getClipboardExporter());
+  var clipboard = new Clipboard(surface);
   var sel = doc.createSelection({
     type: 'container',
     containerId: 'main',
@@ -232,4 +233,38 @@ QUnit.uiTest("Pasting using json with wrong schema.", function(assert) {
 
   editor.clipboard.onPaste(event);
   assert.equal(doc.get(['p1', 'content']), '0XXX123456789', "Pasting should have fallen back to plain-text pasting.");
+});
+
+QUnit.uiTest("Browser - Chrome (OSX/Linux) - Plain Text", function(assert) {
+  var done = assert.async();
+  var editor = _containerEditorSample();
+  var doc = editor.getDocument();
+  load('fixtures/clipboard/browser-linux-plain-text.html')
+    .then(function(html) {
+      var event = new ClipboardEvent();
+      event.clipboardData.setData('text/plain', '');
+      event.clipboardData.setData('text/html', html);
+      editor.clipboard.onPaste(event);
+      assert.equal(doc.get(['p1', 'content']), '0XXX123456789', "Content should have been pasted.");
+    })
+    .done(done);
+});
+
+QUnit.uiTest("Browser - Chrome (OSX/Linux) - Annotated Text", function(assert) {
+  var done = assert.async();
+  var editor = _containerEditorSample();
+  var doc = editor.getDocument();
+  load('fixtures/clipboard/browser-linux-annotated-text.html')
+    .then(function(html) {
+      var event = new ClipboardEvent();
+      event.clipboardData.setData('text/plain', '');
+      event.clipboardData.setData('text/html', html);
+      editor.clipboard.onPaste(event);
+      assert.equal(doc.get(['p1', 'content']), '0XXX123456789', "Content should have been pasted.");
+      var annotations = doc.getIndex('annotations').get(['p1', 'content']);
+      assert.equal(annotations.length, 1, "There should be one annotation on the property now.");
+      var anno = annotations[0];
+      assert.equal(anno.type, 'link', "The annotation should be a link.");
+    })
+    .done(done);
 });

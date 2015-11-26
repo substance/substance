@@ -2,9 +2,10 @@
 
 var oo = require('../util/oo');
 var DOMElement = require('./DefaultDOMElement');
-var DefaultDOMElement = require('./DefaultDOMElement');
 var JSONConverter = require('../model/JSONConverter');
 var documentHelpers = require('../model/documentHelpers');
+var ClipboardImporter = require('./ClipboardImporter');
+var ClipboardExporter = require('./ClipboardExporter');
 
 /**
   The Clipboard is a Component which should be rendered as a sibling component
@@ -28,11 +29,14 @@ var documentHelpers = require('../model/documentHelpers');
   Otherwise, only plain text will be copied. If `Paragraph` is not present in your schema,
   `schema.getDefaultTextType()` is used instead.
 */
-var Clipboard = function(surface, htmlImporter, htmlExporter) {
+var Clipboard = function(surface) {
 
   this.surface = surface;
-  this.htmlImporter = htmlImporter;
-  this.htmlExporter = htmlExporter;
+  var doc = surface.getDocument();
+  var schema = doc.getSchema();
+
+  this.htmlImporter = new ClipboardImporter({ schema: schema, DocumentClass: doc.constructor });
+  this.htmlExporter = new ClipboardExporter();
 
   this.onCopy = this.onCopy.bind(this);
   this.onCut = this.onCut.bind(this);
@@ -177,7 +181,6 @@ Clipboard.Prototype = function() {
     // console.log('Available types', types);
 
     var json;
-    var docEl;
     var html;
     var plainText = clipboardData.getData('text/plain');
 
@@ -196,14 +199,11 @@ Clipboard.Prototype = function() {
     // and fallback to plain text import if it's bad
     if (types['text/html']) {
       html = clipboardData.getData('text/html');
-      docEl = DefaultDOMElement.parseHTML(html);
-      // check the quality of the HTML first and
-      // fall back to plain-text pasting if it is not
-      // compatible.
-      if (this.htmlImporter.checkQuality(docEl)) {
-        return this._pasteHtml(docEl, plainText);
+      if (this._pasteHtml(html, plainText)) {
+        return;
       }
     }
+
     // Fallback to plain-text in other cases
     surface.transaction(function(tx, args) {
       args.text = plainText;
@@ -277,17 +277,20 @@ Clipboard.Prototype = function() {
     @param {ui/DOMElement} docElement
     @param {String} text plain text representation used as a fallback
   */
-  this._pasteHtml = function(docElement, text) {
+  this._pasteHtml = function(html, text) {
     var surface = this.getSurface();
     if (!surface) return;
     // TODO: the clipboard importer should make sure
     // that the container exists
-    var content = this.htmlImporter.importDocument(docElement);
-    surface.transaction(function(tx, args) {
-      args.text = text;
-      args.doc = content;
-      return surface.paste(tx, args);
-    });
+    var content = this.htmlImporter.importDocument(html);
+    if (content) {
+      surface.transaction(function(tx, args) {
+        args.text = text;
+        args.doc = content;
+        return surface.paste(tx, args);
+      });
+      return true;
+    }
   };
 
 };
