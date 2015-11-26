@@ -10,9 +10,19 @@ module.exports = function(config) {
       'test/unit/**/*.test.js': ['browserify']
     },
     browsers: ['Chrome'],
+    customLaunchers: {
+      Chrome_travis_ci: {
+        base: 'Chrome',
+          flags: ['--no-sandbox']
+      }
+    },
     singleRun: true,
     browserify: {
       debug: true // include inline source maps
     }
   });
+
+  if(process.env.TRAVIS){
+      config.browsers = ['Chrome_travis_ci'];
+  }
 };
