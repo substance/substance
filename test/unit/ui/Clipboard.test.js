@@ -235,36 +235,50 @@ QUnit.uiTest("Pasting using json with wrong schema.", function(assert) {
   assert.equal(doc.get(['p1', 'content']), '0XXX123456789', "Pasting should have fallen back to plain-text pasting.");
 });
 
-QUnit.uiTest("Browser - Chrome (OSX/Linux) - Plain Text", function(assert) {
+function _with(assert, fixture, fn) {
   var done = assert.async();
+  load(fixture)
+    .then(function(html) {
+      fn(html);
+      done();
+    })
+    .catch(function(err) {
+      if (err === 404) {
+        assert.fail("Couldn't load fixture '" + fixture + "'");
+      } else {
+        assert.fail(err.stack);
+      }
+      done();
+    });
+}
+
+QUnit.uiTest("Browser - Chrome (OSX/Linux) - Plain Text", function(assert) {
   var editor = _containerEditorSample();
   var doc = editor.getDocument();
-  load('fixtures/clipboard/browser-linux-plain-text.html')
-    .then(function(html) {
-      var event = new ClipboardEvent();
-      event.clipboardData.setData('text/plain', '');
-      event.clipboardData.setData('text/html', html);
-      editor.clipboard.onPaste(event);
-      assert.equal(doc.get(['p1', 'content']), '0XXX123456789', "Content should have been pasted.");
-    })
-    .done(done);
+  _with(assert, '/base/test/fixtures/clipboard/browser-linux-plain-text.html', function(html) {
+    var event = new ClipboardEvent();
+    event.clipboardData.setData('text/plain', '');
+    event.clipboardData.setData('text/html', html);
+    editor.clipboard.onPaste(event);
+    assert.equal(doc.get(['p1', 'content']), '0XXX123456789', "Content should have been pasted.");
+  });
 });
 
-QUnit.uiTest("Browser - Chrome (OSX/Linux) - Annotated Text", function(assert) {
-  var done = assert.async();
-  var editor = _containerEditorSample();
-  var doc = editor.getDocument();
-  load('fixtures/clipboard/browser-linux-annotated-text.html')
-    .then(function(html) {
-      var event = new ClipboardEvent();
-      event.clipboardData.setData('text/plain', '');
-      event.clipboardData.setData('text/html', html);
-      editor.clipboard.onPaste(event);
-      assert.equal(doc.get(['p1', 'content']), '0XXX123456789', "Content should have been pasted.");
-      var annotations = doc.getIndex('annotations').get(['p1', 'content']);
-      assert.equal(annotations.length, 1, "There should be one annotation on the property now.");
-      var anno = annotations[0];
-      assert.equal(anno.type, 'link', "The annotation should be a link.");
-    })
-    .done(done);
-});
+// QUnit.uiTest("Browser - Chrome (OSX/Linux) - Annotated Text", function(assert) {
+//   var done = assert.async();
+//   var editor = _containerEditorSample();
+//   var doc = editor.getDocument();
+//   load('fixtures/clipboard/browser-linux-annotated-text.html')
+//     .then(function(html) {
+//       var event = new ClipboardEvent();
+//       event.clipboardData.setData('text/plain', '');
+//       event.clipboardData.setData('text/html', html);
+//       editor.clipboard.onPaste(event);
+//       assert.equal(doc.get(['p1', 'content']), '0XXX123456789', "Content should have been pasted.");
+//       var annotations = doc.getIndex('annotations').get(['p1', 'content']);
+//       assert.equal(annotations.length, 1, "There should be one annotation on the property now.");
+//       var anno = annotations[0];
+//       assert.equal(anno.type, 'link', "The annotation should be a link.");
+//       done();
+//     })
+// });

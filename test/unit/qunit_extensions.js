@@ -1,7 +1,11 @@
-require('../phantomjs/shims');
+'use strict';
 
 var inBrowser = (typeof window !== 'undefined');
 var isEmpty = require('lodash/lang/isEmpty');
+
+QUnit.assert.fail = function(msg) {
+  this.push(false, false, true, msg);
+};
 
 QUnit.assert.isEmpty = function(a, msg) {
   this.push(isEmpty(a), false, true, msg);

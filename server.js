@@ -85,8 +85,11 @@ app.get('/test/test.js', function (req, res, next) {
   });
 });
 
-// Provide FontAwesome fonts
-app.use(express.static(__dirname));
+// Provide static routes for testing
+// for accessing test/index.html and for fixtures
+// NOTE: '/base' is necessary to be compatible with karma
+app.use('/test', express.static(__dirname + '/test'));
+app.use('/base/test', express.static(__dirname + '/test'));
 
 app.listen(PORT);
 console.log('Server is listening on %s', PORT);

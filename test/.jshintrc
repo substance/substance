@@ -9,7 +9,6 @@
   "predef": [
     "window",
     "document",
-    "QUnit",
-    "sinon"
+    "QUnit"
   ]
 }

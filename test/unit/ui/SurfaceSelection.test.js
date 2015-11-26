@@ -1,7 +1,9 @@
 "use strict";
+
 require('../qunit_extensions');
 
 var SurfaceSelection = require('../../../ui/SurfaceSelection');
+var $ = require('../../../util/jquery');
 
 QUnit.uiModule('ui/SurfaceSelection');
 
@@ -15,18 +17,6 @@ var singlePropertyFixture = [
 var emptyParagraphFixture = [
   '<div id="test1" class="content-node" data-id="test1">',
     '<span data-path="test1.content"></span>',
-  '</div>'
-].join('');
-
-var multiplePropertiesFixture = [
-  '<div id="test1">',
-    '<span data-path="test1.content">The first property.</span>',
-  '</div>',
-  '<div id="test2">',
-    '<span data-path="test2.content">The second property.</span>',
-  '</div>',
-  '<div id="test3">',
-    '<span data-path="test3.content">The third property.</span>',
   '</div>'
 ].join('');
 

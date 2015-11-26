@@ -2,6 +2,7 @@
 
 require('../qunit_extensions');
 
+var sinon = require('sinon');
 var cloneDeep = require('lodash/lang/cloneDeep');
 var isEqual = require('lodash/lang/isEqual');
 var Component = require('../../../ui/Component');
