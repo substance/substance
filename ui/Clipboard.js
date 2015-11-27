@@ -5,6 +5,7 @@ var JSONConverter = require('../model/JSONConverter');
 var documentHelpers = require('../model/documentHelpers');
 var ClipboardImporter = require('./ClipboardImporter');
 var ClipboardExporter = require('./ClipboardExporter');
+var substanceGlobals = require('../util/substanceGlobals');
 
 /**
   The Clipboard is a Component which should be rendered as a sibling component
@@ -122,6 +123,8 @@ Clipboard.Prototype = function() {
     // we keep the copied data for internal use.
     // Then we have copy'n'paste at least within one app
     Clipboard.clipboardData = clipboardData;
+    // FOR DEBUGGING
+    substanceGlobals.clipboardData = clipboardData;
     if (event.clipboardData && clipboardData.doc) {
       event.preventDefault();
       // convert the copied document to json
@@ -161,20 +164,35 @@ Clipboard.Prototype = function() {
     event.preventDefault();
     event.stopPropagation();
 
-    var json;
+    var plainText;
     var html;
-    var plainText = clipboardData.getData('text/plain');
+    var json;
+    if (types['text/plain']) {
+      plainText = clipboardData.getData('text/plain');
+    }
+    if (types['text/html']) {
+      html = clipboardData.getData('text/html');
+    }
+    if (types['application/substance']) {
+      json = clipboardData.getData('application/substance');
+    }
+
+    // FOR DEBUGGING
+    substanceGlobals.clipboardData = {
+      text: plainText,
+      html: html,
+      json: json
+    };
 
     // WORKAROUND: FF does not provide HTML coming in from other applications
     // so fall back to the paste shim
-    if (this.isFF && !types['application/substance'] && !types['text/html']) {
+    if (this.isFF && !json && !html) {
       this._pastePlainText(plainText);
       return;
     }
 
     // use internal data if available
-    if (types['application/substance']) {
-      json = clipboardData.getData('application/substance');
+    if (json) {
       json = JSON.parse(json);
       var schema = surface.getDocument().getSchema();
       // only paste via JSON if the schema is correct
@@ -185,8 +203,7 @@ Clipboard.Prototype = function() {
 
     // if we have content given as HTML we let the importer assess the quality first
     // and fallback to plain text import if it's bad
-    if (types['text/html']) {
-      html = clipboardData.getData('text/html');
+    if (html) {
       if (this._pasteHtml(html, plainText)) {
         return;
       }
@@ -227,7 +244,16 @@ Clipboard.Prototype = function() {
     window.setTimeout(function() {
       this.surface.selection = sel;
       var html = el.innerHTML;
+      var text = el.textContent;
       el.innerHTML = "";
+
+      // FOR DEBUGGING
+      substanceGlobals.clipboardData = {
+        text: text,
+        html: html,
+        json: null
+      };
+
       return this._pasteHtml(html, el.textContent);
     }.bind(this));
   };
