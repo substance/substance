@@ -9,6 +9,7 @@
  */
 var Helpers = {};
 var $ = require('./jquery');
+var deleteFromArray = require('./deleteFromArray');
 
 // Lang helpers
 
@@ -217,14 +218,7 @@ Helpers.isArrayEqual = function(a, b) {
  * @param {Array} array
  * @param value
  */
-Helpers.deleteFromArray = function(array, value) {
-  for (var i = 0; i < array.length; i++) {
-    if (array[i] === value) {
-      array.splice(i, 1);
-      i--;
-    }
-  }
-};
+Helpers.deleteFromArray = deleteFromArray;
 
 /*
  * Clones a given object.

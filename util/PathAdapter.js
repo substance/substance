@@ -1,7 +1,9 @@
 'use strict';
 
-var _ = require('./helpers');
+var isString = require('lodash/lang/isString');
+var isArray = require('lodash/lang/isArray');
 var oo = require('./oo');
+var deleteFromArray = require('./deleteFromArray');
 
 /*
  * An adapter to access an object via path.
@@ -10,7 +12,7 @@ var oo = require('./oo');
  * @param {object} [obj] An object to operate on
  * @memberof module:Basics
  * @example
- * 
+ *
  * var pathAdapter = new PathAdapter({a: "aVal", b: {b1: 'b1Val', b2: 'b2Val'}});
  */
 
@@ -42,7 +44,7 @@ PathAdapter.Prototype = function() {
    * @method getRoot
    * @memberof module:Basics.PathAdapter.prototype
    * @example
-   * 
+   *
    * pathAdapter.getRoot();
    */
   this.getRoot = function() {
@@ -79,16 +81,14 @@ PathAdapter.Prototype = function() {
    * @method getRoot
    * @memberof module:Basics.PathAdapter.prototype
    * @example
-   * 
+   *
    * pathAdapter.get(['b', 'b1']);
    * // => b1Val
    */
   this.get = function(path) {
-    if (_.isString(path)) {
+    if (isString(path)) {
       return this[path];
-    } else if (!path || path.length === 0) {
-      return this.getRoot();
-    } else {
+    } else if (isArray(path)) {
       var key = path[path.length-1];
       var context = this._resolve(path);
       if (context) {
@@ -96,11 +96,13 @@ PathAdapter.Prototype = function() {
       } else {
         return undefined;
       }
+    } else {
+      return undefined;
     }
   };
 
   this.set = function(path, value) {
-    if (_.isString(path)) {
+    if (isString(path)) {
       this[path] = value;
     } else {
       var key = path[path.length-1];
@@ -109,7 +111,7 @@ PathAdapter.Prototype = function() {
   };
 
   this.delete = function(path, strict) {
-    if (_.isString(path)) {
+    if (isString(path)) {
       delete this[path];
     } else {
       var key = path[path.length-1];
@@ -156,7 +158,7 @@ PathAdapter.Arrays = function() {
 PathAdapter.Arrays.Prototype = function() {
 
   this.get = function(path) {
-    if (_.isString(path)) {
+    if (isString(path)) {
       return this[path];
     } else if (!path || path.length === 0) {
       return this.getRoot();
@@ -184,7 +186,7 @@ PathAdapter.Arrays.Prototype = function() {
   this.remove = function(path, value) {
     var values = this.get(path);
     if (values) {
-      _.deleteFromArray(values, value);
+      deleteFromArray(values, value);
     } else {
       console.warn('Warning: trying to remove a value for an unknown path.', path, value);
     }
