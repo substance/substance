@@ -28,7 +28,7 @@ module.exports = {
       converter.annotatedText([node.id, 'title']))
     );
     el.append(
-      converter.exportElement(node.getContentNode())
+      converter.convertNode(node.getContentNode())
     );
     el.append($$('caption').append(
       converter.annotatedText([node.id, 'caption']))
