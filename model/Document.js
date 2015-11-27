@@ -2,7 +2,7 @@
 
 var each = require('lodash/collection/each');
 var AbstractDocument = require('./AbstractDocument');
-var NodeIndex = require('./data/NodeIndex');
+var DocumentIndex = require('./DocumentIndex');
 var AnnotationIndex = require('./AnnotationIndex');
 var AnchorIndex = require('./AnchorIndex');
 
@@ -50,7 +50,7 @@ function Document(schema) {
   this.__id__ = __id__++;
 
   // all by type
-  this.addIndex('type', NodeIndex.create({
+  this.addIndex('type', DocumentIndex.create({
     property: "type"
   }));
 

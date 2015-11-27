@@ -6,7 +6,7 @@ var map = require('lodash/collection/map');
 var filter = require('lodash/collection/filter');
 var PathAdapter = require('../util/PathAdapter');
 var PropertyAnnotation = require('./PropertyAnnotation');
-var NodeIndex = require('./data/NodeIndex');
+var DocumentIndex = require('./DocumentIndex');
 
 // PropertyAnnotation Index
 // ----------------
@@ -27,7 +27,7 @@ var AnnotationIndex = function() {
   this.byType = new PathAdapter();
 };
 
-NodeIndex.extend(AnnotationIndex, function() {
+AnnotationIndex.Prototype = function() {
 
   this.property = "path";
 
@@ -86,7 +86,9 @@ NodeIndex.extend(AnnotationIndex, function() {
     }
   };
 
-});
+};
+
+DocumentIndex.extend(AnnotationIndex);
 
 AnnotationIndex.filterByRange = function(start, end) {
   return function(anno) {

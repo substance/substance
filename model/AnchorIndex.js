@@ -4,7 +4,7 @@ var isArray = require('lodash/lang/isArray');
 var filter = require('lodash/collection/filter');
 var PathAdapter = require('../util/PathAdapter');
 var ContainerAnnotation = require('./ContainerAnnotation');
-var NodeIndex = require('./data/NodeIndex');
+var DocumentIndex = require('./DocumentIndex');
 
 var ContainerAnnotationAnchorIndex = function(doc) {
   this.doc = doc;
@@ -12,7 +12,7 @@ var ContainerAnnotationAnchorIndex = function(doc) {
   this.byId = {};
 };
 
-NodeIndex.extend(ContainerAnnotationAnchorIndex, function() {
+DocumentIndex.extend(ContainerAnnotationAnchorIndex, function() {
   this.select = function(node) {
     return (node instanceof ContainerAnnotation);
   };
