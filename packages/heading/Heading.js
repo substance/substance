@@ -21,7 +21,7 @@ TextBlock.extend(Heading, function HeadingPrototype() {
 Heading.static.name = "heading";
 
 Heading.static.defineSchema({
-  "level": "number"
+  "level": { type: "number", default: 1 }
 });
 
 Heading.static.tocType = true;
