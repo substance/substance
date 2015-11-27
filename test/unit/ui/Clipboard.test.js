@@ -381,3 +381,27 @@ QUnit.uiTest("Browser - Edge (Windows) - Annotated Text", function(assert) {
 QUnit.uiTest("Browser - Edge (Windows) - Two Paragraphs", function(assert) {
   _twoParagraphsTest(assert, 'browser-windows-edge-two-paragraphs.html', 'forceWindows');
 });
+
+QUnit.uiTest("GoogleDocs - Chrome (OSX/Linux) - Plain Text", function(assert) {
+  _plainTextTest(assert, 'google-docs-osx-linux-chrome-plain-text.html');
+});
+
+QUnit.uiTest("GoogleDocs - Chrome (OSX/Linux) - Annotated Text", function(assert) {
+  _annotatedTextTest(assert, 'google-docs-osx-linux-chrome-annotated-text.html');
+});
+
+QUnit.uiTest("GoogleDocs - Chrome (OSX/Linux) - Two Paragraphs", function(assert) {
+  _twoParagraphsTest(assert, 'google-docs-osx-linux-chrome-two-paragraphs.html');
+});
+
+QUnit.uiTest("GoogleDocs - Firefox (Linux) - Plain Text", function(assert) {
+  _plainTextTest(assert, 'google-docs-linux-firefox-plain-text.html');
+});
+
+QUnit.uiTest("GoogleDocs - Firefox (Linux) - Annotated Text", function(assert) {
+  _annotatedTextTest(assert, 'google-docs-linux-firefox-annotated-text.html');
+});
+
+QUnit.uiTest("GoogleDocs - Firefox (OSX) - Plain Text", function(assert) {
+  _plainTextTest(assert, 'google-docs-osx-firefox-plain-text.html');
+});
