@@ -46,14 +46,18 @@ var paste = function(tx, args) {
     args.selection = tmp.selection;
   }
   var nodes = pasteDoc.get(CLIPBOARD_CONTAINER_ID).nodes;
+  var schema = tx.getSchema();
+
   if (nodes.length > 0) {
     var first = pasteDoc.get(nodes[0]);
-    // copy of a property selection creates a doc containing
-    // one default text node with a specific id
-    if (nodes.length === 1 && first.id === CLIPBOARD_PROPERTY_ID) {
-      return _pasteAnnotatedText(tx, args);
-    } else {
-      return _pasteDocument(tx, args);
+
+    if (schema.isInstanceOf(first.type, 'text')) {
+      args = _pasteAnnotatedText(tx, args);
+      nodes.shift();
+    }
+    // if still nodes left > 0
+    if (nodes.length > 0) {
+      args = _pasteDocument(tx, args);
     }
   }
   return args;
