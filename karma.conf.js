@@ -9,7 +9,7 @@ module.exports = function(config) {
     preprocessors: {
       'test/unit/**/*.test.js': ['browserify']
     },
-    browsers: ['Chrome'],
+    browsers: ['Chrome', 'Firefox'],
     customLaunchers: {
       Chrome_travis_ci: {
         base: 'Chrome',
@@ -23,6 +23,6 @@ module.exports = function(config) {
   });
 
   if(process.env.TRAVIS){
-      config.browsers = ['Chrome_travis_ci'];
+      config.browsers = ['Chrome_travis_ci', 'Firefox'];
   }
 };

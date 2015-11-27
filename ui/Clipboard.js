@@ -1,7 +1,6 @@
 "use strict";
 
 var oo = require('../util/oo');
-var DOMElement = require('./DefaultDOMElement');
 var JSONConverter = require('../model/JSONConverter');
 var documentHelpers = require('../model/documentHelpers');
 var ClipboardImporter = require('./ClipboardImporter');
@@ -154,35 +153,24 @@ Clipboard.Prototype = function() {
     var clipboardData = event.clipboardData;
     var surface = this.getSurface();
 
-    // FIXME: it seems, that in order to share the clipboard among
-    // surfaces we attach it to a higher level element.
-    // But why not just have one clipboard for each?
-    // Even if it seems inconvenient to use the native clipboard as shared
-    // data store, it would be more consistent regarding the responsibility
-    // of the clipboard. However, then we need reliable native clipboard support.
-    if (!surface || !surface.isNativeFocused) return;
-
     var types = {};
     for (var i = 0; i < clipboardData.types.length; i++) {
       types[clipboardData.types[i]] = true;
     }
 
-    // HACK: FF does not provide HTML coming in from other applications
-    // so fall back to the paste shim
-    if (this.isFF && !types['application/substance'] && !types['text/html']) {
-      this.onBeforePasteShim();
-      surface.rerenderSelection();
-      this.onPasteShim();
-      return;
-    }
-
     event.preventDefault();
     event.stopPropagation();
-    // console.log('Available types', types);
 
     var json;
     var html;
     var plainText = clipboardData.getData('text/plain');
+
+    // WORKAROUND: FF does not provide HTML coming in from other applications
+    // so fall back to the paste shim
+    if (this.isFF && !types['application/substance'] && !types['text/html']) {
+      this._pastePlainText(plainText);
+      return;
+    }
 
     // use internal data if available
     if (types['application/substance']) {
@@ -205,6 +193,11 @@ Clipboard.Prototype = function() {
     }
 
     // Fallback to plain-text in other cases
+    this._pastePlainText(plainText);
+  };
+
+  this._pastePlainText = function(plainText) {
+    var surface = this.getSurface();
     surface.transaction(function(tx, args) {
       args.text = plainText;
       return surface.paste(tx, args);
@@ -214,25 +207,28 @@ Clipboard.Prototype = function() {
   this.onBeforePasteShim = function() {
     var surface = this.getSurface();
     if (!surface) return;
-    // console.log("Paste before...");
-    this.el.focus();
+    // console.log("Clipboard.onBeforePasteShim...");
+    // HACK: need to work on the native element here
+    var el = this._getNativeElement();
+    el.focus();
     var range = document.createRange();
-    range.selectNodeContents(this.el);
+    range.selectNodeContents(el);
     var selection = window.getSelection();
     selection.removeAllRanges();
     selection.addRange(range);
   };
 
   this.onPasteShim = function() {
-    this.el.empty();
+    // HACK: need to work on the native element here
+    var el = this._getNativeElement;
+    el.innerHTML = "";
     var sel = this.surface.getSelection();
+    // NOTE: this delay is necessary to let the browser paste into the paste bin
     window.setTimeout(function() {
       this.surface.selection = sel;
-      var html = this.el.html();
-      this.el.empty();
-      html = ['<html><head></head><body>', html, '</body></html>'].join('');
-      var docEl = DOMElement.parseHTML(html);
-      return this._pasteHtml(docEl);
+      var html = el.innerHTML;
+      el.innerHTML = "";
+      return this._pasteHtml(html, el.textContent);
     }.bind(this));
   };
 
@@ -293,6 +289,9 @@ Clipboard.Prototype = function() {
     }
   };
 
+  this._getNativeElement = function() {
+    return this.el.el;
+  };
 };
 
 oo.initClass(Clipboard);
