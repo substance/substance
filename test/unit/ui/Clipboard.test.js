@@ -252,22 +252,33 @@ function _with(assert, fixture, fn) {
     });
 }
 
-QUnit.uiTest("Browser - Chrome (OSX/Linux) - Plain Text", function(assert) {
+function _fixtureTest(assert, fixture, impl, forceWindows) {
   var editor = _containerEditorSample();
-  var doc = editor.getDocument();
-  _with(assert, '/base/test/fixtures/clipboard/browser-linux-plain-text.html', function(html) {
+  fixture = '/base/test/fixtures/clipboard/' + fixture;
+  if (forceWindows) {
+    // NOTE: faking 'Windows' mode in importer so that
+    // the correct implementation will be used
+    editor.clipboard.htmlImporter._isWindows = true;
+  }
+  _with(assert, fixture, function(html) {
+    impl(editor, html);
+  });
+}
+
+function _plainTextTest(assert, fixture, forceWindows) {
+  _fixtureTest(assert, fixture, function(editor, html) {
+    var doc = editor.getDocument();
     var event = new ClipboardEvent();
     event.clipboardData.setData('text/plain', '');
     event.clipboardData.setData('text/html', html);
     editor.clipboard.onPaste(event);
     assert.equal(doc.get(['p1', 'content']), '0XXX123456789', "Content should have been pasted correctly.");
-  });
-});
+  }, forceWindows);
+}
 
-QUnit.uiTest("Browser - Chrome (OSX/Linux) - Annotated Text", function(assert) {
-  var editor = _containerEditorSample();
-  var doc = editor.getDocument();
-  _with(assert, '/base/test/fixtures/clipboard/browser-linux-annotated-text.html', function(html) {
+function _annotatedTextTest(assert, fixture, forceWindows) {
+  _fixtureTest(assert, fixture, function(editor, html) {
+    var doc = editor.getDocument();
     var event = new ClipboardEvent();
     event.clipboardData.setData('text/plain', '');
     event.clipboardData.setData('text/html', html);
@@ -277,232 +288,96 @@ QUnit.uiTest("Browser - Chrome (OSX/Linux) - Annotated Text", function(assert) {
     assert.equal(annotations.length, 1, "There should be one annotation on the property now.");
     var anno = annotations[0];
     assert.equal(anno.type, 'link', "The annotation should be a link.");
-  })
+  }, forceWindows);
+}
+
+function _twoParagraphsTest(assert, fixture, forceWindows) {
+  _fixtureTest(assert, fixture, function(editor, html) {
+    var doc = editor.getDocument();
+    var event = new ClipboardEvent();
+    event.clipboardData.setData('text/plain', '');
+    event.clipboardData.setData('text/html', html);
+    editor.clipboard.onPaste(event);
+    var main = doc.get('main');
+    var p1 = main.getChildAt(0);
+    assert.equal(p1.content, '0', "First paragraph should be truncated.");
+    var p2 = main.getChildAt(1);
+    assert.equal(p2.content, 'AAA', "Second paragraph should contain 'AAA'.");
+    var p3 = main.getChildAt(2);
+    assert.equal(p3.content, 'BBB', "Third paragraph should contain 'BBB'.");
+    var p4 = main.getChildAt(3);
+    assert.equal(p4.content, '123456789', "Remainder of original p1 should go into forth paragraph.");
+  }, forceWindows);
+}
+
+QUnit.uiTest("Browser - Chrome (OSX/Linux) - Plain Text", function(assert) {
+  _plainTextTest(assert, 'browser-linux-plain-text.html');
+});
+
+QUnit.uiTest("Browser - Chrome (OSX/Linux) - Annotated Text", function(assert) {
+  _annotatedTextTest(assert, 'browser-linux-annotated-text.html');
 });
 
 QUnit.uiTest("Browser - Chrome (OSX/Linux) - Two Paragraphs", function(assert) {
-  var editor = _containerEditorSample();
-  var doc = editor.getDocument();
-  _with(assert, '/base/test/fixtures/clipboard/browser-linux-two-paragraphs.html', function(html) {
-    var event = new ClipboardEvent();
-    event.clipboardData.setData('text/plain', '');
-    event.clipboardData.setData('text/html', html);
-    editor.clipboard.onPaste(event);
-    var main = doc.get('main');
-    var p1 = main.getChildAt(0);
-    assert.equal(p1.content, '0', "First paragraph should be truncated.");
-    var p2 = main.getChildAt(1);
-    assert.equal(p2.content, 'AAA', "Second paragraph should contain 'AAA'.");
-    var p3 = main.getChildAt(2);
-    assert.equal(p3.content, 'BBB', "Third paragraph should contain 'BBB'.");
-    var p4 = main.getChildAt(3);
-    assert.equal(p4.content, '123456789', "Remainder of original p1 should go into forth paragraph.");
-  })
+  _twoParagraphsTest(assert, 'browser-linux-two-paragraphs.html');
 });
 
 QUnit.uiTest("Browser - Chrome (Windows) - Plain Text", function(assert) {
-  var editor = _containerEditorSample();
-  var doc = editor.getDocument();
-  _with(assert, '/base/test/fixtures/clipboard/browser-windows-plain-text.html', function(html) {
-    var event = new ClipboardEvent();
-    event.clipboardData.setData('text/plain', '');
-    event.clipboardData.setData('text/html', html);
-    editor.clipboard.onPaste(event);
-    assert.equal(doc.get(['p1', 'content']), '0XXX123456789', "Content should have been pasted correctly.");
-  });
+  _plainTextTest(assert, 'browser-windows-plain-text.html', 'forceWindows');
 });
 
-QUnit.uiTest("Browser - Chrome (OSX/Linux) - Annotated Text", function(assert) {
-  var editor = _containerEditorSample();
-  var doc = editor.getDocument();
-  _with(assert, '/base/test/fixtures/clipboard/browser-windows-annotated-text.html', function(html) {
-    var event = new ClipboardEvent();
-    event.clipboardData.setData('text/plain', '');
-    event.clipboardData.setData('text/html', html);
-    editor.clipboard.onPaste(event);
-    assert.equal(doc.get(['p1', 'content']), '0XXX123456789', "Content should have been pasted correctly.");
-    var annotations = doc.getIndex('annotations').get(['p1', 'content']);
-    assert.equal(annotations.length, 1, "There should be one annotation on the property now.");
-    var anno = annotations[0];
-    assert.equal(anno.type, 'link', "The annotation should be a link.");
-  })
+QUnit.uiTest("Browser - Chrome (Windows) - Annotated Text", function(assert) {
+  _annotatedTextTest(assert, 'browser-windows-annotated-text.html', 'forceWindows');
 });
 
 QUnit.uiTest("Browser - Chrome (Windows) - Two Paragraphs", function(assert) {
-  var editor = _containerEditorSample();
-  var doc = editor.getDocument();
-  _with(assert, '/base/test/fixtures/clipboard/browser-windows-two-paragraphs.html', function(html) {
-    var event = new ClipboardEvent();
-    event.clipboardData.setData('text/plain', '');
-    event.clipboardData.setData('text/html', html);
-    editor.clipboard.onPaste(event);
-    var main = doc.get('main');
-    var p1 = main.getChildAt(0);
-    assert.equal(p1.content, '0', "First paragraph should be truncated.");
-    var p2 = main.getChildAt(1);
-    assert.equal(p2.content, 'AAA', "Second paragraph should contain 'AAA'.");
-    var p3 = main.getChildAt(2);
-    assert.equal(p3.content, 'BBB', "Third paragraph should contain 'BBB'.");
-    var p4 = main.getChildAt(3);
-    assert.equal(p4.content, '123456789', "Remainder of original p1 should go into forth paragraph.");
-  })
+  _twoParagraphsTest(assert, 'browser-windows-two-paragraphs.html', 'forceWindows');
 });
 
 QUnit.uiTest("Browser - Firefox (Linux) - Plain Text", function(assert) {
-  var editor = _containerEditorSample();
-  var doc = editor.getDocument();
-  _with(assert, '/base/test/fixtures/clipboard/browser-linux-firefox-plain-text.html', function(html) {
-    var event = new ClipboardEvent();
-    event.clipboardData.setData('text/plain', '');
-    event.clipboardData.setData('text/html', html);
-    editor.clipboard.onPaste(event);
-    assert.equal(doc.get(['p1', 'content']), '0XXX123456789', "Content should have been pasted correctly.");
-  });
+  _plainTextTest(assert, 'browser-linux-firefox-plain-text.html');
 });
 
 QUnit.uiTest("Browser - Firefox (Linux) - Annotated Text", function(assert) {
-  var editor = _containerEditorSample();
-  var doc = editor.getDocument();
-  _with(assert, '/base/test/fixtures/clipboard/browser-linux-firefox-annotated-text.html', function(html) {
-    var event = new ClipboardEvent();
-    event.clipboardData.setData('text/plain', '');
-    event.clipboardData.setData('text/html', html);
-    editor.clipboard.onPaste(event);
-    assert.equal(doc.get(['p1', 'content']), '0XXX123456789', "Content should have been pasted correctly.");
-    var annotations = doc.getIndex('annotations').get(['p1', 'content']);
-    assert.equal(annotations.length, 1, "There should be one annotation on the property now.");
-    var anno = annotations[0];
-    assert.equal(anno.type, 'link', "The annotation should be a link.");
-  })
+  _annotatedTextTest(assert, 'browser-linux-firefox-annotated-text.html');
 });
 
 QUnit.uiTest("Browser - Firefox (Linux) - Two Paragraphs", function(assert) {
-  var editor = _containerEditorSample();
-  var doc = editor.getDocument();
-  _with(assert, '/base/test/fixtures/clipboard/browser-linux-firefox-two-paragraphs.html', function(html) {
-    var event = new ClipboardEvent();
-    event.clipboardData.setData('text/plain', '');
-    event.clipboardData.setData('text/html', html);
-    editor.clipboard.onPaste(event);
-    var main = doc.get('main');
-    var p1 = main.getChildAt(0);
-    assert.equal(p1.content, '0', "First paragraph should be truncated.");
-    var p2 = main.getChildAt(1);
-    assert.equal(p2.content, 'AAA', "Second paragraph should contain 'AAA'.");
-    var p3 = main.getChildAt(2);
-    assert.equal(p3.content, 'BBB', "Third paragraph should contain 'BBB'.");
-    var p4 = main.getChildAt(3);
-    assert.equal(p4.content, '123456789', "Remainder of original p1 should go into forth paragraph.");
-  })
+  _twoParagraphsTest(assert, 'browser-linux-firefox-two-paragraphs.html');
 });
 
 QUnit.uiTest("Browser - Firefox (OSX) - Plain Text", function(assert) {
-  var editor = _containerEditorSample();
-  var doc = editor.getDocument();
-  _with(assert, '/base/test/fixtures/clipboard/browser-osx-firefox-plain-text.html', function(html) {
-    var event = new ClipboardEvent();
-    event.clipboardData.setData('text/plain', '');
-    event.clipboardData.setData('text/html', html);
-    editor.clipboard.onPaste(event);
-    assert.equal(doc.get(['p1', 'content']), '0XXX123456789', "Content should have been pasted correctly.");
-  });
+  _plainTextTest(assert, 'browser-osx-firefox-plain-text.html');
 });
 
 QUnit.uiTest("Browser - Firefox (OSX) - Annotated Text", function(assert) {
-  var editor = _containerEditorSample();
-  var doc = editor.getDocument();
-  _with(assert, '/base/test/fixtures/clipboard/browser-osx-firefox-annotated-text.html', function(html) {
-    var event = new ClipboardEvent();
-    event.clipboardData.setData('text/plain', '');
-    event.clipboardData.setData('text/html', html);
-    editor.clipboard.onPaste(event);
-    assert.equal(doc.get(['p1', 'content']), '0XXX123456789', "Content should have been pasted correctly.");
-    var annotations = doc.getIndex('annotations').get(['p1', 'content']);
-    assert.equal(annotations.length, 1, "There should be one annotation on the property now.");
-    var anno = annotations[0];
-    assert.equal(anno.type, 'link', "The annotation should be a link.");
-  })
+  _annotatedTextTest(assert, 'browser-osx-firefox-annotated-text.html');
 });
 
 QUnit.uiTest("Browser - Firefox (OSX) - Two Paragraphs", function(assert) {
-  var editor = _containerEditorSample();
-  var doc = editor.getDocument();
-  _with(assert, '/base/test/fixtures/clipboard/browser-osx-firefox-two-paragraphs.html', function(html) {
-    var event = new ClipboardEvent();
-    event.clipboardData.setData('text/plain', '');
-    event.clipboardData.setData('text/html', html);
-    editor.clipboard.onPaste(event);
-    var main = doc.get('main');
-    var p1 = main.getChildAt(0);
-    assert.equal(p1.content, '0', "First paragraph should be truncated.");
-    var p2 = main.getChildAt(1);
-    assert.equal(p2.content, 'AAA', "Second paragraph should contain 'AAA'.");
-    var p3 = main.getChildAt(2);
-    assert.equal(p3.content, 'BBB', "Third paragraph should contain 'BBB'.");
-    var p4 = main.getChildAt(3);
-    assert.equal(p4.content, '123456789', "Remainder of original p1 should go into forth paragraph.");
-  })
+  _twoParagraphsTest(assert, 'browser-osx-firefox-two-paragraphs.html');
 });
 
 QUnit.uiTest("Browser - Firefox (Windows) - Plain Text", function(assert) {
-  var editor = _containerEditorSample();
-  var doc = editor.getDocument();
-  _with(assert, '/base/test/fixtures/clipboard/browser-windows-firefox-plain-text.html', function(html) {
-    var event = new ClipboardEvent();
-    event.clipboardData.setData('text/plain', '');
-    event.clipboardData.setData('text/html', html);
-    editor.clipboard.onPaste(event);
-    assert.equal(doc.get(['p1', 'content']), '0XXX123456789', "Content should have been pasted correctly.");
-  });
+  _plainTextTest(assert, 'browser-windows-firefox-plain-text.html', 'forceWindows');
 });
 
 QUnit.uiTest("Browser - Firefox (Windows) - Annotated Text", function(assert) {
-  var editor = _containerEditorSample();
-  var doc = editor.getDocument();
-  _with(assert, '/base/test/fixtures/clipboard/browser-windows-firefox-annotated-text.html', function(html) {
-    var event = new ClipboardEvent();
-    event.clipboardData.setData('text/plain', '');
-    event.clipboardData.setData('text/html', html);
-    editor.clipboard.onPaste(event);
-    assert.equal(doc.get(['p1', 'content']), '0XXX123456789', "Content should have been pasted correctly.");
-    var annotations = doc.getIndex('annotations').get(['p1', 'content']);
-    assert.equal(annotations.length, 1, "There should be one annotation on the property now.");
-    var anno = annotations[0];
-    assert.equal(anno.type, 'link', "The annotation should be a link.");
-  })
+  _annotatedTextTest(assert, 'browser-windows-firefox-annotated-text.html', 'forceWindows');
 });
 
 QUnit.uiTest("Browser - Firefox (Windows) - Two Paragraphs", function(assert) {
-  var editor = _containerEditorSample();
-  var doc = editor.getDocument();
-  _with(assert, '/base/test/fixtures/clipboard/browser-windows-firefox-two-paragraphs.html', function(html) {
-    var event = new ClipboardEvent();
-    event.clipboardData.setData('text/plain', '');
-    event.clipboardData.setData('text/html', html);
-    editor.clipboard.onPaste(event);
-    var main = doc.get('main');
-    var p1 = main.getChildAt(0);
-    assert.equal(p1.content, '0', "First paragraph should be truncated.");
-    var p2 = main.getChildAt(1);
-    assert.equal(p2.content, 'AAA', "Second paragraph should contain 'AAA'.");
-    var p3 = main.getChildAt(2);
-    assert.equal(p3.content, 'BBB', "Third paragraph should contain 'BBB'.");
-    var p4 = main.getChildAt(3);
-    assert.equal(p4.content, '123456789', "Remainder of original p1 should go into forth paragraph.");
-  })
+  _twoParagraphsTest(assert, 'browser-windows-firefox-two-paragraphs.html', 'forceWindows');
 });
 
 QUnit.uiTest("Browser - Edge (Windows) - Plain Text", function(assert) {
-  var editor = _containerEditorSample();
-  var doc = editor.getDocument();
-  // NOTE: faking 'Windows' mode in importer so that
-  // the correct implementation will be used
-  editor.clipboard.htmlImporter._isWindows = true;
-  _with(assert, '/base/test/fixtures/clipboard/browser-windows-edge-plain-text.html', function(html) {
-    var event = new ClipboardEvent();
-    event.clipboardData.setData('text/plain', '');
-    event.clipboardData.setData('text/html', html);
-    editor.clipboard.onPaste(event);
-    assert.equal(doc.get(['p1', 'content']), '0XXX123456789', "Content should have been pasted correctly.");
-  });
+  _plainTextTest(assert, 'browser-windows-edge-plain-text.html', 'forceWindows');
+});
+
+QUnit.uiTest("Browser - Edge (Windows) - Annotated Text", function(assert) {
+  _annotatedTextTest(assert, 'browser-windows-edge-annotated-text.html', 'forceWindows');
+});
+
+QUnit.uiTest("Browser - Edge (Windows) - Two Paragraphs", function(assert) {
+  _twoParagraphsTest(assert, 'browser-windows-edge-two-paragraphs.html', 'forceWindows');
 });
