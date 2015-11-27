@@ -86,6 +86,13 @@ SurfaceSelection.Prototype = function() {
     var current = node;
     var propertyEl = null;
     while(current) {
+      // as described in #273, when clicking near to an inline node
+      // the provided node can be inside the inline node
+      // we then continue with the inline node itself and a changed offset
+      if (current.dataset && current.dataset.external) {
+        node = current;
+        offset = (offset > 0) ? 1 : 0;
+      }
       // if available extract a path fragment
       if (current.dataset && current.dataset.path) {
         propertyEl = current;
