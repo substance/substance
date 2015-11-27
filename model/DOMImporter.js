@@ -529,7 +529,7 @@ DOMImporter.Prototype = function DOMImporterPrototype() {
     }
     var repl = SPACE;
     // replace multiple tabs and new-lines by one space
-    text = text.replace(TABS_OR_NL, SPACE);
+    text = text.replace(TABS_OR_NL, '');
     // TODO: the last char handling is only necessary for for nested calls
     // i.e., when processing the content of an annotation, for instance
     // we need to work out how we could control this with an inner state

@@ -260,7 +260,7 @@ QUnit.uiTest("Browser - Chrome (OSX/Linux) - Plain Text", function(assert) {
     event.clipboardData.setData('text/plain', '');
     event.clipboardData.setData('text/html', html);
     editor.clipboard.onPaste(event);
-    assert.equal(doc.get(['p1', 'content']), '0XXX123456789', "Content should have been pasted.");
+    assert.equal(doc.get(['p1', 'content']), '0XXX123456789', "Content should have been pasted correctly.");
   });
 });
 
@@ -272,7 +272,7 @@ QUnit.uiTest("Browser - Chrome (OSX/Linux) - Annotated Text", function(assert) {
     event.clipboardData.setData('text/plain', '');
     event.clipboardData.setData('text/html', html);
     editor.clipboard.onPaste(event);
-    assert.equal(doc.get(['p1', 'content']), '0XXX123456789', "Content should have been pasted.");
+    assert.equal(doc.get(['p1', 'content']), '0XXX123456789', "Content should have been pasted correctly.");
     var annotations = doc.getIndex('annotations').get(['p1', 'content']);
     assert.equal(annotations.length, 1, "There should be one annotation on the property now.");
     var anno = annotations[0];
@@ -287,7 +287,6 @@ QUnit.uiTest("Browser - Chrome (OSX/Linux) - Two Paragraphs", function(assert) {
     var event = new ClipboardEvent();
     event.clipboardData.setData('text/plain', '');
     event.clipboardData.setData('text/html', html);
-    debugger;
     editor.clipboard.onPaste(event);
     var main = doc.get('main');
     var p1 = main.getChildAt(0);
@@ -299,4 +298,16 @@ QUnit.uiTest("Browser - Chrome (OSX/Linux) - Two Paragraphs", function(assert) {
     var p4 = main.getChildAt(3);
     assert.equal(p4.content, '123456789', "Remainder of original p1 should go into forth paragraph.");
   })
+});
+
+QUnit.uiTest("Browser - Chrome (Windows) - Plain Text", function(assert) {
+  var editor = _containerEditorSample();
+  var doc = editor.getDocument();
+  _with(assert, '/base/test/fixtures/clipboard/browser-windows-plain-text.html', function(html) {
+    var event = new ClipboardEvent();
+    event.clipboardData.setData('text/plain', '');
+    event.clipboardData.setData('text/html', html);
+    editor.clipboard.onPaste(event);
+    assert.equal(doc.get(['p1', 'content']), '0XXX123456789', "Content should have been pasted correctly.");
+  });
 });
