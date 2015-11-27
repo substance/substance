@@ -6,7 +6,7 @@ var EventEmitter = require('../util/EventEmitter');
 
 /**
   A document selection. Refers to a Substance document model, not to the DOM.
-  
+
   Implemented by {@link model/PropertySelection} and {@link model/ContainerSelection}
 
   @class
@@ -100,7 +100,7 @@ oo.initClass(Selection);
 
 /**
   Class to represent null selections.
-  
+
   @class
 */
 
@@ -125,7 +125,7 @@ Selection.nullSelection = Object.freeze(new Selection.NullSelection());
 /**
   A selection fragment. Used when we need to break down a {@link model/ContainerAnnotation}
   into their fragments, each corresponding to a property selection.
-  
+
   @class Selection.Fragment
 */
 
@@ -136,6 +136,12 @@ Selection.Fragment = function(type, path, startOffset, endOffset) {
   this.path = path;
   this.startOffset = startOffset;
   this.endOffset = endOffset || startOffset;
+
+  // Note: this is necessary for the fragmentation algorithm to
+  // know that a cursor should be closed instantly (like a self-closing tag)
+  if (type === 'cursor') {
+    this.zeroWidth = true;
+  }
 };
 
 EventEmitter.extend(Selection.Fragment);
