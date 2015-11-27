@@ -50,6 +50,14 @@ HTMLImporter.extend(ClipboardImporter, function() {
   */
   this.importDocument = function(html) {
     var body;
+    if (navigator.appVersion.indexOf("Win") !== -1) {
+      // Under windows we can exploit <!--StartFragment--> and <!--EndFragment-->
+      // to have an easier life
+      var match = /<!--StartFragment\-->(.*)<!--EndFragment-->/.exec(html);
+      if (match) {
+        html = match[1];
+      }
+    }
     var el = DefaultDOMElement.parseHTML(html);
     if (isArray(el) || !el.isDocumentNode()) {
       body = DefaultDOMElement.createElement('body');
