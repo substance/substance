@@ -144,7 +144,7 @@ function _pasteDocument(tx, args) {
   } else {
     var result = breakNode(tx, args);
     selection = result.selection;
-    insertPos = startAddress[0];
+    insertPos = startAddress[0] + 1;
   }
   if (insertPos < 0) {
     console.error('Could not find insertion position in ContainerNode.');

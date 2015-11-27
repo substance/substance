@@ -279,3 +279,24 @@ QUnit.uiTest("Browser - Chrome (OSX/Linux) - Annotated Text", function(assert) {
     assert.equal(anno.type, 'link', "The annotation should be a link.");
   })
 });
+
+QUnit.uiTest("Browser - Chrome (OSX/Linux) - Two Paragraphs", function(assert) {
+  var editor = _containerEditorSample();
+  var doc = editor.getDocument();
+  _with(assert, '/base/test/fixtures/clipboard/browser-linux-two-paragraphs.html', function(html) {
+    var event = new ClipboardEvent();
+    event.clipboardData.setData('text/plain', '');
+    event.clipboardData.setData('text/html', html);
+    debugger;
+    editor.clipboard.onPaste(event);
+    var main = doc.get('main');
+    var p1 = main.getChildAt(0);
+    assert.equal(p1.content, '0', "First paragraph should be truncated.");
+    var p2 = main.getChildAt(1);
+    assert.equal(p2.content, 'AAA', "Second paragraph should contain 'AAA'.");
+    var p3 = main.getChildAt(2);
+    assert.equal(p3.content, 'BBB', "Third paragraph should contain 'BBB'.");
+    var p4 = main.getChildAt(3);
+    assert.equal(p4.content, '123456789', "Remainder of original p1 should go into forth paragraph.");
+  })
+});
