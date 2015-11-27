@@ -223,6 +223,7 @@ VirtualDOMElement.Prototype = function() {
     clone._ref = this._ref;
     clone._isOnRoute = this._isOnRoute;
     clone.props = cloneDeep(this.props);
+    return clone;
   };
 
   this.append = function() {
@@ -375,6 +376,12 @@ VirtualElement.Prototype = function() {
   this._clone = function() {
     return new VirtualElement(this._tagName);
   };
+
+  // shallow equals
+  this._quasiEquals = function(other) {
+    return this.type === other.type && this._tagName === other._tagName;
+  };
+
 };
 
 VirtualDOMElement.extend(VirtualElement);
@@ -423,6 +430,11 @@ VirtualComponentElement.Prototype = function() {
 
   this._clone = function() {
     return new VirtualComponentElement(this.ComponentClass);
+  };
+
+  // shallow equals
+  this._quasiEquals = function(other) {
+    return (this.type === other.type && this.ComponentClass === other.ComponentClass);
   };
 
 };
@@ -490,6 +502,11 @@ VirtualTextNode.Prototype = function() {
     return new VirtualTextNode(this.props.text);
   };
 
+  // shallow equals
+  this._quasiEquals = function(other) {
+    return (this.type === other.type && this.props.text === other.props.text);
+  };
+
 };
 
 VirtualDOMElement.extend(VirtualTextNode);
@@ -518,6 +535,11 @@ RawHtml.Prototype = function() {
 
   this._clone = function() {
     return new RawHtml(this.html);
+  };
+
+  // shallow equals
+  this._quasiEquals = function(other) {
+    return (this.type === other.type && this.html === other.html);
   };
 
 };

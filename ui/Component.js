@@ -903,7 +903,6 @@ Component.Prototype = function ComponentPrototype() {
     var newContent = data._children;
 
     if (isEqual(oldContent, newContent)) {
-      // console.log('-----');
       this._data = data;
       return;
     }
@@ -975,8 +974,16 @@ Component.Prototype = function ComponentPrototype() {
       if (oldRef && newRef) {
         // the component is in the right place already
         if (oldRef === newRef) {
-          comp = oldComp;
-          _update(comp, _new);
+          // check if the two nodes are 'quasi' equal
+          // i.e. having the same type and e.g. Component class
+          if (_new._quasiEquals(_old)) {
+            comp = oldComp;
+            _update(comp, _new);
+          } else {
+            comp = this._compileComponent(_new, scope);
+            _replace(oldComp, comp);
+            comp.triggerDidMount(isMounted);
+          }
           pos++; oldPos++; newPos++;
         }
         // a new component has been inserted
