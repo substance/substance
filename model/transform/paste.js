@@ -22,6 +22,7 @@ var CLIPBOARD_PROPERTY_ID = require('./copySelection').CLIPBOARD_PROPERTY_ID;
 */
 
 var paste = function(tx, args) {
+  args.text = args.text || '';
   if (args.selection.isNull()) {
     console.error("Can not paste, without selection.");
     return args;
@@ -34,7 +35,7 @@ var paste = function(tx, args) {
   // when we are in a container, we interpret line-breaks
   // and create a document with multiple paragraphs
   // in a PropertyEditor we paste the text as is
-  if (args.text && !pasteDoc) {
+  if (!pasteDoc) {
     if (inContainer) {
       args.doc = pasteDoc = _convertPlainTextToDocument(tx, args);
     } else {

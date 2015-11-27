@@ -184,6 +184,15 @@ QUnit.uiTest("Pasting text into ContainerEditor using 'text/plain'.", function(a
   assert.equal(doc.get(['p1', 'content']), '0XXX123456789', "Plain text should be correct.");
 });
 
+QUnit.uiTest("Pasting without any data given.", function(assert) {
+  var editor = _containerEditorSample();
+  var doc = editor.getDocument();
+  var event = new ClipboardEvent();
+  editor.clipboard.onPaste(event);
+  assert.equal(doc.get(['p1', 'content']), '0123456789', "Text should be still the same.");
+});
+
+
 QUnit.uiTest("Pasting text into ContainerEditor using 'text/html'.", function(assert) {
   var editor = _containerEditorSample();
   var doc = editor.getDocument();
@@ -342,6 +351,19 @@ QUnit.uiTest("Browser - Firefox (Linux) - Annotated Text", function(assert) {
 
 QUnit.uiTest("Browser - Firefox (Linux) - Two Paragraphs", function(assert) {
   _twoParagraphsTest(assert, 'browser-linux-firefox-two-paragraphs.html');
+});
+
+QUnit.uiTest("Browser - Firefox (Linux) - Whole Page", function(assert) {
+  _fixtureTest(assert, 'browser-linux-firefox-whole-page.html', function(editor, html) {
+    var doc = editor.getDocument();
+    var event = new ClipboardEvent();
+    event.clipboardData.setData('text/plain', 'XXX');
+    event.clipboardData.setData('text/html', html);
+    editor.clipboard.onPaste(event);
+    // in most cases HTML conversion will crash
+    // and Clipboard should fall back to plain text
+    assert.equal(doc.get(['p1', 'content']), '0XXX123456789', "Content should have been pasted correctly.");
+  });
 });
 
 QUnit.uiTest("Browser - Firefox (OSX) - Plain Text", function(assert) {

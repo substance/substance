@@ -304,7 +304,12 @@ Clipboard.Prototype = function() {
     if (!surface) return;
     // TODO: the clipboard importer should make sure
     // that the container exists
-    var content = this.htmlImporter.importDocument(html);
+    var content = null;
+    try {
+      content = this.htmlImporter.importDocument(html);
+    } catch (err) {
+      return false;
+    }
     if (content) {
       surface.transaction(function(tx, args) {
         args.text = text;

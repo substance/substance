@@ -48,7 +48,7 @@ QUnit.uiTest = function() {
 if (inBrowser) {
   // log errors into the console because there source maps are considered
   QUnit.log(function(details) {
-    if (details.message && /^Error/.exec(details.message)) {
+    if (details.message && /Error/.exec(details.message)) {
       console.error(details.message);
     }
   });
