@@ -48,7 +48,9 @@ TextPropertyComponent.Prototype = function() {
   };
 
   this.render = function() {
-    return this.super.render.call(this);
+    var el = this.super.render.call(this);
+    el.removeClass('sc-annotated-text').addClass('sc-text-property');
+    return el;
   };
 
   this.getAnnotations = function() {
