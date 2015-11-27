@@ -1,11 +1,6 @@
 'use strict';
 
-var Component = require('./Component');
-var $$ = Component.$$;
-var Fragmenter = require('../model/Fragmenter');
-var AnnotationComponent = require('./AnnotationComponent');
 var AnnotatedTextComponent = require('./AnnotatedTextComponent');
-
 
 /**
   Renders a text property. Used internally by different components (e.g. ui/TextPropertyEditor)
