@@ -2,10 +2,9 @@ var glob = require('glob');
 var path = require('path');
 var each = require('lodash/collection/each');
 var QUnit = require('qunitjs');
-var sinon = require('sinon');
+var colors = require('colors');
 
 global.QUnit = QUnit;
-global.sinon = sinon;
 
 var files = glob.sync('unit/**/*/*.test.js', {cwd: 'test'});
 each(files, function(file) {
@@ -44,14 +43,18 @@ QUnit.log(function(data) {
 
 QUnit.done(function(data) {
   if (fails > 0) {
-    console.error('FAILED: %d tests of %d failed', fails, count);
+    console.error('FAILED: %d tests of %d failed'.red, fails, count);
     process.exit(1);
   } else {
-    console.log('YAY: %d tests passed', count);
+    console.log('YAY: %d tests passed'.green, count);
   }
 });
 
-console.log('Running tests in node.js...');
+console.log('');
+console.log('#####################################'.yellow);
+console.log('Running tests in node.js...'.yellow);
+console.log('#####################################'.yellow);
+console.log('');
 QUnit.load();
 
 

@@ -33,10 +33,9 @@ function Node(props) {
   }
 
   each(NodeClass.static.schema, function(prop, name) {
-    // check integrity
-    // TODO: more! e.g. type check
-    // mandatory properties
-    var propIsGiven = props.hasOwnProperty(name);
+    // check integrity of provided props, such as type correctness,
+    // and mandatory properties
+    var propIsGiven = (props[name] !== undefined);
     var hasDefault = prop.hasOwnProperty('default');
     var isOptional = prop.optional;
     if ( (!isOptional && !hasDefault) && !propIsGiven) {

@@ -44,3 +44,12 @@ QUnit.uiTest = function() {
     QUnit.test.apply(QUnit.test, arguments);
   }
 };
+
+if (inBrowser) {
+  // log errors into the console because there source maps are considered
+  QUnit.log(function(details) {
+    if (details.message && details.message.startsWith('Error')) {
+      console.error(details.message);
+    }
+  });
+}

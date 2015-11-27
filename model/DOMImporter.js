@@ -172,19 +172,12 @@ DOMImporter.Prototype = function DOMImporterPrototype() {
           iterator.back();
           this._wrapInlineElementsIntoBlockElement(iterator);
         } else if (el.isElementNode()) {
-          var inlineTypeConverter = this._getPropertyAnnotationConverterForElement(el);
           // NOTE: hard to tell if unsupported nodes on this level
           // should be treated as inline or not.
-          // ATM we only support spans as entry to the catch-all implementation
-          // that collects inline elements and wraps into a paragraph.
-          // TODO: maybe this should be the default?
-
-          if (inlineTypeConverter || el.tagName === "span") {
-            iterator.back();
-            this._wrapInlineElementsIntoBlockElement(iterator);
-          } else {
-            this._createDefaultBlockElement(el);
-          }
+          // ATM: we apply a catch-all to handle cases where inline content
+          // is found on top level
+          iterator.back();
+          this._wrapInlineElementsIntoBlockElement(iterator);
         }
       }
     }

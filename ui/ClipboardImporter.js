@@ -83,36 +83,16 @@ HTMLImporter.extend(ClipboardImporter, function() {
 
   function _fixupGoogleDocsBody(body) {
     if (!body) return;
-    // Look for paragraphs in <b> which is served by GDocs.
-    var gdocsRoot = body.findAll('b > p');
-    if (gdocsRoot.length === 0) {
-      return body;
-    } else if (gdocsRoot.length === 1) {
-      return gdocsRoot[0].getParent();
-    } else {
-      return null;
+    // Google Docs has a strange convention to use a bold tag as
+    // container for the copied elements
+    // HACK: we exploit the fact that this element has an id with a
+    // specific format, e.g., id="docs-internal-guid-5bea85da-43dc-fb06-e327-00c1c6576cf7"
+    var bold = body.find('b');
+    if (bold && bold.id.startsWith('docs-internal')) {
+      return bold;
     }
+    return body;
   }
-
-  // Do we really need this?
-  // function _checkQuality(body) {
-  //   // Are there any useful block-level elements?
-  //   // For example this works if you copy'n'paste a set of paragraphs from a wikipedia page
-  //   if (body.find('body > p')) {
-  //     return true;
-  //   }
-  //   // if we have paragraphs on a deeper level, it is fishy
-  //   if (body.find('* p')) {
-  //     return false;
-  //   }
-  //   // TODO: should this be the case when body contains only annotated text?
-  //   if (body.find('body > a, body > b, body > i, body > strong, body > italic')) {
-  //     return true;
-  //   }
-  //   // TODO: how does the content for inline data look like?
-  //   return false;
-  // }
-
 
   this.convertBody = function(body) {
     this.convertContainer(body.childNodes, CLIPBOARD_CONTAINER_ID);
