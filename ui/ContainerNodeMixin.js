@@ -6,7 +6,7 @@ var $$ = Component.$$;
 
 var ContainerNodeMixin = {
   _renderNode: function(nodeId) {
-    var doc = this.getDocument();
+    var doc = this.context.doc;
     var node = doc.get(nodeId);
     var componentRegistry = this.context.componentRegistry || this.props.componentRegistry;
     var ComponentClass = componentRegistry.get(node.type);
