@@ -146,11 +146,11 @@ function _pasteDocument(tx, args) {
     selection = result.selection;
     insertPos = startAddress[0] + 1;
   }
+  // TODO how should this check be useful?
   if (insertPos < 0) {
     console.error('Could not find insertion position in ContainerNode.');
   }
   // transfer nodes from content document
-  // TODO: transfer annotations
   var nodeIds = pasteDoc.get(CLIPBOARD_CONTAINER_ID).nodes;
   var annoIndex = pasteDoc.getIndex('annotations');
   var insertedNodes = [];
@@ -166,7 +166,7 @@ function _pasteDocument(tx, args) {
     insertedNodes.push(node);
 
     // transfer annotations
-    // what about nodes that are referenced by annotations?
+    // what if we have changed the id of nodes that are referenced by annotations?
     var annos = annoIndex.get(nodeId);
     for (var j = 0; j < annos.length; j++) {
       var data = annos[j].toJSON();
@@ -185,26 +185,11 @@ function _pasteDocument(tx, args) {
   // set a new selection
   var lastPath = container.getLastPath(last(insertedNodes));
   var lastLength = tx.get(lastPath).length;
-  // This version turned out to be useful in some situations
-  // as it hightlights the pasted content
-  // we leave it here for debugging
-  if (false) {
-    var firstPath = container.getFirstPath(insertedNodes[0]);
-    selection = tx.createSelection({
-      type: 'container',
-      containerId: container.id,
-      startPath: firstPath,
-      startOffset: 0,
-      endPath: lastPath,
-      endOffset: lastLength
-    });
-  } else {
-    selection = tx.createSelection({
-      type: 'property',
-      path: lastPath,
-      startOffset: lastLength
-    });
-  }
+  selection = tx.createSelection({
+    type: 'property',
+    path: lastPath,
+    startOffset: lastLength
+  });
   args.selection = selection;
   return args;
 }
