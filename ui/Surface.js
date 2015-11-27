@@ -24,7 +24,7 @@ function Surface() {
   Component.apply(this, arguments);
 
   var controller = this.getController();
-  var doc = this.getDocument();
+  var doc =  this.getDocument();
 
   if (!controller) {
     throw new Error('Surface needs a valid controller');
@@ -177,7 +177,27 @@ Surface.Prototype = function() {
   };
 
   this.getDocument = function() {
-    return this.props.doc;
+    // TODO: decide where the doc should come from
+    // I am against abusing the controller for everything
+    // it should only take over tasks which can not be solved otherwise
+    // Providing the doc is a bad example.
+    if (this.doc) {
+      return this.doc;
+    }
+    var doc =  this.context.doc;
+    // Leaving this here for legacy reason
+    if (!doc) {
+      console.warn('TODO: provide the doc instance via context (or as prop).');
+      var controller = this.getController();
+      if (controller) {
+        doc = controller.getDocument();
+      }
+    }
+    if (!doc) {
+      throw new Error('Could not retrieve document.');
+    }
+    this.doc = doc;
+    return doc;
   };
 
   // Must be implemented by container surfaces
