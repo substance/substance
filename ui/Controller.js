@@ -354,10 +354,13 @@ Controller.Prototype = function() {
   // avoid confusion
   this.transaction = function() {
     var surface = this.getFocusedSurface();
-    if (!surface) {
-      throw new Error('No focused surface!');
+    if (surface) {
+      surface.transaction.apply(surface, arguments);
+    } else {
+      // No focused surface, let's do it on document
+      this.props.doc.transaction.apply(this.props.doc, arguments);
     }
-    surface.transaction.apply(surface, arguments);
+    
   };
 
   // FIXME: even if this seems to be very hacky,
