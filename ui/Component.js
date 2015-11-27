@@ -10,6 +10,7 @@ var I18n = require('./i18n');
 var EventEmitter = require('../util/EventEmitter');
 var DefaultDOMElement = require('./DefaultDOMElement');
 var VirtualDOMElement = require('./VirtualDOMElement');
+var VirtualTextNode = VirtualDOMElement.VirtualTextNode;
 
 var __id__ = 0;
 var _htmlParams;
@@ -705,6 +706,9 @@ Component.Prototype = function ComponentPrototype() {
    * @param {ui/Component.VirtualNode} child the child component
    */
   this.append = function(child) {
+    if (isString(child)) {
+      child = new VirtualTextNode(child);
+    }
     var comp = this._compileComponent(child, {
       refs: this.refs
     });

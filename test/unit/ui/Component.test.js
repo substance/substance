@@ -427,3 +427,9 @@ QUnit.test("Cascaded updates of HTML attributes.", function(assert) {
   comp.setProps({ childCss: { "width": "50px" } });
   assert.equal(comp.refs.child.$el.css('width'), "50px", "Child component should have updated css style.");
 });
+
+QUnit.test("Component.append() should support appending text.", function(assert) {
+  var comp = Component._render($$(SimpleComponent));
+  comp.append('XXX');
+  assert.equal(comp.text(), 'XXX');
+});
