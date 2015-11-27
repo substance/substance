@@ -146,4 +146,15 @@ Selection.Fragment = function(type, path, startOffset, endOffset) {
 
 EventEmitter.extend(Selection.Fragment);
 
+Object.defineProperties(Selection.Fragment.prototype, {
+  offset: {
+    get: function() { return this.startOffset; }
+  },
+  id: {
+    get: function() {
+      return this.type;
+    }
+  }
+});
+
 module.exports = Selection;
