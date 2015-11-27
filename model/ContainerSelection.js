@@ -84,7 +84,7 @@ ContainerSelection.Prototype = function() {
   /**
     Attach document to selection.
 
-    @param {Document} document to attach
+    @param {Document} doc document to attach
     @returns {Selection}
   */
   this.attach = function(doc) {

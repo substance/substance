@@ -41,7 +41,12 @@ function PropertySelection(properties) {
 }
 
 PropertySelection.Prototype = function() {
+ 
+  /**
+    Convert container selection to JSON.
 
+    @returns {Object}
+  */
   this.toJSON = function() {
     return {
       type: 'property',
@@ -52,6 +57,11 @@ PropertySelection.Prototype = function() {
     };
   };
 
+  /**
+    Get attached to selection document.
+
+    @returns {Document}
+  */
   this.getDocument = function() {
     var doc = this._internal.doc;
     if (!doc) {
@@ -60,6 +70,12 @@ PropertySelection.Prototype = function() {
     return doc;
   };
 
+  /**
+    Attach document to a selection.
+
+    @param {Document} doc document to attach
+    @returns {Selection}
+  */
   this.attach = function(doc) {
     this._internal.doc = doc;
     return this;
@@ -73,6 +89,9 @@ PropertySelection.Prototype = function() {
     return [this.range];
   };
 
+  /**
+    Get range of a selection.
+  */
   this.getRange = function() {
     return this.range;
   };
@@ -101,6 +120,12 @@ PropertySelection.Prototype = function() {
     );
   };
 
+  /**
+    Collapse a selection to chosen direction.
+
+    @param {String} direction either left of right
+    @returns {Selection}
+  */
   this.collapse = function(direction) {
     var coor;
     if (direction === 'left') {
@@ -113,15 +138,30 @@ PropertySelection.Prototype = function() {
 
   // Helper Methods
   // ----------------------
+  
+  /**
+    Get path of a selection, e.g. target property where selected data is stored.
 
+    @returns {String[]} path 
+  */
   this.getPath = function() {
     return this.range.start.path;
   };
 
+  /**
+    Get start of a selection range. 
+
+    @returns {Number} offset 
+  */
   this.getStartOffset = function() {
     return this.range.start.offset;
   };
 
+  /**
+    Get end of a selection range. 
+
+    @returns {Number} offset 
+  */
   this.getEndOffset = function() {
     return this.range.end.offset;
   };
@@ -136,7 +176,13 @@ PropertySelection.Prototype = function() {
     ].join('');
   };
 
+  /**
+    Checks if this selection is inside another one.
 
+    @param {Selection} other
+    @param {Boolean} [strict] true if should check that it is strictly inside the other
+    @returns {Boolean}
+  */
   this.isInsideOf = function(other, strict) {
     if (other.isNull()) return false;
     if (other.isContainerSelection()) {
@@ -153,7 +199,14 @@ PropertySelection.Prototype = function() {
         this.end.offset <= other.end.offset);
     }
   };
+  
+  /**
+    Checks if this selection contains another one.
 
+    @param {Selection} other
+    @param {Boolean} [strict] true if should check that it is strictly contains the other
+    @returns {Boolean}
+  */
   this.contains = function(other, strict) {
     if (other.isNull()) return false;
     if (other.isContainerSelection()) {
@@ -171,6 +224,13 @@ PropertySelection.Prototype = function() {
     }
   };
 
+  /**
+    Checks if this selection overlaps another one.
+
+    @param {Selection} other
+    @param {Boolean} [strict] true if should check that it is strictly overlaps the other
+    @returns {Boolean}
+  */
   this.overlaps = function(other, strict) {
     if (other.isNull()) return false;
     if (other.isContainerSelection()) {
@@ -185,6 +245,12 @@ PropertySelection.Prototype = function() {
     }
   };
 
+  /**
+    Checks if this selection has the right boundary in common with another one.
+
+    @param {Selection} other
+    @returns {Boolean}
+  */
   this.isRightAlignedWith = function(other) {
     if (other.isNull()) return false;
     if (other.isContainerSelection()) {
@@ -195,6 +261,12 @@ PropertySelection.Prototype = function() {
       this.getEndOffset() === other.getEndOffset());
   };
 
+  /**
+    Checks if this selection has the left boundary in common with another one.
+
+    @param {Selection} other
+    @returns {Boolean}
+  */
   this.isLeftAlignedWith = function(other) {
     if (other.isNull()) return false;
     if (other.isContainerSelection()) {
@@ -205,6 +277,12 @@ PropertySelection.Prototype = function() {
       this.getStartOffset() === other.getStartOffset());
   };
 
+  /**
+    Expands selection to include another selection.
+
+    @param {Selection} other
+    @returns {Selection} a new selection
+  */
   this.expand = function(other) {
     if (other.isNull()) return this;
     if (other.isContainerSelection()) {
@@ -219,6 +297,13 @@ PropertySelection.Prototype = function() {
     return this.createWithNewRange(newStartOffset, newEndOffset);
   };
 
+  /**
+    Creates a new selection with given range and same path.
+
+    @param {Number} startOffset
+    @param {Number} endOffset
+    @returns {Selection} a new selection
+  */
   this.createWithNewRange = function(startOffset, endOffset) {
     return new PropertySelection({
       path: this.path,
@@ -227,6 +312,12 @@ PropertySelection.Prototype = function() {
     });
   };
 
+  /**
+    Creates a new selection by truncating this one by another selection.
+
+    @param {Selection} other
+    @returns {Selection} a new selection
+  */
   this.truncate = function(other) {
     if (other.isNull()) return this;
     // Checking that paths are ok
@@ -251,6 +342,11 @@ PropertySelection.Prototype = function() {
     return this;
   };
 
+  /**
+    Return fragments for a given selection.
+
+    @returns {Selection.Fragment[]}
+  */
   this.getFragments = function() {
     if (this.isCollapsed()) {
       return [new Selection.Fragment('cursor', this.path, this.startOffset)];
