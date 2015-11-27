@@ -344,8 +344,9 @@ DOMImporter.Prototype = function DOMImporterPrototype() {
   };
 
   this.defaultConverter = function(el, converter) {
-    /* jshint unused:false */
-    console.warn('This element is not handled by the converters you provided. This is the default implementation which just skips conversion. Override DOMImporter.defaultConverter(el, converter) to change this behavior.', el.outerHTML);
+    if (!this.IGNORE_DEFAULT_WARNINGS) {
+      console.warn('This element is not handled by the converters you provided. This is the default implementation which just skips conversion. Override DOMImporter.defaultConverter(el, converter) to change this behavior.', el.outerHTML);
+    }
     var defaultTextType = this.schema.getDefaultTextType();
     var defaultConverter = this._defaultBlockConverter;
     if (!defaultConverter) {
@@ -391,7 +392,9 @@ DOMImporter.Prototype = function DOMImporterPrototype() {
           if (blockTypeConverter) {
             throw new Error('Expected inline element. Found block element:', el.outerHTML);
           }
-          console.warn('Unsupported inline element. We will not create an annotation for it, but process its children to extract annotated text.', el.outerHTML);
+          if (!this.IGNORE_DEFAULT_WARNINGS) {
+            console.warn('Unsupported inline element. We will not create an annotation for it, but process its children to extract annotated text.', el.outerHTML);
+          }
           // Note: this will store the result into the current context
           this.annotatedText(el);
           continue;

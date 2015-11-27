@@ -28,6 +28,9 @@ function ClipboardImporter(config) {
     throw new Error('Missing argument: config.schema is required.');
   }
 
+  // disabling warnings about default importers
+  this.IGNORE_DEFAULT_WARNINGS = true;
+
   // Looking into the schema and trying to find standard types
   //
 
