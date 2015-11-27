@@ -300,13 +300,11 @@ function _twoParagraphsTest(assert, fixture, forceWindows) {
     editor.clipboard.onPaste(event);
     var main = doc.get('main');
     var p1 = main.getChildAt(0);
-    assert.equal(p1.content, '0', "First paragraph should be truncated.");
+    assert.equal(p1.content, '0AAA', "First paragraph should be truncated.");
     var p2 = main.getChildAt(1);
-    assert.equal(p2.content, 'AAA', "Second paragraph should contain 'AAA'.");
+    assert.equal(p2.content, 'BBB', "Second paragraph should contain 'BBB'.");
     var p3 = main.getChildAt(2);
-    assert.equal(p3.content, 'BBB', "Third paragraph should contain 'BBB'.");
-    var p4 = main.getChildAt(3);
-    assert.equal(p4.content, '123456789', "Remainder of original p1 should go into forth paragraph.");
+    assert.equal(p3.content, '123456789', "Remainder of original p1 should go into forth paragraph.");
   }, forceWindows);
 }
 
@@ -404,4 +402,16 @@ QUnit.uiTest("GoogleDocs - Firefox (Linux) - Annotated Text", function(assert) {
 
 QUnit.uiTest("GoogleDocs - Firefox (OSX) - Plain Text", function(assert) {
   _plainTextTest(assert, 'google-docs-osx-firefox-plain-text.html');
+});
+
+QUnit.uiTest("LibreOffice (OSX/Linux) - Plain Text", function(assert) {
+  _plainTextTest(assert, 'libre-office-osx-linux-plain-text.html');
+});
+
+QUnit.uiTest("LibreOffice (OSX/Linux) - Annotated Text", function(assert) {
+  _annotatedTextTest(assert, 'libre-office-osx-linux-annotated-text.html');
+});
+
+QUnit.uiTest("LibreOffice (OSX/Linux) - Two Paragraphs", function(assert) {
+  _twoParagraphsTest(assert, 'libre-office-osx-linux-two-paragraphs.html');
 });
