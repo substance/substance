@@ -88,7 +88,7 @@ HTMLImporter.extend(ClipboardImporter, function() {
     // HACK: we exploit the fact that this element has an id with a
     // specific format, e.g., id="docs-internal-guid-5bea85da-43dc-fb06-e327-00c1c6576cf7"
     var bold = body.find('b');
-    if (bold && bold.id.startsWith('docs-internal')) {
+    if (bold && /^docs-internal/.exec(bold.id)) {
       return bold;
     }
     return body;
