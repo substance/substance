@@ -15,7 +15,7 @@ DocumentNode.extend(Figure, function FigurePrototype() {
 
   this.setLabel = function(label) {
     this.label = label;
-    this.emit('label', label);
+    this.emit('label:changed', label);
   };
 
     // Set compiled text representation
