@@ -177,3 +177,34 @@ QUnit.uiTest("a selection spanning over a external at the end of a property", fu
   assert.deepEqual(sel.start.offset, 8, 'startOffset should be extracted correctly.');
   assert.deepEqual(sel.end.offset, 9, 'startOffset should be extracted correctly.');
 });
+
+// Test for issue #273
+
+var textPropWithInlineElements = [
+  '<span class="sc-text-property" data-path="prop.content" spellcheck="false" style="white-space: pre-wrap;">',
+    'Historically, the sensation of fullness has been documented as far ',
+    'back as Homers  Odyssey. Pioneering work by Cannon and Washburn ',
+    'revealed a correlation between stomach expansion and satiety in humans ',
+    '(Cannon and Washburn, 1911), which was later confirmed in rodents (',
+    '<span id="test" data-id="test" data-external="1" contenteditable="false">',
+      '[5]',
+    '</span>',
+    '). Recently, several groups have shown that feeding-related neurons ',
+    'are sensitive to satiety state but not nutrients in Drosophila (',
+      '<span class="bib-item-citation citation annotation" data-id="bib_item_citation_cf288234a38ea4cd9c3d04337049584e" data-external="1" contenteditable="false">',
+        '[3]',
+      '</span>',
+    '). These studies argue that non-metabolic inputs such as mechanic tension could regulate feeding.<br>',
+  '</span>'
+].join('');
+
+QUnit.uiTest("Issue #273: 'Could not find char position' when clicking right above an inline node", function(assert) {
+  var el = $('#qunit-fixture').html(textPropWithInlineElements)[0];
+  var surfaceSelection = new SurfaceSelection(el);
+  var node = el.querySelector('#test').childNodes[0];
+  var offset = 2;
+  var coor = surfaceSelection.getModelCoordinate(node, offset, {});
+  assert.ok(coor, "Extrated coordinate should be !== null");
+  assert.deepEqual(coor.path, ['prop', 'content'], 'Path should be extracted correctly.');
+  assert.equal(coor.offset, 270, 'Offset should be extracted correctly.');
+});
