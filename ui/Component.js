@@ -571,6 +571,12 @@ Component.Prototype = function ComponentPrototype() {
     throw new Error('Not supported.');
   };
 
+  this.setId = function(id) {
+    this._data.setId(id);
+    this.el.id = id;
+    return this;
+  };
+
   this.getTextContent = function() {
     if (!this.$el) {
       return "";
@@ -650,22 +656,9 @@ Component.Prototype = function ComponentPrototype() {
     return this;
   };
 
-  /**
-   * Add css styles.
-   *
-   * Part of the incremental updating API.
-   *
-   * @param {Object} style an object containing CSS property: value pairs.
-   */
-  this.css = function(style) {
-    if (arguments.length === 2) {
-      this._data.css(arguments[0], arguments[1]);
-      this.$el.css(arguments[0], arguments[1]);
-    } else if (style) {
-      this._data.css(style);
-      this.$el.css(style);
-    }
-    return this;
+  this.setStyle = function(name, value) {
+    this._data.setStyle(name, value);
+    this.$el.css(name, value);
   };
 
   this.getChildNodes = function() {
@@ -673,12 +666,16 @@ Component.Prototype = function ComponentPrototype() {
   };
 
   this.getChildren = function() {
-    // TODO: in DOMElement only real elements are provided
+    // TODO: this should return only real elements (i.e., without TextNodes and Comments)
     return this.children;
   };
 
+  this.createElement = function() {
+    throw new Error('Not supported yet.');
+  };
+
   this.clone = function() {
-    throw new Error('Not supported.');
+    throw new Error('Not supported yet.');
   };
 
   this.is = function(cssSelector) {
@@ -801,9 +798,8 @@ Component.Prototype = function ComponentPrototype() {
       $el.css(data.style);
     }
     // $.on
-    each(data.handlers, function(handler, event) {
-      // console.log('Binding to', event, 'in', scope.owner);
-      $el.on(event, handler.bind(scope.owner));
+    each(data.handlers, function(handlerSpec, eventName) {
+      this._bindHandler($el[0], scope, eventName, handlerSpec);
     }, this);
     return $el;
   };
@@ -848,11 +844,11 @@ Component.Prototype = function ComponentPrototype() {
     }
     // $.on / $.off
     if (!isEqual(oldData.handlers, data.handlers)) {
-      each(oldData.handlers, function(handler, event) {
-        $el.off(event);
+      each(oldData.handlers, function(handler, eventName) {
+        $el.off(eventName);
       });
-      each(data.handlers, function(handler, event) {
-        $el.on(event, handler.bind(scope.owner));
+      each(data.handlers, function(handlerSpec, eventName) {
+        this._bindHandler($el[0], scope, eventName, handlerSpec);
       }, this);
     }
     return $el;
@@ -1124,6 +1120,25 @@ Component.Prototype = function ComponentPrototype() {
     this.state = state || {};
     // freezing state to 'enforce' immutability
     Object.freeze(this.state);
+  };
+
+  this._bindHandler = function(nativeEl, scope, eventName, handlerSpec) {
+    // console.log('Binding to', event, 'in', scope.owner);
+    var handler = handlerSpec.handler;
+    if (handlerSpec.context) {
+      handler = handler.bind(handlerSpec.context);
+    } else {
+      handler = handler.bind(scope.owner);
+    }
+    if (handlerSpec.selector) {
+      var _handler = handler;
+      handler = function(event) {
+        if ($(event.target).is(handlerSpec.selector)) {
+          _handler(event);
+        }
+      };
+    }
+    nativeEl.addEventListener(eventName, handler);
   };
 };
 

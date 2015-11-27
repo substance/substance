@@ -172,19 +172,12 @@ DOMImporter.Prototype = function DOMImporterPrototype() {
           iterator.back();
           this._wrapInlineElementsIntoBlockElement(iterator);
         } else if (el.isElementNode()) {
-          var inlineTypeConverter = this._getPropertyAnnotationConverterForElement(el);
           // NOTE: hard to tell if unsupported nodes on this level
           // should be treated as inline or not.
-          // ATM we only support spans as entry to the catch-all implementation
-          // that collects inline elements and wraps into a paragraph.
-          // TODO: maybe this should be the default?
-
-          if (inlineTypeConverter || el.tagName === "span") {
-            iterator.back();
-            this._wrapInlineElementsIntoBlockElement(iterator);
-          } else {
-            this._createDefaultBlockElement(el);
-          }
+          // ATM: we apply a catch-all to handle cases where inline content
+          // is found on top level
+          iterator.back();
+          this._wrapInlineElementsIntoBlockElement(iterator);
         }
       }
     }
@@ -344,8 +337,9 @@ DOMImporter.Prototype = function DOMImporterPrototype() {
   };
 
   this.defaultConverter = function(el, converter) {
-    /* jshint unused:false */
-    console.warn('This element is not handled by the converters you provided. This is the default implementation which just skips conversion. Override DOMImporter.defaultConverter(el, converter) to change this behavior.', el.outerHTML);
+    if (!this.IGNORE_DEFAULT_WARNINGS) {
+      console.warn('This element is not handled by the converters you provided. This is the default implementation which just skips conversion. Override DOMImporter.defaultConverter(el, converter) to change this behavior.', el.outerHTML);
+    }
     var defaultTextType = this.schema.getDefaultTextType();
     var defaultConverter = this._defaultBlockConverter;
     if (!defaultConverter) {
@@ -391,7 +385,9 @@ DOMImporter.Prototype = function DOMImporterPrototype() {
           if (blockTypeConverter) {
             throw new Error('Expected inline element. Found block element:', el.outerHTML);
           }
-          console.warn('Unsupported inline element. We will not create an annotation for it, but process its children to extract annotated text.', el.outerHTML);
+          if (!this.IGNORE_DEFAULT_WARNINGS) {
+            console.warn('Unsupported inline element. We will not create an annotation for it, but process its children to extract annotated text.', el.outerHTML);
+          }
           // Note: this will store the result into the current context
           this.annotatedText(el);
           continue;
@@ -474,6 +470,7 @@ DOMImporter.Prototype = function DOMImporterPrototype() {
     var wrapper = $$('div');
     while(childIterator.hasNext()) {
       var el = childIterator.next();
+      // if there is a block node we finish this wrapper
       var blockTypeConverter = this._getBlockConverterForElement(el);
       if (blockTypeConverter) {
         childIterator.back();
@@ -486,7 +483,6 @@ DOMImporter.Prototype = function DOMImporterPrototype() {
       if (!node.type) {
         throw new Error('Contract: Html.defaultConverter() must return a node with type.');
       }
-      node.id = node.id || this.nextId(node.type);
       this._createAndShow(node);
     }
     return node;
@@ -526,7 +522,7 @@ DOMImporter.Prototype = function DOMImporterPrototype() {
     }
     var repl = SPACE;
     // replace multiple tabs and new-lines by one space
-    text = text.replace(TABS_OR_NL, SPACE);
+    text = text.replace(TABS_OR_NL, '');
     // TODO: the last char handling is only necessary for for nested calls
     // i.e., when processing the content of an annotation, for instance
     // we need to work out how we could control this with an inner state

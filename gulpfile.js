@@ -1,5 +1,3 @@
-var path = require('path');
-var glob = require('glob');
 var gulp = require('gulp');
 var source = require('vinyl-source-stream');
 var buffer = require('vinyl-buffer');
@@ -11,9 +9,6 @@ var jshint = require('gulp-jshint');
 var browserify = require('browserify');
 var uglify = require('gulp-uglify');
 var sourcemaps = require('gulp-sourcemaps');
-var qunit = require('node-qunit-phantomjs');
-var istanbul = require('browserify-istanbul');
-var istanbulReport = require('gulp-istanbul-report');
 var generate = require('./doc/generator/generate');
 var config = require('./doc/config.json');
 var sass = require('gulp-sass');
@@ -86,54 +81,6 @@ gulp.task('build', ['lint'], function() {
     .on('error', gutil.log)
     .pipe(sourcemaps.write('./'))
     .pipe(gulp.dest('./dist'));
-});
-
-var _buildTestBundle = function(testfiles, options) {
-  options = options || {};
-  var b = browserify({ debug: true });
-  if (options.withInstrumentaion) {
-    b = b.transform(istanbul);
-  }
-  return b.add(path.join(__dirname, 'test', 'test-globals.js'))
-    .add(testfiles.map(function(file) {
-      return path.join(__dirname, file);
-    }))
-    .bundle()
-    .pipe(source('test.js'))
-    .pipe(buffer())
-    .pipe(sourcemaps.init({loadMaps: true}))
-    .on('error', gutil.log)
-    .pipe(sourcemaps.write('./'))
-    .pipe(gulp.dest('./tmp/test/'));
-};
-
-gulp.task('build:test', ['lint'], function() {
-  var testfiles = glob.sync("test/**/*.test.js");
-  gulp.src(['./test/index.html'])
-   .pipe(gulp.dest('./tmp/test/'));
-  gulp.src(['./test/lib/jquery.js', './test/lib/qunit.js'])
-   .pipe(gulp.dest('./tmp/test/lib/'));
-  return _buildTestBundle(testfiles);
-});
-
-gulp.task('build:coverage', function() {
-  var testfiles = glob.sync("test/**/*.test.js");
-  return _buildTestBundle(testfiles, { withInstrumentaion: true });
-});
-
-gulp.task('test', ['build:test'], function() {
-  return qunit('./tmp/test/index.html');
-});
-
-gulp.task('coverage', ['build:coverage'], function() {
-  qunit('./tmp/test/index.html', {
-    customRunner: path.join(__dirname, 'test/run-phantomjs.js')
-  }, function() {
-    gulp.src('./coverage/coverage.json')
-    .pipe(istanbulReport({
-      reporters: ['html']
-    }));
-  });
 });
 
 gulp.task('default', ['build']);

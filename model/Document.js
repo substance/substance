@@ -9,8 +9,6 @@ var AnchorIndex = require('./AnchorIndex');
 var TransactionDocument = require('./TransactionDocument');
 
 var PathEventProxy = require('./PathEventProxy');
-var ClipboardImporter = require('./ClipboardImporter');
-var ClipboardExporter = require('./ClipboardExporter');
 
 var __id__ = 0;
 
@@ -22,7 +20,7 @@ var __id__ = 0;
   @abstract
   @extends model/AbstractDocument
   @example
-  
+
   ```js
   var Document = require('substance/model/Document');
   var articleSchema = require('./myArticleSchema');
@@ -37,7 +35,7 @@ var __id__ = 0;
       nodes: []
     });
   };
-  
+
   Document.extend(Article);
   ```
 */
@@ -309,14 +307,6 @@ Document.Prototype = function() {
 
   this.getDocumentMeta = function() {
     return this.get('document');
-  };
-
-  this.getClipboardImporter = function() {
-    return new ClipboardImporter({ schema: this.getSchema()});
-  };
-
-  this.getClipboardExporter = function() {
-    return new ClipboardExporter();
   };
 
   this.getHighlights = function() {

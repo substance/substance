@@ -3,11 +3,11 @@
 require('../qunit_extensions');
 var Surface = require('../../../ui/Surface');
 
-function StubSurface(doc, sel, containerId) {
+function StubSurface(doc, containerId) {
 
-  this.containerId = containerId || 'main';
   this.name = 'test_surface';
-  this.selection = sel;
+  this.containerId = containerId;
+  this.selection = null;
 
   this.getName = function() {
     return this.name;
@@ -38,6 +38,9 @@ function StubSurface(doc, sel, containerId) {
   this.rerenderDomSelection = function() {};
 
   this.transaction = Surface.prototype.transaction;
+
+  this.copy = Surface.prototype.copy;
+
 }
 
 module.exports = StubSurface;

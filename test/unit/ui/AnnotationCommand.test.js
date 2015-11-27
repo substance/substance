@@ -65,6 +65,8 @@ function sample() {
 
 QUnit.test("PropertyAnnotation: cmd.canTrucate", function(assert) {
   var doc = sample();
+  var surface = new StubSurface(doc, 'main');
+  var cmd = new ToggleStrongCommand(surface);
 
   var sel = doc.createSelection({
     type: 'property',
@@ -72,17 +74,17 @@ QUnit.test("PropertyAnnotation: cmd.canTrucate", function(assert) {
     startOffset: 3,
     endOffset: 8
   });
+  surface.setSelection(sel);
 
-  var surface = new StubSurface(doc, sel);
-  var cmd = new ToggleStrongCommand(surface);
   var cmdState = cmd.getCommandState();
-
   assert.equal(cmdState.mode, 'expand', "Mode should be 'expand'");
 });
 
 
 QUnit.test("Property Annotation: Toggle on", function(assert) {
   var doc = sample();
+  var surface = new StubSurface(doc, 'main');
+  var cmd = new ToggleStrongCommand(surface);
 
   var sel = doc.createSelection({
     type: 'property',
@@ -90,9 +92,7 @@ QUnit.test("Property Annotation: Toggle on", function(assert) {
     startOffset: 1,
     endOffset: 6
   });
-
-  var surface = new StubSurface(doc, sel);
-  var cmd = new ToggleStrongCommand(surface);
+  surface.setSelection(sel);
 
   // Execute against the provided selection context
 
@@ -111,15 +111,16 @@ QUnit.test("Property Annotation: Toggle on", function(assert) {
 QUnit.test("Property Annotation: Toggle off", function(assert) {
   var doc = sample();
 
+  var surface = new StubSurface(doc, 'main');
+  var cmd = new ToggleStrongCommand(surface);
+
   var sel = doc.createSelection({
     type: 'property',
     path: ['p1', 'content'],
     startOffset: 5,
     endOffset: 7
   });
-
-  var surface = new StubSurface(doc, sel);
-  var cmd = new ToggleStrongCommand(surface);
+  surface.setSelection(sel);
 
   // Execute against the provided selection context
   var res = cmd.execute();
@@ -131,6 +132,8 @@ QUnit.test("Property Annotation: Toggle off", function(assert) {
 
 QUnit.test("Container Annotation: Toggle on", function(assert) {
   var doc = sample();
+  var surface = new StubSurface(doc, 'main');
+  var cmd = new ToggleContainerAnnoCommand(surface);
 
   // Selected text 'Paragraph' in p1
   var sel = doc.createSelection({
@@ -141,10 +144,7 @@ QUnit.test("Container Annotation: Toggle on", function(assert) {
     endPath: ['p4', 'content'],
     endOffset: 3,
   });
-
-
-  var surface = new StubSurface(doc, sel);
-  var cmd = new ToggleContainerAnnoCommand(surface);
+  surface.setSelection(sel);
 
   // Execute against the provided selection context
   var res = cmd.execute();
@@ -159,6 +159,8 @@ QUnit.test("Container Annotation: Toggle on", function(assert) {
 
 QUnit.test("Container Annotation: Toggle off", function(assert) {
   var doc = sample();
+  var surface = new StubSurface(doc, 'main');
+  var cmd = new ToggleContainerAnnoCommand(surface);
 
   // Selected text 'Paragraph' in p1
   var sel = doc.createSelection({
@@ -169,9 +171,7 @@ QUnit.test("Container Annotation: Toggle off", function(assert) {
     endPath: ['p2', 'content'],
     endOffset: 2,
   });
-
-  var surface = new StubSurface(doc, sel);
-  var cmd = new ToggleContainerAnnoCommand(surface);
+  surface.setSelection(sel);
 
   // Execute against the provided selection context
   var res = cmd.execute();
@@ -186,6 +186,8 @@ QUnit.test("Container Annotation: Toggle off", function(assert) {
 
 QUnit.test("Container Annotation: Fuse annos", function(assert) {
   var doc = sample();
+  var surface = new StubSurface(doc, 'main');
+  var cmd = new ToggleContainerAnnoCommand(surface);
 
   // Create a second container annotation to be fused
   doc.create({
@@ -207,9 +209,7 @@ QUnit.test("Container Annotation: Fuse annos", function(assert) {
     endPath: ['p4', 'content'],
     endOffset: 4,
   });
-
-  var surface = new StubSurface(doc, sel);
-  var cmd = new ToggleContainerAnnoCommand(surface);
+  surface.setSelection(sel);
 
   // Execute against the provided selection context
 

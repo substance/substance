@@ -4,7 +4,6 @@ var Surface = require('./Surface');
 var TextPropertyManager = require('../model/TextPropertyManager');
 var insertText = require('../model/transform/insertText');
 var deleteSelection = require('../model/transform/deleteSelection');
-var copySelection = require('../model/transform/copySelection');
 var Component = require('./Component');
 var TextProperty = require('./TextPropertyComponent');
 var $$ = Component.$$;
@@ -12,17 +11,17 @@ var $$ = Component.$$;
 /**
   Editor for a text property (annotated string). Needs to be
   instantiated inside a {@link ui/Controller} context.
-  
+
   @class
   @component
   @extends ui/Surface
-  
+
   @prop {String} name unique editor name
   @prop {String[]} path path to a text property
   @prop {ui/SurfaceCommand[]} commands array of command classes to be available
 
   @example
-  
+
   Create a `TextPropertyEditor` for the `name` property of an author object. Allow emphasis annotations.
 
   ```js
@@ -42,22 +41,19 @@ function TextPropertyEditor() {
 
 TextPropertyEditor.Prototype = function() {
 
-  this.dispose = function() {
-    Surface.prototype.dispose.call(this);
-  };
-
   this.isContainerEditor = function() {
     return false;
   };
 
   this.render = function() {
-    var el = $$(this.props.tagName || 'div')
-      .addClass("sc-text-property-editor")
+    var el = Surface.prototype.render.call(this);
+    el.tagName = this.props.tagName || 'div';
+    el.addClass("sc-text-property-editor")
       .attr({
         spellcheck: false,
         contenteditable: true
-      })
-      .append(
+      });
+    el.append(
         $$(TextProperty, {
           tagName: "div",
           path: this.props.path
@@ -114,15 +110,6 @@ TextPropertyEditor.Prototype = function() {
   this.softBreak = function(tx, args) {
     args.text = "\n";
     return this.insertText(tx, args);
-  };
-
-  /**
-    Copy the current selection. Performs a {@link model/transform/copySelection}
-    transformation.
-  */
-  this.copy = function(doc, selection) {
-    var result = copySelection(doc, { selection: selection });
-    return result.doc;
   };
 
   /**

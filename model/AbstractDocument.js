@@ -26,7 +26,6 @@ function AbstractDocument(schema) {
   this.schema = schema;
 
   this.AUTO_ATTACH = true;
-  this.FOR_CLIPBOARD = false;
 
   this.nodeFactory = new DocumentNodeFactory(this);
 
@@ -39,10 +38,6 @@ EventEmitter.extend(AbstractDocument, function AbstractDocumentPrototype() {
 
   this.isTransaction = function() {
     return false;
-  };
-
-  this.isClipboard = function() {
-    return this.FOR_CLIPBOARD;
   };
 
   this.newInstance = function() {
@@ -141,6 +136,8 @@ EventEmitter.extend(AbstractDocument, function AbstractDocumentPrototype() {
    * @skip
    */
   this.toJSON = function() {
+    // TODO: deprecate this
+    // console.warn('DEPRECATED: Document.toJSON(). Use model/JSONConverter instead.');
     var nodes = {};
     each(this.getNodes(), function(node) {
       nodes[node.id] = node.toJSON();
@@ -200,6 +197,8 @@ EventEmitter.extend(AbstractDocument, function AbstractDocumentPrototype() {
 
     @example
 
+    Creating a PropertySelection:
+
     ```js
     doc.createSelection({
       type: 'property',
@@ -208,8 +207,37 @@ EventEmitter.extend(AbstractDocument, function AbstractDocumentPrototype() {
       endOffset: 20
     })
     ```
+
+    Creating a ContainerSelection:
+
+    ```js
+    doc.createSelection({
+      type: 'container',
+      containerId: 'main',
+      startPath: [ 'p1', 'content'],
+      startOffset: 10,
+      startPath: [ 'p2', 'content'],
+      endOffset: 20
+    })
+    ```
+
+    Creating a NullSelection:
+
+    ```js
+    doc.createSelection(null);
+    ```
   */
   this.createSelection = function(sel) {
+    /*
+     TODO: maybe we want a simpler DSL in addition to the JSON spec?
+      ```
+      doc.createSelection(null);
+      doc.createSelection(['p1','content'], 0, 5);
+        -> PropertySelection
+      doc.createSelection(['p1','content'], 0, ['p2', 'content'], 5);
+        -> ContainerSelection
+      ```
+    */
     if (!sel) {
       return Selection.nullSelection;
     }
@@ -223,10 +251,6 @@ EventEmitter.extend(AbstractDocument, function AbstractDocumentPrototype() {
       default:
         throw new Error('Unsupported selection type', sel.type);
     }
-  };
-
-  this._setForClipboard = function(val) {
-    this.FOR_CLIPBOARD = val;
   };
 
   this._create = function(nodeData) {

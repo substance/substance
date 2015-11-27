@@ -2,6 +2,7 @@
 
 var oo = require('../util/oo');
 var $ = require('../util/jquery');
+var isArray = require('lodash/lang/isArray');
 var map = require('lodash/collection/map');
 var inBrowser = (typeof window !== 'undefined');
 var DOMElement = require('./DOMElement');
@@ -12,6 +13,7 @@ function DefaultDOMElement(el) {
   }
   this.el = el;
   this.$el = $(el);
+  this._handlers = {};
   Object.freeze(this);
 }
 
@@ -65,6 +67,15 @@ DefaultDOMElement.Prototype = function() {
     throw new Error('tagName is readonly.');
   };
 
+  this.getId = function() {
+    return this.el.id;
+  };
+
+  this.setId = function(id) {
+    this.el.id = id;
+    return this;
+  };
+
   this.getTextContent = function() {
     return this.$el.text();
   };
@@ -100,15 +111,51 @@ DefaultDOMElement.Prototype = function() {
     return this;
   };
 
-  this.getNodeType = function() {
-    if (this.isTextNode()) {
-      return "text";
-    } else if (this.isCommentNode()) {
-      return "comment";
-    } else if (this.isElementNode()) {
-      return "element";
+  this.getStyle = function(name) {
+    return this.$el.css(name);
+  };
+
+  this.setStyle = function(name, value) {
+    this.$el.css(name, value);
+  };
+
+  this.addEventListener = function(eventName, selector, handler, context) {
+    if (this._handlers[eventName]) {
+      throw new Error('Handler for event "' + eventName + '" has already been registered.');
+    }
+    if (inBrowser) {
+      if (context) {
+        handler = handler.bind(context);
+      }
+      if (selector) {
+        var _handler = handler;
+        handler = function(event) {
+          if ($(event.target).is(selector)) {
+            _handler(event);
+          }
+        };
+      }
+      this.addEventListener(eventName, selector, handler);
+      this._handlers[eventName] = handler;
     } else {
-      throw new Error("Unsupported node type");
+      // not supported in cheerio
+    }
+  };
+
+  this.removeEventListener = function(eventName) {
+    var handler = this._handlers[eventName];
+    if (!handler) return;
+    delete this._handlers[eventName];
+    if (inBrowser) {
+      this.el.removeEventListener(eventName, handler);
+    } else {
+      // not supported in cheerio
+    }
+  };
+
+  this.focus = function() {
+    if (inBrowser) {
+      this.$el.focus();
     }
   };
 
@@ -137,6 +184,14 @@ DefaultDOMElement.Prototype = function() {
     }
   };
 
+  this.isDocumentNode = function() {
+    if (inBrowser) {
+      return (this.el.nodeType === window.Node.DOCUMENT_NODE);
+    } else {
+      return this.el === this.el.root;
+    }
+  };
+
   this.getChildNodes = function() {
     var childNodes = [];
     var iterator = this.getChildNodeIterator();
@@ -157,6 +212,10 @@ DefaultDOMElement.Prototype = function() {
     return new DefaultDOMElement.NodeIterator(this.el.childNodes);
   };
 
+  this.createElement = function(str) {
+    return DefaultDOMElement.createElement(str);
+  };
+
   this.clone = function() {
     var $clone = this.$el.clone();
     return new DefaultDOMElement($clone[0]);
@@ -164,6 +223,35 @@ DefaultDOMElement.Prototype = function() {
 
   this.is = function(cssSelector) {
     return this.$el.is(cssSelector);
+  };
+
+  this.getParent = function() {
+    var parent;
+    if (inBrowser) {
+      parent = this.el.parentNode;
+    } else {
+      parent = this.el.parent;
+    }
+    if (parent) {
+      return new DefaultDOMElement(parent);
+    } else {
+      return null;
+    }
+  };
+
+  this.getRoot = function() {
+    var root;
+    if (inBrowser) {
+      root = this.el.ownerDocument;
+    } else {
+      root = this.el.root;
+    }
+    if (root) {
+      return new DefaultDOMElement(root);
+    } else {
+      return null;
+    }
+    return new DefaultDOMElement(root);
   };
 
   this.find = function(cssSelector) {
@@ -183,7 +271,11 @@ DefaultDOMElement.Prototype = function() {
   };
 
   this.append = function(child) {
-    if (child instanceof DefaultDOMElement) {
+    if (isArray(child)) {
+      child.forEach(function(node) {
+        this.append(node);
+      }.bind(this));
+    } else if (child instanceof DefaultDOMElement) {
       this.$el.append(child.$el);
     } else {
       this.$el.append(child);

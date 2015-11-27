@@ -1,3 +1,5 @@
+/* jshint latedef: nofunc */
+
 'use strict';
 
 var isEqual = require('lodash/lang/isEqual');
@@ -5,8 +7,8 @@ var cloneDeep = require('lodash/lang/cloneDeep');
 var each = require('lodash/collection/each');
 var annotationHelpers = require('../annotationHelpers');
 
-/* jshint latedef: false */
-
+var CLIPBOARD_CONTAINER_ID = "clipboard_content";
+var CLIPBOARD_PROPERTY_ID = "clipboard_property";
 
 /**
   Creates a new document instance containing only the selected content
@@ -15,7 +17,7 @@ var annotationHelpers = require('../annotationHelpers');
   @return {Object} with a `doc` property that has a fresh doc with the copied content
 */
 
-var copySelection = function(doc, args) {
+function copySelection(doc, args) {
   var selection = args.selection;
   if (selection.isNull()) {
     args.doc = null;
@@ -31,53 +33,51 @@ var copySelection = function(doc, args) {
     args.doc = null;
   }
   return args;
-};
+}
 
-var _copyPropertySelection = function(doc, selection) {
+function _copyPropertySelection(doc, selection) {
   var copy = doc.newInstance();
-  copy._setForClipboard(true);
   var path = selection.start.path;
   var offset = selection.start.offset;
   var endOffset = selection.end.offset;
   var text = doc.get(path);
-  var containerNode = copy.get(copySelection.CLIPBOARD_CONTAINER_ID);
+  var containerNode = copy.get(CLIPBOARD_CONTAINER_ID);
   if (!containerNode) {
     containerNode = copy.create({
       type: 'container',
-      id: copySelection.CLIPBOARD_CONTAINER_ID,
+      id: CLIPBOARD_CONTAINER_ID,
       nodes: []
     });
   }
   copy.create({
     type: doc.schema.getDefaultTextType(),
-    id: 'text',
+    id: CLIPBOARD_PROPERTY_ID,
     content: text.substring(offset, endOffset)
   });
-  containerNode.show('text');
+  containerNode.show(CLIPBOARD_PROPERTY_ID);
   var annotations = doc.getIndex('annotations').get(path, offset, endOffset);
   each(annotations, function(anno) {
     var data = cloneDeep(anno.toJSON());
-    data.path = ['text', 'content'];
+    data.path = [CLIPBOARD_PROPERTY_ID, 'content'];
     data.startOffset = Math.max(offset, anno.startOffset)-offset;
     data.endOffset = Math.min(endOffset, anno.endOffset)-offset;
     copy.create(data);
   });
   return copy;
-};
+}
 
 // TODO: copying nested nodes is not straight-forward,
 // as it is not clear if the node is valid to be created just partially
 // Basically this needs to be implemented for each nested node.
 // The default implementation ignores partially selected nested nodes.
-var _copyContainerSelection = function(doc, selection) {
+function _copyContainerSelection(doc, selection) {
   var copy = doc.newInstance();
-  copy._setForClipboard(true);
   var annotationIndex = doc.getIndex('annotations');
   var container = doc.get(selection.containerId);
   // create a new container
   var containerNode = copy.create({
     type: 'container',
-    id: copySelection.CLIPBOARD_CONTAINER_ID,
+    id: CLIPBOARD_CONTAINER_ID,
     nodes: []
   });
   // copy nodes and annotations.
@@ -136,7 +136,8 @@ var _copyContainerSelection = function(doc, selection) {
     if (addresses[i] > endAddress) {
       copy.set(path, "");
     } else {
-      text = doc.get(path); if (selection.end.offset < text.length) {
+      text = doc.get(path);
+      if (selection.end.offset < text.length) {
         copy.update(path, {
           delete: { start: selection.end.offset, end: text.length }
         });
@@ -146,8 +147,9 @@ var _copyContainerSelection = function(doc, selection) {
     }
   }
   return copy;
-};
+}
 
-copySelection.CLIPBOARD_CONTAINER_ID = "clipboard_content";
+copySelection.CLIPBOARD_CONTAINER_ID = CLIPBOARD_CONTAINER_ID;
+copySelection.CLIPBOARD_PROPERTY_ID = CLIPBOARD_PROPERTY_ID;
 
 module.exports = copySelection;

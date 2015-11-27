@@ -7,48 +7,97 @@ var annotationHelpers = require('../annotationHelpers');
 var deleteSelection = require('./deleteSelection');
 var insertText = require('./insertText');
 var breakNode = require('./breakNode');
+
 var CLIPBOARD_CONTAINER_ID = require('./copySelection').CLIPBOARD_CONTAINER_ID;
+var CLIPBOARD_PROPERTY_ID = require('./copySelection').CLIPBOARD_PROPERTY_ID;
 
 /* jshint latedef: false */
 
 /**
   Pastes clipboard content at the current selection
 
-  @param {Object} args object with `selection` and `doc` for Substance content or 
+  @param {Object} args object with `selection` and `doc` for Substance content or
   `text` for external HTML content
   @return {Object} with updated `selection`
 */
 
 var paste = function(tx, args) {
+  args.text = args.text || '';
   if (args.selection.isNull()) {
     console.error("Can not paste, without selection.");
     return args;
   }
-  // if paste dataplain text paste is simple
-  if (args.text && !args.doc) {
-    return insertText(tx, args);
-  }
-
+  // TODO: is there a better way to detect that this paste is happening within a
+  // container?
+  var inContainer = !!args.containerId;
   var pasteDoc = args.doc;
+
+  // when we are in a container, we interpret line-breaks
+  // and create a document with multiple paragraphs
+  // in a PropertyEditor we paste the text as is
+  if (!pasteDoc) {
+    if (inContainer) {
+      args.doc = pasteDoc = _convertPlainTextToDocument(tx, args);
+    } else {
+      return insertText(tx, args);
+    }
+  }
   if (!args.selection.isCollapsed()) {
     var tmp = deleteSelection(tx, args);
     args.selection = tmp.selection;
   }
   var nodes = pasteDoc.get(CLIPBOARD_CONTAINER_ID).nodes;
+  var schema = tx.getSchema();
+
   if (nodes.length > 0) {
     var first = pasteDoc.get(nodes[0]);
-    // copy of a property selection creates a doc containing
-    // one default text node with id 'text'
-    if (nodes.length === 1 && first.isInstanceOf("text")) {
-      return _pasteAnnotatedText(tx, args);
-    } else {
-      return _pasteDocument(tx, args);
+
+    if (schema.isInstanceOf(first.type, 'text')) {
+      args = _pasteAnnotatedText(tx, args);
+      nodes.shift();
+    }
+    // if still nodes left > 0
+    if (nodes.length > 0) {
+      args = _pasteDocument(tx, args);
     }
   }
   return args;
 };
 
-var _pasteAnnotatedText = function(tx, args) {
+/*
+  Splits plain text by lines and puts them into paragraphs.
+*/
+function _convertPlainTextToDocument(tx, args) {
+  var defaultTextType = tx.getSchema().getDefaultTextType();
+  var lines = args.text.split(/\s*\n\s*\n/);
+  var pasteDoc = tx.newInstance();
+  var container = pasteDoc.create({
+    type: 'container',
+    id: CLIPBOARD_CONTAINER_ID,
+    nodes: []
+  });
+  var node;
+  if (lines.length === 1) {
+    node = pasteDoc.create({
+      id: CLIPBOARD_PROPERTY_ID,
+      type: defaultTextType,
+      content: lines[0]
+    });
+    container.show(node.id);
+  } else {
+    for (var i = 0; i < lines.length; i++) {
+      node = pasteDoc.create({
+        id: uuid(defaultTextType),
+        type: defaultTextType,
+        content: lines[i]
+      });
+      container.show(node.id);
+    }
+  }
+  return pasteDoc;
+}
+
+function _pasteAnnotatedText(tx, args) {
   var copy = args.doc;
   var selection = args.selection;
 
@@ -79,9 +128,9 @@ var _pasteAnnotatedText = function(tx, args) {
   });
   args.selection = selection;
   return args;
-};
+}
 
-var _pasteDocument = function(tx, args) {
+function _pasteDocument(tx, args) {
   var pasteDoc = args.doc;
   var containerId = args.containerId;
   var selection = args.selection;
@@ -100,13 +149,13 @@ var _pasteDocument = function(tx, args) {
   } else {
     var result = breakNode(tx, args);
     selection = result.selection;
-    insertPos = startAddress[0];
+    insertPos = startAddress[0] + 1;
   }
+  // TODO how should this check be useful?
   if (insertPos < 0) {
     console.error('Could not find insertion position in ContainerNode.');
   }
   // transfer nodes from content document
-  // TODO: transfer annotations
   var nodeIds = pasteDoc.get(CLIPBOARD_CONTAINER_ID).nodes;
   var annoIndex = pasteDoc.getIndex('annotations');
   var insertedNodes = [];
@@ -117,12 +166,12 @@ var _pasteDocument = function(tx, args) {
     if (tx.get(nodeId)) {
       node.id = uuid(node.type);
     }
-    tx.create(node);
+    node = tx.create(node);
     container.show(node.id, insertPos++);
     insertedNodes.push(node);
 
     // transfer annotations
-    // what about nodes that are referenced by annotations?
+    // what if we have changed the id of nodes that are referenced by annotations?
     var annos = annoIndex.get(nodeId);
     for (var j = 0; j < annos.length; j++) {
       var data = annos[j].toJSON();
@@ -141,28 +190,13 @@ var _pasteDocument = function(tx, args) {
   // set a new selection
   var lastPath = container.getLastPath(last(insertedNodes));
   var lastLength = tx.get(lastPath).length;
-  // This version turned out to be useful in some situations
-  // as it hightlights the pasted content
-  // we leave it here for debugging
-  if (false) {
-    var firstPath = container.getFirstPath(insertedNodes[0]);
-    selection = tx.createSelection({
-      type: 'container',
-      containerId: container.id,
-      startPath: firstPath,
-      startOffset: 0,
-      endPath: lastPath,
-      endOffset: lastLength
-    });
-  } else {
-    selection = tx.createSelection({
-      type: 'property',
-      path: lastPath,
-      startOffset: lastLength
-    });
-  }
+  selection = tx.createSelection({
+    type: 'property',
+    path: lastPath,
+    startOffset: lastLength
+  });
   args.selection = selection;
   return args;
-};
+}
 
 module.exports = paste;

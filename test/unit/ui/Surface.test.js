@@ -1,11 +1,11 @@
 "use strict";
 
 require('../qunit_extensions');
-var ContainerEditor = require('../../../ui/ContainerEditor');
+
 var Component = require('../../../ui/Component');
-var Controller = require('../../../ui/Controller');
 var simple = require('../../fixtures/simple');
 var createAnnotation = require('../../../model/transform/createAnnotation');
+var TestContainerEditor = require('./TestContainerEditor');
 var $ = require('../../../util/jquery');
 var $$ = Component.$$;
 
@@ -18,21 +18,7 @@ QUnit.uiModule('ui/Surface');
 // This test was added to cover issue #82
 QUnit.uiTest("Set the selection after creating annotation.", function(assert) {
   var doc = simple();
-
-  // TODO: We should find a way to test a surface without the extra infrastructure
-  var MyApp = Controller.extend({
-    render: function() {
-      return $$('div').append(
-        $$(ContainerEditor, {
-          doc: this.props.doc,
-          containerId: 'main',
-          name: 'main'
-        }).ref('editor')
-      );
-    }
-  });
-
-  var app = Component.mount($$(MyApp, {
+  var app = Component.mount($$(TestContainerEditor, {
     doc: doc,
     config: {
       controller: {

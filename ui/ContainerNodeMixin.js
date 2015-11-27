@@ -6,9 +6,9 @@ var $$ = Component.$$;
 
 var ContainerNodeMixin = {
   _renderNode: function(nodeId) {
-    var doc = this.context.doc;
+    var doc = this.getDocument();
     var node = doc.get(nodeId);
-    var componentRegistry = this.context.componentRegistry;
+    var componentRegistry = this.context.componentRegistry || this.props.componentRegistry;
     var ComponentClass = componentRegistry.get(node.type);
     if (!ComponentClass) {
       console.error('Could not resolve a component for type: ' + node.type);
