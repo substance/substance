@@ -236,6 +236,12 @@ function _checked(prop, value) {
   } else {
     type = prop.type;
   }
+  if (value === null) {
+    throw new Error('Value for property ' + prop.name + ' is null.');
+  }
+  if (value === undefined) {
+    throw new Error('Value for property ' + prop.name + ' is undefined.');
+  }
   if (type === "string" && !isString(value) ||
       type === "boolean" && !isBoolean(value) ||
       type === "number" && !isNumber(value) ||
