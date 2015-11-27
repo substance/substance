@@ -415,3 +415,15 @@ QUnit.uiTest("LibreOffice (OSX/Linux) - Annotated Text", function(assert) {
 QUnit.uiTest("LibreOffice (OSX/Linux) - Two Paragraphs", function(assert) {
   _twoParagraphsTest(assert, 'libre-office-osx-linux-two-paragraphs.html');
 });
+
+QUnit.uiTest("Microsoft Word 11 (OSX) - Plain Text", function(assert) {
+  _plainTextTest(assert, 'word-11-osx-plain-text.html');
+});
+
+QUnit.uiTest("Microsoft Word 11 (OSX) - Annotated Text", function(assert) {
+  _annotatedTextTest(assert, 'word-11-osx-annotated-text.html');
+});
+
+QUnit.uiTest("Microsoft Word 11 (OSX) - Two Paragraphs", function(assert) {
+  _twoParagraphsTest(assert, 'word-11-osx-two-paragraphs.html');
+});
