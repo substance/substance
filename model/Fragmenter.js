@@ -9,7 +9,7 @@ var EXIT = -1;
 // Markers are put before other opening tags
 var ENTER_EXIT = -2;
 
-// Annotator
+// Fragmenter
 // --------
 //
 // An algorithm that is used to fragment overlapping structure elements
@@ -38,11 +38,11 @@ var ENTER_EXIT = -2;
 // TODO: If a violation for nodes of the same level occurs an Error should be thrown.
 // Currently, in such cases the first element that is opened earlier is preserved.
 
-var Annotator = function(options) {
+var Fragmenter = function(options) {
   extend(this, options);
 };
 
-Annotator.Prototype = function() {
+Fragmenter.Prototype = function() {
 
   // This is a sweep algorithm wich uses a set of ENTER/EXIT entries
   // to manage a stack of active elements.
@@ -212,6 +212,6 @@ Annotator.Prototype = function() {
 
 };
 
-oo.initClass(Annotator);
+oo.initClass(Fragmenter);
 
-module.exports = Annotator;
+module.exports = Fragmenter;

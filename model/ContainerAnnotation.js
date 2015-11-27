@@ -194,7 +194,7 @@ ContainerAnnotation.Fragment = function Fragment(anno, path, mode) {
 
   this.type = "container-annotation-fragment";
   this.anno = anno;
-  // HACK: id is necessary for Annotator
+  // HACK: id is necessary for Fragmenter
   this.id = anno.id;
   this.path = path;
   this.mode = mode;

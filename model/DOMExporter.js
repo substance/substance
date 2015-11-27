@@ -5,7 +5,7 @@ var isBoolean = require('lodash/lang/isBoolean');
 var isNumber = require('lodash/lang/isNumber');
 var isString = require('lodash/lang/isString');
 var each = require('lodash/collection/each');
-var Annotator = require('./Annotator');
+var Fragmenter = require('./Fragmenter');
 var Registry = require('../util/Registry');
 var $$ = require('../ui/VirtualDOMElement').createElement;
 
@@ -110,7 +110,7 @@ DOMExporter.Prototype = function() {
     var annotations = doc.getIndex('annotations').get(path);
     var text = doc.get(path);
 
-    var annotator = new Annotator();
+    var annotator = new Fragmenter();
     annotator.onText = function(context, text) {
       context.children.push(text);
     };

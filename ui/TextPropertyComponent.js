@@ -2,17 +2,17 @@
 
 var Component = require('./Component');
 var $$ = Component.$$;
-var Annotator = require('../model/Annotator');
+var Fragmenter = require('../model/Fragmenter');
 var AnnotationComponent = require('./AnnotationComponent');
 
 
 /**
   Renders a text property. Used internally by different components (e.g. ui/TextPropertyEditor)
-  
+
   @class
   @component
   @extends ui/Component
-  
+
   @prop {String[]} path path to a text property
   @prop {String} [tagName] specifies which tag should be used - defaults to `div`
 
@@ -34,14 +34,14 @@ TextPropertyComponent.Prototype = function() {
   this.initialize = function() {
     // Only register Property when inside a surface context
     if (this.getSurface()) {
-      this.getTextPropertyManager().registerProperty(this);  
+      this.getTextPropertyManager().registerProperty(this);
     }
   };
 
   this.dispose = function() {
     // Only register Property when inside a surface context
     if (this.getSurface()) {
-      this.getTextPropertyManager().unregisterProperty(this);  
+      this.getTextPropertyManager().unregisterProperty(this);
     }
   };
 
@@ -68,7 +68,7 @@ TextPropertyComponent.Prototype = function() {
         whiteSpace: "pre-wrap"
       });
 
-    var annotator = new Annotator();
+    var annotator = new Fragmenter();
     var fragmentCounters = {};
     annotator.onText = function(context, text) {
       if (text && text.length > 0) {
