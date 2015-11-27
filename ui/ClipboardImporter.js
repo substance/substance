@@ -1,3 +1,5 @@
+/* global navigator */
+
 'use strict';
 
 var isArray = require('lodash/lang/isArray');
@@ -41,6 +43,8 @@ function ClipboardImporter(config) {
     converters: converters
   });
   ClipboardImporter.super.call(this, config);
+
+  this._isWindows = (navigator && navigator.appVersion && navigator.appVersion.indexOf("Win") !== -1);
 }
 
 HTMLImporter.extend(ClipboardImporter, function() {
@@ -50,7 +54,7 @@ HTMLImporter.extend(ClipboardImporter, function() {
   */
   this.importDocument = function(html) {
     var body;
-    if (navigator.appVersion.indexOf("Win") !== -1) {
+    if (this._isWindows) {
       // Under windows we can exploit <!--StartFragment--> and <!--EndFragment-->
       // to have an easier life
       var match = /<!--StartFragment\-->(.*)<!--EndFragment-->/.exec(html);

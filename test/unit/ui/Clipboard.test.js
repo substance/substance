@@ -495,6 +495,9 @@ QUnit.uiTest("Browser - Firefox (Windows) - Two Paragraphs", function(assert) {
 QUnit.uiTest("Browser - Edge (Windows) - Plain Text", function(assert) {
   var editor = _containerEditorSample();
   var doc = editor.getDocument();
+  // NOTE: faking 'Windows' mode in importer so that
+  // the correct implementation will be used
+  editor.clipboard.htmlImporter._isWindows = true;
   _with(assert, '/base/test/fixtures/clipboard/browser-windows-edge-plain-text.html', function(html) {
     var event = new ClipboardEvent();
     event.clipboardData.setData('text/plain', '');
