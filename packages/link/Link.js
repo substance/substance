@@ -1,6 +1,7 @@
 'use strict';
 
 var PropertyAnnotation = require('../../model/PropertyAnnotation');
+var Fragmenter = require('../../model/Fragmenter');
 
 function Link() {
   Link.super.apply(this, arguments);
@@ -14,5 +15,8 @@ Link.static.defineSchema({
   title: { type: 'text', optional: true },
   url: { type: 'string', 'default': 'http://'}
 });
+
+// in presence of overlapping annotations will try to render this as one element
+Link.static.fragmentation = Fragmenter.SHOULD_NOT_SPLIT;
 
 module.exports = Link;

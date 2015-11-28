@@ -6,6 +6,7 @@ var last = require('lodash/array/last');
 var EventEmitter = require('../util/EventEmitter');
 var DocumentNode = require('./DocumentNode');
 var Selection = require('./Selection');
+var Anchor = require('./Anchor');
 
 /**
   Describes an annotation sticking on a container that can span over multiple
@@ -32,50 +33,27 @@ function ContainerAnnotation() {
   ContainerAnnotation.super.apply(this, arguments);
 }
 
-var name = "container-annotation";
-
-var schema = {
-  // id of container node
-  container: "container",
-  startPath: ["string"],
-  startOffset: "number",
-  endPath: ["string"],
-  endOffset: "number"
-};
-
 ContainerAnnotation.Prototype = function() {
 
-  this.getStartAnchor = function() {
-    if (!this._startAnchor) {
-      this._startAnchor = new ContainerAnnotation.Anchor(this, 'isStart');
+  /**
+    Get the plain text spanned by this annotation.
+
+    @returns {String}
+  */
+  this.getText = function() {
+    var doc = this.getDocument();
+    if (!doc) {
+      console.warn('Trying to use a ContainerAnnotation which is not attached to the document.');
+      return "";
     }
-    return this._startAnchor;
+    return doc.getTextForSelection(this.getSelection());
   };
 
-  this.getEndAnchor = function() {
-    if (!this._endAnchor) {
-      this._endAnchor = new ContainerAnnotation.Anchor(this);
-    }
-    return this._endAnchor;
-  };
+  /**
+    Provides a selection which has the same range as this annotation.
 
-  this.getStartPath = function() {
-    return this.startPath;
-  };
-
-  this.getEndPath = function() {
-    return this.endPath;
-  };
-
-  this.getStartOffset = function() {
-    return this.startOffset;
-  };
-
-  this.getEndOffset = function() {
-    return this.endOffset;
-  };
-
-  // Provide a selection which has the same range as this annotation.
+    @returns {model/ContainerSelection}
+  */
   this.getSelection = function() {
     var doc = this.getDocument();
     // Guard: when this is called while this node has been detached already.
@@ -93,13 +71,16 @@ ContainerAnnotation.Prototype = function() {
     });
   };
 
-  this.getText = function() {
-    var doc = this.getDocument();
-    if (!doc) {
-      console.warn('Trying to use a ContainerAnnotation which is not attached to the document.');
-      return "";
+  this.setHighlighted = function(highlighted) {
+
+    if (this.highlighted !== highlighted) {
+      this.highlighted = highlighted;
+      this.emit('highlighted', highlighted);
+
+      each(this.fragments, function(frag) {
+        frag.emit('highlighted', highlighted);
+      });
     }
-    return doc.getTextForSelection(this.getSelection());
   };
 
   this.updateRange = function(tx, sel) {
@@ -120,18 +101,6 @@ ContainerAnnotation.Prototype = function() {
     }
   };
 
-  this.setHighlighted = function(highlighted) {
-
-    if (this.highlighted !== highlighted) {
-      this.highlighted = highlighted;
-      this.emit('highlighted', highlighted);
-
-      each(this.fragments, function(frag) {
-        frag.emit('highlighted', highlighted);
-      });
-    }
-  };
-
   this.getFragments = function() {
     var fragments = [];
     var doc = this.getDocument();
@@ -149,21 +118,49 @@ ContainerAnnotation.Prototype = function() {
     return fragments;
   };
 
+  this.getStartAnchor = function() {
+    if (!this._startAnchor) {
+      this._startAnchor = new ContainerAnnotation.Anchor(this, 'isStart');
+    }
+    return this._startAnchor;
+  };
+
+  this.getEndAnchor = function() {
+    if (!this._endAnchor) {
+      this._endAnchor = new ContainerAnnotation.Anchor(this);
+    }
+    return this._endAnchor;
+  };
+
 };
 
 DocumentNode.extend(ContainerAnnotation);
 
-ContainerAnnotation.static.name = name;
+ContainerAnnotation.static.name = "container-annotation";
 
-ContainerAnnotation.static.defineSchema(schema);
+ContainerAnnotation.static.defineSchema({
+  // id of container node
+  container: "container",
+  startPath: ["string"],
+  startOffset: "number",
+  endPath: ["string"],
+  endOffset: "number"
+});
+
 ContainerAnnotation.static.isContainerAnnotation = true;
 
 /**
   @class
   @private
 */
-ContainerAnnotation.Anchor = function Anchor(anno, isStart) {
+ContainerAnnotation.Anchor = function(anno, isStart) {
+  // Note: we are not calling Anchor() as it is not useful for us
+  // as we need to delegate to the annos value dynamically
+  // Anchor.call(this, path, offset)
+
+  // initializing mixin
   EventEmitter.call(this);
+
   this.type = "container-annotation-anchor";
   this.anno = anno;
   // TODO: remove this.node in favor of this.anno
@@ -176,20 +173,36 @@ ContainerAnnotation.Anchor = function Anchor(anno, isStart) {
 
 ContainerAnnotation.Anchor.Prototype = function() {
 
-  this.zeroWidth = true;
-
   this.getTypeNames = function() {
     return [this.type];
   };
+
+  this.getPath = function() {
+    return (this.isStart ? this.node.startPath : this.node.endPath);
+  };
+
+  this.getOffset = function() {
+    return (this.isStart ? this.node.startOffset : this.node.endOffset);
+  };
+
 };
 
-EventEmitter.extend(ContainerAnnotation.Anchor);
+Anchor.extend(ContainerAnnotation.Anchor, EventEmitter.prototype);
+
+Object.defineProperties(ContainerAnnotation.Anchor.prototype, {
+  path: {
+    get: function() { return this.getPath(); }
+  },
+  offset: {
+    get: function() { return this.getOffset(); }
+  }
+});
 
 /**
   @class
   @private
 */
-ContainerAnnotation.Fragment = function Fragment(anno, path, mode) {
+ContainerAnnotation.Fragment = function(anno, path, mode) {
   EventEmitter.call(this);
 
   this.type = "container-annotation-fragment";
@@ -201,29 +214,32 @@ ContainerAnnotation.Fragment = function Fragment(anno, path, mode) {
 };
 
 ContainerAnnotation.Fragment.Prototype = function() {
-
   this.getTypeNames = function() {
     return [this.type];
+  };
+
+  this.getStartOffset = function() {
+    return ( (this.mode === "start" || this.mode === "property") ? this.anno.startOffset : 0);
+  };
+
+  this.getEndOffset = function() {
+    var doc = this.anno.getDocument();
+    var textProp = doc.get(this.path);
+    var length = textProp.length;
+    return ( (this.mode === "end" || this.mode === "property") ? this.anno.endOffset : length);
   };
 };
 
 EventEmitter.extend(ContainerAnnotation.Fragment);
 
+ContainerAnnotation.Fragment.static.fragmentation = Number.MAX_VALUE;
+
 Object.defineProperties(ContainerAnnotation.Fragment.prototype, {
   startOffset: {
-    get: function() {
-      return ( (this.mode === "start" || this.mode === "property") ? this.anno.startOffset : 0);
-    },
-    set: function() { throw new Error('Immutable!'); }
+    get: function() { return this.getStartOffset(); }
   },
   endOffset: {
-    get: function() {
-      var doc = this.anno.getDocument();
-      var textProp = doc.get(this.path);
-      var length = textProp.length;
-      return ( (this.mode === "end" || this.mode === "property") ? this.anno.endOffset : length);
-    },
-    set: function() { throw new Error('Immutable!'); }
+    get: function() { return this.getEndOffset(); }
   },
   highlighted: {
     get: function() {
@@ -231,23 +247,6 @@ Object.defineProperties(ContainerAnnotation.Fragment.prototype, {
     },
     set: function() { throw new Error('Immutable!'); }
   }
-});
-
-ContainerAnnotation.Fragment.static.level = Number.MAX_VALUE;
-
-Object.defineProperties(ContainerAnnotation.Anchor.prototype, {
-  path: {
-    get: function() {
-      return (this.isStart ? this.node.startPath : this.node.endPath);
-    },
-    set: function() { throw new Error('Immutable!'); }
-  },
-  offset: {
-    get: function() {
-      return (this.isStart ? this.node.startOffset : this.node.endOffset);
-    },
-    set: function() { throw new Error('Immutable!'); }
-  },
 });
 
 module.exports = ContainerAnnotation;

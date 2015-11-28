@@ -10,8 +10,8 @@ var Range = require('./Range');
   A selection which is bound to a property. Implements {@link model/Selection}.
 
   @class
-  @example  
-  
+  @example
+
   ```js
   var propSel = doc.createSelection({
     type: 'property',
@@ -253,9 +253,9 @@ PropertySelection.Prototype = function() {
 
   this.getFragments = function() {
     if (this.isCollapsed()) {
-      return [new Selection.Fragment('cursor', this.path, this.startOffset)];
+      return [new Selection.Cursor(this.path, this.startOffset)];
     } else {
-      return [new Selection.Fragment('selection-fragment', this.path, this.startOffset, this.endOffset)];
+      return [new Selection.Fragment(this.path, this.startOffset, this.endOffset)];
     }
   };
 };

@@ -11,7 +11,7 @@
   },
   "main": "index.js",
   "scripts": {
-    "test": "gulp lint && ./node_modules/.bin/karma start && node test/run.js",
+    "test": "gulp test",
     "coverage": "gulp coverage",
     "doc": "gulp doc"
   },

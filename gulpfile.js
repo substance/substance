@@ -14,6 +14,7 @@ var config = require('./doc/config.json');
 var sass = require('gulp-sass');
 var through2 = require('through2');
 var fs = require('fs');
+var Karma = require('karma').Server;
 
 gulp.task('doc:sass', function() {
   gulp.src('./doc/app.scss')
@@ -82,5 +83,19 @@ gulp.task('build', ['lint'], function() {
     .pipe(sourcemaps.write('./'))
     .pipe(gulp.dest('./dist'));
 });
+
+gulp.task('test:karma', ['lint'], function(done) {
+  new Karma({
+    configFile: __dirname + '/karma.conf.js',
+    singleRun: true
+  }, done).start();
+});
+
+gulp.task('test:server', ['lint'], function() {
+  // requiring instead of doing 'node test/run.js'
+  require('./test/run');
+});
+
+gulp.task('test', ['lint', 'test:karma', 'test:server']);
 
 gulp.task('default', ['build']);

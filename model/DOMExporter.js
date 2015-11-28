@@ -114,14 +114,14 @@ DOMExporter.Prototype = function() {
     annotator.onText = function(context, text) {
       context.children.push(text);
     };
-    annotator.onEnter = function(entry) {
-      var anno = entry.node;
+    annotator.onEnter = function(fragment) {
+      var anno = fragment.node;
       return {
         annotation: anno,
         children: []
       };
     };
-    annotator.onExit = function(entry, context, parentContext) {
+    annotator.onExit = function(fragment, context, parentContext) {
       var anno = context.annotation;
       var converter = self.getNodeConverter(anno);
       if (!converter) {

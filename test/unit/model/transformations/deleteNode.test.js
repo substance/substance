@@ -48,8 +48,8 @@ QUnit.test("Move startAnchor of container annotation to next node.", function(as
     deleteNode(tx, args);
   });
   var anno = doc.get('a1');
-  assert.deepEqual(anno.getStartPath(), ["p2", "content"], "Start anchor should now be on second paragraph.");
-  assert.equal(anno.getStartOffset(), 0);
+  assert.deepEqual(anno.startPath, ["p2", "content"], "Start anchor should now be on second paragraph.");
+  assert.equal(anno.startOffset, 0);
 });
 
 QUnit.test("Move endAnchor of container annotation to previous node.", function(assert) {
@@ -60,6 +60,6 @@ QUnit.test("Move endAnchor of container annotation to previous node.", function(
   });
   var anno = doc.get('a1');
   var p2 = doc.get('p2');
-  assert.deepEqual(anno.getEndPath(), ["p2", "content"], "End anchor should now be on second paragraph.");
-  assert.equal(anno.getEndOffset(), p2.content.length);
+  assert.deepEqual(anno.endPath, ["p2", "content"], "End anchor should now be on second paragraph.");
+  assert.equal(anno.endOffset, p2.content.length);
 });
