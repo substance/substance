@@ -14,10 +14,18 @@ CrossLinkComponent.Prototype = function() {
     var el;
     if (nodeId && doc.get(nodeId)) {
       el = $$('a').addClass('sc-cross-link')
-        .attr({href: '#', "data-type": 'cross-link', "data-node-id": nodeId})
-        .append(nodeId);
+        .attr({
+          href: '#contextId=toc,nodeId='+nodeId,
+          "data-type": 'cross-link',
+          "data-node-id": nodeId
+        });
     } else {
-      el = $$('span').append(nodeId);
+      el = $$('span');
+    }
+    if (this.props.children) {
+      el.append(this.props.children);
+    } else {
+      el.append(nodeId);
     }
     return el;
   };

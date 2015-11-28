@@ -3,7 +3,6 @@ var ContainerRenderer = require('./components/ContainerRenderer');
 var Component = require('../ui/Component');
 var $$ = Component.$$;
 var DocumentationController = require('./DocumentationController');
-var $ = require('../util/jquery');
 var Cover = require('./components/CoverComponent');
 
 var DocumentationReader = DocumentationController.extend({
@@ -37,9 +36,7 @@ var DocumentationReader = DocumentationController.extend({
     var doc = this.props.doc;
     var meta = doc.get('meta');
     var config = this.getConfig();
-    var el = $$('div').addClass('sc-documentation-reader sc-controller')
-      // TODO: we need to support event delegation
-      .on('click', this.onClickCrossLink);
+    var el = $$('div').addClass('sc-documentation-reader sc-controller');
 
     el.append(
       $$('div').ref('workspace').addClass('se-workspace').append(
@@ -75,18 +72,6 @@ var DocumentationReader = DocumentationController.extend({
       this.jumpToNode(this.state.nodeId);
     }
   },
-
-  // TODO: we can get rid of this, if we use
-  // send('focusNode', nodeId) in all child components
-  onClickCrossLink: function(e) {
-    var $target = $(e.target);
-    if ($target.is('a[data-type="cross-link"]')) {
-      e.preventDefault();
-      e.stopPropagation();
-      var nodeId = $target.attr('data-node-id');
-      this.focusNode(nodeId);
-    }
-  }
 });
 
 module.exports = DocumentationReader;
