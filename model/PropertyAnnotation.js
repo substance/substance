@@ -4,7 +4,7 @@ var isEqual = require('lodash/lang/isEqual');
 var DocumentNode = require('./DocumentNode');
 
 /**
-  An property annotation can be used to overlay text and give it a special meaning.
+  A property annotation can be used to overlay text and give it a special meaning.
   PropertyAnnotations only work on text properties. If you want to annotate multiple
   nodes you have to use a {@link model/ContainerAnnotation}.
 
@@ -14,7 +14,7 @@ var DocumentNode = require('./DocumentNode');
   @prop {String[]} path Identifies a text property in the document (e.g. `['text_1', 'content']`)
   @prop {Number} startOffset the character where the annoation starts
   @prop {Number} endOffset: the character where the annoation starts
-  
+
   @example
 
   Here's how a **strong** annotation is created. In Substance annotations are stored
@@ -38,20 +38,49 @@ function PropertyAnnotation() {
   PropertyAnnotation.super.apply(this, arguments);
 }
 
-var name = "annotation";
-
-var schema = {
-  path: ["string"],
-  startOffset: "number",
-  endOffset: "number"
-};
-
 PropertyAnnotation.Prototype = function() {
 
+  /**
+    Get the plain text spanned by this annotation.
+
+    @returns {String}
+  */
+  this.getText = function() {
+    var doc = this.getDocument();
+    if (!doc) {
+      console.warn('Trying to use an PropertyAnnotation which is not attached to the document.');
+      return "";
+    }
+    var text = doc.get(this.path);
+    return text.substring(this.startOffset, this.endOffset);
+  };
+
+  /**
+    Determines if an annotation can be split e.g., when breaking a node.
+
+    In these cases, a new annotation will be created attached to the created node.
+
+    For certain annotation types,you may want to the annotation truncated
+    rather than split, where you need to override this method returning `false`.
+  */
   this.canSplit = function() {
     return true;
   };
 
+  /**
+    If this annotation is a an Anchor.
+
+    Anchors are annotations with a zero width.
+    For instance, ContainerAnnotation have a start and an end anchor,
+    or rendered cursors are modeled as anchors.
+
+    @returns {Boolean}
+  */
+  this.isAnchor = function() {
+    return false;
+  };
+
+  // TODO: maybe this should go into documentHelpers
   this.getSelection = function() {
     return this.getDocument().createSelection({
       type: 'property',
@@ -76,24 +105,21 @@ PropertyAnnotation.Prototype = function() {
     }
   };
 
-  this.getText = function() {
-    var doc = this.getDocument();
-    if (!doc) {
-      console.warn('Trying to use an PropertyAnnotation which is not attached to the document.');
-      return "";
-    }
-    var text = doc.get(this.path);
-    return text.substring(this.startOffset, this.endOffset);
-  };
 };
 
 DocumentNode.extend(PropertyAnnotation);
 
+PropertyAnnotation.static.name = "annotation";
 
-PropertyAnnotation.static.name = name;
-PropertyAnnotation.static.defineSchema(schema);
+PropertyAnnotation.static.defineSchema({
+  path: ["string"],
+  startOffset: "number",
+  endOffset: "number"
+});
+
 PropertyAnnotation.static.isPropertyAnnotation = true;
 
+// these properties making PropertyAnnotation compatible with ContainerAnnotations
 Object.defineProperties(PropertyAnnotation.prototype, {
   startPath: {
     get: function() {

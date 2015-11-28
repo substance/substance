@@ -6,8 +6,7 @@ var each = require('lodash/collection/each');
 
 var ENTER = 1;
 var EXIT = -1;
-// Markers are put before other opening tags
-var ENTER_EXIT = -2;
+var ANCHOR = -2;
 
 // Fragmenter
 // --------
@@ -82,55 +81,96 @@ Fragmenter.Prototype = function() {
   //   Removes 'idea1' from stack and creates a new 'bold1'
   //
 
-  // Orders sweep events according to following precedences:
-  //
-  // 1. pos
-  // 2. EXIT < ENTER
-  // 3. if both ENTER: ascending level
-  // 4. if both EXIT: descending level
+  var extractEntries = function(annotations) {
+    var openers = [];
+    var closers = [];
+    each(annotations, function(a) {
+      var isAnchor = (a.isAnchor ? a.isAnchor() : false);
+      // special treatment for zero-width annos such as ContainerAnnotation.Anchors
+      if (isAnchor) {
+        openers.push({ pos: a.offset, mode: ANCHOR, id: a.id, level: 0, type: 'anchor', node: a });
+      } else {
+        // TODO better naming, `Node.static.level` does not say enough
+        // Better would be `Node.static.fragmentation = Fragmenter.SHOULD_NOT_SPLIT;`
+        // meaning, that the fragmenter should try to render the fragment as one single
+        // element, and not splitting it up on different stack levels.
+        // E.g. When bold an link are overlapping
+        // the fragmenter should not split the link element such as A<b>B<a>CD</a></b><a>EF</a>GH
+        // but should instead A<b>B</b><a><b>CD</b><a>EF</a>GH
 
-  var _compare = function(a, b) {
+        // use a weak default level when not given
+        var l = Fragmenter.NORMAL;
+        var isInline = (a.isInline ? a.isInline() : false);
+        if (isInline) {
+          l = Number.MAX_VALUE;
+        } else if (a.constructor.static && a.constructor.static.hasOwnProperty('fragmentation')) {
+          l = a.constructor.static.fragmentation;
+        } else if (a.hasOwnProperty('fragmentationHint')) {
+          l = a.fragmentationHint;
+        }
+        var opener = { pos: a.startOffset, mode: ENTER, level: l, id: a.id, type: a.type, node: a };
+        openers.push(opener);
+        closers.push({ pos: a.endOffset, mode: EXIT, level: l, id: a.id, type: a.type, node: a, opener: opener});
+      }
+    });
+
+    // sort the openers
+    openers.sort(_compareOpeners);
+    // store indexes for openers
+    for (var i = openers.length - 1; i >= 0; i--) {
+      openers[i].idx = i;
+    }
+    closers.sort(_compareClosers);
+    // merge openers and closers, sorted by pos
+    var entries = [];
+    var idx = 0;
+    var idx1 = 0;
+    var idx2 = 0;
+    while(true) {
+      var opener = openers[idx1];
+      var closer = closers[idx2];
+      if (opener && closer) {
+        // close before open
+        if (closer.pos <= opener.pos) {
+          entries[idx] = closer;
+          idx++; idx2++;
+        } else {
+          entries[idx] = opener;
+          idx++; idx1++;
+        }
+      } else if (opener) {
+        entries[idx++] = opener;
+        idx1++;
+      } else if (closer) {
+        entries[idx++] = closer;
+        idx2++;
+      } else {
+        break;
+      }
+    }
+    return entries;
+  };
+
+  function _compareOpeners(a, b) {
     if (a.pos < b.pos) return -1;
     if (a.pos > b.pos) return 1;
-
-    if (a.id === b.id) {
-      return b.mode - a.mode;
-    }
-
     if (a.mode < b.mode) return -1;
     if (a.mode > b.mode) return 1;
-
-    if (a.mode === ENTER) {
+    if (a.mode === b.mode) {
       if (a.level < b.level) return -1;
       if (a.level > b.level) return 1;
     }
-
-    if (a.mode === EXIT) {
-      if (a.level > b.level) return -1;
-      if (a.level < b.level) return 1;
-    }
-
     return 0;
-  };
+  }
 
-  var extractEntries = function(annotations) {
-    var entries = [];
-    each(annotations, function(a) {
-      // special treatment for zero-width annos such as ContainerAnnotation.Anchors
-      if (a.zeroWidth) {
-        entries.push({ pos: a.offset, mode: ENTER_EXIT, id: a.id, level: Number.MAX_VALUE, type: 'anchor', node: a });
-      } else {
-        // use a weak default level when not given
-        var l = 1000;
-        if (a.constructor.static && a.constructor.static.level) {
-          l = a.constructor.static.level;
-        }
-        entries.push({ pos : a.startOffset, mode: ENTER, level: l, id: a.id, type: a.type, node: a });
-        entries.push({ pos : a.endOffset, mode: EXIT, level: l, id: a.id, type: a.type, node: a });
-      }
-    });
-    return entries;
-  };
+  // sort in inverse order of openers
+  function _compareClosers(a, b) {
+    if (a.pos < b.pos) return -1;
+    if (a.pos > b.pos) return 1;
+    if (a.opener.idx > b.opener.idx) return -1;
+    if (a.opener.idx < b.opener.idx) return 1;
+    return 0;
+  }
 
   this.onText = function(/*context, text*/) {};
 
@@ -159,7 +199,7 @@ Fragmenter.Prototype = function() {
     var self = this;
 
     var entries = extractEntries.call(this, annotations);
-    entries.sort(_compare.bind(this));
+
     var stack = [{context: rootContext, entry: null}];
     var pos = 0;
 
@@ -170,7 +210,7 @@ Fragmenter.Prototype = function() {
 
       pos = entry.pos;
       var stackLevel, idx;
-      if (entry.mode === ENTER || entry.mode === ENTER_EXIT) {
+      if (entry.mode === ENTER || entry.mode === ANCHOR) {
         // find the correct position and insert an entry
         for (stackLevel = 1; stackLevel < stack.length; stackLevel++) {
           if (entry.level < stack[stackLevel].entry.level) {
@@ -188,7 +228,7 @@ Fragmenter.Prototype = function() {
           stack[idx].context = self.enter(stack[idx].entry, stack[idx-1].context);
         }
       }
-      if (entry.mode === EXIT || entry.mode === ENTER_EXIT) {
+      if (entry.mode === EXIT || entry.mode === ANCHOR) {
         // find the according entry and remove it from the stack
         for (stackLevel = 1; stackLevel < stack.length; stackLevel++) {
           if (stack[stackLevel].entry.node === entry.node) {
@@ -213,5 +253,10 @@ Fragmenter.Prototype = function() {
 };
 
 oo.initClass(Fragmenter);
+
+Fragmenter.SHOULD_NOT_SPLIT = 0;
+Fragmenter.NORMAL = 10;
+Fragmenter.ANY = 100;
+Fragmenter.ALWAYS_ON_TOP = Number.MAX_VALUE;
 
 module.exports = Fragmenter;

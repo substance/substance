@@ -2,7 +2,7 @@
 
 var oo = require('../util/oo');
 var EventEmitter = require('../util/EventEmitter');
-
+var Anchor = require('./Anchor');
 
 /**
   A document selection. Refers to a Substance document model, not to the DOM.
@@ -129,32 +129,34 @@ Selection.nullSelection = Object.freeze(new Selection.NullSelection());
   @class Selection.Fragment
 */
 
-Selection.Fragment = function(type, path, startOffset, endOffset) {
+Selection.Fragment = function(path, startOffset, endOffset) {
   EventEmitter.call(this);
 
-  this.type = type;
+  this.type = "selection-fragment";
   this.path = path;
   this.startOffset = startOffset;
   this.endOffset = endOffset || startOffset;
+};
 
-  // Note: this is necessary for the fragmentation algorithm to
-  // know that a cursor should be closed instantly (like a self-closing tag)
-  if (type === 'cursor') {
-    this.zeroWidth = true;
-  }
+Selection.Fragment.Prototype = function() {
+
+  this.isAnchor = function() {
+    return false;
+  };
+
+  this.isInline = function() {
+    return false;
+  };
+
 };
 
 EventEmitter.extend(Selection.Fragment);
 
-Object.defineProperties(Selection.Fragment.prototype, {
-  offset: {
-    get: function() { return this.startOffset; }
-  },
-  id: {
-    get: function() {
-      return this.type;
-    }
-  }
-});
+Selection.Cursor = function(path, offset) {
+  Anchor.call(this, path, offset);
+  this.type = "cursor";
+};
+
+Anchor.extend(Selection.Cursor);
 
 module.exports = Selection;

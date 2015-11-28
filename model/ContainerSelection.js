@@ -12,8 +12,8 @@ var Coordinate = require('./Coordinate');
   A selection spanning multiple nodes. Implements {@link model/Selection}.
 
   @class
-  @example  
-  
+  @example
+
   ```js
   var containerSel = doc.createSelection({
     type: 'container',
@@ -283,7 +283,7 @@ ContainerSelection.Prototype = function() {
     // TODO: document what this is exactly used for
     var sels = this.splitIntoPropertySelections();
     var fragments = map(sels, function(sel) {
-      return new Selection.Fragment('selection-fragment', sel.path,
+      return new Selection.Fragment(sel.path,
         sel.startOffset, sel.endOffset);
     });
     return fragments;
