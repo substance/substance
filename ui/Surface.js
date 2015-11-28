@@ -53,10 +53,13 @@ function Surface() {
   this.domObserverConfig = { subtree: true, characterData: true };
   this.skipNextObservation = false;
 
-  // set when editing is enabled
-  this.enabled = true;
+  // Note: doing this here, so that we don't crash under node when
+  // this file gets required
   this.isIE = Surface.detectIE();
   this.isFF = window.navigator.userAgent.toLowerCase().indexOf('firefox') > -1;
+
+  // set when editing is enabled
+  this.enabled = true;
   this.undoEnabled = true;
   this.textTypes = this.props.textTypes;
   this._initializeCommandRegistry(this.props.commands);
@@ -680,9 +683,9 @@ Surface.Prototype = function() {
     // Since we allow the surface be blurred natively when clicking
     // on tools we now need to make sure that the element is focused natively
     // when we set the selection
-    // This is actually only a problem on FF, other proses set the focus implicitly
+    // This is actually only a problem on FF, other browsers set the focus implicitly
     // when a new DOM selection is set.
-    if (!sel.isNull() && this.el) {
+    if (this.isFF && !sel.isNull() && this.el) {
       this.el.focus();
     }
   };
