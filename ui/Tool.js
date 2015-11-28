@@ -57,6 +57,7 @@ Tool.Prototype = function() {
 
   this.onClick = function(e) {
     e.preventDefault();
+    e.stopPropagation();
     if (this.state.disabled) {
       return;
     }
