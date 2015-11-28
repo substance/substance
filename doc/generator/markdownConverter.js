@@ -46,8 +46,9 @@ function convertCodeLinks(parsed) {
   while ((event = walker.next())) {
     node = event.node;
     if (node.type === 'Text') {
-      var match = /(\{\s*@link([^\}]*)\})/.exec(node.literal);
-      if (match) {
+      var re = /(\{\s*@link([^\}]*)\})/;
+      var match = re.exec(node.literal);
+      while (match) {
         sourceposPre = undefined;
         sourceposLink = undefined;
         sourceposPost = undefined;
@@ -71,6 +72,10 @@ function convertCodeLinks(parsed) {
         node.insertBefore(link);
         node.insertBefore(post);
         node.unlink();
+
+        // iterating to find all matches
+        node = post;
+        match = re.exec(post.literal);
       }
     }
   }
