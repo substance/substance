@@ -24,6 +24,10 @@ module.exports = {
   'instance-methods': 'Methods',
   'instance-properties': 'Properties',
   'instance-events': 'Events',
+  'inherited-instance-methods': 'Inherited Methods',
+  'inherited-instance-properties': 'Inherited Properties',
+  'inherited-class-properties': 'Inherited Class properties',
+  'inherited-class-methods': 'Inherited Class methods',
   'props': 'Props',
   'state': 'State'
 };

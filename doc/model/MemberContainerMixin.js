@@ -1,14 +1,14 @@
 'use strict';
 
 var filter = require('lodash/collection/filter');
+var each = require('lodash/collection/each');
 
 var MemberContainerMixin = {
 
   getMembers: function(config) {
     config = config || {};
     var members = [];
-
-    this.getMemberCategories().forEach(function(cat) {
+    each(this.getMemberCategories(), function(cat) {
       var catMembers = this.getCategoryMembers(cat, config);
       members = members.concat(catMembers);
     }.bind(this));

@@ -36,7 +36,7 @@ NamespaceComponent.Prototype = function() {
     );
     if (node.members.length > 0) {
       // member index
-      el.append($$(MemberIndexComponent, {node: node, categories: node.getMemberCategories()}));
+      el.append($$(MemberIndexComponent, {node: node}));
       // members
       el.append(this._renderMembers());
     }

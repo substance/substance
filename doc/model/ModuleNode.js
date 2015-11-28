@@ -3,11 +3,11 @@
 var DocumentedNode = require('./DocumentedNode');
 var MemberContainerMixin = require('./MemberContainerMixin');
 
-var MEMBER_CATEGORIES = [
-  {name: 'classes', path: ['class']},
-  {name: 'methods', path: ['method']},
-  {name: 'properties', path: ['property']},
-];
+var MEMBER_CATEGORIES = {
+  'classes': {name: 'classes', path: ['class']},
+  'methods': {name: 'methods', path: ['method']},
+  'properties': {name: 'properties', path: ['property']},
+};
 
 function ModuleNode() {
   ModuleNode.super.apply(this, arguments);

@@ -12,7 +12,7 @@ var TextOperation = require('./TextOperation');
   Incremental data storage implemention.
 
   @class IncrementalData
-  @extends Data
+  @extends model/data/Data
   @private
  */
 

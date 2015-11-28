@@ -9,11 +9,11 @@ var MemberContainerMixin = require('./MemberContainerMixin');
 // - model/transform
 // - ui
 
-var MEMBER_CATEGORIES = [
-  {name: 'modules', path: ['module']},
-  {name: 'classes', path: ['class']},
-  {name: 'functions', path: ['function']},
-];
+var MEMBER_CATEGORIES = {
+  'modules': {name: 'modules', path: ['module']},
+  'classes': {name: 'classes', path: ['class']},
+  'functions': {name: 'functions', path: ['function']},
+};
 
 function NamespaceNode() {
   NamespaceNode.super.apply(this, arguments);
