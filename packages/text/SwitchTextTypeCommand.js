@@ -65,19 +65,24 @@ SwitchTextType.Prototype = function() {
       var path = sel.getPath();
       var node = doc.get(path[0]);
 
-      if (node.isText() && node.isBlock()) {
-        newState.currentTextType = this.getCurrentTextType(node);
+      // There are cases where path points to an already deleted node,
+      // so we need to guard node
+      if (node) {
+        if (node.isText() && node.isBlock()) {
+          newState.currentTextType = this.getCurrentTextType(node);
+          if (!newState.currentTextType) {
+            newState.disabled = true;
+          }
+        }
         if (!newState.currentTextType) {
+          // We 'abuse' the currentTextType field by providing a property
+          // identifier that is translated into a name using an i18n resolve.
+          // E.g. this.i18n('figure.caption') -> Figre Caption
+          newState.currentTextType = {name: [node.type, path[1]].join('.')};
           newState.disabled = true;
         }
       }
-      if (!newState.currentTextType) {
-        // We 'abuse' the currentTextType field by providing a property
-        // identifier that is translated into a name using an i18n resolve.
-        // E.g. this.i18n('figure.caption') -> Figre Caption
-        newState.currentTextType = {name: [node.type, path[1]].join('.')};
-        newState.disabled = true;
-      }
+
     }
     return newState;
   };
