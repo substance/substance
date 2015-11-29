@@ -159,7 +159,7 @@ _Parser.Prototype = function() {
     return nodes;
   };
 
-  var STATIC_PROP = /(.+)\.static/
+  var STATIC_PROP = /(.+)\.static/;
 
   /**
    * Prepares a parsed block/entity.
@@ -199,7 +199,6 @@ _Parser.Prototype = function() {
         refinedTags.push({ type: 'param', value: param });
         entity.params.push(param);
       } else if (tag.type === "return" || tag.type === "returns") {
-        debugger;
         // TODO: in dox a type can have multiple entries
         var returnVal = {
           type: tag.types.join('|'),

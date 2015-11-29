@@ -15,13 +15,13 @@ var EventEmitter = require('../../util/EventEmitter');
 /**
   Base node implementation.
 
+  @private
   @class Node
   @node
   @extends EventEmitter
   @param {Object} properties
 
   @prop {String} id an id that is unique within this data
-
  */
 function Node(props) {
   EventEmitter.call(this);

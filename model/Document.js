@@ -42,7 +42,7 @@ var __id__ = 0;
 
 /**
   @constructor Document
-  @param {model/Schema} schema The document schema.
+  @param {DocumentSchema} schema The document schema.
 */
 
 function Document(schema) {
@@ -200,12 +200,12 @@ Document.Prototype = function() {
   */
   this.import = function(importer) {
     try {
-      this.data.stopIndexing();
+      this.data._stopIndexing();
       importer(this);
-      this.data.startIndexing();
+      this.data._startIndexing();
     } finally {
       this.data.queue = [];
-      this.data.startIndexing();
+      this.data._startIndexing();
     }
   };
 
