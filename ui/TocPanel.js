@@ -2,12 +2,12 @@
 
 var _ = require('../util/helpers');
 var Component = require('./Component');
-var $$ = Component.$$;
 var Panel = require('./Panel');
+var $$ = Component.$$;
 var Icon = require('./FontAwesomeIcon');
 
-function TocPanel() {
-  Panel.apply(this, arguments);
+function TOCPanel() {
+  Component.apply(this, arguments);
 
   var doc = this.getDocument();
   doc.connect(this, {
@@ -16,7 +16,10 @@ function TocPanel() {
   });
 }
 
-TocPanel.Prototype = function() {
+TOCPanel.Prototype = function() {
+  this.getDocument = function() {
+    return this.context.doc;
+  };
 
   this.getInitialState = function() {
     var doc = this.props.doc;
@@ -47,7 +50,9 @@ TocPanel.Prototype = function() {
           href: "#",
           "data-id": node.id,
         })
-        .on('click', this.handleClick)
+        // TODO: Why does handleClick get bound to this.refs.panelEl and not this?
+        // Seems that handlers will be bound to the parent, not the owner.
+        .on('click', this.handleClick.bind(this))
         .append(
           $$(Icon, {icon: 'fa-caret-right'}),
           node.getTocName()
@@ -58,15 +63,11 @@ TocPanel.Prototype = function() {
       tocEntries.append(tocEntry);
     }, this);
 
-    var el = $$("div")
-      .addClass('sc-toc-panel sc-panel');
-
-    var panelContent = $$('div')
-      .addClass('se-panel-content')
-      .ref('panelContent');
-
-    panelContent.append(tocEntries);
-    el.append(panelContent);
+    var el = $$('div').addClass('sc-toc').append(
+      $$(Panel).ref('panelEl').append(
+        tocEntries
+      )
+    );
     return el;
   };
 
@@ -123,12 +124,6 @@ TocPanel.Prototype = function() {
   };
 };
 
-Panel.extend(TocPanel);
+Component.extend(TOCPanel);
 
-// Panel Configuration
-// -----------------
-
-TocPanel.contextId = 'toc';
-TocPanel.icon = 'fa-align-left';
-
-module.exports = TocPanel;
+module.exports = TOCPanel;

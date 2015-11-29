@@ -4,6 +4,7 @@ var Component = require('../ui/Component');
 var $$ = Component.$$;
 var DocumentationController = require('./DocumentationController');
 var Cover = require('./components/CoverComponent');
+var ContextSection = require('../ui/ContextSection');
 
 var DocumentationReader = DocumentationController.extend({
   // Editor configuration
@@ -21,7 +22,12 @@ var DocumentationReader = DocumentationController.extend({
           'module': require('./components/ModuleComponent'),
           'property': require('./components/PropertyComponent'),
           'event': require('./components/EventComponent'),
-          'toc': require('../ui/TocPanel')
+          'toc': require('../ui/TOCPanel')
+        }
+      },
+      panels: {
+        'toc': {
+          hideContextToggles: true
         }
       },
       panelOrder: ['toc'],
@@ -53,7 +59,7 @@ var DocumentationReader = DocumentationController.extend({
         $$('div').ref('resource')
           .addClass('se-resource')
           .append(
-            this.renderContextPanel()
+            $$(ContextSection)
           )
       )
     );
