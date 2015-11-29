@@ -20,10 +20,8 @@ ContextSection.Prototype = function() {
 
   this.render = function() {
     var componentRegistry = this.context.componentRegistry;
-    var parentState = this.context.controller.state;
-    var config = this.context.config;
-    var contextId = parentState.contextId;
-    var panelConfig = config.panels[contextId] || {};
+    var contextId = this.props.contextId;
+    var panelConfig = this.props.panelConfig;
     var PanelComponentClass = componentRegistry.get(contextId);
 
     var el = $$('div').addClass('sc-context-section');
@@ -34,7 +32,7 @@ ContextSection.Prototype = function() {
       el.addClass('sm-context-toggles-shown');
     } else {
       el.addClass('sm-context-toggles-hidden');
-    }    
+    }
 
     // Add context panel
     var props = this._propsFromParentState();
