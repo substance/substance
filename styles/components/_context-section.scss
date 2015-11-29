@@ -1,0 +1,14 @@
+.sc-context-section {
+  .se-context-panel {
+    position: absolute;
+    top: 0px;
+    left: 0px;
+    right: 0px;
+    bottom: 0px;
+  }
+
+  // Add some spacing when context toggles are shown
+  &.sm-context-toggles-shown .se-context-panel {
+    top: 40px;
+  }
+}

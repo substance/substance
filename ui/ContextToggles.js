@@ -13,8 +13,11 @@ function ContextToggles() {
 ContextToggles.Prototype = function() {
 
   this.render = function() {
-    var panelOrder = this.props.panelOrder;
-    var contextId = this.props.contextId;
+    // TODO: this should be less bound to the app context!
+    var config = this.context.config;
+    var parentState = this.context.controller.state;
+    var panelOrder = config.panelOrder;
+    var contextId = parentState.contextId;
 
     var el = $$('div').addClass("sc-context-toggles");
     _.each(panelOrder, function(panelId) {

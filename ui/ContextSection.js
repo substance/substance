@@ -31,11 +31,16 @@ ContextSection.Prototype = function() {
     // Only render context toggles when we are dealing with a dialog
     if (!panelConfig.hideContextToggles) {
       el.append($$(ContextToggles));
-    }
+      el.addClass('sm-context-toggles-shown');
+    } else {
+      el.addClass('sm-context-toggles-hidden');
+    }    
 
     // Add context panel
     var props = this._propsFromParentState();
-    el.append($$(PanelComponentClass, props));
+    el.append(
+      $$(PanelComponentClass, props).addClass('se-context-panel').ref(contextId)
+    );
     return el;
   };
 };

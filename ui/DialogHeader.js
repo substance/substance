@@ -1,7 +1,5 @@
 'use strict';
 
-var _ = require('../util/helpers');
-
 var Component = require('./Component');
 var $$ = Component.$$;
 var Icon = require('./FontAwesomeIcon');
@@ -23,7 +21,7 @@ DialogHeader.Prototype = function() {
 
   this.handleCancel = function(e) {
     e.preventDefault();
-    this.send("switchContext", "toc");
+    this.send("switchContext", this.props.exitContext || "toc");
   };
 
 };
