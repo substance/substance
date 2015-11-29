@@ -212,6 +212,8 @@ Document.Prototype = function() {
   /**
     Creates a new {@link model/DocumentNode}. Use this API on a {@link model/TransactionDocument} to ensure consistency.
 
+    @param {Object} nodeData
+
     @example
 
     ```js
@@ -239,6 +241,19 @@ Document.Prototype = function() {
     return this.data.get(nodeData.id);
   };
 
+  /**
+    Removes a node with given nodeId.
+
+    @param {String} nodeId
+
+    @example
+
+    ```js
+    doc.transaction(function(tx) {
+      tx.delete('p1');
+    });
+    ```
+  */
   this.delete = function(nodeId) {
     if (this.FORCE_TRANSACTIONS) {
       throw new Error('Use a transaction!');
@@ -253,6 +268,20 @@ Document.Prototype = function() {
     }
   };
 
+  /**
+    Set a node's property to a new value.
+
+    @param {Array} path
+    @param {String} value
+
+    @example
+
+    ```js
+    doc.transaction(function(tx) {
+      tx.set(['p1', 'content'], "Hello there! I'm a new paragraph.");
+    });
+    ```
+  */
   this.set = function(path, value) {
     if (this.FORCE_TRANSACTIONS) {
       throw new Error('Use a transaction!');

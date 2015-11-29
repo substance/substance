@@ -64,6 +64,11 @@ function ContainerSelection(properties) {
 
 ContainerSelection.Prototype = function() {
 
+  /**
+    Convert container selection to JSON.
+
+    @returns {Object}
+  */
   this.toJSON = function() {
     return {
       type: 'container',
@@ -76,6 +81,12 @@ ContainerSelection.Prototype = function() {
     };
   };
 
+  /**
+    Attach document to selection.
+
+    @param {Document} doc document to attach
+    @returns {Selection}
+  */
   this.attach = function(doc) {
     this._internal.doc = doc;
     return this;
@@ -92,13 +103,19 @@ ContainerSelection.Prototype = function() {
   this.toString = function() {
     return "ContainerSelection("+ JSON.stringify(this.range.start.path) + ":" + this.range.start.offset + " -> " +  JSON.stringify(this.range.end.path) + ":" + this.range.end.offset + (this.reverse ? ", reverse" : "") + ")";
   };
+ 
+  /**
+    Return the currently used container.
 
+    @return {Document.Container}
+  */
   this.getContainer = function() {
     return this.getDocument().get(this.containerId);
   };
 
   /**
     Expands this selection to include another selection.
+
     @param {Selection} other
     @returns {Selection} a new selection
   */
@@ -245,6 +262,8 @@ ContainerSelection.Prototype = function() {
   };
 
   /**
+    Splits container selection into property selections
+
     @returns {PropertySelection[]}
   */
   this.splitIntoPropertySelections = function() {
@@ -277,6 +296,8 @@ ContainerSelection.Prototype = function() {
   };
 
   /**
+    Return fragments each corresponding to a property selection of splitted container selection.
+
     @returns {Selection.Fragment[]}
   */
   this.getFragments = function() {
