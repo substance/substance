@@ -59,7 +59,10 @@ var DocumentationReader = DocumentationController.extend({
         $$('div').ref('resource')
           .addClass('se-resource')
           .append(
-            $$(ContextSection)
+            $$(ContextSection, {
+              panelConfig: config.panels[this.state.contextId],
+              contextId: this.state.contextId
+            }).ref(this.state.contextId)
           )
       )
     );
