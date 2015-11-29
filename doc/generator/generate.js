@@ -3,7 +3,8 @@ var schema = require('../model/Documentation').schema;
 var map = require('lodash/collection/map');
 var pick = require('lodash/object/pick');
 
-module.exports = function generate(config) {
+
+function generate(config) {
   var nodes = collectNodes(config);
 
   // make the nodes conform to the schema
@@ -27,4 +28,6 @@ module.exports = function generate(config) {
   });
 
   return nodes;
-};
+}
+
+module.exports = generate;

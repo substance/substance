@@ -77,6 +77,13 @@ _Parser.Prototype = function() {
       // the main entity of a module is that one which has the same name as the entry
       // e.g. the class 'Component' in file 'Component.js' would be assumed to be exported
       if (this._exportableTypes[entity.type] && (entity.id === this.name)) {
+        if (mainEntity) {
+          throw new Error([
+            'Ambigous main entity in file ', this.file,
+            "\n Found: ", mainEntity.name, " of type ", mainEntity.type, " in line ", mainEntity.line,
+            "\n and: ", entity.name, " of type ", entity.type, " in line ", entity.line
+          ].join(''));
+        }
         mainEntity = entity;
       }
 
@@ -274,8 +281,12 @@ _Parser.Prototype = function() {
   var _typeTagMatcher = /^\s*(\{[^@][^{]+\})\s+([\w\/]+)\s+(.+)/;
 
   function _prepareParam(tag) {
+    var shortTypes = tag.types.map(function(type) {
+      return path.basename(type);
+    });
     var param = {
       type: tag.types.join('|'),
+      shortType: shortTypes.join('|'),
       name: tag.name,
       description: markdown.toHtml(tag.description)
     };
@@ -289,6 +300,7 @@ _Parser.Prototype = function() {
 
   function _createNode(self, entity, node) {
     node.name = entity.name;
+    node.ns = self.folder;
     node.example = entity.example;
     node.sourceFile = self.file;
     node.sourceLine = entity.sourceLine;
