@@ -159,6 +159,8 @@ _Parser.Prototype = function() {
     return nodes;
   };
 
+  var STATIC_PROP = /(.+)\.static/
+
   /**
    * Prepares a parsed block/entity.
    * For instance, it sets flags when certain tags are present.
@@ -184,8 +186,10 @@ _Parser.Prototype = function() {
         entity.isClass = true;
         entity.type = "class";
         entity.members = [];
+
         // overloaded receiver
         if (tag.string) {
+          entity.sourceLine = entity.line;
           var ctx = _extractClassCtx(this, tag.string);
           entity.ctx = extend({}, entity.ctx, ctx);
           entity.name = ctx.name;
@@ -194,7 +198,8 @@ _Parser.Prototype = function() {
         var param = _prepareParam(tag);
         refinedTags.push({ type: 'param', value: param });
         entity.params.push(param);
-      } else if (tag.type === "return") {
+      } else if (tag.type === "return" || tag.type === "returns") {
+        debugger;
         // TODO: in dox a type can have multiple entries
         var returnVal = {
           type: tag.types.join('|'),
@@ -247,6 +252,15 @@ _Parser.Prototype = function() {
     }, this);
 
     entity.tags = refinedTags;
+
+    // support for `static` props defined this way 'Foo.static.foo'
+    if (entity.ctx && entity.ctx.receiver) {
+      var match = STATIC_PROP.exec(entity.ctx.receiver);
+      if (match) {
+        entity.ctx.receiver = match[1];
+        entity.isStatic = true;
+      }
+    }
 
     if (!entity.id) {
       var id = "";
