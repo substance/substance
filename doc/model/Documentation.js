@@ -1,5 +1,6 @@
 'use strict';
 
+var each = require('lodash/collection/each');
 var Document = require('../../model/Document');
 var Schema = require('../../model/DocumentSchema');
 var schema = new Schema('substance-documentation', '0.1.0');
@@ -47,7 +48,7 @@ Documentation.Prototype = function() {
     contentNodes.forEach(function(nsId) {
       var ns = this.get(nsId);
       tocNodes.push(ns);
-      ns.getMemberCategories().forEach(function(cat) {
+      each(ns.getMemberCategories(), function(cat) {
         var catMembers = ns.getCategoryMembers(cat, config);
         tocNodes = tocNodes.concat(catMembers);
       });

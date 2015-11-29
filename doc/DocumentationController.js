@@ -1,7 +1,7 @@
 'use strict';
 
 var _ = require('../util/helpers');
-
+var extend = require('lodash/object/extend');
 var Controller = require("../ui/Controller");
 var Component = require('../ui/Component');
 var $$ = Component.$$;
@@ -30,6 +30,15 @@ function DocumentationController(parent, params) {
 }
 
 DocumentationController.Prototype = function() {
+
+  var _super = DocumentationController.super.prototype;
+
+  this.setState = function(newState) {
+    if (!newState.contextId) {
+      newState = extend({}, this.getInitialState(), newState);
+    }
+    _super.setState.call(this, newState);
+  };
 
   this.focusNode = function(nodeId) {
     this.extendState({

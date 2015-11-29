@@ -16,64 +16,51 @@ var Anchor = require('./Anchor');
 function Selection() {}
 
 Selection.Prototype = function() {
-  /**
-    Get all ranges of a selection.
-  */
-  this.getRanges = function() {
-    return [];
-  };
 
   /**
-    Returns true when selection is null.
+    @returns {Boolean} true when selection is null.
   */
   this.isNull = function() {
     return false;
   };
 
   /**
-    Returns true when selection consists of multiple ranges
-  */
-  this.isMultiSeletion = function() {
-    return false;
-  };
-
-  /**
-    Returns true for property selections
+    @returns {Boolean} true for property selections
   */
   this.isPropertySelection = function() {
     return false;
   };
 
   /**
-    Returns true if selection is a {@link model/ContainerSelection}
+    @returns {Boolean} true if selection is a {@link model/ContainerSelection}
   */
   this.isContainerSelection = function() {
     return false;
   };
 
   /**
-    Returns true if selection is a {@link model/TableSelection}
+    @returns {Boolean} true if selection is a {@link model/TableSelection}
   */
   this.isTableSelection = function() {
     return false;
   };
 
   /**
-    Returns true when selection is collapsed
+    @returns {Boolean} true when selection is collapsed
   */
   this.isCollapsed = function() {
     return true;
   };
 
   /**
-    Returns true if startOffset < endOffset
+    @returns {Boolean} true if startOffset < endOffset
   */
   this.isReverse = function() {
     return false;
   };
 
   /**
-    Returns true if selection equals `other` selection
+    @returns {Boolean} true if selection equals `other` selection
   */
   this.equals = function(other) {
     if (this === other) {
@@ -88,10 +75,41 @@ Selection.Prototype = function() {
   };
 
   /**
-    Describes selection as human readable string
+    @returns {String} This selection as human readable string.
   */
   this.toString = function() {
     return "null";
+  };
+
+  /**
+    @private
+    @returns {Range[]} All ranges of a selection.
+  */
+  this.getRanges = function() {
+    return [];
+  };
+
+  /**
+    Attach document to the selection.
+
+    @private
+    @param {Document} doc document to attach
+    @returns {this}
+  */
+  this.attach = function(doc) {
+    /* jshint unused: false */
+    throw new Error('This method is abstract.');
+  };
+
+
+  /**
+    Convert container selection to JSON.
+
+    @abstract
+    @returns {Object}
+  */
+  this.toJSON = function() {
+    throw new Error('This method is abstract.');
   };
 
 };
@@ -101,6 +119,7 @@ oo.initClass(Selection);
 /**
   Class to represent null selections.
 
+  @private
   @class
 */
 
@@ -116,17 +135,19 @@ Selection.extend(Selection.NullSelection);
 
 /**
   We use a singleton to represent NullSelections.
-  @type {model/Selection.NullSelection}
+
+  @type {model/Selection}
 */
 
 Selection.nullSelection = Object.freeze(new Selection.NullSelection());
 
 
 /**
-  A selection fragment. Used when we need to break down a {@link model/ContainerAnnotation}
+  A selection fragment. Used when we split a {@link model/ContainerSelection}
   into their fragments, each corresponding to a property selection.
 
-  @class Selection.Fragment
+  @private
+  @class
 */
 
 Selection.Fragment = function(path, startOffset, endOffset) {
@@ -152,6 +173,14 @@ Selection.Fragment.Prototype = function() {
 
 EventEmitter.extend(Selection.Fragment);
 
+/**
+  Describe the cursor when creating selection fragments.
+  This is used for rendering selections.
+
+  @private
+  @class
+  @extends Anchor
+*/
 Selection.Cursor = function(path, offset) {
   Anchor.call(this, path, offset);
   this.type = "cursor";

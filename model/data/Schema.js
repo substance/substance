@@ -5,11 +5,14 @@ var NodeRegistry = require('./NodeRegistry');
 var Node = require('./Node');
 
 /**
+  Schema for Data Objects.
+
   @class Schema
+  @private
  */
 
 /**
-  @consructor
+  @constructor Schema
   @param {String} name
   @param {String} version
 */

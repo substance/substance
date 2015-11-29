@@ -3,16 +3,15 @@
 var DocumentedNode = require('./DocumentedNode');
 var MemberContainerMixin = require('./MemberContainerMixin');
 
-var MEMBER_CATEGORIES = [
-  {name: 'ctor', path: ['class', 'ctor']},
-  {name: 'instance-methods', path: ['instance', 'method']},
-  {name: 'instance-properties', path: ['instance', 'property']},
-  {name: 'instance-events', path: ['instance', 'event']},
-
-  {name: 'class-methods', path: ['class', 'method']},
-  {name: 'class-properties', path: ['class', 'property']},
-  {name: 'inner-classes', path: ['class', 'class']}
-];
+var MEMBER_CATEGORIES = {
+  'ctor': {name: 'ctor', path: ['class', 'ctor']},
+  'instance-methods': {name: 'instance-methods', path: ['instance', 'method']},
+  'instance-properties': {name: 'instance-properties', path: ['instance', 'property']},
+  'instance-events': {name: 'instance-events', path: ['instance', 'event']},
+  'class-methods': {name: 'class-methods', path: ['class', 'method']},
+  'class-properties': {name: 'class-properties', path: ['class', 'property']},
+  'inner-classes': {name: 'inner-classes', path: ['class', 'class']}
+};
 
 function ClassNode() {
   ClassNode.super.apply(this, arguments);
@@ -31,6 +30,29 @@ ClassNode.Prototype = function() {
   this.getMemberCategories = function() {
     return MEMBER_CATEGORIES;
   };
+
+  // var INHERITED = ['instance-methods', 'instance-properties', 'class-methods', 'class-properties'];
+  var INHERITED = ['instance-methods', 'instance-properties'];
+
+  this.getInheritedMembers = function(config) {
+    var inheritedMembers = {};
+    var doc = this.getDocument();
+    var superClass = this.superClass ? doc.get(this.superClass) : null;
+    if (superClass) {
+      inheritedMembers = superClass.getInheritedMembers(config);
+      INHERITED.forEach(function(group) {
+        var members = superClass.getCategoryMembers(MEMBER_CATEGORIES[group], config);
+        if (members.length > 0) {
+          inheritedMembers[group] = inheritedMembers[group] || {};
+          members.forEach(function(member) {
+            inheritedMembers[group][member.id] = member;
+          });
+        }
+      });
+    }
+    return inheritedMembers;
+  };
+
 };
 
 DocumentedNode.extend(ClassNode, MemberContainerMixin);

@@ -77,6 +77,13 @@ _Parser.Prototype = function() {
       // the main entity of a module is that one which has the same name as the entry
       // e.g. the class 'Component' in file 'Component.js' would be assumed to be exported
       if (this._exportableTypes[entity.type] && (entity.id === this.name)) {
+        if (mainEntity) {
+          throw new Error([
+            'Ambigous main entity in file ', this.file,
+            "\n Found: ", mainEntity.name, " of type ", mainEntity.type, " in line ", mainEntity.line,
+            "\n and: ", entity.name, " of type ", entity.type, " in line ", entity.line
+          ].join(''));
+        }
         mainEntity = entity;
       }
 
@@ -152,6 +159,8 @@ _Parser.Prototype = function() {
     return nodes;
   };
 
+  var STATIC_PROP = /(.+)\.static/;
+
   /**
    * Prepares a parsed block/entity.
    * For instance, it sets flags when certain tags are present.
@@ -177,8 +186,10 @@ _Parser.Prototype = function() {
         entity.isClass = true;
         entity.type = "class";
         entity.members = [];
+
         // overloaded receiver
         if (tag.string) {
+          entity.sourceLine = entity.line;
           var ctx = _extractClassCtx(this, tag.string);
           entity.ctx = extend({}, entity.ctx, ctx);
           entity.name = ctx.name;
@@ -187,7 +198,7 @@ _Parser.Prototype = function() {
         var param = _prepareParam(tag);
         refinedTags.push({ type: 'param', value: param });
         entity.params.push(param);
-      } else if (tag.type === "return") {
+      } else if (tag.type === "return" || tag.type === "returns") {
         // TODO: in dox a type can have multiple entries
         var returnVal = {
           type: tag.types.join('|'),
@@ -241,6 +252,15 @@ _Parser.Prototype = function() {
 
     entity.tags = refinedTags;
 
+    // support for `static` props defined this way 'Foo.static.foo'
+    if (entity.ctx && entity.ctx.receiver) {
+      var match = STATIC_PROP.exec(entity.ctx.receiver);
+      if (match) {
+        entity.ctx.receiver = match[1];
+        entity.isStatic = true;
+      }
+    }
+
     if (!entity.id) {
       var id = "";
       if (entity.ctx) {
@@ -274,8 +294,12 @@ _Parser.Prototype = function() {
   var _typeTagMatcher = /^\s*(\{[^@][^{]+\})\s+([\w\/]+)\s+(.+)/;
 
   function _prepareParam(tag) {
+    var shortTypes = tag.types.map(function(type) {
+      return path.basename(type);
+    });
     var param = {
       type: tag.types.join('|'),
+      shortType: shortTypes.join('|'),
       name: tag.name,
       description: markdown.toHtml(tag.description)
     };
@@ -289,10 +313,14 @@ _Parser.Prototype = function() {
 
   function _createNode(self, entity, node) {
     node.name = entity.name;
+    node.ns = self.folder;
     node.example = entity.example;
     node.sourceFile = self.file;
     node.sourceLine = entity.sourceLine;
     node.tags = entity.tags;
+    if (entity.isPrivate) {
+      node.isPrivate = true;
+    }
     if (entity.description.full) {
       node.description = entity.description.full;
     }
@@ -464,10 +492,12 @@ _Parser.Prototype = function() {
   this._parseTagTypes = function(str, tag) {
     if (/\{[^{]+\}/.exec(str)) {
       str = str.replace(/\//g, '_SEP_');
+      str = str.replace(/\[\]/g, '_ARR_');
       try {
         var types = dox_parseTagTypes(str, tag);
         for (var i = 0; i < types.length; i++) {
           types[i] = types[i].replace(/_SEP_/g, '/');
+          types[i] = types[i].replace(/_ARR_/g, '[]');
         }
       } catch (err) {
         throw new Error('Could not parse jsdoc expression found in ' + this.file + "\n" + err.message);

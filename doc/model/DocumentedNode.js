@@ -28,6 +28,7 @@ DocumentedNode.static.defineSchema({
   example: { type: 'string', optional: true }, // HTML
   sourceFile: 'string', // ui/Component.js
   sourceLine: 'number',
+  isPrivate: { type: 'boolean', default: false },
   tags: { type: ['array', 'object'], default: [] }, // [ { name: 'type', string: '...', html: '...'}]
 });
 

@@ -23,7 +23,7 @@ ParamsComponent.Prototype = function() {
         paramsTable.append(
           $$('tr').addClass('se-param').append(
             $$('td').addClass('se-param-name').append(param.name),
-            $$('td').addClass('se-param-type').append($$(CrossLink, {nodeId: param.type})),
+            $$('td').addClass('se-param-type').append($$(CrossLink, {nodeId: param.type}).append(param.shortType)),
             $$('td').addClass('se-param-description').html(param.description)
           )
         );

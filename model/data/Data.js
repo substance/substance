@@ -8,8 +8,12 @@ var PathAdapter = require('../../util/PathAdapter');
 var EventEmitter = require('../../util/EventEmitter');
 
 /**
-  A data storage implemention.
+  A data storage implemention that supports data defined via a {@link model/data/Schema},
+  and incremental updates which are backed by a OT library.
 
+  It forms the underlying implementation for {@link model/Document}.
+
+  @private
   @class Data
   @extends util/EventEmitter
  */
@@ -35,6 +39,15 @@ function Data(schema, options) {
 }
 
 Data.Prototype = function() {
+
+  /**
+    Check if this storage contains a node with given id.
+
+    @returns {Boolean} `true` if a node with id exists, `false` otherwise.
+   */
+  this.contains = function(id) {
+    return (!!this.nodes[id]);
+  };
 
   /**
     Get a node or value via path.
@@ -84,7 +97,7 @@ Data.Prototype = function() {
     if (this.__QUEUE_INDEXING__) {
       this.queue.push(change);
     } else {
-      this.updateIndexes(change);
+      this._updateIndexes(change);
     }
 
     return node;
@@ -108,7 +121,7 @@ Data.Prototype = function() {
     if (this.__QUEUE_INDEXING__) {
       this.queue.push(change);
     } else {
-      this.updateIndexes(change);
+      this._updateIndexes(change);
     }
 
     return node;
@@ -137,7 +150,7 @@ Data.Prototype = function() {
     if (this.__QUEUE_INDEXING__) {
       this.queue.push(change);
     } else {
-      this.updateIndexes(change);
+      this._updateIndexes(change);
     }
 
     return oldValue;
@@ -146,9 +159,15 @@ Data.Prototype = function() {
   /**
     Update a property incrementally.
 
+    DEPRECATED: this will be replaced in Beta 3 with a more intuitive API.
+
     @param {Array} property path
     @param {Object} diff
-   */
+    @returns {any} The value before applying the update.
+
+    @deprecated
+
+  */
   this.update = function(path, diff) {
     // TODO: do we really want this incremental implementation here?
     var oldValue = this.nodes.get(path);
@@ -203,7 +222,7 @@ Data.Prototype = function() {
     if (this.__QUEUE_INDEXING__) {
       this.queue.push(change);
     } else {
-      this.updateIndexes(change);
+      this._updateIndexes(change);
     }
 
     return oldValue;
@@ -212,7 +231,12 @@ Data.Prototype = function() {
   /**
     Convert to JSON.
 
+    DEPRECATED: We moved away from having JSON as first-class exchange format.
+    We will remove this soon.
+
+    @private
     @returns {Object} Plain content.
+    @deprecated
    */
   this.toJSON = function() {
     return {
@@ -222,16 +246,9 @@ Data.Prototype = function() {
   };
 
   /**
-    Check if this storage contains a node with given id.
-
-    @returns {Boolean} `true` if a node with id exists, `false` otherwise.
-   */
-  this.contains = function(id) {
-    return (!!this.nodes[id]);
-  };
-
-  /**
     Clear nodes.
+
+    @private
    */
   this.reset = function() {
     this.nodes = new PathAdapter();
@@ -262,7 +279,7 @@ Data.Prototype = function() {
     return this.indexes[name];
   };
 
-  this.updateIndexes = function(change) {
+  this._updateIndexes = function(change) {
     if (!change || this.__QUEUE_INDEXING__) return;
     each(this.indexes, function(index) {
       if (index.select(change.node)) {
@@ -274,15 +291,15 @@ Data.Prototype = function() {
     });
   };
 
-  this.stopIndexing = function() {
+  this._stopIndexing = function() {
     this.__QUEUE_INDEXING__ = true;
   };
 
-  this.startIndexing = function() {
+  this._startIndexing = function() {
     this.__QUEUE_INDEXING__ = false;
     while(this.queue.length >0) {
       var change = this.queue.shift();
-      this.updateIndexes(change);
+      this._updateIndexes(change);
     }
   };
 

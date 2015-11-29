@@ -1,5 +1,6 @@
 'use strict';
 
+var each = require('lodash/collection/each');
 var Component = require('../../ui/Component');
 var $$ = Component.$$;
 var UnsupportedNode = require('../../ui/UnsupportedNode');
@@ -13,7 +14,7 @@ MemberContainerComponent.Prototype = function() {
   this._renderMembers = function() {
     var node = this.props.node;
     var el = $$('div');
-    node.getMemberCategories().forEach(function(cat) {
+    each(node.getMemberCategories(), function(cat) {
       var catMembers = this._getCategoryMembers(cat);
       if (catMembers.length > 0) {
         el.append(this._renderMemberCategory(cat, catMembers));
@@ -25,7 +26,9 @@ MemberContainerComponent.Prototype = function() {
   this._renderMemberCategory = function(cat, catMembers) {
     var catEl = $$('div').addClass('se-member-category');
     var membersEl = $$('div').addClass('se-members');
-    catMembers.forEach(function(memberNode) {
+    // Note: using lodash each, so that we are independent
+    // of catMembers being an array or an object.
+    each(catMembers, function(memberNode) {
       membersEl.append(this._renderMember(memberNode));
     }.bind(this));
     catEl.append(membersEl);

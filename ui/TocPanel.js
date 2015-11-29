@@ -20,7 +20,7 @@ TocPanel.Prototype = function() {
 
   this.getInitialState = function() {
     var doc = this.props.doc;
-    var tocNodes = doc.getTOCNodes();
+    var tocNodes = doc.getTOCNodes(this.context.config);
     return {
       tocNodes: tocNodes,
       activeNode: tocNodes.length > 0 ? tocNodes[0].id : null

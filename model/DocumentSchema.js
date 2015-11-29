@@ -47,7 +47,7 @@ DocumentSchema.Prototype = function() {
     produces a new node of the type returned here. Abstract method, which must be implemented.
 
     @abstract
-    @return {String} default text type (e.g. 'paragraph')
+    @returns {String} default text type (e.g. 'paragraph')
   */
 
   this.getDefaultTextType = function() {
