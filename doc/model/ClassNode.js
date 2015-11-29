@@ -31,7 +31,8 @@ ClassNode.Prototype = function() {
     return MEMBER_CATEGORIES;
   };
 
-  var INHERITED = ['instance-methods', 'instance-properties', 'class-methods', 'class-properties'];
+  // var INHERITED = ['instance-methods', 'instance-properties', 'class-methods', 'class-properties'];
+  var INHERITED = ['instance-methods', 'instance-properties'];
 
   this.getInheritedMembers = function(config) {
     var inheritedMembers = {};
