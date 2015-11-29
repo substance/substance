@@ -8,6 +8,7 @@ var converter = {
   toHtml: function(text) {
     var parsed = reader.parse(text);
     highlightCodeblocks(parsed);
+    makeLinksExternal(parsed);
     convertCodeLinks(parsed);
     return writer.render(parsed);
   }
@@ -39,6 +40,25 @@ function highlightCodeblocks(parsed) {
   }
 }
 
+function makeLinksExternal(parsed) {
+  var walker = parsed.walker();
+  var event, node;
+  while ((event = walker.next())) {
+    node = event.node;
+    if (event.entering && node.type === 'Link') {
+      var href = node.destination;
+      var text = href;
+      if (node.firstChild) {
+        text = node.firstChild.literal;
+      }
+      var el = new commonmark.Node('Html');
+      el.literal = ['<a href="', href, '" target="_blank">', text, '</a>'].join('');
+      node.insertBefore(el);
+      node.unlink();
+    }
+  }
+}
+
 function convertCodeLinks(parsed) {
   var walker = parsed.walker();
   var event, node;
@@ -65,7 +85,7 @@ function convertCodeLinks(parsed) {
         var pre = new commonmark.Node('Text', sourceposPre);
         pre.literal = node.literal.slice(0, match.index);
         var link = new commonmark.Node('Html', sourceposLink);
-        link.literal = ['<a href="#'+id+'" data-type="cross-link" data-node-id="'+id+'">', id,'</a>'].join('');
+        link.literal = ['<a href="#nodeId='+id+'" data-type="cross-link" data-node-id="'+id+'">', id,'</a>'].join('');
         var post = new commonmark.Node('Text', sourceposPost);
         post.literal = node.literal.slice(match.index+match[0].length);
         node.insertBefore(pre);
