@@ -100,7 +100,7 @@ ContentPanel.Prototype = function() {
       top: (scanline - scrollTop)+'px'
     });
   
-    var tocNodes = doc.getTOCNodes();
+    var tocNodes = doc.getTOCNodes(this.context.config);
     if (tocNodes.length === 0) return;
 
     // Use first heading as default

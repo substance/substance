@@ -63,7 +63,8 @@ TOCPanel.Prototype = function() {
       tocEntries.append(tocEntry);
     }, this);
 
-    var el = $$('div').addClass('sc-toc').append(
+
+    var el = $$('div').addClass('sc-toc-panel').append(
       $$(Panel).ref('panelEl').append(
         tocEntries
       )
@@ -102,7 +103,7 @@ TOCPanel.Prototype = function() {
     }
     if (needsUpdate) {
       return this.setState({
-       tocNodes: doc.getTOCNodes()
+       tocNodes: doc.getTOCNodes(this.context.config)
       });
     }
   };

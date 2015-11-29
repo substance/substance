@@ -57,7 +57,6 @@ Documentation.Prototype = function() {
   };
 };
 
-
 Document.extend(Documentation);
 Documentation.schema = schema;
 
