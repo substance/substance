@@ -66,7 +66,7 @@ function collectNodes(config) {
   meta.sha = out.toString().trim();
   nodes[meta.id] = meta;
 
-  _enhanceParams(nodes);
+  _enhanceTypes(nodes);
 
   return nodes;
 }
@@ -108,24 +108,32 @@ var _builtins = {
   'null': true, 'undefined': true
 };
 
-function _enhanceParams(nodes) {
+function _enhanceTypes(nodes) {
   each(nodes, function(node) {
     if (node.params) {
       each(node.params, _enhanceParam.bind(null, nodes, node));
+    }
+    if (node.superClass) {
+      node.superClass = _enhancedType(nodes, node, node.superClass);
     }
   });
 }
 
 function _enhanceParam(nodes, node, param) {
-  var type = param.type;
+  param.type = _enhancedType(nodes, node, param.type);
+}
+
+function _enhancedType(nodes, node, type) {
   if (_builtins[type] || nodes[type]) {
-    return;
+    return type;
   }
   // if the type is not absolute trying to reolve
   // the type within the same namespace
   var nsScopedType = node.ns + "/" + type;
   if (nodes[nsScopedType]) {
-    param.type = nsScopedType;
+    return nsScopedType;
+  } else {
+    return type;
   }
 }
 
