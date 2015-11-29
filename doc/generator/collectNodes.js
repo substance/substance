@@ -106,7 +106,7 @@ var _builtins = {
   'Object': true, 'Array': true, 'String': true,
   'Number': true, 'Boolean': true,
   'null': true, 'undefined': true,
-  'this': true
+  'this': true, 'any': true
 };
 
 function _enhanceTypes(nodes) {

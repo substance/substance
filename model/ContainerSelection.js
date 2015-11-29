@@ -9,9 +9,11 @@ var Range = require('./Range');
 var Coordinate = require('./Coordinate');
 
 /**
-  A selection spanning multiple nodes. Implements {@link model/Selection}.
+  A selection spanning multiple nodes.
 
   @class
+  @extends PropertySelection
+
   @example
 
   ```js
@@ -32,18 +34,22 @@ function ContainerSelection(properties) {
   */
   var containerId = properties.containerId;
   /**
+    The path of the property where this annotations starts.
     @type {String[]}
   */
   var startPath = properties.startPath;
   /**
+    The path of the property where this annotations ends.
     @type {String[]}
   */
   var endPath = properties.endPath || properties.startPath;
   /**
+    The character position where this annotations starts.
     @type {Number}
   */
   var startOffset = properties.startOffset;
   /**
+    The character position where this annotations ends.
     @type {Number}
   */
   var endOffset = properties.endOffset || properties.startOffset;
@@ -64,11 +70,6 @@ function ContainerSelection(properties) {
 
 ContainerSelection.Prototype = function() {
 
-  /**
-    Convert container selection to JSON.
-
-    @returns {Object}
-  */
   this.toJSON = function() {
     return {
       type: 'container',
@@ -81,12 +82,6 @@ ContainerSelection.Prototype = function() {
     };
   };
 
-  /**
-    Attach document to selection.
-
-    @param {Document} doc document to attach
-    @returns {Selection}
-  */
   this.attach = function(doc) {
     this._internal.doc = doc;
     return this;
@@ -103,22 +98,14 @@ ContainerSelection.Prototype = function() {
   this.toString = function() {
     return "ContainerSelection("+ JSON.stringify(this.range.start.path) + ":" + this.range.start.offset + " -> " +  JSON.stringify(this.range.end.path) + ":" + this.range.end.offset + (this.reverse ? ", reverse" : "") + ")";
   };
- 
-  /**
-    Return the currently used container.
 
-    @return {Document.Container}
+  /**
+    @return {model/Container} The container node instance for this selection.
   */
   this.getContainer = function() {
     return this.getDocument().get(this.containerId);
   };
 
-  /**
-    Expands this selection to include another selection.
-
-    @param {Selection} other
-    @returns {Selection} a new selection
-  */
   this.expand = function(other) {
     var c1 = this._coordinates(this);
     var c2 = this._coordinates(other);
@@ -149,12 +136,6 @@ ContainerSelection.Prototype = function() {
     return _createNewSelection(this, newCoors);
   };
 
-  /**
-    Creates a new selection by truncating this one by another selection.
-
-    @param {Selection} other
-    @returns {Selection} a new selection
-  */
   this.truncate = function(other) {
     var c1 = this._coordinates(this);
     var c2 = this._coordinates(other);
@@ -182,13 +163,6 @@ ContainerSelection.Prototype = function() {
     return _createNewSelection(this, newCoors);
   };
 
-  /**
-    Checks if this selection is inside another one.
-
-    @param {Selection} other
-    @param {Boolean} [strict] true if should check that it is strictly inside the other
-    @returns {Boolean}
-  */
   this.isInsideOf = function(other, strict) {
     if (other.isNull()) return false;
     var c1 = this._coordinates(this);
@@ -196,12 +170,6 @@ ContainerSelection.Prototype = function() {
     return (_isBefore(c2.start, c1.start, strict) && _isBefore(c1.end, c2.end, strict));
   };
 
-  /**
-    Checks if this selection contains another one.
-
-    @param {Selection} other
-    @returns {Boolean}
-  */
   this.contains = function(other) {
     var c1 = this._coordinates(this);
     var c2 = this._coordinates(other);
@@ -211,6 +179,7 @@ ContainerSelection.Prototype = function() {
   /**
     Checks if this selection contains another but has at least one boundary in common.
 
+    @private
     @param {Selection} other
     @returns {Boolean}
   */
@@ -224,12 +193,6 @@ ContainerSelection.Prototype = function() {
     );
   };
 
-  /**
-    Checks if this selection overlaps another one.
-
-    @param {Selection} other
-    @returns {Boolean}
-  */
   this.overlaps = function(other) {
     var c1 = this._coordinates(this);
     var c2 = this._coordinates(other);
@@ -237,24 +200,12 @@ ContainerSelection.Prototype = function() {
     return !(_isBefore(c1.end, c2.start) || _isBefore(c2.end, c1.start));
   };
 
-  /**
-    Checks if this selection has the left boundary in common with another one.
-
-    @param {Selection} other
-    @returns {Boolean}
-  */
   this.isLeftAlignedWith = function(other) {
     var c1 = this._coordinates(this);
     var c2 = this._coordinates(other);
     return _isEqual(c1.start, c2.start);
   };
 
-  /**
-    Checks if this selection has the right boundary in common with another one.
-
-    @param {Selection} other
-    @returns {Boolean}
-  */
   this.isRightAlignedWith = function(other) {
     var c1 = this._coordinates(this);
     var c2 = this._coordinates(other);
@@ -296,9 +247,7 @@ ContainerSelection.Prototype = function() {
   };
 
   /**
-    Return fragments each corresponding to a property selection of splitted container selection.
-
-    @returns {Selection.Fragment[]}
+    @returns {Selection.Fragment[]} Fragments resulting from splitting this into property selections.
   */
   this.getFragments = function() {
     // TODO: document what this is exactly used for
@@ -388,12 +337,18 @@ Object.defineProperties(ContainerSelection.prototype, {
     },
     set: function() { throw new Error('immutable.'); }
   },
+  /**
+    @property {String[]} ContainerSelection.prototype.startPath
+  */
   startPath: {
     get: function() {
       return this.range.start.path;
     },
     set: function() { throw new Error('immutable.'); }
   },
+  /**
+    @property {String[]} ContainerSelection.prototype.endPath
+  */
   endPath: {
     get: function() {
       return this.range.end.path;

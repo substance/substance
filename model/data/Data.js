@@ -167,7 +167,7 @@ Data.Prototype = function() {
 
     @deprecated
 
-   */
+  */
   this.update = function(path, diff) {
     // TODO: do we really want this incremental implementation here?
     var oldValue = this.nodes.get(path);
