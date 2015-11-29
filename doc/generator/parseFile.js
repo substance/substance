@@ -492,10 +492,12 @@ _Parser.Prototype = function() {
   this._parseTagTypes = function(str, tag) {
     if (/\{[^{]+\}/.exec(str)) {
       str = str.replace(/\//g, '_SEP_');
+      str = str.replace(/\[\]/g, '_ARR_');
       try {
         var types = dox_parseTagTypes(str, tag);
         for (var i = 0; i < types.length; i++) {
           types[i] = types[i].replace(/_SEP_/g, '/');
+          types[i] = types[i].replace(/_ARR_/g, '[]');
         }
       } catch (err) {
         throw new Error('Could not parse jsdoc expression found in ' + this.file + "\n" + err.message);

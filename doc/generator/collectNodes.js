@@ -105,7 +105,8 @@ function _loadDoc(mdFile) {
 var _builtins = {
   'Object': true, 'Array': true, 'String': true,
   'Number': true, 'Boolean': true,
-  'null': true, 'undefined': true
+  'null': true, 'undefined': true,
+  'this': true
 };
 
 function _enhanceTypes(nodes) {
