@@ -305,6 +305,9 @@ _Parser.Prototype = function() {
     node.sourceFile = self.file;
     node.sourceLine = entity.sourceLine;
     node.tags = entity.tags;
+    if (entity.isPrivate) {
+      node.isPrivate = true;
+    }
     if (entity.description.full) {
       node.description = entity.description.full;
     }

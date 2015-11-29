@@ -21,7 +21,7 @@ var MemberContainerMixin = {
     var members = memberIndex.get([this.id].concat(cat.path));
     members = filter(members, function(memberNode) {
       // skip nodes according to configuration
-      if ((memberNode.type === "method" && memberNode.isPrivate && config.skipPrivateMethods) ||
+      if ((memberNode.isPrivate && config.skipPrivateMethods) ||
         (memberNode.type === "class" && memberNode.isAbstract && config.skipAbstractClasses)) {
         return false;
       }
