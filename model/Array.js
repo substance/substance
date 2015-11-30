@@ -31,13 +31,14 @@ ArrayUpdater.Prototype = function() {
     ```
   */
   this.insert = function(tx, path, offset, value) {
+    var oldValue = tx.nodes.get(path);
     if (isArray(oldValue)) {
-      var diff = { insert: { offset: offset, value: value } }
+      var diff = { insert: { offset: offset, value: value } };
       return tx.update(path, diff);
     } else {
-      throw new Error('Value type is not supported:', JSON.stringify(value));
+      throw new Error('Value type is not supported:', JSON.stringify(oldValue));
     }
-  }
+  };
 
   /**
     Delete a value from an array
@@ -55,13 +56,14 @@ ArrayUpdater.Prototype = function() {
     ```
   */
   this.delete = function(tx, path, offset) {
+    var oldValue = tx.nodes.get(path);
     if (isArray(oldValue)) {
-      var diff = { delete: { offset: offset } }
+      var diff = { delete: { offset: offset } };
       return tx.update(path, diff);
     } else {
-      throw new Error('Value type is not supported:', JSON.stringify(value));
+      throw new Error('Value type is not supported:', JSON.stringify(oldValue));
     }
-  }
+  };
 };
 
 module.exports = ArrayUpdater;
