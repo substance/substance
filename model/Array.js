@@ -2,12 +2,34 @@
 
 var isArray = require('lodash/lang/isArray');
 
+/**
+  Array incremental updates API.
+
+  @class
+ */
+
 function ArrayUpdater() {
   ArrayUpdater.super.apply(this, arguments);
 }
 
 ArrayUpdater.Prototype = function() {
 
+  /**
+    Insert value to an array
+
+    @param {model/TransactionDocument} tx the document instance
+    @param {Array} path path to property
+    @param {Number} offset position in array
+    @param {any} value value to insert
+
+    @example
+
+    ```js
+      var Arr = require('substance/model/Array')
+      
+      Arr.insert(tx, ['body', 'nodes'], 3, 'p1');
+    ```
+  */
   this.insert = function(tx, path, offset, value) {
     if (isArray(oldValue)) {
       var diff = { insert: { offset: offset, value: value } }
@@ -17,6 +39,21 @@ ArrayUpdater.Prototype = function() {
     }
   }
 
+  /**
+    Delete value from an array
+
+    @param {model/TransactionDocument} tx the document instance
+    @param {Array} path path to property
+    @param {Number} offset position in array
+
+    @example
+
+    ```js
+      var Arr = require('substance/model/Array')
+      
+      Arr.delete(tx, ['body', 'nodes'], 3);
+    ```
+  */
   this.delete = function(tx, path, offset) {
     if (isArray(oldValue)) {
       var diff = { delete: { offset: offset } }
