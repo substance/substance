@@ -2,6 +2,7 @@
 
 require('../qunit_extensions');
 var cloneDeep = require('lodash/lang/cloneDeep');
+var documentHelpers = require('../../../model/documentHelpers');
 var sample = require('../../fixtures/container_sample');
 var sample1 = require('../../fixtures/sample1');
 var documentHelpers = require('../../../model/documentHelpers');

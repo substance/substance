@@ -1,10 +1,12 @@
 'use strict';
 
+/* jshint latedef:nofunc */
+
 var $ = require('../util/jquery');
 var isFunction = require('lodash/lang/isFunction');
 var isString = require('lodash/lang/isString');
+var isFunction = require('lodash/lang/isFunction');
 var isEqual = require('lodash/lang/isEqual');
-var clone = require('lodash/lang/clone');
 var extend = require('lodash/object/extend');
 var each = require('lodash/collection/each');
 var I18n = require('./i18n');
@@ -89,7 +91,7 @@ function Component(parent, params) {
   this.refs = {};
   // TODO: This is maybe not a good idea. If we want to do it, we could allow
   // ref (without the underscore) being passed but remove it from the params
-  // afterwards so we don't pullute the props.
+  // afterwards so we don't pollute the props.
   this._ref = params._ref;
 
   this.parent = parent;
@@ -214,7 +216,10 @@ Component.Prototype = function ComponentPrototype() {
    * Call this to manually trigger a rerender.
    */
   this.rerender = function() {
-    this._render(this.render());
+    _pushOwner(this);
+    var virtualEl = this.render();
+    _popOwner();
+    this._render(virtualEl);
   };
 
   /**
@@ -737,9 +742,7 @@ Component.Prototype = function ComponentPrototype() {
     if (isString(child)) {
       child = new VirtualTextNode(child);
     }
-    var comp = this._compileComponent(child, {
-      refs: this.refs
-    });
+    var comp = this._compileComponent(child);
     this._data.append(child);
     this.$el.append(comp.$el);
     this.children.push(comp);
@@ -753,9 +756,7 @@ Component.Prototype = function ComponentPrototype() {
    * Part of the incremental updating API.
    */
   this.insertAt = function(pos, child) {
-    var comp = this._compileComponent(child, {
-      refs: this.refs
-    });
+    var comp = this._compileComponent(child);
     this._data.insertAt(pos, child);
     if (pos > this.children.length-1) {
       this.$el.append(comp.$el);
@@ -921,7 +922,7 @@ Component.Prototype = function ComponentPrototype() {
 
     // when during the last render there where no 'keys'
     // then we can just wipe and rerender
-    if (this._no_refs_) {
+    if (Object.keys(this.refs).length === 0) {
       this._renderFromScratch(data, scope);
       return;
     }
@@ -1081,7 +1082,12 @@ Component.Prototype = function ComponentPrototype() {
         pos++; oldPos++; newPos++;
       }
       if (comp._ref) {
-        scope.refs[comp._ref] = comp;
+        var _data = comp._data;
+        if (_data._owner) {
+          _data._owner.refs[comp._ref] = comp;
+        } else {
+          console.warn('FIXME: owner is unknown.');
+        }
       }
       if (comp._isOnRoute) {
         // TODO: probably this raises false alarms.
@@ -1093,14 +1099,8 @@ Component.Prototype = function ComponentPrototype() {
       children.push(comp);
     }
 
-    if (Object.keys(scope.refs).length > 0) {
-      delete this._no_refs_;
-    } else {
-      this._no_refs_ = true;
-    }
-
     this.children = children;
-    this.refs = clone(scope.refs);
+    // this.refs = clone(scope.refs);
     this._data = data;
 
     this.didRender();
@@ -1128,12 +1128,7 @@ Component.Prototype = function ComponentPrototype() {
         comp.triggerDidMount(isMounted);
       }
     }
-    if (Object.keys(scope.refs).length > 0) {
-      delete this._no_refs_;
-    } else {
-      this._no_refs_ = true;
-    }
-    this.refs = scope.refs;
+    // this.refs = scope.refs;
     this.children = children;
     this._data = data;
 
@@ -1261,10 +1256,40 @@ Component.Text.Prototype = function() {
 };
 Component.extend(Component.Text);
 
-Component.createElement = VirtualDOMElement.createElement;
+/*
+Note: Component.createElement() should be used from within a Component#render()
+      only.
+
+      This is important to be able to implement refs and handlers correctly.
+      Both, are bound to the owner, which is the Component instance of the last
+      entered render method.
+*/
+
+var _currentOwner = null;
+var _ownerStack = [];
+
+function _pushOwner(owner) {
+  _currentOwner = owner;
+  _ownerStack.push(owner);
+}
+
+function _popOwner() {
+  _currentOwner = _ownerStack.pop();
+}
+
+Component.createElement = function() {
+  if (!_currentOwner) {
+    throw new Error('Component.createElement can not be used outside of the Component rendering lifecycle.');
+  }
+  var el = VirtualDOMElement.createElement.apply(null, arguments);
+  el._owner = _currentOwner;
+  return el;
+};
+
+// only for legacy
 Component.$$ = Component.createElement;
 
-/**
+/*
   Internal implementation, rendering a virtual component
   created using the $$ operator.
 
@@ -1291,15 +1316,10 @@ Component._render = function(data, options) {
       break;
     case 'component':
       component = new data.ComponentClass(parent, data);
-      // TODO: we have a problem here: basically this is the place
-      // where we descend into a child component implementation.
-      // The component's render implementation would expect e.g. that handlers are
-      // bound to it, and also refs created within that component.
-      // However, it is also possible to provide children via append,
-      // in the parent component's render method. Those handlers should be bound
-      // to the parent. The same for refs.
-      // To solve this, $$ would need to be contextified, which is quite ugly to achieve.
-      component._render(component.render());
+      _pushOwner(component);
+      var virtualEl = component.render();
+      _popOwner();
+      component._render(virtualEl);
       break;
     case 'html':
       // DON'T mix $$.html() with $$.append()
@@ -1308,7 +1328,12 @@ Component._render = function(data, options) {
       throw new Error('Unsupported component type: ' + data.type);
   }
   if (data._ref) {
-    scope.refs[data._ref] = component;
+    if (data._owner) {
+      data._owner.refs[data._ref] = component;
+    } else {
+      console.warn('FIXME: owner is unknown.');
+    }
+    // scope.refs[data._ref] = component;
   }
   if (data._isOnRoute) {
     // TODO: probably I have to make sure that the route cleared before
@@ -1322,33 +1347,97 @@ Component._render = function(data, options) {
 };
 
 /**
+  @param {Class|Function} ComponentClass a Component class or a render function
+  @param {Object} [props]
+  @returns {Component}
+
+  @example
+
+  Creating an instace of a Component:
+
+  ```
+  var comp = Component.render(MyComponent)
+  ```
+
+  Creating an anonymous Component class via a render function.
+  This is used mostly internally, e.g., in the test suite.
+
+  ```
+  var comp = Component.render(function() {
+    return $$('div').append('foo')
+  })
+  ```
+*/
+Component.render = function(component, props) {
+  props = props || {};
+  if (isFunction(component)) {
+    var ComponentClass = component;
+    if (!(ComponentClass.prototype instanceof Component)) {
+      ComponentClass = function AnonymousComponent() {
+        Component.apply(this, arguments);
+      };
+      Component.extend(ComponentClass, {
+       render : component
+      });
+    }
+    component = new ComponentClass("root", { props: props });
+    _pushOwner(component);
+    var virtualEl = component.render();
+    _popOwner();
+    component._render(virtualEl);
+  } else {
+    throw new Error('Unsupported arguments for Component.render');
+  }
+  return component;
+};
+
+/**
   Mount a component onto a given DOM or jquery element.
 
   Mounting a component means, that the component gets rendered
   and then appended to the given element.
   If the element is in the DOM, all components receive a 'didMount' event.
 
-  @param {Component|VirtualComponent} component to be mounted
+  @param {Class} component Component Class to be mounted
+  @param {Object} [props] props for the component
   @param el a DOM or jQuery element
   @return {Component} the mounted component
 
   @example
 
+  Mounting a component via Component class and providing props.
+
   ```
-  Component.mount($$(MyComponent), $('body'));
+  Component.mount(MyComponent, { foo: "foo" }, $('body'));
+  ```
+
+  Creating a component using `Component.render()` and mounting later:
+
+  ```
+  var comp = Component.render(MyComponent);
+  comp.addClass('foo');
+  Component.mount(comp, $('body'));
+  ```
+
 */
-Component.mount = function(component, el) {
+Component.mount = function(component, props, el) {
+  if (arguments.length === 2) {
+    el = arguments[1];
+    props = {};
+  }
   if (component instanceof Component) {
-    component._render(component.render());
+    // nothing to do
   } else if (component instanceof VirtualDOMElement) {
+    // mounting a virtual element is not recommended
+    // because we can't support 'refs' without having a 'render()' context
+    console.warn('DEPRECATED: use Component.mount(MyComponent, {...}, el) instead.');
     component = Component._render(component);
-  } else if (component instanceof Component) {
-    component._render(component.render());
+  } else if (arguments[0].prototype instanceof Component) {
+    component = Component.render(component, props);
   } else {
     throw new Error('component must be of type Component or VirtualComponent');
   }
   if (!el) throw new Error('An element is needed for mounting.');
-
   $(el).append(component.$el);
   component.triggerDidMount();
   return component;

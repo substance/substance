@@ -152,7 +152,7 @@ QUnit.uiTest("Copying a container selection", function(assert) {
 
 function _containerEditorSample() {
   var doc = simple();
-  var app = Component.mount($$(TestContainerEditor, {
+  var app = Component.mount(TestContainerEditor, {
     doc: doc,
     config: {
       controller: {
@@ -160,7 +160,7 @@ function _containerEditorSample() {
         commands: [],
       }
     }
-  }), $('#qunit-fixture'));
+  }, $('#qunit-fixture'));
   var editor = app.refs.editor;
   var sel = doc.createSelection({
     type: 'property',
