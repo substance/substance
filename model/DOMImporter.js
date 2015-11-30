@@ -55,7 +55,6 @@ function DOMImporter(config) {
     }
     var NodeClass = schema.getNodeClass(converter.type);
     if (!NodeClass) {
-      console.warn('No node type registered for name', converter.type);
       return;
     }
     if (defaultTextType === converter.type) {
