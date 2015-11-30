@@ -11,12 +11,7 @@ ArrayUpdater.Prototype = function() {
   this.insert = function(tx, path, offset, value) {
     if (isArray(oldValue)) {
       var diff = { insert: { offset: offset, value: value } }
-      var op = tx.data.update(path, diff);
-      if (!op) return;
-      if (tx.document.isTransacting) {
-        tx.ops.push(op);
-      }
-      return op;
+      return tx.update(path, diff);
     } else {
       throw new Error('Value type is not supported:', JSON.stringify(value));
     }
@@ -25,12 +20,7 @@ ArrayUpdater.Prototype = function() {
   this.delete = function(tx, path, offset) {
     if (isArray(oldValue)) {
       var diff = { delete: { offset: offset } }
-      var op = tx.data.update(path, diff);
-      if (!op) return;
-      if (tx.document.isTransacting) {
-        tx.ops.push(op);
-      }
-      return op;
+      return tx.update(path, diff);
     } else {
       throw new Error('Value type is not supported:', JSON.stringify(value));
     }
