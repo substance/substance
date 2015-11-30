@@ -15,7 +15,7 @@ function ArrayUpdater() {
 ArrayUpdater.Prototype = function() {
 
   /**
-    Insert value to an array
+    Insert a value into an array
 
     @param {model/TransactionDocument} tx the document instance
     @param {Array} path path to property
@@ -40,7 +40,7 @@ ArrayUpdater.Prototype = function() {
   }
 
   /**
-    Delete value from an array
+    Delete a value from an array
 
     @param {model/TransactionDocument} tx the document instance
     @param {Array} path path to property
