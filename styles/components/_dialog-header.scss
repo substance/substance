@@ -1,0 +1,41 @@
+.sc-dialog-header {
+  background: #F8F8F8;
+  position: absolute;
+  top: 0px;
+  left: 0px;
+  right: 0px;
+  overflow: hidden;
+  height: 40px;
+  border-bottom: 1px solid #ddd;
+
+  .se-back {
+    padding-left: 20px;
+    display: block;
+    float: left;
+    line-height: 40px;
+    font-size: 16px;
+  }
+
+  .se-label {
+    padding: 0px 20px;
+    font-size: 14px;
+    font-weight: 600;
+    line-height: 39px;
+    float: left;
+  }
+
+  .se-actions {
+    overflow: hidden;
+    float: right;
+
+    a {
+      display: block;
+      float: left;
+      font-weight: 600;
+      padding: 0px 4px;
+      font-size: 12px;
+      line-height: 40px;
+      margin-right: 20px;
+    }
+  }
+}
