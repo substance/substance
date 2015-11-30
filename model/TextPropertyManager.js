@@ -62,7 +62,7 @@ TextPropertyManager.Prototype = function() {
   };
 
   this.renderSelection = function(sel) {
-    if (!sel) {
+    if (!sel || sel.isNull()) {
       this.removeSelection();
       return;
     }
