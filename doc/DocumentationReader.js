@@ -60,8 +60,9 @@ var DocumentationReader = DocumentationController.extend({
           .addClass('se-resource')
           .append(
             $$(ContextSection, {
+              panelProps: this._panelPropsFromState(),
+              contextId: this.state.contextId,
               panelConfig: config.panels[this.state.contextId],
-              contextId: this.state.contextId
             }).ref(this.state.contextId)
           )
       )

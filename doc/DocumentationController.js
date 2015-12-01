@@ -4,6 +4,7 @@ var _ = require('../util/helpers');
 var extend = require('lodash/object/extend');
 var Controller = require("../ui/Controller");
 var Router = require('../ui/Router');
+var omit = require('lodash/object/omit');
 
 // Substance is i18n ready, but by now we did not need it
 // Thus, we configure I18n statically as opposed to loading
@@ -30,6 +31,12 @@ function DocumentationController(parent, params) {
 DocumentationController.Prototype = function() {
 
   var _super = DocumentationController.super.prototype;
+
+  this._panelPropsFromState = function() {
+    var props = omit(this.state, 'contextId');
+    props.doc = this.getDocument();
+    return props;
+  };
 
   this.setState = function(newState) {
     if (!newState.contextId) {
