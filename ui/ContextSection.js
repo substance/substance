@@ -1,6 +1,7 @@
 'use strict';
 
-var _ = require('../util/helpers');
+var extend = require('lodash/object/extend');
+var omit = require('lodash/object/omit');
 var Component = require('./Component');
 var $$ = Component.$$;
 var ContextToggles = require('./ContextToggles');
@@ -12,9 +13,21 @@ function ContextSection() {
 ContextSection.Prototype = function() {
 
   this._propsFromParentState = function() {
+    /*
+     This is implementation is wrong as it violates a basic principle.
+     A component is rerendered, when its state or props have changed.
+
+     Deriving props for children from the parent state is seriously a bad practice.
+     As stated in #311, it raises the expectation, that rerendering occurs
+     just because the parent state has changed.
+
+     On such premises, it is not possible to implement an efficient reactive
+     rendering engine, as there is no way to tell, when to bound descending.
+     Moreover a parent component could cut off this component by deciding
+     that shouldRerender = false.
+    */
     var parentState = this.context.controller.state;
-    var props = _.omit(parentState, 'contextId');
-    props.doc = this.context.controller.getDocument();
+    var props = omit(parentState, 'contextId');
     return props;
   };
 
@@ -23,6 +36,7 @@ ContextSection.Prototype = function() {
     var contextId = this.props.contextId;
     var panelConfig = this.props.panelConfig;
     var PanelComponentClass = componentRegistry.get(contextId);
+    var doc = this.context.controller.getDocument();
 
     var el = $$('div').addClass('sc-context-section');
 
@@ -35,9 +49,11 @@ ContextSection.Prototype = function() {
     }
 
     // Add context panel
-    var props = this._propsFromParentState();
     el.append(
-      $$(PanelComponentClass, props).addClass('se-context-panel').ref(contextId)
+      // forwarding all props from above adding doc as a prop
+      $$(PanelComponentClass, extend({
+        doc: doc
+      }, this.props)).addClass('se-context-panel').ref(contextId)
     );
     return el;
   };
