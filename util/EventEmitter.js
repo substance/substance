@@ -1,10 +1,13 @@
 'use strict';
 
 var oo = require("./oo");
+var each = require('lodash/collection/each');
+
+var DEBUG = false;
 
 /**
   Event support.
- 
+
   @class
   @private
 */
@@ -149,12 +152,18 @@ EventEmitter.Prototype = function() {
    * @return true if a listener was notified, false otherwise.
    */
   this.emit = function (event) {
-    if ( event in this.__events__ ) {
+    if (event in this.__events__) {
+      if (DEBUG) {
+        console.log("Emitting event %s on %s", event, this);
+      }
       // Clone the list of bindings so that handlers can remove or add handlers during the call.
       var bindings = this.__events__[event].slice();
       var args = Array.prototype.slice.call(arguments, 1);
       for (var i = 0, len = bindings.length; i < len; i++) {
         var binding = bindings[i];
+        if (DEBUG) {
+          console.log("- triggering %s", binding.context.constructor.name);
+        }
         binding.method.apply(binding.context, args);
       }
       return true;
@@ -230,6 +239,13 @@ EventEmitter.Prototype = function() {
     // emitter.off('event', this)
     // i.e., without need to specify the handler again
     return this._off.apply(this, arguments);
+  };
+
+  this._debugEvents = function() {
+    console.log('### EventEmitter: ', this);
+    each(this.__events__, function(handlers, name) {
+      console.log("- %s listeners for %s: ", handlers.length, name, handlers);
+    }, this);
   };
 };
 
