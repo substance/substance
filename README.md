@@ -39,7 +39,7 @@ Blockquote                                                                  | �
 Codeblock                                                                   | ✓
 Imgage                                                                      | ✓
 Embed (image, video, tweet etc.)                                            | ✓
-List                                                                        | ✓
+List                                                                        | Beta 3
 Table                                                                       | Beta 3
 Figure (including upload)                                                   | Beta 4
                                                                             |
