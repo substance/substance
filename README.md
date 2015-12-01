@@ -93,7 +93,7 @@ $ npm run doc
 
 ### Beta 3
 
-*ETA: January 2015*
+*ETA: January 2016*
 
 - Automatically generated performance report
 - Table node
