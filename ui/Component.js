@@ -902,11 +902,11 @@ Component.Prototype = function ComponentPrototype() {
     var oldContent = oldData._children;
     var newContent = data._children;
 
-    // FIXME: this optimization caused issue 312
-    // if (isEqual(oldContent, newContent)) {
-    //   this._data = data;
-    //   return;
-    // }
+    // FIXME: this optimization is causing issue 311
+    if (isEqual(oldContent, newContent)) {
+      this._data = data;
+      return;
+    }
 
     var oldComps = _indexByRef(oldData._children, "old");
     var newComps = _indexByRef(data._children);
