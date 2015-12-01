@@ -1,7 +1,6 @@
 var Documentation = require('./model/Documentation');
 var Component = require('../ui/Component');
 var DocumentationReader = require('./DocumentationReader');
-var $$ = Component.$$;
 var $ = require('../util/jquery');
 var _ = require('../util/helpers');
 var importDocumentation = require('./model/importDocumentation');
@@ -20,8 +19,8 @@ $(function() {
   var doc = new Documentation();
   window.doc = doc;
   _loadDocument(function(err, doc) {
-    Component.mount($$(DocumentationReader, {
+    Component.mount(DocumentationReader, {
       doc: doc
-    }), $('body'));
+    }, $('body'));
   });
 });
