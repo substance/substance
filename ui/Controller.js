@@ -520,17 +520,6 @@ Controller.Prototype = function() {
   };
 };
 
-/**
-  Controller static method. This is just to test documentation
-
-  @param {String} a a string
-  @param {String} b another string
-  @static
-  @return {String} The result of the static method
-*/
-Controller.concatStrings = function(a, b) {
-  return a.concat(b);
-};
 
 /**
   Emitted after a command has been executed. Since we did not allow command
