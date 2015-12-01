@@ -1,6 +1,5 @@
 'use strict';
 
-var extend = require('lodash/object/extend');
 var Component = require('./Component');
 var $$ = Component.$$;
 var ContextToggles = require('./ContextToggles');
@@ -16,7 +15,6 @@ ContextSection.Prototype = function() {
     var contextId = this.props.contextId;
     var panelConfig = this.props.panelConfig;
     var PanelComponentClass = componentRegistry.get(contextId);
-    var doc = this.context.controller.getDocument();
     var el = $$('div').addClass('sc-context-section');
 
     // Only render context toggles when we are dealing with a dialog
