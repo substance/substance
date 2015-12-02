@@ -10,12 +10,24 @@ var expandAnnotation = require('../model/transform/expandAnnotation');
 var truncateAnnotation = require('../model/transform/truncateAnnotation');
 var deleteAnnotation = require('../model/transform/deleteAnnotation');
 
+/**
+  A class for commands intended to be executed on the annotations.
+
+  @class
+  @extends ui/Command
+ */
+
 var AnnotationCommand = function(surface) {
   SurfaceCommand.call(this, surface);
 };
 
 AnnotationCommand.Prototype = function() {
 
+  /**
+    Get the type of an annotation.
+   
+    @returns {String} The Annotation's type.
+   */
   this.getAnnotationType = function() {
     if (this.constructor.static.annotationType) {
       return this.constructor.static.annotationType;
