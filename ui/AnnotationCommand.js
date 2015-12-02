@@ -12,9 +12,25 @@ var deleteAnnotation = require('../model/transform/deleteAnnotation');
 
 /**
   A class for commands intended to be executed on the annotations.
+  See the example below to learn how to define a custom `AnnotationCommand`.
 
   @class
-  @extends ui/Command
+  @extends ui/SurfaceCommand
+
+  @example
+
+  ```js
+  var AnnotationCommand = require('substance/ui/AnnotationCommand');
+  
+  function SmallCapsCommand() {
+    SmallCaps.super.apply(this, arguments);
+  }
+
+  var SmallCapsCommand = AnnotationCommand.extend();
+
+  SmallCapsCommand.static.name = 'smallcaps';
+  SmallCapsCommand.static.annotationType = 'smallcaps';
+  ```
  */
 
 var AnnotationCommand = function(surface) {
@@ -25,8 +41,8 @@ AnnotationCommand.Prototype = function() {
 
   /**
     Get the type of an annotation.
-   
-    @returns {String} The Annotation's type.
+    
+    @returns {String} The annotation's type.
    */
   this.getAnnotationType = function() {
     if (this.constructor.static.annotationType) {
@@ -36,10 +52,23 @@ AnnotationCommand.Prototype = function() {
     }
   };
 
+  /**
+    Get the annotation's data.
+   
+    @returns {Object} The annotation's data.
+   */
   this.getAnnotationData = function() {
     return {};
   };
 
+  /**
+    Checks if command couldn't be executed with current selection.
+
+    @param {Array} annos annotations
+    @param {Object} sel selection
+   
+    @returns {Boolean} Whether or not command could be executed.
+   */
   this.isDisabled = function(annos, sel) {
     // var surface = this.getSurface();
     // if ((!surface.isEnabled()) || sel.isNull()) {
@@ -60,16 +89,43 @@ AnnotationCommand.Prototype = function() {
     return false;
   };
 
+  /**
+    Checks if new annotations could be created.
+    There should be no annotation overlapping, selection must be not collapsed.
+
+    @param {Array} annos annotations
+    @param {Object} sel selection
+   
+    @returns {Boolean} Whether or not annotation could be created.
+   */
   // When there's no existing annotation overlapping, we create a new one.
   this.canCreate = function(annos, sel) {
     return (annos.length === 0 && !sel.isCollapsed());
   };
 
+  /**
+    Checks if annotations could be fused.
+    There should be more than one annotation overlaped by current selection.
+
+    @param {Array} annos annotations
+    @param {Object} sel selection
+   
+    @returns {Boolean} Whether or not annotations could be fused.
+   */
   // When more than one annotation overlaps with the current selection
   this.canFuse = function(annos, sel) {
     return (annos.length >= 2 && !sel.isCollapsed());
   };
 
+  /**
+    Checks if annotation could be deleted.
+    Cursor or selection must be inside an existing annotation.
+
+    @param {Array} annos annotations
+    @param {Object} sel selection
+   
+    @returns {Boolean} Whether or not annotation could be deleted.
+   */
   // When the cursor or selection is inside an existing annotation
   this.canDelete = function(annos, sel) {
     if (annos.length !== 1) return false;
@@ -77,6 +133,16 @@ AnnotationCommand.Prototype = function() {
     return sel.isInsideOf(annoSel);
   };
 
+  /**
+    Checks if annotation could be expanded.
+    There should be overlap with only a single annotation,
+    selection should be also outside of this annotation.
+
+    @param {Array} annos annotations
+    @param {Object} sel selection
+   
+    @returns {Boolean} Whether or not annotation could be expanded.
+   */
   // When there's some overlap with only a single annotation we do an expand
   this.canExpand = function(annos, sel) {
     if (annos.length !== 1) return false;
@@ -84,6 +150,16 @@ AnnotationCommand.Prototype = function() {
     return sel.overlaps(annoSel) && !sel.isInsideOf(annoSel);
   };
 
+  /**
+    Checks if annotation could be truncated.
+    There should be overlap with only a single annotation,
+    selection should also have boundary in common with this annotation.
+
+    @param {Array} annos annotations
+    @param {Object} sel selection
+   
+    @returns {Boolean} Whether or not annotation could be truncated.
+   */
   this.canTruncate = function(annos, sel) {
     if (annos.length !== 1) return false;
     var annoSel = annos[0].getSelection();
@@ -93,6 +169,11 @@ AnnotationCommand.Prototype = function() {
            !sel.isCollapsed();
   };
 
+  /**
+    Gets annotations for current selection.
+   
+    @returns {Array} annos Annotations.
+   */
   this.getAnnotationsForSelection = function() {
     var sel = this.getSelection();
     var doc = this.getDocument();
@@ -102,6 +183,11 @@ AnnotationCommand.Prototype = function() {
     return annos;
   };
 
+  /**
+    Execute command and trigger transformation.
+   
+    @returns {Object} info object with execution details.
+   */
   // Execute command and trigger transformations
   this.execute = function() {
     var annos = this.getAnnotationsForSelection();
@@ -127,6 +213,11 @@ AnnotationCommand.Prototype = function() {
     }
   };
 
+  /**
+    Gets command state object.
+   
+    @returns {Object} info object with command details.
+   */
   this.getCommandState = function() {
     var sel = this.getSelection();
     var annos = this.getAnnotationsForSelection();
@@ -164,6 +255,11 @@ AnnotationCommand.Prototype = function() {
     return newState;
   };
 
+  /**
+    Apply an annotation transformation.
+   
+    @returns {Object} transformed annotations.
+   */
   // Helper to trigger an annotation transformation
   this.applyTransform = function(transformFn) {
     var surface = this.getSurface();
