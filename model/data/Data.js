@@ -279,6 +279,11 @@ Data.Prototype = function() {
     return this.indexes[name];
   };
 
+  /**
+    Update a node index by providing of change object.
+
+    @param {Object} change
+   */
   this._updateIndexes = function(change) {
     if (!change || this.__QUEUE_INDEXING__) return;
     each(this.indexes, function(index) {
@@ -291,10 +296,16 @@ Data.Prototype = function() {
     });
   };
 
+  /**
+    Stops indexing process, all changes will be collected in indexing queue.
+  */
   this._stopIndexing = function() {
     this.__QUEUE_INDEXING__ = true;
   };
 
+  /**
+    Update all index changes from indexing queue.
+  */
   this._startIndexing = function() {
     this.__QUEUE_INDEXING__ = false;
     while(this.queue.length >0) {
