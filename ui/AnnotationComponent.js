@@ -16,7 +16,7 @@ var $$ = Component.$$;
   @example
 
   ```js
-  $$(TextProperty, { 
+  $$(AnnotationComponent, { 
     doc: doc, 
     node: node 
   })
