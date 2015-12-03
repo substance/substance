@@ -78,7 +78,12 @@ Surface.Prototype = function() {
     if (!this.isIE) {
       el.on('compositionstart', this.onCompositionStart);
     }
-    if (!this.isIE) {
+
+    // Note: TextEvent in Chrome/Webkit is the easiest for us
+    // as it contains the actual inserted string.
+    // Though, it is not available in FF and not working properly in IE
+    // where we fall back to a ContentEditable backed implementation.
+    if (window.TextEvent && !this.isIE) {
       el.on('textInput', this.onTextInput);
     } else {
       el.on('keypress', this.onTextInputShim);
