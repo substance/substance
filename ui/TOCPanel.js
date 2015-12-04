@@ -2,7 +2,7 @@
 
 var _ = require('../util/helpers');
 var Component = require('./Component');
-var Panel = require('./Panel');
+var ScrollPane = require('./ScrollPane');
 var $$ = Component.$$;
 var Icon = require('./FontAwesomeIcon');
 
@@ -63,9 +63,8 @@ TOCPanel.Prototype = function() {
       tocEntries.append(tocEntry);
     }, this);
 
-
     var el = $$('div').addClass('sc-toc-panel').append(
-      $$(Panel).ref('panelEl').append(
+      $$(ScrollPane).ref('panelEl').append(
         tocEntries
       )
     );

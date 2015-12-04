@@ -5,6 +5,7 @@ var Component = require('./Component');
 var $$ = Component.$$;
 
 function Panel() {
+  console.warn('DEPRECATED! Please use substance/ui/ScrollPane instead.');
   Component.apply(this, arguments);
 }
 
@@ -37,10 +38,6 @@ Panel.Prototype = function() {
   };
 
   this.getPanelContentElement = function() {
-    return this.refs.panelContent.$el[0];
-  };
-
-  this.getScrollableContainer = function() {
     return this.refs.panelContent.$el[0];
   };
 
@@ -92,9 +89,7 @@ Panel.Prototype = function() {
   };
 
   this.scrollToNode = function(nodeId) {
-    // var n = this.findNodeView(nodeId);
-    // TODO make this generic
-    var panelContentEl = this.getScrollableContainer();
+    var panelContentEl = this.getPanelContentElement();
 
     // Node we want to scroll to
     var targetNode = $(panelContentEl).find('*[data-id="'+nodeId+'"]')[0];
