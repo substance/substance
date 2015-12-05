@@ -7,6 +7,7 @@ var EventEmitter = require('../util/EventEmitter');
 var DocumentNode = require('./DocumentNode');
 var Selection = require('./Selection');
 var Anchor = require('./Anchor');
+var documentHelpers = require('./documentHelpers');
 
 /**
   Describes an annotation sticking on a container that can span over multiple
@@ -46,7 +47,7 @@ ContainerAnnotation.Prototype = function() {
       console.warn('Trying to use a ContainerAnnotation which is not attached to the document.');
       return "";
     }
-    return doc.getTextForSelection(this.getSelection());
+    return documentHelpers.getTextForSelection(doc, this.getSelection());
   };
 
   /**
