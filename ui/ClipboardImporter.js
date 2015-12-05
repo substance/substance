@@ -103,7 +103,7 @@ HTMLImporter.extend(ClipboardImporter, function() {
     while(childIterator.hasNext()) {
       var el = childIterator.next();
       // if there is a block node we finish this wrapper
-      var blockTypeConverter = this._getBlockConverterForElement(el);
+      var blockTypeConverter = this._getConverterForElement(el, 'block');
       if (blockTypeConverter) {
         childIterator.back();
         break;

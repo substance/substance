@@ -27,6 +27,7 @@ function DOMImporter(config) {
   this.$$ = $$;
 
   this._defaultBlockConverter = null;
+  this._allConverters = [];
   this._blockConverters = [];
   this._propertyAnnotationConverters = [];
 
@@ -61,6 +62,7 @@ function DOMImporter(config) {
       this._defaultBlockConverter = converter;
     }
 
+    this._allConverters.push(converter);
     // Defaults to _blockConverters
     if (NodeClass.static.isPropertyAnnotation) {
       this._propertyAnnotationConverters.push(converter);
@@ -154,7 +156,7 @@ DOMImporter.Prototype = function DOMImporterPrototype() {
     var iterator = new DefaultDOMElement.NodeIterator(elements);
     while(iterator.hasNext()) {
       var el = iterator.next();
-      var blockTypeConverter = this._getBlockConverterForElement(el);
+      var blockTypeConverter = this._getConverterForElement(el, 'block');
       var node;
       if (blockTypeConverter) {
         node = this._nodeData(el, blockTypeConverter.type);
@@ -189,8 +191,12 @@ DOMImporter.Prototype = function DOMImporterPrototype() {
     @returns {object} the created node as JSON
    */
   this.convertElement = function(el) {
-    var converter = this._getBlockConverterForElement(el);
+    return this._convertElement(el);
+  };
+
+  this._convertElement = function(el, mode) {
     var node;
+    var converter = this._getConverterForElement(el, mode);
     if (converter) {
       node = this._nodeData(el, converter.type);
       node = converter.import(el, node, this) || node;
@@ -378,7 +384,7 @@ DOMImporter.Prototype = function DOMImporterPrototype() {
         // skip comment nodes
         continue;
       } else if (el.isElementNode()) {
-        var inlineTypeConverter = this._getPropertyAnnotationConverterForElement(el);
+        var inlineTypeConverter = this._getConverterForElement(el, 'inline');
         if (!inlineTypeConverter) {
           if (!this.IGNORE_DEFAULT_WARNINGS) {
             console.warn('Unsupported inline element. We will not create an annotation for it, but process its children to extract annotated text.', el.outerHTML);
@@ -427,30 +433,21 @@ DOMImporter.Prototype = function DOMImporterPrototype() {
     return context.text;
   };
 
-  this._getBlockConverterForElement = function(el) {
-    // HACK: tagName does not exist for prmitive nodes such as DOM TextNode.
-    if (!el.tagName) return null;
-    for (var i = 0; i < this._blockConverters.length; i++) {
-      if (this._blockConverters[i].matchElement(el)) {
-        return this._blockConverters[i];
+  this._getConverterForElement = function(el, mode) {
+    var converters;
+    if (mode === "block") {
+      if (!el.tagName) return null;
+      converters = this._blockConverters;
+    } else if (mode === "inline") {
+      converters = this._propertyAnnotationConverters;
+    } else {
+      converters = this._allConverters;
+    }
+    for (var i = 0; i < converters.length; i++) {
+      if (converters[i].matchElement(el)) {
+        return converters[i];
       }
     }
-  };
-
-  this._getPropertyAnnotationConverterForElement = function(el) {
-    for (var i = 0; i < this._propertyAnnotationConverters.length; i++) {
-      if (this._propertyAnnotationConverters[i].matchElement(el)) {
-        return this._propertyAnnotationConverters[i];
-      }
-    }
-  };
-
-  this._getNodeConverterForElement = function(el) {
-    var converter = this._getBlockConverterForElement(el);
-    if (!converter) {
-      converter = this._getPropertyAnnotationConverterForElement(el);
-    }
-    return converter;
   };
 
   /**
@@ -466,7 +463,7 @@ DOMImporter.Prototype = function DOMImporterPrototype() {
     while(childIterator.hasNext()) {
       var el = childIterator.next();
       // if there is a block node we finish this wrapper
-      var blockTypeConverter = this._getBlockConverterForElement(el);
+      var blockTypeConverter = this._getConverterForElement(el, 'block');
       if (blockTypeConverter) {
         childIterator.back();
         break;
