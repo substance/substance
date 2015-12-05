@@ -380,10 +380,6 @@ DOMImporter.Prototype = function DOMImporterPrototype() {
       } else if (el.isElementNode()) {
         var inlineTypeConverter = this._getPropertyAnnotationConverterForElement(el);
         if (!inlineTypeConverter) {
-          var blockTypeConverter = this._getBlockConverterForElement(el);
-          if (blockTypeConverter) {
-            throw new Error('Expected inline element. Found block element:', el.outerHTML);
-          }
           if (!this.IGNORE_DEFAULT_WARNINGS) {
             console.warn('Unsupported inline element. We will not create an annotation for it, but process its children to extract annotated text.', el.outerHTML);
           }
