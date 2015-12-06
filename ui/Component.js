@@ -358,10 +358,38 @@ Component.Prototype = function ComponentPrototype() {
     ```
   */
   this.actions = function(actions) {
+    // Deprecated because I don't like how it reads
+    // this.actions({ ... })
+    // being a method but named like it was a property.
+    console.log("DEPRECATED: Use 'this.handleAction(name, method)' instead.");
     each(actions, function(method, action) {
       var handler = method.bind(this);
       this.actionHandlers[action] = handler;
     }, this);
+  };
+
+  /**
+    Define an action handler. Call this during construction/initialization of a component.
+
+    @param {String} action name
+    @param {Functon} a function of this component.
+
+    @example
+
+    ```
+    function MyComponent() {
+      Component.apply(this, arguments);
+      ...
+      this.actions({
+       'openPrompt': this.openPrompt,
+       'closePrompt': this.closePrompt
+      });
+    }
+    ```
+  */
+  this.handleAction = function(name, handler) {
+    handler = handler.bind(this);
+    this.actionHandlers[name] = handler;
   };
 
   /**
