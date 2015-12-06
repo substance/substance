@@ -321,16 +321,17 @@ Surface.Prototype = function() {
     // transition: blurred -> focused
     if (!this.isFocused && val) {
       // console.log('Surface focus:', this.__id__);
+      this.isFocused = val;
+      this.getController().didFocus(this);
+      this.emit('focus', this);
     }
     // transition: focused -> blurred
     else if (this.isFocused && !val) {
+      this.isFocused = val;
       // console.log('Surface blur:', this.__id__);
       // when a surface gets blurred a persisted selection will be removed
       this.textPropertyManager.removeSelection();
-    }
-    this.isFocused = val;
-    if (this.isFocused) {
-      this.getController().didFocus(this);
+      this.emit('blur', this);
     }
   };
 
@@ -409,10 +410,7 @@ Surface.Prototype = function() {
     // Ctrl+A: select all
     var handled = false;
     if ( (event.ctrlKey||event.metaKey) && event.keyCode === 65 ) {
-      var newSelection = this.selectAll();
-      if (newSelection) {
-        this.setSelection(newSelection);
-      }
+      this.selectAll()
       handled = true;
     }
     // Undo/Redo: cmd+z, cmd+shift+z
