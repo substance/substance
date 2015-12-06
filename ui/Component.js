@@ -1,6 +1,7 @@
 'use strict';
 
 var $ = require('../util/jquery');
+var isFunction = require('lodash/lang/isFunction');
 var isString = require('lodash/lang/isString');
 var isEqual = require('lodash/lang/isEqual');
 var clone = require('lodash/lang/clone');
@@ -350,22 +351,26 @@ Component.Prototype = function ComponentPrototype() {
     function MyComponent() {
       Component.apply(this, arguments);
       ...
-      this.actions({
+      this.handleActions({
        'openPrompt': this.openPrompt,
        'closePrompt': this.closePrompt
       });
     }
     ```
   */
+  this.handleActions = function(actionHandlers) {
+    each(actionHandlers, function(method, actionName) {
+      this.handleAction(actionName, method);
+    }, this);
+    return this;
+  };
+
   this.actions = function(actions) {
     // Deprecated because I don't like how it reads
     // this.actions({ ... })
     // being a method but named like it was a property.
-    console.log("DEPRECATED: Use 'this.handleAction(name, method)' instead.");
-    each(actions, function(method, action) {
-      var handler = method.bind(this);
-      this.actionHandlers[action] = handler;
-    }, this);
+    console.log("DEPRECATED: Use 'this.handleActions(actions)' instead.");
+    return this.handleActions(actions);
   };
 
   /**
@@ -373,21 +378,11 @@ Component.Prototype = function ComponentPrototype() {
 
     @param {String} action name
     @param {Functon} a function of this component.
-
-    @example
-
-    ```
-    function MyComponent() {
-      Component.apply(this, arguments);
-      ...
-      this.actions({
-       'openPrompt': this.openPrompt,
-       'closePrompt': this.closePrompt
-      });
-    }
-    ```
   */
   this.handleAction = function(name, handler) {
+    if (!name || !handler || !isFunction(handler)) {
+      throw new Error('Illegal arguments.');
+    }
     handler = handler.bind(this);
     this.actionHandlers[name] = handler;
   };
@@ -537,7 +532,12 @@ Component.Prototype = function ComponentPrototype() {
   this.didReceiveProps = function() {};
 
   /**
-    Hook which is called after properties have been set.
+    Hook which is called before each render.
+  */
+  this.willRender = function() {};
+
+  /**
+    Hook which is called after each render.
   */
   this.didRender = function() {};
 
@@ -887,6 +887,8 @@ Component.Prototype = function ComponentPrototype() {
   };
 
   this._render = function(data, scope) {
+    this.willRender();
+
     if (!data) {
       throw new Error('Nothing to render. Make sure your render method returns a virtual element: '+this.displayName);
     }
@@ -1100,6 +1102,7 @@ Component.Prototype = function ComponentPrototype() {
     this.children = children;
     this.refs = clone(scope.refs);
     this._data = data;
+
     this.didRender();
   };
 
@@ -1130,6 +1133,7 @@ Component.Prototype = function ComponentPrototype() {
     this.refs = scope.refs;
     this.children = children;
     this._data = data;
+
     this.didRender();
   };
 
