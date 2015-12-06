@@ -171,7 +171,7 @@ ContainerEditor.Prototype = function() {
     var firstPath = container.getFirstPath();
     var lastPath = container.getLastPath();
     var lastText = doc.get(lastPath);
-    return doc.createSelection({
+    var sel = doc.createSelection({
       type: 'container',
       containerId: container.id,
       startPath: firstPath,
@@ -179,6 +179,7 @@ ContainerEditor.Prototype = function() {
       endPath: lastPath,
       endOffset: lastText.length
     });
+    this.setSelection(sel);
   };
 
   /**

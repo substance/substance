@@ -69,18 +69,15 @@ TextPropertyEditor.Prototype = function() {
   */
   this.selectAll = function() {
     var doc = this.getDocument();
-    var sel = this.getSelection();
-    if (sel.isNull()) return;
-    if (sel.isPropertySelection()) {
-      var path = sel.start.path;
-      var text = doc.get(path);
-      return doc.createSelection({
-        type: 'property',
-        path: path,
-        startOffset: 0,
-        endOffset: text.length
-      });
-    }
+    var path = this.props.path;
+    var text = doc.get(path);
+    var sel = doc.createSelection({
+      type: 'property',
+      path: path,
+      startOffset: 0,
+      endOffset: text.length
+    });
+    this.setSelection(sel);
   };
 
   /**
