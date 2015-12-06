@@ -71,7 +71,7 @@ TextPropertyComponent.Prototype = function() {
   };
 
   this.getDocument = function() {
-    return this.getController().getDocument();
+    return this.context.doc;
   };
 
   this.getElement = function() {
