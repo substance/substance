@@ -26,13 +26,13 @@ I18n.instance.load(require('../i18n/en'));
   @class
   @component
   @abstract
-  
+
   @example
 
-  We utilize a custom {@link ui/Toolbar} and a configured {@link ui/ContainerEditor}. 
+  We utilize a custom {@link ui/Toolbar} and a configured {@link ui/ContainerEditor}.
   Check out the [examples](http://gitub.com/substance/examples) for complete usage.
 
-   as a `Toolbar` including tools like the `UndoTool` and a configured `ContainerEditor`, which will do the actual editing work. 
+   as a `Toolbar` including tools like the `UndoTool` and a configured `ContainerEditor`, which will do the actual editing work.
 
   ```js
   var ProseEditor = Controller.extend({
@@ -155,7 +155,12 @@ Controller.Prototype = function() {
 
   // Use static config if available, otherwise try to fetch it from props
   this.getConfig = function() {
-    return this.constructor.static.config || this.props.config;
+    return this.constructor.static.config || this.props.config || {
+      controller: {
+        components: [],
+        commands: []
+      }
+    };
   };
 
   /**
@@ -360,7 +365,7 @@ Controller.Prototype = function() {
       // No focused surface, let's do it on document
       this.props.doc.transaction.apply(this.props.doc, arguments);
     }
-    
+
   };
 
   // FIXME: even if this seems to be very hacky,
