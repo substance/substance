@@ -112,8 +112,16 @@ function Controller() {
 
 Controller.Prototype = function() {
 
+  this.getInitialState = function() {
+    return {};
+  };
+
   this.didMount = function() {
-    this.$el.on('keydown', this.handleApplicationKeyCombos);
+    // TODO: usually we attach handlers during render
+    // this would mean that call child controllers
+    // would need to call super.render() or render the hanlder by themselves
+    // which would be the preferred way, to increase transparency
+    this.$el.on('keydown', this.handleApplicationKeyCombos.bind(this));
   };
 
   /**
