@@ -409,8 +409,8 @@ Surface.Prototype = function() {
     // Built-in key combos
     // Ctrl+A: select all
     var handled = false;
-    if ( (event.ctrlKey||event.metaKey) && event.keyCode === 65 ) {
-      this.selectAll()
+    if ( (event.ctrlKey||event.metaKey) && event.keyCode === 65) {
+      this.selectAll();
       handled = true;
     }
     // Undo/Redo: cmd+z, cmd+shift+z
@@ -606,6 +606,8 @@ Surface.Prototype = function() {
     // Note: we need this timeout so that CE updates the DOM selection first
     // before we map the DOM selection
     window.setTimeout(function() {
+      if (self._isDisposed()) return;
+
       var options = {
         direction: (event.keyCode === Surface.Keys.LEFT) ? 'left' : 'right'
       };
@@ -625,6 +627,8 @@ Surface.Prototype = function() {
     // Note: we need this timeout so that CE updates the DOM selection first
     // before we map the DOM selection
     window.setTimeout(function() {
+      if (self._isDisposed()) return;
+
       var options = {
         direction: (event.keyCode === Surface.Keys.UP) ? 'left' : 'right'
       };
@@ -632,6 +636,11 @@ Surface.Prototype = function() {
       // TODO: enable this when we are better, see comment above
       //self.rerenderDomSelection();
     });
+  };
+
+  this._isDisposed = function() {
+    // HACK: if surfaceSelection === null, this surface has been disposed
+    return !this.surfaceSelection;
   };
 
   this._handleSpaceKey = function(event) {
