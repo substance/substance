@@ -1110,6 +1110,9 @@ Component.Prototype = function ComponentPrototype() {
     for (var i = 0; i < this.children.length; i++) {
       this.children[i].unmount();
     }
+    // HACK: make sure that this el is really empty
+    // FIXME: e.g. RawHtml we do not register as children
+    this.$el.empty();
     var isMounted = Component.isMounted(this);
     var children = [];
     for (var j = 0; j < data._children.length; j++) {
