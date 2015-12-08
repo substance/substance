@@ -466,13 +466,8 @@ Surface.Prototype = function() {
     this.skipNextObservation = true;
   };
 
-  // a shim for textInput events based on keyPress and a horribly dangerous dance with the CE
   this.onTextInputShim = function(event) {
-    // Filter out non-character keys. Doing this prevents:
-    // * Unexpected content deletion when selection is not collapsed and the user presses, for
-    //   example, the Home key (Firefox fires 'keypress' for it)
-    // * Incorrect pawning when selection is collapsed and the user presses a key that is not handled
-    //   elsewhere and doesn't produce any text, for example Escape
+    // Filter out non-character keys
     if (
       // Catches most keys that don't produce output (charCode === 0, thus no character)
       event.which === 0 || event.charCode === 0 ||
