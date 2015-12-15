@@ -3,7 +3,7 @@
 var Component = require('./Component');
 var $$ = Component.$$;
 var Panel = require("./Panel");
-var ScrollPane = require('substance/ui/ScrollPane');
+var ScrollPane = require('./ScrollPane');
 
 /**
   Scrollable content Panel with support for highlights.
