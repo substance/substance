@@ -52,6 +52,13 @@ Superscript                                                                 | �
 Code                                                                        | ✓
 Comment                                                                     | Beta 4
 
+**Platform support**                                                        |
+Mozilla Firefox (>=42)                                                      | ✓
+Apple Safari (>=9)                                                          | ✓
+Google Chrome (>=47)                                                        | ✓
+Microsoft Edge                                                              | ✓
+Mobile Safari (iOS)                                                         | Beta 5
+Mobile Chrome (Android)                                                     | Beta 5
 
 ## Development
 
@@ -106,6 +113,7 @@ $ npm run doc
 
 ### Beta 5
 
+- Mobile support
 - Modules for server-side integration
   - Persistence API for documents
   - Figure upload
