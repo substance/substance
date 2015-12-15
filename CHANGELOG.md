@@ -1,7 +1,7 @@
 ## Beta 3
 
-- Added ui/ScrollPane Component used to wrap any content and make it scrollable within a container
-- Added ui/TOC as an interface for custom Table of Contents implementations
+- Added ui/ScrollPane Component used to wrap any content and make it scrollable within a container (1ae97f9)
+- Added ui/TOC as an interface for custom Table of Contents implementations (1ae97f9)
 - Fixed a bug where Firefox ignored input events (e3d6173)
 
 ## Beta 2
