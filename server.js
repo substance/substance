@@ -2,12 +2,12 @@ var express = require('express');
 var path = require('path');
 var glob = require('glob');
 var browserify = require('browserify');
-var sass = require('node-sass');
 var PORT = process.env.PORT || 4201;
 var app = express();
 
 var config = require('./doc/config.json');
 var generate = require('./doc/generator/generate');
+var serverUtils = require('./util/serverUtils');
 
 // use static server
 app.use('/docs', express.static(path.join(__dirname, 'doc/assets')));
@@ -20,46 +20,8 @@ app.get('/docs/documentation.json', function(req, res) {
   res.json(nodes);
 });
 
-app.get('/docs/app.js', function (req, res) {
-  browserify({ debug: true, cache: false })
-    .add(path.join(__dirname, 'doc', 'app.js'))
-    .bundle()
-    .on('error', function(err){
-      console.error(err.message);
-      res.send('console.log("'+err.message+'");');
-    })
-    .pipe(res);
-});
-
-var handleError = function(err, res) {
-  console.error(err);
-  res.status(400).json(err);
-};
-
-var renderSass = function(cb) {
-  sass.render({
-    file: path.join(__dirname, 'doc', 'app.scss'),
-    sourceMap: true,
-    outFile: 'app.css',
-  }, cb);
-};
-
-
-app.get('/docs/app.css', function(req, res) {
-  renderSass(function(err, result) {
-    if (err) return handleError(err, res);
-    res.set('Content-Type', 'text/css');
-    res.send(result.css);
-  });
-});
-
-app.get('/docs/app.css.map', function(req, res) {
-  renderSass(function(err, result) {
-    if (err) return handleError(err, res);
-    res.set('Content-Type', 'text/css');
-    res.send(result.map);
-  });
-});
+serverUtils.serveStyles(app, '/docs/app.css', path.join(__dirname, 'doc', 'app.scss'));
+serverUtils.serveJS(app, '/docs/app.js', path.join(__dirname, 'doc', 'app.js'));
 
 // Test suite
 app.get('/test/test.js', function (req, res, next) {
