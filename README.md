@@ -29,7 +29,7 @@ TextPropertyEditor for editing annotated text                               | �
 ContainerEditor for in-flow-editing                                         | ✓
 Scrollable ContentPanel with Support for highlights                         | ✓
 Customizable Toolbar                                                        | ✓
-Interactive Scrollbar                                                       | ✓
+ScrollPane with interactive visual Scrollbar                                | ✓
 Interactive TOCPanel                                                        | ✓
                                                                             |
 **Predefined content types**                                                |

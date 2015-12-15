@@ -6,14 +6,6 @@ function FunctionNode() {
   FunctionNode.super.apply(this, arguments);
 }
 
-FunctionNode.Prototype = function() {
-
-  this.getTocLevel = function() {
-    return 2;
-  };
-
-};
-
 DocumentedNode.extend(FunctionNode);
 
 FunctionNode.static.name = 'function';

@@ -12,11 +12,6 @@ DocumentedNode.Prototype = function() {
   this.getSpecificType = function() {
     return this.type;
   };
-
-  this.getTocName = function() {
-    return this.name;
-  };
-
 };
 
 Node.extend(DocumentedNode);

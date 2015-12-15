@@ -294,33 +294,6 @@ Document.Prototype = function() {
     return this.get('document');
   };
 
-  this.getHighlights = function() {
-    return this._highlights;
-  };
-
-  // Set higlights on a document
-  this.setHighlights = function(highlights) {
-    var oldHighlights = this._highlights;
-
-    if (oldHighlights) {
-      each(oldHighlights, function(nodeId) {
-        var node = this.get(nodeId);
-        // Node could in the meanwhile have been deleted
-        if (node) {
-          node.setHighlighted(false);
-        }
-      }, this);
-    }
-
-    each(highlights, function(nodeId) {
-      var node = this.get(nodeId);
-      node.setHighlighted(true);
-    }, this);
-
-    this._highlights = highlights;
-    this.emit('highlights:updated', highlights);
-  };
-
   this._apply = function(documentChange, mode) {
     if (mode !== 'saveTransaction') {
       if (this.isTransacting) {

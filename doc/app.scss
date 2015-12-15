@@ -4,25 +4,9 @@ $fa-font-path:  "./fonts" !default;
 // Substance base styles
 @import '../styles/base/index';
 
-// UI Components used
-@import '../styles/components/_controller';
-@import '../styles/components/_surface';
-@import '../styles/components/_scroll-pane';
-@import '../styles/components/_panel'; // TODO: Remove as it's legacy
-@import '../styles/components/_content-panel';
-@import '../styles/components/_context-toggles';
-@import '../styles/components/_toc-panel';
-@import '../styles/components/_dialog-header';
-@import '../styles/components/_scrollbar';
-@import '../styles/components/_status-bar';
-@import '../styles/components/_text-property';
-
-// Nodes
-@import '../packages/link/_link';
-@import '../packages/embed/_embed';
-@import '../packages/table/_table';
-@import '../packages/emphasis/_emphasis';
-@import '../packages/strong/_strong';
+// Substance modules
+@import '../styles/components/_all';
+@import '../packages/_all';
 
 // Components
 @import './styles/_variables';
@@ -95,7 +79,7 @@ body {
       left: 0px;
       right: 0px;
 
-      .se-panel-content-inner {
+      .se-content {
         padding: 40px;
       }
     }

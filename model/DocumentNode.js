@@ -146,8 +146,10 @@ DocumentNode.Prototype = function() {
 
   // TODO: should this really be here?
   // volatile property necessary to render highlighted node differently
-  this.setHighlighted = function(highlighted) {
+  // TODO: We should get this out here
+  this.setHighlighted = function(highlighted, scope) {
     if (this.highlighted !== highlighted) {
+      this.highlightedScope = scope;
       this.highlighted = highlighted;
       this.emit('highlighted', highlighted);
     }

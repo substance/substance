@@ -14,7 +14,8 @@ AnnotationComponent.Prototype = function() {
       .attr("data-id", this.props.node.id)
       .addClass(this.getClassNames());
     if (this.props.node.highlighted) {
-      el.addClass('highlighted');
+      el.addClass('sm-highlighted');
+      // el.addClass('sm-'+this.props.node.highlightedScope);
     }
     el.append(this.props.children);
     return el;
@@ -38,9 +39,11 @@ AnnotationComponent.Prototype = function() {
 
   this.onHighlightedChanged = function() {
     if (this.props.node.highlighted) {
-      this.$el.addClass('highlighted');
+      this.$el.addClass('sm-highlighted');
+      // this.$el.addClass('sm-'+this.props.node.highlightedScope);
     } else {
-      this.$el.removeClass('highlighted');
+      this.$el.removeClass('sm-highlighted');
+      // this.$el.removeClass('sm-'+this.props.node.highlightedScope);
     }
   };
 };

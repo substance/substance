@@ -23,10 +23,6 @@ ClassNode.Prototype = function() {
     return 'class';
   };
 
-  this.getTocLevel = function() {
-    return 2;
-  };
-
   this.getMemberCategories = function() {
     return MEMBER_CATEGORIES;
   };

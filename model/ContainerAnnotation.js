@@ -72,14 +72,14 @@ ContainerAnnotation.Prototype = function() {
     });
   };
 
-  this.setHighlighted = function(highlighted) {
-
+  this.setHighlighted = function(highlighted, scope) {
     if (this.highlighted !== highlighted) {
       this.highlighted = highlighted;
-      this.emit('highlighted', highlighted);
+      this.highlightedScope = scope;
+      this.emit('highlighted', highlighted, scope);
 
       each(this.fragments, function(frag) {
-        frag.emit('highlighted', highlighted);
+        frag.emit('highlighted', highlighted, scope);
       });
     }
   };
@@ -132,7 +132,6 @@ ContainerAnnotation.Prototype = function() {
     }
     return this._endAnchor;
   };
-
 };
 
 DocumentNode.extend(ContainerAnnotation);
