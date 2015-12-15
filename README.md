@@ -17,12 +17,12 @@ Incremental document updates (undoable operations)                          | �
 Transformations for document manipulation                                   | ✓
 Custom editing toolbars                                                     | ✓
 Commands for controlling the editor                                         | ✓
-Key bindings                                                                | Beta 3
+Key bindings                                                                | Beta 4
 I18N support                                                                | ✓
-Realtime collaboration                                                      | Beta 3
-Full Unicode support                                                        | Beta 3
-Plugins                                                                     | Beta 3
-Persistence API for documents                                               | Beta 4
+Realtime collaboration                                                      | Beta 4
+Full Unicode support                                                        | Beta 4
+Plugins                                                                     | Beta 4
+Persistence API for documents                                               | Beta 5
                                                                             |
 **UI Components**                                                           |
 TextPropertyEditor for editing annotated text                               | ✓
@@ -39,9 +39,9 @@ Blockquote                                                                  | �
 Codeblock                                                                   | ✓
 Imgage                                                                      | ✓
 Embed (image, video, tweet etc.)                                            | ✓
-List                                                                        | Beta 3
-Table                                                                       | Beta 3
-Figure (including upload)                                                   | Beta 4
+List                                                                        | Beta 4
+Table                                                                       | Beta 4
+Figure (including upload)                                                   | Beta 5
                                                                             |
 **Predefined annotation types**                                             |
 Strong                                                                      | ✓
@@ -50,7 +50,7 @@ Link                                                                        | �
 Subscript                                                                   | ✓
 Superscript                                                                 | ✓
 Code                                                                        | ✓
-Comment                                                                     | Beta 3
+Comment                                                                     | Beta 4
 
 
 ## Development
@@ -91,7 +91,7 @@ $ npm run doc
 
 ## Roadmap
 
-### Beta 3
+### Beta 4
 
 *ETA: January 2016*
 
@@ -104,7 +104,7 @@ $ npm run doc
 - Improved Unicode support
 - Improved stability, documentation and tests
 
-### Beta 4
+### Beta 5
 
 - Modules for server-side integration
   - Persistence API for documents
