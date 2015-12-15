@@ -51,7 +51,7 @@ Subscript                                                                   | �
 Superscript                                                                 | ✓
 Code                                                                        | ✓
 Comment                                                                     | Beta 4
-
+                                                                            |
 **Platform support**                                                        |
 Mozilla Firefox (>=42)                                                      | ✓
 Apple Safari (>=9)                                                          | ✓
