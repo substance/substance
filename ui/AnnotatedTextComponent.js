@@ -5,6 +5,13 @@ var $$ = Component.$$;
 var Fragmenter = require('../model/Fragmenter');
 var AnnotationComponent = require('./AnnotationComponent');
 
+/**
+  Renders an anotated text. Used internally by ui/TextPropertyComponent
+
+  @class
+  @component
+  @extends ui/AnnotationComponent
+*/
 
 function AnnotatedTextComponent() {
   AnnotatedTextComponent.super.apply(this, arguments);
@@ -12,6 +19,11 @@ function AnnotatedTextComponent() {
 
 AnnotatedTextComponent.Prototype = function() {
 
+  /**
+    Node render implementation. Use model/Fragmenter for rendering of annotations.
+
+    @return {VirtualNode} VirtualNode created using ui/Component
+   */
   this.render = function() {
     var componentRegistry = this.context.componentRegistry;
     var doc = this.getDocument();
@@ -76,16 +88,31 @@ AnnotatedTextComponent.Prototype = function() {
     return el;
   };
 
+  /**
+    Gets annotations related to current node.
+
+    @return {Array} Node's annotations
+   */
   this.getAnnotations = function() {
     var doc = this.getDocument();
     var annotations = doc.getIndex('annotations').get(this.props.path);
     return annotations;
   };
 
+  /**
+    Gets document instance.
+
+    @return {Document} The document instance
+   */
   this.getDocument = function() {
     return this.props.doc || this.context.doc;
   };
 
+  /**
+    Gets a node path.
+
+    @return {String[]} Node path
+   */
   this.getPath = function() {
     return this.props.path;
   };

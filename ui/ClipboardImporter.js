@@ -25,6 +25,10 @@ var converters = [
   require('../packages/list/ListItemHTMLConverter'),
 ];
 
+/**
+  Import HTML from clipboard. Used for inter-application copy'n'paste.
+*/
+
 function ClipboardImporter(config) {
   if (!config.schema) {
     throw new Error('Missing argument: config.schema is required.');
@@ -94,6 +98,11 @@ HTMLImporter.extend(ClipboardImporter, function() {
     return body;
   }
 
+  /**
+    Converts all children of a given body element.
+
+    @param {String} body body element of given HTML document
+  */
   this.convertBody = function(body) {
     this.convertContainer(body.childNodes, CLIPBOARD_CONTAINER_ID);
   };
@@ -125,7 +134,11 @@ HTMLImporter.extend(ClipboardImporter, function() {
     return node;
   };
 
+  /**
+    Creates substance document to paste.
 
+    @return {Document} the document instance
+  */
   this.createDocument = function() {
     var doc = this._createDocument();
     if (!doc.get(CLIPBOARD_CONTAINER_ID)) {

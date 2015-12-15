@@ -4,17 +4,31 @@ var Component = require('./Component');
 var each = require('lodash/collection/each');
 var without = require('lodash/array/without');
 
+/**
+  Abstract Panel interface.
+  
+  @class
+  @abstract
+  @component
+  @extends ui/Component
+*/
+
 function Panel() {
   Component.apply(this, arguments);
   this._highlights = {};
 }
 
 Panel.Prototype = function() {
-
+  
   this.getHighlights = function() {
     return this._highlights;
   };
 
+  /**
+    Get the Document instance.
+
+    @returns {Document}
+  */
   this.getDocument = function() {
     return this.context.doc;
   };

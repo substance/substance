@@ -130,6 +130,15 @@ IncrementalData.Prototype = function() {
     this.emit('operation:applied', op, this);
   };
 
+  /**
+    Creates proper operation based on provided node path and diff.
+
+    @param {Array} path
+    @param {Object} diff
+    @returns {ObjectOperation} operation.
+
+    @private
+  */
   this._getDiffOp = function(path, diff) {
     var diffOp = null;
     if (diff.isOperation) {

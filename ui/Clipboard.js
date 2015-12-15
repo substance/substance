@@ -105,6 +105,9 @@ Clipboard.Prototype = function() {
     this.el = Clipboard._sharedPasteElement;
   };
 
+  /*
+    Called by to disable clipboard handling.
+  */
   this.detach = function(rootElement) {
     rootElement.off('copy', this.onCopy);
     rootElement.off('cut', this.onCut);
@@ -116,6 +119,11 @@ Clipboard.Prototype = function() {
     }
   };
 
+  /*
+    Called when copy event fired.
+
+    @param {Event} event
+  */
   this.onCopy = function(event) {
     // console.log("Clipboard.onCopy", arguments);
     var clipboardData = this._copy();
@@ -138,6 +146,11 @@ Clipboard.Prototype = function() {
     }
   };
 
+  /*
+    Called when cut event fired.
+
+    @param {Event} event
+  */
   this.onCut = function(event) {
     // preventing default behavior to avoid that contenteditable
     // destroys our DOM
@@ -151,6 +164,11 @@ Clipboard.Prototype = function() {
     });
   };
 
+  /*
+    Called when paste event fired.
+
+    @param {Event} event
+  */
   // Works on Safari/Chrome/FF
   this.onPaste = function(event) {
     var clipboardData = event.clipboardData;
@@ -213,6 +231,11 @@ Clipboard.Prototype = function() {
     this._pastePlainText(plainText);
   };
 
+  /*
+    Pastes a given plain text into the surface.
+
+    @param {String} plainText plain text
+  */
   this._pastePlainText = function(plainText) {
     var surface = this.getSurface();
     surface.transaction(function(tx, args) {
@@ -258,6 +281,9 @@ Clipboard.Prototype = function() {
     }.bind(this));
   };
 
+  /*
+    Copies data from surface to clipboard.
+  */
   this._copy = function() {
     var surface = this.getSurface();
     var sel = surface.getSelection();
@@ -277,6 +303,12 @@ Clipboard.Prototype = function() {
     };
   };
 
+  /*
+    Pastes substance data to surface.
+
+    @param {Object} json substance document in json
+    @param {String} text plain text representation used as a fallback
+  */
   this._pasteSubstanceData = function(json, text) {
     var surface = this.getSurface();
     if (!surface) return;

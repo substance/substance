@@ -3,6 +3,14 @@
 var Component = require('./Component');
 var $$ = Component.$$;
 
+/**
+  Panel inside Modal.
+  
+  @class
+  @component
+  @extends ui/Panel
+*/
+
 function ModalPanel() {
   Component.apply(this,arguments);
 }

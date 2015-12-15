@@ -6,6 +6,9 @@ var converters = ClipboardImporter.converters;
 var CLIPBOARD_CONTAINER_ID = ClipboardImporter.CLIPBOARD_CONTAINER_ID;
 var CLIPBOARD_PROPERTY_ID = ClipboardImporter.CLIPBOARD_PROPERTY_ID;
 
+/**
+  Export HTML from clipboard. Used for inter-application copy'n'paste.
+*/
 // FIXME: this is not working yet
 function ClipboardExporter() {
   ClipboardExporter.super.call(this, {
@@ -15,6 +18,13 @@ function ClipboardExporter() {
 
 ClipboardExporter.Prototype = function() {
 
+  /**
+    Exports document in html format.
+
+    @param {Document} doc document to export
+
+    @return {String} html representation of given document
+  */
   this.exportDocument = function(doc) {
     var html;
     var elements = this.convertDocument(doc);
@@ -28,6 +38,13 @@ ClipboardExporter.Prototype = function() {
     return '<html><body>' + html + '</body></html>';
   };
 
+  /**
+    Coverts document to set of DOM elements.
+
+    @param {Document} doc document to convert
+
+    @return {Array} array of DOM elements each represented single node 
+  */
   this.convertDocument = function(doc) {
     var content = doc.get(CLIPBOARD_CONTAINER_ID);
     if (!content) {

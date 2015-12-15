@@ -3,6 +3,26 @@
 var Component = require('./Component');
 var $$ = Component.$$;
 
+/**
+  Renders an annotation. Used internally by different components (e.g. ui/AnnotatedTextComponent)
+  
+  @class
+  @component
+  @extends ui/Component
+  
+  @prop {Object} doc document
+  @prop {Object} node node which describes annotation
+
+  @example
+
+  ```js
+  $$(AnnotationComponent, { 
+    doc: doc, 
+    node: node 
+  })
+  ```
+*/
+
 function AnnotationComponent() {
   Component.apply(this, arguments);
 }

@@ -89,6 +89,11 @@ Node.Prototype = function() {
     return schema[propertyName].type;
   };
 
+  /**
+    Convert node to JSON.
+
+    @returns {Object} JSON representation of node.
+   */
   this.toJSON = function() {
     var data = {
       type: this.constructor.static.name
