@@ -15,10 +15,6 @@ function ModuleNode() {
 
 ModuleNode.Prototype = function() {
 
-  this.getTocLevel = function() {
-    return 2;
-  };
-
   this.getMemberCategories = function() {
     return MEMBER_CATEGORIES;
   };

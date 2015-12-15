@@ -20,19 +20,9 @@ function NamespaceNode() {
 }
 
 NamespaceNode.Prototype = function() {
-
-  this.getTocLevel = function() {
-    return 1;
-  };
-
   this.getMemberCategories = function() {
     return MEMBER_CATEGORIES;
   };
-
-  this.getTocName = function() {
-    return this.id;
-  };
-
 };
 
 Node.extend(NamespaceNode, MemberContainerMixin);

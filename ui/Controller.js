@@ -100,11 +100,10 @@ function Controller() {
   if (config.i18n) {
     I18n.instance.load(config.i18n);
   }
+
   /**
-   * Manages tools.
-   *
-   * @type ui.ToolManager
-   */
+    Manages tools.
+  */
   this.toolManager = new ToolManager(this);
   this._initialize(this.props);
   this.handleStateUpdate(this.state);
@@ -125,9 +124,9 @@ Controller.Prototype = function() {
   };
 
   /**
-   * Dispose component when component life ends. If you need to implement dispose
-   * in your custom Controller class, don't forget the super call.
-   */
+     Dispose component when component life ends. If you need to implement dispose
+     in your custom Controller class, don't forget the super call.
+  */
   this.dispose = function() {
     this.$el.off('keydown');
     if (this.props.doc) {

@@ -69,19 +69,7 @@ var DocumentationReader = DocumentationController.extend({
     );
 
     return el;
-  },
-
-  didMount: function() {
-    if (this.state.nodeId) {
-      this.jumpToNode(this.state.nodeId);
-    }
-  },
-
-  didUpdateState: function() {
-    if (this.state.nodeId) {
-      this.jumpToNode(this.state.nodeId);
-    }
-  },
+  }
 });
 
 module.exports = DocumentationReader;
