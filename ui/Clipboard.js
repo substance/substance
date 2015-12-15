@@ -10,7 +10,7 @@ var substanceGlobals = require('../util/substanceGlobals');
 /**
   The Clipboard is a Component which should be rendered as a sibling component
   of one or multiple Surfaces.
-
+  
   It uses the JSONImporter and JSONExporter for internal copy'n'pasting,
   i.e., within one window or between two instances with the same DocumentSchema.
 
@@ -28,6 +28,8 @@ var substanceGlobals = require('../util/substanceGlobals');
   To make this work for a custom schema, you must include the default nodes into your schema.
   Otherwise, only plain text will be copied. If `Paragraph` is not present in your schema,
   `schema.getDefaultTextType()` is used instead.
+
+  @class Clipboard
 */
 var Clipboard = function(surface) {
 
