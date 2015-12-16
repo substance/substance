@@ -147,8 +147,8 @@ DOMImporter.Prototype = function DOMImporterPrototype() {
   /**
     Converts and shows all children of a given element.
 
-    @param {ui/DOMElement} containerEl An element representing a container node.
-    @param {String} containerId The id of the target container node.
+    @param {ui/DOMElement[]} elements All elements that should be converted into the container.
+    @param {String} containerId TODO The id of the target container node.
    */
   this.convertContainer = function(elements) {
     var state = this.state;
