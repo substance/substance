@@ -511,7 +511,7 @@ QUnit.test("Should wipe a referenced component when class changes", function(ass
   assert.ok(comp.refs.context instanceof ComponentB, 'Context should be of instance ComponentB');
 });
 
-QUnit.test('Click handlers should not leak', function(assert) {
+QUnit.uiTest('Click handlers should not leak', function(assert) {
 
   // Using a this.onClick handler defined on prototype
   var comp = Component.render(ClickableComponent);

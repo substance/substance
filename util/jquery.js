@@ -8,6 +8,8 @@ if (inBrowser) {
     var cheerio = require('cheerio');
     cheerio.prototype.prop = cheerio.prototype.attr;
     cheerio.prototype.removeProp = cheerio.prototype.removeAttr;
+    cheerio.prototype.on = function() {};
+    cheerio.prototype.off = function() {};
     $ = cheerio.load('', {decodeEntities: false});
     /*
        we need to be able to create native text nodes efficiently

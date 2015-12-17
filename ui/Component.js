@@ -885,7 +885,11 @@ Component.Prototype = function ComponentPrototype() {
     // TODO: maybe we find a solution to this in the future
     // if (!isEqual(oldData.handlers, data.handlers)) {
       each(oldData.handlers, function(handlerSpec, eventName) {
-        el.removeEventListener(eventName, handlerSpec.handler);
+        if (el.removeEventListener) {
+          el.removeEventListener(eventName, handlerSpec.handler);
+        } else {
+          $el.off(eventName);
+        }
       });
       each(data.handlers, function(handlerSpec, eventName) {
         this._bindHandler(el, scope, eventName, handlerSpec);
@@ -1197,7 +1201,11 @@ Component.Prototype = function ComponentPrototype() {
         }
       };
     }
-    nativeEl.addEventListener(eventName, handler);
+    if (nativeEl.addEventListener) {
+      nativeEl.addEventListener(eventName, handler);
+    } else {
+      $(nativeEl).on(eventName, handler);
+    }
   };
 };
 
