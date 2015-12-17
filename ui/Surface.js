@@ -346,6 +346,13 @@ Surface.Prototype = function() {
     this._setSelection(sel);
   };
 
+  this.setSelectionFromEvent = function(evt) {
+    this.skipNextFocusEvent = true;
+    var domRange = Surface.getDOMRangeFromEvent(evt);
+    var sel = this.surfaceSelection.getSelectionFromDOMRange(domRange);
+    this.setSelection(sel);
+  };
+
   this.rerenderDomSelection = function() {
     if (this.surfaceSelection) {
       var surfaceSelection = this.surfaceSelection;
@@ -757,6 +764,41 @@ Surface.detectIE = function() {
   }
   // other browser
   return false;
+};
+
+Surface.getDOMRangeFromEvent = function(evt) {
+  var range, x = evt.clientX, y = evt.clientY;
+
+  // Try the simple IE way first
+  if (document.body.createTextRange) {
+    range = document.body.createTextRange();
+    range.moveToPoint(x, y);
+  }
+
+  else if (typeof document.createRange != "undefined") {
+    // Try Mozilla's rangeOffset and rangeParent properties,
+    // which are exactly what we want
+    if (typeof evt.rangeParent != "undefined") {
+      range = document.createRange();
+      range.setStart(evt.rangeParent, evt.rangeOffset);
+      range.collapse(true);
+    }
+
+    // Try the standards-based way next
+    else if (document.caretPositionFromPoint) {
+      var pos = document.caretPositionFromPoint(x, y);
+      range = document.createRange();
+      range.setStart(pos.offsetNode, pos.offset);
+      range.collapse(true);
+    }
+
+    // Next, the WebKit way
+    else if (document.caretRangeFromPoint) {
+      range = document.caretRangeFromPoint(x, y);
+    }
+  }
+
+  return range;
 };
 
 module.exports = Surface;

@@ -73,7 +73,7 @@ AnnotatedTextComponent.Prototype = function() {
       var el = $$(ComponentClass, { doc: doc, node: node });
       // adding keys here, enables preservative rerendering
       // TODO: experiment, if this reduces cursor flickering, already...
-      // el.ref(id + "@" + fragmentCounters[id]);
+      el.ref(id + "@" + fragmentCounters[id]);
       return el;
     };
     fragmenter.onExit = function(fragment, context, parentContext) {
