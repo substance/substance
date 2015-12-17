@@ -68,8 +68,9 @@ TOC.Prototype = function() {
 
   this.computeEntries = function() {
     var doc = this.getDocument();
+    var config = this.controller.getConfig();
     var entries = [];
-    var contentNodes = doc.get('main').nodes;
+    var contentNodes = doc.get(config.containerId).nodes;
     _.each(contentNodes, function(nodeId) {
       var node = doc.get(nodeId);
       if (node.type === 'heading') {
