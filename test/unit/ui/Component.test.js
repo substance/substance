@@ -514,7 +514,7 @@ QUnit.test("Should wipe a referenced component when class changes", function(ass
 QUnit.test('Click handlers should not leak', function(assert) {
 
   // Using a this.onClick handler defined on prototype
-  var comp = Component.mount($$(ClickableComponent), $('#qunit-fixture'));
+  var comp = Component.render(ClickableComponent);
   comp.el.click();
   assert.equal(comp.__clickCount, 1, 'onClick handler should have been called once');
   comp.el.click();
@@ -523,7 +523,7 @@ QUnit.test('Click handlers should not leak', function(assert) {
   assert.equal(comp.__clickCount, 3, 'onClick handler should have been called thrice');
 
   // Using inline handler
-  comp = Component.mount($$(ClickableComponent, {useInlineHandler: true}), $('#qunit-fixture'));
+  comp = Component.render(ClickableComponent, {useInlineHandler: true});
   comp.el.click();
   assert.equal(comp.__clickCount, 1, 'onClick handler should have been called once');
   comp.el.click();
@@ -543,7 +543,7 @@ QUnit.test('Should store refs always on owners', function(assert) {
     }
   });
 
-  var comp = Component.mount($$(MyComponent), $('#qunit-fixture'));
+  var comp = Component.render(MyComponent);
   assert.ok(comp.refs.helloComp, 'There should stil be a ref to the helloComp element/component');
 });
 
@@ -593,7 +593,7 @@ QUnit.test("Refs should survive rerenders", function(assert) {
     }
   });
 
-  var comp = Component.mount($$(ComponentWithRefs), $('#qunit-fixture'));
+  var comp = Component.render(ComponentWithRefs);
   assert.ok(comp.refs.contentPanel, 'There should be a ref to the contentPanel component');
   comp.setState({contextId: 'foo'});
   assert.ok(comp.refs.contentPanel, 'There should stil be a ref to the contentPanel component');

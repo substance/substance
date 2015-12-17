@@ -841,6 +841,7 @@ Component.Prototype = function ComponentPrototype() {
 
   this._updateElement = function(data, oldData, scope) {
     var $el = this.$el;
+    var el = this.el;
 
     // TODO: we should make sure that html parameters given from
     // parent are preserved
@@ -877,15 +878,19 @@ Component.Prototype = function ComponentPrototype() {
         $el.css(data.style);
       }
     }
-    // $.on / $.off
-    if (!isEqual(oldData.handlers, data.handlers)) {
-      each(oldData.handlers, function(handler, eventName) {
-        $el.off(eventName);
+    // ATTENTION: as we bind context to handler functions when
+    // attaching to the event, it does not help to check for equality
+    // as this is always false.
+    // Thus we need to remove and add handlers on every update.
+    // TODO: maybe we find a solution to this in the future
+    // if (!isEqual(oldData.handlers, data.handlers)) {
+      each(oldData.handlers, function(handlerSpec, eventName) {
+        el.removeEventListener(eventName, handlerSpec.handler);
       });
       each(data.handlers, function(handlerSpec, eventName) {
-        this._bindHandler($el[0], scope, eventName, handlerSpec);
+        this._bindHandler(el, scope, eventName, handlerSpec);
       }, this);
-    }
+    // }
     return $el;
   };
 
@@ -1183,6 +1188,7 @@ Component.Prototype = function ComponentPrototype() {
     } else {
       handler = handler.bind(scope.owner);
     }
+    handlerSpec.handler = handler;
     if (handlerSpec.selector) {
       var _handler = handler;
       handler = function(event) {
