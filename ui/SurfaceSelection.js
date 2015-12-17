@@ -405,7 +405,7 @@ SurfaceSelection.Prototype = function() {
     sel.removeAllRanges();
     sel.addRange(domRange);
     return this.getSelection();
-  }
+  };
 };
 
 oo.initClass(SurfaceSelection);

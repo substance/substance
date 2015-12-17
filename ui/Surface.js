@@ -799,7 +799,6 @@ Surface.getDOMRangeFromEvent = function(evt) {
   }
 
   return range;
-}
-
+};
 
 module.exports = Surface;
