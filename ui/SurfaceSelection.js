@@ -399,6 +399,13 @@ SurfaceSelection.Prototype = function() {
     sel.removeAllRanges();
     this.state = null;
   };
+
+  this.getSelectionFromDOMRange = function(domRange) {
+    var sel = window.getSelection();
+    sel.removeAllRanges();
+    sel.addRange(domRange);
+    return this.getSelection();
+  }
 };
 
 oo.initClass(SurfaceSelection);
