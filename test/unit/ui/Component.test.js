@@ -8,6 +8,8 @@ var Component = require('../../../ui/Component');
 var $$ = Component.$$;
 var $ = require('../../../util/jquery');
 
+
+
 QUnit.uiModule('ui/Component');
 
 var TestComponent = Component.extend({
@@ -28,6 +30,28 @@ var SimpleComponent = TestComponent.extend({
       el.append(this.props.children);
     }
     return el;
+  }
+});
+
+var ClickableComponent = Component.extend({
+  initialize: function() {
+    this.__clickCount = 0;
+  },
+  render: function() {
+    var el = $$('a').append('Click me').attr('href', '#');
+    if (this.props.useInlineHandler) {
+      el.on('click', function() {
+        this.__clickCount += 1;
+        this.rerender();
+      });
+    } else {
+      el.on('click', this.onClick);
+    }
+    return el;
+  },
+  onClick: function() {
+    this.__clickCount += 1;
+    this.rerender();
   }
 });
 
@@ -267,7 +291,7 @@ QUnit.uiTest("Only call didMount once for childs and grandchilds when setProps i
 });
 
 // TODO: The next test case covers most of this, so maybe we can remove it in the future
-QUnit.test("Propagate properties to child components when setProps called on parent", function(assert) {
+QUnit.test('Propagate properties to child components when setProps called on parent', function(assert) {
   var ItemComponent = TestComponent.extend({
     render: function() {
       return $$('div').append(this.props.name);
@@ -300,7 +324,7 @@ QUnit.test("Propagate properties to child components when setProps called on par
 });
 
 
-QUnit.test("Preserve components when ref matches, and rerender when props changed", function(assert) {
+QUnit.test('Preserve components when ref matches, and rerender when props changed', function(assert) {
   var ItemComponent = TestComponent.extend({
     shouldRerender: function(nextProps) {
       return !isEqual(nextProps, this.props);
@@ -433,7 +457,6 @@ QUnit.test("Component.append() should support appending text.", function(assert)
   assert.equal(comp.text(), 'XXX');
 });
 
-
 QUnit.test("Should wipe a referenced component when class changes", function(assert) {
 
   var ComponentA = TestComponent.extend({
@@ -465,4 +488,98 @@ QUnit.test("Should wipe a referenced component when class changes", function(ass
   assert.ok(comp.refs.context instanceof ComponentA, 'Context should be of instance ComponentA');
   comp.setProps({context: 'B'});
   assert.ok(comp.refs.context instanceof ComponentB, 'Context should be of instance ComponentB');
+});
+
+QUnit.test('Click handlers should not leak', function(assert) {
+  
+  // Using a this.onClick handler defined on prototype
+  var comp = Component.mount($$(ClickableComponent), $('#qunit-fixture'));
+  comp.el.click();
+  assert.equal(comp.__clickCount, 1, 'onClick handler should have been called once');
+  comp.el.click();
+  assert.equal(comp.__clickCount, 2, 'onClick handler should have been called twice');
+  comp.el.click();
+  assert.equal(comp.__clickCount, 3, 'onClick handler should have been called thrice');
+
+  // Using inline handler
+  comp = Component.mount($$(ClickableComponent, {useInlineHandler: true}), $('#qunit-fixture'));
+  comp.el.click();
+  assert.equal(comp.__clickCount, 1, 'onClick handler should have been called once');
+  comp.el.click();
+  assert.equal(comp.__clickCount, 2, 'onClick handler should have been called twice');
+  comp.el.click();
+  assert.equal(comp.__clickCount, 3, 'onClick handler should have been called thrice');
+});
+
+QUnit.test('Should store refs always on owners', function(assert) {
+  var MyComponent = TestComponent.extend({
+    render: function() {
+      return $$('div').append(
+        $$(SimpleComponent).append(
+          $$('div').ref('helloComp')
+        ).ref('simpleComp')
+      );
+    }
+  });
+
+  var comp = Component.mount($$(MyComponent), $('#qunit-fixture'));
+  assert.ok(comp.refs.helloComp, 'There should stil be a ref to the helloComp element/component');
+});
+
+// HACK: this is more of an integration test, but I did not manage to isolate the error
+// maybe the solution gets us closer to what actually went wrong.
+QUnit.test("Refs should survive rerenders", function(assert) {
+
+  var ComponentWithRefs = Component.extend({
+    getInitialState: function() {
+      return {contextid: 'hello'};
+    },
+
+    render: function() {
+      var el = $$('div').addClass('lc-lens lc-writer sc-controller');
+
+      var workspace = $$('div').ref('workspace').addClass('le-workspace');
+
+      workspace.append(
+        // Main (left column)
+        $$('div').ref('main').addClass("le-main").append(
+          $$(SimpleComponent).ref('toolbar').append($$(SimpleComponent)),
+
+          $$(SimpleComponent).ref('contentPanel').append(
+            $$(SimpleComponent).ref('coverEditor'),
+
+            // The full fledged document (ContainerEditor)
+            $$("div").ref('main').addClass('document-content').append(
+              $$(SimpleComponent, {
+              }).ref('mainEditor')
+            ),
+            $$(SimpleComponent).ref('bib')
+          )
+        )
+      );
+
+      // Context section (right column)
+      workspace.append(
+        $$(SimpleComponent, {
+        }).ref(this.state.contextId)
+      );
+
+      el.append(workspace);
+
+      // Status bar
+      el.append(
+        $$(SimpleComponent, {}).ref('statusBar')
+      );
+      return el;
+    },
+  });
+
+  var comp = Component.mount($$(ComponentWithRefs), $('#qunit-fixture'));
+  assert.ok(comp.refs.contentPanel, 'There should be a ref to the contentPanel component');
+  comp.setState({contextId: 'foo'});
+  assert.ok(comp.refs.contentPanel, 'There should stil be a ref to the contentPanel component');
+  comp.setState({contextId: 'bar'});
+  assert.ok(comp.refs.contentPanel, 'There should stil be a ref to the contentPanel component');
+  comp.setState({contextId: 'baz'});
+  assert.ok(comp.refs.contentPanel, 'There should stil be a ref to the contentPanel component');
 });
