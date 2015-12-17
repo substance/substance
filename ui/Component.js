@@ -89,6 +89,8 @@ function Component(parent, params) {
   params = params || {};
 
   this.refs = {};
+  this._preserved = {};
+
   // TODO: This is maybe not a good idea. If we want to do it, we could allow
   // ref (without the underscore) being passed but remove it from the params
   // afterwards so we don't pollute the props.
@@ -900,12 +902,12 @@ Component.Prototype = function ComponentPrototype() {
       }
       throw new Error("Component.render() must return one html element: e.g., $$('div')");
     }
-    if (!scope) {
-      scope = {
-        owner: this,
-        refs: {}
-      };
-    }
+
+    scope = {
+      owner: scope ? scope.owner : this,
+      parent: this
+    };
+
     var oldData = this._data;
 
     // the first time we need to create the component element
@@ -920,9 +922,15 @@ Component.Prototype = function ComponentPrototype() {
     // update the element
     this._updateElement(data, oldData, scope);
 
-    // when during the last render there where no 'keys'
+    // TODO: using refs as indicator for preservative rerendering
+    // is ok API wise, but should be addressed in a more explicit way
+    // in the implementation. The reason: refs are actually bound to the 'owner'
+    // but the decision whether to preserve must be done on 'parent'
+    // HACK: when during the last render there where no 'keys'
     // then we can just wipe and rerender
-    if (Object.keys(this.refs).length === 0) {
+    // var refs = this.refs;
+    // this.refs = {};
+    if (Object.keys(this._preserved).length === 0) {
       this._renderFromScratch(data, scope);
       return;
     }
@@ -1088,6 +1096,7 @@ Component.Prototype = function ComponentPrototype() {
         } else {
           console.warn('FIXME: owner is unknown.');
         }
+        this._preserved[data._ref] = comp;
       }
       if (comp._isOnRoute) {
         // TODO: probably this raises false alarms.
@@ -1100,7 +1109,6 @@ Component.Prototype = function ComponentPrototype() {
     }
 
     this.children = children;
-    // this.refs = clone(scope.refs);
     this._data = data;
 
     this.didRender();
@@ -1128,7 +1136,6 @@ Component.Prototype = function ComponentPrototype() {
         comp.triggerDidMount(isMounted);
       }
     }
-    // this.refs = scope.refs;
     this.children = children;
     this._data = data;
 
@@ -1136,7 +1143,11 @@ Component.Prototype = function ComponentPrototype() {
   };
 
   this._compileComponent = function(data, scope) {
-    return Component._render(data, { scope: scope, context: this });
+    scope = scope || {
+      owner: this,
+      parent: this
+    };
+    return Component._render(data, scope);
   };
 
   this._getContext = function() {
@@ -1293,18 +1304,17 @@ Component.$$ = Component.createElement;
   Internal implementation, rendering a virtual component
   created using the $$ operator.
 
-  Don't us it. You should use `Component.mount()` instead.
+  Don't use it. You should use `Component.mount()` instead.
 
   @private
 */
-Component._render = function(data, options) {
+Component._render = function(data, scope) {
   var component;
-  options = options || {};
-  var scope = options.scope || {
-    context: null,
-    refs: {}
+  scope = scope || {
+    owner: null,
+    parent: null
   };
-  var parent = options.context || "root";
+  var parent = scope.parent || "root";
   switch(data.type) {
     case 'text':
       component = new Component.Text(parent, data.props.text);
@@ -1333,9 +1343,15 @@ Component._render = function(data, options) {
     } else {
       console.warn('FIXME: owner is unknown.');
     }
-    // scope.refs[data._ref] = component;
+    // HACK: regarding 'ref' it is fine to register the component with the owner
+    // regarding 'preservative rendering' ATM we need to add the ref to the parent too
+    // TODO: find a better way to enable preservative rendering. Checking Object.keys(this.refs)
+    // is not the right way
+    if (scope.parent) {
+      scope.parent._preserved[data._ref] = component;
+    }
   }
-  if (data._isOnRoute) {
+  if (data._isOnRoute && scope.owner) {
     // TODO: probably I have to make sure that the route cleared before
     // rerendering, so that this check does not give a false alarm
     if (scope.owner.route) {
