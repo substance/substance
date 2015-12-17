@@ -107,7 +107,7 @@ ScrollPane.Prototype = function() {
   */
   this.getScrollPosition = function() {
     var scrollableEl = this.getScrollableElement();
-    return $(scrollableEl).scrollTop();
+    return Math.ceil($(scrollableEl).scrollTop());
   };
 
   /**
