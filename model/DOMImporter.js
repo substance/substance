@@ -81,15 +81,6 @@ DOMImporter.Prototype = function DOMImporterPrototype() {
     var state = {
       preserveWhitespace: false
     };
-    // get the target containerId from config or schema
-    var containerId = this.config.containerId;
-    if (!containerId && this.schema.getBodyContainer) {
-      containerId = this.schema.getBodyContainer();
-    }
-    if (!containerId) {
-      throw new Error('Container id must be specified: either via config.containerId, or via schema.getBodyContainer()');
-    }
-    state.containerId = containerId;
     this.state = state;
     this.reset();
     return state;
@@ -99,6 +90,7 @@ DOMImporter.Prototype = function DOMImporterPrototype() {
     this.state = extend(this.state, {
       nodes: [],
       inlineNodes: [],
+      containerId: null,
       container: [],
       ids: {},
       // stack of contexts to handle reentrant calls
@@ -111,15 +103,6 @@ DOMImporter.Prototype = function DOMImporterPrototype() {
 
   this.createDocument = function() {
     var doc = this._createDocument();
-    var containerId = this.state.containerId;
-    var container = doc.get(containerId);
-    if (!container) {
-      doc.create({
-        type: 'container',
-        id: containerId,
-        nodes: []
-      });
-    }
     return doc;
   };
 
@@ -127,13 +110,18 @@ DOMImporter.Prototype = function DOMImporterPrototype() {
     // creating all nodes
     var doc = this.createDocument();
     each(this.state.nodes, function(node) {
+      // delete if the node exists already
+      if (doc.get(node.id)) {
+        doc.delete(node.id);
+      }
       doc.create(node);
     });
-    // filling the container
-    doc.set([this.state.containerId, 'nodes'], this.state.container);
     // creating annotations afterwards so that the targeted nodes exist for sure
-    each(this.state.inlineNodes, function(inlineNode) {
-      doc.create(inlineNode);
+    each(this.state.inlineNodes, function(node) {
+      if (doc.get(node.id)) {
+        doc.delete(node.id);
+      }
+      doc.create(node);
     });
     return doc;
   };
@@ -148,11 +136,13 @@ DOMImporter.Prototype = function DOMImporterPrototype() {
     Converts and shows all children of a given element.
 
     @param {ui/DOMElement[]} elements All elements that should be converted into the container.
-    @param {String} containerId TODO The id of the target container node.
+    @param {String} containerId The id of the target container node.
+    @returns {Object} the preliminary container node
    */
-  this.convertContainer = function(elements) {
+  this.convertContainer = function(elements, containerId) {
     var state = this.state;
     state.container = [];
+    state.containerId = containerId;
     var iterator = new DefaultDOMElement.NodeIterator(elements);
     while(iterator.hasNext()) {
       var el = iterator.next();
@@ -182,6 +172,13 @@ DOMImporter.Prototype = function DOMImporterPrototype() {
         }
       }
     }
+    var container = {
+      type: 'container',
+      id: containerId,
+      nodes: this.state.container.slice(0)
+    };
+    this.createNode(container);
+    return container;
   };
 
   /**

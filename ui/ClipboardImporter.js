@@ -43,7 +43,6 @@ function ClipboardImporter(config) {
   extend(config, {
     trimWhitespaces: true,
     REMOVE_INNER_WS: true,
-    containerId: CLIPBOARD_CONTAINER_ID,
     converters: converters
   });
   ClipboardImporter.super.call(this, config);
