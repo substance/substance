@@ -22,8 +22,7 @@ function TestHTMLImporter() {
   TestHTMLImporter.super.call(this, {
     schema: schema,
     converters: converters,
-    DocumentClass: TestArticle,
-    containerId: 'main'
+    DocumentClass: TestArticle
   });
 }
 
@@ -31,7 +30,7 @@ HTMLImporter.extend(TestHTMLImporter, function() {
 
   this.convertDocument = function(documentEl) {
     var bodyEl = documentEl.find('body');
-    this.convertContainer(bodyEl.children, this.config.containerId);
+    this.convertContainer(bodyEl.children, 'main');
   };
 
 });

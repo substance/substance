@@ -11,7 +11,7 @@ module.exports = {
   import: function(el, node, converter) {
     var codeEl = el.find('code');
     if (codeEl) {
-      node.content = converter.annotatedText(codeEl, [node.id, 'content']);
+      node.content = converter.annotatedText(codeEl, [node.id, 'content'], { preserveWhitespace: true });
     }
   },
 
