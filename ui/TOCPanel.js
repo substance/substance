@@ -50,7 +50,7 @@ TOCPanel.Prototype = function() {
         .ref(entry.id)
         // TODO: Why does handleClick get bound to this.refs.panelEl and not this?
         // Seems that handlers will be bound to the parent, not the owner.
-        .on('click', this.handleClick.bind(this))
+        .on('click', this.handleClick)
         .append(
           $$(Icon, {icon: 'fa-caret-right'}),
           entry.name
@@ -72,8 +72,6 @@ TOCPanel.Prototype = function() {
   this.handleClick = function(e) {
     var nodeId = e.currentTarget.dataset.id;
     e.preventDefault();
-    // var toc = this.context.toc;
-    // toc.emit('entry:selected', nodeId);
     this.send('tocEntrySelected', nodeId);
   };
 };

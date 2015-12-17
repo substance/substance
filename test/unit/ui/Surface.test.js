@@ -18,7 +18,7 @@ QUnit.uiModule('ui/Surface');
 // This test was added to cover issue #82
 QUnit.uiTest("Set the selection after creating annotation.", function(assert) {
   var doc = simple();
-  var app = Component.mount($$(TestContainerEditor, {
+  var app = Component.mount(TestContainerEditor, {
     doc: doc,
     config: {
       controller: {
@@ -26,7 +26,7 @@ QUnit.uiTest("Set the selection after creating annotation.", function(assert) {
         commands: [],
       }
     }
-  }), $('#qunit-fixture'));
+  }, $('#qunit-fixture'));
 
   var surface = app.refs.editor;
 
