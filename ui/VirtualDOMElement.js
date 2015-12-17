@@ -30,6 +30,9 @@ function VirtualDOMElement() {
   this._ref = null;
   this._isOnRoute = false;
   this.props = {};
+
+  // used by Component
+  this._owner = null;
 }
 
 VirtualDOMElement.Prototype = function() {
@@ -45,6 +48,12 @@ VirtualDOMElement.Prototype = function() {
     @param {String} ref id for the compiled Component
   */
   this.ref = function(ref) {
+    // Failing early, as this feature depends on the notion of a 'owner'
+    // which can only be achieved by a controlling the rendering life-cycle
+    // as it is done by Component
+    if (!this._owner) {
+      throw new Error('$$().ref() can only be used during Component rendering.');
+    }
     this._ref = ref;
     return this;
   };
