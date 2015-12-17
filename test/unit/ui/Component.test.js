@@ -11,13 +11,27 @@ var $ = require('../../../util/jquery');
 QUnit.uiModule('ui/Component');
 
 var TestComponent = Component.extend({
+  spiesEnabled: true,
+  _enableSpies: function() {
+    ['didMount','didRender','dispose','shouldRerender','render'].forEach(function(name) {
+      this[name] = sinon.spy(this, name);
+    }.bind(this));
+  },
+  _disableSpies: function() {
+    ['didMount','didRender','dispose','shouldRerender','render'].forEach(function(name) {
+      this[name].restore();
+    }.bind(this));
+  },
   initialize: function() {
     // make some methods inspectable
-    this.didMount = sinon.spy(this, 'didMount');
-    this.didRender = sinon.spy(this, 'didRender');
-    this.dispose = sinon.spy(this, 'dispose');
-    this.shouldRerender = sinon.spy(this, 'shouldRerender');
-    this.render = sinon.spy(this, 'render');
+    // this.didMount = sinon.spy(this, 'didMount');
+    // this.didRender = sinon.spy(this, 'didRender');
+    // this.dispose = sinon.spy(this, 'dispose');
+    // this.shouldRerender = sinon.spy(this, 'shouldRerender');
+    // this.render = sinon.spy(this, 'render');
+    if (this.spiesEnabled) {
+      this._enableSpies();
+    }
   }
 });
 
@@ -494,4 +508,37 @@ QUnit.test("#312: refs should be bound to the owner, not to the parent.", functi
   var comp = Component.render(Parent);
   assert.isDefinedAndNotNull(comp.refs.foo, 'Ref should be bound to owner.');
   assert.equal(comp.refs.foo.text(), 'foo', 'Ref should point to the right component.');
+});
+
+QUnit.test("Preserving grand children using refs.", function(assert) {
+  var Grandchild = TestComponent.extend({
+    spiesEnabled: false,
+    render: function() {
+      return $$('div').append(this.props.foo);
+    },
+  });
+  var Parent = TestComponent.extend({
+    spiesEnabled: false,
+    render: function() {
+      var el = $$('div');
+      el.append(
+        $$('div').ref('child').append(
+          // generating a random property making sure the grandchild gets rerendered
+          $$(Grandchild, { foo: ""+Date.now() }).ref('grandchild')
+        )
+      );
+      return el;
+    },
+  });
+  var comp = Component.render(Parent);
+  assert.isDefinedAndNotNull(comp.refs.child, "Ref 'child' should be set.");
+  assert.isDefinedAndNotNull(comp.refs.grandchild, "Ref 'grandchild' should be set.");
+
+  var child = comp.refs.child;
+  var grandchild = comp.refs.grandchild;
+  comp.rerender();
+  assert.isDefinedAndNotNull(comp.refs.child, "Ref 'child' should be set.");
+  assert.isDefinedAndNotNull(comp.refs.grandchild, "Ref 'grandchild' should be set.");
+  assert.ok(comp.refs.child === child, "'child' should be the same");
+  assert.ok(comp.refs.grandchild === grandchild, "'grandchild' should be the same");
 });
