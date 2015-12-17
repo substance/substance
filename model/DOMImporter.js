@@ -79,7 +79,7 @@ DOMImporter.Prototype = function DOMImporterPrototype() {
 
   this._initState = function() {
     var state = {
-      trimWhitespaces: !!this.config.trimWhitespaces,
+      preserveWhitespace: false
     };
     // get the target containerId from config or schema
     var containerId = this.config.containerId;
@@ -252,17 +252,22 @@ DOMImporter.Prototype = function DOMImporterPrototype() {
   /**
     Convert annotated text.
 
-    Make sure you call this method only for elements where `this.isParagraphish(elements) === true`.
+    You should call this method only for elements containing rich-text.
 
     @param {ui/DOMElement} el
     @param {String[]} path The target property where the extracted text (plus annotations) should be stored.
+    @param {Object} options
+    @param {Boolean} options.preserveWhitespace when true will preserve whitespace. Default: false.
     @returns {String} The converted text as plain-text
    */
-  this.annotatedText = function(el, path) {
+  this.annotatedText = function(el, path, options) {
     var state = this.state;
     if (path) {
       if (state.stack.length>0) {
         throw new Error('Contract: it is not allowed to bind a new call annotatedText to a path while the previous has not been completed.', el.outerHTML);
+      }
+      if (options && options.preserveWhitespace) {
+        state.preserveWhitespace = true;
       }
       state.stack = [{ path: path, offset: 0, text: ""}];
     } else {
@@ -279,6 +284,7 @@ DOMImporter.Prototype = function DOMImporterPrototype() {
     var text = this._annotatedText(iterator);
     if (path) {
       state.stack.pop();
+      state.preserveWhitespace = false;
     }
     return text;
   };
@@ -509,7 +515,7 @@ DOMImporter.Prototype = function DOMImporterPrototype() {
 
   // TODO: this needs to be tested and documented
   this._prepareText = function(state, text) {
-    if (!state.trimWhitespaces) {
+    if (state.preserveWhitespace) {
       return text;
     }
     var repl = SPACE;
@@ -525,7 +531,9 @@ DOMImporter.Prototype = function DOMImporterPrototype() {
     }
     text = text.replace(WS_RIGHT, repl);
     // EXPERIMENTAL: also remove white-space within
-    if (this.config.REMOVE_INNER_WS) {
+    // this happens if somebody treats the text more like it would be done in Markdown
+    // i.e. introducing line-breaks
+    if (this.config.REMOVE_INNER_WS || state.removeInnerWhitespace) {
       text = text.replace(WS_ALL, SPACE);
     }
     state.lastChar = text[text.length-1] || state.lastChar;
