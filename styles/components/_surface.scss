@@ -7,3 +7,8 @@
     cursor: default;
   }
 }
+
+// We want Firefox to have a transparent native selection
+::-moz-selection {
+  background: rgba(77, 149, 233, 0.46);
+}
