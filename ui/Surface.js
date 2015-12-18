@@ -508,6 +508,18 @@ Surface.Prototype = function() {
   };
 
   this.onMouseDown = function(event) {
+
+    // special treatment for triple clicks
+    if (event.detail >= 3) {
+      var sel = this.getSelection();
+      if (sel.isPropertySelection()) {
+        this._selectProperty(sel.path);
+        event.preventDefault();
+        event.stopPropagation();
+        return;
+      }
+    }
+
     if ( event.which !== 1 ) {
       return;
     }
@@ -519,22 +531,28 @@ Surface.Prototype = function() {
     this.skipNextFocusEvent = true;
     // Bind mouseup to the whole document in case of dragging out of the surface
     this.dragging = true;
-    this.$document.one( 'mouseup', this.onMouseUp );
+    this.$document.one('mouseup', this.onMouseUp);
   };
 
   this.onMouseUp = function() {
     // ... and unbind the temporary handler
     this.dragging = false;
     this.setFocused(true);
-    // HACK: somehow the DOM selection is sometimes not there
     var self = this;
-    setTimeout(function() {
+    var textPropertyManager = this.textPropertyManager;
+    // HACK: somehow the DOM selection is sometimes not there
+    // TODO: works for me without this hack
+    // setTimeout(function() {
       if (self.surfaceSelection) {
         var sel = self.surfaceSelection.getSelection();
-        self.textPropertyManager.removeSelection();
-        self.setSelection(sel);
+        if (textPropertyManager.hasSelection()) {
+          textPropertyManager.removeSelection();
+          self.setSelection(sel);
+        } else {
+          self._setModelSelection(sel);
+        }
       }
-    });
+    // });
   };
 
   this.onMouseMove = function() {
@@ -720,6 +738,17 @@ Surface.Prototype = function() {
       this.emit('selection:changed', sel, this);
     }
     return true;
+  };
+
+  this._selectProperty = function(path) {
+    var doc = this.getDocument();
+    var text = doc.get(path);
+    this.setSelection(doc.createSelection({
+      type: 'property',
+      path: path,
+      startOffset: 0,
+      endOffset: text.length
+    }));
   };
 };
 
