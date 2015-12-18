@@ -7,7 +7,7 @@ var app = express();
 
 var config = require('./doc/config.json');
 var generate = require('./doc/generator/generate');
-var serverUtils = require('./util/serverUtils');
+var serverUtils = require('./util/server');
 
 // use static server
 app.use('/docs', express.static(path.join(__dirname, 'doc/assets')));

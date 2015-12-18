@@ -5,7 +5,7 @@
 - Fixed a bug where Firefox ignored input events (e3d6173)
 - Fixed an issue in ui/Component where owner and parent were confused (085a695)
 - Activate incremental rendering for ui/AnnotatedTextComponent (3e3fb8c)
-- Added serverUtils for easier development (7e12ae7)
+- Added util/server for easier development (7e12ae7)
 
 ## Beta 2
 

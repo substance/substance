@@ -6,10 +6,10 @@ var sass = require('node-sass');
   @example
 
   ```js
-  var serverUtils = require('substance/util/serverUtils');
+  var serverUtils = require('substance/util/server');
   ```
 */
-var serverUtils = {};
+var server = {};
 
 /**
   Serves a bundled CSS file. For compilation Sass is used.
@@ -21,10 +21,10 @@ var serverUtils = {};
   @example
 
   ```js
-  serverUtils.serveStyles(app, '/app.css', path.join(__dirname, 'src', 'app.scss'));
+  server.serveStyles(app, '/app.css', path.join(__dirname, 'src', 'app.scss'));
   ```
 */
-serverUtils.serveStyles = function(app, route, sourcePath) {
+server.serveStyles = function(app, route, sourcePath) {
   app.get(route, function(req, res) {
     sass.render({
       file: sourcePath,
@@ -53,10 +53,10 @@ serverUtils.serveStyles = function(app, route, sourcePath) {
   @example
 
   ```js
-  serverUtils.serveJS(app, 'app.js', path.join(__dirname, 'src', 'app.js'));
+  server.serveJS(app, 'app.js', path.join(__dirname, 'src', 'app.js'));
   ```
 */
-serverUtils.serveJS = function(app, route, sourcePath) {
+server.serveJS = function(app, route, sourcePath) {
   app.get(route, function(req, res) {
     browserify({ debug: true, cache: false })
       .add(sourcePath)
@@ -68,4 +68,4 @@ serverUtils.serveJS = function(app, route, sourcePath) {
   });
 };
 
-module.exports = serverUtils;
+module.exports = server;
