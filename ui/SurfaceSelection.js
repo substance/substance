@@ -57,7 +57,6 @@ SurfaceSelection.Prototype = function() {
       this.state = null;
       return;
     }
-    // console.log('###', anchorNode, anchorOffset, focusNode, focusOffset);
     var start, end;
     if (collapsed) {
       start = this.getModelCoordinate(anchorNode, anchorOffset, options);
@@ -293,6 +292,9 @@ SurfaceSelection.Prototype = function() {
 
   this.getSelection = function() {
     var wSel = window.getSelection();
+    // Use this log whenever the mapping goes wrong to analyze what
+    // is actually being provided by the browser
+    // console.log('SurfaceSelection.getSelection()', 'anchorNode:', wSel.anchorNode, 'anchorOffset:', wSel.anchorOffset, 'focusNode:', wSel.focusNode, 'focusOffset:', wSel.focusOffset, 'collapsed:', wSel.collapsed);
     var sel = this._getSelection(wSel.anchorNode, wSel.anchorOffset, wSel.focusNode, wSel.focusOffset, wSel.collapsed);
     // console.log('### selection', sel.toString());
     return sel;
