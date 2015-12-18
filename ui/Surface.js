@@ -10,6 +10,7 @@ var Clipboard = require('./Clipboard');
 var $$ = Component.$$;
 var $ = require('../util/jquery');
 var copySelection = require('../model/transform/copySelection');
+var platform = require('../util/platform');
 
 /**
    Abstract interface for editing components.
@@ -19,7 +20,6 @@ var copySelection = require('../model/transform/copySelection');
    @component
    @abstract
 */
-
 function Surface() {
   Component.apply(this, arguments);
 
@@ -53,11 +53,6 @@ function Surface() {
   this.domObserverConfig = { subtree: true, characterData: true };
   this.skipNextObservation = false;
 
-  // Note: doing this here, so that we don't crash under node when
-  // this file gets required
-  this.isIE = Surface.detectIE();
-  this.isFF = window.navigator.userAgent.toLowerCase().indexOf('firefox') > -1;
-
   // set when editing is enabled
   this.enabled = true;
   this.undoEnabled = true;
@@ -75,7 +70,7 @@ Surface.Prototype = function() {
     // Keyboard Events
     el.on('keydown', this.onKeyDown);
     // OSX specific handling of dead-keys
-    if (!this.isIE) {
+    if (!platform.isIE) {
       el.on('compositionstart', this.onCompositionStart);
     }
 
@@ -83,7 +78,7 @@ Surface.Prototype = function() {
     // as it contains the actual inserted string.
     // Though, it is not available in FF and not working properly in IE
     // where we fall back to a ContentEditable backed implementation.
-    if (window.TextEvent && !this.isIE) {
+    if (window.TextEvent && !platform.isIE) {
       el.on('textInput', this.onTextInput);
     } else {
       el.on('keypress', this.onTextInputShim);
@@ -717,7 +712,7 @@ Surface.Prototype = function() {
     // when we set the selection
     // This is actually only a problem on FF, other browsers set the focus implicitly
     // when a new DOM selection is set.
-    if (this.isFF && !sel.isNull() && this.el) {
+    if (platform.isFF && !sel.isNull() && this.el) {
       this.el.focus();
     }
   };
@@ -773,27 +768,6 @@ Surface.Keys =  {
   SPACE: 32
 };
 
-Surface.detectIE = function() {
-  var ua = window.navigator.userAgent;
-  var msie = ua.indexOf('MSIE ');
-  if (msie > 0) {
-      // IE 10 or older => return version number
-      return parseInt(ua.substring(msie + 5, ua.indexOf('.', msie)), 10);
-  }
-  var trident = ua.indexOf('Trident/');
-  if (trident > 0) {
-      // IE 11 => return version number
-      var rv = ua.indexOf('rv:');
-      return parseInt(ua.substring(rv + 3, ua.indexOf('.', rv)), 10);
-  }
-  var edge = ua.indexOf('Edge/');
-  if (edge > 0) {
-     // IE 12 => return version number
-     return parseInt(ua.substring(edge + 5, ua.indexOf('.', edge)), 10);
-  }
-  // other browser
-  return false;
-};
 
 Surface.getDOMRangeFromEvent = function(evt) {
   var range, x = evt.clientX, y = evt.clientY;
