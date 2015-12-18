@@ -2,7 +2,6 @@
 -----------------------------------------------------*/
 
 .sc-scroll-pane {
-
   position: absolute;
   top: 0px;
   bottom: 0px;
@@ -22,18 +21,25 @@
       right: 20px;
     }
 
-    /* Hide native scroll bar in content panel */
+    // Hide native scroll bar in content panel
     .se-scrollable::-webkit-scrollbar {
       width: 0px;
       height: 0px;
     }
-
     .se-scrollable::-webkit-scrollbar-thumb {
       background-color: rgba(0, 0, 0, 0);
     }
 
+    // Hide native scrollbar in Internet Explorer/Edge
     .se-scrollable {
       -ms-overflow-style: none;
+    }
+
+    // Firefox-specific hack for hiding the scrollbar
+    &.sm-firefox .se-scrollable {
+      margin-right: -15px;
+      overflow-y: scroll;
+      overflow-x: hidden;
     }
   }
 

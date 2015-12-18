@@ -75,7 +75,7 @@ Scrollbar.Prototype = function() {
 
   this.render = function() {
     var el = $$('div')
-      .addClass('sc-scrollbar '+this.props.contextId)
+      .addClass('sc-scrollbar')
       .on('mousedown', this.onMouseDown);
     
     if (this.props.highlights) {
