@@ -2,6 +2,7 @@
 
 var inBrowser = (typeof window !== 'undefined');
 var isEmpty = require('lodash/lang/isEmpty');
+var platform = require('../../util/platform');
 
 QUnit.assert.fail = function(msg) {
   this.push(false, false, true, msg);
@@ -41,6 +42,12 @@ QUnit.uiModule = function(name, hooks) {
 
 QUnit.uiTest = function() {
   if (inBrowser) {
+    QUnit.test.apply(QUnit.test, arguments);
+  }
+};
+
+QUnit.firefoxTest = function() {
+  if (inBrowser && platform.isFF) {
     QUnit.test.apply(QUnit.test, arguments);
   }
 };
