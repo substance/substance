@@ -80,8 +80,12 @@ TextPropertyManager.Prototype = function() {
     this.selectionFragments = fragments;
   };
 
+  this.hasSelection = function() {
+    return (this.selectionFragments.length > 0);
+  };
+
   this.removeSelection = function() {
-    if (this.selectionFragments.length === 0) return;
+    if (!this.hasSelection()) return;
     each(this.selectionFragments, function(frag) {
       var record = this.records[frag.path];
       if (record) {
