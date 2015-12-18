@@ -11,7 +11,7 @@
 
   // Substance scrollbar active
   &.sm-substance-scrollbar {
-    
+
     // Make space for Substance Scrollbar on the left side
     &.sm-scrollbar-position-left .se-scrollable {
       left: 20px;
@@ -27,12 +27,16 @@
       width: 0px;
       height: 0px;
     }
-    
+
     .se-scrollable::-webkit-scrollbar-thumb {
       background-color: rgba(0, 0, 0, 0);
     }
+
+    .se-scrollable {
+      -ms-overflow-style: none;
+    }
   }
-  
+
   // The scrollable container element
   .se-scrollable {
     position: absolute;
