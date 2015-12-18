@@ -1,12 +1,12 @@
 'use strict';
 
-var _ = require('../util/helpers');
+var isEqual = require('lodash/lang/isEqual');
 var $ = require('../util/jquery');
 var oo = require('../util/oo');
 var Document = require('../model/Document');
 var Range = require('../model/Range');
 var Coordinate = require('../model/Coordinate');
-var isEqual = require('lodash/lang/isEqual');
+var Selection = require('../model/Selection');
 
 /*
  * A class that maps DOM selections to model selections.
@@ -249,7 +249,7 @@ SurfaceSelection.Prototype = function() {
       new Coordinate(start.path, start.offset),
       new Coordinate(end.path, end.offset)
     );
-    if (_.isEqual(start.path, end.path)) {
+    if (isEqual(start.path, end.path)) {
       return doc.createSelection({
         type: 'property',
         path: start.path,
@@ -318,9 +318,52 @@ SurfaceSelection.Prototype = function() {
     // Use this log whenever the mapping goes wrong to analyze what
     // is actually being provided by the browser
     // console.log('SurfaceSelection.getSelection()', 'anchorNode:', wSel.anchorNode, 'anchorOffset:', wSel.anchorOffset, 'focusNode:', wSel.focusNode, 'focusOffset:', wSel.focusOffset, 'collapsed:', wSel.collapsed);
+    if (wSel.rangeCount === 0) {
+      return Selection.nullSelection;
+    }
+    // HACK: special treatment for edge cases as addressed by #354.
+    // Sometimes anchorNode and focusNodes are the surface
+    if ($(wSel.anchorNode).is('.surface')) {
+      var wRange = wSel.getRangeAt(0);
+      return this._getSelectionFromRange(wRange);
+    }
     var sel = this._getSelection(wSel.anchorNode, wSel.anchorOffset, wSel.focusNode, wSel.focusOffset, wSel.collapsed);
     // console.log('### selection', sel.toString());
     return sel;
+  };
+
+  this._getSelectionFromRange = function(wRange) {
+    var frag = wRange.cloneContents();
+    var props = frag.querySelectorAll('*[data-path]');
+    if (props.length === 0) {
+      return Selection.nullSelection;
+    } else {
+      var doc = this.doc;
+      var first = props[0];
+      var last = props[props.length-1];
+      var startPath = first.dataset.path.split('.');
+      var text;
+      if (first === last) {
+        text = doc.get(startPath);
+        return doc.createSelection({
+          type: 'property',
+          path: startPath,
+          startOffset: 0,
+          endOffset: text.length
+        });
+      } else {
+        var endPath = last.dataset.path.split('.');
+        text = doc.get(endPath);
+        return doc.createSelection({
+          type: 'container',
+          containerId: this.container.id,
+          startPath: startPath,
+          startOffset: 0,
+          endPath: endPath,
+          endOffset: text.length
+        });
+      }
+    }
   };
 
   var _findDomPosition = function(element, offset) {
