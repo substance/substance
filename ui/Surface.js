@@ -581,6 +581,11 @@ Surface.Prototype = function() {
 
   this.onNativeBlur = function() {
     // console.log('Native blur on surface', this.__id__);
+
+    // clearing DOM selection first, which eliminates strange selection
+    // artifacts coming from changing the text property structure
+    // while having a rendered DOM selection.
+    window.getSelection().removeAllRanges();
     this.textPropertyManager.renderSelection(this.selection);
     this.isNativeFocused = false;
     this.skipNextFocusEvent = false;
