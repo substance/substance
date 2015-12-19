@@ -71,9 +71,11 @@ AnnotatedTextComponent.Prototype = function() {
       }
       var ComponentClass = componentRegistry.get(node.type) || AnnotationComponent;
       var el = $$(ComponentClass, { doc: doc, node: node });
-      // adding keys here, enables preservative rerendering
-      // TODO: experiment, if this reduces cursor flickering, already...
-      el.ref(id + "@" + fragmentCounters[id]);
+      // adding refs here, enables preservative rerendering
+      // TODO: while this solves problems with rerendering inline nodes
+      // with external content, it decreases the overall performance too much.
+      // We should optimize the component first before we can enable this.
+      // el.ref(id + "@" + fragmentCounters[id]);
       return el;
     };
     fragmenter.onExit = function(fragment, context, parentContext) {
