@@ -535,9 +535,11 @@ Surface.Prototype = function() {
     this.setFocused(true);
     var self = this;
     var textPropertyManager = this.textPropertyManager;
-    // HACK: somehow the DOM selection is sometimes not there
-    // TODO: works for me without this hack
-    // setTimeout(function() {
+    // ATTENTION: this delay is necessary for cases the user clicks
+    // into an existing selection. In this case the window selection still
+    // holds the old value, and is set to the correct selection after this
+    // being called.
+    setTimeout(function() {
       if (self.surfaceSelection) {
         var sel = self.surfaceSelection.getSelection();
         if (textPropertyManager.hasSelection()) {
@@ -547,7 +549,7 @@ Surface.Prototype = function() {
           self._setModelSelection(sel);
         }
       }
-    // });
+    });
   };
 
   this.onMouseMove = function() {
