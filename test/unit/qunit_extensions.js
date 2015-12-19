@@ -59,4 +59,13 @@ if (inBrowser) {
       console.error(details.message);
     }
   });
+
+  QUnit.setDOMSelection = function(startNode, startOffset, endNode, endOffset) {
+    var sel = window.getSelection();
+    var range = window.document.createRange();
+    range.setStart(startNode, startOffset);
+    range.setEnd(endNode, endOffset);
+    sel.removeAllRanges();
+    sel.addRange(range);
+  };
 }

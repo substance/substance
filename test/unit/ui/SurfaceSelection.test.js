@@ -243,10 +243,7 @@ QUnit.firefoxTest("Issue #354: Wrong selection in FF when double clicking betwee
   var el = $('#qunit-fixture').html(surfaceWithParagraphs)[0];
   var surfaceSelection = new SurfaceSelection(el, new StubDoc());
   var surface = el.querySelector('#surface');
-  var wRange = document.createRange();
-  wRange.setStart(surface, 0);
-  wRange.setEnd(surface, 1);
-  window.getSelection().addRange(wRange);
+  QUnit.setDOMSelection(surface, 0, surface, 1);
   var sel = surfaceSelection.getSelection();
   assert.ok(sel.isPropertySelection(), "Selection should be property selection.");
   assert.deepEqual(sel.path, ['p1', 'content'], 'Path should be extracted correctly.');
