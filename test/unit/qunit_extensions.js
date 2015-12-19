@@ -2,6 +2,7 @@
 
 var inBrowser = (typeof window !== 'undefined');
 var isEmpty = require('lodash/lang/isEmpty');
+var platform = require('../../util/platform');
 
 QUnit.assert.fail = function(msg) {
   this.push(false, false, true, msg);
@@ -45,6 +46,12 @@ QUnit.uiTest = function() {
   }
 };
 
+QUnit.firefoxTest = function() {
+  if (inBrowser && platform.isFF) {
+    QUnit.test.apply(QUnit.test, arguments);
+  }
+};
+
 if (inBrowser) {
   // log errors into the console because there source maps are considered
   QUnit.log(function(details) {
@@ -52,4 +59,13 @@ if (inBrowser) {
       console.error(details.message);
     }
   });
+
+  QUnit.setDOMSelection = function(startNode, startOffset, endNode, endOffset) {
+    var sel = window.getSelection();
+    var range = window.document.createRange();
+    range.setStart(startNode, startOffset);
+    range.setEnd(endNode, endOffset);
+    sel.removeAllRanges();
+    sel.addRange(range);
+  };
 }

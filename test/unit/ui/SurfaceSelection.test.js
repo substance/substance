@@ -2,10 +2,26 @@
 
 require('../qunit_extensions');
 
+var isArray = require('lodash/lang/isArray');
 var SurfaceSelection = require('../../../ui/SurfaceSelection');
+var Document = require('../../../model/Document');
 var $ = require('../../../util/jquery');
 
 QUnit.uiModule('ui/SurfaceSelection');
+
+var StubDoc = function() {}
+StubDoc.prototype.get = function(path) {
+  var pathStr = path;
+  if (isArray(path)) {
+    pathStr = path.join('.');
+  }
+  var el = window.document.body.querySelector('*[data-path="'+pathStr+'"]');
+  if (!el) {
+    return "";
+  }
+  return el.textContent;
+};
+StubDoc.prototype.createSelection = Document.prototype.createSelection;
 
 // Fixtures
 var singlePropertyFixture = [
@@ -59,6 +75,20 @@ var wrappedTextNodesWithExternals = [
       '<span id="before-last">..</span>',
       '<span data-external="1">$</span>',
     '</span>',
+  '</div>'
+].join('');
+
+var surfaceWithParagraphs = [
+  '<div id="surface" class="surface">',
+    '<div id="p1">',
+      '<span data-path="p1.content">AA</span>',
+    '</div>',
+    '<div id="p2">',
+      '<span data-path="p2.content">BBB</span>',
+    '</div>',
+    '<div id="p3">',
+      '<span data-path="p.content">CCCC</span>',
+    '</div>',
   '</div>'
 ].join('');
 
@@ -207,4 +237,15 @@ QUnit.uiTest("Issue #273: 'Could not find char position' when clicking right abo
   assert.ok(coor, "Extrated coordinate should be !== null");
   assert.deepEqual(coor.path, ['prop', 'content'], 'Path should be extracted correctly.');
   assert.equal(coor.offset, 270, 'Offset should be extracted correctly.');
+});
+
+QUnit.firefoxTest("Issue #354: Wrong selection in FF when double clicking between lines", function(assert) {
+  var el = $('#qunit-fixture').html(surfaceWithParagraphs)[0];
+  var surfaceSelection = new SurfaceSelection(el, new StubDoc());
+  var surface = el.querySelector('#surface');
+  QUnit.setDOMSelection(surface, 0, surface, 1);
+  var sel = surfaceSelection.getSelection();
+  assert.ok(sel.isPropertySelection(), "Selection should be property selection.");
+  assert.deepEqual(sel.path, ['p1', 'content'], 'Path should be extracted correctly.');
+  assert.deepEqual([sel.startOffset, sel.endOffset], [0, 2], 'Offsets should be extracted correctly.');
 });
