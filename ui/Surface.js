@@ -505,7 +505,7 @@ Surface.Prototype = function() {
   this.onMouseDown = function(event) {
 
     // special treatment for triple clicks
-    if (event.detail >= 3) {
+    if (!(platform.isIE && platform.version<12) && event.detail >= 3) {
       var sel = this.getSelection();
       if (sel.isPropertySelection()) {
         this._selectProperty(sel.path);

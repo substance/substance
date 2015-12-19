@@ -18,7 +18,15 @@ var platform = {
   /**
     True if user agent is Firefox
   */
-  isFF: false
+
+  isFF: false,
+  /*
+    Major version
+
+    ATTENTION: at the moment only extracted for IE
+  */
+  version: -1,
+
 };
 
 if (typeof window !== 'undefined') {
@@ -30,14 +38,23 @@ if (typeof window !== 'undefined') {
 
   if (msie > 0) {
       // IE 10 or older => return version number
-      platform.isIE = parseInt(ua.substring(msie + 5, ua.indexOf('.', msie)), 10);
+      platform.isIE = true;
+      platform.version = 10;
+      // TODO: if we need someday, this would be the exact version number
+      // parseInt(ua.substring(msie + 5, ua.indexOf('.', msie)), 10);
   } else if (trident > 0) {
       // IE 11 => return version number
-      var rv = ua.indexOf('rv:');
-      platform.isIE = parseInt(ua.substring(rv + 3, ua.indexOf('.', rv)), 10);
+      platform.isIE = true;
+      platform.version = 11;
+      // TODO: if we need someday, this would be the exact version number
+      // var rv = ua.indexOf('rv:');
+      // parseInt(ua.substring(rv + 3, ua.indexOf('.', rv)), 10);
   } else if (edge > 0) {
      // IE 12 => return version number
-     platform.isIE = parseInt(ua.substring(edge + 5, ua.indexOf('.', edge)), 10);
+     platform.isIE = true;
+     platform.version = 12;
+     // TODO: if we need someday, this would be the exact version number
+     parseInt(ua.substring(edge + 5, ua.indexOf('.', edge)), 10);
   }
 
   // Detect Firefox
