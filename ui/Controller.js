@@ -464,6 +464,18 @@ Controller.Prototype = function() {
     this.onCommandExecuted(info, commandName, cmd);
   };
 
+  this.uploadFile = function(file, cb) {
+    // This is a testing implementation
+    if (this.props.onUploadFile) {
+      return this.props.onUploadFile(file, cb);
+    } else {
+      // Default file upload implementation
+      // We just return a temporary objectUrl
+      var fileUrl = window.URL.createObjectURL(file);
+      cb(null, fileUrl);
+    }
+  };
+
   /**
    * Push surface state
    */
