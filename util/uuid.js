@@ -17,8 +17,8 @@ Dual licensed under the MIT and GPL licenses.
  * @memberof module:Basics
  */
 module.exports = function(prefix, len) {
-  if (prefix && prefix[prefix.length-1] !== "_") {
-    prefix = prefix.concat("_");
+  if (prefix && prefix[prefix.length-1] !== "-") {
+    prefix = prefix.concat("-");
   }
   var chars = '0123456789abcdefghijklmnopqrstuvwxyz'.split(''),
       uuid = [],
