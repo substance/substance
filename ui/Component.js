@@ -346,6 +346,7 @@ Component.Prototype = function ComponentPrototype() {
       }
       comp = comp.getParent();
     }
+    console.warn('Action', action, 'was not handled.');
     return false;
   };
 
