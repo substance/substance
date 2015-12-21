@@ -21,7 +21,7 @@ DialogHeader.Prototype = function() {
 
   this.handleCancel = function(e) {
     e.preventDefault();
-    this.send("switchContext", this.props.exitContext || "toc");
+    this.send('closeDialog');
   };
 
 };
