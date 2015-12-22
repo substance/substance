@@ -3,6 +3,7 @@
 require('../qunit_extensions');
 var sample = require('../../fixtures/container_sample');
 var simpleSample = require('../../fixtures/sample1');
+var empty = require('../../fixtures/empty');
 var DocumentAddress = require('../../../model/DocumentAddress');
 var uuid = require('../../../util/uuid');
 
@@ -241,19 +242,19 @@ QUnit.test("Issue #360: Comparing container addresses", function(assert) {
 });
 
 QUnit.test("Issue #360 (II): getting a range of addresses", function(assert) {
-  var doc = sample();
+  var doc = empty();
   doc.transaction(function(tx) {
     var container = tx.get('main');
     for (var i = 0; i < 25; i++) {
       var p = tx.create({
         type: 'paragraph',
-        id: uuid(),
+        id: "p" + i,
         content: "XXX"
       });
-      container.show(p.pid);
+      container.show(p.id);
     }
   });
   var container = doc.get('main');
-  var addresses = container.getAddressRange([0,0], [24, 0]);
+  var addresses = container.getAddressRange(new DocumentAddress(0,0), new DocumentAddress(24, 0));
   assert.equal(addresses.length, 25, "There should be 25 addresses");
 });

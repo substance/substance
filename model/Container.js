@@ -324,18 +324,16 @@ DocumentNode.extend(Container, ParentNodeMixin, function() {
   };
 
   this.getAddressRange = function(startAddress, endAddress) {
-    if (endAddress < startAddress) {
+    if (endAddress.isBefore(startAddress)) {
       var tmp = startAddress;
       startAddress = endAddress;
       endAddress = tmp;
     }
     var addresses = [startAddress];
-    if (startAddress < endAddress) {
-      var address = startAddress;
-      while (address < endAddress) {
-        address = this.getNextAddress(address);
-        addresses.push(address);
-      }
+    var address = startAddress;
+    while (address.isBefore(endAddress)) {
+      address = this.getNextAddress(address);
+      addresses.push(address);
     }
     return addresses;
   };
