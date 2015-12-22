@@ -111,7 +111,7 @@ QUnit.test("Deleting all", function(assert) {
   var path = out.selection.getPath();
   var address = container.getAddress(path);
   assert.ok(out.selection.isCollapsed(), "Selection should be collapsed (Cursor).");
-  assert.deepEqual(address, [0,0], "Cursor should be in empty text node.");
+  assert.ok(address.isEqual([0,0]), "Cursor should be in empty text node.");
   assert.equal(out.selection.start.offset, 0, "Cursor should be at first position.");
 });
 
@@ -147,7 +147,7 @@ QUnit.test("Deleting partially", function(assert) {
   var path = out.selection.getPath();
   var address = container.getAddress(path);
   assert.ok(out.selection.isCollapsed(), "Selection should be collapsed (Cursor).");
-  assert.deepEqual(address, [0,0], "Cursor should be in empty text node.");
+  assert.ok(address.isEqual([0,0]), "Cursor should be in empty text node.");
   assert.equal(out.selection.start.offset, 0, "Cursor should be at first position.");
 });
 

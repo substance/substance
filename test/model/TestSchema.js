@@ -17,6 +17,7 @@ var TableRow = require('../../packages/table/TableRow');
 var TableCell = require('../../packages/table/TableCell');
 var List = require('../../packages/list/List');
 var ListItem = require('../../packages/list/ListItem');
+var Image = require('../../packages/image/Image');
 
 var schema = new Schema("test-article", "1.0.0");
 
@@ -33,6 +34,7 @@ schema.addNodes([
   Link,
   Table, TableSection, TableRow, TableCell,
   List, ListItem,
+  Image,
   TestNode,
   TestContainerAnnotation,
   TestStructuredNode

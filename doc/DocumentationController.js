@@ -19,10 +19,11 @@ function DocumentationController(parent, params) {
 
   this.handleApplicationKeyCombos = this.handleApplicationKeyCombos.bind(this);
   this.handleActions({
-    "switchState": this.switchState,
-    "extendState": this.extendState,
-    "switchContext": this.switchContext,
-    'tocEntrySelected': this.tocEntrySelected
+    'switchState': this.switchState,
+    'extendState': this.extendState,
+    'switchContext': this.switchContext,
+    'tocEntrySelected': this.focusNode,
+    'focusNode': this.focusNode
   });
 }
 
@@ -30,7 +31,7 @@ DocumentationController.Prototype = function() {
 
   var _super = DocumentationController.super.prototype;
 
-  this.tocEntrySelected = function(nodeId) {
+  this.focusNode = function(nodeId) {
     this.extendState({
       nodeId: nodeId
     });
