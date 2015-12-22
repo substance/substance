@@ -11,7 +11,10 @@ var breakNode = require('../model/transform/breakNode');
 var insertNode = require('../model/transform/insertNode');
 var switchTextType = require('../model/transform/switchTextType');
 var paste = require('../model/transform/paste');
+var uuid = require('../util/uuid');
 var ContainerNodeMixin = require('./ContainerNodeMixin');
+var Component = require('./Component');
+var $$ = Component.$$;
 
 /**
   Represents a flow editor that manages a sequence of nodes in a container. Needs to be
@@ -61,23 +64,59 @@ function ContainerEditor() {
 
 ContainerEditor.Prototype = function() {
 
+  // Create a first text element
+  this.onCreateText = function() {
+    this.transaction(function(tx) {
+      var container = tx.get(this.props.containerId);
+      var textType = tx.getSchema().getDefaultTextType();
+      var node = tx.create({
+        id: uuid(textType),
+        type: textType,
+        content: 'Start writing'
+      });
+      container.show(node.id);
+    }.bind(this));
+    this.rerender();
+  };
+
+  this.isEmpty = function() {
+    var doc = this.getDocument();
+    var containerNode = doc.get(this.props.containerId);
+    return (containerNode && containerNode.nodes.length === 0);
+  };
+
+  this.shouldEnableSurface = function() {
+    return !this.isEmpty();
+  };
+
   this.render = function() {
     var el = Surface.prototype.render.call(this);
 
     var doc = this.getDocument();
+    var containerId = this.props.containerId;
     var containerNode = doc.get(this.props.containerId);
+    if (!containerNode) {
+      console.warn('No container node found for ', this.props.containerId);
+    }
+    var isEmpty = this.isEmpty();
 
-    el.addClass('sc-container-editor container-node ' + containerNode.id)
+    el.addClass('sc-container-editor container-node ' + containerId)
       .attr({
         spellCheck: false,
-        "data-id": containerNode.id,
-        "contenteditable": true
+        "data-id": containerId,
+        "contenteditable": !isEmpty
       });
 
-    // node components
-    _.each(containerNode.nodes, function(nodeId) {
-      el.append(this._renderNode(nodeId));
-    }, this);
+    if (isEmpty) {
+      el.append(
+        $$('a').attr('href', '#').append('Create text').on('click', this.onCreateText)
+      );
+    } else {
+      // node components
+      _.each(containerNode.nodes, function(nodeId) {
+        el.append(this._renderNode(nodeId));
+      }, this);
+    }
 
     return el;
   };
