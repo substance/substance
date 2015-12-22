@@ -139,6 +139,10 @@ DocumentNode.Prototype = function() {
     return addressablePropertyNames || [];
   };
 
+  this.hasAddressableProperties = function() {
+    return this.getAddressablePropertyNames().length > 0;
+  };
+
   this.getPropertyNameAt = function(idx) {
     var propertyNames = this.constructor.static.addressablePropertyNames || [];
     return propertyNames[idx];

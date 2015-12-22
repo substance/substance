@@ -288,8 +288,8 @@ QUnit.test("Addresses for nodes without editable properties.", function(assert) 
   var img = doc.get('img');
   var address = container._getFirstAddress(img);
   assert.isNullOrUndefined(address, "Image does not have an addressable property.");
-  address = container.getNextAddress(new DocumentAddress(1,0));
-  assert.isAddressEqual([2,0], "Image address should be skipped.");
+  address = container.getNextAddress(new DocumentAddress(0,0));
+  assert.isAddressEqual(address, [2,0], "Image address should be skipped.");
   var range = container.getAddressRange(new DocumentAddress(1,0), new DocumentAddress(2,0));
   assert.equal(range.length, 2, "There should be 2 addressable properties.");
 });
