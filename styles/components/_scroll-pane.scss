@@ -17,8 +17,16 @@
     }
 
     // Make space for Substance Scrollbar on the right side
-    &.sm-scrollbar-position-right .se-scrollable {
-      right: 20px;
+    &.sm-scrollbar-position-right {
+      // Patches the scrollbar to stick on the right side
+      .sc-scrollbar {
+        right: 0px;
+        left: auto;
+      }
+
+      .se-scrollable {
+        right: 20px;
+      }
     }
 
     // Hide native scroll bar in content panel

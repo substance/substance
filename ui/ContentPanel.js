@@ -21,6 +21,9 @@ function ContentPanel() {
   doc.connect(this, {
     'document:changed': this.onDocumentChange
   }, -1);
+
+  // We keep this as an option if scrolling gets too slow
+  // this._debouncedOnScroll = debounce(this.onScroll.bind(this), 500);
 }
 
 ContentPanel.Prototype = function() {
@@ -40,8 +43,8 @@ ContentPanel.Prototype = function() {
     
     el.append(
       $$(ScrollPane, {
-        scrollbarType: 'substance', // defaults to native
-        scrollbarPosition: 'left', // defaults to right
+        scrollbarType: this.props.scrollbarType || 'substance',
+        scrollbarPosition: this.props.scrollbarPosition || 'left',
         onScroll: this.onScroll.bind(this)
       }).append(
         this.props.children
