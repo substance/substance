@@ -67,7 +67,7 @@ ContainerEditor.Prototype = function() {
   // Create a first text element
   this.onCreateText = function() {
     var newSel;
-    this.transaction(function(tx, args) {
+    this.transaction(function(tx) {
       var container = tx.get(this.props.containerId);
       var textType = tx.getSchema().getDefaultTextType();
       var node = tx.create({
@@ -76,7 +76,7 @@ ContainerEditor.Prototype = function() {
         content: ''
       });
       container.show(node.id);
-      
+
       newSel = tx.createSelection({
         type: 'property',
         path: [ node.id, 'content'],
