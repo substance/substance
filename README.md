@@ -37,7 +37,7 @@ Paragraph                                                                   | �
 Heading                                                                     | ✓
 Blockquote                                                                  | ✓
 Codeblock                                                                   | ✓
-Imgage                                                                      | ✓
+Image                                                                       | ✓
 Embed (image, video, tweet etc.)                                            | ✓
 List                                                                        | Beta 4
 Table                                                                       | Beta 4

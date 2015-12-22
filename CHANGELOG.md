@@ -3,11 +3,14 @@
 - Added a Router implementation that can serialize component states to hash fragments
 - Added ui/ScrollPane Component used to wrap any content and make it scrollable within a container (1ae97f9)
 - Added ui/TOC as an interface for custom Table of Contents implementations (1ae97f9)
+- Added util/server for easier development (7e12ae7)
+- Added TabbedPane component (105e80d)
+- Added SplitPane component (105e80d)
 - Fixed a bug where Firefox ignored input events (e3d6173)
 - Fixed an issue in ui/Component where owner and parent were confused (085a695)
-- Activate incremental rendering for ui/AnnotatedTextComponent (3e3fb8c)
-- Added util/server for easier development (7e12ae7)
-- Added TabbedPane component
+- Fixed numerous issues related to mapping DOM selections to model selections.
+- Fixed a bug where nodes that have no addressable text property could not be rendered
+- Fixed an edge case where triple clicking inside a paragraph with inline nodes did not led to an undesired selection.
 
 ## Beta 2
 
