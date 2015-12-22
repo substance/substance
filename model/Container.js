@@ -4,6 +4,7 @@ var last = require('lodash/array/last');
 var map = require('lodash/collection/map');
 var DocumentNode = require('./DocumentNode');
 var ParentNodeMixin = require('./ParentNodeMixin');
+var DocumentAddress = require('./DocumentAddress');
 
 /**
   A Container represents a list of node ids in first place.
@@ -84,7 +85,7 @@ DocumentNode.extend(Container, ParentNodeMixin, function() {
     if (propIndex < 0) {
       throw new Error('Can not resolve index for property ' + property);
     }
-    var address = [propIndex];
+    var address = new DocumentAddress().push(propIndex);
     var parent, childIndex;
     while(node.hasParent()) {
       parent = node.getParent();
@@ -165,11 +166,11 @@ DocumentNode.extend(Container, ParentNodeMixin, function() {
       node = doc.get(nodeId);
       properties = node.getAddressablePropertyNames();
       if (properties.length > 1 && address[1] < properties.length - 1) {
-        return [address[0], address[1] + 1];
+        return new DocumentAddress().push(address[0], address[1] + 1);
       } else {
         if (address[0] < this.nodes.length-1) {
           nodeId = this.nodes[address[0]+1];
-          return [address[0]+1].concat(this._getFirstAddress(doc.get(nodeId)));
+          return new DocumentAddress().push(address[0]+1).append(this._getFirstAddress(doc.get(nodeId)));
         } else {
           return null;
         }
@@ -181,7 +182,7 @@ DocumentNode.extend(Container, ParentNodeMixin, function() {
       properties = node.getAddressablePropertyNames();
       var newAddress;
       if (properties.length > 1 && last(address) < properties.length-1) {
-        newAddress = address.slice(0);
+        newAddress = address.clone();
         newAddress[newAddress.length-1]++;
         return newAddress;
       } else {
@@ -203,7 +204,7 @@ DocumentNode.extend(Container, ParentNodeMixin, function() {
         var nextIndex = childIndex+1;
         var sibling = parent.getChildAt(nextIndex);
         var tail = this._getFirstAddress(sibling);
-        newAddress = address.slice(0, i).concat([nextIndex]).concat(tail);
+        newAddress = address.slice(0, i).push(nextIndex).append(tail);
         return newAddress;
       }
     }
@@ -215,11 +216,11 @@ DocumentNode.extend(Container, ParentNodeMixin, function() {
     // extra implementation for the most common case
     if (address.length === 2) {
       if (address[1] > 0) {
-        return [address[0], address[1]-1];
+        return new DocumentAddress().push(address[0], address[1]-1);
       } else if (address[0] > 0) {
         nodeId = this.nodes[address[0]-1];
         node = doc.get(nodeId);
-        return [address[0]-1].concat(this._getLastAddress(node));
+        return new DocumentAddress().push(address[0]-1).append(this._getLastAddress(node));
       } else {
         return null;
       }
@@ -230,7 +231,7 @@ DocumentNode.extend(Container, ParentNodeMixin, function() {
       node = last(nodes);
       var newAddress;
       if (last(address) > 0) {
-        newAddress = address.slice(0);
+        newAddress = address.clone();
         newAddress[newAddress.length-1]--;
         return newAddress;
       } else {
@@ -249,7 +250,7 @@ DocumentNode.extend(Container, ParentNodeMixin, function() {
         var prevIndex = address[i]-1;
         var sibling = parent.getChildAt(prevIndex);
         var tail = this._getLastAddress(sibling);
-        newAddress = address.slice(0, i).concat([prevIndex]).concat(tail);
+        newAddress = address.slice(0, i).push(prevIndex).append(tail);
         return newAddress;
       }
     }
@@ -258,7 +259,7 @@ DocumentNode.extend(Container, ParentNodeMixin, function() {
   // Note: this is internal as it does provide address partials
   // i.e., when called for nested nodes
   this._getFirstAddress = function(node) {
-    var address = [];
+    var address = new DocumentAddress();
     while (node.hasChildren()) {
       address.push(0);
       node = node.getChildAt(0);
@@ -269,7 +270,7 @@ DocumentNode.extend(Container, ParentNodeMixin, function() {
   };
 
   this._getLastAddress = function(node) {
-    var address = [];
+    var address = new DocumentAddress();
     while (node.hasChildren()) {
       var childIndex = node.getChildCount()-1;
       address.push(childIndex);
@@ -289,7 +290,7 @@ DocumentNode.extend(Container, ParentNodeMixin, function() {
       console.warn("Container.getLastAddress(): Illegal argument. Could not find node position.");
       return null;
     }
-    return [pos].concat(this._getFirstAddress(topLevelNode));
+    return new DocumentAddress().push(pos).append(this._getFirstAddress(topLevelNode));
   };
 
   this.getFirstPath = function(topLevelNode) {
@@ -310,7 +311,7 @@ DocumentNode.extend(Container, ParentNodeMixin, function() {
       console.warn("Container.getLastAddress(): Illegal argument. Could not find node position.");
       return null;
     }
-    return [pos].concat(this._getLastAddress(topLevelNode));
+    return new DocumentAddress().push(pos).append(this._getLastAddress(topLevelNode));
   };
 
   this.getLastPath = function(topLevelNode) {
@@ -369,8 +370,8 @@ DocumentNode.extend(Container, ParentNodeMixin, function() {
 
   this.getAddressesForNode = function(node) {
     var pos = this.getChildIndex(node);
-    var first = [pos].concat(this._getFirstAddress(node));
-    var last = [pos].concat(this._getLastAddress(node));
+    var first = new DocumentAddress().push(pos).append(this._getFirstAddress(node));
+    var last = new DocumentAddress().push(pos).append(this._getLastAddress(node));
     return this.getAddressRange(first, last);
   };
 

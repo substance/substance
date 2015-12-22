@@ -179,6 +179,7 @@ ContainerEditor.Prototype = function() {
       endPath: lastPath,
       endOffset: lastText.length
     });
+    console.log('###', sel.toString());
     this.setSelection(sel);
   };
 

@@ -113,7 +113,7 @@ function _copyContainerSelection(doc, selection) {
   node = container.getChildAt(startAddress[0]);
   var addresses = container.getAddressesForNode(node);
   for (i = 0; i < addresses.length; i++) {
-    if (addresses[i] < startAddress) {
+    if (addresses[i].isBefore(startAddress)) {
       path = container.getPathForAddress(addresses[i]);
       copy.set(path, "");
     } else {
@@ -133,7 +133,7 @@ function _copyContainerSelection(doc, selection) {
   addresses = container.getAddressesForNode(node);
   for (i = addresses.length - 1; i >= 0; i--) {
     path = container.getPathForAddress(addresses[i]);
-    if (addresses[i] > endAddress) {
+    if (addresses[i].isAfter(endAddress)) {
       copy.set(path, "");
     } else {
       text = doc.get(path);

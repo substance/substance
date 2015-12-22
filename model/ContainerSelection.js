@@ -1,7 +1,6 @@
 'use strict';
 
 var isNumber = require('lodash/lang/isNumber');
-var isEqual = require('lodash/lang/isEqual');
 var map = require('lodash/collection/map');
 var PropertySelection = require('./PropertySelection');
 var Selection = require('./Selection');
@@ -117,22 +116,19 @@ ContainerSelection.Prototype = function() {
       start: { address: c1s.address, offset: c1s.offset },
       end: { address: c1e.address, offset: c1e.offset }
     };
-    if (c1s.address > c2s.address) {
+    if (c1s.address.equals(c2s.address)) {
+      newCoors.start.offset = Math.min(c1s.offset, c2s.offset);
+    } else if (c1s.address.isAfter(c2s.address)) {
       newCoors.start.address = c2s.address;
       newCoors.start.offset = c2s.offset;
-    } else if (c1s.address < c2s.address) {
-      // note leaving this here as '==' is not working on array w/o deep check
-    } else /* if (c1s.address == c2s.address) */ {
-      newCoors.start.offset = Math.min(c1s.offset, c2s.offset);
     }
-    if (c1e.address < c2e.address) {
+    if (c1e.address.equals(c2e.address)) {
+      newCoors.end.offset = Math.max(c1e.offset, c2e.offset);
+    } else if (c1e.address.isBefore(c2e.address)) {
       newCoors.end.address = c2e.address;
       newCoors.end.offset = c2e.offset;
-    } else if (c1e.address > c2e.address) {
-      // note leaving this here as '==' is not working on array w/o deep check
-    } else /* if (c1e.address === c2e.address) */ {
-      newCoors.end.offset = Math.max(c1e.offset, c2e.offset);
     }
+
     return _createNewSelection(this, newCoors);
   };
 
@@ -292,16 +288,15 @@ ContainerSelection.Prototype = function() {
   };
 
   var _isBefore = function(c1, c2, strict) {
-    if (c1.address < c2.address) return true;
-    if (c1.address > c2.address) return false;
-    // now addresses are equal and we need to check offsets
+    if (c1.address.isBefore(c2.address)) return true;
+    if (c1.address.isAfter(c2.address)) return false;
     if (c1.offset > c2.offset) return false;
     if (strict && (c1.offset === c2.offset)) return false;
     return true;
   };
 
   var _isEqual = function(c1, c2) {
-    return (isEqual(c1.address, c2.address) && c1.offset === c2.offset);
+    return (c1.address.equals(c2.address) && c1.offset === c2.offset);
   };
 
   var _createNewSelection = function(containerSel, newCoors) {

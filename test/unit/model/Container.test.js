@@ -226,3 +226,15 @@ QUnit.test("Property range with nested nodes", function(assert) {
   assert.deepEqual(container.getPathRange(['p4', 'content'], ['td2', 'content']),
     [['p4', 'content'], ['td1', 'content'], ['td2', 'content']], 'Property range should cover all spanned properties.');
 });
+
+QUnit.test("Issue #360: Comparing container addresses", function(assert) {
+  // The problem revealed by this issue was, that the original comparison
+  // implementation made use of the string representation and the natural
+  // lexical order, which obviously does not make sense as
+  // '21,0' < '3,0'
+  var a = new DocumentAddress(3,0);
+  var b = new DocumentAddress(21,0);
+  assert.ok(a.isBefore(b), "3,0 should be before 21,0");
+  assert.notOk(b.isBefore(a), "21,0 should not be before 3,0");
+  assert.notOk(a.isEqual(b), "3,0 should be === 21,0");
+});
