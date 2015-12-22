@@ -3,6 +3,29 @@
 var Component = require('./Component');
 var $$ = Component.$$;
 
+/**
+  A split view layout component. Takes properties for configuration and 2 children via append.
+
+  @class SplitPane
+  @component
+
+  @prop {String} splitType either 'vertical' (default) or 'horizontal'.
+  @prop {String} sizeA size of the first pane (A). '40%' or '100px' or 'inherit' are valid values.
+  @prop {String} sizeB size of second pane. sizeA and sizeB can not be combined.
+  
+  @example
+  
+  ```js
+  $$(SplitPane, {
+    sizeA: '30%'
+    splitType: 'horizontal'
+  }).append(
+    $$('div').append('Pane A')
+    $$('div').append('Pane B')
+  )
+  ```
+*/
+
 function SplitPane() {
   Component.apply(this, arguments);
 }
@@ -10,8 +33,8 @@ function SplitPane() {
 SplitPane.Prototype = function() {
 
   // Accepts % and px units for size property
-  this.getReferenceStyle = function() {
-    var size = this.props.size || '40%';
+  this.getSizedStyle = function(size) {
+    if (!size || size === 'inherit') return {};
     if (this.props.splitType === 'horizontal') {
       return {'height': size};
     } else {
@@ -31,24 +54,23 @@ SplitPane.Prototype = function() {
       el.addClass('sm-vertical');
     }
 
-    var pane1 = this.props.children[0];
-    var pane2 = this.props.children[1];
+    var paneA = this.props.children[0];
+    var paneB = this.props.children[1];
 
-    if (this.props.reverseSizing) {
-      // Second pane gets the fixed size
-      pane2.addClass('se-pane sm-sized');
-      pane2.css(this.getReferenceStyle());
-      pane1.addClass('se-pane sm-stretched');
+    // Apply configured size either to pane A or B.
+    if (this.props.sizeB) {
+      paneB.addClass('se-pane sm-sized');
+      paneB.css(this.getSizedStyle(this.props.sizeB));
+      paneA.addClass('se-pane sm-auto-fill');
     } else {
-      pane1.addClass('se-pane sm-sized');
-      pane1.css(this.getReferenceStyle());
-      pane2.addClass('se-pane sm-stretched');
+      paneA.addClass('se-pane sm-sized');
+      paneA.css(this.getSizedStyle(this.props.sizeA));
+      paneB.addClass('se-pane sm-auto-fill');
     }
 
-    // We monkey patch
     el.append(
-      pane1,
-      pane2
+      paneA,
+      paneB
     );
     return el;
   };
