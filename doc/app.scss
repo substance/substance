@@ -4,11 +4,11 @@ $fa-font-path:  "./fonts" !default;
 // Substance base styles
 @import '../styles/base/index';
 
-// Substance modules
+// Substance core and official packages
 @import '../styles/components/_all';
 @import '../packages/_all';
 
-// Components
+// DocumentationReader component styles
 @import './styles/_variables';
 @import './styles/_globals';
 @import './styles/components/_namespace';

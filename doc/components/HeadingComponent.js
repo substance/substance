@@ -22,7 +22,7 @@ HeadingComponent.Prototype = function() {
     var name = node.name;
     var type = node.type;
     var specificType = node.getSpecificType();
-    var el = $$('div').addClass('sc-heading');
+    var el = $$('div').addClass('sc-doc-heading');
     var headerEl = $$('a').attr({href: '#'}).addClass('se-header')
         .on('click', this.onClick);
 
