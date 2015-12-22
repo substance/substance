@@ -4,6 +4,7 @@ require('../qunit_extensions');
 var sample = require('../../fixtures/container_sample');
 var simpleSample = require('../../fixtures/sample1');
 var DocumentAddress = require('../../../model/DocumentAddress');
+var uuid = require('../../../util/uuid');
 
 QUnit.module('model/Container');
 
@@ -114,7 +115,7 @@ QUnit.test("Should return null if there is no next address", function(assert) {
   doc.transaction(function(tx) {
     tx.get('main').hide('p5');
   });
-  var next = container.getNextAddress([6,0,1,2,0]);
+  next = container.getNextAddress([6,0,1,2,0]);
   assert.equal(next, null);
 });
 
@@ -189,7 +190,7 @@ QUnit.test("Should return null if there is no previous address", function(assert
     tx.get('main').hide('list1');
     tx.get('main').hide('p4');
   });
-  var previous = container.getPreviousAddress([0,0,0,0,0]);
+  previous = container.getPreviousAddress([0,0,0,0,0]);
   assert.equal(previous, null);
 });
 
@@ -237,4 +238,22 @@ QUnit.test("Issue #360: Comparing container addresses", function(assert) {
   assert.ok(a.isBefore(b), "3,0 should be before 21,0");
   assert.notOk(b.isBefore(a), "21,0 should not be before 3,0");
   assert.notOk(a.isEqual(b), "3,0 should be === 21,0");
+});
+
+QUnit.test("Issue #360 (II): getting a range of addresses", function(assert) {
+  var doc = sample();
+  doc.transaction(function(tx) {
+    var container = tx.get('main');
+    for (var i = 0; i < 25; i++) {
+      var p = tx.create({
+        type: 'paragraph',
+        id: uuid(),
+        content: "XXX"
+      });
+      container.show(p.pid);
+    }
+  });
+  var container = doc.get('main');
+  var addresses = container.getAddressRange([0,0], [24, 0]);
+  assert.equal(addresses.length, 25, "There should be 25 addresses");
 });
