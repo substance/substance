@@ -6,16 +6,42 @@ var sass = require('node-sass');
   @example
 
   ```js
-  var serverUtils = require('substance/util/server');
+  var server = require('substance/util/server');
   ```
 */
 var server = {};
 
+
+/**
+  Serves a bundled JS file. Browserify is used as a module bundler.
+
+  @param {ExpressApplication} app Express.js application instance
+  @param {String} route Express route under which the bundled javascript should be served
+  @param {String} sourcePath entry point for js bundling
+
+  @example
+
+  ```js
+  server.serveJS(app, 'app.js', path.join(__dirname, 'src', 'app.js'));
+  ```
+*/
+server.serveJS = function(app, route, sourcePath) {
+  app.get(route, function(req, res) {
+    browserify({ debug: true, cache: false })
+      .add(sourcePath)
+      .bundle()
+      .on('error', function(err) {
+        console.error(err.message);
+      })
+      .pipe(res);
+  });
+};
+
 /**
   Serves a bundled CSS file. For compilation Sass is used.
 
-  @param {ExpressApplication} Express.js application instance
-  @param {String} Express route under which the styles should be served
+  @param {ExpressApplication} app Express.js application instance
+  @param {String} route Express route under which the styles should be served
   @param {String} sourcePath entry point for sass compilation
 
   @example
@@ -43,29 +69,6 @@ server.serveStyles = function(app, route, sourcePath) {
   });
 };
 
-/**
-  Serves a bundled JS file. Browserify is used as a module bundler.
 
-  @param {ExpressApplication} Express.js application instance
-  @param {String} Express route under which the bundled javascript should be served
-  @param {String} sourcePath entry point for js bundling
-
-  @example
-
-  ```js
-  server.serveJS(app, 'app.js', path.join(__dirname, 'src', 'app.js'));
-  ```
-*/
-server.serveJS = function(app, route, sourcePath) {
-  app.get(route, function(req, res) {
-    browserify({ debug: true, cache: false })
-      .add(sourcePath)
-      .bundle()
-      .on('error', function(err) {
-        console.error(err.message);
-      })
-      .pipe(res);
-  });
-};
 
 module.exports = server;

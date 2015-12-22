@@ -157,7 +157,7 @@ EventEmitter.extend(AbstractDocument, function AbstractDocumentPrototype() {
   /**
     Update a property incrementally.
 
-    DEPRECATED: this will be replaced in Beta 3 with a more intuitive API.
+    DEPRECATED: this will be replaced with a more intuitive API soon.
 
     @param {Array} property path
     @param {Object} diff
