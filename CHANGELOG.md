@@ -1,11 +1,13 @@
 ## Beta 3
 
+- Added a Router implementation that can serialize component states to hash fragments
 - Added ui/ScrollPane Component used to wrap any content and make it scrollable within a container (1ae97f9)
 - Added ui/TOC as an interface for custom Table of Contents implementations (1ae97f9)
 - Fixed a bug where Firefox ignored input events (e3d6173)
 - Fixed an issue in ui/Component where owner and parent were confused (085a695)
 - Activate incremental rendering for ui/AnnotatedTextComponent (3e3fb8c)
 - Added util/server for easier development (7e12ae7)
+- Added TabbedPane component
 
 ## Beta 2
 
