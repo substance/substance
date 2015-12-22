@@ -258,3 +258,38 @@ QUnit.test("Issue #360 (II): getting a range of addresses", function(assert) {
   var addresses = container.getAddressRange(new DocumentAddress(0,0), new DocumentAddress(24, 0));
   assert.equal(addresses.length, 25, "There should be 25 addresses");
 });
+
+QUnit.test("Addresses for nodes without editable properties.", function(assert) {
+  // Nodes without properties should be skipped when dealing with addresses
+  var doc = empty();
+  doc.transaction(function(tx) {
+    var container = tx.get('main');
+    var node = tx.create({
+      type: 'paragraph',
+      id: "p1",
+      content: "XXX"
+    });
+    container.show(node.id);
+    var node = tx.create({
+      type: 'image',
+      id: "img",
+      src: "YYY"
+    });
+    container.show(node.id);
+    var node = tx.create({
+      type: 'paragraph',
+      id: "p2",
+      content: "ZZZ"
+    });
+    container.show(node.id);
+  });
+  var container = doc.get('main');
+
+  var img = doc.get('img');
+  var address = container._getFirstAddress(img);
+  assert.isNullOrUndefined(address, "Image does not have an addressable property.");
+  address = container.getNextAddress(new DocumentAddress(1,0));
+  assert.isAddressEqual([2,0], "Image address should be skipped.");
+  var range = container.getAddressRange(new DocumentAddress(1,0), new DocumentAddress(2,0));
+  assert.equal(range.length, 2, "There should be 2 addressable properties.");
+});
