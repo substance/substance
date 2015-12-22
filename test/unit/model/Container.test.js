@@ -3,100 +3,105 @@
 require('../qunit_extensions');
 var sample = require('../../fixtures/container_sample');
 var simpleSample = require('../../fixtures/sample1');
+var DocumentAddress = require('../../../model/DocumentAddress');
 
 QUnit.module('model/Container');
+
+QUnit.assert.isAddressEqual = function(a, b, msg) {
+  this.push(DocumentAddress.equal(a, b), false, true, msg);
+};
 
 QUnit.test("Numerical address for simple nodes", function(assert) {
   var doc = sample();
   var container = doc.get('main');
-  assert.deepEqual(container.getAddress(['p1', 'content']), [0,0], "Address of 'p1.content'.");
-  assert.deepEqual(container.getAddress(['p2', 'content']), [1,0], "Address of 'p2.content'.");
-  assert.deepEqual(container.getAddress(['p3', 'content']), [3,0], "Address of 'p3.content'.");
-  assert.deepEqual(container.getAddress(['p4', 'content']), [5,0], "Address of 'p4.content'.");
-  assert.deepEqual(container.getAddress(['p5', 'content']), [7,0], "Address of 'p5.content'.");
+  assert.isAddressEqual(container.getAddress(['p1', 'content']), [0,0], "Address of 'p1.content'.");
+  assert.isAddressEqual(container.getAddress(['p2', 'content']), [1,0], "Address of 'p2.content'.");
+  assert.isAddressEqual(container.getAddress(['p3', 'content']), [3,0], "Address of 'p3.content'.");
+  assert.isAddressEqual(container.getAddress(['p4', 'content']), [5,0], "Address of 'p4.content'.");
+  assert.isAddressEqual(container.getAddress(['p5', 'content']), [7,0], "Address of 'p5.content'.");
 });
 
 QUnit.test("Numerical address for structured nodes", function(assert) {
   var doc = sample();
   var container = doc.get('main');
-  assert.deepEqual(container.getAddress(['sn1', 'title']), [2,0], "Address of 'sn1.title'.");
-  assert.deepEqual(container.getAddress(['sn1', 'body']), [2,1], "Address of 'sn1.body'.");
-  assert.deepEqual(container.getAddress(['sn1', 'caption']), [2,2], "Address of 'sn1.caption'.");
+  assert.isAddressEqual(container.getAddress(['sn1', 'title']), [2,0], "Address of 'sn1.title'.");
+  assert.isAddressEqual(container.getAddress(['sn1', 'body']), [2,1], "Address of 'sn1.body'.");
+  assert.isAddressEqual(container.getAddress(['sn1', 'caption']), [2,2], "Address of 'sn1.caption'.");
 });
 
 QUnit.test("Numerical address for nested nodes (list items)", function(assert) {
   var doc = sample();
   var container = doc.get('main');
-  assert.deepEqual(container.getAddress(['li1', 'content']), [4,0,0], "Address of 'li1.content'.");
-  assert.deepEqual(container.getAddress(['li2', 'content']), [4,1,0], "Address of 'li2.content'.");
-  assert.deepEqual(container.getAddress(['li3', 'content']), [4,2,0], "Address of 'li3.content'.");
+  assert.isAddressEqual(container.getAddress(['li1', 'content']), [4,0,0], "Address of 'li1.content'.");
+  assert.isAddressEqual(container.getAddress(['li2', 'content']), [4,1,0], "Address of 'li2.content'.");
+  assert.isAddressEqual(container.getAddress(['li3', 'content']), [4,2,0], "Address of 'li3.content'.");
 });
 
 QUnit.test("Numerical address for deeply nested nodes (table cells)", function(assert) {
   var doc = sample();
   var container = doc.get('main');
-  assert.deepEqual(container.getAddress(['td1', 'content']), [6,0,0,0,0], "Address of 'td1.content'.");
-  assert.deepEqual(container.getAddress(['td2', 'content']), [6,0,0,1,0], "Address of 'td2.content'.");
-  assert.deepEqual(container.getAddress(['td3', 'content']), [6,0,0,2,0], "Address of 'td3.content'.");
-  assert.deepEqual(container.getAddress(['td4', 'content']), [6,0,1,0,0], "Address of 'td4.content'.");
-  assert.deepEqual(container.getAddress(['td5', 'content']), [6,0,1,1,0], "Address of 'td5.content'.");
-  assert.deepEqual(container.getAddress(['td6', 'content']), [6,0,1,2,0], "Address of 'td6.content'.");
+  assert.isAddressEqual(container.getAddress(['td1', 'content']), [6,0,0,0,0], "Address of 'td1.content'.");
+  assert.isAddressEqual(container.getAddress(['td2', 'content']), [6,0,0,1,0], "Address of 'td2.content'.");
+  assert.isAddressEqual(container.getAddress(['td3', 'content']), [6,0,0,2,0], "Address of 'td3.content'.");
+  assert.isAddressEqual(container.getAddress(['td4', 'content']), [6,0,1,0,0], "Address of 'td4.content'.");
+  assert.isAddressEqual(container.getAddress(['td5', 'content']), [6,0,1,1,0], "Address of 'td5.content'.");
+  assert.isAddressEqual(container.getAddress(['td6', 'content']), [6,0,1,2,0], "Address of 'td6.content'.");
 });
 
 QUnit.test("Getting next address for simple nodes", function(assert) {
   var doc = sample();
   var container = doc.get('main');
   var next = container.getNextAddress([0,0]);
-  assert.deepEqual(next, [1,0]);
+  assert.isAddressEqual(next, [1,0]);
   next = container.getNextAddress(next);
-  assert.deepEqual(next, [2,0]);
+  assert.isAddressEqual(next, [2,0]);
 });
 
 QUnit.test("Getting next address for structured nodes", function(assert) {
   var doc = sample();
   var container = doc.get('main');
   var next = container.getNextAddress([1,0]);
-  assert.deepEqual(next, [2,0]);
+  assert.isAddressEqual(next, [2,0]);
   next = container.getNextAddress(next);
-  assert.deepEqual(next, [2,1]);
+  assert.isAddressEqual(next, [2,1]);
   next = container.getNextAddress(next);
-  assert.deepEqual(next, [2,2]);
+  assert.isAddressEqual(next, [2,2]);
   next = container.getNextAddress(next);
-  assert.deepEqual(next, [3,0]);
+  assert.isAddressEqual(next, [3,0]);
 });
 
 QUnit.test("Getting next address for nested nodes (list items)", function(assert) {
   var doc = sample();
   var container = doc.get('main');
   var next = container.getNextAddress([3,0]);
-  assert.deepEqual(next, [4,0,0]);
+  assert.isAddressEqual(next, [4,0,0]);
   next = container.getNextAddress(next);
-  assert.deepEqual(next, [4,1,0]);
+  assert.isAddressEqual(next, [4,1,0]);
   next = container.getNextAddress(next);
-  assert.deepEqual(next, [4,2,0]);
+  assert.isAddressEqual(next, [4,2,0]);
   next = container.getNextAddress(next);
-  assert.deepEqual(next, [4,3,0]);
+  assert.isAddressEqual(next, [4,3,0]);
   next = container.getNextAddress(next);
-  assert.deepEqual(next, [5,0]);
+  assert.isAddressEqual(next, [5,0]);
 });
 
 QUnit.test("Getting next address for deeply nested nodes (table items)", function(assert) {
   var doc = sample();
   var container = doc.get('main');
   var next = container.getNextAddress([5,0]);
-  assert.deepEqual(next, [6,0,0,0,0]);
+  assert.isAddressEqual(next, [6,0,0,0,0]);
   next = container.getNextAddress(next);
-  assert.deepEqual(next, [6,0,0,1,0]);
+  assert.isAddressEqual(next, [6,0,0,1,0]);
   next = container.getNextAddress(next);
-  assert.deepEqual(next, [6,0,0,2,0]);
+  assert.isAddressEqual(next, [6,0,0,2,0]);
   next = container.getNextAddress(next);
-  assert.deepEqual(next, [6,0,1,0,0]);
+  assert.isAddressEqual(next, [6,0,1,0,0]);
   next = container.getNextAddress(next);
-  assert.deepEqual(next, [6,0,1,1,0]);
+  assert.isAddressEqual(next, [6,0,1,1,0]);
   next = container.getNextAddress(next);
-  assert.deepEqual(next, [6,0,1,2,0]);
+  assert.isAddressEqual(next, [6,0,1,2,0]);
   next = container.getNextAddress(next);
-  assert.deepEqual(next, [7,0]);
+  assert.isAddressEqual(next, [7,0]);
 });
 
 QUnit.test("Should return null if there is no next address", function(assert) {
@@ -117,56 +122,56 @@ QUnit.test("Getting previous address for simple nodes", function(assert) {
   var doc = sample();
   var container = doc.get('main');
   var previous = container.getPreviousAddress([2,0]);
-  assert.deepEqual(previous, [1,0]);
+  assert.isAddressEqual(previous, [1,0]);
   previous = container.getPreviousAddress(previous);
-  assert.deepEqual(previous, [0,0]);
+  assert.isAddressEqual(previous, [0,0]);
 });
 
 QUnit.test("Getting previous address for structured nodes", function(assert) {
   var doc = sample();
   var container = doc.get('main');
   var previous = container.getPreviousAddress([3,0]);
-  assert.deepEqual(previous, [2,2]);
+  assert.isAddressEqual(previous, [2,2]);
   previous = container.getPreviousAddress(previous);
-  assert.deepEqual(previous, [2,1]);
+  assert.isAddressEqual(previous, [2,1]);
   previous = container.getPreviousAddress(previous);
-  assert.deepEqual(previous, [2,0]);
+  assert.isAddressEqual(previous, [2,0]);
   previous = container.getPreviousAddress(previous);
-  assert.deepEqual(previous, [1,0]);
+  assert.isAddressEqual(previous, [1,0]);
 });
 
 QUnit.test("Getting previous address for nested nodes (list items)", function(assert) {
   var doc = sample();
   var container = doc.get('main');
   var previous = container.getPreviousAddress([5,0]);
-  assert.deepEqual(previous, [4,3,0]);
+  assert.isAddressEqual(previous, [4,3,0]);
   previous = container.getPreviousAddress(previous);
-  assert.deepEqual(previous, [4,2,0]);
+  assert.isAddressEqual(previous, [4,2,0]);
   previous = container.getPreviousAddress(previous);
-  assert.deepEqual(previous, [4,1,0]);
+  assert.isAddressEqual(previous, [4,1,0]);
   previous = container.getPreviousAddress(previous);
-  assert.deepEqual(previous, [4,0,0]);
+  assert.isAddressEqual(previous, [4,0,0]);
   previous = container.getPreviousAddress(previous);
-  assert.deepEqual(previous, [3,0]);
+  assert.isAddressEqual(previous, [3,0]);
 });
 
 QUnit.test("Getting previous address for deeply nested nodes (table items)", function(assert) {
   var doc = sample();
   var container = doc.get('main');
   var previous = container.getPreviousAddress([7,0]);
-  assert.deepEqual(previous, [6,0,1,2,0]);
+  assert.isAddressEqual(previous, [6,0,1,2,0]);
   previous = container.getPreviousAddress(previous);
-  assert.deepEqual(previous, [6,0,1,1,0]);
+  assert.isAddressEqual(previous, [6,0,1,1,0]);
   previous = container.getPreviousAddress(previous);
-  assert.deepEqual(previous, [6,0,1,0,0]);
+  assert.isAddressEqual(previous, [6,0,1,0,0]);
   previous = container.getPreviousAddress(previous);
-  assert.deepEqual(previous, [6,0,0,2,0]);
+  assert.isAddressEqual(previous, [6,0,0,2,0]);
   previous = container.getPreviousAddress(previous);
-  assert.deepEqual(previous, [6,0,0,1,0]);
+  assert.isAddressEqual(previous, [6,0,0,1,0]);
   previous = container.getPreviousAddress(previous);
-  assert.deepEqual(previous, [6,0,0,0,0]);
+  assert.isAddressEqual(previous, [6,0,0,0,0]);
   previous = container.getPreviousAddress(previous);
-  assert.deepEqual(previous, [5,0]);
+  assert.isAddressEqual(previous, [5,0]);
 });
 
 QUnit.test("Should return null if there is no previous address", function(assert) {
