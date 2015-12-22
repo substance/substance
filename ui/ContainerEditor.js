@@ -66,17 +66,26 @@ ContainerEditor.Prototype = function() {
 
   // Create a first text element
   this.onCreateText = function() {
-    this.transaction(function(tx) {
+    var newSel;
+    this.transaction(function(tx, args) {
       var container = tx.get(this.props.containerId);
       var textType = tx.getSchema().getDefaultTextType();
       var node = tx.create({
         id: uuid(textType),
         type: textType,
-        content: 'Start writing'
+        content: ''
       });
       container.show(node.id);
+      
+      newSel = tx.createSelection({
+        type: 'property',
+        path: [ node.id, 'content'],
+        startOffset: 0,
+        endOffset: 0
+      });
     }.bind(this));
     this.rerender();
+    this.setSelection(newSel);
   };
 
   this.isEmpty = function() {
@@ -109,7 +118,7 @@ ContainerEditor.Prototype = function() {
 
     if (isEmpty) {
       el.append(
-        $$('a').attr('href', '#').append('Create text').on('click', this.onCreateText)
+        $$('a').attr('href', '#').append('Start writing').on('click', this.onCreateText)
       );
     } else {
       // node components
