@@ -64,39 +64,48 @@ function Surface() {
 Surface.Prototype = function() {
 
   this.render = function() {
+    var shouldEnableSurface = this.shouldEnableSurface();
+
     var el = $$("div")
       .addClass('surface')
       .attr('spellCheck', false);
-    // Keyboard Events
-    el.on('keydown', this.onKeyDown);
-    // OSX specific handling of dead-keys
-    if (!platform.isIE) {
-      el.on('compositionstart', this.onCompositionStart);
+
+    if (shouldEnableSurface) {
+      // Keyboard Events
+      el.on('keydown', this.onKeyDown);
+      // OSX specific handling of dead-keys
+      if (!platform.isIE) {
+        el.on('compositionstart', this.onCompositionStart);
+      }
+
+      // Note: TextEvent in Chrome/Webkit is the easiest for us
+      // as it contains the actual inserted string.
+      // Though, it is not available in FF and not working properly in IE
+      // where we fall back to a ContentEditable backed implementation.
+      if (window.TextEvent && !platform.isIE) {
+        el.on('textInput', this.onTextInput);
+      } else {
+        el.on('keypress', this.onTextInputShim);
+      }
+
+     // Mouse Events
+      el.on('mousedown', this.onMouseDown);
+
+      // disable drag'n'drop
+      el.on('dragstart', this.onDragStart);
+
+      // we will react on this to render a custom selection
+      el.on('focus', this.onNativeFocus);
+      el.on('blur', this.onNativeBlur);
+
+      this.clipboard.attach(el);
     }
-
-    // Note: TextEvent in Chrome/Webkit is the easiest for us
-    // as it contains the actual inserted string.
-    // Though, it is not available in FF and not working properly in IE
-    // where we fall back to a ContentEditable backed implementation.
-    if (window.TextEvent && !platform.isIE) {
-      el.on('textInput', this.onTextInput);
-    } else {
-      el.on('keypress', this.onTextInputShim);
-    }
-
-    // Mouse Events
-    el.on('mousedown', this.onMouseDown);
-
-    // disable drag'n'drop
-    el.on('dragstart', this.onDragStart);
-
-    // we will react on this to render a custom selection
-    el.on('focus', this.onNativeFocus);
-    el.on('blur', this.onNativeBlur);
-
-    this.clipboard.attach(el);
 
     return el;
+  };
+
+  this.shouldEnableSurface = function() {
+    return true;
   };
 
   this.didMount = function() {

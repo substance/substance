@@ -79,20 +79,31 @@ ContainerEditor.Prototype = function() {
     this.rerender();
   };
 
+  this.isEmpty = function() {
+    var doc = this.getDocument();
+    var containerNode = doc.get(this.props.containerId);
+    return (containerNode && containerNode.nodes.length === 0);
+  };
+
+  this.shouldEnableSurface = function() {
+    return !this.isEmpty();
+  };
+
   this.render = function() {
     var el = Surface.prototype.render.call(this);
 
     var doc = this.getDocument();
+    var containerId = this.props.containerId;
     var containerNode = doc.get(this.props.containerId);
     if (!containerNode) {
-      throw new Error('No container node found for ', this.props.containerId);
+      console.warn('No container node found for ', this.props.containerId);
     }
-    var isEmpty = containerNode.nodes.length === 0;
+    var isEmpty = this.isEmpty();
 
-    el.addClass('sc-container-editor container-node ' + containerNode.id)
+    el.addClass('sc-container-editor container-node ' + containerId)
       .attr({
         spellCheck: false,
-        "data-id": containerNode.id,
+        "data-id": containerId,
         "contenteditable": !isEmpty
       });
 
@@ -104,7 +115,7 @@ ContainerEditor.Prototype = function() {
       // node components
       _.each(containerNode.nodes, function(nodeId) {
         el.append(this._renderNode(nodeId));
-      }, this);      
+      }, this);
     }
 
     return el;
