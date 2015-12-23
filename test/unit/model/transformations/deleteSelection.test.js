@@ -5,6 +5,23 @@ var sample1 = require('../../../fixtures/sample1');
 var containerSample = require('../../../fixtures/container_anno_sample');
 var deleteSelection = require('../../../../model/transform/deleteSelection');
 
+
+function addStructuredNode(doc) {
+  var structuredNode;
+  doc.transaction(function(tx) {
+    structuredNode = tx.create({
+      id: "sn1",
+      type: "structured-node",
+      title: "0123456789",
+      body: "0123456789",
+      caption: "0123456789"
+    });
+    tx.get('main').show(structuredNode.id, 1);
+  });
+  return structuredNode;
+}
+
+
 QUnit.module('model/transform/deleteSelection');
 
 QUnit.test("Deleting a property selection", function(assert) {
@@ -117,17 +134,7 @@ QUnit.test("Deleting all", function(assert) {
 
 QUnit.test("Deleting partially", function(assert) {
   var doc = sample1();
-  var structuredNode;
-  doc.transaction(function(tx) {
-    structuredNode = tx.create({
-      id: "sn1",
-      type: "structured-node",
-      title: "0123456789",
-      body: "0123456789",
-      caption: "0123456789"
-    });
-    tx.get('main').show(structuredNode.id, 1);
-  });
+  var structuredNode = addStructuredNode(doc);
   var sel = doc.createSelection({
     type: 'container',
     containerId: 'main',
@@ -149,6 +156,30 @@ QUnit.test("Deleting partially", function(assert) {
   assert.ok(out.selection.isCollapsed(), "Selection should be collapsed (Cursor).");
   assert.ok(address.isEqual([0,0]), "Cursor should be in empty text node.");
   assert.equal(out.selection.start.offset, 0, "Cursor should be at first position.");
+});
+
+QUnit.test("Deleting wrapped structured node", function(assert) {
+  var doc = sample1();
+  addStructuredNode(doc);
+
+  // structured node sits betweeen h1 and p1
+  var sel = doc.createSelection({
+    type: 'container',
+    containerId: 'main',
+    startPath: ['h1', 'content'],
+    startOffset: 4,
+    endPath: ['p1', 'content'],
+    endOffset: 4
+  });
+
+  var args = { selection: sel, containerId: 'main' };
+  deleteSelection(doc, args);
+  var containerNodes = doc.get(['main', 'nodes']);
+  assert.deepEqual(containerNodes, ["h1", "h2", "p2", "h3", "p3"], 'sn and p1 should have been deleted from the container');
+  var h1 = doc.get('h1');
+
+  assert.notOk(doc.get('sn'), 'Structured node should have been deleted');
+  assert.equal(h1.content, 'Sectgraph 1', 'h1 should have been joined with the remaining contents of p1');
 });
 
 QUnit.test("Edge case: delete container selection spaning multiple nodes containing container annotations", function(assert) {
