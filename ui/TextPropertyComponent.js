@@ -42,8 +42,10 @@ TextPropertyComponent.Prototype = function() {
   };
 
   this.getInitialState = function() {
+    var tpm = this.getTextPropertyManager();
     return {
-      fragments: this.getTextPropertyManager().getFragments(this.props.path)
+      highlights: tpm.getHighlights(this.props.path),
+      fragments: tpm.getFragments(this.props.path)
     };
   };
 
@@ -60,6 +62,14 @@ TextPropertyComponent.Prototype = function() {
       annotations = annotations.concat(this.state.fragments);
     }
     return annotations;
+  };
+
+  this.getHighlights = function() {
+    if (this.state.highlights) {
+      return this.state.highlights;
+    } else {
+      return {};
+    }
   };
 
   this.getContainer = function() {
@@ -87,6 +97,12 @@ TextPropertyComponent.Prototype = function() {
   this.setFragments = function(fragments) {
     this.extendState({
       fragments: fragments
+    });
+  };
+
+  this.setHighlights = function(highlights) {
+    this.extendState({
+      highlights: highlights
     });
   };
 

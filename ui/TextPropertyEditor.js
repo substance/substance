@@ -1,7 +1,6 @@
 'use strict';
 
 var Surface = require('./Surface');
-var TextPropertyManager = require('../model/TextPropertyManager');
 var insertText = require('../model/transform/insertText');
 var deleteSelection = require('../model/transform/deleteSelection');
 var Component = require('./Component');
@@ -35,8 +34,6 @@ var $$ = Component.$$;
 
 function TextPropertyEditor() {
   Surface.apply(this, arguments);
-  var doc = this.getDocument();
-  this.textPropertyManager = new TextPropertyManager(doc);
 }
 
 TextPropertyEditor.Prototype = function() {

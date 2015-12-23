@@ -151,12 +151,12 @@ DocumentNode.Prototype = function() {
   // TODO: should this really be here?
   // volatile property necessary to render highlighted node differently
   // TODO: We should get this out here
-  this.setHighlighted = function(highlighted, scope) {
-    if (this.highlighted !== highlighted) {
-      this.highlightedScope = scope;
-      this.highlighted = highlighted;
-      this.emit('highlighted', highlighted);
-    }
+  this.setHighlighted = function() {
+    // if (this.highlighted !== highlighted) {
+    //   this.highlightedScope = scope;
+    //   this.highlighted = highlighted;
+    //   this.emit('highlighted', highlighted);
+    // }
   };
 
   // Experimental: we are working on a simpler API replacing the

@@ -5,25 +5,41 @@ var isString = require('lodash/lang/isString');
 var each = require('lodash/collection/each');
 var values = require('lodash/object/values');
 var extend = require('lodash/object/extend');
+var PropertyAnnotation = require('./PropertyAnnotation');
 var ContainerAnnotation = require('./ContainerAnnotation');
 var TextOperation = require('./data/TextOperation');
 
 var Record, Change;
 
-function TextPropertyManager(doc, containerId) {
-  if (!doc) {
-    throw new Error('Illegal arguments: doc is mandatory.');
+var __id__ = 0;
+
+function TextPropertyManager(surface) {
+  if (!surface) {
+    throw new Error('Illegal arguments: surface is mandatory.');
   }
-  this.doc = doc;
-  this.containerId = containerId;
+  this.__id__ = __id__++;
+  this.surface = surface;
+  this.doc = surface.getDocument();
+
+  if (surface.isContainerEditor()) {
+    this.containerId = surface.getContainerId();
+  }
 
   this.records = {};
   this.fragments = {};
   this.selectionFragments = [];
+  this.highlights = {};
 
   this.doc.connect(this, {
     "document:changed": this.onDocumentChange
   }, { priority: -1 });
+
+  this.hightlightManager = surface.getHighlightManager();
+  if (this.hightlightManager) {
+    this.hightlightManager.connect(this, {
+      'highlights:updated': this.onHighlightsUpdated
+    });
+  }
 
   this._initialize();
 }
@@ -32,6 +48,7 @@ TextPropertyManager.Prototype = function() {
 
   this.dispose = function() {
     this.doc.disconnect(this);
+    this.hightlightManager.disconnect(this);
   };
 
   this._initializeFragment = function(fragment) {
@@ -134,9 +151,48 @@ TextPropertyManager.Prototype = function() {
     }
   };
 
+  this.getHighlights = function(path) {
+    var record = this.records[path];
+    if (record) {
+      return record.highlights || {};
+    } else {
+      return {};
+    }
+  };
+
   this.onDocumentChange = function(change) {
     var _changes = this._record(change);
     this._dispatch(_changes, change);
+  };
+
+  this.onHighlightsUpdated = function(highlights) {
+    // TODO: we need to find out where the highlights should go to
+    // Right now we only consider annotations to be highlighted
+    // on the long run we will want to highligh full nodes, too
+    // Then this task can't be done by the TextPropertyManager
+    console.log('TextPropertyManager.onHighlightsUpdated', highlights);
+    var doc = this.doc;
+    var _highlights = {};
+    each(highlights, function(nodeId, scope) {
+      var node = doc.get(nodeId);
+      if (node instanceof PropertyAnnotation) {
+        var hls = _highlights[node.path];
+        if (!hls) {
+          hls = {};
+          _highlights[node.path] = hls;
+        }
+        hls[nodeId] = scope;
+      }
+      // TODO: deal with highlights for ContainerAnnotations
+      // ... and in future think about how to dispatch highlights for nodes
+    }, this);
+    each(_highlights, function(hls, path) {
+      var record = this.records[path];
+      record.highlights = hls;
+      if (record && record.property) {
+        record.property.setHighlights(hls);
+      }
+    }, this);
   };
 
   function _createChanges() {

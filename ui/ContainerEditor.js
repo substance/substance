@@ -2,7 +2,6 @@
 
 var _ = require('../util/helpers');
 var Surface = require('./Surface');
-var TextPropertyManager = require('../model/TextPropertyManager');
 var EditingBehavior = require('../model/EditingBehavior');
 var insertText = require('../model/transform/insertText');
 var copySelection = require('../model/transform/copySelection');
@@ -55,7 +54,6 @@ function ContainerEditor() {
   var doc = this.getDocument();
 
   this.editingBehavior = new EditingBehavior();
-  this.textPropertyManager = new TextPropertyManager(doc, this.props.containerId);
 
   doc.connect(this, {
     'document:changed': this.onDocumentChange
