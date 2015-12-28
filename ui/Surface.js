@@ -179,7 +179,7 @@ Surface.Prototype = function() {
   };
 
   this.getElement = function() {
-    return this.element;
+    return this.el;
   };
 
   this.getController = function() {
@@ -366,7 +366,7 @@ Surface.Prototype = function() {
   };
 
   this.getDomNodeForId = function(nodeId) {
-    return this.element.querySelector('*[data-id='+nodeId+']');
+    return this.getElement().querySelector('*[data-id='+nodeId+']');
   };
 
   this.getLogger = function() {
