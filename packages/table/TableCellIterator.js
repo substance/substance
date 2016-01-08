@@ -41,7 +41,12 @@ TableCellIterator.Prototype = function() {
 
   this.nextSection = function(it) {
     it.sectionIndex++;
-    it.sectionNode = this.table.getSectionAt(it.sectionIndex);
+    if (it.sectionIndex < this.table.getChildCount()) {
+      it.sectionNode = this.table.getSectionAt(it.sectionIndex);
+    } else {
+      it.sectionNode = null;
+    }
+
     if (!it.sectionNode) {
       it.finished = true;
     } else {
@@ -54,7 +59,11 @@ TableCellIterator.Prototype = function() {
   this.nextRow = function(it) {
     it.rowIndex++;
     if (it.sectionNode) {
-      it.rowNode = it.sectionNode.getRowAt(it.rowIndex);
+      if (it.rowIndex < it.sectionNode.getChildCount()) {
+        it.rowNode = it.sectionNode.getRowAt(it.rowIndex);
+      } else {
+        it.rowNode = null;
+      }
     }
     while (!it.rowNode && !it.finished) {
       this.nextSection(it);
@@ -69,7 +78,11 @@ TableCellIterator.Prototype = function() {
   this.nextCell = function(it) {
     if (it.cellNode) {
       it.cellIndex++;
-      it.cellNode = it.rowNode.getCellAt(it.cellIndex);
+      if (it.cellIndex < it.rowNode.getChildCount()) {
+        it.cellNode = it.rowNode.getCellAt(it.cellIndex);
+      } else {
+        it.cellNode = null;
+      }
     }
     // step into the next row if there is no next cell or if the column is
     // beyond the rectangle boundaries
