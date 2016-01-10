@@ -11,6 +11,7 @@ var $$ = Component.$$;
 var $ = require('../util/jquery');
 var copySelection = require('../model/transform/copySelection');
 var platform = require('../util/platform');
+var TextPropertyManager = require('../model/TextPropertyManager');
 
 /**
    Abstract interface for editing components.
@@ -59,6 +60,8 @@ function Surface() {
   this.textTypes = this.props.textTypes;
   this._initializeCommandRegistry(this.props.commands);
   controller.registerSurface(this);
+
+  this.textPropertyManager = new TextPropertyManager(this);
 }
 
 Surface.Prototype = function() {
@@ -619,6 +622,10 @@ Surface.Prototype = function() {
         this.setSelection(sel);
       }
     }.bind(this));
+  };
+
+  this.getHighlightManager = function() {
+    return this.context.hightlightManager;
   };
 
   // ## internal implementations

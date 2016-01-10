@@ -6,11 +6,12 @@ var Fragmenter = require('../model/Fragmenter');
 var AnnotationComponent = require('./AnnotationComponent');
 
 /**
-  Renders an anotated text. Used internally by ui/TextPropertyComponent
+  Renders annotated text.
+  Used internally by ui/TextPropertyComponent.
 
   @class
   @component
-  @extends ui/AnnotationComponent
+  @extends ui/Component
 */
 
 function AnnotatedTextComponent() {
@@ -30,6 +31,7 @@ AnnotatedTextComponent.Prototype = function() {
     var path = this.getPath();
     var text = doc.get(path) || "";
     var annotations = this.getAnnotations();
+    var highlights = this.getHighlights();
 
     var el = $$(this.props.tagName || 'span')
       .addClass('sc-annotated-text')
@@ -41,6 +43,14 @@ AnnotatedTextComponent.Prototype = function() {
         whiteSpace: "pre-wrap"
       });
 
+    function _addHighlight(el, nodeId) {
+      if (highlights[nodeId]) {
+        el.addProps({
+          highlighted: highlights[nodeId]
+        });
+      }
+    }
+
     var fragmenter = new Fragmenter();
     var fragmentCounters = {};
     fragmenter.onText = function(context, text) {
@@ -51,6 +61,7 @@ AnnotatedTextComponent.Prototype = function() {
     fragmenter.onEnter = function(fragment) {
       var node = fragment.node;
       var id = node.id;
+      var el;
       if (!fragmentCounters[id]) {
         fragmentCounters[id] = 0;
       }
@@ -60,17 +71,22 @@ AnnotatedTextComponent.Prototype = function() {
       } else if (node.type === 'selection-fragment') {
         return $$('span').addClass('se-selection-fragment');
       } else if (node.type === "container-annotation-fragment") {
-        return $$(AnnotationComponent, { doc: doc, node: node })
+        el = $$(AnnotationComponent, { doc: doc, node: node })
           .addClass("se-annotation-fragment")
           .addClass(node.anno.getTypeNames().join(' ').replace(/_/g, "-"));
+        _addHighlight(el, node.anno.id);
+        return el;
       } else if (node.type === "container-annotation-anchor") {
-        return $$(AnnotationComponent, { doc: doc, node: node })
+        el = $$(AnnotationComponent, { doc: doc, node: node })
           .addClass("se-anchor")
           .addClass(node.anno.getTypeNames().join(' ').replace(/_/g, "-"))
           .addClass(node.isStart?"start-anchor":"end-anchor");
+        _addHighlight(el, node.anno.id);
+        return el;
       }
       var ComponentClass = componentRegistry.get(node.type) || AnnotationComponent;
-      var el = $$(ComponentClass, { doc: doc, node: node });
+      el = $$(ComponentClass, { doc: doc, node: node });
+      _addHighlight(el, node.id);
       // adding refs here, enables preservative rerendering
       // TODO: while this solves problems with rerendering inline nodes
       // with external content, it decreases the overall performance too much.
@@ -117,6 +133,10 @@ AnnotatedTextComponent.Prototype = function() {
    */
   this.getPath = function() {
     return this.props.path;
+  };
+
+  this.getHighlights = function() {
+    return {};
   };
 
 };

@@ -1,12 +1,13 @@
 'use strict';
 
 var Component = require('./Component');
+var isEqual = require('lodash/lang/isEqual');
 var each = require('lodash/collection/each');
 var without = require('lodash/array/without');
 
 /**
   Abstract Panel interface.
-  
+
   @class
   @abstract
   @component
@@ -19,7 +20,7 @@ function Panel() {
 }
 
 Panel.Prototype = function() {
-  
+
   this.getHighlights = function() {
     return this._highlights;
   };
@@ -62,14 +63,22 @@ Panel.Prototype = function() {
       }.bind(this));
     }.bind(this));
 
-    this._highlights = highlights;
-    this.onHighlightsUpdated(highlights);
-    // this.emit('highlights:updated', highlights);
+    if (!isEqual(this._highlights, highlights)) {
+      this._highlights = highlights;
+      this.onHighlightsUpdated(highlights);
+      this.emit('highlights:updated', highlights);
+    }
   };
 
   this.onHighlightsUpdated = function(highlights) {
     /* jshint unused: false */
     console.warn('onHighlightsUpdated is not implemented');
+  };
+
+  this.getChildContext = function() {
+    return {
+      hightlightManager: this
+    };
   };
 
 };
