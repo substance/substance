@@ -18,7 +18,7 @@ module.exports = {
     var sectionType = tagName.substring(1);
     tableSection.sectionType = sectionType;
     tableSection.rows = [];
-    each(el.find('tr'), function(rowEl) {
+    each(el.findAll('tr'), function(rowEl) {
       var rowNode = converter.convertElement(rowEl);
       rowNode.parent = tableSection.id;
       tableSection.rows.push(rowNode.id);
