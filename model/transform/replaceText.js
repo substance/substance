@@ -1,7 +1,6 @@
 /* jshint latedef: false */
 'use strict';
 
-var each = require('lodash/collection/each');
 var extend = require('lodash/object/extend');
 var deleteSelection = require('./deleteSelection');
 var updateAnnotations = require('./updateAnnotations');
@@ -13,7 +12,6 @@ var updateAnnotations = require('./updateAnnotations');
  * to the range of the new text.
  */
 function replaceText(tx, args) {
-  var selection = args.selection;
   return _defaultReplace(tx, args);
 }
 
