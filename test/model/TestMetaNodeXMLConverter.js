@@ -1,13 +1,13 @@
+'use strict';
 
 module.exports = {
 
-  matchElement: function(el) {
-    return el.attr('typeof') === 'meta';
-  },
+  tagName: 'meta',
+  type: 'meta',
 
   import: function(el, node, converter) {
     node.id = 'meta';
-    var titleEl = el.find('[property=title]');
+    var titleEl = el.find('title');
     if (titleEl) {
       node.title = converter.annotatedText(titleEl, ['meta', 'title']);
     } else {
@@ -17,11 +17,9 @@ module.exports = {
 
   export: function(node, el, converter) {
     var $$ = converter.$$;
-    el.attr('typeof', 'meta');
-    el.append($$('h1')
-      .attr('property', 'title')
-      .append(converter.annotatedText(['meta', 'title']))
-    );
-  },
+    el.append($$('title').append(
+      converter.annotatedText(['meta', 'title'])
+    ));
+  }
 
 };

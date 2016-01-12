@@ -76,7 +76,7 @@ npm start
 
 Navigate to `http://localhost:4201/docs` for the docs and `http://localhost:4201/test` for the test suite.
 
-To run the test-suite headless (using Phantom.js)
+To run the test-suite headless
 
 ```
 $ npm test
@@ -100,7 +100,7 @@ $ npm run doc
 
 ### Beta 4
 
-*ETA: January 2016*
+*ETA: February 2016*
 
 - Automatically generated performance report
 - Table node

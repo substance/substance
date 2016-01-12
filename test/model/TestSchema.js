@@ -1,6 +1,5 @@
 'use strict';
 
-var Document = require('../../model/Document');
 var Schema = require('../../model/DocumentSchema');
 var MetaNode = require('./TestMetaNode');
 var TestNode = require('./TestNode');

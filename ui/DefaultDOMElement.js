@@ -303,6 +303,7 @@ DefaultDOMElement.Prototype = function() {
 DOMElement.extend(DefaultDOMElement);
 
 DefaultDOMElement.createElement = function(str) {
+  console.warn('Do not use DefaultDOMElement.createElement directly.');
   str = str.trim();
   if (str[0] !== '<') {
     str = '<' + str + '>';
@@ -420,7 +421,7 @@ function _parseXML(str, format) {
       }
     }
   } else {
-    nativeEls = $(str);
+    nativeEls = $.parseXML(str);
   }
 
   var elements = [];
