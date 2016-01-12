@@ -29,10 +29,7 @@ function _upateAfterInsert(tx, args) {
 function _updateAfterDelete(tx, args) {
   var op = args.op;
   var diff = op.diff;
-  var result = annotationHelpers.deletedText(tx, op.getPath(), diff.pos, diff.pos + diff.getLength(), args.replaceTextSupport);
-  if (args.replaceTextSupport) {
-    args.ignoredAnnotations = result;
-  }
+  annotationHelpers.deletedText(tx, op.getPath(), diff.pos, diff.pos + diff.getLength(), args.replaceTextSupport);
   return args;
 }
 

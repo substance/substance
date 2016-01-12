@@ -14,11 +14,7 @@ var updateAnnotations = require('./updateAnnotations');
  */
 function replaceText(tx, args) {
   var selection = args.selection;
-  if (!selection.isPropertySelection()) {
-    return _defaultReplace(tx, args);
-  } else {
-    return _preservativeReplace(tx, args);
-  }
+  return _defaultReplace(tx, args);
 }
 
 function _defaultReplace(tx, args) {
@@ -34,35 +30,6 @@ function _defaultReplace(tx, args) {
     type: 'property',
     path: range.start.path,
     startOffset: range.start.offset + text.length
-  });
-  return args;
-}
-
-function _preservativeReplace(tx, args) {
-  var text = args.text;
-  var range = args.selection.getRange();
-  var path = range.start.path;
-  var startOffset = range.start.offset;
-  var endOffset = range.end.offset;
-  var newEndOffset = startOffset + text.length;
-  // delete the text
-  var op = tx.update(path, { delete: { start: startOffset, end: endOffset } });
-  // update annos but without deleting annos that cover the same range
-  // as the selection
-  var tmp = updateAnnotations(tx, { op: op, 'replaceTextSupport': true });
-  var preservedAnnos = tmp.ignoredAnnotations;
-  // insert text
-  op = tx.update(range.start.path, { insert: { offset: range.start.offset, value: text } } );
-  // update annos
-  updateAnnotations(tx, { op: op, ignoredAnnotations: preservedAnnos });
-  // update preserved annotations
-  each(preservedAnnos, function(anno) {
-    tx.set([anno.id, 'endOffset'], newEndOffset);
-  });
-  args.selection = tx.createSelection({
-    type: 'property',
-    path: path,
-    startOffset: newEndOffset
   });
   return args;
 }
