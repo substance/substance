@@ -18,9 +18,9 @@ var load = function(url) {
       }).done(function(data) {
         cache[url] = data;
         resolve(data);
-      }).error(function(xhr, status, err) {
+      }).error(function(/*xhr, status, err*/) {
         reject(404);
-      })
+      });
     });
   }
   return promise;

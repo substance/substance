@@ -26,6 +26,11 @@ if (inBrowser) {
         children: []
       };
     };
+
+    $.parseXML = function(str) {
+      var parsed = $.load(str, {xmlMode: true});
+      return parsed.root()[0].children.slice();
+    };
   }
   module.exports = $;
 }
