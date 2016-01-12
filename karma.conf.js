@@ -9,7 +9,7 @@ module.exports = function(config) {
     preprocessors: {
       'test/unit/**/*.test.js': ['browserify']
     },
-    browsers: ['Chrome', 'Firefox'],
+    browsers: ['Chrome'],
     customLaunchers: {
       Chrome_travis_ci: {
         base: 'Chrome',
