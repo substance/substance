@@ -26,6 +26,8 @@ function Surface() {
   var controller = this.getController();
   var doc =  this.getDocument();
 
+  // TODO: we need a DocumentSession instance
+
   if (!controller) {
     throw new Error('Surface needs a valid controller');
   }
@@ -36,8 +38,8 @@ function Surface() {
     throw new Error('No name provided');
   }
 
+  this.docSession = controller.getDocumentSession();
   this.name = this.props.name;
-  this.selection = Document.nullSelection;
   this.clipboard = new Clipboard(this);
 
   // HACK: we need to listen to mousup on document
@@ -212,6 +214,10 @@ Surface.Prototype = function() {
     return doc;
   };
 
+  this.getDocumentSession = function() {
+    return this.docSession;
+  };
+
   // Must be implemented by container surfaces
   this.getContainer = function() {};
 
@@ -238,11 +244,9 @@ Surface.Prototype = function() {
   /**
     Run a transformation as a transaction properly configured for this surface.
 
-    @param beforeState (optional) use this to override the default before-state (e.g. to use a different the initial selection).
-    @param transformation a (surface) transformation function(tx, args) which receives
+    @param transformation a transformation function(tx, args) which receives
                           the selection the transaction was started with, and should return
                           output arguments containing a selection, as well.
-    @param ctx (optional) will be used as `this` object when calling the transformation.
 
     @example
 
@@ -258,64 +262,29 @@ Surface.Prototype = function() {
     });
     ```
 
-    Reusing the current selection:
+    Adding event information to the transaction:
+
     ```js
     surface.transaction(function(tx, args) {
-      ...
-      this.foo();
-      ...
-      return args;
-    }, this);
-    ```
-
-    Adding custom information to the transaction:
-
-    ```js
-    surface.transaction(beforeState, function(tx, args) {
+      tx.info.foo = 'bar';
       ...
     });
     ```
    */
-  this.transaction = function(transformation, ctx) {
-    // `beforeState` is saved with the document operation and will be used
-    // to recover the selection when using 'undo'.
-    var beforeState = {
-      surfaceId: this.getName(),
-      selection: this.getSelection()
-    };
-    // Note: this is to provide the optional signature transaction(before)
-    if (!_.isFunction(arguments[0]) && arguments.length >= 2) {
-      var customBeforeState = arguments[0];
-      beforeState = _.extend(beforeState, customBeforeState);
-      transformation = arguments[1];
-      ctx = arguments[2];
-    }
-    var afterState;
-    // TODO: remove this clear here, and in future do it on document:willchange (not implemented yet)
-    // Then cursor flickering will be gone for undo/redos too.
-    // this.surfaceSelection.clear();
-    var doc = this.getDocument();
-    // Making the doc transaction silent, so that the document:changed event does not
-    // get emitted before the selection has been updated.
-    var change = doc.transaction(beforeState, {silent: true}, function(tx, args) {
-      args.selection = beforeState.selection;
-      // A transformation receives a set of input arguments and should return a set of output arguments.
-      var result = transformation.call(ctx, tx, args);
-      // The `afterState` is saved with the document operation and will be used
-      // to recover the selection whe using `redo`.
-      afterState = result || {};
-      // If no selection is returned, the old selection is for `afterState`.
-      if (!afterState.selection) {
-        afterState.selection = beforeState.selection;
-      }
-      afterState.surfaceId = beforeState.surfaceId;
-      return afterState;
+  this.transaction = function(transformation) {
+    var docSession = this.docSession;
+    var surfaceId = this.getName();
+    // using the silent version, so that the selection:changed event does not get emitted too early
+    var change = docSession.transaction(function(tx, args) {
+      // `beforeState` is saved with the document operation and will be used
+      // to recover the selection when using 'undo'.
+      tx.before.surfaceId = surfaceId;
+      return transformation(tx, args);
     });
     if (change) {
       // set the selection before notifying any listeners
-      var sel = afterState.selection;
-      this._setSelection(sel, "silent");
-      doc._notifyChangeListeners(change);
+      var sel = this.getSelection();
+      // TODO: selection is now owned by by DocumentSession
       this.emit('selection:changed', sel, this);
       this.rerenderDomSelection();
     }
@@ -340,7 +309,7 @@ Surface.Prototype = function() {
   };
 
   this.getSelection = function() {
-    return this.selection;
+    return this.docSession.getSelection();
   };
 
   /**
@@ -467,7 +436,7 @@ Surface.Prototype = function() {
       this.surfaceSelection.clear();
       args.text = event.data;
       return this.insertText(tx, args);
-    }, this);
+    }.bind(this));
     this.rerenderDomSelection();
   };
 
@@ -500,7 +469,7 @@ Surface.Prototype = function() {
         this.surfaceSelection.clear();
         args.text = character;
         return this.insertText(tx, args);
-      }, this);
+      }.bind(this));
       this.rerenderDomSelection();
       event.preventDefault();
       event.stopPropagation();
@@ -591,11 +560,12 @@ Surface.Prototype = function() {
   this.onNativeBlur = function() {
     // console.log('Native blur on surface', this.__id__);
 
-    // clearing DOM selection first, which eliminates strange selection
+    // HACK: clearing DOM selection first, which eliminates strange selection
     // artifacts coming from changing the text property structure
     // while having a rendered DOM selection.
     window.getSelection().removeAllRanges();
-    this.textPropertyManager.renderSelection(this.selection);
+
+    this.textPropertyManager.renderSelection(this.getSelection());
     this.isNativeFocused = false;
     this.skipNextFocusEvent = false;
   };
@@ -682,7 +652,7 @@ Surface.Prototype = function() {
       this.surfaceSelection.clear();
       args.text = " ";
       return this.insertText(tx, args);
-    }, this);
+    }.bind(this));
     this.rerenderDomSelection();
   };
 
@@ -691,11 +661,11 @@ Surface.Prototype = function() {
     if (event.shiftKey) {
       this.transaction(function(tx, args) {
         return this.softBreak(tx, args);
-      }, this);
+      }.bind(this));
     } else {
       this.transaction(function(tx, args) {
         return this.break(tx, args);
-      }, this);
+      }.bind(this));
     }
     this.rerenderDomSelection();
   };
@@ -706,7 +676,7 @@ Surface.Prototype = function() {
     this.transaction(function(tx, args) {
       args.direction = direction;
       return this.delete(tx, args);
-    }, this);
+    }.bind(this));
     this.rerenderDomSelection();
   };
 
@@ -744,7 +714,7 @@ Surface.Prototype = function() {
    */
   this._setModelSelection = function(sel, silent) {
     sel = sel || Document.nullSelection;
-    this.selection = sel;
+    this.docSession.setSelection(sel);
     if (!silent) {
       this.emit('selection:changed', sel, this);
     }

@@ -269,7 +269,7 @@ AnnotationCommand.Prototype = function() {
     var result; // to store transform result
     if (sel.isNull()) return;
 
-    surface.transaction({ selection: sel }, function(tx, args) {
+    surface.transaction(function(tx, args) {
       args.annotationType = self.getAnnotationType();
       args.annotationData = self.getAnnotationData();
       args.splitContainerSelections = false;

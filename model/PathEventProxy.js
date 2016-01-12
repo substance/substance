@@ -3,6 +3,8 @@
 var oo = require('../util/oo');
 var each = require('lodash/collection/each');
 var PathAdapter = require('../util/PathAdapter');
+var deleteFromArray = require('../util/deleteFromArray');
+
 
 var NotifyByPathProxy = function(doc) {
   this.listeners = new PathAdapter();
@@ -13,6 +15,11 @@ var NotifyByPathProxy = function(doc) {
 NotifyByPathProxy.Prototype = function() {
 
   this.onDocumentChanged = function(change, info, doc) {
+    // stop if no listeners registered
+    if (this._list.length === 0) {
+      return;
+    }
+
     var listeners = this.listeners;
     var updated = change.updated;
 
@@ -31,7 +38,7 @@ NotifyByPathProxy.Prototype = function() {
       }
     }
 
-    each(change.ops, function(op) {
+    change.ops.forEach(function(op) {
       if ( (op.type === "create" || op.type === "delete") && (op.val.path || op.val.startPath)) {
         if (op.val.path) {
           _updated(op.val.path, op);
@@ -53,17 +60,17 @@ NotifyByPathProxy.Prototype = function() {
           }
         }
       }
-    }, this);
-    change.traverse(function(path) {
+    }.bind(this));
+    change.updated.traverse(function(path) {
       var key = path.concat(['listeners']);
       var scopedListeners = listeners.get(key);
       each(scopedListeners, function(entry) {
         entry.method.call(entry.listener, change, info, doc);
       });
-    }, this);
+    }.bind(this));
   };
 
-  this.add = function(path, listener, method) {
+  this._add = function(path, listener, method) {
     var key = path.concat(['listeners']);
     var listeners = this.listeners.get(key);
     if (!listeners) {
@@ -73,29 +80,35 @@ NotifyByPathProxy.Prototype = function() {
     if (!method) {
       throw new Error('Invalid argument: expected function but got ' + method);
     }
-    listeners.push({ method: method, listener: listener });
+    var entry = { path: path, method: method, listener: listener };
+    listeners.push(entry);
+    this._list.push(entry);
   };
 
   this.connect = function(listener, path, method) {
     this.add(path, listener, method);
   };
 
-  // TODO: it would be cool if we would just need to provide the listener instance, no path
-  this.remove = function(path, listener) {
-    var key = path.concat(['listeners']);
-    var listeners = this.listeners.get(key);
-    if (listeners) {
-      for (var i = 0; i < listeners.length; i++) {
-        if (listeners[i].listener === listener) {
-          listeners.splice(i, 1);
-          return;
-        }
+  this.disconnect = function(listener) {
+    for (var i = 0; i < this._list.length; i++) {
+      if (this._list[i].listener === listener) {
+        var entry = this._list[i];
+        this._list.splice(i, 1);
+        var key = entry.concat(['listeners']);
+        var listeners = this.listeners.get(key);
+        deleteFromArray(listeners, entry);
       }
     }
   };
 
-  this.disconnect = function(listener, path) {
-    this.remove(path, listener);
+  this.add = function(path, listener, method) {
+    console.warn('DEPRECATED: use PathEventProxy#connect(this, path, method) instead.');
+    return this._add(path, listener, method);
+  };
+
+  this.remove = function(path, listener) {
+    console.warn('DEPRECATED: use PathEventProxy#disconnect(this) instead.');
+    this.disconnect(listener);
   };
 
 };

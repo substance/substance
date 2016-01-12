@@ -41,7 +41,6 @@ module.exports = function() {
   main.show('table1');
   article.create({ type: 'paragraph', id: 'p5', content: '0123456789' });
   main.show('p5');
-  article.documentDidLoad();
   article.FORCE_TRANSACTIONS = false;
   return article;
 };

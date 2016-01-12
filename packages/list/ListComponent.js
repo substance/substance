@@ -11,11 +11,11 @@ var ListComponent = Component.extend({
 
   initialize: function() {
     this.doc = this.props.doc;
-    this.doc.getEventProxy('path').add([this.props.node.id, 'items'], this, this.onItemsChanged);
+    this.doc.getEventProxy('path').connect(this, [this.props.node.id, 'items'], this.onItemsChanged);
   },
 
   dispose: function() {
-    this.doc.getEventProxy('path').remove([this.props.node.id, 'items'], this);
+    this.doc.getEventProxy('path').disconnect(this);
     this.doc = null;
   },
 

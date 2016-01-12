@@ -5,8 +5,8 @@ var isNumber = require('lodash/lang/isNumber');
 var Operation = require('./Operation');
 var Conflict = require('./Conflict');
 
-var INS = "+";
-var DEL = "-";
+var INSERT = "insert";
+var DELETE = "delete";
 
 var hasConflict;
 
@@ -19,7 +19,7 @@ function TextOperation(data) {
   if (!data || data.type === undefined || data.pos === undefined || data.str === undefined) {
     throw new Error("Illegal argument: insufficient data.");
   }
-  // '+' or '-'
+  // 'insert' or 'delete'
   this.type = data.type;
   // the position where to apply the operation
   this.pos = data.pos;
@@ -45,7 +45,7 @@ TextOperation.Prototype = function() {
 
   this.apply = function(str) {
     if (this.isEmpty()) return str;
-    if (this.type === INS) {
+    if (this.type === INSERT) {
       if (str.length < this.pos) {
         throw new Error("Provided string is too short.");
       }
@@ -55,7 +55,7 @@ TextOperation.Prototype = function() {
         return str.slice(0, this.pos).concat(this.str).concat(str.slice(this.pos));
       }
     }
-    else /* if (this.type === DEL) */ {
+    else /* if (this.type === DELETE) */ {
       if (str.length < this.pos + this.str.length) {
         throw new Error("Provided string is too short.");
       }
@@ -76,11 +76,11 @@ TextOperation.Prototype = function() {
   };
 
   this.isInsert = function() {
-    return this.type === INS;
+    return this.type === INSERT;
   };
 
   this.isDelete = function() {
-    return this.type === DEL;
+    return this.type === DELETE;
   };
 
   this.getLength = function() {
@@ -89,7 +89,7 @@ TextOperation.Prototype = function() {
 
   this.invert = function() {
     var data = {
-      type: this.isInsert() ? '-' : '+',
+      type: this.isInsert() ? DELETE : INSERT,
       pos: this.pos,
       str: this.str
     };
@@ -113,7 +113,7 @@ TextOperation.Prototype = function() {
   };
 
   this.toString = function() {
-    return ["(", (this.isInsert() ? '+' : '-'), ",", this.pos, ",'", this.str, "')"].join('');
+    return ["(", (this.isInsert() ? INSERT : DELETE), ",", this.pos, ",'", this.str, "')"].join('');
   };
 };
 
@@ -123,11 +123,11 @@ hasConflict = function(a, b) {
   // Insert vs Insert:
   //
   // Insertions are conflicting iff their insert position is the same.
-  if (a.type === INS && b.type === INS)  return (a.pos === b.pos);
+  if (a.type === INSERT && b.type === INSERT)  return (a.pos === b.pos);
   // Delete vs Delete:
   //
   // Deletions are conflicting if their ranges overlap.
-  if (a.type === DEL && b.type === DEL) {
+  if (a.type === DELETE && b.type === DELETE) {
     // to have no conflict, either `a` should be after `b` or `b` after `a`, otherwise.
     return !(a.pos >= b.pos + b.str.length || b.pos >= a.pos + a.str.length);
   }
@@ -135,7 +135,7 @@ hasConflict = function(a, b) {
   //
   // A deletion and an insertion are conflicting if the insert position is within the deleted range.
   var del, ins;
-  if (a.type === DEL) {
+  if (a.type === DELETE) {
     del = a; ins = b;
   } else {
     del = b; ins = a;
@@ -188,7 +188,7 @@ function transform_delete_delete(a, b, first) {
 //
 
 function transform_insert_delete(a, b) {
-  if (a.type === DEL) {
+  if (a.type === DELETE) {
     return transform_insert_delete(b, a);
   }
   // we can assume, that a is an insertion and b is a deletion
@@ -219,10 +219,10 @@ var transform = function(a, b, options) {
     a = a.clone();
     b = b.clone();
   }
-  if (a.type === INS && b.type === INS)  {
+  if (a.type === INSERT && b.type === INSERT)  {
     transform_insert_insert(a, b);
   }
-  else if (a.type === DEL && b.type === DEL) {
+  else if (a.type === DELETE && b.type === DELETE) {
     transform_delete_delete(a, b, true);
   }
   else {
@@ -238,14 +238,14 @@ TextOperation.transform = function() {
 /* Factories */
 
 TextOperation.Insert = function(pos, str) {
-  return new TextOperation({ type: INS, pos: pos, str: str });
+  return new TextOperation({ type: INSERT, pos: pos, str: str });
 };
 
 TextOperation.Delete = function(pos, str) {
-  return new TextOperation({ type: DEL, pos: pos, str: str });
+  return new TextOperation({ type: DELETE, pos: pos, str: str });
 };
 
-TextOperation.INSERT = INS;
-TextOperation.DELETE = DEL;
+TextOperation.INSERT = INSERT;
+TextOperation.DELETE = DELETE;
 
 module.exports = TextOperation;

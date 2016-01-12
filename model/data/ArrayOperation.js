@@ -8,8 +8,8 @@ var Operation = require('./Operation');
 var Conflict = require('./Conflict');
 
 var NOP = "NOP";
-var DEL = "delete";
-var INS = "insert";
+var DELETE = "delete";
+var INSERT = "insert";
 
 /*
   @class
@@ -26,7 +26,7 @@ var ArrayOperation = function(data) {
   this.type = data.type;
   if (this.type === NOP) return;
 
-  if (this.type !== INS && this.type !== DEL) {
+  if (this.type !== INSERT && this.type !== DELETE) {
     throw new Error("Illegal type.");
   }
   // the position where to apply the operation
@@ -48,7 +48,7 @@ ArrayOperation.Prototype = function() {
     if (this.type === NOP) {
       return array;
     }
-    if (this.type === INS) {
+    if (this.type === INSERT) {
       if (array.length < this.pos) {
         throw new Error("Provided array is too small.");
       }
@@ -56,7 +56,7 @@ ArrayOperation.Prototype = function() {
       return array;
     }
     // Delete
-    else /* if (this.type === DEL) */ {
+    else /* if (this.type === DELETE) */ {
       if (array.length < this.pos) {
         throw new Error("Provided array is too small.");
       }
@@ -80,8 +80,8 @@ ArrayOperation.Prototype = function() {
   this.invert = function() {
     var data = this.toJSON();
     if (this.type === NOP) data.type = NOP;
-    else if (this.type === INS) data.type = DEL;
-    else /* if (this.type === DEL) */ data.type = INS;
+    else if (this.type === INSERT) data.type = DELETE;
+    else /* if (this.type === DELETE) */ data.type = INSERT;
     return new ArrayOperation(data);
   };
 
@@ -100,11 +100,11 @@ ArrayOperation.Prototype = function() {
   };
 
   this.isInsert = function() {
-    return this.type === INS;
+    return this.type === INSERT;
   };
 
   this.isDelete = function() {
-    return this.type === DEL;
+    return this.type === DELETE;
   };
 
   this.getOffset = function() {
@@ -120,7 +120,7 @@ ArrayOperation.Prototype = function() {
   };
 
   this.toString = function() {
-    return ["(", (this.isInsert() ? '+' : '-'), ",", this.getOffset(), ",'", this.getValue(), "')"].join('');
+    return ["(", (this.isInsert() ? INSERT : DELETE), ",", this.getOffset(), ",'", this.getValue(), "')"].join('');
   };
 };
 
@@ -128,7 +128,7 @@ Operation.extend(ArrayOperation);
 
 var hasConflict = function(a, b) {
   if (a.type === NOP || b.type === NOP) return false;
-  if (a.type === INS && b.type === INS) {
+  if (a.type === INSERT && b.type === INSERT) {
     return a.pos === b.pos;
   } else {
     return false;
@@ -165,7 +165,7 @@ function transform_delete_delete(a, b) {
 
 function transform_insert_delete(a, b) {
   // reduce to a normalized case
-  if (a.type === DEL) {
+  if (a.type === DELETE) {
     var tmp = a;
     a = b;
     b = tmp;
@@ -192,10 +192,10 @@ var transform = function(a, b, options) {
   if (a.type === NOP || b.type === NOP)  {
     // nothing to transform
   }
-  else if (a.type === INS && b.type === INS)  {
+  else if (a.type === INSERT && b.type === INSERT)  {
     transform_insert_insert(a, b);
   }
-  else if (a.type === DEL && b.type === DEL) {
+  else if (a.type === DELETE && b.type === DELETE) {
     transform_delete_delete(a, b);
   }
   else {
@@ -210,16 +210,16 @@ ArrayOperation.hasConflict = hasConflict;
 /* Factories */
 
 ArrayOperation.Insert = function(pos, val) {
-  return new ArrayOperation({type:INS, pos: pos, val: val});
+  return new ArrayOperation({type:INSERT, pos: pos, val: val});
 };
 
 ArrayOperation.Delete = function(pos, val) {
-  return new ArrayOperation({ type:DEL, pos: pos, val: val });
+  return new ArrayOperation({ type:DELETE, pos: pos, val: val });
 };
 
 ArrayOperation.NOP = NOP;
-ArrayOperation.DELETE = DEL;
-ArrayOperation.INSERT = INS;
+ArrayOperation.DELETE = DELETE;
+ArrayOperation.INSERT = INSERT;
 
 // Export
 // ========

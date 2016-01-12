@@ -98,7 +98,8 @@ DocumentNode.extend(Container, ParentNodeMixin, function() {
     }
     var nodeIndex = this.getPosition(node.id);
     if (nodeIndex < 0) {
-      throw new Error('Can not resolve index of node ' + node.id);
+      // throw new Error('Can not resolve index of node ' + node.id);
+      return null;
     }
     address.unshift(nodeIndex);
     return address;
@@ -365,6 +366,9 @@ DocumentNode.extend(Container, ParentNodeMixin, function() {
   };
 
   this.getAddressRange = function(startAddress, endAddress) {
+    if (!startAddress || !endAddress) {
+      return [];
+    }
     if (endAddress.isBefore(startAddress)) {
       var tmp = startAddress;
       startAddress = endAddress;

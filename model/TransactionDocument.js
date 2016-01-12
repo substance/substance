@@ -1,11 +1,12 @@
 'use strict';
 
-var clone = require('lodash/lang/clone');
 var isFunction = require('lodash/lang/isFunction');
 var extend = require('lodash/object/extend');
 var each = require('lodash/collection/each');
-var AbstractDocument = require('./AbstractDocument');
+var Document = require('./Document');
 var DocumentChange = require('./DocumentChange');
+var IncrementalData = require('./data/IncrementalData');
+var DocumentNodeFactory = require('./DocumentNodeFactory');
 
 var __id__ = 0;
 
@@ -30,11 +31,18 @@ var __id__ = 0;
   });
   ```
 */
-function TransactionDocument(document) {
-  AbstractDocument.call(this, document.schema);
+function TransactionDocument(document, session) {
   this.__id__ = "TX_"+__id__++;
 
+  this.schema = document.schema;
+  this.nodeFactory = new DocumentNodeFactory(this);
+  this.data = new IncrementalData(this.schema, {
+    nodeFactory: this.nodeFactory
+  });
+
   this.document = document;
+  this.session = session;
+
   // ops recorded since transaction start
   this.ops = [];
   // app information state information used to recover the state before the transaction
@@ -50,62 +58,38 @@ function TransactionDocument(document) {
 
 TransactionDocument.Prototype = function() {
 
-  this.isTransaction = function() {
-    return true;
-  };
-
   this.reset = function() {
     this.ops = [];
     this.before = {};
   };
 
-  /**
-    @include model/AbstractDocument#set
-  */
   this.create = function(nodeData) {
     var op = this.data.create(nodeData);
     if (!op) return;
-    if (this.document.isTransacting) {
-      this.ops.push(op);
-    }
+    this.ops.push(op);
     // TODO: incremental graph returns op not the node,
     // so probably here we should too?
     return this.data.get(nodeData.id);
   };
 
-  /**
-    @include model/AbstractDocument#set
-  */
   this.delete = function(nodeId) {
     var op = this.data.delete(nodeId);
     if (!op) return;
-    if (this.document.isTransacting) {
-      this.ops.push(op);
-    }
+    this.ops.push(op);
     return op;
   };
 
-  /**
-    @include model/AbstractDocument#set
-  */
   this.set = function(path, value) {
     var op = this.data.set(path, value);
     if (!op) return;
-    if (this.document.isTransacting) {
-      this.ops.push(op);
-    }
+    this.ops.push(op);
     return op;
   };
 
-  /**
-    @include model/AbstractDocument#set
-  */
   this.update = function(path, diffOp) {
     var op = this.data.update(path, diffOp);
     if (!op) return;
-    if (this.document.isTransacting) {
-      this.ops.push(op);
-    }
+    this.ops.push(op);
     return op;
   };
 
@@ -120,110 +104,59 @@ TransactionDocument.Prototype = function() {
     return this.ops;
   };
 
-  this.apply = function(documentChange) {
+  this._apply = function(documentChange) {
     each(documentChange.ops, function(op) {
       this.data.apply(op);
     }, this);
   };
 
-  this.getIndex = function(name) {
-    return this.data.getIndex(name);
-  };
-
-  this.createSelection = function() {
-    return this.document.createSelection.apply(this, arguments);
-  };
-
-  this.getSchema = function() {
-    return this.schema;
-  };
-
-  this._transaction = function(beforeState, eventData, transformation) {
-    if (arguments.length === 1) {
-      transformation = arguments[0];
-      eventData = {};
-      beforeState = {};
-    }
-    if (arguments.length === 2) {
-      transformation = arguments[1];
-      eventData = {};
-    } else {
-      eventData = eventData || {};
-    }
-
+  this._transaction = function(transformation) {
     if (!isFunction(transformation)) {
       throw new Error('Document.transaction() requires a transformation function.');
     }
-
     // var time = Date.now();
     // HACK: ATM we can't deep clone as we do not have a deserialization
     // for selections.
-    this._startTransaction(clone(beforeState));
+    this._startTransaction();
     // console.log('Starting the transaction took', Date.now() - time);
     try {
       // time = Date.now();
-      var result = transformation(this, beforeState);
-      // being robust to transformation not returning a result
-      if (!result) result = {};
+      transformation(this, {});
       // console.log('Executing the transformation took', Date.now() - time);
-      var afterState = {};
-      // only keys that are in the beforeState can be in the afterState
-      // TODO: maybe this is to sharp?
-      // we could also just merge the transformation result with beforeState
-      // but then we might have non-state related information in the after state.
-      for (var key in beforeState) {
-        if (result[key]) {
-          afterState[key] = result[key];
-        } else {
-          afterState[key] = beforeState[key];
-        }
-      }
-      // save automatically if not _isCancelled
+      // save automatically if not canceled
       if (!this._isCancelled) {
-        return this._saveTransaction(afterState, eventData);
+        return this._saveTransaction();
       }
     } finally {
       if (!this._isSaved) {
         this.cancel();
       }
       // HACK: making sure that the state is reset when an exception has occurred
-      this.document.isTransacting = false;
+      this.session.isTransacting = false;
     }
   };
 
-  this._startTransaction = function(beforeState) {
-    // TODO: maybe we need to prepare the stage
-    this.before = beforeState || {};
+  this._startTransaction = function() {
+    this.before = {};
+    this.after = {};
+    this.info = {};
     this._isCancelled = false;
     this._isSaved = false;
+    // TODO: we should use a callback and not an event
+    // Note: this is used to initialize
     this.document.emit('transaction:started', this);
   };
 
-  this._saveTransaction = function(afterState, info) {
+  this._saveTransaction = function() {
     if (this._isCancelled) {
       return;
     }
-    var doc = this.document;
     var beforeState = this.before;
-    afterState = extend({}, beforeState, afterState);
+    var afterState = extend({}, beforeState, this.after);
     var ops = this.ops;
     var change;
     if (ops.length > 0) {
       change = new DocumentChange(ops, beforeState, afterState);
-      // apply the change
-      doc._apply(change, 'saveTransaction');
-      // push to undo queue and wipe the redo queue
-      doc.done.push(change);
-      doc.undone = [];
-      // console.log('Document._saveTransaction took %s ms', (Date.now() - time));
-      // time = Date.now();
-      if (!info.silent) {
-        // TODO: I would like to wrap this with a try catch.
-        // however, debugging gets inconvenient as caught exceptions don't trigger a breakpoint
-        // by default, and other libraries such as jquery throw noisily.
-        doc._notifyChangeListeners(change, info);
-      }
-      // console.log('Notifying change listener took %s ms', (Date.now() - time));
     }
     this._isSaved = true;
     this.reset();
@@ -246,6 +179,6 @@ TransactionDocument.Prototype = function() {
 
 };
 
-AbstractDocument.extend(TransactionDocument);
+Document.extend(TransactionDocument);
 
 module.exports = TransactionDocument;

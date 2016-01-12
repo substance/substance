@@ -50,6 +50,10 @@ ControllerCommand.Prototype = function() {
     return this.controller.getDocument();
   };
 
+  this.getDocumentSession = function() {
+    return this.controller.getDocumentSession();
+  };
+
   /**
     Execute command
 
