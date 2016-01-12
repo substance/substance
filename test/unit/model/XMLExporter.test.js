@@ -1,16 +1,16 @@
 'use strict';
 
 require('../qunit_extensions');
-var TestHTMLExporter = require('../../model/TestHTMLExporter');
+var TestXMLExporter = require('../../model/TestXMLExporter');
 var TestArticle = require('../../model/TestArticle');
 var simpleDoc = require('../../fixtures/simple');
 
 var exporter;
 var doc;
 
-QUnit.module('model/HTMLExporter', {
+QUnit.module('model/XMLExporter', {
   beforeEach: function() {
-    exporter = new TestHTMLExporter();
+    exporter = new TestXMLExporter();
     doc = new TestArticle();
   },
   afterEach: function() {
@@ -56,13 +56,25 @@ QUnit.test("Exporting h2", function(assert) {
 QUnit.test("Exporting simple document", function(assert) {
   var doc = simpleDoc();
   var rootEl = exporter.exportDocument(doc);
-  var body = rootEl.find('body');
-  var actual = body.html();
+  var actual = rootEl.serialize();
   var expected = [
+    '<article>',
     '<p data-id="p1">' + CONTENT + '</p>',
     '<p data-id="p2">' + CONTENT + '</p>',
     '<p data-id="p3">' + CONTENT + '</p>',
-    '<p data-id="p4">' + CONTENT + '</p>'
+    '<p data-id="p4">' + CONTENT + '</p>',
+    '</article>'
   ].join('');
   assert.equal(expected, actual);
+});
+
+QUnit.test("Exporting meta", function(assert) {
+  var meta = doc.get('meta');
+  var el = exporter.convertNode(meta);
+  var actual = el.outerHTML;
+
+  console.log('actual', actual);
+  // var expected = '<h2 data-id="h2">' + CONTENT + '</h2>';
+  // assert.equal(expected, actual);
+  assert.ok(true);
 });

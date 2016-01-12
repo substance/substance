@@ -17,10 +17,12 @@ module.exports = {
   },
 
   export: function(node, el, converter) {
-    el.tagName = 'h' + node.level;
+    var $$ = converter.$$;
+    el = $$('h'+node.level).attr('data-id', node.id);
     el.append(
       converter.annotatedText([node.id, 'content'])
     );
+    return el;
   }
 
 };

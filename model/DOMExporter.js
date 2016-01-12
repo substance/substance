@@ -7,7 +7,7 @@ var isString = require('lodash/lang/isString');
 var each = require('lodash/collection/each');
 var Fragmenter = require('./Fragmenter');
 var Registry = require('../util/Registry');
-var $$ = require('../ui/VirtualDOMElement').createElement;
+// var $$ = require('../ui/VirtualDOMElement').createElement;
 
 function DOMExporter(config) {
   if (!config.converters) {
@@ -18,7 +18,11 @@ function DOMExporter(config) {
     doc: null
   };
   this.config = config;
-  this.$$ = $$;
+
+  this.state.documentEl = this.createDocumentElement();
+
+  this.$$ = this.createElement.bind(this);
+
   config.converters.forEach(function(converter) {
     if (!converter.type) {
       console.error('Converter must provide the type of the associated node.', converter);
@@ -30,12 +34,17 @@ function DOMExporter(config) {
 
 DOMExporter.Prototype = function() {
 
+  this.createElement = function(str) {
+    return this.state.documentEl.createElement(str);
+  };
+
   this.exportDocument = function(doc) {
+    this.state.documentEl = this.createDocumentElement();
     // TODO: this is no left without much functionality
     // still, it would be good to have a consistent top-level API
     // i.e. converter.importDocument(el) and converter.exportDocument(doc)
     // On the other side, the 'internal' API methods are named this.convert*.
-    return this.convertDocument(doc);
+    return this.convertDocument(doc, this.state.documentEl);
   };
 
   /**
@@ -84,9 +93,9 @@ DOMExporter.Prototype = function() {
     }
     var el;
     if (converter.tagName) {
-      el = $$(converter.tagName);
+      el = this.$$(converter.tagName);
     } else {
-      el = $$('div');
+      el = this.$$('div');
     }
     el.attr('data-id', node.id);
     if (converter.export) {
@@ -99,7 +108,7 @@ DOMExporter.Prototype = function() {
 
   this.convertProperty = function(doc, path, options) {
     this.initialize(doc, options);
-    var wrapper = $$('div')
+    var wrapper = this.$$('div')
       .append(this.annotatedText(path));
     return wrapper.innerHTML;
   };
@@ -129,9 +138,9 @@ DOMExporter.Prototype = function() {
       }
       var el;
       if (converter.tagName) {
-        el = $$(converter.tagName);
+        el = this.$$(converter.tagName);
       } else {
-        el = $$('span');
+        el = this.$$('span');
       }
       el.attr('data-id', anno.id);
       el.append(context.children);
@@ -139,7 +148,7 @@ DOMExporter.Prototype = function() {
         converter.export(anno, el, self);
       }
       parentContext.children.push(el);
-    };
+    }.bind(this);
     var wrapper = { children: [] };
     annotator.start(wrapper, text, annotations);
     return wrapper.children;
@@ -173,7 +182,7 @@ DOMExporter.defaultBlockConverter = {
       if (name === 'id' || name === 'type') {
         return;
       }
-      var prop = $$('div').attr('property', name);
+      var prop = this.$$('div').attr('property', name);
       if (node.getPropertyType(name) === 'string') {
         prop.append(converter.annotatedText([node.id, name]));
       } else {

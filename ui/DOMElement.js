@@ -30,6 +30,7 @@ function DOMElement() {
 
 DOMElement.Prototype = function() {
 
+
   /* jshint unused: false */
 
   /**
@@ -597,6 +598,10 @@ DOMElement.Prototype = function() {
   */
   this.remove = function() {
     throw new Error('This method is abstract.');
+  };
+
+  this.serialize = function() {
+    return this.outerHTML;
   };
 
 };

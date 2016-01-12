@@ -85,11 +85,19 @@ DefaultDOMElement.Prototype = function() {
   };
 
   this.getInnerHtml = function() {
-    return this.$el.html();
+    if (inBrowser) {
+      return this.el.innerHTML;
+    } else {
+      return this.$el.html();
+    }
   };
 
   this.setInnerHtml = function(html) {
-    this.$el.html(html);
+    if (inBrowser) {
+      this.el.innerHTML = html;
+    } else {
+      this.$el.html(html);
+    }
   };
 
   this.getOuterHtml = function() {
@@ -213,7 +221,11 @@ DefaultDOMElement.Prototype = function() {
   };
 
   this.createElement = function(str) {
-    return DefaultDOMElement.createElement(str);
+    if (inBrowser) {
+      return new DefaultDOMElement(this.el.ownerDocument.createElement(str));
+    } else {
+      return DefaultDOMElement.createElement(str);
+    }
   };
 
   this.clone = function() {
@@ -276,7 +288,7 @@ DefaultDOMElement.Prototype = function() {
         this.append(node);
       }.bind(this));
     } else if (child instanceof DefaultDOMElement) {
-      this.$el.append(child.$el);
+      this.$el.append(child.el);
     } else {
       this.$el.append(child);
     }
@@ -305,8 +317,8 @@ DOMElement.extend(DefaultDOMElement);
 DefaultDOMElement.createElement = function(str) {
   console.warn('Do not use DefaultDOMElement.createElement directly.');
   str = str.trim();
-  if (str[0] !== '<') {
-    str = '<' + str + '>';
+  if (str[0] === '<') {
+    throw new Error('Illegal argument: invalid tag name.')
   }
   var el;
   el = $(str)[0];
@@ -378,10 +390,28 @@ oo.initClass(DefaultDOMElement.NodeIterator);
 
 function _parseXML(str, format) {
   var nativeEls = [];
+  var doc;
 
-  if (inBrowser) {
+  if (!str) {
+    // Create an empty XML document
+    if (inBrowser) {
+      if (format === 'xml') {
+        doc = (new window.DOMParser()).parseFromString('<dummy/>', 'text/xml');
+        // doc.removeChild(doc.documentElement);
+        // doc.ownerDocument = doc;
+      } else {
+        doc = (new window.DOMParser()).parseFromString('<html></html>', 'text/html');
+      }
+    } else {
+      if (format === 'xml') {
+        doc = $.parseXML('');
+      } else {
+        doc = $.parseHTML('');
+      }
+    }
+    return new DefaultDOMElement(doc);
+  } else if (inBrowser) {
     var parser = new window.DOMParser();
-    var doc;
     var isFullDoc;
     if (format === 'html') {
       isFullDoc = (str.search('<html>')>=0);
@@ -405,7 +435,7 @@ function _parseXML(str, format) {
     } else {
       if (format === 'html') {
         if (isFullDoc) {
-          nativeEls = [doc];
+          nativeEls = [doc.firstChild];
         } else {
           // if the provided html is just a partial
           // then DOMParser still creates a full document

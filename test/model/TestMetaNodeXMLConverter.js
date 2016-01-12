@@ -17,7 +17,7 @@ module.exports = {
 
   export: function(node, el, converter) {
     var $$ = converter.$$;
-    el.append($$('title').append(
+    el.append(el.createElement('title').append(
       converter.annotatedText(['meta', 'title'])
     ));
   }
