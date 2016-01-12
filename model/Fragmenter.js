@@ -108,9 +108,11 @@ Fragmenter.Prototype = function() {
         } else if (a.hasOwnProperty('fragmentationHint')) {
           l = a.fragmentationHint;
         }
-        var opener = { pos: a.startOffset, mode: ENTER, level: l, id: a.id, type: a.type, node: a };
+        var startOffset = Math.min(a.startOffset, a.endOffset);
+        var endOffset = Math.max(a.startOffset, a.endOffset);
+        var opener = { pos: startOffset, mode: ENTER, level: l, id: a.id, type: a.type, node: a };
         openers.push(opener);
-        closers.push({ pos: a.endOffset, mode: EXIT, level: l, id: a.id, type: a.type, node: a, opener: opener});
+        closers.push({ pos: endOffset, mode: EXIT, level: l, id: a.id, type: a.type, node: a, opener: opener});
       }
     });
 
