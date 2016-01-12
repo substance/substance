@@ -4,6 +4,7 @@ var sinon = require('sinon');
 
 require('../qunit_extensions');
 var TextPropertyManager = require('../../../model/TextPropertyManager');
+var DocumentSession = require('../../../model/DocumentSession');
 var sample = require('../../fixtures/container_anno_sample');
 
 var manager;
@@ -53,50 +54,37 @@ QUnit.test("Manager should load existing container annotations.", function(asser
 });
 
 QUnit.test("Call update when property is updated.", function(assert) {
-  doc.transaction(function(tx) {
-    tx.update(textProp1.path, { "insert": { offset: 0, value: 'a' } } );
-  });
+  doc.update(textProp1.path, { "insert": { offset: 0, value: 'a' } } );
   assert.equal(textProp1.update.callCount, 1, "Property should have been updated.");
 });
 
 QUnit.test("Call update when an annotation is created.", function(assert) {
-  doc.transaction(function(tx) {
-    tx.create({
-      id: "test-anno",
-      type: "annotation",
-      path: textProp1.path,
-      startOffset: 0,
-      endOffset: 1
-    });
+  doc.create({
+    id: "test-anno",
+    type: "annotation",
+    path: textProp1.path,
+    startOffset: 0,
+    endOffset: 1
   });
   assert.equal(textProp1.update.callCount, 1, "Property should have been updated.");
 });
 
 QUnit.test("Call update when an annotation is removed.", function(assert) {
-  doc.transaction(function(tx) {
-    tx.delete("a2");
-  });
+  doc.delete("a2");
   assert.equal(textProp1.update.callCount, 1, "Property should have been updated.");
 });
 
 QUnit.test("Call update when an annotation has been updated.", function(assert) {
-  doc.transaction(function(tx) {
-    tx.set(["a2", "startOffset"], 1);
-  });
+  doc.set(["a2", "startOffset"], 1);
   assert.equal(textProp1.update.callCount, 1, "Property should have been updated.");
   textProp1.update.reset();
-  doc.transaction(function(tx) {
-    tx.set(["a2", "endOffset"], 7);
-  });
+  doc.set(["a2", "endOffset"], 7);
   assert.equal(textProp1.update.callCount, 1, "Property should have been updated.");
 });
 
 QUnit.test("Call update when an annotation has been transferred.", function(assert) {
   _textProp2();
-
-  doc.transaction(function(tx) {
-    tx.set(["a2", "path"], ["p2", "content"]);
-  });
+  doc.set(["a2", "path"], ["p2", "content"]);
   assert.equal(textProp1.update.callCount, 1, "First property should have been updated.");
   assert.equal(textProp2.update.callCount, 1, "Second component should have been updated.");
 });
@@ -104,17 +92,14 @@ QUnit.test("Call update when an annotation has been transferred.", function(asse
 QUnit.test("Set fragments when a container annotation has been created.", function(assert) {
   _textProp2();
   _textProp3();
-
-  doc.transaction(function(tx) {
-    tx.create({
-      id: "test-ca",
-      type: "test-container-anno",
-      container: "main",
-      startPath: ["p1", "content"],
-      startOffset: 0,
-      endPath: ["p3", "content"],
-      endOffset: 5
-    });
+  doc.create({
+    id: "test-ca",
+    type: "test-container-anno",
+    container: "main",
+    startPath: ["p1", "content"],
+    startOffset: 0,
+    endPath: ["p3", "content"],
+    endOffset: 5
   });
   assert.equal(textProp1.setFragments.callCount, 1, "first.setFragments should have been called.");
   assert.equal(textProp1.setFragments.args[0][0].length, 2, "First property should have received two fragments.");
@@ -139,9 +124,7 @@ QUnit.test("TextPropertyManager is updated after other Components.", function(as
   // registering another listener, which could be another component, such as ContainerNode
   doc.on('document:changed', other);
   // debugger;
-  doc.transaction(function(tx) {
-    tx.update(textProp1.path, { "insert": { offset: 0, value: 'a' } } );
-  });
+  doc.update(textProp1.path, { "insert": { offset: 0, value: 'a' } } );
   assert.ok(other.calledBefore(manager.onDocumentChange), "TextPropertyManager should have been called later.");
 });
 
@@ -152,7 +135,8 @@ QUnit.test("TextPropertyManager is updated after other Components.", function(as
 // i.e. the deletion of the annotation was taken as sign to rerender the
 // text property
 QUnit.test("Issue #66: do not update deleted properties.", function(assert) {
-  doc.transaction(function(tx) {
+  var docSession = new DocumentSession(doc);
+  docSession.transaction(function(tx) {
     tx.create({
       id: 's1',
       type: 'strong',
@@ -161,7 +145,7 @@ QUnit.test("Issue #66: do not update deleted properties.", function(assert) {
       endOffset: 5
     });
   });
-  doc.transaction(function(tx) {
+  docSession.transaction(function(tx) {
     var id = textProp1.path[0];
     // when deleting a node, the property will unregister itself
     manager.unregisterProperty(textProp1);
@@ -182,8 +166,6 @@ QUnit.test("Issue #66: do not update deleted properties.", function(assert) {
 QUnit.test("Issue #79: update on ContainerAnnotation changes.", function(assert) {
   _textProp2();
   _textProp3();
-  doc.transaction(function(tx) {
-    tx.set(["a1", "startOffset"], 3);
-  });
+  doc.set(["a1", "startOffset"], 3);
   assert.equal(textProp1.setFragments.callCount, 1, "First property should have been updated.");
 });

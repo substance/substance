@@ -1,8 +1,9 @@
 "use strict";
 
 require('../../qunit_extensions');
-var simple = require('../../../fixtures/simple');
 var insertNode = require('../../../../model/transform/insertNode');
+var DocumentSession = require('../../../../model/DocumentSession');
+var simple = require('../../../fixtures/simple');
 
 QUnit.module('model/transform/insertNode');
 
@@ -37,7 +38,8 @@ QUnit.test("InsertNode usage", function(assert) {
 
 QUnit.test("Insert node should break node.", function(assert) {
   var doc = simple();
-  doc.transaction(function(tx, args) {
+  var docSession = new DocumentSession(doc);
+  docSession.transaction(function(tx, args) {
     args.containerId = 'main';
     args.selection = doc.createSelection(selectionInFirstParagraph);
     args.node = testNode;
@@ -56,7 +58,8 @@ QUnit.test("Insert node should break node.", function(assert) {
 
 QUnit.test("Inserting an existing node should be possible", function(assert) {
   var doc = simple();
-  doc.transaction(function(tx, args) {
+  var docSession = new DocumentSession(doc);
+  docSession.transaction(function(tx, args) {
     tx.create(testNode);
     args.containerId = 'main';
     args.selection = doc.createSelection(selectionInFirstParagraph);
@@ -69,7 +72,8 @@ QUnit.test("Inserting an existing node should be possible", function(assert) {
 QUnit.test("Selection after insert.", function(assert) {
   var doc = simple();
   var sel;
-  doc.transaction(function(tx, args) {
+  var docSession = new DocumentSession(doc);
+  docSession.transaction(function(tx, args) {
     args.containerId = 'main';
     args.selection = doc.createSelection(selectionInFirstParagraph);
     args.node = testNode;

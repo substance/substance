@@ -2,27 +2,30 @@
 
 var ControllerCommand = require('./ControllerCommand');
 
-var Undo = ControllerCommand.extend({
-  static: {
-    name: 'undo'
-  },
+function Undo() {
+  Undo.super.apply(this, arguments);
+}
 
-  getCommandState: function() {
-    var doc = this.getDocument();
+Undo.Prototype = function() {
+  this.getCommandState = function() {
+    var docSession = this.getDocumentSession();
     return {
-      disabled: doc.done.length === 0,
+      disabled: !docSession.canUndo(),
       active: false
     };
-  },
-
-  execute: function() {
-    var doc = this.getDocument();
-    if (doc.done.length>0) {
-      doc.undo();
+  };
+  this.execute = function() {
+    var docSession = this.getDocumentSession();
+    if (docSession.canUndo()) {
+      docSession.undo();
       return true;
     }
     return false;
-  }
-});
+  };
+};
+
+ControllerCommand.extend(Undo);
+
+ControllerCommand.static.name = 'undo';
 
 module.exports = Undo;

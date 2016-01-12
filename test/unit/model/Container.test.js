@@ -113,9 +113,7 @@ QUnit.test("Should return null if there is no next address", function(assert) {
   var next = container.getNextAddress([7,0]);
   assert.equal(next, null);
   // the last is a nested node
-  doc.transaction(function(tx) {
-    tx.get('main').hide('p5');
-  });
+  doc.get('main').hide('p5');
   next = container.getNextAddress([6,0,1,2,0]);
   assert.equal(next, null);
 });
@@ -183,14 +181,13 @@ QUnit.test("Should return null if there is no previous address", function(assert
   var previous = container.getPreviousAddress([0,0]);
   assert.equal(previous, null);
   // the first is a nested node
-  doc.transaction(function(tx) {
-    tx.get('main').hide('p1');
-    tx.get('main').hide('p2');
-    tx.get('main').hide('sn1');
-    tx.get('main').hide('p3');
-    tx.get('main').hide('list1');
-    tx.get('main').hide('p4');
-  });
+  var main = doc.get('main');
+  main.hide('p1');
+  main.hide('p2');
+  main.hide('sn1');
+  main.hide('p3');
+  main.hide('list1');
+  main.hide('p4');
   previous = container.getPreviousAddress([0,0,0,0,0]);
   assert.equal(previous, null);
 });
@@ -243,18 +240,15 @@ QUnit.test("Issue #360: Comparing container addresses", function(assert) {
 
 QUnit.test("Issue #360 (II): getting a range of addresses", function(assert) {
   var doc = empty();
-  doc.transaction(function(tx) {
-    var container = tx.get('main');
-    for (var i = 0; i < 25; i++) {
-      var p = tx.create({
-        type: 'paragraph',
-        id: "p" + i,
-        content: "XXX"
-      });
-      container.show(p.id);
-    }
-  });
   var container = doc.get('main');
+  for (var i = 0; i < 25; i++) {
+    var p = doc.create({
+      type: 'paragraph',
+      id: "p" + i,
+      content: "XXX"
+    });
+    container.show(p.id);
+  }
   var addresses = container.getAddressRange(new DocumentAddress(0,0), new DocumentAddress(24, 0));
   assert.equal(addresses.length, 25, "There should be 25 addresses");
 });
@@ -262,28 +256,25 @@ QUnit.test("Issue #360 (II): getting a range of addresses", function(assert) {
 QUnit.test("Addresses for nodes without editable properties.", function(assert) {
   // Nodes without properties should be skipped when dealing with addresses
   var doc = empty();
-  doc.transaction(function(tx) {
-    var container = tx.get('main');
-    var node = tx.create({
-      type: 'paragraph',
-      id: "p1",
-      content: "XXX"
-    });
-    container.show(node.id);
-    var node = tx.create({
-      type: 'image',
-      id: "img",
-      src: "YYY"
-    });
-    container.show(node.id);
-    var node = tx.create({
-      type: 'paragraph',
-      id: "p2",
-      content: "ZZZ"
-    });
-    container.show(node.id);
-  });
   var container = doc.get('main');
+  var node = doc.create({
+    type: 'paragraph',
+    id: "p1",
+    content: "XXX"
+  });
+  container.show(node.id);
+  var node = doc.create({
+    type: 'image',
+    id: "img",
+    src: "YYY"
+  });
+  container.show(node.id);
+  var node = doc.create({
+    type: 'paragraph',
+    id: "p2",
+    content: "ZZZ"
+  });
+  container.show(node.id);
 
   var img = doc.get('img');
   var address = container._getFirstAddress(img);

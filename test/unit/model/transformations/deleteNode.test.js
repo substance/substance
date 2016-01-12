@@ -3,6 +3,7 @@
 require('../../qunit_extensions');
 var containerAnnoSample = require('../../../fixtures/container_anno_sample');
 var deleteNode = require('../../../../model/transform/deleteNode');
+var DocumentSession = require('../../../../model/DocumentSession');
 
 QUnit.module('model/transform/deleteNode');
 
@@ -15,7 +16,8 @@ QUnit.test("DeleteNode usage", function(assert) {
 
 QUnit.test("Delete a plain node", function(assert) {
   var doc = containerAnnoSample();
-  doc.transaction(function(tx, args) {
+  var docSession = new DocumentSession(doc);
+  docSession.transaction(function(tx, args) {
     args.nodeId = "p4";
     deleteNode(tx, args);
   });
@@ -24,7 +26,8 @@ QUnit.test("Delete a plain node", function(assert) {
 
 QUnit.test("Delete annotations when deleting a node", function(assert) {
   var doc = containerAnnoSample();
-  doc.transaction(function(tx) {
+  var docSession = new DocumentSession(doc);
+  docSession.transaction(function(tx) {
     tx.create({
       id: "test-anno",
       type: "annotation",
@@ -34,7 +37,7 @@ QUnit.test("Delete annotations when deleting a node", function(assert) {
   });
   assert.isDefinedAndNotNull(doc.get("test-anno"));
 
-  doc.transaction(function(tx, args) {
+  docSession.transaction(function(tx, args) {
     args.nodeId = "p4";
     deleteNode(tx, args);
   });
@@ -43,7 +46,8 @@ QUnit.test("Delete annotations when deleting a node", function(assert) {
 
 QUnit.test("Move startAnchor of container annotation to next node.", function(assert) {
   var doc = containerAnnoSample();
-  doc.transaction(function(tx, args) {
+  var docSession = new DocumentSession(doc);
+  docSession.transaction(function(tx, args) {
     args.nodeId = "p1";
     deleteNode(tx, args);
   });
@@ -54,7 +58,8 @@ QUnit.test("Move startAnchor of container annotation to next node.", function(as
 
 QUnit.test("Move endAnchor of container annotation to previous node.", function(assert) {
   var doc = containerAnnoSample();
-  doc.transaction(function(tx, args) {
+  var docSession = new DocumentSession(doc);
+  docSession.transaction(function(tx, args) {
     args.nodeId = "p3";
     deleteNode(tx, args);
   });
