@@ -74,3 +74,15 @@ QUnit.test("Importing meta", function(assert) {
     title: CONTENT
   });
 });
+
+QUnit.test("Importing image", function(assert) {
+  var xml = '<img data-id="img1" src="someimage.png" preview-src="someimagepreview.png"/>';
+  var el = DOMElement.parseXML(xml);
+  var node = importer.convertElement(el);
+  assert.deepEqual(node, {
+    id: 'img1',
+    type: 'image',
+    src: 'someimage.png',
+    previewSrc: 'someimagepreview.png'
+  });
+});

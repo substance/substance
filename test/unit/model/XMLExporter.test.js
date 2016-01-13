@@ -72,9 +72,15 @@ QUnit.test("Exporting meta", function(assert) {
   var meta = doc.get('meta');
   var el = exporter.convertNode(meta);
   var actual = el.outerHTML;
-
-  console.log('actual', actual);
-  // var expected = '<h2 data-id="h2">' + CONTENT + '</h2>';
-  // assert.equal(expected, actual);
+  var expected = '<meta data-id="meta"><title>Untitled</title></meta>';
+  assert.equal(expected, actual);
   assert.ok(true);
+});
+
+QUnit.test("Exporting image", function(assert) {
+  var img = doc.create({ type: 'image', id: 'img1', 'src': 'img1.png', 'previewSrc': 'img1preview.png' });
+  var el = exporter.convertNode(img);
+  var actual = el.outerHTML;
+  var expected = '<img data-id="img1" src="img1.png" preview-src="img1preview.png"/>';
+  assert.equal(expected, actual);
 });
