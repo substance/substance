@@ -10,7 +10,7 @@ var substanceGlobals = require('../util/substanceGlobals');
 /**
   The Clipboard is a Component which should be rendered as a sibling component
   of one or multiple Surfaces.
-  
+
   It uses the JSONImporter and JSONExporter for internal copy'n'pasting,
   i.e., within one window or between two instances with the same DocumentSchema.
 
@@ -92,7 +92,7 @@ Clipboard.Prototype = function() {
       var root = el.getRoot();
       var body = root.find('body');
       if (body) {
-        var _sharedPasteElement = root.createElement('div')
+        var _sharedPasteElement = body.createElement('div')
           .attr('contenteditable', true)
           .css({
             position: 'fixed',
