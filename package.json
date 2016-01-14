@@ -20,7 +20,8 @@
   "dependencies": {
     "lodash": "3.10.1",
     "jquery": "2.1.4",
-    "cheerio": "0.19.0"
+    "cheerio": "0.19.0",
+    "dom-serializer": "0.1.0"
   },
   "devDependencies": {
     "browserify": "substance/node-browserify#d3caeb6dcdaa97a258d099c7231a57f0f60ec876",
@@ -57,6 +58,7 @@
     "yargs": "3.30.0"
   },
   "browser": {
-    "cheerio": false
+    "cheerio": false,
+    "dom-serializer": false
   }
 }

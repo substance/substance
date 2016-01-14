@@ -15,6 +15,6 @@ module.exports = {
 
   export: function(node, el) {
     el.attr('src', node.src)
-      .attr('preview-src', node.previewSrc)
+      .attr('preview-src', node.previewSrc);
   }
 };

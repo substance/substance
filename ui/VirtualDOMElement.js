@@ -24,14 +24,14 @@ function VirtualDOMElement() {
   this.htmlProps = {};
   this.style = {};
   this.handlers = {};
-  this._children = [];
+  this.children = [];
 
-  // component related properties
+  // Component related properties
   this._ref = null;
   this._isOnRoute = false;
-  this.props = {};
-
-  // used by Component
+  this.props = {
+    children: this.children
+  };
   this._owner = null;
 }
 
@@ -67,17 +67,20 @@ VirtualDOMElement.Prototype = function() {
 
   this.setProps = function(props) {
     this.props = props;
+    this.props.children = this.props.children || this.children;
     return this;
   };
 
   this.extendProps = function(props) {
     extend(this.props, props);
+    this.props.children = this.props.children || this.children;
     return this;
   };
 
   this.addProps = function(props) {
     console.log('DEPRECATED: Use setProps() or extendProps()');
     extend(this.props, props);
+    this.props.children = this.props.children || this.children;
     return this;
   };
 
@@ -225,7 +228,7 @@ VirtualDOMElement.Prototype = function() {
     clone.style = cloneDeep(this.style);
     clone.handlers = cloneDeep(this.handlers);
 
-    clone._children = this._children.map(function(child) {
+    clone.children = this.children.map(function(child) {
       return child.clone();
     });
 
@@ -335,21 +338,6 @@ VirtualDOMElement.Prototype = function() {
 
 DOMElement.extend(VirtualDOMElement);
 
-Object.defineProperties(VirtualDOMElement.prototype, {
-  /**
-    @property {Array<ui/DOMElement>} ui/DOMElement#children children elements
-   */
-  'children': {
-    configurable: true,
-    get: function() {
-      return this._children;
-    },
-    set: function(children) {
-      this._children = children;
-    }
-  },
-});
-
 /*
   A virtual HTML element.
 
@@ -360,17 +348,17 @@ Object.defineProperties(VirtualDOMElement.prototype, {
 function VirtualElement(tagName) {
   VirtualDOMElement.call(this);
   this.type = 'element';
-  this._tagName = tagName;
+  this.tagName = tagName;
 }
 
 VirtualElement.Prototype = function() {
 
   this.getTagName = function() {
-    return this._tagName;
+    return this.tagName;
   };
 
   this.setTagName = function(tagName) {
-    this._tagName = tagName;
+    this.tagName = tagName;
     return this;
   };
 
@@ -383,31 +371,17 @@ VirtualElement.Prototype = function() {
   };
 
   this._clone = function() {
-    return new VirtualElement(this._tagName);
+    return new VirtualElement(this.tagName);
   };
 
   // shallow equals
   this._quasiEquals = function(other) {
-    return this.type === other.type && this._tagName === other._tagName;
+    return this.type === other.type && this.tagName === other.tagName;
   };
 
 };
 
 VirtualDOMElement.extend(VirtualElement);
-
-Object.defineProperties(VirtualElement.prototype, {
-  /**
-    @property {String} ui/DOMElement#tagName
-   */
-  'tagName': {
-    get: function() {
-      return this._tagName;
-    },
-    set: function(tagName) {
-      this._tagName = tagName;
-    }
-  },
-});
 
 /*
   A virtual element which gets rendered by a custom component.
@@ -450,23 +424,7 @@ VirtualComponentElement.Prototype = function() {
 
 VirtualDOMElement.extend(VirtualComponentElement);
 
-Object.defineProperties(VirtualComponentElement.prototype, {
-  /**
-    @property {Array<ui/DOMElement>} ui/DOMElement#children children elements
-   */
-  'children': {
-    configurable: true,
-    get: function() {
-      if (!this.props.children) {
-        this.props.children = [];
-      }
-      return this.props.children;
-    },
-    set: function(children) {
-      this.props.children = children;
-    }
-  },
-});
+Object.defineProperties(VirtualComponentElement.prototype, {});
 
 
 /*

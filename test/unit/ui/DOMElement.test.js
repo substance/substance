@@ -65,3 +65,20 @@ QUnit.test("Parsing an XML document", function(assert) {
   assert.isDefinedAndNotNull(body);
   assert.equal(body.text(), 'TEST');
 });
+
+QUnit.test("hasClass", function(assert) {
+  var p = DOMElement.parseHTML('<p class="foo">TEST</p>');
+  assert.ok(p.hasClass('foo'), 'Element should have class "foo".');
+});
+
+QUnit.test("addClass", function(assert) {
+  var p = DOMElement.parseHTML('<p>TEST</p>');
+  p.addClass('foo');
+  assert.ok(p.hasClass('foo'), 'Element should have class "foo".');
+});
+
+QUnit.test("removeClass", function(assert) {
+  var p = DOMElement.parseHTML('<p class="foo">TEST</p>');
+  p.removeClass('foo');
+  assert.notOk(p.hasClass('foo'), 'Element should not have class "foo".');
+});

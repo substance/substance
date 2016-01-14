@@ -7,7 +7,6 @@ var extend = require('lodash/object/extend');
 var bind = require('lodash/function/bind');
 var uuid = require('../util/uuid');
 var DefaultDOMElement = require('../ui/DefaultDOMElement');
-var $$ = DefaultDOMElement.createElement;
 
 /**
   A generic base implementation for XML/HTML importers.

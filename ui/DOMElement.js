@@ -610,18 +610,6 @@ oo.initClass(DOMElement);
 
 Object.defineProperties(DOMElement.prototype, {
   /**
-    @property {String} ui/DOMElement#tagName
-   */
-  'tagName': {
-    configurable: true,
-    get: function() {
-      return this.getTagName();
-    },
-    set: function(tagName) {
-      this.setTagName(tagName);
-    }
-  },
-  /**
     @property {String} ui/DOMElement#id
    */
   'id': {
@@ -682,18 +670,6 @@ Object.defineProperties(DOMElement.prototype, {
     }
   },
   /**
-    @property {Array<ui/DOMElement>} ui/DOMElement#children children elements
-   */
-  'children': {
-    configurable: true,
-    get: function() {
-      return this.getChildren();
-    },
-    set: function() {
-      throw new Error('ui/DOMElement#children is readonly.');
-    }
-  },
-  /**
     @property {Array<ui/DOMElement>} ui/DOMElement#children child nodes
    */
   'childNodes': {
@@ -706,28 +682,6 @@ Object.defineProperties(DOMElement.prototype, {
     }
   },
 });
-
-/**
-  Creates an element for the given string.
-
-  The string can either be a tagName or a full HTML string as supported by jQuery.
-
-  @note {@link ui/VirtualElement.createElement} and {@link ui/Component.createElement} have a different semantics.
-  @param {String} str a tagname or a html element as string
-  @returns {ui/DefaultDOMElement}
-*/
-DOMElement.createElement = function(str) {
-  var DefaultDOMElement = require('./DefaultDOMElement');
-  return DefaultDOMElement.createElement(str);
-};
-
-/**
-  Alias for {@link ui/DOMElement.createElement}.
-
-  @param {String} str a tagname or a html element as string
-  @returns {ui/DefaultDOMElement}
-*/
-DOMElement.$$ = DOMElement.createElement;
 
 /**
   Parses a given HTML string.

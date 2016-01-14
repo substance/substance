@@ -104,9 +104,7 @@ DefaultDOMElement.Prototype = function() {
     if (inBrowser) {
       return this.el.outerHTML;
     } else {
-      // TODO: this seems a bit awkward, but with jQuery there is no better
-      // way... maybe using low-level cheerio API?
-      return DefaultDOMElement.createElement('div').append(this.clone()).html();
+      return $._serialize(this.el);
     }
   };
 
@@ -220,12 +218,14 @@ DefaultDOMElement.Prototype = function() {
     return new DefaultDOMElement.NodeIterator(this.el.childNodes);
   };
 
-  this.createElement = function(str) {
+  this.createElement = function(tagName) {
+    var el;
     if (inBrowser) {
-      return new DefaultDOMElement(this.el.ownerDocument.createElement(str));
+      el = this.el.ownerDocument.createElement(tagName);
     } else {
-      return DefaultDOMElement.createElement(str);
+      el = $._createElement(tagName, this.el.root);
     }
+    return new DefaultDOMElement(el);
   };
 
   this.clone = function() {
@@ -295,13 +295,18 @@ DefaultDOMElement.Prototype = function() {
   };
 
   this.insertAt = function(pos, child) {
-    /* jshint unused:false */
-    throw new Error('This method is abstract.');
+    var children = this.children;
+    if (pos > children.length-1) {
+      this.append(child);
+    } else {
+      this.$el.insertBefore(children[pos].$el);
+    }
+    return this;
   };
 
   this.removeAt = function(pos) {
-    /* jshint unused:false */
-    throw new Error('This method is abstract.');
+    this.children[pos].$el.remove();
+    return this;
   };
 
   this.empty = function() {
@@ -309,24 +314,40 @@ DefaultDOMElement.Prototype = function() {
     return this;
   };
 
+  this.remove = function() {
+    this.$el.remove();
+  };
+
 };
 
 DOMElement.extend(DefaultDOMElement);
 
-DefaultDOMElement.createElement = function(str) {
-  str = str.trim();
-  if (str[0] === '<') {
-    throw new Error('Illegal argument: invalid tag name.');
-  }
-  var el;
-  if (inBrowser) {
-    el = window.document.createElement(str);
-  } else {
-    // HACK: using custom factory method for cheerio's native text node
-    el = $('<'+str+'>');
-  }
-  return new DefaultDOMElement(el);
-};
+Object.defineProperties(DefaultDOMElement.prototype, {
+  /**
+    @property {String} ui/DOMElement#tagName
+   */
+  'tagName': {
+    configurable: true,
+    get: function() {
+      return this.getTagName();
+    },
+    set: function(tagName) {
+      this.setTagName(tagName);
+    }
+  },
+  /**
+    @property {Array<ui/DOMElement>} ui/DOMElement#children children elements
+   */
+  'children': {
+    configurable: true,
+    get: function() {
+      return this.getChildren();
+    },
+    set: function() {
+      throw new Error('ui/DOMElement#children is readonly.');
+    }
+  },
+});
 
 DefaultDOMElement.createTextNode = function(text) {
   var el;
@@ -338,8 +359,6 @@ DefaultDOMElement.createTextNode = function(text) {
   }
   return new DefaultDOMElement(el);
 };
-
-DefaultDOMElement.$$ = DefaultDOMElement.createElement;
 
 /**
   A class that provides a browser/server compatible way to iterate
@@ -391,7 +410,7 @@ DefaultDOMElement.NodeIterator.Prototype = function() {
 
 oo.initClass(DefaultDOMElement.NodeIterator);
 
-function _parseXML(str, format) {
+function _parseMarkup(str, format) {
   var nativeEls = [];
   var doc;
 
@@ -405,7 +424,9 @@ function _parseXML(str, format) {
       } else {
         doc = (new window.DOMParser()).parseFromString('<html></html>', 'text/html');
       }
-    } else {
+    }
+    // cheerio
+    else {
       if (format === 'xml') {
         doc = $.parseXML('');
       } else {
@@ -453,7 +474,9 @@ function _parseXML(str, format) {
         nativeEls = doc.childNodes;
       }
     }
-  } else {
+  }
+  // cheerio
+  else {
     nativeEls = $.parseXML(str);
   }
 
@@ -473,7 +496,7 @@ function _parseXML(str, format) {
   @returns {DOMElement|DOMElement[]}
 */
 DefaultDOMElement.parseHTML = function(html) {
-  return _parseXML(html, 'html');
+  return _parseMarkup(html, 'html');
 };
 
 /*
@@ -481,7 +504,7 @@ DefaultDOMElement.parseHTML = function(html) {
   @returns {DOMElement|DOMElement[]}
 */
 DefaultDOMElement.parseXML = function(xml) {
-  return _parseXML(xml, 'xml');
+  return _parseMarkup(xml, 'xml');
 };
 
 module.exports = DefaultDOMElement;
