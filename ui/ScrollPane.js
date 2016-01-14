@@ -12,22 +12,44 @@ var $$ = Component.$$;
   @class ScrollPane
   @component
 
-  @prop {String} scrollbarType 'native' or 'substance' for a more advanced visual scrollbar. Defaults to 'native'.
-  @prop {String} [scrollbarPosition] 'left' or 'right' only relevant when scrollBarType: 'substance'. Defaults to 'right'.
+  @prop {String} scrollbarType 'native' or 'substance' for a more advanced visual scrollbar. Defaults to 'native'
+  @prop {String} [scrollbarPosition] 'left' or 'right' only relevant when scrollBarType: 'substance'. Defaults to 'right'
+  @prop {ui/Highlights} [highlights] object that maintains highlights and can be manipulated from different sources
 
+  @example
+  
   ```js
   $$(ScrollPane, {
     scrollbarType: 'substance', // defaults to native
     scrollbarPosition: 'left', // defaults to right
-    onScroll: this.onScroll.bind(this)
+    onScroll: this.onScroll.bind(this),
+    highlights: myHighlights
   }
   ```
  */
 function ScrollPane() {
   Component.apply(this, arguments);
+
+  if (this.props.highlights) {
+    this.props.highlights.connect(this, {
+      'highlights:updated': this.onHighlightsUpdated
+    });
+  }
 }
 
 ScrollPane.Prototype = function() {
+  this.dispose = function() {
+    if (this.props.highlights) {
+      this.props.highlights.disconnect(this);
+    }
+  };
+
+  this.onHighlightsUpdated = function(highlights) {    
+    this.refs.scrollbar.extendProps({
+      highlights: highlights
+    });
+  };
+
   this.render = function() {
     var el = $$('div')
       .addClass('sc-scroll-pane');
