@@ -15,7 +15,7 @@ var each = require('lodash/collection/each');
   - {@link ui/Component}
 
   Methods which rely on a CSS selector implementation are only available for {@link ui/DefaultDOMElement} instance, which is used during DOM import.
-  I.e., don't use the following methods in HTML/XML exporters and Component renderers:
+  I.e., don't use the following methods in Component renderers:
   - {@link ui/DOMElement#is}
   - {@link ui/DOMElement#find}
   - {@link ui/DOMElement#findAll}
@@ -25,7 +25,7 @@ var each = require('lodash/collection/each');
   @interface
 */
 function DOMElement() {
-  // TODO: we might want to support @interface in addition to @classes?
+  // TODO: we might want to support @interface in addition to @class?
 }
 
 DOMElement.Prototype = function() {
