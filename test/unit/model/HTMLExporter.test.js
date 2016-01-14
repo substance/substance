@@ -71,7 +71,13 @@ QUnit.test("Exporting a link", function(assert) {
   var p1 = doc.create({ type: 'paragraph', id: 'p1', content: CONTENT });
   doc.create({ type: 'link', id: 'l1', path: ['p1', 'content'], startOffset: 4, endOffset: 7, url: 'foo', title: 'bar' });
   var el = exporter.convertNode(p1);
-  var actual = el.outerHTML;
-  var expected = '<p data-id="p1">0123<a data-id="l1" href="foo" title="bar">456</a>789</p>';
-  assert.equal(actual, expected);
+  var childNodes = el.getChildNodes();
+  assert.equal(childNodes.length, 3);
+  assert.equal(childNodes[0].textContent, "0123");
+  assert.equal(childNodes[1].textContent, "456");
+  assert.equal(childNodes[2].textContent, "789");
+  var a = childNodes[1];
+  assert.equal(a.attr('data-id'), 'l1');
+  assert.equal(a.attr('href'), 'foo');
+  assert.equal(a.attr('title'), 'bar');
 });

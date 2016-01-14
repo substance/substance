@@ -323,7 +323,13 @@ DefaultDOMElement.Prototype = function() {
   };
 
   this.getChildNodeIterator = function() {
-    return new DefaultDOMElement.NodeIterator(this.el.childNodes);
+    var childNodes;
+    if (inBrowser) {
+      childNodes = this.el.childNodes;
+    } else {
+      childNodes = this.el.children;
+    }
+    return new DefaultDOMElement.NodeIterator(childNodes);
   };
 
   this._createNativeElement = function(tagName) {
