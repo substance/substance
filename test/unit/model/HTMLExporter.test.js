@@ -46,7 +46,7 @@ QUnit.test("Exporting h1", function(assert) {
 });
 
 QUnit.test("Exporting h2", function(assert) {
-  var h2= doc.create({ type: 'heading', id: 'h2', level: 2, content: CONTENT });
+  var h2 = doc.create({ type: 'heading', id: 'h2', level: 2, content: CONTENT });
   var el = exporter.convertNode(h2);
   var actual = el.outerHTML;
   var expected = '<h2 data-id="h2">' + CONTENT + '</h2>';
@@ -64,5 +64,14 @@ QUnit.test("Exporting simple document", function(assert) {
     '<p data-id="p3">' + CONTENT + '</p>',
     '<p data-id="p4">' + CONTENT + '</p>'
   ].join('');
+  assert.equal(actual, expected);
+});
+
+QUnit.test("Exporting a link", function(assert) {
+  var p1 = doc.create({ type: 'paragraph', id: 'p1', content: CONTENT });
+  doc.create({ type: 'link', id: 'l1', path: ['p1', 'content'], startOffset: 4, endOffset: 7, url: 'foo', title: 'bar' });
+  var el = exporter.convertNode(p1);
+  var actual = el.outerHTML;
+  var expected = '<p data-id="p1">0123<a data-id="l1" href="foo" title="bar">456</a>789</p>';
   assert.equal(actual, expected);
 });

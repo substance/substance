@@ -406,6 +406,11 @@ DOMImporter.Prototype = function DOMImporterPrototype() {
           // inline nodes are attached to an invisible character
           if (NodeClass.static.isInline) {
             this.customText("\u200B");
+          } else {
+            // We call this to descent into the element
+            // which could be 'forgotten' otherwise.
+            // TODO: what if the converter has processed the element already?
+            this.annotatedText(el);
           }
           // ... and transfer the result into the current context
           var result = state.stack.pop();
