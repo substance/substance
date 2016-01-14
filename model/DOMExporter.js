@@ -1,11 +1,7 @@
 "use strict";
 
 var oo = require('../util/oo');
-var isBoolean = require('lodash/lang/isBoolean');
-var isNumber = require('lodash/lang/isNumber');
-var isString = require('lodash/lang/isString');
 var extend = require('lodash/object/extend');
-var each = require('lodash/collection/each');
 var Fragmenter = require('./Fragmenter');
 var Registry = require('../util/Registry');
 
@@ -155,11 +151,11 @@ DOMExporter.Prototype = function() {
   };
 
   this.getDefaultBlockConverter = function() {
-    return DOMExporter.defaultBlockConverter;
+    throw new Error('This method is abstract.');
   };
 
   this.getDefaultPropertyAnnotationConverter = function() {
-    return DOMExporter.defaultPropertyAnnotationConverter;
+    throw new Error('This method is abstract.');
   };
 
   this.getDocument = function() {
@@ -173,41 +169,5 @@ DOMExporter.Prototype = function() {
 };
 
 oo.initClass(DOMExporter);
-
-DOMExporter.defaultBlockConverter = {
-  export: function(node, el, converter) {
-    el.attr('data-type', node.type);
-    var properties = node.toJSON();
-    each(properties, function(value, name) {
-      if (name === 'id' || name === 'type') {
-        return;
-      }
-      var prop = this.$$('div').attr('property', name);
-      if (node.getPropertyType(name) === 'string') {
-        prop.append(converter.annotatedText([node.id, name]));
-      } else {
-        prop.text(value);
-      }
-      el.append(prop);
-    });
-  }
-};
-
-DOMExporter.defaultPropertyAnnotationConverter = {
-  export: function(node, el) {
-    el.tagName = 'span';
-    el.attr('data-type', node.type);
-    var properties = node.toJSON();
-    each(properties, function(value, name) {
-      if (name === 'id' || name === 'type') {
-        return;
-      }
-      if (isString(value) || isNumber(value) || isBoolean(value)) {
-        el.attr('data-'+name, value);
-      }
-    });
-  }
-};
-
 
 module.exports = DOMExporter;
