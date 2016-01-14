@@ -242,7 +242,11 @@ function _checked(prop, value) {
     type = prop.type;
   }
   if (value === null) {
-    throw new Error('Value for property ' + prop.name + ' is null.');
+    if (prop.notNull) {
+      throw new Error('Value for property ' + prop.name + ' is null.');
+    } else {
+      return value;
+    }
   }
   if (value === undefined) {
     throw new Error('Value for property ' + prop.name + ' is undefined.');

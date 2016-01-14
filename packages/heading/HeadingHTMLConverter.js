@@ -17,8 +17,7 @@ module.exports = {
   },
 
   export: function(node, el, converter) {
-    var $$ = converter.$$;
-    el = $$('h'+node.level).attr('data-id', node.id);
+    el = el.withTagName('h'+node.level);
     el.append(
       converter.annotatedText([node.id, 'content'])
     );

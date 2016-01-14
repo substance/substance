@@ -4,10 +4,10 @@ var oo = require('../util/oo');
 var isBoolean = require('lodash/lang/isBoolean');
 var isNumber = require('lodash/lang/isNumber');
 var isString = require('lodash/lang/isString');
+var extend = require('lodash/object/extend');
 var each = require('lodash/collection/each');
 var Fragmenter = require('./Fragmenter');
 var Registry = require('../util/Registry');
-// var $$ = require('../ui/VirtualDOMElement').createElement;
 
 function DOMExporter(config) {
   if (!config.converters) {
@@ -17,7 +17,7 @@ function DOMExporter(config) {
   this.state = {
     doc: null
   };
-  this.config = config;
+  this.config = extend({idAttribute: 'id'}, config);
 
   config.converters.forEach(function(converter) {
     if (!converter.type) {
@@ -93,7 +93,7 @@ DOMExporter.Prototype = function() {
     } else {
       el = this.$$('div');
     }
-    el.attr('data-id', node.id);
+    el.attr(this.config.idAttribute, node.id);
     if (converter.export) {
       el = converter.export(node, el, this) || el;
     } else {
@@ -138,7 +138,7 @@ DOMExporter.Prototype = function() {
       } else {
         el = this.$$('span');
       }
-      el.attr('data-id', anno.id);
+      el.attr(this.config.idAttribute, anno.id);
       el.append(context.children);
       if (converter.export) {
         converter.export(anno, el, self);

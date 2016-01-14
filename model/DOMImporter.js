@@ -4,7 +4,6 @@ var oo = require('../util/oo');
 var each = require('lodash/collection/each');
 var last = require('lodash/array/last');
 var extend = require('lodash/object/extend');
-var bind = require('lodash/function/bind');
 var uuid = require('../util/uuid');
 var DefaultDOMElement = require('../ui/DefaultDOMElement');
 
@@ -18,8 +17,7 @@ function DOMImporter(config) {
   if (!config.converters) {
     throw new Error('config.converters is mandatory');
   }
-
-  this.config = extend({idAttribute: 'data-id'}, config);
+  this.config = extend({ idAttribute: 'id' }, config);
   this.schema = config.schema;
   this.state = null;
 
@@ -49,7 +47,7 @@ function DOMImporter(config) {
       return;
     }
     if (!converter.matchElement) {
-      converter.matchElement = bind(this._defaultElementMatcher, converter);
+      converter.matchElement = this._defaultElementMatcher.bind(converter);
     }
     var NodeClass = schema.getNodeClass(converter.type);
     if (!NodeClass) {

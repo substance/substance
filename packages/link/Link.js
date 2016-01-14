@@ -12,7 +12,7 @@ PropertyAnnotation.extend(Link);
 Link.static.name = "link";
 
 Link.static.defineSchema({
-  title: { type: 'text', optional: true },
+  title: { type: 'string', optional: true },
   url: { type: 'string', 'default': 'http://'}
 });
 

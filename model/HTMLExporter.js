@@ -2,9 +2,11 @@
 
 var DOMExporter = require('./DOMExporter');
 var DefaultDOMElement = require('../ui/DefaultDOMElement');
+var extend = require('lodash/object/extend');
 
-function HTMLExporter() {
-  DOMExporter.apply(this, arguments);
+function HTMLExporter(config) {
+  config = extend({ idAttribute: 'data-id' }, config);
+  DOMExporter.call(this, config);
 
   // used internally for creating elements
   this._el = DefaultDOMElement.parseHTML('<html></html>');
