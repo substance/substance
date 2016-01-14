@@ -24,8 +24,6 @@ function DOMImporter(config) {
   this.schema = config.schema;
   this.state = null;
 
-  this.$$ = $$;
-
   this._defaultBlockConverter = null;
   this._allConverters = [];
   this._blockConverters = [];
@@ -453,6 +451,10 @@ DOMImporter.Prototype = function DOMImporterPrototype() {
     }
   };
 
+  this._createElement = function(tagName) {
+    return this._el.createElement(tagName);
+  };
+
   /**
     Wraps the remaining (inline) elements of a node iterator into a default
     block node.
@@ -462,7 +464,7 @@ DOMImporter.Prototype = function DOMImporterPrototype() {
     @returns {model/DocumentNode}
    */
   this._wrapInlineElementsIntoBlockElement = function(childIterator) {
-    var wrapper = $$('div');
+    var wrapper = this._createElement('div');
     while(childIterator.hasNext()) {
       var el = childIterator.next();
       // if there is a block node we finish this wrapper
@@ -476,7 +478,7 @@ DOMImporter.Prototype = function DOMImporterPrototype() {
     var node = this.defaultConverter(wrapper, this);
     if (node) {
       if (!node.type) {
-        throw new Error('Contract: Html.defaultConverter() must return a node with type.');
+        throw new Error('Contract: DOMImporter.defaultConverter() must return a node with type.');
       }
       this._createAndShow(node);
     }
@@ -487,7 +489,7 @@ DOMImporter.Prototype = function DOMImporterPrototype() {
     Converts an element into a default block level node.
 
     @private
-    @param {ui/DOMElement} $el
+    @param {ui/DOMElement} el
     @returns {model/DocumentNode}
    */
   this._createDefaultBlockElement = function(el) {
@@ -580,7 +582,5 @@ DOMImporter.Prototype = function DOMImporterPrototype() {
 
 };
 oo.initClass(DOMImporter);
-
-DOMImporter.$$ = require('../ui/VirtualDOMElement').createElement;
 
 module.exports = DOMImporter;

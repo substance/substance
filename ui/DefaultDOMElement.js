@@ -252,18 +252,17 @@ DefaultDOMElement.Prototype = function() {
   };
 
   this.getRoot = function() {
-    var root;
-    if (inBrowser) {
-      root = this.el.ownerDocument;
-    } else {
-      root = this.el.root;
+    var el = this.el;
+    var parent = el;
+    while (parent) {
+      el = parent;
+      if (inBrowser) {
+        parent = el.parentNode;
+      } else {
+        parent = el.parent;
+      }
     }
-    if (root) {
-      return new DefaultDOMElement(root);
-    } else {
-      return null;
-    }
-    return new DefaultDOMElement(root);
+    return new DefaultDOMElement(el);
   };
 
   this.find = function(cssSelector) {
@@ -315,13 +314,17 @@ DefaultDOMElement.Prototype = function() {
 DOMElement.extend(DefaultDOMElement);
 
 DefaultDOMElement.createElement = function(str) {
-  console.warn('Do not use DefaultDOMElement.createElement directly.');
   str = str.trim();
   if (str[0] === '<') {
-    throw new Error('Illegal argument: invalid tag name.')
+    throw new Error('Illegal argument: invalid tag name.');
   }
   var el;
-  el = $(str)[0];
+  if (inBrowser) {
+    el = window.document.createElement(str);
+  } else {
+    // HACK: using custom factory method for cheerio's native text node
+    el = $('<'+str+'>');
+  }
   return new DefaultDOMElement(el);
 };
 
@@ -419,23 +422,10 @@ function _parseXML(str, format) {
     } else if (format === 'xml') {
       doc = parser.parseFromString(str, 'text/xml');
     }
-    if (!doc) {
-      // console.error('DOMParser.parseFromString failed. Falling back to jQuery based parsing.');
-      if (format === "html") {
-        if (isFullDoc) {
-          doc = $.parseXML(str);
-          nativeEls = doc.childNodes;
-        } else {
-          nativeEls = $.parseHTML(str);
-        }
-      } else if (format === "xml") {
-        doc = $.parseXML(str);
-        nativeEls = doc.childNodes;
-      }
-    } else {
+    if (doc) {
       if (format === 'html') {
         if (isFullDoc) {
-          nativeEls = [doc.firstChild];
+          nativeEls = [doc.querySelector('html')];
         } else {
           // if the provided html is just a partial
           // then DOMParser still creates a full document
@@ -447,6 +437,19 @@ function _parseXML(str, format) {
         // Note: as XML parser we always get a document with childNodes representing
         // the content
         // TODO: is it ok just to provide the 'content', not the XML meta info?
+        nativeEls = doc.childNodes;
+      }
+    } else {
+      // console.error('DOMParser.parseFromString failed. Falling back to jQuery based parsing.');
+      if (format === "html") {
+        if (isFullDoc) {
+          doc = $.parseXML(str);
+          nativeEls = doc.childNodes;
+        } else {
+          nativeEls = $.parseHTML(str);
+        }
+      } else if (format === "xml") {
+        doc = $.parseXML(str);
         nativeEls = doc.childNodes;
       }
     }

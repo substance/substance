@@ -12,7 +12,8 @@ function TestXMLExporter() {
 
 XMLExporter.extend(TestXMLExporter, function() {
 
-  this.convertDocument = function(doc, articleEl) {
+  this.convertDocument = function(doc) {
+    var articleEl = DefaultDOMElement.parseXML('<article></article>');
     var main = doc.get('main');
     articleEl.append(
       this.convertContainer(main)
@@ -20,9 +21,6 @@ XMLExporter.extend(TestXMLExporter, function() {
     return articleEl;
   };
 
-  this.createDocumentElement = function() {
-    return DefaultDOMElement.parseXML('<article></article>');
-  };
 });
 
 module.exports = TestXMLExporter;

@@ -5,6 +5,9 @@ var DefaultDOMElement = require('../ui/DefaultDOMElement');
 
 function XMLImporter() {
   DOMImporter.apply(this, arguments);
+
+  // only used internally for creating wrapper elements
+  this._el = DefaultDOMElement.parseXML('<dummy></dummy>');
 }
 
 XMLImporter.Prototype = function() {

@@ -19,10 +19,6 @@ function DOMExporter(config) {
   };
   this.config = config;
 
-  this.state.documentEl = this.createDocumentElement();
-
-  this.$$ = this.createElement.bind(this);
-
   config.converters.forEach(function(converter) {
     if (!converter.type) {
       console.error('Converter must provide the type of the associated node.', converter);
@@ -30,21 +26,21 @@ function DOMExporter(config) {
     }
     this.converters.add(converter.type, converter);
   }.bind(this));
+
+  // NOTE: Subclasses (HTMLExporter and XMLExporter) must initialize this
+  // with a proper DOMElement instance which is used to create new elements.
+  this._el = null;
+  this.$$ = this.createElement.bind(this);
 }
 
 DOMExporter.Prototype = function() {
 
-  this.createElement = function(str) {
-    return this.state.documentEl.createElement(str);
-  };
-
   this.exportDocument = function(doc) {
-    this.state.documentEl = this.createDocumentElement();
     // TODO: this is no left without much functionality
     // still, it would be good to have a consistent top-level API
     // i.e. converter.importDocument(el) and converter.exportDocument(doc)
     // On the other side, the 'internal' API methods are named this.convert*.
-    return this.convertDocument(doc, this.state.documentEl);
+    return this.convertDocument(doc);
   };
 
   /**
@@ -168,6 +164,10 @@ DOMExporter.Prototype = function() {
 
   this.getDocument = function() {
     return this.state.doc;
+  };
+
+  this.createElement = function(str) {
+    return this._el.createElement(str);
   };
 
 };
