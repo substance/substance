@@ -6,7 +6,7 @@
 module.exports = {
 
   type: 'image',
-  tagName: 'img',
+  tagName: 'image',
 
   import: function(el, node) {
     node.src = el.attr('src');
