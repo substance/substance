@@ -11,13 +11,13 @@ function TestHTMLExporter() {
 
 HTMLExporter.extend(TestHTMLExporter, function() {
 
-  this.convertDocument = function(doc) {
-    var element = this.$$('body');
+  this.convertDocument = function(doc, htmlEl) {
+    var bodyEl = htmlEl.find('body');
     var main = doc.get('main');
-    element.append(
+    bodyEl.append(
       this.convertContainer(main)
     );
-    return element;
+    return htmlEl;
   };
 
 });

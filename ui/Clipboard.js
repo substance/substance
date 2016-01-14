@@ -6,11 +6,12 @@ var documentHelpers = require('../model/documentHelpers');
 var ClipboardImporter = require('./ClipboardImporter');
 var ClipboardExporter = require('./ClipboardExporter');
 var substanceGlobals = require('../util/substanceGlobals');
+var DefaultDOMElement = require('./DefaultDOMElement');
 
 /**
   The Clipboard is a Component which should be rendered as a sibling component
   of one or multiple Surfaces.
-  
+
   It uses the JSONImporter and JSONExporter for internal copy'n'pasting,
   i.e., within one window or between two instances with the same DocumentSchema.
 
@@ -67,13 +68,10 @@ Clipboard.Prototype = function() {
     @param {util/jquery} a jQuery wrapped element
   */
   this.attach = function(el) {
-    // TODO: we want to use ui/DOMElement instead of $
     // However, we need to inject an element into document.body, which can't be accessed via
     // DOMElement API atm.
-
     el.addEventListener('copy', null, this.onCopy, this);
     el.addEventListener('cut', null, this.onCut, this);
-
     if (this.isIe) {
       el.addEventListener('beforepaste', null, this.onBeforePasteShim, this);
       el.addEventListener('paste', null, this.onPasteShim, this);
@@ -83,7 +81,7 @@ Clipboard.Prototype = function() {
   };
 
   this.didMount = function() {
-    var el = this.surface;
+    var el = new DefaultDOMElement(this.surface.el);
     // Note: we need a hidden content-editable element to be able to intercept native pasting.
     // We put this element into document.body and share it among all Clipboard instances.
     // This element must be content-editable, thus it must not have `display:none` or `visibility:hidden`,
@@ -92,7 +90,7 @@ Clipboard.Prototype = function() {
       var root = el.getRoot();
       var body = root.find('body');
       if (body) {
-        var _sharedPasteElement = root.createElement('div')
+        var _sharedPasteElement = body.createElement('div')
           .attr('contenteditable', true)
           .css({
             position: 'fixed',

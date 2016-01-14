@@ -11,6 +11,7 @@ var extend = require('lodash/object/extend');
 var each = require('lodash/collection/each');
 var I18n = require('./i18n');
 var EventEmitter = require('../util/EventEmitter');
+var DOMElement = require('./DOMElement');
 var DefaultDOMElement = require('./DefaultDOMElement');
 var VirtualDOMElement = require('./VirtualDOMElement');
 var VirtualTextNode = VirtualDOMElement.VirtualTextNode;
@@ -97,10 +98,7 @@ function Component(parent, params) {
   this._ref = params._ref;
 
   this.parent = parent;
-  // the children, private as they are managed by rendering
-  // ATTENTION: while this is defined as '_children' we should never access it directly
-  // so that we can override it via getChildren()
-  this._children = [];
+  this.children = [];
 
   // context from parent (dependency injection)
   this.context = this._getContext();
@@ -140,6 +138,10 @@ function Component(parent, params) {
 Component.Prototype = function ComponentPrototype() {
 
   extend(this, EventEmitter.prototype);
+
+  function NOT_SUPPORTED() {
+    throw new Error('Not supported.');
+  }
 
   // Experimental (we need this to initialize the Router)
   this.getInitialContext = function() {
@@ -584,6 +586,8 @@ Component.Prototype = function ComponentPrototype() {
     return this;
   };
 
+  this.attr = DefaultDOMElement.prototype.attr;
+
   this.removeAttr = function() {
     this._data.removeAttr.apply(this._data, arguments);
     if (this.$el) {
@@ -604,9 +608,13 @@ Component.Prototype = function ComponentPrototype() {
     return this;
   };
 
+  this.getTagName = DefaultDOMElement.prototype.getTagName;
+
   this.setTagName = function() {
     throw new Error('Not supported.');
   };
+
+  this.getId = DefaultDOMElement.prototype.getId;
 
   this.setId = function(id) {
     this._data.setId(id);
@@ -642,16 +650,9 @@ Component.Prototype = function ComponentPrototype() {
     throw new Error('Not supported.');
   };
 
-  // TODO: get rid of it by reusing DefaultDOMElement as element impl
-  this.getOuterHtml = function() {
-    if (inBrowser) {
-      return this.el.outerHTML;
-    } else {
-      // TODO: this seems a bit awkward, but with jQuery there is no better
-      // way... maybe using low-level cheerio API?
-      return $('<div>').append(this.$el.clone()).html();
-    }
-  };
+  this.getOuterHtml = DefaultDOMElement.prototype.getOuterHtml;
+
+  this.getValue = DefaultDOMElement.prototype.getValue;
 
   this.setValue = function(value) {
     this._data.val(value);
@@ -661,42 +662,26 @@ Component.Prototype = function ComponentPrototype() {
     return this;
   };
 
-  /**
-   * Get or set HTML properties analog to [jQuery.prop](http://api.jquery.com/prop).
-   *
-   * Note: we can't follow jquery's method name here, as it brings a semantical
-   * conflict/confusion with the component's setProps API.
-   * `$.prop` is used less often, thus it should be acceptable to deviate from jquery.
-   * In fact, we have not used `$.prop` at all so far, as we haven't made use
-   * of input fields and such where you have a lot of html properties.
-   */
-  this.htmlProp = function() {
-    if (arguments.length === 1 && isString(arguments[0])) {
-      return this.$el.prop(arguments[0]);
-    } else {
-      this._data.htmlProp.apply(this._data, arguments);
-      if (this.$el) {
-        this.$el.prop.apply(this.$el, arguments);
-      }
-      return this;
-    }
-  };
-
-  /**
-    Remove HTML properties analog to [jQuery.removeProp](http://api.jquery.com/removeProp/)
-  */
-  this.removeHtmlProp = function() {
-    this._data.removeHtmlProp.apply(this._data, arguments);
-    if (this.$el) {
-      this.$el.removeProp.apply(this.$el, arguments);
-    }
-    return this;
-  };
+  this.getStyle = DefaultDOMElement.prototype.getStyle;
 
   this.setStyle = function(name, value) {
     this._data.setStyle(name, value);
     this.$el.css(name, value);
   };
+
+  this.addEventListener = DefaultDOMElement.prototype.addEventListener;
+
+  this.removeEventListener = DefaultDOMElement.prototype.removeEventListener;
+
+  this.focus = DefaultDOMElement.prototype.focus;
+
+  this.isTextNode = DefaultDOMElement.prototype.isTextNode;
+
+  this.isElementNode = DefaultDOMElement.prototype.isElementNode;
+
+  this.isCommentNode = DefaultDOMElement.prototype.isCommentNode;
+
+  this.isDocumentNode = DefaultDOMElement.prototype.isDocumentNode;
 
   this.getChildNodes = function() {
     return this.children;
@@ -706,6 +691,8 @@ Component.Prototype = function ComponentPrototype() {
     // TODO: this should return only real elements (i.e., without TextNodes and Comments)
     return this.children;
   };
+
+  this.getChildNodeIterator = DefaultDOMElement.prototype.getChildNodeIterator;
 
   this.createElement = function() {
     throw new Error('Not supported yet.');
@@ -724,15 +711,19 @@ Component.Prototype = function ComponentPrototype() {
     return false;
   };
 
-  this.find = function(cssSelector) {
-    /* jshint unused:false */
-    throw new Error('Not supported.');
+  this.getRoot = function() {
+    var comp = this;
+    var parent = comp;
+    while (parent) {
+      comp = parent;
+      parent = comp.getParent();
+    }
+    return comp;
   };
 
-  this.findAll = function(cssSelector) {
-    /* jshint unused:false */
-    throw new Error('Not supported.');
-  };
+  this.find = NOT_SUPPORTED;
+
+  this.findAll = NOT_SUPPORTED;
 
   /**
    * Append a child component created using {@link ui/Component.$$}.
@@ -790,7 +781,7 @@ Component.Prototype = function ComponentPrototype() {
    * Part of the incremental updating API.
    */
   this.empty = function() {
-    this._data._children = [];
+    this._data.children = [];
     this.$el.empty();
     for (var i = 0; i < this.children.length; i++) {
       this.children[i].unmount();
@@ -801,6 +792,38 @@ Component.Prototype = function ComponentPrototype() {
 
   this.remove = function() {
     this.unmount();
+  };
+
+  /**
+   * Get or set HTML properties analog to [jQuery.prop](http://api.jquery.com/prop).
+   *
+   * Note: we can't follow jquery's method name here, as it brings a semantical
+   * conflict/confusion with the component's setProps API.
+   * `$.prop` is used less often, thus it should be acceptable to deviate from jquery.
+   * In fact, we have not used `$.prop` at all so far, as we haven't made use
+   * of input fields and such where you have a lot of html properties.
+   */
+  this.htmlProp = function() {
+    if (arguments.length === 1 && isString(arguments[0])) {
+      return this.$el.prop(arguments[0]);
+    } else {
+      this._data.htmlProp.apply(this._data, arguments);
+      if (this.$el) {
+        this.$el.prop.apply(this.$el, arguments);
+      }
+      return this;
+    }
+  };
+
+  /**
+    Remove HTML properties analog to [jQuery.removeProp](http://api.jquery.com/removeProp/)
+  */
+  this.removeHtmlProp = function() {
+    this._data.removeHtmlProp.apply(this._data, arguments);
+    if (this.$el) {
+      this.$el.removeProp.apply(this.$el, arguments);
+    }
+    return this;
   };
 
   /* Internal API */
@@ -818,7 +841,7 @@ Component.Prototype = function ComponentPrototype() {
   };
 
   this._createElement = function(data, scope) {
-    var $el = $('<' + data._tagName + '>');
+    var $el = $('<' + data.tagName + '>');
     // $.addClass
     $el.addClass(this._htmlParams.classNames);
     $el.addClass(data.classNames);
@@ -948,8 +971,8 @@ Component.Prototype = function ComponentPrototype() {
     var el = this.$el[0];
     var isMounted = Component.isMounted(this);
 
-    var oldContent = oldData._children;
-    var newContent = data._children;
+    var oldContent = oldData.children;
+    var newContent = data.children;
 
     // FIXME: this optimization is causing issue 311
     if (isEqual(oldContent, newContent)) {
@@ -957,8 +980,8 @@ Component.Prototype = function ComponentPrototype() {
       return;
     }
 
-    var oldComps = _indexByRef(oldData._children, "old");
-    var newComps = _indexByRef(data._children);
+    var oldComps = _indexByRef(oldData.children, "old");
+    var newComps = _indexByRef(data.children);
 
     var pos = 0;
     var oldPos = 0;
@@ -1133,14 +1156,14 @@ Component.Prototype = function ComponentPrototype() {
     this.$el.empty();
     var isMounted = Component.isMounted(this);
     var children = [];
-    for (var j = 0; j < data._children.length; j++) {
+    for (var j = 0; j < data.children.length; j++) {
       // EXPERIMENTAL: supporting $$.html()
       // basically it doesn't make sense to mix $$.html() with $$.append(), but...
-      if (data._children[j] instanceof VirtualDOMElement.RawHtml) {
-        this.$el.html(data._children[j].html);
+      if (data.children[j] instanceof VirtualDOMElement.RawHtml) {
+        this.$el.html(data.children[j].html);
         children = [];
       } else {
-        var comp = this._compileComponent(data._children[j], scope);
+        var comp = this._compileComponent(data.children[j], scope);
         this.$el.append(comp.$el);
         children.push(comp);
         comp.triggerDidMount(isMounted);
@@ -1210,22 +1233,7 @@ Component.Prototype = function ComponentPrototype() {
   };
 };
 
-DefaultDOMElement.extend(Component);
-
-Object.defineProperties(Component.prototype, {
-  /**
-    @property {Array<ui/DOMElement>} ui/DOMElement#children children elements
-   */
-  'children': {
-    get: function() {
-      return this._children;
-    },
-    set: function(children) {
-      this._children = children;
-    }
-  },
-});
-
+DOMElement.extend(Component);
 
 /**
  * Adding a property which is providing an i18n service
@@ -1255,7 +1263,7 @@ Component.Container = function(parent, params) {
 Component.extend(Component.Container);
 
 Component.HTMLElement = function(parent, tagName, params) {
-  this._tagName = tagName;
+  this.tagName = tagName;
   Component.Container.call(this, parent, params);
 };
 
@@ -1336,7 +1344,7 @@ Component._render = function(data, scope) {
       component._render();
       break;
     case 'element':
-      component = new Component.HTMLElement(parent, data._tagName, data);
+      component = new Component.HTMLElement(parent, data.tagName, data);
       component._render(data, scope);
       break;
     case 'component':

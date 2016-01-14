@@ -4,10 +4,10 @@ var oo = require('../util/oo');
 var isBoolean = require('lodash/lang/isBoolean');
 var isNumber = require('lodash/lang/isNumber');
 var isString = require('lodash/lang/isString');
+var extend = require('lodash/object/extend');
 var each = require('lodash/collection/each');
 var Fragmenter = require('./Fragmenter');
 var Registry = require('../util/Registry');
-var $$ = require('../ui/VirtualDOMElement').createElement;
 
 function DOMExporter(config) {
   if (!config.converters) {
@@ -17,8 +17,8 @@ function DOMExporter(config) {
   this.state = {
     doc: null
   };
-  this.config = config;
-  this.$$ = $$;
+  this.config = extend({idAttribute: 'id'}, config);
+
   config.converters.forEach(function(converter) {
     if (!converter.type) {
       console.error('Converter must provide the type of the associated node.', converter);
@@ -26,6 +26,11 @@ function DOMExporter(config) {
     }
     this.converters.add(converter.type, converter);
   }.bind(this));
+
+  // NOTE: Subclasses (HTMLExporter and XMLExporter) must initialize this
+  // with a proper DOMElement instance which is used to create new elements.
+  this._el = null;
+  this.$$ = this.createElement.bind(this);
 }
 
 DOMExporter.Prototype = function() {
@@ -84,11 +89,11 @@ DOMExporter.Prototype = function() {
     }
     var el;
     if (converter.tagName) {
-      el = $$(converter.tagName);
+      el = this.$$(converter.tagName);
     } else {
-      el = $$('div');
+      el = this.$$('div');
     }
-    el.attr('data-id', node.id);
+    el.attr(this.config.idAttribute, node.id);
     if (converter.export) {
       el = converter.export(node, el, this) || el;
     } else {
@@ -99,7 +104,7 @@ DOMExporter.Prototype = function() {
 
   this.convertProperty = function(doc, path, options) {
     this.initialize(doc, options);
-    var wrapper = $$('div')
+    var wrapper = this.$$('div')
       .append(this.annotatedText(path));
     return wrapper.innerHTML;
   };
@@ -129,17 +134,17 @@ DOMExporter.Prototype = function() {
       }
       var el;
       if (converter.tagName) {
-        el = $$(converter.tagName);
+        el = this.$$(converter.tagName);
       } else {
-        el = $$('span');
+        el = this.$$('span');
       }
-      el.attr('data-id', anno.id);
+      el.attr(this.config.idAttribute, anno.id);
       el.append(context.children);
       if (converter.export) {
         converter.export(anno, el, self);
       }
       parentContext.children.push(el);
-    };
+    }.bind(this);
     var wrapper = { children: [] };
     annotator.start(wrapper, text, annotations);
     return wrapper.children;
@@ -161,6 +166,10 @@ DOMExporter.Prototype = function() {
     return this.state.doc;
   };
 
+  this.createElement = function(str) {
+    return this._el.createElement(str);
+  };
+
 };
 
 oo.initClass(DOMExporter);
@@ -173,7 +182,7 @@ DOMExporter.defaultBlockConverter = {
       if (name === 'id' || name === 'type') {
         return;
       }
-      var prop = $$('div').attr('property', name);
+      var prop = this.$$('div').attr('property', name);
       if (node.getPropertyType(name) === 'string') {
         prop.append(converter.annotatedText([node.id, name]));
       } else {

@@ -65,3 +65,30 @@ QUnit.test("Parsing an XML document", function(assert) {
   assert.isDefinedAndNotNull(body);
   assert.equal(body.text(), 'TEST');
 });
+
+QUnit.test("hasClass", function(assert) {
+  var p = DOMElement.parseHTML('<p class="foo">TEST</p>');
+  assert.ok(p.hasClass('foo'), 'Element should have class "foo".');
+});
+
+QUnit.test("addClass", function(assert) {
+  var p = DOMElement.parseHTML('<p>TEST</p>');
+  p.addClass('foo');
+  assert.ok(p.hasClass('foo'), 'Element should have class "foo".');
+});
+
+QUnit.test("removeClass", function(assert) {
+  var p = DOMElement.parseHTML('<p class="foo">TEST</p>');
+  p.removeClass('foo');
+  assert.notOk(p.hasClass('foo'), 'Element should not have class "foo".');
+});
+
+QUnit.test("withTagName", function(assert) {
+  var p = DOMElement.parseHTML('<p class="foo" style="width:100px;" data-foo="foo">TEST</p>');
+  var p2 = p.withTagName('div');
+  assert.equal(p2.tagName, 'div', 'New element should have tagName "div".');
+  assert.ok(p2.hasClass('foo'), 'CSS classes should be preserved.');
+  assert.equal(p2.css('width'), '100px', 'CSS styles should be preserved.');
+  assert.equal(p2.attr('data-foo'), 'foo', 'Attributes should be preserved.');
+  assert.equal(p2.innerHTML, 'TEST', 'Inner HTML should be cloned.');
+});

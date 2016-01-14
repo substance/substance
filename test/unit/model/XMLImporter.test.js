@@ -18,7 +18,7 @@ QUnit.module('model/XMLImporter', {
 var CONTENT = '0123456789';
 
 QUnit.test("Importing paragraph", function(assert) {
-  var xml = '<p data-id="p1">' + CONTENT + '</p>';
+  var xml = '<p id="p1">' + CONTENT + '</p>';
   var el = DOMElement.parseXML(xml);
   var node = importer.convertElement(el);
   assert.deepEqual(node, {
@@ -29,7 +29,7 @@ QUnit.test("Importing paragraph", function(assert) {
 });
 
 QUnit.test("Importing paragraph with strong", function(assert) {
-  var xml = '<p data-id="p1">0123<strong data-id="s1">456</strong>789</p>';
+  var xml = '<p id="p1">0123<strong id="s1">456</strong>789</p>';
   var el = DOMElement.parseXML(xml);
   importer.convertElement(el);
   var doc = importer.generateDocument();
@@ -40,7 +40,7 @@ QUnit.test("Importing paragraph with strong", function(assert) {
 });
 
 QUnit.test("Importing h1", function(assert) {
-  var xml = '<h1 data-id="h1">' + CONTENT + '</h1>';
+  var xml = '<h1 id="h1">' + CONTENT + '</h1>';
   var el = DOMElement.parseXML(xml);
   var node = importer.convertElement(el);
   assert.deepEqual(node, {
@@ -52,7 +52,7 @@ QUnit.test("Importing h1", function(assert) {
 });
 
 QUnit.test("Importing h2", function(assert) {
-  var xml = '<h2 data-id="h2">' + CONTENT + '</h2>';
+  var xml = '<h2 id="h2">' + CONTENT + '</h2>';
   var el = DOMElement.parseXML(xml);
   var node = importer.convertElement(el);
   assert.deepEqual(node, {
@@ -72,5 +72,17 @@ QUnit.test("Importing meta", function(assert) {
     id: 'meta',
     type: 'meta',
     title: CONTENT
+  });
+});
+
+QUnit.test("Importing image", function(assert) {
+  var xml = '<image id="img1" src="someimage.png" preview-src="someimagepreview.png"/>';
+  var el = DOMElement.parseXML(xml);
+  var node = importer.convertElement(el);
+  assert.deepEqual(node, {
+    id: 'img1',
+    type: 'image',
+    src: 'someimage.png',
+    previewSrc: 'someimagepreview.png'
   });
 });

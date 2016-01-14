@@ -33,12 +33,8 @@ function ClipboardImporter(config) {
   if (!config.schema) {
     throw new Error('Missing argument: config.schema is required.');
   }
-
   // disabling warnings about default importers
   this.IGNORE_DEFAULT_WARNINGS = true;
-
-  // Looking into the schema and trying to find standard types
-  //
 
   extend(config, {
     trimWhitespaces: true,
@@ -50,7 +46,7 @@ function ClipboardImporter(config) {
   this._isWindows = (navigator && navigator.appVersion && navigator.appVersion.indexOf("Win") !== -1);
 }
 
-HTMLImporter.extend(ClipboardImporter, function() {
+ClipboardImporter.Prototype = function() {
 
   /**
     Parses HTML and applies some sanitization/normalization.
@@ -66,11 +62,15 @@ HTMLImporter.extend(ClipboardImporter, function() {
       }
     }
     var el = DefaultDOMElement.parseHTML(html);
-    if (isArray(el) || !el.isDocumentNode()) {
-      body = DefaultDOMElement.createElement('body');
+    if (isArray(el)) {
+      body = this._createElement('body');
       body.append(el);
     } else {
       body = el.find('body');
+    }
+    if (!body) {
+      body = this._createElement('body');
+      body.append(el);
     }
     body = _fixupGoogleDocsBody(body);
     if (!body) {
@@ -107,7 +107,7 @@ HTMLImporter.extend(ClipboardImporter, function() {
   };
 
   this._wrapInlineElementsIntoBlockElement = function(childIterator) {
-    var wrapper = this.$$('p');
+    var wrapper = this._createElement('p');
     while(childIterator.hasNext()) {
       var el = childIterator.next();
       // if there is a block node we finish this wrapper
@@ -150,7 +150,9 @@ HTMLImporter.extend(ClipboardImporter, function() {
     return doc;
   };
 
-});
+};
+
+HTMLImporter.extend(ClipboardImporter);
 
 ClipboardImporter.converters = converters;
 ClipboardImporter.CLIPBOARD_CONTAINER_ID = CLIPBOARD_CONTAINER_ID;

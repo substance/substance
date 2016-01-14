@@ -2,7 +2,10 @@
 
 var oo = require('../util/oo');
 var $ = require('../util/jquery');
+var isString = require('lodash/lang/isString');
 var isArray = require('lodash/lang/isArray');
+var extend = require('lodash/object/extend');
+var each = require('lodash/collection/each');
 var map = require('lodash/collection/map');
 var inBrowser = (typeof window !== 'undefined');
 var DOMElement = require('./DOMElement');
@@ -20,51 +23,138 @@ function DefaultDOMElement(el) {
 DefaultDOMElement.Prototype = function() {
 
   this.hasClass = function(className) {
-    return this.$el.hasClass(className);
+    if (inBrowser) {
+      return this.el.classList.contains(className);
+    } else {
+      return this.$el.hasClass(className);
+    }
   };
 
   this.addClass = function(classString) {
-    this.$el.addClass(classString);
+    if (inBrowser) {
+      var classList = this.el.classList;
+      var classes = classString.split(/\s+/);
+      if (classes.length === 1) {
+        classList.add(classString);
+      } else {
+        classes.forEach(function(c) {
+          if (c) classList.add(c);
+        });
+      }
+    } else {
+      this.$el.addClass(classString);
+    }
     return this;
   };
 
   this.removeClass = function(classString) {
-    this.$el.removeClass(classString);
+    if (inBrowser) {
+      var classList = this.el.classList;
+      var classes = classString.split(/\s+/);
+      if (classes.length === 1) {
+        classList.remove(classString);
+      } else {
+        classes.forEach(function(c) {
+          if (c) {
+            classList.remove(c);
+          }
+        });
+      }
+    } else {
+      this.$el.removeClass(classString);
+    }
     return this;
   };
 
   this.attr = function(name, value) {
     if (arguments.length === 1) {
-      return this.getAttribute(name);
+      if (isString(arguments[0])) {
+        return this.getAttribute(name);
+      } else {
+        each(arguments[0], function(val, name) {
+          this.setAttribute(name, val);
+        }.bind(this));
+        return this;
+      }
     } else {
-      return this.setAttribute(name, value);
+      this.setAttribute(name, value);
+      return this;
     }
   };
 
   this.removeAttr = function(name) {
-    this.$el.removeAttr(name);
+    if (inBrowser) {
+      this.el.removeAttribute(name);
+    } else {
+      delete this.el.attribs[name];
+    }
     return this;
   };
 
+  this.removeAttribute = this.removeAttr;
+
   this.getAttribute = function(name) {
-    return this.$el.attr(name);
+    if (inBrowser) {
+      if (this.el.hasAttribute(name)) {
+        return this.el.getAttribute(name);
+      } else {
+        return undefined;
+      }
+    } else {
+      return this.el.attribs[name];
+    }
   };
 
   this.setAttribute = function(name, value) {
-    this.$el.attr(name, value);
+    if (inBrowser) {
+      this.el.setAttribute(name, value);
+    } else {
+      this.el.attribs[name] = value;
+    }
     return this;
   };
 
   this.getTagName = function() {
-    if (!this.el.tagName) {
-      return "";
+    if (inBrowser) {
+      if (!this.el.tagName) {
+        return "";
+      } else {
+        return this.el.tagName.toLowerCase();
+      }
     } else {
-      return this.el.tagName.toLowerCase();
+      if (this.el.type !== 'tag') {
+        return "";
+      } else {
+        return this.el.name.toLowerCase();
+      }
     }
   };
 
   this.setTagName = function() {
     throw new Error('tagName is readonly.');
+  };
+
+  /**
+    A convenience method to create an element with a different
+    tagName but same content.
+    @param {String} tagName
+    @returns {DOMElement} a new element
+  */
+  this.withTagName = function(tagName) {
+    if (inBrowser) {
+      var wrapper = this._createNativeElement('div');
+      var oldTagName = this.getTagName();
+      var outerHTML = this.el.outerHTML;
+      outerHTML = outerHTML.replace(new RegExp("^\s*<\s*"+oldTagName), '<'+tagName);
+      outerHTML = outerHTML.replace(new RegExp(oldTagName + '\s*>\s*$'), tagName+'>');
+      wrapper.innerHTML = outerHTML;
+      return new DefaultDOMElement(wrapper.firstChild);
+    } else {
+      var newEl = this.createElement(tagName);
+      newEl.innerHTML = this.innerHTML;
+      newEl.el.attribs = extend({}, this.el.attribs);
+      return newEl;
+    }
   };
 
   this.getId = function() {
@@ -77,28 +167,43 @@ DefaultDOMElement.Prototype = function() {
   };
 
   this.getTextContent = function() {
-    return this.$el.text();
+    if (inBrowser) {
+      return this.el.textContent;
+    } else {
+      return this.$el.text();
+    }
   };
 
   this.setTextContent = function(text) {
-    this.$el.text(text);
+    if (inBrowser) {
+      this.el.textContent = text;
+    } else {
+      this.$el.text(text);
+    }
+    return this;
   };
 
   this.getInnerHtml = function() {
-    return this.$el.html();
+    if (inBrowser) {
+      return this.el.innerHTML;
+    } else {
+      return this.$el.html();
+    }
   };
 
   this.setInnerHtml = function(html) {
-    this.$el.html(html);
+    if (inBrowser) {
+      this.el.innerHTML = html;
+    } else {
+      this.$el.html(html);
+    }
   };
 
   this.getOuterHtml = function() {
     if (inBrowser) {
       return this.el.outerHTML;
     } else {
-      // TODO: this seems a bit awkward, but with jQuery there is no better
-      // way... maybe using low-level cheerio API?
-      return DefaultDOMElement.createElement('div').append(this.clone()).html();
+      return $._serialize(this.el);
     }
   };
 
@@ -112,11 +217,20 @@ DefaultDOMElement.Prototype = function() {
   };
 
   this.getStyle = function(name) {
-    return this.$el.css(name);
+    if (inBrowser) {
+      return this.el.style[name];
+    } else {
+      return this.$el.css(name);
+    }
   };
 
   this.setStyle = function(name, value) {
-    this.$el.css(name, value);
+    if (inBrowser) {
+      this.el.style[name] = value;
+    } else {
+      this.$el.css(name, value);
+    }
+    return this;
   };
 
   this.addEventListener = function(eventName, selector, handler, context) {
@@ -212,16 +326,34 @@ DefaultDOMElement.Prototype = function() {
     return new DefaultDOMElement.NodeIterator(this.el.childNodes);
   };
 
-  this.createElement = function(str) {
-    return DefaultDOMElement.createElement(str);
+  this._createNativeElement = function(tagName) {
+    var el;
+    if (inBrowser) {
+      el = this.el.ownerDocument.createElement(tagName);
+    } else {
+      el = $._createElement(tagName, this.el.root);
+    }
+    return el;
+  };
+
+  this.createElement = function(tagName) {
+    var el = this._createNativeElement(tagName);
+    return new DefaultDOMElement(el);
   };
 
   this.clone = function() {
-    var $clone = this.$el.clone();
-    return new DefaultDOMElement($clone[0]);
+    var clone;
+    if (inBrowser) {
+      clone = this.el.cloneNode(true);
+    } else {
+      clone = this.$el.clone()[0];
+    }
+    return new DefaultDOMElement(clone);
   };
 
   this.is = function(cssSelector) {
+    // Note: there is DOMElement.matches which is not supported
+    // by all (mobile) browsers
     return this.$el.is(cssSelector);
   };
 
@@ -240,32 +372,41 @@ DefaultDOMElement.Prototype = function() {
   };
 
   this.getRoot = function() {
-    var root;
-    if (inBrowser) {
-      root = this.el.ownerDocument;
-    } else {
-      root = this.el.root;
+    var el = this.el;
+    var parent = el;
+    while (parent) {
+      el = parent;
+      if (inBrowser) {
+        parent = el.parentNode;
+      } else {
+        parent = el.parent;
+      }
     }
-    if (root) {
-      return new DefaultDOMElement(root);
-    } else {
-      return null;
-    }
-    return new DefaultDOMElement(root);
+    return new DefaultDOMElement(el);
   };
 
   this.find = function(cssSelector) {
-    var $result = this.$el.find(cssSelector);
-    if ($result.length > 0) {
-      return new DefaultDOMElement($result[0]);
+    var result = null;
+    if (inBrowser && this.el.querySelector) {
+      result = this.el.querySelector(cssSelector);
+    } else {
+      result = this.$el.find(cssSelector)[0];
+    }
+    if (result) {
+      return new DefaultDOMElement(result);
     } else {
       return null;
     }
   };
 
   this.findAll = function(cssSelector) {
-    var $result = this.$el.find(cssSelector);
-    return map($result, function(el) {
+    var result;
+    if (inBrowser && this.el.querySelectorAll) {
+      result = this.el.querySelectorAll(cssSelector);
+    } else {
+      result = this.$el.find(cssSelector);
+    }
+    return map(result, function(el) {
       return new DefaultDOMElement(el);
     });
   };
@@ -276,7 +417,7 @@ DefaultDOMElement.Prototype = function() {
         this.append(node);
       }.bind(this));
     } else if (child instanceof DefaultDOMElement) {
-      this.$el.append(child.$el);
+      this.$el.append(child.el);
     } else {
       this.$el.append(child);
     }
@@ -284,34 +425,63 @@ DefaultDOMElement.Prototype = function() {
   };
 
   this.insertAt = function(pos, child) {
-    /* jshint unused:false */
-    throw new Error('This method is abstract.');
+    var children = this.children;
+    if (pos > children.length-1) {
+      this.append(child);
+    } else {
+      this.$el.insertBefore(children[pos].$el);
+    }
+    return this;
   };
 
   this.removeAt = function(pos) {
-    /* jshint unused:false */
-    throw new Error('This method is abstract.');
+    this.children[pos].$el.remove();
+    return this;
   };
 
   this.empty = function() {
-    this.$el.empty();
+    if (inBrowser) {
+      this.el.innerHTML = "";
+    } else {
+      this.$el.empty();
+    }
     return this;
+  };
+
+  this.remove = function() {
+    this.$el.remove();
   };
 
 };
 
 DOMElement.extend(DefaultDOMElement);
 
-DefaultDOMElement.createElement = function(str) {
-  console.warn('Do not use DefaultDOMElement.createElement directly.');
-  str = str.trim();
-  if (str[0] !== '<') {
-    str = '<' + str + '>';
-  }
-  var el;
-  el = $(str)[0];
-  return new DefaultDOMElement(el);
-};
+Object.defineProperties(DefaultDOMElement.prototype, {
+  /**
+    @property {String} ui/DOMElement#tagName
+   */
+  'tagName': {
+    configurable: true,
+    get: function() {
+      return this.getTagName();
+    },
+    set: function(tagName) {
+      this.setTagName(tagName);
+    }
+  },
+  /**
+    @property {Array<ui/DOMElement>} ui/DOMElement#children children elements
+   */
+  'children': {
+    configurable: true,
+    get: function() {
+      return this.getChildren();
+    },
+    set: function() {
+      throw new Error('ui/DOMElement#children is readonly.');
+    }
+  },
+});
 
 DefaultDOMElement.createTextNode = function(text) {
   var el;
@@ -323,8 +493,6 @@ DefaultDOMElement.createTextNode = function(text) {
   }
   return new DefaultDOMElement(el);
 };
-
-DefaultDOMElement.$$ = DefaultDOMElement.createElement;
 
 /**
   A class that provides a browser/server compatible way to iterate
@@ -376,12 +544,32 @@ DefaultDOMElement.NodeIterator.Prototype = function() {
 
 oo.initClass(DefaultDOMElement.NodeIterator);
 
-function _parseXML(str, format) {
+function _parseMarkup(str, format) {
   var nativeEls = [];
+  var doc;
 
-  if (inBrowser) {
+  if (!str) {
+    // Create an empty XML document
+    if (inBrowser) {
+      if (format === 'xml') {
+        doc = (new window.DOMParser()).parseFromString('<dummy/>', 'text/xml');
+        // doc.removeChild(doc.documentElement);
+        // doc.ownerDocument = doc;
+      } else {
+        doc = (new window.DOMParser()).parseFromString('<html></html>', 'text/html');
+      }
+    }
+    // cheerio
+    else {
+      if (format === 'xml') {
+        doc = $.parseXML('');
+      } else {
+        doc = $.parseHTML('');
+      }
+    }
+    return new DefaultDOMElement(doc);
+  } else if (inBrowser) {
     var parser = new window.DOMParser();
-    var doc;
     var isFullDoc;
     if (format === 'html') {
       isFullDoc = (str.search('<html>')>=0);
@@ -389,23 +577,10 @@ function _parseXML(str, format) {
     } else if (format === 'xml') {
       doc = parser.parseFromString(str, 'text/xml');
     }
-    if (!doc) {
-      // console.error('DOMParser.parseFromString failed. Falling back to jQuery based parsing.');
-      if (format === "html") {
-        if (isFullDoc) {
-          doc = $.parseXML(str);
-          nativeEls = doc.childNodes;
-        } else {
-          nativeEls = $.parseHTML(str);
-        }
-      } else if (format === "xml") {
-        doc = $.parseXML(str);
-        nativeEls = doc.childNodes;
-      }
-    } else {
+    if (doc) {
       if (format === 'html') {
         if (isFullDoc) {
-          nativeEls = [doc];
+          nativeEls = [doc.querySelector('html')];
         } else {
           // if the provided html is just a partial
           // then DOMParser still creates a full document
@@ -419,8 +594,23 @@ function _parseXML(str, format) {
         // TODO: is it ok just to provide the 'content', not the XML meta info?
         nativeEls = doc.childNodes;
       }
+    } else {
+      // console.error('DOMParser.parseFromString failed. Falling back to jQuery based parsing.');
+      if (format === "html") {
+        if (isFullDoc) {
+          doc = $.parseXML(str);
+          nativeEls = doc.childNodes;
+        } else {
+          nativeEls = $.parseHTML(str);
+        }
+      } else if (format === "xml") {
+        doc = $.parseXML(str);
+        nativeEls = doc.childNodes;
+      }
     }
-  } else {
+  }
+  // cheerio
+  else {
     nativeEls = $.parseXML(str);
   }
 
@@ -440,7 +630,7 @@ function _parseXML(str, format) {
   @returns {DOMElement|DOMElement[]}
 */
 DefaultDOMElement.parseHTML = function(html) {
-  return _parseXML(html, 'html');
+  return _parseMarkup(html, 'html');
 };
 
 /*
@@ -448,7 +638,7 @@ DefaultDOMElement.parseHTML = function(html) {
   @returns {DOMElement|DOMElement[]}
 */
 DefaultDOMElement.parseXML = function(xml) {
-  return _parseXML(xml, 'xml');
+  return _parseMarkup(xml, 'xml');
 };
 
 module.exports = DefaultDOMElement;

@@ -6,6 +6,7 @@ var TestArticle = require('./TestArticle');
 
 var converters = [
   require('../../packages/paragraph/ParagraphXMLConverter'),
+  require('../../packages/image/ImageXMLConverter'),
   require('../../packages/heading/HeadingXMLConverter'),
   require('../../packages/emphasis/EmphasisXMLConverter'),
   require('../../packages/strong/StrongXMLConverter'),

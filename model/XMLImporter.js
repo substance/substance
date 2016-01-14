@@ -2,9 +2,14 @@
 
 var DOMImporter = require('./DOMImporter');
 var DefaultDOMElement = require('../ui/DefaultDOMElement');
+var extend = require('lodash/object/extend');
 
-function XMLImporter() {
-  DOMImporter.apply(this, arguments);
+function XMLImporter(config) {
+  config = extend({ idAttribute: 'id' }, config);
+  DOMImporter.call(this, config);
+
+  // only used internally for creating wrapper elements
+  this._el = DefaultDOMElement.parseXML('<dummy></dummy>');
 }
 
 XMLImporter.Prototype = function() {

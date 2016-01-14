@@ -17,10 +17,11 @@ module.exports = {
   },
 
   export: function(node, el, converter) {
-    el.tagName = 'h' + node.level;
+    el = el.withTagName('h'+node.level);
     el.append(
       converter.annotatedText([node.id, 'content'])
     );
+    return el;
   }
 
 };
