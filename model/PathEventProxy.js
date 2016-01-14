@@ -86,7 +86,7 @@ NotifyByPathProxy.Prototype = function() {
   };
 
   this.connect = function(listener, path, method) {
-    this.add(path, listener, method);
+    this._add(path, listener, method);
   };
 
   this.disconnect = function(listener) {
