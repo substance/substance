@@ -10,6 +10,14 @@ var map = require('lodash/collection/map');
 var inBrowser = (typeof window !== 'undefined');
 var DOMElement = require('./DOMElement');
 
+/**
+  Implements {@link DOMElement} interface. For the browser we use native DOM
+  manipulation where possible and jQuery where useful. On the server Cheerio
+  is used to represent the DOM.
+
+  @class
+*/
+
 function DefaultDOMElement(el) {
   if (!el) {
     throw new Error('Illegal argument: el is null');

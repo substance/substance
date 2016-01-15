@@ -8,6 +8,32 @@ var isBoolean = require('lodash/lang/isBoolean');
 var isNumber = require('lodash/lang/isNumber');
 var isString = require('lodash/lang/isString');
 
+/**
+  @class
+  @abstract
+
+  Base class for custom HTML exporters. If you want to use XML as your
+  exchange format see {@link model/XMLExporter}.
+
+  @example
+  
+  Below is a full example taken from the [Notepad](https://github.com/substance/examples/blob/master/converter/NoteExporter.js) example.
+
+  ```js
+  var HTMLExporter = require('substance/model/HTMLExporter');
+  var converters = require('./NoteImporter').converters;
+
+  function NoteExporter() {
+    NoteExporter.super.call(this, {
+      converters: converters,
+      containerId: 'body'
+    });
+  }
+
+  HTMLExporter.extend(NoteExporter);
+  ```
+*/
+
 function HTMLExporter(config) {
   config = extend({ idAttribute: 'data-id' }, config);
   DOMExporter.call(this, config);

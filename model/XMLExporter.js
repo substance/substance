@@ -8,6 +8,61 @@ var isBoolean = require('lodash/lang/isBoolean');
 var isNumber = require('lodash/lang/isNumber');
 var isString = require('lodash/lang/isString');
 
+/**
+  @class
+  @abstract
+
+  Base class for custom XML exporters. If you want to use HTML as your
+  exchange format see {@link model/HTMLExporter}.
+
+  @example
+  
+  Below is a full example taken from [Lens](https://github.com/substance/lens/blob/master/model/LensArticleExporter.js).
+
+  ```js
+  var XMLExporter = require('substance/model/XMLExporter');
+  var converters = require('./LensArticleImporter').converters;
+  var each = require('lodash/collection/each');
+
+  function LensArticleExporter() {
+    LensArticleExporter.super.call(this, {
+      converters: converters,
+      containerId: 'main'
+    });
+  }
+
+  LensArticleExporter.Prototype = function() {
+    this.exportDocument = function(doc) {
+      this.state.doc = doc;
+      var $$ = this.$$;
+      var articleEl = $$('article');
+
+      // Export ArticleMeta
+      var metaEl = this.convertNode(doc.get('article-meta'));
+      articleEl.append(metaEl);
+
+      // Export resources (e.g. bib items)
+      var resourceEl = $$('resources');
+      var bibItems = doc.getIndex('type').get('bib-item');
+      each(bibItems, function(bibItem) {
+        var bibItemEl = this.convertNode(bibItem);
+        resourceEl.append(bibItemEl);
+      }, this);
+      articleEl.append(resourceEl);
+
+      // Export article body
+      var bodyElements = this.convertContainer(doc.get('main'));
+      articleEl.append(
+        $$('body').append(bodyElements)
+      );
+      return articleEl.outerHTML;
+    };
+  };
+
+  XMLExporter.extend(LensArticleExporter);
+  ```
+*/
+
 function XMLExporter(config) {
   config = extend({ idAttribute: 'id' }, config);
   DOMExporter.call(this, config);
