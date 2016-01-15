@@ -15,7 +15,7 @@ var server = {};
 /**
   Serves a bundled JS file. Browserify is used as a module bundler.
 
-  @param {ExpressApplication} app Express.js application instance
+  @param {ExpressApplication} expressApp Express.js application instance
   @param {String} route Express route under which the bundled javascript should be served
   @param {String} sourcePath entry point for js bundling
 
@@ -25,8 +25,8 @@ var server = {};
   server.serveJS(app, 'app.js', path.join(__dirname, 'src', 'app.js'));
   ```
 */
-server.serveJS = function(app, route, sourcePath) {
-  app.get(route, function(req, res) {
+server.serveJS = function(expressApp, route, sourcePath) {
+  expressApp.get(route, function(req, res) {
     browserify({ debug: true, cache: false })
       .add(sourcePath)
       .bundle()
@@ -40,7 +40,7 @@ server.serveJS = function(app, route, sourcePath) {
 /**
   Serves a bundled CSS file. For compilation Sass is used.
 
-  @param {ExpressApplication} app Express.js application instance
+  @param {ExpressApplication} expressApp Express.js application instance
   @param {String} route Express route under which the styles should be served
   @param {String} sourcePath entry point for sass compilation
 
@@ -50,8 +50,8 @@ server.serveJS = function(app, route, sourcePath) {
   server.serveStyles(app, '/app.css', path.join(__dirname, 'src', 'app.scss'));
   ```
 */
-server.serveStyles = function(app, route, sourcePath) {
-  app.get(route, function(req, res) {
+server.serveStyles = function(expressApp, route, sourcePath) {
+  expressApp.get(route, function(req, res) {
     sass.render({
       file: sourcePath,
       sourceMap: true,
