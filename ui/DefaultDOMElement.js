@@ -578,7 +578,7 @@ function _parseMarkup(str, format) {
     var parser = new window.DOMParser();
     var isFullDoc;
     if (format === 'html') {
-      isFullDoc = (str.search('<html>')>=0);
+      isFullDoc = (str.search(/<\s*html/i)>=0);
       doc = parser.parseFromString(str, 'text/html');
     } else if (format === 'xml') {
       doc = parser.parseFromString(str, 'text/xml');

@@ -46,7 +46,7 @@ HTMLExporter.Prototype = function() {
         if (name === 'id' || name === 'type') {
           return;
         }
-        var prop = this.$$('div').attr('property', name);
+        var prop = converter.$$('div').attr('property', name);
         if (node.getPropertyType(name) === 'string') {
           prop.append(converter.annotatedText([node.id, name]));
         } else {

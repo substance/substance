@@ -5,6 +5,7 @@ var ClipboardImporter = require('./ClipboardImporter');
 var converters = ClipboardImporter.converters;
 var CLIPBOARD_CONTAINER_ID = ClipboardImporter.CLIPBOARD_CONTAINER_ID;
 var CLIPBOARD_PROPERTY_ID = ClipboardImporter.CLIPBOARD_PROPERTY_ID;
+var JSONConverter = require('../model/JSONConverter');
 
 /**
   Export HTML from clipboard. Used for inter-application copy'n'paste.
@@ -35,7 +36,13 @@ ClipboardExporter.Prototype = function() {
         return el.outerHTML;
       }).join('');
     }
-    return '<html><body>' + html + '</body></html>';
+    var jsonConverter = new JSONConverter();
+    var json = [
+      "<meta name='substance' content='",
+      JSON.stringify(jsonConverter.exportDocument(doc)),
+      "'>"
+    ].join('');
+    return '<html><head>' +json+ '</head><body>' + html + '</body></html>';
   };
 
   /**
@@ -43,7 +50,7 @@ ClipboardExporter.Prototype = function() {
 
     @param {Document} doc document to convert
 
-    @return {Array} array of DOM elements each represented single node 
+    @return {Array} array of DOM elements each represented single node
   */
   this.convertDocument = function(doc) {
     var content = doc.get(CLIPBOARD_CONTAINER_ID);
