@@ -11,6 +11,15 @@
 - Fixed numerous issues related to mapping DOM selections to model selections.
 - Fixed a bug where nodes that have no addressable text property could not be rendered
 - Fixed an edge case where triple clicking inside a paragraph with inline nodes did not led to an undesired selection.
+- Fixed an issue where focusedSurface is set too late on the controller
+- Fixed an issue where an image wrapped in a selection was not deleted
+- Fixed an bug where selection was mapped incorrectly at the end of the paragraph (76eab1f)
+- Fixed several converter issues related to XML parsing and serializing (#391)
+- Improved API documentation
+- Fixed an issue where typing over an inline node did not remove it
+- Added ui/Highlights class for distributed management of highlights
+- Removed ui/ContentPanel in favor of an improved ScrollPane implementation
+- ScrollPane is now aware of TOC instances (when provided)
 
 ## Beta 2
 
