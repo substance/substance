@@ -51,7 +51,11 @@ function ContainerSelection(properties) {
     The character position where this annotations ends.
     @type {Number}
   */
-  var endOffset = properties.endOffset || properties.startOffset;
+  var endOffset = properties.endOffset;
+  if (!isNumber(endOffset)) {
+    endOffset = properties.startOffset;
+  }
+
   if (!containerId || !startPath || !isNumber(startOffset)) {
     throw new Error('Invalid arguments: `containerId`, `startPath` and `startOffset` are mandatory');
   }
