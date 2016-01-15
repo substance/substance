@@ -18,7 +18,7 @@ BlockNode.extend(Table, ParentNodeMixin, function Table() {
   };
 
   this.getSections = function() {
-    return this.getChidren();
+    return this.getChildren();
   };
 
   this.getSectionAt = function(secIdx) {

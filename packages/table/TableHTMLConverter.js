@@ -32,7 +32,7 @@ module.exports = {
         sectionType: "body",
         rows: []
       };
-      each(el.find('tr'), function(rowEl) {
+      each(el.findAll('tr'), function(rowEl) {
         var rowNode = converter.convertElement(rowEl);
         rowNode.parent = sectionNode.id;
         sectionNode.rows.push(rowNode.id);

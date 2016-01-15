@@ -12,7 +12,7 @@ module.exports = {
 
   import: function(el, tableRow, converter) {
     tableRow.cells = [];
-    each(el.find('th,td'), function(cellEl) {
+    each(el.findAll('th,td'), function(cellEl) {
       var cellNode = converter.convertElement(cellEl);
       cellNode.parent = tableRow.id;
       tableRow.cells.push(cellNode.id);
