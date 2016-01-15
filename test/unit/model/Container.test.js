@@ -5,7 +5,7 @@ var sample = require('../../fixtures/container_sample');
 var simpleSample = require('../../fixtures/sample1');
 var empty = require('../../fixtures/empty');
 var DocumentAddress = require('../../../model/DocumentAddress');
-var uuid = require('../../../util/uuid');
+// var uuid = require('../../../util/uuid');
 
 QUnit.module('model/Container');
 
@@ -263,13 +263,13 @@ QUnit.test("Addresses for nodes without editable properties.", function(assert) 
     content: "XXX"
   });
   container.show(node.id);
-  var node = doc.create({
+  node = doc.create({
     type: 'image',
     id: "img",
     src: "YYY"
   });
   container.show(node.id);
-  var node = doc.create({
+  node = doc.create({
     type: 'paragraph',
     id: "p2",
     content: "ZZZ"
@@ -280,7 +280,9 @@ QUnit.test("Addresses for nodes without editable properties.", function(assert) 
   var address = container._getFirstAddress(img);
   assert.isNullOrUndefined(address, "Image does not have an addressable property.");
   address = container.getNextAddress(new DocumentAddress(0,0));
-  assert.isAddressEqual(address, [2,0], "Image address should be skipped.");
-  var range = container.getAddressRange(new DocumentAddress(1,0), new DocumentAddress(2,0));
-  assert.equal(range.length, 2, "There should be 2 addressable properties.");
+  assert.isAddressEqual(address, [1,-1], "Inaddressible nodes should have component index -1.");
+  address = container.getNextAddress(address);
+  assert.isAddressEqual(address, [2,0]);
+  var range = container.getAddressRange(new DocumentAddress(0,0), new DocumentAddress(2,0));
+  assert.equal(range.length, 3, "There should be 3 addressable properties.");
 });

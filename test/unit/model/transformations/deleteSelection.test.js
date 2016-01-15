@@ -5,7 +5,6 @@ var deleteSelection = require('../../../../model/transform/deleteSelection');
 var containerSample = require('../../../fixtures/container_anno_sample');
 var sample1 = require('../../../fixtures/sample1');
 
-
 function addStructuredNode(doc) {
   var structuredNode = doc.create({
     id: "sn1",
@@ -16,6 +15,18 @@ function addStructuredNode(doc) {
   });
   doc.get('main').show(structuredNode.id, 1);
   return structuredNode;
+}
+
+function addImage(doc) {
+  // This node does not have any editable properties
+  var imageNode = doc.create({
+    id: "img1",
+    type: "image",
+    src: "img1.png",
+    previewSrc: "img1thumb.png",
+  });
+  doc.get('main').show(imageNode.id, 1);
+  return imageNode;
 }
 
 QUnit.module('model/transform/deleteSelection');
@@ -178,6 +189,30 @@ QUnit.test("Deleting wrapped structured node", function(assert) {
   assert.equal(h1.content, 'Sectgraph 1', 'h1 should have been joined with the remaining contents of p1');
 });
 
+QUnit.test("Delete wrapped nodes that have no editable properties", function(assert) {
+  var doc = sample1();
+  addImage(doc);
+
+  // image node sits betweeen h1 and p1
+  var sel = doc.createSelection({
+    type: 'container',
+    containerId: 'main',
+    startPath: ['h1', 'content'],
+    startOffset: 4,
+    endPath: ['p1', 'content'],
+    endOffset: 4
+  });
+
+  var args = { selection: sel, containerId: 'main' };
+  deleteSelection(doc, args);
+  var containerNodes = doc.get(['main', 'nodes']);
+  assert.deepEqual(containerNodes, ["h1", "h2", "p2", "h3", "p3"], 'sn and p1 should have been deleted from the container');
+  var h1 = doc.get('h1');
+
+  assert.notOk(doc.get('img1'), 'Structured node should have been deleted');
+  assert.equal(h1.content, 'Sectgraph 1', 'h1 should have been joined with the remaining contents of p1');
+});
+
 QUnit.test("Edge case: delete container selection spaning multiple nodes containing container annotations", function(assert) {
   // the annotation spans over three nodes
   // we start the selection within the anno in the first text node
@@ -200,6 +235,7 @@ QUnit.test("Edge case: delete container selection spaning multiple nodes contain
   assert.deepEqual(a1.endPath, ['p1', 'content'], "Container annotation should be truncated");
   assert.equal(a1.endOffset, 7, "Container annotation should be truncated");
 });
+
 
 QUnit.test("Edge case: delete container selection with 2 fully selected paragraphs", function(assert) {
   // when all nodes under a container selection are covered

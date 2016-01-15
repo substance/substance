@@ -170,7 +170,7 @@ DocumentNode.extend(Container, ParentNodeMixin, function() {
     return path;
   };
 
-  this.getNextAddress = function(address) {
+  this._getNextAddress = function(address) {
     var nodeId, node, properties;
     var doc = this.getDocument();
     // extra implementation for the most common case
@@ -187,12 +187,7 @@ DocumentNode.extend(Container, ParentNodeMixin, function() {
           if (node.hasAddressableProperties()) {
             return new DocumentAddress(address[0]+1).append(this._getFirstAddress(doc.get(nodeId)));
           } else {
-            // HACK: even that we know that this node doesn't have
-            // an addressable property we call this method again with a fictive
-            // address, which should essentialy resolve the next node's address
-            // TODO: we should try to rewrite this algorithm considering
-            // nodes without properties explicitly
-            return this.getNextAddress(new DocumentAddress(address[0]+1, 0));
+            return new DocumentAddress(address[0]+1, -1);
           }
         } else {
           return null;
@@ -235,7 +230,9 @@ DocumentNode.extend(Container, ParentNodeMixin, function() {
     }
   };
 
-  this.getPreviousAddress = function(address) {
+  this.getNextAddress = this._getNextAddress;
+
+  this._getPreviousAddress = function(address) {
     var nodeId, node;
     var doc = this.getDocument();
     // extra implementation for the most common case
@@ -248,12 +245,7 @@ DocumentNode.extend(Container, ParentNodeMixin, function() {
         if (node.hasAddressableProperties()) {
           return new DocumentAddress(address[0]-1).append(this._getLastAddress(node));
         } else {
-          // HACK: even that we know that this node doesn't have
-          // an addressable property we call this method again with a fictive
-          // address, which should essentialy resolve the next node's address
-          // TODO: we should try to rewrite this algorithm considering
-          // nodes without properties explicitly
-          return this.getPreviousAddress(new DocumentAddress(address[0]-1, 0));
+          return new DocumentAddress(address[0]-1, -1);
         }
       } else {
         return null;
@@ -291,6 +283,8 @@ DocumentNode.extend(Container, ParentNodeMixin, function() {
       }
     }
   };
+
+  this.getPreviousAddress = this._getPreviousAddress;
 
   // Note: this is internal as it does provide address partials
   // i.e., when called for nested nodes
@@ -377,7 +371,7 @@ DocumentNode.extend(Container, ParentNodeMixin, function() {
     var addresses = [startAddress];
     var address = startAddress;
     while (address.isBefore(endAddress)) {
-      address = this.getNextAddress(address);
+      address = this._getNextAddress(address);
       addresses.push(address);
     }
     return addresses;
@@ -412,10 +406,14 @@ DocumentNode.extend(Container, ParentNodeMixin, function() {
   };
 
   this.getAddressesForNode = function(node) {
-    var pos = this.getChildIndex(node);
-    var first = new DocumentAddress().push(pos).append(this._getFirstAddress(node));
-    var last = new DocumentAddress().push(pos).append(this._getLastAddress(node));
-    return this.getAddressRange(first, last);
+    if (node.hasAddressableProperties()) {
+      var pos = this.getChildIndex(node);
+      var first = new DocumentAddress().push(pos).append(this._getFirstAddress(node));
+      var last = new DocumentAddress().push(pos).append(this._getLastAddress(node));
+      return this.getAddressRange(first, last);
+    } else {
+      return [];
+    }
   };
 
   this.getPathsForNode = function(node) {
