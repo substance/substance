@@ -58,13 +58,22 @@ ClipboardImporter.Prototype = function() {
   this.importDocument = function(html) {
     var body, el;
 
+    if (this._isWindows) {
+      // Under windows we can exploit <!--StartFragment--> and <!--EndFragment-->
+      // to have an easier life
+      var match = /<!--StartFragment\-->(.*)<!--EndFragment-->/.exec(html);
+      if (match) {
+        html = match[1];
+      }
+    }
+
     // when copying from a substance editor we store JSON in a meta tag
     // Then we parse the
     // If the import fails e.g. because the schema is incompatible
     // we fall back to plain HTML import
     if (html.search(/meta name=.substance./)>=0) {
       el = DefaultDOMElement.parseHTML(html);
-      var substanceData = el.find('head meta[name="substance"]');
+      var substanceData = el.find('meta[name="substance"]');
       if (substanceData) {
         var jsonStr = substanceData.attr('content');
         try {
@@ -72,15 +81,6 @@ ClipboardImporter.Prototype = function() {
         } catch(err) {
           console.error(err);
         }
-      }
-    }
-
-    if (this._isWindows) {
-      // Under windows we can exploit <!--StartFragment--> and <!--EndFragment-->
-      // to have an easier life
-      var match = /<!--StartFragment\-->(.*)<!--EndFragment-->/.exec(html);
-      if (match) {
-        html = match[1];
       }
     }
 

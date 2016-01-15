@@ -190,6 +190,7 @@ Clipboard.Prototype = function() {
       text: plainText,
       html: html
     };
+    // console.log('onPaste(): html = ', html);
 
     // WORKAROUND: FF does not provide HTML coming in from other applications
     // so fall back to the paste shim
