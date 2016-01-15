@@ -22,7 +22,7 @@ CrossLinkComponent.Prototype = function() {
     } else {
       el = $$('span');
     }
-    if (this.props.children) {
+    if (this.props.children.length > 0) {
       el.append(this.props.children);
     } else {
       el.append(nodeId);

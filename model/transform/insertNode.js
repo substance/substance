@@ -4,10 +4,25 @@ var deleteSelection = require('./deleteSelection');
 var breakNode = require('./breakNode');
 
 /**
-  Inserts a new node at the given selection/cursor
+  Inserts a new node at the given selection/cursor.
 
   @param {Object} args object with `selection`, `containerId` and `node` that has the node data
-  @return {Object} with updated `selection`
+
+  @return {Object} object with updated selection
+
+  @example
+  
+  ```js
+  insertNode(tx, {
+    selection: bodyEditor.getSelection(),
+    containerId: bodyEditor.getContainerId(),
+    node: {
+      id: 'nodeId',
+      type: 'paragraph',
+      content: 'hello'
+    }
+  });
+  ```
 */
 
 function insertNode(tx, args) {

@@ -5,9 +5,17 @@ var each = require('lodash/collection/each');
 var without = require('lodash/array/without');
 
 /**
- Keeps track of highlights
- 
- @class
+  Manages highlights. Used by {@link ui/ScrollPane}.
+
+  @class
+
+  @param {model/Document} doc document instance
+
+  @example
+  
+  ```
+  var contentHighlights = new Highlights(doc);
+  ```
 */
 
 var Highlights = function(doc) {
@@ -19,23 +27,32 @@ var Highlights = function(doc) {
 
 Highlights.Prototype = function() {
 
-  this.getHighlights = function() {
+  /**
+    Get currently active highlights.
+
+    @return {Object} Returns current highlights as a scoped object.
+  */
+  this.get = function() {
     return this._highlights;
   };
-
+  
   /**
-    Get the Document instance.
+    Set highlights.
 
-    @returns {Document}
+    @param {Object} scoped object describing highlights
+
+    @example
+
+    ```js
+      highlights.set({
+        'figures': ['figure-1', 'figure-3']
+        'citations': ['citation-1', 'citation-5']
+      });
+    ```
   */
-  this.getDocument = function() {
-    return this.doc;
-  };
-
-  // Set higlights on a document
-  this.setHighlights = function(highlights) {
+  this.set = function(highlights) {
     var oldHighlights = this._highlights;
-    var doc = this.getDocument();
+    var doc = this.doc;
     // Iterate over scopes of provided highlights
     each(highlights, function(newScopedHighlights, scope) {
       var oldScopedHighlights = oldHighlights[scope] || [];
@@ -62,10 +79,15 @@ Highlights.Prototype = function() {
     }.bind(this));
 
     this._highlights = highlights;
-    // this.onHighlightsUpdated(highlights);
     this.emit('highlights:updated', highlights);
   };
 };
+
+/**
+  Emitted when highlights have been updated
+
+  @event ui/Highlights@highlights:updated
+*/
 
 EventEmitter.extend(Highlights);
 

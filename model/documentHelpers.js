@@ -15,10 +15,9 @@ var AnnotationIndex = require('./AnnotationIndex');
 var documentHelpers = {};
 
 /**
-  Returns true if given type is a container selection
-
   @param {model/Document} doc
   @param {String} type
+  @return {Boolean} `true` if given type is a {@link model/ContainerAnnotation}
 */
 documentHelpers.isContainerAnnotation = function(doc, type) {
   var schema = doc.getSchema();
@@ -30,7 +29,7 @@ documentHelpers.isContainerAnnotation = function(doc, type) {
 
   @param {model/Document} doc
   @param {model/Selection} sel
-  @return An array of property annotations.
+  @return {model/PropertyAnnotation[]} An array of property annotations.
           Returns an empty array when selection is a container selection.
 */
 documentHelpers.getPropertyAnnotationsForSelection = function(doc, sel, options) {
@@ -115,7 +114,7 @@ documentHelpers.getAnnotationsForSelection = function(doc, sel, annotationType, 
   For a given selection, get the corresponding text string
 
   @param {Document} doc
-  @param {Document.Selection} sel
+  @param {model/Selection} sel
   @return {String} text enclosed by the annotation
 */
 
