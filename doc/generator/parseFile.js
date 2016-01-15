@@ -354,7 +354,7 @@ _Parser.Prototype = function() {
       });
       var sep;
       if (member.isEvent) {
-        sep = "!";
+        sep = "@";
       } else if (member.isConstructor) {
         sep = "@";
         member.isStatic = true;
@@ -438,7 +438,7 @@ _Parser.Prototype = function() {
 
   function _extractEventInfo(self, tag) {
     var eventId = tag.string;
-    var parts = eventId.split('!');
+    var parts = eventId.split('@');
     var name = parts[1];
     var receiver = parts[0];
     receiver = _normalizeReceiver(self, receiver);
