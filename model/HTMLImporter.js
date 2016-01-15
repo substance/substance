@@ -8,7 +8,7 @@ var extend = require('lodash/object/extend');
   @class
   @abstract
 
-  Base class for custom HTML converters. If you want to use XML as your
+  Base class for custom HTML importers. If you want to use XML as your
   exchange format see {@link model/XMLImporter}.
 
   @example
