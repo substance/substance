@@ -1,4 +1,3 @@
-var ContentPanel = require("../ui/ContentPanel");
 var ContainerRenderer = require('./components/ContainerRenderer');
 var Component = require('../ui/Component');
 var $$ = Component.$$;
@@ -6,6 +5,7 @@ var DocumentationController = require('./DocumentationController');
 var Cover = require('./components/CoverComponent');
 var TabbedPane = require('../ui/TabbedPane');
 var SplitPane = require('../ui/SplitPane');
+var ScrollPane = require('../ui/ScrollPane');
 
 function DocumentationReader() {
   DocumentationController.apply(this, arguments);
@@ -54,12 +54,14 @@ DocumentationReader.Prototype = function() {
     var meta = doc.get('meta');
 
     return $$('div').ref('main').addClass('se-main-section').append(
-      $$(ContentPanel, {scrollbarType: 'native', scrollbarPosition: 'right'}).append(
+      $$(ScrollPane, {
+        toc: this.toc
+      }).ref('contentPanel').append(
         $$(Cover, {node: meta}).ref('cover'),
         $$(ContainerRenderer, {
           containerId: config.containerId
         }).ref('mainAnnotator')
-      ).ref('contentPanel')
+      )
     );
   };
 
@@ -71,7 +73,6 @@ DocumentationReader.Prototype = function() {
       ).ref('splitPane')
     );
   };
-
 };
 
 DocumentationController.extend(DocumentationReader);

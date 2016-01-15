@@ -2,7 +2,7 @@
 
 var _ = require('../util/helpers');
 var extend = require('lodash/object/extend');
-var Controller = require("../ui/Controller");
+var Controller = require('../ui/Controller');
 var Router = require('../ui/Router');
 var omit = require('lodash/object/omit');
 var DocumentationTOC = require('./DocumentationTOC');
@@ -53,19 +53,15 @@ DocumentationController.Prototype = function() {
   // HACK: For some reasons this.refs.contentPanel disappears after 2nd state update
   // so we work around by caching this.refs.contentPanel.refs.scrollPane
   this.didMount = function() {
-    if (!this.contentPanel && this.refs.contentPanel) {
-      this.contentPanel = this.refs.contentPanel;
-      this.contentPanelScrollPane = this.contentPanel.refs.scrollPane;
-    }
 
     if (this.state.nodeId && this.state.contextId === 'toc') {
-      this.contentPanelScrollPane.scrollTo(this.state.nodeId);
+      this.refs.contentPanel.scrollTo(this.state.nodeId);
     }
   };
 
   this.didUpdateState = function() {
     if (this.state.nodeId && this.state.contextId === 'toc') {
-      this.contentPanelScrollPane.scrollTo(this.state.nodeId);
+      this.refs.contentPanel.scrollTo(this.state.nodeId);
     }
   };
 
