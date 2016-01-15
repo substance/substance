@@ -4,6 +4,30 @@ var Component = require('./Component');
 var each = require('lodash/collection/each');
 var $$ = Component.$$;
 
+/**
+  A tabbed pane layout component. The actual content is specified via append.
+
+  @class TabbedPane
+  @component
+  
+  @prop {Object[]} tabs an array of objects with id and name properties
+  @prop {String} activeTab id of currently active tab
+
+  @example
+  
+  ```js
+  $$(TabbedPane, {
+    tabs: [
+      {id: 'tabA', 'A'},
+      {id: 'tabB', 'B'},
+    ],
+    activeTab: 'tabA'
+  }).ref('tabbedPane').append(
+    tabAContent
+  )
+  ```
+*/
+
 function TabbedPane() {
   Component.apply(this, arguments);
 }
@@ -11,8 +35,6 @@ function TabbedPane() {
 TabbedPane.Prototype = function() {
   this.render = function() {
     var el = $$('div').addClass('sc-tabbed-pane');
-
-    // Tabs
     var tabsEl = $$('div').addClass('se-tabs');
     each(this.props.tabs, function(tab) {
       var tabEl = $$('a')
@@ -32,7 +54,6 @@ TabbedPane.Prototype = function() {
     }, this);
     
     el.append(tabsEl);
-
     // Active content
     el.append(
       $$('div').addClass('se-tab-content').ref('tabContent').append(
