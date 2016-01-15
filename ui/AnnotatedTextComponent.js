@@ -71,6 +71,9 @@ AnnotatedTextComponent.Prototype = function() {
       }
       var ComponentClass = componentRegistry.get(node.type) || AnnotationComponent;
       var el = $$(ComponentClass, { doc: doc, node: node });
+      if (node.constructor.static.isInline) {
+        el.attr('data-inline', '1');
+      }
       // adding refs here, enables preservative rerendering
       // TODO: while this solves problems with rerendering inline nodes
       // with external content, it decreases the overall performance too much.
