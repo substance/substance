@@ -40,10 +40,25 @@ function ScrollPane() {
 }
 
 ScrollPane.Prototype = function() {
+  this.didMount = function() {
+    // HACK: Scrollbar should use DOMMutationObserver instead
+    if (this.refs.scrollbar) {
+      this.context.doc.connect(this, {
+        'document:changed': this.onDocumentChange
+      }, -1);      
+    }
+  };
+
   this.dispose = function() {
     if (this.props.highlights) {
       this.props.highlights.disconnect(this);
     }
+    this.context.doc.disconnect(this);
+  };
+
+  // HACK: Scrollbar should use DOMMutationObserver instead
+  this.onDocumentChange = function() {
+      this.refs.scrollbar.updatePositions();
   };
 
   this.onHighlightsUpdated = function(highlights) {    
