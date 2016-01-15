@@ -141,7 +141,7 @@ Surface.Prototype = function() {
   this.getCommand = function(commandName) {
     return this.commandRegistry.get(commandName);
   };
-  
+
   this.getTextTypes = function() {
     return this.textTypes || [];
   };
@@ -487,6 +487,11 @@ Surface.Prototype = function() {
       var sel = this.getSelection();
       if (sel.isPropertySelection()) {
         this._selectProperty(sel.path);
+        event.preventDefault();
+        event.stopPropagation();
+        return;
+      } else if (sel.isContainerSelection()) {
+        this._selectProperty(sel.startPath);
         event.preventDefault();
         event.stopPropagation();
         return;

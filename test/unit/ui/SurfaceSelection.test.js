@@ -80,15 +80,15 @@ var wrappedTextNodesWithExternals = [
 
 var surfaceWithParagraphs = [
   '<div id="surface" class="surface">',
-    '<div id="p1">',
+    '<p id="p1">',
       '<span data-path="p1.content">AA</span>',
-    '</div>',
-    '<div id="p2">',
+    '</p>',
+    '<p id="p2">',
       '<span data-path="p2.content">BBB</span>',
-    '</div>',
-    '<div id="p3">',
-      '<span data-path="p.content">CCCC</span>',
-    '</div>',
+    '</p>',
+    '<p id="p3">',
+      '<span data-path="p3.content">CCCC</span>',
+    '</p>',
   '</div>'
 ].join('');
 
@@ -248,4 +248,21 @@ QUnit.firefoxTest("Issue #354: Wrong selection in FF when double clicking betwee
   assert.ok(sel.isPropertySelection(), "Selection should be property selection.");
   assert.deepEqual(sel.path, ['p1', 'content'], 'Path should be extracted correctly.');
   assert.deepEqual([sel.startOffset, sel.endOffset], [0, 2], 'Offsets should be extracted correctly.');
+});
+
+QUnit.uiTest("Issue #376: Wrong selection mapping at end of paragraph", function(assert) {
+  var el = $('#qunit-fixture').html(surfaceWithParagraphs)[0];
+  var surfaceSelection = new SurfaceSelection(el, new StubDoc());
+  var p1span = el.querySelector('#p1 span');
+  var p2 = el.querySelector('#p2');
+  var anchorNode = p1span;
+  var anchorOffset = 1;
+  var focusNode = p2;
+  var focusOffset = 0;
+  surfaceSelection._pullState(anchorNode, anchorOffset, focusNode, focusOffset, false);
+  var sel = surfaceSelection.state;
+  assert.deepEqual(sel.start.path, ['p1', 'content'], 'startPath');
+  assert.deepEqual(sel.start.offset, 2, 'startOffset');
+  assert.deepEqual(sel.end.path, ['p2', 'content'], 'endPath');
+  assert.deepEqual(sel.end.offset, 0, 'endOffset');
 });

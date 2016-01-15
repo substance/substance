@@ -277,28 +277,6 @@ SurfaceSelection.Prototype = function() {
           endCol: col2
         });
       } else {
-        // HACK: in some cases we get a range starting at the
-        // end of a property and reaching to the beginning of
-        // the next node.
-        // While this makes sense on the model side -- e.g. to merge paragraphs via backspace --
-        // we don't want the map this from the DOM selection
-        // as the browser does not give a visual glue, plus
-        // produces a similar situation in many cases when double clicking
-        // debugger;
-        var first = doc.get(range.start.path);
-        if (range.end.offset === 0 &&
-            first && first.length === range.start.offset) {
-          var container = doc.get(this.container.id);
-          var nextPath = container.getNextPath(range.start.path);
-          if (isEqual(nextPath, range.end.path)) {
-            return doc.createSelection({
-              type: 'property',
-              path: range.start.path,
-              startOffset: range.start.offset,
-              endOffset: range.start.offset
-            });
-          }
-        }
         return doc.createSelection({
           type: 'container',
           containerId: this.container.id,
