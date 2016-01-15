@@ -7,7 +7,17 @@ var updateAnnotations = require('./updateAnnotations');
   Inserts text at the given selection.
 
   @param {Object} args object with `selection`, `text`
-  @return {Object} with updated `selection`
+  @return {Object} object with updated `selection`
+
+  @example
+
+  
+  ```js
+  insertText(tx, {
+    selection: bodyEditor.getSelection(),
+    text: 'Guten Tag'
+  });
+  ```
 */
 
 var insertText = function(tx, args) {

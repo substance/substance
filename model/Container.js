@@ -15,19 +15,23 @@ var DocumentAddress = require('./DocumentAddress');
   or spanning annotations or so called ContainerAnnotations.
   A Container provides a bridge between those two worlds: nodes and properties.
 
-  @class
-  @prop {Array<id>} nodes
+  @prop {String[]} nodes
 
   @example
 
   A figure node might consist of a title, an image, and a caption.
   As the image is not editable via conventional editing, we can say, the figure consists of
-  two editable properties 'title' and 'caption'.
+  two editable properties `title` and `caption`.
 
   In our data model we can describe selections by a start coordinate and an end
   coordinate, such as
-       start: { path: ['paragraph_1', 'content'],   offset: 10 } },
-       end:   { path: ['figure_10',   'caption'],   offset: 5  } }
+
+  ```js
+  {
+    start: { path: ['paragraph_1', 'content'],   offset: 10 } },
+    end:   { path: ['figure_10',   'caption'],   offset: 5  } }
+  }
+  ```
 
   I.e. such a selection starts in a component of a paragraph, and ends in the caption of a figure.
   If you want to use that selection for deleting, you need to derive somehow what exactly

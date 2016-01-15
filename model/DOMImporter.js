@@ -242,9 +242,8 @@ DOMImporter.Prototype = function DOMImporterPrototype() {
   // };
 
   /**
-    Convert annotated text.
-
-    You should call this method only for elements containing rich-text.
+    Convert annotated text. You should call this method only for elements
+    containing rich-text.
 
     @param {ui/DOMElement} el
     @param {String[]} path The target property where the extracted text (plus annotations) should be stored.

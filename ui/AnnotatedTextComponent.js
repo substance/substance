@@ -6,7 +6,7 @@ var Fragmenter = require('../model/Fragmenter');
 var AnnotationComponent = require('./AnnotationComponent');
 
 /**
-  Renders an anotated text. Used internally by ui/TextPropertyComponent
+  Renders an anotated text. Used internally by {@link ui/TextPropertyComponent}.
 
   @class
   @component

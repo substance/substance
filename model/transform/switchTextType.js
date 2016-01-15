@@ -9,7 +9,20 @@ var deleteNode = require('./deleteNode');
   Switch text type for a given node. E.g. from `paragraph` to `heading`.
 
   @param {Object} args object with `selection`, `containerId` and `data` with new node data
-  @return {Object} with updated `selection`
+  @return {Object} object with updated `selection`
+
+  @example
+  
+  ```js
+  switchTextType(tx, {
+    selection: bodyEditor.getSelection(),
+    containerId: bodyEditor.getContainerId(),
+    data: {
+      type: 'heading',
+      level: 2
+    }
+  });
+  ```
 */
 
 function switchTextType(tx, args) {

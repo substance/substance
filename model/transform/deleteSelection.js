@@ -1,5 +1,7 @@
 'use strict';
 
+/* jshint latedef:false */
+
 var extend = require('lodash/object/extend');
 var last = require('lodash/array/last');
 var uuid = require('../../util/uuid');
@@ -8,13 +10,19 @@ var deleteNode = require('./deleteNode');
 var merge = require('./merge');
 var updateAnnotations = require('./updateAnnotations');
 
-/* jshint latedef:false */
-
 /**
   Deletes a given selection.
 
   @param {Object} args object with `selection`
   @return {Object} with updated `selection`
+
+  @example
+  
+  ```js
+  deleteSelection(tx, {
+    selection: bodyEditor.getSelection(),
+  });
+  ```
 */
 
 function deleteSelection(tx, args) {

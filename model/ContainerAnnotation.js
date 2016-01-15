@@ -39,7 +39,7 @@ ContainerAnnotation.Prototype = function() {
   /**
     Get the plain text spanned by this annotation.
 
-    @returns {String}
+    @return {String}
   */
   this.getText = function() {
     var doc = this.getDocument();
@@ -53,7 +53,7 @@ ContainerAnnotation.Prototype = function() {
   /**
     Provides a selection which has the same range as this annotation.
 
-    @returns {model/ContainerSelection}
+    @return {model/ContainerSelection}
   */
   this.getSelection = function() {
     var doc = this.getDocument();
