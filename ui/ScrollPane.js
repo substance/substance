@@ -12,22 +12,46 @@ var $$ = Component.$$;
   @class ScrollPane
   @component
 
-  @prop {String} scrollbarType 'native' or 'substance' for a more advanced visual scrollbar. Defaults to 'native'.
-  @prop {String} [scrollbarPosition] 'left' or 'right' only relevant when scrollBarType: 'substance'. Defaults to 'right'.
+  @prop {String} scrollbarType 'native' or 'substance' for a more advanced visual scrollbar. Defaults to 'native'
+  @prop {String} [scrollbarPosition] 'left' or 'right' only relevant when scrollBarType: 'substance'. Defaults to 'right'
+  @prop {ui/Highlights} [highlights] object that maintains highlights and can be manipulated from different sources
+  @prop {ui/TOC} [toc] object that maintains table of content entries
 
+  @example
+  
   ```js
   $$(ScrollPane, {
     scrollbarType: 'substance', // defaults to native
     scrollbarPosition: 'left', // defaults to right
-    onScroll: this.onScroll.bind(this)
-  }
+    onScroll: this.onScroll.bind(this),
+    highlights: this.contentHighlights,
+    toc: this.toc
+  })
   ```
  */
 function ScrollPane() {
   Component.apply(this, arguments);
+
+  if (this.props.highlights) {
+    this.props.highlights.connect(this, {
+      'highlights:updated': this.onHighlightsUpdated
+    });
+  }
 }
 
 ScrollPane.Prototype = function() {
+  this.dispose = function() {
+    if (this.props.highlights) {
+      this.props.highlights.disconnect(this);
+    }
+  };
+
+  this.onHighlightsUpdated = function(highlights) {    
+    this.refs.scrollbar.extendProps({
+      highlights: highlights
+    });
+  };
+
   this.render = function() {
     var el = $$('div')
       .addClass('sc-scroll-pane');
@@ -68,14 +92,18 @@ ScrollPane.Prototype = function() {
 
   this.onScroll = function() {
     if (this.props.onScroll) {
-      this.props.onScroll(this.getScrollPosition());
+      this.props.onScroll(this.getScrollPosition(), this.refs.scrollable);
+    }
+
+    // Update TOC if provided
+    if (this.props.toc) {
+      this.context.toc.markActiveEntry(this);
     }
   };
 
   /**
     Returns the height of scrollPane (inner content overflows)
   */
-
   this.getHeight = function() {
     var scrollableEl = this.getScrollableElement();
     return $(scrollableEl).height();

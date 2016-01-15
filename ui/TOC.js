@@ -4,6 +4,18 @@ var _ = require('../util/helpers');
 var EventEmitter = require('../util/EventEmitter');
 var $ = require('../util/jquery');
 
+/**
+  Manages a table of content for a container. Default implementation considers
+  all headings as TOC entries. You can extend this implementation and override
+  `computeEntries`. Instantiate this class on controller level and pass it to relevant components
+  (such as {@link ui/TOCPanel} and {@link ui/ScrollPane}).
+
+  @class TOC
+  @component
+
+  @prop {Controller} 
+ */
+
 function TOC(controller) {
   EventEmitter.apply(this, arguments);
   this.controller = controller;
