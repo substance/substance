@@ -141,9 +141,9 @@ Surface.Prototype = function() {
   this.getCommand = function(commandName) {
     return this.commandRegistry.get(commandName);
   };
-
+  
   this.getTextTypes = function() {
-    return this.textTypes;
+    return this.textTypes || [];
   };
 
   this.executeCommand = function(commandName, args) {

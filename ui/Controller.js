@@ -463,6 +463,10 @@ Controller.Prototype = function() {
   };
 
   this._onSelectionChanged = function(sel, surface) {
+    // HACK: make sure focusedSurface is up to date as soon as
+    // possible because some listeners rely on it.
+    this.focusedSurface = surface;
+
     this.emit('selection:changed', sel, surface);
     this.onSelectionChanged(sel, surface);
   };
