@@ -89,7 +89,7 @@ SurfaceSelection.Prototype = function() {
       // as described in #273, when clicking near to an inline node
       // the provided node can be inside the inline node
       // we then continue with the inline node itself and a changed offset
-      if (current.dataset && current.dataset.external) {
+      if (current.dataset && current.dataset.inline) {
         node = current;
         offset = (offset > 0) ? 1 : 0;
       }
@@ -127,10 +127,10 @@ SurfaceSelection.Prototype = function() {
       if (node.nodeType === window.Node.TEXT_NODE) {
         charPos += node.textContent.length;
       } else if (node.nodeType === window.Node.ELEMENT_NODE) {
-        // external nodes have a length of 1
+        // inline nodes have a length of 1
         // they are attached to an invisible character
         // but may have a custom rendering
-        if ($(node).data('external')) {
+        if (node.dataset && node.dataset.inline) {
           charPos += 1;
           return false;
         }
@@ -144,13 +144,13 @@ SurfaceSelection.Prototype = function() {
     }
     // count characters recursively
     // by sum up the length of all TextNodes
-    // and counting external nodes by 1.
+    // and counting inline nodes by 1.
     function _countCharacters(el) {
       var type = el.nodeType;
       if (type === window.Node.TEXT_NODE) {
         return el.textContent.length;
       } else if (type === window.Node.ELEMENT_NODE) {
-        if ($(el).data('external')) {
+        if (el.dataset && el.dataset.inline) {
           return 1;
         } else {
           var count = 0;
@@ -165,8 +165,7 @@ SurfaceSelection.Prototype = function() {
 
     var found = false;
 
-    // HACK: edge case which occurs when the last element
-    // is not content-editable (i.e., external)
+    // HACK: edge case which occurs when the last element is not content-editable
     // then the anchor node is the property element itself
     if (endNode === propertyEl) {
       var child = propertyEl.firstChild;
@@ -321,13 +320,15 @@ SurfaceSelection.Prototype = function() {
     if (wSel.rangeCount === 0) {
       return Selection.nullSelection;
     }
+    var sel;
     // HACK: special treatment for edge cases as addressed by #354.
     // Sometimes anchorNode and focusNodes are the surface
     if ($(wSel.anchorNode).is('.surface')) {
       var wRange = wSel.getRangeAt(0);
-      return this._getSelectionFromRange(wRange);
+      sel = this._getSelectionFromRange(wRange);
+    } else {
+      sel = this._getSelection(wSel.anchorNode, wSel.anchorOffset, wSel.focusNode, wSel.focusOffset, wSel.collapsed);
     }
-    var sel = this._getSelection(wSel.anchorNode, wSel.anchorOffset, wSel.focusNode, wSel.focusOffset, wSel.collapsed);
     // console.log('### selection', sel.toString());
     return sel;
   };
@@ -382,7 +383,7 @@ SurfaceSelection.Prototype = function() {
         };
       }
     } else if (element.nodeType === document.ELEMENT_NODE) {
-      if ($(element).data('external')) {
+      if (element.dataset && element.dataset.inline) {
         return {
           node: null,
           offset: offset-1
