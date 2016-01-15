@@ -6,15 +6,19 @@ var $$ = Component.$$;
 var each = require('lodash/collection/each');
 
 /**
-  A rich scrollbar implementation that supports highlights.
+  A rich scrollbar implementation that supports highlights.   Usually
+  instantiated by {@link ScrollPane}, so you will likely not create it
+  yourself.
 
   @class Scrollbar
   @component
+  @private
 
   @prop {ui/ScrollPane} scrollPane scroll pane the scrollbar operates on
   @prop {object} highlights hightlights grouped by scope
 
   @example
+
   ```js
   $$(Scrollbar, {
     scrollPane: this,
@@ -22,19 +26,6 @@ var each = require('lodash/collection/each');
       'bib-items': ['bib-item-citation-1', 'bib-item-citation-2']
     }
   }).ref('scrollbar')
-  ```
-
-  Usually
-  instantiated by {@link ScrollPane}, so you will likely not create it
-  yourself. However, it's likely that you want to update the highlights
-  in the scrollbar, which works like this:
-
-  ```js
-  this.scrollbar.extendState({
-    highlights: {
-      'figures': ['figure-1', 'figure-citation-1']
-    }
-  });
   ```
 */
 
@@ -177,12 +168,6 @@ Scrollbar.Prototype = function() {
     $(window).off('mousemove', this.onMouseMove);
     $(window).off('mouseup', this.onMouseUp);
   };
-
-  // Handle Scroll
-  // -----------------
-  //
-  // Handle scroll event
-  // .thumb element
 
   this.onMouseMove = function(e) {
     if (this._mouseDown) {
