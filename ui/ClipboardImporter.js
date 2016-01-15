@@ -6,6 +6,7 @@ var isArray = require('lodash/lang/isArray');
 var extend = require('lodash/object/extend');
 var HTMLImporter = require('../model/HTMLImporter');
 var DefaultDOMElement = require('./DefaultDOMElement');
+var JSONConverter = require('../model/JSONConverter');
 
 // Note: sharing the symbol with the transformation
 var CLIPBOARD_CONTAINER_ID = require('../model/transform/copySelection').CLIPBOARD_CONTAINER_ID;
@@ -55,7 +56,25 @@ ClipboardImporter.Prototype = function() {
     Parses HTML and applies some sanitization/normalization.
   */
   this.importDocument = function(html) {
-    var body;
+    var body, el;
+
+    // when copying from a substance editor we store JSON in a meta tag
+    // Then we parse the
+    // If the import fails e.g. because the schema is incompatible
+    // we fall back to plain HTML import
+    if (html.search(/meta name=.substance./)>=0) {
+      el = DefaultDOMElement.parseHTML(html);
+      var substanceData = el.find('head meta[name="substance"]');
+      if (substanceData) {
+        var jsonStr = substanceData.attr('content');
+        try {
+          return this.importFromJSON(jsonStr);
+        } catch(err) {
+          console.error(err);
+        }
+      }
+    }
+
     if (this._isWindows) {
       // Under windows we can exploit <!--StartFragment--> and <!--EndFragment-->
       // to have an easier life
@@ -64,7 +83,8 @@ ClipboardImporter.Prototype = function() {
         html = match[1];
       }
     }
-    var el = DefaultDOMElement.parseHTML(html);
+
+    el = DefaultDOMElement.parseHTML(html);
     if (isArray(el)) {
       body = this._createElement('body');
       body.append(el);
@@ -99,6 +119,14 @@ ClipboardImporter.Prototype = function() {
     }
     return body;
   }
+
+  this.importFromJSON = function(jsonStr) {
+    var doc = this.createDocument();
+    var jsonData = JSON.parse(jsonStr);
+    var converter = new JSONConverter();
+    converter.importDocument(doc, jsonData);
+    return doc;
+  };
 
   /**
     Converts all children of a given body element.

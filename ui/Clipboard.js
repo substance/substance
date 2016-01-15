@@ -1,7 +1,6 @@
 "use strict";
 
 var oo = require('../util/oo');
-var JSONConverter = require('../model/JSONConverter');
 var documentHelpers = require('../model/documentHelpers');
 var ClipboardImporter = require('./ClipboardImporter');
 var ClipboardExporter = require('./ClipboardExporter');
@@ -135,12 +134,7 @@ Clipboard.Prototype = function() {
     substanceGlobals.clipboardData = clipboardData;
     if (event.clipboardData && clipboardData.doc) {
       event.preventDefault();
-      // convert the copied document to json
-      var converter = new JSONConverter();
-      var json = converter.exportDocument(clipboardData.doc);
-      json.__id__ = clipboardData.doc.__id__;
-      // store as json, plain text, and html
-      event.clipboardData.setData('application/substance', JSON.stringify(json));
+      // store as plain text and html
       event.clipboardData.setData('text/plain', clipboardData.text);
       event.clipboardData.setData('text/html', clipboardData.html);
     }
@@ -172,51 +166,36 @@ Clipboard.Prototype = function() {
   // Works on Safari/Chrome/FF
   this.onPaste = function(event) {
     var clipboardData = event.clipboardData;
-    var surface = this.getSurface();
 
     var types = {};
     for (var i = 0; i < clipboardData.types.length; i++) {
       types[clipboardData.types[i]] = true;
     }
+    // console.log('onPaste(): received content types', types);
 
     event.preventDefault();
     event.stopPropagation();
 
     var plainText;
     var html;
-    var json;
     if (types['text/plain']) {
       plainText = clipboardData.getData('text/plain');
     }
     if (types['text/html']) {
       html = clipboardData.getData('text/html');
     }
-    if (types['application/substance']) {
-      json = clipboardData.getData('application/substance');
-    }
 
     // FOR DEBUGGING
     substanceGlobals.clipboardData = {
       text: plainText,
-      html: html,
-      json: json
+      html: html
     };
 
     // WORKAROUND: FF does not provide HTML coming in from other applications
     // so fall back to the paste shim
-    if (this.isFF && !json && !html) {
+    if (this.isFF && !html) {
       this._pastePlainText(plainText);
       return;
-    }
-
-    // use internal data if available
-    if (json) {
-      json = JSON.parse(json);
-      var schema = surface.getDocument().getSchema();
-      // only paste via JSON if the schema is correct
-      if (json.schema.name === schema.name && json.schema.version === schema.version) {
-        return this._pasteSubstanceData(json, plainText);
-      }
     }
 
     // if we have content given as HTML we let the importer assess the quality first
@@ -273,8 +252,7 @@ Clipboard.Prototype = function() {
       // FOR DEBUGGING
       substanceGlobals.clipboardData = {
         text: text,
-        html: html,
-        json: null
+        html: html
       };
 
       return this._pasteHtml(html, el.textContent);
@@ -301,28 +279,6 @@ Clipboard.Prototype = function() {
       html: clipboardHtml,
       text: clipboardText
     };
-  };
-
-  /*
-    Pastes substance data to surface.
-
-    @param {Object} json substance document in json
-    @param {String} text plain text representation used as a fallback
-  */
-  this._pasteSubstanceData = function(json, text) {
-    var surface = this.getSurface();
-    if (!surface) return;
-    var doc = surface.getDocument();
-
-    var content = doc.newInstance();
-    var converter = new JSONConverter();
-    converter.importDocument(content, json);
-
-    surface.transaction(function(tx, args) {
-      args.text = text;
-      args.doc = content;
-      return surface.paste(tx, args);
-    });
   };
 
   /*
