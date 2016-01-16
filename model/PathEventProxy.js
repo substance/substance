@@ -94,7 +94,7 @@ NotifyByPathProxy.Prototype = function() {
       if (this._list[i].listener === listener) {
         var entry = this._list[i];
         this._list.splice(i, 1);
-        var key = entry.concat(['listeners']);
+        var key = entry.path.concat(['listeners']);
         var listeners = this.listeners.get(key);
         deleteFromArray(listeners, entry);
       }
