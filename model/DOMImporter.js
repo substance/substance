@@ -219,7 +219,7 @@ DOMImporter.Prototype = function DOMImporterPrototype() {
   this._nodeData = function(el, type) {
     return {
       type: type,
-      id: this.getIdForElement(el)
+      id: this.getIdForElement(el, type)
     };
   };
 
