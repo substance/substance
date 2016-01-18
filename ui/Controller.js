@@ -184,6 +184,7 @@ Controller.Prototype = function() {
     return {
       config: this.getConfig(),
       doc: this.props.doc,
+      documentSession: this.documentSession,
       controller: this,
       componentRegistry: this.componentRegistry,
       toolManager: this.toolManager,
