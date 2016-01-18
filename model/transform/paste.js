@@ -161,12 +161,7 @@ function _pasteDocument(tx, args) {
   var insertedNodes = [];
   for (var i = 0; i < nodeIds.length; i++) {
     var nodeId = nodeIds[i];
-    var node = pasteDoc.get(nodeId).toJSON();
-    // create a new id if the node exists already
-    if (tx.get(nodeId)) {
-      node.id = uuid(node.type);
-    }
-    node = tx.create(node);
+    var node = _copyNode(tx, pasteDoc.get(nodeId));
     container.show(node.id, insertPos++);
     insertedNodes.push(node);
 
@@ -197,6 +192,24 @@ function _pasteDocument(tx, args) {
   });
   args.selection = selection;
   return args;
+}
+
+function _copyNode(tx, pasteNode) {
+  var nodeId = pasteNode.id;
+  var data = pasteNode.toJSON();
+  // create a new id if the node exists already
+  if (tx.get(nodeId)) {
+    data.id = uuid(pasteNode.type);
+  }
+  if (pasteNode.hasChildren()) {
+    var children = pasteNode.getChildren();
+    var childrenIds = data[pasteNode.getChildrenProperty()];
+    for (var i = 0; i < children.length; i++) {
+      var childNode = _copyNode(tx, children[i]);
+      childrenIds[i] = childNode.id;
+    }
+  }
+  return tx.create(data);
 }
 
 module.exports = paste;

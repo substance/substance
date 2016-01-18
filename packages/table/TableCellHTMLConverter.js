@@ -12,7 +12,6 @@ module.exports = {
   },
 
   import: function(el, tableCell, converter) {
-    var id = converter.defaultId(el, 'heading');
     if (el.is('th')) {
       tableCell.cellType = "head";
     } else {
@@ -26,14 +25,16 @@ module.exports = {
     if (rowspan) {
       tableCell.rowspan = parseInt(rowspan, 10);
     }
-    tableCell.content = converter.annotatedText(el, [id, 'content']);
+    tableCell.content = converter.annotatedText(el, [tableCell.id, 'content']);
   },
 
   export: function(cell, el, converter) {
-    el.tagName = (cell.cellType==="head" ? "th" : "td");
+    var tagName = (cell.cellType==="head" ? "th" : "td");
+    el = el.withTagName(tagName);
     el.append(
       converter.annotatedText([cell.id, 'content'])
     );
+    return el;
   }
 
 };

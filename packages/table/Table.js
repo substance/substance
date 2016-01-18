@@ -1,5 +1,7 @@
 'use strict';
 
+var oo = require('../../util/oo');
+var extend = require('lodash/object/extend');
 var BlockNode = require('../../model/BlockNode');
 var ParentNodeMixin = require('../../model/ParentNodeMixin');
 var TableMatrix = require('./TableMatrix');
@@ -12,7 +14,9 @@ function Table() {
   this.matrix = null;
 }
 
-BlockNode.extend(Table, ParentNodeMixin, function Table() {
+Table.Prototype = function () {
+
+  extend(this, ParentNodeMixin);
 
   this.getChildrenProperty = function() {
     return 'sections';
@@ -71,7 +75,10 @@ BlockNode.extend(Table, ParentNodeMixin, function Table() {
       return row.join('\t');
     }).join('\n');
   };
-});
+
+};
+
+oo.inherit(Table, BlockNode);
 
 Table.static.name = "table";
 
@@ -113,10 +120,11 @@ Table.fromTSV = function(tx, tsv, sep) {
     var row = tx.create(rowData);
     sectionData.rows.push(row.id);
   }
+  var section = tx.create(sectionData);
   return tx.create({
     type: 'table',
     id: tableId,
-    sections: [sectionData.id]
+    sections: [section.id]
   });
 };
 
