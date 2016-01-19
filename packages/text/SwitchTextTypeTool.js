@@ -14,7 +14,6 @@ var SurfaceTool = require('../../ui/SurfaceTool');
 
 function SwitchTextType() {
   SurfaceTool.apply(this, arguments);
-  this.context.toolManager.registerTool(this);
 }
 
 SwitchTextType.Prototype = function() {
