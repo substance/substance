@@ -116,41 +116,6 @@ function Controller() {
 
 Controller.Prototype = function() {
 
-  this.getInitialState = function() {
-    return {};
-  };
-
-  this.didMount = function() {
-    // TODO: usually we attach handlers during render
-    // this would mean that call child controllers
-    // would need to call super.render() or render the hanlder by themselves
-    // which would be the preferred way, to increase transparency
-    this.$el.on('keydown', this.handleApplicationKeyCombos.bind(this));
-  };
-
-  /**
-     Dispose component when component life ends. If you need to implement dispose
-     in your custom Controller class, don't forget the super call.
-  */
-  this.dispose = function() {
-    this.$el.off('keydown');
-    if (this.props.doc) {
-      this._dispose();
-    }
-  };
-
-  this._dispose = function() {
-    this.props.doc.disconnect(this);
-  };
-
-  this.willReceiveProps = function(newProps) {
-    if (this.props.doc && newProps.doc !== this.props.doc) {
-      this._dispose();
-      this.empty();
-      this._initialize(newProps);
-    }
-  };
-
   this._initialize = function(props) {
     var doc = props.doc;
 
@@ -165,14 +130,12 @@ Controller.Prototype = function() {
     });
   };
 
-  // Use static config if available, otherwise try to fetch it from props
-  this.getConfig = function() {
-    return this.constructor.static.config || this.props.config || {
-      controller: {
-        components: [],
-        commands: []
-      }
-    };
+  /**
+     Dispose component when component life ends. If you need to implement dispose
+     in your custom Controller class, don't forget the super call.
+  */
+  this.dispose = function() {
+    this.props.doc.disconnect(this);
   };
 
   /**
@@ -190,6 +153,42 @@ Controller.Prototype = function() {
       toolManager: this.toolManager,
       i18n: I18n.instance
     };
+  };
+
+  this.getInitialState = function() {
+    return {};
+  };
+
+  // Use static config if available, otherwise try to fetch it from props
+  this.getConfig = function() {
+    return this.constructor.static.config || this.props.config || {
+      controller: {
+        components: [],
+        commands: []
+      }
+    };
+  };
+
+  this.willReceiveProps = function(newProps) {
+    if (this.props.doc && newProps.doc !== this.props.doc) {
+      this._dispose();
+      this.empty();
+      this._initialize(newProps);
+    }
+  };
+
+  /**
+   * Render method of the controller component. This needs to be implemented by the
+   * custom Controller class.
+   *
+   * @abstract
+   * @return {ui/Component.VirtualNode} VirtualNode created using Component.$$
+   */
+  this.render = function() {
+    var $$ = Component.$$;
+    return $$('div')
+      .addClass('sc-controller')
+      .on('keydown', this.handleApplicationKeyCombos);
   };
 
   /**
@@ -543,17 +542,6 @@ Controller.Prototype = function() {
         logger.error('Document saving is not handled at the moment. Make sure onSave is passed in the props');
       }
     }
-  };
-
-  /**
-   * Render method of the controller component. This needs to be implemented by the
-   * custom Controller class.
-   *
-   * @abstract
-   * @return {ui/Component.VirtualNode} VirtualNode created using Component.$$
-   */
-  this.render = function() {
-    throw new Error('Controller.prototype.render is abstract. You need to define your own controller component');
   };
 };
 
