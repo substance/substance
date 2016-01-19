@@ -10,6 +10,10 @@ var Highlights = require('./Highlights');
 var TabbedPane = require('./TabbedPane');
 var SplitPane = require('./SplitPane');
 var StatusBar = require('./StatusBar');
+var Toolbar = require('./Toolbar');
+var ScrollPane = require('./ScrollPane');
+var ContainerEditor = require('./ContainerEditor');
+
 
 var I18n = require('./i18n');
 I18n.instance.load(require('../i18n/en'));
@@ -80,8 +84,40 @@ TwoPanelController.Prototype = function() {
       );
   };
 
+  this._renderToolbar = function() {
+    return $$(Toolbar).ref('toolbar');
+  };
+
   this._renderMainSection = function() {
-    throw new Error('This method is abstract.');
+    return $$('div').ref('main').addClass('se-main-section').append(
+      $$(SplitPane, {splitType: 'horizontal'}).append(
+        this._renderToolbar(),
+        // Content Panel below
+        $$(ScrollPane, {
+          scrollbarType: 'substance',
+          scrollbarPosition: 'left',
+          toc: this.toc,
+          highlights: this.contentHighlights
+        }).ref('contentPanel').append(
+          this._renderContentPanel()
+        )
+      ).ref('mainSectionSplitPane')
+    );
+  };
+
+  this._renderContentPanel = function() {
+    var config = this.getConfig();
+    var containerId = config.containerId;
+    var containerConfig = config[containerId];
+    // The full fledged document (ContainerEditor)
+    return $$("div").ref('main').addClass('document-content').append(
+      $$(ContainerEditor, {
+        name: 'main',
+        containerId: containerId,
+        commands: containerConfig.commands,
+        textTypes: containerConfig.textTypes
+      }).ref('mainEditor')
+    );
   };
 
   this._renderContextSection = function() {
@@ -90,7 +126,7 @@ TwoPanelController.Prototype = function() {
     var contextId = this.state.contextId;
     var panels = config.panels || {};
     var panelConfig = panels[this.state.contextId] || {};
-    var tabOrder = config.tabOrder;
+    var tabOrder = config.tabOrder || [];
     var PanelComponentClass = this.componentRegistry.get(contextId);
 
     var tabs = tabOrder.map(function(contextId) {
