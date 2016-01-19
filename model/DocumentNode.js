@@ -167,7 +167,7 @@ DocumentNode.Prototype = function() {
       if (match) {
         var propertyName = match[1];
         if (this.constructor.static.schema[propertyName]) {
-          this.getDocument().getEventProxy('path').add([this.id, propertyName], this, this._onPropertyChange.bind(this, propertyName));
+          this.getDocument().getEventProxy('path').connect([this.id, propertyName], this, this._onPropertyChange.bind(this, propertyName));
         }
       }
     }, this);
