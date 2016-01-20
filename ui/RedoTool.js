@@ -2,11 +2,12 @@
 
 var ControllerTool = require('./ControllerTool');
 
-var RedoTool = ControllerTool.extend({
-  static: {
-    name: 'redo',
-    command: 'redo'  
-  }
-});
+function RedoTool() {
+  RedoTool.super.apply(this, arguments);
+}
+
+ControllerTool.extend(RedoTool);
+RedoTool.static.name = 'redo';
+RedoTool.static.command = 'redo';
 
 module.exports = RedoTool;
