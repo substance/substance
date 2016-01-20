@@ -2,12 +2,13 @@
 
 var ControllerCommand = require('./ControllerCommand');
 
-var Save = ControllerCommand.extend({
-  static: {
-    name: 'save'
-  },
+function SaveCommand() {
+  SaveCommand.super.apply(this, arguments);
+}
 
-  getCommandState: function() {
+SaveCommand.Prototype = function() {
+
+  this.getCommandState = function() {
     var doc = this.getDocument();
     return {
       disabled: !doc.__dirty,
@@ -15,12 +16,16 @@ var Save = ControllerCommand.extend({
     };
   },
 
-  execute: function() {
+  this.execute = function() {
     this.getController().saveDocument();
     return {
       status: 'saving-process-started'
     };
-  }
-});
+  };
+};
 
-module.exports = Save;
+ControllerCommand.extend(SaveCommand);
+
+SaveCommand.static.name = 'save';
+
+module.exports = SaveCommand;

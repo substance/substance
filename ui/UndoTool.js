@@ -2,11 +2,12 @@
 
 var ControllerTool = require('./ControllerTool');
 
-var UndoTool = ControllerTool.extend({
-  static: {
-    name: 'undo',
-    command: 'undo'
-  }
-});
+function UndoTool() {
+  UndoTool.super.apply(this, arguments);
+}
+
+ControllerTool.extend(UndoTool);
+UndoTool.static.name = 'undo';
+UndoTool.static.command = 'undo';
 
 module.exports = UndoTool;
