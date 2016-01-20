@@ -15,6 +15,7 @@ var DOMElement = require('./DOMElement');
 var DefaultDOMElement = require('./DefaultDOMElement');
 var VirtualDOMElement = require('./VirtualDOMElement');
 var VirtualTextNode = VirtualDOMElement.VirtualTextNode;
+var DelegatedEvent = require('./DelegatedEvent');
 
 var __id__ = 0;
 var _htmlParams;
@@ -1219,9 +1220,18 @@ Component.Prototype = function ComponentPrototype() {
     handlerSpec.handler = handler;
     if (handlerSpec.selector) {
       var _handler = handler;
+      var self = this;
       handler = function(event) {
-        if ($(event.target).is(handlerSpec.selector)) {
-          _handler(event);
+        var el = event.target;
+        while(el) {
+          if ($(el).is(handlerSpec.selector)) {
+            _handler(new DelegatedEvent(self, el, event));
+            break;
+          }
+          if (el === nativeEl) {
+            break;
+          }
+          el = el.parentNode;
         }
       };
     }
