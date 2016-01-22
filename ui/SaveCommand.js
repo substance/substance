@@ -14,7 +14,7 @@ SaveCommand.Prototype = function() {
       disabled: !doc.__dirty,
       active: false
     };
-  },
+  };
 
   this.execute = function() {
     this.getController().saveDocument();
