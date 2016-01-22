@@ -115,11 +115,15 @@ DocumentSession.Prototype = function() {
       tx.after.selection = result.selection || sel;
       extend(info, tx.info);
     });
-    this.selection = change.after.selection;
-    this.isTransacting = false;
-    this._commit(change, info);
-    this.emit('selection:changed', this.selection, this);
-    return change;
+    if (change) {
+      this.selection = change.after.selection;
+      this.isTransacting = false;
+      this._commit(change, info);
+      this.emit('selection:changed', this.selection, this);
+      return change;
+    } else {
+      this.isTransacting = false;
+    }
   };
 
   this.onDocumentChange = function(change, info) {
