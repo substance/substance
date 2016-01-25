@@ -154,16 +154,16 @@ EventEmitter.Prototype = function() {
   this.emit = function (event) {
     if (event in this.__events__) {
       if (DEBUG) {
-        console.log("Emitting event %s on %s", event, this);
+        console.log("Emitting event %s (%d listeners) on", event, Object.keys(this.__events__[event]).length, this);
       }
       // Clone the list of bindings so that handlers can remove or add handlers during the call.
       var bindings = this.__events__[event].slice();
       var args = Array.prototype.slice.call(arguments, 1);
       for (var i = 0, len = bindings.length; i < len; i++) {
         var binding = bindings[i];
-        if (DEBUG) {
-          console.log("- triggering %s", binding.context.constructor.name);
-        }
+        // if (DEBUG) {
+        //   console.log("- triggering %s", binding.context.constructor.name);
+        // }
         binding.method.apply(binding.context, args);
       }
       return true;
