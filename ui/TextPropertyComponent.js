@@ -27,6 +27,8 @@ function TextPropertyComponent() {
 
 TextPropertyComponent.Prototype = function() {
 
+  var _super = Object.getPrototypeOf(this);
+
   this.initialize = function() {
     // Only register Property when inside a surface context
     if (this.getSurface()) {
@@ -35,6 +37,8 @@ TextPropertyComponent.Prototype = function() {
   };
 
   this.dispose = function() {
+    _super.dispose.call(this);
+
     // Only register Property when inside a surface context
     if (this.getSurface()) {
       this.getTextPropertyManager().unregisterProperty(this);
