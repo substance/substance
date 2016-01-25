@@ -335,7 +335,7 @@ Surface.Prototype = function() {
   };
 
   this.getDomNodeForId = function(nodeId) {
-    return this.getElement().querySelector('*[data-id='+nodeId+']');
+    return this.getElement().querySelector('*[data-id="'+nodeId+'"]');
   };
 
   this.getLogger = function() {
