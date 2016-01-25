@@ -78,9 +78,11 @@ AnnotatedTextComponent.Prototype = function() {
       // TODO: while this solves problems with rerendering inline nodes
       // with external content, it decreases the overall performance too much.
       // We should optimize the component first before we can enable this.
-      // el.ref(id + "@" + fragmentCounters[id]);
+      if (this.context.config && this.context.config.preservativeTextPropertyRendering) {
+        el.ref(id + "@" + fragmentCounters[id]);
+      }
       return el;
-    };
+    }.bind(this);
     fragmenter.onExit = function(fragment, context, parentContext) {
       parentContext.append(context);
     };
