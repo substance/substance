@@ -764,7 +764,7 @@ Surface.Prototype = function() {
     } else {
       var sel = this.getSelection();
       if (sel.isNull()) {
-        return null;
+        return {};
       } else {
         if (sel.isCollapsed()) {
           var cursorEl = this.el.querySelector('.se-cursor');
@@ -772,7 +772,7 @@ Surface.Prototype = function() {
             return cursorEl.getBoundingClientRect();
           } else {
             console.log('FIXME: there should be a rendered cursor element.');
-            return null;
+            return {};
           }
         } else {
           var selFragments = this.el.querySelectorAll('.se-selection-fragment');
