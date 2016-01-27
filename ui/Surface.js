@@ -736,6 +736,73 @@ Surface.Prototype = function() {
       endOffset: text.length
     }));
   };
+
+  // EXPERIMENTAL: get bounding box for current selection
+  this.getBoundingRectangleForSelection = function() {
+    var wsel = window.getSelection();
+    // having a DOM selection?
+    if (wsel.rangeCount > 0) {
+      var wrange = wsel.getRangeAt(0);
+      // unfortunately, collapsed selections to not have a boundary rectangle
+      // thus we need to insert a span temporarily and take its rectangle
+      if (wrange.collapsed) {
+        var span = document.createElement('span');
+        // Ensure span has dimensions and position by
+        // adding a zero-width space character
+        this.skipNextObservation = true;
+        span.appendChild(window.document.createTextNode("\u200b"));
+        wrange.insertNode(span);
+        var rect = span.getBoundingClientRect();
+        var spanParent = span.parentNode;
+        spanParent.removeChild(span);
+        // Glue any broken text nodes back together
+        spanParent.normalize();
+        return rect;
+      } else {
+        return wrange.getBoundingClientRect();
+      }
+    } else {
+      var sel = this.getSelection();
+      if (sel.isNull()) {
+        return null;
+      } else {
+        if (sel.isCollapsed()) {
+          var cursorEl = this.el.querySelector('.se-cursor');
+          if (cursorEl) {
+            return cursorEl.getBoundingClientRect();
+          } else {
+            console.log('FIXME: there should be a rendered cursor element.');
+            return null;
+          }
+        } else {
+          var selFragments = this.el.querySelectorAll('.se-selection-fragment');
+          if (selFragments.length > 0) {
+            var bottom = 0;
+            var top = 0;
+            var right = 0;
+            var left = 0;
+            selFragments.forEach(function(el) {
+              var rect = el.getBoundingClientRect();
+              bottom = Math.max(rect.bottom, bottom);
+              top = Math.min(rect.top, top);
+              left = Math.min(rect.left, left);
+              right = Math.max(rect.right, right);
+            });
+            var height = bottom - top;
+            var width = right -left;
+            return {
+              top: top, bottom: bottom,
+              left: left, right: right,
+              width: width, height: height
+            };
+          } else {
+            console.log('FIXME: there should be a rendered selection fragments element.');
+          }
+        }
+      }
+    }
+  };
+
 };
 
 Component.extend(Surface);
