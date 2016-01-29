@@ -1130,6 +1130,10 @@ Component.Prototype = function ComponentPrototype() {
         } else {
           console.warn('FIXME: owner is unknown.');
         }
+
+        if (!data._ref) {
+          console.error('data._ref is not a string');
+        }
         this._preserved[data._ref] = comp;
       }
       if (comp._isOnRoute) {
@@ -1381,6 +1385,9 @@ Component._render = function(data, scope) {
     // TODO: find a better way to enable preservative rendering. Checking Object.keys(this.refs)
     // is not the right way
     if (scope.parent) {
+      if (!data._ref) {
+        console.error('data._ref is not a string');
+      }
       scope.parent._preserved[data._ref] = component;
     }
   }
