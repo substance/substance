@@ -26,10 +26,14 @@ module.exports = {
   },
 
   export: function(section, el, converter) {
-    el.tagName = 't' + section.sectionType;
+    el = el.withTagName('t' + section.sectionType);
     each(section.getRows(), function(row) {
       el.append(converter.convertNode(row));
     });
+
+    // Reassigning el requires us to return el.
+    // Have a look at DOMExporter.convertNode()
+    return el;
   },
 
 };
