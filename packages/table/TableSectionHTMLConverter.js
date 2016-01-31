@@ -30,6 +30,10 @@ module.exports = {
     each(section.getRows(), function(row) {
       el.append(converter.convertNode(row));
     });
+
+    // Reassigning el requires us to return el.
+    // Have a look at DOMExporter.convertNode()
+    return el;
   },
 
 };
