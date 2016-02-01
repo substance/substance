@@ -224,7 +224,7 @@ Component.Prototype = function ComponentPrototype() {
     _pushOwner(this);
     var virtualEl = this.render();
     _popOwner();
-    this._render(virtualEl);
+    this._render(virtualEl, null, "force");
   };
 
   /**
@@ -923,7 +923,7 @@ Component.Prototype = function ComponentPrototype() {
     return $el;
   };
 
-  this._render = function(data, scope) {
+  this._render = function(data, scope, forced) {
     this.willRender();
 
     if (!data) {
@@ -976,7 +976,11 @@ Component.Prototype = function ComponentPrototype() {
     var newContent = data.children;
 
     // FIXME: this optimization is causing issue 311
-    if (isEqual(oldContent, newContent)) {
+    // This is not optimal, as this leads to unintuitive behavior
+    // when using non-primitive props, such as Node instances.
+    // Until we solve this properly we at least skip this optimization
+    // when calling this.rerender() (like React's forceUpdate())
+    if (!forced && isEqual(oldContent, newContent)) {
       this._data = data;
       return;
     }
