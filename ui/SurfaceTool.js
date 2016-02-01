@@ -24,10 +24,12 @@ var Tool = require('./Tool');
   ```
 */
 function SurfaceTool() {
-  Tool.apply(this, arguments);
+  SurfaceTool.super.apply(this, arguments);
 }
 
 SurfaceTool.Prototype = function() {
+
+  var _super = Object.getPrototypeOf(this);
 
   /**
     Get command associated with the tool, based on the focused surface
@@ -51,6 +53,8 @@ SurfaceTool.Prototype = function() {
     Custom tool implementation must do a super call.
   */
   this.dispose = function() {
+    _super.dispose.call(this);
+
     var ctrl = this.getController();
     ctrl.disconnect(this);
   };

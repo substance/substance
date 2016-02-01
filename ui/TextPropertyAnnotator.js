@@ -13,13 +13,13 @@ var $$ = Component.$$;
   @class
   @component
   @extends ui/Surface
-  
+
   @prop {String} name unique surface name
   @prop {String[]} path path to a text property
   @prop {ui/SurfaceCommand[]} commands array of command classes to be available
 
   @example
-  
+
   ```js
   $$(TextPropertyAnnotator, {
     name: 'abstract',
@@ -36,10 +36,6 @@ function TextPropertyAnnotator() {
 }
 
 TextPropertyAnnotator.Prototype = function() {
-
-  this.dispose = function() {
-    Surface.prototype.dispose.call(this);
-  };
 
   this.isContainerEditor = function() {
     return false;
@@ -59,4 +55,5 @@ TextPropertyAnnotator.Prototype = function() {
 };
 
 Surface.extend(TextPropertyAnnotator);
+
 module.exports = TextPropertyAnnotator;

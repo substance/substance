@@ -18,7 +18,8 @@ var $$ = Component.$$;
 */
 
 function Tool() {
-  Component.apply(this, arguments);
+  Tool.super.apply(this, arguments);
+
   this.context.toolManager.registerTool(this);
 }
 
