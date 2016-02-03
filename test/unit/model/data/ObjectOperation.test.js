@@ -1,8 +1,8 @@
 "use strict";
 
 require('../../qunit_extensions');
-var isEqual = require('lodash/lang/isEqual');
-var cloneDeep = require('lodash/lang/cloneDeep');
+var isEqual = require('lodash/isEqual');
+var cloneDeep = require('lodash/cloneDeep');
 
 var PathAdapter = require('../../../../util/PathAdapter');
 var ObjectOperation = require('../../../../model/data/ObjectOperation');

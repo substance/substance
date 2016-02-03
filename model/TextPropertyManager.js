@@ -1,10 +1,10 @@
 'use strict';
 
 var oo = require('../util/oo');
-var isString = require('lodash/lang/isString');
-var each = require('lodash/collection/each');
-var values = require('lodash/object/values');
-var extend = require('lodash/object/extend');
+var isString = require('lodash/isString');
+var each = require('lodash/each');
+var values = require('lodash/values');
+var extend = require('lodash/extend');
 var ContainerAnnotation = require('./ContainerAnnotation');
 var TextOperation = require('./data/TextOperation');
 
@@ -53,7 +53,7 @@ TextPropertyManager.Prototype = function() {
             each(anno.getFragments(), this._initializeFragment, this);
           }
         }
-      }, this);
+      }.bind(this));
     }
   };
 
@@ -78,7 +78,7 @@ TextPropertyManager.Prototype = function() {
           record.property.setFragments(values(record.fragments));
         }
       }
-    }, this);
+    }.bind(this));
     // console.log('Setting selection fragments', fragments);
     this.selectionFragments = fragments;
   };
@@ -97,7 +97,7 @@ TextPropertyManager.Prototype = function() {
           record.property.setFragments(values(record.fragments));
         }
       }
-    }, this);
+    }.bind(this));
     // console.log('Clearing selection fragments');
     this.selectionFragments = [];
   };

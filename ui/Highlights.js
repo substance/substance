@@ -1,8 +1,8 @@
 'use strict';
 
 var EventEmitter = require('../util/EventEmitter');
-var each = require('lodash/collection/each');
-var without = require('lodash/array/without');
+var each = require('lodash/each');
+var without = require('lodash/without');
 
 /**
   Manages highlights. Used by {@link ui/ScrollPane}.
@@ -12,7 +12,7 @@ var without = require('lodash/array/without');
   @param {model/Document} doc document instance
 
   @example
-  
+
   ```
   var contentHighlights = new Highlights(doc);
   ```
@@ -35,7 +35,7 @@ Highlights.Prototype = function() {
   this.get = function() {
     return this._highlights;
   };
-  
+
   /**
     Set highlights.
 

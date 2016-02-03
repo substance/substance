@@ -1,12 +1,12 @@
 /* jshint latedef: false */
 
-var isFunction = require('lodash/lang/isFunction');
-var isString = require('lodash/lang/isString');
-var isArray = require('lodash/lang/isArray');
-var cloneDeep = require('lodash/lang/cloneDeep');
-var extend = require('lodash/object/extend');
-var omit = require('lodash/object/omit');
-var without = require('lodash/array/without');
+var isFunction = require('lodash/isFunction');
+var isString = require('lodash/isString');
+var isArray = require('lodash/isArray');
+var cloneDeep = require('lodash/cloneDeep');
+var extend = require('lodash/extend');
+var omit = require('lodash/omit');
+var without = require('lodash/without');
 var DOMElement = require('./DOMElement');
 
 /**

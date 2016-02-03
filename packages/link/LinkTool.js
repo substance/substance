@@ -1,8 +1,8 @@
 'use strict';
 
-var extend = require('lodash/object/extend');
-var includes = require('lodash/collection/includes');
-var capitalize = require('lodash/string/capitalize');
+var extend = require('lodash/extend');
+var includes = require('lodash/includes');
+var capitalize = require('lodash/capitalize');
 var Component = require('../../ui/Component');
 var $$ = Component.$$;
 

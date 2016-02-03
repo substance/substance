@@ -1,6 +1,6 @@
 'use strict';
 
-var filter = require('lodash/collection/filter');
+var filter = require('lodash/filter');
 var AnnotationIndex = require('./AnnotationIndex');
 
 /**

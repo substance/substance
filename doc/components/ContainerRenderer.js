@@ -1,6 +1,6 @@
 'use strict';
 
-var each = require('lodash/collection/each');
+var each = require('lodash/each');
 var Component = require('../../ui/Component');
 var $$ = Component.$$;
 
@@ -25,7 +25,7 @@ ContainerRenderer.Prototype = function() {
     // node components
     each(containerNode.nodes, function(nodeId) {
       el.append(this._renderNode(nodeId));
-    }, this);
+    }.bind(this));
 
     return el;
   };

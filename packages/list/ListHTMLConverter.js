@@ -1,8 +1,8 @@
 'use strict';
 
-var each = require('lodash/collection/each');
-var isArray = require('lodash/lang/isArray');
-var last = require('lodash/array/last');
+var each = require('lodash/each');
+var isArray = require('lodash/isArray');
+var last = require('lodash/last');
 var DOMElement = require('../../ui/DefaultDOMElement');
 
 /*

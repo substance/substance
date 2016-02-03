@@ -1,9 +1,9 @@
 'use strict';
 
 var SurfaceCommand = require('../../ui/SurfaceCommand');
-var _isMatch = require('lodash/lang/isMatch');
-var _find = require('lodash/collection/find');
-var _clone = require('lodash/lang/clone');
+var _isMatch = require('lodash/isMatch');
+var _find = require('lodash/find');
+var _clone = require('lodash/clone');
 
 var SwitchTextType = function(surface) {
   SurfaceCommand.call(this, surface);

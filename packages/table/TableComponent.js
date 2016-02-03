@@ -1,6 +1,6 @@
 'use strict';
 
-var each = require('lodash/collection/each');
+var each = require('lodash/each');
 var $ = require('../../util/jquery');
 var Component = require('../../ui/Component');
 var TextProperty = require('../../ui/TextPropertyComponent');
@@ -73,11 +73,11 @@ TableComponent.Prototype = function() {
             path: [ cell.id, "content"]
           }));
           rowEl.append(cellEl);
-        }, this);
+        }.bind(this));
         secEl.append(rowEl);
-      }, this);
+      }.bind(this));
       content.push(secEl);
-    }, this);
+    }.bind(this));
     return content;
   };
 

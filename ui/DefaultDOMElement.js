@@ -2,11 +2,11 @@
 
 var oo = require('../util/oo');
 var $ = require('../util/jquery');
-var isString = require('lodash/lang/isString');
-var isArray = require('lodash/lang/isArray');
-var extend = require('lodash/object/extend');
-var each = require('lodash/collection/each');
-var map = require('lodash/collection/map');
+var isString = require('lodash/isString');
+var isArray = require('lodash/isArray');
+var extend = require('lodash/extend');
+var each = require('lodash/each');
+var map = require('lodash/map');
 var inBrowser = (typeof window !== 'undefined');
 var DOMElement = require('./DOMElement');
 

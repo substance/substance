@@ -2,8 +2,8 @@
 
 /* jshint latedef:false */
 
-var extend = require('lodash/object/extend');
-var last = require('lodash/array/last');
+var extend = require('lodash/extend');
+var last = require('lodash/last');
 var uuid = require('../../util/uuid');
 var deleteCharacter = require('./deleteCharacter');
 var deleteNode = require('./deleteNode');
@@ -17,7 +17,7 @@ var updateAnnotations = require('./updateAnnotations');
   @return {Object} with updated `selection`
 
   @example
-  
+
   ```js
   deleteSelection(tx, {
     selection: bodyEditor.getSelection(),

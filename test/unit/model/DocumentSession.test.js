@@ -2,7 +2,7 @@
 
 require('../qunit_extensions');
 var sinon = require('sinon');
-var extend = require('lodash/object/extend');
+var extend = require('lodash/extend');
 var DocumentSession = require('../../../model/DocumentSession');
 var simple = require('../../fixtures/simple');
 

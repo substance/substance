@@ -1,6 +1,6 @@
 'use strict';
 
-var each = require('lodash/collection/each');
+var each = require('lodash/each');
 
 /*
  * Delete a node and all annotations attached to it,

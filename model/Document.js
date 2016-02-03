@@ -1,6 +1,6 @@
 'use strict';
 
-var each = require('lodash/collection/each');
+var each = require('lodash/each');
 var DocumentIndex = require('./DocumentIndex');
 var AnnotationIndex = require('./AnnotationIndex');
 var AnchorIndex = require('./AnchorIndex');
@@ -418,11 +418,11 @@ Document.Prototype = function() {
     // clear all existing nodes (as they should be there in the seed)
     each(this.data.nodes, function(node) {
       this.delete(node.id);
-    }, this);
+    }.bind(this));
     // create nodes
     each(seed.nodes, function(nodeData) {
       this.create(nodeData);
-    }, this);
+    }.bind(this));
 
   };
 

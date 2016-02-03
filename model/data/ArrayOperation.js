@@ -1,8 +1,8 @@
 'use strict';
 
-var isNumber = require('lodash/lang/isNumber');
-var isEqual = require('lodash/lang/isEqual');
-var cloneDeep = require('lodash/lang/cloneDeep');
+var isNumber = require('lodash/isNumber');
+var isEqual = require('lodash/isEqual');
+var cloneDeep = require('lodash/cloneDeep');
 
 var Operation = require('./Operation');
 var Conflict = require('./Conflict');

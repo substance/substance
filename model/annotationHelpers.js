@@ -1,7 +1,7 @@
 "use strict";
 
-var each = require('lodash/collection/each');
-var uniq = require('lodash/array/uniq');
+var each = require('lodash/each');
+var uniq = require('lodash/uniq');
 var uuid = require('../util/uuid');
 
 // TODO: this should be implemented as transformations

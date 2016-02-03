@@ -1,5 +1,5 @@
 var TOC = require('../ui/TOC');
-var each = require('lodash/collection/each');
+var each = require('lodash/each');
 
 function DocumentationTOC() {
   TOC.apply(this, arguments);

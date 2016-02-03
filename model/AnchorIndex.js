@@ -1,7 +1,6 @@
 'use strict';
 
-var isArray = require('lodash/lang/isArray');
-var filter = require('lodash/collection/filter');
+var filter = require('lodash/filter');
 var PathAdapter = require('../util/PathAdapter');
 var ContainerAnnotation = require('./ContainerAnnotation');
 var DocumentIndex = require('./DocumentIndex');

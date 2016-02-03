@@ -1,7 +1,7 @@
 'use strict';
 
-var isString = require('lodash/lang/isString');
-var each = require('lodash/collection/each');
+var isString = require('lodash/isString');
+var each = require('lodash/each');
 var uuid = require('../util/uuid');
 var EditingBehavior = require('../model/EditingBehavior');
 var insertText = require('../model/transform/insertText');
@@ -91,7 +91,7 @@ ContainerEditor.Prototype = function() {
       // node components
       each(containerNode.nodes, function(nodeId) {
         el.append(this._renderNode(nodeId));
-      }, this);
+      }.bind(this));
     }
 
     return el;

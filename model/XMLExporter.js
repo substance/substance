@@ -2,11 +2,11 @@
 
 var DOMExporter = require('./DOMExporter');
 var DefaultDOMElement = require('../ui/DefaultDOMElement');
-var extend = require('lodash/object/extend');
-var each = require('lodash/collection/each');
-var isBoolean = require('lodash/lang/isBoolean');
-var isNumber = require('lodash/lang/isNumber');
-var isString = require('lodash/lang/isString');
+var extend = require('lodash/extend');
+var each = require('lodash/each');
+var isBoolean = require('lodash/isBoolean');
+var isNumber = require('lodash/isNumber');
+var isString = require('lodash/isString');
 
 /**
   @class
@@ -16,13 +16,13 @@ var isString = require('lodash/lang/isString');
   exchange format see {@link model/HTMLExporter}.
 
   @example
-  
+
   Below is a full example taken from [Lens](https://github.com/substance/lens/blob/master/model/LensArticleExporter.js).
 
   ```js
   var XMLExporter = require('substance/model/XMLExporter');
   var converters = require('./LensArticleImporter').converters;
-  var each = require('lodash/collection/each');
+  var each = require('lodash/each');
 
   function LensArticleExporter() {
     LensArticleExporter.super.call(this, {
@@ -47,7 +47,7 @@ var isString = require('lodash/lang/isString');
       each(bibItems, function(bibItem) {
         var bibItemEl = this.convertNode(bibItem);
         resourceEl.append(bibItemEl);
-      }, this);
+      }.bind(this));
       articleEl.append(resourceEl);
 
       // Export article body

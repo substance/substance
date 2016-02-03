@@ -1,9 +1,8 @@
 'use strict';
 
-var isString = require('lodash/lang/isString');
-var each = require('lodash/collection/each');
-var map = require('lodash/collection/map');
-var filter = require('lodash/collection/filter');
+var isString = require('lodash/isString');
+var map = require('lodash/map');
+var filter = require('lodash/filter');
 var PathAdapter = require('../util/PathAdapter');
 var PropertyAnnotation = require('./PropertyAnnotation');
 var DocumentIndex = require('./DocumentIndex');

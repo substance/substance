@@ -3,7 +3,7 @@
 require('../qunit_extensions');
 
 var sinon = require('sinon');
-var isEqual = require('lodash/lang/isEqual');
+var isEqual = require('lodash/isEqual');
 var Component = require('../../../ui/Component');
 var $$ = Component.$$;
 var $ = require('../../../util/jquery');

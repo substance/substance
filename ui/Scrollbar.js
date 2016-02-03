@@ -3,7 +3,7 @@
 var $ = require('../util/jquery');
 var Component = require('./Component');
 var $$ = Component.$$;
-var each = require('lodash/collection/each');
+var each = require('lodash/each');
 
 /**
   A rich scrollbar implementation that supports highlights.   Usually
@@ -68,7 +68,7 @@ Scrollbar.Prototype = function() {
     var el = $$('div')
       .addClass('sc-scrollbar')
       .on('mousedown', this.onMouseDown);
-    
+
     if (this.props.highlights) {
       var highlightEls = [];
 

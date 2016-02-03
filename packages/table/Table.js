@@ -1,7 +1,7 @@
 'use strict';
 
 var oo = require('../../util/oo');
-var extend = require('lodash/object/extend');
+var extend = require('lodash/extend');
 var BlockNode = require('../../model/BlockNode');
 var ParentNodeMixin = require('../../model/ParentNodeMixin');
 var TableMatrix = require('./TableMatrix');

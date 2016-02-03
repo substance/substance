@@ -1,8 +1,8 @@
 'use strict';
 
 var $ = require('../util/jquery');
-var isEqual = require('lodash/lang/isEqual');
-var each = require('lodash/collection/each');
+var isEqual = require('lodash/isEqual');
+var each = require('lodash/each');
 var platform = require('../util/platform');
 var Registry = require('../util/Registry');
 var copySelection = require('../model/transform/copySelection');
@@ -613,7 +613,7 @@ Surface.Prototype = function() {
     each(commands, function(CommandClass) {
       var cmd = new CommandClass(this);
       commandRegistry.add(CommandClass.static.name, cmd);
-    }, this);
+    }.bind(this));
     this.commandRegistry = commandRegistry;
   };
 
@@ -796,7 +796,7 @@ Surface.Prototype = function() {
       if (isEqual(path, _path)) {
         delete this._annotations[id];
       }
-    }, this);
+    }.bind(this));
   };
 
   this._getFragments = function(path) {

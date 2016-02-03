@@ -1,7 +1,7 @@
 'use strict';
 
-var isArray = require('lodash/lang/isArray');
-var isNumber = require('lodash/lang/isNumber');
+var isArray = require('lodash/isArray');
+var isNumber = require('lodash/isNumber');
 var isArrayEqual = require('../util/isArrayEqual');
 var oo = require('../util/oo');
 

@@ -1,7 +1,7 @@
 "use strict";
 
-var isEqual = require('lodash/lang/isEqual');
-var delay = require('lodash/function/delay');
+var isEqual = require('lodash/isEqual');
+var delay = require('lodash/delay');
 var oo = require('../util/oo');
 var ObjectOperation = require('./data/ObjectOperation');
 

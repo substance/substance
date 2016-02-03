@@ -1,8 +1,8 @@
 'use strict';
 
-var isString = require('lodash/lang/isString');
-var isArray = require('lodash/lang/isArray');
-var cloneDeep = require('lodash/lang/cloneDeep');
+var isString = require('lodash/isString');
+var isArray = require('lodash/isArray');
+var cloneDeep = require('lodash/cloneDeep');
 var Data = require('./Data');
 var ObjectOperation = require('./ObjectOperation');
 var ArrayOperation = require('./ArrayOperation');

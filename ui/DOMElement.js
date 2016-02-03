@@ -1,10 +1,10 @@
 'use strict';
 
 var oo = require('../util/oo');
-var isFunction = require('lodash/lang/isFunction');
-var isObject = require('lodash/lang/isObject');
-var isString = require('lodash/lang/isString');
-var each = require('lodash/collection/each');
+var isFunction = require('lodash/isFunction');
+var isObject = require('lodash/isObject');
+var isString = require('lodash/isString');
+var each = require('lodash/each');
 
 /**
   A unified interface for DOM elements used by Substance.
@@ -81,7 +81,7 @@ DOMElement.Prototype = function() {
       } else if (isObject(arguments[0])) {
         each(arguments[0], function(value, name) {
           this.setAttribute(name, value);
-        }, this);
+        }.bind(this));
       }
     } else if (arguments.length === 2) {
       this.setAttribute(arguments[0], arguments[1]);
@@ -301,7 +301,7 @@ DOMElement.Prototype = function() {
       } else if (isObject(arguments[0])) {
         each(arguments[0], function(value, name) {
           this.setStyle(name, value);
-        }, this);
+        }.bind(this));
       } else {
         throw new Error('Illegal arguments.');
       }

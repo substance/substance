@@ -1,8 +1,8 @@
 'use strict';
 
-var isString = require('lodash/lang/isString');
-var isEqual = require('lodash/lang/isEqual');
-var cloneDeep = require('lodash/lang/cloneDeep');
+var isString = require('lodash/isString');
+var isEqual = require('lodash/isEqual');
+var cloneDeep = require('lodash/cloneDeep');
 var PathAdapter = require('../../util/PathAdapter');
 var Operation = require('./Operation');
 var TextOperation = require('./TextOperation');

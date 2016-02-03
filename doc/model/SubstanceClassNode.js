@@ -1,7 +1,7 @@
 'use strict';
 
 var ClassNode = require('./ClassNode');
-var find = require('lodash/collection/find');
+var find = require('lodash/find');
 
 function SubstanceClassNode() {
   SubstanceClassNode.super.apply(this, arguments);

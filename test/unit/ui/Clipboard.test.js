@@ -2,8 +2,6 @@
 
 require('../qunit_extensions');
 
-var isArray = require('lodash/lang/isArray');
-var each = require('lodash/collection/each');
 var simple = require('../../fixtures/simple');
 var Clipboard = require('../../../ui/Clipboard');
 var DOMElement = require('../../../ui/DOMElement');

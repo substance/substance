@@ -1,8 +1,8 @@
 "use strict";
 
 var oo = require('../util/oo');
-var extend = require('lodash/object/extend');
-var each = require('lodash/collection/each');
+var extend = require('lodash/extend');
+var each = require('lodash/each');
 
 var ENTER = 1;
 var EXIT = -1;

@@ -3,12 +3,12 @@
 /* jshint latedef:nofunc */
 
 var $ = require('../util/jquery');
-var isFunction = require('lodash/lang/isFunction');
-var isString = require('lodash/lang/isString');
-var isFunction = require('lodash/lang/isFunction');
-var isEqual = require('lodash/lang/isEqual');
-var extend = require('lodash/object/extend');
-var each = require('lodash/collection/each');
+var isFunction = require('lodash/isFunction');
+var isString = require('lodash/isString');
+var isFunction = require('lodash/isFunction');
+var isEqual = require('lodash/isEqual');
+var extend = require('lodash/extend');
+var each = require('lodash/each');
 var I18n = require('./i18n');
 var EventEmitter = require('../util/EventEmitter');
 var DOMElement = require('./DOMElement');
@@ -372,7 +372,7 @@ Component.Prototype = function ComponentPrototype() {
   this.handleActions = function(actionHandlers) {
     each(actionHandlers, function(method, actionName) {
       this.handleAction(actionName, method);
-    }, this);
+    }.bind(this));
     return this;
   };
 
@@ -860,7 +860,7 @@ Component.Prototype = function ComponentPrototype() {
     // $.on
     each(data.handlers, function(handlerSpec, eventName) {
       this._bindHandler($el[0], data._owner, eventName, handlerSpec);
-    }, this);
+    }.bind(this));
     return $el;
   };
 
@@ -918,7 +918,7 @@ Component.Prototype = function ComponentPrototype() {
       });
       each(data.handlers, function(handlerSpec, eventName) {
         this._bindHandler(el, data._owner, eventName, handlerSpec);
-      }, this);
+      }.bind(this));
     // }
     return $el;
   };

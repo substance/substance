@@ -1,7 +1,7 @@
 /* jshint latedef: false */
 'use strict';
 
-var extend = require('lodash/object/extend');
+var extend = require('lodash/extend');
 var annotationHelpers = require('../annotationHelpers');
 
 var merge = function(tx, args) {

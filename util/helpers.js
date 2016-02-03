@@ -17,54 +17,54 @@ var deleteFromArray = require('./deleteFromArray');
  * See https://lodash.com/docs#isEqual
  * @method isEqual
  */
-Helpers.isEqual = require('lodash/lang/isEqual');
+Helpers.isEqual = require('lodash/isEqual');
 /*
  * See https://lodash.com/docs#isObject
  * @method isObject
  */
-Helpers.isObject = require('lodash/lang/isObject');
+Helpers.isObject = require('lodash/isObject');
 /*
  * See https://lodash.com/docs#isArray
  * @method isArray
  */
-Helpers.isArray = require('lodash/lang/isArray');
+Helpers.isArray = require('lodash/isArray');
 /*
  * See https://lodash.com/docs#isString
  * @method isString
  */
-Helpers.isString = require('lodash/lang/isString');
+Helpers.isString = require('lodash/isString');
 /*
  * See https://lodash.com/docs#isNumber
  * @method isNumber
  */
-Helpers.isNumber = require('lodash/lang/isNumber');
+Helpers.isNumber = require('lodash/isNumber');
 /*
  * See https://lodash.com/docs#isBoolean
  * @method isBoolean
  */
-Helpers.isBoolean = require('lodash/lang/isBoolean');
+Helpers.isBoolean = require('lodash/isBoolean');
 /*
  * See https://lodash.com/docs#isFunction
  * @method isFunction
  */
-Helpers.isFunction = require('lodash/lang/isFunction');
+Helpers.isFunction = require('lodash/isFunction');
 /*
  * See https://lodash.com/docs#cloneDeep
  * @method cloneDeep
  */
-Helpers.cloneDeep = require('lodash/lang/cloneDeep');
+Helpers.cloneDeep = require('lodash/cloneDeep');
 
 /*
  * See https://lodash.com/docs#clone
  * @method clone
  */
-Helpers.clone = require('lodash/lang/clone');
+Helpers.clone = require('lodash/clone');
 
 /*
  * See https://lodash.com/docs#isEmpty
  * @method isEmpty
  */
-Helpers.isEmpty = require('lodash/lang/isEmpty');
+Helpers.isEmpty = require('lodash/isEmpty');
 
 // Function helpers
 
@@ -72,17 +72,17 @@ Helpers.isEmpty = require('lodash/lang/isEmpty');
  * See https://lodash.com/docs#bind
  * @method bind
  */
-Helpers.bind = require('lodash/function/bind');
+Helpers.bind = require('lodash/bind');
 /*
  * See https://lodash.com/docs#delay
  * @method delay
  */
-Helpers.delay = require('lodash/function/delay');
+Helpers.delay = require('lodash/delay');
 /*
  * See https://lodash.com/docs#debounce
  * @method debounce
  */
-Helpers.debounce = require('lodash/function/debounce');
+Helpers.debounce = require('lodash/debounce');
 
 // Object helpers
 
@@ -90,17 +90,17 @@ Helpers.debounce = require('lodash/function/debounce');
  * See https://lodash.com/docs#extend
  * @method extend
  */
-Helpers.extend = require('lodash/object/extend');
+Helpers.extend = require('lodash/extend');
 /*
  * See https://lodash.com/docs#omit
  * @method omit
  */
-Helpers.omit = require('lodash/object/omit');
+Helpers.omit = require('lodash/omit');
 /*
  * See https://lodash.com/docs#values
  * @method values
  */
-Helpers.values = require('lodash/object/values');
+Helpers.values = require('lodash/values');
 
 // Array helpers
 
@@ -108,37 +108,36 @@ Helpers.values = require('lodash/object/values');
  * See https://lodash.com/docs#last
  * @method last
  */
-Helpers.last = require('lodash/array/last');
+Helpers.last = require('lodash/last');
 /*
- * See https://lodash.com/docs#first
- * @method first
+ * See https://lodash.com/docs#head
  */
-Helpers.first = require('lodash/array/first');
+Helpers.first = require('lodash/head');
 /*
  * See https://lodash.com/docs#compact
  * @method compact
  */
-Helpers.compact = require('lodash/array/compact');
+Helpers.compact = require('lodash/compact');
 /*
  * See https://lodash.com/docs#uniq
  * @method uniq
  */
-Helpers.uniq = require('lodash/array/uniq');
+Helpers.uniq = require('lodash/uniq');
 /*
  * See https://lodash.com/docs#intersection
  * @method intersection
  */
-Helpers.intersection = require('lodash/array/intersection');
+Helpers.intersection = require('lodash/intersection');
 /*
  * See https://lodash.com/docs#union
  * @method union
  */
-Helpers.union = require('lodash/array/union');
+Helpers.union = require('lodash/union');
 /*
  * See https://lodash.com/docs#without
  * @method without
  */
-Helpers.without = require('lodash/array/without');
+Helpers.without = require('lodash/without');
 
 // Collection helpers
 
@@ -146,42 +145,32 @@ Helpers.without = require('lodash/array/without');
  * See https://lodash.com/docs#each
  * @method each
  */
-Helpers.each = require('lodash/collection/forEach');
+Helpers.each = require('lodash/forEach');
 /*
  * See https://lodash.com/docs#filter
  * @method filter
  */
-Helpers.filter = require('lodash/collection/filter');
+Helpers.filter = require('lodash/filter');
 /*
  * See https://lodash.com/docs#includes
  * @method includes
  */
-Helpers.includes = require('lodash/collection/includes');
+Helpers.includes = require('lodash/includes');
 /*
  * See https://lodash.com/docs#find
  * @method find
  */
-Helpers.find = require('lodash/collection/find');
+Helpers.find = require('lodash/find');
 /*
  * See https://lodash.com/docs#map
  * @method map
  */
-Helpers.map = require('lodash/collection/map');
-/*
- * See https://lodash.com/docs#pluck
- * @method pluck
- */
-Helpers.pluck = require('lodash/collection/pluck');
-/*
- * See https://lodash.com/docs#indexBy
- * @method indexBy
- */
-Helpers.indexBy = require('lodash/collection/indexBy');
+Helpers.map = require('lodash/map');
 /*
  * See https://lodash.com/docs#sortBy
  * @method sortBy
  */
-Helpers.sortBy = require('lodash/collection/sortBy');
+Helpers.sortBy = require('lodash/sortBy');
 
 // String helpers
 
@@ -189,7 +178,7 @@ Helpers.sortBy = require('lodash/collection/sortBy');
  * See https://lodash.com/docs#capitalize
  * @method capitalize
  */
-Helpers.capitalize = require('lodash/string/capitalize');
+Helpers.capitalize = require('lodash/capitalize');
 
 /*
  * Check if two arrays are equal.

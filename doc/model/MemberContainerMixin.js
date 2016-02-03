@@ -1,7 +1,7 @@
 'use strict';
 
-var filter = require('lodash/collection/filter');
-var each = require('lodash/collection/each');
+var filter = require('lodash/filter');
+var each = require('lodash/each');
 
 var MemberContainerMixin = {
 

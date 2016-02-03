@@ -1,7 +1,7 @@
 'use strict';
 
 var oo = require('../util/oo');
-var each = require('lodash/collection/each');
+var each = require('lodash/each');
 var PathAdapter = require('../util/PathAdapter');
 var deleteFromArray = require('../util/deleteFromArray');
 

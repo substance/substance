@@ -1,6 +1,6 @@
 'use strict';
 
-var isEqual = require('lodash/lang/isEqual');
+var isEqual = require('lodash/isEqual');
 var $ = require('../util/jquery');
 var oo = require('../util/oo');
 var Document = require('../model/Document');

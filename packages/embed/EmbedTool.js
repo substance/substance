@@ -1,7 +1,7 @@
 'use strict';
 
-var extend = require('lodash/object/extend');
-var capitalize = require('lodash/string/capitalize');
+var extend = require('lodash/extend');
+var capitalize = require('lodash/capitalize');
 var SurfaceTool = require('../../ui/SurfaceTool');
 var Component = require('../../ui/Component');
 var $$ = Component.$$;

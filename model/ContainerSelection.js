@@ -1,7 +1,7 @@
 'use strict';
 
-var isNumber = require('lodash/lang/isNumber');
-var map = require('lodash/collection/map');
+var isNumber = require('lodash/isNumber');
+var map = require('lodash/map');
 var PropertySelection = require('./PropertySelection');
 var Selection = require('./Selection');
 var Range = require('./Range');

@@ -1,9 +1,9 @@
 'use strict';
 
-var isString = require('lodash/lang/isString');
-var isArray = require('lodash/lang/isArray');
-var cloneDeep = require('lodash/lang/cloneDeep');
-var each = require('lodash/collection/each');
+var isArray = require('lodash/isArray');
+var isString = require('lodash/isString');
+var each = require('lodash/each');
+var cloneDeep = require('lodash/cloneDeep');
 var PathAdapter = require('../../util/PathAdapter');
 var EventEmitter = require('../../util/EventEmitter');
 

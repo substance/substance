@@ -1,7 +1,7 @@
 'use strict';
 
-var isString = require('lodash/lang/isString');
-var isNumber = require('lodash/lang/isNumber');
+var isString = require('lodash/isString');
+var isNumber = require('lodash/isNumber');
 var Operation = require('./Operation');
 var Conflict = require('./Conflict');
 

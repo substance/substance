@@ -1,9 +1,9 @@
 'use strict';
 
 var oo = require('../../util/oo');
-var isArray = require('lodash/lang/isArray');
-var each = require('lodash/collection/each');
-var extend = require('lodash/object/extend');
+var isArray = require('lodash/isArray');
+var each = require('lodash/each');
+var extend = require('lodash/extend');
 var PathAdapter = require('../../util/PathAdapter');
 
 /**

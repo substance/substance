@@ -1,6 +1,6 @@
 'use strict';
 
-var each = require('lodash/collection/each');
+var each = require('lodash/each');
 var Component = require('../../ui/Component');
 var $$ = Component.$$;
 var SurfaceTool = require('../../ui/SurfaceTool');
@@ -70,7 +70,7 @@ SwitchTextType.Prototype = function() {
           .append(this.i18n.t(textType.name))
           .on('click', this.handleClick);
       options.append(button);
-    }, this);
+    }.bind(this));
 
     el.append(options);
     return el;

@@ -1,10 +1,10 @@
 'use strict';
 
 var _ = require('../util/helpers');
-var extend = require('lodash/object/extend');
+var extend = require('lodash/extend');
 var Controller = require('../ui/Controller');
 var Router = require('../ui/Router');
-var omit = require('lodash/object/omit');
+var omit = require('lodash/omit');
 var DocumentationTOC = require('./DocumentationTOC');
 
 // Substance is i18n ready, but by now we did not need it

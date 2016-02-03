@@ -1,6 +1,6 @@
 "use strict";
 
-var extend = require('lodash/object/extend');
+var extend = require('lodash/extend');
 var oo = require('../util/oo');
 var EventEmitter = require('../util/EventEmitter');
 var TransactionDocument = require('./TransactionDocument');

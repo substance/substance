@@ -1,6 +1,6 @@
 'use strict';
 
-var _ = require('../util/helpers');
+var each = require('lodash/each');
 var Component = require('./Component');
 var ToolManager = require('./ToolManager');
 var Registry = require('../util/Registry');
@@ -201,7 +201,7 @@ Controller.Prototype = function() {
 
   this._initializeComponentRegistry = function(components) {
     var componentRegistry = new Registry();
-    _.each(components, function(ComponentClass, name) {
+    each(components, function(ComponentClass, name) {
       componentRegistry.add(name, ComponentClass);
     });
     this.componentRegistry = componentRegistry;
@@ -209,10 +209,10 @@ Controller.Prototype = function() {
 
   this._initializeCommandRegistry = function(commands) {
     var commandRegistry = new Registry();
-    _.each(commands, function(CommandClass) {
+    each(commands, function(CommandClass) {
       var cmd = new CommandClass(this);
       commandRegistry.add(CommandClass.static.name, cmd);
-    }, this);
+    }.bind(this));
     this.commandRegistry = commandRegistry;
   };
 

@@ -2,9 +2,9 @@
 
 'use strict';
 
-var isEqual = require('lodash/lang/isEqual');
-var cloneDeep = require('lodash/lang/cloneDeep');
-var each = require('lodash/collection/each');
+var isEqual = require('lodash/isEqual');
+var cloneDeep = require('lodash/cloneDeep');
+var each = require('lodash/each');
 var annotationHelpers = require('../annotationHelpers');
 
 var CLIPBOARD_CONTAINER_ID = "clipboard_content";

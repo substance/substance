@@ -1,7 +1,7 @@
 'use strict';
 
 var oo = require("./oo");
-var each = require('lodash/collection/each');
+var each = require('lodash/each');
 
 var DEBUG = false;
 
@@ -245,7 +245,7 @@ EventEmitter.Prototype = function() {
     console.log('### EventEmitter: ', this);
     each(this.__events__, function(handlers, name) {
       console.log("- %s listeners for %s: ", handlers.length, name, handlers);
-    }, this);
+    }.bind(this));
   };
 };
 

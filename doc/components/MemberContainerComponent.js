@@ -1,6 +1,6 @@
 'use strict';
 
-var each = require('lodash/collection/each');
+var each = require('lodash/each');
 var Component = require('../../ui/Component');
 var $$ = Component.$$;
 var UnsupportedNode = require('../../ui/UnsupportedNode');

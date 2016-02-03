@@ -1,9 +1,9 @@
 'use strict';
 
-var isEqual = require('lodash/lang/isEqual');
-var isObject = require('lodash/lang/isObject');
-var isArray = require('lodash/lang/isArray');
-var map = require('lodash/collection/map');
+var isEqual = require('lodash/isEqual');
+var isObject = require('lodash/isObject');
+var isArray = require('lodash/isArray');
+var map = require('lodash/map');
 var oo = require('../util/oo');
 var uuid = require('../util/uuid');
 var PathAdapter = require('../util/PathAdapter');

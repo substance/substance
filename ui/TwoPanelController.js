@@ -1,7 +1,7 @@
 'use strict';
 
-var extend = require('lodash/object/extend');
-var omit = require('lodash/object/omit');
+var extend = require('lodash/extend');
+var omit = require('lodash/omit');
 var Controller = require("./Controller");
 var Component = require('./Component');
 var $$ = Component.$$;

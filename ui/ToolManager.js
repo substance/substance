@@ -3,7 +3,7 @@
 var oo = require('../util/oo');
 var ControllerTool = require('./ControllerTool');
 var SurfaceTool = require('./SurfaceTool');
-var without = require('lodash/array/without');
+var without = require('lodash/without');
 
 var DEFAULT_TOOLSTATE = {
   disabled: true,

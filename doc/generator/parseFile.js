@@ -2,8 +2,8 @@
 var oo = require('../../util/oo');
 var fs = require('fs');
 var path = require('path');
-var each = require('lodash/collection/each');
-var extend = require('lodash/object/extend');
+var each = require('lodash/each');
+var extend = require('lodash/extend');
 var dox = require('dox');
 var markdown = require('./markdownConverter');
 dox.setMarkdownConverter(markdown);
@@ -109,7 +109,7 @@ _Parser.Prototype = function() {
           return;
         }
       }
-    }, this);
+    }.bind(this));
 
     if (exported.length === 0 && mainEntity) {
       exported.push(mainEntity);
@@ -154,7 +154,7 @@ _Parser.Prototype = function() {
         console.error('FIXME: convert to node', entity.ctx);
         return;
       }
-    }, this);
+    }.bind(this));
 
     return nodes;
   };
@@ -248,7 +248,7 @@ _Parser.Prototype = function() {
           refinedTags.push({ type: tag.type, value: tag.string });
         }
       }
-    }, this);
+    }.bind(this));
 
     entity.tags = refinedTags;
 

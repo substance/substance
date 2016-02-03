@@ -51,7 +51,7 @@ ContainerAnnotator.Prototype = function() {
     // node components
     _.each(containerNode.nodes, function(nodeId) {
       el.append(this._renderNode(nodeId));
-    }, this);
+    }.bind(this));
 
     return el;
   };

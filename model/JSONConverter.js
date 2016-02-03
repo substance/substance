@@ -1,8 +1,8 @@
 'use strict';
 
 var oo = require('../util/oo');
-var isArray = require('lodash/lang/isArray');
-var each = require('lodash/collection/each');
+var isArray = require('lodash/isArray');
+var each = require('lodash/each');
 
 function JSONConverter() {}
 
