@@ -1,8 +1,8 @@
 'use strict';
 
-var _ = require('../util/helpers');
-var Surface = require('./Surface');
-var TextPropertyManager = require('../model/TextPropertyManager');
+var isString = require('lodash/lang/isString');
+var each = require('lodash/collection/each');
+var uuid = require('../util/uuid');
 var EditingBehavior = require('../model/EditingBehavior');
 var insertText = require('../model/transform/insertText');
 var copySelection = require('../model/transform/copySelection');
@@ -11,8 +11,7 @@ var breakNode = require('../model/transform/breakNode');
 var insertNode = require('../model/transform/insertNode');
 var switchTextType = require('../model/transform/switchTextType');
 var paste = require('../model/transform/paste');
-var uuid = require('../util/uuid');
-var ContainerNodeMixin = require('./ContainerNodeMixin');
+var Surface = require('./Surface');
 var Component = require('./Component');
 var $$ = Component.$$;
 
@@ -50,53 +49,22 @@ var $$ = Component.$$;
 
 function ContainerEditor() {
   Surface.apply(this, arguments);
-  if (!_.isString(this.props.containerId)) throw new Error("Illegal argument: Expecting containerId.");
 
+  this.containerId = this.props.containerId;
+  if (!isString(this.props.containerId)) {
+    throw new Error("Illegal argument: Expecting containerId.");
+  }
   var doc = this.getDocument();
-
+  this.container = doc.get(this.containerId);
+  if (!this.container) {
+    throw new Error('Container with id ' + this.containerId + ' does not exist.');
+  }
   this.editingBehavior = new EditingBehavior();
-  this.textPropertyManager = new TextPropertyManager(doc, this.props.containerId);
-
-  doc.connect(this, {
-    'document:changed': this.onDocumentChange
-  });
 }
 
 ContainerEditor.Prototype = function() {
 
-  // Create a first text element
-  this.onCreateText = function() {
-    var newSel;
-    this.transaction(function(tx) {
-      var container = tx.get(this.props.containerId);
-      var textType = tx.getSchema().getDefaultTextType();
-      var node = tx.create({
-        id: uuid(textType),
-        type: textType,
-        content: ''
-      });
-      container.show(node.id);
-
-      newSel = tx.createSelection({
-        type: 'property',
-        path: [ node.id, 'content'],
-        startOffset: 0,
-        endOffset: 0
-      });
-    }.bind(this));
-    this.rerender();
-    this.setSelection(newSel);
-  };
-
-  this.isEmpty = function() {
-    var doc = this.getDocument();
-    var containerNode = doc.get(this.props.containerId);
-    return (containerNode && containerNode.nodes.length === 0);
-  };
-
-  this.shouldEnableSurface = function() {
-    return !this.isEmpty();
-  };
+  var _super = Object.getPrototypeOf(this);
 
   this.render = function() {
     var el = Surface.prototype.render.call(this);
@@ -107,22 +75,21 @@ ContainerEditor.Prototype = function() {
     if (!containerNode) {
       console.warn('No container node found for ', this.props.containerId);
     }
-    var isEmpty = this.isEmpty();
-
+    var isEditable = this.isEditable();
     el.addClass('sc-container-editor container-node ' + containerId)
       .attr({
         spellCheck: false,
         "data-id": containerId,
-        "contenteditable": !isEmpty
+        "contenteditable": isEditable
       });
 
-    if (isEmpty) {
+    if (this.isEmpty()) {
       el.append(
         $$('a').attr('href', '#').append('Start writing').on('click', this.onCreateText)
       );
     } else {
       // node components
-      _.each(containerNode.nodes, function(nodeId) {
+      each(containerNode.nodes, function(nodeId) {
         el.append(this._renderNode(nodeId));
       }, this);
     }
@@ -130,32 +97,7 @@ ContainerEditor.Prototype = function() {
     return el;
   };
 
-  this.onDocumentChange = function(change) {
-    if (change.isAffected([this.props.containerId, 'nodes'])) {
-      for (var i = 0; i < change.ops.length; i++) {
-        var op = change.ops[i];
-        if (op.type === "update" && op.path[0] === this.props.containerId) {
-          var diff = op.diff;
-          if (diff.type === "insert") {
-            this._insertNodeAt(diff.getOffset(), diff.getValue());
-          } else if (diff.type === "delete") {
-            this._removeNodeAt(diff.getOffset());
-          }
-        }
-      }
-    }
-  };
-
-  /**
-    Register custom editor behavior using this method
-  */
-  this.extendBehavior = function(extension) {
-    extension.register(this.editingBehavior);
-  };
-
   // Used by Clipboard
-  // TODO: maybe rather check against the class type so we don't need this
-  // rather dumb method
   this.isContainerEditor = function() {
     return true;
   };
@@ -171,6 +113,53 @@ ContainerEditor.Prototype = function() {
   this.getContainer = function() {
     return this.getDocument().get(this.getContainerId());
   };
+
+  this.isEmpty = function() {
+    var doc = this.getDocument();
+    var containerNode = doc.get(this.props.containerId);
+    return (containerNode && containerNode.nodes.length === 0);
+  };
+
+  this.isEditable = function() {
+    return _super.isEditable.call(this) && !this.isEmpty();
+  };
+
+  /*
+    Register custom editor behavior using this method
+  */
+  this.extendBehavior = function(extension) {
+    extension.register(this.editingBehavior);
+  };
+
+  this.getTextTypes = function() {
+    return this.textTypes || [];
+  };
+
+  // Used by TextTool
+  // TODO: Filter by enabled commands for this Surface
+  this.getTextCommands = function() {
+    var textCommands = {};
+    this.commandRegistry.each(function(cmd) {
+      if (cmd.constructor.static.textTypeName) {
+        textCommands[cmd.constructor.static.name] = cmd;
+      }
+    });
+    return textCommands;
+  };
+
+  this.enable = function() {
+    // As opposed to a ContainerEditor, a regular Surface
+    // is not a ContentEditable -- but every contained TextProperty
+    this.attr('contentEditable', true);
+    this.enabled = true;
+  };
+
+  this.disable = function() {
+    this.removeAttr('contentEditable');
+    this.enabled = false;
+  };
+
+  /* Editing behavior */
 
   /**
     Performs a {@link model/transform/deleteSelection} transformation
@@ -267,21 +256,57 @@ ContainerEditor.Prototype = function() {
     return result.doc;
   };
 
+  this.onDocumentChange = function(change) {
+    // first update the container
+    if (change.isAffected([this.props.containerId, 'nodes'])) {
+      for (var i = 0; i < change.ops.length; i++) {
+        var op = change.ops[i];
+        if (op.type === "update" && op.path[0] === this.props.containerId) {
+          var diff = op.diff;
+          if (diff.type === "insert") {
+            var comp = this._renderNode(diff.getValue());
+            this.insertAt(diff.getOffset(), comp);
+          } else if (diff.type === "delete") {
+            this.removeAt(diff.getOffset());
+          }
+        }
+      }
+    }
+    // do other stuff such as rerendering text properties
+    _super.onDocumentChange.call(this, change);
+  };
+
+  // Create a first text element
+  this.onCreateText = function() {
+    var newSel;
+    this.transaction(function(tx) {
+      var container = tx.get(this.props.containerId);
+      var textType = tx.getSchema().getDefaultTextType();
+      var node = tx.create({
+        id: uuid(textType),
+        type: textType,
+        content: ''
+      });
+      container.show(node.id);
+
+      newSel = tx.createSelection({
+        type: 'property',
+        path: [ node.id, 'content'],
+        startOffset: 0,
+        endOffset: 0
+      });
+    }.bind(this));
+    this.rerender();
+    this.setSelection(newSel);
+  };
+
   this._prepareArgs = function(args) {
     args.containerId = this.getContainerId();
     args.editingBehavior = this.editingBehavior;
   };
 
-  this._insertNodeAt = function(pos, nodeId) {
-    var comp = this._renderNode(nodeId);
-    this.insertAt(pos, comp);
-  };
-
-  this._removeNodeAt = function(pos) {
-    this.removeAt(pos);
-  };
 };
 
-Surface.extend(ContainerEditor, ContainerNodeMixin);
+Surface.extend(ContainerEditor);
 
 module.exports = ContainerEditor;

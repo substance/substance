@@ -66,6 +66,9 @@ TextPropertyManager.Prototype = function() {
       this.removeSelection();
       return;
     }
+    if (this.hasSelection()) {
+      this.removeSelection();
+    }
     var fragments = sel.getFragments();
     each(fragments, function(frag) {
       var record = this.records[frag.path];

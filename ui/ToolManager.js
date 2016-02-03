@@ -23,14 +23,11 @@ function ToolManager(controller) {
   this.controller = controller;
   this.tools = [];
 
-  var doc = this.controller.getDocument();
-
-  doc.connect(this, {
-    "document:changed": this.updateTools
-  }, { priority: -2 });
-
+  var docSession = this.controller.getDocumentSession();
+  docSession.connect(this, {
+    'selection:changed': this.updateTools
+  });
   this.controller.connect(this, {
-    'selection:changed': this.updateTools,
     'document:saved': this.updateTools
   });
 }
@@ -38,9 +35,9 @@ function ToolManager(controller) {
 ToolManager.Prototype = function() {
 
   this.dispose = function() {
-    var doc = this.controller.getDocument();
+    var docSession = this.controller.getDocumentSession();
     this.controller.disconnect(this);
-    doc.disconnect(this);
+    docSession.disconnect(this);
   };
 
   this.getCommandState = function(tool) {
@@ -75,6 +72,7 @@ ToolManager.Prototype = function() {
 
   // Just updates all tool states
   this.updateTools = function() {
+    // console.log('Updating tools');
     this.tools.forEach(function(tool) {
       var state = this.getCommandState(tool);
       tool.setState(state);

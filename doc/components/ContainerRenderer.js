@@ -1,22 +1,20 @@
 'use strict';
 
-var _ = require('../../util/helpers');
+var each = require('lodash/collection/each');
 var Component = require('../../ui/Component');
-var ContainerNodeMixin = require('../../ui/ContainerNodeMixin');
 var $$ = Component.$$;
 
 function ContainerRenderer() {
   Component.apply(this, arguments);
+
+  this.doc = this.context.doc;
+  this.componentRegistry = this.context.componentRegistry;
 }
 
 ContainerRenderer.Prototype = function() {
 
-  _.extend(this, ContainerNodeMixin.prototype);
-
   this.render = function() {
-    var doc = this.context.doc;
-    var containerNode = doc.get(this.props.containerId);
-
+    var containerNode = this.doc.get(this.props.containerId);
     var el = $$("div")
       .addClass('sc-container-renderer ')
       .attr({
@@ -24,17 +22,30 @@ ContainerRenderer.Prototype = function() {
         "data-id": containerNode.id,
         "contenteditable": false
       });
-
     // node components
-    _.each(containerNode.nodes, function(nodeId) {
+    each(containerNode.nodes, function(nodeId) {
       el.append(this._renderNode(nodeId));
     }, this);
 
     return el;
   };
 
+  this._renderNode = function(nodeId) {
+    var node = this.doc.get(nodeId);
+    var ComponentClass = this.componentRegistry.get(node.type);
+    if (!ComponentClass) {
+      console.error('Could not resolve a component for type: ' + node.type);
+      return $$('div');
+    } else {
+      return $$(ComponentClass, {
+        doc: this.doc,
+        node: node
+      });
+    }
+  };
+
 };
 
-Component.extend(ContainerRenderer, ContainerNodeMixin);
+Component.extend(ContainerRenderer);
 
 module.exports = ContainerRenderer;

@@ -5,7 +5,6 @@ var oo = require('../util/oo');
 var Range = function(start, end) {
   this.start = start;
   this.end = end;
-  Object.freeze(this);
 };
 
 Range.Prototype = function() {

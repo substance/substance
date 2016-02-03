@@ -17,7 +17,12 @@ SwitchTextType.Prototype = function() {
 
   // Available text types on the surface
   this.getTextTypes = function() {
-    return this.getSurface().getTextTypes();
+    var surface = this.getSurface();
+    if (surface.isContainerEditor()) {
+      return surface.getTextTypes();
+    } else {
+      return [];
+    }
   };
 
   this.getTextType = function(textTypeName) {
@@ -32,11 +37,9 @@ SwitchTextType.Prototype = function() {
   this.getCurrentTextType = function(node) {
     var textTypes = this.getTextTypes();
     var currentTextType;
-
     textTypes.forEach(function(textType) {
       var nodeProps = _clone(textType.data);
       delete nodeProps.type;
-
       if (_isMatch(node, nodeProps) && node.type === textType.data.type) {
         currentTextType = textType;
       }
@@ -64,15 +67,11 @@ SwitchTextType.Prototype = function() {
       var doc = this.getDocument();
       var path = sel.getPath();
       var node = doc.get(path[0]);
-
       // There are cases where path points to an already deleted node,
       // so we need to guard node
       if (node) {
         if (node.isText() && node.isBlock()) {
           newState.currentTextType = this.getCurrentTextType(node);
-          if (!newState.currentTextType) {
-            newState.disabled = true;
-          }
         }
         if (!newState.currentTextType) {
           // We 'abuse' the currentTextType field by providing a property
@@ -82,7 +81,6 @@ SwitchTextType.Prototype = function() {
           newState.disabled = true;
         }
       }
-
     }
     return newState;
   };

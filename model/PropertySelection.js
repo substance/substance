@@ -52,8 +52,10 @@ function PropertySelection(properties) {
     new Coordinate(path, endOffset)
   );
   this.reverse = properties.reverse;
+
+  this.surfaceId = properties.surfaceId;
+
   this._internal = {};
-  Object.freeze(this);
 }
 
 PropertySelection.Prototype = function() {
@@ -69,7 +71,8 @@ PropertySelection.Prototype = function() {
       path: this.path,
       startOffset: this.startOffset,
       endOffset: this.endOffset,
-      reverse: this.reverse
+      reverse: this.reverse,
+      surfaceId: this.surfaceId
     };
   };
 

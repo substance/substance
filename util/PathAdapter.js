@@ -77,13 +77,12 @@ PathAdapter.Prototype = function() {
   /**
    * Get value at path
    *
-   * @return {object} The root object
-   * @method getRoot
-   * @memberof module:Basics.PathAdapter.prototype
+   * @return {object} The value stored for a given path
+   *
    * @example
    *
-   * pathAdapter.get(['b', 'b1']);
-   * // => b1Val
+   * obj.get(['b', 'b1']);
+   * => b1Val
    */
   this.get = function(path) {
     if (isString(path)) {
@@ -211,6 +210,10 @@ PathAdapter.Arrays.Prototype = function() {
         this._traverse(root[id], childPath, fn, ctx);
       }
     }
+  };
+
+  this.forEach = function(fn) {
+    return this._traverse(this.getRoot(), [], fn);
   };
 
 };

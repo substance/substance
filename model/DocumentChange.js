@@ -1,5 +1,6 @@
 'use strict';
 
+var isEqual = require('lodash/lang/isEqual');
 var isObject = require('lodash/lang/isObject');
 var isArray = require('lodash/lang/isArray');
 var map = require('lodash/collection/map');
@@ -237,6 +238,49 @@ DocumentChange.transform = function(A, B) {
       ObjectOperation.transform(b_op, a_op, {inplace: true});
     }
   }
+};
+
+
+function _transformCoordinate(coor, op) {
+  if (!isEqual(op.path, coor.path)) return false;
+  var hasChanged = false;
+  if (op.type === 'update' && op.propertyType === 'string') {
+    var diff = op.diff;
+    var newOffset;
+    if (diff.isInsert() && diff.pos <= coor.offset) {
+      newOffset = coor.offset + diff.str.length;
+      console.log('Transforming coordinate after inserting %s chars:', diff.str.length, coor.toString(), '->', newOffset);
+      coor.offset = newOffset;
+      hasChanged = true;
+    } else if (diff.isDelete() && diff.pos <= coor.offset) {
+      newOffset = Math.max(diff.pos, coor.offset - diff.str.length);
+      console.log('Transforming coordinate after deleting %s chars:', diff.str.length, coor.toString(), '->', newOffset);
+      coor.offset = newOffset;
+      hasChanged = true;
+    }
+  }
+  return hasChanged;
+}
+
+// PRELIMINARY
+// This needs a greater refactor, introducing Coordinates as built-in types
+// which are considered together with operation transformations
+DocumentChange.transformSelection = function(sel, A) {
+  if (!sel || (!sel.isPropertySelection() && !sel.isContainerSelection()) ) {
+    return false;
+  }
+  var ops = A.ops;
+  var hasChanged = false;
+  var isCollapsed = sel.isCollapsed();
+  ops.forEach(function(op) {
+    hasChanged |= _transformCoordinate(sel.start, op);
+    if (!isCollapsed) {
+      hasChanged |= _transformCoordinate(sel.end, op);
+    } else {
+      sel.range.end = sel.range.start;
+    }
+  });
+  return hasChanged;
 };
 
 module.exports = DocumentChange;

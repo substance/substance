@@ -29,25 +29,25 @@ TextPropertyComponent.Prototype = function() {
 
   var _super = Object.getPrototypeOf(this);
 
-  this.initialize = function() {
-    // Only register Property when inside a surface context
-    if (this.getSurface()) {
-      this.getTextPropertyManager().registerProperty(this);
+  this.didMount = function() {
+    var surface = this.getSurface();
+    if (surface) {
+      surface._registerTextProperty(this.props.path, this);
     }
   };
 
   this.dispose = function() {
     _super.dispose.call(this);
-
-    // Only register Property when inside a surface context
-    if (this.getSurface()) {
-      this.getTextPropertyManager().unregisterProperty(this);
+    var surface = this.getSurface();
+    if (surface) {
+      surface._unregisterTextProperty(this.props.path, this);
     }
   };
 
   this.getInitialState = function() {
+    var surface = this.getSurface();
     return {
-      fragments: this.getTextPropertyManager().getFragments(this.props.path)
+      fragments: surface._getFragments(this.props.path)
     };
   };
 
@@ -85,23 +85,6 @@ TextPropertyComponent.Prototype = function() {
   this.getSurface = function() {
     return this.context.surface;
   };
-
-  // TextPropertyManager API
-
-  this.setFragments = function(fragments) {
-    this.extendState({
-      fragments: fragments
-    });
-  };
-
-  this.update = function() {
-    this.rerender();
-  };
-
-  this.getTextPropertyManager = function() {
-    return this.getSurface().getTextPropertyManager();
-  };
-
 };
 
 AnnotatedTextComponent.extend(TextPropertyComponent);

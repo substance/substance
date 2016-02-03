@@ -28,7 +28,6 @@ function Coordinate(path, offset, after) {
   if (!Object.isFrozen(path)) {
     Object.freeze(path);
   }
-  Object.freeze(this);
 }
 
 Coordinate.Prototype = function() {
@@ -52,6 +51,18 @@ Coordinate.Prototype = function() {
 
   this.getOffset = function() {
     return this.offset;
+  };
+
+  this.toJSON = function() {
+    return {
+      path: this.path,
+      offset: this.offset,
+      after: this.after
+    };
+  };
+
+  this.toString = function() {
+    return "(" + this.path.join('.') + ", " + this.offset + ")";
   };
 
 };

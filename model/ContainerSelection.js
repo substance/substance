@@ -67,8 +67,10 @@ function ContainerSelection(properties) {
     new Coordinate(endPath, endOffset)
   );
   this.reverse = properties.reverse;
+
+  this.surfaceId = properties.surfaceId;
+
   this._internal = {};
-  Object.freeze(this);
 }
 
 ContainerSelection.Prototype = function() {
@@ -81,7 +83,8 @@ ContainerSelection.Prototype = function() {
       startOffset: this.startOffset,
       endPath: this.endPath,
       endOffset: this.endOffset,
-      reverse: this.reverse
+      reverse: this.reverse,
+      surfaceId: this.surfaceId
     };
   };
 
