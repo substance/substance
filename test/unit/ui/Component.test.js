@@ -8,8 +8,6 @@ var Component = require('../../../ui/Component');
 var $$ = Component.$$;
 var $ = require('../../../util/jquery');
 
-
-
 QUnit.uiModule('ui/Component');
 
 var TestComponent = Component.extend({

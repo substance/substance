@@ -364,14 +364,8 @@ Controller.Prototype = function() {
 
   /**
    * Called whenever a surface has been focused.
-   *
-   * @TODO Should this really be a public method?
    */
-  this.didFocus = function(surface) {
-    // if (this.focusedSurface && surface !== this.focusedSurface) {
-    //   this.focusedSurface.setFocused(false);
-    // }
-    // this.focusedSurface = surface;
+  this.didFocus = function() {
   };
 
   // For now just delegate to the current surface

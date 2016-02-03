@@ -841,7 +841,7 @@ Component.Prototype = function ComponentPrototype() {
     return index;
   };
 
-  this._createElement = function(data, scope) {
+  this._createElement = function(data) {
     var $el = $('<' + data.tagName + '>');
     // $.addClass
     $el.addClass(this._htmlParams.classNames);
@@ -864,7 +864,7 @@ Component.Prototype = function ComponentPrototype() {
     return $el;
   };
 
-  this._updateElement = function(data, oldData, scope) {
+  this._updateElement = function(data, oldData) {
     var $el = this.$el;
     var el = this.el;
 

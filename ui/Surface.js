@@ -800,6 +800,7 @@ Surface.Prototype = function() {
   };
 
   this._getFragments = function(path) {
+    /* jshint unused:false */
     return [];
   };
 

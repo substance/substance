@@ -16,7 +16,7 @@ var $ = require('../util/jquery');
   @class TOC
   @component
 
-  @prop {Controller} 
+  @prop {Controller}
  */
 
 function TOC(controller) {
@@ -29,7 +29,7 @@ function TOC(controller) {
   } else {
     this.activeEntry = null;
   }
-  
+
   var doc = this.getDocument();
   doc.connect(this, {
     'document:changed': this.handleDocumentChange
@@ -128,7 +128,7 @@ TOC.Prototype = function() {
     // $('.se-scanline').css({
     //   top: (scanline - scrollTop)+'px'
     // });
-  
+
     var tocNodes = this.computeEntries();
     if (tocNodes.length === 0) return;
 

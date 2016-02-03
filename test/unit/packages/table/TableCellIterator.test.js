@@ -1,7 +1,7 @@
 'use strict';
 
 require('../../qunit_extensions');
-var SampleArticle = require('../../../fixtures/sample1.js');
+var sample = require('../../../fixtures/sample1.js');
 var uuid = require('../../../../util/uuid');
 
 var TableCellIterator = require('../../../../packages/table/TableCellIterator');
@@ -9,7 +9,7 @@ var TableCellIterator = require('../../../../packages/table/TableCellIterator');
 QUnit.module('packages/table/TableCellIterator');
 
 QUnit.test('Iterator should return as many cells as were created', function (assert) {
-  var article = SampleArticle();
+  var article = sample();
 
   var newTableId = uuid('table');
   var newSectionId = uuid('table-section');
@@ -47,7 +47,7 @@ QUnit.test('Iterator should return as many cells as were created', function (ass
     rows: [newRow.id]
   });
 
-  var newTable  = article.create({
+  article.create({
     id: newTableId,
     type: 'table',
     sections: [newSection.id]
