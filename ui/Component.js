@@ -134,7 +134,6 @@ function Component(parent, virtualEl) {
     console.warn("Component.didInitialize() has been deprecated. Use Component.initialize() instead.");
     this.didInitialize(this.props, this.state);
   }
-
   this.initialize();
 }
 
@@ -1185,7 +1184,6 @@ Component.Prototype = function ComponentPrototype() {
     }
     this.children = children;
     this._data = data;
-
     this.didRender();
   };
 

@@ -26,8 +26,9 @@ var Command = require('./Command');
   SaveCommand.static.name = 'save';
   ```
 */
-var ControllerCommand = function(controller) {
-  this.controller = controller;
+var ControllerCommand = function(context) {
+  this.context = context;
+  this.controller = context.controller;
 };
 
 ControllerCommand.Prototype = function() {

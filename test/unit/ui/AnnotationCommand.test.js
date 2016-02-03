@@ -66,7 +66,7 @@ function sample() {
 QUnit.test("PropertyAnnotation: cmd.canTrucate", function(assert) {
   var doc = sample();
   var surface = new StubSurface(doc, 'main');
-  var cmd = new ToggleStrongCommand(surface);
+  var cmd = new ToggleStrongCommand({surface: surface});
 
   var sel = doc.createSelection({
     type: 'property',
@@ -84,7 +84,7 @@ QUnit.test("PropertyAnnotation: cmd.canTrucate", function(assert) {
 QUnit.test("Property Annotation: Toggle on", function(assert) {
   var doc = sample();
   var surface = new StubSurface(doc, 'main');
-  var cmd = new ToggleStrongCommand(surface);
+  var cmd = new ToggleStrongCommand({surface: surface});
 
   var sel = doc.createSelection({
     type: 'property',
@@ -112,7 +112,7 @@ QUnit.test("Property Annotation: Toggle off", function(assert) {
   var doc = sample();
 
   var surface = new StubSurface(doc, 'main');
-  var cmd = new ToggleStrongCommand(surface);
+  var cmd = new ToggleStrongCommand({surface: surface});
 
   var sel = doc.createSelection({
     type: 'property',
@@ -133,7 +133,7 @@ QUnit.test("Property Annotation: Toggle off", function(assert) {
 QUnit.test("Container Annotation: Toggle on", function(assert) {
   var doc = sample();
   var surface = new StubSurface(doc, 'main');
-  var cmd = new ToggleContainerAnnoCommand(surface);
+  var cmd = new ToggleContainerAnnoCommand({surface: surface});
 
   // Selected text 'Paragraph' in p1
   var sel = doc.createSelection({
@@ -160,7 +160,7 @@ QUnit.test("Container Annotation: Toggle on", function(assert) {
 QUnit.test("Container Annotation: Toggle off", function(assert) {
   var doc = sample();
   var surface = new StubSurface(doc, 'main');
-  var cmd = new ToggleContainerAnnoCommand(surface);
+  var cmd = new ToggleContainerAnnoCommand({surface: surface});
 
   // Selected text 'Paragraph' in p1
   var sel = doc.createSelection({
@@ -187,7 +187,7 @@ QUnit.test("Container Annotation: Toggle off", function(assert) {
 QUnit.test("Container Annotation: Fuse annos", function(assert) {
   var doc = sample();
   var surface = new StubSurface(doc, 'main');
-  var cmd = new ToggleContainerAnnoCommand(surface);
+  var cmd = new ToggleContainerAnnoCommand({surface: surface});
 
   // There is already a container anno in the fixture
   // p1.content[5]...p3.content[4]

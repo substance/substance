@@ -629,7 +629,8 @@ Surface.Prototype = function() {
   this._initializeCommandRegistry = function(commands) {
     var commandRegistry = new Registry();
     each(commands, function(CommandClass) {
-      var cmd = new CommandClass(this);
+      var commandContext = _.extend({}, this.context, this.getChildContext());
+      var cmd = new CommandClass(commandContext);
       commandRegistry.add(CommandClass.static.name, cmd);
     }.bind(this));
     this.commandRegistry = commandRegistry;
