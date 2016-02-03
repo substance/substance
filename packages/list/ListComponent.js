@@ -2,7 +2,7 @@
 
 var Component = require('../../ui/Component');
 var $$ = Component.$$;
-var ListHtmlConverter = require('./ListHtmlConverter');
+var ListHtmlConverter = require('./ListHTMLConverter');
 var ListItemComponent = require('./ListItemComponent');
 
 var ListComponent = Component.extend({

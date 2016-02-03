@@ -31,7 +31,7 @@ I18n.instance.load(require('../i18n/en'));
   @example
 
   We utilize a custom {@link ui/Toolbar} and a configured {@link ui/ContainerEditor}.
-  Check out the [examples](http://gitub.com/substance/examples) for complete usage.
+  Check out the [examples](https://github.com/substance/examples) for complete usage.
 
    as a `Toolbar` including tools like the `UndoTool` and a configured `ContainerEditor`, which will do the actual editing work.
 
