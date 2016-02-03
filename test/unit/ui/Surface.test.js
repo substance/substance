@@ -7,7 +7,6 @@ var simple = require('../../fixtures/simple');
 var createAnnotation = require('../../../model/transform/createAnnotation');
 var TestContainerEditor = require('./TestContainerEditor');
 var $ = require('../../../util/jquery');
-var $$ = Component.$$;
 
 var components = {
   "paragraph": require('../../../packages/paragraph/ParagraphComponent')
@@ -42,7 +41,7 @@ QUnit.uiTest("Set the selection after creating annotation.", function(assert) {
   surface.$el.blur();
   surface.transaction(function(tx, args) {
     args.selection = sel;
-    args.annotationType = "strong";
+    args.node = {type: "strong"};
     args = createAnnotation(tx, args);
     return args;
   });
