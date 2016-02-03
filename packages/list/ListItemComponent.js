@@ -1,6 +1,6 @@
 'use strict';
 
-var Component = require('../Component');
+var Component = require('../../ui/Component');
 var $$ = Component.$$;
 var TextProperty = require('../../ui/TextPropertyComponent');
 
