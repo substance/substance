@@ -1490,10 +1490,18 @@ Component.mount = function(component, props, el) {
   } else {
     throw new Error('component must be of type Component or VirtualComponent');
   }
+  if (isString(el)) {
+    el = window.document.querySelector(el);
+  }
   if (!el) throw new Error('An element is needed for mounting.');
-  $(el).append(component.$el);
+  el.appendChild(component.el);
   component.triggerDidMount();
   return component;
+};
+
+Component.static.mount = function(props, el) {
+  var ComponentClass = this.__class__;
+  return Component.mount(ComponentClass, props, el);
 };
 
 /**
