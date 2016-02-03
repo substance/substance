@@ -1,6 +1,6 @@
 'use strict';
 
-var isEqual = require('lodash/each');
+var isEqual = require('lodash/isEqual');
 var last = require('lodash/last');
 var each = require('lodash/each');
 var EventEmitter = require('../util/EventEmitter');
