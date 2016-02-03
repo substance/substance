@@ -84,7 +84,7 @@ SwitchTextType.Prototype = function() {
   };
 
   this.executeCommand = function(textType) {
-    this.getSurface().executeCommand('switchTextType', textType);
+    this.getSurface().executeCommand('switch-text-type', textType);
   };
 
   this.toggleAvailableTextTypes = function(e) {
@@ -106,7 +106,7 @@ SwitchTextType.Prototype = function() {
 
 SurfaceTool.extend(SwitchTextType);
 
-SwitchTextType.static.name = 'switchTextType';
-SwitchTextType.static.command = 'switchTextType';
+SwitchTextType.static.name = 'switch-text-type';
+SwitchTextType.static.command = 'switch-text-type';
 
 module.exports = SwitchTextType;

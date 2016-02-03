@@ -105,6 +105,6 @@ SwitchTextType.Prototype = function() {
 };
 
 SurfaceCommand.extend(SwitchTextType);
-SwitchTextType.static.name = 'switchTextType';
+SwitchTextType.static.name = 'switch-text-type';
 
 module.exports = SwitchTextType;
