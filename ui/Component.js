@@ -859,7 +859,7 @@ Component.Prototype = function ComponentPrototype() {
     }
     // $.on
     each(data.handlers, function(handlerSpec, eventName) {
-      this._bindHandler($el[0], scope, eventName, handlerSpec);
+      this._bindHandler($el[0], data._owner, eventName, handlerSpec);
     }, this);
     return $el;
   };
@@ -917,7 +917,7 @@ Component.Prototype = function ComponentPrototype() {
         }
       });
       each(data.handlers, function(handlerSpec, eventName) {
-        this._bindHandler(el, scope, eventName, handlerSpec);
+        this._bindHandler(el, data._owner, eventName, handlerSpec);
       }, this);
     // }
     return $el;
@@ -1213,13 +1213,13 @@ Component.Prototype = function ComponentPrototype() {
     Object.freeze(this.state);
   };
 
-  this._bindHandler = function(nativeEl, scope, eventName, handlerSpec) {
+  this._bindHandler = function(nativeEl, owner, eventName, handlerSpec) {
     // console.log('Binding to', event, 'in', scope.owner);
     var handler = handlerSpec.handler;
     if (handlerSpec.context) {
       handler = handler.bind(handlerSpec.context);
     } else {
-      handler = handler.bind(scope.owner);
+      handler = handler.bind(owner);
     }
     handlerSpec.handler = handler;
     if (handlerSpec.selector) {
