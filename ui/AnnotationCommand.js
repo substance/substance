@@ -264,21 +264,29 @@ AnnotationCommand.Prototype = function() {
   this.applyTransform = function(transformFn) {
     var surface = this.getSurface();
     var sel = this.getSelection();
-    var self = this;
 
     var result; // to store transform result
     if (sel.isNull()) return;
 
     surface.transaction(function(tx, args) {
-      args.annotationType = self.getAnnotationType();
-      args.annotationData = self.getAnnotationData();
+      // Used by expand/truncate/fuse
+      args.annotationType = this.getAnnotationType();
+
+      // Used for createAnnotation transformation
+      args.node = this.getAnnotationData();
+      // For backwards compatibility: In future type should be
+      // provided with getAnnotationData
+      if (!args.node.type) {
+        args.node.type = this.getAnnotationType();
+      }
+
       args.splitContainerSelections = false;
-      args.containerId = self.getContainerId();
+      args.containerId = this.getContainerId();
 
       args = transformFn(tx, args);
       result = args.result;
       return args;
-    });
+    }.bind(this));
 
     return result;
   };

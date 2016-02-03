@@ -36,6 +36,8 @@ function fuseAnnotation(tx, args) {
   // The expanded selection
   args.selection = sel;
 
+  args.node = {type: args.annotationType};
+
   // Sets args.result to new annotation
   return createAnnotation(tx, args);
 }

@@ -14,17 +14,19 @@ var helpers = require('../documentHelpers');
   @param {Object} args object with transformation arguments `selection`, `containerId`, `annotationType` and `annotationData`
   @scopedparam {model/Selection} args.selection A document selection
   @scopedparam {String} args.containerId a valid container id
-  @scopedparam {String} args.annotationType type of the new annotation
-  @scopedparam {Object} [args.annotationData] additional data that should be stored on the object
+  @scopedparam {Object} args.node data describing the annotation node
 
   @example
 
   ```js
   createAnnotation(tx, {
     selection: bodyEditor.getSelection(),
-    annoType: 'link',
     containerId: bodyEditor.getContainerId(),
-    annoData: {url: 'http://example.com'}
+    
+    node: {
+      type: 'link',
+      url: 'http://example.com'
+    }
   });
   ```
 */
@@ -33,16 +35,23 @@ function createAnnotation(tx, args) {
   var sel = args.selection;
   var annoType = args.annotationType;
   var annoData = args.annotationData;
+  var node = args.node;
   var containerId = args.containerId;
+
+  if (!node && annoType) {
+    console.warn('DEPRECATED: Use node: {type: "strong"} instead of annotationType: "strong"');
+    node = {
+      type: annoType
+    };
+    extend(node, annoData);
+  }
 
   if (!sel) {
     throw new Error('selection is required.');
   }
-
-  if (!annoType) {
-    throw new Error('annotationType is required');
+  if (!node) {
+    throw new Error('node is required');
   }
-
   if (sel.isContainerSelection() && !containerId) {
     throw new Error('containerId must be provided for container selections');
   }
@@ -53,13 +62,11 @@ function createAnnotation(tx, args) {
     return _createPropertyAnnotations(tx, args);
   }
 
-  var anno = {
-    id: uuid(annoType),
-    type: annoType,
-  };
-  extend(anno, annoData);
+  var anno = extend({
+    id: uuid(node.type)
+  }, node);
 
-  if (helpers.isContainerAnnotation(tx, annoType)) {
+  if (helpers.isContainerAnnotation(tx, node.type)) {
     anno.startPath = sel.start.path;
     anno.endPath = sel.end.path;
     anno.container = containerId;
@@ -77,9 +84,7 @@ function createAnnotation(tx, args) {
 
 function _createPropertyAnnotations(tx, args) {
   var sel = args.selection;
-  var annoType = args.annotationType;
-  var annoData = args.annotationData;
-
+  var node = args.node;
   var sels;
   if (sel.isPropertySelection()) {
     sels = []; // we just do nothing in the property selection case? why?
@@ -89,10 +94,9 @@ function _createPropertyAnnotations(tx, args) {
 
   for (var i = 0; i < sels.length; i++) {
     var anno = {
-      id: uuid(annoType),
-      type: annoType
+      id: uuid(node.type)
     };
-    extend(anno, annoData);
+    extend(anno, node);
     anno.path = sels[i].getPath();
     anno.startOffset = sels[i].getStartOffset();
     anno.endOffset = sels[i].getEndOffset();
