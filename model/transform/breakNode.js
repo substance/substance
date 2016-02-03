@@ -75,12 +75,14 @@ function breakTextNode(tx, args) {
   }
   // otherwise a default text type node is inserted
   else {
+    newNode = node.toJSON();
+    newNode.id = id;
+    newNode.content = text.substring(offset);
+    if (offset === text.length) {
+      newNode.type = tx.getSchema().getDefaultTextType();
+    }
+    tx.create(newNode);
     // create a new node
-    newNode = tx.create({
-      id: id,
-      type: tx.getSchema().getDefaultTextType(),
-      content: text.substring(offset)
-    });
     if (offset < text.length) {
       // transfer annotations which are after offset to the new node
       annotationHelpers.transferAnnotations(tx, path, offset, [id, 'content'], 0);
