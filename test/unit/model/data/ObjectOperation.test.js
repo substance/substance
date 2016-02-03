@@ -4,7 +4,7 @@ require('../../qunit_extensions');
 var isEqual = require('lodash/isEqual');
 var cloneDeep = require('lodash/cloneDeep');
 
-var PathAdapter = require('../../../../util/PathAdapter');
+var DataObject = require('../../../../model/data/DataObject');
 var ObjectOperation = require('../../../../model/data/ObjectOperation');
 var ArrayOperation = require('../../../../model/data/ArrayOperation');
 var TextOperation = require('../../../../model/data/TextOperation');
@@ -59,16 +59,6 @@ QUnit.test("Deleting nested values.", function(assert) {
   assert.deepEqual(obj, expected, 'Should delete nested value.');
 });
 
-QUnit.test("Deleting unknown values.", function(assert) {
-  var path = ["a", "b"];
-  var val = "bla";
-  var op = ObjectOperation.Delete(path, val);
-  var obj = { a: { c: "bla"} };
-  assert.throws(function() {
-    op.apply(obj);
-  }, 'Should throw if deleting an unknown value.');
-});
-
 QUnit.test("Updating a text property.", function(assert) {
   var obj = {a: "bla"};
   var path = ["a"];
@@ -115,8 +105,8 @@ QUnit.test("Deleting a top-level property using id.", function(assert) {
   assert.deepEqual(obj, expected);
 });
 
-QUnit.test("Apply operation on PathAdapter.", function(assert) {
-  var myObj = new PathAdapter();
+QUnit.test("Apply operation on DataObject.", function(assert) {
+  var myObj = new DataObject();
   var op = ObjectOperation.Set(['foo', 'bar'], null, 'bla');
   op.apply(myObj);
   assert.equal(myObj.get(['foo', 'bar']), 'bla');

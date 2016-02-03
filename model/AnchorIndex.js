@@ -1,17 +1,17 @@
 'use strict';
 
 var filter = require('lodash/filter');
-var PathAdapter = require('../util/PathAdapter');
+var TreeIndex = require('../util/TreeIndex');
 var ContainerAnnotation = require('./ContainerAnnotation');
 var DocumentIndex = require('./DocumentIndex');
 
-var ContainerAnnotationAnchorIndex = function(doc) {
+var AnchorIndex = function(doc) {
   this.doc = doc;
-  this.byPath = new PathAdapter.Arrays();
+  this.byPath = new TreeIndex.Arrays();
   this.byId = {};
 };
 
-DocumentIndex.extend(ContainerAnnotationAnchorIndex, function() {
+DocumentIndex.extend(AnchorIndex, function() {
   this.select = function(node) {
     return (node instanceof ContainerAnnotation);
   };
@@ -23,14 +23,7 @@ DocumentIndex.extend(ContainerAnnotationAnchorIndex, function() {
   };
 
   this.get = function(path, containerName) {
-    var anchors = this.byPath.get(path) || [];
-    if (!isArray(anchors)) {
-      var _anchors = [];
-      this.byPath._traverse(anchors, [], function(path, anchors) {
-        _anchors = _anchors.concat(anchors);
-      });
-      anchors = _anchors;
-    }
+    var anchors = this.byPath.getAll(path);
     if (containerName) {
       return filter(anchors, function(anchor) {
         return (anchor.container === containerName);
@@ -75,4 +68,4 @@ DocumentIndex.extend(ContainerAnnotationAnchorIndex, function() {
 
 });
 
-module.exports = ContainerAnnotationAnchorIndex;
+module.exports = AnchorIndex;

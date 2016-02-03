@@ -3,7 +3,7 @@
 var isString = require('lodash/isString');
 var map = require('lodash/map');
 var filter = require('lodash/filter');
-var PathAdapter = require('../util/PathAdapter');
+var TreeIndex = require('../util/TreeIndex');
 var PropertyAnnotation = require('./PropertyAnnotation');
 var DocumentIndex = require('./DocumentIndex');
 
@@ -22,8 +22,8 @@ var DocumentIndex = require('./DocumentIndex');
 //    aIndex.get(["text_1", "content"], 23, 45);
 
 var AnnotationIndex = function() {
-  this.byPath = new PathAdapter();
-  this.byType = new PathAdapter();
+  this.byPath = new TreeIndex();
+  this.byType = new TreeIndex();
 };
 
 AnnotationIndex.Prototype = function() {
@@ -42,21 +42,13 @@ AnnotationIndex.Prototype = function() {
 
   // TODO: use object interface? so we can combine filters (path and type)
   this.get = function(path, start, end, type) {
-    var annotations = this.byPath.get(path) || {};
+    var annotations;
     if (isString(path) || path.length === 1) {
-      // flatten annotations if this is called via node id
-      var _annos = annotations;
-      annotations = [];
-      each(_annos, function(level) {
-        annotations = annotations.concat(map(level, function(anno) {
-          return anno;
-        }));
-      });
+      annotations = this.byPath.getAll(path) || {};
     } else {
-      annotations = map(annotations, function(anno) {
-        return anno;
-      });
+      annotations = this.byPath.get(path);
     }
+    annotations = map(annotations);
     /* jshint eqnull:true */
     // null check for null or undefined
     if (start != null) {

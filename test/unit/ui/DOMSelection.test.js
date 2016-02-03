@@ -2,14 +2,15 @@
 
 require('../qunit_extensions');
 
-var isArray = require('lodash/lang/isArray');
-var SurfaceSelection = require('../../../ui/SurfaceSelection');
+var isArray = require('lodash/isArray');
+var DOMSelection = require('../../../ui/DOMSelection');
 var Document = require('../../../model/Document');
 var $ = require('../../../util/jquery');
 
-QUnit.uiModule('ui/SurfaceSelection');
+QUnit.uiModule('ui/DOMSelection');
 
-var StubDoc = function() {}
+function StubDoc() {}
+
 StubDoc.prototype.get = function(path) {
   var pathStr = path;
   if (isArray(path)) {
@@ -94,7 +95,7 @@ var surfaceWithParagraphs = [
 
 QUnit.uiTest("Get coordinate for collapsed selection", function(assert) {
   var el = $('#qunit-fixture').html(singlePropertyFixture)[0];
-  var surfaceSelection = new SurfaceSelection(el);
+  var surfaceSelection = new DOMSelection(el);
   var node = el.querySelector('#test1').childNodes[0].childNodes[0];
   var offset = 5;
   var coor = surfaceSelection.getModelCoordinate(node, offset, {});
@@ -105,7 +106,7 @@ QUnit.uiTest("Get coordinate for collapsed selection", function(assert) {
 
 QUnit.uiTest("Search coordinate (before)", function(assert) {
   var el = $('#qunit-fixture').html(mixedFixture)[0];
-  var surfaceSelection = new SurfaceSelection(el);
+  var surfaceSelection = new DOMSelection(el);
   var node = el.querySelector('#before').childNodes[0];
   var offset = 1;
   var coor = surfaceSelection.searchForCoordinate(node, offset, {});
@@ -116,7 +117,7 @@ QUnit.uiTest("Search coordinate (before)", function(assert) {
 
 QUnit.uiTest("Search coordinate (between)", function(assert) {
   var el = $('#qunit-fixture').html(mixedFixture)[0];
-  var surfaceSelection = new SurfaceSelection(el);
+  var surfaceSelection = new DOMSelection(el);
   var node = el.querySelector('#between').childNodes[0];
   var offset = 1;
   var coor = surfaceSelection.searchForCoordinate(node, offset, {});
@@ -127,7 +128,7 @@ QUnit.uiTest("Search coordinate (between)", function(assert) {
 
 QUnit.uiTest("Search coordinate (between, left)", function(assert) {
   var el = $('#qunit-fixture').html(mixedFixture)[0];
-  var surfaceSelection = new SurfaceSelection(el);
+  var surfaceSelection = new DOMSelection(el);
   var node = el.querySelector('#between').childNodes[0];
   var offset = 1;
   var coor = surfaceSelection.searchForCoordinate(node, offset, {direction: 'left'});
@@ -138,7 +139,7 @@ QUnit.uiTest("Search coordinate (between, left)", function(assert) {
 
 QUnit.uiTest("Search coordinate (after)", function(assert) {
   var el = $('#qunit-fixture').html(mixedFixture)[0];
-  var surfaceSelection = new SurfaceSelection(el);
+  var surfaceSelection = new DOMSelection(el);
   var node = el.querySelector('#after').childNodes[0];
   var offset = 1;
   var coor = surfaceSelection.searchForCoordinate(node, offset, {});
@@ -149,7 +150,7 @@ QUnit.uiTest("Search coordinate (after)", function(assert) {
 
 QUnit.uiTest("coordinate via search", function(assert) {
   var el = $('#qunit-fixture').html(mixedFixture)[0];
-  var surfaceSelection = new SurfaceSelection(el);
+  var surfaceSelection = new DOMSelection(el);
   var node = el.querySelector('#between').childNodes[0];
   var offset = 1;
   var coor = surfaceSelection.getModelCoordinate(node, offset, {});
@@ -160,7 +161,7 @@ QUnit.uiTest("coordinate via search", function(assert) {
 
 QUnit.uiTest("coordinate for empty paragraph", function(assert) {
   var el = $('#qunit-fixture').html(emptyParagraphFixture)[0];
-  var surfaceSelection = new SurfaceSelection(el);
+  var surfaceSelection = new DOMSelection(el);
   var node = el.querySelector('#test1');
   var offset = 0;
   var coor = surfaceSelection.getModelCoordinate(node, offset, {});
@@ -171,7 +172,7 @@ QUnit.uiTest("coordinate for empty paragraph", function(assert) {
 
 QUnit.uiTest("coordinate from wrapped text nodes", function(assert) {
   var el = $('#qunit-fixture').html(wrappedTextNodes)[0];
-  var surfaceSelection = new SurfaceSelection(el);
+  var surfaceSelection = new DOMSelection(el);
   var node = el.querySelector('#test1_content');
   var offset = 4;
   var coor = surfaceSelection.getModelCoordinate(node, offset, {});
@@ -182,7 +183,7 @@ QUnit.uiTest("coordinate from wrapped text nodes", function(assert) {
 
 QUnit.uiTest("coordinate from wrapped text nodes with externals", function(assert) {
   var el = $('#qunit-fixture').html(wrappedTextNodesWithExternals)[0];
-  var surfaceSelection = new SurfaceSelection(el);
+  var surfaceSelection = new DOMSelection(el);
   var node = el.querySelector('#test1_content');
   var offset = 6;
   var coor = surfaceSelection.getModelCoordinate(node, offset, {});
@@ -193,7 +194,7 @@ QUnit.uiTest("coordinate from wrapped text nodes with externals", function(asser
 
 QUnit.uiTest("a selection spanning over a external at the end of a property", function(assert) {
   var el = $('#qunit-fixture').html(wrappedTextNodesWithExternals)[0];
-  var surfaceSelection = new SurfaceSelection(el);
+  var surfaceSelection = new DOMSelection(el);
   var anchorNode = el.querySelector('#before-last').childNodes[0];
   var anchorOffset = 2;
   var focusNode = el.querySelector('#test1_content');
@@ -230,7 +231,7 @@ var textPropWithInlineElements = [
 
 QUnit.uiTest("Issue #273: 'Could not find char position' when clicking right above an inline node", function(assert) {
   var el = $('#qunit-fixture').html(textPropWithInlineElements)[0];
-  var surfaceSelection = new SurfaceSelection(el);
+  var surfaceSelection = new DOMSelection(el);
   var node = el.querySelector('#test').childNodes[0];
   var offset = 2;
   var coor = surfaceSelection.getModelCoordinate(node, offset, {});
@@ -241,7 +242,7 @@ QUnit.uiTest("Issue #273: 'Could not find char position' when clicking right abo
 
 QUnit.firefoxTest("Issue #354: Wrong selection in FF when double clicking between lines", function(assert) {
   var el = $('#qunit-fixture').html(surfaceWithParagraphs)[0];
-  var surfaceSelection = new SurfaceSelection(el, new StubDoc());
+  var surfaceSelection = new DOMSelection(el, new StubDoc());
   var surface = el.querySelector('#surface');
   QUnit.setDOMSelection(surface, 0, surface, 1);
   var sel = surfaceSelection.getSelection();
@@ -252,7 +253,7 @@ QUnit.firefoxTest("Issue #354: Wrong selection in FF when double clicking betwee
 
 QUnit.uiTest("Issue #376: Wrong selection mapping at end of paragraph", function(assert) {
   var el = $('#qunit-fixture').html(surfaceWithParagraphs)[0];
-  var surfaceSelection = new SurfaceSelection(el, new StubDoc());
+  var surfaceSelection = new DOMSelection(el, new StubDoc());
   var p1span = el.querySelector('#p1 span');
   var p2 = el.querySelector('#p2');
   var anchorNode = p1span;

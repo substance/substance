@@ -2,17 +2,15 @@
 
 var oo = require('../util/oo');
 var each = require('lodash/each');
-var PathAdapter = require('../util/PathAdapter');
-var deleteFromArray = require('../util/deleteFromArray');
+var TreeIndex = require('../util/TreeIndex');
 
-
-var NotifyByPathProxy = function(doc) {
-  this.listeners = new PathAdapter();
+var PathEventProxy = function(doc) {
+  this.listeners = new TreeIndex.Arrays();
   this._list = [];
   this.doc = doc;
 };
 
-NotifyByPathProxy.Prototype = function() {
+PathEventProxy.Prototype = function() {
 
   this.onDocumentChanged = function(change, info, doc) {
     // stop if no listeners registered
@@ -61,9 +59,8 @@ NotifyByPathProxy.Prototype = function() {
         }
       }
     }.bind(this));
-    change.updated.traverse(function(path) {
-      var key = path.concat(['listeners']);
-      var scopedListeners = listeners.get(key);
+    change.updated.forEach(function(_, path) {
+      var scopedListeners = listeners.get(path);
       each(scopedListeners, function(entry) {
         entry.method.call(entry.listener, change, info, doc);
       });
@@ -71,17 +68,11 @@ NotifyByPathProxy.Prototype = function() {
   };
 
   this._add = function(path, listener, method) {
-    var key = path.concat(['listeners']);
-    var listeners = this.listeners.get(key);
-    if (!listeners) {
-      listeners = [];
-      this.listeners.set(key, listeners);
-    }
     if (!method) {
       throw new Error('Invalid argument: expected function but got ' + method);
     }
     var entry = { path: path, method: method, listener: listener };
-    listeners.push(entry);
+    this.listeners.add(path, entry);
     this._list.push(entry);
   };
 
@@ -94,9 +85,7 @@ NotifyByPathProxy.Prototype = function() {
       if (this._list[i].listener === listener) {
         var entry = this._list[i];
         this._list.splice(i, 1);
-        var key = entry.path.concat(['listeners']);
-        var listeners = this.listeners.get(key);
-        deleteFromArray(listeners, entry);
+        this.listeners.remove(entry.path, entry);
       }
     }
   };
@@ -113,6 +102,6 @@ NotifyByPathProxy.Prototype = function() {
 
 };
 
-oo.initClass(NotifyByPathProxy);
+oo.initClass(PathEventProxy);
 
-module.exports = NotifyByPathProxy;
+module.exports = PathEventProxy;

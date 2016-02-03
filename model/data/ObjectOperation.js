@@ -3,7 +3,7 @@
 var isString = require('lodash/isString');
 var isEqual = require('lodash/isEqual');
 var cloneDeep = require('lodash/cloneDeep');
-var PathAdapter = require('../../util/PathAdapter');
+var DataObject = require('./DataObject');
 var Operation = require('./Operation');
 var TextOperation = require('./TextOperation');
 var ArrayOperation = require('./ArrayOperation');
@@ -86,10 +86,10 @@ ObjectOperation.Prototype = function() {
   this.apply = function(obj) {
     if (this.type === NOP) return obj;
     var adapter;
-    if (obj instanceof PathAdapter) {
+    if (obj instanceof DataObject) {
       adapter = obj;
     } else {
-      adapter = new PathAdapter(obj);
+      adapter = new DataObject(obj);
     }
     if (this.type === CREATE) {
       adapter.set(this.path, cloneDeep(this.val));

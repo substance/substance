@@ -6,7 +6,7 @@ var isArray = require('lodash/isArray');
 var map = require('lodash/map');
 var oo = require('../util/oo');
 var uuid = require('../util/uuid');
-var PathAdapter = require('../util/PathAdapter');
+var TreeIndex = require('../util/TreeIndex');
 var OperationSerializer = require('./data/OperationSerializer');
 var ObjectOperation = require('./data/ObjectOperation');
 
@@ -92,7 +92,7 @@ DocumentChange.Prototype = function() {
     var ops = this.ops;
     var created = {};
     var deleted = {};
-    var updated = new PathAdapter.Arrays();
+    var updated = new TreeIndex();
     var i;
     for (i = 0; i < ops.length; i++) {
       var op = ops[i];
@@ -107,7 +107,7 @@ DocumentChange.Prototype = function() {
       }
       if (op.type === "set" || op.type === "update") {
         // The old as well the new one is affected
-        updated.add(op.path, op);
+        updated.set(op.path, true);
       }
     }
     this.created = created;
