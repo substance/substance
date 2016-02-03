@@ -25,7 +25,7 @@ QUnit.uiTest("Set the selection after creating annotation.", function(assert) {
         commands: [],
       }
     }
-  }, $('#qunit-fixture'));
+  }, '#qunit-fixture');
 
   var surface = app.refs.editor;
 

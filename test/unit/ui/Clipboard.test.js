@@ -137,7 +137,7 @@ function _containerEditorSample() {
         commands: [],
       }
     }
-  }, $('#qunit-fixture'));
+  }, '#qunit-fixture');
   var editor = app.refs.editor;
   var sel = doc.createSelection({
     type: 'property',
