@@ -24,10 +24,10 @@ EditLinkPrompt.Prototype = function() {
   // Tried setting .htmlProp('autofocus', true) in render
   // But this only worked for the first time
   this.didMount = function() {
-    // var $el = this.refs.url.$el;
-    // _.delay(function() {
-    //   $el.focus();
-    // }, 0);
+    var input = this.refs.url;
+    setTimeout(function() {
+      input.focus();
+    });
   };
 
   this.onDelete = function(e) {
