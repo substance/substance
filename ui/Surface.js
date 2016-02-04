@@ -378,7 +378,13 @@ Surface.Prototype = function() {
     }.bind(this));
     if (this.domSelection) {
       // console.log('Rerendering DOM selection after document change.', this.__id__);
-      this.rerenderDomSelection();
+      // HACK: this is necessary under FF; without focus the selection does not
+      // get rendered.
+      // TODO: I'd rather prefer to only look at selection.surfaceId
+      if (change.after.surfaceId === this.getName()) {
+        this.focus();
+        this.rerenderDomSelection();
+      }
     }
     this.emit('selection:changed', this.getSelection());
   };
