@@ -1493,6 +1493,11 @@ Component.mount = function(component, props, el) {
   if (isString(el)) {
     el = window.document.querySelector(el);
   }
+  // LEGACY: for a while we support the old API using jquery
+  if (el.length) {
+    console.warn('DEPRECATED: we will drop jquery support.');
+    el = el[0];
+  }
   if (!el) throw new Error('An element is needed for mounting.');
   el.appendChild(component.el);
   component.triggerDidMount();
