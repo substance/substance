@@ -17,48 +17,7 @@ PathEventProxy.Prototype = function() {
     if (this._list.length === 0) {
       return;
     }
-
     var listeners = this.listeners;
-    var updated = change.updated;
-
-    function _updated(path, op) {
-      if (!change.deleted[path[0]]) {
-        updated.add(path, op);
-      }
-    }
-
-    function _updatedContainerAnno(containerId, startPath, endPath, op) {
-      var container = doc.get(containerId);
-      var paths = container.getPathRange(startPath, endPath);
-       // mark all affected paths as updated
-      for (var i = 0; i < paths.length; i++) {
-        _updated(paths[i], op);
-      }
-    }
-
-    change.ops.forEach(function(op) {
-      if ( (op.type === "create" || op.type === "delete") && (op.val.path || op.val.startPath)) {
-        if (op.val.path) {
-          _updated(op.val.path, op);
-        } else if (op.val.startPath) {
-          _updatedContainerAnno(op.val.container, op.val.startPath, op.val.endPath, op);
-        }
-      }
-      else if (op.type === "set" && (op.path[1] === "path" || op.path[1] === "startPath" || op.path[1] === "endPath")) {
-        _updated(op.val, op);
-        _updated(op.original, op);
-      }
-      else if (op.type === "set" && (op.path[1] === "startOffset" || op.path[1] === "endOffset")) {
-        var anno = this.doc.get(op.path[0]);
-        if (anno) {
-          if (anno.path) {
-            _updated(anno.path, op);
-          } else {
-            _updatedContainerAnno(anno.container, anno.startPath, anno.endPath, op);
-          }
-        }
-      }
-    }.bind(this));
     change.updated.forEach(function(_, path) {
       var scopedListeners = listeners.get(path);
       each(scopedListeners, function(entry) {

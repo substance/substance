@@ -87,6 +87,7 @@ DocumentChange.Prototype = function() {
     var created = {};
     var deleted = {};
     var updated = new TreeIndex();
+    var affectedContainerAnnos = [];
 
     // TODO: we will introduce a special operation type for coordinates
     function _checkAnnotation(op) {
@@ -116,10 +117,9 @@ DocumentChange.Prototype = function() {
               updated.set(node.path, true);
             }
           } else if (node.isContainerAnnotation()) {
-            if ((propName === 'startPath' || propName === 'startOffset') && !deleted[node.startPath[0]]) {
-              updated.set(node.startPath, true);
-            } else if ((propName === 'endPath' || propName === 'endOffset') && !deleted[node.endPath[0]]) {
-              updated.set(node.endPath, true);
+            if (propName === 'startPath' || propName === 'startOffset' ||
+                propName === 'endPath' || propName === 'endOffset') {
+              affectedContainerAnnos.push(node);
             }
           }
           break;
@@ -143,6 +143,17 @@ DocumentChange.Prototype = function() {
       }
       _checkAnnotation(op);
     }
+
+    affectedContainerAnnos.forEach(function(anno) {
+      var container = doc.get(anno.container);
+      var paths = container.getPathRange(anno.startPath, anno.endPath);
+      paths.forEach(function(path) {
+        if (!deleted[path[0]]) {
+          updated.set(path, true);
+        }
+      });
+    });
+
     this.created = created;
     this.deleted = deleted;
     this.updated = updated;
