@@ -1,9 +1,9 @@
 /* jshint latedef:nofunc */
 "use strict";
 
-var isArray = require('lodash/lang/isArray');
-var isNumber = require('lodash/lang/isNumber');
-var isObject = require('lodash/lang/isObject');
+var isArray = require('lodash/isArray');
+var isNumber = require('lodash/isNumber');
+var isObject = require('lodash/isObject');
 var oo = require('../../util/oo');
 var ObjectOperation = require('./ObjectOperation');
 var TextOperation = require('./TextOperation');

@@ -63,7 +63,9 @@ gulp.task('lint', function() {
     './model/**/*.js',
     './packages/**/*.js',
     './ui/**/*.js',
-    './util/**/*.js'
+    './util/**/*.js',
+    './test/model/*.js',
+    './test/unit/**/*.js'
   ]).pipe(jshint())
     .pipe(jshint.reporter('default'))
     .pipe(jshint.reporter("fail"));

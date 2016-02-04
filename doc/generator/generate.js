@@ -1,7 +1,7 @@
 var collectNodes = require('./collectNodes');
 var schema = require('../model/Documentation').schema;
-var map = require('lodash/collection/map');
-var pick = require('lodash/object/pick');
+var map = require('lodash/map');
+var pick = require('lodash/pick');
 
 
 function generate(config) {

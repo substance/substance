@@ -2,8 +2,8 @@
 
 'use strict';
 
-var isArray = require('lodash/lang/isArray');
-var extend = require('lodash/object/extend');
+var isArray = require('lodash/isArray');
+var extend = require('lodash/extend');
 var HTMLImporter = require('../model/HTMLImporter');
 var DefaultDOMElement = require('./DefaultDOMElement');
 var JSONConverter = require('../model/JSONConverter');

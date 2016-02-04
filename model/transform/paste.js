@@ -1,7 +1,7 @@
 'use strict';
 
-var last = require('lodash/array/last');
-var each = require('lodash/collection/each');
+var last = require('lodash/last');
+var each = require('lodash/each');
 var uuid = require('../../util/uuid');
 var annotationHelpers = require('../annotationHelpers');
 var deleteSelection = require('./deleteSelection');

@@ -2,7 +2,7 @@
 
 var DOMImporter = require('./DOMImporter');
 var DefaultDOMElement = require('../ui/DefaultDOMElement');
-var extend = require('lodash/object/extend');
+var extend = require('lodash/extend');
 
 /**
   @class
@@ -12,7 +12,7 @@ var extend = require('lodash/object/extend');
   exchange format see {@link model/XMLImporter}.
 
   @example
-  
+
   Below is a full example taken from the [Notepad](https://github.com/substance/examples/blob/master/converter/NoteImporter.js) example.
 
   ```js
@@ -82,7 +82,7 @@ HTMLImporter.Prototype = function() {
     @param {ui/DOMElement} documentEl the document element.
 
     @example
-  
+
     When a fragment `<h1>Foo</h1><p></Bar</p>` is imported the implementation
     looks like this.
 
@@ -91,7 +91,7 @@ HTMLImporter.Prototype = function() {
         this.convertContainer(els, 'body');
       };
     ```
-  
+
     If a full document `<html><body><p>A</p><p>B</p></body></html>` is imported
     you get the `<html>` element instead of a node array.
 

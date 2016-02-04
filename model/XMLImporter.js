@@ -2,7 +2,7 @@
 
 var DOMImporter = require('./DOMImporter');
 var DefaultDOMElement = require('../ui/DefaultDOMElement');
-var extend = require('lodash/object/extend');
+var extend = require('lodash/extend');
 
 /**
   @class
@@ -12,7 +12,7 @@ var extend = require('lodash/object/extend');
   exchange format see {@link model/HTMLImporter}.
 
   @example
-  
+
   Below is a full example taken from [Lens](https://github.com/substance/lens/blob/master/model/LensArticleImporter.js).
 
   ```js

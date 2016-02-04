@@ -2,19 +2,11 @@
 
 require('../qunit_extensions');
 
-var isArray = require('lodash/lang/isArray');
-var each = require('lodash/collection/each');
 var simple = require('../../fixtures/simple');
 var Clipboard = require('../../../ui/Clipboard');
 var DOMElement = require('../../../ui/DOMElement');
-var VirtualDOMElement = require('../../../ui/VirtualDOMElement');
 var Component = require('../../../ui/Component');
-var copySelection = require('../../../model/transform/copySelection');
-var CLIPBOARD_CONTAINER_ID = copySelection.CLIPBOARD_CONTAINER_ID;
-var CLIPBOARD_PROPERTY_ID = copySelection.CLIPBOARD_PROPERTY_ID;
 var StubSurface = require('./StubSurface');
-var $ = require('../../../util/jquery');
-var $$ = VirtualDOMElement.createElement;
 var load = require('../load');
 
 var TestContainerEditor = require('./TestContainerEditor');
@@ -68,7 +60,6 @@ QUnit.uiTest("Copying HTML, and plain text", function(assert) {
 
 QUnit.uiTest("Copying a property selection", function(assert) {
   var doc = simple();
-  var schema = doc.getSchema();
   var surface = new StubSurface(doc, null, 'main');
   var clipboard = new Clipboard(surface);
   var sel = doc.createSelection({ type: 'property', path: ['p1', 'content'], startOffset: 0, endOffset: 5 });
@@ -139,7 +130,7 @@ function _containerEditorSample() {
         commands: [],
       }
     }
-  }, $('#qunit-fixture'));
+  }, '#qunit-fixture');
   var editor = app.refs.editor;
   var sel = doc.createSelection({
     type: 'property',

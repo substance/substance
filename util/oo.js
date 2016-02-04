@@ -2,13 +2,13 @@
 
 'use strict';
 
-var isObject = require('lodash/lang/isObject');
-var isFunction = require('lodash/lang/isFunction');
+var isObject = require('lodash/isObject');
+var isFunction = require('lodash/isFunction');
 // WORKAROUND: using the phantomjs Function.prototype.bind polyfill
 // the implementation in this file does not work strangely.
 // it works however if we are using lodash bind here
 // For whatever reason, the polyfill works alright in other places.
-var bind = require('lodash/function/bind');
+var bind = require('lodash/bind');
 
 /**
  * Helpers for oo programming.
@@ -331,7 +331,7 @@ function _extendClass(ParentClass) {
 
   // from right to left copy all mixins into the prototype
   // but never overwrite
-  // like with lodash/object/extend, the mixin later in the args list 'wins'
+  // like with lodash/extend, the mixin later in the args list 'wins'
   for (var i = mixins.length - 1; i >= 0; i--) {
     _mixin(ChildClass, mixins[i]);
   }

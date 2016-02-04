@@ -6,7 +6,6 @@ var Component = require('../../../ui/Component');
 var simple = require('../../fixtures/simple');
 var createAnnotation = require('../../../model/transform/createAnnotation');
 var TestContainerEditor = require('./TestContainerEditor');
-var $ = require('../../../util/jquery');
 
 var components = {
   "paragraph": require('../../../packages/paragraph/ParagraphComponent')
@@ -25,7 +24,7 @@ QUnit.uiTest("Set the selection after creating annotation.", function(assert) {
         commands: [],
       }
     }
-  }, $('#qunit-fixture'));
+  }, '#qunit-fixture');
 
   var surface = app.refs.editor;
 
@@ -47,7 +46,7 @@ QUnit.uiTest("Set the selection after creating annotation.", function(assert) {
   });
   surface.el.focus();
   var wsel = window.getSelection();
-  var newSel = surface.surfaceSelection.getSelection();
+  var newSel = surface.domSelection.getSelection();
   assert.equal(wsel.rangeCount, 1, "There should be a DOM selection.");
   assert.ok(newSel.equals(sel), "New selection should be equal to initial selection.");
 });

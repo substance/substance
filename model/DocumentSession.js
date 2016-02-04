@@ -1,12 +1,14 @@
 "use strict";
 
-var extend = require('lodash/object/extend');
+var extend = require('lodash/extend');
 var oo = require('../util/oo');
 var EventEmitter = require('../util/EventEmitter');
 var TransactionDocument = require('./TransactionDocument');
 var DefaultChangeCompressor = require('./DefaultChangeCompressor');
 var Selection = require('./Selection');
 var DocumentChange = require('./DocumentChange');
+
+var __id__ = 0;
 
 /*
   TODO: Maybe find a suitable name.
@@ -19,6 +21,8 @@ var DocumentChange = require('./DocumentChange');
 */
 function DocumentSession(doc, options) {
   DocumentSession.super.apply(this);
+
+  this.__id__ = __id__++;
 
   options = options || {};
   this.doc = doc;
@@ -35,12 +39,27 @@ function DocumentSession(doc, options) {
 
   this.compressor = options.compressor || new DefaultChangeCompressor();
 
+  // Note: registering twice:
+  // 1. once to do internal transformations in case changes are coming
+  // in from another session -- this must be done as early as possible
+  // 2. to trigger events, such as selection:changed -- this must
+  // be done rather late, so that other listeners such as renderers
+  // have finished their job already.
   this.doc.connect(this, {
     'document:changed': this.onDocumentChange
-  });
+  }, { priority: 1000 });
+
+  this.doc.connect(this, {
+    'document:changed': this.afterDocumentChange
+  }, { priority: -10 });
+
 }
 
 DocumentSession.Prototype = function() {
+
+  this.getDocument = function() {
+    return this.doc;
+  };
 
   this.getSelection = function() {
     return this.selection;
@@ -48,6 +67,11 @@ DocumentSession.Prototype = function() {
 
   this.setSelection = function(sel) {
     this.selection = sel;
+    this.emit('selection:changed', sel, this);
+    // For those who are just interested in selection changes
+    // done via this method -- as opposed to implicit changes
+    // via DocumentChange
+    this.emit('selection:changed:explicitly', sel, this);
   };
 
   this.canUndo = function() {
@@ -119,7 +143,7 @@ DocumentSession.Prototype = function() {
       this.selection = change.after.selection;
       this.isTransacting = false;
       this._commit(change, info);
-      this.emit('selection:changed', this.selection, this);
+      this._selectionHasChanged = true;
       return change;
     } else {
       this.isTransacting = false;
@@ -133,6 +157,22 @@ DocumentSession.Prototype = function() {
       // TODO: as an optimization we could rebase the history lazily
       DocumentChange.transform(this.doneChanges, change);
       DocumentChange.transform(this.undoneChanges, change);
+      // console.log('Transforming selection...', this.__id__);
+      this._selectionHasChanged = DocumentChange.transformSelection(this.selection, change);
+    } else if (info.replay) {
+      var selection = change.after.selection;
+      if (selection) {
+        this.selection = selection;
+        this._selectionHasChanged = true;
+      }
+    }
+  };
+
+  this.afterDocumentChange = function() {
+    if (this._selectionHasChanged) {
+      // console.log('selection has changed', this.__id__);
+      this._selectionHasChanged = false;
+      this.emit('selection:changed', this.selection, this);
     }
   };
 

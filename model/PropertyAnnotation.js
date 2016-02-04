@@ -1,6 +1,6 @@
 'use strict';
 
-var isEqual = require('lodash/lang/isEqual');
+var isEqual = require('lodash/isEqual');
 var DocumentNode = require('./DocumentNode');
 
 /**

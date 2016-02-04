@@ -1,7 +1,7 @@
 'use strict';
 
 var Component = require('./Component');
-var each = require('lodash/collection/each');
+var each = require('lodash/each');
 var $$ = Component.$$;
 
 /**
@@ -9,12 +9,12 @@ var $$ = Component.$$;
 
   @class TabbedPane
   @component
-  
+
   @prop {Object[]} tabs an array of objects with id and name properties
   @prop {String} activeTab id of currently active tab
 
   @example
-  
+
   ```js
   $$(TabbedPane, {
     tabs: [
@@ -51,8 +51,8 @@ TabbedPane.Prototype = function() {
         $$('span').addClass('label').append(tab.name)
       );
       tabsEl.append(tabEl);
-    }, this);
-    
+    }.bind(this));
+
     el.append(tabsEl);
     // Active content
     el.append(

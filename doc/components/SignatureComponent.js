@@ -1,6 +1,6 @@
 'use strict';
 
-var pluck = require('lodash/collection/pluck');
+var pluck = require('../../util/pluck');
 var Component = require('../../ui/Component');
 var $$ = Component.$$;
 var Documentation = require('../model/Documentation');

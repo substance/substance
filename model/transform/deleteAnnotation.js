@@ -1,6 +1,6 @@
 'use strict';
 
-var helpers = require('../documentHelpers');
+var documentHelpers = require('../documentHelpers');
 
 // Args:
 // - selection: current document selection
@@ -17,7 +17,7 @@ function deleteAnnotation(tx, args) {
     throw new Error('containerId must be provided for container selections');
   }
 
-  var annos = helpers.getAnnotationsForSelection(tx, sel, args.annotationType, args.containerId);
+  var annos = documentHelpers.getAnnotationsForSelection(tx, sel, args.annotationType, args.containerId);
   var annoId = annos[0].id;
   tx.delete(annoId);
 

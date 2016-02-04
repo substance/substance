@@ -1,7 +1,7 @@
 'use strict';
 
 var NodeIndex = require('../../model/data/NodeIndex');
-var PathAdapter = require('../../util/PathAdapter');
+var TreeIndex = require('../../util/TreeIndex');
 
 /**
   @class
@@ -10,7 +10,7 @@ function MemberIndex(doc) {
   NodeIndex.apply(this, arguments);
 
   this.doc = doc;
-  this.index = new PathAdapter();
+  this.index = new TreeIndex();
 }
 
 MemberIndex.Prototype = function() {

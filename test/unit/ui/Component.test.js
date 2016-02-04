@@ -3,12 +3,10 @@
 require('../qunit_extensions');
 
 var sinon = require('sinon');
-var isEqual = require('lodash/lang/isEqual');
+var isEqual = require('lodash/isEqual');
 var Component = require('../../../ui/Component');
 var $$ = Component.$$;
 var $ = require('../../../util/jquery');
-
-
 
 QUnit.uiModule('ui/Component');
 
@@ -94,13 +92,10 @@ QUnit.uiTest("Different mount scenarios", function(assert) {
   assert.isDefinedAndNotNull(comp.el);
 
   // Mount to an existing DOM element (this time we pass a jQuery element which is also supported)
-  comp = Component.mount(SimpleComponent, $('#qunit-fixture'));
+  comp = Component.mount(SimpleComponent, '#qunit-fixture');
   assert.equal(comp.didMount.callCount, 1, "didMount must not be called when mounting to attached elements");
   assert.equal(comp.didRender.callCount, 1, "didRender must have been called once");
   assert.isDefinedAndNotNull(comp.el);
-
-  // Mount, passing a Component instance instead of a VirtualComponent
-  comp = Component.mount(new SimpleComponent("root"), $('#qunit-fixture')[0]);
 });
 
 QUnit.test("Render an HTML element", function(assert) {
@@ -306,7 +301,7 @@ QUnit.uiTest("Only call didMount once for childs and grandchilds when setProps i
     }
   });
 
-  var comp = Component.mount(Parent, $('#qunit-fixture'));
+  var comp = Component.mount(Parent, '#qunit-fixture');
   var childComp = comp.refs.child;
   var grandChildComp = childComp.refs.child;
   assert.equal(childComp.didMount.callCount, 1, "Child's didMount should have been called only once.");
@@ -351,7 +346,7 @@ QUnit.test('Propagate properties to child components when setProps called on par
 });
 
 
-QUnit.test('Preserve components when ref matches, and rerender when props changed', function(assert) {
+QUnit.uiTest('Preserve components when ref matches, and rerender when props changed', function(assert) {
   var ItemComponent = TestComponent.extend({
     shouldRerender: function(nextProps) {
       return !isEqual(nextProps, this.props);
@@ -369,7 +364,6 @@ QUnit.test('Preserve components when ref matches, and rerender when props change
       return el;
     }
   });
-
   // Initial mount
   var comp = Component.mount(CompositeComponent, {
     items: [
@@ -377,7 +371,7 @@ QUnit.test('Preserve components when ref matches, and rerender when props change
       {ref: 'b', name: 'B'},
       {ref: 'c', name: 'C'}
     ]
-  }, $('#qunit-fixture'));
+  }, '#qunit-fixture');
 
   var a = comp.refs.a;
   var b = comp.refs.b;
@@ -481,7 +475,7 @@ QUnit.test("Component.append() should support appending text.", function(assert)
   assert.equal(comp.text(), 'XXX');
 });
 
-QUnit.test("Should wipe a referenced component when class changes", function(assert) {
+QUnit.uiTest("Should wipe a referenced component when class changes", function(assert) {
   var ComponentA = TestComponent.extend({
     render: function() {
       return $$('div').addClass('component-a');
@@ -505,7 +499,7 @@ QUnit.test("Should wipe a referenced component when class changes", function(ass
       return el;
     }
   });
-  var comp = Component.mount(MainComponent, {context: 'A'}, $('#qunit-fixture'));
+  var comp = Component.mount(MainComponent, {context: 'A'}, '#qunit-fixture');
   assert.ok(comp.refs.context instanceof ComponentA, 'Context should be of instance ComponentA');
   comp.setProps({context: 'B'});
   assert.ok(comp.refs.context instanceof ComponentB, 'Context should be of instance ComponentB');

@@ -2,14 +2,14 @@
 
 'use strict';
 
-var isBoolean = require('lodash/lang/isBoolean');
-var isNumber = require('lodash/lang/isNumber');
-var isString = require('lodash/lang/isString');
-var isArray = require('lodash/lang/isArray');
-var isObject = require('lodash/lang/isObject');
-var cloneDeep = require('lodash/lang/cloneDeep');
-var each = require('lodash/collection/each');
-var extend = require('lodash/object/extend');
+var isBoolean = require('lodash/isBoolean');
+var isNumber = require('lodash/isNumber');
+var isString = require('lodash/isString');
+var isArray = require('lodash/isArray');
+var isObject = require('lodash/isObject');
+var cloneDeep = require('lodash/cloneDeep');
+var each = require('lodash/each');
+var extend = require('lodash/extend');
 var EventEmitter = require('../../util/EventEmitter');
 
 /**
@@ -48,7 +48,7 @@ function Node(props) {
     } else {
       // property is optional
     }
-  }, this);
+  }.bind(this));
 }
 
 Node.Prototype = function() {
@@ -100,7 +100,7 @@ Node.Prototype = function() {
     };
     each(this.constructor.static.schema, function(prop, name) {
       data[prop.name] = this[name];
-    }, this);
+    }.bind(this));
     return data;
   };
 

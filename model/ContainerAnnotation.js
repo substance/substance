@@ -1,8 +1,8 @@
 'use strict';
 
-var isEqual = require('lodash/lang/isEqual');
-var each = require('lodash/collection/each');
-var last = require('lodash/array/last');
+var isEqual = require('lodash/isEqual');
+var last = require('lodash/last');
+var each = require('lodash/each');
 var EventEmitter = require('../util/EventEmitter');
 var DocumentNode = require('./DocumentNode');
 var Selection = require('./Selection');

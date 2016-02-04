@@ -1,6 +1,6 @@
 'use strict';
 
-var each = require('lodash/collection/each');
+var each = require('lodash/each');
 var DocumentIndex = require('./DocumentIndex');
 var AnnotationIndex = require('./AnnotationIndex');
 var AnchorIndex = require('./AnchorIndex');
@@ -202,7 +202,9 @@ Document.Prototype = function() {
   */
   this.create = function(nodeData) {
     var op = this._create(nodeData);
-    this._notifyChangeListeners(new DocumentChange([op], {}, {}));
+    var change = new DocumentChange([op], {}, {});
+    change._extractInformation(this);
+    this._notifyChangeListeners(change);
     return this.data.get(nodeData.id);
   };
 
@@ -223,7 +225,9 @@ Document.Prototype = function() {
   this.delete = function(nodeId) {
     var node = this.get(nodeId);
     var op = this._delete(nodeId);
-    this._notifyChangeListeners(new DocumentChange([op], {}, {}));
+    var change = new DocumentChange([op], {}, {});
+    change._extractInformation(this);
+    this._notifyChangeListeners(change);
     return node;
   };
 
@@ -245,7 +249,9 @@ Document.Prototype = function() {
   this.set = function(path, value) {
     var oldValue = this.get(path);
     var op = this._set(path, value);
-    this._notifyChangeListeners(new DocumentChange([op], {}, {}));
+    var change = new DocumentChange([op], {}, {});
+    change._extractInformation(this);
+    this._notifyChangeListeners(change);
     return oldValue;
   };
 
@@ -285,7 +291,9 @@ Document.Prototype = function() {
   */
   this.update = function(path, diff) {
     var op = this._update(path, diff);
-    this._notifyChangeListeners(new DocumentChange([op], {}, {}));
+    var change = new DocumentChange([op], {}, {});
+    change._extractInformation(this);
+    this._notifyChangeListeners(change);
     return op;
   };
 
@@ -391,21 +399,23 @@ Document.Prototype = function() {
     return this.get('document');
   };
 
-  this._apply = function(transaction) {
-    each(transaction.ops, function(op) {
+  this._apply = function(documentChange) {
+    each(documentChange.ops, function(op) {
       this.data.apply(op);
       this.emit('operation:applied', op);
     }.bind(this));
+    // extract aggregated information, such as which property has been affected etc.
+    documentChange._extractInformation(this);
   };
 
-  this._notifyChangeListeners = function(transaction, info) {
+  this._notifyChangeListeners = function(change, info) {
     info = info || {};
-    this.emit('document:changed', transaction, info, this);
+    this.emit('document:changed', change, info, this);
   };
 
-  this._updateEventProxies = function(transaction, info) {
+  this._updateEventProxies = function(change, info) {
     each(this.eventProxies, function(proxy) {
-      proxy.onDocumentChanged(transaction, info, this);
+      proxy.onDocumentChanged(change, info, this);
     }.bind(this));
   };
 
@@ -418,11 +428,11 @@ Document.Prototype = function() {
     // clear all existing nodes (as they should be there in the seed)
     each(this.data.nodes, function(node) {
       this.delete(node.id);
-    }, this);
+    }.bind(this));
     // create nodes
     each(seed.nodes, function(nodeData) {
       this.create(nodeData);
-    }, this);
+    }.bind(this));
 
   };
 

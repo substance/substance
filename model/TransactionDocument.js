@@ -1,8 +1,8 @@
 'use strict';
 
-var isFunction = require('lodash/lang/isFunction');
-var extend = require('lodash/object/extend');
-var each = require('lodash/collection/each');
+var isFunction = require('lodash/isFunction');
+var extend = require('lodash/extend');
+var each = require('lodash/each');
 var Document = require('./Document');
 var DocumentChange = require('./DocumentChange');
 var IncrementalData = require('./data/IncrementalData');
@@ -51,7 +51,7 @@ function TransactionDocument(document, session) {
   // HACK: copying all indexes
   each(document.data.indexes, function(index, name) {
     this.data.addIndex(name, index.clone());
-  }, this);
+  }.bind(this));
 
   this.loadSeed(document.toJSON());
 }
@@ -105,9 +105,9 @@ TransactionDocument.Prototype = function() {
   };
 
   this._apply = function(documentChange) {
-    each(documentChange.ops, function(op) {
+    documentChange.ops.forEach(function(op) {
       this.data.apply(op);
-    }, this);
+    }.bind(this));
   };
 
   this._transaction = function(transformation) {

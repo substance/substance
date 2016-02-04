@@ -1,6 +1,6 @@
 'use strict';
 
-var _ = require('../util/helpers');
+var each = require('lodash/each');
 var Component = require('./Component');
 var ToolManager = require('./ToolManager');
 var Registry = require('../util/Registry');
@@ -95,7 +95,6 @@ function Controller() {
   this.documentSession = new DocumentSession(this.props.doc);
 
   this.surfaces = {};
-  this.focusedSurface = null;
   this.stack = [];
   this.logger = new Logger();
   var config = this.getConfig();
@@ -202,7 +201,7 @@ Controller.Prototype = function() {
 
   this._initializeComponentRegistry = function(components) {
     var componentRegistry = new Registry();
-    _.each(components, function(ComponentClass, name) {
+    each(components, function(ComponentClass, name) {
       componentRegistry.add(name, ComponentClass);
     });
     this.componentRegistry = componentRegistry;
@@ -210,10 +209,10 @@ Controller.Prototype = function() {
 
   this._initializeCommandRegistry = function(commands) {
     var commandRegistry = new Registry();
-    _.each(commands, function(CommandClass) {
+    each(commands, function(CommandClass) {
       var cmd = new CommandClass(this);
       commandRegistry.add(CommandClass.static.name, cmd);
-    }, this);
+    }.bind(this));
     this.commandRegistry = commandRegistry;
   };
 
@@ -293,7 +292,12 @@ Controller.Prototype = function() {
    * @return {ui/Surface} Surface instance
    */
   this.getFocusedSurface = function() {
-    return this.focusedSurface;
+    var surfaceId = this.documentSession.selection.surfaceId;
+    if (surfaceId) {
+      return this.surfaces[surfaceId];
+    } else {
+      return null;
+    }
   };
 
   /**
@@ -360,14 +364,8 @@ Controller.Prototype = function() {
 
   /**
    * Called whenever a surface has been focused.
-   *
-   * @TODO Should this really be a public method?
    */
-  this.didFocus = function(surface) {
-    if (this.focusedSurface && surface !== this.focusedSurface) {
-      this.focusedSurface.setFocused(false);
-    }
-    this.focusedSurface = surface;
+  this.didFocus = function() {
   };
 
   // For now just delegate to the current surface
@@ -425,27 +423,14 @@ Controller.Prototype = function() {
   this.onDocumentChanged = function(change, info) {
     // On undo/redo
     if (info.replay) {
-      var selection = change.after.selection;
-      var surfaceId = change.after.surfaceId;
-      if (surfaceId) {
-        var surface = this.surfaces[surfaceId];
-        if (surface) {
-          if (this.focusedSurface !== surface) {
-            this.didFocus(surface);
-          }
-          surface.setSelection(selection);
-        } else {
-          console.warn('No surface with name', surfaceId);
-        }
-      }
-
       // after undo/redo, also recover the stored controller state
       if (change.after.state) {
         this.setState(change.after.state);
       }
     }
-
     // Save logic related
+    // TODO: we need to rethink this regarding
+    // real-time collab
     var doc = this.getDocument();
     doc.__dirty = true;
     var logger = this.getLogger();
@@ -465,8 +450,7 @@ Controller.Prototype = function() {
   this._onSelectionChanged = function(sel, surface) {
     // HACK: make sure focusedSurface is up to date as soon as
     // possible because some listeners rely on it.
-    this.focusedSurface = surface;
-
+    // this.focusedSurface = surface;
     this.emit('selection:changed', sel, surface);
     this.onSelectionChanged(sel, surface);
   };

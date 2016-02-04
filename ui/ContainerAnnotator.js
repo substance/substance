@@ -1,6 +1,6 @@
 'use strict';
 
-var _ = require('../util/helpers');
+var each = require('lodash/each');
 var Component = require('./Component');
 var ContainerEditor = require('./ContainerEditor');
 var $$ = Component.$$;
@@ -49,9 +49,9 @@ ContainerAnnotator.Prototype = function() {
       });
 
     // node components
-    _.each(containerNode.nodes, function(nodeId) {
+    each(containerNode.nodes, function(nodeId) {
       el.append(this._renderNode(nodeId));
-    }, this);
+    }.bind(this));
 
     return el;
   };

@@ -1,7 +1,7 @@
 "use strict";
 /* jshint latedef: false */
 
-var extend = require('lodash/object/extend');
+var extend = require('lodash/extend');
 var uuid = require('../../util/uuid');
 var helpers = require('../documentHelpers');
 

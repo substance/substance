@@ -1,7 +1,7 @@
 "use strict";
 
 require('../../qunit_extensions');
-var isEqual = require('lodash/lang/isEqual');
+var isEqual = require('lodash/isEqual');
 var TextOperation = require('../../../../model/data/TextOperation');
 
 QUnit.module('model/data/TextOperation');

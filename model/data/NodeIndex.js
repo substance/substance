@@ -1,10 +1,10 @@
 'use strict';
 
 var oo = require('../../util/oo');
-var isArray = require('lodash/lang/isArray');
-var each = require('lodash/collection/each');
-var extend = require('lodash/object/extend');
-var PathAdapter = require('../../util/PathAdapter');
+var isArray = require('lodash/isArray');
+var each = require('lodash/each');
+var extend = require('lodash/extend');
+var TreeIndex = require('../../util/TreeIndex');
 
 /**
   Index for Nodes.
@@ -19,10 +19,10 @@ var NodeIndex = function() {
   /**
    * Internal storage.
    *
-   * @property {PathAdapter} index
+   * @property {TreeIndex} index
    * @private
    */
-  this.index = new PathAdapter();
+  this.index = new TreeIndex();
 };
 
 NodeIndex.Prototype = function() {
@@ -34,23 +34,16 @@ NodeIndex.Prototype = function() {
    * @returns A node or an object with ids and nodes as values.
    */
   this.get = function(path) {
-    // TODO: what is the correct return value. We have arrays at some places.
-    // HACK: unwrap objects on the index when method is called without a path
-    if (!path) return this.getAll();
     return this.index.get(path) || {};
   };
 
   /**
-   * Collects all indexed nodes.
+   * Collects nodes recursively.
    *
    * @returns An object with ids as keys and nodes as values.
    */
-  this.getAll = function() {
-    var result = {};
-    each(this.index, function(values) {
-      extend(result, values);
-    });
-    return result;
+  this.getAll = function(path) {
+    return this.index.getAll(path);
   };
 
   /**
@@ -93,7 +86,7 @@ NodeIndex.Prototype = function() {
     }
     each(values, function(value) {
       this.index.set([value, node.id], node);
-    }, this);
+    }.bind(this));
   };
 
   /**
@@ -111,7 +104,7 @@ NodeIndex.Prototype = function() {
     }
     each(values, function(value) {
       this.index.delete([value, node.id]);
-    }, this);
+    }.bind(this));
   };
 
   /**
@@ -130,14 +123,14 @@ NodeIndex.Prototype = function() {
     }
     each(values, function(value) {
       this.index.delete([value, node.id]);
-    }, this);
+    }.bind(this));
     values = newValue;
     if (!isArray(values)) {
       values = [values];
     }
     each(values, function(value) {
       this.index.set([value, node.id], node);
-    }, this);
+    }.bind(this));
   };
 
   this.set = function(node, path, newValue, oldValue) {
@@ -170,7 +163,7 @@ NodeIndex.Prototype = function() {
       if (this.select(node)) {
         this.create(node);
       }
-    }, this);
+    }.bind(this));
   };
 
 };

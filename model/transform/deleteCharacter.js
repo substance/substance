@@ -1,6 +1,6 @@
 'use strict';
 
-var extend = require('lodash/object/extend');
+var extend = require('lodash/extend');
 var merge = require('./merge');
 var updateAnnotations = require('./updateAnnotations');
 

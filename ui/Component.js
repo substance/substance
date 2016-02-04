@@ -3,12 +3,12 @@
 /* jshint latedef:nofunc */
 
 var $ = require('../util/jquery');
-var isFunction = require('lodash/lang/isFunction');
-var isString = require('lodash/lang/isString');
-var isFunction = require('lodash/lang/isFunction');
-var isEqual = require('lodash/lang/isEqual');
-var extend = require('lodash/object/extend');
-var each = require('lodash/collection/each');
+var isFunction = require('lodash/isFunction');
+var isString = require('lodash/isString');
+var isFunction = require('lodash/isFunction');
+var isEqual = require('lodash/isEqual');
+var extend = require('lodash/extend');
+var each = require('lodash/each');
 var I18n = require('./i18n');
 var EventEmitter = require('../util/EventEmitter');
 var DOMElement = require('./DOMElement');
@@ -372,7 +372,7 @@ Component.Prototype = function ComponentPrototype() {
   this.handleActions = function(actionHandlers) {
     each(actionHandlers, function(method, actionName) {
       this.handleAction(actionName, method);
-    }, this);
+    }.bind(this));
     return this;
   };
 
@@ -841,7 +841,7 @@ Component.Prototype = function ComponentPrototype() {
     return index;
   };
 
-  this._createElement = function(data, scope) {
+  this._createElement = function(data) {
     var $el = $('<' + data.tagName + '>');
     // $.addClass
     $el.addClass(this._htmlParams.classNames);
@@ -859,12 +859,12 @@ Component.Prototype = function ComponentPrototype() {
     }
     // $.on
     each(data.handlers, function(handlerSpec, eventName) {
-      this._bindHandler($el[0], scope, eventName, handlerSpec);
-    }, this);
+      this._bindHandler($el[0], data._owner, eventName, handlerSpec);
+    }.bind(this));
     return $el;
   };
 
-  this._updateElement = function(data, oldData, scope) {
+  this._updateElement = function(data, oldData) {
     var $el = this.$el;
     var el = this.el;
 
@@ -917,8 +917,8 @@ Component.Prototype = function ComponentPrototype() {
         }
       });
       each(data.handlers, function(handlerSpec, eventName) {
-        this._bindHandler(el, scope, eventName, handlerSpec);
-      }, this);
+        this._bindHandler(el, data._owner, eventName, handlerSpec);
+      }.bind(this));
     // }
     return $el;
   };
@@ -1213,13 +1213,13 @@ Component.Prototype = function ComponentPrototype() {
     Object.freeze(this.state);
   };
 
-  this._bindHandler = function(nativeEl, scope, eventName, handlerSpec) {
+  this._bindHandler = function(nativeEl, owner, eventName, handlerSpec) {
     // console.log('Binding to', event, 'in', scope.owner);
     var handler = handlerSpec.handler;
     if (handlerSpec.context) {
       handler = handler.bind(handlerSpec.context);
     } else {
-      handler = handler.bind(scope.owner);
+      handler = handler.bind(owner);
     }
     handlerSpec.handler = handler;
     if (handlerSpec.selector) {
@@ -1490,10 +1490,18 @@ Component.mount = function(component, props, el) {
   } else {
     throw new Error('component must be of type Component or VirtualComponent');
   }
+  if (isString(el)) {
+    el = window.document.querySelector(el);
+  }
   if (!el) throw new Error('An element is needed for mounting.');
-  $(el).append(component.$el);
+  el.appendChild(component.el);
   component.triggerDidMount();
   return component;
+};
+
+Component.static.mount = function(props, el) {
+  var ComponentClass = this.__class__;
+  return Component.mount(ComponentClass, props, el);
 };
 
 /**

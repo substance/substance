@@ -2,11 +2,11 @@
 
 var DOMExporter = require('./DOMExporter');
 var DefaultDOMElement = require('../ui/DefaultDOMElement');
-var extend = require('lodash/object/extend');
-var each = require('lodash/collection/each');
-var isBoolean = require('lodash/lang/isBoolean');
-var isNumber = require('lodash/lang/isNumber');
-var isString = require('lodash/lang/isString');
+var extend = require('lodash/extend');
+var each = require('lodash/each');
+var isBoolean = require('lodash/isBoolean');
+var isNumber = require('lodash/isNumber');
+var isString = require('lodash/isString');
 
 /**
   @class
@@ -16,7 +16,7 @@ var isString = require('lodash/lang/isString');
   exchange format see {@link model/XMLExporter}.
 
   @example
-  
+
   Below is a full example taken from the [Notepad](https://github.com/substance/examples/blob/master/converter/NoteExporter.js) example.
 
   ```js

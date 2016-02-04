@@ -1,6 +1,6 @@
 'use strict';
 
-var extend = require('lodash/object/extend');
+var extend = require('lodash/extend');
 var uuid = require('../../util/uuid');
 var annotationHelpers = require('../annotationHelpers');
 var deleteNode = require('./deleteNode');
@@ -12,7 +12,7 @@ var deleteNode = require('./deleteNode');
   @return {Object} object with updated `selection`
 
   @example
-  
+
   ```js
   switchTextType(tx, {
     selection: bodyEditor.getSelection(),

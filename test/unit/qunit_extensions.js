@@ -1,7 +1,7 @@
 'use strict';
 
 var inBrowser = (typeof window !== 'undefined');
-var isEmpty = require('lodash/lang/isEmpty');
+var isEmpty = require('lodash/isEmpty');
 var platform = require('../../util/platform');
 
 QUnit.assert.fail = function(msg) {

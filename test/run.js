@@ -1,6 +1,6 @@
 var glob = require('glob');
 var path = require('path');
-var each = require('lodash/collection/each');
+var each = require('lodash/each');
 var QUnit = require('qunitjs');
 var colors = require('colors');
 

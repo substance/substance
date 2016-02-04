@@ -1,6 +1,9 @@
 "use strict";
 
-var _ = require('../util/helpers');
+var each = require('lodash/each');
+var includes = require('lodash/includes');
+var head = require('lodash/head');
+
 var EventEmitter = require('../util/EventEmitter');
 var $ = require('../util/jquery');
 
@@ -13,7 +16,7 @@ var $ = require('../util/jquery');
   @class TOC
   @component
 
-  @prop {Controller} 
+  @prop {Controller}
  */
 
 function TOC(controller) {
@@ -26,7 +29,7 @@ function TOC(controller) {
   } else {
     this.activeEntry = null;
   }
-  
+
   var doc = this.getDocument();
   doc.connect(this, {
     'document:changed': this.handleDocumentChange
@@ -59,14 +62,14 @@ TOC.Prototype = function() {
       if (op.isCreate() || op.isDelete()) {
         var nodeData = op.getValue();
         nodeType = nodeData.type;
-        if (_.includes(tocTypes, nodeType)) {
+        if (includes(tocTypes, nodeType)) {
           needsUpdate = true;
           break;
         }
       } else {
         var id = op.path[0];
         var node = doc.get(id);
-        if (node && _.includes(tocTypes, node.type)) {
+        if (node && includes(tocTypes, node.type)) {
           needsUpdate = true;
           break;
         }
@@ -83,7 +86,7 @@ TOC.Prototype = function() {
     var config = this.controller.getConfig();
     var entries = [];
     var contentNodes = doc.get(config.containerId).nodes;
-    _.each(contentNodes, function(nodeId) {
+    each(contentNodes, function(nodeId) {
       var node = doc.get(nodeId);
       if (node.type === 'heading') {
         entries.push({
@@ -125,12 +128,12 @@ TOC.Prototype = function() {
     // $('.se-scanline').css({
     //   top: (scanline - scrollTop)+'px'
     // });
-  
+
     var tocNodes = this.computeEntries();
     if (tocNodes.length === 0) return;
 
     // Use first toc node as default
-    var activeEntry = _.first(tocNodes).id;
+    var activeEntry = head(tocNodes).id;
     tocNodes.forEach(function(tocNode) {
       var nodeEl = $panelContent.find('[data-id="'+tocNode.id+'"]')[0];
       if (!nodeEl) {

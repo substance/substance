@@ -1,10 +1,10 @@
 'use strict';
 
-var isString = require('lodash/lang/isString');
-var isArray = require('lodash/lang/isArray');
-var cloneDeep = require('lodash/lang/cloneDeep');
-var each = require('lodash/collection/each');
-var PathAdapter = require('../../util/PathAdapter');
+var isArray = require('lodash/isArray');
+var isString = require('lodash/isString');
+var each = require('lodash/each');
+var cloneDeep = require('lodash/cloneDeep');
+var DataObject = require('./DataObject');
 var EventEmitter = require('../../util/EventEmitter');
 
 /**
@@ -27,7 +27,7 @@ function Data(schema, options) {
   EventEmitter.call(this);
 
   this.schema = schema;
-  this.nodes = new PathAdapter();
+  this.nodes = new DataObject();
   this.indexes = {};
   this.options = options || {};
   this.nodeFactory = options.nodeFactory || schema.getNodeFactory();
@@ -251,7 +251,7 @@ Data.Prototype = function() {
     @private
    */
   this.reset = function() {
-    this.nodes = new PathAdapter();
+    this.nodes.clear();
   };
 
   /**

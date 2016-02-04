@@ -1,6 +1,6 @@
 'use strict';
 
-var helpers = require('../documentHelpers');
+var documentHelpers = require('../documentHelpers');
 
 // Args:
 // - selection: current document selection
@@ -21,7 +21,7 @@ function truncateAnnotation(tx, args) {
     throw new Error('containerId must be provided for container selections');
   }
 
-  var annos = helpers.getAnnotationsForSelection(tx, sel, args.annotationType, args.containerId);
+  var annos = documentHelpers.getAnnotationsForSelection(tx, sel, args.annotationType, args.containerId);
   // TODO: should we throw when more than one anno has been found?
   var anno = annos[0];
   var annoSel = anno.getSelection();

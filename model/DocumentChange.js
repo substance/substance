@@ -1,11 +1,12 @@
 'use strict';
 
-var isObject = require('lodash/lang/isObject');
-var isArray = require('lodash/lang/isArray');
-var map = require('lodash/collection/map');
+var isEqual = require('lodash/isEqual');
+var isObject = require('lodash/isObject');
+var isArray = require('lodash/isArray');
+var map = require('lodash/map');
 var oo = require('../util/oo');
 var uuid = require('../util/uuid');
-var PathAdapter = require('../util/PathAdapter');
+var TreeIndex = require('../util/TreeIndex');
 var OperationSerializer = require('./data/OperationSerializer');
 var ObjectOperation = require('./data/ObjectOperation');
 
@@ -73,27 +74,61 @@ function DocumentChange(ops, before, after) {
   this.created = null;
   // a hash with all deleted nodes
   this.deleted = null;
-
-  // TODO: maybe do this lazily, i.e. only when the change inspection API is used?
-  this._init();
 }
 
 DocumentChange.Prototype = function() {
 
-  this.freeze = function() {
-    Object.freeze(this);
-    Object.freeze(this.ops);
-    Object.freeze(this.before);
-    Object.freeze(this.after);
-  };
-
-  this._init = function() {
+  /*
+    Extract aggregated information about which nodes and properties have been affected.
+    This gets called by Document after applying the change.
+  */
+  this._extractInformation = function(doc) {
     var ops = this.ops;
     var created = {};
     var deleted = {};
-    var updated = new PathAdapter.Arrays();
-    var i;
-    for (i = 0; i < ops.length; i++) {
+    var updated = new TreeIndex();
+    var affectedContainerAnnos = [];
+
+    // TODO: we will introduce a special operation type for coordinates
+    function _checkAnnotation(op) {
+      var node = op.val;
+      var path, propName;
+      switch (op.type) {
+        case "create":
+        case "delete":
+          // HACK: detecting annotation changes in an opportunistic way
+          if (node.hasOwnProperty('startOffset')) {
+            path = node.path || node.startPath;
+            updated.set(path, true);
+          }
+          if (node.hasOwnProperty('endPath')) {
+            path = node.endPath;
+            updated.set(path, true);
+          }
+          break;
+        case "update":
+        case "set":
+          // HACK: detecting annotation changes in an opportunistic way
+          node = doc.get(op.path[0]);
+          if (node) {
+            propName = op.path[1];
+            if (node.isPropertyAnnotation()) {
+              if ((propName === 'path' || propName === 'startOffset' ||
+                   propName === 'endOffset') && !deleted[node.path[0]]) {
+                updated.set(node.path, true);
+              }
+            } else if (node.isContainerAnnotation()) {
+              if (propName === 'startPath' || propName === 'startOffset' ||
+                  propName === 'endPath' || propName === 'endOffset') {
+                affectedContainerAnnos.push(node);
+              }
+            }
+          }
+          break;
+      }
+    }
+
+    for (var i = 0; i < ops.length; i++) {
       var op = ops[i];
       if (op.type === "create") {
         created[op.val.id] = op.val;
@@ -106,9 +141,21 @@ DocumentChange.Prototype = function() {
       }
       if (op.type === "set" || op.type === "update") {
         // The old as well the new one is affected
-        updated.add(op.path, op);
+        updated.set(op.path, true);
       }
+      _checkAnnotation(op);
     }
+
+    affectedContainerAnnos.forEach(function(anno) {
+      var container = doc.get(anno.container);
+      var paths = container.getPathRange(anno.startPath, anno.endPath);
+      paths.forEach(function(path) {
+        if (!deleted[path[0]]) {
+          updated.set(path, true);
+        }
+      });
+    });
+
     this.created = created;
     this.deleted = deleted;
     this.updated = updated;
@@ -237,6 +284,49 @@ DocumentChange.transform = function(A, B) {
       ObjectOperation.transform(b_op, a_op, {inplace: true});
     }
   }
+};
+
+
+function _transformCoordinate(coor, op) {
+  if (!isEqual(op.path, coor.path)) return false;
+  var hasChanged = false;
+  if (op.type === 'update' && op.propertyType === 'string') {
+    var diff = op.diff;
+    var newOffset;
+    if (diff.isInsert() && diff.pos <= coor.offset) {
+      newOffset = coor.offset + diff.str.length;
+      console.log('Transforming coordinate after inserting %s chars:', diff.str.length, coor.toString(), '->', newOffset);
+      coor.offset = newOffset;
+      hasChanged = true;
+    } else if (diff.isDelete() && diff.pos <= coor.offset) {
+      newOffset = Math.max(diff.pos, coor.offset - diff.str.length);
+      console.log('Transforming coordinate after deleting %s chars:', diff.str.length, coor.toString(), '->', newOffset);
+      coor.offset = newOffset;
+      hasChanged = true;
+    }
+  }
+  return hasChanged;
+}
+
+// PRELIMINARY
+// This needs a greater refactor, introducing Coordinates as built-in types
+// which are considered together with operation transformations
+DocumentChange.transformSelection = function(sel, A) {
+  if (!sel || (!sel.isPropertySelection() && !sel.isContainerSelection()) ) {
+    return false;
+  }
+  var ops = A.ops;
+  var hasChanged = false;
+  var isCollapsed = sel.isCollapsed();
+  ops.forEach(function(op) {
+    hasChanged |= _transformCoordinate(sel.start, op);
+    if (!isCollapsed) {
+      hasChanged |= _transformCoordinate(sel.end, op);
+    } else {
+      sel.range.end = sel.range.start;
+    }
+  });
+  return hasChanged;
 };
 
 module.exports = DocumentChange;

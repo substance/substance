@@ -1,8 +1,8 @@
 'use strict';
 
-var extend = require('lodash/object/extend');
-var includes = require('lodash/collection/includes');
-var capitalize = require('lodash/string/capitalize');
+var extend = require('lodash/extend');
+var includes = require('lodash/includes');
+var capitalize = require('lodash/capitalize');
 var Component = require('../../ui/Component');
 var $$ = Component.$$;
 
@@ -24,10 +24,10 @@ EditLinkPrompt.Prototype = function() {
   // Tried setting .htmlProp('autofocus', true) in render
   // But this only worked for the first time
   this.didMount = function() {
-    // var $el = this.refs.url.$el;
-    // _.delay(function() {
-    //   $el.focus();
-    // }, 0);
+    var input = this.refs.url;
+    setTimeout(function() {
+      input.focus();
+    });
   };
 
   this.onDelete = function(e) {

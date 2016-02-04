@@ -1,7 +1,7 @@
 'use strict';
 
+var extend = require('lodash/extend');
 var oo = require('../util/oo');
-var _ = require('../util/helpers');
 
 function I18n() {
   this.map = {};
@@ -16,7 +16,7 @@ I18n.Prototype = function() {
     }
   };
   this.load = function(map) {
-    _.extend(this.map, map);
+    extend(this.map, map);
   };
 };
 

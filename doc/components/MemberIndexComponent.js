@@ -1,7 +1,7 @@
 'use strict';
 
-var each = require('lodash/collection/each');
-var sortBy = require('lodash/collection/sortBy');
+var each = require('lodash/each');
+var sortBy = require('lodash/sortBy');
 var $$ = require('../../ui/Component').$$;
 var MemberContainerComponent = require('./MemberContainerComponent');
 var CrossLink = require('./CrossLinkComponent');

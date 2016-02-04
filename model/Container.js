@@ -1,7 +1,6 @@
 'use strict';
 
-var last = require('lodash/array/last');
-var map = require('lodash/collection/map');
+var last = require('lodash/last');
 var DocumentNode = require('./DocumentNode');
 var ParentNodeMixin = require('./ParentNodeMixin');
 var DocumentAddress = require('./DocumentAddress');
@@ -386,7 +385,7 @@ DocumentNode.extend(Container, ParentNodeMixin, function() {
     var startAddress = this.getAddress(startPath);
     var endAddress = this.getAddress(endPath);
     var addresses = this.getAddressRange(startAddress, endAddress);
-    return map(addresses, this.getPathForAddress, this);
+    return addresses.map(this.getPathForAddress.bind(this));
   };
 
   this.getNextPath = function(path) {
@@ -422,7 +421,7 @@ DocumentNode.extend(Container, ParentNodeMixin, function() {
 
   this.getPathsForNode = function(node) {
     var addresses = this.getAddressesForNode(node);
-    return map(addresses, this.getPathForAddress, this);
+    return addresses.map(this.getPathForAddress.bind(this));
   };
 
 });

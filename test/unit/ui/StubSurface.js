@@ -8,7 +8,7 @@ function StubSurface(doc, containerId) {
 
   this.name = 'test_surface';
   this.containerId = containerId;
-  this.docSession = new DocumentSession(doc);
+  this.documentSession = new DocumentSession(doc);
 
   this.getName = function() {
     return this.name;
@@ -19,11 +19,11 @@ function StubSurface(doc, containerId) {
   };
 
   this.getDocumentSession = function() {
-    return this.docSession;
+    return this.documentSession;
   };
 
   this.getSelection = function() {
-    return this.docSession.getSelection();
+    return this.documentSession.getSelection();
   };
 
   this.setSelection = function(sel) {
@@ -31,7 +31,7 @@ function StubSurface(doc, containerId) {
   };
 
   this._setSelection = function(sel) {
-    this.docSession.setSelection(sel);
+    this.documentSession.setSelection(sel);
   };
 
   this.getContainerId = function() {

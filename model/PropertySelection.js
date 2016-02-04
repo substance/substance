@@ -1,7 +1,7 @@
 'use strict';
 
-var isEqual = require('lodash/lang/isEqual');
-var isNumber = require('lodash/lang/isNumber');
+var isEqual = require('lodash/isEqual');
+var isNumber = require('lodash/isNumber');
 var Selection = require('./Selection');
 var Coordinate = require('./Coordinate');
 var Range = require('./Range');
@@ -52,8 +52,10 @@ function PropertySelection(properties) {
     new Coordinate(path, endOffset)
   );
   this.reverse = properties.reverse;
+
+  this.surfaceId = properties.surfaceId;
+
   this._internal = {};
-  Object.freeze(this);
 }
 
 PropertySelection.Prototype = function() {
@@ -69,7 +71,8 @@ PropertySelection.Prototype = function() {
       path: this.path,
       startOffset: this.startOffset,
       endOffset: this.endOffset,
-      reverse: this.reverse
+      reverse: this.reverse,
+      surfaceId: this.surfaceId
     };
   };
 

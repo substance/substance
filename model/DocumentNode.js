@@ -1,6 +1,6 @@
 'use strict';
 
-var each = require('lodash/collection/each');
+var each = require('lodash/each');
 var DataNode = require('./data/Node');
 
 /**
@@ -170,7 +170,7 @@ DocumentNode.Prototype = function() {
           this.getDocument().getEventProxy('path').connect(this, [this.id, propertyName], this._onPropertyChange.bind(this, propertyName));
         }
       }
-    }, this);
+    }.bind(this));
     DataNode.prototype.connect.apply(this, arguments);
   };
 
