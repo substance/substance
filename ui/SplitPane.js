@@ -42,6 +42,20 @@ SplitPane.Prototype = function() {
     }
   };
 
+
+  this.mouseDown = function(e) {
+    console.log('pos', e.clientX);
+  };
+
+  this.onMouseMove = function(e) {
+    console.log('pos', e.clientX);
+  };
+
+  this.mouseUp = function() {
+    console.log('pos', e.clientX);
+  };
+
+
   this.render = function() {
     if (this.props.children.length !== 2) {
       throw new Error('SplitPane only works with exactly two child elements');
@@ -68,8 +82,14 @@ SplitPane.Prototype = function() {
       paneB.addClass('se-pane sm-auto-fill');
     }
 
+    var dividerEl = $$('div').addClass('se-split-pane-divider')
+                        .on('mousedown', this.mouseDown)
+                        .on('mousemove', this.mouseMove)
+                        .on('mouseup', this.mouseUp)
+
     el.append(
       paneA,
+      dividerEl,
       paneB
     );
     return el;

@@ -74,7 +74,7 @@ TwoPanelController.Prototype = function() {
     return _super.render.call(this)
       .append(
         $$(SplitPane, {splitType: 'horizontal', sizeB: 'inherit'}).append(
-          $$(SplitPane, {splitType: 'vertical', sizeA: '60%'}).append(
+          $$(SplitPane, {draggable: true, splitType: 'vertical', sizeA: '60%'}).append(
             // TODO: provide a default implementation here
             this._renderMainSection(),
             this._renderContextSection()

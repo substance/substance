@@ -9,6 +9,14 @@
   top: 0px;
   bottom: 0px;
 
+  // Works for vertical split
+  .se-split-pane-divider {
+    width: 3px;
+    // don't grow, don't shrink, use width or height for size determination
+    flex: 0 0 auto; 
+    background: blue;
+  }
+
   &.sm-vertical {
   }
 
@@ -24,7 +32,7 @@
     &.sm-sized {
       position: relative;
       // don't grow, don't shrink, use width or height for size determination
-      flex: 0 0 auto;    
+      flex: 0 0 auto;
     }
 
     &.sm-auto-fill {
