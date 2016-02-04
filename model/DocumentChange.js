@@ -74,27 +74,59 @@ function DocumentChange(ops, before, after) {
   this.created = null;
   // a hash with all deleted nodes
   this.deleted = null;
-
-  // TODO: maybe do this lazily, i.e. only when the change inspection API is used?
-  this._init();
 }
 
 DocumentChange.Prototype = function() {
 
-  this.freeze = function() {
-    Object.freeze(this);
-    Object.freeze(this.ops);
-    Object.freeze(this.before);
-    Object.freeze(this.after);
-  };
-
-  this._init = function() {
+  /*
+    Extract aggregated information about which nodes and properties have been affected.
+    This gets called by Document after applying the change.
+  */
+  this._extractInformation = function(doc) {
     var ops = this.ops;
     var created = {};
     var deleted = {};
     var updated = new TreeIndex();
-    var i;
-    for (i = 0; i < ops.length; i++) {
+
+    // TODO: we will introduce a special operation type for coordinates
+    function _checkAnnotation(op) {
+      var node = op.val;
+      var path, propName;
+      switch (op.type) {
+        case "create":
+        case "delete":
+          // HACK: detecting annotation changes in an opportunistic way
+          if (node.hasOwnProperty('startOffset')) {
+            path = node.path || node.startPath;
+            updated.set(path, true);
+          }
+          if (node.hasOwnProperty('endPath')) {
+            path = node.endPath;
+            updated.set(path, true);
+          }
+          break;
+        case "update":
+        case "set":
+          // HACK: detecting annotation changes in an opportunistic way
+          node = doc.get(op.path[0]);
+          propName = op.path[1];
+          if (node.isPropertyAnnotation()) {
+            if ((propName === 'path' || propName === 'startOffset' ||
+                 propName === 'endOffset') && !deleted[node.path[0]]) {
+              updated.set(node.path, true);
+            }
+          } else if (node.isContainerAnnotation()) {
+            if ((propName === 'startPath' || propName === 'startOffset') && !deleted[node.startPath[0]]) {
+              updated.set(node.startPath, true);
+            } else if ((propName === 'endPath' || propName === 'endOffset') && !deleted[node.endPath[0]]) {
+              updated.set(node.endPath, true);
+            }
+          }
+          break;
+      }
+    }
+
+    for (var i = 0; i < ops.length; i++) {
       var op = ops[i];
       if (op.type === "create") {
         created[op.val.id] = op.val;
@@ -109,6 +141,7 @@ DocumentChange.Prototype = function() {
         // The old as well the new one is affected
         updated.set(op.path, true);
       }
+      _checkAnnotation(op);
     }
     this.created = created;
     this.deleted = deleted;
