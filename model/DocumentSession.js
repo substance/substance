@@ -141,6 +141,9 @@ DocumentSession.Prototype = function() {
     });
     if (change) {
       this.selection = change.after.selection;
+      if (change.after.surfaceId) {
+        this.selection.surfaceId = change.after.surfaceId;
+      }
       this.isTransacting = false;
       this._selectionHasChanged = true;
       this._commit(change, info);
