@@ -370,7 +370,7 @@ Surface.Prototype = function() {
   /* Event handlers */
 
   this.onDocumentChange = function(change) {
-    change.updated.forEach(function(path) {
+    change.updated.forEach(function(_, path) {
       var comp = this._textProperties[path];
       if (comp) {
         comp.rerender();
