@@ -85,9 +85,6 @@ ListEditing.Prototype = function() {
       newNode = node.toJSON();
       newNode.id = id;
       newNode.content = text.substring(offset);
-      // if (offset === text.length) { // cursor is at the end
-      //   newNode.type = tx.getSchema().getDefaultTextType();
-      // }
       tx.create(newNode);
       if (offset < text.length) {
         // transfer annotations which are after offset to the new node
@@ -148,7 +145,22 @@ ListEditing.Prototype = function() {
    *        a textish node.
    */
   this.mergeListWithTextish = function(tx, args) {
-    console.log('TODO: implement merge list-text');
+    var containerId = args.containerId;
+    var container = tx.get(containerId);
+    // get the id of the last list item
+    var lastListItemId = args.first.items[args.first.items.length-1];
+    var originalOffset = tx.get(lastListItemId).content.length;
+    // hide the textish node
+    container.hide(args.second.id);
+    // add the content of the text node to the last item of the list
+    tx.update([lastListItemId, 'content'], {insert: {offset: originalOffset, value: args.second.content}});
+    // update the selection
+    var selection = tx.createSelection({
+      type: 'property',
+      path: [lastListItemId, 'content'],
+      startOffset: originalOffset
+    });
+    args.selection = selection;
     return args;
   };
 
