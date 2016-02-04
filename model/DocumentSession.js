@@ -142,8 +142,8 @@ DocumentSession.Prototype = function() {
     if (change) {
       this.selection = change.after.selection;
       this.isTransacting = false;
-      this._commit(change, info);
       this._selectionHasChanged = true;
+      this._commit(change, info);
       return change;
     } else {
       this.isTransacting = false;
