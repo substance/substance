@@ -346,7 +346,7 @@ QUnit.test('Propagate properties to child components when setProps called on par
 });
 
 
-QUnit.test('Preserve components when ref matches, and rerender when props changed', function(assert) {
+QUnit.uiTest('Preserve components when ref matches, and rerender when props changed', function(assert) {
   var ItemComponent = TestComponent.extend({
     shouldRerender: function(nextProps) {
       return !isEqual(nextProps, this.props);
@@ -364,7 +364,6 @@ QUnit.test('Preserve components when ref matches, and rerender when props change
       return el;
     }
   });
-
   // Initial mount
   var comp = Component.mount(CompositeComponent, {
     items: [
@@ -476,7 +475,7 @@ QUnit.test("Component.append() should support appending text.", function(assert)
   assert.equal(comp.text(), 'XXX');
 });
 
-QUnit.test("Should wipe a referenced component when class changes", function(assert) {
+QUnit.uiTest("Should wipe a referenced component when class changes", function(assert) {
   var ComponentA = TestComponent.extend({
     render: function() {
       return $$('div').addClass('component-a');
