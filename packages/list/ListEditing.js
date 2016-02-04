@@ -1,4 +1,5 @@
 var oo = require('../../util/oo');
+var uuid = require('../../util/uuid');
 
 var annotationHelpers = require('../../model/annotationHelpers');
 
@@ -16,7 +17,69 @@ ListEditing.Prototype = function() {
   };
 
   this.breakList = function(tx, args) {
-    console.log("TODO: implement break list");
+    var selection = args.selection;
+    if (!selection.isPropertySelection()) {
+      throw new Error('Expected property selection.');
+    }
+
+    var range = selection.getRange();
+    var path = range.start.path;
+    var offset = range.start.offset;
+    var node = tx.get(path[0]);
+
+    // split the text property and create a new list item node with trailing text and annotations transferred
+    var text = node.content;
+    var id = uuid(node.type);
+    var parentList = tx.get(node.parent);
+    var newPath = [id, 'content'];
+    var newNode;
+    // when breaking at the beginning, a new list-item node will be inserted at the
+    // current position of the current node
+    if (offset === 0) {
+      newNode = tx.create({
+        id: id,
+        type: node.type,
+        content: "",
+        parent: node.parent
+      });
+      // update the items of the parent list
+      tx.update([node.parent, 'items'], {insert: {offset: parentList.items.indexOf(node.id), value: id}});
+      // maintain the selection at the beginning
+      selection = tx.createSelection({
+        type: 'property',
+        path: path,
+        startOffset: 0
+      });
+    }
+    // otherwise a new list-item node containing all the trailing text is inserted
+    // just after the current position of the current node
+    else {
+      newNode = node.toJSON();
+      newNode.id = id;
+      newNode.content = text.substring(offset);
+      // if (offset === text.length) { // cursor is at the end
+      //   newNode.type = tx.getSchema().getDefaultTextType();
+      // }
+      tx.create(newNode);
+      if (offset < text.length) {
+        // transfer annotations which are after offset to the new node
+        annotationHelpers.transferAnnotations(tx, path, offset, [id, 'content'], 0);
+        // truncate the original property
+        tx.update(path, {
+          delete: { start: offset, end: text.length }
+        });
+      }
+      // update the parent list to contain the newly created list item as a child item
+      tx.update([node.parent, 'items'], {insert: {offset: parentList.items.indexOf(node.id)+1, value: id}});
+      // update the selection
+      selection = tx.createSelection({
+        type: 'property',
+        path: newPath,
+        startOffset: 0
+      });
+    }
+    args.selection = selection;
+    args.node = newNode;
     return args;
   };
 
