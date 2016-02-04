@@ -202,7 +202,9 @@ Document.Prototype = function() {
   */
   this.create = function(nodeData) {
     var op = this._create(nodeData);
-    this._notifyChangeListeners(new DocumentChange([op], {}, {}));
+    var change = new DocumentChange([op], {}, {});
+    change._extractInformation(this);
+    this._notifyChangeListeners(change);
     return this.data.get(nodeData.id);
   };
 
@@ -223,7 +225,9 @@ Document.Prototype = function() {
   this.delete = function(nodeId) {
     var node = this.get(nodeId);
     var op = this._delete(nodeId);
-    this._notifyChangeListeners(new DocumentChange([op], {}, {}));
+    var change = new DocumentChange([op], {}, {});
+    change._extractInformation(this);
+    this._notifyChangeListeners(change);
     return node;
   };
 
@@ -245,7 +249,9 @@ Document.Prototype = function() {
   this.set = function(path, value) {
     var oldValue = this.get(path);
     var op = this._set(path, value);
-    this._notifyChangeListeners(new DocumentChange([op], {}, {}));
+    var change = new DocumentChange([op], {}, {});
+    change._extractInformation(this);
+    this._notifyChangeListeners(change);
     return oldValue;
   };
 
@@ -285,7 +291,9 @@ Document.Prototype = function() {
   */
   this.update = function(path, diff) {
     var op = this._update(path, diff);
-    this._notifyChangeListeners(new DocumentChange([op], {}, {}));
+    var change = new DocumentChange([op], {}, {});
+    change._extractInformation(this);
+    this._notifyChangeListeners(change);
     return op;
   };
 

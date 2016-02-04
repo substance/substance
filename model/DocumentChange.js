@@ -110,16 +110,18 @@ DocumentChange.Prototype = function() {
         case "set":
           // HACK: detecting annotation changes in an opportunistic way
           node = doc.get(op.path[0]);
-          propName = op.path[1];
-          if (node.isPropertyAnnotation()) {
-            if ((propName === 'path' || propName === 'startOffset' ||
-                 propName === 'endOffset') && !deleted[node.path[0]]) {
-              updated.set(node.path, true);
-            }
-          } else if (node.isContainerAnnotation()) {
-            if (propName === 'startPath' || propName === 'startOffset' ||
-                propName === 'endPath' || propName === 'endOffset') {
-              affectedContainerAnnos.push(node);
+          if (node) {
+            propName = op.path[1];
+            if (node.isPropertyAnnotation()) {
+              if ((propName === 'path' || propName === 'startOffset' ||
+                   propName === 'endOffset') && !deleted[node.path[0]]) {
+                updated.set(node.path, true);
+              }
+            } else if (node.isContainerAnnotation()) {
+              if (propName === 'startPath' || propName === 'startOffset' ||
+                  propName === 'endPath' || propName === 'endOffset') {
+                affectedContainerAnnos.push(node);
+              }
             }
           }
           break;
