@@ -27,6 +27,9 @@ ListEditing.Prototype = function() {
     var offset = range.start.offset;
     var node = tx.get(path[0]);
 
+    var containerId = args.containerId;
+    var container = tx.get(containerId);
+
     // split the text property and create a new list item node with trailing text and annotations transferred
     var text = node.content;
     var id = uuid(node.type);
@@ -36,20 +39,45 @@ ListEditing.Prototype = function() {
     // when breaking at the beginning, a new list-item node will be inserted at the
     // current position of the current node
     if (offset === 0) {
-      newNode = tx.create({
-        id: id,
-        type: node.type,
-        content: "",
-        parent: node.parent
-      });
-      // update the items of the parent list
-      tx.update([node.parent, 'items'], {insert: {offset: parentList.items.indexOf(node.id), value: id}});
-      // maintain the selection at the beginning
-      selection = tx.createSelection({
-        type: 'property',
-        path: path,
-        startOffset: 0
-      });
+      if (text.length === 0) {
+        // if we hit return on an already empty list item, it should transform into
+        // a paragraph
+        var index = container.getChildIndex(parentList); // index of current list
+        // create a paragraph node
+        var defaultType = tx.getSchema().getDefaultTextType();
+        id = uuid(defaultType);
+        newNode = tx.create({
+          id: id,
+          type: defaultType,
+          content: ""
+        });
+        // show the paragraph node
+        container.show(id, index+1);
+        // remove the current empty list item from the list
+        tx.update([node.parent, 'items'], {delete: {offset: parentList.items.indexOf(node.id)}});
+        newPath = [id, 'content'];
+        // trandfer the cursor to the paragraph
+        selection = tx.createSelection({
+          type: 'property',
+          path: newPath,
+          startOffset: 0
+        });
+      } else {
+        newNode = tx.create({
+          id: id,
+          type: node.type,
+          content: "",
+          parent: node.parent
+        });
+        // update the items of the parent list
+        tx.update([node.parent, 'items'], {insert: {offset: parentList.items.indexOf(node.id), value: id}});
+        // maintain the selection at the beginning
+        selection = tx.createSelection({
+          type: 'property',
+          path: path,
+          startOffset: 0
+        });
+      }
     }
     // otherwise a new list-item node containing all the trailing text is inserted
     // just after the current position of the current node
