@@ -370,12 +370,13 @@ Surface.Prototype = function() {
   /* Event handlers */
 
   this.onDocumentChange = function(change) {
+    // dirty text properties which need to be updated due to selection changes
+    var needUpdate = this._updateSelectionFragments();
+    // plus all text properties affected by the change
     change.updated.forEach(function(_, path) {
-      var comp = this._textProperties[path];
-      if (comp) {
-        comp.rerender();
-      }
-    }.bind(this));
+      needUpdate[path] = true;
+    });
+    this._updateTextProperties(needUpdate);
     if (this.domSelection) {
       // console.log('Rerendering DOM selection after document change.', this.__id__);
       this.rerenderDomSelection();
@@ -385,7 +386,11 @@ Surface.Prototype = function() {
 
   this.onSelectionChange = function() {
     // console.log('Rerendering DOM selection after selection change.');
-    this.rerenderDomSelection();
+    var needUpdate = this._updateSelectionFragments();
+    this._updateTextProperties(needUpdate);
+    if (this.domSelection) {
+      this.rerenderDomSelection();
+    }
     this.emit('selection:changed', this.getSelection());
   };
 
@@ -801,7 +806,57 @@ Surface.Prototype = function() {
 
   this._getFragments = function(path) {
     /* jshint unused:false */
-    return [];
+    var frags = [];
+    if (this._selectionFragments) {
+      var selectionFragments = this._selectionFragments[path];
+      if (selectionFragments) {
+        frags = frags.concat(selectionFragments);
+      }
+    }
+    return frags;
+  };
+
+  this._computeSelectionFragments = function(sel, selectionFragments) {
+    selectionFragments = selectionFragments || {};
+    if (sel && !sel.isNull()) {
+      var fragments = sel.getFragments();
+      fragments.forEach(function(frag) {
+        var pathStr = frag.path.toString();
+        var frags = selectionFragments[pathStr];
+        if (!frags) {
+          frags = [];
+          selectionFragments[pathStr] = frags;
+        }
+        frags.push(frag);
+      });
+    }
+    return selectionFragments;
+  };
+
+  this._updateSelectionFragments = function() {
+    var needUpdate = {};
+    var oldSelectionFragments = this._selectionFragments;
+    var newSelectionFragments = {};
+    this._computeSelectionFragments(this.getSelection(), newSelectionFragments);
+    this._selectionFragments = newSelectionFragments;
+    // properties which displayed the selection previously
+    each(oldSelectionFragments, function(_, pathStr) {
+      needUpdate[pathStr] = true;
+    });
+    // properties which display the selection currently
+    each(newSelectionFragments, function(_, pathStr) {
+      needUpdate[pathStr] = true;
+    });
+    return needUpdate;
+  };
+
+  this._updateTextProperties = function(needUpdate) {
+    each(needUpdate, function(_, pathStr) {
+      var comp = this._textProperties[pathStr];
+      if (comp) {
+        comp.rerender();
+      }
+    }.bind(this));
   };
 
   // TODO: we could integrate container node rendering into this helper

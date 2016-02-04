@@ -44,13 +44,6 @@ TextPropertyComponent.Prototype = function() {
     }
   };
 
-  this.getInitialState = function() {
-    var surface = this.getSurface();
-    return {
-      fragments: surface._getFragments(this.props.path)
-    };
-  };
-
   this.render = function() {
     var el = this.super.render.call(this);
     el.removeClass('sc-annotated-text').addClass('sc-text-property');
@@ -60,8 +53,9 @@ TextPropertyComponent.Prototype = function() {
   this.getAnnotations = function() {
     var doc = this.getDocument();
     var annotations = doc.getIndex('annotations').get(this.props.path);
-    if (this.state.fragments) {
-      annotations = annotations.concat(this.state.fragments);
+    var fragments = this.getSurface()._getFragments(this.props.path);
+    if (fragments) {
+      annotations = annotations.concat(fragments);
     }
     return annotations;
   };
