@@ -1,7 +1,7 @@
 'use strict';
 
 var Component = require('./Component');
-var _ = require('../util/helpers');
+var capitalize = require('lodash/capitalize');
 var $$ = Component.$$;
 
 /**
@@ -12,7 +12,7 @@ var $$ = Component.$$;
 
   Like with {@link ui/Command} are two categories of tools, {@link ui/SurfaceTool}
   and {@link ui/ControllerTool}.
-  
+
   @class
   @component
 */
@@ -25,8 +25,8 @@ function Tool() {
 
 Tool.Prototype = function() {
 
-  /* 
-    Initialize toolstate. Obtained from the toolmanager by asking for 
+  /*
+    Initialize toolstate. Obtained from the toolmanager by asking for
     the associated command state.
   */
   this.getInitialState = function() {
@@ -72,7 +72,7 @@ Tool.Prototype = function() {
     var title = this.props.title || this.i18n.t(this.getName());
     // Used only by annotation tool so far
     if (this.state.mode) {
-      title = [_.capitalize(this.state.mode), title].join(' ');
+      title = [capitalize(this.state.mode), title].join(' ');
     }
     var el = $$('div')
       .attr('title', title)

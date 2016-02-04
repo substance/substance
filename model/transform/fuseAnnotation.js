@@ -1,7 +1,7 @@
 'use strict';
 
 var each = require('lodash/each');
-var helpers = require('../documentHelpers');
+var documentHelpers = require('../documentHelpers');
 var createAnnotation = require('./createAnnotation');
 
 // Args:
@@ -23,7 +23,7 @@ function fuseAnnotation(tx, args) {
     throw new Error('containerId must be provided for container selections');
   }
 
-  var annos = helpers.getAnnotationsForSelection(tx, sel, args.annotationType, args.containerId);
+  var annos = documentHelpers.getAnnotationsForSelection(tx, sel, args.annotationType, args.containerId);
 
   each(annos, function(anno) {
     sel = sel.expand(anno.getSelection());
