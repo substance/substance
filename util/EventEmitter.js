@@ -209,7 +209,7 @@ EventEmitter.Prototype = function() {
   };
 
   /**
-   * Subscribe a listener to a event.
+   * Subscribe a listener to an event.
    *
    * @param {String} event
    * @param {Function} method
