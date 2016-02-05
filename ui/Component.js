@@ -860,9 +860,13 @@ Component.Prototype = function ComponentPrototype() {
       $el.css(data.style);
     }
     // $.on
-    each(this._virtualEl.handlers, function(handlerSpec, eventName) {
-      this._bindHandler($el[0], this._virtualEl._owner, eventName, handlerSpec);
-    }.bind(this));
+    // HACK: ATM handlers attached to 'component' typed component
+    // are not bound (as opposed to 'element' types)
+    if (this._virtualEl.type === 'component') {
+      each(this._virtualEl.handlers, function(handlerSpec, eventName) {
+        this._bindHandler($el[0], this._virtualEl._owner, eventName, handlerSpec);
+      }.bind(this));
+    }
     each(data.handlers, function(handlerSpec, eventName) {
       this._bindHandler($el[0], data._owner, eventName, handlerSpec);
     }.bind(this));
