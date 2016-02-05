@@ -132,11 +132,16 @@ DocumentSession.Prototype = function() {
     this.stage.reset();
     var sel = this.selection;
     info = info || {};
+    var surfaceId = sel.surfaceId;
     var change = this.stage._transaction(function(tx) {
       tx.before.selection = sel;
       var args = { selection: sel };
       var result = transformation(tx, args) || {};
-      tx.after.selection = result.selection || sel;
+      sel = result.selection || sel;
+      if (!sel.surfaceId) {
+        sel.surfaceId = surfaceId;
+      }
+      tx.after.selection = sel;
       extend(info, tx.info);
     });
     if (change) {
