@@ -222,39 +222,58 @@ ListEditing.Prototype = function() {
   // TODO: this implementation is *very* similar to merge.mergeTextNodes
   // try to consolidate this
   this.mergeListItems = function(tx, args) {
-    var list = args.node;
-    var first = args.first;
-    var second = args.second;
-    var firstPath = first.getPath();
-    var secondPath = second.getPath();
-    var firstText = tx.get(first.getPath());
     var selection;
-    // when the first component is empty we rather remove than merging into it
-    if (firstText.length === 0) {
-      // remove the first item from the item list, and delete it from the document
-      list.removeItem(first[0]);
-      tx.delete(firstPath[0]);
-      // set the selection to the end of the first component
+    var node = tx.get(args.path[0]);
+    var nodeIndex = args.node.items.indexOf(args.path[0]);
+    if (args.direction === 'right') {
+      // If delete is hit at the end of a list element, we merge the content of the
+      // next element int othe current one.
+      var nextNode = tx.get(args.node.items[nodeIndex+1]);
+      var contentLength = node.content.length;
+      tx.update(args.path, {insert: {offset: contentLength, value: nextNode.content}});
+      tx.update([args.node.id, 'items'], {delete: {offset: nodeIndex+1}});
       selection = tx.createSelection({
         type: 'property',
-        path: secondPath,
-        startOffset: 0
+        path: args.path,
+        startOffset: contentLength
       });
     } else {
-      var secondText = tx.get(second.getPath());
-      // TODO: we should introduce a trafo that moves a text fragment and its annotations
-      // to a new location
-      // append the second text and transfer annotations
-      tx.update(firstPath, { insert: { offset: firstText.length, value: secondText } });
-      annotationHelpers.transferAnnotations(tx, secondPath, 0, firstPath, firstText.length);
-      // remove the second item from the list and delete it from the document
-      list.removeItem(secondPath[0]);
-      tx.delete(secondPath[0]);
-      // set the selection to the end of the first component
+      // If backspace is hit at the beginning of a the list element,
+      // we convert the first list item into a paragraph and split the list
+      // into 2 lists.
+      var defaultType = tx.getSchema().getDefaultTextType();
+      var id = uuid(defaultType);
+      var containerId = args.containerId;
+      var container = tx.get(containerId);
+      var index = container.getChildIndex(args.node);
+      var numItems = args.node.items.length;
+      tx.create({
+        id: id,
+        type: defaultType,
+        content: node.content
+      });
+      var newList = tx.create({
+        id: uuid('list'),
+        type: args.node.type,
+        items: args.node.items.slice(nodeIndex+1, numItems),
+        ordered: args.node.ordered
+      });
+      var listElem;
+      for (var i=0; i<newList.items.length; i++) {
+        listElem = tx.get(newList.items[i]);
+        listElem.parent = newList.id;
+      }
+      // delete the trailing list items from the first list
+      for (i=numItems-1; i>=nodeIndex; i--) {
+        tx.update([args.node.id, 'items'], {delete: {offset: i}});
+      }
+      // show the paragraph node and the second list node
+      container.show(id, index+1);
+      container.show(newList.id, index+2);
       selection = tx.createSelection({
         type: 'property',
-        path: first.path,
-        startOffset: firstText.length
+        path: [id, 'content'],
+        startOffset: 0
       });
     }
     args.selection = selection;
