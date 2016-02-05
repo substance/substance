@@ -5,6 +5,9 @@ var isEqual = require('lodash/isEqual');
 var each = require('lodash/each');
 var platform = require('../util/platform');
 var Registry = require('../util/Registry');
+var Selection = require('../model/Selection');
+var PropertySelection = require('../model/PropertySelection');
+var ContainerSelection = require('../model/ContainerSelection');
 var copySelection = require('../model/transform/copySelection');
 var insertText = require('../model/transform/insertText');
 var deleteSelection = require('../model/transform/deleteSelection');
@@ -273,10 +276,13 @@ Surface.Prototype = function() {
   };
 
   this.setSelectionFromEvent = function(evt) {
-    this.skipNextFocusEvent = true;
-    var domRange = Surface.getDOMRangeFromEvent(evt);
-    var sel = this.domSelection.getSelectionFromDOMRange(domRange);
-    this.setSelection(sel);
+    if (this.domSelection) {
+      this.skipNextFocusEvent = true;
+      var domRange = Surface.getDOMRangeFromEvent(evt);
+      var range = this.domSelection.getSelectionFromDOMRange(domRange);
+      var sel = this._createSelection(range);
+      this.setSelection(sel);
+    }
   };
 
   this.rerenderDomSelection = function() {
@@ -469,8 +475,10 @@ Surface.Prototype = function() {
     // necessary for handling dead keys properly
     this.skipNextObservation=true;
     this.transaction(function(tx, args) {
-      // trying to remove the DOM selection to reduce flickering
-      this.domSelection.clear();
+      if (this.domSelection) {
+        // trying to remove the DOM selection to reduce flickering
+        this.domSelection.clear();
+      }
       args.text = event.data;
       return this.insertText(tx, args);
     }.bind(this));
@@ -501,8 +509,10 @@ Surface.Prototype = function() {
     }
     if (character.length>0) {
       this.transaction(function(tx, args) {
-        // trying to remove the DOM selection to reduce flickering
-        this.domSelection.clear();
+        if (this.domSelection) {
+          // trying to remove the DOM selection to reduce flickering
+          this.domSelection.clear();
+        }
         args.text = character;
         return this.insertText(tx, args);
       }.bind(this));
@@ -555,7 +565,8 @@ Surface.Prototype = function() {
     // being called.
     setTimeout(function() {
       if (this.domSelection) {
-        var sel = this.domSelection.getSelection();
+        var range = this.domSelection.mapDOMSelection();
+        var sel = this._createSelection(range);
         this.setSelection(sel);
       }
     }.bind(this));
@@ -603,7 +614,8 @@ Surface.Prototype = function() {
     //   if (this.isFocused){
     //     this.rerenderDomSelection();
     //   } else {
-    //     var sel = this.domSelection.getSelection();
+    //     var range = this.domSelection.mapDOMSelection();
+    //     var sel = this._createSelection(range);
     //     this.setFocused(true);
     //     this.setSelection(sel);
     //   }
@@ -877,6 +889,32 @@ Surface.Prototype = function() {
       doc: doc,
       node: node
     });
+  };
+
+  // TODO: DOMSelection provides just plain objects containing
+  // Coordinate instances
+  this._createSelection = function(range) {
+    if (!range) {
+      return Selection.nullSelection;
+    }
+    if (range.isReverse) {
+      var tmp = range.start;
+      range.start = range.end;
+      range.end = tmp;
+    }
+    var sel;
+    if (isEqual(range.start.path, range.end.path)) {
+      sel = new PropertySelection(range.start, range.end, range.isReverse);
+    } else {
+      if (!this.isContainerEditor()) {
+        console.error('Can only create ContainerSelection for ContainerEditors');
+        return Selection.nullSelection;
+      }
+      sel = new ContainerSelection(this.getContainerId(),
+        range.start, range.end, range.isReverse);
+    }
+    sel.attach(this.getDocument());
+    return sel;
   };
 
 };

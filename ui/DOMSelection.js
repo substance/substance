@@ -1,13 +1,10 @@
 /* jshint latedef:nofunc */
 'use strict';
 
-var isEqual = require('lodash/isEqual');
 var $ = require('../util/jquery');
 var oo = require('../util/oo');
 var Coordinate = require('../model/Coordinate');
 var Selection = require('../model/Selection');
-var PropertySelection = require('../model/PropertySelection');
-var ContainerSelection = require('../model/ContainerSelection');
 var TextPropertyComponent = require('./TextPropertyComponent');
 
 /*
@@ -25,7 +22,6 @@ var TextPropertyComponent = require('./TextPropertyComponent');
  */
 function SurfaceSelection(surface) {
   this.surface = surface;
-  this.doc = surface.getDocument();
 }
 
 SurfaceSelection.Prototype = function() {
@@ -59,7 +55,7 @@ SurfaceSelection.Prototype = function() {
     }
   };
 
-  this.getSelection = function() {
+  this.mapDOMSelection = function() {
     var wSel = window.getSelection();
     // Use this log whenever the mapping goes wrong to analyze what
     // is actually being provided by the browser
@@ -75,47 +71,18 @@ SurfaceSelection.Prototype = function() {
     } else {
       range = this._getRange(wSel.anchorNode, wSel.anchorOffset, wSel.focusNode, wSel.focusOffset, wSel.collapsed);
     }
-    var sel = this._createSelection(range);
-    console.log('### selection', sel.toString());
-    return sel;
+    // console.log('### extracted range from DOM', range);
+    return range;
   };
 
   this.getSelectionFromDOMRange = function(wRange) {
-    var range = this._getRange(wRange.startContainer, wRange.startOffset, wRange.endContainer, wRange.endOffset);
-    return this._createSelection(range);
+    return this._getRange(wRange.startContainer, wRange.startOffset, wRange.endContainer, wRange.endOffset);
   };
 
   this.clear = function() {
     var sel = window.getSelection();
     sel.removeAllRanges();
     this.state = null;
-  };
-
-  // TODO: it would be preferable to leave this implementation
-  // agnostic regarding selection classes
-  // so, we could move this method into the surface
-  this._createSelection = function(range) {
-    if (!range) {
-      return Selection.nullSelection;
-    }
-    if (range.isReverse) {
-      var tmp = range.start;
-      range.start = range.end;
-      range.end = tmp;
-    }
-    var sel;
-    if (isEqual(range.start.path, range.end.path)) {
-      sel = new PropertySelection(range.start, range.end, range.isReverse);
-    } else {
-      if (!this.surface.isContainerEditor()) {
-        console.error('Can only create ContainerSelection for ContainerEditors');
-        return Selection.nullSelection;
-      }
-      sel = new ContainerSelection(this.surface.getContainerId(),
-        range.start, range.end, range.isReverse);
-    }
-    sel.attach(this.doc);
-    return sel;
   };
 
   this._getRange = function(anchorNode, anchorOffset, focusNode, focusOffset) {
@@ -215,7 +182,7 @@ SurfaceSelection.Prototype = function() {
     Binary search on all text properties.
   */
   this._searchForCoordinate = function(node, offset, options) {
-    var elements = this.element.querySelectorAll('*[data-path]');
+    var elements = this.surface.el.querySelectorAll('*[data-path]');
     var idx, idx1, idx2, cmp1, cmp2;
     idx1 = 0;
     idx2 = elements.length-1;
@@ -252,8 +219,9 @@ SurfaceSelection.Prototype = function() {
     } else {
       charPos = 0;
     }
+    var path = elements[idx].dataset.path.split('.');
     return {
-      container: elements[idx],
+      path: path,
       offset: charPos
     };
   };
@@ -283,11 +251,5 @@ SurfaceSelection.Prototype = function() {
 };
 
 oo.initClass(SurfaceSelection);
-
-SurfaceSelection.Coordinate = function(el, charPos) {
-  this.el = el;
-  this.offset = charPos;
-  this.path = el.dataset.path.split('.');
-};
 
 module.exports = SurfaceSelection;
