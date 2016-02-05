@@ -403,6 +403,12 @@ Object.defineProperties(PropertySelection.prototype, {
     },
     set: function() { throw new Error('immutable.'); }
   },
+  startPath: {
+    get: function() {
+      return this.range.start.path;
+    },
+    set: function() { throw new Error('immutable.'); }
+  },
   /**
     @property {Number} PropertySelection.startOffset
   */
