@@ -113,7 +113,7 @@ Surface.Prototype = function() {
 
   this.didMount = function() {
     if (!this.isReadonly()) {
-      this.domSelection = new DOMSelection(this.el, this.getDocument(), this.getContainer());
+      this.domSelection = new DOMSelection(this);
       this.clipboard.didMount();
       // Document Change Events
       this.domObserver.observe(this.el, this.domObserverConfig);
@@ -802,6 +802,10 @@ Surface.Prototype = function() {
         delete this._annotations[id];
       }
     }.bind(this));
+  };
+
+  this._getTextPropertyComponent = function(path) {
+    return this._textProperties[path];
   };
 
   this._getFragments = function(path) {

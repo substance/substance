@@ -24,36 +24,42 @@ var Range = require('./Range');
 
 
 */
-function PropertySelection(properties) {
-  PropertySelection.super.apply(this);
+function PropertySelection(start, end, reverse) {
 
-  /**
-    The path to the selected property.
-    @type {String[]}
-  */
-  var path = properties.path;
-  /**
-    Start character position.
-    @type {Number}
-  */
-  var startOffset = properties.startOffset;
-  /**
-    End character position.
-    @type {Number}
-  */
-  var endOffset = properties.endOffset || properties.startOffset;
+  if (arguments[0] instanceof Coordinate) {
+    end = end || start;
+    this.range = new Range(start, end);
+    this.reverse = !!reverse;
+  } else {
+    var properties = arguments[0];
+    /**
+      The path to the selected property.
+      @type {String[]}
+    */
+    var path = properties.path;
+    /**
+      Start character position.
+      @type {Number}
+    */
+    var startOffset = properties.startOffset;
+    /**
+      End character position.
+      @type {Number}
+    */
+    var endOffset = properties.endOffset || properties.startOffset;
 
-  if (!path || !isNumber(startOffset)) {
-    throw new Error('Invalid arguments: `path` and `startOffset` are mandatory');
+    if (!path || !isNumber(startOffset)) {
+      throw new Error('Invalid arguments: `path` and `startOffset` are mandatory');
+    }
+
+    this.range = new Range(
+      new Coordinate(path, startOffset),
+      new Coordinate(path, endOffset)
+    );
+    this.reverse = properties.reverse;
+
+    this.surfaceId = properties.surfaceId;
   }
-
-  this.range = new Range(
-    new Coordinate(path, startOffset),
-    new Coordinate(path, endOffset)
-  );
-  this.reverse = properties.reverse;
-
-  this.surfaceId = properties.surfaceId;
 
   this._internal = {};
 }
@@ -403,6 +409,7 @@ Object.defineProperties(PropertySelection.prototype, {
     },
     set: function() { throw new Error('immutable.'); }
   },
+
   startPath: {
     get: function() {
       return this.range.start.path;
@@ -418,6 +425,14 @@ Object.defineProperties(PropertySelection.prototype, {
     },
     set: function() { throw new Error('immutable.'); }
   },
+
+  endPath: {
+    get: function() {
+      return this.range.end.path;
+    },
+    set: function() { throw new Error('immutable.'); }
+  },
+
   /**
     @property {Number} PropertySelection.endOffset
   */

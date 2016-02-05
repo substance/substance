@@ -26,49 +26,61 @@ var Coordinate = require('./Coordinate');
   });
   ```
 */
-function ContainerSelection(properties) {
-  // Note: not calling the super ctor as it freezes the instance
-  /**
-    @type {String}
-  */
-  var containerId = properties.containerId;
-  /**
-    The path of the property where this annotations starts.
-    @type {String[]}
-  */
-  var startPath = properties.startPath;
-  /**
-    The path of the property where this annotations ends.
-    @type {String[]}
-  */
-  var endPath = properties.endPath || properties.startPath;
-  /**
-    The character position where this annotations starts.
-    @type {Number}
-  */
-  var startOffset = properties.startOffset;
-  /**
-    The character position where this annotations ends.
-    @type {Number}
-  */
-  var endOffset = properties.endOffset;
-  if (!isNumber(endOffset)) {
-    endOffset = properties.startOffset;
+function ContainerSelection(containerId, start, end, reverse) {
+  if (arguments[1] instanceof Coordinate) {
+    this.containerId = containerId;
+    end = end || start;
+    this.range = new Range(start, end);
+    this.reverse = !!reverse;
+  } else {
+    var properties = arguments[0];
+    // Note: not calling the super ctor as it freezes the instance
+    /**
+      @type {String}
+    */
+    var containerId = properties.containerId;
+    /**
+      The path of the property where this annotations starts.
+      @type {String[]}
+    */
+    var startPath = properties.startPath;
+    /**
+      The path of the property where this annotations ends.
+      @type {String[]}
+    */
+    var endPath = properties.endPath || properties.startPath;
+    /**
+      The character position where this annotations starts.
+      @type {Number}
+    */
+    var startOffset = properties.startOffset;
+    /**
+      The character position where this annotations ends.
+      @type {Number}
+    */
+    var endOffset = properties.endOffset;
+    if (!isNumber(endOffset)) {
+      endOffset = properties.startOffset;
+    }
+
+    if (!containerId || !startPath || !isNumber(startOffset)) {
+      throw new Error('Invalid arguments: `containerId`, `startPath` and `startOffset` are mandatory');
+    }
+
+    // TODO: validate arguments
+    this.containerId = containerId;
+    this.range = new Range(
+      new Coordinate(startPath, startOffset),
+      new Coordinate(endPath, endOffset)
+    );
+    this.reverse = properties.reverse;
+
+    this.surfaceId = properties.surfaceId;
   }
 
-  if (!containerId || !startPath || !isNumber(startOffset)) {
-    throw new Error('Invalid arguments: `containerId`, `startPath` and `startOffset` are mandatory');
+  if (!containerId) {
+    throw new Error('Invalid argument: `containerId` is mandatory');
   }
-
-  // TODO: validate arguments
-  this.containerId = containerId;
-  this.range = new Range(
-    new Coordinate(startPath, startOffset),
-    new Coordinate(endPath, endOffset)
-  );
-  this.reverse = properties.reverse;
-
-  this.surfaceId = properties.surfaceId;
 
   this._internal = {};
 }

@@ -43,6 +43,24 @@ var Fragmenter = function(options) {
 
 Fragmenter.Prototype = function() {
 
+  this.start = function(rootContext, text, annotations) {
+    return this._start(rootContext, text, annotations);
+  };
+
+  this.onText = function(context, text, entry) {
+    /* jshint unused: false */
+  };
+
+  // should return the created user context
+  this.onEnter = function(entry, parentContext) {
+    /* jshint unused: false */
+    return null;
+  };
+
+  this.onExit = function(entry, context, parentContext) {
+    /* jshint unused: false */
+  };
+
   // This is a sweep algorithm wich uses a set of ENTER/EXIT entries
   // to manage a stack of active elements.
   // Whenever a new element is entered it will be appended to its parent element.
@@ -81,14 +99,23 @@ Fragmenter.Prototype = function() {
   //   Removes 'idea1' from stack and creates a new 'bold1'
   //
 
-  var extractEntries = function(annotations) {
+  function _extractEntries(annotations) {
     var openers = [];
     var closers = [];
     each(annotations, function(a) {
       var isAnchor = (a.isAnchor ? a.isAnchor() : false);
       // special treatment for zero-width annos such as ContainerAnnotation.Anchors
       if (isAnchor) {
-        openers.push({ pos: a.offset, mode: ANCHOR, id: a.id, level: 0, type: 'anchor', node: a });
+        openers.push({
+          mode: ANCHOR,
+          pos: a.offset,
+          id: a.id,
+          level: 0,
+          type: 'anchor',
+          node: a,
+          counter: -1,
+          length: 0
+        });
       } else {
         // TODO better naming, `Node.static.level` does not say enough
         // Better would be `Node.static.fragmentation = Fragmenter.SHOULD_NOT_SPLIT;`
@@ -110,9 +137,26 @@ Fragmenter.Prototype = function() {
         }
         var startOffset = Math.min(a.startOffset, a.endOffset);
         var endOffset = Math.max(a.startOffset, a.endOffset);
-        var opener = { pos: startOffset, mode: ENTER, level: l, id: a.id, type: a.type, node: a };
+        var opener = {
+          pos: startOffset,
+          mode: ENTER,
+          level: l,
+          id: a.id,
+          type: a.type,
+          node: a,
+          length: 0,
+          counter: -1,
+        };
         openers.push(opener);
-        closers.push({ pos: endOffset, mode: EXIT, level: l, id: a.id, type: a.type, node: a, opener: opener});
+        closers.push({
+          pos: endOffset,
+          mode: EXIT,
+          level: l,
+          id: a.id,
+          type: a.type,
+          node: a,
+          opener: opener
+        });
       }
     });
 
@@ -151,7 +195,7 @@ Fragmenter.Prototype = function() {
       }
     }
     return entries;
-  };
+  }
 
   function _compareOpeners(a, b) {
     if (a.pos < b.pos) return -1;
@@ -174,44 +218,34 @@ Fragmenter.Prototype = function() {
     return 0;
   }
 
-  this.onText = function(/*context, text*/) {};
-
-  // should return the created user context
-  this.onEnter = function(/*entry, parentContext*/) {
-    return null;
-  };
-
-  this.onExit = function(/*entry, context, parentContext*/) {};
-
-  this.enter = function(entry, parentContext) {
+  this._enter = function(entry, parentContext) {
+    entry.counter++;
     return this.onEnter(entry, parentContext);
   };
 
-  this.exit = function(entry, context, parentContext) {
+  this._exit = function(entry, context, parentContext) {
     this.onExit(entry, context, parentContext);
   };
 
-  this.createText = function(context, text) {
-    if (text.length > 0) {
-      this.onText(context, text);
-    }
+  this._createText = function(context, text, entry) {
+    this.onText(context, text, entry);
   };
 
-  this.start = function(rootContext, text, annotations) {
-    var self = this;
-
-    var entries = extractEntries.call(this, annotations);
-
+  this._start = function(rootContext, text, annotations) {
+    var entries = _extractEntries.call(this, annotations);
     var stack = [{context: rootContext, entry: null}];
-    var pos = 0;
 
+    var pos = 0;
     for (var i = 0; i < entries.length; i++) {
       var entry = entries[i];
-      // in any case we add the last text to the current element
-      this.createText(stack[stack.length-1].context, text.substring(pos, entry.pos));
+      var textFragment = text.substring(pos, entry.pos);
+      if (textFragment) {
+        // add the last text to the current element
+        this._createText(stack[stack.length-1].context, textFragment, entry);
+      }
 
       pos = entry.pos;
-      var stackLevel, idx;
+      var stackLevel, idx, _entry;
       if (entry.mode === ENTER || entry.mode === ANCHOR) {
         // find the correct position and insert an entry
         for (stackLevel = 1; stackLevel < stack.length; stackLevel++) {
@@ -222,12 +256,18 @@ Fragmenter.Prototype = function() {
         // create elements which are open, and are now stacked ontop of the
         // entered entry
         for (idx = stack.length-1; idx >= stackLevel; idx--) {
-          this.exit(stack[idx].entry, stack[idx].context, stack[idx-1].context);
+          _entry = stack[idx].entry;
+          // compute number of characters since last 'enter'
+          _entry.length = pos - _entry.pos;
+          this._exit(_entry, stack[idx].context, stack[idx-1].context);
         }
         stack.splice(stackLevel, 0, {entry: entry});
         // create new elements for all lower entries
         for (idx = stackLevel; idx < stack.length; idx++) {
-          stack[idx].context = self.enter(stack[idx].entry, stack[idx-1].context);
+          _entry = stack[idx].entry;
+          // bump 'enter' pos
+          _entry.pos = pos;
+          stack[idx].context = this._enter(_entry, stack[idx-1].context);
         }
       }
       if (entry.mode === EXIT || entry.mode === ANCHOR) {
@@ -238,18 +278,27 @@ Fragmenter.Prototype = function() {
           }
         }
         for (idx = stack.length-1; idx >= stackLevel; idx--) {
-          this.exit(stack[idx].entry, stack[idx].context, stack[idx-1].context);
+          _entry = stack[idx].entry;
+          // compute number of characters since last 'enter'
+          _entry.length = pos - _entry.pos;
+          this._exit(_entry, stack[idx].context, stack[idx-1].context);
         }
         stack.splice(stackLevel, 1);
         // create new elements for all lower entries
         for (idx = stackLevel; idx < stack.length; idx++) {
-          stack[idx].context = self.enter(stack[idx].entry, stack[idx-1].context);
+          _entry = stack[idx].entry;
+          // bump 'enter' pos
+          _entry.pos = pos;
+          stack[idx].context = this._enter(_entry, stack[idx-1].context);
         }
       }
     }
 
     // Finally append a trailing text node
-    this.createText(rootContext, text.substring(pos));
+    var trailingText = text.substring(pos);
+    if (trailingText) {
+      this._createText(rootContext, trailingText);
+    }
   };
 
 };
