@@ -125,7 +125,36 @@ ListEditing.Prototype = function() {
    *        the second list node.
    */
   this.mergeListWithList = function(tx, args) {
-    console.log('TODO: implement merge list-list');
+    var node = tx.get(args.path[0]);
+    if (args.direction === 'right') {
+      // if delete is hit at the end of the first list, merge the first item of
+      // the second list into the last item of the first list
+      var item = tx.get(args.second.items[0]);
+      tx.update([node.id, 'content'], {insert: {offset: node.content.length, value: item.content}});
+      tx.update([args.second.id, 'items'], {delete: {offset: 0}});
+    } else {
+      // if backspace is hit at the beginning of teh second list, we just convert the
+      // list item to a paragraph
+      var defaultType = tx.getSchema().getDefaultTextType();
+      var id = uuid(defaultType);
+      var containerId = args.containerId;
+      var container = tx.get(containerId);
+      var index = container.getChildIndex(args.first);
+      tx.create({
+        id: id,
+        type: defaultType,
+        content: node.content
+      });
+      // show the paragraph node
+      container.show(id, index+1);
+      var selection = tx.createSelection({
+        type: 'property',
+        path: [id, 'content'],
+        startOffset: 0
+      });
+      args.selection = selection;
+      tx.update([args.second.id, 'items'], {delete: {offset: 0}});
+    }
     return args;
   };
 

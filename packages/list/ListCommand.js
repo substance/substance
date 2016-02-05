@@ -43,7 +43,8 @@ ListCommand.Prototype = function() {
       // create a new list node
       var newList = {
         id: uuid("list"),
-        type: "list"
+        type: "list",
+        ordered: true
       };
       // and a new list item node, set its parent to the list node
       var newListItem = {
