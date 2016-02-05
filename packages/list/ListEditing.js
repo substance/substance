@@ -180,7 +180,27 @@ ListEditing.Prototype = function() {
    *        a textish node.
    */
   this.mergeTextishWithList = function(tx, args) {
-    console.log('TODO: implement merge text-list');
+    // we convert the first list item into a paragraph
+    var containerId = args.containerId;
+    var container = tx.get(containerId);
+    var index = container.getChildIndex(args.second);
+    var defaultType = tx.getSchema().getDefaultTextType();
+    var id = uuid(defaultType);
+    var content = tx.get(args.second.items[0]).content;
+    tx.create({
+      id: id,
+      type: defaultType,
+      content: content
+    });
+    // show the paragraph node
+    container.show(id, index);
+    var selection = tx.createSelection({
+      type: 'property',
+      path: [id, 'content'],
+      startOffset: 0
+    });
+    args.selection = selection;
+    tx.update([args.second.id, 'items'], {delete: {offset: 0}});
     return args;
   };
 
