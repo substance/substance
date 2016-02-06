@@ -323,7 +323,9 @@ DocumentChange.transformSelection = function(sel, A) {
     if (!isCollapsed) {
       hasChanged |= _transformCoordinate(sel.end, op);
     } else {
-      sel.endPath = sel.startPath;
+      if (sel.isContainerSelection()) {
+        sel.endPath = sel.startPath;
+      }
       sel.endOffset = sel.startOffset;
     }
   });

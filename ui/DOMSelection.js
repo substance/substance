@@ -5,7 +5,6 @@ var $ = require('../util/jquery');
 var oo = require('../util/oo');
 var Coordinate = require('../model/Coordinate');
 var Range = require('../model/Range');
-var Selection = require('../model/Selection');
 var TextPropertyComponent = require('./TextPropertyComponent');
 
 /*
@@ -17,15 +16,15 @@ var TextPropertyComponent = require('./TextPropertyComponent');
  *    there are extra positions before and after non-editable child elements.
  * 3. Some native cursor behaviors need to be overidden.
  *
- * @class SurfaceSelection
+ * @class DOMSelection
  * @constructor
  * @param {Element} rootElement
  */
-function SurfaceSelection(surface) {
+function DOMSelection(surface) {
   this.surface = surface;
 }
 
-SurfaceSelection.Prototype = function() {
+DOMSelection.Prototype = function() {
 
   this.setSelection = function(sel) {
     // console.log('### renderSelection', sel.toString());
@@ -68,13 +67,13 @@ SurfaceSelection.Prototype = function() {
     var wSel = window.getSelection();
     // Use this log whenever the mapping goes wrong to analyze what
     // is actually being provided by the browser
-    // console.log('SurfaceSelection.getSelection()', 'anchorNode:', wSel.anchorNode, 'anchorOffset:', wSel.anchorOffset, 'focusNode:', wSel.focusNode, 'focusOffset:', wSel.focusOffset, 'collapsed:', wSel.collapsed);
+    // console.log('DOMSelection.getSelection()', 'anchorNode:', wSel.anchorNode, 'anchorOffset:', wSel.anchorOffset, 'focusNode:', wSel.focusNode, 'focusOffset:', wSel.focusOffset, 'collapsed:', wSel.collapsed);
     if (wSel.rangeCount === 0) {
       return null;
     }
     if (wSel.isCollapsed) {
       var coor = this._getCoordinate(wSel.anchorNode, wSel.anchorOffset, options);
-      range = this._createRange(coor, coor, false);
+      range = _createRange(coor, coor, false);
     }
     // HACK: special treatment for edge cases as addressed by #354.
     // Sometimes anchorNode and focusNodes are the surface
@@ -85,6 +84,12 @@ SurfaceSelection.Prototype = function() {
     }
     // console.log('### extracted range from DOM', range.toString);
     return range;
+  };
+
+  // only for legacy reasons
+  this.getSelection = function() {
+    console.error('DEPRECATED: use this.mapDOMSelection() instead.');
+    return this.mapDOMSelection.apply(this, arguments);
   };
 
   /*
@@ -232,7 +237,7 @@ SurfaceSelection.Prototype = function() {
     } else {
       charPos = 0;
     }
-    return new Coordinate(path, offset);
+    return new Coordinate(path, charPos);
   };
 
   /*
@@ -251,7 +256,7 @@ SurfaceSelection.Prototype = function() {
     if (props.length === 0) {
       return null;
     } else {
-      var doc = this.doc;
+      var doc = this.surface.getDocument();
       var first = props[0];
       var last = props[props.length-1];
       var startPath = _getPath(first);
@@ -275,10 +280,11 @@ SurfaceSelection.Prototype = function() {
     }
   };
 
-
   function _compareNodes(node1, node2) {
     var cmp = node1.compareDocumentPosition(node2);
-    if (cmp&window.document.DOCUMENT_POSITION_FOLLOWING) {
+    // Note: the first two cases are necessary because POSITION_FOLLOWING
+    // has strange semantics when the relationship is actually hierarchical
+    if (cmp & window.document.DOCUMENT_POSITION_FOLLOWING) {
       return -1;
     } else if (cmp&window.document.DOCUMENT_POSITION_PRECEDING) {
       return 1;
@@ -287,15 +293,24 @@ SurfaceSelection.Prototype = function() {
     }
   }
 
+  var _r1, _r2;
+
   function _isReverse(anchorNode, anchorOffset, focusNode, focusOffset) {
     // the selection is reversed when the focus propertyEl is before
     // the anchor el or the computed charPos is in reverse order
-    var reverse = false;
     if (focusNode && anchorNode) {
-      var cmp = _compareNodes(focusNode, anchorNode);
-      reverse = ( cmp < 0 || (cmp === 0 && focusOffset < anchorOffset) );
+      if (!_r1) {
+        _r1 = window.document.createRange();
+        _r2 = window.document.createRange();
+      }
+      _r1.setStart(anchorNode, anchorOffset);
+      _r2.setStart(focusNode, focusOffset);
+      var cmp = _r1.compareBoundaryPoints(window.Range.START_TO_START, _r2);
+      if (cmp === 1) {
+        return true;
+      }
     }
-    return reverse;
+    return false;
   }
 
   function _getPath(el) {
@@ -325,6 +340,6 @@ SurfaceSelection.Prototype = function() {
 
 };
 
-oo.initClass(SurfaceSelection);
+oo.initClass(DOMSelection);
 
-module.exports = SurfaceSelection;
+module.exports = DOMSelection;

@@ -5,9 +5,6 @@ var isEqual = require('lodash/isEqual');
 var each = require('lodash/each');
 var platform = require('../util/platform');
 var Registry = require('../util/Registry');
-var Selection = require('../model/Selection');
-var PropertySelection = require('../model/PropertySelection');
-var ContainerSelection = require('../model/ContainerSelection');
 var copySelection = require('../model/transform/copySelection');
 var insertText = require('../model/transform/insertText');
 var deleteSelection = require('../model/transform/deleteSelection');
@@ -280,7 +277,7 @@ Surface.Prototype = function() {
       this.skipNextFocusEvent = true;
       var domRange = Surface.getDOMRangeFromEvent(evt);
       var range = this.domSelection.getSelectionFromDOMRange(domRange);
-      var sel = this._createSelection(range);
+      var sel = this.getDocument().createSelection(range);
       this.setSelection(sel);
     }
   };
@@ -566,7 +563,7 @@ Surface.Prototype = function() {
     setTimeout(function() {
       if (this.domSelection) {
         var range = this.domSelection.mapDOMSelection();
-        var sel = this._createSelection(range);
+        var sel = this.getDocument().createSelection(range);
         this.setSelection(sel);
       }
     }.bind(this));
@@ -615,7 +612,7 @@ Surface.Prototype = function() {
     //     this.rerenderDomSelection();
     //   } else {
     //     var range = this.domSelection.mapDOMSelection();
-    //     var sel = this._createSelection(range);
+    //     var sel = this.getDocument().createSelection(range);
     //     this.setFocused(true);
     //     this.setSelection(sel);
     //   }
