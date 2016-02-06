@@ -89,11 +89,17 @@ I18n.instance.load(require('../i18n/en'));
 */
 function Controller() {
   Component.apply(this, arguments);
-  if (!this.props.doc) throw new Error('Controller requires a Substance document instance');
 
-  // NOTE: transactional editing, collab stuff etc is maintained by DocumentSession
-  // TODO: we will want to make this configurable
-  this.documentSession = new DocumentSession(this.props.doc);
+  // Either takes a DocumentSession compatible object or a doc instance
+  if (this.props.documentSession) {
+    this.documentSession = this.props.documentSession;
+    this.doc = this.props.documentSession.doc;
+  } else if (this.props.doc) {
+    this.documentSession = new DocumentSession(this.props.doc);
+    this.doc = this.props.doc;
+  } else {
+    if (!this.props.doc) throw new Error('Controller requires a Substance document instance');
+  }
 
   this.surfaces = {};
   this.stack = [];
@@ -116,8 +122,8 @@ function Controller() {
 
 Controller.Prototype = function() {
 
-  this._initialize = function(props) {
-    var doc = props.doc;
+  this._initialize = function(/*props*/) {
+    var doc = this.doc;
 
     // Register event handlers
     doc.connect(this, {
@@ -135,7 +141,7 @@ Controller.Prototype = function() {
      in your custom Controller class, don't forget the super call.
   */
   this.dispose = function() {
-    this.props.doc.disconnect(this);
+    this.doc.disconnect(this);
   };
 
   /**
@@ -146,7 +152,7 @@ Controller.Prototype = function() {
   this.getChildContext = function() {
     return {
       config: this.getConfig(),
-      doc: this.props.doc,
+      doc: this.doc,
       documentSession: this.documentSession,
       controller: this,
       componentRegistry: this.componentRegistry,
@@ -170,7 +176,7 @@ Controller.Prototype = function() {
   };
 
   this.willReceiveProps = function(newProps) {
-    if (this.props.doc && newProps.doc !== this.props.doc) {
+    if (this.doc && newProps.doc !== this.doc) {
       this._dispose();
       this.empty();
       this._initialize(newProps);
@@ -265,7 +271,7 @@ Controller.Prototype = function() {
    * @return {model/Document} The document instance owned by the controller
    */
   this.getDocument = function() {
-    return this.props.doc;
+    return this.doc;
   };
 
   this.getDocumentSession = function() {
