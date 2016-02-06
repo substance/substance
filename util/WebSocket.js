@@ -1,7 +1,7 @@
 "use strict";
 
 var EventEmitter = require('./EventEmitter');
-var uuid = require('uuid');
+var uuid = require('./uuid');
 
 /**
   Simple WebSocket implementation for local testing
@@ -17,7 +17,9 @@ function WebSocket(messageQueue) {
   // Once the connection with the server is established, we
   // receive an 'open' event and we are ready to send and
   // receive messages.
-  messageQueue.connect(this);
+  setTimeout(function() {
+    messageQueue.connectClient(this);
+  }.bind(this), 20);
 }
 
 WebSocket.Prototype = function() {
@@ -43,10 +45,11 @@ WebSocket.Prototype = function() {
   this.send = function(data) {
     this.messageQueue.pushMessage({
       from: this.clientId,
-      to: this.clientId+':hub',
+      to: this.clientId,
       data: data
     });
   };
+
 };
 
 EventEmitter.extend(WebSocket);

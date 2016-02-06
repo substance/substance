@@ -2,6 +2,7 @@
 
 var EventEmitter = require('./EventEmitter');
 var uuid = require('./uuid');
+var ServerWebSocket = require('./ServerWebSocket');
 
 /*
   Local in-process Websocket server implementation for client-side development
@@ -40,6 +41,7 @@ function WebSocketServer(messageQueue) {
   this.messageQueue.connect(this, {
     'connection:requested': this._connectionRequested
   });
+
   this.clients = {};
 }
 
@@ -53,11 +55,11 @@ WebSocketServer.Prototype = function() {
   this._connectionRequested = function(clientId) {
     var serverClientId = clientId+'-server';
     var sws = new ServerWebSocket(this.messageQueue, serverClientId);
-    this.messageQueue.connect(sws);
+    this.messageQueue.connectServerClient(sws);
 
     this.clients[serverClientId] = sws;
     this.emit('connection', sws); // hub implementers use this to register a new connection
-    sws.send('open'); // tell the client we are ready for receiving messages
+    sws.send(['open']); // tell the client we are ready for receiving messages
   };
 
 };

@@ -18,10 +18,19 @@ MessageQueue.Prototype = function() {
   /**
     A new client connects to the message queue
   */
-  this.connect = function(ws) {
+  this.connectClient = function(ws) {
     this.clients[ws.clientId] = ws;
 
     this.emit('connection:requested', ws.clientId);
+  };
+
+  /**
+    This is called by the server as a response to
+    connection:requested. ws is the server-side end of
+    the communication channel
+  */
+  this.connectServerClient = function(ws) {
+    this.clients[ws.clientId] = ws;
   };
 
   this.pushMessage = function(message) {

@@ -1,10 +1,7 @@
 "use strict";
 
-var DocumentSession = require('./DocumentSession');
-var oo = require('../util/oo');
-var EventEmitter = require('../util/EventEmitter');
-var DocumentChange = require('./DocumentChange');
-var WebSocketServer = require('../util/WebSocketServer');
+var EventEmitter = require('./EventEmitter');
+var WebSocketServer = require('./WebSocketServer');
 var forEach = require('lodash/forEach');
 
 /*
@@ -114,8 +111,8 @@ StubHub.Prototype = function() {
     // TODO: make this a real check
     if (this.doc.rev === rev || true) {
       forEach(changeset, function(change) {
-        doc._apply(change);
-      });
+        this.doc._apply(change);
+      }.bind(this));
       // send confirmation to client that commited
       ws.send('commit:confirmed', rev);
     } else {
@@ -123,7 +120,6 @@ StubHub.Prototype = function() {
       throw new Error('client and server have different versions: server side rebase needed!');
     }
   };
-
 };
 
 EventEmitter.extend(StubHub);

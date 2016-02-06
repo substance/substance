@@ -26,7 +26,7 @@ ServerWebSocket.Prototype = function() {
   this.send = function(data) {
     this.messageQueue.pushMessage({
       from: this.clientId,
-      to: this.clientId.replace(':hub', ''),
+      to: this.clientId.replace('-server', ''),
       data: data
     });
   };
