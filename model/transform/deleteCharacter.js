@@ -11,36 +11,31 @@ var updateAnnotations = require('./updateAnnotations');
   If the caret is at the begin or end it will call `mergeNodes`.
 */
 var deleteCharacter = function(tx, args) {
-  var selection = args.selection;
+  var sel = args.selection;
   var direction = args.direction;
-  var range = selection.getRange();
   var startChar, endChar;
-  if (!selection.isCollapsed()) {
+  if (!sel.isCollapsed()) {
     throw new Error('Selection must be collapsed for transformation "deleteCharacter"');
   }
-  var prop = tx.get(range.start.path);
-  if ((range.start.offset === 0 && direction === 'left') ||
-      (range.start.offset === prop.length && direction === 'right')) {
+  var prop = tx.get(sel.path);
+  if ((sel.startOffset === 0 && direction === 'left') ||
+      (sel.startOffset === prop.length && direction === 'right')) {
     var tmp = merge(tx, extend({}, args, {
-      selection: selection,
+      selection: sel,
       containerId: args.containerId,
-      path: range.start.path,
+      path: sel.path,
       direction: direction
     }));
-    selection = tmp.selection;
+    sel = tmp.selection;
   } else {
     // simple delete one character
-    startChar = (direction === 'left') ? range.start.offset-1 : range.start.offset;
+    startChar = (direction === 'left') ? sel.startOffset-1 : sel.startOffset;
     endChar = startChar+1;
-    var op = tx.update(range.start.path, { delete: { start: startChar, end: endChar } });
+    var op = tx.update(sel.path, { delete: { start: startChar, end: endChar } });
     updateAnnotations(tx, { op: op });
-    selection = tx.createSelection({
-      type: 'property',
-      path: range.start.path,
-      startOffset: startChar
-    });
+    sel = tx.createSelection(sel.path, startChar);
   }
-  args.selection = selection;
+  args.selection = sel;
   return args;
 };
 

@@ -2,10 +2,9 @@
 
 var isNumber = require('lodash/isNumber');
 var map = require('lodash/map');
-var PropertySelection = require('./PropertySelection');
 var Selection = require('./Selection');
-var Range = require('./Range');
-var Coordinate = require('./Coordinate');
+var PropertySelection = require('./PropertySelection');
+var CoordinateAdapter = PropertySelection.CoordinateAdapter;
 
 /**
   A selection spanning multiple nodes.
@@ -26,63 +25,54 @@ var Coordinate = require('./Coordinate');
   });
   ```
 */
-function ContainerSelection(containerId, start, end, reverse) {
-  if (arguments[1] instanceof Coordinate) {
-    this.containerId = containerId;
-    end = end || start;
-    this.range = new Range(start, end);
-    this.reverse = !!reverse;
-  } else {
-    var properties = arguments[0];
-    // Note: not calling the super ctor as it freezes the instance
-    /**
-      @type {String}
-    */
-    var containerId = properties.containerId;
-    /**
-      The path of the property where this annotations starts.
-      @type {String[]}
-    */
-    var startPath = properties.startPath;
-    /**
-      The path of the property where this annotations ends.
-      @type {String[]}
-    */
-    var endPath = properties.endPath || properties.startPath;
-    /**
-      The character position where this annotations starts.
-      @type {Number}
-    */
-    var startOffset = properties.startOffset;
-    /**
-      The character position where this annotations ends.
-      @type {Number}
-    */
-    var endOffset = properties.endOffset;
-    if (!isNumber(endOffset)) {
-      endOffset = properties.startOffset;
-    }
+function ContainerSelection(containerId, startPath, startOffset, endPath, endOffset, reverse, surfaceId) {
 
-    if (!containerId || !startPath || !isNumber(startOffset)) {
-      throw new Error('Invalid arguments: `containerId`, `startPath` and `startOffset` are mandatory');
-    }
+  /**
+    @type {String}
+  */
+  this.containerId = containerId;
 
-    // TODO: validate arguments
-    this.containerId = containerId;
-    this.range = new Range(
-      new Coordinate(startPath, startOffset),
-      new Coordinate(endPath, endOffset)
-    );
-    this.reverse = properties.reverse;
+  /**
+    The path of the property where this annotations starts.
+    @type {String[]}
+  */
+  this.startPath = startPath;
 
-    this.surfaceId = properties.surfaceId;
+  /**
+    The character position where this annotations starts.
+    @type {Number}
+  */
+  this.startOffset = startOffset;
+
+  /**
+    The path of the property where this annotations ends.
+    @type {String[]}
+  */
+  this.endPath = endPath;
+
+  /**
+    The character position where this annotations ends.
+    @type {Number}
+  */
+  this.endOffset = endOffset;
+
+
+  this.reverse = !!reverse;
+
+  this.surfaceId = surfaceId;
+
+  if (!this.containerId || !this.startPath || !isNumber(this.startOffset) ||
+   !this.endPath || !isNumber(this.endOffset) ) {
+    throw new Error('Invalid arguments: `containerId`, `startPath`, `startOffset`, `endPath`, and `endOffset` are mandatory');
   }
 
-  if (!containerId) {
-    throw new Error('Invalid argument: `containerId` is mandatory');
-  }
-
-  this._internal = {};
+  this._internal = {
+    // adapters for Coordinate oriented implementations
+    start: new CoordinateAdapter(this, 'startPath', 'startOffset'),
+    end: new CoordinateAdapter(this, 'endPath', 'endOffset'),
+    // set when attached to document
+    doc: null
+  };
 }
 
 ContainerSelection.Prototype = function() {
@@ -105,16 +95,36 @@ ContainerSelection.Prototype = function() {
     return this;
   };
 
-  this.isPropertySelection = function() {
-    return false;
+  this.getDocument = function() {
+    return this._internal.doc;
   };
 
   this.isContainerSelection = function() {
     return true;
   };
 
+  this.isNull = function() {
+    return false;
+  };
+
+  this.isCollapsed = function() {
+    return this.start.equals(this.end);
+  };
+
+  this.isReverse = function() {
+    return this.reverse;
+  };
+
+  this.equals = function(other) {
+    return (
+      Selection.prototype.equals.call(this, other) &&
+      this.containerId === other.containerId &&
+      (this.start.equals(other.start) && this.end.equals(other.end))
+    );
+  };
+
   this.toString = function() {
-    return "ContainerSelection("+ JSON.stringify(this.range.start.path) + ":" + this.range.start.offset + " -> " +  JSON.stringify(this.range.end.path) + ":" + this.range.end.offset + (this.reverse ? ", reverse" : "") + ")";
+    return "ContainerSelection("+ JSON.stringify(this.startPath) + ":" + this.startOffset + " -> " +  JSON.stringify(this.endPath) + ":" + this.endOffset + (this.reverse ? ", reverse" : "") + ")";
   };
 
   /**
@@ -124,6 +134,23 @@ ContainerSelection.Prototype = function() {
     return this.getDocument().get(this.containerId);
   };
 
+  /**
+    Collapse a selection to chosen direction.
+
+    @param {String} direction either left of right
+    @returns {PropertySelection}
+  */
+  this.collapse = function(direction) {
+    var coor;
+    if (direction === 'left') {
+      coor = this.start;
+    } else {
+      coor = this.end;
+    }
+    return this.createWithNewRange(coor, coor);
+  };
+
+
   this.expand = function(other) {
     var c1 = this._coordinates(this);
     var c2 = this._coordinates(other);
@@ -131,51 +158,50 @@ ContainerSelection.Prototype = function() {
     var c2s = c2.start;
     var c1e = c1.end;
     var c2e = c2.end;
-    var newCoors = {
-      start: { address: c1s.address, offset: c1s.offset },
-      end: { address: c1e.address, offset: c1e.offset }
-    };
+    var start = { address: c1s.address, offset: c1s.offset };
+    var end = { address: c1e.address, offset: c1e.offset };
+
     if (c1s.address.equals(c2s.address)) {
-      newCoors.start.offset = Math.min(c1s.offset, c2s.offset);
+      start.offset = Math.min(c1s.offset, c2s.offset);
     } else if (c1s.address.isAfter(c2s.address)) {
-      newCoors.start.address = c2s.address;
-      newCoors.start.offset = c2s.offset;
+      start.address = c2s.address;
+      start.offset = c2s.offset;
     }
     if (c1e.address.equals(c2e.address)) {
-      newCoors.end.offset = Math.max(c1e.offset, c2e.offset);
+      end.offset = Math.max(c1e.offset, c2e.offset);
     } else if (c1e.address.isBefore(c2e.address)) {
-      newCoors.end.address = c2e.address;
-      newCoors.end.offset = c2e.offset;
+      end.address = c2e.address;
+      end.offset = c2e.offset;
     }
 
-    return _createNewSelection(this, newCoors);
+    return _createNewSelection(this, start, end);
   };
 
   this.truncate = function(other) {
     var c1 = this._coordinates(this);
     var c2 = this._coordinates(other);
 
-    var newCoors = {};
+    var start, end;
     if (_isBefore(c2.start, c1.start, 'strict')) {
-      newCoors.start = c1.start;
-      newCoors.end = c2.end;
+      start = c1.start;
+      end = c2.end;
     } else if (_isBefore(c1.end, c2.end, 'strict')) {
-      newCoors.start = c2.start;
-      newCoors.end = c1.end;
+      start = c2.start;
+      end = c1.end;
     } else if (_isEqual(c1.start, c2.start)) {
       if (_isEqual(c1.end, c2.end)) {
         return Selection.nullSelection;
       } else {
-        newCoors.start = c2.end;
-        newCoors.end = c1.end;
+        start = c2.end;
+        end = c1.end;
       }
     } else if (_isEqual(c1.end, c2.end)) {
-      newCoors.start = c1.start;
-      newCoors.end = c2.start;
+      start = c1.start;
+      end = c2.start;
     } else {
       throw new Error('Could not determine coordinates for truncate. Check input');
     }
-    return _createNewSelection(this, newCoors);
+    return _createNewSelection(this, start, end);
   };
 
   this.isInsideOf = function(other, strict) {
@@ -235,8 +261,7 @@ ContainerSelection.Prototype = function() {
   this.splitIntoPropertySelections = function() {
     var sels = [];
     var container = this.getContainer();
-    var range = this.range;
-    var paths = container.getPathRange(range.start.path, range.end.path);
+    var paths = container.getPathRange(this.startPath, this.endPath);
     var doc = container.getDocument();
     for (var i = 0; i < paths.length; i++) {
       var path = paths[i];
@@ -251,12 +276,7 @@ ContainerSelection.Prototype = function() {
       } else {
         endOffset = doc.get(path).length;
       }
-      sels.push(doc.createSelection({
-        type: 'property',
-        path: path,
-        startOffset: startOffset,
-        endOffset: endOffset
-      }));
+      sels.push(new PropertySelection(path, startOffset, endOffset, false, this.surfaceId));
     }
     return sels;
   };
@@ -282,22 +302,21 @@ ContainerSelection.Prototype = function() {
       return sel._internal.containerRange;
     }
     var container = this.getContainer();
-    var range = sel.getRange();
-    var startAddress = container.getAddress(range.start.path);
+    var startAddress = container.getAddress(sel.startPath);
     var endAddress;
     if (sel.isCollapsed()) {
       endAddress = startAddress;
     } else {
-      endAddress = container.getAddress(range.end.path);
+      endAddress = container.getAddress(sel.endPath);
     }
     var containerRange = {
       start: {
         address: startAddress,
-        offset: range.start.offset,
+        offset: sel.startOffset,
       },
       end: {
         address: endAddress,
-        offset: range.end.offset
+        offset: sel.endOffset
       }
     };
     if (sel instanceof ContainerSelection) {
@@ -318,57 +337,66 @@ ContainerSelection.Prototype = function() {
     return (c1.address.equals(c2.address) && c1.offset === c2.offset);
   };
 
-  var _createNewSelection = function(containerSel, newCoors) {
+  var _createNewSelection = function(containerSel, start, end) {
     var container = containerSel.getContainer();
-    newCoors.start.path = container.getPathForAddress(newCoors.start.address);
-    newCoors.end.path = container.getPathForAddress(newCoors.end.address);
-    var newSel = new ContainerSelection({
-      containerId: containerSel.containerId,
-      startPath: newCoors.start.path,
-      startOffset: newCoors.start.offset,
-      endPath: newCoors.end.path,
-      endOffset: newCoors.end.offset
-    });
-
-    // HACK: We must not loose the document on the way if any is attached.
+    start.path = container.getPathForAddress(start.address);
+    end.path = container.getPathForAddress(end.address);
+    var newSel = new ContainerSelection(containerSel.containerId,
+      start.path, start.offset, end.path, end.offset, false, containerSel.surfaceId);
+    // we need to attach the new selection
     var doc = containerSel._internal.doc;
     if (doc) {
       newSel.attach(doc);
-    } else {
-      console.warn('No document attached to selection');
     }
-
     return newSel;
   };
 };
 
-PropertySelection.extend(ContainerSelection);
+Selection.extend(ContainerSelection);
 
 Object.defineProperties(ContainerSelection.prototype, {
   path: {
     get: function() {
       throw new Error('ContainerSelection has no path property. Use startPath and endPath instead');
     },
-    set: function() { throw new Error('immutable.'); }
+    set: function() {
+      throw new Error('ContainerSelection has no path property. Use startPath and endPath instead.');
+    }
   },
   /**
-    @property {String[]} ContainerSelection.prototype.startPath
+    @property {Coordinate} ContainerSelection.start
   */
-  startPath: {
+  start: {
     get: function() {
-      return this.range.start.path;
+      return this._internal.start;
     },
     set: function() { throw new Error('immutable.'); }
   },
   /**
-    @property {String[]} ContainerSelection.prototype.endPath
+    @property {Coordinate} ContainerSelection.end
   */
-  endPath: {
+  end: {
     get: function() {
-      return this.range.end.path;
+      return this._internal.end;
     },
     set: function() { throw new Error('immutable.'); }
-  }
+  },
+
 });
+
+ContainerSelection.fromJSON = function(properties) {
+  // Note: not calling the super ctor as it freezes the instance
+  var containerId = properties.containerId;
+  var startPath = properties.startPath;
+  var endPath = properties.endPath || properties.startPath;
+  var startOffset = properties.startOffset;
+  var endOffset = properties.endOffset;
+  var reverse = !!properties.reverse;
+  // Note: to be able to associate selections with surfaces we decided
+  // to introduce this optional property
+  var surfaceId = properties.surfaceId;
+  var sel = new ContainerSelection(containerId, startPath, startOffset, endPath, endOffset, reverse, surfaceId);
+  return sel;
+};
 
 module.exports = ContainerSelection;

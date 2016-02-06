@@ -39,25 +39,20 @@ function deleteSelection(tx, args) {
 }
 
 function _deletePropertySelection(tx, args) {
-  var range = args.selection.getRange();
-  var path = range.start.path;
-  var startOffset = range.start.offset;
-  var endOffset = range.end.offset;
+  var sel = args.selection;
+  var path = sel.path;
+  var startOffset = sel.startOffset;
+  var endOffset = sel.endOffset;
   var op = tx.update(path, { delete: { start: startOffset, end: endOffset } });
   updateAnnotations(tx, {op: op});
-  args.selection = tx.createSelection({
-    type: 'property',
-    path: path,
-    startOffset: startOffset
-  });
+  args.selection = tx.createSelection(path, startOffset);
   return args;
 }
 
 function _deleteContainerSelection(tx, args) {
-  var selection = args.selection;
-  var containerId = selection.containerId;
-  var range = selection.getRange();
-  var nodeSels = _getNodeSelection(tx, selection);
+  var sel = args.selection;
+  var containerId = sel.containerId;
+  var nodeSels = _getNodeSelection(tx, sel);
   var nodeSel, node, type;
 
   args.selection = null;
@@ -79,11 +74,7 @@ function _deleteContainerSelection(tx, args) {
   }
   // update the selection; take the first component which is not fully deleted
   if (!nodeSels[0].isFully) {
-    args.selection = tx.createSelection({
-      type: 'property',
-      path: range.start.path,
-      startOffset: range.start.offset
-    });
+    args.selection = tx.createSelection(sel.startPath, sel.startOffset);
   } else {
     // if the first node has been deleted fully we need to find the first property
     // which remained and set the selection to the first character.
@@ -91,11 +82,7 @@ function _deleteContainerSelection(tx, args) {
     for (var i = 1; i < nodeSels.length; i++) {
       nodeSel = nodeSels[i];
       if (!nodeSel.isFully) {
-        args.selection = tx.createSelection({
-          type: 'property',
-          path: nodeSel.paths[0],
-          startOffset: 0
-        });
+        args.selection = tx.createSelection(nodeSel.paths[0], 0);
         break;
       }
     }
@@ -111,11 +98,7 @@ function _deleteContainerSelection(tx, args) {
       };
       tx.create(node);
       container.show(node.id, firstNodePos);
-      args.selection = tx.createSelection({
-        type: 'property',
-        path: [node.id, 'content'],
-        startOffset: 0
-      });
+      args.selection = tx.createSelection([node.id, 'content'], 0);
     }
   }
   // Do a merge
@@ -146,11 +129,7 @@ function _deleteContainerSelection(tx, args) {
     };
     tx.create(node);
     container.show(node.id, 0);
-    args.selection = tx.createSelection({
-      type: 'property',
-      path: [node.id, 'content'],
-      startOffset: 0
-    });
+    args.selection = tx.createSelection([node.id, 'content'], 0);
   }
   return args;
 }
@@ -171,12 +150,7 @@ function _deleteNodePartially(tx, args) {
       endOffset = nodeSel.endOffset;
     }
     _deletePropertySelection(tx, extend({}, args, {
-      selection: tx.createSelection({
-        type: 'property',
-        path: path,
-        startOffset: startOffset,
-        endOffset: endOffset
-      })
+      selection: tx.createSelection(path, startOffset, endOffset)
     }));
   }
 }
@@ -185,13 +159,12 @@ function _deleteNodePartially(tx, args) {
 // it generates a data structure containing
 // information about a selection range grouped by nodes
 // e.g, if a node is fully selected or only partially
-function _getNodeSelection(doc, containerSelection) {
+function _getNodeSelection(doc, sel) {
   var result = [];
   var groups = {};
-  var range = containerSelection.getRange();
-  var container = doc.get(containerSelection.containerId);
-  var addresses = container.getAddressRange(container.getAddress(range.start.path),
-    container.getAddress(range.end.path));
+  var container = doc.get(sel.containerId);
+  var addresses = container.getAddressRange(container.getAddress(sel.startPath),
+    container.getAddress(sel.endPath));
   for (var i = 0; i < addresses.length; i++) {
     var address = addresses[i];
     var node = container.getChildAt(address[0]);
@@ -224,24 +197,24 @@ function _getNodeSelection(doc, containerSelection) {
   var endNodeSel = result[result.length-1];
   var startLen = doc.get(container.getPath(startAddress)).length;
   var endLen = doc.get(container.getPath(endAddress)).length;
-  if (range.start.offset > 0 ||
+  if (sel.startOffset > 0 ||
     (previousAddress && previousAddress[0] === startAddress[0]))
   {
     startNodeSel.isFully = false;
-    startNodeSel.startOffset = range.start.offset;
+    startNodeSel.startOffset = sel.startOffset;
     if (result.length === 1) {
-      startNodeSel.endOffset = range.end.offset;
+      startNodeSel.endOffset = sel.endOffset;
     } else {
       startNodeSel.endOffset = startLen;
     }
   }
   if (result.length > 1 &&
-      (range.end.offset < endLen ||
+      (sel.endOffset < endLen ||
         (nextAddress && nextAddress[0] === endAddress[0]))
      ) {
     endNodeSel.isFully = false;
     endNodeSel.startOffset = 0;
-    endNodeSel.endOffset = range.end.offset;
+    endNodeSel.endOffset = sel.endOffset;
   }
   return result;
 }

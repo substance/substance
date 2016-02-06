@@ -22,5 +22,5 @@ QUnit.test("Expand with PropertySelection", function(assert) {
     endOffset: 6
   });
   containerSel = containerSel.expand(propSel);
-  assert.equal(containerSel.getStartOffset(), 1, "Should expand left boundary to 1.");
+  assert.equal(containerSel.startOffset, 1, "Should expand left boundary to 1.");
 });

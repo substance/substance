@@ -25,8 +25,8 @@ function breakNode(tx, args) {
   if (!args.selection.isCollapsed()) {
     args = deleteSelection(tx, args);
   }
-  var range = args.selection.getRange();
-  var node = tx.get(range.start.path[0]);
+  var sel = args.selection;
+  var node = tx.get(sel.start.path[0]);
   var behavior = args.editingBehavior;
   if (node.isInstanceOf('text')) {
     return breakTextNode(tx, args);
@@ -40,14 +40,13 @@ function breakNode(tx, args) {
 }
 
 function breakTextNode(tx, args) {
-  var selection = args.selection;
+  var sel = args.selection;
   var containerId = args.containerId;
-  if (!selection.isPropertySelection()) {
+  if (!sel.isPropertySelection()) {
     throw new Error('Expected property selection.');
   }
-  var range = selection.getRange();
-  var path = range.start.path;
-  var offset = range.start.offset;
+  var path = sel.path;
+  var offset = sel.startOffset;
   var node = tx.get(path[0]);
 
   // split the text property and create a new paragraph node with trailing text and annotations transferred
@@ -67,11 +66,7 @@ function breakTextNode(tx, args) {
     });
     // show the new node
     container.show(id, nodePos);
-    selection = tx.createSelection({
-      type: 'property',
-      path: path,
-      startOffset: 0
-    });
+    sel = tx.createSelection(path, 0);
   }
   // otherwise a default text type node is inserted
   else {
@@ -94,13 +89,9 @@ function breakTextNode(tx, args) {
     // show the new node
     container.show(id, nodePos+1);
     // update the selection
-    selection = tx.createSelection({
-      type: 'property',
-      path: newPath,
-      startOffset: 0
-    });
+    sel = tx.createSelection(newPath, 0);
   }
-  args.selection = selection;
+  args.selection = sel;
   args.node = newNode;
   return args;
 }

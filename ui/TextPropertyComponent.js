@@ -1,6 +1,7 @@
 /* jshint latedef:nofunc */
 'use strict';
 
+var isNumber = require('lodash/isNumber');
 var AnnotatedTextComponent = require('./AnnotatedTextComponent');
 var Component = require('./Component');
 var $$ = Component.$$;
@@ -182,7 +183,10 @@ TextPropertyComponent.getCoordinate = function(root, node, offset) {
     return null;
   }
   var charPos = _getCharPos(node, offset);
-  return new Coordinate(path, charPos);
+  if (isNumber(charPos)) {
+    return new Coordinate(path, charPos);
+  }
+  return null;
 };
 
 function _getPath(root, node) {

@@ -138,7 +138,7 @@ DocumentSession.Prototype = function() {
       var args = { selection: sel };
       var result = transformation(tx, args) || {};
       sel = result.selection || sel;
-      if (!sel.surfaceId) {
+      if (sel instanceof Selection && !sel.isNull() && !sel.surfaceId) {
         sel.surfaceId = surfaceId;
       }
       tx.after.selection = sel;

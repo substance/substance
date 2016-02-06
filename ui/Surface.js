@@ -891,32 +891,6 @@ Surface.Prototype = function() {
     });
   };
 
-  // TODO: DOMSelection provides just plain objects containing
-  // Coordinate instances
-  this._createSelection = function(range) {
-    if (!range) {
-      return Selection.nullSelection;
-    }
-    if (range.isReverse) {
-      var tmp = range.start;
-      range.start = range.end;
-      range.end = tmp;
-    }
-    var sel;
-    if (isEqual(range.start.path, range.end.path)) {
-      sel = new PropertySelection(range.start, range.end, range.isReverse);
-    } else {
-      if (!this.isContainerEditor()) {
-        console.error('Can only create ContainerSelection for ContainerEditors');
-        return Selection.nullSelection;
-      }
-      sel = new ContainerSelection(this.getContainerId(),
-        range.start, range.end, range.isReverse);
-    }
-    sel.attach(this.getDocument());
-    return sel;
-  };
-
 };
 
 Component.extend(Surface);

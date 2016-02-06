@@ -236,16 +236,18 @@ ContainerAnnotation.Fragment.static.fragmentation = Number.MAX_VALUE;
 
 Object.defineProperties(ContainerAnnotation.Fragment.prototype, {
   startOffset: {
-    get: function() { return this.getStartOffset(); }
+    get: function() { return this.getStartOffset(); },
+    set: function() { throw new Error('ContainerAnnotation.Fragment.startOffset is read-only.'); }
   },
   endOffset: {
-    get: function() { return this.getEndOffset(); }
+    get: function() { return this.getEndOffset(); },
+    set: function() { throw new Error('ContainerAnnotation.Fragment.endOffset is read-only.'); }
   },
   highlighted: {
     get: function() {
       return this.anno.highlighted;
     },
-    set: function() { throw new Error('Immutable!'); }
+    set: function() { throw new Error('ContainerAnnotation.Fragment.highlighted is read-only.'); }
   }
 });
 
