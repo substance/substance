@@ -47,8 +47,9 @@ var Command = require('./Command');
   InsertImageCommand.static.name = 'insertImage';
   ```
 */
-var SurfaceCommand = function(surface) {
-  this.surface = surface;
+var SurfaceCommand = function(context) {
+  this.context = context;
+  this.surface = context.surface;
 };
 
 SurfaceCommand.Prototype = function() {

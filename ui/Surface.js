@@ -3,6 +3,7 @@
 var $ = require('../util/jquery');
 var isEqual = require('lodash/isEqual');
 var each = require('lodash/each');
+var extend = require('lodash/extend');
 var platform = require('../util/platform');
 var Registry = require('../util/Registry');
 var copySelection = require('../model/transform/copySelection');
@@ -629,7 +630,8 @@ Surface.Prototype = function() {
   this._initializeCommandRegistry = function(commands) {
     var commandRegistry = new Registry();
     each(commands, function(CommandClass) {
-      var cmd = new CommandClass(this);
+      var commandContext = extend({}, this.context, this.getChildContext());
+      var cmd = new CommandClass(commandContext);
       commandRegistry.add(CommandClass.static.name, cmd);
     }.bind(this));
     this.commandRegistry = commandRegistry;
