@@ -97,11 +97,11 @@ StubHub.Prototype = function() {
     session. 
   */
   this.open = function(ws, documentId, version) {
-    ws.send(['openCompleted', version]);
+    ws.send(['openDone', version]);
     // TODO: check revision of document from client with server-side revision
     // If client version is older send diff to client sends back new server
     // version + needed changes to bring the client to the latest version.
-    // ws.send(['openCompleted', version, changeset]);
+    // ws.send(['openDone', version, changeset]);
   };
 
   /*
@@ -110,6 +110,7 @@ StubHub.Prototype = function() {
   this._applyChanges = function(changes) {
     forEach(changes, function(change) {
       this.doc._apply(change);
+      this.doc.version += 1;
     }.bind(this));
   };
 
@@ -117,14 +118,20 @@ StubHub.Prototype = function() {
     Client wants to commit changes
   */
   this.commit = function(ws, changes, version) {
-    // TODO: make this a real check
-    if (this.doc.verison === version || true) {
-      this.applyChanges(changes);
+    if (this.doc.version === version) {
+      this._applyChanges(changes);
+      var newVersion = this.doc.version;
       // send confirmation to client that commited
-      ws.send('commitCompleted', rev);
+      ws.send(['commitDone', newVersion]);
+
+      // Send changes to all other clients
+      var collaboratorSockets = this.getCollaboratorSockets(ws);
+      forEach(collaboratorSockets, function(socket) {
+        socket.send(['update', changes, newVersion]);
+      });
     } else {
       // TODO: Make use of DocumentChange.transform()
-      throw new Error('client and server have different versions: server side rebase needed!');
+      throw new Error('client and server have different versions: server-side rebase needed!');
     }
   };
 };

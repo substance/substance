@@ -3,6 +3,8 @@
 var EventEmitter = require('./EventEmitter');
 var uuid = require('./uuid');
 
+var __id__ = 0;
+
 /**
   Simple WebSocket implementation for local testing
 */
@@ -12,6 +14,7 @@ function WebSocket(messageQueue) {
   this.messageQueue = messageQueue;
 
   this.clientId = uuid();
+  this.__id__ = __id__++;
 
   // This connects the new client socket to the message queue
   // Once the connection with the server is established, we

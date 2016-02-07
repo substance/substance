@@ -2,6 +2,8 @@
 
 var EventEmitter = require('./EventEmitter');
 
+var __id__ = 0;
+
 /**
   Simple ServerWebSocket implementation for local testing
 */
@@ -10,6 +12,8 @@ function ServerWebSocket(messageQueue, clientId) {
   ServerWebSocket.super.apply(this);
   this.messageQueue = messageQueue;
   this.clientId = clientId;
+
+  this.__id__ = __id__++;
 }
 
 ServerWebSocket.Prototype = function() {
