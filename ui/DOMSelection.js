@@ -53,12 +53,22 @@ DOMSelection.Prototype = function() {
       return;
     }
     var startComp = this.surface._getTextPropertyComponent(sel.startPath);
+    if (!startComp) {
+      console.warn('FIXME: selection seems to be invalid.');
+      this.clear();
+      return;
+    }
     var start = startComp.getDOMCoordinate(sel.startOffset);
     var end;
     if (sel.isCollapsed()) {
       end = start;
     } else {
       var endComp = this.surface._getTextPropertyComponent(sel.endPath);
+      if (!endComp) {
+        console.warn('FIXME: selection seems to be invalid.');
+        this.clear();
+        return;
+      }
       end = endComp.getDOMCoordinate(sel.endOffset);
     }
     // if there is a range then set replace the window selection accordingly
