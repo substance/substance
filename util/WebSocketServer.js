@@ -1,7 +1,6 @@
 "use strict";
 
 var EventEmitter = require('./EventEmitter');
-var uuid = require('./uuid');
 var ServerWebSocket = require('./ServerWebSocket');
 
 /*
