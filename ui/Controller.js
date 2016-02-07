@@ -1,6 +1,7 @@
 'use strict';
 
 var each = require('lodash/each');
+var extend = require('lodash/extend');
 var Component = require('./Component');
 var ToolManager = require('./ToolManager');
 var Registry = require('../util/Registry');
@@ -210,7 +211,7 @@ Controller.Prototype = function() {
   this._initializeCommandRegistry = function(commands) {
     var commandRegistry = new Registry();
     each(commands, function(CommandClass) {
-      var commandContext = _.extend({}, this.context, this.getChildContext());
+      var commandContext = extend({}, this.context, this.getChildContext());
       var cmd = new CommandClass(commandContext);
       commandRegistry.add(CommandClass.static.name, cmd);
     }.bind(this));
