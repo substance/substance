@@ -45,7 +45,7 @@ WebSocket.Prototype = function() {
   this.send = function(data) {
     this.messageQueue.pushMessage({
       from: this.clientId,
-      to: this.clientId,
+      to: this.clientId+"-server",
       data: data
     });
   };

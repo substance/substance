@@ -30,6 +30,10 @@ function StubHub(doc, messageQueue) {
   StubHub.super.apply(this);
 
   this.doc = doc;
+
+  // We just assume some doc id + version for the StubHub
+  this.doc.id = 'doc-15';
+  this.doc.version = 1;
   this.messageQueue = messageQueue;
   this.wss = new WebSocketServer(messageQueue);
 
@@ -56,7 +60,7 @@ StubHub.Prototype = function() {
     Note: No data is exchanged yet.
   */
   this._onConnection = function(ws) {
-    console.log('a new collaborator arrived');
+    console.log('a new collaborator arrived', ws.clientId);
     var self = this;
 
     ws.connect(this, {
@@ -67,7 +71,7 @@ StubHub.Prototype = function() {
   };
 
   /*
-    Handling of remote messages. 
+    Handling of client messages. 
 
     Message comes in in the following format:
 
@@ -91,30 +95,33 @@ StubHub.Prototype = function() {
   /*
     First thing the client sends to initialize the collaborative editing
     session. 
-
-    TODO: in future we need to load a doc's changeset from the db and
-    verify the revision
   */
-  this.open = function(ws, documentId, rev) {
-    ws.send(['open:finsihed', rev]);
-
+  this.open = function(ws, documentId, version) {
+    ws.send(['openCompleted', version]);
     // TODO: check revision of document from client with server-side revision
-    // If client version is older send diff to client
-    // sends back new server revision + needed changes to bring the client to the latest version
-    // ws.send(['open:finished', rev, changeset]);
+    // If client version is older send diff to client sends back new server
+    // version + needed changes to bring the client to the latest version.
+    // ws.send(['openCompleted', version, changeset]);
+  };
+
+  /*
+    Apply a set of changes to the document
+  */
+  this._applyChanges = function(changes) {
+    forEach(changes, function(change) {
+      this.doc._apply(change);
+    }.bind(this));
   };
 
   /*
     Client wants to commit changes
   */
-  this.commit = function(ws, changeset, rev) {
+  this.commit = function(ws, changes, version) {
     // TODO: make this a real check
-    if (this.doc.rev === rev || true) {
-      forEach(changeset, function(change) {
-        this.doc._apply(change);
-      }.bind(this));
+    if (this.doc.verison === version || true) {
+      this.applyChanges(changes);
       // send confirmation to client that commited
-      ws.send('commit:confirmed', rev);
+      ws.send('commitCompleted', rev);
     } else {
       // TODO: Make use of DocumentChange.transform()
       throw new Error('client and server have different versions: server side rebase needed!');
