@@ -6,12 +6,17 @@ var EventEmitter = require('./EventEmitter');
   Websocket server implementation for client-side development of protocols
 */
 
-function MessageQueue() {
+function MessageQueue(options) {
+  options = options || {};
   MessageQueue.super.apply(this);
 
   this.clients = {};
   this.messages = [];
-  setInterval(this._processMessage.bind(this), 20);
+
+  // If manual processing is on user must call tick to process the next message
+  if (!options.manualProcess) {
+    setInterval(this._processMessage.bind(this), 100);  
+  }
 }
 
 MessageQueue.Prototype = function() {
@@ -37,6 +42,10 @@ MessageQueue.Prototype = function() {
   */
   this.pushMessage = function(message) {
     this.messages.push(message);
+  };
+
+  this.tick = function() {
+    this._processMessage();
   };
 
   /*

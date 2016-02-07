@@ -35,6 +35,7 @@ CollabSession.Prototype = function() {
 
   this._onDocumentChange = function(change, info) {
     console.log('doc changed', change, info);
+    // this.pendingChanges.push(change);
   };
 
   /*
