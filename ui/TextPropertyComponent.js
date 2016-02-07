@@ -146,6 +146,12 @@ TextPropertyComponent.Prototype = function() {
   this._getDOMCoordinate = function(el, charPos) {
     var l;
     var idx = 0;
+    if (charPos === 0) {
+      return {
+        container: el,
+        offset: 0
+      };
+    }
     for (var child = el.firstChild; child; child=child.nextSibling, idx++) {
       if (child.nodeType === 3) {
         l = child.length;
