@@ -105,9 +105,12 @@ TextPropertyComponent.Prototype = function() {
 
   this.getAnnotations = function() {
     var annotations = this.getDocument().getIndex('annotations').get(this.props.path);
-    var fragments = this.getSurface()._getFragments(this.props.path);
-    if (fragments) {
-      annotations = annotations.concat(fragments);
+    var surface = this.getSurface();
+    if (surface) {
+      var fragments = surface._getFragments(this.props.path);
+      if (fragments) {
+        annotations = annotations.concat(fragments);
+      }
     }
     return annotations;
   };
