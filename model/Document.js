@@ -1,18 +1,23 @@
 'use strict';
 
 var each = require('lodash/each');
+var isEqual = require('lodash/isEqual');
+var isArray = require('lodash/isArray');
+var isObject = require('lodash/isObject');
+var isString = require('lodash/isString');
+var EventEmitter = require('../util/EventEmitter');
 var DocumentIndex = require('./DocumentIndex');
 var AnnotationIndex = require('./AnnotationIndex');
 var AnchorIndex = require('./AnchorIndex');
 var DocumentChange = require('./DocumentChange');
 var PathEventProxy = require('./PathEventProxy');
-var EventEmitter = require('../util/EventEmitter');
 var IncrementalData = require('./data/IncrementalData');
 var DocumentNodeFactory = require('./DocumentNodeFactory');
+var Coordinate = require('./Coordinate');
+var Range = require('./Range');
 var Selection = require('./Selection');
 var PropertySelection = require('./PropertySelection');
 var ContainerSelection = require('./ContainerSelection');
-var TableSelection = require('./TableSelection');
 var docHelpers = require('./documentHelpers');
 
 var __id__ = 0;
@@ -327,25 +332,13 @@ Document.Prototype = function() {
     Creating a PropertySelection:
 
     ```js
-    doc.createSelection({
-      type: 'property',
-      path: [ 'text1', 'content'],
-      startOffset: 10,
-      endOffset: 20
-    })
+    doc.createSelection([ 'text1', 'content'], 10, 20);
     ```
 
     Creating a ContainerSelection:
 
     ```js
-    doc.createSelection({
-      type: 'container',
-      containerId: 'main',
-      startPath: [ 'p1', 'content'],
-      startOffset: 10,
-      startPath: [ 'p2', 'content'],
-      endOffset: 20
-    })
+    doc.createSelection('main', [ 'p1', 'content'], 10, [ 'p2', 'content'], 20)
     ```
 
     Creating a NullSelection:
@@ -353,31 +346,63 @@ Document.Prototype = function() {
     ```js
     doc.createSelection(null);
     ```
+
+    You can also call this method with JSON data
+
+    ```js
+    doc.createSelection({
+      type: 'property',
+      path: [ 'p1', 'content'],
+      startOffset: 10,
+      endOffset: 20
+    });
+    ```
+
   */
-  this.createSelection = function(sel) {
-    /*
-     TODO: maybe we want a simpler DSL in addition to the JSON spec?
-      ```
-      doc.createSelection(null);
-      doc.createSelection(['p1','content'], 0, 5);
-        -> PropertySelection
-      doc.createSelection(['p1','content'], 0, ['p2', 'content'], 5);
-        -> ContainerSelection
-      ```
-    */
-    if (!sel) {
+  this.createSelection = function() {
+    if (arguments.length === 1 && arguments[0] === null) {
       return Selection.nullSelection;
     }
-    switch(sel.type) {
-      case 'property':
-        return new PropertySelection(sel).attach(this);
-      case 'container':
-        return new ContainerSelection(sel).attach(this);
-      case 'table':
-        return new TableSelection(sel).attach(this);
-      default:
-        throw new Error('Unsupported selection type', sel.type);
+    var sel;
+    if (arguments[0] instanceof Coordinate) {
+      var coor = arguments[0];
+      sel = new PropertySelection(coor.start.path, coor.start.offset, coor.end.offset, false);
+    } else if (arguments[0] instanceof Range) {
+      var range = arguments[0];
+      if (isEqual(range.start.path, range.end.path)) {
+        sel = new PropertySelection(range.start.path, range.start.offset, range.end.offset, range.reverse);
+      } else {
+        sel = new ContainerSelection(range.start, range.end, range.isReverse);
+      }
+    } else if (arguments.length === 1 && isObject(arguments[0])) {
+      var json = arguments[0];
+      switch(json.type) {
+        case 'property':
+          sel = new PropertySelection.fromJSON(json);
+          break;
+        case 'container':
+          sel = new ContainerSelection.fromJSON(json);
+          break;
+        default:
+          throw new Error('Unsupported selection type', json.type);
+      }
     }
+    // createSelection(startPath, startOffset)
+    else if (arguments.length === 2 && isArray(arguments[0])) {
+      sel = new PropertySelection(arguments[0], arguments[1], arguments[1]);
+    }
+    // createSelection(startPath, startOffset, endOffset)
+    else if (arguments.length === 3 && isArray(arguments[0])) {
+      sel = new PropertySelection(arguments[0], arguments[1], arguments[2]);
+    }
+    // createSelection(containerId, startPath, startOffset, endPath, endOffset)
+    else if (arguments.length === 5 && isString(arguments[0])) {
+      sel = new ContainerSelection(arguments[0], arguments[1], arguments[2], arguments[3], arguments[4]);
+    } else {
+      throw new Error('Illegal arguments for Document.createSelection().');
+    }
+    sel.attach(this);
+    return sel;
   };
 
   this.getEventProxy = function(name) {

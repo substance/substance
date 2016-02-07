@@ -4,7 +4,8 @@ var isEqual = require('lodash/isEqual');
 var isNumber = require('lodash/isNumber');
 var Selection = require('./Selection');
 var Coordinate = require('./Coordinate');
-var Range = require('./Range');
+
+/* jshint latedef:nofunc */
 
 /**
   A selection which is bound to a property. Implements {@link model/Selection}.
@@ -21,41 +22,49 @@ var Range = require('./Range');
     startOffset: 3,
     endOffset: 6
   });
-
-
 */
-function PropertySelection(properties) {
-  PropertySelection.super.apply(this);
+function PropertySelection(path, startOffset, endOffset, reverse, surfaceId) {
 
   /**
     The path to the selected property.
     @type {String[]}
   */
-  var path = properties.path;
+  this.path = path;
+
   /**
     Start character position.
     @type {Number}
   */
-  var startOffset = properties.startOffset;
+  this.startOffset = startOffset;
+
   /**
     End character position.
     @type {Number}
   */
-  var endOffset = properties.endOffset || properties.startOffset;
+  this.endOffset = endOffset;
+
+  /**
+    Selection direction.
+    @type {Boolean}
+  */
+  this.reverse = !!reverse;
+
+  /**
+    Identifier of the surface this selection should be active in.
+    @type {String}
+  */
+  this.surfaceId = surfaceId;
 
   if (!path || !isNumber(startOffset)) {
     throw new Error('Invalid arguments: `path` and `startOffset` are mandatory');
   }
-
-  this.range = new Range(
-    new Coordinate(path, startOffset),
-    new Coordinate(path, endOffset)
-  );
-  this.reverse = properties.reverse;
-
-  this.surfaceId = properties.surfaceId;
-
-  this._internal = {};
+  this._internal = {
+    // dynamic adapters for Coordinate oriented implementations
+    start: new CoordinateAdapter(this, 'path', 'startOffset'),
+    end: new CoordinateAdapter(this, 'path', 'endOffset'),
+    // set when attached to document
+    doc: null
+  };
 }
 
 PropertySelection.Prototype = function() {
@@ -98,59 +107,52 @@ PropertySelection.Prototype = function() {
     return this;
   };
 
+  this.isPropertySelection = function() {
+    return true;
+  };
+
   this.isNull = function() {
     return false;
   };
 
-  this.getRanges = function() {
-    return [this.range];
-  };
-
-  /**
-    Get range of a selection.
-  */
-  this.getRange = function() {
-    return this.range;
-  };
-
   this.isCollapsed = function() {
-    return this.range.isCollapsed();
+    return this.startOffset === this.endOffset;
   };
 
   this.isReverse = function() {
     return this.reverse;
   };
 
-  this.isPropertySelection = function() {
-    return true;
-  };
-
-  this.isMultiSeletion = function() {
-    return false;
-  };
-
   this.equals = function(other) {
     return (
       Selection.prototype.equals.call(this, other) &&
-      !other.isTableSelection() &&
-      this.range.equals(other.range)
+      (this.start.equals(other.start) && this.end.equals(other.end))
     );
+  };
+
+  this.toString = function() {
+    return [
+      "PropertySelection(", JSON.stringify(this.path), ", ",
+        this.startOffset, " -> ", this.endOffset,
+        (this.reverse?", reverse":""),
+      ")"
+    ].join('');
   };
 
   /**
     Collapse a selection to chosen direction.
 
     @param {String} direction either left of right
-    @returns {Selection}
+    @returns {PropertySelection}
   */
   this.collapse = function(direction) {
-    var coor;
+    var offset;
     if (direction === 'left') {
-      coor = this.range.start;
+      offset = this.startOffset;
     } else {
-      coor = this.range.end;
+      offset = this.endOffset;
     }
-    return this.createWithNewRange(coor.offset, coor.offset);
+    return this.createWithNewRange(offset, offset);
   };
 
   // Helper Methods
@@ -162,35 +164,25 @@ PropertySelection.Prototype = function() {
     @returns {String[]} path
   */
   this.getPath = function() {
-    return this.range.start.path;
+    return this.path;
   };
 
   /**
-    Get start of a selection range.
+    Get start character position.
 
     @returns {Number} offset
   */
   this.getStartOffset = function() {
-    return this.range.start.offset;
+    return this.startOffset;
   };
 
   /**
-    Get end of a selection range.
+    Get end character position.
 
     @returns {Number} offset
   */
   this.getEndOffset = function() {
-    return this.range.end.offset;
-  };
-
-  this.toString = function() {
-    return [
-      "PropertySelection(", JSON.stringify(this.range.start.path), ", ",
-        this.range.start.offset, " -> ", this.range.end.offset,
-        (this.reverse?", reverse":""),
-        (this.range.start.after?", after":""),
-      ")"
-    ].join('');
+    return this.endOffset;
   };
 
   /**
@@ -208,12 +200,12 @@ PropertySelection.Prototype = function() {
     }
     if (strict) {
       return (isEqual(this.path, other.path) &&
-        this.start.offset > other.start.offset &&
-        this.end.offset < other.end.offset);
+        this.startOffset > other.startOffset &&
+        this.endOffset < other.endOffset);
     } else {
       return (isEqual(this.path, other.path) &&
-        this.start.offset >= other.start.offset &&
-        this.end.offset <= other.end.offset);
+        this.startOffset >= other.startOffset &&
+        this.endOffset <= other.endOffset);
     }
   };
 
@@ -232,12 +224,12 @@ PropertySelection.Prototype = function() {
     }
     if (strict) {
       return (isEqual(this.path, other.path) &&
-        this.start.offset < other.start.offset &&
-        this.end.offset > other.end.offset);
+        this.startOffset < other.startOffset &&
+        this.endOffset > other.endOffset);
     } else {
       return (isEqual(this.path, other.path) &&
-        this.start.offset <= other.start.offset &&
-        this.end.offset >= other.end.offset);
+        this.startOffset <= other.startOffset &&
+        this.endOffset >= other.endOffset);
     }
   };
 
@@ -254,7 +246,7 @@ PropertySelection.Prototype = function() {
       // console.log('PropertySelection.overlaps: delegating to ContainerSelection.overlaps...');
       return other.overlaps(this);
     }
-    if (!isEqual(this.getPath(), other.getPath())) return false;
+    if (!isEqual(this.path, other.path)) return false;
     if (strict) {
       return (! (this.startOffset>=other.endOffset||this.endOffset<=other.startOffset) );
     } else {
@@ -274,8 +266,8 @@ PropertySelection.Prototype = function() {
       // console.log('PropertySelection.isRightAlignedWith: delegating to ContainerSelection.isRightAlignedWith...');
       return other.isRightAlignedWith(this);
     }
-    return (isEqual(this.getPath(), other.getPath()) &&
-      this.getEndOffset() === other.getEndOffset());
+    return (isEqual(this.path, other.path) &&
+      this.endOffset === other.endOffset);
   };
 
   /**
@@ -290,8 +282,8 @@ PropertySelection.Prototype = function() {
       // console.log('PropertySelection.isLeftAlignedWith: delegating to ContainerSelection.isLeftAlignedWith...');
       return other.isLeftAlignedWith(this);
     }
-    return (isEqual(this.getPath(), other.getPath()) &&
-      this.getStartOffset() === other.getStartOffset());
+    return (isEqual(this.path, other.path) &&
+      this.startOffset === other.startOffset);
   };
 
   /**
@@ -322,11 +314,12 @@ PropertySelection.Prototype = function() {
     @returns {Selection} a new selection
   */
   this.createWithNewRange = function(startOffset, endOffset) {
-    return new PropertySelection({
-      path: this.path,
-      startOffset: startOffset,
-      endOffset: endOffset
-    });
+    var sel = new PropertySelection(this.path, startOffset, endOffset, false, this.surfaceId);
+    var doc = this._internal.doc;
+    if (doc) {
+      sel.attach(doc);
+    }
+    return sel;
   };
 
   /**
@@ -339,8 +332,8 @@ PropertySelection.Prototype = function() {
     if (other.isNull()) return this;
     // Checking that paths are ok
     // doing that in a generalized manner so that other can even be a ContainerSelection
-    if (!isEqual(this.start.path, other.start.path) ||
-      !isEqual(this.end.path, other.end.path)) {
+    if (!isEqual(this.startPath, other.startPath) ||
+      !isEqual(this.endPath, other.endPath)) {
       throw new Error('Can not expand PropertySelection to a different property.');
     }
     var newStartOffset;
@@ -353,10 +346,6 @@ PropertySelection.Prototype = function() {
       newEndOffset = other.startOffset;
     }
     return this.createWithNewRange(newStartOffset, newEndOffset);
-  };
-
-  this._coordinates = function() {
-    return this;
   };
 
   /**
@@ -381,7 +370,7 @@ Object.defineProperties(PropertySelection.prototype, {
   */
   start: {
     get: function() {
-      return this.range.start;
+      return this._internal.start;
     },
     set: function() { throw new Error('immutable.'); }
   },
@@ -390,47 +379,67 @@ Object.defineProperties(PropertySelection.prototype, {
   */
   end: {
     get: function() {
-      return this.range.end;
-    },
-    set: function() { throw new Error('immutable.'); }
-  },
-  /**
-    @property {String[]} PropertySelection.path
-  */
-  path: {
-    get: function() {
-      return this.range.start.path;
-    },
-    set: function() { throw new Error('immutable.'); }
-  },
-  /**
-    @property {Number} PropertySelection.startOffset
-  */
-  startOffset: {
-    get: function() {
-      return this.range.start.offset;
-    },
-    set: function() { throw new Error('immutable.'); }
-  },
-  /**
-    @property {Number} PropertySelection.endOffset
-  */
-  endOffset: {
-    get: function() {
-      return this.range.end.offset;
-    },
-    set: function() { throw new Error('immutable.'); }
-  },
-  /**
-    @property {Boolean} PropertySelection.collapsed
-  */
-  collapsed: {
-    get: function() {
-      return this.isCollapsed();
+      return this._internal.end;
     },
     set: function() { throw new Error('immutable.'); }
   },
 
+  // making this similar to ContainerSelection
+  startPath: {
+    get: function() {
+      return this.path;
+    },
+    set: function() { throw new Error('immutable.'); }
+  },
+  endPath: {
+    get: function() {
+      return this.path;
+    },
+    set: function() { throw new Error('immutable.'); }
+  },
 });
+
+PropertySelection.fromJSON = function(json) {
+  var path = json.path;
+  var startOffset = json.startOffset;
+  var endOffset = json.hasOwnProperty('endOffset') ? json.endOffset : json.startOffset;
+  var reverse = json.reverse;
+  var surfaceId = json.surfaceId;
+  return new PropertySelection(path, startOffset, endOffset, reverse, surfaceId);
+};
+
+/*
+  Adapter for Coordinate oriented implementations.
+  E.g. Coordinate transforms can be applied to update selections
+  using OT.
+*/
+function CoordinateAdapter(propertySelection, pathProperty, offsetProperty) {
+  this._sel = propertySelection;
+  this._pathProp = pathProperty;
+  this._offsetProp = offsetProperty;
+}
+
+Coordinate.extend(CoordinateAdapter);
+
+Object.defineProperties(CoordinateAdapter.prototype, {
+  path: {
+    get: function() {
+      return this._sel[this._pathProp];
+    },
+    set: function(path) {
+      this._sel[this._pathProp] = path;
+    }
+  },
+  offset: {
+    get: function() {
+      return this._sel[this._offsetProp];
+    },
+    set: function(offset) {
+      this._sel[this._offsetProp] = offset;
+    }
+  }
+});
+
+PropertySelection.CoordinateAdapter = CoordinateAdapter;
 
 module.exports = PropertySelection;

@@ -26,15 +26,15 @@ var deleteNode = require('./deleteNode');
 */
 
 function switchTextType(tx, args) {
-  var selection = args.selection;
-  if (!selection.isPropertySelection()) {
+  var sel = args.selection;
+  if (!sel.isPropertySelection()) {
     console.error("Selection must be a PropertySelection.");
     return args;
   }
-  var nodeId = selection.getPath()[0];
+  var path = sel.path;
+  var nodeId = path[0];
   var data = args.data;
   var node = tx.get(nodeId);
-  var path = selection.path;
   if (!(node.isInstanceOf('text'))) {
     console.warn('Trying to use switchTextType on a non text node. Skipping.');
     return args;
@@ -62,16 +62,10 @@ function switchTextType(tx, args) {
     container.hide(nodeId);
     container.show(newNode.id, pos);
   }
-
   // remove the old one from the document
   deleteNode(tx, { nodeId: node.id });
 
-  args.selection = tx.createSelection({
-    type: 'property',
-    path: newPath,
-    startOffset: selection.startOffset,
-    endOffset: selection.endOffset
-  });
+  args.selection = tx.createSelection(newPath, sel.startOffset, sel.endOffset);
 
   return args;
 }

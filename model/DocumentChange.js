@@ -295,12 +295,12 @@ function _transformCoordinate(coor, op) {
     var newOffset;
     if (diff.isInsert() && diff.pos <= coor.offset) {
       newOffset = coor.offset + diff.str.length;
-      console.log('Transforming coordinate after inserting %s chars:', diff.str.length, coor.toString(), '->', newOffset);
+      // console.log('Transforming coordinate after inserting %s chars:', diff.str.length, coor.toString(), '->', newOffset);
       coor.offset = newOffset;
       hasChanged = true;
     } else if (diff.isDelete() && diff.pos <= coor.offset) {
       newOffset = Math.max(diff.pos, coor.offset - diff.str.length);
-      console.log('Transforming coordinate after deleting %s chars:', diff.str.length, coor.toString(), '->', newOffset);
+      // console.log('Transforming coordinate after deleting %s chars:', diff.str.length, coor.toString(), '->', newOffset);
       coor.offset = newOffset;
       hasChanged = true;
     }
@@ -323,7 +323,10 @@ DocumentChange.transformSelection = function(sel, A) {
     if (!isCollapsed) {
       hasChanged |= _transformCoordinate(sel.end, op);
     } else {
-      sel.range.end = sel.range.start;
+      if (sel.isContainerSelection()) {
+        sel.endPath = sel.startPath;
+      }
+      sel.endOffset = sel.startOffset;
     }
   });
   return hasChanged;

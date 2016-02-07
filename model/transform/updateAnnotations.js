@@ -22,14 +22,14 @@ function updateAnnotations(tx, args) {
 function _upateAfterInsert(tx, args) {
   var op = args.op;
   var diff = op.diff;
-  annotationHelpers.insertedText(tx, new Coordinate(op.getPath(), diff.pos), diff.getLength(), args.ignoredAnnotations);
+  annotationHelpers.insertedText(tx, new Coordinate(op.path, diff.pos), diff.getLength(), args.ignoredAnnotations);
   return args;
 }
 
 function _updateAfterDelete(tx, args) {
   var op = args.op;
   var diff = op.diff;
-  annotationHelpers.deletedText(tx, op.getPath(), diff.pos, diff.pos + diff.getLength(), args.replaceTextSupport);
+  annotationHelpers.deletedText(tx, op.path, diff.pos, diff.pos + diff.getLength(), args.replaceTextSupport);
   return args;
 }
 

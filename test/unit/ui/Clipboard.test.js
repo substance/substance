@@ -137,7 +137,7 @@ function _containerEditorSample() {
     path: ['p1', 'content'],
     startOffset: 1
   });
-  editor.setFocused(true);
+  // editor.setFocused(true);
   // HACK faking that the element is focused natively
   editor.isNativeFocused = true;
   editor.setSelection(sel);

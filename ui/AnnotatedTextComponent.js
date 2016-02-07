@@ -10,11 +10,17 @@ var AnnotationComponent = require('./AnnotationComponent');
 
   @class
   @component
-  @extends ui/AnnotationComponent
+  @extends ui/Component
 */
 
 function AnnotatedTextComponent() {
   AnnotatedTextComponent.super.apply(this, arguments);
+
+  this.fragmenter = new Fragmenter({
+    onText: this._renderTextNode.bind(this),
+    onEnter: this._renderFragment.bind(this),
+    onExit: this._finishFragment.bind(this)
+  });
 }
 
 AnnotatedTextComponent.Prototype = function() {
@@ -25,85 +31,57 @@ AnnotatedTextComponent.Prototype = function() {
     @return {VirtualNode} VirtualNode created using ui/Component
    */
   this.render = function() {
-    var componentRegistry = this.context.componentRegistry;
-    var doc = this.getDocument();
-    var path = this.getPath();
-    var text = doc.get(path) || "";
-    var annotations = this.getAnnotations();
-
-    var el = $$(this.props.tagName || 'span')
+    var el = this._renderContent()
       .addClass('sc-annotated-text')
-      .attr({
-        "data-path": this.props.path.join('.'),
-        spellCheck: false,
-      })
       .css({
         whiteSpace: "pre-wrap"
       });
-
-    var fragmenter = new Fragmenter();
-    var fragmentCounters = {};
-    fragmenter.onText = function(context, text) {
-      if (text && text.length > 0) {
-        context.append(text);
-      }
-    };
-    fragmenter.onEnter = function(fragment) {
-      var node = fragment.node;
-      var id = node.id;
-      if (!fragmentCounters[id]) {
-        fragmentCounters[id] = 0;
-      }
-      fragmentCounters[id] = fragmentCounters[id]+1;
-      if (node.type === 'cursor') {
-        return $$('span').addClass('se-cursor');
-      } else if (node.type === 'selection-fragment') {
-        return $$('span').addClass('se-selection-fragment');
-      } else if (node.type === "container-annotation-fragment") {
-        return $$(AnnotationComponent, { doc: doc, node: node })
-          .addClass("se-annotation-fragment")
-          .addClass(node.anno.getTypeNames().join(' ').replace(/_/g, "-"));
-      } else if (node.type === "container-annotation-anchor") {
-        return $$(AnnotationComponent, { doc: doc, node: node })
-          .addClass("se-anchor")
-          .addClass(node.anno.getTypeNames().join(' ').replace(/_/g, "-"))
-          .addClass(node.isStart?"start-anchor":"end-anchor");
-      }
-      var ComponentClass = componentRegistry.get(node.type) || AnnotationComponent;
-      var el = $$(ComponentClass, { doc: doc, node: node });
-      if (node.constructor.static.isInline) {
-        el.attr('data-inline', '1');
-      }
-      // adding refs here, enables preservative rerendering
-      // TODO: while this solves problems with rerendering inline nodes
-      // with external content, it decreases the overall performance too much.
-      // We should optimize the component first before we can enable this.
-      if (this.context.config && this.context.config.preservativeTextPropertyRendering) {
-        el.ref(id + "@" + fragmentCounters[id]);
-      }
-      return el;
-    }.bind(this);
-    fragmenter.onExit = function(fragment, context, parentContext) {
-      parentContext.append(context);
-    };
-    fragmenter.start(el, text, annotations);
-    // NOTE: this is particularly necessary for text-properties of
-    // block level text nodes. Otherwise, the element will not y-expand
-    // as desired, and soft-breaks are not visible.
-    // TODO: sometimes we do not want to do this. Make it configurable.
-    el.append($$('br'));
     return el;
   };
 
-  /**
-    Gets annotations related to current node.
+  this.getText = function() {
+    return this.props.text;
+  };
 
-    @return {Array} Node's annotations
-   */
   this.getAnnotations = function() {
+    return this.props.annotations || [];
+  };
+
+  this._renderContent = function() {
+    var text = this.getText();
+    var annotations = this.getAnnotations();
+    var el = $$(this.props.tagName || 'span');
+    this.fragmenter.start(el, text, annotations);
+    return el;
+  };
+
+  this._renderTextNode = function(context, text) {
+    if (text && text.length > 0) {
+      context.append(text);
+    }
+  };
+
+  this._renderFragment = function(fragment) {
     var doc = this.getDocument();
-    var annotations = doc.getIndex('annotations').get(this.props.path);
-    return annotations;
+    var componentRegistry = this.getComponentRegistry();
+    var node = fragment.node;
+    if (node.type === "container-annotation-fragment") {
+      return $$(AnnotationComponent, { doc: doc, node: node })
+        .addClass("se-annotation-fragment")
+        .addClass(node.anno.getTypeNames().join(' ').replace(/_/g, "-"));
+    } else if (node.type === "container-annotation-anchor") {
+      return $$(AnnotationComponent, { doc: doc, node: node })
+        .addClass("se-anchor")
+        .addClass(node.anno.getTypeNames().join(' ').replace(/_/g, "-"))
+        .addClass(node.isStart?"start-anchor":"end-anchor");
+    }
+    var ComponentClass = componentRegistry.get(node.type) || AnnotationComponent;
+    var el = $$(ComponentClass, { doc: doc, node: node });
+    return el;
+  };
+
+  this._finishFragment = function(fragment, context, parentContext) {
+    parentContext.append(context);
   };
 
   /**
@@ -115,13 +93,8 @@ AnnotatedTextComponent.Prototype = function() {
     return this.props.doc || this.context.doc;
   };
 
-  /**
-    Gets a node path.
-
-    @return {String[]} Node path
-   */
-  this.getPath = function() {
-    return this.props.path;
+  this.getComponentRegistry = function() {
+    return this.props.componentRegistry || this.context.componentRegistry;
   };
 
 };

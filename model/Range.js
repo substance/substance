@@ -2,9 +2,10 @@
 
 var oo = require('../util/oo');
 
-var Range = function(start, end) {
+var Range = function(start, end, reverse) {
   this.start = start;
   this.end = end;
+  this.reverse = !!reverse;
 };
 
 Range.Prototype = function() {
@@ -16,6 +17,10 @@ Range.Prototype = function() {
   this.equals = function(other) {
     if (this === other) return true;
     else return (this.start.equals(other.start) && this.end.equals(other.end));
+  };
+
+  this.isReverse = function() {
+    return this.reverse;
   };
 
 };

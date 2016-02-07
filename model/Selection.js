@@ -112,6 +112,16 @@ Selection.Prototype = function() {
     throw new Error('This method is abstract.');
   };
 
+  /**
+    Get selection fragments for this selection.
+
+    A selection fragment is bound to a single property.
+    @returns {Selection.Fragment[]}
+  */
+  this.getFragments = function() {
+    return [];
+  };
+
 };
 
 oo.initClass(Selection);

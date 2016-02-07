@@ -25,16 +25,9 @@ QUnit.uiTest("Set the selection after creating annotation.", function(assert) {
       }
     }
   }, '#qunit-fixture');
-
   var surface = app.refs.editor;
-
-  surface.setFocused(true);
-  var sel = doc.createSelection({
-    type: 'property',
-    path: ['p1', 'content'],
-    startOffset: 0,
-    endOffset: 5
-  });
+  // surface.setFocused(true);
+  var sel = doc.createSelection(['p1', 'content'], 0, 5);
   surface.setSelection(sel);
   // this should blur the surface which should persist the selection
   surface.$el.blur();
@@ -46,7 +39,7 @@ QUnit.uiTest("Set the selection after creating annotation.", function(assert) {
   });
   surface.el.focus();
   var wsel = window.getSelection();
-  var newSel = surface.domSelection.getSelection();
+  var newSel = surface.domSelection.mapDOMSelection();
   assert.equal(wsel.rangeCount, 1, "There should be a DOM selection.");
   assert.ok(newSel.equals(sel), "New selection should be equal to initial selection.");
 });

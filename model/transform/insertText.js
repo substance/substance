@@ -11,7 +11,7 @@ var updateAnnotations = require('./updateAnnotations');
 
   @example
 
-  
+
   ```js
   insertText(tx, {
     selection: bodyEditor.getSelection(),
@@ -21,34 +21,29 @@ var updateAnnotations = require('./updateAnnotations');
 */
 
 var insertText = function(tx, args) {
-  var selection = args.selection;
+  var sel = args.selection;
   var text = args.text;
-  if (!selection) {
+  if (!sel) {
     throw new Error('Argument `selection` is mandatory for transformation `insertText`.');
   }
   if (!text) {
     throw new Error('Argument `text` is mandatory for transformation `insertText`.');
   }
-  if (!(selection.isPropertySelection() || selection.isContainerSelection())) {
+  if (!(sel.isPropertySelection() || sel.isContainerSelection())) {
     throw new Error('Selection must be property or container selection.');
   }
   // Extra transformation for replacing text, as there are edge cases
-  if (!selection.isCollapsed()) {
+  if (!sel.isCollapsed()) {
     return replaceText(tx, args);
   }
-  var range = selection.getRange();
   // HACK(?): if the string property is not initialized yet we do it here
   // for convenience.
-  if (tx.get(range.start.path) === undefined) {
-    tx.set(range.start.path, "");
+  if (tx.get(sel.startPath) === undefined) {
+    tx.set(sel.startPath, "");
   }
-  var op = tx.update(range.start.path, { insert: { offset: range.start.offset, value: text } } );
+  var op = tx.update(sel.startPath, { insert: { offset: sel.startOffset, value: text } } );
   updateAnnotations(tx, {op: op});
-  args.selection = tx.createSelection({
-    type: 'property',
-    path: range.start.path,
-    startOffset: range.start.offset + text.length
-  });
+  args.selection = tx.createSelection(sel.startPath, sel.startOffset + text.length);
   return args;
 };
 

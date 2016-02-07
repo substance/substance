@@ -22,7 +22,7 @@ var helpers = require('../documentHelpers');
   createAnnotation(tx, {
     selection: bodyEditor.getSelection(),
     containerId: bodyEditor.getContainerId(),
-    
+
     node: {
       type: 'link',
       url: 'http://example.com'
@@ -55,28 +55,26 @@ function createAnnotation(tx, args) {
   if (sel.isContainerSelection() && !containerId) {
     throw new Error('containerId must be provided for container selections');
   }
-
   // Special case: We split the current container selection into
   // multiple property annotations
   if (args.splitContainerSelections && sel.isContainerSelection()) {
     return _createPropertyAnnotations(tx, args);
   }
-
   var anno = extend({
     id: uuid(node.type)
   }, node);
 
   if (helpers.isContainerAnnotation(tx, node.type)) {
-    anno.startPath = sel.start.path;
-    anno.endPath = sel.end.path;
+    anno.startPath = sel.startPath;
+    anno.endPath = sel.endPath;
     anno.container = containerId;
   } else if (sel.isPropertySelection()) {
-    anno.path = sel.getPath();
+    anno.path = sel.path;
   } else {
     throw new Error('Illegal state: can not apply ContainerSelection');
   }
-  anno.startOffset = sel.getStartOffset();
-  anno.endOffset = sel.getEndOffset();
+  anno.startOffset = sel.startOffset;
+  anno.endOffset = sel.endOffset;
   // start the transaction with an initial selection
   args.result = tx.create(anno);
   return args;
@@ -98,11 +96,10 @@ function _createPropertyAnnotations(tx, args) {
     };
     extend(anno, node);
     anno.path = sels[i].getPath();
-    anno.startOffset = sels[i].getStartOffset();
-    anno.endOffset = sels[i].getEndOffset();
+    anno.startOffset = sels[i].startOffset;
+    anno.endOffset = sels[i].endOffset;
     tx.create(anno);
   }
 }
-
 
 module.exports = createAnnotation;

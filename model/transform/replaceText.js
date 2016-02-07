@@ -19,16 +19,15 @@ function _defaultReplace(tx, args) {
   var out = deleteSelection(tx, extend({}, args, {
     direction: 'right'
   }));
-  var selection = out.selection;
-  var range = selection.getRange();
+  var sel = out.selection;
+  if (!sel.isPropertySelection()) {
+    // Should not happen if deleteSelection works correctly
+    throw new Error('Invalid state.');
+  }
   var text = args.text;
-  var op = tx.update(range.start.path, { insert: { offset: range.start.offset, value: text } } );
+  var op = tx.update(sel.path, { insert: { offset: sel.startOffset, value: text } } );
   updateAnnotations(tx, { op: op });
-  args.selection = tx.createSelection({
-    type: 'property',
-    path: range.start.path,
-    startOffset: range.start.offset + text.length
-  });
+  args.selection = tx.createSelection(sel.path, sel.startOffset + text.length);
   return args;
 }
 

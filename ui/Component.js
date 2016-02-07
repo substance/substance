@@ -75,7 +75,7 @@ var inBrowser = (typeof window !== 'undefined');
   );
   ```
 */
-function Component(parent, params) {
+function Component(parent, virtualEl) {
   EventEmitter.call(this);
 
   if (!parent && parent !== "root") {
@@ -88,7 +88,8 @@ function Component(parent, params) {
   this.$el = null;
   this.el = null;
 
-  params = params || {};
+  virtualEl = virtualEl || {};
+  this._virtualEl = virtualEl;
 
   this.refs = {};
   this._preserved = {};
@@ -96,7 +97,7 @@ function Component(parent, params) {
   // TODO: This is maybe not a good idea. If we want to do it, we could allow
   // ref (without the underscore) being passed but remove it from the params
   // afterwards so we don't pollute the props.
-  this._ref = params._ref;
+  this._ref = virtualEl._ref;
 
   this.parent = parent;
   this.children = [];
@@ -104,18 +105,19 @@ function Component(parent, params) {
   // context from parent (dependency injection)
   this.context = this._getContext();
 
-  this._isOnRoute = params._isOnRoute;
+  this._isOnRoute = virtualEl._isOnRoute;
   if (parent === "root") {
     this._isOnRoute = true;
   }
 
-  this._htmlParams = _htmlParams(params);
-  this._setProps(params.props);
+  this._htmlParams = _htmlParams(virtualEl);
+  this._setProps(virtualEl.props);
 
   this._setState(this._getInitialState());
 
   this.actionHandlers = {};
 
+  // TODO: how does _data and virtualEl work together?
   this._data = {
     attributes: {},
     style: {},
@@ -858,6 +860,13 @@ Component.Prototype = function ComponentPrototype() {
       $el.css(data.style);
     }
     // $.on
+    // HACK: ATM handlers attached to 'component' typed component
+    // are not bound (as opposed to 'element' types)
+    if (this._virtualEl.type === 'component') {
+      each(this._virtualEl.handlers, function(handlerSpec, eventName) {
+        this._bindHandler($el[0], this._virtualEl._owner, eventName, handlerSpec);
+      }.bind(this));
+    }
     each(data.handlers, function(handlerSpec, eventName) {
       this._bindHandler($el[0], data._owner, eventName, handlerSpec);
     }.bind(this));

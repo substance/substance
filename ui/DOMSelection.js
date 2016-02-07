@@ -1,205 +1,203 @@
+/* jshint latedef:nofunc */
 'use strict';
 
-var isEqual = require('lodash/isEqual');
 var $ = require('../util/jquery');
 var oo = require('../util/oo');
-var Document = require('../model/Document');
-var Range = require('../model/Range');
 var Coordinate = require('../model/Coordinate');
-var Selection = require('../model/Selection');
+var Range = require('../model/Range');
+var TextPropertyComponent = require('./TextPropertyComponent');
 
 /*
  * A class that maps DOM selections to model selections.
  *
  * There are some difficulties with mapping model selections:
- * 1. DOM selections can not model discontinuous selections, such as TableSelections or MultiSelections.
+ * 1. DOM selections can not model discontinuous selections.
  * 2. Not all positions reachable via ContentEditable can be mapped to model selections. For instance,
  *    there are extra positions before and after non-editable child elements.
- * 3. Some native cursor behaviors need to be overidden, such as for navigating tables.
+ * 3. Some native cursor behaviors need to be overidden.
  *
- * @class SurfaceSelection
+ * @class DOMSelection
  * @constructor
  * @param {Element} rootElement
  */
-function SurfaceSelection(rootElement, doc, container) {
-  this.element = rootElement;
-  this.doc = doc;
-  this.container = container;
-  this.state = new SurfaceSelection.State();
+function DOMSelection(surface) {
+  this.surface = surface;
 }
 
-SurfaceSelection.Prototype = function() {
+DOMSelection.Prototype = function() {
 
-  function compareNodes(node1, node2) {
-    var cmp = node1.compareDocumentPosition(node2);
-    if (cmp&window.document.DOCUMENT_POSITION_FOLLOWING) {
-      return -1;
-    } else if (cmp&window.document.DOCUMENT_POSITION_PRECEDING) {
-      return 1;
-    } else {
-      return 0;
+  this.setSelection = function(sel) {
+    // console.log('### renderSelection', sel.toString());
+    var wSel = window.getSelection();
+    if (sel.isNull() || sel.isTableSelection()) {
+      return this.clear();
     }
-  }
+    var startComp = this.surface._getTextPropertyComponent(sel.startPath);
+    var start = startComp.getDOMCoordinate(sel.startOffset);
+    var end;
+    if (sel.isCollapsed()) {
+      end = start;
+    } else {
+      var endComp = this.surface._getTextPropertyComponent(sel.endPath);
+      end = endComp.getDOMCoordinate(sel.endOffset);
+    }
+    // if there is a range then set replace the window selection accordingly
+    wSel.removeAllRanges();
+    var wRange = window.document.createRange();
+    if (sel.isReverse()) {
+      wRange.setStart(end.container, end.offset);
+      wSel.addRange(wRange);
+      wSel.extend(start.container, start.offset);
+    } else {
+      wRange.setStart(start.container, start.offset);
+      wRange.setEnd(end.container, end.offset);
+      wSel.addRange(wRange);
+    }
+  };
 
-  // input methods:
-  // - mouse down (setting cursor with mouse)
-  // - keyboard cursor movement
-  // - expand:
-  //   - mouse dragging
-  //   - cursor movement with shift
+  /*
+    Maps the current DOM selection to a model range.
 
-  // workflow for mapping from DOM to model:
-  // 1. extract coordinates
-  // 2. fixup coordinates
-  // 3. create a model selection
-  this._pullState = function(anchorNode, anchorOffset, focusNode, focusOffset, collapsed, options) {
+    @param {object} [options]
+      - `direction`: `left` or `right`; a hint for disambiguations, used by Surface during cursor navigation.
+    @returns {model/Range}
+  */
+  this.mapDOMSelection = function(options) {
+    var range;
+    var wSel = window.getSelection();
+    // Use this log whenever the mapping goes wrong to analyze what
+    // is actually being provided by the browser
+    // console.log('DOMSelection.getSelection()', 'anchorNode:', wSel.anchorNode, 'anchorOffset:', wSel.anchorOffset, 'focusNode:', wSel.focusNode, 'focusOffset:', wSel.focusOffset, 'collapsed:', wSel.collapsed);
+    if (wSel.rangeCount === 0) {
+      return null;
+    }
+    if (wSel.isCollapsed) {
+      var coor = this._getCoordinate(wSel.anchorNode, wSel.anchorOffset, options);
+      range = _createRange(coor, coor, false);
+    }
+    // HACK: special treatment for edge cases as addressed by #354.
+    // Sometimes anchorNode and focusNodes are the surface
+    if ($(wSel.anchorNode).is('.surface')) {
+      range = this._getEnclosingRange(wSel.getRangeAt(0));
+    } else {
+      range = this._getRange(wSel.anchorNode, wSel.anchorOffset, wSel.focusNode, wSel.focusOffset);
+    }
+    // console.log('### extracted range from DOM', range.toString);
+    return range;
+  };
+
+  // only for legacy reasons
+  this.getSelection = function() {
+    console.error('DEPRECATED: use this.mapDOMSelection() instead.');
+    return this.mapDOMSelection.apply(this, arguments);
+  };
+
+  /*
+    Map a DOM range to a model range.
+
+    @param {Range} range
+    @returns {model/Range}
+  */
+  this.mapDOMRange = function(wRange) {
+    return this._getRange(wRange.startContainer, wRange.startOffset,
+      wRange.endContainer, wRange.endOffset);
+  };
+
+  /*
+    Clear the DOM selection.
+  */
+  this.clear = function() {
+    window.getSelection().removeAllRanges();
+  };
+
+  /*
+    Extract a model range from given DOM elements.
+
+    @param {Node} anchorNode
+    @param {number} anchorOffset
+    @param {Node} focusNode
+    @param {number} focusOffset
+    @returns {model/Range}
+  */
+  this._getRange = function(anchorNode, anchorOffset, focusNode, focusOffset) {
+    var start = this._getCoordinate(anchorNode, anchorOffset);
+    var end;
+    if (anchorNode === focusNode && anchorOffset === focusOffset) {
+      end = start;
+    } else {
+      end = this._getCoordinate(focusNode, focusOffset);
+    }
+    var isReverse = _isReverse(anchorNode, anchorOffset, focusNode, focusOffset);
+    if (start && end) {
+      return _createRange(start, end, isReverse);
+    } else {
+      return null;
+    }
+  };
+
+  /*
+    Map a DOM coordinate to a model coordinate.
+
+    @param {Node} node
+    @param {number} offset
+    @param {object} options
+    @param {object} [options]
+      - `direction`: `left` or `right`; a hint for disambiguation.
+    @returns {model/Coordinate}
+
+    @info
+
+    `options.direction` can be used to control the result when this function is called
+    after cursor navigation. The root problem is that we are using ContentEditable on
+    Container level (as opposed to TextProperty level). The native ContentEditable allows
+    cursor positions which do not make sense in the model sense.
+
+    For example,
+
+    ```
+    <div contenteditable=true>
+      <p data-path="p1.content">foo</p>
+      <img>
+      <p data-path="p1.content">bar</p>
+    </div>
+    ```
+    would allow to set the cursor directly before or after the image, which
+    we want to prevent, as it is not a valid insert position for text.
+    Instead, if we find the DOM selection in such a situation, then we map it to the
+    closest valid model address. And this depends on the direction of movement.
+    Moving `left` would provide the previous address, `right` would provide the next address.
+    The default direction is `right`.
+  */
+  this._getCoordinate = function(node, offset, options) {
+    // Trying to apply the most common situation first
+    // and after that covering known edge cases
+    var coor = TextPropertyComponent.getCoordinate(this.surface.el, node, offset);
+    if (!coor) {
+      coor = this._searchForCoordinate(node, offset, options);
+    }
+    return coor;
+  };
+
+  /*
+    Map a DOM coordinate to a model coordinate via a brute-force search
+    on all properties.
+
+    This is used as a backup strategy for delicate DOM selections.
+
+    @param {Node} node
+    @param {number} offset
+    @param {object} options
+    @param {'left'|'right'} options.direction
+    @returns {model/Coordinate} the coordinate
+  */
+  this._searchForCoordinate = function(node, offset, options) {
     options = options || {};
-    if (!focusNode || !anchorNode) {
-      this.state = null;
-      return;
-    }
-    var start, end;
-    if (collapsed) {
-      start = this.getModelCoordinate(anchorNode, anchorOffset, options);
-      end = start;
-    } else {
-      start = this.getModelCoordinate(anchorNode, anchorOffset, options);
-      end = this.getModelCoordinate(focusNode, focusOffset, options);
-    }
-    // the selection is reversed when the focus propertyEl is before
-    // the anchor el or the computed charPos is in reverse order
-    var reverse = false;
-    if (!collapsed && focusNode && anchorNode) {
-      var cmp = compareNodes(end.el, start.el);
-      reverse = ( cmp < 0 || (cmp === 0 && end.offset < start.offset) );
-    }
-    if (reverse) {
-      var tmp = end;
-      end = start;
-      start = tmp;
-    }
-    // console.log('### extracted selection:', start, end, reverse);
-    this.state = new SurfaceSelection.State(collapsed, reverse, start, end);
-  };
-
-  this.getModelCoordinate = function(node, offset, options) {
-    var current = node;
-    var propertyEl = null;
-    while(current) {
-      // as described in #273, when clicking near to an inline node
-      // the provided node can be inside the inline node
-      // we then continue with the inline node itself and a changed offset
-      if (current.dataset && current.dataset.inline) {
-        node = current;
-        offset = (offset > 0) ? 1 : 0;
-      }
-      // if available extract a path fragment
-      if (current.dataset && current.dataset.path) {
-        propertyEl = current;
-        break;
-      }
-      // edge case: when a node is empty then then the given DOM node
-      // is the node element and with offset=0
-      if ($(current).is('.content-node') && offset === 0) {
-        var $propertyEl = $(current).find('[data-path]');
-        if ($propertyEl.length) {
-          return new SurfaceSelection.Coordinate($propertyEl[0], 0);
-        }
-      }
-      current = current.parentNode;
-    }
-    if (!propertyEl) {
-      return this.searchForCoordinate(node, offset, options);
-    }
-    var charPos = this._computeCharPosition(propertyEl, node, offset);
-    return new SurfaceSelection.Coordinate(propertyEl, charPos);
-  };
-
-  this._computeCharPosition = function(propertyEl, endNode, offset) {
-    var charPos = 0;
-
-    // This works with endNode being a TextNode
-    function _getPosition(node) {
-      if (endNode === node) {
-        charPos += offset;
-        return true;
-      }
-      if (node.nodeType === window.Node.TEXT_NODE) {
-        charPos += node.textContent.length;
-      } else if (node.nodeType === window.Node.ELEMENT_NODE) {
-        // inline nodes have a length of 1
-        // they are attached to an invisible character
-        // but may have a custom rendering
-        if (node.dataset && node.dataset.inline) {
-          charPos += 1;
-          return false;
-        }
-        for (var childNode = node.firstChild; childNode; childNode = childNode.nextSibling) {
-          if (_getPosition(childNode)) {
-            return true;
-          }
-        }
-      }
-      return false;
-    }
-    // count characters recursively
-    // by sum up the length of all TextNodes
-    // and counting inline nodes by 1.
-    function _countCharacters(el) {
-      var type = el.nodeType;
-      if (type === window.Node.TEXT_NODE) {
-        return el.textContent.length;
-      } else if (type === window.Node.ELEMENT_NODE) {
-        if (el.dataset && el.dataset.inline) {
-          return 1;
-        } else {
-          var count = 0;
-          for (var childNode = el.firstChild; childNode; childNode = childNode.nextSibling) {
-            count += _countCharacters(childNode);
-          }
-          return count;
-        }
-      }
-      return 0;
-    }
-
-    var found = false;
-
-    // HACK: edge case which occurs when the last element is not content-editable
-    // then the anchor node is the property element itself
-    if (endNode === propertyEl) {
-      var child = propertyEl.firstChild;
-      for (var i = 0; i < offset; i++) {
-        if (!child) {
-          break;
-        }
-        charPos += _countCharacters(child);
-        child = child.nextSibling;
-      }
-      found = true;
-    } else {
-      found = _getPosition(propertyEl);
-    }
-
-    if (!found) {
-      console.error('Could not find char position.');
-      return 0;
-    }
-    // console.log('charPos', charPos);
-    return charPos;
-  };
-
-  /**
-   * Look up model coordinate by doing a search
-   * on all available property elements.
-   */
-  this.searchForCoordinate = function(node, offset, options) {
-    var elements = this.element.querySelectorAll('*[data-path]');
+    var elements = this.surface.el.querySelectorAll('*[data-path]');
     var idx, idx1, idx2, cmp1, cmp2;
     idx1 = 0;
     idx2 = elements.length-1;
-    cmp1 = compareNodes(elements[idx1], node);
-    cmp2 = compareNodes(elements[idx2], node);
+    cmp1 = _compareNodes(elements[idx1], node);
+    cmp2 = _compareNodes(elements[idx2], node);
     while(true) {
       var l = idx2-idx1+1;
       if (cmp2 < 0) {
@@ -213,7 +211,7 @@ SurfaceSelection.Prototype = function() {
         break;
       }
       var pivotIdx = idx1 + Math.floor(l/2);
-      var pivotCmp = compareNodes(elements[pivotIdx], node);
+      var pivotCmp = _compareNodes(elements[pivotIdx], node);
       if (pivotCmp < 0) {
         idx1 = pivotIdx;
         cmp1 = pivotCmp;
@@ -223,252 +221,125 @@ SurfaceSelection.Prototype = function() {
       }
     }
     var charPos;
+    var doc = this.surface.getDocument();
+    var path = _getPath(elements[idx]);
+    var text = doc.get(path);
     if (options.direction === "left") {
-      idx = Math.max(0, idx-1);
-      charPos = elements[idx].textContent.length;
+      if (idx === 0) {
+        charPos = 0;
+      } else {
+        path = _getPath(elements[idx-1]);
+        text = doc.get(path);
+        charPos = text.length;
+      }
     } else if (cmp2<0) {
-      charPos = elements[idx].textContent.length;
+      charPos = text.length;
     } else {
       charPos = 0;
     }
-    return new SurfaceSelection.Coordinate(elements[idx], charPos);
+    return new Coordinate(path, charPos);
   };
 
-  this._getSelection = function(anchorNode, anchorOffset, focusNode, focusOffset, collapsed) {
-    this._pullState(anchorNode, anchorOffset, focusNode, focusOffset, collapsed);
-    // console.log('#### selection state', this.state);
-    if (!this.state) {
-      return Document.nullSelection;
-    }
-    var doc = this.doc;
-    var start = this.state.start;
-    var end = this.state.end;
-    var node1, node2, parent1, parent2, row1, col1, row2, col2;
-    var range = new Range(
-      new Coordinate(start.path, start.offset),
-      new Coordinate(end.path, end.offset)
-    );
-    if (isEqual(start.path, end.path)) {
-      return doc.createSelection({
-        type: 'property',
-        path: start.path,
-        startOffset: start.offset,
-        endOffset: end.offset,
-        reverse: this.state.reverse
-      });
-    } else {
-      node1 = doc.get(start.path[0]);
-      node2 = doc.get(end.path[0]);
-      parent1 = node1.getRoot();
-      parent2 = node2.getRoot();
-      if (parent1.type === "table" && parent1.id === parent2.id) {
-        // HACK making sure that the table matrix has been computed
-        parent1.getMatrix();
-        row1 = node1.rowIdx;
-        col1 = node1.colIdx;
-        row2 = node2.rowIdx;
-        col2 = node2.colIdx;
-        return doc.createSelection({
-          type: 'table',
-          tableId: parent1.id,
-          startRow: row1,
-          startCol: col1,
-          endRow: row2,
-          endCol: col2
-        });
-      } else {
-        return doc.createSelection({
-          type: 'container',
-          containerId: this.container.id,
-          startPath: range.start.path,
-          startOffset: range.start.offset,
-          endPath: range.end.path,
-          endOffset: range.end.offset,
-          reverse: this.state.reverse
-        });
-      }
-    }
-  };
+  /*
+    Computes a model range that encloses all properties
+    spanned by a given DOM range.
 
-  this.getSelection = function() {
-    var wSel = window.getSelection();
-    // Use this log whenever the mapping goes wrong to analyze what
-    // is actually being provided by the browser
-    // console.log('SurfaceSelection.getSelection()', 'anchorNode:', wSel.anchorNode, 'anchorOffset:', wSel.anchorOffset, 'focusNode:', wSel.focusNode, 'focusOffset:', wSel.focusOffset, 'collapsed:', wSel.collapsed);
-    if (wSel.rangeCount === 0) {
-      return Selection.nullSelection;
-    }
-    var sel;
-    // HACK: special treatment for edge cases as addressed by #354.
-    // Sometimes anchorNode and focusNodes are the surface
-    if ($(wSel.anchorNode).is('.surface')) {
-      var wRange = wSel.getRangeAt(0);
-      sel = this._getSelectionFromRange(wRange);
-    } else {
-      sel = this._getSelection(wSel.anchorNode, wSel.anchorOffset, wSel.focusNode, wSel.focusOffset, wSel.collapsed);
-    }
-    // console.log('### selection', sel.toString());
-    return sel;
-  };
+    This is used in edge cases, where DOM selection anchors are not
+    within TextProperties.
 
-  this._getSelectionFromRange = function(wRange) {
+    @param {Range} range
+    @returns {model/Range}
+  */
+  this._getEnclosingRange = function(wRange) {
     var frag = wRange.cloneContents();
     var props = frag.querySelectorAll('*[data-path]');
     if (props.length === 0) {
-      return Selection.nullSelection;
+      return null;
     } else {
-      var doc = this.doc;
+      var doc = this.surface.getDocument();
       var first = props[0];
       var last = props[props.length-1];
-      var startPath = first.dataset.path.split('.');
+      var startPath = _getPath(first);
       var text;
       if (first === last) {
         text = doc.get(startPath);
-        return doc.createSelection({
-          type: 'property',
-          path: startPath,
-          startOffset: 0,
-          endOffset: text.length
-        });
+        return new Range(
+          new Coordinate(startPath, 0),
+          new Coordinate(startPath, text.length),
+          false
+        );
       } else {
-        var endPath = last.dataset.path.split('.');
+        var endPath = _getPath(last);
         text = doc.get(endPath);
-        return doc.createSelection({
-          type: 'container',
-          containerId: this.container.id,
-          startPath: startPath,
-          startOffset: 0,
-          endPath: endPath,
-          endOffset: text.length
-        });
+        return new Range(
+          new Coordinate(startPath, 0),
+          new Coordinate(endPath, text.length),
+          false
+        );
       }
     }
   };
 
-  var _findDomPosition = function(element, offset) {
-    if (element.nodeType === document.TEXT_NODE) {
-      var l = element.textContent.length;
-      if (l < offset) {
-        return {
-          node: null,
-          offset: offset-l
-        };
-      } else {
-        return {
-          node: element,
-          offset: offset,
-          boundary: (l === offset)
-        };
-      }
-    } else if (element.nodeType === document.ELEMENT_NODE) {
-      if (element.dataset && element.dataset.inline) {
-        return {
-          node: null,
-          offset: offset-1
-        };
-      }
-      // edge case: if the element itself is empty and offset===0
-      if (!element.firstChild && offset === 0) {
-        return {
-          node: element,
-          offset: 0
-        };
-      }
-      for (var child = element.firstChild; child; child = child.nextSibling) {
-        var pos = _findDomPosition(child, offset);
-        if (pos.node) {
-          return pos;
-        } else {
-          // not found in this child; then pos.offset contains the translated offset
-          offset = pos.offset;
-        }
-      }
-    }
-    return {
-      node: null,
-      offset: offset
-    };
-  };
-
-  this._getDomPosition = function(path, offset) {
-    var selector = '*[data-path="'+path.join('.')+'"]';
-    var componentElement = this.element.querySelector(selector);
-    if (!componentElement) {
-      console.warn('Could not find DOM element for path', path);
-      return null;
-    }
-    // console.log('### Found component element', componentElement);
-    var pos = _findDomPosition(componentElement, offset);
-    if (pos.node) {
-      return pos;
+  function _compareNodes(node1, node2) {
+    var cmp = node1.compareDocumentPosition(node2);
+    // Note: the first two cases are necessary because POSITION_FOLLOWING
+    // has strange semantics when the relationship is actually hierarchical
+    if (cmp & window.document.DOCUMENT_POSITION_FOLLOWING) {
+      return -1;
+    } else if (cmp&window.document.DOCUMENT_POSITION_PRECEDING) {
+      return 1;
     } else {
-      return null;
+      return 0;
     }
-  };
+  }
 
-  this.setSelection = function(sel) {
-    // console.log('### renderSelection', sel.toString());
-    var wSel = window.getSelection();
-    if (sel.isNull() || sel.isTableSelection()) {
-      return this.clear();
-    }
-    var range = sel.getRange();
-    var startPosition = this._getDomPosition(range.start.path, range.start.offset);
-    if (!startPosition) {
-      return this.clear();
-    }
-    var endPosition;
-    if (range.isCollapsed()) {
-      endPosition = startPosition;
-    } else {
-      endPosition = this._getDomPosition(range.end.path, range.end.offset);
-    }
-    if (!endPosition) {
-      return this.clear();
-    }
-    // if there is a range then set replace the window selection accordingly
-    wSel.removeAllRanges();
-    range = window.document.createRange();
-    if (sel.isReverse()) {
-      range.setStart(endPosition.node, endPosition.offset);
-      wSel.addRange(range);
-      wSel.extend(startPosition.node, startPosition.offset);
-    } else {
-      range.setStart(startPosition.node, startPosition.offset);
-      range.setEnd(endPosition.node, endPosition.offset);
-      wSel.addRange(range);
-    }
-    this.state = new SurfaceSelection.State(sel.isCollapsed(), sel.isReverse(), range.start, range.end);
-  };
+  var _r1, _r2;
 
-  this.clear = function() {
-    var sel = window.getSelection();
-    sel.removeAllRanges();
-    this.state = null;
-  };
+  function _isReverse(anchorNode, anchorOffset, focusNode, focusOffset) {
+    // the selection is reversed when the focus propertyEl is before
+    // the anchor el or the computed charPos is in reverse order
+    if (focusNode && anchorNode) {
+      if (!_r1) {
+        _r1 = window.document.createRange();
+        _r2 = window.document.createRange();
+      }
+      _r1.setStart(anchorNode, anchorOffset);
+      _r2.setStart(focusNode, focusOffset);
+      var cmp = _r1.compareBoundaryPoints(window.Range.START_TO_START, _r2);
+      if (cmp === 1) {
+        return true;
+      }
+    }
+    return false;
+  }
 
-  this.getSelectionFromDOMRange = function(domRange) {
-    var sel = window.getSelection();
-    sel.removeAllRanges();
-    sel.addRange(domRange);
-    return this.getSelection();
-  };
+  function _getPath(el) {
+    if (el && el.dataset && el.dataset.path) {
+      return el.dataset.path.split('.');
+    }
+  }
+
+  /*
+   Helper for creating a model range correctly
+   as for model/Range start should be before end.
+
+   In contrast to that, DOM selections are described with anchor and focus coordinates,
+   i.e. bearing the information of direction implicitly.
+   To simplify the implementation we treat anchor and focus equally
+   and only at the end exploit the fact deriving an isReverse flag
+   and bringing start and end in the correct order.
+  */
+  function _createRange(start, end, isReverse) {
+    if (isReverse) {
+      var tmp = start;
+      start = end;
+      end = tmp;
+    }
+    return new Range(start, end, isReverse);
+  }
+
 };
 
-oo.initClass(SurfaceSelection);
+oo.initClass(DOMSelection);
 
-SurfaceSelection.State = function(collapsed, reverse, start, end) {
-  this.collapsed = collapsed;
-  this.reverse = reverse;
-  this.start = start;
-  this.end = end;
-  Object.freeze(this);
-};
-
-SurfaceSelection.Coordinate = function(el, charPos) {
-  this.el = el;
-  this.offset = charPos;
-  this.path = el.dataset.path.split('.');
-};
-
-module.exports = SurfaceSelection;
+module.exports = DOMSelection;

@@ -113,7 +113,7 @@ Surface.Prototype = function() {
 
   this.didMount = function() {
     if (!this.isReadonly()) {
-      this.domSelection = new DOMSelection(this.el, this.getDocument(), this.getContainer());
+      this.domSelection = new DOMSelection(this);
       this.clipboard.didMount();
       // Document Change Events
       this.domObserver.observe(this.el, this.domObserverConfig);
@@ -273,10 +273,13 @@ Surface.Prototype = function() {
   };
 
   this.setSelectionFromEvent = function(evt) {
-    this.skipNextFocusEvent = true;
-    var domRange = Surface.getDOMRangeFromEvent(evt);
-    var sel = this.domSelection.getSelectionFromDOMRange(domRange);
-    this.setSelection(sel);
+    if (this.domSelection) {
+      this.skipNextFocusEvent = true;
+      var domRange = Surface.getDOMRangeFromEvent(evt);
+      var range = this.domSelection.getSelectionFromDOMRange(domRange);
+      var sel = this.getDocument().createSelection(range);
+      this.setSelection(sel);
+    }
   };
 
   this.rerenderDomSelection = function() {
@@ -370,12 +373,13 @@ Surface.Prototype = function() {
   /* Event handlers */
 
   this.onDocumentChange = function(change) {
+    // dirty text properties which need to be updated due to selection changes
+    var needUpdate = this._updateSelectionFragments();
+    // plus all text properties affected by the change
     change.updated.forEach(function(_, path) {
-      var comp = this._textProperties[path];
-      if (comp) {
-        comp.rerender();
-      }
-    }.bind(this));
+      needUpdate[path] = true;
+    });
+    this._updateTextProperties(needUpdate);
     if (this.domSelection) {
       // console.log('Rerendering DOM selection after document change.', this.__id__);
       // HACK: this is necessary under FF; without focus the selection does not
@@ -391,7 +395,11 @@ Surface.Prototype = function() {
 
   this.onSelectionChange = function() {
     // console.log('Rerendering DOM selection after selection change.');
-    this.rerenderDomSelection();
+    var needUpdate = this._updateSelectionFragments();
+    this._updateTextProperties(needUpdate);
+    if (this.domSelection) {
+      this.rerenderDomSelection();
+    }
     this.emit('selection:changed', this.getSelection());
   };
 
@@ -470,8 +478,10 @@ Surface.Prototype = function() {
     // necessary for handling dead keys properly
     this.skipNextObservation=true;
     this.transaction(function(tx, args) {
-      // trying to remove the DOM selection to reduce flickering
-      this.domSelection.clear();
+      if (this.domSelection) {
+        // trying to remove the DOM selection to reduce flickering
+        this.domSelection.clear();
+      }
       args.text = event.data;
       return this.insertText(tx, args);
     }.bind(this));
@@ -502,8 +512,10 @@ Surface.Prototype = function() {
     }
     if (character.length>0) {
       this.transaction(function(tx, args) {
-        // trying to remove the DOM selection to reduce flickering
-        this.domSelection.clear();
+        if (this.domSelection) {
+          // trying to remove the DOM selection to reduce flickering
+          this.domSelection.clear();
+        }
         args.text = character;
         return this.insertText(tx, args);
       }.bind(this));
@@ -556,7 +568,8 @@ Surface.Prototype = function() {
     // being called.
     setTimeout(function() {
       if (this.domSelection) {
-        var sel = this.domSelection.getSelection();
+        var range = this.domSelection.mapDOMSelection();
+        var sel = this.getDocument().createSelection(range);
         this.setSelection(sel);
       }
     }.bind(this));
@@ -604,7 +617,8 @@ Surface.Prototype = function() {
     //   if (this.isFocused){
     //     this.rerenderDomSelection();
     //   } else {
-    //     var sel = this.domSelection.getSelection();
+    //     var range = this.domSelection.mapDOMSelection();
+    //     var sel = this.getDocument().createSelection(range);
     //     this.setFocused(true);
     //     this.setSelection(sel);
     //   }
@@ -708,7 +722,9 @@ Surface.Prototype = function() {
   };
 
   this._updateModelSelection = function(options) {
-    this.setSelection(this.domSelection.getSelection(options));
+    var range = this.domSelection.mapDOMSelection(options);
+    var sel = this.getDocument().createSelection(range);
+    this.setSelection(sel);
   };
 
   this._selectProperty = function(path) {
@@ -805,9 +821,63 @@ Surface.Prototype = function() {
     }.bind(this));
   };
 
+  this._getTextPropertyComponent = function(path) {
+    return this._textProperties[path];
+  };
+
   this._getFragments = function(path) {
     /* jshint unused:false */
-    return [];
+    var frags = [];
+    if (this._selectionFragments) {
+      var selectionFragments = this._selectionFragments[path];
+      if (selectionFragments) {
+        frags = frags.concat(selectionFragments);
+      }
+    }
+    return frags;
+  };
+
+  this._computeSelectionFragments = function(sel, selectionFragments) {
+    selectionFragments = selectionFragments || {};
+    if (sel && !sel.isNull()) {
+      var fragments = sel.getFragments();
+      fragments.forEach(function(frag) {
+        var pathStr = frag.path.toString();
+        var frags = selectionFragments[pathStr];
+        if (!frags) {
+          frags = [];
+          selectionFragments[pathStr] = frags;
+        }
+        frags.push(frag);
+      });
+    }
+    return selectionFragments;
+  };
+
+  this._updateSelectionFragments = function() {
+    var needUpdate = {};
+    var oldSelectionFragments = this._selectionFragments;
+    var newSelectionFragments = {};
+    this._computeSelectionFragments(this.getSelection(), newSelectionFragments);
+    this._selectionFragments = newSelectionFragments;
+    // properties which displayed the selection previously
+    each(oldSelectionFragments, function(_, pathStr) {
+      needUpdate[pathStr] = true;
+    });
+    // properties which display the selection currently
+    each(newSelectionFragments, function(_, pathStr) {
+      needUpdate[pathStr] = true;
+    });
+    return needUpdate;
+  };
+
+  this._updateTextProperties = function(needUpdate) {
+    each(needUpdate, function(_, pathStr) {
+      var comp = this._textProperties[pathStr];
+      if (comp) {
+        comp.rerender();
+      }
+    }.bind(this));
   };
 
   // TODO: we could integrate container node rendering into this helper

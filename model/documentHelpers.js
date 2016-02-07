@@ -34,18 +34,10 @@ documentHelpers.isContainerAnnotation = function(doc, type) {
 */
 documentHelpers.getPropertyAnnotationsForSelection = function(doc, sel, options) {
   options = options || {};
-  var annotations;
-  var path, startOffset, endOffset;
-
-  if (sel.isPropertySelection()) {
-    path = sel.getPath();
-    startOffset = sel.getStartOffset();
-    endOffset = sel.getEndOffset();
-  } else {
+  if (!sel.isPropertySelection()) {
     return [];
   }
-
-  annotations = doc.getIndex('annotations').get(path, startOffset, endOffset);
+  var annotations = doc.getIndex('annotations').get(sel.path, sel.startOffset, sel.endOffset);
   if (options.type) {
     annotations = filter(annotations, AnnotationIndex.filterByType(options.type));
   }
@@ -128,17 +120,16 @@ documentHelpers.getTextForSelection = function(doc, sel) {
   } else if (sel.isContainerSelection()) {
     var result = [];
     var container = doc.get(sel.containerId);
-    var range = sel.range;
-    var paths = container.getPathRange(range.start.path, range.end.path);
+    var paths = container.getPathRange(sel.startPath, sel.endPath);
     for (var i = 0; i < paths.length; i++) {
       var path = paths[i];
       text = doc.get(path);
       if (paths.length === 1) {
-        result.push(text.substring(sel.start.offset, sel.end.offset));
+        result.push(text.substring(sel.startOffset, sel.endOffset));
       } else if (i===0) {
-        result.push(text.substring(sel.start.offset));
+        result.push(text.substring(sel.startOffset));
       } else if (i===paths.length-1) {
-        result.push(text.substring(0, sel.end.offset));
+        result.push(text.substring(0, sel.endOffset));
       } else {
         result.push(text);
       }
