@@ -1,6 +1,6 @@
-var oo = require('../../../util/oo');
+var oo = require('../../util/oo');
 
-var annotationHelpers = require('../../annotationHelpers');
+var annotationHelpers = require('../../model/annotationHelpers');
 
 function ListEditing() {}
 
