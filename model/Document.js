@@ -360,19 +360,20 @@ Document.Prototype = function() {
 
   */
   this.createSelection = function() {
+    var coor, range;
     if (arguments.length === 1 && arguments[0] === null) {
       return Selection.nullSelection;
     }
     var sel;
     if (arguments[0] instanceof Coordinate) {
-      var coor = arguments[0];
+      coor = arguments[0];
       sel = new PropertySelection(coor.start.path, coor.start.offset, coor.end.offset, false);
     } else if (arguments[0] instanceof Range) {
-      var range = arguments[0];
+      range = arguments[0];
       if (isEqual(range.start.path, range.end.path)) {
         sel = new PropertySelection(range.start.path, range.start.offset, range.end.offset, range.reverse);
       } else {
-        sel = new ContainerSelection(range.start, range.end, range.isReverse);
+        sel = new ContainerSelection(range.containerId, range.start, range.end, range.isReverse);
       }
     } else if (arguments.length === 1 && isObject(arguments[0])) {
       var json = arguments[0];

@@ -31,6 +31,11 @@ function StubSurface(el) {
   this.getDocument = function() {
     return this.doc;
   };
+
+  this.isContainerEditor = function() {
+    return false;
+  };
+
 }
 
 // Fixtures

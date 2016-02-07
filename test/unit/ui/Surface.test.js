@@ -39,7 +39,7 @@ QUnit.uiTest("Set the selection after creating annotation.", function(assert) {
   });
   surface.el.focus();
   var wsel = window.getSelection();
-  var newSel = surface.domSelection.mapDOMSelection();
+  var newSel = surface.domSelection.getSelection();
   assert.equal(wsel.rangeCount, 1, "There should be a DOM selection.");
   assert.ok(newSel.equals(sel), "New selection should be equal to initial selection.");
 });

@@ -5,6 +5,7 @@ var map = require('lodash/map');
 var Selection = require('./Selection');
 var PropertySelection = require('./PropertySelection');
 var CoordinateAdapter = PropertySelection.CoordinateAdapter;
+var RangeAdapter = PropertySelection.RangeAdapter;
 
 /**
   A selection spanning multiple nodes.
@@ -70,9 +71,11 @@ function ContainerSelection(containerId, startPath, startOffset, endPath, endOff
     // adapters for Coordinate oriented implementations
     start: new CoordinateAdapter(this, 'startPath', 'startOffset'),
     end: new CoordinateAdapter(this, 'endPath', 'endOffset'),
+    range: null,
     // set when attached to document
     doc: null
   };
+  this._internal.range = new RangeAdapter(this);
 }
 
 ContainerSelection.Prototype = function() {
@@ -370,7 +373,7 @@ Object.defineProperties(ContainerSelection.prototype, {
     get: function() {
       return this._internal.start;
     },
-    set: function() { throw new Error('immutable.'); }
+    set: function() { throw new Error('ContainerSelection.prototype.start is read-only.'); }
   },
   /**
     @property {Coordinate} ContainerSelection.end
@@ -379,7 +382,14 @@ Object.defineProperties(ContainerSelection.prototype, {
     get: function() {
       return this._internal.end;
     },
-    set: function() { throw new Error('immutable.'); }
+    set: function() { throw new Error('ContainerSelection.prototype.end is read-only.'); }
+  },
+
+  range: {
+    get: function() {
+      return this._internal.range;
+    },
+    set: function() { throw new Error('ContainerSelection.prototype.range is read-only.'); }
   },
 
 });

@@ -568,8 +568,7 @@ Surface.Prototype = function() {
     // being called.
     setTimeout(function() {
       if (this.domSelection) {
-        var range = this.domSelection.mapDOMSelection();
-        var sel = this.getDocument().createSelection(range);
+        var sel = this.domSelection.getSelection();
         this.setSelection(sel);
       }
     }.bind(this));
@@ -617,8 +616,7 @@ Surface.Prototype = function() {
     //   if (this.isFocused){
     //     this.rerenderDomSelection();
     //   } else {
-    //     var range = this.domSelection.mapDOMSelection();
-    //     var sel = this.getDocument().createSelection(range);
+    //     var sel = this.domSelection.getSelection();
     //     this.setFocused(true);
     //     this.setSelection(sel);
     //   }
@@ -722,20 +720,14 @@ Surface.Prototype = function() {
   };
 
   this._updateModelSelection = function(options) {
-    var range = this.domSelection.mapDOMSelection(options);
-    var sel = this.getDocument().createSelection(range);
+    var sel = this.domSelection.getSelection(options);
     this.setSelection(sel);
   };
 
   this._selectProperty = function(path) {
     var doc = this.getDocument();
     var text = doc.get(path);
-    this.setSelection(doc.createSelection({
-      type: 'property',
-      path: path,
-      startOffset: 0,
-      endOffset: text.length
-    }));
+    this.setSelection(doc.createSelection(path, 0, text.length));
   };
 
   // EXPERIMENTAL: get bounding box for current selection

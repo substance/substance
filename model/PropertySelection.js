@@ -4,6 +4,7 @@ var isEqual = require('lodash/isEqual');
 var isNumber = require('lodash/isNumber');
 var Selection = require('./Selection');
 var Coordinate = require('./Coordinate');
+var Range = require('./Range');
 
 /* jshint latedef:nofunc */
 
@@ -62,9 +63,11 @@ function PropertySelection(path, startOffset, endOffset, reverse, surfaceId) {
     // dynamic adapters for Coordinate oriented implementations
     start: new CoordinateAdapter(this, 'path', 'startOffset'),
     end: new CoordinateAdapter(this, 'path', 'endOffset'),
+    range: null,
     // set when attached to document
     doc: null
   };
+  this._internal.range = new RangeAdapter(this);
 }
 
 PropertySelection.Prototype = function() {
@@ -157,6 +160,10 @@ PropertySelection.Prototype = function() {
 
   // Helper Methods
   // ----------------------
+
+  this.getRange = function() {
+    return this.range;
+  };
 
   /**
     Get path of a selection, e.g. target property where selected data is stored.
@@ -372,7 +379,7 @@ Object.defineProperties(PropertySelection.prototype, {
     get: function() {
       return this._internal.start;
     },
-    set: function() { throw new Error('immutable.'); }
+    set: function() { throw new Error('PropertySelection.prototype.start is read-only.'); }
   },
   /**
     @property {Coordinate} PropertySelection.end
@@ -381,7 +388,13 @@ Object.defineProperties(PropertySelection.prototype, {
     get: function() {
       return this._internal.end;
     },
-    set: function() { throw new Error('immutable.'); }
+    set: function() { throw new Error('PropertySelection.prototype.end is read-only.'); }
+  },
+  range: {
+    get: function() {
+      return this._internal.range;
+    },
+    set: function() { throw new Error('PropertySelection.prototype.range is read-only.'); }
   },
 
   // making this similar to ContainerSelection
@@ -417,6 +430,7 @@ function CoordinateAdapter(propertySelection, pathProperty, offsetProperty) {
   this._sel = propertySelection;
   this._pathProp = pathProperty;
   this._offsetProp = offsetProperty;
+  Object.freeze(this);
 }
 
 Coordinate.extend(CoordinateAdapter);
@@ -441,5 +455,35 @@ Object.defineProperties(CoordinateAdapter.prototype, {
 });
 
 PropertySelection.CoordinateAdapter = CoordinateAdapter;
+
+function RangeAdapter(sel) {
+  this._sel = sel;
+  this.start = sel.start;
+  this.end = sel.end;
+  Object.freeze(this);
+}
+
+Range.extend(RangeAdapter);
+
+Object.defineProperties(RangeAdapter.prototype, {
+  reverse: {
+    get: function() {
+      return this._sel.reverse;
+    },
+    set: function(reverse) {
+      this._sel.reverse = reverse;
+    }
+  },
+  surfaceId: {
+    get: function() {
+      return this._sel.surfaceId;
+    },
+    set: function(surfaceId) {
+      this._sel.surfaceId = surfaceId;
+    }
+  },
+});
+
+PropertySelection.RangeAdapter = RangeAdapter;
 
 module.exports = PropertySelection;

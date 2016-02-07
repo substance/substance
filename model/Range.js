@@ -2,10 +2,11 @@
 
 var oo = require('../util/oo');
 
-var Range = function(start, end, reverse) {
+var Range = function(start, end, reverse, containerId) {
   this.start = start;
   this.end = end;
   this.reverse = !!reverse;
+  this.containerId = containerId;
 };
 
 Range.Prototype = function() {
@@ -16,7 +17,11 @@ Range.Prototype = function() {
 
   this.equals = function(other) {
     if (this === other) return true;
-    else return (this.start.equals(other.start) && this.end.equals(other.end));
+    else return (
+      this.containerId === other.containerId &&
+      this.start.equals(other.start) &&
+      this.end.equals(other.end)
+    );
   };
 
   this.isReverse = function() {

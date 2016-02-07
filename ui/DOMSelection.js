@@ -26,11 +26,31 @@ function DOMSelection(surface) {
 
 DOMSelection.Prototype = function() {
 
+  /**
+    Create a model selection by mapping the current DOM selection
+    to model coordinates.
+
+    @param {object} options
+      - `direction`: `left` or `right`; a hint for disambiguations, used by Surface during cursor navigation.
+    @returns {model/Selection}
+  */
+  this.getSelection = function(options) {
+    var range = this.mapDOMSelection(options);
+    var doc = this.surface.getDocument();
+    return doc.createSelection(range);
+  };
+
+  /**
+    Transfer a given model selection into the DOM.
+
+    @param {model/Selection} sel
+  */
   this.setSelection = function(sel) {
     // console.log('### renderSelection', sel.toString());
     var wSel = window.getSelection();
     if (sel.isNull() || sel.isTableSelection()) {
-      return this.clear();
+      this.clear();
+      return;
     }
     var startComp = this.surface._getTextPropertyComponent(sel.startPath);
     var start = startComp.getDOMCoordinate(sel.startOffset);
@@ -56,6 +76,17 @@ DOMSelection.Prototype = function() {
   };
 
   /*
+    Map a DOM range to a model range.
+
+    @param {Range} range
+    @returns {model/Range}
+  */
+  this.mapDOMRange = function(wRange) {
+    return this._getRange(wRange.startContainer, wRange.startOffset,
+      wRange.endContainer, wRange.endOffset);
+  };
+
+  /*
     Maps the current DOM selection to a model range.
 
     @param {object} [options]
@@ -73,7 +104,7 @@ DOMSelection.Prototype = function() {
     }
     if (wSel.isCollapsed) {
       var coor = this._getCoordinate(wSel.anchorNode, wSel.anchorOffset, options);
-      range = _createRange(coor, coor, false);
+      range = _createRange(coor, coor, false, this.getContainerId());
     }
     // HACK: special treatment for edge cases as addressed by #354.
     // Sometimes anchorNode and focusNodes are the surface
@@ -86,28 +117,19 @@ DOMSelection.Prototype = function() {
     return range;
   };
 
-  // only for legacy reasons
-  this.getSelection = function() {
-    console.error('DEPRECATED: use this.mapDOMSelection() instead.');
-    return this.mapDOMSelection.apply(this, arguments);
-  };
-
-  /*
-    Map a DOM range to a model range.
-
-    @param {Range} range
-    @returns {model/Range}
-  */
-  this.mapDOMRange = function(wRange) {
-    return this._getRange(wRange.startContainer, wRange.startOffset,
-      wRange.endContainer, wRange.endOffset);
-  };
-
   /*
     Clear the DOM selection.
   */
   this.clear = function() {
     window.getSelection().removeAllRanges();
+  };
+
+  this.getContainerId = function() {
+    if (this.surface.isContainerEditor()) {
+      return this.surface.getContainerId();
+    } else {
+      return null;
+    }
   };
 
   /*
@@ -129,7 +151,7 @@ DOMSelection.Prototype = function() {
     }
     var isReverse = _isReverse(anchorNode, anchorOffset, focusNode, focusOffset);
     if (start && end) {
-      return _createRange(start, end, isReverse);
+      return _createRange(start, end, isReverse, this.getContainerId());
     } else {
       return null;
     }
@@ -329,13 +351,13 @@ DOMSelection.Prototype = function() {
    and only at the end exploit the fact deriving an isReverse flag
    and bringing start and end in the correct order.
   */
-  function _createRange(start, end, isReverse) {
+  function _createRange(start, end, isReverse, containerId) {
     if (isReverse) {
       var tmp = start;
       start = end;
       end = tmp;
     }
-    return new Range(start, end, isReverse);
+    return new Range(start, end, isReverse, containerId);
   }
 
 };
