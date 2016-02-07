@@ -716,7 +716,9 @@ Surface.Prototype = function() {
   };
 
   this._updateModelSelection = function(options) {
-    this.setSelection(this.domSelection.getSelection(options));
+    var range = this.domSelection.mapDOMSelection(options);
+    var sel = this.getDocument().createSelection(range);
+    this.setSelection(sel);
   };
 
   this._selectProperty = function(path) {
