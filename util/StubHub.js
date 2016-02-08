@@ -34,6 +34,7 @@ function StubHub(doc, messageQueue) {
   // We just assume some doc id + version for the StubHub
   this.doc.id = 'doc-15';
   this.doc.version = 1;
+  this.changes = [];
   this.messageQueue = messageQueue;
   this.wss = new WebSocketServer(messageQueue);
 
@@ -105,11 +106,22 @@ StubHub.Prototype = function() {
   };
 
   /*
+    Get all changes that happened since a particular version
+
+    NOTE: assumes that version 1 = [] and version 2 = [c1]
+  */
+  this.getChangesSinceVersion = function(version) {
+    return this.changes.splice(version-1);
+  };
+
+  /*
     Apply a set of changes to the document
   */
   this._applyChanges = function(changes) {
     forEach(changes, function(change) {
       this.doc._apply(change);
+      // Remember a changes history.
+      this.changes.push(change);
       this.doc.version += 1;
     }.bind(this));
   };
