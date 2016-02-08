@@ -97,13 +97,24 @@ StubHub.Prototype = function() {
   /*
     First thing the client sends to initialize the collaborative editing
     session.
+
+    @param ws
+    @param documentId
+    @param version The client's document version
+    @param change pending client change
+
+    Note: a client can reconnect having a pending change
+    which is similar to the commit case
   */
-  this.open = function(ws, documentId, version) {
-    ws.send(['openDone', version]);
-    // TODO: check revision of document from client with server-side revision
-    // If client version is older send diff to client sends back new server
-    // version + needed changes to bring the client to the latest version.
-    // ws.send(['openDone', version, changeset]);
+  this.open = function(ws, documentId, version, change) {
+    // TODO: this needs to be ironed out
+    if (change) {
+      this.commit(ws, change, version);
+    } else {
+      var changes = this.getChangesSinceVersion(version);
+      var serverVersion = this.getVersion();
+      ws.send(['openDone', serverVersion, changes]);
+    }
   };
 
   /*
@@ -113,6 +124,10 @@ StubHub.Prototype = function() {
   */
   this.getChangesSinceVersion = function(version) {
     return this.changes.splice(version-1);
+  };
+
+  this.getVersion = function() {
+    return this.changes.length + 1;
   };
 
   /*
@@ -142,7 +157,7 @@ StubHub.Prototype = function() {
       // Send changes to all other clients
       collaboratorSockets = this.getCollaboratorSockets(ws);
       forEach(collaboratorSockets, function(socket) {
-        socket.send(['update', change, newVersion]);
+        socket.send(['update', newVersion, change]);
       });
     } else {
       var changes = this.getChangesSinceVersion(this.doc.version);

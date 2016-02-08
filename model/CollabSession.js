@@ -2,7 +2,6 @@
 
 var DocumentSession = require('./DocumentSession');
 var WebSocket = require('../util/WebSocket');
-var forEach = require('lodash/forEach');
 
 /*
   Session that is connected to a Substance Hub allowing
@@ -83,11 +82,18 @@ CollabSession.Prototype = function() {
   */
   this._onConnected = function() {
     console.log(this.ws.clientId, ': Opened connection. Attempting to open a doc session on the hub.');
-    this.ws.send(['open', this.doc.id, this.doc.version]);
+    // TODO: we could provide a pending change, then we can reuse
+    // the 'oncommit' behavior of the server providing rebased changes
+    // This needs to be thought through...
+    var pendingChange = null;
+    if (pendingChange) {
+      this._committing = true;
+    }
+    this.ws.send(['open', this.doc.id, this.doc.version, pendingChange]);
   };
 
   /*
-    Handling of remote messages. 
+    Handling of remote messages.
 
     Message comes in in the following format:
 
@@ -130,36 +136,41 @@ CollabSession.Prototype = function() {
     Server has opened the document. The collab session is live from
     now on.
   */
-  this.openDone = function(serverVersion, change) {
+  this.openDone = function(serverVersion, changes) {
     if (this.doc.version !== serverVersion) {
       // There have been changes on the server since the doc was opened
       // the last time
-      this._applyChange(change);
-      this.doc.version = serverVersion;
+      if (changes) {
+        changes.forEach(function(change) {
+          this._applyRemoteChange(change);
+        }.bind(this));
+      }
     }
+    this.doc.version = serverVersion;
     console.log(this.ws.clientId, ': Open complete. Listening for remote changes ...');
   };
 
   /*
     Retrieved when a commit has been confirmed by the server
   */
-  this.commitDone = function(version, change) {
-    this.doc.version = version;
-    if (change) {
-      this._applyChange(change);
+  this.commitDone = function(version, changes) {
+    if (changes) {
+      changes.forEach(function(change) {
+        this._applyChange(change);
+      }.bind(this));
     }
+    this.doc.version = version;
     this._committing = false;
     console.log(this.ws.clientId, ': commit confirmed by server. New version:', version);
   };
 
   /*
     We receive an update from the server
+    As a client can only commit one change at a time
+    there is also only one update at a time.
   */
-  this.update = function(changes, version) {
-    forEach(changes, function(change) {
-      this._applyChange(change);
-    }.bind(this));
-    
+  this.update = function(version, change) {
+    this._applyRemoteChange(change);
     this.doc.version = version;
   };
 
