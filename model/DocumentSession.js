@@ -159,21 +159,28 @@ DocumentSession.Prototype = function() {
   };
 
   this.onDocumentChange = function(change, info) {
-    if (info.session !== this) {
-      this.stage._apply(change);
-      // rebase the change history
-      // TODO: as an optimization we could rebase the history lazily
-      DocumentChange.transform(this.doneChanges, change);
-      DocumentChange.transform(this.undoneChanges, change);
-      // console.log('Transforming selection...', this.__id__);
-      this._selectionHasChanged = DocumentChange.transformSelection(this.selection, change);
-    } else if (info.replay) {
+    if (info.replay && change.session === this) {
       var selection = change.after.selection;
       if (selection) {
         this.selection = selection;
         this._selectionHasChanged = true;
       }
     }
+    // ATTENTION: this is used if you have two independent DocumentSessions
+    // in one client.
+    else if (info.session !== this) {
+      this.stage._apply(change);
+      this._transformLocalChangeHistory(change, info);
+    }
+  };
+
+  this._transformLocalChangeHistory = function(change) {
+    // rebase the change history
+    // TODO: as an optimization we could rebase the history lazily
+    DocumentChange.transform(this.doneChanges, change);
+    DocumentChange.transform(this.undoneChanges, change);
+    // console.log('Transforming selection...', this.__id__);
+    this._selectionHasChanged = DocumentChange.transformSelection(this.selection, change);
   };
 
   this.afterDocumentChange = function() {
