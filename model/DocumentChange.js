@@ -211,6 +211,10 @@ DocumentChange.Prototype = function() {
     return JSON.stringify(data);
   };
 
+  this.clone = function() {
+    return DocumentChange.fromJSON(this.toJSON());
+  };
+
   this.toJSON = function() {
     var data = {
       sessionId: this.sessionId,
@@ -255,6 +259,14 @@ DocumentChange.fromJSON = function(data) {
   data.ops = data.ops.map(function(opData) {
     return ObjectOperation.fromJSON(opData);
   });
+  var Document = require('./Document');
+  if (data.before.selection) {
+    data.before.selection = Document.createSelection(data.before.selection);
+  }
+  if (data.after.selection) {
+    data.after.selection = Document.createSelection(data.after.selection);
+  }
+
   return new DocumentChange(data);
 };
 

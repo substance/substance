@@ -1,7 +1,6 @@
 "use strict";
 
 var EventEmitter = require('./EventEmitter');
-var WebSocketServer = require('./WebSocketServer');
 var forEach = require('lodash/forEach');
 var DocumentChange = require('./../model/DocumentChange');
 
@@ -27,7 +26,8 @@ var DocumentChange = require('./../model/DocumentChange');
   ```
 */
 
-function StubHub(doc, messageQueue) {
+
+function StubHub(doc, wss) {
   StubHub.super.apply(this);
 
   this.doc = doc;
@@ -36,8 +36,7 @@ function StubHub(doc, messageQueue) {
   this.doc.id = 'doc-15';
   this.doc.version = 1;
   this.changes = [];
-  this.messageQueue = messageQueue;
-  this.wss = new WebSocketServer(messageQueue);
+  this.wss = wss;
 
   this.wss.connect(this, {
     'connection': this._onConnection
@@ -178,10 +177,10 @@ StubHub.Prototype = function() {
       // update the other collaborators with the new change
       collaboratorSockets = this.getCollaboratorSockets(ws);
       forEach(collaboratorSockets, function(socket) {
-        socket.send(['update', newVersion, this._serialize(newChange)]);
+        socket.send(['update', newVersion, this._serializeChange(newChange)]);
       }.bind(this));
       // confirm the new commit, providing the diff since last common version
-      ws.send(['commitDone'], newVersion, changes.map(this._serialize.bind(this)));
+      ws.send(['commitDone'], newVersion, changes.map(this._serializeChange.bind(this)));
     }
   };
 
