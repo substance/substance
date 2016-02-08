@@ -2,7 +2,6 @@
 
 var DocumentSession = require('./DocumentSession');
 var WebSocket = require('../util/WebSocket');
-var forEach = require('lodash/forEach');
 
 /*
   Session that is connected to a Substance Hub allowing
@@ -35,7 +34,6 @@ function CollabSession(doc, options) {
 
   this.ws.onopen = this._onConnected.bind(this);
   this.ws.onmessage = this._onMessage.bind(this);
-
 }
 
 CollabSession.Prototype = function() {
@@ -54,7 +52,7 @@ CollabSession.Prototype = function() {
     // We immediately commit each change for now. However we may want to have 
     // a mechanism for keeping track of pendingChanges and send them as one
     // batch of changes. This is also needed for offline scenarios.
-    this.ws.send(['commit', [change], this.doc.version]);
+    this.ws.send(['commit', change, this.doc.version]);
   };
 
   /*
@@ -88,28 +86,26 @@ CollabSession.Prototype = function() {
   };
 
   /*
-    Apply a set of changes to the document
+    Apply a change to the document
   */
-  this._applyChanges = function(changes) {
-    forEach(changes, function(change) {
-      this.stage._apply(change);
-      this.doc._apply(change);
-      // We need to notify the change listeners so the UI gets updated
-      // We pass replay: false, so this does not become part of the undo
-      // history.
-      this._notifyChangeListeners(change, { replay: false, remote: true });
-    }.bind(this));
+  this._applyChange = function(change) {
+    this.stage._apply(change);
+    this.doc._apply(change);
+    // We need to notify the change listeners so the UI gets updated
+    // We pass replay: false, so this does not become part of the undo
+    // history.
+    this._notifyChangeListeners(change, { replay: false, remote: true });    
   };
 
   /*
     Server has opened the document. The collab session is live from
     now on.
   */
-  this.openDone = function(serverVersion, changes) {
+  this.openDone = function(serverVersion, change) {
     if (this.doc.version !== serverVersion) {
       // There have been changes on the server since the doc was opened
       // the last time
-      this._applyChanges(changes);
+      this._applyChange(change);
       this.doc.version = serverVersion;
     }
     console.log(this.ws.clientId, ': Open complete. Listening for remote changes ...');
@@ -118,10 +114,10 @@ CollabSession.Prototype = function() {
   /*
     Retrieved when a commit has been confirmed by the server
   */
-  this.commitDone = function(version, changes) {
+  this.commitDone = function(version, change) {
     this.doc.version = version;
-    if (changes) {
-      this._applyChanges(changes);
+    if (change) {
+      this._applyChange(change);
     }
     console.log(this.ws.clientId, ': commit confirmed by server. New version:', version);
   };
@@ -129,8 +125,8 @@ CollabSession.Prototype = function() {
   /*
     We receive an update from the server
   */
-  this.update = function(changes, version) {
-    this._applyChanges(changes);
+  this.update = function(change, version) {
+    this._applyChange(change);
     this.doc.version = version;
   };
 

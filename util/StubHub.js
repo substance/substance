@@ -117,21 +117,19 @@ StubHub.Prototype = function() {
   /*
     Apply a set of changes to the document
   */
-  this._applyChanges = function(changes) {
-    forEach(changes, function(change) {
-      this.doc._apply(change);
-      // Remember a changes history.
-      this.changes.push(change);
-      this.doc.version += 1;
-    }.bind(this));
+  this._applyChange = function(change) {
+    this.doc._apply(change);
+    // Remember change in history.
+    this.changes.push(change);
+    this.doc.version += 1;
   };
 
   /*
     Client wants to commit changes
   */
-  this.commit = function(ws, changes, version) {
+  this.commit = function(ws, change, version) {
     if (this.doc.version === version) {
-      this._applyChanges(changes);
+      this._applyChange(change);
       var newVersion = this.doc.version;
       // send confirmation to client that commited
       ws.send(['commitDone', newVersion]);
@@ -139,7 +137,7 @@ StubHub.Prototype = function() {
       // Send changes to all other clients
       var collaboratorSockets = this.getCollaboratorSockets(ws);
       forEach(collaboratorSockets, function(socket) {
-        socket.send(['update', changes, newVersion]);
+        socket.send(['update', change, newVersion]);
       });
     } else {
       // TODO: Make use of DocumentChange.transform()
