@@ -373,7 +373,7 @@ Surface.Prototype = function() {
 
   /* Event handlers */
 
-  this.onDocumentChange = function(change) {
+  this.onDocumentChange = function(change, info) {
     // dirty text properties which need to be updated due to selection changes
     var needUpdate = this._updateSelectionFragments();
     // plus all text properties affected by the change
@@ -381,7 +381,7 @@ Surface.Prototype = function() {
       needUpdate[path] = true;
     });
     this._updateTextProperties(needUpdate);
-    if (this.domSelection) {
+    if (this.domSelection && !info.remote) {
       // console.log('Rerendering DOM selection after document change.', this.__id__);
       // HACK: this is necessary under FF; without focus the selection does not
       // get rendered.
