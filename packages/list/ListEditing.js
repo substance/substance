@@ -130,10 +130,12 @@ ListEditing.Prototype = function() {
       // if delete is hit at the end of the first list, merge the first item of
       // the second list into the last item of the first list
       var item = tx.get(args.second.items[0]);
-      tx.update([node.id, 'content'], {insert: {offset: node.content.length, value: item.content}});
+      var length = node.content.length;
+      tx.update([node.id, 'content'], {insert: {offset: length, value: item.content}});
+      annotationHelpers.transferAnnotations(tx, [item.id, 'content'], 0, [node.id, 'content'], length);
       tx.update([args.second.id, 'items'], {delete: {offset: 0}});
     } else {
-      // if backspace is hit at the beginning of teh second list, we just convert the
+      // if backspace is hit at the beginning of the second list, we just convert the
       // list item to a paragraph
       var defaultType = tx.getSchema().getDefaultTextType();
       var id = uuid(defaultType);
@@ -147,6 +149,8 @@ ListEditing.Prototype = function() {
       });
       // show the paragraph node
       container.show(id, index+1);
+      // transfer annotations
+      annotationHelpers.transferAnnotations(tx, args.path, 0, [id, 'content'], 0);
       var selection = tx.createSelection({
         type: 'property',
         path: [id, 'content'],
@@ -183,6 +187,7 @@ ListEditing.Prototype = function() {
     container.hide(args.second.id);
     // add the content of the text node to the last item of the list
     tx.update([lastListItemId, 'content'], {insert: {offset: originalOffset, value: args.second.content}});
+    annotationHelpers.transferAnnotations(tx, [args.second.id, 'content'], 0, [lastListItemId, 'content'], originalOffset);
     // update the selection
     var selection = tx.createSelection({
       type: 'property',
@@ -226,6 +231,7 @@ ListEditing.Prototype = function() {
       });
       // show the paragraph node
       container.show(id, index);
+      annotationHelpers.transferAnnotations(tx, [args.second.items[0], 'content'], 0, [id, 'content'], 0);
       selection = tx.createSelection({
         type: 'property',
         path: [id, 'content'],
@@ -236,6 +242,7 @@ ListEditing.Prototype = function() {
       // element into the paragraph
       var contentLength = args.first.content.length;
       tx.update([args.first.id, 'content'], {insert: {offset: contentLength, value: content}});
+      annotationHelpers.transferAnnotations(tx, [args.second.items[0], 'content'], 0, [args.first.id, 'content'], contentLength);
       selection = tx.createSelection({
         type: 'property',
         path: [args.first.id, 'content'],
@@ -256,10 +263,11 @@ ListEditing.Prototype = function() {
     var nodeIndex = args.node.items.indexOf(args.path[0]);
     if (args.direction === 'right') {
       // If delete is hit at the end of a list element, we merge the content of the
-      // next element int othe current one.
+      // next element into the current one.
       var nextNode = tx.get(args.node.items[nodeIndex+1]);
       var contentLength = node.content.length;
       tx.update(args.path, {insert: {offset: contentLength, value: nextNode.content}});
+      annotationHelpers.transferAnnotations(tx, [nextNode.id, 'content'], 0, args.path, contentLength);
       tx.update([args.node.id, 'items'], {delete: {offset: nodeIndex+1}});
       selection = tx.createSelection({
         type: 'property',
@@ -281,6 +289,10 @@ ListEditing.Prototype = function() {
         type: defaultType,
         content: node.content
       });
+      // show the paragraph node and the second list node
+      annotationHelpers.transferAnnotations(tx, args.path, 0, [id, 'content'], 0);
+      container.show(id, index+1);
+      // make a new list with the trailing items
       var newList = tx.create({
         id: uuid('list'),
         type: args.node.type,
@@ -292,13 +304,11 @@ ListEditing.Prototype = function() {
         listElem = tx.get(newList.items[i]);
         listElem.parent = newList.id;
       }
+      container.show(newList.id, index+2);
       // delete the trailing list items from the first list
       for (i=numItems-1; i>=nodeIndex; i--) {
         tx.update([args.node.id, 'items'], {delete: {offset: i}});
       }
-      // show the paragraph node and the second list node
-      container.show(id, index+1);
-      container.show(newList.id, index+2);
       selection = tx.createSelection({
         type: 'property',
         path: [id, 'content'],
