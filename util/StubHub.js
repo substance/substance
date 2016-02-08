@@ -116,33 +116,45 @@ StubHub.Prototype = function() {
 
   /*
     Apply a set of changes to the document
+
+    @returns transformed change after being applied
+
+    TODO: perform transformation here
   */
-  this._applyChange = function(change) {
-    this.doc._apply(change);
-    // Remember change in history.
-    this.changes.push(change);
+  this._applyChange = function(change, version) {
+    if (this.doc.version === version) {
+      this.doc._apply(change);
+      // Remember change in history.
+      this.changes.push(change);
+      
+    } else {
+      // TODO: Make use of DocumentChange.transform()
+      throw new Error('client and server have different versions: server-side rebase needed!');
+    }
+
     this.doc.version += 1;
+
+    // We need to return a list of changes here because sometimes we need to update
+    // multiple user selections
+    return [change];
+
   };
 
   /*
     Client wants to commit changes
   */
   this.commit = function(ws, change, version) {
-    if (this.doc.version === version) {
-      this._applyChange(change);
-      var newVersion = this.doc.version;
-      // send confirmation to client that commited
-      ws.send(['commitDone', newVersion]);
+    
+    var appliedChanges = this._applyChange(change, version);
+    var newVersion = this.doc.version;
+    // send confirmation to client that commited
+    ws.send(['commitDone', newVersion]);
 
-      // Send changes to all other clients
-      var collaboratorSockets = this.getCollaboratorSockets(ws);
-      forEach(collaboratorSockets, function(socket) {
-        socket.send(['update', change, newVersion]);
-      });
-    } else {
-      // TODO: Make use of DocumentChange.transform()
-      throw new Error('client and server have different versions: server-side rebase needed!');
-    }
+    // Send changes to all other clients
+    var collaboratorSockets = this.getCollaboratorSockets(ws);
+    forEach(collaboratorSockets, function(socket) {
+      socket.send(['update', appliedChanges, newVersion]);
+    });
   };
 };
 

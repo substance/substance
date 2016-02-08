@@ -2,14 +2,13 @@
 
 var DocumentSession = require('./DocumentSession');
 var WebSocket = require('../util/WebSocket');
+var forEach = require('lodash/forEach');
 
 /*
   Session that is connected to a Substance Hub allowing
   collaboration in real-time.
 
   TODO:
-    - is 'commit' a good terminology? should we just call it update which
-      works in both directions
     - error handling strategies
       - e.g. a commit message never gets through to the server
          - how to detect those errors? timeout?
@@ -29,30 +28,54 @@ function CollabSession(doc, options) {
   this.doc.version = 1;
 
   this.messageQueue = options.messageQueue;
-  this.pendingChanges = [];
+  this.nextCommit = null;
   this.ws = new WebSocket(this.messageQueue);
 
   this.ws.onopen = this._onConnected.bind(this);
   this.ws.onmessage = this._onMessage.bind(this);
+
+  // Try to commit changes to the server every 1s
+  setInterval(this.commit.bind(this), 1000);
 }
 
 CollabSession.Prototype = function() {
-
   var _super = Object.getPrototypeOf(this);
+
+  /*
+    Send local changes to the world.
+  */
+  this.commit = function() {
+    // If there is something to commit and there is no commit pending
+    if (this.nextCommit && !this._committing) {
+      // console.log('committing', this.nextCommit);
+      this.ws.send(['commit', this.nextCommit, this.doc.version]);
+
+      this._pendingCommit = this.nextCommit;
+      this.nextCommit = null;
+      this._committing = true;
+    }
+  };
+
+  /*
+    We record all local changes into a single change (aka commit) that
+  */
+  this._recordCommit = function(change) {
+    if (!this.nextCommit) {
+      this.nextCommit = change;
+    } else {
+      // Merge new change into nextCommit
+      this.nextCommit.ops = this.nextCommit.ops.concat(change.ops);
+      this.nextCommit.after = change.after;
+    }
+  };
 
   this.afterDocumentChange = function(change, info) {
     _super.afterDocumentChange.apply(this, arguments);
 
-    console.log('doc changed', change, info);
-
-    // We only consider local changes here.
-    if (info.remote) return;
-
-    // this.pendingChanges.push(change);
-    // We immediately commit each change for now. However we may want to have 
-    // a mechanism for keeping track of pendingChanges and send them as one
-    // batch of changes. This is also needed for offline scenarios.
-    this.ws.send(['commit', change, this.doc.version]);
+    // Record local chagnes into nextCommit
+    if (!info.remote) {
+      this._recordCommit(change);
+    }
   };
 
   /*
@@ -125,14 +148,18 @@ CollabSession.Prototype = function() {
     if (change) {
       this._applyChange(change);
     }
+    this._committing = false;
     console.log(this.ws.clientId, ': commit confirmed by server. New version:', version);
   };
 
   /*
     We receive an update from the server
   */
-  this.update = function(change, version) {
-    this._applyChange(change);
+  this.update = function(changes, version) {
+    forEach(changes, function(change) {
+      this._applyChange(change);
+    }.bind(this));
+    
     this.doc.version = version;
   };
 
