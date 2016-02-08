@@ -245,12 +245,13 @@ DocumentChange.fromJSON = function(data) {
 };
 
 /*
-  Transforms this change by another one, in the sense of rebasing this change
-  w.r.t to the given other change.
-  I.e, if a and b are both based on version v_n, while applying b results in version v_{n+1}
-  then this call transforms this change so that it can be applied on v_{n+1} afterwards.
+  Transforms change A with B.
+
+     / A - B' \
+  v_n          v_n+1
+     \ B - A' /
 */
-DocumentChange.transform = function(A, B) {
+DocumentChange.transformInplace = function(A, B) {
   // TODO: also transform the selections (before and after)
   // TODO: some day collect conflicts so that we can report back to the user
   //       this would have the effect, that no conflicting change would be sent to
@@ -272,18 +273,16 @@ DocumentChange.transform = function(A, B) {
   for (i = 0; i < B.length; i++) {
     b_ops = b_ops.concat(B[i].ops);
   }
-  for (i = 0; i < b_ops.length; i++) {
-    var b_op = b_ops[i];
-    // clone the other ops so they are not changed by the transform
-    // TODO: maybe would be good to have more control which parts are manipulated inplace.
-    b_op = b_op.clone();
-    for (var j = 0; j < a_ops.length; j++) {
-      var a_op = a_ops[j];
+  for (i = 0; i < a_ops.length; i++) {
+    var a_op = a_ops[i];
+    for (var j = 0; j < b_ops.length; j++) {
+      var b_op = b_ops[j];
       // ATTENTION: order of arguments is important.
       // First argument is the dominant one, i.e. it is treated as if it was applied before
-      ObjectOperation.transform(b_op, a_op, {inplace: true});
+      ObjectOperation.transform(a_op, b_op, {inplace: true});
     }
   }
+  // TODO: transform selections implicitly
 };
 
 

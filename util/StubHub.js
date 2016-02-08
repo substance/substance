@@ -3,6 +3,7 @@
 var EventEmitter = require('./EventEmitter');
 var WebSocketServer = require('./WebSocketServer');
 var forEach = require('lodash/forEach');
+var DocumentChange = require('./../model/DocumentChange');
 
 /*
   Hub implementation for local testing
@@ -17,7 +18,7 @@ var forEach = require('lodash/forEach');
     -> ['close', 'doc1']
 
   @example
-  
+
   ```js
   var hub = new StubHub(doc, messageQueue);
 
@@ -72,7 +73,7 @@ StubHub.Prototype = function() {
   };
 
   /*
-    Handling of client messages. 
+    Handling of client messages.
 
     Message comes in in the following format:
 
@@ -95,7 +96,7 @@ StubHub.Prototype = function() {
 
   /*
     First thing the client sends to initialize the collaborative editing
-    session. 
+    session.
   */
   this.open = function(ws, documentId, version) {
     ws.send(['openDone', version]);
@@ -128,20 +129,35 @@ StubHub.Prototype = function() {
     Client wants to commit changes
   */
   this.commit = function(ws, change, version) {
+    var newVersion, collaboratorSockets;
     if (this.doc.version === version) {
       this._applyChange(change);
-      var newVersion = this.doc.version;
+      newVersion = this.doc.version;
       // send confirmation to client that commited
       ws.send(['commitDone', newVersion]);
 
       // Send changes to all other clients
-      var collaboratorSockets = this.getCollaboratorSockets(ws);
+      collaboratorSockets = this.getCollaboratorSockets(ws);
       forEach(collaboratorSockets, function(socket) {
         socket.send(['update', change, newVersion]);
       });
     } else {
-      // TODO: Make use of DocumentChange.transform()
-      throw new Error('client and server have different versions: server-side rebase needed!');
+      var changes = this.getChangesSinceVersion(this.doc.version);
+      changes = changes.map(function(change) {
+        return change.clone();
+      });
+      var newChange = change.clone();
+      for (var i = 0; i < changes.length; i++) {
+        DocumentChange.transformInplace(changes[i], newChange);
+      }
+      this._applyChange(newChange);
+      newVersion = this.doc.version;
+
+      collaboratorSockets = this.getCollaboratorSockets(ws);
+      forEach(collaboratorSockets, function(socket) {
+        socket.send(['update', newVersion, newChange]);
+      });
+      ws.send(['commitDone'], newVersion, changes);
     }
   };
 };

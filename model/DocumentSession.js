@@ -174,13 +174,20 @@ DocumentSession.Prototype = function() {
     }
   };
 
-  this._transformLocalChangeHistory = function(change) {
-    // rebase the change history
-    // TODO: as an optimization we could rebase the history lazily
-    DocumentChange.transform(this.doneChanges, change);
-    DocumentChange.transform(this.undoneChanges, change);
+  this._transformLocalChangeHistory = function(externalChange) {
+    // Transform the change history
+    // Note: using a clone as the transform is done inplace
+    // which is ok for the changes in the undo history, but not
+    // for the external change
+    var clone = {
+      ops: externalChange.ops.map(function(op) { return op.clone(); })
+    };
+    DocumentChange.transformInplace(clone, this.doneChanges);
+    DocumentChange.transformInplace(clone, this.undoneChanges);
     // console.log('Transforming selection...', this.__id__);
-    this._selectionHasChanged = DocumentChange.transformSelection(this.selection, change);
+    // Transform the selection
+    this._selectionHasChanged =
+      DocumentChange.transformSelection(this.selection, externalChange);
   };
 
   this.afterDocumentChange = function() {
