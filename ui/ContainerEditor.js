@@ -273,7 +273,7 @@ ContainerEditor.Prototype = function() {
       }
     }
     // do other stuff such as rerendering text properties
-    _super.onDocumentChange.call(this, change);
+    _super.onDocumentChange.apply(this, arguments);
   };
 
   // Create a first text element
