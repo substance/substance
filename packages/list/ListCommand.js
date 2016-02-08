@@ -41,10 +41,10 @@ ListCommand.Prototype = function() {
 
     surface.transaction(function(tx, args) {
       var newList;
+      var container = tx.get(containerId);
       if (node.type === 'list-item') {
         var defaultType = tx.getSchema().getDefaultTextType();
         var id = uuid(defaultType);
-        var container = tx.get(containerId);
         var parentList = tx.get(node.parent);
         var index = container.getChildIndex(parentList);
         var numItems = parentList.items.length;
@@ -101,7 +101,6 @@ ListCommand.Prototype = function() {
         var newPath = [newListItem.id, 'content'];
         // transfer annotations from the current node to new list item
         annotationHelpers.transferAnnotations(tx, path, 0, newPath, 0);
-        var container = tx.get(containerId);
         var pos = container.getPosition(node.id);
         // show the new list item and hide the old node
         container.show(newList.id, pos+1);
