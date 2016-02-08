@@ -361,7 +361,9 @@ Document.Prototype = function() {
   */
   this.createSelection = function() {
     var sel = Document.createSelection.apply(null, arguments);
-    sel.attach(this);
+    if (!sel.isNull()) {
+      sel.attach(this);
+    }
     return sel;
   };
 
