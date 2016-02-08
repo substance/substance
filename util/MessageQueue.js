@@ -12,14 +12,28 @@ function MessageQueue(options) {
 
   this.clients = {};
   this.messages = [];
-
-  // If manual processing is on user must call tick to process the next message
-  if (!options.manualProcess) {
-    setInterval(this._processMessage.bind(this), 100);  
-  }
 }
 
 MessageQueue.Prototype = function() {
+
+  /*
+    Starts queue processing
+  */
+  this.start = function() {
+    this._interval = setInterval(this._processMessage.bind(this), 100);  
+  };
+
+  /*
+    Stops the queue processing
+  */
+  this.stop = function() {
+    clearInterval(this._interval);
+  };
+
+  this.tick = function() {
+    this._processMessage();
+  };
+
   /**
     A new client connects to the message queue
   */
@@ -42,11 +56,10 @@ MessageQueue.Prototype = function() {
   */
   this.pushMessage = function(message) {
     this.messages.push(message);
+    this.emit('messages:updated', this.messages);
   };
 
-  this.tick = function() {
-    this._processMessage();
-  };
+
 
   /*
     Takes one message off the queue and delivers it to the recepient
@@ -54,6 +67,7 @@ MessageQueue.Prototype = function() {
   this._processMessage = function() {
     var message = this.messages.shift();
     if (!message) return; // nothing to process
+    this.emit('messages:updated', this.messages);
     var to = message.to;
     // var from = message.from;
     this.clients[to]._onMessage(message.data);
