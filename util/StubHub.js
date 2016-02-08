@@ -107,13 +107,14 @@ StubHub.Prototype = function() {
     which is similar to the commit case
   */
   this.open = function(ws, documentId, version, change) {
+    change = this._deserializeChange(change);
     // TODO: this needs to be ironed out
     if (change) {
       this.commit(ws, change, version);
     } else {
       var changes = this.getChangesSinceVersion(version);
       var serverVersion = this.getVersion();
-      ws.send(['openDone', serverVersion, changes]);
+      ws.send(['openDone', serverVersion, changes.map(this._serializeChange.bind(this))]);
     }
   };
 
@@ -148,6 +149,7 @@ StubHub.Prototype = function() {
     Client wants to commit changes
   */
   this.commit = function(ws, change, version) {
+    change = this._deserializeChange(change);
     var newVersion, collaboratorSockets;
     if (this.doc.version === version) {
       this._applyChange(change);
@@ -157,8 +159,8 @@ StubHub.Prototype = function() {
       // Send changes to all other clients
       collaboratorSockets = this.getCollaboratorSockets(ws);
       forEach(collaboratorSockets, function(socket) {
-        socket.send(['update', newVersion, change]);
-      });
+        socket.send(['update', newVersion, this._serializeChange(change)]);
+      }.bind(this));
     } else {
       var changes = this.getChangesSinceVersion(this.doc.version);
       // create clones of the changes for transformation
@@ -176,12 +178,25 @@ StubHub.Prototype = function() {
       // update the other collaborators with the new change
       collaboratorSockets = this.getCollaboratorSockets(ws);
       forEach(collaboratorSockets, function(socket) {
-        socket.send(['update', newVersion, newChange]);
-      });
+        socket.send(['update', newVersion, this._serialize(newChange)]);
+      }.bind(this));
       // confirm the new commit, providing the diff since last common version
-      ws.send(['commitDone'], newVersion, changes);
+      ws.send(['commitDone'], newVersion, changes.map(this._serialize.bind(this)));
     }
   };
+
+  this._serializeChange = function(change) {
+    if (change) {
+      return change.serialize();
+    }
+  };
+
+  this._deserializeChange = function(changeData) {
+    if (changeData) {
+      return DocumentChange.deserialize(changeData);
+    }
+  };
+
 };
 
 EventEmitter.extend(StubHub);

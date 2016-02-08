@@ -4,6 +4,7 @@ var isEqual = require('lodash/isEqual');
 var isObject = require('lodash/isObject');
 var isArray = require('lodash/isArray');
 var map = require('lodash/map');
+var clone = require('lodash/clone');
 var oo = require('../util/oo');
 var uuid = require('../util/uuid');
 var TreeIndex = require('../util/TreeIndex');
@@ -38,6 +39,8 @@ var FINAL = 3;
 function DocumentChange(ops, before, after) {
   if (arguments.length === 1 && isObject(arguments[0])) {
     var data = arguments[0];
+    // sessionId
+    this.sessionId = data.sessionId;
     // a unique id
     this.sha = data.sha;
     // the document version this change can be applied on
@@ -56,8 +59,6 @@ function DocumentChange(ops, before, after) {
     this.after = data.after;
 
     this.state = data.state || FINAL;
-
-    // this.freeze();
   } else if (arguments.length === 3) {
     this.sha = uuid();
     this.timestamp = Date.now();
@@ -196,36 +197,39 @@ DocumentChange.Prototype = function() {
 
   this.isUpdated = this.isAffected;
 
+  /*
+    TODO serializers and deserializers should allow
+    for application data in 'after' and 'before'
+  */
+
   this.serialize = function() {
     var opSerializer = new OperationSerializer();
-    var data = {
-      sha: this.sha,
-      version: this.version,
-      timestamp: this.timestamp,
-      before: {
-        selection: this.before.selection
-      },
-      ops: this.ops.map(function(op) {
-        return opSerializer.serialize(op);
-      }),
-      after: {
-        selection: this.after.selection
-      }
-    };
+    var data = this.toJSON();
+    data.ops = this.ops.map(function(op) {
+      return opSerializer.serialize(op);
+    });
     return JSON.stringify(data);
   };
 
   this.toJSON = function() {
-    return {
+    var data = {
+      sessionId: this.sessionId,
       sha: this.sha,
       version: this.version,
       state: this.state,
-      before: this.before,
+      before: clone(this.before),
       ops: map(this.ops, function(op) {
         return op.toJSON();
       }),
-      after: this.after,
+      after: clone(this.after),
     };
+    if (this.before.selection) {
+      data.before.selection = this.before.selection.toJSON();
+    }
+    if (this.after.selection) {
+      data.after.selection = this.after.selection.toJSON();
+    }
+    return data;
   };
 };
 
@@ -237,10 +241,20 @@ DocumentChange.deserialize = function(str) {
   data.ops = data.ops.map(function(opData) {
     return opSerializer.deserialize(opData);
   });
+  var Document = require('./Document');
+  if (data.before.selection) {
+    data.before.selection = Document.createSelection(data.before.selection);
+  }
+  if (data.after.selection) {
+    data.after.selection = Document.createSelection(data.after.selection);
+  }
   return new DocumentChange(data);
 };
 
 DocumentChange.fromJSON = function(data) {
+  data.ops = data.ops.map(function(opData) {
+    return ObjectOperation.fromJSON(opData);
+  });
   return new DocumentChange(data);
 };
 

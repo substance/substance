@@ -23,6 +23,8 @@ function DocumentSession(doc, options) {
   DocumentSession.super.apply(this);
 
   this.__id__ = __id__++;
+  // local sessionId, overwritten by CollabSession
+  this.sessionId = __id__;
 
   options = options || {};
   this.doc = doc;
@@ -72,6 +74,10 @@ DocumentSession.Prototype = function() {
     // done via this method -- as opposed to implicit changes
     // via DocumentChange
     this.emit('selection:changed:explicitly', sel, this);
+  };
+
+  this.getCollaborators = function() {
+    return null;
   };
 
   this.canUndo = function() {
@@ -199,8 +205,9 @@ DocumentSession.Prototype = function() {
   };
 
   this._commit = function(change, info) {
-    // apply the change
+    change.sessionId = this.sessionId;
     change.timestamp = Date.now();
+
     // TODO: try to find a more explicit way, or a maybe a smarter way
     // to keep the TransactionDocument in sync
     this.doc._apply(change);
@@ -226,6 +233,7 @@ DocumentSession.Prototype = function() {
 
   this._notifyChangeListeners = function(change, info) {
     info = info || {};
+    // TODO: iron this out... we should have change.sessionId already
     info.session = this;
     // TODO: I would like to wrap this with a try catch.
     // however, debugging gets inconvenient as caught exceptions don't trigger a breakpoint

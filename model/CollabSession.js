@@ -1,6 +1,7 @@
 'use strict';
 
 var DocumentSession = require('./DocumentSession');
+var DocumentChange = require('./DocumentChange');
 var WebSocket = require('../util/WebSocket');
 
 /*
@@ -47,8 +48,7 @@ CollabSession.Prototype = function() {
     // If there is something to commit and there is no commit pending
     if (this.nextCommit && !this._committing) {
       // console.log('committing', this.nextCommit);
-      this.ws.send(['commit', this.nextCommit, this.doc.version]);
-
+      this.ws.send(['commit', this._serializeChange(this.nextCommit), this.doc.version]);
       this._pendingCommit = this.nextCommit;
       this.nextCommit = null;
       this._committing = true;
@@ -89,7 +89,7 @@ CollabSession.Prototype = function() {
     if (pendingChange) {
       this._committing = true;
     }
-    this.ws.send(['open', this.doc.id, this.doc.version, pendingChange]);
+    this.ws.send(['open', this.doc.id, this.doc.version, this._serializeChange(pendingChange)]);
   };
 
   /*
@@ -142,6 +142,7 @@ CollabSession.Prototype = function() {
       // the last time
       if (changes) {
         changes.forEach(function(change) {
+          change = this._deserializeChange(change);
           this._applyRemoteChange(change);
         }.bind(this));
       }
@@ -156,6 +157,7 @@ CollabSession.Prototype = function() {
   this.commitDone = function(version, changes) {
     if (changes) {
       changes.forEach(function(change) {
+        change = this._deserializeChange(change);
         this._applyChange(change);
       }.bind(this));
     }
@@ -170,8 +172,21 @@ CollabSession.Prototype = function() {
     there is also only one update at a time.
   */
   this.update = function(version, change) {
+    change = this._deserializeChange(change);
     this._applyRemoteChange(change);
     this.doc.version = version;
+  };
+
+  this._serializeChange = function(change) {
+    if (change) {
+      return change.serialize();
+    }
+  };
+
+  this._deserializeChange = function(changeData) {
+    if (changeData) {
+      return DocumentChange.deserialize(changeData);
+    }
   };
 
 };
