@@ -117,6 +117,10 @@ StubHub.Prototype = function() {
 
   /*
     Apply a set of changes to the document
+
+    @returns transformed change after being applied
+
+    TODO: perform transformation here
   */
   this._applyChange = function(change) {
     this.doc._apply(change);
@@ -135,7 +139,6 @@ StubHub.Prototype = function() {
       newVersion = this.doc.version;
       // send confirmation to client that commited
       ws.send(['commitDone', newVersion]);
-
       // Send changes to all other clients
       collaboratorSockets = this.getCollaboratorSockets(ws);
       forEach(collaboratorSockets, function(socket) {
@@ -143,20 +146,24 @@ StubHub.Prototype = function() {
       });
     } else {
       var changes = this.getChangesSinceVersion(this.doc.version);
+      // create clones of the changes for transformation
       changes = changes.map(function(change) {
         return change.clone();
       });
       var newChange = change.clone();
+      // transform changes
       for (var i = 0; i < changes.length; i++) {
         DocumentChange.transformInplace(changes[i], newChange);
       }
+      // apply the new change
       this._applyChange(newChange);
       newVersion = this.doc.version;
-
+      // update the other collaborators with the new change
       collaboratorSockets = this.getCollaboratorSockets(ws);
       forEach(collaboratorSockets, function(socket) {
         socket.send(['update', newVersion, newChange]);
       });
+      // confirm the new commit, providing the diff since last common version
       ws.send(['commitDone'], newVersion, changes);
     }
   };
