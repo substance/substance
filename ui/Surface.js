@@ -831,7 +831,7 @@ Surface.Prototype = function() {
     return frags;
   };
 
-  this._computeSelectionFragments = function(sel, selectionFragments) {
+  this._computeSelectionFragments = function(sel, selectionFragments, userData) {
     selectionFragments = selectionFragments || {};
     if (sel && !sel.isNull()) {
       var fragments = sel.getFragments();
@@ -842,6 +842,7 @@ Surface.Prototype = function() {
           frags = [];
           selectionFragments[pathStr] = frags;
         }
+        frag.userData = userData;
         frags.push(frag);
       });
     }
@@ -852,7 +853,17 @@ Surface.Prototype = function() {
     var needUpdate = {};
     var oldSelectionFragments = this._selectionFragments;
     var newSelectionFragments = {};
+    // local selection
     this._computeSelectionFragments(this.getSelection(), newSelectionFragments);
+    // if this.documentSession is a CollabSession there might
+    // be other collaborators, for which we want to show the selection too
+    var collaborators = this.getDocumentSession().getCollaborators();
+    if (collaborators) {
+      each(collaborators, function(collaborator) {
+        this._computeSelectionFragments(collaborator.selection, newSelectionFragments, collaborator);
+      }.bind(this));
+    }
+
     this._selectionFragments = newSelectionFragments;
     // properties which displayed the selection previously
     each(oldSelectionFragments, function(_, pathStr) {

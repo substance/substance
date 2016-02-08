@@ -56,8 +56,14 @@ TextPropertyComponent.Prototype = function() {
     var el;
     if (node.type === 'cursor') {
       el = $$('span').addClass('se-cursor');
+      if (fragment.data) {
+        el.addClass('user-'+fragment.data.sessionIndex);
+      }
     } else if (node.type === 'selection-fragment') {
       el = $$('span').addClass('se-selection-fragment');
+      if (fragment.data) {
+        el.addClass('user-'+fragment.data.sessionIndex);
+      }
     } else {
       el = _super._renderFragment.call(this, fragment);
       if (node.constructor.static.isInline) {

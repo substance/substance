@@ -3,6 +3,7 @@
 var DocumentSession = require('./DocumentSession');
 var DocumentChange = require('./DocumentChange');
 var WebSocket = require('../util/WebSocket');
+var uuid = require('../util/uuid');
 
 /*
   Session that is connected to a Substance Hub allowing
@@ -18,6 +19,9 @@ var WebSocket = require('../util/WebSocket');
 */
 function CollabSession(doc, options) {
   CollabSession.super.call(this, doc, options);
+
+  // TODO: this should be retrieved from the server?
+  this.sessionId = uuid();
 
   // TODO: The CollabSession or the doc needs to be aware of a doc id
   // that corresponds to the doc on the server. For now we just
@@ -36,9 +40,15 @@ function CollabSession(doc, options) {
 
   // Try to commit changes to the server every 1s
   setInterval(this.commit.bind(this), 1000);
+
+  // whenever a change of a new collaborator is received
+  // we add a record here
+  this.collaborators = {};
+  this.sessionIdPool = [1,2,3,4,5,6,7,8,9,10];
 }
 
 CollabSession.Prototype = function() {
+
   var _super = Object.getPrototypeOf(this);
 
   /*
@@ -118,13 +128,48 @@ CollabSession.Prototype = function() {
     Apply a change to the document
   */
   this._applyRemoteChange = function(change) {
+    console.log("REMOTE CHANGE", change);
     this.stage._apply(change);
     this.doc._apply(change);
     this._transformLocalChangeHistory(change);
+
+    if (change.sessionId) {
+      var collaborator = this.collaborators[change.sessionId];
+      if (!collaborator) {
+        // find user index used for selecting a color
+        collaborator = {
+          sessionId: change.sessionId,
+          sessionIndex: this._getNextSessionIndex(),
+          selection: null
+        };
+        this.collaborators[change.sessionId] = collaborator;
+      }
+      collaborator.selection = change.after.selection;
+    }
+
     // We need to notify the change listeners so the UI gets updated
     // We pass replay: false, so this does not become part of the undo
     // history.
     this._notifyChangeListeners(change, { replay: false, remote: true });
+  };
+
+  this.getCollaborators = function() {
+    return this.collaborators;
+  };
+
+  /*
+    Get a session index which is used e.g. for styling user selections.
+
+    Note: this implementation considers that collaborators can disappear,
+          thus sessionIndex can be used when a new collaborator
+          appears.
+  */
+  this._getNextSessionIndex = function() {
+    if (this.sessionIdPool.length === 0) {
+      var collabCount = Object.keys(this.collaborators).length;
+      this.sessionIdPool.push(collabCount);
+    }
+    return this.sessionIdPool.shift();
   };
 
   this._applyChange = function() {
