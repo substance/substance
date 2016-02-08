@@ -1,10 +1,19 @@
 .sc-text-property {
   .se-cursor {
     outline: 1px solid #999;
+
+    &.sm-user-1 {
+      outline-color: blue;
+    }
   }
 
   .se-selection-fragment {
     background-color: #ddd;
+
+    &.sm-user-1 {
+      background: blue;
+    }
+
   }
 
   .se-container-annotation.se-anchor {
@@ -14,4 +23,5 @@
   .sm-highlighted {
     background: #ddd;
   }
+
 }

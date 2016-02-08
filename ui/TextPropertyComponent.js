@@ -54,15 +54,12 @@ TextPropertyComponent.Prototype = function() {
     var node = fragment.node;
     var id = node.id;
     var el;
-    if (node.type === 'cursor') {
-      el = $$('span').addClass('se-cursor');
-      if (fragment.data) {
-        el.addClass('user-'+fragment.data.sessionIndex);
-      }
-    } else if (node.type === 'selection-fragment') {
-      el = $$('span').addClass('se-selection-fragment');
-      if (fragment.data) {
-        el.addClass('user-'+fragment.data.sessionIndex);
+    if (node.type === 'cursor' || node.type === 'selection-fragment') {
+      el = $$('span').addClass('se-'+node.type);
+      if (node.userData) {
+        el.addClass('sm-user-'+node.userData.sessionIndex);
+      } else {
+        el.addClass('sm-local-user');
       }
     } else {
       el = _super._renderFragment.call(this, fragment);
