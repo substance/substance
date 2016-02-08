@@ -1,6 +1,7 @@
 "use strict";
 
 var extend = require('lodash/extend');
+var each = require('lodash/each');
 var oo = require('../util/oo');
 var EventEmitter = require('../util/EventEmitter');
 var TransactionDocument = require('./TransactionDocument');
@@ -211,6 +212,14 @@ DocumentSession.Prototype = function() {
     // TODO: try to find a more explicit way, or a maybe a smarter way
     // to keep the TransactionDocument in sync
     this.doc._apply(change);
+
+    // transform local version collaborator selections
+    var collaborators = this.getCollaborators();
+    if (collaborators) {
+      each(collaborators, function(collaborator) {
+        DocumentChange.transformSelection(collaborator.selection, change);
+      });
+    }
 
     var lastChange = this._getLastChange();
     // try to merge this change with the last to get more natural changes
