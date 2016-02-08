@@ -36,14 +36,15 @@ function CollabSession(doc, options) {
   this.ws.onopen = this._onConnected.bind(this);
   this.ws.onmessage = this._onMessage.bind(this);
 
-  this.doc.connect(this, {
-    'document:changed': this._onDocumentChange
-  });
 }
 
 CollabSession.Prototype = function() {
 
-  this._onDocumentChange = function(change, info) {
+  var _super = Object.getPrototypeOf(this);
+
+  this.afterDocumentChange = function(change, info) {
+    _super.afterDocumentChange.apply(this, arguments);
+
     console.log('doc changed', change, info);
 
     // We only consider local changes here.
@@ -91,6 +92,7 @@ CollabSession.Prototype = function() {
   */
   this._applyChanges = function(changes) {
     forEach(changes, function(change) {
+      this.stage._apply(change);
       this.doc._apply(change);
       // We need to notify the change listeners so the UI gets updated
       // We pass replay: false, so this does not become part of the undo
