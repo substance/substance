@@ -38,13 +38,12 @@ function CollabSession(doc, options) {
   this.ws.onopen = this._onConnected.bind(this);
   this.ws.onmessage = this._onMessage.bind(this);
 
-  // Try to commit changes to the server every 1s
-  setInterval(this.commit.bind(this), 1000);
-
   // whenever a change of a new collaborator is received
   // we add a record here
   this.collaborators = {};
   this.sessionIdPool = [1,2,3,4,5,6,7,8,9,10];
+
+  this.start();
 }
 
 CollabSession.Prototype = function() {
@@ -62,6 +61,18 @@ CollabSession.Prototype = function() {
       this._pendingCommit = this.nextCommit;
       this.nextCommit = null;
       this._committing = true;
+    }
+  };
+
+  this.start = function() {
+    this._runner = setInterval(this.commit.bind(this), 1000);
+  };
+
+  this.stop = function() {
+    // Try to commit changes to the server every 1s
+    if (this._runner) {
+      clearInterval(this._runner);
+      this._runner = null;
     }
   };
 
