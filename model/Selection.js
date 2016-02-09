@@ -139,6 +139,10 @@ Selection.NullSelection.Prototype = function() {
   this.isNull = function() {
     return true;
   };
+
+  this.toJSON = function() {
+    return null;
+  }
 };
 
 Selection.extend(Selection.NullSelection);
