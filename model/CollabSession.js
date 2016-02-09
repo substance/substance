@@ -29,7 +29,7 @@ function CollabSession(doc, options) {
   this.doc.id = 'doc-15';
 
   // TODO: Also we need to somehow store a version number (local version)
-  this.doc.version = 1;
+  this.doc.version = 0;
 
   this.messageQueue = options.messageQueue;
   this.nextCommit = null;
@@ -58,7 +58,7 @@ CollabSession.Prototype = function() {
     // If there is something to commit and there is no commit pending
     if (this.nextCommit && !this._committing) {
       // console.log('committing', this.nextCommit);
-      this.ws.send(['commit', this._serializeChange(this.nextCommit), this.doc.version]);
+      this.ws.send(['commit', this.doc.id, this._serializeChange(this.nextCommit), this.doc.version]);
       this._pendingCommit = this.nextCommit;
       this.nextCommit = null;
       this._committing = true;
@@ -217,9 +217,12 @@ CollabSession.Prototype = function() {
     there is also only one update at a time.
   */
   this.update = function(version, change) {
-    change = this._deserializeChange(change);
-    this._applyRemoteChange(change);
-    this.doc.version = version;
+    if (!this.nextCommit) {
+      // We only accept updates if there are no pending commitable changes
+      change = this._deserializeChange(change);
+      this._applyRemoteChange(change);
+      this.doc.version = version;
+    }
   };
 
   this._serializeChange = function(change) {

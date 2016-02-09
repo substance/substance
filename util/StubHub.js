@@ -26,18 +26,13 @@ var DocumentChange = require('./../model/DocumentChange');
   ```
 */
 
-
-function StubHub(doc, wss) {
+function StubHub(wss, store) {
   StubHub.super.apply(this);
 
-  this.doc = doc;
-
-  // We just assume some doc id + version for the StubHub
-  this.doc.id = 'doc-15';
-  this.doc.version = 1;
-  this.changes = [];
   this.wss = wss;
 
+  // where docs (change history is stored)
+  this.store = store;
   this.wss.connect(this, {
     'connection': this._onConnection
   });
@@ -46,11 +41,15 @@ function StubHub(doc, wss) {
 StubHub.Prototype = function() {
   /*
     For a given web socket get all other websockets (aka collaborators)
+
+    collaborator(docId): client !== ws && ws.documentId === documentId
   */
-  this.getCollaboratorSockets = function(ws) {
+  this.getCollaboratorSockets = function(ws, documentId) {
     var collabs = [];
     forEach(this.wss.clients, function(client) {
-      if (client !== ws) collabs.push(client);
+      if (client !== ws && ws.documentId === documentId) {
+        collabs.push(client);
+      }
     });
     return collabs;
   };
@@ -99,7 +98,7 @@ StubHub.Prototype = function() {
 
     @param ws
     @param documentId
-    @param version The client's document version
+    @param version The client's document version (0 if client starts with an empty doc)
     @param change pending client change
 
     Note: a client can reconnect having a pending change
@@ -107,81 +106,69 @@ StubHub.Prototype = function() {
   */
   this.open = function(ws, documentId, version, change) {
     change = this._deserializeChange(change);
+
+    // We store the documentId on the socket instance. That way we know at which
+    // document a client is looking at. ATM we support only one active doc editing 
+    // session per client.
+    ws.documentId = documentId;
     // TODO: this needs to be ironed out
+
     if (change) {
       this.commit(ws, change, version);
+      // TODO: client should receive an openDone message too
     } else {
-      var changes = this.getChangesSinceVersion(version);
-      var serverVersion = this.getVersion();
-      ws.send(['openDone', serverVersion, changes.map(this._serializeChange.bind(this))]);
+      this.store.getChanges(documentId, version, function(err, changes, headVersion) {
+        // changes.map(this._serializeChange.bind(this))
+        ws.send(['openDone', headVersion, changes]);
+      }.bind(this));      
     }
-  };
-
-  /*
-    Get all changes that happened since a particular version
-
-    NOTE: assumes that version 1 = [] and version 2 = [c1]
-  */
-  this.getChangesSinceVersion = function(version) {
-    return this.changes.splice(version-1);
-  };
-
-  this.getVersion = function() {
-    return this.changes.length + 1;
-  };
-
-  /*
-    Apply a set of changes to the document
-
-    @returns transformed change after being applied
-
-    TODO: perform transformation here
-  */
-  this._applyChange = function(change) {
-    this.doc._apply(change);
-    // Remember change in history.
-    this.changes.push(change);
-    this.doc.version += 1;
   };
 
   /*
     Client wants to commit changes
   */
-  this.commit = function(ws, change, version) {
-    change = this._deserializeChange(change);
-    var newVersion, collaboratorSockets;
-    if (this.doc.version === version) {
-      this._applyChange(change);
-      newVersion = this.doc.version;
-      // send confirmation to client that commited
-      ws.send(['commitDone', newVersion]);
-      // Send changes to all other clients
-      collaboratorSockets = this.getCollaboratorSockets(ws);
-      forEach(collaboratorSockets, function(socket) {
-        socket.send(['update', newVersion, this._serializeChange(change)]);
-      }.bind(this));
-    } else {
-      var changes = this.getChangesSinceVersion(this.doc.version);
-      // create clones of the changes for transformation
-      changes = changes.map(function(change) {
-        return change.clone();
-      });
-      var newChange = change.clone();
-      // transform changes
-      for (var i = 0; i < changes.length; i++) {
-        DocumentChange.transformInplace(changes[i], newChange);
+  this.commit = function(ws, documentId, rawChange, clientVersion) {
+    var change = this._deserializeChange(rawChange);
+    var collaboratorSockets;
+
+    // Get latest doc version
+    this.store.getVersion(documentId, function(err, headVersion) {
+      if (headVersion === clientVersion) { // Fast forward update
+        this.store.addChange(documentId, rawChange, function(err, newVersion) {
+          // send confirmation to client that commited
+          ws.send(['commitDone', newVersion]);
+          // Send changes to all other clients
+          collaboratorSockets = this.getCollaboratorSockets(ws, documentId);
+          forEach(collaboratorSockets, function(socket) {
+            socket.send(['update', newVersion, rawChange]);
+          }.bind(this));
+        }.bind(this));
+      } else { // Client changes need to be rebased to headVersion
+        this.getChanges(documentId, clientVersion, function(err, changes) {
+          // create clones of the changes for transformation
+          changes = changes.map(function(change) {
+            return this._deserializeChange(change);
+            // change.clone();
+          });
+          var newChange = change.clone();
+          // transform changes
+          for (var i = 0; i < changes.length; i++) {
+            DocumentChange.transformInplace(changes[i], newChange);
+          }
+          // apply the new change
+          this.store.addChange(documentId, newChange, function(err, headVersion) {
+            // update the other collaborators with the new change
+            collaboratorSockets = this.getCollaboratorSockets(ws);
+            forEach(collaboratorSockets, function(socket) {
+              socket.send(['update', headVersion, this._serializeChange(newChange)]);
+            }.bind(this));
+            // confirm the new commit, providing the diff since last common version
+            ws.send(['commitDone'], headVersion, changes.map(this._serializeChange.bind(this)));
+          });
+
+        }.bind(this));
       }
-      // apply the new change
-      this._applyChange(newChange);
-      newVersion = this.doc.version;
-      // update the other collaborators with the new change
-      collaboratorSockets = this.getCollaboratorSockets(ws);
-      forEach(collaboratorSockets, function(socket) {
-        socket.send(['update', newVersion, this._serializeChange(newChange)]);
-      }.bind(this));
-      // confirm the new commit, providing the diff since last common version
-      ws.send(['commitDone'], newVersion, changes.map(this._serializeChange.bind(this)));
-    }
+    }.bind(this));
   };
 
   this._serializeChange = function(change) {
@@ -195,7 +182,6 @@ StubHub.Prototype = function() {
       return DocumentChange.deserialize(changeData);
     }
   };
-
 };
 
 EventEmitter.extend(StubHub);
