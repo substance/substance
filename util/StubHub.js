@@ -111,63 +111,67 @@ StubHub.Prototype = function() {
     // document a client is looking at. ATM we support only one active doc editing 
     // session per client.
     ws.documentId = documentId;
-    // TODO: this needs to be ironed out
 
     if (change) {
-      this.commit(ws, change, version);
-      // TODO: client should receive an openDone message too
+      this._commit(documentId, change, version, function(err, newChange, serverVersion, serverChanges) {
+        ws.send(['openDone', serverVersion, serverChanges]);
+        this._broadCastChange(ws, documentId, newChange, serverVersion);
+      });
     } else {
-      this.store.getChanges(documentId, version, function(err, changes, headVersion) {
-        // changes.map(this._serializeChange.bind(this))
-        ws.send(['openDone', headVersion, changes]);
+      this.store.getChanges(documentId, version, function(err, changes, serverVersion) {
+        ws.send(['openDone', serverVersion, changes]);
       }.bind(this));      
     }
   };
 
-  /*
-    Client wants to commit changes
-  */
-  this.commit = function(ws, documentId, rawChange, clientVersion) {
+  this._commit = function(documentId, rawChange, clientVersion, cb) {
     var change = this._deserializeChange(rawChange);
-    var collaboratorSockets;
 
     // Get latest doc version
     this.store.getVersion(documentId, function(err, headVersion) {
       if (headVersion === clientVersion) { // Fast forward update
         this.store.addChange(documentId, rawChange, function(err, newVersion) {
-          // send confirmation to client that commited
-          ws.send(['commitDone', newVersion]);
-          // Send changes to all other clients
-          collaboratorSockets = this.getCollaboratorSockets(ws, documentId);
-          forEach(collaboratorSockets, function(socket) {
-            socket.send(['update', newVersion, rawChange]);
-          }.bind(this));
+          cb(null, rawChange, newVersion);
         }.bind(this));
       } else { // Client changes need to be rebased to headVersion
         this.getChanges(documentId, clientVersion, function(err, changes) {
           // create clones of the changes for transformation
           changes = changes.map(function(change) {
             return this._deserializeChange(change);
-            // change.clone();
           });
           var newChange = change.clone();
           // transform changes
           for (var i = 0; i < changes.length; i++) {
             DocumentChange.transformInplace(changes[i], newChange);
           }
+          // Serialize change for persistence and broadcast
+          newChange = this._serializeChange(newChange);
           // apply the new change
-          this.store.addChange(documentId, newChange, function(err, headVersion) {
-            // update the other collaborators with the new change
-            collaboratorSockets = this.getCollaboratorSockets(ws);
-            forEach(collaboratorSockets, function(socket) {
-              socket.send(['update', headVersion, this._serializeChange(newChange)]);
-            }.bind(this));
-            // confirm the new commit, providing the diff since last common version
-            ws.send(['commitDone'], headVersion, changes.map(this._serializeChange.bind(this)));
+          this.store.addChange(documentId, newChange, function(err, newVersion) {
+            cb(null, newChange, newVersion, changes.map(this._serializeChange.bind(this)));
           });
 
         }.bind(this));
       }
+    }.bind(this));
+  };
+
+  this._broadCastChange = function(ws, documentId, newChange, newVersion) {
+    // Send changes to all *other* clients
+    var collaboratorSockets = this.getCollaboratorSockets(ws, documentId);
+    forEach(collaboratorSockets, function(socket) {
+      socket.send(['update', newVersion, newChange]);
+    }.bind(this));
+  };
+
+  /*
+    Client wants to commit changes
+  */
+  this.commit = function(ws, documentId, rawChange, clientVersion) {
+    this._commit(documentId, rawChange, clientVersion, function(err, newChange, serverVersion, serverChanges) {
+      this._broadCastChange(ws, documentId, newChange, serverVersion);
+      // confirm the new commit, providing the diff since last common version
+      ws.send(['commitDone', serverVersion, serverChanges]);
     }.bind(this));
   };
 
