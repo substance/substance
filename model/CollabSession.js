@@ -1,5 +1,6 @@
-  'use strict';
+'use strict';
 
+var isString = require('lodash/isString');
 var DocumentSession = require('./DocumentSession');
 var DocumentChange = require('./DocumentChange');
 var uuid = require('../util/uuid');
@@ -282,6 +283,8 @@ CollabSession.Prototype = function() {
   this.deserializeChange = function(data) {
     if (data instanceof DocumentChange) {
       return data;
+    } else if (isString(data)) {
+      return DocumentChange.fromJSON(JSON.parse(data));
     } else {
       return DocumentChange.fromJSON(data);
     }
