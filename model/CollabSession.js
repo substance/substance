@@ -2,7 +2,6 @@
 
 var DocumentSession = require('./DocumentSession');
 var DocumentChange = require('./DocumentChange');
-var WebSocket = require('../util/WebSocket');
 var uuid = require('../util/uuid');
 
 /*
@@ -17,8 +16,10 @@ var uuid = require('../util/uuid');
            - resend same commit?
            - just include affected changes with the next regular commit?
 */
-function CollabSession(doc, options) {
+function CollabSession(doc, ws, options) {
   CollabSession.super.call(this, doc, options);
+
+  options = options || {};
 
   // TODO: this should be retrieved from the server?
   this.sessionId = uuid();
@@ -26,14 +27,13 @@ function CollabSession(doc, options) {
   // TODO: The CollabSession or the doc needs to be aware of a doc id
   // that corresponds to the doc on the server. For now we just
   // store it on the document instance.
-  this.doc.id = 'doc-15';
+  this.doc.id = options.docId;
 
   // TODO: Also we need to somehow store a version number (local version)
-  this.doc.version = 0;
+  this.doc.version = options.docVersion;
 
-  this.messageQueue = options.messageQueue;
   this.nextCommit = null;
-  this.ws = new WebSocket(this.messageQueue);
+  this.ws = ws;
 
   this.ws.onopen = this._onConnected.bind(this);
   this.ws.onmessage = this._onMessage.bind(this);

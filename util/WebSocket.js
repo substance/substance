@@ -9,12 +9,12 @@ var __id__ = 0;
   Simple WebSocket implementation for local testing
 */
 
-function WebSocket(messageQueue) {
+function WebSocket(messageQueue, clientId) {
   WebSocket.super.apply(this);
-  this.messageQueue = messageQueue;
-
-  this.clientId = uuid();
   this.__id__ = __id__++;
+
+  this.messageQueue = messageQueue;
+  this.clientId = clientId || uuid();
 
   // This connects the new client socket to the message queue
   // Once the connection with the server is established, we
