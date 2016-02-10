@@ -4,6 +4,7 @@ var EventEmitter = require('./EventEmitter');
 var forEach = require('lodash/forEach');
 var DocumentChange = require('../model/DocumentChange');
 var CollabSession = require('../model/CollabSession');
+var uuid = require('./uuid');
 
 /*
   Hub for realizing collaborative editing. Implements the server-end of the
@@ -30,6 +31,7 @@ var CollabSession = require('../model/CollabSession');
   ```
 */
 
+
 function StubHub(wss, store) {
   StubHub.super.apply(this);
 
@@ -39,7 +41,8 @@ function StubHub(wss, store) {
   this.store = store;
 
   this._connections = {};
-  this.wss.on('connection', this._onConnection, this);
+  this._onConnection = this._onConnection.bind(this);
+  this.wss.on('connection', this._onConnection);
 }
 
 StubHub.Prototype = function() {
@@ -70,8 +73,8 @@ StubHub.Prototype = function() {
   */
   this._onConnection = function(ws) {
     // TODO: there is no way to disconnect a client
-    var clientId = ws.clientId;
-    console.log('a new collaborator arrived', clientId);
+    var clientId = ws.clientId || uuid();
+    console.log('clientId', clientId);
     var connection = {
       clientId: clientId,
       socket: ws,
@@ -142,10 +145,12 @@ StubHub.Prototype = function() {
         this._broadCastChange(ws, documentId, serverVersion, newChange);
       }.bind(this));
     } else {
-      this.store.getChanges(documentId, version, function(err, serverVersion, changes) {
-        var msg = ['openDone', serverVersion, changes.map(this.serializeChange)];
-        this._send(ws, msg);
-      }.bind(this));
+      this.store.getChanges(documentId, version,
+        function(err, serverVersion, changes) {
+          var msg = ['openDone', serverVersion, changes.map(this.serializeChange)];
+          this._send(ws, msg);
+        }.bind(this)
+      );
     }
   };
 
@@ -172,22 +177,26 @@ StubHub.Prototype = function() {
           cb(null, newVersion, change);
         }.bind(this));
       } else { // Client changes need to be rebased to headVersion
-        this.store.getChanges(documentId, clientVersion, function(err, changes) {
-          // create clones of the changes for transformation
-          changes = changes.map(this.deserializeChange);
-          var newChange = this.deserializeChange(change);
-          // transform changes
-          for (var i = 0; i < changes.length; i++) {
-            DocumentChange.transformInplace(changes[i], newChange);
-          }
-          // Serialize change for persistence and broadcast
-          newChange = this._serializeChange(newChange);
-          // apply the new change
-          this.store.addChange(documentId, this.serializeChange(newChange), function(err, newVersion) {
-            cb(null, newVersion, newChange, changes.map(this.serializeChange));
-          });
+        this.store.getChanges(documentId, clientVersion,
+          function(err, serverVersion, changes) {
+            // create clones of the changes for transformation
+            changes = changes.map(this.deserializeChange);
+            var newChange = this.deserializeChange(change);
+            // transform changes
+            for (var i = 0; i < changes.length; i++) {
+              DocumentChange.transformInplace(changes[i], newChange);
+            }
+            // Serialize change for persistence and broadcast
+            newChange = this.serializeChange(newChange);
+            // apply the new change
+            this.store.addChange(documentId, this.serializeChange(newChange),
+              function(err, newVersion) {
+               cb(null, newVersion, newChange, changes.map(this.serializeChange));
+              }.bind(this)
+            );
 
-        }.bind(this));
+          }.bind(this)
+        );
       }
     }.bind(this));
   };

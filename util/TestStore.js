@@ -23,8 +23,10 @@ TestStore.Prototype = function() {
 
     if (sinceVersion === 0) {
       cb(null, currentVersion, changes);
+    } else if (sinceVersion > 0) {
+      cb(null, currentVersion, changes.slice(sinceVersion));
     } else {
-      cb(null, currentVersion, changes.splice(sinceVersion - 1));
+      throw new Error('Illegal version: ' + sinceVersion);
     }
   };
 

@@ -132,7 +132,7 @@ CollabSession.Prototype = function() {
     after some operations have been performed.
   */
   this._onMessage = function(msg) {
-    msg = this.deserializeMessage(msg);
+    msg = this.deserializeMessage(msg.data);
     var method = msg[0];
     var version, change, changes;
     switch(method) {
@@ -225,6 +225,7 @@ CollabSession.Prototype = function() {
     }
     this.doc.version = serverVersion;
     console.log(this.ws.clientId, ': Open complete. Listening for remote changes ...');
+    this.emit('connected');
   };
 
   /*

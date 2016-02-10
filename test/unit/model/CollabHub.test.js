@@ -53,7 +53,7 @@ QUnit.test("Insert at same position", function(assert) {
   var insertAtSamePos = require('../../fixtures/collab/insertAtSamePos');
   _setup(twoParagraphs, insertAtSamePos);
   messageQueue.flush();
-  assert(doc1.get(['p1', 'content']), '01234ba56789');
-  assert(doc2.get(['p1', 'content']), '01234ba56789');
+  assert.equal(doc1.get(['p1', 'content']), '01234ba56789');
+  assert.equal(doc2.get(['p1', 'content']), '01234ba56789');
 });
 
