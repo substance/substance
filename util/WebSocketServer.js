@@ -8,7 +8,7 @@ var ServerWebSocket = require('./ServerWebSocket');
   of protocols.
 
   @example
-  
+
   ```js
   var messageQueue = new MessageQueue();
   var wss = new WebSocketServer(messageQueue);
@@ -33,32 +33,41 @@ var ServerWebSocket = require('./ServerWebSocket');
   ```
 */
 
-function WebSocketServer(messageQueue) {
+function WebSocketServer(messageQueue, serverId) {
   WebSocketServer.super.apply(this);
   this.messageQueue = messageQueue;
-
-  this.messageQueue.connect(this, {
-    'connection:requested': this._connectionRequested
-  });
-
+  this.serverId = serverId || "server";
   this.clients = {};
 }
 
 WebSocketServer.Prototype = function() {
+
+  this.connect = function() {
+    this.messageQueue.connectServer(this);
+  };
+
+  this.disconnect = function() {
+    // not implemented yet
+    // this.messageQueue.disconnectServer(this);
+    this.messageQueue.off(this);
+  };
 
   /**
     New websocket connection requested. Creates the server-side
     counterpart of the websocket and registers it in the message
     queue.
   */
-  this._connectionRequested = function(clientId) {
-    var serverClientId = clientId+'-server';
-    var sws = new ServerWebSocket(this.messageQueue, serverClientId);
-    this.messageQueue.connectServerClient(sws);
-
-    this.clients[serverClientId] = sws;
-    this.emit('connection', sws); // hub implementers use this to register a new connection
-    sws.send(['open']); // tell the client we are ready for receiving messages
+  this.handleConnectionRequest = function(clientId) {
+    // TODO: this implementation does not allow for multiple connections
+    // from one client to a server
+    // and ATM we have only one server
+    var sws = new ServerWebSocket(this.messageQueue, this.serverId, clientId);
+    this.messageQueue.connectServerSocket(sws);
+    this.clients[clientId] = sws;
+    // let server implementation know of the new connection
+    this.emit('connection', sws);
+    // telling the client we are ready for receiving messages
+    sws.send(['open']);
   };
 
 };
