@@ -2,16 +2,24 @@
   .se-cursor {
     outline: 1px solid #999;
 
-    &.sm-user-1 {
-      outline-color: blue;
+    &.sm-user-2 {
+      outline-color: rgba(192, 238, 204, 0.6);
+    }
+
+    &.sm-user-3 {
+      outline-color: rgba(33, 97, 172, 0.6);
     }
   }
 
   .se-selection-fragment {
     background-color: #ddd;
 
-    &.sm-user-1 {
-      background: blue;
+    &.sm-user-2 {
+      background: rgba(192, 238, 204, 0.6);
+    }
+
+    &.sm-user-3 {
+      background: rgba(33, 97, 172, 0.6);
     }
 
   }
