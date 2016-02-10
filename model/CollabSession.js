@@ -42,7 +42,6 @@ function CollabSession(doc, ws, options) {
   // we add a record here
   this.collaborators = {};
   this.sessionIdPool = [1,2,3,4,5,6,7,8,9,10];
-
   this.start();
 }
 
@@ -50,6 +49,9 @@ CollabSession.Prototype = function() {
 
   var _super = Object.getPrototypeOf(this);
 
+  this._send = function(message) {
+    this.ws.send(JSON.stringify(message));
+  };
   /*
     Send local changes to the world.
   */
@@ -57,7 +59,7 @@ CollabSession.Prototype = function() {
     // If there is something to commit and there is no commit pending
     if (this.nextCommit && !this._committing) {
       // console.log('committing', this.nextCommit);
-      this.ws.send(['commit', this.doc.id, this._serializeChange(this.nextCommit), this.doc.version]);
+      this._send(['commit', this.doc.id, this._serializeChange(this.nextCommit), this.doc.version]);
       this._pendingCommit = this.nextCommit;
       this.nextCommit = null;
       this._committing = true;
@@ -110,7 +112,7 @@ CollabSession.Prototype = function() {
     if (pendingChange) {
       this._committing = true;
     }
-    this.ws.send(['open', this.doc.id, this.doc.version, this._serializeChange(pendingChange)]);
+    this._send(['open', this.doc.id, this.doc.version, this._serializeChange(pendingChange)]);
   };
 
   /*
@@ -128,6 +130,7 @@ CollabSession.Prototype = function() {
     after some operations have been performed.
   */
   this._onMessage = function(data) {
+    var data = JSON.parse(data);
     var method = data[0];
     var args = data.splice(1);
 

@@ -5,9 +5,15 @@ var forEach = require('lodash/forEach');
 var DocumentChange = require('./../model/DocumentChange');
 
 /*
-  Hub implementation for local testing
+  Hub for realizing collaborative editing. Implements the server-end of the
+  protocol.
 
-  A typical communication flow between client and hub could look like this:
+  @class
+
+  @param {WebsocketServer} wss a websocket server instance
+  @param {Store} a substance changes store instance
+
+  A typical communication flow between client and hub looks like this:
 
     -> ['open', 'doc1']
     <- ['open:confirmed']
@@ -17,12 +23,9 @@ var DocumentChange = require('./../model/DocumentChange');
     -> ['close', 'doc1']
 
   @example
-
+  
   ```js
-  var hub = new StubHub(doc, messageQueue);
-
-  var docSession1 = new CollabSession(doc, messageQueue);
-  var docSession2 = new CollabSession(doc, messageQueue);
+  var hub = new StubHub(wss, store);
   ```
 */
 
@@ -39,6 +42,12 @@ function StubHub(wss, store) {
 }
 
 StubHub.Prototype = function() {
+  /*
+    Turns message into string and sends it over the wire
+  */
+  this._send = function(ws, message) {
+    ws.send(JSON.stringify(message));
+  };
 
   this.dispose = function() {
     this.wss.off(this);
@@ -64,20 +73,20 @@ StubHub.Prototype = function() {
 
     Note: No data is exchanged yet.
   */
-  this._onConnection = function(sws) {
+  this._onConnection = function(ws) {
     // TODO: there is no way to disconnect a client
-    var clientId = sws.clientId;
+    var clientId = ws.clientId;
     console.log('a new collaborator arrived', clientId);
     var connection = {
       clientId: clientId,
-      socket: sws,
-      onMessage: this._onMessage.bind(this, sws)
+      socket: ws,
+      onMessage: this._onMessage.bind(this, ws)
     };
     if (this._connections[clientId]) {
       throw new Error('Client is already connected.');
     }
     this._connections[clientId] =  connection;
-    sws.on('message', connection.onMessage);
+    ws.on('message', connection.onMessage);
   };
 
   /*
@@ -95,6 +104,7 @@ StubHub.Prototype = function() {
     after some operations have been performed.
   */
   this._onMessage = function(ws, data) {
+    var data = JSON.parse(data);
     var method = data[0];
     var args = data.splice(1);
     args.unshift(ws);
@@ -124,12 +134,12 @@ StubHub.Prototype = function() {
 
     if (change) {
       this._commit(documentId, change, version, function(err, newChange, serverVersion, serverChanges) {
-        ws.send(['openDone', serverVersion, serverChanges]);
+        this._send(ws, ['openDone', serverVersion, serverChanges]);
         this._broadCastChange(ws, documentId, newChange, serverVersion);
-      });
+      }.bind(this));
     } else {
       this.store.getChanges(documentId, version, function(err, changes, serverVersion) {
-        ws.send(['openDone', serverVersion, changes]);
+        this._send(ws, ['openDone', serverVersion, changes]);
       }.bind(this));      
     }
   };
@@ -170,7 +180,7 @@ StubHub.Prototype = function() {
     // Send changes to all *other* clients
     var collaboratorSockets = this.getCollaboratorSockets(ws, documentId);
     forEach(collaboratorSockets, function(socket) {
-      socket.send(['update', newVersion, newChange]);
+      this._send(socket, ['update', newVersion, newChange]);
     }.bind(this));
   };
 
@@ -181,7 +191,7 @@ StubHub.Prototype = function() {
     this._commit(documentId, rawChange, clientVersion, function(err, newChange, serverVersion, serverChanges) {
       this._broadCastChange(ws, documentId, newChange, serverVersion);
       // confirm the new commit, providing the diff since last common version
-      ws.send(['commitDone', serverVersion, serverChanges]);
+      this._send(ws, ['commitDone', serverVersion, serverChanges]);
     }.bind(this));
   };
 
