@@ -22,9 +22,9 @@ TestStore.Prototype = function() {
     var currentVersion = this._getVersion(id);
 
     if (sinceVersion === 0) {
-      cb(null, changes, currentVersion);
+      cb(null, currentVersion, changes);
     } else {
-      cb(null, changes.splice(sinceVersion - 1), currentVersion);
+      cb(null, currentVersion, changes.splice(sinceVersion - 1));
     }
   };
 

@@ -48,14 +48,8 @@ function DocumentSession(doc, options) {
   // 2. to trigger events, such as selection:changed -- this must
   // be done rather late, so that other listeners such as renderers
   // have finished their job already.
-  this.doc.connect(this, {
-    'document:changed': this.onDocumentChange
-  }, { priority: 1000 });
-
-  this.doc.connect(this, {
-    'document:changed': this.afterDocumentChange
-  }, { priority: -10 });
-
+  this.doc.on('document:changed', this.onDocumentChange, this, {priority: 1000});
+  this.doc.on('document:changed', this.afterDocumentChange, this, {priority: -10});
 }
 
 DocumentSession.Prototype = function() {
@@ -152,14 +146,16 @@ DocumentSession.Prototype = function() {
       extend(info, tx.info);
     });
     if (change) {
-      this.selection = change.after.selection;
-      // HACK injecting the surfaceId here...
-      // TODO: we should find out where the best place is to do this
-      if (this.selection && !this.selection.isNull() && change.after.surfaceId) {
-        this.selection.surfaceId = change.after.surfaceId;
+      if (change.after.selection instanceof Selection) {
+        this.selection = change.after.selection;
+        // HACK injecting the surfaceId here...
+        // TODO: we should find out where the best place is to do this
+        if (this.selection && !this.selection.isNull() && change.after.surfaceId) {
+          this.selection.surfaceId = change.after.surfaceId;
+        }
+        this._selectionHasChanged = true;
       }
       this.isTransacting = false;
-      this._selectionHasChanged = true;
       this._commit(change, info);
       return change;
     } else {

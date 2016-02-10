@@ -42,7 +42,6 @@ function CollabSession(doc, ws, options) {
   // we add a record here
   this.collaborators = {};
   this.sessionIdPool = [1,2,3,4,5,6,7,8,9,10];
-
   this.start();
 }
 
@@ -58,7 +57,7 @@ CollabSession.Prototype = function() {
     if (this.nextCommit && !this._committing) {
       // console.log('committing', this.nextCommit);
       var msg = ['commit', this.doc.id, this.doc.version, this.serializeChange(this.nextCommit)];
-      this.ws.send(this.serializeMessage(msg));
+      this._send(msg);
       this._pendingCommit = this.nextCommit;
       this.nextCommit = null;
       this._committing = true;
@@ -111,8 +110,11 @@ CollabSession.Prototype = function() {
     if (pendingChange) {
       this._committing = true;
     }
-    var msg = ['open', this.doc.id, this.doc.version, pendingChange];
-    this.ws.send(this.serializeMessage(msg));
+    var msg = ['open', this.doc.id, this.doc.version];
+    if (pendingChange) {
+      msg.push(this.serializeChange(pendingChange));
+    }
+    this._send(msg);
   };
 
   /*
@@ -266,7 +268,7 @@ CollabSession.Prototype = function() {
     } else {
       return JSON.parse(msg);
     }
-  }
+  };
 
   this.serializeChange = function(change) {
     if (change instanceof DocumentChange) {
@@ -274,7 +276,7 @@ CollabSession.Prototype = function() {
     } else {
       return change;
     }
-  }
+  };
 
   this.deserializeChange = function(data) {
     if (data instanceof DocumentChange) {
@@ -282,6 +284,10 @@ CollabSession.Prototype = function() {
     } else {
       return DocumentChange.fromJSON(data);
     }
+  };
+
+  this._send = function(msg) {
+    this.ws.send(this.serializeMessage(msg));
   };
 
 };

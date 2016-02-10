@@ -89,9 +89,7 @@ function Document(schema) {
 
   // Note: using the general event queue (as opposed to calling _updateEventProxies from within _notifyChangeListeners)
   // so that handler priorities are considered correctly
-  this.connect(this, {
-    'document:changed': this._updateEventProxies
-  });
+  this.on('document:changed', this._updateEventProxies, this);
 }
 
 Document.Prototype = function() {
