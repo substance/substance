@@ -208,6 +208,7 @@ CollabSession.Prototype = function() {
     }
     this.doc.version = serverVersion;
     console.log(this.ws.clientId, ': Open complete. Listening for remote changes ...');
+    this.emit('connected');
   };
 
   /*
