@@ -15,6 +15,8 @@ function ServerWebSocket(messageQueue, serverId, clientId) {
   this.messageQueue = messageQueue;
   this.serverId = serverId;
   this.clientId = clientId;
+
+  this._isSimulated = true;
 }
 
 ServerWebSocket.Prototype = function() {
@@ -34,11 +36,15 @@ ServerWebSocket.Prototype = function() {
     Gets called by the message queue to handle a message
   */
   this.send = function(data) {
-    this.messageQueue.pushMessage({
+    var msg = {
       from: this.serverId,
-      to: this.clientId,
-      data: data
-    });
+      to: this.clientId
+    };
+    if (data) {
+      // msg.data = JSON.parse(data);
+      msg.data = data;
+    }
+    this.messageQueue.pushMessage(msg);
   };
 };
 

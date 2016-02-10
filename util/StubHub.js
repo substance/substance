@@ -2,7 +2,8 @@
 
 var EventEmitter = require('./EventEmitter');
 var forEach = require('lodash/forEach');
-var DocumentChange = require('./../model/DocumentChange');
+var DocumentChange = require('../model/DocumentChange');
+var CollabSession = require('../model/CollabSession');
 
 /*
   Hub implementation for local testing
@@ -94,13 +95,24 @@ StubHub.Prototype = function() {
     The first argument is always the websocket so we can respond to messages
     after some operations have been performed.
   */
-  this._onMessage = function(ws, data) {
-    var method = data[0];
-    var args = data.splice(1);
-    args.unshift(ws);
-    // Call handler
-    this[method].apply(this, args);
-  };
+  this._onMessage = function(ws, msg) {
+    msg = this.deserializeMessage(msg);
+    var method = msg[0];
+    var docId, version, change;
+    switch(method) {
+      case 'open':
+      case 'commit':
+        docId = msg[1];
+        version = msg[2];
+        if (msg[3]) {
+          change = this.deserializeChange(msg[3]);
+        }
+        this[method](ws, docId, version, change);
+        break;
+      default:
+        console.error('CollabHub: unsupported message', method, msg);
+    }
+ };
 
   /*
     First thing the client sends to initialize the collaborative editing
@@ -115,8 +127,6 @@ StubHub.Prototype = function() {
     which is similar to the commit case
   */
   this.open = function(ws, documentId, version, change) {
-    change = this._deserializeChange(change);
-
     // We store the documentId on the socket instance. That way we know at which
     // document a client is looking at. ATM we support only one active doc editing
     // session per client.
@@ -128,8 +138,9 @@ StubHub.Prototype = function() {
       // TODO: client should receive an openDone message too
     } else {
       this.store.getChanges(documentId, version, function(err, changes, headVersion) {
-        // changes.map(this._serializeChange.bind(this))
-        ws.send(['openDone', headVersion, changes]);
+        changes = changes.map(this.serializeChange);
+        var msg = ['openDone', headVersion, changes];
+        ws.send(this.serializeMessage(msg));
       }.bind(this));
     }
   };
@@ -137,43 +148,46 @@ StubHub.Prototype = function() {
   /*
     Client wants to commit changes
   */
-  this.commit = function(ws, documentId, rawChange, clientVersion) {
-    var change = this._deserializeChange(rawChange);
+  this.commit = function(ws, documentId, clientVersion, change) {
     var collaboratorSockets;
-
     // Get latest doc version
     this.store.getVersion(documentId, function(err, headVersion) {
       if (headVersion === clientVersion) { // Fast forward update
-        this.store.addChange(documentId, rawChange, function(err, newVersion) {
+        this.store.addChange(documentId, this.serializeChange(change), function(err, newVersion) {
           // send confirmation to client that commited
-          ws.send(['commitDone', newVersion]);
+          var msg = ['commitDone', newVersion];
+          ws.send(this.serializeMessage(msg));
           // Send changes to all other clients
           collaboratorSockets = this.getCollaboratorSockets(ws, documentId);
           forEach(collaboratorSockets, function(socket) {
-            socket.send(['update', newVersion, rawChange]);
+            var msg = ['update', newVersion, this.serializeChange(change)];
+            socket.send(this.serializeMessage(msg));
           }.bind(this));
         }.bind(this));
       } else { // Client changes need to be rebased to headVersion
-        this.getChanges(documentId, clientVersion, function(err, changes) {
+        this.store.getChanges(documentId, clientVersion, function(err, changes) {
           // create clones of the changes for transformation
           changes = changes.map(function(change) {
-            return this._deserializeChange(change);
-            // change.clone();
-          });
-          var newChange = change.clone();
+            return this.deserializeChange(change);
+          }.bind(this));
+          var newChange = this.deserializeChange(change);
           // transform changes
           for (var i = 0; i < changes.length; i++) {
             DocumentChange.transformInplace(changes[i], newChange);
           }
           // apply the new change
-          this.store.addChange(documentId, newChange, function(err, headVersion) {
+          this.store.addChange(documentId, this.serializeChange(newChange), function(err, headVersion) {
             // update the other collaborators with the new change
             collaboratorSockets = this.getCollaboratorSockets(ws);
             forEach(collaboratorSockets, function(socket) {
-              socket.send(['update', headVersion, this._serializeChange(newChange)]);
+              var msg = ['update', headVersion, this.serializeChange(newChange)];
+              socket.send(this.serializeMessage(msg));
             }.bind(this));
             // confirm the new commit, providing the diff since last common version
-            ws.send(['commitDone'], headVersion, changes.map(this._serializeChange.bind(this)));
+            var msg = ['commitDone', headVersion, changes.map(function(change) {
+              return this.serializeChange(change);
+            }.bind(this))];
+            ws.send(this.serializeMessage(msg));
           });
 
         }.bind(this));
@@ -181,17 +195,17 @@ StubHub.Prototype = function() {
     }.bind(this));
   };
 
-  this._serializeChange = function(change) {
-    if (change) {
-      return change.serialize();
-    }
+  this.serializeMessage = function(msg) {
+    return msg;
   };
 
-  this._deserializeChange = function(changeData) {
-    if (changeData) {
-      return DocumentChange.deserialize(changeData);
-    }
+  this.deserializeMessage = function(msg) {
+    return msg;
   };
+
+  this.serializeChange = CollabSession.prototype.serializeChange;
+
+  this.deserializeChange = CollabSession.prototype.deserializeChange;
 };
 
 EventEmitter.extend(StubHub);

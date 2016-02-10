@@ -1,4 +1,4 @@
-'use strict';
+  'use strict';
 
 var DocumentSession = require('./DocumentSession');
 var DocumentChange = require('./DocumentChange');
@@ -57,7 +57,8 @@ CollabSession.Prototype = function() {
     // If there is something to commit and there is no commit pending
     if (this.nextCommit && !this._committing) {
       // console.log('committing', this.nextCommit);
-      this.ws.send(['commit', this.doc.id, this._serializeChange(this.nextCommit), this.doc.version]);
+      var msg = ['commit', this.doc.id, this.doc.version, this.serializeChange(this.nextCommit)];
+      this.ws.send(this.serializeMessage(msg));
       this._pendingCommit = this.nextCommit;
       this.nextCommit = null;
       this._committing = true;
@@ -110,7 +111,8 @@ CollabSession.Prototype = function() {
     if (pendingChange) {
       this._committing = true;
     }
-    this.ws.send(['open', this.doc.id, this.doc.version, this._serializeChange(pendingChange)]);
+    var msg = ['open', this.doc.id, this.doc.version, pendingChange];
+    this.ws.send(this.serializeMessage(msg));
   };
 
   /*
@@ -127,12 +129,29 @@ CollabSession.Prototype = function() {
     The first argument is always the websocket so we can respond to messages
     after some operations have been performed.
   */
-  this._onMessage = function(data) {
-    var method = data[0];
-    var args = data.splice(1);
-
-    // Call handler
-    this[method].apply(this, args);
+  this._onMessage = function(msg) {
+    msg = this.deserializeMessage(msg);
+    var method = msg[0];
+    var version, change, changes;
+    switch(method) {
+      case 'openDone':
+      case 'commitDone':
+        version = msg[1];
+        if (msg[2]) {
+          changes = msg[2].map(function(change) {
+            return this.deserializeChange(change);
+          }.bind(this));
+        }
+        this[method](version, changes);
+        break;
+      case 'update':
+        version = msg[1];
+        change = this.deserializeChange(msg[2]);
+        this.update(version, change);
+        break;
+      default:
+        console.error('CollabSession: unsupported message', method, msg);
+    }
   };
 
   /*
@@ -198,7 +217,6 @@ CollabSession.Prototype = function() {
       // the last time
       if (changes) {
         changes.forEach(function(change) {
-          change = this._deserializeChange(change);
           this._applyRemoteChange(change);
         }.bind(this));
       }
@@ -213,7 +231,6 @@ CollabSession.Prototype = function() {
   this.commitDone = function(version, changes) {
     if (changes) {
       changes.forEach(function(change) {
-        change = this._deserializeChange(change);
         this._applyChange(change);
       }.bind(this));
     }
@@ -230,21 +247,40 @@ CollabSession.Prototype = function() {
   this.update = function(version, change) {
     if (!this.nextCommit) {
       // We only accept updates if there are no pending commitable changes
-      change = this._deserializeChange(change);
       this._applyRemoteChange(change);
       this.doc.version = version;
     }
   };
 
-  this._serializeChange = function(change) {
-    if (change) {
-      return change.serialize();
+  this.serializeMessage = function(msg) {
+    if (this.ws._isSimulated) {
+      return msg;
+    } else {
+      return JSON.stringify(msg);
     }
   };
 
-  this._deserializeChange = function(changeData) {
-    if (changeData) {
-      return DocumentChange.deserialize(changeData);
+  this.deserializeMessage = function(msg) {
+    if (this.ws._isSimulated) {
+      return msg;
+    } else {
+      return JSON.parse(msg);
+    }
+  }
+
+  this.serializeChange = function(change) {
+    if (change instanceof DocumentChange) {
+      return change.toJSON();
+    } else {
+      return change;
+    }
+  }
+
+  this.deserializeChange = function(data) {
+    if (data instanceof DocumentChange) {
+      return data;
+    } else {
+      return DocumentChange.fromJSON(data);
     }
   };
 

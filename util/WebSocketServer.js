@@ -38,6 +38,8 @@ function WebSocketServer(messageQueue, serverId) {
   this.messageQueue = messageQueue;
   this.serverId = serverId || "server";
   this.clients = {};
+
+  this._isSimulated = true;
 }
 
 WebSocketServer.Prototype = function() {
