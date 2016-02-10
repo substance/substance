@@ -33,12 +33,17 @@ function StubHub(wss, store) {
 
   // where docs (change history is stored)
   this.store = store;
-  this.wss.connect(this, {
-    'connection': this._onConnection
-  });
+
+  this._connections = {};
+  this.wss.on('connection', this._onConnection, this);
 }
 
 StubHub.Prototype = function() {
+
+  this.dispose = function() {
+    this.wss.off(this);
+  };
+
   /*
     For a given web socket get all other websockets (aka collaborators)
 
@@ -59,15 +64,20 @@ StubHub.Prototype = function() {
 
     Note: No data is exchanged yet.
   */
-  this._onConnection = function(ws) {
-    console.log('a new collaborator arrived', ws.clientId);
-    var self = this;
-
-    ws.connect(this, {
-      'message': function(data) {
-        self._onMessage(ws, data);
-      }
-    });
+  this._onConnection = function(sws) {
+    // TODO: there is no way to disconnect a client
+    var clientId = sws.clientId;
+    console.log('a new collaborator arrived', clientId);
+    var connection = {
+      clientId: clientId,
+      socket: sws,
+      onMessage: this._onMessage.bind(this, sws)
+    };
+    if (this._connections[clientId]) {
+      throw new Error('Client is already connected.');
+    }
+    this._connections[clientId] =  connection;
+    sws.on('message', connection.onMessage);
   };
 
   /*
@@ -108,7 +118,7 @@ StubHub.Prototype = function() {
     change = this._deserializeChange(change);
 
     // We store the documentId on the socket instance. That way we know at which
-    // document a client is looking at. ATM we support only one active doc editing 
+    // document a client is looking at. ATM we support only one active doc editing
     // session per client.
     ws.documentId = documentId;
     // TODO: this needs to be ironed out
@@ -120,7 +130,7 @@ StubHub.Prototype = function() {
       this.store.getChanges(documentId, version, function(err, changes, headVersion) {
         // changes.map(this._serializeChange.bind(this))
         ws.send(['openDone', headVersion, changes]);
-      }.bind(this));      
+      }.bind(this));
     }
   };
 

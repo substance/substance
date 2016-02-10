@@ -9,23 +9,21 @@ var __id__ = 0;
   Simple WebSocket implementation for local testing
 */
 
-function WebSocket(messageQueue, clientId) {
+function WebSocket(messageQueue, clientId, serverId) {
   WebSocket.super.apply(this);
-  this.__id__ = __id__++;
 
+  this.__id__ = __id__++;
   this.messageQueue = messageQueue;
   this.clientId = clientId || uuid();
-
-  // This connects the new client socket to the message queue
-  // Once the connection with the server is established, we
-  // receive an 'open' event and we are ready to send and
-  // receive messages.
-  setTimeout(function() {
-    messageQueue.connectClient(this);
-  }.bind(this), 20);
+  this.serverId = serverId || "server";
 }
 
 WebSocket.Prototype = function() {
+
+  this.connect = function() {
+    this.messageQueue.connectClientSocket(this);
+  };
+
   /**
     Gets called by the message queue to handle a message
   */
@@ -48,7 +46,7 @@ WebSocket.Prototype = function() {
   this.send = function(data) {
     this.messageQueue.pushMessage({
       from: this.clientId,
-      to: this.clientId+"-server",
+      to: this.serverId,
       data: data
     });
   };
