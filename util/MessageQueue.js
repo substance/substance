@@ -36,6 +36,10 @@ MessageQueue.Prototype = function() {
     }
   };
 
+  this.clear = function() {
+    this.messages = [];
+  };
+
   this.tick = function() {
     this._processMessage();
   };
