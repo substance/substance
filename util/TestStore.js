@@ -14,18 +14,6 @@ function TestStore(db) {
 }
 
 TestStore.Prototype = function() {
-  this._getVersion = function(id) {
-    return this._db[id].length;
-  };
-
-  this._getChanges = function(id) {
-    return this._db[id];
-  };
-
-  this._addChange = function(id, change) {
-    this._db[id].push(change);
-  };
-
   /*
     Gets changes from the DB
   */
@@ -53,6 +41,18 @@ TestStore.Prototype = function() {
   */
   this.getVersion = function(id, cb) {
     cb(null, this._getVersion(id));
+  };
+
+  this._getVersion = function(id) {
+    return this._db[id].length;
+  };
+
+  this._getChanges = function(id) {
+    return this._db[id];
+  };
+
+  this._addChange = function(id, change) {
+    this._db[id].push(change);
   };
 
 };
