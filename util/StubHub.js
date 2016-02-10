@@ -2,7 +2,8 @@
 
 var EventEmitter = require('./EventEmitter');
 var forEach = require('lodash/forEach');
-var DocumentChange = require('./../model/DocumentChange');
+var DocumentChange = require('../model/DocumentChange');
+var uuid = require('./uuid');
 
 /*
   Hub for realizing collaborative editing. Implements the server-end of the
@@ -29,6 +30,7 @@ var DocumentChange = require('./../model/DocumentChange');
   ```
 */
 
+
 function StubHub(wss, store) {
   StubHub.super.apply(this);
 
@@ -38,7 +40,8 @@ function StubHub(wss, store) {
   this.store = store;
 
   this._connections = {};
-  this.wss.on('connection', this._onConnection, this);
+  this._onConnection = this._onConnection.bind(this);
+  this.wss.on('connection', this._onConnection);
 }
 
 StubHub.Prototype = function() {
@@ -75,8 +78,8 @@ StubHub.Prototype = function() {
   */
   this._onConnection = function(ws) {
     // TODO: there is no way to disconnect a client
-    var clientId = ws.clientId;
-    console.log('a new collaborator arrived', clientId);
+    var clientId = ws.clientId || uuid();
+    console.log('clientId', clientId);
     var connection = {
       clientId: clientId,
       socket: ws,

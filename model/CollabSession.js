@@ -129,8 +129,8 @@ CollabSession.Prototype = function() {
     The first argument is always the websocket so we can respond to messages
     after some operations have been performed.
   */
-  this._onMessage = function(data) {
-    var data = JSON.parse(data);
+  this._onMessage = function(message) {
+    var data = JSON.parse(message.data);
     var method = data[0];
     var args = data.splice(1);
 

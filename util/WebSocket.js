@@ -2,7 +2,6 @@
 
 var EventEmitter = require('./EventEmitter');
 var uuid = require('./uuid');
-
 var __id__ = 0;
 
 /**
@@ -36,7 +35,7 @@ WebSocket.Prototype = function() {
       this.onopen();
     } else {
       // Handler must be provided by user
-      this.onmessage(data);
+      this.onmessage({data: data});
     }
   };
 
