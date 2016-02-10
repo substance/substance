@@ -153,7 +153,9 @@ DocumentSession.Prototype = function() {
     });
     if (change) {
       this.selection = change.after.selection;
-      if (change.after.surfaceId) {
+      // HACK injecting the surfaceId here...
+      // TODO: we should find out where the best place is to do this
+      if (this.selection && !this.selection.isNull() && change.after.surfaceId) {
         this.selection.surfaceId = change.after.surfaceId;
       }
       this.isTransacting = false;
