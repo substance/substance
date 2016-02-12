@@ -191,35 +191,45 @@ CollabHub.Prototype = function() {
     }.bind(this));
   };
 
-  this.updateSelection = function(ws, documentId, clientVersion, change) {
-    console.log('updateselection', change);
-    // TODO: rebase change if needed
-    this._broadCastChange(ws, documentId, clientVersion, change, 'updateSelection');
+  this.updateSelection = function(ws, documentId, clientVersion, newChange) {
+    console.log('updateselection', newChange);
+    this.store.getVersion(documentId, function(err, serverVersion) {
+      if (serverVersion === clientVersion) {
+        this._broadCastChange(ws, documentId, clientVersion, newChange, 'updateSelection');
+      } else {
+        this._rebaseChange(documentId, clientVersion, newChange, function(err, rebasedNewChange) {
+          this._broadCastChange(ws, documentId, clientVersion, rebasedNewChange, 'updateSelection');
+        });
+      }
+    }.bind(this));
   };
 
-  this._commit = function(documentId, clientVersion, change, cb) {
-    // Get latest doc version
-    this.store.getVersion(documentId, function(err, headVersion) {
-      if (headVersion === clientVersion) { // Fast forward update
-        this.store.addChange(documentId, this.serializeChange(change), function(err, newVersion) {
-          cb(null, newVersion, change);
-        }.bind(this));
-      } else { // Client changes need to be rebased to headVersion
-        this.store.getChanges(documentId, clientVersion,
-          function(err, serverVersion, changes) {
-            var B = changes.map(this.deserializeChange);
-            var a = this.deserializeChange(change);
-            // transform changes
-            DocumentChange.transformInplace(a, B);
-            // apply the new change
-            this.store.addChange(documentId, this.serializeChange(a),
-              function(err, newVersion) {
-               cb(null, newVersion, a, B);
-              }.bind(this)
-            );
+  this._rebaseChange = function (documentId, clientVersion, change, cb) {
+    this.store.getChanges(documentId, clientVersion,
+      function(err, serverVersion, changes) {
+        var B = changes.map(this.deserializeChange);
+        var a = this.deserializeChange(change);
+        // transform changes
+        DocumentChange.transformInplace(a, B);
+        // apply the new change
+        cb(null, a, B);
+      }.bind(this)
+    );
+  };
 
-          }.bind(this)
-        );
+  this._commit = function(documentId, clientVersion, newChange, cb) {
+    // Get latest doc version
+    this.store.getVersion(documentId, function(err, serverVersion) {
+      if (serverVersion === clientVersion) { // Fast forward update
+        this.store.addChange(documentId, this.serializeChange(newChange), function(err, newVersion) {
+          cb(null, newVersion, newChange);
+        }.bind(this));
+      } else { // Client changes need to be rebased to latest serverVersion
+        this._rebaseChange(documentId, clientVersion, newChange, function(err, rebasedNewChange, rebasedOtherChanges) {
+          this.store.addChange(documentId, this.serializeChange(rebasedNewChange), function(err, newVersion) {
+            cb(null, newVersion, rebasedNewChange, rebasedOtherChanges);
+          }.bind(this));
+        }.bind(this));
       }
     }.bind(this));
   };
@@ -246,7 +256,6 @@ CollabHub.Prototype = function() {
   };
 
   this.serializeChange = CollabSession.prototype.serializeChange;
-
   this.deserializeChange = CollabSession.prototype.deserializeChange;
 };
 
