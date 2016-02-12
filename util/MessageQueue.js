@@ -6,8 +6,7 @@ var EventEmitter = require('./EventEmitter');
   Websocket server implementation for client-side development of protocols
 */
 
-function MessageQueue(options) {
-  options = options || {};
+function MessageQueue() {
   MessageQueue.super.apply(this);
 
   this.connections = {};
@@ -115,6 +114,7 @@ MessageQueue.Prototype = function() {
     } else {
       socket._onMessage(message.data);
     }
+    this.emit('message:sent', message);
   };
 };
 

@@ -142,7 +142,7 @@ Selection.NullSelection.Prototype = function() {
 
   this.toJSON = function() {
     return null;
-  }
+  };
 };
 
 Selection.extend(Selection.NullSelection);

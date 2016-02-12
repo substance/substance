@@ -6,6 +6,7 @@ var MessageQueue = require('../../../util/MessageQueue');
 var WebSocketServer = require('../../../util/WebSocketServer');
 var WebSocket = require('../../../util/WebSocket');
 var CollabSession = require('../../../model/CollabSession');
+var DocumentChange = require('../../../model/DocumentChange');
 var StubHub = require('../../../util/StubHub');
 var TestStore = require('../../../util/TestStore');
 
@@ -17,7 +18,7 @@ var store, messageQueue;
 var wss, ws1, ws2;
 var hub, client1, client2;
 
-function _setup(fixture, createMessages) {
+function _setup(fixture, messageFromSnapshot) {
   doc1 = fixture.createArticle();
   doc2 = fixture.createArticle();
   store = new TestStore({
@@ -36,7 +37,7 @@ function _setup(fixture, createMessages) {
     docId: 'test',
     docVersion: 1
   });
-  // TODO: can we shoult make this configurable
+  // TODO: can we should make this configurable
   client1.stop();
   client2.stop();
 
@@ -44,8 +45,24 @@ function _setup(fixture, createMessages) {
   ws1.connect();
   ws2.connect();
 
+  // make sure hub thinks that client has connected
+  hub.open(ws1, 'test', 1);
+  hub.open(ws2, 'test', 1);
+
   messageQueue.clear();
-  messageQueue.messages = createMessages();
+  messageQueue.messages = messageFromSnapshot();
+  messageQueue.on('message:sent', function(message) {
+    if (message.to === 'hub' && message.data[0] === 'commit') {
+      var change = DocumentChange.fromJSON(message.data[3]);
+      if (message.from === "user1") {
+        doc1._apply(change);
+        client1._committing(change);
+      } else if (message.from === "user2") {
+        doc2._apply(change);
+        client2._committing(change);
+      }
+    }
+  });
 }
 
 QUnit.test("Insert at same position", function(assert) {

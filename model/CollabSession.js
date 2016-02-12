@@ -63,9 +63,7 @@ CollabSession.Prototype = function() {
       // console.log('committing', this.nextCommit);
       var msg = ['commit', this.doc.id, this.doc.version, this.serializeChange(this.nextCommit)];
       this._send(msg);
-      this._pendingCommit = this.nextCommit;
-      this.nextCommit = null;
-      this._committing = true;
+      this._committing(this.nextCommit);
     }
   };
 
@@ -94,6 +92,13 @@ CollabSession.Prototype = function() {
     }
   };
 
+  // set internal state for committing
+  this._committing = function(change) {
+    this._pendingCommit = change;
+    this.nextCommit = null;
+    this._committing = true;
+  };
+
   this.setSelection = function(sel) {
     var beforeSel = this.selection;
     _super.setSelection.call(this, sel);
@@ -107,7 +112,7 @@ CollabSession.Prototype = function() {
       selection: afterSel
     });
     change.sessionId = this.sessionId;
-    var msg = ['updateSelection', this.doc.id, this.doc.version, this.serializeChange(change)]
+    var msg = ['updateSelection', this.doc.id, this.doc.version, this.serializeChange(change)];
     this._send(msg);
   };
 
@@ -194,7 +199,7 @@ CollabSession.Prototype = function() {
 
     var collaborator = this._getCollaborator(change.sessionId);
     if (collaborator) {
-      collaborator.selection = change.after.selection;  
+      collaborator.selection = change.after.selection;
     }
 
     // We need to notify the change listeners so the UI gets updated
@@ -271,14 +276,15 @@ CollabSession.Prototype = function() {
   /*
     Retrieved when a commit has been confirmed by the server
   */
-  this.commitDone = function(version, changes) {
-    if (changes) {
-      changes.forEach(function(change) {
-        this._applyChange(change);
+  this.commitDone = function(version, remoteChanges) {
+    if (remoteChanges) {
+      remoteChanges.forEach(function(change) {
+        this._applyRemoteChange(change);
       }.bind(this));
     }
     this.doc.version = version;
     this._committing = false;
+    this._pendingCommit = null;
     console.log(this.ws.clientId, ': commit confirmed by server. New version:', version);
   };
 
@@ -288,7 +294,7 @@ CollabSession.Prototype = function() {
     there is also only one update at a time.
   */
   this.applyRemoteChange = function(version, change) {
-    if (!this.nextCommit) {
+    if (!this.nextCommit && !this._committing) {
       // We only accept updates if there are no pending commitable changes
       this._applyRemoteChange(change);
       this.doc.version = version;
