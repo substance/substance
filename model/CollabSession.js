@@ -4,6 +4,8 @@ var isString = require('lodash/isString');
 var DocumentSession = require('./DocumentSession');
 var DocumentChange = require('./DocumentChange');
 var uuid = require('../util/uuid');
+var debounce = require('lodash/debounce');
+
 
 /*
   Session that is connected to a Substance Hub allowing
@@ -39,6 +41,8 @@ function CollabSession(doc, ws, options) {
   this.ws.onopen = this._onConnected.bind(this);
   this.ws.onmessage = this._onMessage.bind(this);
 
+  this._broadCastSelectionUpdateDebounced = debounce(this._broadCastSelectionUpdate, 250);
+
   // whenever a change of a new collaborator is received
   // we add a record here
   this.collaborators = {};
@@ -66,7 +70,7 @@ CollabSession.Prototype = function() {
   };
 
   this.start = function() {
-    this._runner = setInterval(this.commit.bind(this), 1000);
+    this._runner = setInterval(this.commit.bind(this), 500);
   };
 
   this.stop = function() {
@@ -91,18 +95,18 @@ CollabSession.Prototype = function() {
   };
 
   this.setSelection = function(sel) {
-    var beforeSelection = this.selection;
+    var beforeSel = this.selection;
     _super.setSelection.call(this, sel);
+    this._broadCastSelectionUpdateDebounced(beforeSel, sel);
+  };
 
+  this._broadCastSelectionUpdate = function(beforeSel, afterSel) {
     var change = new DocumentChange([], {
-      selection: beforeSelection
+      selection: beforeSel
     }, {
-      selection: sel
+      selection: afterSel
     });
-
     change.sessionId = this.sessionId;
-
-    console.log('selection-change', change.serialize());
     var msg = ['updateSelection', this.doc.id, this.doc.version, this.serializeChange(change)]
     this._send(msg);
   };
