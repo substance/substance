@@ -399,7 +399,7 @@ Surface.Prototype = function() {
   this._rerenderSelection = function() {
     var needUpdate = this._updateSelectionFragments();
     this._updateTextProperties(needUpdate);
-    if (this.domSelection) {
+    if (this.domSelection && this.isNativeFocused) {
       this.rerenderDomSelection();
     }
   };
@@ -610,12 +610,12 @@ Surface.Prototype = function() {
     // artifacts coming from changing the text property structure
     // while having a rendered DOM selection.
     // window.getSelection().removeAllRanges();
-    // this.isNativeFocused = false;
+    this.isNativeFocused = false;
     // this.skipNextFocusEvent = false;
   };
 
   this.onNativeFocus = function() {
-    // this.isNativeFocused = true;
+    this.isNativeFocused = true;
     // // console.log('Native focus on surface', this.__id__);
     // // ATTENTION: native focus event is triggered before the DOM selection is there
     // // Thus we need to delay this, unfortunately.
