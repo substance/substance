@@ -1,3 +1,5 @@
+/* jshint latedef:nofunc */
+
 'use strict';
 
 var isEqual = require('lodash/isEqual');
@@ -272,48 +274,83 @@ DocumentChange.fromJSON = function(data) {
 };
 
 /*
-  Transforms change A with B.
+  Transforms change A with B, as if A was done before B.
+  A' and B' can be used to update two clients to get to the
+  same document content.
 
      / A - B' \
   v_n          v_n+1
      \ B - A' /
 */
 DocumentChange.transformInplace = function(A, B) {
-  // TODO: also transform the selections (before and after)
-  // TODO: some day collect conflicts so that we can report back to the user
-  //       this would have the effect, that no conflicting change would be sent to
-  //       the server, but would be resolved on the client first.
-  //       Note: the only conflicts that need resolution are 'insert text' at the same position
-  //       and 'set value' of the same property
-  var a_ops = [];
-  var b_ops = [];
-  var i;
+  _transformInplaceBatch(A, B);
+};
+
+function _transformInplaceSingle(a, b) {
+  for (var i = 0; i < a.ops.length; i++) {
+    var a_op = a.ops[i];
+    for (var j = 0; j < b.ops.length; j++) {
+      var b_op = b.ops[j];
+      // ATTENTION: order of arguments is important.
+      // First argument is the dominant one, i.e. it is treated as if it was applied before
+      ObjectOperation.transform(a_op, b_op, {inplace: true});
+    }
+  }
+  if (a.before) {
+    _transformSelectionInplace(a.before.selection, b);
+  }
+  if (a.after) {
+    _transformSelectionInplace(a.after.selection, b);
+  }
+  if (b.before) {
+    _transformSelectionInplace(b.before.selection, a);
+  }
+  if (b.after) {
+    _transformSelectionInplace(b.after.selection, a);
+  }
+}
+
+function _transformInplaceBatch(A, B) {
   if (!isArray(A)) {
     A = [A];
   }
   if (!isArray(B)) {
     B = [B];
   }
-  for (i = 0; i < A.length; i++) {
-    a_ops = a_ops.concat(A[i].ops);
-  }
-  for (i = 0; i < B.length; i++) {
-    b_ops = b_ops.concat(B[i].ops);
-  }
-  for (i = 0; i < a_ops.length; i++) {
-    var a_op = a_ops[i];
-    for (var j = 0; j < b_ops.length; j++) {
-      var b_op = b_ops[j];
-      // ATTENTION: order of arguments is important.
-      // First argument is the dominant one, i.e. it is treated as if it was applied before
-      ObjectOperation.transform(a_op, b_op, {inplace: true});
+  for (var i = 0; i < A.length; i++) {
+    var a = A[i];
+    for (var j = 0; j < B.length; j++) {
+      var b = B[j];
+      _transformInplaceSingle(a,b);
     }
   }
-  // TODO: transform selections implicitly
-};
+}
 
+function _transformSelectionInplace(sel, a) {
+  if (!sel || (!sel.isPropertySelection() && !sel.isContainerSelection()) ) {
+    return false;
+  }
+  var ops = a.ops;
+  var hasChanged = false;
+  var isCollapsed = sel.isCollapsed();
+  for(var i=0; i<ops.length; i++) {
+    var op = ops[i];
+    hasChanged |= _transformCoordinateInplace(sel.start, op);
+    if (!isCollapsed) {
+      hasChanged |= _transformCoordinateInplace(sel.end, op);
+    } else {
+      if (sel.isContainerSelection()) {
+        sel.endPath = sel.startPath;
+      }
+      sel.endOffset = sel.startOffset;
+    }
+  }
+  return hasChanged;
+}
 
-function _transformCoordinate(coor, op) {
+DocumentChange.transformSelection = _transformSelectionInplace;
+
+function _transformCoordinateInplace(coor, op) {
   if (!isEqual(op.path, coor.path)) return false;
   var hasChanged = false;
   if (op.type === 'update' && op.propertyType === 'string') {
@@ -333,29 +370,5 @@ function _transformCoordinate(coor, op) {
   }
   return hasChanged;
 }
-
-// PRELIMINARY
-// This needs a greater refactor, introducing Coordinates as built-in types
-// which are considered together with operation transformations
-DocumentChange.transformSelection = function(sel, A) {
-  if (!sel || (!sel.isPropertySelection() && !sel.isContainerSelection()) ) {
-    return false;
-  }
-  var ops = A.ops;
-  var hasChanged = false;
-  var isCollapsed = sel.isCollapsed();
-  ops.forEach(function(op) {
-    hasChanged |= _transformCoordinate(sel.start, op);
-    if (!isCollapsed) {
-      hasChanged |= _transformCoordinate(sel.end, op);
-    } else {
-      if (sel.isContainerSelection()) {
-        sel.endPath = sel.startPath;
-      }
-      sel.endOffset = sel.startOffset;
-    }
-  });
-  return hasChanged;
-};
 
 module.exports = DocumentChange;
