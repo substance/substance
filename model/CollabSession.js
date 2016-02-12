@@ -232,6 +232,14 @@ CollabSession.Prototype = function() {
       if (sel) {
         sel.attach(this.doc);
       }
+      // EXPERIMENTAL: needing to rebase the selection
+      // when ever there are pending changes
+      if (this._pendingCommit) {
+        DocumentChange.transformSelection(sel, this._pendingCommit);
+      }
+      if (this.nextCommit) {
+        DocumentChange.transformSelection(sel, this.nextCommit);
+      }
       collaborator.selection = sel;
       this.emit('collaborators:changed');
     }
