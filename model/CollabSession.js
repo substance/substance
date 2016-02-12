@@ -90,6 +90,23 @@ CollabSession.Prototype = function() {
     }
   };
 
+  this.setSelection = function(sel) {
+    var beforeSelection = this.selection;
+    _super.setSelection.call(this, sel);
+
+    var change = new DocumentChange([], {
+      selection: beforeSelection
+    }, {
+      selection: sel
+    });
+
+    change.sessionId = this.sessionId;
+
+    console.log('selection-change', change.serialize());
+    var msg = ['updateSelection', this.doc.id, this.doc.version, this.serializeChange(change)]
+    this._send(msg);
+  };
+
   this.afterDocumentChange = function(change, info) {
     _super.afterDocumentChange.apply(this, arguments);
 
@@ -150,7 +167,12 @@ CollabSession.Prototype = function() {
       case 'update':
         version = msg[1];
         change = this.deserializeChange(msg[2]);
-        this.update(version, change);
+        this.applyRemoteChange(version, change);
+        break;
+      case 'updateSelection':
+        version = msg[1];
+        change = this.deserializeChange(msg[2]);
+        this.applyRemoteSelection(version, change);
         break;
       default:
         console.error('CollabSession: unsupported message', method, msg);
@@ -166,24 +188,37 @@ CollabSession.Prototype = function() {
     this.doc._apply(change);
     this._transformLocalChangeHistory(change);
 
-    if (change.sessionId) {
-      var collaborator = this.collaborators[change.sessionId];
-      if (!collaborator) {
-        // find user index used for selecting a color
-        collaborator = {
-          sessionId: change.sessionId,
-          sessionIndex: this._getNextSessionIndex(),
-          selection: null
-        };
-        this.collaborators[change.sessionId] = collaborator;
-      }
-      collaborator.selection = change.after.selection;
+    var collaborator = this._getCollaborator(change.sessionId);
+    if (collaborator) {
+      collaborator.selection = change.after.selection;  
     }
 
     // We need to notify the change listeners so the UI gets updated
     // We pass replay: false, so this does not become part of the undo
     // history.
     this._notifyChangeListeners(change, { replay: false, remote: true });
+  };
+
+  this._getCollaborator = function(sessionId) {
+      var collaborator = this.collaborators[sessionId];
+      if (!collaborator) {
+        // find user index used for selecting a color
+        collaborator = {
+          sessionId: sessionId,
+          sessionIndex: this._getNextSessionIndex(),
+          selection: null
+        };
+        this.collaborators[sessionId] = collaborator;
+      }
+      return collaborator;
+  };
+
+  this._applyRemoteSelection = function(change) {
+    var collaborator = this._getCollaborator(change.sessionId);
+    if (collaborator) {
+      collaborator.selection = change.after.selection;
+      this.emit('collaborators:changed');
+    }
   };
 
   this.getCollaborators = function() {
@@ -248,12 +283,16 @@ CollabSession.Prototype = function() {
     As a client can only commit one change at a time
     there is also only one update at a time.
   */
-  this.update = function(version, change) {
+  this.applyRemoteChange = function(version, change) {
     if (!this.nextCommit) {
       // We only accept updates if there are no pending commitable changes
       this._applyRemoteChange(change);
       this.doc.version = version;
     }
+  };
+
+  this.applyRemoteSelection = function(version, change) {
+    this._applyRemoteSelection(change);
   };
 
   this.serializeMessage = function(msg) {

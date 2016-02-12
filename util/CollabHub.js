@@ -115,6 +115,14 @@ StubHub.Prototype = function() {
         }
         this[method](ws, docId, version, change);
         break;
+      case 'updateSelection':
+        docId = msg[1];
+        version = msg[2];
+        if (msg[3]) {
+          change = this.deserializeChange(msg[3]);
+        }
+        this[method](ws, docId, version, change);
+        break;
       default:
         console.error('CollabHub: unsupported message', method, msg);
     }
@@ -167,6 +175,12 @@ StubHub.Prototype = function() {
       }
       this._send(ws, msg);
     }.bind(this));
+  };
+
+  this.updateSelection = function(ws, documentId, clientVersion, change) {
+    console.log('updateselection', change);
+    // TODO: rebase change if needed
+    this._broadCastChange(ws, documentId, clientVersion, change);
   };
 
   this._commit = function(documentId, clientVersion, change, cb) {
