@@ -166,13 +166,16 @@ DocumentChange.Prototype = function() {
   };
 
   this.invert = function() {
+    var clone = this.clone();
     var ops = [];
     for (var i = this.ops.length - 1; i >= 0; i--) {
       ops.push(this.ops[i].invert());
     }
-    var before = this.after;
-    var after = this.before;
-    return new DocumentChange(ops, before, after);
+    var tmp = clone.before;
+    clone.before = this.after;
+    clone.after = tmp;
+    clone.ops = ops;
+    return clone;
   };
 
   this.isPending = function() {

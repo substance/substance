@@ -198,6 +198,7 @@ CollabSession.Prototype = function() {
     this.stage._apply(change);
     this.doc._apply(change);
     this._transformLocalChangeHistory(change);
+    this._transformSelections(change);
 
     var collaborator = this._getCollaborator(change.sessionId);
     if (collaborator) {

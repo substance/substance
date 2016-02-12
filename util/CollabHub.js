@@ -199,7 +199,7 @@ CollabHub.Prototype = function() {
       } else {
         this._rebaseChange(documentId, clientVersion, newChange, function(err, rebasedNewChange) {
           this._broadCastChange(ws, documentId, clientVersion, rebasedNewChange, 'updateSelection');
-        });
+        }.bind(this));
       }
     }.bind(this));
   };

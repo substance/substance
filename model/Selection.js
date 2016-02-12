@@ -143,6 +143,11 @@ Selection.NullSelection.Prototype = function() {
   this.toJSON = function() {
     return null;
   };
+
+  this.clone = function() {
+    return this;
+  };
+
 };
 
 Selection.extend(Selection.NullSelection);
