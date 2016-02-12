@@ -193,19 +193,14 @@ CollabHub.Prototype = function() {
       } else { // Client changes need to be rebased to headVersion
         this.store.getChanges(documentId, clientVersion,
           function(err, serverVersion, changes) {
-            // create clones of the changes for transformation
-            changes = changes.map(this.deserializeChange);
-            var newChange = this.deserializeChange(change);
+            var B = changes.map(this.deserializeChange);
+            var a = this.deserializeChange(change);
             // transform changes
-            for (var i = 0; i < changes.length; i++) {
-              DocumentChange.transformInplace(changes[i], newChange);
-            }
-            // Serialize change for persistence and broadcast
-            newChange = this.serializeChange(newChange);
+            DocumentChange.transformInplace(a, B);
             // apply the new change
-            this.store.addChange(documentId, this.serializeChange(newChange),
+            this.store.addChange(documentId, this.serializeChange(a),
               function(err, newVersion) {
-               cb(null, newVersion, newChange, changes.map(this.serializeChange));
+               cb(null, newVersion, a, B);
               }.bind(this)
             );
 
