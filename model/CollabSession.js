@@ -254,7 +254,7 @@ CollabSession.Prototype = function() {
     there is also only one update at a time.
   */
   this.update = function(version, change) {
-    if (!this.nextCommit) {
+    if (!this.nextCommit && !this._committing) {
       // We only accept updates if there are no pending commitable changes
       this._applyRemoteChange(change);
       this.doc.version = version;
