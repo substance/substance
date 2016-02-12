@@ -2,6 +2,7 @@
 
 var oo = require("./oo");
 var each = require('lodash/each');
+var isObject = require('lodash/isObject');
 
 var DEBUG = false;
 
@@ -109,6 +110,7 @@ EventEmitter.Prototype = function() {
    * @param {Object} options
    */
   this.off = function(event, method, context) {
+    /* jshint unused:false */
     if (arguments.length === 1 && isObject(arguments[0])) {
       _disconnect.call(this, arguments[0]);
     } else {
@@ -116,24 +118,24 @@ EventEmitter.Prototype = function() {
     }
   };
 
-  function validateMethod( method, context ) {
+  function validateMethod(method, context) {
     // Validate method and context
-    if ( typeof method === 'string' ) {
+    if (typeof method === 'string') {
       // Validate method
-      if ( context === undefined || context === null ) {
+      if (context === undefined || context === null) {
         throw new Error( 'Method name "' + method + '" has no context.' );
       }
-      if ( !( method in context ) ) {
+      if (!(method in context)) {
         // Technically the method does not need to exist yet: it could be
         // added before call time. But this probably signals a typo.
         throw new Error( 'Method not found: "' + method + '"' );
       }
-      if ( typeof context[method] !== 'function' ) {
+      if (typeof context[method] !== 'function') {
         // Technically the property could be replaced by a function before
         // call time. But this probably signals a typo.
         throw new Error( 'Property "' + method + '" is not a function' );
       }
-    } else if ( typeof method !== 'function' ) {
+    } else if (typeof method !== 'function') {
       throw new Error( 'Invalid callback. Function or method name expected.' );
     }
   }
@@ -147,9 +149,10 @@ EventEmitter.Prototype = function() {
    * @private
    */
   function _on(event, method, context, priority) {
+    /*jshint validthis:true */
     var bindings;
     validateMethod( method, context );
-    if ( this.__events__.hasOwnProperty( event ) ) {
+    if (this.__events__.hasOwnProperty(event)) {
       bindings = this.__events__[event];
     } else {
       // Auto-initialize bindings list
@@ -162,7 +165,7 @@ EventEmitter.Prototype = function() {
       priority: priority
     });
     return this;
-  };
+  }
 
   /**
    * Remove a listener.
@@ -173,6 +176,7 @@ EventEmitter.Prototype = function() {
    * @private
    */
   function _off(event, method, context) {
+    /*jshint validthis:true */
     var i, bindings;
     if ( arguments.length === 1 ) {
       // Remove all bindings for event
@@ -201,7 +205,7 @@ EventEmitter.Prototype = function() {
       delete this.__events__[event];
     }
     return this;
-  };
+  }
 
   /**
    * Internal implementation of connect.
@@ -209,6 +213,7 @@ EventEmitter.Prototype = function() {
    * @private
    */
   function _connect(obj, methods, options) {
+    /*jshint validthis:true */
     var priority = 0;
     if (arguments.length === 3) {
       priority = options.priority || priority;
@@ -219,7 +224,7 @@ EventEmitter.Prototype = function() {
     }
     this.__events__[event].sort(byPriorityDescending);
     return this;
-  };
+  }
 
   /**
    * Internal implementation of disconnect.
@@ -227,6 +232,7 @@ EventEmitter.Prototype = function() {
    * @private
    */
   function _disconnect(context) {
+    /*jshint validthis:true */
     var i, event, bindings;
     // Remove all connections to the context
     for ( event in this.__events__ ) {
@@ -241,7 +247,7 @@ EventEmitter.Prototype = function() {
       }
     }
     return this;
-  };
+  }
 
   this._debugEvents = function() {
     console.log('### EventEmitter: ', this);

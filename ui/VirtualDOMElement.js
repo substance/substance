@@ -601,7 +601,7 @@ Outlet.prototype.append = function() {
 };
 
 Outlet.prototype.empty = function() {
-  this.virtualEl.props[this.name] = outlet;
+  this.virtualEl.props[this.name] = [];
 };
 
 module.exports = VirtualDOMElement;

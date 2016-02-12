@@ -401,7 +401,7 @@ Surface.Prototype = function() {
     if (this.domSelection) {
       this.rerenderDomSelection();
     }
-  }
+  };
 
   this.onSelectionChange = function() {
     // console.log('Rerendering DOM selection after selection change.');

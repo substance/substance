@@ -6,7 +6,7 @@ var EventEmitter = require('./EventEmitter');
   Websocket server implementation for client-side development of protocols
 */
 
-function MessageQueue(options) {
+function MessageQueue() {
   MessageQueue.super.apply(this);
 
   this.connections = {};
