@@ -27,13 +27,13 @@ var uuid = require('./uuid');
   @example
 
   ```js
-  var hub = new StubHub(wss, store);
+  var hub = new CollabHub(wss, store);
   ```
 */
 
 
-function StubHub(wss, store) {
-  StubHub.super.apply(this);
+function CollabHub(wss, store) {
+  CollabHub.super.apply(this);
 
   this.wss = wss;
 
@@ -45,7 +45,7 @@ function StubHub(wss, store) {
   this.wss.on('connection', this._onConnection);
 }
 
-StubHub.Prototype = function() {
+CollabHub.Prototype = function() {
 
   this.dispose = function() {
     this.wss.off(this);
@@ -58,9 +58,9 @@ StubHub.Prototype = function() {
   */
   this.getCollaboratorSockets = function(ws, documentId) {
     var collabs = [];
-    forEach(this.wss.clients, function(client) {
-      if (client !== ws && ws.documentId === documentId) {
-        collabs.push(client);
+    forEach(this._connections, function(conn) {
+      if (conn.documentId === documentId && conn.socket !== ws) {
+        collabs.push(conn.socket);
       }
     });
     return collabs;
@@ -72,13 +72,20 @@ StubHub.Prototype = function() {
     Note: No data is exchanged yet.
   */
   this._onConnection = function(ws) {
-    // TODO: there is no way to disconnect a client
-    var clientId = ws.clientId || uuid();
-    console.log('clientId', clientId);
+    // HACK: we would like to have an id for the native sockets
+    // but there seems not be something like this.
+    // Thus we store our own there, which we want to use for dispatching
+    if (!ws.clientId) {
+      ws.clientId = uuid();
+    }
+
+    // TODO: add a way to disconnect a client
+    var clientId = ws.clientId;
     var connection = {
       clientId: clientId,
       socket: ws,
-      onMessage: this._onMessage.bind(this, ws)
+      onMessage: this._onMessage.bind(this, ws),
+      documentId: null
     };
     if (this._connections[clientId]) {
       throw new Error('Client is already connected.');
@@ -133,10 +140,17 @@ StubHub.Prototype = function() {
     which is similar to the commit case
   */
   this.open = function(ws, documentId, version, change) {
-    // We store the documentId on the socket instance. That way we know at which
+    var conn = this._connections[ws.clientId];
+    if (!conn) {
+      throw new Error('Client not registered', ws.clientId);
+    }
+    // We keep the documentId for this socket instance. That way we know at which
     // document a client is looking at. ATM we support only one active doc editing
     // session per client.
-    ws.documentId = documentId;
+    if (conn.documentId) {
+      console.error('Client is already registered for document', conn.documentId);
+    }
+    conn.documentId = documentId;
 
     if (change) {
       this._commit(documentId, version, change, function(err, serverVersion, newChange, serverChanges) {
@@ -227,6 +241,6 @@ StubHub.Prototype = function() {
   this.deserializeChange = CollabSession.prototype.deserializeChange;
 };
 
-EventEmitter.extend(StubHub);
+EventEmitter.extend(CollabHub);
 
-module.exports = StubHub;
+module.exports = CollabHub;

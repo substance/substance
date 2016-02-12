@@ -10,6 +10,7 @@ var uuid = require('../util/uuid');
 var TreeIndex = require('../util/TreeIndex');
 var OperationSerializer = require('./data/OperationSerializer');
 var ObjectOperation = require('./data/ObjectOperation');
+var Selection = require('./Selection');
 
 var PROVISIONAL = 1;
 var PENDING = 2;
@@ -256,17 +257,17 @@ DocumentChange.deserialize = function(str) {
 };
 
 DocumentChange.fromJSON = function(data) {
+  data = clone(data);
   data.ops = data.ops.map(function(opData) {
     return ObjectOperation.fromJSON(opData);
   });
   var Document = require('./Document');
-  if (data.before.selection) {
+  if (data.before.selection && !(data.before.selection instanceof Selection)) {
     data.before.selection = Document.createSelection(data.before.selection);
   }
-  if (data.after.selection) {
+  if (data.after.selection && !(data.after.selection instanceof Selection)) {
     data.after.selection = Document.createSelection(data.after.selection);
   }
-
   return new DocumentChange(data);
 };
 

@@ -7,7 +7,6 @@ var EventEmitter = require('./EventEmitter');
 */
 
 function MessageQueue(options) {
-  options = options || {};
   MessageQueue.super.apply(this);
 
   this.connections = {};
@@ -115,6 +114,7 @@ MessageQueue.Prototype = function() {
     } else {
       socket._onMessage(message.data);
     }
+    this.emit('message:sent', message);
   };
 };
 

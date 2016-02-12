@@ -59,9 +59,7 @@ CollabSession.Prototype = function() {
       // console.log('committing', this.nextCommit);
       var msg = ['commit', this.doc.id, this.doc.version, this.serializeChange(this.nextCommit)];
       this._send(msg);
-      this._pendingCommit = this.nextCommit;
-      this.nextCommit = null;
-      this._committing = true;
+      this._committing(this.nextCommit);
     }
   };
 
@@ -88,6 +86,13 @@ CollabSession.Prototype = function() {
       this.nextCommit.ops = this.nextCommit.ops.concat(change.ops);
       this.nextCommit.after = change.after;
     }
+  };
+
+  // set internal state for committing
+  this._committing = function(change) {
+    this._pendingCommit = change;
+    this.nextCommit = null;
+    this._committing = true;
   };
 
   this.afterDocumentChange = function(change, info) {
