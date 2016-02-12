@@ -56,10 +56,10 @@ function _setup(fixture, messageFromSnapshot) {
       var change = DocumentChange.fromJSON(message.data[3]);
       if (message.from === "user1") {
         doc1._apply(change);
-        client1._committing(change);
+        client1._afterCommit(change);
       } else if (message.from === "user2") {
         doc2._apply(change);
-        client2._committing(change);
+        client2._afterCommit(change);
       }
     }
   });
