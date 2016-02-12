@@ -119,6 +119,7 @@ Surface.Prototype = function() {
       this.clipboard.didMount();
       // Document Change Events
       this.domObserver.observe(this.el, this.domObserverConfig);
+      this._rerenderSelection();
     }
   };
 
