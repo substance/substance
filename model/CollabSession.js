@@ -272,14 +272,15 @@ CollabSession.Prototype = function() {
   /*
     Retrieved when a commit has been confirmed by the server
   */
-  this.commitDone = function(version, changes) {
-    if (changes) {
-      changes.forEach(function(change) {
-        this._applyChange(change);
+  this.commitDone = function(version, remoteChanges) {
+    if (remoteChanges) {
+      remoteChanges.forEach(function(change) {
+        this._applyRemoteChange(change);
       }.bind(this));
     }
     this.doc.version = version;
     this._committing = false;
+    this._pendingCommit = null;
     console.log(this.ws.clientId, ': commit confirmed by server. New version:', version);
   };
 
