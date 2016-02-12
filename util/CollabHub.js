@@ -164,7 +164,7 @@ CollabHub.Prototype = function() {
       this._commit(documentId, version, change, function(err, serverVersion, newChange, serverChanges) {
         var msg = ['openDone', serverVersion, serverChanges.map(this.serializeChange)];
         this._send(ws, msg);
-        this._broadCastChange(ws, documentId, serverVersion, newChange);
+        this._broadCastChange(ws, documentId, serverVersion, newChange, 'update');
       }.bind(this));
     } else {
       this.store.getChanges(documentId, version,
@@ -181,7 +181,7 @@ CollabHub.Prototype = function() {
   */
   this.commit = function(ws, documentId, clientVersion, change) {
     this._commit(documentId, clientVersion, change, function(err, serverVersion, newChange, serverChanges) {
-      this._broadCastChange(ws, documentId, serverVersion, newChange);
+      this._broadCastChange(ws, documentId, serverVersion, newChange, 'update');
       // confirm the new commit, providing the diff since last common version
       var msg = ['commitDone', serverVersion];
       if (serverChanges && serverChanges.length > 0) {
@@ -194,7 +194,7 @@ CollabHub.Prototype = function() {
   this.updateSelection = function(ws, documentId, clientVersion, change) {
     console.log('updateselection', change);
     // TODO: rebase change if needed
-    this._broadCastChange(ws, documentId, clientVersion, change);
+    this._broadCastChange(ws, documentId, clientVersion, change, 'updateSelection');
   };
 
   this._commit = function(documentId, clientVersion, change, cb) {
@@ -224,11 +224,11 @@ CollabHub.Prototype = function() {
     }.bind(this));
   };
 
-  this._broadCastChange = function(ws, documentId, newVersion, newChange) {
+  this._broadCastChange = function(ws, documentId, newVersion, newChange, messageName) {
     // Send changes to all *other* clients
     var collaboratorSockets = this.getCollaboratorSockets(ws, documentId);
     forEach(collaboratorSockets, function(socket) {
-      var msg = ['update', newVersion, this.serializeChange(newChange)];
+      var msg = [messageName, newVersion, this.serializeChange(newChange)];
       socket.send(this.serializeMessage(msg));
     }.bind(this));
   };

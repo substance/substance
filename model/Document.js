@@ -501,7 +501,7 @@ Document.createSelection = function() {
     if (isEqual(range.start.path, range.end.path)) {
       sel = new PropertySelection(range.start.path, range.start.offset, range.end.offset, range.reverse);
     } else {
-      sel = new ContainerSelection(range.containerId, range.start, range.end, range.isReverse);
+      sel = new ContainerSelection(range.containerId, range.start.path, range.start.offset, range.end.path, range.end.offset, range.isReverse);
     }
   } else if (arguments.length === 1 && isObject(arguments[0])) {
     var json = arguments[0];

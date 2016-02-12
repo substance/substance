@@ -3,11 +3,12 @@
     outline: 1px solid #999;
 
     &.sm-user-2 {
-      outline-color: rgba(192, 238, 204, 0.6);
+      outline-color: rgba(255, 147, 0, 1);
+      
     }
 
     &.sm-user-3 {
-      outline-color: rgba(33, 97, 172, 0.6);
+      outline-color: rgba(192, 238, 204, 1);
     }
   }
 
@@ -15,11 +16,11 @@
     background-color: #ddd;
 
     &.sm-user-2 {
-      background: rgba(192, 238, 204, 0.6);
+      background: rgba(255, 147, 0, 0.6);
     }
 
     &.sm-user-3 {
-      background: rgba(33, 97, 172, 0.6);
+      background: rgba(192, 238, 204, 0.6);
     }
   }
 

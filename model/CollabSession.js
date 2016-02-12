@@ -106,14 +106,16 @@ CollabSession.Prototype = function() {
   };
 
   this._broadCastSelectionUpdate = function(beforeSel, afterSel) {
-    var change = new DocumentChange([], {
-      selection: beforeSel
-    }, {
-      selection: afterSel
-    });
-    change.sessionId = this.sessionId;
-    var msg = ['updateSelection', this.doc.id, this.doc.version, this.serializeChange(change)];
-    this._send(msg);
+    if (!this.nextCommit && !this._committing) {
+      var change = new DocumentChange([], {
+        selection: beforeSel
+      }, {
+        selection: afterSel
+      });
+      change.sessionId = this.sessionId;
+      var msg = ['updateSelection', this.doc.id, this.doc.version, this.serializeChange(change)];
+      this._send(msg);      
+    }
   };
 
   this.afterDocumentChange = function(change, info) {
@@ -302,6 +304,7 @@ CollabSession.Prototype = function() {
   };
 
   this.applyRemoteSelection = function(version, change) {
+    console.log('applyRemoteSelection');
     this._applyRemoteSelection(change);
   };
 
