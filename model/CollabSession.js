@@ -114,7 +114,7 @@ CollabSession.Prototype = function() {
       });
       change.sessionId = this.sessionId;
       var msg = ['updateSelection', this.doc.id, this.doc.version, this.serializeChange(change)];
-      this._send(msg);      
+      this._send(msg);
     }
   };
 
@@ -227,7 +227,11 @@ CollabSession.Prototype = function() {
   this._applyRemoteSelection = function(change) {
     var collaborator = this._getCollaborator(change.sessionId);
     if (collaborator) {
-      collaborator.selection = change.after.selection;
+      var sel = change.after.selection;
+      if (sel) {
+        sel.attach(this.doc);
+      }
+      collaborator.selection = sel;
       this.emit('collaborators:changed');
     }
   };
