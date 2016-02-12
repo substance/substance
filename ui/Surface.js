@@ -67,6 +67,7 @@ function Surface() {
   // Only react to changes done via documentSession.setSelection
   // in the other case we are dealing with it ourself
   this.documentSession.on('selection:changed:explicitly', this.onSelectionChange, this);
+  this.documentSession.on('collaborators:changed', this.onCollaboratorsChange, this);
 }
 
 Surface.Prototype = function() {
@@ -394,14 +395,22 @@ Surface.Prototype = function() {
     this.emit('selection:changed', this.getSelection());
   };
 
-  this.onSelectionChange = function() {
-    // console.log('Rerendering DOM selection after selection change.');
+  this._rerenderSelection = function() {
     var needUpdate = this._updateSelectionFragments();
     this._updateTextProperties(needUpdate);
     if (this.domSelection) {
       this.rerenderDomSelection();
     }
+  }
+
+  this.onSelectionChange = function() {
+    // console.log('Rerendering DOM selection after selection change.');
+    this._rerenderSelection();
     this.emit('selection:changed', this.getSelection());
+  };
+
+  this.onCollaboratorsChange = function() {
+    this._rerenderSelection();
   };
 
   /*
