@@ -79,7 +79,7 @@ server.serveHTML = function(expressApp, route, sourcePath, config) {
         return;
       }
       var html = data.toString();
-      metaTags = [];
+      var metaTags = [];
       each(config, function(val, key) {
         metaTags.push('<meta name="'+key+'" content="'+val+'">');
       });
