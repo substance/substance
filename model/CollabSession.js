@@ -195,7 +195,7 @@ CollabSession.Prototype = function() {
     Apply a change to the document
   */
   this._applyRemoteChange = function(change) {
-    console.log("REMOTE CHANGE", change);
+    // console.log("REMOTE CHANGE", change);
     this.stage._apply(change);
     this.doc._apply(change);
     this._transformLocalChangeHistory(change);
@@ -318,7 +318,6 @@ CollabSession.Prototype = function() {
   };
 
   this.applyRemoteSelection = function(version, change) {
-    console.log('applyRemoteSelection');
     this._applyRemoteSelection(change);
   };
 
@@ -332,22 +331,17 @@ CollabSession.Prototype = function() {
 
   this.serializeChange = function(change) {
     if (change instanceof DocumentChange) {
-      change = change.toJSON();
+      return JSON.stringify(change.toJSON());
     } else {
-      console.error('FIXME: We want to have serializeChange called on real object only');
+      throw new Error('FIXME: We want to have serializeChange called on real object only');
     }
-    return JSON.stringify(change);
   };
 
   this.deserializeChange = function(data) {
     if (isString(data)) {
       return DocumentChange.fromJSON(JSON.parse(data));
-    } else if (isObject(data)) {
-      console.error('FIXME: We want allow to serialize in any way, so this is not desirable');
-      return DocumentChange.fromJSON(data);
     } else {
-      console.error('FIXME: We want allow to serialize in any way, so this is not desirable');
-      return data;
+      throw new Error('CollabSession.deserializeChange is expecting a string');
     }
   };
 

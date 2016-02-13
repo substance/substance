@@ -129,7 +129,6 @@ CollabHub.Prototype = function() {
         if (msg[3]) {
           change = this.deserializeChange(msg[3]);
         }
-        console.log('AAAAA', msg);
         this[method](ws, docId, version, change);
         break;
       default:
@@ -171,7 +170,9 @@ CollabHub.Prototype = function() {
     } else {
       this.store.getChanges(documentId, version,
         function(err, serverVersion, changes) {
-          var msg = ['openDone', serverVersion, changes.map(this.serializeChange)];
+          // ATTENTION: store provides serialized changes
+          // so we don't need to serialize here
+          var msg = ['openDone', serverVersion, changes];
           this._send(ws, msg);
         }.bind(this)
       );
@@ -194,7 +195,6 @@ CollabHub.Prototype = function() {
   };
 
   this.updateSelection = function(ws, documentId, clientVersion, newChange) {
-    console.log('updateselection', newChange);
     this.store.getVersion(documentId, function(err, serverVersion) {
       if (serverVersion === clientVersion) {
         this._broadCastChange(ws, documentId, clientVersion, newChange, 'updateSelection');
@@ -239,15 +239,17 @@ CollabHub.Prototype = function() {
   this._broadCastChange = function(ws, documentId, newVersion, newChange, messageName) {
     // Send changes to all *other* clients
     var collaboratorSockets = this.getCollaboratorSockets(ws, documentId);
-    forEach(collaboratorSockets, function(socket) {
-      console.log('_broadCastChange', socket);
+    forEach(collaboratorSockets, function(socket, id) {
       var msg = [messageName, newVersion, this.serializeChange(newChange)];
-      socket.send(this.serializeMessage(msg));
+      try {
+        socket.send(this.serializeMessage(msg));
+      } catch (err) {
+        delete this._connections[id];
+      }
     }.bind(this));
   };
 
   this._send = function(ws, msg) {
-    console.log('Sending msg', msg);
     ws.send(this.serializeMessage(msg));
   };
 
@@ -261,19 +263,16 @@ CollabHub.Prototype = function() {
 
   // to stringified JSON
   this.serializeChange = function(change, db) {
-    if (change instanceof DocumentChange) {
-      change = change.toJSON();
-    }
+    // HACK: we do not want to serialize some of the data,
+    // such as selections (otherwise you gonna see selections after
+    // loading from data base)
     if (db) {
-      return JSON.stringify(change);
+      return JSON.stringify({ops: change.ops, before: {}, after: {}});
     } else {
-      // TODO: we want allow to serialize in any way, so this is not desirable
-      console.warn('we want allow to serialize in any way, so this is not desirable');
-      return change;
+      return JSON.stringify(change.toJSON());
     }
   };
 
-  // from stringified JSON
   this.deserializeChange = function(data) {
     return DocumentChange.fromJSON(JSON.parse(data));
   };
