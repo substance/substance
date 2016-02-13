@@ -1,7 +1,6 @@
 'use strict';
 
 var isString = require('lodash/isString');
-var isObject = require('lodash/isObject');
 var DocumentSession = require('./DocumentSession');
 var DocumentChange = require('./DocumentChange');
 var uuid = require('../util/uuid');
