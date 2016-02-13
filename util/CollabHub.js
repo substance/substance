@@ -5,7 +5,6 @@
 var EventEmitter = require('./EventEmitter');
 var forEach = require('lodash/forEach');
 var DocumentChange = require('../model/DocumentChange');
-var CollabSession = require('../model/CollabSession');
 var uuid = require('./uuid');
 
 /*
@@ -248,7 +247,7 @@ CollabHub.Prototype = function() {
   };
 
   this._send = function(ws, msg) {
-    console.log('Sending msg', msg)
+    console.log('Sending msg', msg);
     ws.send(this.serializeMessage(msg));
   };
 
