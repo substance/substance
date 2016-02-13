@@ -384,7 +384,7 @@ Surface.Prototype = function() {
     });
     this._updateTextProperties(needUpdate);
     if (this.domSelection && !info.remote) {
-      console.log('Rerendering DOM selection after document change.', this.__id__);
+      // console.log('Rerendering DOM selection after document change.', this.__id__);
       // HACK: under FF we must make sure that the contenteditable is
       // focused.
       if (change.after.surfaceId === this.getName()) {
@@ -843,7 +843,7 @@ Surface.Prototype = function() {
   this._computeSelectionFragments = function(sel, selectionFragments, userData) {
     selectionFragments = selectionFragments || {};
     if (sel && !sel.isNull()) {
-      console.log('Computing selection fragments for', sel.toString());
+      // console.log('Computing selection fragments for', sel.toString());
       var fragments = sel.getFragments();
       fragments.forEach(function(frag) {
         var pathStr = frag.path.toString();

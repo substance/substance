@@ -124,16 +124,13 @@ Controller.Prototype = function() {
 
   this._initialize = function(/*props*/) {
     var doc = this.doc;
-
     // Register event handlers
-    doc.connect(this, {
-      'document:changed': this.onDocumentChanged,
-      'transaction:started': this.onTransactionStarted
-    }, {
+    doc.on('document:changed', this.onDocumentChanged, this, {
       // Use lower priority so that everyting is up2date
       // when we receive the update
       priority: -20
     });
+    doc.on('transaction:started', this.onTransactionStarted, this);
   };
 
   /**
@@ -141,7 +138,7 @@ Controller.Prototype = function() {
      in your custom Controller class, don't forget the super call.
   */
   this.dispose = function() {
-    this.doc.disconnect(this);
+    this.doc.off(this);
   };
 
   /**
@@ -341,10 +338,8 @@ Controller.Prototype = function() {
    * @param surface {ui/Surface} A new surface instance to register
    */
   this.registerSurface = function(surface) {
-    surface.connect(this, {
-      'selection:changed': this._onSelectionChanged,
-      'command:executed': this._onCommandExecuted
-    });
+    surface.on('selection:changed', this._onSelectionChanged, this);
+    surface.on('command:executed', this._onCommandExecuted, this);
     this.surfaces[surface.getName()] = surface;
   };
 
@@ -354,7 +349,7 @@ Controller.Prototype = function() {
    * @param surface {ui/Surface} A surface instance to unregister
    */
   this.unregisterSurface = function(surface) {
-    surface.disconnect(this);
+    surface.off(this);
     delete this.surfaces[surface.getName()];
     if (surface && this.focusedSurface === surface) {
       this.focusedSurface = null;
@@ -555,9 +550,7 @@ Controller.Prototype = function() {
     this.didInitialize = function() {
       var ctrl = this.getController();
 
-      ctrl.connect(this, {
-        'command:executed': this.onCommandExecuted
-      });
+      ctrl.on('command:executed', this.onCommandExecuted, this);
     };
 
     this.onCommandExecuted = function(info, commandName) {

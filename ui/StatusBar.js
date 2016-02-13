@@ -11,12 +11,12 @@ var ICONS_FOR_TYPE = {
 };
 
 /*
-  A simple StatusBar implementation that displays a document's title and 
+  A simple StatusBar implementation that displays a document's title and
   renders messages.
 
   @class
   @component
-  
+
   @prop {model/Document} doc The document instance
 
   @state {String} message The message displayed in the status bar.
@@ -27,12 +27,16 @@ function StatusBar() {
 
   var ctrl = this.context.controller;
   var logger = ctrl.getLogger();
-  logger.connect(this, {
-    'messages:updated': this.handleStatusUpdate
-  });
+  logger.on('messages:updated', this.handleStatusUpdate, this);
 }
 
 StatusBar.Prototype = function() {
+
+  this.dispose = function() {
+    var ctrl = this.context.controller;
+    var logger = ctrl.getLogger();
+    logger.off(this);
+  };
 
   this.render = function() {
     var meta = this.props.doc.getDocumentMeta();

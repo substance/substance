@@ -1,10 +1,6 @@
 'use strict';
 
 var each = require('lodash/each');
-var isEqual = require('lodash/isEqual');
-var isArray = require('lodash/isArray');
-var isObject = require('lodash/isObject');
-var isString = require('lodash/isString');
 var EventEmitter = require('../util/EventEmitter');
 var DocumentIndex = require('./DocumentIndex');
 var AnnotationIndex = require('./AnnotationIndex');
@@ -13,11 +9,7 @@ var DocumentChange = require('./DocumentChange');
 var PathEventProxy = require('./PathEventProxy');
 var IncrementalData = require('./data/IncrementalData');
 var DocumentNodeFactory = require('./DocumentNodeFactory');
-var Coordinate = require('./Coordinate');
-var Range = require('./Range');
 var Selection = require('./Selection');
-var PropertySelection = require('./PropertySelection');
-var ContainerSelection = require('./ContainerSelection');
 var docHelpers = require('./documentHelpers');
 
 var __id__ = 0;

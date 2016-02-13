@@ -7,7 +7,6 @@ var isObject = require('lodash/isObject');
 var isArray = require('lodash/isArray');
 var map = require('lodash/map');
 var clone = require('lodash/clone');
-var cloneDeep = require('lodash/cloneDeep');
 var oo = require('../util/oo');
 var uuid = require('../util/uuid');
 var TreeIndex = require('../util/TreeIndex');

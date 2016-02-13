@@ -24,20 +24,16 @@ function ToolManager(controller) {
   this.tools = [];
 
   var docSession = this.controller.getDocumentSession();
-  docSession.connect(this, {
-    'selection:changed': this.updateTools
-  });
-  this.controller.connect(this, {
-    'document:saved': this.updateTools
-  });
+  docSession.on('selection:changed', this.updateTools, this);
+  this.controller.on('document:saved', this.updateTools, this);
 }
 
 ToolManager.Prototype = function() {
 
   this.dispose = function() {
     var docSession = this.controller.getDocumentSession();
-    this.controller.disconnect(this);
-    docSession.disconnect(this);
+    docSession.off(this);
+    this.controller.off(this);
   };
 
   this.getCommandState = function(tool) {

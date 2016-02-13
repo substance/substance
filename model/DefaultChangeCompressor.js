@@ -1,3 +1,4 @@
+/*jshint unused:false */
 "use strict";
 
 var isEqual = require('lodash/isEqual');
@@ -11,30 +12,30 @@ function DefaultChangeCompressor() {
 
 DefaultChangeCompressor.Prototype = function() {
 
-  // TODO: only if the previous c
   this.shouldMerge = function(lastChange, newChange) {
     return false;
-    var now = Date.now();
-    var shouldMerge = (now - lastChange.timestamp < MAXIMUM_CHANGE_DURATION);
-    if (shouldMerge) {
-      // we are only interested in compressing subsequent operations while typing
-      // TODO: we could make our lifes easier by just tagging these changes
-      var firstOp = lastChange.ops[0];
-      var secondOp = newChange.ops[0];
-      var firstDiff = firstOp.diff;
-      var secondDiff = secondOp.diff;
-      // HACK: this check is pretty optimistic. We should tag changes, so that
-      // we can compress only changes related to typing here.
-      shouldMerge = (
-        firstOp.isUpdate('string') &&
-        secondOp.isUpdate('string') &&
-        secondDiff.getLength() === 1 &&
-        firstDiff.type === secondDiff.type &&
-        isEqual(firstOp.path, secondOp.path)
-      );
-    }
+    // var now = Date.now();
+    // // var shouldMerge = (now - lastChange.timestamp < MAXIMUM_CHANGE_DURATION);
+    // var shouldMerge = true;
+    // if (shouldMerge) {
+    //   // we are only interested in compressing subsequent operations while typing
+    //   // TODO: we could make our lifes easier by just tagging these changes
+    //   var firstOp = lastChange.ops[0];
+    //   var secondOp = newChange.ops[0];
+    //   var firstDiff = firstOp.diff;
+    //   var secondDiff = secondOp.diff;
+    //   // HACK: this check is pretty optimistic. We should tag changes, so that
+    //   // we can compress only changes related to typing here.
+    //   shouldMerge = (
+    //     firstOp.isUpdate('string') &&
+    //     secondOp.isUpdate('string') &&
+    //     secondDiff.getLength() === 1 &&
+    //     firstDiff.type === secondDiff.type &&
+    //     isEqual(firstOp.path, secondOp.path)
+    //   );
+    // }
 
-    return shouldMerge;
+    // return shouldMerge;
   };
 
   /*
