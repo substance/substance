@@ -5,7 +5,7 @@ require('../qunit_extensions');
 var MessageQueue = require('../../../util/MessageQueue');
 var WebSocketServer = require('../../../util/WebSocketServer');
 var WebSocket = require('../../../util/WebSocket');
-var CollabSession = require('../../../model/CollabSession');
+var CollabSession = require('../../../model/StubCollabSession');
 var DocumentChange = require('../../../model/DocumentChange');
 var StubHub = require('../../../util/StubHub');
 var TestStore = require('../../../util/TestStore');

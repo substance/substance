@@ -1,6 +1,7 @@
 'use strict';
 
 var isString = require('lodash/isString');
+var isObject = require('lodash/isObject');
 var DocumentSession = require('./DocumentSession');
 var DocumentChange = require('./DocumentChange');
 var uuid = require('../util/uuid');
@@ -322,36 +323,31 @@ CollabSession.Prototype = function() {
   };
 
   this.serializeMessage = function(msg) {
-    if (this.ws._isSimulated) {
-      return msg;
-    } else {
-      return JSON.stringify(msg);
-    }
+    return JSON.stringify(msg);
   };
 
   this.deserializeMessage = function(msg) {
-    if (this.ws._isSimulated) {
-      return msg;
-    } else {
-      return JSON.parse(msg);
-    }
+    return JSON.parse(msg);
   };
 
   this.serializeChange = function(change) {
     if (change instanceof DocumentChange) {
-      return change.toJSON();
+      change = change.toJSON();
     } else {
-      return change;
+      console.error('FIXME: We want to have serializeChange called on real object only');
     }
+    return JSON.stringify(change);
   };
 
   this.deserializeChange = function(data) {
-    if (data instanceof DocumentChange) {
-      return data;
-    } else if (isString(data)) {
+    if (isString(data)) {
       return DocumentChange.fromJSON(JSON.parse(data));
-    } else {
+    } else if (isObject(data)) {
+      console.error('FIXME: We want allow to serialize in any way, so this is not desirable');
       return DocumentChange.fromJSON(data);
+    } else {
+      console.error('FIXME: We want allow to serialize in any way, so this is not desirable');
+      return data;
     }
   };
 

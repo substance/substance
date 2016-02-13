@@ -1,5 +1,7 @@
 "use strict";
 
+// HACK!
+
 var EventEmitter = require('./EventEmitter');
 var forEach = require('lodash/forEach');
 var DocumentChange = require('../model/DocumentChange');
@@ -128,6 +130,7 @@ CollabHub.Prototype = function() {
         if (msg[3]) {
           change = this.deserializeChange(msg[3]);
         }
+        console.log('AAAAA', msg);
         this[method](ws, docId, version, change);
         break;
       default:
@@ -221,12 +224,12 @@ CollabHub.Prototype = function() {
     // Get latest doc version
     this.store.getVersion(documentId, function(err, serverVersion) {
       if (serverVersion === clientVersion) { // Fast forward update
-        this.store.addChange(documentId, this.serializeChange(newChange), function(err, newVersion) {
+        this.store.addChange(documentId, this.serializeChange(newChange, 'db'), function(err, newVersion) {
           cb(null, newVersion, newChange);
         }.bind(this));
       } else { // Client changes need to be rebased to latest serverVersion
         this._rebaseChange(documentId, clientVersion, newChange, function(err, rebasedNewChange, rebasedOtherChanges) {
-          this.store.addChange(documentId, this.serializeChange(rebasedNewChange), function(err, newVersion) {
+          this.store.addChange(documentId, this.serializeChange(rebasedNewChange, 'db'), function(err, newVersion) {
             cb(null, newVersion, rebasedNewChange, rebasedOtherChanges);
           }.bind(this));
         }.bind(this));
@@ -238,12 +241,14 @@ CollabHub.Prototype = function() {
     // Send changes to all *other* clients
     var collaboratorSockets = this.getCollaboratorSockets(ws, documentId);
     forEach(collaboratorSockets, function(socket) {
+      console.log('_broadCastChange', socket);
       var msg = [messageName, newVersion, this.serializeChange(newChange)];
       socket.send(this.serializeMessage(msg));
     }.bind(this));
   };
 
   this._send = function(ws, msg) {
+    console.log('Sending msg', msg)
     ws.send(this.serializeMessage(msg));
   };
 
@@ -255,8 +260,24 @@ CollabHub.Prototype = function() {
     return JSON.parse(msg);
   };
 
-  this.serializeChange = CollabSession.prototype.serializeChange;
-  this.deserializeChange = CollabSession.prototype.deserializeChange;
+  // to stringified JSON
+  this.serializeChange = function(change, db) {
+    if (change instanceof DocumentChange) {
+      change = change.toJSON();
+    }
+    if (db) {
+      return JSON.stringify(change);
+    } else {
+      // TODO: we want allow to serialize in any way, so this is not desirable
+      console.warn('we want allow to serialize in any way, so this is not desirable');
+      return change;
+    }
+  };
+
+  // from stringified JSON
+  this.deserializeChange = function(data) {
+    return DocumentChange.fromJSON(JSON.parse(data));
+  };
 };
 
 EventEmitter.extend(CollabHub);
