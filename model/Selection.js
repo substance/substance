@@ -1,7 +1,13 @@
 'use strict';
 
+var isEqual = require('lodash/isEqual');
+var isArray = require('lodash/isArray');
+var isObject = require('lodash/isObject');
+var isString = require('lodash/isString');
 var oo = require('../util/oo');
 var EventEmitter = require('../util/EventEmitter');
+var Coordinate = require('./Coordinate');
+var Range = require('./Range');
 var Anchor = require('./Anchor');
 
 /**
@@ -13,9 +19,41 @@ var Anchor = require('./Anchor');
   @abstract
 */
 
-function Selection() {}
+function Selection() {
+  // Internal stuff
+  var _internal = {};
+  Object.defineProperty(this, "_internal", {
+      enumerable: false,
+      value: _internal
+  });
+    // set when attached to document
+  _internal.doc = null;
+}
 
 Selection.Prototype = function() {
+
+  /**
+    @returns {Document} The attached document instance
+  */
+  this.getDocument = function() {
+    var doc = this._internal.doc;
+    if (!doc) {
+      throw new Error('Selection is not attached to a document.');
+    }
+    return doc;
+  };
+
+  /**
+    Attach document to the selection.
+
+    @private
+    @param {Document} doc document to attach
+    @returns {this}
+  */
+  this.attach = function(doc) {
+    this._internal.doc = doc;
+    return this;
+  };
 
   /**
     @returns {Boolean} true when selection is null.
@@ -35,6 +73,10 @@ Selection.Prototype = function() {
     @returns {Boolean} true if selection is a {@link model/ContainerSelection}
   */
   this.isContainerSelection = function() {
+    return false;
+  };
+
+  this.isCustomSelection = function() {
     return false;
   };
 
@@ -70,6 +112,8 @@ Selection.Prototype = function() {
     } else if (this.isNull() !== other.isNull()) {
       return false;
     } else {
+      // Note: returning true here, so that sub-classes
+      // can call this as a predicate in their expression
       return true;
     }
   };
@@ -80,27 +124,6 @@ Selection.Prototype = function() {
   this.toString = function() {
     return "null";
   };
-
-  /**
-    @private
-    @returns {Range[]} All ranges of a selection.
-  */
-  this.getRanges = function() {
-    return [];
-  };
-
-  /**
-    Attach document to the selection.
-
-    @private
-    @param {Document} doc document to attach
-    @returns {this}
-  */
-  this.attach = function(doc) {
-    /* jshint unused: false */
-    throw new Error('This method is abstract.');
-  };
-
 
   /**
     Convert container selection to JSON.
@@ -133,7 +156,9 @@ oo.initClass(Selection);
   @class
 */
 
-Selection.NullSelection = function() {};
+Selection.NullSelection = function() {
+  Selection.call(this);
+};
 
 Selection.NullSelection.Prototype = function() {
   this.isNull = function() {
@@ -147,7 +172,6 @@ Selection.NullSelection.Prototype = function() {
   this.clone = function() {
     return this;
   };
-
 };
 
 Selection.extend(Selection.NullSelection);
@@ -159,6 +183,77 @@ Selection.extend(Selection.NullSelection);
 */
 
 Selection.nullSelection = Object.freeze(new Selection.NullSelection());
+
+Selection.fromJSON = function(json) {
+  if (!json) {
+    return Selection.nullSelection;
+  }
+  var type = json.type;
+  switch(type) {
+    case 'property':
+      var PropertySelection = require('./PropertySelection');
+      return PropertySelection.fromJSON(json);
+    case 'container':
+      var ContainerSelection = require('./ContainerSelection');
+      return ContainerSelection.fromJSON(json);
+    case 'custom':
+      var CustomSelection = require('./CustomSelection');
+      return CustomSelection.fromJSON(json);
+    case 'default':
+      // TODO: what if we have custom selections?
+      console.error('Selection.fromJSON(): unsupported selection data', json);
+      return Selection.nullSelection;
+  }
+};
+
+Selection.create = function() {
+  var PropertySelection = require('./PropertySelection');
+  var ContainerSelection = require('./ContainerSelection');
+  var coor, range;
+  if (arguments.length === 1 && arguments[0] === null) {
+    return Selection.nullSelection;
+  }
+  var sel;
+  if (arguments[0] instanceof Coordinate) {
+    coor = arguments[0];
+    sel = new PropertySelection(coor.start.path, coor.start.offset, coor.end.offset, false);
+  } else if (arguments[0] instanceof Range) {
+    range = arguments[0];
+    if (isEqual(range.start.path, range.end.path)) {
+      sel = new PropertySelection(range.start.path, range.start.offset, range.end.offset, range.reverse);
+    } else {
+      sel = new ContainerSelection(range.containerId, range.start.path, range.start.offset, range.end.path, range.end.offset, range.isReverse);
+    }
+  } else if (arguments.length === 1 && isObject(arguments[0])) {
+    var json = arguments[0];
+    switch(json.type) {
+      case 'property':
+        sel = new PropertySelection.fromJSON(json);
+        break;
+      case 'container':
+        sel = new ContainerSelection.fromJSON(json);
+        break;
+      default:
+        throw new Error('Unsupported selection type', json.type);
+    }
+  }
+  // createSelection(startPath, startOffset)
+  else if (arguments.length === 2 && isArray(arguments[0])) {
+    sel = new PropertySelection(arguments[0], arguments[1], arguments[1]);
+  }
+  // createSelection(startPath, startOffset, endOffset)
+  else if (arguments.length === 3 && isArray(arguments[0])) {
+    sel = new PropertySelection(arguments[0], arguments[1], arguments[2]);
+  }
+  // createSelection(containerId, startPath, startOffset, endPath, endOffset)
+  else if (arguments.length === 5 && isString(arguments[0])) {
+    sel = new ContainerSelection(arguments[0], arguments[1], arguments[2], arguments[3], arguments[4]);
+  } else {
+    console.error('Illegal arguments for Selection.create().', arguments);
+    sel = Selection.nullSelection;
+  }
+  return sel;
+};
 
 
 /**

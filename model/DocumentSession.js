@@ -39,6 +39,7 @@ function DocumentSession(doc, options) {
 
   this.doneChanges = [];
   this.undoneChanges = [];
+  this._lastChange = null;
 
   this.compressor = options.compressor || new DefaultChangeCompressor();
 
@@ -88,6 +89,9 @@ DocumentSession.Prototype = function() {
     if (change) {
       this.stage._apply(change);
       this.doc._apply(change);
+      if (change.after.selection) {
+        this.selection = change.after.selection;
+      }
       this.undoneChanges.push(change.invert());
       this._notifyChangeListeners(change, { 'replay': true });
     } else {
@@ -100,6 +104,9 @@ DocumentSession.Prototype = function() {
     if (change) {
       this.stage._apply(change);
       this.doc._apply(change);
+      if (change.after.selection) {
+        this.selection = change.after.selection;
+      }
       this.doneChanges.push(change.invert());
       this._notifyChangeListeners(change, { 'replay': true });
     } else {
@@ -229,17 +236,18 @@ DocumentSession.Prototype = function() {
       });
     }
 
-    var lastChange = this._getLastChange();
+    var currentChange = this._currentChange;
     // try to merge this change with the last to get more natural changes
     // e.g. not every keystroke, but typed words or such.
     var merged = false;
-    if (lastChange && !lastChange.isFinal()) {
-      if (this.compressor.shouldMerge(lastChange, change)) {
-        merged = this.compressor.merge(lastChange, change);
+    if (currentChange) {
+      if (this.compressor.shouldMerge(currentChange, change)) {
+        merged = this.compressor.merge(currentChange, change);
       }
     }
     if (!merged) {
       // push to undo queue and wipe the redo queue
+      this._currentChange = change;
       this.doneChanges.push(change.invert());
     }
     this.undoneChanges = [];
@@ -256,10 +264,6 @@ DocumentSession.Prototype = function() {
     // however, debugging gets inconvenient as caught exceptions don't trigger a breakpoint
     // by default, and other libraries such as jquery throw noisily.
     this.doc._notifyChangeListeners(change, info);
-  };
-
-  this._getLastChange = function() {
-    return this.doneChanges[this.doneChanges.length-1];
   };
 
 };

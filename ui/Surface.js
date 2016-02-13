@@ -384,10 +384,9 @@ Surface.Prototype = function() {
     });
     this._updateTextProperties(needUpdate);
     if (this.domSelection && !info.remote) {
-      // console.log('Rerendering DOM selection after document change.', this.__id__);
-      // HACK: this is necessary under FF; without focus the selection does not
-      // get rendered.
-      // TODO: I'd rather prefer to only look at selection.surfaceId
+      console.log('Rerendering DOM selection after document change.', this.__id__);
+      // HACK: under FF we must make sure that the contenteditable is
+      // focused.
       if (change.after.surfaceId === this.getName()) {
         this.focus();
         this.rerenderDomSelection();
@@ -397,8 +396,8 @@ Surface.Prototype = function() {
   };
 
   this._rerenderSelection = function() {
-    var needUpdate = this._updateSelectionFragments();
-    this._updateTextProperties(needUpdate);
+    var updatedProps = this._updateSelectionFragments();
+    this._updateTextProperties(updatedProps);
     if (this.domSelection && this.isNativeFocused) {
       this.rerenderDomSelection();
     }
@@ -842,6 +841,7 @@ Surface.Prototype = function() {
   };
 
   this._computeSelectionFragments = function(sel, selectionFragments, userData) {
+    console.log('Computing selection fragments for', sel.toString());
     selectionFragments = selectionFragments || {};
     if (sel && !sel.isNull()) {
       var fragments = sel.getFragments();

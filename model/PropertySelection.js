@@ -25,6 +25,7 @@ var Range = require('./Range');
   });
 */
 function PropertySelection(path, startOffset, endOffset, reverse, surfaceId) {
+  Selection.call(this);
 
   /**
     The path to the selected property.
@@ -59,14 +60,10 @@ function PropertySelection(path, startOffset, endOffset, reverse, surfaceId) {
   if (!path || !isNumber(startOffset)) {
     throw new Error('Invalid arguments: `path` and `startOffset` are mandatory');
   }
-  this._internal = {
-    // dynamic adapters for Coordinate oriented implementations
-    start: new CoordinateAdapter(this, 'path', 'startOffset'),
-    end: new CoordinateAdapter(this, 'path', 'endOffset'),
-    range: null,
-    // set when attached to document
-    doc: null
-  };
+
+  // dynamic adapters for Coordinate oriented implementations
+  this._internal.start = new CoordinateAdapter(this, 'path', 'startOffset');
+  this._internal.end = new CoordinateAdapter(this, 'path', 'endOffset');
   this._internal.range = new RangeAdapter(this);
 }
 
@@ -86,28 +83,6 @@ PropertySelection.Prototype = function() {
       reverse: this.reverse,
       surfaceId: this.surfaceId
     };
-  };
-
-  /**
-    @returns {Document} The attached document instance
-  */
-  this.getDocument = function() {
-    var doc = this._internal.doc;
-    if (!doc) {
-      throw new Error('Selection is not attached to a document.');
-    }
-    return doc;
-  };
-
-  /**
-    Attach document to a selection.
-
-    @param {Document} doc document to attach
-    @returns {Selection}
-  */
-  this.attach = function(doc) {
-    this._internal.doc = doc;
-    return this;
   };
 
   this.isPropertySelection = function() {
@@ -379,7 +354,8 @@ Object.defineProperties(PropertySelection.prototype, {
     get: function() {
       return this._internal.start;
     },
-    set: function() { throw new Error('PropertySelection.prototype.start is read-only.'); }
+    set: function() { throw new Error('PropertySelection.prototype.start is read-only.'); },
+    enumerable: false
   },
   /**
     @property {Coordinate} PropertySelection.end
@@ -388,13 +364,15 @@ Object.defineProperties(PropertySelection.prototype, {
     get: function() {
       return this._internal.end;
     },
-    set: function() { throw new Error('PropertySelection.prototype.end is read-only.'); }
+    set: function() { throw new Error('PropertySelection.prototype.end is read-only.'); },
+    enumerable: false
   },
   range: {
     get: function() {
       return this._internal.range;
     },
-    set: function() { throw new Error('PropertySelection.prototype.range is read-only.'); }
+    set: function() { throw new Error('PropertySelection.prototype.range is read-only.'); },
+    enumerable: false
   },
 
   // making this similar to ContainerSelection
@@ -402,13 +380,15 @@ Object.defineProperties(PropertySelection.prototype, {
     get: function() {
       return this.path;
     },
-    set: function() { throw new Error('immutable.'); }
+    set: function() { throw new Error('immutable.'); },
+    enumerable: false
   },
   endPath: {
     get: function() {
       return this.path;
     },
-    set: function() { throw new Error('immutable.'); }
+    set: function() { throw new Error('immutable.'); },
+    enumerable: false
   },
 });
 

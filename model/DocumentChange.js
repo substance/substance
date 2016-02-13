@@ -7,16 +7,13 @@ var isObject = require('lodash/isObject');
 var isArray = require('lodash/isArray');
 var map = require('lodash/map');
 var clone = require('lodash/clone');
+var cloneDeep = require('lodash/cloneDeep');
 var oo = require('../util/oo');
 var uuid = require('../util/uuid');
 var TreeIndex = require('../util/TreeIndex');
 var OperationSerializer = require('./data/OperationSerializer');
 var ObjectOperation = require('./data/ObjectOperation');
 var Selection = require('./Selection');
-
-var PROVISIONAL = 1;
-var PENDING = 2;
-var FINAL = 3;
 
 /*
 
@@ -46,26 +43,17 @@ function DocumentChange(ops, before, after) {
     this.sessionId = data.sessionId;
     // a unique id
     this.sha = data.sha;
-    // the document version this change can be applied on
-    this.version = data.version;
     // when the change has been applied
     this.timestamp = data.timestamp;
-    // id of the user who applied this change
-    if (data.userId) {
-      this.userId = data.userId;
-    }
     // application state before the change was applied
     this.before = data.before;
     // array of operations
     this.ops = data.ops;
     // application state after the change was applied
     this.after = data.after;
-
-    this.state = data.state || FINAL;
   } else if (arguments.length === 3) {
     this.sha = uuid();
     this.timestamp = Date.now();
-    this.state = PROVISIONAL;
     this.ops = ops.slice(0);
     this.before = before;
     this.after = after;
@@ -166,32 +154,18 @@ DocumentChange.Prototype = function() {
   };
 
   this.invert = function() {
-    var clone = this.clone();
+    var copy = cloneDeep(this);
+    copy.ops = [];
+    var tmp = copy.before;
+    copy.before = this.after;
+    copy.after = tmp;
+    var inverted = DocumentChange.fromJSON(copy);
     var ops = [];
     for (var i = this.ops.length - 1; i >= 0; i--) {
       ops.push(this.ops[i].invert());
     }
-    var tmp = clone.before;
-    clone.before = this.after;
-    clone.after = tmp;
-    clone.ops = ops;
-    return clone;
-  };
-
-  this.isPending = function() {
-    return this.state === PENDING;
-  };
-
-  this.makePending = function() {
-    this.state = PENDING;
-  };
-
-  this.isFinal = function() {
-    return this.state >= FINAL;
-  };
-
-  this.makeFinal = function() {
-    this.state = FINAL;
+    inverted.ops = ops;
+    return inverted;
   };
 
   // Inspection API used by DocumentChange listeners
@@ -223,21 +197,25 @@ DocumentChange.Prototype = function() {
 
   this.toJSON = function() {
     var data = {
+      // to connect the selection with a user
       sessionId: this.sessionId,
+      // to identify this change
       sha: this.sha,
-      version: this.version,
-      state: this.state,
+      // before state
       before: clone(this.before),
       ops: map(this.ops, function(op) {
         return op.toJSON();
       }),
+      // after state
       after: clone(this.after),
     };
-    if (this.before.selection) {
-      data.before.selection = this.before.selection.toJSON();
+    var sel = this.before.selection;
+    if (sel && sel instanceof Selection) {
+      data.before.selection = sel.toJSON();
     }
-    if (this.after.selection) {
-      data.after.selection = this.after.selection.toJSON();
+    sel = this.after.selection;
+    if (sel && sel instanceof Selection) {
+      data.after.selection = sel.toJSON();
     }
     return data;
   };
@@ -251,28 +229,22 @@ DocumentChange.deserialize = function(str) {
   data.ops = data.ops.map(function(opData) {
     return opSerializer.deserialize(opData);
   });
-  var Document = require('./Document');
   if (data.before.selection) {
-    data.before.selection = Document.createSelection(data.before.selection);
+    data.before.selection = Selection.fromJSON(data.before.selection);
   }
   if (data.after.selection) {
-    data.after.selection = Document.createSelection(data.after.selection);
+    data.after.selection = Selection.fromJSON(data.after.selection);
   }
   return new DocumentChange(data);
 };
 
 DocumentChange.fromJSON = function(data) {
-  data = clone(data);
+  data = cloneDeep(data);
   data.ops = data.ops.map(function(opData) {
     return ObjectOperation.fromJSON(opData);
   });
-  var Document = require('./Document');
-  if (data.before.selection && !(data.before.selection instanceof Selection)) {
-    data.before.selection = Document.createSelection(data.before.selection);
-  }
-  if (data.after.selection && !(data.after.selection instanceof Selection)) {
-    data.after.selection = Document.createSelection(data.after.selection);
-  }
+  data.before.selection = Selection.fromJSON(data.before.selection);
+  data.after.selection = Selection.fromJSON(data.after.selection);
   return new DocumentChange(data);
 };
 

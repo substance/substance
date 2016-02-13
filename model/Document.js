@@ -358,10 +358,8 @@ Document.Prototype = function() {
 
   */
   this.createSelection = function() {
-    var sel = Document.createSelection.apply(null, arguments);
-    if (!sel.isNull()) {
-      sel.attach(this);
-    }
+    var sel = Selection.create.apply(null, arguments);
+    sel.attach(this);
     return sel;
   };
 
@@ -486,51 +484,5 @@ Document.Prototype = function() {
 };
 
 EventEmitter.extend(Document);
-
-Document.createSelection = function() {
-  var coor, range;
-  if (arguments.length === 1 && arguments[0] === null) {
-    return Selection.nullSelection;
-  }
-  var sel;
-  if (arguments[0] instanceof Coordinate) {
-    coor = arguments[0];
-    sel = new PropertySelection(coor.start.path, coor.start.offset, coor.end.offset, false);
-  } else if (arguments[0] instanceof Range) {
-    range = arguments[0];
-    if (isEqual(range.start.path, range.end.path)) {
-      sel = new PropertySelection(range.start.path, range.start.offset, range.end.offset, range.reverse);
-    } else {
-      sel = new ContainerSelection(range.containerId, range.start.path, range.start.offset, range.end.path, range.end.offset, range.isReverse);
-    }
-  } else if (arguments.length === 1 && isObject(arguments[0])) {
-    var json = arguments[0];
-    switch(json.type) {
-      case 'property':
-        sel = new PropertySelection.fromJSON(json);
-        break;
-      case 'container':
-        sel = new ContainerSelection.fromJSON(json);
-        break;
-      default:
-        throw new Error('Unsupported selection type', json.type);
-    }
-  }
-  // createSelection(startPath, startOffset)
-  else if (arguments.length === 2 && isArray(arguments[0])) {
-    sel = new PropertySelection(arguments[0], arguments[1], arguments[1]);
-  }
-  // createSelection(startPath, startOffset, endOffset)
-  else if (arguments.length === 3 && isArray(arguments[0])) {
-    sel = new PropertySelection(arguments[0], arguments[1], arguments[2]);
-  }
-  // createSelection(containerId, startPath, startOffset, endPath, endOffset)
-  else if (arguments.length === 5 && isString(arguments[0])) {
-    sel = new ContainerSelection(arguments[0], arguments[1], arguments[2], arguments[3], arguments[4]);
-  } else {
-    throw new Error('Illegal arguments for Document.createSelection().');
-  }
-  return sel;
-};
 
 module.exports = Document;

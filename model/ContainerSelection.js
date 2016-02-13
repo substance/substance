@@ -27,6 +27,7 @@ var RangeAdapter = PropertySelection.RangeAdapter;
   ```
 */
 function ContainerSelection(containerId, startPath, startOffset, endPath, endOffset, reverse, surfaceId) {
+  Selection.call(this);
 
   /**
     @type {String}
@@ -67,14 +68,9 @@ function ContainerSelection(containerId, startPath, startOffset, endPath, endOff
     throw new Error('Invalid arguments: `containerId`, `startPath`, `startOffset`, `endPath`, and `endOffset` are mandatory');
   }
 
-  this._internal = {
-    // adapters for Coordinate oriented implementations
-    start: new CoordinateAdapter(this, 'startPath', 'startOffset'),
-    end: new CoordinateAdapter(this, 'endPath', 'endOffset'),
-    range: null,
-    // set when attached to document
-    doc: null
-  };
+  // dynamic adapters for Coordinate oriented implementations
+  this._internal.start = new CoordinateAdapter(this, 'startPath', 'startOffset');
+  this._internal.end = new CoordinateAdapter(this, 'endPath', 'endOffset');
   this._internal.range = new RangeAdapter(this);
 }
 
@@ -91,15 +87,6 @@ ContainerSelection.Prototype = function() {
       reverse: this.reverse,
       surfaceId: this.surfaceId
     };
-  };
-
-  this.attach = function(doc) {
-    this._internal.doc = doc;
-    return this;
-  };
-
-  this.getDocument = function() {
-    return this._internal.doc;
   };
 
   this.isContainerSelection = function() {
