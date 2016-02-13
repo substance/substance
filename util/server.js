@@ -1,5 +1,7 @@
 var browserify = require("browserify");
 var sass = require('node-sass');
+var fs = require('fs');
+var each = require('lodash/each');
 
 /**
   @module
@@ -69,6 +71,24 @@ server.serveStyles = function(expressApp, route, sourcePath) {
   });
 };
 
+server.serveHTML = function(expressApp, route, sourcePath, config) {
+  expressApp.get(route, function(req, res) {
+    fs.readFile(sourcePath, function (err, data) {
+      if (err) {
+        res.status(500).json(err);
+        return;
+      }
+      var html = data.toString();
+      metaTags = [];
+      each(config, function(val, key) {
+        metaTags.push('<meta name="'+key+'" content="'+val+'">');
+      });
+      html = html.replace('<!--CONFIG-->', metaTags.join(''));
+      res.set('Content-Type', 'text/html');
+      res.send(html);
+    });
+  });
+};
 
 
 module.exports = server;
