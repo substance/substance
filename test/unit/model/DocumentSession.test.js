@@ -80,6 +80,7 @@ QUnit.test("Selections after undo/redo.", function(assert) {
   var sel = docSession.getSelection();
   assert.ok(sel.equals(Selection.create(path, 3)), 'Selection should be set correctly after undo.');
   docSession.redo();
+  sel = docSession.getSelection();
   assert.ok(sel.equals(Selection.create(path, 6)), 'Selection should be set correctly after redo.');
 });
 

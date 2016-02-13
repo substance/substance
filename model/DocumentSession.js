@@ -171,16 +171,16 @@ DocumentSession.Prototype = function() {
   };
 
   this.onDocumentChange = function(change, info) {
-    if (info.replay && change.session === this) {
-      var selection = change.after.selection;
-      if (selection) {
-        this.selection = selection;
-        this._selectionHasChanged = true;
-      }
-    }
+    // if (info.replay && change.session === this) {
+    //   var selection = change.after.selection;
+    //   if (selection) {
+    //     this.selection = selection;
+    //     this._selectionHasChanged = true;
+    //   }
+    // }
     // ATTENTION: this is used if you have two independent DocumentSessions
     // in one client.
-    else if (info.session !== this) {
+    if (info.session !== this) {
       this.stage._apply(change);
       this._transformLocalChangeHistory(change, info);
       this._transformSelections(change, info);

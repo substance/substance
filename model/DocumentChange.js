@@ -154,10 +154,12 @@ DocumentChange.Prototype = function() {
   };
 
   this.invert = function() {
-    var copy = cloneDeep(this);
+    // shallow cloning this
+    var copy = this.toJSON();
     copy.ops = [];
+    // swapping before and after
     var tmp = copy.before;
-    copy.before = this.after;
+    copy.before = copy.after;
     copy.after = tmp;
     var inverted = DocumentChange.fromJSON(copy);
     var ops = [];
@@ -239,7 +241,6 @@ DocumentChange.deserialize = function(str) {
 };
 
 DocumentChange.fromJSON = function(data) {
-  data = cloneDeep(data);
   data.ops = data.ops.map(function(opData) {
     return ObjectOperation.fromJSON(opData);
   });

@@ -841,9 +841,9 @@ Surface.Prototype = function() {
   };
 
   this._computeSelectionFragments = function(sel, selectionFragments, userData) {
-    console.log('Computing selection fragments for', sel.toString());
     selectionFragments = selectionFragments || {};
     if (sel && !sel.isNull()) {
+      console.log('Computing selection fragments for', sel.toString());
       var fragments = sel.getFragments();
       fragments.forEach(function(frag) {
         var pathStr = frag.path.toString();
