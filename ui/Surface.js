@@ -865,6 +865,9 @@ Surface.Prototype = function() {
     var newSelectionFragments = {};
     // local selection
     var sel = this.getSelection();
+    // Note: we don't render a cursor when this is focused
+    // as otherwise we would interfer to much with ContentEditable.
+    // Such as double-click makes troubles in FF.
     if (!this.isNativeFocused || !sel.isCollapsed()) {
       this._computeSelectionFragments(sel, newSelectionFragments);
     }
