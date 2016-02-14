@@ -110,7 +110,7 @@ Fragmenter.Prototype = function() {
           mode: ANCHOR,
           pos: a.offset,
           id: a.id,
-          level: 0,
+          level: Fragmenter.ALWAYS_ON_TOP,
           type: 'anchor',
           node: a,
           counter: -1,
