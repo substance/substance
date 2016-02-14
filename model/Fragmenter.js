@@ -213,6 +213,18 @@ Fragmenter.Prototype = function() {
   function _compareClosers(a, b) {
     if (a.pos < b.pos) return -1;
     if (a.pos > b.pos) return 1;
+    // this makes closer be sorted in inverse order of openers
+    // to reduce stack sice
+    // HACK: a bit trial error. When we have to collapsed annotations
+    // at the same position then we want the closers in the same order
+    // as the openers.
+    if (a.pos === a.opener.pos && b.pos === b.opener.pos) {
+      if (a.opener.idx < b.opener.idx) {
+        return -1;
+      } else {
+        return 1;
+      }
+    }
     if (a.opener.idx > b.opener.idx) return -1;
     if (a.opener.idx < b.opener.idx) return 1;
     return 0;
