@@ -62,7 +62,6 @@ CollabSession.Prototype = function() {
     @param {WebSocket} ws a connected websocket.
   */
   this.open = function(ws) {
-
     if (ws.readyState !== 1) { // 1 == WebSocket.OPEN
       throw new Error('Websocket is not open yet');
     }
@@ -77,6 +76,8 @@ CollabSession.Prototype = function() {
       // This behaves like a commit
       msg.push(this.serializeChange(this.nextCommit));
       this._send(msg);
+      // In case of a reconnect we need to set _opened back to false
+      this._opened = false;
       this._afterCommit(this.nextCommit);
     } else {
       this._send(msg);
@@ -96,8 +97,10 @@ CollabSession.Prototype = function() {
   };
 
   this.close = function() {
-    // TODO: send a message to the server that we are no longer
-    // editing that document
+    // Let the server know we no longer want to edit this document
+    var msg = ['close', this.doc.id, this.doc.version];
+    this._send(msg);
+    // And now dispose and deregister the handlers
     this.dispose();
   };
 
@@ -113,7 +116,7 @@ CollabSession.Prototype = function() {
       this._afterCommit(this.nextCommit);
     }
   };
-  
+
   this.start = function() {
     this._runner = setInterval(this.commit.bind(this), 1000);
   };
