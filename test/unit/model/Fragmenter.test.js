@@ -188,3 +188,14 @@ QUnit.test("Two collapsed annotations.", function(assert) {
   var html = _render(TEXT, annos);
   assert.equal(html, '<a></a><b></b>ABCDEFGHI');
 });
+
+QUnit.test("Anchors should not fragment other annotations.", function(assert) {
+  var annos = [
+    new Anno('a', 'a1', 3, 6),
+    new Anno('b', 'b1', 4, 4, {
+      isAnchor: true
+    })
+  ];
+  var html = _render(TEXT, annos);
+  assert.equal(html, 'ABC<a>D<b></b>EF</a>GHI');
+});
