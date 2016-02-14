@@ -3,6 +3,7 @@
 
 var $ = require('../util/jquery');
 var oo = require('../util/oo');
+var platform = require('../util/platform');
 var Coordinate = require('../model/Coordinate');
 var Range = require('../model/Range');
 var TextPropertyComponent = require('./TextPropertyComponent');
@@ -75,20 +76,23 @@ DOMSelection.Prototype = function() {
     // if there is a range then set replace the window selection accordingly
     wSel.removeAllRanges();
     var wRange = window.document.createRange();
-    if (sel.isReverse()) {
-      // console.log('DOMSelection: rendering a reverse selection.');
-      var tmp = start;
-      start = end;
-      end = tmp;
-    }
-    wRange.setStart(start.container, start.offset);
-    wSel.addRange(wRange);
-    if (!sel.isCollapsed()) {
+    if (sel.isCollapsed()) {
+      wRange.setStart(start.container, start.offset);
+      wSel.addRange(wRange);
+    } else {
+      if (sel.isReverse()) {
+        // console.log('DOMSelection: rendering a reverse selection.');
+        var tmp = start;
+        start = end;
+        end = tmp;
+      }
       // HACK: using wRange setEnd does not work reliably
       // so we set just the start anchor
       // and then use window.Selection.extend()
       // unfortunately we are not able to test this behavior as it needs
       // triggering native keyboard events
+      wRange.setStart(start.container, start.offset);
+      wSel.addRange(wRange);
       wSel.extend(end.container, end.offset);
     }
     // console.log('DOMSelection.setSelection()', 'anchorNode:', wSel.anchorNode, 'anchorOffset:', wSel.anchorOffset, 'focusNode:', wSel.focusNode, 'focusOffset:', wSel.focusOffset, 'collapsed:', wSel.collapsed);
