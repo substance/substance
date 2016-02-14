@@ -28,6 +28,14 @@ Range.Prototype = function() {
     return this.reverse;
   };
 
+  this.toString = function() {
+    var str = [this.start.toString(), '->', this.end.toString()]
+    if (this.isReverse()) {
+      str.push('(reverse)');
+    }
+    return str.join('');
+  };
+
 };
 
 oo.initClass(Range);
