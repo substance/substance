@@ -864,7 +864,10 @@ Surface.Prototype = function() {
     var oldSelectionFragments = this._selectionFragments;
     var newSelectionFragments = {};
     // local selection
-    this._computeSelectionFragments(this.getSelection(), newSelectionFragments);
+    var sel = this.getSelection();
+    if (!this.isNativeFocused || !sel.isCollapsed()) {
+      this._computeSelectionFragments(sel, newSelectionFragments);
+    }
     // if this.documentSession is a CollabSession there might
     // be other collaborators, for which we want to show the selection too
     var collaborators = this.getDocumentSession().getCollaborators();
