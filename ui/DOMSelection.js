@@ -3,7 +3,6 @@
 
 var $ = require('../util/jquery');
 var oo = require('../util/oo');
-var platform = require('../util/platform');
 var Coordinate = require('../model/Coordinate');
 var Range = require('../model/Range');
 var TextPropertyComponent = require('./TextPropertyComponent');
