@@ -1,6 +1,7 @@
 "use strict";
 
 var extend = require('lodash/extend');
+var each = require('lodash/each');
 var oo = require('../util/oo');
 var EventEmitter = require('../util/EventEmitter');
 var TransactionDocument = require('./TransactionDocument');
@@ -23,6 +24,8 @@ function DocumentSession(doc, options) {
   DocumentSession.super.apply(this);
 
   this.__id__ = __id__++;
+  // local sessionId, overwritten by CollabSession
+  this.sessionId = __id__;
 
   options = options || {};
   this.doc = doc;
@@ -36,6 +39,7 @@ function DocumentSession(doc, options) {
 
   this.doneChanges = [];
   this.undoneChanges = [];
+  this._lastChange = null;
 
   this.compressor = options.compressor || new DefaultChangeCompressor();
 
@@ -45,14 +49,8 @@ function DocumentSession(doc, options) {
   // 2. to trigger events, such as selection:changed -- this must
   // be done rather late, so that other listeners such as renderers
   // have finished their job already.
-  this.doc.connect(this, {
-    'document:changed': this.onDocumentChange
-  }, { priority: 1000 });
-
-  this.doc.connect(this, {
-    'document:changed': this.afterDocumentChange
-  }, { priority: -10 });
-
+  this.doc.on('document:changed', this.onDocumentChange, this, {priority: 1000});
+  this.doc.on('document:changed', this.afterDocumentChange, this, {priority: -10});
 }
 
 DocumentSession.Prototype = function() {
@@ -74,6 +72,10 @@ DocumentSession.Prototype = function() {
     this.emit('selection:changed:explicitly', sel, this);
   };
 
+  this.getCollaborators = function() {
+    return null;
+  };
+
   this.canUndo = function() {
     return this.doneChanges.length > 0;
   };
@@ -87,6 +89,9 @@ DocumentSession.Prototype = function() {
     if (change) {
       this.stage._apply(change);
       this.doc._apply(change);
+      if (change.after.selection) {
+        this.selection = change.after.selection;
+      }
       this.undoneChanges.push(change.invert());
       this._notifyChangeListeners(change, { 'replay': true });
     } else {
@@ -99,6 +104,9 @@ DocumentSession.Prototype = function() {
     if (change) {
       this.stage._apply(change);
       this.doc._apply(change);
+      if (change.after.selection) {
+        this.selection = change.after.selection;
+      }
       this.doneChanges.push(change.invert());
       this._notifyChangeListeners(change, { 'replay': true });
     } else {
@@ -145,12 +153,16 @@ DocumentSession.Prototype = function() {
       extend(info, tx.info);
     });
     if (change) {
-      this.selection = change.after.selection;
-      if (change.after.surfaceId) {
-        this.selection.surfaceId = change.after.surfaceId;
+      if (change.after.selection instanceof Selection) {
+        this.selection = change.after.selection;
+        // HACK injecting the surfaceId here...
+        // TODO: we should find out where the best place is to do this
+        if (this.selection && !this.selection.isNull() && change.after.surfaceId) {
+          this.selection.surfaceId = change.after.surfaceId;
+        }
+        this._selectionHasChanged = true;
       }
       this.isTransacting = false;
-      this._selectionHasChanged = true;
       this._commit(change, info);
       return change;
     } else {
@@ -159,20 +171,44 @@ DocumentSession.Prototype = function() {
   };
 
   this.onDocumentChange = function(change, info) {
+    // if (info.replay && change.session === this) {
+    //   var selection = change.after.selection;
+    //   if (selection) {
+    //     this.selection = selection;
+    //     this._selectionHasChanged = true;
+    //   }
+    // }
+    // ATTENTION: this is used if you have two independent DocumentSessions
+    // in one client.
     if (info.session !== this) {
       this.stage._apply(change);
-      // rebase the change history
-      // TODO: as an optimization we could rebase the history lazily
-      DocumentChange.transform(this.doneChanges, change);
-      DocumentChange.transform(this.undoneChanges, change);
-      // console.log('Transforming selection...', this.__id__);
-      this._selectionHasChanged = DocumentChange.transformSelection(this.selection, change);
-    } else if (info.replay) {
-      var selection = change.after.selection;
-      if (selection) {
-        this.selection = selection;
-        this._selectionHasChanged = true;
-      }
+      this._transformLocalChangeHistory(change, info);
+      this._transformSelections(change, info);
+    }
+  };
+
+  this._transformLocalChangeHistory = function(externalChange) {
+    // Transform the change history
+    // Note: using a clone as the transform is done inplace
+    // which is ok for the changes in the undo history, but not
+    // for the external change
+    var clone = {
+      ops: externalChange.ops.map(function(op) { return op.clone(); })
+    };
+    DocumentChange.transformInplace(clone, this.doneChanges);
+    DocumentChange.transformInplace(clone, this.undoneChanges);
+  };
+
+  this._transformSelections = function(change) {
+    // console.log('Transforming selection...', this.__id__);
+    // Transform the selection
+    this._selectionHasChanged =
+      DocumentChange.transformSelection(this.selection, change);
+    var collaborators = this.getCollaborators();
+    if (collaborators) {
+      each(collaborators, function(collaborator) {
+        DocumentChange.transformSelection(collaborator.selection, change);
+      });
     }
   };
 
@@ -185,23 +221,33 @@ DocumentSession.Prototype = function() {
   };
 
   this._commit = function(change, info) {
-    // apply the change
+    change.sessionId = this.sessionId;
     change.timestamp = Date.now();
+
     // TODO: try to find a more explicit way, or a maybe a smarter way
     // to keep the TransactionDocument in sync
     this.doc._apply(change);
 
-    var lastChange = this._getLastChange();
+    // transform local version collaborator selections
+    var collaborators = this.getCollaborators();
+    if (collaborators) {
+      each(collaborators, function(collaborator) {
+        DocumentChange.transformSelection(collaborator.selection, change);
+      });
+    }
+
+    var currentChange = this._currentChange;
     // try to merge this change with the last to get more natural changes
     // e.g. not every keystroke, but typed words or such.
     var merged = false;
-    if (lastChange && !lastChange.isFinal()) {
-      if (this.compressor.shouldMerge(lastChange, change)) {
-        merged = this.compressor.merge(lastChange, change);
+    if (currentChange) {
+      if (this.compressor.shouldMerge(currentChange, change)) {
+        merged = this.compressor.merge(currentChange, change);
       }
     }
     if (!merged) {
       // push to undo queue and wipe the redo queue
+      this._currentChange = change;
       this.doneChanges.push(change.invert());
     }
     this.undoneChanges = [];
@@ -212,15 +258,12 @@ DocumentSession.Prototype = function() {
 
   this._notifyChangeListeners = function(change, info) {
     info = info || {};
+    // TODO: iron this out... we should have change.sessionId already
     info.session = this;
     // TODO: I would like to wrap this with a try catch.
     // however, debugging gets inconvenient as caught exceptions don't trigger a breakpoint
     // by default, and other libraries such as jquery throw noisily.
     this.doc._notifyChangeListeners(change, info);
-  };
-
-  this._getLastChange = function() {
-    return this.doneChanges[this.doneChanges.length-1];
   };
 
 };

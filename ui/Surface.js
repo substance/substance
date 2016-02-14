@@ -67,6 +67,7 @@ function Surface() {
   // Only react to changes done via documentSession.setSelection
   // in the other case we are dealing with it ourself
   this.documentSession.on('selection:changed:explicitly', this.onSelectionChange, this);
+  this.documentSession.on('collaborators:changed', this.onCollaboratorsChange, this);
 }
 
 Surface.Prototype = function() {
@@ -118,6 +119,7 @@ Surface.Prototype = function() {
       this.clipboard.didMount();
       // Document Change Events
       this.domObserver.observe(this.el, this.domObserverConfig);
+      this._rerenderSelection();
     }
   };
 
@@ -373,7 +375,7 @@ Surface.Prototype = function() {
 
   /* Event handlers */
 
-  this.onDocumentChange = function(change) {
+  this.onDocumentChange = function(change, info) {
     // dirty text properties which need to be updated due to selection changes
     var needUpdate = this._updateSelectionFragments();
     // plus all text properties affected by the change
@@ -381,11 +383,10 @@ Surface.Prototype = function() {
       needUpdate[path] = true;
     });
     this._updateTextProperties(needUpdate);
-    if (this.domSelection) {
+    if (this.domSelection && !info.remote) {
       // console.log('Rerendering DOM selection after document change.', this.__id__);
-      // HACK: this is necessary under FF; without focus the selection does not
-      // get rendered.
-      // TODO: I'd rather prefer to only look at selection.surfaceId
+      // HACK: under FF we must make sure that the contenteditable is
+      // focused.
       if (change.after.surfaceId === this.getName()) {
         this.focus();
         this.rerenderDomSelection();
@@ -394,14 +395,22 @@ Surface.Prototype = function() {
     this.emit('selection:changed', this.getSelection());
   };
 
-  this.onSelectionChange = function() {
-    // console.log('Rerendering DOM selection after selection change.');
-    var needUpdate = this._updateSelectionFragments();
-    this._updateTextProperties(needUpdate);
-    if (this.domSelection) {
+  this._rerenderSelection = function() {
+    var updatedProps = this._updateSelectionFragments();
+    this._updateTextProperties(updatedProps);
+    if (this.domSelection && this.isNativeFocused) {
       this.rerenderDomSelection();
     }
+  };
+
+  this.onSelectionChange = function() {
+    // console.log('Rerendering DOM selection after selection change.');
+    this._rerenderSelection();
     this.emit('selection:changed', this.getSelection());
+  };
+
+  this.onCollaboratorsChange = function() {
+    this._rerenderSelection();
   };
 
   /*
@@ -600,12 +609,12 @@ Surface.Prototype = function() {
     // artifacts coming from changing the text property structure
     // while having a rendered DOM selection.
     // window.getSelection().removeAllRanges();
-    // this.isNativeFocused = false;
+    this.isNativeFocused = false;
     // this.skipNextFocusEvent = false;
   };
 
   this.onNativeFocus = function() {
-    // this.isNativeFocused = true;
+    this.isNativeFocused = true;
     // // console.log('Native focus on surface', this.__id__);
     // // ATTENTION: native focus event is triggered before the DOM selection is there
     // // Thus we need to delay this, unfortunately.
@@ -831,9 +840,10 @@ Surface.Prototype = function() {
     return frags;
   };
 
-  this._computeSelectionFragments = function(sel, selectionFragments) {
+  this._computeSelectionFragments = function(sel, selectionFragments, userData) {
     selectionFragments = selectionFragments || {};
     if (sel && !sel.isNull()) {
+      // console.log('Computing selection fragments for', sel.toString());
       var fragments = sel.getFragments();
       fragments.forEach(function(frag) {
         var pathStr = frag.path.toString();
@@ -842,6 +852,7 @@ Surface.Prototype = function() {
           frags = [];
           selectionFragments[pathStr] = frags;
         }
+        frag.userData = userData;
         frags.push(frag);
       });
     }
@@ -852,7 +863,17 @@ Surface.Prototype = function() {
     var needUpdate = {};
     var oldSelectionFragments = this._selectionFragments;
     var newSelectionFragments = {};
+    // local selection
     this._computeSelectionFragments(this.getSelection(), newSelectionFragments);
+    // if this.documentSession is a CollabSession there might
+    // be other collaborators, for which we want to show the selection too
+    var collaborators = this.getDocumentSession().getCollaborators();
+    if (collaborators) {
+      each(collaborators, function(collaborator) {
+        this._computeSelectionFragments(collaborator.selection, newSelectionFragments, collaborator);
+      }.bind(this));
+    }
+
     this._selectionFragments = newSelectionFragments;
     // properties which displayed the selection previously
     each(oldSelectionFragments, function(_, pathStr) {

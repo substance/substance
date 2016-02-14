@@ -2,6 +2,7 @@
 
 var oo = require("./oo");
 var each = require('lodash/each');
+var isObject = require('lodash/isObject');
 
 var DEBUG = false;
 
@@ -16,133 +17,6 @@ function EventEmitter() {
 }
 
 EventEmitter.Prototype = function() {
-
-  function validateMethod( method, context ) {
-    // Validate method and context
-    if ( typeof method === 'string' ) {
-      // Validate method
-      if ( context === undefined || context === null ) {
-        throw new Error( 'Method name "' + method + '" has no context.' );
-      }
-      if ( !( method in context ) ) {
-        // Technically the method does not need to exist yet: it could be
-        // added before call time. But this probably signals a typo.
-        throw new Error( 'Method not found: "' + method + '"' );
-      }
-      if ( typeof context[method] !== 'function' ) {
-        // Technically the property could be replaced by a function before
-        // call time. But this probably signals a typo.
-        throw new Error( 'Property "' + method + '" is not a function' );
-      }
-    } else if ( typeof method !== 'function' ) {
-      throw new Error( 'Invalid callback. Function or method name expected.' );
-    }
-  }
-
-  /**
-   * Internal implementation for registering a listener.
-   *
-   * @param {String} event
-   * @param {Function} method
-   * @param {Object} context
-   * @private
-   */
-  this._on = function ( event, method, context, priority) {
-    var bindings;
-    validateMethod( method, context );
-    if ( this.__events__.hasOwnProperty( event ) ) {
-      bindings = this.__events__[event];
-    } else {
-      // Auto-initialize bindings list
-      bindings = this.__events__[event] = [];
-    }
-    // Add binding
-    bindings.push({
-      method: method,
-      context: context || null,
-      priority: priority
-    });
-    return this;
-  };
-
-  /**
-   * Remove a listener.
-   *
-   * @param {String} event
-   * @param {Function} method
-   * @param {Object} context
-   * @private
-   */
-  this._off = function ( event, method, context ) {
-    var i, bindings;
-    if ( arguments.length === 1 ) {
-      // Remove all bindings for event
-      delete this.__events__[event];
-      return this;
-    }
-    validateMethod( method, context );
-    if ( !( event in this.__events__ ) || !this.__events__[event].length ) {
-      // No matching bindings
-      return this;
-    }
-    // Default to null context
-    if ( arguments.length < 3 ) {
-      context = null;
-    }
-    // Remove matching handlers
-    bindings = this.__events__[event];
-    i = bindings.length;
-    while ( i-- ) {
-      if ( bindings[i].method === method && bindings[i].context === context ) {
-        bindings.splice( i, 1 );
-      }
-    }
-    // Cleanup if now empty
-    if ( bindings.length === 0 ) {
-      delete this.__events__[event];
-    }
-    return this;
-  };
-
-  /**
-   * Internal implementation of connect.
-   *
-   * @private
-   */
-  this._connect = function (obj, methods, options) {
-    var priority = 0;
-    if (arguments.length === 3) {
-      priority = options.priority || priority;
-    }
-    for ( var event in methods ) {
-      var method = methods[event];
-      this._on( event, method, obj, priority);
-    }
-    this.__events__[event].sort(byPriorityDescending);
-    return this;
-  };
-
-  /**
-   * Internal implementation of disconnect.
-   *
-   * @private
-   */
-  this._disconnect = function(context) {
-    var i, event, bindings;
-    // Remove all connections to the context
-    for ( event in this.__events__ ) {
-      bindings = this.__events__[event];
-      i = bindings.length;
-      while ( i-- ) {
-        // bindings[i] may have been removed by the previous step's
-        // this.off so check it still exists
-        if ( bindings[i] && bindings[i].context === context ) {
-          this._off( event, bindings[i].method, context );
-        }
-      }
-    }
-    return this;
-  };
 
   /**
    * Emit an event.
@@ -192,8 +66,9 @@ EventEmitter.Prototype = function() {
    * @chainable
    */
   this.connect = function (obj, methods, options) {
+    console.warn('DEPRECATED: Use EventEmitter.on(event, method, context) instead.');
     /* jshint unused:false */
-    return this._connect.apply(this, arguments);
+    return _connect.apply(this, arguments);
   };
 
   /**
@@ -205,11 +80,12 @@ EventEmitter.Prototype = function() {
    * @chainable
    */
   this.disconnect = function(listener) {
-    return this._disconnect(listener);
+    console.warn('DEPRECATED: Use EventEmitter.off(listener) instead.');
+    return _disconnect.call(this, listener);
   };
 
   /**
-   * Subscribe a listener to a event.
+   * Subscribe a listener to an event.
    *
    * @param {String} event
    * @param {Function} method
@@ -221,7 +97,7 @@ EventEmitter.Prototype = function() {
     if (arguments.length === 4) {
       priority = options.priority || priority;
     }
-    this._on(event, method, context, priority);
+    _on.call(this, event, method, context, priority);
     this.__events__[event].sort(byPriorityDescending);
   };
 
@@ -235,11 +111,143 @@ EventEmitter.Prototype = function() {
    */
   this.off = function(event, method, context) {
     /* jshint unused:false */
-    // TODO: we could add sugar to be able to be able to just use
-    // emitter.off('event', this)
-    // i.e., without need to specify the handler again
-    return this._off.apply(this, arguments);
+    if (arguments.length === 1 && isObject(arguments[0])) {
+      _disconnect.call(this, arguments[0]);
+    } else {
+      _off.apply(this, arguments);
+    }
   };
+
+  function validateMethod(method, context) {
+    // Validate method and context
+    if (typeof method === 'string') {
+      // Validate method
+      if (context === undefined || context === null) {
+        throw new Error( 'Method name "' + method + '" has no context.' );
+      }
+      if (!(method in context)) {
+        // Technically the method does not need to exist yet: it could be
+        // added before call time. But this probably signals a typo.
+        throw new Error( 'Method not found: "' + method + '"' );
+      }
+      if (typeof context[method] !== 'function') {
+        // Technically the property could be replaced by a function before
+        // call time. But this probably signals a typo.
+        throw new Error( 'Property "' + method + '" is not a function' );
+      }
+    } else if (typeof method !== 'function') {
+      throw new Error( 'Invalid callback. Function or method name expected.' );
+    }
+  }
+
+  /**
+   * Internal implementation for registering a listener.
+   *
+   * @param {String} event
+   * @param {Function} method
+   * @param {Object} context
+   * @private
+   */
+  function _on(event, method, context, priority) {
+    /*jshint validthis:true */
+    var bindings;
+    validateMethod( method, context );
+    if (this.__events__.hasOwnProperty(event)) {
+      bindings = this.__events__[event];
+    } else {
+      // Auto-initialize bindings list
+      bindings = this.__events__[event] = [];
+    }
+    // Add binding
+    bindings.push({
+      method: method,
+      context: context || null,
+      priority: priority
+    });
+    return this;
+  }
+
+  /**
+   * Remove a listener.
+   *
+   * @param {String} event
+   * @param {Function} method
+   * @param {Object} context
+   * @private
+   */
+  function _off(event, method, context) {
+    /*jshint validthis:true */
+    var i, bindings;
+    if ( arguments.length === 1 ) {
+      // Remove all bindings for event
+      delete this.__events__[event];
+      return this;
+    }
+    validateMethod( method, context );
+    if ( !( event in this.__events__ ) || !this.__events__[event].length ) {
+      // No matching bindings
+      return this;
+    }
+    // Default to null context
+    if ( arguments.length < 3 ) {
+      context = null;
+    }
+    // Remove matching handlers
+    bindings = this.__events__[event];
+    i = bindings.length;
+    while ( i-- ) {
+      if ( bindings[i].method === method && bindings[i].context === context ) {
+        bindings.splice( i, 1 );
+      }
+    }
+    // Cleanup if now empty
+    if ( bindings.length === 0 ) {
+      delete this.__events__[event];
+    }
+    return this;
+  }
+
+  /**
+   * Internal implementation of connect.
+   *
+   * @private
+   */
+  function _connect(obj, methods, options) {
+    /*jshint validthis:true */
+    var priority = 0;
+    if (arguments.length === 3) {
+      priority = options.priority || priority;
+    }
+    for ( var event in methods ) {
+      var method = methods[event];
+      _on.call(this,event, method, obj, priority);
+    }
+    this.__events__[event].sort(byPriorityDescending);
+    return this;
+  }
+
+  /**
+   * Internal implementation of disconnect.
+   *
+   * @private
+   */
+  function _disconnect(context) {
+    /*jshint validthis:true */
+    var i, event, bindings;
+    // Remove all connections to the context
+    for ( event in this.__events__ ) {
+      bindings = this.__events__[event];
+      i = bindings.length;
+      while ( i-- ) {
+        // bindings[i] may have been removed by the previous step's
+        // this.off so check it still exists
+        if ( bindings[i] && bindings[i].context === context ) {
+          _off.call(this, event, bindings[i].method, context );
+        }
+      }
+    }
+    return this;
+  }
 
   this._debugEvents = function() {
     console.log('### EventEmitter: ', this);

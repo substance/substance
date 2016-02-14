@@ -4,6 +4,7 @@ require('../qunit_extensions');
 var sinon = require('sinon');
 var extend = require('lodash/extend');
 var DocumentSession = require('../../../model/DocumentSession');
+var Selection = require('../../../model/Selection');
 var simple = require('../../fixtures/simple');
 
 QUnit.module('model/DocumentSession');
@@ -15,19 +16,24 @@ QUnit.test("Transaction: before and after state.", function(assert) {
   doc.on('document:changed', function(_change) {
     change = _change;
   });
-  var beforeState = { selection: 'foo', some: "other" };
-  var afterState = { selection: 'bar' };
+  var beforeState = {
+    selection: doc.createSelection(['p1', 'content'], 1),
+    some: "other"
+  };
+  var afterState = {
+    selection: doc.createSelection(['p1', 'content'], 2)
+  };
   docSession.transaction(function(tx, args) {
     extend(tx.before, beforeState);
     tx.create({ type: 'paragraph', id: 'bla', content: ""});
-    args.selection = 'bar';
+    args.selection = doc.createSelection(['p1', 'content'], 2);
     return args;
   });
   assert.ok(change !== null, "Change should be applied.");
   assert.ok(change.before !== null, "Change should have before state.");
   assert.ok(change.after !== null, "Change should have after state.");
   assert.deepEqual(change.before, beforeState, "Change.before should be the same.");
-  assert.equal(change.after.selection, afterState.selection, "Change.after.selection should be set correctly.");
+  assert.ok(change.after.selection.equals(afterState.selection), "Change.after.selection should be set correctly.");
   assert.equal(change.after.some, beforeState.some, "Not updated state variables should be forwarded.");
 });
 
@@ -59,6 +65,25 @@ QUnit.test("Undoing and redoing a change.", function(assert) {
   docSession.redo();
   assert.equal(doc.get(['p1', 'content']), '012XXX3456789', 'Text should have been changed again.');
 });
+
+QUnit.test("Selections after undo/redo.", function(assert) {
+  var doc = simple();
+  var docSession = new DocumentSession(doc);
+  var path = ['p1', 'content'];
+  docSession.setSelection(Selection.create(path, 3));
+  docSession.transaction(function(tx, args) {
+    tx.update(path, { insert: {offset: 3, value: "XXX"} });
+    args.selection = Selection.create(path, 6);
+    return args;
+  });
+  docSession.undo();
+  var sel = docSession.getSelection();
+  assert.ok(sel.equals(Selection.create(path, 3)), 'Selection should be set correctly after undo.');
+  docSession.redo();
+  sel = docSession.getSelection();
+  assert.ok(sel.equals(Selection.create(path, 6)), 'Selection should be set correctly after redo.');
+});
+
 
 QUnit.test("Undoing and redoing a change after external change.", function(assert) {
   var doc = simple();

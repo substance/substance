@@ -1,10 +1,6 @@
 'use strict';
 
 var each = require('lodash/each');
-var isEqual = require('lodash/isEqual');
-var isArray = require('lodash/isArray');
-var isObject = require('lodash/isObject');
-var isString = require('lodash/isString');
 var EventEmitter = require('../util/EventEmitter');
 var DocumentIndex = require('./DocumentIndex');
 var AnnotationIndex = require('./AnnotationIndex');
@@ -13,11 +9,7 @@ var DocumentChange = require('./DocumentChange');
 var PathEventProxy = require('./PathEventProxy');
 var IncrementalData = require('./data/IncrementalData');
 var DocumentNodeFactory = require('./DocumentNodeFactory');
-var Coordinate = require('./Coordinate');
-var Range = require('./Range');
 var Selection = require('./Selection');
-var PropertySelection = require('./PropertySelection');
-var ContainerSelection = require('./ContainerSelection');
 var docHelpers = require('./documentHelpers');
 
 var __id__ = 0;
@@ -89,9 +81,7 @@ function Document(schema) {
 
   // Note: using the general event queue (as opposed to calling _updateEventProxies from within _notifyChangeListeners)
   // so that handler priorities are considered correctly
-  this.connect(this, {
-    'document:changed': this._updateEventProxies
-  });
+  this.on('document:changed', this._updateEventProxies, this);
 }
 
 Document.Prototype = function() {
@@ -360,48 +350,7 @@ Document.Prototype = function() {
 
   */
   this.createSelection = function() {
-    var coor, range;
-    if (arguments.length === 1 && arguments[0] === null) {
-      return Selection.nullSelection;
-    }
-    var sel;
-    if (arguments[0] instanceof Coordinate) {
-      coor = arguments[0];
-      sel = new PropertySelection(coor.start.path, coor.start.offset, coor.end.offset, false);
-    } else if (arguments[0] instanceof Range) {
-      range = arguments[0];
-      if (isEqual(range.start.path, range.end.path)) {
-        sel = new PropertySelection(range.start.path, range.start.offset, range.end.offset, range.reverse);
-      } else {
-        sel = new ContainerSelection(range.containerId, range.start, range.end, range.isReverse);
-      }
-    } else if (arguments.length === 1 && isObject(arguments[0])) {
-      var json = arguments[0];
-      switch(json.type) {
-        case 'property':
-          sel = new PropertySelection.fromJSON(json);
-          break;
-        case 'container':
-          sel = new ContainerSelection.fromJSON(json);
-          break;
-        default:
-          throw new Error('Unsupported selection type', json.type);
-      }
-    }
-    // createSelection(startPath, startOffset)
-    else if (arguments.length === 2 && isArray(arguments[0])) {
-      sel = new PropertySelection(arguments[0], arguments[1], arguments[1]);
-    }
-    // createSelection(startPath, startOffset, endOffset)
-    else if (arguments.length === 3 && isArray(arguments[0])) {
-      sel = new PropertySelection(arguments[0], arguments[1], arguments[2]);
-    }
-    // createSelection(containerId, startPath, startOffset, endPath, endOffset)
-    else if (arguments.length === 5 && isString(arguments[0])) {
-      sel = new ContainerSelection(arguments[0], arguments[1], arguments[2], arguments[3], arguments[4]);
-    } else {
-      throw new Error('Illegal arguments for Document.createSelection().');
-    }
+    var sel = Selection.create.apply(null, arguments);
     sel.attach(this);
     return sel;
   };

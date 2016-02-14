@@ -239,28 +239,28 @@ VirtualDOMElement.Prototype = function() {
   };
 
   this.append = function() {
+    this._append(this.children, arguments);
+    return this;
+  };
+
+  this._append = function(outlet, args) {
     var children;
-    var _children = this.children;
-    if (arguments.length === 1) {
-      var child = arguments[0];
-      if (!child) {
-        return this;
-      }
+    if (args.length > 1) {
+      children = Array.prototype.slice.call(args,0);
+      VirtualDOMElement.prepareChildren(children);
+      Array.prototype.push.apply(outlet, children);
+    } else {
+      var child = args[0];
       if (isArray(child)) {
         children = child;
         VirtualDOMElement.prepareChildren(children);
-        Array.prototype.push.apply(_children, children);
+        Array.prototype.push.apply(outlet, children);
       } else if (isString(child)) {
-        _children.push(new VirtualTextNode(child));
+        outlet.push(new VirtualTextNode(child));
       } else {
-        _children.push(child);
+        outlet.push(child);
       }
-    } else {
-      children = Array.prototype.slice.call(arguments,0);
-      VirtualDOMElement.prepareChildren(children);
-      Array.prototype.push.apply(_children, children);
     }
-    return this;
   };
 
   this.insertAt = function(pos, child) {
@@ -324,6 +324,10 @@ VirtualDOMElement.Prototype = function() {
 
   this.removeEventListener = function(eventName) {
     delete this.handlers[eventName];
+  };
+
+  this.outlet = function(name) {
+    return new Outlet(this, name);
   };
 
   this._compile = function() {
@@ -574,5 +578,30 @@ VirtualDOMElement.createElement = function() {
 VirtualDOMElement.$$ = VirtualDOMElement.createElement;
 VirtualDOMElement.VirtualTextNode = VirtualTextNode;
 VirtualDOMElement.RawHtml = RawHtml;
+
+function Outlet(virtualEl, name) {
+  this.virtualEl = virtualEl;
+  this.name = name;
+  Object.freeze(this);
+}
+
+Outlet.prototype._getOutlet = function() {
+  var outlet = this.virtualEl.props[this.name];
+  if (!outlet) {
+    outlet = [];
+    this.virtualEl.props[this.name] = outlet;
+  }
+  return outlet;
+};
+
+Outlet.prototype.append = function() {
+  var outlet = this._getOutlet();
+  this.virtualEl._append(outlet, arguments);
+  return this;
+};
+
+Outlet.prototype.empty = function() {
+  this.virtualEl.props[this.name] = [];
+};
 
 module.exports = VirtualDOMElement;

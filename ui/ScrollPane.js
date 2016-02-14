@@ -18,7 +18,7 @@ var $$ = Component.$$;
   @prop {ui/TOC} [toc] object that maintains table of content entries
 
   @example
-  
+
   ```js
   $$(ScrollPane, {
     scrollbarType: 'substance', // defaults to native
@@ -33,9 +33,7 @@ function ScrollPane() {
   Component.apply(this, arguments);
 
   if (this.props.highlights) {
-    this.props.highlights.connect(this, {
-      'highlights:updated': this.onHighlightsUpdated
-    });
+    this.props.highlights.on('highlights:updated', this.onHighlightsUpdated, this);
   }
 }
 
@@ -43,17 +41,15 @@ ScrollPane.Prototype = function() {
   this.didMount = function() {
     // HACK: Scrollbar should use DOMMutationObserver instead
     if (this.refs.scrollbar) {
-      this.context.doc.connect(this, {
-        'document:changed': this.onDocumentChange
-      }, -1);      
+      this.context.doc.on('document:changed', this.onDocumentChange, this, { priority: -1 });
     }
   };
 
   this.dispose = function() {
     if (this.props.highlights) {
-      this.props.highlights.disconnect(this);
+      this.props.highlights.off(this);
     }
-    this.context.doc.disconnect(this);
+    this.context.doc.off(this);
   };
 
   // HACK: Scrollbar should use DOMMutationObserver instead
@@ -61,7 +57,7 @@ ScrollPane.Prototype = function() {
       this.refs.scrollbar.updatePositions();
   };
 
-  this.onHighlightsUpdated = function(highlights) {    
+  this.onHighlightsUpdated = function(highlights) {
     this.refs.scrollbar.extendProps({
       highlights: highlights
     });
@@ -88,7 +84,7 @@ ScrollPane.Prototype = function() {
         }).ref('scrollbar')
           .attr('id', 'content-scrollbar')
       );
-      
+
       // Scanline is debugging purposes, display: none by default.
       el.append(
         $$('div').ref("scanline").addClass('se-scanline')
@@ -161,7 +157,7 @@ ScrollPane.Prototype = function() {
   /**
     Get offset relative to `.se-content`.
 
-    @param {DOMNode} el DOM node that lives inside the 
+    @param {DOMNode} el DOM node that lives inside the
   */
   this.getPanelOffsetForElement = function(el) {
     // initial offset

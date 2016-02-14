@@ -1,3 +1,4 @@
+/* jshint latedef:nofunc */
 'use strict';
 
 var extend = require('lodash/extend');
@@ -8,70 +9,18 @@ var $$ = Component.$$;
 
 var SurfaceTool = require('../../ui/SurfaceTool');
 
-function EditLinkPrompt() {
-  Component.apply(this, arguments);
-}
-
-EditLinkPrompt.Prototype = function() {
-
-  this.onSave = function(e) {
-    e.preventDefault();
-    this.props.tool.updateLink({
-      url: this.refs.url.$el.val()
-    });
-  };
-
-  // Tried setting .htmlProp('autofocus', true) in render
-  // But this only worked for the first time
-  this.didMount = function() {
-    var input = this.refs.url;
-    setTimeout(function() {
-      input.focus();
-    });
-  };
-
-  this.onDelete = function(e) {
-    e.preventDefault();
-    this.props.tool.deleteLink();
-  };
-
-  this.render = function() {
-    var link = this.props.link;
-    var el = $$('div').addClass('se-prompt');
-
-    el.append([
-      $$('div').addClass('se-prompt-title').append(this.i18n.t('hyperlink')),
-      $$('input').attr({type: 'text', placeholder: 'http://your-website.com', value: link.url})
-                 .ref('url')
-                 // This only works on the first load. Why?
-                 // Is this element even preserved when unmounted and rerendered?
-                 .htmlProp('autofocus', true)
-                 .on('change', this.onSave),
-      $$('a').attr({href: '#'})
-             .addClass('se-delete-link')
-             .append(this.i18n.t('delete'))
-             .on('click', this.onDelete)
-    ]);
-    return el;
-  };
-};
-
-Component.extend(EditLinkPrompt);
-
 function LinkTool() {
   SurfaceTool.apply(this, arguments);
 
   var ctrl = this.getController();
-  ctrl.connect(this, {
-    'command:executed': this.onCommandExecuted
-  });
+  ctrl.on('command:executed', this.onCommandExecuted, this);
 }
 
 LinkTool.Prototype = function() {
 
   this.dispose = function() {
     var ctrl = this.getController();
-    ctrl.disconnect(this);
+    ctrl.off(this);
   };
 
   this.onCommandExecuted = function(info, commandName) {
@@ -157,5 +106,56 @@ SurfaceTool.extend(LinkTool);
 
 LinkTool.static.name = 'link';
 LinkTool.static.command = 'link';
+
+function EditLinkPrompt() {
+  Component.apply(this, arguments);
+}
+
+EditLinkPrompt.Prototype = function() {
+
+  // Tried setting .htmlProp('autofocus', true) in render
+  // But this only worked for the first time
+  this.didMount = function() {
+    var input = this.refs.url;
+    setTimeout(function() {
+      input.focus();
+    });
+  };
+
+  this.render = function() {
+    var link = this.props.link;
+    var el = $$('div').addClass('se-prompt');
+
+    el.append([
+      $$('div').addClass('se-prompt-title').append(this.i18n.t('hyperlink')),
+      $$('input').attr({type: 'text', placeholder: 'http://your-website.com', value: link.url})
+                 .ref('url')
+                 // This only works on the first load. Why?
+                 // Is this element even preserved when unmounted and rerendered?
+                 .htmlProp('autofocus', true)
+                 .on('change', this.onSave),
+      $$('a').attr({href: '#'})
+             .addClass('se-delete-link')
+             .append(this.i18n.t('delete'))
+             .on('click', this.onDelete)
+    ]);
+    return el;
+  };
+
+  this.onSave = function(e) {
+    e.preventDefault();
+    this.props.tool.updateLink({
+      url: this.refs.url.$el.val()
+    });
+  };
+
+  this.onDelete = function(e) {
+    e.preventDefault();
+    this.props.tool.deleteLink();
+  };
+
+};
+
+Component.extend(EditLinkPrompt);
 
 module.exports = LinkTool;

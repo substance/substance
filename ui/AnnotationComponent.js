@@ -5,20 +5,20 @@ var $$ = Component.$$;
 
 /**
   Renders an annotation. Used internally by different components (e.g. ui/AnnotatedTextComponent)
-  
+
   @class
   @component
   @extends ui/Component
-  
+
   @prop {Object} doc document
   @prop {Object} node node which describes annotation
 
   @example
 
   ```js
-  $$(AnnotationComponent, { 
-    doc: doc, 
-    node: node 
+  $$(AnnotationComponent, {
+    doc: doc,
+    node: node
   })
   ```
 */
@@ -47,14 +47,12 @@ AnnotationComponent.Prototype = function() {
 
   this.didMount = function() {
     var node = this.props.node;
-    node.connect(this, {
-      'highlighted': this.onHighlightedChanged
-    });
+    node.on('highlighted', this.onHighlightedChanged, this);
   };
 
   this.dispose = function() {
     var node = this.props.node;
-    node.disconnect(this);
+    node.off(this);
   };
 
   this.onHighlightedChanged = function() {
