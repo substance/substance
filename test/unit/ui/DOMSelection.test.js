@@ -351,7 +351,7 @@ QUnit.uiTest("Issue #376: Wrong selection mapping at end of paragraph", function
   assert.deepEqual(range.end.offset, 0, 'endOffset');
 });
 
-QUnit.uiTest("Mapping a ContainerSelection to the DOM", function(assert) {
+QUnit.webkitTest("Mapping a ContainerSelection to the DOM", function(assert) {
   var el = $('#qunit-fixture').html(surfaceWithParagraphs)[0];
   var domSelection = new DOMSelection(new StubSurface(el));
   var sel = new ContainerSelection('main', ['p1', 'content'], 1, ['p2', 'content'], 1);

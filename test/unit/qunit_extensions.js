@@ -52,6 +52,13 @@ QUnit.firefoxTest = function() {
   }
 };
 
+QUnit.webkitTest = function() {
+  if (inBrowser && platform.isWebkit) {
+    QUnit.test.apply(QUnit.test, arguments);
+  }
+};
+
+
 if (inBrowser) {
   // log errors into the console because there source maps are considered
   QUnit.log(function(details) {
