@@ -168,3 +168,23 @@ QUnit.test("Two subsequent inline nodes.", function(assert) {
   var html = _render(TEXT, annos);
   assert.equal(html, 'ABC<a>D</a><b>E</b>FGHI');
 });
+
+QUnit.test("Collapsed annotation.", function(assert) {
+  var annos = [
+    new Anno('a', 'a1', 0, 0, {
+    })
+  ];
+  var html = _render(TEXT, annos);
+  assert.equal(html, '<a></a>ABCDEFGHI');
+});
+
+QUnit.test("Two collapsed annotations.", function(assert) {
+  var annos = [
+    new Anno('a', 'a1', 0, 0, {
+    }),
+    new Anno('b', 'b2', 0, 0, {
+    })
+  ];
+  var html = _render(TEXT, annos);
+  assert.equal(html, '<a></a><b></b>ABCDEFGHI');
+});

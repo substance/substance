@@ -20,6 +20,9 @@ var platform = {
   */
 
   isFF: false,
+
+  isWebkit: false,
+
   /*
     Major version
 
@@ -59,6 +62,9 @@ if (typeof window !== 'undefined') {
 
   // Detect Firefox
   platform.isFF = window.navigator.userAgent.toLowerCase().indexOf('firefox') > -1;
+
+  // TODO: explicit detection of Webkit&/Blink
+  platform.isWebkit = !platform.isFF && !platform.isIE;
 }
 
 module.exports = platform;

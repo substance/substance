@@ -1,10 +1,14 @@
 "use strict";
 
+/* jshint latedef:nofunc */
+
 require('../qunit_extensions');
 
 var isArray = require('lodash/isArray');
 var DOMSelection = require('../../../ui/DOMSelection');
+var TextPropertyComponent = require('../../../ui/TextPropertyComponent');
 var Document = require('../../../model/Document');
+var ContainerSelection = require('../../../model/ContainerSelection');
 var $ = require('../../../util/jquery');
 
 QUnit.uiModule('ui/DOMSelection');
@@ -22,20 +26,45 @@ StubDoc.prototype.get = function(path) {
   }
   return el.textContent;
 };
+
 StubDoc.prototype.createSelection = Document.prototype.createSelection;
 
-function StubSurface(el) {
+function StubSurface(el, containerId) {
   this.el = el;
   this.doc = new StubDoc();
+  this.containerId = containerId;
 
   this.getDocument = function() {
     return this.doc;
   };
 
   this.isContainerEditor = function() {
-    return false;
+    return !!this.containerId;
   };
 
+  this.getContainerId = function() {
+    return this.containerId;
+  };
+
+  this._getTextPropertyComponent = function(path) {
+    var pathStr = path;
+    if (isArray(path)) {
+      pathStr = path.join('.');
+    }
+    var el = window.document.body.querySelector('*[data-path="'+pathStr+'"]');
+    if (!el) {
+      return null;
+    }
+    return new StubTextPropertyComponent(el);
+  };
+}
+
+function StubTextPropertyComponent(el) {
+  this.el = el;
+
+  this.getDOMCoordinate = TextPropertyComponent.prototype.getDOMCoordinate;
+
+  this._getDOMCoordinate = TextPropertyComponent.prototype._getDOMCoordinate;
 }
 
 // Fixtures
@@ -320,4 +349,36 @@ QUnit.uiTest("Issue #376: Wrong selection mapping at end of paragraph", function
   assert.deepEqual(range.start.offset, 2, 'startOffset');
   assert.deepEqual(range.end.path, ['p2', 'content'], 'endPath');
   assert.deepEqual(range.end.offset, 0, 'endOffset');
+});
+
+QUnit.webkitTest("Mapping a ContainerSelection to the DOM", function(assert) {
+  var el = $('#qunit-fixture').html(surfaceWithParagraphs)[0];
+  var domSelection = new DOMSelection(new StubSurface(el));
+  var sel = new ContainerSelection('main', ['p1', 'content'], 1, ['p2', 'content'], 1);
+  var p1span = $(el).find('#p1 span');
+  var p2span = $(el).find('#p2 span');
+  var p1Text = p1span[0].firstChild;
+  var p2Text = p2span[0].firstChild;
+  domSelection.setSelection(sel);
+  var wSel = window.getSelection();
+  assert.equal(wSel.anchorNode, p1Text, 'anchorNode should be in first paragraph.');
+  assert.equal(wSel.anchorOffset, 1, 'anchorOffset should be correct.');
+  assert.equal(wSel.focusNode, p2Text, 'focusNode should be in second paragraph.');
+  assert.equal(wSel.focusOffset, 1, 'focusOffset should be correct.');
+});
+
+QUnit.uiTest("Mapping a ContainerSelection from DOM to model", function(assert) {
+  var el = $('#qunit-fixture').html(surfaceWithParagraphs)[0];
+  var domSelection = new DOMSelection(new StubSurface(el, 'main'));
+  var p1span = el.querySelector('#p1 span');
+  var p2span = el.querySelector('#p2 span');
+  var p1Text = p1span.firstChild;
+  var p2Text = p2span.firstChild;
+  QUnit.setDOMSelection(p1Text, 1, p2Text, 2);
+  var sel = domSelection.getSelection(sel);
+  assert.ok(sel.isContainerSelection(), 'Should be a container selection.');
+  assert.deepEqual(sel.startPath, ['p1', 'content'], 'startPath should be correct.');
+  assert.equal(sel.startOffset, 1, 'startOffset should be correct.');
+  assert.deepEqual(sel.endPath, ['p2', 'content'], 'endPath should be correct.');
+  assert.equal(sel.endOffset, 2, 'endOffset should be correct.');
 });

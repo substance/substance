@@ -71,18 +71,30 @@ DOMSelection.Prototype = function() {
       }
       end = endComp.getDOMCoordinate(sel.endOffset);
     }
+    // console.log('mapped to DOM coordinates', start.container, start.offset, end.container, end.offset, 'isReverse?', sel.isReverse());
     // if there is a range then set replace the window selection accordingly
     wSel.removeAllRanges();
     var wRange = window.document.createRange();
-    if (sel.isReverse()) {
-      wRange.setStart(end.container, end.offset);
-      wSel.addRange(wRange);
-      wSel.extend(start.container, start.offset);
-    } else {
+    if (sel.isCollapsed()) {
       wRange.setStart(start.container, start.offset);
-      wRange.setEnd(end.container, end.offset);
       wSel.addRange(wRange);
+    } else {
+      if (sel.isReverse()) {
+        // console.log('DOMSelection: rendering a reverse selection.');
+        var tmp = start;
+        start = end;
+        end = tmp;
+      }
+      // HACK: using wRange setEnd does not work reliably
+      // so we set just the start anchor
+      // and then use window.Selection.extend()
+      // unfortunately we are not able to test this behavior as it needs
+      // triggering native keyboard events
+      wRange.setStart(start.container, start.offset);
+      wSel.addRange(wRange);
+      wSel.extend(end.container, end.offset);
     }
+    // console.log('DOMSelection.setSelection()', 'anchorNode:', wSel.anchorNode, 'anchorOffset:', wSel.anchorOffset, 'focusNode:', wSel.focusNode, 'focusOffset:', wSel.focusOffset, 'collapsed:', wSel.collapsed);
   };
 
   /*
@@ -123,7 +135,7 @@ DOMSelection.Prototype = function() {
     } else {
       range = this._getRange(wSel.anchorNode, wSel.anchorOffset, wSel.focusNode, wSel.focusOffset);
     }
-    // console.log('### extracted range from DOM', range.toString);
+    // console.log('### extracted range from DOM', range.toString());
     return range;
   };
 
