@@ -177,7 +177,7 @@ Fragmenter.Prototype = function() {
       var closer = closers[idx2];
       if (opener && closer) {
         // close before open
-        if (closer.pos <= opener.pos) {
+        if (closer.pos <= opener.pos && closer.opener !== opener) {
           entries[idx] = closer;
           idx++; idx2++;
         } else {
