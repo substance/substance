@@ -355,11 +355,11 @@ QUnit.uiTest("Mapping a ContainerSelection to the DOM", function(assert) {
   var el = $('#qunit-fixture').html(surfaceWithParagraphs)[0];
   var domSelection = new DOMSelection(new StubSurface(el));
   var sel = new ContainerSelection('main', ['p1', 'content'], 1, ['p2', 'content'], 1);
+  var p1span = $(el).find('#p1 span');
+  var p2span = $(el).find('#p2 span');
+  var p1Text = p1span[0].firstChild;
+  var p2Text = p2span[0].firstChild;
   domSelection.setSelection(sel);
-  var p1span = el.querySelector('#p1 span');
-  var p2span = el.querySelector('#p2 span');
-  var p1Text = p1span.firstChild;
-  var p2Text = p2span.firstChild;
   var wSel = window.getSelection();
   assert.equal(wSel.anchorNode, p1Text, 'anchorNode should be in first paragraph.');
   assert.equal(wSel.anchorOffset, 1, 'anchorOffset should be correct.');
