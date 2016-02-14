@@ -29,7 +29,7 @@ Range.Prototype = function() {
   };
 
   this.toString = function() {
-    var str = [this.start.toString(), '->', this.end.toString()]
+    var str = [this.start.toString(), '->', this.end.toString()];
     if (this.isReverse()) {
       str.push('(reverse)');
     }
