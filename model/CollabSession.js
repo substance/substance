@@ -6,7 +6,6 @@ var DocumentChange = require('./DocumentChange');
 var uuid = require('../util/uuid');
 var debounce = require('lodash/debounce');
 
-
 /*
   Session that is connected to a Substance Hub allowing
   collaboration in real-time.
@@ -19,7 +18,7 @@ var debounce = require('lodash/debounce');
            - resend same commit?
            - just include affected changes with the next regular commit?
 */
-function CollabSession(doc, ws, options) {
+function CollabSession(doc, options) {
   CollabSession.super.call(this, doc, options);
 
   options = options || {};
@@ -35,24 +34,75 @@ function CollabSession(doc, ws, options) {
   // TODO: Also we need to somehow store a version number (local version)
   this.doc.version = options.docVersion;
 
+  // Internal state
+  this._opened = false;
   this.nextCommit = null;
-  this.ws = ws;
-
-  this.ws.onopen = this._onConnected.bind(this);
-  this.ws.onmessage = this._onMessage.bind(this);
-
-  this._broadCastSelectionUpdateDebounced = debounce(this._broadCastSelectionUpdate, 250);
+  this._committing = false;
+  this._pendingCommit = null;
 
   // whenever a change of a new collaborator is received
   // we add a record here
   this.collaborators = {};
   this.sessionIdPool = [1,2,3,4,5,6,7,8,9,10];
-  this.start();
+
+  // Bind handlers
+  this._broadCastSelectionUpdateDebounced = debounce(this._broadCastSelectionUpdate, 250);
+
+  // this._onConnected = this._onConnected.bind(this);
+  this._onMessage = this._onMessage.bind(this);
 }
 
 CollabSession.Prototype = function() {
 
   var _super = Object.getPrototypeOf(this);
+
+  /*
+    Connect session with remote endpoint and loads the document
+
+    @param {WebSocket} ws a connected websocket.
+  */
+  this.open = function(ws) {
+    if (ws.readyState !== 1) { // 1 == WebSocket.OPEN
+      throw new Error('Websocket is not open yet');
+    }
+
+    // In the case of a reconnect (first remove the old handlers)
+    this.dispose();
+    this.ws = ws;
+    this.ws.addEventListener('message', this._onMessage);
+
+    var msg = ['open', this.doc.id, this.doc.version];
+    if (this.nextCommit) {
+      // This behaves like a commit
+      msg.push(this.serializeChange(this.nextCommit));
+      this._send(msg);
+      // In case of a reconnect we need to set _opened back to false
+      this._opened = false;
+      this._afterCommit(this.nextCommit);
+    } else {
+      this._send(msg);
+    }
+  };
+
+  // Needed in the case of a reconnect or explicit close
+  this.dispose = function() {
+    if (this.ws) {
+      this.ws.removeEventListener('message', this._onMessage);  
+    }
+    // Reset to original state
+    this._opened = false;
+    this.nextCommit = null;
+    this._committing = false;
+    this._pendingCommit = null;
+  };
+
+  this.close = function() {
+    // Let the server know we no longer want to edit this document
+    var msg = ['close', this.doc.id, this.doc.version];
+    this._send(msg);
+    // And now dispose and deregister the handlers
+    this.dispose();
+  };
 
   /*
     Send local changes to the world.
@@ -68,7 +118,7 @@ CollabSession.Prototype = function() {
   };
 
   this.start = function() {
-    this._runner = setInterval(this.commit.bind(this), 500);
+    this._runner = setInterval(this.commit.bind(this), 1000);
   };
 
   this.stop = function() {
@@ -121,29 +171,10 @@ CollabSession.Prototype = function() {
   this.afterDocumentChange = function(change, info) {
     _super.afterDocumentChange.apply(this, arguments);
 
-    // Record local chagnes into nextCommit
+    // Record local changes into nextCommit
     if (!info.remote) {
       this._recordCommit(change);
     }
-  };
-
-  /*
-    As soon as we are connected we attempt to open a document
-  */
-  this._onConnected = function() {
-    console.log(this.ws.clientId, ': Opened connection. Attempting to open a doc session on the hub.');
-    // TODO: we could provide a pending change, then we can reuse
-    // the 'oncommit' behavior of the server providing rebased changes
-    // This needs to be thought through...
-    var pendingChange = null;
-    if (pendingChange) {
-      this._committing = true;
-    }
-    var msg = ['open', this.doc.id, this.doc.version];
-    if (pendingChange) {
-      msg.push(this.serializeChange(pendingChange));
-    }
-    this._send(msg);
   };
 
   /*
@@ -285,7 +316,14 @@ CollabSession.Prototype = function() {
     }
     this.doc.version = serverVersion;
     console.log(this.ws.clientId, ': Open complete. Listening for remote changes ...');
-    this.emit('connected');
+    this._opened = true;
+    this.emit('opened');
+    // Now we start to periodically push local changes to remote
+    this.start();
+  };
+
+  this.isOpen = function() {
+    return this._opened;
   };
 
   /*
