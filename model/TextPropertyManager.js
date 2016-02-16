@@ -103,7 +103,8 @@ TextPropertyManager.Prototype = function() {
     var path = property.getPath();
     var record = this.records[path];
     if (record && record.property && record.property !== property) {
-      throw new Error('Property already registered.');
+      console.error('FIXME: Property already registered.');
+      return;
     }
     if (!record) {
       record = new Record(path);

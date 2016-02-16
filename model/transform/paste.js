@@ -189,12 +189,15 @@ function _pasteDocument(tx, args) {
 
   // set a new selection
   var lastPath = container.getLastPath(last(insertedNodes));
-  var lastLength = tx.get(lastPath).length;
-  selection = tx.createSelection({
-    type: 'property',
-    path: lastPath,
-    startOffset: lastLength
-  });
+  if (lastPath) {
+    var lastProp = tx.get(lastPath);
+    var lastLength = lastProp.length;
+    selection = tx.createSelection({
+      type: 'property',
+      path: lastPath,
+      startOffset: lastLength
+    });
+  }
   args.selection = selection;
   return args;
 }

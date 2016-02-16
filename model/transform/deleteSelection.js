@@ -17,7 +17,7 @@ var updateAnnotations = require('./updateAnnotations');
   @return {Object} with updated `selection`
 
   @example
-  
+
   ```js
   deleteSelection(tx, {
     selection: bodyEditor.getSelection(),
@@ -31,9 +31,11 @@ function deleteSelection(tx, args) {
     args = deleteCharacter(tx, args);
   } else if (selection.isPropertySelection()) {
     args = _deletePropertySelection(tx, args);
-  } else {
+  } else if (selection.isContainerSelection()) {
     // deal with container deletes
     args = _deleteContainerSelection(tx, args);
+  } else if (selection.isNodeSelection()) {
+    args = _deleteNodeSelection(tx, args);
   }
   return args;
 }
@@ -152,6 +154,19 @@ function _deleteContainerSelection(tx, args) {
       startOffset: 0
     });
   }
+  return args;
+}
+
+function _deleteNodeSelection(tx, args) {
+  var sel = args.selection;
+  var containerId = args.containerId;
+  var container = tx.get(containerId);
+  var nodeId = sel.nodeId;
+  if (container) {
+    container.hide(nodeId);
+    tx.delete(nodeId);
+  }
+  args.selection = null;
   return args;
 }
 

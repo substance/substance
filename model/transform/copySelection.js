@@ -2,7 +2,6 @@
 
 'use strict';
 
-var isEqual = require('lodash/lang/isEqual');
 var cloneDeep = require('lodash/lang/cloneDeep');
 var each = require('lodash/collection/each');
 var annotationHelpers = require('../annotationHelpers');
@@ -17,18 +16,22 @@ var CLIPBOARD_PROPERTY_ID = "clipboard_property";
   @return {Object} with a `doc` property that has a fresh doc with the copied content
 */
 
-function copySelection(doc, args) {
+function copySelection(tx, args) {
   var selection = args.selection;
   if (selection.isNull()) {
     args.doc = null;
   }
   // return a simplified version if only a piece of text is selected
-  else if (selection.isPropertySelection() || isEqual(selection.start.path, selection.end.path)) {
-    args.doc = _copyPropertySelection(doc, selection);
+  else if (selection.isPropertySelection()) {
+    args.doc = _copyPropertySelection(tx, selection);
   }
   else if (selection.isContainerSelection()) {
-    args.doc = _copyContainerSelection(doc, selection);
-  } else {
+    args.doc = _copyContainerSelection(tx, selection);
+  }
+  else if (selection.isNodeSelection()) {
+    args.doc = _copyNodeSelection(tx, args);
+  }
+  else {
     console.error('Copy is not yet supported for selection type.');
     args.doc = null;
   }
@@ -146,6 +149,22 @@ function _copyContainerSelection(doc, selection) {
       break;
     }
   }
+  return copy;
+}
+
+function _copyNodeSelection(tx, args) {
+  var copy = tx.newInstance();
+  var sel = args.selection;
+  var nodeId = sel.nodeId;
+  // create a new container
+  var container = copy.create({
+    type: 'container',
+    id: CLIPBOARD_CONTAINER_ID,
+    nodes: []
+  });
+  var node = tx.get(nodeId);
+  node = copy.create(node.toJSON());
+  container.show(node.id);
   return copy;
 }
 

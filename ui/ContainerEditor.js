@@ -146,6 +146,34 @@ ContainerEditor.Prototype = function() {
     }
   };
 
+  this.onDrop = function(event) {
+    event.preventDefault();
+    event.stopPropagation();
+
+    var draggedSelection = this._draggedSelection;
+    this._draggedSelection = null;
+
+    if (!draggedSelection || draggedSelection.isNull() || draggedSelection.isCollapsed()) {
+      // nothing to do
+      return;
+    }
+    var insertSel = this.getSelectionFromEvent(event);
+    // console.log('### inserting at', insertSel);
+    if (insertSel && !insertSel.isNull()) {
+      this.transaction(function(tx, args) {
+        args.selection = draggedSelection;
+        args.containerId = this.getContainerId();
+        args = copySelection(tx, args);
+        deleteSelection(tx, args);
+        // TODO: we need to transform the original insert selection
+        // because it might have been affected by the deletion above
+        args.selection = insertSel;
+        args = paste(tx, args);
+        return args;
+      }.bind(this));
+    }
+  };
+
   /**
     Register custom editor behavior using this method
   */

@@ -45,6 +45,10 @@ Selection.Prototype = function() {
     return false;
   };
 
+  this.isNodeSelection = function() {
+    return false;
+  };
+
   /**
     @returns {Boolean} true when selection is collapsed
   */

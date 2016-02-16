@@ -9,8 +9,10 @@ var Component = require('./Component');
 var Clipboard = require('./Clipboard');
 var $$ = Component.$$;
 var $ = require('../util/jquery');
-var copySelection = require('../model/transform/copySelection');
 var platform = require('../util/platform');
+var copySelection = require('../model/transform/copySelection');
+var deleteSelection = require('../model/transform/deleteSelection');
+var paste = require('../model/transform/paste');
 
 /**
    Abstract interface for editing components.
@@ -95,6 +97,7 @@ Surface.Prototype = function() {
 
       // disable drag'n'drop
       el.on('dragstart', this.onDragStart);
+      el.on('drop', this.onDrop);
 
       // we will react on this to render a custom selection
       el.on('focus', this.onNativeFocus);
@@ -319,10 +322,14 @@ Surface.Prototype = function() {
     this._setSelection(sel);
   };
 
-  this.setSelectionFromEvent = function(evt) {
+  this.getSelectionFromEvent = function(evt) {
     this.skipNextFocusEvent = true;
     var domRange = Surface.getDOMRangeFromEvent(evt);
-    var sel = this.surfaceSelection.getSelectionFromDOMRange(domRange);
+    return this.surfaceSelection.getSelectionFromDOMRange(domRange);
+  };
+
+  this.setSelectionFromEvent = function(evt) {
+    var sel = this.getSelectionFromEvent(evt);
     this.setSelection(sel);
   };
 
@@ -558,6 +565,11 @@ Surface.Prototype = function() {
   };
 
   this.onDragStart = function(event) {
+    event.preventDefault();
+    event.stopPropagation();
+  };
+
+  this.onDrop = function(event) {
     event.preventDefault();
     event.stopPropagation();
   };
