@@ -152,7 +152,8 @@ ContainerEditor.Prototype = function() {
 
   this.onDragStart = function(event) {
     // allow dragging here
-    this._draggedSelection = this.getSelection();
+    // this._draggedSelection = this.getSelection();
+    event.preventDefault();
     event.stopPropagation();
   };
 
