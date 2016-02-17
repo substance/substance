@@ -146,7 +146,29 @@ ContainerEditor.Prototype = function() {
     }
   };
 
+  this.onDragOver = function() {};
+
+  this.onDragEnter = function() {};
+
+  this.onDragStart = function(event) {
+    // allow dragging here
+    this._draggedSelection = this.getSelection();
+    event.stopPropagation();
+  };
+
+
   this.onDrop = function(event) {
+    // EXPERIMENTAL: if there was no-one who set the
+    // initial selection, we assume that the drop has been triggered
+    // via dropping a file from external
+    if (!this._draggedSelection) {
+      this.send('file:dropped', event);
+      event.preventDefault();
+      event.stopPropagation();
+      return;
+    };
+
+    // otherwise we stop the default ContentEditable behavior
     event.preventDefault();
     event.stopPropagation();
 
@@ -157,8 +179,13 @@ ContainerEditor.Prototype = function() {
       // nothing to do
       return;
     }
+
+    // we try to map the current cursor position to a model coordinate
     var insertSel = this.getSelectionFromEvent(event);
     // console.log('### inserting at', insertSel);
+
+    // and if succsessful, we cut out the original selection
+    // and paste the content at the new position.
     if (insertSel && !insertSel.isNull()) {
       this.transaction(function(tx, args) {
         args.selection = draggedSelection;

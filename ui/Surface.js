@@ -11,8 +11,6 @@ var $$ = Component.$$;
 var $ = require('../util/jquery');
 var platform = require('../util/platform');
 var copySelection = require('../model/transform/copySelection');
-var deleteSelection = require('../model/transform/deleteSelection');
-var paste = require('../model/transform/paste');
 
 /**
    Abstract interface for editing components.
@@ -97,6 +95,8 @@ Surface.Prototype = function() {
 
       // disable drag'n'drop
       el.on('dragstart', this.onDragStart);
+      el.on('dragover', this.onDragOver);
+      el.on('dragenter', this.onDragEnter);
       el.on('drop', this.onDrop);
 
       // we will react on this to render a custom selection
@@ -565,13 +565,23 @@ Surface.Prototype = function() {
   };
 
   this.onDragStart = function(event) {
+    /* jshint unused:false */
+    // event.preventDefault();
+    // event.stopPropagation();
+  };
+
+  this.onDragOver = function() {};
+
+  this.onDragEnter = function() {};
+
+  this.onDrop = function(event) {
+    console.log('TODO: implement drop', event);
     event.preventDefault();
     event.stopPropagation();
   };
 
-  this.onDrop = function(event) {
-    event.preventDefault();
-    event.stopPropagation();
+  this.isDragging = function() {
+    return !!this._draggedSelection;
   };
 
   this.onNativeBlur = function() {
