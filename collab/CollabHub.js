@@ -163,6 +163,11 @@ CollabHub.Prototype = function() {
       // TODO: we should send back some message to the client that there is no valid session
       if (err) throw new Error('No user session found for sessionToken', msg.sessionToken);
 
+      if (!userSession) {
+        console.error('An unauthenticated user sent a message. Ignoring... ', msg);
+        return;
+      }
+
       var change;
       switch(msg.type) {
         case 'open':

@@ -20,6 +20,11 @@ function HubClient(config) {
   this.__id__ = __id__++;
   this.config = config;
   this._onMessage = this._onMessage.bind(this);
+  
+  if (config.session) {
+    this._session = config.session;  
+  }
+  
   // Establish websocket connection
   this._initWebSocket();
 }
@@ -135,6 +140,10 @@ HubClient.Prototype = function() {
       this._session = hubSession;
       cb(null, hubSession);
     }.bind(this));
+  };
+
+  this.logout = function() {
+    this._session = null;
   };
 
   /*

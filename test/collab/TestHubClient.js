@@ -3,7 +3,6 @@ var HubClient = require('../../collab/HubClient');
 function TestHubClient(config) {
   TestHubClient.super.apply(this, arguments);
   this.ws = config.ws;
-  this._session = config.session;
 }
 
 TestHubClient.Prototype = function() {
