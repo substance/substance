@@ -2,12 +2,11 @@
   .se-cursor {
     outline: 1px solid #999;
 
-    &.sm-user-2 {
+    &.sm-collaborator-1 {
       outline-color: rgba(255, 147, 0, 1);
-      
     }
 
-    &.sm-user-3 {
+    &.sm-collaborator-2 {
       outline-color: rgba(192, 238, 204, 1);
     }
   }
@@ -15,11 +14,11 @@
   .se-selection-fragment {
     background-color: #ddd;
 
-    &.sm-user-2 {
+    &.sm-collaborator-1 {
       background: rgba(255, 147, 0, 0.6);
     }
 
-    &.sm-user-3 {
+    &.sm-collaborator-2 {
       background: rgba(192, 238, 204, 0.6);
     }
   }

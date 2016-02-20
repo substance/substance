@@ -1,6 +1,6 @@
 "use strict";
 
-var EventEmitter = require('./EventEmitter');
+var EventEmitter = require('../../util/EventEmitter');
 
 /**
   Websocket server implementation for client-side development of protocols

@@ -1,15 +1,15 @@
 "use strict";
 
-var EventEmitter = require('./EventEmitter');
-var uuid = require('./uuid');
+var EventEmitter = require('../../util/EventEmitter');
+var uuid = require('../../util/uuid');
 var __id__ = 0;
 
 /**
-  Simple WebSocket implementation for local testing
+  Simple TestWebSocket implementation for local testing
 */
 
-function WebSocket(messageQueue, clientId, serverId) {
-  WebSocket.super.apply(this);
+function TestWebSocket(messageQueue, clientId, serverId) {
+  TestWebSocket.super.apply(this);
 
   this.__id__ = __id__++;
   this.messageQueue = messageQueue;
@@ -19,10 +19,28 @@ function WebSocket(messageQueue, clientId, serverId) {
   this._isSimulated = true;
 }
 
-WebSocket.Prototype = function() {
+TestWebSocket.Prototype = function() {
 
   this.connect = function() {
     this.messageQueue.connectClientSocket(this);
+  };
+
+  /*
+    Emulating native addEventListener API
+  */
+  this.addEventListener = function(eventName, handler) {
+    if (this['on'+eventName]) {
+      // For simplicity we only support a single handler per event atm
+      console.warn('on'+eventName, ' is already set. Overriding handler.');
+    } 
+    this['on'+eventName] = handler;
+  };
+
+  /*
+    Emulating native removeEventListener API
+  */
+  this.removeEventListener = function(eventName, handler) {
+    delete this['on'+eventName];
   };
 
   /**
@@ -58,6 +76,6 @@ WebSocket.Prototype = function() {
 
 };
 
-EventEmitter.extend(WebSocket);
+EventEmitter.extend(TestWebSocket);
 
-module.exports = WebSocket;
+module.exports = TestWebSocket;

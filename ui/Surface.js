@@ -840,7 +840,7 @@ Surface.Prototype = function() {
     return frags;
   };
 
-  this._computeSelectionFragments = function(sel, selectionFragments, userData) {
+  this._computeSelectionFragments = function(sel, selectionFragments, collaborator) {
     selectionFragments = selectionFragments || {};
     if (sel && !sel.isNull()) {
       // console.log('Computing selection fragments for', sel.toString());
@@ -852,7 +852,7 @@ Surface.Prototype = function() {
           frags = [];
           selectionFragments[pathStr] = frags;
         }
-        frag.userData = userData;
+        frag.collaborator = collaborator;
         frags.push(frag);
       });
     }
