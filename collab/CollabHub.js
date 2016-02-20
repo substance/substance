@@ -60,6 +60,15 @@ CollabHub.Prototype = function() {
         res.json(session);
       });
     });
+
+    app.post('/hub/api/signup', function(req, res) {
+      console.log('POST: /hub/api/signup');
+      var userData = req.body;
+      store.createUser(userData, function(err, result) {
+        if (err) return res.status(500).send(err);
+        res.json(result);
+      });
+    });
   };
 
   /*
@@ -87,7 +96,6 @@ CollabHub.Prototype = function() {
     forEach(conn.documents, function(document, documentId) {
       this._broadcastCollaboratorDisconnected(ws, documentId, conn.collaboratorId);
     }.bind(this));
-    console.log('disconnecting: ', conn.userSession.user.userId);
   };
 
   this.dispose = function() {

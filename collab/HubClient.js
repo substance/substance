@@ -47,8 +47,8 @@ HubClient.Prototype = function() {
     Reconnect if websocket gets closed for some reason
   */
   this._onWebSocketClose = function() {
-    console.log('websocket connection closed. Attempting to reconnect in 5s.');
     this.ws.removeEventListener('message', this._onMessage);
+    // console.log('websocket connection closed. Attempting to reconnect in 5s.');
     // setTimeout(function() {
     //   this._initWebSocket();
     // }.bind(this), 5000);
@@ -134,6 +134,17 @@ HubClient.Prototype = function() {
       if (err) return cb(err);
       this._session = hubSession;
       cb(null, hubSession);
+    }.bind(this));
+  };
+
+  /*
+    Signup a new user
+  */
+  this.signup = function(userData, cb) {
+    this._request('POST', '/hub/api/signup', userData, function(err, res) {
+      if (err) return cb(err);
+      this._session = res.session;
+      cb(null, res.loginKey);
     }.bind(this));
   };
 
