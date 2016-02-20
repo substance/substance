@@ -4,6 +4,7 @@ var EventEmitter = require('../util/EventEmitter');
 var forEach = require('lodash/forEach');
 var DocumentChange = require('../model/DocumentChange');
 var uuid = require('../util/uuid');
+
 /*
   Hub for realizing collaborative editing. Implements the server-end of the
   protocol.
@@ -54,10 +55,9 @@ CollabHub.Prototype = function() {
     app.post('/hub/api/authenticate', function(req, res) {
       console.log('POST: /hub/api/authenticate');
       var loginData = req.body;
-      store.createSession(loginData).then(function(session) {
+      store.createSession(loginData, function(err, session) {
+        if (err) return res.status(500).send(err);
         res.json(session);
-      }, function(err) {
-        res.status(500).send(err);
       });
     });
   };
