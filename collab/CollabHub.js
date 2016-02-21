@@ -52,22 +52,34 @@ CollabHub.Prototype = function() {
   */
   this.addRoutes = function(app) {
     var store = this.store;
-    app.post('/hub/api/authenticate', function(req, res) {
+    
+    app.post('/hub/api/authenticate', function(req, res, next) {
       console.log('POST: /hub/api/authenticate');
       var loginData = req.body;
       store.createSession(loginData, function(err, session) {
-        if (err) return res.status(500).send(err);
+        if(err) return next(err);
         res.json(session);
       });
     });
 
-    app.post('/hub/api/signup', function(req, res) {
+    app.post('/hub/api/signup', function(req, res, next) {
       console.log('POST: /hub/api/signup');
       var userData = req.body;
       store.createUser(userData, function(err, result) {
-        if (err) return res.status(500).send(err);
+        if(err) return next(err);
         res.json(result);
       });
+    });
+  
+    app.get('/hub/api/snapshot/:id', function(req, res, next) {
+      store.getSnapshot(req.params.id, function(err, doc, version) {
+        if(err) return next(err);
+        res.json([doc, version]);
+      });
+    });
+
+    app.post('/hub/api/upload', store.getFileUploader('figures'), function(req, res, next) {
+      res.json({name: store.getFileName(req)});
     });
   };
 
