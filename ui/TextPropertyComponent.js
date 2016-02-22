@@ -37,11 +37,14 @@ TextPropertyComponent.Prototype = function() {
   this.render = function() {
     var path = this.props.path;
 
+    var isEditable = this.isEditable();
+
     var el = this._renderContent()
       .addClass('sc-text-property')
       .attr({
         "data-path": path.join('.'),
         spellCheck: false,
+        contenteditable: isEditable
       })
       .css({
         whiteSpace: "pre-wrap"
