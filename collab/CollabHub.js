@@ -384,7 +384,7 @@ CollabHub.Prototype = function() {
     this.store.getVersion(documentId, function(err, serverVersion) {
       if (serverVersion === clientVersion) { // Fast forward update
         this.store.addChange(documentId, this.serializeChange(newChange), function(err, newVersion) {
-          cb(null, newVersion, newChange);
+          cb(null, newVersion, newChange, []);
         }.bind(this));
       } else { // Client changes need to be rebased to latest serverVersion
         this._rebaseChange(documentId, clientVersion, newChange, function(err, rebasedNewChange, rebasedOtherChanges) {
