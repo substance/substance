@@ -78,7 +78,7 @@ CollabHub.Prototype = function() {
       });
     });
 
-    app.post('/hub/api/upload', store.getFileUploader('figures'), function(req, res, next) {
+    app.post('/hub/api/upload', store.getFileUploader('files'), function(req, res, next) {
       res.json({name: store.getFileName(req)});
     });
   };
