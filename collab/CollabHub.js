@@ -182,9 +182,7 @@ CollabHub.Prototype = function() {
     // so we don't need to hit the database all the time.
     this.store.getSession(msg.sessionToken, function(err, userSession) {
       // TODO: we should send back some message to the client that there is no valid session
-      if (err) throw new Error('No user session found for sessionToken', msg.sessionToken);
-
-      if (!userSession) {
+      if (err) {
         console.error('Connection is not authenticated. Ignoring message... ', msg);
         var errorMsg = {
           scope: 'hub',
