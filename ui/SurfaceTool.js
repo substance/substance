@@ -56,7 +56,7 @@ SurfaceTool.Prototype = function() {
     _super.dispose.call(this);
 
     var ctrl = this.getController();
-    ctrl.disconnect(this);
+    ctrl.off(this);
   };
 
   /**

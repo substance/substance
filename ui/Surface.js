@@ -125,7 +125,7 @@ Surface.Prototype = function() {
 
   this.dispose = function() {
     var doc = this.getDocument();
-    doc.disconnect(this);
+    doc.off(this);
     this.domSelection = null;
     this.domObserver.disconnect();
     this.getController().unregisterSurface(this);
