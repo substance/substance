@@ -16,6 +16,8 @@ function TestWebSocket(messageQueue, clientId, serverId) {
   this.clientId = clientId || uuid();
   this.serverId = serverId || "server";
 
+  // We consider our TestWebSocket connected right away.
+  this.readyState = 1;
   this._isSimulated = true;
 }
 
