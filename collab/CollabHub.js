@@ -52,7 +52,7 @@ CollabHub.Prototype = function() {
   */
   this.addRoutes = function(app) {
     var store = this.store;
-    
+
     app.post('/hub/api/authenticate', function(req, res, next) {
       console.log('POST: /hub/api/authenticate');
       var loginData = req.body;
@@ -71,6 +71,7 @@ CollabHub.Prototype = function() {
       });
     });
   
+
     app.get('/hub/api/snapshot/:id', function(req, res, next) {
       store.getSnapshot(req.params.id, function(err, doc, version) {
         if(err) return next(err);
@@ -81,6 +82,7 @@ CollabHub.Prototype = function() {
     app.post('/hub/api/upload', store.getFileUploader('files'), function(req, res, next) {
       res.json({name: store.getFileName(req)});
     });
+
   };
 
   /*
@@ -103,8 +105,15 @@ CollabHub.Prototype = function() {
   };
 
   this._onWebSocketClose = function(ws) {
-    var conn = this._connections.get(ws);
+    this._resetConnection(ws);
+  };
 
+  /*
+    If user gets disconnected or goes into unauthenticated state we need to 
+    disable currently edited documents
+  */
+  this._resetConnection = function(ws) {
+    var conn = this._connections.get(ws);
     forEach(conn.documents, function(document, documentId) {
       this._broadcastCollaboratorDisconnected(ws, documentId, conn.collaboratorId);
     }.bind(this));
@@ -176,7 +185,14 @@ CollabHub.Prototype = function() {
       if (err) throw new Error('No user session found for sessionToken', msg.sessionToken);
 
       if (!userSession) {
-        console.error('An unauthenticated user sent a message. Ignoring... ', msg);
+        console.error('Connection is not authenticated. Ignoring message... ', msg);
+        var errorMsg = {
+          scope: 'hub',
+          type: 'sessionInvalid'
+        };
+        // Let hubClient know that session became invalid
+        this._send(ws, undefined, errorMsg);
+        this._resetConnection(ws);
         return;
       }
 

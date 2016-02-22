@@ -10,6 +10,8 @@ var Selection = require('../model/Selection');
 /*
   Session that is connected to a Substance Hub allowing
   collaboration in real-time.
+
+  Assumes a running and authenticated hubClient connection.
 */
 function CollabSession(doc, config) {
   CollabSession.super.call(this, doc, config);
@@ -37,38 +39,68 @@ function CollabSession(doc, config) {
   // Keep track of collaborators in a session
   this.collaborators = {};
 
-  // This happens when the hubClient performs a websocket reconnect
-  this.hubClient.on('connection', this._onHubClientConnected.bind(this));
+  // This happens on a reconnect
+  this.hubClient.on('connection', this._onHubClientConnected, this);
+
+
+  // DISABLED: We handle all authentication / logout scenarios on app level for now
+  // -------------------
+  // 
+  // this.hubClient.on('authenticate', this._onHubClientAuthenticated, this);
+  // this.hubClient.on('disconnect', this._onHubClientDisconnected, this);
+  // We treat unauthenticate like disconnect, as the collabsession requires
+  // an authenticated session
+  // this.hubClient.on('unauthenticate', this._onHubClientUnauthenticated, this);
+
   this.hubClient.on('message', this._onMessage.bind(this));
 
   // Attempt to open a document immediately
-  this.open();
+  if (this.hubClient.isAuthenticated()) {
+    this.open();  
+  } else {
+    console.warn('Attempted to create a CollabSession using an unauthenticated hubClient');
+  }
+  
 }
 
 CollabSession.Prototype = function() {
 
   var _super = Object.getPrototypeOf(this);
 
-  /* This happens on reconnect of the websocket owned by HubClient */
+  /*
+    A new authenticated hubClient connection is available.
+
+    This happens in a reconnect scenario. We just
+  */
   this._onHubClientConnected = function() {
     console.log('hub client reconnected to a new websocket. We reopen the doc.');
     this._opened = false;
     this.open();
   };
 
+  // this._onHubClientAuthenticated = function() {
+  //   console.log('hub client authenticated');
+  //   this._opened = false;
+  //   this.open();
+  // };
+  
+  // this._onHubClientUnauthenticated = function() {
+  //   console.log('hub client unauthenticated.');
+  //   this._opened = false;
+  //   // this._onHubClientDisconnected();
+  // };
+
   /*
-    Handling of remote messages.
+    Hub Client got disconnected. E.g. when the session became invalid.
+  */
+  // this._onHubClientDisconnected = function() {
+  //   console.log('hub client disconnected');
+  //   this._opened = false;
+  //   // this._computeNextCommit();
+  // };
 
-    Message comes in in the following format:
-
-    ['open', 'doc13']
-
-    We turn this into a method call internally:
-
-    this.open(ws, 'doc13')
-
-    The first argument is always the websocket so we can respond to messages
-    after some operations have been performed.
+  /*
+    Dispatching of remote messages.
   */
   this._onMessage = function(msg) {
     // TODO: Only consider messages with the right documentId
@@ -76,7 +108,8 @@ CollabSession.Prototype = function() {
       console.info('No documentId provided with message');
     }
 
-    console.log('MESSAGE RECEIVED', msg);
+    // console.log('MESSAGE RECEIVED', msg);
+
     var changes, change;
     switch(msg.type) {
       case 'openDone':
@@ -108,10 +141,10 @@ CollabSession.Prototype = function() {
   };
 
   /*
-    If there's an unconfirmed pending commit it will be merged with the current nextCommit
+    If there's an unconfirmed pending commit it will be merged with nextCommit
 
-    This is needed in a reconnect scenario. Where we have to assume the pendingCommit will never
-    be confirmed.
+    This is needed in a disconnect/reconnect scenario. Where we know the
+    pendingCommit will never be confirmed.
   */
   this._computeNextCommit = function() {
     var newNextCommit = this._nextCommit;
@@ -129,11 +162,18 @@ CollabSession.Prototype = function() {
   };
 
   /*
-    Connect session with remote endpoint and loads the document
+    Connect session with remote endpoint and loads the upstream changes.
+    
+    This operation initializes an editing session. It may happen that we never
+    see a response (openDone) for it. E.g. when the connection is not
+    authenticated. However in such cases we will receive a connected event
+    and then open gets called again, considering the pendingCommit
+    (see _computeNextCommit).
 
     @param {WebSocket} ws a connected websocket.
   */
   this.open = function() {
+    this._opened = false;
     var msg = {
       type: 'open',
       documentId: this.doc.id,
@@ -142,12 +182,12 @@ CollabSession.Prototype = function() {
 
     // Makes sure an eventual pendingCommit gets considered in the nextCommit.
     this._computeNextCommit();
+
     if (this._nextCommit) {
       // This behaves like a commit
       msg.change = this.serializeChange(this._nextCommit);
       this._send(msg);
       // In case of a reconnect we need to set _opened back to false
-      this._opened = false;
       this._afterCommit(this._nextCommit);
     } else {
       this._send(msg);
@@ -162,6 +202,9 @@ CollabSession.Prototype = function() {
     this._pendingCommit = null;
   };
 
+  /*
+    TODO: Make use of it.
+  */
   this.close = function() {
     // Let the server know we no longer want to edit this document
     var msg = {
@@ -170,7 +213,6 @@ CollabSession.Prototype = function() {
       version: this.doc.version
     };
     this._send(msg);
-
     // And now dispose and deregister the handlers
     this.dispose();
   };
@@ -180,7 +222,7 @@ CollabSession.Prototype = function() {
   */
   this.commit = function() {
     // If there is something to commit and there is no commit pending
-    if (this._nextCommit && !this._pendingCommit) {
+    if (this.hubClient.isConnected() && this._nextCommit && !this._pendingCommit) {
       console.log('committing', this._nextCommit);
       var msg = {
         type: 'commit', 
@@ -265,7 +307,6 @@ CollabSession.Prototype = function() {
       this._recordCommit(change);
     }
   };
-
 
   /*
     Apply a change to the document

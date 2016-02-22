@@ -22,7 +22,7 @@ function HubClient(config) {
   this._onMessage = this._onMessage.bind(this);
   
   if (config.session) {
-    this._session = config.session;  
+    this._session = config.session;
   }
   
   // Establish websocket connection
@@ -53,10 +53,11 @@ HubClient.Prototype = function() {
   */
   this._onWebSocketClose = function() {
     this.ws.removeEventListener('message', this._onMessage);
-    // console.log('websocket connection closed. Attempting to reconnect in 5s.');
-    // setTimeout(function() {
-    //   this._initWebSocket();
-    // }.bind(this), 5000);
+    this.emit('disconnect');
+    console.log('websocket connection closed. Attempting to reconnect in 5s.');
+    setTimeout(function() {
+      this._initWebSocket();
+    }.bind(this), 5000);
   };
 
   /*
@@ -65,12 +66,26 @@ HubClient.Prototype = function() {
   this._onMessage = function(msg) {
     msg = this.deserializeMessage(msg.data);
     if (msg.scope === 'hub') {
-      this.emit('message', msg);
+      var handled = this._handleMessage(msg);
+      if (!handled) {
+        this.emit('message', msg);  
+      }
     } else {
       console.info('Message ignored. Not sent in hub scope', msg);
     }
-    
   };
+
+  /*
+    Some messages are handled by the hubClient.
+    E.g. when a users session gets invalid/expires during an editing session
+  */
+  this._handleMessage = function(msg) {
+    if (msg.type === 'sessionInvalid') {
+      console.log('HubClient: Session became invalid');
+      this.logout();
+      return true;
+    }
+  }
 
   /*
     Send message via websocket channel
@@ -80,7 +95,6 @@ HubClient.Prototype = function() {
     msg.scope = 'hub';
     this.ws.send(this.serializeMessage(msg));
   };
-
 
   /*
     A generic request method
@@ -130,6 +144,13 @@ HubClient.Prototype = function() {
   };
 
   /*
+    Returns true if websocket connection is open
+  */
+  this.isConnected = function() {
+    return this.ws && this.ws.readyState === 1;
+  };
+
+  /*
     Authenticate user
 
     Logindata consists of an object (usually with login/password properties)
@@ -139,11 +160,13 @@ HubClient.Prototype = function() {
       if (err) return cb(err);
       this._session = hubSession;
       cb(null, hubSession);
+      this.emit('authenticate');
     }.bind(this));
   };
 
   this.logout = function() {
     this._session = null;
+    this.emit('unauthenticate');
   };
 
   /*
@@ -154,6 +177,7 @@ HubClient.Prototype = function() {
       if (err) return cb(err);
       this._session = res.session;
       cb(null, res.loginKey);
+      this.emit('authenticate');
     }.bind(this));
   };
 
