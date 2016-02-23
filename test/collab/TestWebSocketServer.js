@@ -1,4 +1,4 @@
-"use strict";
+'use strict';
 
 var EventEmitter = require('../../util/EventEmitter');
 var TestServerWebSocket = require('./TestServerWebSocket');

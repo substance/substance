@@ -1,4 +1,4 @@
-"use strict";
+'use strict';
 
 var EventEmitter = require('../../util/EventEmitter');
 
@@ -11,6 +11,7 @@ function MessageQueue() {
 
   this.connections = {};
   this.messages = [];
+  this._log = [];
 }
 
 MessageQueue.Prototype = function() {
@@ -90,6 +91,7 @@ MessageQueue.Prototype = function() {
   */
   this.pushMessage = function(message) {
     this.messages.push(message);
+    this._log.push(message);
     this.emit('messages:updated', this.messages);
   };
 

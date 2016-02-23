@@ -1,4 +1,4 @@
-"use strict";
+'use strict';
 
 var EventEmitter = require('../../util/EventEmitter');
 var uuid = require('../../util/uuid');
@@ -34,7 +34,7 @@ TestWebSocket.Prototype = function() {
     if (this['on'+eventName]) {
       // For simplicity we only support a single handler per event atm
       console.warn('on'+eventName, ' is already set. Overriding handler.');
-    } 
+    }
     this['on'+eventName] = handler;
   };
 

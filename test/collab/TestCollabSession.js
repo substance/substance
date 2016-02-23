@@ -1,3 +1,5 @@
+'use strict';
+
 var CollabSession = require('../../collab/CollabSession');
 var DocumentChange = require('../../model/DocumentChange');
 

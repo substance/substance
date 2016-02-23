@@ -1,3 +1,5 @@
+'use strict';
+
 var HubClient = require('../../collab/HubClient');
 
 function TestHubClient(config) {
@@ -10,7 +12,6 @@ TestHubClient.Prototype = function() {
     this.ws = this.config.ws;
     this.ws.onopen = this._onWebSocketOpen.bind(this);
     this.ws.onclose = this._onWebSocketClose.bind(this);
-    window.ws = this.ws; // for debugging purposes
   };
 
   this.serializeMessage = function(msg) {

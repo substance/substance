@@ -1,3 +1,5 @@
+'use strict';
+
 var CollabHub = require('../../collab/CollabHub');
 var TestCollabSession = require('./TestCollabSession');
 

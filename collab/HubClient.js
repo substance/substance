@@ -20,11 +20,11 @@ function HubClient(config) {
   this.__id__ = __id__++;
   this.config = config;
   this._onMessage = this._onMessage.bind(this);
-  
+
   if (config.session) {
     this._session = config.session;
   }
-  
+
   // Establish websocket connection
   this._initWebSocket();
 }
@@ -43,8 +43,16 @@ HubClient.Prototype = function() {
     window.ws = this.ws; // for debugging purposes
   };
 
-  this._onWebSocketOpen = function() {
+  this._connect = function() {
     this.ws.addEventListener('message', this._onMessage);
+  };
+
+  this._disconnect = function() {
+    this.ws.removeEventListener('message', this._onMessage);
+  };
+
+  this._onWebSocketOpen = function() {
+    this._connect();
     this.emit('connection', this.ws);
   };
 
@@ -52,7 +60,7 @@ HubClient.Prototype = function() {
     Reconnect if websocket gets closed for some reason
   */
   this._onWebSocketClose = function() {
-    this.ws.removeEventListener('message', this._onMessage);
+    this._disconnect();
     this.emit('disconnect');
     console.log('websocket connection closed. Attempting to reconnect in 5s.');
     setTimeout(function() {
@@ -68,7 +76,7 @@ HubClient.Prototype = function() {
     if (msg.scope === 'hub') {
       var handled = this._handleMessage(msg);
       if (!handled) {
-        this.emit('message', msg);  
+        this.emit('message', msg);
       }
     } else {
       console.info('Message ignored. Not sent in hub scope', msg);
@@ -85,7 +93,7 @@ HubClient.Prototype = function() {
       this.logout();
       return true;
     }
-  }
+  };
 
   /*
     Send message via websocket channel
