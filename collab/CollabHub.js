@@ -78,10 +78,9 @@ CollabHub.Prototype = function() {
       });
     });
 
-    app.post('/hub/api/upload', store.getFileUploader('files'), function(req, res, next) {
+    app.post('/hub/api/upload', store.getFileUploader('files'), function(req, res) {
       res.json({name: store.getFileName(req)});
     });
-
   };
 
   /*
@@ -151,8 +150,7 @@ CollabHub.Prototype = function() {
         collaborators[conn.collaboratorId] = {
           user: conn.userSession.user,
           selection: doc.selection,
-          collaboratorId: conn.collaboratorId,
-          collaboratorIndex: doc.collaboratorIndex
+          collaboratorId: conn.collaboratorId
         };
       }
     }.bind(this));
@@ -237,14 +235,10 @@ CollabHub.Prototype = function() {
 
     // Get other connected collaborators for document
     var collaborators = this.getCollaborators(ws, documentId);
-
-    // = 2 if you are the second user to open the document
-    var collaboratorIndex = Object.keys(collaborators).length + 1;
     
     // Update connection state
     conn.documents[documentId] = {
-      selection: null,
-      collaboratorIndex: collaboratorIndex
+      selection: null
     };
     conn.userSession = userSession;
     
@@ -281,16 +275,15 @@ CollabHub.Prototype = function() {
       self._send(ws, documentId, msg);
 
       // Broadcast arrival of new collaborator
-      self._broadcastCollaboratorConnected(ws, documentId, userSession.user, conn.collaboratorId, collaboratorIndex);
+      self._broadcastCollaboratorConnected(ws, documentId, userSession.user, conn.collaboratorId);
     });
   };
 
-  this._broadcastCollaboratorConnected = function(ws, documentId, user, collaboratorId, collaboratorIndex) {
+  this._broadcastCollaboratorConnected = function(ws, documentId, user, collaboratorId) {
     var collaborator = {
       user: user,
       selection: null,
-      collaboratorId: collaboratorId,
-      collaboratorIndex: collaboratorIndex
+      collaboratorId: collaboratorId
     };
     var msg = {
       type: 'collaboratorConnected',

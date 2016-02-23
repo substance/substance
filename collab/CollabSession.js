@@ -42,6 +42,9 @@ function CollabSession(doc, config) {
   // This happens on a reconnect
   this.hubClient.on('connection', this._onHubClientConnected, this);
 
+  // Constraints used for computing color indexes
+  this.__maxColors = 5;
+  this.__nextColorIndex = 0;
 
   // DISABLED: We handle all authentication / logout scenarios on app level for now
   // -------------------
@@ -391,15 +394,11 @@ CollabSession.Prototype = function() {
     this.doc.version = serverVersion;
 
     // Initialize collaborators
-    // console.log('collaborators after open: ', collaborators);
-
     this.collaborators = collaborators;
     forEach(this.collaborators, function(collaborator) {
-      collaborator.selection = Selection.fromJSON(collaborator.selection);
-    });
+      this._addCollaborator(collaborator);
+    }.bind(this));
     this.emit('collaborators:changed');
-
-    // console.log('Open complete. Listening for remote changes ...');
 
     this._opened = true;
     this.emit('opened');
@@ -411,9 +410,17 @@ CollabSession.Prototype = function() {
     return this._opened;
   };
 
-  this.collaboratorConnected = function(collaborator) {
+  this._addCollaborator = function(collaborator) {
     this.collaborators[collaborator.collaboratorId] = collaborator;
-    // console.log('collaborator connected', this.collaborators);
+    if (collaborator.selection) {
+      collaborator.selection = Selection.fromJSON(collaborator.selection);  
+    }
+    collaborator.colorIndex = this._getNextColorIndex();
+  };
+
+  this.collaboratorConnected = function(collaborator) {
+    this._addCollaborator(collaborator);
+    console.log('collaborator connected', this.collaborators);
     this.emit('collaborators:changed');
   };
 
@@ -464,6 +471,17 @@ CollabSession.Prototype = function() {
 
   this._send = function(msg) {
     this.hubClient.send(msg);
+  };
+
+  /*
+    Get color index for rendering cursors and selections in round robin style.
+    Note: This implementation considers a configured maxColors value. The
+    first color will be reused as more then maxColors collaborators arrive.
+  */
+  this._getNextColorIndex = function() {
+    var colorIndex = this.__nextColorIndex;
+    this.__nextColorIndex = (this.__nextColorIndex + 1) % this.__maxColors;
+    return colorIndex + 1; // so we can 1..5 instead of 0..4
   };
 
 };
