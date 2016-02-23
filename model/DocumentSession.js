@@ -91,6 +91,7 @@ DocumentSession.Prototype = function() {
       this.doc._apply(change);
       if (change.after.selection) {
         this.selection = change.after.selection;
+        this._selectionHasChanged = true;
       }
       this.undoneChanges.push(change.invert());
       this._notifyChangeListeners(change, { 'replay': true });
@@ -106,6 +107,7 @@ DocumentSession.Prototype = function() {
       this.doc._apply(change);
       if (change.after.selection) {
         this.selection = change.after.selection;
+        this._selectionHasChanged = true;
       }
       this.doneChanges.push(change.invert());
       this._notifyChangeListeners(change, { 'replay': true });
