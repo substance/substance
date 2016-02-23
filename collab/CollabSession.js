@@ -197,6 +197,7 @@ CollabSession.Prototype = function() {
   // Needed in the case of a reconnect or explicit close
   this.dispose = function() {
     // Reset to original state
+    this.stop();
     this._opened = false;
     this._nextCommit = null;
     this._pendingCommit = null;
@@ -236,7 +237,10 @@ CollabSession.Prototype = function() {
   };
 
   this.start = function() {
-    this._runner = setInterval(this.commit.bind(this), 1000);
+    // ATTENTION: don't start multiple runners
+    if (!this._runner) {
+      this._runner = setInterval(this.commit.bind(this), 1000);
+    }
   };
 
   this.stop = function() {
@@ -373,10 +377,12 @@ CollabSession.Prototype = function() {
     now on.
   */
   this.openDone = function(serverVersion, changes, collaborators) {
+    // console.log('Received "openDone"', serverVersion, changes);
     if (this.doc.version !== serverVersion) {
       // There have been changes on the server since the doc was opened
       // the last time
       if (changes) {
+        // console.log('Applying remote changes...');
         changes.forEach(function(change) {
           this._applyRemoteChange(change);
         }.bind(this));

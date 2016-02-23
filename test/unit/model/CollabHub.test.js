@@ -63,9 +63,11 @@ function _setup(fixture, messagesFromSnapshot) {
     docId: 'test',
     docVersion: 1
   });
-  // this stops the user sessions from auto-committing
-  session1.stop();
-  session2.stop();
+  // HACK: overriding the CollabSession.start() to prevent
+  // the session from auto-committing and running forever
+  session1.start = function(){};
+  session2.start = function(){};
+
   // this connects the peers 'physically'
   wss.connect();
   ws1.connect();
