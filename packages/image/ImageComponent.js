@@ -11,12 +11,12 @@ ImageComponent.Prototype = function() {
 
   this.initialize = function() {
     var doc = this.props.doc;
-    doc.connect(this, { 'document:changed': this.handleDocumentChange });
+    doc.on(this, { 'document:changed': this.handleDocumentChange });
   };
 
   this.dispose = function() {
     var doc = this.props.doc;
-    doc.disconnect(this);
+    doc.off(this);
   };
 
   this.render = function() {
