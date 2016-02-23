@@ -30,7 +30,7 @@ function CollabSession(doc, config) {
 
   // Internal state
   this._opened = false; // becomes true as soon as the initial open has been completd
-  this._nextCommit = null; // 
+  this._nextCommit = null; //
   this._pendingCommit = null;
 
   // Bind handlers
@@ -45,7 +45,7 @@ function CollabSession(doc, config) {
 
   // DISABLED: We handle all authentication / logout scenarios on app level for now
   // -------------------
-  // 
+  //
   // this.hubClient.on('authenticate', this._onHubClientAuthenticated, this);
   // this.hubClient.on('disconnect', this._onHubClientDisconnected, this);
   // We treat unauthenticate like disconnect, as the collabsession requires
@@ -56,11 +56,11 @@ function CollabSession(doc, config) {
 
   // Attempt to open a document immediately
   if (this.hubClient.isAuthenticated()) {
-    this.open();  
+    this.open();
   } else {
     console.warn('Attempted to create a CollabSession using an unauthenticated hubClient');
   }
-  
+
 }
 
 CollabSession.Prototype = function() {
@@ -73,7 +73,7 @@ CollabSession.Prototype = function() {
     This happens in a reconnect scenario. We just
   */
   this._onHubClientConnected = function() {
-    console.log('hub client reconnected to a new websocket. We reopen the doc.');
+    // console.log('hub client reconnected to a new websocket. We reopen the doc.');
     this._opened = false;
     this.open();
   };
@@ -83,7 +83,7 @@ CollabSession.Prototype = function() {
   //   this._opened = false;
   //   this.open();
   // };
-  
+
   // this._onHubClientUnauthenticated = function() {
   //   console.log('hub client unauthenticated.');
   //   this._opened = false;
@@ -154,7 +154,7 @@ CollabSession.Prototype = function() {
       this._pendingCommit = null;
       if (this._nextCommit) {
         newNextCommit.ops = newNextCommit.ops.concat(this._nextCommit.ops);
-        newNextCommit.after = this._nextCommit.after;        
+        newNextCommit.after = this._nextCommit.after;
       }
     }
     this._nextCommit = newNextCommit;
@@ -163,7 +163,7 @@ CollabSession.Prototype = function() {
 
   /*
     Connect session with remote endpoint and loads the upstream changes.
-    
+
     This operation initializes an editing session. It may happen that we never
     see a response (openDone) for it. E.g. when the connection is not
     authenticated. However in such cases we will receive a connected event
@@ -223,9 +223,9 @@ CollabSession.Prototype = function() {
   this.commit = function() {
     // If there is something to commit and there is no commit pending
     if (this.hubClient.isConnected() && this._nextCommit && !this._pendingCommit) {
-      console.log('committing', this._nextCommit);
+      // console.log('committing', this._nextCommit);
       var msg = {
-        type: 'commit', 
+        type: 'commit',
         documentId: this.doc.id,
         version: this.doc.version,
         change: this.serializeChange(this._nextCommit)
@@ -385,7 +385,7 @@ CollabSession.Prototype = function() {
     this.doc.version = serverVersion;
 
     // Initialize collaborators
-    console.log('collaborators after open: ', collaborators);
+    // console.log('collaborators after open: ', collaborators);
 
     this.collaborators = collaborators;
     forEach(this.collaborators, function(collaborator) {
@@ -393,7 +393,7 @@ CollabSession.Prototype = function() {
     });
     this.emit('collaborators:changed');
 
-    console.log('Open complete. Listening for remote changes ...');
+    // console.log('Open complete. Listening for remote changes ...');
 
     this._opened = true;
     this.emit('opened');
@@ -407,13 +407,13 @@ CollabSession.Prototype = function() {
 
   this.collaboratorConnected = function(collaborator) {
     this.collaborators[collaborator.collaboratorId] = collaborator;
-    console.log('collaborator connected', this.collaborators);
+    // console.log('collaborator connected', this.collaborators);
     this.emit('collaborators:changed');
   };
 
   this.collaboratorDisconnected = function(collaboratorId) {
     delete this.collaborators[collaboratorId];
-    console.log('collaborator disconnected', collaboratorId, this.collaborators);
+    // console.log('collaborator disconnected', collaboratorId, this.collaborators);
     this.emit('collaborators:changed');
   };
 
@@ -428,7 +428,7 @@ CollabSession.Prototype = function() {
     }
     this.doc.version = version;
     this._pendingCommit = null;
-    console.log('commit confirmed by server. New version:', version);
+    // console.log('commit confirmed by server. New version:', version);
   };
 
   /*
