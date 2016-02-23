@@ -11,7 +11,7 @@ ImageComponent.Prototype = function() {
 
   this.initialize = function() {
     var doc = this.props.doc;
-    doc.on(this, { 'document:changed': this.handleDocumentChange });
+    doc.on('document:changed', this.handleDocumentChange, this);
   };
 
   this.dispose = function() {
