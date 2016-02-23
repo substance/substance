@@ -172,6 +172,9 @@ HubClient.Prototype = function() {
     }.bind(this));
   };
 
+  /*
+    Clear user session
+  */
   this.logout = function() {
     this._session = null;
     this.emit('unauthenticate');
@@ -187,6 +190,34 @@ HubClient.Prototype = function() {
       cb(null, res.loginKey);
       this.emit('authenticate');
     }.bind(this));
+  };
+
+  /* 
+    Generic uploadFile implementation.
+
+    Takes a file object and returns an url (location of the uploaded file)
+  */
+  this.uploadFile = function(file, cb) {
+    var formData = new window.FormData();
+    formData.append("files", file);
+    var xhr = new XMLHttpRequest();
+    xhr.open('post', '/hub/api/upload', true);
+    xhr.upload.onprogress = function(e) {
+      if (e.lengthComputable) {
+        var percentage = (e.loaded / e.total) * 100;
+        console.log('percentage', percentage);
+        // TODO: do something with percentage
+      }
+    };
+    xhr.onload = function(e) {
+      if(this.status == 500) {
+        cb(new Error(this.response));
+      }
+      var data = JSON.parse(this.response);
+      var path = '/files/' + data.name;
+      cb(null, path);
+    };
+    xhr.send(formData);
   };
 
   this.getDocument = function(documentId, cb) {
