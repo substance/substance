@@ -56,7 +56,7 @@ CollabHub.Prototype = function() {
     app.post('/hub/api/authenticate', function(req, res, next) {
       console.log('POST: /hub/api/authenticate');
       var loginData = req.body;
-      store.createSession(loginData, function(err, session) {
+      store.authenticate(loginData, function(err, session) {
         if(err) return next(err);
         res.json(session);
       });
@@ -71,7 +71,6 @@ CollabHub.Prototype = function() {
       });
     });
   
-
     app.get('/hub/api/snapshot/:id', function(req, res, next) {
       store.getSnapshot(req.params.id, function(err, doc, version) {
         if(err) return next(err);
