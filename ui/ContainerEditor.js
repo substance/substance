@@ -60,6 +60,11 @@ function ContainerEditor() {
     throw new Error('Container with id ' + this.containerId + ' does not exist.');
   }
   this.editingBehavior = new EditingBehavior();
+  if (this.props.editingBehavior) {
+    this.props.editingBehavior.forEach(function(BehaviorClass) {
+      this.extendBehavior(new BehaviorClass());
+    }.bind(this));
+  }
 }
 
 ContainerEditor.Prototype = function() {
