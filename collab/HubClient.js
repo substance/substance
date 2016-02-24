@@ -198,25 +198,31 @@ HubClient.Prototype = function() {
     Takes a file object and returns an url (location of the uploaded file)
   */
   this.uploadFile = function(file, cb) {
-    var formData = new window.FormData();
-    formData.append("files", file);
-    var xhr = new XMLHttpRequest();
-    xhr.open('post', '/hub/api/upload', true);
-    xhr.upload.onprogress = function(e) {
+    var self = this;
+
+    function transferComplete(e) {
+      if(e.currentTarget.status == 200) {
+        var data = JSON.parse(e.currentTarget.response);
+        var path = '/media/' + data.name;
+        cb(null, path);
+      } else {
+        cb(new Error(e.currentTarget.response));
+      }
+    }
+
+    function updateProgress(e) {
       if (e.lengthComputable) {
         var percentage = (e.loaded / e.total) * 100;
-        console.log('percentage', percentage);
-        // TODO: do something with percentage
+        self.documentSession.hubClient.emit('upload', percentage);
       }
-    };
-    xhr.onload = function(e) {
-      if(this.status == 500) {
-        cb(new Error(this.response));
-      }
-      var data = JSON.parse(this.response);
-      var path = '/files/' + data.name;
-      cb(null, path);
-    };
+    }
+
+    var formData = new window.FormData();
+    formData.append("files", file);
+    var xhr = new window.XMLHttpRequest();
+    xhr.addEventListener("load", transferComplete);
+    xhr.upload.addEventListener("progress", updateProgress);
+    xhr.open('post', '/hub/api/upload', true);
     xhr.send(formData);
   };
 
