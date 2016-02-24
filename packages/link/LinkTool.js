@@ -3,7 +3,6 @@
 
 var extend = require('lodash/extend');
 var includes = require('lodash/includes');
-var capitalize = require('lodash/capitalize');
 var Component = require('../../ui/Component');
 var $$ = Component.$$;
 
