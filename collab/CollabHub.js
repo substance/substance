@@ -71,10 +71,13 @@ CollabHub.Prototype = function() {
       });
     });
   
-    app.get('/hub/api/snapshot/:id', function(req, res, next) {
+    app.get('/hub/api/documents/:id', function(req, res, next) {
       store.getSnapshot(req.params.id, function(err, doc, version) {
         if(err) return next(err);
-        res.json([doc, version]);
+        res.json({
+          document: doc,
+          version: version
+        });
       });
     });
 

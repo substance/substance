@@ -221,7 +221,7 @@ HubClient.Prototype = function() {
   };
 
   this.getDocument = function(documentId, cb) {
-    this._request('GET', '/hub/api/documents/'+documentId, cb);
+    this._request('GET', '/hub/api/documents/'+documentId, null, cb);
   };
 
   this.serializeMessage = function(msg) {
