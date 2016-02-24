@@ -1,6 +1,5 @@
 'use strict';
 
-// var isString = require('lodash/isString');
 var forEach = require('lodash/forEach');
 var DocumentSession = require('../model/DocumentSession');
 var DocumentChange = require('../model/DocumentChange');
@@ -11,7 +10,7 @@ var Selection = require('../model/Selection');
   Session that is connected to a Substance Hub allowing
   collaboration in real-time.
 
-  Assumes a running and authenticated hubClient connection.
+  Requires a connected and authenticated hubClient.
 */
 function CollabSession(doc, config) {
   CollabSession.super.call(this, doc, config);
@@ -45,16 +44,6 @@ function CollabSession(doc, config) {
   // Constraints used for computing color indexes
   this.__maxColors = 5;
   this.__nextColorIndex = 0;
-
-  // DISABLED: We handle all authentication / logout scenarios on app level for now
-  // -------------------
-  //
-  // this.hubClient.on('authenticate', this._onHubClientAuthenticated, this);
-  // this.hubClient.on('disconnect', this._onHubClientDisconnected, this);
-  // We treat unauthenticate like disconnect, as the collabsession requires
-  // an authenticated session
-  // this.hubClient.on('unauthenticate', this._onHubClientUnauthenticated, this);
-
   this.hubClient.on('message', this._onMessage.bind(this));
 
   // Attempt to open a document immediately
@@ -80,27 +69,6 @@ CollabSession.Prototype = function() {
     this._opened = false;
     this.open();
   };
-
-  // this._onHubClientAuthenticated = function() {
-  //   console.log('hub client authenticated');
-  //   this._opened = false;
-  //   this.open();
-  // };
-
-  // this._onHubClientUnauthenticated = function() {
-  //   console.log('hub client unauthenticated.');
-  //   this._opened = false;
-  //   // this._onHubClientDisconnected();
-  // };
-
-  /*
-    Hub Client got disconnected. E.g. when the session became invalid.
-  */
-  // this._onHubClientDisconnected = function() {
-  //   console.log('hub client disconnected');
-  //   this._opened = false;
-  //   // this._computeNextCommit();
-  // };
 
   /*
     Dispatching of remote messages.
@@ -222,12 +190,11 @@ CollabSession.Prototype = function() {
   };
 
   /*
-    Send local changes to the world.
+    Send local changes to upstream.
   */
   this.commit = function() {
     // If there is something to commit and there is no commit pending
     if (this.hubClient.isConnected() && this._nextCommit && !this._pendingCommit) {
-      // console.log('committing', this._nextCommit);
       var msg = {
         type: 'commit',
         documentId: this.doc.id,
@@ -239,6 +206,9 @@ CollabSession.Prototype = function() {
     }
   };
 
+  /*
+    Try to commit changes to the server every 1s
+  */
   this.start = function() {
     // ATTENTION: don't start multiple runners
     if (!this._runner) {
@@ -246,8 +216,10 @@ CollabSession.Prototype = function() {
     }
   };
 
+  /*
+    Stop auto-committing changes
+  */
   this.stop = function() {
-    // Try to commit changes to the server every 1s
     if (this._runner) {
       clearInterval(this._runner);
       this._runner = null;
