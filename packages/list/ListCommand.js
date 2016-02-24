@@ -38,6 +38,7 @@ ListCommand.Prototype = function() {
     var node = doc.get(path[0]);
     var content = node.content;
     var containerId = this.getContainerId();
+    var self = this;
 
     surface.transaction(function(tx, args) {
       var newList;
@@ -85,7 +86,7 @@ ListCommand.Prototype = function() {
         newList = {
           id: uuid("list"),
           type: "list",
-          ordered: true
+          ordered: self.ordered
         };
         // and a new list item node, set its parent to the list node
         var newListItem = {
@@ -106,14 +107,11 @@ ListCommand.Prototype = function() {
         container.show(newList.id, pos+1);
         container.hide(node.id);
       }
-      console.log(args);
       return args;
     });
   };
 };
 
 SurfaceCommand.extend(ListCommand);
-
-ListCommand.static.name = 'list';
 
 module.exports = ListCommand;
