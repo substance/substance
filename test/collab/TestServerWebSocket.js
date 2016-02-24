@@ -1,15 +1,15 @@
-"use strict";
+'use strict';
 
-var EventEmitter = require('./EventEmitter');
+var EventEmitter = require('../../util/EventEmitter');
 
 var __id__ = 0;
 
 /**
-  Simple ServerWebSocket implementation for local testing
+  Simple TestServerWebSocket implementation for local testing
 */
 
-function ServerWebSocket(messageQueue, serverId, clientId) {
-  ServerWebSocket.super.apply(this);
+function TestServerWebSocket(messageQueue, serverId, clientId) {
+  TestServerWebSocket.super.apply(this);
 
   this.__id__ = __id__++;
   this.messageQueue = messageQueue;
@@ -19,7 +19,7 @@ function ServerWebSocket(messageQueue, serverId, clientId) {
   this._isSimulated = true;
 }
 
-ServerWebSocket.Prototype = function() {
+TestServerWebSocket.Prototype = function() {
 
   this.connect = function() {
     this.messageQueue.connectServerSocket(this);
@@ -48,6 +48,6 @@ ServerWebSocket.Prototype = function() {
   };
 };
 
-EventEmitter.extend(ServerWebSocket);
+EventEmitter.extend(TestServerWebSocket);
 
-module.exports = ServerWebSocket;
+module.exports = TestServerWebSocket;

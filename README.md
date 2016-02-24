@@ -17,12 +17,13 @@ Incremental document updates (undoable operations)                          | �
 Transformations for document manipulation                                   | ✓
 Custom editing toolbars                                                     | ✓
 Commands for controlling the editor                                         | ✓
-Key bindings                                                                | Beta 4
 I18N support                                                                | ✓
 Realtime collaboration                                                      | Beta 4
-Full Unicode support                                                        | Beta 4
-Plugins                                                                     | Beta 4
-Persistence API for documents                                               | Beta 5
+Persistence API for documents                                               | Beta 4
+Key bindings                                                                | Beta 5
+Full Unicode support                                                        | Beta 5
+Plugins                                                                     | Beta 5
+
                                                                             |
 **UI Components**                                                           |
 TextPropertyEditor for editing annotated text                               | ✓
@@ -41,7 +42,6 @@ Image                                                                       | �
 Embed (image, video, tweet etc.)                                            | ✓
 List                                                                        | Beta 4
 Table                                                                       | Beta 4
-Figure (including upload)                                                   | Beta 5
                                                                             |
 **Predefined annotation types**                                             |
 Strong                                                                      | ✓
@@ -102,23 +102,20 @@ $ npm run doc
 
 *ETA: February 2016*
 
-- Automatically generated performance report
+- Realtime collaboration
+- Persistence API for documents
 - Table node
 - Editing of lists
-- Key bindings
-- Plugins
-- Realtime collaboration
-- Improved Unicode support
 - Improved stability, documentation and tests
+- Full-stack platform example
 
 ### Beta 5
 
+- Key bindings
+- Improved Unicode support
 - Mobile support
+- Automatically generated performance report
 - Modules for server-side integration
-  - Persistence API for documents
-  - Figure upload
-- Server-side realtime collaboration infrastructure
-- Full-stack platform example
 
 ### 1.0 Final
 

@@ -1,7 +1,7 @@
-"use strict";
+'use strict';
 
-var EventEmitter = require('./EventEmitter');
-var ServerWebSocket = require('./ServerWebSocket');
+var EventEmitter = require('../../util/EventEmitter');
+var TestServerWebSocket = require('./TestServerWebSocket');
 
 /*
   Local in-process Websocket server implementation for client-side development
@@ -11,7 +11,7 @@ var ServerWebSocket = require('./ServerWebSocket');
 
   ```js
   var messageQueue = new MessageQueue();
-  var wss = new WebSocketServer(messageQueue);
+  var wss = new TestWebSocketServer(messageQueue);
 
   wss.on('connection', function(ws) {
     console.log(ws.clientId, 'connected to websocket server');
@@ -33,8 +33,8 @@ var ServerWebSocket = require('./ServerWebSocket');
   ```
 */
 
-function WebSocketServer(messageQueue, serverId) {
-  WebSocketServer.super.apply(this);
+function TestWebSocketServer(messageQueue, serverId) {
+  TestWebSocketServer.super.apply(this);
   this.messageQueue = messageQueue;
   this.serverId = serverId || "server";
   this.clients = {};
@@ -42,7 +42,7 @@ function WebSocketServer(messageQueue, serverId) {
   this._isSimulated = true;
 }
 
-WebSocketServer.Prototype = function() {
+TestWebSocketServer.Prototype = function() {
 
   this.connect = function() {
     this.messageQueue.connectServer(this);
@@ -63,7 +63,7 @@ WebSocketServer.Prototype = function() {
     // TODO: this implementation does not allow for multiple connections
     // from one client to a server
     // and ATM we have only one server
-    var sws = new ServerWebSocket(this.messageQueue, this.serverId, clientId);
+    var sws = new TestServerWebSocket(this.messageQueue, this.serverId, clientId);
     this.messageQueue.connectServerSocket(sws);
     this.clients[clientId] = sws;
     // let server implementation know of the new connection
@@ -74,6 +74,6 @@ WebSocketServer.Prototype = function() {
 
 };
 
-EventEmitter.extend(WebSocketServer);
-module.exports = WebSocketServer;
+EventEmitter.extend(TestWebSocketServer);
+module.exports = TestWebSocketServer;
 

@@ -277,7 +277,9 @@ ContainerEditor.Prototype = function() {
   };
 
   // Create a first text element
-  this.onCreateText = function() {
+  this.onCreateText = function(e) {
+    e.preventDefault();
+    
     var newSel;
     this.transaction(function(tx) {
       var container = tx.get(this.props.containerId);

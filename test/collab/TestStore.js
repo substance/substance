@@ -1,6 +1,30 @@
-"use strict";
+'use strict';
 
-var EventEmitter = require('./EventEmitter');
+var EventEmitter = require('../../util/EventEmitter');
+
+var USERS = {
+  'user1': {
+    'userId': 'user1',
+    'password': 'demo',
+    'name': 'User 1'
+  },
+  'user2': {
+    'userId': 'user2',
+    'password': 'demo',
+    'name': 'User 2'
+  }
+};
+
+var SESSIONS = {
+  'user1token': {
+    'user': USERS['user1'],
+    'sessionToken': 'user1token'
+  },
+  'user2token': {
+    'user': USERS['user2'],
+    'sessionToken': 'user2token'
+  }
+};
 
 /*
   Implements Substance Store API. This is just a stub and is used for
@@ -9,7 +33,7 @@ var EventEmitter = require('./EventEmitter');
 function TestStore(db) {
   TestStore.super.apply(this);
 
-  // db the testhub operates on. It's just a simple object.
+  // Just a simple object serves us as a db
   this._db = db;
 }
 
@@ -55,6 +79,18 @@ TestStore.Prototype = function() {
 
   this._addChange = function(id, change) {
     this._db[id].push(change);
+  };
+
+  this.getUser = function(userId, cb) {
+    cb(null, USERS[userId]);
+  };
+
+  this.deleteSession = function(/*sessionToken*/) {
+    // TODO: implement
+  };
+
+  this.getSession = function(sessionToken, cb) {
+    cb(null, SESSIONS[sessionToken]);
   };
 
 };

@@ -125,7 +125,7 @@ Surface.Prototype = function() {
 
   this.dispose = function() {
     var doc = this.getDocument();
-    doc.disconnect(this);
+    doc.off(this);
     this.domSelection = null;
     this.domObserver.disconnect();
     this.getController().unregisterSurface(this);
@@ -840,7 +840,7 @@ Surface.Prototype = function() {
     return frags;
   };
 
-  this._computeSelectionFragments = function(sel, selectionFragments, userData) {
+  this._computeSelectionFragments = function(sel, selectionFragments, collaborator) {
     selectionFragments = selectionFragments || {};
     if (sel && !sel.isNull()) {
       // console.log('Computing selection fragments for', sel.toString());
@@ -852,7 +852,7 @@ Surface.Prototype = function() {
           frags = [];
           selectionFragments[pathStr] = frags;
         }
-        frag.userData = userData;
+        frag.collaborator = collaborator;
         frags.push(frag);
       });
     }

@@ -56,8 +56,8 @@ TextPropertyComponent.Prototype = function() {
     var el;
     if (node.type === 'cursor' || node.type === 'selection-fragment') {
       el = $$('span').addClass('se-'+node.type);
-      if (node.userData) {
-        el.addClass('sm-user-'+node.userData.sessionIndex);
+      if (node.collaborator) {
+        el.addClass('sm-collaborator-'+node.collaborator.colorIndex);
       } else {
         el.addClass('sm-local-user');
       }

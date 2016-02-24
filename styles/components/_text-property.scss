@@ -1,27 +1,20 @@
 .sc-text-property {
   .se-cursor {
     outline: 1px solid #999;
-
-    &.sm-user-2 {
-      outline-color: rgba(255, 147, 0, 1);
-      
-    }
-
-    &.sm-user-3 {
-      outline-color: rgba(192, 238, 204, 1);
-    }
+    &.sm-collaborator-1 { outline-color: $collaborator-color-1; }
+    &.sm-collaborator-2 { outline-color: $collaborator-color-2; }
+    &.sm-collaborator-3 { outline-color: $collaborator-color-3; }
+    &.sm-collaborator-4 { outline-color: $collaborator-color-4; }
+    &.sm-collaborator-5 { outline-color: $collaborator-color-5; }
   }
 
   .se-selection-fragment {
     background-color: #ddd;
-
-    &.sm-user-2 {
-      background: rgba(255, 147, 0, 0.6);
-    }
-
-    &.sm-user-3 {
-      background: rgba(192, 238, 204, 0.6);
-    }
+    &.sm-collaborator-1 { background: $collaborator-color-1-transparent; }
+    &.sm-collaborator-2 { background: $collaborator-color-2-transparent; }
+    &.sm-collaborator-3 { background: $collaborator-color-3-transparent; }
+    &.sm-collaborator-4 { background: $collaborator-color-4-transparent; }
+    &.sm-collaborator-5 { background: $collaborator-color-5-transparent; }
   }
 
   .se-container-annotation.se-anchor {
@@ -31,5 +24,4 @@
   .sm-highlighted {
     background: #ddd;
   }
-
 }
