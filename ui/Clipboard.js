@@ -91,6 +91,7 @@ Clipboard.Prototype = function() {
       if (body) {
         var _sharedPasteElement = body.createElement('div')
           .attr('contenteditable', true)
+          .attr('tabindex', -1)
           .css({
             position: 'fixed',
             opacity: '0.0',

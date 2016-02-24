@@ -11,16 +11,38 @@ var SurfaceTool = require('../../ui/SurfaceTool');
 
 function LinkTool() {
   SurfaceTool.apply(this, arguments);
-
-  var ctrl = this.getController();
-  ctrl.on('command:executed', this.onCommandExecuted, this);
 }
 
 LinkTool.Prototype = function() {
 
+  var _super = Object.getPrototypeOf(this);
+
+  this.didMount = function() {
+    var ctrl = this.getController();
+    ctrl.on('command:executed', this.onCommandExecuted, this);
+  };
+
   this.dispose = function() {
     var ctrl = this.getController();
     ctrl.off(this);
+  };
+
+  this.render = function() {
+    var el = _super.render.apply(this, arguments);
+    el.addClass('sc-link-tool');
+
+    if (this.state.mode === 'edit') {
+      el.addClass('sm-active');
+    }
+
+    // When we are in edit mode showing the edit prompt
+    if (this.state.mode === 'edit' && this.state.showPrompt) {
+      var link = this.getLink();
+      var prompt = $$(EditLinkPrompt, {link: link, tool: this});
+      el.append(prompt);
+    }
+
+    return el;
   };
 
   this.onCommandExecuted = function(info, commandName) {
@@ -61,44 +83,6 @@ LinkTool.Prototype = function() {
 
   this.getLink = function() {
     return this.getDocument().get(this.state.annotationId);
-  };
-
-
-  this.render = function() {
-    var title = this.props.title || capitalize(this.getName());
-
-    if (this.state.mode) {
-      title = [capitalize(this.state.mode), title].join(' ');
-    }
-
-    var el = $$('div')
-      .addClass('sc-link-tool se-tool')
-      .attr('title', title);
-
-    if (this.state.disabled) {
-      el.addClass('sm-disabled');
-    }
-
-    if (this.state.mode === 'edit') {
-      el.addClass('sm-active');
-    }
-
-    if (this.state.mode) {
-      el.addClass(this.state.mode);
-    }
-
-    var button = $$("button").on('click', this.onClick);
-
-    button.append(this.props.children);
-    el.append(button);
-
-    // When we are in edit mode showing the edit prompt
-    if (this.state.mode === 'edit' && this.state.showPrompt) {
-      var link = this.getLink();
-      var prompt = $$(EditLinkPrompt, {link: link, tool: this});
-      el.append(prompt);
-    }
-    return el;
   };
 };
 

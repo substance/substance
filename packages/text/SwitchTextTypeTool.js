@@ -4,6 +4,7 @@ var each = require('lodash/each');
 var Component = require('../../ui/Component');
 var $$ = Component.$$;
 var SurfaceTool = require('../../ui/SurfaceTool');
+var keys = require('../../util/keys');
 
 /*
   Abstract class for text types. Implements the SurfaceTool API.
@@ -14,6 +15,9 @@ var SurfaceTool = require('../../ui/SurfaceTool');
 
 function SwitchTextType() {
   SurfaceTool.apply(this, arguments);
+
+  // cursor for keyboard navigation
+  this._navIdx = -1;
 }
 
 SwitchTextType.Prototype = function() {
@@ -21,14 +25,6 @@ SwitchTextType.Prototype = function() {
   this.getInitialState = function() {
     var state = this.context.toolManager.getCommandState(this);
     return state;
-  };
-
-  this.getTextCommands = function() {
-    var surface = this.getSurface();
-    if (!this.textCommands && surface) {
-      this.textCommands = surface.getTextCommands();
-    }
-    return this.textCommands || {};
   };
 
   this.dispose = function() {
@@ -46,34 +42,58 @@ SwitchTextType.Prototype = function() {
     }
     var el = $$("div").addClass('sc-switch-text-type');
 
-    // Note: this is a view internal state for opening the select dropdown
-    if (this.state.open) {
-      el.addClass('sm-open');
-    }
+    var toggleButton = $$('button').ref('toggle')
+      .addClass('se-toggle')
+      .attr('title', this.i18n.t('switch_text'))
+      .append(this.i18n.t(textTypeName))
+      .on('click', this.toggleAvailableTextTypes);
+
     if (this.state.disabled) {
       el.addClass('sm-disabled');
+      toggleButton.attr('tabindex', -1);
+    } else {
+      toggleButton.attr('tabindex', 1);
     }
 
-    el.append($$('button')
-      .addClass('se-toggle').attr('href', "#")
-      .attr('title', this.props.title)
-      .append(this.i18n.t(textTypeName))
-      .on('click', this.toggleAvailableTextTypes)
-    );
+    el.append(toggleButton);
 
-    // dropdown options
-    var options = $$('div').addClass("se-options");
-    each(this.state.textTypes, function(textType) {
-      var button = $$('button')
-          .addClass('se-option sm-'+textType.name)
-          .attr("data-type", textType.name)
-          .append(this.i18n.t(textType.name))
-          .on('click', this.handleClick);
-      options.append(button);
-    }.bind(this));
+    if (this.state.open) {
+      el.addClass('sm-open');
 
-    el.append(options);
+      // dropdown options
+      var options = $$('div').addClass("se-options").ref('options');
+      each(this.state.textTypes, function(textType) {
+        var button = $$('button')
+            .addClass('se-option sm-'+textType.name)
+            .attr("data-type", textType.name)
+            .append(this.i18n.t(textType.name))
+            .on('click', this.handleClick);
+        options.append(button);
+      }.bind(this));
+      el.append(options);
+
+      el.on('keydown', this.onKeydown);
+    }
+
     return el;
+  };
+
+  this.didRender = function() {
+    if (this.state.open) {
+      this.refs.toggle.focus();
+    }
+  };
+
+  this.executeCommand = function(textType) {
+    this.getSurface().executeCommand('switch-text-type', textType);
+  };
+
+  this.getTextCommands = function() {
+    var surface = this.getSurface();
+    if (!this.textCommands && surface) {
+      this.textCommands = surface.getTextCommands();
+    }
+    return this.textCommands || {};
   };
 
   this.handleClick = function(e) {
@@ -83,8 +103,26 @@ SwitchTextType.Prototype = function() {
     this.executeCommand(e.currentTarget.dataset.type);
   };
 
-  this.executeCommand = function(textType) {
-    this.getSurface().executeCommand('switch-text-type', textType);
+  this.onKeydown = function(event) {
+    var handled = false;
+    switch (event.keyCode) {
+      case keys.UP:
+        this._nav(-1);
+        handled = true;
+        break;
+      case keys.DOWN:
+        this._nav(1);
+        handled = true;
+        break;
+      case keys.ESCAPE:
+        this.toggleDropdown();
+        handled = true;
+        break;
+    }
+    if (handled) {
+      event.preventDefault();
+      event.stopPropagation();
+    }
   };
 
   this.toggleAvailableTextTypes = function(e) {
@@ -98,10 +136,29 @@ SwitchTextType.Prototype = function() {
   };
 
   this.toggleDropdown = function() {
+    // reset index for keyboard navigation
+    this._navIdx = -1;
     this.extendState({
       open: !this.state.open
     });
   };
+
+  this._nav = function(step) {
+    this._navIdx += step;
+
+    this._navIdx = Math.max(0, this._navIdx);
+    this._navIdx = Math.min(this._getOptionsCount()-1, this._navIdx);
+
+    if (this._navIdx >= 0) {
+      var option = this.refs.options.children[this._navIdx];
+      option.focus();
+    }
+  };
+
+  this._getOptionsCount = function() {
+    return this.refs.options.children.length;
+  };
+
 };
 
 SurfaceTool.extend(SwitchTextType);
