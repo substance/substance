@@ -30,14 +30,14 @@ var SESSIONS = {
   Implements Substance Store API. This is just a stub and is used for
   testing.
 */
-function TestStore(db) {
-  TestStore.super.apply(this);
+function TestBackend(db) {
+  TestBackend.super.apply(this);
 
   // Just a simple object serves us as a db
   this._db = db;
 }
 
-TestStore.Prototype = function() {
+TestBackend.Prototype = function() {
   /*
     Gets changes from the DB
   */
@@ -57,8 +57,8 @@ TestStore.Prototype = function() {
   /*
     Add a change
   */
-  this.addChange = function(id, change, cb) {
-    this._addChange(id, change);
+  this.addChange = function(id, change, userId, cb) {
+    this._addChange(id, change, userId);
     cb(null, this._getVersion(id));
   };
 
@@ -95,5 +95,5 @@ TestStore.Prototype = function() {
 
 };
 
-EventEmitter.extend(TestStore);
-module.exports = TestStore;
+EventEmitter.extend(TestBackend);
+module.exports = TestBackend;

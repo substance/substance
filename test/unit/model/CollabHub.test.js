@@ -8,7 +8,7 @@ var TestWebSocket = require('../../collab/TestWebSocket');
 var TestCollabSession = require('../../collab/TestCollabSession');
 var TestCollabHub = require('../../collab/TestCollabHub');
 var TestHubClient = require('../../collab/TestHubClient');
-var TestStore = require('../../collab/TestStore');
+var TestBackend = require('../../collab/TestBackend');
 var DocumentChange = require('../../../model/DocumentChange');
 
 
@@ -22,7 +22,7 @@ var hub, client1, client2;
 function _setup(fixture, messagesFromSnapshot) {
   doc1 = fixture.createArticle();
   doc2 = fixture.createArticle();
-  store = new TestStore({
+  store = new TestBackend({
     "test": fixture.createChangeset()
   });
   messageQueue = new MessageQueue();
@@ -36,7 +36,7 @@ function _setup(fixture, messagesFromSnapshot) {
     session: {
       sessionToken: 'user1token',
       user: {
-        'id': 'user1',
+        'userId': 'user1',
         'name': 'User 1'
       }
     }
@@ -47,7 +47,7 @@ function _setup(fixture, messagesFromSnapshot) {
     session: {
       sessionToken: 'user2token',
       user: {
-        'id': 'user2',
+        'userId': 'user2',
         'name': 'User 2'
       }
     }

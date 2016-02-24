@@ -339,7 +339,7 @@ CollabHub.Prototype = function() {
   */
   this.commit = function(ws, userSession, documentId, clientVersion, change) {
     var conn = this._connections.get(ws);
-    this._commit(documentId, clientVersion, change, function(err, serverVersion, newChange, serverChanges) {
+    this._commit(documentId, clientVersion, change, userSession.userId, function(err, serverVersion, newChange, serverChanges) {
       // Broadcast change to collaborators
       var broadcastMsg = {
         type: 'update',
@@ -374,16 +374,16 @@ CollabHub.Prototype = function() {
     );
   };
 
-  this._commit = function(documentId, clientVersion, newChange, cb) {
+  this._commit = function(documentId, clientVersion, newChange, userId, cb) {
     // Get latest doc version
     this.store.getVersion(documentId, function(err, serverVersion) {
       if (serverVersion === clientVersion) { // Fast forward update
-        this.store.addChange(documentId, this.serializeChange(newChange), function(err, newVersion) {
+        this.store.addChange(documentId, this.serializeChange(newChange), userId, function(err, newVersion) {
           cb(null, newVersion, newChange, []);
         }.bind(this));
       } else { // Client changes need to be rebased to latest serverVersion
         this._rebaseChange(documentId, clientVersion, newChange, function(err, rebasedNewChange, rebasedOtherChanges) {
-          this.store.addChange(documentId, this.serializeChange(rebasedNewChange), function(err, newVersion) {
+          this.store.addChange(documentId, this.serializeChange(rebasedNewChange), userId, function(err, newVersion) {
             cb(null, newVersion, rebasedNewChange, rebasedOtherChanges);
           }.bind(this));
         }.bind(this));
