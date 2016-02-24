@@ -23,7 +23,6 @@ Persistence API for documents                                               | Be
 Key bindings                                                                | Beta 5
 Full Unicode support                                                        | Beta 5
 Plugins                                                                     | Beta 5
-
                                                                             |
 **UI Components**                                                           |
 TextPropertyEditor for editing annotated text                               | ✓
