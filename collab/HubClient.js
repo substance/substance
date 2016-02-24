@@ -35,7 +35,7 @@ HubClient.Prototype = function() {
     Initialize websocket connection and handle reconnecting
   */
   this._initWebSocket = function() {
-    console.log('Starting websocket connection:', this.wsUrl);
+    console.log('Starting websocket connection:', this.config.wsUrl);
 
     this.ws = new window.WebSocket(this.config.wsUrl);
     this.ws.onopen = this._onWebSocketOpen.bind(this);
