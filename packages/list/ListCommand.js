@@ -113,7 +113,6 @@ ListCommand.Prototype = function() {
       var pos = container.getPosition(node.id);
       // show the new list item and hide the old node
       container.show(newList.id, pos+1);
-      container.hide(node.id);
       deleteNode(tx, {nodeId: node.id});
       return args;
     };

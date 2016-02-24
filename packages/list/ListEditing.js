@@ -179,13 +179,10 @@ ListEditing.Prototype = function() {
    *        a textish node.
    */
   this.mergeListWithTextish = function(tx, args) {
-    var containerId = args.containerId;
-    var container = tx.get(containerId);
     // get the id of the last list item
     var lastListItemId = args.first.items[args.first.items.length-1];
     var originalOffset = tx.get(lastListItemId).content.length;
     // hide and delete the textish node
-    container.hide(args.second.id);
     deleteNode(tx, {nodeId: args.second.id});
     // add the content of the text node to the last item of the list
     tx.update([lastListItemId, 'content'], {insert: {offset: originalOffset, value: args.second.content}});
