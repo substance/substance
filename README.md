@@ -83,7 +83,7 @@ To run the test-suite headless
 $ npm test
 ```
 
-To create a test coverate report:
+To create a test coverage report:
 
 ```
 $ npm run coverage
