@@ -41,73 +41,88 @@ ListCommand.Prototype = function() {
     var containerId = this.getContainerId();
     var self = this;
 
-    surface.transaction(function(tx, args) {
+    // define behavior when the list tool is clicked while the current selection
+    // is a list item.
+    var listToText = function(tx, args) {
       var newList;
       var container = tx.get(containerId);
+      var defaultType = tx.getSchema().getDefaultTextType();
+      var id = uuid(defaultType);
+      var parentList = tx.get(node.parent);
+      var index = container.getChildIndex(parentList);
+      var numItems = parentList.items.length;
+      var nodeIndex = parentList.items.indexOf(node.id);
+      tx.create({
+        id: id,
+        type: defaultType,
+        content: node.content
+      });
+      // show the paragraph node and the second list node
+      annotationHelpers.transferAnnotations(tx, path, 0, [id, 'content'], 0);
+      container.show(id, index+1);
+      // make a new list with the trailing items
+      newList = tx.create({
+        id: uuid('list'),
+        type: parentList.type,
+        items: parentList.items.slice(nodeIndex+1, numItems),
+        ordered: parentList.ordered
+      });
+      var listElem;
+      for (var i=0; i<newList.items.length; i++) {
+        listElem = tx.get(newList.items[i]);
+        listElem.parent = newList.id;
+      }
+      container.show(newList.id, index+2);
+      // delete the trailing list items from the first list
+      for (i=numItems-1; i>=nodeIndex; i--) {
+        tx.update([parentList.id, 'items'], {delete: {offset: i}});
+      }
+      var selection = tx.createSelection({
+        type: 'property',
+        path: [id, 'content'],
+        startOffset: 0
+      });
+      args.selection = selection;
+      return args;
+    };
+
+    // define behavior when the list tool is clicked while the current selection
+    // is a text item.
+    var textToList = function(tx, args) {
+      var container = tx.get(containerId);
+      // create a new list node
+      var newList = {
+        id: uuid("list"),
+        type: "list",
+        ordered: self.ordered
+      };
+      // and a new list item node, set its parent to the list node
+      var newListItem = {
+        id: uuid("list-item"),
+        parent: newList.id,
+        content: content,
+        type: "list-item"
+      };
+      // create the nodes
+      tx.create(newListItem);
+      newList.items = [newListItem.id];
+      tx.create(newList);
+      var newPath = [newListItem.id, 'content'];
+      // transfer annotations from the current node to new list item
+      annotationHelpers.transferAnnotations(tx, path, 0, newPath, 0);
+      var pos = container.getPosition(node.id);
+      // show the new list item and hide the old node
+      container.show(newList.id, pos+1);
+      container.hide(node.id);
+      deleteNode(tx, {nodeId: node.id});
+      return args;
+    };
+
+    surface.transaction(function(tx, args) {
       if (node.type === 'list-item') {
-        var defaultType = tx.getSchema().getDefaultTextType();
-        var id = uuid(defaultType);
-        var parentList = tx.get(node.parent);
-        var index = container.getChildIndex(parentList);
-        var numItems = parentList.items.length;
-        var nodeIndex = parentList.items.indexOf(node.id);
-        tx.create({
-          id: id,
-          type: defaultType,
-          content: node.content
-        });
-        // show the paragraph node and the second list node
-        annotationHelpers.transferAnnotations(tx, path, 0, [id, 'content'], 0);
-        container.show(id, index+1);
-        // make a new list with the trailing items
-        newList = tx.create({
-          id: uuid('list'),
-          type: parentList.type,
-          items: parentList.items.slice(nodeIndex+1, numItems),
-          ordered: parentList.ordered
-        });
-        var listElem;
-        for (var i=0; i<newList.items.length; i++) {
-          listElem = tx.get(newList.items[i]);
-          listElem.parent = newList.id;
-        }
-        container.show(newList.id, index+2);
-        // delete the trailing list items from the first list
-        for (i=numItems-1; i>=nodeIndex; i--) {
-          tx.update([parentList.id, 'items'], {delete: {offset: i}});
-        }
-        var selection = tx.createSelection({
-          type: 'property',
-          path: [id, 'content'],
-          startOffset: 0
-        });
-        args.selection = selection;
+        args = listToText(tx, args);
       } else {
-        // create a new list node
-        newList = {
-          id: uuid("list"),
-          type: "list",
-          ordered: self.ordered
-        };
-        // and a new list item node, set its parent to the list node
-        var newListItem = {
-          id: uuid("list-item"),
-          parent: newList.id,
-          content: content,
-          type: "list-item"
-        };
-        // create the nodes
-        tx.create(newListItem);
-        newList.items = [newListItem.id];
-        tx.create(newList);
-        var newPath = [newListItem.id, 'content'];
-        // transfer annotations from the current node to new list item
-        annotationHelpers.transferAnnotations(tx, path, 0, newPath, 0);
-        var pos = container.getPosition(node.id);
-        // show the new list item and hide the old node
-        container.show(newList.id, pos+1);
-        container.hide(node.id);
-        deleteNode(tx, {nodeId: node.id});
+        args = textToList(tx, args);
       }
       return args;
     });
