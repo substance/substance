@@ -111,6 +111,7 @@ $ npm run doc
 ### Beta 5
 
 - Key bindings
+- Plugins
 - Improved Unicode support
 - Mobile support
 - Automatically generated performance report
