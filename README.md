@@ -99,7 +99,7 @@ $ npm run doc
 
 ### Beta 4
 
-*ETA: February 2016*
+*ETA: March 2016*
 
 - Realtime collaboration
 - Persistence API for documents
