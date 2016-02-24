@@ -1,6 +1,7 @@
 'use strict';
 
 var annotationHelpers = require('../../model/annotationHelpers');
+var deleteNode = require('../../model/transform/deleteNode');
 var SurfaceCommand = require('../../ui/SurfaceCommand');
 var uuid = require('../../util/uuid');
 
@@ -106,9 +107,11 @@ ListCommand.Prototype = function() {
         // show the new list item and hide the old node
         container.show(newList.id, pos+1);
         container.hide(node.id);
+        deleteNode(tx, {nodeId: node.id});
       }
       return args;
     });
+    return true;
   };
 };
 

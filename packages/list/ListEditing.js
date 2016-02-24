@@ -2,6 +2,7 @@ var oo = require('../../util/oo');
 var uuid = require('../../util/uuid');
 
 var annotationHelpers = require('../../model/annotationHelpers');
+var deleteNode = require('../../model/transform/deleteNode');
 
 function ListEditing() {}
 
@@ -183,8 +184,9 @@ ListEditing.Prototype = function() {
     // get the id of the last list item
     var lastListItemId = args.first.items[args.first.items.length-1];
     var originalOffset = tx.get(lastListItemId).content.length;
-    // hide the textish node
+    // hide and delete the textish node
     container.hide(args.second.id);
+    deleteNode(tx, {nodeId: args.second.id});
     // add the content of the text node to the last item of the list
     tx.update([lastListItemId, 'content'], {insert: {offset: originalOffset, value: args.second.content}});
     annotationHelpers.transferAnnotations(tx, [args.second.id, 'content'], 0, [lastListItemId, 'content'], originalOffset);
