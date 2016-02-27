@@ -1,12 +1,12 @@
 /* Toolbar
 -------------------------------------------------- */
- 
+
 .sc-toolbar {
   height: 40px;
   overflow: visible;
   border-bottom: 1px solid #ddd;
   font-size: 13px; // make generic
-  
+
   /* Toolbar group
   ---------------------------- */
 
@@ -52,7 +52,7 @@
         @include dark-fill(0.1);
       }
 
-      button:hover {
+      button:hover, button:focus {
         @include dark-fill(0.1);
       }
 
@@ -61,7 +61,7 @@
         cursor: default;
 
         button:hover {
-          background: none; 
+          background: none;
         }
       }
     }
@@ -69,14 +69,14 @@
 
   /* ???
   ---------------------------- */
-  
+
   input {
     margin: 5px;
     margin-left: 20px;
     min-width: 600px;
     border: none;
   }
-  
+
   /* Toolbar Dropdown
   ---------------------------- */
 
@@ -91,6 +91,10 @@
       line-height: 30px;
       margin: 5px;
       display: block;
+
+      button:focus {
+        @include dark-fill(0.1);
+      }
     }
 
     &:not(.sm-disabled) .se-toggle:after {
@@ -117,7 +121,11 @@
         padding: 5px 10px;
         width:100%; // needed to make buttons render like block elements
 
-        &:hover {
+        &:hover, &:focus {
+          @include dark-fill(0.05);
+        }
+
+        button:focus {
           @include dark-fill(0.05);
         }
 
@@ -126,7 +134,7 @@
           cursor: default;
 
           button:hover {
-            background: none; 
+            background: none;
           }
         }
       }
