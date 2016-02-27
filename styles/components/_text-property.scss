@@ -1,6 +1,10 @@
 .sc-text-property {
   .se-cursor {
     outline: 1px solid #999;
+    display: inline-block;
+    width: 0px;
+    height: 1em;
+    
     &.sm-collaborator-1 { outline-color: $collaborator-color-1; }
     &.sm-collaborator-2 { outline-color: $collaborator-color-2; }
     &.sm-collaborator-3 { outline-color: $collaborator-color-3; }
