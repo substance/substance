@@ -117,8 +117,8 @@ HubClient.Prototype = function() {
         cb(null, data);
       },
       error: function(err) {
-        console.error(err);
-        cb(err.responseText);
+        // console.error(err);
+        cb(new Error(err.responseJSON.errorMessage));
       }
     };
 
