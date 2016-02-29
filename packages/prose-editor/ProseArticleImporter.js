@@ -1,7 +1,6 @@
 'use strict';
 
 var HTMLImporter = require('../../model/HTMLImporter');
-var DefaultDOMElement = require('../../ui/DefaultDOMElement');
 var ProseArticle = require('./ProseArticle');
 var schema = ProseArticle.schema;
 
