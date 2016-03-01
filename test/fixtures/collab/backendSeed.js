@@ -6,7 +6,7 @@ var testSeed = {
     'test': {
       userId: 'test',
       name: 'Test user',
-      loginKey: '1234'      
+      loginKey: '1234'
     }
   },
   changesets: {
