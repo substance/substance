@@ -1,9 +1,9 @@
 'use strict';
 
-var isString = require('lodash/isString');
 var isNumber = require('lodash/isNumber');
 var Operation = require('./Operation');
 var Conflict = require('./Conflict');
+var isString = require('../../util/isString');
 
 var INSERT = "insert";
 var DELETE = "delete";

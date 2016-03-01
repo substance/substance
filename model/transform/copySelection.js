@@ -3,9 +3,10 @@
 'use strict';
 
 var isEqual = require('lodash/isEqual');
-var cloneDeep = require('lodash/cloneDeep');
 var each = require('lodash/each');
+
 var annotationHelpers = require('../annotationHelpers');
+var cloneDeep = require('../../util/cloneDeep');
 
 var CLIPBOARD_CONTAINER_ID = "clipboard_content";
 var CLIPBOARD_PROPERTY_ID = "clipboard_property";

@@ -1,12 +1,12 @@
 'use strict';
 
-var DOMExporter = require('./DOMExporter');
-var DefaultDOMElement = require('../ui/DefaultDOMElement');
 var extend = require('lodash/extend');
 var each = require('lodash/each');
 var isBoolean = require('lodash/isBoolean');
 var isNumber = require('lodash/isNumber');
-var isString = require('lodash/isString');
+var DOMExporter = require('./DOMExporter');
+var DefaultDOMElement = require('../ui/DefaultDOMElement');
+var isString = require('../util/isString');
 
 /**
   @class

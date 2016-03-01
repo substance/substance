@@ -2,8 +2,8 @@
 
 var isNumber = require('lodash/isNumber');
 var isEqual = require('lodash/isEqual');
-var cloneDeep = require('lodash/cloneDeep');
 
+var cloneDeep = require('../../util/cloneDeep');
 var Operation = require('./Operation');
 var Conflict = require('./Conflict');
 

@@ -1,7 +1,7 @@
 'use strict';
 
-var cloneDeep = require('lodash/cloneDeep');
 var isEqual = require('lodash/isEqual');
+var cloneDeep = require('../util/cloneDeep');
 
 var Selection = require('./Selection');
 

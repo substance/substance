@@ -1,13 +1,13 @@
 'use strict';
 
-var isString = require('lodash/isString');
 var isEqual = require('lodash/isEqual');
-var cloneDeep = require('lodash/cloneDeep');
 var DataObject = require('./DataObject');
 var Operation = require('./Operation');
 var TextOperation = require('./TextOperation');
 var ArrayOperation = require('./ArrayOperation');
 var Conflict = require('./Conflict');
+var isString = require('../../util/isString');
+var cloneDeep = require('../../util/cloneDeep');
 
 var NOP = "NOP";
 var CREATE = "create";

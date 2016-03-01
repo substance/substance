@@ -1,10 +1,11 @@
 'use strict';
 
 var isArray = require('lodash/isArray');
-var isString = require('lodash/isString');
 var each = require('lodash/each');
-var cloneDeep = require('lodash/cloneDeep');
+
 var DataObject = require('./DataObject');
+var isString = require('../../util/isString');
+var cloneDeep = require('../../util/cloneDeep');
 var EventEmitter = require('../../util/EventEmitter');
 
 /**

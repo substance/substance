@@ -1,11 +1,11 @@
 'use strict';
 
-var isString = require('lodash/isString');
 var isArray = require('lodash/isArray');
 var get = require('lodash/get');
 var setWith = require('lodash/setWith');
 var unset = require('lodash/unset');
 var oo = require('../../util/oo');
+var isString = require('../../util/isString');
 
 /*
   An object that can be access via path API.

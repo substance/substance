@@ -4,13 +4,14 @@
 
 var isBoolean = require('lodash/isBoolean');
 var isNumber = require('lodash/isNumber');
-var isString = require('lodash/isString');
 var isArray = require('lodash/isArray');
 var isObject = require('lodash/isObject');
-var cloneDeep = require('lodash/cloneDeep');
 var each = require('lodash/each');
 var extend = require('lodash/extend');
 var EventEmitter = require('../../util/EventEmitter');
+var isString = require('../../util/isString');
+var cloneDeep = require('../../util/cloneDeep');
+var UnicodeString = require('../../util/UnicodeString');
 
 /**
   Base node implementation.
@@ -171,7 +172,7 @@ function _defineSchema(NodeClass, schema) {
   if (!NodeClass.static.hasOwnProperty('addressablePropertyNames')) {
     var addressablePropertyNames = [];
     each(NodeClass.static.schema, function(prop, name) {
-      if (prop.type === "string" && prop.addressable === true) {
+      if (prop.type === "text" && prop.addressable === true) {
         addressablePropertyNames.push(name);
       }
     });
@@ -198,7 +199,7 @@ function _compileDefintion(definition) {
     definition.type = [ "array", definition.type[0] ];
   } else if (definition.type === 'text') {
     result = {
-      type: "string",
+      type: "text",
       addressable: true,
       default: ''
     };
@@ -252,6 +253,7 @@ function _checked(prop, value) {
     throw new Error('Value for property ' + prop.name + ' is undefined.');
   }
   if (type === "string" && !isString(value) ||
+      type === "text" && !isString(value) ||
       type === "boolean" && !isBoolean(value) ||
       type === "number" && !isNumber(value) ||
       type === "array" && !isArray(value) ||
@@ -259,7 +261,12 @@ function _checked(prop, value) {
       type === "object" && !isObject(value)) {
     throw new Error('Illegal value type for property ' + prop.name + ': expected ' + type + ', was ' + (typeof value));
   }
-  return value;
+  // make sure that a string is wrapped into a UnicodeString object
+  if (type === "text" && !(value instanceof UnicodeString)) {
+    return new UnicodeString(value);
+  } else {
+    return value;
+  }
 }
 
 module.exports = Node;
