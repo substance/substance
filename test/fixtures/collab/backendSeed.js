@@ -1,4 +1,3 @@
-var exampleNoteChangeset = require('./model/exampleNoteChangeset')();
 var twoParagraphs = require('./two-paragraphs');
 
 // Fixture for backend
