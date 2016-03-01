@@ -1,49 +1,26 @@
 'use strict';
 
 var EventEmitter = require('../../util/EventEmitter');
-
-var USERS = {
-  'user1': {
-    'userId': 'user1',
-    'password': 'demo',
-    'name': 'User 1'
-  },
-  'user2': {
-    'userId': 'user2',
-    'password': 'demo',
-    'name': 'User 2'
-  }
-};
-
-var SESSIONS = {
-  'user1token': {
-    'user': USERS['user1'],
-    'sessionToken': 'user1token'
-  },
-  'user2token': {
-    'user': USERS['user2'],
-    'sessionToken': 'user2token'
-  }
-};
+var twoParagraphs = require('../fixtures/collab/two-paragraphs');
+var JSONConverter = require('../../model/JSONConverter');
 
 /*
   Implements Substance Store API. This is just a stub and is used for
   testing.
 */
-function TestBackend(db) {
+function TestBackend(config) {
   TestBackend.super.apply(this);
-
-  // Just a simple object serves us as a db
-  this._db = db;
+  this.config = config;
 }
 
 TestBackend.Prototype = function() {
+
   /*
-    Gets changes from the DB
+    Gets changes for a given document
   */
-  this.getChanges = function(id, sinceVersion, cb) {
-    var changes = this._getChanges(id);
-    var currentVersion = this._getVersion(id);
+  this.getChanges = function(documentId, sinceVersion, cb) {
+    var changes = this._getChanges(documentId);
+    var currentVersion = this._getVersion(documentId);
 
     if (sinceVersion === 0) {
       cb(null, currentVersion, changes);
@@ -55,11 +32,67 @@ TestBackend.Prototype = function() {
   };
 
   /*
-    Add a change
+    Creates a new empty or prefilled document
+  
+    Writes the initial change into the database.
+    Returns the JSON serialized version, as a starting point
   */
-  this.addChange = function(id, change, userId, cb) {
-    this._addChange(id, change, userId);
-    cb(null, this._getVersion(id));
+  this.createDocument = function(documentId, cb) {
+    if (this._documentExists(documentId)) {
+      return cb(new Error('Document already exists'));
+    }
+    var startingDoc = twoParagraphs.createArticle();
+    var startingDocChanges = twoParagraphs.createChangeset();
+    this._db.documents[documentId] = [];
+    this._addChange(documentId, startingDocChanges[0]);
+    cb(null, startingDoc);
+  };
+
+  /*
+    Delete document
+  */
+  this.deleteDocument = function(documentId, cb) {
+    var exists = this._documentExists(documentId);
+    if (!exists) return cb(new Error('Document does not exist'));
+    delete this._db.documents[documentId];
+    cb(null);
+  };
+
+  /*
+    Get document snapshot
+  */
+  this.getDocument = function(documentId, cb) {
+    var self = this;
+    this.getChanges(documentId, 0, function(err, version, changes) {
+      if(err) return cb(err);
+      var doc = new self.config.ArticleClass();
+      changes.forEach(function(change) {
+        change.ops.forEach(function(op) {
+          doc.data.apply(op);
+        });
+      });
+      var converter = new JSONConverter();
+      cb(null, converter.exportDocument(doc), version);
+    });
+  };
+
+  /*
+    Returns true if changeset exists
+  */
+  this.documentExists = function(documentId, cb) {
+    cb(null, this._documentExists());
+  };
+
+  /*
+    Add a change object to the database
+  */
+  this.addChange = function(documentId, change, userId, cb) {
+    var exists = this._documentExists(documentId);
+    if (!exists) {
+      return cb(new Error('Document '+documentId+' does not exist'));
+    }
+    this._addChange(documentId, change, userId);
+    cb(null, this._getVersion(documentId));
   };
 
   /*
@@ -69,28 +102,60 @@ TestBackend.Prototype = function() {
     cb(null, this._getVersion(id));
   };
 
-  this._getVersion = function(id) {
-    return this._db[id].length;
-  };
-
-  this._getChanges = function(id) {
-    return this._db[id];
-  };
-
-  this._addChange = function(id, change) {
-    this._db[id].push(change);
-  };
-
+  /*
+    Get user based on userId
+  */
   this.getUser = function(userId, cb) {
-    cb(null, USERS[userId]);
+    cb(null, this._getUser(userId));
   };
 
-  this.deleteSession = function(/*sessionToken*/) {
+  /*
+    Seeds the database
+  */
+  this.seed = function(seed, cb) {
+    this._db = seed;
+    cb(null, seed);
+  };
+
+  /*
+    Remove a session based on a given session token
+  */
+  this.deleteSession = function(sessionToken) {
     // TODO: implement
+    delete this._db.sessions[sessionToken];
   };
 
+  /*
+    Get session for a given session toke
+  */
   this.getSession = function(sessionToken, cb) {
-    cb(null, SESSIONS[sessionToken]);
+    var session = Object.assign({}, this._db.sessions[sessionToken]);
+    // Create rich session
+    session.user = this._getUser(session.userId);
+    cb(null, session);
+  };
+
+  // Handy synchronous helpers
+  // -------------------------
+
+  this._documentExists = function(documentId) {
+    return !!this._db.documents[documentId];
+  };
+
+  this._getVersion = function(documentId) {
+    return this._db.documents[documentId].length;
+  };
+
+  this._getChanges = function(documentId) {
+    return this._db.documents[documentId];
+  };
+
+  this._addChange = function(documentId, change) {
+    this._db.documents[documentId].push(change);
+  };
+
+  this._getUser = function(userId) {
+    return this._db.users[userId];
   };
 
 };

@@ -3,14 +3,27 @@ var twoParagraphs = require('./two-paragraphs');
 // Fixture for backend
 var testSeed = {
   users: {
-    'test': {
-      userId: 'test',
-      name: 'Test user',
-      loginKey: '1234'
+    'user1': {
+      userId: 'user1',
+      name: 'User 2'
+    },
+    'user2': {
+      userId: 'user1',
+      name: 'User 2'
     }
   },
-  changesets: {
+  documents: {
     'test-doc': twoParagraphs.createChangeset()
+  },
+  sessions: {
+    'user1token': {
+      'userId': 'user1',
+      'sessionToken': 'user1token'
+    },
+    'user2token': {
+      'userId': 'user2',
+      'sessionToken': 'user2token'
+    }
   }
 };
 
