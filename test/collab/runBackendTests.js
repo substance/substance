@@ -7,7 +7,6 @@ function runBackendTests(backend, QUnit) {
   QUnit.test("Test if seed db has a valid document test-doc", function(assert) {
     var done = assert.async();
     backend.getDocument('test-doc', function(err, doc) {
-      console.log('article', doc);
       assert.ok(doc, 'valid doc snapshot expected');
       done();
     });

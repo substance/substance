@@ -37,11 +37,10 @@ MemoryBackend.Prototype = function() {
     Returns the JSON serialized version, as a starting point
   */
   this.createDocument = function(documentId, schemaName, cb) {
-    var schemaConfig = this._getSchemaConfig(schemaName);
+    var schemaConfig = this.config.schemas[schemaName];
     if (!schemaConfig) {
-      throw new Error('Schema '+schemaName+' not found');
+      cb(new new Error('Schema '+schemaName+' not found'));
     }
-
     var docFactory = schemaConfig.documentFactory;
 
     if (this._documentExists(documentId)) {
@@ -72,29 +71,35 @@ MemoryBackend.Prototype = function() {
   };
 
   /*
-    Get document snapshot
+    Get document snapshot.
+
+    Uses schema information stored at the doc entry and
+    constructs a document using the corresponding documentFactory
+    that is available as a schema config object.
   */
   this.getDocument = function(documentId, cb) {
     var doc = this._db.documents[documentId];
     if (!doc) {
       return cb(new Error('Document does not exist'));
     }
-    try {
-      var docFactory = this._getDocumentFactory(doc.schema.name);
-      this.getChanges(documentId, 0, function(err, version, changes) {
-        if(err) return cb(err);
-        var doc = docFactory.createEmptyArticle();
-        changes.forEach(function(change) {
-          change.ops.forEach(function(op) {
-            doc.data.apply(op);
-          });
-        });
-        var converter = new JSONConverter();
-        cb(null, converter.exportDocument(doc), version);
-      });
-    } catch(err) {
-      cb(err);
+
+    var schemaConfig = this.config.schemas[doc.schema.name];
+    if (!schemaConfig) {
+      cb(new new Error('Schema '+doc.schema.name+' not found'));
     }
+
+    var docFactory = schemaConfig.documentFactory;
+    this.getChanges(documentId, 0, function(err, version, changes) {
+      if(err) return cb(err);
+      var doc = docFactory.createEmptyArticle();
+      changes.forEach(function(change) {
+        change.ops.forEach(function(op) {
+          doc.data.apply(op);
+        });
+      });
+      var converter = new JSONConverter();
+      cb(null, converter.exportDocument(doc), version);
+    });
   };
 
   /*
@@ -177,25 +182,6 @@ MemoryBackend.Prototype = function() {
 
   this._getUser = function(userId) {
     return this._db.users[userId];
-  };
-
-  this._getSchemaConfig = function(schemaName) {
-    var schemaConfig = this.config.schemas[schemaName];
-    if (schemaConfig) {
-      return schemaConfig;
-    } else {
-      throw new Error('Schema '+schemaName+' not found');
-    }
-  };
-
-  this._getDocumentFactory = function(schemaName) {
-    var schemaConfig = this._getSchemaConfig(schemaName);
-    var docFactory = schemaConfig.documentFactory;
-    if (docFactory) {
-      return docFactory;
-    } else {
-      throw new Error('DocumentFactory for '+ schemaName +'missing.');
-    }
   };
 
 
