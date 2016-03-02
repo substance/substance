@@ -12,6 +12,8 @@ var testSeed = {
   },
   documents: {
     'test-doc': {
+      documentId: 'test-doc',
+      userId: 'user1',
       schema: {
         name: 'prose-article',
         version: '1.0.0'

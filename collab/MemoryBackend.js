@@ -4,6 +4,7 @@ var EventEmitter = require('../util/EventEmitter');
 var JSONConverter = require('../model/JSONConverter');
 var matches = require('lodash/matches');
 var filter = require('lodash/filter');
+var map = require('lodash/map');
 var uuid = require('../util/uuid');
 
 /*
@@ -62,13 +63,17 @@ MemoryBackend.Prototype = function() {
         name: schemaConfig.name,
         version: schemaConfig.version
       },
+      documentId: documentId,
       userId: userId,
       changes: []
     };
     this._addChange(documentId, changeset[0]);
 
-    var initialVersion = 1;
-    cb(null, initialVersion, doc);
+    var res = {
+      data: doc,
+      version: 1
+    };
+    cb(null, res);
   };
 
   /*
@@ -89,14 +94,14 @@ MemoryBackend.Prototype = function() {
     that is available as a schema config object.
   */
   this.getDocument = function(documentId, cb) {
-    var doc = this._db.documents[documentId];
-    if (!doc) {
+    var docRecord = this._db.documents[documentId];
+    if (!docRecord) {
       return cb(new Error('Document does not exist'));
     }
 
-    var schemaConfig = this.config.schemas[doc.schema.name];
+    var schemaConfig = this.config.schemas[docRecord.schema.name];
     if (!schemaConfig) {
-      cb(new Error('Schema '+doc.schema.name+' not found'));
+      cb(new Error('Schema '+docRecord.schema.name+' not found'));
     }
 
     var docFactory = schemaConfig.documentFactory;
@@ -109,7 +114,12 @@ MemoryBackend.Prototype = function() {
         });
       });
       var converter = new JSONConverter();
-      cb(null, converter.exportDocument(doc), version);
+      var res = {
+        data: converter.exportDocument(doc),
+        version: version,
+        userId: docRecord.userId
+      };
+      cb(null, res);
     });
   };
 
@@ -179,8 +189,16 @@ MemoryBackend.Prototype = function() {
     List available documents
   */
   this.listDocuments = function(filters, cb) {
-    var _matcher = matches(filters);
-    var documents = filter(this._db.documents, _matcher);
+    var documents = map(this._db.documents, function(doc) {
+      return {
+        documentId: doc.documentId,
+        userId: doc.userId,
+        schema: doc.schema
+      };
+    });
+
+    // Filter doc based on provided filters argument
+    documents = filter(documents, matches(filters));
     cb(null, documents);
   };
 
