@@ -16,7 +16,7 @@ function runBackendTests(backend, QUnit) {
     var done = assert.async();
     backend.getVersion('test-doc', function(err, version) {
       assert.notOk(err, 'Should not error');
-      assert.equal(1, version);
+      assert.equal(version, 1, 'Document version should equals 1');
       done();
     });
   });
@@ -25,8 +25,8 @@ function runBackendTests(backend, QUnit) {
     var done = assert.async();
     backend.getChanges('test-doc', 0, function(err, version, changes) {
       assert.notOk(err, 'Should not error');
-      assert.equal(1, changes.length);
-      assert.equal(1, version);
+      assert.equal(changes.length, 1, 'Should be only one change');
+      assert.equal(version, 1, 'Document version should equals 1');
       done();
     });
   });
@@ -62,7 +62,7 @@ function runBackendTests(backend, QUnit) {
     var done = assert.async();
     backend.addChange('test-doc', {'some': 'change'}, null, function(err, version) {
       assert.notOk(err, 'Should not error');
-      assert.equal(2, version, 'Version should have been incremented by 1');
+      assert.equal(version, 2, 'Version should have been incremented by 1');
 
       backend.getChanges('test-doc', 0, function(err, version, changes) {
         assert.equal(changes.length, 2, 'There should be two changes in the db');
