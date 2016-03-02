@@ -1,7 +1,7 @@
 
 function runBackendTests(backend, QUnit) {
 
-  // Test Initial Seed validity
+  // Document API
   // --------------------
 
   QUnit.test("Test if seed db has a valid document test-doc", function(assert) {
@@ -31,12 +31,9 @@ function runBackendTests(backend, QUnit) {
     });
   });
 
-  // Test full API
-  // --------------------
-
   QUnit.test('Create a new document', function(assert) {
     var done = assert.async();
-    backend.createDocument('new-doc', 'prose-article', function(err, doc) {
+    backend.createDocument('new-doc', 'prose-article', 'user2', function(err, doc) {
       assert.ok(doc, 'valid doc snapshot expected');
       done();
     });
@@ -46,7 +43,19 @@ function runBackendTests(backend, QUnit) {
     var done = assert.async();
     backend.deleteDocument('new-doc', function(err) {
       assert.ok(!err, 'Should delete a document');
-      done();
+
+      backend.getDocument('new-doc', function(err, doc) {
+        assert.ok(err, 'Should print an error that document does not exist');
+        assert.isNullOrUndefined(doc, 'doc should be undefined');
+
+        // Test if there are still changes for that doc after deletion
+        backend.getChanges('new-doc', 0, function(err, version, changes) {
+          assert.ok(err, 'Should print an error that document does not exist');
+          assert.isNullOrUndefined(version, 'version should be undefined');
+          assert.isNullOrUndefined(changes, 'changes should be undefined');
+          done();
+        });
+      });
     });
   });
 
@@ -69,6 +78,72 @@ function runBackendTests(backend, QUnit) {
         assert.equal(version, 2, 'New version should be 2');
         done();
       });
+    });
+  });
+
+  // Users API
+  // --------------------
+
+  QUnit.test('Get user', function(assert) {
+    var done = assert.async();
+    backend.getUser('user1', function(err, user) {
+      assert.notOk(err, 'Getting an existing user should not error');
+      assert.equal(user.userId, 'user1', 'userId should be "user1"');
+      done();
+    });
+  });
+
+  QUnit.test('Get user that does not exist', function(assert) {
+    var done = assert.async();
+    backend.getUser('userx', function(err, user) {
+      assert.ok(err, 'Getting a user that does not exist should error');
+      assert.isNullOrUndefined(user, 'user should be undefined');
+      done();
+    });
+  });
+
+  QUnit.test('Create a new user', function(assert) {
+    var done = assert.async();
+    backend.createUser({'userId': 'user3'}, function(err, newUser) {
+      assert.notOk(err, 'Creating a new user should not error');
+      assert.equal(newUser.userId, 'user3', 'New user should have userId 3');
+
+      // Let's see if the user is now really in the db
+      backend.getUser('user3', function(err, user) {
+        assert.notOk(err, 'Getting user after creation should not error');
+        assert.equal(user.userId, 'user3', 'userId should be "user3"');
+        done();
+      });
+    });
+  });
+
+  QUnit.test('Create a new user that already exists', function(assert) {
+    var done = assert.async();
+    backend.createUser({'userId': 'user1'}, function(err, newUser) {
+      assert.ok(err, 'Creating a new user should error');
+      assert.isNullOrUndefined(newUser, 'newUser should be undefined');
+      done();
+    });
+  });
+
+  // Sessions API
+  // --------------------
+
+  QUnit.test('Get an existing session', function(assert) {
+    var done = assert.async();
+    backend.getSession('user1token', function(err, session) {
+      assert.equal(session.sessionToken, 'user1token', 'Session token should match');
+      assert.equal(session.user.userId, 'user1', 'Session should be associated with user1');
+      done();
+    });
+  });
+
+  QUnit.test('Get a non-existent session', function(assert) {
+    var done = assert.async();
+    backend.getSession('user1token', function(err, session) {
+      assert.equal(session.sessionToken, 'user1token', 'Session token should match');
+      assert.equal(session.user.userId, 'user1', 'Session should be associated with user1');
+      done();
     });
   });
 }

@@ -2,6 +2,9 @@
 
 var EventEmitter = require('../util/EventEmitter');
 var JSONConverter = require('../model/JSONConverter');
+var matches = require('lodash/matches');
+var filter = require('lodash/filter');
+var uuid = require('../util/uuid');
 
 /*
   Implements Substance Store API. This is just a stub and is used for
@@ -18,15 +21,20 @@ MemoryBackend.Prototype = function() {
     Gets changes for a given document
   */
   this.getChanges = function(documentId, sinceVersion, cb) {
-    var changes = this._getChanges(documentId);
-    var currentVersion = this._getVersion(documentId);
+    
+    if (this._documentExists(documentId)) {
+      var changes = this._getChanges(documentId);
+      var currentVersion = this._getVersion(documentId);
 
-    if (sinceVersion === 0) {
-      cb(null, currentVersion, changes);
-    } else if (sinceVersion > 0) {
-      cb(null, currentVersion, changes.slice(sinceVersion));
+      if (sinceVersion === 0) {
+        cb(null, currentVersion, changes);
+      } else if (sinceVersion > 0) {
+        cb(null, currentVersion, changes.slice(sinceVersion));
+      } else {
+        cb(new Error('Illegal version: ' + sinceVersion));
+      }
     } else {
-      throw new Error('Illegal version: ' + sinceVersion);
+      cb(new Error('Document does not exist'));
     }
   };
 
@@ -36,7 +44,7 @@ MemoryBackend.Prototype = function() {
     Writes the initial change into the database.
     Returns the JSON serialized version, as a starting point
   */
-  this.createDocument = function(documentId, schemaName, cb) {
+  this.createDocument = function(documentId, schemaName, userId, cb) {
     var schemaConfig = this.config.schemas[schemaName];
     if (!schemaConfig) {
       cb(new Error('Schema '+schemaName+' not found'));
@@ -54,6 +62,7 @@ MemoryBackend.Prototype = function() {
         name: schemaConfig.name,
         version: schemaConfig.version
       },
+      userId: userId,
       changes: []
     };
     this._addChange(documentId, changeset[0]);
@@ -134,7 +143,87 @@ MemoryBackend.Prototype = function() {
     Get user based on userId
   */
   this.getUser = function(userId, cb) {
-    cb(null, this._getUser(userId));
+    var user = this._getUser(userId);
+    if (user) {
+      cb(null, user);
+    } else {
+      cb(new Error('User not found'));
+    }
+  };
+
+  /*
+    Create a new use
+  */
+  this.createUser = function(userData, cb) {
+    if (this._userExists(userData.userId)) {
+      cb(new Error('User already exists'));
+    } else {
+      this._createUser(userData);
+      cb(null, userData);
+    }
+  };
+
+  /*
+    Delete user based on userId
+  */
+  this.deleteUser = function(userId, cb) {
+    if (this._userExists(userId)) {
+      cb(new Error('User already exists'));
+    } else {
+      this._deleteUser(userId);
+      cb(null);
+    }
+  };
+
+  /*
+    List available documents
+  */
+  this.listDocuments = function(filters, cb) {
+    var _matcher = matches(filters);
+    var documents = filter(this._db.documents, _matcher);
+    cb(null, documents);
+  };
+
+  /*
+    Authenticate based on loginData object
+
+    Stub implementation only supports authenticating though an
+    existing sessionToken. It's kind of a fake login
+
+    Please test this throughly in your persisted backend implementation.
+  */
+  this.authenticate = function(loginData, cb) {
+    var session = this._db.sessions[loginData.sessionToken];
+    if (session) {
+      // Remove old session and create new session
+      this._deleteSession(session.seessionToken);
+      var newSession = this._createSession(session.userId);
+      this.getSession(newSession.sessionToken, cb);
+    } else {
+      cb(new Error('No session found for '+ loginData.sessionToken));
+    }
+  };
+
+  /*
+    Remove a session based on a given session token
+  */
+  this.deleteSession = function(sessionToken) {
+    delete this._db.sessions[sessionToken];
+  };
+
+  /*
+    Get session for a given session toke
+  */
+  this.getSession = function(sessionToken, cb) {
+    var session = this._db.sessions[sessionToken];
+    if (session) {
+      // Create rich session
+      var richSession = Object.assign({}, this._db.sessions[sessionToken]);
+      richSession.user = this._getUser(session.userId);
+      cb(null, richSession);
+    } else {
+      cb(new Error('No session found for sessionToken: '+ sessionToken));
+    }
   };
 
   /*
@@ -143,24 +232,6 @@ MemoryBackend.Prototype = function() {
   this.seed = function(seed, cb) {
     this._db = seed;
     cb(null, seed);
-  };
-
-  /*
-    Remove a session based on a given session token
-  */
-  this.deleteSession = function(sessionToken) {
-    // TODO: implement
-    delete this._db.sessions[sessionToken];
-  };
-
-  /*
-    Get session for a given session toke
-  */
-  this.getSession = function(sessionToken, cb) {
-    var session = Object.assign({}, this._db.sessions[sessionToken]);
-    // Create rich session
-    session.user = this._getUser(session.userId);
-    cb(null, session);
   };
 
   // Handy synchronous helpers
@@ -186,6 +257,38 @@ MemoryBackend.Prototype = function() {
     return this._db.users[userId];
   };
 
+  this._createUser = function(userData) {
+    this._db.users[userData.userId] = userData;
+  };
+
+  this._userExists = function(userId) {
+    return !!this._db.users[userId];
+  };
+
+  this._deleteUser = function(userId) {
+    delete this._db.users[userId];
+  };
+
+  this._createSession = function(userId) {
+    var newSession = {
+      sessionToken: uuid(),
+      userId: userId
+    };
+    this._db.sessions[newSession.sessionToken] = newSession;
+    return newSession;
+  };
+
+  this._deleteSession = function(sessionToken) {
+    delete this._db.sessions[sessionToken];
+  };
+
+  this._userExists = function(userId) {
+    return !!this._db.users[userId];
+  };
+
+  this._deleteUser = function(userId) {
+    delete this._db.users[userId];
+  };
 
 };
 

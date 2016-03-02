@@ -4,12 +4,10 @@ var twoParagraphs = require('./two-paragraphs');
 var testSeed = {
   users: {
     'user1': {
-      userId: 'user1',
-      name: 'User 1'
+      userId: 'user1'
     },
     'user2': {
-      userId: 'user1',
-      name: 'User 2'
+      userId: 'user1'
     }
   },
   documents: {
