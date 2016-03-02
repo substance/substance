@@ -1,19 +1,18 @@
 'use strict';
 
-var EventEmitter = require('../../util/EventEmitter');
-var twoParagraphs = require('../fixtures/collab/two-paragraphs');
-var JSONConverter = require('../../model/JSONConverter');
+var EventEmitter = require('../util/EventEmitter');
+var JSONConverter = require('../model/JSONConverter');
 
 /*
   Implements Substance Store API. This is just a stub and is used for
   testing.
 */
-function TestBackend(config) {
-  TestBackend.super.apply(this);
+function MemoryBackend(config) {
+  MemoryBackend.super.apply(this);
   this.config = config;
 }
 
-TestBackend.Prototype = function() {
+MemoryBackend.Prototype = function() {
 
   /*
     Gets changes for a given document
@@ -37,15 +36,29 @@ TestBackend.Prototype = function() {
     Writes the initial change into the database.
     Returns the JSON serialized version, as a starting point
   */
-  this.createDocument = function(documentId, cb) {
+  this.createDocument = function(documentId, schemaName, cb) {
+    var schemaConfig = this._getSchemaConfig(schemaName);
+    if (!schemaConfig) {
+      throw new Error('Schema '+schemaName+' not found');
+    }
+
+    var docFactory = schemaConfig.documentFactory;
+
     if (this._documentExists(documentId)) {
       return cb(new Error('Document already exists'));
     }
-    var startingDoc = twoParagraphs.createArticle();
-    var startingDocChanges = twoParagraphs.createChangeset();
-    this._db.documents[documentId] = [];
-    this._addChange(documentId, startingDocChanges[0]);
-    cb(null, startingDoc);
+
+    var doc = docFactory.createArticle();
+    var changeset = docFactory.createChangeset();
+    this._db.documents[documentId] = {
+      schema: {
+        name: schemaConfig.name,
+        version: schemaConfig.version
+      },
+      changes: []
+    };
+    this._addChange(documentId, changeset[0]);
+    cb(null, doc);
   };
 
   /*
@@ -62,18 +75,26 @@ TestBackend.Prototype = function() {
     Get document snapshot
   */
   this.getDocument = function(documentId, cb) {
-    var self = this;
-    this.getChanges(documentId, 0, function(err, version, changes) {
-      if(err) return cb(err);
-      var doc = new self.config.ArticleClass();
-      changes.forEach(function(change) {
-        change.ops.forEach(function(op) {
-          doc.data.apply(op);
+    var doc = this._db.documents[documentId];
+    if (!doc) {
+      return cb(new Error('Document does not exist'));
+    }
+    try {
+      var docFactory = this._getDocumentFactory(doc.schema.name);
+      this.getChanges(documentId, 0, function(err, version, changes) {
+        if(err) return cb(err);
+        var doc = docFactory.createEmptyArticle();
+        changes.forEach(function(change) {
+          change.ops.forEach(function(op) {
+            doc.data.apply(op);
+          });
         });
+        var converter = new JSONConverter();
+        cb(null, converter.exportDocument(doc), version);
       });
-      var converter = new JSONConverter();
-      cb(null, converter.exportDocument(doc), version);
-    });
+    } catch(err) {
+      cb(err);
+    }
   };
 
   /*
@@ -143,22 +164,42 @@ TestBackend.Prototype = function() {
   };
 
   this._getVersion = function(documentId) {
-    return this._db.documents[documentId].length;
+    return this._db.documents[documentId].changes.length;
   };
 
   this._getChanges = function(documentId) {
-    return this._db.documents[documentId];
+    return this._db.documents[documentId].changes;
   };
 
   this._addChange = function(documentId, change) {
-    this._db.documents[documentId].push(change);
+    this._db.documents[documentId].changes.push(change);
   };
 
   this._getUser = function(userId) {
     return this._db.users[userId];
   };
 
+  this._getSchemaConfig = function(schemaName) {
+    var schemaConfig = this.config.schemas[schemaName];
+    if (schemaConfig) {
+      return schemaConfig;
+    } else {
+      throw new Error('Schema '+schemaName+' not found');
+    }
+  };
+
+  this._getDocumentFactory = function(schemaName) {
+    var schemaConfig = this._getSchemaConfig(schemaName);
+    var docFactory = schemaConfig.documentFactory;
+    if (docFactory) {
+      return docFactory;
+    } else {
+      throw new Error('DocumentFactory for '+ schemaName +'missing.');
+    }
+  };
+
+
 };
 
-EventEmitter.extend(TestBackend);
-module.exports = TestBackend;
+EventEmitter.extend(MemoryBackend);
+module.exports = MemoryBackend;

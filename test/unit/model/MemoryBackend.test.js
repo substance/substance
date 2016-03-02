@@ -3,14 +3,21 @@
 require('../qunit_extensions');
 
 var backendSeed = require('../../fixtures/collab/backendSeed');
-var TestBackend = require('../../collab/TestBackend');
+var MemoryBackend = require('../../../collab/MemoryBackend');
 var runBackendTests = require('../../collab/runBackendTests');
+var twoParagraphs = require('../../fixtures/collab/two-paragraphs');
 
-var backend = new TestBackend({
-  ArticleClass: require('../../../packages/prose-editor/ProseArticle')
+var backend = new MemoryBackend({
+  schemas: {
+    'prose-article': {
+      name: 'prose-article',
+      version: '1.0.0',
+      documentFactory: twoParagraphs
+    }
+  }
 });
 
-QUnit.module('collab/Backend', {
+QUnit.module('collab/MemoryBackend', {
   beforeEach: function(assert) {
     var done = assert.async();
     backend.seed(backendSeed, function(err) {

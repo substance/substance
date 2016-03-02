@@ -1,7 +1,8 @@
-// Test Initial Seed validity
-// --------------------
 
 function runBackendTests(backend, QUnit) {
+
+  // Test Initial Seed validity
+  // --------------------
 
   QUnit.test("Test if seed db has a valid document test-doc", function(assert) {
     var done = assert.async();
@@ -21,7 +22,7 @@ function runBackendTests(backend, QUnit) {
     });
   });
 
-  QUnit.test("Check if seed db test-doc has valid changes", function(assert) {
+  QUnit.test("Test if seed db test-doc has valid changes", function(assert) {
     var done = assert.async();
     backend.getChanges('test-doc', 0, function(err, version, changes) {
       assert.notOk(err, 'Should not error');
@@ -36,7 +37,7 @@ function runBackendTests(backend, QUnit) {
 
   QUnit.test('Create a new document', function(assert) {
     var done = assert.async();
-    backend.createDocument('new-doc', function(err, doc) {
+    backend.createDocument('new-doc', 'prose-article', function(err, doc) {
       assert.ok(doc, 'valid doc snapshot expected');
       done();
     });
@@ -45,16 +46,15 @@ function runBackendTests(backend, QUnit) {
   QUnit.test('Delete document', function(assert) {
     var done = assert.async();
     backend.deleteDocument('new-doc', function(err) {
-      assert.ok(!err, 'There should not be no error on deletion');
+      assert.ok(!err, 'Should delete a document');
       done();
     });
   });
 
-  // TODO: Use a real change!
   QUnit.test('Should not allow adding a change to non existing changeset', function(assert) {
     var done = assert.async();
-    backend.addChange('some-nonexistent-doc', {'some': 'change'}, null, function(err, version) {
-      assert.ok(err, 'There should be an error');
+    backend.addChange('some-non-existent-doc', {'some': 'change'}, null, function(err) {
+      assert.ok(err, 'Adding change to non existent doc should error');
       done();
     });
   });
@@ -63,10 +63,15 @@ function runBackendTests(backend, QUnit) {
     var done = assert.async();
     backend.addChange('test-doc', {'some': 'change'}, null, function(err, version) {
       assert.notOk(err, 'Should not error');
-      assert.equal(2, version);
-      done();
+      assert.equal(2, version, 'Version should have been incremented by 1');
+
+      backend.getChanges('test-doc', 0, function(err, version, changes) {
+        assert.equal(changes.length, 2, 'There should be two changes in the db');
+        assert.equal(version, 2, 'New version should be 2');
+        done();
+      });
     });
   });
-};
+}
 
 module.exports = runBackendTests;

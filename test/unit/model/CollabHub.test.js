@@ -8,9 +8,8 @@ var TestWebSocket = require('../../collab/TestWebSocket');
 var TestCollabSession = require('../../collab/TestCollabSession');
 var TestCollabHub = require('../../collab/TestCollabHub');
 var TestHubClient = require('../../collab/TestHubClient');
-var TestBackend = require('../../collab/TestBackend');
+var MemoryBackend = require('../../../collab/MemoryBackend');
 var DocumentChange = require('../../../model/DocumentChange');
-
 
 QUnit.module('model/CollabHub');
 
@@ -22,7 +21,7 @@ var hub, client1, client2;
 function _setup(fixture, messagesFromSnapshot) {
   doc1 = fixture.createArticle();
   doc2 = fixture.createArticle();
-  store = new TestBackend({
+  store = new MemoryBackend({
     "test": fixture.createChangeset()
   });
   messageQueue = new MessageQueue();
