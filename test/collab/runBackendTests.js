@@ -12,7 +12,7 @@ function runBackendTests(backend, QUnit) {
       assert.ok(doc, 'valid doc snapshot expected');
       assert.ok(doc.data, 'should have document data attached');
       assert.equal(doc.version, 1, 'doc version should be 1');
-      assert.equal(doc.userId, 'user1', 'userId should be "user1"');
+      assert.equal(doc.userId, '1', 'userId should be "1"');
       done();
     });
   });
@@ -38,7 +38,7 @@ function runBackendTests(backend, QUnit) {
 
   QUnit.test('Create a new document', function(assert) {
     var done = assert.async();
-    backend.createDocument('new-doc', 'prose-article', 'user2', function(err, doc) {
+    backend.createDocument('new-doc', 'prose-article', '2', function(err, doc) {
       assert.ok(doc, 'valid doc snapshot expected');
       done();
     });
@@ -91,7 +91,7 @@ function runBackendTests(backend, QUnit) {
     backend.listDocuments({}, function(err, documents) {
       assert.notOk(err, 'Should not error');
       assert.equal(documents.length, 1, 'There should be one document returned');
-      assert.equal(documents[0].userId, 'user1', 'First doc should have userId "user1"');
+      assert.equal(documents[0].userId, '1', 'First doc should have userId "1"');
       assert.equal(documents[0].documentId, 'test-doc', 'documentId should be "test-doc"');
       done();
     });
@@ -99,10 +99,10 @@ function runBackendTests(backend, QUnit) {
 
   QUnit.test('List documents with matching filter', function(assert) {
     var done = assert.async();
-    backend.listDocuments({userId: 'user1'}, function(err, documents) {
+    backend.listDocuments({userId: '1'}, function(err, documents) {
       assert.notOk(err, 'Should not error');
       assert.equal(documents.length, 1, 'There should be one document returned');
-      assert.equal(documents[0].userId, 'user1', 'First doc should have userId "user1"');
+      assert.equal(documents[0].userId, '1', 'First doc should have userId "1"');
       assert.equal(documents[0].documentId, 'test-doc', 'documentId should be "test-doc"');
       done();
     });
@@ -122,9 +122,9 @@ function runBackendTests(backend, QUnit) {
 
   QUnit.test('Get user', function(assert) {
     var done = assert.async();
-    backend.getUser('user1', function(err, user) {
+    backend.getUser('1', function(err, user) {
       assert.notOk(err, 'Getting an existing user should not error');
-      assert.equal(user.userId, 'user1', 'userId should be "user1"');
+      assert.equal(user.userId, '1', 'userId should be "1"');
       done();
     });
   });
@@ -140,14 +140,14 @@ function runBackendTests(backend, QUnit) {
 
   QUnit.test('Create a new user', function(assert) {
     var done = assert.async();
-    backend.createUser({'userId': 'user3'}, function(err, newUser) {
+    backend.createUser({'userId': '3'}, function(err, newUser) {
       assert.notOk(err, 'Creating a new user should not error');
-      assert.equal(newUser.userId, 'user3', 'New user should have userId 3');
+      assert.equal(newUser.userId, '3', 'New user should have userId 3');
 
       // Let's see if the user is now really in the db
-      backend.getUser('user3', function(err, user) {
+      backend.getUser('3', function(err, user) {
         assert.notOk(err, 'Getting user after creation should not error');
-        assert.equal(user.userId, 'user3', 'userId should be "user3"');
+        assert.equal(user.userId, '3', 'userId should be "3"');
         done();
       });
     });
@@ -155,7 +155,7 @@ function runBackendTests(backend, QUnit) {
 
   QUnit.test('Create a new user that already exists', function(assert) {
     var done = assert.async();
-    backend.createUser({'userId': 'user1'}, function(err, newUser) {
+    backend.createUser({'userId': '1'}, function(err, newUser) {
       assert.ok(err, 'Creating a new user should error');
       assert.isNullOrUndefined(newUser, 'newUser should be undefined');
       done();
@@ -169,7 +169,7 @@ function runBackendTests(backend, QUnit) {
     var done = assert.async();
     backend.getSession('user1token', function(err, session) {
       assert.equal(session.sessionToken, 'user1token', 'Session token should match');
-      assert.equal(session.user.userId, 'user1', 'Session should be associated with user1');
+      assert.equal(session.user.userId, '1', 'Session should be associated with user 1');
       done();
     });
   });
@@ -178,7 +178,7 @@ function runBackendTests(backend, QUnit) {
     var done = assert.async();
     backend.getSession('user1token', function(err, session) {
       assert.equal(session.sessionToken, 'user1token', 'Session token should match');
-      assert.equal(session.user.userId, 'user1', 'Session should be associated with user1');
+      assert.equal(session.user.userId, '1', 'Session should be associated with user 1');
       done();
     });
   });
@@ -188,7 +188,7 @@ function runBackendTests(backend, QUnit) {
     backend.authenticate({sessionToken: 'user1token'}, function(err, session) {
       assert.notOk(err, 'Authenticating with an existing session token should not error');
       assert.notEqual(session.sessionToken, 'user1token', 'There should be a new token assigned.');
-      assert.equal(session.user.userId, 'user1', 'New should be associated with user1');
+      assert.equal(session.user.userId, '1', 'New should be associated with user 1');
 
       backend.getSession('user1token', function(err, session) {
         assert.ok(err, 'Looking for old session should error');
