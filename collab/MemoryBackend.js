@@ -196,7 +196,7 @@ MemoryBackend.Prototype = function() {
     var session = this._db.sessions[loginData.sessionToken];
     if (session) {
       // Remove old session and create new session
-      this._deleteSession(session.seessionToken);
+      this._deleteSession(session.sessionToken);
       var newSession = this._createSession(session.userId);
       this.getSession(newSession.sessionToken, cb);
     } else {
@@ -207,8 +207,13 @@ MemoryBackend.Prototype = function() {
   /*
     Remove a session based on a given session token
   */
-  this.deleteSession = function(sessionToken) {
-    delete this._db.sessions[sessionToken];
+  this.deleteSession = function(sessionToken, cb) {
+    if (this._sessionExists(sessionToken)) {
+      this._deleteSession(sessionToken);
+      cb(null);
+    } else {
+      cb(new Error('Session does not exist'));
+    }
   };
 
   /*
@@ -267,6 +272,10 @@ MemoryBackend.Prototype = function() {
 
   this._deleteUser = function(userId) {
     delete this._db.users[userId];
+  };
+
+  this._sessionExists = function(sessionToken) {
+    return !!this._db.sessions[sessionToken];
   };
 
   this._createSession = function(userId) {

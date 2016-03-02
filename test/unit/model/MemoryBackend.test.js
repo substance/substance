@@ -20,7 +20,11 @@ var backend = new MemoryBackend({
 QUnit.module('collab/MemoryBackend', {
   beforeEach: function(assert) {
     var done = assert.async();
-    backend.seed(backendSeed, function(err) {
+
+    // Make sure we create a new seed instance, as data ops
+    // are performed directly on the seed object
+    var newBackendSeed = JSON.parse(JSON.stringify(backendSeed));
+    backend.seed(newBackendSeed, function(err) {
       if (err) {
         return console.error(err);
       } else {

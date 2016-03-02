@@ -41,15 +41,15 @@ function runBackendTests(backend, QUnit) {
 
   QUnit.test('Delete document', function(assert) {
     var done = assert.async();
-    backend.deleteDocument('new-doc', function(err) {
+    backend.deleteDocument('test-doc', function(err) {
       assert.ok(!err, 'Should delete a document');
 
-      backend.getDocument('new-doc', function(err, doc) {
+      backend.getDocument('test-doc', function(err, doc) {
         assert.ok(err, 'Should print an error that document does not exist');
         assert.isNullOrUndefined(doc, 'doc should be undefined');
 
         // Test if there are still changes for that doc after deletion
-        backend.getChanges('new-doc', 0, function(err, version, changes) {
+        backend.getChanges('test-doc', 0, function(err, version, changes) {
           assert.ok(err, 'Should print an error that document does not exist');
           assert.isNullOrUndefined(version, 'version should be undefined');
           assert.isNullOrUndefined(changes, 'changes should be undefined');
@@ -146,6 +146,34 @@ function runBackendTests(backend, QUnit) {
       done();
     });
   });
+
+  QUnit.test('Authenticate based on existing session token', function(assert) {
+    var done = assert.async();
+    backend.authenticate({sessionToken: 'user1token'}, function(err, session) {
+      assert.notOk(err, 'Authenticating with an existing session token should not error');
+      assert.notEqual(session.sessionToken, 'user1token', 'There should be a new token assigned.');
+      assert.equal(session.user.userId, 'user1', 'New should be associated with user1');
+
+      backend.getSession('user1token', function(err, session) {
+        assert.ok(err, 'Looking for old session should error');
+        assert.isNullOrUndefined(session, 'session should be undefined');
+        done();
+      });
+    });
+  });
+
+  QUnit.test('Delete existing session', function(assert) {
+    var done = assert.async();
+    backend.deleteSession('user1token', function(err) {
+      assert.notOk(err, 'Deleting an existing session should not error');
+      backend.getSession('user1token', function(err, session) {
+        assert.ok(err, 'Looking for old session should error');
+        assert.isNullOrUndefined(session, 'session should be undefined');
+        done();
+      });
+    });
+  });
+
 }
 
 module.exports = runBackendTests;
