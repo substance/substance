@@ -39,7 +39,7 @@ MemoryBackend.Prototype = function() {
   this.createDocument = function(documentId, schemaName, cb) {
     var schemaConfig = this.config.schemas[schemaName];
     if (!schemaConfig) {
-      cb(new new Error('Schema '+schemaName+' not found'));
+      cb(new Error('Schema '+schemaName+' not found'));
     }
     var docFactory = schemaConfig.documentFactory;
 
@@ -57,7 +57,9 @@ MemoryBackend.Prototype = function() {
       changes: []
     };
     this._addChange(documentId, changeset[0]);
-    cb(null, doc);
+
+    var initialVersion = 1;
+    cb(null, initialVersion, doc);
   };
 
   /*
@@ -85,7 +87,7 @@ MemoryBackend.Prototype = function() {
 
     var schemaConfig = this.config.schemas[doc.schema.name];
     if (!schemaConfig) {
-      cb(new new Error('Schema '+doc.schema.name+' not found'));
+      cb(new Error('Schema '+doc.schema.name+' not found'));
     }
 
     var docFactory = schemaConfig.documentFactory;
