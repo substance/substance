@@ -28,17 +28,26 @@ function runBackendTests(backend, QUnit) {
 
   QUnit.test("Test if seed db test-doc has valid changes", function(assert) {
     var done = assert.async();
-    backend.getChanges('test-doc', 0, function(err, version, changes) {
+    var req = {
+      documentId: 'test-doc',
+      sinceVersion: 0
+    };
+    backend.getChanges(req, function(err, res) {
       assert.notOk(err, 'Should not error');
-      assert.equal(changes.length, 1, 'Should be only one change');
-      assert.equal(version, 1, 'Document version should equals 1');
+      assert.equal(res.changes.length, 1, 'Should be only one change');
+      assert.equal(res.currentVersion, 1, 'Document version should equals 1');
       done();
     });
   });
 
   QUnit.test('Create a new document', function(assert) {
     var done = assert.async();
-    backend.createDocument('new-doc', 'prose-article', '2', function(err, doc) {
+    var req = {
+      documentId: 'new-doc',
+      schemaName: 'prose-article',
+      userId: '2'
+    };
+    backend.createDocument(req, function(err, doc) {
       assert.ok(doc, 'valid doc snapshot expected');
       done();
     });
@@ -54,10 +63,12 @@ function runBackendTests(backend, QUnit) {
         assert.isNullOrUndefined(doc, 'doc should be undefined');
 
         // Test if there are still changes for that doc after deletion
-        backend.getChanges('test-doc', 0, function(err, version, changes) {
+        var req = {
+          documentId: 'test-doc',
+          sinceVersion: 0
+        };
+        backend.getChanges(req, function(err, res) {
           assert.ok(err, 'Should print an error that document does not exist');
-          assert.isNullOrUndefined(version, 'version should be undefined');
-          assert.isNullOrUndefined(changes, 'changes should be undefined');
           done();
         });
       });
@@ -66,7 +77,12 @@ function runBackendTests(backend, QUnit) {
 
   QUnit.test('Should not allow adding a change to non existing changeset', function(assert) {
     var done = assert.async();
-    backend.addChange('some-non-existent-doc', {'some': 'change'}, null, function(err) {
+    var req = {
+      documentId: 'some-non-existent-doc',
+      change: {'some': 'change'},
+      userId: '1'
+    };
+    backend.addChange(req, function(err) {
       assert.ok(err, 'Adding change to non existent doc should error');
       done();
     });
@@ -74,13 +90,23 @@ function runBackendTests(backend, QUnit) {
 
   QUnit.test('Add a change to an existing doc', function(assert) {
     var done = assert.async();
-    backend.addChange('test-doc', {'some': 'change'}, null, function(err, version) {
+    var req = {
+      documentId: 'test-doc',
+      change: {'some': 'change'},
+      userId: '1'
+    };
+    backend.addChange(req, function(err, version) {
       assert.notOk(err, 'Should not error');
       assert.equal(version, 2, 'Version should have been incremented by 1');
 
-      backend.getChanges('test-doc', 0, function(err, version, changes) {
-        assert.equal(changes.length, 2, 'There should be two changes in the db');
-        assert.equal(version, 2, 'New version should be 2');
+      var req = {
+        documentId: 'test-doc',
+        sinceVersion: 0
+      };
+
+      backend.getChanges(req, function(err, res) {
+        assert.equal(res.changes.length, 2, 'There should be two changes in the db');
+        assert.equal(res.currentVersion, 2, 'New version should be 2');
         done();
       });
     });

@@ -21,18 +21,27 @@ MemoryBackend.Prototype = function() {
   /*
     Gets changes for a given document
   */
-  this.getChanges = function(documentId, sinceVersion, cb) {
+  this.getChanges = function(options, cb) {
     
-    if (this._documentExists(documentId)) {
-      var changes = this._getChanges(documentId);
-      var currentVersion = this._getVersion(documentId);
+    if (this._documentExists(options.documentId)) {
+      var changes = this._getChanges(options.documentId);
+      var currentVersion = this._getVersion(options.documentId);
+      var res;
 
-      if (sinceVersion === 0) {
-        cb(null, currentVersion, changes);
-      } else if (sinceVersion > 0) {
-        cb(null, currentVersion, changes.slice(sinceVersion));
+      if (options.sinceVersion === 0) {
+        res = { 
+          currentVersion: currentVersion,
+          changes: changes
+        };
+        cb(null, res);
+      } else if (options.sinceVersion > 0) {
+        res = { 
+          currentVersion: currentVersion,
+          changes: changes.slice(options.sinceVersion)
+        };
+        cb(null, res);
       } else {
-        cb(new Error('Illegal version: ' + sinceVersion));
+        cb(new Error('Illegal version: ' + options.sinceVersion));
       }
     } else {
       cb(new Error('Document does not exist'));
@@ -45,29 +54,29 @@ MemoryBackend.Prototype = function() {
     Writes the initial change into the database.
     Returns the JSON serialized version, as a starting point
   */
-  this.createDocument = function(documentId, schemaName, userId, cb) {
-    var schemaConfig = this.config.schemas[schemaName];
+  this.createDocument = function(options, cb) {
+    var schemaConfig = this.config.schemas[options.schemaName];
     if (!schemaConfig) {
-      cb(new Error('Schema '+schemaName+' not found'));
+      cb(new Error('Schema '+options.schemaName+' not found'));
     }
     var docFactory = schemaConfig.documentFactory;
 
-    if (this._documentExists(documentId)) {
+    if (this._documentExists(options.documentId)) {
       return cb(new Error('Document already exists'));
     }
 
     var doc = docFactory.createArticle();
     var changeset = docFactory.createChangeset();
-    this._db.documents[documentId] = {
+    this._db.documents[options.documentId] = {
       schema: {
         name: schemaConfig.name,
         version: schemaConfig.version
       },
-      documentId: documentId,
-      userId: userId,
+      documentId: options.documentId,
+      userId: options.userId,
       changes: []
     };
-    this._addChange(documentId, changeset[0]);
+    this._addChange(options.documentId, changeset[0]);
 
     var res = {
       data: doc,
@@ -105,21 +114,25 @@ MemoryBackend.Prototype = function() {
     }
 
     var docFactory = schemaConfig.documentFactory;
-    this.getChanges(documentId, 0, function(err, version, changes) {
+    var options = {
+      documentId: documentId,
+      sinceVersion: 0
+    };
+    this.getChanges(options, function(err, res) {
       if(err) return cb(err);
       var doc = docFactory.createEmptyArticle();
-      changes.forEach(function(change) {
+      res.changes.forEach(function(change) {
         change.ops.forEach(function(op) {
           doc.data.apply(op);
         });
       });
       var converter = new JSONConverter();
-      var res = {
+      var output = {
         data: converter.exportDocument(doc),
-        version: version,
+        version: res.currentVersion,
         userId: docRecord.userId
       };
-      cb(null, res);
+      cb(null, output);
     });
   };
 
@@ -133,13 +146,13 @@ MemoryBackend.Prototype = function() {
   /*
     Add a change object to the database
   */
-  this.addChange = function(documentId, change, userId, cb) {
-    var exists = this._documentExists(documentId);
+  this.addChange = function(options, cb) {
+    var exists = this._documentExists(options.documentId);
     if (!exists) {
-      return cb(new Error('Document '+documentId+' does not exist'));
+      return cb(new Error('Document '+options.documentId+' does not exist'));
     }
-    this._addChange(documentId, change, userId);
-    cb(null, this._getVersion(documentId));
+    this._addChange(options.documentId, options.change, options.userId);
+    cb(null, this._getVersion(options.documentId));
   };
 
   /*
