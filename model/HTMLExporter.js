@@ -16,7 +16,7 @@ var isString = require('lodash/lang/isString');
   exchange format see {@link model/XMLExporter}.
 
   @example
-  
+
   Below is a full example taken from the [Notepad](https://github.com/substance/examples/blob/master/converter/NoteExporter.js) example.
 
   ```js
@@ -74,7 +74,10 @@ HTMLExporter.Prototype = function() {
         }
         var prop = converter.$$('div').attr('property', name);
         if (node.getPropertyType(name) === 'string') {
-          prop.append(converter.annotatedText([node.id, name]));
+          // only convert the property if value is not empty
+          if (value) {
+            prop.append(converter.annotatedText([node.id, name]));
+          }
         } else {
           prop.text(value);
         }
