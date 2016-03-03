@@ -167,7 +167,7 @@ ContainerEditor.Prototype = function() {
       event.preventDefault();
       event.stopPropagation();
       return;
-    };
+    }
 
     // otherwise we stop the default ContentEditable behavior
     event.preventDefault();
