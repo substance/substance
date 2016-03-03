@@ -132,6 +132,8 @@ documentHelpers.getTextForSelection = function(doc, sel) {
     var paths = container.getPathRange(range.start.path, range.end.path);
     for (var i = 0; i < paths.length; i++) {
       var path = paths[i];
+      // FIXME: there should be no invalid paths
+      if (!path) continue;
       text = doc.get(path);
       if (paths.length === 1) {
         result.push(text.substring(sel.start.offset, sel.end.offset));
