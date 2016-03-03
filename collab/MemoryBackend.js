@@ -235,7 +235,7 @@ MemoryBackend.Prototype = function() {
   };
 
   /*
-    Get session for a given session toke
+    Get session for a given session token
   */
   this.getSession = function(sessionToken, cb) {
     var session = this._db.sessions[sessionToken];
