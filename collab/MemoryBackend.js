@@ -21,27 +21,27 @@ MemoryBackend.Prototype = function() {
   /*
     Gets changes for a given document
   */
-  this.getChanges = function(options, cb) {
+  this.getChanges = function(args, cb) {
     
-    if (this._documentExists(options.documentId)) {
-      var changes = this._getChanges(options.documentId);
-      var currentVersion = this._getVersion(options.documentId);
+    if (this._documentExists(args.documentId)) {
+      var changes = this._getChanges(args.documentId);
+      var currentVersion = this._getVersion(args.documentId);
       var res;
 
-      if (options.sinceVersion === 0) {
+      if (args.sinceVersion === 0) {
         res = { 
           currentVersion: currentVersion,
           changes: changes
         };
         cb(null, res);
-      } else if (options.sinceVersion > 0) {
+      } else if (args.sinceVersion > 0) {
         res = { 
           currentVersion: currentVersion,
-          changes: changes.slice(options.sinceVersion)
+          changes: changes.slice(args.sinceVersion)
         };
         cb(null, res);
       } else {
-        cb(new Error('Illegal version: ' + options.sinceVersion));
+        cb(new Error('Illegal version: ' + args.sinceVersion));
       }
     } else {
       cb(new Error('Document does not exist'));
@@ -54,29 +54,29 @@ MemoryBackend.Prototype = function() {
     Writes the initial change into the database.
     Returns the JSON serialized version, as a starting point
   */
-  this.createDocument = function(options, cb) {
-    var schemaConfig = this.config.schemas[options.schemaName];
+  this.createDocument = function(args, cb) {
+    var schemaConfig = this.config.schemas[args.schemaName];
     if (!schemaConfig) {
-      cb(new Error('Schema '+options.schemaName+' not found'));
+      cb(new Error('Schema '+args.schemaName+' not found'));
     }
     var docFactory = schemaConfig.documentFactory;
 
-    if (this._documentExists(options.documentId)) {
+    if (this._documentExists(args.documentId)) {
       return cb(new Error('Document already exists'));
     }
 
     var doc = docFactory.createArticle();
     var changeset = docFactory.createChangeset();
-    this._db.documents[options.documentId] = {
+    this._db.documents[args.documentId] = {
       schema: {
         name: schemaConfig.name,
         version: schemaConfig.version
       },
-      documentId: options.documentId,
-      userId: options.userId,
+      documentId: args.documentId,
+      userId: args.userId,
       changes: []
     };
-    this._addChange(options.documentId, changeset[0]);
+    this._addChange(args.documentId, changeset[0]);
 
     var res = {
       data: doc,
@@ -114,11 +114,11 @@ MemoryBackend.Prototype = function() {
     }
 
     var docFactory = schemaConfig.documentFactory;
-    var options = {
+    var args = {
       documentId: documentId,
       sinceVersion: 0
     };
-    this.getChanges(options, function(err, res) {
+    this.getChanges(args, function(err, res) {
       if(err) return cb(err);
       var doc = docFactory.createEmptyArticle();
       res.changes.forEach(function(change) {
@@ -146,13 +146,13 @@ MemoryBackend.Prototype = function() {
   /*
     Add a change object to the database
   */
-  this.addChange = function(options, cb) {
-    var exists = this._documentExists(options.documentId);
+  this.addChange = function(args, cb) {
+    var exists = this._documentExists(args.documentId);
     if (!exists) {
-      return cb(new Error('Document '+options.documentId+' does not exist'));
+      return cb(new Error('Document '+args.documentId+' does not exist'));
     }
-    this._addChange(options.documentId, options.change, options.userId);
-    cb(null, this._getVersion(options.documentId));
+    this._addChange(args.documentId, args.change, args.userId);
+    cb(null, this._getVersion(args.documentId));
   };
 
   /*
