@@ -21,18 +21,27 @@ MemoryBackend.Prototype = function() {
   /*
     Gets changes for a given document
   */
-  this.getChanges = function(documentId, sinceVersion, cb) {
+  this.getChanges = function(args, cb) {
     
-    if (this._documentExists(documentId)) {
-      var changes = this._getChanges(documentId);
-      var currentVersion = this._getVersion(documentId);
+    if (this._documentExists(args.documentId)) {
+      var changes = this._getChanges(args.documentId);
+      var currentVersion = this._getVersion(args.documentId);
+      var res;
 
-      if (sinceVersion === 0) {
-        cb(null, currentVersion, changes);
-      } else if (sinceVersion > 0) {
-        cb(null, currentVersion, changes.slice(sinceVersion));
+      if (args.sinceVersion === 0) {
+        res = { 
+          currentVersion: currentVersion,
+          changes: changes
+        };
+        cb(null, res);
+      } else if (args.sinceVersion > 0) {
+        res = { 
+          currentVersion: currentVersion,
+          changes: changes.slice(args.sinceVersion)
+        };
+        cb(null, res);
       } else {
-        cb(new Error('Illegal version: ' + sinceVersion));
+        cb(new Error('Illegal version: ' + args.sinceVersion));
       }
     } else {
       cb(new Error('Document does not exist'));
@@ -45,29 +54,29 @@ MemoryBackend.Prototype = function() {
     Writes the initial change into the database.
     Returns the JSON serialized version, as a starting point
   */
-  this.createDocument = function(documentId, schemaName, userId, cb) {
-    var schemaConfig = this.config.schemas[schemaName];
+  this.createDocument = function(args, cb) {
+    var schemaConfig = this.config.schemas[args.schemaName];
     if (!schemaConfig) {
-      cb(new Error('Schema '+schemaName+' not found'));
+      cb(new Error('Schema '+args.schemaName+' not found'));
     }
     var docFactory = schemaConfig.documentFactory;
 
-    if (this._documentExists(documentId)) {
+    if (this._documentExists(args.documentId)) {
       return cb(new Error('Document already exists'));
     }
 
     var doc = docFactory.createArticle();
     var changeset = docFactory.createChangeset();
-    this._db.documents[documentId] = {
+    this._db.documents[args.documentId] = {
       schema: {
         name: schemaConfig.name,
         version: schemaConfig.version
       },
-      documentId: documentId,
-      userId: userId,
+      documentId: args.documentId,
+      userId: args.userId,
       changes: []
     };
-    this._addChange(documentId, changeset[0]);
+    this._addChange(args.documentId, changeset[0]);
 
     var res = {
       data: doc,
@@ -105,21 +114,25 @@ MemoryBackend.Prototype = function() {
     }
 
     var docFactory = schemaConfig.documentFactory;
-    this.getChanges(documentId, 0, function(err, version, changes) {
+    var args = {
+      documentId: documentId,
+      sinceVersion: 0
+    };
+    this.getChanges(args, function(err, res) {
       if(err) return cb(err);
       var doc = docFactory.createEmptyArticle();
-      changes.forEach(function(change) {
+      res.changes.forEach(function(change) {
         change.ops.forEach(function(op) {
           doc.data.apply(op);
         });
       });
       var converter = new JSONConverter();
-      var res = {
+      var output = {
         data: converter.exportDocument(doc),
-        version: version,
+        version: res.currentVersion,
         userId: docRecord.userId
       };
-      cb(null, res);
+      cb(null, output);
     });
   };
 
@@ -133,13 +146,13 @@ MemoryBackend.Prototype = function() {
   /*
     Add a change object to the database
   */
-  this.addChange = function(documentId, change, userId, cb) {
-    var exists = this._documentExists(documentId);
+  this.addChange = function(args, cb) {
+    var exists = this._documentExists(args.documentId);
     if (!exists) {
-      return cb(new Error('Document '+documentId+' does not exist'));
+      return cb(new Error('Document '+args.documentId+' does not exist'));
     }
-    this._addChange(documentId, change, userId);
-    cb(null, this._getVersion(documentId));
+    this._addChange(args.documentId, args.change, args.userId);
+    cb(null, this._getVersion(args.documentId));
   };
 
   /*
