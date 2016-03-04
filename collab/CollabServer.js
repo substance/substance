@@ -1,7 +1,6 @@
 'use strict';
 
 var Server = require('./server');
-
 var CollabEngine = require('CollabEngine');
 
 /*
@@ -33,6 +32,7 @@ CollabServer.Prototype = function() {
     });
   };
 
+
   // Give message a scope
   this.send = function(collaboratorId, message) {
     message.scope = 'hub';
@@ -40,7 +40,74 @@ CollabServer.Prototype = function() {
   };
 
   this.execute = function(req, res) {
-    this.collabEngine
+    var msg = req.message;
+    this[msg.type](req, res);
+  };
+
+  /*
+    Enter a collab session
+  */
+  this.enter = function(req, res) {
+    var args = req.message;
+
+    args.change = this.deserializeChange(msg.change);
+
+    this.collabEngine.enter(args, function(err, result) {
+      // result: changes, version, change
+      if (err) {
+        res.error(err);
+      } else {
+        var collaboratorIds = this.collabEngine.getCollaboratorIds(args.documentId);
+        var collaborators = this.collabEngine.getCollaborators(args.documentId);
+
+        // We need to broadcast a new change if there is one
+        if (result.change) {
+          this.broadCast(collaboratorIds, {
+            type: 'update',
+            version: serverVersion,
+            change: result.change,
+            collaboratorId: args.collaboratorId,
+            documentId: args.documentId
+          });
+        }
+
+        // Notify collaborators that there is a new person
+        this.broadCast(collaboratorIds, {
+          type: 'collaboratorEntered'
+          collaborator: {
+            selection: null,
+            collaboratorId: args.collaboratorId
+          }
+        });
+        
+        res.send({
+          type: 'enterDone',
+          version: result.version,
+          changes: result.changes,
+          collaborators: collaborators
+        });
+
+        res.send(result.sender);
+        this.broadCast
+      }
+      this.next(req, res);
+    }.bind(this));
+  };
+
+  /*
+    Clients send a commit
+  */
+  this.commit = function() {
+
+  };
+
+  // to stringified JSON
+  this.serializeChange = function(change) {
+    return change.toJSON();
+  };
+
+  this.deserializeChange = function(serializedChange) {
+    return DocumentChange.fromJSON(serializedChange);
   };
 
 };

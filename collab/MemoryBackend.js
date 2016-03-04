@@ -20,6 +20,9 @@ MemoryBackend.Prototype = function() {
 
   /*
     Gets changes for a given document
+
+    @param {String} args.documentId doc id
+    @param {Number} args.sinceVersion since which change
   */
   this.getChanges = function(args, cb) {
     

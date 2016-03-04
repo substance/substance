@@ -2,27 +2,76 @@
 
 var EventEmitter = require('../util/EventEmitter');
 var forEach = require('lodash/forEach');
+var map = require('lodash/map');
 var DocumentChange = require('../model/DocumentChange');
 var uuid = require('../util/uuid');
 
 /*
   Engine for realizing collaborative editing. Implements the server-methods of 
-  the real time editing as a library.
+  the real time editing as a reusable library.
 */
 
-function CollabEngine(wss, store) {
+function CollabEngine(store) {
   CollabEngine.super.apply(this);
-
-  this.wss = wss;
 
   // Where docs, users and sessions are stored
   this.store = store;
-  this._onConnection = this._onConnection.bind(this);
-  this.wss.on('connection', this._onConnection);
-  this._connections = new WeakMap();
+
+  // Active collaborators
+  this._collaborators = {};
 }
 
 CollabEngine.Prototype = function() {
+
+  /*
+    Register collaborator for a given documentId
+  */
+  this._register = function(collaboratorId, documentId) {
+    var collaborator = this._collaborators[collaboratorId];
+
+    if (!collaborator) {
+      collaborator = this._collaborators[collaboratorId] = {
+        collaboratorId: collaboratorId,
+        documents: {}
+      };
+    }
+
+    if (collaborator.documents[documentId]) {
+      console.error('ERROR: Collaborator already registered for doc.');
+    }
+
+    // Register document
+    collaborator.documents[documentId] = {
+      selection: null
+    };
+  };
+
+  /*
+    Get collaborators for a specific document
+  */
+  this.getCollaborators = function(documentId, collaboratorId) {
+    var collaborators = {};
+    forEach(this._collaborators, function(collab) {
+      var doc = collab.documents[documentId];
+      if (doc && collab.collaboratorId !== collaboratorId) {
+        collaborators[collab.collaboratorId] = {
+          selection: collab.selection,
+          collaboratorId: collab.collaboratorId
+        };
+      }
+    }.bind(this));
+    return collaborators;
+  };
+
+  /*
+    Get only collaborator ids for a specific document
+  */
+  this.getCollaboratorIds = function(documentId, collaboratorId) {
+    var collaborators = this.getCollaborators(documentId, collaboratorId);
+    return map(collaborators, function(c) {
+      return c.collaboratorId;
+    });
+  };
 
   /*
     Start a new collaborative editing session.
@@ -34,55 +83,66 @@ CollabEngine.Prototype = function() {
     Note: a client can reconnect having a pending change
     which is similar to the commit case
   */
-  this.start = function(args, cb) {
-    var conn = this._connections.get(ws);
-    var self = this;
-
-    if (conn.documents[documentId]) {
-      console.error('Connection is already registered for document', documentId);
-    }
-
-    // Get other connected collaborators for document
-    var collaborators = this.getCollaborators(ws, documentId);
-    
-    // Update connection state
-    conn.documents[documentId] = {
-      selection: null
-    };
-    conn.userSession = userSession;
-      
-    if (change) {
-      this._rebasedOpen(args, cb);
+  this.enter = function(args, cb) {
+    this._register(args.collaboratorId, args.documentId);
+    if (args.change) {
+      // Stores new change and rebases it if needed
+      this._commit(args, cb);
     } else {
-      this._fastForwardOpen(args, cb);
+      // Just get the latest changes
+      this.store.getChanges(args, cb);
     }
   };
 
-  this._rebasedStart = function(args, cb) {
-    this._commit(args, function(err, result) {
-      if (err) return cb(err);
-      this._completeStart(result, cb);
-    });
-  };
+  /*
+    Rebase change
 
-  this._fastForwardStart = function(args, cb) {
-    this._commit(args, function(err, result) {
-      if (err) return cb(err);
-      
-      self.store.getChanges(documentId, clientVersion, function(err, serverVersion, changes) {
-        cb(serverVersion, null, changes);
+    args: documentId, version, change
+  */
+  this._rebaseChange = function (args, cb) {
+    var args = {
+      documentId: args.documentId,
+      sinceVersion: args.version
+    };
+
+    this.store.getChanges(args, function(err, result) {
+      var B = changes.map(this.deserializeChange);
+      var a = this.deserializeChange(args.change);
+      // transform changes
+      DocumentChange.transformInplace(a, B);
+      cb(null, {
+        change: this.serializeChange(a),
+        changes: B.map(this.deserializeChange)
       });
-    });
+    }.bind(this));
   };
 
-  this._completeStart = function(args) {
-    
+  this._commit = function(documentId, clientVersion, newChange, userId, cb) {
+    // Get latest doc version
+    this.store.getVersion(documentId, function(err, serverVersion) {
+      if (serverVersion === clientVersion) { // Fast forward update
+        this.store.addChange(documentId, this.serializeChange(newChange), userId, function(err, newVersion) {
+          cb(null, newVersion, newChange, []);
+        }.bind(this));
+      } else { // Client changes need to be rebased to latest serverVersion
+        this._rebaseChange(documentId, clientVersion, newChange, function(err, rebasedNewChange, rebasedOtherChanges) {
+          this.store.addChange(documentId, this.serializeChange(rebasedNewChange), userId, function(err, newVersion) {
+            cb(null, newVersion, rebasedNewChange, rebasedOtherChanges);
+          }.bind(this));
+        }.bind(this));
+      }
+    }.bind(this));
   };
 
-
+  /*
+    Collaborator leaves the party
+  */
+  this.leave = function(args) {
+    this._unregister(args.collaboratorId, args.documentId);
+  };
 
 };
 
-EventEmitter.extend(CollabHub);
+EventEmitter.extend(CollabEngine);
 
-module.exports = CollabHub;
+module.exports = CollabEngine;

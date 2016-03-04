@@ -2,8 +2,7 @@
 
 var EventEmitter = require('../util/EventEmitter');
 var oo = require('../util/oo');
-var $ = require('../util/jquery');
-var __id__ = 0;
+var uuid = require('../util/uuid');
 
 /**
   ServerRequest
@@ -66,7 +65,6 @@ ServerResponse.Prototype = function() {
 
 oo.initClass(ServerResponse);
 
-
 /**
   Server
 
@@ -99,7 +97,7 @@ Server.Prototype = function() {
     Implement your own as a hook
   */
   this.authorize = function(req, res) {
-    this.req.isAuthorized = true;
+    this.req.setAuthorized();
     this.next(req, res);
   };
 
@@ -116,7 +114,7 @@ Server.Prototype = function() {
     Ability to enrich the response data
   */
   this.enhanceResponse = function(req, res) {
-    next(req, res);
+    this.next(req, res);
   };
 
   /*
@@ -168,7 +166,7 @@ Server.Prototype = function() {
     return res.isReady && res.isEnhanced && !res.isSent;
   };
 
-  this.__done = function() {
+  this.__done = function(req, res) {
     return res.isSent;
   };
 
@@ -183,9 +181,9 @@ Server.Prototype = function() {
       this.enhanceResponse(req, res);
     } else if (this.__enhanced) {
       this.sendResponse(req, res);
-    } else if (this.__error(req, res) {
+    } else if (this.__error(req, res)) {
       this.sendError(req, res);
-    } else if (this.__done) {
+    } else if (this.__done(req,res)) {
       console.log('yay we are done');
     }
   };
@@ -209,7 +207,7 @@ Server.Prototype = function() {
 
   // Takes a request object
   this._processRequest = function(req) {
-    var res = new Response();
+    var res = new ServerResponse();
     this.next(req, res);
   };
 
@@ -226,13 +224,14 @@ Server.Prototype = function() {
     after some operations have been performed.
   */
   this._onMessage = function(ws, msg) {
-    msg = this.deserializeMessage(msg);
-
     // Retrieve the connection data
     var conn = this._connections.get(ws);
+    msg = this.deserializeMessage(msg);
+
+    // We attach a unique collaborator id to each message
+    msg.collaboratorId = conn.collaboratorId;
 
     var req = {
-      collaboratorId: conn.collaboratorId,
       message: msg,
       ws: ws
     };
@@ -251,4 +250,4 @@ Server.Prototype = function() {
 
 EventEmitter.extend(Server);
 
-module.exports = SubstanceServer;
+module.exports = Server;
