@@ -50,8 +50,6 @@ CollabServer.Prototype = function() {
   this.enter = function(req, res) {
     var args = req.message;
 
-    args.change = this.deserializeChange(msg.change);
-
     this.collabEngine.enter(args, function(err, result) {
       // result: changes, version, change
       if (err) {
