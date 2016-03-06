@@ -104,7 +104,7 @@ function runBackendTests(backend, QUnit) {
     backend.getChanges(args, function(err, result) {
       assert.notOk(err, 'Should not error');
       assert.equal(result.changes.length, 1, 'Should be only one change');
-      assert.equal(result.currentVersion, 1, 'Document version should equals 1');
+      assert.equal(result.version, 1, 'Document version should equals 1');
       done();
     });
   });
@@ -139,7 +139,7 @@ function runBackendTests(backend, QUnit) {
 
       backend.getChanges(args, function(err, result) {
         assert.equal(result.changes.length, 2, 'There should be two changes in the db');
-        assert.equal(result.currentVersion, 2, 'New version should be 2');
+        assert.equal(result.version, 2, 'New version should be 2');
         done();
       });
     });

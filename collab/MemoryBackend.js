@@ -131,7 +131,7 @@ MemoryBackend.Prototype = function() {
       var converter = new JSONConverter();
       var output = {
         data: converter.exportDocument(doc),
-        version: res.currentVersion,
+        version: res.version,
         userId: docRecord.userId
       };
       cb(null, output);

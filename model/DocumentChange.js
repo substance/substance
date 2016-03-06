@@ -240,12 +240,14 @@ DocumentChange.deserialize = function(str) {
 };
 
 DocumentChange.fromJSON = function(data) {
-  data.ops = data.ops.map(function(opData) {
+  // Don't write to original object on deserialization
+  var change = Object.assign({}, data);
+  change.ops = data.ops.map(function(opData) {
     return ObjectOperation.fromJSON(opData);
   });
-  data.before.selection = Selection.fromJSON(data.before.selection);
-  data.after.selection = Selection.fromJSON(data.after.selection);
-  return new DocumentChange(data);
+  change.before.selection = Selection.fromJSON(data.before.selection);
+  change.after.selection = Selection.fromJSON(data.after.selection);
+  return new DocumentChange(change);
 };
 
 /*

@@ -87,7 +87,7 @@ CollabEngine.Prototype = function() {
 
     if (args.change) {
       // Stores new change and rebases it if needed
-      this._commit(args, cb);
+      this.commit(args, cb);
     } else {
       // Just get the latest changes
       this.store.getChanges({
@@ -214,7 +214,7 @@ CollabEngine.Prototype = function() {
       cb(null, {
         change: this.serializeChange(a),
         changes: B.map(this.serializeChange),
-        version: result.result.version
+        version: result.version
       });
     }.bind(this));
   };
@@ -233,7 +233,8 @@ CollabEngine.Prototype = function() {
 
   // from JSON
   this.deserializeChange = function(serializedChange) {
-    return DocumentChange.fromJSON(serializedChange);
+    var ch = DocumentChange.fromJSON(serializedChange);
+    return ch;
   };
 
 };
