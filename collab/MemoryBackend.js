@@ -21,25 +21,24 @@ MemoryBackend.Prototype = function() {
   /*
     Gets changes for a given document
 
-    @param {String} args.documentId doc id
+    @param {String} args.documentId document id
     @param {Number} args.sinceVersion since which change
   */
   this.getChanges = function(args, cb) {
-    
     if (this._documentExists(args.documentId)) {
       var changes = this._getChanges(args.documentId);
-      var currentVersion = this._getVersion(args.documentId);
+      var version = this._getVersion(args.documentId);
       var res;
 
       if (args.sinceVersion === 0) {
-        res = { 
-          currentVersion: currentVersion,
+        res = {
+          version: version,
           changes: changes
         };
         cb(null, res);
       } else if (args.sinceVersion > 0) {
-        res = { 
-          currentVersion: currentVersion,
+        res = {
+          version: version,
           changes: changes.slice(args.sinceVersion)
         };
         cb(null, res);
