@@ -135,6 +135,7 @@ ListEditing.Prototype = function() {
       tx.update([node.id, 'content'], {insert: {offset: length, value: item.content}});
       annotationHelpers.transferAnnotations(tx, [item.id, 'content'], 0, [node.id, 'content'], length);
       tx.update([args.second.id, 'items'], {delete: {offset: 0}});
+      if (tx.get([args.second.id, 'items']).length === 0) deleteNode(tx, {nodeId: args.second.id});
     } else {
       // if backspace is hit at the beginning of the second list, we just convert the
       // list item to a paragraph
@@ -159,6 +160,7 @@ ListEditing.Prototype = function() {
       });
       args.selection = selection;
       tx.update([args.second.id, 'items'], {delete: {offset: 0}});
+      if (tx.get([args.second.id, 'items']).length === 0) deleteNode(tx, {nodeId: args.second.id});
     }
     return args;
   };
@@ -250,6 +252,7 @@ ListEditing.Prototype = function() {
     }
     args.selection = selection;
     tx.update([args.second.id, 'items'], {delete: {offset: 0}});
+    if (tx.get([args.second.id, 'items']).length === 0) deleteNode(tx, {nodeId: args.second.id});
     return args;
   };
 
@@ -291,22 +294,24 @@ ListEditing.Prototype = function() {
       // show the paragraph node and the second list node
       annotationHelpers.transferAnnotations(tx, args.path, 0, [id, 'content'], 0);
       container.show(id, index+1);
-      // make a new list with the trailing items
-      var newList = tx.create({
-        id: uuid('list'),
-        type: args.node.type,
-        items: args.node.items.slice(nodeIndex+1, numItems),
-        ordered: args.node.ordered
-      });
-      var listElem;
-      for (var i=0; i<newList.items.length; i++) {
-        listElem = tx.get(newList.items[i]);
-        listElem.parent = newList.id;
+      if (args.node.items.slice(nodeIndex+1, numItems).length > 0){
+        // make a new list with the trailing items
+        var newList = tx.create({
+          id: uuid('list'),
+          type: args.node.type,
+          items: args.node.items.slice(nodeIndex+1, numItems),
+          ordered: args.node.ordered
+        });
+        var listElem;
+        for (var i=0; i<newList.items.length; i++) {
+          listElem = tx.get(newList.items[i]);
+          listElem.parent = newList.id;
+        }
+        container.show(newList.id, index+2);
       }
-      container.show(newList.id, index+2);
       // delete the trailing list items from the first list
-      for (i=numItems-1; i>=nodeIndex; i--) {
-        tx.update([args.node.id, 'items'], {delete: {offset: i}});
+      for (var j=numItems-1; j>=nodeIndex; j--) {
+        tx.update([args.node.id, 'items'], {delete: {offset: j}});
       }
       selection = tx.createSelection({
         type: 'property',
