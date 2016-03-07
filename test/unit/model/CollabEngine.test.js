@@ -49,23 +49,11 @@ QUnit.module('collab/CollabEngine', {
   }
 });
 
-var ENTER_ARGS = {
-  collaboratorId: 'collab-1',
-  documentId: 'test-doc', 
-  version: 1
-};
-
-var COMMIT_ARGS = {
-  collaboratorId: 'collab-1',
-  documentId: 'test-doc',
-  change: exampleChange,
-  version: 1
-};
 
 QUnit.test('New collaborator enters with latest version', function(assert) {
   var done = assert.async();
 
-  collabEngine.enter({
+  collabEngine.connect({
     collaboratorId: 'collab-1',
     documentId: 'test-doc', 
     version: 1
@@ -80,7 +68,7 @@ QUnit.test('New collaborator enters with latest version', function(assert) {
 QUnit.test('New collaborator enters with an outdated version', function(assert) {
   var done = assert.async();
 
-  collabEngine.enter({
+  collabEngine.connect({
     collaboratorId: 'collab-1',
     documentId: 'test-doc', 
     version: 0
@@ -94,9 +82,13 @@ QUnit.test('New collaborator enters with an outdated version', function(assert) 
 
 QUnit.test('New collaborator enters with a new fast-forward change', function(assert) {
   var done = assert.async();
-  var enterArgs = Object.assign({}, ENTER_ARGS, {change: exampleChange});
 
-  collabEngine.enter(enterArgs, function(err, result) {
+  collabEngine.connect({
+    collaboratorId: 'collab-1',
+    documentId: 'test-doc', 
+    version: 1,
+    change: exampleChange
+  }, function(err, result) {
     assert.isNullOrUndefined(err, 'Should not error');
     assert.equal(result.version, 2);
     assert.equal(result.changes.length, 0);
@@ -112,7 +104,7 @@ QUnit.test('New collaborator enters with a change that needs rebasing', function
   var insertTextChange1 = insertText(testDoc, 1, '!');
   var insertTextChange2 = insertText(testDoc, 5, '$$$'); // 5 is based on version 1, after rebasing should be 6
 
-  collabEngine.enter({
+  collabEngine.connect({
     collaboratorId: 'collab-1',
     documentId: 'test-doc', 
     version: 1,
@@ -121,7 +113,7 @@ QUnit.test('New collaborator enters with a change that needs rebasing', function
     assert.isNullOrUndefined(err, 'Should not error');
     assert.equal(result.version, 2);
 
-    collabEngine.enter({
+    collabEngine.connect({
       collaboratorId: 'collab-2',
       documentId: 'test-doc',
       version: 1,
@@ -137,21 +129,23 @@ QUnit.test('New collaborator enters with a change that needs rebasing', function
 });
 
 
-QUnit.test('Two collaborators enter', function(assert) {
+QUnit.test('Two collaborators connect', function(assert) {
   var done = assert.async();
-  collabEngine.enter({
+  collabEngine.connect({
     collaboratorId: 'collab-1',
     documentId: 'test-doc', 
     version: 1
   }, function(err, result) {
-    collabEngine.enter({
+    assert.ok(result, 'connect result should be set');
+    collabEngine.connect({
       collaboratorId: 'collab-2',
       documentId: 'test-doc',
       version: 1
     }, function(err, result) {
+      assert.ok(result, 'connect result should be set');
       assert.isNullOrUndefined(err, 'Should not error');
       var collaboratorIds = collabEngine.getCollaboratorIds('test-doc', 'collab-2');
-      var collaborators = collabEngine.getCollaborators('test-doc', 'collab-2');      
+      // var collaborators = collabEngine.getCollaborators('test-doc', 'collab-2');      
       assert.deepEqual(collaboratorIds, ['collab-1'], 'Should return one collaboratorId');
       collaboratorIds = collabEngine.getCollaboratorIds('test-doc', 'collab-1');
       assert.deepEqual(collaboratorIds, ['collab-2'], 'Should return one collaboratorId');
@@ -163,12 +157,21 @@ QUnit.test('Two collaborators enter', function(assert) {
 QUnit.test('Collaborator does a fast-forward commit', function(assert) {
   var done = assert.async();
 
-  collabEngine.enter(ENTER_ARGS, function(err, result) {
+  collabEngine.connect({
+    collaboratorId: 'collab-1',
+    documentId: 'test-doc', 
+    version: 1
+  }, function(err, result) {
     assert.isNullOrUndefined(err, 'Should not error on enter');
-    assert.ok(result, 'enter should produce a result object');
-    collabEngine.commit(COMMIT_ARGS, function(err, commitResult) {
+    assert.ok(result, 'connect should produce a result object');
+    collabEngine.commit({
+      collaboratorId: 'collab-1',
+      documentId: 'test-doc',
+      change: exampleChange,
+      version: 1
+    }, function(err, commitResult) {
       assert.equal(commitResult.version, 2, 'Version should be 2 after commit');
-      assert.deepEqual(commitResult.change, COMMIT_ARGS.change, 'Change should be untouched');
+      assert.deepEqual(commitResult.change, exampleChange, 'Change should be untouched');
       done();
     });
   });
