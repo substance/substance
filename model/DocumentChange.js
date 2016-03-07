@@ -5,6 +5,7 @@
 var isEqual = require('lodash/isEqual');
 var isObject = require('lodash/isObject');
 var isArray = require('lodash/isArray');
+var extend = require('lodash/extend');
 var map = require('lodash/map');
 var clone = require('lodash/clone');
 var oo = require('../util/oo');
@@ -241,7 +242,7 @@ DocumentChange.deserialize = function(str) {
 
 DocumentChange.fromJSON = function(data) {
   // Don't write to original object on deserialization
-  var change = Object.assign({}, data);
+  var change = extend({}, data);
   change.ops = data.ops.map(function(opData) {
     return ObjectOperation.fromJSON(opData);
   });

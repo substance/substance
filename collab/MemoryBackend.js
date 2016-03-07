@@ -6,6 +6,7 @@ var matches = require('lodash/matches');
 var filter = require('lodash/filter');
 var map = require('lodash/map');
 var uuid = require('../util/uuid');
+var extend = require('lodash/extend');
 
 /*
   Implements Substance Store API. This is just a stub and is used for
@@ -256,7 +257,7 @@ MemoryBackend.Prototype = function() {
     var session = this._db.sessions[sessionToken];
     if (session) {
       // Create rich session
-      var richSession = Object.assign({}, this._db.sessions[sessionToken]);
+      var richSession = extend({}, this._db.sessions[sessionToken]);
       richSession.user = this._getUser(session.userId);
       cb(null, richSession);
     } else {

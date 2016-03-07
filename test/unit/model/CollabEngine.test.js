@@ -17,8 +17,6 @@ var testDoc = twoParagraphs.createArticle();
 // properly play the rebase scenario
 var exampleChange = insertParagraph(testDoc);
 
-console.log('le exampleChange', exampleChange);
-
 var backend = new MemoryBackend({
   schemas: {
     'prose-article': {
