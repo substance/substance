@@ -86,7 +86,7 @@ oo.initClass(ServerResponse);
 function Server(config) {
   Server.super.apply(this);
   this.wss = config.wss;
-
+  this.scope = config.scope || 'hub';
   this._onConnection = this._onConnection.bind(this);
   this.wss.on('connection', this._onConnection);
   this._connections = new WeakMap();
@@ -270,6 +270,7 @@ Server.Prototype = function() {
     Send message to collaborator
   */
   this.send = function(collaboratorId, message) {
+    message.scope = this.scope;
     var ws = this._collaborators[collaboratorId].connection;
     ws.send(this.serializeMessage(message));
   };

@@ -9,13 +9,14 @@ var CollabEngine = require('./CollabEngine');
 function CollabServer(config) {
   CollabServer.super.apply(this, arguments);
 
+  this.scope = 'substance/collab';
   this.backend = config.backend;
   this.collabEngine = new CollabEngine(this.backend);
 }
 
 CollabServer.Prototype = function() {
 
-  var _super = Object.getPrototypeOf(this);
+  // var _super = Object.getPrototypeOf(this);
 
   this.onDisconnect = function(collaboratorId) {
     // All documents collaborator is currently collaborating to
@@ -36,25 +37,20 @@ CollabServer.Prototype = function() {
 
   /*
     Checks for authentication based on message.sessionToken
-  */
-  this.authenticate = function(req, res) {
-    this.backend.getSession(req.message.sessionToken, function(err, userSession) {
-      if (err) {
-        res.error(new Error('Not authenticated'));
-      } else {
-        req.setAuthenticated(userSession);
-      }
-      this.next(req, res);
-    }.bind(this));
-  };
 
-  /*
-    Override send method to give messages a unique scope
+    TODO: This is potentially too specific for the general CollabServer. We may
+    want to move all user/session related stuff into app scope
   */
-  this.send = function(collaboratorId, message) {
-    message.scope = 'hub';
-    _super.send.call(this, collaboratorId, message);
-  };
+  // this.authenticate = function(req, res) {
+  //   this.backend.getSession(req.message.sessionToken, function(err, userSession) {
+  //     if (err) {
+  //       res.error(new Error('Not authenticated'));
+  //     } else {
+  //       req.setAuthenticated(userSession);
+  //     }
+  //     this.next(req, res);
+  //   }.bind(this));
+  // };
 
   /*
     Execute CollabServer API method based on msg.type
@@ -167,6 +163,13 @@ CollabServer.Prototype = function() {
       }
       this.next(req, res);
     }.bind(this));
+  };
+
+  /*
+    Clients sends a selection update
+  */
+  this.updateSelection = function() {
+
   };
 };
 

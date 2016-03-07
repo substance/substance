@@ -47,12 +47,7 @@ function CollabSession(doc, config) {
   this.hubClient.on('message', this._onMessage.bind(this));
 
   // Attempt to open a document immediately
-  if (this.hubClient.isAuthenticated()) {
-    this.connect();
-  } else {
-    console.warn('Attempted to create a CollabSession using an unauthenticated hubClient');
-  }
-
+  this.connect();
 }
 
 CollabSession.Prototype = function() {
