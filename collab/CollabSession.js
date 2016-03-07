@@ -10,14 +10,14 @@ var Selection = require('../model/Selection');
   Session that is connected to a Substance Hub allowing
   collaboration in real-time.
 
-  Requires a connected and authenticated hubClient.
+  Requires a connected and authenticated collabClient.
 */
 function CollabSession(doc, config) {
   CollabSession.super.call(this, doc, config);
 
   config = config || {};
 
-  this.hubClient = config.hubClient;
+  this.collabClient = config.collabClient;
 
   // TODO: The CollabSession or the doc needs to be aware of a doc id
   // that corresponds to the doc on the server. For now we just
@@ -39,12 +39,12 @@ function CollabSession(doc, config) {
   this.collaborators = {};
 
   // This happens on a reconnect
-  this.hubClient.on('connection', this._onHubClientConnected, this);
+  this.collabClient.on('connection', this._onConnected, this);
 
   // Constraints used for computing color indexes
   this.__maxColors = 5;
   this.__nextColorIndex = 0;
-  this.hubClient.on('message', this._onMessage.bind(this));
+  this.collabClient.on('message', this._onMessage.bind(this));
 
   // Attempt to open a document immediately
   this.connect();
@@ -55,12 +55,11 @@ CollabSession.Prototype = function() {
   var _super = Object.getPrototypeOf(this);
 
   /*
-    A new authenticated hubClient connection is available.
+    A new authenticated collabClient connection is available.
 
-    This happens in a reconnect scenario. We just
+    This happens in a reconnect scenario.
   */
-  this._onHubClientConnected = function() {
-    // console.log('hub client reconnected to a new websocket. We reopen the doc.');
+  this._onConnected = function() {
     this._connected = false;
     this.connect();
   };
@@ -188,7 +187,7 @@ CollabSession.Prototype = function() {
   */
   this.commit = function() {
     // If there is something to commit and there is no commit pending
-    if (this.hubClient.isConnected() && this._nextCommit && !this._pendingCommit) {
+    if (this.collabClient.isConnected() && this._nextCommit && !this._pendingCommit) {
       var msg = {
         type: 'commit',
         documentId: this.doc.id,
@@ -437,7 +436,7 @@ CollabSession.Prototype = function() {
   };
 
   this._send = function(msg) {
-    this.hubClient.send(msg);
+    this.collabClient.send(msg);
   };
 
   /*
