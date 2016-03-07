@@ -87,7 +87,7 @@ ListCommand.Prototype = function() {
       var selection = tx.createSelection({
         type: 'property',
         path: [id, 'content'],
-        startOffset: 0
+        startOffset: sel.startOffset
       });
       args.selection = selection;
       return args;
@@ -122,6 +122,12 @@ ListCommand.Prototype = function() {
       // show the new list item and hide the old node
       container.show(newList.id, pos+1);
       deleteNode(tx, {nodeId: node.id});
+      var selection = tx.createSelection({
+        type: 'property',
+        path: [newListItem.id, 'content'],
+        startOffset: sel.startOffset
+      });
+      args.selection = selection;
       return args;
     };
 
