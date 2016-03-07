@@ -94,7 +94,7 @@ CollabEngine.Prototype = function() {
   };
 
   /*
-    Enter a new collaborative editing session.
+    Connect a new collaborative editing session.
 
     @param args.documentId
     @param args.version The client's document version (0 if client starts with an empty doc)
@@ -103,7 +103,7 @@ CollabEngine.Prototype = function() {
     Note: a client can reconnect having a pending change
     which is similar to the commit case
   */
-  this.enter = function(args, cb) {
+  this.connect = function(args, cb) {
     this._register(args.collaboratorId, args.documentId);
 
     if (args.change) {
@@ -115,6 +115,8 @@ CollabEngine.Prototype = function() {
         documentId: args.documentId,
         sinceVersion: args.version,
       }, function(err, result) {
+        if (err) return cb(err);
+
         cb(null, {
           changes: result.changes,
           version: result.version
@@ -146,7 +148,7 @@ CollabEngine.Prototype = function() {
   };
 
   /*
-    Fast forward commit (server version = client version)
+    Fast forward commit (client version = server version)
   */
   this._commitFF = function(args, cb) {
     // Store the commit
@@ -158,7 +160,7 @@ CollabEngine.Prototype = function() {
       if (err) return cb(err);
       cb(null, {
         change: args.change, // collaborators must be notified
-        changes: [],
+        changes: [], // no changes missed in fast-forward scenario
         version: serverVersion
       });
     }.bind(this));
@@ -241,12 +243,11 @@ CollabEngine.Prototype = function() {
   };
 
   /*
-    Collaborator leaves the party. Exit either concerns a single
-    document (args.documentId is set) or all documents
+    Collaborator leaves a document editing session
 
-    This method is synchronous
+    NOTE: This method is synchronous
   */
-  this.exit = function(args) {
+  this.disconnect = function(args) {
     this._unregister(args.collaboratorId, args.documentId);
   };
 

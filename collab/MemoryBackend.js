@@ -269,7 +269,9 @@ MemoryBackend.Prototype = function() {
   */
   this.seed = function(seed, cb) {
     this._db = seed;
-    cb(null, seed);
+    if (cb) {
+      cb(null, seed);
+    }
   };
 
   // Handy synchronous helpers

@@ -28,7 +28,7 @@ function CollabSession(doc, config) {
   this.doc.version = config.docVersion;
 
   // Internal state
-  this._opened = false; // becomes true as soon as the initial open has been completd
+  this._conected = false; // becomes true as soon as the initial connect has been completed
   this._nextCommit = null; //
   this._pendingCommit = null;
 
@@ -48,7 +48,7 @@ function CollabSession(doc, config) {
 
   // Attempt to open a document immediately
   if (this.hubClient.isAuthenticated()) {
-    this.open();
+    this.connect();
   } else {
     console.warn('Attempted to create a CollabSession using an unauthenticated hubClient');
   }
@@ -66,8 +66,8 @@ CollabSession.Prototype = function() {
   */
   this._onHubClientConnected = function() {
     // console.log('hub client reconnected to a new websocket. We reopen the doc.');
-    this._opened = false;
-    this.open();
+    this._connected = false;
+    this.connect();
   };
 
   /*
@@ -83,7 +83,7 @@ CollabSession.Prototype = function() {
 
     var changes, change;
     switch(msg.type) {
-      case 'openDone':
+      case 'connectDone':
       case 'commitDone':
         if (msg.changes) {
           changes = msg.changes.map(function(change) {
@@ -136,17 +136,17 @@ CollabSession.Prototype = function() {
     Connect session with remote endpoint and loads the upstream changes.
 
     This operation initializes an editing session. It may happen that we never
-    see a response (openDone) for it. E.g. when the connection is not
+    see a response (enterDone) for it. E.g. when the connection is not
     authenticated. However in such cases we will receive a connected event
     and then open gets called again, considering the pendingCommit
     (see _computeNextCommit).
 
     @param {WebSocket} ws a connected websocket.
   */
-  this.open = function() {
-    this._opened = false;
+  this.connect = function() {
+    this._connected = false;
     var msg = {
-      type: 'open',
+      type: 'connect',
       documentId: this.doc.id,
       version: this.doc.version
     };
@@ -158,7 +158,7 @@ CollabSession.Prototype = function() {
       // This behaves like a commit
       msg.change = this.serializeChange(this._nextCommit);
       this._send(msg);
-      // In case of a reconnect we need to set _opened back to false
+      // In case of a reconnect we need to set _connected back to false
       this._afterCommit(this._nextCommit);
     } else {
       this._send(msg);
@@ -169,7 +169,7 @@ CollabSession.Prototype = function() {
   this.dispose = function() {
     // Reset to original state
     this.stop();
-    this._opened = false;
+    this._connected = false;
     this._nextCommit = null;
     this._pendingCommit = null;
   };
@@ -177,12 +177,11 @@ CollabSession.Prototype = function() {
   /*
     TODO: Make use of it.
   */
-  this.close = function() {
+  this.disconnect = function() {
     // Let the server know we no longer want to edit this document
     var msg = {
-      type: 'close',
-      documentId: this.doc.id,
-      version: this.doc.version
+      type: 'disconnect',
+      documentId: this.doc.id
     };
     this._send(msg);
     // And now dispose and deregister the handlers
@@ -371,15 +370,16 @@ CollabSession.Prototype = function() {
       this._addCollaborator(collaborator);
     }.bind(this));
     this.emit('collaborators:changed');
+    this._connected = true;
 
-    this._opened = true;
-    this.emit('opened');
+    // Not recommended to use this event
+    this.emit('connected');
     // Now we start to record local changes and periodically push them to remove
     this.start();
   };
 
-  this.isOpen = function() {
-    return this._opened;
+  this.isConnected = function() {
+    return this._connected;
   };
 
   this._addCollaborator = function(collaborator) {

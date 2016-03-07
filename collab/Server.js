@@ -25,9 +25,7 @@ ServerRequest.Prototype = function() {
   };
 
   /*
-    Marks a request as authorized
-
-    authorizationData is optional
+    Marks a request as authorized (authorizationData is optional)
   */
   this.setAuthorized = function(authorizationData) {
     this.isAuthorized = true;
@@ -43,7 +41,9 @@ oo.initClass(ServerRequest);
 function ServerResponse() {
   this.isReady = false; // once the response has been set using send
   this.isEnhanced = false; // after response has been enhanced by enhancer
+  this.isSent = false; // after response has been sent
   this.error = null;
+  this.data = null;
 }
 
 ServerResponse.Prototype = function() {
@@ -61,6 +61,18 @@ ServerResponse.Prototype = function() {
   */
   this.send = function(data) {
     this.data = data;
+    this.isReady = true;
+  };
+
+  /*
+    Sets the isEnhanced flags
+  */
+  this.setEnhanced = function() {
+    this.isEnhanced = true;
+  };
+
+  this.setSent = function() {
+    this.isSent = true;
   };
 };
 
@@ -78,6 +90,7 @@ function Server(config) {
   this._onConnection = this._onConnection.bind(this);
   this.wss.on('connection', this._onConnection);
   this._connections = new WeakMap();
+  this._collaborators = {};
 }
 
 Server.Prototype = function() {
@@ -102,7 +115,7 @@ Server.Prototype = function() {
     Implement your own as a hook
   */
   this.authenticate = function(req, res) {
-    this.req.setAuthenticated();
+    req.setAuthenticated();
     this.next(req, res);
   };
 
@@ -112,7 +125,7 @@ Server.Prototype = function() {
     Implement your own as a hook
   */
   this.authorize = function(req, res) {
-    this.req.setAuthorized();
+    req.setAuthorized();
     this.next(req, res);
   };
 
@@ -129,6 +142,7 @@ Server.Prototype = function() {
     Ability to enrich the response data
   */
   this.enhanceResponse = function(req, res) {
+    res.setEnhanced();
     this.next(req, res);
   };
 
@@ -137,11 +151,9 @@ Server.Prototype = function() {
   */
   this._onConnection = function(ws) {
     var collaboratorId = uuid();
-
     var connection = {
       collaboratorId: collaboratorId
     };
-
     this._connections.set(ws, connection);
 
     // Mapping to find connection for collaboratorId
@@ -154,7 +166,7 @@ Server.Prototype = function() {
   };
 
   /*
-    When connection closes
+    When websocket connection closes
   */
   this._onClose = function(ws) {
     var conn = this._connections.get(ws);
@@ -162,7 +174,7 @@ Server.Prototype = function() {
 
     this.onDisconnect(collaboratorId);
     
-    // Remove the connection record
+    // Remove the connection records
     delete this._collaborators[collaboratorId];
     this._connections.delete(ws);
   };
@@ -189,6 +201,16 @@ Server.Prototype = function() {
     return req.isAuthenticated && req.isAuthorized && !res.isReady;
   };
 
+  this.__executed = function(req, res) {
+    // excecute must call res.send() so res.data is set
+    return req.isAuthenticated && req.isAuthorized && res.isReady && res.data && !res.isEnhanced;
+  };
+
+  this.__enhanced = function(req, res) {
+    // excecute must call res.send() so res.data is set
+    return req.isAuthenticated && req.isAuthorized && res.isReady && res.data && res.isEnhanced;
+  };
+
   this.__error = function(req, res) {
     return res.error;
   };
@@ -210,7 +232,7 @@ Server.Prototype = function() {
       this.execute(req, res);
     } else if (this.__executed(req, res)) {
       this.enhanceResponse(req, res);
-    } else if (this.__enhanced) {
+    } else if (this.__enhanced(req, res)) {
       this.sendResponse(req, res);
     } else if (this.__error(req, res)) {
       this.sendError(req, res);
@@ -219,6 +241,9 @@ Server.Prototype = function() {
     }
   };
 
+  /*
+    Send error response
+  */
   this.sendError = function(req, res) {
     var collaboratorId = req.message.collaboratorId;
     var msg = {
@@ -227,17 +252,25 @@ Server.Prototype = function() {
       requestMessage: req.message
     };
     this.send(collaboratorId, msg);
+    res.setSent();
+    this.next(req, res);
   };
 
+  /*
+    Send response
+  */
   this.sendResponse = function(req, res) {
-    
-  }
+    var collaboratorId = req.message.collaboratorId;
+    this.send(collaboratorId, res.data);
+    res.setSent();
+    this.next(req, res);
+  };
 
   /*
     Send message to collaborator
   */
   this.send = function(collaboratorId, message) {
-    var ws = this._collaborators[collaboratorId];
+    var ws = this._collaborators[collaboratorId].connection;
     ws.send(this.serializeMessage(message));
   };
 
@@ -275,7 +308,6 @@ Server.Prototype = function() {
 
     // We attach a unique collaborator id to each message
     msg.collaboratorId = conn.collaboratorId;
-
     var req = new ServerRequest(msg, ws);
     this._processRequest(req);
   };

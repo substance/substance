@@ -1,7 +1,7 @@
 'use strict';
 
-var Server = require('./server');
-var CollabEngine = require('CollabEngine');
+var Server = require('./Server');
+var CollabEngine = require('./CollabEngine');
 
 /*
   Implements Substance CollabServer API.
@@ -10,7 +10,7 @@ function CollabServer(config) {
   CollabServer.super.apply(this, arguments);
 
   this.backend = config.backend;
-  this.collabEngine = new CollabEngine();
+  this.collabEngine = new CollabEngine(this.backend);
 }
 
 CollabServer.Prototype = function() {
@@ -45,7 +45,7 @@ CollabServer.Prototype = function() {
         req.setAuthenticated(userSession);
       }
       this.next(req, res);
-    });
+    }.bind(this));
   };
 
   /*
@@ -65,12 +65,12 @@ CollabServer.Prototype = function() {
   };
 
   /*
-    Enter a collab session
+    Connect a new collab session based on documentId, version and maybe a pending change
   */
-  this.enter = function(req, res) {
+  this.connect = function(req, res) {
     var args = req.message;
 
-    this.collabEngine.enter(args, function(err, result) {
+    this.collabEngine.connect(args, function(err, result) {
       // result: changes, version, change
       if (err) {
         res.error(err);
@@ -91,7 +91,7 @@ CollabServer.Prototype = function() {
 
         // Notify others that there is a new collaborator
         this.broadCast(collaboratorIds, {
-          type: 'collaboratorEntered',
+          type: 'collaboratorConnected',
           collaborator: {
             selection: null,
             collaboratorId: args.collaboratorId
@@ -100,7 +100,7 @@ CollabServer.Prototype = function() {
         
         // Send the response
         res.send({
-          type: 'enterDone',
+          type: 'connectDone',
           version: result.version,
           changes: result.changes,
           collaborators: collaborators
@@ -111,9 +111,9 @@ CollabServer.Prototype = function() {
   };
 
   /*
-    Exit collab session
+    Disconnect collab session
   */
-  this.exit = function(req, res) {
+  this.disconnect = function(req, res) {
     var args = req.message;
     this.collabEngine.exit({
       collaboratorId: args.collaboratorId,
@@ -124,7 +124,7 @@ CollabServer.Prototype = function() {
       }
       // Notify client that exit has completed successfully
       res.send({
-        type: 'exitDone'
+        type: 'disconnectDone'
       });
     }.bind(this));
   };
