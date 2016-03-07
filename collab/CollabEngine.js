@@ -9,7 +9,6 @@ var DocumentChange = require('../model/DocumentChange');
   Engine for realizing collaborative editing. Implements the server-methods of 
   the real time editing as a reusable library.
 */
-
 function CollabEngine(store) {
   CollabEngine.super.apply(this);
 

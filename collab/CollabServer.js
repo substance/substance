@@ -61,7 +61,13 @@ CollabServer.Prototype = function() {
   */
   this.execute = function(req, res) {
     var msg = req.message;
-    this[msg.type](req, res);
+    var method = this[msg.type];
+
+    if (method) {
+      method.call(this, req, res);
+    } else {
+      console.error('Method', msg.type, 'not implemented for CollabServer');
+    }
   };
 
   /*
@@ -75,8 +81,8 @@ CollabServer.Prototype = function() {
       if (err) {
         res.error(err);
       } else {
-        var collaboratorIds = this.collabEngine.getCollaboratorIds(args.documentId);
-        var collaborators = this.collabEngine.getCollaborators(args.documentId);
+        var collaboratorIds = this.collabEngine.getCollaboratorIds(args.documentId, args.collaboratorId);
+        var collaborators = this.collabEngine.getCollaborators(args.documentId, args.collaboratorId);
 
         // We need to broadcast a new change if there is one
         if (result.change) {
@@ -141,7 +147,7 @@ CollabServer.Prototype = function() {
       if (err) {
         res.error(err);
       } else {
-        var collaboratorIds = this.collabEngine.getCollaboratorIds(args.documentId);
+        var collaboratorIds = this.collabEngine.getCollaboratorIds(args.documentId, args.collaboratorId);
 
         // We need to broadcast the change to all collaborators
         this.broadCast(collaboratorIds, {

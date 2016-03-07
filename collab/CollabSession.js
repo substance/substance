@@ -350,7 +350,7 @@ CollabSession.Prototype = function() {
     Server has opened the document. The collab session is live from
     now on.
   */
-  this.openDone = function(serverVersion, changes, collaborators) {
+  this.connectDone = function(serverVersion, changes, collaborators) {
     // console.log('Received "openDone"', serverVersion, changes);
     if (this.doc.version !== serverVersion) {
       // There have been changes on the server since the doc was opened
