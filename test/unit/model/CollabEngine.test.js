@@ -6,6 +6,7 @@ var backendSeed = require('../../fixtures/collab/backendSeed');
 var MemoryBackend = require('../../../collab/MemoryBackend');
 var twoParagraphs = require('../../fixtures/collab/two-paragraphs');
 var insertParagraph = require('../../fixtures/collab/insertParagraph');
+var insertText = require('../../fixtures/collab/insertText');
 var MemoryBackend = require('../../../collab/MemoryBackend');
 var CollabEngine = require('../../../collab/CollabEngine');
 
@@ -61,14 +62,32 @@ var COMMIT_ARGS = {
   version: 1
 };
 
-QUnit.test('New collaborator enters', function(assert) {
+QUnit.test('New collaborator enters with latest version', function(assert) {
   var done = assert.async();
 
-  collabEngine.enter(ENTER_ARGS, function(err, result) {
+  collabEngine.enter({
+    collaboratorId: 'collab-1',
+    documentId: 'test-doc', 
+    version: 1
+  }, function(err, result) {
     assert.isNullOrUndefined(err, 'Should not error');
     assert.equal(result.version, 1);
     assert.equal(result.changes.length, 0);
-    // TODO: collabEngine should have one collaborator entry
+    done();
+  });
+});
+
+QUnit.test('New collaborator enters with an outdated version', function(assert) {
+  var done = assert.async();
+
+  collabEngine.enter({
+    collaboratorId: 'collab-1',
+    documentId: 'test-doc', 
+    version: 0
+  }, function(err, result) {
+    assert.isNullOrUndefined(err, 'Should not error');
+    assert.equal(result.version, 1);
+    assert.equal(result.changes.length, 1);
     done();
   });
 });
@@ -85,18 +104,59 @@ QUnit.test('New collaborator enters with a new fast-forward change', function(as
   });
 });
 
-
 QUnit.test('New collaborator enters with a change that needs rebasing', function(assert) {
   var done = assert.async();
-  var enterArgs = Object.assign({}, ENTER_ARGS, {change: exampleChange, version: 0});
 
-  collabEngine.enter(enterArgs, function(err, result) {
+  // We simulate that by letting another user 'collab-2' makeing a text change
+  // that affects a later text change of 'collab-1' - the one that needs rebasing.
+  var insertTextChange1 = insertText(testDoc, 1, '!');
+  var insertTextChange2 = insertText(testDoc, 5, '$$$'); // 5 is based on version 1, after rebasing should be 6
+
+  collabEngine.enter({
+    collaboratorId: 'collab-1',
+    documentId: 'test-doc', 
+    version: 1,
+    change: insertTextChange1
+  }, function(err, result) {
     assert.isNullOrUndefined(err, 'Should not error');
     assert.equal(result.version, 2);
-    assert.equal(result.changes.length, 1);
-    // TODO: we need a change that actually has to be transformed in a rebase scenario
-    // assert.notDeepEqual(result.change, exampleChange, 'Change should have been rebased');
-    done();
+
+    collabEngine.enter({
+      collaboratorId: 'collab-2',
+      documentId: 'test-doc',
+      version: 1,
+      change: insertTextChange2
+    }, function(err, result) {
+      assert.isNullOrUndefined(err, 'Should not error');
+      assert.equal(result.version, 3);
+      assert.equal(result.changes.length, 1);
+      assert.notDeepEqual(result.change, insertTextChange2, 'Tranformed change should differ from original change');
+      done();
+    });    
+  });
+});
+
+
+QUnit.test('Two collaborators enter', function(assert) {
+  var done = assert.async();
+  collabEngine.enter({
+    collaboratorId: 'collab-1',
+    documentId: 'test-doc', 
+    version: 1
+  }, function(err, result) {
+    collabEngine.enter({
+      collaboratorId: 'collab-2',
+      documentId: 'test-doc',
+      version: 1
+    }, function(err, result) {
+      assert.isNullOrUndefined(err, 'Should not error');
+      var collaboratorIds = collabEngine.getCollaboratorIds('test-doc', 'collab-2');
+      var collaborators = collabEngine.getCollaborators('test-doc', 'collab-2');      
+      assert.deepEqual(collaboratorIds, ['collab-1'], 'Should return one collaboratorId');
+      collaboratorIds = collabEngine.getCollaboratorIds('test-doc', 'collab-1');
+      assert.deepEqual(collaboratorIds, ['collab-2'], 'Should return one collaboratorId');
+      done();
+    });
   });
 });
 
@@ -114,3 +174,7 @@ QUnit.test('Collaborator does a fast-forward commit', function(assert) {
   });
 });
 
+QUnit.test('Collaborator does a commit that needs rebasing', function(assert) {
+  // We may want to use a proper seed to simulate that scenario
+  assert.ok(true, 'TODO: implement');
+});

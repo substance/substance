@@ -46,6 +46,27 @@ CollabEngine.Prototype = function() {
   };
 
   /*
+    Unregister collaborator id from document
+  */
+  this._unregister = function(collaboratorId, documentId) {
+    var collaborator = this._collaborators[collaboratorId];
+    delete collaborator.documents[documentId];
+    var docCount = Object.keys(collaborator.documents);
+    // If there is no doc left, we can remove the entire collaborator entry
+    if (docCount === 0) {
+      delete this._collaborators[collaboratorId];
+    }
+  };
+
+  /*
+    Get list of active documents for a given collaboratorId
+  */
+  this.getDocumentIds = function(collaboratorId) {
+    var collaborator = this._collaborators[collaboratorId];
+    return Object.keys(collaborator.documents);
+  };
+
+  /*
     Get collaborators for a specific document
   */
   this.getCollaborators = function(documentId, collaboratorId) {
@@ -202,7 +223,7 @@ CollabEngine.Prototype = function() {
     IN: documentId, change, version (change version)
     OUT: change, changes (server changes), version (server version)
   */
-  this._rebaseChange = function (args, cb) {
+  this._rebaseChange = function(args, cb) {
     this.store.getChanges({
       documentId: args.documentId,
       sinceVersion: args.version
@@ -220,18 +241,25 @@ CollabEngine.Prototype = function() {
   };
 
   /*
-    Collaborator leaves the party
+    Collaborator leaves the party. Exit either concerns a single
+    document (args.documentId is set) or all documents
+
+    This method is synchronous
   */
   this.exit = function(args) {
     this._unregister(args.collaboratorId, args.documentId);
   };
 
-  // to stringified JSON
+  /*
+    To JSON
+  */
   this.serializeChange = function(change) {
     return change.toJSON();
   };
 
-  // from JSON
+  /*
+    From JSON
+  */
   this.deserializeChange = function(serializedChange) {
     var ch = DocumentChange.fromJSON(serializedChange);
     return ch;

@@ -4,11 +4,13 @@ var EventEmitter = require('../util/EventEmitter');
 var oo = require('../util/oo');
 var uuid = require('../util/uuid');
 
-/**
+/*
   ServerRequest
 */
 
-function ServerRequest() {
+function ServerRequest(message, ws) {
+  this.message = message;
+  this.ws = ws;
   this.isAuthenticated = false;
   this.isAuhorized = false;
 }
@@ -35,10 +37,9 @@ ServerRequest.Prototype = function() {
 
 oo.initClass(ServerRequest);
 
-/**
-  ServerRequest
+/*
+  ServerResponse
 */
-
 function ServerResponse() {
   this.isReady = false; // once the response has been set using send
   this.isEnhanced = false; // after response has been enhanced by enhancer
@@ -82,6 +83,20 @@ function Server(config) {
 Server.Prototype = function() {
 
   /*
+    Hook called when a collaborator connects
+  */
+  this.onConnection = function(/*collaboratorId*/) {
+    // noop
+  };
+
+  /*
+    Hook called when a collaborator disconnects
+  */
+  this.onDisconnect = function(/*collaboratorId*/) {
+    // noop
+  };
+
+  /*
     Stub implementation for authenticate middleware.
 
     Implement your own as a hook
@@ -121,19 +136,35 @@ Server.Prototype = function() {
     When a new collaborator connects we generate a unique id for them
   */
   this._onConnection = function(ws) {
+    var collaboratorId = uuid();
+
     var connection = {
-      collaboratorId: uuid()
+      collaboratorId: collaboratorId
     };
 
     this._connections.set(ws, connection);
 
     // Mapping to find connection for collaboratorId
-    this._collaborators[connection.collaboratorId] = {
+    this._collaborators[collaboratorId] = {
       connection: ws
     };
 
     ws.on('message', this._onMessage.bind(this, ws));
-    ws.on('close', this._onWebSocketClose.bind(this, ws));
+    ws.on('close', this._onClose.bind(this, ws));
+  };
+
+  /*
+    When connection closes
+  */
+  this._onClose = function(ws) {
+    var conn = this._connections.get(ws);
+    var collaboratorId = conn.collaboratorId;
+
+    this.onDisconnect(collaboratorId);
+    
+    // Remove the connection record
+    delete this._collaborators[collaboratorId];
+    this._connections.delete(ws);
   };
 
   // Implements state machine for handling the request response cycle
@@ -184,9 +215,23 @@ Server.Prototype = function() {
     } else if (this.__error(req, res)) {
       this.sendError(req, res);
     } else if (this.__done(req,res)) {
-      console.log('yay we are done');
+      console.log('We are done with processing the request.');
     }
   };
+
+  this.sendError = function(req, res) {
+    var collaboratorId = req.message.collaboratorId;
+    var msg = {
+      type: 'error',
+      errorMessage: res.error.message,
+      requestMessage: req.message
+    };
+    this.send(collaboratorId, msg);
+  };
+
+  this.sendResponse = function(req, res) {
+    
+  }
 
   /*
     Send message to collaborator
@@ -231,10 +276,7 @@ Server.Prototype = function() {
     // We attach a unique collaborator id to each message
     msg.collaboratorId = conn.collaboratorId;
 
-    var req = {
-      message: msg,
-      ws: ws
-    };
+    var req = new ServerRequest(msg, ws);
     this._processRequest(req);
   };
 
