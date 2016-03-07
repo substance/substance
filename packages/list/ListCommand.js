@@ -1,5 +1,6 @@
 'use strict';
 
+var _ = require('lodash');
 var annotationHelpers = require('../../model/annotationHelpers');
 var deleteNode = require('../../model/transform/deleteNode');
 var SurfaceCommand = require('../../ui/SurfaceCommand');
@@ -21,8 +22,14 @@ ListCommand.Prototype = function() {
     var sel = this.getSelection();
     var disabled = !surface.isEnabled() || sel.isNull() || !sel.isPropertySelection();
 
+    var doc = this.getDocument();
+    var path = sel.getPath();
+    var node = doc.get(path[0]);
+
+    var active = _.startsWith(node.id, 'list-item') && (node.ordered === this.ordered);
+
     return {
-      active: true,
+      active: active,
       disabled: disabled
     };
   };
@@ -100,6 +107,7 @@ ListCommand.Prototype = function() {
       var newListItem = {
         id: uuid("list-item"),
         parent: newList.id,
+        ordered: newList.ordered,
         content: content,
         type: "list-item"
       };
