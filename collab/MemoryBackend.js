@@ -327,9 +327,6 @@ MemoryBackend.Prototype = function() {
     delete this._db.sessions[sessionToken];
   };
 
-  this._userExists = function(userId) {
-    return !!this._db.users[userId];
-  };
 
   this._deleteUser = function(userId) {
     delete this._db.users[userId];

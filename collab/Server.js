@@ -85,15 +85,19 @@ oo.initClass(ServerResponse);
 */
 function Server(config) {
   Server.super.apply(this);
-  this.wss = config.wss;
+  
   this.scope = config.scope || 'hub';
   this._onConnection = this._onConnection.bind(this);
-  this.wss.on('connection', this._onConnection);
-  this._connections = new WeakMap();
-  this._collaborators = {};
 }
 
 Server.Prototype = function() {
+
+  this.start = function(wss) {
+    this.wss = wss;
+    this._connections = new WeakMap();
+    this._collaborators = {};
+    this.wss.on('connection', this._onConnection);
+  };
 
   /*
     Hook called when a collaborator connects

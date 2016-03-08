@@ -2,12 +2,12 @@
 
 require('../qunit_extensions');
 
-var backendSeed = require('../../fixtures/collab/backendSeed');
-var MemoryBackend = require('../../../collab/MemoryBackend');
-var runBackendTests = require('../../collab/runBackendTests');
+var documentStoreSeed = require('../../fixtures/collab/documentStoreSeed');
+var DocumentStore = require('../../../collab/DocumentStore');
+var testDocumentStore = require('../../collab/testDocumentStore');
 var twoParagraphs = require('../../fixtures/collab/two-paragraphs');
 
-var backend = new MemoryBackend({
+var store = new DocumentStore({
   schemas: {
     'prose-article': {
       name: 'prose-article',
@@ -17,14 +17,14 @@ var backend = new MemoryBackend({
   }
 });
 
-QUnit.module('collab/MemoryBackend', {
+QUnit.module('collab/DocumentStore', {
   beforeEach: function(assert) {
     var done = assert.async();
 
     // Make sure we create a new seed instance, as data ops
     // are performed directly on the seed object
-    var newBackendSeed = JSON.parse(JSON.stringify(backendSeed));
-    backend.seed(newBackendSeed, function(err) {
+    var newDocumentStoreSeed = JSON.parse(JSON.stringify(documentStoreSeed));
+    store.seed(newBackendSeed, function(err) {
       if (err) {
         return console.error(err);
       } else {
@@ -35,4 +35,4 @@ QUnit.module('collab/MemoryBackend', {
 });
 
 // Runs the offical backend test suite
-runBackendTests(backend, QUnit);
+runBackendTests(store, QUnit);
