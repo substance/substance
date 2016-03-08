@@ -1,6 +1,9 @@
 .sc-text-property {
   .se-cursor {
     outline: 1px solid #999;
+    display: inline-block;
+    width: 0px;
+    height: 1em;
   }
 
   .se-selection-fragment {
