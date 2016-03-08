@@ -175,8 +175,7 @@ CollabServer.Prototype = function() {
   */
   this.updateSelection = function(req/*, res*/) {
     var args = req.message;
-    console.log('updateSel', args);
-    
+
     this.collabEngine.updateSelection(args, function(err, result) {
       if (err) {
         // Selection updates are not that important, so we just do nothing here
