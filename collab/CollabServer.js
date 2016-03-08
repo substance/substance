@@ -178,11 +178,12 @@ CollabServer.Prototype = function() {
 
     this.collabEngine.updateSelection(args, function(err, result) {
       if (err) {
+        console.error('updateSelection error: ', err);
         // Selection updates are not that important, so we just do nothing here
         // TODO: think of a way to 'abort' a request without sending a response
         // res.error(err);
       } else {
-        var collaboratorIds = this.collabEngine.getCollaboratorIds(args.documentId, collaboratorIds);
+        var collaboratorIds = this.collabEngine.getCollaboratorIds(args.documentId, args.collaboratorId);
         this.broadCast(collaboratorIds, {
           type: 'updateSelection',
           version: result.version,
