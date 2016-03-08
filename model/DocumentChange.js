@@ -5,9 +5,9 @@
 var isEqual = require('lodash/isEqual');
 var isObject = require('lodash/isObject');
 var isArray = require('lodash/isArray');
-var extend = require('lodash/extend');
 var map = require('lodash/map');
 var clone = require('lodash/clone');
+var cloneDeep = require('lodash/cloneDeep');
 var oo = require('../util/oo');
 var uuid = require('../util/uuid');
 var TreeIndex = require('../util/TreeIndex');
@@ -211,6 +211,12 @@ DocumentChange.Prototype = function() {
       // after state
       after: clone(this.after),
     };
+
+    // Just to make sure rich selection objects don't end up
+    // in the JSON result
+    data.after.selection = undefined;
+    data.before.selection = undefined;
+
     var sel = this.before.selection;
     if (sel && sel instanceof Selection) {
       data.before.selection = sel.toJSON();
@@ -242,7 +248,7 @@ DocumentChange.deserialize = function(str) {
 
 DocumentChange.fromJSON = function(data) {
   // Don't write to original object on deserialization
-  var change = extend({}, data);
+  var change = cloneDeep(data);
   change.ops = data.ops.map(function(opData) {
     return ObjectOperation.fromJSON(opData);
   });
