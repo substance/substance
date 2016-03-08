@@ -57,6 +57,11 @@ CollabEngine.Prototype = function() {
     }
   };
 
+  this._updateSelection = function(collaboratorId, documentId, sel) {
+    var docEntry = this._collaborators[collaboratorId].documents[documentId];
+    docEntry.selection = sel;
+  };
+
   /*
     Get list of active documents for a given collaboratorId
   */
@@ -74,7 +79,7 @@ CollabEngine.Prototype = function() {
       var doc = collab.documents[documentId];
       if (doc && collab.collaboratorId !== collaboratorId) {
         collaborators[collab.collaboratorId] = {
-          selection: collab.selection,
+          selection: doc.selection,
           collaboratorId: collab.collaboratorId
         };
       }
@@ -197,14 +202,18 @@ CollabEngine.Prototype = function() {
     Transforms an incoming selection update if needed. Selection updates
     are realized as changes that don't get stored in the database.
 
-    IN: documentId, version, change
+    IN: collaboratorId, documentId, version, change
     OUT: transformed change
   */
-  this.transformSelection = function(args, cb) {
+  this.updateSelection = function(args, cb) {
     this.store.getVersion(args.documentId, function(err, serverVersion) {
       if (serverVersion === args.version) {
         // Fast-foward: Nothing needs to be transformed
-        cb(null, args.change);
+        this._updateSelection(args.collaboratorId, args.documentId);
+        cb(null, {
+          version: serverVersion,
+          change: args.change
+        });
       } else {
         this._rebaseChange({
           documentId: args.documentId,
@@ -212,8 +221,12 @@ CollabEngine.Prototype = function() {
           version: args.version
         }, function(err, rebased) {
           if (err) return cb(err);
-          cb(null, rebased.change);
-        });
+          this._updateSelection(args.collaboratorId, args.documentId);
+          cb(null, {
+            version: serverVersion,
+            change: rebased.change
+          });
+        }.bind(this));
       }
     }.bind(this));
   };

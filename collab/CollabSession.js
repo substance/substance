@@ -285,6 +285,7 @@ CollabSession.Prototype = function() {
   */
   this._applyRemoteChange = function(change, collaboratorId) {
     // console.log("REMOTE CHANGE", change);
+
     this.stage._apply(change);
     this.doc._apply(change);
     this._transformLocalChangeHistory(change);

@@ -25,10 +25,11 @@ CollabServer.Prototype = function() {
       var collaboratorIds = this.collabEngine.getCollaboratorIds(documentId, collaboratorIds);
       this.broadCast(collaboratorIds, {
         type: 'collaboratorDisconnected',
+        documentId: documentId,
         collaboratorId: collaboratorId
       });
       // Exit from each document session
-      this.collabEngine.exit({
+      this.collabEngine.disconnect({
         documentId: documentId,
         collaboratorId: collaboratorId
       });
@@ -94,6 +95,7 @@ CollabServer.Prototype = function() {
         // Notify others that there is a new collaborator
         this.broadCast(collaboratorIds, {
           type: 'collaboratorConnected',
+          documentId: args.documentId,
           collaborator: {
             selection: null,
             collaboratorId: args.collaboratorId
@@ -103,6 +105,7 @@ CollabServer.Prototype = function() {
         // Send the response
         res.send({
           type: 'connectDone',
+          documentId: args.documentId,
           version: result.version,
           changes: result.changes,
           collaborators: collaborators
@@ -124,9 +127,10 @@ CollabServer.Prototype = function() {
       if (err) {
         res.error(err);
       }
-      // Notify client that exit has completed successfully
+      // Notify client that disconnect has completed successfully
       res.send({
-        type: 'disconnectDone'
+        type: 'disconnectDone',
+        documentId: args.documentId
       });
     }.bind(this));
   };
@@ -156,6 +160,7 @@ CollabServer.Prototype = function() {
 
         // confirm the new commit, providing the diff (changes) since last common version
         res.send({
+          documentId: args.documentId,
           type: 'commitDone',
           version: result.version,
           changes: result.changes          
@@ -168,9 +173,28 @@ CollabServer.Prototype = function() {
   /*
     Clients sends a selection update
   */
-  this.updateSelection = function() {
-
+  this.updateSelection = function(req/*, res*/) {
+    var args = req.message;
+    console.log('updateSel', args);
+    
+    this.collabEngine.updateSelection(args, function(err, result) {
+      if (err) {
+        // Selection updates are not that important, so we just do nothing here
+        // TODO: think of a way to 'abort' a request without sending a response
+        // res.error(err);
+      } else {
+        var collaboratorIds = this.collabEngine.getCollaboratorIds(args.documentId, collaboratorIds);
+        this.broadCast(collaboratorIds, {
+          type: 'updateSelection',
+          version: result.version,
+          change: result.change,
+          collaboratorId: args.collaboratorId,
+          documentId: args.documentId     
+        });
+      }
+    }.bind(this));
   };
+
 };
 
 Server.extend(CollabServer);
