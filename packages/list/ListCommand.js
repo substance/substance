@@ -1,6 +1,5 @@
 'use strict';
 
-var _ = require('lodash');
 var annotationHelpers = require('../../model/annotationHelpers');
 var deleteNode = require('../../model/transform/deleteNode');
 var SurfaceCommand = require('../../ui/SurfaceCommand');
@@ -26,7 +25,7 @@ ListCommand.Prototype = function() {
     var path = sel.getPath();
     var node = doc.get(path[0]);
 
-    var active = _.startsWith(node.id, 'list-item') && (node.ordered === this.ordered);
+    var active = (node.type === 'list-item') && (node.ordered === this.ordered);
 
     return {
       active: active,
@@ -133,7 +132,16 @@ ListCommand.Prototype = function() {
 
     surface.transaction(function(tx, args) {
       if (node.type === 'list-item') {
-        args = listToText(tx, args);
+        if (node.ordered === self.ordered){
+          args = listToText(tx, args);
+        } else {
+          // switch list type between ordered and unordered list
+          var items = tx.get([node.parent, 'items']);
+          for (var i=0; i<items.length; i++){
+            tx.set([items[i], 'ordered'], self.ordered);
+          }
+          tx.set([node.parent, 'ordered'], self.ordered);
+        }
       } else {
         args = textToList(tx, args);
       }
