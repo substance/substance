@@ -49,6 +49,7 @@ ListCommand.Prototype = function() {
 
     // define behavior when the list tool is clicked while the current selection
     // is a list item.
+    //TODO: this is very similar to mergeListItems. See if we can resuse that
     var listToText = function(tx, args) {
       var newList;
       var container = tx.get(containerId);
@@ -66,20 +67,22 @@ ListCommand.Prototype = function() {
       // show the paragraph node and the second list node
       annotationHelpers.transferAnnotations(tx, path, 0, [id, 'content'], 0);
       container.show(id, index+1);
-      // make a new list with the trailing items
-      newList = tx.create({
-        id: uuid('list'),
-        type: parentList.type,
-        items: parentList.items.slice(nodeIndex+1, numItems),
-        ordered: parentList.ordered
-      });
-      for (var i=0; i<newList.items.length; i++) {
-        tx.set([newList.items[i], 'parent'], newList.id);
+      if (parentList.items.slice(nodeIndex+1, numItems).length > 0){
+        // make a new list with the trailing items
+        newList = tx.create({
+          id: uuid('list'),
+          type: parentList.type,
+          items: parentList.items.slice(nodeIndex+1, numItems),
+          ordered: parentList.ordered
+        });
+        for (var i=0; i<newList.items.length; i++) {
+          tx.set([newList.items[i], 'parent'], newList.id);
+        }
+        container.show(newList.id, index+2);
       }
-      container.show(newList.id, index+2);
       // delete the trailing list items from the first list
-      for (i=numItems-1; i>=nodeIndex; i--) {
-        tx.update([parentList.id, 'items'], {delete: {offset: i}});
+      for (var j=numItems-1; j>=nodeIndex; j--) {
+        tx.update([parentList.id, 'items'], {delete: {offset: j}});
       }
       var selection = tx.createSelection({
         type: 'property',
