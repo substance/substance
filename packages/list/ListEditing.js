@@ -256,9 +256,6 @@ ListEditing.Prototype = function() {
     return args;
   };
 
-
-  // TODO: this implementation is *very* similar to merge.mergeTextNodes
-  // try to consolidate this
   this.mergeListItems = function(tx, args) {
     var selection;
     var node = tx.get(args.path[0]);
@@ -302,10 +299,8 @@ ListEditing.Prototype = function() {
           items: args.node.items.slice(nodeIndex+1, numItems),
           ordered: args.node.ordered
         });
-        var listElem;
         for (var i=0; i<newList.items.length; i++) {
-          listElem = tx.get(newList.items[i]);
-          listElem.parent = newList.id;
+          tx.set([newList.items[i], 'parent'], newList.id);
         }
         container.show(newList.id, index+2);
       }

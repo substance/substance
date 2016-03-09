@@ -73,10 +73,8 @@ ListCommand.Prototype = function() {
         items: parentList.items.slice(nodeIndex+1, numItems),
         ordered: parentList.ordered
       });
-      var listElem;
       for (var i=0; i<newList.items.length; i++) {
-        listElem = tx.get(newList.items[i]);
-        listElem.parent = newList.id;
+        tx.set([newList.items[i], 'parent'], newList.id);
       }
       container.show(newList.id, index+2);
       // delete the trailing list items from the first list
