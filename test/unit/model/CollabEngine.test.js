@@ -2,12 +2,11 @@
 
 require('../qunit_extensions');
 
-var backendSeed = require('../../fixtures/collab/backendSeed');
-var MemoryBackend = require('../../../collab/MemoryBackend');
+var documentStoreSeed = require('../../fixtures/collab/documentStoreSeed');
+var DocumentStore = require('../../../collab/DocumentStore');
 var twoParagraphs = require('../../fixtures/collab/two-paragraphs');
 var insertParagraph = require('../../fixtures/collab/insertParagraph');
 var insertText = require('../../fixtures/collab/insertText');
-var MemoryBackend = require('../../../collab/MemoryBackend');
 var CollabEngine = require('../../../collab/CollabEngine');
 
 // Equivalent to the 'test-doc' that is in the backendseed.
@@ -17,7 +16,7 @@ var testDoc = twoParagraphs.createArticle();
 // properly play the rebase scenario
 var exampleChange = insertParagraph(testDoc);
 
-var backend = new MemoryBackend({
+var store = new DocumentStore({
   schemas: {
     'prose-article': {
       name: 'prose-article',
@@ -35,15 +34,15 @@ QUnit.module('collab/CollabEngine', {
 
     // Make sure we create a new seed instance, as data ops
     // are performed directly on the seed object
-    var newBackendSeed = JSON.parse(JSON.stringify(backendSeed));
-    backend.seed(newBackendSeed, function(err) {
+    var newDocumentStoreSeed = JSON.parse(JSON.stringify(documentStoreSeed));
+    store.seed(newDocumentStoreSeed, function(err) {
       if (err) {
         return console.error(err);
       } else {
         done();
       }
     });
-    collabEngine = new CollabEngine(backend);
+    collabEngine = new CollabEngine(store);
   }
 });
 

@@ -12,7 +12,6 @@ function testDocumentStore(store, QUnit) {
       assert.ok(doc, 'valid doc snapshot expected');
       assert.ok(doc.data, 'should have document data attached');
       assert.equal(doc.version, 1, 'doc version should be 1');
-      assert.equal(doc.userId, '1', 'userId should be "1"');
       done();
     });
   });
@@ -21,8 +20,7 @@ function testDocumentStore(store, QUnit) {
     var done = assert.async();
     var args = {
       documentId: 'new-doc',
-      schemaName: 'prose-article',
-      userId: '2'
+      schemaName: 'prose-article'
     };
     store.createDocument(args, function(err, doc) {
       assert.ok(doc, 'valid doc snapshot expected');
@@ -49,37 +47,6 @@ function testDocumentStore(store, QUnit) {
           done();
         });
       });
-    });
-  });
-
-  QUnit.test('List documents', function(assert) {
-    var done = assert.async();
-    store.listDocuments({}, function(err, documents) {
-      assert.notOk(err, 'Should not error');
-      assert.equal(documents.length, 1, 'There should be one document returned');
-      assert.equal(documents[0].userId, '1', 'First doc should have userId "1"');
-      assert.equal(documents[0].documentId, 'test-doc', 'documentId should be "test-doc"');
-      done();
-    });
-  });
-
-  QUnit.test('List documents with matching filter', function(assert) {
-    var done = assert.async();
-    store.listDocuments({userId: '1'}, function(err, documents) {
-      assert.notOk(err, 'Should not error');
-      assert.equal(documents.length, 1, 'There should be one document returned');
-      assert.equal(documents[0].userId, '1', 'First doc should have userId "1"');
-      assert.equal(documents[0].documentId, 'test-doc', 'documentId should be "test-doc"');
-      done();
-    });
-  });
-
-  QUnit.test('List documents with filter that does not match', function(assert) {
-    var done = assert.async();
-    store.listDocuments({userId: 'userx'}, function(err, documents) {
-      assert.notOk(err, 'Should not error');
-      assert.equal(documents.length, 0, 'There should be no matches');
-      done();
     });
   });
 
@@ -113,8 +80,7 @@ function testDocumentStore(store, QUnit) {
     var done = assert.async();
     var args = {
       documentId: 'some-non-existent-doc',
-      change: {'some': 'change'},
-      userId: '1'
+      change: {'some': 'change'}
     };
     store.addChange(args, function(err) {
       assert.ok(err, 'Adding change to non existent doc should error');
@@ -126,8 +92,7 @@ function testDocumentStore(store, QUnit) {
     var done = assert.async();
     var args = {
       documentId: 'test-doc',
-      change: {'some': 'change'},
-      userId: '1'
+      change: {'some': 'change'}
     };
     store.addChange(args, function(err, version) {
       assert.notOk(err, 'Should not error');
@@ -147,4 +112,4 @@ function testDocumentStore(store, QUnit) {
 
 }
 
-module.exports = runBackendTests;
+module.exports = testDocumentStore;

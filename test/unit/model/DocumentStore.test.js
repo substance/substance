@@ -24,7 +24,7 @@ QUnit.module('collab/DocumentStore', {
     // Make sure we create a new seed instance, as data ops
     // are performed directly on the seed object
     var newDocumentStoreSeed = JSON.parse(JSON.stringify(documentStoreSeed));
-    store.seed(newBackendSeed, function(err) {
+    store.seed(newDocumentStoreSeed, function(err) {
       if (err) {
         return console.error(err);
       } else {
@@ -35,4 +35,4 @@ QUnit.module('collab/DocumentStore', {
 });
 
 // Runs the offical backend test suite
-runBackendTests(store, QUnit);
+testDocumentStore(store, QUnit);

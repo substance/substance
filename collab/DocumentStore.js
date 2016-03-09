@@ -70,7 +70,7 @@ DocumentStore.Prototype = function() {
 
     var doc = docFactory.createArticle();
     var changeset = docFactory.createChangeset();
-    this._db.documents[args.documentId] = {
+    this._documents[args.documentId] = {
       schema: {
         name: schemaConfig.name,
         version: schemaConfig.version
@@ -94,7 +94,7 @@ DocumentStore.Prototype = function() {
   this.deleteDocument = function(documentId, cb) {
     var exists = this._documentExists(documentId);
     if (!exists) return cb(new Error('Document does not exist'));
-    delete this._db.documents[documentId];
+    delete this._documents[documentId];
     cb(null);
   };
 
@@ -106,7 +106,7 @@ DocumentStore.Prototype = function() {
     that is available as a schema config object.
   */
   this.getDocument = function(documentId, cb) {
-    var docRecord = this._db.documents[documentId];
+    var docRecord = this._documents[documentId];
     if (!docRecord) {
       return cb(new Error('Document does not exist'));
     }
@@ -168,7 +168,7 @@ DocumentStore.Prototype = function() {
     List available documents
   */
   this.listDocuments = function(filters, cb) {
-    var documents = map(this._db.documents, function(doc) {
+    var documents = map(this._documents, function(doc) {
       return {
         documentId: doc.documentId,
         userId: doc.userId,
@@ -185,7 +185,7 @@ DocumentStore.Prototype = function() {
     Seeds the database
   */
   this.seed = function(documents, cb) {
-    this._db = documents;
+    this._documents = documents;
     if (cb) {
       cb(null, documents);
     }
