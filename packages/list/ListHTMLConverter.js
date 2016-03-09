@@ -44,6 +44,7 @@ var ListHtmlConverter = {
    */
   import: function(el, list, converter) {
     list.items = [];
+    list.ordered = el.is('ol');
     // iterate through the children keeping track of the nesting level
     // and associated list type
     var state = {

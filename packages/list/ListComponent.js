@@ -12,6 +12,7 @@ var ListComponent = Component.extend({
   initialize: function() {
     this.doc = this.props.doc;
     this.doc.getEventProxy('path').connect(this, [this.props.node.id, 'items'], this.onItemsChanged);
+    this.doc.getEventProxy('path').connect(this, [this.props.node.id, 'ordered'], this.onOrderChanged);
   },
 
   dispose: function() {
@@ -20,7 +21,7 @@ var ListComponent = Component.extend({
   },
 
   render: function() {
-    return ListHtmlConverter.render(this.props.node, {
+    var elem = ListHtmlConverter.render(this.props.node, {
       createListElement: function(list) {
         var tagName = list.ordered ? 'ol' : 'ul';
         return $$(tagName)
@@ -31,11 +32,16 @@ var ListComponent = Component.extend({
         return $$(ListItemComponent, {node: item});
       }
     });
+    return $$('div').append(elem);
   },
 
   onItemsChanged: function() {
     this.rerender();
   },
+
+  onOrderChanged: function() {
+    this.rerender();
+  }
 
 });
 

@@ -21,8 +21,14 @@ ListCommand.Prototype = function() {
     var sel = this.getSelection();
     var disabled = !surface.isEnabled() || sel.isNull() || !sel.isPropertySelection();
 
+    var doc = this.getDocument();
+    var path = sel.getPath();
+    var node = doc.get(path[0]);
+
+    var active = (node.type === 'list-item') && (node.ordered === this.ordered);
+
     return {
-      active: true,
+      active: active,
       disabled: disabled
     };
   };
@@ -80,7 +86,7 @@ ListCommand.Prototype = function() {
       var selection = tx.createSelection({
         type: 'property',
         path: [id, 'content'],
-        startOffset: 0
+        startOffset: sel.startOffset
       });
       args.selection = selection;
       return args;
@@ -100,6 +106,7 @@ ListCommand.Prototype = function() {
       var newListItem = {
         id: uuid("list-item"),
         parent: newList.id,
+        ordered: newList.ordered,
         content: content,
         type: "list-item"
       };
@@ -114,12 +121,27 @@ ListCommand.Prototype = function() {
       // show the new list item and hide the old node
       container.show(newList.id, pos+1);
       deleteNode(tx, {nodeId: node.id});
+      var selection = tx.createSelection({
+        type: 'property',
+        path: [newListItem.id, 'content'],
+        startOffset: sel.startOffset
+      });
+      args.selection = selection;
       return args;
     };
 
     surface.transaction(function(tx, args) {
       if (node.type === 'list-item') {
-        args = listToText(tx, args);
+        if (node.ordered === self.ordered){
+          args = listToText(tx, args);
+        } else {
+          // switch list type between ordered and unordered list
+          var items = tx.get([node.parent, 'items']);
+          for (var i=0; i<items.length; i++){
+            tx.set([items[i], 'ordered'], self.ordered);
+          }
+          tx.set([node.parent, 'ordered'], self.ordered);
+        }
       } else {
         args = textToList(tx, args);
       }
