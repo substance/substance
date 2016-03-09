@@ -9,15 +9,15 @@ var uuid = require('../util/uuid');
 var extend = require('lodash/extend');
 
 /*
-  Implements Substance Store API. This is just a stub and is used for
-  testing.
+  Implements Substance DocumentStore API. This is used for testing
+  and serves as a reference implementation for persistent stores.
 */
-function MemoryBackend(config) {
-  MemoryBackend.super.apply(this);
+function DocumentStore(config) {
+  DocumentStore.super.apply(this);
   this.config = config;
 }
 
-MemoryBackend.Prototype = function() {
+DocumentStore.Prototype = function() {
 
   /*
     Gets changes for a given document
@@ -132,8 +132,7 @@ MemoryBackend.Prototype = function() {
       var converter = new JSONConverter();
       var output = {
         data: converter.exportDocument(doc),
-        version: res.version,
-        userId: docRecord.userId
+        version: res.version
       };
       cb(null, output);
     });
@@ -154,7 +153,7 @@ MemoryBackend.Prototype = function() {
     if (!exists) {
       return cb(new Error('Document '+args.documentId+' does not exist'));
     }
-    this._addChange(args.documentId, args.change, args.userId);
+    this._addChange(args.documentId, args.change);
     cb(null, this._getVersion(args.documentId));
   };
 
@@ -163,42 +162,6 @@ MemoryBackend.Prototype = function() {
   */
   this.getVersion = function(id, cb) {
     cb(null, this._getVersion(id));
-  };
-
-  /*
-    Get user based on userId
-  */
-  this.getUser = function(userId, cb) {
-    var user = this._getUser(userId);
-    if (user) {
-      cb(null, user);
-    } else {
-      cb(new Error('User not found'));
-    }
-  };
-
-  /*
-    Create a new use
-  */
-  this.createUser = function(userData, cb) {
-    if (this._userExists(userData.userId)) {
-      cb(new Error('User already exists'));
-    } else {
-      this._createUser(userData);
-      cb(null, userData);
-    }
-  };
-
-  /*
-    Delete user based on userId
-  */
-  this.deleteUser = function(userId, cb) {
-    if (this._userExists(userId)) {
-      cb(new Error('User already exists'));
-    } else {
-      this._deleteUser(userId);
-      cb(null);
-    }
   };
 
   /*
@@ -219,59 +182,12 @@ MemoryBackend.Prototype = function() {
   };
 
   /*
-    Authenticate based on loginData object
-
-    Stub implementation only supports authenticating though an
-    existing sessionToken. It's kind of a fake login
-
-    Please test this throughly in your persisted backend implementation.
-  */
-  this.authenticate = function(loginData, cb) {
-    var session = this._db.sessions[loginData.sessionToken];
-    if (session) {
-      // Remove old session and create new session
-      this._deleteSession(session.sessionToken);
-      var newSession = this._createSession(session.userId);
-      this.getSession(newSession.sessionToken, cb);
-    } else {
-      cb(new Error('No session found for '+ loginData.sessionToken));
-    }
-  };
-
-  /*
-    Remove a session based on a given session token
-  */
-  this.deleteSession = function(sessionToken, cb) {
-    if (this._sessionExists(sessionToken)) {
-      this._deleteSession(sessionToken);
-      cb(null);
-    } else {
-      cb(new Error('Session does not exist'));
-    }
-  };
-
-  /*
-    Get session for a given session toke
-  */
-  this.getSession = function(sessionToken, cb) {
-    var session = this._db.sessions[sessionToken];
-    if (session) {
-      // Create rich session
-      var richSession = extend({}, this._db.sessions[sessionToken]);
-      richSession.user = this._getUser(session.userId);
-      cb(null, richSession);
-    } else {
-      cb(new Error('No session found for sessionToken: '+ sessionToken));
-    }
-  };
-
-  /*
     Seeds the database
   */
-  this.seed = function(seed, cb) {
-    this._db = seed;
+  this.seed = function(documents, cb) {
+    this._db = documents;
     if (cb) {
-      cb(null, seed);
+      cb(null, documents);
     }
   };
 
@@ -279,60 +195,23 @@ MemoryBackend.Prototype = function() {
   // -------------------------
 
   this._documentExists = function(documentId) {
-    return !!this._db.documents[documentId];
+    return !!this._documents[documentId];
   };
 
   this._getVersion = function(documentId) {
-    return this._db.documents[documentId].changes.length;
+    return this._documents[documentId].changes.length;
   };
 
   this._getChanges = function(documentId) {
-    return this._db.documents[documentId].changes;
+    return this._documents[documentId].changes;
   };
 
   this._addChange = function(documentId, change) {
-    this._db.documents[documentId].changes.push(change);
+    this._documents[documentId].changes.push(change);
   };
 
-  this._getUser = function(userId) {
-    return this._db.users[userId];
-  };
-
-  this._createUser = function(userData) {
-    this._db.users[userData.userId] = userData;
-  };
-
-  this._userExists = function(userId) {
-    return !!this._db.users[userId];
-  };
-
-  this._deleteUser = function(userId) {
-    delete this._db.users[userId];
-  };
-
-  this._sessionExists = function(sessionToken) {
-    return !!this._db.sessions[sessionToken];
-  };
-
-  this._createSession = function(userId) {
-    var newSession = {
-      sessionToken: uuid(),
-      userId: userId
-    };
-    this._db.sessions[newSession.sessionToken] = newSession;
-    return newSession;
-  };
-
-  this._deleteSession = function(sessionToken) {
-    delete this._db.sessions[sessionToken];
-  };
-
-
-  this._deleteUser = function(userId) {
-    delete this._db.users[userId];
-  };
 
 };
 
-EventEmitter.extend(MemoryBackend);
-module.exports = MemoryBackend;
+EventEmitter.extend(DocumentStore);
+module.exports = DocumentStore;

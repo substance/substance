@@ -92,7 +92,7 @@ function Server(config) {
 
 Server.Prototype = function() {
 
-  this.start = function(wss) {
+  this.bind = function(wss) {
     this.wss = wss;
     this._connections = new WeakMap();
     this._collaborators = {};
