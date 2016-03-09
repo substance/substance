@@ -165,23 +165,6 @@ DocumentStore.Prototype = function() {
   };
 
   /*
-    List available documents
-  */
-  this.listDocuments = function(filters, cb) {
-    var documents = map(this._documents, function(doc) {
-      return {
-        documentId: doc.documentId,
-        userId: doc.userId,
-        schema: doc.schema
-      };
-    });
-
-    // Filter doc based on provided filters argument
-    documents = filter(documents, matches(filters));
-    cb(null, documents);
-  };
-
-  /*
     Seeds the database
   */
   this.seed = function(documents, cb) {
