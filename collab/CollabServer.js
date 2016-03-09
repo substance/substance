@@ -2,6 +2,8 @@
 
 var Server = require('./Server');
 var CollabEngine = require('./CollabEngine');
+var extend = require('lodash/extend');
+var each = require('lodash/each');
 
 /*
   Implements Substance CollabServer API.
@@ -11,12 +13,47 @@ function CollabServer(config) {
 
   this.scope = 'substance/collab';
   this.backend = config.backend;
+  
   this.collabEngine = new CollabEngine(this.backend);
+
+  // Here we store additional collaborator data
+  this._collaboratorInfo = {};
 }
 
 CollabServer.Prototype = function() {
 
-  // var _super = Object.getPrototypeOf(this);
+  this.getEnhanceCollaborators = function(documentId, collaboratorId) {
+    var collaborators = this.collabEngine.getCollaborators(documentId, collaboratorId);
+    each(collaborators, function(collaborator, collaboratorId) {
+      var info = this._collaboratorInfo[collaboratorId];
+      extend(collaborator, info, collaborator);
+    }.bind(this));
+    return collaborators;
+  };
+
+  this.enhanceCollaborator = function(message, cb) {
+    if (this.config.enhanceCollaborator) {
+      this.config.enhanceCollaborator(message, cb);
+    } else {
+      cb(null, {});
+    }
+  };
+
+  /*
+    Configurable authenticate method
+  */
+  this.authenticate = function(req, res) {
+    if (this.config.authenticate) {
+      this.config.authenticate(req.message, function(err, session) {
+        if (err) return res.error(err);
+        req.setAuthenticated(session);
+        this.next();
+      }.bind(this));
+    } else {
+      req.setAuthenticated();
+      this.next(req, res);
+    }
+  };
 
   this.onDisconnect = function(collaboratorId) {
     // All documents collaborator is currently collaborating to
@@ -35,23 +72,6 @@ CollabServer.Prototype = function() {
       });
     }.bind(this));
   };
-
-  /*
-    Checks for authentication based on message.sessionToken
-
-    TODO: This is potentially too specific for the general CollabServer. We may
-    want to move all user/session related stuff into app scope
-  */
-  // this.authenticate = function(req, res) {
-  //   this.backend.getSession(req.message.sessionToken, function(err, userSession) {
-  //     if (err) {
-  //       res.error(new Error('Not authenticated'));
-  //     } else {
-  //       req.setAuthenticated(userSession);
-  //     }
-  //     this.next(req, res);
-  //   }.bind(this));
-  // };
 
   /*
     Execute CollabServer API method based on msg.type
@@ -79,7 +99,8 @@ CollabServer.Prototype = function() {
         res.error(err);
       } else {
         var collaboratorIds = this.collabEngine.getCollaboratorIds(args.documentId, args.collaboratorId);
-        var collaborators = this.collabEngine.getCollaborators(args.documentId, args.collaboratorId);
+        
+
 
         // We need to broadcast a new change if there is one
         if (result.change) {
@@ -92,23 +113,36 @@ CollabServer.Prototype = function() {
           });
         }
 
-        // Notify others that there is a new collaborator
-        this.broadCast(collaboratorIds, {
-          type: 'collaboratorConnected',
-          documentId: args.documentId,
-          collaborator: {
-            selection: null,
-            collaboratorId: args.collaboratorId
+        var collaborator = {
+          selection: null,
+          collaboratorId: args.collaboratorId
+        };
+
+        this.enhanceCollaborator(req.message, function(err, info) {
+          if (!err && info) {
+            collaborator = extend({}, info, collaborator);
+
+            // Store info for each collaborator
+            this._collaboratorInfo[args.collaboratorId] = info;
           }
-        });
-        
-        // Send the response
-        res.send({
-          type: 'connectDone',
-          documentId: args.documentId,
-          version: result.version,
-          changes: result.changes,
-          collaborators: collaborators
+          // Notify others that there is a new collaborator
+          this.broadCast(collaboratorIds, {
+            type: 'collaboratorConnected',
+            documentId: args.documentId,
+            collaborator: collaborator
+          });
+
+          // Get enhance collaborators (e.g. including some app-specific user-info)
+          var collaborators = this.getEnhanceCollaborators(args.documentId, args.collaboratorId);
+
+          // Send the response
+          res.send({
+            type: 'connectDone',
+            documentId: args.documentId,
+            version: result.version,
+            changes: result.changes,
+            collaborators: collaborators
+          });
         });
       }
       this.next(req, res);
@@ -127,6 +161,9 @@ CollabServer.Prototype = function() {
       if (err) {
         res.error(err);
       }
+
+      // Delete collaborator info object
+      delete this._collaboratorInfo[args.collaboratorId];
       // Notify client that disconnect has completed successfully
       res.send({
         type: 'disconnectDone',

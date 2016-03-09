@@ -86,6 +86,7 @@ oo.initClass(ServerResponse);
 function Server(config) {
   Server.super.apply(this);
   
+  this.config = config;
   this.scope = config.scope || 'hub';
   this._onConnection = this._onConnection.bind(this);
 }
