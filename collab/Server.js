@@ -312,10 +312,12 @@ Server.Prototype = function() {
     var conn = this._connections.get(ws);
     msg = this.deserializeMessage(msg);
 
-    // We attach a unique collaborator id to each message
-    msg.collaboratorId = conn.collaboratorId;
-    var req = new ServerRequest(msg, ws);
-    this._processRequest(req);
+    if (msg.scope === this.scope) {
+      // We attach a unique collaborator id to each message
+      msg.collaboratorId = conn.collaboratorId;
+      var req = new ServerRequest(msg, ws);
+      this._processRequest(req);      
+    }
   };
 
   this.serializeMessage = function(msg) {

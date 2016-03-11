@@ -74,6 +74,7 @@ ChangeStore.Prototype = function() {
   this.seed = function(changes, cb) {
     this._changes = changes;
     if (cb) { cb(null); }
+    return this;
   };
 
   // Handy synchronous helpers

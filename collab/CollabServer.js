@@ -12,9 +12,9 @@ function CollabServer(config) {
   CollabServer.super.apply(this, arguments);
 
   this.scope = 'substance/collab';
-  this.backend = config.backend;
+  this.documentEngine = config.documentEngine;
   
-  this.collabEngine = new CollabEngine(this.backend);
+  this.collabEngine = new CollabEngine(this.documentEngine);
 
   // Here we store additional collaborator data
   this._collaboratorInfo = {};
@@ -99,8 +99,6 @@ CollabServer.Prototype = function() {
         res.error(err);
       } else {
         var collaboratorIds = this.collabEngine.getCollaboratorIds(args.documentId, args.collaboratorId);
-        
-
 
         // We need to broadcast a new change if there is one
         if (result.change) {
@@ -143,7 +141,7 @@ CollabServer.Prototype = function() {
             changes: result.changes,
             collaborators: collaborators
           });
-        });
+        }.bind(this));
       }
       this.next(req, res);
     }.bind(this));

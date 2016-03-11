@@ -68,6 +68,7 @@ DocumentStore.Prototype = function() {
   this.seed = function(documents, cb) {
     this._documents = documents;
     if (cb) { cb(null); }
+    return this;
   };
 
   // Handy synchronous helpers
