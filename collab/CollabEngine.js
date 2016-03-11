@@ -66,6 +66,11 @@ CollabEngine.Prototype = function() {
   */
   this.getDocumentIds = function(collaboratorId) {
     var collaborator = this._collaborators[collaboratorId];
+    if (!collaborator) {
+      console.log('CollabEngine.getDocumentIds', collaboratorId, 'not found');
+      console.log('CollabEngine._collaborators', this._collaborators);
+      return [];
+    }
     return Object.keys(collaborator.documents);
   };
 

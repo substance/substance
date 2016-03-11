@@ -55,7 +55,11 @@ CollabServer.Prototype = function() {
     }
   };
 
+  /*
+    Called when a collaborator disconnects
+  */
   this.onDisconnect = function(collaboratorId) {
+    console.log('disconnecting ', collaboratorId);
     // All documents collaborator is currently collaborating to
     var documentIds = this.collabEngine.getDocumentIds(collaboratorId);
     documentIds.forEach(function(documentId) {
