@@ -9,11 +9,10 @@ var DocumentChange = require('../model/DocumentChange');
   Engine for realizing collaborative editing. Implements the server-methods of 
   the real time editing as a reusable library.
 */
-function CollabEngine(store) {
+function CollabEngine(documentEngine) {
   CollabEngine.super.apply(this);
 
-  // Where changes are stored
-  this.store = store;
+  this.documentEngine = documentEngine;
 
   // Active collaborators
   this._collaborators = {};
@@ -115,7 +114,7 @@ CollabEngine.Prototype = function() {
       this.commit(args, cb);
     } else {
       // Just get the latest changes
-      this.store.getChanges({
+      this.documentEngine.getChanges({
         documentId: args.documentId,
         sinceVersion: args.version,
       }, function(err, result) {
@@ -142,7 +141,7 @@ CollabEngine.Prototype = function() {
   */
   this.commit = function(args, cb) {
     // Get latest doc version
-    this.store.getVersion(args.documentId, function(err, serverVersion) {
+    this.documentEngine.getVersion(args.documentId, function(err, serverVersion) {
       if (serverVersion === args.version) { // Fast forward update
         this._commitFF(args, cb);
       } else { // Client changes need to be rebased to latest serverVersion
@@ -156,7 +155,7 @@ CollabEngine.Prototype = function() {
   */
   this._commitFF = function(args, cb) {
     // Store the commit
-    this.store.addChange({
+    this.documentEngine.addChange({
       documentId: args.documentId,
       change: args.change, // rebased change
       userId: args.userId
@@ -183,7 +182,7 @@ CollabEngine.Prototype = function() {
       if (err) return cb(err);
 
       // Store the rebased commit
-      this.store.addChange({
+      this.documentEngine.addChange({
         documentId: args.documentId,
         change: rebased.change, // rebased change
         userId: args.userId
@@ -206,7 +205,7 @@ CollabEngine.Prototype = function() {
     OUT: transformed change
   */
   this.updateSelection = function(args, cb) {
-    this.store.getVersion(args.documentId, function(err, serverVersion) {
+    this.documentEngine.getVersion(args.documentId, function(err, serverVersion) {
       if (serverVersion === args.version) {
         // Fast-foward: Nothing needs to be transformed
         this._updateSelection(args.collaboratorId, args.documentId);
@@ -238,7 +237,7 @@ CollabEngine.Prototype = function() {
     OUT: change, changes (server changes), version (server version)
   */
   this._rebaseChange = function(args, cb) {
-    this.store.getChanges({
+    this.documentEngine.getChanges({
       documentId: args.documentId,
       sinceVersion: args.version
     }, function(err, result) {

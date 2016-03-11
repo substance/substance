@@ -1,15 +1,10 @@
-var twoParagraphs = require('./two-paragraphs');
-
-// Fixture for backend
+// Fixture for documentStore
 var documentStoreSeed = {
   'test-doc': {
     documentId: 'test-doc',
-    userId: '1',
-    schema: {
-      name: 'prose-article',
-      version: '1.0.0'
-    },
-    changes: twoParagraphs.createChangeset()
+    schemaName: 'prose-article',
+    schemaVersion: '1.0.0',
+    version: 1 // document has one change = version 1
   }
 };
 

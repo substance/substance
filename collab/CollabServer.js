@@ -31,9 +31,9 @@ CollabServer.Prototype = function() {
     return collaborators;
   };
 
-  this.enhanceCollaborator = function(message, cb) {
+  this.enhanceCollaborator = function(req, cb) {
     if (this.config.enhanceCollaborator) {
-      this.config.enhanceCollaborator(message, cb);
+      this.config.enhanceCollaborator(req, cb);
     } else {
       cb(null, {});
     }
@@ -118,7 +118,7 @@ CollabServer.Prototype = function() {
           collaboratorId: args.collaboratorId
         };
 
-        this.enhanceCollaborator(req.message, function(err, info) {
+        this.enhanceCollaborator(req, function(err, info) {
           if (!err && info) {
             collaborator = extend({}, info, collaborator);
 

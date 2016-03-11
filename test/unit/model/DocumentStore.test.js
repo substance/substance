@@ -5,17 +5,7 @@ require('../qunit_extensions');
 var documentStoreSeed = require('../../fixtures/collab/documentStoreSeed');
 var DocumentStore = require('../../../collab/DocumentStore');
 var testDocumentStore = require('../../collab/testDocumentStore');
-var twoParagraphs = require('../../fixtures/collab/two-paragraphs');
-
-var store = new DocumentStore({
-  schemas: {
-    'prose-article': {
-      name: 'prose-article',
-      version: '1.0.0',
-      documentFactory: twoParagraphs
-    }
-  }
-});
+var store = new DocumentStore();
 
 QUnit.module('collab/DocumentStore', {
   beforeEach: function(assert) {

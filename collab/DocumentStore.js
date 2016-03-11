@@ -1,167 +1,65 @@
 'use strict';
 
-var EventEmitter = require('../util/EventEmitter');
-var JSONConverter = require('../model/JSONConverter');
-var matches = require('lodash/matches');
-var filter = require('lodash/filter');
-var map = require('lodash/map');
-var uuid = require('../util/uuid');
+var oo = require('../util/oo');
 var extend = require('lodash/extend');
 
 /*
-  Implements Substance DocumentStore API. This is used for testing
-  and serves as a reference implementation for persistent stores.
+  Implements Substance DocumentStore API. This is just a dumb store.
+  No integrity checks are made, as this is the task of DocumentEngine
 */
 function DocumentStore(config) {
-  DocumentStore.super.apply(this);
   this.config = config;
+
+  // We will store data here
+  this._db = {};
 }
 
 DocumentStore.Prototype = function() {
 
   /*
-    Gets changes for a given document
-
-    @param {String} args.documentId document id
-    @param {Number} args.sinceVersion since which change
+    Create a new document record
   */
-  this.getChanges = function(args, cb) {
-    if (this._documentExists(args.documentId)) {
-      var changes = this._getChanges(args.documentId);
-      var version = this._getVersion(args.documentId);
-      var res;
-
-      if (args.sinceVersion === 0) {
-        res = {
-          version: version,
-          changes: changes
-        };
-        cb(null, res);
-      } else if (args.sinceVersion > 0) {
-        res = {
-          version: version,
-          changes: changes.slice(args.sinceVersion)
-        };
-        cb(null, res);
-      } else {
-        cb(new Error('Illegal version: ' + args.sinceVersion));
-      }
-    } else {
-      cb(new Error('Document does not exist'));
-    }
+  this.createDocument = function(props, cb) {
+    var exists = this._documentExists(props.documentId);
+    if (exists) return cb(new Error('Document already exists'));
+    this._createDocument(props);
+    cb(null, this._getDocument(props.documentId));
   };
 
   /*
-    Creates a new empty or prefilled document
-  
-    Writes the initial change into the database.
-    Returns the JSON serialized version, as a starting point
+    Get document by documentId
+  */  
+  this.getDocument = function(documentId, cb) {
+    var doc = this._getDocument(documentId);
+    if (!doc) return cb(new Error('Document does not exist'));
+    cb(null, doc);
+  };
+
+  /*
+    Update document record
   */
-  this.createDocument = function(args, cb) {
-    var schemaConfig = this.config.schemas[args.schemaName];
-    if (!schemaConfig) {
-      cb(new Error('Schema '+args.schemaName+' not found'));
-    }
-    var docFactory = schemaConfig.documentFactory;
-
-    if (this._documentExists(args.documentId)) {
-      return cb(new Error('Document already exists'));
-    }
-
-    var doc = docFactory.createArticle();
-    var changeset = docFactory.createChangeset();
-    this._documents[args.documentId] = {
-      schema: {
-        name: schemaConfig.name,
-        version: schemaConfig.version
-      },
-      documentId: args.documentId,
-      userId: args.userId,
-      changes: []
-    };
-    this._addChange(args.documentId, changeset[0]);
-
-    var res = {
-      data: doc,
-      version: 1
-    };
-    cb(null, res);
+  this.updateDocument = function(documentId, newProps, cb) {
+    var exists = this._documentExists(documentId);
+    if (!exists) return cb(new Error('Document does not exist'));
+    this._updateDocument(documentId, newProps);
+    cb(null, this._getDocument(documentId));
   };
 
   /*
     Delete document
   */
   this.deleteDocument = function(documentId, cb) {
-    var exists = this._documentExists(documentId);
-    if (!exists) return cb(new Error('Document does not exist'));
-    delete this._documents[documentId];
-    cb(null);
-  };
-
-  /*
-    Get document snapshot.
-
-    Uses schema information stored at the doc entry and
-    constructs a document using the corresponding documentFactory
-    that is available as a schema config object.
-  */
-  this.getDocument = function(documentId, cb) {
-    var docRecord = this._documents[documentId];
-    if (!docRecord) {
-      return cb(new Error('Document does not exist'));
-    }
-
-    var schemaConfig = this.config.schemas[docRecord.schema.name];
-    if (!schemaConfig) {
-      cb(new Error('Schema '+docRecord.schema.name+' not found'));
-    }
-
-    var docFactory = schemaConfig.documentFactory;
-    var args = {
-      documentId: documentId,
-      sinceVersion: 0
-    };
-    this.getChanges(args, function(err, res) {
-      if(err) return cb(err);
-      var doc = docFactory.createEmptyArticle();
-      res.changes.forEach(function(change) {
-        change.ops.forEach(function(op) {
-          doc.data.apply(op);
-        });
-      });
-      var converter = new JSONConverter();
-      var output = {
-        data: converter.exportDocument(doc),
-        version: res.version
-      };
-      cb(null, output);
-    });
+    var doc = this._getDocument(documentId);
+    if (!doc) return cb(new Error('Document does not exist'));
+    this._deleteDocument(documentId);
+    cb(null, doc);
   };
 
   /*
     Returns true if changeset exists
   */
   this.documentExists = function(documentId, cb) {
-    cb(null, this._documentExists());
-  };
-
-  /*
-    Add a change object to the database
-  */
-  this.addChange = function(args, cb) {
-    var exists = this._documentExists(args.documentId);
-    if (!exists) {
-      return cb(new Error('Document '+args.documentId+' does not exist'));
-    }
-    this._addChange(args.documentId, args.change);
-    cb(null, this._getVersion(args.documentId));
-  };
-
-  /*
-    Gets the version number for a document
-  */
-  this.getVersion = function(id, cb) {
-    cb(null, this._getVersion(id));
+    cb(null, this._documentExists(documentId));
   };
 
   /*
@@ -169,32 +67,35 @@ DocumentStore.Prototype = function() {
   */
   this.seed = function(documents, cb) {
     this._documents = documents;
-    if (cb) {
-      cb(null, documents);
-    }
+    if (cb) { cb(null); }
   };
 
   // Handy synchronous helpers
   // -------------------------
 
+  this._createDocument = function(props) {
+    this._documents[props.documentId] = props;
+  };
+
+  this._deleteDocument = function(documentId) {
+    delete this._documents[documentId];
+  };
+
+  // Get document record
+  this._getDocument = function(documentId) {
+    return this._documents[documentId];
+  };
+  
+  this._updateDocument = function(documentId, props) {
+    var doc = this._documents[props.documentId];
+    extend(doc, props);
+  };
+
   this._documentExists = function(documentId) {
     return !!this._documents[documentId];
   };
 
-  this._getVersion = function(documentId) {
-    return this._documents[documentId].changes.length;
-  };
-
-  this._getChanges = function(documentId) {
-    return this._documents[documentId].changes;
-  };
-
-  this._addChange = function(documentId, change) {
-    this._documents[documentId].changes.push(change);
-  };
-
-
 };
 
-EventEmitter.extend(DocumentStore);
+oo.initClass(DocumentStore);
 module.exports = DocumentStore;

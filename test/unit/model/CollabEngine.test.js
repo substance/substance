@@ -3,7 +3,10 @@
 require('../qunit_extensions');
 
 var documentStoreSeed = require('../../fixtures/collab/documentStoreSeed');
+var changeStoreSeed = require('../../fixtures/collab/changeStoreSeed');
 var DocumentStore = require('../../../collab/DocumentStore');
+var ChangeStore = require('../../../collab/ChangeStore');
+var DocumentEngine = require('../../../collab/DocumentEngine');
 var twoParagraphs = require('../../fixtures/collab/two-paragraphs');
 var insertParagraph = require('../../fixtures/collab/insertParagraph');
 var insertText = require('../../fixtures/collab/insertText');
@@ -16,7 +19,12 @@ var testDoc = twoParagraphs.createArticle();
 // properly play the rebase scenario
 var exampleChange = insertParagraph(testDoc);
 
-var store = new DocumentStore({
+var documentStore = new DocumentStore();
+var changeStore = new ChangeStore();
+
+var documentEngine = new DocumentEngine({
+  documentStore: documentStore,
+  changeStore: changeStore,
   schemas: {
     'prose-article': {
       name: 'prose-article',
@@ -31,21 +39,18 @@ var collabEngine;
 QUnit.module('collab/CollabEngine', {
   beforeEach: function(assert) {
     var done = assert.async();
-
-    // Make sure we create a new seed instance, as data ops
-    // are performed directly on the seed object
     var newDocumentStoreSeed = JSON.parse(JSON.stringify(documentStoreSeed));
-    store.seed(newDocumentStoreSeed, function(err) {
-      if (err) {
-        return console.error(err);
-      } else {
+    var newChangeStoreSeed = JSON.parse(JSON.stringify(changeStoreSeed));
+    documentStore.seed(newDocumentStoreSeed, function(err) {
+      if (err) return console.error(err);
+      changeStore.seed(newChangeStoreSeed, function(err) {
+        if (err) return console.error(err);
+        collabEngine = new CollabEngine(documentEngine);
         done();
-      }
+      });
     });
-    collabEngine = new CollabEngine(store);
   }
 });
-
 
 QUnit.test('New collaborator enters with latest version', function(assert) {
   var done = assert.async();
