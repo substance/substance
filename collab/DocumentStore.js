@@ -9,9 +9,6 @@ var extend = require('lodash/extend');
 */
 function DocumentStore(config) {
   this.config = config;
-
-  // We will store data here
-  this._db = {};
 }
 
 DocumentStore.Prototype = function() {

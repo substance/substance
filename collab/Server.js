@@ -42,7 +42,7 @@ function ServerResponse() {
   this.isReady = false; // once the response has been set using send
   this.isEnhanced = false; // after response has been enhanced by enhancer
   this.isSent = false; // after response has been sent
-  this.error = null;
+  this.err = null;
   this.data = null;
 }
 
@@ -51,8 +51,8 @@ ServerResponse.Prototype = function() {
   /*
     Sends an error response
   */
-  this.error = function(error) {
-    this.error = error;
+  this.error = function(err) {
+    this.err = err;
     this.isReady = true;
   };
 
@@ -217,11 +217,7 @@ Server.Prototype = function() {
   };
 
   this.__error = function(req, res) {
-    return res.error;
-  };
-
-  this.__enhanced = function(req, res) {
-    return res.isReady && res.isEnhanced && !res.isSent;
+    return res.err;
   };
 
   this.__done = function(req, res) {
@@ -253,7 +249,7 @@ Server.Prototype = function() {
     var collaboratorId = req.message.collaboratorId;
     var msg = {
       type: 'error',
-      errorMessage: res.error.message,
+      errorMessage: res.err.message,
       requestMessage: req.message
     };
     this.send(collaboratorId, msg);
