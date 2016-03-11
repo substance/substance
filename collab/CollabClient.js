@@ -8,7 +8,6 @@ var __id__ = 0;
 
   Communicates via websocket for real-time operations
 */
-
 function CollabClient(config) {
   CollabClient.super.apply(this);
 
@@ -79,6 +78,10 @@ CollabClient.Prototype = function() {
   */
   this.send = function(msg) {
     msg.scope = 'substance/collab';
+
+    if (this.config.enhanceMessage) {
+      msg = this.config.enhanceMessage(msg);
+    }
     this.ws.send(this.serializeMessage(msg));
   };
 

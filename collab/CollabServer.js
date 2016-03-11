@@ -48,7 +48,12 @@ CollabServer.Prototype = function() {
           console.log('Request is not authenticated.', req);
           return res.error(err);
         }
+
+        console.log('CollabServer.authenticate session', !!session);
         req.setAuthenticated(session);
+
+        // console.log('############req.session', req.session);
+
         this.next(req, res);
       }.bind(this));
     } else {
@@ -122,6 +127,8 @@ CollabServer.Prototype = function() {
           selection: null,
           collaboratorId: args.collaboratorId
         };
+
+        console.log('--------------- req.isAuthenticated', req.isAuthenticated);
 
         this.enhanceCollaborator(req, function(err, info) {
           if (!err && info) {
