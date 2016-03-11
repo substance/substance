@@ -108,8 +108,22 @@ DocumentEngine.Prototype = function() {
 
   };
 
+  /*
+    Delete document by documentId
+
+    NOTE: We return custom errors here as the store may have store-specific errors (e.g. SQL errors)
+    and we don't want to expose that to the user. However it needs to be discussed if that's the right
+    approach.
+  */
   this.deleteDocument = function(documentId, cb) {
-    this.documentStore.deleteDocument(documentId, cb);
+    this.documentExists(documentId, function(err, exists) {
+      if (err) return cb(new Error('Could not delete document'));
+      if (!exists) return cb(new Error('Could not delete. Document does not exist'));
+      this.documentStore.deleteDocument(documentId, function(err, doc) {
+        if (err) return cb(new Error('Could not delete document'));
+        cb(null, doc);
+      });
+    });
   };
 
   /*
