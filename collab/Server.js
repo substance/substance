@@ -211,9 +211,8 @@ Server.Prototype = function() {
     return req.isAuthenticated && req.isAuthorized && res.isReady && res.data && !res.isEnhanced;
   };
 
-  this.__enhanced = function(req, res) {
-    // excecute must call res.send() so res.data is set
-    return req.isAuthenticated && req.isAuthorized && res.isReady && res.data && res.isEnhanced;
+  this.__enhanced = function(req, res) {   
+    return res.isReady && res.isEnhanced && !res.isSent;    
   };
 
   this.__error = function(req, res) {
@@ -238,7 +237,7 @@ Server.Prototype = function() {
     } else if (this.__error(req, res)) {
       this.sendError(req, res);
     } else if (this.__done(req,res)) {
-      console.log('We are done with processing the request.', req, res);
+      console.log('We are done with processing the request.');
     }
   };
 
@@ -264,7 +263,12 @@ Server.Prototype = function() {
     var collaboratorId = req.message.collaboratorId;
     this.send(collaboratorId, res.data);
     res.setSent();
+    console.log('sendResponse', res.isSent);
     this.next(req, res);
+  };
+
+  this._isWebsocketOpen = function(ws) {
+    return ws && ws.readyState === 1;
   };
 
   /*
@@ -273,7 +277,11 @@ Server.Prototype = function() {
   this.send = function(collaboratorId, message) {
     message.scope = this.scope;
     var ws = this._collaborators[collaboratorId].connection;
-    ws.send(this.serializeMessage(message));
+    if (this._isWebsocketOpen(ws)) {
+      ws.send(this.serializeMessage(message));  
+    } else {
+      console.error('Server#send: Websocket for collaborator', collaboratorId, 'is no longer open', message);
+    }
   };
 
   /*

@@ -346,7 +346,7 @@ CollabSession.Prototype = function() {
     now on.
   */
   this.connectDone = function(serverVersion, changes, collaborators) {
-    // console.log('Received "openDone"', serverVersion, changes);
+    console.log('Received connectDone', serverVersion, changes);
     if (this.doc.version !== serverVersion) {
       // There have been changes on the server since the doc was opened
       // the last time

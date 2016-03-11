@@ -13,7 +13,6 @@ function CollabServer(config) {
 
   this.scope = 'substance/collab';
   this.documentEngine = config.documentEngine;
-  
   this.collabEngine = new CollabEngine(this.documentEngine);
 
   // Here we store additional collaborator data
@@ -45,9 +44,12 @@ CollabServer.Prototype = function() {
   this.authenticate = function(req, res) {
     if (this.config.authenticate) {
       this.config.authenticate(req.message, function(err, session) {
-        if (err) return res.error(err);
+        if (err) {
+          console.log('Request is not authenticated.', req);
+          return res.error(err);
+        }
         req.setAuthenticated(session);
-        this.next();
+        this.next(req, res);
       }.bind(this));
     } else {
       req.setAuthenticated();
@@ -59,11 +61,11 @@ CollabServer.Prototype = function() {
     Called when a collaborator disconnects
   */
   this.onDisconnect = function(collaboratorId) {
-    console.log('disconnecting ', collaboratorId);
+    console.log('CollabServer.onDisconnect ', collaboratorId);
     // All documents collaborator is currently collaborating to
     var documentIds = this.collabEngine.getDocumentIds(collaboratorId);
     documentIds.forEach(function(documentId) {
-      var collaboratorIds = this.collabEngine.getCollaboratorIds(documentId, collaboratorIds);
+      var collaboratorIds = this.collabEngine.getCollaboratorIds(documentId, collaboratorId);
       this.broadCast(collaboratorIds, {
         type: 'collaboratorDisconnected',
         documentId: documentId,
@@ -97,6 +99,7 @@ CollabServer.Prototype = function() {
   this.connect = function(req, res) {
     var args = req.message;
 
+    console.log('CollabServer.connect', args.collaboratorId);
     this.collabEngine.connect(args, function(err, result) {
       // result: changes, version, change
       if (err) {
