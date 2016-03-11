@@ -123,7 +123,7 @@ DocumentEngine.Prototype = function() {
         if (err) return cb(new Error('Could not delete document'));
         cb(null, doc);
       });
-    });
+    }.bind(this));
   };
 
   /*
