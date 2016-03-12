@@ -1,185 +1,67 @@
 module.exports = function() {
   return [
     {
+      "from": "hub",
+      "to": "user1",
+      "data": [
+        "open"
+      ]
+    },
+    {
+      "from": "hub",
+      "to": "user2",
+      "data": [
+        "open"
+      ]
+    },
+    {
       "from": "user1",
       "to": "hub",
       "data": {
-        "type": "open",
-        "documentId": "test",
-        "version": 0,
-        "sessionToken": "user1token",
-        "scope": "hub"
+        "type": "connect",
+        "documentId": "test-doc",
+        "version": 1,
+        "scope": "substance/collab",
+        "collaboratorId": "dfd9875adc4ff6981a71241a7d673f16"
       }
     },
     {
       "from": "user2",
       "to": "hub",
       "data": {
-        "type": "open",
-        "documentId": "test",
-        "version": 0,
-        "sessionToken": "user2token",
-        "scope": "hub"
+        "type": "connect",
+        "documentId": "test-doc",
+        "version": 1,
+        "scope": "substance/collab",
+        "collaboratorId": "a7e6d83a643a1874f28a3af6f776a601"
       }
     },
     {
       "from": "hub",
       "to": "user1",
       "data": {
-        "type": "openDone",
+        "type": "connectDone",
+        "documentId": "test-doc",
         "version": 1,
-        "changes": [
-          {
-            "sessionId": 1,
-            "sha": "71496986b89eca61a1b8cec591c08db4",
-            "before": {},
-            "ops": [
-              {
-                "type": "create",
-                "path": [
-                  "p1"
-                ],
-                "val": {
-                  "id": "p1",
-                  "type": "paragraph",
-                  "content": "0123456789"
-                }
-              },
-              {
-                "type": "update",
-                "path": [
-                  "body",
-                  "nodes"
-                ],
-                "propertyType": "array",
-                "diff": {
-                  "type": "insert",
-                  "pos": 0,
-                  "val": "p1"
-                }
-              },
-              {
-                "type": "create",
-                "path": [
-                  "p2"
-                ],
-                "val": {
-                  "id": "p2",
-                  "type": "paragraph",
-                  "content": "0123456789"
-                }
-              },
-              {
-                "type": "update",
-                "path": [
-                  "body",
-                  "nodes"
-                ],
-                "propertyType": "array",
-                "diff": {
-                  "type": "insert",
-                  "pos": 1,
-                  "val": "p2"
-                }
-              }
-            ],
-            "after": {}
-          }
-        ],
+        "changes": [],
         "collaborators": {
-          "d3d86107711f870225578bcf0a14e78b": {
-            "user": {
-              "userId": "user2",
-              "password": "demo",
-              "name": "User 2"
+          "a7e6d83a643a1874f28a3af6f776a601": {
+            "selection": {
+              "type": "property",
+              "path": [
+                "p1",
+                "content"
+              ],
+              "startOffset": 7,
+              "endOffset": 7,
+              "reverse": false,
+              "surfaceId": "bodyEditor"
             },
-            "selection": null,
-            "collaboratorId": "d3d86107711f870225578bcf0a14e78b",
-            "collaboratorIndex": 2
+            "collaboratorId": "a7e6d83a643a1874f28a3af6f776a601",
+            "colorIndex": 1
           }
         },
-        "scope": "hub",
-        "documentId": "test"
-      }
-    },
-    {
-      "from": "hub",
-      "to": "user2",
-      "data": {
-        "type": "openDone",
-        "version": 1,
-        "changes": [
-          {
-            "sessionId": 1,
-            "sha": "71496986b89eca61a1b8cec591c08db4",
-            "before": {},
-            "ops": [
-              {
-                "type": "create",
-                "path": [
-                  "p1"
-                ],
-                "val": {
-                  "id": "p1",
-                  "type": "paragraph",
-                  "content": "0123456789"
-                }
-              },
-              {
-                "type": "update",
-                "path": [
-                  "body",
-                  "nodes"
-                ],
-                "propertyType": "array",
-                "diff": {
-                  "type": "insert",
-                  "pos": 0,
-                  "val": "p1"
-                }
-              },
-              {
-                "type": "create",
-                "path": [
-                  "p2"
-                ],
-                "val": {
-                  "id": "p2",
-                  "type": "paragraph",
-                  "content": "0123456789"
-                }
-              },
-              {
-                "type": "update",
-                "path": [
-                  "body",
-                  "nodes"
-                ],
-                "propertyType": "array",
-                "diff": {
-                  "type": "insert",
-                  "pos": 1,
-                  "val": "p2"
-                }
-              }
-            ],
-            "after": {}
-          }
-        ],
-        "collaborators": {
-          "3d65f28e25ae81b47a1c5927ef67ab24": {
-            "user": {
-              "userId": "user1",
-              "password": "demo",
-              "name": "User 1"
-            },
-            "selection": null,
-            "collaboratorId": "3d65f28e25ae81b47a1c5927ef67ab24",
-            "collaboratorIndex": 1
-          }
-        },
-        "scope": "hub",
-        "documentId": "test"
+        "scope": "substance/collab"
       }
     },
     {
@@ -187,18 +69,51 @@ module.exports = function() {
       "to": "user1",
       "data": {
         "type": "collaboratorConnected",
+        "documentId": "test-doc",
         "collaborator": {
-          "user": {
-            "userId": "user2",
-            "password": "demo",
-            "name": "User 2"
+          "selection": {
+            "type": "property",
+            "path": [
+              "p1",
+              "content"
+            ],
+            "startOffset": 7,
+            "endOffset": 7,
+            "reverse": false,
+            "surfaceId": "bodyEditor"
           },
-          "selection": null,
-          "collaboratorId": "d3d86107711f870225578bcf0a14e78b",
-          "collaboratorIndex": 2
+          "collaboratorId": "a7e6d83a643a1874f28a3af6f776a601",
+          "colorIndex": 1
         },
-        "scope": "hub",
-        "documentId": "test"
+        "scope": "substance/collab"
+      }
+    },
+    {
+      "from": "hub",
+      "to": "user2",
+      "data": {
+        "type": "connectDone",
+        "documentId": "test-doc",
+        "version": 1,
+        "changes": [],
+        "collaborators": {
+          "dfd9875adc4ff6981a71241a7d673f16": {
+            "selection": {
+              "type": "property",
+              "path": [
+                "p1",
+                "content"
+              ],
+              "startOffset": 7,
+              "endOffset": 7,
+              "reverse": false,
+              "surfaceId": "bodyEditor"
+            },
+            "collaboratorId": "dfd9875adc4ff6981a71241a7d673f16",
+            "colorIndex": 1
+          }
+        },
+        "scope": "substance/collab"
       }
     },
     {
@@ -206,10 +121,10 @@ module.exports = function() {
       "to": "hub",
       "data": {
         "type": "updateSelection",
-        "documentId": "test",
+        "documentId": "test-doc",
         "version": 1,
         "change": {
-          "sha": "ffb91eedf147e85d88e250ee91efdc66",
+          "sha": "b1246daaebb5972a48b9296a20da02b3",
           "before": {
             "selection": null
           },
@@ -228,8 +143,8 @@ module.exports = function() {
             }
           }
         },
-        "sessionToken": "user1token",
-        "scope": "hub"
+        "scope": "substance/collab",
+        "collaboratorId": "dfd9875adc4ff6981a71241a7d673f16"
       }
     },
     {
@@ -237,11 +152,11 @@ module.exports = function() {
       "to": "hub",
       "data": {
         "type": "commit",
-        "documentId": "test",
+        "documentId": "test-doc",
         "version": 1,
         "change": {
           "sessionId": 2,
-          "sha": "04a8e11764111936205c376364b71da0",
+          "sha": "02926328e4cd83bb8cab231f5cd1c1ac",
           "before": {
             "selection": {
               "type": "property",
@@ -286,8 +201,8 @@ module.exports = function() {
             "surfaceId": "bodyEditor"
           }
         },
-        "sessionToken": "user1token",
-        "scope": "hub"
+        "scope": "substance/collab",
+        "collaboratorId": "dfd9875adc4ff6981a71241a7d673f16"
       }
     },
     {
@@ -295,10 +210,10 @@ module.exports = function() {
       "to": "hub",
       "data": {
         "type": "updateSelection",
-        "documentId": "test",
+        "documentId": "test-doc",
         "version": 1,
         "change": {
-          "sha": "f1c62a0254880dcadd32cfb8bebe9c17",
+          "sha": "e87537ec16064d2690cd5efb0155bff2",
           "before": {
             "selection": null
           },
@@ -317,8 +232,8 @@ module.exports = function() {
             }
           }
         },
-        "sessionToken": "user2token",
-        "scope": "hub"
+        "scope": "substance/collab",
+        "collaboratorId": "a7e6d83a643a1874f28a3af6f776a601"
       }
     },
     {
@@ -326,11 +241,11 @@ module.exports = function() {
       "to": "hub",
       "data": {
         "type": "commit",
-        "documentId": "test",
+        "documentId": "test-doc",
         "version": 1,
         "change": {
           "sessionId": 3,
-          "sha": "0bc94c323d9cd5ea705f307968f708a5",
+          "sha": "1cbd4ec67ca27e7b1be3df5356625707",
           "before": {
             "selection": {
               "type": "property",
@@ -375,8 +290,256 @@ module.exports = function() {
             "surfaceId": "bodyEditor"
           }
         },
-        "sessionToken": "user2token",
-        "scope": "hub"
+        "scope": "substance/collab",
+        "collaboratorId": "a7e6d83a643a1874f28a3af6f776a601"
+      }
+    },
+    {
+      "from": "hub",
+      "to": "user2",
+      "data": {
+        "type": "updateSelection",
+        "version": 1,
+        "change": {
+          "sha": "b1246daaebb5972a48b9296a20da02b3",
+          "before": {
+            "selection": null
+          },
+          "ops": [],
+          "after": {
+            "selection": {
+              "type": "property",
+              "path": [
+                "p1",
+                "content"
+              ],
+              "startOffset": 5,
+              "endOffset": 5,
+              "reverse": false,
+              "surfaceId": "bodyEditor"
+            }
+          }
+        },
+        "collaboratorId": "dfd9875adc4ff6981a71241a7d673f16",
+        "documentId": "test-doc",
+        "scope": "substance/collab"
+      }
+    },
+    {
+      "from": "hub",
+      "to": "user2",
+      "data": {
+        "type": "update",
+        "version": 2,
+        "change": {
+          "sessionId": 2,
+          "sha": "02926328e4cd83bb8cab231f5cd1c1ac",
+          "before": {
+            "selection": {
+              "type": "property",
+              "path": [
+                "p1",
+                "content"
+              ],
+              "startOffset": 5,
+              "endOffset": 5,
+              "reverse": false,
+              "surfaceId": "bodyEditor"
+            },
+            "surfaceId": "bodyEditor"
+          },
+          "ops": [
+            {
+              "type": "update",
+              "path": [
+                "p1",
+                "content"
+              ],
+              "propertyType": "string",
+              "diff": {
+                "type": "insert",
+                "pos": 5,
+                "str": "a"
+              }
+            }
+          ],
+          "after": {
+            "selection": {
+              "type": "property",
+              "path": [
+                "p1",
+                "content"
+              ],
+              "startOffset": 6,
+              "endOffset": 6,
+              "reverse": false,
+              "surfaceId": "bodyEditor"
+            },
+            "surfaceId": "bodyEditor"
+          }
+        },
+        "collaboratorId": "dfd9875adc4ff6981a71241a7d673f16",
+        "documentId": "test-doc",
+        "scope": "substance/collab"
+      }
+    },
+    {
+      "from": "hub",
+      "to": "user1",
+      "data": {
+        "documentId": "test-doc",
+        "type": "commitDone",
+        "version": 2,
+        "changes": [],
+        "scope": "substance/collab"
+      }
+    },
+    {
+      "from": "hub",
+      "to": "user1",
+      "data": {
+        "type": "updateSelection",
+        "version": 2,
+        "change": {
+          "sha": "e87537ec16064d2690cd5efb0155bff2",
+          "before": {
+            "selection": null
+          },
+          "ops": [],
+          "after": {
+            "selection": {
+              "type": "property",
+              "path": [
+                "p1",
+                "content"
+              ],
+              "startOffset": 6,
+              "endOffset": 6,
+              "reverse": false,
+              "surfaceId": "bodyEditor"
+            }
+          }
+        },
+        "collaboratorId": "a7e6d83a643a1874f28a3af6f776a601",
+        "documentId": "test-doc",
+        "scope": "substance/collab"
+      }
+    },
+    {
+      "from": "hub",
+      "to": "user1",
+      "data": {
+        "type": "update",
+        "version": 3,
+        "change": {
+          "sessionId": 3,
+          "sha": "1cbd4ec67ca27e7b1be3df5356625707",
+          "before": {
+            "selection": {
+              "type": "property",
+              "path": [
+                "p1",
+                "content"
+              ],
+              "startOffset": 5,
+              "endOffset": 5,
+              "reverse": false,
+              "surfaceId": "bodyEditor"
+            },
+            "surfaceId": "bodyEditor"
+          },
+          "ops": [
+            {
+              "type": "update",
+              "path": [
+                "p1",
+                "content"
+              ],
+              "propertyType": "string",
+              "diff": {
+                "type": "insert",
+                "pos": 5,
+                "str": "b"
+              }
+            }
+          ],
+          "after": {
+            "selection": {
+              "type": "property",
+              "path": [
+                "p1",
+                "content"
+              ],
+              "startOffset": 7,
+              "endOffset": 7,
+              "reverse": false,
+              "surfaceId": "bodyEditor"
+            },
+            "surfaceId": "bodyEditor"
+          }
+        },
+        "collaboratorId": "a7e6d83a643a1874f28a3af6f776a601",
+        "documentId": "test-doc",
+        "scope": "substance/collab"
+      }
+    },
+    {
+      "from": "hub",
+      "to": "user2",
+      "data": {
+        "documentId": "test-doc",
+        "type": "commitDone",
+        "version": 3,
+        "changes": [
+          {
+            "sessionId": 2,
+            "sha": "02926328e4cd83bb8cab231f5cd1c1ac",
+            "before": {
+              "selection": {
+                "type": "property",
+                "path": [
+                  "p1",
+                  "content"
+                ],
+                "startOffset": 6,
+                "endOffset": 6,
+                "reverse": false,
+                "surfaceId": "bodyEditor"
+              },
+              "surfaceId": "bodyEditor"
+            },
+            "ops": [
+              {
+                "type": "update",
+                "path": [
+                  "p1",
+                  "content"
+                ],
+                "propertyType": "string",
+                "diff": {
+                  "type": "insert",
+                  "pos": 6,
+                  "str": "a"
+                }
+              }
+            ],
+            "after": {
+              "selection": {
+                "type": "property",
+                "path": [
+                  "p1",
+                  "content"
+                ],
+                "startOffset": 7,
+                "endOffset": 7,
+                "reverse": false,
+                "surfaceId": "bodyEditor"
+              },
+              "surfaceId": "bodyEditor"
+            }
+          }
+        ],
+        "scope": "substance/collab"
       }
     }
   ];
