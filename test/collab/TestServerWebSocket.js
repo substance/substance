@@ -17,6 +17,7 @@ function TestServerWebSocket(messageQueue, serverId, clientId) {
   this.clientId = clientId;
 
   this._isSimulated = true;
+  this.readyState = 1; // consider always connected
 }
 
 TestServerWebSocket.Prototype = function() {
