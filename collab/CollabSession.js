@@ -10,14 +10,14 @@ var Selection = require('../model/Selection');
   Session that is connected to a Substance Hub allowing
   collaboration in real-time.
 
-  Requires a connected and authenticated hubClient.
+  Requires a connected and authenticated collabClient.
 */
 function CollabSession(doc, config) {
   CollabSession.super.call(this, doc, config);
 
   config = config || {};
 
-  this.hubClient = config.hubClient;
+  this.collabClient = config.collabClient;
 
   // TODO: The CollabSession or the doc needs to be aware of a doc id
   // that corresponds to the doc on the server. For now we just
@@ -28,7 +28,7 @@ function CollabSession(doc, config) {
   this.doc.version = config.docVersion;
 
   // Internal state
-  this._opened = false; // becomes true as soon as the initial open has been completd
+  this._conected = false; // becomes true as soon as the initial connect has been completed
   this._nextCommit = null; //
   this._pendingCommit = null;
 
@@ -39,20 +39,15 @@ function CollabSession(doc, config) {
   this.collaborators = {};
 
   // This happens on a reconnect
-  this.hubClient.on('connection', this._onHubClientConnected, this);
+  this.collabClient.on('connection', this._onConnected, this);
 
   // Constraints used for computing color indexes
   this.__maxColors = 5;
   this.__nextColorIndex = 0;
-  this.hubClient.on('message', this._onMessage.bind(this));
+  this.collabClient.on('message', this._onMessage.bind(this));
 
   // Attempt to open a document immediately
-  if (this.hubClient.isAuthenticated()) {
-    this.open();
-  } else {
-    console.warn('Attempted to create a CollabSession using an unauthenticated hubClient');
-  }
-
+  this.connect();
 }
 
 CollabSession.Prototype = function() {
@@ -60,14 +55,13 @@ CollabSession.Prototype = function() {
   var _super = Object.getPrototypeOf(this);
 
   /*
-    A new authenticated hubClient connection is available.
+    A new authenticated collabClient connection is available.
 
-    This happens in a reconnect scenario. We just
+    This happens in a reconnect scenario.
   */
-  this._onHubClientConnected = function() {
-    // console.log('hub client reconnected to a new websocket. We reopen the doc.');
-    this._opened = false;
-    this.open();
+  this._onConnected = function() {
+    this._connected = false;
+    this.connect();
   };
 
   /*
@@ -83,7 +77,7 @@ CollabSession.Prototype = function() {
 
     var changes, change;
     switch(msg.type) {
-      case 'openDone':
+      case 'connectDone':
       case 'commitDone':
         if (msg.changes) {
           changes = msg.changes.map(function(change) {
@@ -136,17 +130,17 @@ CollabSession.Prototype = function() {
     Connect session with remote endpoint and loads the upstream changes.
 
     This operation initializes an editing session. It may happen that we never
-    see a response (openDone) for it. E.g. when the connection is not
+    see a response (enterDone) for it. E.g. when the connection is not
     authenticated. However in such cases we will receive a connected event
     and then open gets called again, considering the pendingCommit
     (see _computeNextCommit).
 
     @param {WebSocket} ws a connected websocket.
   */
-  this.open = function() {
-    this._opened = false;
+  this.connect = function() {
+    this._connected = false;
     var msg = {
-      type: 'open',
+      type: 'connect',
       documentId: this.doc.id,
       version: this.doc.version
     };
@@ -158,7 +152,7 @@ CollabSession.Prototype = function() {
       // This behaves like a commit
       msg.change = this.serializeChange(this._nextCommit);
       this._send(msg);
-      // In case of a reconnect we need to set _opened back to false
+      // In case of a reconnect we need to set _connected back to false
       this._afterCommit(this._nextCommit);
     } else {
       this._send(msg);
@@ -169,7 +163,7 @@ CollabSession.Prototype = function() {
   this.dispose = function() {
     // Reset to original state
     this.stop();
-    this._opened = false;
+    this._connected = false;
     this._nextCommit = null;
     this._pendingCommit = null;
   };
@@ -177,12 +171,11 @@ CollabSession.Prototype = function() {
   /*
     TODO: Make use of it.
   */
-  this.close = function() {
+  this.disconnect = function() {
     // Let the server know we no longer want to edit this document
     var msg = {
-      type: 'close',
-      documentId: this.doc.id,
-      version: this.doc.version
+      type: 'disconnect',
+      documentId: this.doc.id
     };
     this._send(msg);
     // And now dispose and deregister the handlers
@@ -194,7 +187,7 @@ CollabSession.Prototype = function() {
   */
   this.commit = function() {
     // If there is something to commit and there is no commit pending
-    if (this.hubClient.isConnected() && this._nextCommit && !this._pendingCommit) {
+    if (this.collabClient.isConnected() && this._nextCommit && !this._pendingCommit) {
       var msg = {
         type: 'commit',
         documentId: this.doc.id,
@@ -292,6 +285,7 @@ CollabSession.Prototype = function() {
   */
   this._applyRemoteChange = function(change, collaboratorId) {
     // console.log("REMOTE CHANGE", change);
+
     this.stage._apply(change);
     this.doc._apply(change);
     this._transformLocalChangeHistory(change);
@@ -351,8 +345,8 @@ CollabSession.Prototype = function() {
     Server has opened the document. The collab session is live from
     now on.
   */
-  this.openDone = function(serverVersion, changes, collaborators) {
-    // console.log('Received "openDone"', serverVersion, changes);
+  this.connectDone = function(serverVersion, changes, collaborators) {
+    console.log('Received connectDone', serverVersion, changes);
     if (this.doc.version !== serverVersion) {
       // There have been changes on the server since the doc was opened
       // the last time
@@ -371,15 +365,16 @@ CollabSession.Prototype = function() {
       this._addCollaborator(collaborator);
     }.bind(this));
     this.emit('collaborators:changed');
+    this._connected = true;
 
-    this._opened = true;
-    this.emit('opened');
+    // Not recommended to use this event
+    this.emit('connected');
     // Now we start to record local changes and periodically push them to remove
     this.start();
   };
 
-  this.isOpen = function() {
-    return this._opened;
+  this.isConnected = function() {
+    return this._connected;
   };
 
   this._addCollaborator = function(collaborator) {
@@ -442,7 +437,7 @@ CollabSession.Prototype = function() {
   };
 
   this._send = function(msg) {
-    this.hubClient.send(msg);
+    this.collabClient.send(msg);
   };
 
   /*

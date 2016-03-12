@@ -1,8 +1,9 @@
 'use strict';
 
-var _makeFixture = require('./_makeFixture');
+var createDocumentFactory = require('../../../model/createDocumentFactory');
+var ProseArticle = require('../../../packages/prose-editor/ProseArticle');
 
-module.exports = _makeFixture(function(tx) {
+module.exports = createDocumentFactory(ProseArticle, function(tx) {
   var body = tx.get('body');
 
   tx.create({

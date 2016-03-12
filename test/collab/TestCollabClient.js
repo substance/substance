@@ -1,13 +1,13 @@
 'use strict';
 
-var HubClient = require('../../collab/HubClient');
+var CollabClient = require('../../collab/CollabClient');
 
-function TestHubClient(config) {
-  TestHubClient.super.apply(this, arguments);
+function TestCollabClient(config) {
+  TestCollabClient.super.apply(this, arguments);
   this.ws = config.ws;
 }
 
-TestHubClient.Prototype = function() {
+TestCollabClient.Prototype = function() {
   this._initWebSocket = function() {
     this.ws = this.config.ws;
     this.ws.onopen = this._onWebSocketOpen.bind(this);
@@ -21,9 +21,8 @@ TestHubClient.Prototype = function() {
   this.deserializeMessage = function(msg) {
     return msg;
   };
-
 };
 
-HubClient.extend(TestHubClient);
+CollabClient.extend(TestCollabClient);
 
-module.exports = TestHubClient;
+module.exports = TestCollabClient;
