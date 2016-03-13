@@ -2,6 +2,7 @@
 
 var oo = require('../util/oo');
 var extend = require('lodash/extend');
+var Err = require('../util/Error');
 
 /*
   Implements Substance DocumentStore API. This is just a dumb store.
@@ -15,10 +16,16 @@ DocumentStore.Prototype = function() {
 
   /*
     Create a new document record
+    
+    @return {Object} document record
   */
   this.createDocument = function(props, cb) {
     var exists = this._documentExists(props.documentId);
-    if (exists) return cb(new Error('Document already exists'));
+    if (exists) {
+      return cb(new Err('DocumentStore.CreateError', {
+        message: 'Could not create because document already exists.'
+      }));
+    }
     this._createDocument(props);
     cb(null, this._getDocument(props.documentId));
   };
@@ -28,7 +35,11 @@ DocumentStore.Prototype = function() {
   */  
   this.getDocument = function(documentId, cb) {
     var doc = this._getDocument(documentId);
-    if (!doc) return cb(new Error('Document does not exist'));
+    if (!doc) {
+      return cb(new Err('DocumentStore.ReadError', {
+        message: 'Document could not be found.'
+      }));
+    }
     cb(null, doc);
   };
 
@@ -37,7 +48,11 @@ DocumentStore.Prototype = function() {
   */
   this.updateDocument = function(documentId, newProps, cb) {
     var exists = this._documentExists(documentId);
-    if (!exists) return cb(new Error('Document does not exist'));
+    if (!exists) {
+      return cb(new Err('DocumentStore.UpdateError', {
+        message: 'Document does not exist.'
+      }));
+    }
     this._updateDocument(documentId, newProps);
     cb(null, this._getDocument(documentId));
   };
@@ -47,7 +62,11 @@ DocumentStore.Prototype = function() {
   */
   this.deleteDocument = function(documentId, cb) {
     var doc = this._getDocument(documentId);
-    if (!doc) return cb(new Error('Document does not exist'));
+    if (!doc) {
+      return cb(new Err('DocumentStore.DeleteError', {
+        message: 'Document does not exist.'
+      }));
+    }
     this._deleteDocument(documentId);
     cb(null, doc);
   };
@@ -85,15 +104,15 @@ DocumentStore.Prototype = function() {
   };
   
   this._updateDocument = function(documentId, props) {
-    var doc = this._documents[props.documentId];
+    var doc = this._documents[documentId];
     extend(doc, props);
   };
 
   this._documentExists = function(documentId) {
     return !!this._documents[documentId];
   };
-
 };
+
 
 oo.initClass(DocumentStore);
 module.exports = DocumentStore;
