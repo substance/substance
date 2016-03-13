@@ -54,7 +54,7 @@ function testDocumentStore(store, QUnit) {
 
   QUnit.test("Get document that does not exist", function(assert) {
     var done = assert.async();
-    store.getDocument('not-there-doc', function(err, doc) {
+    store.getDocument('not-there-doc', function(err) {
       assert.equal(err.name, 'DocumentStore.ReadError', 'Should give a read error for deleted document');
       done();
     });
@@ -98,7 +98,7 @@ function testDocumentStore(store, QUnit) {
       assert.notOk(err, 'There should be no error');
       assert.ok(doc, 'Deleted doc entry should be returned');
       assert.equal(doc.schemaName, 'prose-article', 'doc schemaName should be "prose-article"');
-      
+
       store.getDocument('test-doc', function(err, doc) {
         assert.equal(err.name, 'DocumentStore.ReadError', 'Should give a read error for deleted document');
         assert.isNullOrUndefined(doc, 'doc should be undefined');
@@ -115,6 +115,28 @@ function testDocumentStore(store, QUnit) {
       done();
     });
   });
+
+  /*
+    Exists
+  */
+  QUnit.test('documentExists should return true for existing document', function(assert) {
+    var done = assert.async();
+    store.documentExists('test-doc', function(err, exists) {
+      assert.notOk(err, 'There should be no error');
+      assert.ok(exists, 'exists should be true');
+      done();
+    });
+  });
+
+  QUnit.test('documentExists should return false for non-existing document', function(assert) {
+    var done = assert.async();
+    store.documentExists('not-existing-doc', function(err, exists) {
+      assert.notOk(err, 'There should be no error');
+      assert.notOk(exists, 'exists should be false');
+      done();
+    });
+  });
+
 }
 
 module.exports = testDocumentStore;
