@@ -89,9 +89,9 @@ function testChangeStore(store, QUnit) {
 
   QUnit.test("Delete changes of test-doc", function(assert) {
     var done = assert.async();
-    store.deleteChanges('test-doc', function(err, deletedChanges) {
+    store.deleteChanges('test-doc', function(err, changeCount) {
       assert.notOk(err, 'Should not error');
-      assert.equal(deletedChanges.length, 1, 'There should be 1 deleted changes');
+      assert.equal(changeCount, 1, 'There should be 1 deleted change');
       store.getChanges({
         documentId: 'test-doc',
         sinceVersion: 0
@@ -106,9 +106,9 @@ function testChangeStore(store, QUnit) {
 
   QUnit.test("Delete changes of not existing doc", function(assert) {
     var done = assert.async();
-    store.deleteChanges('not-existing-doc', function(err, deletedChanges) {
+    store.deleteChanges('not-existing-doc', function(err, changeCount) {
       assert.notOk(err, 'Should not error');
-      assert.equal(deletedChanges.length, 0, 'There should be 0 deleted changes');
+      assert.equal(changeCount, 0, 'There should be 0 deleted changes');
       done();
     });
   });
