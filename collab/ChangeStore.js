@@ -70,7 +70,7 @@ ChangeStore.Prototype = function() {
   */
   this.deleteChanges = function(documentId, cb) {
     var deletedChanges = this._deleteChanges(documentId);
-    cb(null, deletedChanges);
+    cb(null, deletedChanges.length);
   };
 
   /*
