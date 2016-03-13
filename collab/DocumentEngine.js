@@ -94,7 +94,7 @@ DocumentEngine.Prototype = function() {
     this.documentStore.getDocument(documentId, function(err, docRecord) {
       if (err) {
         return cb(new Err('DocumentEngine.ReadError', {
-          err: err
+          cause: err
         }));
       }
 
@@ -112,7 +112,7 @@ DocumentEngine.Prototype = function() {
       }, function(err, res) {
         if (err) {
           return cb(new Err('DocumentEngine.ReadError', {
-            err: err
+            cause: err
           }));
         }
 
@@ -138,7 +138,14 @@ DocumentEngine.Prototype = function() {
     Delete document by documentId
   */
   this.deleteDocument = function(documentId, cb) {
-    this.documentStore.deleteDocument(documentId, cb);
+    this.documentStore.deleteDocument(documentId, function(err, doc) {
+      if (err) {
+        return cb(new Err('DocumentEngine.DeleteDocumentError', {
+          cause: err
+        }));
+      }
+      cb(null, doc);
+    });
   };
 
   /*
@@ -156,7 +163,7 @@ DocumentEngine.Prototype = function() {
       if (err || !exists) {
         return cb(new Err('DocumentEngine.ReadError', {
           message: !exists ? 'Document does not exist' : null,
-          err: err
+          cause: err
         }));
       }
       this.changeStore.getChanges(args, cb);  
@@ -171,7 +178,7 @@ DocumentEngine.Prototype = function() {
       if (err || !exists) {
         return cb(new Err('DocumentEngine.ReadError', {
           message: !exists ? 'Document does not exist' : null,
-          err: err
+          cause: err
         }));
       }
       this.changeStore.getVersion(documentId, cb);
@@ -186,7 +193,7 @@ DocumentEngine.Prototype = function() {
       if (err || !exists) {
         return cb(new Err('DocumentEngine.ReadError', {
           message: !exists ? 'Document does not exist' : null,
-          err: err
+          cause: err
         }));
       }
       this.changeStore.addChange(args, cb);
