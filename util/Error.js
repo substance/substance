@@ -21,7 +21,10 @@ function SubstanceError(name, options) {
   this.errorCode = options.errorCode;
 
   this.cause = options.cause;
-  Error.captureStackTrace(this, (SubstanceError));
+
+  if (Error.captureStackTrace) {
+    Error.captureStackTrace(this, (SubstanceError));  
+  }
 }
 
 SubstanceError.Prototype = function() {
