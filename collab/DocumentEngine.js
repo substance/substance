@@ -2,6 +2,7 @@
 
 var EventEmitter = require('../util/EventEmitter');
 var JSONConverter = require('../model/JSONConverter');
+var Err = require('../util/Error');
 
 /*
   DocumentEngine
@@ -28,13 +29,19 @@ DocumentEngine.Prototype = function() {
   this.createDocument = function(args, cb) {
     var schemaConfig = this.schemas[args.schemaName];
     if (!schemaConfig) {
-      cb(new Error('Schema '+args.schemaName+' not found'));
+      return cb(new Err('DocumentEngine.SchemaNotFoundError', {
+        message: 'Schema not found for ' + args.schemaName
+      }));
     }
     var docFactory = schemaConfig.documentFactory;
 
     this.documentStore.documentExists(args.documentId, function(err, exists) {
-      if (err) return cb(err);
-      if (exists) return cb(new Error('Document already exists'));
+      if (err || exists) {
+        return cb(new Err('DocumentEngine.CreateError', {
+          message: !exists ? 'Document already exists' : null,
+          cause: err
+        }));
+      }
 
       var doc = docFactory.createArticle();
       var changeset = docFactory.createChangeset();
@@ -44,13 +51,21 @@ DocumentEngine.Prototype = function() {
         schemaVersion: schemaConfig.version,
         documentId: args.documentId
       }, function(err) {
-        if (err) return cb(err);
+        if (err) {
+          return cb(new Err('DocumentEngine.CreateError', {
+            cause: err
+          }));
+        }
 
         this.changeStore.addChange({
           documentId: args.documentId,
           change: changeset[0]
         }, function(err) {
-          if (err) return cb(err);
+          if (err) {
+            return cb(new Err('DocumentEngine.CreateError', {
+              cause: err
+            }));
+          }
           cb(null, {
             data: doc,
             version: 1
@@ -77,11 +92,17 @@ DocumentEngine.Prototype = function() {
     // TODO: Implement and use snapshots for faster access
 
     this.documentStore.getDocument(documentId, function(err, docRecord) {
-      if (err) return cb(new Error('Document does not exist'));
+      if (err) {
+        return cb(new Err('DocumentEngine.ReadError', {
+          err: err
+        }));
+      }
 
       var schemaConfig = this.schemas[docRecord.schemaName];
       if (!schemaConfig) {
-        cb(new Error('Schema '+docRecord.schemaName+' not found'));
+        return cb(new Err('DocumentEngine.SchemaNotFoundError', {
+          message: 'Schema not found for ' + docRecord.schemaName
+        }));
       }
 
       var docFactory = schemaConfig.documentFactory;
@@ -89,7 +110,12 @@ DocumentEngine.Prototype = function() {
         documentId: documentId,
         sinceVersion: 0
       }, function(err, res) {
-        if(err) return cb(err);
+        if (err) {
+          return cb(new Err('DocumentEngine.ReadError', {
+            err: err
+          }));
+        }
+
         var doc = docFactory.createEmptyArticle();
         res.changes.forEach(function(change) {
           change.ops.forEach(function(op) {
@@ -110,20 +136,9 @@ DocumentEngine.Prototype = function() {
 
   /*
     Delete document by documentId
-
-    NOTE: We return custom errors here as the store may have store-specific errors (e.g. SQL errors)
-    and we don't want to expose that to the user. However it needs to be discussed if that's the right
-    approach.
   */
   this.deleteDocument = function(documentId, cb) {
-    this.documentExists(documentId, function(err, exists) {
-      if (err) return cb(new Error('Could not delete document'));
-      if (!exists) return cb(new Error('Could not delete. Document does not exist'));
-      this.documentStore.deleteDocument(documentId, function(err, doc) {
-        if (err) return cb(new Error('Could not delete document'));
-        cb(null, doc);
-      });
-    }.bind(this));
+    this.documentStore.deleteDocument(documentId, cb);
   };
 
   /*
@@ -138,8 +153,12 @@ DocumentEngine.Prototype = function() {
   */
   this.getChanges = function(args, cb) {
     this.documentExists(args.documentId, function(err, exists) {
-      if (err) return cb(err);
-      if (!exists) return cb(new Error('Document does not exist'));
+      if (err || !exists) {
+        return cb(new Err('DocumentEngine.ReadError', {
+          message: !exists ? 'Document does not exist' : null,
+          err: err
+        }));
+      }
       this.changeStore.getChanges(args, cb);  
     }.bind(this));
   };
@@ -149,8 +168,12 @@ DocumentEngine.Prototype = function() {
   */
   this.getVersion = function(documentId, cb) {
     this.documentExists(documentId, function(err, exists) {
-      if (err) return cb(err);
-      if (!exists) return cb(new Error('Document does not exist'));
+      if (err || !exists) {
+        return cb(new Err('DocumentEngine.ReadError', {
+          message: !exists ? 'Document does not exist' : null,
+          err: err
+        }));
+      }
       this.changeStore.getVersion(documentId, cb);
     }.bind(this));
   };
@@ -160,8 +183,12 @@ DocumentEngine.Prototype = function() {
   */
   this.addChange = function(args, cb) {
     this.documentExists(args.documentId, function(err, exists) {
-      if (err) return cb(err);
-      if (!exists) return cb(new Error('Document does not exist'));
+      if (err || !exists) {
+        return cb(new Err('DocumentEngine.ReadError', {
+          message: !exists ? 'Document does not exist' : null,
+          err: err
+        }));
+      }
       this.changeStore.addChange(args, cb);
     }.bind(this)); 
   };
