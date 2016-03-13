@@ -2,6 +2,7 @@
 
 var oo = require('../util/oo');
 var extend = require('lodash/extend');
+var Err = require('../util/Error');
 
 /*
   Implements Substance ChangeStore API. This is just a dumb store.
@@ -37,7 +38,9 @@ ChangeStore.Prototype = function() {
       };
       cb(null, res);
     } else {
-      cb(new Error('Illegal version: ' + args.sinceVersion));
+      cb(new Err('ChangeStore.ReadError', {
+        message: 'Illegal argument "sinceVersion":' +args.sinceVersion
+      }));
     }
   };
 
@@ -45,6 +48,18 @@ ChangeStore.Prototype = function() {
     Add a change object to the database
   */
   this.addChange = function(args, cb) {
+    if (!args.documentId) {
+      return cb(new Err('ChangeStore.CreateError', {
+        message: 'No documentId provided'
+      }));
+    }
+
+    if (!args.change) {
+      return cb(new Err('ChangeStore.CreateError', {
+        message: 'No change provided'
+      }));
+    }
+
     this._addChange(args.documentId, args.change);
     var newVersion = this._getVersion(args.documentId);
     cb(null, newVersion);
@@ -78,17 +93,18 @@ ChangeStore.Prototype = function() {
   // -------------------------
 
   this._deleteChanges = function(documentId) {
-    var changes = this._changes[documentId];
+    var changes = this._getChanges(documentId);
     delete this._changes[documentId];
     return changes;
   };
 
   this._getVersion = function(documentId) {
-    return this._changes[documentId].length;
+    var changes = this._changes[documentId];
+    return changes ? changes.length : 0;
   };
 
   this._getChanges = function(documentId) {
-    return this._changes[documentId];
+    return this._changes[documentId] || [];
   };
 
   this._addChange = function(documentId, change) {
