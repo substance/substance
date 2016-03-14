@@ -25,14 +25,13 @@ var ListComponent = Component.extend({
       createListElement: function(list) {
         var tagName = list.ordered ? 'ol' : 'ul';
         return $$(tagName)
-          .attr('data-id', list.id)
-          .addClass('sc-list');
+          .attr('data-id', list.id);
       },
       renderListItem: function(item) {
         return $$(ListItemComponent, {node: item});
       }
     });
-    return $$('div').append(elem);
+    return $$('div').addClass('sc-list').append(elem);
   },
 
   onItemsChanged: function() {
