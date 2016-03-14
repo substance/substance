@@ -43,9 +43,9 @@ CollabServer.Prototype = function() {
   */
   this.authenticate = function(req, res) {
     if (this.config.authenticate) {
-      this.config.authenticate(req.message, function(err, session) {
+      this.config.authenticate(req, function(err, session) {
         if (err) {
-          console.log('Request is not authenticated.', req);
+          console.log('Request is not authenticated.');
           return res.error(err);
         }
 
@@ -114,6 +114,7 @@ CollabServer.Prototype = function() {
 
         // We need to broadcast a new change if there is one
         if (result.change) {
+          console.log('CollabServer.connect: Client change is broadcasted', collaboratorIds);
           this.broadCast(collaboratorIds, {
             type: 'update',
             version: result.version,
@@ -128,7 +129,7 @@ CollabServer.Prototype = function() {
           collaboratorId: args.collaboratorId
         };
 
-        console.log('--------------- req.isAuthenticated', req.isAuthenticated);
+        // console.log('--------------- req.isAuthenticated', req.isAuthenticated);
 
         this.enhanceCollaborator(req, function(err, info) {
           if (!err && info) {
