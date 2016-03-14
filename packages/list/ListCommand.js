@@ -84,6 +84,8 @@ ListCommand.Prototype = function() {
       for (var j=numItems-1; j>=nodeIndex; j--) {
         tx.update([parentList.id, 'items'], {delete: {offset: j}});
       }
+      // if list has no items left, delete it
+      if (tx.get([parentList.id, 'items']).length === 0) deleteNode(tx, {nodeId: parentList.id});
       var selection = tx.createSelection({
         type: 'property',
         path: [id, 'content'],
