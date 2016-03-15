@@ -95,6 +95,7 @@ function Controller() {
     this.documentSession = this.props.documentSession;
     this.doc = this.props.documentSession.doc;
   } else if (this.props.doc) {
+    console.warn('Deprecated: Please pass a DocumentSession instance instead.');
     this.documentSession = new DocumentSession(this.props.doc);
     this.doc = this.props.doc;
   } else {
