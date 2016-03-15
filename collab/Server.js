@@ -237,7 +237,7 @@ Server.Prototype = function() {
     } else if (this.__error(req, res)) {
       this.sendError(req, res);
     } else if (this.__done(req,res)) {
-      console.log('We are done with processing the request.');
+      // console.log('We are done with processing the request.');
     }
   };
 

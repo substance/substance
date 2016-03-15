@@ -366,6 +366,8 @@ CollabSession.Prototype = function() {
     }.bind(this));
     this.emit('collaborators:changed');
     this._connected = true;
+    // Important: after connect done we need to reset _pendingCommit
+    this._pendingCommit = null;
 
     // Not recommended to use this event
     this.emit('connected');
