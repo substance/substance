@@ -46,8 +46,12 @@ function CollabSession(doc, config) {
   this.__nextColorIndex = 0;
   this.collabClient.on('message', this._onMessage.bind(this));
 
-  // Attempt to open a document immediately
-  this.connect();
+  // Attempt to open a document immediately, but only if the collabClient is
+  // already connected. If not the _onConnected handler will take care of it
+  // once websocket connection is ready.
+  if (this.collabClient.isConnected()) {
+    this.connect();  
+  }
 }
 
 CollabSession.Prototype = function() {
