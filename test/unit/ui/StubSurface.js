@@ -38,6 +38,10 @@ function StubSurface(doc, containerId) {
     return this.containerId;
   };
 
+  this.isContainerEditor = function() {
+    return !!this.containerId;
+  };
+
   this.emit = function() {};
 
   this.rerenderDomSelection = function() {};
