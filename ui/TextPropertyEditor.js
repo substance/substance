@@ -45,6 +45,9 @@ TextPropertyEditor.Prototype = function() {
         path: this.props.path
       })
     );
+    if (this.isEditable()) {
+      el.attr('contenteditable', true);
+    }
     return el;
   };
 

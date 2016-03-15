@@ -398,7 +398,7 @@ Surface.Prototype = function() {
         this.rerenderDomSelection();
       }
     }
-    this.emit('selection:changed', this.getSelection());
+    this.emit('selection:changed', this.getSelection(), this);
   };
 
   this._rerenderSelection = function() {
@@ -412,7 +412,7 @@ Surface.Prototype = function() {
   this.onSelectionChange = function() {
     // console.log('Rerendering DOM selection after selection change.');
     this._rerenderSelection();
-    this.emit('selection:changed', this.getSelection());
+    this.emit('selection:changed', this.getSelection(), this);
   };
 
   this.onCollaboratorsChange = function() {
