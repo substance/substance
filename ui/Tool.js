@@ -78,9 +78,8 @@ Tool.Prototype = function() {
       .attr('title', title)
       .addClass('se-tool');
     el.append(
-      $$('button').on('click', this.onClick)
-                  .append(this.props.children)
-    );
+      $$('button').append(this.props.children)
+    ).on('click', this.onClick);
     if (this.state.disabled) {
       el.addClass('sm-disabled');
     }
