@@ -83,14 +83,6 @@ To run the test-suite headless
 $ npm test
 ```
 
-To create a test coverage report:
-
-```
-$ npm run coverage
-```
-
-The report is stored in the `coverage` folder.
-
 To bundle the docs into a distribution:
 
 ```
