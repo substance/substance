@@ -49,7 +49,8 @@ DocumentEngine.Prototype = function() {
       this.documentStore.createDocument({
         schemaName: schemaConfig.name,
         schemaVersion: schemaConfig.version,
-        documentId: args.documentId
+        documentId: args.documentId,
+        info: args.info
       }, function(err) {
         if (err) {
           return cb(new Err('DocumentEngine.CreateError', {
