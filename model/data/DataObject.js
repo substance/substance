@@ -25,6 +25,8 @@ function DataObject(root) {
 
 DataObject.Prototype = function() {
 
+  this._isDataObject = true;
+
   this.getRoot = function() {
     if (this.__root__) {
       return this.__root__;

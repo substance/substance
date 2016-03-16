@@ -36,6 +36,8 @@ function ContainerAnnotation() {
 
 ContainerAnnotation.Prototype = function() {
 
+  this._isContainerAnnotation = true;
+
   /**
     Get the plain text spanned by this annotation.
 

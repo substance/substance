@@ -53,6 +53,8 @@ function Node(props) {
 
 Node.Prototype = function() {
 
+  this._isNode = true;
+
   /**
     Check if the node is of a given type.
 

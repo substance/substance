@@ -1,8 +1,6 @@
 'use strict';
 
 var oo = require('../util/oo');
-var ControllerTool = require('./ControllerTool');
-var SurfaceTool = require('./SurfaceTool');
 var without = require('lodash/without');
 
 var DEFAULT_TOOLSTATE = {
@@ -58,10 +56,10 @@ ToolManager.Prototype = function() {
   this.getCommand = function(tool) {
     var commandName = tool.constructor.static.command;
 
-    if (tool instanceof SurfaceTool) {
+    if (tool._isSurfaceTool) {
       var surface = this.controller.getFocusedSurface();
       return surface ? surface.getCommand(commandName) : false;
-    } else if (tool instanceof ControllerTool) {
+    } else if (tool._isControllerTool) {
       return this.controller.getCommand(commandName);
     }
   };

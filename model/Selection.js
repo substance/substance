@@ -6,8 +6,6 @@ var isObject = require('lodash/isObject');
 var isString = require('lodash/isString');
 var oo = require('../util/oo');
 var EventEmitter = require('../util/EventEmitter');
-var Coordinate = require('./Coordinate');
-var Range = require('./Range');
 var Anchor = require('./Anchor');
 
 /**
@@ -31,6 +29,8 @@ function Selection() {
 }
 
 Selection.Prototype = function() {
+
+  this._isSelection = true;
 
   /**
     @returns {Document} The attached document instance
@@ -214,10 +214,10 @@ Selection.create = function() {
     return Selection.nullSelection;
   }
   var sel;
-  if (arguments[0] instanceof Coordinate) {
+  if (arguments[0]._isCoordinate) {
     coor = arguments[0];
     sel = new PropertySelection(coor.start.path, coor.start.offset, coor.end.offset, false);
-  } else if (arguments[0] instanceof Range) {
+  } else if (arguments[0]._isRange) {
     range = arguments[0];
     if (isEqual(range.start.path, range.end.path)) {
       sel = new PropertySelection(range.start.path, range.start.offset, range.end.offset, range.reverse);

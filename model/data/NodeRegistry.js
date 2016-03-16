@@ -1,7 +1,6 @@
 'use strict';
 
 var Registry = require('../../util/Registry');
-var Node = require('./Node');
 
 /**
   Registry for Nodes.
@@ -25,7 +24,7 @@ NodeRegistry.Prototype = function() {
     if ( typeof name !== 'string' || name === '' ) {
       throw new Error( 'Node names must be strings and must not be empty' );
     }
-    if ( !( nodeClazz.prototype instanceof Node) ) {
+    if ( !( nodeClazz.prototype._isNode) ) {
       throw new Error( 'Nodes must be subclasses of Substance.Data.Node' );
     }
     if (this.contains(name)) {

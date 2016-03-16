@@ -43,6 +43,8 @@ TextOperation.fromJSON = function(data) {
 
 TextOperation.Prototype = function() {
 
+  this._isTextOperation = true;
+
   this.apply = function(str) {
     if (this.isEmpty()) return str;
     if (this.type === INSERT) {

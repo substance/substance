@@ -2,7 +2,6 @@
 
 var filter = require('lodash/filter');
 var TreeIndex = require('../util/TreeIndex');
-var ContainerAnnotation = require('./ContainerAnnotation');
 var DocumentIndex = require('./DocumentIndex');
 
 var AnchorIndex = function(doc) {
@@ -12,8 +11,9 @@ var AnchorIndex = function(doc) {
 };
 
 DocumentIndex.extend(AnchorIndex, function() {
+
   this.select = function(node) {
-    return (node instanceof ContainerAnnotation);
+    return (node._isContainerAnnotation);
   };
 
   this.reset = function(data) {

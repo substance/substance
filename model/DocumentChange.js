@@ -218,11 +218,11 @@ DocumentChange.Prototype = function() {
     data.before.selection = undefined;
 
     var sel = this.before.selection;
-    if (sel && sel instanceof Selection) {
+    if (sel && sel._isSelection) {
       data.before.selection = sel.toJSON();
     }
     sel = this.after.selection;
-    if (sel && sel instanceof Selection) {
+    if (sel && sel._isSelection) {
       data.after.selection = sel.toJSON();
     }
     return data;

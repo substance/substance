@@ -40,6 +40,8 @@ function PropertyAnnotation() {
 
 PropertyAnnotation.Prototype = function() {
 
+  this._isPropertyAnnotation = true;
+
   /**
     Get the plain text spanned by this annotation.
 
