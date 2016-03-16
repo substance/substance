@@ -49,8 +49,9 @@ DocumentEngine.Prototype = function() {
       this.documentStore.createDocument({
         schemaName: schemaConfig.name,
         schemaVersion: schemaConfig.version,
-        documentId: args.documentId
-      }, function(err) {
+        documentId: args.documentId,
+        info: args.info
+      }, function(err, docRecord) {
         if (err) {
           return cb(new Err('DocumentEngine.CreateError', {
             cause: err
@@ -66,8 +67,11 @@ DocumentEngine.Prototype = function() {
               cause: err
             }));
           }
+          
+          var converter = new JSONConverter();
           cb(null, {
-            data: doc,
+            documentId: docRecord.documentId,
+            data: converter.exportDocument(doc),
             version: 1
           });
         });
