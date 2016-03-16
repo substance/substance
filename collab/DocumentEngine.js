@@ -67,9 +67,11 @@ DocumentEngine.Prototype = function() {
               cause: err
             }));
           }
+          
+          var converter = new JSONConverter();
           cb(null, {
             documentId: docRecord.documentId,
-            data: doc,
+            data: converter.exportDocument(doc),
             version: 1
           });
         });
