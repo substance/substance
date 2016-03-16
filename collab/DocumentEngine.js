@@ -51,7 +51,7 @@ DocumentEngine.Prototype = function() {
         schemaVersion: schemaConfig.version,
         documentId: args.documentId,
         info: args.info
-      }, function(err) {
+      }, function(err, docRecord) {
         if (err) {
           return cb(new Err('DocumentEngine.CreateError', {
             cause: err
@@ -68,6 +68,7 @@ DocumentEngine.Prototype = function() {
             }));
           }
           cb(null, {
+            documentId: docRecord.documentId,
             data: doc,
             version: 1
           });
