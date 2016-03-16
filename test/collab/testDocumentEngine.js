@@ -94,11 +94,14 @@ function testDocumentEngine(documentEngine, QUnit) {
         documentId: 'test-doc',
         sinceVersion: 0
       };
-
       documentEngine.getChanges(args, function(err, result) {
         assert.equal(result.changes.length, 2, 'There should be two changes in the db');
         assert.equal(result.version, 2, 'New version should be 2');
-        done();
+
+        documentEngine.documentStore.getDocument('test-doc', function(err, doc) {
+          assert.equal(doc.version, 2, 'Version of document record should be 2');
+          done();
+        });
       });
     });
   });
