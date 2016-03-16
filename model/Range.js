@@ -11,6 +11,8 @@ var Range = function(start, end, reverse, containerId) {
 
 Range.Prototype = function() {
 
+  this._isRange = true;
+
   this.isCollapsed = function() {
     return this.start.equals(this.end);
   };

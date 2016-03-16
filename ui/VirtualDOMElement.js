@@ -37,6 +37,11 @@ function VirtualDOMElement() {
 
 VirtualDOMElement.Prototype = function() {
 
+  /*
+    For instance of like checks.
+  */
+  this._isVirtualDOMElement = true;
+
   // ############# Component API ################################
 
   /**
@@ -496,6 +501,8 @@ function RawHtml(html) {
 
 RawHtml.Prototype = function() {
 
+  this._isRawHtml = true;
+
   this.getNodeType = function() {
     return 'rawHtml';
   };
@@ -551,14 +558,13 @@ VirtualDOMElement.prepareChildren = function(children) {
   ```
 */
 VirtualDOMElement.createElement = function() {
-  var Component = require('./Component');
   var content = null;
   if (isString(arguments[0])) {
     if (arguments.length !== 1) {
       throw new Error('Illegal usage of Component.$$.');
     }
     content = new VirtualElement(arguments[0]);
-  } else if (isFunction(arguments[0]) && arguments[0].prototype instanceof Component) {
+  } else if (isFunction(arguments[0]) && arguments[0].prototype._isComponent) {
     if (arguments.length < 1 || arguments.length > 2) {
       throw new Error('Illegal usage of Component.$$.');
     }

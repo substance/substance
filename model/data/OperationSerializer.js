@@ -95,7 +95,7 @@ OperationSerializer.Prototype = function() {
 
   this.serializePrimitiveOp = function(op) {
     var out = [];
-    if (op instanceof TextOperation) {
+    if (op._isTextOperation) {
       if (op.isInsert()) {
         out.push('t+');
       } else if (op.isDelete()) {
@@ -103,7 +103,7 @@ OperationSerializer.Prototype = function() {
       }
       out.push(op.pos);
       out.push(op.str);
-    } else if (op instanceof ArrayOperation) {
+    } else if (op._isArrayOperation) {
       if (op.isInsert()) {
         out.push('a+');
       } else if (op.isDelete()) {

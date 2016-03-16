@@ -30,6 +30,8 @@ function DefaultDOMElement(el) {
 
 DefaultDOMElement.Prototype = function() {
 
+  this._isDefaultDOMElement = true;
+
   this.hasClass = function(className) {
     if (inBrowser) {
       return this.el.classList.contains(className);
@@ -430,7 +432,7 @@ DefaultDOMElement.Prototype = function() {
       child.forEach(function(node) {
         this.append(node);
       }.bind(this));
-    } else if (child instanceof DefaultDOMElement) {
+    } else if (child._isDefaultDOMElement) {
       this.$el.append(child.el);
     } else {
       this.$el.append(child);
@@ -539,7 +541,7 @@ DefaultDOMElement.NodeIterator.Prototype = function() {
   this.next = function() {
     this.pos += 1;
     var next = this.nodes[this.pos];
-    if (next instanceof DefaultDOMElement) {
+    if (next._isDefaultDOMElement) {
       return next;
     }
     return new DefaultDOMElement(next);
