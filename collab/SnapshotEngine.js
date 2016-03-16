@@ -40,9 +40,13 @@ SnapshotEngine.Prototype = function() {
     TODO: this could potentially live in DocumentEngine
   */
   this.requestSnapshot = function(documentId, cb) {
-    this.createSnapshot({
-      documentId: documentId
-    }, cb);
+    if (this.snapshotStore) {
+      this.createSnapshot({
+        documentId: documentId
+      }, cb);
+    } else {
+      cb(null); // do nothing
+    }
   };
 
   /*

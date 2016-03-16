@@ -3,6 +3,7 @@
 var EventEmitter = require('../util/EventEmitter');
 var JSONConverter = require('../model/JSONConverter');
 var Err = require('../util/Error');
+var SnapshotEngine = require('./SnapshotEngine');
 
 /*
   DocumentEngine
@@ -15,7 +16,13 @@ function DocumentEngine(config) {
   // Where changes are stored
   this.documentStore = config.documentStore;
   this.changeStore = config.changeStore;
-  this.snapshotStore = config.snapshotStore;
+
+  // SnapshotEngine instance is required
+  this.snapshotEngine = config.snapshotEngine || new SnapshotEngine({
+    schemas: this.schemas,
+    documentStore: this.documentStore,
+    changeStore: this.changeStore
+  });
 }
 
 DocumentEngine.Prototype = function() {
@@ -200,7 +207,20 @@ DocumentEngine.Prototype = function() {
           cause: err
         }));
       }
-      this.changeStore.addChange(args, cb);
+      this.changeStore.addChange(args, function(err, newVersion) {
+        if (err) return cb(err);
+        // We write the new version to the document store.
+        this.documentStore.updateDocument(args.documentId, {
+          version: newVersion
+        }, function(err) {
+          if (err) return cb(err);
+          this.snapshotEngine.requestSnapshot(args.documentId, function() {
+            // no matter if errored or not we will complete the addChange
+            // successfully
+            cb(null, newVersion);
+          });
+        }.bind(this));
+      }.bind(this));
     }.bind(this)); 
   };
 };
