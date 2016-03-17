@@ -124,6 +124,7 @@ QUnit.test('New collaborator enters with a change that needs rebasing', function
       assert.isNullOrUndefined(err, 'Should not error');
       assert.equal(result.version, 3);
       assert.equal(result.changes.length, 1);
+
       assert.notDeepEqual(result.change, insertTextChange2, 'Tranformed change should differ from original change');
       done();
     });    

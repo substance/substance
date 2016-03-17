@@ -44,7 +44,35 @@ function testChangeStore(store, QUnit) {
     store.getChanges(args, function(err, result) {
       assert.notOk(err, 'Should not error');
       assert.equal(result.changes.length, 1, 'Should be only one change');
-      assert.equal(result.version, 1, 'Document version should equals 1');
+      assert.equal(result.version, 1, 'Document version should be 1');
+      done();
+    });
+  });
+
+  QUnit.test("Return all changes of test-doc-2 by not specifying sinceVersion", function(assert) {
+    var done = assert.async();
+    var args = {
+      documentId: 'test-doc-2'
+    };
+    store.getChanges(args, function(err, result) {
+      assert.notOk(err, 'Should not error');
+      assert.equal(result.changes.length, 3, 'Should be only one change');
+      assert.equal(result.version, 3, 'Document version should be 1');
+      done();
+    });
+  });
+
+  QUnit.test("Return changes of test-doc-2 between version 1 and version 2", function(assert) {
+    var done = assert.async();
+    var args = {
+      documentId: 'test-doc-2',
+      sinceVersion: 1,
+      toVersion: 2
+    };
+    store.getChanges(args, function(err, result) {
+      assert.notOk(err, 'Should not error');
+      assert.equal(result.changes.length, 1, 'Should be only one change');
+      assert.equal(result.version, 3, 'Latest version should be 3');
       done();
     });
   });
