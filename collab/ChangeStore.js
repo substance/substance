@@ -1,7 +1,6 @@
 'use strict';
 
 var oo = require('../util/oo');
-var extend = require('lodash/extend');
 var Err = require('../util/Error');
 
 /*
@@ -22,7 +21,13 @@ ChangeStore.Prototype = function() {
   */
   this.getChanges = function(args, cb) {
     var changes = this._getChanges(args.documentId);
+
+    // sinceVersion is optional
+    if (!args.sinceVersion) {
+      args.sinceVersion = 0;
+    }
     var version = this._getVersion(args.documentId);
+
     var res;
 
     if (args.sinceVersion === 0) {
