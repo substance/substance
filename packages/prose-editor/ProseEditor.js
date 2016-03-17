@@ -24,7 +24,6 @@ Editor.Prototype = function() {
   // Custom Render method for your editor
   this.render = function() {
     var config = this.getConfig();
-
     var tools = [
       $$(SwitchTextTypeTool),
       $$(UndoTool).append($$(Icon, {icon: 'fa-undo'})),

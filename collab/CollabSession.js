@@ -28,7 +28,7 @@ function CollabSession(doc, config) {
   this.doc.version = config.docVersion;
 
   // Internal state
-  this._conected = false; // becomes true as soon as the initial connect has been completed
+  this._connected = false; // becomes true as soon as the initial connect has been completed
   this._nextCommit = null; //
   this._pendingCommit = null;
 
@@ -50,7 +50,7 @@ function CollabSession(doc, config) {
   // already connected. If not the _onConnected handler will take care of it
   // once websocket connection is ready.
   if (this.collabClient.isConnected()) {
-    this.connect();  
+    this.connect();
   }
 }
 
@@ -72,9 +72,13 @@ CollabSession.Prototype = function() {
     Dispatching of remote messages.
   */
   this._onMessage = function(msg) {
-    // TODO: Only consider messages with the right documentId
     if (msg.documentId !== this.doc.id) {
-      console.info('No documentId provided with message');
+      // skip messages that are not for this session
+      // TODO: instead we could consider to register
+      // this session instance with the CollabClient
+      // and let the CollabClient dispatch messages to the right
+      // session.
+      return;
     }
 
     // console.log('MESSAGE RECEIVED', msg);
@@ -166,6 +170,7 @@ CollabSession.Prototype = function() {
   // Needed in the case of a reconnect or explicit close
   this.dispose = function() {
     // Reset to original state
+    this.disconnect();
     this.stop();
     this._connected = false;
     this._nextCommit = null;
@@ -182,8 +187,6 @@ CollabSession.Prototype = function() {
       documentId: this.doc.id
     };
     this._send(msg);
-    // And now dispose and deregister the handlers
-    this.dispose();
   };
 
   /*
@@ -288,7 +291,7 @@ CollabSession.Prototype = function() {
     Apply a change to the document
   */
   this._applyRemoteChange = function(change, collaboratorId) {
-    // console.log("REMOTE CHANGE", change);
+    console.log("REMOTE CHANGE", change);
 
     this.stage._apply(change);
     this.doc._apply(change);
@@ -386,7 +389,7 @@ CollabSession.Prototype = function() {
   this._addCollaborator = function(collaborator) {
     this.collaborators[collaborator.collaboratorId] = collaborator;
     if (collaborator.selection) {
-      collaborator.selection = Selection.fromJSON(collaborator.selection);  
+      collaborator.selection = Selection.fromJSON(collaborator.selection);
     }
     collaborator.colorIndex = this._getNextColorIndex();
   };

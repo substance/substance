@@ -6,7 +6,7 @@ var map = require('lodash/map');
 var DocumentChange = require('../model/DocumentChange');
 
 /*
-  Engine for realizing collaborative editing. Implements the server-methods of 
+  Engine for realizing collaborative editing. Implements the server-methods of
   the real time editing as a reusable library.
 */
 function CollabEngine(documentEngine) {
@@ -48,11 +48,13 @@ CollabEngine.Prototype = function() {
   */
   this._unregister = function(collaboratorId, documentId) {
     var collaborator = this._collaborators[collaboratorId];
-    delete collaborator.documents[documentId];
-    var docCount = Object.keys(collaborator.documents);
-    // If there is no doc left, we can remove the entire collaborator entry
-    if (docCount === 0) {
-      delete this._collaborators[collaboratorId];
+    if (collaborator) {
+      delete collaborator.documents[documentId];
+      var docCount = Object.keys(collaborator.documents);
+      // If there is no doc left, we can remove the entire collaborator entry
+      if (docCount === 0) {
+        delete this._collaborators[collaboratorId];
+      }
     }
   };
 

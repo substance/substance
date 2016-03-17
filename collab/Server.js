@@ -18,7 +18,7 @@ function ServerRequest(message, ws) {
 ServerRequest.Prototype = function() {
   /*
     Marks a request as authenticated
-  */  
+  */
   this.setAuthenticated = function(session) {
     this.isAuthenticated = true;
     this.session = session;
@@ -47,7 +47,7 @@ function ServerResponse() {
 }
 
 ServerResponse.Prototype = function() {
-  
+
   /*
     Sends an error response
   */
@@ -85,9 +85,14 @@ oo.initClass(ServerResponse);
 */
 function Server(config) {
   Server.super.apply(this);
-  
+
   this.config = config;
   this.scope = config.scope || 'hub';
+
+  this._connections = null;
+  this._collaborators = null;
+  this.wss = null;
+
   this._onConnection = this._onConnection.bind(this);
 }
 
@@ -155,7 +160,7 @@ Server.Prototype = function() {
     When a new collaborator connects we generate a unique id for them
   */
   this._onConnection = function(ws) {
-    var collaboratorId = uuid();
+    var collaboratorId = this._generateCollaboratorId();
     var connection = {
       collaboratorId: collaboratorId
     };
@@ -170,6 +175,10 @@ Server.Prototype = function() {
     ws.on('close', this._onClose.bind(this, ws));
   };
 
+  this._generateCollaboratorId = function() {
+    return uuid();
+  };
+
   /*
     When websocket connection closes
   */
@@ -178,14 +187,14 @@ Server.Prototype = function() {
     var collaboratorId = conn.collaboratorId;
 
     this.onDisconnect(collaboratorId);
-    
+
     // Remove the connection records
     delete this._collaborators[collaboratorId];
     this._connections.delete(ws);
   };
 
   // Implements state machine for handling the request response cycle
-  // 
+  //
   // __initial -        > authenticated      -> __authenticated, __error
   // __authenticated   -> authorize          -> __authorized, __error
   // __authorized      -> execute            -> __executed, __error
@@ -211,8 +220,8 @@ Server.Prototype = function() {
     return req.isAuthenticated && req.isAuthorized && res.isReady && res.data && !res.isEnhanced;
   };
 
-  this.__enhanced = function(req, res) {   
-    return res.isReady && res.isEnhanced && !res.isSent;    
+  this.__enhanced = function(req, res) {
+    return res.isReady && res.isEnhanced && !res.isSent;
   };
 
   this.__error = function(req, res) {
@@ -278,7 +287,7 @@ Server.Prototype = function() {
     message.scope = this.scope;
     var ws = this._collaborators[collaboratorId].connection;
     if (this._isWebsocketOpen(ws)) {
-      ws.send(this.serializeMessage(message));  
+      ws.send(this.serializeMessage(message));
     } else {
       console.error('Server#send: Websocket for collaborator', collaboratorId, 'is no longer open', message);
     }
@@ -320,7 +329,7 @@ Server.Prototype = function() {
       // We attach a unique collaborator id to each message
       msg.collaboratorId = conn.collaboratorId;
       var req = new ServerRequest(msg, ws);
-      this._processRequest(req);      
+      this._processRequest(req);
     }
   };
 

@@ -70,18 +70,22 @@ CollabServer.Prototype = function() {
     // All documents collaborator is currently collaborating to
     var documentIds = this.collabEngine.getDocumentIds(collaboratorId);
     documentIds.forEach(function(documentId) {
-      var collaboratorIds = this.collabEngine.getCollaboratorIds(documentId, collaboratorId);
-      this.broadCast(collaboratorIds, {
-        type: 'collaboratorDisconnected',
-        documentId: documentId,
-        collaboratorId: collaboratorId
-      });
-      // Exit from each document session
-      this.collabEngine.disconnect({
-        documentId: documentId,
-        collaboratorId: collaboratorId
-      });
+      this._disconnectDocument(collaboratorId, documentId);
     }.bind(this));
+  };
+
+  this._disconnectDocument = function(collaboratorId, documentId) {
+    var collaboratorIds = this.collabEngine.getCollaboratorIds(documentId, collaboratorId);
+    this.broadCast(collaboratorIds, {
+      type: 'collaboratorDisconnected',
+      documentId: documentId,
+      collaboratorId: collaboratorId
+    });
+    // Exit from each document session
+    this.collabEngine.disconnect({
+      documentId: documentId,
+      collaboratorId: collaboratorId
+    });
   };
 
   /*
@@ -167,27 +171,19 @@ CollabServer.Prototype = function() {
   */
   this.disconnect = function(req, res) {
     var args = req.message;
-    this.collabEngine.exit({
-      collaboratorId: args.collaboratorId,
+    var collaboratorId = args.collaboratorId;
+    var documentId = args.documentId;
+    this._disconnectDocument(collaboratorId, documentId);
+    // Notify client that disconnect has completed successfully
+    res.send({
+      type: 'disconnectDone',
       documentId: args.documentId
-    }, function(err) {
-      if (err) {
-        res.error(err);
-      }
-
-      // Delete collaborator info object
-      delete this._collaboratorInfo[args.collaboratorId];
-      // Notify client that disconnect has completed successfully
-      res.send({
-        type: 'disconnectDone',
-        documentId: args.documentId
-      });
-    }.bind(this));
+    });
   };
 
   /*
     Clients send a commit. Change will be applied on server and rebased
-    if needed. Then the client 
+    if needed. Then the client
   */
   this.commit = function(req, res) {
     var args = req.message;
@@ -213,7 +209,7 @@ CollabServer.Prototype = function() {
           documentId: args.documentId,
           type: 'commitDone',
           version: result.version,
-          changes: result.changes          
+          changes: result.changes
         });
       }
       this.next(req, res);
@@ -239,7 +235,7 @@ CollabServer.Prototype = function() {
           version: result.version,
           change: result.change,
           collaboratorId: args.collaboratorId,
-          documentId: args.documentId     
+          documentId: args.documentId
         });
       }
     }.bind(this));

@@ -17,7 +17,7 @@ function TestWebSocket(messageQueue, clientId, serverId) {
   this.serverId = serverId || "server";
 
   // We consider our TestWebSocket connected right away.
-  this.readyState = 1;
+  this.readyState = -1;
   this._isSimulated = true;
 }
 
@@ -25,6 +25,11 @@ TestWebSocket.Prototype = function() {
 
   this.connect = function() {
     this.messageQueue.connectClientSocket(this);
+  };
+
+  this.disconnect = function() {
+    this.messageQueue.disconnectClientSocket(this);
+    this.readyState = -1;
   };
 
   /*
@@ -53,11 +58,16 @@ TestWebSocket.Prototype = function() {
     // var args = data.slice(1);
 
     if (name === 'open') {
+      this.readyState = 1;
       // Handler must be provided by user
-      this.onopen();
+      if (this.onopen) {
+        this.onopen();
+      }
     } else {
       // Handler must be provided by user
-      this.onmessage({data: data});
+      if (this.onmessage) {
+        this.onmessage({data: data});
+      }
     }
   };
 

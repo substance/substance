@@ -73,6 +73,20 @@ MessageQueue.Prototype = function() {
     conn.server.handleConnectionRequest(clientId);
   };
 
+  this.disconnectClientSocket = function(ws) {
+    var serverId = ws.serverId;
+    var clientId = ws.clientId;
+    var conn = this.connections[serverId];
+    if (conn && conn.type === "server") {
+      var sws = conn.sockets[clientId];
+      if (sws) {
+        sws.emit('close', sws);
+        delete this.connections[clientId];
+        delete conn.sockets[clientId];
+      }
+    }
+  };
+
   /*
     This is called by the server as a response to
     connection:requested. ws is the server-side end of

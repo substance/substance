@@ -90,17 +90,7 @@ I18n.instance.load(require('../i18n/en'));
 function Controller() {
   Component.apply(this, arguments);
 
-  // Either takes a DocumentSession compatible object or a doc instance
-  if (this.props.documentSession) {
-    this.documentSession = this.props.documentSession;
-    this.doc = this.props.documentSession.doc;
-  } else if (this.props.doc) {
-    console.warn('Deprecated: Please pass a DocumentSession instance instead.');
-    this.documentSession = new DocumentSession(this.props.doc);
-    this.doc = this.props.doc;
-  } else {
-    if (!this.props.doc) throw new Error('Controller requires a Substance document instance');
-  }
+  this.willReceiveProps(this.props);
 
   this.surfaces = {};
   this.stack = [];
@@ -117,13 +107,31 @@ function Controller() {
     Manages tools.
   */
   this.toolManager = new ToolManager(this);
-  this._initialize(this.props);
+
   this.handleStateUpdate(this.state);
 }
 
 Controller.Prototype = function() {
 
-  this._initialize = function(/*props*/) {
+  this.willReceiveProps = function(newProps) {
+    if (this.doc) {
+      this.doc.off(this);
+    }
+    if (this.el) {
+      this.empty();
+    }
+    // Either takes a DocumentSession compatible object or a doc instance
+    if (newProps.documentSession) {
+      this.documentSession = newProps.documentSession;
+      this.doc = newProps.documentSession.getDocument();
+    } else if (newProps.doc) {
+      console.warn('Deprecated: Please pass a DocumentSession instance instead.');
+      this.documentSession = new DocumentSession(newProps.doc);
+      this.doc = newProps.doc;
+    } else if (!newProps.doc) {
+      throw new Error('Controller requires a Substance document instance');
+    }
+
     var doc = this.doc;
     // Register event handlers
     doc.on('document:changed', this.onDocumentChanged, this, {
@@ -171,14 +179,6 @@ Controller.Prototype = function() {
         commands: []
       }
     };
-  };
-
-  this.willReceiveProps = function(newProps) {
-    if (this.doc && newProps.doc !== this.doc) {
-      this._dispose();
-      this.empty();
-      this._initialize(newProps);
-    }
   };
 
   /**

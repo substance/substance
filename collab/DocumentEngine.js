@@ -22,7 +22,7 @@ DocumentEngine.Prototype = function() {
 
   /*
     Creates a new empty or prefilled document
-  
+
     Writes the initial change into the database.
     Returns the JSON serialized version, as a starting point
   */
@@ -82,7 +82,7 @@ DocumentEngine.Prototype = function() {
     constructs a document using the corresponding documentFactory
     that is available as a schema config object.
 
-    @param args.documentId 
+    @param args.documentId
     @param args.version
   */
   this.getDocument = function(args, cb) {
@@ -166,7 +166,7 @@ DocumentEngine.Prototype = function() {
           cause: err
         }));
       }
-      this.changeStore.getChanges(args, cb);  
+      this.changeStore.getChanges(args, cb);
     }.bind(this));
   };
 
@@ -196,8 +196,23 @@ DocumentEngine.Prototype = function() {
           cause: err
         }));
       }
-      this.changeStore.addChange(args, cb);
-    }.bind(this)); 
+      this.changeStore.addChange(args, function(err, newVersion) {
+        if (err) {
+          return cb(new Err('DocumentEngine.WriteError', {
+            message: 'Could not add change.',
+            cause: err
+          }));
+        }
+        args.version = newVersion;
+        if (this.snapshotStore) {
+          this.snapshotStore.update(args, function(err) {
+            cb(null, newVersion);
+          });
+        } else {
+          cb(null, newVersion);
+        }
+      }.bind(this));
+    }.bind(this));
   };
 };
 

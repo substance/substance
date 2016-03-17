@@ -71,7 +71,6 @@ TestWebSocketServer.Prototype = function() {
     // telling the client we are ready for receiving messages
     sws.send(['open']);
   };
-
 };
 
 EventEmitter.extend(TestWebSocketServer);
