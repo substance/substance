@@ -28,13 +28,13 @@ ChangeStore.Prototype = function() {
     if (args.sinceVersion === 0) {
       res = {
         version: version,
-        changes: changes
+        changes: changes.slice(0, args.toVersion)
       };
       cb(null, res);
     } else if (args.sinceVersion > 0) {
       res = {
         version: version,
-        changes: changes.slice(args.sinceVersion)
+        changes: changes.slice(args.sinceVersion, args.toVersion)
       };
       cb(null, res);
     } else {

@@ -16,6 +16,7 @@ function SnapshotStore(config) {
 
 SnapshotStore.Prototype = function() {
 
+
   /*
     Get Snapshot by documentId and version. If no version is provided
     the highest version available is returned
@@ -31,14 +32,35 @@ SnapshotStore.Prototype = function() {
     var documentId = args.documentId;
     var version = args.version;
     var docEntry = this._snapshots[documentId];
+    var result;
+
     if (!docEntry) return cb(null, undefined);
+
+    var availableVersions = Object.keys(docEntry);
+
+    // Exit if no versions are available
+    if (availableVersions.length === 0) return cb(null, undefined);
 
     // If no version is given we return the latest version available
     if (!version) {
-      var availableVersions = Object.keys(docEntry);
-      version = Math.max.apply(null, availableVersions);
+      var latestVersion = Math.max.apply(null, availableVersions);
+      result = docEntry[latestVersion];
+    } else {
+      // Attemt to get the version
+      result = docEntry[version];
+      if (!result && args.findClosest) {
+        // We don't have a snaphot for that requested version
+        var smallerVersions = availableVersions.filter(function(v) {
+          return parseInt(v, 10) < version;
+        });
+
+        // Take the closest version if there is any
+        var clostestVersion = Math.max.apply(null, smallerVersions);
+        result = docEntry[clostestVersion];
+      }
     }
-    cb(null, docEntry[version]);
+
+    cb(null, result);
   };
 
   /*

@@ -4,7 +4,7 @@ require('../qunit_extensions');
 
 var snapshotStoreSeed = require('../../fixtures/collab/snapshotStoreSeed');
 var SnapshotStore = require('../../../collab/SnapshotStore');
-var tetSnapshotStore = require('../../collab/testSnapshotStore');
+var testSnapshotStore = require('../../collab/testSnapshotStore');
 var store = new SnapshotStore();
 
 QUnit.module('collab/SnapshotStore', {
@@ -25,4 +25,4 @@ QUnit.module('collab/SnapshotStore', {
 });
 
 // Runs the offical backend test suite
-tetSnapshotStore(store, QUnit);
+testSnapshotStore(store, QUnit);

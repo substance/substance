@@ -53,6 +53,11 @@ SnapshotEngine.Prototype = function() {
     Creates a snapshot
   */
   this.createSnapshot = function(args, cb) {
+    if (!this.snapshotStore) {
+      throw new Err('SnapshotStoreRequiredError', {
+        message: 'You must provide a snapshot store to be able to create snapshots'
+      });
+    }
     this._computeSnapshot(args, function(err, snapshot) {
       if (err) return cb(err);
       this.snapshotStore.createSnapshot(snapshot, cb);
@@ -100,11 +105,12 @@ SnapshotEngine.Prototype = function() {
     // snaphot = null if no snapshot has been found
     this.snapshotStore.getSnapshot({
       documentId: documentId,
-      version: version
+      version: version,
+      findClosest: true
     }, function(err, snapshot) {
       if (err) return cb(err);
 
-      if (version === snapshot.version) {
+      if (snapshot && version === snapshot.version) {
         // we alread have a snapshot for this version
         return cb(null, snapshot);
       }
@@ -122,9 +128,10 @@ SnapshotEngine.Prototype = function() {
       }
 
       // Now we get the remaining changes after the known version
-      this.getChanges({
+      this.changeStore.getChanges({
         documentId: documentId,
-        sinceVersion: knownVersion
+        sinceVersion: knownVersion, // 1
+        toVersion: version // 2
       }, function(err, result) {
         if (err) cb(err);
         // Apply remaining changes to the doc
@@ -136,8 +143,8 @@ SnapshotEngine.Prototype = function() {
           data: converter.exportDocument(doc)
         };
         cb(null, snapshot);
-      });
-    });
+      }.bind(this));
+    }.bind(this));
   };
 
   /*

@@ -1,8 +1,9 @@
+// Please see snapshotStoreSeed.js for the used fixture data
+
 function testSnapshotEngine(snapshotEngine, docFactory, QUnit) {
   QUnit.test('Compute a new snapshot', function(assert) {
     var done = assert.async();
     snapshotEngine.getSnapshot({documentId: 'test-doc'}, function(err, snapshot) {
-      console.log(err);
       assert.notOk(err, 'There should be no error');
       assert.equal(snapshot.version, 1, 'Snapshot should be at version 1');
       done();
@@ -12,7 +13,6 @@ function testSnapshotEngine(snapshotEngine, docFactory, QUnit) {
   QUnit.test('Compute a new snapshot for 3 changes', function(assert) {
     var done = assert.async();
     snapshotEngine.getSnapshot({documentId: 'test-doc-2'}, function(err, snapshot) {
-      console.log(err);
       assert.notOk(err, 'There should be no error');
       assert.equal(snapshot.version, 3, 'Snapshot should be at version 3');
       done();
@@ -26,7 +26,6 @@ function testSnapshotEngine(snapshotEngine, docFactory, QUnit) {
       done();
     });
   });
-
 }
 
 module.exports = testSnapshotEngine;
