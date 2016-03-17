@@ -17,6 +17,7 @@ LinkTool.Prototype = function() {
   var _super = Object.getPrototypeOf(this);
 
   this.didMount = function() {
+    _super.didMount.apply(this, arguments);
     var ctrl = this.getController();
     ctrl.on('command:executed', this.onCommandExecuted, this);
   };
