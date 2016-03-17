@@ -9,6 +9,9 @@ var Err = require('../util/Error');
 */
 function SnapshotStore(config) {
   this.config = config;
+
+  // Snapshots will stored here
+  this._snapshots = {};
 }
 
 SnapshotStore.Prototype = function() {
@@ -22,13 +25,15 @@ SnapshotStore.Prototype = function() {
   this.getSnapshot = function(args, cb) {
     if (!args || !args.documentId) {
       return cb(new Err('InvalidArgumentsError', {
-        message: 'args requires a documentId'
+        message: 'args require a documentId'
       }));
     }
     var documentId = args.documentId;
     var version = args.version;
     var docEntry = this._snapshots[documentId];
     if (!docEntry) return cb(null, undefined);
+
+    // If no version is given we return the latest version available
     if (!version) {
       var availableVersions = Object.keys(docEntry);
       version = Math.max.apply(null, availableVersions);
