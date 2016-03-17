@@ -6,6 +6,58 @@ var deleteNode = require('../../model/transform/deleteNode');
 
 function ListEditing() {}
 
+/**
+  convert the list item into a paragraph and split the list
+  into 2 lists.
+
+  @function
+
+  @param {model/TransactionDocument} tx the document instance
+  @param {Object} args object with fields `node`, `containerId`, `path`
+*/
+var listItemToParagraph = function(tx, args){
+  var defaultType = tx.getSchema().getDefaultTextType();
+  var id = uuid(defaultType);
+  var containerId = args.containerId;
+  var container = tx.get(containerId);
+  var index = container.getChildIndex(args.node);
+  var numItems = args.node.items.length;
+  var node = tx.get(args.path[0]);
+  var nodeIndex = args.node.items.indexOf(args.path[0]);
+  tx.create({
+    id: id,
+    type: defaultType,
+    content: node.content
+  });
+  // show the paragraph node and the second list node
+  annotationHelpers.transferAnnotations(tx, args.path, 0, [id, 'content'], 0);
+  container.show(id, index+1);
+  if (args.node.items.slice(nodeIndex+1, numItems).length > 0){
+    // make a new list with the trailing items
+    var newList = tx.create({
+      id: uuid('list'),
+      type: args.node.type,
+      items: args.node.items.slice(nodeIndex+1, numItems),
+      ordered: args.node.ordered
+    });
+    for (var i=0; i<newList.items.length; i++) {
+      tx.set([newList.items[i], 'parent'], newList.id);
+    }
+    container.show(newList.id, index+2);
+  }
+  // delete the trailing list items from the first list
+  for (var j=numItems-1; j>=nodeIndex; j--) {
+    tx.update([args.node.id, 'items'], {delete: {offset: j}});
+  }
+  var selection = tx.createSelection({
+    type: 'property',
+    path: [id, 'content'],
+    startOffset: 0
+  });
+  args.selection = selection;
+  return args;
+};
+
 ListEditing.Prototype = function() {
 
   this.register = function(behavior) {
@@ -38,13 +90,11 @@ ListEditing.Prototype = function() {
     // current position of the current node
     if (offset === 0) {
       if (text.length === 0) {
-				// if we hit return on an already empty list item, it should transform into
+        // if we hit return on an already empty list item, it should transform into
         // a paragraph
-				// set the needed arguments and call mergeListItems behavior
-				args.direction = 'left';
-				args.path = path;
-				args.node = parentList;
-				args = this.mergeListItems(tx, args);
+        args.path = path;
+        args.node = parentList;
+        args = listItemToParagraph(tx, args);
       } else {
         newNode = tx.create({
           id: id,
@@ -60,7 +110,7 @@ ListEditing.Prototype = function() {
           path: path,
           startOffset: 0
         });
-				args.selection = selection;
+        args.selection = selection;
       }
     }
     // otherwise a new list-item node containing all the trailing text is inserted
@@ -86,7 +136,7 @@ ListEditing.Prototype = function() {
         path: newPath,
         startOffset: 0
       });
-			args.selection = selection;
+      args.selection = selection;
     }
     args.node = newNode;
     return args;
@@ -256,48 +306,10 @@ ListEditing.Prototype = function() {
         path: args.path,
         startOffset: contentLength
       });
+      args.selection = selection;
     } else {
-      // If backspace is hit at the beginning of a the list element,
-      // we convert the first list item into a paragraph and split the list
-      // into 2 lists.
-      var defaultType = tx.getSchema().getDefaultTextType();
-      var id = uuid(defaultType);
-      var containerId = args.containerId;
-      var container = tx.get(containerId);
-      var index = container.getChildIndex(args.node);
-      var numItems = args.node.items.length;
-      tx.create({
-        id: id,
-        type: defaultType,
-        content: node.content
-      });
-      // show the paragraph node and the second list node
-      annotationHelpers.transferAnnotations(tx, args.path, 0, [id, 'content'], 0);
-      container.show(id, index+1);
-      if (args.node.items.slice(nodeIndex+1, numItems).length > 0){
-        // make a new list with the trailing items
-        var newList = tx.create({
-          id: uuid('list'),
-          type: args.node.type,
-          items: args.node.items.slice(nodeIndex+1, numItems),
-          ordered: args.node.ordered
-        });
-        for (var i=0; i<newList.items.length; i++) {
-          tx.set([newList.items[i], 'parent'], newList.id);
-        }
-        container.show(newList.id, index+2);
-      }
-      // delete the trailing list items from the first list
-      for (var j=numItems-1; j>=nodeIndex; j--) {
-        tx.update([args.node.id, 'items'], {delete: {offset: j}});
-      }
-      selection = tx.createSelection({
-        type: 'property',
-        path: [id, 'content'],
-        startOffset: 0
-      });
+      args = listItemToParagraph(tx, args);
     }
-    args.selection = selection;
     return args;
   };
 
