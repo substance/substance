@@ -98,7 +98,10 @@ SnapshotEngine.Prototype = function() {
     var doc;
 
     // snaphot = null if no snapshot has been found
-    this.snapshotStore.getLatestSnapshot(documentId, function(err, snapshot) {
+    this.snapshotStore.getSnapshot({
+      documentId: documentId,
+      version: version
+    }, function(err, snapshot) {
       if (err) return cb(err);
 
       if (version === snapshot.version) {
