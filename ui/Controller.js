@@ -175,7 +175,7 @@ Controller.Prototype = function() {
 
   this.willReceiveProps = function(newProps) {
     if (this.doc && newProps.doc !== this.doc) {
-      this._dispose();
+      this.dispose();
       this.empty();
       this._initialize(newProps);
     }
