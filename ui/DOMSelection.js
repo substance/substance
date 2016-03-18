@@ -24,6 +24,17 @@ function DOMSelection(surface) {
   this.surface = surface;
 }
 
+function isElementInViewport (el) {
+    if (typeof $ === "function" && el instanceof $) {
+        el = el[0];
+    }
+    var rect = el.getBoundingClientRect();
+    return (
+        rect.top >= 0 &&
+        rect.bottom <= $('.lt-editors')[0].getBoundingClientRect().bottom - 20
+    );
+}
+
 DOMSelection.Prototype = function() {
 
   /**
@@ -78,6 +89,13 @@ DOMSelection.Prototype = function() {
     if (sel.isCollapsed()) {
       wRange.setStart(start.container, start.offset);
       wSel.addRange(wRange);
+      var el = document.createElement("span");
+      el.id = 'cursor';
+      wRange.deleteContents();
+      wRange.insertNode(el);
+      var visible = isElementInViewport(el);
+      if (!visible) $(".lt-editors")[0].scrollTop = $('#cursor')[0].offsetTop;
+      $('#cursor').remove();
     } else {
       if (sel.isReverse()) {
         // console.log('DOMSelection: rendering a reverse selection.');
