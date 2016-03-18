@@ -94,7 +94,13 @@ DOMSelection.Prototype = function() {
       wRange.deleteContents();
       wRange.insertNode(el);
       var visible = isElementInViewport(el);
-      if (!visible) $(".lt-editors")[0].scrollTop = $('#cursor')[0].offsetTop;
+      if ($('#cursor')[0].offsetTop < $(".lt-editors")[0].scrollTop){
+        // scrolling up
+        if (!visible) $(".lt-editors")[0].scrollTop = $('#cursor')[0].offsetTop - 200;
+      } else {
+        // scrolling down
+        if (!visible) $(".lt-editors")[0].scrollTop = $('#cursor')[0].offsetTop + 200;
+      }
       $('#cursor').remove();
     } else {
       if (sel.isReverse()) {
