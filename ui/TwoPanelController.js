@@ -79,7 +79,7 @@ TwoPanelController.Prototype = function() {
             this._renderMainSection(),
             this._renderContextSection()
           ).ref('splitPane'),
-          $$(StatusBar, {doc: this.props.doc}).ref('statusBar')
+          $$(StatusBar, {doc: this.getDocument()}).ref('statusBar')
         ).ref('workspaceSplitPane')
       );
   };

@@ -5,10 +5,10 @@ var Tool = require('./Tool');
 /**
   Abstract class for tools tools that interact with a document. E.g. UndoTool or
   RedoTool. Needs to be instantiated inside a {@link ui/Controller} context.
-  
+
   @class
   @extends ui/Tool
-  
+
   @example
 
   ```js
@@ -29,9 +29,11 @@ function ControllerTool() {
 
 ControllerTool.Prototype = function() {
 
+  this._isControllerTool = true;
+
   /*
     Get document instance
-    
+
     @return {model/Document} The document instance owned by the controller
   */
   this.getDocument = function() {

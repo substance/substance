@@ -56,7 +56,7 @@ DocumentSchema.Prototype = function() {
 
   this.isAnnotationType = function(type) {
     var nodeClass = this.getNodeClass(type);
-    return (nodeClass && nodeClass.prototype instanceof PropertyAnnotation);
+    return (nodeClass && nodeClass.prototype._isPropertyAnnotation);
   };
 
   this.getBuiltIns = function() {

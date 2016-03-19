@@ -92,7 +92,7 @@ Schema.Prototype = function() {
 
     @param {String} type
     @param {String} parentType
-    @returns {Boolean} true if `(type instanceof parentType)`.
+    @returns {Boolean} true if type is and instance of parentType.
   */
   this.isInstanceOf = function(type, parentType) {
     var NodeClass = this.getNodeClass(type);

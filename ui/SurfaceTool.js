@@ -5,14 +5,14 @@ var Tool = require('./Tool');
 /**
   Abstract class for tools that interact with the selection of active surface.
   Needs to be instantiated inside a {@link ui/Controller} context.
-  
+
   @class
   @component
   @abstract
   @extends ui/Tool
 
   @example
-  
+
   ```js
   var SurfaceTool = require('substance/ui/SurfaceTool');
   function InsertImageTool() {
@@ -30,6 +30,8 @@ function SurfaceTool() {
 SurfaceTool.Prototype = function() {
 
   var _super = Object.getPrototypeOf(this);
+
+  this._isSurfaceTool = true;
 
   /**
     Get command associated with the tool, based on the focused surface
@@ -49,19 +51,19 @@ SurfaceTool.Prototype = function() {
 
   /**
     Unbinds event handler before getting unmounted.
-    
+
     Custom tool implementation must do a super call.
   */
   this.dispose = function() {
     _super.dispose.call(this);
 
     var ctrl = this.getController();
-    ctrl.disconnect(this);
+    ctrl.off(this);
   };
 
   /**
     Return the currently focused surface
-    
+
     @return {ui/Surface}
   */
   this.getSurface = function() {
@@ -70,7 +72,7 @@ SurfaceTool.Prototype = function() {
 
   /**
     Return the document associated with the focused surface.
-    
+
     @return {model/Document}
   */
   this.getDocument = function() {
@@ -79,7 +81,7 @@ SurfaceTool.Prototype = function() {
 
   /**
     Return the currently active container
-    
+
     @return {Document.Container}
     @public
   */

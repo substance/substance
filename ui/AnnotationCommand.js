@@ -177,11 +177,13 @@ AnnotationCommand.Prototype = function() {
   this.getAnnotationsForSelection = function() {
     var sel = this.getSelection();
     var doc = this.getDocument();
-    var annotationType = this.getAnnotationType();
-    var containerId = null;
-    if(helpers.isContainerAnnotation(doc, annotationType)){
-        containerId = this.getContainerId();
+    var surface = this.getSurface();
+    var containerId;
+
+    if (surface.isContainerEditor()) {
+      containerId = surface.getContainerId();
     }
+    var annotationType = this.getAnnotationType();
     var annos = helpers.getAnnotationsForSelection(doc, sel, annotationType, containerId);
     return annos;
   };
@@ -285,8 +287,8 @@ AnnotationCommand.Prototype = function() {
 
       args.splitContainerSelections = false;
 
-      if(helpers.isContainerAnnotation(this.getDocument(), args.annotationType)){
-          args.containerId = this.getContainerId();
+      if (surface.isContainerEditor()) {
+        args.containerId = surface.getContainerId();
       }
 
       args = transformFn(tx, args);

@@ -89,6 +89,8 @@ ContainerSelection.Prototype = function() {
     };
   };
 
+  this._isContainerSelection = true;
+
   this.isContainerSelection = function() {
     return true;
   };
@@ -309,7 +311,7 @@ ContainerSelection.Prototype = function() {
         offset: sel.endOffset
       }
     };
-    if (sel instanceof ContainerSelection) {
+    if (sel._isContainerSelection) {
       sel._internal.containerRange = containerRange;
     }
     return containerRange;

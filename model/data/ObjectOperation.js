@@ -44,9 +44,9 @@ var ObjectOperation = function(data) {
   else if (this.type === UPDATE) {
     if (data.diff) {
       this.diff = data.diff;
-      if (data.diff instanceof TextOperation) {
+      if (data.diff._isTextOperation) {
         this.propertyType = 'string';
-      } else if (data.diff instanceof ArrayOperation) {
+      } else if (data.diff._isArrayOperation) {
         this.propertyType = 'array';
       } else {
         throw new Error('Invalid data: diff must be a TextOperation or an ArrayOperation.');
@@ -83,10 +83,12 @@ ObjectOperation.fromJSON = function(data) {
 
 ObjectOperation.Prototype = function() {
 
+  this._isObjectOperation = true;
+
   this.apply = function(obj) {
     if (this.type === NOP) return obj;
     var adapter;
-    if (obj instanceof DataObject) {
+    if (obj._isDataObject) {
       adapter = obj;
     } else {
       adapter = new DataObject(obj);
@@ -102,7 +104,7 @@ ObjectOperation.Prototype = function() {
       var diff = this.diff;
       var oldVal = adapter.get(this.path);
       var newVal;
-      if (diff instanceof ArrayOperation) {
+      if (diff._isArrayOperation) {
         newVal = diff.apply(oldVal);
       } else {
         newVal = diff.apply(oldVal);
@@ -168,7 +170,7 @@ ObjectOperation.Prototype = function() {
     }
     else if (this.type === UPDATE) {
       var invertedDiff;
-      if (this.diff instanceof TextOperation) {
+      if (this.diff._isTextOperation) {
         invertedDiff = TextOperation.fromJSON(this.diff.toJSON()).invert();
       } else {
         invertedDiff = ArrayOperation.fromJSON(this.diff.toJSON()).invert();
@@ -198,9 +200,9 @@ ObjectOperation.Prototype = function() {
       data.val = this.val;
     }
     else if (this.type === UPDATE) {
-      if (this.diff instanceof ArrayOperation) {
+      if (this.diff._isArrayOperation) {
         data.propertyType = "array";
-      } else /* if (this.diff instanceof TextOperation) */ {
+      } else /* if (this.diff._isTextOperation) */ {
         data.propertyType = "string";
       }
       data.diff = this.diff.toJSON();
@@ -411,10 +413,10 @@ ObjectOperation.Delete = function(idOrPath, val) {
 
 ObjectOperation.Update = function(path, op) {
   var propertyType;
-  if (op instanceof TextOperation) {
+  if (op._isTextOperation) {
     propertyType = "string";
   }
-  else if (op instanceof ArrayOperation) {
+  else if (op._isArrayOperation) {
     propertyType = "array";
   }
   else {

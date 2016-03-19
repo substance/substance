@@ -79,7 +79,13 @@ SurfaceCommand.Prototype = function() {
    */
   this.getContainerId = function() {
     var surface = this.getSurface();
-    return surface.getContainerId();
+    console.warn('Deprecated: Use Surface API directly');
+    if (surface.isContainerEditor()) {
+      return surface.getContainerId();  
+    } else {
+      return null;
+    }
+    
   };
 
   /**

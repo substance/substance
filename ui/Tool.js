@@ -19,8 +19,6 @@ var $$ = Component.$$;
 
 function Tool() {
   Tool.super.apply(this, arguments);
-
-  this.context.toolManager.registerTool(this);
 }
 
 Tool.Prototype = function() {
@@ -33,8 +31,61 @@ Tool.Prototype = function() {
     return this.context.toolManager.getCommandState(this);
   };
 
+  this.didMount = function() {
+    this.context.toolManager.registerTool(this);
+  };
+
   this.dispose = function() {
     this.context.toolManager.unregisterTool(this);
+  };
+
+  /**
+    Default tool rendering. You can override this method to provide your custom markup
+  */
+  this.render = function() {
+    var el = $$('div')
+      .addClass('se-tool');
+
+    var title = this.getTitle();
+    if (title) {
+      el.attr('title', title);
+      el.attr('aria-label', title);
+    }
+
+    var button = $$('button')
+      .on('click', this.onClick)
+      .append(this.props.children);
+    el.append(button);
+
+    if (this.state.disabled) {
+      el.addClass('sm-disabled');
+      // make button inaccessible
+      button.attr('tabindex', -1);
+    } else {
+      // make button accessible for tab-navigation
+      button.attr('tabindex', 1);
+    }
+
+    // .sm-active
+    if (this.state.active) {
+      el.addClass('sm-active');
+    }
+    // .sm-<mode>
+    // TODO: it seems that the mode class is not following the 'sm-' prefix-rules
+    if (this.state.mode) {
+      el.addClass(this.state.mode);
+    }
+
+    return el;
+  };
+
+  this.getTitle = function() {
+    var title = this.props.title || this.i18n.t(this.getName());
+    // Used only by annotation tool so far
+    if (this.state.mode) {
+      title = [capitalize(this.state.mode), title].join(' ');
+    }
+    return title;
   };
 
   /**
@@ -65,34 +116,8 @@ Tool.Prototype = function() {
     this.performAction();
   };
 
-  /**
-    Default tool rendering. You can override this method to provide your custom markup
-  */
-  this.render = function() {
-    var title = this.props.title || this.i18n.t(this.getName());
-    // Used only by annotation tool so far
-    if (this.state.mode) {
-      title = [capitalize(this.state.mode), title].join(' ');
-    }
-    var el = $$('div')
-      .attr('title', title)
-      .addClass('se-tool');
-    el.append(
-      $$('button').on('click', this.onClick)
-                  .append(this.props.children)
-    );
-    if (this.state.disabled) {
-      el.addClass('sm-disabled');
-    }
-    if (this.state.mode) {
-      el.addClass(this.state.mode);
-    }
-    if (this.state.active) {
-      el.addClass('sm-active');
-    }
-    return el;
-  };
 };
 
 Component.extend(Tool);
+
 module.exports = Tool;

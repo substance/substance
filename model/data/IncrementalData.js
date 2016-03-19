@@ -108,13 +108,13 @@ IncrementalData.Prototype = function() {
       var oldVal = this.get(op.path);
       var diff = op.diff;
       if (op.propertyType === 'array') {
-        if (! (diff instanceof ArrayOperation) ) {
+        if (! (diff._isArrayOperation) ) {
           diff = ArrayOperation.fromJSON(diff);
         }
         // array ops work inplace
         diff.apply(oldVal);
       } else if (op.propertyType === 'string') {
-        if (! (diff instanceof TextOperation) ) {
+        if (! (diff._isTextOperation) ) {
           diff = TextOperation.fromJSON(diff);
         }
         var newVal = diff.apply(oldVal);

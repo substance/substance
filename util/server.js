@@ -1,4 +1,4 @@
-var browserify = require("browserify");
+var browserify = require('browserify');
 var sass = require('node-sass');
 var fs = require('fs');
 var each = require('lodash/each');

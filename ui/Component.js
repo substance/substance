@@ -141,6 +141,8 @@ Component.Prototype = function ComponentPrototype() {
 
   extend(this, EventEmitter.prototype);
 
+  this._isComponent = true;
+
   function NOT_SUPPORTED() {
     throw new Error('Not supported.');
   }
@@ -939,10 +941,7 @@ Component.Prototype = function ComponentPrototype() {
     }
 
     if (data.type !== 'element') {
-      if (data instanceof $) {
-        throw new Error('Your render() method accidently return a jQuery instance instead of a VirtualComponent created $$.');
-      }
-      throw new Error("Component.render() must return one html element: e.g., $$('div')");
+      throw new Error("Component.render() must return one virtual HTML element such as $$('div')");
     }
 
     scope = {
@@ -1010,7 +1009,7 @@ Component.Prototype = function ComponentPrototype() {
 
     function _update(comp, data) {
       // Note: when updating a HTML element we provide the same ref scope
-      if (comp instanceof Component.Container) {
+      if (comp._isComponentContainer) {
         comp._render(data, scope);
       } else {
         // HACK: propagating HTML element data and setting props (including lifecycle hooks)
@@ -1172,7 +1171,7 @@ Component.Prototype = function ComponentPrototype() {
     for (var j = 0; j < data.children.length; j++) {
       // EXPERIMENTAL: supporting $$.html()
       // basically it doesn't make sense to mix $$.html() with $$.append(), but...
-      if (data.children[j] instanceof VirtualDOMElement.RawHtml) {
+      if (data.children[j]._isRawHtml) {
         this.$el.html(data.children[j].html);
         children = [];
       } else {
@@ -1280,6 +1279,9 @@ Component.extend(Component.Root);
 
 Component.Container = function(parent, params) {
   Component.call(this, parent, params);
+};
+Component.Container.Prototype = function() {
+  this._isComponentContainer = true;
 };
 Component.extend(Component.Container);
 
@@ -1432,7 +1434,7 @@ Component.render = function(component, props) {
   props = props || {};
   if (isFunction(component)) {
     var ComponentClass = component;
-    if (!(ComponentClass.prototype instanceof Component)) {
+    if (!(ComponentClass.prototype._isComponent)) {
       ComponentClass = function AnonymousComponent() {
         Component.apply(this, arguments);
       };
@@ -1485,14 +1487,14 @@ Component.mount = function(component, props, el) {
     el = arguments[1];
     props = {};
   }
-  if (component instanceof Component) {
+  if (component._isComponent) {
     // nothing to do
-  } else if (component instanceof VirtualDOMElement) {
+  } else if (component._isVirtualDOMElement) {
     // mounting a virtual element is not recommended
     // because we can't support 'refs' without having a 'render()' context
     console.warn('DEPRECATED: use Component.mount(MyComponent, {...}, el) instead.');
     component = Component._render(component);
-  } else if (arguments[0].prototype instanceof Component) {
+  } else if (arguments[0].prototype._isComponent) {
     component = Component.render(component, props);
   } else {
     throw new Error('component must be of type Component or VirtualComponent');

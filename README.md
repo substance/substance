@@ -2,7 +2,9 @@
 
 Substance is a JavaScript library for web-based content editing. It provides building blocks for realizing custom text editors and web-based publishing systems.
 
-Check the [project website](http://substance.io), the [examples](https://github.com/substance/examples) and the [API documentation](http://substance.io/docs).
+Read the [introduction post](https://medium.com/@_mql/build-your-own-editor-with-substance-7790eb600109), check the [project website](http://substance.io), the [examples](https://github.com/substance/examples) and the [API documentation](http://substance.io/docs).
+
+*Substance Beta 4 introduces support for realtime collaboration. While still under development, you can already check out and run our full-stack collaborative [Notepad](https://github.com/substance/notepad) application.*
 
 ## Features
 
@@ -17,12 +19,12 @@ Incremental document updates (undoable operations)                          | �
 Transformations for document manipulation                                   | ✓
 Custom editing toolbars                                                     | ✓
 Commands for controlling the editor                                         | ✓
-Key bindings                                                                | Beta 4
 I18N support                                                                | ✓
 Realtime collaboration                                                      | Beta 4
-Full Unicode support                                                        | Beta 4
-Plugins                                                                     | Beta 4
-Persistence API for documents                                               | Beta 5
+Persistence API for documents                                               | Beta 4
+Key bindings                                                                | Beta 5
+Full Unicode support                                                        | Beta 5
+Plugins                                                                     | Beta 5
                                                                             |
 **UI Components**                                                           |
 TextPropertyEditor for editing annotated text                               | ✓
@@ -41,7 +43,6 @@ Image                                                                       | �
 Embed (image, video, tweet etc.)                                            | ✓
 List                                                                        | Beta 4
 Table                                                                       | Beta 4
-Figure (including upload)                                                   | Beta 5
                                                                             |
 **Predefined annotation types**                                             |
 Strong                                                                      | ✓
@@ -82,14 +83,6 @@ To run the test-suite headless
 $ npm test
 ```
 
-To create a test coverate report:
-
-```
-$ npm run coverage
-```
-
-The report is stored in the `coverage` folder.
-
 To bundle the docs into a distribution:
 
 ```
@@ -100,25 +93,23 @@ $ npm run doc
 
 ### Beta 4
 
-*ETA: February 2016*
+*ETA: March 2016*
 
-- Automatically generated performance report
+- Realtime collaboration
+- Persistence API for documents
 - Table node
 - Editing of lists
-- Key bindings
-- Plugins
-- Realtime collaboration
-- Improved Unicode support
 - Improved stability, documentation and tests
+- Full-stack platform example
 
 ### Beta 5
 
+- Key bindings
+- Plugins
+- Improved Unicode support
 - Mobile support
+- Automatically generated performance report
 - Modules for server-side integration
-  - Persistence API for documents
-  - Figure upload
-- Server-side realtime collaboration infrastructure
-- Full-stack platform example
 
 ### 1.0 Final
 

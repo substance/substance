@@ -44,6 +44,8 @@ ArrayOperation.fromJSON = function(data) {
 
 ArrayOperation.Prototype = function() {
 
+  this._isArrayOperation = true;
+
   this.apply = function(array) {
     if (this.type === NOP) {
       return array;

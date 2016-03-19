@@ -4,7 +4,6 @@ var isString = require('lodash/isString');
 var map = require('lodash/map');
 var filter = require('lodash/filter');
 var TreeIndex = require('../util/TreeIndex');
-var PropertyAnnotation = require('./PropertyAnnotation');
 var DocumentIndex = require('./DocumentIndex');
 
 // PropertyAnnotation Index
@@ -31,7 +30,7 @@ AnnotationIndex.Prototype = function() {
   this.property = "path";
 
   this.select = function(node) {
-    return (node instanceof PropertyAnnotation);
+    return !!node._isPropertyAnnotation;
   };
 
   this.reset = function(data) {

@@ -148,14 +148,14 @@ DocumentSession.Prototype = function() {
       var args = { selection: sel };
       var result = transformation(tx, args) || {};
       sel = result.selection || sel;
-      if (sel instanceof Selection && !sel.isNull() && !sel.surfaceId) {
+      if (sel._isSelection && !sel.isNull() && !sel.surfaceId) {
         sel.surfaceId = surfaceId;
       }
       tx.after.selection = sel;
       extend(info, tx.info);
     });
     if (change) {
-      if (change.after.selection instanceof Selection) {
+      if (change.after.selection._isSelection) {
         this.selection = change.after.selection;
         // HACK injecting the surfaceId here...
         // TODO: we should find out where the best place is to do this

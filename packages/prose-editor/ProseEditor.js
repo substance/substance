@@ -26,7 +26,7 @@ Editor.Prototype = function() {
     var config = this.getConfig();
 
     var tools = [
-      $$(SwitchTextTypeTool, {'title': this.i18n.t('switch_text')}),
+      $$(SwitchTextTypeTool),
       $$(UndoTool).append($$(Icon, {icon: 'fa-undo'})),
       $$(RedoTool).append($$(Icon, {icon: 'fa-repeat'})),
       $$(StrongTool).append($$(Icon, {icon: 'fa-bold'})),

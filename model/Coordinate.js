@@ -32,6 +32,8 @@ function Coordinate(path, offset, after) {
 
 Coordinate.Prototype = function() {
 
+  this._isCoordinate = true;
+
   this.equals = function(other) {
     return (other === this ||
       (isArrayEqual(other.path, this.path) && other.offset === this.offset) );

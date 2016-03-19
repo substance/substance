@@ -6,6 +6,7 @@ var each = require('lodash/each');
 var extend = require('lodash/extend');
 var platform = require('../util/platform');
 var Registry = require('../util/Registry');
+var Selection = require('../model/Selection');
 var copySelection = require('../model/transform/copySelection');
 var insertText = require('../model/transform/insertText');
 var deleteSelection = require('../model/transform/deleteSelection');
@@ -14,6 +15,7 @@ var Clipboard = require('./Clipboard');
 var Component = require('./Component');
 var $$ = Component.$$;
 var UnsupportedNode = require('./UnsupportedNode');
+var keys = require('../util/keys');
 
 /**
    Abstract interface for editing components.
@@ -76,7 +78,8 @@ Surface.Prototype = function() {
     var tagName = this.props.tagName || 'div';
     var el = $$(tagName)
       .addClass('sc-surface')
-      .attr('spellCheck', false);
+      .attr('spellCheck', false)
+      .attr('tabindex', 2);
 
     if (this.isEditable()) {
       // Keyboard Events
@@ -125,7 +128,7 @@ Surface.Prototype = function() {
 
   this.dispose = function() {
     var doc = this.getDocument();
-    doc.disconnect(this);
+    doc.off(this);
     this.domSelection = null;
     this.domObserver.disconnect();
     this.getController().unregisterSurface(this);
@@ -388,11 +391,14 @@ Surface.Prototype = function() {
       // HACK: under FF we must make sure that the contenteditable is
       // focused.
       if (change.after.surfaceId === this.getName()) {
-        this.focus();
+        if (!this.isNativeFocused) {
+          this.skipNextFocusEvent = true;
+          this.focus();
+        }
         this.rerenderDomSelection();
       }
     }
-    this.emit('selection:changed', this.getSelection());
+    this.emit('selection:changed', this.getSelection(), this);
   };
 
   this._rerenderSelection = function() {
@@ -406,7 +412,7 @@ Surface.Prototype = function() {
   this.onSelectionChange = function() {
     // console.log('Rerendering DOM selection after selection change.');
     this._rerenderSelection();
-    this.emit('selection:changed', this.getSelection());
+    this.emit('selection:changed', this.getSelection(), this);
   };
 
   this.onCollaboratorsChange = function() {
@@ -422,18 +428,18 @@ Surface.Prototype = function() {
       return;
     }
     switch ( event.keyCode ) {
-      case Surface.Keys.LEFT:
-      case Surface.Keys.RIGHT:
+      case keys.LEFT:
+      case keys.RIGHT:
         return this._handleLeftOrRightArrowKey(event);
-      case Surface.Keys.UP:
-      case Surface.Keys.DOWN:
+      case keys.UP:
+      case keys.DOWN:
         return this._handleUpOrDownArrowKey(event);
-      case Surface.Keys.ENTER:
+      case keys.ENTER:
         return this._handleEnterKey(event);
-      case Surface.Keys.SPACE:
+      case keys.SPACE:
         return this._handleSpaceKey(event);
-      case Surface.Keys.BACKSPACE:
-      case Surface.Keys.DELETE:
+      case keys.BACKSPACE:
+      case keys.DELETE:
         return this._handleDeleteKey(event);
       default:
         break;
@@ -509,7 +515,7 @@ Surface.Prototype = function() {
       // Catches most keys that don't produce output (charCode === 0, thus no character)
       event.which === 0 || event.charCode === 0 ||
       // Opera 12 doesn't always adhere to that convention
-      event.keyCode === Surface.Keys.TAB || event.keyCode === Surface.Keys.ESCAPE ||
+      event.keyCode === keys.TAB || event.keyCode === keys.ESCAPE ||
       // prevent combinations with meta keys, but not alt-graph which is represented as ctrl+alt
       !!(event.metaKey) || (!!event.ctrlKey^!!event.altKey)
     ) {
@@ -610,29 +616,43 @@ Surface.Prototype = function() {
     // while having a rendered DOM selection.
     // window.getSelection().removeAllRanges();
     this.isNativeFocused = false;
-    // this.skipNextFocusEvent = false;
+    this.skipNextFocusEvent = false;
+
+    // HACK: hard-coding the current decision to render the cursor fragment
+    // only when blurred
+    var sel = this.getSelection();
+    if (sel && sel.isCollapsed()) {
+      this._rerenderSelection();
+    }
   };
 
   this.onNativeFocus = function() {
+    // console.log('Native focus on surface', this.__id__);
     this.isNativeFocused = true;
-    // // console.log('Native focus on surface', this.__id__);
-    // // ATTENTION: native focus event is triggered before the DOM selection is there
-    // // Thus we need to delay this, unfortunately.
-    // window.setTimeout(function() {
-    //   // when focus is handled via mouse selection
-    //   // then everything is done already, and we do not need to handle it.
-    //   if (this.skipNextFocusEvent) return;
-    //   // console.log('... handling native focus on surface', this.__id__);
-    //   if (this.isFocused){
-    //     this.rerenderDomSelection();
-    //   } else {
-    //     var sel = this.domSelection.getSelection();
-    //     this.setFocused(true);
-    //     this.setSelection(sel);
-    //   }
-    // }.bind(this));
-  };
 
+    // in some cases we don't react on native focusing
+    // e.g., when the selection is being set via mouse
+    // or if the selection is set implicitly
+    if (this.skipNextFocusEvent) {
+      this.skipNextFocusEvent = false;
+      return;
+    }
+
+    var sel = this.getSelection();
+    // if gets focus, but selection is null or not within this surface
+    // we
+    if (!sel || sel.isNull() || sel.surfaceId !== this.getName()) {
+      var first = this.el.querySelector('*[data-path]');
+      if (first) {
+        var path = first.dataset.path.split('.');
+        this.setSelection(Selection.create(path, 0));
+      } else {
+        console.error('FIXME: can not set selection after focus.');
+      }
+    } else {
+      this._rerenderSelection();
+    }
+  };
 
   // Internal implementations
 
@@ -654,7 +674,7 @@ Surface.Prototype = function() {
       if (self._isDisposed()) return;
 
       var options = {
-        direction: (event.keyCode === Surface.Keys.LEFT) ? 'left' : 'right'
+        direction: (event.keyCode === keys.LEFT) ? 'left' : 'right'
       };
       self._updateModelSelection(options);
       // We could rerender the selection, to make sure the DOM is representing
@@ -674,7 +694,7 @@ Surface.Prototype = function() {
     window.setTimeout(function() {
       if (self._isDisposed()) return;
       var options = {
-        direction: (event.keyCode === Surface.Keys.UP) ? 'left' : 'right'
+        direction: (event.keyCode === keys.UP) ? 'left' : 'right'
       };
       self._updateModelSelection(options);
     });
@@ -711,7 +731,7 @@ Surface.Prototype = function() {
 
   this._handleDeleteKey = function (event) {
     event.preventDefault();
-    var direction = (event.keyCode === Surface.Keys.BACKSPACE) ? 'left' : 'right';
+    var direction = (event.keyCode === keys.BACKSPACE) ? 'left' : 'right';
     this.transaction(function(tx, args) {
       args.direction = direction;
       return this.delete(tx, args);
@@ -725,7 +745,8 @@ Surface.Prototype = function() {
     // when we set the selection
     // This is actually only a problem on FF, other browsers set the focus implicitly
     // when a new DOM selection is set.
-    if (platform.isFF && !sel.isNull() && this.el) {
+    if (platform.isFF && !sel.isNull() && this.el && !this.isNativeFocused) {
+      this.skipNextFocusEvent = true;
       this.el.focus();
     }
   };
@@ -840,7 +861,7 @@ Surface.Prototype = function() {
     return frags;
   };
 
-  this._computeSelectionFragments = function(sel, selectionFragments, userData) {
+  this._computeSelectionFragments = function(sel, selectionFragments, collaborator) {
     selectionFragments = selectionFragments || {};
     if (sel && !sel.isNull()) {
       // console.log('Computing selection fragments for', sel.toString());
@@ -852,7 +873,7 @@ Surface.Prototype = function() {
           frags = [];
           selectionFragments[pathStr] = frags;
         }
-        frag.userData = userData;
+        frag.collaborator = collaborator;
         frags.push(frag);
       });
     }
@@ -920,25 +941,6 @@ Surface.Prototype = function() {
 };
 
 Component.extend(Surface);
-
-Surface.Keys =  {
-  UNDEFINED: 0,
-  BACKSPACE: 8,
-  DELETE: 46,
-  LEFT: 37,
-  RIGHT: 39,
-  UP: 38,
-  DOWN: 40,
-  ENTER: 13,
-  END: 35,
-  HOME: 36,
-  TAB: 9,
-  PAGEUP: 33,
-  PAGEDOWN: 34,
-  ESCAPE: 27,
-  SHIFT: 16,
-  SPACE: 32
-};
 
 
 Surface.getDOMRangeFromEvent = function(evt) {
