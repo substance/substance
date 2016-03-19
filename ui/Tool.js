@@ -53,9 +53,9 @@ Tool.Prototype = function() {
     }
 
     var button = $$('button')
-      .on('click', this.onClick)
       .append(this.props.children);
-    el.append(button);
+
+    el.append(button).on('click', this.onClick);
 
     if (this.state.disabled) {
       el.addClass('sm-disabled');
@@ -115,7 +115,6 @@ Tool.Prototype = function() {
     }
     this.performAction();
   };
-
 };
 
 Component.extend(Tool);
