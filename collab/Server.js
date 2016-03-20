@@ -216,7 +216,7 @@ Server.Prototype = function() {
   };
 
   this.__error = function(req, res) {
-    return res.err;
+    return res.err && !res.isSent;
   };
 
   this.__done = function(req, res) {
