@@ -26,6 +26,25 @@ ChangeStore.Prototype = function() {
     if (!args.sinceVersion) {
       args.sinceVersion = 0;
     }
+
+    if(args.sinceVersion < 0) {
+      return cb(new Err('ChangeStore.ReadError', {
+        message: 'Illegal argument "sinceVersion":' +args.sinceVersion
+      }));
+    }
+
+    if(args.toVersion < 0) {
+      return cb(new Err('ChangeStore.ReadError', {
+        message: 'Illegal argument "toVersion":' +args.toVersion
+      }));
+    }
+
+    if(args.sinceVersion >= args.toVersion) {
+      return cb(new Err('ChangeStore.ReadError', {
+        message: 'Illegal version arguments "sinceVersion":' +args.sinceVersion+ ', toVersion":' +args.toVersion
+      }));
+    }
+    
     var version = this._getVersion(args.documentId);
 
     var res;
@@ -42,10 +61,6 @@ ChangeStore.Prototype = function() {
         changes: changes.slice(args.sinceVersion, args.toVersion)
       };
       cb(null, res);
-    } else {
-      cb(new Err('ChangeStore.ReadError', {
-        message: 'Illegal argument "sinceVersion":' +args.sinceVersion
-      }));
     }
   };
 

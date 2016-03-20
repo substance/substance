@@ -77,11 +77,36 @@ function testChangeStore(store, QUnit) {
     });
   });
 
-  QUnit.test("Invalid use of getChanges", function(assert) {
+  QUnit.test("Invalid use of getChanges sinceVersion argument", function(assert) {
     var done = assert.async();
     var args = {
       documentId: 'test-doc',
       sinceVersion: -5
+    };
+    store.getChanges(args, function(err) {
+      assert.equal(err.name, 'ChangeStore.ReadError', 'Should give a read error as invalid version provided');
+      done();
+    });
+  });
+
+  QUnit.test("Invalid use of getChanges toVersion argument", function(assert) {
+    var done = assert.async();
+    var args = {
+      documentId: 'test-doc',
+      toVersion: -3
+    };
+    store.getChanges(args, function(err) {
+      assert.equal(err.name, 'ChangeStore.ReadError', 'Should give a read error as invalid version provided');
+      done();
+    });
+  });
+
+  QUnit.test("Invalid use of getChanges version arguments", function(assert) {
+    var done = assert.async();
+    var args = {
+      documentId: 'test-doc',
+      sinceVersion: 2,
+      toVersion: 1
     };
     store.getChanges(args, function(err) {
       assert.equal(err.name, 'ChangeStore.ReadError', 'Should give a read error as invalid version provided');
