@@ -7,7 +7,13 @@ function testChangeStore(store, QUnit) {
     var done = assert.async();
     var args = {
       documentId: 'test-doc',
-      change: {'some': 'change'}
+      change: {
+        ops: [{some: 'operation'}],
+        // the info object is meant to store any custom information
+        info: {
+          userId: 'testuser'
+        }
+      }
     };
     store.addChange(args, function(err, version) {
       assert.notOk(err, 'Should not error');
@@ -18,6 +24,7 @@ function testChangeStore(store, QUnit) {
       }, function(err, result) {
         assert.equal(result.changes.length, 2, 'There should be two changes in the db');
         assert.equal(result.version, 2, 'New version should be 2');
+        assert.equal(result.changes[1].info.userId, 'testuser', 'info.userId should be "testuser"');
         done();
       });
     });
