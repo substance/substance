@@ -21,6 +21,19 @@ function testDocumentStore(store, QUnit) {
     });
   });
 
+  QUnit.test('Create a new document without providing a documentId', function(assert) {
+    var done = assert.async();
+    var newDoc = {
+      schemaName: 'prose-article',
+      schemaVersion: '1.0.0'
+    };
+    store.createDocument(newDoc, function(err, doc) {
+      assert.ok(doc, 'valid doc entry expected');
+      assert.ok(doc.documentId, 'Auto-generated documentId should be returned');
+      done();
+    });
+  });
+
   QUnit.test('Create a new document that already exists', function(assert) {
     var done = assert.async();
     var newDoc = {
