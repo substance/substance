@@ -62,6 +62,20 @@ function testChangeStore(store, QUnit) {
     });
   });
 
+  QUnit.test("Should return no changes if sinceVersion = actual version", function(assert) {
+    var done = assert.async();
+    var args = {
+      documentId: 'test-doc-2',
+      sinceVersion: 3
+    };
+    store.getChanges(args, function(err, result) {
+      assert.notOk(err, 'Should not error');
+      assert.equal(result.changes.length, 0, 'Should have zero changes');
+      assert.equal(result.version, 3, 'Document version should be 1');
+      done();
+    });
+  });
+
   QUnit.test("Return changes of test-doc-2 between version 1 and version 2", function(assert) {
     var done = assert.async();
     var args = {
