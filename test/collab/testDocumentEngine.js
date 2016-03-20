@@ -19,7 +19,18 @@ function testDocumentEngine(documentEngine, QUnit) {
       documentId: 'new-doc',
       schemaName: 'prose-article'
     }, function(err, doc) {
-      assert.ok(doc, 'valid doc snapshot expected');
+      assert.ok(doc.data, 'valid doc snapshot expected');
+      done();
+    });
+  });
+
+  QUnit.test('Create a new document without documentId provided', function(assert) {
+    var done = assert.async();
+    documentEngine.createDocument({
+      schemaName: 'prose-article'
+    }, function(err, doc) {
+      assert.ok(doc.data, 'valid doc snapshot expected');
+      assert.ok(doc.documentId, 'Auto-generated documentId expected');
       done();
     });
   });

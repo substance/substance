@@ -33,7 +33,6 @@ function testSnapshotEngineWithPersistence(snapshotEngine, docFactory, QUnit) {
     // By requesting version 2 of test-doc-2 the snapshot will be computed based
     // on version1 + changes since then
     snapshotEngine.getSnapshot({documentId: 'test-doc-2', version: 2}, function(err, snapshot) {
-      console.log(err);
       assert.notOk(err, 'There should be no error');
       assert.equal(snapshot.version, 2, 'Snapshot should be at version 3');
       done();
