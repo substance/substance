@@ -16,9 +16,8 @@ DocumentServer.Prototype = function() {
     Attach this server to an express instance
   */
   this.bind = function(app) {
-    var route = this.path + '/:id';
-    console.log('ROUTE', route);
-    app.get(route, this._getDocument.bind(this));
+    app.get(this.path + '/:id', this._getDocument.bind(this));
+    app.post(this.path, this._createDocument.bind(this));
   };
 
   /*
@@ -29,6 +28,22 @@ DocumentServer.Prototype = function() {
     this.engine.getDocument({
       documentId: documentId
     }, function(err, result) {
+      if (err) return next(err);
+      res.json(result);
+    });
+  };
+
+  /*
+    Create a new document, given a schemaName and schemaVersion
+  */
+  this._createDocument = function(req, res, next) {
+    var args = req.body;
+    var newDoc = {
+      schemaName: args.schemaName, // e.g. prose-article
+      info: args.info // optional
+    };
+
+    this.engine.createDocument(newDoc, function(err, result) {
       if (err) return next(err);
       res.json(result);
     });

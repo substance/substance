@@ -139,7 +139,6 @@ CollabEngine.Prototype = function() {
     @param {String} args.collaboratorId collaboratorId
     @param {String} args.documentId document id
     @param {Number} args.version client version
-    @param {Number} args.userId collaborator's userId if known
     @param {Number} args.change new change
 
     OUT: version, changes, version
@@ -162,8 +161,7 @@ CollabEngine.Prototype = function() {
     // Store the commit
     this.documentEngine.addChange({
       documentId: args.documentId,
-      change: args.change, // rebased change
-      userId: args.userId
+      change: args.change
     }, function(err, serverVersion) {
       if (err) return cb(err);
       cb(null, {
@@ -189,8 +187,7 @@ CollabEngine.Prototype = function() {
       // Store the rebased commit
       this.documentEngine.addChange({
         documentId: args.documentId,
-        change: rebased.change, // rebased change
-        userId: args.userId
+        change: rebased.change // rebased change
       }, function(err, serverVersion) {
         if (err) return cb(err);
         cb(null, {

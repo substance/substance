@@ -6,7 +6,6 @@ var $ = require('../util/jquery');
 /*
   HTTP client for talking with DocumentServer
 */
-
 function DocumentClient(config) {
   this.config = config;
 }
@@ -36,8 +35,36 @@ DocumentClient.Prototype = function() {
     $.ajax(ajaxOpts);
   };
 
+  /*
+    Create a new document on the server
+
+    @example
+  
+    ```js
+    documentClient.getDocument('mydoc-id');
+    ```
+  */
+
   this.getDocument = function(documentId, cb) {
     this._request('GET', this.config.httpUrl+documentId, null, cb);
+  };
+
+  /*
+    Create a new document on the server
+    
+    ```js
+    @example
+    ```
+
+    documentClient.createDocument({
+      schemaName: 'prose-article',
+      info: {
+        userId: 'userx'
+      }
+    });
+  */
+  this.createDocument = function(newDocument, cb) {
+    this._request('POST', this.config.httpUrl, newDocument, cb);
   };
 
 };

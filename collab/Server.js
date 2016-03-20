@@ -216,7 +216,7 @@ Server.Prototype = function() {
   };
 
   this.__error = function(req, res) {
-    return res.err;
+    return res.err && !res.isSent;
   };
 
   this.__done = function(req, res) {
@@ -263,7 +263,6 @@ Server.Prototype = function() {
     var collaboratorId = req.message.collaboratorId;
     this.send(collaboratorId, res.data);
     res.setSent();
-    console.log('Server.sendResponse res.isSent: ', res.isSent);
     this.next(req, res);
   };
 

@@ -36,113 +36,54 @@ DocumentEngine.Prototype = function() {
   this.createDocument = function(args, cb) {
     var schemaConfig = this.schemas[args.schemaName];
     if (!schemaConfig) {
-      return cb(new Err('DocumentEngine.SchemaNotFoundError', {
+      return cb(new Err('SchemaNotFoundError', {
         message: 'Schema not found for ' + args.schemaName
       }));
     }
     var docFactory = schemaConfig.documentFactory;
+    var doc = docFactory.createArticle();
+    var changeset = docFactory.createChangeset();
 
-    this.documentStore.documentExists(args.documentId, function(err, exists) {
-      if (err || exists) {
-        return cb(new Err('DocumentEngine.CreateError', {
-          message: !exists ? 'Document already exists' : null,
+    this.documentStore.createDocument({
+      schemaName: schemaConfig.name,
+      schemaVersion: schemaConfig.version,
+      documentId: args.documentId,
+      info: args.info
+    }, function(err, docRecord) {
+      if (err) {
+        return cb(new Err('CreateError', {
           cause: err
         }));
       }
 
-      var doc = docFactory.createArticle();
-      var changeset = docFactory.createChangeset();
-
-      this.documentStore.createDocument({
-        schemaName: schemaConfig.name,
-        schemaVersion: schemaConfig.version,
-        documentId: args.documentId,
-        info: args.info
-      }, function(err, docRecord) {
+      this.changeStore.addChange({
+        documentId: docRecord.documentId,
+        change: changeset[0]
+      }, function(err) {
         if (err) {
-          return cb(new Err('DocumentEngine.CreateError', {
+          return cb(new Err('CreateError', {
             cause: err
           }));
         }
-
-        this.changeStore.addChange({
-          documentId: args.documentId,
-          change: changeset[0]
-        }, function(err) {
-          if (err) {
-            return cb(new Err('DocumentEngine.CreateError', {
-              cause: err
-            }));
-          }
-          
-          var converter = new JSONConverter();
-          cb(null, {
-            documentId: docRecord.documentId,
-            data: converter.exportDocument(doc),
-            version: 1
-          });
+        
+        var converter = new JSONConverter();
+        cb(null, {
+          documentId: docRecord.documentId,
+          data: converter.exportDocument(doc),
+          version: 1
         });
-      }.bind(this));
+      });
     }.bind(this));
   };
 
   /*
-    Get document snapshot.
-
-    Uses schema information stored at the doc entry and
-    constructs a document using the corresponding documentFactory
-    that is available as a schema config object.
+    Get a document snapshot.
 
     @param args.documentId 
     @param args.version
   */
   this.getDocument = function(args, cb) {
-    var documentId = args.documentId;
-    // TODO: allow to getDocument for a particular version
-    // var version = args.version;
-    // TODO: Implement and use snapshots for faster access
-
-    this.documentStore.getDocument(documentId, function(err, docRecord) {
-      if (err) {
-        return cb(new Err('DocumentEngine.ReadError', {
-          cause: err
-        }));
-      }
-
-      var schemaConfig = this.schemas[docRecord.schemaName];
-      if (!schemaConfig) {
-        return cb(new Err('DocumentEngine.SchemaNotFoundError', {
-          message: 'Schema not found for ' + docRecord.schemaName
-        }));
-      }
-
-      var docFactory = schemaConfig.documentFactory;
-      this.getChanges({
-        documentId: documentId,
-        sinceVersion: 0
-      }, function(err, res) {
-        if (err) {
-          return cb(new Err('DocumentEngine.ReadError', {
-            cause: err
-          }));
-        }
-
-        var doc = docFactory.createEmptyArticle();
-        res.changes.forEach(function(change) {
-          change.ops.forEach(function(op) {
-            doc.data.apply(op);
-          });
-        });
-        var converter = new JSONConverter();
-        var output = {
-          data: converter.exportDocument(doc),
-          version: res.version
-        };
-        cb(null, output);
-      });
-
-    }.bind(this));
-
+    this.snapshotEngine.getSnapshot(args, cb);
   };
 
   /*
@@ -151,7 +92,7 @@ DocumentEngine.Prototype = function() {
   this.deleteDocument = function(documentId, cb) {
     this.documentStore.deleteDocument(documentId, function(err, doc) {
       if (err) {
-        return cb(new Err('DocumentEngine.DeleteDocumentError', {
+        return cb(new Err('DeleteError', {
           cause: err
         }));
       }
@@ -172,7 +113,7 @@ DocumentEngine.Prototype = function() {
   this.getChanges = function(args, cb) {
     this.documentExists(args.documentId, function(err, exists) {
       if (err || !exists) {
-        return cb(new Err('DocumentEngine.ReadError', {
+        return cb(new Err('ReadError', {
           message: !exists ? 'Document does not exist' : null,
           cause: err
         }));
@@ -187,7 +128,7 @@ DocumentEngine.Prototype = function() {
   this.getVersion = function(documentId, cb) {
     this.documentExists(documentId, function(err, exists) {
       if (err || !exists) {
-        return cb(new Err('DocumentEngine.ReadError', {
+        return cb(new Err('ReadError', {
           message: !exists ? 'Document does not exist' : null,
           cause: err
         }));
@@ -202,7 +143,7 @@ DocumentEngine.Prototype = function() {
   this.addChange = function(args, cb) {
     this.documentExists(args.documentId, function(err, exists) {
       if (err || !exists) {
-        return cb(new Err('DocumentEngine.ReadError', {
+        return cb(new Err('ReadError', {
           message: !exists ? 'Document does not exist' : null,
           cause: err
         }));

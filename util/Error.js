@@ -46,7 +46,14 @@ SubstanceError.Prototype = function() {
     // We also print the cause in the same way
     if (this.cause) {
       parts.push('\nCaused by: ');
-      parts.push(this.cause.inspect());
+
+      if (this.cause.inspect) {
+        // If cause is again a Substance error
+        parts.push(this.cause.inspect());  
+      } else {
+        // If not we just use Error.toString
+        parts.push(this.cause.toString());  
+      }
     }
 
     return parts.join('');
