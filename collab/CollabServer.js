@@ -39,6 +39,19 @@ CollabServer.Prototype = function() {
   };
 
   /*
+    connect and commit methods get an additional
+    argument info which will be stored along with the
+    change in the database
+  */
+  this.enhanceChange = function(req, cb) {
+    if (this.config.enhanceChange) {
+      this.config.enhanceChange(req, cb);
+    } else {
+      cb(null, {});
+    }
+  };
+
+  /*
     Configurable authenticate method
   */
   this.authenticate = function(req, res) {
@@ -101,11 +114,17 @@ CollabServer.Prototype = function() {
     var args = req.message;
 
     console.log('CollabServer.connect', args.collaboratorId);
-    this.collabEngine.connect(args, function(err, result) {
-      // result: changes, version, change
-      if (err) {
-        res.error(err);
-      } else {
+
+    this.enhanceChange(req, function(err, info) {
+      if (err) return res.error(err);
+      // If the connect comes with a change we add the info
+      if (args.change) {
+        args.change.info = info;
+      }
+
+      this.collabEngine.connect(args, function(err, result) {
+        // result: changes, version, change
+        if (err) return res.error(err);
         var collaboratorIds = this.collabEngine.getCollaboratorIds(args.documentId, args.collaboratorId);
 
         // We need to broadcast a new change if there is one
@@ -153,9 +172,14 @@ CollabServer.Prototype = function() {
             collaborators: collaborators
           });
         }.bind(this));
-      }
-      this.next(req, res);
+
+        this.next(req, res);
+      }.bind(this));
+
     }.bind(this));
+
+    
+
   };
 
   /*
@@ -188,31 +212,36 @@ CollabServer.Prototype = function() {
   this.commit = function(req, res) {
     var args = req.message;
 
-    this.collabEngine.commit(args, function(err, result) {
-      // result has changes, version, change
-      if (err) {
-        res.error(err);
-      } else {
-        var collaboratorIds = this.collabEngine.getCollaboratorIds(args.documentId, args.collaboratorId);
+    this.enhanceChange(req, function(err, info) {
+      if (err) return res.error(err);
+      args.change.info = info;
 
-        // We need to broadcast the change to all collaborators
-        this.broadCast(collaboratorIds, {
-          type: 'update',
-          version: result.version,
-          change: result.change,
-          collaboratorId: args.collaboratorId,
-          documentId: args.documentId
-        });
+      this.collabEngine.commit(args, function(err, result) {
+        // result has changes, version, change
+        if (err) {
+          res.error(err);
+        } else {
+          var collaboratorIds = this.collabEngine.getCollaboratorIds(args.documentId, args.collaboratorId);
 
-        // confirm the new commit, providing the diff (changes) since last common version
-        res.send({
-          documentId: args.documentId,
-          type: 'commitDone',
-          version: result.version,
-          changes: result.changes          
-        });
-      }
-      this.next(req, res);
+          // We need to broadcast the change to all collaborators
+          this.broadCast(collaboratorIds, {
+            type: 'update',
+            version: result.version,
+            change: result.change,
+            collaboratorId: args.collaboratorId,
+            documentId: args.documentId
+          });
+
+          // confirm the new commit, providing the diff (changes) since last common version
+          res.send({
+            documentId: args.documentId,
+            type: 'commitDone',
+            version: result.version,
+            changes: result.changes          
+          });
+        }
+        this.next(req, res);
+      }.bind(this));
     }.bind(this));
   };
 
