@@ -48,11 +48,7 @@ CollabServer.Prototype = function() {
           console.log('Request is not authenticated.');
           return res.error(err);
         }
-
-        console.log('CollabServer.authenticate session', !!session);
         req.setAuthenticated(session);
-
-        // console.log('############req.session', req.session);
 
         this.next(req, res);
       }.bind(this));

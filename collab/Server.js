@@ -263,7 +263,6 @@ Server.Prototype = function() {
     var collaboratorId = req.message.collaboratorId;
     this.send(collaboratorId, res.data);
     res.setSent();
-    console.log('Server.sendResponse res.isSent: ', res.isSent);
     this.next(req, res);
   };
 
