@@ -30,8 +30,8 @@ function isElementInViewport (el) {
     }
     var rect = el.getBoundingClientRect();
     return (
-        rect.top >= 0 &&
-        rect.bottom <= $('.lt-editors')[0].getBoundingClientRect().bottom - 20
+        rect.top >= 70 && // 70 is adjustment for top navbar etc
+        rect.bottom <= el.offsetParent.getBoundingClientRect().bottom - 20 // 20 is adjustment for bottom padding etc
     );
 }
 
@@ -90,18 +90,19 @@ DOMSelection.Prototype = function() {
       wRange.setStart(start.container, start.offset);
       wSel.addRange(wRange);
       var el = document.createElement("span");
-      el.id = 'cursor';
-      wRange.deleteContents();
+      el.id = 'curr-pos-span';
       wRange.insertNode(el);
       var visible = isElementInViewport(el);
-      if ($('#cursor')[0].offsetTop < $(".lt-editors")[0].scrollTop){
+      var offsetParent = $("#curr-pos-span").offsetParent()[0];
+      var scrollAdjustment = 200;
+      if ($('#curr-pos-span')[0].offsetTop < offsetParent.scrollTop){
         // scrolling up
-        if (!visible) $(".lt-editors")[0].scrollTop = $('#cursor')[0].offsetTop - 200;
+        if (!visible) offsetParent.scrollTop = $('#curr-pos-span')[0].offsetTop - scrollAdjustment;
       } else {
         // scrolling down
-        if (!visible) $(".lt-editors")[0].scrollTop = $('#cursor')[0].offsetTop + 200;
+        if (!visible) offsetParent.scrollTop = $('#curr-pos-span')[0].offsetTop - parseInt($(window).height()) + scrollAdjustment;
       }
-      $('#cursor').remove();
+      $('#curr-pos-span').remove();
     } else {
       if (sel.isReverse()) {
         // console.log('DOMSelection: rendering a reverse selection.');
