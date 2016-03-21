@@ -161,7 +161,8 @@ CollabEngine.Prototype = function() {
     // Store the commit
     this.documentEngine.addChange({
       documentId: args.documentId,
-      change: args.change
+      change: args.change,
+      documentInfo: args.documentInfo
     }, function(err, serverVersion) {
       if (err) return cb(err);
       cb(null, {
@@ -187,7 +188,8 @@ CollabEngine.Prototype = function() {
       // Store the rebased commit
       this.documentEngine.addChange({
         documentId: args.documentId,
-        change: rebased.change // rebased change
+        change: rebased.change, // rebased change
+        documentInfo: args.documentInfo
       }, function(err, serverVersion) {
         if (err) return cb(err);
         cb(null, {
