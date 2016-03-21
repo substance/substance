@@ -4,59 +4,9 @@ var uuid = require('../../util/uuid');
 var annotationHelpers = require('../../model/annotationHelpers');
 var deleteNode = require('../../model/transform/deleteNode');
 
+var listUtils = require('./listUtils');
+
 function ListEditing() {}
-
-/**
-  convert the list item into a paragraph and split the list
-  into 2 lists.
-
-  @function
-
-  @param {model/TransactionDocument} tx the document instance
-  @param {Object} args object with fields `node`, `containerId`, `path`
-*/
-var listItemToParagraph = function(tx, args){
-  var defaultType = tx.getSchema().getDefaultTextType();
-  var id = uuid(defaultType);
-  var containerId = args.containerId;
-  var container = tx.get(containerId);
-  var index = container.getChildIndex(args.node);
-  var numItems = args.node.items.length;
-  var node = tx.get(args.path[0]);
-  var nodeIndex = args.node.items.indexOf(args.path[0]);
-  tx.create({
-    id: id,
-    type: defaultType,
-    content: node.content
-  });
-  // show the paragraph node and the second list node
-  annotationHelpers.transferAnnotations(tx, args.path, 0, [id, 'content'], 0);
-  container.show(id, index+1);
-  if (args.node.items.slice(nodeIndex+1, numItems).length > 0){
-    // make a new list with the trailing items
-    var newList = tx.create({
-      id: uuid('list'),
-      type: args.node.type,
-      items: args.node.items.slice(nodeIndex+1, numItems),
-      ordered: args.node.ordered
-    });
-    for (var i=0; i<newList.items.length; i++) {
-      tx.set([newList.items[i], 'parent'], newList.id);
-    }
-    container.show(newList.id, index+2);
-  }
-  // delete the trailing list items from the first list
-  for (var j=numItems-1; j>=nodeIndex; j--) {
-    tx.update([args.node.id, 'items'], {delete: {offset: j}});
-  }
-  var selection = tx.createSelection({
-    type: 'property',
-    path: [id, 'content'],
-    startOffset: 0
-  });
-  args.selection = selection;
-  return args;
-};
 
 ListEditing.Prototype = function() {
 
@@ -94,7 +44,7 @@ ListEditing.Prototype = function() {
         // a paragraph
         args.path = path;
         args.node = parentList;
-        args = listItemToParagraph(tx, args);
+        args = listUtils.listItemToParagraph(tx, args);
       } else {
         newNode = tx.create({
           id: id,
@@ -308,7 +258,7 @@ ListEditing.Prototype = function() {
       });
       args.selection = selection;
     } else {
-      args = listItemToParagraph(tx, args);
+      args = listUtils.listItemToParagraph(tx, args);
     }
     return args;
   };
