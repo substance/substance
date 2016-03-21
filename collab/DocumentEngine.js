@@ -42,8 +42,12 @@ DocumentEngine.Prototype = function() {
     }
     var docFactory = schemaConfig.documentFactory;
     var doc = docFactory.createArticle();
-    var changeset = docFactory.createChangeset();
-
+    var change = docFactory.createChangeset()[0];
+    
+    // HACK: we use the info object for the change as well, however
+    // we should be able to control this separately.
+    change.info = args.info;
+    
     this.documentStore.createDocument({
       schemaName: schemaConfig.name,
       schemaVersion: schemaConfig.version,
@@ -59,7 +63,7 @@ DocumentEngine.Prototype = function() {
 
       this.changeStore.addChange({
         documentId: docRecord.documentId,
-        change: changeset[0]
+        change: change
       }, function(err) {
         if (err) {
           return cb(new Err('CreateError', {
