@@ -48,6 +48,7 @@ DocumentEngine.Prototype = function() {
       schemaName: schemaConfig.name,
       schemaVersion: schemaConfig.version,
       documentId: args.documentId,
+      version: 1, // we always start with version 1
       info: args.info
     }, function(err, docRecord) {
       if (err) {
