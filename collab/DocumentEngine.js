@@ -144,6 +144,8 @@ DocumentEngine.Prototype = function() {
 
   /*
     Add change to a given documentId
+
+    args: documentId, change [, documentInfo]
   */
   this.addChange = function(args, cb) {
     this.documentExists(args.documentId, function(err, exists) {
@@ -157,7 +159,9 @@ DocumentEngine.Prototype = function() {
         if (err) return cb(err);
         // We write the new version to the document store.
         this.documentStore.updateDocument(args.documentId, {
-          version: newVersion
+          version: newVersion,
+          // Store custom documentInfo
+          info: args.documentInfo
         }, function(err) {
           if (err) return cb(err);
           this.snapshotEngine.requestSnapshot(args.documentId, function() {
@@ -169,6 +173,7 @@ DocumentEngine.Prototype = function() {
       }.bind(this));
     }.bind(this)); 
   };
+
 };
 
 EventEmitter.extend(DocumentEngine);
