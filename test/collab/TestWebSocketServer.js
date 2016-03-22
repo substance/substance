@@ -33,13 +33,17 @@ var TestServerWebSocket = require('./TestServerWebSocket');
   ```
 */
 
-function TestWebSocketServer(messageQueue, serverId) {
-  TestWebSocketServer.super.apply(this);
-  this.messageQueue = messageQueue;
-  this.serverId = serverId || "server";
-  this.clients = {};
+function TestWebSocketServer(config) {
 
+  TestWebSocketServer.super.apply(this);
+  this.messageQueue = config.messageQueue;
+  this.serverId = config.serverId || "server";
+  this.clients = {};
   this._isSimulated = true;
+
+  if (!config.manualConnect) {
+    this.connect();
+  }
 }
 
 TestWebSocketServer.Prototype = function() {

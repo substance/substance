@@ -74,7 +74,8 @@ CollabSession.Prototype = function() {
   this._onMessage = function(msg) {
     // TODO: Only consider messages with the right documentId
     if (msg.documentId !== this.doc.id) {
-      console.info('No documentId provided with message');
+      console.info('Message is does not address this document. Skipping', msg.documentId);
+      return;
     }
 
     // console.log('MESSAGE RECEIVED', msg);

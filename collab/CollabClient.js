@@ -13,59 +13,36 @@ function CollabClient(config) {
 
   this.__id__ = __id__++;
   this.config = config;
-  this._onMessage = this._onMessage.bind(this);
+  this.connection = config.connection;
   
   // Hard-coded for now
   this.scope = 'substance/collab';
 
-  // Establish websocket connection
-  this._initWebSocket();
+  // Bind handlers
+  this._onMessage = this._onMessage.bind(this);
+  this._onConnectionOpen = this._onConnectionOpen.bind(this);
+  this._onConnectionClose = this._onConnectionClose.bind(this);
+
+  // Connect handlers
+  this.connection.on('open', this._onConnectionOpen);
+  this.connection.on('close', this._onConnectionClose);
+  this.connection.on('message', this._onMessage);
 }
 
 CollabClient.Prototype = function() {
 
-  /*
-    Initialize websocket connection and handle reconnecting
-  */
-  this._initWebSocket = function() {
-    console.log('Starting websocket connection:', this.config.wsUrl);
-
-    this.ws = new window.WebSocket(this.config.wsUrl);
-    this.ws.onopen = this._onWebSocketOpen.bind(this);
-    this.ws.onclose = this._onWebSocketClose.bind(this);
-    window.ws = this.ws; // for debugging purposes
+  this._onConnectionClose = function() {
+    this.emit('disconnected');
   };
 
-  this._connect = function() {
-    this.ws.addEventListener('message', this._onMessage);
-  };
-
-  this._disconnect = function() {
-    this.ws.removeEventListener('message', this._onMessage);
-  };
-
-  this._onWebSocketOpen = function() {
-    this._connect();
-    this.emit('connection', this.ws);
+  this._onConnectionOpen = function() {
+    this.emit('connected');
   };
 
   /*
-    Reconnect if websocket gets closed for some reason
-  */
-  this._onWebSocketClose = function() {
-    this._disconnect();
-    this.emit('disconnect');
-    console.log('websocket connection closed. Attempting to reconnect in 5s.');
-    setTimeout(function() {
-      this._initWebSocket();
-    }.bind(this), 5000);
-  };
-
-  /*
-    Delegate incoming websocket messages
+    Delegate incoming messages from the connection
   */
   this._onMessage = function(msg) {
-    msg = this.deserializeMessage(msg.data);
     if (msg.scope === this.scope) {
       this.emit('message', msg);
     } else {
@@ -77,29 +54,24 @@ CollabClient.Prototype = function() {
     Send message via websocket channel
   */
   this.send = function(msg) {
-    msg.scope = 'substance/collab';
+    if (!this.connection.isOpen()) {
+      console.error('Message could not be sent. Connection not open.', msg);
+      return;
+    }
 
+    msg.scope = this.scope;
     if (this.config.enhanceMessage) {
       msg = this.config.enhanceMessage(msg);
     }
-    this.ws.send(this.serializeMessage(msg));
+    this.connection.send(msg);
   };
 
   /*
     Returns true if websocket connection is open
   */
   this.isConnected = function() {
-    return this.ws && this.ws.readyState === 1;
+    return this.connection.isOpen();
   };
-
-  this.serializeMessage = function(msg) {
-    return JSON.stringify(msg);
-  };
-
-  this.deserializeMessage = function(msg) {
-    return JSON.parse(msg);
-  };
-
 };
 
 EventEmitter.extend(CollabClient);

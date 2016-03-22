@@ -8,13 +8,13 @@ var __id__ = 0;
   Simple TestWebSocket implementation for local testing
 */
 
-function TestWebSocket(messageQueue, clientId, serverId) {
+function TestWebSocket(config) {
   TestWebSocket.super.apply(this);
 
   this.__id__ = __id__++;
-  this.messageQueue = messageQueue;
-  this.clientId = clientId || uuid();
-  this.serverId = serverId || "server";
+  this.messageQueue = config.messageQueue;
+  this.clientId = config.clientId || uuid();
+  this.serverId = config.serverId || "server";
 
   // We consider our TestWebSocket connected right away.
   this.readyState = 1;
