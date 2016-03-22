@@ -24,6 +24,13 @@ TestWebSocketConnection.Prototype = function() {
   };
 
   /*
+    Used for manual websocket connect
+  */
+  this.connect = function() {
+    this.ws.connect();
+  };
+
+  /*
     Our message queue holds JS objects already so we just
     pass through the msg
   */
