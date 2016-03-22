@@ -54,6 +54,7 @@ ListCommand.Prototype = function() {
     var doc = this.getDocument();
     var surface = this.getSurface();
     var self = this;
+    var containerId = this.getContainerId();
 
     if (!sel.isPropertySelection()){
       var nodes = sel.getContainer().nodes;
@@ -61,7 +62,7 @@ ListCommand.Prototype = function() {
       var selectedNodes = _.map(selectedNodeIds, function(elem){
         return doc.get(elem);
       });
-      var containerId = this.getContainerId();
+
       surface.transaction(function(tx, args){
         var container = tx.get(containerId);
         var newList = {
@@ -91,7 +92,11 @@ ListCommand.Prototype = function() {
         for(i=0; i<selectedNodeIds.length; i++){
           deleteNode(tx, {nodeId: selectedNodeIds[i]});
         }
-        var selection = tx.createSelection(null);
+        var selection = tx.createSelection({
+          type: 'property',
+          path: [newListItem.id, 'content'],
+          startOffset: newListItem.content.length
+        });
         args.selection = selection;
         return args;
       });
