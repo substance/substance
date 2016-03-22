@@ -1,9 +1,13 @@
 'use strict';
 
-var annotationHelpers = require('../../model/annotationHelpers');
-var deleteNode = require('../../model/transform/deleteNode');
+var _ = require('lodash');
 var SurfaceCommand = require('../../ui/SurfaceCommand');
 var uuid = require('../../util/uuid');
+var deleteNode = require('../../model/transform/deleteNode');
+
+var annotationHelpers = require('../../model/annotationHelpers');
+
+var listUtils = require('./listUtils');
 
 
 var ListCommand = function(surface) {
@@ -19,13 +23,23 @@ ListCommand.Prototype = function() {
   this.getCommandState = function() {
     var surface = this.getSurface();
     var sel = this.getSelection();
-    var disabled = !surface.isEnabled() || sel.isNull() || !sel.isPropertySelection();
-
     var doc = this.getDocument();
-    var path = sel.getPath();
-    var node = doc.get(path[0]);
+    var active, disabled;
 
-    var active = (node.type === 'list-item') && (node.ordered === this.ordered);
+    if (sel.isPropertySelection()){
+      disabled = !surface.isEnabled() || sel.isNull();
+      var path = sel.getPath();
+      var node = doc.get(path[0]);
+      active = (node.type === 'list-item') && (node.ordered === this.ordered);
+    } else if (sel.isContainerSelection()) {
+      // is enabled only if all selected nodes are paragraphs
+      var nodes = sel.getContainer().nodes;
+      var selectedNodes = _.slice(nodes, nodes.indexOf(sel.startPath[0]), nodes.indexOf(sel.endPath[0])+1);
+      disabled = !_.every(_.map(selectedNodes, function(elem){
+        return (doc.get(elem).type) === 'paragraph';
+      }));
+      active = false;
+    }
 
     return {
       active: active,
@@ -37,119 +51,83 @@ ListCommand.Prototype = function() {
   // TODO: This currently works for preoperty selection only. Make it work on container selection too.
   this.execute = function() {
     var sel = this.getSelection();
-    if (!sel.isPropertySelection()) return;
     var doc = this.getDocument();
     var surface = this.getSurface();
-
-    var path = sel.getPath();
-    var node = doc.get(path[0]);
-    var content = node.content;
-    var containerId = this.getContainerId();
     var self = this;
 
-    // define behavior when the list tool is clicked while the current selection
-    // is a list item.
-    //TODO: this is very similar to mergeListItems. See if we can resuse that
-    var listToText = function(tx, args) {
-      var newList;
-      var container = tx.get(containerId);
-      var defaultType = tx.getSchema().getDefaultTextType();
-      var id = uuid(defaultType);
-      var parentList = tx.get(node.parent);
-      var index = container.getChildIndex(parentList);
-      var numItems = parentList.items.length;
-      var nodeIndex = parentList.items.indexOf(node.id);
-      tx.create({
-        id: id,
-        type: defaultType,
-        content: node.content
+    if (!sel.isPropertySelection()){
+      var nodes = sel.getContainer().nodes;
+      var selectedNodeIds = _.slice(nodes, nodes.indexOf(sel.startPath[0]), nodes.indexOf(sel.endPath[0])+1);
+      var selectedNodes = _.map(selectedNodeIds, function(elem){
+        return doc.get(elem);
       });
-      // show the paragraph node and the second list node
-      annotationHelpers.transferAnnotations(tx, path, 0, [id, 'content'], 0);
-      container.show(id, index+1);
-      if (parentList.items.slice(nodeIndex+1, numItems).length > 0){
-        // make a new list with the trailing items
-        newList = tx.create({
-          id: uuid('list'),
-          type: parentList.type,
-          items: parentList.items.slice(nodeIndex+1, numItems),
-          ordered: parentList.ordered
-        });
-        for (var i=0; i<newList.items.length; i++) {
-          tx.set([newList.items[i], 'parent'], newList.id);
+      var containerId = this.getContainerId();
+      surface.transaction(function(tx, args){
+        var container = tx.get(containerId);
+        var newList = {
+          id: uuid("list"),
+          type: "list",
+          ordered: self.ordered
+        };
+        var items = [];
+        var newListItem;
+        for (var i=0; i<selectedNodes.length; i++){
+          newListItem = {
+            id: uuid("list-item"),
+            parent: newList.id,
+            ordered: newList.ordered,
+            content: selectedNodes[i].content,
+            type: "list-item"
+          };
+          tx.create(newListItem);
+          annotationHelpers.transferAnnotations(tx, [selectedNodes[i].id, 'content'], 0, [newListItem.id, 'content'], 0);
+          items.push(newListItem.id);
         }
-        container.show(newList.id, index+2);
-      }
-      // delete the trailing list items from the first list
-      for (var j=numItems-1; j>=nodeIndex; j--) {
-        tx.update([parentList.id, 'items'], {delete: {offset: j}});
-      }
-      // if list has no items left, delete it
-      if (tx.get([parentList.id, 'items']).length === 0) deleteNode(tx, {nodeId: parentList.id});
-      var selection = tx.createSelection({
-        type: 'property',
-        path: [id, 'content'],
-        startOffset: sel.startOffset
+        newList.items = items;
+        tx.create(newList);
+        var pos = container.getPosition(sel.startPath[0]);
+        // show the new list item and hide the old node
+        container.show(newList.id, pos);
+        for(i=0; i<selectedNodeIds.length; i++){
+          deleteNode(tx, {nodeId: selectedNodeIds[i]});
+        }
+        var selection = tx.createSelection(null);
+        args.selection = selection;
+        return args;
       });
-      args.selection = selection;
-      return args;
-    };
+    } else {
+      var path = sel.getPath();
+      var node = doc.get(path[0]);
 
-    // define behavior when the list tool is clicked while the current selection
-    // is a text item.
-    var textToList = function(tx, args) {
-      var container = tx.get(containerId);
-      // create a new list node
-      var newList = {
-        id: uuid("list"),
-        type: "list",
-        ordered: self.ordered
-      };
-      // and a new list item node, set its parent to the list node
-      var newListItem = {
-        id: uuid("list-item"),
-        parent: newList.id,
-        ordered: newList.ordered,
-        content: content,
-        type: "list-item"
-      };
-      // create the nodes
-      tx.create(newListItem);
-      newList.items = [newListItem.id];
-      tx.create(newList);
-      var newPath = [newListItem.id, 'content'];
-      // transfer annotations from the current node to new list item
-      annotationHelpers.transferAnnotations(tx, path, 0, newPath, 0);
-      var pos = container.getPosition(node.id);
-      // show the new list item and hide the old node
-      container.show(newList.id, pos+1);
-      deleteNode(tx, {nodeId: node.id});
-      var selection = tx.createSelection({
-        type: 'property',
-        path: [newListItem.id, 'content'],
-        startOffset: sel.startOffset
-      });
-      args.selection = selection;
-      return args;
-    };
-
-    surface.transaction(function(tx, args) {
-      if (node.type === 'list-item') {
-        if (node.ordered === self.ordered){
-          args = listToText(tx, args);
-        } else {
-          // switch list type between ordered and unordered list
-          var items = tx.get([node.parent, 'items']);
-          for (var i=0; i<items.length; i++){
-            tx.set([items[i], 'ordered'], self.ordered);
+      surface.transaction(function(tx, args) {
+        if (node.type === 'list-item') {
+          if (node.ordered === self.ordered){
+            // convert list item to paragraph
+            var parentList = tx.get(node.parent);
+            args.path = path;
+            args.node = parentList;
+            args.containerId = containerId;
+            args = listUtils.listItemToParagraph(tx, args);
+          } else {
+            // switch list type between ordered and unordered list
+            var items = tx.get([node.parent, 'items']);
+            for (var i=0; i<items.length; i++){
+              tx.set([items[i], 'ordered'], self.ordered);
+            }
+            tx.set([node.parent, 'ordered'], self.ordered);
           }
-          tx.set([node.parent, 'ordered'], self.ordered);
+        } else {
+          // convert node to list
+          args.node = node;
+          args.ordered = self.ordered;
+          args.containerId = containerId;
+          args.path = path;
+          args.selection = sel;
+          args = listUtils.paragraphToList(tx, args);
         }
-      } else {
-        args = textToList(tx, args);
-      }
-      return args;
-    });
+        return args;
+      });
+    }
     return true;
   };
 };
