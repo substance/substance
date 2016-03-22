@@ -24,6 +24,17 @@ function DOMSelection(surface) {
   this.surface = surface;
 }
 
+function isElementInViewport (el) {
+    if (typeof $ === "function" && el instanceof $) {
+        el = el[0];
+    }
+    var rect = el.getBoundingClientRect();
+    return (
+        rect.top >= 70 && // 70 is adjustment for top navbar etc
+        rect.bottom <= el.offsetParent.getBoundingClientRect().bottom - 20 // 20 is adjustment for bottom padding etc
+    );
+}
+
 DOMSelection.Prototype = function() {
 
   /**
@@ -78,6 +89,20 @@ DOMSelection.Prototype = function() {
     if (sel.isCollapsed()) {
       wRange.setStart(start.container, start.offset);
       wSel.addRange(wRange);
+      var el = document.createElement("span");
+      el.id = 'curr-pos-span';
+      wRange.insertNode(el);
+      var visible = isElementInViewport(el);
+      var offsetParent = $("#curr-pos-span").offsetParent()[0];
+      var scrollAdjustment = 200;
+      if ($('#curr-pos-span')[0].offsetTop < offsetParent.scrollTop){
+        // scrolling up
+        if (!visible) offsetParent.scrollTop = $('#curr-pos-span')[0].offsetTop - scrollAdjustment;
+      } else {
+        // scrolling down
+        if (!visible) offsetParent.scrollTop = $('#curr-pos-span')[0].offsetTop - parseInt($(window).height()) + scrollAdjustment;
+      }
+      $('#curr-pos-span').remove();
     } else {
       if (sel.isReverse()) {
         // console.log('DOMSelection: rendering a reverse selection.');
