@@ -28,7 +28,7 @@ function CollabSession(doc, config) {
   this.doc.version = config.docVersion;
 
   // Internal state
-  this._conected = false; // becomes true as soon as the initial connect has been completed
+  this._connected = false; // becomes true as soon as the initial connect has been completed
   this._nextCommit = null; //
   this._pendingCommit = null;
 
@@ -39,7 +39,8 @@ function CollabSession(doc, config) {
   this.collaborators = {};
 
   // This happens on a reconnect
-  this.collabClient.on('connection', this._onConnected, this);
+  this.collabClient.on('connected', this._onConnected, this);
+  this.collabClient.on('disconnected', this._onDisconnected, this);
 
   // Constraints used for computing color indexes
   this.__maxColors = 5;
@@ -64,8 +65,14 @@ CollabSession.Prototype = function() {
     This happens in a reconnect scenario.
   */
   this._onConnected = function() {
+    console.log('CollabSession.connected');
     this._connected = false;
     this.connect();
+  };
+
+  this._onDisconnected = function() {
+    console.log('CollabSession.disconnected');
+    this._connected = false;
   };
 
   /*
@@ -74,7 +81,8 @@ CollabSession.Prototype = function() {
   this._onMessage = function(msg) {
     // TODO: Only consider messages with the right documentId
     if (msg.documentId !== this.doc.id) {
-      console.info('No documentId provided with message');
+      console.info('Message is does not address this document. Skipping', msg.documentId);
+      return;
     }
 
     // console.log('MESSAGE RECEIVED', msg);
@@ -443,7 +451,11 @@ CollabSession.Prototype = function() {
   };
 
   this._send = function(msg) {
-    this.collabClient.send(msg);
+    if (this.collabClient.isConnected()) {
+      this.collabClient.send(msg);
+    } else {
+      console.warn('Not sending message since disconnected');
+    }
   };
 
   /*

@@ -4,10 +4,10 @@ require('../qunit_extensions');
 
 var MessageQueue = require('../../collab/MessageQueue');
 var TestWebSocketServer = require('../../collab/TestWebSocketServer');
-var TestWebSocket = require('../../collab/TestWebSocket');
 var TestCollabSession = require('../../collab/TestCollabSession');
 var TestCollabServer = require('../../collab/TestCollabServer');
-var TestCollabClient = require('../../collab/TestCollabClient');
+var TestWebSocketConnection = require('../../collab/TestWebSocketConnection');
+var CollabClient = require('../../../collab/CollabClient');
 var DocumentStore = require('../../../collab/DocumentStore');
 var ChangeStore = require('../../../collab/ChangeStore');
 var DocumentEngine = require('../../../collab/DocumentEngine');
@@ -21,7 +21,7 @@ QUnit.module('model/CollabServer');
 
 var doc1, doc2, session1, session2;
 var documentEngine, messageQueue, changeStore, documentStore;
-var wss, ws1, ws2;
+var wss, conn1,conn2;
 var hub, client1, client2;
 
 function _setup(messagesFromSnapshot) {
@@ -44,19 +44,38 @@ function _setup(messagesFromSnapshot) {
   });
 
   messageQueue = new MessageQueue();
-  wss = new TestWebSocketServer(messageQueue, 'hub');
-  ws1 = new TestWebSocket(messageQueue, 'user1', 'hub');
-  ws2 = new TestWebSocket(messageQueue, 'user2', 'hub');
+  
+  wss = new TestWebSocketServer({
+    messageQueue: messageQueue,
+    serverId: 'hub',
+    manualConnect: true
+  });
 
   hub = new TestCollabServer({
     documentEngine: documentEngine
   });
 
-  client1 = new TestCollabClient({
-    ws: ws1
+  // Once the server we can open connections
+  conn1 = new TestWebSocketConnection({
+    messageQueue: messageQueue,
+    clientId: 'user1',
+    serverId: 'hub',
+    manualConnect: true
   });
-  client2 = new TestCollabClient({
-    ws: ws2
+
+  conn2 = new TestWebSocketConnection({
+    messageQueue: messageQueue,
+    clientId: 'user2',
+    serverId: 'hub',
+    manualConnect: true
+  });
+
+  client1 = new CollabClient({
+    connection: conn1
+  });
+
+  client2 = new CollabClient({
+    connection: conn2
   });
 
   session1 = new TestCollabSession(doc1, {
@@ -69,6 +88,7 @@ function _setup(messagesFromSnapshot) {
     docId: 'test-doc',
     docVersion: 1
   });
+
   // HACK: overriding the CollabSession.start() to prevent
   // the session from auto-committing and running forever
   session1.start = function(){};
@@ -76,13 +96,15 @@ function _setup(messagesFromSnapshot) {
 
   // this connects the peers 'physically'
   wss.connect();
-  ws1.connect();
-  ws2.connect();
+  conn1.connect();
+  conn2.connect();
+
   // HACK: to avoid that the clients send new messages
   // we don't deliver the 'open' event
   // Now we need to make sure that the hubClients are still handling messages afterwards
-  client1._connect();
-  client2._connect();
+  // client1._connect();
+  // client2._connect();
+
   // seed the message queue with the messages from the fixture
   messageQueue.clear();
   messageQueue.messages = messagesFromSnapshot();
