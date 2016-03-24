@@ -139,7 +139,6 @@ CollabServer.Prototype = function() {
           this._collaboratorInfo[args.collaboratorId] = info;
         }
 
-        debugger;
         // Get enhance collaborators (e.g. including some app-specific user-info)
         var collaborators = this.getEnhancedCollaborators(args.documentId, args.collaboratorId);
 

@@ -49,7 +49,7 @@ CollabEngine.Prototype = function() {
   this._unregister = function(collaboratorId, documentId) {
     var collaborator = this._collaborators[collaboratorId];
     delete collaborator.documents[documentId];
-    var docCount = Object.keys(collaborator.documents);
+    var docCount = Object.keys(collaborator.documents).length;
     // If there is no doc left, we can remove the entire collaborator entry
     if (docCount === 0) {
       delete this._collaborators[collaboratorId];
