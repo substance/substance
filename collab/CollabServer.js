@@ -47,7 +47,9 @@ CollabServer.Prototype = function() {
       this.config.authenticate(req, function(err, session) {
         if (err) {
           console.log('Request is not authenticated.');
-          return res.error(err);
+          res.error(err);
+          this.next(req, res);
+          return;
         }
         req.setAuthenticated(session);
         this.next(req, res);
@@ -65,7 +67,9 @@ CollabServer.Prototype = function() {
       this.config.enhanceRequest(req, function(err) {
         if (err) {
           console.error('enhanceRequest returned an error', err);
-          return res.error(err);
+          res.error(err);
+          this.next(req, res);
+          return;
         }
         req.setEnhanced();
         this.next(req, res);
@@ -83,17 +87,7 @@ CollabServer.Prototype = function() {
     // All documents collaborator is currently collaborating to
     var documentIds = this.collabEngine.getDocumentIds(collaboratorId);
     documentIds.forEach(function(documentId) {
-      var collaboratorIds = this.collabEngine.getCollaboratorIds(documentId, collaboratorId);
-      this.broadCast(collaboratorIds, {
-        type: 'collaboratorDisconnected',
-        documentId: documentId,
-        collaboratorId: collaboratorId
-      });
-      // Exit from each document session
-      this.collabEngine.disconnect({
-        documentId: documentId,
-        collaboratorId: collaboratorId
-      });
+      this._disconnectDocument(collaboratorId, documentId);
     }.bind(this));
   };
 
@@ -122,7 +116,11 @@ CollabServer.Prototype = function() {
     this.collabEngine.connect(args, function(err, result) {
 
       // result: changes, version, change
-      if (err) return res.error(err);
+      if (err) {
+        res.error(err);
+        this.next(req, res);
+        return;
+      }
       var collaboratorIds = this.collabEngine.getCollaboratorIds(args.documentId, args.collaboratorId);
 
       var collaborator = {
@@ -167,27 +165,31 @@ CollabServer.Prototype = function() {
     }.bind(this));
   };
 
-  /*
-    Disconnect collab session
-  */
   this.disconnect = function(req, res) {
     var args = req.message;
-    this.collabEngine.exit({
-      collaboratorId: args.collaboratorId,
+    var collaboratorId = args.collaboratorId;
+    var documentId = args.documentId;
+    this._disconnectDocument(collaboratorId, documentId);
+    // Notify client that disconnect has completed successfully
+    res.send({
+      type: 'disconnectDone',
       documentId: args.documentId
-    }, function(err) {
-      if (err) {
-        res.error(err);
-      }
+    });
+    this.next(req, res);
+  };
 
-      // Delete collaborator info object
-      delete this._collaboratorInfo[args.collaboratorId];
-      // Notify client that disconnect has completed successfully
-      res.send({
-        type: 'disconnectDone',
-        documentId: args.documentId
-      });
-    }.bind(this));
+  this._disconnectDocument = function(collaboratorId, documentId) {
+    var collaboratorIds = this.collabEngine.getCollaboratorIds(documentId, collaboratorId);
+    this.broadCast(collaboratorIds, {
+      type: 'collaboratorDisconnected',
+      documentId: documentId,
+      collaboratorId: collaboratorId
+    });
+    // Exit from each document session
+    this.collabEngine.disconnect({
+      documentId: documentId,
+      collaboratorId: collaboratorId
+    });
   };
 
   /*
@@ -201,6 +203,7 @@ CollabServer.Prototype = function() {
       // result has changes, version, change
       if (err) {
         res.error(err);
+        this.next(req,res);
       } else {
         var collaboratorIds = this.collabEngine.getCollaboratorIds(args.documentId, args.collaboratorId);
 

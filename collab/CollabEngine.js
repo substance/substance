@@ -4,6 +4,7 @@ var EventEmitter = require('../util/EventEmitter');
 var forEach = require('lodash/forEach');
 var map = require('lodash/map');
 var DocumentChange = require('../model/DocumentChange');
+var Err = require('../util/Error');
 
 /*
   Engine for realizing collaborative editing. Implements the server-methods of 
@@ -137,8 +138,12 @@ CollabEngine.Prototype = function() {
     this.documentEngine.getVersion(args.documentId, function(err, serverVersion) {
       if (serverVersion === args.version) { // Fast forward update
         this._commitFF(args, cb);
-      } else { // Client changes need to be rebased to latest serverVersion
+      } else if (serverVersion > args.version) { // Client changes need to be rebased to latest serverVersion
         this._commitRB(args, cb);
+      } else {
+        cb(new Err('InvalidVersionError', {
+          message: 'Client version greater than server version'
+        }));
       }
     }.bind(this));
   };

@@ -82,8 +82,8 @@ CollabSession.Prototype = function() {
   */
   this._onMessage = function(msg) {
     // TODO: Only consider messages with the right documentId
-    if (msg.documentId !== this.doc.id) {
-      console.info('Message is does not address this document. Skipping', msg.documentId);
+    if (!((msg.documentId === this.doc.id) || (msg.type === 'error' && msg.requestMessage.documentId === this.doc.id))) {
+      console.info('Message is not addressed for this document. Skipping', msg.documentId);
       return;
     }
 
@@ -91,6 +91,9 @@ CollabSession.Prototype = function() {
 
     var changes, change;
     switch(msg.type) {
+      case 'error':
+        this.error(msg);
+        break;
       case 'connectDone':
       case 'commitDone':
         if (msg.changes) {
