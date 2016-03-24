@@ -12,22 +12,42 @@ function TestWebSocketConnection() {
 
 TestWebSocketConnection.Prototype = function() {
 
-  // var _super = TestWebSocketConnection.super.prototype;
+  var _super = TestWebSocketConnection.super.prototype;
 
   this._createWebSocket = function() {
     // this.config has messageQueue, clientId, serverId
     var ws = new TestWebSocket(this.config);
-    if (!this.config.manualConnect) {
-      ws.connect();
-    }
     return ws;
   };
 
   /*
-    Used for manual websocket connect
+    Manual connect
   */
   this.connect = function() {
+    this._connect();
+  };
+
+  /*
+    Manual disconnect
+  */
+  this.disconnect = function() {
+    this._disconnect();
+  };
+
+  this._connect = function() {
+    // Create websocket and bind events open/close/message
+    _super._connect.apply(this, arguments);
+    // connects websocket to the messageQueue and triggers 'open' event
     this.ws.connect();
+  };
+
+  this._disconnect = function() {
+    this.ws.disconnect();
+    _super._disconnect.apply(this, arguments);
+  };
+
+  this._onConnectionClose = function() {
+    console.log('TestWebSocketConnection._onConnectionClose. Noop.');
   };
 
   /*

@@ -16,8 +16,8 @@ function TestWebSocket(config) {
   this.clientId = config.clientId || uuid();
   this.serverId = config.serverId || "server";
 
-  // We consider our TestWebSocket connected right away.
-  this.readyState = 1;
+  // We consider our TestWebSocket WebSocket.CLOSED at the beginning
+  this.readyState = 3;
   this._isSimulated = true;
 }
 
@@ -25,6 +25,14 @@ TestWebSocket.Prototype = function() {
 
   this.connect = function() {
     this.messageQueue.connectClientSocket(this);
+    this.readyState = 1; // WebSocket.OPEN
+    this.triggerOpen();
+  };
+
+  this.disconnect = function() {
+    this.messageQueue.disconnectClientSocket(this);
+    this.readyState = 3; // WebSocket.CLOSED
+    this.triggerClose();
   };
 
   /*
@@ -39,6 +47,17 @@ TestWebSocket.Prototype = function() {
   };
 
   /*
+    This can is called by the messageQueue once the connection is established
+  */
+  this.triggerOpen = function() {
+    if (this.onopen) this.onopen();
+  };
+
+  this.triggerClose = function() {
+    if (this.onclose) this.onclose();
+  };
+
+  /*
     Emulating native removeEventListener API
   */
   this.removeEventListener = function(eventName, handler) {
@@ -49,16 +68,8 @@ TestWebSocket.Prototype = function() {
     Gets called by the message queue to handle a message
   */
   this._onMessage = function(data) {
-    var name = data[0];
-    // var args = data.slice(1);
-
-    if (name === 'open') {
-      // Handler must be provided by user
-      this.onopen();
-    } else {
-      // Handler must be provided by user
-      this.onmessage({data: data});
-    }
+    // Handler must be provided by user
+    this.onmessage({data: data});
   };
 
   /**
@@ -70,7 +81,6 @@ TestWebSocket.Prototype = function() {
       to: this.serverId
     };
     if (data) {
-      // msg.data = JSON.parse(data);
       msg.data = data;
     }
     this.messageQueue.pushMessage(msg);
