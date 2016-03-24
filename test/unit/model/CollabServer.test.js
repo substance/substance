@@ -16,6 +16,8 @@ var documentStoreSeed = require('../../fixtures/collab/documentStoreSeed');
 var changeStoreSeed = require('../../fixtures/collab/changeStoreSeed');
 var twoParagraphs = require('../../fixtures/collab/two-paragraphs');
 var DocumentChange = require('../../../model/DocumentChange');
+var cloneDeep = require('lodash/cloneDeep');
+
 
 QUnit.module('model/CollabServer');
 
@@ -24,7 +26,8 @@ var documentEngine, messageQueue, changeStore, documentStore;
 var wss, conn1,conn2;
 var hub, client1, client2;
 
-function _setup(messagesFromSnapshot) {
+
+function _setup() {
   doc1 = twoParagraphs.createArticle();
   doc2 = twoParagraphs.createArticle();
 
@@ -48,26 +51,28 @@ function _setup(messagesFromSnapshot) {
   wss = new TestWebSocketServer({
     messageQueue: messageQueue,
     serverId: 'hub',
-    manualConnect: true
+    // manualConnect: true
   });
 
   hub = new TestCollabServer({
     documentEngine: documentEngine
   });
 
+  hub.bind(wss);
+
   // Once the server we can open connections
   conn1 = new TestWebSocketConnection({
     messageQueue: messageQueue,
     clientId: 'user1',
     serverId: 'hub',
-    manualConnect: true
+    // manualConnect: true
   });
 
   conn2 = new TestWebSocketConnection({
     messageQueue: messageQueue,
     clientId: 'user2',
     serverId: 'hub',
-    manualConnect: true
+    // manualConnect: true
   });
 
   client1 = new CollabClient({
@@ -95,9 +100,9 @@ function _setup(messagesFromSnapshot) {
   session2.start = function(){};
 
   // this connects the peers 'physically'
-  wss.connect();
-  conn1.connect();
-  conn2.connect();
+  // wss.connect();
+  // conn1.connect();
+  // conn2.connect();
 
   // HACK: to avoid that the clients send new messages
   // we don't deliver the 'open' event
@@ -105,9 +110,6 @@ function _setup(messagesFromSnapshot) {
   // client1._connect();
   // client2._connect();
 
-  // seed the message queue with the messages from the fixture
-  messageQueue.clear();
-  messageQueue.messages = messagesFromSnapshot();
   // HACK: as we are just replaying messages here,
   // we need to apply the local change, which would is usually done before the
   // message is sent
@@ -125,6 +127,21 @@ function _setup(messagesFromSnapshot) {
   });
 }
 
+function _play(messages) {
+  messageQueue.clear();
+
+  messages.forEach(function(message) {
+    if (message.from === 'hub') {
+      // When we hit a server message we flush the queue, so the server
+      // can do the work
+      messageQueue.flush();
+    } else {
+      messageQueue.pushMessage(cloneDeep(message));
+    }
+  });
+  messageQueue.flush();
+}
+
 QUnit.test("Insert at same position", function(assert) {
   /*
     This fixture has been recorded with the CollabWriter example using `#debug`
@@ -132,10 +149,45 @@ QUnit.test("Insert at same position", function(assert) {
     2. insert 'b' after '01234' as user 2
   */
   var insertAtSamePos = require('../../fixtures/collab/insertAtSamePos');
-  // var twoParagraphs = require('../../fixtures/collab/two-paragraphs');
-  _setup(insertAtSamePos);
-  messageQueue.flush();
+  _setup();
+  _play(insertAtSamePos);
+
   assert.equal(doc1.get(['p1', 'content']), '01234ba56789');
   assert.equal(doc2.get(['p1', 'content']), '01234ba56789');
 });
 
+// QUnit.test("Should error if clientVersion > serverVersion", function(assert) {
+//   /*
+//     This fixture has been recorded with the CollabWriter example using `#debug`
+//     1. dump after loading
+//     2. remove all messages after connect
+//     3. change version from 1 to 3 for user1
+//   */
+//   var connectWithInvalidVersion = require('../../fixtures/collab/connectWithInvalidVersion');
+//   _setup();
+//   _play(connectWithInvalidVersion);
+//   debugger;
+
+//   console.log('session1', session1);
+//   assert.ok(session1._error, 'There should be an error');
+//   assert.notOk(session1._pendingCommit, '_pendingCommit should be null');
+// });
+
+
+QUnit.test("reconnect should transport the selection and update collaborators", function(assert) {
+  /*
+    This fixture has been recorded with the CollabWriter example using `#debug`
+    1. just use the initial dump
+    2. select 0123 as user 1
+    3. disconnect network of user 1
+    4. reconnect network of user 1
+
+    -> now user 2 should still see 0123 being selected by user 1
+  */
+  var reconnectWithSelection = require('../../fixtures/collab/reconnectWithSelection');
+  _setup();
+  _play(reconnectWithSelection);
+  var collaborator = session2.collaborators[Object.keys(session2.collaborators)[0]];
+
+  assert.ok(collaborator.selection, 'Selection should not be null');
+});

@@ -47,7 +47,8 @@ TestWebSocketConnection.Prototype = function() {
   };
 
   this._onConnectionClose = function() {
-    console.log('TestWebSocketConnection._onConnectionClose. Noop.');
+    this.emit('close');
+    // this._disconnect();
   };
 
   /*

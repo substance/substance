@@ -22,7 +22,7 @@ function CollabServer(config) {
 CollabServer.Prototype = function() {
   var _super = CollabServer.super.prototype;
 
-  this.getEnhanceCollaborators = function(documentId, collaboratorId) {
+  this.getEnhancedCollaborators = function(documentId, collaboratorId) {
     var collaborators = this.collabEngine.getCollaborators(documentId, collaboratorId);
     each(collaborators, function(collaborator, collaboratorId) {
       var info = this._collaboratorInfo[collaboratorId];
@@ -120,24 +120,13 @@ CollabServer.Prototype = function() {
     console.log('CollabServer.connect', args.collaboratorId);
 
     this.collabEngine.connect(args, function(err, result) {
+
       // result: changes, version, change
       if (err) return res.error(err);
       var collaboratorIds = this.collabEngine.getCollaboratorIds(args.documentId, args.collaboratorId);
 
-      // We need to broadcast a new change if there is one
-      if (result.change) {
-        console.log('CollabServer.connect: Client change is broadcasted', collaboratorIds);
-        this.broadCast(collaboratorIds, {
-          type: 'update',
-          version: result.version,
-          change: result.change,
-          collaboratorId: args.collaboratorId,
-          documentId: args.documentId
-        });
-      }
-
       var collaborator = {
-        selection: null,
+        selection: args.change.after.selection,
         collaboratorId: args.collaboratorId
       };
 
@@ -146,19 +135,13 @@ CollabServer.Prototype = function() {
       this.enhanceCollaborator(req, function(err, info) {
         if (!err && info) {
           collaborator = extend({}, info, collaborator);
-
           // Store info for each collaborator
           this._collaboratorInfo[args.collaboratorId] = info;
         }
-        // Notify others that there is a new collaborator
-        this.broadCast(collaboratorIds, {
-          type: 'collaboratorConnected',
-          documentId: args.documentId,
-          collaborator: collaborator
-        });
 
+        debugger;
         // Get enhance collaborators (e.g. including some app-specific user-info)
-        var collaborators = this.getEnhanceCollaborators(args.documentId, args.collaboratorId);
+        var collaborators = this.getEnhancedCollaborators(args.documentId, args.collaboratorId);
 
         // Send the response
         res.send({
@@ -168,8 +151,19 @@ CollabServer.Prototype = function() {
           changes: result.changes,
           collaborators: collaborators
         });
-      }.bind(this));
 
+        // We need to broadcast a new change if there is one
+        console.log('CollabServer.connect: Client change is broadcasted', collaboratorIds);
+        this.broadCast(collaboratorIds, {
+          type: 'update',
+          version: result.version,
+          change: result.change,
+          collaboratorId: args.collaboratorId,
+           // we send collaborator object so the other parties can register them
+          collaborator: collaborator,
+          documentId: args.documentId
+        });
+      }.bind(this));
       this.next(req, res);
     }.bind(this));
   };
@@ -247,7 +241,7 @@ CollabServer.Prototype = function() {
       } else {
         var collaboratorIds = this.collabEngine.getCollaboratorIds(args.documentId, args.collaboratorId);
         this.broadCast(collaboratorIds, {
-          type: 'updateSelection',
+          type: 'update',
           version: result.version,
           change: result.change,
           collaboratorId: args.collaboratorId,

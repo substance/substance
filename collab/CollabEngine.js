@@ -23,7 +23,7 @@ CollabEngine.Prototype = function() {
   /*
     Register collaborator for a given documentId
   */
-  this._register = function(collaboratorId, documentId) {
+  this._register = function(collaboratorId, documentId, selection) {
     var collaborator = this._collaborators[collaboratorId];
 
     if (!collaborator) {
@@ -39,7 +39,7 @@ CollabEngine.Prototype = function() {
 
     // Register document
     collaborator.documents[documentId] = {
-      selection: null
+      selection: selection
     };
   };
 
@@ -56,9 +56,9 @@ CollabEngine.Prototype = function() {
     }
   };
 
-  this._updateSelection = function(collaboratorId, documentId, sel) {
+  this._updateSelection = function(collaboratorId, documentId, change) {
     var docEntry = this._collaborators[collaboratorId].documents[documentId];
-    docEntry.selection = sel;
+    docEntry.selection = change.after.selection;
   };
 
   /*
@@ -112,25 +112,14 @@ CollabEngine.Prototype = function() {
     which is similar to the commit case
   */
   this.connect = function(args, cb) {
-    this._register(args.collaboratorId, args.documentId);
-
-    if (args.change) {
-      // Stores new change and rebases it if needed
-      this.commit(args, cb);
-    } else {
-      // Just get the latest changes
-      this.documentEngine.getChanges({
-        documentId: args.documentId,
-        sinceVersion: args.version,
-      }, function(err, result) {
-        if (err) return cb(err);
-
-        cb(null, {
-          changes: result.changes,
-          version: result.version
-        });
-      });
-    }
+    // We now always get a change since the selection should be considered
+    this.commit(args, function(err, result) {
+      if (err) return cb(err);
+      // We wait with registering the collaborator so we can have the correct,
+      // transformed selection
+      this._register(args.collaboratorId, args.documentId, result.change.after.selection);
+      cb(null, result);
+    }.bind(this));
   };
 
   /*
@@ -158,6 +147,19 @@ CollabEngine.Prototype = function() {
     Fast forward commit (client version = server version)
   */
   this._commitFF = function(args, cb) {
+    // HACK: On connect we may receive a nop that only has selection data.
+    // We don't want to store such changes.
+    // TODO: it would be nice if we could handle this in a different
+    // branch of connect, so we don't spoil the commit implementation
+    if (args.change.ops.length === 0) {
+      console.log('skipped nop change');
+      return cb(null, {
+        change: args.change,
+        changes: [],
+        version: args.version
+      });
+    }
+    
     // Store the commit
     this.documentEngine.addChange({
       documentId: args.documentId,
@@ -184,6 +186,19 @@ CollabEngine.Prototype = function() {
     }, function(err, rebased) {
       // result has change, changes, version (serverversion)
       if (err) return cb(err);
+
+      // HACK: On connect we may receive a nop that only has selection data.
+      // We don't want to store such changes.
+      // TODO: it would be nice if we could handle this in a different
+      // branch of connect, so we don't spoil the commit implementation
+      if (args.change.ops.length === 0) {
+        console.log('skipped nop change');
+        return cb(null, {
+          change: rebased.change,
+          changes: rebased.changes,
+          version: rebased.version
+        });
+      }
 
       // Store the rebased commit
       this.documentEngine.addChange({
@@ -212,7 +227,7 @@ CollabEngine.Prototype = function() {
     this.documentEngine.getVersion(args.documentId, function(err, serverVersion) {
       if (serverVersion === args.version) {
         // Fast-foward: Nothing needs to be transformed
-        this._updateSelection(args.collaboratorId, args.documentId);
+        this._updateSelection(args.collaboratorId, args.documentId, args.change);
         cb(null, {
           version: serverVersion,
           change: args.change
@@ -224,7 +239,7 @@ CollabEngine.Prototype = function() {
           version: args.version
         }, function(err, rebased) {
           if (err) return cb(err);
-          this._updateSelection(args.collaboratorId, args.documentId);
+          this._updateSelection(args.collaboratorId, args.documentId, rebased.change);
           cb(null, {
             version: serverVersion,
             change: rebased.change

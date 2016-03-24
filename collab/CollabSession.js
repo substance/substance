@@ -71,7 +71,9 @@ CollabSession.Prototype = function() {
   };
 
   this._onDisconnected = function() {
-    console.log('CollabSession.disconnected');
+    console.log('CollabSession network disconnected');
+    this.collaborators = {};
+    this.emit('collaborators:changed');
     this._connected = false;
   };
 
@@ -98,19 +100,13 @@ CollabSession.Prototype = function() {
         }
         this[msg.type](msg.version, changes, msg.collaborators);
         break;
-      case 'collaboratorConnected':
-        this.collaboratorConnected(msg.collaborator);
-        break;
       case 'collaboratorDisconnected':
         this.collaboratorDisconnected(msg.collaboratorId);
         break;
       case 'update':
         change = this.deserializeChange(msg.change);
-        this.applyRemoteChange(msg.version, change, msg.collaboratorId);
-        break;
-      case 'updateSelection':
-        change = this.deserializeChange(msg.change);
-        this.applyRemoteSelection(msg.version, change, msg.collaboratorId);
+        // msg.collaborator is optional (it's included when updates comes from a new collaborator)
+        this.applyRemoteUpdate(msg.version, change, msg.collaboratorId, msg.collaborator);
         break;
       default:
         console.error('CollabSession: unsupported message', msg.type, msg);
@@ -167,8 +163,18 @@ CollabSession.Prototype = function() {
       // In case of a reconnect we need to set _connected back to false
       this._afterCommit(this._nextCommit);
     } else {
+      // Attach a change that only has the selection
+      var selUpdateChange = this._getChangeForSelection(this.selection, this.selection);
+      msg.change = this.serializeChange(selUpdateChange);
       this._send(msg);
     }
+  };
+
+  this.error = function(error) {
+    console.error('An error occured', error);
+    this._error = error;
+    this._computeNextCommit();
+    this._pendingCommit = null;
   };
 
   // Needed in the case of a reconnect or explicit close
@@ -257,9 +263,22 @@ CollabSession.Prototype = function() {
     that update to other collaborators
   */
   this.setSelection = function(sel) {
+    // We just remember beforeSel on the CollabSession (need for connect use-case)
     var beforeSel = this.selection;
     _super.setSelection.call(this, sel);
     this._broadCastSelectionUpdateDebounced(beforeSel, sel);
+  };
+
+  /*
+    Takes beforeSel + afterSel and wraps it in a no-op DocumentChange
+  */
+  this._getChangeForSelection = function(beforeSel, afterSel) {
+    var change = new DocumentChange([], {
+      selection: beforeSel
+    }, {
+      selection: afterSel
+    });
+    return change;
   };
 
   /*
@@ -267,11 +286,7 @@ CollabSession.Prototype = function() {
   */
   this._broadCastSelectionUpdate = function(beforeSel, afterSel) {
     if (!this._nextCommit && !this._pendingCommit) {
-      var change = new DocumentChange([], {
-        selection: beforeSel
-      }, {
-        selection: afterSel
-      });
+      var change = this._getChangeForSelection(beforeSel, afterSel);
 
       var msg = {
         type: 'updateSelection',
@@ -295,43 +310,17 @@ CollabSession.Prototype = function() {
   /*
     Apply a change to the document
   */
-  this._applyRemoteChange = function(change, collaboratorId) {
+  this._applyRemoteChange = function(change /*, collaboratorId, collaborator*/) {
     // console.log("REMOTE CHANGE", change);
-
     this.stage._apply(change);
     this.doc._apply(change);
     this._transformLocalChangeHistory(change);
     this._transformSelections(change);
 
-    var collaborator = this.collaborators[collaboratorId];
-    if (collaborator) {
-      collaborator.selection = change.after.selection;
-    }
-
     // We need to notify the change listeners so the UI gets updated
     // We pass replay: false, so this does not become part of the undo
     // history.
     this._notifyChangeListeners(change, { replay: false, remote: true });
-  };
-
-  this._applyRemoteSelection = function(version, change, collaboratorId) {
-    var collaborator = this.collaborators[collaboratorId];
-    if (collaborator) {
-      var sel = change.after.selection;
-      if (sel) {
-        sel.attach(this.doc);
-      }
-      // EXPERIMENTAL: needing to rebase the selection
-      // when ever there are pending changes
-      if (this._pendingCommit) {
-        DocumentChange.transformSelection(sel, this._pendingCommit);
-      }
-      if (this._nextCommit) {
-        DocumentChange.transformSelection(sel, this._nextCommit);
-      }
-      collaborator.selection = sel;
-      this.emit('collaborators:changed');
-    }
   };
 
   this.getCollaborators = function() {
@@ -371,9 +360,9 @@ CollabSession.Prototype = function() {
     }
     this.doc.version = serverVersion;
 
+
     // Initialize collaborators
-    this.collaborators = collaborators;
-    forEach(this.collaborators, function(collaborator) {
+    forEach(collaborators, function(collaborator) {
       this._addCollaborator(collaborator);
     }.bind(this));
     this.emit('collaborators:changed');
@@ -382,7 +371,7 @@ CollabSession.Prototype = function() {
     this._pendingCommit = null;
 
     // Not recommended to use this event
-    this.emit('connected');
+    // this.emit('connected');
     // Now we start to record local changes and periodically push them to remove
     this.start();
   };
@@ -391,23 +380,9 @@ CollabSession.Prototype = function() {
     return this._connected;
   };
 
-  this._addCollaborator = function(collaborator) {
-    this.collaborators[collaborator.collaboratorId] = collaborator;
-    if (collaborator.selection) {
-      collaborator.selection = Selection.fromJSON(collaborator.selection);  
-    }
-    collaborator.colorIndex = this._getNextColorIndex();
-  };
-
-  this.collaboratorConnected = function(collaborator) {
-    this._addCollaborator(collaborator);
-    console.log('collaborator connected', this.collaborators);
-    this.emit('collaborators:changed');
-  };
-
   this.collaboratorDisconnected = function(collaboratorId) {
     delete this.collaborators[collaboratorId];
-    // console.log('collaborator disconnected', collaboratorId, this.collaborators);
+    console.log('collaborator disconnected', collaboratorId, this.collaborators);
     this.emit('collaborators:changed');
   };
 
@@ -426,14 +401,44 @@ CollabSession.Prototype = function() {
   };
 
   /*
+    Update collaborator based on data sent with a remote update
+  */
+  this._updateCollaborator = function(collaboratorId, change, newCollaborator) {
+    var collaborator = this.collaborators[collaboratorId];
+    if (collaborator) {
+      collaborator.selection = change.after.selection;
+      this.emit('collaborators:changed');
+    } else {
+      if (newCollaborator) {
+        console.log('collaborator connected', collaboratorId);
+        this._addCollaborator(newCollaborator);
+        this.emit('collaborators:changed');
+      } else {
+        console.log('collaboratorId not found in collabSession.');
+      }
+    }
+  };
+
+  this._addCollaborator = function(collaborator) {
+    this.collaborators[collaborator.collaboratorId] = collaborator;
+    if (collaborator.selection) {
+      collaborator.selection = Selection.fromJSON(collaborator.selection);  
+    }
+    collaborator.colorIndex = this._getNextColorIndex();
+  };
+
+  /*
     We receive an update from the server
     As a client can only commit one change at a time
     there is also only one update at a time.
   */
-  this.applyRemoteChange = function(version, change, userId) {
+  this.applyRemoteUpdate = function(version, change, collaboratorId, collaborator) {
+    // Update the collaborators first
+    this._updateCollaborator(collaboratorId, change, collaborator);
+    
     if (!this._nextCommit && !this._pendingCommit) {
       // We only accept updates if there are no pending commitable changes
-      this._applyRemoteChange(change, userId);
+      change = this._applyRemoteChange(change);
       this.doc.version = version;
     }
   };
