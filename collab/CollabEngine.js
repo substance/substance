@@ -4,6 +4,7 @@ var EventEmitter = require('../util/EventEmitter');
 var forEach = require('lodash/forEach');
 var map = require('lodash/map');
 var DocumentChange = require('../model/DocumentChange');
+var Selection = require('../model/Selection');
 var Err = require('../util/Error');
 
 /*
@@ -35,7 +36,7 @@ CollabEngine.Prototype = function() {
     }
 
     if (collaborator.documents[documentId]) {
-      console.error('ERROR: Collaborator already registered for doc.');
+      console.warn('Collaborator already registered for doc. connected twice?');
     }
 
     // Register document
@@ -57,9 +58,9 @@ CollabEngine.Prototype = function() {
     }
   };
 
-  this._updateSelection = function(collaboratorId, documentId, change) {
+  this._updateSelection = function(collaboratorId, documentId, sel) {
     var docEntry = this._collaborators[collaboratorId].documents[documentId];
-    docEntry.selection = change.after.selection;
+    docEntry.selection = sel;
   };
 
   /*
@@ -152,12 +153,14 @@ CollabEngine.Prototype = function() {
     Fast forward commit (client version = server version)
   */
   this._commitFF = function(args, cb) {
+    // debugger;
+    this._updateCollaboratorSelections(args.documentId, args.change);
+    
     // HACK: On connect we may receive a nop that only has selection data.
     // We don't want to store such changes.
     // TODO: it would be nice if we could handle this in a different
     // branch of connect, so we don't spoil the commit implementation
     if (args.change.ops.length === 0) {
-      console.log('skipped nop change');
       return cb(null, {
         change: args.change,
         changes: [],
@@ -181,6 +184,29 @@ CollabEngine.Prototype = function() {
   };
 
   /*
+    Update all collaborators selections of a document according to a given change
+
+    WARNING: This has not been tested quite well
+  */
+  this._updateCollaboratorSelections = function(documentId, change) {
+    // debugger;
+    // By not providing the 2nd argument to getCollaborators the change
+    // creator is also included.
+    var collaborators = this.getCollaborators(documentId);
+
+    forEach(collaborators, function(collaborator) {
+      if (collaborator.selection) {
+        var sel = Selection.fromJSON(collaborator.selection);
+        change = this.deserializeChange(change);
+        DocumentChange.transformSelection(sel, change);
+        // Write back the transformed selection to the server state
+        this._updateSelection(collaborator.collaboratorId, documentId, sel.toJSON());
+      }
+    }.bind(this));
+
+  };
+
+  /*
     Rebased commit (client version < server version)
   */
   this._commitRB = function(args, cb) {
@@ -192,12 +218,13 @@ CollabEngine.Prototype = function() {
       // result has change, changes, version (serverversion)
       if (err) return cb(err);
 
+      this._updateCollaboratorSelections(args.documentId, rebased.change);
+
       // HACK: On connect we may receive a nop that only has selection data.
       // We don't want to store such changes.
       // TODO: it would be nice if we could handle this in a different
       // branch of connect, so we don't spoil the commit implementation
       if (args.change.ops.length === 0) {
-        console.log('skipped nop change');
         return cb(null, {
           change: rebased.change,
           changes: rebased.changes,
@@ -230,9 +257,10 @@ CollabEngine.Prototype = function() {
   */
   this.updateSelection = function(args, cb) {
     this.documentEngine.getVersion(args.documentId, function(err, serverVersion) {
+      if (err) return cb(err);
       if (serverVersion === args.version) {
         // Fast-foward: Nothing needs to be transformed
-        this._updateSelection(args.collaboratorId, args.documentId, args.change);
+        this._updateSelection(args.collaboratorId, args.documentId, args.change.after.selection);
         cb(null, {
           version: serverVersion,
           change: args.change
@@ -244,7 +272,7 @@ CollabEngine.Prototype = function() {
           version: args.version
         }, function(err, rebased) {
           if (err) return cb(err);
-          this._updateSelection(args.collaboratorId, args.documentId, rebased.change);
+          this._updateSelection(args.collaboratorId, args.documentId, rebased.change.after.selection);
           cb(null, {
             version: serverVersion,
             change: rebased.change

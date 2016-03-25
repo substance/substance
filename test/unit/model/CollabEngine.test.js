@@ -34,6 +34,16 @@ var documentEngine = new DocumentEngine({
   }
 });
 
+var fakeChange = {
+  before: {
+    selection: null
+  },
+  after: {
+    selection: null,
+  },
+  ops: []
+};
+
 var collabEngine;
 
 QUnit.module('collab/CollabEngine', {
@@ -58,7 +68,8 @@ QUnit.test('New collaborator enters with latest version', function(assert) {
   collabEngine.connect({
     collaboratorId: 'collab-1',
     documentId: 'test-doc', 
-    version: 1
+    version: 1,
+    change: fakeChange
   }, function(err, result) {
     assert.isNullOrUndefined(err, 'Should not error');
     assert.equal(result.version, 1);
@@ -73,7 +84,8 @@ QUnit.test('New collaborator enters with an outdated version', function(assert) 
   collabEngine.connect({
     collaboratorId: 'collab-1',
     documentId: 'test-doc', 
-    version: 0
+    version: 0,
+    change: fakeChange
   }, function(err, result) {
     assert.isNullOrUndefined(err, 'Should not error');
     assert.equal(result.version, 1);
@@ -137,13 +149,15 @@ QUnit.test('Two collaborators connect', function(assert) {
   collabEngine.connect({
     collaboratorId: 'collab-1',
     documentId: 'test-doc', 
-    version: 1
+    version: 1,
+    change: fakeChange
   }, function(err, result) {
     assert.ok(result, 'connect result should be set');
     collabEngine.connect({
       collaboratorId: 'collab-2',
       documentId: 'test-doc',
-      version: 1
+      version: 1,
+      change: fakeChange
     }, function(err, result) {
       assert.ok(result, 'connect result should be set');
       assert.isNullOrUndefined(err, 'Should not error');
@@ -163,7 +177,8 @@ QUnit.test('Collaborator does a fast-forward commit', function(assert) {
   collabEngine.connect({
     collaboratorId: 'collab-1',
     documentId: 'test-doc', 
-    version: 1
+    version: 1,
+    change: fakeChange
   }, function(err, result) {
     assert.isNullOrUndefined(err, 'Should not error on enter');
     assert.ok(result, 'connect should produce a result object');

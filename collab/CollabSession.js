@@ -5,6 +5,7 @@ var DocumentSession = require('../model/DocumentSession');
 var DocumentChange = require('../model/DocumentChange');
 var debounce = require('lodash/debounce');
 var Selection = require('../model/Selection');
+var Err = require('../util/Error');
 
 /*
   Session that is connected to a Substance Hub allowing
@@ -19,18 +20,30 @@ function CollabSession(doc, config) {
 
   this.collabClient = config.collabClient;
 
-  // TODO: The CollabSession or the doc needs to be aware of a doc id
-  // that corresponds to the doc on the server. For now we just
-  // store it on the document instance.
-  this.doc.id = config.docId;
+  if (config.docVersion) {
+    console.warn('config.docVersion is deprecated: Use config.version instead');
+  }
 
-  // TODO: Also we need to somehow store a version number (local version)
-  this.doc.version = config.docVersion;
+  if (config.docVersion) {
+    console.warn('config.docId is deprecated: Use config.documentId instead');
+  }
+
+  this.version = config.version || config.docVersion;
+  this.documentId = config.documentId || config.docId;
+
+  if (!this.documentId) {
+    throw new Err('InvalidArgumentsError', {message: 'documentId is mandatory'});
+  }
+
+  if (!this.version) {
+    throw new Err('InvalidArgumentsError', {message: 'version is mandatory'});
+  }
 
   // Internal state
   this._connected = false; // becomes true as soon as the initial connect has been completed
   this._nextCommit = null; //
   this._pendingCommit = null;
+  this._error = null;
 
   // Bind handlers
   this._broadCastSelectionUpdateDebounced = debounce(this._broadCastSelectionUpdate, 250);
@@ -72,6 +85,7 @@ CollabSession.Prototype = function() {
 
   this._onDisconnected = function() {
     console.log('CollabSession network disconnected');
+    // We remove all collaborators
     this.collaborators = {};
     this.emit('collaborators:changed');
     this._connected = false;
@@ -82,7 +96,7 @@ CollabSession.Prototype = function() {
   */
   this._onMessage = function(msg) {
     // TODO: Only consider messages with the right documentId
-    if (!((msg.documentId === this.doc.id) || (msg.type === 'error' && msg.requestMessage.documentId === this.doc.id))) {
+    if (!((msg.documentId === this.documentId) || (msg.type === 'error' && msg.requestMessage.documentId === this.documentId))) {
       console.info('Message is not addressed for this document. Skipping', msg.documentId);
       return;
     }
@@ -119,7 +133,7 @@ CollabSession.Prototype = function() {
   /*
     If there's an unconfirmed pending commit it will be merged with nextCommit
 
-    This is needed in a disconnect/reconnect scenario. Where we know the
+    This is needed in a disconnect/reconnect scenario, where we assume the
     pendingCommit will never be confirmed.
   */
   this._computeNextCommit = function() {
@@ -152,8 +166,8 @@ CollabSession.Prototype = function() {
     this._connected = false;
     var msg = {
       type: 'connect',
-      documentId: this.doc.id,
-      version: this.doc.version
+      documentId: this.documentId,
+      version: this.version
     };
 
     // Makes sure an eventual pendingCommit gets considered in the nextCommit.
@@ -173,9 +187,16 @@ CollabSession.Prototype = function() {
     }
   };
 
+  /*
+    Handle errors. This gets called if any request produced
+    an error on the server. The error object holds te original
+    message we could inspect in a custom error handler to trigger
+    certain behavior.
+  */
   this.error = function(error) {
     console.error('An error occured', error);
     this._error = error;
+    this.emit('error,', error);
     this._computeNextCommit();
     this._pendingCommit = null;
   };
@@ -184,6 +205,7 @@ CollabSession.Prototype = function() {
   this.dispose = function() {
     // Reset to original state
     this.stop();
+    this._error = null;
     this._connected = false;
     this._nextCommit = null;
     this._pendingCommit = null;
@@ -196,7 +218,7 @@ CollabSession.Prototype = function() {
     // Let the server know we no longer want to edit this document
     var msg = {
       type: 'disconnect',
-      documentId: this.doc.id
+      documentId: this.documentId
     };
     this._send(msg);
     // And now dispose and deregister the handlers
@@ -211,8 +233,8 @@ CollabSession.Prototype = function() {
     if (this.collabClient.isConnected() && this._nextCommit && !this._pendingCommit) {
       var msg = {
         type: 'commit',
-        documentId: this.doc.id,
-        version: this.doc.version,
+        documentId: this.documentId,
+        version: this.version,
         change: this.serializeChange(this._nextCommit)
       };
       this._send(msg);
@@ -223,20 +245,30 @@ CollabSession.Prototype = function() {
   /*
     Try to commit changes to the server every 1s
   */
-  this.start = function() {
+  this.startAutoCommit = function() {
     // ATTENTION: don't start multiple runners
-    if (!this._runner) {
-      this._runner = setInterval(this.commit.bind(this), 1000);
-    }
+    this._autoCommit = true;
+    // if (!this._runner) {
+    //   this._runner = setInterval(this.commit.bind(this), 1000);
+    // }
   };
 
   /*
     Stop auto-committing changes
   */
-  this.stop = function() {
-    if (this._runner) {
-      clearInterval(this._runner);
-      this._runner = null;
+  this.stopAutoCommit = function() {
+    this._autoCommit = false;
+    // if (this._runner) {
+    //   clearInterval(this._runner);
+    //   this._runner = null;
+    // }
+  };
+
+  this._requestCommit = function() {
+    if (this._autoCommit) {
+      this.commit();
+    } else {
+      console.log('nextCommit ready. call this.commit() to send it.');
     }
   };
 
@@ -251,6 +283,8 @@ CollabSession.Prototype = function() {
       this._nextCommit.ops = this._nextCommit.ops.concat(change.ops);
       this._nextCommit.after = change.after;
     }
+
+    this._requestCommit();
   };
 
   /*
@@ -259,6 +293,7 @@ CollabSession.Prototype = function() {
   this._afterCommit = function(change) {
     this._pendingCommit = change;
     this._nextCommit = null;
+    this._error = null;
   };
 
   /*
@@ -290,11 +325,10 @@ CollabSession.Prototype = function() {
   this._broadCastSelectionUpdate = function(beforeSel, afterSel) {
     if (!this._nextCommit && !this._pendingCommit) {
       var change = this._getChangeForSelection(beforeSel, afterSel);
-
       var msg = {
         type: 'updateSelection',
-        documentId: this.doc.id,
-        version: this.doc.version,
+        documentId: this.documentId,
+        version: this.version,
         change: this.serializeChange(change)
       };
       this._send(msg);
@@ -313,10 +347,11 @@ CollabSession.Prototype = function() {
   /*
     Apply a change to the document
   */
-  this._applyRemoteChange = function(change /*, collaboratorId, collaborator*/) {
-    // console.log("REMOTE CHANGE", change);
+  this._applyRemoteChange = function(change/*, collaboratorId, collaborator*/) {
     this.stage._apply(change);
     this.doc._apply(change);
+
+    // QUESTION: will this manipulate the change?
     this._transformLocalChangeHistory(change);
     this._transformSelections(change);
 
@@ -324,6 +359,7 @@ CollabSession.Prototype = function() {
     // We pass replay: false, so this does not become part of the undo
     // history.
     this._notifyChangeListeners(change, { replay: false, remote: true });
+    return change;
   };
 
   this.getCollaborators = function() {
@@ -351,32 +387,36 @@ CollabSession.Prototype = function() {
   */
   this.connectDone = function(serverVersion, changes, collaborators) {
     console.log('Received connectDone', serverVersion, changes);
-    if (this.doc.version !== serverVersion) {
+    if (this.version !== serverVersion) {
       // There have been changes on the server since the doc was opened
       // the last time
       if (changes) {
         // console.log('Applying remote changes...');
         changes.forEach(function(change) {
           this._applyRemoteChange(change);
+          // No additional selection updates needed
         }.bind(this));
       }
     }
-    this.doc.version = serverVersion;
-
+    this.version = serverVersion;
 
     // Initialize collaborators
+    this.collaborators = {};
     forEach(collaborators, function(collaborator) {
       this._addCollaborator(collaborator);
     }.bind(this));
     this.emit('collaborators:changed');
     this._connected = true;
+
     // Important: after connect done we need to reset _pendingCommit
     this._pendingCommit = null;
+    this._error = null;
 
     // Not recommended to use this event
     // this.emit('connected');
+
     // Now we start to record local changes and periodically push them to remove
-    this.start();
+    this.startAutoCommit();
   };
 
   this.isConnected = function() {
@@ -398,8 +438,11 @@ CollabSession.Prototype = function() {
         this._applyRemoteChange(change);
       }.bind(this));
     }
-    this.doc.version = version;
+    this.version = version;
     this._pendingCommit = null;
+
+    // Attempt to send new commit for remaining changes
+    this._requestCommit();
     // console.log('commit confirmed by server. New version:', version);
   };
 
@@ -410,12 +453,12 @@ CollabSession.Prototype = function() {
     var collaborator = this.collaborators[collaboratorId];
     if (collaborator) {
       collaborator.selection = change.after.selection;
-      this.emit('collaborators:changed');
+      // this.emit('collaborators:changed');
     } else {
       if (newCollaborator) {
         console.log('collaborator connected', collaboratorId);
         this._addCollaborator(newCollaborator);
-        this.emit('collaborators:changed');
+        // this.emit('collaborators:changed');
       } else {
         console.log('collaboratorId not found in collabSession.');
       }
@@ -425,29 +468,55 @@ CollabSession.Prototype = function() {
   this._addCollaborator = function(collaborator) {
     this.collaborators[collaborator.collaboratorId] = collaborator;
     if (collaborator.selection) {
-      collaborator.selection = Selection.fromJSON(collaborator.selection);  
+      collaborator.selection = Selection.fromJSON(collaborator.selection);
     }
     collaborator.colorIndex = this._getNextColorIndex();
   };
 
   /*
-    We receive an update from the server
-    As a client can only commit one change at a time
-    there is also only one update at a time.
-  */
-  this.applyRemoteUpdate = function(version, change, collaboratorId, collaborator) {
-    // Update the collaborators first
-    this._updateCollaborator(collaboratorId, change, collaborator);
-    
-    if (!this._nextCommit && !this._pendingCommit) {
-      // We only accept updates if there are no pending commitable changes
-      change = this._applyRemoteChange(change);
-      this.doc.version = version;
-    }
-  };
+    We receive an update from the server. We only apply the remote change if
+    there's no pending commit. applyRemoteUpdate is also called for selection
+    updates.
 
-  this.applyRemoteSelection = function(version, change, collaboratorId) {
-    this._applyRemoteSelection(version, change, collaboratorId);
+    TODO: it may happen that we receive selection changes while we are in a pending
+    commit state.
+
+    IMPORTANT: never set collaborator states before _applyRemoteChange has been performed
+    as this would transform them again
+  */
+  this.applyRemoteUpdate = function(version, change, collaboratorId, newCollaborator) {
+
+    // We only accept updates if there are no pending commitable changes
+    // Not sure this check is correct.
+    if (!this._nextCommit && !this._pendingCommit) {
+      
+      if (change.ops.length > 0) {
+        this._applyRemoteChange(change);  
+      }
+
+      // Register new collaborator if needed
+      // It's important this happens after this._applyRemoteChange as it must
+      // not be transformed
+      if (newCollaborator) {
+        console.log('collaborator connected', collaboratorId);
+        this._addCollaborator(newCollaborator);
+      } else {
+        // Update existing collaborator entry
+        var collaborator = this.collaborators[collaboratorId];
+        if (collaborator) {
+          collaborator.selection = change.after.selection;
+        } else {
+          console.log('collaborator not found', collaboratorId);
+        }
+      }
+      // This is fired in addition to the document:changed event
+      // so possibly we have 2 rerenders here.
+      this.emit('collaborators:changed');
+
+      this.version = version;
+    } else {
+      console.log("EDGECASE: received an update but can't apply as there is a pendingCommit in the air");
+    }
   };
 
   this.serializeChange = function(change) {
@@ -462,7 +531,7 @@ CollabSession.Prototype = function() {
     if (this.collabClient.isConnected()) {
       this.collabClient.send(msg);
     } else {
-      console.warn('Not sending message since disconnected');
+      console.warn('Try not to call _send when disconnected. Skipping message', msg);
     }
   };
 
@@ -476,7 +545,6 @@ CollabSession.Prototype = function() {
     this.__nextColorIndex = (this.__nextColorIndex + 1) % this.__maxColors;
     return colorIndex + 1; // so we can 1..5 instead of 0..4
   };
-
 };
 
 DocumentSession.extend(CollabSession);

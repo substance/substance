@@ -6,8 +6,19 @@ module.exports = [
       "type": "connect",
       "documentId": "test-doc",
       "version": 1,
+      "change": {
+        "sha": "bbce00ffaaf4289c80a18aa8cbc14454",
+        "before": {
+          "selection": null
+        },
+        "ops": [],
+        "info": {},
+        "after": {
+          "selection": null
+        }
+      },
       "scope": "substance/collab",
-      "collaboratorId": "dfd9875adc4ff6981a71241a7d673f16"
+      "collaboratorId": "6c83b78e60b7e22e775728f8c1b2b4ad"
     }
   },
   {
@@ -17,8 +28,19 @@ module.exports = [
       "type": "connect",
       "documentId": "test-doc",
       "version": 1,
+      "change": {
+        "sha": "5613a70e8e719093d4d5765b2292a720",
+        "before": {
+          "selection": null
+        },
+        "ops": [],
+        "info": {},
+        "after": {
+          "selection": null
+        }
+      },
       "scope": "substance/collab",
-      "collaboratorId": "a7e6d83a643a1874f28a3af6f776a601"
+      "collaboratorId": "9bb90734d220c0e7095f376abf22f849"
     }
   },
   {
@@ -29,23 +51,7 @@ module.exports = [
       "documentId": "test-doc",
       "version": 1,
       "changes": [],
-      "collaborators": {
-        "a7e6d83a643a1874f28a3af6f776a601": {
-          "selection": {
-            "type": "property",
-            "path": [
-              "p1",
-              "content"
-            ],
-            "startOffset": 7,
-            "endOffset": 7,
-            "reverse": false,
-            "surfaceId": "bodyEditor"
-          },
-          "collaboratorId": "a7e6d83a643a1874f28a3af6f776a601",
-          "colorIndex": 1
-        }
-      },
+      "collaborators": {},
       "scope": "substance/collab"
     }
   },
@@ -53,8 +59,20 @@ module.exports = [
     "from": "hub",
     "to": "user1",
     "data": {
-      "type": "collaboratorConnected",
-      "documentId": "test-doc",
+      "type": "update",
+      "version": 1,
+      "change": {
+        "sha": "5613a70e8e719093d4d5765b2292a720",
+        "before": {
+          "selection": null
+        },
+        "ops": [],
+        "info": {},
+        "after": {
+          "selection": null
+        }
+      },
+      "collaboratorId": "9bb90734d220c0e7095f376abf22f849",
       "collaborator": {
         "selection": {
           "type": "property",
@@ -67,9 +85,10 @@ module.exports = [
           "reverse": false,
           "surfaceId": "bodyEditor"
         },
-        "collaboratorId": "a7e6d83a643a1874f28a3af6f776a601",
+        "collaboratorId": "9bb90734d220c0e7095f376abf22f849",
         "colorIndex": 1
       },
+      "documentId": "test-doc",
       "scope": "substance/collab"
     }
   },
@@ -82,19 +101,9 @@ module.exports = [
       "version": 1,
       "changes": [],
       "collaborators": {
-        "dfd9875adc4ff6981a71241a7d673f16": {
-          "selection": {
-            "type": "property",
-            "path": [
-              "p1",
-              "content"
-            ],
-            "startOffset": 7,
-            "endOffset": 7,
-            "reverse": false,
-            "surfaceId": "bodyEditor"
-          },
-          "collaboratorId": "dfd9875adc4ff6981a71241a7d673f16",
+        "6c83b78e60b7e22e775728f8c1b2b4ad": {
+          "selection": null,
+          "collaboratorId": "6c83b78e60b7e22e775728f8c1b2b4ad",
           "colorIndex": 1
         }
       },
@@ -109,11 +118,12 @@ module.exports = [
       "documentId": "test-doc",
       "version": 1,
       "change": {
-        "sha": "b1246daaebb5972a48b9296a20da02b3",
+        "sha": "e0ce304c364611021afc91852507ad0c",
         "before": {
           "selection": null
         },
         "ops": [],
+        "info": {},
         "after": {
           "selection": {
             "type": "property",
@@ -129,7 +139,7 @@ module.exports = [
         }
       },
       "scope": "substance/collab",
-      "collaboratorId": "dfd9875adc4ff6981a71241a7d673f16"
+      "collaboratorId": "6c83b78e60b7e22e775728f8c1b2b4ad"
     }
   },
   {
@@ -140,8 +150,8 @@ module.exports = [
       "documentId": "test-doc",
       "version": 1,
       "change": {
-        "sessionId": 2,
-        "sha": "02926328e4cd83bb8cab231f5cd1c1ac",
+        "sessionId": 5,
+        "sha": "6b78853a577a5076904a931454c19b56",
         "before": {
           "selection": {
             "type": "property",
@@ -171,6 +181,7 @@ module.exports = [
             }
           }
         ],
+        "info": {},
         "after": {
           "selection": {
             "type": "property",
@@ -187,7 +198,7 @@ module.exports = [
         }
       },
       "scope": "substance/collab",
-      "collaboratorId": "dfd9875adc4ff6981a71241a7d673f16"
+      "collaboratorId": "6c83b78e60b7e22e775728f8c1b2b4ad"
     }
   },
   {
@@ -198,11 +209,12 @@ module.exports = [
       "documentId": "test-doc",
       "version": 1,
       "change": {
-        "sha": "e87537ec16064d2690cd5efb0155bff2",
+        "sha": "ce1c3d1a0f447dd91f771573bedc2674",
         "before": {
           "selection": null
         },
         "ops": [],
+        "info": {},
         "after": {
           "selection": {
             "type": "property",
@@ -218,7 +230,7 @@ module.exports = [
         }
       },
       "scope": "substance/collab",
-      "collaboratorId": "a7e6d83a643a1874f28a3af6f776a601"
+      "collaboratorId": "9bb90734d220c0e7095f376abf22f849"
     }
   },
   {
@@ -229,8 +241,8 @@ module.exports = [
       "documentId": "test-doc",
       "version": 1,
       "change": {
-        "sessionId": 3,
-        "sha": "1cbd4ec67ca27e7b1be3df5356625707",
+        "sessionId": 6,
+        "sha": "fc9228b67225257954c4be73cb659d24",
         "before": {
           "selection": {
             "type": "property",
@@ -260,6 +272,7 @@ module.exports = [
             }
           }
         ],
+        "info": {},
         "after": {
           "selection": {
             "type": "property",
@@ -276,21 +289,22 @@ module.exports = [
         }
       },
       "scope": "substance/collab",
-      "collaboratorId": "a7e6d83a643a1874f28a3af6f776a601"
+      "collaboratorId": "9bb90734d220c0e7095f376abf22f849"
     }
   },
   {
     "from": "hub",
     "to": "user2",
     "data": {
-      "type": "updateSelection",
+      "type": "update",
       "version": 1,
       "change": {
-        "sha": "b1246daaebb5972a48b9296a20da02b3",
+        "sha": "e0ce304c364611021afc91852507ad0c",
         "before": {
           "selection": null
         },
         "ops": [],
+        "info": {},
         "after": {
           "selection": {
             "type": "property",
@@ -305,7 +319,7 @@ module.exports = [
           }
         }
       },
-      "collaboratorId": "dfd9875adc4ff6981a71241a7d673f16",
+      "collaboratorId": "6c83b78e60b7e22e775728f8c1b2b4ad",
       "documentId": "test-doc",
       "scope": "substance/collab"
     }
@@ -317,8 +331,8 @@ module.exports = [
       "type": "update",
       "version": 2,
       "change": {
-        "sessionId": 2,
-        "sha": "02926328e4cd83bb8cab231f5cd1c1ac",
+        "sessionId": 5,
+        "sha": "6b78853a577a5076904a931454c19b56",
         "before": {
           "selection": {
             "type": "property",
@@ -348,6 +362,7 @@ module.exports = [
             }
           }
         ],
+        "info": {},
         "after": {
           "selection": {
             "type": "property",
@@ -363,7 +378,7 @@ module.exports = [
           "surfaceId": "bodyEditor"
         }
       },
-      "collaboratorId": "dfd9875adc4ff6981a71241a7d673f16",
+      "collaboratorId": "6c83b78e60b7e22e775728f8c1b2b4ad",
       "documentId": "test-doc",
       "scope": "substance/collab"
     }
@@ -383,14 +398,15 @@ module.exports = [
     "from": "hub",
     "to": "user1",
     "data": {
-      "type": "updateSelection",
+      "type": "update",
       "version": 2,
       "change": {
-        "sha": "e87537ec16064d2690cd5efb0155bff2",
+        "sha": "ce1c3d1a0f447dd91f771573bedc2674",
         "before": {
           "selection": null
         },
         "ops": [],
+        "info": {},
         "after": {
           "selection": {
             "type": "property",
@@ -405,7 +421,7 @@ module.exports = [
           }
         }
       },
-      "collaboratorId": "a7e6d83a643a1874f28a3af6f776a601",
+      "collaboratorId": "9bb90734d220c0e7095f376abf22f849",
       "documentId": "test-doc",
       "scope": "substance/collab"
     }
@@ -417,8 +433,8 @@ module.exports = [
       "type": "update",
       "version": 3,
       "change": {
-        "sessionId": 3,
-        "sha": "1cbd4ec67ca27e7b1be3df5356625707",
+        "sessionId": 6,
+        "sha": "fc9228b67225257954c4be73cb659d24",
         "before": {
           "selection": {
             "type": "property",
@@ -448,6 +464,7 @@ module.exports = [
             }
           }
         ],
+        "info": {},
         "after": {
           "selection": {
             "type": "property",
@@ -463,7 +480,7 @@ module.exports = [
           "surfaceId": "bodyEditor"
         }
       },
-      "collaboratorId": "a7e6d83a643a1874f28a3af6f776a601",
+      "collaboratorId": "9bb90734d220c0e7095f376abf22f849",
       "documentId": "test-doc",
       "scope": "substance/collab"
     }
@@ -477,8 +494,8 @@ module.exports = [
       "version": 3,
       "changes": [
         {
-          "sessionId": 2,
-          "sha": "02926328e4cd83bb8cab231f5cd1c1ac",
+          "sessionId": 5,
+          "sha": "6b78853a577a5076904a931454c19b56",
           "before": {
             "selection": {
               "type": "property",
@@ -508,6 +525,7 @@ module.exports = [
               }
             }
           ],
+          "info": {},
           "after": {
             "selection": {
               "type": "property",

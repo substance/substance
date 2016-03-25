@@ -124,7 +124,7 @@ CollabServer.Prototype = function() {
       var collaboratorIds = this.collabEngine.getCollaboratorIds(args.documentId, args.collaboratorId);
 
       var collaborator = {
-        selection: args.change.after.selection,
+        selection: result.change.after.selection,
         collaboratorId: args.collaboratorId
       };
 
@@ -150,7 +150,7 @@ CollabServer.Prototype = function() {
         });
 
         // We need to broadcast a new change if there is one
-        console.log('CollabServer.connect: Client change is broadcasted', collaboratorIds);
+        console.log('CollabServer.connect: update is broadcasted to collaborators', collaboratorIds);
         this.broadCast(collaboratorIds, {
           type: 'update',
           version: result.version,
@@ -194,7 +194,7 @@ CollabServer.Prototype = function() {
 
   /*
     Clients send a commit. Change will be applied on server and rebased
-    if needed. Then the client 
+    if needed.
   */
   this.commit = function(req, res) {
     var args = req.message;
@@ -233,7 +233,6 @@ CollabServer.Prototype = function() {
   */
   this.updateSelection = function(req/*, res*/) {
     var args = req.message;
-
     this.collabEngine.updateSelection(args, function(err, result) {
       if (err) {
         console.error('updateSelection error: ', err);
