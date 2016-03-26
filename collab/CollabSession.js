@@ -54,7 +54,7 @@ function CollabSession(doc, config) {
   this._error = null;
 
   // Bind handlers
-  this._broadCastSelectionUpdateDebounced = this._broadCastSelectionUpdate; //debounce(this._broadCastSelectionUpdate, 250);
+  this._broadCastSelectionUpdateDebounced = debounce(this._broadCastSelectionUpdate, 250);
 
   // Keep track of collaborators in a session
   this.collaborators = {};
@@ -231,7 +231,7 @@ CollabSession.Prototype = function() {
     var collaborators = args.collaborators;
     var serverVersion = args.version;
 
-    if (changes) {
+    if (changes && changes.length > 0) {
       // There have been changes on the server since the doc was opened
       // the last time
       changes.forEach(function(change) {
@@ -241,7 +241,15 @@ CollabSession.Prototype = function() {
     }
 
     this.version = serverVersion;
-    this._updateCollaborators(collaborators);
+
+    // Only apply updated collaborators if there are no local cahnges
+    // Otherwise they will not be accurate. We can safely skip this
+    // here as we know the next sync will be triggered soon. And if
+    // followed by an idle phase (_nextChange = null) will give us
+    // the latest collaborator records
+    if (!this._nextChange) {
+      this._updateCollaborators(collaborators);
+    }
 
     // Important: after sync is done we need to reset _pendingChange and _error
     // In this state we can safely listen to 
@@ -259,7 +267,7 @@ CollabSession.Prototype = function() {
     if (this._nextChange && this.__canSync()) {
       this.sync();
     } else {
-      console.log('not able to sync now next-commit/pending-commit', !!this._nextChange, this.__canSync());
+      // console.log('not able to sync now next-commit/pending-commit', !!this._nextChange, this.__canSync());
     }
   };
 
@@ -411,6 +419,8 @@ CollabSession.Prototype = function() {
       }
 
       this._updateCollaborators(collaborators);
+    } else {
+      console.log('skipped update. we wait for a sync to complete');
     }
   };
 
