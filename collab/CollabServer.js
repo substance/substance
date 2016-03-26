@@ -156,7 +156,7 @@ CollabServer.Prototype = function() {
       type: 'update',
       documentId: documentId,
       // Removes the entry
-      collaborators
+      collaborators: collaborators
     });
     // Exit from each document session
     this.collabEngine.disconnect({
