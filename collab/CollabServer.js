@@ -90,7 +90,7 @@ CollabServer.Prototype = function() {
   this.sync = function(req, res) {
     var args = req.message;
 
-    console.log('CollabServer.connect', args.collaboratorId);
+    // console.log('CollabServer.connect', args.collaboratorId);
 
     // Takes an optional argument collaboratorInfo
     this.collabEngine.sync(args, function(err, result) {
@@ -114,7 +114,7 @@ CollabServer.Prototype = function() {
       });
 
       // We need to broadcast a new change if there is one
-      console.log('CollabServer.connect: update is broadcasted to collaborators', Object.keys(collaborators));
+      // console.log('CollabServer.connect: update is broadcasted to collaborators', Object.keys(collaborators));
 
       forEach(collaborators, function(collaborator) {
         this.send(collaborator.collaboratorId, {
