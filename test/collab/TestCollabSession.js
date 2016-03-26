@@ -4,10 +4,10 @@ var CollabSession = require('../../collab/CollabSession');
 var DocumentChange = require('../../model/DocumentChange');
 
 function TestCollabSession() {
-  TestCollabSession.super.apply(this, arguments);
-
   this._incomingMessages = [];
   this._outgoingMessages = [];
+
+  TestCollabSession.super.apply(this, arguments);
 }
 
 TestCollabSession.Prototype = function() {

@@ -35,10 +35,6 @@ CollabEngine.Prototype = function() {
       };
     }
 
-    if (collaborator.documents[documentId]) {
-      console.warn('Collaborator already registered for doc. connected twice?');
-    }
-
     // Register document
     collaborator.documents[documentId] = {
       selection: selection
@@ -113,12 +109,11 @@ CollabEngine.Prototype = function() {
     Note: a client can reconnect having a pending change
     which is similar to the commit case
   */
-  this.connect = function(args, cb) {
+  this.sync = function(args, cb) {
     // We now always get a change since the selection should be considered
-    this.commit(args, function(err, result) {
+    this._sync(args, function(err, result) {
       if (err) return cb(err);
-      // We wait with registering the collaborator so we can have the correct,
-      // transformed selection
+      // Registers the collaborator If not already registered for that document
       this._register(args.collaboratorId, args.documentId, result.change.after.selection);
       cb(null, result);
     }.bind(this));
@@ -134,13 +129,13 @@ CollabEngine.Prototype = function() {
 
     OUT: version, changes, version
   */
-  this.commit = function(args, cb) {
+  this._sync = function(args, cb) {
     // Get latest doc version
     this.documentEngine.getVersion(args.documentId, function(err, serverVersion) {
       if (serverVersion === args.version) { // Fast forward update
-        this._commitFF(args, cb);
+        this._syncFF(args, cb);
       } else if (serverVersion > args.version) { // Client changes need to be rebased to latest serverVersion
-        this._commitRB(args, cb);
+        this._syncRB(args, cb);
       } else {
         cb(new Err('InvalidVersionError', {
           message: 'Client version greater than server version'
@@ -150,9 +145,31 @@ CollabEngine.Prototype = function() {
   };
 
   /*
+    Update all collaborators selections of a document according to a given change
+
+    WARNING: This has not been tested quite well
+  */
+  this._updateCollaboratorSelections = function(documentId, change) {
+    // debugger;
+    // By not providing the 2nd argument to getCollaborators the change
+    // creator is also included.
+    var collaborators = this.getCollaborators(documentId);
+
+    forEach(collaborators, function(collaborator) {
+      if (collaborator.selection) {
+        var sel = Selection.fromJSON(collaborator.selection);
+        change = this.deserializeChange(change);
+        DocumentChange.transformSelection(sel, change);
+        // Write back the transformed selection to the server state
+        this._updateSelection(collaborator.collaboratorId, documentId, sel.toJSON());
+      }
+    }.bind(this));
+  };
+
+  /*
     Fast forward commit (client version = server version)
   */
-  this._commitFF = function(args, cb) {
+  this._syncFF = function(args, cb) {
     // debugger;
     this._updateCollaboratorSelections(args.documentId, args.change);
     
@@ -184,32 +201,9 @@ CollabEngine.Prototype = function() {
   };
 
   /*
-    Update all collaborators selections of a document according to a given change
-
-    WARNING: This has not been tested quite well
-  */
-  this._updateCollaboratorSelections = function(documentId, change) {
-    // debugger;
-    // By not providing the 2nd argument to getCollaborators the change
-    // creator is also included.
-    var collaborators = this.getCollaborators(documentId);
-
-    forEach(collaborators, function(collaborator) {
-      if (collaborator.selection) {
-        var sel = Selection.fromJSON(collaborator.selection);
-        change = this.deserializeChange(change);
-        DocumentChange.transformSelection(sel, change);
-        // Write back the transformed selection to the server state
-        this._updateSelection(collaborator.collaboratorId, documentId, sel.toJSON());
-      }
-    }.bind(this));
-
-  };
-
-  /*
     Rebased commit (client version < server version)
   */
-  this._commitRB = function(args, cb) {
+  this._syncRB = function(args, cb) {
     this._rebaseChange({
       documentId: args.documentId,
       change: args.change,
@@ -245,40 +239,6 @@ CollabEngine.Prototype = function() {
           version: serverVersion
         });
       }.bind(this));
-    }.bind(this));
-  };
-
-  /*
-    Transforms an incoming selection update if needed. Selection updates
-    are realized as changes that don't get stored in the database.
-
-    IN: collaboratorId, documentId, version, change
-    OUT: transformed change
-  */
-  this.updateSelection = function(args, cb) {
-    this.documentEngine.getVersion(args.documentId, function(err, serverVersion) {
-      if (err) return cb(err);
-      if (serverVersion === args.version) {
-        // Fast-foward: Nothing needs to be transformed
-        this._updateSelection(args.collaboratorId, args.documentId, args.change.after.selection);
-        cb(null, {
-          version: serverVersion,
-          change: args.change
-        });
-      } else {
-        this._rebaseChange({
-          documentId: args.documentId,
-          change: args.change,
-          version: args.version
-        }, function(err, rebased) {
-          if (err) return cb(err);
-          this._updateSelection(args.collaboratorId, args.documentId, rebased.change.after.selection);
-          cb(null, {
-            version: serverVersion,
-            change: rebased.change
-          });
-        }.bind(this));
-      }
     }.bind(this));
   };
 

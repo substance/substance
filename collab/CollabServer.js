@@ -2,8 +2,7 @@
 
 var Server = require('./Server');
 var CollabEngine = require('./CollabEngine');
-var extend = require('lodash/extend');
-var each = require('lodash/each');
+var forEach = require('lodash/forEach');
 
 /*
   Implements Substance CollabServer API.
@@ -14,30 +13,10 @@ function CollabServer(config) {
   this.scope = 'substance/collab';
   this.documentEngine = config.documentEngine;
   this.collabEngine = new CollabEngine(this.documentEngine);
-
-  // Here we store additional collaborator data
-  this._collaboratorInfo = {};
 }
 
 CollabServer.Prototype = function() {
   var _super = CollabServer.super.prototype;
-
-  this.getEnhancedCollaborators = function(documentId, collaboratorId) {
-    var collaborators = this.collabEngine.getCollaborators(documentId, collaboratorId);
-    each(collaborators, function(collaborator, collaboratorId) {
-      var info = this._collaboratorInfo[collaboratorId];
-      extend(collaborator, info, collaborator);
-    }.bind(this));
-    return collaborators;
-  };
-
-  this.enhanceCollaborator = function(req, cb) {
-    if (this.config.enhanceCollaborator) {
-      this.config.enhanceCollaborator(req, cb);
-    } else {
-      cb(null, {});
-    }
-  };
 
   /*
     Configurable authenticate method
@@ -106,64 +85,52 @@ CollabServer.Prototype = function() {
   };
 
   /*
-    Connect a new collab session based on documentId, version and maybe a pending change
+    Client initiates a sync
   */
-  this.connect = function(req, res) {
+  this.sync = function(req, res) {
     var args = req.message;
 
     console.log('CollabServer.connect', args.collaboratorId);
 
-    this.collabEngine.connect(args, function(err, result) {
-
+    // Takes an optional argument collaboratorInfo
+    this.collabEngine.sync(args, function(err, result) {
       // result: changes, version, change
       if (err) {
         res.error(err);
         this.next(req, res);
         return;
       }
-      var collaboratorIds = this.collabEngine.getCollaboratorIds(args.documentId, args.collaboratorId);
 
-      var collaborator = {
-        selection: result.change.after.selection,
-        collaboratorId: args.collaboratorId
-      };
+      // Get enhance collaborators (e.g. including some app-specific user-info)
+      var collaborators = this.collabEngine.getCollaborators(args.documentId, args.collaboratorId);
 
-      // console.log('--------------- req.isAuthenticated', req.isAuthenticated);
+      // Send the response
+      res.send({
+        type: 'syncDone',
+        documentId: args.documentId,
+        version: result.version,
+        changes: result.changes,
+        collaborators: collaborators
+      });
 
-      this.enhanceCollaborator(req, function(err, info) {
-        if (!err && info) {
-          collaborator = extend({}, info, collaborator);
-          // Store info for each collaborator
-          this._collaboratorInfo[args.collaboratorId] = info;
-        }
+      // We need to broadcast a new change if there is one
+      console.log('CollabServer.connect: update is broadcasted to collaborators', Object.keys(collaborators));
 
-        // Get enhance collaborators (e.g. including some app-specific user-info)
-        var collaborators = this.getEnhancedCollaborators(args.documentId, args.collaboratorId);
-
-        // Send the response
-        res.send({
-          type: 'connectDone',
+      forEach(collaborators, function(collaborator) {
+        this.send(collaborator.collaboratorId, {
+          type: 'update',
           documentId: args.documentId,
           version: result.version,
-          changes: result.changes,
-          collaborators: collaborators
-        });
-
-        // We need to broadcast a new change if there is one
-        console.log('CollabServer.connect: update is broadcasted to collaborators', collaboratorIds);
-        this.broadCast(collaboratorIds, {
-          type: 'update',
-          version: result.version,
           change: result.change,
-          collaboratorId: args.collaboratorId,
-           // we send collaborator object so the other parties can register them
-          collaborator: collaborator,
-          documentId: args.documentId
+          // collaboratorId: args.collaboratorId,
+          // All except of receiver record
+          collaborators: this.collabEngine.getCollaborators(args.documentId, collaborator.collaboratorId)
         });
       }.bind(this));
       this.next(req, res);
     }.bind(this));
   };
+
 
   this.disconnect = function(req, res) {
     var args = req.message;
@@ -180,10 +147,15 @@ CollabServer.Prototype = function() {
 
   this._disconnectDocument = function(collaboratorId, documentId) {
     var collaboratorIds = this.collabEngine.getCollaboratorIds(documentId, collaboratorId);
+
+    var collaborators = {};
+    collaborators[collaboratorId] = null;
+
     this.broadCast(collaboratorIds, {
-      type: 'collaboratorDisconnected',
+      type: 'update',
       documentId: documentId,
-      collaboratorId: collaboratorId
+      // Removes the entry
+      collaborators
     });
     // Exit from each document session
     this.collabEngine.disconnect({
@@ -192,65 +164,6 @@ CollabServer.Prototype = function() {
     });
   };
 
-  /*
-    Clients send a commit. Change will be applied on server and rebased
-    if needed.
-  */
-  this.commit = function(req, res) {
-    var args = req.message;
-
-    this.collabEngine.commit(args, function(err, result) {
-      // result has changes, version, change
-      if (err) {
-        res.error(err);
-        this.next(req,res);
-      } else {
-        var collaboratorIds = this.collabEngine.getCollaboratorIds(args.documentId, args.collaboratorId);
-
-        // We need to broadcast the change to all collaborators
-        this.broadCast(collaboratorIds, {
-          type: 'update',
-          version: result.version,
-          change: result.change,
-          collaboratorId: args.collaboratorId,
-          documentId: args.documentId
-        });
-
-        // confirm the new commit, providing the diff (changes) since last common version
-        res.send({
-          documentId: args.documentId,
-          type: 'commitDone',
-          version: result.version,
-          changes: result.changes          
-        });
-      }
-      this.next(req, res);
-    }.bind(this));
-  };
-
-  /*
-    Clients sends a selection update
-  */
-  this.updateSelection = function(req/*, res*/) {
-    var args = req.message;
-    this.collabEngine.updateSelection(args, function(err, result) {
-      if (err) {
-        console.error('updateSelection error: ', err);
-        // Selection updates are not that important, so we just do nothing here
-        // TODO: think of a way to 'abort' a request without sending a response
-        // res.error(err);
-      } else {
-        var collaboratorIds = this.collabEngine.getCollaboratorIds(args.documentId, args.collaboratorId);
-        this.broadCast(collaboratorIds, {
-          type: 'update',
-          version: result.version,
-          change: result.change,
-          collaboratorId: args.collaboratorId,
-          documentId: args.documentId     
-        });
-      }
-    }.bind(this));
-  };
 };
 
 Server.extend(CollabServer);
