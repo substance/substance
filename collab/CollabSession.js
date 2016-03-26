@@ -17,6 +17,7 @@ function CollabSession(doc, config) {
   CollabSession.super.call(this, doc, config);
 
   config = config || {};
+  this.config = config;
 
   this.collabClient = config.collabClient;
 
@@ -527,11 +528,18 @@ CollabSession.Prototype = function() {
     return DocumentChange.fromJSON(serializedChange);
   };
 
+  /*
+    Send message
+
+    Returns true if sent, false if not sent (e.g. when not connected)
+  */
   this._send = function(msg) {
     if (this.collabClient.isConnected()) {
       this.collabClient.send(msg);
+      return true;
     } else {
       console.warn('Try not to call _send when disconnected. Skipping message', msg);
+      return false;
     }
   };
 
