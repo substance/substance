@@ -3,6 +3,7 @@
 var EventEmitter = require('../util/EventEmitter');
 var oo = require('../util/oo');
 var uuid = require('../util/uuid');
+var extend = require('lodash/extend');
 
 /*
   ServerRequest
@@ -58,8 +59,9 @@ ServerResponse.Prototype = function() {
   /*
     Sends an error response
   */
-  this.error = function(err) {
+  this.error = function(err, errData) {
     this.err = err;
+    this.errData = errData;
     this.isReady = true;
   };
 
@@ -271,9 +273,12 @@ Server.Prototype = function() {
     var collaboratorId = req.message.collaboratorId;
     var msg = {
       type: 'error',
+      errorName: res.err.name,
       errorMessage: res.err.message,
       requestMessage: req.message
     };
+
+    msg = extend(msg, res.errData);
     this.send(collaboratorId, msg);
     res.setSent();
     this.next(req, res);

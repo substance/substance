@@ -56,7 +56,7 @@ MessageQueue.Prototype = function() {
     };
   };
 
-  /**
+  /*
     A new client connects to the message queue
   */
   this.connectClientSocket = function(ws) {
@@ -74,6 +74,21 @@ MessageQueue.Prototype = function() {
   };
 
   /*
+    A client disconnects from the message queue
+  */
+  this.disconnectClientSocket = function(ws) {
+    var serverId = ws.serverId;
+    var clientId = ws.clientId;
+    var conn = this.connections[serverId];
+
+    if (!conn || conn.type !== "server") {
+      throw new Error('Unknown server id.');
+    }
+    conn.server.handleDisconnectRequest(clientId);
+    delete this.connections[ws.clientId];
+  };
+
+  /*
     This is called by the server as a response to
     connection:requested. ws is the server-side end of
     the communication channel
@@ -84,6 +99,19 @@ MessageQueue.Prototype = function() {
       throw new Error('Server is not connected:' + ws.serverId);
     }
     server.sockets[ws.clientId] = ws;
+  };
+
+  /*
+    This is called by the server.
+
+    Really needed? Isn't this done already in TestWebSocketServer?
+  */
+  this.disconnectServerSocket = function(ws) {
+    var server = this.connections[ws.serverId];
+    if (!server) {
+      throw new Error('Server is not connected:' + ws.serverId);
+    }
+    delete server.sockets[ws.clientId];
   };
 
   /*
