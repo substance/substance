@@ -115,7 +115,6 @@ CollabServer.Prototype = function() {
 
       // We need to broadcast a new change if there is one
       // console.log('CollabServer.connect: update is broadcasted to collaborators', Object.keys(collaborators));
-
       forEach(collaborators, function(collaborator) {
         this.send(collaborator.collaboratorId, {
           type: 'update',
@@ -131,7 +130,9 @@ CollabServer.Prototype = function() {
     }.bind(this));
   };
 
-
+  /*
+    Expcicit disconnect. User wants to exit a collab session.
+  */
   this.disconnect = function(req, res) {
     var args = req.message;
     var collaboratorId = args.collaboratorId;

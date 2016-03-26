@@ -48,7 +48,7 @@ function CollabSession(doc, config) {
   }
 
   // Internal state
-  // this._connected = false; // becomes true as soon as the initial connect has been completed
+  this._connected = false; // gets flipped to true in syncDone
   this._nextChange = null; // next change to be sent over the wire
   this._pendingChange = null; // change that is currently being synced
   this._error = null;
@@ -60,8 +60,8 @@ function CollabSession(doc, config) {
   this.collaborators = {};
 
   // This happens on a reconnect
-  this.collabClient.on('connected', this._onConnected, this);
-  this.collabClient.on('disconnected', this._onDisconnected, this);
+  this.collabClient.on('connected', this._onCollabClientConnected, this);
+  this.collabClient.on('disconnected', this._onCollabClientDisconnected, this);
 
   // Constraints used for computing color indexes
   this.__maxColors = 5;
@@ -85,21 +85,35 @@ CollabSession.Prototype = function() {
 
     This happens in a reconnect scenario.
   */
-  this._onConnected = function() {
-    console.log('CollabSession.connected');
-    // this._connected = false;
+  this._onCollabClientConnected = function() {
+    console.log('CollabClient connected');
     // Attempt to sync
     if (this.autoSync) {
       this.sync();
     }
   };
 
-  this._onDisconnected = function() {
-    console.log('CollabSession network disconnected');
+  /*
+    Implicit disconnect (server connection drop out)
+  */
+  this._onCollabClientDisconnected = function() {
+    console.log('CollabClient disconnected');
     this._abortSync();
+    if (this._connected) {
+      this._afterDisconnected();  
+    }
+  };
+  
+  /*
+    Sets the correct state after a collab session has been disconnected
+    either explicitly or triggered by a connection drop out.
+  */
+  this._afterDisconnected = function() {
     // We remove all collaborators
     this.collaborators = {};
     this.emit('collaborators:changed');
+    this._connected = false;
+    this.emit('disconnected');
   };
 
   /*
@@ -134,18 +148,17 @@ CollabSession.Prototype = function() {
     this._abortSync();
   };
 
-  // Needed in the case of a reconnect or explicit close
+  /*
+    Unregister event handlers. Call this before throw away
+    a CollabSession reference. Otherwise you will leak memory
+  */
   this.dispose = function() {
-    // Reset to original state
-    this.stop();
-    this._error = null;
-    this._connected = false;
-    this._nextChange = null;
-    this._pendingChange = null;
+    // This happens on a reconnect
+    this.collabClient.off(this);
   };
 
   /*
-    TODO: Make use of it.
+    Explicit disconnect initiated by user
   */
   this.disconnect = function() {
     // Let the server know we no longer want to edit this document
@@ -153,9 +166,16 @@ CollabSession.Prototype = function() {
       type: 'disconnect',
       documentId: this.documentId
     };
+
+    // We abort pening syncs
+    this._abortSync();
     this._send(msg);
-    // And now dispose and deregister the handlers
-    this.dispose();
+  };
+
+  this.disconnectDone = function() {
+    // console.log('disconnect done');
+    // Let the server know we no longer want to edit this document
+    this._afterDisconnected();
   };
 
   /*
@@ -176,6 +196,7 @@ CollabSession.Prototype = function() {
       }
       this._pendingChange = null;
     }
+    this._error = null;
     this._nextChange = newNextChange;
   };
 
@@ -213,6 +234,7 @@ CollabSession.Prototype = function() {
       };
       this._send(msg);
       this._pendingChange = this._nextChange;
+
       this._nextChange = null;
       this._error = null;
     } else {
@@ -254,6 +276,10 @@ CollabSession.Prototype = function() {
     // Important: after sync is done we need to reset _pendingChange and _error
     // In this state we can safely listen to 
     this._pendingChange = null;
+
+    // Each time the sync worked we consider the system connected
+    this._connected = true;
+    this.emit('connected');
     this._error = null;
 
     // Attempt to sync again (maybe we have new local changes)
@@ -266,8 +292,6 @@ CollabSession.Prototype = function() {
   this._requestSync = function() {
     if (this._nextChange && this.__canSync()) {
       this.sync();
-    } else {
-      // console.log('not able to sync now next-commit/pending-commit', !!this._nextChange, this.__canSync());
     }
   };
 

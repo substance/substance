@@ -100,7 +100,7 @@ CollabEngine.Prototype = function() {
   };
 
   /*
-    Connect a new collaborative editing session.
+    Client starts a sync
 
     @param args.documentId
     @param args.version The client's document version (0 if client starts with an empty doc)
@@ -120,7 +120,7 @@ CollabEngine.Prototype = function() {
   };
 
   /*
-    Client wants to commit a change
+    Internal implementation of sync
 
     @param {String} args.collaboratorId collaboratorId
     @param {String} args.documentId document id
