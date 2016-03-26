@@ -233,7 +233,7 @@ CollabSession.Prototype = function() {
         change: this.serializeChange(nextChange)
       };
       this._send(msg);
-      this._pendingChange = this._nextChange;
+      this._pendingChange = nextChange;
 
       this._nextChange = null;
       this._error = null;
@@ -252,7 +252,6 @@ CollabSession.Prototype = function() {
     var changes = args.changes;
     var collaborators = args.collaborators;
     var serverVersion = args.version;
-
     if (changes && changes.length > 0) {
       // There have been changes on the server since the doc was opened
       // the last time
@@ -270,7 +269,13 @@ CollabSession.Prototype = function() {
     // followed by an idle phase (_nextChange = null) will give us
     // the latest collaborator records
     if (!this._nextChange) {
-      this._updateCollaborators(collaborators);
+      // We will not update collaborator selections if we know the
+      // last sync was just there to broadcast our own selection
+      // Maybe we want a separate protocol method for that again to 
+      // eliminate extra noise
+      if (this._pendingChange.ops.length > 0 || changes.length>0) {
+        this._updateCollaborators(collaborators);
+      }
     }
 
     // Important: after sync is done we need to reset _pendingChange and _error
@@ -409,6 +414,8 @@ CollabSession.Prototype = function() {
         collaborator.colorIndex = old ? old.colorIndex : this._getNextColorIndex();
         // Parse selection from record
         collaborator.selection = Selection.fromJSON(collaborator.selection);
+        collaborator.selection.attach(this.doc);
+
         this.collaborators[collaboratorId] = collaborator;
       } else {
         delete this.collaborators[collaboratorId];
