@@ -1,5 +1,8 @@
+// NOTE: Disabled this for now. We will focus on unit test of CollabSession/CollabServer first.
+// ---------------------------
+// 
 // 'use strict';
-
+// 
 // require('../qunit_extensions');
 
 // var MessageQueue = require('../../collab/MessageQueue');
