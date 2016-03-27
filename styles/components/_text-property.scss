@@ -10,15 +10,23 @@
     &.sm-collaborator-3 { outline-color: $collaborator-color-3; }
     &.sm-collaborator-4 { outline-color: $collaborator-color-4; }
     &.sm-collaborator-5 { outline-color: $collaborator-color-5; }
+    &.sm-collaborator-6 { outline-color: $collaborator-color-6; }
+    &.sm-collaborator-7 { outline-color: $collaborator-color-7; }
+    &.sm-collaborator-8 { outline-color: $collaborator-color-8; }
+    &.sm-collaborator-9 { outline-color: $collaborator-color-9; }
   }
 
   .se-selection-fragment {
     background-color: #ddd;
-    &.sm-collaborator-1 { background: $collaborator-color-1-transparent; }
-    &.sm-collaborator-2 { background: $collaborator-color-2-transparent; }
-    &.sm-collaborator-3 { background: $collaborator-color-3-transparent; }
-    &.sm-collaborator-4 { background: $collaborator-color-4-transparent; }
-    &.sm-collaborator-5 { background: $collaborator-color-5-transparent; }
+    &.sm-collaborator-1 { background: rgba($collaborator-color-1, 0.15); }
+    &.sm-collaborator-2 { background: rgba($collaborator-color-2, 0.15); }
+    &.sm-collaborator-3 { background: rgba($collaborator-color-3, 0.15); }
+    &.sm-collaborator-4 { background: rgba($collaborator-color-4, 0.15); }
+    &.sm-collaborator-5 { background: rgba($collaborator-color-5, 0.15); }
+    &.sm-collaborator-6 { background: rgba($collaborator-color-6, 0.15); }
+    &.sm-collaborator-7 { background: rgba($collaborator-color-7, 0.15); }
+    &.sm-collaborator-8 { background: rgba($collaborator-color-8, 0.15); }
+    &.sm-collaborator-9 { background: rgba($collaborator-color-9, 0.15); }
   }
 
   .se-container-annotation.se-anchor {
