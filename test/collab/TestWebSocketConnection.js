@@ -48,7 +48,6 @@ TestWebSocketConnection.Prototype = function() {
 
   this._onConnectionClose = function() {
     this.emit('close');
-    // this._disconnect();
   };
 
   /*

@@ -54,7 +54,7 @@ ClientConnection.Prototype = function() {
   };
 
   /*
-    Triggers a reconnect
+    Trigger reconnect on connection close
   */
   this._onConnectionClose = function() {
     this._disconnect();
