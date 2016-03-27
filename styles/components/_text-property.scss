@@ -14,19 +14,21 @@
     &.sm-collaborator-7 { outline-color: $collaborator-color-7; }
     &.sm-collaborator-8 { outline-color: $collaborator-color-8; }
     &.sm-collaborator-9 { outline-color: $collaborator-color-9; }
+    &.sm-collaborator-10 { outline-color: $collaborator-color-10; }
   }
 
   .se-selection-fragment {
     background-color: #ddd;
-    &.sm-collaborator-1 { background: rgba($collaborator-color-1, 0.15); }
-    &.sm-collaborator-2 { background: rgba($collaborator-color-2, 0.15); }
-    &.sm-collaborator-3 { background: rgba($collaborator-color-3, 0.15); }
-    &.sm-collaborator-4 { background: rgba($collaborator-color-4, 0.15); }
-    &.sm-collaborator-5 { background: rgba($collaborator-color-5, 0.15); }
-    &.sm-collaborator-6 { background: rgba($collaborator-color-6, 0.15); }
-    &.sm-collaborator-7 { background: rgba($collaborator-color-7, 0.15); }
-    &.sm-collaborator-8 { background: rgba($collaborator-color-8, 0.15); }
-    &.sm-collaborator-9 { background: rgba($collaborator-color-9, 0.15); }
+    &.sm-collaborator-1 { background: rgba($collaborator-color-1, 0.20); }
+    &.sm-collaborator-2 { background: rgba($collaborator-color-2, 0.20); }
+    &.sm-collaborator-3 { background: rgba($collaborator-color-3, 0.20); }
+    &.sm-collaborator-4 { background: rgba($collaborator-color-4, 0.20); }
+    &.sm-collaborator-5 { background: rgba($collaborator-color-5, 0.20); }
+    &.sm-collaborator-6 { background: rgba($collaborator-color-6, 0.20); }
+    &.sm-collaborator-7 { background: rgba($collaborator-color-7, 0.20); }
+    &.sm-collaborator-8 { background: rgba($collaborator-color-8, 0.20); }
+    &.sm-collaborator-9 { background: rgba($collaborator-color-9, 0.20); }
+    &.sm-collaborator-10 { background: rgba($collaborator-color-10, 0.20); }
   }
 
   .se-container-annotation.se-anchor {
