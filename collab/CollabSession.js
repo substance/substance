@@ -269,13 +269,9 @@ CollabSession.Prototype = function() {
     // followed by an idle phase (_nextChange = null) will give us
     // the latest collaborator records
     if (!this._nextChange) {
-      // We will not update collaborator selections if we know the
-      // last sync was just there to broadcast our own selection
-      // Maybe we want a separate protocol method for that again to 
-      // eliminate extra noise
-      if (this._pendingChange.ops.length > 0 || changes.length>0) {
-        this._updateCollaborators(collaborators);
-      }
+      // This causes problems as it leads to a lot of rerenders
+      // Idea: le's check if the collaborators record actually changes
+      this._updateCollaborators(collaborators);
     }
 
     // Important: after sync is done we need to reset _pendingChange and _error
@@ -406,6 +402,10 @@ CollabSession.Prototype = function() {
     return this._connected;
   };
 
+  // IDEA: we could check if anything changes and only then
+  // emit the collaborators:changed event
+  // this would solve cases where the user selection gets desctroyed
+  // because of many collaboratorSelection updates
   this._updateCollaborators = function(collaborators) {
     forEach(collaborators, function(collaborator, collaboratorId) {
       if (collaborator) {

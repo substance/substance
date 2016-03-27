@@ -61,7 +61,7 @@ ClientConnection.Prototype = function() {
     this.emit('close');
     console.log('websocket connection closed. Attempting to reconnect in 5s.');
     setTimeout(function() {
-      this._initWebSocket();
+      this._connect();
     }.bind(this), 5000);
   };
 
@@ -81,7 +81,7 @@ ClientConnection.Prototype = function() {
       console.warn('Message could not be sent. Connection is not open.', msg);
       return;
     }
-    this.ws.send(msg);
+    this.ws.send(this.serializeMessage(msg));
   };
 
   /*
