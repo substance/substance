@@ -3,6 +3,7 @@
 var EventEmitter = require('../util/EventEmitter');
 var forEach = require('lodash/forEach');
 var map = require('lodash/map');
+var extend = require('lodash/extend');
 var DocumentChange = require('../model/DocumentChange');
 var Selection = require('../model/Selection');
 var Err = require('../util/Error');
@@ -25,7 +26,7 @@ CollabEngine.Prototype = function() {
   /*
     Register collaborator for a given documentId
   */
-  this._register = function(collaboratorId, documentId, selection) {
+  this._register = function(collaboratorId, documentId, selection, collaboratorInfo) {
     var collaborator = this._collaborators[collaboratorId];
 
     if (!collaborator) {
@@ -34,6 +35,9 @@ CollabEngine.Prototype = function() {
         documents: {}
       };
     }
+
+    // Extend with collaboratorInfo if available
+    collaborator.info = collaboratorInfo;
 
     // Register document
     collaborator.documents[documentId] = {
@@ -80,10 +84,12 @@ CollabEngine.Prototype = function() {
     forEach(this._collaborators, function(collab) {
       var doc = collab.documents[documentId];
       if (doc && collab.collaboratorId !== collaboratorId) {
-        collaborators[collab.collaboratorId] = {
+        var entry = {
           selection: doc.selection,
           collaboratorId: collab.collaboratorId
         };
+        entry = extend({}, collab.info, entry);
+        collaborators[collab.collaboratorId] = entry;
       }
     }.bind(this));
     return collaborators;
@@ -114,7 +120,7 @@ CollabEngine.Prototype = function() {
     this._sync(args, function(err, result) {
       if (err) return cb(err);
       // Registers the collaborator If not already registered for that document
-      this._register(args.collaboratorId, args.documentId, result.change.after.selection);
+      this._register(args.collaboratorId, args.documentId, result.change.after.selection, args.collaboratorInfo);
       cb(null, result);
     }.bind(this));
   };
@@ -150,7 +156,6 @@ CollabEngine.Prototype = function() {
     WARNING: This has not been tested quite well
   */
   this._updateCollaboratorSelections = function(documentId, change) {
-    // debugger;
     // By not providing the 2nd argument to getCollaborators the change
     // creator is also included.
     var collaborators = this.getCollaborators(documentId);
@@ -170,7 +175,6 @@ CollabEngine.Prototype = function() {
     Fast forward commit (client version = server version)
   */
   this._syncFF = function(args, cb) {
-    // debugger;
     this._updateCollaboratorSelections(args.documentId, args.change);
     
     // HACK: On connect we may receive a nop that only has selection data.
