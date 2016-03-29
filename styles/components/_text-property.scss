@@ -4,6 +4,7 @@
     display: inline-block;
     width: 0px;
     height: 1em;
+    margin-top: -1px;
     
     &.sm-collaborator-1 { outline-color: $collaborator-color-1; }
     &.sm-collaborator-2 { outline-color: $collaborator-color-2; }
