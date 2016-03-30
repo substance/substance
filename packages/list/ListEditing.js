@@ -42,9 +42,9 @@ ListEditing.Prototype = function() {
       if (text.length === 0) {
         // if we hit return on an already empty list item, it should transform into
         // a paragraph
-        args.path = path;
-        args.node = parentList;
-        args = listUtils.listItemToParagraph(tx, args);
+        args.nodes = [node];
+        args.list = parentList;
+        args = listUtils.listItemsToParagraph(tx, args);
       } else {
         newNode = tx.create({
           id: id,
@@ -258,7 +258,9 @@ ListEditing.Prototype = function() {
       });
       args.selection = selection;
     } else {
-      args = listUtils.listItemToParagraph(tx, args);
+      args.list = args.node;
+      args.nodes = [node];
+      args = listUtils.listItemsToParagraph(tx, args);
     }
     return args;
   };

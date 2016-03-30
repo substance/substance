@@ -14,42 +14,46 @@ var annotationHelpers = require('../../model/annotationHelpers');
   @param {model/TransactionDocument} tx the document instance
   @param {Object} args object with fields `node`, `containerId`, `path`
 */
-var listItemToParagraph = function(tx, args){
+var listItemsToParagraph = function(tx, args){
   var defaultType = tx.getSchema().getDefaultTextType();
-  var id = uuid(defaultType);
+  var id;
   var containerId = args.containerId;
   var container = tx.get(containerId);
-  var index = container.getChildIndex(args.node);
-  var numItems = args.node.items.length;
-  var node = tx.get(args.path[0]);
-  var nodeIndex = args.node.items.indexOf(args.path[0]);
-  tx.create({
-    id: id,
-    type: defaultType,
-    content: node.content
-  });
-  // show the paragraph node and the second list node
-  annotationHelpers.transferAnnotations(tx, args.path, 0, [id, 'content'], 0);
-  container.show(id, index+1);
-  if (args.node.items.slice(nodeIndex+1, numItems).length > 0){
+  var index = container.getChildIndex(args.list);
+  var numItems = args.list.items.length;
+  var nodes = args.nodes;
+  var nodeIndex = args.list.items.indexOf(args.nodes[0].id);
+  for (var i=0; i<nodes.length; i++){
+    id = uuid(defaultType);
+    tx.create({
+      id: id,
+      type: defaultType,
+      content: nodes[i].content
+    });
+    // show the paragraph node and the second list node
+    annotationHelpers.transferAnnotations(tx, [nodes[i].id, 'content'], 0, [id, 'content'], 0);
+    container.show(id, index+i+1);
+  }
+
+  if (args.list.items.slice(nodeIndex+nodes.length, numItems).length > 0){
     // make a new list with the trailing items
     var newList = tx.create({
       id: uuid('list'),
-      type: args.node.type,
-      items: args.node.items.slice(nodeIndex+1, numItems),
-      ordered: args.node.ordered
+      type: args.list.type,
+      items: args.list.items.slice(nodeIndex+nodes.length, numItems),
+      ordered: args.list.ordered
     });
-    for (var i=0; i<newList.items.length; i++) {
+    for (i=0; i<newList.items.length; i++) {
       tx.set([newList.items[i], 'parent'], newList.id);
     }
-    container.show(newList.id, index+2);
+    container.show(newList.id, index+nodes.length+1);
   }
   // delete the trailing list items from the first list
   for (var j=numItems-1; j>=nodeIndex; j--) {
-    tx.update([args.node.id, 'items'], {delete: {offset: j}});
+    tx.update([args.list.id, 'items'], {delete: {offset: j}});
   }
   // if list has no items left, delete it
-  if (tx.get([args.node.id, 'items']).length === 0) deleteNode(tx, {nodeId: node.id});
+  if (tx.get([args.list.id, 'items']).length === 0) deleteNode(tx, {nodeId: args.list.id});
   var selection = tx.createSelection({
     type: 'property',
     path: [id, 'content'],
@@ -59,7 +63,7 @@ var listItemToParagraph = function(tx, args){
   return args;
 };
 
-var paragraphToList = function(tx, args) {
+var paragraphsToList = function(tx, args) {
   var container = tx.get(args.containerId);
   // create a new list node
   var newList = {
@@ -67,25 +71,32 @@ var paragraphToList = function(tx, args) {
     type: "list",
     ordered: args.ordered
   };
+  var items = [];
+  var newListItem;
   // and a new list item node, set its parent to the list node
-  var newListItem = {
-    id: uuid("list-item"),
-    parent: newList.id,
-    ordered: newList.ordered,
-    content: args.node.content,
-    type: "list-item"
-  };
-  // create the nodes
-  tx.create(newListItem);
-  newList.items = [newListItem.id];
+  for (var i=0; i<args.nodes.length; i++){
+    newListItem = {
+      id: uuid("list-item"),
+      parent: newList.id,
+      ordered: newList.ordered,
+      content: args.nodes[i].content,
+      type: "list-item"
+    };
+    // create the nodes
+    tx.create(newListItem);
+    items.push(newListItem.id);
+    var newPath = [newListItem.id, 'content'];
+    // transfer annotations from the current node to new list item
+    annotationHelpers.transferAnnotations(tx, [args.nodes[i].id, 'content'], 0, newPath, 0);
+  }
+  newList.items = items;
   tx.create(newList);
-  var newPath = [newListItem.id, 'content'];
-  // transfer annotations from the current node to new list item
-  annotationHelpers.transferAnnotations(tx, args.path, 0, newPath, 0);
-  var pos = container.getPosition(args.node.id);
+  var pos = container.getPosition(args.nodes[0].id);
   // show the new list item and hide the old node
   container.show(newList.id, pos+1);
-  deleteNode(tx, {nodeId: args.node.id});
+  for (i=0; i<args.nodes.length; i++){
+    deleteNode(tx, {nodeId: args.nodes[i].id});
+  }
   var selection = tx.createSelection({
     type: 'property',
     path: [newListItem.id, 'content'],
@@ -96,6 +107,6 @@ var paragraphToList = function(tx, args) {
 };
 
 module.exports = {
-  listItemToParagraph: listItemToParagraph,
-  paragraphToList: paragraphToList
+  listItemsToParagraph: listItemsToParagraph,
+  paragraphsToList: paragraphsToList
 };
