@@ -183,7 +183,7 @@ DocumentSession.Prototype = function() {
     if (info.session !== this) {
       this.stage._apply(change);
       this._transformLocalChangeHistory(change, info);
-      this._transformSelections(change, info);
+      this._transformSelection(change, info);
     }
   };
 
