@@ -172,7 +172,7 @@ CollabEngine.Prototype = function() {
   };
 
   /*
-    Fast forward commit (client version = server version)
+    Fast forward sync (client version = server version)
   */
   this._syncFF = function(args, cb) {
     this._updateCollaboratorSelections(args.documentId, args.change);
@@ -184,7 +184,8 @@ CollabEngine.Prototype = function() {
     if (args.change.ops.length === 0) {
       return cb(null, {
         change: args.change,
-        changes: [],
+        // changes: [],
+        serverChange: null,
         version: args.version
       });
     }
@@ -198,14 +199,15 @@ CollabEngine.Prototype = function() {
       if (err) return cb(err);
       cb(null, {
         change: args.change, // collaborators must be notified
-        changes: [], // no changes missed in fast-forward scenario
+        serverChange: null,
+        // changes: [], // no changes missed in fast-forward scenario
         version: serverVersion
       });
     }.bind(this));
   };
 
   /*
-    Rebased commit (client version < server version)
+    Rebased sync (client version < server version)
   */
   this._syncRB = function(args, cb) {
     this._rebaseChange({
@@ -225,7 +227,7 @@ CollabEngine.Prototype = function() {
       if (args.change.ops.length === 0) {
         return cb(null, {
           change: rebased.change,
-          changes: rebased.changes,
+          serverChange: rebased.serverChange,
           version: rebased.version
         });
       }
@@ -239,7 +241,7 @@ CollabEngine.Prototype = function() {
         if (err) return cb(err);
         cb(null, {
           change: rebased.change,
-          changes: rebased.changes, // collaborators must be notified
+          serverChange: rebased.serverChange, // collaborators must be notified
           version: serverVersion
         });
       }.bind(this));
@@ -261,9 +263,14 @@ CollabEngine.Prototype = function() {
       var a = this.deserializeChange(args.change);
       // transform changes
       DocumentChange.transformInplace(a, B);
+      var ops = B.reduce(function(ops, change) {
+        return ops.concat(change.ops);
+      }, []);
+      var serverChange = new DocumentChange(ops, {}, {});
+      
       cb(null, {
         change: this.serializeChange(a),
-        changes: B.map(this.serializeChange),
+        serverChange: this.serializeChange(serverChange),
         version: result.version
       });
     }.bind(this));
