@@ -38,7 +38,12 @@ ListCommand.Prototype = function() {
       disabled = !_.every(_.map(selectedNodes, function(elem){
         return (doc.get(elem).type) === 'paragraph';
       }));
+      var startNode = doc.get(sel.startPath[0]);
       active = false;
+      if ((startNode.type === 'list-item') && (startNode.ordered == this.ordered)){
+        var endNode = doc.get(sel.endPath[0]);
+        if ((endNode.type === 'list-item') && (startNode.parent === endNode.parent)) active = true;
+      }
     }
 
     return {
@@ -57,47 +62,40 @@ ListCommand.Prototype = function() {
     var containerId = this.getContainerId();
 
     if (!sel.isPropertySelection()){
-      var nodes = sel.getContainer().nodes;
-      var selectedNodeIds = _.slice(nodes, nodes.indexOf(sel.startPath[0]), nodes.indexOf(sel.endPath[0])+1);
-      var selectedNodes = _.map(selectedNodeIds, function(elem){
-        return doc.get(elem);
-      });
-
       surface.transaction(function(tx, args){
-        var container = tx.get(containerId);
-        var newList = {
-          id: uuid("list"),
-          type: "list",
-          ordered: self.ordered
-        };
-        var items = [];
-        var newListItem;
-        for (var i=0; i<selectedNodes.length; i++){
-          newListItem = {
-            id: uuid("list-item"),
-            parent: newList.id,
-            ordered: newList.ordered,
-            content: selectedNodes[i].content,
-            type: "list-item"
-          };
-          tx.create(newListItem);
-          annotationHelpers.transferAnnotations(tx, [selectedNodes[i].id, 'content'], 0, [newListItem.id, 'content'], 0);
-          items.push(newListItem.id);
+        var selections = sel.splitIntoPropertySelections();
+        var nodes = [];
+        for (var i=0; i<selections.length; i++){
+          nodes.push(tx.get(selections[i].path[0]));
         }
-        newList.items = items;
-        tx.create(newList);
-        var pos = container.getPosition(sel.startPath[0]);
-        // show the new list item and hide the old node
-        container.show(newList.id, pos);
-        for(i=0; i<selectedNodeIds.length; i++){
-          deleteNode(tx, {nodeId: selectedNodeIds[i]});
+        var allParagraphs = _.every(_.map(nodes, function(node){
+          return (node.type === 'paragraph');
+        }));
+        var listItemsofSameList = _.every(_.map(nodes, function(node){
+          return ((node.type === 'list-item') && (nodes[0].parent === node.parent));
+        }));
+        if (allParagraphs){
+          args.nodes = nodes;
+          args.ordered = self.ordered;
+          args.containerId = containerId;
+          args.selection = sel;
+          args = listUtils.paragraphsToList(tx, args);
+        } else if (listItemsofSameList) {
+          if (nodes[0].ordered === self.ordered){
+            args.nodes = nodes;
+            args.list = tx.get(nodes[0].parent);
+            args.containerId = containerId;
+            args = listUtils.listItemsToParagraph(tx, args);
+          } else {
+            // switch list type between ordered and unordered list
+            var items = tx.get([nodes[0].parent, 'items']);
+            for (i=0; i<items.length; i++){
+              tx.set([items[i], 'ordered'], self.ordered);
+            }
+            tx.set([nodes[0].parent, 'ordered'], self.ordered);
+          }
         }
-        var selection = tx.createSelection({
-          type: 'property',
-          path: [newListItem.id, 'content'],
-          startOffset: newListItem.content.length
-        });
-        args.selection = selection;
+
         return args;
       });
     } else {
@@ -109,10 +107,10 @@ ListCommand.Prototype = function() {
           if (node.ordered === self.ordered){
             // convert list item to paragraph
             var parentList = tx.get(node.parent);
-            args.path = path;
-            args.node = parentList;
+            args.nodes = [node];
+            args.list = parentList;
             args.containerId = containerId;
-            args = listUtils.listItemToParagraph(tx, args);
+            args = listUtils.listItemsToParagraph(tx, args);
           } else {
             // switch list type between ordered and unordered list
             var items = tx.get([node.parent, 'items']);
@@ -123,12 +121,11 @@ ListCommand.Prototype = function() {
           }
         } else {
           // convert node to list
-          args.node = node;
+          args.nodes = [node];
           args.ordered = self.ordered;
           args.containerId = containerId;
-          args.path = path;
           args.selection = sel;
-          args = listUtils.paragraphToList(tx, args);
+          args = listUtils.paragraphsToList(tx, args);
         }
         return args;
       });
