@@ -1,6 +1,7 @@
 /* Variables
 -------------------------------------------------- */
- 
+
+// Colors
 $border-color: #ddd;
 
 $fill-gray-color: #eee;
@@ -8,9 +9,20 @@ $fill-light-color: #f8f8f8;
 $fill-white-color: #fff;
 $fill-dark-color: #404040;
 
+// Font colors
+$default-text-color: rgba(0,0,0,0.75);
+$light-text-color: rgba(0,0,0,.5);
+
+// Default padding
 $default-padding: 20px;
+
+// Font sizes
+$default-font-size: 16px;
 $small-font-size: 14px;
 $large-font-size: 20px;
+$xlarge-font-size: 25px;
+
+$strong-font-weight: 600;
 
 $highlight-color-1: #0b9dd9;
 $highlight-color-2: #91bb04;

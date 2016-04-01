@@ -32,7 +32,7 @@ blockquote:before, blockquote:after,
 q:before, q:after { content:''; content:none; }
 /* tables still need 'cellspacing="0"' in the markup */
 table { border-collapse: collapse; border-spacing:0; }
-/* remember to define focus styles. Hee Haw */
+/* remember to define focus styles. */
 :focus { outline:0; }
 
 *, *:after, *:before {
@@ -41,30 +41,6 @@ table { border-collapse: collapse; border-spacing:0; }
           box-sizing:border-box;
 }
 
-// [type=submit],
-// button,
-// button::-moz-focus-inner {
-//   border: 0;
-//   padding: 0;
-//   background: blue;
-//   font:1px/20px 'Source Sans Pro', Arial;
-// }
-
-/* Special button reset */
-// button {
-//   border: 0;
-//   padding: 0;
-//   margin: 0;
-//   background: blue;
-//   display: block;
-//   // font: 1px/20px "Source Sans Pro", Arial;
-// }
-
-// button::-moz-focus-inner,
-// input::-moz-focus-inner {
-//   border: 0;
-//   padding: 0;
-// }
 
 /* Reset `button` and button-style `input` default styles */
 input[type="submit"],
@@ -74,14 +50,12 @@ button {
     background: none;
     border: 0;
     color: inherit;
-    /* cursor: default; */
     cursor: pointer;
     font: inherit;
     line-height: normal;
     overflow: visible;
     padding: 0;
     display: block;
-    // float: left;
     text-align: left;
     -webkit-appearance: button; /* for input */
     -webkit-user-select: none; /* for button */

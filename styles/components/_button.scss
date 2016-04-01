@@ -1,0 +1,13 @@
+.sc-button {
+  padding: 10px 5px;
+  text-align: center;
+  font-size: 16px;
+  min-width: 200px;
+  font-weight: 600;
+  display: inline-block;
+  border: 2px solid #3B4749;
+
+  &:focus {
+    outline: 2px solid #5BE3FF;  
+  }
+}
