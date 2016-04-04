@@ -183,7 +183,7 @@ DocumentSession.Prototype = function() {
     if (info.session !== this) {
       this.stage._apply(change);
       this._transformLocalChangeHistory(change, info);
-      this._transformSelections(change, info);
+      this._transformSelection(change, info);
     }
   };
 
@@ -199,11 +199,16 @@ DocumentSession.Prototype = function() {
     DocumentChange.transformInplace(clone, this.undoneChanges);
   };
 
-  this._transformSelections = function(change) {
+  this._transformSelection = function(change) {
     // console.log('Transforming selection...', this.__id__);
     // Transform the selection
     this._selectionHasChanged =
       DocumentChange.transformSelection(this.selection, change);
+  };
+
+  this._transformCollaboratorSelections = function(change) {
+    // console.log('Transforming selection...', this.__id__);
+    // Transform the selection
     var collaborators = this.getCollaborators();
     if (collaborators) {
       each(collaborators, function(collaborator) {

@@ -73,7 +73,6 @@ QUnit.test('New collaborator enters with latest version', function(assert) {
   }, function(err, result) {
     assert.isNullOrUndefined(err, 'Should not error');
     assert.equal(result.version, 1);
-    assert.equal(result.changes.length, 0);
     done();
   });
 });
@@ -89,7 +88,6 @@ QUnit.test('New collaborator enters with an outdated version', function(assert) 
   }, function(err, result) {
     assert.isNullOrUndefined(err, 'Should not error');
     assert.equal(result.version, 1);
-    assert.equal(result.changes.length, 1);
     done();
   });
 });
@@ -105,7 +103,6 @@ QUnit.test('New collaborator enters with a new fast-forward change', function(as
   }, function(err, result) {
     assert.isNullOrUndefined(err, 'Should not error');
     assert.equal(result.version, 2);
-    assert.equal(result.changes.length, 0);
     done();
   });
 });
@@ -135,14 +132,12 @@ QUnit.test('New collaborator enters with a change that needs rebasing', function
     }, function(err, result) {
       assert.isNullOrUndefined(err, 'Should not error');
       assert.equal(result.version, 3);
-      assert.equal(result.changes.length, 1);
-
+      assert.ok(result.serverChange, 'There should be a server change');
       assert.notDeepEqual(result.change, insertTextChange2, 'Tranformed change should differ from original change');
       done();
     });    
   });
 });
-
 
 QUnit.test('Two collaborators enter', function(assert) {
   var done = assert.async();
@@ -162,7 +157,6 @@ QUnit.test('Two collaborators enter', function(assert) {
       assert.ok(result, 'connect result should be set');
       assert.isNullOrUndefined(err, 'Should not error');
       var collaboratorIds = collabEngine.getCollaboratorIds('test-doc', 'collab-2');
-      // var collaborators = collabEngine.getCollaborators('test-doc', 'collab-2');      
       assert.deepEqual(collaboratorIds, ['collab-1'], 'Should return one collaboratorId');
       collaboratorIds = collabEngine.getCollaboratorIds('test-doc', 'collab-1');
       assert.deepEqual(collaboratorIds, ['collab-2'], 'Should return one collaboratorId');

@@ -1,109 +1,63 @@
 /* Inline Elements: Defaults
 ------------------------------------------------------- */
 
+$h1-font-size: 26px;
+$h2-font-size: 22px;
+$h3-font-size: 18px;
+$h4-font-size: 16px;
+
+
 body,
 input,
 textarea {
-  color:rgba(0,0,0,0.75);
+  color: $default-text-color;
   font-family: -apple-system, ".SFNSText-Regular", "San Francisco", "Roboto", "Segoe UI", "Helvetica Neue", "Arial", sans-serif;
-  font-size: 16px;
+  font-size: $default-font-size;
   min-height: 30px;
   line-height: 1.5;
   -webkit-font-smoothing:antialiased;
 }
 
 h1, h2, h3, h4, h5, h6 {
-  font-weight: 600;
+  font-weight: $strong-font-weight;
   margin:0;
 }
 
 h1 {
-  font-size:30px;
-  line-height:40px;
+  font-size: $h1-font-size;
 }
 
 h2 {
-  font-size:30px;
-  line-height:30px;
-  padding-top:20px;
-  padding-bottom:10px;
+  font-size: $h2-font-size;
 }
 
 h3 {
-  font-size:22px;
-  line-height:20px;
-  padding-top:10px;
-  padding-bottom:10px;
+  font-size: $h3-font-size;
 }
 
+// Not recommended to use
 h4, h5, h6 {
-  font-size:15px;
-  line-height:20px;
-  padding-bottom:10px;
+  font-size: $h4-font-size;
 }
-
-p { /* margin-bottom:20px;*/ }
-
-p:last-child { margin-bottom:0; }
 
 .strong,
 strong {
-  font-weight:600;
+  font-weight:$strong-font-weight;
 }
 
 .emphasis, em { font-style: italic; }
 
 /* Links */
 a {
-  color:#2079DC;;
-  text-decoration:none;
-}
+  color:#2079DC;
+  text-decoration:none; 
 
-a.active, a:hover { color:#63b6e5; }
-// a:focus { box-shadow:inset 0 0 0 1px rgba(0,0,0,0.05); }
-.dark a, a.dark { color:rgba(255,255,255,.5); }
-a.dark.active, .dark a.active, a.dark:hover, .dark a:hover { color:white; }
-// .dark a:focus { box-shadow:inset 0 0 0 1px rgba(255,255,255,0.05); }
-a.quiet { color:rgba(0,0,0,0.5); }
-a.quiet.active, a.quiet:hover { color:rgba(0,0,0,0.75); }
-.dark a.quiet, a.quiet.dark { color:white; }
-.dark a.quiet:hover, a.quiet.dark.active, a.quiet.dark:hover { color:rgba(255,255,255,0.5); }
-
-/* Buttons */
-// button:focus { box-shadow:inset 0 0 0 1px rgba(0,0,0,0.05); }
-
-/* Buttons (generic)
--------------------------------------------------- */
-
-.button {
-  font-weight: 600;
-  height: 30px;
-  min-width: 30px;
-  padding: 0px 10px;
-  text-align: center;
-
-  &:hover {
-    // @include dark-fill(0.1);
+  &.active, &:hover {
+    color:#63b6e5;
   }
 
-  // Display in a linkish way
-  &.plain {
-    background:none;
-    color: #1B6685;
-
-    &:hover {
-      color: rgba(11, 157, 217, 1);
-    }
-  }
-
-  &.loud {
-    background: #4A90E2;
-    color: rgba(255,255,255, 0.8);
-
-    &:hover {
-      background: #397AC6;
-      color: #fff;
-    }
+  &:focus {
+    outline: 2px solid #5BE3FF;  
   }
 }
 

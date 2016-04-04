@@ -1,0 +1,38 @@
+$medium-layout-width: 620px;
+$large-layout-width: 960px;
+
+.sc-layout {
+
+  &.sm-type-centered {
+    text-align: center;
+  }
+
+  // Takes all space
+  &.sm-width-full {
+    width: 100%;
+  }
+
+  // Medium sized area, centered
+  &.sm-width-medium {
+    max-width: $medium-layout-width;
+    margin: 0px auto;
+  }
+
+  &.sm-width-large {
+    max-width: $large-layout-width;
+    margin: 0px auto;
+  }
+
+  // When used inside layouts paragraphs and headings get some
+  // padding by default.
+  // 
+  // TODO: maybe this should be activated explicitly thrugh a
+  // Prose component that turns on the text paddings.
+  > p {
+    padding-bottom: $default-padding;
+  }
+
+  > h1, h2, h3, h4 {
+    padding-bottom: $default-padding;
+  }
+}

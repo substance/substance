@@ -109,7 +109,7 @@ CollabServer.Prototype = function() {
         type: 'syncDone',
         documentId: args.documentId,
         version: result.version,
-        changes: result.changes,
+        serverChange: result.serverChange,
         collaborators: collaborators
       });
 

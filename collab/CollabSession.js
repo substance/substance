@@ -153,7 +153,7 @@ CollabSession.Prototype = function() {
     a CollabSession reference. Otherwise you will leak memory
   */
   this.dispose = function() {
-    // This happens on a reconnect
+    this.disconnect();
     this.collabClient.off(this);
   };
 
@@ -232,6 +232,7 @@ CollabSession.Prototype = function() {
         version: this.version,
         change: this.serializeChange(nextChange)
       };
+
       this._send(msg);
       this._pendingChange = nextChange;
 
@@ -249,16 +250,13 @@ CollabSession.Prototype = function() {
     the collaborators (=selections etc.)
   */
   this.syncDone = function(args) {
-    var changes = args.changes;
+    var serverChange = args.serverChange;
     var collaborators = args.collaborators;
     var serverVersion = args.version;
-    if (changes && changes.length > 0) {
-      // There have been changes on the server since the doc was opened
-      // the last time
-      changes.forEach(function(change) {
-        change = this.deserializeChange(change);
-        this._applyRemoteChange(change);
-      }.bind(this));
+
+    if (serverChange) {
+      serverChange = this.deserializeChange(serverChange);
+      this._applyRemoteChange(serverChange);
     }
 
     this.version = serverVersion;
@@ -268,24 +266,28 @@ CollabSession.Prototype = function() {
     // here as we know the next sync will be triggered soon. And if
     // followed by an idle phase (_nextChange = null) will give us
     // the latest collaborator records
-    if (!this._nextChange) {
-      // We will not update collaborator selections if we know the
-      // last sync was just there to broadcast our own selection
-      // Maybe we want a separate protocol method for that again to 
-      // eliminate extra noise
-      if (this._pendingChange.ops.length > 0 || changes.length>0) {
-        this._updateCollaborators(collaborators);
-      }
+
+    this._updateCollaborators(collaborators);
+    if (this._nextChange) {
+      this._transformCollaboratorSelections(this._nextChange);
     }
 
     // Important: after sync is done we need to reset _pendingChange and _error
     // In this state we can safely listen to 
     this._pendingChange = null;
+    this._error = null;
 
     // Each time the sync worked we consider the system connected
     this._connected = true;
+
+    // TODO: this would trigger too many renders potentially
+    // once we have our phases in place we can do this in one go
+    if (serverChange) {
+      this._notifyChangeListeners(serverChange, { replay: false, remote: true });  
+    }
+
+    this.emit('collaborators:changed');
     this.emit('connected');
-    this._error = null;
 
     // Attempt to sync again (maybe we have new local changes)
     this._requestSync();
@@ -368,18 +370,18 @@ CollabSession.Prototype = function() {
   /*
     Apply a change to the document
   */
-  this._applyRemoteChange = function(change/*, collaboratorId, collaborator*/) {
+  this._applyRemoteChange = function(change) {
     this.stage._apply(change);
     this.doc._apply(change);
 
-    // QUESTION: will this manipulate the change?
+    // Only undo+redo history is updated according to the new change
     this._transformLocalChangeHistory(change);
-    this._transformSelections(change);
+    this._transformSelection(change);
 
     // We need to notify the change listeners so the UI gets updated
     // We pass replay: false, so this does not become part of the undo
     // history.
-    this._notifyChangeListeners(change, { replay: false, remote: true });
+    // this._notifyChangeListeners(change, { replay: false, remote: true });
     return change;
   };
 
@@ -406,6 +408,12 @@ CollabSession.Prototype = function() {
     return this._connected;
   };
 
+  /*
+    IDEA: we could check if anything changes and only then
+    emit the collaborators:changed event
+    this would solve cases where the user selection gets destroyed
+    because of many collaboratorSelection updates
+  */
   this._updateCollaborators = function(collaborators) {
     forEach(collaborators, function(collaborator, collaboratorId) {
       if (collaborator) {
@@ -421,7 +429,7 @@ CollabSession.Prototype = function() {
         delete this.collaborators[collaboratorId];
       }
     }.bind(this));
-    this.emit('collaborators:changed');
+    // this.emit('collaborators:changed');
   };
 
   /*
@@ -435,21 +443,23 @@ CollabSession.Prototype = function() {
     ignore the update. We will receive all server updates on the next syncDone.
   */
   this.update = function(args) {
-    var change = args.change;
+    var serverChange = args.change;
     var collaborators = args.collaborators;
     var serverVersion = args.version;
 
     if (!this._nextChange && !this._pendingChange) {
-      if (change) {
-        change = this.deserializeChange(change);
-        this._applyRemoteChange(change);
+      if (serverChange) {
+        serverChange = this.deserializeChange(serverChange);
+        this._applyRemoteChange(serverChange);
       }
-
       if (serverVersion) {
         this.version = serverVersion;
       }
-
       this._updateCollaborators(collaborators);
+      if (serverChange) {
+        this._notifyChangeListeners(serverChange, { replay: false, remote: true });  
+      }
+      this.emit('collaborators:changed');
     } else {
       console.log('skipped update. we wait for a sync to complete');
     }
