@@ -153,7 +153,7 @@ CollabSession.Prototype = function() {
     a CollabSession reference. Otherwise you will leak memory
   */
   this.dispose = function() {
-    // This happens on a reconnect
+    this.disconnect();
     this.collabClient.off(this);
   };
 
