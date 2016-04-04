@@ -1,0 +1,19 @@
+.sc-input {
+  width: 100%;
+  max-width: 500px;
+  // padding: 5px 30px;
+  height: 40px;
+  padding: 0px 10px;
+  line-height: 40px;
+  border: 1px solid #ddd;
+
+  &:focus {
+    background: #fff;
+    outline: 2px solid #5BE3FF;
+  }
+
+  &.sm-centered {
+    text-align: center;
+  }
+}
+

@@ -1,6 +1,12 @@
 /* Inline Elements: Defaults
 ------------------------------------------------------- */
 
+$h1-font-size: 26px;
+$h2-font-size: 22px;
+$h3-font-size: 18px;
+$h4-font-size: 16px;
+
+
 body,
 input,
 textarea {
@@ -18,28 +24,20 @@ h1, h2, h3, h4, h5, h6 {
 }
 
 h1 {
-  font-size:30px;
-  line-height:40px;
+  font-size: $h1-font-size;
 }
 
 h2 {
-  font-size:30px;
-  line-height:30px;
-  padding-top:20px;
-  padding-bottom:10px;
+  font-size: $h2-font-size;
 }
 
 h3 {
-  font-size:22px;
-  line-height:20px;
-  padding-top:10px;
-  padding-bottom:10px;
+  font-size: $h3-font-size;
 }
 
+// Not recommended to use
 h4, h5, h6 {
-  font-size:15px;
-  line-height:20px;
-  padding-bottom:10px;
+  font-size: $h4-font-size;
 }
 
 .strong,
@@ -50,6 +48,16 @@ strong {
 .emphasis, em { font-style: italic; }
 
 /* Links */
-a { color:#2079DC; text-decoration:none; }
-a.active, a:hover { color:#63b6e5; }
+a {
+  color:#2079DC;
+  text-decoration:none; 
+
+  &.active, &:hover {
+    color:#63b6e5;
+  }
+
+  &:focus {
+    outline: 2px solid #5BE3FF;  
+  }
+}
 

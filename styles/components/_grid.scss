@@ -7,9 +7,19 @@
     box-sizing: border-box;
   }
 
+  > .row:before,
+  > .row:after {
+      content: " ";
+      display: table;
+  }
+
+  > .row:after {
+      clear: both;
+  }
+
   // Row styles
   > .se-row {
-    overflow: auto; // clear floats
+    // overflow: hidden; // clear floats
 
     > .se-cell {
       position: relative;

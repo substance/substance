@@ -10,4 +10,9 @@
   &:focus {
     outline: 2px solid #5BE3FF;  
   }
+
+  &:disabled {
+    opacity: 0.4;
+    cursor: not-allowed;
+  }
 }

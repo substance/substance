@@ -10,6 +10,9 @@ Button.Prototype = function() {
   this.render = function() {
     var el = $$('button').addClass('sc-button');
     el.append(this.props.children);
+    if (this.props.disabled) {
+      el.attr({disabled: 'disabled'});
+    }
     return el;
   };
 };
