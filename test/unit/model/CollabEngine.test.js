@@ -132,7 +132,6 @@ QUnit.test('New collaborator enters with a change that needs rebasing', function
     }, function(err, result) {
       assert.isNullOrUndefined(err, 'Should not error');
       assert.equal(result.version, 3);
-      console.log('result.change', result);
       assert.ok(result.serverChange, 'There should be a server change');
       assert.notDeepEqual(result.change, insertTextChange2, 'Tranformed change should differ from original change');
       done();
