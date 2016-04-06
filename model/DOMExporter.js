@@ -4,6 +4,7 @@ var oo = require('../util/oo');
 var extend = require('lodash/object/extend');
 var Fragmenter = require('./Fragmenter');
 var Registry = require('../util/Registry');
+var encodeXMLEntities = require('../util/encodeXMLEntities');
 
 function DOMExporter(config) {
   if (!config.converters) {
@@ -113,7 +114,7 @@ DOMExporter.Prototype = function() {
 
     var annotator = new Fragmenter();
     annotator.onText = function(context, text) {
-      context.children.push(text);
+      context.children.push(encodeXMLEntities(text));
     };
     annotator.onEnter = function(fragment) {
       var anno = fragment.node;
