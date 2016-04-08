@@ -291,6 +291,10 @@ function _extendClass(ParentClass) {
   // this ctor is used when extend is not provided with a constructor function.
   function AnonymousClass() {
     ParentClass.apply(this, arguments);
+
+    if (this.initialize) {
+      this.initialize();
+    }
   }
 
   var args = Array.prototype.slice.call(arguments, 1);
