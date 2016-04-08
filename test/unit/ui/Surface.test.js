@@ -5,6 +5,7 @@ require('../qunit_extensions');
 var Component = require('../../../ui/Component');
 var simple = require('../../fixtures/simple');
 var createAnnotation = require('../../../model/transform/createAnnotation');
+var DocumentSession = require('../../../model/DocumentSession');
 var TestContainerEditor = require('./TestContainerEditor');
 
 var components = {
@@ -16,8 +17,10 @@ QUnit.uiModule('ui/Surface');
 // This test was added to cover issue #82
 QUnit.uiTest("Set the selection after creating annotation.", function(assert) {
   var doc = simple();
+  var documentSession = new DocumentSession(doc);
   var app = Component.mount(TestContainerEditor, {
     doc: doc,
+    documentSession: documentSession,
     config: {
       controller: {
         components: components,
