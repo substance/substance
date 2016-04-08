@@ -74,7 +74,7 @@ QUnit.uiTest("Copying a property selection", function(assert) {
 
   var htmlDoc = DOMElement.parseHTML(clipboardData.data['text/html']);
   var body = htmlDoc.find('body');
-  var childNodes = body.childNodes;
+  var childNodes = body.getChildNodes();
   assert.equal(childNodes.length, 1, "There should be only one element");
   var el = childNodes[0];
   assert.equal(el.nodeType, 'text', "HTML element should be a text node.");
@@ -107,7 +107,7 @@ QUnit.uiTest("Copying a container selection", function(assert) {
   assert.equal(clipboardData.data['text/plain'], TEXT.join('\n'), "Plain text should be correct.");
 
   var htmlDoc = DOMElement.parseHTML(clipboardData.data['text/html']);
-  var elements = htmlDoc.find('body').children;
+  var elements = htmlDoc.find('body').getChildren();
   assert.equal(elements.length, 3, "HTML should consist of three elements.");
   var p1 = elements[0];
   assert.equal(p1.attr('data-id'), 'p1', "First element should have correct data-id.");

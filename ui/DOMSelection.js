@@ -215,7 +215,8 @@ DOMSelection.Prototype = function() {
   this._getCoordinate = function(node, offset, options) {
     // Trying to apply the most common situation first
     // and after that covering known edge cases
-    var coor = TextPropertyComponent.getCoordinate(this.surface.el, node, offset);
+    var el = this.surface.getNativeElement();
+    var coor = TextPropertyComponent.getCoordinate(el, node, offset);
     if (!coor) {
       coor = this._searchForCoordinate(node, offset, options);
     }
@@ -236,7 +237,8 @@ DOMSelection.Prototype = function() {
   */
   this._searchForCoordinate = function(node, offset, options) {
     options = options || {};
-    var elements = this.surface.el.querySelectorAll('*[data-path]');
+    var el = this.surface.getNativeElement();
+    var elements = el.querySelectorAll('*[data-path]');
     var idx, idx1, idx2, cmp1, cmp2;
     idx1 = 0;
     idx2 = elements.length-1;

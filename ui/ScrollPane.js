@@ -1,6 +1,5 @@
 'use strict';
 
-var $ = require('../util/jquery');
 var platform = require('../util/platform');
 var Component = require('./Component');
 var Scrollbar = require('./Scrollbar');
@@ -117,7 +116,7 @@ ScrollPane.Prototype = function() {
   */
   this.getHeight = function() {
     var scrollableEl = this.getScrollableElement();
-    return $(scrollableEl).height();
+    return scrollableEl.height;
   };
 
   /**
@@ -126,8 +125,8 @@ ScrollPane.Prototype = function() {
   this.getContentHeight = function() {
     var contentHeight = 0;
     var contentEl = this.refs.content.el;
-    $(contentEl).children().each(function() {
-     contentHeight += $(this).outerHeight();
+    contentEl.childNodes.forEach(function(el) {
+      contentHeight += el.getOuterHeight();
     });
     return contentHeight;
   };
@@ -151,7 +150,7 @@ ScrollPane.Prototype = function() {
   */
   this.getScrollPosition = function() {
     var scrollableEl = this.getScrollableElement();
-    return Math.floor($(scrollableEl).scrollTop() + 1);
+    return Math.floor(scrollableEl.getProperty('scrollTop') + 1);
   };
 
   /**
@@ -161,18 +160,18 @@ ScrollPane.Prototype = function() {
   */
   this.getPanelOffsetForElement = function(el) {
     // initial offset
-    var offset = $(el).position().top;
+    var offset = el.getPosition().top;
 
     // Now look at the parents
     function addParentOffset(el) {
       var parentEl = el.parentNode;
 
       // Reached the content wrapper element or the parent el. We are done.
-      if ($(el).hasClass('se-content') || !parentEl) return;
+      if (el.hasClass('se-content') || !parentEl) return;
 
       // Found positioned element (calculate offset!)
-      if ($(el).css('position') === 'absolute' || $(el).css('position') === 'relative') {
-        offset += $(el).position().top;
+      if (el.getStyle('position') === 'absolute' || el.getStyle('position') === 'relative') {
+        offset += el.getPosition().top;
       }
       addParentOffset(parentEl);
     }
@@ -188,10 +187,10 @@ ScrollPane.Prototype = function() {
   */
   this.scrollTo = function(componentId) {
     var scrollableEl = this.getScrollableElement();
-    var targetNode = $(scrollableEl).find('*[data-id="'+componentId+'"]')[0];
+    var targetNode = scrollableEl.find('*[data-id="'+componentId+'"]');
     if (targetNode) {
       var offset = this.getPanelOffsetForElement(targetNode);
-      $(scrollableEl).scrollTop(offset);
+      scrollableEl.setProperty('scrollTop', offset);
     } else {
       console.warn(componentId, 'not found in scrollable container');
     }

@@ -78,9 +78,10 @@ QUnit.test("Exporting meta", function(assert) {
 });
 
 QUnit.test("Exporting image", function(assert) {
-  var img = doc.create({ type: 'image', id: 'img1', 'src': 'img1.png', 'previewSrc': 'img1preview.png' });
+  var data = { type: 'image', id: 'img1', 'src': 'img1.png', 'previewSrc': 'img1preview.png' };
+  var img = doc.create(data);
   var el = exporter.convertNode(img);
-  var actual = el.serialize();
-  var expected = '<image id="img1" src="img1.png" preview-src="img1preview.png"/>';
-  assert.equal(actual, expected);
+  assert.equal(el.tagName.toLowerCase(), 'image');
+  assert.equal(el.id, 'img1');
+  assert.equal(el.getAttribute('src'), 'img1.png');
 });

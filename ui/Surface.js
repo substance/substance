@@ -121,7 +121,7 @@ Surface.Prototype = function() {
       this.domSelection = new DOMSelection(this);
       this.clipboard.didMount();
       // Document Change Events
-      this.domObserver.observe(this.el, this.domObserverConfig);
+      this.domObserver.observe(this.el.getNativeElement(), this.domObserverConfig);
       this._rerenderSelection();
     }
   };
@@ -298,7 +298,7 @@ Surface.Prototype = function() {
   };
 
   this.getDomNodeForId = function(nodeId) {
-    return this.getElement().querySelector('*[data-id="'+nodeId+'"]');
+    return this.el.getNativeElement().querySelector('*[data-id="'+nodeId+'"]');
   };
 
   /* Editing behavior */
@@ -642,7 +642,7 @@ Surface.Prototype = function() {
     // if gets focus, but selection is null or not within this surface
     // we
     if (!sel || sel.isNull() || sel.surfaceId !== this.getName()) {
-      var first = this.el.querySelector('*[data-path]');
+      var first = this.el.getNativeElement().querySelector('*[data-path]');
       if (first) {
         var path = first.dataset.path.split('.');
         this.setSelection(Selection.create(path, 0));
@@ -791,8 +791,9 @@ Surface.Prototype = function() {
       if (sel.isNull()) {
         return {};
       } else {
+        var nativeEl = this.el.getNativeElement();
         if (sel.isCollapsed()) {
-          var cursorEl = this.el.querySelector('.se-cursor');
+          var cursorEl = nativeEl.querySelector('.se-cursor');
           if (cursorEl) {
             return cursorEl.getBoundingClientRect();
           } else {
@@ -800,7 +801,7 @@ Surface.Prototype = function() {
             return {};
           }
         } else {
-          var selFragments = this.el.querySelectorAll('.se-selection-fragment');
+          var selFragments = nativeEl.querySelectorAll('.se-selection-fragment');
           if (selFragments.length > 0) {
             var bottom = 0;
             var top = 0;
