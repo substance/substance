@@ -6,6 +6,7 @@ require('../qunit_extensions');
 
 var isArray = require('lodash/isArray');
 var DOMSelection = require('../../../ui/DOMSelection');
+var DefaultDOMElement = require('../../../ui/DefaultDOMElement');
 var TextPropertyComponent = require('../../../ui/TextPropertyComponent');
 var Document = require('../../../model/Document');
 var ContainerSelection = require('../../../model/ContainerSelection');
@@ -29,8 +30,8 @@ StubDoc.prototype.get = function(path) {
 
 StubDoc.prototype.createSelection = Document.prototype.createSelection;
 
-function StubSurface(el, containerId) {
-  this.el = el;
+function StubSurface(nativeEl, containerId) {
+  this.el = DefaultDOMElement.wrapNativeElement(nativeEl);
   this.doc = new StubDoc();
   this.containerId = containerId;
 
@@ -46,12 +47,16 @@ function StubSurface(el, containerId) {
     return this.containerId;
   };
 
+  this.getNativeElement = function() {
+    return this.el.getNativeElement();
+  };
+
   this._getTextPropertyComponent = function(path) {
     var pathStr = path;
     if (isArray(path)) {
       pathStr = path.join('.');
     }
-    var el = window.document.body.querySelector('*[data-path="'+pathStr+'"]');
+    var el = this.el.find('*[data-path="'+pathStr+'"]');
     if (!el) {
       return null;
     }

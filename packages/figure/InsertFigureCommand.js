@@ -2,7 +2,7 @@
 
 var uuid = require('../../util/uuid');
 var SurfaceCommand = require('../../ui/SurfaceCommand');
-var $ = require('../../util/jquery');
+var DefaultDOMElement = require('../../ui/DefaultDOMElement');
 
 var InsertFigureCommand = SurfaceCommand.extend({
 
@@ -33,16 +33,17 @@ var InsertFigureCommand = SurfaceCommand.extend({
     // Return if command is disabled
     if (state.disabled) return;
 
-    var $surface = surface.$el;
-    var $inputEl = $('<input type="file" id="file_input" style="opacity: 0;">');
-    $surface.append($inputEl);
-    $inputEl.click();
+    var surfaceEl = surface.el;
+    var inputEl = DefaultDOMElement.parseHTML('<input type="file" id="file_input" style="opacity: 0;">');
+    surfaceEl.appendChild(inputEl);
+    inputEl.click();
 
-    $inputEl.on('change', function(/*e*/) {
-      var file = $inputEl[0].files[0];
+    inputEl.on('change', function() {
+      var files = inputEl.getProperty('files');
+      var file = files[0];
 
       // We no longer need the file input
-      $inputEl.remove();
+      inputEl.remove();
 
       controller.uploadFile(file, function(err, figureUrl) {
         // NOTE: we are providing a custom beforeState, to make sure

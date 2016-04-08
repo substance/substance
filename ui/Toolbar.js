@@ -2,7 +2,7 @@
 
 var Component = require('./Component');
 var $$ = Component.$$;
-var $ = require('../util/jquery');
+var DefaultDOMElement = require('./DefaultDOMElement');
 
 /**
   A simple container holding editing tools.
@@ -89,14 +89,12 @@ Dropdown.Prototype = function() {
   this.handleDropdownToggle = function(e) {
     e.preventDefault();
     var open = this.state.open;
-    var ctx = this;
     if (open) return;
     this.setState({open: !this.state.open});
+    // TODO: why do we need to do this delayed?
     setTimeout(function() {
-      $(window).one('click', function(e) {
-        /*jshint unused: false */
-        ctx.close();
-      });
+      var windowEl = DefaultDOMElement.wrapNativeElement(window);
+      windowEl.on('click', this.close, this, { once: true });
     }, 0);
   };
 

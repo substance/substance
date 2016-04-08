@@ -15,12 +15,12 @@ var _loadDocument = function(cb) {
   });
 };
 
-$(function() {
+window.onload = function() {
   var doc = new Documentation();
   window.doc = doc;
   _loadDocument(function(err, doc) {
     Component.mount(DocumentationReader, {
       doc: doc
-    }, $('body'));
+    }, 'body');
   });
-});
+};

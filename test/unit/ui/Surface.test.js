@@ -30,7 +30,7 @@ QUnit.uiTest("Set the selection after creating annotation.", function(assert) {
   var sel = doc.createSelection(['p1', 'content'], 0, 5);
   surface.setSelection(sel);
   // this should blur the surface which should persist the selection
-  surface.$el.blur();
+  surface.el.blur();
   surface.transaction(function(tx, args) {
     args.selection = sel;
     args.node = {type: "strong"};
