@@ -39,10 +39,6 @@ VirtualElement.Prototype = function() {
     return this.parent;
   };
 
-  this.getOwner = function() {
-    return this._owner;
-  };
-
   /**
     Associates a reference identifier with this element.
 
@@ -336,7 +332,7 @@ VirtualHTMLElement.Prototype = function() {
       listener = arguments[0];
     } else {
       options = options || {};
-      options.context = options.context || this.getOwner();
+      options.context = options.context || this._owner._comp;
       listener = new DOMElement.EventListener(eventName, handler, options);
     }
     this.eventListeners.push(listener);
@@ -450,6 +446,10 @@ function VirtualComponent(ComponentClass, props) {
 VirtualComponent.Prototype = function() {
 
   this._isVirtualComponent = true;
+
+  this.getComponent = function() {
+    return this._comp;
+  };
 
   // Note: for VirtualComponentElement we put children into props
   // so that the render method of ComponentClass can place it.

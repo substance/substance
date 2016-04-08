@@ -5,18 +5,13 @@ require('../qunit_extensions');
 var spy = require('../../spy');
 var isEqual = require('lodash/isEqual');
 var Component = require('../../../ui/Component');
+var RenderingEngine = require('../../../ui/RenderingEngine');
 
 var _withSpiesEnabled = false;
 
 function enableSpies() {
   _withSpiesEnabled = true;
 }
-
-QUnit.module('ui/Component', {
-  beforeEach: function() {
-    _withSpiesEnabled = false;
-  }
-});
 
 function TestComponent() {
   TestComponent.super.apply(this, arguments);
@@ -55,6 +50,15 @@ function renderTestComponent(renderFunc, props) {
   }
   return comp;
 }
+
+function _ComponentTests(debug) {
+
+QUnit.module('ui/Component'+(debug?'(debug)':''), {
+  beforeEach: function() {
+    _withSpiesEnabled = false;
+    RenderingEngine.DEBUG = debug;
+  }
+});
 
 QUnit.test("Throw error when render method is not returning an element", function(assert) {
   var MyComponent = TestComponent.extend({
@@ -487,6 +491,58 @@ QUnit.test("Updating HTML attributes in nested components", function(assert) {
   assert.equal(comp.refs.child.css('width'), "50px", "Child component should have updated css style.");
 });
 
+QUnit.test("Special nesting situation", function(assert) {
+  // problem was observed in TOCPanel where components (tocEntry) are ingested via dependency-injection
+  // and appended to a 'div' element (tocEntries) which then was ingested into a ScrollPane.
+  // The order of _capturing must be determined correctly, i.e. first the ScrollPane needs to
+  // be captured, so that the parent of the 'div' element (tocEntries) is known.
+  // only then the tocEntry components can be captured.
+  function Parent() {
+    Parent.super.apply(this, arguments);
+
+    this.render = function($$) {
+      var el = $$('div');
+      // grandchildren wrapped into a 'div' element
+      var grandchildren = $$('div').append(
+        $$(GrandChild, { name: 'foo' }).ref('foo'),
+        $$(GrandChild, { name: 'bar' }).ref('bar')
+      );
+      el.append(
+        // grandchildren wrapper ingested into Child component
+        $$(Child).append(grandchildren)
+      );
+      return el;
+    };
+  }
+  TestComponent.extend(Parent);
+
+  function Child() {
+    Child.super.apply(this, arguments);
+
+    this.render = function($$) {
+      return $$('div').append(this.props.children);
+    };
+  }
+  TestComponent.extend(Child);
+
+  function GrandChild() {
+    GrandChild.super.apply(this, arguments);
+
+    this.render = function($$) {
+      return $$('div').append(this.props.name);
+    };
+  }
+  TestComponent.extend(GrandChild);
+
+  var comp = Parent.static.render();
+  var foo = comp.refs.foo;
+  var bar = comp.refs.bar;
+  assert.isDefinedAndNotNull(foo, "Component should have a ref 'foo'.");
+  assert.equal(foo.textContent, 'foo', "foo should have textContent 'foo'");
+  assert.isDefinedAndNotNull(bar, "Component should have a ref 'bar'.");
+  assert.equal(bar.textContent, 'bar', "bar should have textContent 'bar'");
+});
+
 /* ##################### Refs: Preserving Components ##########################*/
 
 QUnit.test("Children without a ref are not retained", function(assert) {
@@ -885,3 +941,10 @@ QUnit.test("#312: refs should be bound to the owner, not to the parent.", functi
   assert.isDefinedAndNotNull(comp.refs.foo, 'Ref should be bound to owner.');
   assert.equal(comp.refs.foo.text(), 'foo', 'Ref should point to the right component.');
 });
+
+}
+
+// with RenderingEngine in debug mode
+_ComponentTests(true);
+// and without
+_ComponentTests(false);
