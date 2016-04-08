@@ -8,18 +8,12 @@ var VirtualElement = require('./VirtualElement');
 var DOMElement = require('./DOMElement');
 var DefaultDOMElement = require('./DefaultDOMElement');
 
-var DEBUG = true;
-
 function RenderingEngine() {}
 
 RenderingEngine.Prototype = function() {
 
   this._rerender = function(comp) {
-    var vel = new VirtualElement.Component(comp.constructor);
-    vel._comp = comp;
-    if (comp.__htmlConfig__) {
-      vel._mergeHTMLConfig(comp.__htmlConfig__);
-    }
+    var vel = _createWrappingVirtualComponent(comp);
     _capture(vel, 'forceCapture');
     if (vel._isVirtualComponent) {
       _render(vel._content);
@@ -83,7 +77,7 @@ RenderingEngine.Prototype = function() {
         comp._setProps(vel.props);
       }
       if (needRerender) {
-        var context = new CaptureContext(comp);
+        var context = new CaptureContext(vel);
         var content = comp.render(context.$$);
         if (comp.__htmlConfig__) {
           content._mergeHTMLConfig(comp.__htmlConfig__);
@@ -94,7 +88,7 @@ RenderingEngine.Prototype = function() {
         _prepareVirtualComponent(comp, content);
         // Descending
         // TODO: only do this in DEBUG mode
-        if (DEBUG) {
+        if (RenderingEngine.DEBUG) {
           // in this case we use the render() function as iterating function, where
           // $$ is a function which creates components and renders them recursively.
           // NOTE: calling $$ here will use _capture for capturing child components
@@ -478,7 +472,7 @@ RenderingEngine.Prototype = function() {
   DescendingContext.Prototype = function() {
     this._createComponent = function() {
       var vel = this.elements[this.pos++];
-      if (!vel.__isCaptured__ && vel.parent) {
+      if (!vel.__isCaptured__ && this._ancestorsReady(vel.parent)) {
         _capture(vel);
         this.updates++;
       }
@@ -493,6 +487,15 @@ RenderingEngine.Prototype = function() {
     this.reset = function() {
       this.pos = 0;
       this.updates = 0;
+    };
+    this._ancestorsReady = function(vel) {
+      while (vel) {
+        if (vel === this.owner || vel.__isCaptured__) {
+          return true;
+        }
+        vel = vel.parent;
+      }
+      return false;
     };
   };
   oo.initClass(DescendingContext);
@@ -521,8 +524,20 @@ CaptureContext.prototype._createComponent = function() {
   return vel;
 };
 
-RenderingEngine.createContext = function(owner) {
-  return new CaptureContext(owner);
+function _createWrappingVirtualComponent(comp) {
+  var vel = new VirtualElement.Component(comp.constructor);
+  vel._comp = comp;
+  if (comp.__htmlConfig__) {
+    vel._mergeHTMLConfig(comp.__htmlConfig__);
+  }
+  return vel;
+}
+
+RenderingEngine.createContext = function(comp) {
+  var vel = _createWrappingVirtualComponent(comp);
+  return new CaptureContext(vel);
 };
+
+RenderingEngine.DEBUG = false;
 
 module.exports = RenderingEngine;

@@ -1,6 +1,5 @@
 "use strict";
 
-var each = require('lodash/each');
 var Component = require('./Component');
 var ScrollPane = require('./ScrollPane');
 var Icon = require('./FontAwesomeIcon');
@@ -29,7 +28,9 @@ TOCPanel.Prototype = function() {
       .addClass("se-toc-entries")
       .ref('tocEntries');
 
-    each(toc.getEntries(), function(entry) {
+    var entries = toc.getEntries();
+    for (var i = 0; i < entries.length; i++) {
+      var entry = entries[i];
       var level = entry.level;
 
       var tocEntryEl = $$('a')
@@ -51,7 +52,7 @@ TOCPanel.Prototype = function() {
         tocEntryEl.addClass("sm-active");
       }
       tocEntries.append(tocEntryEl);
-    }.bind(this));
+    }
 
     var el = $$('div').addClass('sc-toc-panel').append(
       $$(ScrollPane).ref('panelEl').append(
