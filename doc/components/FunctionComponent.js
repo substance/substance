@@ -2,7 +2,6 @@
 
 var pluck = require('../../util/pluck');
 var Component = require('../../ui/Component');
-var $$ = Component.$$;
 
 var Heading = require('./HeadingComponent');
 var Params = require('./ParamsComponent');
@@ -14,7 +13,7 @@ function FunctionComponent() {
 
 FunctionComponent.Prototype = function() {
 
-  this.render = function() {
+  this.render = function($$) {
     var node = this.props.node;
     // Constructor params
     var el = $$('div')
@@ -40,12 +39,6 @@ FunctionComponent.Prototype = function() {
     return el;
   };
 
-  this.renderSignature = function() {
-    var node = this.props.node;
-    var paramSig = pluck(node.params, 'name').join(', ');
-    var signature = [node.name, '(', paramSig, ')'];
-    return $$('div').addClass('se-signature').append(signature);
-  };
 };
 
 Component.extend(FunctionComponent);

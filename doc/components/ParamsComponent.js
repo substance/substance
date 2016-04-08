@@ -1,16 +1,15 @@
 'use strict';
 
 var Component = require('../../ui/Component');
-var $$ = Component.$$;
-
 var CrossLink = require('./CrossLinkComponent');
 
 function ParamsComponent() {
-  Component.apply(this, arguments);
+  ParamsComponent.super.apply(this, arguments);
 }
 
 ParamsComponent.Prototype = function() {
-  this.render = function() {
+
+  this.render = function($$) {
     var el = $$('div').addClass('sc-params');
     var params = this.props.params;
     var returns = this.props.returns;
@@ -46,4 +45,5 @@ ParamsComponent.Prototype = function() {
 };
 
 Component.extend(ParamsComponent);
+
 module.exports = ParamsComponent;

@@ -2,7 +2,6 @@
 
 var each = require('lodash/each');
 var sortBy = require('lodash/sortBy');
-var $$ = require('../../ui/Component').$$;
 var MemberContainerComponent = require('./MemberContainerComponent');
 var CrossLink = require('./CrossLinkComponent');
 
@@ -14,22 +13,22 @@ MemberIndexComponent.Prototype = function() {
 
   var _super = MemberIndexComponent.super.prototype;
 
-  this.render = function() {
+  this.render = function($$) {
     var el = $$('div').addClass('sc-member-index');
-    el.append(this._renderMembers());
+    el.append(this._renderMembers($$));
     return el;
   };
 
-  this._renderMembers = function() {
-    var children = _super._renderMembers.call(this);
+  this._renderMembers = function($$) {
+    var children = _super._renderMembers.call(this, $$);
     var node = this.props.node;
     if (node.type === 'class' && node.superClass) {
-      children = children.concat(this._renderInheritedMembers());
+      children = children.concat(this._renderInheritedMembers($$));
     }
     return children;
   };
 
-  this._renderInheritedMembers = function() {
+  this._renderInheritedMembers = function($$) {
     var elements = [];
     var config = this.context.config;
     var node = this.props.node;
@@ -38,7 +37,7 @@ MemberIndexComponent.Prototype = function() {
     each(inheritedMembers, function(members, group) {
       members = sortBy(members, 'id');
       var cat = categories[group];
-      var catEl = _super._renderMemberCategory.call(this, cat, members);
+      var catEl = _super._renderMemberCategory.call(this, $$, cat, members);
       catEl.insertAt(0,
         $$('span').addClass('se-label').append(this.i18n.t('inherited-' + cat.name))
       );
@@ -47,7 +46,7 @@ MemberIndexComponent.Prototype = function() {
     return elements;
   };
 
-  this._renderMemberCategory = function(cat) {
+  this._renderMemberCategory = function($$, cat) {
     var catEl = _super._renderMemberCategory.apply(this, arguments);
     catEl.insertAt(0,
       $$('span').addClass('se-label').append(this.i18n.t(cat.name))
@@ -55,7 +54,7 @@ MemberIndexComponent.Prototype = function() {
     return catEl;
   };
 
-  this._renderMember = function(memberNode) {
+  this._renderMember = function($$, memberNode) {
     return $$(CrossLink, {doc: this.props.doc, nodeId: memberNode.id})
       .append(memberNode.name, ' ');
   };
