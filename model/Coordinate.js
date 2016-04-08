@@ -2,7 +2,7 @@
 
 var isArray = require('lodash/isArray');
 var isNumber = require('lodash/isNumber');
-var isArrayEqual = require('../util/isArrayEqual');
+var isEqual = require('lodash/isEqual');
 var oo = require('../util/oo');
 
 // path: the address of a property, such as ['text_1', 'content']
@@ -36,7 +36,7 @@ Coordinate.Prototype = function() {
 
   this.equals = function(other) {
     return (other === this ||
-      (isArrayEqual(other.path, this.path) && other.offset === this.offset) );
+      (isEqual(other.path, this.path) && other.offset === this.offset) );
   };
 
   this.withCharPos = function(offset) {
