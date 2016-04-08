@@ -1,8 +1,6 @@
 'use strict';
 
 var each = require('lodash/each');
-var Component = require('../../ui/Component');
-var $$ = Component.$$;
 var SurfaceTool = require('../../ui/SurfaceTool');
 var keys = require('../../util/keys');
 
@@ -14,7 +12,7 @@ var keys = require('../../util/keys');
 */
 
 function SwitchTextType() {
-  SurfaceTool.apply(this, arguments);
+  SwitchTextType.super.apply(this, arguments);
 
   // cursor for keyboard navigation
   this._navIdx = -1;
@@ -27,14 +25,10 @@ SwitchTextType.Prototype = function() {
     return state;
   };
 
-  this.dispose = function() {
-    this.context.toolManager.unregisterTool(this);
-  };
-
   // UI Specific parts
   // ----------------
 
-  this.render = function() {
+  this.render = function($$) {
     var textTypeName = 'No selection';
 
     if (this.state.currentTextType) {

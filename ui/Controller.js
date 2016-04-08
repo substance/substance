@@ -186,10 +186,9 @@ Controller.Prototype = function() {
    * custom Controller class.
    *
    * @abstract
-   * @return {ui/Component.VirtualNode} VirtualNode created using Component.$$
+   * @return {ui/VirtualElement} virtual element created using $$
    */
-  this.render = function() {
-    var $$ = Component.$$;
+  this.render = function($$) {
     return $$('div')
       .addClass('sc-controller')
       .on('keydown', this.handleApplicationKeyCombos);

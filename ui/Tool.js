@@ -2,7 +2,6 @@
 
 var Component = require('./Component');
 var capitalize = require('lodash/capitalize');
-var $$ = Component.$$;
 
 /**
   Abstract Tool interface for editing and annotation tools.
@@ -42,7 +41,7 @@ Tool.Prototype = function() {
   /**
     Default tool rendering. You can override this method to provide your custom markup
   */
-  this.render = function() {
+  this.render = function($$) {
     var el = $$('div')
       .addClass('se-tool');
 

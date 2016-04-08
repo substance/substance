@@ -1,8 +1,5 @@
 'use strict';
 
-var Component = require('../../ui/Component');
-var $$ = Component.$$;
-
 var Controller = require('../../ui/Controller');
 var ContainerEditor = require('../../ui/ContainerEditor');
 var SplitPane = require('../../ui/SplitPane');
@@ -16,13 +13,13 @@ var StrongTool = require('../strong/StrongTool');
 var EmphasisTool = require('../emphasis/EmphasisTool');
 var LinkTool = require('../link/LinkTool');
 
-function Editor() {
-  Controller.apply(this, arguments);
+function ProseEditor() {
+  ProseEditor.super.apply(this, arguments);
 }
 
-Editor.Prototype = function() {
-  // Custom Render method for your editor
-  this.render = function() {
+ProseEditor.Prototype = function() {
+
+  this.render = function($$) {
     var config = this.getConfig();
 
     var tools = [
@@ -55,9 +52,9 @@ Editor.Prototype = function() {
   };
 };
 
-Controller.extend(Editor);
+Controller.extend(ProseEditor);
 
-Editor.static.config = {
+ProseEditor.static.config = {
   // Controller specific configuration (required!)
   controller: {
     // Component registry
@@ -94,4 +91,4 @@ Editor.static.config = {
   }
 };
 
-module.exports = Editor;
+module.exports = ProseEditor;

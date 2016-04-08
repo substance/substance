@@ -4,20 +4,16 @@
 var extend = require('lodash/extend');
 var includes = require('lodash/includes');
 var Component = require('../../ui/Component');
-var $$ = Component.$$;
-
 var SurfaceTool = require('../../ui/SurfaceTool');
 
 function LinkTool() {
-  SurfaceTool.apply(this, arguments);
+  LinkTool.super.apply(this, arguments);
 }
 
 LinkTool.Prototype = function() {
 
-  var _super = Object.getPrototypeOf(this);
-
   this.didMount = function() {
-    _super.didMount.apply(this, arguments);
+    this.super.didMount.call(this);
     var ctrl = this.getController();
     ctrl.on('command:executed', this.onCommandExecuted, this);
   };
@@ -27,21 +23,18 @@ LinkTool.Prototype = function() {
     ctrl.off(this);
   };
 
-  this.render = function() {
-    var el = _super.render.apply(this, arguments);
+  this.render = function($$) {
+    var el = this.super.render.apply(this, arguments);
     el.addClass('sc-link-tool');
-
     if (this.state.mode === 'edit') {
       el.addClass('sm-active');
     }
-
     // When we are in edit mode showing the edit prompt
     if (this.state.mode === 'edit' && this.state.showPrompt) {
       var link = this.getLink();
       var prompt = $$(EditLinkPrompt, {link: link, tool: this});
       el.append(prompt);
     }
-
     return el;
   };
 
@@ -74,7 +67,6 @@ LinkTool.Prototype = function() {
 
   this.deleteLink = function() {
     var link = this.getLink();
-
     this.getSurface().transaction(function(tx) {
       tx.delete(link.id);
     });
@@ -89,10 +81,9 @@ LinkTool.Prototype = function() {
 SurfaceTool.extend(LinkTool);
 
 LinkTool.static.name = 'link';
-LinkTool.static.command = 'link';
 
 function EditLinkPrompt() {
-  Component.apply(this, arguments);
+  EditLinkPrompt.super.apply(this, arguments);
 }
 
 EditLinkPrompt.Prototype = function() {
@@ -106,11 +97,10 @@ EditLinkPrompt.Prototype = function() {
     });
   };
 
-  this.render = function() {
+  this.render = function($$) {
     var link = this.props.link;
     var el = $$('div').addClass('se-prompt');
-
-    el.append([
+    el.append(
       $$('div').addClass('se-prompt-title').append(this.i18n.t('hyperlink')),
       $$('input').attr({type: 'text', placeholder: 'http://your-website.com', value: link.url})
                  .ref('url')
@@ -122,7 +112,7 @@ EditLinkPrompt.Prototype = function() {
              .addClass('se-delete-link')
              .append(this.i18n.t('delete'))
              .on('click', this.onDelete)
-    ]);
+    );
     return el;
   };
 

@@ -1,17 +1,16 @@
 'use strict';
 
 var Component = require('./Component');
-var $$ = Component.$$;
 var DefaultDOMElement = require('./DefaultDOMElement');
 
 /**
   A simple container holding editing tools.
-  
+
   @class
   @component
 
   @example
-  
+
   ```js
   $$(Toolbar).append(
     $$(Toolbar.Group).append(
@@ -26,7 +25,8 @@ function Toolbar() {
 }
 
 Toolbar.Prototype = function() {
-  this.render = function() {
+
+  this.render = function($$) {
     var el = $$("div").addClass("sc-toolbar");
     el.append(this.props.children);
     return el;
@@ -38,10 +38,10 @@ Component.extend(Toolbar);
 /**
   @class Toolbar.Dropdown
   @component
-  
+
   @prop {ui/VirtualDOMElement} name unique editor name
   @example
-  
+
   ```
   $$(Toolbar.Dropdown, {label: $$(Icon, {icon: 'fa-image'}),}).append(
     $$(InsertFigureTool).append(this.i18n.t('insert'))
@@ -63,7 +63,7 @@ Dropdown.Prototype = function() {
 
   // Note: It's important that all children tools are rendered (even if not shown)
   // because only that way we can keep the disabled states accurate
-  this.render = function() {
+  this.render = function($$) {
     var el = $$('div').addClass('se-toolbar-dropdown');
     if (this.state.open) {
       el.addClass('sm-open');
@@ -114,7 +114,7 @@ Component.extend(Dropdown);
   @prop {ui/VirtualDOMElement} name unique editor name
 
   @example
-    
+
   ```js
   $$(Toolbar.Group).append(
     $$(StrongTool).append($$(Icon, {icon: 'fa-bold'}))
@@ -127,11 +127,13 @@ function Group() {
 }
 
 Group.Prototype = function() {
-  this.render = function() {
+
+  this.render = function($$) {
     var el = $$('div').addClass('se-toolbar-group');
     el.append(this.props.children);
     return el;
   };
+
 };
 
 Component.extend(Group);

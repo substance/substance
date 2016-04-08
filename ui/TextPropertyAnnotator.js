@@ -2,9 +2,7 @@
 
 var Surface = require('./Surface');
 var TextPropertyManager = require('../model/TextPropertyManager');
-var Component = require('./Component');
 var TextProperty = require('./TextPropertyComponent');
-var $$ = Component.$$;
 
 /**
   Annotator for a text property. Needs to be instantiated inside a {@link ui/Controller}
@@ -37,11 +35,7 @@ function TextPropertyAnnotator() {
 
 TextPropertyAnnotator.Prototype = function() {
 
-  this.isContainerEditor = function() {
-    return false;
-  };
-
-  this.render = function() {
+  this.render = function($$) {
     var el = $$(this.props.tagName || 'div')
       .addClass("sc-text-property-annotator")
       .append(
@@ -52,6 +46,11 @@ TextPropertyAnnotator.Prototype = function() {
       );
     return el;
   };
+
+  this.isContainerEditor = function() {
+    return false;
+  };
+
 };
 
 Surface.extend(TextPropertyAnnotator);

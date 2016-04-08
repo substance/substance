@@ -3,7 +3,6 @@
 var platform = require('../util/platform');
 var Component = require('./Component');
 var Scrollbar = require('./Scrollbar');
-var $$ = Component.$$;
 
 /**
   Wraps content in a scroll pane.
@@ -62,7 +61,7 @@ ScrollPane.Prototype = function() {
     });
   };
 
-  this.render = function() {
+  this.render = function($$) {
     var el = $$('div')
       .addClass('sc-scroll-pane');
 

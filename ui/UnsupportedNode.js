@@ -1,7 +1,6 @@
 'use strict';
 
 var Component = require('./Component');
-var $$ = Component.$$;
 
 function UnsupportedNodeComponent() {
   Component.apply(this, arguments);
@@ -9,7 +8,7 @@ function UnsupportedNodeComponent() {
 
 UnsupportedNodeComponent.Prototype = function() {
 
-  this.render = function() {
+  this.render = function($$) {
     return $$('pre')
       .addClass("content-node unsupported")
       .attr({

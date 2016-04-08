@@ -1,7 +1,6 @@
 "use strict";
 
 var Component = require('./Component');
-var $$ = Component.$$;
 
 /**
   Renders an annotation. Used internally by different components (e.g. ui/AnnotatedTextComponent)
@@ -29,7 +28,7 @@ function AnnotationComponent() {
 
 AnnotationComponent.Prototype = function() {
 
-  this.render = function() {
+  this.render = function($$) {
     var el = $$('span')
       .attr("data-id", this.props.node.id)
       .addClass(this.getClassNames());

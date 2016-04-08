@@ -1,9 +1,7 @@
 'use strict';
 
 var each = require('lodash/each');
-var Component = require('./Component');
 var ContainerEditor = require('./ContainerEditor');
-var $$ = Component.$$;
 
 /**
   Represents a flow annotator that manages a sequence of nodes in a container. Needs to
@@ -31,12 +29,12 @@ var $$ = Component.$$;
  */
 
 function ContainerAnnotator() {
-  ContainerEditor.apply(this, arguments);
+  ContainerAnnotator.super.apply(this, arguments);
 }
 
 ContainerAnnotator.Prototype = function() {
 
-  this.render = function() {
+  this.render = function($$) {
     var doc = this.getDocument();
     var containerNode = doc.get(this.props.containerId);
 
@@ -59,4 +57,5 @@ ContainerAnnotator.Prototype = function() {
 };
 
 ContainerEditor.extend(ContainerAnnotator);
+
 module.exports = ContainerAnnotator;

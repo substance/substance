@@ -13,7 +13,6 @@ var deleteSelection = require('../model/transform/deleteSelection');
 var DOMSelection = require('./DOMSelection');
 var Clipboard = require('./Clipboard');
 var Component = require('./Component');
-var $$ = Component.$$;
 var UnsupportedNode = require('./UnsupportedNode');
 var keys = require('../util/keys');
 
@@ -74,7 +73,7 @@ function Surface() {
 
 Surface.Prototype = function() {
 
-  this.render = function() {
+  this.render = function($$) {
     var tagName = this.props.tagName || 'div';
     var el = $$(tagName)
       .addClass('sc-surface')
@@ -924,7 +923,7 @@ Surface.Prototype = function() {
   };
 
   // TODO: we could integrate container node rendering into this helper
-  this._renderNode = function(nodeId) {
+  this._renderNode = function($$, nodeId) {
     var doc = this.getDocument();
     var node = doc.get(nodeId);
     var componentRegistry = this.context.componentRegistry || this.props.componentRegistry;

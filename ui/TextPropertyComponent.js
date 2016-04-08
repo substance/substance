@@ -3,8 +3,6 @@
 
 var isNumber = require('lodash/isNumber');
 var AnnotatedTextComponent = require('./AnnotatedTextComponent');
-var Component = require('./Component');
-var $$ = Component.$$;
 var Coordinate = require('../model/Coordinate');
 
 /**
@@ -34,10 +32,10 @@ TextPropertyComponent.Prototype = function() {
 
   var _super = Object.getPrototypeOf(this);
 
-  this.render = function() {
+  this.render = function($$) {
     var path = this.props.path;
 
-    var el = this._renderContent()
+    var el = this._renderContent($$)
       .addClass('sc-text-property')
       .attr({
         'data-path': path.join('.'),
@@ -51,7 +49,7 @@ TextPropertyComponent.Prototype = function() {
     return el;
   };
 
-  this._renderFragment = function(fragment) {
+  this._renderFragment = function($$, fragment) {
     var node = fragment.node;
     var id = node.id;
     var el;
@@ -72,7 +70,7 @@ TextPropertyComponent.Prototype = function() {
         el.addClass('sm-local-user');
       }
     } else {
-      el = _super._renderFragment.call(this, fragment);
+      el = _super._renderFragment.apply(this, arguments);
       if (node.constructor.static.isInline) {
         el.attr({
           'contentEditable': false,
@@ -153,7 +151,7 @@ TextPropertyComponent.Prototype = function() {
   };
 
   this.getDOMCoordinate = function(charPos) {
-    return this._getDOMCoordinate(this.el, charPos);
+    return this._getDOMCoordinate(this.el.getNativeElement(), charPos);
   };
 
   this._getDOMCoordinate = function(el, charPos) {

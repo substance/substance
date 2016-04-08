@@ -1,7 +1,6 @@
 "use strict";
 
 var Component = require('./Component');
-var $$ = Component.$$;
 
 var ICONS_FOR_TYPE = {
   "error": "fa-exclamation-circle",
@@ -24,21 +23,21 @@ var ICONS_FOR_TYPE = {
 
 function StatusBar() {
   Component.apply(this, arguments);
-
-  var ctrl = this.context.controller;
-  var logger = ctrl.getLogger();
-  logger.on('messages:updated', this.handleStatusUpdate, this);
 }
 
 StatusBar.Prototype = function() {
 
+  this.didMount = function() {
+    var logger = this.context.controller.getLogger();
+    logger.on('messages:updated', this.handleStatusUpdate, this);
+  };
+
   this.dispose = function() {
-    var ctrl = this.context.controller;
-    var logger = ctrl.getLogger();
+    var logger = this.context.controller.getLogger();
     logger.off(this);
   };
 
-  this.render = function() {
+  this.render = function($$) {
     var meta = this.props.doc.getDocumentMeta();
     var title = meta ? meta.title : this.i18n.t('untitled');
     var message = this.state.message;
