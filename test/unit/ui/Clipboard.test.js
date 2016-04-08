@@ -7,12 +7,15 @@ var Clipboard = require('../../../ui/Clipboard');
 var DOMElement = require('../../../ui/DOMElement');
 var Component = require('../../../ui/Component');
 var StubSurface = require('./StubSurface');
+var DocumentSession = require('../../../model/DocumentSession');
 var load = require('../load');
 
 var TestContainerEditor = require('./TestContainerEditor');
 var components = {
   "paragraph": require('../../../packages/paragraph/ParagraphComponent')
 };
+
+Clipboard.NO_CATCH = QUnit.config.notrycatch;
 
 QUnit.uiModule('ui/Clipboard');
 
@@ -122,8 +125,10 @@ QUnit.uiTest("Copying a container selection", function(assert) {
 
 function _containerEditorSample() {
   var doc = simple();
+  var documentSession = new DocumentSession(doc);
   var app = Component.mount(TestContainerEditor, {
     doc: doc,
+    documentSession: documentSession,
     config: {
       controller: {
         components: components,
@@ -176,19 +181,17 @@ QUnit.uiTest("Pasting text into ContainerEditor using 'text/html'.", function(as
 
 function _with(assert, fixture, fn) {
   var done = assert.async();
-  load(fixture)
+  var p = load(fixture)
     .then(function(html) {
       fn(html);
-      done();
     })
-    .catch(function(err) {
-      if (err === 404) {
-        assert.fail("Couldn't load fixture '" + fixture + "'");
-      } else {
-        assert.fail(err.stack);
-      }
+    .then(done);
+  if (!QUnit.config.notrycatch) {
+    p.catch(function(err) {
+      console.error(err.stack);
       done();
     });
+  }
 }
 
 function _fixtureTest(assert, fixture, impl, forceWindows) {
