@@ -6,10 +6,16 @@ var colors = require('colors');
 
 global.QUnit = QUnit;
 
-var files = glob.sync('unit/**/*/*.test.js', {cwd: 'test'});
+var files = glob.sync('**/*/*.test.js', {cwd: 'test'});
+// var files = glob.sync('unit/ui/Component.test.js', {cwd: 'test'});
 each(files, function(file) {
   require('./' + file);
 });
+
+// disable try-catch in iron-node which has window defined
+if (typeof window !== 'undefined' && window.process) {
+  QUnit.config.notrycatch = true;
+}
 
 var lastModule = null;
 var lastTestName = null;
