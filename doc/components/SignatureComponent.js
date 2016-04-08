@@ -2,24 +2,16 @@
 
 var pluck = require('../../util/pluck');
 var Component = require('../../ui/Component');
-var $$ = Component.$$;
 var Documentation = require('../model/Documentation');
-
-// var Params = require('./ParamsComponent');
 var SourceLink = require('./SourceLinkComponent');
 
 function SignatureComponent() {
-  Component.apply(this, arguments);
+  SignatureComponent.super.apply(this, arguments);
 }
 
 SignatureComponent.Prototype = function() {
-  this.onClick = function(e) {
-    e.preventDefault();
-    e.stopPropagation();
-    this.send('focusNode', this.props.node.id);
-  };
 
-  this.render = function() {
+  this.render = function($$) {
     var el = $$('div').addClass('sc-signature');
     var node = this.props.node;
     var params = node.params;
@@ -64,8 +56,15 @@ SignatureComponent.Prototype = function() {
     // }
     return el;
   };
+
+  this.onClick = function(e) {
+    e.preventDefault();
+    e.stopPropagation();
+    this.send('focusNode', this.props.node.id);
+  };
+
 };
 
-
 Component.extend(SignatureComponent);
+
 module.exports = SignatureComponent;

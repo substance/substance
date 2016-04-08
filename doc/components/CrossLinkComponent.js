@@ -1,14 +1,13 @@
 'use strict';
 
 var Component = require('../../ui/Component');
-var $$ = Component.$$;
 
 function CrossLinkComponent() {
-  Component.apply(this, arguments);
+  CrossLinkComponent.super.apply(this, arguments);
 }
 
 CrossLinkComponent.Prototype = function() {
-  this.render = function() {
+  this.render = function($$) {
     var doc = this.context.doc;
     var nodeId = this.props.nodeId;
     var el;

@@ -1,7 +1,6 @@
 'use strict';
 
 var Component = require('../../ui/Component');
-var $$ = Component.$$;
 var SourceLink = require('./SourceLinkComponent');
 var CrossLink = require('./CrossLinkComponent');
 
@@ -10,13 +9,8 @@ function HeadingComponent() {
 }
 
 HeadingComponent.Prototype = function() {
-  this.onClick = function(e) {
-    e.preventDefault();
-    e.stopPropagation();
-    this.send('focusNode', this.props.node.id);
-  };
 
-  this.render = function() {
+  this.render = function($$) {
     var node = this.props.node;
 
     var name = node.name;
@@ -68,6 +62,13 @@ HeadingComponent.Prototype = function() {
 
     return el;
   };
+
+  this.onClick = function(e) {
+    e.preventDefault();
+    e.stopPropagation();
+    this.send('focusNode', this.props.node.id);
+  };
+
 };
 
 Component.extend(HeadingComponent);
