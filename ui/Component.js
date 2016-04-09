@@ -298,7 +298,7 @@ Component.Prototype = function() {
   this.send = function(action) {
     var comp = this;
     while(comp) {
-      if (comp._actionHandlers[action]) {
+      if (comp._actionHandlers && comp._actionHandlers[action]) {
         comp._actionHandlers[action].apply(comp, Array.prototype.slice.call(arguments, 1));
         return true;
       }
