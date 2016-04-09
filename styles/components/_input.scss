@@ -1,15 +1,22 @@
 .sc-input {
   width: 100%;
   max-width: 500px;
-  // padding: 5px 30px;
-  height: 40px;
-  padding: 0px 10px;
-  line-height: 40px;
+  height: $base-height;
+  padding: 0px $default-padding/2;
+  line-height: $base-height;
   border: 1px solid #ddd;
+
+  &.tall {
+    height: $tall-height;
+  }
+
+  &.short {
+    height: $short-height;
+  }
 
   &:focus {
     background: #fff;
-    outline: 2px solid #5BE3FF;
+    outline: 2px solid $focus-outline-color;
   }
 
   &.sm-centered {

@@ -1,6 +1,12 @@
 /* Variables
 -------------------------------------------------- */
 
+// Normalized heights (used by buttons and inputs)
+
+$base-height: 30px;
+$tall-height: 40px;
+$short-height: 20px;
+
 // Colors
 $border-color: #ddd;
 
@@ -8,6 +14,9 @@ $fill-gray-color: #eee;
 $fill-light-color: #f8f8f8;
 $fill-white-color: #fff;
 $fill-dark-color: #404040;
+
+$link-color: #2079DC;
+$focus-outline-color: #5BE3FF;
 
 // Font colors
 $default-text-color: rgba(0,0,0,0.75);

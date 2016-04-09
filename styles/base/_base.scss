@@ -44,7 +44,7 @@ strong {
 
 /* Links */
 a {
-  color:#2079DC;
+  color: $link-color; 
   text-decoration:none; 
 
   &.active, &:hover {
