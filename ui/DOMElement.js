@@ -886,6 +886,15 @@ var _propertyDefinitions = {
       throw new Error('ui/DOMElement#children is readonly.');
     }
   },
+  'parentNode': {
+    configurable: true,
+    get: function() {
+      return this.getParent();
+    },
+    set: function() {
+      throw new Error('ui/DOMElement#parentNode is readonly.');
+    }
+  },
   'height': {
     configurable: true,
     get: function() {
