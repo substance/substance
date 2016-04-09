@@ -302,34 +302,30 @@ RenderingEngine.Prototype = function() {
     }
   }
 
+  /*
+    This tries to map the virtual component to existing component instances
+    by looking at the old and new refs, making sure that the element type is
+    compatible.
+    This is then applied to the ancestors leading to an implicit
+    mapping of parent elements, which makes
+  */
   function _mapComponents(comp, vc) {
-    if (_canBeMapped(comp, vc)) {
-      // if vc is mapped, it can be that it has a different owner
-      while(comp && vc && !vc.__isMapped__) {
-        vc._comp = comp;
-        comp.__isMapped__ = true;
-        vc.__isMapped__ = true;
-        comp = comp.getParent();
-        vc = vc.getParent();
+    while (comp && vc) {
+      // Stop if one them has been mapped already
+      // or the virtual element has its own component already
+      // or if virtual element and component do not match semantically
+      if (vc.__isMapped__ || comp.__isMapped__ ||
+          vc._comp || !_isOfSameType(comp, vc))
+      {
+        break;
       }
+      vc._comp = comp;
+      vc.__isMapped__ = true;
+      // TODO: can we somehow avoid poluting the component?
+      comp.__isMapped__ = true;
+      comp = comp.getParent();
+      vc = vc.getParent();
     }
-  }
-
-  function _canBeMapped(comp, vc) {
-    // already mapped to the same component?
-    if (comp === vc._comp) {
-      return true;
-    }
-    if (!_isOfSameType(comp, vc)) {
-      return false;
-    }
-    comp = comp.getParent();
-    vc = vc.getParent();
-    // both null => ok
-    if (!comp && !vc) return true;
-    // one of them null => nope
-    if (!comp || !vc) return false;
-    return _canBeMapped(comp, vc);
   }
 
   function _isOfSameType(comp, vc) {
