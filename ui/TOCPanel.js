@@ -41,8 +41,6 @@ TOCPanel.Prototype = function() {
           "data-id": entry.id,
         })
         .ref(entry.id)
-        // TODO: Why does handleClick get bound to this.refs.panelEl and not this?
-        // Seems that handlers will be bound to the parent, not the owner.
         .on('click', this.handleClick)
         .append(
           $$(Icon, {icon: 'fa-caret-right'}),

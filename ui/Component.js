@@ -81,10 +81,6 @@ function Component(parent, props) {
   this.__foreignRefs__ = {};
   this._actionHandlers = {};
 
-  // available after first rendering which allows to create VirtualElements
-  // that can be used with this.insertAt() andthis.append()
-  this.$$ = null;
-
   // context from parent (dependency injection)
   this._setContext(this._getContext());
   this._setProps(props);

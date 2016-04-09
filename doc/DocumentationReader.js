@@ -22,24 +22,6 @@ DocumentationReader.Prototype = function() {
     );
   };
 
-  this._renderMainSection = function($$) {
-    var config = this.getConfig();
-    var doc = this.props.doc;
-    var meta = doc.get('meta');
-
-    return $$('div').ref('main').addClass('se-main-section').append(
-      $$(ScrollPane, {
-        toc: this.toc
-      }).ref('contentPanel').append(
-        $$(Cover, {node: meta}).ref('cover'),
-        $$(ContainerRenderer, {
-          containerId: config.containerId
-        }).ref('mainAnnotator')
-      )
-    );
-  };
-
-  // Used by two-column apps
   this._renderContextSection = function($$) {
     var config = this.getConfig();
     var panelProps = this._panelPropsFromState();
@@ -73,6 +55,23 @@ DocumentationReader.Prototype = function() {
       );
     }
     return el;
+  };
+
+  this._renderMainSection = function($$) {
+    var config = this.getConfig();
+    var doc = this.props.doc;
+    var meta = doc.get('meta');
+
+    return $$('div').ref('main').addClass('se-main-section').append(
+      $$(ScrollPane, {
+        toc: this.toc
+      }).ref('contentPanel').append(
+        $$(Cover, {node: meta}).ref('cover'),
+        $$(ContainerRenderer, {
+          containerId: config.containerId
+        }).ref('mainAnnotator')
+      )
+    );
   };
 
 };
