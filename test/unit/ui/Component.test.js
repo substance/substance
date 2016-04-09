@@ -543,6 +543,82 @@ QUnit.test("Special nesting situation", function(assert) {
   assert.equal(bar.textContent, 'bar', "bar should have textContent 'bar'");
 });
 
+QUnit.test("Special nesting situation II", function(assert) {
+  function Parent() {
+    this.super.apply(this, arguments);
+    this.render = function($$) {
+      return $$('div').addClass('parent').append(
+        $$(Child).append(
+          $$('div').addClass('grandchild-container').append(
+            $$(GrandChild).ref('grandchild')
+          )
+        ).ref('child')
+      );
+    };
+  }
+  Component.extend(Parent);
+  function Child() {
+    this.super.apply(this, arguments);
+    this.render = function($$) {
+      var el = $$('div').addClass('child').append(
+        this.props.children
+      );
+      return el;
+    };
+  }
+  Component.extend(Child);
+  function GrandChild() {
+    this.super.apply(this, arguments);
+    this.render = function($$) {
+      return $$('div').addClass('grandchild');
+    };
+  }
+  Component.extend(GrandChild);
+  var comp = Parent.static.render();
+  var child = comp.refs.child;
+  var grandchild = comp.refs.grandchild;
+  assert.isDefinedAndNotNull(child, "Child should be referenced.");
+  assert.isDefinedAndNotNull(grandchild, "Grandchild should be referenced.");
+  comp.rerender();
+  assert.ok(child === comp.refs.child, "Child should have been retained.");
+  assert.ok(grandchild === comp.refs.grandchild, "Grandchild should have been retained.");
+});
+
+QUnit.test("Implicit retaining should not override higher-level rules", function(assert) {
+  // If a child component has refs, itself should not be retained without
+  // being ref'd by the parent
+  function Parent() {
+    this.super.apply(this, arguments);
+    this.render = function($$) {
+      // Child is not ref'd: this means the parent is not interested in keeping
+      // this instance on rerender
+      return $$('div').addClass('parent').append($$(Child));
+    };
+  }
+  Component.extend(Parent);
+  function Child() {
+    this.super.apply(this, arguments);
+    this.render = function($$) {
+      // 'foo' is ref'd, so it should be retained when rerendering on this level
+      var el = $$('div').addClass('child').append(
+        $$('div').addClass('foo').ref('foo')
+      );
+      return el;
+    };
+  }
+  Component.extend(Child);
+  var comp = Parent.static.render();
+  var child = comp.find('.child');
+  assert.isDefinedAndNotNull(child, "Child should exist.");
+  var foo = child.refs.foo;
+  child.rerender();
+  assert.ok(child.refs.foo === foo, "'foo' should have been retained.");
+  comp.rerender();
+  var child2 = comp.find('.child');
+  assert.ok(child !== child2, "Child should have been renewed.");
+  assert.ok(foo !== child2.refs.foo, "'foo' should be different as well.");
+});
+
 /* ##################### Refs: Preserving Components ##########################*/
 
 QUnit.test("Children without a ref are not retained", function(assert) {
