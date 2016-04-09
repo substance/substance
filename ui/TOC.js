@@ -129,7 +129,7 @@ TOC.Prototype = function() {
 
     // Use first toc node as default
     var activeEntry = tocNodes[0].id;
-    for (var i = 0; i < tocNodes.length; i++) {
+    for (var i = tocNodes.length - 1; i >= 0; i--) {
       var tocNode = tocNodes[i];
       var nodeEl = panelContent.find('[data-id="'+tocNode.id+'"]');
       if (!nodeEl) {

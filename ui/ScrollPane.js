@@ -169,7 +169,8 @@ ScrollPane.Prototype = function() {
       if (el.hasClass('se-content') || !parentEl) return;
 
       // Found positioned element (calculate offset!)
-      if (el.getStyle('position') === 'absolute' || el.getStyle('position') === 'relative') {
+      var position = el.getStyle('position');
+      if (position === 'absolute' || position === 'relative') {
         offset += el.getPosition().top;
       }
       addParentOffset(parentEl);
