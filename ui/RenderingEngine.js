@@ -314,6 +314,8 @@ RenderingEngine.Prototype = function() {
       // Stop if one them has been mapped already
       // or the virtual element has its own component already
       // or if virtual element and component do not match semantically
+      // Note: the owner component is mapped at very first, so this
+      // recursion will stop at the owner at the latest.
       if (vc.__isMapped__ || comp.__isMapped__ ||
           vc._comp || !_isOfSameType(comp, vc))
       {
