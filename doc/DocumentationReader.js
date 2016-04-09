@@ -13,6 +13,14 @@ function DocumentationReader() {
 
 DocumentationReader.Prototype = function() {
 
+  // this increases rerendering speed alot.
+  // A deep rerender takes quite a time (about 400ms) because of the many components.
+  // We can do this as long the content is not changed depending on the state
+  // -- just updating scroll position ATM.
+  this.shouldRerender = function() {
+    return false;
+  };
+
   this.render = function($$) {
     return $$('div').addClass('sc-documentation-reader sc-controller').append(
       $$(SplitPane, {splitType: 'vertical', sizeA: '270px'}).append(
