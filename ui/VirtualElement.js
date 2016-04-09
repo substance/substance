@@ -74,10 +74,10 @@ DOMElement._defineProperties(VirtualElement, without(DOMElement._propertyNames, 
 function VirtualHTMLElement(tagName) {
   VirtualHTMLElement.super.call(this);
 
-  this.classNames = [];
-  this.attributes = {};
-  this.htmlProps = {};
-  this.style = {};
+  this.classNames = null;
+  this.attributes = null;
+  this.htmlProps = null;
+  this.style = null;
   this.children = [];
   this.eventListeners = [];
 
@@ -97,33 +97,48 @@ VirtualHTMLElement.Prototype = function() {
   };
 
   this.hasClass = function(className) {
-    return this.classNames.indexOf(className) > -1;
+    if (this.classNames) {
+      return this.classNames.indexOf(className) > -1;
+    }
+    return false;
   };
 
   this.addClass = function(className) {
+    if (!this.classNames) {
+      this.classNames = [];
+    }
     this.classNames.push(className);
     return this;
   };
 
   this.removeClass = function(className) {
-    this.classNames = this.classNames.without(className);
+    if (this.classNames) {
+      this.classNames = this.classNames.without(className);
+    }
     return this;
   };
 
   this.removeAttr = function(attr) {
-    if (isString(attr)) {
-      delete this.attributes[attr];
-    } else {
-      this.attributes = omit(this.attributes, attr);
+    if (this.attributes) {
+      if (isString(attr)) {
+        delete this.attributes[attr];
+      } else {
+        this.attributes = omit(this.attributes, attr);
+      }
     }
     return this;
   };
 
   this.getAttribute = function(name) {
-    return this.attributes[name];
+    if (this.attributes) {
+      return this.attributes[name];
+    }
   };
 
   this.setAttribute = function(name, value) {
+    if (!this.attributes) {
+      this.attributes = {};
+    }
     this.attributes[name] = value;
     return this;
   };
@@ -132,25 +147,39 @@ VirtualHTMLElement.Prototype = function() {
     // we are having separated storages for differet
     // kind of attributes which we now pull together
     // in the same way as a native DOM element has it
-    var attributes = clone(this.attributes);
-    attributes.class = this.classNames.join(' ');
-    attributes.style = map(this.style, function(val, key) {
-      return key + ":" + val;
-    }).join(';');
+    var attributes = {};
+    if (this.attributes) {
+      extend(attributes, this.attributes);
+    }
+    if (this.classNames) {
+      attributes.class = this.classNames.join(' ');
+    }
+    if (this.style) {
+      attributes.style = map(this.style, function(val, key) {
+        return key + ":" + val;
+      }).join(';');
+    }
     return attributes;
   };
 
   this.getProperty = function(name) {
-    return this.htmlProps[name];
+    if (this.htmlProps) {
+      return this.htmlProps[name];
+    }
   };
 
   this.setProperty = function(name, value) {
+    if (!this.htmlProps) {
+      this.htmlProps = {};
+    }
     this.htmlProps[name] = value;
     return this;
   };
 
   this.removeProperty = function(name) {
-    delete this.htmlProps[name];
+    if (this.htmlProps) {
+      delete this.htmlProps[name];
+    }
     return this;
   };
 
@@ -185,11 +214,11 @@ VirtualHTMLElement.Prototype = function() {
   };
 
   this.getValue = function() {
-    return this.htmlProps['value'];
+    return this.getProperty('value');
   };
 
   this.setValue = function(value) {
-    this.htmlProps['value'] = value;
+    this.setProperty('value', value);
     return this;
   };
 
@@ -413,11 +442,36 @@ VirtualHTMLElement.Prototype = function() {
   };
 
   this._mergeHTMLConfig = function(other) {
-    this.classNames = this.classNames.concat(other.classNames);
-    extend(this.attributes, other.attributes);
-    extend(this.htmlProps, other.htmlProps);
-    extend(this.style, other.style);
-    this.eventListeners = this.eventListeners.concat(other.eventListeners);
+    if (other.classNames) {
+      if (!this.classNames) {
+        this.classNames = [];
+      }
+      this.classNames = this.classNames.concat(other.classNames);
+    }
+    if (other.attributes) {
+      if (!this.attributes) {
+        this.attributes = {};
+      }
+      extend(this.attributes, other.attributes);
+    }
+    if (other.htmlProps) {
+      if (!this.htmlProps) {
+        this.htmlProps = {};
+      }
+      extend(this.htmlProps, other.htmlProps);
+    }
+    if (other.style) {
+      if (!this.style) {
+        this.style = {};
+      }
+      extend(this.style, other.style);
+    }
+    if (other.eventListeners) {
+      if (!this.style) {
+        this.eventListeners = [];
+      }
+      this.eventListeners = this.eventListeners.concat(other.eventListeners);
+    }
   };
 };
 

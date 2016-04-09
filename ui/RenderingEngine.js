@@ -1,11 +1,8 @@
 "use strict";
 
 var each = require('lodash/each');
-var clone = require('lodash/clone');
-var findIndex = require('lodash/findIndex');
 var oo = require('../util/oo');
 var VirtualElement = require('./VirtualElement');
-var DOMElement = require('./DOMElement');
 var DefaultDOMElement = require('./DefaultDOMElement');
 
 function RenderingEngine() {}
@@ -367,8 +364,6 @@ RenderingEngine.Prototype = function() {
       el.setTagName(vel.tagName);
     }
     _updateHash({
-      // HACK: knowing that we have a copy already,
-      // we do not clone again
       oldHash: el.getAttributes(),
       newHash: vel.getAttributes(),
       update: function(key, val) {
@@ -379,8 +374,8 @@ RenderingEngine.Prototype = function() {
       }
     });
     _updateHash({
-      oldHash: clone(el.htmlProps),
-      newHash: clone(vel.htmlProps),
+      oldHash: el.htmlProps,
+      newHash: vel.htmlProps,
       update: function(key, val) {
         el.setProperty(key, val);
       },
@@ -390,10 +385,8 @@ RenderingEngine.Prototype = function() {
     });
     _updateListeners({
       el: el,
-      // HACK: knowing that oldListeners won't be manipulated
-      // we don't clone it
       oldListeners: el.getEventListeners(),
-      newListeners: clone(vel.getEventListeners())
+      newListeners: vel.getEventListeners()
     });
 
     // special treatment of HTML elements having custom innerHTML
@@ -414,7 +407,8 @@ RenderingEngine.Prototype = function() {
 
   function _updateHash(args) {
     var newHash = args.newHash;
-    var oldHash = args.oldHash;
+    var oldHash = args.oldHash || {};
+    var updatedKeys = {};
     var update = args.update;
     var remove = args.remove;
     var key;
@@ -422,14 +416,14 @@ RenderingEngine.Prototype = function() {
       if (newHash.hasOwnProperty(key)) {
         var oldVal = oldHash[key];
         var newVal = newHash[key];
-        delete oldHash[key];
         if (oldVal !== newVal) {
+          updatedKeys[key] = true;
           update(key, newVal);
         }
       }
     }
     for (key in oldHash) {
-      if (oldHash.hasOwnProperty(key)) {
+      if (oldHash.hasOwnProperty(key) && !updatedKeys[key]) {
         remove(key);
       }
     }
@@ -437,22 +431,13 @@ RenderingEngine.Prototype = function() {
 
   function _updateListeners(args) {
     var el = args.el;
-    var oldListeners = args.oldListeners;
-    var newListeners = args.newListeners;
-
-    var i, idx, listener;
+    var oldListeners = args.oldListeners || [];
+    var newListeners = args.newListeners || [];
+    // NOTE: considering the low number of listeners
+    // it is quicker to just remove and add instead of computing the minimal update
+    var i;
     for (i=0; i<oldListeners.length;i++) {
-      listener = oldListeners[i];
-      idx = findIndex(newListeners,
-        DOMElement.EventListener.matches.bind(null, listener)
-      );
-      if (idx > -1) {
-        // this listener is present in the old list and in the new list
-        // so nothing to do, just remove it from 'new' listeners
-        newListeners.splice(idx, 1);
-      } else {
-        el.removeEventListener(listener);
-      }
+      el.removeEventListener(oldListeners[i]);
     }
     for (i=0; i<newListeners.length;i++) {
       el.addEventListener(newListeners[i]);
