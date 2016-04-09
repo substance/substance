@@ -131,7 +131,13 @@ BrowserDOMElement.Prototype = function() {
   };
 
   this.getStyle = function(name) {
-    return this.el.style[name];
+    // NOTE: important to provide computed style, otherwise we don't get inherited styles
+    var style = this.getComputedStyle();
+    return style[name] || this.el.style[name];
+  };
+
+  this.getComputedStyle = function() {
+    return window.getComputedStyle(this.el);
   };
 
   var _pxStyles = {
@@ -500,7 +506,7 @@ BrowserDOMElement.Prototype = function() {
   this.getOuterHeight = function(withMargin) {
     var outerHeight = this.el.offsetHeight;
     if (withMargin) {
-      var style = window.getComputedStyle(this.el);
+      var style = this.getComputedStyle();
       outerHeight += parseInt(style.marginTop) + parseInt(style.marginBottom);
     }
     return outerHeight;
