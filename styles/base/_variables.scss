@@ -1,26 +1,53 @@
 /* Variables
 -------------------------------------------------- */
 
-// Colors
-$border-color: #ddd;
+// Normalized heights (used by buttons and inputs)
 
-$fill-gray-color: #eee;
-$fill-light-color: #f8f8f8;
+$base-height: 40px;
+$short-height: 20px;
+$border-radius: 5px;
+
+// Colors
+$border-color: #E0E4E4;
 $fill-white-color: #fff;
+$fill-light-color: #f7f9f9; // #f8f8f8;
 $fill-dark-color: #404040;
+
+// Depending on a base-color
+$darken-color-1: rgba(0,0,0,0.05);
+$darken-color-2: rgba(0,0,0,0.10);
+$darken-color-3: rgba(0,0,0,0.25);
+$darken-color-4: rgba(0,0,0,0.50);
+$darken-color-5: rgba(0,0,0,0.75);
+
+$lighten-color-1: rgba(0,0,0,0.05);
+$lighten-color-2: rgba(0,0,0,0.10);
+$lighten-color-3: rgba(0,0,0,0.25);
+$lighten-color-4: rgba(0,0,0,0.50);
+$lighten-color-5: rgba(0,0,0,0.75);
+
+$link-color: #2079DC;
+$focus-outline-color: #5BE3FF;
 
 // Font colors
 $default-text-color: rgba(0,0,0,0.75);
-$light-text-color: rgba(0,0,0,.5);
+$light-text-color: rgba(0,0,0,.40);
 
 // Default padding
 $default-padding: 20px;
 
-// Font sizes
+// Prose font sizes
 $default-font-size: 16px;
 $small-font-size: 14px;
 $large-font-size: 20px;
 $xlarge-font-size: 25px;
+// Title font sizes
+$title-font-size: 38px;
+// Heading font sizes
+$h1-font-size: 26px;
+$h2-font-size: 22px;
+$h3-font-size: 18px;
+$h4-font-size: 16px;
 
 $strong-font-weight: 600;
 

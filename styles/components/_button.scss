@@ -1,14 +1,16 @@
 .sc-button {
-  padding: 10px 5px;
+  padding: 0px $default-padding/2;
   text-align: center;
-  font-size: 16px;
-  min-width: 200px;
-  font-weight: 600;
+  height: 40px;
+  font-size: $default-font-size;
+  color: $link-color;
+
+  font-weight: $strong-font-weight;
   display: inline-block;
-  border: 2px solid #3B4749;
+  border: 2px solid $link-color;
 
   &:focus {
-    outline: 2px solid #5BE3FF;  
+    outline: 2px solid $focus-outline-color;
   }
 
   &:disabled {
