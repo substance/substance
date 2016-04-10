@@ -74,14 +74,15 @@ DOMElement._defineProperties(VirtualElement, without(DOMElement._propertyNames, 
 function VirtualHTMLElement(tagName) {
   VirtualHTMLElement.super.call(this);
 
+  this._tagName = tagName;
   this.classNames = null;
   this.attributes = null;
   this.htmlProps = null;
   this.style = null;
-  this.children = [];
-  this.eventListeners = [];
+  this.eventListeners = null;
 
-  this._tagName = tagName;
+  this.children = [];
+
 }
 
 VirtualHTMLElement.Prototype = function() {
@@ -364,10 +365,15 @@ VirtualHTMLElement.Prototype = function() {
       options.context = options.context || this._owner._comp;
       listener = new DOMElement.EventListener(eventName, handler, options);
     }
+    if (!this.eventListeners) {
+      this.eventListeners = [];
+    }
     this.eventListeners.push(listener);
   };
   this.removeEventListener = function(eventName, handler) {
-    DOMElement._findEventListenerIndex(this.eventListeners, eventName, handler);
+    if (this.eventListeners) {
+      DOMElement._findEventListenerIndex(this.eventListeners, eventName, handler);
+    }
   };
 
   this.getEventListeners = function() {
@@ -467,7 +473,7 @@ VirtualHTMLElement.Prototype = function() {
       extend(this.style, other.style);
     }
     if (other.eventListeners) {
-      if (!this.style) {
+      if (!this.eventListeners) {
         this.eventListeners = [];
       }
       this.eventListeners = this.eventListeners.concat(other.eventListeners);
