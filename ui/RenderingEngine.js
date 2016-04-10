@@ -455,7 +455,7 @@ RenderingEngine.Prototype = function() {
   DescendingContext.Prototype = function() {
     this._createComponent = function() {
       var vel = this.elements[this.pos++];
-      if (!vel.__isCaptured__ && this._ancestorsReady(vel.parent)) {
+      if (!vel.__isCaptured__ && vel._isVirtualComponent && this._ancestorsReady(vel.parent)) {
         _capture(vel);
         this.updates++;
       }
@@ -473,7 +473,9 @@ RenderingEngine.Prototype = function() {
     };
     this._ancestorsReady = function(vel) {
       while (vel) {
-        if (vel === this.owner || vel.__isCaptured__) {
+        if (vel.__isCaptured__ ||
+            // TODO: iron this out
+            vel === this.owner || vel === this.owner._content) {
           return true;
         }
         vel = vel.parent;
@@ -521,6 +523,6 @@ RenderingEngine.createContext = function(comp) {
   return new CaptureContext(vel);
 };
 
-RenderingEngine.DEBUG = false;
+RenderingEngine.DEBUG = true;
 
 module.exports = RenderingEngine;
