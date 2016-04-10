@@ -22,12 +22,12 @@ var TextOperation = require('./TextOperation');
   @param {Object} [options]
 */
 var IncrementalData = function(schema, options) {
-  this.super.call(this, schema, options);
+  IncrementalData.super.call(this, schema, options);
 };
 
 IncrementalData.Prototype = function() {
 
-  var _super = this.super.prototype;
+  var _super = IncrementalData.super.prototype;
 
   /**
     Create a new node.

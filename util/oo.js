@@ -238,12 +238,6 @@ function _inherit(ChildClass, ParentClass) {
         enumerable: false,
         writable: true,
         configurable: true
-      },
-      'super': {
-        value: ParentClass,
-        enumerable: false,
-        writable: true,
-        configurable: true
       }
     });
     ChildClass.prototype = new PrototypeCtor();
@@ -253,12 +247,6 @@ function _inherit(ChildClass, ParentClass) {
       // Restore constructor property of clazz
       constructor: {
         value: ChildClass,
-        enumerable: false,
-        writable: true,
-        configurable: true
-      },
-      'super': {
-        value: ParentClass,
         enumerable: false,
         writable: true,
         configurable: true
