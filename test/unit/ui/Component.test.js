@@ -278,6 +278,7 @@ QUnit.uiTest("Rendering an element with click handler", function(assert) {
 
   // first render without a click handler
   var comp = ClickableComponent.static.render();
+
   comp.click();
   assert.equal(comp.value, 0, 'Handler should not have been triggered');
 
@@ -618,6 +619,42 @@ QUnit.test("Implicit retaining should not override higher-level rules", function
   assert.ok(child !== child2, "Child should have been renewed.");
   assert.ok(foo !== child2.refs.foo, "'foo' should be different as well.");
 });
+
+QUnit.uiTest("Eventlisteners on child element", function(assert) {
+  function Parent() {
+    Parent.super.apply(this, arguments);
+  }
+  Parent.Prototype = function() {
+    this.render = function($$) {
+      return $$('div').append($$(Child).ref('child'));
+    };
+  };
+  Component.extend(Parent);
+
+  function Child() {
+    Child.super.apply(this, arguments);
+    this.clicks = 0;
+  }
+  Child.Prototype = function() {
+    this.render = function($$) {
+      return $$('a').append('Click me').on('click', this.onClick);
+    };
+    this.onClick = function() {
+      this.clicks++;
+    };
+  };
+  Component.extend(Child);
+
+  var comp = Parent.static.render();
+  var child = comp.refs.child;
+  child.click();
+  assert.equal(child.clicks, 1, 'Handler should have been triggered');
+  comp.rerender();
+  child.clicks = 0;
+  child.click();
+  assert.equal(child.clicks, 1, 'Handler should have been triggered');
+});
+
 
 /* ##################### Refs: Preserving Components ##########################*/
 
