@@ -545,12 +545,12 @@ QUnit.test("Special nesting situation", function(assert) {
 
 QUnit.test("Special nesting situation II", function(assert) {
   function Parent() {
-    this.super.apply(this, arguments);
+    Parent.super.apply(this, arguments);
     this.render = function($$) {
       return $$('div').addClass('parent').append(
         $$(Child).append(
           $$('div').addClass('grandchild-container').append(
-            $$(GrandChild).ref('grandchild')
+            $$(Grandchild).ref('grandchild')
           )
         ).ref('child')
       );
@@ -558,7 +558,7 @@ QUnit.test("Special nesting situation II", function(assert) {
   }
   Component.extend(Parent);
   function Child() {
-    this.super.apply(this, arguments);
+    Child.super.apply(this, arguments);
     this.render = function($$) {
       var el = $$('div').addClass('child').append(
         this.props.children
@@ -567,13 +567,13 @@ QUnit.test("Special nesting situation II", function(assert) {
     };
   }
   Component.extend(Child);
-  function GrandChild() {
-    this.super.apply(this, arguments);
+  function Grandchild() {
+    Grandchild.super.apply(this, arguments);
     this.render = function($$) {
       return $$('div').addClass('grandchild');
     };
   }
-  Component.extend(GrandChild);
+  Component.extend(Grandchild);
   var comp = Parent.static.render();
   var child = comp.refs.child;
   var grandchild = comp.refs.grandchild;
@@ -588,7 +588,7 @@ QUnit.test("Implicit retaining should not override higher-level rules", function
   // If a child component has refs, itself should not be retained without
   // being ref'd by the parent
   function Parent() {
-    this.super.apply(this, arguments);
+    Parent.super.apply(this, arguments);
     this.render = function($$) {
       // Child is not ref'd: this means the parent is not interested in keeping
       // this instance on rerender
@@ -597,7 +597,7 @@ QUnit.test("Implicit retaining should not override higher-level rules", function
   }
   Component.extend(Parent);
   function Child() {
-    this.super.apply(this, arguments);
+    Child.super.apply(this, arguments);
     this.render = function($$) {
       // 'foo' is ref'd, so it should be retained when rerendering on this level
       var el = $$('div').addClass('child').append(

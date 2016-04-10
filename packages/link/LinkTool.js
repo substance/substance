@@ -12,8 +12,10 @@ function LinkTool() {
 
 LinkTool.Prototype = function() {
 
+  var _super = LinkTool.super.prototype;
+
   this.didMount = function() {
-    this.super.didMount.call(this);
+    _super.didMount.call(this);
     var ctrl = this.getController();
     ctrl.on('command:executed', this.onCommandExecuted, this);
   };
@@ -24,7 +26,7 @@ LinkTool.Prototype = function() {
   };
 
   this.render = function($$) {
-    var el = this.super.render.apply(this, arguments);
+    var el = _super.render.apply(this, arguments);
     el.addClass('sc-link-tool');
     if (this.state.mode === 'edit') {
       el.addClass('sm-active');
