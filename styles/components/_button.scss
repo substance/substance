@@ -1,10 +1,9 @@
 .sc-button {
   padding: 0px $default-padding/2;
   text-align: center;
-  // min-width: 200px;
   height: 40px;
+  font-size: $default-font-size;
   color: $link-color;
-  // line-height: 30px;
 
   font-weight: $strong-font-weight;
   display: inline-block;

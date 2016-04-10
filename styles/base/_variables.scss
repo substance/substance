@@ -3,24 +3,35 @@
 
 // Normalized heights (used by buttons and inputs)
 
-$base-height: 30px;
-$tall-height: 40px;
+$base-height: 40px;
 $short-height: 20px;
+$border-radius: 5px;
 
 // Colors
-$border-color: #ddd;
-
-$fill-gray-color: #eee;
-$fill-light-color: #f8f8f8;
+$border-color: #E0E4E4;
 $fill-white-color: #fff;
+$fill-light-color: #f7f9f9; // #f8f8f8;
 $fill-dark-color: #404040;
+
+// Depending on a base-color
+$darken-color-1: rgba(0,0,0,0.05);
+$darken-color-2: rgba(0,0,0,0.10);
+$darken-color-3: rgba(0,0,0,0.25);
+$darken-color-4: rgba(0,0,0,0.50);
+$darken-color-5: rgba(0,0,0,0.75);
+
+$lighten-color-1: rgba(0,0,0,0.05);
+$lighten-color-2: rgba(0,0,0,0.10);
+$lighten-color-3: rgba(0,0,0,0.25);
+$lighten-color-4: rgba(0,0,0,0.50);
+$lighten-color-5: rgba(0,0,0,0.75);
 
 $link-color: #2079DC;
 $focus-outline-color: #5BE3FF;
 
 // Font colors
 $default-text-color: rgba(0,0,0,0.75);
-$light-text-color: rgba(0,0,0,.5);
+$light-text-color: rgba(0,0,0,.40);
 
 // Default padding
 $default-padding: 20px;
