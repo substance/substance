@@ -55,8 +55,7 @@ MemberIndexComponent.Prototype = function() {
   };
 
   this._renderMember = function($$, memberNode) {
-    return $$(CrossLink, {doc: this.props.doc, nodeId: memberNode.id})
-      .append(memberNode.name, ' ');
+    return $$(CrossLink, {node: memberNode}).append(memberNode.name, ' ');
   };
 
   this.getMemberCategories = function() {
