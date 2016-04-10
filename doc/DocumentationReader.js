@@ -6,12 +6,17 @@ var Cover = require('./components/CoverComponent');
 var TabbedPane = require('../ui/TabbedPane');
 var SplitPane = require('../ui/SplitPane');
 var ScrollPane = require('../ui/ScrollPane');
+var DocumentationRouter = require('./DocumentationRouter');
 
 function DocumentationReader() {
   DocumentationReader.super.apply(this, arguments);
+
+  this.router = new DocumentationRouter(this);
 }
 
 DocumentationReader.Prototype = function() {
+
+  var _super = DocumentationReader.super.prototype;
 
   // this increases rerendering speed alot.
   // A deep rerender takes quite a time (about 400ms) because of the many components.
@@ -19,6 +24,16 @@ DocumentationReader.Prototype = function() {
   // -- just updating scroll position ATM.
   this.shouldRerender = function() {
     return false;
+  };
+
+  this.didMount = function() {
+    _super.didMount.call(this);
+    this._updateScrollPosition();
+  };
+
+  this.didUpdateState = function() {
+    _super.didUpdateState.call(this);
+    this._updateScrollPosition();
   };
 
   this.render = function($$) {
@@ -80,6 +95,12 @@ DocumentationReader.Prototype = function() {
         }).ref('mainAnnotator')
       )
     );
+  };
+
+  this._updateScrollPosition = function() {
+    if (this.refs.contentPanel && this.state.nodeId) {
+      this.refs.contentPanel.scrollTo(this.state.nodeId);
+    }
   };
 
 };

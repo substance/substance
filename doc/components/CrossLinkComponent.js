@@ -8,23 +8,20 @@ function CrossLinkComponent() {
 
 CrossLinkComponent.Prototype = function() {
   this.render = function($$) {
-    var doc = this.context.doc;
-    var nodeId = this.props.nodeId;
+    var node = this.props.node;
     var el;
-    if (nodeId && doc.get(nodeId)) {
+    if (node) {
       el = $$('a').addClass('sc-cross-link')
         .attr({
-          href: '#contextId=toc,nodeId='+nodeId,
+          href: '#'+node.id,
           "data-type": 'cross-link',
-          "data-node-id": nodeId
+          "data-node-id": node.id
         });
     } else {
       el = $$('span');
     }
     if (this.props.children.length > 0) {
       el.append(this.props.children);
-    } else {
-      el.append(nodeId);
     }
     return el;
   };
