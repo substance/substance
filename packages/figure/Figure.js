@@ -33,6 +33,7 @@ DocumentNode.extend(Figure, function FigurePrototype() {
 Figure.static.name = "figure";
 
 Figure.static.defineSchema({
+  "label": "text",
   "title": "text",
   "content": "id",
   "caption": "text",
