@@ -299,6 +299,29 @@ QUnit.uiTest("Rendering an element with click handler", function(assert) {
   assert.equal(comp.value, 20, 'Rerendering should not add multiple listeners.');
 });
 
+QUnit.uiTest("Rendering an element with once-click handler", function(assert) {
+  function ClickableComponent() {
+    ClickableComponent.super.apply(this, arguments);
+    this.clicks = 0;
+  }
+  ClickableComponent.Prototype = function() {
+    this.render = function($$) {
+      return $$('a').append('Click me')
+        .on('click', this.onClick, this, { once: true });
+    };
+    this.onClick = function() {
+      this.clicks += 1;
+    };
+  };
+  Component.extend(ClickableComponent);
+
+  var comp = ClickableComponent.static.render();
+  comp.click();
+  assert.equal(comp.clicks, 1, 'Handler should have been triggered');
+  comp.click();
+  assert.equal(comp.clicks, 1, 'Handler should not have been triggered again');
+});
+
 /* ##################### Nested Elements/Components ##########################*/
 
 QUnit.test("Render children elements", function(assert) {
