@@ -35,7 +35,7 @@ function TextPropertyEditor() {
 TextPropertyEditor.Prototype = function() {
 
   this.render = function($$) {
-    var el = Surface.prototype.render.call(this);
+    var el = Surface.prototype.render.apply(this, arguments);
     el.addClass("sc-text-property-editor");
     el.append(
       $$(TextProperty, {
