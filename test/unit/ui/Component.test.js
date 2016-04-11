@@ -669,6 +669,28 @@ QUnit.test("Special nesting situation II", function(assert) {
   assert.ok(grandchild === comp.refs.grandchild, "Grandchild should have been retained.");
 });
 
+QUnit.test("Edge case: ingesting a child without picking up", function(assert) {
+  function Parent() {
+    Parent.super.apply(this, arguments);
+    this.render = function($$) {
+      return $$('div').append(
+        $$(Child).append('Foo')
+      );
+    };
+  }
+  Component.extend(Parent);
+  function Child() {
+    Child.super.apply(this, arguments);
+    this.render = function($$) {
+      return $$('div');
+    };
+  }
+  Component.extend(Child);
+  var comp = Parent.static.render();
+  assert.equal(comp.el.getChildCount(), 1, "Should have 1 child");
+  assert.equal(comp.el.textContent, '', "textContent should be empty");
+});
+
 QUnit.test("Implicit retaining should not override higher-level rules", function(assert) {
   // If a child component has refs, itself should not be retained without
   // being ref'd by the parent
