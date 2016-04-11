@@ -93,9 +93,9 @@ Dropdown.Prototype = function() {
     this.setState({open: !this.state.open});
     // TODO: why do we need to do this delayed?
     setTimeout(function() {
-      var windowEl = DefaultDOMElement.wrapNativeElement(window);
-      windowEl.on('click', this.close, this, { once: true });
-    }, 0);
+      var _window = DefaultDOMElement.getBrowserWindow();
+      _window.on('click', this.close, this, { once: true });
+    }.bind(this), 0);
   };
 
   this.close = function() {

@@ -31,10 +31,6 @@ var inBrowser = require('../util/inBrowser');
 
 function Scrollbar() {
   Scrollbar.super.apply(this, arguments);
-
-  if (inBrowser) {
-    this.windowEl = DefaultDOMElement.wrapNativeElement(window);
-  }
 }
 
 Scrollbar.Prototype = function() {
@@ -42,7 +38,7 @@ Scrollbar.Prototype = function() {
   this.didMount = function() {
     var scrollableEl = this.getScrollableElement();
     // do a full rerender when window gets resized
-    this.windowEl.on('resize', this.onResize, this);
+    DefaultDOMElement.getBrowserWindow().on('resize', this.onResize, this);
     // update the scroll handler on scroll
     scrollableEl.on('scroll', this.onScroll, this);
 
@@ -54,7 +50,7 @@ Scrollbar.Prototype = function() {
 
   this.dispose = function() {
     var scrollableEl = this.getScrollableElement();
-    this.windowEl.off(this);
+    DefaultDOMElement.getBrowserWindow().off(this);
     scrollableEl.off(this);
   };
 
@@ -157,8 +153,9 @@ Scrollbar.Prototype = function() {
 
     // temporarily, we bind to events on window level
     // because could leave the this element's area while dragging
-    this.windowEl.on('mousemove', this.onMouseMove, this);
-    this.windowEl.on('mouseup', this.onMouseUp, this);
+    var _window = DefaultDOMElement.getBrowserWindow();
+    _window.on('mousemove', this.onMouseMove, this);
+    _window.on('mouseup', this.onMouseUp, this);
 
     var scrollBarOffset = this.el.getOffset().top;
     var y = e.pageY - scrollBarOffset;
@@ -175,8 +172,8 @@ Scrollbar.Prototype = function() {
   // Handle Mouse Up
   this.onMouseUp = function() {
     this._mouseDown = false;
-    var windowEl = DefaultDOMElement.wrapNativeElement(window);
-    windowEl.off(this);
+    var _window = DefaultDOMElement.getBrowserWindow();
+    _window.off(this);
   };
 
   this.onMouseMove = function(e) {
