@@ -65,6 +65,10 @@ ContainerEditor.Prototype = function() {
 
   var _super = Object.getPrototypeOf(this);
 
+  this.shouldRerender = function(newProps) {
+    return false;
+  };
+
   this.render = function($$) {
     var el = _super.render.apply(this, arguments);
 
