@@ -100,11 +100,12 @@ RenderingEngine.Prototype = function() {
       } else {
         vel.__skip__ = true;
       }
-    }
-    // capture children
-    if (vel.children) {
-      for (var i = 0; i < vel.children.length; i++) {
-        _capture(vel.children[i]);
+    } else {
+      // capture children
+      if (vel.children) {
+        for (var i = 0; i < vel.children.length; i++) {
+          _capture(vel.children[i]);
+        }
       }
     }
     vel.__isCaptured__ = true;
