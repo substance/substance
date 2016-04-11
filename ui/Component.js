@@ -357,7 +357,12 @@ Component.Prototype = function() {
     // which will not lead to an extra rerender
     var needRerender = !this.__isSettingProps__ &&
       this.shouldRerender(this.getProps(), newState);
-    this._setState(newState);
+    if (this.state) {
+      this.willUpdateState(newState);
+    }
+    this.state = newState || {};
+    Object.freeze(this.state);
+    this.didUpdateState();
     if (needRerender) {
       this.rerender();
     }
@@ -575,15 +580,6 @@ Component.Prototype = function() {
       return context;
     }
     return context;
-  };
-
-  this._setState = function(newState) {
-    if (this.state) {
-      this.willUpdateState(newState);
-    }
-    this.state = newState || {};
-    Object.freeze(this.state);
-    this.didUpdateState();
   };
 
   function _unwrapComp(el) {
