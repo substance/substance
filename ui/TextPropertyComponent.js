@@ -32,8 +32,24 @@ TextPropertyComponent.Prototype = function() {
 
   var _super = Object.getPrototypeOf(this);
 
+  this.didMount = function() {
+    _super.didMount.call(this);
+    var surface = this.getSurface();
+    if (surface) {
+      surface._registerTextProperty(this);
+    }
+  };
+
+  this.dispose = function() {
+    _super.dispose.call(this);
+    var surface = this.getSurface();
+    if (surface) {
+      surface._unregisterTextProperty(this);
+    }
+  };
+
   this.render = function($$) {
-    var path = this.props.path;
+    var path = this.getPath();
 
     var el = this._renderContent($$)
       .addClass('sc-text-property')
@@ -95,30 +111,20 @@ TextPropertyComponent.Prototype = function() {
     parentContext.append(context);
   };
 
-  this.didMount = function() {
-    var surface = this.getSurface();
-    if (surface) {
-      surface._registerTextProperty(this.props.path, this);
-    }
-  };
-
-  this.dispose = function() {
-    _super.dispose.call(this);
-    var surface = this.getSurface();
-    if (surface) {
-      surface._unregisterTextProperty(this.props.path, this);
-    }
+  this.getPath = function() {
+    return this.props.path;
   };
 
   this.getText = function() {
-    return this.getDocument().get(this.props.path);
+    return this.getDocument().get(this.getPath());
   };
 
   this.getAnnotations = function() {
-    var annotations = this.getDocument().getIndex('annotations').get(this.props.path);
+    var path = this.getPath();
+    var annotations = this.getDocument().getIndex('annotations').get(path);
     var surface = this.getSurface();
     if (surface) {
-      var fragments = surface._getFragments(this.props.path);
+      var fragments = surface._getFragments(path);
       if (fragments) {
         annotations = annotations.concat(fragments);
       }
