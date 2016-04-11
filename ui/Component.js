@@ -75,6 +75,7 @@ function Component(parent, props) {
   this.parent = parent;
   this.el = null;
   this.refs = {};
+
     // HACK: a temporary solution to handle refs owned by an ancestor
     // is to store them here as well, so that we can map virtual components
     // efficiently
@@ -82,9 +83,12 @@ function Component(parent, props) {
   this._actionHandlers = {};
 
   // context from parent (dependency injection)
-  this._setContext(this._getContext());
-  this._setProps(props);
-  this._setState(this._getInitialState());
+  this.context = this._getContext() || {};
+  Object.freeze(this.context);
+  this.props = props || {};
+  Object.freeze(props);
+  this.state = this._getInitialState() || {};
+  Object.freeze(this.state);
 }
 
 Component.Prototype = function() {
@@ -395,7 +399,9 @@ Component.Prototype = function() {
     // set a flag so that this.setState() can omit triggering render
     this.__isSettingProps__ = true;
     try {
-      this.willReceiveProps(newProps);
+      if (!this.props) {
+        this.willReceiveProps(newProps);
+      }
       this.props = newProps || {};
       Object.freeze(newProps);
       this.didReceiveProps();
@@ -569,13 +575,10 @@ Component.Prototype = function() {
     return context;
   };
 
-  this._setContext = function(context) {
-    this.context = context || {};
-    Object.freeze(this.context);
-  };
-
   this._setState = function(newState) {
-    this.willUpdateState(newState);
+    if (this.state) {
+      this.willUpdateState(newState);
+    }
     this.state = newState || {};
     Object.freeze(this.state);
     this.didUpdateState();
