@@ -25,12 +25,13 @@ var $$ = Component.$$;
 
 function AnnotationComponent() {
   Component.apply(this, arguments);
+  this._tagName = 'span';
 }
 
 AnnotationComponent.Prototype = function() {
 
   this.render = function() {
-    var el = $$('span')
+    var el = $$(this._tagName)
       .attr("data-id", this.props.node.id)
       .addClass(this.getClassNames());
     if (this.props.node.highlighted) {

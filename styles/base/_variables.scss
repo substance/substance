@@ -1,6 +1,11 @@
 /* Variables
 -------------------------------------------------- */
 
+// Layout
+$small-layout-width: 300px;
+$medium-layout-width: 620px;
+$large-layout-width: 960px;
+
 // Normalized heights (used by buttons and inputs)
 
 $base-height: 40px;
@@ -9,6 +14,10 @@ $border-radius: 5px;
 
 // Colors
 $border-color: #E0E4E4;
+
+// Used by Button component
+$button-color: rgba(0,0,0,0.75);
+
 $fill-white-color: #fff;
 $fill-light-color: #f7f9f9; // #f8f8f8;
 $fill-dark-color: #404040;
@@ -26,8 +35,8 @@ $lighten-color-3: rgba(0,0,0,0.25);
 $lighten-color-4: rgba(0,0,0,0.50);
 $lighten-color-5: rgba(0,0,0,0.75);
 
-$link-color: #2079DC;
-$focus-outline-color: #5BE3FF;
+$link-color: #1795CD;
+$focus-outline-color: #1795CD;// #5BE3FF;
 
 // Font colors
 $default-text-color: rgba(0,0,0,0.75);
