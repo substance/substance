@@ -35,7 +35,7 @@ function TwoPanelController() {
 
 TwoPanelController.Prototype = function() {
 
-  var _super = Object.getPrototypeOf(this);
+  var _super = TwoPanelController.super.prototype;
 
   this.getChildContext = function() {
     var childContext = _super.getChildContext.call(this);
@@ -63,17 +63,18 @@ TwoPanelController.Prototype = function() {
 
   this.render = function($$) {
     // TODO: maybe make status bar configurable
-    return _super.render.call(this)
-      .append(
-        $$(SplitPane, {splitType: 'horizontal', sizeB: 'inherit'}).append(
-          $$(SplitPane, {splitType: 'vertical', sizeA: '60%'}).append(
-            // TODO: provide a default implementation here
-            this._renderMainSection($$),
-            this._renderContextSection($$)
-          ).ref('splitPane'),
-          $$(StatusBar, {doc: this.getDocument()}).ref('statusBar')
-        ).ref('workspaceSplitPane')
-      );
+    var el = _super.render.apply(this, arguments);
+    el.append(
+      $$(SplitPane, {splitType: 'horizontal', sizeB: 'inherit'}).append(
+        $$(SplitPane, {splitType: 'vertical', sizeA: '60%'}).append(
+          // TODO: provide a default implementation here
+          this._renderMainSection($$),
+          this._renderContextSection($$)
+        ).ref('splitPane'),
+        $$(StatusBar, {doc: this.getDocument()}).ref('statusBar')
+      ).ref('workspaceSplitPane')
+    );
+    return el;
   };
 
   this._renderMainSection = function($$) {
