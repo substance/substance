@@ -1,6 +1,5 @@
 'use strict';
 
-var $ = require('../util/jquery');
 var isEqual = require('lodash/isEqual');
 var each = require('lodash/each');
 var extend = require('lodash/extend');
@@ -15,6 +14,8 @@ var Clipboard = require('./Clipboard');
 var Component = require('./Component');
 var UnsupportedNode = require('./UnsupportedNode');
 var keys = require('../util/keys');
+var inBrowser = require('../util/inBrowser');
+var DefaultDOMElement = require('./DefaultDOMElement');
 
 /**
    Abstract interface for editing components.
@@ -49,8 +50,9 @@ function Surface() {
 
   // HACK: we need to listen to mousup on document
   // to catch events outside the surface
-  this.$document = $(window.document);
-  this.onMouseUp = this.onMouseUp.bind(this);
+  if (inBrowser) {
+    this.documentEl = DefaultDOMElement.wrapNativeElement(window.document);
+  }
 
   // set when editing is enabled
   this.enabled = true;
@@ -571,7 +573,9 @@ Surface.Prototype = function() {
     // then the handler needs to kick in and recover a persisted selection or such
     this.skipNextFocusEvent = true;
     // Bind mouseup to the whole document in case of dragging out of the surface
-    this.$document.one('mouseup', this.onMouseUp);
+    if (this.documentEl) {
+      this.documentEl.on('mouseup', this.onMouseUp, this, { once: true });
+    }
   };
 
   this.onMouseUp = function() {
@@ -774,7 +778,7 @@ Surface.Prototype = function() {
         // Ensure span has dimensions and position by
         // adding a zero-width space character
         this.skipNextObservation = true;
-        span.appendChild(window.document.createTextNode("\u200b"));
+        span.appendChild(DefaultDOMElement.createTextNode("\u200b"));
         wrange.insertNode(span);
         var rect = span.getBoundingClientRect();
         var spanParent = span.parentNode;
