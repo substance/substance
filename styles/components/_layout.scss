@@ -1,7 +1,10 @@
-$medium-layout-width: 620px;
-$large-layout-width: 960px;
-
 .sc-layout {
+  padding: $default-padding;
+  padding-top: 2 * $default-padding;
+
+  &.sm-no-padding {
+    padding: 0;
+  }
 
   &.sm-type-centered {
     text-align: center;
@@ -10,6 +13,12 @@ $large-layout-width: 960px;
   // Takes all space
   &.sm-width-full {
     width: 100%;
+  }
+
+  // Small sized area
+  &.sm-width-small {
+    max-width: $small-layout-width;
+    margin: 0px auto;
   }
 
   // Medium sized area, centered
