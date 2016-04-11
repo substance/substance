@@ -2,21 +2,21 @@ var Component = require('./Component');
 var $$ = Component.$$;
 
 /**
-  Simple layout component for simple layout tasks, without writing CSS.
+  Simple layout component for simple layout tasks, without having to write CSS
 
   @class
   @component
 
   @prop {String} width 'small', 'medium', 'large' and 'full'
-  @prop {String} [type] 'centered', 'left-aligned' or 'right-aligned'
-  @prop {String} [noPadding] No padding around layout, will fill the whole space available
+  @prop {String} [textAlign] 'center', 'left' or 'right'
+  @prop {String} [noPadding] No padding around layout, will fill the whole space
 
   @example
 
   ```js
   var form = $$(Layout, {
     width: 'large',
-    type: 'centered'
+    textAlign: 'center'
   });
   ```
 */
@@ -29,7 +29,9 @@ Layout.Prototype = function() {
   this.render = function() {
     var el = $$('div').addClass('sc-layout');
     el.addClass('sm-width-'+this.props.width);
-    el.addClass('sm-type-'+this.props.type);
+    if (this.props.textAlign) {
+      el.addClass('sm-text-align-'+this.props.textAlign);
+    }
 
     if (this.props.noPadding) {
       el.addClass('sm-no-padding');

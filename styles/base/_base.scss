@@ -44,15 +44,15 @@ strong {
 
 /* Links */
 a {
-  color: $link-color; 
+  color: $link-color;
   text-decoration:none; 
 
-  &.active, &:hover {
-    color:#63b6e5;
-  }
+  // &.active, &:hover {
+  //   color:#63b6e5;
+  // }
 
   &:focus {
-    outline: 2px solid #5BE3FF;  
+    outline: 1px solid #5BE3FF;  
   }
 }
 

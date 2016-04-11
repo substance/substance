@@ -2,17 +2,15 @@
   padding: $default-padding;
   padding-top: 2 * $default-padding;
 
+  // By default takes the full width
+  width: 100%;
+
   &.sm-no-padding {
     padding: 0;
   }
 
   &.sm-type-centered {
     text-align: center;
-  }
-
-  // Takes all space
-  &.sm-width-full {
-    width: 100%;
   }
 
   // Small sized area
@@ -35,7 +33,7 @@
   // When used inside layouts paragraphs and headings get some
   // padding by default.
   // 
-  // TODO: maybe this should be activated explicitly thrugh a
+  // TODO: maybe this should be activated explicitly through a
   // Prose component that turns on the text paddings.
   > p {
     padding-bottom: $default-padding;
