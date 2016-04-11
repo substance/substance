@@ -1,5 +1,6 @@
+'use strict';
+
 var Component = require('./Component');
-var $$ = Component.$$;
 
 function Input() {
   Component.apply(this, arguments);
@@ -7,7 +8,7 @@ function Input() {
 
 Input.Prototype = function() {
 
-  this.render = function() {
+  this.render = function($$) {
     var el = $$('input').attr({
       value: this.props.value,
       type: this.props.type,
