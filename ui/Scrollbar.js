@@ -35,12 +35,10 @@ function Scrollbar() {
 Scrollbar.Prototype = function() {
 
   this.didMount = function() {
-    var scrollableEl = this.getScrollableElement();
     // do a full rerender when window gets resized
     DefaultDOMElement.getBrowserWindow().on('resize', this.onResize, this);
     // update the scroll handler on scroll
-    scrollableEl.on('scroll', this.onScroll, this);
-
+    this.props.scrollPane.on('scroll', this.onScroll, this);
     // TODO: why is this necessary here?
     setTimeout(function() {
       this.updatePositions();
@@ -48,9 +46,8 @@ Scrollbar.Prototype = function() {
   };
 
   this.dispose = function() {
-    var scrollableEl = this.getScrollableElement();
     DefaultDOMElement.getBrowserWindow().off(this);
-    scrollableEl.off(this);
+    this.props.scrollPane.off(this);
   };
 
   // TODO: This is actually a place where we could need didUpdate or
@@ -172,7 +169,8 @@ Scrollbar.Prototype = function() {
   this.onMouseUp = function() {
     this._mouseDown = false;
     var _window = DefaultDOMElement.getBrowserWindow();
-    _window.off(this);
+    _window.off('mousemove', this.onMouseMove, this);
+    _window.off('mouseup', this.onMouseUp, this);
   };
 
   this.onMouseMove = function(e) {

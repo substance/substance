@@ -598,10 +598,20 @@ function BrowserWindow() {
 }
 
 BrowserWindow.Prototype = function() {
-  this.on = DOMElement.prototype.on;
-  this.off = DOMElement.prototype.off;
-  this.addEventListener = BrowserDOMElement.prototype.addEventListener;
-  this.removeEventListener = BrowserDOMElement.prototype.removeEventListener;
+  var _super = BrowserDOMElement.prototype;
+  this.on = function() {
+    return _super.on.apply(this, arguments);
+  };
+  this.off = function() {
+    return _super.off.apply(this, arguments);
+  };
+  this.addEventListener = function() {
+    return _super.addEventListener.apply(this, arguments);
+  };
+  this.removeEventListener = function() {
+    return _super.removeEventListener.apply(this, arguments);
+  };
+  this.getEventListeners = BrowserDOMElement.prototype.getEventListeners;
 };
 
 oo.initClass(BrowserWindow);
