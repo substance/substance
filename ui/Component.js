@@ -76,17 +76,19 @@ function Component(parent, props) {
   this.el = null;
   this.refs = {};
 
-    // HACK: a temporary solution to handle refs owned by an ancestor
-    // is to store them here as well, so that we can map virtual components
-    // efficiently
+  // HACK: a temporary solution to handle refs owned by an ancestor
+  // is to store them here as well, so that we can map virtual components
+  // efficiently
   this.__foreignRefs__ = {};
   this._actionHandlers = {};
 
   // context from parent (dependency injection)
   this.context = this._getContext() || {};
   Object.freeze(this.context);
+  // setting props without triggering willReceiveProps or didReceiveProps
   this.props = props || {};
-  Object.freeze(props);
+  Object.freeze(this.props);
+  // setting initial state without triggering willUpdateState or didUpdateState
   this.state = this._getInitialState() || {};
   Object.freeze(this.state);
 }
