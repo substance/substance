@@ -12,7 +12,7 @@
 
   &:focus {
     background: #fff;
-    outline: 2px solid $focus-outline-color;
+    border-color: $focus-outline-color;
   }
 
   &.sm-centered {

@@ -9,8 +9,12 @@
     padding: 0;
   }
 
-  &.sm-type-centered {
+  &.sm-text-align-center {
     text-align: center;
+  }
+
+  &.sm-text-align-right {
+    text-align: right;
   }
 
   // Small sized area

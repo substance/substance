@@ -52,7 +52,12 @@ a {
   // }
 
   &:focus {
-    outline: 1px solid #5BE3FF;  
+    outline: 1px solid $focus-outline-color;  
   }
 }
 
+button {
+  &:focus {
+    outline: 1px solid $focus-outline-color;  
+  }
+}
