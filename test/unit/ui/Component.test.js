@@ -959,9 +959,12 @@ QUnit.test('Preserve components when ref matches, and rerender when props change
 
   var childNodes = comp.childNodes;
   assert.equal(childNodes.length, 3, 'Component should have 3 children.');
-  assert.equal(childNodes[0].textContent, 'A', '__first child should have text A');
-  assert.equal(childNodes[1].textContent, 'B', '__second child should have text B');
-  assert.equal(childNodes[2].textContent, 'C', '__third child should have text C');
+  assert.equal(childNodes[0].textContent, 'A', '.. first child should have text A');
+  assert.equal(childNodes[1].textContent, 'B', '.. second child should have text B');
+  assert.equal(childNodes[2].textContent, 'C', '.. third child should have text C');
+
+  comp.refs.a.render.reset();
+  comp.refs.b.render.reset();
 
   // Props update that preserves some of our components, drops some others
   // and adds some new
@@ -977,18 +980,18 @@ QUnit.test('Preserve components when ref matches, and rerender when props change
   childNodes = comp.childNodes;
   assert.equal(childNodes.length, 4, 'Component should now have 4 children.');
   // a and b should have been preserved
-  assert.equal(a, comp.refs.a, '__a should be the same instance');
-  assert.equal(b, comp.refs.b, '__b should be the same component instance');
+  assert.equal(a, comp.refs.a, '.. a should be the same instance');
+  assert.equal(b, comp.refs.b, '.. b should be the same component instance');
   // c should be gone
-  assert.equal(c.dispose.callCount, 1, '__c should have been unmounted');
+  assert.equal(c.dispose.callCount, 1, '.. c should have been unmounted');
   // a should have been rerendered (different props) while b should not (same props)
-  assert.equal(a.render.callCount, 2, '__Component a should have been rendered twice');
-  assert.equal(b.render.callCount, 1, '__Component b should have been rendered once');
+  assert.ok(a.render.callCount > 0, '.. Component a should have been rerendered');
+  assert.equal(b.render.callCount, 0, '.. Component b should not have been rerendered');
   // check content
-  assert.equal(childNodes[0].textContent, 'X', '__first child should have text X');
-  assert.equal(childNodes[1].textContent, 'Y', '__second child should have text Y');
-  assert.equal(childNodes[2].textContent, 'B', '__third child should have text Y');
-  assert.equal(childNodes[3].textContent, 'Z', '__fourth child should have text Z');
+  assert.equal(childNodes[0].textContent, 'X', '.. first child should have text X');
+  assert.equal(childNodes[1].textContent, 'Y', '.. second child should have text Y');
+  assert.equal(childNodes[2].textContent, 'B', '.. third child should have text Y');
+  assert.equal(childNodes[3].textContent, 'Z', '.. fourth child should have text Z');
 });
 
 // Note: this is more of an integration test, but I did not manage to isolate the error

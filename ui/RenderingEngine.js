@@ -447,7 +447,7 @@ RenderingEngine.Prototype = function() {
     this.refs = {};
     this.foreignRefs = {};
     this.elements = captureContext.elements;
-    this.updates = captureContext.components.length;
+    this.updates = captureContext.elements.length;
     this.pos = 0;
 
     this.$$ = this._createComponent.bind(this);
@@ -455,7 +455,7 @@ RenderingEngine.Prototype = function() {
   DescendingContext.Prototype = function() {
     this._createComponent = function() {
       var vel = this.elements[this.pos++];
-      if (!vel.__isCaptured__ && vel._isVirtualComponent && this._ancestorsReady(vel.parent)) {
+      if (!vel.__isCaptured__ && this._ancestorsReady(vel)) {
         _capture(vel);
         this.updates++;
       }
