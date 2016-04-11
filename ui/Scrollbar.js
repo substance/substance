@@ -3,7 +3,6 @@
 var Component = require('./Component');
 var each = require('lodash/each');
 var DefaultDOMElement = require('./DefaultDOMElement');
-var inBrowser = require('../util/inBrowser');
 
 /**
   A rich scrollbar implementation that supports highlights.   Usually
