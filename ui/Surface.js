@@ -836,17 +836,22 @@ Surface.Prototype = function() {
   // TextProperty components are registered via path
   // Annotations are just registered via path for lookup, not as instances
 
-  this._registerTextProperty = function(path, component) {
-    this._textProperties[path] = component;
+  this._registerTextProperty = function(textPropertyComponent) {
+    var path = textPropertyComponent.getPath();
+    this._textProperties[path] = textPropertyComponent;
   };
 
-  this._unregisterTextProperty = function(path) {
-    delete this._textProperties[path];
-    each(this._annotations, function(_path, id) {
-      if (isEqual(path, _path)) {
-        delete this._annotations[id];
-      }
-    }.bind(this));
+  this._unregisterTextProperty = function(textPropertyComponent) {
+    var path = textPropertyComponent.getPath();
+    if (this._textProperties[path] === textPropertyComponent) {
+      delete this._textProperties[path];
+      // TODO: what do we need this for?
+      each(this._annotations, function(_path, id) {
+        if (isEqual(path, _path)) {
+          delete this._annotations[id];
+        }
+      }.bind(this));
+    }
   };
 
   this._getTextPropertyComponent = function(path) {
