@@ -658,9 +658,8 @@ function ElementComponent(parent, virtualComp) {
     throw new Error("Illegal argument: 'virtualComp' must be a VirtualHTMLElement.");
   }
   this.parent = parent;
-  // just take the reference of the parent context
-  // so it can be passed through to child components
-  this.context = parent.context;
+  this.context = this._getContext() || {};
+  Object.freeze(this.context);
 }
 
 ElementComponent.Prototype = function() {
