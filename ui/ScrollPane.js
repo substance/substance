@@ -29,14 +29,14 @@ var Scrollbar = require('./Scrollbar');
  */
 function ScrollPane() {
   Component.apply(this, arguments);
-
-  if (this.props.highlights) {
-    this.props.highlights.on('highlights:updated', this.onHighlightsUpdated, this);
-  }
 }
 
 ScrollPane.Prototype = function() {
+
   this.didMount = function() {
+    if (this.props.highlights) {
+      this.props.highlights.on('highlights:updated', this.onHighlightsUpdated, this);
+    }
     // HACK: Scrollbar should use DOMMutationObserver instead
     if (this.refs.scrollbar) {
       this.context.doc.on('document:changed', this.onDocumentChange, this, { priority: -1 });
@@ -100,14 +100,16 @@ ScrollPane.Prototype = function() {
   };
 
   this.onScroll = function() {
+    var scrollPos = this.getScrollPosition();
+    var scrollable = this.refs.scrollable;
     if (this.props.onScroll) {
-      this.props.onScroll(this.getScrollPosition(), this.refs.scrollable);
+      this.props.onScroll(scrollPos, scrollable);
     }
-
     // Update TOC if provided
     if (this.props.toc) {
       this.context.toc.markActiveEntry(this);
     }
+    this.emit('scroll', scrollPos, scrollable);
   };
 
   /**
