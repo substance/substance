@@ -2,6 +2,7 @@
 
 var isString = require('lodash/isString');
 var isNumber = require('lodash/isNumber');
+var oo = require('../util/oo');
 var DOMElement = require('./DOMElement');
 var DelegatedEvent = require('./DelegatedEvent');
 
@@ -585,6 +586,29 @@ BrowserDOMElement.wrapNativeElement = function(el) {
   } else {
     return new BrowserDOMElement(el);
   }
+};
+
+/*
+  Wrapper for the window element only exposing the eventlistener API.
+*/
+function BrowserWindow() {
+  this.el = window;
+  window.__BrowserDOMElementWrapper__ = this;
+  this.eventListeners = [];
+}
+
+BrowserWindow.Prototype = function() {
+  this.on = DOMElement.prototype.on;
+  this.off = DOMElement.prototype.off;
+  this.addEventListener = BrowserDOMElement.prototype.addEventListener;
+  this.removeEventListener = BrowserDOMElement.prototype.removeEventListener;
+};
+
+oo.initClass(BrowserWindow);
+
+BrowserDOMElement.getBrowserWindow = function() {
+  if (window.__BrowserDOMElementWrapper__) return window.__BrowserDOMElementWrapper__;
+  return new BrowserWindow(window);
 };
 
 module.exports = BrowserDOMElement;

@@ -27,6 +27,19 @@ DefaultDOMElement._create = function(el) {
 };
 
 /*
+  A wrapper for Browser's `window` providing
+  the DOMElement's eventlistener API.
+*/
+DefaultDOMElement.getBrowserWindow = function() {
+  if (inBrowser) {
+    return DOMElementImpl.getBrowserWindow();
+  } else {
+    // just a stub if not in browser
+    return DefaultDOMElement.createElement('div');
+  }
+};
+
+/*
   @param {String} html
   @returns {DOMElement|DOMElement[]}
 */
