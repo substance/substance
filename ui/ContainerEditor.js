@@ -65,7 +65,10 @@ ContainerEditor.Prototype = function() {
 
   var _super = Object.getPrototypeOf(this);
 
-  this.shouldRerender = function(newProps) {
+  // Note: this component is self managed
+  this.shouldRerender = function() {
+    // TODO: we should still detect when the document has changed,
+    // see https://github.com/substance/substance/issues/543
     return false;
   };
 
