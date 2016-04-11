@@ -197,7 +197,7 @@ BrowserDOMElement.Prototype = function() {
       listener.__hasEventDelegation__ = true;
     }
     this.el.addEventListener(listener.eventName, listener.handler, listener.capture);
-    listener._el = this.el;
+    listener._el = this;
     this.eventListeners.push(listener);
   };
 
