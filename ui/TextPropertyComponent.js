@@ -60,7 +60,7 @@ TextPropertyComponent.Prototype = function() {
         // Add zero-width character. Since we have a non-empty element, the
         // outline style set on the cursor would not be visible in certain
         // scenarios (e.g. when cursor is at the very beginning of a text.
-        el.html('&#xfeff;');
+        el.append("\uFEFF");
         el.append($$('div').addClass('se-cursor-inner'));
       }
 
