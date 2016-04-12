@@ -1,6 +1,6 @@
 'use strict';
 
-var Router = require('../ui/_Router');
+var Router = require('../ui/Router');
 
 function DocumentationRouter(controller) {
   DocumentationRouter.super.call(this);
@@ -20,12 +20,7 @@ DocumentationRouter.Prototype = function() {
   };
 
   this.routeFromState = function() {
-    var nodeId = this.controller.state.nodeId;
-    if (nodeId) {
-      this.setRoute(nodeId);
-    } else {
-      this.clearRoute();
-    }
+    return this.controller.state.nodeId;
   };
 
 };

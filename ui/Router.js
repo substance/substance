@@ -1,124 +1,124 @@
 'use strict';
 
-var oo = require('../util/oo');
 var each = require('lodash/each');
-var $ = require('../util/jquery');
+var oo = require('../util/oo');
+var DefaultDOMElement = require('./DefaultDOMElement');
 
-var Router = function(app) {
-  this.app = app;
-  this.state = [];
-  this.loadState();
-
-  var self = this;
-  $(window).on('hashchange', function() {
-    self.onHashChange();
-  });
+var Router = function() {
+  this.__isStarted__ = false;
 };
 
 Router.Prototype = function() {
 
-  this.loadState = function() {
-    var route = window.location.hash.slice(1);
-    if (route) {
-      var state = this.getStateFromRoute(route);
-      if (state) {
-        this.state = state;
-      }
+  /*
+    Starts listening for hash-changes
+  */
+  this.start = function() {
+    var window = DefaultDOMElement.getBrowserWindow();
+    window.on('hashchange', this._onHashChange, this);
+    this.__isStarted__ = true;
+  };
+
+  /*
+    Takes the current route and updates the application state.
+  */
+  this.readURL = function() {
+    if (!this.__isStarted__) this.start();
+    this.stateFromRoute(this.getRoute());
+  };
+
+  this.writeURL = function() {
+    var route = this.routeFromState();
+    if (!route) {
+      this.clearRoute();
+    } else {
+      this.setRoute(route);
     }
   };
 
-  this.getInitialState = function(component) {
-    if (!component._isOnRoute) return null;
-    // get router index of component
-    var index = this.getRouteIndex(component);
-    var state = this.state[index];
-    console.log('Router: getInitialState', component, index, state);
-    return state;
+  this.dispose = function() {
+    var window = DefaultDOMElement.getBrowserWindow();
+    window.off(this);
   };
 
-  this.truncateState = function(component) {
-    if (this.__disabled__) return;
-    var index = this.getRouteIndex(component);
-    this.state = this.state.slice(0, index);
+  /*
+    Maps a route to application state and updates the application.
+
+    This should be implemented by an application specific router.
+
+    @abstract
+    @param String route content of the URL's hash fragment
+   */
+  this.stateFromRoute = function(route) {
+    /* jshint unused:false */
   };
 
-  this.getRouteIndex = function(component) {
-    var idx = -1;
-    while (component && component !== "root") {
-      if (component._isOnRoute) idx++;
-      component = component.getParent();
+  /*
+    Maps an application  route to application state and updates the application.
+
+    This should be implemented by an application specific router.
+
+    @abstract
+   */
+  this.routeFromState = function() {};
+
+  this.getRoute = function() {
+    return window.location.hash.slice(1);
+  };
+
+  this.setRoute = function(route) {
+    this.__isSaving__ = true;
+    try {
+      window.history.pushState({} , '', '#'+route);
+    } finally {
+      this.__isSaving__ = false;
     }
-    return idx;
   };
 
-  this.updateState = function(routeState) {
-    if (this.__disabled__) return;
-    this.state = routeState.slice(0);
-    var route = this.getRouteFromState(this.state, 'state');
-    window.history.pushState({} , '', '#'+route);
+  this.clearRoute = function() {
+    this.setRoute('');
   };
 
-  this.getStateFromRoute = function(route) {
-    var routeState = [];
-    var stateParts = route.split(';');
-    each(stateParts, function(statePart) {
-      var pairs = statePart.split(',');
-      var state = {};
-      each(pairs, function(pair) {
-        var tuple = pair.split('=');
-        state[tuple[0]] = tuple[1];
-      });
-      routeState.push(state);
-    });
-    return routeState;
-  };
-
-  this.getRouteFromState = function(routeState) {
-    var routeParts = [];
-    each(routeState, function(state) {
-      var stateParts = [];
-      each(state, function(value, key) {
-        // only primitives are allowed
-        if (typeof value === 'object') {
-          return;
-        }
-        stateParts.push(key + "=" + value);
-      });
-      routeParts.push(stateParts.join(','));
-    });
-
-    return routeParts.join(";");
-  };
-
-  this.onHashChange = function() {
-    var route = window.location.hash.slice(1);
-    this.state = [];
-    if (route) {
-      this.state = this.getStateFromRoute(route) || [];
+  this._onHashChange = function() {
+    if (this.__isSaving__) {
+      return;
     }
-    // TODO: we need to disable router updates triggered by these updates
-    // plus we need to navigave through the route and call set state on each
-    // component on the route
-    this.__disabled__ = true;
-    var comp = this.app;
-    for (var i = 0; i < this.state.length; i++) {
-      var state = this.state[i];
-      comp.setState(state);
-      comp = comp.route;
-      // if we can't set the state directly, we rely on initialization
-      if (!comp) {
-        break;
-      }
+    if (this.__isLoading__) {
+      console.error('FIXME: router is currently applying a route.');
+      return;
     }
-    this.__disabled__ = false;
-  };
-
-  this.isActive = function() {
-    return !this.__disabled__;
+    this.__isLoading__ = true;
+    try {
+      var route = this.getRoute();
+      this.stateFromRoute(route);
+    } finally {
+      this.__isLoading__ = false;
+    }
   };
 
 };
 
 oo.initClass(Router);
+
+Router.objectToRouteString = function(obj) {
+  var route = [];
+  each(obj, function(val, key) {
+    route.push(key+'='+val);
+  });
+  return route.join(',');
+};
+
+Router.routeStringToObject = function(routeStr) {
+  var obj = {};
+  var params = routeStr.split(',');
+  params.forEach(function(param) {
+    var tuple = param.split('=');
+    if (tuple.length !== 2) {
+      throw new Error('Illegal route.');
+    }
+    obj[tuple[0].trim()] = tuple[1].trim();
+  });
+  return obj;
+};
 
 module.exports = Router;
