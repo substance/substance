@@ -98,11 +98,6 @@ Component.Prototype = function() {
 
   this._isComponent = true;
 
-  // Experimental (we need this to initialize the Router)
-  this.getInitialContext = function() {
-    return {};
-  };
-
   /**
     Provides the context which is delivered to every child component. Override if you want to
     provide your own child context.
@@ -569,14 +564,13 @@ Component.Prototype = function() {
   };
 
   this._getContext = function() {
+    var context = {};
     var parent = this.getParent();
-    var context = this.getInitialContext();
     if (parent) {
-      context = extend({}, parent.context, context);
+      context = extend(context, parent.context);
       if (parent.getChildContext) {
         return extend(context, parent.getChildContext());
       }
-      return context;
     }
     return context;
   };
