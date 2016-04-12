@@ -362,6 +362,12 @@ BrowserDOMElement.Prototype = function() {
     if (!child || !child._isBrowserDOMElement) {
       throw new Error('Illegal child type.');
     }
+    // HACK: I thought it isn't possible to create
+    // a BrowserDOMElement instance without having this
+    // done already
+    if (!child.el._wrapper) {
+      child.el._wrapper = child;
+    }
     console.assert(child.el._wrapper === child, "Expecting a backlink between native element and CheerioDOMElement");
     return child.getNativeElement();
   };
