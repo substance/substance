@@ -2,10 +2,7 @@
 
 var _ = require('lodash');
 var SurfaceCommand = require('../../ui/SurfaceCommand');
-var uuid = require('../../util/uuid');
-var deleteNode = require('../../model/transform/deleteNode');
 
-var annotationHelpers = require('../../model/annotationHelpers');
 
 var listUtils = require('./listUtils');
 
