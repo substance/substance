@@ -10,13 +10,11 @@ function FigureComponent() {
 FigureComponent.Prototype = function() {
 
   this.didMount = function() {
-    this.props.node.connect(this, {
-      "label:changed": this.onLabelChanged
-    });
+    this.props.node.on("label:changed", this.onLabelChanged, this);
   };
 
   this.dispose = function() {
-    this.props.node.disconnect(this);
+    this.props.node.off(this);
   };
 
   this.render = function($$) {
