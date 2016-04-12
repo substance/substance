@@ -12,11 +12,11 @@ ListComponent.Prototype = function() {
 
   this.didMount = function() {
     this.doc = this.props.doc;
-    this.doc.getEventProxy('path').connect(this, [this.props.node.id, 'items'], this.onItemsChanged);
+    this.doc.getEventProxy('path').on([this.props.node.id, 'items'], this.onItemsChanged, this);
   };
 
   this.dispose = function() {
-    this.doc.getEventProxy('path').disconnect(this);
+    this.doc.getEventProxy('path').off(this);
     this.doc = null;
   };
 

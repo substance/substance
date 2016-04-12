@@ -19,13 +19,14 @@ AnnotationComponent.extend(LinkComponent, function LinkComponentPrototype() {
     AnnotationComponent.prototype.didMount.call(this);
     var node = this.props.node;
     this.doc = node.getDocument();
-    this.doc.getEventProxy('path').connect(this, [node.id, 'title'], this.rerender);
-    this.doc.getEventProxy('path').connect(this, [node.id, 'url'], this.rerender);
+    var pathEventProxy = this.doc.getEventProxy('path');
+    pathEventProxy.on([node.id, 'title'], this.rerender, this);
+    pathEventProxy.on([node.id, 'url'], this.rerender, this);
   };
 
   this.dispose = function() {
     AnnotationComponent.prototype.dispose.call(this);
-    this.doc.getEventProxy('path').disconnect(this);
+    this.doc.getEventProxy('path').off(this);
   };
 });
 
