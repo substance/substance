@@ -373,15 +373,9 @@ CollabSession.Prototype = function() {
   this._applyRemoteChange = function(change) {
     this.stage._apply(change);
     this.doc._apply(change);
-
     // Only undo+redo history is updated according to the new change
     this._transformLocalChangeHistory(change);
     this._transformSelection(change);
-
-    // We need to notify the change listeners so the UI gets updated
-    // We pass replay: false, so this does not become part of the undo
-    // history.
-    // this._notifyChangeListeners(change, { replay: false, remote: true });
     return change;
   };
 
