@@ -3,7 +3,6 @@
 var Component = require('./Component');
 var each = require('lodash/each');
 var DefaultDOMElement = require('./DefaultDOMElement');
-var inBrowser = require('../util/inBrowser');
 
 /**
   A rich scrollbar implementation that supports highlights.   Usually
@@ -31,21 +30,15 @@ var inBrowser = require('../util/inBrowser');
 
 function Scrollbar() {
   Scrollbar.super.apply(this, arguments);
-
-  if (inBrowser) {
-    this.windowEl = DefaultDOMElement.wrapNativeElement(window);
-  }
 }
 
 Scrollbar.Prototype = function() {
 
   this.didMount = function() {
-    var scrollableEl = this.getScrollableElement();
     // do a full rerender when window gets resized
-    this.windowEl.on('resize', this.onResize, this);
+    DefaultDOMElement.getBrowserWindow().on('resize', this.onResize, this);
     // update the scroll handler on scroll
-    scrollableEl.on('scroll', this.onScroll, this);
-
+    this.props.scrollPane.on('scroll', this.onScroll, this);
     // TODO: why is this necessary here?
     setTimeout(function() {
       this.updatePositions();
@@ -53,9 +46,8 @@ Scrollbar.Prototype = function() {
   };
 
   this.dispose = function() {
-    var scrollableEl = this.getScrollableElement();
-    this.windowEl.off(this);
-    scrollableEl.off(this);
+    DefaultDOMElement.getBrowserWindow().off(this);
+    this.props.scrollPane.off(this);
   };
 
   // TODO: This is actually a place where we could need didUpdate or
@@ -157,8 +149,9 @@ Scrollbar.Prototype = function() {
 
     // temporarily, we bind to events on window level
     // because could leave the this element's area while dragging
-    this.windowEl.on('mousemove', this.onMouseMove, this);
-    this.windowEl.on('mouseup', this.onMouseUp, this);
+    var _window = DefaultDOMElement.getBrowserWindow();
+    _window.on('mousemove', this.onMouseMove, this);
+    _window.on('mouseup', this.onMouseUp, this);
 
     var scrollBarOffset = this.el.getOffset().top;
     var y = e.pageY - scrollBarOffset;
@@ -175,8 +168,9 @@ Scrollbar.Prototype = function() {
   // Handle Mouse Up
   this.onMouseUp = function() {
     this._mouseDown = false;
-    var windowEl = DefaultDOMElement.wrapNativeElement(window);
-    windowEl.off(this);
+    var _window = DefaultDOMElement.getBrowserWindow();
+    _window.off('mousemove', this.onMouseMove, this);
+    _window.off('mouseup', this.onMouseUp, this);
   };
 
   this.onMouseMove = function(e) {

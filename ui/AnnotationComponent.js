@@ -28,13 +28,24 @@ function AnnotationComponent() {
 
 AnnotationComponent.Prototype = function() {
 
+  // TODO: we should avoid to have a didMount hook on an abstract base class
+  this.didMount = function() {
+    var node = this.props.node;
+    node.on('highlighted', this.onHighlightedChanged, this);
+  };
+
+  // TODO: we should avoid to have a didMount hook on an abstract base class
+  this.dispose = function() {
+    var node = this.props.node;
+    node.off(this);
+  };
+
   this.render = function($$) {
     var el = $$('span')
       .attr("data-id", this.props.node.id)
       .addClass(this.getClassNames());
     if (this.props.node.highlighted) {
       el.addClass('sm-highlighted');
-      // el.addClass('sm-'+this.props.node.highlightedScope);
     }
     el.append(this.props.children);
     return el;
@@ -44,23 +55,11 @@ AnnotationComponent.Prototype = function() {
     return 'sc-'+this.props.node.type;
   };
 
-  this.didMount = function() {
-    var node = this.props.node;
-    node.on('highlighted', this.onHighlightedChanged, this);
-  };
-
-  this.dispose = function() {
-    var node = this.props.node;
-    node.off(this);
-  };
-
   this.onHighlightedChanged = function() {
     if (this.props.node.highlighted) {
-      this.$el.addClass('sm-highlighted');
-      // this.$el.addClass('sm-'+this.props.node.highlightedScope);
+      this.el.addClass('sm-highlighted');
     } else {
-      this.$el.removeClass('sm-highlighted');
-      // this.$el.removeClass('sm-'+this.props.node.highlightedScope);
+      this.el.removeClass('sm-highlighted');
     }
   };
 };

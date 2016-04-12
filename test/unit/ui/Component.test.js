@@ -201,6 +201,67 @@ QUnit.test("Rerender on setState()", function(assert) {
   assert.ok(comp.render.callCount > 0, "Component should have been rerendered.");
 });
 
+QUnit.test("Dependency-Injection", function(assert) {
+  function Parent() {
+    Parent.super.apply(this, arguments);
+  }
+  Parent.Prototype = function() {
+    this.getChildContext = function() {
+      var childContext = {};
+      if (this.props.name) {
+        childContext[this.props.name] = this.props.name;
+      }
+      return childContext;
+    };
+    this.render = function($$) {
+      var el = $$('div');
+      // direct child
+      el.append($$(Child).ref('a'));
+      // indirect child
+      el.append($$('div').append(
+        $$(Child).ref('b')
+      ));
+      // ingested grandchild
+      var grandchild = $$(Child).ref('c');
+      el.append(
+        $$(Wrapper, {name:'bar'}).append(grandchild)
+      );
+      return el;
+    };
+  };
+  Component.extend(Parent);
+
+  function Child() {
+    Child.super.apply(this, arguments);
+    this.render = function($$) {
+      return $$('div');
+    };
+  }
+  Component.extend(Child);
+
+  function Wrapper() {
+    Wrapper.super.apply(this, arguments);
+  }
+  Wrapper.Prototype = function() {
+    this.getChildContext = Parent.prototype.getChildContext;
+    this.render = function($$) {
+      return $$('div').append(this.props.children);
+    };
+  };
+  Component.extend(Wrapper);
+
+  var comp = Parent.static.render({name: 'foo'});
+  var a = comp.refs.a;
+  var b = comp.refs.b;
+  var c = comp.refs.c;
+  assert.isDefinedAndNotNull(a.context.foo, "'a' should have a property 'foo' in its context");
+  assert.isNullOrUndefined(a.context.bar, ".. but not 'bar'");
+  assert.isDefinedAndNotNull(b.context.foo, "'b' should have a property 'foo' in its context");
+  assert.isNullOrUndefined(b.context.bar, ".. but not 'bar'");
+  assert.isDefinedAndNotNull(c.context.foo, "'c' should have a property 'foo' in its context");
+  assert.isDefinedAndNotNull(c.context.bar, ".. and also 'bar'");
+});
+
 /* ##################### Rerendering ##########################*/
 
 QUnit.test("Rerendering varying content", function(assert) {
@@ -606,6 +667,28 @@ QUnit.test("Special nesting situation II", function(assert) {
   comp.rerender();
   assert.ok(child === comp.refs.child, "Child should have been retained.");
   assert.ok(grandchild === comp.refs.grandchild, "Grandchild should have been retained.");
+});
+
+QUnit.test("Edge case: ingesting a child without picking up", function(assert) {
+  function Parent() {
+    Parent.super.apply(this, arguments);
+    this.render = function($$) {
+      return $$('div').append(
+        $$(Child).append('Foo')
+      );
+    };
+  }
+  Component.extend(Parent);
+  function Child() {
+    Child.super.apply(this, arguments);
+    this.render = function($$) {
+      return $$('div');
+    };
+  }
+  Component.extend(Child);
+  var comp = Parent.static.render();
+  assert.equal(comp.el.getChildCount(), 1, "Should have 1 child");
+  assert.equal(comp.el.textContent, '', "textContent should be empty");
 });
 
 QUnit.test("Implicit retaining should not override higher-level rules", function(assert) {

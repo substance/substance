@@ -13,13 +13,11 @@ function TableComponent() {
 TableComponent.Prototype = function() {
 
   this.didMount = function() {
-    this.context.surface.connect(this, {
-      "selection:changed": this.onSelectionChange
-    });
+    this.context.surface.on("selection:changed", this.onSelectionChange, this);
   };
 
   this.dispose = function() {
-    this.context.surface.disconnect(this);
+    this.context.surface.off(this);
   };
 
   this.getInitialState = function() {

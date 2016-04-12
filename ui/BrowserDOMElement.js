@@ -2,6 +2,7 @@
 
 var isString = require('lodash/isString');
 var isNumber = require('lodash/isNumber');
+var oo = require('../util/oo');
 var DOMElement = require('./DOMElement');
 var DelegatedEvent = require('./DelegatedEvent');
 
@@ -361,6 +362,12 @@ BrowserDOMElement.Prototype = function() {
     if (!child || !child._isBrowserDOMElement) {
       throw new Error('Illegal child type.');
     }
+    // HACK: I thought it isn't possible to create
+    // a BrowserDOMElement instance without having this
+    // done already
+    if (!child.el._wrapper) {
+      child.el._wrapper = child;
+    }
     console.assert(child.el._wrapper === child, "Expecting a backlink between native element and CheerioDOMElement");
     return child.getNativeElement();
   };
@@ -585,6 +592,39 @@ BrowserDOMElement.wrapNativeElement = function(el) {
   } else {
     return new BrowserDOMElement(el);
   }
+};
+
+/*
+  Wrapper for the window element only exposing the eventlistener API.
+*/
+function BrowserWindow() {
+  this.el = window;
+  window.__BrowserDOMElementWrapper__ = this;
+  this.eventListeners = [];
+}
+
+BrowserWindow.Prototype = function() {
+  var _super = BrowserDOMElement.prototype;
+  this.on = function() {
+    return _super.on.apply(this, arguments);
+  };
+  this.off = function() {
+    return _super.off.apply(this, arguments);
+  };
+  this.addEventListener = function() {
+    return _super.addEventListener.apply(this, arguments);
+  };
+  this.removeEventListener = function() {
+    return _super.removeEventListener.apply(this, arguments);
+  };
+  this.getEventListeners = BrowserDOMElement.prototype.getEventListeners;
+};
+
+oo.initClass(BrowserWindow);
+
+BrowserDOMElement.getBrowserWindow = function() {
+  if (window.__BrowserDOMElementWrapper__) return window.__BrowserDOMElementWrapper__;
+  return new BrowserWindow(window);
 };
 
 module.exports = BrowserDOMElement;
