@@ -13,6 +13,10 @@ var ListComponent = Component.extend({
     this.doc = this.props.doc;
     this.doc.getEventProxy('path').connect(this, [this.props.node.id, 'items'], this.onItemsChanged);
     this.doc.getEventProxy('path').connect(this, [this.props.node.id, 'ordered'], this.onOrderChanged);
+
+    this.handleActions({
+      'rerenderList': this.rerender,
+    });
   },
 
   dispose: function() {

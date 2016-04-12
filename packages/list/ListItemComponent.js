@@ -10,6 +10,11 @@ function ListItemComponent() {
 
 ListItemComponent.Prototype = function() {
 
+  this.initialize = function() {
+    this.doc = this.props.node.getDocument();
+    this.doc.getEventProxy('path').connect(this, [this.props.node.id, 'level'], this.onLevelChanged);
+  };
+
   this.render = function() {
     var item = this.props.node;
     var doc = item.getDocument();
@@ -17,6 +22,10 @@ ListItemComponent.Prototype = function() {
       .attr('data-id', item.id)
       .append($$(TextProperty, { doc: doc, path: [item.id, 'content']}));
     return el;
+  };
+
+  this.onLevelChanged = function() {
+    this.send('rerenderList');
   };
 };
 
