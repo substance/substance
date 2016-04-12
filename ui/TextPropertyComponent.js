@@ -40,12 +40,13 @@ TextPropertyComponent.Prototype = function() {
     var el = this._renderContent()
       .addClass('sc-text-property')
       .attr({
-        "data-path": path.join('.'),
+        'data-path': path.join('.'),
         spellCheck: false,
       })
       .css({
-        whiteSpace: "pre-wrap"
+        whiteSpace: 'pre-wrap'
       });
+
     el.append($$('br'));
     return el;
   };
@@ -56,6 +57,15 @@ TextPropertyComponent.Prototype = function() {
     var el;
     if (node.type === 'cursor' || node.type === 'selection-fragment') {
       el = $$('span').addClass('se-'+node.type);
+
+      if (node.type === 'cursor') {
+        // Add zero-width character. Since we have a non-empty element, the
+        // outline style set on the cursor would not be visible in certain
+        // scenarios (e.g. when cursor is at the very beginning of a text.
+        el.html('&#xfeff;');
+        el.append($$('div').addClass('se-cursor-inner'));
+      }
+
       if (node.collaborator) {
         el.addClass('sm-collaborator-'+node.collaborator.colorIndex);
       } else {
@@ -70,12 +80,12 @@ TextPropertyComponent.Prototype = function() {
           'data-length': 1
         });
       }
-      // adding refs here, enables preservative rerendering
+      // Adding refs here, enables preservative rerendering
       // TODO: while this solves problems with rerendering inline nodes
       // with external content, it decreases the overall performance too much.
       // We should optimize the component first before we can enable this.
       if (this.context.config && this.context.config.preservativeTextPropertyRendering) {
-        el.ref(id + "@" + fragment.counter);
+        el.ref(id + '@' + fragment.counter);
       }
     }
     el.attr('data-offset', fragment.pos);
@@ -181,8 +191,6 @@ TextPropertyComponent.Prototype = function() {
       }
     }
   };
-
-
 };
 
 AnnotatedTextComponent.extend(TextPropertyComponent);

@@ -3,6 +3,7 @@
 var oo = require('../util/oo');
 var extend = require('lodash/extend');
 var Err = require('../util/Error');
+var uuid = require('../util/uuid');
 
 /*
   Implements Substance DocumentStore API. This is just a dumb store.
@@ -20,6 +21,12 @@ DocumentStore.Prototype = function() {
     @return {Object} document record
   */
   this.createDocument = function(props, cb) {
+
+    if (!props.documentId) {
+      // We generate a documentId ourselves
+      props.documentId = uuid();
+    }
+
     var exists = this._documentExists(props.documentId);
     if (exists) {
       return cb(new Err('DocumentStore.CreateError', {

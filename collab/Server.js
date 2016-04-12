@@ -3,6 +3,7 @@
 var EventEmitter = require('../util/EventEmitter');
 var oo = require('../util/oo');
 var uuid = require('../util/uuid');
+var extend = require('lodash/extend');
 
 /*
   ServerRequest
@@ -31,6 +32,13 @@ ServerRequest.Prototype = function() {
     this.isAuthorized = true;
     this.authorizationData = authorizationData;
   };
+
+  /*
+    Sets the isEnhanced flag
+  */
+  this.setEnhanced = function() {
+    this.isEnhanced = true;
+  };
 };
 
 oo.initClass(ServerRequest);
@@ -51,8 +59,9 @@ ServerResponse.Prototype = function() {
   /*
     Sends an error response
   */
-  this.error = function(err) {
+  this.error = function(err, errData) {
     this.err = err;
+    this.errData = errData;
     this.isReady = true;
   };
 
@@ -65,7 +74,7 @@ ServerResponse.Prototype = function() {
   };
 
   /*
-    Sets the isEnhanced flags
+    Sets the isEnhanced flag
   */
   this.setEnhanced = function() {
     this.isEnhanced = true;
@@ -134,6 +143,15 @@ Server.Prototype = function() {
     this.next(req, res);
   };
 
+
+  /*
+    Ability to enrich the request data
+  */
+  this.enhanceRequest = function(req, res) {
+    req.setEnhanced();
+    this.next(req, res);
+  };
+
   /*
     Executes the API according to the message type
 
@@ -188,7 +206,8 @@ Server.Prototype = function() {
   // 
   // __initial -        > authenticated      -> __authenticated, __error
   // __authenticated   -> authorize          -> __authorized, __error
-  // __authorized      -> execute            -> __executed, __error
+  // __authorized      -> enhanceRequest     -> __requestEnhanced, __error
+  // __requestEnhanced -> execute            -> __executed, __error
   // __executed        -> enhanceResponse    -> __enhanced, __error
   // __enhanced        -> sendResponse       -> __done, __error
   // __error           -> sendError          -> __done
@@ -203,7 +222,11 @@ Server.Prototype = function() {
   };
 
   this.__authorized = function(req, res) {
-    return req.isAuthenticated && req.isAuthorized && !res.isReady;
+    return req.isAuthenticated && req.isAuthorized && !req.isEnhanced && !res.isReady;
+  };
+
+  this.__requestEnhanced = function(req, res) {
+    return req.isAuthenticated && req.isAuthorized && req.isEnhanced && !res.isReady;
   };
 
   this.__executed = function(req, res) {
@@ -216,7 +239,7 @@ Server.Prototype = function() {
   };
 
   this.__error = function(req, res) {
-    return res.err;
+    return res.err && !res.isSent;
   };
 
   this.__done = function(req, res) {
@@ -229,6 +252,8 @@ Server.Prototype = function() {
     } else if (this.__authenticated(req, res)) {
       this.authorize(req, res);
     } else if (this.__authorized(req, res)) {
+      this.enhanceRequest(req, res);
+    } else if (this.__requestEnhanced(req, res)) {
       this.execute(req, res);
     } else if (this.__executed(req, res)) {
       this.enhanceResponse(req, res);
@@ -248,9 +273,12 @@ Server.Prototype = function() {
     var collaboratorId = req.message.collaboratorId;
     var msg = {
       type: 'error',
+      errorName: res.err.name,
       errorMessage: res.err.message,
       requestMessage: req.message
     };
+
+    msg = extend(msg, res.errData);
     this.send(collaboratorId, msg);
     res.setSent();
     this.next(req, res);
@@ -263,7 +291,6 @@ Server.Prototype = function() {
     var collaboratorId = req.message.collaboratorId;
     this.send(collaboratorId, res.data);
     res.setSent();
-    console.log('Server.sendResponse res.isSent: ', res.isSent);
     this.next(req, res);
   };
 

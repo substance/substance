@@ -1,12 +1,17 @@
 var AnnotationComponent = require('../../ui/AnnotationComponent');
 
+
 function LinkComponent() {
   LinkComponent.super.apply(this, arguments);
+
+  this._tagName = 'a';
 }
 
 AnnotationComponent.extend(LinkComponent, function LinkComponentPrototype() {
   this.render = function() {
     var el = AnnotationComponent.prototype.render.call(this);
+    el.attr('href', this.props.node.url);
+
     var titleComps = [this.props.node.url];
     if (this.props.node.title) {
       titleComps.push(this.props.node.title);

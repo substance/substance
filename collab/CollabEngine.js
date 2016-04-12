@@ -3,7 +3,10 @@
 var EventEmitter = require('../util/EventEmitter');
 var forEach = require('lodash/forEach');
 var map = require('lodash/map');
+var extend = require('lodash/extend');
 var DocumentChange = require('../model/DocumentChange');
+var Selection = require('../model/Selection');
+var Err = require('../util/Error');
 
 /*
   Engine for realizing collaborative editing. Implements the server-methods of 
@@ -23,7 +26,7 @@ CollabEngine.Prototype = function() {
   /*
     Register collaborator for a given documentId
   */
-  this._register = function(collaboratorId, documentId) {
+  this._register = function(collaboratorId, documentId, selection, collaboratorInfo) {
     var collaborator = this._collaborators[collaboratorId];
 
     if (!collaborator) {
@@ -33,13 +36,12 @@ CollabEngine.Prototype = function() {
       };
     }
 
-    if (collaborator.documents[documentId]) {
-      console.error('ERROR: Collaborator already registered for doc.');
-    }
+    // Extend with collaboratorInfo if available
+    collaborator.info = collaboratorInfo;
 
     // Register document
     collaborator.documents[documentId] = {
-      selection: null
+      selection: selection
     };
   };
 
@@ -49,7 +51,7 @@ CollabEngine.Prototype = function() {
   this._unregister = function(collaboratorId, documentId) {
     var collaborator = this._collaborators[collaboratorId];
     delete collaborator.documents[documentId];
-    var docCount = Object.keys(collaborator.documents);
+    var docCount = Object.keys(collaborator.documents).length;
     // If there is no doc left, we can remove the entire collaborator entry
     if (docCount === 0) {
       delete this._collaborators[collaboratorId];
@@ -82,10 +84,12 @@ CollabEngine.Prototype = function() {
     forEach(this._collaborators, function(collab) {
       var doc = collab.documents[documentId];
       if (doc && collab.collaboratorId !== collaboratorId) {
-        collaborators[collab.collaboratorId] = {
+        var entry = {
           selection: doc.selection,
           collaboratorId: collab.collaboratorId
         };
+        entry = extend({}, collab.info, entry);
+        collaborators[collab.collaboratorId] = entry;
       }
     }.bind(this));
     return collaborators;
@@ -102,7 +106,7 @@ CollabEngine.Prototype = function() {
   };
 
   /*
-    Connect a new collaborative editing session.
+    Client starts a sync
 
     @param args.documentId
     @param args.version The client's document version (0 if client starts with an empty doc)
@@ -111,73 +115,101 @@ CollabEngine.Prototype = function() {
     Note: a client can reconnect having a pending change
     which is similar to the commit case
   */
-  this.connect = function(args, cb) {
-    this._register(args.collaboratorId, args.documentId);
-
-    if (args.change) {
-      // Stores new change and rebases it if needed
-      this.commit(args, cb);
-    } else {
-      // Just get the latest changes
-      this.documentEngine.getChanges({
-        documentId: args.documentId,
-        sinceVersion: args.version,
-      }, function(err, result) {
-        if (err) return cb(err);
-
-        cb(null, {
-          changes: result.changes,
-          version: result.version
-        });
-      });
-    }
+  this.sync = function(args, cb) {
+    // We now always get a change since the selection should be considered
+    this._sync(args, function(err, result) {
+      if (err) return cb(err);
+      // Registers the collaborator If not already registered for that document
+      this._register(args.collaboratorId, args.documentId, result.change.after.selection, args.collaboratorInfo);
+      cb(null, result);
+    }.bind(this));
   };
 
   /*
-    Client wants to commit a change
+    Internal implementation of sync
 
     @param {String} args.collaboratorId collaboratorId
     @param {String} args.documentId document id
     @param {Number} args.version client version
-    @param {Number} args.userId collaborator's userId if known
     @param {Number} args.change new change
 
     OUT: version, changes, version
   */
-  this.commit = function(args, cb) {
+  this._sync = function(args, cb) {
     // Get latest doc version
     this.documentEngine.getVersion(args.documentId, function(err, serverVersion) {
       if (serverVersion === args.version) { // Fast forward update
-        this._commitFF(args, cb);
-      } else { // Client changes need to be rebased to latest serverVersion
-        this._commitRB(args, cb);
+        this._syncFF(args, cb);
+      } else if (serverVersion > args.version) { // Client changes need to be rebased to latest serverVersion
+        this._syncRB(args, cb);
+      } else {
+        cb(new Err('InvalidVersionError', {
+          message: 'Client version greater than server version'
+        }));
       }
     }.bind(this));
   };
 
   /*
-    Fast forward commit (client version = server version)
+    Update all collaborators selections of a document according to a given change
+
+    WARNING: This has not been tested quite well
   */
-  this._commitFF = function(args, cb) {
+  this._updateCollaboratorSelections = function(documentId, change) {
+    // By not providing the 2nd argument to getCollaborators the change
+    // creator is also included.
+    var collaborators = this.getCollaborators(documentId);
+
+    forEach(collaborators, function(collaborator) {
+      if (collaborator.selection) {
+        var sel = Selection.fromJSON(collaborator.selection);
+        change = this.deserializeChange(change);
+        DocumentChange.transformSelection(sel, change);
+        // Write back the transformed selection to the server state
+        this._updateSelection(collaborator.collaboratorId, documentId, sel.toJSON());
+      }
+    }.bind(this));
+  };
+
+  /*
+    Fast forward sync (client version = server version)
+  */
+  this._syncFF = function(args, cb) {
+    this._updateCollaboratorSelections(args.documentId, args.change);
+    
+    // HACK: On connect we may receive a nop that only has selection data.
+    // We don't want to store such changes.
+    // TODO: it would be nice if we could handle this in a different
+    // branch of connect, so we don't spoil the commit implementation
+    if (args.change.ops.length === 0) {
+      return cb(null, {
+        change: args.change,
+        // changes: [],
+        serverChange: null,
+        version: args.version
+      });
+    }
+    
     // Store the commit
     this.documentEngine.addChange({
       documentId: args.documentId,
-      change: args.change, // rebased change
-      userId: args.userId
+      change: args.change,
+      documentInfo: args.documentInfo
     }, function(err, serverVersion) {
       if (err) return cb(err);
       cb(null, {
         change: args.change, // collaborators must be notified
-        changes: [], // no changes missed in fast-forward scenario
+        serverChange: null,
+        // changes: [], // no changes missed in fast-forward scenario
         version: serverVersion
       });
     }.bind(this));
   };
 
   /*
-    Rebased commit (client version < server version)
+    Rebased sync (client version < server version)
   */
-  this._commitRB = function(args, cb) {
+  this._syncRB = function(args, cb) {
     this._rebaseChange({
       documentId: args.documentId,
       change: args.change,
@@ -186,52 +218,33 @@ CollabEngine.Prototype = function() {
       // result has change, changes, version (serverversion)
       if (err) return cb(err);
 
+      this._updateCollaboratorSelections(args.documentId, rebased.change);
+
+      // HACK: On connect we may receive a nop that only has selection data.
+      // We don't want to store such changes.
+      // TODO: it would be nice if we could handle this in a different
+      // branch of connect, so we don't spoil the commit implementation
+      if (args.change.ops.length === 0) {
+        return cb(null, {
+          change: rebased.change,
+          serverChange: rebased.serverChange,
+          version: rebased.version
+        });
+      }
+
       // Store the rebased commit
       this.documentEngine.addChange({
         documentId: args.documentId,
         change: rebased.change, // rebased change
-        userId: args.userId
+        documentInfo: args.documentInfo
       }, function(err, serverVersion) {
         if (err) return cb(err);
         cb(null, {
           change: rebased.change,
-          changes: rebased.changes, // collaborators must be notified
+          serverChange: rebased.serverChange, // collaborators must be notified
           version: serverVersion
         });
       }.bind(this));
-    }.bind(this));
-  };
-
-  /*
-    Transforms an incoming selection update if needed. Selection updates
-    are realized as changes that don't get stored in the database.
-
-    IN: collaboratorId, documentId, version, change
-    OUT: transformed change
-  */
-  this.updateSelection = function(args, cb) {
-    this.documentEngine.getVersion(args.documentId, function(err, serverVersion) {
-      if (serverVersion === args.version) {
-        // Fast-foward: Nothing needs to be transformed
-        this._updateSelection(args.collaboratorId, args.documentId);
-        cb(null, {
-          version: serverVersion,
-          change: args.change
-        });
-      } else {
-        this._rebaseChange({
-          documentId: args.documentId,
-          change: args.change,
-          version: args.version
-        }, function(err, rebased) {
-          if (err) return cb(err);
-          this._updateSelection(args.collaboratorId, args.documentId);
-          cb(null, {
-            version: serverVersion,
-            change: rebased.change
-          });
-        }.bind(this));
-      }
     }.bind(this));
   };
 
@@ -250,9 +263,14 @@ CollabEngine.Prototype = function() {
       var a = this.deserializeChange(args.change);
       // transform changes
       DocumentChange.transformInplace(a, B);
+      var ops = B.reduce(function(ops, change) {
+        return ops.concat(change.ops);
+      }, []);
+      var serverChange = new DocumentChange(ops, {}, {});
+      
       cb(null, {
         change: this.serializeChange(a),
-        changes: B.map(this.serializeChange),
+        serverChange: this.serializeChange(serverChange),
         version: result.version
       });
     }.bind(this));

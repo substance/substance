@@ -2,21 +2,18 @@
 -------------------------------------------------- */
 
 .sc-toolbar {
-  height: 40px;
-  overflow: visible;
-  border-bottom: 1px solid #ddd;
-  font-size: 13px; // make generic
+  font-size: $small-font-size;
 
   /* Toolbar group
   ---------------------------- */
 
   .se-toolbar-group {
-    float: left;
+    display: inline-block;
 
     .se-tool {
       line-height: normal;
 
-      float: left;
+      display: inline-block;
       position: relative;
 
       button {
@@ -83,7 +80,7 @@
   .se-toolbar-dropdown {
     overflow: visible;
     position: relative;
-    float: left;
+    display: inline-block;
 
     .se-toggle {
       height: 30px;

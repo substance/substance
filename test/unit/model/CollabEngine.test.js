@@ -34,6 +34,16 @@ var documentEngine = new DocumentEngine({
   }
 });
 
+var fakeChange = {
+  before: {
+    selection: null
+  },
+  after: {
+    selection: null,
+  },
+  ops: []
+};
+
 var collabEngine;
 
 QUnit.module('collab/CollabEngine', {
@@ -55,14 +65,14 @@ QUnit.module('collab/CollabEngine', {
 QUnit.test('New collaborator enters with latest version', function(assert) {
   var done = assert.async();
 
-  collabEngine.connect({
+  collabEngine.sync({
     collaboratorId: 'collab-1',
     documentId: 'test-doc', 
-    version: 1
+    version: 1,
+    change: fakeChange
   }, function(err, result) {
     assert.isNullOrUndefined(err, 'Should not error');
     assert.equal(result.version, 1);
-    assert.equal(result.changes.length, 0);
     done();
   });
 });
@@ -70,14 +80,14 @@ QUnit.test('New collaborator enters with latest version', function(assert) {
 QUnit.test('New collaborator enters with an outdated version', function(assert) {
   var done = assert.async();
 
-  collabEngine.connect({
+  collabEngine.sync({
     collaboratorId: 'collab-1',
     documentId: 'test-doc', 
-    version: 0
+    version: 0,
+    change: fakeChange
   }, function(err, result) {
     assert.isNullOrUndefined(err, 'Should not error');
     assert.equal(result.version, 1);
-    assert.equal(result.changes.length, 1);
     done();
   });
 });
@@ -85,7 +95,7 @@ QUnit.test('New collaborator enters with an outdated version', function(assert) 
 QUnit.test('New collaborator enters with a new fast-forward change', function(assert) {
   var done = assert.async();
 
-  collabEngine.connect({
+  collabEngine.sync({
     collaboratorId: 'collab-1',
     documentId: 'test-doc', 
     version: 1,
@@ -93,7 +103,6 @@ QUnit.test('New collaborator enters with a new fast-forward change', function(as
   }, function(err, result) {
     assert.isNullOrUndefined(err, 'Should not error');
     assert.equal(result.version, 2);
-    assert.equal(result.changes.length, 0);
     done();
   });
 });
@@ -106,7 +115,7 @@ QUnit.test('New collaborator enters with a change that needs rebasing', function
   var insertTextChange1 = insertText(testDoc, 1, '!');
   var insertTextChange2 = insertText(testDoc, 5, '$$$'); // 5 is based on version 1, after rebasing should be 6
 
-  collabEngine.connect({
+  collabEngine.sync({
     collaboratorId: 'collab-1',
     documentId: 'test-doc', 
     version: 1,
@@ -115,7 +124,7 @@ QUnit.test('New collaborator enters with a change that needs rebasing', function
     assert.isNullOrUndefined(err, 'Should not error');
     assert.equal(result.version, 2);
 
-    collabEngine.connect({
+    collabEngine.sync({
       collaboratorId: 'collab-2',
       documentId: 'test-doc',
       version: 1,
@@ -123,32 +132,31 @@ QUnit.test('New collaborator enters with a change that needs rebasing', function
     }, function(err, result) {
       assert.isNullOrUndefined(err, 'Should not error');
       assert.equal(result.version, 3);
-      assert.equal(result.changes.length, 1);
-
+      assert.ok(result.serverChange, 'There should be a server change');
       assert.notDeepEqual(result.change, insertTextChange2, 'Tranformed change should differ from original change');
       done();
     });    
   });
 });
 
-
-QUnit.test('Two collaborators connect', function(assert) {
+QUnit.test('Two collaborators enter', function(assert) {
   var done = assert.async();
-  collabEngine.connect({
+  collabEngine.sync({
     collaboratorId: 'collab-1',
     documentId: 'test-doc', 
-    version: 1
+    version: 1,
+    change: fakeChange
   }, function(err, result) {
     assert.ok(result, 'connect result should be set');
-    collabEngine.connect({
+    collabEngine.sync({
       collaboratorId: 'collab-2',
       documentId: 'test-doc',
-      version: 1
+      version: 1,
+      change: fakeChange
     }, function(err, result) {
       assert.ok(result, 'connect result should be set');
       assert.isNullOrUndefined(err, 'Should not error');
       var collaboratorIds = collabEngine.getCollaboratorIds('test-doc', 'collab-2');
-      // var collaborators = collabEngine.getCollaborators('test-doc', 'collab-2');      
       assert.deepEqual(collaboratorIds, ['collab-1'], 'Should return one collaboratorId');
       collaboratorIds = collabEngine.getCollaboratorIds('test-doc', 'collab-1');
       assert.deepEqual(collaboratorIds, ['collab-2'], 'Should return one collaboratorId');
@@ -157,30 +165,31 @@ QUnit.test('Two collaborators connect', function(assert) {
   });
 });
 
-QUnit.test('Collaborator does a fast-forward commit', function(assert) {
+QUnit.test('Collaborator does a fast-forward sync', function(assert) {
   var done = assert.async();
 
-  collabEngine.connect({
+  collabEngine.sync({
     collaboratorId: 'collab-1',
     documentId: 'test-doc', 
-    version: 1
+    version: 1,
+    change: fakeChange
   }, function(err, result) {
     assert.isNullOrUndefined(err, 'Should not error on enter');
     assert.ok(result, 'connect should produce a result object');
-    collabEngine.commit({
+    collabEngine.sync({
       collaboratorId: 'collab-1',
       documentId: 'test-doc',
       change: exampleChange,
       version: 1
-    }, function(err, commitResult) {
-      assert.equal(commitResult.version, 2, 'Version should be 2 after commit');
-      assert.deepEqual(commitResult.change, exampleChange, 'Change should be untouched');
+    }, function(err, syncResult) {
+      assert.equal(syncResult.version, 2, 'Version should be 2 after commit');
+      assert.deepEqual(syncResult.change, exampleChange, 'Change should be untouched');
       done();
     });
   });
 });
 
-QUnit.test('Collaborator does a commit that needs rebasing', function(assert) {
+QUnit.test('Collaborator does a sync that needs rebasing', function(assert) {
   // We may want to use a proper seed to simulate that scenario
   assert.ok(true, 'TODO: implement');
 });

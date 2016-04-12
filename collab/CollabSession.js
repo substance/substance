@@ -4,7 +4,9 @@ var forEach = require('lodash/forEach');
 var DocumentSession = require('../model/DocumentSession');
 var DocumentChange = require('../model/DocumentChange');
 var debounce = require('lodash/debounce');
+var cloneDeep = require('lodash/cloneDeep');
 var Selection = require('../model/Selection');
+var Err = require('../util/Error');
 
 /*
   Session that is connected to a Substance Hub allowing
@@ -16,21 +18,40 @@ function CollabSession(doc, config) {
   CollabSession.super.call(this, doc, config);
 
   config = config || {};
+  this.config = config;
 
   this.collabClient = config.collabClient;
 
-  // TODO: The CollabSession or the doc needs to be aware of a doc id
-  // that corresponds to the doc on the server. For now we just
-  // store it on the document instance.
-  this.doc.id = config.docId;
+  if (config.docVersion) {
+    console.warn('config.docVersion is deprecated: Use config.version instead');
+  }
 
-  // TODO: Also we need to somehow store a version number (local version)
-  this.doc.version = config.docVersion;
+  if (config.docVersion) {
+    console.warn('config.docId is deprecated: Use config.documentId instead');
+  }
+
+  this.version = config.version || config.docVersion;
+  this.documentId = config.documentId || config.docId;
+
+  if (config.autoSync !== undefined) {
+    this.autoSync = config.autoSync;
+  } else {
+    this.autoSync = true;
+  }
+
+  if (!this.documentId) {
+    throw new Err('InvalidArgumentsError', {message: 'documentId is mandatory'});
+  }
+
+  if (!this.version) {
+    throw new Err('InvalidArgumentsError', {message: 'version is mandatory'});
+  }
 
   // Internal state
-  this._conected = false; // becomes true as soon as the initial connect has been completed
-  this._nextCommit = null; //
-  this._pendingCommit = null;
+  this._connected = false; // gets flipped to true in syncDone
+  this._nextChange = null; // next change to be sent over the wire
+  this._pendingChange = null; // change that is currently being synced
+  this._error = null;
 
   // Bind handlers
   this._broadCastSelectionUpdateDebounced = debounce(this._broadCastSelectionUpdate, 250);
@@ -39,7 +60,8 @@ function CollabSession(doc, config) {
   this.collaborators = {};
 
   // This happens on a reconnect
-  this.collabClient.on('connection', this._onConnected, this);
+  this.collabClient.on('connected', this._onCollabClientConnected, this);
+  this.collabClient.on('disconnected', this._onCollabClientDisconnected, this);
 
   // Constraints used for computing color indexes
   this.__maxColors = 5;
@@ -49,199 +71,249 @@ function CollabSession(doc, config) {
   // Attempt to open a document immediately, but only if the collabClient is
   // already connected. If not the _onConnected handler will take care of it
   // once websocket connection is ready.
-  if (this.collabClient.isConnected()) {
-    this.connect();  
+  if (this.collabClient.isConnected() && this.autoSync) {
+    this.sync();
   }
 }
 
 CollabSession.Prototype = function() {
 
-  var _super = Object.getPrototypeOf(this);
+  var _super = CollabSession.super.prototype;
 
   /*
     A new authenticated collabClient connection is available.
 
     This happens in a reconnect scenario.
   */
-  this._onConnected = function() {
+  this._onCollabClientConnected = function() {
+    console.log('CollabClient connected');
+    // Attempt to sync
+    if (this.autoSync) {
+      this.sync();
+    }
+  };
+
+  /*
+    Implicit disconnect (server connection drop out)
+  */
+  this._onCollabClientDisconnected = function() {
+    console.log('CollabClient disconnected');
+    this._abortSync();
+    if (this._connected) {
+      this._afterDisconnected();  
+    }
+  };
+  
+  /*
+    Sets the correct state after a collab session has been disconnected
+    either explicitly or triggered by a connection drop out.
+  */
+  this._afterDisconnected = function() {
+    // We remove all collaborators
+    this.collaborators = {};
+    this.emit('collaborators:changed');
     this._connected = false;
-    this.connect();
+    this.emit('disconnected');
   };
 
   /*
     Dispatching of remote messages.
   */
   this._onMessage = function(msg) {
-    // TODO: Only consider messages with the right documentId
-    if (msg.documentId !== this.doc.id) {
-      console.info('No documentId provided with message');
+    // Skip if message is not addressing this document
+    if (msg.documentId !== this.documentId) {
+      return false;
     }
 
-    // console.log('MESSAGE RECEIVED', msg);
-
-    var changes, change;
-    switch(msg.type) {
-      case 'connectDone':
-      case 'commitDone':
-        if (msg.changes) {
-          changes = msg.changes.map(function(change) {
-            return this.deserializeChange(change);
-          }.bind(this));
-        }
-        this[msg.type](msg.version, changes, msg.collaborators);
-        break;
-      case 'collaboratorConnected':
-        this.collaboratorConnected(msg.collaborator);
-        break;
-      case 'collaboratorDisconnected':
-        this.collaboratorDisconnected(msg.collaboratorId);
-        break;
-      case 'update':
-        change = this.deserializeChange(msg.change);
-        this.applyRemoteChange(msg.version, change, msg.collaboratorId);
-        break;
-      case 'updateSelection':
-        change = this.deserializeChange(msg.change);
-        this.applyRemoteSelection(msg.version, change, msg.collaboratorId);
-        break;
-      default:
-        console.error('CollabSession: unsupported message', msg.type, msg);
+    // Delegate
+    var actionFn = this[msg.type].bind(this);
+    if (!actionFn) {
+      console.error('CollabSession: unsupported message', msg.type, msg);
+      return false;
     }
+    actionFn(cloneDeep(msg));
+    return true;
   };
 
   /*
-    If there's an unconfirmed pending commit it will be merged with nextCommit
-
-    This is needed in a disconnect/reconnect scenario. Where we know the
-    pendingCommit will never be confirmed.
+    Handle errors. This gets called if any request produced
+    an error on the server. The error object holds te original
+    message we could inspect in a custom error handler to trigger
+    certain behavior.
   */
-  this._computeNextCommit = function() {
-    var newNextCommit = this._nextCommit;
-
-    if (this._pendingCommit) {
-      newNextCommit = this._pendingCommit;
-      this._pendingCommit = null;
-      if (this._nextCommit) {
-        newNextCommit.ops = newNextCommit.ops.concat(this._nextCommit.ops);
-        newNextCommit.after = this._nextCommit.after;
-      }
-    }
-    this._nextCommit = newNextCommit;
-    return newNextCommit;
+  this.error = function(error) {
+    console.error('An error occured', error);
+    this._error = error;
+    this.emit('error,', error);
+    this._abortSync();
   };
 
   /*
-    Connect session with remote endpoint and loads the upstream changes.
-
-    This operation initializes an editing session. It may happen that we never
-    see a response (enterDone) for it. E.g. when the connection is not
-    authenticated. However in such cases we will receive a connected event
-    and then open gets called again, considering the pendingCommit
-    (see _computeNextCommit).
-
-    @param {WebSocket} ws a connected websocket.
+    Unregister event handlers. Call this before throw away
+    a CollabSession reference. Otherwise you will leak memory
   */
-  this.connect = function() {
-    this._connected = false;
-    var msg = {
-      type: 'connect',
-      documentId: this.doc.id,
-      version: this.doc.version
-    };
-
-    // Makes sure an eventual pendingCommit gets considered in the nextCommit.
-    this._computeNextCommit();
-
-    if (this._nextCommit) {
-      // This behaves like a commit
-      msg.change = this.serializeChange(this._nextCommit);
-      this._send(msg);
-      // In case of a reconnect we need to set _connected back to false
-      this._afterCommit(this._nextCommit);
-    } else {
-      this._send(msg);
-    }
-  };
-
-  // Needed in the case of a reconnect or explicit close
   this.dispose = function() {
-    // Reset to original state
-    this.stop();
-    this._connected = false;
-    this._nextCommit = null;
-    this._pendingCommit = null;
+    this.disconnect();
+    this.collabClient.off(this);
   };
 
   /*
-    TODO: Make use of it.
+    Explicit disconnect initiated by user
   */
   this.disconnect = function() {
     // Let the server know we no longer want to edit this document
     var msg = {
       type: 'disconnect',
-      documentId: this.doc.id
+      documentId: this.documentId
     };
+
+    // We abort pening syncs
+    this._abortSync();
     this._send(msg);
-    // And now dispose and deregister the handlers
-    this.dispose();
+  };
+
+  this.disconnectDone = function() {
+    // console.log('disconnect done');
+    // Let the server know we no longer want to edit this document
+    this._afterDisconnected();
   };
 
   /*
-    Send local changes to upstream.
+    Abots the currently running sync.
+
+    This is called _onDisconnect and could be called after a sync request
+    times out (not yet implemented)
   */
-  this.commit = function() {
-    // If there is something to commit and there is no commit pending
-    if (this.collabClient.isConnected() && this._nextCommit && !this._pendingCommit) {
+  this._abortSync = function() {
+    var newNextChange = this._nextChange;
+
+    if (this._pendingChange) {
+      newNextChange = this._pendingChange;
+      // If we have local changes also, we append them to the new nextChange
+      if (this._nextChange) {
+        newNextChange.ops = newNextChange.ops.concat(this._nextChange.ops);
+        newNextChange.after = this._nextChange.after;
+      }
+      this._pendingChange = null;
+    }
+    this._error = null;
+    this._nextChange = newNextChange;
+  };
+
+  /*
+    Get next change for sync.
+
+    If there are no local changes we create a change that only
+    holds the current selection.
+  */
+  this._getNextChange = function() {
+    var nextChange = this._nextChange;
+    if (!nextChange) {
+      // Change only holds the current selection
+      nextChange = this._getChangeForSelection(this.selection, this.selection);
+    }
+    return nextChange;
+  };
+
+  this.__canSync = function() {
+    return this.collabClient.isConnected() && !this._pendingChange;
+  };
+
+  /*
+    Synchronize with collab server
+  */
+  this.sync = function() {
+    // If there is something to sync and there is no running sync
+    if (this.__canSync()) {
+      var nextChange = this._getNextChange();
       var msg = {
-        type: 'commit',
-        documentId: this.doc.id,
-        version: this.doc.version,
-        change: this.serializeChange(this._nextCommit)
+        type: 'sync',
+        documentId: this.documentId,
+        version: this.version,
+        change: this.serializeChange(nextChange)
       };
+
       this._send(msg);
-      this._afterCommit(this._nextCommit);
+      this._pendingChange = nextChange;
+
+      this._nextChange = null;
+      this._error = null;
+    } else {
+      console.error('Can not sync. Either collabClient is not connected or we are already syncing');
     }
   };
 
   /*
-    Try to commit changes to the server every 1s
+    Sync has completed
+
+    We apply server changes that happened in the meanwhile and we update
+    the collaborators (=selections etc.)
   */
-  this.start = function() {
-    // ATTENTION: don't start multiple runners
-    if (!this._runner) {
-      this._runner = setInterval(this.commit.bind(this), 1000);
+  this.syncDone = function(args) {
+    var serverChange = args.serverChange;
+    var collaborators = args.collaborators;
+    var serverVersion = args.version;
+
+    if (serverChange) {
+      serverChange = this.deserializeChange(serverChange);
+      this._applyRemoteChange(serverChange);
     }
+
+    this.version = serverVersion;
+
+    // Only apply updated collaborators if there are no local cahnges
+    // Otherwise they will not be accurate. We can safely skip this
+    // here as we know the next sync will be triggered soon. And if
+    // followed by an idle phase (_nextChange = null) will give us
+    // the latest collaborator records
+
+    this._updateCollaborators(collaborators);
+    if (this._nextChange) {
+      this._transformCollaboratorSelections(this._nextChange);
+    }
+
+    // Important: after sync is done we need to reset _pendingChange and _error
+    // In this state we can safely listen to 
+    this._pendingChange = null;
+    this._error = null;
+
+    // Each time the sync worked we consider the system connected
+    this._connected = true;
+
+    // TODO: this would trigger too many renders potentially
+    // once we have our phases in place we can do this in one go
+    if (serverChange) {
+      this._notifyChangeListeners(serverChange, { replay: false, remote: true });  
+    }
+
+    this.emit('collaborators:changed');
+    this.emit('connected');
+
+    // Attempt to sync again (maybe we have new local changes)
+    this._requestSync();
   };
 
   /*
-    Stop auto-committing changes
+    Triggers a new sync if there is a new change and no pending sync
   */
-  this.stop = function() {
-    if (this._runner) {
-      clearInterval(this._runner);
-      this._runner = null;
+  this._requestSync = function() {
+    if (this._nextChange && this.__canSync()) {
+      this.sync();
     }
   };
 
   /*
     We record all local changes into a single change (aka commit) that
   */
-  this._recordCommit = function(change) {
-    if (!this._nextCommit) {
-      this._nextCommit = change;
+  this._recordChange = function(change) {
+    if (!this._nextChange) {
+      this._nextChange = change;
     } else {
       // Merge new change into nextCommit
-      this._nextCommit.ops = this._nextCommit.ops.concat(change.ops);
-      this._nextCommit.after = change.after;
+      this._nextChange.ops = this._nextChange.ops.concat(change.ops);
+      this._nextChange.after = change.after;
     }
-  };
-
-  /*
-    Set internal state for committing
-  */
-  this._afterCommit = function(change) {
-    this._pendingCommit = change;
-    this._nextCommit = null;
+    this._requestSync();
   };
 
   /*
@@ -249,30 +321,41 @@ CollabSession.Prototype = function() {
     that update to other collaborators
   */
   this.setSelection = function(sel) {
+    // We just remember beforeSel on the CollabSession (need for connect use-case)
     var beforeSel = this.selection;
     _super.setSelection.call(this, sel);
     this._broadCastSelectionUpdateDebounced(beforeSel, sel);
   };
 
   /*
+    Takes beforeSel + afterSel and wraps it in a no-op DocumentChange
+  */
+  this._getChangeForSelection = function(beforeSel, afterSel) {
+    var change = new DocumentChange([], {
+      selection: beforeSel
+    }, {
+      selection: afterSel
+    });
+    return change;
+  };
+
+  /*
+    Returns true if there are local changes
+  */
+  this._hasLocalChanges = function() {
+    return this._nextChange && this._nextChange.ops.length > 0;
+  };
+
+  /*
     Send selection update to other collaborators
   */
   this._broadCastSelectionUpdate = function(beforeSel, afterSel) {
-    if (!this._nextCommit && !this._pendingCommit) {
-      var change = new DocumentChange([], {
-        selection: beforeSel
-      }, {
-        selection: afterSel
-      });
-
-      var msg = {
-        type: 'updateSelection',
-        documentId: this.doc.id,
-        version: this.doc.version,
-        change: this.serializeChange(change)
-      };
-      this._send(msg);
+    if (this._nextChange) {
+      this._nextChange.after.selection = afterSel;
+    } else {
+      this._nextChange = this._getChangeForSelection(beforeSel, afterSel);
     }
+    this._requestSync();
   };
 
   this.afterDocumentChange = function(change, info) {
@@ -280,50 +363,26 @@ CollabSession.Prototype = function() {
 
     // Record local changes into nextCommit
     if (!info.remote) {
-      this._recordCommit(change);
+      this._recordChange(change);
     }
   };
 
   /*
     Apply a change to the document
   */
-  this._applyRemoteChange = function(change, collaboratorId) {
-    // console.log("REMOTE CHANGE", change);
-
+  this._applyRemoteChange = function(change) {
     this.stage._apply(change);
     this.doc._apply(change);
-    this._transformLocalChangeHistory(change);
-    this._transformSelections(change);
 
-    var collaborator = this.collaborators[collaboratorId];
-    if (collaborator) {
-      collaborator.selection = change.after.selection;
-    }
+    // Only undo+redo history is updated according to the new change
+    this._transformLocalChangeHistory(change);
+    this._transformSelection(change);
 
     // We need to notify the change listeners so the UI gets updated
     // We pass replay: false, so this does not become part of the undo
     // history.
-    this._notifyChangeListeners(change, { replay: false, remote: true });
-  };
-
-  this._applyRemoteSelection = function(version, change, collaboratorId) {
-    var collaborator = this.collaborators[collaboratorId];
-    if (collaborator) {
-      var sel = change.after.selection;
-      if (sel) {
-        sel.attach(this.doc);
-      }
-      // EXPERIMENTAL: needing to rebase the selection
-      // when ever there are pending changes
-      if (this._pendingCommit) {
-        DocumentChange.transformSelection(sel, this._pendingCommit);
-      }
-      if (this._nextCommit) {
-        DocumentChange.transformSelection(sel, this._nextCommit);
-      }
-      collaborator.selection = sel;
-      this.emit('collaborators:changed');
-    }
+    // this._notifyChangeListeners(change, { replay: false, remote: true });
+    return change;
   };
 
   this.getCollaborators = function() {
@@ -345,93 +404,65 @@ CollabSession.Prototype = function() {
     return this.sessionIdPool.shift();
   };
 
-  /*
-    Server has opened the document. The collab session is live from
-    now on.
-  */
-  this.connectDone = function(serverVersion, changes, collaborators) {
-    console.log('Received connectDone', serverVersion, changes);
-    if (this.doc.version !== serverVersion) {
-      // There have been changes on the server since the doc was opened
-      // the last time
-      if (changes) {
-        // console.log('Applying remote changes...');
-        changes.forEach(function(change) {
-          this._applyRemoteChange(change);
-        }.bind(this));
-      }
-    }
-    this.doc.version = serverVersion;
-
-    // Initialize collaborators
-    this.collaborators = collaborators;
-    forEach(this.collaborators, function(collaborator) {
-      this._addCollaborator(collaborator);
-    }.bind(this));
-    this.emit('collaborators:changed');
-    this._connected = true;
-    // Important: after connect done we need to reset _pendingCommit
-    this._pendingCommit = null;
-
-    // Not recommended to use this event
-    this.emit('connected');
-    // Now we start to record local changes and periodically push them to remove
-    this.start();
-  };
-
   this.isConnected = function() {
     return this._connected;
   };
 
-  this._addCollaborator = function(collaborator) {
-    this.collaborators[collaborator.collaboratorId] = collaborator;
-    if (collaborator.selection) {
-      collaborator.selection = Selection.fromJSON(collaborator.selection);  
-    }
-    collaborator.colorIndex = this._getNextColorIndex();
-  };
+  /*
+    IDEA: we could check if anything changes and only then
+    emit the collaborators:changed event
+    this would solve cases where the user selection gets destroyed
+    because of many collaboratorSelection updates
+  */
+  this._updateCollaborators = function(collaborators) {
+    forEach(collaborators, function(collaborator, collaboratorId) {
+      if (collaborator) {
+        var old = this.collaborators[collaboratorId];
+        // Assign colorIndex (try to restore from old record)
+        collaborator.colorIndex = old ? old.colorIndex : this._getNextColorIndex();
+        // Parse selection from record
+        collaborator.selection = Selection.fromJSON(collaborator.selection);
+        collaborator.selection.attach(this.doc);
 
-  this.collaboratorConnected = function(collaborator) {
-    this._addCollaborator(collaborator);
-    console.log('collaborator connected', this.collaborators);
-    this.emit('collaborators:changed');
-  };
-
-  this.collaboratorDisconnected = function(collaboratorId) {
-    delete this.collaborators[collaboratorId];
-    // console.log('collaborator disconnected', collaboratorId, this.collaborators);
-    this.emit('collaborators:changed');
+        this.collaborators[collaboratorId] = collaborator;
+      } else {
+        delete this.collaborators[collaboratorId];
+      }
+    }.bind(this));
+    // this.emit('collaborators:changed');
   };
 
   /*
-    Retrieved when a commit has been confirmed by the server
-  */
-  this.commitDone = function(version, remoteChanges) {
-    if (remoteChanges) {
-      remoteChanges.forEach(function(change) {
-        this._applyRemoteChange(change);
-      }.bind(this));
-    }
-    this.doc.version = version;
-    this._pendingCommit = null;
-    // console.log('commit confirmed by server. New version:', version);
-  };
+    Apply remote update
 
-  /*
-    We receive an update from the server
-    As a client can only commit one change at a time
-    there is also only one update at a time.
-  */
-  this.applyRemoteChange = function(version, change, userId) {
-    if (!this._nextCommit && !this._pendingCommit) {
-      // We only accept updates if there are no pending commitable changes
-      this._applyRemoteChange(change, userId);
-      this.doc.version = version;
-    }
-  };
+    We receive an update from the server. We only apply the remote change if
+    there's no pending commit. applyRemoteUpdate is also called for selection
+    updates.
 
-  this.applyRemoteSelection = function(version, change, collaboratorId) {
-    this._applyRemoteSelection(version, change, collaboratorId);
+    If we are currently in the middle of a sync or have local changes we just
+    ignore the update. We will receive all server updates on the next syncDone.
+  */
+  this.update = function(args) {
+    var serverChange = args.change;
+    var collaborators = args.collaborators;
+    var serverVersion = args.version;
+
+    if (!this._nextChange && !this._pendingChange) {
+      if (serverChange) {
+        serverChange = this.deserializeChange(serverChange);
+        this._applyRemoteChange(serverChange);
+      }
+      if (serverVersion) {
+        this.version = serverVersion;
+      }
+      this._updateCollaborators(collaborators);
+      if (serverChange) {
+        this._notifyChangeListeners(serverChange, { replay: false, remote: true });  
+      }
+      this.emit('collaborators:changed');
+    } else {
+      console.log('skipped update. we wait for a sync to complete');
+    }
   };
 
   this.serializeChange = function(change) {
@@ -442,8 +473,19 @@ CollabSession.Prototype = function() {
     return DocumentChange.fromJSON(serializedChange);
   };
 
+  /*
+    Send message
+
+    Returns true if sent, false if not sent (e.g. when not connected)
+  */
   this._send = function(msg) {
-    this.collabClient.send(msg);
+    if (this.collabClient.isConnected()) {
+      this.collabClient.send(msg);
+      return true;
+    } else {
+      console.warn('Try not to call _send when disconnected. Skipping message', msg);
+      return false;
+    }
   };
 
   /*
@@ -456,7 +498,6 @@ CollabSession.Prototype = function() {
     this.__nextColorIndex = (this.__nextColorIndex + 1) % this.__maxColors;
     return colorIndex + 1; // so we can 1..5 instead of 0..4
   };
-
 };
 
 DocumentSession.extend(CollabSession);

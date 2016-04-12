@@ -39,9 +39,10 @@ var Selection = require('./Selection');
 function DocumentChange(ops, before, after) {
   if (arguments.length === 1 && isObject(arguments[0])) {
     var data = arguments[0];
-    // sessionId
+    // TODO: check if we really still need sessionId as we use dynamic
+    // collaboratorIds now for the CollabServer
     this.sessionId = data.sessionId;
-    // a unique id
+    // a unique id for the change
     this.sha = data.sha;
     // when the change has been applied
     this.timestamp = data.timestamp;
@@ -49,10 +50,12 @@ function DocumentChange(ops, before, after) {
     this.before = data.before;
     // array of operations
     this.ops = data.ops;
+    this.info = data.info; // custom change info
     // application state after the change was applied
     this.after = data.after;
   } else if (arguments.length === 3) {
     this.sha = uuid();
+    this.info = {};
     this.timestamp = Date.now();
     this.ops = ops.slice(0);
     this.before = before;
@@ -211,6 +214,7 @@ DocumentChange.Prototype = function() {
       ops: map(this.ops, function(op) {
         return op.toJSON();
       }),
+      info: this.info,
       // after state
       after: clone(this.after),
     };

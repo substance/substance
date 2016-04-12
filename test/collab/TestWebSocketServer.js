@@ -6,40 +6,18 @@ var TestServerWebSocket = require('./TestServerWebSocket');
 /*
   Local in-process Websocket server implementation for client-side development
   of protocols.
-
-  @example
-
-  ```js
-  var messageQueue = new MessageQueue();
-  var wss = new TestWebSocketServer(messageQueue);
-
-  wss.on('connection', function(ws) {
-    console.log(ws.clientId, 'connected to websocket server');
-
-    ws.on('message', function(data) {
-      console.log('data received on server');
-    });
-  });
-
-  var ws1 = new WebSocket(messageQueue);
-
-  ws1.onopen = function() {
-    console.log('connection established for ws1');
-  };
-
-  ws1.onmessage = function(data) {
-    console.log('data received', data);
-  };
-  ```
 */
 
-function TestWebSocketServer(messageQueue, serverId) {
+function TestWebSocketServer(config) {
   TestWebSocketServer.super.apply(this);
-  this.messageQueue = messageQueue;
-  this.serverId = serverId || "server";
+  this.messageQueue = config.messageQueue;
+  this.serverId = config.serverId || "server";
   this.clients = {};
-
   this._isSimulated = true;
+
+  if (!config.manualConnect) {
+    this.connect();
+  }
 }
 
 TestWebSocketServer.Prototype = function() {
@@ -48,13 +26,7 @@ TestWebSocketServer.Prototype = function() {
     this.messageQueue.connectServer(this);
   };
 
-  this.disconnect = function() {
-    // not implemented yet
-    // this.messageQueue.disconnectServer(this);
-    this.messageQueue.off(this);
-  };
-
-  /**
+  /*
     New websocket connection requested. Creates the server-side
     counterpart of the websocket and registers it in the message
     queue.
@@ -66,10 +38,20 @@ TestWebSocketServer.Prototype = function() {
     var sws = new TestServerWebSocket(this.messageQueue, this.serverId, clientId);
     this.messageQueue.connectServerSocket(sws);
     this.clients[clientId] = sws;
-    // let server implementation know of the new connection
+    // Emit connection event
     this.emit('connection', sws);
-    // telling the client we are ready for receiving messages
-    sws.send(['open']);
+  };
+
+  /*
+    Disconnect an existing websocket
+  */
+  this.handleDisconnectRequest = function(clientId) {
+    var sws = this.clients[clientId];
+    this.messageQueue.disconnectServerSocket(sws);
+
+    // Emit close event on websocket server
+    sws.emit('close', sws);
+    delete this.clients[clientId];
   };
 
 };
