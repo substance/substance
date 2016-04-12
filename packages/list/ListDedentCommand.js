@@ -16,17 +16,17 @@ ListDedentCommand.Prototype = function() {
   this.getCommandState = function() {
     var sel = this.getSelection();
     var doc = this.getDocument();
-    var disabled = true;
+    var enabled = false;
 
     if (sel.isPropertySelection()){
       var path = sel.getPath();
       var node = doc.get(path[0]);
-      disabled = (node.type !== 'list-item') && (node.level > 1);
+      enabled = (node.type === 'list-item') && (node.level > 1);
     }
 
     return {
       active: false,
-      disabled: disabled
+      disabled: !enabled
     };
   };
 
