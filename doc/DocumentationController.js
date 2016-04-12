@@ -33,7 +33,7 @@ DocumentationController.Prototype = function() {
   this.didMount = function() {
     _super.didMount.call(this);
 
-    this.router.load();
+    this.router.readURL();
   };
 
   this.dispose = function() {
@@ -59,7 +59,7 @@ DocumentationController.Prototype = function() {
 
   this.focusNode = function(nodeId) {
     this._focusNode(nodeId);
-    this.router.routeFromState();
+    this.router.writeURL();
   };
 
   this.switchState = function(newState) {
