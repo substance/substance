@@ -6,8 +6,8 @@ function LinkComponent() {
 }
 
 AnnotationComponent.extend(LinkComponent, function LinkComponentPrototype() {
-  this.render = function() {
-    var el = AnnotationComponent.prototype.render.call(this);
+  this.render = function($$) {
+    var el = AnnotationComponent.prototype.render.call(this, $$);
 
     el.tagName = 'a';
     el.attr('href', this.props.node.url);
