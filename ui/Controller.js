@@ -117,36 +117,13 @@ function Controller() {
     Manages tools.
   */
   this.toolManager = new ToolManager(this);
-  this._initialize(this.props);
+
+  // initial state mapping
   this.handleStateUpdate(this.state);
 }
 
 Controller.Prototype = function() {
 
-  this._initialize = function(/*props*/) {
-    var doc = this.doc;
-    // Register event handlers
-    doc.on('document:changed', this.onDocumentChanged, this, {
-      // Use lower priority so that everyting is up2date
-      // when we receive the update
-      priority: -20
-    });
-    doc.on('transaction:started', this.onTransactionStarted, this);
-  };
-
-  /**
-     Dispose component when component life ends. If you need to implement dispose
-     in your custom Controller class, don't forget the super call.
-  */
-  this.dispose = function() {
-    this.doc.off(this);
-  };
-
-  /**
-   * Defines the child context. You should override this to provide your own contexts.
-   *
-   * @return {object} the child context
-   */
   this.getChildContext = function() {
     return {
       config: this.getConfig(),
@@ -163,22 +140,32 @@ Controller.Prototype = function() {
     return {};
   };
 
-  // Use static config if available, otherwise try to fetch it from props
-  this.getConfig = function() {
-    return this.constructor.static.config || this.props.config || {
-      controller: {
-        components: [],
-        commands: []
-      }
-    };
+  this.didMount = function() {
+    this._observeDoc(this.doc);
   };
 
+  /**
+    Is called when component life ends. If you need to implement dispose
+    in your custom Controller class, don't forget the super call.
+  */
+  this.dispose = function() {
+    this.doc.off(this);
+  };
+
+
   this.willReceiveProps = function(newProps) {
-    if (this.doc && newProps.doc !== this.doc) {
+    var oldDoc = this.doc;
+    var newDoc = newProps.documentSession.getDocument();
+    if (oldDoc !== newDoc) {
       this.dispose();
       this.empty();
-      this._initialize(newProps);
+      this._observeDoc(newDoc);
     }
+  };
+
+  this.didReceiveProps = function() {
+    this.documentSession = this.props.documentSession;
+    this.doc = this.props.documentSession.getDocument();
   };
 
   /**
@@ -186,22 +173,22 @@ Controller.Prototype = function() {
    * custom Controller class.
    *
    * @abstract
-   * @return {ui/Component.VirtualNode} VirtualNode created using Component.$$
+   * @return {ui/VirtualElement} virtual element created using $$
    */
-  this.render = function() {
-    var $$ = Component.$$;
+  this.render = function($$) {
     return $$('div')
       .addClass('sc-controller')
       .on('keydown', this.handleApplicationKeyCombos);
   };
 
-  /**
-    Get the associated ToolManager instance
-
-    @return {ui/ToolManager} the ToolManager instance
-  */
-  this.getToolManager = function() {
-    return this.toolManager;
+  this._observeDoc = function(doc) {
+    // Register event handlers
+    doc.on('document:changed', this.onDocumentChanged, this, {
+      // Use lower priority so that everyting is up2date
+      // when we receive the update
+      priority: -20
+    });
+    doc.on('transaction:started', this.onTransactionStarted, this);
   };
 
   this._initializeComponentRegistry = function(components) {
@@ -220,6 +207,26 @@ Controller.Prototype = function() {
       commandRegistry.add(CommandClass.static.name, cmd);
     }.bind(this));
     this.commandRegistry = commandRegistry;
+  };
+
+
+  // Use static config if available, otherwise try to fetch it from props
+  this.getConfig = function() {
+    return this.constructor.static.config || this.props.config || {
+      controller: {
+        components: [],
+        commands: []
+      }
+    };
+  };
+
+  /**
+    Get the associated ToolManager instance
+
+    @return {ui/ToolManager} the ToolManager instance
+  */
+  this.getToolManager = function() {
+    return this.toolManager;
   };
 
   /**
@@ -369,8 +376,7 @@ Controller.Prototype = function() {
   /**
    * Called whenever a surface has been focused.
    */
-  this.didFocus = function() {
-  };
+  this.didFocus = function() {};
 
   // For now just delegate to the current surface
   // TODO: Remove. Let's only allow Document.transaction and Surface.transaction to

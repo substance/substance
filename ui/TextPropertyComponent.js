@@ -3,8 +3,6 @@
 
 var isNumber = require('lodash/isNumber');
 var AnnotatedTextComponent = require('./AnnotatedTextComponent');
-var Component = require('./Component');
-var $$ = Component.$$;
 var Coordinate = require('../model/Coordinate');
 
 /**
@@ -34,10 +32,26 @@ TextPropertyComponent.Prototype = function() {
 
   var _super = Object.getPrototypeOf(this);
 
-  this.render = function() {
-    var path = this.props.path;
+  this.didMount = function() {
+    _super.didMount.call(this);
+    var surface = this.getSurface();
+    if (surface) {
+      surface._registerTextProperty(this);
+    }
+  };
 
-    var el = this._renderContent()
+  this.dispose = function() {
+    _super.dispose.call(this);
+    var surface = this.getSurface();
+    if (surface) {
+      surface._unregisterTextProperty(this);
+    }
+  };
+
+  this.render = function($$) {
+    var path = this.getPath();
+
+    var el = this._renderContent($$)
       .addClass('sc-text-property')
       .attr({
         'data-path': path.join('.'),
@@ -51,7 +65,7 @@ TextPropertyComponent.Prototype = function() {
     return el;
   };
 
-  this._renderFragment = function(fragment) {
+  this._renderFragment = function($$, fragment) {
     var node = fragment.node;
     var id = node.id;
     var el;
@@ -62,7 +76,7 @@ TextPropertyComponent.Prototype = function() {
         // Add zero-width character. Since we have a non-empty element, the
         // outline style set on the cursor would not be visible in certain
         // scenarios (e.g. when cursor is at the very beginning of a text.
-        el.html('&#xfeff;');
+        el.append("\uFEFF");
         el.append($$('div').addClass('se-cursor-inner'));
       }
 
@@ -72,7 +86,7 @@ TextPropertyComponent.Prototype = function() {
         el.addClass('sm-local-user');
       }
     } else {
-      el = _super._renderFragment.call(this, fragment);
+      el = _super._renderFragment.apply(this, arguments);
       if (node.constructor.static.isInline) {
         el.attr({
           'contentEditable': false,
@@ -97,30 +111,20 @@ TextPropertyComponent.Prototype = function() {
     parentContext.append(context);
   };
 
-  this.didMount = function() {
-    var surface = this.getSurface();
-    if (surface) {
-      surface._registerTextProperty(this.props.path, this);
-    }
-  };
-
-  this.dispose = function() {
-    _super.dispose.call(this);
-    var surface = this.getSurface();
-    if (surface) {
-      surface._unregisterTextProperty(this.props.path, this);
-    }
+  this.getPath = function() {
+    return this.props.path;
   };
 
   this.getText = function() {
-    return this.getDocument().get(this.props.path);
+    return this.getDocument().get(this.getPath());
   };
 
   this.getAnnotations = function() {
-    var annotations = this.getDocument().getIndex('annotations').get(this.props.path);
+    var path = this.getPath();
+    var annotations = this.getDocument().getIndex('annotations').get(path);
     var surface = this.getSurface();
     if (surface) {
-      var fragments = surface._getFragments(this.props.path);
+      var fragments = surface._getFragments(path);
       if (fragments) {
         annotations = annotations.concat(fragments);
       }
@@ -153,7 +157,7 @@ TextPropertyComponent.Prototype = function() {
   };
 
   this.getDOMCoordinate = function(charPos) {
-    return this._getDOMCoordinate(this.el, charPos);
+    return this._getDOMCoordinate(this.el.getNativeElement(), charPos);
   };
 
   this._getDOMCoordinate = function(el, charPos) {

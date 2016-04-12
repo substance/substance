@@ -23,8 +23,11 @@ var Tool = require('./Tool');
  */
 
 function ControllerTool() {
-  Tool.apply(this, arguments);
-  if (!this.context.controller) throw new Error('No controller context found.');
+  ControllerTool.super.apply(this, arguments);
+
+  if (!this.context.controller) {
+    throw new Error('No controller context found.');
+  }
 }
 
 ControllerTool.Prototype = function() {
@@ -50,4 +53,5 @@ ControllerTool.Prototype = function() {
 };
 
 Tool.extend(ControllerTool);
+
 module.exports = ControllerTool;

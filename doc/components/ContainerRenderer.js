@@ -2,7 +2,6 @@
 
 var each = require('lodash/each');
 var Component = require('../../ui/Component');
-var $$ = Component.$$;
 
 function ContainerRenderer() {
   Component.apply(this, arguments);
@@ -13,7 +12,7 @@ function ContainerRenderer() {
 
 ContainerRenderer.Prototype = function() {
 
-  this.render = function() {
+  this.render = function($$) {
     var containerNode = this.doc.get(this.props.containerId);
     var el = $$("div")
       .addClass('sc-container-renderer ')
@@ -24,13 +23,13 @@ ContainerRenderer.Prototype = function() {
       });
     // node components
     each(containerNode.nodes, function(nodeId) {
-      el.append(this._renderNode(nodeId));
+      el.append(this._renderNode($$, nodeId));
     }.bind(this));
 
     return el;
   };
 
-  this._renderNode = function(nodeId) {
+  this._renderNode = function($$, nodeId) {
     var node = this.doc.get(nodeId);
     var ComponentClass = this.componentRegistry.get(node.type);
     if (!ComponentClass) {

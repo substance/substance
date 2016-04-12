@@ -27,6 +27,8 @@ var IncrementalData = function(schema, options) {
 
 IncrementalData.Prototype = function() {
 
+  var _super = IncrementalData.super.prototype;
+
   /**
     Create a new node.
 
@@ -101,9 +103,9 @@ IncrementalData.Prototype = function() {
     if (op.type === ObjectOperation.NOP) return;
     else if (op.type === ObjectOperation.CREATE) {
       // clone here as the operations value must not be changed
-      this.super.create.call(this, cloneDeep(op.val));
+      _super.create.call(this, cloneDeep(op.val));
     } else if (op.type === ObjectOperation.DELETE) {
-      this.super.delete.call(this, op.val.id);
+      _super.delete.call(this, op.val.id);
     } else if (op.type === ObjectOperation.UPDATE) {
       var oldVal = this.get(op.path);
       var diff = op.diff;
@@ -118,12 +120,12 @@ IncrementalData.Prototype = function() {
           diff = TextOperation.fromJSON(diff);
         }
         var newVal = diff.apply(oldVal);
-        this.super.set.call(this, op.path, newVal);
+        _super.set.call(this, op.path, newVal);
       } else {
         throw new Error("Unsupported type for operational update.");
       }
     } else if (op.type === ObjectOperation.SET) {
-      this.super.set.call(this, op.path, op.val);
+      _super.set.call(this, op.path, op.val);
     } else {
       throw new Error("Illegal state.");
     }

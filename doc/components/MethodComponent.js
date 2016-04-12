@@ -1,7 +1,6 @@
 'use strict';
 
 var Component = require('../../ui/Component');
-var $$ = Component.$$;
 
 var Signature = require('./SignatureComponent');
 var Example = require('./ExampleComponent');
@@ -13,7 +12,7 @@ function MethodComponent() {
 
 MethodComponent.Prototype = function() {
 
-  this.render = function() {
+  this.render = function($$) {
     var node = this.props.node;
     var el = $$('div')
       .addClass('sc-method')

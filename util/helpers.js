@@ -8,8 +8,6 @@
  * @memberof module:Basics
  */
 var Helpers = {};
-var $ = require('./jquery');
-var deleteFromArray = require('./deleteFromArray');
 
 // Lang helpers
 
@@ -181,24 +179,6 @@ Helpers.sortBy = require('lodash/sortBy');
 Helpers.capitalize = require('lodash/capitalize');
 
 /*
- * Check if two arrays are equal.
- *
- * @method isArrayEqual
- * @param {Array} a
- * @param {Array} b
- * @deprecated use `Helpers.isEqual` instead.
- */
-Helpers.isArrayEqual = function(a, b) {
-  if (a === b) return true;
-  if (a === null || b === null) return false;
-  if (a.length != b.length) return false;
-  for (var i = 0; i < a.length; ++i) {
-    if (a[i] !== b[i]) return false;
-  }
-  return true;
-};
-
-/*
  * Removes all occurrence of value in array using Array.splice
  * I.e., this changes the array instead of creating a new one
  * as _.without() does.
@@ -207,25 +187,7 @@ Helpers.isArrayEqual = function(a, b) {
  * @param {Array} array
  * @param value
  */
-Helpers.deleteFromArray = deleteFromArray;
-
-/*
- * Clones a given object.
- * Uses obj.clone() if available, otherwise delegates to _.cloneDeep().
- *
- * @method clone
- * @param {Object} obj
- * @return The cloned object.
- */
-Helpers.deepclone = function(obj) {
-  if (obj === null || obj === undefined) {
-    return obj;
-  }
-  if (Helpers.isFunction(obj.clone)) {
-    return obj.clone();
-  }
-  return Helpers.deepclone(obj);
-};
+Helpers.deleteFromArray = require('./deleteFromArray');
 
 /*
  * Alias for {{#crossLink "Helpers/cloneDeep:method"}}{{/crossLink}}.
@@ -233,52 +195,8 @@ Helpers.deepclone = function(obj) {
  */
 Helpers.deepclone = Helpers.cloneDeep;
 
-/*
- * Web helper to compute the relative offset of an element to an ancestor element.
- *
- * @method getRelativeOffset
- * @param {jQuery.Selector} $element
- * @param {jQuery.Selector} $ancestor
- * @return An object with properties
- *   - top: Number
- *   - left: Number
- */
-Helpers.getRelativeOffset = function ( $element, $ancestor ) {
-  var pos = $element.offset();
-  var ancestorPos = $ancestor.offset();
-  pos.left -= ancestorPos.left;
-  pos.top -= ancestorPos.top;
-  return pos;
-};
-
 Helpers.uuid = require('./uuid');
 
-Helpers.serializeDOMElement = function($el) {
-  var $tmp = $('<div>');
-  $tmp.append($el.clone());
-  return $tmp.html();
-};
-
-Helpers.request = function(method, url, data, cb) {
-  var ajaxOpts = {
-    type: method,
-    url: url,
-    contentType: "application/json; charset=UTF-8",
-    // dataType: "json",
-    success: function(data) {
-      cb(null, data);
-    },
-    error: function(err) {
-      console.error(err);
-      cb(err.responseText);
-    }
-  };
-
-  if (data) {
-    ajaxOpts.data = JSON.stringify(data);
-  }
-
-  $.ajax(ajaxOpts);
-};
+Helpers.request = require('./request');
 
 module.exports = Helpers;

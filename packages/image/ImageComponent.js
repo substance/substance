@@ -1,17 +1,16 @@
 'use strict';
 
 var Component = require('../../ui/Component');
-var $$ = Component.$$;
 
 function ImageComponent() {
-  Component.apply(this, arguments);
+  ImageComponent.super.apply(this, arguments);
 }
 
 ImageComponent.Prototype = function() {
 
-  this.initialize = function() {
+  this.didMount = function() {
     var doc = this.props.doc;
-    doc.on('document:changed', this.handleDocumentChange, this);
+    doc.on('document:changed', this.onDocumentChange, this);
   };
 
   this.dispose = function() {
@@ -19,7 +18,7 @@ ImageComponent.Prototype = function() {
     doc.off(this);
   };
 
-  this.render = function() {
+  this.render = function($$) {
     return $$('img')
       .addClass('sc-image')
       .attr({
@@ -29,11 +28,12 @@ ImageComponent.Prototype = function() {
       });
   };
 
-  this.handleDocumentChange = function(change) {
+  this.onDocumentChange = function(change) {
     if (change.isAffected([this.props.node.id, "src"])) {
       this.rerender();
     }
   };
+
 };
 
 Component.extend(ImageComponent);

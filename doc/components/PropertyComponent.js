@@ -1,19 +1,17 @@
 'use strict';
 
 var Component = require('../../ui/Component');
-var $$ = Component.$$;
-
 var Example = require('./ExampleComponent');
 var SourceLink = require('./SourceLinkComponent');
 var Documentation = require('../model/Documentation');
 
 function PropertyComponent() {
-  Component.apply(this, arguments);
+  PropertyComponent.super.apply(this, arguments);
 }
 
 PropertyComponent.Prototype = function() {
 
-  this.render = function() {
+  this.render = function($$) {
     var node = this.props.node;
     var el = $$('div')
       .addClass('sc-property')
@@ -49,4 +47,5 @@ PropertyComponent.Prototype = function() {
 };
 
 Component.extend(PropertyComponent);
+
 module.exports = PropertyComponent;

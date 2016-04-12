@@ -1,24 +1,18 @@
 'use strict';
 
 var Component = require('../../ui/Component');
-var $$ = Component.$$;
 
 var Example = require('./ExampleComponent');
 var Params = require('./ParamsComponent');
 var SourceLink = require('./SourceLinkComponent');
 
 function EventComponent() {
-  Component.apply(this, arguments);
+  EventComponent.super.apply(this, arguments);
 }
 
 EventComponent.Prototype = function() {
-  this.onClick = function(e) {
-    e.preventDefault();
-    e.stopPropagation();
-    this.send('focusNode', this.props.node.id);
-  };
 
-  this.render = function() {
+  this.render = function($$) {
     var node = this.props.node;
     var el = $$('div')
       .addClass('sc-method')
@@ -51,6 +45,12 @@ EventComponent.Prototype = function() {
     }
 
     return el;
+  };
+
+  this.onClick = function(e) {
+    e.preventDefault();
+    e.stopPropagation();
+    this.send('focusNode', this.props.node.id);
   };
 
 };

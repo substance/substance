@@ -1,6 +1,5 @@
 'use strict';
 
-var $ = require('../util/jquery');
 var isEqual = require('lodash/isEqual');
 var each = require('lodash/each');
 var extend = require('lodash/extend');
@@ -13,9 +12,10 @@ var deleteSelection = require('../model/transform/deleteSelection');
 var DOMSelection = require('./DOMSelection');
 var Clipboard = require('./Clipboard');
 var Component = require('./Component');
-var $$ = Component.$$;
 var UnsupportedNode = require('./UnsupportedNode');
 var keys = require('../util/keys');
+var inBrowser = require('../util/inBrowser');
+var DefaultDOMElement = require('./DefaultDOMElement');
 
 /**
    Abstract interface for editing components.
@@ -50,8 +50,9 @@ function Surface() {
 
   // HACK: we need to listen to mousup on document
   // to catch events outside the surface
-  this.$document = $(window.document);
-  this.onMouseUp = this.onMouseUp.bind(this);
+  if (inBrowser) {
+    this.documentEl = DefaultDOMElement.wrapNativeElement(window.document);
+  }
 
   // set when editing is enabled
   this.enabled = true;
@@ -74,7 +75,7 @@ function Surface() {
 
 Surface.Prototype = function() {
 
-  this.render = function() {
+  this.render = function($$) {
     var tagName = this.props.tagName || 'div';
     var el = $$(tagName)
       .addClass('sc-surface')
@@ -121,7 +122,7 @@ Surface.Prototype = function() {
       this.domSelection = new DOMSelection(this);
       this.clipboard.didMount();
       // Document Change Events
-      this.domObserver.observe(this.el, this.domObserverConfig);
+      this.domObserver.observe(this.el.getNativeElement(), this.domObserverConfig);
       this._rerenderSelection();
     }
   };
@@ -298,7 +299,7 @@ Surface.Prototype = function() {
   };
 
   this.getDomNodeForId = function(nodeId) {
-    return this.getElement().querySelector('*[data-id="'+nodeId+'"]');
+    return this.el.getNativeElement().querySelector('*[data-id="'+nodeId+'"]');
   };
 
   /* Editing behavior */
@@ -572,7 +573,9 @@ Surface.Prototype = function() {
     // then the handler needs to kick in and recover a persisted selection or such
     this.skipNextFocusEvent = true;
     // Bind mouseup to the whole document in case of dragging out of the surface
-    this.$document.one('mouseup', this.onMouseUp);
+    if (this.documentEl) {
+      this.documentEl.on('mouseup', this.onMouseUp, this, { once: true });
+    }
   };
 
   this.onMouseUp = function() {
@@ -642,7 +645,7 @@ Surface.Prototype = function() {
     // if gets focus, but selection is null or not within this surface
     // we
     if (!sel || sel.isNull() || sel.surfaceId !== this.getName()) {
-      var first = this.el.querySelector('*[data-path]');
+      var first = this.el.getNativeElement().querySelector('*[data-path]');
       if (first) {
         var path = first.dataset.path.split('.');
         this.setSelection(Selection.create(path, 0));
@@ -775,7 +778,7 @@ Surface.Prototype = function() {
         // Ensure span has dimensions and position by
         // adding a zero-width space character
         this.skipNextObservation = true;
-        span.appendChild(window.document.createTextNode("\u200b"));
+        span.appendChild(DefaultDOMElement.createTextNode("\u200b"));
         wrange.insertNode(span);
         var rect = span.getBoundingClientRect();
         var spanParent = span.parentNode;
@@ -791,8 +794,9 @@ Surface.Prototype = function() {
       if (sel.isNull()) {
         return {};
       } else {
+        var nativeEl = this.el.getNativeElement();
         if (sel.isCollapsed()) {
-          var cursorEl = this.el.querySelector('.se-cursor');
+          var cursorEl = nativeEl.querySelector('.se-cursor');
           if (cursorEl) {
             return cursorEl.getBoundingClientRect();
           } else {
@@ -800,7 +804,7 @@ Surface.Prototype = function() {
             return {};
           }
         } else {
-          var selFragments = this.el.querySelectorAll('.se-selection-fragment');
+          var selFragments = nativeEl.querySelectorAll('.se-selection-fragment');
           if (selFragments.length > 0) {
             var bottom = 0;
             var top = 0;
@@ -832,17 +836,22 @@ Surface.Prototype = function() {
   // TextProperty components are registered via path
   // Annotations are just registered via path for lookup, not as instances
 
-  this._registerTextProperty = function(path, component) {
-    this._textProperties[path] = component;
+  this._registerTextProperty = function(textPropertyComponent) {
+    var path = textPropertyComponent.getPath();
+    this._textProperties[path] = textPropertyComponent;
   };
 
-  this._unregisterTextProperty = function(path) {
-    delete this._textProperties[path];
-    each(this._annotations, function(_path, id) {
-      if (isEqual(path, _path)) {
-        delete this._annotations[id];
-      }
-    }.bind(this));
+  this._unregisterTextProperty = function(textPropertyComponent) {
+    var path = textPropertyComponent.getPath();
+    if (this._textProperties[path] === textPropertyComponent) {
+      delete this._textProperties[path];
+      // TODO: what do we need this for?
+      each(this._annotations, function(_path, id) {
+        if (isEqual(path, _path)) {
+          delete this._annotations[id];
+        }
+      }.bind(this));
+    }
   };
 
   this._getTextPropertyComponent = function(path) {
@@ -923,7 +932,7 @@ Surface.Prototype = function() {
   };
 
   // TODO: we could integrate container node rendering into this helper
-  this._renderNode = function(nodeId) {
+  this._renderNode = function($$, nodeId) {
     var doc = this.getDocument();
     var node = doc.get(nodeId);
     var componentRegistry = this.context.componentRegistry || this.props.componentRegistry;

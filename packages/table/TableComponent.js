@@ -5,27 +5,26 @@ var $ = require('../../util/jquery');
 var Component = require('../../ui/Component');
 var TextProperty = require('../../ui/TextPropertyComponent');
 var TableSelection = require('../../model/TableSelection');
-var $$ = Component.$$;
 
 function TableComponent() {
-  Component.apply(this, arguments);
-
-  this.context.surface.connect(this, {
-    "selection:changed": this.onSelectionChange
-  });
+  TableComponent.super.apply(this, arguments);
 }
 
 TableComponent.Prototype = function() {
 
+  this.didMount = function() {
+    this.context.surface.on("selection:changed", this.onSelectionChange, this);
+  };
+
   this.dispose = function() {
-    this.context.surface.disconnect(this);
+    this.context.surface.off(this);
   };
 
   this.getInitialState = function() {
     return { mode: 'table' };
   };
 
-  this.render = function() {
+  this.render = function($$) {
     var tableEl = $$('table')
       .addClass("content-node table")
       .attr({
@@ -39,11 +38,11 @@ TableComponent.Prototype = function() {
     }
     // HACK: make sure row col indexes are up2date
     this.props.node.getMatrix();
-    tableEl.append(this.renderTableContent());
+    tableEl.append(this.renderTableContent($$));
     return tableEl;
   };
 
-  this.renderTableContent = function() {
+  this.renderTableContent = function($$) {
     var content = [];
     each(this.props.node.getSections(), function(sec) {
       var secEl = $$("t"+sec.sectionType).key(sec.id);

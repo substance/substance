@@ -1,11 +1,10 @@
 'use strict';
 
 var oo = require('../util/oo');
-var each = require('lodash/each');
 var last = require('lodash/last');
 var extend = require('lodash/extend');
 var uuid = require('../util/uuid');
-var DefaultDOMElement = require('../ui/DefaultDOMElement');
+var ArrayIterator = require('../util/ArrayIterator');
 
 /**
   A generic base implementation for XML/HTML importers.
@@ -104,7 +103,7 @@ DOMImporter.Prototype = function DOMImporterPrototype() {
   this.generateDocument = function() {
     // creating all nodes
     var doc = this.createDocument();
-    each(this.state.nodes, function(node) {
+    this.state.nodes.forEach(function(node) {
       // delete if the node exists already
       if (doc.get(node.id)) {
         doc.delete(node.id);
@@ -112,7 +111,7 @@ DOMImporter.Prototype = function DOMImporterPrototype() {
       doc.create(node);
     });
     // creating annotations afterwards so that the targeted nodes exist for sure
-    each(this.state.inlineNodes, function(node) {
+    this.state.inlineNodes.forEach(function(node) {
       if (doc.get(node.id)) {
         doc.delete(node.id);
       }
@@ -138,7 +137,7 @@ DOMImporter.Prototype = function DOMImporterPrototype() {
     var state = this.state;
     state.container = [];
     state.containerId = containerId;
-    var iterator = new DefaultDOMElement.NodeIterator(elements);
+    var iterator = new ArrayIterator(elements);
     while(iterator.hasNext()) {
       var el = iterator.next();
       var blockTypeConverter = this._getConverterForElement(el, 'block');
@@ -550,27 +549,23 @@ DOMImporter.Prototype = function DOMImporterPrototype() {
     @param {util/jQuery} $el
     @returns {util/jQuery} an element with trimmed text
    */
-  this._trimTextContent = function($el) {
-    var nodes = $el[0].childNodes;
-    var first = nodes[0];
-    var last = last(nodes);
+  this._trimTextContent = function(el) {
+    var nodes = el.getChildNodes();
+    var firstNode = nodes[0];
+    var lastNode = last(nodes);
     var text, trimmed;
-    if (first) {
       // trim the first and last text
-      if (this._getDomNodeType(first) === "text") {
-        text = first.textContent;
-        trimmed = this.trimLeft(text);
-        first.textContent = trimmed;
-      }
+    if (firstNode && firstNode.isTextNode()) {
+      text = firstNode.textContent;
+      trimmed = this._trimLeft(text);
+      firstNode.textContent = trimmed;
     }
-    if (last) {
-      if (this._getDomNodeType(last) === "text") {
-        text = last.textContent;
-        trimmed = this.trimRight(text);
-        last.textContent = trimmed;
-      }
+    if (lastNode && lastNode.isTextNode()) {
+      text = lastNode.textContent;
+      trimmed = this._trimRight(text);
+      lastNode.textContent = trimmed;
     }
-    return $el;
+    return el;
   };
 
   this._trimLeft = function(text) {

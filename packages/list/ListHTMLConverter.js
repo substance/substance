@@ -1,9 +1,7 @@
 'use strict';
 
-var each = require('lodash/each');
 var isArray = require('lodash/isArray');
 var last = require('lodash/last');
-var DOMElement = require('../../ui/DefaultDOMElement');
 
 /*
  * HTML converter for List.
@@ -50,9 +48,14 @@ var ListHtmlConverter = {
     var state = {
       level: 0,
       types: [],
-      list: list
+      list: list,
+      items: []
     };
     this._importList(state, el, converter);
+    state.items.forEach(function(item) {
+      list.items.push(item.id);
+      item.parent = list.id;
+    });
   },
 
   export: function(node, el, converter) {
@@ -110,14 +113,14 @@ var ListHtmlConverter = {
   _importList: function(state, listEl, converter) {
     state.level++;
     state.types.push(listEl.tagName);
-    each(listEl.children, function(child) {
+    listEl.getChildren().forEach(function(child) {
       var type = child.tagName;
       if (type === "li") {
         this._importListItem(state, child, converter);
       } else if (type == "ol" || type === "ul") {
         this._importList(state, child, converter);
       }
-    });
+    }.bind(this));
     state.level--;
     state.types.pop();
   },
@@ -126,7 +129,7 @@ var ListHtmlConverter = {
   _normalizeListItem: function(state, li) {
     var segments = [[]];
     var lastSegment = segments[0];
-    each(li.childNodes, function(child) {
+    li.getChildNodes().forEach(function(child) {
       var type = child.tagName;
       if (type === "ol" || type === "ul") {
         lastSegment = child;
@@ -155,12 +158,12 @@ var ListHtmlConverter = {
       var fragment = fragments[i];
       if (isArray(fragment)) {
         // create a list item and use the fragment as annotated content
-        var wrapper = DOMElement.create('span').append(fragment);
-        converter.trimTextContent(wrapper);
+        var wrapper = li.createElement('li').append(fragment);
+        converter._trimTextContent(wrapper);
         var listItem = converter.convertElement(wrapper);
         listItem.ordered = ordered;
         listItem.level = state.level;
-        state.list.items.push(listItem.id);
+        state.items.push(listItem);
       } else {
         this._importList(state, fragment, converter);
       }

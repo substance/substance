@@ -1,25 +1,26 @@
 'use strict';
 
 var Component = require('../../ui/Component');
-var $$ = Component.$$;
 var ListHtmlConverter = require('./ListHTMLConverter');
 var ListItemComponent = require('./ListItemComponent');
 
-var ListComponent = Component.extend({
+function ListComponent() {
+  ListComponent.super.apply(this, arguments);
+}
 
-  displayName: "ListComponent",
+ListComponent.Prototype = function() {
 
-  initialize: function() {
+  this.didMount = function() {
     this.doc = this.props.doc;
-    this.doc.getEventProxy('path').connect(this, [this.props.node.id, 'items'], this.onItemsChanged);
-  },
+    this.doc.getEventProxy('path').on([this.props.node.id, 'items'], this.onItemsChanged, this);
+  };
 
-  dispose: function() {
-    this.doc.getEventProxy('path').disconnect(this);
+  this.dispose = function() {
+    this.doc.getEventProxy('path').off(this);
     this.doc = null;
-  },
+  };
 
-  render: function() {
+  this.render = function($$) {
     return ListHtmlConverter.render(this.props.node, {
       createListElement: function(list) {
         var tagName = list.ordered ? 'ol' : 'ul';
@@ -31,12 +32,14 @@ var ListComponent = Component.extend({
         return $$(ListItemComponent, {node: item});
       }
     });
-  },
+  };
 
-  onItemsChanged: function() {
+  this.onItemsChanged = function() {
     this.rerender();
-  },
+  };
 
-});
+};
+
+Component.extend(ListComponent);
 
 module.exports = ListComponent;

@@ -1,9 +1,8 @@
 'use strict';
 
-var $ = require('../util/jquery');
 var Component = require('./Component');
-var $$ = Component.$$;
 var each = require('lodash/each');
+var DefaultDOMElement = require('./DefaultDOMElement');
 
 /**
   A rich scrollbar implementation that supports highlights.   Usually
@@ -30,30 +29,25 @@ var each = require('lodash/each');
 */
 
 function Scrollbar() {
-  Component.apply(this, arguments);
-
-  // used together with jquery
-  this.onMouseUp = this.onMouseUp.bind(this);
-  this.onMouseMove = this.onMouseMove.bind(this);
+  Scrollbar.super.apply(this, arguments);
 }
 
 Scrollbar.Prototype = function() {
 
   this.didMount = function() {
+    // do a full rerender when window gets resized
+    DefaultDOMElement.getBrowserWindow().on('resize', this.onResize, this);
+    // update the scroll handler on scroll
+    this.props.scrollPane.on('scroll', this.onScroll, this);
+    // TODO: why is this necessary here?
     setTimeout(function() {
       this.updatePositions();
     }.bind(this));
-
-    // Install global event handlers
-    $(window).on('resize', this.rerender.bind(this));
-
-    var scrollPane = this.props.scrollPane;
-    var scrollableEl = scrollPane.getScrollableElement();
-    $(scrollableEl).on('scroll', this.onScroll.bind(this));
   };
 
   this.dispose = function() {
-    $(window).off('resize');
+    DefaultDOMElement.getBrowserWindow().off(this);
+    this.props.scrollPane.off(this);
   };
 
   // TODO: This is actually a place where we could need didUpdate or
@@ -64,7 +58,7 @@ Scrollbar.Prototype = function() {
     }
   };
 
-  this.render = function() {
+  this.render = function($$) {
     var el = $$('div')
       .addClass('sc-scrollbar')
       .on('mousedown', this.onMouseDown);
@@ -91,10 +85,6 @@ Scrollbar.Prototype = function() {
     return el;
   };
 
-  this.onScroll = function() {
-    this.updatePositions();
-  };
-
   this.updatePositions = function() {
     var scrollPane = this.props.scrollPane;
     var scrollableEl = scrollPane.getScrollableElement();
@@ -116,10 +106,10 @@ Scrollbar.Prototype = function() {
       // Compute highlights
       each(this.props.highlights,function(highlights) {
         each(highlights, function(nodeId) {
-          var nodeEl = $(scrollableEl).find('*[data-id="'+nodeId+'"]');
-          if (!nodeEl.length) return;
-          var top = nodeEl.position().top / this.factor;
-          var height = nodeEl.outerHeight(true) / this.factor;
+          var nodeEl = scrollableEl.find('*[data-id="'+nodeId+'"]');
+          if (!nodeEl) return;
+          var top = nodeEl.getPosition().top / this.factor;
+          var height = nodeEl.getOuterHeight(true) / this.factor;
 
           // Use specified minHeight for highlights
           if (height < Scrollbar.overlayMinHeight) {
@@ -140,6 +130,18 @@ Scrollbar.Prototype = function() {
     }
   };
 
+  this.getScrollableElement = function() {
+    return this.props.scrollPane.getScrollableElement();
+  };
+
+  this.onResize = function() {
+    this.rerender();
+  };
+
+  this.onScroll = function() {
+    this.updatePositions();
+  };
+
   this.onMouseDown = function(e) {
     e.stopPropagation();
     e.preventDefault();
@@ -147,38 +149,40 @@ Scrollbar.Prototype = function() {
 
     // temporarily, we bind to events on window level
     // because could leave the this element's area while dragging
-    $(window).on('mousemove', this.onMouseMove);
-    $(window).on('mouseup', this.onMouseUp);
+    var _window = DefaultDOMElement.getBrowserWindow();
+    _window.on('mousemove', this.onMouseMove, this);
+    _window.on('mouseup', this.onMouseUp, this);
 
-    var scrollBarOffset = this.$el.offset().top;
+    var scrollBarOffset = this.el.getOffset().top;
     var y = e.pageY - scrollBarOffset;
-    var $thumbEl = this.refs.thumb.$el;
-    if (e.target !== $thumbEl[0]) {
+    var thumbEl = this.refs.thumb.el;
+    if (e.target !== thumbEl.getNativeElement()) {
       // Jump to mousedown position
-      this.offset = $thumbEl.height() / 2;
+      this.offset = thumbEl.height / 2;
       this.onMouseMove(e);
     } else {
-      this.offset = y - $thumbEl.position().top;
+      this.offset = y - thumbEl.getPosition().top;
     }
   };
 
   // Handle Mouse Up
   this.onMouseUp = function() {
     this._mouseDown = false;
-    $(window).off('mousemove', this.onMouseMove);
-    $(window).off('mouseup', this.onMouseUp);
+    var _window = DefaultDOMElement.getBrowserWindow();
+    _window.off('mousemove', this.onMouseMove, this);
+    _window.off('mouseup', this.onMouseUp, this);
   };
 
   this.onMouseMove = function(e) {
     if (this._mouseDown) {
       var scrollPane = this.props.scrollPane;
       var scrollableEl = scrollPane.getScrollableElement();
-      var scrollBarOffset = this.$el.offset().top;
+      var scrollBarOffset = this.el.getOffset().top;
       var y = e.pageY - scrollBarOffset;
 
       // find offset to visible-area.top
       var scroll = (y-this.offset)*this.factor;
-      this.scrollTop = $(scrollableEl).scrollTop(scroll);
+      scrollableEl.setProperty('scrollTop', scroll);
     }
   };
 };

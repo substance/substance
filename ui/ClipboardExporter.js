@@ -10,7 +10,6 @@ var JSONConverter = require('../model/JSONConverter');
 /**
   Export HTML from clipboard. Used for inter-application copy'n'paste.
 */
-// FIXME: this is not working yet
 function ClipboardExporter() {
   ClipboardExporter.super.call(this, {
     converters: converters

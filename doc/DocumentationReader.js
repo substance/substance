@@ -1,19 +1,51 @@
+'use strict';
+
 var ContainerRenderer = require('./components/ContainerRenderer');
-var Component = require('../ui/Component');
-var $$ = Component.$$;
 var DocumentationController = require('./DocumentationController');
 var Cover = require('./components/CoverComponent');
 var TabbedPane = require('../ui/TabbedPane');
 var SplitPane = require('../ui/SplitPane');
 var ScrollPane = require('../ui/ScrollPane');
+var DocumentationRouter = require('./DocumentationRouter');
 
 function DocumentationReader() {
-  DocumentationController.apply(this, arguments);
+  DocumentationReader.super.apply(this, arguments);
+
+  this.router = new DocumentationRouter(this);
 }
 
 DocumentationReader.Prototype = function() {
-  // Used by two-column apps
-  this._renderContextSection = function() {
+
+  var _super = DocumentationReader.super.prototype;
+
+  // this increases rerendering speed alot.
+  // A deep rerender takes quite a time (about 400ms) because of the many components.
+  // We can do this as long the content is not changed depending on the state
+  // -- just updating scroll position ATM.
+  this.shouldRerender = function() {
+    return false;
+  };
+
+  this.didMount = function() {
+    _super.didMount.call(this);
+    this._updateScrollPosition();
+  };
+
+  this.didUpdateState = function() {
+    _super.didUpdateState.call(this);
+    this._updateScrollPosition();
+  };
+
+  this.render = function($$) {
+    return $$('div').addClass('sc-documentation-reader sc-controller').append(
+      $$(SplitPane, {splitType: 'vertical', sizeA: '270px'}).append(
+        this._renderContextSection($$),
+        this._renderMainSection($$)
+      ).ref('splitPane')
+    );
+  };
+
+  this._renderContextSection = function($$) {
     var config = this.getConfig();
     var panelProps = this._panelPropsFromState();
     var contextId = this.state.contextId;
@@ -48,7 +80,7 @@ DocumentationReader.Prototype = function() {
     return el;
   };
 
-  this._renderMainSection = function() {
+  this._renderMainSection = function($$) {
     var config = this.getConfig();
     var doc = this.props.doc;
     var meta = doc.get('meta');
@@ -65,14 +97,12 @@ DocumentationReader.Prototype = function() {
     );
   };
 
-  this.render = function() {
-    return $$('div').addClass('sc-documentation-reader sc-controller').append(
-      $$(SplitPane, {splitType: 'vertical', sizeA: '270px'}).append(
-        this._renderContextSection(),
-        this._renderMainSection()
-      ).ref('splitPane')
-    );
+  this._updateScrollPosition = function() {
+    if (this.refs.contentPanel && this.state.nodeId) {
+      this.refs.contentPanel.scrollTo(this.state.nodeId);
+    }
   };
+
 };
 
 DocumentationController.extend(DocumentationReader);

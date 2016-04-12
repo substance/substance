@@ -1,14 +1,14 @@
 'use strict';
 
 var Component = require('../../ui/Component');
-var $$ = Component.$$;
 
 function ExampleComponent() {
-  Component.apply(this, arguments);
+  ExampleComponent.super.apply(this, arguments);
 }
 
 ExampleComponent.Prototype = function() {
-  this.render = function() {
+
+  this.render = function($$) {
     var node = this.props.node;
     var el = $$('div').addClass('sc-example').append(
       $$('div').addClass('se-heading').append(this.i18n.t('example'))
@@ -19,6 +19,7 @@ ExampleComponent.Prototype = function() {
 
     return el;
   };
+
 };
 
 Component.extend(ExampleComponent);

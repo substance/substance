@@ -1,23 +1,15 @@
 'use strict';
 
-var Component = require('../../ui/Component');
-var $$ = Component.$$;
 var MemberContainerComponent = require('./MemberContainerComponent');
 var MemberIndexComponent = require('./MemberIndexComponent');
 
 function NamespaceComponent() {
-  MemberContainerComponent.apply(this, arguments);
+  NamespaceComponent.super.apply(this, arguments);
 }
 
 NamespaceComponent.Prototype = function() {
 
-  this.onClick = function(e) {
-    e.preventDefault();
-    e.stopPropagation();
-    this.send('focusNode', this.props.node.id);
-  };
-
-  this.render = function() {
+  this.render = function($$) {
     var node = this.props.node;
     var el = $$('div')
       .addClass('sc-namespace')
@@ -38,10 +30,16 @@ NamespaceComponent.Prototype = function() {
       // member index
       el.append($$(MemberIndexComponent, {node: node}));
       // members
-      el.append(this._renderMembers());
+      el.append(this._renderMembers($$));
     }
 
     return el;
+  };
+
+  this.onClick = function(e) {
+    e.preventDefault();
+    e.stopPropagation();
+    this.send('focusNode', this.props.node.id);
   };
 
 };

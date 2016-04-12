@@ -4,11 +4,6 @@
 
 var isObject = require('lodash/isObject');
 var isFunction = require('lodash/isFunction');
-// WORKAROUND: using the phantomjs Function.prototype.bind polyfill
-// the implementation in this file does not work strangely.
-// it works however if we are using lodash bind here
-// For whatever reason, the polyfill works alright in other places.
-var bind = require('lodash/bind');
 
 /**
  * Helpers for oo programming.
@@ -236,7 +231,15 @@ function _inherit(ChildClass, ParentClass) {
   // Provide a shortcut to the parent constructor
   ChildClass.super = ParentClass;
   if (PrototypeCtor) {
-    PrototypeCtor.prototype = ParentClass.prototype;
+    PrototypeCtor.prototype = Object.create(ParentClass.prototype, {
+      // Restore constructor property of clazz
+      constructor: {
+        value: PrototypeCtor,
+        enumerable: false,
+        writable: true,
+        configurable: true
+      }
+    });
     ChildClass.prototype = new PrototypeCtor();
     ChildClass.prototype.constructor = ChildClass;
   } else {
@@ -250,8 +253,8 @@ function _inherit(ChildClass, ParentClass) {
       }
     });
   }
-  // provide a shortcut to the parent prototype
-  ChildClass.prototype.super = ParentClass.prototype;
+  // provide a shortcut to the parent class
+  // ChildClass.prototype.super = ParentClass;
   // Extend static properties - always initialize both sides
   var StaticScope = _StaticScope();
   if (ParentClass.static) {
@@ -291,6 +294,10 @@ function _extendClass(ParentClass) {
   // this ctor is used when extend is not provided with a constructor function.
   function AnonymousClass() {
     ParentClass.apply(this, arguments);
+
+    if (this.initialize) {
+      this.initialize();
+    }
   }
 
   var args = Array.prototype.slice.call(arguments, 1);
@@ -361,7 +368,7 @@ function _makeExtensible(clazz) {
     oo.initClass(clazz);
   }
   clazz.static._makeExtendFunction = function(parentClazz) {
-    return bind(_extendClass, clazz, parentClazz);
+    return _extendClass.bind(clazz, parentClazz);
   };
   clazz.extend = clazz.static._makeExtendFunction(clazz);
 }

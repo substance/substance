@@ -3,8 +3,6 @@
 var extend = require('lodash/extend');
 var omit = require('lodash/omit');
 var Controller = require("./Controller");
-var Component = require('./Component');
-var $$ = Component.$$;
 var TOC = require('./TOC');
 var Highlights = require('./Highlights');
 var TabbedPane = require('./TabbedPane');
@@ -37,7 +35,7 @@ function TwoPanelController() {
 
 TwoPanelController.Prototype = function() {
 
-  var _super = Object.getPrototypeOf(this);
+  var _super = TwoPanelController.super.prototype;
 
   this.getChildContext = function() {
     var childContext = _super.getChildContext.call(this);
@@ -51,47 +49,38 @@ TwoPanelController.Prototype = function() {
     return {'contextId': 'toc'};
   };
 
-  this.getContentPanel = function() {
-    // the render method is currently to custom to be able to
-    // provide a default implementation
-    throw new Error('This method is abstract.');
-  };
-
   this.didMount = function() {
-    if (this.state.nodeId && this.state.contextId === 'toc') {
-      this.getContentPanel().scrollTo(this.state.nodeId);
-    }
+    _super.didMount.call(this);
+
+    this._scrollToNode();
   };
 
   this.didUpdateState = function() {
-    if (this.state.nodeId && this.state.contextId === 'toc') {
-      this.getContentPanel().scrollTo(this.state.nodeId);
-    }
+    _super.didUpdateState.call(this);
+
+    this._scrollToNode();
   };
 
-  this.render = function() {
+  this.render = function($$) {
     // TODO: maybe make status bar configurable
-    return _super.render.call(this)
-      .append(
-        $$(SplitPane, {splitType: 'horizontal', sizeB: 'inherit'}).append(
-          $$(SplitPane, {splitType: 'vertical', sizeA: '60%'}).append(
-            // TODO: provide a default implementation here
-            this._renderMainSection(),
-            this._renderContextSection()
-          ).ref('splitPane'),
-          $$(StatusBar, {doc: this.getDocument()}).ref('statusBar')
-        ).ref('workspaceSplitPane')
-      );
+    var el = _super.render.apply(this, arguments);
+    el.append(
+      $$(SplitPane, {splitType: 'horizontal', sizeB: 'inherit'}).append(
+        $$(SplitPane, {splitType: 'vertical', sizeA: '60%'}).append(
+          // TODO: provide a default implementation here
+          this._renderMainSection($$),
+          this._renderContextSection($$)
+        ).ref('splitPane'),
+        $$(StatusBar, {doc: this.getDocument()}).ref('statusBar')
+      ).ref('workspaceSplitPane')
+    );
+    return el;
   };
 
-  this._renderToolbar = function() {
-    return $$(Toolbar).ref('toolbar');
-  };
-
-  this._renderMainSection = function() {
+  this._renderMainSection = function($$) {
     return $$('div').ref('main').addClass('se-main-section').append(
       $$(SplitPane, {splitType: 'horizontal'}).append(
-        this._renderToolbar(),
+        this._renderToolbar($$),
         // Content Panel below
         $$(ScrollPane, {
           scrollbarType: 'substance',
@@ -99,13 +88,17 @@ TwoPanelController.Prototype = function() {
           toc: this.toc,
           highlights: this.contentHighlights
         }).ref('contentPanel').append(
-          this._renderContentPanel()
+          this._renderContentPanel($$)
         )
       ).ref('mainSectionSplitPane')
     );
   };
 
-  this._renderContentPanel = function() {
+  this._renderToolbar = function($$) {
+    return $$(Toolbar).ref('toolbar');
+  };
+
+  this._renderContentPanel = function($$) {
     var config = this.getConfig();
     var containerId = config.containerId;
     var containerConfig = config[containerId];
@@ -120,7 +113,7 @@ TwoPanelController.Prototype = function() {
     );
   };
 
-  this._renderContextSection = function() {
+  this._renderContextSection = function($$) {
     var config = this.getConfig();
     var panelProps = this._panelPropsFromState();
     var contextId = this.state.contextId;
@@ -153,6 +146,18 @@ TwoPanelController.Prototype = function() {
       );
     }
     return el;
+  };
+
+  this._scrollToNode = function() {
+    if (this.state.nodeId && this.state.contextId === 'toc') {
+      this.getContentPanel().scrollTo(this.state.nodeId);
+    }
+  };
+
+  this.getContentPanel = function() {
+    // the render method is currently to custom to be able to
+    // provide a default implementation
+    throw new Error('This method is abstract.');
   };
 
   // Action handlers

@@ -3,6 +3,7 @@ var commonmark = require('commonmark');
 var reader = new commonmark.Parser();
 var highlightjs = require('highlight.js');
 var writer = new commonmark.HtmlRenderer();
+var CrossLinkComponent = require('../components/CrossLinkComponent');
 
 var converter = {
   toHtml: function(text) {
@@ -85,7 +86,9 @@ function convertCodeLinks(parsed) {
         var pre = new commonmark.Node('Text', sourceposPre);
         pre.literal = node.literal.slice(0, match.index);
         var link = new commonmark.Node('Html', sourceposLink);
-        link.literal = ['<a href="#nodeId='+id+'" data-type="cross-link" data-node-id="'+id+'">', id,'</a>'].join('');
+        // Note: using server-side rendering here
+        var crossLink = CrossLinkComponent.static.render({ node: { id: id }, children: [id]});
+        link.literal = crossLink.outerHTML;
         var post = new commonmark.Node('Text', sourceposPost);
         post.literal = node.literal.slice(match.index+match[0].length);
         node.insertBefore(pre);

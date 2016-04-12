@@ -2,7 +2,6 @@
 
 var Component = require('./Component');
 var each = require('lodash/each');
-var $$ = Component.$$;
 
 /**
   A tabbed pane layout component. The actual content is specified via append.
@@ -33,7 +32,8 @@ function TabbedPane() {
 }
 
 TabbedPane.Prototype = function() {
-  this.render = function() {
+
+  this.render = function($$) {
     var el = $$('div').addClass('sc-tabbed-pane');
     var tabsEl = $$('div').addClass('se-tabs');
     each(this.props.tabs, function(tab) {

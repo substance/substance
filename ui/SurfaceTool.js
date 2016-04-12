@@ -29,8 +29,6 @@ function SurfaceTool() {
 
 SurfaceTool.Prototype = function() {
 
-  var _super = Object.getPrototypeOf(this);
-
   this._isSurfaceTool = true;
 
   /**
@@ -47,18 +45,6 @@ SurfaceTool.Prototype = function() {
     } else {
       throw new Error('Contract: AnnotationTool.static.command should be associated to a supported command.');
     }
-  };
-
-  /**
-    Unbinds event handler before getting unmounted.
-
-    Custom tool implementation must do a super call.
-  */
-  this.dispose = function() {
-    _super.dispose.call(this);
-
-    var ctrl = this.getController();
-    ctrl.off(this);
   };
 
   /**
@@ -99,6 +85,7 @@ SurfaceTool.Prototype = function() {
     var surface = this.getSurface();
     surface.executeCommand(this.constructor.static.command);
   };
+
 };
 
 Tool.extend(SurfaceTool);

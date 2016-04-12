@@ -12,8 +12,7 @@ var insertNode = require('../model/transform/insertNode');
 var switchTextType = require('../model/transform/switchTextType');
 var paste = require('../model/transform/paste');
 var Surface = require('./Surface');
-var Component = require('./Component');
-var $$ = Component.$$;
+var RenderingEngine = require('./RenderingEngine');
 
 /**
   Represents a flow editor that manages a sequence of nodes in a container. Needs to be
@@ -66,8 +65,15 @@ ContainerEditor.Prototype = function() {
 
   var _super = Object.getPrototypeOf(this);
 
-  this.render = function() {
-    var el = Surface.prototype.render.call(this);
+  // Note: this component is self managed
+  this.shouldRerender = function() {
+    // TODO: we should still detect when the document has changed,
+    // see https://github.com/substance/substance/issues/543
+    return false;
+  };
+
+  this.render = function($$) {
+    var el = _super.render.apply(this, arguments);
 
     var doc = this.getDocument();
     var containerId = this.props.containerId;
@@ -90,7 +96,7 @@ ContainerEditor.Prototype = function() {
     } else {
       // node components
       each(containerNode.nodes, function(nodeId) {
-        el.append(this._renderNode(nodeId));
+        el.append(this._renderNode($$, nodeId));
       }.bind(this));
     }
 
@@ -258,14 +264,15 @@ ContainerEditor.Prototype = function() {
 
   this.onDocumentChange = function(change) {
     // first update the container
+    var renderContext = RenderingEngine.createContext(this);
     if (change.isAffected([this.props.containerId, 'nodes'])) {
       for (var i = 0; i < change.ops.length; i++) {
         var op = change.ops[i];
         if (op.type === "update" && op.path[0] === this.props.containerId) {
           var diff = op.diff;
           if (diff.type === "insert") {
-            var comp = this._renderNode(diff.getValue());
-            this.insertAt(diff.getOffset(), comp);
+            var nodeEl = this._renderNode(renderContext.$$, diff.getValue());
+            this.insertAt(diff.getOffset(), nodeEl);
           } else if (diff.type === "delete") {
             this.removeAt(diff.getOffset());
           }
@@ -279,7 +286,7 @@ ContainerEditor.Prototype = function() {
   // Create a first text element
   this.onCreateText = function(e) {
     e.preventDefault();
-    
+
     var newSel;
     this.transaction(function(tx) {
       var container = tx.get(this.props.containerId);

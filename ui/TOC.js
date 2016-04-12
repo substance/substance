@@ -2,10 +2,7 @@
 
 var each = require('lodash/each');
 var includes = require('lodash/includes');
-var head = require('lodash/head');
-
 var EventEmitter = require('../util/EventEmitter');
-var $ = require('../util/jquery');
 
 /**
   Manages a table of content for a container. Default implementation considers
@@ -31,9 +28,7 @@ function TOC(controller) {
   }
 
   var doc = this.getDocument();
-  doc.connect(this, {
-    'document:changed': this.handleDocumentChange
-  });
+  doc.on('document:changed', this.handleDocumentChange, this);
 }
 
 TOC.Prototype = function() {
@@ -113,7 +108,7 @@ TOC.Prototype = function() {
   };
 
   this.markActiveEntry = function(scrollPane) {
-    var $panelContent = $(scrollPane.getContentElement());
+    var panelContent = scrollPane.getContentElement();
     var contentHeight = scrollPane.getContentHeight();
     var scrollPaneHeight = scrollPane.getHeight();
     var scrollPos = scrollPane.getScrollPosition();
@@ -124,6 +119,8 @@ TOC.Prototype = function() {
     var scanline = Math.max(regularScanline, smartScanline);
 
     // For debugging purposes
+    // TODO: FIXME this code does not make sense anymore.
+    //       The scanline should be part of the scrolled content not the scrollbar
     // To activate remove display:none for .scanline in the CSS
     // $('.se-scanline').css({
     //   top: (scanline - scrollTop)+'px'
@@ -133,9 +130,10 @@ TOC.Prototype = function() {
     if (tocNodes.length === 0) return;
 
     // Use first toc node as default
-    var activeEntry = head(tocNodes).id;
-    tocNodes.forEach(function(tocNode) {
-      var nodeEl = $panelContent.find('[data-id="'+tocNode.id+'"]')[0];
+    var activeEntry = tocNodes[0].id;
+    for (var i = tocNodes.length - 1; i >= 0; i--) {
+      var tocNode = tocNodes[i];
+      var nodeEl = panelContent.find('[data-id="'+tocNode.id+'"]');
       if (!nodeEl) {
         console.warn('Not found in Content panel', tocNode.id);
         return;
@@ -143,8 +141,9 @@ TOC.Prototype = function() {
       var panelOffset = scrollPane.getPanelOffsetForElement(nodeEl);
       if (scanline >= panelOffset) {
         activeEntry = tocNode.id;
+        break;
       }
-    }.bind(this));
+    }
 
     if (this.activeEntry !== activeEntry) {
       this.activeEntry = activeEntry;

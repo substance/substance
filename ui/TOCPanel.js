@@ -1,35 +1,26 @@
 "use strict";
 
-var each = require('lodash/each');
 var Component = require('./Component');
 var ScrollPane = require('./ScrollPane');
-var $$ = Component.$$;
 var Icon = require('./FontAwesomeIcon');
 
 function TOCPanel() {
   Component.apply(this, arguments);
-
-  var toc = this.context.toc;
-  toc.connect(this, {
-    'toc:updated': this.onTOCUpdated
-  });
 }
 
 TOCPanel.Prototype = function() {
-  this.getDocument = function() {
-    return this.context.doc;
-  };
 
-  this.onTOCUpdated = function() {
-    this.rerender();
+  this.didMount = function() {
+    var toc = this.context.toc;
+    toc.on('toc:updated', this.onTOCUpdated, this);
   };
 
   this.dispose = function() {
     var toc = this.context.toc;
-    toc.disconnect(this);
+    toc.off(this);
   };
 
-  this.render = function() {
+  this.render = function($$) {
     var toc = this.context.toc;
     var activeEntry = toc.activeEntry;
 
@@ -37,7 +28,9 @@ TOCPanel.Prototype = function() {
       .addClass("se-toc-entries")
       .ref('tocEntries');
 
-    each(toc.getEntries(), function(entry) {
+    var entries = toc.getEntries();
+    for (var i = 0; i < entries.length; i++) {
+      var entry = entries[i];
       var level = entry.level;
 
       var tocEntryEl = $$('a')
@@ -48,8 +41,6 @@ TOCPanel.Prototype = function() {
           "data-id": entry.id,
         })
         .ref(entry.id)
-        // TODO: Why does handleClick get bound to this.refs.panelEl and not this?
-        // Seems that handlers will be bound to the parent, not the owner.
         .on('click', this.handleClick)
         .append(
           $$(Icon, {icon: 'fa-caret-right'}),
@@ -59,7 +50,7 @@ TOCPanel.Prototype = function() {
         tocEntryEl.addClass("sm-active");
       }
       tocEntries.append(tocEntryEl);
-    }.bind(this));
+    }
 
     var el = $$('div').addClass('sc-toc-panel').append(
       $$(ScrollPane).ref('panelEl').append(
@@ -67,6 +58,14 @@ TOCPanel.Prototype = function() {
       )
     );
     return el;
+  };
+
+  this.getDocument = function() {
+    return this.context.doc;
+  };
+
+  this.onTOCUpdated = function() {
+    this.rerender();
   };
 
   this.handleClick = function(e) {

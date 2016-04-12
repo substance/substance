@@ -23,6 +23,8 @@ function DocumentNode(doc, props) {
 
 DocumentNode.Prototype = function() {
 
+  var _super = DocumentNode.super.prototype;
+
   /**
     Get the Document instance.
 
@@ -159,26 +161,51 @@ DocumentNode.Prototype = function() {
     }
   };
 
+  function _matchPropertyEvent(eventName) {
+    return /([a-zA-Z_0-9]+):changed/.exec(eventName);
+  }
+
+  this.on = function(eventName, handler, ctx) {
+    var match = _matchPropertyEvent(eventName);
+    if (match) {
+      var propertyName = match[1];
+      if (this.constructor.static.schema[propertyName]) {
+        var doc = this.getDocument();
+        doc.getEventProxy('path')
+          .on([this.id, propertyName], handler, ctx);
+      }
+    }
+    _super.on.apply(this, arguments);
+  };
+
+  this.off = function(ctx, eventName, handler) {
+    var doc = this.getDocument();
+    var match = false;
+    if (!eventName) {
+      doc.getEventProxy('path').off(ctx);
+    } else {
+      match = _matchPropertyEvent(eventName);
+    }
+    if (match) {
+      var propertyName = match[1];
+      doc.getEventProxy('path')
+        .off(ctx, [this.id, propertyName], handler);
+    }
+    _super.off.apply(this, arguments);
+  };
+
   // Experimental: we are working on a simpler API replacing the
   // rather inconvenient EventProxy API.
   this.connect = function(ctx, handlers) {
+    console.warn('DEPRECATED: use Node.on() instead');
     each(handlers, function(func, name) {
-      var match = /([a-zA-Z_0-9]+):changed/.exec(name);
-      if (match) {
-        var propertyName = match[1];
-        if (this.constructor.static.schema[propertyName]) {
-          this.getDocument().getEventProxy('path').connect(this, [this.id, propertyName], this._onPropertyChange.bind(this, propertyName));
-        }
-      }
+      this.on(name, func, ctx);
     }.bind(this));
-    DataNode.prototype.connect.apply(this, arguments);
   };
 
-  this.disconnect = function() {
-    // TODO: right now do not unregister from the event proxy
-    // when there is no property listener left
-    // We would need to implement disconnect
-    DataNode.prototype.disconnect.apply(this, arguments);
+  this.disconnect = function(ctx) {
+    console.warn('DEPRECATED: use Node.off() instead');
+    this.off(ctx);
   };
 
   this._onPropertyChange = function(propertyName) {

@@ -1,14 +1,14 @@
 'use strict';
 
 var Component = require('../../ui/Component');
-var $$ = Component.$$;
 
 function SourceLinkComponent() {
-  Component.apply(this, arguments);
+  SourceLinkComponent.super.apply(this, arguments);
 }
 
 SourceLinkComponent.Prototype = function() {
-  this.render = function() {
+
+  this.render = function($$) {
     var node = this.props.node;
     var el = $$('a').addClass('sc-source-link')
       .attr({href: '#', target:'_blank', "data-source-file": node.sourceFile, "data-source-line": node.sourceLine})

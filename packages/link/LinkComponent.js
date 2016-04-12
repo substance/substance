@@ -3,13 +3,13 @@ var AnnotationComponent = require('../../ui/AnnotationComponent');
 
 function LinkComponent() {
   LinkComponent.super.apply(this, arguments);
-
-  this._tagName = 'a';
 }
 
 AnnotationComponent.extend(LinkComponent, function LinkComponentPrototype() {
   this.render = function() {
     var el = AnnotationComponent.prototype.render.call(this);
+
+    el.tagName = 'a';
     el.attr('href', this.props.node.url);
 
     var titleComps = [this.props.node.url];
@@ -24,13 +24,14 @@ AnnotationComponent.extend(LinkComponent, function LinkComponentPrototype() {
     AnnotationComponent.prototype.didMount.call(this);
     var node = this.props.node;
     this.doc = node.getDocument();
-    this.doc.getEventProxy('path').connect(this, [node.id, 'title'], this.rerender);
-    this.doc.getEventProxy('path').connect(this, [node.id, 'url'], this.rerender);
+    var pathEventProxy = this.doc.getEventProxy('path');
+    pathEventProxy.on([node.id, 'title'], this.rerender, this);
+    pathEventProxy.on([node.id, 'url'], this.rerender, this);
   };
 
   this.dispose = function() {
     AnnotationComponent.prototype.dispose.call(this);
-    this.doc.getEventProxy('path').disconnect(this);
+    this.doc.getEventProxy('path').off(this);
   };
 });
 

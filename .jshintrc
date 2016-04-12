@@ -2,7 +2,7 @@
   "esnext": true,
   "node": true,
   "devel": true,
-  "latedef": true,
+  "latedef": "nofunc",
   "undef": true,
   "unused": true,
   "sub": true,

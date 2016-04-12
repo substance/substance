@@ -1,7 +1,6 @@
 'use strict';
 
 var Component = require('../../ui/Component');
-var $$ = Component.$$;
 var SourceLink = require('./SourceLinkComponent');
 var CrossLink = require('./CrossLinkComponent');
 
@@ -10,14 +9,10 @@ function HeadingComponent() {
 }
 
 HeadingComponent.Prototype = function() {
-  this.onClick = function(e) {
-    e.preventDefault();
-    e.stopPropagation();
-    this.send('focusNode', this.props.node.id);
-  };
 
-  this.render = function() {
+  this.render = function($$) {
     var node = this.props.node;
+    var doc = node.getDocument();
 
     var name = node.name;
     var type = node.type;
@@ -57,10 +52,11 @@ HeadingComponent.Prototype = function() {
       )
     );
     if (node.type === "class" && node.superClass) {
+      var superClassNode = doc.get(node.superClass);
       details.append(
         $$('span').addClass('se-extends').append(
           $$('span').append(' ' + this.i18n.t('extends') + ' '),
-          $$(CrossLink, {nodeId: node.superClass})
+          $$(CrossLink, {node: superClassNode})
         )
       );
     }
@@ -68,6 +64,13 @@ HeadingComponent.Prototype = function() {
 
     return el;
   };
+
+  this.onClick = function(e) {
+    e.preventDefault();
+    e.stopPropagation();
+    this.send('focusNode', this.props.node.id);
+  };
+
 };
 
 Component.extend(HeadingComponent);

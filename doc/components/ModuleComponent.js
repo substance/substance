@@ -1,20 +1,17 @@
 'use strict';
 
-var Component = require('../../ui/Component');
-var $$ = Component.$$;
-
 var MemberContainerComponent = require('./MemberContainerComponent');
 var Heading = require('./HeadingComponent');
 var Example = require('./ExampleComponent');
 var MemberIndexComponent = require('./MemberIndexComponent');
 
 function ModuleComponent() {
-  MemberContainerComponent.apply(this, arguments);
+  ModuleComponent.super.apply(this, arguments);
 }
 
 ModuleComponent.Prototype = function() {
 
-  this.render = function() {
+  this.render = function($$) {
 
     var node = this.props.node;
     var el = $$('div')
@@ -36,7 +33,7 @@ ModuleComponent.Prototype = function() {
       // member index
       el.append($$(MemberIndexComponent, {node: node}));
       // members
-      el.append(this._renderMembers());
+      el.append(this._renderMembers($$));
     }
 
     return el;
