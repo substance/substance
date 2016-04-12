@@ -1,5 +1,6 @@
+'use strict';
+
 var Component = require('./Component');
-var $$ = Component.$$;
 
 function Button() {
   Component.apply(this, arguments);
@@ -7,7 +8,7 @@ function Button() {
 
 Button.Prototype = function() {
 
-  this.render = function() {
+  this.render = function($$) {
     var el = $$('button').addClass('sc-button');
     el.append(this.props.children);
     if (this.props.disabled) {

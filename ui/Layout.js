@@ -1,5 +1,6 @@
+'use strict';
+
 var Component = require('./Component');
-var $$ = Component.$$;
 
 /**
   Simple layout component for simple layout tasks, without having to write CSS
@@ -26,7 +27,7 @@ function Layout() {
 
 Layout.Prototype = function() {
 
-  this.render = function() {
+  this.render = function($$) {
     var el = $$('div').addClass('sc-layout');
     el.addClass('sm-width-'+this.props.width);
     if (this.props.textAlign) {

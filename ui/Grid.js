@@ -1,5 +1,6 @@
+'use strict';
+
 var Component = require('./Component');
-var $$ = Component.$$;
 
 /*
   Simple component for realizing grid layouts
@@ -10,7 +11,7 @@ function Grid() {
 
 Grid.Prototype = function() {
 
-  this.render = function() {
+  this.render = function($$) {
     var el = $$('div').addClass('sc-grid');
     if (this.props.mobile) {
       el.addClass('sm-mobile');
@@ -31,7 +32,7 @@ function Row() {
 
 Row.Prototype = function() {
 
-  this.render = function() {
+  this.render = function($$) {
     var el = $$('div').addClass('se-row');
     el.append(this.props.children);
     return el;
@@ -49,7 +50,7 @@ function Cell() {
 
 Cell.Prototype = function() {
 
-  this.render = function() {
+  this.render = function($$) {
     var el = $$('div').addClass('se-cell');
     el.addClass('sm-column-'+this.props.columns);
     el.append(this.props.children);
