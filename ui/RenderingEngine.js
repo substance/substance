@@ -2,6 +2,7 @@
 
 var each = require('lodash/each');
 var oo = require('../util/oo');
+var inBrowser = require('../util/inBrowser');
 var VirtualElement = require('./VirtualElement');
 var DefaultDOMElement = require('./DefaultDOMElement');
 
@@ -524,6 +525,12 @@ RenderingEngine.createContext = function(comp) {
   return new CaptureContext(vel);
 };
 
-RenderingEngine.DEBUG = true;
+RenderingEngine.DEBUG = false;
+
+if (inBrowser) {
+  if (window.SUBSTANCE_DEBUG_RENDERING) {
+    RenderingEngine.DEBUG = !!window.SUBSTANCE_DEBUG_RENDERING;
+  }
+}
 
 module.exports = RenderingEngine;
