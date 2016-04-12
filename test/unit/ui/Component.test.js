@@ -191,6 +191,16 @@ QUnit.test("Rerender on setProps()", function(assert) {
   assert.ok(comp.render.callCount > 0, "Component should have been rerendered.");
 });
 
+QUnit.test("Setting props triggers willReceiveProps() and didReceiveProps()", function(assert) {
+  var comp = SimpleComponent.static.render({ foo: 'bar '});
+  spy(comp, 'willReceiveProps');
+  spy(comp, 'didReceiveProps');
+  comp.setProps({ foo: 'baz' });
+  assert.ok(comp.willReceiveProps.callCount === 1, "willReceiveProps() should have been called once.");
+  assert.ok(comp.didReceiveProps.callCount === 1, "didReceiveProps() should have been called once.");
+});
+
+
 QUnit.test("Rerender on setState()", function(assert) {
   enableSpies();
   var comp = SimpleComponent.static.render();
