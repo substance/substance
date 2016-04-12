@@ -1,7 +1,6 @@
 'use strict';
 
 var Component = require('./Component');
-var $$ = Component.$$;
 var Fragmenter = require('../model/Fragmenter');
 var AnnotationComponent = require('./AnnotationComponent');
 
@@ -15,12 +14,6 @@ var AnnotationComponent = require('./AnnotationComponent');
 
 function AnnotatedTextComponent() {
   AnnotatedTextComponent.super.apply(this, arguments);
-
-  this.fragmenter = new Fragmenter({
-    onText: this._renderTextNode.bind(this),
-    onEnter: this._renderFragment.bind(this),
-    onExit: this._finishFragment.bind(this)
-  });
 }
 
 AnnotatedTextComponent.Prototype = function() {
@@ -30,8 +23,8 @@ AnnotatedTextComponent.Prototype = function() {
 
     @return {VirtualNode} VirtualNode created using ui/Component
    */
-  this.render = function() {
-    var el = this._renderContent()
+  this.render = function($$) {
+    var el = this._renderContent($$)
       .addClass('sc-annotated-text')
       .css({
         whiteSpace: "pre-wrap"
@@ -47,11 +40,16 @@ AnnotatedTextComponent.Prototype = function() {
     return this.props.annotations || [];
   };
 
-  this._renderContent = function() {
+  this._renderContent = function($$) {
     var text = this.getText();
     var annotations = this.getAnnotations();
     var el = $$(this.props.tagName || 'span');
-    this.fragmenter.start(el, text, annotations);
+    var fragmenter = new Fragmenter({
+      onText: this._renderTextNode.bind(this),
+      onEnter: this._renderFragment.bind(this, $$),
+      onExit: this._finishFragment.bind(this)
+    });
+    fragmenter.start(el, text, annotations);
     return el;
   };
 
@@ -61,7 +59,7 @@ AnnotatedTextComponent.Prototype = function() {
     }
   };
 
-  this._renderFragment = function(fragment) {
+  this._renderFragment = function($$, fragment) {
     var doc = this.getDocument();
     var componentRegistry = this.getComponentRegistry();
     var node = fragment.node;

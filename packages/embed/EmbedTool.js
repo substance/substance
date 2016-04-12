@@ -4,38 +4,41 @@ var extend = require('lodash/extend');
 var capitalize = require('lodash/capitalize');
 var SurfaceTool = require('../../ui/SurfaceTool');
 var Component = require('../../ui/Component');
-var $$ = Component.$$;
 
-var UrlPrompt = Component.extend({
-  onSave: function(e) {
-    e.preventDefault();
-    this.props.tool.createEmbed(this.refs.url.$el.val());
-  },
+function EmbedTool() {
+  EmbedTool.super.apply(this, arguments);
+}
 
-  render: function() {
-    var el = $$('div').addClass('se-prompt');
-    el.append([
-      $$('div').addClass('se-prompt-title').append(this.i18n.t('embed-src')),
-      $$('input').attr({type: 'text', placeholder: 'https://vimeo.com/...', value: ''})
-                 .ref('url')
-                 .on('change', this.onSave)
-    ]);
+EmbedTool.Prototype = function() {
+
+  this.render = function($$) {
+    var title = this.props.title || capitalize(this.getName());
+    if (this.state.mode) {
+      title = [capitalize(this.state.mode), title].join(' ');
+    }
+    var el = $$('div')
+      .addClass('sc-embed-tool se-tool');
+    if (this.state.disabled) {
+      el.addClass('sm-disabled');
+    }
+
+    var button = $$("button")
+      .addClass('button')
+      .attr('title', title)
+      .on('click', this.onClick);
+    button.append(this.props.children);
+
+    el.append(button);
+    // When we are in edit mode showing the edit prompt
+    if (this.state.showPrompt) {
+      var prompt = $$(URLPrompt, {tool: this});
+      el.append(prompt);
+    }
+
     return el;
-  }
-});
+  };
 
-var EmbedTool = SurfaceTool.extend({
-  static: {
-    name: 'embed',
-    command: 'embed'
-  },
-
-  onClick: function() {
-    var newState = extend({}, this.state, {showPrompt: !this.state.showPrompt});
-    this.setState(newState);
-  },
-
-  createEmbed: function(src) {
+  this.createEmbed = function(src) {
     var surface = this.getSurface();
     var commandName = this.constructor.static.command;
     var embedResolver = this.context.embedResolver;
@@ -45,37 +48,44 @@ var EmbedTool = SurfaceTool.extend({
         html: html
       });
     });
-  },
+  };
 
-  render: function() {
-    var title = this.props.title || capitalize(this.getName());
+  this.onClick = function() {
+    var newState = extend({}, this.state, {showPrompt: !this.state.showPrompt});
+    this.setState(newState);
+  };
 
-    if (this.state.mode) {
-      title = [capitalize(this.state.mode), title].join(' ');
-    }
+};
 
-    var el = $$('div')
-      .addClass('sc-embed-tool se-tool');
+SurfaceTool.extend(EmbedTool);
 
-    if (this.state.disabled) {
-      el.addClass('sm-disabled');
-    }
+EmbedTool.static.name = 'embed';
 
-    var button = $$("button")
-      .addClass('button')
-      .attr('title', title)
-      .on('click', this.onClick);
+function URLPrompt() {
+  URLPrompt.super.apply(this, arguments);
+}
 
-    button.append(this.props.children);
-    el.append(button);
-
-    // When we are in edit mode showing the edit prompt
-    if (this.state.showPrompt) {
-      var prompt = $$(UrlPrompt, {tool: this});
-      el.append(prompt);
-    }
+URLPrompt.Prototype = function() {
+  this.render = function($$) {
+    var el = $$('div').addClass('se-prompt');
+    el.append(
+      $$('div')
+        .addClass('se-prompt-title')
+        .append(this.i18n.t('embed-src')),
+      $$('input').ref('url')
+        .attr({type: 'text', placeholder: 'https://vimeo.com/...', value: ''})
+        .on('change', this.onSave)
+    );
     return el;
-  }
-});
+  };
+
+  this.onSave = function(e) {
+    e.preventDefault();
+    this.props.tool.createEmbed(this.refs.url.val());
+  };
+
+};
+
+Component.extend(URLPrompt);
 
 module.exports = EmbedTool;

@@ -2,15 +2,14 @@
 
 var Component = require('../Component');
 var UnsupportedNode = require('./unsupported_node');
-var $$ = Component.$$;
 
 function IncludeComponent() {
-  Component.apply(this, arguments);
+  IncludeComponent.super.apply(this, arguments);
 }
 
 IncludeComponent.Prototype = function() {
 
-  this.render = function() {
+  this.render = function($$) {
     var doc = this.props.doc;
     var node = doc.get(this.props.node.nodeId);
     var componentRegistry = this.context.componentRegistry;
@@ -22,7 +21,9 @@ IncludeComponent.Prototype = function() {
     return $$('div')
       .addClass("content-node include")
       .attr("data-id", this.props.node.id)
-      .append($$(ComponentClass, { doc: doc, node: node }).ref(node.id));
+      .append(
+        $$(ComponentClass, { doc: doc, node: node }).ref(node.id)
+      );
   };
 };
 

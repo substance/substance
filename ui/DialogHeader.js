@@ -1,25 +1,24 @@
 'use strict';
 
 var Component = require('./Component');
-var $$ = Component.$$;
 var Icon = require('./FontAwesomeIcon');
 
 function DialogHeader() {
-  Component.apply(this, arguments);
+  DialogHeader.super.apply(this, arguments);
 }
 
 DialogHeader.Prototype = function() {
 
-  this.render = function() {
+  this.render = function($$) {
     return $$('div').addClass('sc-dialog-header').append(
         $$('a').addClass('se-back').attr('href', '#')
-          .on('click', this.handleCancel)
+          .on('click', this.onCancel)
           .append($$(Icon, {icon: 'fa-chevron-left'})),
         $$('div').addClass('se-label').append(this.props.label)
     );
   };
 
-  this.handleCancel = function(e) {
+  this.onCancel = function(e) {
     e.preventDefault();
     this.send('closeDialog');
   };

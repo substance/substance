@@ -66,7 +66,7 @@ Scrollbar.Prototype = function() {
     }
   };
 
-  this.render = function() {
+  this.render = function($$) {
     var el = $$('div')
       .addClass('sc-scrollbar')
       .on('mousedown', this.onMouseDown);

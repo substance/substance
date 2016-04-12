@@ -1,9 +1,7 @@
 'use strict';
 
 var Surface = require('./Surface');
-var Component = require('./Component');
 var TextProperty = require('./TextPropertyComponent');
-var $$ = Component.$$;
 
 /**
   Editor for a text property (annotated string). Needs to be
@@ -36,7 +34,7 @@ function TextPropertyEditor() {
 
 TextPropertyEditor.Prototype = function() {
 
-  this.render = function() {
+  this.render = function($$) {
     var el = Surface.prototype.render.call(this);
     el.addClass("sc-text-property-editor");
     el.append(

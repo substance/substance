@@ -1,7 +1,6 @@
 'use strict';
 
 var Component = require('./Component');
-var $$ = Component.$$;
 
 /**
   A split view layout component. Takes properties for configuration and 2 children via append.
@@ -12,9 +11,9 @@ var $$ = Component.$$;
   @prop {String} splitType either 'vertical' (default) or 'horizontal'.
   @prop {String} sizeA size of the first pane (A). '40%' or '100px' or 'inherit' are valid values.
   @prop {String} sizeB size of second pane. sizeA and sizeB can not be combined.
-  
+
   @example
-  
+
   ```js
   $$(SplitPane, {
     sizeA: '30%'
@@ -32,17 +31,7 @@ function SplitPane() {
 
 SplitPane.Prototype = function() {
 
-  // Accepts % and px units for size property
-  this.getSizedStyle = function(size) {
-    if (!size || size === 'inherit') return {};
-    if (this.props.splitType === 'horizontal') {
-      return {'height': size};
-    } else {
-      return {'width': size};
-    }
-  };
-
-  this.render = function() {
+  this.render = function($$) {
     if (this.props.children.length !== 2) {
       throw new Error('SplitPane only works with exactly two child elements');
     }
@@ -74,6 +63,17 @@ SplitPane.Prototype = function() {
     );
     return el;
   };
+
+  // Accepts % and px units for size property
+  this.getSizedStyle = function(size) {
+    if (!size || size === 'inherit') return {};
+    if (this.props.splitType === 'horizontal') {
+      return {'height': size};
+    } else {
+      return {'width': size};
+    }
+  };
+
 };
 
 Component.extend(SplitPane);

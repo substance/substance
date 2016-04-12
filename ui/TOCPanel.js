@@ -3,33 +3,25 @@
 var each = require('lodash/each');
 var Component = require('./Component');
 var ScrollPane = require('./ScrollPane');
-var $$ = Component.$$;
 var Icon = require('./FontAwesomeIcon');
 
 function TOCPanel() {
   Component.apply(this, arguments);
-
-  var toc = this.context.toc;
-  toc.connect(this, {
-    'toc:updated': this.onTOCUpdated
-  });
 }
 
 TOCPanel.Prototype = function() {
-  this.getDocument = function() {
-    return this.context.doc;
-  };
 
-  this.onTOCUpdated = function() {
-    this.rerender();
+  this.didMount = function() {
+    var toc = this.context.toc;
+    toc.on('toc:updated', this.onTOCUpdated, this);
   };
 
   this.dispose = function() {
     var toc = this.context.toc;
-    toc.disconnect(this);
+    toc.off(this);
   };
 
-  this.render = function() {
+  this.render = function($$) {
     var toc = this.context.toc;
     var activeEntry = toc.activeEntry;
 
@@ -67,6 +59,14 @@ TOCPanel.Prototype = function() {
       )
     );
     return el;
+  };
+
+  this.getDocument = function() {
+    return this.context.doc;
+  };
+
+  this.onTOCUpdated = function() {
+    this.rerender();
   };
 
   this.handleClick = function(e) {
