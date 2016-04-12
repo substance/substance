@@ -19,7 +19,6 @@ function CollabSession(doc, config) {
 
   config = config || {};
   this.config = config;
-
   this.collabClient = config.collabClient;
 
   if (config.docVersion) {
@@ -266,8 +265,7 @@ CollabSession.Prototype = function() {
     // here as we know the next sync will be triggered soon. And if
     // followed by an idle phase (_nextChange = null) will give us
     // the latest collaborator records
-
-    this._updateCollaborators(collaborators);
+    var collaboratorsChanged = this._updateCollaborators(collaborators);
     if (this._nextChange) {
       this._transformCollaboratorSelections(this._nextChange);
     }
@@ -286,7 +284,9 @@ CollabSession.Prototype = function() {
       this._notifyChangeListeners(serverChange, { replay: false, remote: true });  
     }
 
-    this.emit('collaborators:changed');
+    if (collaboratorsChanged) {
+      this.emit('collaborators:changed');  
+    }
     this.emit('connected');
 
     // Attempt to sync again (maybe we have new local changes)
@@ -415,21 +415,31 @@ CollabSession.Prototype = function() {
     because of many collaboratorSelection updates
   */
   this._updateCollaborators = function(collaborators) {
+    var changed = false;
+
     forEach(collaborators, function(collaborator, collaboratorId) {
       if (collaborator) {
+        var oldSelection;
         var old = this.collaborators[collaboratorId];
+        if (old) {
+          oldSelection = old.selection;
+        }
+        var newSelection = Selection.fromJSON(collaborator.selection);
+        newSelection.attach(this.doc);
+
         // Assign colorIndex (try to restore from old record)
         collaborator.colorIndex = old ? old.colorIndex : this._getNextColorIndex();
-        // Parse selection from record
-        collaborator.selection = Selection.fromJSON(collaborator.selection);
-        collaborator.selection.attach(this.doc);
-
+        collaborator.selection = newSelection;
         this.collaborators[collaboratorId] = collaborator;
+        if (!newSelection.equals(oldSelection)) {
+          changed = true;
+        }
       } else {
+        changed = true; // Collaborator left, so we need an update
         delete this.collaborators[collaboratorId];
       }
     }.bind(this));
-    // this.emit('collaborators:changed');
+    return changed;
   };
 
   /*
@@ -455,11 +465,13 @@ CollabSession.Prototype = function() {
       if (serverVersion) {
         this.version = serverVersion;
       }
-      this._updateCollaborators(collaborators);
+      var collaboratorsChanged = this._updateCollaborators(collaborators);
       if (serverChange) {
         this._notifyChangeListeners(serverChange, { replay: false, remote: true });  
       }
-      this.emit('collaborators:changed');
+      if (collaboratorsChanged) {
+        this.emit('collaborators:changed');  
+      }
     } else {
       console.log('skipped update. we wait for a sync to complete');
     }
