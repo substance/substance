@@ -9,9 +9,9 @@ QUnit.module('model/PathEventProxy');
 QUnit.test("Updating a property", function(assert) {
   var doc = sample1();
   var callCount = 0;
-  doc.getEventProxy('path').connect(this, ['test', 'arrayVal'], function() {
+  doc.getEventProxy('path').on(['test', 'arrayVal'], function() {
     callCount++;
-  });
+  }, this);
   doc.update(['test', 'arrayVal'], { insert: { offset: 1, value: '1000' } } );
   assert.equal(callCount, 1, "Event proxy listener should have been called.");
 });
@@ -19,9 +19,9 @@ QUnit.test("Updating a property", function(assert) {
 QUnit.test("Setting a property", function(assert) {
   var doc = sample1();
   var callCount = 0;
-  doc.getEventProxy('path').connect(this, ['test', 'arrayVal'], function() {
+  doc.getEventProxy('path').on(['test', 'arrayVal'], function() {
     callCount++;
-  });
+  }, this);
   doc.set(['test', 'arrayVal'], [1,1,1]);
   assert.equal(callCount, 1, "Event proxy listener should have been called.");
 });
@@ -30,9 +30,9 @@ QUnit.test("Setting a property and deleting the node afterwards", function(asser
   var doc = sample1();
   var docSession = new DocumentSession(doc);
   var callCount = 0;
-  doc.getEventProxy('path').connect(this, ['test', 'arrayVal'], function() {
+  doc.getEventProxy('path').on(['test', 'arrayVal'], function() {
     callCount++;
-  });
+  }, this);
   docSession.transaction(function(tx) {
     tx.set(['test', 'arrayVal'], [1,1,1]);
     tx.delete('test');
