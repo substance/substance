@@ -3,7 +3,6 @@
 var each = require('lodash/each');
 var isArray = require('lodash/isArray');
 var last = require('lodash/last');
-var DOMElement = require('../../ui/DefaultDOMElement');
 
 /*
  * HTML converter for List.
@@ -45,6 +44,7 @@ var ListHtmlConverter = {
    */
   import: function(el, list, converter) {
     list.items = [];
+    list.ordered = el.is('ol');
     // iterate through the children keeping track of the nesting level
     // and associated list type
     var state = {
@@ -108,63 +108,28 @@ var ListHtmlConverter = {
   },
 
   _importList: function(state, listEl, converter) {
+    var self = this;
     state.level++;
     state.types.push(listEl.tagName);
     each(listEl.children, function(child) {
       var type = child.tagName;
       if (type === "li") {
-        this._importListItem(state, child, converter);
+        self._importListItem(state, child, converter);
       } else if (type == "ol" || type === "ul") {
-        this._importList(state, child, converter);
+        self._importList(state, child, converter);
       }
     });
     state.level--;
     state.types.pop();
   },
 
-  // TODO: this needs to be fleshed out to be 100% robust
-  _normalizeListItem: function(state, li) {
-    var segments = [[]];
-    var lastSegment = segments[0];
-    each(li.childNodes, function(child) {
-      var type = child.tagName;
-      if (type === "ol" || type === "ul") {
-        lastSegment = child;
-        segments.push(lastSegment);
-      } else {
-        if (/^\s*$/.exec(child.textContent)) {
-          // skip fragments with only whitespace
-          return;
-        }
-        if (!isArray(lastSegment)) {
-          lastSegment = [];
-          segments.push(lastSegment);
-        }
-        lastSegment.push(child);
-      }
-    });
-    return segments;
-  },
-
   _importListItem: function(state, li, converter) {
     var ordered = (last(state.types) === "ol");
-    // in our interpretation a list item may have leading annotated text
-    // and trailing list element
-    var fragments = this._normalizeListItem(state, li, converter);
-    for (var i = 0; i < fragments.length; i++) {
-      var fragment = fragments[i];
-      if (isArray(fragment)) {
-        // create a list item and use the fragment as annotated content
-        var wrapper = DOMElement.create('span').append(fragment);
-        converter.trimTextContent(wrapper);
-        var listItem = converter.convertElement(wrapper);
-        listItem.ordered = ordered;
-        listItem.level = state.level;
-        state.list.items.push(listItem.id);
-      } else {
-        this._importList(state, fragment, converter);
-      }
-    }
+    var listItem = converter.convertElement(li);
+    listItem.ordered = ordered;
+    listItem.level = state.level;
+    listItem.parent = state.list.id;
+    state.list.items.push(listItem.id);
   },
 
 };

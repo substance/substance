@@ -170,6 +170,9 @@ DocumentChange.Prototype = function() {
       ops.push(this.ops[i].invert());
     }
     inverted.ops = ops;
+    // Attach the selections back to the document
+    inverted.before.selection.attach(this.after.selection._internal.doc);
+    inverted.after.selection.attach(this.before.selection._internal.doc);
     return inverted;
   };
 

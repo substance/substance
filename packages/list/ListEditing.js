@@ -1,6 +1,10 @@
-var oo = require('../../../util/oo');
+var oo = require('../../util/oo');
+var uuid = require('../../util/uuid');
 
-var annotationHelpers = require('../../annotationHelpers');
+var annotationHelpers = require('../../model/annotationHelpers');
+var deleteNode = require('../../model/transform/deleteNode');
+
+var listUtils = require('./listUtils');
 
 function ListEditing() {}
 
@@ -16,9 +20,77 @@ ListEditing.Prototype = function() {
   };
 
   this.breakList = function(tx, args) {
-    console.log("TODO: implement break list");
+    var selection = args.selection;
+    if (!selection.isPropertySelection()) {
+      throw new Error('Expected property selection.');
+    }
+
+    var range = selection.getRange();
+    var path = range.start.path;
+    var offset = range.start.offset;
+    var node = tx.get(path[0]);
+
+    // split the text property and create a new list item node with trailing text and annotations transferred
+    var text = node.content;
+    var id = uuid(node.type);
+    var parentList = tx.get(node.parent);
+    var newPath = [id, 'content'];
+    var newNode;
+    // when breaking at the beginning, a new list-item node will be inserted at the
+    // current position of the current node
+    if (offset === 0) {
+      if (text.length === 0) {
+        // if we hit return on an already empty list item, it should transform into
+        // a paragraph
+        args.nodes = [node];
+        args.list = parentList;
+        args = listUtils.listItemsToParagraph(tx, args);
+      } else {
+        newNode = tx.create({
+          id: id,
+          type: node.type,
+          content: "",
+          parent: node.parent
+        });
+        // update the items of the parent list
+        tx.update([node.parent, 'items'], {insert: {offset: parentList.items.indexOf(node.id), value: id}});
+        // maintain the selection at the beginning
+        selection = tx.createSelection({
+          type: 'property',
+          path: path,
+          startOffset: 0
+        });
+        args.selection = selection;
+      }
+    }
+    // otherwise a new list-item node containing all the trailing text is inserted
+    // just after the current position of the current node
+    else {
+      newNode = node.toJSON();
+      newNode.id = id;
+      newNode.content = text.substring(offset);
+      tx.create(newNode);
+      if (offset < text.length) {
+        // transfer annotations which are after offset to the new node
+        annotationHelpers.transferAnnotations(tx, path, offset, [id, 'content'], 0);
+        // truncate the original property
+        tx.update(path, {
+          delete: { start: offset, end: text.length }
+        });
+      }
+      // update the parent list to contain the newly created list item as a child item
+      tx.update([node.parent, 'items'], {insert: {offset: parentList.items.indexOf(node.id)+1, value: id}});
+      // update the selection
+      selection = tx.createSelection({
+        type: 'property',
+        path: newPath,
+        startOffset: 0
+      });
+      args.selection = selection;
+    }
+    args.node = newNode;
     return args;
-  };
+  }.bind(this);
 
   /**
    * Implements a transformation that will be applied in situations like that
@@ -37,7 +109,42 @@ ListEditing.Prototype = function() {
    *        the second list node.
    */
   this.mergeListWithList = function(tx, args) {
-    console.log('TODO: implement merge list-list');
+    var node = tx.get(args.path[0]);
+    if (args.direction === 'right') {
+      // if delete is hit at the end of the first list, merge the first item of
+      // the second list into the last item of the first list
+      var item = tx.get(args.second.items[0]);
+      var length = node.content.length;
+      tx.update([node.id, 'content'], {insert: {offset: length, value: item.content}});
+      annotationHelpers.transferAnnotations(tx, [item.id, 'content'], 0, [node.id, 'content'], length);
+      tx.update([args.second.id, 'items'], {delete: {offset: 0}});
+      if (tx.get([args.second.id, 'items']).length === 0) deleteNode(tx, {nodeId: args.second.id});
+    } else {
+      // if backspace is hit at the beginning of the second list, we just convert the
+      // list item to a paragraph
+      var defaultType = tx.getSchema().getDefaultTextType();
+      var id = uuid(defaultType);
+      var containerId = args.containerId;
+      var container = tx.get(containerId);
+      var index = container.getChildIndex(args.first);
+      tx.create({
+        id: id,
+        type: defaultType,
+        content: node.content
+      });
+      // show the paragraph node
+      container.show(id, index+1);
+      // transfer annotations
+      annotationHelpers.transferAnnotations(tx, args.path, 0, [id, 'content'], 0);
+      var selection = tx.createSelection({
+        type: 'property',
+        path: [id, 'content'],
+        startOffset: 0
+      });
+      args.selection = selection;
+      tx.update([args.second.id, 'items'], {delete: {offset: 0}});
+      if (tx.get([args.second.id, 'items']).length === 0) deleteNode(tx, {nodeId: args.second.id});
+    }
     return args;
   };
 
@@ -57,7 +164,21 @@ ListEditing.Prototype = function() {
    *        a textish node.
    */
   this.mergeListWithTextish = function(tx, args) {
-    console.log('TODO: implement merge list-text');
+    // get the id of the last list item
+    var lastListItemId = args.first.items[args.first.items.length-1];
+    var originalOffset = tx.get(lastListItemId).content.length;
+    // hide and delete the textish node
+    deleteNode(tx, {nodeId: args.second.id});
+    // add the content of the text node to the last item of the list
+    tx.update([lastListItemId, 'content'], {insert: {offset: originalOffset, value: args.second.content}});
+    annotationHelpers.transferAnnotations(tx, [args.second.id, 'content'], 0, [lastListItemId, 'content'], originalOffset);
+    // update the selection
+    var selection = tx.createSelection({
+      type: 'property',
+      path: [lastListItemId, 'content'],
+      startOffset: originalOffset
+    });
+    args.selection = selection;
     return args;
   };
 
@@ -77,50 +198,70 @@ ListEditing.Prototype = function() {
    *        a textish node.
    */
   this.mergeTextishWithList = function(tx, args) {
-    console.log('TODO: implement merge text-list');
-    return args;
-  };
-
-
-  // TODO: this implementation is *very* similar to merge.mergeTextNodes
-  // try to consolidate this
-  this.mergeListItems = function(tx, args) {
-    var list = args.node;
-    var first = args.first;
-    var second = args.second;
-    var firstPath = first.getPath();
-    var secondPath = second.getPath();
-    var firstText = tx.get(first.getPath());
+    var containerId = args.containerId;
+    var container = tx.get(containerId);
+    var index = container.getChildIndex(args.second);
+    var defaultType = tx.getSchema().getDefaultTextType();
+    var id = uuid(defaultType);
+    var content = tx.get(args.second.items[0]).content;
     var selection;
-    // when the first component is empty we rather remove than merging into it
-    if (firstText.length === 0) {
-      // remove the first item from the item list, and delete it from the document
-      list.removeItem(first[0]);
-      tx.delete(firstPath[0]);
-      // set the selection to the end of the first component
+    if (args.direction === 'left') {
+      // If backspace is hit at the beginning of the list,
+      // we convert the first list item into a paragraph
+      tx.create({
+        id: id,
+        type: defaultType,
+        content: content
+      });
+      // show the paragraph node
+      container.show(id, index);
+      annotationHelpers.transferAnnotations(tx, [args.second.items[0], 'content'], 0, [id, 'content'], 0);
       selection = tx.createSelection({
         type: 'property',
-        path: secondPath,
+        path: [id, 'content'],
         startOffset: 0
       });
     } else {
-      var secondText = tx.get(second.getPath());
-      // TODO: we should introduce a trafo that moves a text fragment and its annotations
-      // to a new location
-      // append the second text and transfer annotations
-      tx.update(firstPath, { insert: { offset: firstText.length, value: secondText } });
-      annotationHelpers.transferAnnotations(tx, secondPath, 0, firstPath, firstText.length);
-      // remove the second item from the list and delete it from the document
-      list.removeItem(secondPath[0]);
-      tx.delete(secondPath[0]);
-      // set the selection to the end of the first component
+      // if delete is hit at the end of the paragraph, we merge the first list
+      // element into the paragraph
+      var contentLength = args.first.content.length;
+      tx.update([args.first.id, 'content'], {insert: {offset: contentLength, value: content}});
+      annotationHelpers.transferAnnotations(tx, [args.second.items[0], 'content'], 0, [args.first.id, 'content'], contentLength);
       selection = tx.createSelection({
         type: 'property',
-        path: first.path,
-        startOffset: firstText.length
+        path: [args.first.id, 'content'],
+        startOffset: contentLength
       });
     }
     args.selection = selection;
+    tx.update([args.second.id, 'items'], {delete: {offset: 0}});
+    if (tx.get([args.second.id, 'items']).length === 0) deleteNode(tx, {nodeId: args.second.id});
+    return args;
+  };
+
+  this.mergeListItems = function(tx, args) {
+    var selection;
+    var node = tx.get(args.path[0]);
+    var nodeIndex = args.node.items.indexOf(args.path[0]);
+    if (args.direction === 'right') {
+      // If delete is hit at the end of a list element, we merge the content of the
+      // next element into the current one.
+      var nextNode = tx.get(args.node.items[nodeIndex+1]);
+      var contentLength = node.content.length;
+      tx.update(args.path, {insert: {offset: contentLength, value: nextNode.content}});
+      annotationHelpers.transferAnnotations(tx, [nextNode.id, 'content'], 0, args.path, contentLength);
+      tx.update([args.node.id, 'items'], {delete: {offset: nodeIndex+1}});
+      selection = tx.createSelection({
+        type: 'property',
+        path: args.path,
+        startOffset: contentLength
+      });
+      args.selection = selection;
+    } else {
+      args.list = args.node;
+      args.nodes = [node];
+      args = listUtils.listItemsToParagraph(tx, args);
+    }
     return args;
   };
 
