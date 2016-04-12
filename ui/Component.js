@@ -84,11 +84,10 @@ function Component(parent, props) {
   // context from parent (dependency injection)
   this.context = this._getContext() || {};
   Object.freeze(this.context);
-  // setting props without triggering willReceiveProps or didReceiveProps
+  // setting props without triggering willReceiveProps
   this.props = props || {};
   Object.freeze(this.props);
-  // setting initial state without triggering willUpdateState or didUpdateState
-  this.state = this._getInitialState() || {};
+  this.state = this.getInitialState() || {};
   Object.freeze(this.state);
 }
 
@@ -155,7 +154,7 @@ Component.Prototype = function() {
 
   this.mount = function(el) {
     if (!this.el) {
-      this.rerender();
+      this._render();
     }
     if (!el._isDOMElement) {
       el = DefaultDOMElement.wrapNativeElement(el);
@@ -186,15 +185,18 @@ Component.Prototype = function() {
    * Call this to manually trigger a rerender.
    */
   this.rerender = function() {
+    this._render();
+    this.didUpdate();
+  };
+
+  this._render = function() {
     if (this.__isRendering__) {
       throw new Error('Component is rendering already.');
     }
     this.__isRendering__ = true;
     try {
-      this.willRender();
       var engine = new RenderingEngine();
-      engine._rerender(this);
-      this.didRender();
+      engine._render(this);
     } finally {
       delete this.__isRendering__;
     }
@@ -251,17 +253,17 @@ Component.Prototype = function() {
    */
   this.didMount = function() {};
 
+
   /**
-    Checks whether a given element has been injected in the document already
+    Hook which is called after each rerender.
+  */
+  this.didUpdate = function() {};
 
-    We traverse up the DOM until we find the document root element. We return true
-    if we can find it.
-
-    @return a boolean indicating if this component is mounted.
+  /**
+    @return a boolean indicating if this component has been mounted
    */
   this.isMounted = function() {
-    // Not rendered yet, so can not be mounted
-    return this.el.isInDocument();
+    return this.__isMounted__;
   };
 
   /**
@@ -273,8 +275,8 @@ Component.Prototype = function() {
     this.getChildren().forEach(function(child) {
       child.triggerDispose();
     });
-    this.__isMounted__ = false;
     this.dispose();
+    this.__isMounted__ = false;
   };
 
   /**
@@ -342,6 +344,15 @@ Component.Prototype = function() {
   };
 
   /**
+    Get the current component state
+
+    @return {Object} the current state
+  */
+  this.getState = function() {
+    return this.state;
+  };
+
+  /**
     Sets the state of this component, potentially leading to a rerender.
 
     Usually this is used by the component itself.
@@ -351,14 +362,14 @@ Component.Prototype = function() {
     // which will not lead to an extra rerender
     var needRerender = !this.__isSettingProps__ &&
       this.shouldRerender(this.getProps(), newState);
-    if (this.state) {
-      this.willUpdateState(newState);
-    }
+    // triggering this to provide a possibility to look at old before it is changed
+    this.willUpdateState(newState);
     this.state = newState || {};
     Object.freeze(this.state);
-    this.didUpdateState();
     if (needRerender) {
       this.rerender();
+    } else if (!this.__isSettingProps__) {
+      this.didUpdate();
     }
   };
 
@@ -372,15 +383,18 @@ Component.Prototype = function() {
   };
 
   /**
-    Hook which is called before the state is changed.
-    Use this to dispose objects which will be replaced during a state change.
+    Called before state is changed.
   */
   this.willUpdateState = function(newState) { /* jshint unused: false */ };
 
   /**
-    Hook which is called after the state has updated.
+    Get the current properties
+
+    @return {Object} the current state
   */
-  this.didUpdateState = function() {};
+  this.getProps = function() {
+    return this.props;
+  };
 
   /**
     Sets the properties of this component, potentially leading to a rerender.
@@ -392,6 +406,8 @@ Component.Prototype = function() {
     this._setProps(newProps);
     if (needRerender) {
       this.rerender();
+    } else {
+      this.didUpdate();
     }
   };
 
@@ -403,7 +419,6 @@ Component.Prototype = function() {
       this.willReceiveProps(newProps);
       this.props = newProps || {};
       Object.freeze(newProps);
-      this.didReceiveProps();
     } finally {
       delete this.__isSettingProps__;
     }
@@ -420,44 +435,12 @@ Component.Prototype = function() {
   };
 
   /**
-    Get the current properties
-
-    @return {Object} the current state
-  */
-  this.getProps = function() {
-    return this.props;
-  };
-
-  /**
-    Get the current component state
-
-    @return {Object} the current state
-  */
-  this.getState = function() {
-    return this.state;
-  };
-
-  /**
     Hook which is called before properties are updated. Use this to dispose objects which will be replaced when properties change.
+
+    For example you can use this to derive state from props.
+    @param {object} newProps
   */
   this.willReceiveProps = function(newProps) { /* jshint unused: false */ };
-
-  /**
-    Hook which is called after properties have been set.
-
-    Use this to derive state from props.
-  */
-  this.didReceiveProps = function() {};
-
-  /**
-    Hook which is called before each render.
-  */
-  this.willRender = function() {};
-
-  /**
-    Hook which is called after each render.
-  */
-  this.didRender = function() {};
 
   this.getChildNodes = function() {
     if (!this.el) return [];
@@ -551,16 +534,6 @@ Component.Prototype = function() {
     this.el.remove();
   };
 
-  this._getInitialState = function() {
-    if (this.context.router) {
-      var state = this.context.router.getInitialState(this);
-      if (state) {
-        return state;
-      }
-    }
-    return this.getInitialState();
-  };
-
   this._getContext = function() {
     var context = {};
     var parent = this.getParent();
@@ -614,7 +587,7 @@ Component.static.render = function(props) {
   props = props || {};
   var ComponentClass = this.__class__;
   var comp = new ComponentClass(null, props);
-  comp.rerender();
+  comp._render();
   return comp;
 };
 

@@ -55,8 +55,8 @@ TwoPanelController.Prototype = function() {
     this._scrollToNode();
   };
 
-  this.didUpdateState = function() {
-    _super.didUpdateState.call(this);
+  this.didUpdate = function() {
+    _super.didUpdate.call(this);
 
     this._scrollToNode();
   };

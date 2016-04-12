@@ -159,13 +159,10 @@ Controller.Prototype = function() {
     if (oldDoc !== newDoc) {
       this.dispose();
       this.empty();
+      this.documentSession = newProps.documentSession;
+      this.doc = newProps.documentSession.getDocument();
       this._observeDoc(newDoc);
     }
-  };
-
-  this.didReceiveProps = function() {
-    this.documentSession = this.props.documentSession;
-    this.doc = this.props.documentSession.getDocument();
   };
 
   /**
@@ -422,12 +419,13 @@ Controller.Prototype = function() {
     }
   };
 
-  this.handleStateUpdate = function() {
-    // no-op, should be overridden by custom writer
-  };
-
   this.willUpdateState = function(newState) {
     this.handleStateUpdate(newState);
+  };
+
+  this.handleStateUpdate = function(newState) {
+    /* jshint unused: false */
+    // no-op, should be overridden by custom writer
   };
 
   this.onDocumentChanged = function(change, info) {

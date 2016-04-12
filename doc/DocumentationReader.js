@@ -31,8 +31,8 @@ DocumentationReader.Prototype = function() {
     this._updateScrollPosition();
   };
 
-  this.didUpdateState = function() {
-    _super.didUpdateState.call(this);
+  this.didUpdate = function() {
+    _super.didUpdate.call(this);
     this._updateScrollPosition();
   };
 

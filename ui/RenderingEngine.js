@@ -10,7 +10,7 @@ function RenderingEngine() {}
 
 RenderingEngine.Prototype = function() {
 
-  this._rerender = function(comp) {
+  this._render = function(comp) {
     var vel = _createWrappingVirtualComponent(comp);
     _capture(vel, 'forceCapture');
     if (vel._isVirtualComponent) {
@@ -72,7 +72,9 @@ RenderingEngine.Prototype = function() {
         // NOTE: don't ask if shouldRerender if no element is there yet
         needRerender = !comp.el || comp.shouldRerender(vel.props);
         comp.__htmlConfig__ = vel._copyHTMLConfig();
+        // updates prop triggering willReceiveProps
         comp._setProps(vel.props);
+        vel.__isUpdated__ = true;
       }
       if (needRerender) {
         var context = new CaptureContext(vel);
@@ -82,6 +84,7 @@ RenderingEngine.Prototype = function() {
         }
         content._comp = comp;
         vel._content = content;
+        vel.__isUpdated__ = true;
         // Mapping: map virtual elements to existing components based on refs
         _prepareVirtualComponent(comp, content);
         // Descending
@@ -97,6 +100,8 @@ RenderingEngine.Prototype = function() {
             comp.render(descendingContext.$$);
           }
         }
+        // a VirtualComponent has its content as a VirtualHTMLElement
+        // which needs to be captured recursively
         _capture(vel._content);
       } else {
         vel.__skip__ = true;
@@ -115,7 +120,12 @@ RenderingEngine.Prototype = function() {
 
   function _render(vel) {
     var state = { removed: [] };
-    if (vel.__skip__) return;
+    if (vel.__skip__) {
+      if (vel.__isUpdated__) {
+        vel._comp.didUpdate();
+      }
+      return;
+    }
     // before changes can be applied, a VirtualElement must have been captured
     console.assert(vel.__isCaptured__, 'VirtualElement must be captured before rendering');
 
@@ -124,7 +134,11 @@ RenderingEngine.Prototype = function() {
 
     // VirtualComponents apply changes to its content element
     if (vel._isVirtualComponent) {
-      return _render(vel._content);
+      _render(vel._content);
+      if (vel.__isUpdated__) {
+        comp.didUpdate();
+      }
+      return;
     }
     // render the element
     if (!comp.el) {
@@ -497,6 +511,7 @@ function CaptureContext(owner) {
   this.elements = [];
   this.components = [];
   this.$$ = this._createComponent.bind(this);
+  this.$$.capturing = true;
 }
 
 CaptureContext.prototype._createComponent = function() {
