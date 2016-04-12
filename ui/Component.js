@@ -400,9 +400,7 @@ Component.Prototype = function() {
     // set a flag so that this.setState() can omit triggering render
     this.__isSettingProps__ = true;
     try {
-      if (!this.props) {
-        this.willReceiveProps(newProps);
-      }
+      this.willReceiveProps(newProps);
       this.props = newProps || {};
       Object.freeze(newProps);
       this.didReceiveProps();
