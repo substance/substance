@@ -4,7 +4,6 @@ var isString = require('lodash/isString');
 var isFunction = require('lodash/isFunction');
 var extend = require('lodash/extend');
 var each = require('lodash/each');
-var without = require('lodash/without');
 var EventEmitter = require('../util/EventEmitter');
 var RenderingEngine = require('./RenderingEngine');
 var VirtualElement = require('./VirtualElement');
@@ -582,29 +581,36 @@ Component.Prototype = function() {
     return context;
   };
 
-  function _unwrapComp(el) {
-    if (el) return el._comp;
-  }
+  this.addEventListener = function() {
+    throw "Not supported.";
+  };
 
-  function _unwrapCompStrict(el) {
-    console.assert(el._comp, "Expecting a back-link to the component instance.");
-    return _unwrapComp(el);
-  }
+  this.removeEventListener = function() {
+    throw "Not supported.";
+  };
 
-  function notNull(n) { return n; }
-
-  Component.unwrap = _unwrapComp;
+  this.insertBefore = function() {
+    throw "Not supported.";
+  };
 
 };
 
 DOMElement.Delegator.extend(Component);
 
-DOMElement._defineProperties(Component,
-  without(DOMElement._propertyNames,
-    'addEventListener', 'removeEventListener',
-    'insertBefore'
-  )
-);
+DOMElement._defineProperties(Component, DOMElement._propertyNames);
+
+function _unwrapComp(el) {
+  if (el) return el._comp;
+}
+
+function _unwrapCompStrict(el) {
+  console.assert(el._comp, "Expecting a back-link to the component instance.");
+  return _unwrapComp(el);
+}
+
+function notNull(n) { return n; }
+
+Component.unwrap = _unwrapComp;
 
 /**
  * Adding a property which is providing an i18n service
