@@ -186,6 +186,10 @@ Component.Prototype = function() {
    */
   this.rerender = function() {
     this._render();
+    // when this component is not mounted still trigger didUpdate()
+    if (!this.isMounted()) {
+      this.didUpdate();
+    }
   };
 
   this._render = function() {
