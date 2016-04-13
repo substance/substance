@@ -489,15 +489,27 @@ RenderingEngine.Prototype = function() {
   DescendingContext.Prototype = function() {
     this._createComponent = function() {
       var vel = this.elements[this.pos++];
+      // only capture VirtualComponent's with a captured parent
+      // all others have been captured at this point already
+      // or will either be captured by a different owner
       if (!vel.__isCaptured__ && vel._isVirtualComponent &&
            vel.parent && vel.parent.__isCaptured__) {
         _capture(vel);
         this.updates++;
         this.remaining--;
       }
+      // Note: we return a new VirtualElement so that the render method does work
+      // as expected.
+      // TODO: instead of creating a new VirtualElement each time, we could return
+      // an immutable wrapper for the already recorded element.
       vel = VirtualElement.createElement.apply(null, arguments);
+      // these variables need to be set make the 'ref()' API work
       vel._context = this;
       vel._owner = this.owner;
+      // Note: important to deactivate these methods as otherwise the captured
+      // element will be damaged when calling el.append()
+      vel._attach = function() {};
+      vel._detach = function() {};
       return vel;
     };
     this.hasPendingCaptures = function() {
