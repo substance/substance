@@ -89,11 +89,17 @@ DocumentSession.Prototype = function() {
     if (change) {
       this.stage._apply(change);
       this.doc._apply(change);
-      if (change.after.selection) {
-        this.selection = change.after.selection;
+      var oldSel = this.selection;
+      var sel = change.after.selection;
+      if (sel) {
+        sel.attach(this.doc);
+        this.selection = sel;
       }
       this.undoneChanges.push(change.invert());
       this._notifyChangeListeners(change, { 'replay': true });
+      if (!oldSel.equals(this.selection)) {
+        this.emit('selection:changed', this.selection, this);
+      }
     } else {
       console.error('No change can be undone.');
     }
@@ -104,11 +110,17 @@ DocumentSession.Prototype = function() {
     if (change) {
       this.stage._apply(change);
       this.doc._apply(change);
-      if (change.after.selection) {
-        this.selection = change.after.selection;
+      var oldSel = this.selection;
+      var sel = change.after.selection;
+      if (sel) {
+        sel.attach(this.doc);
+        this.selection = sel;
       }
       this.doneChanges.push(change.invert());
       this._notifyChangeListeners(change, { 'replay': true });
+      if (oldSel !== this.selection) {
+        this.emit('selection:changed', this.selection, this);
+      }
     } else {
       console.error('No change can be redone.');
     }
