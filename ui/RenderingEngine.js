@@ -11,6 +11,7 @@ function RenderingEngine() {}
 RenderingEngine.Prototype = function() {
 
   this._render = function(comp) {
+    // var t0 = Date.now();
     var vel = _createWrappingVirtualComponent(comp);
     _capture(vel, 'forceCapture');
     if (vel._isVirtualComponent) {
@@ -18,6 +19,7 @@ RenderingEngine.Prototype = function() {
     } else {
       _render(vel);
     }
+    // console.log("RenderingEngine: finished rendering in %s ms", Date.now()-t0);
   };
 
   // this is used together with the incremental Component API
@@ -109,6 +111,8 @@ RenderingEngine.Prototype = function() {
             child.__isCaptured__ = true;
           }
           content.__isCaptured__ = true;
+          // then we run comp.render($$) with a special $$ that captures VirtualComponent's
+          // recursively
           var descendingContext = new DescendingContext(context);
           while (descendingContext.hasPendingCaptures()) {
             descendingContext.reset();
@@ -123,7 +127,6 @@ RenderingEngine.Prototype = function() {
         vel.__skip__ = true;
       }
     } else if (vel._isVirtualHTMLElement) {
-      // capture children
       for (var i = 0; i < vel.children.length; i++) {
         _capture(vel.children[i]);
       }
