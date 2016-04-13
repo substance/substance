@@ -1,12 +1,12 @@
 .sc-member-index {
   font-size: $font-size-small;
   .se-label {
-    font-weight: bold;
+    font-weight: $strong-font-weight;
   }
   .se-members {
-    margin-bottom: 10px;    
+    margin-bottom: $default-padding / 2;
     a {
-      padding-right: 10px;
+      margin-right: $default-padding / 2;
     }
   }
   margin-bottom: $node-margin-bottom;

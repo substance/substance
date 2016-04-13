@@ -2,6 +2,7 @@
 
 var Server = require('./Server');
 var CollabEngine = require('./CollabEngine');
+var Err = require('../util/Error');
 var forEach = require('lodash/forEach');
 
 /*
@@ -19,15 +20,33 @@ CollabServer.Prototype = function() {
   var _super = CollabServer.super.prototype;
 
   /*
+    Send an error
+  */
+  this._error = function(req, res, err) {
+    res.error({
+      type: 'error',
+      error: {
+        name: req.message.type+'Error',
+        cause: {
+          name: err.name
+        }
+      },
+      // errorName: err.name,
+      documentId: req.message.documentId
+    });
+    this.next(req, res);
+  };
+
+  /*
     Configurable authenticate method
   */
   this.authenticate = function(req, res) {
     if (this.config.authenticate) {
       this.config.authenticate(req, function(err, session) {
         if (err) {
-          console.log('Request is not authenticated.');
-          res.error(err);
-          this.next(req, res);
+          console.error(err);
+          // Send the response with some delay
+          this._error(req, res, new Err('AuthenticationError', {cause: err}));
           return;
         }
         req.setAuthenticated(session);
@@ -46,8 +65,7 @@ CollabServer.Prototype = function() {
       this.config.enhanceRequest(req, function(err) {
         if (err) {
           console.error('enhanceRequest returned an error', err);
-          res.error(err);
-          this.next(req, res);
+          this._error(req, res, err);
           return;
         }
         req.setEnhanced();
@@ -96,8 +114,7 @@ CollabServer.Prototype = function() {
     this.collabEngine.sync(args, function(err, result) {
       // result: changes, version, change
       if (err) {
-        res.error(err);
-        this.next(req, res);
+        this._error(req, res, err);
         return;
       }
 

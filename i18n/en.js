@@ -20,5 +20,8 @@ module.exports = {
   'heading3': 'Heading 3',
   'codeblock': 'Codeblock',
   'blockquote': 'Blockquote',
-  'container-selection': 'Multiple Elements'
+  'container-selection': 'Multiple Elements',
+  'AuthenticationError': 'Not authenticated.',
+  'syncError': 'Could not sync.',
+  'SyncError': 'Could not sync.'
 };
