@@ -28,6 +28,10 @@ SwitchTextType.Prototype = function() {
   // UI Specific parts
   // ----------------
 
+  this.didMount = function() {
+    this._focusToggle();
+  };
+
   this.render = function($$) {
     var textTypeName = 'No selection';
 
@@ -72,7 +76,11 @@ SwitchTextType.Prototype = function() {
     return el;
   };
 
-  this.didRender = function() {
+  this.didUpdate = function() {
+    this._focusToggle();
+  };
+
+  this._focusToggle = function() {
     if (this.state.open) {
       this.refs.toggle.focus();
     }

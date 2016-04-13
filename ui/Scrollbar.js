@@ -50,12 +50,8 @@ Scrollbar.Prototype = function() {
     this.props.scrollPane.off(this);
   };
 
-  // TODO: This is actually a place where we could need didUpdate or
-  // didRerender when we know the component has already been mounted
-  this.didRender = function() {
-    if (this.isMounted()) {
-      this.updatePositions();
-    }
+  this.didUpdate = function() {
+    this.updatePositions();
   };
 
   this.render = function($$) {

@@ -24,13 +24,13 @@ function TestComponent() {
 TestComponent.Prototype = function() {
 
   this._enableSpies = function() {
-    ['didMount','didRender','dispose','shouldRerender','render'].forEach(function(name) {
+    ['didMount','didUpdate','dispose','shouldRerender','render'].forEach(function(name) {
       spy(this, name);
     }.bind(this));
   };
 
   this._disableSpies = function() {
-    ['didMount','didRender','dispose','shouldRerender','render'].forEach(function(name) {
+    ['didMount','didUpdate','dispose','shouldRerender','render'].forEach(function(name) {
       this[name].restore();
     }.bind(this));
   };
@@ -91,11 +91,9 @@ QUnit.uiTest("Mounting a component", function(assert) {
   var el = window.document.createElement('div');
   var comp = Component.mount(SimpleComponent, el);
   assert.equal(comp.didMount.callCount, 0, "didMount must not be called when mounting to detached elements");
-  assert.equal(comp.didRender.callCount, 1, "didRender must have been called once");
   // Mount to an existing DOM element
   comp = Component.mount(SimpleComponent, window.document.querySelector('#qunit-fixture'));
   assert.equal(comp.didMount.callCount, 1, "didMount should have been called");
-  assert.equal(comp.didRender.callCount, 1, "didRender must have been called once");
 });
 
 QUnit.test("Render an HTML element", function(assert) {
@@ -191,15 +189,19 @@ QUnit.test("Rerender on setProps()", function(assert) {
   assert.ok(comp.render.callCount > 0, "Component should have been rerendered.");
 });
 
-QUnit.test("Setting props triggers willReceiveProps() and didReceiveProps()", function(assert) {
+QUnit.test("Rerendering triggers didUpdate()", function(assert) {
   var comp = SimpleComponent.static.render({ foo: 'bar '});
-  spy(comp, 'willReceiveProps');
-  spy(comp, 'didReceiveProps');
-  comp.setProps({ foo: 'baz' });
-  assert.ok(comp.willReceiveProps.callCount === 1, "willReceiveProps() should have been called once.");
-  assert.ok(comp.didReceiveProps.callCount === 1, "didReceiveProps() should have been called once.");
+  spy(comp, 'didUpdate');
+  comp.rerender();
+  assert.ok(comp.didUpdate.callCount === 1, "didUpdate() should have been called once.");
 });
 
+QUnit.test("Setting props triggers willReceiveProps()", function(assert) {
+  var comp = SimpleComponent.static.render({ foo: 'bar '});
+  spy(comp, 'willReceiveProps');
+  comp.setProps({ foo: 'baz' });
+  assert.ok(comp.willReceiveProps.callCount === 1, "willReceiveProps() should have been called once.");
+});
 
 QUnit.test("Rerender on setState()", function(assert) {
   enableSpies();
@@ -209,6 +211,34 @@ QUnit.test("Rerender on setState()", function(assert) {
   comp.setState({ foo: 'baz' });
   assert.ok(comp.shouldRerender.callCount > 0, "Component should have been asked whether to rerender.");
   assert.ok(comp.render.callCount > 0, "Component should have been rerendered.");
+});
+
+QUnit.test("Setting state triggers willUpdateState()", function(assert) {
+  var comp = SimpleComponent.static.render();
+  spy(comp, 'willUpdateState');
+  comp.setState({ foo: 'baz' });
+  assert.ok(comp.willUpdateState.callCount === 1, "willUpdateState() should have been called once.");
+});
+
+QUnit.test("Trigger didUpdate() when state or props have changed even with shouldRerender() = false", function(assert) {
+  function A() {
+    A.super.apply(this, arguments);
+    this.shouldRerender = function() {
+      return false;
+    };
+    this.render = function($$) {
+      return $$('div');
+    };
+  }
+  Component.extend(A);
+  var comp = A.static.render();
+  spy(comp, 'didUpdate');
+  // component will not rerender but still should trigger didUpdate()
+  comp.setProps({foo: 'bar'});
+  assert.ok(comp.didUpdate.callCount === 1, "comp.didUpdate() should have been called once.");
+  comp.didUpdate.reset();
+  comp.setState({foo: 'bar'});
+  assert.ok(comp.didUpdate.callCount === 1, "comp.didUpdate() should have been called once.");
 });
 
 QUnit.test("Dependency-Injection", function(assert) {
@@ -815,6 +845,41 @@ QUnit.test("Render a child component with ref", function(assert) {
   assert.ok(comp.refs.foo === child, 'Child component should have been preserved.');
   assert.ok(comp.refs.foo.getNativeElement() === el, 'Native element should be the same.');
 });
+
+QUnit.test("Rerendering a child component with ref triggers didUpdate()", function(assert) {
+  var comp = renderTestComponent(function($$) {
+    return $$('div').append(
+      $$(SimpleComponent).ref('foo')
+    );
+  });
+  var child = comp.refs.foo;
+  spy(child, 'didUpdate');
+  comp.rerender();
+  assert.ok(child.didUpdate.callCount === 1, "child.didUpdate() should have been called once.");
+});
+
+QUnit.test("Trigger didUpdate() on children even when shouldRerender()=false", function(assert) {
+  function Child() {
+    Child.super.apply(this, arguments);
+  }
+  Child.Prototype = function() {
+    this.shouldRerender = function() {
+      return false;
+    };
+  };
+  Component.extend(Child);
+  var comp = renderTestComponent(function($$) {
+    return $$('div').append(
+      // change prop randomly
+      $$(Child, {foo: Date.now()}).ref('foo')
+    );
+  });
+  var child = comp.refs.foo;
+  spy(child, 'didUpdate');
+  comp.rerender();
+  assert.ok(child.didUpdate.callCount === 1, "child.didUpdate() should have been called once.");
+});
+
 
 QUnit.test("Refs on grandchild elements.", function(assert) {
   var comp = renderTestComponent(function($$) {

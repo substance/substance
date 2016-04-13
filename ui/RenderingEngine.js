@@ -10,7 +10,8 @@ function RenderingEngine() {}
 
 RenderingEngine.Prototype = function() {
 
-  this._rerender = function(comp) {
+  this._render = function(comp) {
+    // var t0 = Date.now();
     var vel = _createWrappingVirtualComponent(comp);
     _capture(vel, 'forceCapture');
     if (vel._isVirtualComponent) {
@@ -18,6 +19,7 @@ RenderingEngine.Prototype = function() {
     } else {
       _render(vel);
     }
+    // console.log("RenderingEngine: finished rendering in %s ms", Date.now()-t0);
   };
 
   // this is used together with the incremental Component API
@@ -72,7 +74,9 @@ RenderingEngine.Prototype = function() {
         // NOTE: don't ask if shouldRerender if no element is there yet
         needRerender = !comp.el || comp.shouldRerender(vel.props);
         comp.__htmlConfig__ = vel._copyHTMLConfig();
+        // updates prop triggering willReceiveProps
         comp._setProps(vel.props);
+        vel.__isUpdated__ = true;
       }
       if (needRerender) {
         var context = new CaptureContext(vel);
@@ -82,6 +86,7 @@ RenderingEngine.Prototype = function() {
         }
         content._comp = comp;
         vel._content = content;
+        vel.__isUpdated__ = true;
         // Mapping: map virtual elements to existing components based on refs
         _prepareVirtualComponent(comp, content);
         // Descending
@@ -89,24 +94,41 @@ RenderingEngine.Prototype = function() {
         if (RenderingEngine.DEBUG) {
           // in this case we use the render() function as iterating function, where
           // $$ is a function which creates components and renders them recursively.
-          // NOTE: calling $$ here will use _capture for capturing child components
+          // first we can create all element components that can be reached
+          // without recursion
+          var stack = content.children.slice(0);
+          while (stack.length) {
+            var child = stack.shift();
+            if (child.__isCaptured__ || child._isVirtualComponent) {
+              continue;
+            }
+            if (!child._comp) {
+              _create(child);
+            }
+            if (child._isVirtualHTMLElement && child.children.length > 0) {
+              stack = stack.concat(child.children);
+            }
+            child.__isCaptured__ = true;
+          }
+          content.__isCaptured__ = true;
+          // then we run comp.render($$) with a special $$ that captures VirtualComponent's
           // recursively
           var descendingContext = new DescendingContext(context);
           while (descendingContext.hasPendingCaptures()) {
             descendingContext.reset();
             comp.render(descendingContext.$$);
           }
+        } else {
+          // a VirtualComponent has its content as a VirtualHTMLElement
+          // which needs to be captured recursively
+          _capture(vel._content);
         }
-        _capture(vel._content);
       } else {
         vel.__skip__ = true;
       }
-    } else {
-      // capture children
-      if (vel.children) {
-        for (var i = 0; i < vel.children.length; i++) {
-          _capture(vel.children[i]);
-        }
+    } else if (vel._isVirtualHTMLElement) {
+      for (var i = 0; i < vel.children.length; i++) {
+        _capture(vel.children[i]);
       }
     }
     vel.__isCaptured__ = true;
@@ -115,7 +137,12 @@ RenderingEngine.Prototype = function() {
 
   function _render(vel) {
     var state = { removed: [] };
-    if (vel.__skip__) return;
+    if (vel.__skip__) {
+      if (vel.__isUpdated__) {
+        vel._comp.didUpdate();
+      }
+      return;
+    }
     // before changes can be applied, a VirtualElement must have been captured
     console.assert(vel.__isCaptured__, 'VirtualElement must be captured before rendering');
 
@@ -124,7 +151,11 @@ RenderingEngine.Prototype = function() {
 
     // VirtualComponents apply changes to its content element
     if (vel._isVirtualComponent) {
-      return _render(vel._content);
+      _render(vel._content);
+      if (vel.__isUpdated__) {
+        comp.didUpdate();
+      }
+      return;
     }
     // render the element
     if (!comp.el) {
@@ -449,25 +480,40 @@ RenderingEngine.Prototype = function() {
     this.refs = {};
     this.foreignRefs = {};
     this.elements = captureContext.elements;
-    this.updates = captureContext.elements.length;
     this.pos = 0;
+    this.updates = captureContext.components.length;
+    this.remaining = this.updates;
 
     this.$$ = this._createComponent.bind(this);
   }
   DescendingContext.Prototype = function() {
     this._createComponent = function() {
       var vel = this.elements[this.pos++];
-      if (!vel.__isCaptured__ && this._ancestorsReady(vel)) {
+      // only capture VirtualComponent's with a captured parent
+      // all others have been captured at this point already
+      // or will either be captured by a different owner
+      if (!vel.__isCaptured__ && vel._isVirtualComponent &&
+           vel.parent && vel.parent.__isCaptured__) {
         _capture(vel);
         this.updates++;
+        this.remaining--;
       }
+      // Note: we return a new VirtualElement so that the render method does work
+      // as expected.
+      // TODO: instead of creating a new VirtualElement each time, we could return
+      // an immutable wrapper for the already recorded element.
       vel = VirtualElement.createElement.apply(null, arguments);
+      // these variables need to be set make the 'ref()' API work
       vel._context = this;
       vel._owner = this.owner;
+      // Note: important to deactivate these methods as otherwise the captured
+      // element will be damaged when calling el.append()
+      vel._attach = function() {};
+      vel._detach = function() {};
       return vel;
     };
     this.hasPendingCaptures = function() {
-      return this.updates > 0;
+      return this.updates > 0 && this.remaining > 0;
     };
     this.reset = function() {
       this.pos = 0;
@@ -497,6 +543,7 @@ function CaptureContext(owner) {
   this.elements = [];
   this.components = [];
   this.$$ = this._createComponent.bind(this);
+  this.$$.capturing = true;
 }
 
 CaptureContext.prototype._createComponent = function() {
