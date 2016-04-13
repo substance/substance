@@ -2,6 +2,7 @@
 
 var each = require('lodash/each');
 var EventEmitter = require('../util/EventEmitter');
+var uuid = require('../util/uuid');
 var DocumentIndex = require('./DocumentIndex');
 var AnnotationIndex = require('./AnnotationIndex');
 var AnchorIndex = require('./AnchorIndex');
