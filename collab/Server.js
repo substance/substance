@@ -3,7 +3,6 @@
 var EventEmitter = require('../util/EventEmitter');
 var oo = require('../util/oo');
 var uuid = require('../util/uuid');
-var extend = require('lodash/extend');
 
 /*
   ServerRequest
@@ -58,10 +57,19 @@ ServerResponse.Prototype = function() {
   
   /*
     Sends an error response
+
+    @example
+
+    ```js
+    res.error({
+      type: 'syncError',
+      errorName: 'AuthenticationError',
+      documentId: 'doc-1'
+    });
+    ```
   */
-  this.error = function(err, errData) {
+  this.error = function(err) {
     this.err = err;
-    this.errData = errData;
     this.isReady = true;
   };
 
@@ -271,14 +279,7 @@ Server.Prototype = function() {
   */
   this.sendError = function(req, res) {
     var collaboratorId = req.message.collaboratorId;
-    var msg = {
-      type: 'error',
-      errorName: res.err.name,
-      errorMessage: res.err.message,
-      requestMessage: req.message
-    };
-
-    msg = extend(msg, res.errData);
+    var msg = res.err;
     this.send(collaboratorId, msg);
     res.setSent();
     this.next(req, res);

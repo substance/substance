@@ -125,25 +125,41 @@ CollabSession.Prototype = function() {
     }
 
     // Delegate
-    var actionFn = this[msg.type].bind(this);
+    var actionFn = this[msg.type];
     if (!actionFn) {
       console.error('CollabSession: unsupported message', msg.type, msg);
       return false;
     }
+    actionFn = actionFn.bind(this);
     actionFn(cloneDeep(msg));
     return true;
   };
 
   /*
     Handle errors. This gets called if any request produced
-    an error on the server. The error object holds te original
-    message we could inspect in a custom error handler to trigger
-    certain behavior.
+    an error on the server.
   */
-  this.error = function(error) {
-    console.error('An error occured', error);
-    this._error = error;
-    this.emit('error,', error);
+
+  this.error = function(message) {
+    var error = message.error;
+    var errorFn = this[error.name];
+    var err = Err.fromJSON(error);
+    
+    if (!errorFn) {
+      console.error('CollabSession: unsupported error', error.name);
+      return false;
+    }
+
+    this.emit('error', err);
+    errorFn = errorFn.bind(this);
+    errorFn(err);
+  };
+
+  /*
+    Handle sync error
+  */
+  this.syncError = function(error) {
+    console.error('sync error occured', error);
     this._abortSync();
   };
 
@@ -222,6 +238,7 @@ CollabSession.Prototype = function() {
     Synchronize with collab server
   */
   this.sync = function() {
+
     // If there is something to sync and there is no running sync
     if (this.__canSync()) {
       var nextChange = this._getNextChange();
@@ -234,7 +251,9 @@ CollabSession.Prototype = function() {
 
       this._send(msg);
       this._pendingChange = nextChange;
-
+      // Can be used to reset errors that arised from previous syncs.
+      // When a new sync is started, users can use this event to unset the error
+      this.emit('sync');
       this._nextChange = null;
       this._error = null;
     } else {
@@ -257,7 +276,6 @@ CollabSession.Prototype = function() {
       serverChange = this.deserializeChange(serverChange);
       this._applyRemoteChange(serverChange);
     }
-
     this.version = serverVersion;
 
     // Only apply updated collaborators if there are no local cahnges
@@ -280,10 +298,9 @@ CollabSession.Prototype = function() {
 
     // TODO: this would trigger too many renders potentially
     // once we have our phases in place we can do this in one go
-    if (serverChange) {
+    if (serverChange && serverChange.ops.length > 0) {
       this._notifyChangeListeners(serverChange, { replay: false, remote: true });  
     }
-
     if (collaboratorsChanged) {
       this.emit('collaborators:changed');  
     }
@@ -467,7 +484,7 @@ CollabSession.Prototype = function() {
         this.emit('collaborators:changed');  
       }
     } else {
-      console.log('skipped update. we wait for a sync to complete');
+      console.log('skipped remote update. Pending sync or local changes.');
     }
   };
 

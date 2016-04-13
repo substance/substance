@@ -55,7 +55,6 @@ SubstanceError.Prototype = function() {
         parts.push(this.cause.toString());  
       }
     }
-
     return parts.join('');
   };
 };
@@ -63,5 +62,16 @@ SubstanceError.Prototype = function() {
 oo.initClass(Error);
 
 Error.extend(SubstanceError);
+
+SubstanceError.fromJSON = function(err) {
+  if (!err) return null;
+  var error = new SubstanceError(err.name, {
+    message: err.message,
+    info: err.info,
+    errorCode: err.errorCode,
+    cause: SubstanceError.fromJSON(err.cause)
+  });
+  return error;
+};
 
 module.exports = SubstanceError;
