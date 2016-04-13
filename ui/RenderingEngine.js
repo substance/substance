@@ -19,6 +19,7 @@ RenderingEngine.Prototype = function() {
     } else {
       _render(vel);
     }
+    _triggerUpdate(vel);
     // console.log("RenderingEngine: finished rendering in %s ms", Date.now()-t0);
   };
 
@@ -62,6 +63,7 @@ RenderingEngine.Prototype = function() {
     var comp = vel._comp;
     if (!comp) {
       comp = _create(vel);
+      vel.__isNew__ = true;
     }
     if (vel._isVirtualComponent) {
       var needRerender;
@@ -76,7 +78,9 @@ RenderingEngine.Prototype = function() {
         comp.__htmlConfig__ = vel._copyHTMLConfig();
         // updates prop triggering willReceiveProps
         comp._setProps(vel.props);
-        vel.__isUpdated__ = true;
+        if (!vel.__isNew__) {
+          vel.__isUpdated__ = true;
+        }
       }
       if (needRerender) {
         var context = new CaptureContext(vel);
@@ -86,7 +90,9 @@ RenderingEngine.Prototype = function() {
         }
         content._comp = comp;
         vel._content = content;
-        vel.__isUpdated__ = true;
+        if (!vel.__isNew__) {
+          vel.__isUpdated__ = true;
+        }
         // Mapping: map virtual elements to existing components based on refs
         _prepareVirtualComponent(comp, content);
         // Descending
@@ -138,9 +144,6 @@ RenderingEngine.Prototype = function() {
   function _render(vel) {
     var state = { removed: [] };
     if (vel.__skip__) {
-      if (vel.__isUpdated__) {
-        vel._comp.didUpdate();
-      }
       return;
     }
     // before changes can be applied, a VirtualElement must have been captured
@@ -152,9 +155,6 @@ RenderingEngine.Prototype = function() {
     // VirtualComponents apply changes to its content element
     if (vel._isVirtualComponent) {
       _render(vel._content);
-      if (vel.__isUpdated__) {
-        comp.didUpdate();
-      }
       return;
     }
     // render the element
@@ -262,6 +262,19 @@ RenderingEngine.Prototype = function() {
     comp.__foreignRefs__ = foreignRefs;
 
     vel.__isRendered__ = true;
+  }
+
+  function _triggerUpdate(vel) {
+    if (vel._isVirtualComponent) {
+      if (!vel.__skip__) {
+        vel._content.children.forEach(_triggerUpdate);
+      }
+      if (vel.__isUpdated__) {
+        vel._comp.didUpdate();
+      }
+    } else if (vel._isVirtualHTMLElement) {
+      vel.children.forEach(_triggerUpdate);
+    }
   }
 
   function _appendChild(parent, child) {
@@ -572,7 +585,7 @@ RenderingEngine.createContext = function(comp) {
   return new CaptureContext(vel);
 };
 
-RenderingEngine.DEBUG = false;
+RenderingEngine.DEBUG = true;
 
 if (inBrowser) {
   if (window.SUBSTANCE_DEBUG_RENDERING) {

@@ -1035,7 +1035,6 @@ QUnit.test("Implicitly retain elements when grandchild elements have refs.", fun
 });
 
 QUnit.test("Implicitly retain elements when passing grandchild with ref.", function(assert) {
-  // But you must ref the child!
   function Child() {
     Child.super.apply(this, arguments);
     this.render = function($$) {
@@ -1060,6 +1059,42 @@ QUnit.test("Implicitly retain elements when passing grandchild with ref.", funct
   assert.ok(child === comp.getChildAt(0), "Child should be retained.");
   assert.ok(child.el === comp.getChildAt(0).el, "Child element should be retained.");
 });
+
+// In ScrollPane we provied a link into the Srollbar which accesses
+// ScrollPanes ref in didUpdate()
+// This is working fine when didUpdate() is called at the right time,
+// i.e., when ScrollPane has been rendered already
+QUnit.test("Everthing should be rendered when didUpdate() is triggered.", function(assert) {
+  var parentIsUpdated = false;
+  function Parent() {
+    Parent.super.apply(this, arguments);
+    this.render = function($$) {
+      return $$('div').append(
+        $$(Child, {parent: this}).ref('child')
+      );
+    };
+  }
+  Component.extend(Parent);
+  function Child() {
+    Child.super.apply(this, arguments);
+    this.render = function($$) {
+      return $$('div');
+    };
+    this.didUpdate = function() {
+      if (this.props.parent.el) {
+        parentIsUpdated = true;
+      }
+    };
+  }
+  Component.extend(Child);
+
+  var comp = Parent.static.render();
+  // didUpdate() should not have been called (no rerender)
+  assert.notOk(parentIsUpdated, 'Initially child.didUpdate() should not have been called.');
+  comp.rerender();
+  assert.ok(parentIsUpdated, 'After rerender child.didUpdate() should have access to parent.el');
+});
+
 
 /* ##################### Incremental Component API ##########################*/
 

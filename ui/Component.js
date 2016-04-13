@@ -186,7 +186,6 @@ Component.Prototype = function() {
    */
   this.rerender = function() {
     this._render();
-    this.didUpdate();
   };
 
   this._render = function() {
