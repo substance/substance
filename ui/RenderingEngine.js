@@ -92,26 +92,40 @@ RenderingEngine.Prototype = function() {
         if (RenderingEngine.DEBUG) {
           // in this case we use the render() function as iterating function, where
           // $$ is a function which creates components and renders them recursively.
-          // NOTE: calling $$ here will use _capture for capturing child components
-          // recursively
+          // first we can create all element components that can be reached
+          // without recursion
+          var stack = content.children.slice(0);
+          while (stack.length) {
+            var child = stack.shift();
+            if (child.__isCaptured__ || child._isVirtualComponent) {
+              continue;
+            }
+            if (!child._comp) {
+              _create(child);
+            }
+            if (child._isVirtualHTMLElement && child.children.length > 0) {
+              stack = stack.concat(child.children);
+            }
+            child.__isCaptured__ = true;
+          }
+          content.__isCaptured__ = true;
           var descendingContext = new DescendingContext(context);
           while (descendingContext.hasPendingCaptures()) {
             descendingContext.reset();
             comp.render(descendingContext.$$);
           }
+        } else {
+          // a VirtualComponent has its content as a VirtualHTMLElement
+          // which needs to be captured recursively
+          _capture(vel._content);
         }
-        // a VirtualComponent has its content as a VirtualHTMLElement
-        // which needs to be captured recursively
-        _capture(vel._content);
       } else {
         vel.__skip__ = true;
       }
-    } else {
+    } else if (vel._isVirtualHTMLElement) {
       // capture children
-      if (vel.children) {
-        for (var i = 0; i < vel.children.length; i++) {
-          _capture(vel.children[i]);
-        }
+      for (var i = 0; i < vel.children.length; i++) {
+        _capture(vel.children[i]);
       }
     }
     vel.__isCaptured__ = true;
@@ -463,17 +477,20 @@ RenderingEngine.Prototype = function() {
     this.refs = {};
     this.foreignRefs = {};
     this.elements = captureContext.elements;
-    this.updates = captureContext.elements.length;
     this.pos = 0;
+    this.updates = captureContext.components.length;
+    this.remaining = this.updates;
 
     this.$$ = this._createComponent.bind(this);
   }
   DescendingContext.Prototype = function() {
     this._createComponent = function() {
       var vel = this.elements[this.pos++];
-      if (!vel.__isCaptured__ && this._ancestorsReady(vel)) {
+      if (!vel.__isCaptured__ && vel._isVirtualComponent &&
+           vel.parent && vel.parent.__isCaptured__) {
         _capture(vel);
         this.updates++;
+        this.remaining--;
       }
       vel = VirtualElement.createElement.apply(null, arguments);
       vel._context = this;
@@ -481,7 +498,7 @@ RenderingEngine.Prototype = function() {
       return vel;
     };
     this.hasPendingCaptures = function() {
-      return this.updates > 0;
+      return this.updates > 0 && this.remaining > 0;
     };
     this.reset = function() {
       this.pos = 0;
