@@ -20,7 +20,6 @@ var Tool = require('./Tool');
   }
   SurfaceTool.extend(InsertImageTool);
   InsertImageTool.static.name = 'insertImage';
-  InsertImageTool.static.command = 'insertImage';
   ```
 */
 function SurfaceTool() {
@@ -39,11 +38,11 @@ SurfaceTool.Prototype = function() {
     var surface = ctrl.getFocusedSurface();
     if (!surface) return;
 
-    var commandName = this.constructor.static.command;
+    var commandName = this.getCommandName();
     if (commandName) {
       return surface.getCommand(commandName);
     } else {
-      throw new Error('Contract: AnnotationTool.static.command should be associated to a supported command.');
+      throw new Error('Contract: commandName should be associated to a supported command.');
     }
   };
 
@@ -83,7 +82,7 @@ SurfaceTool.Prototype = function() {
   */
   this.performAction = function() {
     var surface = this.getSurface();
-    surface.executeCommand(this.constructor.static.command);
+    surface.executeCommand(this.getCommandName());
   };
 
 };

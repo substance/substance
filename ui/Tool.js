@@ -98,12 +98,11 @@ Tool.Prototype = function() {
     Get tool registration name
   */
   this.getName = function() {
-    var toolName = this.constructor.static.name;
-    if (toolName) {
-      return toolName;
-    } else {
-      throw new Error('Contract: Tool.static.name must have a value');
-    }
+    return this.constructor.static.name;
+  };
+
+  this.getCommandName = function() {
+    return this.constructor.static.command || this.constructor.static.name;
   };
 
   this.onClick = function(e) {

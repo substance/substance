@@ -2,7 +2,11 @@
 
 var AnnotationCommand = require('../../ui/AnnotationCommand');
 
-var StrongCommand = AnnotationCommand.extend();
+function StrongCommand() {
+  StrongCommand.super.apply(this, arguments);
+}
+
+AnnotationCommand.extend(StrongCommand);
 
 StrongCommand.static.name = 'strong';
 StrongCommand.static.annotationType = 'strong';

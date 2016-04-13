@@ -170,6 +170,5 @@ SwitchTextType.Prototype = function() {
 SurfaceTool.extend(SwitchTextType);
 
 SwitchTextType.static.name = 'switch-text-type';
-SwitchTextType.static.command = 'switch-text-type';
 
 module.exports = SwitchTextType;

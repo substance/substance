@@ -19,7 +19,15 @@ function ProseEditor() {
 
 ProseEditor.Prototype = function() {
 
+  var _super = ProseEditor.super.prototype;
+
+  this.didMount = function() {
+    _super.didMount.call(this);
+    this.refs.bodyEditor.selectFirst();
+  };
+
   this.render = function($$) {
+
     var config = this.getConfig();
 
     var tools = [

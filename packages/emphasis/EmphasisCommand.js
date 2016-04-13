@@ -1,11 +1,13 @@
 'use strict';
 
 var AnnotationCommand = require('../../ui/AnnotationCommand');
-var ToggleEmphasis = AnnotationCommand.extend({
-  static: {
-    name: 'emphasis',
-    annotationType: 'emphasis'
-  }
-});
 
-module.exports = ToggleEmphasis;
+function EmphasisCommand() {
+  EmphasisCommand.super.apply(this, arguments);
+}
+AnnotationCommand.extend(EmphasisCommand);
+
+EmphasisCommand.static.name = 'emphasis';
+EmphasisCommand.static.annotationType = 'emphasis';
+
+module.exports = EmphasisCommand;

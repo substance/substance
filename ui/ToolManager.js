@@ -54,7 +54,7 @@ ToolManager.Prototype = function() {
 
   // Get command for a certain tool
   this.getCommand = function(tool) {
-    var commandName = tool.constructor.static.command;
+    var commandName = tool.getCommandName();
 
     if (tool._isSurfaceTool) {
       var surface = this.controller.getFocusedSurface();

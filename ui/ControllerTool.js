@@ -18,7 +18,6 @@ var Tool = require('./Tool');
   }
   ControllerTool.extend(SaveTool);
   SaveTool.static.name = 'save';
-  SaveTool.static.command = 'save';
   ```
  */
 
@@ -48,7 +47,7 @@ ControllerTool.Prototype = function() {
   */
   this.performAction = function() {
     var ctrl = this.getController();
-    ctrl.executeCommand(this.constructor.static.command);
+    ctrl.executeCommand(this.getCommandName());
   };
 };
 
