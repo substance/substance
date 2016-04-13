@@ -177,8 +177,7 @@ PropertySelection.Prototype = function() {
   this.isInsideOf = function(other, strict) {
     if (other.isNull()) return false;
     if (other.isContainerSelection()) {
-      // console.log('PropertySelection.isInsideOf: delegating to ContainerSelection.contains...');
-      return other.contains(this);
+      return other.contains(this, strict);
     }
     if (strict) {
       return (isEqual(this.path, other.path) &&
@@ -200,19 +199,7 @@ PropertySelection.Prototype = function() {
   */
   this.contains = function(other, strict) {
     if (other.isNull()) return false;
-    if (other.isContainerSelection()) {
-      // console.log('PropertySelection.contains: delegating to ContainerSelection.isInsideOf...');
-      return other.isInsideOf(this);
-    }
-    if (strict) {
-      return (isEqual(this.path, other.path) &&
-        this.startOffset < other.startOffset &&
-        this.endOffset > other.endOffset);
-    } else {
-      return (isEqual(this.path, other.path) &&
-        this.startOffset <= other.startOffset &&
-        this.endOffset >= other.endOffset);
-    }
+    return other.isInsideOf(this, strict);
   };
 
   /**
@@ -276,8 +263,11 @@ PropertySelection.Prototype = function() {
   */
   this.expand = function(other) {
     if (other.isNull()) return this;
+
+    // if the other is a ContainerSelection
+    // we delegate to that implementation as it is more complex
+    // and can deal with PropertySelections, too
     if (other.isContainerSelection()) {
-      // console.log('PropertySelection.expand: delegating to ContainerSelection.expand...');
       return other.expand(this);
     }
     if (!isEqual(this.path, other.path)) {
@@ -285,6 +275,73 @@ PropertySelection.Prototype = function() {
     }
     var newStartOffset = Math.min(this.startOffset, other.startOffset);
     var newEndOffset = Math.max(this.endOffset, other.endOffset);
+    return this.createWithNewRange(newStartOffset, newEndOffset);
+  };
+
+
+  /**
+    Creates a new selection by truncating this one by another selection.
+
+    @param {Selection} other
+    @returns {Selection} a new selection
+  */
+  this.truncateWith = function(other) {
+    if (other.isNull()) return this;
+    if (other.isInsideOf(this, 'strict')) {
+      // the other selection should overlap only on one side
+      throw new Error('Can not truncate with a contained selections');
+    }
+    if (!this.overlaps(other)) {
+      return this;
+    }
+    var otherStartOffset, otherEndOffset;
+    if (other.isPropertySelection()) {
+      otherStartOffset = other.startOffset;
+      otherEndOffset = other.endOffset;
+    } else if (other.isContainerSelection()) {
+      // either the startPath or the endPath must be the same
+      if (isEqual(other.startPath, this.path)) {
+        otherStartOffset = other.startOffset;
+      } else {
+        otherStartOffset = this.startOffset;
+      }
+      if (isEqual(other.endPath, this.path)) {
+        otherEndOffset = other.endOffset;
+      } else {
+        otherEndOffset = this.endOffset;
+      }
+    } else {
+      return this;
+    }
+
+    var newStartOffset;
+    var newEndOffset;
+    if (this.startOffset > otherStartOffset && this.endOffset > otherEndOffset) {
+      newStartOffset = otherEndOffset;
+      newEndOffset = this.endOffset;
+    } else if (this.startOffset < otherStartOffset && this.endOffset < otherEndOffset) {
+      newStartOffset = this.startOffset;
+      newEndOffset = otherStartOffset;
+    } else if (this.startOffset === otherStartOffset) {
+      if (this.endOffset <= otherEndOffset) {
+        return Selection.nullSelection;
+      } else {
+        newStartOffset = otherEndOffset;
+        newEndOffset = this.endOffset;
+      }
+    } else if (this.endOffset === otherEndOffset) {
+      if (this.startOffset >= otherStartOffset) {
+        return Selection.nullSelection;
+      } else {
+        newStartOffset = this.startOffset;
+        newEndOffset = otherStartOffset;
+      }
+    } else if (other.contains(this)) {
+      return Selection.nullSelection;
+    } else {
+      // FIXME: if this happens, we have a bug somewhere above
+      throw new Error('Illegal state.');
+    }
     return this.createWithNewRange(newStartOffset, newEndOffset);
   };
 
@@ -305,42 +362,25 @@ PropertySelection.Prototype = function() {
   };
 
   /**
-    Creates a new selection by truncating this one by another selection.
-
-    @param {Selection} other
-    @returns {Selection} a new selection
-  */
-  this.truncate = function(other) {
-    if (other.isNull()) return this;
-    // Checking that paths are ok
-    // doing that in a generalized manner so that other can even be a ContainerSelection
-    if (!isEqual(this.startPath, other.startPath) ||
-      !isEqual(this.endPath, other.endPath)) {
-      throw new Error('Can not expand PropertySelection to a different property.');
-    }
-    var newStartOffset;
-    var newEndOffset;
-    if (this.startOffset === other.startOffset) {
-      newStartOffset = other.endOffset;
-      newEndOffset = this.endOffset;
-    } else if (this.endOffset === other.endOffset) {
-      newStartOffset = this.startOffset;
-      newEndOffset = other.startOffset;
-    }
-    return this.createWithNewRange(newStartOffset, newEndOffset);
-  };
-
-  /**
     Return fragments for a given selection.
 
     @returns {Selection.Fragment[]}
   */
   this.getFragments = function() {
-    if (this.isCollapsed()) {
-      return [new Selection.Cursor(this.path, this.startOffset)];
-    } else {
-      return [new Selection.Fragment(this.path, this.startOffset, this.endOffset)];
+    if(this._internal.fragments) {
+      return this._internal.fragments;
     }
+
+    var fragments;
+
+    if (this.isCollapsed()) {
+      fragments = [new Selection.Cursor(this.path, this.startOffset)];
+    } else {
+      fragments = [new Selection.Fragment(this.path, this.startOffset, this.endOffset)];
+    }
+
+    this._internal.fragments = fragments;
+    return fragments;
   };
 };
 

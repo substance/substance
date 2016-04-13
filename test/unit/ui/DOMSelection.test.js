@@ -14,6 +14,7 @@ var Container = require('../../../model/Container');
 var Paragraph = require('../../../packages/paragraph/Paragraph');
 var ContainerSelection = require('../../../model/ContainerSelection');
 var $ = require('../../../util/jquery');
+var oo = require('../../../util/oo');
 
 QUnit.uiModule('ui/DOMSelection');
 
@@ -21,35 +22,45 @@ function StubDoc() {
   this.nodes = null;
 }
 
-StubDoc.prototype.get = function(path) {
-  if (this.nodes === null) {
-    this.nodes = {};
-    this.nodes['main'] = new Container(this, {
-      type: 'container',
-      id: 'main',
-      nodes: []
-    });
-    var propEls = window.document.body.querySelectorAll('*[data-path]');
-    for (var i = 0; i < propEls.length; i++) {
-      var propEl = propEls[i];
-      var nodeId = propEl.dataset.path.split('.')[0];
-      this.nodes[nodeId] = new Paragraph(this, {
-        type: 'paragraph',
-        id: nodeId,
-        content: propEl.textContent
-      });
-      this.nodes.main.nodes.push(nodeId);
-    }
-  }
+StubDoc.Prototype = function() {
 
-  if (!isArray(path)) {
-    path = [path];
-  }
-  var result = get(this.nodes, path);
-  return result;
+  this.get = function(path) {
+    if (this.nodes === null) {
+      this.nodes = {};
+      this.nodes['main'] = new Container(this, {
+        type: 'container',
+        id: 'main',
+        nodes: []
+      });
+      var propEls = window.document.body.querySelectorAll('*[data-path]');
+      for (var i = 0; i < propEls.length; i++) {
+        var propEl = propEls[i];
+        var nodeId = propEl.dataset.path.split('.')[0];
+        this.nodes[nodeId] = new Paragraph(this, {
+          type: 'paragraph',
+          id: nodeId,
+          content: propEl.textContent
+        });
+        this.nodes.main.nodes.push(nodeId);
+      }
+    }
+
+    if (!isArray(path)) {
+      path = [path];
+    }
+    var result = get(this.nodes, path);
+    return result;
+  };
+
+  this.createSelection = Document.prototype.createSelection;
+
+  this.on = function() {};
+
+  this.off = function() {};
 };
 
-StubDoc.prototype.createSelection = Document.prototype.createSelection;
+oo.initClass(StubDoc);
+
 
 function StubSurface(nativeEl, containerId) {
   this.el = DefaultDOMElement.wrapNativeElement(nativeEl);

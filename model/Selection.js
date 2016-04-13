@@ -1,9 +1,5 @@
 'use strict';
 
-var isEqual = require('lodash/isEqual');
-var isArray = require('lodash/isArray');
-var isObject = require('lodash/isObject');
-var isString = require('lodash/isString');
 var oo = require('../util/oo');
 var EventEmitter = require('../util/EventEmitter');
 var Anchor = require('./Anchor');
@@ -73,6 +69,10 @@ Selection.Prototype = function() {
     @returns {Boolean} true if selection is a {@link model/ContainerSelection}
   */
   this.isContainerSelection = function() {
+    return false;
+  };
+
+  this.isNodeSelection = function() {
     return false;
   };
 
@@ -207,54 +207,8 @@ Selection.fromJSON = function(json) {
 };
 
 Selection.create = function() {
-  var PropertySelection = require('./PropertySelection');
-  var ContainerSelection = require('./ContainerSelection');
-  var coor, range;
-  if (arguments.length === 1 && arguments[0] === null) {
-    return Selection.nullSelection;
-  }
-  var sel;
-  if (arguments[0]._isCoordinate) {
-    coor = arguments[0];
-    sel = new PropertySelection(coor.start.path, coor.start.offset, coor.end.offset, false);
-  } else if (arguments[0]._isRange) {
-    range = arguments[0];
-    if (isEqual(range.start.path, range.end.path)) {
-      sel = new PropertySelection(range.start.path, range.start.offset, range.end.offset, range.reverse);
-    } else {
-      sel = new ContainerSelection(range.containerId, range.start.path, range.start.offset, range.end.path, range.end.offset, range.isReverse());
-    }
-  } else if (arguments.length === 1 && isObject(arguments[0])) {
-    var json = arguments[0];
-    switch(json.type) {
-      case 'property':
-        sel = new PropertySelection.fromJSON(json);
-        break;
-      case 'container':
-        sel = new ContainerSelection.fromJSON(json);
-        break;
-      default:
-        throw new Error('Unsupported selection type', json.type);
-    }
-  }
-  // createSelection(startPath, startOffset)
-  else if (arguments.length === 2 && isArray(arguments[0])) {
-    sel = new PropertySelection(arguments[0], arguments[1], arguments[1]);
-  }
-  // createSelection(startPath, startOffset, endOffset)
-  else if (arguments.length === 3 && isArray(arguments[0])) {
-    sel = new PropertySelection(arguments[0], arguments[1], arguments[2]);
-  }
-  // createSelection(containerId, startPath, startOffset, endPath, endOffset)
-  else if (arguments.length === 5 && isString(arguments[0])) {
-    sel = new ContainerSelection(arguments[0], arguments[1], arguments[2], arguments[3], arguments[4]);
-  } else {
-    console.error('Illegal arguments for Selection.create().', arguments);
-    sel = Selection.nullSelection;
-  }
-  return sel;
+  throw new Error('Selection.create() has been removed as it is not possible to create selections consistently without looking into the document.');
 };
-
 
 /**
   A selection fragment. Used when we split a {@link model/ContainerSelection}
@@ -264,13 +218,14 @@ Selection.create = function() {
   @class
 */
 
-Selection.Fragment = function(path, startOffset, endOffset) {
+Selection.Fragment = function(path, startOffset, endOffset, full) {
   EventEmitter.call(this);
 
   this.type = "selection-fragment";
   this.path = path;
   this.startOffset = startOffset;
   this.endOffset = endOffset || startOffset;
+  this.full = !!full;
 };
 
 Selection.Fragment.Prototype = function() {
@@ -283,9 +238,71 @@ Selection.Fragment.Prototype = function() {
     return false;
   };
 
+  this.isPropertyFragment = function() {
+    return true;
+  };
+
+  this.isNodeFragment = function() {
+    return false;
+  };
+
+  this.isFull = function() {
+    return this.full;
+  };
+
+  this.isPartial = function() {
+    return !this.full;
+  };
+
+  this.getNodeId = function() {
+    return this.path[0];
+  };
+
 };
 
 EventEmitter.extend(Selection.Fragment);
+
+
+Selection.NodeFragment = function(nodeId) {
+  EventEmitter.call(this);
+
+  this.type = "node-fragment";
+  this.nodeId = nodeId;
+};
+
+Selection.NodeFragment.Prototype = function() {
+
+  this.isAnchor = function() {
+    return false;
+  };
+
+  this.isInline = function() {
+    return false;
+  };
+
+  this.isPropertyFragment = function() {
+    return false;
+  };
+
+  this.isNodeFragment = function() {
+    return true;
+  };
+
+  this.isFull = function() {
+    return true;
+  };
+
+  this.isPartial = function() {
+    return false;
+  };
+
+  this.getNodeId = function() {
+    return this.nodeId;
+  };
+};
+
+EventEmitter.extend(Selection.NodeFragment);
+
 
 /**
   Describe the cursor when creating selection fragments.
@@ -298,6 +315,18 @@ EventEmitter.extend(Selection.Fragment);
 Selection.Cursor = function(path, offset) {
   Anchor.call(this, path, offset);
   this.type = "cursor";
+};
+
+Selection.Cursor.Prototype = function() {
+
+  this.isPropertyFragment = function() {
+    return false;
+  };
+
+  this.isNodeFragment = function() {
+    return false;
+  };
+
 };
 
 Anchor.extend(Selection.Cursor);
