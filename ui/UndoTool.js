@@ -7,7 +7,7 @@ function UndoTool() {
 }
 
 ControllerTool.extend(UndoTool);
+
 UndoTool.static.name = 'undo';
-UndoTool.static.command = 'undo';
 
 module.exports = UndoTool;

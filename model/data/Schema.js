@@ -51,9 +51,8 @@ Schema.Prototype = function() {
     if (!nodes) return;
     for (var i = 0; i < nodes.length; i++) {
       var NodeClass = nodes[i];
-      // FIXME: there is some rubish coming in
       if (!NodeClass.static) {
-        console.log('AAAAAAA', NodeClass);
+        console.error('Illegal node class: ', NodeClass);
         continue;
       }
       this.addNode(NodeClass);
@@ -84,7 +83,7 @@ Schema.Prototype = function() {
     @returns {Node[]} An array of Node classes.
   */
   this.getBuiltIns = function() {
-    return [ Node ];
+    return [];
   };
 
   /**

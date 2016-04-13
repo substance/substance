@@ -2,6 +2,7 @@
 
 var each = require('lodash/each');
 var EventEmitter = require('../util/EventEmitter');
+var uuid = require('../util/uuid');
 var DocumentIndex = require('./DocumentIndex');
 var AnnotationIndex = require('./AnnotationIndex');
 var AnchorIndex = require('./AnchorIndex');
@@ -196,6 +197,9 @@ Document.Prototype = function() {
     ```
   */
   this.create = function(nodeData) {
+    if (!nodeData.id) {
+      nodeData.id = uuid(nodeData.type);
+    }
     var op = this._create(nodeData);
     var change = new DocumentChange([op], {}, {});
     change._extractInformation(this);

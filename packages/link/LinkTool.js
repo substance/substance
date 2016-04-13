@@ -41,7 +41,7 @@ LinkTool.Prototype = function() {
   };
 
   this.onCommandExecuted = function(info, commandName) {
-    if (commandName === this.constructor.static.command) {
+    if (commandName === this.getCommandName()) {
       // Toggle the edit prompt when either edit is requested or a new link has been created
       if (includes(['edit','create'], info.mode)) {
         this.togglePrompt();

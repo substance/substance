@@ -7,7 +7,7 @@ function CodeTool() {
 }
 
 SurfaceTool.extend(CodeTool);
+
 CodeTool.static.name = 'code';
-CodeTool.static.command = 'code';
 
 module.exports = CodeTool;

@@ -55,6 +55,9 @@ Node.Prototype = function() {
 
   this._isNode = true;
 
+
+  this.dispose = function() {};
+
   /**
     Check if the node is of a given type.
 

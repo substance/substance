@@ -5,9 +5,9 @@ var _isMatch = require('lodash/isMatch');
 var _find = require('lodash/find');
 var _clone = require('lodash/clone');
 
-var SwitchTextType = function(surface) {
-  SurfaceCommand.call(this, surface);
-};
+function SwitchTextType() {
+  SurfaceCommand.apply(this, arguments);
+}
 
 SwitchTextType.Prototype = function() {
 

@@ -9,6 +9,5 @@ function EmphasisTool() {
 AnnotationTool.extend(EmphasisTool);
 
 EmphasisTool.static.name = 'emphasis';
-EmphasisTool.static.command = 'emphasis';
 
 module.exports = EmphasisTool;

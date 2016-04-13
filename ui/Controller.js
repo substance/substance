@@ -1,7 +1,9 @@
 'use strict';
 
+var isArray = require('lodash/isArray');
 var each = require('lodash/each');
 var extend = require('lodash/extend');
+var mergeWith = require('lodash/mergeWith');
 var Component = require('./Component');
 var ToolManager = require('./ToolManager');
 var Registry = require('../util/Registry');
@@ -90,33 +92,18 @@ I18n.instance.load(require('../i18n/en'));
 function Controller() {
   Component.apply(this, arguments);
 
-  // Either takes a DocumentSession compatible object or a doc instance
-  if (this.props.documentSession) {
-    this.documentSession = this.props.documentSession;
-    this.doc = this.props.documentSession.doc;
-  } else if (this.props.doc) {
-    console.warn('Deprecated: Please pass a DocumentSession instance instead.');
-    this.documentSession = new DocumentSession(this.props.doc);
-    this.doc = this.props.doc;
-  } else {
-    if (!this.props.doc) throw new Error('Controller requires a Substance document instance');
-  }
-
   this.surfaces = {};
   this.stack = [];
   this.logger = new Logger();
+
   var config = this.getConfig();
+
+  this._initializeController(this.props);
   this._initializeComponentRegistry(config.controller.components);
   this._initializeCommandRegistry(config.controller.commands);
-
   if (config.i18n) {
     I18n.instance.load(config.i18n);
   }
-
-  /**
-    Manages tools.
-  */
-  this.toolManager = new ToolManager(this);
 
   // initial state mapping
   this.handleStateUpdate(this.state);
@@ -127,21 +114,26 @@ Controller.Prototype = function() {
   this.getChildContext = function() {
     return {
       config: this.getConfig(),
-      doc: this.doc,
-      documentSession: this.documentSession,
       controller: this,
+      documentSession: this.documentSession,
+      doc: this.doc,
       componentRegistry: this.componentRegistry,
       toolManager: this.toolManager,
       i18n: I18n.instance
     };
   };
 
-  this.getInitialState = function() {
-    return {};
-  };
-
-  this.didMount = function() {
-    this._observeDoc(this.doc);
+  this.willReceiveProps = function(nextProps) {
+    var newSession = nextProps.documentSession;
+    var newDoc = nextProps.doc;
+    var shouldDispose = (
+      (newSession && newSession !== this.documentSession) ||
+      (newDoc && newDoc !== this.doc)
+    );
+    if (shouldDispose) {
+      this._disposeController();
+      this._initializeController(nextProps);
+    }
   };
 
   /**
@@ -149,20 +141,7 @@ Controller.Prototype = function() {
     in your custom Controller class, don't forget the super call.
   */
   this.dispose = function() {
-    this.doc.off(this);
-  };
-
-
-  this.willReceiveProps = function(newProps) {
-    var oldDoc = this.doc;
-    var newDoc = newProps.documentSession.getDocument();
-    if (oldDoc !== newDoc) {
-      this.dispose();
-      this.empty();
-      this.documentSession = newProps.documentSession;
-      this.doc = newProps.documentSession.getDocument();
-      this._observeDoc(newDoc);
-    }
+    this._disposeController();
   };
 
   /**
@@ -178,14 +157,31 @@ Controller.Prototype = function() {
       .on('keydown', this.handleApplicationKeyCombos);
   };
 
-  this._observeDoc = function(doc) {
+  this._initializeController = function(props) {
+    // Either takes a DocumentSession compatible object or a doc instance
+    if (props.documentSession) {
+      this.documentSession = props.documentSession;
+      this.doc = this.documentSession.getDocument();
+    } else if (props.doc) {
+      this.documentSession = new DocumentSession(props.doc);
+      this.doc = props.doc;
+    } else {
+      throw new Error('Controller requires a DocumentSession instance');
+    }
+    this.toolManager = new ToolManager(this);
     // Register event handlers
-    doc.on('document:changed', this.onDocumentChanged, this, {
+    this.doc.on('document:changed', this.onDocumentChanged, this, {
       // Use lower priority so that everyting is up2date
       // when we receive the update
       priority: -20
     });
-    doc.on('transaction:started', this.onTransactionStarted, this);
+    this.doc.on('transaction:started', this.onTransactionStarted, this);
+  };
+
+  this._disposeController = function() {
+    this.doc.off(this);
+    this.toolManager.dispose();
+    this.empty();
   };
 
   this._initializeComponentRegistry = function(components) {
@@ -209,21 +205,18 @@ Controller.Prototype = function() {
 
   // Use static config if available, otherwise try to fetch it from props
   this.getConfig = function() {
-    return this.constructor.static.config || this.props.config || {
-      controller: {
-        components: [],
-        commands: []
-      }
-    };
-  };
-
-  /**
-    Get the associated ToolManager instance
-
-    @return {ui/ToolManager} the ToolManager instance
-  */
-  this.getToolManager = function() {
-    return this.toolManager;
+    if (this.props.config) {
+      return this.props.config;
+    } else if (this.constructor.static.config) {
+      return this.constructor.static.config;
+    } else {
+      return {
+        controller: {
+          components: {},
+          commands: []
+        }
+      };
+    }
   };
 
   /**
@@ -325,12 +318,8 @@ Controller.Prototype = function() {
     }
   };
 
-  /**
-   * Get containerId for currently focused surface
-   *
-   * @return {String|undefined} container id for currently focused surface, or undefined
-   */
   this.getContainerId = function() {
+    console.error('DEPRECATED: use controller.getFocusedSurface().getContainerId() instead.');
     var surface = this.getSurface();
     if (surface) {
       return surface.getContainerId();
@@ -359,15 +348,6 @@ Controller.Prototype = function() {
     if (surface && this.focusedSurface === surface) {
       this.focusedSurface = null;
     }
-  };
-
-  /**
-   * Check if there are any surfaces registered
-   *
-   * @return {true|false} true if surface count > 0
-   */
-  this.hasSurfaces = function() {
-    return Object.keys(this.surfaces).length > 0;
   };
 
   /**
@@ -588,4 +568,23 @@ Controller.Prototype = function() {
 */
 
 Component.extend(Controller);
+
+function _concatArrays(objValue, srcValue) {
+  if (isArray(objValue)) {
+    return objValue.concat(srcValue);
+  }
+}
+
+Controller.static.mergeConfig = function(one, other) {
+  var config = {
+    controller: {
+      components: {},
+      commands: []
+    }
+  };
+  mergeWith(config, one, _concatArrays);
+  mergeWith(config, other, _concatArrays);
+  return config;
+};
+
 module.exports = Controller;
