@@ -20,6 +20,8 @@ function SwitchTextType() {
 
 SwitchTextType.Prototype = function() {
 
+  var _super = SwitchTextType.super.prototype;
+
   this.getInitialState = function() {
     var state = this.context.toolManager.getCommandState(this);
     return state;
@@ -29,6 +31,8 @@ SwitchTextType.Prototype = function() {
   // ----------------
 
   this.didMount = function() {
+    _super.didMount.call(this);
+
     this._focusToggle();
   };
 
