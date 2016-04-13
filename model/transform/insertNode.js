@@ -2,6 +2,7 @@
 
 var deleteSelection = require('./deleteSelection');
 var breakNode = require('./breakNode');
+var uuid = require('../../util/uuid');
 
 /**
   Inserts a new node at the given selection/cursor.
@@ -11,7 +12,7 @@ var breakNode = require('./breakNode');
   @return {Object} object with updated selection
 
   @example
-  
+
   ```js
   insertNode(tx, {
     selection: bodyEditor.getSelection(),
@@ -48,24 +49,39 @@ function insertNode(tx, args) {
   selection = tmp.selection;
   // create the node if it does not exist yet
   // notice, that it is also allowed to insert an existing node
+  if (!node.id) {
+    node.id = uuid(node.type);
+  }
   if (!tx.get(node.id)) {
     node = tx.create(node);
   }
   // make sure we have the real node, not just its data
   node = tx.get(node.id);
   // insert the new node after the node where the cursor was
-  var address = container.getAddress(selection.start.path);
-  var pos = address[0];
-  container.show(node.id, pos);
-  // if possible set the selection to the first position in the inserted node
-  var firstPath = container.getFirstPath(node);
-  if (firstPath) {
+  var nodePos = container.getPosition(selection.start.getNodeId());
+  container.show(node.id, nodePos);
+
+  // if the new node is a text node we can set the cursor to the
+  // first character position
+  if (node.isText()) {
     args.selection = tx.createSelection({
       type: 'property',
-      path: firstPath,
+      path: [node.id, 'content'],
       startOffset: 0
     });
   }
+  // otherwise we select the whole new node
+  else {
+    args.selection = tx.createSelection({
+      type: 'container',
+      containerId: containerId,
+      startPath: [node.id],
+      startOffset: 0,
+      endPath: [node.id],
+      endOffset: 1
+    });
+  }
+
   return args;
 }
 

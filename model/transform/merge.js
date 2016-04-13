@@ -12,63 +12,43 @@ var merge = function(tx, args) {
     throw new Error('Insufficient arguments! mandatory fields: `containerId`, `path`, `direction`');
   }
   var container = tx.get(containerId);
-  var address = container.getAddress(path);
+  var nodeId = path[0];
+  var nodePos = container.getPosition(nodeId);
+  var l = container.getLength();
   var tmp;
-  if (direction === 'right') {
-    var nextAddress = container.getNextAddress(address);
-    if (nextAddress) {
-      tmp = _mergeComponents(tx, extend({}, args, {
-        containerId: containerId,
-        firstAddress: address,
-        secondAddress: nextAddress
-      }));
-      args.selection = tmp.selection;
-    }
-  } else if (direction === 'left') {
-    var previousAdress = container.getPreviousAddress(address);
-    if (previousAdress) {
-      tmp = _mergeComponents(tx, extend({}, args, {
-        containerId: containerId,
-        firstAddress: previousAdress,
-        secondAddress: address
-      }));
-      args.selection = tmp.selection;
-    }
-  } else {
-    // No behavior defined for this merge
+  if (direction === 'right' && nodePos < l-1) {
+    var nextNodeId = container.nodes[nodePos+1];
+    tmp = _mergeNodes(tx, extend({}, args, {
+      containerId: containerId,
+      firstNodeId: nodeId,
+      secondNodeId: nextNodeId
+    }));
+    args.selection = tmp.selection;
+  } else if (direction === 'left' && nodePos > 0) {
+    var previousNodeId = container.nodes[nodePos-1];
+    tmp = _mergeNodes(tx, extend({}, args, {
+      containerId: containerId,
+      firstNodeId: previousNodeId,
+      secondNodeId: nodeId
+    }));
+    args.selection = tmp.selection;
   }
   return args;
 };
 
-var _mergeComponents = function(tx, args) {
-  var container = tx.get(args.containerId);
-  var firstAddress = args.firstAddress;
-  var secondAddress = args.secondAddress;
-  var firstNode = container.getChildAt(firstAddress[0]);
-  var secondNode = container.getChildAt(secondAddress[0]);
-  var behavior = args.editingBehavior;
-  var mergeTrafo;
-  // some components consist of multiple child components
-  // in this case, a custom editing behavior must have been defined
-  if (firstNode === secondNode) {
-    if (behavior && behavior.canMergeComponents(firstNode.type)) {
-      mergeTrafo = behavior.getComponentMerger(firstNode.type);
-      return mergeTrafo.call(this, tx, extend({}, args, {
-        node: firstNode,
-        firstAddress: firstAddress,
-        secondAddress: secondAddress
-      }));
-    }
-  } else {
-    // most often a merge happens between two different nodes (e.g., 2 paragraphs)
-    mergeTrafo = _getNodeMerger(args.editingBehavior, firstNode, secondNode);
-    if (mergeTrafo) {
-      return mergeTrafo.call(this, tx, extend({}, args, {
-        containerId: args.containerId,
-        first: firstNode,
-        second: secondNode
-      }));
-    }
+var _mergeNodes = function(tx, args) {
+  var firstNodeId = args.firstNodeId;
+  var secondNodeId = args.secondNodeId;
+  var firstNode = tx.get(firstNodeId);
+  var secondNode = tx.get(secondNodeId);
+  // most often a merge happens between two different nodes (e.g., 2 paragraphs)
+  var mergeTrafo = _getNodeMerger(args.editingBehavior, firstNode, secondNode);
+  if (mergeTrafo) {
+    return mergeTrafo.call(this, tx, extend({}, args, {
+      containerId: args.containerId,
+      first: firstNode,
+      second: secondNode
+    }));
   }
   return args;
 };

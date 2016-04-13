@@ -32,7 +32,6 @@ function deleteSelection(tx, args) {
   } else if (selection.isPropertySelection()) {
     args = _deletePropertySelection(tx, args);
   } else {
-    // deal with container deletes
     args = _deleteContainerSelection(tx, args);
   }
   return args;
@@ -52,74 +51,82 @@ function _deletePropertySelection(tx, args) {
 function _deleteContainerSelection(tx, args) {
   var sel = args.selection;
   var containerId = sel.containerId;
-  var nodeSels = _getNodeSelection(tx, sel);
-  var nodeSel, node, type;
-
-  args.selection = null;
-  // apply deletion backwards so that we do not to recompute array positions
   var container = tx.get(containerId);
-  var firstNodePos = container.getPosition(nodeSels[0].node.id);
-  for (var idx = nodeSels.length - 1; idx >= 0; idx--) {
-    nodeSel = nodeSels[idx];
-    node = nodeSel.node;
-    if (nodeSel.isFully) {
-      deleteNode(tx, extend({}, args, {
-        nodeId: node.id
-      }));
-    } else {
-      _deleteNodePartially(tx, extend({}, args, {
-        nodeSel: nodeSel
-      }));
-    }
+
+  var startPos = container.getPosition(sel.start.path[0]);
+  // var endPos = container.getPosition(sel.end.path[0]);
+  var fragments = sel.getFragments();
+  if (fragments.length === 0) {
+    return args;
   }
-  // update the selection; take the first component which is not fully deleted
-  if (!nodeSels[0].isFully) {
-    args.selection = tx.createSelection(sel.startPath, sel.startOffset);
-  } else {
-    // if the first node has been deleted fully we need to find the first property
-    // which remained and set the selection to the first character.
-    args.selection = null;
-    for (var i = 1; i < nodeSels.length; i++) {
-      nodeSel = nodeSels[i];
-      if (!nodeSel.isFully) {
-        args.selection = tx.createSelection(nodeSel.paths[0], 0);
-        break;
+
+  var remainingCoor = null;
+  var node, type;
+
+  for (var i = 0; i < fragments.length; i++) {
+    var fragment = fragments[i];
+
+    if (fragment.isPropertyFragment()) {
+      if (fragment.isPartial()) {
+        if (!remainingCoor) {
+          remainingCoor = {
+            path: fragment.path,
+            offset: fragment.startOffset
+          };
+        }
+        _deletePropertySelection(tx, {
+          selection: fragment
+        });
+      } else {
+        deleteNode(tx, extend({}, args, {
+          nodeId: fragment.path[0]
+        }));
       }
-    }
-    // TODO: if we could not find an insertion position,
-    // that is the case when nodes were fully selected,
-    // insert a default text node and set the cursor into it
-    if (args.selection === null) {
-      type = tx.getSchema().getDefaultTextType();
-      node = {
-        type: type,
-        id: uuid(type),
-        content: ""
-      };
-      tx.create(node);
-      container.show(node.id, firstNodePos);
-      args.selection = tx.createSelection([node.id, 'content'], 0);
-    }
-  }
-  // Do a merge
-  if (nodeSels.length>1) {
-    var firstSel = nodeSels[0];
-    var lastSel = nodeSels[nodeSels.length-1];
-    if (firstSel.isFully || lastSel.isFully) {
-      // TODO: think about if we want to merge in those cases
-    } else {
-      var secondPath = last(lastSel.paths);
-      var tmp = merge(tx, extend({}, args, {
-        selection: args.selection,
-        containerId: containerId,
-        path: secondPath,
-        direction: 'left'
+    } else if (fragment.isNodeFragment()) {
+      deleteNode(tx, extend({}, args, {
+        nodeId: fragment.nodeId
       }));
-      args.selection = tmp.selection;
     }
   }
-  // If the container is empty after deletion insert a default text node is inserted
-  container = tx.get(containerId);
+
+  // update the selection; take the first component which is not fully deleted
+  if (remainingCoor) {
+    args.selection = tx.createSelection(remainingCoor.path, remainingCoor.offset);
+  } else {
+    // if all nodes have been deleted insert a text node
+    // TODO: in some cases this is not the desired behavior.
+    // it is ok in cases such as:
+    //  - when inserting text
+    //  - pressing delete or backspace
+    // this should not be done when
+    //  - pasting a container (as opposed to property)
+    //  - inserting a node
+    // i.e. only before property operations
+    type = tx.getSchema().getDefaultTextType();
+    node = {
+      type: type,
+      id: uuid(type),
+      content: ""
+    };
+    tx.create(node);
+    container.show(node.id, startPos);
+    args.selection = tx.createSelection([node.id, 'content'], 0);
+  }
+
+  // try to merge the first and last remaining nodes
+  // NOTE: ATM only merges text nodes
+  if (fragments.length > 1 &&
+      fragments[0].isPartial() &&
+      last(fragments).isPartial()) {
+    merge(tx, extend({}, args, {
+      selection: args.selection,
+      containerId: containerId,
+      path: sel.endPath,
+      direction: 'left'
+    }));
+  }
+
+  // If the container is empty insert an empty text node
   if (container.nodes.length === 0) {
     type = tx.getSchema().getDefaultTextType();
     node = {
@@ -131,92 +138,8 @@ function _deleteContainerSelection(tx, args) {
     container.show(node.id, 0);
     args.selection = tx.createSelection([node.id, 'content'], 0);
   }
+
   return args;
-}
-
-function _deleteNodePartially(tx, args) {
-  // Just go through all components and apply a property deletion
-  var nodeSel = args.nodeSel;
-  var paths = nodeSel.paths;
-  var length = paths.length;
-  for (var i = 0; i < length; i++) {
-    var path = paths[i];
-    var startOffset = 0;
-    var endOffset = tx.get(path).length;
-    if (i === 0) {
-      startOffset = nodeSel.startOffset;
-    }
-    if (i === length-1) {
-      endOffset = nodeSel.endOffset;
-    }
-    _deletePropertySelection(tx, extend({}, args, {
-      selection: tx.createSelection(path, startOffset, endOffset)
-    }));
-  }
-}
-
-// TODO: find a better naming and extract this into its own class
-// it generates a data structure containing
-// information about a selection range grouped by nodes
-// e.g, if a node is fully selected or only partially
-function _getNodeSelection(doc, sel) {
-  var result = [];
-  var groups = {};
-  var container = doc.get(sel.containerId);
-  var addresses = container.getAddressRange(container.getAddress(sel.startPath),
-    container.getAddress(sel.endPath));
-  for (var i = 0; i < addresses.length; i++) {
-    var address = addresses[i];
-    var node = container.getChildAt(address[0]);
-    if (!node) {
-      throw new Error('Illegal state: expecting a component to have a proper root node id set.');
-    }
-    var nodeId = node.id;
-    var nodeGroup;
-    if (!groups[nodeId]) {
-      nodeGroup = {
-        node: node,
-        isFully: true,
-        addresses: [],
-        paths: []
-      };
-      groups[nodeId] = nodeGroup;
-      result.push(nodeGroup);
-    }
-    nodeGroup = groups[nodeId];
-    nodeGroup.addresses.push(address);
-    nodeGroup.paths.push(container.getPath(address));
-  }
-  // finally we analyze the first and last node-selection
-  // if these
-  var startAddress = addresses[0];
-  var endAddress = addresses[addresses.length-1];
-  var previousAddress = container.getPreviousAddress(startAddress);
-  var nextAddress = container.getPreviousAddress(endAddress);
-  var startNodeSel = result[0];
-  var endNodeSel = result[result.length-1];
-  var startLen = doc.get(container.getPath(startAddress)).length;
-  var endLen = doc.get(container.getPath(endAddress)).length;
-  if (sel.startOffset > 0 ||
-    (previousAddress && previousAddress[0] === startAddress[0]))
-  {
-    startNodeSel.isFully = false;
-    startNodeSel.startOffset = sel.startOffset;
-    if (result.length === 1) {
-      startNodeSel.endOffset = sel.endOffset;
-    } else {
-      startNodeSel.endOffset = startLen;
-    }
-  }
-  if (result.length > 1 &&
-      (sel.endOffset < endLen ||
-        (nextAddress && nextAddress[0] === endAddress[0]))
-     ) {
-    endNodeSel.isFully = false;
-    endNodeSel.startOffset = 0;
-    endNodeSel.endOffset = sel.endOffset;
-  }
-  return result;
 }
 
 module.exports = deleteSelection;

@@ -1,13 +1,14 @@
 "use strict";
 
 require('../../qunit_extensions');
+var simple = require('../../../fixtures/simple');
 var sample1 = require('../../../fixtures/sample1');
 var breakNode = require('../../../../model/transform/breakNode');
 
 QUnit.module('model/transform/breakNode');
 
 QUnit.test("Breaking a paragraph", function(assert) {
-  var doc = sample1();
+  var doc = simple();
   var sel = doc.createSelection({
     type: 'property',
     path: ['p1', 'content'],
@@ -17,8 +18,8 @@ QUnit.test("Breaking a paragraph", function(assert) {
   var out = breakNode(doc, args);
   var newNodeId = out.node.id;
   var selection = out.selection;
-  assert.equal(doc.get(['p1', 'content']), 'Para', 'Content of p2 should be truncated.');
-  assert.equal(doc.get([newNodeId, 'content']), 'graph 1', 'Remaining content should be inserted into new paragraph.');
+  assert.equal(doc.get(['p1', 'content']), '0123', 'Content of p2 should be truncated.');
+  assert.equal(doc.get([newNodeId, 'content']), '456789', 'Remaining content should be inserted into new paragraph.');
   assert.ok(selection.isCollapsed(), 'Selection should be collapsed afterwards.');
   assert.deepEqual(selection.path, [newNodeId, 'content'], 'Selection should be in new line.');
   assert.equal(selection.startOffset, 0, 'Selection should be at begin of line.');

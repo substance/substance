@@ -2,9 +2,9 @@
 
 'use strict';
 
-var isEqual = require('lodash/isEqual');
 var cloneDeep = require('lodash/cloneDeep');
 var each = require('lodash/each');
+var last = require('lodash/last');
 var annotationHelpers = require('../annotationHelpers');
 
 var CLIPBOARD_CONTAINER_ID = "clipboard_content";
@@ -23,7 +23,7 @@ function copySelection(doc, args) {
     args.doc = null;
   }
   // return a simplified version if only a piece of text is selected
-  else if (selection.isPropertySelection() || isEqual(selection.start.path, selection.end.path)) {
+  else if (selection.isPropertySelection()) {
     args.doc = _copyPropertySelection(doc, selection);
   }
   else if (selection.isContainerSelection()) {
@@ -72,7 +72,6 @@ function _copyPropertySelection(doc, selection) {
 // The default implementation ignores partially selected nested nodes.
 function _copyContainerSelection(doc, selection) {
   var copy = doc.newInstance();
-  var annotationIndex = doc.getIndex('annotations');
   var container = doc.get(selection.containerId);
   // create a new container
   var containerNode = copy.create({
@@ -80,73 +79,73 @@ function _copyContainerSelection(doc, selection) {
     id: CLIPBOARD_CONTAINER_ID,
     nodes: []
   });
-  // copy nodes and annotations.
-  var i, node;
+
+  var fragments = selection.getFragments();
+
+  if (fragments.length === 0) {
+    return copy;
+  }
+
   var created = {};
-  var startAddress = container.getAddress(selection.start.path);
-  var endAddress = container.getAddress(selection.end.path);
-  for (i = startAddress[0]; i <= endAddress[0]; i++) {
-    node = container.getChildAt(i);
-    var nodeId = node.id;
+
+  // copy nodes and annotations.
+  for (var i = 0; i < fragments.length; i++) {
+    var fragment = fragments[i];
+    var nodeId = fragment.getNodeId();
+    var node = doc.get(nodeId);
     // skip created nodes
     if (!created[nodeId]) {
-      created[nodeId] = copy.create(node.toJSON());
+      _copyNode(copy, node, container, created);
       containerNode.show(nodeId);
-    }
-    // nested nodes should provide a custom implementation
-    if (node.hasChildren()) {
-      // TODO: call a customized implementation for nested nodes
-      // and continue, to skip the default implementation
-    }
-    var paths = container.getPathsForNode(node);
-    for (var j = 0; j < paths.length; j++) {
-      var annotations = annotationIndex.get(paths[j]);
-      for (var k = 0; k < annotations.length; k++) {
-        copy.create(cloneDeep(annotations[k].toJSON()));
-      }
-    }
-  }
-  // 2. Truncate properties according to the selection.
-  // TODO: we need a more sophisticated concept when we introduce dynamic structures
-  // such as lists or tables
-  var text, path;
-  node = container.getChildAt(startAddress[0]);
-  var addresses = container.getAddressesForNode(node);
-  for (i = 0; i < addresses.length; i++) {
-    if (addresses[i].isBefore(startAddress)) {
-      path = container.getPathForAddress(addresses[i]);
-      copy.set(path, "");
-    } else {
-      if (selection.start.offset > 0) {
-        path = container.getPathForAddress(addresses[i]);
-        text = doc.get(path);
-        copy.update(path, {
-          delete: { start: 0, end: selection.start.offset }
-        });
-        annotationHelpers.deletedText(copy, path, 0, selection.start.offset);
-      }
-      break;
     }
   }
 
-  node = container.getChildAt(endAddress[0]);
-  addresses = container.getAddressesForNode(node);
-  for (i = addresses.length - 1; i >= 0; i--) {
-    path = container.getPathForAddress(addresses[i]);
-    if (addresses[i].isAfter(endAddress)) {
-      copy.set(path, "");
-    } else {
-      text = doc.get(path);
-      if (selection.end.offset < text.length) {
-        copy.update(path, {
-          delete: { start: selection.end.offset, end: text.length }
-        });
-        annotationHelpers.deletedText(copy, path, selection.end.offset, text.length);
-      }
-      break;
-    }
+  var firstFragment = fragments[0];
+  var lastFragment = last(fragments);
+  var path, offset, text;
+
+  // if first is a text node, remove part before the selection
+  if (firstFragment.isPropertyFragment()) {
+    path = firstFragment.path;
+    offset = firstFragment.startOffset;
+    text = doc.get(path);
+    copy.update(path, {
+      delete: { start: 0, end: offset }
+    });
+    annotationHelpers.deletedText(copy, path, 0, offset);
   }
+
+  // if last is a is a text node, remove part before the selection
+  if (lastFragment.isPropertyFragment()) {
+    path = lastFragment.path;
+    offset = lastFragment.endOffset;
+    text = doc.get(path);
+    copy.update(path, {
+      delete: { start: offset, end: text.length }
+    });
+    annotationHelpers.deletedText(copy, path, offset, text.length);
+  }
+
   return copy;
+}
+
+function _copyNode(doc, node, container, created) {
+  // nested nodes should provide a custom implementation
+  if (node.hasChildren()) {
+    // TODO: call a customized implementation for nested nodes
+    // and continue, to skip the default implementation
+    var children = node.getChildren();
+    children.forEach(function(child) {
+      _copyNode(doc, child, container, created);
+    });
+  }
+  created[node.id] = doc.create(node.toJSON());
+
+  var annotationIndex = doc.getIndex('annotations');
+  var annotations = annotationIndex.get([node.id]);
+  each(annotations, function(anno) {
+    doc.create(cloneDeep(anno.toJSON()));
+  });
 }
 
 copySelection.CLIPBOARD_CONTAINER_ID = CLIPBOARD_CONTAINER_ID;

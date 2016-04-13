@@ -137,19 +137,17 @@ function _pasteDocument(tx, args) {
   var container = tx.get(containerId);
 
   var startPath = selection.start.path;
-  var startAddress = container.getAddress(startPath);
-  var nextAddress = container.getNextAddress(startAddress);
+  var startPos = container.getPosition(selection.start.getNodeId());
+  var text = tx.get(startPath);
   var insertPos;
   // Break, unless we are at the last character of a node,
   // then we can simply insert after the node
-  if ( (!nextAddress || nextAddress[0] !== startAddress[0]) &&
-    tx.get(startPath).length === selection.start.offset )
-  {
-    insertPos = startAddress[0] + 1;
+  if ( text.length === selection.start.offset ) {
+    insertPos = startPos + 1;
   } else {
     var result = breakNode(tx, args);
     selection = result.selection;
-    insertPos = startAddress[0] + 1;
+    insertPos = startPos + 1;
   }
   // TODO how should this check be useful?
   if (insertPos < 0) {
@@ -182,15 +180,17 @@ function _pasteDocument(tx, args) {
 
   if (insertedNodes.length === 0) return args;
 
-  // set a new selection
-  var lastPath = container.getLastPath(last(insertedNodes));
-  var lastLength = tx.get(lastPath).length;
-  selection = tx.createSelection({
-    type: 'property',
-    path: lastPath,
-    startOffset: lastLength
+  // select the whole pasted block
+  var firstNode = insertedNodes[0];
+  var lastNode = last(insertedNodes);
+  args.selection = tx.createSelection({
+    type: 'container',
+    containerId: containerId,
+    startPath: [firstNode.id],
+    startOffset: 0,
+    endPath: [lastNode.id],
+    endOffset: 1,
   });
-  args.selection = selection;
   return args;
 }
 

@@ -3,6 +3,7 @@
 require('../../qunit_extensions');
 var simple = require('../../../fixtures/simple');
 var sample1 = require('../../../fixtures/sample1');
+var containerSample = require('../../../fixtures/container_sample');
 var copySelection = require('../../../../model/transform/copySelection');
 var CLIPBOARD_PROPERTY_ID = copySelection.CLIPBOARD_PROPERTY_ID;
 
@@ -89,4 +90,63 @@ QUnit.test("Copying a node without editable properties", function(assert) {
   var copy = out.doc;
   var img = copy.get('i1');
   assert.isDefinedAndNotNull(img, 'The image should be copied.');
+});
+
+QUnit.test("Copying a paragraph", function(assert) {
+  var doc = simple();
+  var sel = doc.createSelection({
+    type: 'container',
+    containerId: 'main',
+    startPath: ['p2'],
+    startOffset: 0,
+    endPath: ['p2'],
+    endOffset: 1
+  });
+  var args = {selection: sel};
+  var out = copySelection(doc, args);
+  var copy = out.doc;
+  var p2 = copy.get('p2');
+  assert.equal(p2.content, doc.get('p2').content, 'The whole paragraph should be copied.');
+});
+
+QUnit.test("Copying a nested node (list)", function(assert) {
+  var doc = containerSample();
+  var list1 = doc.get('list1');
+  var sel = doc.createSelection({
+    type: 'container',
+    containerId: 'main',
+    startPath: ['list1'],
+    startOffset: 0,
+    endPath: ['list1'],
+    endOffset: list1.items.length
+  });
+  var args = { selection: sel };
+  var out = copySelection(doc, args);
+  var copy = out.doc;
+  list1 = copy.get('list1');
+  assert.equal(list1.items.length, 4, 'Should have 4 list-items.');
+});
+
+QUnit.test("Copying a node without properties", function(assert) {
+  var doc = simple();
+  doc.create({
+    type: 'image',
+    id: 'i1',
+    src: 'foo'
+  });
+  doc.get('main').show('i1', 1);
+  var sel = doc.createSelection({
+    type: 'container',
+    containerId: 'main',
+    startPath: ['i1'],
+    startOffset: 0,
+    endPath: ['i1'],
+    endOffset: 1
+  });
+  var args = { selection: sel };
+  var out = copySelection(doc, args);
+  var copy = out.doc;
+  var img = copy.get('i1');
+  assert.isDefinedAndNotNull(img, 'The image should be copied.');
+  assert.equal(img.src, 'foo');
 });

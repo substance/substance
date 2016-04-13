@@ -143,12 +143,20 @@ DocumentChange.Prototype = function() {
 
     affectedContainerAnnos.forEach(function(anno) {
       var container = doc.get(anno.container);
-      var paths = container.getPathRange(anno.startPath, anno.endPath);
-      paths.forEach(function(path) {
-        if (!deleted[path[0]]) {
+      var startPos = container.getPosition(anno.startPath[0]);
+      var endPos = container.getPosition(anno.endPath[0]);
+      for (var pos = startPos; pos <= endPos; pos++) {
+        var node = container.getChildAt(pos);
+        var path;
+        if (node.isText()) {
+          path = [node.id, 'content'];
+        } else {
+          path = [node.id];
+        }
+        if (!deleted[node.id]) {
           updated.set(path, true);
         }
-      });
+      }
     });
 
     this.created = created;

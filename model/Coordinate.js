@@ -67,6 +67,14 @@ Coordinate.Prototype = function() {
     return "(" + this.path.join('.') + ", " + this.offset + ")";
   };
 
+  this.isPropertyCoordinate = function() {
+    return this.path.length > 1;
+  };
+
+  this.isNodeCoordinate = function() {
+    return this.path.length === 1;
+  };
+
 };
 
 oo.initClass(Coordinate);

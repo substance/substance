@@ -2,32 +2,10 @@
 
 require('../../qunit_extensions');
 var deleteSelection = require('../../../../model/transform/deleteSelection');
-var containerSample = require('../../../fixtures/container_anno_sample');
+var containerSample = require('../../../fixtures/container_sample');
+var containerAnnoSample = require('../../../fixtures/container_anno_sample');
+var simple = require('../../../fixtures/simple');
 var sample1 = require('../../../fixtures/sample1');
-
-function addStructuredNode(doc) {
-  var structuredNode = doc.create({
-    id: "sn1",
-    type: "structured-node",
-    title: "0123456789",
-    body: "0123456789",
-    caption: "0123456789"
-  });
-  doc.get('main').show(structuredNode.id, 1);
-  return structuredNode;
-}
-
-function addImage(doc) {
-  // This node does not have any editable properties
-  var imageNode = doc.create({
-    id: "img1",
-    type: "image",
-    src: "img1.png",
-    previewSrc: "img1thumb.png",
-  });
-  doc.get('main').show(imageNode.id, 1);
-  return imageNode;
-}
 
 QUnit.module('model/transform/deleteSelection');
 
@@ -114,6 +92,64 @@ QUnit.test("Deleting a container selection", function(assert) {
   assert.deepEqual([anno.startOffset, anno.endOffset], [13, 23], 'Annotation should have been placed correctly.');
 });
 
+QUnit.test("Deleting a paragraph", function(assert) {
+  var doc = sample1();
+  var main = doc.get('main');
+  var sel = doc.createSelection({
+    type: 'container',
+    containerId: 'main',
+    startPath: ['p1'],
+    startOffset: 0,
+    endPath: ['p1'],
+    endOffset: 1
+  });
+  var args = {selection: sel, containerId: 'main'};
+  deleteSelection(doc, args);
+  assert.isNullOrUndefined(doc.get('p1'), 'Paragraph should be deleted ...');
+  assert.equal(main.nodes.indexOf('p1'), -1, '... and hidden.');
+});
+
+QUnit.test("Deleting a structured node", function(assert) {
+  var doc = containerSample();
+  var main = doc.get('main');
+  var sn1 = doc.get('sn1');
+  var sel = doc.createSelection({
+    type: 'container',
+    containerId: 'main',
+    startPath: ['sn1'],
+    startOffset: 0,
+    endPath: ['sn1'],
+    endOffset: sn1.getAddressablePropertyNames().length
+  });
+  var args = {selection: sel, containerId: 'main'};
+  deleteSelection(doc, args);
+  assert.isNullOrUndefined(doc.get('sn1'), 'sn1 should be deleted ...');
+  assert.equal(main.nodes.indexOf('sn1'), -1, '... and hidden.');
+});
+
+QUnit.test("Deleting a nested node (list)", function(assert) {
+  var doc = containerSample();
+  var main = doc.get('main');
+  var list1 = doc.get('list1');
+  var sel = doc.createSelection({
+    type: 'container',
+    containerId: 'main',
+    startPath: ['list1'],
+    startOffset: 0,
+    endPath: ['list1'],
+    endOffset: list1.items.length
+  });
+  var args = {selection: sel, containerId: 'main'};
+  deleteSelection(doc, args);
+  assert.isNullOrUndefined(doc.get('list1'), 'list1 should be deleted ...');
+  assert.equal(main.nodes.indexOf('list1'), -1, '... and hidden.');
+  assert.isNullOrUndefined(doc.get('li1'), 'li1 should be deleted');
+  assert.isNullOrUndefined(doc.get('li2'), 'li2 should be deleted');
+  assert.isNullOrUndefined(doc.get('li3'), 'li3 should be deleted');
+  assert.isNullOrUndefined(doc.get('li4'), 'li4 should be deleted');
+});
+
+
 QUnit.test("Deleting all", function(assert) {
   var doc = sample1();
   var sel = doc.createSelection({
@@ -132,20 +168,34 @@ QUnit.test("Deleting all", function(assert) {
   var first = container.getChildAt(0);
   var defaultTextType = doc.getSchema().getDefaultTextType();
   assert.equal(first.type, defaultTextType, "Node should be a default text node");
-  var path = out.selection.getPath();
-  var address = container.getAddress(path);
+  var address = container.getAddress(out.selection.start);
   assert.ok(out.selection.isCollapsed(), "Selection should be collapsed (Cursor).");
-  assert.ok(address.isEqual([0,0]), "Cursor should be in empty text node.");
-  assert.equal(out.selection.start.offset, 0, "Cursor should be at first position.");
+  assert.equal(address.toString(), '0.0', "Cursor should be at very first position.");
 });
 
-QUnit.test("Deleting partially", function(assert) {
-  var doc = sample1();
+function addStructuredNode(doc) {
+  var structuredNode = doc.create({
+    id: "sn1",
+    type: "structured-node",
+    title: "0123456789",
+    body: "0123456789",
+    caption: "0123456789"
+  });
+  doc.get('main').show(structuredNode.id, 1);
+  return structuredNode;
+}
+
+QUnit.test("Trying to delete a structured node partially", function(assert) {
+  // Node we decided not to allow container selections which select
+  // structured nodes partially. This test is a reminiscence to that old implementation.
+  var doc = simple();
   var structuredNode = addStructuredNode(doc);
+  // this selection is not 'valid' (TODO: add documentation and link here)
+  // and is turned into a selection which spans over the whole node
   var sel = doc.createSelection({
     type: 'container',
     containerId: 'main',
-    startPath: ['h1', 'content'],
+    startPath: ['p1', 'content'],
     startOffset: 0,
     endPath: [structuredNode.id, 'body'],
     endOffset: 5
@@ -153,19 +203,16 @@ QUnit.test("Deleting partially", function(assert) {
   var args = { selection: sel, containerId: 'main' };
   var out = deleteSelection(doc, args);
   var container = doc.get('main');
-  var first = container.getChildAt(0);
-  assert.equal(first.id, structuredNode.id, "First node should have been deleted.");
-  assert.equal(first.title, "", "Node's title should have been deleted.");
-  assert.equal(first.body, "56789", "Node's body should have been truncated.");
+  assert.isNullOrUndefined(doc.get('p1'), 'p1 should have been deleted');
+  assert.isNullOrUndefined(doc.get('sn1'), 'sn1 should have been deleted');
   // Check selection
-  var path = out.selection.getPath();
-  var address = container.getAddress(path);
   assert.ok(out.selection.isCollapsed(), "Selection should be collapsed (Cursor).");
-  assert.ok(address.isEqual([0,0]), "Cursor should be in empty text node.");
+  var address = container.getAddress(out.selection.start);
+  assert.equal(address.toString(), '0.0', "Cursor should be in empty text node.");
   assert.equal(out.selection.start.offset, 0, "Cursor should be at first position.");
 });
 
-QUnit.test("Deleting wrapped structured node", function(assert) {
+QUnit.test("Deleting a structured node and merge surrounding context", function(assert) {
   var doc = sample1();
   addStructuredNode(doc);
 
@@ -189,11 +236,24 @@ QUnit.test("Deleting wrapped structured node", function(assert) {
   assert.equal(h1.content, 'Sectgraph 1', 'h1 should have been joined with the remaining contents of p1');
 });
 
-QUnit.test("Delete wrapped nodes that have no editable properties", function(assert) {
+function addImage(doc) {
+  // This node does not have any editable properties
+  var imageNode = doc.create({
+    id: "img1",
+    type: "image",
+    src: "img1.png",
+    previewSrc: "img1thumb.png",
+  });
+  doc.get('main').show(imageNode.id, 1);
+  return imageNode;
+}
+
+QUnit.test("Delete a node without editable properties", function(assert) {
   var doc = sample1();
+
+  // this adds an image node between h1 and p1
   addImage(doc);
 
-  // image node sits betweeen h1 and p1
   var sel = doc.createSelection({
     type: 'container',
     containerId: 'main',
@@ -213,11 +273,11 @@ QUnit.test("Delete wrapped nodes that have no editable properties", function(ass
   assert.equal(h1.content, 'Sectgraph 1', 'h1 should have been joined with the remaining contents of p1');
 });
 
-QUnit.test("Edge case: delete container selection spaning multiple nodes containing container annotations", function(assert) {
+QUnit.test("Edge case: delete container selection spanning multiple nodes containing container annotations", function(assert) {
   // the annotation spans over three nodes
   // we start the selection within the anno in the first text node
   // and expand to the end of the third node
-  var doc = containerSample();
+  var doc = containerAnnoSample();
   var sel = doc.createSelection({
     type: 'container',
     containerId: 'main',
@@ -241,7 +301,7 @@ QUnit.test("Edge case: delete container selection with 2 fully selected paragrap
   // when all nodes under a container selection are covered
   // fully, we want to have a default text type get inserted
   // and the cursor at its first position
-  var doc = containerSample();
+  var doc = containerAnnoSample();
   var sel = doc.createSelection({
     type: 'container',
     containerId: 'main',
