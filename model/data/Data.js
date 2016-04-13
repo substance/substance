@@ -6,6 +6,7 @@ var each = require('lodash/each');
 var cloneDeep = require('lodash/cloneDeep');
 var DataObject = require('./DataObject');
 var EventEmitter = require('../../util/EventEmitter');
+var NodeFactory = require('./NodeFactory');
 
 /**
   A data storage implemention that supports data defined via a {@link model/data/Schema},
@@ -26,11 +27,14 @@ var EventEmitter = require('../../util/EventEmitter');
 function Data(schema, options) {
   EventEmitter.call(this);
 
+  options = options || {};
+
   this.schema = schema;
   this.nodes = new DataObject();
   this.indexes = {};
   this.options = options || {};
-  this.nodeFactory = options.nodeFactory || schema.getNodeFactory();
+
+  this.nodeFactory = options.nodeFactory || new NodeFactory(schema.nodeRegistry);
 
   // Sometimes necessary to resolve issues with updating indexes in presence
   // of cyclic dependencies

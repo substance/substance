@@ -1,29 +1,23 @@
 'use strict';
 
-var NodeRegistry = require('./data/NodeRegistry');
+var oo = require('../util/oo');
 
 function DocumentNodeFactory(doc) {
-  DocumentNodeFactory.super.call(this);
-
   this.doc = doc;
-
-  doc.schema.each(function(NodeClass) {
-    this.register(NodeClass);
-  }.bind(this));
 }
 
 DocumentNodeFactory.Prototype = function() {
 
   this.create = function(nodeType, nodeData) {
-    var NodeClass = this.get(nodeType);
+    var NodeClass = this.doc.schema.getNodeClass(nodeType);
     if (!NodeClass) {
-      throw new Error('No Node registered by that name: ' + nodeType);
+      throw new Error('No node registered by that name: ' + nodeType);
     }
     return new NodeClass(this.doc, nodeData);
   };
 
 };
 
-NodeRegistry.extend(DocumentNodeFactory);
+oo.initClass(DocumentNodeFactory);
 
 module.exports = DocumentNodeFactory;
