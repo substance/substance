@@ -19,7 +19,7 @@ NodeRegistry.Prototype = function() {
 
     @param {Class} nodeClass
    */
-  this.register = function ( nodeClazz ) {
+  this.register = function (nodeClazz) {
     var name = nodeClazz.static && nodeClazz.static.name;
     if ( typeof name !== 'string' || name === '' ) {
       throw new Error( 'Node names must be strings and must not be empty' );

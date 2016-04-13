@@ -196,6 +196,9 @@ Document.Prototype = function() {
     ```
   */
   this.create = function(nodeData) {
+    if (!nodeData.id) {
+      nodeData.id = uuid(nodeData.type);
+    }
     var op = this._create(nodeData);
     var change = new DocumentChange([op], {}, {});
     change._extractInformation(this);

@@ -115,6 +115,7 @@ Data.Prototype = function() {
    */
   this.delete = function(nodeId) {
     var node = this.nodes[nodeId];
+    node.dispose();
     delete this.nodes[nodeId];
 
     var change = {

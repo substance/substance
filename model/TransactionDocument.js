@@ -3,6 +3,7 @@
 var isFunction = require('lodash/isFunction');
 var extend = require('lodash/extend');
 var each = require('lodash/each');
+var uuid = require('../util/uuid');
 var Document = require('./Document');
 var DocumentChange = require('./DocumentChange');
 var IncrementalData = require('./data/IncrementalData');
@@ -64,6 +65,9 @@ TransactionDocument.Prototype = function() {
   };
 
   this.create = function(nodeData) {
+    if (!nodeData.id) {
+      nodeData.id = uuid(nodeData.type);
+    }
     var op = this.data.create(nodeData);
     if (!op) return;
     this.ops.push(op);
@@ -176,6 +180,8 @@ TransactionDocument.Prototype = function() {
   this.newInstance = function() {
     return this.document.newInstance();
   };
+
+  this.isTransactionDocument = true;
 
 };
 
