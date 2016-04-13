@@ -49,8 +49,8 @@ var InsertFigureCommand = SurfaceCommand.extend({
         // NOTE: we are providing a custom beforeState, to make sure
         // thate the correct initial selection is used.
 
-        var beforeState = { selection: surface.getSelection() };
-        surface.transaction(beforeState, function(tx, args) {
+        // var beforeState = { selection: surface.getSelection() };
+        surface.transaction(function(tx, args) {
           var newImage = tx.create({
             id: uuid("image"),
             type: "image",
