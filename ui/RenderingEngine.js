@@ -90,7 +90,7 @@ RenderingEngine.Prototype = function() {
         }
         content._comp = comp;
         vel._content = content;
-        if (!vel.__isNew__) {
+        if (!vel.__isNew__ && comp.isMounted()) {
           vel.__isUpdated__ = true;
         }
         // Mapping: map virtual elements to existing components based on refs

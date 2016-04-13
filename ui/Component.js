@@ -232,8 +232,8 @@ Component.Prototype = function() {
     // To prevent from multiple calls to didMount, which can happen under
     // specific circumstances we use a guard.
     if (!this.__isMounted__) {
-      this.didMount();
       this.__isMounted__ = true;
+      this.didMount();
     }
   };
 
