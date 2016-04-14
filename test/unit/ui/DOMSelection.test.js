@@ -352,7 +352,7 @@ QUnit.uiTest("Issue #273: 'Could not find char position' when clicking right abo
 });
 
 var surfaceWithParagraphs = [
-  '<div id="surface">',
+  '<div id="surface" class="sc-surface">',
     '<p id="p1">',
       '<span data-path="p1.content">AA</span>',
     '</p>',
@@ -420,6 +420,10 @@ QUnit.uiTest("Mapping a ContainerSelection from DOM to model", function(assert) 
   assert.equal(sel.endOffset, 2, 'endOffset should be correct.');
 });
 
+// TODO: is this a real case?
+// This works in Chrome but not in FF
+// Chrome maps the anchor to a textNode (text, 0) which is working fine
+// FF takes the anchor as we specified it (surface, 2)
 QUnit.uiTest("DOM Coordinate on surface element", function(assert) {
   var el = $('#qunit-fixture').html(surfaceWithParagraphs)[0];
   var domSelection = new DOMSelection(new StubSurface(el, 'main'));

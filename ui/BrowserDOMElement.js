@@ -304,7 +304,11 @@ BrowserDOMElement.Prototype = function() {
     // ATTENTION: looking at https://developer.mozilla.org/en/docs/Web/API/Element/matches
     // Element.matches might not be supported by some mobile browsers
     var el = this.el;
-    return matches.call(el, cssSelector);
+    if (this.isElementNode()) {
+      return matches.call(el, cssSelector);
+    } else {
+      return false;
+    }
   };
 
   this.getParent = function() {
