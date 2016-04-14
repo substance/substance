@@ -2,6 +2,7 @@
 
 var isString = require('lodash/isString');
 var each = require('lodash/each');
+var last = require('lodash/last');
 var uuid = require('../util/uuid');
 var EditingBehavior = require('../model/EditingBehavior');
 var insertText = require('../model/transform/insertText');

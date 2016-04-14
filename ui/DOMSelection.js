@@ -4,7 +4,7 @@
 var oo = require('../util/oo');
 var Coordinate = require('../model/Coordinate');
 var Range = require('../model/Range');
-var BrowserDOMElement = require('./BrowserDOMElement');
+var DefaultDOMElement = require('./DefaultDOMElement');
 var TextPropertyComponent = require('./TextPropertyComponent');
 
 /*
@@ -130,7 +130,7 @@ DOMSelection.Prototype = function() {
     }
     // HACK: special treatment for edge cases as addressed by #354.
     // Sometimes anchorNode and focusNodes are the surface
-    if (BrowserDOMElement.wrapNativeElement(wSel.anchorNode).is('.sc-surface')) {
+    if (DefaultDOMElement.wrapNativeElement(wSel.anchorNode).is('.sc-surface')) {
       range = this._getEnclosingRange(wSel.getRangeAt(0));
     } else {
       range = this._getRange(wSel.anchorNode, wSel.anchorOffset, wSel.focusNode, wSel.focusOffset);
