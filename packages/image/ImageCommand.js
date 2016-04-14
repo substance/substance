@@ -51,7 +51,7 @@ var ImageCommand = SurfaceCommand.extend({
     inputEl.on('change', function(/*e*/) {
       // Pick the first file
       // TODO: is there a way to use DefaultDOMElement API to access the files property?
-      var file = inputEl.el.files[0];
+      var file = inputEl.getProperty('files')[0];
 
       // We no longer need the file input
       inputEl.remove();
