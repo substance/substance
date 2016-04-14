@@ -211,18 +211,36 @@ ContainerEditor.Prototype = function() {
   this.selectAll = function() {
     var doc = this.getDocument();
     var container = doc.get(this.getContainerId());
-    var firstPath = container.getFirstPath();
-    var lastPath = container.getLastPath();
-    var lastText = doc.get(lastPath);
+    if (container.nodes.length === 0) {
+      return;
+    }
+    var firstNodeId = container.nodes[0];
+    var lastNodeId = last(container.nodes);
     var sel = doc.createSelection({
       type: 'container',
       containerId: container.id,
-      startPath: firstPath,
+      startPath: [firstNodeId],
       startOffset: 0,
-      endPath: lastPath,
-      endOffset: lastText.length
+      endPath: [lastNodeId],
+      endOffset: 1
     });
-    console.log('###', sel.toString());
+    this.setSelection(sel);
+  };
+
+  this.selectFirst = function() {
+    var doc = this.getDocument();
+    var nodes = this.getContainer().nodes;
+    if (nodes.length === 0) {
+      console.info('ContainerEditor.selectFirst(): Container is empty.');
+      return;
+    }
+    var node = doc.get(nodes[0]);
+    var sel;
+    if (node.isText()) {
+      sel = doc.createSelection(node.getTextPath(), 0);
+    } else {
+      sel = doc.createSelection(this.getContainerId(), [node.id], 0, [node.id], 1);
+    }
     this.setSelection(sel);
   };
 
