@@ -54,6 +54,8 @@ var paste = function(tx, args) {
 
     if (schema.isInstanceOf(first.type, 'text')) {
       args = _pasteAnnotatedText(tx, args);
+      // HACK: this changes the container's nodes array.
+      // We do this, to be able to call _pasteDocument inserting the remaining nodes
       nodes.shift();
     }
     // if still nodes left > 0
