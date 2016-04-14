@@ -181,7 +181,7 @@ AnnotationCommand.Prototype = function() {
     var annotationType = this.getAnnotationType();
     var containerId;
     if (surface.isContainerEditor()) {
-      containerId = this.getContainerId();
+      containerId = surface.getContainerId();
     }
     var annos = helpers.getAnnotationsForSelection(doc, sel, annotationType, containerId);
     return annos;
