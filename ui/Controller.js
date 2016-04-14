@@ -111,6 +111,11 @@ function Controller() {
 
 Controller.Prototype = function() {
 
+  /**
+   * Defines the child context. You should override this to provide your own contexts.
+   *
+   * @return {object} the child context
+   */
   this.getChildContext = function() {
     return {
       config: this.getConfig(),
@@ -539,7 +544,7 @@ Controller.Prototype = function() {
     };
 
     this.onCommandExecuted = function(info, commandName) {
-      if (commandName === this.static.command) {
+      if (commandName === this.getCommandName()) {
         // Toggle the edit prompt when either edit is
         // requested or a new link has been created
         if (_.includes(['edit','create'], info.mode)) {

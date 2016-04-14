@@ -50,21 +50,10 @@ Tool.Prototype = function() {
       el.attr('title', title);
       el.attr('aria-label', title);
     }
-
-    var button = $$('button')
-      .on('click', this.onClick)
-      .append(this.props.children);
-    el.append(button);
-
+    //.sm-disabled
     if (this.state.disabled) {
       el.addClass('sm-disabled');
-      // make button inaccessible
-      button.attr('tabindex', -1);
-    } else {
-      // make button accessible for tab-navigation
-      button.attr('tabindex', 1);
     }
-
     // .sm-active
     if (this.state.active) {
       el.addClass('sm-active');
@@ -75,7 +64,25 @@ Tool.Prototype = function() {
       el.addClass(this.state.mode);
     }
 
+    // button
+    el.append(this.renderButton($$));
+
     return el;
+  };
+
+  this.renderButton = function($$) {
+    var button = $$('button')
+      .on('click', this.onClick)
+      .append(this.props.children);
+
+    if (this.state.disabled) {
+      // make button inaccessible
+      button.attr('tabindex', -1);
+    } else {
+      // make button accessible for tab-navigation
+      button.attr('tabindex', 1);
+    }
+    return button;
   };
 
   this.getTitle = function() {

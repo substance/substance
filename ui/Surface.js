@@ -110,7 +110,7 @@ Surface.Prototype = function() {
       // we will react on this to render a custom selection
       el.on('focus', this.onNativeFocus);
       el.on('blur', this.onNativeBlur);
-
+      // activate the clipboard
       this.clipboard.attach(el);
     }
 

@@ -147,7 +147,7 @@ ContainerEditor.Prototype = function() {
     var textCommands = {};
     this.commandRegistry.each(function(cmd) {
       if (cmd.constructor.static.textTypeName) {
-        textCommands[cmd.constructor.static.name] = cmd;
+        textCommands[cmd.getName()] = cmd;
       }
     });
     return textCommands;
