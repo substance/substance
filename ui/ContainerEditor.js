@@ -131,6 +131,13 @@ ContainerEditor.Prototype = function() {
   };
 
   /*
+    TODO: Select first content to be found
+  */
+  this.selectFirst = function() {
+    console.warn('TODO: Implement selection of first content to be found.');
+  };
+
+  /*
     Register custom editor behavior using this method
   */
   this.extendBehavior = function(extension) {
