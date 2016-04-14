@@ -48,7 +48,7 @@ ProseEditor.Prototype = function() {
         ),
         $$(ScrollPane, {scrollbarType: 'substance', scrollbarPosition: 'right'}).append(
           $$(ContainerEditor, {
-            doc: this.props.doc,
+            documentSession: this.documentSession,
             containerId: 'body',
             name: 'bodyEditor',
             commands: config.bodyEditor.commands,
