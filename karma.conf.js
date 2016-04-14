@@ -23,6 +23,13 @@ module.exports = function(config) {
   });
 
   if(process.env.TRAVIS){
-      config.browsers = ['Chrome_travis_ci', 'Firefox'];
+    config.browsers = ['Chrome_travis_ci', 'Firefox'];
+  } else {
+    var fs = require('fs');
+    if (fs.existsSync(__dirname + "/karma.conf.local.js")) {
+      var localConfig = require('./karma.conf.local');
+      var merge = require('./util/merge');
+      merge(config, localConfig, { array: 'replace' });
+    }
   }
 };
