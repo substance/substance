@@ -11,16 +11,16 @@
       background: #999;
     }
     
-    &.sm-collaborator-1  .se-cursor-inner { outline-color: $collaborator-color-1; }
-    &.sm-collaborator-2  .se-cursor-inner { outline-color: $collaborator-color-2; }
-    &.sm-collaborator-3  .se-cursor-inner { outline-color: $collaborator-color-3; }
-    &.sm-collaborator-4  .se-cursor-inner { outline-color: $collaborator-color-4; }
-    &.sm-collaborator-5  .se-cursor-inner { outline-color: $collaborator-color-5; }
-    &.sm-collaborator-6  .se-cursor-inner { outline-color: $collaborator-color-6; }
-    &.sm-collaborator-7  .se-cursor-inner { outline-color: $collaborator-color-7; }
-    &.sm-collaborator-8  .se-cursor-inner { outline-color: $collaborator-color-8; }
-    &.sm-collaborator-9  .se-cursor-inner { outline-color: $collaborator-color-9; }
-    &.sm-collaborator-10 .se-cursor-inner { outline-color: $collaborator-color-10; }
+    &.sm-collaborator-1  .se-cursor-inner { background: $collaborator-color-1; }
+    &.sm-collaborator-2  .se-cursor-inner { background: $collaborator-color-2; }
+    &.sm-collaborator-3  .se-cursor-inner { background: $collaborator-color-3; }
+    &.sm-collaborator-4  .se-cursor-inner { background: $collaborator-color-4; }
+    &.sm-collaborator-5  .se-cursor-inner { background: $collaborator-color-5; }
+    &.sm-collaborator-6  .se-cursor-inner { background: $collaborator-color-6; }
+    &.sm-collaborator-7  .se-cursor-inner { background: $collaborator-color-7; }
+    &.sm-collaborator-8  .se-cursor-inner { background: $collaborator-color-8; }
+    &.sm-collaborator-9  .se-cursor-inner { background: $collaborator-color-9; }
+    &.sm-collaborator-10 .se-cursor-inner { background: $collaborator-color-10; }
   }
 
   .se-selection-fragment {
