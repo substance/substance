@@ -1,7 +1,7 @@
 'use strict';
 
 var isNumber = require('lodash/isNumber');
-var map = require('lodash/map');
+var Coordinate = require('./Coordinate');
 var Selection = require('./Selection');
 var PropertySelection = require('./PropertySelection');
 var CoordinateAdapter = PropertySelection.CoordinateAdapter;
@@ -95,6 +95,16 @@ ContainerSelection.Prototype = function() {
     return true;
   };
 
+  this.isNodeSelection = function() {
+    return (
+      this.startPath.length === 1 &&
+      this.endPath.length === 1 &&
+      (this.reverse ?
+        this.endOffset === 0 && this.startOffset === 1 :
+        this.startOffset === 0 && this.endOffset === 1)
+    );
+  };
+
   this.isNull = function() {
     return false;
   };
@@ -123,7 +133,65 @@ ContainerSelection.Prototype = function() {
     @return {model/Container} The container node instance for this selection.
   */
   this.getContainer = function() {
-    return this.getDocument().get(this.containerId);
+    if (!this._internal.container) {
+      this._internal.container = this.getDocument().get(this.containerId);
+    }
+    return this._internal.container;
+  };
+
+  this.isInsideOf = function(other, strict) {
+    // Note: this gets called from PropertySelection.contains()
+    // because this implementation can deal with mixed selection types.
+    if (other.isNull()) return false;
+    strict = !!strict;
+    var r1 = this._range(this);
+    var r2 = this._range(other);
+    return (r2.start.isBefore(r1.start, strict) &&
+      r1.end.isBefore(r2.end, strict));
+  };
+
+  this.contains = function(other, strict) {
+    // Note: this gets called from PropertySelection.isInsideOf()
+    // because this implementation can deal with mixed selection types.
+    if (other.isNull()) return false;
+    strict = !!strict;
+    var r1 = this._range(this);
+    var r2 = this._range(other);
+    return (r1.start.isBefore(r2.start, strict) &&
+      r2.end.isBefore(r1.end, strict));
+  };
+
+  this.overlaps = function(other) {
+    var r1 = this._range(this);
+    var r2 = this._range(other);
+    // it overlaps if they are not disjunct
+    return !(r1.end.isBefore(r2.start, false) ||
+      r2.end.isBefore(r1.start, false));
+  };
+
+  this.isLeftAlignedWith = function(other) {
+    var r1 = this._range(this);
+    var r2 = this._range(other);
+    return r1.start.isEqual(r2.start);
+  };
+
+  this.isRightAlignedWith = function(other) {
+    var r1 = this._range(this);
+    var r2 = this._range(other);
+    return r1.end.isEqual(r2.end);
+  };
+
+  this.containsNode = function(nodeId) {
+    var container = this.getContainer();
+    var startPos = container.getPosition(this.startPath[0]);
+    var endPos = container.getPosition(this.endPath[0]);
+    var pos = container.getPosition(nodeId);
+    if ((startPos>pos || endPos<pos) ||
+        (startPos === pos && this.startPath.length === 1 && this.startOffset > 0) ||
+        (endPos === pos && this.endPath.length === 1 && this.endOffset < 1)) {
+      return false;
+    }
+    return true;
   };
 
   /**
@@ -139,200 +207,253 @@ ContainerSelection.Prototype = function() {
     } else {
       coor = this.end;
     }
-    return this.createWithNewRange(coor, coor);
+    return _createNewSelection(this, coor, coor);
   };
 
 
   this.expand = function(other) {
-    var c1 = this._coordinates(this);
-    var c2 = this._coordinates(other);
-    var c1s = c1.start;
-    var c2s = c2.start;
-    var c1e = c1.end;
-    var c2e = c2.end;
-    var start = { address: c1s.address, offset: c1s.offset };
-    var end = { address: c1e.address, offset: c1e.offset };
+    var r1 = this._range(this);
+    var r2 = this._range(other);
+    var start;
+    var end;
 
-    if (c1s.address.equals(c2s.address)) {
-      start.offset = Math.min(c1s.offset, c2s.offset);
-    } else if (c1s.address.isAfter(c2s.address)) {
-      start.address = c2s.address;
-      start.offset = c2s.offset;
+    if (r1.start.isEqual(r2.start)) {
+      start = new Coordinate(this.start.path, Math.min(this.start.offset, other.start.offset));
+    } else if (r1.start.isAfter(r2.start)) {
+      start = new Coordinate(other.start.path, other.start.offset);
+    } else {
+      start = this.start;
     }
-    if (c1e.address.equals(c2e.address)) {
-      end.offset = Math.max(c1e.offset, c2e.offset);
-    } else if (c1e.address.isBefore(c2e.address)) {
-      end.address = c2e.address;
-      end.offset = c2e.offset;
+    if (r1.end.isEqual(r2.end)) {
+      end = new Coordinate(this.end.path, Math.max(this.end.offset, other.end.offset));
+    } else if (r1.end.isBefore(r2.end, false)) {
+      end = new Coordinate(other.end.path, other.end.offset);
+    } else {
+      end = this.end;
     }
 
     return _createNewSelection(this, start, end);
   };
 
-  this.truncate = function(other) {
-    var c1 = this._coordinates(this);
-    var c2 = this._coordinates(other);
-
+  this.truncateWith = function(other) {
+    if (other.isInsideOf(this, 'strict')) {
+      // the other selection should overlap only on one side
+      throw new Error('Can not truncate with a contained selections');
+    }
+    if (!this.overlaps(other)) {
+      return this;
+    }
+    var r1 = this._range(this);
+    var r2 = this._range(other);
     var start, end;
-    if (_isBefore(c2.start, c1.start, 'strict')) {
-      start = c1.start;
-      end = c2.end;
-    } else if (_isBefore(c1.end, c2.end, 'strict')) {
-      start = c2.start;
-      end = c1.end;
-    } else if (_isEqual(c1.start, c2.start)) {
-      if (_isEqual(c1.end, c2.end)) {
-        return Selection.nullSelection;
+    if (r2.start.isBefore(r1.start, 'strict') && r2.end.isBefore(r1.end, 'strict')) {
+      start = other.end;
+      end = this.end;
+    } else if (r1.start.isBefore(r2.start, 'strict') && r1.end.isBefore(r2.end, 'strict')) {
+      start = this.start;
+      end = other.start;
+    } else if (r1.start.isEqual(r2.start)) {
+      if (r2.end.isBefore(r1.end, 'strict')) {
+        start = other.end;
+        end = this.end;
       } else {
-        start = c2.end;
-        end = c1.end;
+        // the other selection is larger which eliminates this one
+        return Selection.nullSelection;
       }
-    } else if (_isEqual(c1.end, c2.end)) {
-      start = c1.start;
-      end = c2.start;
+    } else if (r1.end.isEqual(r2.end)) {
+      if (r1.start.isBefore(r2.start, 'strict')) {
+        start = this.start;
+        end = other.start;
+      } else {
+        // the other selection is larger which eliminates this one
+        return Selection.nullSelection;
+      }
+    } else if (this.isInsideOf(other)) {
+      return Selection.nullSelection;
     } else {
       throw new Error('Could not determine coordinates for truncate. Check input');
     }
     return _createNewSelection(this, start, end);
   };
 
-  this.isInsideOf = function(other, strict) {
-    if (other.isNull()) return false;
-    var c1 = this._coordinates(this);
-    var c2 = this._coordinates(other);
-    return (_isBefore(c2.start, c1.start, strict) && _isBefore(c1.end, c2.end, strict));
-  };
-
-  this.contains = function(other) {
-    var c1 = this._coordinates(this);
-    var c2 = this._coordinates(other);
-    return (_isBefore(c1.start, c2.start) && _isBefore(c2.end, c1.end));
-  };
-
   /**
-    Checks if this selection contains another but has at least one boundary in common.
+    Helper to create selection fragments for this ContainerSelection.
 
-    @private
-    @param {Selection} other
-    @returns {Boolean}
+    Used for selection rendering, for instance.
+
+    @returns {Selection.Fragment[]} Fragments resulting from splitting this into property selections.
   */
-  this.includesWithOneBoundary = function(other) {
-    // includes and at least one boundary
-    var c1 = this._coordinates(this);
-    var c2 = this._coordinates(other);
-    return (
-      (_isEqual(c1.start, c2.start) && _isBefore(c2.end, c1.end)) ||
-      (_isEqual(c1.end, c2.end) && _isBefore(c1.start, c2.start))
-    );
-  };
+  this.getFragments = function() {
+    if(this._internal.fragments) {
+      return this._internal.fragments;
+    }
 
-  this.overlaps = function(other) {
-    var c1 = this._coordinates(this);
-    var c2 = this._coordinates(other);
-    // it overlaps if they are not disjunct
-    return !(_isBefore(c1.end, c2.start) || _isBefore(c2.end, c1.start));
-  };
+    /*
+      NOTE:
+        This implementation is a bit more complicated
+        to simplify implementations at other places.
+        A ContainerSelections can be seen as a list of property and node
+        fragments.
+        The following implementation is covering all cases in a canonical
+        way, considering all combinations of start end end coordinates
+        either given as ([nodeId, propertyName], offset) or
+        ([nodeId], 0|1).
+    */
 
-  this.isLeftAlignedWith = function(other) {
-    var c1 = this._coordinates(this);
-    var c2 = this._coordinates(other);
-    return _isEqual(c1.start, c2.start);
-  };
 
-  this.isRightAlignedWith = function(other) {
-    var c1 = this._coordinates(this);
-    var c2 = this._coordinates(other);
-    return _isEqual(c1.end, c2.end);
+    var fragments = [];
+
+    var doc = this.getDocument();
+    var container = this.getContainer();
+    var startPos = container.getPosition(this.startPath[0]);
+    var endPos = container.getPosition(this.endPath[0]);
+
+    var coor, node, nodeId, fragment, path, offset, text;
+    if (startPos !== endPos) {
+
+      // First fragment can either be a property fragment (fully or partial) or a node fragment
+      coor = this.start;
+      path = coor.path;
+      offset = coor.offset;
+      nodeId = path[0];
+      node = doc.get(nodeId);
+      if (!node) {
+        throw new Error('Node does not exist:' + nodeId);
+      }
+      // coordinate is a property coordinate
+      if (coor.isPropertyCoordinate()) {
+        text = doc.get(path);
+        fragment = new Selection.Fragment(path, offset, text.length, (offset === 0));
+        fragments.push(fragment);
+      }
+      // coordinate is a node coordinate (before)
+      else if (coor.isNodeCoordinate() && offset === 0) {
+        fragments.push(
+          new Selection.NodeFragment(node.id)
+        );
+      }
+
+      // fragments in-between are either full property fragments or node fragments
+      for (var pos= startPos+1; pos < endPos; pos++) {
+        node = container.getChildAt(pos);
+        if (node.isText()) {
+          path = [node.id, 'content'];
+          text = doc.get(path);
+          fragments.push(
+            new Selection.Fragment(path, 0, text.length, true)
+          );
+        } else {
+          fragments.push(
+            new Selection.NodeFragment(container.nodes[pos])
+          );
+        }
+      }
+
+      // last fragment is again either a property fragment (fully or partial) or a node fragment
+      coor = this.end;
+      path = coor.path;
+      offset = coor.offset;
+      nodeId = path[0];
+      node = doc.get(nodeId);
+      if (!node) {
+        throw new Error('Node does not exist:' + nodeId);
+      }
+      // coordinate is a property coordinate
+      if (coor.isPropertyCoordinate()) {
+        text = doc.get(path);
+        fragment = new Selection.Fragment(path, 0, offset, (offset === text.length));
+        fragments.push(fragment);
+      }
+      // coordinate is a node coordinate (after)
+      else if (coor.isNodeCoordinate() && offset > 0) {
+        fragments.push(
+          new Selection.NodeFragment(node.id)
+        );
+      }
+    } else {
+      // startPos === endPos
+      path = this.start.path;
+      nodeId = path[0];
+      node = doc.get(nodeId);
+      var startIsNodeCoordinate = this.start.isNodeCoordinate();
+      var endIsNodeCoordinate = this.end.isNodeCoordinate();
+      if (!node.isText()) {
+        fragments.push(
+          new Selection.NodeFragment(nodeId)
+        );
+      } else if (startIsNodeCoordinate && endIsNodeCoordinate && this.startOffset < this.endOffset) {
+        fragments.push(
+          new Selection.NodeFragment(nodeId)
+        );
+      } else if (!startIsNodeCoordinate && endIsNodeCoordinate && this.endOffset > 0) {
+        text = doc.get(this.startPath);
+        fragments.push(
+          new Selection.Fragment(path, this.startOffset, text.length, (this.startOffset === 0))
+        );
+      } else if (startIsNodeCoordinate && !endIsNodeCoordinate && this.startOffset === 0) {
+        text = doc.get(this.endPath);
+        fragments.push(
+          new Selection.Fragment(path, 0, this.endOffset, (this.endOffset === text.length))
+        );
+      } else if (!startIsNodeCoordinate && !endIsNodeCoordinate) {
+        text = doc.get(this.startPath);
+        fragments.push(
+          new Selection.Fragment(path, this.startOffset, this.endOffset, (this.startOffset === 0 && this.endOffset === text.length))
+        );
+      }
+    }
+
+    this._internal.fragments = fragments;
+
+    return fragments;
   };
 
   /**
-    Splits container selection into property selections
+    Splits a container selection into property selections.
 
     @returns {PropertySelection[]}
   */
   this.splitIntoPropertySelections = function() {
     var sels = [];
-    var container = this.getContainer();
-    var paths = container.getPathRange(this.startPath, this.endPath);
-    var doc = container.getDocument();
-    for (var i = 0; i < paths.length; i++) {
-      var path = paths[i];
-      var startOffset, endOffset;
-      if (i===0) {
-        startOffset = this.startOffset;
-      } else {
-        startOffset = 0;
+    var fragments = this.getFragments();
+    fragments.forEach(function(fragment) {
+      if (fragment instanceof Selection.Fragment) {
+        sels.push(
+          new PropertySelection(fragment.path, fragment.startOffset,
+            fragment.endOffset, false, this.surfaceId)
+        );
       }
-      if (i === paths.length-1) {
-        endOffset = this.endOffset;
-      } else {
-        endOffset = doc.get(path).length;
-      }
-      sels.push(new PropertySelection(path, startOffset, endOffset, false, this.surfaceId));
-    }
+    });
     return sels;
   };
 
-  /**
-    @returns {Selection.Fragment[]} Fragments resulting from splitting this into property selections.
-  */
-  this.getFragments = function() {
-    // TODO: document what this is exactly used for
-    var sels = this.splitIntoPropertySelections();
-    var fragments = map(sels, function(sel) {
-      return new Selection.Fragment(sel.path,
-        sel.startOffset, sel.endOffset);
-    });
-    return fragments;
-  };
-
-  this._coordinates = function(sel) {
+  this._range = function(sel) {
     // EXPERIMENTAL: caching the internal address based range
     // as we use it very often.
-    // However, this bears the danger, that this can get invalid by a change
-    if (sel._internal.containerRange) {
-      return sel._internal.containerRange;
+    // However, this is dangerous as this data can get invalid by a change
+    if (sel._internal.addressRange) {
+      return sel._internal.addressRange;
     }
+
     var container = this.getContainer();
-    var startAddress = container.getAddress(sel.startPath);
+    var startAddress = container.getAddress(sel.start);
     var endAddress;
     if (sel.isCollapsed()) {
       endAddress = startAddress;
     } else {
-      endAddress = container.getAddress(sel.endPath);
+      endAddress = container.getAddress(sel.end);
     }
-    var containerRange = {
-      start: {
-        address: startAddress,
-        offset: sel.startOffset,
-      },
-      end: {
-        address: endAddress,
-        offset: sel.endOffset
-      }
+    var addressRange = {
+      start: startAddress,
+      end: endAddress
     };
     if (sel._isContainerSelection) {
-      sel._internal.containerRange = containerRange;
+      sel._internal.addressRange = addressRange;
     }
-    return containerRange;
-  };
-
-  var _isBefore = function(c1, c2, strict) {
-    if (c1.address.isBefore(c2.address)) return true;
-    if (c1.address.isAfter(c2.address)) return false;
-    if (c1.offset > c2.offset) return false;
-    if (strict && (c1.offset === c2.offset)) return false;
-    return true;
-  };
-
-  var _isEqual = function(c1, c2) {
-    return (c1.address.equals(c2.address) && c1.offset === c2.offset);
+    return addressRange;
   };
 
   var _createNewSelection = function(containerSel, start, end) {
-    var container = containerSel.getContainer();
-    start.path = container.getPathForAddress(start.address);
-    end.path = container.getPathForAddress(end.address);
     var newSel = new ContainerSelection(containerSel.containerId,
       start.path, start.offset, end.path, end.offset, false, containerSel.surfaceId);
     // we need to attach the new selection

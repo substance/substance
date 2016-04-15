@@ -3,11 +3,11 @@ module.exports = function(config) {
     basePath: '.',
     frameworks: ['browserify', 'source-map-support', 'qunit'],
     files: [
-      'test/unit/**/*.test.js',
+      'test/**/*.test.js',
       { pattern: 'test/fixtures/**/*.html', included: false, served: true },
     ],
     preprocessors: {
-      'test/unit/**/*.test.js': ['browserify']
+      'test/**/*.test.js': ['browserify']
     },
     browsers: ['Chrome'],
     customLaunchers: {
@@ -23,6 +23,13 @@ module.exports = function(config) {
   });
 
   if(process.env.TRAVIS){
-      config.browsers = ['Chrome_travis_ci', 'Firefox'];
+    config.browsers = ['Chrome_travis_ci', 'Firefox'];
+  } else {
+    var fs = require('fs');
+    if (fs.existsSync(__dirname + "/karma.conf.local.js")) {
+      var localConfig = require('./karma.conf.local');
+      var merge = require('./util/merge');
+      merge(config, localConfig, { array: 'replace' });
+    }
   }
 };

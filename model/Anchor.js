@@ -1,6 +1,6 @@
 'use strict';
 
-var oo = require('../util/oo');
+var Coordinate = require('./Coordinate');
 
 /*
   Anchors are special annotations which have a zero width.
@@ -16,9 +16,8 @@ var oo = require('../util/oo');
   @class
   @abstract
 */
-function Anchor(path, offset) {
-  this.path = path;
-  this.offset = offset;
+function Anchor() {
+  Anchor.super.apply(this, arguments);
 }
 
 Anchor.Prototype = function() {
@@ -27,18 +26,8 @@ Anchor.Prototype = function() {
     return true;
   };
 
-  this.getPath = function() {
-    return this.path;
-  };
-
-  this.getOffset = function() {
-    return this.offset;
-  };
-
 };
 
-oo.initClass(Anchor);
+Coordinate.extend(Anchor);
 
 module.exports = Anchor;
-
-

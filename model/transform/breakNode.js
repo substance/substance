@@ -28,7 +28,7 @@ function breakNode(tx, args) {
   var sel = args.selection;
   var node = tx.get(sel.start.path[0]);
   var behavior = args.editingBehavior;
-  if (node.isInstanceOf('text')) {
+  if (node.isText()) {
     return breakTextNode(tx, args);
   } else if (behavior && behavior.canBreak(node.type)) {
     var breaker = behavior.getBreaker(node.type);
@@ -52,7 +52,7 @@ function breakTextNode(tx, args) {
   // split the text property and create a new paragraph node with trailing text and annotations transferred
   var text = node.content;
   var container = tx.get(containerId);
-  var nodePos = container.getChildIndex(node);
+  var nodePos = container.getPosition(node.id);
   var id = uuid(node.type);
   var newPath = [id, 'content'];
   var newNode;

@@ -4,7 +4,6 @@ require('../qunit_extensions');
 var sinon = require('sinon');
 var extend = require('lodash/extend');
 var DocumentSession = require('../../../model/DocumentSession');
-var Selection = require('../../../model/Selection');
 var simple = require('../../fixtures/simple');
 
 QUnit.module('model/DocumentSession');
@@ -70,18 +69,18 @@ QUnit.test("Selections after undo/redo.", function(assert) {
   var doc = simple();
   var docSession = new DocumentSession(doc);
   var path = ['p1', 'content'];
-  docSession.setSelection(Selection.create(path, 3));
+  docSession.setSelection(doc.createSelection(path, 3));
   docSession.transaction(function(tx, args) {
     tx.update(path, { insert: {offset: 3, value: "XXX"} });
-    args.selection = Selection.create(path, 6);
+    args.selection = tx.createSelection(path, 6);
     return args;
   });
   docSession.undo();
   var sel = docSession.getSelection();
-  assert.ok(sel.equals(Selection.create(path, 3)), 'Selection should be set correctly after undo.');
+  assert.ok(sel.equals(doc.createSelection(path, 3)), 'Selection should be set correctly after undo.');
   docSession.redo();
   sel = docSession.getSelection();
-  assert.ok(sel.equals(Selection.create(path, 6)), 'Selection should be set correctly after redo.');
+  assert.ok(sel.equals(doc.createSelection(path, 6)), 'Selection should be set correctly after redo.');
 });
 
 

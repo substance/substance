@@ -15,7 +15,6 @@ function component(renderFunc, props) {
 // Tests that apply some scenarios to the Browser DOM
 
 QUnit.browserTest("Three elements", function(assert) {
-  var containerEl = assert.test.sandbox;
   var comp = component(function($$) {
     return $$('div').append(
       $$('span').append('Foo'),
@@ -43,7 +42,7 @@ QUnit.browserTest("Three elements", function(assert) {
     assert.equal(third.childNodes[0].nodeType, window.Node.TEXT_NODE, ".. which is a TEXT_NODE");
     assert.equal(third.childNodes[0].textContent, 'Baz', ".. with content 'Baz'");
   }
-  comp.mount(containerEl);
+  comp.mount(this.sandbox);
   runChecks();
   comp.rerender();
   runChecks();

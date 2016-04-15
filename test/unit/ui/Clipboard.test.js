@@ -15,9 +15,11 @@ var components = {
   "paragraph": require('../../../packages/paragraph/ParagraphComponent')
 };
 
-Clipboard.NO_CATCH = QUnit.config.notrycatch;
-
-QUnit.uiModule('ui/Clipboard');
+QUnit.uiModule('ui/Clipboard', {
+  beforeEach: function() {
+    Clipboard.NO_CATCH = QUnit.config.notrycatch;
+  }
+});
 
 function ClipboardEventData() {
   this.data = {};

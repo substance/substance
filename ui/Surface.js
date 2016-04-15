@@ -110,7 +110,7 @@ Surface.Prototype = function() {
       // we will react on this to render a custom selection
       el.on('focus', this.onNativeFocus);
       el.on('blur', this.onNativeBlur);
-
+      // activate the clipboard
       this.clipboard.attach(el);
     }
 
@@ -874,13 +874,30 @@ Surface.Prototype = function() {
     selectionFragments = selectionFragments || {};
     if (sel && !sel.isNull()) {
       // console.log('Computing selection fragments for', sel.toString());
+      var doc = this.getDocument();
       var fragments = sel.getFragments();
       fragments.forEach(function(frag) {
-        var pathStr = frag.path.toString();
-        var frags = selectionFragments[pathStr];
+        var key;
+        if (frag.isNodeFragment()) {
+          var node = doc.get(frag.getNodeId());
+          // HACK: we replace NodeFragments for TextNodes
+          // by a PropertyFragment so that the selection is rendered
+          // in the same way as other property fragments
+          if (node.isText()) {
+            var path = node.getTextPath();
+            var len = node.getText().length;
+            frag = new Selection.Fragment(path, 0, len, true);
+            key = path.join(',');
+          } else {
+            key = node.id;
+          }
+        } else {
+          key = frag.path.toString();
+        }
+        var frags = selectionFragments[key];
         if (!frags) {
           frags = [];
-          selectionFragments[pathStr] = frags;
+          selectionFragments[key] = frags;
         }
         frag.collaborator = collaborator;
         frags.push(frag);

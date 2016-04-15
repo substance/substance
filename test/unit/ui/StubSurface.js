@@ -50,6 +50,7 @@ function StubSurface(doc, containerId) {
 
   this.copy = Surface.prototype.copy;
 
+  this._prepareArgs = function() {};
 }
 
 module.exports = StubSurface;

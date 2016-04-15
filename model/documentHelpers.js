@@ -1,7 +1,9 @@
 'use strict';
 
+var isString = require('lodash/isString');
 var filter = require('lodash/filter');
 var AnnotationIndex = require('./AnnotationIndex');
+var Selection = require('./Selection');
 
 /**
   @module
@@ -54,6 +56,7 @@ documentHelpers.getPropertyAnnotationsForSelection = function(doc, sel, options)
   @return {Array} An array of container annotations
 */
 documentHelpers.getContainerAnnotationsForSelection = function(doc, sel, container, options) {
+  options = options || {};
   // ATTENTION: looking for container annotations is not as efficient as property
   // selections, as we do not have an index that has notion of the spatial extend
   // of an annotation (which would depend on a model-side implementation of
@@ -119,21 +122,17 @@ documentHelpers.getTextForSelection = function(doc, sel) {
     return text.substring(sel.start.offset, sel.end.offset);
   } else if (sel.isContainerSelection()) {
     var result = [];
-    var container = doc.get(sel.containerId);
-    var paths = container.getPathRange(sel.startPath, sel.endPath);
-    for (var i = 0; i < paths.length; i++) {
-      var path = paths[i];
-      text = doc.get(path);
-      if (paths.length === 1) {
-        result.push(text.substring(sel.startOffset, sel.endOffset));
-      } else if (i===0) {
-        result.push(text.substring(sel.startOffset));
-      } else if (i===paths.length-1) {
-        result.push(text.substring(0, sel.endOffset));
-      } else {
-        result.push(text);
+    var fragments = sel.getFragments();
+    fragments.forEach(function(fragment) {
+      if (fragment instanceof Selection.Fragment) {
+        var text = doc.get(fragment.path);
+        if (isString(text)) {
+          result.push(
+            text.substring(fragment.startOffset, fragment.endOffset)
+          );
+        }
       }
-    }
+    });
     return result.join('\n');
   }
 };

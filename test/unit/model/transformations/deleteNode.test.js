@@ -7,13 +7,6 @@ var DocumentSession = require('../../../../model/DocumentSession');
 
 QUnit.module('model/transform/deleteNode');
 
-QUnit.test("DeleteNode usage", function(assert) {
-  var doc = containerAnnoSample();
-  assert.throws(function() {
-    deleteNode(doc, {});
-  });
-});
-
 QUnit.test("Delete a plain node", function(assert) {
   var doc = containerAnnoSample();
   var docSession = new DocumentSession(doc);

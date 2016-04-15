@@ -1,5 +1,9 @@
 'use strict';
 
+var isEqual = require('lodash/isEqual');
+var isObject = require('lodash/isObject');
+var isArray = require('lodash/isArray');
+var isString = require('lodash/isString');
 var each = require('lodash/each');
 var EventEmitter = require('../util/EventEmitter');
 var uuid = require('../util/uuid');
@@ -11,6 +15,8 @@ var PathEventProxy = require('./PathEventProxy');
 var IncrementalData = require('./data/IncrementalData');
 var DocumentNodeFactory = require('./DocumentNodeFactory');
 var Selection = require('./Selection');
+var Coordinate = require('./Coordinate');
+var Range = require('./Range');
 var docHelpers = require('./documentHelpers');
 
 var __id__ = 0;
@@ -351,10 +357,160 @@ Document.Prototype = function() {
       endOffset: 20
     });
     ```
-
   */
   this.createSelection = function() {
-    var sel = Selection.create.apply(null, arguments);
+    var PropertySelection = require('./PropertySelection');
+    var ContainerSelection = require('./ContainerSelection');
+    var coor, range;
+    if (arguments.length === 1 && arguments[0] === null) {
+      return Selection.nullSelection;
+    }
+    var selData = null;
+    if (arguments[0] instanceof Coordinate) {
+      coor = arguments[0];
+      selData = {
+        type: 'property',
+        path: coor.start.path,
+        startOffset: coor.start.offset,
+        endOffset: coor.end.offset
+      };
+    }
+    // TODO: make sure that range.reverse is ok
+    else if (arguments[0] instanceof Range) {
+      range = arguments[0];
+      if (isEqual(range.start.path, range.end.path) && !range.start.isNodeCoordinate()) {
+        selData = {
+          type: 'property',
+          path: range.start.path,
+          startOffset: range.start.offset,
+          endOffset: range.end.offset
+        };
+      } else {
+        selData = {
+          type: 'container',
+          containerId: range.containerId,
+          startPath: range.start.path,
+          startOffset: range.start.offset,
+          endPath: range.end.path,
+          endOffset: range.end.offset
+        };
+      }
+    }
+    else if (arguments.length === 1 && isObject(arguments[0])) {
+      selData = arguments[0];
+    }
+    // createSelection(startPath, startOffset)
+    else if (arguments.length === 2 && isArray(arguments[0])) {
+      selData = {
+        type: 'property',
+        path: arguments[0],
+        startOffset: arguments[1],
+        endOffset: arguments[1]
+      };
+    }
+    // createSelection(startPath, startOffset, endOffset)
+    else if (arguments.length === 3 && isArray(arguments[0])) {
+      selData = {
+        type: 'property',
+        path: arguments[0],
+        startOffset: arguments[1],
+        endOffset: arguments[2]
+      };
+    }
+    // createSelection(containerId, startPath, startOffset, endPath, endOffset)
+    else if (arguments.length === 5 && isString(arguments[0])) {
+      selData = {
+        type: 'container',
+        containerId: arguments[0],
+        startPath: arguments[1],
+        startOffset: arguments[2],
+        endPath: arguments[3],
+        endOffset: arguments[4]
+      };
+    } else {
+      console.error('Illegal arguments for Selection.create().', arguments);
+      return Selection.nullSelection;
+    }
+
+    var sel, tmp;
+
+    if (!selData) {
+      //fix if this is thrown
+      throw new Error('Illegal state.');
+    }
+    if (selData.type === 'property') {
+      if (selData.endOffset === null || selData.endOffset === undefined) {
+        selData.endOffset = selData.startOffset;
+      }
+      if (selData.startOffset>selData.endOffset) {
+        tmp = selData.startOffset;
+        selData.startOffset = selData.endOffset;
+        selData.endOffset = tmp;
+        selData.reverse = true;
+      }
+      sel = new PropertySelection(selData.path, selData.startOffset, selData.endOffset, selData.reverse);
+    } else if (selData.type === 'container') {
+      var container = this.get(selData.containerId);
+      var startNodeId = selData.startPath[0];
+      var endNodeId = selData.endPath[0];
+      var startPos = container.getPosition(startNodeId);
+      var endPos = container.getPosition(endNodeId);
+      var startNode = this.get(startNodeId);
+      var endNode = this.get(endNodeId);
+      if (!startNode) {
+        throw new Error('Illegal argument: node with id ' + startNodeId + ' does not exist');
+      }
+      if (!endNode) {
+        throw new Error('Illegal argument: node with id ' + endNodeId + ' does not exist');
+      }
+      // ATTENTION: since Beta4 we are not supporting partial
+      // selections of nodes other than text nodes
+      if (selData.startPath.length > 1) {
+        if (!startNode.isText()) {
+          console.warn('Selecting a non-textish node partially is not supported. Select the full node.');
+          selData.startPath = [startNodeId];
+          selData.startOffset = 0;
+        }
+      }
+      if (selData.endPath.length > 1) {
+        if (!endNode.isText()) {
+          console.warn('Selecting a non-textish node partially is not supported. Select the full node.');
+          selData.endPath = [endNodeId];
+          selData.endOffset = 1;
+        }
+      }
+
+      if (startPos < endPos) {
+        sel = new ContainerSelection(selData.containerId, selData.startPath, selData.startOffset, selData.endPath, selData.endOffset, false);
+      } else if (endPos < startPos) {
+        sel = new ContainerSelection(selData.containerId, selData.endPath, selData.endOffset, selData.startPath, selData.startOffset, true);
+      } else {
+        // now we are in the same node
+        // TODO: bring node and property coors into correct order
+        if (selData.startPath.length > 1 && selData.endPath.length > 1) {
+          if (selData.startOffset > selData.endOffset) {
+            tmp = selData.startOffset;
+            selData.startOffset = selData.endOffset;
+            selData.endOffset = tmp;
+            selData.reverse = true;
+          }
+        } else if (
+          (selData.startPath.length === 1 && selData.endPath.length > 1 && selData.startOffset > 0) ||
+          (selData.startPath.length > 1 && selData.endPath.length === 1 && selData.endOffset === 0) ||
+          (selData.startPath.length === 1 && selData.endPath.length === 1 && selData.endOffset === 0)
+        ) {
+          tmp = selData.startPath;
+          selData.startPath = selData.endPath;
+          selData.endPath = tmp;
+          tmp = selData.startOffset;
+          selData.startOffset = selData.endOffset;
+          selData.endOffset = tmp;
+          selData.reverse = true;
+        }
+        sel = new ContainerSelection(selData.containerId, selData.startPath, selData.startOffset, selData.endPath, selData.endOffset, selData.reverse);
+      }
+    }
+
     sel.attach(this);
     return sel;
   };

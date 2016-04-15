@@ -33,3 +33,9 @@ tmp
 
 # IDE / Editor genereated files
 .idea
+
+# Often having an HTML file for experimenting with native browser behavior
+experiment.html
+
+# Overriding karma.conf.js
+karma.conf.local.js

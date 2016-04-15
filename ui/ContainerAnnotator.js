@@ -47,8 +47,8 @@ ContainerAnnotator.Prototype = function() {
       });
 
     // node components
-    each(containerNode.nodes, function(nodeId) {
-      el.append(this._renderNode(nodeId));
+    each(containerNode.getNodes(), function(node) {
+      el.append(this.renderNode(node));
     }.bind(this));
 
     return el;

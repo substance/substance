@@ -56,12 +56,16 @@ DefaultDOMElement.parseXML = function(xml) {
 };
 
 DefaultDOMElement.wrapNativeElement = function(el) {
-  if (inBrowser && (el instanceof window.Node || el === window) ) {
-    var BrowserDOMElement = require('./BrowserDOMElement');
-    return BrowserDOMElement.wrapNativeElement(el);
-  } else if (el.root && el.root.type === "root" ) {
-    var CheerioDOMElement = require('./CheerioDOMElement');
-    return CheerioDOMElement.wrapNativeElement(el);
+  if (el) {
+    if (inBrowser && (el instanceof window.Node || el === window) ) {
+      var BrowserDOMElement = require('./BrowserDOMElement');
+      return BrowserDOMElement.wrapNativeElement(el);
+    } else if (el.root && el.root.type === "root" ) {
+      var CheerioDOMElement = require('./CheerioDOMElement');
+      return CheerioDOMElement.wrapNativeElement(el);
+    }
+  } else {
+    return null;
   }
 };
 

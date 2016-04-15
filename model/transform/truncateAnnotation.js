@@ -25,7 +25,7 @@ function truncateAnnotation(tx, args) {
   // TODO: should we throw when more than one anno has been found?
   var anno = annos[0];
   var annoSel = anno.getSelection();
-  var newAnnoSel = annoSel.truncate(sel);
+  var newAnnoSel = annoSel.truncateWith(sel);
   anno.updateRange(tx, newAnnoSel);
   args.result = anno;
   return args;

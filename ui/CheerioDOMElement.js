@@ -1,6 +1,7 @@
 'use strict';
 
 var isString = require('lodash/isString');
+var last = require('lodash/last');
 var extend = require('lodash/extend');
 var clone = require('lodash/clone');
 var $ = require('../util/cheerio.customized');
@@ -177,6 +178,49 @@ CheerioDOMElement.Prototype = function() {
 
   this.getChildAt = function(pos) {
     return this._wrapNativeElement(this.el.children[pos]);
+  };
+
+  this.getChildIndex = function(child) {
+    if (!child._isCheerioDOMElement) {
+      throw new Error('Expecting a CheerioDOMElement instance.');
+    }
+    return this.el.children.indexOf(child.el);
+  };
+
+  this.getFirstChild = function() {
+    var firstChild = this.el.children[0];
+    if (firstChild) {
+      return CheerioDOMElement.wrapNativeElement(firstChild);
+    } else {
+      return null;
+    }
+  };
+
+  this.getLastChild = function() {
+    var lastChild = last(this.el.children);
+    if (lastChild) {
+      return CheerioDOMElement.wrapNativeElement(lastChild);
+    } else {
+      return null;
+    }
+  };
+
+  this.getNextSibling = function() {
+    var next = this.el.next;
+    if (next) {
+      return CheerioDOMElement.wrapNativeElement(next);
+    } else {
+      return null;
+    }
+  };
+
+  this.getPreviousSibling = function() {
+    var previous = this.el.previous;
+    if (previous) {
+      return CheerioDOMElement.wrapNativeElement(previous);
+    } else {
+      return null;
+    }
   };
 
   this.isTextNode = function() {

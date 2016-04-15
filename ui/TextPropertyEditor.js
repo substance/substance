@@ -28,14 +28,19 @@ var TextProperty = require('./TextPropertyComponent');
   ```
 */
 
-function TextPropertyEditor() {
+function TextPropertyEditor(parent, props) {
+  if (!props.name) {
+    props.name = props.path.join('.');
+  }
   Surface.apply(this, arguments);
 }
 
 TextPropertyEditor.Prototype = function() {
 
+  var _super = TextPropertyEditor.super.prototype;
+
   this.render = function($$) {
-    var el = Surface.prototype.render.apply(this, arguments);
+    var el = _super.render.apply(this, arguments);
     el.addClass("sc-text-property-editor");
     el.append(
       $$(TextProperty, {
