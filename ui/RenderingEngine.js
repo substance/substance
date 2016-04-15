@@ -85,6 +85,10 @@ RenderingEngine.Prototype = function() {
       if (needRerender) {
         var context = new CaptureContext(vel);
         var content = comp.render(context.$$);
+        if (!content || !content._isVirtualHTMLElement) {
+          throw new Error("Component.render must return VirtualHTMLElement");
+        }
+
         if (comp.__htmlConfig__) {
           content._mergeHTMLConfig(comp.__htmlConfig__);
         }
