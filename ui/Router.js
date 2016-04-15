@@ -1,10 +1,11 @@
 'use strict';
 
 var each = require('lodash/each');
-var oo = require('../util/oo');
+var EventEmitter = require('../util/EventEmitter');
 var DefaultDOMElement = require('./DefaultDOMElement');
 
 var Router = function() {
+  EventEmitter.apply(this, arguments);
   this.__isStarted__ = false;
 };
 
@@ -22,17 +23,17 @@ Router.Prototype = function() {
   /*
     Takes the current route and updates the application state.
   */
-  this.readURL = function() {
+  this.readRoute = function() {
     if (!this.__isStarted__) this.start();
-    this.stateFromRoute(this.getRoute());
+    return this.deserializeRoute(this.getRoute());
   };
 
-  this.writeURL = function() {
-    var route = this.routeFromState();
-    if (!route) {
+  this.writeRoute = function(route) {
+    var routeString = this.serializeRoute(route);
+    if (!routeString) {
       this.clearRoute();
     } else {
-      this.setRoute(route);
+      this.setRoute(routeString);
     }
   };
 
@@ -42,25 +43,25 @@ Router.Prototype = function() {
   };
 
   /*
-    Maps a route to application state and updates the application.
-
-    This should be implemented by an application specific router.
+    Maps a route URL to a route object
 
     @abstract
     @param String route content of the URL's hash fragment
    */
-  this.stateFromRoute = function(route) {
+  this.deserializeRoute = function(routeString) {
     /* jshint unused:false */
   };
 
   /*
-    Maps an application  route to application state and updates the application.
+    Maps a route object to a route URL
 
     This should be implemented by an application specific router.
 
     @abstract
    */
-  this.routeFromState = function() {};
+  this.serializeRoute = function(route) {
+    /* jshint unused:false */
+  };
 
   this.getRoute = function() {
     return window.location.hash.slice(1);
@@ -89,8 +90,9 @@ Router.Prototype = function() {
     }
     this.__isLoading__ = true;
     try {
-      var route = this.getRoute();
-      this.stateFromRoute(route);
+      var routeString = this.getRoute();
+      var route = this.deserializeRoute(routeString);
+      this.emit('route:changed', route);
     } finally {
       this.__isLoading__ = false;
     }
@@ -98,7 +100,7 @@ Router.Prototype = function() {
 
 };
 
-oo.initClass(Router);
+EventEmitter.extend(Router);
 
 Router.objectToRouteString = function(obj) {
   var route = [];
