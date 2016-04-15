@@ -121,7 +121,7 @@ EditLinkPrompt.Prototype = function() {
   this.onSave = function(e) {
     e.preventDefault();
     this.props.tool.updateLink({
-      url: this.refs.url.$el.val()
+      url: this.refs.url.val()
     });
   };
 
