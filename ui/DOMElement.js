@@ -368,7 +368,8 @@ DOMElement.Prototype = function() {
     if (arguments.length === 0) {
       return this.getInnerHTML();
     } else {
-      return this.setInnerHTML(html);
+      this.setInnerHTML(html);
+      return this;
     }
   };
 
@@ -525,8 +526,28 @@ DOMElement.Prototype = function() {
     throw new Error(NOT_IMPLEMENTED);
   };
 
+  this.getChildIndex = function(child) {
+    throw new Error(NOT_IMPLEMENTED);
+  };
+
   this.getChildNodeIterator = function() {
     return new ArrayIterator(this.getChildNodes());
+  };
+
+  this.getLastChild = function() {
+    throw new Error(NOT_IMPLEMENTED);
+  };
+
+  this.getFirstChild = function() {
+    throw new Error(NOT_IMPLEMENTED);
+  };
+
+  this.getNextSibling = function() {
+    throw new Error(NOT_IMPLEMENTED);
+  };
+
+  this.getPreviousSibling = function() {
+    throw new Error(NOT_IMPLEMENTED);
   };
 
   /**
@@ -725,6 +746,13 @@ DOMElement.Prototype = function() {
     throw new Error(NOT_IMPLEMENTED);
   };
 
+  this.remove = function() {
+    var parent = this.getParent();
+    if (parent) {
+      parent.removeChild(this);
+    }
+  };
+
   /**
     Removes all child nodes from this element.
 
@@ -759,17 +787,23 @@ DOMElement.Prototype = function() {
     **Attention: this makes only sense for elements which are rendered in the browser**
 
   */
-  this.focus = function() {};
+  this.focus = function() {
+    return this;
+  };
 
   /**
     Blur this element.
   */
-  this.blur = function() {};
+  this.blur = function() {
+    return this;
+  };
 
   /**
     Trigger a click event on this element.
   */
-  this.click = function() {};
+  this.click = function() {
+    return this;
+  };
 
   /* API to retrieve layout information */
 
@@ -1069,5 +1103,37 @@ DOMElement._findEventListenerIndex = function(eventListeners, eventName, handler
   return idx;
 };
 
+function TextNode() {}
+
+TextNode.Prototype = function() {
+  this._isDOMElement = true;
+
+  this.isTextNode = function() {
+    return true;
+  };
+
+  this.getNodeType = function() {
+    return 'text';
+  };
+
+  this.isElementNode =
+  this.isDocumentNode =
+  this.isCommentNode = function() {
+    return false;
+  };
+
+  [
+    'getParent', 'getNextSibling', 'getPreviousSibling',
+    'text', 'getTextContent', 'setTextContent',
+    'clone'
+  ].forEach(function(name) {
+    this[name] = DOMElement.prototype[name];
+  }.bind(this));
+
+};
+
+oo.initClass(TextNode);
+
+DOMElement.TextNode = TextNode;
 
 module.exports = DOMElement;

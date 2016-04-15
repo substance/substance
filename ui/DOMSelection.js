@@ -1,6 +1,7 @@
 /* jshint latedef:nofunc */
 'use strict';
 
+var last = require('lodash/last');
 var oo = require('../util/oo');
 var Coordinate = require('../model/Coordinate');
 var Range = require('../model/Range');
@@ -124,16 +125,20 @@ DOMSelection.Prototype = function() {
     if (wSel.rangeCount === 0) {
       return null;
     }
+    var anchorNode = DefaultDOMElement.wrapNativeElement(wSel.anchorNode);
     if (wSel.isCollapsed) {
-      var coor = this._getCoordinate(wSel.anchorNode, wSel.anchorOffset, options);
+      var coor = this._getCoordinate(anchorNode, wSel.anchorOffset, options);
       range = _createRange(coor, coor, false, this.getContainerId());
     }
     // HACK: special treatment for edge cases as addressed by #354.
     // Sometimes anchorNode and focusNodes are the surface
-    if (DefaultDOMElement.wrapNativeElement(wSel.anchorNode).is('.sc-surface')) {
-      range = this._getEnclosingRange(wSel.getRangeAt(0));
-    } else {
-      range = this._getRange(wSel.anchorNode, wSel.anchorOffset, wSel.focusNode, wSel.focusOffset);
+    else {
+      if (anchorNode.isElementNode() && anchorNode.is('.sc-surface')) {
+        range = this._getEnclosingRange(wSel.getRangeAt(0));
+      } else {
+        var focusNode = DefaultDOMElement.wrapNativeElement(wSel.focusNode);
+        range = this._getRange(anchorNode, wSel.anchorOffset, focusNode, wSel.focusOffset);
+      }
     }
     // console.log('### extracted range from DOM', range.toString());
     return range;
@@ -215,7 +220,7 @@ DOMSelection.Prototype = function() {
   this._getCoordinate = function(node, offset, options) {
     // Trying to apply the most common situation first
     // and after that covering known edge cases
-    var el = this.surface.getNativeElement();
+    var el = this.surface.el;
     var coor = TextPropertyComponent.getCoordinate(el, node, offset);
     if (!coor) {
       coor = this._searchForCoordinate(node, offset, options);
@@ -236,54 +241,61 @@ DOMSelection.Prototype = function() {
     @returns {model/Coordinate} the coordinate
   */
   this._searchForCoordinate = function(node, offset, options) {
+    // NOTE: assuming that most situations are covered by
+    // TextPropertyComponent.getCoordinate already, we are trying just to
+    // solve the remaining scenarios, in an opportunistic way
     options = options || {};
-    var el = this.surface.getNativeElement();
-    var elements = el.querySelectorAll('*[data-path]');
-    var idx, idx1, idx2, cmp1, cmp2;
-    idx1 = 0;
-    idx2 = elements.length-1;
-    cmp1 = _compareNodes(elements[idx1], node);
-    cmp2 = _compareNodes(elements[idx2], node);
-    while(true) {
-      var l = idx2-idx1+1;
-      if (cmp2 < 0) {
-        idx = idx2;
-        break;
-      } else if (cmp1 > 0) {
-        idx = idx1;
-        break;
-      } else if (l<=2) {
-        idx = idx2;
-        break;
-      }
-      var pivotIdx = idx1 + Math.floor(l/2);
-      var pivotCmp = _compareNodes(elements[pivotIdx], node);
-      if (pivotCmp < 0) {
-        idx1 = pivotIdx;
-        cmp1 = pivotCmp;
-      } else {
-        idx2 = pivotIdx;
-        cmp2 = pivotCmp;
+    options.direction = options.direction || 'right';
+    var dir = options.direction;
+    if (node.isElementNode()) {
+      var childCount = node.getChildCount();
+      offset = Math.max(0, Math.min(childCount, offset));
+      var el = node.getChildAt(offset);
+      while (el) {
+        var textPropertyEl;
+        if (dir === 'right') {
+          if (el.isElementNode()) {
+            if (el.getAttribute('data-path')) {
+              textPropertyEl = el;
+            } else {
+              textPropertyEl = el.find('*[data-path]');
+            }
+            if (textPropertyEl) {
+              return new Coordinate(_getPath(textPropertyEl), 0);
+            }
+          }
+          el = el.getNextSibling();
+        } else {
+          if (el.isElementNode()) {
+            if (el.getAttribute('data-path')) {
+              textPropertyEl = el;
+            } else {
+              var textPropertyEls = el.findAll('*[data-path]');
+              textPropertyEl = last(textPropertyEls);
+            }
+            if (textPropertyEl) {
+              var path = _getPath(textPropertyEl);
+              var doc = this.surface.getDocument();
+              var text = doc.get(path);
+              return new Coordinate(path, text.length);
+            }
+          }
+          el = el.getPreviousSibling();
+        }
       }
     }
-    var charPos;
-    var doc = this.surface.getDocument();
-    var path = _getPath(elements[idx]);
-    var text = doc.get(path);
-    if (options.direction === "left") {
-      if (idx === 0) {
-        charPos = 0;
-      } else {
-        path = _getPath(elements[idx-1]);
-        text = doc.get(path);
-        charPos = text.length;
+    // if we land here then we could not find an addressable element on this level.
+    // try to find it one level higher
+    if (node !== this.surface.el) {
+      var parent = node.getParent();
+      var nodeIdx = parent.getChildIndex(node);
+      if (dir === 'right') {
+        nodeIdx++;
       }
-    } else if (cmp2<0) {
-      charPos = text.length;
-    } else {
-      charPos = 0;
+      return this._searchForCoordinate(parent, nodeIdx, options);
     }
-    return new Coordinate(path, charPos);
+
+    return null;
   };
 
   /*
@@ -326,19 +338,6 @@ DOMSelection.Prototype = function() {
     }
   };
 
-  function _compareNodes(node1, node2) {
-    var cmp = node1.compareDocumentPosition(node2);
-    // Note: the first two cases are necessary because POSITION_FOLLOWING
-    // has strange semantics when the relationship is actually hierarchical
-    if (cmp & window.document.DOCUMENT_POSITION_FOLLOWING) {
-      return -1;
-    } else if (cmp&window.document.DOCUMENT_POSITION_PRECEDING) {
-      return 1;
-    } else {
-      return 0;
-    }
-  }
-
   var _r1, _r2;
 
   function _isReverse(anchorNode, anchorOffset, focusNode, focusOffset) {
@@ -349,8 +348,8 @@ DOMSelection.Prototype = function() {
         _r1 = window.document.createRange();
         _r2 = window.document.createRange();
       }
-      _r1.setStart(anchorNode, anchorOffset);
-      _r2.setStart(focusNode, focusOffset);
+      _r1.setStart(anchorNode.getNativeElement(), anchorOffset);
+      _r2.setStart(focusNode.getNativeElement(), focusOffset);
       var cmp = _r1.compareBoundaryPoints(window.Range.START_TO_START, _r2);
       if (cmp === 1) {
         return true;
@@ -360,9 +359,14 @@ DOMSelection.Prototype = function() {
   }
 
   function _getPath(el) {
-    if (el && el.dataset && el.dataset.path) {
-      return el.dataset.path.split('.');
+    if (!el._isDOMElement) {
+      el = DefaultDOMElement.wrapNativeElement(el);
     }
+    if (el.isElementNode()) {
+      var pathStr = el.getAttribute('data-path');
+      return pathStr.split('.');
+    }
+    throw new Error("Can't get path from element:" + el.outerHTML);
   }
 
   /*

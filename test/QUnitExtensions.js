@@ -3,6 +3,7 @@
 var inBrowser = require('../util/inBrowser');
 var isEmpty = require('lodash/isEmpty');
 var platform = require('../util/platform');
+var DefaultDOMElement = require('../ui/DefaultDOMElement');
 
 QUnit.assert.fail = function(msg) {
   this.push(false, false, true, msg);
@@ -27,28 +28,25 @@ QUnit.uiModule = function(name, hooks) {
   if (inBrowser) {
     var __beforeEach__ = hooks.beforeEach;
     hooks.beforeEach = function(assert) {
-      if (!window.document.querySelector('#qunit-fixture')) {
-        var fixtureElement = window.document.createElement('div');
+      var fixtureElement = window.document.querySelector('#qunit-fixture');
+      if (!fixtureElement) {
+        fixtureElement = window.document.createElement('div');
         fixtureElement.id = "qunit-fixture";
         window.document.querySelector('body').appendChild(fixtureElement);
       }
-      var testEl = window.document.getElementById('qunit-test-output-'+assert.test.testId)
-      if (testEl) {
-        var assertList = testEl.querySelector('.qunit-assert-list');
-        var sandbox = window.document.createElement('div')
-        sandbox.className = "sandbox";
-        testEl.insertBefore(sandbox, assertList);
-        assert.test.sandbox = sandbox;
-      }
+      var sandboxEl = window.document.createElement('div');
+      sandboxEl.id = 'sandbox-'+assert.test.id;
+      fixtureElement.appendChild(sandboxEl);
+      assert.test.testEnvironment.sandbox = DefaultDOMElement.wrapNativeElement(sandboxEl);
       if (__beforeEach__) {
         __beforeEach__();
       }
     };
     var __afterEach__ = hooks.__afterEach__;
     hooks.afterEach = function(assert) {
-      var sandboxEl = assert.test.sandbox;
-      if (sandboxEl) {
-        sandboxEl.parentNode.removeChild(sandboxEl);
+      var sandbox = assert.test.testEnvironment.sandbox;
+      if (sandbox) {
+        sandbox.remove();
       }
       if (__afterEach__) {
         __afterEach__();
@@ -90,6 +88,12 @@ if (inBrowser) {
   QUnit.setDOMSelection = function(startNode, startOffset, endNode, endOffset) {
     var sel = window.getSelection();
     var range = window.document.createRange();
+    if (startNode._isDOMElement) {
+      startNode = startNode.getNativeElement();
+    }
+    if (endNode._isDOMElement) {
+      endNode = endNode.getNativeElement();
+    }
     range.setStart(startNode, startOffset);
     range.setEnd(endNode, endOffset);
     sel.removeAllRanges();

@@ -680,4 +680,8 @@ Object.defineProperty(Component, '$$', {
   }
 });
 
+Component.unwrapDOMElement = function(el) {
+  return _unwrapComp(el);
+};
+
 module.exports = Component;

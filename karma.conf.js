@@ -3,11 +3,11 @@ module.exports = function(config) {
     basePath: '.',
     frameworks: ['browserify', 'source-map-support', 'qunit'],
     files: [
-      'test/unit/**/*.test.js',
+      'test/**/*.test.js',
       { pattern: 'test/fixtures/**/*.html', included: false, served: true },
     ],
     preprocessors: {
-      'test/unit/**/*.test.js': ['browserify']
+      'test/**/*.test.js': ['browserify']
     },
     browsers: ['Chrome'],
     customLaunchers: {

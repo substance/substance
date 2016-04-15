@@ -157,7 +157,7 @@ TextPropertyComponent.Prototype = function() {
   };
 
   this.getDOMCoordinate = function(charPos) {
-    return this._getDOMCoordinate(this.el.getNativeElement(), charPos);
+    return this._getDOMCoordinate(this.el, charPos);
   };
 
   this._getDOMCoordinate = function(el, charPos) {
@@ -165,24 +165,25 @@ TextPropertyComponent.Prototype = function() {
     var idx = 0;
     if (charPos === 0) {
       return {
-        container: el,
+        container: el.getNativeElement(),
         offset: 0
       };
     }
-    for (var child = el.firstChild; child; child=child.nextSibling, idx++) {
-      if (child.nodeType === 3) {
-        l = child.length;
+    for (var child = el.getFirstChild(); child; child=child.getNextSibling(), idx++) {
+      if (child.isTextNode()) {
+        l = child.textContent.length;
         if (l >= charPos) {
           return {
-            container: child,
+            container: child.getNativeElement(),
             offset: charPos
           };
         } else {
           charPos -= l;
         }
-      } else if (child.nodeType === 1) {
-        if (child.dataset && child.dataset.length) {
-          l = parseInt(child.dataset.length, 10);
+      } else if (child.isElementNode()) {
+        var length = child.getAttribute('data-length');
+        if (length) {
+          l = parseInt(length, 10);
           if (l>= charPos) {
             return this._getDOMCoordinate(child, charPos, idx);
           } else {
@@ -229,13 +230,14 @@ function _getPropertyContext(root, node, offset) {
     if (!node || node === root) {
       return null;
     }
-    if (node.nodeType === 1) {
-      if (node.dataset && node.dataset.path) {
+    if (node.isElementNode()) {
+      var path = node.getAttribute('data-path');
+      if (path) {
         result.el = node;
-        result.path = node.dataset.path.split('.');
+        result.path = path.split('.');
         return result;
       }
-      if (node.dataset && node.dataset.inline) {
+      if (node.getAttribute('data-inline')) {
         // we need to normalize situations where the DOM coordinate
         // is inside an inline node, which we have observed
         // can actually happen.
@@ -245,7 +247,7 @@ function _getPropertyContext(root, node, offset) {
         }
       }
     }
-    node = node.parentNode;
+    node = node.getParent();
   }
   return null;
 }
@@ -264,17 +266,19 @@ function _getCharPos(node, offset) {
     in just one iteration.
   */
 
-  parent = node.parentNode;
-  if (node.nodeType === 3) {
+  parent = node.getParent();
+  if (node.isTextNode()) {
     // TextNode is first child
     if (node === parent.firstChild) {
       // ... we can stop if parent is text property
-      if (parent.dataset.path) {
+      var parentPath = parent.getAttribute('data-path');
+      var parentOffset = parent.getAttribute('data-offset');
+      if (parentPath) {
         charPos = offset;
       }
       // ... and we can stop if parent has an offset hint
-      else if (parent.dataset.offset) {
-        charPos = parseInt(parent.dataset.offset, 10) + offset;
+      else if (parentOffset) {
+        charPos = parseInt(parentOffset, 10) + offset;
       }
       // ... otherwise we count the charPos by recursing up-tree
       else {
@@ -282,26 +286,27 @@ function _getCharPos(node, offset) {
       }
     } else {
       // the node has a predecessor so we can apply recurse using the child index
-      childIdx = Array.prototype.indexOf.call(parent.childNodes, node);
+      childIdx = parent.getChildIndex(node);
       charPos = _getCharPos(parent, childIdx) + offset;
     }
-  } else if (node.nodeType === 1) {
-    var dataset = node.dataset;
+  } else if (node.isElementNode()) {
+    var pathStr = node.getAttribute('data-path');
+    var offsetStr = node.getAttribute('data-offset');
     // if node is the element of a text property, then offset is a child index
     // up to which we need to sum up all lengths
-    if (dataset && dataset.path) {
+    if (pathStr) {
       charPos = _countCharacters(node, offset);
     }
     // similar if node is the element of an annotation, and we can use the
     // element's offset
-    else if (dataset && dataset.offset) {
-      childIdx = Array.prototype.indexOf.call(parent.childNodes, node);
-      charPos = parseInt(dataset.offset, 10) + _countCharacters(node, offset);
+    else if (offsetStr) {
+      childIdx = parent.getChildIndex(node);
+      charPos = parseInt(offsetStr, 10) + _countCharacters(node, offset);
     }
     // for other elements we need to count characters in the child tree
     // adding the offset of this element which needs to be computed by recursing up-tree
     else {
-      childIdx = Array.prototype.indexOf.call(parent.childNodes, node);
+      childIdx = parent.getChildIndex(node);
       charPos = _getCharPos(parent, childIdx) + _countCharacters(node, offset);
     }
   } else {
@@ -314,23 +319,23 @@ function _getCharPos(node, offset) {
 function _countCharacters(el, maxIdx) {
   var charPos = 0;
   // inline elements have a length of 1
-  if (el.dataset && el.dataset.inline) {
+  if (el.getAttribute('data-inline')) {
     return maxIdx === 0 ? 0 : 1;
   }
-  var l = el.childNodes.length;
+  var l = el.getChildCount();
   if (arguments.length === 1) {
     maxIdx = l;
   }
   maxIdx = Math.min(l, maxIdx);
-  for (var i=0, child = el.firstChild; i < maxIdx; child = child.nextSibling, i++) {
-    if (child.nodeType === 3) {
-      charPos += child.length;
-    } else if (child.nodeType === 1) {
-      var dataset = child.dataset;
-      if (dataset && dataset.inline) {
+  for (var i=0, child = el.getFirstChild(); i < maxIdx; child = child.getNextSibling(), i++) {
+    if (child.isTextNode()) {
+      charPos += child.getTextContent().length;
+    } else if (child.isElementNode()) {
+      var length = child.getAttribute('data-length');
+      if (child.getAttribute('data-inline')) {
         charPos += 1;
-      } else if (dataset && dataset.length) {
-        charPos += parseInt(dataset.length, 10);
+      } else if (length) {
+        charPos += parseInt(length, 10);
       } else {
         charPos += _countCharacters(child);
       }

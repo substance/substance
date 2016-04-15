@@ -13,7 +13,7 @@ var matches = (
 );
 
 function BrowserDOMElement(el) {
-  console.assert(el instanceof window.Node || el === window, "Expecting native DOM node.");
+  console.assert(el instanceof window.Node, "Expecting native DOM node.");
   this.el = el;
   el._wrapper = this;
   this.eventListeners = [];
@@ -267,6 +267,49 @@ BrowserDOMElement.Prototype = function() {
 
   this.getChildAt = function(pos) {
     return BrowserDOMElement.wrapNativeElement(this.el.childNodes[pos]);
+  };
+
+  this.getChildIndex = function(child) {
+    if (!child._isBrowserDOMElement) {
+      throw new Error('Expecting a BrowserDOMElement instance.');
+    }
+    return Array.prototype.indexOf.call(this.el.childNodes, child.el);
+  };
+
+  this.getFirstChild = function() {
+    var firstChild = this.el.firstChild;
+    if (firstChild) {
+      return BrowserDOMElement.wrapNativeElement(firstChild);
+    } else {
+      return null;
+    }
+  };
+
+  this.getLastChild = function() {
+    var lastChild = this.el.lastChild;
+    if (lastChild) {
+      return BrowserDOMElement.wrapNativeElement(lastChild);
+    } else {
+      return null;
+    }
+  };
+
+  this.getNextSibling = function() {
+    var next = this.el.nextSibling;
+    if (next) {
+      return BrowserDOMElement.wrapNativeElement(next);
+    } else {
+      return null;
+    }
+  };
+
+  this.getPreviousSibling = function() {
+    var previous = this.el.previousSibling;
+    if (previous) {
+      return BrowserDOMElement.wrapNativeElement(previous);
+    } else {
+      return null;
+    }
   };
 
   this.isTextNode = function() {
@@ -591,12 +634,43 @@ BrowserDOMElement.parseMarkup = function(str, format) {
 };
 
 BrowserDOMElement.wrapNativeElement = function(el) {
-  if (el._wrapper) {
-    return el._wrapper;
+  if (el) {
+    if (el._wrapper) {
+      return el._wrapper;
+    } else if (el instanceof window.Node) {
+      if (el.nodeType === 3) {
+        return new TextNode(el);
+      } else {
+        return new BrowserDOMElement(el);
+      }
+    } else if (el === window) {
+      return BrowserDOMElement.getBrowserWindow();
+    }
   } else {
-    return new BrowserDOMElement(el);
+    return null;
   }
 };
+
+function TextNode(nativeEl) {
+  console.assert(nativeEl instanceof window.Node && nativeEl.nodeType === 3, "Expecting native TextNode.");
+  this.el = nativeEl;
+  nativeEl._wrapper = this;
+}
+TextNode.Prototype = function() {
+  this._isBrowserDOMElement = true;
+  [
+    'getParent', 'getNextSibling', 'getPreviousSibling',
+    'getTextContent', 'setTextContent',
+    'getInnerHTML', 'setInnerHTML', 'getOuterHTML',
+    'getNativeElement', 'clone'
+  ].forEach(function(name) {
+    this[name] = BrowserDOMElement.prototype[name];
+  }.bind(this));
+};
+DOMElement.TextNode.extend(TextNode);
+DOMElement._defineProperties(TextNode, ['nodeType', 'textContent', 'innerHTML', 'outerHTML', 'parentNode']);
+
+BrowserDOMElement.TextNode = TextNode;
 
 /*
   Wrapper for the window element only exposing the eventlistener API.

@@ -1,0 +1,17 @@
+#qunit-tests.hidepass li.running {
+  visibility: initial !important;
+  position: initial !important;
+  width: initial !important;
+  height: initial !important;
+  padding: initial !important;
+  border: initial !important;
+  margin: initial !important;
+}
+
+#qunit-fixture {
+  position: initial !important;
+  top: initial !important;
+  left: initial !important;
+  width: 1000px;
+  height: 1000px;
+}
