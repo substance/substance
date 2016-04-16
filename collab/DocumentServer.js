@@ -16,21 +16,9 @@ DocumentServer.Prototype = function() {
     Attach this server to an express instance
   */
   this.bind = function(app) {
-    app.get(this.path + '/:id', this._getDocument.bind(this));
     app.post(this.path, this._createDocument.bind(this));
-  };
-
-  /*
-    Generate new loginKey for user and send email with a link
-  */
-  this._getDocument = function(req, res, next) {
-    var documentId = req.params.id;
-    this.engine.getDocument({
-      documentId: documentId
-    }, function(err, result) {
-      if (err) return next(err);
-      res.json(result);
-    });
+    app.get(this.path + '/:id', this._getDocument.bind(this));
+    app.delete(this.path + '/:id', this._deleteDocument.bind(this));
   };
 
   /*
@@ -44,6 +32,30 @@ DocumentServer.Prototype = function() {
     };
 
     this.engine.createDocument(newDoc, function(err, result) {
+      if (err) return next(err);
+      res.json(result);
+    });
+  };
+
+  /*
+    Get a document with given document id
+  */
+  this._getDocument = function(req, res, next) {
+    var documentId = req.params.id;
+    this.engine.getDocument({
+      documentId: documentId
+    }, function(err, result) {
+      if (err) return next(err);
+      res.json(result);
+    });
+  };
+
+  /*
+    Remove a document with given document id
+  */
+  this._deleteDocument = function(req, res, next) {
+    var documentId = req.params.id;
+    this.engine.deleteDocument(documentId, function(err, result) {
       if (err) return next(err);
       res.json(result);
     });
