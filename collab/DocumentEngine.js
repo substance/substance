@@ -101,8 +101,15 @@ DocumentEngine.Prototype = function() {
           cause: err
         }));
       }
-      cb(null, doc);
-    });
+      this.changeStore.deleteChanges(documentId, function(err) {
+        if (err) {
+          return cb(new Err('DeleteError', {
+            cause: err
+          }));
+        }
+        cb(null, doc);
+      });
+    }.bind(this));
   };
 
   /*

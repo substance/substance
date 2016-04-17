@@ -50,6 +50,10 @@ function testDocumentEngine(documentEngine, QUnit) {
         };
         documentEngine.getChanges(args, function(err) {
           assert.ok(err, 'Should print an error that document does not exist');
+        });
+        documentEngine.changeStore.getChanges(args, function(err, result) {
+          assert.equal(result.changes.length, 0, 'Should be no changes');
+          assert.equal(result.version, 0, 'Document version should equals 0');
           done();
         });
       });
