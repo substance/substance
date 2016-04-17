@@ -21,19 +21,23 @@ Router.Prototype = function() {
   };
 
   /*
-    Takes the current route and updates the application state.
+    Reads out the current route
   */
   this.readRoute = function() {
     if (!this.__isStarted__) this.start();
-    return this.deserializeRoute(this.getRoute());
+    return this.parseRoute(this.getRouteString());
   };
 
-  this.writeRoute = function(route) {
-    var routeString = this.serializeRoute(route);
+  /*
+    Writes out a given route as a string url
+  */
+  this.writeRoute = function(route, opts) {
+    opts = opts || {};
+    var routeString = this.stringifyRoute(route);
     if (!routeString) {
-      this.clearRoute();
+      this.clearRoute(opts);
     } else {
-      this.setRoute(routeString);
+      this._writeRoute(routeString, opts);
     }
   };
 
@@ -47,40 +51,45 @@ Router.Prototype = function() {
 
     @abstract
     @param String route content of the URL's hash fragment
-   */
-  this.deserializeRoute = function(routeString) {
-    /* jshint unused:false */
+  */
+  this.parseRoute = function(routeString) {
+    return Router.routeStringToObject(routeString);
   };
 
   /*
     Maps a route object to a route URL
 
-    This should be implemented by an application specific router.
+    This can be overriden by an application specific router.
 
     @abstract
-   */
-  this.serializeRoute = function(route) {
-    /* jshint unused:false */
+  */
+  this.stringifyRoute = function(route) {
+    return Router.objectToRouteString(route);
   };
 
-  this.getRoute = function() {
+  this.getRouteString = function() {
     return window.location.hash.slice(1);
   };
 
-  this.setRoute = function(route) {
+  this._writeRoute = function(route, opts) {
     this.__isSaving__ = true;
     try {
-      window.history.pushState({} , '', '#'+route);
+      if (opts.replace) {
+        window.history.replaceState({} , '', '#'+route);
+      } else {
+        window.history.pushState({} , '', '#'+route);
+      }
     } finally {
       this.__isSaving__ = false;
     }
   };
 
-  this.clearRoute = function() {
-    this.setRoute('');
+  this.clearRoute = function(opts) {
+    this._writeRoute('', opts);
   };
 
   this._onHashChange = function() {
+    console.log('_onHashChange');
     if (this.__isSaving__) {
       return;
     }
@@ -90,8 +99,8 @@ Router.Prototype = function() {
     }
     this.__isLoading__ = true;
     try {
-      var routeString = this.getRoute();
-      var route = this.deserializeRoute(routeString);
+      var routeString = this.getRouteString();
+      var route = this.parseRoute(routeString);
       this.emit('route:changed', route);
     } finally {
       this.__isLoading__ = false;
@@ -112,6 +121,8 @@ Router.objectToRouteString = function(obj) {
 
 Router.routeStringToObject = function(routeStr) {
   var obj = {};
+  // Empty route maps to empty route object
+  if (!routeStr) return obj;
   var params = routeStr.split(',');
   params.forEach(function(param) {
     var tuple = param.split('=');
