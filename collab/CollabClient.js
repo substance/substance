@@ -72,6 +72,10 @@ CollabClient.Prototype = function() {
   this.isConnected = function() {
     return this.connection.isOpen();
   };
+
+  this.dispose = function() {
+    this.connection.off(this);
+  };
 };
 
 EventEmitter.extend(CollabClient);
