@@ -159,11 +159,11 @@ QUnit.test("Rendering an element with HTML attributes etc.", function(assert) {
     return $$('div')
       .addClass('foo')
       .attr('data-id', 'foo')
-      .setProperty('type', 'foo');
+      .htmlProp('type', 'foo');
   });
   assert.equal(comp.attr('data-id'), 'foo', 'Element should have data-id="foo".');
   assert.ok(comp.hasClass('foo'), 'Element should have class "foo".');
-  assert.equal(comp.getProperty('type'), 'foo', 'Element should have type "foo".');
+  assert.equal(comp.htmlProp('type'), 'foo', 'Element should have type "foo".');
 });
 
 QUnit.test("Rendering an input element with value", function(assert) {

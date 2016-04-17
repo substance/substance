@@ -196,11 +196,11 @@ VirtualHTMLElement.Prototype = function() {
   };
 
   this.getValue = function() {
-    return this.getProperty('value');
+    return this.htmlProp('value');
   };
 
   this.setValue = function(value) {
-    this.setProperty('value', value);
+    this.htmlProp('value', value);
     return this;
   };
 
