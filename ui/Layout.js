@@ -3,7 +3,7 @@
 var Component = require('./Component');
 
 /**
-  Simple layout component for simple layout tasks, without having to write CSS
+  Layout component for simple layout tasks, without having to write CSS
 
   @class
   @component
