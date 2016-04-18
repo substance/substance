@@ -589,11 +589,11 @@ DOMImporter.State.Prototype = function() {
   };
 
   this.pushElementContext = function(type) {
-    this.state.contexts.push(type);
+    this.contexts.push(type);
   };
 
   this.popElementContext = function() {
-    this.state.contexts.pop();
+    this.contexts.pop();
   };
 
 };
