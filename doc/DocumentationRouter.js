@@ -4,22 +4,23 @@ var Router = require('../ui/Router');
 
 function DocumentationRouter(controller) {
   DocumentationRouter.super.call(this);
-
   this.controller = controller;
 }
 
 DocumentationRouter.Prototype = function() {
 
-  this.stateFromRoute = function(route) {
+  this.parseRoute = function(route) {
     if (!route) {
-      this.controller.setState(this.controller.getInitialState());
+      return this.controller.getInitialState();
     } else {
-      var nodeId = route;
-      this.controller._focusNode(nodeId);
+      // var nodeId = route;
+      return {
+        nodeId: route
+      };
     }
   };
 
-  this.routeFromState = function() {
+  this.stringifyRoute = function() {
     return this.controller.state.nodeId;
   };
 
