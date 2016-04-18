@@ -614,10 +614,7 @@ BrowserDOMElement.parseMarkup = function(str, format) {
           nativeEls = body.childNodes;
         }
       } else if (format === 'xml') {
-        // Note: as XML parser we always get a document with childNodes representing
-        // the content
-        // TODO: is it ok just to provide the 'content', not the XML meta info?
-        nativeEls = doc.childNodes;
+        nativeEls = [doc];
       }
     } else {
       throw new Error('Could not parse DOM string.');
