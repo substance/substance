@@ -197,6 +197,29 @@ DOMElement.Prototype = function() {
     throw new Error(NOT_IMPLEMENTED);
   };
 
+  /**
+    jQuery style getter and setter for HTML element properties.
+
+    @abstract
+    @param {String} name
+    @param {String} [value] if present the property will be set
+    @returns {String|this} if used as getter the property value, otherwise this element for chaining
+   */
+  this.htmlProp = function() {
+    if (arguments.length === 1) {
+      if (isString(arguments[0])) {
+        return this.getProperty(arguments[0]);
+      } else if (isObject(arguments[0])) {
+        forEach(arguments[0], function(value, name) {
+          this.setProperty(name, value);
+        }.bind(this));
+      }
+    } else if (arguments.length === 2) {
+      this.setProperty(arguments[0], arguments[1]);
+    }
+    return this;
+  };
+
   this.getProperty = function(name) {
     throw new Error(NOT_IMPLEMENTED);
   };
@@ -305,29 +328,6 @@ DOMElement.Prototype = function() {
       this.setStyle(arguments[0], arguments[1]);
     } else {
       throw new Error('Illegal arguments.');
-    }
-    return this;
-  };
-
-  /**
-    jQuery style getter and setter for HTML element properties.
-
-    @abstract
-    @param {String} name
-    @param {String} [value] if present the property will be set
-    @returns {String|this} if used as getter the property value, otherwise this element for chaining
-   */
-  this.htmlProp = function() {
-    if (arguments.length === 1) {
-      if (isString(arguments[0])) {
-        return this.getProperty(arguments[0]);
-      } else if (isObject(arguments[0])) {
-        forEach(arguments[0], function(value, name) {
-          this.setProperty(name, value);
-        }.bind(this));
-      }
-    } else if (arguments.length === 2) {
-      this.setProperty(arguments[0], arguments[1]);
     }
     return this;
   };

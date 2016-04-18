@@ -312,44 +312,23 @@ VirtualHTMLElement.Prototype = function() {
     return this;
   };
 
-  this.getHTMLProp = function(name) {
+  this.getProperty = function(name) {
     if (this.htmlProps) {
       return this.htmlProps[name];
     }
   };
 
-  this.setHTMLProp = function(name, value) {
+  this.setProperty = function(name, value) {
     if (!this.htmlProps) {
       this.htmlProps = {};
     }
     this.htmlProps[name] = value;
   };
 
-  /**
-    jQuery style getter and setter for HTML element properties.
-
-    @abstract
-    @param {String} name
-    @param {String} [value] if present the property will be set
-    @returns {String|this} if used as getter the property value, otherwise this element for chaining
-   */
-  this.htmlProp = function() {
-    if (arguments.length === 1) {
-      if (isString(arguments[0])) {
-        return this.getHTMLProp(arguments[0]);
-      } else if (isObject(arguments[0])) {
-        forEach(arguments[0], function(value, name) {
-          this.setHTMLProp(name, value);
-        }.bind(this));
-      }
-    } else if (arguments.length === 2) {
-      this.setHTMLProp(arguments[0], arguments[1]);
+  this.removeProperty = function(name) {
+    if (this.htmlProps) {
+      delete this.htmlProps[name];  
     }
-    return this;
-  };
-
-  this.removeHTMLProp = function(name) {
-    delete this.htmlProps[name];
   };
 
   this.getStyle = function(name) {

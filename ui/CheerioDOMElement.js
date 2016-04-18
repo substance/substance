@@ -79,6 +79,7 @@ CheerioDOMElement.Prototype = function() {
     this.$el.prop(name, value);
   };
 
+  // TODO: verify that this.el[name] is correct
   this.removeProperty = function(name) {
     delete this.htmlProps[name];
     delete this.el[name];
