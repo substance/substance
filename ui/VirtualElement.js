@@ -2,8 +2,6 @@
 
 var isFunction = require('lodash/isFunction');
 var isString = require('lodash/isString');
-var isObject = require('lodash/isObject');
-var forEach = require('lodash/forEach');
 var isArray = require('lodash/isArray');
 var map = require('lodash/map');
 var clone = require('lodash/clone');
