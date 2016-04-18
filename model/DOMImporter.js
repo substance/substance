@@ -596,6 +596,10 @@ DOMImporter.State.Prototype = function() {
     this.contexts.pop();
   };
 
+  this.getCurrentElementContext = function() {
+    return last(this.contexts);
+  };
+
 };
 
 oo.initClass(DOMImporter.State);
