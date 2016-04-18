@@ -580,22 +580,19 @@ BrowserDOMElement.createElement = function(tagName) {
   return window.document.createElement(tagName);
 };
 
-BrowserDOMElement.parseMarkup = function(str, format) {
+BrowserDOMElement.parseMarkup = function(str, format, isFullDoc) {
   var nativeEls = [];
   var doc;
   if (!str) {
     // Create an empty XML document
     if (format === 'xml') {
       doc = (new window.DOMParser()).parseFromString('<dummy/>', 'text/xml');
-      // doc.removeChild(doc.documentElement);
-      // doc.ownerDocument = doc;
     } else {
       doc = (new window.DOMParser()).parseFromString('<html></html>', 'text/html');
     }
     return new BrowserDOMElement(doc);
   } else {
     var parser = new window.DOMParser();
-    var isFullDoc;
     if (format === 'html') {
       isFullDoc = (str.search(/<\s*html/i)>=0);
       doc = parser.parseFromString(str, 'text/html');
@@ -614,7 +611,11 @@ BrowserDOMElement.parseMarkup = function(str, format) {
           nativeEls = body.childNodes;
         }
       } else if (format === 'xml') {
-        nativeEls = [doc];
+        if (isFullDoc) {
+          nativeEls = [doc];
+        } else {
+          nativeEls = doc.childNodes;
+        }
       }
     } else {
       throw new Error('Could not parse DOM string.');
