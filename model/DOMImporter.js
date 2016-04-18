@@ -2,6 +2,8 @@
 
 var oo = require('../util/oo');
 var last = require('lodash/last');
+var each = require('lodash/each');
+var clone = require('lodash/clone');
 var extend = require('lodash/extend');
 var uuid = require('../util/uuid');
 var ArrayIterator = require('../util/ArrayIterator');
@@ -50,6 +52,7 @@ function DOMImporter(config) {
     }
     var NodeClass = schema.getNodeClass(converter.type);
     if (!NodeClass) {
+      console.error('No node type defined for converter', converter.type);
       return;
     }
     if (defaultTextType === converter.type) {
@@ -198,10 +201,20 @@ DOMImporter.Prototype = function DOMImporterPrototype() {
   };
 
   this._nodeData = function(el, type) {
-    return {
+    var nodeData = {
       type: type,
       id: this.getIdForElement(el, type)
     };
+    var NodeClass = this.schema.getNodeClass(type);
+    each(NodeClass.static.schema, function(prop, name) {
+      // check integrity of provided props, such as type correctness,
+      // and mandatory properties
+      var hasDefault = prop.hasOwnProperty('default');
+      if (hasDefault) {
+        nodeData[name] = clone(prop.default);
+      }
+    }.bind(this));
+    return nodeData;
   };
 
   // /**
