@@ -66,33 +66,13 @@ function DOMImporter(config) {
 
   }.bind(this));
 
-  this._initState();
+  this.state = new DOMImporter.State();
 }
 
 DOMImporter.Prototype = function DOMImporterPrototype() {
 
-  this._initState = function() {
-    var state = {
-      preserveWhitespace: false
-    };
-    this.state = state;
-    this.reset();
-    return state;
-  };
-
   this.reset = function() {
-    this.state = extend(this.state, {
-      nodes: [],
-      inlineNodes: [],
-      containerId: null,
-      container: [],
-      ids: {},
-      // stack of contexts to handle reentrant calls
-      stack: [],
-      lastChar: "",
-      skipTypes: {},
-      ignoreAnnotations: false,
-    });
+    this.state.reset();
   };
 
   this.createDocument = function() {
@@ -190,7 +170,9 @@ DOMImporter.Prototype = function DOMImporterPrototype() {
     var converter = this._getConverterForElement(el, mode);
     if (converter) {
       node = this._nodeData(el, converter.type);
+      this.state.pushElementContext(converter.type);
       node = converter.import(el, node, this) || node;
+      this.state.popElementContext();
       this.createNode(node);
     } else {
       throw new Error('No converter found for '+el.tagName);
@@ -445,10 +427,15 @@ DOMImporter.Prototype = function DOMImporterPrototype() {
       converters = this._allConverters;
     }
     for (var i = 0; i < converters.length; i++) {
-      if (converters[i].matchElement(el)) {
+      var converter = converters[i];
+      if (this._converterCanBeApplied(converter, el)) {
         return converters[i];
       }
     }
+  };
+
+  this._converterCanBeApplied = function(converter, el) {
+    return converter.matchElement(el);
   };
 
   this._createElement = function(tagName) {
@@ -578,5 +565,39 @@ DOMImporter.Prototype = function DOMImporterPrototype() {
 
 };
 oo.initClass(DOMImporter);
+
+DOMImporter.State = function() {
+  this.reset();
+};
+
+DOMImporter.State.Prototype = function() {
+
+  this.reset = function() {
+    this.preserveWhitespace = false;
+    this.nodes = [];
+    this.inlineNodes = [];
+    this.containerId = null;
+    this.container = [];
+    this.ids = {};
+    // stack for reentrant calls into _convertElement()
+    this.contexts = [];
+    // stack for reentrant calls into _annotatedText()
+    this.stack = [];
+    this.lastChar = "";
+    this.skipTypes = {};
+    this.ignoreAnnotations = false;
+  };
+
+  this.pushElementContext = function(type) {
+    this.state.contexts.push(type);
+  };
+
+  this.popElementContext = function() {
+    this.state.contexts.pop();
+  };
+
+};
+
+oo.initClass(DOMImporter.State);
 
 module.exports = DOMImporter;
