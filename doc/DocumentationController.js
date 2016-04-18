@@ -13,6 +13,8 @@ function DocumentationController() {
   DocumentationController.super.apply(this, arguments);
 
   this.router = new DocumentationRouter(this);
+  this.router.on('route:changed', this._onRouteChanged, this);
+
   this.toc = new DocumentationTOC(this);
 
   this.handleActions({
@@ -33,12 +35,25 @@ DocumentationController.Prototype = function() {
   this.didMount = function() {
     _super.didMount.call(this);
 
-    this.router.readURL();
+    var route = this.router.readRoute();
+    // Replaces the current entry without creating new history entry
+    // or triggering hashchange
+    this.navigate(route, {replace: true});
+  };
+
+  this.navigate = function(route, opts) {
+    console.log('navigating',route);
+    this.extendState(route);
+    this.router.writeRoute(route, opts);
+  };
+
+  this._onRouteChanged = function(route) {
+    console.log('onrouteChanged', route);
+    this.navigate(route, {replace: true});
   };
 
   this.dispose = function() {
     _super.dispose.call(this);
-
     this.router.dispose();
   };
 
@@ -58,20 +73,17 @@ DocumentationController.Prototype = function() {
   // ---------------
 
   this.focusNode = function(nodeId) {
-    this._focusNode(nodeId);
-    this.router.writeURL();
+    this.navigate({
+      nodeId: nodeId
+    });
   };
 
   this.switchState = function(newState) {
-    // make sure default state is set
-    if (!newState.contextId) {
-      newState = extend({}, this.getInitialState(), newState);
-    }
-    this.setState(newState);
+    this.navigate(newState);
   };
 
   this.switchContext = function(contextId) {
-    this.switchState({
+    this.navigate({
       contextId: contextId
     });
   };
@@ -80,12 +92,6 @@ DocumentationController.Prototype = function() {
     this.toc.emit("entry:selected", nodeId);
   };
 
-  // Private methods
-  // ---------------
-
-  this._focusNode = function(nodeId) {
-    this.extendState({ nodeId: nodeId });
-  };
 
   // TODO: we should try to achieve a more Component idiomatic implementation
   this._panelPropsFromState = function() {

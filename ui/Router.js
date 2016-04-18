@@ -1,10 +1,11 @@
 'use strict';
 
 var each = require('lodash/each');
-var oo = require('../util/oo');
+var EventEmitter = require('../util/EventEmitter');
 var DefaultDOMElement = require('./DefaultDOMElement');
 
 var Router = function() {
+  EventEmitter.apply(this, arguments);
   this.__isStarted__ = false;
 };
 
@@ -20,19 +21,23 @@ Router.Prototype = function() {
   };
 
   /*
-    Takes the current route and updates the application state.
+    Reads out the current route
   */
-  this.readURL = function() {
+  this.readRoute = function() {
     if (!this.__isStarted__) this.start();
-    this.stateFromRoute(this.getRoute());
+    return this.parseRoute(this.getRouteString());
   };
 
-  this.writeURL = function() {
-    var route = this.routeFromState();
-    if (!route) {
-      this.clearRoute();
+  /*
+    Writes out a given route as a string url
+  */
+  this.writeRoute = function(route, opts) {
+    opts = opts || {};
+    var routeString = this.stringifyRoute(route);
+    if (!routeString) {
+      this.clearRoute(opts);
     } else {
-      this.setRoute(route);
+      this._writeRoute(routeString, opts);
     }
   };
 
@@ -42,44 +47,49 @@ Router.Prototype = function() {
   };
 
   /*
-    Maps a route to application state and updates the application.
-
-    This should be implemented by an application specific router.
+    Maps a route URL to a route object
 
     @abstract
     @param String route content of the URL's hash fragment
-   */
-  this.stateFromRoute = function(route) {
-    /* jshint unused:false */
+  */
+  this.parseRoute = function(routeString) {
+    return Router.routeStringToObject(routeString);
   };
 
   /*
-    Maps an application  route to application state and updates the application.
+    Maps a route object to a route URL
 
-    This should be implemented by an application specific router.
+    This can be overriden by an application specific router.
 
     @abstract
-   */
-  this.routeFromState = function() {};
+  */
+  this.stringifyRoute = function(route) {
+    return Router.objectToRouteString(route);
+  };
 
-  this.getRoute = function() {
+  this.getRouteString = function() {
     return window.location.hash.slice(1);
   };
 
-  this.setRoute = function(route) {
+  this._writeRoute = function(route, opts) {
     this.__isSaving__ = true;
     try {
-      window.history.pushState({} , '', '#'+route);
+      if (opts.replace) {
+        window.history.replaceState({} , '', '#'+route);
+      } else {
+        window.history.pushState({} , '', '#'+route);
+      }
     } finally {
       this.__isSaving__ = false;
     }
   };
 
-  this.clearRoute = function() {
-    this.setRoute('');
+  this.clearRoute = function(opts) {
+    this._writeRoute('', opts);
   };
 
   this._onHashChange = function() {
+    console.log('_onHashChange');
     if (this.__isSaving__) {
       return;
     }
@@ -89,8 +99,9 @@ Router.Prototype = function() {
     }
     this.__isLoading__ = true;
     try {
-      var route = this.getRoute();
-      this.stateFromRoute(route);
+      var routeString = this.getRouteString();
+      var route = this.parseRoute(routeString);
+      this.emit('route:changed', route);
     } finally {
       this.__isLoading__ = false;
     }
@@ -98,7 +109,7 @@ Router.Prototype = function() {
 
 };
 
-oo.initClass(Router);
+EventEmitter.extend(Router);
 
 Router.objectToRouteString = function(obj) {
   var route = [];
@@ -110,6 +121,8 @@ Router.objectToRouteString = function(obj) {
 
 Router.routeStringToObject = function(routeStr) {
   var obj = {};
+  // Empty route maps to empty route object
+  if (!routeStr) return obj;
   var params = routeStr.split(',');
   params.forEach(function(param) {
     var tuple = param.split('=');

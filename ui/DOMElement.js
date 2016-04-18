@@ -6,7 +6,7 @@ var isObject = require('lodash/isObject');
 var isString = require('lodash/isString');
 var isArray = require('lodash/isArray');
 var findIndex = require('lodash/findIndex');
-var each = require('lodash/each');
+var forEach = require('lodash/forEach');
 var ArrayIterator = require('../util/ArrayIterator');
 
 /**
@@ -139,7 +139,7 @@ DOMElement.Prototype = function() {
       if (isString(arguments[0])) {
         return this.getAttribute(arguments[0]);
       } else if (isObject(arguments[0])) {
-        each(arguments[0], function(value, name) {
+        forEach(arguments[0], function(value, name) {
           this.setAttribute(name, value);
         }.bind(this));
       }
@@ -195,6 +195,29 @@ DOMElement.Prototype = function() {
 
   this.getAttributes = function() {
     throw new Error(NOT_IMPLEMENTED);
+  };
+
+  /**
+    jQuery style getter and setter for HTML element properties.
+
+    @abstract
+    @param {String} name
+    @param {String} [value] if present the property will be set
+    @returns {String|this} if used as getter the property value, otherwise this element for chaining
+   */
+  this.htmlProp = function() {
+    if (arguments.length === 1) {
+      if (isString(arguments[0])) {
+        return this.getProperty(arguments[0]);
+      } else if (isObject(arguments[0])) {
+        forEach(arguments[0], function(value, name) {
+          this.setProperty(name, value);
+        }.bind(this));
+      }
+    } else if (arguments.length === 2) {
+      this.setProperty(arguments[0], arguments[1]);
+    }
+    return this;
   };
 
   this.getProperty = function(name) {
@@ -295,7 +318,7 @@ DOMElement.Prototype = function() {
       if (isString(arguments[0])) {
         return this.getStyle(arguments[0]);
       } else if (isObject(arguments[0])) {
-        each(arguments[0], function(value, name) {
+        forEach(arguments[0], function(value, name) {
           this.setStyle(name, value);
         }.bind(this));
       } else {
@@ -1008,7 +1031,7 @@ DOMElementDelegator.Prototype = function() {
     'position': null
   };
 
-  each(_delegators, function(defaultValue, method) {
+  forEach(_delegators, function(defaultValue, method) {
     this[method] = function() {
       if (!this.el) {
         if (defaultValue === 'throw') {

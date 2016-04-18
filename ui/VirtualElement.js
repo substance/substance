@@ -163,27 +163,6 @@ VirtualHTMLElement.Prototype = function() {
     return attributes;
   };
 
-  this.getProperty = function(name) {
-    if (this.htmlProps) {
-      return this.htmlProps[name];
-    }
-  };
-
-  this.setProperty = function(name, value) {
-    if (!this.htmlProps) {
-      this.htmlProps = {};
-    }
-    this.htmlProps[name] = value;
-    return this;
-  };
-
-  this.removeProperty = function(name) {
-    if (this.htmlProps) {
-      delete this.htmlProps[name];
-    }
-    return this;
-  };
-
   this.getId = function() {
     return this.getAttribute('id');
   };
@@ -215,11 +194,11 @@ VirtualHTMLElement.Prototype = function() {
   };
 
   this.getValue = function() {
-    return this.getProperty('value');
+    return this.htmlProp('value');
   };
 
   this.setValue = function(value) {
-    this.setProperty('value', value);
+    this.htmlProp('value', value);
     return this;
   };
 
@@ -331,16 +310,23 @@ VirtualHTMLElement.Prototype = function() {
     return this;
   };
 
-  this.getHTMLProp = function(name) {
-    return this.htmlProps[name];
+  this.getProperty = function(name) {
+    if (this.htmlProps) {
+      return this.htmlProps[name];
+    }
   };
 
-  this.setHTMLProp = function(name, value) {
+  this.setProperty = function(name, value) {
+    if (!this.htmlProps) {
+      this.htmlProps = {};
+    }
     this.htmlProps[name] = value;
   };
 
-  this.removeHTMLProp = function(name) {
-    delete this.htmlProps[name];
+  this.removeProperty = function(name) {
+    if (this.htmlProps) {
+      delete this.htmlProps[name];  
+    }
   };
 
   this.getStyle = function(name) {
