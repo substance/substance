@@ -512,6 +512,7 @@ DOMImporter.Prototype = function DOMImporterPrototype() {
   // var ALL_WS_NOTSPACE_RIGHT = /[\t\n]+$/g;
   var SPACE = " ";
   var TABS_OR_NL = /[\t\n\r]+/g;
+  var TABS = /[\t]+/g;
 
   // TODO: this needs to be tested and documented
   this._prepareText = function(state, text) {
@@ -520,7 +521,7 @@ DOMImporter.Prototype = function DOMImporterPrototype() {
     }
     var repl = SPACE;
     // replace multiple tabs and new-lines by one space
-    text = text.replace(TABS_OR_NL, '');
+    text = text.replace(TABS, '');
     // TODO: the last char handling is only necessary for for nested calls
     // i.e., when processing the content of an annotation, for instance
     // we need to work out how we could control this with an inner state
