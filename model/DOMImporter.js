@@ -173,7 +173,7 @@ DOMImporter.Prototype = function DOMImporterPrototype() {
     var converter = this._getConverterForElement(el, mode);
     if (converter) {
       node = this._nodeData(el, converter.type);
-      this.state.pushElementContext(converter.type);
+      this.state.pushElementContext(converter.type, converter.tagName);
       node = converter.import(el, node, this) || node;
       this.state.popElementContext();
       this.createNode(node);
@@ -601,12 +601,12 @@ DOMImporter.State.Prototype = function() {
     this.ignoreAnnotations = false;
   };
 
-  this.pushElementContext = function(type) {
-    this.contexts.push(type);
+  this.pushElementContext = function(type, tagName) {
+    this.contexts.push({ type: type, tagName: tagName });
   };
 
   this.popElementContext = function() {
-    this.contexts.pop();
+    return this.contexts.pop();
   };
 
   this.getCurrentElementContext = function() {
