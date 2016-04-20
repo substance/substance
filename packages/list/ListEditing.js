@@ -49,6 +49,7 @@ ListEditing.Prototype = function() {
         newNode = tx.create({
           id: id,
           type: node.type,
+          level: node.level,
           content: "",
           parent: node.parent
         });
@@ -167,11 +168,11 @@ ListEditing.Prototype = function() {
     // get the id of the last list item
     var lastListItemId = args.first.items[args.first.items.length-1];
     var originalOffset = tx.get(lastListItemId).content.length;
-    // hide and delete the textish node
-    deleteNode(tx, {nodeId: args.second.id});
     // add the content of the text node to the last item of the list
     tx.update([lastListItemId, 'content'], {insert: {offset: originalOffset, value: args.second.content}});
     annotationHelpers.transferAnnotations(tx, [args.second.id, 'content'], 0, [lastListItemId, 'content'], originalOffset);
+    // hide and delete the textish node
+    deleteNode(tx, {nodeId: args.second.id});
     // update the selection
     var selection = tx.createSelection({
       type: 'property',
