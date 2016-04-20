@@ -49,6 +49,7 @@ ListEditing.Prototype = function() {
         newNode = tx.create({
           id: id,
           type: node.type,
+          level: node.level,
           content: "",
           parent: node.parent
         });
