@@ -12,7 +12,8 @@ ListItemComponent.Prototype = function() {
 
   this.initialize = function() {
     this.doc = this.props.node.getDocument();
-    this.doc.getEventProxy('path').connect(this, [this.props.node.id, 'level'], this.onLevelChanged);
+    this.doc.getEventProxy('path').connect(this, [this.props.node.id, 'level'], this.rerenderList);
+    this.doc.getEventProxy('path').connect(this, [this.props.node.id, 'ordered'], this.rerenderList);
   };
 
   this.render = function() {
@@ -24,7 +25,7 @@ ListItemComponent.Prototype = function() {
     return el;
   };
 
-  this.onLevelChanged = function() {
+  this.rerenderList = function() {
     this.send('rerenderList');
   };
 };

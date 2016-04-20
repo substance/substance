@@ -112,9 +112,11 @@ ListCommand.Prototype = function() {
             // switch list type between ordered and unordered list
             var items = tx.get([node.parent, 'items']);
             for (var i=0; i<items.length; i++){
-              tx.set([items[i], 'ordered'], self.ordered);
+              if(doc.get(items[i]).level === node.level){
+                tx.set([items[i], 'ordered'], self.ordered);
+              }
             }
-            tx.set([node.parent, 'ordered'], self.ordered);
+            if(node.level === 1) tx.set([node.parent, 'ordered'], self.ordered);
           }
         } else {
           // convert node to list
