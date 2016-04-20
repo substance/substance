@@ -218,6 +218,7 @@ DocumentSession.Prototype = function() {
     if (this._selectionHasChanged) {
       // console.log('selection has changed', this.__id__);
       this._selectionHasChanged = false;
+      this.doc.__dirty = true;
       this.emit('selection:changed', this.selection, this);
     }
   };
