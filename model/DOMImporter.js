@@ -248,13 +248,13 @@ DOMImporter.Prototype = function DOMImporterPrototype() {
   this.annotatedText = function(el, path, options) {
     var state = this.state;
     if (path) {
-      if (state.stack.length>0) {
-        throw new Error('Contract: it is not allowed to bind a new call annotatedText to a path while the previous has not been completed.', el.outerHTML);
-      }
+      // if (state.stack.length>0) {
+      //   throw new Error('Contract: it is not allowed to bind a new call annotatedText to a path while the previous has not been completed.', el.outerHTML);
+      // }
       if (options && options.preserveWhitespace) {
         state.preserveWhitespace = true;
       }
-      state.stack = [{ path: path, offset: 0, text: ""}];
+      state.stack.push({ path: path, offset: 0, text: ""});
     } else {
       if (state.stack.length===0) {
         throw new Error("Contract: DOMImporter.annotatedText() requires 'path' for non-reentrant call.", el.outerHTML);
@@ -264,12 +264,15 @@ DOMImporter.Prototype = function DOMImporterPrototype() {
     // annotated text property. This feature is mainly used to eat up
     // whitespace in XML/HTML at tag boundaries, produced by pretty-printed XML/HTML.
     this.state.lastChar = '';
-
-    var iterator = el.getChildNodeIterator();
-    var text = this._annotatedText(iterator);
-    if (path) {
-      state.stack.pop();
-      state.preserveWhitespace = false;
+    var text;
+    try {
+      var iterator = el.getChildNodeIterator();
+      text = this._annotatedText(iterator);
+    } finally {
+      if (path) {
+        state.stack.pop();
+        state.preserveWhitespace = false;
+      }
     }
     return text;
   };
