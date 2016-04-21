@@ -68,7 +68,9 @@ BrowserDOMElement.Prototype = function() {
     var l = attributes.length;
     for(var i=0; i < l; i++) {
       var attr = attributes.item(i);
-      result[attr.name] = attr.value;
+      if (attr.name === 'class' && attr.name === 'style') {
+        result[attr.name] = attr.value;
+      }
     }
     return result;
   };
