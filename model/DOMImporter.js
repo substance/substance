@@ -127,7 +127,9 @@ DOMImporter.Prototype = function DOMImporterPrototype() {
       var node;
       if (blockTypeConverter) {
         node = this._nodeData(el, blockTypeConverter.type);
+        state.pushElementContext(el.tagName);
         node = blockTypeConverter.import(el, node, this) || node;
+        state.popElementContext();
         this._createAndShow(node);
       } else {
         if (el.isCommentNode()) {
@@ -165,7 +167,8 @@ DOMImporter.Prototype = function DOMImporterPrototype() {
     @returns {object} the created node as JSON
    */
   this.convertElement = function(el) {
-    return this._convertElement(el);
+    var node = this._convertElement(el);
+    return node;
   };
 
   this._convertElement = function(el, mode) {
@@ -173,7 +176,7 @@ DOMImporter.Prototype = function DOMImporterPrototype() {
     var converter = this._getConverterForElement(el, mode);
     if (converter) {
       node = this._nodeData(el, converter.type);
-      this.state.pushElementContext(converter.type, converter.tagName);
+      this.state.pushElementContext(el.tagName);
       node = converter.import(el, node, this) || node;
       this.state.popElementContext();
       this.createNode(node);
@@ -265,14 +268,13 @@ DOMImporter.Prototype = function DOMImporterPrototype() {
     // whitespace in XML/HTML at tag boundaries, produced by pretty-printed XML/HTML.
     this.state.lastChar = '';
     var text;
-    try {
-      var iterator = el.getChildNodeIterator();
-      text = this._annotatedText(iterator);
-    } finally {
-      if (path) {
-        state.stack.pop();
-        state.preserveWhitespace = false;
-      }
+    var iterator = el.getChildNodeIterator();
+    this.state.pushElementContext(el.tagName);
+    text = this._annotatedText(iterator);
+    this.state.popElementContext();
+    if (path) {
+      state.stack.pop();
+      state.preserveWhitespace = false;
     }
     return text;
   };
@@ -345,7 +347,9 @@ DOMImporter.Prototype = function DOMImporterPrototype() {
       throw new Error('Could not find converter for default type ', defaultTextType);
     }
     var node = this._nodeData(el, defaultTextType);
+    this.state.pushElementContext(el.tagName);
     node = defaultConverter.import(el, node, converter) || node;
+    this.state.popElementContext();
     return node;
   };
 
@@ -396,7 +400,9 @@ DOMImporter.Prototype = function DOMImporterPrototype() {
         if (inlineTypeConverter.import) {
           // push a new context so we can deal with reentrant calls
           state.stack.push({ path: context.path, offset: startOffset, text: ""});
+          state.pushElementContext(el.tagName);
           inlineNode = inlineTypeConverter.import(el, inlineNode, this) || inlineNode;
+          state.popElementContext();
 
           var NodeClass = this.schema.getNodeClass(inlineType);
           // inline nodes are attached to an invisible character
@@ -604,8 +610,8 @@ DOMImporter.State.Prototype = function() {
     this.ignoreAnnotations = false;
   };
 
-  this.pushElementContext = function(type, tagName) {
-    this.contexts.push({ type: type, tagName: tagName });
+  this.pushElementContext = function(tagName) {
+    this.contexts.push({ tagName: tagName });
   };
 
   this.popElementContext = function() {
