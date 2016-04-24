@@ -26,6 +26,7 @@ ClipboardExporter.Prototype = function() {
     @return {String} html representation of given document
   */
   this.exportDocument = function(doc) {
+    this.state.doc = doc;
     var html;
     var elements = this.convertDocument(doc);
     if (elements.length === 1 && elements[0].attr('data-id') === CLIPBOARD_PROPERTY_ID) {
