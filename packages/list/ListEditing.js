@@ -42,9 +42,13 @@ ListEditing.Prototype = function() {
       if (text.length === 0) {
         // if we hit return on an already empty list item, it should transform into
         // a paragraph
-        args.nodes = [node];
-        args.list = parentList;
-        args = listUtils.listItemsToParagraph(tx, args);
+        if (node.level === 1){
+          args.nodes = [node];
+          args.list = parentList;
+          args = listUtils.listItemsToParagraph(tx, args);
+        } else {
+          tx.set([node.id, 'level'], node.level-1);
+        }
       } else {
         newNode = tx.create({
           id: id,
