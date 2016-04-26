@@ -7,6 +7,7 @@ var clone = require('lodash/clone');
 var extend = require('lodash/extend');
 var uuid = require('../util/uuid');
 var ArrayIterator = require('../util/ArrayIterator');
+var InlineWrapperConverter = require('./InlineWrapperConverter');
 
 /**
   A generic base implementation for XML/HTML importers.
@@ -448,12 +449,34 @@ DOMImporter.Prototype = function DOMImporterPrototype() {
     } else {
       converters = this._allConverters;
     }
+    var converter = null;
     for (var i = 0; i < converters.length; i++) {
-      var converter = converters[i];
-      if (this._converterCanBeApplied(converter, el)) {
-        return converters[i];
+      if (this._converterCanBeApplied(converters[i], el)) {
+        converter = converters[i];
+        break;
       }
     }
+    // there are some block nodes which are used as inline nodes as well.
+    // In this case we wrap the block node into an InlineWrapper
+    if (!converter && mode === 'inline') {
+      var blockConverter = this._getConverterForElement(el, 'block');
+      if (blockConverter) {
+        converter = InlineWrapperConverter;
+      }
+    }
+    if (!converter) {
+      converter = this._getUnsupportedNodeConverter();
+    }
+    return converter;
+  };
+
+  this._getUnsupportedNodeConverter = function() {
+    return {
+      type: 'unsupported',
+      matchElement: function() { return true; },
+      import: function() {},
+      export: function() {}
+    };
   };
 
   this._converterCanBeApplied = function(converter, el) {

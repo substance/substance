@@ -949,6 +949,7 @@ Surface.Prototype = function() {
   };
 
   // TODO: we could integrate container node rendering into this helper
+  // TODO: this helper should be available also in non surface context
   this._renderNode = function($$, nodeId) {
     var doc = this.getDocument();
     var node = doc.get(nodeId);

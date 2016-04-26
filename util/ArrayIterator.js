@@ -13,6 +13,7 @@ function ArrayIterator(arr) {
 }
 
 ArrayIterator.Prototype = function() {
+
   /**
     @returns {Boolean} true if there is another child node left.
    */
@@ -40,6 +41,7 @@ ArrayIterator.Prototype = function() {
     }
     return this;
   };
+
 };
 
 oo.initClass(ArrayIterator);
