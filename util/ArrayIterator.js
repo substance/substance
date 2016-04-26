@@ -14,6 +14,8 @@ function ArrayIterator(arr) {
 
 ArrayIterator.Prototype = function() {
 
+  this._isArrayIterator = true;
+
   /**
     @returns {Boolean} true if there is another child node left.
    */
