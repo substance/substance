@@ -152,6 +152,7 @@ DOMSelection.Prototype = function() {
     if (wSel.isCollapsed) {
       var coor = this._getCoordinate(wSel.anchorNode, wSel.anchorOffset, options);
       range = _createRange(coor, coor, false, this.getContainerId());
+      return range;
     }
     // HACK: special treatment for edge cases as addressed by #354.
     // Sometimes anchorNode and focusNodes are the surface

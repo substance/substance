@@ -111,11 +111,25 @@ ListCommand.Prototype = function() {
           } else {
             // switch list type between ordered and unordered list
             var items = tx.get([node.parent, 'items']);
-            for (var i=0; i<items.length; i++){
+            var nodeIndex = items.indexOf(node.id);
+            var contiguousItems = [];
+            for (var i=nodeIndex; i>=0; i--){
               if(doc.get(items[i]).level === node.level){
-                tx.set([items[i], 'ordered'], self.ordered);
+                contiguousItems.push(items[i]);
+              } else {
+                break;
               }
             }
+            for (i=nodeIndex+1; i<items.length; i++){
+              if(doc.get(items[i]).level === node.level){
+                contiguousItems.push(items[i]);
+              } else {
+                break;
+              }
+            }
+            contiguousItems.forEach(function(id){
+              tx.set([id, 'ordered'], self.ordered);
+            });
             if(node.level === 1) tx.set([node.parent, 'ordered'], self.ordered);
           }
         } else {
