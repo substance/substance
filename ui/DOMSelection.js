@@ -157,8 +157,6 @@ DOMSelection.Prototype = function() {
     // Sometimes anchorNode and focusNodes are the surface
     if ($(wSel.anchorNode).is('.surface')) {
       range = this._getEnclosingRange(wSel.getRangeAt(0));
-    } else {
-      range = this._getRange(wSel.anchorNode, wSel.anchorOffset, wSel.focusNode, wSel.focusOffset);
     }
     // console.log('### extracted range from DOM', range.toString());
     return range;
