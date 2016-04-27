@@ -152,11 +152,14 @@ DOMSelection.Prototype = function() {
     if (wSel.isCollapsed) {
       var coor = this._getCoordinate(wSel.anchorNode, wSel.anchorOffset, options);
       range = _createRange(coor, coor, false, this.getContainerId());
+      return range;
     }
     // HACK: special treatment for edge cases as addressed by #354.
     // Sometimes anchorNode and focusNodes are the surface
     if ($(wSel.anchorNode).is('.surface')) {
       range = this._getEnclosingRange(wSel.getRangeAt(0));
+    } else {
+      range = this._getRange(wSel.anchorNode, wSel.anchorOffset, wSel.focusNode, wSel.focusOffset);
     }
     // console.log('### extracted range from DOM', range.toString());
     return range;
