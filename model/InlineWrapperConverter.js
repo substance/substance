@@ -1,7 +1,5 @@
 'use strict';
 
-var uuid = require('../util/uuid');
-
 module.exports = {
   type: 'inline-wrapper',
   import: function(el, node, converter) {

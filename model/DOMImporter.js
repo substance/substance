@@ -471,12 +471,8 @@ DOMImporter.Prototype = function DOMImporterPrototype() {
   };
 
   this._getUnsupportedNodeConverter = function() {
-    return {
-      type: 'unsupported',
-      matchElement: function() { return true; },
-      import: function() {},
-      export: function() {}
-    };
+    console.warn('DOMImporter._getUnsupportedNodeConverter() is abstract.' +
+         '\nIf you want to add unsupported elements to your model you should override this method.');
   };
 
   this._converterCanBeApplied = function(converter, el) {
