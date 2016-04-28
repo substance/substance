@@ -30,7 +30,7 @@ module.exports = {
 
   export: function(cell, el, converter) {
     var tagName = (cell.cellType==="head" ? "th" : "td");
-    el = el.withTagName(tagName);
+    el.setTagName(tagName);
     el.append(
       converter.annotatedText([cell.id, 'content'])
     );
