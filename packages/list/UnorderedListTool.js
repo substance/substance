@@ -8,7 +8,7 @@ function UnorderedListTool() {
 
 SurfaceTool.extend(UnorderedListTool);
 
-UnorderedListTool.static.name = 'unordered-list';
+UnorderedListTool.static.name = 'Bulleted list';
 UnorderedListTool.static.command = 'unordered-list';
 
 module.exports = UnorderedListTool;
