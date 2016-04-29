@@ -193,6 +193,7 @@ DOMImporter.Prototype = function DOMImporterPrototype() {
     }
     this.state.ids[node.id] = true;
     this.state.nodes.push(node);
+    return node;
   };
 
   this.show = function(node) {
