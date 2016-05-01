@@ -7,7 +7,7 @@ var substanceGlobals = {
 };
 
 if (global.hasOwnProperty('Substance')) {
-  throw new Error('global.Substance is already defined.');
+  console.warn('global.Substance is already defined.');
 }
 global.Substance = substanceGlobals;
 
