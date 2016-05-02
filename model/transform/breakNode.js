@@ -59,11 +59,15 @@ function breakTextNode(tx, args) {
   // when breaking at the first position, a new node of the same
   // type will be inserted.
   if (offset === 0) {
-    newNode = tx.create({
+    var nodeData = {
       id: id,
       type: node.type,
       content: ""
-    });
+    };
+    if (node.level) {
+      nodeData['level'] = node.level;
+    }
+    newNode = tx.create(nodeData);
     // show the new node
     container.show(id, nodePos);
     sel = tx.createSelection(path, 0);
