@@ -128,7 +128,7 @@ EditLinkPrompt.Prototype = function() {
 
   this.preventClick = function(e) {
     e.preventDefault();
-    e.stopPropgation();
+    e.stopPropagation();
   };
 
   this.onSave = function(e) {
