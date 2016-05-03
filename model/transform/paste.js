@@ -47,15 +47,8 @@ var paste = function(tx, args) {
     args.selection = tmp.selection;
   }
   var nodes = pasteDoc.get(CLIPBOARD_CONTAINER_ID).nodes;
-  var schema = tx.getSchema();
 
   if (nodes.length > 0) {
-    var first = pasteDoc.get(nodes[0]);
-
-    if (schema.isInstanceOf(first.type, 'text')) {
-      args = _pasteAnnotatedText(tx, args);
-      nodes.shift();
-    }
     // if still nodes left > 0
     if (nodes.length > 0) {
       args = _pasteDocument(tx, args);
