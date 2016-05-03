@@ -278,7 +278,7 @@ CollabSession.Prototype = function() {
     }
     this.version = serverVersion;
 
-    // Only apply updated collaborators if there are no local cahnges
+    // Only apply updated collaborators if there are no local changes
     // Otherwise they will not be accurate. We can safely skip this
     // here as we know the next sync will be triggered soon. And if
     // followed by an idle phase (_nextChange = null) will give us
