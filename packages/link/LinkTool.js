@@ -108,7 +108,7 @@ EditLinkPrompt.Prototype = function() {
 
   this.render = function() {
     var link = this.props.link;
-    var el = $$('div').addClass('se-prompt');
+    var el = $$('div').addClass('se-prompt').on('click', this.preventClick);
 
     el.append([
       $$('div').addClass('se-prompt-title').append(this.i18n.t('hyperlink')),
@@ -124,6 +124,11 @@ EditLinkPrompt.Prototype = function() {
              .on('click', this.onDelete)
     ]);
     return el;
+  };
+
+  this.preventClick = function(e) {
+    e.preventDefault();
+    e.stopPropgation();
   };
 
   this.onSave = function(e) {

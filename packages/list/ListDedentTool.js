@@ -8,7 +8,7 @@ function ListDedentTool() {
 
 SurfaceTool.extend(ListDedentTool);
 
-ListDedentTool.static.name = 'dedent-list-item';
+ListDedentTool.static.name = 'Decrease indent of list item';
 ListDedentTool.static.command = 'dedent-list-item';
 
 module.exports = ListDedentTool;

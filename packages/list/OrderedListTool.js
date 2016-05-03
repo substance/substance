@@ -8,7 +8,7 @@ function OrderedListTool() {
 
 SurfaceTool.extend(OrderedListTool);
 
-OrderedListTool.static.name = 'ordered-list';
+OrderedListTool.static.name = 'Numbered list';
 OrderedListTool.static.command = 'ordered-list';
 
 module.exports = OrderedListTool;
