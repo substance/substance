@@ -43,7 +43,9 @@ Tool.Prototype = function() {
   */
   this.render = function($$) {
     var el = $$('div')
-      .addClass('se-tool');
+      .addClass('se-tool')
+      .on('click', this.onClick);
+
 
     var title = this.getTitle();
     if (title) {
@@ -72,7 +74,6 @@ Tool.Prototype = function() {
 
   this.renderButton = function($$) {
     var button = $$('button')
-      .on('click', this.onClick)
       .append(this.props.children);
 
     if (this.state.disabled) {
