@@ -115,7 +115,10 @@ BrowserDOMElement.Prototype = function() {
 
     var textContent = this.getTextContent();
     if (textContent) {
-      newEl.setTextContent(textContent);
+      // Warning, don't replace with setTextContent()
+      // When compiled, and executed on the browser, BrowserDOMElement
+      // newEl is a native HTML node which doesn't have setTextContent()
+      newEl.textContent = textContent;
     }
     
     this._replaceNativeEl(newEl);
