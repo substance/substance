@@ -20,6 +20,7 @@ function DOMImporter(config) {
   this.config = extend({ idAttribute: 'id' }, config);
   this.schema = config.schema;
   this.state = null;
+  this.converters = config.schema.converters || config.converters;
 
   this._defaultBlockConverter = null;
   this._allConverters = [];
@@ -29,7 +30,7 @@ function DOMImporter(config) {
   var schema = this.schema;
   var defaultTextType = schema.getDefaultTextType();
 
-  config.converters.forEach(function(Converter) {
+  this.converters.forEach(function(Converter) {
     var converter;
     if (typeof Converter === 'function') {
       console.log('installing converter', Converter);

@@ -1,5 +1,7 @@
 "use strict";
 
+var $ = require('jquery');
+
 var oo = require('../util/oo');
 var documentHelpers = require('../model/documentHelpers');
 var ClipboardImporter = require('./ClipboardImporter');
@@ -295,8 +297,19 @@ Clipboard.Prototype = function() {
     // TODO: the clipboard importer should make sure
     // that the container exists
     var content = null;
+    var $html = $(html);
+    var str = '';
+    // wrap tables in zinx markup
+    $html.each(function(){
+      if(this.nodeName === 'TABLE') {
+        str = str + '<div class="zinx-table">' + this.outerHTML + '</div>';
+      } else {
+        str = str + this.outerHTML;
+      }
+    });
+    str = str + '<p></p>';
     try {
-      content = this.htmlImporter.importDocument(html);
+      content = this.htmlImporter.importDocument(str);
     } catch (err) {
       return false;
     }
