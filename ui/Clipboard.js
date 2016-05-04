@@ -302,7 +302,7 @@ Clipboard.Prototype = function() {
     // wrap tables in zinx markup
     $html.each(function(){
       if(this.nodeName === 'TABLE') {
-        str = str + '<div class="zinx-table">' + this.outerHTML + '</div>';
+        str = str + '<div class="zx-tablewrapper">' + this.outerHTML + '</div>';
       } else {
         str = str + this.outerHTML;
       }
