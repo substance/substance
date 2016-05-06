@@ -39,7 +39,26 @@ ListIndentCommand.Prototype = function() {
 
     surface.transaction(function(tx, args) {
       if (node.type === 'list-item') {
+        var items = tx.get([node.parent, 'items']);
+        var nodeIndex = items.indexOf(node.id);
+        var contiguousItems = [];
+        for (var i=nodeIndex; i>=0; i--){
+          if(doc.get(items[i]).level === node.level+1){
+            contiguousItems.push(items[i]);
+          } else {
+            break;
+          }
+        }
+        for (i=nodeIndex+1; i<items.length; i++){
+          if(doc.get(items[i]).level === node.level+1){
+            contiguousItems.push(items[i]);
+          } else {
+            break;
+          }
+        }
+        var ordered = contiguousItems.length > 0 ? doc.get(contiguousItems[0]).ordered : node.ordered;
         tx.set([node.id, 'level'], node.level+1);
+        tx.set([node.id, 'ordered'], ordered);
       }
       return args;
     });

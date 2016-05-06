@@ -29,6 +29,7 @@ ListEditing.Prototype = function() {
     var path = range.start.path;
     var offset = range.start.offset;
     var node = tx.get(path[0]);
+    var doc = node.getDocument();
 
     // split the text property and create a new list item node with trailing text and annotations transferred
     var text = node.content;
@@ -47,7 +48,26 @@ ListEditing.Prototype = function() {
           args.list = parentList;
           args = listUtils.listItemsToParagraph(tx, args);
         } else {
+          var items = tx.get([node.parent, 'items']);
+          var nodeIndex = items.indexOf(node.id);
+          var contiguousItems = [];
+          for (var i=nodeIndex; i>=0; i--){
+            if(doc.get(items[i]).level === node.level-1){
+              contiguousItems.push(items[i]);
+            } else {
+              break;
+            }
+          }
+          for (i=nodeIndex+1; i<items.length; i++){
+            if(doc.get(items[i]).level === node.level-1){
+              contiguousItems.push(items[i]);
+            } else {
+              break;
+            }
+          }
+          var ordered = contiguousItems.length > 0 ? doc.get(contiguousItems[0]).ordered : node.ordered;
           tx.set([node.id, 'level'], node.level-1);
+          tx.set([node.id, 'ordered'], ordered);
         }
       } else {
         newNode = tx.create({
