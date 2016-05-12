@@ -304,7 +304,7 @@ Clipboard.Prototype = function() {
       if(this.nodeName === 'TABLE') {
         str = str + '<div class="zx-tablewrapper">' + this.outerHTML + '</div>';
       } else {
-        str = str + this.outerHTML;
+        str = str + (this.outerHTML || '');
       }
     });
     str = str + '<p></p>';
