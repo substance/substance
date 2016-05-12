@@ -104,17 +104,36 @@ function Server(config) {
   Server.super.apply(this);
   
   this.config = config;
-  this.scope = config.scope || 'hub';
   this._onConnection = this._onConnection.bind(this);
 }
 
 Server.Prototype = function() {
 
   this.bind = function(wss) {
+    if (this.wss) {
+      throw new Error('Server is already bound to a websocket');
+    }
     this.wss = wss;
     this._connections = new WeakMap();
     this._collaborators = {};
     this.wss.on('connection', this._onConnection);
+
+    var interval = this.config.heartbeat;
+    if (interval) {
+      this._heartbeat = setInterval(this._sendHeartbeat.bind(this), interval);
+    }
+    this._bound = true;
+  };
+
+  /*
+    NOTE: This method is yet untested
+  */
+  this.unbind = function() {
+    if (this._bound) {
+      this.wss.off('connection', this._onConnection);
+    } else {
+      throw new Error('Server is not yet bound to a websocket.');
+    }
   };
 
   /*
@@ -210,17 +229,18 @@ Server.Prototype = function() {
     this._connections.delete(ws);
   };
 
-  // Implements state machine for handling the request response cycle
-  // 
-  // __initial -        > authenticated      -> __authenticated, __error
-  // __authenticated   -> authorize          -> __authorized, __error
-  // __authorized      -> enhanceRequest     -> __requestEnhanced, __error
-  // __requestEnhanced -> execute            -> __executed, __error
-  // __executed        -> enhanceResponse    -> __enhanced, __error
-  // __enhanced        -> sendResponse       -> __done, __error
-  // __error           -> sendError          -> __done
-  // __done // end state
-
+  /*
+    Implements state machine for handling the request response cycle
+    
+    __initial -        > authenticated      -> __authenticated, __error
+    __authenticated   -> authorize          -> __authorized, __error
+    __authorized      -> enhanceRequest     -> __requestEnhanced, __error
+    __requestEnhanced -> execute            -> __executed, __error
+    __executed        -> enhanceResponse    -> __enhanced, __error
+    __enhanced        -> sendResponse       -> __done, __error
+    __error           -> sendError          -> __done
+    __done // end state
+  */
   this.__initial = function(req, res) {
     return !req.isAuthenticated && !req.isAuthorized && !res.isReady;
   };
@@ -286,6 +306,18 @@ Server.Prototype = function() {
   };
 
   /*
+    Sends a heartbeat message to all connected collaborators
+  */
+  this._sendHeartbeat = function() {
+    Object.keys(this._collaborators).forEach(function(collaboratorId) {
+      this.send(collaboratorId, {
+        type: 'highfive',
+        scope: '_internal'
+      });
+    }.bind(this));
+  };
+
+  /*
     Send response
   */
   this.sendResponse = function(req, res) {
@@ -303,7 +335,10 @@ Server.Prototype = function() {
     Send message to collaborator
   */
   this.send = function(collaboratorId, message) {
-    message.scope = this.scope;
+    if (!message.scope && this.config.scope) {
+      message.scope = this.config.scope;
+    }
+    
     var ws = this._collaborators[collaboratorId].connection;
     if (this._isWebsocketOpen(ws)) {
       ws.send(this.serializeMessage(message));  
