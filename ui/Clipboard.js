@@ -293,6 +293,7 @@ Clipboard.Prototype = function() {
   */
   this._pasteHtml = function(html, text) {
     var surface = this.getSurface();
+    var self = this;
     if (!surface) return;
     // TODO: the clipboard importer should make sure
     // that the container exists
@@ -301,6 +302,7 @@ Clipboard.Prototype = function() {
     var str = '';
     // wrap tables in zinx markup
     $html.each(function(){
+      self._cleanInlineStyle(this);
       if(this.nodeName === 'TABLE') {
         str = str + '<div class="zx-tablewrapper">' + this.outerHTML + '</div>';
       } else {
@@ -321,6 +323,14 @@ Clipboard.Prototype = function() {
       });
       return true;
     }
+  };
+
+  this._cleanInlineStyle = function(el){
+    var self = this;
+    $(el).removeAttr('style');
+    $(el).children().each(function(){
+      self._cleanInlineStyle(this);
+    });
   };
 
   this._getNativeElement = function() {
