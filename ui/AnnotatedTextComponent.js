@@ -1,8 +1,9 @@
 'use strict';
 
-var Component = require('./Component');
 var Fragmenter = require('../model/Fragmenter');
+var Component = require('./Component');
 var AnnotationComponent = require('./AnnotationComponent');
+var InlineWrapperComponent = require('./InlineWrapperComponent');
 
 /**
   Renders an anotated text. Used internally by {@link ui/TextPropertyComponent}.
@@ -73,7 +74,16 @@ AnnotatedTextComponent.Prototype = function() {
         .addClass(node.anno.getTypeNames().join(' ').replace(/_/g, "-"))
         .addClass(node.isStart?"start-anchor":"end-anchor");
     }
-    var ComponentClass = componentRegistry.get(node.type) || AnnotationComponent;
+    var ComponentClass;
+    if (node.type === "inline-wrapper") {
+      ComponentClass = InlineWrapperComponent;
+    } else {
+      ComponentClass = componentRegistry.get(node.type);
+      if (!ComponentClass) {
+        console.warn('No component registered for type %s. Using AnnotationComponent.', node.type);
+        ComponentClass = AnnotationComponent;
+      }
+    }
     var el = $$(ComponentClass, { doc: doc, node: node });
     return el;
   };

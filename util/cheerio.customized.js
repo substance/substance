@@ -69,7 +69,7 @@ if (!$) {
 
     $._serialize = function(el) {
       var serialize = require('dom-serializer');
-      var opts = el.options || el.root.options;
+      var opts = el.options || (el.root && el.root.options);
       return serialize(el, opts);
     };
   }

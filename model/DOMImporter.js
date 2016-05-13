@@ -2,9 +2,12 @@
 
 var oo = require('../util/oo');
 var last = require('lodash/last');
+var each = require('lodash/each');
+var clone = require('lodash/clone');
 var extend = require('lodash/extend');
 var uuid = require('../util/uuid');
 var ArrayIterator = require('../util/ArrayIterator');
+var InlineWrapperConverter = require('./InlineWrapperConverter');
 
 /**
   A generic base implementation for XML/HTML importers.
@@ -50,6 +53,7 @@ function DOMImporter(config) {
     }
     var NodeClass = schema.getNodeClass(converter.type);
     if (!NodeClass) {
+      console.error('No node type defined for converter', converter.type);
       return;
     }
     if (defaultTextType === converter.type) {
@@ -66,33 +70,13 @@ function DOMImporter(config) {
 
   }.bind(this));
 
-  this._initState();
+  this.state = new DOMImporter.State();
 }
 
 DOMImporter.Prototype = function DOMImporterPrototype() {
 
-  this._initState = function() {
-    var state = {
-      preserveWhitespace: false
-    };
-    this.state = state;
-    this.reset();
-    return state;
-  };
-
   this.reset = function() {
-    this.state = extend(this.state, {
-      nodes: [],
-      inlineNodes: [],
-      containerId: null,
-      container: [],
-      ids: {},
-      // stack of contexts to handle reentrant calls
-      stack: [],
-      lastChar: "",
-      skipTypes: {},
-      ignoreAnnotations: false,
-    });
+    this.state.reset();
   };
 
   this.createDocument = function() {
@@ -144,7 +128,9 @@ DOMImporter.Prototype = function DOMImporterPrototype() {
       var node;
       if (blockTypeConverter) {
         node = this._nodeData(el, blockTypeConverter.type);
+        state.pushElementContext(el.tagName);
         node = blockTypeConverter.import(el, node, this) || node;
+        state.popElementContext();
         this._createAndShow(node);
       } else {
         if (el.isCommentNode()) {
@@ -182,7 +168,8 @@ DOMImporter.Prototype = function DOMImporterPrototype() {
     @returns {object} the created node as JSON
    */
   this.convertElement = function(el) {
-    return this._convertElement(el);
+    var node = this._convertElement(el);
+    return node;
   };
 
   this._convertElement = function(el, mode) {
@@ -190,7 +177,9 @@ DOMImporter.Prototype = function DOMImporterPrototype() {
     var converter = this._getConverterForElement(el, mode);
     if (converter) {
       node = this._nodeData(el, converter.type);
+      this.state.pushElementContext(el.tagName);
       node = converter.import(el, node, this) || node;
+      this.state.popElementContext();
       this.createNode(node);
     } else {
       throw new Error('No converter found for '+el.tagName);
@@ -204,6 +193,7 @@ DOMImporter.Prototype = function DOMImporterPrototype() {
     }
     this.state.ids[node.id] = true;
     this.state.nodes.push(node);
+    return node;
   };
 
   this.show = function(node) {
@@ -216,10 +206,20 @@ DOMImporter.Prototype = function DOMImporterPrototype() {
   };
 
   this._nodeData = function(el, type) {
-    return {
+    var nodeData = {
       type: type,
       id: this.getIdForElement(el, type)
     };
+    var NodeClass = this.schema.getNodeClass(type);
+    each(NodeClass.static.schema, function(prop, name) {
+      // check integrity of provided props, such as type correctness,
+      // and mandatory properties
+      var hasDefault = prop.hasOwnProperty('default');
+      if (hasDefault) {
+        nodeData[name] = clone(prop.default);
+      }
+    }.bind(this));
+    return nodeData;
   };
 
   // /**
@@ -253,13 +253,13 @@ DOMImporter.Prototype = function DOMImporterPrototype() {
   this.annotatedText = function(el, path, options) {
     var state = this.state;
     if (path) {
-      if (state.stack.length>0) {
-        throw new Error('Contract: it is not allowed to bind a new call annotatedText to a path while the previous has not been completed.', el.outerHTML);
-      }
+      // if (state.stack.length>0) {
+      //   throw new Error('Contract: it is not allowed to bind a new call annotatedText to a path while the previous has not been completed.', el.outerHTML);
+      // }
       if (options && options.preserveWhitespace) {
         state.preserveWhitespace = true;
       }
-      state.stack = [{ path: path, offset: 0, text: ""}];
+      state.stack.push({ path: path, offset: 0, text: ""});
     } else {
       if (state.stack.length===0) {
         throw new Error("Contract: DOMImporter.annotatedText() requires 'path' for non-reentrant call.", el.outerHTML);
@@ -269,9 +269,11 @@ DOMImporter.Prototype = function DOMImporterPrototype() {
     // annotated text property. This feature is mainly used to eat up
     // whitespace in XML/HTML at tag boundaries, produced by pretty-printed XML/HTML.
     this.state.lastChar = '';
-
+    var text;
     var iterator = el.getChildNodeIterator();
-    var text = this._annotatedText(iterator);
+    this.state.pushElementContext(el.tagName);
+    text = this._annotatedText(iterator);
+    this.state.popElementContext();
     if (path) {
       state.stack.pop();
       state.preserveWhitespace = false;
@@ -347,7 +349,9 @@ DOMImporter.Prototype = function DOMImporterPrototype() {
       throw new Error('Could not find converter for default type ', defaultTextType);
     }
     var node = this._nodeData(el, defaultTextType);
+    this.state.pushElementContext(el.tagName);
     node = defaultConverter.import(el, node, converter) || node;
+    this.state.popElementContext();
     return node;
   };
 
@@ -398,7 +402,9 @@ DOMImporter.Prototype = function DOMImporterPrototype() {
         if (inlineTypeConverter.import) {
           // push a new context so we can deal with reentrant calls
           state.stack.push({ path: context.path, offset: startOffset, text: ""});
+          state.pushElementContext(el.tagName);
           inlineNode = inlineTypeConverter.import(el, inlineNode, this) || inlineNode;
+          state.popElementContext();
 
           var NodeClass = this.schema.getNodeClass(inlineType);
           // inline nodes are attached to an invisible character
@@ -444,11 +450,34 @@ DOMImporter.Prototype = function DOMImporterPrototype() {
     } else {
       converters = this._allConverters;
     }
+    var converter = null;
     for (var i = 0; i < converters.length; i++) {
-      if (converters[i].matchElement(el)) {
-        return converters[i];
+      if (this._converterCanBeApplied(converters[i], el)) {
+        converter = converters[i];
+        break;
       }
     }
+    // there are some block nodes which are used as inline nodes as well.
+    // In this case we wrap the block node into an InlineWrapper
+    if (!converter && mode === 'inline') {
+      var blockConverter = this._getConverterForElement(el, 'block');
+      if (blockConverter) {
+        converter = InlineWrapperConverter;
+      }
+    }
+    if (!converter) {
+      converter = this._getUnsupportedNodeConverter();
+    }
+    return converter;
+  };
+
+  this._getUnsupportedNodeConverter = function() {
+    console.warn('DOMImporter._getUnsupportedNodeConverter() is abstract.' +
+         '\nIf you want to add unsupported elements to your model you should override this method.');
+  };
+
+  this._converterCanBeApplied = function(converter, el) {
+    return converter.matchElement(el);
   };
 
   this._createElement = function(tagName) {
@@ -578,5 +607,43 @@ DOMImporter.Prototype = function DOMImporterPrototype() {
 
 };
 oo.initClass(DOMImporter);
+
+DOMImporter.State = function() {
+  this.reset();
+};
+
+DOMImporter.State.Prototype = function() {
+
+  this.reset = function() {
+    this.preserveWhitespace = false;
+    this.nodes = [];
+    this.inlineNodes = [];
+    this.containerId = null;
+    this.container = [];
+    this.ids = {};
+    // stack for reentrant calls into _convertElement()
+    this.contexts = [];
+    // stack for reentrant calls into _annotatedText()
+    this.stack = [];
+    this.lastChar = "";
+    this.skipTypes = {};
+    this.ignoreAnnotations = false;
+  };
+
+  this.pushElementContext = function(tagName) {
+    this.contexts.push({ tagName: tagName });
+  };
+
+  this.popElementContext = function() {
+    return this.contexts.pop();
+  };
+
+  this.getCurrentElementContext = function() {
+    return last(this.contexts);
+  };
+
+};
+
+oo.initClass(DOMImporter.State);
 
 module.exports = DOMImporter;

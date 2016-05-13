@@ -351,8 +351,9 @@ DOMElement.Prototype = function() {
     if (arguments.length === 0) {
       return this.getTextContent();
     } else {
-      return this.setTextContent(text);
+      this.setTextContent(text);
     }
+    return this;
   };
 
   /**
@@ -392,8 +393,8 @@ DOMElement.Prototype = function() {
       return this.getInnerHTML();
     } else {
       this.setInnerHTML(html);
-      return this;
     }
+    return this;
   };
 
   /**

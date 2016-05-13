@@ -96,7 +96,7 @@ XMLExporter.Prototype = function() {
         if (name === 'id' || name === 'type') {
           return;
         }
-        var prop = this.$$(name);
+        var prop = converter.$$(name);
         if (node.getPropertyType(name) === 'string') {
           prop.append(converter.annotatedText([node.id, name]));
         } else {

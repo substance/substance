@@ -51,8 +51,8 @@ DefaultDOMElement.parseHTML = function(html) {
   @param {String} xml
   @returns {DOMElement|DOMElement[]}
 */
-DefaultDOMElement.parseXML = function(xml) {
-  return DOMElementImpl.parseMarkup(xml, 'xml');
+DefaultDOMElement.parseXML = function(xml, fullDoc) {
+  return DOMElementImpl.parseMarkup(xml, 'xml', fullDoc);
 };
 
 DefaultDOMElement.wrapNativeElement = function(el) {

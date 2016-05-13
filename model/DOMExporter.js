@@ -2,6 +2,7 @@
 
 var oo = require('../util/oo');
 var extend = require('lodash/extend');
+var isString = require('lodash/isString');
 var Fragmenter = require('./Fragmenter');
 var Registry = require('../util/Registry');
 var encodeXMLEntities = require('../util/encodeXMLEntities');
@@ -78,8 +79,13 @@ DOMExporter.Prototype = function() {
   };
 
   this.convertNode = function(node) {
-    // always make sure that we have the doc in our state
-    this.state.doc = node.getDocument();
+    if (isString(node)) {
+      // Assuming this.state.doc has been set by convertDocument
+      node = this.state.doc.get(node);
+    } else {
+      this.state.doc = node.getDocument();
+    }
+
     var converter = this.getNodeConverter(node);
     if (!converter) {
       converter = this.getDefaultBlockConverter();
