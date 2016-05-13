@@ -20,6 +20,7 @@ function ToolManager(controller) {
 
   this.controller = controller;
   this.tools = [];
+  this._components = [];
 
   var docSession = this.controller.getDocumentSession();
   docSession.on('selection:changed', this.updateTools, this);
@@ -44,6 +45,20 @@ ToolManager.Prototype = function() {
     }
   };
 
+  /*
+    Called by components to register for tool state updates
+  */
+  this.registerComponent = function(comp) {
+    this._components.push(comp);
+  };
+
+  /*
+    Unregister component
+  */
+  this.unregisterComponent = function(comp) {
+    this._components = without(this._components, comp);
+  };
+
   this.registerTool = function(tool) {
     this.tools.push(tool);
   };
@@ -66,13 +81,23 @@ ToolManager.Prototype = function() {
 
   // Just updates all tool states
   this.updateTools = function() {
+    var toolState = {};
     // console.log('Updating tools');
     this.tools.forEach(function(tool) {
       var state = this.getCommandState(tool);
+      toolState[tool.name] = state;
       tool.setState(state);
     }.bind(this));
+
+    this._components.forEach(function(comp) {
+      comp.setProps({
+        toolState: toolState
+      });
+    });
+
   };
 };
+
 
 oo.initClass(ToolManager);
 
