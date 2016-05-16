@@ -4,28 +4,22 @@ var each = require('lodash/each');
 var SurfaceTool = require('../../ui/SurfaceTool');
 var keys = require('../../util/keys');
 
-/*
-  Abstract class for text types. Implements the SurfaceTool API.
+/**
+  SwitchTextTypeTool. Implements the SurfaceTool API.
 
   @class
   @component
 */
-
-function SwitchTextType() {
-  SwitchTextType.super.apply(this, arguments);
+function SwitchTextTypeTool() {
+  SwitchTextTypeTool.super.apply(this, arguments);
 
   // cursor for keyboard navigation
   this._navIdx = -1;
 }
 
-SwitchTextType.Prototype = function() {
+SwitchTextTypeTool.Prototype = function() {
 
-  var _super = SwitchTextType.super.prototype;
-
-  this.getInitialState = function() {
-    var state = this.context.toolManager.getCommandState(this);
-    return state;
-  };
+  var _super = SwitchTextTypeTool.super.prototype;
 
   // UI Specific parts
   // ----------------
@@ -39,10 +33,10 @@ SwitchTextType.Prototype = function() {
   this.render = function($$) {
     var textTypeName = 'No selection';
 
-    if (this.state.currentTextType) {
-      textTypeName = this.state.currentTextType.name;
+    if (this.props.currentTextType) {
+      textTypeName = this.props.currentTextType.name;
     }
-    var el = $$("div").addClass('sc-switch-text-type');
+    var el = $$('div').addClass('sc-switch-text-type');
 
     var toggleButton = $$('button').ref('toggle')
       .addClass('se-toggle')
@@ -50,7 +44,7 @@ SwitchTextType.Prototype = function() {
       .append(this.i18n.t(textTypeName))
       .on('click', this.toggleAvailableTextTypes);
 
-    if (this.state.disabled) {
+    if (this.props.disabled || !this.props.currentTextType) {
       el.addClass('sm-disabled');
       toggleButton.attr('tabindex', -1);
     } else {
@@ -64,16 +58,15 @@ SwitchTextType.Prototype = function() {
 
       // dropdown options
       var options = $$('div').addClass("se-options").ref('options');
-      each(this.state.textTypes, function(textType) {
+      each(this.props.textTypes, function(textType) {
         var button = $$('button')
             .addClass('se-option sm-'+textType.name)
-            .attr("data-type", textType.name)
+            .attr('data-type', textType.name)
             .append(this.i18n.t(textType.name))
             .on('click', this.handleClick);
         options.append(button);
       }.bind(this));
       el.append(options);
-
       el.on('keydown', this.onKeydown);
     }
 
@@ -134,7 +127,7 @@ SwitchTextType.Prototype = function() {
   this.toggleAvailableTextTypes = function(e) {
     e.preventDefault();
     e.stopPropagation();
-    if (this.state.disabled) return;
+    if (this.props.disabled) return;
 
     // HACK: This only updates the view state state.open is not set on the tool itself
     // That way the dropdown automatically closes when the selection changes
@@ -167,8 +160,8 @@ SwitchTextType.Prototype = function() {
 
 };
 
-SurfaceTool.extend(SwitchTextType);
+SurfaceTool.extend(SwitchTextTypeTool);
 
-SwitchTextType.static.name = 'switch-text-type';
+SwitchTextTypeTool.static.name = 'switch-text-type';
 
-module.exports = SwitchTextType;
+module.exports = SwitchTextTypeTool;

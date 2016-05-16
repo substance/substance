@@ -324,6 +324,34 @@ Controller.Prototype = function() {
 
   this.getContainerId = function() {
     warn('DEPRECATED: use controller.getFocusedSurface().getContainerId() instead.');
+    var surface = this.getSurface();
+    if (surface) {
+      return surface.getContainerId();
+    }
+  };
+
+  /**
+    Retrieve the names of all available surface commands
+
+    Used by ToolManager, when there is no focused surface
+  */
+  this.getAllSurfaceCommands = function() {
+    var surfaceCommands = {};
+    var config = this.getConfig();
+
+    each(config.surfaces, function(surfaceConfig) {
+      each(surfaceConfig.commands, function(CommandClass) {
+        var name = CommandClass.static.name;
+        surfaceCommands[name] = name;
+      });
+    });
+    return Object.keys(surfaceCommands);
+  };
+
+  // For now just delegate to the current surface
+  // TODO: Remove. Let's only allow Document.transaction and Surface.transaction to
+  // avoid confusion
+  this.transaction = function() {
     var surface = this.getFocusedSurface();
     if (surface) {
       return surface.getContainerId();

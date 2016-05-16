@@ -64,6 +64,7 @@ function Surface() {
 
   // set when editing is enabled
   this.undoEnabled = true;
+
   this.textTypes = this.props.textTypes;
   this.commandRegistry = _createCommandRegistry(this, this.props.commands);
 

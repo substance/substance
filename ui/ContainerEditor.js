@@ -247,7 +247,7 @@ ContainerEditor.Prototype = function() {
     return this.textTypes || [];
   };
 
-  // Used by TextTool
+  // Used by SwitchTextTypeTool
   // TODO: Filter by enabled commands for this Surface
   this.getTextCommands = function() {
     var textCommands = {};
