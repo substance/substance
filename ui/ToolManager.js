@@ -79,15 +79,25 @@ ToolManager.Prototype = function() {
     }
   };
 
+  /*
+    Derive tool state from all commands available in the
+    current (selection) context
+  */
+  this.getToolState = function() {
+    var toolState = {};
+    // Iterate surface commands
+    var surface = this.controller.getFocusedSurface();
+    if (surface) {
+      surface.commandRegistry.each(function(cmd) {
+        toolState[cmd.getName()] = cmd.getCommandState();
+      });
+    }
+    return toolState;
+  };
+
   // Just updates all tool states
   this.updateTools = function() {
-    var toolState = {};
-    // console.log('Updating tools');
-    this.tools.forEach(function(tool) {
-      var state = this.getCommandState(tool);
-      toolState[tool.name] = state;
-      tool.setState(state);
-    }.bind(this));
+    var toolState = this.getToolState();
 
     this._components.forEach(function(comp) {
       comp.setProps({

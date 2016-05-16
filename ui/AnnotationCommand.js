@@ -31,8 +31,7 @@ var deleteAnnotation = require('../model/transform/deleteAnnotation');
   SmallCapsCommand.static.name = 'smallcaps';
   SmallCapsCommand.static.annotationType = 'smallcaps';
   ```
- */
-
+*/
 var AnnotationCommand = function(surface) {
   SurfaceCommand.call(this, surface);
 };
@@ -248,7 +247,7 @@ AnnotationCommand.Prototype = function() {
       newState.mode = "expand";
     } else if (this.canEdit(annos, sel)) {
       newState.mode = "edit";
-      newState.annotationId = annos[0].id;
+      newState.node = annos[0];
       newState.active = true;
     } else if (this.canDelete(annos, sel)) {
       newState.active = true;
