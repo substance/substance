@@ -1,10 +1,12 @@
 'use strict';
 
-var oo = require('../util/oo');
 var last = require('lodash/last');
 var each = require('lodash/each');
 var clone = require('lodash/clone');
 var extend = require('lodash/extend');
+var error = require('../util/error');
+var warn = require('../util/warn');
+var oo = require('../util/oo');
 var uuid = require('../util/uuid');
 var ArrayIterator = require('../util/ArrayIterator');
 var InlineWrapperConverter = require('./InlineWrapperConverter');
@@ -34,18 +36,18 @@ function DOMImporter(config) {
   config.converters.forEach(function(Converter) {
     var converter;
     if (typeof Converter === 'function') {
-      console.log('installing converter', Converter);
+      // console.log('installing converter', Converter);
       converter = new Converter();
     } else {
       converter = Converter;
     }
 
     if (!converter.type) {
-      console.error('Converter must provide the type of the associated node.', converter);
+      error('Converter must provide the type of the associated node.', converter);
       return;
     }
     if (!converter.matchElement && !converter.tagName) {
-      console.error('Converter must provide a matchElement function or a tagName property.', converter);
+      error('Converter must provide a matchElement function or a tagName property.', converter);
       return;
     }
     if (!converter.matchElement) {
@@ -341,7 +343,7 @@ DOMImporter.Prototype = function DOMImporterPrototype() {
 
   this.defaultConverter = function(el, converter) {
     if (!this.IGNORE_DEFAULT_WARNINGS) {
-      console.warn('This element is not handled by the converters you provided. This is the default implementation which just skips conversion. Override DOMImporter.defaultConverter(el, converter) to change this behavior.', el.outerHTML);
+      warn('This element is not handled by the converters you provided. This is the default implementation which just skips conversion. Override DOMImporter.defaultConverter(el, converter) to change this behavior.', el.outerHTML);
     }
     var defaultTextType = this.schema.getDefaultTextType();
     var defaultConverter = this._defaultBlockConverter;
@@ -387,7 +389,7 @@ DOMImporter.Prototype = function DOMImporterPrototype() {
         var inlineTypeConverter = this._getConverterForElement(el, 'inline');
         if (!inlineTypeConverter) {
           if (!this.IGNORE_DEFAULT_WARNINGS) {
-            console.warn('Unsupported inline element. We will not create an annotation for it, but process its children to extract annotated text.', el.outerHTML);
+            warn('Unsupported inline element. We will not create an annotation for it, but process its children to extract annotated text.', el.outerHTML);
           }
           // Note: this will store the result into the current context
           this.annotatedText(el);
@@ -430,7 +432,7 @@ DOMImporter.Prototype = function DOMImporterPrototype() {
         inlineNode.path = context.path.slice(0);
         state.inlineNodes.push(inlineNode);
       } else {
-        console.warn('Unknown element type. Taking plain text.', el.outerHTML);
+        warn('Unknown element type. Taking plain text.', el.outerHTML);
         text = this._prepareText(state, el.textContent);
         context.text = context.text.concat(text);
         context.offset += text.length;

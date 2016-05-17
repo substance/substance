@@ -1,3 +1,5 @@
+'use strict';
+
 var Documentation = require('./Documentation');
 var each = require('lodash/each');
 

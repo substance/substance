@@ -1,6 +1,7 @@
 'use strict';
 
 var $ = require('./jquery');
+var error = require('./error');
 
 module.exports = function request(method, url, data, cb) {
   var ajaxOpts = {
@@ -12,7 +13,7 @@ module.exports = function request(method, url, data, cb) {
       cb(null, data);
     },
     error: function(err) {
-      console.error(err);
+      error(err);
       cb(err.responseText);
     }
   };
