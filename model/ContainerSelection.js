@@ -99,10 +99,18 @@ ContainerSelection.Prototype = function() {
     return (
       this.startPath.length === 1 &&
       this.endPath.length === 1 &&
-      (this.reverse ?
-        this.endOffset === 0 && this.startOffset === 1 :
-        this.startOffset === 0 && this.endOffset === 1)
+      this.startPath[0] == this.endPath[0]
     );
+  };
+
+  this.isEntireNodeSelected = function() {
+    return (this.reverse ?
+      this.endOffset === 0 && this.startOffset === 1 :
+      this.startOffset === 0 && this.endOffset === 1);
+  };
+
+  this.getNodeId = function() {
+    return this.startPath[0];
   };
 
   this.isNull = function() {
@@ -159,6 +167,20 @@ ContainerSelection.Prototype = function() {
     var r2 = this._range(other);
     return (r1.start.isBefore(r2.start, strict) &&
       r2.end.isBefore(r1.end, strict));
+  };
+
+  this.containsNodeFragment = function(nodeId, strict) {
+    var container = this.getContainer();
+    var coor = new Coordinate([nodeId], 0);
+    var address = container.getAddress(coor);
+    var r = this._range(this);
+    // console.log('ContainerSelection.containsNodeFragment', address, 'is within', r.start, '->', r.end, '?');
+    var contained = r.start.isBefore(address, strict);
+    if (contained) {
+      address.offset = 1;
+      contained = r.end.isAfter(address, strict);
+    }
+    return contained;
   };
 
   this.overlaps = function(other) {
@@ -425,6 +447,10 @@ ContainerSelection.Prototype = function() {
       }
     });
     return sels;
+  };
+
+  this._clone = function() {
+    return new ContainerSelection(this.containerId, this.startPath, this.startOffset, this.endPath, this.endOffset, this.reverse, this.surfaceId);
   };
 
   this._range = function(sel) {
