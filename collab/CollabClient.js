@@ -1,6 +1,8 @@
 "use strict";
 
 var EventEmitter = require('../util/EventEmitter');
+var warn = require('../util/warn');
+var info = require('../util/info');
 var __id__ = 0;
 
 /**
@@ -14,7 +16,7 @@ function CollabClient(config) {
   this.__id__ = __id__++;
   this.config = config;
   this.connection = config.connection;
-  
+
   // Hard-coded for now
   this.scope = 'substance/collab';
 
@@ -46,7 +48,7 @@ CollabClient.Prototype = function() {
     if (msg.scope === this.scope) {
       this.emit('message', msg);
     } else {
-      // console.info('Message ignored. Not sent in hub scope', msg);
+      info('Message ignored. Not sent in hub scope', msg);
     }
   };
 
@@ -55,7 +57,7 @@ CollabClient.Prototype = function() {
   */
   this.send = function(msg) {
     if (!this.connection.isOpen()) {
-      console.error('Message could not be sent. Connection not open.', msg);
+      warn('Message could not be sent. Connection not open.', msg);
       return;
     }
 
