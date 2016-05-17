@@ -1,21 +1,22 @@
 'use strict';
 
-var isEqual = require('lodash/isEqual');
 var each = require('lodash/each');
 var extend = require('lodash/extend');
+var error = require('../util/error');
+var info = require('../util/info');
+var inBrowser = require('../util/inBrowser');
+var keys = require('../util/keys');
 var platform = require('../util/platform');
+var warn = require('../util/warn');
 var Registry = require('../util/Registry');
-var Selection = require('../model/Selection');
 var copySelection = require('../model/transform/copySelection');
-var insertText = require('../model/transform/insertText');
 var deleteSelection = require('../model/transform/deleteSelection');
-var DOMSelection = require('./DOMSelection');
+var insertText = require('../model/transform/insertText');
 var Clipboard = require('./Clipboard');
 var Component = require('./Component');
-var UnsupportedNode = require('./UnsupportedNode');
-var keys = require('../util/keys');
-var inBrowser = require('../util/inBrowser');
 var DefaultDOMElement = require('./DefaultDOMElement');
+var DOMSelection = require('./DOMSelection');
+var UnsupportedNode = require('./UnsupportedNodeComponent');
 
 /**
    Abstract interface for editing components.
@@ -28,18 +29,25 @@ var DefaultDOMElement = require('./DefaultDOMElement');
 function Surface() {
   Surface.super.apply(this, arguments);
 
-  this.controller = this.context.controller || this.props.controller;
-  if (!this.controller) {
-    throw new Error('Surface needs a valid controller');
+  // DocumentSession instance must be provided either as a prop
+  // or via dependency-injection
+  this.documentSession = this.props.documentSession || this.context.documentSession;
+  if (!this.documentSession) {
+    throw new Error('No DocumentSession provided');
   }
-  this.documentSession = this.controller.getDocumentSession();
   this.name = this.props.name;
   if (!this.name) {
-    throw new Error('No id provided');
+    throw new Error('Surface must have a name.');
   }
+  if (this.name.indexOf('/') > -1) {
+    // because we are using '/' to deal with nested surfaces (isolated nodes)
+    throw new Error("Surance.name must not contain '/'");
+  }
+  // this path is an identifier unique for this surface
+  // considering nesting in IsolatedNodes
+  this._surfaceId = _createSurfaceId(this);
 
   this.clipboard = new Clipboard(this);
-  var doc = this.documentSession.getDocument();
 
   this.domSelection = null;
 
@@ -55,95 +63,165 @@ function Surface() {
   }
 
   // set when editing is enabled
-  this.enabled = true;
   this.undoEnabled = true;
   this.textTypes = this.props.textTypes;
-  this._initializeCommandRegistry(this.props.commands);
-
-  this.controller.registerSurface(this);
+  this.commandRegistry = _createCommandRegistry(this, this.props.commands);
 
   // a registry for TextProperties which allows us to dispatch changes
   this._textProperties = {};
-  this._annotations = {};
 
-  doc.on('document:changed', this.onDocumentChange, this);
-  // Only react to changes done via documentSession.setSelection
-  // in the other case we are dealing with it ourself
-  this.documentSession.on('selection:changed:explicitly', this.onSelectionChange, this);
-  this.documentSession.on('collaborators:changed', this.onCollaboratorsChange, this);
+  this._state = {
+    // true if the document session's selection is addressing this surface
+    skipNextFocusEvent: false,
+    // used to avoid multiple rerenderings (e.g. simultanous update of text and fragments)
+    isDirty: false,
+    dirtyProperties: {},
+    // while fragments are provided as a hash of (type -> [Fragment])
+    // we derive a hash of (prop-key -> [Fragment]); in other words, Fragments grouped by property
+    fragments: {},
+    // we want to show the cursor fragment only when blurred, so we keep it separated from the other fragments
+    cursorFragment: null,
+  };
+
+  this._deriveProps(this.props);
+}
+
+function _createCommandRegistry(surface, commands) {
+  var commandRegistry = new Registry();
+  each(commands, function(CommandClass) {
+    var commandContext = extend({}, surface.context, surface.getChildContext());
+    var cmd = new CommandClass(commandContext);
+    commandRegistry.add(CommandClass.static.name, cmd);
+  });
+  return commandRegistry;
+}
+
+function _createSurfaceId(surface) {
+  var surfaceParent = surface.getSurfaceParent();
+  if (surfaceParent) {
+    return surfaceParent.getId() + '/' + surface.name;
+  } else {
+    return surface.name;
+  }
 }
 
 Surface.Prototype = function() {
+
+  var _super = Surface.super.prototype;
+
+  this.getChildContext = function() {
+    return {
+      surface: this,
+      surfaceParent: this,
+      doc: this.getDocument()
+    };
+  };
+
+  this.didMount = function() {
+    _super.didMount.call(this);
+
+    if (this.context.surfaceManager) {
+      this.context.surfaceManager.registerSurface(this);
+    }
+    if (!this.isReadonly()) {
+      this.domSelection = this._createDOMSelection();
+      this.clipboard.didMount();
+      // Document Change Events
+      this.domObserver.observe(this.el.getNativeElement(), this.domObserverConfig);
+    }
+  };
+
+  this.dispose = function() {
+    _super.dispose.call(this);
+
+    this.domSelection = null;
+    this.domObserver.disconnect();
+    if (this.context.surfaceManager) {
+      this.context.surfaceManager.unregisterSurface(this);
+    }
+  };
+
+  this.willReceiveProps = function(nextProps) {
+    _super.willReceiveProps.apply(this, arguments);
+
+    this._deriveProps(nextProps);
+  };
+
+  this.didUpdate = function() {
+    _super.didUpdate.call(this);
+
+    this._update();
+  };
 
   this.render = function($$) {
     var tagName = this.props.tagName || 'div';
     var el = $$(tagName)
       .addClass('sc-surface')
       .attr('spellCheck', false)
-      .attr('tabindex', 2);
+      .attr('tabindex', 2)
+      .attr('contenteditable', false);
 
-    if (this.isEditable()) {
-      // Keyboard Events
-      el.on('keydown', this.onKeyDown);
-      // OSX specific handling of dead-keys
-      if (!platform.isIE) {
-        el.on('compositionstart', this.onCompositionStart);
+    if (!this.isDisabled()) {
+      if (this.isEditable()) {
+        // Keyboard Events
+        el.on('keydown', this.onKeyDown);
+        // OSX specific handling of dead-keys
+        if (!platform.isIE) {
+          el.on('compositionstart', this.onCompositionStart);
+        }
+        // Note: TextEvent in Chrome/Webkit is the easiest for us
+        // as it contains the actual inserted string.
+        // Though, it is not available in FF and not working properly in IE
+        // where we fall back to a ContentEditable backed implementation.
+        if (window.TextEvent && !platform.isIE) {
+          el.on('textInput', this.onTextInput);
+        } else {
+          el.on('keypress', this.onTextInputShim);
+        }
       }
-      // Note: TextEvent in Chrome/Webkit is the easiest for us
-      // as it contains the actual inserted string.
-      // Though, it is not available in FF and not working properly in IE
-      // where we fall back to a ContentEditable backed implementation.
-      if (window.TextEvent && !platform.isIE) {
-        el.on('textInput', this.onTextInput);
-      } else {
-        el.on('keypress', this.onTextInputShim);
+      if (!this.isReadonly()) {
+        // Mouse Events
+        el.on('mousedown', this.onMouseDown);
+        // disable drag'n'drop
+        el.on('dragstart', this.onDragStart);
+        // we will react on this to render a custom selection
+        el.on('focus', this.onNativeFocus);
+        el.on('blur', this.onNativeBlur);
+        // activate the clipboard
+        this.clipboard.attach(el);
       }
     }
-
-    if (!this.isReadonly()) {
-      // Mouse Events
-      el.on('mousedown', this.onMouseDown);
-
-      // disable drag'n'drop
-      el.on('dragstart', this.onDragStart);
-
-      // we will react on this to render a custom selection
-      el.on('focus', this.onNativeFocus);
-      el.on('blur', this.onNativeBlur);
-      // activate the clipboard
-      this.clipboard.attach(el);
-    }
-
     return el;
   };
 
-  this.didMount = function() {
-    if (!this.isReadonly()) {
-      this.domSelection = new DOMSelection(this);
-      this.clipboard.didMount();
-      // Document Change Events
-      this.domObserver.observe(this.el.getNativeElement(), this.domObserverConfig);
-      this._rerenderSelection();
-    }
-  };
-
-  this.dispose = function() {
+  this.renderNode = function($$, node) {
     var doc = this.getDocument();
-    doc.off(this);
-    this.domSelection = null;
-    this.domObserver.disconnect();
-    this.getController().unregisterSurface(this);
+    var componentRegistry = this.getComponentRegistry();
+    var ComponentClass = componentRegistry.get(node.type);
+    if (!ComponentClass) {
+      error('Could not resolve a component for type: ' + node.type);
+      ComponentClass = UnsupportedNode;
+    }
+    return $$(ComponentClass, {
+      doc: doc,
+      node: node
+    }).ref(node.id);
   };
 
-  this.getChildContext = function() {
-    return {
-      surface: this,
-      doc: this.getDocument()
-    };
+  this.getComponentRegistry = function() {
+    return this.context.componentRegistry || this.props.componentRegistry;
   };
 
   this.getName = function() {
     return this.name;
+  };
+
+  this.getId = function() {
+    return this._surfaceId;
+  };
+
+  this.isDisabled = function() {
+    return this.props.disabled;
   };
 
   this.isEditable = function() {
@@ -165,7 +243,7 @@ Surface.Prototype = function() {
   this.executeCommand = function(commandName, args) {
     var cmd = this.getCommand(commandName);
     if (!cmd) {
-      console.warn('command', commandName, 'not registered on controller');
+      warn('command', commandName, 'not registered on controller');
       return;
     }
     // Run command
@@ -175,7 +253,7 @@ Surface.Prototype = function() {
       // TODO: We want to replace this with a more specific, scoped event
       // but for that we need an improved EventEmitter API
     } else if (info === undefined) {
-      console.warn('command ', commandName, 'must return either an info object or true when handled or false when not handled');
+      warn('command ', commandName, 'must return either an info object or true when handled or false when not handled');
     }
   };
 
@@ -184,7 +262,7 @@ Surface.Prototype = function() {
   };
 
   this.getController = function() {
-    return this.controller;
+    return this.context.controller;
   };
 
   this.getDocument = function() {
@@ -195,20 +273,8 @@ Surface.Prototype = function() {
     return this.documentSession;
   };
 
-  this.enable = function() {
-    // As opposed to a ContainerEditor, a regular Surface
-    // is not a ContentEditable -- but every contained TextProperty
-    console.log('TODO: enable all contained TextProperties');
-    this.enabled = true;
-  };
-
-  this.disable = function() {
-    console.log('TODO: disable all contained TextProperties');
-    this.enabled = false;
-  };
-
   this.isEnabled = function() {
-    return this.enabled;
+    return !this.state.disabled;
   };
 
   this.isContainerEditor = function() {
@@ -248,40 +314,74 @@ Surface.Prototype = function() {
    */
   this.transaction = function(transformation) {
     var documentSession = this.documentSession;
-    var surfaceId = this.getName();
-    // using the silent version, so that the selection:changed event does not get emitted too early
+    var surfaceId = this.getId();
+    var self = this;
     documentSession.transaction(function(tx, args) {
       // `beforeState` is saved with the document operation and will be used
       // to recover the selection when using 'undo'.
       tx.before.surfaceId = surfaceId;
+      self._prepareArgs(args);
       return transformation(tx, args);
     });
   };
 
   this.setFocused = function() {
-    console.log('DEPRECATED: this is should not be necessary anymore.');
-    console.log('Maybe you want the native focus? then you can try surface.focus()');
+    warn('DEPRECATED: this is should not be necessary anymore.\n'+
+         'Maybe you want the native focus? then you can try surface.focus()');
   };
 
   this.getSelection = function() {
     return this.documentSession.getSelection();
   };
 
+  /*
+    Internal method to access the surface parent.
+  */
+  this.getSurfaceParent = function() {
+    return this.context.surfaceParent;
+  };
+
   /**
    * Set the model selection and update the DOM selection accordingly
    */
   this.setSelection = function(sel) {
+    // console.log('Surface.setSelection()', this.name, sel);
     // storing the surface id so that we can associate
     // the selection with this surface later
-    if (!sel.isNull()) {
-      sel.surfaceId = this.name;
+    if (sel && !sel.isNull()) {
+      sel.surfaceId = this.getId();
     }
     this._setSelection(sel);
   };
 
+  this.blur = function() {
+    if (this._hasNativeFocus()) {
+      this.el.blur();
+    } else {
+      this._update();
+      this.rerenderDOMSelection();
+    }
+    this.emit('surface:blurred', this);
+  };
+
+  this._hasNativeFocus = function() {
+    if (inBrowser) {
+      var focusedElement = window.document.activeElement;
+      return this.el.getNativeElement() === focusedElement;
+    }
+    return false;
+  };
+
+  this.focus = function() {
+    this.el.focus();
+    this._update();
+    this.rerenderDOMSelection();
+    this.emit('surface:focused', this);
+  };
+
   this.setSelectionFromEvent = function(evt) {
     if (this.domSelection) {
-      this.skipNextFocusEvent = true;
+      this._state.skipNextFocusEvent = true;
       var domRange = Surface.getDOMRangeFromEvent(evt);
       var range = this.domSelection.getSelectionFromDOMRange(domRange);
       var sel = this.getDocument().createSelection(range);
@@ -289,12 +389,19 @@ Surface.Prototype = function() {
     }
   };
 
-  this.rerenderDomSelection = function() {
-    if (this.domSelection) {
-      var domSelection = this.domSelection;
+  this.rerenderDOMSelection = function() {
+    if (inBrowser &&
+      // HACK: in our examples we are hosting two instances of one editor
+      // which reside in IFrames. To avoid competing DOM selection updates
+      // we update only the one which as a focused document.
+      (!Surface.MULTIPLE_APPS_ON_PAGE || window.document.hasFocus())) {
+      // console.log('Surface.rerenderDOMSelection', this.__id__);
+      if (!this._hasNativeFocus()) {
+        this.skipNextFocusEvent = true;
+        this.el.focus();
+      }
       var sel = this.getSelection();
-      // console.log('Re-rendering DOM selection', sel.toString(), this.__id__);
-      domSelection.setSelection(sel);
+      this.domSelection.setSelection(sel);
     }
   };
 
@@ -378,47 +485,6 @@ Surface.Prototype = function() {
   };
 
   /* Event handlers */
-
-  this.onDocumentChange = function(change, info) {
-    // dirty text properties which need to be updated due to selection changes
-    var needUpdate = this._updateSelectionFragments();
-    // plus all text properties affected by the change
-    change.updated.forEach(function(_, path) {
-      needUpdate[path] = true;
-    });
-    this._updateTextProperties(needUpdate);
-    if (this.domSelection && !info.remote) {
-      // console.log('Rerendering DOM selection after document change.', this.__id__);
-      // HACK: under FF we must make sure that the contenteditable is
-      // focused.
-      if (change.after.surfaceId === this.getName()) {
-        if (!this.isNativeFocused) {
-          this.skipNextFocusEvent = true;
-          this.focus();
-        }
-        this.rerenderDomSelection();
-      }
-    }
-    this.emit('selection:changed', this.getSelection(), this);
-  };
-
-  this._rerenderSelection = function() {
-    var updatedProps = this._updateSelectionFragments();
-    this._updateTextProperties(updatedProps);
-    if (this.domSelection && this.isNativeFocused) {
-      this.rerenderDomSelection();
-    }
-  };
-
-  this.onSelectionChange = function() {
-    // console.log('Rerendering DOM selection after selection change.');
-    this._rerenderSelection();
-    this.emit('selection:changed', this.getSelection(), this);
-  };
-
-  this.onCollaboratorsChange = function() {
-    this._rerenderSelection();
-  };
 
   /*
    * Handle document key down events.
@@ -546,6 +612,8 @@ Surface.Prototype = function() {
   };
 
   this.onMouseDown = function(event) {
+    // console.log('mousedown on', this.name);
+    event.stopPropagation();
 
     // special treatment for triple clicks
     if (!(platform.isIE && platform.version<12) && event.detail >= 3) {
@@ -562,25 +630,39 @@ Surface.Prototype = function() {
         return;
       }
     }
-
+    // TODO: what is this exactly?
     if ( event.which !== 1 ) {
       return;
     }
-    // console.log('MouseDown on Surface %s', this.__id__);
     // 'mouseDown' is triggered before 'focus' so we tell
     // our focus handler that we are already dealing with it
-    // The opposite situation, when the surface gets focused event.g. using keyboard
+    // The opposite situation, when the surface gets focused e.g. using keyboard
     // then the handler needs to kick in and recover a persisted selection or such
     this.skipNextFocusEvent = true;
+
+    // UX-wise, the proper way is to apply the selection on mousedown, and if a drag is started (range selection)
+    // we could maybe map the selection during the drag, but finally once after mouse is released.
+    // TODO: this needs to be solved properly; be aware of browser incompatibilities
+    // HACK: not working in IE which then does not allow a range selection anymore
+    if (!platform.isIE) {
+      // HACK: clearing the DOM selection, otherwise we have troubles with the old selection being in the way for the next selection
+      this.domSelection.clear();
+      setTimeout(function() {
+        if (this.domSelection) {
+          var sel = this.domSelection.getSelection();
+          this.setSelection(sel);
+        }
+      }.bind(this));
+    }
+
     // Bind mouseup to the whole document in case of dragging out of the surface
     if (this.documentEl) {
+      // TODO: we should handle mouse up only if we started a drag (and the selection has really changed)
       this.documentEl.on('mouseup', this.onMouseUp, this, { once: true });
     }
   };
 
   this.onMouseUp = function() {
-    // ... and unbind the temporary handler
-    // this.setFocused(true);
     // ATTENTION: this delay is necessary for cases the user clicks
     // into an existing selection. In this case the window selection still
     // holds the old value, and is set to the correct selection after this
@@ -604,7 +686,7 @@ Surface.Prototype = function() {
     //      - Note: copy, cut, paste work just fine
     //  - dragging selected text
     //  - spell correction
-    console.info("We want to enable a DOM MutationObserver which catches all changes made by native interfaces (such as spell corrections, etc). Lookout for this message and try to set Surface.skipNextObservation=true when you know that you will mutate the DOM.");
+    info("We want to enable a DOM MutationObserver which catches all changes made by native interfaces (such as spell corrections, etc). Lookout for this message and try to set Surface.skipNextObservation=true when you know that you will mutate the DOM.");
   };
 
   this.onDragStart = function(event) {
@@ -613,99 +695,164 @@ Surface.Prototype = function() {
   };
 
   this.onNativeBlur = function() {
-    // console.log('Native blur on surface', this.__id__);
-    // HACK: clearing DOM selection first, which eliminates strange selection
-    // artifacts coming from changing the text property structure
-    // while having a rendered DOM selection.
-    // window.getSelection().removeAllRanges();
-    this.isNativeFocused = false;
-    this.skipNextFocusEvent = false;
-
-    // HACK: hard-coding the current decision to render the cursor fragment
-    // only when blurred
-    var sel = this.getSelection();
-    if (sel && sel.isCollapsed()) {
-      this._rerenderSelection();
+    console.log('Native blur on surface', this.getId());
+    var _state = this._state;
+    if (_state.skipNextFocusEvent) {
+      _state.skipNextFocusEvent = false;
+      return;
+    }
+    // native blur does not lead to a session update,
+    // thus we need to update the selection manually
+    if (_state.cursorFragment) {
+      this._updateProperty(_state.cursorFragment.key);
     }
   };
 
   this.onNativeFocus = function() {
-    // console.log('Native focus on surface', this.__id__);
-    this.isNativeFocused = true;
-
+    console.log('Native focus on surface', this.getId());
+    var _state = this._state;
     // in some cases we don't react on native focusing
-    // e.g., when the selection is being set via mouse
+    // e.g., when the selection is done via mouse
     // or if the selection is set implicitly
-    if (this.skipNextFocusEvent) {
-      this.skipNextFocusEvent = false;
+    if (_state.skipNextFocusEvent) {
+      _state.skipNextFocusEvent = false;
       return;
     }
-
-    var sel = this.getSelection();
-    // if gets focus, but selection is null or not within this surface
-    // we
-    if (!sel || sel.isNull() || sel.surfaceId !== this.getName()) {
-      var first = this.el.getNativeElement().querySelector('*[data-path]');
-      if (first) {
-        var path = first.dataset.path.split('.');
-        this.setSelection(Selection.create(path, 0));
-      } else {
-        console.error('FIXME: can not set selection after focus.');
-      }
-    } else {
-      this._rerenderSelection();
+    // native blur does not lead to a session update,
+    // thus we need to update the selection manually
+    if (_state.cursorFragment) {
+      this._updateProperty(_state.cursorFragment.key);
     }
   };
 
   // Internal implementations
 
-  this._initializeCommandRegistry = function(commands) {
-    var commandRegistry = new Registry();
-    each(commands, function(CommandClass) {
-      var commandContext = extend({}, this.context, this.getChildContext());
-      var cmd = new CommandClass(commandContext);
-      commandRegistry.add(CommandClass.static.name, cmd);
+  this._deriveProps = function(nextProps) {
+    // console.log('deriving props', nextProps, window.clientId);
+    var _state = this._state;
+    var oldFragments = this.props.fragments;
+    if (oldFragments) {
+      _forEachFragment(oldFragments, function(frag) {
+        var key = frag.path.toString();
+        if (this._getComponentForKey(key)) {
+          _markAsDirty(_state, key);
+        }
+      }.bind(this));
+    }
+    var nextFragments = nextProps.fragments;
+    if (nextFragments) {
+      this._deriveFragments(nextFragments);
+    }
+    // console.log('derived props', _state, window.clientId);
+  };
+
+  this._deriveFragments = function(newFragments) {
+    // console.log('deriving fragments', newFragments, window.clientId);
+    var _state = this._state;
+    _state.cursorFragment = null;
+    // group fragments by property
+    var fragments = {};
+    _forEachFragment(newFragments, function(frag, owner) {
+      var key = frag.path.toString();
+      frag.key = key;
+      // skip frags which are not rendered here
+      if (!this._getComponentForKey(key)) return;
+      // extract the cursor fragment for special treatment (not shown when focused)
+      if (frag.type === 'cursor' && owner === 'local-user') {
+        _state.cursorFragment = frag;
+        return;
+      }
+      var propertyFrags = fragments[key];
+      if (!propertyFrags) {
+        propertyFrags = [];
+        fragments[key] = propertyFrags;
+      }
+      propertyFrags.push(frag);
+      _markAsDirty(_state, key);
     }.bind(this));
-    this.commandRegistry = commandRegistry;
+    _state.fragments = fragments;
+    // console.log('derived fragments', fragments, window.clientId);
+  };
+
+  function _forEachFragment(fragments, fn) {
+    each(fragments, function(frags, owner) {
+      frags.forEach(function(frag) {
+        fn(frag, owner);
+      });
+    });
+  }
+
+  // called by SurfaceManager to know which text properties need to be
+  // updated because of model changes
+  this._checkForUpdates = function(change) {
+    var _state = this._state;
+    Object.keys(change.updated).forEach(function(key) {
+      if (this._getComponentForKey(key)) {
+        _markAsDirty(_state, key);
+      }
+    }.bind(this));
+    return _state.isDirty;
+  };
+
+  this._update = function() {
+    var _state = this._state;
+    var dirtyProperties = Object.keys(_state.dirtyProperties);
+    for (var i = 0; i < dirtyProperties.length; i++) {
+      this._updateProperty(dirtyProperties[i]);
+    }
+    _state.isDirty = false;
+    _state.dirtyProperties = {};
+  };
+
+  function _markAsDirty(_state, key) {
+    _state.isDirty = true;
+    _state.dirtyProperties[key] = true;
+  }
+
+  this._updateProperty = function(key) {
+    var _state = this._state;
+    // hide the cursor fragment when focused
+    var cursorFragment = this._hasNativeFocus() ? null : _state.cursorFragment;
+    var frags = _state.fragments[key] || [];
+    if (cursorFragment && cursorFragment.key === key) {
+      frags = frags.concat([cursorFragment]);
+    }
+    var comp = this._getComponentForKey(key);
+    if (comp) {
+      comp.extendProps({
+        fragments: frags
+      });
+    }
+  };
+
+  this._getComponentForKey = function(key) {
+    return this._textProperties[key];
   };
 
   this._handleLeftOrRightArrowKey = function (event) {
-    var self = this;
+    event.stopPropagation();
     // Note: we need this timeout so that CE updates the DOM selection first
     // before we map the DOM selection
     window.setTimeout(function() {
-      if (self._isDisposed()) return;
-
+      if (!this.isMounted()) return;
       var options = {
         direction: (event.keyCode === keys.LEFT) ? 'left' : 'right'
       };
-      self._updateModelSelection(options);
-      // We could rerender the selection, to make sure the DOM is representing
-      // the model selection
-      // TODO: ATM, the DOMSelection is not good enough in doing this, event.g., there
-      // are situations where one can not use left/right navigation anymore, as
-      // DOMSelection will always decides to choose the initial positition,
-      // which means lockin.
-      // self.rerenderDomSelection();
-    });
+      this._updateModelSelection(options);
+    }.bind(this));
   };
 
   this._handleUpOrDownArrowKey = function (event) {
-    var self = this;
+    event.stopPropagation();
     // Note: we need this timeout so that CE updates the DOM selection first
     // before we map the DOM selection
     window.setTimeout(function() {
-      if (self._isDisposed()) return;
+      if (!this.isMounted()) return;
       var options = {
         direction: (event.keyCode === keys.UP) ? 'left' : 'right'
       };
-      self._updateModelSelection(options);
-    });
-  };
-
-  this._isDisposed = function() {
-    // HACK: if domSelection === null, this surface has been disposed
-    return !this.domSelection;
+      this._updateModelSelection(options);
+    }.bind(this));
   };
 
   this._handleSpaceKey = function(event) {
@@ -721,6 +868,7 @@ Surface.Prototype = function() {
 
   this._handleEnterKey = function(event) {
     event.preventDefault();
+    event.stopPropagation();
     if (event.shiftKey) {
       this.transaction(function(tx, args) {
         return this.softBreak(tx, args);
@@ -734,6 +882,7 @@ Surface.Prototype = function() {
 
   this._handleDeleteKey = function (event) {
     event.preventDefault();
+    event.stopPropagation();
     var direction = (event.keyCode === keys.BACKSPACE) ? 'left' : 'right';
     this.transaction(function(tx, args) {
       args.direction = direction;
@@ -742,20 +891,25 @@ Surface.Prototype = function() {
   };
 
   this._setSelection = function(sel) {
-    this.documentSession.setSelection(sel);
+    var _state = this._state;
     // Since we allow the surface be blurred natively when clicking
     // on tools we now need to make sure that the element is focused natively
     // when we set the selection
     // This is actually only a problem on FF, other browsers set the focus implicitly
     // when a new DOM selection is set.
-    if (platform.isFF && !sel.isNull() && this.el && !this.isNativeFocused) {
-      this.skipNextFocusEvent = true;
+    // ATTENTION: in FF 44 this was causing troubles, making the CE unselectable
+    // until the next native blur.
+    if (!sel.isNull() && this.el && !this._hasNativeFocus()) {
+      _state.skipNextFocusEvent = true;
       this.el.focus();
     }
+    this.documentSession.setSelection(sel);
   };
 
   this._updateModelSelection = function(options) {
     var sel = this.domSelection.getSelection(options);
+    // NOTE: this will also lead to a rerendering of the selection
+    // via session.on('update')
     this.setSelection(sel);
   };
 
@@ -800,7 +954,7 @@ Surface.Prototype = function() {
           if (cursorEl) {
             return cursorEl.getBoundingClientRect();
           } else {
-            console.log('FIXME: there should be a rendered cursor element.');
+            error('FIXME: there should be a rendered cursor element.');
             return {};
           }
         } else {
@@ -825,7 +979,7 @@ Surface.Prototype = function() {
               width: width, height: height
             };
           } else {
-            console.log('FIXME: there should be a rendered selection fragments element.');
+            error('FIXME: there should be a rendered selection fragments element.');
           }
         }
       }
@@ -845,12 +999,6 @@ Surface.Prototype = function() {
     var path = textPropertyComponent.getPath();
     if (this._textProperties[path] === textPropertyComponent) {
       delete this._textProperties[path];
-      // TODO: what do we need this for?
-      each(this._annotations, function(_path, id) {
-        if (isEqual(path, _path)) {
-          delete this._annotations[id];
-        }
-      }.bind(this));
     }
   };
 
@@ -858,94 +1006,8 @@ Surface.Prototype = function() {
     return this._textProperties[path];
   };
 
-  this._getFragments = function(path) {
-    /* jshint unused:false */
-    var frags = [];
-    if (this._selectionFragments) {
-      var selectionFragments = this._selectionFragments[path];
-      if (selectionFragments) {
-        frags = frags.concat(selectionFragments);
-      }
-    }
-    return frags;
-  };
-
-  this._computeSelectionFragments = function(sel, selectionFragments, collaborator) {
-    selectionFragments = selectionFragments || {};
-    if (sel && !sel.isNull()) {
-      // console.log('Computing selection fragments for', sel.toString());
-      var doc = this.getDocument();
-      var fragments = sel.getFragments();
-      fragments.forEach(function(frag) {
-        var key;
-        if (frag.isNodeFragment()) {
-          var node = doc.get(frag.getNodeId());
-          // HACK: we replace NodeFragments for TextNodes
-          // by a PropertyFragment so that the selection is rendered
-          // in the same way as other property fragments
-          if (node.isText()) {
-            var path = node.getTextPath();
-            var len = node.getText().length;
-            frag = new Selection.Fragment(path, 0, len, true);
-            key = path.join(',');
-          } else {
-            key = node.id;
-          }
-        } else {
-          key = frag.path.toString();
-        }
-        var frags = selectionFragments[key];
-        if (!frags) {
-          frags = [];
-          selectionFragments[key] = frags;
-        }
-        frag.collaborator = collaborator;
-        frags.push(frag);
-      });
-    }
-    return selectionFragments;
-  };
-
-  this._updateSelectionFragments = function() {
-    var needUpdate = {};
-    var oldSelectionFragments = this._selectionFragments;
-    var newSelectionFragments = {};
-    // local selection
-    var sel = this.getSelection();
-    // Note: we don't render a cursor when this is focused
-    // as otherwise we would interfer to much with ContentEditable.
-    // Such as double-click makes troubles in FF.
-    if (!this.isNativeFocused || !sel.isCollapsed()) {
-      this._computeSelectionFragments(sel, newSelectionFragments);
-    }
-    // if this.documentSession is a CollabSession there might
-    // be other collaborators, for which we want to show the selection too
-    var collaborators = this.getDocumentSession().getCollaborators();
-    if (collaborators) {
-      each(collaborators, function(collaborator) {
-        this._computeSelectionFragments(collaborator.selection, newSelectionFragments, collaborator);
-      }.bind(this));
-    }
-
-    this._selectionFragments = newSelectionFragments;
-    // properties which displayed the selection previously
-    each(oldSelectionFragments, function(_, pathStr) {
-      needUpdate[pathStr] = true;
-    });
-    // properties which display the selection currently
-    each(newSelectionFragments, function(_, pathStr) {
-      needUpdate[pathStr] = true;
-    });
-    return needUpdate;
-  };
-
-  this._updateTextProperties = function(needUpdate) {
-    each(needUpdate, function(_, pathStr) {
-      var comp = this._textProperties[pathStr];
-      if (comp) {
-        comp.rerender();
-      }
-    }.bind(this));
+  this._createDOMSelection = function() {
+    return new DOMSelection(this);
   };
 
   // TODO: we could integrate container node rendering into this helper
@@ -965,10 +1027,18 @@ Surface.Prototype = function() {
     });
   };
 
+  /*
+    Called when starting a transaction to populate the transaction
+    arguments.
+    ATM used only by ContainerEditor.
+  */
+  this._prepareArgs = function(args) {
+    /* jshint unused: false */
+  };
+
 };
 
 Component.extend(Surface);
-
 
 Surface.getDOMRangeFromEvent = function(evt) {
   var range, x = evt.clientX, y = evt.clientY;
