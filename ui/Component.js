@@ -4,6 +4,8 @@ var isString = require('lodash/isString');
 var isFunction = require('lodash/isFunction');
 var extend = require('lodash/extend');
 var each = require('lodash/each');
+var assert = require('../util/assert');
+var warn = require('../util/warn');
 var EventEmitter = require('../util/EventEmitter');
 var RenderingEngine = require('./RenderingEngine');
 var VirtualElement = require('./VirtualElement');
@@ -185,10 +187,12 @@ Component.Prototype = function() {
    * Call this to manually trigger a rerender.
    */
   this.rerender = function() {
+    var oldProps = this.props;
+    var oldState = this.state;
     this._render();
     // when this component is not mounted still trigger didUpdate()
     if (!this.isMounted()) {
-      this.didUpdate();
+      this.didUpdate(oldProps, oldState);
     }
   };
 
@@ -305,7 +309,7 @@ Component.Prototype = function() {
       }
       comp = comp.getParent();
     }
-    console.warn('Action', action, 'was not handled.');
+    warn('Action', action, 'was not handled.');
     return false;
   };
 
@@ -361,6 +365,8 @@ Component.Prototype = function() {
     Usually this is used by the component itself.
   */
   this.setState = function(newState) {
+    var oldProps = this.props;
+    var oldState = this.state;
     // Note: while setting props it is allowed to call this.setState()
     // which will not lead to an extra rerender
     var needRerender = !this.__isSettingProps__ &&
@@ -372,7 +378,7 @@ Component.Prototype = function() {
     if (needRerender) {
       this.rerender();
     } else if (!this.__isSettingProps__) {
-      this.didUpdate();
+      this.didUpdate(oldProps, oldState);
     }
   };
 
@@ -405,12 +411,14 @@ Component.Prototype = function() {
     @param {object} an object with properties
   */
   this.setProps = function(newProps) {
+    var oldProps = this.props;
+    var oldState = this.state;
     var needRerender = this.shouldRerender(newProps, this.state);
     this._setProps(newProps);
     if (needRerender) {
       this.rerender();
     } else {
-      this.didUpdate();
+      this.didUpdate(oldProps, oldState);
     }
   };
 
@@ -478,25 +486,23 @@ Component.Prototype = function() {
     this.insertAt(this.getChildCount(), child);
   };
 
-  this.insertAt = function(pos, child) {
-    if (isString(child)) {
-      child = new VirtualElement.TextNode(child);
+  this.insertAt = function(pos, childEl) {
+    if (isString(childEl)) {
+      childEl = new VirtualElement.TextNode(childEl);
     }
-    if (!child._isVirtualElement) {
+    if (!childEl._isVirtualElement) {
       throw new Error('Invalid argument: "child" must be a VirtualElement.');
     }
-    var comp = new RenderingEngine()._renderChild(this, child);
-    this.el.insertAt(pos, comp.el);
-    if (this.isMounted()) {
-      comp.triggerDidMount(true);
-    }
+    var child = new RenderingEngine()._renderChild(this, childEl);
+    this.el.insertAt(pos, child.el);
+    _mountChild(this, child);
   };
 
   this.removeAt = function(pos) {
     var childEl = this.el.getChildAt(pos);
     if (childEl) {
-      var comp = _unwrapCompStrict(childEl);
-      comp.triggerDispose();
+      var child = _unwrapCompStrict(childEl);
+      _disposeChild(child);
       this.el.removeAt(pos);
     }
   };
@@ -505,7 +511,8 @@ Component.Prototype = function() {
     if (!child || !child._isComponent) {
       throw new Error('removeChild(): Illegal arguments. Expecting a Component instance.');
     }
-    child.triggerDispose();
+    // TODO: remove ref from owner
+    _disposeChild(child);
     this.el.removeChild(child.el);
   };
 
@@ -515,17 +522,34 @@ Component.Prototype = function() {
       throw new Error('replaceChild(): Illegal arguments. Expecting BrowserDOMElement instances.');
     }
     // Attention: Node.replaceChild has weird semantics
-    oldChild.triggerDispose();
+    _disposeChild(oldChild);
     this.el.replaceChild(newChild.el, oldChild.el);
     if (this.isMounted()) {
       newChild.triggerDidMount(true);
     }
   };
 
+  function _disposeChild(child) {
+    child.triggerDispose();
+    if (child._owner && child._ref) {
+      assert(child._owner.refs[child._ref] === child, "Owner's ref should point to this child instance.");
+      delete child._owner.refs[child._ref];
+    }
+  }
+
+  function _mountChild(parent, child) {
+    if (parent.isMounted()) {
+      child.triggerDidMount(true);
+    }
+    if (child._owner && child._ref) {
+      child._owner.refs[child._ref] = child;
+    }
+  }
+
   this.empty = function() {
     if (this.el) {
-      this.childNodes.forEach(function(child) {
-        child.triggerDispose();
+      this.getChildNodes().forEach(function(child) {
+        _disposeChild(child);
       });
       this.el.empty();
     }
@@ -533,7 +557,7 @@ Component.Prototype = function() {
   };
 
   this.remove = function() {
-    this.triggerDispose();
+    _disposeChild(this);
     this.el.remove();
   };
 
@@ -572,7 +596,7 @@ function _unwrapComp(el) {
 }
 
 function _unwrapCompStrict(el) {
-  console.assert(el._comp, "Expecting a back-link to the component instance.");
+  assert(el._comp, "Expecting a back-link to the component instance.");
   return _unwrapComp(el);
 }
 
