@@ -1,5 +1,6 @@
 'use strict';
 
+var warn = require('../util/warn');
 var Command = require('./Command');
 
 /**
@@ -78,8 +79,8 @@ SurfaceCommand.Prototype = function() {
     @return {String} the container id
    */
   this.getContainerId = function() {
+    warn('Deprecated: Use Surface API directly');
     var surface = this.getSurface();
-    console.warn('Deprecated: Use Surface API directly');
     if (surface.isContainerEditor()) {
       return surface.getContainerId();
     } else {

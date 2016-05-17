@@ -2,6 +2,7 @@
 
 var each = require('lodash/each');
 var includes = require('lodash/includes');
+var warn = require('../util/warn');
 var EventEmitter = require('../util/EventEmitter');
 
 /**
@@ -135,7 +136,7 @@ TOC.Prototype = function() {
       var tocNode = tocNodes[i];
       var nodeEl = panelContent.find('[data-id="'+tocNode.id+'"]');
       if (!nodeEl) {
-        console.warn('Not found in Content panel', tocNode.id);
+        warn('Not found in Content panel', tocNode.id);
         return;
       }
       var panelOffset = scrollPane.getPanelOffsetForElement(nodeEl);

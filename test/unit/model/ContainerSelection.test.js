@@ -678,3 +678,39 @@ QUnit.test("[Edge Case] getFragments: start and end are node coordinates (revers
   var fragment = fragments[0];
   assert.ok(fragment.isNodeFragment(), "... which should be a property fragment");
 });
+
+QUnit.test("isNodeSelection()", function(assert) {
+  var doc = simple();
+  // valid NodeSelection
+  var sel = doc.createSelection({
+    type: 'container',
+    containerId: 'main',
+    startPath: ['p1'],
+    startOffset: 0,
+    endPath: ['p1'],
+    endOffset: 1
+  });
+  assert.ok(sel.isNodeSelection(), "selection should be a node selection");
+  assert.ok(sel.isEntireNodeSelected(), "selection should be span over the entire node");
+  // not a NodeSelection (but within one node)
+  sel = doc.createSelection({
+    type: 'container',
+    containerId: 'main',
+    startPath: ['p1'],
+    startOffset: 1,
+    endPath: ['p1'],
+    endOffset: 1
+  });
+  assert.ok(sel.isNodeSelection(), "selection should be a node selection");
+  assert.notOk(sel.isEntireNodeSelected(), "selection should not span over the entire node");
+  // not a NodeSelection (is spanning multiple nodes)
+  sel = doc.createSelection({
+    type: 'container',
+    containerId: 'main',
+    startPath: ['p1'],
+    startOffset: 0,
+    endPath: ['p2'],
+    endOffset: 1
+  });
+  assert.notOk(sel.isNodeSelection(), "selection should not be a node selection");
+});

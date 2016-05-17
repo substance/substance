@@ -1,3 +1,4 @@
+/* globals -Range */
 'use strict';
 
 var isEqual = require('lodash/isEqual');
@@ -147,6 +148,10 @@ PropertySelection.Prototype = function() {
   */
   this.getPath = function() {
     return this.path;
+  };
+
+  this.getNodeId = function() {
+    return this.path[0];
   };
 
   /**
@@ -382,6 +387,11 @@ PropertySelection.Prototype = function() {
     this._internal.fragments = fragments;
     return fragments;
   };
+
+  this._clone = function() {
+    return new PropertySelection(this.path, this.startOffset, this.endOffset, this.reverse, this.surfaceId);
+  };
+
 };
 
 Selection.extend(PropertySelection);

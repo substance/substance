@@ -1,3 +1,6 @@
+/* globals console */
+/* jshint strict:false */
+
 var express = require('express');
 var path = require('path');
 var glob = require('glob');

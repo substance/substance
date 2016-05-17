@@ -1,12 +1,14 @@
-/* jshint latedef:nofunc */
-'use strict';
+/* globals -Range */
+"use strict";
 
 var last = require('lodash/last');
 var oo = require('../util/oo');
+var warn = require('../util/warn');
 var Coordinate = require('../model/Coordinate');
 var Range = require('../model/Range');
 var DefaultDOMElement = require('./DefaultDOMElement');
 var TextPropertyComponent = require('./TextPropertyComponent');
+var IsolatedNodeComponent = require('./IsolatedNodeComponent');
 
 /*
  * A class that maps DOM selections to model selections.
@@ -47,37 +49,42 @@ DOMSelection.Prototype = function() {
     @param {model/Selection} sel
   */
   this.setSelection = function(sel) {
-    // console.log('### renderSelection', sel.toString());
+    // console.log('### DOMSelection: setting selection', sel.toString());
     var wSel = window.getSelection();
-    if (sel.isNull() || sel.isTableSelection()) {
+    if (sel.isNull()) {
       this.clear();
       return;
     }
-    var startComp = this.surface._getTextPropertyComponent(sel.startPath);
-    if (!startComp) {
-      console.warn('FIXME: selection seems to be invalid.');
+    var start = this._getDOMCoordinate(sel.start);
+    if (!start) {
+      warn('FIXME: selection seems to be invalid.');
       this.clear();
       return;
     }
-    var start = startComp.getDOMCoordinate(sel.startOffset);
     var end;
     if (sel.isCollapsed()) {
       end = start;
     } else {
-      var endComp = this.surface._getTextPropertyComponent(sel.endPath);
-      if (!endComp) {
-        console.warn('FIXME: selection seems to be invalid.');
+      end = this._getDOMCoordinate(sel.end);
+      if (!end) {
+        warn('FIXME: selection seems to be invalid.');
         this.clear();
         return;
       }
-      end = endComp.getDOMCoordinate(sel.endOffset);
     }
     // console.log('mapped to DOM coordinates', start.container, start.offset, end.container, end.offset, 'isReverse?', sel.isReverse());
+
     // if there is a range then set replace the window selection accordingly
+    var wRange;
+    if (wSel.rangeCount > 0) {
+      wRange = wSel.getRangeAt(0);
+    } else {
+      wRange = window.document.createRange();
+    }
     wSel.removeAllRanges();
-    var wRange = window.document.createRange();
     if (sel.isCollapsed()) {
       wRange.setStart(start.container, start.offset);
+      wRange.setEnd(start.container, start.offset);
       wSel.addRange(wRange);
     } else {
       if (sel.isReverse()) {
@@ -85,17 +92,44 @@ DOMSelection.Prototype = function() {
         var tmp = start;
         start = end;
         end = tmp;
+        // HACK: using wRange setEnd does not work reliably
+        // so we set just the start anchor
+        // and then use window.Selection.extend()
+        // unfortunately we are not able to test this behavior as it needs
+        // triggering native keyboard events
+        wRange.setStart(start.container, start.offset);
+        wSel.addRange(wRange);
+        wSel.extend(end.container, end.offset);
+      } else {
+        wRange.setStart(start.container, start.offset);
+        wRange.setEnd(end.container, end.offset);
+        wSel.addRange(wRange);
       }
-      // HACK: using wRange setEnd does not work reliably
-      // so we set just the start anchor
-      // and then use window.Selection.extend()
-      // unfortunately we are not able to test this behavior as it needs
-      // triggering native keyboard events
-      wRange.setStart(start.container, start.offset);
-      wSel.addRange(wRange);
-      wSel.extend(end.container, end.offset);
     }
-    // console.log('DOMSelection.setSelection()', 'anchorNode:', wSel.anchorNode, 'anchorOffset:', wSel.anchorOffset, 'focusNode:', wSel.focusNode, 'focusOffset:', wSel.focusOffset, 'collapsed:', wSel.collapsed);
+    // console.log('DOMSelection: mapped selection to DOM', 'anchorNode:', wSel.anchorNode, 'anchorOffset:', wSel.anchorOffset, 'focusNode:', wSel.focusNode, 'focusOffset:', wSel.focusOffset, 'collapsed:', wSel.collapsed);
+  };
+
+  this._getDOMCoordinate = function(coor) {
+    var comp, domCoor = null;
+    if (coor.isNodeCoordinate()) {
+      comp = this.surface.find('*[data-id="'+coor.getNodeId()+'"]');
+      if (comp) {
+        if (comp._isIsolatedNodeComponent) {
+          domCoor = IsolatedNodeComponent.getDOMCoordinate(comp, coor);
+        } else {
+          domCoor = {
+            container: comp.getNativeElement(),
+            offset: coor.offset
+          };
+        }
+      }
+    } else {
+      comp = this.surface._getTextPropertyComponent(coor.path);
+      if (comp) {
+        domCoor = comp.getDOMCoordinate(coor.offset);
+      }
+    }
+    return domCoor;
   };
 
   /*
@@ -121,14 +155,20 @@ DOMSelection.Prototype = function() {
     var wSel = window.getSelection();
     // Use this log whenever the mapping goes wrong to analyze what
     // is actually being provided by the browser
-    // console.log('DOMSelection.getSelection()', 'anchorNode:', wSel.anchorNode, 'anchorOffset:', wSel.anchorOffset, 'focusNode:', wSel.focusNode, 'focusOffset:', wSel.focusOffset, 'collapsed:', wSel.collapsed);
+    // console.log('DOMSelection.mapDOMSelection()', 'anchorNode:', wSel.anchorNode, 'anchorOffset:', wSel.anchorOffset, 'focusNode:', wSel.focusNode, 'focusOffset:', wSel.focusOffset, 'collapsed:', wSel.collapsed);
     if (wSel.rangeCount === 0) {
       return null;
     }
     var anchorNode = DefaultDOMElement.wrapNativeElement(wSel.anchorNode);
     if (wSel.isCollapsed) {
       var coor = this._getCoordinate(anchorNode, wSel.anchorOffset, options);
-      range = _createRange(coor, coor, false, this.getContainerId());
+      // EXPERIMENTAL: when the cursor is in an IsolatedNode
+      // we return a selection for the whole node
+      if (coor.__inIsolatedBlockNode__) {
+        range = _createRangeForIsolatedBlockNode(coor.path[0], this.getContainerId());
+      } else {
+        range = _createRange(coor, coor, false, this.getContainerId());
+      }
     }
     // HACK: special treatment for edge cases as addressed by #354.
     // Sometimes anchorNode and focusNodes are the surface
@@ -149,6 +189,17 @@ DOMSelection.Prototype = function() {
   */
   this.clear = function() {
     window.getSelection().removeAllRanges();
+  };
+
+  this.collapse = function(dir) {
+    var wSel = window.getSelection();
+    var wRange;
+    if (wSel.rangeCount > 0) {
+      wRange = wSel.getRangeAt(0);
+      wRange.collapse(dir === 'left');
+      wSel.removeAllRanges();
+      wSel.addRange(wRange);
+    }
   };
 
   this.getContainerId = function() {
@@ -176,7 +227,7 @@ DOMSelection.Prototype = function() {
     } else {
       end = this._getCoordinate(focusNode, focusOffset);
     }
-    var isReverse = _isReverse(anchorNode, anchorOffset, focusNode, focusOffset);
+    var isReverse = DefaultDOMElement.isReverse(anchorNode, anchorOffset, focusNode, focusOffset);
     if (start && end) {
       return _createRange(start, end, isReverse, this.getContainerId());
     } else {
@@ -220,8 +271,21 @@ DOMSelection.Prototype = function() {
   this._getCoordinate = function(node, offset, options) {
     // Trying to apply the most common situation first
     // and after that covering known edge cases
-    var el = this.surface.el;
-    var coor = TextPropertyComponent.getCoordinate(el, node, offset);
+    var surfaceEl = this.surface.el;
+    var coor = null;
+    // as this is the most often case, try to map the coordinate within
+    // a TextPropertyComponent
+    if (!coor) {
+      coor = TextPropertyComponent.getCoordinate(surfaceEl, node, offset);
+    }
+    // special treatment for isolated nodes
+    if (!coor) {
+      coor = IsolatedNodeComponent.getCoordinate(surfaceEl, node, offset);
+      if (coor) {
+        coor.__inIsolatedBlockNode__ = true;
+      }
+    }
+    // finally fall back to a brute-force search
     if (!coor) {
       coor = this._searchForCoordinate(node, offset, options);
     }
@@ -338,26 +402,6 @@ DOMSelection.Prototype = function() {
     }
   };
 
-  var _r1, _r2;
-
-  function _isReverse(anchorNode, anchorOffset, focusNode, focusOffset) {
-    // the selection is reversed when the focus propertyEl is before
-    // the anchor el or the computed charPos is in reverse order
-    if (focusNode && anchorNode) {
-      if (!_r1) {
-        _r1 = window.document.createRange();
-        _r2 = window.document.createRange();
-      }
-      _r1.setStart(anchorNode.getNativeElement(), anchorOffset);
-      _r2.setStart(focusNode.getNativeElement(), focusOffset);
-      var cmp = _r1.compareBoundaryPoints(window.Range.START_TO_START, _r2);
-      if (cmp === 1) {
-        return true;
-      }
-    }
-    return false;
-  }
-
   function _getPath(el) {
     if (!el._isDOMElement) {
       el = DefaultDOMElement.wrapNativeElement(el);
@@ -386,6 +430,10 @@ DOMSelection.Prototype = function() {
       end = tmp;
     }
     return new Range(start, end, isReverse, containerId);
+  }
+
+  function _createRangeForIsolatedBlockNode(nodeId, containerId) {
+    return new Range(new Coordinate([nodeId], 0), new Coordinate([nodeId], 1), false, containerId);
   }
 
 };

@@ -1,10 +1,9 @@
-/* jshint latedef: nofunc */
-
 'use strict';
 
 var cloneDeep = require('lodash/cloneDeep');
 var each = require('lodash/each');
 var last = require('lodash/last');
+var error = require('../../util/error');
 var annotationHelpers = require('../annotationHelpers');
 
 var CLIPBOARD_CONTAINER_ID = "clipboard_content";
@@ -29,7 +28,7 @@ function copySelection(doc, args) {
   else if (selection.isContainerSelection()) {
     args.doc = _copyContainerSelection(doc, selection);
   } else {
-    console.error('Copy is not yet supported for selection type.');
+    error('Copy is not yet supported for selection type.');
     args.doc = null;
   }
   return args;

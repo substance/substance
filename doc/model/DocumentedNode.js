@@ -1,6 +1,6 @@
 'use strict';
 
-var Node = require('../../model/DocumentNode');
+var DocumentNode = require('../../model/DocumentNode');
 
 function DocumentedNode() {
   DocumentedNode.super.apply(this, arguments);
@@ -14,7 +14,7 @@ DocumentedNode.Prototype = function() {
   };
 };
 
-Node.extend(DocumentedNode);
+DocumentNode.extend(DocumentedNode);
 
 DocumentedNode.static.name = 'source-code';
 

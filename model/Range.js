@@ -1,3 +1,4 @@
+/* globals -Range */
 'use strict';
 
 var oo = require('../util/oo');

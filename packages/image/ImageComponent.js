@@ -1,6 +1,6 @@
 'use strict';
 
-var Component = require('../../ui/Component');
+var BlockNodeComponent = require('../../ui/BlockNodeComponent');
 
 function ImageComponent() {
   ImageComponent.super.apply(this, arguments);
@@ -8,34 +8,35 @@ function ImageComponent() {
 
 ImageComponent.Prototype = function() {
 
+  var _super = ImageComponent.super.prototype;
+
   this.didMount = function() {
-    var doc = this.props.doc;
-    doc.on('document:changed', this.onDocumentChange, this);
+    _super.didMount.call(this);
+
+    this.props.node.on('src:changed', this.rerender, this);
   };
 
   this.dispose = function() {
-    var doc = this.props.doc;
-    doc.off(this);
+    _super.dispose.call(this);
+
+    this.props.node.off(this);
+  };
+
+  this.getTagName = function() {
+    return 'img';
   };
 
   this.render = function($$) {
-    return $$('img')
-      .addClass('sc-image')
+    var el = _super.render.call(this, $$);
+    el.addClass('sc-image')
       .attr({
-        "data-id": this.props.node.id,
-        contentEditable: false,
         src: this.props.node.src,
       });
-  };
-
-  this.onDocumentChange = function(change) {
-    if (change.isAffected([this.props.node.id, "src"])) {
-      this.rerender();
-    }
+    return el;
   };
 
 };
 
-Component.extend(ImageComponent);
+BlockNodeComponent.extend(ImageComponent);
 
 module.exports = ImageComponent;

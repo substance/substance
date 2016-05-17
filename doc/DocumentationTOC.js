@@ -1,3 +1,5 @@
+'use strict';
+
 var TOC = require('../ui/TOC');
 var each = require('lodash/each');
 

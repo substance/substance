@@ -1,3 +1,5 @@
+'use strict';
+
 var MethodComponent = require('./MethodComponent');
 
 function ConstructorComponent() {

@@ -29,10 +29,14 @@ var TextProperty = require('./TextPropertyComponent');
 */
 
 function TextPropertyEditor(parent, props) {
-  if (!props.name) {
-    props.name = props.path.join('.');
-  }
+  // prop 'name' is optional
+  props.name = props.name || props.path.join('.');
+
   Surface.apply(this, arguments);
+
+  if (!props.path) {
+    throw new Error("Property 'path' is mandatory.");
+  }
 }
 
 TextPropertyEditor.Prototype = function() {
@@ -42,15 +46,18 @@ TextPropertyEditor.Prototype = function() {
   this.render = function($$) {
     var el = _super.render.apply(this, arguments);
     el.addClass("sc-text-property-editor");
+    if (!this.props.disabled) {
+      el.addClass('enabled');
+    }
+    if (!this.props.disabled) {
+      el.attr('contenteditable', true);
+    }
     el.append(
       $$(TextProperty, {
         tagName: "div",
         path: this.props.path
       })
     );
-    if (this.isEditable()) {
-      el.attr('contenteditable', true);
-    }
     return el;
   };
 

@@ -1,0 +1,82 @@
+.sc-isolated-node {
+
+  position: relative;
+
+  > .se-container {
+    display: inline-block;
+    position: relative;
+
+    > .se-blocker {
+      position: absolute;
+      top:0; bottom: 0; left: 0; right: 0;
+      z-index: 1;
+    }
+
+    > .se-cursor {
+      position: absolute;
+      top: 0; bottom: 0;
+      width: 1px;
+
+      &.sm-before {
+        left: -5px;
+        border-left: 2px solid $local-selection-color;
+      }
+
+      &.sm-after {
+        right: -5px;
+        border-right: 2px solid $local-selection-color;
+      }
+    }
+
+  }
+
+  > .se-slug {
+    opacity: 0;
+    // as we found out in a spike, the only cross-browser compatible way is to use font-size:1px to make
+    // the
+    font-size: 1px;
+  }
+
+  &.sm-selected {
+    > .se-container {
+      background: rgba(163,205,253, 0.6);
+      outline: 2px solid;
+      outline-color: $local-selection-color;
+    }
+  }
+
+  &.sm-focused {
+    > .se-container {
+      // background: rgba(163,205,253, 0.6);
+      outline: 2px solid;
+      outline-color: $local-selection-color;
+    }
+  }
+
+}
+
+// .sc-isolated-node > .se-container.sm-disabled ::selection,
+// .sc-isolated-node > .se-container .sg-hide-selection ::selection
+// {
+//   background: none;
+// }
+
+// .sc-isolated-node > .se-container .sg-hide-selection ::selection {
+//   background: none;
+// }
+
+// .sc-isolated-node > .se-container.sm-disabled ::-moz-selection {
+//   background: none;
+// }
+
+// .sc-isolated-node > .se-container .sg-hide-selection ::-moz-selection {
+//   background: none;
+// }
+
+// .sc-isolated-node.sm-focused > .se-container ::selection {
+//   background: initial;
+// }
+
+// .sc-isolated-node.sm-focused > .se-container ::-moz-selection {
+//   background: initial;
+// }
