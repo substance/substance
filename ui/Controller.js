@@ -169,11 +169,13 @@ Controller.Prototype = function() {
       throw new Error('Controller requires a DocumentSession instance');
     }
     this.surfaceManager = new SurfaceManager(this.documentSession);
-    this.toolManager = new ToolManager(this);
 
     var config = this.getConfig();
     this._initializeComponentRegistry(config.controller.components);
     this._initializeCommandRegistry(config.controller.commands);
+
+    this.toolManager = new ToolManager(this);
+
     if (config.i18n) {
       I18n.instance.load(config.i18n);
     }

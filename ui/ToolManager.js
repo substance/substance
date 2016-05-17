@@ -26,7 +26,7 @@ function ToolManager(controller) {
   this.toolState = this.getToolState();
 
   var docSession = this.controller.getDocumentSession();
-  docSession.on('selection:changed', this.updateTools, this);
+  docSession.on('didUpdate', this.updateTools, this);
   this.controller.on('document:saved', this.updateTools, this);
 }
 
