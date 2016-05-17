@@ -1,3 +1,4 @@
+/*globals -Document */
 'use strict';
 
 var Document = require('../../model/Document');
