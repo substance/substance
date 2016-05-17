@@ -69,4 +69,13 @@ DefaultDOMElement.wrapNativeElement = function(el) {
   }
 };
 
+DefaultDOMElement.isReverse = function(anchorNode, anchorOffset, focusNode, focusOffset) {
+  if (inBrowser ) {
+    var BrowserDOMElement = require('./BrowserDOMElement');
+    return BrowserDOMElement.isReverse(anchorNode, anchorOffset, focusNode, focusOffset);
+  } else {
+    throw new Error('Not implemented.');
+  }
+};
+
 module.exports = DefaultDOMElement;
