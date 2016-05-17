@@ -1,12 +1,14 @@
+'use strict';
+
 var oo = require('./oo');
 
 /**
   Custom error object for all Substance related errors
 
   @example
-  
+
   ```js
-  var Err = require('substance/util/Error');
+  var Err = require('substance/util/SubstanceError');
   throw new Err('Document.SelectionUpdateError', {message: 'Could not update selection.'});
   ```
 
@@ -27,7 +29,7 @@ function SubstanceError(name, options) {
   this.cause = options.cause;
 
   if (Error.captureStackTrace) {
-    Error.captureStackTrace(this, (SubstanceError));  
+    Error.captureStackTrace(this, (SubstanceError));
   }
 }
 
@@ -49,10 +51,10 @@ SubstanceError.Prototype = function() {
 
       if (this.cause.inspect) {
         // If cause is again a Substance error
-        parts.push(this.cause.inspect());  
+        parts.push(this.cause.inspect());
       } else {
         // If not we just use Error.toString
-        parts.push(this.cause.toString());  
+        parts.push(this.cause.toString());
       }
     }
     return parts.join('');

@@ -1,3 +1,6 @@
+/* globals console */
+/* jshint strict:false */
+
 var browserify = require('browserify');
 var sass = require('node-sass');
 var fs = require('fs');

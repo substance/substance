@@ -1,7 +1,7 @@
 "use strict";
 
 var extend = require('lodash/extend');
-var each = require('lodash/each');
+var warn = require('../util/warn');
 var oo = require('../util/oo');
 var EventEmitter = require('../util/EventEmitter');
 var TransactionDocument = require('./TransactionDocument');
@@ -11,21 +11,10 @@ var DocumentChange = require('./DocumentChange');
 
 var __id__ = 0;
 
-/*
-  TODO: Maybe find a suitable name.
-  The purpose of this class is to maintain editing related things:
-    - selection
-    - transactions
-    - undo/redo
-    - versioning
-    - collaborative editing
-*/
 function DocumentSession(doc, options) {
   DocumentSession.super.apply(this);
 
   this.__id__ = __id__++;
-  // local sessionId, overwritten by CollabSession
-  this.sessionId = __id__;
 
   options = options || {};
   this.doc = doc;
@@ -44,13 +33,9 @@ function DocumentSession(doc, options) {
   this.compressor = options.compressor || new DefaultChangeCompressor();
 
   // Note: registering twice:
-  // 1. once to do internal transformations in case changes are coming
+  // to do internal transformations in case changes are coming
   // in from another session -- this must be done as early as possible
-  // 2. to trigger events, such as selection:changed -- this must
-  // be done rather late, so that other listeners such as renderers
-  // have finished their job already.
   this.doc.on('document:changed', this.onDocumentChange, this, {priority: 1000});
-  this.doc.on('document:changed', this.afterDocumentChange, this, {priority: -10});
 }
 
 DocumentSession.Prototype = function() {
@@ -64,12 +49,12 @@ DocumentSession.Prototype = function() {
   };
 
   this.setSelection = function(sel) {
-    this.selection = sel;
-    this.emit('selection:changed', sel, this);
-    // For those who are just interested in selection changes
-    // done via this method -- as opposed to implicit changes
-    // via DocumentChange
-    this.emit('selection:changed:explicitly', sel, this);
+    var selectionHasChanged = this._setSelection(sel);
+    if(selectionHasChanged) {
+      this._triggerUpdateEvent({
+        selection: sel
+      });
+    }
   };
 
   this.getCollaborators = function() {
@@ -85,28 +70,24 @@ DocumentSession.Prototype = function() {
   };
 
   this.undo = function() {
-    var change = this.doneChanges.pop();
-    if (change) {
-      this.stage._apply(change);
-      this.doc._apply(change);
-      var oldSel = this.selection;
-      var sel = change.after.selection;
-      if (sel) {
-        sel.attach(this.doc);
-        this.selection = sel;
-      }
-      this.undoneChanges.push(change.invert());
-      this._notifyChangeListeners(change, { 'replay': true });
-      if (!oldSel.equals(this.selection)) {
-        this.emit('selection:changed', this.selection, this);
-      }
-    } else {
-      console.error('No change can be undone.');
-    }
+    this._undoRedo('undo');
   };
 
   this.redo = function() {
-    var change = this.undoneChanges.pop();
+    this._undoRedo('redo');
+  };
+
+
+  this._undoRedo = function(which) {
+    var from, to;
+    if (which === 'redo') {
+      from = this.undoneChanges;
+      to = this.doneChanges;
+    } else {
+      from = this.doneChanges;
+      to = this.undoneChanges;
+    }
+    var change = from.pop();
     if (change) {
       this.stage._apply(change);
       this.doc._apply(change);
@@ -114,15 +95,18 @@ DocumentSession.Prototype = function() {
       var sel = change.after.selection;
       if (sel) {
         sel.attach(this.doc);
-        this.selection = sel;
       }
-      this.doneChanges.push(change.invert());
-      this._notifyChangeListeners(change, { 'replay': true });
-      if (oldSel !== this.selection) {
-        this.emit('selection:changed', this.selection, this);
+      this.selection = sel;
+      to.push(change.invert());
+      var update = {
+        change: change
+      };
+      if (!oldSel.equals(sel)) {
+        update.selection = sel;
       }
+      this._triggerUpdateEvent(update, { replay: true });
     } else {
-      console.error('No change can be redone.');
+      warn('No change can be %s.', (which === 'undo'? 'undone':'redone'));
     }
   };
 
@@ -165,15 +149,6 @@ DocumentSession.Prototype = function() {
       extend(info, tx.info);
     });
     if (change) {
-      if (change.after.selection._isSelection) {
-        this.selection = change.after.selection;
-        // HACK injecting the surfaceId here...
-        // TODO: we should find out where the best place is to do this
-        if (this.selection && !this.selection.isNull() && change.after.surfaceId) {
-          this.selection.surfaceId = change.after.surfaceId;
-        }
-        this._selectionHasChanged = true;
-      }
       this.isTransacting = false;
       this._commit(change, info);
       return change;
@@ -183,19 +158,35 @@ DocumentSession.Prototype = function() {
   };
 
   this.onDocumentChange = function(change, info) {
-    // if (info.replay && change.session === this) {
-    //   var selection = change.after.selection;
-    //   if (selection) {
-    //     this.selection = selection;
-    //     this._selectionHasChanged = true;
-    //   }
-    // }
     // ATTENTION: this is used if you have two independent DocumentSessions
     // in one client.
-    if (info.session !== this) {
+    if (info && info.session !== this) {
       this.stage._apply(change);
       this._transformLocalChangeHistory(change, info);
-      this._transformSelection(change, info);
+      var oldSelection = this.selection;
+      var newSelection = this._transformSelection(change, info);
+      this.selection = newSelection;
+      var update = {
+        change: change
+      };
+      if (oldSelection !== newSelection) {
+        update.selection = newSelection;
+      }
+      // this._triggerUpdateEvent(update, info);
+    }
+  };
+
+  this._setSelection = function(sel) {
+    if (!sel) {
+      sel = Selection.nullSelection;
+    } else {
+      sel.attach(this.doc);
+    }
+    if (!sel.equals(this.selection)) {
+      this.selection = sel;
+      return true;
+    } else {
+      return false;
     }
   };
 
@@ -212,46 +203,27 @@ DocumentSession.Prototype = function() {
   };
 
   this._transformSelection = function(change) {
-    // console.log('Transforming selection...', this.__id__);
-    // Transform the selection
-    this._selectionHasChanged =
-      DocumentChange.transformSelection(this.selection, change);
-  };
-
-  this._transformCollaboratorSelections = function(change) {
-    // console.log('Transforming selection...', this.__id__);
-    // Transform the selection
-    var collaborators = this.getCollaborators();
-    if (collaborators) {
-      each(collaborators, function(collaborator) {
-        DocumentChange.transformSelection(collaborator.selection, change);
-      });
-    }
-  };
-
-  this.afterDocumentChange = function() {
-    if (this._selectionHasChanged) {
-      // console.log('selection has changed', this.__id__);
-      this._selectionHasChanged = false;
-      this.emit('selection:changed', this.selection, this);
-    }
+    var oldSelection = this.selection;
+    var newSelection = DocumentChange.transformSelection(oldSelection, change);
+    // console.log('Transformed selection', change, oldSelection.toString(), newSelection.toString());
+    return newSelection;
   };
 
   this._commit = function(change, info) {
-    change.sessionId = this.sessionId;
-    change.timestamp = Date.now();
-
-    // TODO: try to find a more explicit way, or a maybe a smarter way
-    // to keep the TransactionDocument in sync
-    this.doc._apply(change);
-
-    // transform local version collaborator selections
-    var collaborators = this.getCollaborators();
-    if (collaborators) {
-      each(collaborators, function(collaborator) {
-        DocumentChange.transformSelection(collaborator.selection, change);
-      });
+    var selectionHasChanged = this._commitChange(change);
+    var update = {
+      change: change
+    };
+    if (selectionHasChanged) {
+      update.selection = this.selection;
     }
+    this._triggerUpdateEvent(update, info);
+  };
+
+  this._commitChange = function(change) {
+    change.timestamp = Date.now();
+    // update document model
+    this.doc._apply(change);
 
     var currentChange = this._currentChange;
     // try to merge this change with the last to get more natural changes
@@ -267,22 +239,41 @@ DocumentSession.Prototype = function() {
       this._currentChange = change;
       this.doneChanges.push(change.invert());
     }
+    // discard old redo history
     this.undoneChanges = [];
-    // console.log('Document._saveTransaction took %s ms', (Date.now() - time));
-    // time = Date.now();
-    this._notifyChangeListeners(change, info);
+
+    var oldSelection = this.selection || Selection.nullSelection;
+    var newSelection = change.after.selection || Selection.nullSelection;
+    var selectionHasChanged = !oldSelection.equals(newSelection);
+    // HACK injecting the surfaceId here...
+    // TODO: we should find out where the best place is to do this
+    if (!newSelection.isNull()) {
+      newSelection.surfaceId = change.after.surfaceId;
+    }
+    this.selection = newSelection;
+    return selectionHasChanged;
   };
 
-  this._notifyChangeListeners = function(change, info) {
+  this._triggerUpdateEvent = function(update, info) {
     info = info || {};
-    // TODO: iron this out... we should have change.sessionId already
     info.session = this;
-    // TODO: I would like to wrap this with a try catch.
-    // however, debugging gets inconvenient as caught exceptions don't trigger a breakpoint
-    // by default, and other libraries such as jquery throw noisily.
-    this.doc._notifyChangeListeners(change, info);
+    if (update.change && update.change.ops.length > 0) {
+      // TODO: I would like to wrap this with a try catch.
+      // however, debugging gets inconvenient as caught exceptions don't trigger a breakpoint
+      // by default, and other libraries such as jquery throw noisily.
+      this.doc._notifyChangeListeners(update.change, info);
+    } else {
+      // HACK: removing this from the update when it is NOP
+      // this way, we only need to do this check here
+      delete update.change;
+    }
+    if (Object.keys(update).length > 0) {
+      // slots to have more control about when things get
+      // updated, and things have been rendered/updated
+      this.emit('update', update, info);
+      this.emit('didUpdate', update, info);
+    }
   };
-
 };
 
 oo.inherit(DocumentSession, EventEmitter);

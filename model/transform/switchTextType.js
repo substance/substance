@@ -1,6 +1,8 @@
 'use strict';
 
 var extend = require('lodash/extend');
+var error = require('../../util/error');
+var warn = require('../../util/warn');
 var uuid = require('../../util/uuid');
 var annotationHelpers = require('../annotationHelpers');
 var deleteNode = require('./deleteNode');
@@ -28,7 +30,7 @@ var deleteNode = require('./deleteNode');
 function switchTextType(tx, args) {
   var sel = args.selection;
   if (!sel.isPropertySelection()) {
-    console.error("Selection must be a PropertySelection.");
+    error("Selection must be a PropertySelection.");
     return args;
   }
   var path = sel.path;
@@ -36,7 +38,7 @@ function switchTextType(tx, args) {
   var data = args.data;
   var node = tx.get(nodeId);
   if (!(node.isInstanceOf('text'))) {
-    console.warn('Trying to use switchTextType on a non text node. Skipping.');
+    warn('Trying to use switchTextType on a non text node. Skipping.');
     return args;
   }
   // create a new node and transfer annotations

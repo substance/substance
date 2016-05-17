@@ -12,14 +12,6 @@ function TableComponent() {
 
 TableComponent.Prototype = function() {
 
-  this.didMount = function() {
-    this.context.surface.on("selection:changed", this.onSelectionChange, this);
-  };
-
-  this.dispose = function() {
-    this.context.surface.off(this);
-  };
-
   this.getInitialState = function() {
     return { mode: 'table' };
   };

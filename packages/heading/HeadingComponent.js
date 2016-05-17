@@ -1,7 +1,6 @@
 'use strict';
 
-var Component = require('../../ui/Component');
-var TextProperty = require('../../ui/TextPropertyComponent');
+var TextBlockComponent = require('../../ui/TextBlockComponent');
 
 function HeadingComponent() {
   HeadingComponent.super.apply(this, arguments);
@@ -9,16 +8,15 @@ function HeadingComponent() {
 
 HeadingComponent.Prototype = function() {
 
+  var _super = HeadingComponent.super.prototype;
+
   this.render = function($$) {
-    return $$('div')
-      .addClass("sc-heading sm-level-"+this.props.node.level)
-      .attr("data-id", this.props.node.id)
-      .append($$(TextProperty, {
-        path: [ this.props.node.id, "content"]
-      }));
+    var el = _super.render.call(this, $$);
+    return el.addClass("sc-heading sm-level-"+this.props.node.level);
   };
+
 };
 
-Component.extend(HeadingComponent);
+TextBlockComponent.extend(HeadingComponent);
 
 module.exports = HeadingComponent;

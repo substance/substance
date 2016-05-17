@@ -1,4 +1,4 @@
-/* jshint latedef: false */
+'use strict';
 
 var isFunction = require('lodash/isFunction');
 var isString = require('lodash/isString');
@@ -95,6 +95,7 @@ VirtualHTMLElement.Prototype = function() {
 
   this.setTagName = function(tagName) {
     this._tagName = tagName;
+    return this;
   };
 
   this.hasClass = function(className) {
@@ -168,7 +169,8 @@ VirtualHTMLElement.Prototype = function() {
   };
 
   this.setId = function(id) {
-    return this.setAttribute('id', id);
+    this.setAttribute('id', id);
+    return this;
   };
 
   this.setTextContent = function(text) {
@@ -241,6 +243,7 @@ VirtualHTMLElement.Prototype = function() {
       throw Error('It is not possible to mix $$.html() with $$.append(). You can call $$.empty() to reset this virtual element.');
     }
     this._appendChild(this.children, child);
+    return this;
   };
 
   this.insertAt = function(pos, child) {
@@ -285,6 +288,7 @@ VirtualHTMLElement.Prototype = function() {
       throw new Error('removeChild(): element is not a child.');
     }
     this.removeAt(idx);
+    return this;
   };
 
   this.replaceChild = function(oldChild, newChild) {
@@ -298,6 +302,7 @@ VirtualHTMLElement.Prototype = function() {
     }
     this.removeAt(idx);
     this.insertAt(idx, newChild);
+    return this;
   };
 
   this.empty = function() {
@@ -321,12 +326,14 @@ VirtualHTMLElement.Prototype = function() {
       this.htmlProps = {};
     }
     this.htmlProps[name] = value;
+    return this;
   };
 
   this.removeProperty = function(name) {
     if (this.htmlProps) {
-      delete this.htmlProps[name];  
+      delete this.htmlProps[name];
     }
+    return this;
   };
 
   this.getStyle = function(name) {
@@ -340,6 +347,7 @@ VirtualHTMLElement.Prototype = function() {
       this.style = {};
     }
     this.style[name] = value;
+    return this;
   };
 
   this.addEventListener = function(eventName, handler, options) {
@@ -355,11 +363,14 @@ VirtualHTMLElement.Prototype = function() {
       this.eventListeners = [];
     }
     this.eventListeners.push(listener);
+    return this;
   };
+
   this.removeEventListener = function(eventName, handler) {
     if (this.eventListeners) {
       DOMElement._findEventListenerIndex(this.eventListeners, eventName, handler);
     }
+    return this;
   };
 
   this.getEventListeners = function() {
@@ -511,9 +522,13 @@ VirtualComponent.Prototype = function() {
     return new Outlet(this, name);
   };
 
-  this._attach = function() {};
+  this._attach = function(child) {
+    child._preliminaryParent = this;
+  };
 
-  this._detach = function() {};
+  this._detach = function(child) {
+    child._preliminaryParent = null;
+  };
 
   this._copyHTMLConfig = function() {
     return {
@@ -547,7 +562,12 @@ VirtualComponent.Prototype = function() {
   };
 
   Outlet.prototype.empty = function() {
-    this.virtualEl.props[this.name] = [];
+    var arr = this.virtualEl.props[this.name];
+    arr.forEach(function(el) {
+      this._detach(el);
+    }.bind(this));
+    arr.splice(0, arr.length);
+    return this;
   };
 
 };

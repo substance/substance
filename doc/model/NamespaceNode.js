@@ -1,6 +1,6 @@
 'use strict';
 
-var Node = require('../../model/DocumentNode');
+var DocumentNode = require('../../model/DocumentNode');
 var MemberContainerMixin = require('./MemberContainerMixin');
 
 // Corresponds to a folder in substance
@@ -25,7 +25,7 @@ NamespaceNode.Prototype = function() {
   };
 };
 
-Node.extend(NamespaceNode, MemberContainerMixin);
+DocumentNode.extend(NamespaceNode, MemberContainerMixin);
 
 NamespaceNode.static.name = 'namespace';
 

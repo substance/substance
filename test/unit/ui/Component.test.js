@@ -709,6 +709,49 @@ QUnit.test("Special nesting situation II", function(assert) {
   assert.ok(grandchild === comp.refs.grandchild, "Grandchild should have been retained.");
 });
 
+QUnit.test("Implicit retaining in 3-level nesting situation", function(assert) {
+  function Parent() {
+    Parent.super.apply(this, arguments);
+    this.render = function($$) {
+      return $$('div').addClass('parent').append(
+        // this element should be retained implicitly because Grandchild has a ref
+        // The challenge is to find out that wrapper and Child need to be retained,
+        // because of the ref on Grandchild
+        // At the time of descent, nothing can be told about the content of Child
+        // as it depends on Child.render() how grandchild is treated actually
+        $$('div').addClass('wrapper').append(
+          $$(Child).append(
+            $$(Grandchild).ref('grandchild')
+          )
+        )
+      );
+    };
+  }
+  Component.extend(Parent);
+  function Child() {
+    Child.super.apply(this, arguments);
+    this.render = function($$) {
+      var el = $$('div').addClass('child').append(
+        this.props.children
+      );
+      return el;
+    };
+  }
+  Component.extend(Child);
+  function Grandchild() {
+    Grandchild.super.apply(this, arguments);
+    this.render = function($$) {
+      return $$('div').addClass('grandchild');
+    };
+  }
+  Component.extend(Grandchild);
+  var comp = Parent.static.render();
+  var wrapper = comp.find('.wrapper');
+  comp.rerender();
+  var wrapper2 = comp.find('.wrapper');
+  assert.ok(wrapper.el === wrapper2.el, "wrapper element should have been retained.");
+});
+
 QUnit.test("Edge case: ingesting a child without picking up", function(assert) {
   function Parent() {
     Parent.super.apply(this, arguments);
@@ -1048,9 +1091,7 @@ QUnit.test("Implicitly retain elements when passing grandchild with ref.", funct
   var comp = renderTestComponent(function($$) {
     var grandchild = $$('div').ref('grandchild');
     return $$('div').append(
-      $$('div').append(
-        $$(Child).append(grandchild).ref('child')
-      )
+      $$(Child).append(grandchild)
     );
   });
 

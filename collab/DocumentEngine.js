@@ -2,7 +2,7 @@
 
 var EventEmitter = require('../util/EventEmitter');
 var JSONConverter = require('../model/JSONConverter');
-var Err = require('../util/Error');
+var Err = require('../util/SubstanceError');
 var SnapshotEngine = require('./SnapshotEngine');
 
 /*
@@ -29,7 +29,7 @@ DocumentEngine.Prototype = function() {
 
   /*
     Creates a new empty or prefilled document
-  
+
     Writes the initial change into the database.
     Returns the JSON serialized version, as a starting point
   */
@@ -43,11 +43,11 @@ DocumentEngine.Prototype = function() {
     var docFactory = schemaConfig.documentFactory;
     var doc = docFactory.createArticle();
     var change = docFactory.createChangeset()[0];
-    
+
     // HACK: we use the info object for the change as well, however
     // we should be able to control this separately.
     change.info = args.info;
-    
+
     this.documentStore.createDocument({
       schemaName: schemaConfig.name,
       schemaVersion: schemaConfig.version,
@@ -70,7 +70,7 @@ DocumentEngine.Prototype = function() {
             cause: err
           }));
         }
-        
+
         var converter = new JSONConverter();
         cb(null, {
           documentId: docRecord.documentId,
@@ -84,7 +84,7 @@ DocumentEngine.Prototype = function() {
   /*
     Get a document snapshot.
 
-    @param args.documentId 
+    @param args.documentId
     @param args.version
   */
   this.getDocument = function(args, cb) {
@@ -130,7 +130,7 @@ DocumentEngine.Prototype = function() {
           cause: err
         }));
       }
-      this.changeStore.getChanges(args, cb);  
+      this.changeStore.getChanges(args, cb);
     }.bind(this));
   };
 
@@ -178,7 +178,7 @@ DocumentEngine.Prototype = function() {
           });
         }.bind(this));
       }.bind(this));
-    }.bind(this)); 
+    }.bind(this));
   };
 
 };

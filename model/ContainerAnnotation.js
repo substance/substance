@@ -3,6 +3,7 @@
 var isEqual = require('lodash/isEqual');
 var last = require('lodash/last');
 var each = require('lodash/each');
+var warn = require('../util/warn');
 var EventEmitter = require('../util/EventEmitter');
 var DocumentNode = require('./DocumentNode');
 var Selection = require('./Selection');
@@ -46,7 +47,7 @@ ContainerAnnotation.Prototype = function() {
   this.getText = function() {
     var doc = this.getDocument();
     if (!doc) {
-      console.warn('Trying to use a ContainerAnnotation which is not attached to the document.');
+      warn('Trying to use a ContainerAnnotation which is not attached to the document.');
       return "";
     }
     return documentHelpers.getTextForSelection(doc, this.getSelection());
@@ -61,7 +62,7 @@ ContainerAnnotation.Prototype = function() {
     var doc = this.getDocument();
     // Guard: when this is called while this node has been detached already.
     if (!doc) {
-      console.warn('Trying to use a ContainerAnnotation which is not attached to the document.');
+      warn('Trying to use a ContainerAnnotation which is not attached to the document.');
       return Selection.nullSelection();
     }
     return doc.createSelection({

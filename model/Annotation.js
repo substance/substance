@@ -1,2 +1,3 @@
-console.error('DEPRECATED: Use require("substance/model/PropertyAnnotation") instead.');
+'use strict';
+
 module.exports = require('./PropertyAnnotation');

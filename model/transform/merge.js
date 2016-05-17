@@ -1,7 +1,7 @@
-/* jshint latedef: false */
 'use strict';
 
 var extend = require('lodash/extend');
+var info = require('../../util/info');
 var annotationHelpers = require('../annotationHelpers');
 
 var merge = function(tx, args) {
@@ -36,7 +36,7 @@ var merge = function(tx, args) {
   return args;
 };
 
-var _mergeNodes = function(tx, args) {
+function _mergeNodes(tx, args) {
   var firstNodeId = args.firstNodeId;
   var secondNodeId = args.secondNodeId;
   var firstNode = tx.get(firstNodeId);
@@ -44,14 +44,14 @@ var _mergeNodes = function(tx, args) {
   // most often a merge happens between two different nodes (e.g., 2 paragraphs)
   var mergeTrafo = _getNodeMerger(args.editingBehavior, firstNode, secondNode);
   if (mergeTrafo) {
-    return mergeTrafo.call(this, tx, extend({}, args, {
+    return mergeTrafo(tx, extend({}, args, {
       containerId: args.containerId,
       first: firstNode,
       second: secondNode
     }));
   }
   return args;
-};
+}
 
 function _getNodeMerger(behavior, node, otherNode) {
   if (behavior) {
@@ -102,11 +102,11 @@ function _getNodeMerger(behavior, node, otherNode) {
   if (node.isInstanceOf('text') && otherNode.isInstanceOf('text')) {
     return _mergeTextNodes;
   }
-  console.info("No merge behavior defined for %s <- %s", node.type, otherNode.type);
+  info("No merge behavior defined for %s <- %s", node.type, otherNode.type);
   return null;
 }
 
-var _mergeTextNodes = function(tx, args) {
+function _mergeTextNodes(tx, args) {
   var containerId = args.containerId;
   var first = args.first;
   var second = args.second;
@@ -146,6 +146,6 @@ var _mergeTextNodes = function(tx, args) {
   }
   args.selection = selection;
   return args;
-};
+}
 
 module.exports = merge;

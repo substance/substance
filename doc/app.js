@@ -1,3 +1,6 @@
+/* globals console */
+'use strict';
+
 var Documentation = require('./model/Documentation');
 var Component = require('../ui/Component');
 var DocumentationReader = require('./DocumentationReader');

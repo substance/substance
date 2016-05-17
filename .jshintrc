@@ -1,14 +1,13 @@
 {
   "esnext": true,
-  "node": true,
-  "devel": true,
+  "browserify": true,
+  "strict": true,
+  "devel": false,
   "latedef": "nofunc",
   "undef": true,
   "unused": true,
   "sub": true,
   "predef": [
-    "window",
-    "document",
     "QUnit"
   ]
 }
