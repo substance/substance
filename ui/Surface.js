@@ -192,6 +192,9 @@ Surface.Prototype = function() {
         this.clipboard.attach(el);
       }
     }
+    if (this.props.overlay) {
+      console.log('TODO: display overlay', this.props.overlay);
+    }
     return el;
   };
 
