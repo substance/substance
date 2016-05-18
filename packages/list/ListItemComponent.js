@@ -11,9 +11,15 @@ function ListItemComponent() {
 ListItemComponent.Prototype = function() {
 
   this.initialize = function() {
-    this.doc = this.props.node.getDocument();
-    this.doc.getEventProxy('path').connect(this, [this.props.node.id, 'level'], this.rerenderList);
-    this.doc.getEventProxy('path').connect(this, [this.props.node.id, 'ordered'], this.rerenderList);
+    var node = this.props.node;
+    node.connect(this, {'level:changed': this.rerenderList});
+    node.connect(this, {'ordered:changed': this.rerenderList});
+  };
+
+  this.dispose = function() {
+	  var doc = this.props.node.getDocument();
+	  doc.getEventProxy('path').disconnect(this.props.node);
+	  this.props.node.disconnect(this);
   };
 
   this.render = function() {

@@ -10,9 +10,9 @@ var ListComponent = Component.extend({
   displayName: "ListComponent",
 
   initialize: function() {
-    this.doc = this.props.doc;
-    this.doc.getEventProxy('path').connect(this, [this.props.node.id, 'items'], this.onItemsChanged);
-    this.doc.getEventProxy('path').connect(this, [this.props.node.id, 'ordered'], this.onOrderChanged);
+    var node = this.props.node;
+    node.connect(this, {'items:changed': this.onItemsChanged});
+    node.connect(this, {'ordered:changed': this.onOrderChanged});
 
     this.handleActions({
       'rerenderList': this.rerender,
@@ -20,8 +20,9 @@ var ListComponent = Component.extend({
   },
 
   dispose: function() {
-    this.doc.getEventProxy('path').disconnect(this);
-    this.doc = null;
+	var doc = this.props.node.getDocument();
+    doc.getEventProxy('path').disconnect(this.props.node);
+    this.props.node.disconnect(this);
   },
 
   render: function() {
