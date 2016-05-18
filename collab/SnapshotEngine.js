@@ -1,8 +1,10 @@
+'use strict';
+
 var oo = require('../util/oo');
 var JSONConverter = require('../model/JSONConverter');
 var converter = new JSONConverter();
 var each = require('lodash/each');
-var Err = require('../util/Error');
+var Err = require('../util/SubstanceError');
 
 /**
   API for creating and retrieving snapshots of documents
@@ -181,7 +183,7 @@ SnapshotEngine.Prototype = function() {
   */
   this._createDocumentInstance = function(schemaName) {
     var schemaConfig = this.schemas[schemaName];
-    
+
     if (!schemaConfig) {
       throw new Err('SnapshotEngine.SchemaNotFoundError', {
         message:'Schema ' + schemaName + ' not found'

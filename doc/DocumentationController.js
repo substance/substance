@@ -42,13 +42,11 @@ DocumentationController.Prototype = function() {
   };
 
   this.navigate = function(route, opts) {
-    console.log('navigating',route);
     this.extendState(route);
     this.router.writeRoute(route, opts);
   };
 
   this._onRouteChanged = function(route) {
-    console.log('onrouteChanged', route);
     this.navigate(route, {replace: true});
   };
 

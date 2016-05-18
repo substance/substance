@@ -1,7 +1,8 @@
 'use strict';
 
-var Component = require('../Component');
-var UnsupportedNode = require('./unsupported_node');
+var error = require('../../util/error');
+var BlockNodeComponent = require('../../ui/BlockNodeComponent');
+var UnsupportedNode = require('../../ui/UnsupportedNodeComponent');
 
 function IncludeComponent() {
   IncludeComponent.super.apply(this, arguments);
@@ -9,24 +10,27 @@ function IncludeComponent() {
 
 IncludeComponent.Prototype = function() {
 
+  var _super = IncludeComponent.super.prototype;
+
   this.render = function($$) {
     var doc = this.props.doc;
     var node = doc.get(this.props.node.nodeId);
     var componentRegistry = this.context.componentRegistry;
     var ComponentClass = componentRegistry.get(node.type);
     if (!ComponentClass) {
-      console.error('Could not resolve a component for type: ' + node.type);
+      error('Could not resolve a component for type: ' + node.type);
       ComponentClass = UnsupportedNode;
     }
-    return $$('div')
-      .addClass("content-node include")
-      .attr("data-id", this.props.node.id)
+
+    var el = _super.render.call(this, $$);
+    el.addClass("sc-include")
       .append(
         $$(ComponentClass, { doc: doc, node: node }).ref(node.id)
       );
+    return el;
   };
 };
 
-Component.extend(IncludeComponent);
+BlockNodeComponent.extend(IncludeComponent);
 
 module.exports = IncludeComponent;

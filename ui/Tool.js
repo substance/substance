@@ -22,13 +22,6 @@ function Tool() {
 
 Tool.Prototype = function() {
 
-  /*
-    Initialize toolstate. Obtained from the toolmanager by asking for
-    the associated command state.
-  */
-  this.getInitialState = function() {
-    return this.context.toolManager.getCommandState(this);
-  };
 
   this.didMount = function() {
     this.context.toolManager.registerTool(this);
@@ -51,17 +44,17 @@ Tool.Prototype = function() {
       el.attr('aria-label', title);
     }
     //.sm-disabled
-    if (this.state.disabled) {
+    if (this.props.disabled) {
       el.addClass('sm-disabled');
     }
     // .sm-active
-    if (this.state.active) {
+    if (this.props.active) {
       el.addClass('sm-active');
     }
     // .sm-<mode>
     // TODO: it seems that the mode class is not following the 'sm-' prefix-rules
-    if (this.state.mode) {
-      el.addClass(this.state.mode);
+    if (this.props.mode) {
+      el.addClass(this.props.mode);
     }
 
     // button
@@ -75,7 +68,7 @@ Tool.Prototype = function() {
       .on('click', this.onClick)
       .append(this.props.children);
 
-    if (this.state.disabled) {
+    if (this.props.disabled) {
       // make button inaccessible
       button.attr('tabindex', -1);
     } else {
@@ -88,8 +81,8 @@ Tool.Prototype = function() {
   this.getTitle = function() {
     var title = this.props.title || this.i18n.t(this.getName());
     // Used only by annotation tool so far
-    if (this.state.mode) {
-      title = [capitalize(this.state.mode), title].join(' ');
+    if (this.props.mode) {
+      title = [capitalize(this.props.mode), title].join(' ');
     }
     return title;
   };
@@ -115,7 +108,7 @@ Tool.Prototype = function() {
   this.onClick = function(e) {
     e.preventDefault();
     e.stopPropagation();
-    if (this.state.disabled) {
+    if (this.props.disabled) {
       return;
     }
     this.performAction();

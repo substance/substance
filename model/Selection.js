@@ -1,6 +1,7 @@
 'use strict';
 
 var oo = require('../util/oo');
+var error = require('../util/error');
 var EventEmitter = require('../util/EventEmitter');
 var Anchor = require('./Anchor');
 
@@ -27,6 +28,14 @@ function Selection() {
 Selection.Prototype = function() {
 
   this._isSelection = true;
+
+  this.clone = function() {
+    var newSel = this._clone();
+    if (this._internal.doc) {
+      newSel.attach(this._internal.doc);
+    }
+    return newSel;
+  };
 
   /**
     @returns {Document} The attached document instance
@@ -74,6 +83,14 @@ Selection.Prototype = function() {
 
   this.isNodeSelection = function() {
     return false;
+  };
+
+  this.isEntireNodeSelected = function() {
+    return false;
+  };
+
+  this.getNodeId = function() {
+    return null;
   };
 
   this.isCustomSelection = function() {
@@ -201,7 +218,7 @@ Selection.fromJSON = function(json) {
       return CustomSelection.fromJSON(json);
     case 'default':
       // TODO: what if we have custom selections?
-      console.error('Selection.fromJSON(): unsupported selection data', json);
+      error('Selection.fromJSON(): unsupported selection data', json);
       return Selection.nullSelection;
   }
 };
@@ -268,6 +285,7 @@ Selection.NodeFragment = function(nodeId) {
 
   this.type = "node-fragment";
   this.nodeId = nodeId;
+  this.path = [nodeId];
 };
 
 Selection.NodeFragment.Prototype = function() {

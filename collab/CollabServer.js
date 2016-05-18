@@ -2,7 +2,8 @@
 
 var Server = require('./Server');
 var CollabEngine = require('./CollabEngine');
-var Err = require('../util/Error');
+var error = require('../util/error');
+var Err = require('../util/SubstanceError');
 var forEach = require('lodash/forEach');
 
 /*
@@ -44,7 +45,7 @@ CollabServer.Prototype = function() {
     if (this.config.authenticate) {
       this.config.authenticate(req, function(err, session) {
         if (err) {
-          console.error(err);
+          error(err);
           // Send the response with some delay
           this._error(req, res, new Err('AuthenticationError', {cause: err}));
           return;
@@ -64,7 +65,7 @@ CollabServer.Prototype = function() {
     if (this.config.enhanceRequest) {
       this.config.enhanceRequest(req, function(err) {
         if (err) {
-          console.error('enhanceRequest returned an error', err);
+          error('enhanceRequest returned an error', err);
           this._error(req, res, err);
           return;
         }
@@ -80,7 +81,7 @@ CollabServer.Prototype = function() {
     Called when a collaborator disconnects
   */
   this.onDisconnect = function(collaboratorId) {
-    console.log('CollabServer.onDisconnect ', collaboratorId);
+    // console.log('CollabServer.onDisconnect ', collaboratorId);
     // All documents collaborator is currently collaborating to
     var documentIds = this.collabEngine.getDocumentIds(collaboratorId);
     documentIds.forEach(function(documentId) {
@@ -98,7 +99,7 @@ CollabServer.Prototype = function() {
     if (method) {
       method.call(this, req, res);
     } else {
-      console.error('Method', msg.type, 'not implemented for CollabServer');
+      error('Method', msg.type, 'not implemented for CollabServer');
     }
   };
 

@@ -3,6 +3,7 @@
 var isString = require('lodash/isString');
 var isNumber = require('lodash/isNumber');
 var oo = require('../util/oo');
+var assert = require('../util/assert');
 var DOMElement = require('./DOMElement');
 var DelegatedEvent = require('./DelegatedEvent');
 
@@ -13,7 +14,7 @@ var matches = (
 );
 
 function BrowserDOMElement(el) {
-  console.assert(el instanceof window.Node, "Expecting native DOM node.");
+  assert(el instanceof window.Node, "Expecting native DOM node.");
   this.el = el;
   el._wrapper = this;
   this.eventListeners = [];
@@ -48,6 +49,7 @@ BrowserDOMElement.Prototype = function() {
 
   this.setClasses = function(classString) {
     this.el.className = classString;
+    return this;
   };
 
   this.getAttribute = function(name) {
@@ -56,10 +58,12 @@ BrowserDOMElement.Prototype = function() {
 
   this.setAttribute = function(name, value) {
     this.el.setAttribute(name, value);
+    return this;
   };
 
   this.removeAttribute = function(name) {
-    return this.el.removeAttribute(name);
+    this.el.removeAttribute(name);
+    return this;
   };
 
   this.getAttributes = function() {
@@ -68,9 +72,7 @@ BrowserDOMElement.Prototype = function() {
     var l = attributes.length;
     for(var i=0; i < l; i++) {
       var attr = attributes.item(i);
-      if (attr.name === 'class' && attr.name === 'style') {
-        result[attr.name] = attr.value;
-      }
+      result[attr.name] = attr.value;
     }
     return result;
   };
@@ -82,11 +84,13 @@ BrowserDOMElement.Prototype = function() {
   this.setProperty = function(name, value) {
     this.htmlProps[name] = value;
     this.el[name] = value;
+    return this;
   };
 
   this.removeProperty = function(name) {
     delete this.htmlProps[name];
     delete this.el[name];
+    return this;
   };
 
   this.getTagName = function() {
@@ -113,6 +117,7 @@ BrowserDOMElement.Prototype = function() {
       newEl.addEventListener(listener.eventName, listener.handler, listener.capture);
     });
     this._replaceNativeEl(newEl);
+    return this;
   };
 
   this.getId = function() {
@@ -121,6 +126,7 @@ BrowserDOMElement.Prototype = function() {
 
   this.setId = function(id) {
     this.el.id = id;
+    return this;
   };
 
   this.getValue = function() {
@@ -129,6 +135,7 @@ BrowserDOMElement.Prototype = function() {
 
   this.setValue = function(value) {
     this.el.value = value;
+    return this;
   };
 
   this.getStyle = function(name) {
@@ -155,6 +162,7 @@ BrowserDOMElement.Prototype = function() {
       value = value + "px";
     }
     this.el.style[name] = value;
+    return this;
   };
 
   this.getTextContent = function() {
@@ -163,6 +171,7 @@ BrowserDOMElement.Prototype = function() {
 
   this.setTextContent = function(text) {
     this.el.textContent = text;
+    return this;
   };
 
   this.getInnerHTML = function() {
@@ -180,6 +189,7 @@ BrowserDOMElement.Prototype = function() {
 
   this.setInnerHTML = function(html) {
     this.el.innerHTML = html;
+    return this;
   };
 
   this.getOuterHTML = function() {
@@ -200,6 +210,7 @@ BrowserDOMElement.Prototype = function() {
     this.el.addEventListener(listener.eventName, listener.handler, listener.capture);
     listener._el = this;
     this.eventListeners.push(listener);
+    return this;
   };
 
   this._delegatedHandler = function(listener) {
@@ -237,6 +248,7 @@ BrowserDOMElement.Prototype = function() {
       listener._el = null;
       this.el.removeEventListener(listener.eventName, listener.handler);
     }
+    return this;
   };
 
   this.getEventListeners = function() {
@@ -415,7 +427,7 @@ BrowserDOMElement.Prototype = function() {
     if (!child.el._wrapper) {
       child.el._wrapper = child;
     }
-    console.assert(child.el._wrapper === child, "Expecting a backlink between native element and CheerioDOMElement");
+    assert(child.el._wrapper === child, "Expecting a backlink between native element and CheerioDOMElement");
     return child.getNativeElement();
   };
 
@@ -433,6 +445,7 @@ BrowserDOMElement.Prototype = function() {
     } else {
       this.el.insertBefore(nativeChild, childNodes[pos]);
     }
+    return this;
   };
 
   this.insertBefore = function(child, before) {
@@ -441,10 +454,12 @@ BrowserDOMElement.Prototype = function() {
     }
     var nativeChild = this._normalizeChild(child);
     this.el.insertBefore(nativeChild, before.el);
+    return this;
   };
 
   this.removeAt = function(pos) {
     this.el.removeChild(this.el.childNodes[pos]);
+    return this;
   };
 
   this.removeChild = function(child) {
@@ -452,6 +467,7 @@ BrowserDOMElement.Prototype = function() {
       throw new Error('removeChild(): Illegal arguments. Expecting a BrowserDOMElement instance.');
     }
     this.el.removeChild(child.el);
+    return this;
   };
 
   this.replaceChild = function(oldChild, newChild) {
@@ -461,6 +477,7 @@ BrowserDOMElement.Prototype = function() {
     }
     // Attention: Node.replaceChild has weird semantics
     this.el.replaceChild(newChild.el, oldChild.el);
+    return this;
   };
 
   this.empty = function() {
@@ -477,6 +494,7 @@ BrowserDOMElement.Prototype = function() {
     if (this.el.parentNode) {
       this.el.parentNode.removeChild(this.el);
     }
+    return this;
   };
 
   this.serialize = function() {
@@ -500,7 +518,7 @@ BrowserDOMElement.Prototype = function() {
   };
 
   this._replaceNativeEl = function(newEl) {
-    console.assert(newEl instanceof window.Node, "Expecting a native element.");
+    assert(newEl instanceof window.Node, "Expecting a native element.");
     var oldEl = this.el;
     var parentNode = oldEl.parentNode;
     if (parentNode) {
@@ -525,6 +543,7 @@ BrowserDOMElement.Prototype = function() {
 
   this.click = function() {
     this.el.click();
+    return this;
   };
 
   this.getWidth = function() {
@@ -650,7 +669,7 @@ BrowserDOMElement.wrapNativeElement = function(el) {
 };
 
 function TextNode(nativeEl) {
-  console.assert(nativeEl instanceof window.Node && nativeEl.nodeType === 3, "Expecting native TextNode.");
+  assert(nativeEl instanceof window.Node && nativeEl.nodeType === 3, "Expecting native TextNode.");
   this.el = nativeEl;
   nativeEl._wrapper = this;
 }
@@ -701,6 +720,37 @@ oo.initClass(BrowserWindow);
 BrowserDOMElement.getBrowserWindow = function() {
   if (window.__BrowserDOMElementWrapper__) return window.__BrowserDOMElementWrapper__;
   return new BrowserWindow(window);
+};
+
+var _r1, _r2;
+
+BrowserDOMElement.isReverse = function(anchorNode, anchorOffset, focusNode, focusOffset) {
+  // the selection is reversed when the focus propertyEl is before
+  // the anchor el or the computed charPos is in reverse order
+  if (focusNode && anchorNode) {
+    if (!_r1) {
+      _r1 = window.document.createRange();
+      _r2 = window.document.createRange();
+    }
+    _r1.setStart(anchorNode.getNativeElement(), anchorOffset);
+    _r2.setStart(focusNode.getNativeElement(), focusOffset);
+    var cmp = _r1.compareBoundaryPoints(window.Range.START_TO_START, _r2);
+    if (cmp === 1) {
+      return true;
+    }
+  }
+  return false;
+};
+
+BrowserDOMElement.getWindowSelection = function() {
+  var nativeSel = window.getSelection();
+  var result = {
+    anchorNode: BrowserDOMElement.wrapNativeElement(nativeSel.anchorNode),
+    anchorOffset: nativeSel.anchorOffset,
+    focusNode: BrowserDOMElement.wrapNativeElement(nativeSel.focusNode),
+    focusOffset: nativeSel.focusOffset
+  };
+  return result;
 };
 
 module.exports = BrowserDOMElement;

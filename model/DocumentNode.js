@@ -1,6 +1,7 @@
 'use strict';
 
 var each = require('lodash/each');
+var warn = require('../util/warn');
 var DataNode = require('./data/Node');
 
 /**
@@ -197,14 +198,14 @@ DocumentNode.Prototype = function() {
   // Experimental: we are working on a simpler API replacing the
   // rather inconvenient EventProxy API.
   this.connect = function(ctx, handlers) {
-    console.warn('DEPRECATED: use Node.on() instead');
+    warn('DEPRECATED: use Node.on() instead');
     each(handlers, function(func, name) {
       this.on(name, func, ctx);
     }.bind(this));
   };
 
   this.disconnect = function(ctx) {
-    console.warn('DEPRECATED: use Node.off() instead');
+    warn('DEPRECATED: use Node.off() instead');
     this.off(ctx);
   };
 

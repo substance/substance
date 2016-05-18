@@ -8,16 +8,16 @@ function Redo() {
 
 Redo.Prototype = function() {
 
-  this.getCommandState = function() {
-    var docSession = this.getDocumentSession();
+  this.getCommandState = function(context) {
+    var docSession = context.documentSession;
     return {
       disabled: !docSession.canRedo(),
       active: false
     };
   };
 
-  this.execute = function() {
-    var docSession = this.getDocumentSession();
+  this.execute = function(context) {
+    var docSession = context.documentSession;
     if (docSession.canRedo()) {
       docSession.redo();
       return true;

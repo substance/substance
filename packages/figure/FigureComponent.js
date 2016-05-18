@@ -1,6 +1,6 @@
 'use strict';
 
-var Component = require('../../ui/Component');
+var BlockNodeComponent = require('../../ui/BlockNodeComponent');
 var TextProperty = require('../../ui/TextPropertyComponent');
 
 function FigureComponent() {
@@ -9,11 +9,15 @@ function FigureComponent() {
 
 FigureComponent.Prototype = function() {
 
+  var _super = FigureComponent.super.prototype;
+
   this.didMount = function() {
+    _super.didMount.call(this);
     this.props.node.on("label:changed", this.onLabelChanged, this);
   };
 
   this.dispose = function() {
+    _super.dispose.call(this);
     this.props.node.off(this);
   };
 
@@ -21,9 +25,10 @@ FigureComponent.Prototype = function() {
     var componentRegistry = this.context.componentRegistry;
     var contentNode = this.props.node.getContentNode();
     var ContentComponentClass = componentRegistry.get(contentNode.type);
-    var el = $$('div')
-      .addClass('sc-figure') // this.props.node.type
-      .attr("data-id", this.props.node.id);
+
+    var el = _super.render.call(this, $$)
+      .addClass('sc-figure');
+
     el.append($$('div')
       .addClass('se-label').attr("contenteditable", false)
       .append(this.props.node.label)
@@ -64,6 +69,6 @@ FigureComponent.Prototype = function() {
 
 };
 
-Component.extend(FigureComponent);
+BlockNodeComponent.extend(FigureComponent);
 
 module.exports = FigureComponent;

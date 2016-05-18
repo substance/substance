@@ -1,5 +1,6 @@
 'use strict';
 
+var warn = require('../util/warn');
 var platform = require('../util/platform');
 var Component = require('./Component');
 var Scrollbar = require('./Scrollbar');
@@ -194,7 +195,7 @@ ScrollPane.Prototype = function() {
       var offset = this.getPanelOffsetForElement(targetNode);
       scrollableEl.setProperty('scrollTop', offset);
     } else {
-      console.warn(componentId, 'not found in scrollable container');
+      warn(componentId, 'not found in scrollable container');
     }
   };
 };

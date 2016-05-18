@@ -14,6 +14,10 @@ function StubSurface(doc, containerId) {
     return this.name;
   };
 
+  this.getId = function() {
+    return this.name;
+  };
+
   this.getDocument = function() {
     return doc;
   };
@@ -44,7 +48,7 @@ function StubSurface(doc, containerId) {
 
   this.emit = function() {};
 
-  this.rerenderDomSelection = function() {};
+  this.rerenderDOMSelection = function() {};
 
   this.transaction = Surface.prototype.transaction;
 

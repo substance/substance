@@ -10,8 +10,7 @@ LinkCommand.Prototype = function() {
 
   this.getAnnotationData = function() {
     return {
-      url: "",
-      title: ""
+      url: ""
     };
   };
 
@@ -19,6 +18,11 @@ LinkCommand.Prototype = function() {
   this.canEdit = function(annos, sel) {
     // jshint unused: false
     return annos.length === 1;
+  };
+
+  this.canDelete = function(annos, sel) {
+    // jshint unused: false
+    return false;
   };
 
 };

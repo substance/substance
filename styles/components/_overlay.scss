@@ -1,0 +1,121 @@
+.sc-overlay {
+  @include border-radius(0.25rem);
+  @include box-shadow();
+
+  z-index: 200;
+  position: absolute;
+  
+  top: 30px;
+  left: 100px;
+}
+
+// @import "link-tool";
+// The top level element just serves as a refernce point
+// Implements the default position strategy: Aligned bottom left
+// 
+// TODO: be smart about the available space and ad-hoc position
+// top aligned or right aligned etc. if that's better suitable
+
+// .sc-annotation-tools {
+//     position: absolute;
+//     z-index: 200;
+
+//     // Just shifts the reference point
+//     .se-tools-wrapper {
+//         position: relative;
+//         // top: 20px; // should be line-height + some extra spacing
+
+//         .se-tools {
+//             display: -webkit-flex;
+//             display: flex;
+//             -webkit-flex-direction: row;
+//             flex-direction: row;
+//             -webkit-align-items: center;
+//             align-items: center;
+//             -webkit-justify-content: center;
+//             justify-content: center;
+
+//             background: #fff;
+//             @include border-radius(0.25rem);
+//             @include box-shadow();
+
+//             border: 1px solid #ddd;
+//             .se-tool {
+//                 -webkit-flex: 1 1 auto;
+//                 flex: 1 1 auto;
+
+
+
+//                 &:first-child {
+//                     button,
+//                     .sc-link-tool__button {
+//                         margin-left: 5px;
+//                     }
+//                 }
+//                 &:last-child {
+//                     button,
+//                     .sc-link-tool__button {
+//                         margin-right: 5px;
+//                     }
+//                 }
+//                 button,
+//                 .sc-link-tool__button {
+//                     padding: 3px 4px;
+//                     margin: 5px 3px;
+//                     @include border-radius(0.25rem);
+//                     max-width: 25px;
+//                     max-height:25px;
+//                     outline: none;
+//                     text-align: center;
+
+//                     &:focus {
+//                         background: rgba(0, 0, 0, 0.1);
+//                     }
+//                 }
+
+//                 // This is so commonly used that we decided
+//                 // to put this into main toolbar styles
+//                 &.expand button::before, &.truncate button::before {
+//                     content: " \f07e";
+//                     font-family: FontAwesome;
+//                     position: absolute;
+//                     top: 3px;
+//                     right: 3px;
+//                     font-size: 7px;
+//                 }
+
+//                 &.edit button::before {
+//                     content: " \f013";
+//                     font-family: FontAwesome;
+//                     position: absolute;
+//                     top: 3px;
+//                     right: 3px;
+//                     font-size: 7px;
+//                 }
+
+//                 &.sm-active button {
+//                     @include dark-fill(0.1);
+//                 }
+
+//                 button:hover {
+//                     @include dark-fill(0.1);
+//                 }
+
+//                 &.sm-disabled {
+//                     opacity: 0.2;
+//                     cursor: default;
+
+//                     button:hover {
+//                         background: none;
+//                     }
+//                 }
+
+//             }
+//         }
+//     }
+// }
+
+// // Set height outside nested elements to enable plugins to easy override
+// .se-tool {
+//     height:35px;
+// }

@@ -26,6 +26,14 @@ function Toolbar() {
 
 Toolbar.Prototype = function() {
 
+  this.didMount = function() {
+    this.context.documentSession.on('didUpdate', this.rerender, this);
+  };
+
+  this.dispose = function() {
+    this.context.documentSession.off(this);
+  };
+
   this.render = function($$) {
     var el = $$("div").addClass("sc-toolbar");
     el.append(this.props.children);

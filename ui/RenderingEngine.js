@@ -1,6 +1,7 @@
 "use strict";
 
 var each = require('lodash/each');
+var assert = require('../util/assert');
 var oo = require('../util/oo');
 var inBrowser = require('../util/inBrowser');
 var VirtualElement = require('./VirtualElement');
@@ -36,20 +37,26 @@ RenderingEngine.Prototype = function() {
   function _create(vel) {
     var Component = require('./Component');
     var comp = vel._comp;
-    console.assert(!comp, "Component instance should not exist when this method is used.");
+    assert(!comp, "Component instance should not exist when this method is used.");
     var parent = vel.parent._comp;
     // making sure the parent components have been instantiated
     if (!parent) {
       parent = _create(vel.parent);
     }
     if (vel._isVirtualComponent) {
-      console.assert(parent, "A Component should have a parent.");
+      assert(parent, "A Component should have a parent.");
       comp = new vel.ComponentClass(parent, vel.props);
       comp.__htmlConfig__ = vel._copyHTMLConfig();
     } else if (vel._isVirtualHTMLElement) {
       comp = new Component.Element(parent, vel);
     } else if (vel._isVirtualTextNode) {
       comp = new Component.TextNode(parent, vel);
+    }
+    if (vel._ref) {
+      comp._ref = vel._ref;
+    }
+    if (vel._owner) {
+      comp._owner = vel._owner._comp;
     }
     vel._comp = comp;
     return comp;
@@ -72,10 +79,14 @@ RenderingEngine.Prototype = function() {
       // as it has already been cleared that a rerender is necessary
       if (forceCapture) {
         needRerender = true;
+        vel.__oldState__ = comp.state;
+        vel.__oldProps__ = comp.props;
       } else {
         // NOTE: don't ask if shouldRerender if no element is there yet
         needRerender = !comp.el || comp.shouldRerender(vel.props);
         comp.__htmlConfig__ = vel._copyHTMLConfig();
+        vel.__oldState__ = comp.state;
+        vel.__oldProps__ = comp.props;
         // updates prop triggering willReceiveProps
         comp._setProps(vel.props);
         if (!vel.__isNew__) {
@@ -151,10 +162,10 @@ RenderingEngine.Prototype = function() {
       return;
     }
     // before changes can be applied, a VirtualElement must have been captured
-    console.assert(vel.__isCaptured__, 'VirtualElement must be captured before rendering');
+    assert(vel.__isCaptured__, 'VirtualElement must be captured before rendering');
 
     var comp = vel._comp;
-    console.assert(comp && comp._isComponent, "A captured VirtualElement must have a component instance attached.");
+    assert(comp && comp._isComponent, "A captured VirtualElement must have a component instance attached.");
 
     // VirtualComponents apply changes to its content element
     if (vel._isVirtualComponent) {
@@ -181,7 +192,7 @@ RenderingEngine.Prototype = function() {
       comp.el.getChildNodes().forEach(function(node) {
         var childComp = node._comp;
         if (!childComp) {
-          console.log('Removing orphaned DOM element.');
+          // console.log('Removing orphaned DOM element.');
           comp.el.removeChild(node);
         } else {
           oldChildren.push(childComp);
@@ -212,7 +223,7 @@ RenderingEngine.Prototype = function() {
         }
 
         newComp = virtualComp._comp;
-        console.assert(newComp, 'Component instance should now be available.');
+        assert(newComp, 'Component instance should now be available.');
         // append remaining new ones if no old one is left
         if (virtualComp && !oldComp) {
           _appendChild(comp, newComp);
@@ -274,7 +285,7 @@ RenderingEngine.Prototype = function() {
         vel._content.children.forEach(_triggerUpdate);
       }
       if (vel.__isUpdated__) {
-        vel._comp.didUpdate();
+        vel._comp.didUpdate(vel.__oldProps__, vel.__oldState__);
       }
     } else if (vel._isVirtualHTMLElement) {
       vel.children.forEach(_triggerUpdate);
@@ -376,7 +387,19 @@ RenderingEngine.Prototype = function() {
       // TODO: can we somehow avoid poluting the component?
       comp.__isMapped__ = true;
       comp = comp.getParent();
-      vc = vc.getParent();
+      if (vc.parent) {
+        vc = vc.parent;
+      }
+      // to be able to support implicit retaining of elements
+      // we need to propagate mapping through the 'preliminary' parent chain
+      // i.e. not taking the real parents as rendered, but the Components into which
+      // we have passed children (via vel.append() or vel.outlet().append())
+      else if (vc._preliminaryParent) {
+        while (comp && comp._isElementComponent) {
+          comp = comp.getParent();
+        }
+        vc = vc._preliminaryParent;
+      }
     }
   }
 
@@ -406,7 +429,7 @@ RenderingEngine.Prototype = function() {
       return;
     }
     var el = comp.el;
-    console.assert(el, "Component's element should exist at this point.");
+    assert(el, "Component's element should exist at this point.");
     var tagName = el.getTagName();
     if (vel.tagName !== tagName) {
       el.setTagName(vel.tagName);
@@ -464,8 +487,8 @@ RenderingEngine.Prototype = function() {
       if (newHash.hasOwnProperty(key)) {
         var oldVal = oldHash[key];
         var newVal = newHash[key];
+        updatedKeys[key] = true;
         if (oldVal !== newVal) {
-          updatedKeys[key] = true;
           update(key, newVal);
         }
       }

@@ -19,6 +19,10 @@ function AnnotatedTextComponent() {
 
 AnnotatedTextComponent.Prototype = function() {
 
+  // TODO: this component should listen on changes to the property
+  // Otherwise will not be updated.
+  // Note that in contrast, TextPropertyComponents get updated by Surface.
+
   /**
     Node render implementation. Use model/Fragmenter for rendering of annotations.
 
