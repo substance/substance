@@ -7,15 +7,15 @@ function Undo() {
 }
 
 Undo.Prototype = function() {
-  this.getCommandState = function() {
-    var docSession = this.getDocumentSession();
+  this.getCommandState = function(context) {
+    var docSession = context.documentSession;
     return {
       disabled: !docSession.canUndo(),
       active: false
     };
   };
-  this.execute = function() {
-    var docSession = this.getDocumentSession();
+  this.execute = function(context) {
+    var docSession = context.documentSession;
     if (docSession.canUndo()) {
       docSession.undo();
       return true;

@@ -1,14 +1,12 @@
 'use strict';
 
 var each = require('lodash/each');
-var extend = require('lodash/extend');
 var error = require('../util/error');
 var info = require('../util/info');
 var inBrowser = require('../util/inBrowser');
 var keys = require('../util/keys');
 var platform = require('../util/platform');
 var warn = require('../util/warn');
-var Registry = require('../util/Registry');
 var copySelection = require('../model/transform/copySelection');
 var deleteSelection = require('../model/transform/deleteSelection');
 var insertText = require('../model/transform/insertText');
@@ -17,6 +15,7 @@ var Component = require('./Component');
 var DefaultDOMElement = require('./DefaultDOMElement');
 var DOMSelection = require('./DOMSelection');
 var UnsupportedNode = require('./UnsupportedNodeComponent');
+var Overlay = require('./Overlay');
 
 /**
    Abstract interface for editing components.
@@ -66,7 +65,6 @@ function Surface() {
   this.undoEnabled = true;
 
   this.textTypes = this.props.textTypes;
-  this.commandRegistry = _createCommandRegistry(this, this.props.commands);
 
   // a registry for TextProperties which allows us to dispatch changes
   this._textProperties = {};
@@ -87,15 +85,6 @@ function Surface() {
   this._deriveProps(this.props);
 }
 
-function _createCommandRegistry(surface, commands) {
-  var commandRegistry = new Registry();
-  each(commands, function(CommandClass) {
-    var commandContext = extend({}, surface.context, surface.getChildContext());
-    var cmd = new CommandClass(commandContext);
-    commandRegistry.add(CommandClass.static.name, cmd);
-  });
-  return commandRegistry;
-}
 
 function _createSurfaceId(surface) {
   var surfaceParent = surface.getSurfaceParent();
@@ -192,9 +181,15 @@ Surface.Prototype = function() {
         this.clipboard.attach(el);
       }
     }
+    
     if (this.props.overlay) {
-      console.log('TODO: display overlay', this.props.overlay);
+      el.append(
+        $$(Overlay, {
+          overlay: this.props.overlay
+        }).ref('overlay')
+      );
     }
+
     return el;
   };
 
@@ -238,27 +233,6 @@ Surface.Prototype = function() {
 
   this.isReadonly = function() {
     return this.props.editing === "readonly";
-  };
-
-  this.getCommand = function(commandName) {
-    return this.commandRegistry.get(commandName);
-  };
-
-  this.executeCommand = function(commandName, args) {
-    var cmd = this.getCommand(commandName);
-    if (!cmd) {
-      warn('command', commandName, 'not registered on controller');
-      return;
-    }
-    // Run command
-    var info = cmd.execute(args);
-    if (info) {
-      this.emit('command:executed', info, commandName, cmd);
-      // TODO: We want to replace this with a more specific, scoped event
-      // but for that we need an improved EventEmitter API
-    } else if (info === undefined) {
-      warn('command ', commandName, 'must return either an info object or true when handled or false when not handled');
-    }
   };
 
   this.getElement = function() {

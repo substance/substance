@@ -10,7 +10,7 @@ var Logger = require ('../util/Logger');
 var DocumentSession = require('../model/DocumentSession');
 var Component = require('./Component');
 var SurfaceManager = require('./SurfaceManager');
-var ToolManager = require('./ToolManager');
+var CommandManager = require('./CommandManager');
 
 // Setup default I18n
 var I18n = require('./i18n');
@@ -118,7 +118,7 @@ Controller.Prototype = function() {
       doc: this.doc,
       componentRegistry: this.componentRegistry,
       surfaceManager: this.surfaceManager,
-      toolManager: this.toolManager,
+      commandManager: this.commandManager,
       i18n: I18n.instance
     };
   };
@@ -158,6 +158,8 @@ Controller.Prototype = function() {
   };
 
   this._initializeController = function(props) {
+    var config = this.getConfig();
+
     // Either takes a DocumentSession compatible object or a doc instance
     if (props.documentSession) {
       this.documentSession = props.documentSession;
@@ -168,13 +170,10 @@ Controller.Prototype = function() {
     } else {
       throw new Error('Controller requires a DocumentSession instance');
     }
-    this.surfaceManager = new SurfaceManager(this.documentSession);
+    this.surfaceManager = new SurfaceManager(this.documentSession);    
+    this.commandManager = new CommandManager(this, config.commands);
 
-    var config = this.getConfig();
-    this._initializeComponentRegistry(config.controller.components);
-    this._initializeCommandRegistry(config.controller.commands);
-
-    this.toolManager = new ToolManager(this);
+    this._initializeComponentRegistry(config.components);
 
     if (config.i18n) {
       I18n.instance.load(config.i18n);
@@ -197,7 +196,7 @@ Controller.Prototype = function() {
   this._disposeController = function() {
     this.doc.off(this);
     this.surfaceManager.dispose();
-    this.toolManager.dispose();
+    this.commandManager.dispose();
     // Note: we need to clear everything, as the childContext
     // changes which is immutable
     this.empty();
@@ -210,11 +209,9 @@ Controller.Prototype = function() {
     } else if (this.constructor.static.config) {
       return this.constructor.static.config;
     } else {
-      return {
-        controller: {
-          components: {},
-          commands: []
-        }
+      return {        
+        components: {},
+        commands: []
       };
     }
   };
@@ -337,18 +334,18 @@ Controller.Prototype = function() {
 
     Used by ToolManager, when there is no focused surface
   */
-  this.getAllSurfaceCommands = function() {
-    var surfaceCommands = {};
-    var config = this.getConfig();
+  // this.getAllSurfaceCommands = function() {
+  //   var surfaceCommands = {};
+  //   var config = this.getConfig();
 
-    each(config.surfaces, function(surfaceConfig) {
-      each(surfaceConfig.commands, function(CommandClass) {
-        var name = CommandClass.static.name;
-        surfaceCommands[name] = name;
-      });
-    });
-    return Object.keys(surfaceCommands);
-  };
+  //   each(config.surfaces, function(surfaceConfig) {
+  //     each(surfaceConfig.commands, function(CommandClass) {
+  //       var name = CommandClass.static.name;
+  //       surfaceCommands[name] = name;
+  //     });
+  //   });
+  //   return Object.keys(surfaceCommands);
+  // };
 
   // For now just delegate to the current surface
   // TODO: Remove. Let's only allow Document.transaction and Surface.transaction to

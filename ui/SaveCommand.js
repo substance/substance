@@ -8,8 +8,8 @@ function SaveCommand() {
 
 SaveCommand.Prototype = function() {
 
-  this.getCommandState = function() {
-    var doc = this.getDocument();
+  this.getCommandState = function(context) {
+    var doc = context.document;
     return {
       disabled: !doc.__dirty,
       active: false
@@ -17,7 +17,8 @@ SaveCommand.Prototype = function() {
   };
 
   this.execute = function() {
-    this.getController().saveDocument();
+    var controller = this.context.controller;
+    controller.saveDocument();
     return {
       status: 'saving-process-started'
     };

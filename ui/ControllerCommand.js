@@ -27,42 +27,15 @@ var Command = require('./Command');
   ```
 */
 var ControllerCommand = function(context) {
-  this.context = context;
-  this.controller = context.controller;
+
 };
 
 ControllerCommand.Prototype = function() {
 
-  /**
-    Get controller instance
-
-    @return {ui/Controller} controller instance
-   */
-  this.getController = function() {
-    return this.controller;
+  this.isControllerCommand = function() {
+    return true;
   };
 
-  /**
-    Get document instance
-
-    @return {data/Document} document instance owned by the controller
-   */
-  this.getDocument = function() {
-    return this.controller.getDocument();
-  };
-
-  this.getDocumentSession = function() {
-    return this.controller.getDocumentSession();
-  };
-
-  /**
-    Execute command
-
-    @return {object} info object with execution details
-   */
-  this.execute = function() {
-    throw new Error('execute must be implemented by custom commands');
-  };
 };
 
 Command.extend(ControllerCommand);
