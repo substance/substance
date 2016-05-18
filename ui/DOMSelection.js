@@ -89,20 +89,23 @@ DOMSelection.Prototype = function() {
     if (sel.isCollapsed()) {
       wRange.setStart(start.container, start.offset);
       wSel.addRange(wRange);
+
+      // If the selection is not visible, scroll the parent to bring it in view
       var el = document.createElement("span");
       el.id = 'curr-pos-span';
       wRange.insertNode(el);
-      var visible = isElementInViewport(el);
-      var offsetParent = $("#curr-pos-span").offsetParent()[0];
-      var scrollAdjustment = 200;
-      if ($('#curr-pos-span')[0].offsetTop < offsetParent.scrollTop){
-        // scrolling up
-        if (!visible) offsetParent.scrollTop = $('#curr-pos-span')[0].offsetTop - scrollAdjustment;
-      } else {
-        // scrolling down
-        if (!visible) offsetParent.scrollTop = $('#curr-pos-span')[0].offsetTop - parseInt($(window).height()) + scrollAdjustment;
+      if(!isElementInViewport(el)){
+        var offsetParent = $("#curr-pos-span").offsetParent()[0];
+        var scrollAdjustment = 200;
+        if ($('#curr-pos-span')[0].offsetTop < offsetParent.scrollTop){
+          // scrolling up
+          offsetParent.scrollTop = $('#curr-pos-span')[0].offsetTop - scrollAdjustment;
+        } else {
+          // scrolling down
+          offsetParent.scrollTop = $('#curr-pos-span')[0].offsetTop - parseInt($(window).height()) + scrollAdjustment;
+        }
       }
-      $('#curr-pos-span').remove();
+      wRange.deleteContents();
     } else {
       if (sel.isReverse()) {
         // console.log('DOMSelection: rendering a reverse selection.');
