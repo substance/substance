@@ -1,0 +1,10 @@
+.sc-overlay {
+  @include border-radius(0.25rem);
+  @include box-shadow();
+
+  z-index: 200;
+  position: absolute;
+  
+  top: 30px;
+  left: 100px;
+}

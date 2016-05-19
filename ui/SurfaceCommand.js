@@ -48,64 +48,12 @@ var Command = require('./Command');
   InsertImageCommand.static.name = 'insertImage';
   ```
 */
-var SurfaceCommand = function(context) {
-  this.context = context;
-  this.surface = context.surface;
+var SurfaceCommand = function() {
 };
 
 SurfaceCommand.Prototype = function() {
-  /**
-    Get Surface instance
-
-    @return {ui/Surface} The surface instance
-  */
-  this.getSurface = function() {
-    return this.surface;
-  };
-
-  /**
-    Get current selection of surface bound to the command
-
-    @return {model/Selection} the current document selection derived from the surface.
-  */
-  this.getSelection = function() {
-    var surface = this.getSurface();
-    return surface.getSelection();
-  };
-
-  /**
-    Get containerId. Only available on container surfaces, e.g. {@link module:ui.surface.ContainerEditor}.
-
-    @return {String} the container id
-   */
-  this.getContainerId = function() {
-    warn('Deprecated: Use Surface API directly');
-    var surface = this.getSurface();
-    if (surface.isContainerEditor()) {
-      return surface.getContainerId();
-    } else {
-      return null;
-    }
-  };
-
-  /**
-    Get the current document
-
-    @return {data/Document} the container id
-  */
-  this.getDocument = function() {
-    var surface = this.getSurface();
-    return surface.getDocument();
-  };
-
-  /**
-    Execute the command. Needs to be implemented by the custom command class.
-
-    @abstract
-    @return {data/Document} The document instance owned by the controller
-  */
-  this.execute = function() {
-    throw new Error('execute must be implemented by custom commands');
+  this.isSurfaceCommand = function() {
+    return true;
   };
 };
 

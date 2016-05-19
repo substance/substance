@@ -1,14 +1,12 @@
 'use strict';
 
 var each = require('lodash/each');
-var extend = require('lodash/extend');
 var error = require('../util/error');
 var info = require('../util/info');
 var inBrowser = require('../util/inBrowser');
 var keys = require('../util/keys');
 var platform = require('../util/platform');
 var warn = require('../util/warn');
-var Registry = require('../util/Registry');
 var copySelection = require('../model/transform/copySelection');
 var deleteSelection = require('../model/transform/deleteSelection');
 var insertText = require('../model/transform/insertText');
@@ -64,8 +62,8 @@ function Surface() {
 
   // set when editing is enabled
   this.undoEnabled = true;
+
   this.textTypes = this.props.textTypes;
-  this.commandRegistry = _createCommandRegistry(this, this.props.commands);
 
   // a registry for TextProperties which allows us to dispatch changes
   this._textProperties = {};
@@ -86,15 +84,6 @@ function Surface() {
   this._deriveProps(this.props);
 }
 
-function _createCommandRegistry(surface, commands) {
-  var commandRegistry = new Registry();
-  each(commands, function(CommandClass) {
-    var commandContext = extend({}, surface.context, surface.getChildContext());
-    var cmd = new CommandClass(commandContext);
-    commandRegistry.add(CommandClass.static.name, cmd);
-  });
-  return commandRegistry;
-}
 
 function _createSurfaceId(surface) {
   var surfaceParent = surface.getSurfaceParent();
@@ -191,6 +180,7 @@ Surface.Prototype = function() {
         this.clipboard.attach(el);
       }
     }
+
     return el;
   };
 
@@ -234,27 +224,6 @@ Surface.Prototype = function() {
 
   this.isReadonly = function() {
     return this.props.editing === "readonly";
-  };
-
-  this.getCommand = function(commandName) {
-    return this.commandRegistry.get(commandName);
-  };
-
-  this.executeCommand = function(commandName, args) {
-    var cmd = this.getCommand(commandName);
-    if (!cmd) {
-      warn('command', commandName, 'not registered on controller');
-      return;
-    }
-    // Run command
-    var info = cmd.execute(args);
-    if (info) {
-      this.emit('command:executed', info, commandName, cmd);
-      // TODO: We want to replace this with a more specific, scoped event
-      // but for that we need an improved EventEmitter API
-    } else if (info === undefined) {
-      warn('command ', commandName, 'must return either an info object or true when handled or false when not handled');
-    }
   };
 
   this.getElement = function() {
@@ -490,6 +459,7 @@ Surface.Prototype = function() {
    * Handle document key down events.
    */
   this.onKeyDown = function(event) {
+    var commandManager = this.context.commandManager;
     if ( event.which === 229 ) {
       // ignore fake IME events (emitted in IE and Chromium)
       return;
@@ -525,25 +495,25 @@ Surface.Prototype = function() {
     // Undo/Redo: cmd+z, cmd+shift+z
     else if (this.undoEnabled && event.keyCode === 90 && (event.metaKey||event.ctrlKey)) {
       if (event.shiftKey) {
-        this.getController().executeCommand('redo');
+        commandManager.executeCommand('redo');
       } else {
-        this.getController().executeCommand('undo');
+        commandManager.executeCommand('undo');
       }
       handled = true;
     }
     // Toggle strong: cmd+b ctrl+b
     else if (event.keyCode === 66 && (event.metaKey||event.ctrlKey)) {
-      this.executeCommand('strong');
+      commandManager.executeCommand('strong');
       handled = true;
     }
     // Toggle emphasis: cmd+i ctrl+i
     else if (event.keyCode === 73 && (event.metaKey||event.ctrlKey)) {
-      this.executeCommand('emphasis');
+      commandManager.executeCommand('emphasis');
       handled = true;
     }
-    // Toggle link: cmd+l ctrl+l
-    else if (event.keyCode === 76 && (event.metaKey||event.ctrlKey)) {
-      this.executeCommand('link');
+    // Toggle link: cmd+k ctrl+k
+    else if (event.keyCode === 75 && (event.metaKey||event.ctrlKey)) {
+      commandManager.executeCommand('link');
       handled = true;
     }
 

@@ -31,8 +31,7 @@ var deleteAnnotation = require('../model/transform/deleteAnnotation');
   SmallCapsCommand.static.name = 'smallcaps';
   SmallCapsCommand.static.annotationType = 'smallcaps';
   ```
- */
-
+*/
 var AnnotationCommand = function(surface) {
   SurfaceCommand.call(this, surface);
 };
@@ -69,18 +68,12 @@ AnnotationCommand.Prototype = function() {
 
     @returns {Boolean} Whether or not command could be executed.
    */
-  this.isDisabled = function(annos, sel) {
-    // var surface = this.getSurface();
-    // if ((!surface.isEnabled()) || sel.isNull()) {
-    //   return true;
-    // }
-
+  this.isDisabled = function(context, annos, sel) {
     if (sel.isNull()) {
       return true;
     }
-
+    var doc = context.document;
     var annotationType = this.getAnnotationType();
-    var doc = this.getDocument();
     return !helpers.isContainerAnnotation(doc, annotationType) && !sel.isPropertySelection();
   };
 
@@ -174,10 +167,10 @@ AnnotationCommand.Prototype = function() {
 
     @returns {Array} annos Annotations.
    */
-  this.getAnnotationsForSelection = function() {
-    var sel = this.getSelection();
-    var doc = this.getDocument();
-    var surface = this.getSurface();
+  this.getAnnotationsForSelection = function(context) {
+    var sel = context.documentSession.getSelection();
+    var doc = context.document;
+    var surface = context.surface;
     var annotationType = this.getAnnotationType();
     var containerId;
     if (surface.isContainerEditor()) {
@@ -193,24 +186,24 @@ AnnotationCommand.Prototype = function() {
     @returns {Object} info object with execution details.
    */
   // Execute command and trigger transformations
-  this.execute = function() {
-    var annos = this.getAnnotationsForSelection();
-    var sel = this.getSelection();
+  this.execute = function(context) {
+    var annos = this.getAnnotationsForSelection(context);
+    var sel = context.documentSession.getSelection();
 
-    if (this.isDisabled(annos, sel)) {
+    if (this.isDisabled(context, annos, sel)) {
       return false;
     } else if (this.canCreate(annos, sel)) {
-      return this.executeCreate();
+      return this.executeCreate(context);
     } else if (this.canFuse(annos, sel)) {
-      return this.executeFuse();
+      return this.executeFuse(context);
     } else if (this.canTruncate(annos, sel)) {
-      return this.executeTruncate();
+      return this.executeTruncate(context);
     } else if (this.canExpand(annos, sel)) {
-      return this.executeExpand();
+      return this.executeExpand(context);
     } else if (this.canEdit(annos, sel)) {
-      return this.executeEdit(annos, sel);
+      return this.executeEdit(context, annos, sel);
     } else if (this.canDelete(annos, sel)) {
-      return this.executeDelete();
+      return this.executeDelete(context);
     } else {
       // console.warn('ToggleAnnotation.execute: Case not handled.');
       return false;
@@ -222,9 +215,19 @@ AnnotationCommand.Prototype = function() {
 
     @returns {Object} info object with command details.
    */
-  this.getCommandState = function() {
-    var sel = this.getSelection();
-    var annos = this.getAnnotationsForSelection();
+  this.getCommandState = function(context) {
+    var sel = context.documentSession.getSelection();
+    var surface = context.surface;
+
+    if (!surface) {
+      return {
+        disabled: true,
+        active: false
+      };
+    }
+
+    // TODO: provide annos precomputed by documentSession
+    var annos = this.getAnnotationsForSelection(context);
 
     var newState = {
       disabled: false,
@@ -235,7 +238,7 @@ AnnotationCommand.Prototype = function() {
     // We can skip all checking if a disabled condition is met
     // E.g. we don't allow toggling of property annotations when current
     // selection is a container selection
-    if (this.isDisabled(annos, sel)) {
+    if (this.isDisabled(context, annos, sel)) {
       newState.disabled = true;
     } else if (this.canCreate(annos, sel)) {
       newState.mode = "create";
@@ -248,7 +251,7 @@ AnnotationCommand.Prototype = function() {
       newState.mode = "expand";
     } else if (this.canEdit(annos, sel)) {
       newState.mode = "edit";
-      newState.annotationId = annos[0].id;
+      newState.node = annos[0];
       newState.active = true;
     } else if (this.canDelete(annos, sel)) {
       newState.active = true;
@@ -265,9 +268,9 @@ AnnotationCommand.Prototype = function() {
     @returns {Object} transformed annotations.
    */
   // Helper to trigger an annotation transformation
-  this.applyTransform = function(transformFn) {
-    var surface = this.getSurface();
-    var sel = this.getSelection();
+  this.applyTransform = function(context, transformFn) {
+    var surface = context.surface;
+    var sel = context.documentSession.getSelection();
 
     var result; // to store transform result
     if (sel.isNull()) return;
@@ -298,8 +301,8 @@ AnnotationCommand.Prototype = function() {
     return result;
   };
 
-  this.executeEdit = function() {
-    var annos = this.getAnnotationsForSelection();
+  this.executeEdit = function(context) {
+    var annos = this.getAnnotationsForSelection(context);
     return {
       mode: "edit",
       anno: annos[0],
@@ -307,40 +310,40 @@ AnnotationCommand.Prototype = function() {
     };
   };
 
-  this.executeCreate = function() {
-    var anno = this.applyTransform(createAnnotation);
+  this.executeCreate = function(context) {
+    var anno = this.applyTransform(context, createAnnotation);
     return {
       mode: 'create',
       anno: anno
     };
   };
 
-  this.executeFuse = function() {
-    var anno = this.applyTransform(fuseAnnotation);
+  this.executeFuse = function(context) {
+    var anno = this.applyTransform(context, fuseAnnotation);
     return {
       mode: 'fuse',
       anno: anno
     };
   };
 
-  this.executeTruncate = function() {
-    var anno = this.applyTransform(truncateAnnotation);
+  this.executeTruncate = function(context) {
+    var anno = this.applyTransform(context, truncateAnnotation);
     return {
       mode: 'truncate',
       anno: anno
     };
   };
 
-  this.executeExpand = function() {
-    var anno = this.applyTransform(expandAnnotation);
+  this.executeExpand = function(context) {
+    var anno = this.applyTransform(context, expandAnnotation);
     return {
       mode: 'expand',
       anno: anno
     };
   };
 
-  this.executeDelete = function() {
-    var annoId = this.applyTransform(deleteAnnotation);
+  this.executeDelete = function(context) {
+    var annoId = this.applyTransform(context, deleteAnnotation);
     return {
       mode: 'delete',
       annoId: annoId
