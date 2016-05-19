@@ -1,3 +1,5 @@
+"use strict";
+
 var AnnotationComponent = require('../../ui/AnnotationComponent');
 
 
@@ -23,14 +25,15 @@ AnnotationComponent.extend(LinkComponent, function LinkComponentPrototype() {
   this.didMount = function() {
     AnnotationComponent.prototype.didMount.call(this);
     var node = this.props.node;
-    this.doc = node.getDocument();
-    this.doc.getEventProxy('path').connect(this, [node.id, 'title'], this.rerender);
-    this.doc.getEventProxy('path').connect(this, [node.id, 'url'], this.rerender);
+    node.connect(this, {'title:changed': this.rerender});
+    node.connect(this, {'url:changed': this.rerender});
   };
 
   this.dispose = function() {
     AnnotationComponent.prototype.dispose.call(this);
-    this.doc.getEventProxy('path').disconnect(this);
+    var doc = this.props.node.getDocument();
+    doc.getEventProxy('path').disconnect(this.props.node);
+    this.props.node.disconnect(this);
   };
 });
 
