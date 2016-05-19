@@ -10,7 +10,7 @@ var Logger = require ('../util/Logger');
 var DocumentSession = require('../model/DocumentSession');
 var Component = require('./Component');
 var SurfaceManager = require('./SurfaceManager');
-var ToolManager = require('./ToolManager');
+var CommandManager = require('./CommandManager');
 
 // Setup default I18n
 var I18n = require('./i18n');
@@ -118,7 +118,7 @@ Controller.Prototype = function() {
       doc: this.doc,
       componentRegistry: this.componentRegistry,
       surfaceManager: this.surfaceManager,
-      toolManager: this.toolManager,
+      commandManager: this.commandManager,
       i18n: I18n.instance
     };
   };
@@ -158,6 +158,8 @@ Controller.Prototype = function() {
   };
 
   this._initializeController = function(props) {
+    var config = this.getConfig();
+
     // Either takes a DocumentSession compatible object or a doc instance
     if (props.documentSession) {
       this.documentSession = props.documentSession;
@@ -168,12 +170,11 @@ Controller.Prototype = function() {
     } else {
       throw new Error('Controller requires a DocumentSession instance');
     }
-    this.surfaceManager = new SurfaceManager(this.documentSession);
-    this.toolManager = new ToolManager(this);
+    this.surfaceManager = new SurfaceManager(this.documentSession);    
+    this.commandManager = new CommandManager(this, config.commands);
 
-    var config = this.getConfig();
-    this._initializeComponentRegistry(config.controller.components);
-    this._initializeCommandRegistry(config.controller.commands);
+    this._initializeComponentRegistry(config.components);
+
     if (config.i18n) {
       I18n.instance.load(config.i18n);
     }
@@ -195,7 +196,7 @@ Controller.Prototype = function() {
   this._disposeController = function() {
     this.doc.off(this);
     this.surfaceManager.dispose();
-    this.toolManager.dispose();
+    this.commandManager.dispose();
     // Note: we need to clear everything, as the childContext
     // changes which is immutable
     this.empty();
@@ -208,11 +209,9 @@ Controller.Prototype = function() {
     } else if (this.constructor.static.config) {
       return this.constructor.static.config;
     } else {
-      return {
-        controller: {
-          components: {},
-          commands: []
-        }
+      return {        
+        components: {},
+        commands: []
       };
     }
   };
@@ -225,16 +224,6 @@ Controller.Prototype = function() {
     this.componentRegistry = componentRegistry;
   };
 
-  this._initializeCommandRegistry = function(commands) {
-    var commandRegistry = new Registry();
-    each(commands, function(CommandClass) {
-      var commandContext = extend({}, this.context, this.getChildContext());
-      var cmd = new CommandClass(commandContext);
-      commandRegistry.add(CommandClass.static.name, cmd);
-    }.bind(this));
-    this.commandRegistry = commandRegistry;
-  };
-
   this.willUpdateState = function(newState) {
     this.handleStateUpdate(newState);
   };
@@ -242,43 +231,6 @@ Controller.Prototype = function() {
   this.handleStateUpdate = function(newState) {
     /* jshint unused: false */
     // no-op, should be overridden by custom writer
-  };
-
-  /**
-    Get registered controller command by name
-
-    @param {String} commandName the command name
-    @return {ui/ControllerCommand} A controller command
-  */
-  this.getCommand = function(commandName) {
-    return this.commandRegistry.get(commandName);
-  };
-
-  /**
-    Execute command with given name if registered. In most cases this triggers a document transformation and
-    corresponding UI updates. For instance when pressing `ctrl+b` the
-    `toggleStrong` command is executed. Each implemented command returns a custom
-    info object, describing the action that has been performed.
-    After execution a `command:executed` event is emitted on the controller.
-
-    @param {String} commandName the command name
-    @return {ui/ControllerCommand} A controller command
-  */
-  this.executeCommand = function(commandName) {
-    var cmd = this.getCommand(commandName);
-    if (!cmd) {
-      warn('command', commandName, 'not registered on controller');
-      return;
-    }
-    // Run command
-    var info = cmd.execute();
-    if (info) {
-      this.emit('command:executed', info, commandName, cmd);
-      /* TODO: We want to replace this with a more specific, scoped event
-        but for that we need an improved EventEmitter API */
-    } else if (info === undefined) {
-      warn('command ', commandName, 'must return either an info object or true when handled or false when not handled');
-    }
   };
 
   this.getLogger = function() {
@@ -330,24 +282,6 @@ Controller.Prototype = function() {
     }
   };
 
-  /**
-    Retrieve the names of all available surface commands
-
-    Used by ToolManager, when there is no focused surface
-  */
-  this.getAllSurfaceCommands = function() {
-    var surfaceCommands = {};
-    var config = this.getConfig();
-
-    each(config.surfaces, function(surfaceConfig) {
-      each(surfaceConfig.commands, function(CommandClass) {
-        var name = CommandClass.static.name;
-        surfaceCommands[name] = name;
-      });
-    });
-    return Object.keys(surfaceCommands);
-  };
-
   // For now just delegate to the current surface
   // TODO: Remove. Let's only allow Document.transaction and Surface.transaction to
   // avoid confusion
@@ -363,13 +297,14 @@ Controller.Prototype = function() {
     // console.log('####', e.keyCode, e.metaKey, e.ctrlKey, e.shiftKey);
     var handled = false;
 
+    // esc key
     if (e.keyCode === 27) {
       this.setState(this.getInitialState());
       handled = true;
     }
     // Save: cmd+s
     else if (e.keyCode === 83 && (e.metaKey||e.ctrlKey)) {
-      this.executeCommand('save');
+      this.commandManager.executeCommand('save');
       handled = true;
     }
 
@@ -445,10 +380,10 @@ Controller.Prototype = function() {
     logger.info('Unsaved changes');
   };
 
+  // TODO: Do we still need that hook?
   this.onCommandExecuted = function(info, commandName, cmd) {
     /* jshint unused: false */
   };
-
 };
 
 

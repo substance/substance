@@ -84,7 +84,7 @@ SwitchTextTypeTool.Prototype = function() {
   };
 
   this.executeCommand = function(textType) {
-    this.getSurface().executeCommand('switch-text-type', textType);
+    this.context.commandManager.executeCommand('switch-text-type', textType);
   };
 
   this.getTextCommands = function() {
@@ -144,7 +144,6 @@ SwitchTextTypeTool.Prototype = function() {
 
   this._nav = function(step) {
     this._navIdx += step;
-
     this._navIdx = Math.max(0, this._navIdx);
     this._navIdx = Math.min(this._getOptionsCount()-1, this._navIdx);
 

@@ -15,20 +15,57 @@ var capitalize = require('lodash/capitalize');
   @class
   @component
 */
-
 function Tool() {
   Tool.super.apply(this, arguments);
 }
 
 Tool.Prototype = function() {
 
+  // TODO: We should consider not exposing a broad interface
+  // here. Rather tools should use this.context
 
-  this.didMount = function() {
-    this.context.toolManager.registerTool(this);
+  /**
+    Return the currently controller
+
+    @return {ui/Surface}
+  */
+  this.getController = function() {
+    console.warn('use this.context.controller');
+    return this.context.controller;
   };
 
-  this.dispose = function() {
-    this.context.toolManager.unregisterTool(this);
+  /**
+    Return the currently focused surface
+
+    @return {ui/Surface}
+  */
+  this.getSurface = function() {
+    console.warn('use this.context.surface');
+    return this.getController().getFocusedSurface();
+  };
+
+  /**
+    Return the document associated with the focused surface.
+
+    @return {model/Document}
+  */
+  this.getDocument = function() {
+    console.warn('use this.context.document');
+    return this.getController().getDocument();
+  };
+
+  /**
+    Return the currently active container
+
+    @return {Document.Container}
+    @public
+  */
+  this.getContainer = function() {
+    console.warn('use this.context.surface.getContainer()');
+    var surface = this.getSurface();
+    if (surface) {
+      return surface.getContainer();
+    }
   };
 
   /**
@@ -59,7 +96,6 @@ Tool.Prototype = function() {
 
     // button
     el.append(this.renderButton($$));
-
     return el;
   };
 
@@ -88,13 +124,6 @@ Tool.Prototype = function() {
   };
 
   /**
-    Get controller context
-  */
-  this.getController = function() {
-    return this.context.controller;
-  };
-
-  /**
     Get tool registration name
   */
   this.getName = function() {
@@ -112,6 +141,13 @@ Tool.Prototype = function() {
       return;
     }
     this.performAction();
+  };
+
+  /**
+    Executes the associated command
+  */
+  this.performAction = function() {
+    this.context.commandManager.executeCommand(this.getCommandName());
   };
 
 };
