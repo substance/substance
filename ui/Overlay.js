@@ -15,20 +15,11 @@ function Overlay() {
 }
 
 Overlay.Prototype = function() {
-  this.didMount = function() {
-    this.context.documentSession.on('didUpdate', this.rerender, this);
-  };
-
-  this.dispose = function() {
-    this.context.documentSession.off(this);
-  };
 
   this.render = function($$) {
     var el = $$('div').addClass('sc-overlay sm-hidden');
-
     var commandStates = this.context.commandManager.getCommandStates();
     var ComponentClass = this.props.overlay;
-
     el.append($$(ComponentClass, {
       commandStates: commandStates
     }).ref('overlayContent'));
@@ -36,7 +27,12 @@ Overlay.Prototype = function() {
   };
 
   this.didMount = function() {
+    this.context.documentSession.on('didUpdate', this.rerender, this);
     this._update();
+  };
+
+  this.dispose = function() {
+    this.context.documentSession.off(this);
   };
 
   this.didUpdate = function() {
@@ -47,7 +43,7 @@ Overlay.Prototype = function() {
   this._update = function() {
     var content = this.refs.overlayContent;
 
-    if (content.children.length > 0) {
+    if (content.childNodes.length > 0) {
       // Position based on rendering hints
       this._position();
       this.el.removeClass('sm-hidden');
@@ -56,18 +52,26 @@ Overlay.Prototype = function() {
 
   this._position = function() {
     var hints = this.props.hints;
+    var overlayContent = this.refs.overlayContent;
+    window.overlayContent = overlayContent;
+
     if (hints) {
-      // TODO: do smarter layouting
-      var toolContainerWidth,
-        toolContainerHeight = 0,
-        toolContainerEl = this.refs.seTools.$el;
-      if(this.refs.seTools.$el.width()) {
-        toolContainerWidth = toolContainerEl.width()/2;
-        toolContainerHeight = toolContainerEl.height();
-      }
-      var selectionWidth = hints.rectangle.right-hints.rectangle.left;
-      this.$el.css('top', hints.rectangle.top - toolContainerHeight-10);
-      this.$el.css('left', (hints.rectangle.left-toolContainerWidth)+(selectionWidth/2));
+      var contentWidth = this.el.htmlProp('offsetWidth');
+
+      // var contentHeight = overlayContent.htmlProp('clientHeight');
+      var selectionWidth = hints.rectangle.width;
+      var selectionHeight = hints.rectangle.height;
+      var containerWidth = hints.rectangle.left + hints.rectangle.width + hints.rectangle.right;
+      
+      this.el.css('top', hints.rectangle.top + selectionHeight);
+      var leftPos = hints.rectangle.left - contentWidth/2 + selectionWidth/2;
+
+      // Must not exceed left bound
+      leftPos = Math.max(leftPos, 0);
+
+      // Must not exceed right bound
+      leftPos = Math.min(leftPos, containerWidth - contentWidth);
+      this.el.css('left', leftPos);
     }
   };
 };

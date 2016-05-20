@@ -4,6 +4,8 @@ var warn = require('../util/warn');
 var platform = require('../util/platform');
 var Component = require('./Component');
 var Scrollbar = require('./Scrollbar');
+var Overlay = require('./Overlay');
+var getBoundingClientRect = require('../util/getBoundingClientRect');
 
 /**
   Wraps content in a scroll pane.
@@ -34,6 +36,15 @@ function ScrollPane() {
 
 ScrollPane.Prototype = function() {
 
+  /*
+    Expose scrollPane as a child context
+  */
+  this.getChildContext = function() {
+    return {
+      scrollPane: this
+    };
+  };
+
   this.didMount = function() {
     if (this.props.highlights) {
       this.props.highlights.on('highlights:updated', this.onHighlightsUpdated, this);
@@ -42,6 +53,14 @@ ScrollPane.Prototype = function() {
     if (this.refs.scrollbar) {
       this.context.doc.on('document:changed', this.onDocumentChange, this, { priority: -1 });
     }
+
+    this.context.documentSession.on('didUpdate', this._updateOverlay, this, {
+      priority: -1
+    });
+
+    this.handleActions({
+      'updateOverlayHints': this._updateOverlayHints
+    });
   };
 
   this.dispose = function() {
@@ -51,20 +70,10 @@ ScrollPane.Prototype = function() {
     this.context.doc.off(this);
   };
 
-  // HACK: Scrollbar should use DOMMutationObserver instead
-  this.onDocumentChange = function() {
-      this.refs.scrollbar.updatePositions();
-  };
-
-  this.onHighlightsUpdated = function(highlights) {
-    this.refs.scrollbar.extendProps({
-      highlights: highlights
-    });
-  };
-
   this.render = function($$) {
     var el = $$('div')
       .addClass('sc-scroll-pane');
+    var overlay;
 
     if (platform.isFF) {
       el.addClass('sm-firefox');
@@ -90,14 +99,47 @@ ScrollPane.Prototype = function() {
       );
     }
 
+    if (this.props.overlay) {
+      overlay = $$(Overlay, {
+        overlay: this.props.overlay
+      }).ref('overlay');
+    }
+
     el.append(
       $$('div').ref('scrollable').addClass('se-scrollable').append(
-        $$('div').ref('content').addClass('se-content').append(
-          this.props.children
-        )
+        $$('div').ref('content').addClass('se-content')
+          .append(overlay)
+          .append(
+            this.props.children
+          )
       ).on('scroll', this.onScroll)
     );
     return el;
+  };
+
+  this._updateOverlayHints = function(overlayHints) {
+    // Remember overlay hints for next update
+    this._overlayHints = overlayHints;
+  };
+
+  this._updateOverlay = function() {
+    var overlay = this.refs.overlay;
+    if (overlay) {
+      overlay.extendProps({
+        hints: this._overlayHints
+      });
+    }
+  };
+
+  // HACK: Scrollbar should use DOMMutationObserver instead
+  this.onDocumentChange = function() {
+      this.refs.scrollbar.updatePositions();
+  };
+
+  this.onHighlightsUpdated = function(highlights) {
+    this.refs.scrollbar.extendProps({
+      highlights: highlights
+    });
   };
 
   this.onScroll = function() {
@@ -161,26 +203,9 @@ ScrollPane.Prototype = function() {
     @param {DOMNode} el DOM node that lives inside the
   */
   this.getPanelOffsetForElement = function(el) {
-    // initial offset
-    var offset = el.getPosition().top;
-
-    // Now look at the parents
-    function addParentOffset(el) {
-      var parentEl = el.parentNode;
-
-      // Reached the content wrapper element or the parent el. We are done.
-      if (el.hasClass('se-content') || !parentEl) return;
-
-      // Found positioned element (calculate offset!)
-      var position = el.getStyle('position');
-      if (position === 'absolute' || position === 'relative') {
-        offset += el.getPosition().top;
-      }
-      addParentOffset(parentEl);
-    }
-
-    addParentOffset(el.parentNode);
-    return offset;
+    var contentContainerEl = this.refs.content.el.el;
+    var rect = getBoundingClientRect(el, contentContainerEl);
+    return rect.top;
   };
 
   /**

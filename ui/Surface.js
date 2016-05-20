@@ -4,6 +4,7 @@ var each = require('lodash/each');
 var error = require('../util/error');
 var info = require('../util/info');
 var inBrowser = require('../util/inBrowser');
+var getBoundingClientRect = require('../util/getBoundingClientRect');
 var keys = require('../util/keys');
 var platform = require('../util/platform');
 var warn = require('../util/warn');
@@ -39,7 +40,7 @@ function Surface() {
   }
   if (this.name.indexOf('/') > -1) {
     // because we are using '/' to deal with nested surfaces (isolated nodes)
-    throw new Error("Surance.name must not contain '/'");
+    throw new Error("Surface.name must not contain '/'");
   }
   // this path is an identifier unique for this surface
   // considering nesting in IsolatedNodes
@@ -62,7 +63,6 @@ function Surface() {
 
   // set when editing is enabled
   this.undoEnabled = true;
-
   this.textTypes = this.props.textTypes;
 
   // a registry for TextProperties which allows us to dispatch changes
@@ -80,7 +80,6 @@ function Surface() {
     // we want to show the cursor fragment only when blurred, so we keep it separated from the other fragments
     cursorFragment: null,
   };
-
   this._deriveProps(this.props);
 }
 
@@ -118,7 +117,10 @@ Surface.Prototype = function() {
       // Document Change Events
       this.domObserver.observe(this.el.getNativeElement(), this.domObserverConfig);
     }
+
+    this.documentSession.on('didUpdate', this._sendOverlayHints, this);
   };
+
 
   this.dispose = function() {
     _super.dispose.call(this);
@@ -132,13 +134,11 @@ Surface.Prototype = function() {
 
   this.willReceiveProps = function(nextProps) {
     _super.willReceiveProps.apply(this, arguments);
-
     this._deriveProps(nextProps);
   };
 
   this.didUpdate = function() {
     _super.didUpdate.call(this);
-
     this._update();
   };
 
@@ -180,7 +180,6 @@ Surface.Prototype = function() {
         this.clipboard.attach(el);
       }
     }
-
     return el;
   };
 
@@ -249,7 +248,6 @@ Surface.Prototype = function() {
   this.isContainerEditor = function() {
     return false;
   };
-
 
   /**
     Run a transformation as a transaction properly configured for this surface.
@@ -889,77 +887,9 @@ Surface.Prototype = function() {
     this.setSelection(doc.createSelection(path, 0, text.length));
   };
 
-  // EXPERIMENTAL: get bounding box for current selection
-  this.getBoundingRectangleForSelection = function() {
-    var wsel = window.getSelection();
-    // having a DOM selection?
-    if (wsel.rangeCount > 0) {
-      var wrange = wsel.getRangeAt(0);
-      // unfortunately, collapsed selections to not have a boundary rectangle
-      // thus we need to insert a span temporarily and take its rectangle
-      if (wrange.collapsed) {
-        var span = document.createElement('span');
-        // Ensure span has dimensions and position by
-        // adding a zero-width space character
-        this.skipNextObservation = true;
-        span.appendChild(DefaultDOMElement.createTextNode("\u200b"));
-        wrange.insertNode(span);
-        var rect = span.getBoundingClientRect();
-        var spanParent = span.parentNode;
-        spanParent.removeChild(span);
-        // Glue any broken text nodes back together
-        spanParent.normalize();
-        return rect;
-      } else {
-        return wrange.getBoundingClientRect();
-      }
-    } else {
-      var sel = this.getSelection();
-      if (sel.isNull()) {
-        return {};
-      } else {
-        var nativeEl = this.el.getNativeElement();
-        if (sel.isCollapsed()) {
-          var cursorEl = nativeEl.querySelector('.se-cursor');
-          if (cursorEl) {
-            return cursorEl.getBoundingClientRect();
-          } else {
-            error('FIXME: there should be a rendered cursor element.');
-            return {};
-          }
-        } else {
-          var selFragments = nativeEl.querySelectorAll('.se-selection-fragment');
-          if (selFragments.length > 0) {
-            var bottom = 0;
-            var top = 0;
-            var right = 0;
-            var left = 0;
-            selFragments.forEach(function(el) {
-              var rect = el.getBoundingClientRect();
-              bottom = Math.max(rect.bottom, bottom);
-              top = Math.min(rect.top, top);
-              left = Math.min(rect.left, left);
-              right = Math.max(rect.right, right);
-            });
-            var height = bottom - top;
-            var width = right -left;
-            return {
-              top: top, bottom: bottom,
-              left: left, right: right,
-              width: width, height: height
-            };
-          } else {
-            error('FIXME: there should be a rendered selection fragments element.');
-          }
-        }
-      }
-    }
-  };
-
   // internal API for TextProperties to enable dispatching
   // TextProperty components are registered via path
   // Annotations are just registered via path for lookup, not as instances
-
   this._registerTextProperty = function(textPropertyComponent) {
     var path = textPropertyComponent.getPath();
     this._textProperties[path] = textPropertyComponent;
@@ -1004,6 +934,70 @@ Surface.Prototype = function() {
   */
   this._prepareArgs = function(args) {
     /* jshint unused: false */
+  };
+
+  // EXPERIMENTAL: get bounding box for current selection
+  this.getBoundingRectangleForSelection = function() {
+    // TODO: selection rectangle should be calculated
+    // relative to scrolling container, which either is 
+    // the parent scrollPane, or the body element
+    var containerEl = this.context.scrollPane.refs.content.el.el || document.body;
+
+    var wsel = window.getSelection();
+    var wrange;
+    if (wsel.rangeCount > 0) {
+      wrange = wsel.getRangeAt(0);
+    }
+
+    // having a DOM selection?
+    if (wrange && wrange.collapsed) {
+      // unfortunately, collapsed selections to not have a boundary rectangle
+      // thus we need to insert a span temporarily and take its rectangle
+      // if (wrange.collapsed) {
+      var span = document.createElement('span');
+      // Ensure span has dimensions and position by
+      // adding a zero-width space character
+      this.skipNextObservation = true;
+      span.appendChild(window.document.createTextNode("\u200b"));
+      wrange.insertNode(span);
+      var rect = getBoundingClientRect(span, containerEl);
+      var spanParent = span.parentNode;
+      spanParent.removeChild(span);
+      // Glue any broken text nodes back together
+      spanParent.normalize();
+      return rect;
+    } else {
+      var sel = this.getSelection();
+      if (sel.isNull()) {
+        return {};
+      } else {
+        if (sel.isCollapsed()) {
+          var cursorEl = this.el.querySelector('.se-cursor');
+          if (cursorEl) {
+            return getBoundingClientRect(cursorEl, containerEl);
+          } else {
+            console.log('FIXME: there should be a rendered cursor element.');
+            return {};
+          }
+        } else {
+          var nativeEl = this.el.el;
+          var selFragments = nativeEl.querySelectorAll('.se-selection-fragment');
+          if (selFragments.length > 0) {
+            return getBoundingClientRect(selFragments, containerEl);
+          } else {
+            console.log('FIXME: there should be a rendered selection fragments element.');
+            return {};
+          }
+        }
+      }
+    }
+  };
+
+  this._sendOverlayHints = function() {
+    var selectionRect = this.getBoundingRectangleForSelection();
+    this.send('updateOverlayHints', {
+      rectangle: selectionRect
+    });
   };
 
 };
