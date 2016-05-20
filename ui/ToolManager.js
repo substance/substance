@@ -3,7 +3,7 @@
 var oo = require('../util/oo');
 var without = require('lodash/without');
 
-var DEFAULT_TOOLSTATE = {
+var DISABLED_TOOLSTATE = {
   disabled: true,
   active: false
 };
@@ -20,9 +20,13 @@ function ToolManager(controller) {
 
   this.controller = controller;
   this.tools = [];
+  this._components = [];
+
+  // Compute the initial toolstate
+  this.toolState = this.getToolState();
 
   var docSession = this.controller.getDocumentSession();
-  docSession.on('selection:changed', this.updateTools, this);
+  docSession.on('didUpdate', this.updateTools, this);
   this.controller.on('document:saved', this.updateTools, this);
 }
 
@@ -34,14 +38,18 @@ ToolManager.Prototype = function() {
     this.controller.off(this);
   };
 
-  this.getCommandState = function(tool) {
-    var cmd = this.getCommand(tool);
+  /*
+    Called by components to register for tool state updates
+  */
+  this.registerComponent = function(comp) {
+    this._components.push(comp);
+  };
 
-    if (cmd) {
-      return cmd.getCommandState();
-    } else {
-      return DEFAULT_TOOLSTATE;
-    }
+  /*
+    Unregister component
+  */
+  this.unregisterComponent = function(comp) {
+    this._components = without(this._components, comp);
   };
 
   this.registerTool = function(tool) {
@@ -52,24 +60,42 @@ ToolManager.Prototype = function() {
     this.tools = without(this.tools, tool);
   };
 
-  // Get command for a certain tool
-  this.getCommand = function(tool) {
-    var commandName = tool.getCommandName();
+  /*
+    Derive tool state from all commands available in the
+    current (selection) context
+  */
+  this.getToolState = function() {
+    var toolState = {};
 
-    if (tool._isSurfaceTool) {
-      var surface = this.controller.getFocusedSurface();
-      return surface ? surface.getCommand(commandName) : false;
-    } else if (tool._isControllerTool) {
-      return this.controller.getCommand(commandName);
+    // Iterate surface commands
+    var surface = this.controller.getFocusedSurface();
+    if (surface) {
+      surface.commandRegistry.each(function(cmd) {
+        toolState[cmd.getName()] = cmd.getCommandState();
+      });
+    } else {
+      // Provide disabled defaults for all configured Surface commands
+      var surfaceCommands = this.controller.getAllSurfaceCommands();
+      surfaceCommands.forEach(function(commandName) {
+        toolState[commandName] = DISABLED_TOOLSTATE;
+      });
     }
+    // Iterate controller commands
+    this.controller.commandRegistry.each(function(cmd) {
+      toolState[cmd.getName()] = cmd.getCommandState();
+    });
+
+    return toolState;
   };
 
   // Just updates all tool states
   this.updateTools = function() {
-    // console.log('Updating tools');
-    this.tools.forEach(function(tool) {
-      var state = this.getCommandState(tool);
-      tool.setState(state);
+    this.toolState = this.getToolState();
+
+    this._components.forEach(function(comp) {
+      comp.setProps({
+        toolState: this.toolState
+      });
     }.bind(this));
   };
 };

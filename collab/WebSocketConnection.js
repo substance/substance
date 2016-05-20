@@ -11,8 +11,6 @@ function WebSocketConnection() {
 
 WebSocketConnection.Prototype = function() {
 
-  var _super = WebSocketConnection.super.prototype;
-
   this._createWebSocket = function() {
     return new window.WebSocket(this.config.wsUrl);
   };

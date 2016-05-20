@@ -4,12 +4,13 @@ var isArray = require('lodash/isArray');
 var each = require('lodash/each');
 var extend = require('lodash/extend');
 var mergeWith = require('lodash/mergeWith');
-var Component = require('./Component');
-var ToolManager = require('./ToolManager');
+var warn = require('../util/warn');
 var Registry = require('../util/Registry');
 var Logger = require ('../util/Logger');
-var Selection = require('../model/Selection');
 var DocumentSession = require('../model/DocumentSession');
+var Component = require('./Component');
+var SurfaceManager = require('./SurfaceManager');
+var CommandManager = require('./CommandManager');
 
 // Setup default I18n
 var I18n = require('./i18n');
@@ -92,18 +93,11 @@ I18n.instance.load(require('../i18n/en'));
 function Controller() {
   Component.apply(this, arguments);
 
-  this.surfaces = {};
+  this.surfaceManager = null;
   this.stack = [];
   this.logger = new Logger();
 
-  var config = this.getConfig();
-
   this._initializeController(this.props);
-  this._initializeComponentRegistry(config.controller.components);
-  this._initializeCommandRegistry(config.controller.commands);
-  if (config.i18n) {
-    I18n.instance.load(config.i18n);
-  }
 
   // initial state mapping
   this.handleStateUpdate(this.state);
@@ -123,7 +117,8 @@ Controller.Prototype = function() {
       documentSession: this.documentSession,
       doc: this.doc,
       componentRegistry: this.componentRegistry,
-      toolManager: this.toolManager,
+      surfaceManager: this.surfaceManager,
+      commandManager: this.commandManager,
       i18n: I18n.instance
     };
   };
@@ -163,6 +158,8 @@ Controller.Prototype = function() {
   };
 
   this._initializeController = function(props) {
+    var config = this.getConfig();
+
     // Either takes a DocumentSession compatible object or a doc instance
     if (props.documentSession) {
       this.documentSession = props.documentSession;
@@ -173,20 +170,50 @@ Controller.Prototype = function() {
     } else {
       throw new Error('Controller requires a DocumentSession instance');
     }
-    this.toolManager = new ToolManager(this);
+    this.surfaceManager = new SurfaceManager(this.documentSession);    
+    this.commandManager = new CommandManager(this, config.commands);
+
+    this._initializeComponentRegistry(config.components);
+
+    if (config.i18n) {
+      I18n.instance.load(config.i18n);
+    }
+
     // Register event handlers
     this.doc.on('document:changed', this.onDocumentChanged, this, {
       // Use lower priority so that everyting is up2date
       // when we receive the update
       priority: -20
     });
+    // a hook so that the application can add application specific
+    // data to every change
+    // TODO: evaluate if this is really necessary
+    // we have used it once to trigger state changes, e.g. open a panel
+    // on undo/redo
     this.doc.on('transaction:started', this.onTransactionStarted, this);
   };
 
   this._disposeController = function() {
     this.doc.off(this);
-    this.toolManager.dispose();
+    this.surfaceManager.dispose();
+    this.commandManager.dispose();
+    // Note: we need to clear everything, as the childContext
+    // changes which is immutable
     this.empty();
+  };
+
+  // Use static config if available, otherwise try to fetch it from props
+  this.getConfig = function() {
+    if (this.props.config) {
+      return this.props.config;
+    } else if (this.constructor.static.config) {
+      return this.constructor.static.config;
+    } else {
+      return {        
+        components: {},
+        commands: []
+      };
+    }
   };
 
   this._initializeComponentRegistry = function(components) {
@@ -197,68 +224,13 @@ Controller.Prototype = function() {
     this.componentRegistry = componentRegistry;
   };
 
-  this._initializeCommandRegistry = function(commands) {
-    var commandRegistry = new Registry();
-    each(commands, function(CommandClass) {
-      var commandContext = extend({}, this.context, this.getChildContext());
-      var cmd = new CommandClass(commandContext);
-      commandRegistry.add(CommandClass.static.name, cmd);
-    }.bind(this));
-    this.commandRegistry = commandRegistry;
+  this.willUpdateState = function(newState) {
+    this.handleStateUpdate(newState);
   };
 
-
-  // Use static config if available, otherwise try to fetch it from props
-  this.getConfig = function() {
-    if (this.props.config) {
-      return this.props.config;
-    } else if (this.constructor.static.config) {
-      return this.constructor.static.config;
-    } else {
-      return {
-        controller: {
-          components: {},
-          commands: []
-        }
-      };
-    }
-  };
-
-  /**
-    Get registered controller command by name
-
-    @param {String} commandName the command name
-    @return {ui/ControllerCommand} A controller command
-  */
-  this.getCommand = function(commandName) {
-    return this.commandRegistry.get(commandName);
-  };
-
-  /**
-    Execute command with given name if registered. In most cases this triggers a document transformation and
-    corresponding UI updates. For instance when pressing `ctrl+b` the
-    `toggleStrong` command is executed. Each implemented command returns a custom
-    info object, describing the action that has been performed.
-    After execution a `command:executed` event is emitted on the controller.
-
-    @param {String} commandName the command name
-    @return {ui/ControllerCommand} A controller command
-  */
-  this.executeCommand = function(commandName) {
-    var cmd = this.getCommand(commandName);
-    if (!cmd) {
-      console.warn('command', commandName, 'not registered on controller');
-      return;
-    }
-    // Run command
-    var info = cmd.execute();
-    if (info) {
-      this.emit('command:executed', info, commandName, cmd);
-      /* TODO: We want to replace this with a more specific, scoped event
-        but for that we need an improved EventEmitter API */
-    } else if (info === undefined) {
-      console.warn('command ', commandName, 'must return either an info object or true when handled or false when not handled');
-    }
+  this.handleStateUpdate = function(newState) {
+    /* jshint unused: false */
+    // no-op, should be overridden by custom writer
   };
 
   this.getLogger = function() {
@@ -278,20 +250,8 @@ Controller.Prototype = function() {
     return this.documentSession;
   };
 
-  /**
-   * Get Surface instance
-   *
-   * @param {String} name Name under which the surface is registered
-   * @return {ui/Surface} The surface instance
-   */
-
   this.getSurface = function(name) {
-    if (name) {
-      return this.surfaces[name];
-    } else {
-      console.warn('Deprecated: Use getFocusedSurface. Always provide a name for getSurface otherwise.');
-      return this.getFocusedSurface();
-    }
+    return this.surfaceManager.getSurface(name);
   };
 
   /**
@@ -300,12 +260,7 @@ Controller.Prototype = function() {
    * @return {ui/Surface} Surface instance
    */
   this.getFocusedSurface = function() {
-    var surfaceId = this.documentSession.selection.surfaceId;
-    if (surfaceId) {
-      return this.surfaces[surfaceId];
-    } else {
-      return null;
-    }
+    return this.surfaceManager.getFocusedSurface();
   };
 
   /**
@@ -315,50 +270,17 @@ Controller.Prototype = function() {
    * @return {model/Selection} the current selection derived from the surface.
    */
   this.getSelection = function() {
-    var surface = this.getSurface();
-    if (surface) {
-      return surface.getSelection();
-    } else {
-      return Selection.nullSelection;
-    }
+    warn('DEPRECATED: use documentSession.getSelection() instead.');
+    return this.documentSession.getSelection();
   };
 
   this.getContainerId = function() {
-    console.error('DEPRECATED: use controller.getFocusedSurface().getContainerId() instead.');
+    warn('DEPRECATED: use controller.getFocusedSurface().getContainerId() instead.');
     var surface = this.getSurface();
     if (surface) {
       return surface.getContainerId();
     }
   };
-
-  /**
-   * Register a surface
-   *
-   * @param surface {ui/Surface} A new surface instance to register
-   */
-  this.registerSurface = function(surface) {
-    surface.on('selection:changed', this._onSelectionChanged, this);
-    surface.on('command:executed', this._onCommandExecuted, this);
-    this.surfaces[surface.getName()] = surface;
-  };
-
-  /**
-   * Unregister a surface
-   *
-   * @param surface {ui/Surface} A surface instance to unregister
-   */
-  this.unregisterSurface = function(surface) {
-    surface.off(this);
-    delete this.surfaces[surface.getName()];
-    if (surface && this.focusedSurface === surface) {
-      this.focusedSurface = null;
-    }
-  };
-
-  /**
-   * Called whenever a surface has been focused.
-   */
-  this.didFocus = function() {};
 
   // For now just delegate to the current surface
   // TODO: Remove. Let's only allow Document.transaction and Surface.transaction to
@@ -366,20 +288,8 @@ Controller.Prototype = function() {
   this.transaction = function() {
     var surface = this.getFocusedSurface();
     if (surface) {
-      surface.transaction.apply(surface, arguments);
-    } else {
-      // No focused surface, let's do it on document
-      this.documentSession.transaction.apply(this.documentSession, arguments);
+      return surface.getContainerId();
     }
-  };
-
-  // FIXME: even if this seems to be very hacky,
-  // it is quite useful to make transactions 'app-compatible'
-  this.onTransactionStarted = function(tx) {
-    /* jshint unused: false */
-    // // store the state so that it can be recovered when undo/redo
-    // tx.before.state = this.state;
-    // tx.before.selection = this.getSelection();
   };
 
   // return true when you handled a key combo
@@ -387,13 +297,14 @@ Controller.Prototype = function() {
     // console.log('####', e.keyCode, e.metaKey, e.ctrlKey, e.shiftKey);
     var handled = false;
 
+    // esc key
     if (e.keyCode === 27) {
       this.setState(this.getInitialState());
       handled = true;
     }
     // Save: cmd+s
     else if (e.keyCode === 83 && (e.metaKey||e.ctrlKey)) {
-      this.executeCommand('save');
+      this.commandManager.executeCommand('save');
       handled = true;
     }
 
@@ -402,55 +313,6 @@ Controller.Prototype = function() {
       e.stopPropagation();
       return true;
     }
-  };
-
-  this.willUpdateState = function(newState) {
-    this.handleStateUpdate(newState);
-  };
-
-  this.handleStateUpdate = function(newState) {
-    /* jshint unused: false */
-    // no-op, should be overridden by custom writer
-  };
-
-  this.onDocumentChanged = function(change, info) {
-    // On undo/redo
-    if (info.replay) {
-      // after undo/redo, also recover the stored controller state
-      if (change.after.state) {
-        this.setState(change.after.state);
-      }
-    }
-    // Save logic related
-    // TODO: we need to rethink this regarding
-    // real-time collab
-    var doc = this.getDocument();
-    doc.__dirty = true;
-    var logger = this.getLogger();
-    logger.info('Unsaved changes');
-  };
-
-  this.onSelectionChanged = function(sel, surface) {
-    /* jshint unused: false */
-    // No-op: Please override in custom controller class
-  };
-
-  this.onCommandExecuted = function(info, commandName, cmd) {
-    /* jshint unused: false */
-    // No-op: Please override in custom controller class
-  };
-
-  this._onSelectionChanged = function(sel, surface) {
-    // HACK: make sure focusedSurface is up to date as soon as
-    // possible because some listeners rely on it.
-    // this.focusedSurface = surface;
-    this.emit('selection:changed', sel, surface);
-    this.onSelectionChanged(sel, surface);
-  };
-
-  this._onCommandExecuted = function(info, commandName, cmd) {
-    this.emit('command:executed', info, commandName, cmd);
-    this.onCommandExecuted(info, commandName, cmd);
   };
 
   this.uploadFile = function(file, cb) {
@@ -462,32 +324,6 @@ Controller.Prototype = function() {
       // We just return a temporary objectUrl
       var fileUrl = window.URL.createObjectURL(file);
       cb(null, fileUrl);
-    }
-  };
-
-  /**
-   * Push surface state
-   */
-  this.pushState = function() {
-    var state = {
-      surface: this.focusedSurface,
-      selection: null
-    };
-    if (this.focusedSurface) {
-      state.selection = this.focusedSurface.getSelection();
-    }
-    this.focusedSurface = null;
-    this.stack.push(state);
-  };
-
-  /**
-   * Pop surface state
-   */
-  this.popState = function() {
-    var state = this.stack.pop();
-    if (state && state.surface) {
-      state.surface.setFocused(true);
-      state.surface.setSelection(state.selection);
     }
   };
 
@@ -519,6 +355,34 @@ Controller.Prototype = function() {
         logger.error('Document saving is not handled at the moment. Make sure onSave is passed in the props');
       }
     }
+  };
+
+  /* Event handlers
+     ============== */
+
+  this.onTransactionStarted = function(tx) {
+    /* jshint unused: false */
+  };
+
+  this.onDocumentChanged = function(change, info) {
+    // On undo/redo
+    if (info.replay) {
+      // after undo/redo, also recover the stored controller state
+      if (change.after.state) {
+        this.setState(change.after.state);
+      }
+    }
+    // Save logic related
+    // TODO: we need to rethink this regarding real-time collab
+    var doc = this.getDocument();
+    doc.__dirty = true;
+    var logger = this.getLogger();
+    logger.info('Unsaved changes');
+  };
+
+  // TODO: Do we still need that hook?
+  this.onCommandExecuted = function(info, commandName, cmd) {
+    /* jshint unused: false */
   };
 };
 
@@ -555,15 +419,6 @@ Controller.Prototype = function() {
     ...
   };
   ```
-*/
-
-/**
-  Emitted when the active selection has changed, e.g. through cursor movement.
-  Transports `sel` a DocumentSelection that can be expected but also the
-  surface in which the selection change happened.
-
-  @event ui/Controller@selection:changed
-  @param {ui/Command} cmd the command instance
 */
 
 /**

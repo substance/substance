@@ -11,13 +11,9 @@ function SwitchTextType() {
 
 SwitchTextType.Prototype = function() {
 
-  this.getSelection = function() {
-    return this.getSurface().getSelection();
-  };
-
   // Available text types on the surface
-  this.getTextTypes = function() {
-    var surface = this.getSurface();
+  this.getTextTypes = function(context) {
+    var surface = context.surface;
     if (surface.isContainerEditor()) {
       return surface.getTextTypes();
     } else {
@@ -25,8 +21,8 @@ SwitchTextType.Prototype = function() {
     }
   };
 
-  this.getTextType = function(textTypeName) {
-    var textTypes = this.getTextTypes();
+  this.getTextType = function(context, textTypeName) {
+    var textTypes = this.getTextTypes(context);
     return _find(textTypes, function(t) {
       return t.name === textTypeName;
     });
@@ -34,8 +30,8 @@ SwitchTextType.Prototype = function() {
 
   // Search which textType matches the current node
   // E.g. {type: 'heading', level: 1} => heading1
-  this.getCurrentTextType = function(node) {
-    var textTypes = this.getTextTypes();
+  this.getCurrentTextType = function(context, node) {
+    var textTypes = this.getTextTypes(context);
     var currentTextType;
     textTypes.forEach(function(textType) {
       var nodeProps = _clone(textType.data);
@@ -47,14 +43,22 @@ SwitchTextType.Prototype = function() {
     return currentTextType;
   };
 
-  this.getCommandState = function() {
-    var sel = this.getSelection();
-    var surface = this.getSurface();
+  this.getCommandState = function(context) {
+    var sel = context.documentSession.getSelection();
+    var surface = context.surface;
+    var doc = context.document;
+
+    if (!surface) {
+      return {
+        disabled: true,
+        active: false
+      };
+    }
 
     var newState = {
       disabled: false,
       sel: sel,
-      textTypes: this.getTextTypes()
+      textTypes: this.getTextTypes(context)
     };
 
     // Set disabled when not a property selection
@@ -64,14 +68,13 @@ SwitchTextType.Prototype = function() {
       newState.disabled = true;
       newState.currentTextType = {name: 'container-selection'};
     } else {
-      var doc = this.getDocument();
       var path = sel.getPath();
       var node = doc.get(path[0]);
       // There are cases where path points to an already deleted node,
       // so we need to guard node
       if (node) {
         if (node.isText() && node.isBlock()) {
-          newState.currentTextType = this.getCurrentTextType(node);
+          newState.currentTextType = this.getCurrentTextType(context, node);
         }
         if (!newState.currentTextType) {
           // We 'abuse' the currentTextType field by providing a property
@@ -90,10 +93,10 @@ SwitchTextType.Prototype = function() {
 
     @param {String} textTypeName identifier (e.g. heading1)
   */
-  this.execute = function(textTypeName) {
-    var textType = this.getTextType(textTypeName);
+  this.execute = function(context, textTypeName) {
+    var textType = this.getTextType(context, textTypeName);
     var nodeData = textType.data;
-    var surface = this.getSurface();
+    var surface = context.surface;
     surface.transaction(function(tx, args) {
       args.data = nodeData;
       return surface.switchType(tx, args);

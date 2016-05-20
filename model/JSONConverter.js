@@ -1,8 +1,9 @@
 'use strict';
 
-var oo = require('../util/oo');
 var isArray = require('lodash/isArray');
 var each = require('lodash/each');
+var error = require('../util/error');
+var oo = require('../util/oo');
 
 function JSONConverter() {}
 
@@ -17,7 +18,7 @@ JSONConverter.Prototype = function() {
       throw new Error('Incompatible schema.');
     }
     if (schema.version !== json.schema.version) {
-      console.error('Different schema version. Conversion might be problematic.');
+      error('Different schema version. Conversion might be problematic.');
     }
     // the json should just be an array of nodes
     var nodes = json.nodes;

@@ -1,6 +1,7 @@
 'use strict';
 
 var uuid = require('../../util/uuid');
+var info = require('../../util/info');
 var deleteSelection = require('./deleteSelection');
 var annotationHelpers = require('../annotationHelpers');
 
@@ -30,11 +31,16 @@ function breakNode(tx, args) {
   var behavior = args.editingBehavior;
   if (node.isText()) {
     return breakTextNode(tx, args);
-  } else if (behavior && behavior.canBreak(node.type)) {
+  }
+  // default breaking behavior for node selections
+  else if (sel.isNodeSelection() && !sel.isEntireNodeSelected()) {
+    return breakWholeNode(tx, args);
+  }
+  else if (behavior && behavior.canBreak(node.type)) {
     var breaker = behavior.getBreaker(node.type);
     return breaker.call(breaker, tx, args);
   } else {
-    console.info("Breaking is not supported for node type %s.", node.type);
+    info("Breaking is not supported for node type %s.", node.type);
     return args;
   }
 }
@@ -92,6 +98,40 @@ function breakTextNode(tx, args) {
     sel = tx.createSelection(newPath, 0);
   }
   args.selection = sel;
+  args.node = newNode;
+  return args;
+}
+
+function breakWholeNode(tx, args) {
+  var sel = args.selection;
+  var containerId = args.containerId;
+  if (!sel) {
+    throw new Error('Illegal argument: selection is mandatory.');
+  }
+  if (!containerId) {
+    throw new Error('Illegal argument: containerId is mandatory.');
+  }
+  if (!sel.isNodeSelection()) {
+    throw new Error('Illegal argument: selection should be a NodeSelection');
+  }
+  var container = tx.get(containerId);
+  var nodeId = sel.getNodeId();
+  var nodePos = container.getPosition(nodeId);
+  var type = tx.getSchema().getDefaultTextType();
+  var newNode = tx.create({
+    type: type,
+    content: ""
+  });
+  var newSel;
+  if (sel.startOffset === 0) {
+    container.show(newNode.id, nodePos);
+    // in this case the selection does not change
+    newSel = sel;
+  } else {
+    container.show(newNode.id, nodePos+1);
+    newSel = tx.createSelection([newNode.id, 'content'], 0);
+  }
+  args.selection = newSel;
   args.node = newNode;
   return args;
 }

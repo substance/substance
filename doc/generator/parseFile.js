@@ -1,4 +1,6 @@
-/* jshint latedef: false */
+/* jshint node: true */
+'use strict';
+
 var oo = require('../../util/oo');
 var fs = require('fs');
 var path = require('path');
@@ -13,7 +15,7 @@ dox.setMarkdownConverter(markdown);
  * which can be used to create a {doc/model/Documentation} instance.
  */
 function parseFile(jsFile) {
-  var parser = new _Parser(jsFile);
+  var parser = new Parser(jsFile);
   var nodes = parser.parse();
   return nodes;
 }
@@ -24,14 +26,14 @@ function parseFile(jsFile) {
  * @class
  * @private
  */
-function _Parser(jsFile) {
+function Parser(jsFile) {
   this.file = jsFile;
   this.folder = path.dirname(jsFile);
   this.name = path.basename(jsFile, '.js');
   this.id = jsFile.slice(0,-3);
 }
 
-_Parser.Prototype = function() {
+Parser.Prototype = function() {
 
   this.parse = function() {
     var js = fs.readFileSync(this.file, 'utf8');
@@ -509,6 +511,6 @@ _Parser.Prototype = function() {
 
 };
 
-oo.initClass(_Parser);
+oo.initClass(Parser);
 
 module.exports = parseFile;

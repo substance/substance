@@ -1,11 +1,12 @@
-/* jshint latedef: false */
+/* jshint node:true */
+'use strict';
+
 var fs = require('fs');
 var path = require('path');
 var glob = require('glob');
 var child_process = require('child_process');
 var each = require('lodash/each');
 var parseFile = require('./parseFile');
-
 var markdown = require('./markdownConverter');
 
 function collectNodes(config) {

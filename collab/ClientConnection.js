@@ -1,7 +1,9 @@
 "use strict";
 
 var EventEmitter = require('../util/EventEmitter');
-var Err = require('../util/Error');
+var warn = require('../util/warn');
+var info = require('../util/info');
+var Err = require('../util/SubstanceError');
 var __id__ = 0;
 
 /**
@@ -59,7 +61,7 @@ ClientConnection.Prototype = function() {
   this._onConnectionClose = function() {
     this._disconnect();
     this.emit('close');
-    console.log('websocket connection closed. Attempting to reconnect in 5s.');
+    info('websocket connection closed. Attempting to reconnect in 5s.');
     setTimeout(function() {
       this._connect();
     }.bind(this), 5000);
@@ -78,7 +80,7 @@ ClientConnection.Prototype = function() {
   */
   this.send = function(msg) {
     if (!this.isOpen()) {
-      console.warn('Message could not be sent. Connection is not open.', msg);
+      warn('Message could not be sent. Connection is not open.', msg);
       return;
     }
     this.ws.send(this.serializeMessage(msg));

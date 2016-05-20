@@ -3,8 +3,7 @@
 var oo = require("./oo");
 var each = require('lodash/each');
 var isObject = require('lodash/isObject');
-
-var DEBUG = false;
+var warn = require('./warn');
 
 /**
   Event support.
@@ -27,17 +26,13 @@ EventEmitter.Prototype = function() {
    */
   this.emit = function (event) {
     if (event in this.__events__) {
-      if (DEBUG) {
-        console.log("Emitting event %s (%d listeners) on", event, Object.keys(this.__events__[event]).length, this);
-      }
+      // console.log("Emitting event %s (%d listeners) on", event, Object.keys(this.__events__[event]).length, this);
       // Clone the list of bindings so that handlers can remove or add handlers during the call.
       var bindings = this.__events__[event].slice();
       var args = Array.prototype.slice.call(arguments, 1);
       for (var i = 0, len = bindings.length; i < len; i++) {
         var binding = bindings[i];
-        // if (DEBUG) {
-        //   console.log("- triggering %s", binding.context.constructor.name);
-        // }
+        // console.log("- triggering %s", binding.context.constructor.name);
         binding.method.apply(binding.context, args);
       }
       return true;
@@ -66,8 +61,8 @@ EventEmitter.Prototype = function() {
    * @chainable
    */
   this.connect = function (obj, methods, options) {
-    console.warn('DEPRECATED: Use EventEmitter.on(event, method, context) instead.');
     /* jshint unused:false */
+    warn('DEPRECATED: Use EventEmitter.on(event, method, context) instead.');
     return _connect.apply(this, arguments);
   };
 
@@ -80,7 +75,7 @@ EventEmitter.Prototype = function() {
    * @chainable
    */
   this.disconnect = function(listener) {
-    console.warn('DEPRECATED: Use EventEmitter.off(listener) instead.');
+    warn('DEPRECATED: Use EventEmitter.off(listener) instead.');
     return _disconnect.call(this, listener);
   };
 
@@ -250,6 +245,7 @@ EventEmitter.Prototype = function() {
   }
 
   this._debugEvents = function() {
+    /* globals console */
     console.log('### EventEmitter: ', this);
     each(this.__events__, function(handlers, name) {
       console.log("- %s listeners for %s: ", handlers.length, name, handlers);

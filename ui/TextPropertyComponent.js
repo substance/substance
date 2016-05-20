@@ -1,9 +1,9 @@
-/* jshint latedef:nofunc */
 'use strict';
 
 var isNumber = require('lodash/isNumber');
-var AnnotatedTextComponent = require('./AnnotatedTextComponent');
+var error = require('../util/error');
 var Coordinate = require('../model/Coordinate');
+var AnnotatedTextComponent = require('./AnnotatedTextComponent');
 
 /**
   Renders a text property. Used internally by different components to render editable text.
@@ -30,7 +30,7 @@ function TextPropertyComponent() {
 
 TextPropertyComponent.Prototype = function() {
 
-  var _super = Object.getPrototypeOf(this);
+  var _super = TextPropertyComponent.super.prototype;
 
   this.didMount = function() {
     _super.didMount.call(this);
@@ -61,6 +61,10 @@ TextPropertyComponent.Prototype = function() {
         whiteSpace: 'pre-wrap'
       });
 
+    if (this.props.editable) {
+      el.attr('contentEditable', true);
+    }
+
     el.append($$('br'));
     return el;
   };
@@ -81,7 +85,8 @@ TextPropertyComponent.Prototype = function() {
       }
 
       if (node.collaborator) {
-        el.addClass('sm-collaborator-'+node.collaborator.colorIndex);
+        var collaboratorIndex = node.collaborator.colorIndex;
+        el.addClass('sm-collaborator-'+collaboratorIndex);
       } else {
         el.addClass('sm-local-user');
       }
@@ -93,22 +98,19 @@ TextPropertyComponent.Prototype = function() {
           'data-inline':'1',
           'data-length': 1
         });
+        // FIXME: enabling this reveals a bug in RenderEngine with reusing a component but reattached to a new parent.
+        // el.ref(id);
       }
       // Adding refs here, enables preservative rerendering
       // TODO: while this solves problems with rerendering inline nodes
       // with external content, it decreases the overall performance too much.
       // We should optimize the component first before we can enable this.
-      if (this.context.config && this.context.config.preservativeTextPropertyRendering) {
+      else if (this.context.config && this.context.config.preservativeTextPropertyRendering) {
         el.ref(id + '@' + fragment.counter);
       }
     }
     el.attr('data-offset', fragment.pos);
     return el;
-  };
-
-  this._finishFragment = function(fragment, context, parentContext) {
-    context.attr('data-length', fragment.length);
-    parentContext.append(context);
   };
 
   this.getPath = function() {
@@ -122,12 +124,9 @@ TextPropertyComponent.Prototype = function() {
   this.getAnnotations = function() {
     var path = this.getPath();
     var annotations = this.getDocument().getIndex('annotations').get(path);
-    var surface = this.getSurface();
-    if (surface) {
-      var fragments = surface._getFragments(path);
-      if (fragments) {
-        annotations = annotations.concat(fragments);
-      }
+    var fragments = this.props.fragments;
+    if (fragments) {
+      annotations = annotations.concat(fragments);
     }
     return annotations;
   };
@@ -160,6 +159,11 @@ TextPropertyComponent.Prototype = function() {
     return this._getDOMCoordinate(this.el, charPos);
   };
 
+  this._finishFragment = function(fragment, context, parentContext) {
+    context.attr('data-length', fragment.length);
+    parentContext.append(context);
+  };
+
   this._getDOMCoordinate = function(el, charPos) {
     var l;
     var idx = 0;
@@ -190,7 +194,7 @@ TextPropertyComponent.Prototype = function() {
             charPos -= l;
           }
         } else {
-          console.error('FIXME: Can not map to DOM coordinates.');
+          error('FIXME: Can not map to DOM coordinates.');
           return null;
         }
       }

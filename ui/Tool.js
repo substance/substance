@@ -15,27 +15,57 @@ var capitalize = require('lodash/capitalize');
   @class
   @component
 */
-
 function Tool() {
   Tool.super.apply(this, arguments);
 }
 
 Tool.Prototype = function() {
 
-  /*
-    Initialize toolstate. Obtained from the toolmanager by asking for
-    the associated command state.
+  // TODO: We should consider not exposing a broad interface
+  // here. Rather tools should use this.context
+
+  /**
+    Return the currently controller
+
+    @return {ui/Surface}
   */
-  this.getInitialState = function() {
-    return this.context.toolManager.getCommandState(this);
+  this.getController = function() {
+    console.warn('use this.context.controller');
+    return this.context.controller;
   };
 
-  this.didMount = function() {
-    this.context.toolManager.registerTool(this);
+  /**
+    Return the currently focused surface
+
+    @return {ui/Surface}
+  */
+  this.getSurface = function() {
+    console.warn('use this.context.surface');
+    return this.getController().getFocusedSurface();
   };
 
-  this.dispose = function() {
-    this.context.toolManager.unregisterTool(this);
+  /**
+    Return the document associated with the focused surface.
+
+    @return {model/Document}
+  */
+  this.getDocument = function() {
+    console.warn('use this.context.document');
+    return this.getController().getDocument();
+  };
+
+  /**
+    Return the currently active container
+
+    @return {Document.Container}
+    @public
+  */
+  this.getContainer = function() {
+    console.warn('use this.context.surface.getContainer()');
+    var surface = this.getSurface();
+    if (surface) {
+      return surface.getContainer();
+    }
   };
 
   /**
@@ -51,22 +81,21 @@ Tool.Prototype = function() {
       el.attr('aria-label', title);
     }
     //.sm-disabled
-    if (this.state.disabled) {
+    if (this.props.disabled) {
       el.addClass('sm-disabled');
     }
     // .sm-active
-    if (this.state.active) {
+    if (this.props.active) {
       el.addClass('sm-active');
     }
     // .sm-<mode>
     // TODO: it seems that the mode class is not following the 'sm-' prefix-rules
-    if (this.state.mode) {
-      el.addClass(this.state.mode);
+    if (this.props.mode) {
+      el.addClass(this.props.mode);
     }
 
     // button
     el.append(this.renderButton($$));
-
     return el;
   };
 
@@ -75,7 +104,7 @@ Tool.Prototype = function() {
       .on('click', this.onClick)
       .append(this.props.children);
 
-    if (this.state.disabled) {
+    if (this.props.disabled) {
       // make button inaccessible
       button.attr('tabindex', -1);
     } else {
@@ -88,17 +117,10 @@ Tool.Prototype = function() {
   this.getTitle = function() {
     var title = this.props.title || this.i18n.t(this.getName());
     // Used only by annotation tool so far
-    if (this.state.mode) {
-      title = [capitalize(this.state.mode), title].join(' ');
+    if (this.props.mode) {
+      title = [capitalize(this.props.mode), title].join(' ');
     }
     return title;
-  };
-
-  /**
-    Get controller context
-  */
-  this.getController = function() {
-    return this.context.controller;
   };
 
   /**
@@ -115,10 +137,17 @@ Tool.Prototype = function() {
   this.onClick = function(e) {
     e.preventDefault();
     e.stopPropagation();
-    if (this.state.disabled) {
+    if (this.props.disabled) {
       return;
     }
     this.performAction();
+  };
+
+  /**
+    Executes the associated command
+  */
+  this.performAction = function() {
+    this.context.commandManager.executeCommand(this.getCommandName());
   };
 
 };

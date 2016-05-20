@@ -4,6 +4,7 @@ var isString = require('lodash/isString');
 var last = require('lodash/last');
 var extend = require('lodash/extend');
 var clone = require('lodash/clone');
+var assert = require('../util/assert');
 var $ = require('../util/cheerio.customized');
 var DOMElement = require('./DOMElement');
 
@@ -51,6 +52,7 @@ CheerioDOMElement.Prototype = function() {
 
   this.setClasses = function(classString) {
     this.$el.attr('class', classString);
+    return this;
   };
 
   this.getAttribute = function(name) {
@@ -59,10 +61,12 @@ CheerioDOMElement.Prototype = function() {
 
   this.setAttribute = function(name, value) {
     this.$el.attr(name, value);
+    return this;
   };
 
   this.removeAttribute = function(name) {
-    return this.$el.removeAttr(name);
+    this.$el.removeAttr(name);
+    return this;
   };
 
   this.getAttributes = function() {
@@ -77,12 +81,14 @@ CheerioDOMElement.Prototype = function() {
   this.setProperty = function(name, value) {
     this.htmlProps[name] = value;
     this.$el.prop(name, value);
+    return this;
   };
 
   // TODO: verify that this.el[name] is correct
   this.removeProperty = function(name) {
     delete this.htmlProps[name];
     delete this.el[name];
+    return this;
   };
 
   this.getTagName = function() {
@@ -99,6 +105,7 @@ CheerioDOMElement.Prototype = function() {
     $newEl.html(this.$el.html());
     newEl.attribs = extend({}, this.el.attribs);
     this._replaceNativeEl(newEl);
+    return this;
   };
 
   this.getId = function() {
@@ -107,6 +114,7 @@ CheerioDOMElement.Prototype = function() {
 
   this.setId = function(id) {
     this.$el.attr('id', id);
+    return this;
   };
 
   this.getTextContent = function() {
@@ -115,6 +123,7 @@ CheerioDOMElement.Prototype = function() {
 
   this.setTextContent = function(text) {
     this.$el.text(text);
+    return this;
   };
 
   this.getInnerHTML = function() {
@@ -123,6 +132,7 @@ CheerioDOMElement.Prototype = function() {
 
   this.setInnerHTML = function(html) {
     this.$el.html(html);
+    return this;
   };
 
   this.getOuterHTML = function() {
@@ -136,6 +146,7 @@ CheerioDOMElement.Prototype = function() {
 
   this.setValue = function(value) {
     this.$el.val(value);
+    return this;
   };
 
   this.getStyle = function(name) {
@@ -144,11 +155,16 @@ CheerioDOMElement.Prototype = function() {
 
   this.setStyle = function(name, value) {
     this.$el.css(name, value);
+    return this;
   };
 
-  this.addEventListener = function() {};
+  this.addEventListener = function() {
+    return this;
+  };
 
-  this.removeEventListener = function() {};
+  this.removeEventListener = function() {
+    return this;
+  };
 
   this.getEventListeners = function() {
     return [];
@@ -313,7 +329,7 @@ CheerioDOMElement.Prototype = function() {
     if (!child || !child._isCheerioDOMElement) {
       throw new Error('Illegal argument: only String and CheerioDOMElement instances are valid.');
     }
-    console.assert(child.el._wrapper === child, "Expecting a backlink between native element and CheerioDOMElement");
+    assert(child.el._wrapper === child, "Expecting a backlink between native element and CheerioDOMElement");
     return child.getNativeElement();
   };
 
@@ -321,6 +337,7 @@ CheerioDOMElement.Prototype = function() {
     child = this._normalizeChild(child);
     this.el.children.push(child);
     child.parent = this.el;
+    return this;
   };
 
   this.insertAt = function(pos, child) {
@@ -334,6 +351,7 @@ CheerioDOMElement.Prototype = function() {
       children.splice(pos, 0, child);
     }
     child.parent = this.el;
+    return this;
   };
 
   this.insertBefore = function(child, before) {
@@ -355,6 +373,7 @@ CheerioDOMElement.Prototype = function() {
     var child = this.el.children[pos];
     child.parent = null;
     this.el.children.splice(pos, 1);
+    return this;
   };
 
   this.removeChild = function(child) {
@@ -366,6 +385,7 @@ CheerioDOMElement.Prototype = function() {
       throw new Error('removeChild(): element is not a child.');
     }
     this.removeAt(idx);
+    return this;
   };
 
   this.replaceChild = function(oldChild, newChild) {
@@ -378,6 +398,7 @@ CheerioDOMElement.Prototype = function() {
       this.removeAt(idx);
       this.insertAt(idx, newChild.el);
     }
+    return this;
   };
 
   this.empty = function() {

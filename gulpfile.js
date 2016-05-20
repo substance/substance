@@ -59,6 +59,7 @@ gulp.task('doc', ['doc:sass', 'doc:bundle', 'doc:assets', 'doc:data']);
 
 gulp.task('lint', function() {
   return gulp.src([
+    './collab/**/*.js',
     './doc/**/*.js',
     './model/**/*.js',
     './packages/**/*.js',

@@ -1,5 +1,6 @@
-var AnnotationComponent = require('../../ui/AnnotationComponent');
+'use strict';
 
+var AnnotationComponent = require('../../ui/AnnotationComponent');
 
 function LinkComponent() {
   LinkComponent.super.apply(this, arguments);

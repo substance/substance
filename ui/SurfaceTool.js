@@ -2,6 +2,8 @@
 
 var Tool = require('./Tool');
 
+// TODO: we no longer need Surface tool as a specialization
+
 /**
   Abstract class for tools that interact with the selection of active surface.
   Needs to be instantiated inside a {@link ui/Controller} context.
@@ -27,64 +29,7 @@ function SurfaceTool() {
 }
 
 SurfaceTool.Prototype = function() {
-
   this._isSurfaceTool = true;
-
-  /**
-    Get command associated with the tool, based on the focused surface
-  */
-  this.getCommand = function() {
-    var ctrl = this.getController();
-    var surface = ctrl.getFocusedSurface();
-    if (!surface) return;
-
-    var commandName = this.getCommandName();
-    if (commandName) {
-      return surface.getCommand(commandName);
-    } else {
-      throw new Error('Contract: commandName should be associated to a supported command.');
-    }
-  };
-
-  /**
-    Return the currently focused surface
-
-    @return {ui/Surface}
-  */
-  this.getSurface = function() {
-    return this.getController().getFocusedSurface();
-  };
-
-  /**
-    Return the document associated with the focused surface.
-
-    @return {model/Document}
-  */
-  this.getDocument = function() {
-    return this.getController().getDocument();
-  };
-
-  /**
-    Return the currently active container
-
-    @return {Document.Container}
-    @public
-  */
-  this.getContainer = function() {
-    var surface = this.getSurface();
-    if (surface) {
-      return surface.getContainer();
-    }
-  };
-
-  /**
-    Executes the associated command
-  */
-  this.performAction = function() {
-    var surface = this.getSurface();
-    surface.executeCommand(this.getCommandName());
-  };
-
 };
 
 Tool.extend(SurfaceTool);

@@ -126,7 +126,7 @@ var deletedText = function(doc, path, startOffset, endOffset) {
     var anno = doc.get(id);
     var annoSel = anno.getSelection();
     if(annoSel.isCollapsed()) {
-      console.log("...deleting container annotation because it has collapsed" + id);
+      // console.log("...deleting container annotation because it has collapsed" + id);
       doc.delete(id);
     }
   });
@@ -199,7 +199,7 @@ var transferAnnotations = function(doc, path, offset, newPath, newOffset) {
     var anno = doc.get(id);
     var annoSel = anno.getSelection();
     if(annoSel.isCollapsed()) {
-      console.log("...deleting container annotation because it has collapsed" + id);
+      // console.log("...deleting container annotation because it has collapsed" + id);
       doc.delete(id);
     }
   });

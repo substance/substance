@@ -1,9 +1,9 @@
-/* global navigator */
-
 'use strict';
 
 var isArray = require('lodash/isArray');
 var extend = require('lodash/extend');
+var error = require('../util/error');
+var warn = require('../util/warn');
 var HTMLImporter = require('../model/HTMLImporter');
 var DefaultDOMElement = require('./DefaultDOMElement');
 var JSONConverter = require('../model/JSONConverter');
@@ -79,7 +79,7 @@ ClipboardImporter.Prototype = function() {
         try {
           return this.importFromJSON(jsonStr);
         } catch(err) {
-          console.error(err);
+          error(err);
         }
       }
     }
@@ -97,7 +97,7 @@ ClipboardImporter.Prototype = function() {
     }
     body = _fixupGoogleDocsBody(body);
     if (!body) {
-      console.warn('Invalid HTML.');
+      warn('Invalid HTML.');
       return null;
     }
 

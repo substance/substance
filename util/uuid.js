@@ -1,3 +1,5 @@
+'use strict';
+
 /*!
 Math.uuid.js (v1.4)
 http://www.broofa.com

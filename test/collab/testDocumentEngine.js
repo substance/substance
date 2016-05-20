@@ -39,7 +39,7 @@ function testDocumentEngine(documentEngine, QUnit) {
     var done = assert.async();
     documentEngine.deleteDocument('test-doc', function(err) {
       assert.ok(!err, 'Should delete a document');
-      documentEngine.getDocument('test-doc', function(err, doc) {
+      documentEngine.getDocument({documentId: 'test-doc'}, function(err, doc) {
         assert.ok(err, 'Should print an error that document does not exist');
         assert.isNullOrUndefined(doc, 'doc should be undefined');
 
