@@ -1,10 +1,16 @@
 .sc-overlay {
-  @include border-radius(0.25rem);
-  @include box-shadow();
-
+  border-radius: $border-radius;
+  @include shadow();
+  
+  // let's not use this as it affects overlay calculations
+  border: 1px solid $border-color;
+  background: white;
+  
   z-index: 200;
   position: absolute;
-  
-  top: 30px;
-  left: 100px;
+
+  &.sm-hidden {
+    visibility: hidden;
+    position: fixed;
+  }
 }

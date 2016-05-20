@@ -57,6 +57,9 @@ CommandManager.Prototype = function() {
     this.commandStates = commandStates;
   };
 
+  /*
+    Exposes the current commandStates object
+  */
   this.getCommandStates = function() {
     return this.commandStates;
   };
