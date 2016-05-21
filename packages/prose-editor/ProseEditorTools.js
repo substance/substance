@@ -20,6 +20,7 @@ ProseEditorTools.Prototype = function() {
   this.render = function($$) {
     var el = $$("div").addClass('sc-example-toolbar');
     var commandStates = this.props.commandStates;
+    var config = this.context.config;
 
     // TODO: Remove clone hack once #577 is fixed
     var tools = [
@@ -31,8 +32,8 @@ ProseEditorTools.Prototype = function() {
       $$(LinkTool, clone(commandStates.link)).append($$(Icon, {icon: 'fa-link'}))
     ];
 
-    if (this.props.tools) {
-      this.props.tools.forEach(function(tool) {
+    if (config.tools) {
+      config.tools.forEach(function(tool) {
         tools.push(
           $$(tool.component, clone(commandStates[tool.commandName])).append(
             $$(Icon, {icon: tool.icon})
