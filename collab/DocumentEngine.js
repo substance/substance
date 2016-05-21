@@ -95,13 +95,13 @@ DocumentEngine.Prototype = function() {
     Delete document by documentId
   */
   this.deleteDocument = function(documentId, cb) {
-    this.documentStore.deleteDocument(documentId, function(err, doc) {
+    this.changeStore.deleteChanges(documentId, function(err) {
       if (err) {
         return cb(new Err('DeleteError', {
           cause: err
         }));
       }
-      this.changeStore.deleteChanges(documentId, function(err) {
+      this.documentStore.deleteDocument(documentId, function(err, doc) {
         if (err) {
           return cb(new Err('DeleteError', {
             cause: err
