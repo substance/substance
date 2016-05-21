@@ -10,8 +10,10 @@ var ImageCommand = SurfaceCommand.extend({
     name: 'image'
   },
 
-  getCommandState: function() {
-    var sel = this.getSelection();
+  getCommandState: function(context) {
+    var documentSession = context.documentSession;
+    var sel = documentSession.getSelection();
+
     var newState = {
       disabled: true,
       active: false
@@ -28,12 +30,12 @@ var ImageCommand = SurfaceCommand.extend({
 
     TODO: Think about ways to make ImagCommand CLI-compatible.
   */
-  execute: function() {
-    var state = this.getCommandState();
-    var surface = this.getSurface();
+  execute: function(context) {
+    var state = this.getCommandState(context);
+    var surface = context.surface;
 
     // WriterController interface, we use it for file upload
-    var controller = surface.getController();
+    var controller = context.controller;
 
     // Return if command is disabled
     if (state.disabled) return;
@@ -67,7 +69,11 @@ var ImageCommand = SurfaceCommand.extend({
             previewSrc: figureUrl
           };
           // Note: returning the result which will contain an updated selection
-          return surface.insertNode(tx, { selection: args.selection, node: newImage });
+          return surface.insertNode(tx, { 
+            selection: args.selection,
+            node: newImage,
+            containerId: surface.getContainerId()
+          });
         });
       });
     }.bind(this));
