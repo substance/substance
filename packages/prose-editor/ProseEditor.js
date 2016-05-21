@@ -4,14 +4,8 @@ var Controller = require('../../ui/Controller');
 var ContainerEditor = require('../../ui/ContainerEditor');
 var SplitPane = require('../../ui/SplitPane');
 var ScrollPane = require('../../ui/ScrollPane');
-var Icon = require('../../ui/FontAwesomeIcon');
 var Toolbar = require('../../ui/Toolbar');
-var UndoTool = require('../../ui/UndoTool');
-var RedoTool = require('../../ui/RedoTool');
-var SwitchTextTypeTool = require('../text/SwitchTextTypeTool');
-var StrongTool = require('../strong/StrongTool');
-var EmphasisTool = require('../emphasis/EmphasisTool');
-var LinkTool = require('../link/LinkTool');
+var ProseEditorTools = require('./ProseEditorTools');
 
 function ProseEditor() {
   ProseEditor.super.apply(this, arguments);
@@ -23,37 +17,25 @@ ProseEditor.Prototype = function() {
 
   this.didMount = function() {
     _super.didMount.call(this);
-    this.refs.bodyEditor.selectFirst();
+    this.refs.body.selectFirst();
   };
 
   this.render = function($$) {
-
     var config = this.getConfig();
 
-    var tools = [
-      $$(SwitchTextTypeTool),
-      $$(UndoTool).append($$(Icon, {icon: 'fa-undo'})),
-      $$(RedoTool).append($$(Icon, {icon: 'fa-repeat'})),
-      $$(StrongTool).append($$(Icon, {icon: 'fa-bold'})),
-      $$(EmphasisTool).append($$(Icon, {icon: 'fa-italic'})),
-      $$(LinkTool).append($$(Icon, {icon: 'fa-link'}))
-    ];
-    if (this.props.tools) {
-      tools = tools.concat(this.props.tools);
-    }
     return $$('div').addClass('sc-editor').append(
       $$(SplitPane, {splitType: 'horizontal'}).append(
-        $$(Toolbar).append(
-          $$(Toolbar.Group).append(tools)
-        ),
+        $$(Toolbar, {
+          content: ProseEditorTools
+        }),
         $$(ScrollPane, {scrollbarType: 'substance', scrollbarPosition: 'right'}).append(
           $$(ContainerEditor, {
             documentSession: this.documentSession,
             containerId: 'body',
-            name: 'bodyEditor',
-            commands: config.bodyEditor.commands,
-            textTypes: config.bodyEditor.textTypes
-          }).ref('bodyEditor')
+            name: 'body',
+            commands: config.surfaces.body.commands,
+            textTypes: config.surfaces.body.textTypes
+          }).ref('body')
         ).ref('contentPanel')
       )
     );
@@ -63,40 +45,40 @@ ProseEditor.Prototype = function() {
 Controller.extend(ProseEditor);
 
 ProseEditor.static.config = {
-  // Controller specific configuration (required!)
-  controller: {
-    // Component registry
-    components: {
-      'paragraph': require('../paragraph/ParagraphComponent'),
-      'heading': require('../heading/HeadingComponent'),
-      'link': require('../link/LinkComponent'),
-      'codeblock': require('../codeblock/CodeblockComponent'),
-      'blockquote': require('../blockquote/BlockquoteComponent')
-    },
-    // Controller commands
-    commands: [
-      require('../../ui/UndoCommand'),
-      require('../../ui/RedoCommand'),
-      require('../../ui/SaveCommand')
-    ]
+  // Component registry
+  components: {
+    'paragraph': require('../paragraph/ParagraphComponent'),
+    'heading': require('../heading/HeadingComponent'),
+    'link': require('../link/LinkComponent'),
+    'codeblock': require('../codeblock/CodeblockComponent'),
+    'blockquote': require('../blockquote/BlockquoteComponent')
   },
-  // Custom configuration (required!)
-  bodyEditor: {
-    commands: [
-      require('../text/SwitchTextTypeCommand'),
-      require('../strong/StrongCommand'),
-      require('../emphasis/EmphasisCommand'),
-      require('../link/LinkCommand'),
-    ],
-    textTypes: [
-      {name: 'paragraph', data: {type: 'paragraph'}},
-      {name: 'heading1',  data: {type: 'heading', level: 1}},
-      {name: 'heading2',  data: {type: 'heading', level: 2}},
-      {name: 'heading3',  data: {type: 'heading', level: 3}},
-      {name: 'codeblock', data: {type: 'codeblock'}},
-      {name: 'blockquote', data: {type: 'blockquote'}}
-    ]
+  commands: [
+    // Controller commands
+    require('../../ui/UndoCommand'),
+    require('../../ui/RedoCommand'),
+    require('../../ui/SaveCommand'),
+
+    // Surface Commands
+    require('../text/SwitchTextTypeCommand'),
+    require('../strong/StrongCommand'),
+    require('../emphasis/EmphasisCommand'),
+    require('../link/LinkCommand')
+  ],
+  surfaces: {
+    body: {
+      commands: ['switch-text-type', 'strong', 'emphasis', 'link'],
+      textTypes: [
+        {name: 'paragraph', data: {type: 'paragraph'}},
+        {name: 'heading1',  data: {type: 'heading', level: 1}},
+        {name: 'heading2',  data: {type: 'heading', level: 2}},
+        {name: 'heading3',  data: {type: 'heading', level: 3}},
+        {name: 'codeblock', data: {type: 'codeblock'}},
+        {name: 'blockquote', data: {type: 'blockquote'}}
+      ]
+    }    
   }
+
 };
 
 module.exports = ProseEditor;
