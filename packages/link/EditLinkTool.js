@@ -1,3 +1,5 @@
+'use strict';
+
 var Component = require('../../ui/Component');
 var Icon = require('../../ui/FontAwesomeIcon');
 
@@ -83,5 +85,8 @@ EditLinkTool.Prototype = function() {
 };
 
 Component.extend(EditLinkTool);
+
+EditLinkTool.static.name = 'edit-link';
+EditLinkTool.static.commandName = 'link';
 
 module.exports = EditLinkTool;

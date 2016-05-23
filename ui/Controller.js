@@ -2,7 +2,6 @@
 
 var isArray = require('lodash/isArray');
 var each = require('lodash/each');
-var extend = require('lodash/extend');
 var mergeWith = require('lodash/mergeWith');
 var warn = require('../util/warn');
 var Registry = require('../util/Registry');
@@ -11,6 +10,7 @@ var DocumentSession = require('../model/DocumentSession');
 var Component = require('./Component');
 var SurfaceManager = require('./SurfaceManager');
 var CommandManager = require('./CommandManager');
+var Configurator = require('../util/Configurator');
 
 // Setup default I18n
 var I18n = require('./i18n');
@@ -104,6 +104,55 @@ function Controller() {
 }
 
 Controller.Prototype = function() {
+  /*
+    Inspects the configuration object and sets up registries
+
+    Override if you want use a custom configurator
+  */
+  this.configure = function(ConfigFn) {
+    var configurator = new Configurator();
+    this.defaultConfig(configurator);
+    configurator.import(ConfigFn);
+
+    var config = configurator.getConfig();
+
+    // Configure components
+    var components = config.components;
+    var componentRegistry = new Registry();
+    each(components, function(ComponentClass, name) {
+      componentRegistry.add(name, ComponentClass);
+    });
+
+    this.componentRegistry = componentRegistry;
+
+    // Configure tool registry
+    var toolRegistry = new Registry();
+    each(config.tools, function(tool) {
+      toolRegistry.add(tool.Class.static.name, tool);
+    });
+
+    // Setup toolRegistry
+    this.toolRegistry = toolRegistry;
+
+    var CommandClasses = config.commands.map(function(c) { return c.Class; });
+
+    // Prepare command manager
+    this.commandManager = new CommandManager(this, CommandClasses);
+
+    // Setup text types
+    // TODO: consider scopes for text types e.g. text types for body surface
+    // vs text types for author description surface
+    var textTypeSpecs = config.textTypes.map(function(t) { return t.spec; });
+    this.textTypes = textTypeSpecs;
+
+  };
+
+  /*
+    Can be used to inject default config
+  */
+  this.defaultConfig = function(/*config*/) {
+    // no-op
+  };
 
   /**
    * Defines the child context. You should override this to provide your own contexts.
@@ -112,13 +161,13 @@ Controller.Prototype = function() {
    */
   this.getChildContext = function() {
     return {
-      config: this.getConfig(),
       controller: this,
       documentSession: this.documentSession,
       doc: this.doc,
       componentRegistry: this.componentRegistry,
       surfaceManager: this.surfaceManager,
       commandManager: this.commandManager,
+      toolRegistry: this.toolRegistry,
       i18n: I18n.instance
     };
   };
@@ -158,7 +207,6 @@ Controller.Prototype = function() {
   };
 
   this._initializeController = function(props) {
-    var config = this.getConfig();
 
     // Either takes a DocumentSession compatible object or a doc instance
     if (props.documentSession) {
@@ -170,14 +218,13 @@ Controller.Prototype = function() {
     } else {
       throw new Error('Controller requires a DocumentSession instance');
     }
-    this.surfaceManager = new SurfaceManager(this.documentSession);    
-    this.commandManager = new CommandManager(this, config.commands);
+    this.surfaceManager = new SurfaceManager(this.documentSession);
+    this.configure(props.config);
 
-    this._initializeComponentRegistry(config.components);
-
-    if (config.i18n) {
-      I18n.instance.load(config.i18n);
-    }
+    // TODO: fix i18n config
+    // if (config.i18n) {
+    //   I18n.instance.load(config.i18n);
+    // }
 
     // Register event handlers
     this.doc.on('document:changed', this.onDocumentChanged, this, {
@@ -200,28 +247,6 @@ Controller.Prototype = function() {
     // Note: we need to clear everything, as the childContext
     // changes which is immutable
     this.empty();
-  };
-
-  // Use static config if available, otherwise try to fetch it from props
-  this.getConfig = function() {
-    if (this.props.config) {
-      return this.props.config;
-    } else if (this.constructor.static.config) {
-      return this.constructor.static.config;
-    } else {
-      return {        
-        components: {},
-        commands: []
-      };
-    }
-  };
-
-  this._initializeComponentRegistry = function(components) {
-    var componentRegistry = new Registry();
-    each(components, function(ComponentClass, name) {
-      componentRegistry.add(name, ComponentClass);
-    });
-    this.componentRegistry = componentRegistry;
   };
 
   this.willUpdateState = function(newState) {
@@ -428,6 +453,9 @@ Controller.Prototype = function() {
 */
 
 Component.extend(Controller);
+
+// TODO: Once the configurator API is stable mergeConfig
+// is obsolete
 
 function _concatArrays(objValue, srcValue) {
   if (isArray(objValue)) {
