@@ -57,20 +57,20 @@ Overlay.Prototype = function() {
 
     if (hints) {
       var contentWidth = this.el.htmlProp('offsetWidth');
-
-      // var contentHeight = overlayContent.htmlProp('clientHeight');
-      var selectionWidth = hints.rectangle.width;
+      var contentHeight = this.el.htmlProp('offsetHeight');
+      var selectionMaxWidth = hints.rectangle.width;
       var selectionHeight = hints.rectangle.height;
-      var containerWidth = hints.rectangle.left + hints.rectangle.width + hints.rectangle.right;
-      
-      this.el.css('top', hints.rectangle.top + selectionHeight);
-      var leftPos = hints.rectangle.left - contentWidth/2 + selectionWidth/2;
+
+      // By default, Overlays are aligned center/top to the selection
+      this.el.css('top', hints.rectangle.top - contentHeight);
+      var leftPos = hints.rectangle.left + selectionMaxWidth/2 - contentWidth/2;
 
       // Must not exceed left bound
       leftPos = Math.max(leftPos, 0);
 
       // Must not exceed right bound
-      leftPos = Math.min(leftPos, containerWidth - contentWidth);
+      var maxLeftPos = hints.rectangle.left + selectionMaxWidth + hints.rectangle.right - contentWidth;
+      leftPos = Math.min(leftPos, maxLeftPos);
       this.el.css('left', leftPos);
     }
   };
