@@ -2,7 +2,7 @@
 
 var Component = require('../../ui/Component');
 var Icon = require('../../ui/FontAwesomeIcon');
-
+var clone = require('lodash/clone');
 /**
   Component to edit an existing link.
 
@@ -86,7 +86,14 @@ EditLinkTool.Prototype = function() {
 
 Component.extend(EditLinkTool);
 
+EditLinkTool.static.getProps = function(commandStates) {
+  if (commandStates.link.mode === 'edit') {
+    return clone(commandStates.link);
+  } else {
+    return undefined;
+  }
+};
+
 EditLinkTool.static.name = 'edit-link';
-EditLinkTool.static.commandName = 'link';
 
 module.exports = EditLinkTool;

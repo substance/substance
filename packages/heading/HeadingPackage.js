@@ -10,17 +10,17 @@ module.exports = function(config) {
   config.addConverter(HeadingHTMLConverter);
 
   config.addTextType({
-    name: 'heading',
+    name: 'heading1',
     data: {type: 'heading', level: 1}
   });
 
   config.addTextType({
-    name: 'heading',
+    name: 'heading2',
     data: {type: 'heading', level: 2}
   });
 
   config.addTextType({
-    name: 'heading',
+    name: 'heading3',
     data: {type: 'heading', level: 3}
   });
   

@@ -28,10 +28,6 @@ ProseEditorTools.Prototype = function() {
       }
     });
 
-    if (this.props.tools) {
-      tools = tools.concat(this.props.tools);
-    }
-
     el.append(
       $$(Toolbar.Group).append(
         tools
@@ -42,5 +38,4 @@ ProseEditorTools.Prototype = function() {
 };
 
 Component.extend(ProseEditorTools);
-
 module.exports = ProseEditorTools;

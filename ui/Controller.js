@@ -111,7 +111,6 @@ Controller.Prototype = function() {
   */
   this.configure = function(ConfigFn) {
     var configurator = new Configurator();
-    this.defaultConfig(configurator);
     configurator.import(ConfigFn);
 
     var config = configurator.getConfig();
@@ -144,14 +143,6 @@ Controller.Prototype = function() {
     // vs text types for author description surface
     var textTypeSpecs = config.textTypes.map(function(t) { return t.spec; });
     this.textTypes = textTypeSpecs;
-
-  };
-
-  /*
-    Can be used to inject default config
-  */
-  this.defaultConfig = function(/*config*/) {
-    // no-op
   };
 
   /**

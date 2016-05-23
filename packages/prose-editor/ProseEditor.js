@@ -8,8 +8,6 @@ var Toolbar = require('../../ui/Toolbar');
 var ProseEditorTools = require('./ProseEditorTools');
 var ProseEditorOverlay = require('./ProseEditorOverlay');
 
-var ProseEditorDefaultConfig = require('./ProseEditorDefaultConfig');
-
 function ProseEditor() {
   ProseEditor.super.apply(this, arguments);
 }
@@ -21,11 +19,6 @@ ProseEditor.Prototype = function() {
   this.didMount = function() {
     _super.didMount.call(this);
     this.refs.body.selectFirst();
-  };
-
-  // Run the default config block
-  this.defaultConfig = function(config) {
-    ProseEditorDefaultConfig(config);
   };
 
   this.render = function($$) {
@@ -43,7 +36,8 @@ ProseEditor.Prototype = function() {
             documentSession: this.documentSession,
             containerId: 'body',
             name: 'body',
-            // TODO: this is somewhat redundant with the configuration
+            // TODO: this is redundant with the configuration. Possibly we
+            // should provide this via DI instead
             commands: ['switch-text-type', 'strong', 'emphasis', 'link'],
             textTypes: this.textTypes
           }).ref('body')
