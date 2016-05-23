@@ -9,8 +9,8 @@ function InsertNodeCommand() {
 
 InsertNodeCommand.Prototype = function() {
 
-  this.getCommandState = function() {
-    var sel = this.getSelection();
+  this.getCommandState = function(context) {
+    var sel = context.documentSession.getSelection();
     var newState = {
       disabled: true,
       active: false
@@ -21,10 +21,10 @@ InsertNodeCommand.Prototype = function() {
     return newState;
   };
 
-  this.execute = function() {
-    var state = this.getCommandState();
+  this.execute = function(context) {
+    var state = this.getCommandState(context);
     if (state.disabled) return;
-    var surface = this.getSurface();
+    var surface = context.surface;
     surface.transaction(function(tx, args) {
       return this.insertNode(tx, args);
     }.bind(this));
@@ -41,7 +41,6 @@ InsertNodeCommand.Prototype = function() {
     throw new Error('InsertNodeCommand.createNodeData() is abstract.');
   };
 };
-
 
 SurfaceCommand.extend(InsertNodeCommand);
 

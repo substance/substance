@@ -1,4 +1,3 @@
-/* jshint latedef:nofunc */
 'use strict';
 
 var SurfaceTool = require('../../ui/SurfaceTool');
@@ -8,8 +7,6 @@ function LinkTool() {
 }
 
 SurfaceTool.extend(LinkTool);
-
 LinkTool.static.name = 'link';
-
 
 module.exports = LinkTool;

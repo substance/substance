@@ -967,12 +967,13 @@ Surface.Prototype = function() {
       spanParent.normalize();
       return rect;
     } else {
+      var nativeEl = this.el.el;
       var sel = this.getSelection();
       if (sel.isNull()) {
         return {};
       } else {
         if (sel.isCollapsed()) {
-          var cursorEl = this.el.querySelector('.se-cursor');
+          var cursorEl = nativeEl.querySelector('.se-cursor');
           if (cursorEl) {
             return getBoundingClientRect(cursorEl, containerEl);
           } else {
@@ -980,7 +981,7 @@ Surface.Prototype = function() {
             return {};
           }
         } else {
-          var nativeEl = this.el.el;
+          
           var selFragments = nativeEl.querySelectorAll('.se-selection-fragment');
           if (selFragments.length > 0) {
             return getBoundingClientRect(selFragments, containerEl);

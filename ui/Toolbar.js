@@ -43,6 +43,8 @@ Toolbar.Prototype = function() {
       commandStates: commandStates
     }).ref('toolbarContent'));
 
+    el.append(this.props.children);
+
     return el;
   };
 };
