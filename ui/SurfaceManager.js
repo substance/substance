@@ -68,10 +68,13 @@ SurfaceManager.Prototype = function() {
    */
   this.unregisterSurface = function(surface) {
     surface.off(this);
-    delete this.surfaces[surface.getId()];
-    // TODO: this should not be necessary anymore
-    if (surface && this.focusedSurface === surface) {
-      this.focusedSurface = null;
+    var surfaceId = surface.getId();
+    var registeredSurface = this.surfaces[surfaceId];
+    if (registeredSurface === surface) {
+      delete this.surfaces[surfaceId];
+      if (surface && this.focusedSurface === surface) {
+        this._state.focusedSurface = null;
+      }
     }
   };
 
@@ -80,9 +83,12 @@ SurfaceManager.Prototype = function() {
     var _state = this._state;
 
     var updatedSurfaces = {};
-
     if (update.selection) {
-      _state.focusedSurface = this.surfaces[update.selection.surfaceId];
+      var focusedSurface = this.surfaces[update.selection.surfaceId];
+      _state.focusedSurface = focusedSurface;
+      if (focusedSurface) {
+        focusedSurface._focus();
+      }
     }
 
     if (update.change) {
@@ -179,18 +185,11 @@ SurfaceManager.Prototype = function() {
   };
 
   this.onSessionDidUpdate = function() {
-    /*
-      here we will make sure that at the end the DOM selection is rendered
-      on the active surface
-    */
-    var sel = this.documentSession.getSelection();
-    var surfaceId = sel.surfaceId;
-    var surface = this.surfaces[surfaceId];
-    if (surface) {
-      console.log('SurfaceManager: calling surface.focus() after session update.', surfaceId);
-      surface.focus();
-      // surface.el.focus();
-      // surface.rerenderDOMSelection();
+    var focusedSurface = this._state.focusedSurface;
+    if (focusedSurface) {
+      // Note: making sure that at the surface is focused and the selection is rendered
+      // console.log('SurfaceManager: calling surface.focus() after session update.', focusedSurface.getId());
+      focusedSurface.focus();
     }
   };
 

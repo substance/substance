@@ -49,9 +49,9 @@ TextPropertyEditor.Prototype = function() {
     if (!this.props.disabled) {
       el.addClass('enabled');
     }
-    if (!this.props.disabled) {
-      el.attr('contenteditable', true);
-    }
+    // if (!this.props.disabled) {
+    //   el.attr('contenteditable', true);
+    // }
     el.append(
       $$(TextProperty, {
         tagName: "div",

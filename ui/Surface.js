@@ -147,8 +147,7 @@ Surface.Prototype = function() {
     var el = $$(tagName)
       .addClass('sc-surface')
       .attr('spellCheck', false)
-      .attr('tabindex', 2)
-      .attr('contenteditable', false);
+      .attr('tabindex', 2);
 
     if (!this.isDisabled()) {
       if (this.isEditable()) {
@@ -322,11 +321,12 @@ Surface.Prototype = function() {
   };
 
   this.blur = function() {
+    // this.el.removeAttr('contenteditable');
     if (this._hasNativeFocus()) {
       this.el.blur();
     } else {
       this._update();
-      this.rerenderDOMSelection();
+      // this.rerenderDOMSelection();
     }
     this.emit('surface:blurred', this);
   };
@@ -340,10 +340,23 @@ Surface.Prototype = function() {
   };
 
   this.focus = function() {
-    this.el.focus();
+    this._focus();
     this._update();
     this.rerenderDOMSelection();
     this.emit('surface:focused', this);
+  };
+
+  this._focus = function() {
+    if (this.isEditable()) {
+      // TODO: maybe we should set contenteditable only in ContainerEditor and TextPropertyEditor
+      // it is too hard to grasp here
+      this.el.attr('contenteditable', true);
+    }
+    this._state.skipNextFocusEvent = true;
+    // ATTENTION: unfortunately, focusing the contenteditable does lead to auto-scrolling
+    // in some browsers
+    this.el.focus();
+    this._state.skipNextFocusEvent = false;
   };
 
   this.setSelectionFromEvent = function(evt) {
@@ -363,12 +376,11 @@ Surface.Prototype = function() {
       // we update only the one which as a focused document.
       (!Surface.MULTIPLE_APPS_ON_PAGE || window.document.hasFocus())) {
       // console.log('Surface.rerenderDOMSelection', this.__id__);
-      if (!this._hasNativeFocus()) {
-        this.skipNextFocusEvent = true;
-        this.el.focus();
-      }
       var sel = this.getSelection();
-      this.domSelection.setSelection(sel);
+      if (sel.surfaceId === this.getId()) {
+        this._focus();
+        this.domSelection.setSelection(sel);
+      }
     }
   };
 
@@ -665,6 +677,9 @@ Surface.Prototype = function() {
   this.onNativeBlur = function() {
     console.log('Native blur on surface', this.getId());
     var _state = this._state;
+    if (this.isEditable()) {
+      this.el.removeAttr('contenteditable');
+    }
     if (_state.skipNextFocusEvent) {
       _state.skipNextFocusEvent = false;
       return;
@@ -678,6 +693,11 @@ Surface.Prototype = function() {
 
   this.onNativeFocus = function() {
     console.log('Native focus on surface', this.getId());
+    // ATTENTION: ATM whenever a surface gets focused it will scroll into view
+    // where Chrome does this by scrolling the top into view
+    // TODO: we could try to restore the original scrollpos to fix that
+    // Alternatively, scrolling the selection into view would help too
+    // The best would be to prevent auto-scrolling, but that does not seem to be possible.
     var _state = this._state;
     // in some cases we don't react on native focusing
     // e.g., when the selection is done via mouse
@@ -800,7 +820,7 @@ Surface.Prototype = function() {
   this._handleLeftOrRightArrowKey = function (event) {
     event.stopPropagation();
     // Note: we need this timeout so that CE updates the DOM selection first
-    // before we map the DOM selection
+    // before we map it to the model
     window.setTimeout(function() {
       if (!this.isMounted()) return;
       var options = {
@@ -813,7 +833,7 @@ Surface.Prototype = function() {
   this._handleUpOrDownArrowKey = function (event) {
     event.stopPropagation();
     // Note: we need this timeout so that CE updates the DOM selection first
-    // before we map the DOM selection
+    // before we map it to the model
     window.setTimeout(function() {
       if (!this.isMounted()) return;
       var options = {
@@ -867,9 +887,8 @@ Surface.Prototype = function() {
     // when a new DOM selection is set.
     // ATTENTION: in FF 44 this was causing troubles, making the CE unselectable
     // until the next native blur.
-    if (!sel.isNull() && this.el && !this._hasNativeFocus()) {
-      _state.skipNextFocusEvent = true;
-      this.el.focus();
+    if (!sel.isNull() && this.el && sel.surfaceId === this.getId()) {
+      this._focus();
     }
     this.documentSession.setSelection(sel);
   };

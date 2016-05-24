@@ -13,7 +13,8 @@ function IsolatedNodeComponent() {
   this.name = this.props.node.id;
   this._id = _createId(this);
   this._state = {
-    selectionFragment: null
+    selectionFragment: null,
+    level: this._getLevel()
   };
 }
 
@@ -68,6 +69,7 @@ IsolatedNodeComponent.Prototype = function() {
   this.render = function($$) {
     // console.log('##### IsolatedNodeComponent.render()', $$.capturing);
     var el = _super.render.apply(this, arguments);
+    var ContentClass = this._getContentClass() || Component;
 
     var node = this.props.node;
     el.addClass('sc-isolated-node')
@@ -96,6 +98,10 @@ IsolatedNodeComponent.Prototype = function() {
     var container = $$('div').addClass('se-container')
       .attr('contenteditable', false);
 
+    if (ContentClass.static.fullWidth) {
+      container.addClass('sm-full-width');
+    }
+
     if (this.state.mode === 'cursor' && this.state.position === 'before') {
       container.append(
         $$('div').addClass('se-cursor').addClass('sm-before').attr('contenteditable', false)
@@ -103,11 +109,11 @@ IsolatedNodeComponent.Prototype = function() {
     }
     container.append(this.renderContent($$));
 
-    // TODO: there are some content implementations which would work better without that
-    // i.e. having such an overlay here
     if (this._isDisabled()) {
       container.addClass('sm-disabled');
-      container.append($$('div').addClass('se-blocker'));
+      // NOTE: there are some content implementations which work better without a blocker
+      var blocker = $$('div').addClass('se-blocker').css({ 'z-index': this._state.level });
+      container.append(blocker);
     }
 
     if (this.state.mode === 'cursor' && this.state.position === 'after') {
@@ -129,8 +135,7 @@ IsolatedNodeComponent.Prototype = function() {
 
   this.renderContent = function($$) {
     var node = this.props.node;
-    var componentRegistry = this.context.componentRegistry;
-    var ComponentClass = componentRegistry.get(node.type);
+    var ComponentClass = this._getContentClass();
     if (!ComponentClass) {
       error('Could not resolve a component for type: ' + node.type);
       return $$('div');
@@ -141,6 +146,13 @@ IsolatedNodeComponent.Prototype = function() {
       };
       return $$(ComponentClass, props).ref('content');
     }
+  };
+
+  this._getContentClass = function() {
+    var node = this.props.node;
+    var componentRegistry = this.context.componentRegistry;
+    var ComponentClass = componentRegistry.get(node.type);
+    return ComponentClass;
   };
 
   this._registerGlobalDOMHandlers = function() {
@@ -169,6 +181,16 @@ IsolatedNodeComponent.Prototype = function() {
     return this.context.surface;
   };
 
+  this._getLevel = function() {
+    var level = 1;
+    var parent = this.getSurfaceParent();
+    while (parent) {
+      level++;
+      parent = parent.getSurfaceParent();
+    }
+    return level;
+  };
+
   this.onSessionUpdate = function(update) {
     if (update.selection) {
       // TODO: we need to change the DocumentSession update API
@@ -183,8 +205,9 @@ IsolatedNodeComponent.Prototype = function() {
         }
       } else {
         var nodeId = this.props.node.id;
-        var inSurface = (surfaceId === this.getSurfaceParent().getId());
-        var nodeIsSelected = (inSurface &&
+        var inParentSurface = (surfaceId === this.getSurfaceParent().getId());
+        var inChildSurface = (surfaceId && surfaceId.startsWith(this.getId()));
+        var nodeIsSelected = (inParentSurface &&
           newSel.isContainerSelection() && newSel.containsNodeFragment(nodeId)
         );
         // TODO: probably we need to dispatch the state to descendants
@@ -193,7 +216,7 @@ IsolatedNodeComponent.Prototype = function() {
           this.setState({ mode: 'selected' });
           return;
         }
-        var hasCursor = (inSurface &&
+        var hasCursor = (inParentSurface &&
           newSel.isContainerSelection() &&
           newSel.isCollapsed() &&
           newSel.startPath.length === 1 &&
@@ -212,12 +235,15 @@ IsolatedNodeComponent.Prototype = function() {
           this.setState({ mode: null });
           return;
         }
+        if (this.state.mode !== 'focused' && inChildSurface) {
+          this.setState({ mode: 'focused' });
+        }
       }
     }
   };
 
   this.onMousedown = function(event) {
-    // console.log('IsolatedNodeComponent.onMousedown');
+    console.log('IsolatedNodeComponent.onMousedown', this.getId());
     event.stopPropagation();
     switch (this.state.mode) {
       case 'selected':

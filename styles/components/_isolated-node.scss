@@ -28,6 +28,10 @@
       }
     }
 
+    &.sm-full-width {
+      display: block;
+    }
+
   }
 
   > .se-slug {
@@ -54,29 +58,3 @@
   }
 
 }
-
-// .sc-isolated-node > .se-container.sm-disabled ::selection,
-// .sc-isolated-node > .se-container .sg-hide-selection ::selection
-// {
-//   background: none;
-// }
-
-// .sc-isolated-node > .se-container .sg-hide-selection ::selection {
-//   background: none;
-// }
-
-// .sc-isolated-node > .se-container.sm-disabled ::-moz-selection {
-//   background: none;
-// }
-
-// .sc-isolated-node > .se-container .sg-hide-selection ::-moz-selection {
-//   background: none;
-// }
-
-// .sc-isolated-node.sm-focused > .se-container ::selection {
-//   background: initial;
-// }
-
-// .sc-isolated-node.sm-focused > .se-container ::-moz-selection {
-//   background: initial;
-// }

@@ -79,28 +79,35 @@ ContainerEditor.Prototype = function() {
 
   this.willReceiveProps = function(newProps) {
     _super.willReceiveProps.apply(this, arguments);
-
+    var _state = this._state;
     if (!newProps.hasOwnProperty('enabled') || newProps.enabled) {
-      this.enabled = true;
+      _state.enabled = true;
     } else {
-      this.enabled = false;
+      _state.enabled = false;
     }
   };
 
   this.didMount = function() {
     _super.didMount.apply(this, arguments);
+    var documentSession = this.getDocumentSession();
     var doc = this.getDocument();
+    // to do incremental updates
     doc.on('document:changed', this.onDocumentChange, this);
+    // to manage state for proper isolated node support
+    documentSession.on('update', this.onDocumentSessionUpdate, this);
   };
 
   this.dispose = function() {
     _super.dispose.apply(this, arguments);
+    var documentSession = this.getDocumentSession();
     var doc = this.getDocument();
     doc.off(this);
+    documentSession.off(this);
   };
 
   this.render = function($$) {
     var el = _super.render.call(this, $$);
+    var _state = this._state;
 
     var doc = this.getDocument();
     var containerId = this.props.containerId;
@@ -125,10 +132,10 @@ ContainerEditor.Prototype = function() {
       }.bind(this));
     }
 
-    if (this.enabled) {
+    if (_state.enabled) {
       el.attr('contenteditable', true);
     } else {
-      el.attr('contenteditable', false);
+      el.removeAttr('contenteditable');
     }
 
     return el;
@@ -259,18 +266,6 @@ ContainerEditor.Prototype = function() {
     return textCommands;
   };
 
-  this.enable = function() {
-    // As opposed to a ContainerEditor, a regular Surface
-    // is not a ContentEditable -- but every contained TextProperty
-    this.attr('contenteditable', true);
-    this.enabled = true;
-  };
-
-  this.disable = function() {
-    this.removeAttr('contenteditable');
-    this.enabled = false;
-  };
-
   /* Editing behavior */
 
 
@@ -380,28 +375,31 @@ ContainerEditor.Prototype = function() {
     }
   };
 
-  this.onMouseDown = function(event) {
-    if (!this.enabled) {
-      warn('ContainerEditor %s is not enabled. Not reacting on mousedown.');
-      return;
+  this.onDocumentSessionUpdate = function(update) {
+    if (update.selection) {
+      var surfaceId = this.getId();
+      var otherSurfaceId = update.selection.surfaceId;
+      var isEditable = this.isEditable();
+      var isShadowed = this._state.shadowed;
+      var isInNestedNode = otherSurfaceId && otherSurfaceId.startsWith(surfaceId) && otherSurfaceId.length > surfaceId.length;
+      if (isEditable && !isShadowed && isInNestedNode) {
+        this.el.removeAttr('contenteditable');
+        this._state.shadowed = true;
+        return;
+      }
+      if (isShadowed && !isInNestedNode) {
+        this.el.attr('contenteditable', true);
+        this._state.shadowed = false;
+        return;
+      }
     }
-    if (this.isEditable()) {
-      this.attr('contenteditable', true);
+  };
+
+  this.onMouseDown = function(event) {
+    if (this._state.shadowed) {
+      this.el.attr('contenteditable', true);
     }
     _super.onMouseDown.call(this, event);
-  };
-
-  this.onNativeBlur = function(event) {
-    this.attr('contenteditable', false);
-    _super.onNativeBlur.call(this, event);
-  };
-
-  this.onNativeFocus = function(event) {
-    var sel = this.getSelection();
-    if (sel && !sel.isNull() && sel.surfaceId === this.name && this.isEditable()) {
-      this.attr('contenteditable', true);
-    }
-    _super.onNativeFocus.call(this, event);
   };
 
   // Create a first text element
