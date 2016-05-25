@@ -2,25 +2,8 @@
 'use strict';
 
 var Document = require('../../model/Document');
-var DocumentSchema = require('../../model/DocumentSchema');
 
-var schema = new DocumentSchema('prose-article', '1.0.0');
-schema.getDefaultTextType = function() {
-  return 'paragraph';
-};
-
-schema.addNodes([
-  require('../paragraph/Paragraph'),
-  require('../heading/Heading'),
-  require('../codeblock/Codeblock'),
-  require('../blockquote/Blockquote'),
-  require('../image/Image'),
-  require('../emphasis/Emphasis'),
-  require('../strong/Strong'),
-  require('../link/Link'),
-]);
-
-var Article = function() {
+var ProseArticle = function(schema) {
   Document.call(this, schema);
 
   this.create({
@@ -30,7 +13,6 @@ var Article = function() {
   });
 };
 
-Document.extend(Article);
-Article.schema = schema;
+Document.extend(ProseArticle);
 
-module.exports = Article;
+module.exports = ProseArticle;

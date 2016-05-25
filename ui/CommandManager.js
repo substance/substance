@@ -10,9 +10,9 @@ var Registry = require('../util/Registry');
   
   @class
 */
-function CommandManager(controller, commands) {
-  this.controller = controller;
-  this.documentSession = controller.documentSession;
+function CommandManager(context, commands) {
+  this.documentSession = context.documentSession;
+  this.surfaceManager = context.surfaceManager;
 
   // Set up command registry
   this.commandRegistry = new Registry();
@@ -31,29 +31,33 @@ CommandManager.Prototype = function() {
     this.documentSession.off(this);
   };
 
-  this.getContext = function() {
-    var controller = this.controller;
-    var surface = controller.getFocusedSurface();
-    var documentSession = controller.documentSession;
-
+  this.getCommandContext = function() {
     return {
-      surface: surface,
-      documentSession: documentSession,
-      document: documentSession.getDocument(),
-      controller: controller,
+      surfaceManager: this.surfaceManager,
+      documentSession: this.documentSession,
+      // delegate: this._delegateCommand.bind(this),
+      // surface: surfaceManager.getFocusedSurface(),
+      // document: documentSession.getDocument(),
     };
   };
+
+  // TODO: Implement delegator bridge
+  // this._delegateCommand = function(commandName, args) {
+  //   var hook = this.bridge[commandName];
+  //   if (!hook) {
+  //     warn(...);
+  //   }
+  //   return hook(args);
+  // };
 
   /*
     Compute new command states object
   */
   this.updateCommandStates = function() {
     var commandStates = {};
-
     this.commandRegistry.each(function(cmd) {
-      commandStates[cmd.getName()] = cmd.getCommandState(this.getContext());
+      commandStates[cmd.getName()] = cmd.getCommandState(this.getCommandContext());
     }.bind(this));
-
     this.commandStates = commandStates;
   };
 
@@ -74,7 +78,7 @@ CommandManager.Prototype = function() {
       return;
     }
     // Run command
-    var info = cmd.execute(this.getContext(), args);
+    var info = cmd.execute(this.getCommandContext(), args);
     if (info === undefined) {
       warn('command ', commandName, 'must return either an info object or true when handled or false when not handled');
     }

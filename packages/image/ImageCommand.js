@@ -32,7 +32,7 @@ var ImageCommand = SurfaceCommand.extend({
   */
   execute: function(context) {
     var state = this.getCommandState(context);
-    var surface = context.surface;
+    var surface = context.surfaceManager.getFocusedSurface();
 
     // WriterController interface, we use it for file upload
     var controller = context.controller;
@@ -52,7 +52,6 @@ var ImageCommand = SurfaceCommand.extend({
 
     inputEl.on('change', function(/*e*/) {
       // Pick the first file
-      // TODO: is there a way to use DefaultDOMElement API to access the files property?
       var file = inputEl.getProperty('files')[0];
 
       // We no longer need the file input

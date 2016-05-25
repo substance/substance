@@ -14,13 +14,23 @@ var RedoTool = require('../../ui/RedoTool');
 // Base packages
 var ParagraphPackage = require('../paragraph/ParagraphPackage');
 var HeadingPackage = require('../heading/HeadingPackage');
-var Codeblock = require('../codeblock/CodeblockPackage');
-var Blockquote = require('../blockquote/BlockquotePackage');
+var CodeblockPackage = require('../codeblock/CodeblockPackage');
+var BlockquotePackage = require('../blockquote/BlockquotePackage');
 var LinkPackage = require('../link/LinkPackage');
 var EmphasisPackage = require('../emphasis/EmphasisPackage');
 var StrongPackage = require('../strong/StrongPackage');
 
+// Article Class
+var ProseArticle = require('./ProseArticle');
+
 module.exports = function(config) {
+
+  config.defineSchema({
+    name: 'prose-article',
+    ArticleClass: ProseArticle,
+    defaultTextType: 'paragraph'
+  });
+
   // Setup base functionality
   config.addCommand(UndoCommand);
   config.addCommand(RedoCommand);
@@ -34,8 +44,8 @@ module.exports = function(config) {
   // Now import base packages
   config.import(ParagraphPackage);
   config.import(HeadingPackage);
-  config.import(Codeblock);
-  config.import(Blockquote);
+  config.import(CodeblockPackage);
+  config.import(BlockquotePackage);
   config.import(EmphasisPackage);
   config.import(StrongPackage);
   config.import(LinkPackage);
