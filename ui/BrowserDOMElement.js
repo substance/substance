@@ -234,9 +234,14 @@ BrowserDOMElement.Prototype = function() {
   };
 
   this.removeEventListener = function(eventName, handler) {
+    // console.log('removing event listener', eventName, handler);
     var listener = null, idx = -1;
     if (arguments.length === 1 && arguments[0]._isDOMEventListener) {
       listener = arguments[0];
+      var idx = this.eventListeners.indexOf(listener);
+      if (idx > -1) {
+        this.eventListeners.splice(idx, 1);
+      }
     } else {
       idx = DOMElement._findEventListenerIndex(this.eventListeners, eventName, handler);
       listener = this.eventListeners[idx];
@@ -245,6 +250,7 @@ BrowserDOMElement.Prototype = function() {
       }
     }
     if (listener) {
+      // console.log('BrowserDOMElement.removeEventListener:', eventName, this.eventListeners.length);
       listener._el = null;
       this.el.removeEventListener(listener.eventName, listener.handler);
     }
