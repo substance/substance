@@ -217,10 +217,8 @@ IsolatedNodeComponent.Prototype = function() {
     event.stopPropagation();
     switch (this.state.mode) {
       case 'selected':
-        event.preventDefault();
-        this.setState({ mode: 'focused' });
-        break;
       case 'focused':
+      case 'co-focused':
         break;
       default:
         event.preventDefault();
