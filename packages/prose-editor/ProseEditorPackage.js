@@ -3,7 +3,6 @@
 // Base commands
 var UndoCommand = require('../../ui/UndoCommand');
 var RedoCommand = require('../../ui/RedoCommand');
-var SaveCommand = require('../../ui/SaveCommand');
 
 // Base Tools
 var SwitchTextTypeCommand = require('../text/SwitchTextTypeCommand');
@@ -19,6 +18,9 @@ var BlockquotePackage = require('../blockquote/BlockquotePackage');
 var LinkPackage = require('../link/LinkPackage');
 var EmphasisPackage = require('../emphasis/EmphasisPackage');
 var StrongPackage = require('../strong/StrongPackage');
+var CodePackage = require('../code/CodePackage');
+var SubscriptPackage = require('../subscript/SubscriptPackage');
+var SuperscriptPackage = require('../superscript/SuperscriptPackage');
 
 // Article Class
 var ProseArticle = require('./ProseArticle');
@@ -48,6 +50,9 @@ module.exports = {
     config.import(BlockquotePackage);
     config.import(EmphasisPackage);
     config.import(StrongPackage);
+    config.import(SubscriptPackage);
+    config.import(SuperscriptPackage);
+    config.import(CodePackage);
     config.import(LinkPackage);
   }
 };

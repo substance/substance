@@ -1,12 +1,12 @@
 'use strict';
 
-var SurfaceTool = require('../../ui/SurfaceTool');
+var AnnotationTool = require('../../ui/AnnotationTool');
 
 function LinkTool() {
   LinkTool.super.apply(this, arguments);
 }
 
-SurfaceTool.extend(LinkTool);
+AnnotationTool.extend(LinkTool);
 LinkTool.static.name = 'link';
 
 module.exports = LinkTool;

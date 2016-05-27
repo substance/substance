@@ -4,13 +4,10 @@ var Component = require('./Component');
 var capitalize = require('lodash/capitalize');
 
 /**
-  Abstract Tool interface for editing and annotation tools.
+  Default Tool implementation
 
   A tool must be associated with a Command, which holds all the logic, while the tool
   is just the visual representation of the command state.
-
-  Like with {@link ui/Command} are two categories of tools, {@link ui/SurfaceTool}
-  and {@link ui/ControllerTool}.
 
   @class
   @component
@@ -20,53 +17,6 @@ function Tool() {
 }
 
 Tool.Prototype = function() {
-
-  // TODO: We should consider not exposing a broad interface
-  // here. Rather tools should use this.context
-
-  /**
-    Return the currently controller
-
-    @return {ui/Surface}
-  */
-  this.getController = function() {
-    console.warn('use this.context.controller');
-    return this.context.controller;
-  };
-
-  /**
-    Return the currently focused surface
-
-    @return {ui/Surface}
-  */
-  this.getSurface = function() {
-    console.warn('use this.context.surface');
-    return this.getController().getFocusedSurface();
-  };
-
-  /**
-    Return the document associated with the focused surface.
-
-    @return {model/Document}
-  */
-  this.getDocument = function() {
-    console.warn('use this.context.document');
-    return this.getController().getDocument();
-  };
-
-  /**
-    Return the currently active container
-
-    @return {Document.Container}
-    @public
-  */
-  this.getContainer = function() {
-    console.warn('use this.context.surface.getContainer()');
-    var surface = this.getSurface();
-    if (surface) {
-      return surface.getContainer();
-    }
-  };
 
   /**
     Default tool rendering. You can override this method to provide your custom markup
@@ -87,11 +37,6 @@ Tool.Prototype = function() {
     // .sm-active
     if (this.props.active) {
       el.addClass('sm-active');
-    }
-    // .sm-<mode>
-    // TODO: it seems that the mode class is not following the 'sm-' prefix-rules
-    if (this.props.mode) {
-      el.addClass(this.props.mode);
     }
 
     // button
@@ -155,7 +100,6 @@ Tool.Prototype = function() {
   this.performAction = function() {
     this.context.commandManager.executeCommand(this.getCommandName());
   };
-
 };
 
 Component.extend(Tool);

@@ -11,7 +11,15 @@ var ICON_MAP = {
   'save': 'fa-save',
   'image': 'fa-image',
   'undo': 'fa-undo',
-  'redo': 'fa-repeat'
+  'redo': 'fa-repeat',
+  'subscript': 'fa-subscript',
+  'superscript': 'fa-superscript',
+  'code': 'fa-code',
+
+  // Annotation modes
+  'edit': 'fa-cog',
+  'expand': 'fa-arrows-h',
+  'truncate': 'fa-arrows-h'
 };
 
 function IconProvider() {
@@ -20,7 +28,10 @@ function IconProvider() {
 
 IconProvider.Prototype = function() {
   this.renderIcon = function($$, name) {
-    return $$(Icon, {icon: ICON_MAP[name]});
+    var iconClass = ICON_MAP[name];
+    if (iconClass) {
+      return $$(Icon, {icon: ICON_MAP[name]});  
+    }
   };
 };
 

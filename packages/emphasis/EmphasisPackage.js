@@ -6,7 +6,7 @@ var EmphasisCommand = require('./EmphasisCommand');
 
 module.exports = {
   name: 'emphasis',
-  configure: function(config, options) {
+  configure: function(config) {
     config.addNode(Emphasis);
     config.addCommand(EmphasisCommand);
     config.addTool(EmphasisTool);
