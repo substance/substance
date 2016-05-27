@@ -99,8 +99,8 @@ Surface.Prototype = function() {
     if (!this.isReadonly() && inBrowser) {
       this.domSelection = new DOMSelection(this);
       this.clipboard.didMount();
-      this.domObserver = new window.MutationObserver(this.onDomMutations.bind(this));
-      this.domObserver.observe(this.el.getNativeElement(), { subtree: true, characterData: true });
+      // this.domObserver = new window.MutationObserver(this.onDomMutations.bind(this));
+      // this.domObserver.observe(this.el.getNativeElement(), { subtree: true, characterData: true, characterDataOldValue: true });
     }
 
     this.documentSession.on('update', this._onSessionUpdate, this);
@@ -617,7 +617,7 @@ Surface.Prototype = function() {
     }.bind(this));
   };
 
-  this.onDomMutations = function() {
+  this.onDomMutations = function(e) {
     if (this._state.skipNextObservation) {
       this._state.skipNextObservation = false;
       return;
@@ -628,7 +628,7 @@ Surface.Prototype = function() {
     //      - Note: copy, cut, paste work just fine
     //  - dragging selected text
     //  - spell correction
-    info("We want to enable a DOM MutationObserver which catches all changes made by native interfaces (such as spell corrections, etc). Lookout for this message and try to set Surface.skipNextObservation=true when you know that you will mutate the DOM.");
+    info("We want to enable a DOM MutationObserver which catches all changes made by native interfaces (such as spell corrections, etc). Lookout for this message and try to set Surface.skipNextObservation=true when you know that you will mutate the DOM.", e);
   };
 
   this.onDragStart = function(event) {
