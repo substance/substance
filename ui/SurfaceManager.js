@@ -185,11 +185,12 @@ SurfaceManager.Prototype = function() {
   };
 
   this.onSessionDidUpdate = function() {
+    // at the end of the update flow, make sure the surface is focused
+    // and displays the right DOM selection.
     var focusedSurface = this._state.focusedSurface;
     if (focusedSurface) {
-      // Note: making sure that at the surface is focused and the selection is rendered
-      // console.log('SurfaceManager: calling surface.focus() after session update.', focusedSurface.getId());
       focusedSurface.focus();
+      focusedSurface.rerenderDOMSelection();
     }
   };
 
