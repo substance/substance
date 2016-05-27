@@ -1,6 +1,6 @@
-var SurfaceTool = require('../../ui/SurfaceTool');
+var Tool = require('../../ui/Tool');
 
-var ImageTool = SurfaceTool.extend({
+var ImageTool = Tool.extend({
   static: {
     name: 'image',
     command: 'image'

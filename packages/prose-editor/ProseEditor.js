@@ -68,6 +68,7 @@ ProseEditor.Prototype = function() {
     this.surfaceManager = new SurfaceManager(this.documentSession);
     this.fileClient = configurator.getFileClient();
     this.commandManager = new CommandManager(this.getCommandContext(), commands);
+    this.iconProvider = configurator.getIconProvider();
   };
 
   this.getCommandContext = function() {
@@ -82,6 +83,7 @@ ProseEditor.Prototype = function() {
   this.getChildContext = function() {
     return {
       controller: this,
+      iconProvider: this.iconProvider,
       documentSession: this.documentSession,
       doc: this.doc, // TODO: remove in favor of documentSession
       componentRegistry: this.componentRegistry,
@@ -115,7 +117,6 @@ ProseEditor.Prototype = function() {
       )
     );
   };
-
 };
 
 Component.extend(ProseEditor);

@@ -1,13 +1,13 @@
 'use strict';
 
-var ControllerTool = require('./ControllerTool');
+var Tool = require('./Tool');
 
 function SaveTool() {
   SaveTool.super.apply(this, arguments);
 }
 
 
-ControllerTool.extend(SaveTool);
+Tool.extend(SaveTool);
 
 SaveTool.static.name = 'save';
 

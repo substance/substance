@@ -1,12 +1,12 @@
 'use strict';
 
-var ControllerTool = require('./ControllerTool');
+var Tool = require('./Tool');
 
 function RedoTool() {
   RedoTool.super.apply(this, arguments);
 }
 
-ControllerTool.extend(RedoTool);
+Tool.extend(RedoTool);
 
 RedoTool.static.name = 'redo';
 

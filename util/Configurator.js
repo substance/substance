@@ -6,6 +6,7 @@ var DocumentSchema = require('../model/DocumentSchema');
 var Registry = require('../util/Registry');
 var FileClientStub = require('../ui/FileClientStub');
 var SaveHandlerStub = require('../ui/SaveHandlerStub');
+var IconProvider = require('../ui/IconProvider');
 
 // Setup default I18n
 var I18n = require('../ui/i18n');
@@ -29,6 +30,7 @@ function Configurator() {
     commands: [],
     tools: [],
     textTypes: [],
+    iconProvider: IconProvider,
     saveHandler: SaveHandlerStub,
     fileClient: FileClientStub
   };
@@ -116,7 +118,6 @@ Configurator.Prototype = function() {
     };
 
     schema.addNodes(this.config.nodes);
-
     var doc = new schemaConfig.ArticleClass(schema);
     if (seed) {
       seed(doc);
@@ -165,6 +166,10 @@ Configurator.Prototype = function() {
   this.getSaveHandler = function() {
     var SaveHandlerClass = this.config.saveHandler;
     return new SaveHandlerClass();
+  };
+
+  this.getIconProvider = function() {
+    return new IconProvider();
   };
 
   this.getTextTypes = function() {

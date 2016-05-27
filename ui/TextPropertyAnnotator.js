@@ -14,7 +14,7 @@ var TextProperty = require('./TextPropertyComponent');
 
   @prop {String} name unique surface name
   @prop {String[]} path path to a text property
-  @prop {ui/SurfaceCommand[]} commands array of command classes to be available
+  @prop {ui/Command[]} commands array of command classes to be available
 
   @example
 

@@ -1,12 +1,12 @@
 'use strict';
 
-var ControllerTool = require('./ControllerTool');
+var Tool = require('./Tool');
 
 function UndoTool() {
   UndoTool.super.apply(this, arguments);
 }
 
-ControllerTool.extend(UndoTool);
+Tool.extend(UndoTool);
 
 UndoTool.static.name = 'undo';
 

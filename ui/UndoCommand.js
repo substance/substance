@@ -1,6 +1,6 @@
 'use strict';
 
-var ControllerCommand = require('./ControllerCommand');
+var Command = require('./Command');
 
 function Undo() {
   Undo.super.apply(this, arguments);
@@ -24,8 +24,8 @@ Undo.Prototype = function() {
   };
 };
 
-ControllerCommand.extend(Undo);
+Command.extend(Undo);
 
-ControllerCommand.static.name = 'undo';
+Undo.static.name = 'undo';
 
 module.exports = Undo;

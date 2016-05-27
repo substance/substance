@@ -1,6 +1,6 @@
 'use strict';
 
-var ControllerCommand = require('./ControllerCommand');
+var Command = require('./Command');
 
 function SaveCommand() {
   SaveCommand.super.apply(this, arguments);
@@ -26,7 +26,7 @@ SaveCommand.Prototype = function() {
   };
 };
 
-ControllerCommand.extend(SaveCommand);
+Command.extend(SaveCommand);
 
 SaveCommand.static.name = 'save';
 

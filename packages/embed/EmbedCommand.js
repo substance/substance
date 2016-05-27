@@ -1,9 +1,9 @@
 'use strict';
 
 var uuid = require('../../util/uuid');
-var SurfaceCommand = require('../../ui/SurfaceCommand');
+var Command = require('../../ui/Command');
 
-var EmbedCommand = SurfaceCommand.extend({
+var EmbedCommand = Command.extend({
 
   static: {
     name: 'embed'
