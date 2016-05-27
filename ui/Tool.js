@@ -102,7 +102,7 @@ Tool.Prototype = function() {
   this.renderButton = function($$) {
     var button = $$('button')
       .on('click', this.onClick)
-      .append(this.props.children);
+      .append(this.renderIcon($$));
 
     if (this.props.disabled) {
       // make button inaccessible
@@ -112,6 +112,10 @@ Tool.Prototype = function() {
       button.attr('tabindex', 1);
     }
     return button;
+  };
+
+  this.renderIcon = function($$) {
+    return this.props.children;
   };
 
   this.getTitle = function() {

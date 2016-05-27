@@ -14,6 +14,10 @@ LinkCommand.Prototype = function() {
     };
   };
 
+  this.canFuse = function() {
+    return false;
+  };
+
   // When there's some overlap with only a single annotation we do an expand
   this.canEdit = function(annos, sel) {
     // jshint unused: false

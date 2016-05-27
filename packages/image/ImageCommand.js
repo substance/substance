@@ -33,9 +33,7 @@ var ImageCommand = SurfaceCommand.extend({
   execute: function(context) {
     var state = this.getCommandState(context);
     var surface = context.surfaceManager.getFocusedSurface();
-
-    // WriterController interface, we use it for file upload
-    var controller = context.controller;
+    var fileClient = context.fileClient;
 
     // Return if command is disabled
     if (state.disabled) return;
@@ -57,7 +55,7 @@ var ImageCommand = SurfaceCommand.extend({
       // We no longer need the file input
       inputEl.remove();
 
-      controller.uploadFile(file, function(err, figureUrl) {
+      fileClient.uploadFile(file, function(err, figureUrl) {
         // NOTE: we are providing a custom beforeState, to make sure
         // thate the correct initial selection is used.
         surface.transaction(function(tx, args) {

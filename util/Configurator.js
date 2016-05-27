@@ -4,11 +4,20 @@ var oo = require('./oo');
 var each = require('lodash/forEach');
 var DocumentSchema = require('../model/DocumentSchema');
 var Registry = require('../util/Registry');
-var StubFileUploader = require('../ui/StubFileUploader');
+var FileClientStub = require('../ui/FileClientStub');
+var SaveHandlerStub = require('../ui/SaveHandlerStub');
 
 // Setup default I18n
 var I18n = require('../ui/i18n');
 
+/*
+  Default Configurator for Substance editors
+
+  This works well for single-column apps (such as ProseEditor). 
+  Write your own Configurator for apps that require more complex
+  configuration (e.g. when there are multiple surfaces involved
+  each coming with different textTypes, enabled commands etc.)
+*/
 function Configurator() {
   // All data will be collected here
   this.config = {
@@ -19,7 +28,9 @@ function Configurator() {
     converters: [],
     commands: [],
     tools: [],
-    textTypes: []
+    textTypes: [],
+    saveHandler: SaveHandlerStub,
+    fileClient: FileClientStub
   };
 }
 
@@ -74,16 +85,24 @@ Configurator.Prototype = function() {
     });
   };
 
+  this.setSaveHandler = function(saveHandler) {
+    this.config.saveHandler = saveHandler;
+  };
+
+  this.setFileClient = function(fileClient) {
+    this.config.fileClient = fileClient;
+  };
+
   this.import = function(configFn, options) {
     configFn(this, options || {});
   };
 
+  // Config Interpreter APIs
+  // ------------------------
+
   this.getConfig = function() {
     return this.config;
   };
-
-  // Config Interpreter APIs
-  // ------------------------
 
   this.createArticle = function(seed) {
     var schemaConfig = this.config.schema;
@@ -123,7 +142,8 @@ Configurator.Prototype = function() {
   };
 
   this.getCommands = function() {
-    var CommandClasses = this.config.commands.map(function(c) {
+    var commands = this.config.commands
+    var CommandClasses = commands.map(function(c) {
       return c.Class;
     });
     return CommandClasses;
@@ -131,13 +151,20 @@ Configurator.Prototype = function() {
 
   this.getSurfaceCommandNames = function() {
     var commands = this.getCommands();
-    var commandNames = commands.map(function(C) { return C.static.name; });
-    console.log('commandNames', commandNames);
+    var commandNames = commands.map(function(C) {
+      return C.static.name;
+    });
     return commandNames;
   };
 
-  this.getFileUploader = function() {
-    return new StubFileUploader();
+  this.getFileClient = function() {
+    var FileClientClass = this.config.fileClient;
+    return new FileClientClass();
+  };
+
+  this.getSaveHandler = function() {
+    var SaveHandlerClass = this.config.saveHandler;
+    return new SaveHandlerClass();
   };
 
   this.getTextTypes = function() {

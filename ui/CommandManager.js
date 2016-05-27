@@ -11,8 +11,11 @@ var Registry = require('../util/Registry');
   @class
 */
 function CommandManager(context, commands) {
+  this.context = context;
+  if (!context.documentSession) {
+    throw new Error('DocumentSession required.');
+  }
   this.documentSession = context.documentSession;
-  this.surfaceManager = context.surfaceManager;
 
   // Set up command registry
   this.commandRegistry = new Registry();
@@ -32,23 +35,8 @@ CommandManager.Prototype = function() {
   };
 
   this.getCommandContext = function() {
-    return {
-      surfaceManager: this.surfaceManager,
-      documentSession: this.documentSession,
-      // delegate: this._delegateCommand.bind(this),
-      // surface: surfaceManager.getFocusedSurface(),
-      // document: documentSession.getDocument(),
-    };
+    return this.context;
   };
-
-  // TODO: Implement delegator bridge
-  // this._delegateCommand = function(commandName, args) {
-  //   var hook = this.bridge[commandName];
-  //   if (!hook) {
-  //     warn(...);
-  //   }
-  //   return hook(args);
-  // };
 
   /*
     Compute new command states object

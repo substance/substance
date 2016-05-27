@@ -2,10 +2,10 @@
 
 var oo = require('../util/oo');
 
-var StubFileUploader = function() {
+var FileClientStub = function() {
 };
 
-StubFileUploader.Prototype = function() {
+FileClientStub.Prototype = function() {
   this.uploadFile = function(file, cb) {
     // Default file upload implementation
     // We just return a temporary objectUrl
@@ -14,6 +14,6 @@ StubFileUploader.Prototype = function() {
   };
 };
 
-oo.initClass(StubFileUploader);
+oo.initClass(FileClientStub);
 
-module.exports = StubFileUploader;
+module.exports = FileClientStub;

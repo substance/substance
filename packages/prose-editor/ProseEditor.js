@@ -52,6 +52,7 @@ ProseEditor.Prototype = function() {
 
   this._initialize = function(props) {
     var configurator = this.props.configurator;
+    var commands = configurator.getCommands();
 
     if (!props.documentSession) {
       throw new Error('DocumentSession instance required');
@@ -59,25 +60,30 @@ ProseEditor.Prototype = function() {
     this.documentSession = props.documentSession;
     this.doc = this.documentSession.getDocument();
 
-    // Static registries
+    this.saveHandler = configurator.getSaveHandler();
+    this.documentSession.setSaveHandler(this.saveHandler);
     this.componentRegistry = configurator.getComponentRegistry();
     this.toolRegistry = configurator.getToolRegistry();
     this.i18nInstance = configurator.getI18nInstance();
     this.surfaceManager = new SurfaceManager(this.documentSession);
-    this.fileUploader = configurator.getFileUploader();
-    // this.backend = configurator.getBackend();
-    // this.documentSession.on('save', this.backend.save);
-    this.commandManager = new CommandManager({
+    this.fileClient = configurator.getFileClient();
+    this.commandManager = new CommandManager(this.getCommandContext(), commands);
+  };
+
+  this.getCommandContext = function() {
+    return {
       documentSession: this.documentSession,
-      surfaceManager: this.surfaceManager
-    }, configurator.getCommands());
+      surfaceManager: this.surfaceManager,
+      fileClient: this.fileClient,
+      saveHandler: this.saveHandler
+    };
   };
 
   this.getChildContext = function() {
     return {
       controller: this,
       documentSession: this.documentSession,
-      doc: this.doc,
+      doc: this.doc, // TODO: remove in favor of documentSession
       componentRegistry: this.componentRegistry,
       surfaceManager: this.surfaceManager,
       commandManager: this.commandManager,
