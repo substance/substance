@@ -93,8 +93,8 @@ Configurator.Prototype = function() {
     this.config.fileClient = fileClient;
   };
 
-  this.import = function(configFn, options) {
-    configFn(this, options || {});
+  this.import = function(pkg, options) {
+    pkg.configure(this, options || {});
   };
 
   // Config Interpreter APIs
@@ -142,7 +142,7 @@ Configurator.Prototype = function() {
   };
 
   this.getCommands = function() {
-    var commands = this.config.commands
+    var commands = this.config.commands;
     var CommandClasses = commands.map(function(c) {
       return c.Class;
     });

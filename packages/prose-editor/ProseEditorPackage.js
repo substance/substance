@@ -23,30 +23,32 @@ var StrongPackage = require('../strong/StrongPackage');
 // Article Class
 var ProseArticle = require('./ProseArticle');
 
-module.exports = function(config) {
+module.exports = {
+  name: 'prose-editor',
+  configure: function(config) {
+    config.defineSchema({
+      name: 'prose-article',
+      ArticleClass: ProseArticle,
+      defaultTextType: 'paragraph'
+    });
 
-  config.defineSchema({
-    name: 'prose-article',
-    ArticleClass: ProseArticle,
-    defaultTextType: 'paragraph'
-  });
+    // Setup base functionality
+    config.addCommand(UndoCommand);
+    config.addCommand(RedoCommand);
+    config.addCommand(SaveCommand);
+    config.addCommand(SwitchTextTypeCommand);
 
-  // Setup base functionality
-  config.addCommand(UndoCommand);
-  config.addCommand(RedoCommand);
-  config.addCommand(SaveCommand);
-  config.addCommand(SwitchTextTypeCommand);
+    config.addTool(SwitchTextTypeTool);
+    config.addTool(UndoTool, {icon: 'fa-undo'});
+    config.addTool(RedoTool, {icon: 'fa-repeat'});
 
-  config.addTool(SwitchTextTypeTool);
-  config.addTool(UndoTool, {icon: 'fa-undo'});
-  config.addTool(RedoTool, {icon: 'fa-repeat'});
-
-  // Now import base packages
-  config.import(ParagraphPackage);
-  config.import(HeadingPackage);
-  config.import(CodeblockPackage);
-  config.import(BlockquotePackage);
-  config.import(EmphasisPackage);
-  config.import(StrongPackage);
-  config.import(LinkPackage);
+    // Now import base packages
+    config.import(ParagraphPackage);
+    config.import(HeadingPackage);
+    config.import(CodeblockPackage);
+    config.import(BlockquotePackage);
+    config.import(EmphasisPackage);
+    config.import(StrongPackage);
+    config.import(LinkPackage);
+  }
 };
