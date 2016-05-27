@@ -137,7 +137,7 @@ IsolatedNodeComponent.Prototype = function() {
   };
 
   this._isDisabled = function() {
-    return this.state.mode === 'selected' || this.state.mode === 'cursor' || !this.state.mode;
+    return this.state.mode === 'co-selected' || this.state.mode === 'cursor' || !this.state.mode;
   };
 
   this._getSurfaceParent = function() {
