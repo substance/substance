@@ -333,7 +333,6 @@ Surface.Prototype = function() {
       // console.log('Surface.rerenderDOMSelection', this.__id__);
       var sel = this.getSelection();
       if (sel.surfaceId === this.getId()) {
-        this._focus();
         this.domSelection.setSelection(sel);
       }
     }
@@ -833,11 +832,13 @@ Surface.Prototype = function() {
   };
 
   this._focus = function() {
-    this._state.skipNextFocusEvent = true;
-    // ATTENTION: unfortunately, focusing the contenteditable does lead to auto-scrolling
-    // in some browsers
-    this.el.focus();
-    this._state.skipNextFocusEvent = false;
+    if (this.el) {
+      this._state.skipNextFocusEvent = true;
+      // ATTENTION: unfortunately, focusing the contenteditable does lead to auto-scrolling
+      // in some browsers
+      this.el.focus();
+      this._state.skipNextFocusEvent = false;
+    }
   };
 
   this._handleLeftOrRightArrowKey = function (event) {
@@ -909,7 +910,9 @@ Surface.Prototype = function() {
     // when a new DOM selection is set.
     // ATTENTION: in FF 44 this was causing troubles, making the CE unselectable
     // until the next native blur.
-    if (!sel.isNull() && this.el && sel.surfaceId === this.getId()) {
+    // Should not be necessary anymore as this should be covered by this._focus()
+    // which will eventually be called at the end of the update flow
+    if (!sel.isNull() && sel.surfaceId === this.getId() && platform.isFF) {
       this._focus();
     }
     this.documentSession.setSelection(sel);
@@ -971,6 +974,16 @@ Surface.Prototype = function() {
   */
   this._prepareArgs = function(args) {
     /* jshint unused: false */
+  };
+
+  this.setSelectionFromEvent = function(evt) {
+    if (this.domSelection) {
+      this._state.skipNextFocusEvent = true;
+      var domRange = Surface.getDOMRangeFromEvent(evt);
+      var range = this.domSelection.getSelectionFromDOMRange(domRange);
+      var sel = this.getDocument().createSelection(range);
+      this.setSelection(sel);
+    }
   };
 
   // EXPERIMENTAL: get bounding box for current selection
