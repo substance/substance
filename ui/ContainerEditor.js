@@ -123,6 +123,7 @@ ContainerEditor.Prototype = function() {
 
     if (!this.props.disabled) {
       el.addClass('sm-enabled');
+      el.setAttribute('contenteditable', true);
     }
 
     return el;
