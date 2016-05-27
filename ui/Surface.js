@@ -1045,12 +1045,13 @@ Surface.Prototype = function() {
   };
 
   this._sendOverlayHints = function() {
-    if (this.state.mode === 'focused') {
-      var selectionRect = this.getBoundingRectangleForSelection();
-      this.send('updateOverlayHints', {
-        rectangle: selectionRect
-      });
-    }
+    // deactivated due to low performance
+    // if (this.state.mode === 'focused') {
+    //   var selectionRect = this.getBoundingRectangleForSelection();
+    //   this.send('updateOverlayHints', {
+    //     rectangle: selectionRect
+    //   });
+    // }
   };
 
 };
