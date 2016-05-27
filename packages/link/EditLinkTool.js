@@ -58,18 +58,14 @@ EditLinkTool.Prototype = function() {
     return el;
   };
 
-  this.getSurface = function() {
-    return this.context.controller.getFocusedSurface();
-  };
-
   this.onSave = function(e) {
     e.preventDefault();
 
     var node = this.props.node;
-    var surface = this.getSurface();
+    var documentSession = this.context.documentSession;
     var url = this.refs.url.val();
 
-    surface.transaction(function(tx) {
+    documentSession.transaction(function(tx) {
       tx.set([node.id, "url"], url);
     }.bind(this));
   };
@@ -77,8 +73,8 @@ EditLinkTool.Prototype = function() {
   this.onDelete = function(e) {
     e.preventDefault();
     var node = this.props.node;
-    var surface = this.getSurface();
-    surface.transaction(function(tx) {
+    var documentSession = this.context.documentSession;
+    documentSession.transaction(function(tx) {
       tx.delete(node.id);
     });
   };

@@ -9,16 +9,17 @@ function SaveCommand() {
 SaveCommand.Prototype = function() {
 
   this.getCommandState = function(context) {
-    var doc = context.document;
+    var dirty = context.documentSession.isDirty();
+    console.log('SaveCommand.dirty', dirty);
     return {
-      disabled: !doc.__dirty,
+      disabled: !dirty,
       active: false
     };
   };
 
-  this.execute = function() {
-    var controller = this.context.controller;
-    controller.saveDocument();
+  this.execute = function(context) {
+    var documentSession = context.documentSession;
+    documentSession.save();
     return {
       status: 'saving-process-started'
     };

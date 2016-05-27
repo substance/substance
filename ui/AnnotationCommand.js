@@ -72,7 +72,7 @@ AnnotationCommand.Prototype = function() {
     if (sel.isNull()) {
       return true;
     }
-    var doc = context.document;
+    var doc = context.documentSession.getDocument();
     var annotationType = this.getAnnotationType();
     return !helpers.isContainerAnnotation(doc, annotationType) && !sel.isPropertySelection();
   };
@@ -169,8 +169,8 @@ AnnotationCommand.Prototype = function() {
    */
   this.getAnnotationsForSelection = function(context) {
     var sel = context.documentSession.getSelection();
-    var doc = context.document;
-    var surface = context.surface;
+    var doc = context.documentSession.getDocument();
+    var surface = context.surfaceManager.getFocusedSurface();
     var annotationType = this.getAnnotationType();
     var containerId;
     if (surface.isContainerEditor()) {
@@ -217,7 +217,7 @@ AnnotationCommand.Prototype = function() {
    */
   this.getCommandState = function(context) {
     var sel = context.documentSession.getSelection();
-    var surface = context.surface;
+    var surface = context.surfaceManager.getFocusedSurface();
 
     if (!surface) {
       return {
@@ -269,7 +269,7 @@ AnnotationCommand.Prototype = function() {
    */
   // Helper to trigger an annotation transformation
   this.applyTransform = function(context, transformFn) {
-    var surface = context.surface;
+    var surface = context.surfaceManager.getFocusedSurface();
     var sel = context.documentSession.getSelection();
 
     var result; // to store transform result

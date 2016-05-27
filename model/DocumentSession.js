@@ -2,6 +2,7 @@
 
 var extend = require('lodash/extend');
 var warn = require('../util/warn');
+var error = require('../util/error');
 var oo = require('../util/oo');
 var EventEmitter = require('../util/EventEmitter');
 var TransactionDocument = require('./TransactionDocument');
@@ -31,6 +32,7 @@ function DocumentSession(doc, options) {
   this._lastChange = null;
 
   this.compressor = options.compressor || new DefaultChangeCompressor();
+  this.saveHandler = options.saveHandler;
 
   // Note: registering twice:
   // to do internal transformations in case changes are coming
@@ -55,6 +57,15 @@ DocumentSession.Prototype = function() {
         selection: sel
       });
     }
+  };
+
+  /*
+    Set saveHandler via API
+
+    E.g. if saveHandler not available at construction
+  */
+  this.setSaveHandler = function(saveHandler) {
+    this.saveHandler = saveHandler;
   };
 
   this.getCollaborators = function() {
@@ -254,6 +265,43 @@ DocumentSession.Prototype = function() {
     return selectionHasChanged;
   };
 
+  /*
+    Are there unsaved changes?
+  */
+  this.isDirty = function() {
+    return this._dirty;
+  };
+
+  /*
+    Save session / document
+  */
+  this.save = function() {
+    var doc = this.getDocument();
+    var saveHandler = this.saveHandler;
+
+    if (this._dirty && !this._isSaving) {
+      this._isSaving = true;
+      // Pass saving logic to the user defined callback if available
+      if (saveHandler) {
+        // TODO: calculate changes since last save
+        var changes = [];
+        saveHandler.saveDocument(doc, changes, function(err) {
+          
+          this._isSaving = false;
+          if (err) {
+            error('Error during save');
+          } else {
+            this._dirty = false;
+            this._triggerUpdateEvent({}, {force: true});
+          }
+        }.bind(this));
+
+      } else {
+        error('Document saving is not handled at the moment. Make sure saveHandler instance provided to documentSession');
+      }
+    }
+  };
+
   this._triggerUpdateEvent = function(update, info) {
     info = info || {};
     info.session = this;
@@ -262,12 +310,13 @@ DocumentSession.Prototype = function() {
       // however, debugging gets inconvenient as caught exceptions don't trigger a breakpoint
       // by default, and other libraries such as jquery throw noisily.
       this.doc._notifyChangeListeners(update.change, info);
+      this._dirty = true;
     } else {
       // HACK: removing this from the update when it is NOP
       // this way, we only need to do this check here
       delete update.change;
     }
-    if (Object.keys(update).length > 0) {
+    if (Object.keys(update).length > 0 || info.force) {
       // slots to have more control about when things get
       // updated, and things have been rendered/updated
       this.emit('update', update, info);

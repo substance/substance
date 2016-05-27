@@ -10,9 +10,12 @@ var Registry = require('../util/Registry');
   
   @class
 */
-function CommandManager(controller, commands) {
-  this.controller = controller;
-  this.documentSession = controller.documentSession;
+function CommandManager(context, commands) {
+  this.context = context;
+  if (!context.documentSession) {
+    throw new Error('DocumentSession required.');
+  }
+  this.documentSession = context.documentSession;
 
   // Set up command registry
   this.commandRegistry = new Registry();
@@ -31,17 +34,8 @@ CommandManager.Prototype = function() {
     this.documentSession.off(this);
   };
 
-  this.getContext = function() {
-    var controller = this.controller;
-    var surface = controller.getFocusedSurface();
-    var documentSession = controller.documentSession;
-
-    return {
-      surface: surface,
-      documentSession: documentSession,
-      document: documentSession.getDocument(),
-      controller: controller,
-    };
+  this.getCommandContext = function() {
+    return this.context;
   };
 
   /*
@@ -49,11 +43,9 @@ CommandManager.Prototype = function() {
   */
   this.updateCommandStates = function() {
     var commandStates = {};
-
     this.commandRegistry.each(function(cmd) {
-      commandStates[cmd.getName()] = cmd.getCommandState(this.getContext());
+      commandStates[cmd.getName()] = cmd.getCommandState(this.getCommandContext());
     }.bind(this));
-
     this.commandStates = commandStates;
   };
 
@@ -74,7 +66,7 @@ CommandManager.Prototype = function() {
       return;
     }
     // Run command
-    var info = cmd.execute(this.getContext(), args);
+    var info = cmd.execute(this.getCommandContext(), args);
     if (info === undefined) {
       warn('command ', commandName, 'must return either an info object or true when handled or false when not handled');
     }
