@@ -62,8 +62,8 @@ SnapshotEngine.Prototype = function() {
     }
     this._computeSnapshot(args, function(err, snapshot) {
       if (err) return cb(err);
-      this.snapshotStore.createSnapshot(snapshot, cb);
-    });
+      this.snapshotStore.saveSnapshot(snapshot, cb);
+    }.bind(this));
   };
 
   /*
