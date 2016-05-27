@@ -311,20 +311,17 @@ Surface.Prototype = function() {
   };
 
   this.focus = function() {
-    this._focus();
-    this._updateProperties();
-    this.rerenderDOMSelection();
-    this.emit('surface:focused', this);
-  };
-
-  this.setSelectionFromEvent = function(evt) {
-    if (this.domSelection) {
-      this._state.skipNextFocusEvent = true;
-      var domRange = Surface.getDOMRangeFromEvent(evt);
-      var range = this.domSelection.getSelectionFromDOMRange(domRange);
-      var sel = this.getDocument().createSelection(range);
-      this.setSelection(sel);
+    // console.log('Focusing surface %s explicitly with Surface.focus()', this.getId());
+    // NOTE: FF is causing problems with dynamically activated contenteditables
+    // and focusing
+    if (platform.isFF) {
+      this.domSelection.clear();
+      this.el.getNativeElement().blur();
     }
+    if (!this._hasNativeFocus()) {
+      this._focus();
+    }
+    this.emit('surface:focused', this);
   };
 
   this.rerenderDOMSelection = function() {
