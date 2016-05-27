@@ -176,7 +176,7 @@ SurfaceManager.Prototype = function() {
       var surface = this.surfaces[surfaceId];
       if (surface) {
         var newFragments = fragments[surfaceId];
-        // console.log('SurfaceManager: providing surface %s with new fragments', newFragments);
+        // console.log('SurfaceManager: providing surface %s with new fragments', surfaceId, newFragments);
         surface.extendProps({
           fragments: clone(newFragments)
         });

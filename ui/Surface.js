@@ -637,39 +637,36 @@ Surface.Prototype = function() {
   };
 
   this.onNativeBlur = function() {
-    console.log('Native blur on surface', this.getId());
-    var _state = this._state;
-    if (_state.skipNextFocusEvent) {
-      _state.skipNextFocusEvent = false;
-      return;
-    }
+    // console.log('Native blur on surface', this.getId());
+    // NOTE: deactivated this for now, as it had strange side effects
+    // we should find a better way which plays together with our update flow
+
+    // var _state = this._state;
     // native blur does not lead to a session update,
     // thus we need to update the selection manually
-    if (_state.cursorFragment) {
-      this._updateProperty(_state.cursorFragment.key);
-    }
+    // if (_state.cursorFragment) {
+    //   this._updateProperty(_state.cursorFragment.key);
+    // }
   };
 
   this.onNativeFocus = function() {
-    console.log('Native focus on surface', this.getId());
-    // ATTENTION: ATM whenever a surface gets focused it will scroll into view
-    // where Chrome does this by scrolling the top into view
-    // TODO: we could try to restore the original scrollpos to fix that
-    // Alternatively, scrolling the selection into view would help too
-    // The best would be to prevent auto-scrolling, but that does not seem to be possible.
-    var _state = this._state;
+    // console.log('Native focus on surface', this.getId());
+    // NOTE: deactivated this for now, as it had strange side effects
+    // we should find a better way which plays together with our update flow
+
+    // var _state = this._state;
     // in some cases we don't react on native focusing
     // e.g., when the selection is done via mouse
     // or if the selection is set implicitly
-    if (_state.skipNextFocusEvent) {
-      _state.skipNextFocusEvent = false;
-      return;
-    }
+    // if (_state.skipNextFocusEvent) {
+    //   _state.skipNextFocusEvent = false;
+    //   return;
+    // }
     // native focus does not lead to a session update,
     // thus we need to update the selection manually
-    if (_state.cursorFragment) {
-      this._updateProperty(_state.cursorFragment.key);
-    }
+    // if (_state.cursorFragment) {
+    //   this._updateProperty(_state.cursorFragment.key);
+    // }
   };
 
   // Internal implementations
@@ -678,10 +675,9 @@ Surface.Prototype = function() {
   // used to compute fragments that get dispatched to TextProperties
   this._deriveInternalState = function(nextProps) {
     var _state = this._state;
-    var oldFragments = this.props.fragments;
+    var oldFragments = _state.fragments;
     if (oldFragments) {
-      _forEachFragment(oldFragments, function(frag) {
-        var key = frag.path.toString();
+      each(oldFragments, function(frag, key) {
         if (this._getComponentForKey(key)) {
           _markAsDirty(_state, key);
         }
@@ -696,7 +692,7 @@ Surface.Prototype = function() {
   // fragments are all dynamic informations that we are displaying
   // like annotations (such as selections)
   this._deriveFragments = function(newFragments) {
-    // console.log('deriving fragments', newFragments, window.clientId);
+    // console.log('deriving fragments', newFragments, this.getId());
     var _state = this._state;
     _state.cursorFragment = null;
     // group fragments by property
@@ -924,7 +920,7 @@ Surface.Prototype = function() {
 
   this._updateModelSelection = function(options) {
     var sel = this.domSelection.getSelection(options);
-    console.log('Surface: updating model selection', sel.toString());
+    // console.log('Surface: updating model selection', sel.toString());
     // NOTE: this will also lead to a rerendering of the selection
     // via session.on('update')
     this.setSelection(sel);
@@ -962,7 +958,7 @@ Surface.Prototype = function() {
     var componentRegistry = this.context.componentRegistry || this.props.componentRegistry;
     var ComponentClass = componentRegistry.get(node.type);
     if (!ComponentClass) {
-      console.error('Could not resolve a component for type: ' + node.type);
+      error('Could not resolve a component for type: ' + node.type);
       ComponentClass = UnsupportedNode;
     }
     return $$(ComponentClass, {
@@ -1022,7 +1018,7 @@ Surface.Prototype = function() {
           if (cursorEl) {
             return getBoundingClientRect(cursorEl, containerEl);
           } else {
-            console.log('FIXME: there should be a rendered cursor element.');
+            warn('FIXME: there should be a rendered cursor element.');
             return {};
           }
         } else {
@@ -1030,7 +1026,7 @@ Surface.Prototype = function() {
           if (selFragments.length > 0) {
             return getBoundingClientRect(selFragments, containerEl);
           } else {
-            console.log('FIXME: there should be a rendered selection fragments element.');
+            warn('FIXME: there should be a rendered selection fragments element.');
             return {};
           }
         }
