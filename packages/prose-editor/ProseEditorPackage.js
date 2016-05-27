@@ -35,12 +35,11 @@ module.exports = {
     // Setup base functionality
     config.addCommand(UndoCommand);
     config.addCommand(RedoCommand);
-    config.addCommand(SaveCommand);
     config.addCommand(SwitchTextTypeCommand);
 
     config.addTool(SwitchTextTypeTool);
-    config.addTool(UndoTool, {icon: 'fa-undo'});
-    config.addTool(RedoTool, {icon: 'fa-repeat'});
+    config.addTool(UndoTool);
+    config.addTool(RedoTool);
 
     // Now import base packages
     config.import(ParagraphPackage);

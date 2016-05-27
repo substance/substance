@@ -14,7 +14,7 @@ module.exports = {
     config.addComponent('link', LinkComponent);
     config.addConverter(LinkHTMLConverter);
     config.addCommand(LinkCommand);
-    config.addTool(LinkTool, {icon: options.icon || 'fa-link'});
+    config.addTool(LinkTool);
     config.addTool(EditLinkTool, {
       overlay: true
     });

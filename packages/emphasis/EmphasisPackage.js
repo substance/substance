@@ -9,9 +9,7 @@ module.exports = {
   configure: function(config, options) {
     config.addNode(Emphasis);
     config.addCommand(EmphasisCommand);
-    config.addTool(EmphasisTool, {
-      icon: options.icon || 'fa-italic'
-    });
+    config.addTool(EmphasisTool);
   }
 };
 

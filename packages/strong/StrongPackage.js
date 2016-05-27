@@ -9,8 +9,6 @@ module.exports = {
   configure: function(config, options) {
     config.addNode(Strong);
     config.addCommand(StrongCommand);
-    config.addTool(StrongTool, {
-      icon: options.icon || 'fa-bold'
-    });
+    config.addTool(StrongTool);
   }
 };

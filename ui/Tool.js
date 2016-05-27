@@ -115,7 +115,9 @@ Tool.Prototype = function() {
   };
 
   this.renderIcon = function($$) {
-    return this.props.children;
+    var commandName = this.getCommandName();
+    var iconEl = this.context.iconProvider.renderIcon($$, commandName);
+    return iconEl;
   };
 
   this.getTitle = function() {
