@@ -25,6 +25,7 @@ var IsolatedNodeComponent = require('./IsolatedNodeComponent');
  */
 function DOMSelection(surface) {
   this.surface = surface;
+  this._wrange = window.document.createRange();
 }
 
 DOMSelection.Prototype = function() {
@@ -87,7 +88,7 @@ DOMSelection.Prototype = function() {
     if (wSel.rangeCount > 0) {
       wRange = wSel.getRangeAt(0);
     } else {
-      wRange = window.document.createRange();
+      wRange = this._wrange;
     }
     wSel.removeAllRanges();
     if (sel.isCollapsed()) {
@@ -106,6 +107,7 @@ DOMSelection.Prototype = function() {
         // unfortunately we are not able to test this behavior as it needs
         // triggering native keyboard events
         wRange.setStart(start.container, start.offset);
+        wRange.setEnd(start.container, start.offset);
         wSel.addRange(wRange);
         wSel.extend(end.container, end.offset);
       } else {
