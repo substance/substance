@@ -49,7 +49,7 @@ var IsolatedNodeComponent = require('./IsolatedNodeComponent');
  */
 
 function ContainerEditor() {
-  Surface.apply(this, arguments);
+  ContainerEditor.super.apply(this, arguments);
 
   this.containerId = this.props.containerId;
   if (!isString(this.containerId)) {
@@ -63,7 +63,7 @@ function ContainerEditor() {
   this.editingBehavior = new EditingBehavior();
 
   // derive internal state variables
-  this.willReceiveProps(this.props);
+  ContainerEditor.prototype._deriveInternalState.call(this, this.props);
 }
 
 ContainerEditor.Prototype = function() {
@@ -79,35 +79,24 @@ ContainerEditor.Prototype = function() {
 
   this.willReceiveProps = function(newProps) {
     _super.willReceiveProps.apply(this, arguments);
-    var _state = this._state;
-    if (!newProps.hasOwnProperty('enabled') || newProps.enabled) {
-      _state.enabled = true;
-    } else {
-      _state.enabled = false;
-    }
+    ContainerEditor.prototype._deriveInternalState.call(this, newProps);
   };
 
   this.didMount = function() {
     _super.didMount.apply(this, arguments);
-    var documentSession = this.getDocumentSession();
     var doc = this.getDocument();
     // to do incremental updates
     doc.on('document:changed', this.onDocumentChange, this);
-    // to manage state for proper isolated node support
-    documentSession.on('update', this.onDocumentSessionUpdate, this);
   };
 
   this.dispose = function() {
     _super.dispose.apply(this, arguments);
-    var documentSession = this.getDocumentSession();
     var doc = this.getDocument();
     doc.off(this);
-    documentSession.off(this);
   };
 
   this.render = function($$) {
     var el = _super.render.call(this, $$);
-    var _state = this._state;
 
     var doc = this.getDocument();
     var containerId = this.props.containerId;
@@ -132,10 +121,8 @@ ContainerEditor.Prototype = function() {
       }.bind(this));
     }
 
-    if (_state.enabled) {
-      el.attr('contenteditable', true);
-    } else {
-      el.removeAttr('contenteditable');
+    if (!this.props.disabled) {
+      el.addClass('sm-enabled');
     }
 
     return el;
@@ -153,6 +140,15 @@ ContainerEditor.Prototype = function() {
       } else {
         return $$(IsolatedNodeComponent, { node: node }).ref(node.id);
       }
+    }
+  };
+
+  this._deriveInternalState = function(props) {
+    var _state = this._state;
+    if (!props.hasOwnProperty('enabled') || props.enabled) {
+      _state.enabled = true;
+    } else {
+      _state.enabled = false;
     }
   };
 
@@ -373,33 +369,6 @@ ContainerEditor.Prototype = function() {
         }
       }
     }
-  };
-
-  this.onDocumentSessionUpdate = function(update) {
-    if (update.selection) {
-      var surfaceId = this.getId();
-      var otherSurfaceId = update.selection.surfaceId;
-      var isEditable = this.isEditable();
-      var isShadowed = this._state.shadowed;
-      var isInNestedNode = otherSurfaceId && otherSurfaceId.startsWith(surfaceId) && otherSurfaceId.length > surfaceId.length;
-      if (isEditable && !isShadowed && isInNestedNode) {
-        this.el.removeAttr('contenteditable');
-        this._state.shadowed = true;
-        return;
-      }
-      if (isShadowed && !isInNestedNode) {
-        this.el.attr('contenteditable', true);
-        this._state.shadowed = false;
-        return;
-      }
-    }
-  };
-
-  this.onMouseDown = function(event) {
-    if (this._state.shadowed) {
-      this.el.attr('contenteditable', true);
-    }
-    _super.onMouseDown.call(this, event);
   };
 
   // Create a first text element

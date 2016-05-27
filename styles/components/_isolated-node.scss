@@ -41,7 +41,7 @@
     font-size: 1px;
   }
 
-  &.sm-selected {
+  &.sm-selected, &.sm-co-selected {
     > .se-container {
       background: rgba(163,205,253, 0.6);
       outline: 2px solid;
@@ -49,7 +49,7 @@
     }
   }
 
-  &.sm-focused {
+  &.sm-focused, &.sm-co-focused {
     > .se-container {
       // background: rgba(163,205,253, 0.6);
       outline: 2px solid;

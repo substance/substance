@@ -2,29 +2,19 @@
 
 var error = require('../util/error');
 var keys = require('../util/keys');
-var inBrowser = require('../util/inBrowser');
+var createSurfaceId = require('../util/createSurfaceId');
 var Coordinate = require('../model/Coordinate');
 var Component = require('./Component');
-var DefaultDOMElement = require('./DefaultDOMElement');
 
 function IsolatedNodeComponent() {
   IsolatedNodeComponent.super.apply(this, arguments);
 
   this.name = this.props.node.id;
-  this._id = _createId(this);
+  this._id = createSurfaceId(this);
   this._state = {
     selectionFragment: null,
     level: this._getLevel()
   };
-}
-
-function _createId(isolatedNodeComp) {
-  var surfaceParent = isolatedNodeComp.getSurfaceParent();
-  if (surfaceParent) {
-    return surfaceParent.getId() + '/' + isolatedNodeComp.name;
-  } else {
-    return isolatedNodeComp.name;
-  }
 }
 
 IsolatedNodeComponent.Prototype = function() {
@@ -44,17 +34,6 @@ IsolatedNodeComponent.Prototype = function() {
 
     var docSession = this.context.documentSession;
     docSession.on('update', this.onSessionUpdate, this);
-
-    this._registerGlobalDOMHandlers();
-  };
-
-  this.willReceiveProps = function() {
-    _super.willReceiveProps.apply(this, arguments);
-    this._unregisterGlobalDOMHandlers();
-  };
-
-  this.didUpdate = function() {
-    this._registerGlobalDOMHandlers();
   };
 
   this.dispose = function() {
@@ -62,8 +41,6 @@ IsolatedNodeComponent.Prototype = function() {
 
     var docSession = this.context.documentSession;
     docSession.off(this);
-
-    this._unregisterGlobalDOMHandlers();
   };
 
   this.render = function($$) {
@@ -148,6 +125,10 @@ IsolatedNodeComponent.Prototype = function() {
     }
   };
 
+  this.getId = function() {
+    return this._id;
+  };
+
   this._getContentClass = function() {
     var node = this.props.node;
     var componentRegistry = this.context.componentRegistry;
@@ -155,90 +136,79 @@ IsolatedNodeComponent.Prototype = function() {
     return ComponentClass;
   };
 
-  this._registerGlobalDOMHandlers = function() {
-    if (inBrowser && this.state.mode === 'focused') {
-      var documentEl = DefaultDOMElement.wrapNativeElement(window.document);
-      documentEl.on('keydown', this.onKeydown, this);
-    }
-  };
-
-  this._unregisterGlobalDOMHandlers = function() {
-    if (inBrowser) {
-      var documentEl = DefaultDOMElement.wrapNativeElement(window.document);
-      documentEl.off(this, 'keydown');
-    }
-  };
-
   this._isDisabled = function() {
     return this.state.mode === 'selected' || this.state.mode === 'cursor' || !this.state.mode;
   };
 
-  this.getId = function() {
-    return this._id;
-  };
-
-  this.getSurfaceParent = function() {
+  this._getSurfaceParent = function() {
     return this.context.surface;
   };
 
   this._getLevel = function() {
     var level = 1;
-    var parent = this.getSurfaceParent();
+    var parent = this._getSurfaceParent();
     while (parent) {
       level++;
-      parent = parent.getSurfaceParent();
+      parent = parent._getSurfaceParent();
     }
     return level;
   };
 
   this.onSessionUpdate = function(update) {
     if (update.selection) {
-      // TODO: we need to change the DocumentSession update API
-      // as it is important to know the old and new value
-      var newSel = update.selection;
-      var surfaceId = newSel.surfaceId;
-
-      if (this.state.mode === 'focused') {
-        if (surfaceId && !surfaceId.startsWith(this._id)) {
-          this.setState({ mode: null });
-          return;
-        }
+      var newState = this._deriveStateFromSelection(update.selection);
+      if (!newState && this.state.mode) {
+        this.setState({});
       } else {
-        var nodeId = this.props.node.id;
-        var inParentSurface = (surfaceId === this.getSurfaceParent().getId());
-        var inChildSurface = (surfaceId && surfaceId.startsWith(this.getId()));
-        var nodeIsSelected = (inParentSurface &&
-          newSel.isContainerSelection() && newSel.containsNodeFragment(nodeId)
-        );
-        // TODO: probably we need to dispatch the state to descendants
-        if (this.state.mode !== 'selected' && nodeIsSelected) {
-          // console.log('IsolatedNodeComponent: detected node selection.');
-          this.setState({ mode: 'selected' });
-          return;
-        }
-        var hasCursor = (inParentSurface &&
-          newSel.isContainerSelection() &&
-          newSel.isCollapsed() &&
-          newSel.startPath.length === 1 &&
-          newSel.startPath[0] === nodeId
-        );
-        if (this.state.mode !== 'cursor' && hasCursor) {
-          // console.log('IsolatedNodeComponent: detected cursor.');
-          this.setState({ mode: 'cursor', position: newSel.startOffset === 0 ? 'before' : 'after' });
-          return;
-        }
-        if (this.state.mode === 'selected' && !nodeIsSelected) {
-          this.setState({ mode: null });
-          return;
-        }
-        if (this.state.mode === 'cursor' && !hasCursor) {
-          this.setState({ mode: null });
-          return;
-        }
-        if (this.state.mode !== 'focused' && inChildSurface) {
-          this.setState({ mode: 'focused' });
-        }
+        this.setState(newState);
       }
+    }
+  };
+
+  this._deriveStateFromSelection = function(sel) {
+    var surfaceId = sel.surfaceId;
+    if (!surfaceId) return;
+    var id = this.getId();
+    var nodeId = this.props.node.id;
+    var parentId = this._getSurfaceParent().getId();
+    var inParentSurface = (surfaceId === parentId);
+    // detect cases where this node is selected or co-selected by inspecting the selection
+    if (inParentSurface) {
+      if (sel.isNodeSelection() && sel.getNodeId() === nodeId && sel.isEntireNodeSelected()) {
+        return {
+          mode: 'selected'
+        };
+      }
+      if (sel.isContainerSelection() && sel.containsNodeFragment(nodeId)) {
+        return {
+          mode: 'co-selected'
+        };
+      }
+      var hasCursor = (inParentSurface &&
+        sel.isContainerSelection() &&
+        sel.isCollapsed() &&
+        sel.startPath.length === 1 &&
+        sel.startPath[0] === nodeId
+      );
+      if (hasCursor) {
+        return {
+          mode: 'cursor',
+          position: sel.startOffset === 0 ? 'before' : 'after'
+        };
+      }
+      return;
+    }
+    // for all other cases (focused / co-focused) the surface id prefix must match
+    if (!surfaceId.startsWith(id)) return;
+
+    if (surfaceId.length === id.length) {
+      return {
+        mode: 'focused'
+      };
+    } else {
+      return {
+        mode: 'co-focused'
+      };
     }
   };
 
@@ -280,16 +250,15 @@ IsolatedNodeComponent.Prototype = function() {
     console.log('IsolatedNodeComponent: selecting node.');
     var surface = this.context.surface;
     var doc = surface.getDocument();
-    var node = this.props.node;
+    var nodeId = this.props.node.id;
     surface.setSelection(doc.createSelection({
       type: 'container',
       containerId: surface.getContainerId(),
-      startPath: [node.id],
+      startPath: [nodeId],
       startOffset: 0,
-      endPath: [node.id],
+      endPath: [nodeId],
       endOffset: 1
     }));
-    this.el.focus();
   };
 
 };
