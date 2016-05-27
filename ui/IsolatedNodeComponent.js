@@ -159,7 +159,7 @@ IsolatedNodeComponent.Prototype = function() {
       var newState = this._deriveStateFromSelection(update.selection);
       if (!newState && this.state.mode) {
         this.setState({});
-      } else {
+      } else if (newState && newState.mode !== this.state.mode) {
         this.setState(newState);
       }
     }
