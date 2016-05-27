@@ -502,15 +502,12 @@ RenderingEngine.Prototype = function() {
 
   function _updateListeners(args) {
     var el = args.el;
-    var oldListeners = args.oldListeners || [];
-    var newListeners = args.newListeners || [];
     // NOTE: considering the low number of listeners
-    // it is quicker to just remove and add instead of computing the minimal update
-    var i;
-    for (i=0; i<oldListeners.length;i++) {
-      el.removeEventListener(oldListeners[i]);
-    }
-    for (i=0; i<newListeners.length;i++) {
+    // it is quicker to just remove all
+    // and add again instead of computing the minimal update
+    var newListeners = args.newListeners || [];
+    el.removeAllEventListeners();
+    for (var i=0; i<newListeners.length;i++) {
       el.addEventListener(newListeners[i]);
     }
   }

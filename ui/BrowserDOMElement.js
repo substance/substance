@@ -236,25 +236,25 @@ BrowserDOMElement.Prototype = function() {
   this.removeEventListener = function(eventName, handler) {
     // console.log('removing event listener', eventName, handler);
     var listener = null, idx = -1;
-    if (arguments.length === 1 && arguments[0]._isDOMEventListener) {
-      listener = arguments[0];
-      var idx = this.eventListeners.indexOf(listener);
-      if (idx > -1) {
-        this.eventListeners.splice(idx, 1);
-      }
-    } else {
-      idx = DOMElement._findEventListenerIndex(this.eventListeners, eventName, handler);
-      listener = this.eventListeners[idx];
-      if (idx > -1) {
-        this.eventListeners.splice(idx, 1);
-      }
-    }
-    if (listener) {
+    idx = DOMElement._findEventListenerIndex(this.eventListeners, eventName, handler);
+    listener = this.eventListeners[idx];
+    if (idx > -1) {
+      this.eventListeners.splice(idx, 1);
       // console.log('BrowserDOMElement.removeEventListener:', eventName, this.eventListeners.length);
       listener._el = null;
       this.el.removeEventListener(listener.eventName, listener.handler);
     }
     return this;
+  };
+
+  this.removeAllEventListeners = function() {
+    for (var i = 0; i < this.eventListeners.length; i++) {
+      var listener = this.eventListeners[i]
+      // console.log('BrowserDOMElement.removeEventListener:', eventName, this.eventListeners.length);
+      listener._el = null;
+      this.el.removeEventListener(listener.eventName, listener.handler);
+    }
+    this.eventListeners = [];
   };
 
   this.getEventListeners = function() {
