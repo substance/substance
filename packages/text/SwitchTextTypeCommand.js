@@ -1,12 +1,12 @@
 'use strict';
 
-var SurfaceCommand = require('../../ui/SurfaceCommand');
+var Command = require('../../ui/Command');
 var _isMatch = require('lodash/isMatch');
 var _find = require('lodash/find');
 var _clone = require('lodash/clone');
 
 function SwitchTextType() {
-  SurfaceCommand.apply(this, arguments);
+  Command.apply(this, arguments);
 }
 
 SwitchTextType.Prototype = function() {
@@ -105,7 +105,7 @@ SwitchTextType.Prototype = function() {
   };
 };
 
-SurfaceCommand.extend(SwitchTextType);
+Command.extend(SwitchTextType);
 SwitchTextType.static.name = 'switch-text-type';
 
 module.exports = SwitchTextType;

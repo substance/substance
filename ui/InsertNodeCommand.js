@@ -1,6 +1,6 @@
 'use strict';
 
-var SurfaceCommand = require('./SurfaceCommand');
+var Command = require('./Command');
 var insertNode = require('../model/transform/insertNode');
 
 function InsertNodeCommand() {
@@ -42,6 +42,6 @@ InsertNodeCommand.Prototype = function() {
   };
 };
 
-SurfaceCommand.extend(InsertNodeCommand);
+Command.extend(InsertNodeCommand);
 
 module.exports = InsertNodeCommand;

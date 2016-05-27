@@ -1,6 +1,6 @@
 'use strict';
 
-var SurfaceCommand = require('./SurfaceCommand');
+var Command = require('./Command');
 var helpers = require('../model/documentHelpers');
 
 // Annotation transformations
@@ -15,7 +15,7 @@ var deleteAnnotation = require('../model/transform/deleteAnnotation');
   See the example below to learn how to define a custom `AnnotationCommand`.
 
   @class
-  @extends ui/SurfaceCommand
+  @extends ui/Command
 
   @example
 
@@ -33,7 +33,7 @@ var deleteAnnotation = require('../model/transform/deleteAnnotation');
   ```
 */
 var AnnotationCommand = function(surface) {
-  SurfaceCommand.call(this, surface);
+  Command.call(this, surface);
 };
 
 AnnotationCommand.Prototype = function() {
@@ -352,6 +352,6 @@ AnnotationCommand.Prototype = function() {
 
 };
 
-SurfaceCommand.extend(AnnotationCommand);
+Command.extend(AnnotationCommand);
 
 module.exports = AnnotationCommand;

@@ -1,6 +1,6 @@
 'use strict';
 
-var ControllerCommand = require('./ControllerCommand');
+var Command = require('./Command');
 
 function Redo() {
   Redo.super.apply(this, arguments);
@@ -27,7 +27,7 @@ Redo.Prototype = function() {
   };
 };
 
-ControllerCommand.extend(Redo);
+Command.extend(Redo);
 
 Redo.static.name = 'redo';
 

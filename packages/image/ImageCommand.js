@@ -1,10 +1,10 @@
 'use strict';
 
 var uuid = require('../../util/uuid');
-var SurfaceCommand = require('../../ui/SurfaceCommand');
+var Command = require('../../ui/Command');
 var DefaultDOMElement = require('../../ui/DefaultDOMElement');
 
-var ImageCommand = SurfaceCommand.extend({
+var ImageCommand = Command.extend({
 
   static: {
     name: 'image'

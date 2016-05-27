@@ -1,7 +1,7 @@
 'use strict';
 
 var each = require('lodash/each');
-var SurfaceTool = require('../../ui/SurfaceTool');
+var Tool = require('../../ui/Tool');
 var keys = require('../../util/keys');
 
 /**
@@ -159,7 +159,7 @@ SwitchTextTypeTool.Prototype = function() {
 
 };
 
-SurfaceTool.extend(SwitchTextTypeTool);
+Tool.extend(SwitchTextTypeTool);
 
 SwitchTextTypeTool.static.name = 'switch-text-type';
 
