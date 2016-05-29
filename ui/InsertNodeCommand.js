@@ -24,10 +24,12 @@ InsertNodeCommand.Prototype = function() {
   this.execute = function(context) {
     var state = this.getCommandState(context);
     if (state.disabled) return;
-    var surface = context.surface;
-    surface.transaction(function(tx, args) {
-      return this.insertNode(tx, args);
-    }.bind(this));
+    var surface = context.surface ||context.surfaceManager.getFocusedSurface();
+    if (surface) {
+      surface.transaction(function(tx, args) {
+        return this.insertNode(tx, args);
+      }.bind(this));
+    }
     return true;
   };
 

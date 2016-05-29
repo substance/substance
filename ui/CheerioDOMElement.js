@@ -166,6 +166,10 @@ CheerioDOMElement.Prototype = function() {
     return this;
   };
 
+  this.removeAllEventListeners = function() {
+    return this;
+  };
+
   this.getEventListeners = function() {
     return [];
   };

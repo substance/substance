@@ -26,7 +26,7 @@ EventEmitter.Prototype = function() {
    */
   this.emit = function (event) {
     if (event in this.__events__) {
-      // console.log("Emitting event %s (%d listeners) on", event, Object.keys(this.__events__[event]).length, this);
+      // console.log("Emitting event %s (%d listeners) on", event, this.__events__[event].length, this);
       // Clone the list of bindings so that handlers can remove or add handlers during the call.
       var bindings = this.__events__[event].slice();
       var args = Array.prototype.slice.call(arguments, 1);

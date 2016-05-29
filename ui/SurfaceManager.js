@@ -68,10 +68,13 @@ SurfaceManager.Prototype = function() {
    */
   this.unregisterSurface = function(surface) {
     surface.off(this);
-    delete this.surfaces[surface.getId()];
-    // TODO: this should not be necessary anymore
-    if (surface && this.focusedSurface === surface) {
-      this.focusedSurface = null;
+    var surfaceId = surface.getId();
+    var registeredSurface = this.surfaces[surfaceId];
+    if (registeredSurface === surface) {
+      delete this.surfaces[surfaceId];
+      if (surface && this.focusedSurface === surface) {
+        this._state.focusedSurface = null;
+      }
     }
   };
 
@@ -80,9 +83,12 @@ SurfaceManager.Prototype = function() {
     var _state = this._state;
 
     var updatedSurfaces = {};
-
     if (update.selection) {
-      _state.focusedSurface = this.surfaces[update.selection.surfaceId];
+      var focusedSurface = this.surfaces[update.selection.surfaceId];
+      _state.focusedSurface = focusedSurface;
+      if (focusedSurface) {
+        focusedSurface._focus();
+      }
     }
 
     if (update.change) {
@@ -170,7 +176,7 @@ SurfaceManager.Prototype = function() {
       var surface = this.surfaces[surfaceId];
       if (surface) {
         var newFragments = fragments[surfaceId];
-        // console.log('SurfaceManager: providing surface %s with new fragments', newFragments);
+        // console.log('SurfaceManager: providing surface %s with new fragments', surfaceId, newFragments);
         surface.extendProps({
           fragments: clone(newFragments)
         });
@@ -179,18 +185,12 @@ SurfaceManager.Prototype = function() {
   };
 
   this.onSessionDidUpdate = function() {
-    /*
-      here we will make sure that at the end the DOM selection is rendered
-      on the active surface
-    */
-    var sel = this.documentSession.getSelection();
-    var surfaceId = sel.surfaceId;
-    var surface = this.surfaces[surfaceId];
-    if (surface) {
-      console.log('SurfaceManager: calling surface.focus() after session update.', surfaceId);
-      surface.focus();
-      // surface.el.focus();
-      // surface.rerenderDOMSelection();
+    // at the end of the update flow, make sure the surface is focused
+    // and displays the right DOM selection.
+    var focusedSurface = this._state.focusedSurface;
+    if (focusedSurface) {
+      focusedSurface.focus();
+      focusedSurface.rerenderDOMSelection();
     }
   };
 

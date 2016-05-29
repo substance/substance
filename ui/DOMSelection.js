@@ -25,6 +25,7 @@ var IsolatedNodeComponent = require('./IsolatedNodeComponent');
  */
 function DOMSelection(surface) {
   this.surface = surface;
+  this._wrange = window.document.createRange();
 }
 
 DOMSelection.Prototype = function() {
@@ -42,6 +43,14 @@ DOMSelection.Prototype = function() {
     var doc = this.surface.getDocument();
     return doc.createSelection(range);
   };
+
+  // function _printStacktrace() {
+  //   try {
+  //     throw new Error();
+  //   } catch (err) {
+  //     console.log(err.stack);
+  //   }
+  // }
 
   /**
     Transfer a given model selection into the DOM.
@@ -72,14 +81,14 @@ DOMSelection.Prototype = function() {
         return;
       }
     }
-    // console.log('mapped to DOM coordinates', start.container, start.offset, end.container, end.offset, 'isReverse?', sel.isReverse());
+    // console.log('Model->DOMSelection: mapped to DOM coordinates', start.container, start.offset, end.container, end.offset, 'isReverse?', sel.isReverse());
 
     // if there is a range then set replace the window selection accordingly
     var wRange;
     if (wSel.rangeCount > 0) {
       wRange = wSel.getRangeAt(0);
     } else {
-      wRange = window.document.createRange();
+      wRange = this._wrange;
     }
     wSel.removeAllRanges();
     if (sel.isCollapsed()) {
@@ -98,6 +107,7 @@ DOMSelection.Prototype = function() {
         // unfortunately we are not able to test this behavior as it needs
         // triggering native keyboard events
         wRange.setStart(start.container, start.offset);
+        wRange.setEnd(start.container, start.offset);
         wSel.addRange(wRange);
         wSel.extend(end.container, end.offset);
       } else {
@@ -106,7 +116,7 @@ DOMSelection.Prototype = function() {
         wSel.addRange(wRange);
       }
     }
-    // console.log('DOMSelection: mapped selection to DOM', 'anchorNode:', wSel.anchorNode, 'anchorOffset:', wSel.anchorOffset, 'focusNode:', wSel.focusNode, 'focusOffset:', wSel.focusOffset, 'collapsed:', wSel.collapsed);
+    // console.log('Model->DOMSelection: mapped selection to DOM', 'anchorNode:', wSel.anchorNode, 'anchorOffset:', wSel.anchorOffset, 'focusNode:', wSel.focusNode, 'focusOffset:', wSel.focusOffset, 'collapsed:', wSel.collapsed);
   };
 
   this._getDOMCoordinate = function(coor) {
@@ -155,7 +165,7 @@ DOMSelection.Prototype = function() {
     var wSel = window.getSelection();
     // Use this log whenever the mapping goes wrong to analyze what
     // is actually being provided by the browser
-    // console.log('DOMSelection.mapDOMSelection()', 'anchorNode:', wSel.anchorNode, 'anchorOffset:', wSel.anchorOffset, 'focusNode:', wSel.focusNode, 'focusOffset:', wSel.focusOffset, 'collapsed:', wSel.collapsed);
+    // console.log('DOMSelection->Model: anchorNode:', wSel.anchorNode, 'anchorOffset:', wSel.anchorOffset, 'focusNode:', wSel.focusNode, 'focusOffset:', wSel.focusOffset, 'collapsed:', wSel.collapsed);
     if (wSel.rangeCount === 0) {
       return null;
     }
@@ -180,7 +190,7 @@ DOMSelection.Prototype = function() {
         range = this._getRange(anchorNode, wSel.anchorOffset, focusNode, wSel.focusOffset);
       }
     }
-    // console.log('### extracted range from DOM', range.toString());
+    // console.log('DOMSelection->Model: extracted range', range.toString());
     return range;
   };
 
