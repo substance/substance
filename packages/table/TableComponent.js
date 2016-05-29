@@ -2,11 +2,11 @@
 
 var assert = require('../../util/assert');
 var Component = require('../../ui/Component');
+var CustomSelection = require('../../model/CustomSelection');
 var ContainerEditor = require('../../ui/ContainerEditor');
 var DefaultDOMElement = require('../../ui/DefaultDOMElement');
 var TextPropertyEditor = require('../../ui/TextPropertyEditor');
 var tableHelpers = require('./tableHelpers');
-var TableSelection = require('./TableSelection');
 var keys = require('../../util/keys');
 
 // doh: we don't do $el.position() properly yet
@@ -25,7 +25,7 @@ function TableComponent() {
 TableComponent.Prototype = function() {
 
   this.didMount = function() {
-    var documentSession = this.context.documentSession;
+    var documentSession = this.getDocumentSession();
     documentSession.on('didUpdate', this.onSessionDidUpdate, this);
 
     var globalEventHandler = this.context.globalEventHandler;
@@ -35,7 +35,7 @@ TableComponent.Prototype = function() {
   };
 
   this.dispose = function() {
-    var documentSession = this.context.documentSession;
+    var documentSession = this.getDocumentSession();
     documentSession.off(this);
 
     var globalEventHandler = this.context.globalEventHandler;
@@ -62,7 +62,7 @@ TableComponent.Prototype = function() {
     colControls.append($$('td').addClass('se-hspace'));
     for (j = 0; j < ncols; j++) {
       colControls.append(
-        $$('td').addClass('se-column-handle').ref('col-handle'+j)
+        $$('td').addClass('se-column-handle').attr('data-col', j).ref('col-handle'+j)
           .on('mousedown', this._onColumnHandle)
           .append(tableHelpers.getColumnName(j))
       );
@@ -77,7 +77,7 @@ TableComponent.Prototype = function() {
       var rowEl = $$('tr').addClass('se-row').attr('data-row', i);
 
       rowEl.append(
-        $$('td').addClass('se-row-handle').ref('row-handle'+i)
+        $$('td').addClass('se-row-handle').attr('data-row', i).ref('row-handle'+i)
           .on('mousedown', this._onRowHandle)
           .append(tableHelpers.getRowName(i))
       );
@@ -161,14 +161,26 @@ TableComponent.Prototype = function() {
     return this.surfaceId;
   };
 
+  this.getDocumentSession = function() {
+    return this.context.documentSession;
+  };
+
   this.getSelection = function() {
-    var documentSession = this.context.documentSession;
+    var documentSession = this.getDocumentSession();
     var sel = documentSession.getSelection();
     if (sel.surfaceId === this.getId()) {
       return sel;
     } else {
       return null;
     }
+  };
+
+  this._setSelection = function(startRow, startCol, endRow, endCol) {
+    var documentSession = this.getDocumentSession();
+    documentSession.setSelection(new CustomSelection('table', {
+      startRow: startRow, startCol: startCol,
+      endRow: endRow, endCol: endCol
+    }, this.getId()))
   };
 
   this.onSessionDidUpdate = function(update) {
@@ -181,13 +193,37 @@ TableComponent.Prototype = function() {
   };
 
   this.onKeydown = function(e) {
-    console.log('TableComponent.onKeydown');
+    var handled = false;
+    switch (e.keyCode) {
+      case keys.LEFT:
+        this._changeSelection(0, -1, e.shiftKey);
+        handled = true;
+        break;
+      case keys.RIGHT:
+        this._changeSelection(0, 1, e.shiftKey);
+        handled = true;
+        break;
+      case keys.DOWN:
+        this._changeSelection(1, 0, e.shiftKey);
+        handled = true;
+        break;
+      case keys.UP:
+        this._changeSelection(-1, 0, e.shiftKey);
+        handled = true;
+        break;
+    }
+    if (handled) {
+      e.preventDefault();
+    }
   };
 
   this._onColumnHandle = function(e) {
     e.stopPropagation();
     e.preventDefault();
-    console.log('Clicked on column handle.');
+    var el = DefaultDOMElement.wrapNativeElement(e.currentTarget);
+    var col = parseInt(el.attr('data-col'), 10);
+    var rowCount = this.props.node.getRowCount();
+    this._setSelection(0, col, rowCount-1, col);
   };
 
   this._onRowHandle = function(e) {
@@ -204,19 +240,35 @@ TableComponent.Prototype = function() {
     var col = parseInt(el.attr('data-col'), 10);
     var row = parseInt(el.parentNode.attr('data-row'), 10);
 
-    console.log('Clicked on cell %s, %s', row, col);
+    this._setSelection(row, col, row, col);
+  };
 
-    var documentSession = this.context.documentSession;
-    documentSession.setSelection(new TableSelection({
-      startRow: row, endRow: row,
-      startCol: col, endCol: col
-    }, this.getId()));
+  this._changeSelection = function(rowInc, colInc, expand) {
+    var sel = this.getSelection();
+    if (sel) {
+      var documentSession = this.getDocumentSession();
+      var maxRow = this.props.node.getRowCount();
+      var maxCol = this.props.node.getColCount();
+      if (expand) {
+        var endRow = Math.max(0, Math.min(sel.data.endRow + rowInc, maxRow));
+        var endCol = Math.max(0, Math.min(sel.data.endCol + colInc, maxCol));
+        this._setSelection(sel.data.startRow, sel.data.startCol, endRow, endCol);
+      } else {
+        var row = Math.max(0, Math.min(sel.data.endRow + rowInc, maxRow));
+        var col = Math.max(0, Math.min(sel.data.endCol + colInc, maxCol));
+        this._setSelection(row, col, row, col);
+      }
+    }
   };
 
   this._renderSelection = function() {
     var sel = this.getSelection();
-    var startCell = this._getCell(sel.data.startRow, sel.data.startCol);
-    var endCell = this._getCell(sel.data.endRow, sel.data.endCol);
+    var minRow = Math.min(sel.data.startRow, sel.data.endRow);
+    var maxRow = Math.max(sel.data.startRow, sel.data.endRow);
+    var minCol = Math.min(sel.data.startCol, sel.data.endCol);
+    var maxCol = Math.max(sel.data.startCol, sel.data.endCol);
+    var startCell = this._getCell(minRow, minCol);
+    var endCell = this._getCell(maxRow, maxCol);
     // TODO: we need to fix BrowserDOMElement so that we get the right values;
     var startEl = startCell.getNativeElement();
     var endEl = endCell.getNativeElement();
