@@ -1,13 +1,56 @@
 .sc-table {
-  table-layout: fixed;
-  border-collapse: collapse;
+  position: relative;
+  margin: 0px 0px;
 
-  > .se-row {
+  > table {
+    table-layout: fixed;
+    border-collapse: collapse;
 
-    > .se-cell {
-      border: 1px solid #ccc;
-      padding: 2px 5px;
+    td.se-hspace {
+      width: 10px;
     }
 
+    > .se-head {
+      > .se-column-controls {
+        > .se-column-handle {
+          text-align: center;
+          font-size: smaller;
+          border: 1px solid transparent;
+        }
+      }
+    }
+
+    > .se-body {
+      > .se-row {
+        > .se-row-handle {
+          max-width: 15px;
+          text-align: center;
+          font-size: smaller;
+          vertical-align: middle;
+          border: 1px solid transparent;
+        }
+
+        > .se-hspace {
+          max-width: 15px;
+        }
+
+        > .se-cell {
+          border: 1px solid #ccc;
+          padding: 2px 5px;
+        }
+      }
+    }
   }
+
+  > .se-selection {
+    position: absolute;
+
+    &.sm-visible {
+      border: 2px solid $local-selection-color;
+    }
+  }
+}
+
+.sc-isolated-node.sm-selected .sc-table ::selection {
+  background: none;
 }

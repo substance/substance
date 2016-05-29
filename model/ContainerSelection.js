@@ -95,6 +95,10 @@ ContainerSelection.Prototype = function() {
     return true;
   };
 
+  this.getType = function() {
+    return 'container';
+  };
+
   this.isNodeSelection = function() {
     return (
       this.startPath.length === 1 &&

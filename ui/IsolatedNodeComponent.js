@@ -121,6 +121,9 @@ IsolatedNodeComponent.Prototype = function() {
         node: node,
         disabled: this._isDisabled()
       };
+      if (this.state.mode === 'focused') {
+        props.focused = true;
+      }
       return $$(ComponentClass, props).ref('content');
     }
   };

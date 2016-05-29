@@ -118,6 +118,10 @@ Selection.Prototype = function() {
     return false;
   };
 
+  this.getType = function() {
+    throw new Error('Selection.getType() is abstract.');
+  };
+
   /**
     @returns {Boolean} true if selection equals `other` selection
   */
@@ -127,6 +131,8 @@ Selection.Prototype = function() {
     } else if (!other) {
       return false;
     } else if (this.isNull() !== other.isNull()) {
+      return false;
+    } else if (this.getType() !== other.getType()) {
       return false;
     } else {
       // Note: returning true here, so that sub-classes
@@ -180,6 +186,10 @@ Selection.NullSelection = function() {
 Selection.NullSelection.Prototype = function() {
   this.isNull = function() {
     return true;
+  };
+
+  this.getType = function() {
+    return 'null';
   };
 
   this.toJSON = function() {

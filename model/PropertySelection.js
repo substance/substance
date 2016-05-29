@@ -90,6 +90,10 @@ PropertySelection.Prototype = function() {
     return true;
   };
 
+  this.getType = function() {
+    return 'property';
+  };
+
   this.isNull = function() {
     return false;
   };
