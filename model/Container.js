@@ -21,13 +21,18 @@ var ContainerAddress = require('./ContainerAddress');
 function Container() {
   Container.super.apply(this, arguments);
 
-  // TODO: we need to revisit the event proxy implementation
+  // NOTE: we are caching things in this implementation
+  // which we invalidate on every change
+  // TODO: do we really need to invalidate on every change?
+  // or just container changes?
   if (!this.document.isTransactionDocument) {
     this.document.on('document:changed', this._onChange, this);
   }
 }
 
 Container.Prototype = function() {
+
+  this._isContainer = true;
 
   extend(this, ParentNodeMixin);
 

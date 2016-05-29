@@ -1,7 +1,7 @@
 'use strict';
 
 var oo = require('./oo');
-var each = require('lodash/forEach');
+var forEach = require('lodash/forEach');
 var extend = require('lodash/extend');
 var DocumentSchema = require('../model/DocumentSchema');
 var Registry = require('../util/Registry');
@@ -20,14 +20,14 @@ var I18n = require('../ui/i18n');
   configuration (e.g. when there are multiple surfaces involved
   each coming with different textTypes, enabled commands etc.)
 */
-function Configurator() {
+function Configurator(firstPackage) {
   // All data will be collected here
   this.config = {
     schema: {},
     styles: [],
     nodes: [],
     components: {},
-    converters: [],
+    converters: {},
     commands: [],
     tools: [],
     textTypes: [],
@@ -35,6 +35,10 @@ function Configurator() {
     saveHandler: SaveHandlerStub,
     fileClient: FileClientStub
   };
+
+  if (firstPackage) {
+    this.import(firstPackage);
+  }
 }
 
 Configurator.Prototype = function() {
@@ -51,9 +55,16 @@ Configurator.Prototype = function() {
     this.config.nodes.push(NodeClass);
   };
 
-  this.addConverter = function(ConverterClass) {
-    // TODO: check if already registered
-    this.config.converters.push(ConverterClass);
+  this.addConverter = function(type, converter) {
+    var converters = this.config.converters[type];
+    if (!converters) {
+      converters = {};
+      this.config.converters[type] = converters;
+    }
+    if (!converter.type) {
+      throw new Error('A converter needs an associated type.');
+    }
+    converters[converter.type] = converter;
   };
 
   this.addStyle = function(sassFilePath) {
@@ -138,7 +149,7 @@ Configurator.Prototype = function() {
   this.getToolRegistry = function() {
     // Configure tool registry
     var toolRegistry = new Registry();
-    each(this.config.tools, function(tool) {
+    forEach(this.config.tools, function(tool) {
       toolRegistry.add(tool.Class.static.name, tool);
     });
     return toolRegistry;
@@ -146,7 +157,7 @@ Configurator.Prototype = function() {
 
   this.getComponentRegistry = function() {
     var componentRegistry = new Registry();
-    each(this.config.components, function(ComponentClass, name) {
+    forEach(this.config.components, function(ComponentClass, name) {
       componentRegistry.add(name, ComponentClass);
     });
     return componentRegistry;
@@ -166,6 +177,20 @@ Configurator.Prototype = function() {
       return C.static.name;
     });
     return commandNames;
+  };
+
+  this.getConverterRegistry = function() {
+    // Note: converterRegistry is a registry by file type and then
+    // by node type
+    // `configurator.getConverterRegistry().get('html').get('paragraph')` provides the HTML converter for Paragraphs
+    if (!this.converterRegistry) {
+      var converterRegistry = new Registry();
+      forEach(this.config.converters, function(converters, name) {
+        converterRegistry.add(name, new Registry(converters));
+      });
+      this.converterRegistry = converterRegistry;
+    }
+    return this.converterRegistry;
   };
 
   this.getFileClient = function() {
