@@ -1,32 +1,13 @@
-/* Table nodes
------------------------------------------------------*/
-
-.table {
-  width: 100%;
-  margin: 10px 0px;
-  // border: 1px solid #eee;
-  border-collapse: collapse;
+.sc-table {
   table-layout: fixed;
-}
+  border-collapse: collapse;
 
-.table th, .table td {
-  border: 1px solid #efefef;
-}
+  > .se-row {
 
-.table th {
-  font-weight: bold;
-  background: #eee;
-  text-align: center;
-}
+    > .se-cell {
+      border: 1px solid #ccc;
+      padding: 2px 5px;
+    }
 
-.table td {
-  padding: 2px 5px;
-}
-
-.table .selected {
-  background-color: cyan;
-}
-
-.table.table-editing-mode .text-property {
-  cursor: default;
+  }
 }
