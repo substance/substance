@@ -15,8 +15,7 @@ module.exports = {
     config.addConverter(LinkHTMLConverter);
     config.addCommand(LinkCommand);
     config.addTool(LinkTool);
-    config.addTool(EditLinkTool, {
-      overlay: true
-    });
+    config.addTool(EditLinkTool, { overlay: true });
+    config.addIcon('link', { 'fontawesome': 'fa-link'})
   }
 };

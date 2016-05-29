@@ -1,33 +1,32 @@
 'use strict';
 
 var clone = require('lodash/clone');
+var forEach = require('lodash/forEach');
 var oo = require('../util/oo');
 var Icon = require('./FontAwesomeIcon');
 
-// Maps app identifiers to FontAwesome icon classes
+// TODO: we should create a 'core' package where we configure those
 var ICON_MAP = {
-  'link': 'fa-link',
-  'strong': 'fa-bold',
-  'emphasis': 'fa-italic',
   'save': 'fa-save',
-  'image': 'fa-image',
   'undo': 'fa-undo',
   'redo': 'fa-repeat',
-  'subscript': 'fa-subscript',
-  'superscript': 'fa-superscript',
-  'code': 'fa-code',
-
   // Annotation modes
   'edit': 'fa-cog',
   'expand': 'fa-arrows-h',
   'truncate': 'fa-arrows-h'
 };
 
-function IconProvider() {
+function FontAwesomeIconProvider(icons) {
   this.map = clone(ICON_MAP);
+  forEach(icons, function(config, name) {
+    var faClass = config['fontawesome'];
+    if (faClass) {
+      this.addIcon(name, faClass);
+    }
+  }.bind(this));
 }
 
-IconProvider.Prototype = function() {
+FontAwesomeIconProvider.Prototype = function() {
 
   this.renderIcon = function($$, name) {
     var iconClass = this.map[name];
@@ -41,6 +40,6 @@ IconProvider.Prototype = function() {
   };
 };
 
-oo.initClass(IconProvider);
+oo.initClass(FontAwesomeIconProvider);
 
-module.exports = IconProvider;
+module.exports = FontAwesomeIconProvider;

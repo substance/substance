@@ -2,6 +2,7 @@
 
 var oo = require('./oo');
 var each = require('lodash/forEach');
+var extend = require('lodash/extend');
 var DocumentSchema = require('../model/DocumentSchema');
 var Registry = require('../util/Registry');
 var FileClientStub = require('../ui/FileClientStub');
@@ -30,9 +31,7 @@ function Configurator() {
     commands: [],
     tools: [],
     textTypes: [],
-    // TODO: as long we don't have a way to capture
-    // icon provider config we need to have an instance here
-    iconProvider: new FontAwesomeIconProvider(),
+    icons: {},
     saveHandler: SaveHandlerStub,
     fileClient: FileClientStub
   };
@@ -80,6 +79,15 @@ Configurator.Prototype = function() {
       Class: ToolClass,
       options: options || {}
     });
+  };
+
+  this.addIcon = function(iconName, options) {
+    var iconConfig = this.config.icons[iconName];
+    if (!iconConfig) {
+      iconConfig = {};
+      this.config.icons[iconName] = iconConfig;
+    }
+    extend(iconConfig, options);
   };
 
   this.addTextType = function(textType, options) {
@@ -171,7 +179,7 @@ Configurator.Prototype = function() {
   };
 
   this.getIconProvider = function() {
-    return this.config.iconProvider;
+    return new FontAwesomeIconProvider(this.config.icons);
   };
 
   this.getTextTypes = function() {

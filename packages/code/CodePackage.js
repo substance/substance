@@ -10,6 +10,7 @@ module.exports = {
     config.addNode(Code);
     config.addCommand(CodeCommand);
     config.addTool(CodeTool);
+    config.addIcon('code', { 'fontawesome': 'fa-code' });
   }
 };
 

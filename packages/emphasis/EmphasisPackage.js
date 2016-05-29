@@ -10,6 +10,7 @@ module.exports = {
     config.addNode(Emphasis);
     config.addCommand(EmphasisCommand);
     config.addTool(EmphasisTool);
+    config.addIcon('emphasis', { 'fontawesome': 'fa-italic' })
   }
 };
 

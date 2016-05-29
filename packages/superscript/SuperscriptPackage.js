@@ -10,6 +10,7 @@ module.exports = {
     config.addNode(Superscript);
     config.addCommand(SuperscriptCommand);
     config.addTool(SuperscriptTool);
+    config.addIcon(SuperscriptCommand.static.name, { 'fontawesome': 'fa-superscript' });
   }
 };
 
