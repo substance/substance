@@ -7,6 +7,10 @@ var DefaultDOMElement = require('../../ui/DefaultDOMElement');
 var TextPropertyEditor = require('../../ui/TextPropertyEditor');
 var tableHelpers = require('./tableHelpers');
 var TableSelection = require('./TableSelection');
+var keys = require('../../util/keys');
+
+// doh: we don't do $el.position() properly yet
+var $ = require('../../util/jquery');
 
 function TableComponent() {
   TableComponent.super.apply(this, arguments);
@@ -23,11 +27,21 @@ TableComponent.Prototype = function() {
   this.didMount = function() {
     var documentSession = this.context.documentSession;
     documentSession.on('didUpdate', this.onSessionDidUpdate, this);
+
+    var globalEventHandler = this.context.globalEventHandler;
+    if (globalEventHandler) {
+      globalEventHandler.on('keydown', this.onKeydown, this, { id: this.surfaceId });
+    }
   };
 
   this.dispose = function() {
     var documentSession = this.context.documentSession;
     documentSession.off(this);
+
+    var globalEventHandler = this.context.globalEventHandler;
+    if (globalEventHandler) {
+      globalEventHandler.off(this);
+    }
   };
 
   this.render = function($$) {
@@ -143,6 +157,20 @@ TableComponent.Prototype = function() {
     return el;
   };
 
+  this.getId = function() {
+    return this.surfaceId;
+  };
+
+  this.getSelection = function() {
+    var documentSession = this.context.documentSession;
+    var sel = documentSession.getSelection();
+    if (sel.surfaceId === this.getId()) {
+      return sel;
+    } else {
+      return null;
+    }
+  };
+
   this.onSessionDidUpdate = function(update) {
     if (update.selection) {
       var sel = this.getSelection();
@@ -150,6 +178,10 @@ TableComponent.Prototype = function() {
         this._renderSelection(sel);
       }
     }
+  };
+
+  this.onKeydown = function(e) {
+    console.log('TableComponent.onKeydown');
   };
 
   this._onColumnHandle = function(e) {
@@ -181,34 +213,21 @@ TableComponent.Prototype = function() {
     }, this.getId()));
   };
 
-  this.getId = function() {
-    return this.surfaceId;
-  };
-
-  this.getSelection = function() {
-    var documentSession = this.context.documentSession;
-    var sel = documentSession.getSelection();
-    if (sel.surfaceId === this.getId()) {
-      return sel;
-    } else {
-      return null;
-    }
-  };
-
   this._renderSelection = function() {
-    // remove DOM selection
-    window.getSelection().removeAllRanges();
     var sel = this.getSelection();
     var startCell = this._getCell(sel.data.startRow, sel.data.startCol);
     var endCell = this._getCell(sel.data.endRow, sel.data.endCol);
     // TODO: we need to fix BrowserDOMElement so that we get the right values;
     var startEl = startCell.getNativeElement();
     var endEl = endCell.getNativeElement();
+    var pos1 = $(startEl).position();
+    var pos2 = $(endEl).position();
+    var rect2 = endEl.getBoundingClientRect();
     this.refs.selection.css({
-      top: startEl.offsetTop,
-      left: startEl.offsetLeft,
-      width: endEl.offsetLeft + endEl.offsetWidth - startEl.offsetLeft,
-      height: endEl.offsetTop + endEl.offsetHeight - startEl.offsetTop,
+      top: pos1.top,
+      left: pos1.left,
+      height: pos2.top - pos1.top + rect2.height,
+      width: pos2.left - pos1.left + rect2.width
     }).addClass('sm-visible');
   };
 
