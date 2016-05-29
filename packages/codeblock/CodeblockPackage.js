@@ -8,8 +8,8 @@ module.exports = {
   name: 'codeblock',
   configure: function(config) {
     config.addNode(Codeblock);
-    config.addComponent('codeblock', CodeblockComponent);
-    config.addConverter(CodeblockHTMLConverter);
+    config.addComponent(Codeblock.static.name, CodeblockComponent);
+    config.addConverter('html', CodeblockHTMLConverter);
     config.addTextType({
       name: 'codeblock',
       data: {type: 'codeblock'}

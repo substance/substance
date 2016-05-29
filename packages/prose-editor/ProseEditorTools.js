@@ -15,9 +15,9 @@ ProseEditorTools.Prototype = function() {
     var el = $$("div").addClass('sc-example-toolbar');
     var commandStates = this.props.commandStates;
     var toolRegistry = this.context.toolRegistry;
-    
+
     var tools = [];
-    toolRegistry.each(function(tool, name) {
+    toolRegistry.forEach(function(tool, name) {
       if (!tool.options.overlay) {
         // TODO: Remove clone hack once #577 is fixed
         tools.push(

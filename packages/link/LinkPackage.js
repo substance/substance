@@ -11,11 +11,11 @@ module.exports = {
   name: 'link',
   configure: function(config, options) {
     config.addNode(Link);
-    config.addComponent('link', LinkComponent);
-    config.addConverter(LinkHTMLConverter);
+    config.addComponent(Link.static.name, LinkComponent);
+    config.addConverter('html', LinkHTMLConverter);
     config.addCommand(LinkCommand);
     config.addTool(LinkTool);
     config.addTool(EditLinkTool, { overlay: true });
-    config.addIcon('link', { 'fontawesome': 'fa-link'})
+    config.addIcon(LinkCommand.static.name, { 'fontawesome': 'fa-link'})
   }
 };
