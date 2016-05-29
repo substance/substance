@@ -47,7 +47,9 @@ function Surface() {
   // considering nesting in IsolatedNodes
   this._surfaceId = createSurfaceId(this);
 
-  this.clipboard = new Clipboard(this);
+  this.clipboard = new Clipboard(this, {
+    converterRegistry: this.context.converterRegistry
+  });
 
   this.domSelection = null;
   this.domObserver = null;

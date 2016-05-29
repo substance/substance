@@ -1,7 +1,7 @@
 'use strict';
 
 var last = require('lodash/last');
-var each = require('lodash/each');
+var forEach = require('lodash/forEach');
 var clone = require('lodash/clone');
 var extend = require('lodash/extend');
 var error = require('../util/error');
@@ -55,7 +55,7 @@ function DOMImporter(config) {
     }
     var NodeClass = schema.getNodeClass(converter.type);
     if (!NodeClass) {
-      console.error('No node type defined for converter', converter.type);
+      error('No node type defined for converter', converter.type);
       return;
     }
     if (defaultTextType === converter.type) {
@@ -213,7 +213,7 @@ DOMImporter.Prototype = function DOMImporterPrototype() {
       id: this.getIdForElement(el, type)
     };
     var NodeClass = this.schema.getNodeClass(type);
-    each(NodeClass.static.schema, function(prop, name) {
+    forEach(NodeClass.static.schema, function(prop, name) {
       // check integrity of provided props, such as type correctness,
       // and mandatory properties
       var hasDefault = prop.hasOwnProperty('default');
@@ -474,8 +474,10 @@ DOMImporter.Prototype = function DOMImporterPrototype() {
   };
 
   this._getUnsupportedNodeConverter = function() {
-    console.warn('DOMImporter._getUnsupportedNodeConverter() is abstract.' +
-         '\nIf you want to add unsupported elements to your model you should override this method.');
+    warn([
+      'DOMImporter._getUnsupportedNodeConverter() is abstract.',
+      'If you want to add unsupported elements to your model you should override this method.'
+    ].join('\n'));
   };
 
   this._converterCanBeApplied = function(converter, el) {

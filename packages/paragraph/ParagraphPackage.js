@@ -8,8 +8,8 @@ module.exports = {
   name: 'paragraph',
   configure: function(config) {
     config.addNode(Paragraph);
-    config.addComponent('paragraph', ParagraphComponent);
-    config.addConverter(ParagraphHTMLConverter);
+    config.addComponent(Paragraph.static.name, ParagraphComponent);
+    config.addConverter('html', ParagraphHTMLConverter);
     config.addTextType({
       name: 'paragraph',
       data: {type: 'paragraph'}

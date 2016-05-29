@@ -7,7 +7,7 @@ var Registry = require('../util/Registry');
 
 /*
   Listens to changes on the document and selection and updates registered tools accordingly.
-  
+
   @class
 */
 function CommandManager(context, commands) {
@@ -43,7 +43,7 @@ CommandManager.Prototype = function() {
   */
   this.updateCommandStates = function() {
     var commandStates = {};
-    this.commandRegistry.each(function(cmd) {
+    this.commandRegistry.forEach(function(cmd) {
       commandStates[cmd.getName()] = cmd.getCommandState(this.getCommandContext());
     }.bind(this));
     this.commandStates = commandStates;

@@ -48,7 +48,11 @@ var IsolatedNodeComponent = require('./IsolatedNodeComponent');
   ```
  */
 
-function ContainerEditor() {
+function ContainerEditor(parent, props) {
+  // default props derived from the given props
+  props.containerId = props.containerId || props.node.id;
+  props.name = props.name || props.containerId || props.node.id;
+
   ContainerEditor.super.apply(this, arguments);
 
   this.containerId = this.props.containerId;

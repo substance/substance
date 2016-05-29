@@ -15,30 +15,27 @@ var platform = require('../util/platform');
   i.e., within one window or between two instances with the same DocumentSchema.
 
   For inter-application copy'n'paste, the ClipboardImporter and ClipboardExporter is used.
-  For HTML coming from the clipboard we support a fixed set of content types:
-
-    - Paragraph
-    - Heading
-    - Strong/Bold
-    - Emphasis/Italic
-    - Link
-    - Table
-    - List
-
-  To make this work for a custom schema, you must include the default nodes into your schema.
-  Otherwise, only plain text will be copied. If `Paragraph` is not present in your schema,
-  `schema.getDefaultTextType()` is used instead.
 
   @class Clipboard
 */
-var Clipboard = function(surface) {
+var Clipboard = function(surface, config) {
 
   this.surface = surface;
   var doc = surface.getDocument();
   var schema = doc.getSchema();
 
-  this.htmlImporter = new ClipboardImporter({ schema: schema, DocumentClass: doc.constructor });
-  this.htmlExporter = new ClipboardExporter();
+  var htmlConverters = [];
+  if (config.converterRegistry) {
+    htmlConverters = config.converterRegistry.get('html') || [];
+  }
+  var _config = {
+    schema: schema,
+    DocumentClass: doc.constructor,
+    converters: htmlConverters
+  };
+
+  this.htmlImporter = new ClipboardImporter(_config);
+  this.htmlExporter = new ClipboardExporter(_config);
 
   this.onCopy = this.onCopy.bind(this);
   this.onCut = this.onCut.bind(this);

@@ -69,6 +69,7 @@ ProseEditor.Prototype = function() {
     this.fileClient = configurator.getFileClient();
     this.commandManager = new CommandManager(this.getCommandContext(), commands);
     this.iconProvider = configurator.getIconProvider();
+    this.converterRegistry = configurator.getConverterRegistry();
   };
 
   this.getCommandContext = function() {
@@ -76,7 +77,8 @@ ProseEditor.Prototype = function() {
       documentSession: this.documentSession,
       surfaceManager: this.surfaceManager,
       fileClient: this.fileClient,
-      saveHandler: this.saveHandler
+      saveHandler: this.saveHandler,
+      converterRegistry: this.converterRegistry
     };
   };
 
@@ -90,7 +92,8 @@ ProseEditor.Prototype = function() {
       surfaceManager: this.surfaceManager,
       commandManager: this.commandManager,
       toolRegistry: this.toolRegistry,
-      i18n: this.i18nInstance
+      i18n: this.i18nInstance,
+      converterRegistry: this.converterRegistry
     };
   };
 

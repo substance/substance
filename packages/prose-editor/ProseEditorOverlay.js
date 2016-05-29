@@ -12,8 +12,8 @@ ProseEditorOverlay.Prototype = function() {
     var el = $$('div').addClass('sc-prose-editor-overlay');
     var commandStates = this.props.commandStates;
     var toolRegistry = this.context.toolRegistry;
-    
-    toolRegistry.each(function(tool, name) {
+
+    toolRegistry.forEach(function(tool, name) {
       if (tool.options.overlay) {
         var toolProps = tool.Class.static.getProps(commandStates);
         if (toolProps) {
