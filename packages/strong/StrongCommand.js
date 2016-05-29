@@ -9,6 +9,5 @@ function StrongCommand() {
 AnnotationCommand.extend(StrongCommand);
 
 StrongCommand.static.name = 'strong';
-StrongCommand.static.annotationType = 'strong';
 
 module.exports = StrongCommand;
