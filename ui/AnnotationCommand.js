@@ -29,7 +29,6 @@ var deleteAnnotation = require('../model/transform/deleteAnnotation');
   var SmallCapsCommand = AnnotationCommand.extend();
 
   SmallCapsCommand.static.name = 'smallcaps';
-  SmallCapsCommand.static.annotationType = 'smallcaps';
   ```
 */
 var AnnotationCommand = function(surface) {
@@ -44,8 +43,12 @@ AnnotationCommand.Prototype = function() {
     @returns {String} The annotation's type.
    */
   this.getAnnotationType = function() {
-    if (this.constructor.static.annotationType) {
-      return this.constructor.static.annotationType;
+    // NOTE: we never had a case where annotationType was not the same as the name
+    // so we make AnnotationCommand.static.name default, which still can be
+    // overridden using annotationType
+    var annotationType = this.constructor.static.annotationType || this.constructor.static.name;
+    if (annotationType) {
+      return annotationType;
     } else {
       throw new Error('Contract: AnnotationCommand.static.annotationType should be associated to a document annotation type.');
     }

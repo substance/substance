@@ -10,5 +10,6 @@ module.exports = {
     config.addNode(Strong);
     config.addCommand(StrongCommand);
     config.addTool(StrongTool);
+    config.addIcon(StrongCommand.static.name, { 'fontawesome': 'fa-bold' });
   }
 };

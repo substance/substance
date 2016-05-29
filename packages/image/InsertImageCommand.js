@@ -4,13 +4,13 @@ var uuid = require('../../util/uuid');
 var Command = require('../../ui/Command');
 var DefaultDOMElement = require('../../ui/DefaultDOMElement');
 
-var ImageCommand = Command.extend({
+function ImageCommand() {
+  ImageCommand.super.apply(this, arguments);
+}
 
-  static: {
-    name: 'image'
-  },
+ImageCommand.Prototype = function() {
 
-  getCommandState: function(context) {
+  this.getCommandState = function(context) {
     var documentSession = context.documentSession;
     var sel = documentSession.getSelection();
 
@@ -22,7 +22,7 @@ var ImageCommand = Command.extend({
       newState.disabled = false;
     }
     return newState;
-  },
+  };
 
   /**
     Initiates a fileupload and performs image insertion after the fileupload
@@ -30,7 +30,7 @@ var ImageCommand = Command.extend({
 
     TODO: Think about ways to make ImagCommand CLI-compatible.
   */
-  execute: function(context) {
+  this.execute = function(context) {
     var state = this.getCommandState(context);
     var surface = context.surfaceManager.getFocusedSurface();
     var fileClient = context.fileClient;
@@ -66,7 +66,7 @@ var ImageCommand = Command.extend({
             previewSrc: figureUrl
           };
           // Note: returning the result which will contain an updated selection
-          return surface.insertNode(tx, { 
+          return surface.insertNode(tx, {
             selection: args.selection,
             node: newImage,
             containerId: surface.getContainerId()
@@ -78,7 +78,12 @@ var ImageCommand = Command.extend({
     return {
       status: 'file-upload-process-started'
     };
-  }
-});
+  };
+
+};
+
+Command.extend(ImageCommand);
+
+ImageCommand.static.name = 'insert-image';
 
 module.exports = ImageCommand;

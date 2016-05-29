@@ -10,6 +10,6 @@ module.exports = {
     config.addNode(Subscript);
     config.addCommand(SubscriptCommand);
     config.addTool(SubscriptTool);
+    config.addIcon(SubscriptCommand.static.name, { 'fontawesome': 'fa-subscript' });
   }
 };
-
