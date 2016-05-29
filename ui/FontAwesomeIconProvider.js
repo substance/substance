@@ -1,5 +1,6 @@
 'use strict';
 
+var clone = require('lodash/clone');
 var oo = require('../util/oo');
 var Icon = require('./FontAwesomeIcon');
 
@@ -23,15 +24,20 @@ var ICON_MAP = {
 };
 
 function IconProvider() {
-
+  this.map = clone(ICON_MAP);
 }
 
 IconProvider.Prototype = function() {
+
   this.renderIcon = function($$, name) {
-    var iconClass = ICON_MAP[name];
+    var iconClass = this.map[name];
     if (iconClass) {
-      return $$(Icon, {icon: ICON_MAP[name]});  
+      return $$(Icon, {icon:iconClass});
     }
+  };
+
+  this.addIcon = function(name, faClass) {
+    this.map[name] = faClass;
   };
 };
 

@@ -6,7 +6,7 @@ var DocumentSchema = require('../model/DocumentSchema');
 var Registry = require('../util/Registry');
 var FileClientStub = require('../ui/FileClientStub');
 var SaveHandlerStub = require('../ui/SaveHandlerStub');
-var IconProvider = require('../ui/IconProvider');
+var FontAwesomeIconProvider = require('../ui/FontAwesomeIconProvider');
 
 // Setup default I18n
 var I18n = require('../ui/i18n');
@@ -14,7 +14,7 @@ var I18n = require('../ui/i18n');
 /*
   Default Configurator for Substance editors
 
-  This works well for single-column apps (such as ProseEditor). 
+  This works well for single-column apps (such as ProseEditor).
   Write your own Configurator for apps that require more complex
   configuration (e.g. when there are multiple surfaces involved
   each coming with different textTypes, enabled commands etc.)
@@ -30,7 +30,9 @@ function Configurator() {
     commands: [],
     tools: [],
     textTypes: [],
-    iconProvider: IconProvider,
+    // TODO: as long we don't have a way to capture
+    // icon provider config we need to have an instance here
+    iconProvider: new FontAwesomeIconProvider(),
     saveHandler: SaveHandlerStub,
     fileClient: FileClientStub
   };
@@ -169,7 +171,7 @@ Configurator.Prototype = function() {
   };
 
   this.getIconProvider = function() {
-    return new IconProvider();
+    return this.config.iconProvider;
   };
 
   this.getTextTypes = function() {
