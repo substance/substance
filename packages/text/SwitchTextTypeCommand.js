@@ -4,6 +4,7 @@ var Command = require('../../ui/Command');
 var _isMatch = require('lodash/isMatch');
 var _find = require('lodash/find');
 var _clone = require('lodash/clone');
+var warn = require('../../util/warn');
 
 function SwitchTextType() {
   Command.apply(this, arguments);
@@ -13,8 +14,8 @@ SwitchTextType.Prototype = function() {
 
   // Available text types on the surface
   this.getTextTypes = function(context) {
-    var surface = context.surface;
-    if (surface.isContainerEditor()) {
+    var surface = context.surfaceManager.getFocusedSurface();
+    if (surface && surface.isContainerEditor()) {
       return surface.getTextTypes();
     } else {
       return [];
@@ -44,9 +45,10 @@ SwitchTextType.Prototype = function() {
   };
 
   this.getCommandState = function(context) {
+    var documentSession = context.documentSession;
     var sel = context.documentSession.getSelection();
-    var surface = context.surface;
-    var doc = context.document;
+    var surface = context.surfaceManager.getFocusedSurface();
+    var doc = documentSession.getDocument();
 
     if (!surface) {
       return {
@@ -96,7 +98,11 @@ SwitchTextType.Prototype = function() {
   this.execute = function(context, textTypeName) {
     var textType = this.getTextType(context, textTypeName);
     var nodeData = textType.data;
-    var surface = context.surface;
+    var surface = context.surfaceManager.getFocusedSurface();
+    if (!surface) {
+      warn('No focused surface. Stopping command execution.');
+      return;
+    }
     surface.transaction(function(tx, args) {
       args.data = nodeData;
       return surface.switchType(tx, args);
