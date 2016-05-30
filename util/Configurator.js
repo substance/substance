@@ -11,6 +11,7 @@ var FontAwesomeIconProvider = require('../ui/FontAwesomeIconProvider');
 
 // Setup default I18n
 var I18n = require('../ui/i18n');
+I18n.instance.load(require('../i18n/en'));
 
 /*
   Default Configurator for Substance editors
