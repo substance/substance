@@ -14,6 +14,13 @@ var inBrowser = require('../util/inBrowser');
 var DefaultDOMElement = require('./DefaultDOMElement');
 var DOMElement = require('./DOMElement');
 
+/*
+  TODO: to be 100% safe we would need to introduce a hidden contenteditable
+  where we put the selection in case of non-surface situations
+  so that we are still able to receive events such as 'copy' -- actually only Edge is not dispatching
+  to window.document.
+*/
+
 function GlobalEventHandler(documentSession, surfaceManager) {
   this.documentSession = documentSession;
   this.surfaceManager = surfaceManager;
@@ -25,7 +32,7 @@ function GlobalEventHandler(documentSession, surfaceManager) {
 
 GlobalEventHandler.Prototype = function() {
 
-  var events = [ 'keydown', 'keyup', 'keypress', 'mousedown', 'mouseup'];
+  var events = [ 'keydown', 'keyup', 'keypress', 'mousedown', 'mouseup' , 'copy'];
 
   this.initialize = function() {
     if (inBrowser) {

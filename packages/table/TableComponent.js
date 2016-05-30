@@ -114,7 +114,10 @@ TableComponent.Prototype = function() {
     el.append(tableEl);
 
     // selection as an overlay
-    el.append($$('div').addClass('se-selection').ref('selection'));
+    el.append(
+      $$('div').addClass('se-selection').ref('selection')
+        .on('mousedown', this._whenClickingOnSelection)
+    );
 
     return el;
   };
@@ -229,7 +232,10 @@ TableComponent.Prototype = function() {
   this._onRowHandle = function(e) {
     e.stopPropagation();
     e.preventDefault();
-    console.log('Clicked on row handle.');
+    var el = DefaultDOMElement.wrapNativeElement(e.currentTarget);
+    var row = parseInt(el.attr('data-row'), 10);
+    var colCount = this.props.node.getColCount();
+    this._setSelection(row, 0, row, colCount-1);
   };
 
   this._onCell = function(e) {
@@ -247,8 +253,8 @@ TableComponent.Prototype = function() {
     var sel = this.getSelection();
     if (sel) {
       var documentSession = this.getDocumentSession();
-      var maxRow = this.props.node.getRowCount();
-      var maxCol = this.props.node.getColCount();
+      var maxRow = this.props.node.getRowCount()-1;
+      var maxCol = this.props.node.getColCount()-1;
       if (expand) {
         var endRow = Math.max(0, Math.min(sel.data.endRow + rowInc, maxRow));
         var endCol = Math.max(0, Math.min(sel.data.endCol + colInc, maxCol));
@@ -290,6 +296,13 @@ TableComponent.Prototype = function() {
     return cellEl;
   };
 
+  this._whenClickingOnSelection = function(e) {
+    // HACK: invalidating the selection so that we can click the selection overlay away
+    this.context.documentSession.setSelection(new CustomSelection('null', {}, this.getId()));
+    this.refs.selection.css({
+      height: '0px', width: '0px'
+    }).removeClass('sm-visible');
+  };
 };
 
 Component.extend(TableComponent);
