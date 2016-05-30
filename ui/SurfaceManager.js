@@ -4,6 +4,7 @@ var forEach = require('lodash/forEach');
 var clone = require('lodash/clone');
 var oo = require('../util/oo');
 var warn = require('../util/warn');
+var inBrowser = require('../util/inBrowser');
 
 function SurfaceManager(documentSession) {
   this.documentSession = documentSession;
@@ -88,6 +89,12 @@ SurfaceManager.Prototype = function() {
       _state.focusedSurface = focusedSurface;
       if (focusedSurface) {
         focusedSurface._focus();
+      } else if (update.selection.isCustomSelection() && inBrowser) {
+        // HACK: removing DOM selection *and* blurring when having a CustomSelection
+        // otherwise we will receive events on the wrong surface
+        // instead of bubbling up to GlobalEventManager
+        window.getSelection().removeAllRanges();
+        window.document.activeElement.blur();
       }
     }
 

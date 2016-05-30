@@ -9,6 +9,7 @@ var ProseEditorTools = require('./ProseEditorTools');
 var ProseEditorOverlay = require('./ProseEditorOverlay');
 var CommandManager = require('../../ui/CommandManager');
 var SurfaceManager = require('../../ui/SurfaceManager');
+var GlobalEventHandler = require('../../ui/GlobalEventHandler');
 
 function ProseEditor() {
   ProseEditor.super.apply(this, arguments);
@@ -41,6 +42,7 @@ ProseEditor.Prototype = function() {
   this._dispose = function() {
     this.surfaceManager.dispose();
     this.commandManager.dispose();
+    this.globalEventHandler.dispose();
     // Note: we need to clear everything, as the childContext
     // changes which is immutable
     this.empty();
@@ -70,6 +72,7 @@ ProseEditor.Prototype = function() {
     this.commandManager = new CommandManager(this.getCommandContext(), commands);
     this.iconProvider = configurator.getIconProvider();
     this.converterRegistry = configurator.getConverterRegistry();
+    this.globalEventHandler = new GlobalEventHandler(this.documentSession, this.surfaceManager);
   };
 
   this.getCommandContext = function() {
@@ -93,7 +96,8 @@ ProseEditor.Prototype = function() {
       commandManager: this.commandManager,
       toolRegistry: this.toolRegistry,
       i18n: this.i18nInstance,
-      converterRegistry: this.converterRegistry
+      converterRegistry: this.converterRegistry,
+      globalEventHandler: this.globalEventHandler
     };
   };
 
