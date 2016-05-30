@@ -1047,13 +1047,13 @@ Surface.Prototype = function() {
   };
 
   this._sendOverlayHints = function() {
-    // deactivated due to low performance
-    // if (this.state.mode === 'focused') {
-    //   var selectionRect = this.getBoundingRectangleForSelection();
-    //   this.send('updateOverlayHints', {
-    //     rectangle: selectionRect
-    //   });
-    // }
+    // TODO: optimize! This leads to low performance on FF
+    if (this.state.mode === 'focused') {
+    var selectionRect = this.getBoundingRectangleForSelection();
+      this.send('updateOverlayHints', {
+        rectangle: selectionRect
+      });
+    }
   };
 
 };
