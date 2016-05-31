@@ -1,20 +1,18 @@
 'use strict';
 
-var DocumentNode = require('../../model/DocumentNode');
+var TextBlock = require('../../model/TextBlock');
 
 function ListItem() {
-  ListItem.super.apply(this, arguments);
-}
+  ListItem.super.apply(this, arguments)
+};
 
-DocumentNode.extend(ListItem);
+TextBlock.extend(ListItem);
 
-ListItem.static.name = "list-item";
+ListItem.static.name = 'list-item';
 
 ListItem.static.defineSchema({
-  parent: "id",
-  level: { type: "number", default: 1 },
-  ordered: { type: "bool", default: false },
-  content: "text"
+  listType: { type: 'string', default: 'unordered' },
+  level: { type: 'number', default: 1 }
 });
 
 module.exports = ListItem;
