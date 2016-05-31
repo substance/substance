@@ -29,16 +29,15 @@ function breakNode(tx, args) {
   var sel = args.selection;
   var node = tx.get(sel.start.path[0]);
   var behavior = args.editingBehavior;
-  if (node.isText()) {
-    return breakTextNode(tx, args);
-  }
+
   // default breaking behavior for node selections
-  else if (sel.isNodeSelection() && !sel.isEntireNodeSelected()) {
+  if (sel.isNodeSelection() && !sel.isEntireNodeSelected()) {
     return breakWholeNode(tx, args);
-  }
-  else if (behavior && behavior.canBreak(node.type)) {
+  } else if (behavior && behavior.canBreak(node.type)) {
     var breaker = behavior.getBreaker(node.type);
     return breaker.call(breaker, tx, args);
+  } else if (node.isText()) {
+    return breakTextNode(tx, args);
   } else {
     info("Breaking is not supported for node type %s.", node.type);
     return args;
@@ -56,7 +55,7 @@ function breakTextNode(tx, args) {
   var node = tx.get(path[0]);
 
   // split the text property and create a new paragraph node with trailing text and annotations transferred
-  var text = node.content;
+  var text = node.getText();
   var container = tx.get(containerId);
   var nodePos = container.getPosition(node.id);
   var id = uuid(node.type);
@@ -74,11 +73,12 @@ function breakTextNode(tx, args) {
     container.show(id, nodePos);
     sel = tx.createSelection(path, 0);
   }
-  // otherwise a default text type node is inserted
+  // otherwise break the node
   else {
     newNode = node.toJSON();
     newNode.id = id;
     newNode.content = text.substring(offset);
+    // if at the end
     if (offset === text.length) {
       newNode.type = tx.getSchema().getDefaultTextType();
     }

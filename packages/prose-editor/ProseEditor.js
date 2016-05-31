@@ -73,6 +73,7 @@ ProseEditor.Prototype = function() {
     this.iconProvider = configurator.getIconProvider();
     this.converterRegistry = configurator.getConverterRegistry();
     this.globalEventHandler = new GlobalEventHandler(this.documentSession, this.surfaceManager);
+    this.editingBehavior = configurator.getEditingBehavior();
   };
 
   this.getCommandContext = function() {
@@ -97,7 +98,8 @@ ProseEditor.Prototype = function() {
       toolRegistry: this.toolRegistry,
       i18n: this.i18nInstance,
       converterRegistry: this.converterRegistry,
-      globalEventHandler: this.globalEventHandler
+      globalEventHandler: this.globalEventHandler,
+      editingBehavior: this.editingBehavior
     };
   };
 

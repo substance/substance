@@ -64,7 +64,8 @@ function ContainerEditor(parent, props) {
   if (!this.container) {
     throw new Error('Container with id ' + this.containerId + ' does not exist.');
   }
-  this.editingBehavior = new EditingBehavior();
+
+  this.editingBehavior = this.context.editingBehavior || new EditingBehavior();
 
   // derive internal state variables
   ContainerEditor.prototype._deriveInternalState.call(this, this.props);

@@ -8,6 +8,7 @@ var Registry = require('../util/Registry');
 var FileClientStub = require('../ui/FileClientStub');
 var SaveHandlerStub = require('../ui/SaveHandlerStub');
 var FontAwesomeIconProvider = require('../ui/FontAwesomeIconProvider');
+var EditingBehavior = require('../model/EditingBehavior');
 
 // Setup default I18n
 var I18n = require('../ui/i18n');
@@ -32,6 +33,7 @@ function Configurator(firstPackage) {
     commands: [],
     tools: [],
     textTypes: [],
+    editingBehaviors: [],
     icons: {},
     saveHandler: SaveHandlerStub,
     fileClient: FileClientStub
@@ -107,6 +109,10 @@ Configurator.Prototype = function() {
       spec: textType,
       options: options || {}
     });
+  };
+
+  this.addEditingBehavior = function(editingBehavior) {
+    this.config.editingBehaviors.push(editingBehavior);
   };
 
   this.setSaveHandler = function(saveHandler) {
@@ -216,6 +222,14 @@ Configurator.Prototype = function() {
 
   this.getI18nInstance = function() {
     return I18n.instance;
+  };
+
+  this.getEditingBehavior = function() {
+    var editingBehavior = new EditingBehavior();
+    this.config.editingBehaviors.forEach(function(behavior) {
+      behavior.register(editingBehavior);
+    });
+    return editingBehavior;
   };
 
 };
