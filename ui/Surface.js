@@ -265,7 +265,7 @@ Surface.Prototype = function() {
     });
     ```
    */
-  this.transaction = function(transformation) {
+  this.transaction = function(transformation, info) {
     var documentSession = this.documentSession;
     var surfaceId = this.getId();
     var self = this;
@@ -275,7 +275,7 @@ Surface.Prototype = function() {
       tx.before.surfaceId = surfaceId;
       self._prepareArgs(args);
       return transformation(tx, args);
-    });
+    }, info);
   };
 
   this.getSelection = function() {
@@ -503,7 +503,7 @@ Surface.Prototype = function() {
       }
       args.text = event.data;
       return this.insertText(tx, args);
-    }.bind(this));
+    }.bind(this), { action: 'type' });
   };
 
   // Handling Dead-keys under OSX
@@ -537,7 +537,7 @@ Surface.Prototype = function() {
         }
         args.text = character;
         return this.insertText(tx, args);
-      }.bind(this));
+      }.bind(this), { action: 'type' });
       event.preventDefault();
       event.stopPropagation();
       return;
@@ -877,7 +877,7 @@ Surface.Prototype = function() {
       this.domSelection.clear();
       args.text = " ";
       return this.insertText(tx, args);
-    }.bind(this));
+    }.bind(this), { action: 'type' });
   };
 
   this._handleEnterKey = function(event) {
@@ -886,11 +886,11 @@ Surface.Prototype = function() {
     if (event.shiftKey) {
       this.transaction(function(tx, args) {
         return this.softBreak(tx, args);
-      }.bind(this));
+      }.bind(this), { action: 'break' });
     } else {
       this.transaction(function(tx, args) {
         return this.break(tx, args);
-      }.bind(this));
+      }.bind(this), { action: 'break' });
     }
   };
 
@@ -901,7 +901,7 @@ Surface.Prototype = function() {
     this.transaction(function(tx, args) {
       args.direction = direction;
       return this.delete(tx, args);
-    }.bind(this));
+    }.bind(this), { action: 'delete' });
   };
 
   this._setSelection = function(sel) {

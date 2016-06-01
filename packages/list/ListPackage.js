@@ -3,6 +3,7 @@
 var ListItem = require('./ListItem');
 var ListItemComponent = require('./ListItemComponent');
 var ListEditing = require('./ListEditing');
+var ListMacro = require('./ListMacro');
 
 module.exports = {
   name: 'list-item',
@@ -14,5 +15,6 @@ module.exports = {
       data: { type: 'list-item' }
     });
     config.addEditingBehavior(ListEditing);
+    config.addMacro(ListMacro);
   }
 }

@@ -9,6 +9,7 @@ var ProseEditorTools = require('./ProseEditorTools');
 var ProseEditorOverlay = require('./ProseEditorOverlay');
 var CommandManager = require('../../ui/CommandManager');
 var SurfaceManager = require('../../ui/SurfaceManager');
+var MacroManager = require('../../ui/MacroManager');
 var GlobalEventHandler = require('../../ui/GlobalEventHandler');
 
 function ProseEditor() {
@@ -70,6 +71,7 @@ ProseEditor.Prototype = function() {
     this.surfaceManager = new SurfaceManager(this.documentSession);
     this.fileClient = configurator.getFileClient();
     this.commandManager = new CommandManager(this.getCommandContext(), commands);
+    this.macroManager = new MacroManager(this.getMacroContext(), configurator.getMacros());
     this.iconProvider = configurator.getIconProvider();
     this.converterRegistry = configurator.getConverterRegistry();
     this.globalEventHandler = new GlobalEventHandler(this.documentSession, this.surfaceManager);
@@ -84,6 +86,13 @@ ProseEditor.Prototype = function() {
       saveHandler: this.saveHandler,
       converterRegistry: this.converterRegistry
     };
+  };
+
+  this.getMacroContext = function() {
+    return {
+      documentSession: this.documentSession,
+      surfaceManager: this.surfaceManager
+    }
   };
 
   this.getChildContext = function() {

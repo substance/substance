@@ -34,6 +34,7 @@ function Configurator(firstPackage) {
     tools: [],
     textTypes: [],
     editingBehaviors: [],
+    macros: [],
     icons: {},
     saveHandler: SaveHandlerStub,
     fileClient: FileClientStub
@@ -113,6 +114,10 @@ Configurator.Prototype = function() {
 
   this.addEditingBehavior = function(editingBehavior) {
     this.config.editingBehaviors.push(editingBehavior);
+  };
+
+  this.addMacro = function(macro) {
+    this.config.macros.push(macro);
   };
 
   this.setSaveHandler = function(saveHandler) {
@@ -230,6 +235,10 @@ Configurator.Prototype = function() {
       behavior.register(editingBehavior);
     });
     return editingBehavior;
+  };
+
+  this.getMacros = function() {
+    return this.config.macros;
   };
 
 };
