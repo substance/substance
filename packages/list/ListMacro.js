@@ -27,10 +27,10 @@ var ListMacro = {
             type: 'list-item'
           }
         });
-        if (props.action == 'type') {
+        if (props.action === 'type') {
           return {
             selection: tx.createSelection(switchTextResult.node.getTextPath(), 0)
-          }
+          };
         }
       });
       return true;

@@ -1,16 +1,18 @@
 'use strict';
+/* eslint-disable consistent-return */
 
 require('../qunit_extensions');
 
-var documentStoreSeed = require('../../fixtures/collab/documentStoreSeed');
-var changeStoreSeed = require('../../fixtures/collab/changeStoreSeed');
+var error = require('../../../util/error');
 var DocumentStore = require('../../../collab/DocumentStore');
 var ChangeStore = require('../../../collab/ChangeStore');
 var DocumentEngine = require('../../../collab/DocumentEngine');
+var CollabEngine = require('../../../collab/CollabEngine');
+var documentStoreSeed = require('../../fixtures/collab/documentStoreSeed');
+var changeStoreSeed = require('../../fixtures/collab/changeStoreSeed');
 var twoParagraphs = require('../../fixtures/collab/two-paragraphs');
 var insertParagraph = require('../../fixtures/collab/insertParagraph');
 var insertText = require('../../fixtures/collab/insertText');
-var CollabEngine = require('../../../collab/CollabEngine');
 
 // Equivalent to the 'test-doc' that is in the backendseed.
 var testDoc = twoParagraphs.createArticle();
@@ -52,9 +54,9 @@ QUnit.module('collab/CollabEngine', {
     var newDocumentStoreSeed = JSON.parse(JSON.stringify(documentStoreSeed));
     var newChangeStoreSeed = JSON.parse(JSON.stringify(changeStoreSeed));
     documentStore.seed(newDocumentStoreSeed, function(err) {
-      if (err) return console.error(err);
+      if (err) return error(err);
       changeStore.seed(newChangeStoreSeed, function(err) {
-        if (err) return console.error(err);
+        if (err) return error(err);
         collabEngine = new CollabEngine(documentEngine);
         done();
       });
@@ -67,7 +69,7 @@ QUnit.test('New collaborator enters with latest version', function(assert) {
 
   collabEngine.sync({
     collaboratorId: 'collab-1',
-    documentId: 'test-doc', 
+    documentId: 'test-doc',
     version: 1,
     change: fakeChange
   }, function(err, result) {
@@ -82,7 +84,7 @@ QUnit.test('New collaborator enters with an outdated version', function(assert) 
 
   collabEngine.sync({
     collaboratorId: 'collab-1',
-    documentId: 'test-doc', 
+    documentId: 'test-doc',
     version: 0,
     change: fakeChange
   }, function(err, result) {
@@ -97,7 +99,7 @@ QUnit.test('New collaborator enters with a new fast-forward change', function(as
 
   collabEngine.sync({
     collaboratorId: 'collab-1',
-    documentId: 'test-doc', 
+    documentId: 'test-doc',
     version: 1,
     change: exampleChange
   }, function(err, result) {
@@ -117,7 +119,7 @@ QUnit.test('New collaborator enters with a change that needs rebasing', function
 
   collabEngine.sync({
     collaboratorId: 'collab-1',
-    documentId: 'test-doc', 
+    documentId: 'test-doc',
     version: 1,
     change: insertTextChange1
   }, function(err, result) {
@@ -135,7 +137,7 @@ QUnit.test('New collaborator enters with a change that needs rebasing', function
       assert.ok(result.serverChange, 'There should be a server change');
       assert.notDeepEqual(result.change, insertTextChange2, 'Tranformed change should differ from original change');
       done();
-    });    
+    });
   });
 });
 
@@ -143,7 +145,7 @@ QUnit.test('Two collaborators enter', function(assert) {
   var done = assert.async();
   collabEngine.sync({
     collaboratorId: 'collab-1',
-    documentId: 'test-doc', 
+    documentId: 'test-doc',
     version: 1,
     change: fakeChange
   }, function(err, result) {
@@ -170,7 +172,7 @@ QUnit.test('Collaborator does a fast-forward sync', function(assert) {
 
   collabEngine.sync({
     collaboratorId: 'collab-1',
-    documentId: 'test-doc', 
+    documentId: 'test-doc',
     version: 1,
     change: fakeChange
   }, function(err, result) {

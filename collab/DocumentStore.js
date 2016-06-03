@@ -116,7 +116,7 @@ DocumentStore.Prototype = function() {
   };
 
   this._documentExists = function(documentId) {
-    return !!this._documents[documentId];
+    return Boolean(this._documents[documentId]);
   };
 };
 

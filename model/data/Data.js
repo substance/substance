@@ -51,7 +51,7 @@ Data.Prototype = function() {
     @returns {Boolean} `true` if a node with id exists, `false` otherwise.
    */
   this.contains = function(id) {
-    return (!!this.nodes[id]);
+    return Boolean(this.nodes[id]);
   };
 
   /**

@@ -2,6 +2,7 @@
 
 require('../qunit_extensions');
 
+var error = require('../../../util/error');
 var snapshotStoreSeed = require('../../fixtures/collab/snapshotStoreSeed');
 var SnapshotStore = require('../../../collab/SnapshotStore');
 var testSnapshotStore = require('../../collab/testSnapshotStore');
@@ -16,7 +17,7 @@ QUnit.module('collab/SnapshotStore', {
     var newSnapshotStoreSeed = JSON.parse(JSON.stringify(snapshotStoreSeed));
     store.seed(newSnapshotStoreSeed, function(err) {
       if (err) {
-        return console.error(err);
+        error(err);
       } else {
         done();
       }

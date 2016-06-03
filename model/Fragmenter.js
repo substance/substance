@@ -37,9 +37,9 @@ var ANCHOR = -2;
 // TODO: If a violation for nodes of the same level occurs an Error should be thrown.
 // Currently, in such cases the first element that is opened earlier is preserved.
 
-var Fragmenter = function(options) {
+function Fragmenter(options) {
   extend(this, options);
-};
+}
 
 Fragmenter.Prototype = function() {
 
@@ -47,18 +47,15 @@ Fragmenter.Prototype = function() {
     return this._start(rootContext, text, annotations);
   };
 
-  this.onText = function(context, text, entry) {
-    /* jshint unused: false */
+  this.onText = function(context, text, entry) { // eslint-disable-line
   };
 
   // should return the created user context
-  this.onEnter = function(entry, parentContext) {
-    /* jshint unused: false */
+  this.onEnter = function(entry, parentContext) { // eslint-disable-line
     return null;
   };
 
-  this.onExit = function(entry, context, parentContext) {
-    /* jshint unused: false */
+  this.onExit = function(entry, context, parentContext) { // eslint-disable-line
   };
 
   // This is a sweep algorithm wich uses a set of ENTER/EXIT entries
@@ -172,9 +169,8 @@ Fragmenter.Prototype = function() {
     var idx = 0;
     var idx1 = 0;
     var idx2 = 0;
-    while(true) {
-      var opener = openers[idx1];
-      var closer = closers[idx2];
+    var opener, closer;
+    while( (opener = openers[idx1]) || (closer = closers[idx2]) ) {
       if (opener && closer) {
         // close before open
         if (closer.pos <= opener.pos && closer.opener !== opener) {
@@ -190,8 +186,6 @@ Fragmenter.Prototype = function() {
       } else if (closer) {
         entries[idx++] = closer;
         idx2++;
-      } else {
-        break;
       }
     }
     return entries;

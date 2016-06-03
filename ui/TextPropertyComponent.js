@@ -230,10 +230,7 @@ function _getPropertyContext(root, node, offset) {
     node: node,
     offset: offset
   };
-  while (true) {
-    if (!node || node === root) {
-      return null;
-    }
+  while (node && node !== root) {
     if (node.isElementNode()) {
       var path = node.getAttribute('data-path');
       if (path) {

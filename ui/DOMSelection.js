@@ -1,4 +1,3 @@
-/* globals -Range */
 "use strict";
 
 var last = require('lodash/last');

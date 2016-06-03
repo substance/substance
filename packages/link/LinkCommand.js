@@ -14,18 +14,16 @@ LinkCommand.Prototype = function() {
     };
   };
 
-  this.canFuse = function() {
+  this.canFuse = function() {
     return false;
   };
 
   // When there's some overlap with only a single annotation we do an expand
-  this.canEdit = function(annos, sel) {
-    // jshint unused: false
+  this.canEdit = function(annos, sel) { // eslint-disable-line
     return annos.length === 1;
   };
 
-  this.canDelete = function(annos, sel) {
-    // jshint unused: false
+  this.canDelete = function(annos, sel) { // eslint-disable-line
     return false;
   };
 

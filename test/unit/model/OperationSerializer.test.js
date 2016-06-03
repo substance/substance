@@ -31,7 +31,7 @@ QUnit.test('Serializing delete', function(assert) {
   var op = ObjectOperation.Delete(['p1'], p);
   var io = new OperationSerializer();
   var data = io.serialize(op);
-  assert.deepEqual(data,  ['d', p.id, p]);
+  assert.deepEqual(data, ['d', p.id, p]);
 });
 
 QUnit.test('Deserializing delete', function(assert) {

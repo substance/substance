@@ -1,6 +1,7 @@
 'use strict';
 
 var extend = require('lodash/extend');
+var isNumber = require('lodash/isNumber');
 var error = require('../util/error');
 var warn = require('../util/warn');
 var DocumentNode = require('./DocumentNode');
@@ -71,12 +72,9 @@ Container.Prototype = function() {
 
   this.show = function(nodeId, pos) {
     var doc = this.getDocument();
-    // Note: checking with ==  is what we want here
-    /* jshint eqnull: true */
-    if (pos == null) {
+    if (!isNumber(pos)) {
       pos = this.nodes.length;
     }
-    /* jshint eqnull: false */
     doc.update([this.id, 'nodes'], { insert: { offset: pos, value: nodeId } });
   };
 
@@ -125,7 +123,7 @@ Container.Prototype = function() {
   this._getCachedPositions = function() {
     if (!this.positions) {
       var positions = {};
-      this.nodes.map(function(id, pos) {
+      this.nodes.forEach(function(id, pos) {
         positions[id] = pos;
       });
       this.positions = positions;

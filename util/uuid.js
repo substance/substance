@@ -22,10 +22,10 @@ module.exports = function(prefix, len) {
   if (prefix && prefix[prefix.length-1] !== "-") {
     prefix = prefix.concat("-");
   }
-  var chars = '0123456789abcdefghijklmnopqrstuvwxyz'.split(''),
-      uuid = [],
-      radix = 16,
-      idx;
+  var chars = '0123456789abcdefghijklmnopqrstuvwxyz'.split('');
+  var uuid = [];
+  var radix = 16;
+  var idx;
   len = len || 32;
   if (len) {
     // Compact form
@@ -41,7 +41,7 @@ module.exports = function(prefix, len) {
     for (idx = 0; idx < 36; idx++) {
       if (!uuid[idx]) {
         r = 0 | Math.random()*16;
-        uuid[idx] = chars[(idx == 19) ? (r & 0x3) | 0x8 : r];
+        uuid[idx] = chars[(idx === 19) ? (r & 0x3) | 0x8 : r];
       }
     }
   }

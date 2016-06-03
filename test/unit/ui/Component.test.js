@@ -1,4 +1,5 @@
 "use strict";
+/* eslint-disable no-invalid-this, indent */
 
 require('../qunit_extensions');
 
@@ -314,21 +315,18 @@ QUnit.test("Rerendering varying content", function(assert) {
     };
     this.render = function($$) {
       var el = $$('div');
-      switch (this.state.mode) {
-        case 0:
-          el.append(
-            "Foo",
-            $$('br')
-          );
-          break;
-        case 1:
-          el.append(
-            "Bar",
-            $$('span'),
-            "Baz",
-            $$('br')
-          );
-          break;
+      if (this.state.mode === 0) {
+        el.append(
+          "Foo",
+          $$('br')
+        );
+      } else {
+        el.append(
+          "Bar",
+          $$('span'),
+          "Baz",
+          $$('br')
+        );
       }
       return el;
     };
@@ -959,7 +957,7 @@ QUnit.test("Ref on grandchild component.", function(assert) {
     el.append(
       $$('div').append(
         // generating a random property making sure the grandchild gets rerendered
-        $$(Grandchild, { foo: ""+Date.now() }).ref('grandchild')
+        $$(Grandchild, { foo: String(Date.now()) }).ref('grandchild')
       )
     );
     return el;

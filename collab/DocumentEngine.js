@@ -18,7 +18,7 @@ function DocumentEngine(config) {
   this.changeStore = config.changeStore;
 
   // SnapshotEngine instance is required
-  this.snapshotEngine = config.snapshotEngine || new SnapshotEngine({
+  this.snapshotEngine = config.snapshotEngine || new SnapshotEngine({
     schemas: this.schemas,
     documentStore: this.documentStore,
     changeStore: this.changeStore

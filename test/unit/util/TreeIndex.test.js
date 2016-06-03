@@ -23,7 +23,7 @@ QUnit.test("Getting with invalid arguments", function(assert) {
   assert.isNullOrUndefined(adapter.get(), 'Should return no value for no path');
   assert.isNullOrUndefined(adapter.get([]), 'Should return no value for empty path');
   assert.isNullOrUndefined(adapter.get({}), 'Should return no value for object');
-  assert.isNullOrUndefined(adapter.get(1),  'Should return no value for a number');
+  assert.isNullOrUndefined(adapter.get(1), 'Should return no value for a number');
 });
 
 // QUnit.test("Wrapping an existing object", function(assert) {

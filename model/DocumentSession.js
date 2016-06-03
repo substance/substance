@@ -286,7 +286,7 @@ DocumentSession.Prototype = function() {
         // TODO: calculate changes since last save
         var changes = [];
         saveHandler.saveDocument(doc, changes, function(err) {
-          
+
           this._isSaving = false;
           if (err) {
             error('Error during save');
@@ -316,7 +316,7 @@ DocumentSession.Prototype = function() {
       // this way, we only need to do this check here
       delete update.change;
     }
-    if (Object.keys(update).length > 0 || info.force) {
+    if (Object.keys(update).length > 0 || info.force) {
       // slots to have more control about when things get
       // updated, and things have been rendered/updated
       this.emit('update', update, info);

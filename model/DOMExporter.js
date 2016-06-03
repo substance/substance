@@ -59,8 +59,7 @@ DOMExporter.Prototype = function() {
       return out.join('');
     };
   */
-  this.convertDocument = function(doc) {
-    /* jshint unused:false */
+  this.convertDocument = function(doc) { // eslint-disable-line
     throw new Error('This method is abstract');
   };
 

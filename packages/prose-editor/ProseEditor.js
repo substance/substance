@@ -92,7 +92,7 @@ ProseEditor.Prototype = function() {
     return {
       documentSession: this.documentSession,
       surfaceManager: this.surfaceManager
-    }
+    };
   };
 
   this.getChildContext = function() {

@@ -57,6 +57,7 @@ QUnit.test("Class.extend with a ChildClass and a prototype object", function(ass
 QUnit.test("Class.extend with a ChildClass and a Prototype function", function(assert) {
   function B() {}
   A.extend(B, function() {
+    //eslint-disable-next-line no-invalid-this
     this.blupp = function() {
       return "blupp";
     };
@@ -100,6 +101,7 @@ QUnit.test("Class.extend with ChildClass, mixins, and a prototype function.", fu
     }
   };
   A.extend(B, MixinA, function() {
+    //eslint-disable-next-line no-invalid-this
     this.blupp = function() {
       return "blupp";
     };

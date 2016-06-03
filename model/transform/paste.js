@@ -30,7 +30,7 @@ var paste = function(tx, args) {
   }
   // TODO: is there a better way to detect that this paste is happening within a
   // container?
-  var inContainer = !!args.containerId;
+  var inContainer = Boolean(args.containerId);
   var pasteDoc = args.doc;
 
   // when we are in a container, we interpret line-breaks

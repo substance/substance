@@ -317,7 +317,7 @@ CheerioDOMElement.Prototype = function() {
     if (result.length > 0) {
       return result.map(function(el) {
         return this._wrapNativeElement(el);
-      });
+      }.bind(this));
     } else {
       return [];
     }
@@ -365,7 +365,6 @@ CheerioDOMElement.Prototype = function() {
     } else {
       throw new Error('insertBefore(): reference node is not a child of this element.');
     }
-    return this;
   };
 
   this.removeAt = function(pos) {

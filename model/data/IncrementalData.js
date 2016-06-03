@@ -21,9 +21,9 @@ var TextOperation = require('./TextOperation');
   @param {Schema} schema
   @param {Object} [options]
 */
-var IncrementalData = function(schema, options) {
+function IncrementalData(schema, options) {
   IncrementalData.super.call(this, schema, options);
-};
+}
 
 IncrementalData.Prototype = function() {
 

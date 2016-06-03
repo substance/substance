@@ -170,7 +170,7 @@ ContainerAnnotation.Anchor = function(anno, isStart) {
   this.node = anno;
   this.id = anno.id;
   this.container = anno.container;
-  this.isStart = !!isStart;
+  this.isStart = Boolean(isStart);
   Object.freeze(this);
 };
 

@@ -2,6 +2,7 @@
 
 require('../qunit_extensions');
 
+var error = require('../../../util/error');
 var simple = require('../../fixtures/simple');
 var Clipboard = require('../../../ui/Clipboard');
 var DOMElement = require('../../../ui/DOMElement');
@@ -190,7 +191,7 @@ function _with(assert, fixture, fn) {
     .then(done);
   if (!QUnit.config.notrycatch) {
     p.catch(function(err) {
-      console.error(err.stack);
+      error(err.stack);
       done();
     });
   }

@@ -28,14 +28,16 @@ function TestXMLImporter() {
   });
 }
 
-XMLImporter.extend(TestXMLImporter, function() {
+TestXMLImporter.Prototype = function() {
 
   this.convertDocument = function(documentEl) {
     var bodyEl = documentEl.find('body');
     this.convertContainer(bodyEl.children, 'main');
   };
 
-});
+};
+
+XMLImporter.extend(TestXMLImporter);
 
 TestXMLImporter.converters = converters;
 

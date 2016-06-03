@@ -3,8 +3,8 @@
 var TextBlock = require('../../model/TextBlock');
 
 function ListItem() {
-  ListItem.super.apply(this, arguments)
-};
+  ListItem.super.apply(this, arguments);
+}
 
 TextBlock.extend(ListItem);
 

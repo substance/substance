@@ -1,4 +1,3 @@
-/* globals -Node */
 'use strict';
 
 var oo = require('../../util/oo');
@@ -135,13 +134,8 @@ Schema.Prototype = function() {
       error('Unknown node type ', type);
       return null;
     }
-    return _getNodeSchema(NodeClass);
-  };
-
-  var _getNodeSchema = function(NodeClass) {
     return NodeClass.static.schema;
   };
-
 };
 
 oo.initClass(Schema);

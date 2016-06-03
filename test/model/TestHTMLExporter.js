@@ -9,7 +9,7 @@ function TestHTMLExporter() {
   });
 }
 
-HTMLExporter.extend(TestHTMLExporter, function() {
+TestHTMLExporter.Prototype = function() {
 
   this.convertDocument = function(doc, htmlEl) {
     var bodyEl = htmlEl.find('body');
@@ -20,6 +20,8 @@ HTMLExporter.extend(TestHTMLExporter, function() {
     return htmlEl;
   };
 
-});
+};
+
+HTMLExporter.extend(TestHTMLExporter);
 
 module.exports = TestHTMLExporter;

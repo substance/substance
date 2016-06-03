@@ -1,5 +1,6 @@
 'use strict';
 
+var error = require('../util/error');
 var InlineNodeComponent = require('./InlineNodeComponent');
 
 function InlineWrapperComponent() {
@@ -22,7 +23,7 @@ InlineWrapperComponent.Prototype = function() {
     var componentRegistry = this.context.componentRegistry || this.props.componentRegistry;
     var ComponentClass = componentRegistry.get(wrappedNode.type);
     if (!ComponentClass) {
-      console.error('Could not resolve a component for type: ' + wrappedNode.type);
+      error('Could not resolve a component for type: ' + wrappedNode.type);
     } else {
       el.append(
         $$(ComponentClass, {

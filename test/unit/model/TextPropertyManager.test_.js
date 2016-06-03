@@ -11,14 +11,14 @@ var manager;
 var doc;
 var textProp1, textProp2, textProp3;
 
-var MockTextProperty = function(path) {
+function MockTextProperty(path) {
   this.path = path;
   this.setFragments = sinon.spy();
   this.update = sinon.spy();
   this.getPath = function() {
     return this.path;
   };
-};
+}
 
 function _textProp1() {
   textProp1 = new MockTextProperty(["p1", "content"]);

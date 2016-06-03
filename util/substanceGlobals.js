@@ -1,3 +1,6 @@
+'use strict';
+
+var warn = require('./warn');
 /**
   A scope to store global variables.
 
@@ -7,7 +10,7 @@ var substanceGlobals = {
 };
 
 if (global.hasOwnProperty('Substance')) {
-  console.warn('global.Substance is already defined.');
+  warn('global.Substance is already defined.');
 }
 global.Substance = substanceGlobals;
 

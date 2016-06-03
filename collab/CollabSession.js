@@ -33,7 +33,7 @@ function CollabSession(doc, config) {
   }
 
   this.version = config.version || config.docVersion;
-  this.documentId = config.documentId || config.docId;
+  this.documentId = config.documentId || config.docId;
 
   if (config.autoSync !== undefined) {
     this.autoSync = config.autoSync;

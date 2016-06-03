@@ -36,7 +36,7 @@ DocumentationTOC.Prototype = function() {
           });
         });
       });
-    }.bind(this));
+    });
     return entries;
   };
 };

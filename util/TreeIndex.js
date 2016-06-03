@@ -17,7 +17,7 @@ function TreeNode() {}
  * @memberof module:Basics
  * @example
  *
- * var pathAdapter = new TreeIndex({a: "aVal", b: {b1: 'b1Val', b2: 'b2Val'}});
+ * var index = new TreeIndex({a: "aVal", b: {b1: 'b1Val', b2: 'b2Val'}});
  */
 
 function TreeIndex() {}
@@ -62,7 +62,10 @@ TreeIndex.Prototype = function() {
     if (isString(path)) {
       path = [path];
     }
-    setWith(this, path, value, function(val) { if (!val) return new TreeNode(); });
+    setWith(this, path, value, function(val) {
+      if (!val) return new TreeNode();
+      return undefined;
+    });
   };
 
   this.delete = function(path) {
@@ -156,10 +159,12 @@ TreeIndex.Arrays.Prototype = function() {
           return arr;
         } else {
           arr = val;
+          return null;
         }
       } else if (!val) {
         return new TreeNode();
       }
+      return null;
     });
     delete arr.__dummy__;
     arr.push(value);

@@ -43,7 +43,7 @@ DocumentNode.Prototype = function() {
     @returns {Boolean}
   */
   this.hasParent = function() {
-    return !!this.parent;
+    return Boolean(this.parent);
   };
 
   /**
@@ -67,8 +67,7 @@ DocumentNode.Prototype = function() {
 
     @returns {Number} default: -1
   */
-  this.getChildIndex = function(child) {
-    /* jshint unused:false */
+  this.getChildIndex = function(child) { // eslint-disable-line
     return -1;
   };
 
@@ -77,8 +76,7 @@ DocumentNode.Prototype = function() {
 
     @returns {DocumentNode} default: null
   */
-  this.getChildAt = function(idx) {
-    /* jshint unused:false */
+  this.getChildAt = function(idx) { // eslint-disable-line
     return null;
   };
 

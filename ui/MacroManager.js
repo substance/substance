@@ -12,9 +12,9 @@ MacroManager.Prototype = function() {
 
   this.onUpdate = function(update, info) {
     if (update.change) {
-      this.executeMacros(update, info)
+      this.executeMacros(update, info);
     }
-  }
+  };
 
   this.executeMacros = function(update, info) {
     var change = update.change;
@@ -50,8 +50,8 @@ MacroManager.Prototype = function() {
         break;
       }
     }
-  }
-}
+  };
+};
 
 oo.initClass(MacroManager);
 

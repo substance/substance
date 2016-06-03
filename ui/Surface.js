@@ -1,6 +1,7 @@
 'use strict';
 
-var each = require('lodash/each');
+var forEach = require('lodash/forEach');
+var isUndefined = require('lodash/isUndefined');
 var error = require('../util/error');
 var info = require('../util/info');
 var inBrowser = require('../util/inBrowser');
@@ -200,11 +201,11 @@ Surface.Prototype = function() {
   };
 
   this.isEditable = function() {
-    return (this.props.editing === "full" ||  this.props.editing === undefined);
+    return (this.props.editing === "full" || this.props.editing === undefined);
   };
 
   this.isSelectable = function() {
-    return (this.props.editing === "selection" ||  this.props.editing === "full");
+    return (this.props.editing === "selection" || this.props.editing === "full");
   };
 
   this.isReadonly = function() {
@@ -520,7 +521,7 @@ Surface.Prototype = function() {
       // Opera 12 doesn't always adhere to that convention
       event.keyCode === keys.TAB || event.keyCode === keys.ESCAPE ||
       // prevent combinations with meta keys, but not alt-graph which is represented as ctrl+alt
-      !!(event.metaKey) || (!!event.ctrlKey^!!event.altKey)
+      Boolean(event.metaKey) || (Boolean(event.ctrlKey)^Boolean(event.altKey))
     ) {
       return;
     }
@@ -675,7 +676,7 @@ Surface.Prototype = function() {
     var _state = this._state;
     var oldFragments = _state.fragments;
     if (oldFragments) {
-      each(oldFragments, function(frag, key) {
+      forEach(oldFragments, function(frag, key) {
         if (this._getComponentForKey(key)) {
           _markAsDirty(_state, key);
         }
@@ -718,7 +719,7 @@ Surface.Prototype = function() {
   };
 
   function _forEachFragment(fragments, fn) {
-    each(fragments, function(frags, owner) {
+    forEach(fragments, function(frags, owner) {
       frags.forEach(function(frag) {
         fn(frag, owner);
       });
@@ -974,8 +975,7 @@ Surface.Prototype = function() {
     arguments.
     ATM used only by ContainerEditor.
   */
-  this._prepareArgs = function(args) {
-    /* jshint unused: false */
+  this._prepareArgs = function(args) { // eslint-disable-line
   };
 
   this.setSelectionFromEvent = function(evt) {
@@ -1049,7 +1049,7 @@ Surface.Prototype = function() {
   this._sendOverlayHints = function() {
     // TODO: optimize! This leads to low performance on FF
     if (this.state.mode === 'focused') {
-    var selectionRect = this.getBoundingRectangleForSelection();
+      var selectionRect = this.getBoundingRectangleForSelection();
       this.send('updateOverlayHints', {
         rectangle: selectionRect
       });
@@ -1069,10 +1069,10 @@ Surface.getDOMRangeFromEvent = function(evt) {
     range.moveToPoint(x, y);
   }
 
-  else if (typeof document.createRange != "undefined") {
+  else if (!isUndefined(document.createRange)) {
     // Try Mozilla's rangeOffset and rangeParent properties,
     // which are exactly what we want
-    if (typeof evt.rangeParent != "undefined") {
+    if (!isUndefined(evt.rangeParent)) {
       range = document.createRange();
       range.setStart(evt.rangeParent, evt.rangeOffset);
       range.collapse(true);

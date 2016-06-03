@@ -1,13 +1,12 @@
-/*globals -Document */
 'use strict';
 
 var Document = require('../../model/Document');
 var ProseSchema = require('./ProseSchema');
 
-var ProseArticle = function(schema) {
+function ProseArticle(schema) {
   Document.call(this, schema);
   this._initialize();
-};
+}
 
 ProseArticle.Prototype = function() {
 

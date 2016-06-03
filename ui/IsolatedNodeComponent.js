@@ -216,7 +216,7 @@ IsolatedNodeComponent.Prototype = function() {
   };
 
   this.onMousedown = function(event) {
-    console.log('IsolatedNodeComponent.onMousedown', this.getId());
+    // console.log('IsolatedNodeComponent.onMousedown', this.getId());
     event.stopPropagation();
     switch (this.state.mode) {
       case 'selected':
@@ -232,7 +232,7 @@ IsolatedNodeComponent.Prototype = function() {
 
   this.onKeydown = function(event) {
     event.stopPropagation();
-    console.log('####', event.keyCode, event.metaKey, event.ctrlKey, event.shiftKey);
+    // console.log('####', event.keyCode, event.metaKey, event.ctrlKey, event.shiftKey);
     // TODO: while this works when we have an isolated node with input or CE,
     // there is no built-in way of receiving key events in other cases
     // We need a global event listener for keyboard events which dispatches to the current isolated node
@@ -248,7 +248,7 @@ IsolatedNodeComponent.Prototype = function() {
   };
 
   this._selectNode = function() {
-    console.log('IsolatedNodeComponent: selecting node.');
+    // console.log('IsolatedNodeComponent: selecting node.');
     var surface = this.context.surface;
     var doc = surface.getDocument();
     var nodeId = this.props.node.id;

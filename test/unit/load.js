@@ -1,3 +1,4 @@
+/* global Promise */
 'use strict';
 
 var $ = require('../../util/jquery');

@@ -43,7 +43,7 @@ function StubSurface(doc, containerId) {
   };
 
   this.isContainerEditor = function() {
-    return !!this.containerId;
+    return Boolean(this.containerId);
   };
 
   this.emit = function() {};

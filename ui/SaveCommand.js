@@ -10,7 +10,7 @@ SaveCommand.Prototype = function() {
 
   this.getCommandState = function(context) {
     var dirty = context.documentSession.isDirty();
-    console.log('SaveCommand.dirty', dirty);
+    // console.log('SaveCommand.dirty', dirty);
     return {
       disabled: !dirty,
       active: false

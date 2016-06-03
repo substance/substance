@@ -183,7 +183,7 @@ TableComponent.Prototype = function() {
     documentSession.setSelection(new CustomSelection('table', {
       startRow: startRow, startCol: startCol,
       endRow: endRow, endCol: endCol
-    }, this.getId()))
+    }, this.getId()));
   };
 
   this.onSessionDidUpdate = function(update) {
@@ -214,6 +214,8 @@ TableComponent.Prototype = function() {
         this._changeSelection(-1, 0, e.shiftKey);
         handled = true;
         break;
+      default:
+        // nothing
     }
     if (handled) {
       e.preventDefault();
@@ -252,7 +254,6 @@ TableComponent.Prototype = function() {
   this._changeSelection = function(rowInc, colInc, expand) {
     var sel = this.getSelection();
     if (sel) {
-      var documentSession = this.getDocumentSession();
       var maxRow = this.props.node.getRowCount()-1;
       var maxCol = this.props.node.getColCount()-1;
       if (expand) {
@@ -296,7 +297,7 @@ TableComponent.Prototype = function() {
     return cellEl;
   };
 
-  this._whenClickingOnSelection = function(e) {
+  this._whenClickingOnSelection = function(e) { //eslint-disable-line
     // HACK: invalidating the selection so that we can click the selection overlay away
     this.context.documentSession.setSelection(new CustomSelection('null', {}, this.getId()));
     this.refs.selection.css({

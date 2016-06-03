@@ -212,8 +212,7 @@ TwoPanelController.Prototype = function() {
     }
   };
 
-  this.handleStateUpdate = function(newState) {
-    /* jshint unused: false */
+  this.handleStateUpdate = function(newState) { // eslint-disable-line
   };
 
   // Extract props needed for panel parametrization

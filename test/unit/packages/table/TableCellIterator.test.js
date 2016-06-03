@@ -56,9 +56,8 @@ QUnit.test('Iterator should return as many cells as were created', function (ass
   var table = article.get(newTableId);
   var iterator = new TableCellIterator(table);
 
-  var cellNode;
   var cellNodeCount = 0;
-  while ((cellNode = iterator.next()) !== null) {
+  while (iterator.next() !== null) {
     cellNodeCount++;
   }
 

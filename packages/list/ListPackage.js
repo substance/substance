@@ -17,4 +17,4 @@ module.exports = {
     config.addEditingBehavior(ListEditing);
     config.addMacro(ListMacro);
   }
-}
+};

@@ -31,9 +31,9 @@ var deleteAnnotation = require('../model/transform/deleteAnnotation');
   SmallCapsCommand.static.name = 'smallcaps';
   ```
 */
-var AnnotationCommand = function(surface) {
+function AnnotationCommand(surface) {
   Command.call(this, surface);
-};
+}
 
 AnnotationCommand.Prototype = function() {
 

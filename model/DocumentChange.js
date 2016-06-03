@@ -1,5 +1,3 @@
-/* jshint latedef:nofunc */
-
 'use strict';
 
 var isEqual = require('lodash/isEqual');
@@ -117,6 +115,8 @@ DocumentChange.Prototype = function() {
             }
           }
           break;
+        default:
+          throw new Error('Illegal state');
       }
     }
 

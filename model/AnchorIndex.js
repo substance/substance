@@ -4,13 +4,13 @@ var filter = require('lodash/filter');
 var TreeIndex = require('../util/TreeIndex');
 var DocumentIndex = require('./DocumentIndex');
 
-var AnchorIndex = function(doc) {
+function AnchorIndex(doc) {
   this.doc = doc;
   this.byPath = new TreeIndex.Arrays();
   this.byId = {};
-};
+}
 
-DocumentIndex.extend(AnchorIndex, function() {
+AnchorIndex.Prototype = function() {
 
   this.select = function(node) {
     return (node._isContainerAnnotation);
@@ -32,7 +32,6 @@ DocumentIndex.extend(AnchorIndex, function() {
       // return a copy of the array
       return anchors.slice(0);
     }
-    return anchors;
   };
 
   this.create = function(containerAnno) {
@@ -66,6 +65,8 @@ DocumentIndex.extend(AnchorIndex, function() {
     }
   };
 
-});
+};
+
+DocumentIndex.extend(AnchorIndex);
 
 module.exports = AnchorIndex;

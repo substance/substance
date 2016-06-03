@@ -16,8 +16,8 @@ ChangeStore.Prototype = function() {
   /*
     Gets changes for a given document
 
-    @param {String} args.documentId document id
-    @param {Number} args.sinceVersion since which change
+    @param {String} args.documentId document id
+    @param {Number} args.sinceVersion since which change
   */
   this.getChanges = function(args, cb) {
     var changes = this._getChanges(args.documentId);

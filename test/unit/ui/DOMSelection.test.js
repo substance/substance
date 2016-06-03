@@ -1,5 +1,5 @@
 "use strict";
-/* jshint latedef:nofunc */
+/* eslint-disable no-invalid-this, indent */
 
 var get = require('lodash/get');
 var isArray = require('lodash/isArray');
@@ -70,7 +70,7 @@ function StubSurface(el, containerId) {
   };
 
   this.isContainerEditor = function() {
-    return !!this.containerId;
+    return Boolean(this.containerId);
   };
 
   this.getContainerId = function() {
@@ -105,24 +105,24 @@ function StubTextPropertyComponent(el) {
 // Fixtures
 var singlePropertyFixture = [
   '<div id="test1">',
-    '<span data-path="test1.content">Hello World!</span>',
+  '  <span data-path="test1.content">Hello World!</span>',
   '</div>'
 ].join('');
 
 var mixedFixture = [
   '<div id="before">Before</div>',
   '<div id="test1">',
-    '<span data-path="test1.content">The first property.</span>',
+  '  <span data-path="test1.content">The first property.</span>',
   '</div>',
   '<div id="test2">',
-    '<span data-path="test2.content">The second property.</span>',
+  '  <span data-path="test2.content">The second property.</span>',
   '</div>',
   '<div id="between">Between</div>',
   '<div id="test3">',
-    '<span data-path="test3.content">The third property.</span>',
+  '  <span data-path="test3.content">The third property.</span>',
   '</div>',
   '<div id="test4">',
-    '<span data-path="test4.content">The forth property.</span>',
+  '  <span data-path="test4.content">The forth property.</span>',
   '</div>',
   '<div id="after">After</div>'
 ].join('');
@@ -195,7 +195,7 @@ QUnit.uiTest("coordinate via search", function(assert) {
 
 var emptyParagraphFixture = [
   '<div id="test1" class="content-node" data-id="test1">',
-    '<span data-path="test1.content"></span>',
+  '  <span data-path="test1.content"></span>',
   '</div>'
 ].join('');
 
@@ -212,12 +212,12 @@ QUnit.uiTest("DOM coordinate in empty paragraph", function(assert) {
 
 var textWithAnnotations = [
   '<div id="test1">',
-    '<span id="test1_content" data-path="test1.content">',
-      '<span data-offset="0" data-length="2">..</span>',
-      '<span data-offset="2" data-length="2">..</span>',
-      '<span data-offset="4" data-length="2">..</span>',
-      '<span data-offset="6" data-length="2">..</span>',
-    '</span>',
+  '  <span id="test1_content" data-path="test1.content">',
+  '    <span data-offset="0" data-length="2">..</span>',
+  '    <span data-offset="2" data-length="2">..</span>',
+  '    <span data-offset="4" data-length="2">..</span>',
+  '    <span data-offset="6" data-length="2">..</span>',
+  '  </span>',
   '</div>'
 ].join('');
 
@@ -245,14 +245,14 @@ QUnit.uiTest("DOM coordinate on text property level (last)", function(assert) {
 
 var withAnnosAndInlines = [
   '<div id="test1">',
-    '<span id="test1_content" data-path="test1.content">',
-      '<span data-offset="0" data-length="2">..</span>',
-      '<span data-inline="1">$</span>',
-      '<span data-offset="3" data-length="2">..</span>',
-      '<span data-inline="1">$</span>',
-      '<span id="before-last" data-offset="6" data-length="2">..</span>',
-      '<span data-inline="1">$</span>',
-    '</span>',
+  '  <span id="test1_content" data-path="test1.content">',
+  '    <span data-offset="0" data-length="2">..</span>',
+  '    <span data-inline="1">$</span>',
+  '    <span data-offset="3" data-length="2">..</span>',
+  '    <span data-inline="1">$</span>',
+  '    <span id="before-last" data-offset="6" data-length="2">..</span>',
+  '    <span data-inline="1">$</span>',
+  '  </span>',
   '</div>'
 ].join('');
 
@@ -284,12 +284,12 @@ QUnit.uiTest("DOM selection spanning over inline at end", function(assert) {
 
 var withoutHints = [
   '<div id="test1">',
-    '<span id="test1_content" data-path="test1.content">',
-      '<span>..</span>',
-      '<span>..</span>',
-      '<span>..</span>',
-      '<span>..</span>',
-    '</span>',
+  '  <span id="test1_content" data-path="test1.content">',
+  '    <span>..</span>',
+  '    <span>..</span>',
+  '    <span>..</span>',
+  '    <span>..</span>',
+  ' </span>',
   '</div>'
 ].join('');
 
@@ -407,7 +407,7 @@ QUnit.uiTest("Mapping a ContainerSelection from DOM to model", function(assert) 
   var p1Text = el.find('#p1 span').getFirstChild();
   var p2Text = el.find('#p2 span').getFirstChild();
   QUnit.setDOMSelection(p1Text, 1, p2Text, 2);
-  var sel = domSelection.getSelection(sel);
+  var sel = domSelection.getSelection();
   assert.ok(sel.isContainerSelection(), 'Should be a container selection.');
   assert.deepEqual(sel.startPath, ['p1', 'content'], 'startPath should be correct.');
   assert.equal(sel.startOffset, 1, 'startOffset should be correct.');
@@ -424,7 +424,7 @@ QUnit.uiTest("DOM Coordinate on surface element", function(assert) {
   var domSelection = new DOMSelection(new StubSurface(el, 'main'));
   var surface = el.find('#surface');
   QUnit.setDOMSelection(surface, 2, surface, 2);
-  var sel = domSelection.getSelection(sel);
+  var sel = domSelection.getSelection();
   assert.ok(sel.isCollapsed, 'Selection should be collapsed.');
   assert.deepEqual(sel.startPath, ['p3', 'content'], 'startPath should be correct.');
   assert.equal(sel.startOffset, 0, 'startOffset should be correct.');

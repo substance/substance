@@ -1,3 +1,5 @@
+"use strict";
+
 var ContainerEditor = require('../../../ui/ContainerEditor');
 var Controller = require('../../../ui/Controller');
 

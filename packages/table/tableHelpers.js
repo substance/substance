@@ -9,18 +9,17 @@ function getColumnName(col) {
     throw new Error('Illegal argument.');
   }
   var name = "";
-  while(true) {
+  while(col > 0) {
     var mod = col % ALPHABET.length;
     col = Math.floor(col/ALPHABET.length);
     name = ALPHABET[mod] + name;
     if (col > 0) col--;
-    else if (col === 0) break;
   }
   return name;
 }
 
 function getRowName(idx) {
-  return ""+(idx+1);
+  return String(idx+1);
 }
 
 function getColumnIndex(colStr) {
@@ -41,7 +40,7 @@ function getCellId(row,col) {
 function getRowColFromId(id) {
   var match = /^([A-Z]+)([1-9][0-9]*)$/.exec(id);
   return [
-    parseInt(match[2])-1,
+    parseInt(match[2], 10)-1,
     getColumnIndex(match[1])
   ];
 }

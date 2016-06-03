@@ -10,7 +10,7 @@ function TestXMLExporter() {
   });
 }
 
-XMLExporter.extend(TestXMLExporter, function() {
+TestXMLExporter.Prototype = function() {
 
   this.convertDocument = function(doc) {
     var articleEl = DefaultDOMElement.parseXML('<article></article>');
@@ -21,6 +21,8 @@ XMLExporter.extend(TestXMLExporter, function() {
     return articleEl;
   };
 
-});
+};
+
+XMLExporter.extend(TestXMLExporter);
 
 module.exports = TestXMLExporter;

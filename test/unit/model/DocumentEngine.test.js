@@ -1,15 +1,16 @@
 'use strict';
+/* eslint-disable consistent-return */
 
 require('../qunit_extensions');
 
-var documentStoreSeed = require('../../fixtures/collab/documentStoreSeed');
-var changeStoreSeed = require('../../fixtures/collab/changeStoreSeed');
+var error = require('../../../util/error');
 var DocumentStore = require('../../../collab/DocumentStore');
 var ChangeStore = require('../../../collab/ChangeStore');
 var DocumentEngine = require('../../../collab/DocumentEngine');
 var testDocumentEngine = require('../../collab/testDocumentEngine');
 var twoParagraphs = require('../../fixtures/collab/two-paragraphs');
-
+var documentStoreSeed = require('../../fixtures/collab/documentStoreSeed');
+var changeStoreSeed = require('../../fixtures/collab/changeStoreSeed');
 var documentStore = new DocumentStore();
 var changeStore = new ChangeStore();
 
@@ -31,9 +32,9 @@ QUnit.module('collab/DocumentEngine', {
     var newDocumentStoreSeed = JSON.parse(JSON.stringify(documentStoreSeed));
     var newChangeStoreSeed = JSON.parse(JSON.stringify(changeStoreSeed));
     documentStore.seed(newDocumentStoreSeed, function(err) {
-      if (err) return console.error(err);
+      if (err) return error(err);
       changeStore.seed(newChangeStoreSeed, function(err) {
-        if (err) return console.error(err);
+        if (err) return error(err);
         done();
       });
     });

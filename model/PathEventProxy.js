@@ -6,11 +6,11 @@ var oo = require('../util/oo');
 var warn = require('../util/warn');
 var TreeIndex = require('../util/TreeIndex');
 
-var PathEventProxy = function(doc) {
+function PathEventProxy(doc) {
   this.listeners = new TreeIndex.Arrays();
   this._list = [];
   this.doc = doc;
-};
+}
 
 PathEventProxy.Prototype = function() {
 
@@ -46,7 +46,7 @@ PathEventProxy.Prototype = function() {
       forEach(scopedListeners, function(entry) {
         entry.method.call(entry.listener, change, info, doc);
       });
-    }.bind(this));
+    });
   };
 
   this._add = function(listener, path, method) {
@@ -62,9 +62,9 @@ PathEventProxy.Prototype = function() {
     for (var i = 0; i < this._list.length; i++) {
       var item = this._list[i];
       var match = (
-        (!path     || isEqual(item.path, path)) &&
+        (!path || isEqual(item.path, path)) &&
         (!listener || item.listener === listener) &&
-        (!method   || item.method !== method)
+        (!method || item.method !== method)
       );
       if (match) {
         var entry = this._list[i];

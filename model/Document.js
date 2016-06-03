@@ -1,4 +1,3 @@
-/* globals -Range */
 'use strict';
 
 var isEqual = require('lodash/isEqual');
@@ -328,7 +327,7 @@ Document.Prototype = function() {
     Every selection implementation provides its own
     parameter format which is basically a JSON representation.
 
-    @param {model/Selection} sel An object describing the selection.
+    @param {model/Selection} sel An object describing the selection.
 
     @example
 
@@ -371,7 +370,7 @@ Document.Prototype = function() {
 
 
   function _createSelection() {
-    var doc = this; // jshint ignore:line
+    var doc = this; // eslint-disable-line
     var PropertySelection = require('./PropertySelection');
     var ContainerSelection = require('./ContainerSelection');
     var coor, range, path, startOffset, endOffset;

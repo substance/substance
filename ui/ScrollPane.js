@@ -133,7 +133,7 @@ ScrollPane.Prototype = function() {
 
   // HACK: Scrollbar should use DOMMutationObserver instead
   this.onDocumentChange = function() {
-      this.refs.scrollbar.updatePositions();
+    this.refs.scrollbar.updatePositions();
   };
 
   this.onHighlightsUpdated = function(highlights) {

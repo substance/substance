@@ -6,7 +6,7 @@ function SuperscriptCommand() {
   SuperscriptCommand.super.apply(this, arguments);
 }
 
-var SuperscriptCommand = AnnotationCommand.extend();
+AnnotationCommand.extend(SuperscriptCommand);
 
 SuperscriptCommand.static.name = 'superscript';
 

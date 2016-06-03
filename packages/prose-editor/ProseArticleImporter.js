@@ -22,7 +22,7 @@ function ProseArticleImporter() {
   });
 }
 
-HTMLImporter.extend(ProseArticleImporter, function() {
+ProseArticleImporter.Prototype = function() {
   /*
     Takes an HTML string.
   */
@@ -31,7 +31,9 @@ HTMLImporter.extend(ProseArticleImporter, function() {
     if (!bodyEls.length) bodyEls = [bodyEls];
     this.convertContainer(bodyEls, 'body');
   };
-});
+};
+
+HTMLImporter.extend(ProseArticleImporter);
 
 ProseArticleImporter.converters = converters;
 

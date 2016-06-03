@@ -220,7 +220,7 @@ DOMImporter.Prototype = function DOMImporterPrototype() {
       if (hasDefault) {
         nodeData[name] = clone(prop.default);
       }
-    }.bind(this));
+    });
     return nodeData;
   };
 

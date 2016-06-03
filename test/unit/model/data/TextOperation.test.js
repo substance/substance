@@ -89,7 +89,7 @@ QUnit.test("Can't apply on a too short string", function(assert) {
 });
 
 QUnit.test("Can be applied on custom String implementation", function(assert) {
-  var CustomString = function(str) {
+  function CustomString(str) {
     this.arr = str.split('');
     this.splice = function(pos, remove, insert) {
       this.arr.splice(pos, remove);
@@ -100,7 +100,7 @@ QUnit.test("Can be applied on custom String implementation", function(assert) {
     this.toString = function() {
       return this.arr.join('');
     };
-  };
+  }
   Object.defineProperty(CustomString.prototype, 'length', {
     get: function() {
       return this.arr.length;

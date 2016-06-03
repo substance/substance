@@ -1,4 +1,5 @@
-'use strict';
+"use strict";
+/* eslint-disable no-unused-vars */
 
 var oo = require('../util/oo');
 var isFunction = require('lodash/isFunction');
@@ -1078,7 +1079,7 @@ function DOMEventListener(eventName, handler, options) {
   options = options || {};
   var origHandler = handler;
   var context = options.context;
-  var capture = !!options.capture;
+  var capture = Boolean(options.capture);
 
   if (context) {
     handler = handler.bind(context);

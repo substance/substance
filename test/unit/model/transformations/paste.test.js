@@ -1,3 +1,5 @@
+"use strict";
+
 require('../../qunit_extensions');
 var simple = require('../../../fixtures/simple');
 var paste = require('../../../../model/transform/paste');

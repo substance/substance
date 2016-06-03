@@ -176,8 +176,7 @@ Component.Prototype = function() {
    *
    * @return a boolean indicating whether rerender() should be run.
    */
-  this.shouldRerender = function(newProps) {
-    /* jshint unused: false */
+  this.shouldRerender = function(newProps) { // eslint-disable-line
     return true;
   };
 
@@ -394,7 +393,8 @@ Component.Prototype = function() {
   /**
     Called before state is changed.
   */
-  this.willUpdateState = function(newState) { /* jshint unused: false */ };
+  this.willUpdateState = function(newState) { // eslint-disable-line
+  };
 
   /**
     Get the current properties
@@ -451,7 +451,8 @@ Component.Prototype = function() {
     For example you can use this to derive state from props.
     @param {object} newProps
   */
-  this.willReceiveProps = function(newProps) { /* jshint unused: false */ };
+  this.willReceiveProps = function(newProps) { // eslint-disable-line
+  };
 
   this.getChildNodes = function() {
     if (!this.el) return [];
@@ -574,15 +575,15 @@ Component.Prototype = function() {
   };
 
   this.addEventListener = function() {
-    throw "Not supported.";
+    throw new Error("Not supported.");
   };
 
   this.removeEventListener = function() {
-    throw "Not supported.";
+    throw new Error("Not supported.");
   };
 
   this.insertBefore = function() {
-    throw "Not supported.";
+    throw new Error("Not supported.");
   };
 
 };
@@ -697,9 +698,9 @@ Component.TextNode = TextNodeComponent;
 Object.defineProperty(Component, '$$', {
   get: function() {
     throw new Error([
-     "With Substance Beta 4 we introduced a breaking change.",
-     "We needed to turn the former static Component.$$ into a contextualized implementation, which is now served via Component.render($$).",
-     "FIX: change your signature of 'this.render()' in all your Components to 'this.render($$)"
+      "With Substance Beta 4 we introduced a breaking change.",
+      "We needed to turn the former static Component.$$ into a contextualized implementation, which is now served via Component.render($$).",
+      "FIX: change your signature of 'this.render()' in all your Components to 'this.render($$)"
     ].join("\n"));
   }
 });

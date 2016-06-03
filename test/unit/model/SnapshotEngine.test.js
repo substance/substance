@@ -1,8 +1,9 @@
 'use strict';
-
+/* eslint-disable consistent-return */
 
 require('../qunit_extensions');
 
+var error = require('../../../util/error');
 var documentStoreSeed = require('../../fixtures/collab/documentStoreSeed');
 var changeStoreSeed = require('../../fixtures/collab/changeStoreSeed');
 var snapshotStoreSeed = require('../../fixtures/collab/snapshotStoreSeed');
@@ -51,11 +52,11 @@ QUnit.module('collab/SnapshotEngine', {
     var newSnapshotStoreSeed = JSON.parse(JSON.stringify(snapshotStoreSeed));
 
     documentStore.seed(newDocumentStoreSeed, function(err) {
-      if (err) return console.error(err);
+      if (err) return error(err);
       changeStore.seed(newChangeStoreSeed, function(err) {
-        if (err) return console.error(err);
+        if (err) return error(err);
         snapshotStore.seed(newSnapshotStoreSeed, function(err) {
-          if (err) return console.error(err);
+          if (err) return error(err);
           done();
         });
       });

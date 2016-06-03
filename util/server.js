@@ -1,5 +1,5 @@
-/* globals console */
-/* jshint strict:false */
+"use strict";
+/* eslint-disable no-console */
 
 var browserify = require('browserify');
 var sass = require('node-sass');

@@ -6,6 +6,7 @@ var argv = require('yargs').argv;
 var gulpif = require('gulp-if');
 var rename = require('gulp-rename');
 var jshint = require('gulp-jshint');
+var eslint = require('gulp-eslint');
 var browserify = require('browserify');
 var uglify = require('gulp-uglify');
 var sourcemaps = require('gulp-sourcemaps');
@@ -57,6 +58,21 @@ gulp.task('doc:bundle', function () {
 
 gulp.task('doc', ['doc:sass', 'doc:bundle', 'doc:assets', 'doc:data']);
 
+// gulp.task('lint', function() {
+//   return gulp.src([
+//     './collab/**/*.js',
+//     './doc/**/*.js',
+//     './model/**/*.js',
+//     './packages/**/*.js',
+//     './ui/**/*.js',
+//     './util/**/*.js',
+//     './test/model/*.js',
+//     './test/unit/**/*.js'
+//   ]).pipe(jshint())
+//     .pipe(jshint.reporter('default'))
+//     .pipe(jshint.reporter("fail"));
+// });
+
 gulp.task('lint', function() {
   return gulp.src([
     './collab/**/*.js',
@@ -67,10 +83,11 @@ gulp.task('lint', function() {
     './util/**/*.js',
     './test/model/*.js',
     './test/unit/**/*.js'
-  ]).pipe(jshint())
-    .pipe(jshint.reporter('default'))
-    .pipe(jshint.reporter("fail"));
+  ]).pipe(eslint())
+    .pipe(eslint.format())
+    .pipe(eslint.failAfterError());
 });
+
 
 gulp.task('build', ['lint'], function() {
   return browserify({

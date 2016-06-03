@@ -1,5 +1,5 @@
-/* jshint node: true */
 'use strict';
+/* eslint-disable no-console */
 
 var oo = require('../../util/oo');
 var fs = require('fs');
@@ -162,6 +162,7 @@ Parser.Prototype = function() {
   };
 
   var STATIC_PROP = /(.+)\.static/;
+  var _typeTagMatcher = /^\s*(\{[^@][^{]+\})\s+([\w\/]+)\s+(.+)/;
 
   /**
    * Prepares a parsed block/entity.
@@ -292,8 +293,6 @@ Parser.Prototype = function() {
     "module": true,
     "function": true
   };
-
-  var _typeTagMatcher = /^\s*(\{[^@][^{]+\})\s+([\w\/]+)\s+(.+)/;
 
   function _prepareParam(tag) {
     var shortTypes = tag.types.map(function(type) {
@@ -426,13 +425,14 @@ Parser.Prototype = function() {
 
   function _extractExample(str) {
     var firstLineBreak = str.indexOf("\n");
-    var header, body;
+    // var header;
+    var body;
     if (firstLineBreak >= 0) {
-      header = str.slice(0, firstLineBreak).trim();
+      // header = str.slice(0, firstLineBreak).trim();
       body = str.slice(firstLineBreak);
       body = dox.trimIndentation(body);
     } else {
-      header = undefined;
+      // header = undefined;
       body = str.trim();
     }
     return markdown.toHtml(body);

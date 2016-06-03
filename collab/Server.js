@@ -1,4 +1,5 @@
 "use strict";
+/* global WeakMap */
 
 var oo = require('../util/oo');
 var error = require('../util/error');
@@ -109,7 +110,7 @@ Server.Prototype = function() {
   /*
     When a new collaborator connects we generate a unique id for them
   */
-  this._onConnection = function(ws) {
+  this._onConnection = function(ws) {
     var collaboratorId = uuid();
     var connection = {
       collaboratorId: collaboratorId
@@ -393,7 +394,7 @@ ServerResponse.Prototype = function() {
     this.isEnhanced = true;
   };
 
-  this.setSent = function() {
+  this.setSent = function() {
     this.isSent = true;
   };
 };

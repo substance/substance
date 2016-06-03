@@ -91,7 +91,7 @@ CollabEngine.Prototype = function() {
         entry = extend({}, collab.info, entry);
         collaborators[collab.collaboratorId] = entry;
       }
-    }.bind(this));
+    });
     return collaborators;
   };
 
@@ -128,10 +128,10 @@ CollabEngine.Prototype = function() {
   /*
     Internal implementation of sync
 
-    @param {String} args.collaboratorId collaboratorId
-    @param {String} args.documentId document id
-    @param {Number} args.version client version
-    @param {Number} args.change new change
+    @param {String} args.collaboratorId collaboratorId
+    @param {String} args.documentId document id
+    @param {Number} args.version client version
+    @param {Number} args.change new change
 
     OUT: version, changes, version
   */
@@ -203,7 +203,7 @@ CollabEngine.Prototype = function() {
         // changes: [], // no changes missed in fast-forward scenario
         version: serverVersion
       });
-    }.bind(this));
+    });
   };
 
   /*
@@ -244,7 +244,7 @@ CollabEngine.Prototype = function() {
           serverChange: rebased.serverChange, // collaborators must be notified
           version: serverVersion
         });
-      }.bind(this));
+      });
     }.bind(this));
   };
 

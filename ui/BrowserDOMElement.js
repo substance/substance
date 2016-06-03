@@ -249,7 +249,7 @@ BrowserDOMElement.Prototype = function() {
 
   this.removeAllEventListeners = function() {
     for (var i = 0; i < this.eventListeners.length; i++) {
-      var listener = this.eventListeners[i]
+      var listener = this.eventListeners[i];
       // console.log('BrowserDOMElement.removeEventListener:', eventName, this.eventListeners.length);
       listener._el = null;
       this.el.removeEventListener(listener.eventName, listener.handler);
@@ -586,7 +586,7 @@ BrowserDOMElement.Prototype = function() {
     var outerHeight = this.el.offsetHeight;
     if (withMargin) {
       var style = this.getComputedStyle();
-      outerHeight += parseInt(style.marginTop) + parseInt(style.marginBottom);
+      outerHeight += parseInt(style.marginTop, 10) + parseInt(style.marginBottom, 10);
     }
     return outerHeight;
   };

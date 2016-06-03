@@ -5,10 +5,10 @@ var error = require('../util/error');
 var EventEmitter = require('../util/EventEmitter');
 var DefaultDOMElement = require('./DefaultDOMElement');
 
-var Router = function() {
+function Router() {
   EventEmitter.apply(this, arguments);
   this.__isStarted__ = false;
-};
+}
 
 Router.Prototype = function() {
 
@@ -33,7 +33,7 @@ Router.Prototype = function() {
     Writes out a given route as a string url
   */
   this.writeRoute = function(route, opts) {
-    opts = opts || {};
+    opts = opts || {};
     var routeString = this.stringifyRoute(route);
     if (!routeString) {
       this.clearRoute(opts);

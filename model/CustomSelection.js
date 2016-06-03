@@ -16,7 +16,7 @@ function CustomSelection(type, data, surfaceId) {
 CustomSelection.Prototype = function() {
 
   this.toString = function() {
-    return "custom(", JSON.stringify(this.data) + ")";
+    return "custom(" + JSON.stringify(this.data) + ")";
   };
 
   this.isCustomSelection = function() {

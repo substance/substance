@@ -96,7 +96,7 @@ RenderingEngine.Prototype = function() {
       if (needRerender) {
         var context = new CaptureContext(vel);
         var content = comp.render(context.$$);
-        if (!content || !content._isVirtualHTMLElement) {
+        if (!content || !content._isVirtualHTMLElement) {
           throw new Error("Component.render must return VirtualHTMLElement");
         }
 
@@ -613,7 +613,7 @@ RenderingEngine.DEBUG = true;
 
 if (inBrowser) {
   if (window.SUBSTANCE_DEBUG_RENDERING) {
-    RenderingEngine.DEBUG = !!window.SUBSTANCE_DEBUG_RENDERING;
+    RenderingEngine.DEBUG = Boolean(window.SUBSTANCE_DEBUG_RENDERING);
   }
 }
 

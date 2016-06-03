@@ -26,14 +26,16 @@ function TestHTMLImporter() {
   });
 }
 
-HTMLImporter.extend(TestHTMLImporter, function() {
+TestHTMLImporter.Prototype = function() {
 
   this.convertDocument = function(documentEl) {
     var bodyEl = documentEl.find('body');
     this.convertContainer(bodyEl.children, 'main');
   };
 
-});
+};
+
+HTMLImporter.extend(TestHTMLImporter);
 
 TestHTMLImporter.converters = converters;
 

@@ -18,8 +18,8 @@ function Selection() {
   // Internal stuff
   var _internal = {};
   Object.defineProperty(this, "_internal", {
-      enumerable: false,
-      value: _internal
+    enumerable: false,
+    value: _internal
   });
     // set when attached to document
   _internal.doc = null;
@@ -226,8 +226,7 @@ Selection.fromJSON = function(json) {
     case 'custom':
       var CustomSelection = require('./CustomSelection');
       return CustomSelection.fromJSON(json);
-    case 'default':
-      // TODO: what if we have custom selections?
+    default:
       error('Selection.fromJSON(): unsupported selection data', json);
       return Selection.nullSelection;
   }
@@ -252,7 +251,7 @@ Selection.Fragment = function(path, startOffset, endOffset, full) {
   this.path = path;
   this.startOffset = startOffset;
   this.endOffset = endOffset || startOffset;
-  this.full = !!full;
+  this.full = Boolean(full);
 };
 
 Selection.Fragment.Prototype = function() {
