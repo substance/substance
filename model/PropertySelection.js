@@ -6,8 +6,6 @@ var Selection = require('./Selection');
 var Coordinate = require('./Coordinate');
 var Range = require('./Range');
 
-/* jshint latedef:nofunc */
-
 /**
   A selection which is bound to a property. Implements {@link model/Selection}.
 

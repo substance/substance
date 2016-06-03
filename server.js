@@ -1,5 +1,4 @@
-/* globals console */
-/* jshint strict:false */
+/* eslint-disable */
 
 var express = require('express');
 var path = require('path');

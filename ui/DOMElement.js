@@ -92,8 +92,6 @@ DOMElement.Prototype = function() {
     throw new Error(NOT_IMPLEMENTED);
   };
 
-  /* jshint unused: false */
-
   /**
     Checks if a CSS class is set.
 

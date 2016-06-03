@@ -12,8 +12,6 @@ var breakNode = require('./breakNode');
 var CLIPBOARD_CONTAINER_ID = require('./copySelection').CLIPBOARD_CONTAINER_ID;
 var CLIPBOARD_PROPERTY_ID = require('./copySelection').CLIPBOARD_PROPERTY_ID;
 
-/* jshint latedef: false */
-
 /**
   Pastes clipboard content at the current selection
 

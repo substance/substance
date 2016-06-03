@@ -5,8 +5,6 @@ var info = require('../../util/info');
 var deleteSelection = require('./deleteSelection');
 var annotationHelpers = require('../annotationHelpers');
 
-/* jshint latedef: false */
-
 /**
   A transformation that breaks a node at the current position,
   e.g. used when you hit ENTER inside a paragraph.

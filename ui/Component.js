@@ -149,7 +149,6 @@ Component.Prototype = function() {
     @return {VirtualNode} VirtualNode created using $$
    */
   this.render = function($$) {
-    /* jshint unused:false */
     /* istanbul ignore next */
     return $$('div');
   };

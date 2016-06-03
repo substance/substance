@@ -1,4 +1,3 @@
-/* jshint latedef:nofunc */
 "use strict";
 
 var isArray = require('lodash/isArray');

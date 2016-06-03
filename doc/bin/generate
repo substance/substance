@@ -1,6 +1,5 @@
 #!/env/node
-/* globals console */
-/* jshint strict:false */
+/* eslint-disable */
 
 var config = require('../config.json');
 var generate = require('../generator/generate');

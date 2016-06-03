@@ -139,7 +139,6 @@ DocumentSession.Prototype = function() {
     ```
   */
   this.transaction = function(transformation, info) {
-    /* jshint unused: false */
     if (this.isTransacting) {
       throw new Error('Nested transactions are not supported.');
     }

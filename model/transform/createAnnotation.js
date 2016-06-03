@@ -1,5 +1,4 @@
 "use strict";
-/* jshint latedef: false */
 
 var extend = require('lodash/extend');
 var warn = require('../../util/warn');
