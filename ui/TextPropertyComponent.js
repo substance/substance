@@ -58,7 +58,7 @@ TextPropertyComponent.Prototype = function() {
         spellCheck: false,
       })
       .css({
-        whiteSpace: 'pre-wrap'
+        'white-space': 'pre-wrap'
       });
 
     el.append($$('br'));
