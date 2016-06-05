@@ -10,12 +10,6 @@ var converters = [
   require('../../packages/emphasis/EmphasisHTMLConverter'),
   require('../../packages/strong/StrongHTMLConverter'),
   require('../../packages/link/LinkHTMLConverter'),
-  require('../../packages/table/TableHTMLConverter'),
-  require('../../packages/table/TableSectionHTMLConverter'),
-  require('../../packages/table/TableRowHTMLConverter'),
-  require('../../packages/table/TableCellHTMLConverter'),
-  require('../../packages/list/ListHTMLConverter'),
-  require('../../packages/list/ListItemHTMLConverter'),
 ];
 
 function TestHTMLImporter() {

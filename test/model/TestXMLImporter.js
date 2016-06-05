@@ -11,12 +11,6 @@ var converters = [
   require('../../packages/emphasis/EmphasisXMLConverter'),
   require('../../packages/strong/StrongXMLConverter'),
   require('../../packages/link/LinkXMLConverter'),
-  require('../../packages/table/TableXMLConverter'),
-  require('../../packages/table/TableSectionXMLConverter'),
-  require('../../packages/table/TableRowXMLConverter'),
-  require('../../packages/table/TableCellXMLConverter'),
-  require('../../packages/list/ListXMLConverter'),
-  require('../../packages/list/ListItemXMLConverter'),
   require('./TestMetaNodeXMLConverter')
 ];
 

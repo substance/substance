@@ -13,15 +13,17 @@ function TestArticle() {
   });
   this.create({
     type: "container",
-    id: "main",
+    id: "body",
     nodes: []
   });
 }
 
-Document.extend(TestArticle, function TestArticlePrototype() {
+TestArticle.Prototype = function() {
   this.getDocumentMeta = function() {
     return this.get('meta');
   };
-});
+};
+
+Document.extend(TestArticle);
 
 module.exports = TestArticle;
