@@ -1,7 +1,6 @@
 'use strict';
 
 var each = require('lodash/each');
-var error = require('../util/error');
 var EventEmitter = require('../util/EventEmitter');
 var DefaultDOMElement = require('./DefaultDOMElement');
 
@@ -95,7 +94,7 @@ Router.Prototype = function() {
       return;
     }
     if (this.__isLoading__) {
-      error('FIXME: router is currently applying a route.');
+      console.error('FIXME: router is currently applying a route.');
       return;
     }
     this.__isLoading__ = true;

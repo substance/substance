@@ -2,7 +2,6 @@
 
 require('../QUnitExtensions');
 
-var error = require('../../util/error');
 var DocumentStore = require('../../collab/DocumentStore');
 var testDocumentStore = require('./testDocumentStore');
 var documentStoreSeed = require('../fixtures/documentStoreSeed');
@@ -16,7 +15,7 @@ QUnit.module('collab/DocumentStore', {
     // are performed directly on the seed object
     var newDocumentStoreSeed = JSON.parse(JSON.stringify(documentStoreSeed));
     store.seed(newDocumentStoreSeed, function(err) {
-      if (err) error(err);
+      if (err) console.error(err);
       else done();
     });
   }

@@ -1,7 +1,6 @@
 'use strict';
 
 var uuid = require('../../util/uuid');
-var info = require('../../util/info');
 var deleteSelection = require('./deleteSelection');
 var annotationHelpers = require('../annotationHelpers');
 
@@ -37,7 +36,7 @@ function breakNode(tx, args) {
   } else if (node.isText()) {
     return breakTextNode(tx, args);
   } else {
-    info("Breaking is not supported for node type %s.", node.type);
+    console.info("Breaking is not supported for node type %s.", node.type);
     return args;
   }
 }

@@ -4,8 +4,6 @@ var debounce = require('lodash/debounce');
 var forEach = require('lodash/forEach');
 var clone = require('lodash/clone');
 var cloneDeep = require('lodash/cloneDeep');
-var warn = require('../util/warn');
-var error = require('../util/error');
 var Err = require('../util/SubstanceError');
 var DocumentSession = require('../model/DocumentSession');
 var DocumentChange = require('../model/DocumentChange');
@@ -25,11 +23,11 @@ function CollabSession(doc, config) {
   this.collabClient = config.collabClient;
 
   if (config.docVersion) {
-    warn('config.docVersion is deprecated: Use config.version instead');
+    console.warn('config.docVersion is deprecated: Use config.version instead');
   }
 
   if (config.docVersion) {
-    warn('config.docId is deprecated: Use config.documentId instead');
+    console.warn('config.docId is deprecated: Use config.documentId instead');
   }
 
   this.version = config.version || config.docVersion;
@@ -132,7 +130,7 @@ CollabSession.Prototype = function() {
       this._nextChange = null;
       this._error = null;
     } else {
-      error('Can not sync. Either collabClient is not connected or we are already syncing');
+      console.error('Can not sync. Either collabClient is not connected or we are already syncing');
     }
   };
 
@@ -194,7 +192,7 @@ CollabSession.Prototype = function() {
         this.error(msg);
         break;
       default:
-        error('CollabSession: unsupported message', msg.type, msg);
+        console.error('CollabSession: unsupported message', msg.type, msg);
         return false;
     }
     return true;
@@ -210,7 +208,7 @@ CollabSession.Prototype = function() {
       this.collabClient.send(msg);
       return true;
     } else {
-      warn('Try not to call _send when disconnected. Skipping message', msg);
+      console.warn('Try not to call _send when disconnected. Skipping message', msg);
       return false;
     }
   };

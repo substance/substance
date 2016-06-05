@@ -2,8 +2,6 @@
 
 var extend = require('lodash/extend');
 var isNumber = require('lodash/isNumber');
-var error = require('../util/error');
-var warn = require('../util/warn');
 var DocumentNode = require('./DocumentNode');
 var ParentNodeMixin = require('./ParentNodeMixin');
 var ContainerAddress = require('./ContainerAddress');
@@ -62,7 +60,7 @@ Container.Prototype = function() {
     this.nodes.forEach(function(nodeId){
       var node = doc.get(nodeId);
       if (!node) {
-        error('Node does not exist: ', nodeId);
+        console.error('Node does not exist: ', nodeId);
       } else {
         nodes.push(node);
       }
@@ -143,7 +141,7 @@ Container.static.defineSchema({
 
 Object.defineProperty(Container.prototype, 'length', {
   get: function() {
-    warn('DEPRECATED: want to get rid of unnecessary properties. Use this.getLength() instead.');
+    console.warn('DEPRECATED: want to get rid of unnecessary properties. Use this.getLength() instead.');
     return this.nodes.length;
   }
 });

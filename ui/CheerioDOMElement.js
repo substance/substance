@@ -4,7 +4,6 @@ var isString = require('lodash/isString');
 var last = require('lodash/last');
 var extend = require('lodash/extend');
 var clone = require('lodash/clone');
-var assert = require('../util/assert');
 var $ = require('../util/cheerio.customized');
 var DOMElement = require('./DOMElement');
 
@@ -333,7 +332,7 @@ CheerioDOMElement.Prototype = function() {
     if (!child || !child._isCheerioDOMElement) {
       throw new Error('Illegal argument: only String and CheerioDOMElement instances are valid.');
     }
-    assert(child.el._wrapper === child, "Expecting a backlink between native element and CheerioDOMElement");
+    console.assert(child.el._wrapper === child, "Expecting a backlink between native element and CheerioDOMElement");
     return child.getNativeElement();
   };
 

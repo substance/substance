@@ -4,7 +4,6 @@ var isArray = require('lodash/isArray');
 var isString = require('lodash/isString');
 var each = require('lodash/each');
 var cloneDeep = require('lodash/cloneDeep');
-var error = require('../../util/error');
 var EventEmitter = require('../../util/EventEmitter');
 var DataObject = require('./DataObject');
 var NodeFactory = require('./NodeFactory');
@@ -268,7 +267,7 @@ Data.Prototype = function() {
    */
   this.addIndex = function(name, index) {
     if (this.indexes[name]) {
-      error('Index with name %s already exists.', name);
+      console.error('Index with name %s already exists.', name);
     }
     index.reset(this);
     this.indexes[name] = index;
@@ -295,7 +294,7 @@ Data.Prototype = function() {
     each(this.indexes, function(index) {
       if (index.select(change.node)) {
         if (!index[change.type]) {
-          error('Contract: every NodeIndex must implement ' + change.type);
+          console.error('Contract: every NodeIndex must implement ' + change.type);
         }
         index[change.type](change.node, change.path, change.newValue, change.oldValue);
       }

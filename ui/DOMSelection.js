@@ -2,7 +2,6 @@
 
 var last = require('lodash/last');
 var oo = require('../util/oo');
-var warn = require('../util/warn');
 var Coordinate = require('../model/Coordinate');
 var Range = require('../model/Range');
 var DefaultDOMElement = require('./DefaultDOMElement');
@@ -65,7 +64,7 @@ DOMSelection.Prototype = function() {
     }
     var start = this._getDOMCoordinate(sel.start);
     if (!start) {
-      warn('FIXME: selection seems to be invalid.');
+      console.warn('FIXME: selection seems to be invalid.');
       this.clear();
       return;
     }
@@ -75,7 +74,7 @@ DOMSelection.Prototype = function() {
     } else {
       end = this._getDOMCoordinate(sel.end);
       if (!end) {
-        warn('FIXME: selection seems to be invalid.');
+        console.warn('FIXME: selection seems to be invalid.');
         this.clear();
         return;
       }

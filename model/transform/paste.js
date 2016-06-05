@@ -2,7 +2,6 @@
 
 var last = require('lodash/last');
 var each = require('lodash/each');
-var error = require('../../util/error');
 var uuid = require('../../util/uuid');
 var annotationHelpers = require('../annotationHelpers');
 var deleteSelection = require('./deleteSelection');
@@ -23,7 +22,7 @@ var CLIPBOARD_PROPERTY_ID = require('./copySelection').CLIPBOARD_PROPERTY_ID;
 var paste = function(tx, args) {
   args.text = args.text || '';
   if (args.selection.isNull()) {
-    error("Can not paste, without selection.");
+    console.error("Can not paste, without selection.");
     return args;
   }
   // TODO: is there a better way to detect that this paste is happening within a
@@ -152,7 +151,7 @@ function _pasteDocument(tx, args) {
   }
   // TODO how should this check be useful?
   if (insertPos < 0) {
-    error('Could not find insertion position in ContainerNode.');
+    console.error('Could not find insertion position in ContainerNode.');
   }
   // transfer nodes from content document
   var nodeIds = pasteDoc.get(CLIPBOARD_CONTAINER_ID).nodes;

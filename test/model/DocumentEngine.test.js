@@ -3,7 +3,6 @@
 
 require('../QUnitExtensions');
 
-var error = require('../../util/error');
 var DocumentStore = require('../../collab/DocumentStore');
 var ChangeStore = require('../../collab/ChangeStore');
 var DocumentEngine = require('../../collab/DocumentEngine');
@@ -35,9 +34,9 @@ QUnit.module('collab/DocumentEngine', {
     var newDocumentStoreSeed = JSON.parse(JSON.stringify(documentStoreSeed));
     var newChangeStoreSeed = JSON.parse(JSON.stringify(changeStoreSeed));
     documentStore.seed(newDocumentStoreSeed, function(err) {
-      if (err) return error(err);
+      if (err) return console.error(err);
       changeStore.seed(newChangeStoreSeed, function(err) {
-        if (err) return error(err);
+        if (err) return console.error(err);
         done();
       });
     });

@@ -1,6 +1,5 @@
 'use strict';
 
-var assert = require('../../util/assert');
 var Component = require('../../ui/Component');
 var CustomSelection = require('../../model/CustomSelection');
 var ContainerEditor = require('../../ui/ContainerEditor');
@@ -83,7 +82,7 @@ TableComponent.Prototype = function() {
       );
       rowEl.append($$('td').addClass('se-hspace'));
 
-      assert(row.length === ncols, 'row should be complete.');
+      console.assert(row.length === ncols, 'row should be complete.');
       for (j = 0; j < ncols; j++) {
         var cellEntry = row[j];
         var cellEl = this.renderCell($$, cellEntry);

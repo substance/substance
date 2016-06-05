@@ -4,7 +4,6 @@ var Command = require('../../ui/Command');
 var _isMatch = require('lodash/isMatch');
 var _find = require('lodash/find');
 var _clone = require('lodash/clone');
-var warn = require('../../util/warn');
 
 function SwitchTextType() {
   Command.apply(this, arguments);
@@ -100,7 +99,7 @@ SwitchTextType.Prototype = function() {
     var nodeData = textType.data;
     var surface = context.surfaceManager.getFocusedSurface();
     if (!surface) {
-      warn('No focused surface. Stopping command execution.');
+      console.warn('No focused surface. Stopping command execution.');
       return;
     }
     surface.transaction(function(tx, args) {

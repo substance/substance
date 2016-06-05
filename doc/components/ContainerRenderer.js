@@ -2,7 +2,6 @@
 
 var each = require('lodash/each');
 var Component = require('../../ui/Component');
-var error = require('../../util/error');
 
 function ContainerRenderer() {
   Component.apply(this, arguments);
@@ -34,7 +33,7 @@ ContainerRenderer.Prototype = function() {
     var node = this.doc.get(nodeId);
     var ComponentClass = this.componentRegistry.get(node.type);
     if (!ComponentClass) {
-      error('Could not resolve a component for type: ' + node.type);
+      console.error('Could not resolve a component for type: ' + node.type);
       return $$('div');
     } else {
       return $$(ComponentClass, {

@@ -1,6 +1,5 @@
 'use strict';
 
-var error = require('../util/error');
 var keys = require('../util/keys');
 var createSurfaceId = require('../util/createSurfaceId');
 var Coordinate = require('../model/Coordinate');
@@ -114,7 +113,7 @@ IsolatedNodeComponent.Prototype = function() {
     var node = this.props.node;
     var ComponentClass = this._getContentClass();
     if (!ComponentClass) {
-      error('Could not resolve a component for type: ' + node.type);
+      console.error('Could not resolve a component for type: ' + node.type);
       return $$('div');
     } else {
       var props = {
@@ -280,7 +279,7 @@ IsolatedNodeComponent.getCoordinate = function(surfaceEl, node) {
       }
       return new Coordinate([nodeId], charPos);
     } else {
-      error('FIXME: expecting a data-id attribute on IsolatedNodeComponent');
+      console.error('FIXME: expecting a data-id attribute on IsolatedNodeComponent');
     }
   }
   return null;

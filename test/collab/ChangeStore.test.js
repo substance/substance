@@ -2,7 +2,6 @@
 
 require('../QUnitExtensions');
 
-var error = require('../../util/error');
 var ChangeStore = require('../../collab/ChangeStore');
 var testChangeStore = require('./testChangeStore');
 var changeStoreSeed = require('../fixtures/changeStoreSeed');
@@ -16,7 +15,7 @@ QUnit.module('collab/ChangeStore', {
     // are performed directly on the seed object
     var newChangeStoreSeed = JSON.parse(JSON.stringify(changeStoreSeed));
     changeStore.seed(newChangeStoreSeed, function(err) {
-      if (err) error(err);
+      if (err) console.error(err);
       else done();
     });
   }

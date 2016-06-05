@@ -2,7 +2,6 @@
 
 var NodeIndex = require('../../model/data/NodeIndex');
 var TreeIndex = require('../../util/TreeIndex');
-var error = require('../../util/error');
 
 /**
   @class
@@ -34,7 +33,7 @@ MemberIndex.Prototype = function() {
     var parent = doc.get(parentId);
 
     if (!parent) {
-      error('Could not retrieve parent node of member.');
+      console.error('Could not retrieve parent node of member.');
       return [parentId, type, node.name];
     }
 

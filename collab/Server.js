@@ -2,7 +2,6 @@
 /* global WeakMap */
 
 var oo = require('../util/oo');
-var error = require('../util/error');
 var uuid = require('../util/uuid');
 var EventEmitter = require('../util/EventEmitter');
 
@@ -254,7 +253,7 @@ Server.Prototype = function() {
     if (this._isWebsocketOpen(ws)) {
       ws.send(this.serializeMessage(message));
     } else {
-      error('Server#send: Websocket for collaborator', collaboratorId, 'is no longer open', message);
+      console.error('Server#send: Websocket for collaborator', collaboratorId, 'is no longer open', message);
     }
   };
 

@@ -3,7 +3,6 @@
 var forEach = require('lodash/forEach');
 var isEqual = require('lodash/isEqual');
 var oo = require('../util/oo');
-var warn = require('../util/warn');
 var TreeIndex = require('../util/TreeIndex');
 
 function PathEventProxy(doc) {
@@ -26,12 +25,12 @@ PathEventProxy.Prototype = function() {
   };
 
   this.connect = function(listener, path, method) {
-    warn('DEPRECATED: use proxy.on(path, this.onPropertyChange, this) instead');
+    console.warn('DEPRECATED: use proxy.on(path, this.onPropertyChange, this) instead');
     this.on(path, method, listener);
   };
 
   this.disconnect = function(listener) {
-    warn('DEPRECATED: use proxy.off(this) instead');
+    console.warn('DEPRECATED: use proxy.off(this) instead');
     this.off(listener);
   };
 

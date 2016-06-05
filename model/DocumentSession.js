@@ -1,8 +1,6 @@
 "use strict";
 
 var extend = require('lodash/extend');
-var warn = require('../util/warn');
-var error = require('../util/error');
 var oo = require('../util/oo');
 var EventEmitter = require('../util/EventEmitter');
 var TransactionDocument = require('./TransactionDocument');
@@ -117,7 +115,7 @@ DocumentSession.Prototype = function() {
       }
       this._triggerUpdateEvent(update, { replay: true });
     } else {
-      warn('No change can be %s.', (which === 'undo'? 'undone':'redone'));
+      console.warn('No change can be %s.', (which === 'undo'? 'undone':'redone'));
     }
   };
 
@@ -288,7 +286,7 @@ DocumentSession.Prototype = function() {
 
           this._isSaving = false;
           if (err) {
-            error('Error during save');
+            console.error('Error during save');
           } else {
             this._dirty = false;
             this._triggerUpdateEvent({}, {force: true});
@@ -296,7 +294,7 @@ DocumentSession.Prototype = function() {
         }.bind(this));
 
       } else {
-        error('Document saving is not handled at the moment. Make sure saveHandler instance provided to documentSession');
+        console.error('Document saving is not handled at the moment. Make sure saveHandler instance provided to documentSession');
       }
     }
   };

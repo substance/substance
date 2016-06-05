@@ -2,7 +2,6 @@
 
 var oo = require('../util/oo');
 var each = require('lodash/each');
-var warn = require('../util/warn');
 var Registry = require('../util/Registry');
 
 /*
@@ -62,13 +61,13 @@ CommandManager.Prototype = function() {
   this.executeCommand = function(commandName, args) {
     var cmd = this.commandRegistry.get(commandName);
     if (!cmd) {
-      warn('command', commandName, 'not registered');
+      console.warn('command', commandName, 'not registered');
       return;
     }
     // Run command
     var info = cmd.execute(this.getCommandContext(), args);
     if (info === undefined) {
-      warn('command ', commandName, 'must return either an info object or true when handled or false when not handled');
+      console.warn('command ', commandName, 'must return either an info object or true when handled or false when not handled');
     }
     return info;
   };

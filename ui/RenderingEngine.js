@@ -1,7 +1,6 @@
 "use strict";
 
 var each = require('lodash/each');
-var assert = require('../util/assert');
 var oo = require('../util/oo');
 var inBrowser = require('../util/inBrowser');
 var VirtualElement = require('./VirtualElement');
@@ -37,14 +36,14 @@ RenderingEngine.Prototype = function() {
   function _create(vel) {
     var Component = require('./Component');
     var comp = vel._comp;
-    assert(!comp, "Component instance should not exist when this method is used.");
+    console.assert(!comp, "Component instance should not exist when this method is used.");
     var parent = vel.parent._comp;
     // making sure the parent components have been instantiated
     if (!parent) {
       parent = _create(vel.parent);
     }
     if (vel._isVirtualComponent) {
-      assert(parent, "A Component should have a parent.");
+      console.assert(parent, "A Component should have a parent.");
       comp = new vel.ComponentClass(parent, vel.props);
       comp.__htmlConfig__ = vel._copyHTMLConfig();
     } else if (vel._isVirtualHTMLElement) {
@@ -162,10 +161,10 @@ RenderingEngine.Prototype = function() {
       return;
     }
     // before changes can be applied, a VirtualElement must have been captured
-    assert(vel.__isCaptured__, 'VirtualElement must be captured before rendering');
+    console.assert(vel.__isCaptured__, 'VirtualElement must be captured before rendering');
 
     var comp = vel._comp;
-    assert(comp && comp._isComponent, "A captured VirtualElement must have a component instance attached.");
+    console.assert(comp && comp._isComponent, "A captured VirtualElement must have a component instance attached.");
 
     // VirtualComponents apply changes to its content element
     if (vel._isVirtualComponent) {
@@ -223,7 +222,7 @@ RenderingEngine.Prototype = function() {
         }
 
         newComp = virtualComp._comp;
-        assert(newComp, 'Component instance should now be available.');
+        console.assert(newComp, 'Component instance should now be available.');
         // append remaining new ones if no old one is left
         if (virtualComp && !oldComp) {
           _appendChild(comp, newComp);
@@ -429,7 +428,7 @@ RenderingEngine.Prototype = function() {
       return;
     }
     var el = comp.el;
-    assert(el, "Component's element should exist at this point.");
+    console.assert(el, "Component's element should exist at this point.");
     var tagName = el.getTagName();
     if (vel.tagName !== tagName) {
       el.setTagName(vel.tagName);

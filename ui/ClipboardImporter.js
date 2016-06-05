@@ -2,8 +2,6 @@
 
 var isArray = require('lodash/isArray');
 var extend = require('lodash/extend');
-var error = require('../util/error');
-var warn = require('../util/warn');
 var HTMLImporter = require('../model/HTMLImporter');
 var DefaultDOMElement = require('./DefaultDOMElement');
 var JSONConverter = require('../model/JSONConverter');
@@ -61,7 +59,7 @@ ClipboardImporter.Prototype = function() {
         try {
           return this.importFromJSON(jsonStr);
         } catch(err) {
-          error(err);
+          console.error(err);
         }
       }
     }
@@ -79,7 +77,7 @@ ClipboardImporter.Prototype = function() {
     }
     body = _fixupGoogleDocsBody(body);
     if (!body) {
-      warn('Invalid HTML.');
+      console.warn('Invalid HTML.');
       return null;
     }
 

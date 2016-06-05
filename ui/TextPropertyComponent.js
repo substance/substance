@@ -1,7 +1,6 @@
 'use strict';
 
 var isNumber = require('lodash/isNumber');
-var error = require('../util/error');
 var Coordinate = require('../model/Coordinate');
 var AnnotatedTextComponent = require('./AnnotatedTextComponent');
 
@@ -194,7 +193,7 @@ TextPropertyComponent.Prototype = function() {
             charPos -= l;
           }
         } else {
-          error('FIXME: Can not map to DOM coordinates.');
+          console.error('FIXME: Can not map to DOM coordinates.');
           return null;
         }
       }

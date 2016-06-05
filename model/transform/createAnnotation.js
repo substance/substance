@@ -1,7 +1,6 @@
 "use strict";
 
 var extend = require('lodash/extend');
-var warn = require('../../util/warn');
 var uuid = require('../../util/uuid');
 var helpers = require('../documentHelpers');
 
@@ -37,9 +36,8 @@ function createAnnotation(tx, args) {
   var annoData = args.annotationData;
   var node = args.node;
   var containerId = args.containerId;
-
   if (!node && annoType) {
-    warn('DEPRECATED: Use node: {type: "strong"} instead of annotationType: "strong"');
+    console.warn('DEPRECATED: Use node: {type: "strong"} instead of annotationType: "strong"');
     node = {
       type: annoType
     };

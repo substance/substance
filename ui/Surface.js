@@ -2,14 +2,11 @@
 
 var forEach = require('lodash/forEach');
 var isUndefined = require('lodash/isUndefined');
-var error = require('../util/error');
-var info = require('../util/info');
 var inBrowser = require('../util/inBrowser');
 var createSurfaceId = require('../util/createSurfaceId');
 var getBoundingClientRect = require('../util/getBoundingClientRect');
 var keys = require('../util/keys');
 var platform = require('../util/platform');
-var warn = require('../util/warn');
 var copySelection = require('../model/transform/copySelection');
 var deleteSelection = require('../model/transform/deleteSelection');
 var insertText = require('../model/transform/insertText');
@@ -175,7 +172,7 @@ Surface.Prototype = function() {
     var componentRegistry = this.getComponentRegistry();
     var ComponentClass = componentRegistry.get(node.type);
     if (!ComponentClass) {
-      error('Could not resolve a component for type: ' + node.type);
+      console.error('Could not resolve a component for type: ' + node.type);
       ComponentClass = UnsupportedNode;
     }
     return $$(ComponentClass, {
@@ -627,7 +624,7 @@ Surface.Prototype = function() {
     //      - Note: copy, cut, paste work just fine
     //  - dragging selected text
     //  - spell correction
-    info("We want to enable a DOM MutationObserver which catches all changes made by native interfaces (such as spell corrections, etc). Lookout for this message and try to set Surface.skipNextObservation=true when you know that you will mutate the DOM.", e);
+    console.info("We want to enable a DOM MutationObserver which catches all changes made by native interfaces (such as spell corrections, etc). Lookout for this message and try to set Surface.skipNextObservation=true when you know that you will mutate the DOM.", e);
   };
 
   this.onDragStart = function(event) {
@@ -961,7 +958,7 @@ Surface.Prototype = function() {
     var componentRegistry = this.context.componentRegistry || this.props.componentRegistry;
     var ComponentClass = componentRegistry.get(node.type);
     if (!ComponentClass) {
-      error('Could not resolve a component for type: ' + node.type);
+      console.error('Could not resolve a component for type: ' + node.type);
       ComponentClass = UnsupportedNode;
     }
     return $$(ComponentClass, {
@@ -1030,7 +1027,7 @@ Surface.Prototype = function() {
           if (cursorEl) {
             return getBoundingClientRect(cursorEl, containerEl);
           } else {
-            warn('FIXME: there should be a rendered cursor element.');
+            console.warn('FIXME: there should be a rendered cursor element.');
             return {};
           }
         } else {
@@ -1038,7 +1035,7 @@ Surface.Prototype = function() {
           if (selFragments.length > 0) {
             return getBoundingClientRect(selFragments, containerEl);
           } else {
-            warn('FIXME: there should be a rendered selection fragments element.');
+            console.warn('FIXME: there should be a rendered selection fragments element.');
             return {};
           }
         }
