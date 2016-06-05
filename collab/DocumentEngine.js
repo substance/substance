@@ -34,12 +34,19 @@ DocumentEngine.Prototype = function() {
     Returns the JSON serialized version, as a starting point
   */
   this.createDocument = function(args, cb) {
+    // TODO: schema is propbably not a good name here
+    // as it is a record containing a schema, and a factory
+    // providing an empty document
     var schemaConfig = this.schemas[args.schemaName];
     if (!schemaConfig) {
       return cb(new Err('SchemaNotFoundError', {
         message: 'Schema not found for ' + args.schemaName
       }));
     }
+
+    // TODO: we need to rethink this
+    // We have the configurator now, which is defining the schema
+    // and can be used to create a doc instance
     var docFactory = schemaConfig.documentFactory;
     var doc = docFactory.createArticle();
     var change = docFactory.createChangeset()[0];

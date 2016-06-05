@@ -60,6 +60,10 @@ function Document(schema) {
   Document.super.apply(this);
 
   this.__id__ = __id__++;
+  if (!schema) {
+    throw new Error('A document needs a schema for reflection.');
+  }
+
   this.schema = schema;
   this.nodeFactory = new DocumentNodeFactory(this);
   this.data = new IncrementalData(schema, {
@@ -94,6 +98,8 @@ function Document(schema) {
 }
 
 Document.Prototype = function() {
+
+  this._isDocument = true;
 
   this.addIndex = function(name, index) {
     return this.data.addIndex(name, index);
