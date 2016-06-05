@@ -990,7 +990,12 @@ Surface.Prototype = function() {
     // TODO: selection rectangle should be calculated
     // relative to scrolling container, which either is
     // the parent scrollPane, or the body element
-    var containerEl = this.context.scrollPane.refs.content.el.el || document.body;
+    var containerEl;
+    if (this.context.scrollPane) {
+      containerEl = this.context.scrollPane.refs.content.el.el;
+    } else {
+      containerEl = document.body;
+    }
 
     var wsel = window.getSelection();
     var wrange;
