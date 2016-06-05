@@ -81,14 +81,14 @@ DOMImporter.Prototype = function DOMImporterPrototype() {
     this.state.reset();
   };
 
-  this.createDocument = function() {
-    var doc = this._createDocument();
+  this.createDocument = function(schema) {
+    var doc = this._createDocument(schema);
     return doc;
   };
 
   this.generateDocument = function() {
     // creating all nodes
-    var doc = this.createDocument();
+    var doc = this.createDocument(this.config.schema);
     this.state.nodes.forEach(function(node) {
       // delete if the node exists already
       if (doc.get(node.id)) {
@@ -106,9 +106,9 @@ DOMImporter.Prototype = function DOMImporterPrototype() {
     return doc;
   };
 
-  this._createDocument = function() {
+  this._createDocument = function(schema) {
     // create an empty document and initialize the container if not present
-    var doc = new this.config.DocumentClass();
+    var doc = new this.config.DocumentClass(schema);
     return doc;
   };
 

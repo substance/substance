@@ -30,6 +30,8 @@ function Configurator(firstPackage) {
     nodes: [],
     components: {},
     converters: {},
+    importers: {},
+    exporters: {},
     commands: [],
     tools: [],
     textTypes: [],
@@ -60,15 +62,24 @@ Configurator.Prototype = function() {
   };
 
   this.addConverter = function(type, converter) {
+    if (!converter.type) {
+      throw new Error('A converter needs an associated type.');
+    }
+
     var converters = this.config.converters[type];
     if (!converters) {
       converters = {};
       this.config.converters[type] = converters;
     }
-    if (!converter.type) {
-      throw new Error('A converter needs an associated type.');
-    }
     converters[converter.type] = converter;
+  };
+
+  this.addImporter = function(type, ImporterClass) {
+    this.config.importers[type] = ImporterClass;
+  };
+
+  this.addExporter = function(type, ExporterClass) {
+    this.config.exporters[type] = ExporterClass;
   };
 
   this.addStyle = function(sassFilePath) {
@@ -139,23 +150,44 @@ Configurator.Prototype = function() {
     return this.config;
   };
 
-  this.createArticle = function(seed) {
+  this.getSchema = function() {
     var schemaConfig = this.config.schema;
-
     // TODO: We may want to remove passing a schema version as
     // the version is defined by the repository / npm package version
     var schema = new DocumentSchema(schemaConfig.name, '1.0.0');
-
     schema.getDefaultTextType = function() {
       return schemaConfig.defaultTextType;
     };
 
     schema.addNodes(this.config.nodes);
+    return schema;
+  };
+
+  this.createArticle = function(seed) {
+    var schemaConfig = this.config.schema;
+
+    var schema = this.getSchema();
     var doc = new schemaConfig.ArticleClass(schema);
     if (seed) {
       seed(doc);
     }
     return doc;
+  };
+
+  this.createImporter = function(type) {
+    var ImporterClass = this.config.importers[type];
+    var config = {
+      schema: this.getSchema(),
+      converters: this.getConverterRegistry().get(type),
+      DocumentClass: this.config.schema.ArticleClass
+    };
+
+    return new ImporterClass(config);
+  };
+
+  this.createExporter = function(type) {
+    var ExporterClass = this.config.exporters[type];
+    return new ExporterClass();
   };
 
   this.getToolRegistry = function() {
