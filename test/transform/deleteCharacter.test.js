@@ -38,7 +38,7 @@ QUnit.test("Backspacing into previous component", function(assert) {
     path: ['p2', 'content'],
     startOffset: 0
   });
-  var args = {selection: sel, containerId: 'main', direction: 'left'};
+  var args = {selection: sel, containerId: 'body', direction: 'left'};
   var out = deleteCharacter(doc, args);
   var selection = out.selection;
   assert.equal(doc.get(['h2', 'content']), 'Section 2Paragraph with annotation', 'Content of p2 should have been merged into h2.');

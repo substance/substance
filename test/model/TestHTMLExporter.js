@@ -13,9 +13,9 @@ TestHTMLExporter.Prototype = function() {
 
   this.convertDocument = function(doc, htmlEl) {
     var bodyEl = htmlEl.find('body');
-    var main = doc.get('main');
+    var body = doc.get('body');
     bodyEl.append(
-      this.convertContainer(main)
+      this.convertContainer(body)
     );
     return htmlEl;
   };

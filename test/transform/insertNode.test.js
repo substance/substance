@@ -3,6 +3,8 @@
 require('../QUnitExtensions');
 var insertNode = require('../../model/transform/insertNode');
 var DocumentSession = require('../../model/DocumentSession');
+
+var fixture = require('../fixtures/createTestArticle');
 var simple = require('../fixtures/simple');
 
 QUnit.module('model/transform/insertNode');
@@ -20,7 +22,7 @@ var selectionInFirstParagraph = {
 };
 
 QUnit.test("InsertNode usage", function(assert) {
-  var doc = simple();
+  var doc = fixture(simple);
   // mandatory: containerId, selection, node
   assert.throws(function() {
     insertNode(doc, {});
@@ -37,16 +39,16 @@ QUnit.test("InsertNode usage", function(assert) {
 });
 
 QUnit.test("Insert node should break node.", function(assert) {
-  var doc = simple();
+  var doc = fixture(simple);
   var docSession = new DocumentSession(doc);
   docSession.transaction(function(tx, args) {
-    args.containerId = 'main';
+    args.containerId = 'body';
     args.selection = doc.createSelection(selectionInFirstParagraph);
     args.node = testNode;
     insertNode(tx, args);
   });
   // the old paragraph should have been split
-  var container = doc.get('main');
+  var container = doc.get('body');
   var node1 = container.getChildAt(0);
   var node2 = container.getChildAt(1);
   var node3 = container.getChildAt(2);
@@ -57,11 +59,11 @@ QUnit.test("Insert node should break node.", function(assert) {
 });
 
 QUnit.test("Inserting an existing node should be possible", function(assert) {
-  var doc = simple();
+  var doc = fixture(simple);
   var docSession = new DocumentSession(doc);
   docSession.transaction(function(tx, args) {
     tx.create(testNode);
-    args.containerId = 'main';
+    args.containerId = 'body';
     args.selection = doc.createSelection(selectionInFirstParagraph);
     args.node = testNode;
     insertNode(tx, args);
@@ -70,11 +72,11 @@ QUnit.test("Inserting an existing node should be possible", function(assert) {
 });
 
 QUnit.test("Selection after insert.", function(assert) {
-  var doc = simple();
+  var doc = fixture(simple);
   var sel;
   var docSession = new DocumentSession(doc);
   docSession.transaction(function(tx, args) {
-    args.containerId = 'main';
+    args.containerId = 'body';
     args.selection = doc.createSelection(selectionInFirstParagraph);
     args.node = testNode;
     var out = insertNode(tx, args);

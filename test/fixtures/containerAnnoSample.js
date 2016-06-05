@@ -25,7 +25,7 @@ module.exports = function(article) {
   article.create({
     type: 'test-container-anno',
     id: 'a1',
-    container: 'body',
+    containerId: 'body',
     startPath: ['p1', 'content'],
     startOffset: 5,
     endPath: ['p3', 'content'],

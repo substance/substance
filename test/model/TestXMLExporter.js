@@ -14,9 +14,9 @@ TestXMLExporter.Prototype = function() {
 
   this.convertDocument = function(doc) {
     var articleEl = DefaultDOMElement.parseXML('<article></article>');
-    var main = doc.get('main');
+    var body = doc.get('body');
     articleEl.append(
-      this.convertContainer(main)
+      this.convertContainer(body)
     );
     return articleEl;
   };

@@ -3,16 +3,33 @@
 require('../QUnitExtensions');
 
 var DocumentSession = require('../../model/DocumentSession');
-var error = require('../../util/error');
+var Registry = require('../../util/Registry');
 var Clipboard = require('../../ui/Clipboard');
 var DOMElement = require('../../ui/DOMElement');
 var Component = require('../../ui/Component');
-var simple = require('../fixtures/simple');
 var load = require('../load');
 var StubSurface = require('./StubSurface');
 var TestContainerEditor = require('./TestContainerEditor');
-var components = {
+
+var fixture = require('../fixtures/createTestArticle');
+var simple = require('../fixtures/simple');
+
+var componentRegistry = new Registry({
   "paragraph": require('../../packages/paragraph/ParagraphComponent')
+});
+
+var converterRegistry = new Registry({
+  "html": new Registry({
+    "paragraph": require('../../packages/paragraph/ParagraphHTMLConverter'),
+    "heading": require('../../packages/heading/HeadingHTMLConverter'),
+    "strong": require('../../packages/strong/StrongHTMLConverter'),
+    "emphasis": require('../../packages/emphasis/EmphasisHTMLConverter'),
+    "link": require('../../packages/link/LinkHTMLConverter'),
+  })
+});
+
+var clipboardConfig = {
+  converterRegistry: converterRegistry
 };
 
 QUnit.uiModule('ui/Clipboard', {
@@ -46,9 +63,9 @@ function ClipboardEvent() {
 }
 
 QUnit.uiTest("Copying HTML, and plain text", function(assert) {
-  var doc = simple();
-  var surface = new StubSurface(doc, null, 'main');
-  var clipboard = new Clipboard(surface);
+  var doc = fixture(simple);
+  var surface = new StubSurface(doc, null, 'body');
+  var clipboard = new Clipboard(surface, clipboardConfig);
   var sel = doc.createSelection({ type: 'property', path: ['p1', 'content'], startOffset: 0, endOffset: 5 });
   surface.setSelection(sel);
   var event = new ClipboardEvent();
@@ -64,9 +81,9 @@ QUnit.uiTest("Copying HTML, and plain text", function(assert) {
 });
 
 QUnit.uiTest("Copying a property selection", function(assert) {
-  var doc = simple();
-  var surface = new StubSurface(doc, null, 'main');
-  var clipboard = new Clipboard(surface);
+  var doc = fixture(simple);
+  var surface = new StubSurface(doc, null, 'body');
+  var clipboard = new Clipboard(surface, clipboardConfig);
   var sel = doc.createSelection({ type: 'property', path: ['p1', 'content'], startOffset: 0, endOffset: 5 });
   surface.setSelection(sel);
   var TEXT = '01234';
@@ -87,12 +104,12 @@ QUnit.uiTest("Copying a property selection", function(assert) {
 });
 
 QUnit.uiTest("Copying a container selection", function(assert) {
-  var doc = simple();
-  var surface = new StubSurface(doc, null, 'main');
-  var clipboard = new Clipboard(surface);
+  var doc = fixture(simple);
+  var surface = new StubSurface(doc, null, 'body');
+  var clipboard = new Clipboard(surface, clipboardConfig);
   var sel = doc.createSelection({
     type: 'container',
-    containerId: 'main',
+    containerId: 'body',
     startPath: ['p1', 'content'],
     startOffset: 1,
     endPath: ['p3', 'content'],
@@ -126,17 +143,14 @@ QUnit.uiTest("Copying a container selection", function(assert) {
 });
 
 function _containerEditorSample() {
-  var doc = simple();
-  var documentSession = new DocumentSession(doc);
+  var doc = fixture(simple);
   var app = Component.mount(TestContainerEditor, {
-    doc: doc,
-    documentSession: documentSession,
-    config: {
-      controller: {
-        components: components,
-        commands: [],
-      }
-    }
+    context: {
+      documentSession: new DocumentSession(doc),
+      componentRegistry: componentRegistry,
+      converterRegistry: converterRegistry
+    },
+    node: doc.get('body')
   }, '#qunit-fixture');
   var editor = app.refs.editor;
   var sel = doc.createSelection({
@@ -190,7 +204,7 @@ function _with(assert, fixture, fn) {
     .then(done);
   if (!QUnit.config.notrycatch) {
     p.catch(function(err) {
-      error(err.stack);
+      console.error(err.stack);
       done();
     });
   }
@@ -198,7 +212,7 @@ function _with(assert, fixture, fn) {
 
 function _fixtureTest(assert, fixture, impl, forceWindows) {
   var editor = _containerEditorSample();
-  fixture = '/base/test/fixtures/clipboard/' + fixture;
+  fixture = '/base/test/fixtures/html/' + fixture;
   if (forceWindows) {
     // NOTE: faking 'Windows' mode in importer so that
     // the correct implementation will be used
@@ -242,12 +256,12 @@ function _twoParagraphsTest(assert, fixture, forceWindows) {
     event.clipboardData.setData('text/plain', '');
     event.clipboardData.setData('text/html', html);
     editor.clipboard.onPaste(event);
-    var main = doc.get('main');
-    var p1 = main.getChildAt(0);
+    var body = doc.get('body');
+    var p1 = body.getChildAt(0);
     assert.equal(p1.content, '0AAA', "First paragraph should be truncated.");
-    var p2 = main.getChildAt(1);
+    var p2 = body.getChildAt(1);
     assert.equal(p2.content, 'BBB', "Second paragraph should contain 'BBB'.");
-    var p3 = main.getChildAt(2);
+    var p3 = body.getChildAt(2);
     assert.equal(p3.content, '123456789', "Remainder of original p1 should go into forth paragraph.");
   }, forceWindows);
 }

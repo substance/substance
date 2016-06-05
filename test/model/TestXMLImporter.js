@@ -26,7 +26,7 @@ TestXMLImporter.Prototype = function() {
 
   this.convertDocument = function(documentEl) {
     var bodyEl = documentEl.find('body');
-    this.convertContainer(bodyEl.children, 'main');
+    this.convertContainer(bodyEl.children, 'body');
   };
 
 };

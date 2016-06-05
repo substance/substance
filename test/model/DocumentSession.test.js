@@ -4,12 +4,14 @@ require('../QUnitExtensions');
 var sinon = require('sinon');
 var extend = require('lodash/extend');
 var DocumentSession = require('../../model/DocumentSession');
+
+var fixture = require('../fixtures/createTestArticle');
 var simple = require('../fixtures/simple');
 
 QUnit.module('model/DocumentSession');
 
 QUnit.test("Transaction: before and after state.", function(assert) {
-  var doc = simple();
+  var doc = fixture(simple);
   var docSession = new DocumentSession(doc);
   var change = null;
   doc.on('document:changed', function(_change) {
@@ -37,7 +39,7 @@ QUnit.test("Transaction: before and after state.", function(assert) {
 });
 
 QUnit.test("Keeping TransactionDocument up-to-date.", function(assert) {
-  var doc = simple();
+  var doc = fixture(simple);
   var docSession = new DocumentSession(doc);
   docSession.stage._apply = sinon.spy(docSession.stage, '_apply');
 
@@ -49,7 +51,7 @@ QUnit.test("Keeping TransactionDocument up-to-date.", function(assert) {
 });
 
 QUnit.test("Undoing and redoing a change.", function(assert) {
-  var doc = simple();
+  var doc = fixture(simple);
   var docSession = new DocumentSession(doc);
   docSession.transaction(function(tx) {
     tx.update(['p1', 'content'], { insert: {offset: 3, value: "XXX"} });
@@ -66,7 +68,7 @@ QUnit.test("Undoing and redoing a change.", function(assert) {
 });
 
 QUnit.test("Selections after undo/redo.", function(assert) {
-  var doc = simple();
+  var doc = fixture(simple);
   var docSession = new DocumentSession(doc);
   var path = ['p1', 'content'];
   docSession.setSelection(doc.createSelection(path, 3));
@@ -85,7 +87,7 @@ QUnit.test("Selections after undo/redo.", function(assert) {
 
 
 QUnit.test("Undoing and redoing a change after external change.", function(assert) {
-  var doc = simple();
+  var doc = fixture(simple);
   var docSession = new DocumentSession(doc);
   docSession.transaction(function(tx) {
     tx.update(['p1', 'content'], { insert: {offset: 3, value: "XXX"} });
@@ -105,7 +107,7 @@ QUnit.test("Undoing and redoing a change after external change.", function(asser
 });
 
 QUnit.test("Undoing and redoing a change after external change (II).", function(assert) {
-  var doc = simple();
+  var doc = fixture(simple);
   var docSession = new DocumentSession(doc);
   docSession.transaction(function(tx) {
     tx.update(['p1', 'content'], { insert: {offset: 3, value: "XXX"} });
@@ -131,7 +133,7 @@ QUnit.test("Undoing and redoing a change after external change (II).", function(
 QUnit.test("Undo/Redo with two DocumentSessions.", function(assert) {
   // This is not testing the real-time collab hub, just the general ability of
   // DocumentSession to react on external changes
-  var doc = simple();
+  var doc = fixture(simple);
   var session1 = new DocumentSession(doc);
   var session2 = new DocumentSession(doc);
   session1.transaction(function(tx) {

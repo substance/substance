@@ -1,9 +1,12 @@
 "use strict";
 
 require('../QUnitExtensions');
-var simple = require('../fixtures/simple');
 var paste = require('../../model/transform/paste');
 var copySelection = require('../../model/transform/copySelection');
+
+var fixture = require('../fixtures/createTestArticle');
+var simple = require('../fixtures/simple');
+
 // var Table = require('../../packages/table/Table');
 var CLIPBOARD_CONTAINER_ID = copySelection.CLIPBOARD_CONTAINER_ID;
 var CLIPBOARD_PROPERTY_ID = copySelection.CLIPBOARD_PROPERTY_ID;
@@ -11,7 +14,7 @@ var CLIPBOARD_PROPERTY_ID = copySelection.CLIPBOARD_PROPERTY_ID;
 QUnit.module('model/transform/paste');
 
 QUnit.test("Pasting plain text", function(assert) {
-  var doc = simple();
+  var doc = fixture(simple);
   var sel = doc.createSelection({
     type: 'property',
     path: ['p1', 'content'],
@@ -24,7 +27,7 @@ QUnit.test("Pasting plain text", function(assert) {
 });
 
 QUnit.test("Pasting a single paragraph", function(assert) {
-  var doc = simple();
+  var doc = fixture(simple);
   var pasteDoc = doc.newInstance();
   var container = pasteDoc.create({
     type: "container",
@@ -49,7 +52,7 @@ QUnit.test("Pasting a single paragraph", function(assert) {
 });
 
 QUnit.test("Pasting annotated text", function(assert) {
-  var doc = simple();
+  var doc = fixture(simple);
   var sel = doc.createSelection({
     type: 'property',
     path: ['p1', 'content'],
@@ -84,7 +87,7 @@ QUnit.test("Pasting annotated text", function(assert) {
 });
 
 QUnit.test("Pasting two paragraphs", function(assert) {
-  var doc = simple();
+  var doc = fixture(simple);
   var pasteDoc = doc.newInstance();
   var container = pasteDoc.create({
     type: "container",
@@ -108,18 +111,18 @@ QUnit.test("Pasting two paragraphs", function(assert) {
     path: ['p1', 'content'],
     startOffset: 3
   });
-  var args = {containerId: 'main', selection: sel, doc: pasteDoc};
+  var args = {containerId: 'body', selection: sel, doc: pasteDoc};
   paste(doc, args);
-  var main = doc.get('main');
+  var body = doc.get('body');
   var p1 = doc.get('p1');
   assert.equal(p1.content, '012AA', 'First part should be inserted into first paragraph.');
-  assert.equal(main.nodes[1], test2.id, 'Second part should go into a single paragraph.');
-  assert.equal(doc.get(main.nodes[2]).content, '3456789', 'Remaining part of first paragraph should be in a new paragraph.');
-  assert.equal(main.nodes[3], 'p2', 'After that should follow p2.');
+  assert.equal(body.nodes[1], test2.id, 'Second part should go into a single paragraph.');
+  assert.equal(doc.get(body.nodes[2]).content, '3456789', 'Remaining part of first paragraph should be in a new paragraph.');
+  assert.equal(body.nodes[3], 'p2', 'After that should follow p2.');
 });
 
 // QUnit.test("Pasting a table", function(assert) {
-//   var doc = simple();
+//   var doc = fixture(simple);
 //   var pasteDoc = doc.newInstance();
 //   var tsv = [
 //     ['A', 'B', 'C', 'D'].join('\t'),
@@ -139,12 +142,12 @@ QUnit.test("Pasting two paragraphs", function(assert) {
 //     path: ['p1', 'content'],
 //     startOffset: 3
 //   });
-//   var args = {containerId: 'main', selection: sel, doc: pasteDoc};
+//   var args = {containerId: 'body', selection: sel, doc: pasteDoc};
 //   paste(doc, args);
-//   var main = doc.get('main');
+//   var body = doc.get('body');
 //   var p1 = doc.get('p1');
 //   assert.equal(p1.content, '012', 'First paragraph should be truncated.');
-//   assert.equal(doc.get(main.nodes[2]).content, '3456789', 'Remaining part of first paragraph should be in a new paragraph.');
-//   assert.equal(main.nodes[1], table.id, 'Table should be inserted between two paragraphs.');
+//   assert.equal(doc.get(body.nodes[2]).content, '3456789', 'Remaining part of first paragraph should be in a new paragraph.');
+//   assert.equal(body.nodes[1], table.id, 'Table should be inserted between two paragraphs.');
 //   assert.equal(doc.get(table.id).toTSV(), tsv, 'TSV should be correct.');
 // });

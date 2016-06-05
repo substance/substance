@@ -15,7 +15,7 @@ QUnit.test("Merging two paragraphs", function(assert) {
     path: ['p2', 'content'],
     startOffset: 0
   });
-  var args = {selection: sel, containerId: 'main', path: ['p2', 'content'], direction: 'left'};
+  var args = {selection: sel, containerId: 'body', path: ['p2', 'content'], direction: 'left'};
   var out = merge(doc, args);
   var selection = out.selection;
   assert.equal(doc.get(['h2', 'content']), 'Section 2Paragraph with annotation', 'Content of p2 should have been merged into h2.');

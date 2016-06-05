@@ -3,7 +3,9 @@
 require('../QUnitExtensions');
 var TestXMLExporter = require('../model/TestXMLExporter');
 var TestArticle = require('../model/TestArticle');
-var simpleDoc = require('../fixtures/simple');
+
+var fixture = require('../fixtures/createTestArticle');
+var simple = require('../fixtures/simple');
 
 var exporter;
 var doc;
@@ -54,7 +56,7 @@ QUnit.test("Exporting h2", function(assert) {
 });
 
 QUnit.test("Exporting simple document", function(assert) {
-  var doc = simpleDoc();
+  var doc = fixture(simple);
   var rootEl = exporter.exportDocument(doc);
   var actual = rootEl.serialize();
   var expected = [

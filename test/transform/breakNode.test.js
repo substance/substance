@@ -16,7 +16,7 @@ QUnit.test("Breaking a paragraph", function(assert) {
     path: ['p1', 'content'],
     startOffset: 4
   });
-  var args = {selection: sel, containerId: 'main'};
+  var args = {selection: sel, containerId: 'body'};
   var out = breakNode(doc, args);
   var newNodeId = out.node.id;
   var selection = out.selection;
@@ -35,7 +35,7 @@ QUnit.test("Breaking a paragraph with expanded property selection", function(ass
     startOffset: 4,
     endOffset: 10,
   });
-  var args = {selection: sel, containerId: 'main'};
+  var args = {selection: sel, containerId: 'body'};
   var out = breakNode(doc, args);
   var newNodeId = out.node.id;
   var selection = out.selection;
@@ -50,13 +50,13 @@ QUnit.test("Breaking a paragraph with expanded container selection", function(as
   var doc = fixture(headersAndParagraphs);
   var sel = doc.createSelection({
     type: 'container',
-    containerId: 'main',
+    containerId: 'body',
     startPath: ['p1', 'content'],
     startOffset: 4,
     endPath: ['p2', 'content'],
     endOffset: 4,
   });
-  var args = {selection: sel, containerId: 'main'};
+  var args = {selection: sel, containerId: 'body'};
   var out = breakNode(doc, args);
   var newNodeId = out.node.id;
   var selection = out.selection;
@@ -75,7 +75,7 @@ QUnit.test("Breaking a paragraph before annotation", function(assert) {
     path: ['p2', 'content'],
     startOffset: 4
   });
-  var args = {selection: sel, containerId: 'main'};
+  var args = {selection: sel, containerId: 'body'};
   var out = breakNode(doc, args);
   var newNodeId = out.node.id;
   var anno = doc.get('em1');
@@ -94,7 +94,7 @@ QUnit.test("Breaking a paragraph inside an annotation", function(assert) {
     path: ['p2', 'content'],
     startOffset: 20
   });
-  var args = {selection: sel, containerId: 'main'};
+  var args = {selection: sel, containerId: 'body'};
   var out = breakNode(doc, args);
   var newNodeId = out.node.id;
   var annoIndex = doc.getIndex('annotations');

@@ -244,6 +244,8 @@ ObjectOperation.Prototype = function() {
         return ["(>>,", JSON.stringify(this.path), this.propertyType, this.diff.toString(), ")"].join('');
       case SET:
         return ["(=,", JSON.stringify(this.path), this.val, this.original, ")"].join('');
+      case NOP:
+        return "NOP";
       default:
         throw new Error('Invalid type');
     }

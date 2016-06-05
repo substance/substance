@@ -49,7 +49,7 @@ QUnit.test("Copying a container selection", function(assert) {
   var doc = fixture(headersAndParagraphs);
   var sel = doc.createSelection({
     type: 'container',
-    containerId: 'main',
+    containerId: 'body',
     startPath: ['h1', 'content'],
     startOffset: 4,
     endPath: ['p2', 'content'],
@@ -60,7 +60,7 @@ QUnit.test("Copying a container selection", function(assert) {
   var copy = out.doc;
   var content = copy.get('clipboard_content');
   assert.isDefinedAndNotNull(content, 'There should be a container node with id "content".');
-  // 4 nodes? 'main', 'clipboard_content', 'p1', 'p2'
+  // 4 nodes? 'body', 'clipboard_content', 'p1', 'p2'
   assert.equal(content.nodes.length, 4, 'There should be 4 nodes in the copied document.');
   var first = copy.get(content.nodes[0]);
   assert.equal(first.type, 'heading', "The first node should be a heading.");
@@ -77,10 +77,10 @@ QUnit.test("Copying a node without editable properties", function(assert) {
     id: 'i1',
     src: 'foo'
   });
-  doc.get('main').show('i1', 1);
+  doc.get('body').show('i1', 1);
   var sel = doc.createSelection({
     type: 'container',
-    containerId: 'main',
+    containerId: 'body',
     startPath: ['p1', 'content'],
     startOffset: 4,
     endPath: ['p2', 'content'],
@@ -97,7 +97,7 @@ QUnit.test("Copying a paragraph", function(assert) {
   var doc = fixture(simple);
   var sel = doc.createSelection({
     type: 'container',
-    containerId: 'main',
+    containerId: 'body',
     startPath: ['p2'],
     startOffset: 0,
     endPath: ['p2'],
@@ -117,10 +117,10 @@ QUnit.test("Copying a node without properties", function(assert) {
     id: 'i1',
     src: 'foo'
   });
-  doc.get('main').show('i1', 1);
+  doc.get('body').show('i1', 1);
   var sel = doc.createSelection({
     type: 'container',
-    containerId: 'main',
+    containerId: 'body',
     startPath: ['i1'],
     startOffset: 0,
     endPath: ['i1'],

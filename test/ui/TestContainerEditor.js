@@ -1,26 +1,29 @@
 "use strict";
 
-var DocumentSession = require('../../model/DocumentSession');
+var Component = require('../../ui/Component');
 var ContainerEditor = require('../../ui/ContainerEditor');
 
 function TestContainerEditor() {
   TestContainerEditor.super.apply(this, arguments);
-
-  this.documentSession = new DocumentSession(this.props.doc);
 }
 
 TestContainerEditor.Prototype = function() {
+
+  this.getChildContext = function() {
+    return this.props.context;
+  };
+
   this.render = function($$) {
     return $$('div').append(
       $$(ContainerEditor, {
-        documentSession: this.documentSession,
-        containerId: 'main',
-        name: 'main',
+        node: this.props.node,
         commands: [],
         textTypes: []
       }).ref('editor')
     );
   };
 };
+
+Component.extend(TestContainerEditor);
 
 module.exports = TestContainerEditor;

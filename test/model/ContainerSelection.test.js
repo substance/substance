@@ -12,7 +12,7 @@ var containerAnnoSample = require('../fixtures/containerAnnoSample');
 QUnit.module('model/ContainerSelection');
 
 QUnit.test("Creating a ContainerSelection", function(assert) {
-  var sel = new ContainerSelection('main',['p1', 'content'], 1, ['p2', 'content'], 2);
+  var sel = new ContainerSelection('body',['p1', 'content'], 1, ['p2', 'content'], 2);
   assert.ok(sel.isContainerSelection(), 'Should be a container selection.');
   assert.ok(!sel.isNull(), 'Should not be null.');
   assert.deepEqual(sel.startPath, ['p1', 'content'], 'startPath should be correct.');
@@ -24,7 +24,7 @@ QUnit.test("Creating a ContainerSelection", function(assert) {
 
 QUnit.test("Creating a ContainerSelection using a Range", function(assert) {
   var doc = fixture(simple);
-  var range = new Range(new Coordinate(['p1', 'content'], 1), new Coordinate(['p2', 'content'], 2), false, 'main');
+  var range = new Range(new Coordinate(['p1', 'content'], 1), new Coordinate(['p2', 'content'], 2), false, 'body');
   var sel = doc.createSelection(range);
   assert.ok(sel.isContainerSelection(), 'Should be a container selection.');
   assert.deepEqual(sel.startPath, ['p1', 'content'], 'startPath should be correct.');
@@ -35,13 +35,13 @@ QUnit.test("Creating a ContainerSelection using a Range", function(assert) {
 });
 
 QUnit.test("Collapsed ContainerSelection", function(assert) {
-  var sel = new ContainerSelection('main', ['p1', 'content'], 1, ['p1', 'content'], 1);
+  var sel = new ContainerSelection('body', ['p1', 'content'], 1, ['p1', 'content'], 1);
   assert.ok(sel.isContainerSelection(), 'Should be a container selection.');
   assert.ok(sel.isCollapsed(), 'Selection should be collapsed.');
 });
 
 QUnit.test("Reverse ContainerSelection", function(assert) {
-  var sel = new ContainerSelection('main', ['p1', 'content'], 1, ['p1', 'content'], 3, true);
+  var sel = new ContainerSelection('body', ['p1', 'content'], 1, ['p1', 'content'], 3, true);
   assert.ok(sel.isReverse(), 'Selection should be reverse.');
 });
 
@@ -49,7 +49,7 @@ QUnit.test("isInsideOf: strictly inside other", function(assert) {
   var doc = fixture(containerAnnoSample);
   var sel = doc.createSelection({
     type: 'container',
-    containerId: 'main',
+    containerId: 'body',
     startPath: ['p1', 'content'],
     startOffset: 5,
     endPath: ['p3', 'content'],
@@ -57,7 +57,7 @@ QUnit.test("isInsideOf: strictly inside other", function(assert) {
   });
   var other = doc.createSelection({
     type: 'container',
-    containerId: 'main',
+    containerId: 'body',
     startPath: ['p1', 'content'],
     startOffset: 4,
     endPath: ['p3', 'content'],
@@ -71,7 +71,7 @@ QUnit.test("isInsideOf: not-strictly inside other", function(assert) {
   var doc = fixture(containerAnnoSample);
   var sel = doc.createSelection({
     type: 'container',
-    containerId: 'main',
+    containerId: 'body',
     startPath: ['p1', 'content'],
     startOffset: 5,
     endPath: ['p3', 'content'],
@@ -79,7 +79,7 @@ QUnit.test("isInsideOf: not-strictly inside other", function(assert) {
   });
   var other = doc.createSelection({
     type: 'container',
-    containerId: 'main',
+    containerId: 'body',
     startPath: ['p1', 'content'],
     startOffset: 5,
     endPath: ['p3', 'content'],
@@ -93,7 +93,7 @@ QUnit.test("isInsideOf: inside a PropertySelection", function(assert) {
   var doc = fixture(containerAnnoSample);
   var sel = doc.createSelection({
     type: 'container',
-    containerId: 'main',
+    containerId: 'body',
     startPath: ['p1', 'content'],
     startOffset: 4,
     endPath: ['p1', 'content'],
@@ -112,7 +112,7 @@ QUnit.test("isInsideOf: not inside", function(assert) {
   var doc = fixture(containerAnnoSample);
   var other = doc.createSelection({
     type: 'container',
-    containerId: 'main',
+    containerId: 'body',
     startPath: ['p1', 'content'],
     startOffset: 5,
     endPath: ['p3', 'content'],
@@ -121,7 +121,7 @@ QUnit.test("isInsideOf: not inside", function(assert) {
   // wrapping
   var sel = doc.createSelection({
     type: 'container',
-    containerId: 'main',
+    containerId: 'body',
     startPath: ['p1', 'content'],
     startOffset: 4,
     endPath: ['p3', 'content'],
@@ -131,7 +131,7 @@ QUnit.test("isInsideOf: not inside", function(assert) {
   // left-boundary not inside
   sel = doc.createSelection({
     type: 'container',
-    containerId: 'main',
+    containerId: 'body',
     startPath: ['p1', 'content'],
     startOffset: 1,
     endPath: ['p2', 'content'],
@@ -141,7 +141,7 @@ QUnit.test("isInsideOf: not inside", function(assert) {
   // right-boundary not inside
   sel = doc.createSelection({
     type: 'container',
-    containerId: 'main',
+    containerId: 'body',
     startPath: ['p2', 'content'],
     startOffset: 1,
     endPath: ['p3', 'content'],
@@ -157,7 +157,7 @@ QUnit.test("overlaps with other ContainerSelection", function(assert) {
   var doc = fixture(containerAnnoSample);
   var sel = doc.createSelection({
     type: 'container',
-    containerId: 'main',
+    containerId: 'body',
     startPath: ['p1', 'content'],
     startOffset: 4,
     endPath: ['p3', 'content'],
@@ -166,7 +166,7 @@ QUnit.test("overlaps with other ContainerSelection", function(assert) {
   // equal
   var other = doc.createSelection({
     type: 'container',
-    containerId: 'main',
+    containerId: 'body',
     startPath: ['p1', 'content'],
     startOffset: 4,
     endPath: ['p3', 'content'],
@@ -176,7 +176,7 @@ QUnit.test("overlaps with other ContainerSelection", function(assert) {
   // inside
   other = doc.createSelection({
     type: 'container',
-    containerId: 'main',
+    containerId: 'body',
     startPath: ['p1', 'content'],
     startOffset: 5,
     endPath: ['p3', 'content'],
@@ -186,7 +186,7 @@ QUnit.test("overlaps with other ContainerSelection", function(assert) {
   // contained
   other = doc.createSelection({
     type: 'container',
-    containerId: 'main',
+    containerId: 'body',
     startPath: ['p1', 'content'],
     startOffset: 2,
     endPath: ['p3', 'content'],
@@ -196,7 +196,7 @@ QUnit.test("overlaps with other ContainerSelection", function(assert) {
   // left
   other = doc.createSelection({
     type: 'container',
-    containerId: 'main',
+    containerId: 'body',
     startPath: ['p1', 'content'],
     startOffset: 2,
     endPath: ['p2', 'content'],
@@ -206,7 +206,7 @@ QUnit.test("overlaps with other ContainerSelection", function(assert) {
   // right
   other = doc.createSelection({
     type: 'container',
-    containerId: 'main',
+    containerId: 'body',
     startPath: ['p2', 'content'],
     startOffset: 2,
     endPath: ['p3', 'content'],
@@ -217,7 +217,7 @@ QUnit.test("overlaps with other ContainerSelection", function(assert) {
 
 
 QUnit.test("Collapsing to the left", function(assert) {
-  var sel = new ContainerSelection('main', ['p1', 'content'], 1, ['p3', 'content'], 3);
+  var sel = new ContainerSelection('body', ['p1', 'content'], 1, ['p3', 'content'], 3);
   sel = sel.collapse('left');
   assert.ok(sel.isCollapsed(), 'should be collapsed');
   assert.deepEqual(sel.startPath, ['p1', 'content']);
@@ -225,7 +225,7 @@ QUnit.test("Collapsing to the left", function(assert) {
 });
 
 QUnit.test("Collapsing to the right", function(assert) {
-  var sel = new ContainerSelection('main', ['p1', 'content'], 1, ['p3', 'content'], 3);
+  var sel = new ContainerSelection('body', ['p1', 'content'], 1, ['p3', 'content'], 3);
   sel = sel.collapse('right');
   assert.ok(sel.isCollapsed(), 'should be collapsed');
   assert.deepEqual(sel.startPath, ['p3', 'content']);
@@ -236,7 +236,7 @@ QUnit.test("Expanding: other is inside", function(assert) {
   var doc = fixture(containerAnnoSample);
   var sel = doc.createSelection({
     type: 'container',
-    containerId: 'main',
+    containerId: 'body',
     startPath: ['p1', 'content'],
     startOffset: 5,
     endPath: ['p3', 'content'],
@@ -256,7 +256,7 @@ QUnit.test("Expand: is inside other", function(assert) {
   var doc = fixture(containerAnnoSample);
   var sel = doc.createSelection({
     type: 'container',
-    containerId: 'main',
+    containerId: 'body',
     startPath: ['p1', 'content'],
     startOffset: 5,
     endPath: ['p3', 'content'],
@@ -264,7 +264,7 @@ QUnit.test("Expand: is inside other", function(assert) {
   });
   var other = doc.createSelection({
     type: 'container',
-    containerId: 'main',
+    containerId: 'body',
     startPath: ['p1', 'content'],
     startOffset: 3,
     endPath: ['p3', 'content'],
@@ -278,7 +278,7 @@ QUnit.test("Expand right", function(assert) {
   var doc = fixture(containerAnnoSample);
   var sel = doc.createSelection({
     type: 'container',
-    containerId: 'main',
+    containerId: 'body',
     startPath: ['p1', 'content'],
     startOffset: 5,
     endPath: ['p3', 'content'],
@@ -286,7 +286,7 @@ QUnit.test("Expand right", function(assert) {
   });
   var other = doc.createSelection({
     type: 'container',
-    containerId: 'main',
+    containerId: 'body',
     startPath: ['p2', 'content'],
     startOffset: 1,
     endPath: ['p3', 'content'],
@@ -301,7 +301,7 @@ QUnit.test("Expand left", function(assert) {
   var doc = fixture(containerAnnoSample);
   var sel = doc.createSelection({
     type: 'container',
-    containerId: 'main',
+    containerId: 'body',
     startPath: ['p1', 'content'],
     startOffset: 5,
     endPath: ['p3', 'content'],
@@ -309,7 +309,7 @@ QUnit.test("Expand left", function(assert) {
   });
   var other = doc.createSelection({
     type: 'container',
-    containerId: 'main',
+    containerId: 'body',
     startPath: ['p1', 'content'],
     startOffset: 1,
     endPath: ['p2', 'content'],
@@ -324,7 +324,7 @@ QUnit.test("Expand left with PropertySelection", function(assert) {
   var doc = fixture(containerAnnoSample);
   var sel = doc.createSelection({
     type: 'container',
-    containerId: 'main',
+    containerId: 'body',
     startPath: ['p1', 'content'],
     startOffset: 5,
     endPath: ['p3', 'content'],
@@ -345,7 +345,7 @@ QUnit.test("Expand right with PropertySelection", function(assert) {
   var doc = fixture(containerAnnoSample);
   var sel = doc.createSelection({
     type: 'container',
-    containerId: 'main',
+    containerId: 'body',
     startPath: ['p1', 'content'],
     startOffset: 5,
     endPath: ['p3', 'content'],
@@ -366,7 +366,7 @@ QUnit.test("Truncate with other ContainerSelection", function(assert) {
   var doc = fixture(containerAnnoSample);
   var sel = doc.createSelection({
     type: 'container',
-    containerId: 'main',
+    containerId: 'body',
     startPath: ['p1', 'content'],
     startOffset: 5,
     endPath: ['p3', 'content'],
@@ -375,7 +375,7 @@ QUnit.test("Truncate with other ContainerSelection", function(assert) {
   // left side overlapping
   var other = doc.createSelection({
     type: 'container',
-    containerId: 'main',
+    containerId: 'body',
     startPath: ['p1', 'content'],
     startOffset: 1,
     endPath: ['p2', 'content'],
@@ -387,7 +387,7 @@ QUnit.test("Truncate with other ContainerSelection", function(assert) {
   // right side overlapping
   other = doc.createSelection({
     type: 'container',
-    containerId: 'main',
+    containerId: 'body',
     startPath: ['p2', 'content'],
     startOffset: 1,
     endPath: ['p3', 'content'],
@@ -402,7 +402,7 @@ QUnit.test("Truncate with other ContainerSelection", function(assert) {
   // wrapping
   other = doc.createSelection({
     type: 'container',
-    containerId: 'main',
+    containerId: 'body',
     startPath: ['p1', 'content'],
     startOffset: 1,
     endPath: ['p3', 'content'],
@@ -413,7 +413,7 @@ QUnit.test("Truncate with other ContainerSelection", function(assert) {
   // left side aligned
   other = doc.createSelection({
     type: 'container',
-    containerId: 'main',
+    containerId: 'body',
     startPath: ['p1', 'content'],
     startOffset: 5,
     endPath: ['p2', 'content'],
@@ -425,7 +425,7 @@ QUnit.test("Truncate with other ContainerSelection", function(assert) {
   // right side aligned
   other = doc.createSelection({
     type: 'container',
-    containerId: 'main',
+    containerId: 'body',
     startPath: ['p2', 'content'],
     startOffset: 1,
     endPath: ['p3', 'content'],
@@ -441,7 +441,7 @@ QUnit.test("getFragments: start and end are property coordinates (partial)", fun
   var startPath = ['p1', 'content'];
   var sel = doc.createSelection({
     type: 'container',
-    containerId: 'main',
+    containerId: 'body',
     startPath: startPath,
     startOffset: 1,
     endPath: startPath,
@@ -460,7 +460,7 @@ QUnit.test("getFragments: start and end are property coordinates (fully)", funct
   var text = doc.get(startPath);
   var sel = doc.createSelection({
     type: 'container',
-    containerId: 'main',
+    containerId: 'body',
     startPath: startPath,
     startOffset: 0,
     endPath: startPath,
@@ -477,7 +477,7 @@ QUnit.test("getFragments: start is node coordinate (before) and end is property 
   var doc = fixture(simple);
   var sel = doc.createSelection({
     type: 'container',
-    containerId: 'main',
+    containerId: 'body',
     startPath: ['p1'],
     startOffset: 0,
     endPath: ['p1', 'content'],
@@ -495,7 +495,7 @@ QUnit.test("getFragments: start is node coordinate (before) and end is property 
   var text = doc.get(['p1', 'content']);
   var sel = doc.createSelection({
     type: 'container',
-    containerId: 'main',
+    containerId: 'body',
     startPath: ['p1'],
     startOffset: 0,
     endPath: ['p1', 'content'],
@@ -513,7 +513,7 @@ QUnit.test("[Edge case] getFragments: start is node coordinate (after) and end i
   // this means, the start coordinate is after the end coordinate
   var sel = doc.createSelection({
     type: 'container',
-    containerId: 'main',
+    containerId: 'body',
     startPath: ['p1'],
     startOffset: 1,
     endPath: ['p1', 'content'],
@@ -530,7 +530,7 @@ QUnit.test("getFragments: start is property coordinate (partial) and end node co
   var doc = fixture(simple);
   var sel = doc.createSelection({
     type: 'container',
-    containerId: 'main',
+    containerId: 'body',
     startPath: ['p1', 'content'],
     startOffset: 1,
     endPath: ['p1'],
@@ -547,7 +547,7 @@ QUnit.test("getFragments: start is property coordinate (full) and end node coord
   var doc = fixture(simple);
   var sel = doc.createSelection({
     type: 'container',
-    containerId: 'main',
+    containerId: 'body',
     startPath: ['p1', 'content'],
     startOffset: 0,
     endPath: ['p1'],
@@ -564,7 +564,7 @@ QUnit.test("containsNode: inner node", function(assert) {
   var doc = fixture(simple);
   var sel = doc.createSelection({
     type: 'container',
-    containerId: 'main',
+    containerId: 'body',
     startPath: ['p1', 'content'],
     startOffset: 1,
     endPath: ['p3', 'content'],
@@ -577,7 +577,7 @@ QUnit.test("containsNode: outer nodes", function(assert) {
   var doc = fixture(simple);
   var sel = doc.createSelection({
     type: 'container',
-    containerId: 'main',
+    containerId: 'body',
     startPath: ['p2', 'content'],
     startOffset: 1,
     endPath: ['p3', 'content'],
@@ -591,7 +591,7 @@ QUnit.test("containsNode: start/end is nodeFragment", function(assert) {
   var doc = fixture(simple);
   var sel = doc.createSelection({
     type: 'container',
-    containerId: 'main',
+    containerId: 'body',
     startPath: ['p1'],
     startOffset: 0,
     endPath: ['p1'],
@@ -600,7 +600,7 @@ QUnit.test("containsNode: start/end is nodeFragment", function(assert) {
   assert.ok(sel.containsNode('p1'), 'Should contain node.');
   sel = doc.createSelection({
     type: 'container',
-    containerId: 'main',
+    containerId: 'body',
     startPath: ['p1'],
     startOffset: 0,
     endPath: ['p2'],
@@ -613,7 +613,7 @@ QUnit.test("containsNode: with partial node fragment", function(assert) {
   var doc = fixture(simple);
   var sel = doc.createSelection({
     type: 'container',
-    containerId: 'main',
+    containerId: 'body',
     startPath: ['p1'],
     startOffset: 1,
     endPath: ['p2'],
@@ -622,7 +622,7 @@ QUnit.test("containsNode: with partial node fragment", function(assert) {
   assert.notOk(sel.containsNode('p1'), 'Should contain node.');
   sel = doc.createSelection({
     type: 'container',
-    containerId: 'main',
+    containerId: 'body',
     startPath: ['p1'],
     startOffset: 0,
     endPath: ['p2'],
@@ -636,7 +636,7 @@ QUnit.test("[Edge Case] getFragments: start is property coordinate (partial) and
   var doc = fixture(simple);
   var sel = doc.createSelection({
     type: 'container',
-    containerId: 'main',
+    containerId: 'body',
     startPath: ['p1', 'content'],
     startOffset: 1,
     endPath: ['p1'],
@@ -653,7 +653,7 @@ QUnit.test("getFragments: start and end are node coordinates", function(assert) 
   var doc = fixture(simple);
   var sel = doc.createSelection({
     type: 'container',
-    containerId: 'main',
+    containerId: 'body',
     startPath: ['p1'],
     startOffset: 0,
     endPath: ['p1'],
@@ -669,7 +669,7 @@ QUnit.test("[Edge Case] getFragments: start and end are node coordinates (revers
   var doc = fixture(simple);
   var sel = doc.createSelection({
     type: 'container',
-    containerId: 'main',
+    containerId: 'body',
     startPath: ['p1'],
     startOffset: 1,
     endPath: ['p1'],
@@ -686,7 +686,7 @@ QUnit.test("isNodeSelection()", function(assert) {
   // valid NodeSelection
   var sel = doc.createSelection({
     type: 'container',
-    containerId: 'main',
+    containerId: 'body',
     startPath: ['p1'],
     startOffset: 0,
     endPath: ['p1'],
@@ -697,7 +697,7 @@ QUnit.test("isNodeSelection()", function(assert) {
   // not a NodeSelection (but within one node)
   sel = doc.createSelection({
     type: 'container',
-    containerId: 'main',
+    containerId: 'body',
     startPath: ['p1'],
     startOffset: 1,
     endPath: ['p1'],
@@ -708,7 +708,7 @@ QUnit.test("isNodeSelection()", function(assert) {
   // not a NodeSelection (is spanning multiple nodes)
   sel = doc.createSelection({
     type: 'container',
-    containerId: 'main',
+    containerId: 'body',
     startPath: ['p1'],
     startOffset: 0,
     endPath: ['p2'],
