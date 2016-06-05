@@ -2,7 +2,7 @@
 
 var each = require('lodash/each');
 var oo = require('../util/oo');
-var inBrowser = require('../util/inBrowser');
+var substanceGlobals = require('../util/substanceGlobals');
 var VirtualElement = require('./VirtualElement');
 var DefaultDOMElement = require('./DefaultDOMElement');
 
@@ -111,7 +111,7 @@ RenderingEngine.Prototype = function() {
         _prepareVirtualComponent(comp, content);
         // Descending
         // TODO: only do this in DEBUG mode
-        if (RenderingEngine.DEBUG) {
+        if (substanceGlobals.DEBUG_RENDERING) {
           // in this case we use the render() function as iterating function, where
           // $$ is a function which creates components and renders them recursively.
           // first we can create all element components that can be reached
@@ -607,13 +607,5 @@ RenderingEngine.createContext = function(comp) {
   var vel = _createWrappingVirtualComponent(comp);
   return new CaptureContext(vel);
 };
-
-RenderingEngine.DEBUG = true;
-
-if (inBrowser) {
-  if (window.SUBSTANCE_DEBUG_RENDERING) {
-    RenderingEngine.DEBUG = Boolean(window.SUBSTANCE_DEBUG_RENDERING);
-  }
-}
 
 module.exports = RenderingEngine;
