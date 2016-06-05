@@ -3,7 +3,7 @@
 var isFunction = require('lodash/isFunction');
 var DocumentSession = require('../../model/DocumentSession');
 
-module.exports = function(doc, fn) {
+module.exports = function createChangeset(doc, fn) {
   if (!doc._isDocument || !isFunction(fn)) {
     throw new Error('Illegal arguments');
   }

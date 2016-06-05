@@ -66,9 +66,9 @@ QUnit.module('collab/SnapshotEngine', {
 });
 
 // Run the generic testsuite with an engine that does not have a store attached
-testSnapshotEngine(snapshotEngine, twoParagraphs, QUnit);
+testSnapshotEngine(snapshotEngine, documentFactory, QUnit);
 // Run the same testsuite but this time with a store
-testSnapshotEngine(snapshotEngineWithStore, twoParagraphs, QUnit);
+testSnapshotEngine(snapshotEngineWithStore, documentFactory, QUnit);
 
 // Run tests that are only relevant when a snapshot store is provided to the engine
-testSnapshotEngineWithStore(snapshotEngineWithStore, twoParagraphs, QUnit);
+testSnapshotEngineWithStore(snapshotEngineWithStore, documentFactory, QUnit);

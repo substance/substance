@@ -190,8 +190,7 @@ SnapshotEngine.Prototype = function() {
       });
     }
 
-    var docFactory = schemaConfig.documentFactory;
-    var doc = new docFactory.ArticleClass();
+    var doc = schemaConfig.documentFactory.createDocument();
     return doc;
   };
 

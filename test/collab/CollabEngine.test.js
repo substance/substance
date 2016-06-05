@@ -117,8 +117,16 @@ QUnit.test('New collaborator enters with a change that needs rebasing', function
 
   // We simulate that by letting another user 'collab-2' makeing a text change
   // that affects a later text change of 'collab-1' - the one that needs rebasing.
-  var insertTextChange1 = insertText(testDoc, 1, '!');
-  var insertTextChange2 = insertText(testDoc, 5, '$$$'); // 5 is based on version 1, after rebasing should be 6
+  var insertTextChange1 = insertText(testDoc, {
+    path: ['p1', 'content'],
+    pos: 1,
+    text: '!'
+  });
+  var insertTextChange2 = insertText(testDoc, {
+    path: ['p1', 'content'],
+    pos: 5,
+    text: '$$$'
+  }); // 5 is based on version 1, after rebasing should be 6
 
   collabEngine.sync({
     collaboratorId: 'collab-1',
