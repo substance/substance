@@ -84,7 +84,7 @@ AnnotatedTextComponent.Prototype = function() {
     } else {
       ComponentClass = componentRegistry.get(node.type);
       if (!ComponentClass) {
-        console.warn('No component registered for type %s. Using AnnotationComponent.', node.type);
+        // console.warn('No component registered for type %s. Using AnnotationComponent.', node.type);
         ComponentClass = AnnotationComponent;
       }
     }
