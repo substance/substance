@@ -1,6 +1,7 @@
 'use strict';
 
 var oo = require('../util/oo');
+var extend = require('lodash/extend');
 var each = require('lodash/each');
 var Registry = require('../util/Registry');
 
@@ -10,11 +11,14 @@ var Registry = require('../util/Registry');
   @class
 */
 function CommandManager(context, commands) {
-  this.context = context;
   if (!context.documentSession) {
     throw new Error('DocumentSession required.');
   }
   this.documentSession = context.documentSession;
+  this.context = extend({}, context, {
+    // for convenienve we provide access to the doc directly
+    doc: this.documentSession.getDocument()
+  });
 
   // Set up command registry
   this.commandRegistry = new Registry();
@@ -42,10 +46,23 @@ CommandManager.Prototype = function() {
   */
   this.updateCommandStates = function() {
     var commandStates = {};
+    var commandContext = this.getCommandContext();
+    var sessionState = this.getSessionState();
     this.commandRegistry.forEach(function(cmd) {
-      commandStates[cmd.getName()] = cmd.getCommandState(this.getCommandContext());
-    }.bind(this));
+      commandStates[cmd.getName()] = cmd.getCommandState(sessionState, commandContext);
+    });
     this.commandStates = commandStates;
+  };
+
+  // TODO: while we need it here this should go into the flow thingie later
+  this.getSessionState = function() {
+    var documentSession = this.context.documentSession;
+    var sel = documentSession.getSelection();
+    var surface = this.context.surfaceManager.getFocusedSurface();
+    return {
+      selection: sel,
+      surface: surface
+    };
   };
 
   /*
@@ -64,8 +81,9 @@ CommandManager.Prototype = function() {
       console.warn('command', commandName, 'not registered');
       return;
     }
-    // Run command
+    args = extend(this.getSessionState(), args);
     var info = cmd.execute(this.getCommandContext(), args);
+    // TODO: why do we required commands to return a result?
     if (info === undefined) {
       console.warn('command ', commandName, 'must return either an info object or true when handled or false when not handled');
     }

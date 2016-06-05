@@ -23,7 +23,7 @@ QUnit.test("Expand-right of property annotation for a given property selection",
   });
 
   // Prepare and perform transformation
-  var args = {selection: sel, containerId: 'main', annotationType: 'strong'};
+  var args = {selection: sel, containerId: 'body', annotationType: 'strong'};
   var out = expandAnnotation(doc, args);
   var a2 = out.result;
 
@@ -44,7 +44,7 @@ QUnit.test("Expand-right of container annotation for a given property selection"
   });
 
   // Prepare and perform transformation
-  var args = {selection: sel, containerId: 'main', annotationType: 'test-container-anno'};
+  var args = {selection: sel, containerId: 'body', annotationType: 'test-container-anno'};
   var out = expandAnnotation(doc, args);
   var a1 = out.result;
 
@@ -58,7 +58,7 @@ QUnit.test("Expand-right of container annotation for a given container selection
   assert.ok(doc.get('a1'), 'Should have a container annotation a1 in fixture');
   var sel = doc.createSelection({
     type: 'container',
-    containerId: 'main',
+    containerId: 'body',
     startPath: ['p2', 'content'],
     startOffset: 1,
     endPath: ['p3', 'content'],
@@ -66,7 +66,7 @@ QUnit.test("Expand-right of container annotation for a given container selection
   });
 
   // Prepare and perform transformation
-  var args = {selection: sel, containerId: 'main', annotationType: 'test-container-anno'};
+  var args = {selection: sel, containerId: 'body', annotationType: 'test-container-anno'};
   var out = expandAnnotation(doc, args);
   var a1 = out.result;
 

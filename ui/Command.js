@@ -8,10 +8,17 @@ var oo = require('../util/oo');
  @class
 */
 
-var Command = function() {
-};
+var Command = function() {};
 
 Command.Prototype = function() {
+
+  this.getName = function() {
+    return this.constructor.static.name;
+  };
+
+  this.getCommandState = function(sessionState, context) {
+    throw new Error('Command.getCommandState() is abstract.');
+  };
 
   /**
     Execute command
@@ -19,12 +26,8 @@ Command.Prototype = function() {
     @abstract
     @return {Object} info object with execution details
   */
-  this.execute = function() {
-    throw new Error('execute must be implemented by custom commands');
-  };
-
-  this.getName = function() {
-    return this.constructor.static.name;
+  this.execute = function(context, args) {
+    throw new Error('Command.execute() is abstract.');
   };
 
 };

@@ -47,6 +47,10 @@ Selection.Prototype = function() {
     return doc;
   };
 
+  this.isAttached = function() {
+    return Boolean(this._internal.doc);
+  };
+
   /**
     Attach document to the selection.
 

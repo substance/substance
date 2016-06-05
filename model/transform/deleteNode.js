@@ -14,14 +14,12 @@ function deleteNode(tx, args) {
   }
   var nodeId = args.nodeId;
   var node = tx.get(nodeId);
-
   // remove all associated annotations
   var annos = tx.getIndex('annotations').get(nodeId);
   var i;
   for (i = 0; i < annos.length; i++) {
     tx.delete(annos[i].id);
   }
-
   // transfer anchors of ContainerAnnotations to previous or next node:
   //  - start anchors go to the next node
   //  - end anchors go to the previous node
@@ -32,10 +30,8 @@ function deleteNode(tx, args) {
     // Note: during the course of this loop we might have deleted the node already
     // so, don't do it again
     if (!tx.get(anchor.id)) continue;
-
     var pos = container.getPosition(anchor.path[0]);
     var path, offset;
-
     if (anchor.isStart) {
       if (pos < container.getLength()-1) {
         var nextNode = container.getChildAt(pos+1);
@@ -72,16 +68,13 @@ function deleteNode(tx, args) {
       deleteNode(tx, { nodeId: child.id });
     });
   }
-
   // hide node from all containers
   each(tx.getIndex('type').get('container'), function(container) {
     // remove from view first
     container.hide(nodeId);
   });
-
   // finally delete the node itself
   tx.delete(nodeId);
-
   return args;
 }
 

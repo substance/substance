@@ -7,13 +7,10 @@ var helpers = require('../documentHelpers');
 /**
   For a given container selection create property selections of a given type
 
-  @function
-
   @param {model/TransactionDocument} tx the document instance
-  @param {Object} args object with transformation arguments `selection`, `containerId`, `annotationType` and `annotationData`
-  @scopedparam {model/Selection} args.selection A document selection
-  @scopedparam {String} args.containerId a valid container id
-  @scopedparam {Object} args.node data describing the annotation node
+  @param {model/Selection} args.selection A document selection
+  @param {String} args.containerId a valid container id
+  @param {Object} args.node data describing the annotation node
 
   @example
 
@@ -43,13 +40,8 @@ function createAnnotation(tx, args) {
     };
     extend(node, annoData);
   }
-
-  if (!sel) {
-    throw new Error('selection is required.');
-  }
-  if (!node) {
-    throw new Error('node is required');
-  }
+  if (!sel) throw new Error('selection is required.');
+  if (!node) throw new Error('node is required');
   if (sel.isContainerSelection() && !containerId) {
     throw new Error('containerId must be provided for container selections');
   }
@@ -65,7 +57,7 @@ function createAnnotation(tx, args) {
   if (helpers.isContainerAnnotation(tx, node.type)) {
     anno.startPath = sel.startPath;
     anno.endPath = sel.endPath;
-    anno.container = containerId;
+    anno.containerId = containerId;
   } else if (sel.isPropertySelection()) {
     anno.path = sel.path;
   } else {
@@ -73,7 +65,7 @@ function createAnnotation(tx, args) {
   }
   anno.startOffset = sel.startOffset;
   anno.endOffset = sel.endOffset;
-  // start the transaction with an initial selection
+
   args.result = tx.create(anno);
   return args;
 }

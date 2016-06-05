@@ -88,10 +88,7 @@ Tool.Prototype = function() {
   this.onClick = function(e) {
     e.preventDefault();
     e.stopPropagation();
-    if (this.props.disabled) {
-      return;
-    }
-    this.performAction();
+    if (!this.props.disabled) this.performAction();
   };
 
   /**

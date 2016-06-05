@@ -23,7 +23,7 @@ QUnit.test("Truncate property annotation for a given property selection", functi
   });
 
   // Prepare and perform transformation
-  var args = {selection: sel, containerId: 'main', annotationType: 'strong'};
+  var args = {selection: sel, containerId: 'body', annotationType: 'strong'};
   var out = truncateAnnotation(doc, args);
   var a2 = out.result;
 
@@ -44,7 +44,7 @@ QUnit.test("Truncate container annotation for a given property selection", funct
   });
 
   // Prepare and perform transformation
-  var args = {selection: sel, containerId: 'main', annotationType: 'test-container-anno'};
+  var args = {selection: sel, containerId: 'body', annotationType: 'test-container-anno'};
   var out = truncateAnnotation(doc, args);
   var a1 = out.result;
 
@@ -58,7 +58,7 @@ QUnit.test("Truncate container annotation for a given container selection", func
   assert.ok(doc.get('a1'), 'Should have a container annotation a1 in fixture');
   var sel = doc.createSelection({
     type: 'container',
-    containerId: 'main',
+    containerId: 'body',
     startPath: ['p2', 'content'],
     startOffset: 1,
     endPath: ['p3', 'content'],
@@ -66,7 +66,7 @@ QUnit.test("Truncate container annotation for a given container selection", func
   });
 
   // Prepare and perform transformation
-  var args = {selection: sel, containerId: 'main', annotationType: 'test-container-anno'};
+  var args = {selection: sel, containerId: 'body', annotationType: 'test-container-anno'};
   var out = truncateAnnotation(doc, args);
   var a1 = out.result;
 

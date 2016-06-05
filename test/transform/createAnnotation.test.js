@@ -21,7 +21,7 @@ QUnit.test("Create property annotation for a given property selection", function
   });
 
   // Prepare and perform transformation
-  var args = {selection: sel, containerId: 'main', node: {type: 'strong'}};
+  var args = {selection: sel, containerId: 'body', node: {type: 'strong'}};
   var out = createAnnotation(doc, args);
 
   var anno = out.result;
@@ -39,7 +39,7 @@ QUnit.test("Create container annotation for a given container selection", functi
   // Selected text 'Paragraph' in p1
   var sel = doc.createSelection({
     type: 'container',
-    containerId: 'main',
+    containerId: 'body',
     startPath: ['p1', 'content'],
     startOffset: 5,
     endPath: ['h2', 'content'],
@@ -47,7 +47,7 @@ QUnit.test("Create container annotation for a given container selection", functi
   });
 
   // Prepare and perform transformation
-  var args = {selection: sel, containerId: 'main', node: {type: 'test-container-anno'}};
+  var args = {selection: sel, containerId: 'body', node: {type: 'test-container-anno'}};
   var out = createAnnotation(doc, args);
 
   var anno = out.result;
