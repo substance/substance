@@ -13,7 +13,7 @@ ProseEditorOverlay.Prototype = function() {
     var commandStates = this.props.commandStates;
     var toolRegistry = this.context.toolRegistry;
 
-    toolRegistry.forEach(function(tool, name) {
+    toolRegistry.forEach(function(tool) {
       if (tool.options.overlay) {
         var toolProps = tool.Class.static.getProps(commandStates);
         if (toolProps) {
