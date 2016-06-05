@@ -53,7 +53,7 @@ AnnotationIndex.Prototype = function() {
       annotations = filter(annotations, AnnotationIndex.filterByRange(start, end));
     }
     if (type) {
-      annotations = filter(annotations, AnnotationIndex.filterByType(type));
+      annotations = filter(annotations, DocumentIndex.filterByType(type));
     }
     return annotations;
   };
@@ -89,12 +89,6 @@ AnnotationIndex.filterByRange = function(start, end) {
       overlap = overlap && (aStart <= end);
     }
     return overlap;
-  };
-};
-
-AnnotationIndex.filterByType = function(type) {
-  return function(anno) {
-    return anno.isInstanceOf(type);
   };
 };
 

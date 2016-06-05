@@ -2,7 +2,7 @@
 
 var isString = require('lodash/isString');
 var filter = require('lodash/filter');
-var AnnotationIndex = require('./AnnotationIndex');
+var DocumentIndex = require('./DocumentIndex');
 var Selection = require('./Selection');
 
 /**
@@ -41,7 +41,7 @@ documentHelpers.getPropertyAnnotationsForSelection = function(doc, sel, options)
   }
   var annotations = doc.getIndex('annotations').get(sel.path, sel.startOffset, sel.endOffset);
   if (options.type) {
-    annotations = filter(annotations, AnnotationIndex.filterByType(options.type));
+    annotations = filter(annotations, DocumentIndex.filterByType(options.type));
   }
   return annotations;
 };
@@ -51,32 +51,23 @@ documentHelpers.getPropertyAnnotationsForSelection = function(doc, sel, options)
 
   @param {model/Document} doc
   @param {model/Selection} sel
-  @param {model/Container} container
-  @param {object} options
+  @param {String} containerId
+  @param {String} options.type provides only annotations of that type
   @return {Array} An array of container annotations
 */
-documentHelpers.getContainerAnnotationsForSelection = function(doc, sel, container, options) {
-  options = options || {};
+documentHelpers.getContainerAnnotationsForSelection = function(doc, sel, containerId, options) {
   // ATTENTION: looking for container annotations is not as efficient as property
   // selections, as we do not have an index that has notion of the spatial extend
-  // of an annotation (which would depend on a model-side implementation of
-  // Container). Opposed to that, common annotations are bound to properties
-  // which make it easy to lookup.
-  if (!container) {
-    // Fail more silently
-    return [];
-    // throw new Error('Container required.');
+  // of an annotation. Opposed to that, common annotations are bound
+  // to properties which make it easy to lookup.
+  if (!containerId) {
+    throw new Error("'containerId' is required.");
   }
-  var annotations;
-  // Also look for container annotations if a Container instance is given
-  if (options.type) {
-    annotations = doc.getIndex('type').get(options.type);
-  } else {
-    annotations = doc.getIndex('container-annotation-anchors').byId;
-  }
+  options = options || {};
+  var index = doc.getIndex('container-annotations');
+  var annotations = index.get(options.containerId, options.type);
   annotations = filter(annotations, function(anno) {
-    var annoSel = anno.getSelection();
-    return sel.overlaps(annoSel);
+    return sel.overlaps(anno.getSelection());
   });
   return annotations;
 };

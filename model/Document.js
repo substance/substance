@@ -9,6 +9,7 @@ var uuid = require('../util/uuid');
 var EventEmitter = require('../util/EventEmitter');
 var DocumentIndex = require('./DocumentIndex');
 var AnnotationIndex = require('./AnnotationIndex');
+var ContainerAnnotationIndex = require('./ContainerAnnotationIndex');
 var AnchorIndex = require('./AnchorIndex');
 var DocumentChange = require('./DocumentChange');
 var PathEventProxy = require('./PathEventProxy');
@@ -76,7 +77,10 @@ function Document(schema) {
   // special index for (property-scoped) annotations
   this.addIndex('annotations', new AnnotationIndex());
 
-  // special index for (contaoiner-scoped) annotations
+  // TODO: these are only necessary if there is a container annotation
+  // in the schema
+  // special index for (container-scoped) annotations
+  this.addIndex('container-annotations', new ContainerAnnotationIndex());
   this.addIndex('container-annotation-anchors', new AnchorIndex());
 
   // change event proxies are triggered after a document change has been applied

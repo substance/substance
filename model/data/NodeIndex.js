@@ -185,4 +185,10 @@ NodeIndex.create = function(prototype) {
   return index;
 };
 
+NodeIndex.filterByType = function(type) {
+  return function(node) {
+    return node.isInstanceOf(type);
+  };
+};
+
 module.exports = NodeIndex;
