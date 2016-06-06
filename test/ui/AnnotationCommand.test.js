@@ -1,7 +1,7 @@
 'use strict';
 
 require('../QUnitExtensions');
-var helpers = require('../../model/documentHelpers');
+// var helpers = require('../../model/documentHelpers');
 var DocumentSession = require('../../model/DocumentSession');
 
 var AnnotationCommand = require('../../ui/AnnotationCommand');
@@ -23,12 +23,12 @@ var ToggleStrongCommand = AnnotationCommand.extend({
   }
 });
 
-var ToggleContainerAnnoCommand = AnnotationCommand.extend({
-  static: {
-    name: 'toggleContainerAnno',
-    annotationType: 'test-container-anno'
-  }
-});
+// var ToggleContainerAnnoCommand = AnnotationCommand.extend({
+//   static: {
+//     name: 'toggleContainerAnno',
+//     annotationType: 'test-container-anno'
+//   }
+// });
 
 function fixture() {
   var doc = createTestArticle(containerAnnoSample);
@@ -68,9 +68,10 @@ QUnit.test("execute 'create' property annotation", function(assert) {
     startOffset: 1,
     endOffset: 6
   });
-  var res = cmd.execute({ documentSession: docSession }, {
+  var res = cmd.execute({
     mode: 'create',
     selection: sel,
+    documentSession: docSession
   });
   var newAnno = res.anno;
   assert.isDefinedAndNotNull(newAnno, 'A new anno should have been created');
@@ -96,9 +97,10 @@ QUnit.test("execute 'delete' property annotation", function(assert) {
   var docSession = new DocumentSession(doc);
   var cmd = new ToggleStrongCommand();
   var sel = doc.createSelection(['p1', 'content'], 5, 7);
-  cmd.execute({ documentSession: docSession }, {
+  cmd.execute({
     mode: 'delete',
     selection: sel,
+    documentSession: docSession
   });
   assert.isNullOrUndefined(doc.get('a3'), 'a3 should be gone.');
 });

@@ -47,7 +47,7 @@ CommandManager.Prototype = function() {
   this.updateCommandStates = function() {
     var commandStates = {};
     var commandContext = this.getCommandContext();
-    var sessionState = this.getSessionState();
+    var sessionState = this.getCommandProps();
     this.commandRegistry.forEach(function(cmd) {
       commandStates[cmd.getName()] = cmd.getCommandState(sessionState, commandContext);
     });
@@ -55,13 +55,14 @@ CommandManager.Prototype = function() {
   };
 
   // TODO: while we need it here this should go into the flow thingie later
-  this.getSessionState = function() {
+  this.__getCommandProps = function() {
     var documentSession = this.context.documentSession;
     var sel = documentSession.getSelection();
     var surface = this.context.surfaceManager.getFocusedSurface();
     return {
+      documentSession: documentSession
+      surface: surface,
       selection: sel,
-      surface: surface
     };
   };
 
@@ -75,14 +76,14 @@ CommandManager.Prototype = function() {
   /*
     Execute a command, given a context and arguments
   */
-  this.executeCommand = function(commandName, args) {
+  this.executeCommand = function(commandName, props) {
     var cmd = this.commandRegistry.get(commandName);
     if (!cmd) {
       console.warn('command', commandName, 'not registered');
       return;
     }
-    args = extend(this.getSessionState(), args);
-    var info = cmd.execute(this.getCommandContext(), args);
+    props = extend(this.__getCommandProps, props);
+    var info = cmd.execute(props, this.getCommandContext());
     // TODO: why do we required commands to return a result?
     if (info === undefined) {
       console.warn('command ', commandName, 'must return either an info object or true when handled or false when not handled');

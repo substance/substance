@@ -171,9 +171,9 @@ AnnotationCommand.Prototype = function() {
     @param {Object} state.selection the current selection
     @returns {Object} info object with command details.
   */
-  this.getCommandState = function(state, context) { // eslint-disable-line
+  this.getCommandState = function(props, context) { // eslint-disable-line
     context = context || {};
-    var sel = state.selection || context.documentSession.getSelection();
+    var sel = props.selection || context.documentSession.getSelection();
     // We can skip all checking if a disabled condition is met
     // E.g. we don't allow toggling of property annotations when current
     // selection is a container selection
@@ -182,7 +182,7 @@ AnnotationCommand.Prototype = function() {
         disabled: true
       };
     }
-    var annos = this._getAnnotationsForSelection(context, state);
+    var annos = this._getAnnotationsForSelection(props, context);
     var newState = {
       disabled: false,
       active: false,
@@ -214,38 +214,38 @@ AnnotationCommand.Prototype = function() {
     Execute command and trigger transformation.
 
     @returns {Object} info object with execution details.
-   */
+  */
   // Execute command and trigger transformations
-  this.execute = function(context, args) {
-    args = args || {};
-    if (args.disabled) return false;
-    var mode = args.mode;
+  this.execute = function(props, context) {
+    props = props || {};
+    if (props.disabled) return false;
+    var mode = props.mode;
     switch(mode) {
       case 'create':
-        return this.executeCreate(context, args);
+        return this.executeCreate(props, context);
       case 'fuse':
-        return this.executeFuse(context, args);
+        return this.executeFuse(props, context);
       case 'truncate':
-        return this.executeTruncate(context, args);
+        return this.executeTruncate(props, context);
       case 'expand':
-        return this.executeExpand(context, args);
+        return this.executeExpand(props, context);
       case 'edit':
-        return this.executeEdit(context, args);
+        return this.executeEdit(props, context);
       case 'delete':
-        return this.executeDelete(context, args);
+        return this.executeDelete(props, context);
       default:
         console.warn('Command.execute(): unknown mode', mode);
         return false;
     }
   };
 
-  this.executeCreate = function(context, args) {
-    var annos = this._getAnnotationsForSelection(context, args);
-    this._checkPrecondition(context, args, annos, this.canCreate);
-    var newAnno = this._applyTransform(context, args, function(tx) {
-      args.node = this.getAnnotationData();
-      args.node.type = this.getAnnotationType();
-      return createAnnotation(tx, args);
+  this.executeCreate = function(props, context) {
+    var annos = this._getAnnotationsForSelection(props, context);
+    this._checkPrecondition(props, context, annos, this.canCreate);
+    var newAnno = this._applyTransform(props, context, function(tx) {
+      props.node = this.getAnnotationData();
+      props.node.type = this.getAnnotationType();
+      return createAnnotation(tx, props);
     }.bind(this));
     return {
       mode: 'create',
@@ -253,10 +253,10 @@ AnnotationCommand.Prototype = function() {
     };
   };
 
-  this.executeFuse = function(context, args) {
-    var annos = this._getAnnotationsForSelection(context, args);
-    this._checkPrecondition(context, args, annos, this.canFuse);
-    var fusedAnno = this._applyTransform(context, args, function(tx) {
+  this.executeFuse = function(props, context) {
+    var annos = this._getAnnotationsForSelection(props, context);
+    this._checkPrecondition(props, context, annos, this.canFuse);
+    var fusedAnno = this._applyTransform(props, context, function(tx) {
       var result = fuseAnnotation(tx, {
         annos: annos
       });
@@ -270,13 +270,13 @@ AnnotationCommand.Prototype = function() {
     };
   };
 
-  this.executeTruncate = function(context, args) {
-    var annos = this._getAnnotationsForSelection(context, args);
+  this.executeTruncate = function(props, context) {
+    var annos = this._getAnnotationsForSelection(props, context);
     var anno = annos[0];
-    this._checkPrecondition(context, args, annos, this.canTruncate);
-    this._applyTransform(context, args, function(tx) {
+    this._checkPrecondition(props, context, annos, this.canTruncate);
+    this._applyTransform(props, context, function(tx) {
       return truncateAnnotation(tx, {
-        selection: args.selection,
+        selection: props.selection,
         anno: anno
       });
     });
@@ -286,13 +286,13 @@ AnnotationCommand.Prototype = function() {
     };
   };
 
-  this.executeExpand = function(context, args) {
-    var annos = this._getAnnotationsForSelection(context, args);
+  this.executeExpand = function(props, context) {
+    var annos = this._getAnnotationsForSelection(props, context);
     var anno = annos[0];
-    this._checkPrecondition(context, args, annos, this.canExpand);
-    this._applyTransform(context, args, function(tx) {
+    this._checkPrecondition(props, context, annos, this.canExpand);
+    this._applyTransform(props, context, function(tx) {
       expandAnnotation(tx, {
-        selection: args.selection,
+        selection: props.selection,
         anno: anno
       });
     });
@@ -303,9 +303,9 @@ AnnotationCommand.Prototype = function() {
   };
 
   // TODO: do we still need this?
-  this.executeEdit = function(context, args) { // eslint-disable-line
-    var annos = this._getAnnotationsForSelection(context, args);
-    this._checkPrecondition(context, args, annos, this.canEdit);
+  this.executeEdit = function(props, context) { // eslint-disable-line
+    var annos = this._getAnnotationsForSelection(props, context);
+    this._checkPrecondition(props, context, annos, this.canEdit);
     return {
       mode: "edit",
       anno: annos[0],
@@ -313,11 +313,11 @@ AnnotationCommand.Prototype = function() {
     };
   };
 
-  this.executeDelete = function(context, args) {
-    var annos = this._getAnnotationsForSelection(context, args);
+  this.executeDelete = function(props, context) {
+    var annos = this._getAnnotationsForSelection(props, context);
     var anno = annos[0];
-    this._checkPrecondition(context, args, annos, this.canDelete);
-    this._applyTransform(context, args, function(tx) {
+    this._checkPrecondition(props, context, annos, this.canDelete);
+    this._applyTransform(props, context, function(tx) {
       return tx.delete(anno.id);
     });
     return {
@@ -337,19 +337,15 @@ AnnotationCommand.Prototype = function() {
     return this._hasPropertyType;
   };
 
-  this._checkPrecondition = function(context, args, annos, checker) {
-    var sel = this._getSelectionForContext(context, args);
+  this._checkPrecondition = function(props, context, annos, checker) {
+    var sel = _getSelection(props);
     if (!checker.call(this, annos, sel)) {
       throw new Error("AnnotationCommand: can't execute command for selection " + sel.toString());
     }
   };
 
-  this._getSelectionForContext = function(context, args) {
-    return args.selection || context.documentSession.getSelection();
-  };
-
-  this._getAnnotationsForSelection = function(context, args) {
-    var sel = this._getSelectionForContext(context, args);
+  this._getAnnotationsForSelection = function(props) {
+    var sel = _getSelection(props);
     // HACK: currently only for property types
     if (!sel || sel.isNull() || !this._isPropertyAnnotationCommand(sel)) {
       return [];
@@ -365,30 +361,44 @@ AnnotationCommand.Prototype = function() {
     @returns {Object} transformed annotations.
    */
   // Helper to trigger an annotation transformation
-  this._applyTransform = function(context, args, transformFn) {
-    var documentSession = context.documentSession;
-    var sel = this._getSelectionForContext(context, args);
-    var surface = args.surface;
+  this._applyTransform = function(props, context, transformFn) {
+    // HACK: this looks a bit too flexible. Maybe we want to go for
+    var sel = _getSelection(props);
+    var documentSession = _getDocumentSession(props, context);
 
     var result; // to store transform result
     if (sel.isNull()) return;
-    (surface || documentSession).transaction(function(tx, args) {
+    documentSession.transaction(function(tx, props) {
       tx.before.selection = sel;
-      args.selection = sel;
+      props.selection = sel;
       // TODO: why disable this per se?
-      args.splitContainerSelections = false;
-      if (surface && surface.isContainerEditor()) {
-        args.containerId = surface.getContainerId();
+      props.splitContainerSelections = false;
+      // if (surface && surface.isContainerEditor()) {
+      //   props.containerId = surface.getContainerId();
+      // }
+      props = transformFn(tx, props);
+      if (props) {
+        result = props.result;
       }
-      args = transformFn(tx, args);
-      if (args) {
-        result = args.result;
-      }
-      return args;
+      return props;
     });
-
     return result;
   };
+
+  function _getDocumentSession(props, context) {
+    var docSession = props.documentSession || context.documentSession;
+    if (!docSession) {
+      throw new Error("'documentSession' is required.");
+    }
+    return docSession;
+  }
+
+  function _getSelection(props) {
+    if (!props.selection) {
+      throw new Error("'selection' is required.");
+    }
+    return props.selection;
+  }
 
 };
 
