@@ -294,7 +294,11 @@ QUnit.uiTest("Browser - Firefox (Linux) - Whole Page", function(assert) {
     event.clipboardData.setData('text/plain', 'XXX');
     event.clipboardData.setData('text/html', html);
     editor.clipboard.onPaste(event);
-    assert.equal(doc.get(['p1', 'content']), '0XXX123456789', "Content should have been pasted correctly.");
+    // make sure HTML paste succeeded, by checking against the result of plain text insertion
+    assert.notOk(doc.get('p1').getText() === '0XXX123456789', "HTML conversion and paste should have been successful (not fall back to plain-text).");
+    var second = doc.get('body').getNodeAt(1);
+    assert.equal(second.type, 'paragraph', 'Second node should be a paragraph.');
+    assert.equal(second.getText().substring(0, 9), "A synonym", ".. which should start with 'A synonym...'");
   });
 });
 
