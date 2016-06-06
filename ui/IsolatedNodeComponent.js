@@ -1,5 +1,6 @@
 'use strict';
 
+var startsWith = require('lodash/startsWith');
 var keys = require('../util/keys');
 var createSurfaceId = require('../util/createSurfaceId');
 var Coordinate = require('../model/Coordinate');
@@ -201,7 +202,7 @@ IsolatedNodeComponent.Prototype = function() {
       return;
     }
     // for all other cases (focused / co-focused) the surface id prefix must match
-    if (!surfaceId.startsWith(id)) return;
+    if (!startsWith(surfaceId, id)) return;
 
     if (surfaceId.length === id.length) {
       return {

@@ -2,6 +2,7 @@
 
 var forEach = require('lodash/forEach');
 var isUndefined = require('lodash/isUndefined');
+var startsWith = require('lodash/startsWith');
 var inBrowser = require('../util/inBrowser');
 var createSurfaceId = require('../util/createSurfaceId');
 var getBoundingClientRect = require('../util/getBoundingClientRect');
@@ -812,7 +813,7 @@ Surface.Prototype = function() {
     var surfaceId = sel.surfaceId;
     var id = this.getId();
     var mode;
-    if (surfaceId && surfaceId.startsWith(id)) {
+    if (startsWith(surfaceId, id)) {
       if (surfaceId.length === id.length) {
         mode = 'focused';
       } else {
