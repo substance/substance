@@ -161,6 +161,10 @@ ClipboardImporter.Prototype = function() {
     return doc;
   };
 
+  this._getUnsupportedNodeConverter = function() {
+    // nothing
+  };
+
 };
 
 HTMLImporter.extend(ClipboardImporter);
