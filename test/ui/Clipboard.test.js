@@ -14,7 +14,11 @@ var fixture = require('../fixtures/createTestArticle');
 var simple = require('../fixtures/simple');
 
 var componentRegistry = new Registry({
-  "paragraph": require('../../packages/paragraph/ParagraphComponent')
+  "paragraph": require('../../packages/paragraph/ParagraphComponent'),
+  "heading": require('../../packages/heading/HeadingComponent'),
+  "strong": require('../../ui/AnnotationComponent'),
+  "emphasis": require('../../ui/AnnotationComponent'),
+  "link": require('../../packages/link/LinkComponent'),
 });
 
 var converterRegistry = new Registry({
@@ -290,8 +294,6 @@ QUnit.uiTest("Browser - Firefox (Linux) - Whole Page", function(assert) {
     event.clipboardData.setData('text/plain', 'XXX');
     event.clipboardData.setData('text/html', html);
     editor.clipboard.onPaste(event);
-    // in most cases HTML conversion will crash
-    // and Clipboard should fall back to plain text
     assert.equal(doc.get(['p1', 'content']), '0XXX123456789', "Content should have been pasted correctly.");
   });
 });

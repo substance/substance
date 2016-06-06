@@ -165,28 +165,32 @@ Fragmenter.Prototype = function() {
     }
     closers.sort(_compareClosers);
     // merge openers and closers, sorted by pos
-    var entries = [];
+    var entries = new Array(openers.length+closers.length);
     var idx = 0;
     var idx1 = 0;
     var idx2 = 0;
-    var opener, closer;
-    while( (opener = openers[idx1]) || (closer = closers[idx2]) ) {
+    var opener = openers[idx1];
+    var closer = closers[idx2];
+    while(opener || closer) {
       if (opener && closer) {
         // close before open
         if (closer.pos <= opener.pos && closer.opener !== opener) {
           entries[idx] = closer;
-          idx++; idx2++;
+          idx2++;
         } else {
           entries[idx] = opener;
-          idx++; idx1++;
+          idx1++;
         }
       } else if (opener) {
-        entries[idx++] = opener;
+        entries[idx] = opener;
         idx1++;
       } else if (closer) {
-        entries[idx++] = closer;
+        entries[idx] = closer;
         idx2++;
       }
+      opener = openers[idx1];
+      closer = closers[idx2];
+      idx++;
     }
     return entries;
   }
