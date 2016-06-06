@@ -265,14 +265,18 @@ Surface.Prototype = function() {
     ```
    */
   this.transaction = function(transformation, info) {
+    // TODO: we would like to get rid of this method, and only have
+    // documentSession.transaction()
+    // The problem is, that we need to get surfaceId into the change,
+    // to be able to set the selection into the right surface.
+    // ATM we put this into the selection, which is hacky, and makes it
+    // unnecessarily inconvient to create selections.
+    // Maybe documentSession should provide a means to augment the before/after
+    // state of a change.
     var documentSession = this.documentSession;
     var surfaceId = this.getId();
-    var self = this;
-    documentSession.transaction(function(tx, args) {
-      // `beforeState` is saved with the document operation and will be used
-      // to recover the selection when using 'undo'.
+    return documentSession.transaction(function(tx, args) {
       tx.before.surfaceId = surfaceId;
-      self._prepareArgs(args);
       return transformation(tx, args);
     }, info);
   };

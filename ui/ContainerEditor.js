@@ -402,9 +402,15 @@ ContainerEditor.Prototype = function() {
     this.setSelection(newSel);
   };
 
-  this._prepareArgs = function(args) {
-    args.containerId = this.getContainerId();
-    args.editingBehavior = this.editingBehavior;
+  this.transaction = function(transformation, info) {
+    var documentSession = this.documentSession;
+    var surfaceId = this.getId();
+    return documentSession.transaction(function(tx, args) {
+      tx.before.surfaceId = surfaceId;
+      args.containerId = this.getContainerId();
+      args.editingBehavior = this.editingBehavior;
+      return transformation(tx, args);
+    }.bind(this), info);
   };
 
 };
