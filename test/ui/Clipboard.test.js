@@ -7,7 +7,6 @@ var Registry = require('../../util/Registry');
 var Clipboard = require('../../ui/Clipboard');
 var DOMElement = require('../../ui/DOMElement');
 var Component = require('../../ui/Component');
-var load = require('../load');
 var StubSurface = require('./StubSurface');
 var TestContainerEditor = require('./TestContainerEditor');
 
@@ -195,32 +194,14 @@ QUnit.uiTest("Pasting text into ContainerEditor using 'text/html'.", function(as
   assert.equal(doc.get(['p1', 'content']), '0XXX123456789', "Plain text should be correct.");
 });
 
-function _with(assert, fixture, fn) {
-  var done = assert.async();
-  var p = load(fixture)
-    .then(function(html) {
-      fn(html);
-    })
-    .then(done);
-  if (!QUnit.config.notrycatch) {
-    p.catch(function(err) {
-      console.error(err.stack);
-      done();
-    });
-  }
-}
-
 function _fixtureTest(assert, fixture, impl, forceWindows) {
   var editor = _containerEditorSample();
-  fixture = '/base/test/fixtures/html/' + fixture;
   if (forceWindows) {
     // NOTE: faking 'Windows' mode in importer so that
     // the correct implementation will be used
     editor.clipboard.htmlImporter._isWindows = true;
   }
-  _with(assert, fixture, function(html) {
-    impl(editor, html);
-  });
+  impl(editor, fixture);
 }
 
 function _plainTextTest(assert, fixture, forceWindows) {
@@ -267,43 +248,43 @@ function _twoParagraphsTest(assert, fixture, forceWindows) {
 }
 
 QUnit.uiTest("Browser - Chrome (OSX/Linux) - Plain Text", function(assert) {
-  _plainTextTest(assert, 'browser-linux-plain-text.html');
+  _plainTextTest(assert, require('../fixtures/html/browser-linux-plain-text'));
 });
 
 QUnit.uiTest("Browser - Chrome (OSX/Linux) - Annotated Text", function(assert) {
-  _annotatedTextTest(assert, 'browser-linux-annotated-text.html');
+  _annotatedTextTest(assert, require('../fixtures/html/browser-linux-annotated-text'));
 });
 
 QUnit.uiTest("Browser - Chrome (OSX/Linux) - Two Paragraphs", function(assert) {
-  _twoParagraphsTest(assert, 'browser-linux-two-paragraphs.html');
+  _twoParagraphsTest(assert, require('../fixtures/html/browser-linux-two-paragraphs'));
 });
 
 QUnit.uiTest("Browser - Chrome (Windows) - Plain Text", function(assert) {
-  _plainTextTest(assert, 'browser-windows-plain-text.html', 'forceWindows');
+  _plainTextTest(assert, require('../fixtures/html/browser-windows-plain-text'), 'forceWindows');
 });
 
 QUnit.uiTest("Browser - Chrome (Windows) - Annotated Text", function(assert) {
-  _annotatedTextTest(assert, 'browser-windows-annotated-text.html', 'forceWindows');
+  _annotatedTextTest(assert, require('../fixtures/html/browser-windows-annotated-text'), 'forceWindows');
 });
 
 QUnit.uiTest("Browser - Chrome (Windows) - Two Paragraphs", function(assert) {
-  _twoParagraphsTest(assert, 'browser-windows-two-paragraphs.html', 'forceWindows');
+  _twoParagraphsTest(assert, require('../fixtures/html/browser-windows-two-paragraphs'), 'forceWindows');
 });
 
 QUnit.uiTest("Browser - Firefox (Linux) - Plain Text", function(assert) {
-  _plainTextTest(assert, 'browser-linux-firefox-plain-text.html');
+  _plainTextTest(assert, require('../fixtures/html/browser-linux-firefox-plain-text'));
 });
 
 QUnit.uiTest("Browser - Firefox (Linux) - Annotated Text", function(assert) {
-  _annotatedTextTest(assert, 'browser-linux-firefox-annotated-text.html');
+  _annotatedTextTest(assert, require('../fixtures/html/browser-linux-firefox-annotated-text'));
 });
 
 QUnit.uiTest("Browser - Firefox (Linux) - Two Paragraphs", function(assert) {
-  _twoParagraphsTest(assert, 'browser-linux-firefox-two-paragraphs.html');
+  _twoParagraphsTest(assert, require('../fixtures/html/browser-linux-firefox-two-paragraphs'));
 });
 
 QUnit.uiTest("Browser - Firefox (Linux) - Whole Page", function(assert) {
-  _fixtureTest(assert, 'browser-linux-firefox-whole-page.html', function(editor, html) {
+  _fixtureTest(assert, require('../fixtures/html/browser-linux-firefox-whole-page'), function(editor, html) {
     var doc = editor.getDocument();
     var event = new ClipboardEvent();
     event.clipboardData.setData('text/plain', 'XXX');
@@ -316,85 +297,85 @@ QUnit.uiTest("Browser - Firefox (Linux) - Whole Page", function(assert) {
 });
 
 QUnit.uiTest("Browser - Firefox (OSX) - Plain Text", function(assert) {
-  _plainTextTest(assert, 'browser-osx-firefox-plain-text.html');
+  _plainTextTest(assert, require('../fixtures/html/browser-osx-firefox-plain-text'));
 });
 
 QUnit.uiTest("Browser - Firefox (OSX) - Annotated Text", function(assert) {
-  _annotatedTextTest(assert, 'browser-osx-firefox-annotated-text.html');
+  _annotatedTextTest(assert, require('../fixtures/html/browser-osx-firefox-annotated-text'));
 });
 
 QUnit.uiTest("Browser - Firefox (OSX) - Two Paragraphs", function(assert) {
-  _twoParagraphsTest(assert, 'browser-osx-firefox-two-paragraphs.html');
+  _twoParagraphsTest(assert, require('../fixtures/html/browser-osx-firefox-two-paragraphs'));
 });
 
 QUnit.uiTest("Browser - Firefox (Windows) - Plain Text", function(assert) {
-  _plainTextTest(assert, 'browser-windows-firefox-plain-text.html', 'forceWindows');
+  _plainTextTest(assert, require('../fixtures/html/browser-windows-firefox-plain-text'), 'forceWindows');
 });
 
 QUnit.uiTest("Browser - Firefox (Windows) - Annotated Text", function(assert) {
-  _annotatedTextTest(assert, 'browser-windows-firefox-annotated-text.html', 'forceWindows');
+  _annotatedTextTest(assert, require('../fixtures/html/browser-windows-firefox-annotated-text'), 'forceWindows');
 });
 
 QUnit.uiTest("Browser - Firefox (Windows) - Two Paragraphs", function(assert) {
-  _twoParagraphsTest(assert, 'browser-windows-firefox-two-paragraphs.html', 'forceWindows');
+  _twoParagraphsTest(assert, require('../fixtures/html/browser-windows-firefox-two-paragraphs'), 'forceWindows');
 });
 
 QUnit.uiTest("Browser - Edge (Windows) - Plain Text", function(assert) {
-  _plainTextTest(assert, 'browser-windows-edge-plain-text.html', 'forceWindows');
+  _plainTextTest(assert, require('../fixtures/html/browser-windows-edge-plain-text'), 'forceWindows');
 });
 
 QUnit.uiTest("Browser - Edge (Windows) - Annotated Text", function(assert) {
-  _annotatedTextTest(assert, 'browser-windows-edge-annotated-text.html', 'forceWindows');
+  _annotatedTextTest(assert, require('../fixtures/html/browser-windows-edge-annotated-text'), 'forceWindows');
 });
 
 QUnit.uiTest("Browser - Edge (Windows) - Two Paragraphs", function(assert) {
-  _twoParagraphsTest(assert, 'browser-windows-edge-two-paragraphs.html', 'forceWindows');
+  _twoParagraphsTest(assert, require('../fixtures/html/browser-windows-edge-two-paragraphs'), 'forceWindows');
 });
 
 QUnit.uiTest("GoogleDocs - Chrome (OSX/Linux) - Plain Text", function(assert) {
-  _plainTextTest(assert, 'google-docs-osx-linux-chrome-plain-text.html');
+  _plainTextTest(assert, require('../fixtures/html/google-docs-osx-linux-chrome-plain-text'));
 });
 
 QUnit.uiTest("GoogleDocs - Chrome (OSX/Linux) - Annotated Text", function(assert) {
-  _annotatedTextTest(assert, 'google-docs-osx-linux-chrome-annotated-text.html');
+  _annotatedTextTest(assert, require('../fixtures/html/google-docs-osx-linux-chrome-annotated-text'));
 });
 
 QUnit.uiTest("GoogleDocs - Chrome (OSX/Linux) - Two Paragraphs", function(assert) {
-  _twoParagraphsTest(assert, 'google-docs-osx-linux-chrome-two-paragraphs.html');
+  _twoParagraphsTest(assert, require('../fixtures/html/google-docs-osx-linux-chrome-two-paragraphs'));
 });
 
 QUnit.uiTest("GoogleDocs - Firefox (Linux) - Plain Text", function(assert) {
-  _plainTextTest(assert, 'google-docs-linux-firefox-plain-text.html');
+  _plainTextTest(assert, require('../fixtures/html/google-docs-linux-firefox-plain-text'));
 });
 
 QUnit.uiTest("GoogleDocs - Firefox (Linux) - Annotated Text", function(assert) {
-  _annotatedTextTest(assert, 'google-docs-linux-firefox-annotated-text.html');
+  _annotatedTextTest(assert, require('../fixtures/html/google-docs-linux-firefox-annotated-text'));
 });
 
 QUnit.uiTest("GoogleDocs - Firefox (OSX) - Plain Text", function(assert) {
-  _plainTextTest(assert, 'google-docs-osx-firefox-plain-text.html');
+  _plainTextTest(assert, require('../fixtures/html/google-docs-osx-firefox-plain-text'));
 });
 
 QUnit.uiTest("LibreOffice (OSX/Linux) - Plain Text", function(assert) {
-  _plainTextTest(assert, 'libre-office-osx-linux-plain-text.html');
+  _plainTextTest(assert, require('../fixtures/html/libre-office-osx-linux-plain-text'));
 });
 
 QUnit.uiTest("LibreOffice (OSX/Linux) - Annotated Text", function(assert) {
-  _annotatedTextTest(assert, 'libre-office-osx-linux-annotated-text.html');
+  _annotatedTextTest(assert, require('../fixtures/html/libre-office-osx-linux-annotated-text'));
 });
 
 QUnit.uiTest("LibreOffice (OSX/Linux) - Two Paragraphs", function(assert) {
-  _twoParagraphsTest(assert, 'libre-office-osx-linux-two-paragraphs.html');
+  _twoParagraphsTest(assert, require('../fixtures/html/libre-office-osx-linux-two-paragraphs'));
 });
 
 QUnit.uiTest("Microsoft Word 11 (OSX) - Plain Text", function(assert) {
-  _plainTextTest(assert, 'word-11-osx-plain-text.html');
+  _plainTextTest(assert, require('../fixtures/html/word-11-osx-plain-text'));
 });
 
 QUnit.uiTest("Microsoft Word 11 (OSX) - Annotated Text", function(assert) {
-  _annotatedTextTest(assert, 'word-11-osx-annotated-text.html');
+  _annotatedTextTest(assert, require('../fixtures/html/word-11-osx-annotated-text'));
 });
 
 QUnit.uiTest("Microsoft Word 11 (OSX) - Two Paragraphs", function(assert) {
-  _twoParagraphsTest(assert, 'word-11-osx-two-paragraphs.html');
+  _twoParagraphsTest(assert, require('../fixtures/html/word-11-osx-two-paragraphs'));
 });

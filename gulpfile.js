@@ -1,6 +1,10 @@
+'use strict';
+/* eslint-disable no-console */
+
 var gulp = require('gulp');
 var source = require('vinyl-source-stream');
 var buffer = require('vinyl-buffer');
+var transform = require('vinyl-transform');
 var gutil = require('gulp-util');
 var argv = require('yargs').argv;
 var gulpif = require('gulp-if');
@@ -9,6 +13,7 @@ var eslint = require('gulp-eslint');
 var browserify = require('browserify');
 var uglify = require('gulp-uglify');
 var sourcemaps = require('gulp-sourcemaps');
+var mapStream = require('map-stream');
 var generate = require('./doc/generator/generate');
 var config = require('./doc/config.json');
 var sass = require('gulp-sass');
@@ -49,7 +54,7 @@ gulp.task('doc:bundle', function () {
     }))
     .on('error', function (error) {
       console.log(error.stack);
-      this.emit('end');
+      this.emit('end'); // eslint-disable-line
     })
     .pipe(uglify())
     .pipe(gulp.dest('./dist'));
@@ -75,9 +80,9 @@ gulp.task('lint', function() {
 
 gulp.task('build', ['lint'], function() {
   return browserify({
-      entries: './browser.js',
-      debug: true
-    }).bundle()
+    entries: './browser.js',
+    debug: true
+  }).bundle()
     .pipe(source('substance.js'))
     .pipe(buffer())
     .pipe(sourcemaps.init({loadMaps: true}))
@@ -86,6 +91,23 @@ gulp.task('build', ['lint'], function() {
     .on('error', gutil.log)
     .pipe(sourcemaps.write('./'))
     .pipe(gulp.dest('./dist'));
+});
+
+var html2js = transform(function(filename) {
+  return mapStream(function(chunk, next) {
+    console.log('### Compiling ', filename);
+    var wrapped = "'use strict';\nmodule.exports="+JSON.stringify(chunk.toString())+";";
+    return next(null, wrapped);
+  });
+});
+
+gulp.task('test:fixtures', function() {
+  return gulp.src('./test/fixtures/html/*.html')
+    .pipe(html2js)
+    .pipe(rename(function(path) {
+      path.extname = ".js";
+    }))
+    .pipe(gulp.dest('test/fixtures/html/'));
 });
 
 gulp.task('test:karma', ['lint'], function(done) {
