@@ -1,50 +1,59 @@
-/* eslint-disable no-invalid-this */
 "use strict";
+/* eslint-disable no-invalid-this */
 
 require('../QUnitExtensions');
 
+var Registry = require('../../util/Registry');
 var createAnnotation = require('../../model/transform/createAnnotation');
 var DocumentSession = require('../../model/DocumentSession');
+var SurfaceManager = require('../../ui/SurfaceManager');
 var Component = require('../../ui/Component');
 
 var TestContainerEditor = require('./TestContainerEditor');
+var fixture = require('../fixtures/createTestArticle');
 var simple = require('../fixtures/simple');
 
-var components = {
-  "paragraph": require('../../packages/paragraph/ParagraphComponent')
-};
+var componentRegistry = new Registry({
+  "paragraph": require('../../packages/paragraph/ParagraphComponent'),
+  "heading": require('../../packages/heading/HeadingComponent'),
+  "strong": require('../../ui/AnnotationComponent'),
+  "emphasis": require('../../ui/AnnotationComponent'),
+  "link": require('../../packages/link/LinkComponent'),
+});
 
 QUnit.uiModule('ui/Surface');
 
-function _createSurface(doc, el) {
+function _createApp(fixtureSeed, el) {
+  var doc = fixture(fixtureSeed);
   var documentSession = new DocumentSession(doc);
+  var surfaceManager = new SurfaceManager(documentSession);
   var app = Component.mount(TestContainerEditor, {
-    doc: doc,
-    documentSession: documentSession,
-    config: {
-      controller: {
-        components: components,
-        commands: [],
-      }
-    }
+    context: {
+      documentSession: documentSession,
+      surfaceManager: surfaceManager,
+      componentRegistry: componentRegistry
+    },
+    node: doc.get('body')
   }, el);
   var surface = app.refs.editor;
-  return surface;
+  return {
+    documentSession: documentSession,
+    doc: doc,
+    surface: surface,
+  };
 }
 
 // This test was added to cover issue #82
 QUnit.uiTest("Set the selection after creating annotation.", function(assert) {
   var el = this.sandbox;
-  var doc = simple();
-  var surface = _createSurface(doc, el);
-  // surface.setFocused(true);
+  var app = _createApp(simple, el);
+  var doc = app.doc;
+  var surface = app.surface;
   var sel = doc.createSelection(['p1', 'content'], 0, 5);
-  surface.setSelection(sel);
   surface.transaction(function(tx, args) {
     args.selection = sel;
     args.node = {type: "strong"};
-    args = createAnnotation(tx, args);
-    return args;
+    return createAnnotation(tx, args);
   });
   var wsel = window.getSelection();
   var newSel = surface.domSelection.getSelection();
@@ -55,12 +64,12 @@ QUnit.uiTest("Set the selection after creating annotation.", function(assert) {
 QUnit.uiTest("Render a reverse selection.", function(assert) {
   var BrowserDOMElement = require('../../ui/BrowserDOMElement');
   var el = this.sandbox;
-  var doc = simple();
-  var surface = _createSurface(doc, el);
-  // surface.setFocused(true);
+  var app = _createApp(simple, el);
+  var doc = app.doc;
+  var surface = app.surface;
   var sel = doc.createSelection({
     type: 'container',
-    containerId: 'main',
+    containerId: 'body',
     startPath:['p1', 'content'],
     startOffset: 3,
     endPath: ['p2', 'content'],

@@ -5,12 +5,13 @@ require('../QUnitExtensions');
 var Component = require('../../ui/Component');
 var TextPropertyComponent = require('../../ui/TextPropertyComponent');
 
+var fixture = require('../fixtures/createTestArticle');
 var simple = require('../fixtures/simple');
 
 QUnit.uiModule("ui/TextPropertyComponent");
 
 QUnit.uiTest("Get coordinate of empty property", function(assert) {
-  var doc = simple();
+  var doc = fixture(simple);
   doc.create({
     type: 'paragraph',
     id: 'empty',

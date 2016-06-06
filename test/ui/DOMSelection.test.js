@@ -105,24 +105,24 @@ function StubTextPropertyComponent(el) {
 // Fixtures
 var singlePropertyFixture = [
   '<div id="test1">',
-  '  <span data-path="test1.content">Hello World!</span>',
+    '<span data-path="test1.content">Hello World!</span>',
   '</div>'
 ].join('');
 
 var mixedFixture = [
   '<div id="before">Before</div>',
   '<div id="test1">',
-  '  <span data-path="test1.content">The first property.</span>',
+    '<span data-path="test1.content">The first property.</span>',
   '</div>',
   '<div id="test2">',
-  '  <span data-path="test2.content">The second property.</span>',
+    '<span data-path="test2.content">The second property.</span>',
   '</div>',
   '<div id="between">Between</div>',
   '<div id="test3">',
-  '  <span data-path="test3.content">The third property.</span>',
+    '<span data-path="test3.content">The third property.</span>',
   '</div>',
   '<div id="test4">',
-  '  <span data-path="test4.content">The forth property.</span>',
+    '<span data-path="test4.content">The forth property.</span>',
   '</div>',
   '<div id="after">After</div>'
 ].join('');
@@ -130,7 +130,7 @@ var mixedFixture = [
 QUnit.uiTest("Get coordinate for collapsed selection", function(assert) {
   var el = this.sandbox.html(singlePropertyFixture);
   var domSelection = new DOMSelection(new StubSurface(el));
-  var node = el.find('#test1').getFirstChild().getFirstChild();
+  var node = el.find('#test1 > span').getFirstChild();
   var offset = 5;
   var coor = domSelection._getCoordinate(node, offset);
   assert.ok(coor, "Extracted coordinate should be !== null");
@@ -195,7 +195,7 @@ QUnit.uiTest("coordinate via search", function(assert) {
 
 var emptyParagraphFixture = [
   '<div id="test1" class="content-node" data-id="test1">',
-  '  <span data-path="test1.content"></span>',
+    '<span data-path="test1.content"></span>',
   '</div>'
 ].join('');
 
@@ -212,12 +212,12 @@ QUnit.uiTest("DOM coordinate in empty paragraph", function(assert) {
 
 var textWithAnnotations = [
   '<div id="test1">',
-  '  <span id="test1_content" data-path="test1.content">',
-  '    <span data-offset="0" data-length="2">..</span>',
-  '    <span data-offset="2" data-length="2">..</span>',
-  '    <span data-offset="4" data-length="2">..</span>',
-  '    <span data-offset="6" data-length="2">..</span>',
-  '  </span>',
+    '<span id="test1_content" data-path="test1.content">',
+      '<span data-offset="0" data-length="2">..</span>',
+      '<span data-offset="2" data-length="2">..</span>',
+      '<span data-offset="4" data-length="2">..</span>',
+      '<span data-offset="6" data-length="2">..</span>',
+    '</span>',
   '</div>'
 ].join('');
 
@@ -245,14 +245,14 @@ QUnit.uiTest("DOM coordinate on text property level (last)", function(assert) {
 
 var withAnnosAndInlines = [
   '<div id="test1">',
-  '  <span id="test1_content" data-path="test1.content">',
-  '    <span data-offset="0" data-length="2">..</span>',
-  '    <span data-inline="1">$</span>',
-  '    <span data-offset="3" data-length="2">..</span>',
-  '    <span data-inline="1">$</span>',
-  '    <span id="before-last" data-offset="6" data-length="2">..</span>',
-  '    <span data-inline="1">$</span>',
-  '  </span>',
+    '<span id="test1_content" data-path="test1.content">',
+      '<span data-offset="0" data-length="2">..</span>',
+      '<span data-inline="1">$</span>',
+      '<span data-offset="3" data-length="2">..</span>',
+      '<span data-inline="1">$</span>',
+      '<span id="before-last" data-offset="6" data-length="2">..</span>',
+      '<span data-inline="1">$</span>',
+    '</span>',
   '</div>'
 ].join('');
 
@@ -284,12 +284,12 @@ QUnit.uiTest("DOM selection spanning over inline at end", function(assert) {
 
 var withoutHints = [
   '<div id="test1">',
-  '  <span id="test1_content" data-path="test1.content">',
-  '    <span>..</span>',
-  '    <span>..</span>',
-  '    <span>..</span>',
-  '    <span>..</span>',
-  ' </span>',
+    '<span id="test1_content" data-path="test1.content">',
+      '<span>..</span>',
+      '<span>..</span>',
+      '<span>..</span>',
+      '<span>..</span>',
+    '</span>',
   '</div>'
 ].join('');
 
