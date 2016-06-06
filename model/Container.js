@@ -68,6 +68,10 @@ Container.Prototype = function() {
     return nodes;
   };
 
+  this.getNodeAt = function(pos) {
+    return this.getDocument().get(this.nodes[pos]);
+  };
+
   this.show = function(nodeId, pos) {
     var doc = this.getDocument();
     if (!isNumber(pos)) {
