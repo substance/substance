@@ -47,23 +47,11 @@ CommandManager.Prototype = function() {
   this.updateCommandStates = function() {
     var commandStates = {};
     var commandContext = this.getCommandContext();
-    var sessionState = this.getCommandProps();
+    var props = this._getCommandProps();
     this.commandRegistry.forEach(function(cmd) {
-      commandStates[cmd.getName()] = cmd.getCommandState(sessionState, commandContext);
+      commandStates[cmd.getName()] = cmd.getCommandState(props, commandContext);
     });
     this.commandStates = commandStates;
-  };
-
-  // TODO: while we need it here this should go into the flow thingie later
-  this.__getCommandProps = function() {
-    var documentSession = this.context.documentSession;
-    var sel = documentSession.getSelection();
-    var surface = this.context.surfaceManager.getFocusedSurface();
-    return {
-      documentSession: documentSession
-      surface: surface,
-      selection: sel,
-    };
   };
 
   /*
@@ -82,13 +70,25 @@ CommandManager.Prototype = function() {
       console.warn('command', commandName, 'not registered');
       return;
     }
-    props = extend(this.__getCommandProps, props);
+    props = extend(this._getCommandProps, props);
     var info = cmd.execute(props, this.getCommandContext());
     // TODO: why do we required commands to return a result?
     if (info === undefined) {
       console.warn('command ', commandName, 'must return either an info object or true when handled or false when not handled');
     }
     return info;
+  };
+
+  // TODO: while we need it here this should go into the flow thingie later
+  this._getCommandProps = function() {
+    var documentSession = this.context.documentSession;
+    var sel = documentSession.getSelection();
+    var surface = this.context.surfaceManager.getFocusedSurface();
+    return {
+      documentSession: documentSession,
+      surface: surface,
+      selection: sel,
+    };
   };
 
 };

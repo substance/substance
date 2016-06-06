@@ -3,6 +3,7 @@
 var oo = require('./oo');
 var forEach = require('lodash/forEach');
 var extend = require('lodash/extend');
+var DocumentSchema = require('../model/DocumentSchema');
 var EditingBehavior = require('../model/EditingBehavior');
 var Registry = require('../util/Registry');
 var FileClientStub = require('../ui/FileClientStub');

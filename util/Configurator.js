@@ -1,7 +1,6 @@
 'use strict';
 
 var AbstractConfigurator = require('./AbstractConfigurator');
-var DocumentSchema = require('../model/DocumentSchema');
 var FontAwesomeIconProvider = require('../ui/FontAwesomeIconProvider');
 
 // Setup default I18n
