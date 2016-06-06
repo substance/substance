@@ -26,7 +26,7 @@ AnchorIndex.Prototype = function() {
     var anchors = this.byPath.getAll(path);
     if (containerName) {
       return filter(anchors, function(anchor) {
-        return (anchor.container === containerName);
+        return (anchor.containerId === containerName);
       });
     } else {
       // return a copy of the array

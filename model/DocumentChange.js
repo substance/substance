@@ -138,7 +138,7 @@ DocumentChange.Prototype = function() {
     }
 
     affectedContainerAnnos.forEach(function(anno) {
-      var container = doc.get(anno.container);
+      var container = doc.get(anno.containerId);
       var startPos = container.getPosition(anno.startPath[0]);
       var endPos = container.getPosition(anno.endPath[0]);
       for (var pos = startPos; pos <= endPos; pos++) {

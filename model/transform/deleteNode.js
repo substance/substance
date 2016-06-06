@@ -26,7 +26,7 @@ function deleteNode(tx, args) {
   var anchors = tx.getIndex('container-annotation-anchors').get(nodeId);
   for (i = 0; i < anchors.length; i++) {
     var anchor = anchors[i];
-    var container = tx.get(anchor.container);
+    var container = tx.get(anchor.containerId);
     // Note: during the course of this loop we might have deleted the node already
     // so, don't do it again
     if (!tx.get(anchor.id)) continue;
