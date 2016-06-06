@@ -21,7 +21,7 @@ InlineWrapperComponent.Prototype = function() {
       var componentRegistry = this.context.componentRegistry || this.props.componentRegistry;
       var ComponentClass = componentRegistry.get(wrappedNode.type);
       if (!ComponentClass) {
-        error('Could not resolve a component for type: ' + wrappedNode.type);
+        console.error('Could not resolve a component for type: ' + wrappedNode.type);
       } else {
         el.append(
           $$(ComponentClass, {

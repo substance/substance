@@ -16,7 +16,7 @@ Command.Prototype = function() {
     return this.constructor.static.name;
   };
 
-  this.getCommandState = function(sessionState, context) {
+  this.getCommandState = function(sessionState, context) { // eslint-disable-line
     throw new Error('Command.getCommandState() is abstract.');
   };
 
@@ -26,7 +26,7 @@ Command.Prototype = function() {
     @abstract
     @return {Object} info object with execution details
   */
-  this.execute = function(context, args) {
+  this.execute = function(context, args) { // eslint-disable-line
     throw new Error('Command.execute() is abstract.');
   };
 
