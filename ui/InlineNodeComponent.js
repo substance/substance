@@ -31,22 +31,22 @@ InlineNodeComponent.Prototype = function() {
     // TODO: enable this as soon we fixed the rendering issue coming up when activating this
     // var surface = this.context.surface;
     // if (surface && !surface.isDisabled()) {
-    if (false) {
-      el.on('mousedown', _onMousedown, this);
-    }
+    //   el.on('mousedown', _onMousedown, this);
+    // }
 
     return el;
   };
 
   // Note: using a closure function to not polute the prototype avoiding name-clashes
-  function _onMousedown(event) {
-    /* jshint validthis:true */
+  function _onMousedown(event) { // eslint-disable-line
+    /* eslint-disable no-invalid-this */
     event.stopPropagation();
     var node = this.props.node;
     var doc = this.props.node.getDocument();
     var surface = this.context.surface;
     var sel = doc.createSelection(node.path, node.startOffset, node.endOffset);
     surface.setSelection(sel);
+    /* eslint-enable no-invalid-this */
   }
 
 };

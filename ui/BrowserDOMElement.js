@@ -3,7 +3,6 @@
 var isString = require('lodash/isString');
 var isNumber = require('lodash/isNumber');
 var oo = require('../util/oo');
-var assert = require('../util/assert');
 var DOMElement = require('./DOMElement');
 var DelegatedEvent = require('./DelegatedEvent');
 
@@ -14,7 +13,7 @@ var matches = (
 );
 
 function BrowserDOMElement(el) {
-  assert(el instanceof window.Node, "Expecting native DOM node.");
+  console.assert(el instanceof window.Node, "Expecting native DOM node.");
   this.el = el;
   el._wrapper = this;
   this.eventListeners = [];
@@ -249,7 +248,7 @@ BrowserDOMElement.Prototype = function() {
 
   this.removeAllEventListeners = function() {
     for (var i = 0; i < this.eventListeners.length; i++) {
-      var listener = this.eventListeners[i]
+      var listener = this.eventListeners[i];
       // console.log('BrowserDOMElement.removeEventListener:', eventName, this.eventListeners.length);
       listener._el = null;
       this.el.removeEventListener(listener.eventName, listener.handler);
@@ -433,7 +432,7 @@ BrowserDOMElement.Prototype = function() {
     if (!child.el._wrapper) {
       child.el._wrapper = child;
     }
-    assert(child.el._wrapper === child, "Expecting a backlink between native element and CheerioDOMElement");
+    console.assert(child.el._wrapper === child, "Expecting a backlink between native element and CheerioDOMElement");
     return child.getNativeElement();
   };
 
@@ -524,7 +523,7 @@ BrowserDOMElement.Prototype = function() {
   };
 
   this._replaceNativeEl = function(newEl) {
-    assert(newEl instanceof window.Node, "Expecting a native element.");
+    console.assert(newEl instanceof window.Node, "Expecting a native element.");
     var oldEl = this.el;
     var parentNode = oldEl.parentNode;
     if (parentNode) {
@@ -586,7 +585,7 @@ BrowserDOMElement.Prototype = function() {
     var outerHeight = this.el.offsetHeight;
     if (withMargin) {
       var style = this.getComputedStyle();
-      outerHeight += parseInt(style.marginTop) + parseInt(style.marginBottom);
+      outerHeight += parseInt(style.marginTop, 10) + parseInt(style.marginBottom, 10);
     }
     return outerHeight;
   };
@@ -675,7 +674,7 @@ BrowserDOMElement.wrapNativeElement = function(el) {
 };
 
 function TextNode(nativeEl) {
-  assert(nativeEl instanceof window.Node && nativeEl.nodeType === 3, "Expecting native TextNode.");
+  console.assert(nativeEl instanceof window.Node && nativeEl.nodeType === 3, "Expecting native TextNode.");
   this.el = nativeEl;
   nativeEl._wrapper = this;
 }

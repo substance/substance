@@ -4,8 +4,6 @@ var isString = require('lodash/isString');
 var isFunction = require('lodash/isFunction');
 var extend = require('lodash/extend');
 var each = require('lodash/each');
-var assert = require('../util/assert');
-var warn = require('../util/warn');
 var EventEmitter = require('../util/EventEmitter');
 var RenderingEngine = require('./RenderingEngine');
 var VirtualElement = require('./VirtualElement');
@@ -149,7 +147,6 @@ Component.Prototype = function() {
     @return {VirtualNode} VirtualNode created using $$
    */
   this.render = function($$) {
-    /* jshint unused:false */
     /* istanbul ignore next */
     return $$('div');
   };
@@ -176,8 +173,7 @@ Component.Prototype = function() {
    *
    * @return a boolean indicating whether rerender() should be run.
    */
-  this.shouldRerender = function(newProps) {
-    /* jshint unused: false */
+  this.shouldRerender = function(newProps) { // eslint-disable-line
     return true;
   };
 
@@ -309,7 +305,7 @@ Component.Prototype = function() {
       }
       comp = comp.getParent();
     }
-    warn('Action', action, 'was not handled.');
+    console.warn('Action', action, 'was not handled.');
     return false;
   };
 
@@ -394,7 +390,8 @@ Component.Prototype = function() {
   /**
     Called before state is changed.
   */
-  this.willUpdateState = function(newState) { /* jshint unused: false */ };
+  this.willUpdateState = function(newState) { // eslint-disable-line
+  };
 
   /**
     Get the current properties
@@ -451,7 +448,8 @@ Component.Prototype = function() {
     For example you can use this to derive state from props.
     @param {object} newProps
   */
-  this.willReceiveProps = function(newProps) { /* jshint unused: false */ };
+  this.willReceiveProps = function(newProps) { // eslint-disable-line
+  };
 
   this.getChildNodes = function() {
     if (!this.el) return [];
@@ -532,7 +530,7 @@ Component.Prototype = function() {
   function _disposeChild(child) {
     child.triggerDispose();
     if (child._owner && child._ref) {
-      assert(child._owner.refs[child._ref] === child, "Owner's ref should point to this child instance.");
+      console.assert(child._owner.refs[child._ref] === child, "Owner's ref should point to this child instance.");
       delete child._owner.refs[child._ref];
     }
   }
@@ -574,15 +572,15 @@ Component.Prototype = function() {
   };
 
   this.addEventListener = function() {
-    throw "Not supported.";
+    throw new Error("Not supported.");
   };
 
   this.removeEventListener = function() {
-    throw "Not supported.";
+    throw new Error("Not supported.");
   };
 
   this.insertBefore = function() {
-    throw "Not supported.";
+    throw new Error("Not supported.");
   };
 
 };
@@ -596,7 +594,7 @@ function _unwrapComp(el) {
 }
 
 function _unwrapCompStrict(el) {
-  assert(el._comp, "Expecting a back-link to the component instance.");
+  console.assert(el._comp, "Expecting a back-link to the component instance.");
   return _unwrapComp(el);
 }
 
@@ -697,9 +695,9 @@ Component.TextNode = TextNodeComponent;
 Object.defineProperty(Component, '$$', {
   get: function() {
     throw new Error([
-     "With Substance Beta 4 we introduced a breaking change.",
-     "We needed to turn the former static Component.$$ into a contextualized implementation, which is now served via Component.render($$).",
-     "FIX: change your signature of 'this.render()' in all your Components to 'this.render($$)"
+      "With Substance Beta 4 we introduced a breaking change.",
+      "We needed to turn the former static Component.$$ into a contextualized implementation, which is now served via Component.render($$).",
+      "FIX: change your signature of 'this.render()' in all your Components to 'this.render($$)"
     ].join("\n"));
   }
 });

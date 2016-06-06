@@ -1,8 +1,6 @@
-/* globals -Node */
 'use strict';
 
 var oo = require('../../util/oo');
-var error = require('../../util/error');
 var NodeRegistry = require('./NodeRegistry');
 var Node = require('./Node');
 
@@ -54,7 +52,7 @@ Schema.Prototype = function() {
     for (var i = 0; i < nodes.length; i++) {
       var NodeClass = nodes[i];
       if (!NodeClass.static) {
-        error('Illegal node class: ', NodeClass);
+        console.error('Illegal node class: ', NodeClass);
         continue;
       }
       this.addNode(NodeClass);
@@ -132,16 +130,11 @@ Schema.Prototype = function() {
   this.getNodeSchema = function(type) {
     var NodeClass = this.getNodeClass(type);
     if (!NodeClass) {
-      error('Unknown node type ', type);
+      console.error('Unknown node type ', type);
       return null;
     }
-    return _getNodeSchema(NodeClass);
-  };
-
-  var _getNodeSchema = function(NodeClass) {
     return NodeClass.static.schema;
   };
-
 };
 
 oo.initClass(Schema);

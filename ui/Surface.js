@@ -1,14 +1,13 @@
 'use strict';
 
-var each = require('lodash/each');
-var error = require('../util/error');
-var info = require('../util/info');
+var forEach = require('lodash/forEach');
+var isUndefined = require('lodash/isUndefined');
+var startsWith = require('lodash/startsWith');
 var inBrowser = require('../util/inBrowser');
 var createSurfaceId = require('../util/createSurfaceId');
 var getBoundingClientRect = require('../util/getBoundingClientRect');
 var keys = require('../util/keys');
 var platform = require('../util/platform');
-var warn = require('../util/warn');
 var copySelection = require('../model/transform/copySelection');
 var deleteSelection = require('../model/transform/deleteSelection');
 var insertText = require('../model/transform/insertText');
@@ -174,7 +173,7 @@ Surface.Prototype = function() {
     var componentRegistry = this.getComponentRegistry();
     var ComponentClass = componentRegistry.get(node.type);
     if (!ComponentClass) {
-      error('Could not resolve a component for type: ' + node.type);
+      console.error('Could not resolve a component for type: ' + node.type);
       ComponentClass = UnsupportedNode;
     }
     return $$(ComponentClass, {
@@ -200,11 +199,11 @@ Surface.Prototype = function() {
   };
 
   this.isEditable = function() {
-    return (this.props.editing === "full" ||  this.props.editing === undefined);
+    return (this.props.editing === "full" || this.props.editing === undefined);
   };
 
   this.isSelectable = function() {
-    return (this.props.editing === "selection" ||  this.props.editing === "full");
+    return (this.props.editing === "selection" || this.props.editing === "full");
   };
 
   this.isReadonly = function() {
@@ -266,14 +265,18 @@ Surface.Prototype = function() {
     ```
    */
   this.transaction = function(transformation, info) {
+    // TODO: we would like to get rid of this method, and only have
+    // documentSession.transaction()
+    // The problem is, that we need to get surfaceId into the change,
+    // to be able to set the selection into the right surface.
+    // ATM we put this into the selection, which is hacky, and makes it
+    // unnecessarily inconvient to create selections.
+    // Maybe documentSession should provide a means to augment the before/after
+    // state of a change.
     var documentSession = this.documentSession;
     var surfaceId = this.getId();
-    var self = this;
-    documentSession.transaction(function(tx, args) {
-      // `beforeState` is saved with the document operation and will be used
-      // to recover the selection when using 'undo'.
+    return documentSession.transaction(function(tx, args) {
       tx.before.surfaceId = surfaceId;
-      self._prepareArgs(args);
       return transformation(tx, args);
     }, info);
   };
@@ -520,7 +523,7 @@ Surface.Prototype = function() {
       // Opera 12 doesn't always adhere to that convention
       event.keyCode === keys.TAB || event.keyCode === keys.ESCAPE ||
       // prevent combinations with meta keys, but not alt-graph which is represented as ctrl+alt
-      !!(event.metaKey) || (!!event.ctrlKey^!!event.altKey)
+      Boolean(event.metaKey) || (Boolean(event.ctrlKey)^Boolean(event.altKey))
     ) {
       return;
     }
@@ -626,7 +629,7 @@ Surface.Prototype = function() {
     //      - Note: copy, cut, paste work just fine
     //  - dragging selected text
     //  - spell correction
-    info("We want to enable a DOM MutationObserver which catches all changes made by native interfaces (such as spell corrections, etc). Lookout for this message and try to set Surface.skipNextObservation=true when you know that you will mutate the DOM.", e);
+    console.info("We want to enable a DOM MutationObserver which catches all changes made by native interfaces (such as spell corrections, etc). Lookout for this message and try to set Surface.skipNextObservation=true when you know that you will mutate the DOM.", e);
   };
 
   this.onDragStart = function(event) {
@@ -675,7 +678,7 @@ Surface.Prototype = function() {
     var _state = this._state;
     var oldFragments = _state.fragments;
     if (oldFragments) {
-      each(oldFragments, function(frag, key) {
+      forEach(oldFragments, function(frag, key) {
         if (this._getComponentForKey(key)) {
           _markAsDirty(_state, key);
         }
@@ -718,7 +721,7 @@ Surface.Prototype = function() {
   };
 
   function _forEachFragment(fragments, fn) {
-    each(fragments, function(frags, owner) {
+    forEach(fragments, function(frags, owner) {
       frags.forEach(function(frag) {
         fn(frag, owner);
       });
@@ -814,7 +817,7 @@ Surface.Prototype = function() {
     var surfaceId = sel.surfaceId;
     var id = this.getId();
     var mode;
-    if (surfaceId && surfaceId.startsWith(id)) {
+    if (startsWith(surfaceId, id)) {
       if (surfaceId.length === id.length) {
         mode = 'focused';
       } else {
@@ -960,7 +963,7 @@ Surface.Prototype = function() {
     var componentRegistry = this.context.componentRegistry || this.props.componentRegistry;
     var ComponentClass = componentRegistry.get(node.type);
     if (!ComponentClass) {
-      error('Could not resolve a component for type: ' + node.type);
+      console.error('Could not resolve a component for type: ' + node.type);
       ComponentClass = UnsupportedNode;
     }
     return $$(ComponentClass, {
@@ -974,8 +977,7 @@ Surface.Prototype = function() {
     arguments.
     ATM used only by ContainerEditor.
   */
-  this._prepareArgs = function(args) {
-    /* jshint unused: false */
+  this._prepareArgs = function(args) { // eslint-disable-line
   };
 
   this.setSelectionFromEvent = function(evt) {
@@ -993,7 +995,12 @@ Surface.Prototype = function() {
     // TODO: selection rectangle should be calculated
     // relative to scrolling container, which either is
     // the parent scrollPane, or the body element
-    var containerEl = this.context.scrollPane.refs.content.el.el || document.body;
+    var containerEl;
+    if (this.context.scrollPane) {
+      containerEl = this.context.scrollPane.refs.content.el.el;
+    } else {
+      containerEl = document.body;
+    }
 
     var wsel = window.getSelection();
     var wrange;
@@ -1030,7 +1037,7 @@ Surface.Prototype = function() {
           if (cursorEl) {
             return getBoundingClientRect(cursorEl, containerEl);
           } else {
-            warn('FIXME: there should be a rendered cursor element.');
+            console.warn('FIXME: there should be a rendered cursor element.');
             return {};
           }
         } else {
@@ -1038,7 +1045,7 @@ Surface.Prototype = function() {
           if (selFragments.length > 0) {
             return getBoundingClientRect(selFragments, containerEl);
           } else {
-            warn('FIXME: there should be a rendered selection fragments element.');
+            console.warn('FIXME: there should be a rendered selection fragments element.');
             return {};
           }
         }
@@ -1049,7 +1056,7 @@ Surface.Prototype = function() {
   this._sendOverlayHints = function() {
     // TODO: optimize! This leads to low performance on FF
     if (this.state.mode === 'focused') {
-    var selectionRect = this.getBoundingRectangleForSelection();
+      var selectionRect = this.getBoundingRectangleForSelection();
       this.send('updateOverlayHints', {
         rectangle: selectionRect
       });
@@ -1069,10 +1076,10 @@ Surface.getDOMRangeFromEvent = function(evt) {
     range.moveToPoint(x, y);
   }
 
-  else if (typeof document.createRange != "undefined") {
+  else if (!isUndefined(document.createRange)) {
     // Try Mozilla's rangeOffset and rangeParent properties,
     // which are exactly what we want
-    if (typeof evt.rangeParent != "undefined") {
+    if (!isUndefined(evt.rangeParent)) {
       range = document.createRange();
       range.setStart(evt.rangeParent, evt.rangeOffset);
       range.collapse(true);

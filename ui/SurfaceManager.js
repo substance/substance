@@ -3,7 +3,6 @@
 var forEach = require('lodash/forEach');
 var clone = require('lodash/clone');
 var oo = require('../util/oo');
-var warn = require('../util/warn');
 var inBrowser = require('../util/inBrowser');
 
 function SurfaceManager(documentSession) {
@@ -39,7 +38,7 @@ SurfaceManager.Prototype = function() {
     if (name) {
       return this.surfaces[name];
     } else {
-      warn('Deprecated: Use getFocusedSurface. Always provide a name for getSurface otherwise.');
+      console.warn('Deprecated: Use getFocusedSurface. Always provide a name for getSurface otherwise.');
       return this.getFocusedSurface();
     }
   };

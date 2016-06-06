@@ -1,3 +1,5 @@
+'use strict';
+
 var uuid = require('../../util/uuid');
 var annotationHelpers = require('../../model/annotationHelpers');
 
@@ -19,7 +21,7 @@ module.exports = function(tx, args) {
   // when breaking at the first position, a new node of the same
   // type will be inserted.
   if (text.length === 0) {
-    type = tx.getSchema().getDefaultTextType();
+    var type = tx.getSchema().getDefaultTextType();
     nodeData = {
       type: type,
       content:''
@@ -35,7 +37,7 @@ module.exports = function(tx, args) {
     if (offset === 0) {
       nodeData.content = '';
     } else {
-      nodeData.content = text.substring(offset);      
+      nodeData.content = text.substring(offset);
     }
     newNode = tx.create(nodeData);
     selNodeId = newNode.id;

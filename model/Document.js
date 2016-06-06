@@ -1,4 +1,3 @@
-/* globals -Range */
 'use strict';
 
 var isEqual = require('lodash/isEqual');
@@ -7,11 +6,10 @@ var isArray = require('lodash/isArray');
 var isString = require('lodash/isString');
 var each = require('lodash/each');
 var uuid = require('../util/uuid');
-var error = require('../util/error');
-var warn = require('../util/warn');
 var EventEmitter = require('../util/EventEmitter');
 var DocumentIndex = require('./DocumentIndex');
 var AnnotationIndex = require('./AnnotationIndex');
+var ContainerAnnotationIndex = require('./ContainerAnnotationIndex');
 var AnchorIndex = require('./AnchorIndex');
 var DocumentChange = require('./DocumentChange');
 var PathEventProxy = require('./PathEventProxy');
@@ -61,6 +59,10 @@ function Document(schema) {
   Document.super.apply(this);
 
   this.__id__ = __id__++;
+  if (!schema) {
+    throw new Error('A document needs a schema for reflection.');
+  }
+
   this.schema = schema;
   this.nodeFactory = new DocumentNodeFactory(this);
   this.data = new IncrementalData(schema, {
@@ -75,7 +77,10 @@ function Document(schema) {
   // special index for (property-scoped) annotations
   this.addIndex('annotations', new AnnotationIndex());
 
-  // special index for (contaoiner-scoped) annotations
+  // TODO: these are only necessary if there is a container annotation
+  // in the schema
+  // special index for (container-scoped) annotations
+  this.addIndex('container-annotations', new ContainerAnnotationIndex());
   this.addIndex('container-annotation-anchors', new AnchorIndex());
 
   // change event proxies are triggered after a document change has been applied
@@ -95,6 +100,8 @@ function Document(schema) {
 }
 
 Document.Prototype = function() {
+
+  this._isDocument = true;
 
   this.addIndex = function(name, index) {
     return this.data.addIndex(name, index);
@@ -130,8 +137,8 @@ Document.Prototype = function() {
     @param {String|String[]} path node id or path to property.
     @returns {DocumentNode|any|undefined} a Node instance, a value or undefined if not found.
   */
-  this.get = function(path) {
-    return this.data.get(path);
+  this.get = function(path, strict) {
+    return this.data.get(path, strict);
   };
 
   /**
@@ -328,7 +335,7 @@ Document.Prototype = function() {
     Every selection implementation provides its own
     parameter format which is basically a JSON representation.
 
-    @param {model/Selection} sel An object describing the selection.
+    @param {model/Selection} sel An object describing the selection.
 
     @example
 
@@ -371,7 +378,7 @@ Document.Prototype = function() {
 
 
   function _createSelection() {
-    var doc = this; // jshint ignore:line
+    var doc = this; // eslint-disable-line
     var PropertySelection = require('./PropertySelection');
     var ContainerSelection = require('./ContainerSelection');
     var coor, range, path, startOffset, endOffset;
@@ -417,7 +424,7 @@ Document.Prototype = function() {
         endOffset: arguments[4]
       });
     } else {
-      error('Illegal arguments for Selection.create().', arguments);
+      console.error('Illegal arguments for Selection.create().', arguments);
       return Selection.nullSelection;
     }
   }
@@ -442,7 +449,7 @@ Document.Prototype = function() {
       }
       return new PropertySelection(selData.path, selData.startOffset, selData.endOffset, selData.reverse);
     } else if (selData.type === 'container') {
-      var container = doc.get(selData.containerId);
+      var container = doc.get(selData.containerId, 'strict');
       var start = new Coordinate(selData.startPath, selData.startOffset);
       var end = new Coordinate(selData.endPath, selData.endOffset);
       var startAddress = container.getAddress(start);
@@ -478,7 +485,7 @@ Document.Prototype = function() {
       var nodeId = coor.getNodeId();
       var node = doc.get(nodeId);
       if (!node.isText()) {
-        warn('Selecting a non-textish node partially is not supported. Select the full node.');
+        console.warn('Selecting a non-textish node partially is not supported. Select the full node.');
         coor.path = [nodeId];
         coor.offset = isStart ? 0 : 1;
       }
@@ -565,7 +572,7 @@ Document.Prototype = function() {
   };
 
   this.getTextForSelection = function(sel) {
-    warn('DEPRECATED: use docHelpers.getTextForSelection() instead.');
+    console.warn('DEPRECATED: use docHelpers.getTextForSelection() instead.');
     return docHelpers.getTextForSelection(this, sel);
   };
 

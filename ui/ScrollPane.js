@@ -1,6 +1,5 @@
 'use strict';
 
-var warn = require('../util/warn');
 var platform = require('../util/platform');
 var Component = require('./Component');
 var Scrollbar = require('./Scrollbar');
@@ -133,7 +132,7 @@ ScrollPane.Prototype = function() {
 
   // HACK: Scrollbar should use DOMMutationObserver instead
   this.onDocumentChange = function() {
-      this.refs.scrollbar.updatePositions();
+    this.refs.scrollbar.updatePositions();
   };
 
   this.onHighlightsUpdated = function(highlights) {
@@ -220,7 +219,7 @@ ScrollPane.Prototype = function() {
       var offset = this.getPanelOffsetForElement(targetNode);
       scrollableEl.setProperty('scrollTop', offset);
     } else {
-      warn(componentId, 'not found in scrollable container');
+      console.warn(componentId, 'not found in scrollable container');
     }
   };
 };

@@ -1,8 +1,7 @@
 'use strict';
 
 var extend = require('lodash/extend');
-var error = require('../util/error');
-var warn = require('../util/warn');
+var isNumber = require('lodash/isNumber');
 var DocumentNode = require('./DocumentNode');
 var ParentNodeMixin = require('./ParentNodeMixin');
 var ContainerAddress = require('./ContainerAddress');
@@ -61,7 +60,7 @@ Container.Prototype = function() {
     this.nodes.forEach(function(nodeId){
       var node = doc.get(nodeId);
       if (!node) {
-        error('Node does not exist: ', nodeId);
+        console.error('Node does not exist: ', nodeId);
       } else {
         nodes.push(node);
       }
@@ -69,14 +68,15 @@ Container.Prototype = function() {
     return nodes;
   };
 
+  this.getNodeAt = function(pos) {
+    return this.getDocument().get(this.nodes[pos]);
+  };
+
   this.show = function(nodeId, pos) {
     var doc = this.getDocument();
-    // Note: checking with ==  is what we want here
-    /* jshint eqnull: true */
-    if (pos == null) {
+    if (!isNumber(pos)) {
       pos = this.nodes.length;
     }
-    /* jshint eqnull: false */
     doc.update([this.id, 'nodes'], { insert: { offset: pos, value: nodeId } });
   };
 
@@ -125,7 +125,7 @@ Container.Prototype = function() {
   this._getCachedPositions = function() {
     if (!this.positions) {
       var positions = {};
-      this.nodes.map(function(id, pos) {
+      this.nodes.forEach(function(id, pos) {
         positions[id] = pos;
       });
       this.positions = positions;
@@ -145,7 +145,7 @@ Container.static.defineSchema({
 
 Object.defineProperty(Container.prototype, 'length', {
   get: function() {
-    warn('DEPRECATED: want to get rid of unnecessary properties. Use this.getLength() instead.');
+    console.warn('DEPRECATED: want to get rid of unnecessary properties. Use this.getLength() instead.');
     return this.nodes.length;
   }
 });

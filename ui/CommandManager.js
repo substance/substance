@@ -1,8 +1,8 @@
 'use strict';
 
 var oo = require('../util/oo');
+var extend = require('lodash/extend');
 var each = require('lodash/each');
-var warn = require('../util/warn');
 var Registry = require('../util/Registry');
 
 /*
@@ -11,11 +11,14 @@ var Registry = require('../util/Registry');
   @class
 */
 function CommandManager(context, commands) {
-  this.context = context;
   if (!context.documentSession) {
     throw new Error('DocumentSession required.');
   }
   this.documentSession = context.documentSession;
+  this.context = extend({}, context, {
+    // for convenienve we provide access to the doc directly
+    doc: this.documentSession.getDocument()
+  });
 
   // Set up command registry
   this.commandRegistry = new Registry();
@@ -43,9 +46,11 @@ CommandManager.Prototype = function() {
   */
   this.updateCommandStates = function() {
     var commandStates = {};
+    var commandContext = this.getCommandContext();
+    var props = this._getCommandProps();
     this.commandRegistry.forEach(function(cmd) {
-      commandStates[cmd.getName()] = cmd.getCommandState(this.getCommandContext());
-    }.bind(this));
+      commandStates[cmd.getName()] = cmd.getCommandState(props, commandContext);
+    });
     this.commandStates = commandStates;
   };
 
@@ -59,18 +64,31 @@ CommandManager.Prototype = function() {
   /*
     Execute a command, given a context and arguments
   */
-  this.executeCommand = function(commandName, args) {
+  this.executeCommand = function(commandName, props) {
     var cmd = this.commandRegistry.get(commandName);
     if (!cmd) {
-      warn('command', commandName, 'not registered');
+      console.warn('command', commandName, 'not registered');
       return;
     }
-    // Run command
-    var info = cmd.execute(this.getCommandContext(), args);
+    props = extend(this._getCommandProps, props);
+    var info = cmd.execute(props, this.getCommandContext());
+    // TODO: why do we required commands to return a result?
     if (info === undefined) {
-      warn('command ', commandName, 'must return either an info object or true when handled or false when not handled');
+      console.warn('command ', commandName, 'must return either an info object or true when handled or false when not handled');
     }
     return info;
+  };
+
+  // TODO: while we need it here this should go into the flow thingie later
+  this._getCommandProps = function() {
+    var documentSession = this.context.documentSession;
+    var sel = documentSession.getSelection();
+    var surface = this.context.surfaceManager.getFocusedSurface();
+    return {
+      documentSession: documentSession,
+      surface: surface,
+      selection: sel,
+    };
   };
 
 };

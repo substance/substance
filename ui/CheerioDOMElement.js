@@ -4,7 +4,6 @@ var isString = require('lodash/isString');
 var last = require('lodash/last');
 var extend = require('lodash/extend');
 var clone = require('lodash/clone');
-var assert = require('../util/assert');
 var $ = require('../util/cheerio.customized');
 var DOMElement = require('./DOMElement');
 
@@ -317,7 +316,7 @@ CheerioDOMElement.Prototype = function() {
     if (result.length > 0) {
       return result.map(function(el) {
         return this._wrapNativeElement(el);
-      });
+      }.bind(this));
     } else {
       return [];
     }
@@ -333,7 +332,7 @@ CheerioDOMElement.Prototype = function() {
     if (!child || !child._isCheerioDOMElement) {
       throw new Error('Illegal argument: only String and CheerioDOMElement instances are valid.');
     }
-    assert(child.el._wrapper === child, "Expecting a backlink between native element and CheerioDOMElement");
+    console.assert(child.el._wrapper === child, "Expecting a backlink between native element and CheerioDOMElement");
     return child.getNativeElement();
   };
 
@@ -365,7 +364,6 @@ CheerioDOMElement.Prototype = function() {
     } else {
       throw new Error('insertBefore(): reference node is not a child of this element.');
     }
-    return this;
   };
 
   this.removeAt = function(pos) {

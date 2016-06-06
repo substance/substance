@@ -5,7 +5,6 @@ var each = require('lodash/each');
 var last = require('lodash/last');
 var uuid = require('../util/uuid');
 var keys = require('../util/keys');
-var warn = require('../util/warn');
 var platform = require('../util/platform');
 var EditingBehavior = require('../model/EditingBehavior');
 var breakNode = require('../model/transform/breakNode');
@@ -107,7 +106,7 @@ ContainerEditor.Prototype = function() {
     var containerId = this.props.containerId;
     var containerNode = doc.get(this.props.containerId);
     if (!containerNode) {
-      warn('No container node found for ', this.props.containerId);
+      console.warn('No container node found for ', this.props.containerId);
     }
     el.addClass('sc-container-editor container-node ' + containerId)
       .attr({
@@ -242,7 +241,7 @@ ContainerEditor.Prototype = function() {
     TODO: Select first content to be found
   */
   this.selectFirst = function() {
-    warn('TODO: Implement selection of first content to be found.');
+    console.warn('TODO: Implement selection of first content to be found.');
   };
 
   /*
@@ -324,7 +323,7 @@ ContainerEditor.Prototype = function() {
     var doc = this.getDocument();
     var nodes = this.getContainer().nodes;
     if (nodes.length === 0) {
-      warn('ContainerEditor.selectFirst(): Container is empty.');
+      console.warn('ContainerEditor.selectFirst(): Container is empty.');
       return;
     }
     var node = doc.get(nodes[0]);
@@ -403,9 +402,15 @@ ContainerEditor.Prototype = function() {
     this.setSelection(newSel);
   };
 
-  this._prepareArgs = function(args) {
-    args.containerId = this.getContainerId();
-    args.editingBehavior = this.editingBehavior;
+  this.transaction = function(transformation, info) {
+    var documentSession = this.documentSession;
+    var surfaceId = this.getId();
+    return documentSession.transaction(function(tx, args) {
+      tx.before.surfaceId = surfaceId;
+      args.containerId = this.getContainerId();
+      args.editingBehavior = this.editingBehavior;
+      return transformation(tx, args);
+    }.bind(this), info);
   };
 
 };

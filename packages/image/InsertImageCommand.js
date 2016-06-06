@@ -73,7 +73,7 @@ ImageCommand.Prototype = function() {
           });
         });
       });
-    }.bind(this));
+    });
 
     return {
       status: 'file-upload-process-started'

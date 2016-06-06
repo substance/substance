@@ -1,4 +1,3 @@
-/* jshint latedef: false */
 "use strict";
 
 var annotationHelpers = require('../annotationHelpers');

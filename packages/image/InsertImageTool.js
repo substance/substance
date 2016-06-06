@@ -1,3 +1,5 @@
+'use strict';
+
 var Tool = require('../../ui/Tool');
 
 function ImageTool() {

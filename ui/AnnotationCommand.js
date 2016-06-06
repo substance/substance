@@ -1,14 +1,13 @@
 'use strict';
 
-var Command = require('./Command');
+// var filter = require('lodash/filter');
 var helpers = require('../model/documentHelpers');
-
+var Command = require('./Command');
 // Annotation transformations
 var createAnnotation = require('../model/transform/createAnnotation');
 var fuseAnnotation = require('../model/transform/fuseAnnotation');
 var expandAnnotation = require('../model/transform/expandAnnotation');
 var truncateAnnotation = require('../model/transform/truncateAnnotation');
-var deleteAnnotation = require('../model/transform/deleteAnnotation');
 
 /**
   A class for commands intended to be executed on the annotations.
@@ -31,9 +30,9 @@ var deleteAnnotation = require('../model/transform/deleteAnnotation');
   SmallCapsCommand.static.name = 'smallcaps';
   ```
 */
-var AnnotationCommand = function(surface) {
-  Command.call(this, surface);
-};
+function AnnotationCommand() {
+  Command.call(this);
+}
 
 AnnotationCommand.Prototype = function() {
 
@@ -43,9 +42,8 @@ AnnotationCommand.Prototype = function() {
     @returns {String} The annotation's type.
    */
   this.getAnnotationType = function() {
-    // NOTE: we never had a case where annotationType was not the same as the name
-    // so we make AnnotationCommand.static.name default, which still can be
-    // overridden using annotationType
+    // Note: AnnotationCommand.static.annotationType is only necessary if
+    // it is different to Annotation.static.name
     var annotationType = this.constructor.static.annotationType || this.constructor.static.name;
     if (annotationType) {
       return annotationType;
@@ -71,17 +69,19 @@ AnnotationCommand.Prototype = function() {
 
     @returns {Boolean} Whether or not command could be executed.
    */
-  this.isDisabled = function(context, annos, sel) {
-    if (sel.isNull()) {
+  this.isDisabled = function(sel) {
+    if (!sel || sel.isNull() || !sel.isAttached() || sel.isCustomSelection()) {
       return true;
     }
-    var doc = context.documentSession.getDocument();
-    var annotationType = this.getAnnotationType();
-    return !helpers.isContainerAnnotation(doc, annotationType) && !sel.isPropertySelection();
+    // HACK: passing the sel as it has access to the doc for the schema
+    if (this._isPropertyAnnotationCommand(sel)) {
+      return !sel.isPropertySelection();
+    }
+    return false;
   };
 
   // Not implemented by default
-  this.canEdit = function(/*annos, sel*/) {
+  this.canEdit = function(annos, sel) { // eslint-disable-line
     return false;
   };
 
@@ -166,84 +166,29 @@ AnnotationCommand.Prototype = function() {
   };
 
   /**
-    Gets annotations for current selection.
-
-    @returns {Array} annos Annotations.
-   */
-  this.getAnnotationsForSelection = function(context) {
-    var sel = context.documentSession.getSelection();
-    var doc = context.documentSession.getDocument();
-    var surface = context.surfaceManager.getFocusedSurface();
-    var annotationType = this.getAnnotationType();
-    var containerId;
-    if (surface.isContainerEditor()) {
-      containerId = surface.getContainerId();
-    }
-    var annos = helpers.getAnnotationsForSelection(doc, sel, annotationType, containerId);
-    return annos;
-  };
-
-  /**
-    Execute command and trigger transformation.
-
-    @returns {Object} info object with execution details.
-   */
-  // Execute command and trigger transformations
-  this.execute = function(context) {
-    var annos = this.getAnnotationsForSelection(context);
-    var sel = context.documentSession.getSelection();
-
-    if (this.isDisabled(context, annos, sel)) {
-      return false;
-    } else if (this.canCreate(annos, sel)) {
-      return this.executeCreate(context);
-    } else if (this.canFuse(annos, sel)) {
-      return this.executeFuse(context);
-    } else if (this.canTruncate(annos, sel)) {
-      return this.executeTruncate(context);
-    } else if (this.canExpand(annos, sel)) {
-      return this.executeExpand(context);
-    } else if (this.canEdit(annos, sel)) {
-      return this.executeEdit(context, annos, sel);
-    } else if (this.canDelete(annos, sel)) {
-      return this.executeDelete(context);
-    } else {
-      // console.warn('ToggleAnnotation.execute: Case not handled.');
-      return false;
-    }
-  };
-
-  /**
     Gets command state object.
 
+    @param {Object} state.selection the current selection
     @returns {Object} info object with command details.
-   */
-  this.getCommandState = function(context) {
-    var sel = context.documentSession.getSelection();
-    var surface = context.surfaceManager.getFocusedSurface();
-
-    if (!surface) {
+  */
+  this.getCommandState = function(props, context) { // eslint-disable-line
+    context = context || {};
+    var sel = props.selection || context.documentSession.getSelection();
+    // We can skip all checking if a disabled condition is met
+    // E.g. we don't allow toggling of property annotations when current
+    // selection is a container selection
+    if (this.isDisabled(sel)) {
       return {
-        disabled: true,
-        active: false
+        disabled: true
       };
     }
-
-    // TODO: provide annos precomputed by documentSession
-    var annos = this.getAnnotationsForSelection(context);
-
+    var annos = this._getAnnotationsForSelection(props, context);
     var newState = {
       disabled: false,
       active: false,
       mode: null
     };
-
-    // We can skip all checking if a disabled condition is met
-    // E.g. we don't allow toggling of property annotations when current
-    // selection is a container selection
-    if (this.isDisabled(context, annos, sel)) {
-      newState.disabled = true;
-    } else if (this.canCreate(annos, sel)) {
+    if (this.canCreate(annos, sel)) {
       newState.mode = "create";
     } else if (this.canFuse(annos, sel)) {
       newState.mode = "fusion";
@@ -266,46 +211,101 @@ AnnotationCommand.Prototype = function() {
   };
 
   /**
-    Apply an annotation transformation.
+    Execute command and trigger transformation.
 
-    @returns {Object} transformed annotations.
-   */
-  // Helper to trigger an annotation transformation
-  this.applyTransform = function(context, transformFn) {
-    var surface = context.surfaceManager.getFocusedSurface();
-    var sel = context.documentSession.getSelection();
-
-    var result; // to store transform result
-    if (sel.isNull()) return;
-
-    surface.transaction(function(tx, args) {
-      // Used by expand/truncate/fuse
-      args.annotationType = this.getAnnotationType();
-
-      // Used for createAnnotation transformation
-      args.node = this.getAnnotationData();
-      // For backwards compatibility: In future type should be
-      // provided with getAnnotationData
-      if (!args.node.type) {
-        args.node.type = this.getAnnotationType();
-      }
-
-      args.splitContainerSelections = false;
-
-      if (surface.isContainerEditor()) {
-        args.containerId = surface.getContainerId();
-      }
-
-      args = transformFn(tx, args);
-      result = args.result;
-      return args;
-    }.bind(this));
-
-    return result;
+    @returns {Object} info object with execution details.
+  */
+  // Execute command and trigger transformations
+  this.execute = function(props, context) {
+    props = props || {};
+    if (props.disabled) return false;
+    var mode = props.mode;
+    switch(mode) {
+      case 'create':
+        return this.executeCreate(props, context);
+      case 'fuse':
+        return this.executeFuse(props, context);
+      case 'truncate':
+        return this.executeTruncate(props, context);
+      case 'expand':
+        return this.executeExpand(props, context);
+      case 'edit':
+        return this.executeEdit(props, context);
+      case 'delete':
+        return this.executeDelete(props, context);
+      default:
+        console.warn('Command.execute(): unknown mode', mode);
+        return false;
+    }
   };
 
-  this.executeEdit = function(context) {
-    var annos = this.getAnnotationsForSelection(context);
+  this.executeCreate = function(props, context) {
+    var annos = this._getAnnotationsForSelection(props, context);
+    this._checkPrecondition(props, context, annos, this.canCreate);
+    var newAnno = this._applyTransform(props, context, function(tx) {
+      props.node = this.getAnnotationData();
+      props.node.type = this.getAnnotationType();
+      return createAnnotation(tx, props);
+    }.bind(this));
+    return {
+      mode: 'create',
+      anno: newAnno
+    };
+  };
+
+  this.executeFuse = function(props, context) {
+    var annos = this._getAnnotationsForSelection(props, context);
+    this._checkPrecondition(props, context, annos, this.canFuse);
+    var fusedAnno = this._applyTransform(props, context, function(tx) {
+      var result = fuseAnnotation(tx, {
+        annos: annos
+      });
+      return {
+        result: result.node
+      };
+    });
+    return {
+      mode: 'fuse',
+      anno: fusedAnno
+    };
+  };
+
+  this.executeTruncate = function(props, context) {
+    var annos = this._getAnnotationsForSelection(props, context);
+    var anno = annos[0];
+    this._checkPrecondition(props, context, annos, this.canTruncate);
+    this._applyTransform(props, context, function(tx) {
+      return truncateAnnotation(tx, {
+        selection: props.selection,
+        anno: anno
+      });
+    });
+    return {
+      mode: 'truncate',
+      anno: anno
+    };
+  };
+
+  this.executeExpand = function(props, context) {
+    var annos = this._getAnnotationsForSelection(props, context);
+    var anno = annos[0];
+    this._checkPrecondition(props, context, annos, this.canExpand);
+    this._applyTransform(props, context, function(tx) {
+      expandAnnotation(tx, {
+        selection: props.selection,
+        anno: anno
+      });
+    });
+    return {
+      mode: 'expand',
+      anno: anno
+    };
+  };
+
+  // TODO: do we still need this?
+  this.executeEdit = function(props, context) { // eslint-disable-line
+    var annos = this._getAnnotationsForSelection(props, context);
+    this._checkPrecondition(props, context, annos, this.canEdit);
     return {
       mode: "edit",
       anno: annos[0],
@@ -313,45 +313,92 @@ AnnotationCommand.Prototype = function() {
     };
   };
 
-  this.executeCreate = function(context) {
-    var anno = this.applyTransform(context, createAnnotation);
-    return {
-      mode: 'create',
-      anno: anno
-    };
-  };
-
-  this.executeFuse = function(context) {
-    var anno = this.applyTransform(context, fuseAnnotation);
-    return {
-      mode: 'fuse',
-      anno: anno
-    };
-  };
-
-  this.executeTruncate = function(context) {
-    var anno = this.applyTransform(context, truncateAnnotation);
-    return {
-      mode: 'truncate',
-      anno: anno
-    };
-  };
-
-  this.executeExpand = function(context) {
-    var anno = this.applyTransform(context, expandAnnotation);
-    return {
-      mode: 'expand',
-      anno: anno
-    };
-  };
-
-  this.executeDelete = function(context) {
-    var annoId = this.applyTransform(context, deleteAnnotation);
+  this.executeDelete = function(props, context) {
+    var annos = this._getAnnotationsForSelection(props, context);
+    var anno = annos[0];
+    this._checkPrecondition(props, context, annos, this.canDelete);
+    this._applyTransform(props, context, function(tx) {
+      return tx.delete(anno.id);
+    });
     return {
       mode: 'delete',
-      annoId: annoId
+      annoId: anno.id
     };
   };
+
+  this._isPropertyAnnotationCommand = function(sel) {
+    // Note: we are using the selection to retrieve the schema
+    // we need the schema only to know if the annotationType is a property type
+    // so, it should be safe to cache this info
+    if (!this.hasOwnProperty('_hasPropertyType')) {
+      var schema = sel.getDocument().getSchema();
+      this._hasPropertyType = schema.isInstanceOf(this.getAnnotationType(), 'annotation');
+    }
+    return this._hasPropertyType;
+  };
+
+  this._checkPrecondition = function(props, context, annos, checker) {
+    var sel = _getSelection(props);
+    if (!checker.call(this, annos, sel)) {
+      throw new Error("AnnotationCommand: can't execute command for selection " + sel.toString());
+    }
+  };
+
+  this._getAnnotationsForSelection = function(props) {
+    var sel = _getSelection(props);
+    // HACK: currently only for property types
+    if (!sel || sel.isNull() || !this._isPropertyAnnotationCommand(sel)) {
+      return [];
+    }
+    return helpers.getPropertyAnnotationsForSelection(sel.getDocument(), sel, {
+      type: this.getAnnotationType()
+    });
+  };
+
+  /**
+    Apply an annotation transformation.
+
+    @returns {Object} transformed annotations.
+   */
+  // Helper to trigger an annotation transformation
+  this._applyTransform = function(props, context, transformFn) {
+    // HACK: this looks a bit too flexible. Maybe we want to go for
+    var sel = _getSelection(props);
+    var documentSession = _getDocumentSession(props, context);
+
+    var result; // to store transform result
+    if (sel.isNull()) return;
+    documentSession.transaction(function(tx, props) {
+      tx.before.selection = sel;
+      props.selection = sel;
+      // TODO: why disable this per se?
+      props.splitContainerSelections = false;
+      // if (surface && surface.isContainerEditor()) {
+      //   props.containerId = surface.getContainerId();
+      // }
+      props = transformFn(tx, props);
+      if (props) {
+        result = props.result;
+      }
+      return props;
+    });
+    return result;
+  };
+
+  function _getDocumentSession(props, context) {
+    var docSession = props.documentSession || context.documentSession;
+    if (!docSession) {
+      throw new Error("'documentSession' is required.");
+    }
+    return docSession;
+  }
+
+  function _getSelection(props) {
+    if (!props.selection) {
+      throw new Error("'selection' is required.");
+    }
+    return props.selection;
+  }
 
 };
 

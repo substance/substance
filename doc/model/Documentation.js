@@ -1,4 +1,3 @@
-/* globals -Document */
 'use strict';
 
 var Document = require('../../model/Document');
@@ -23,7 +22,7 @@ schema.getDefaultTextType = function() {
   return null;
 };
 
-var Documentation = function() {
+function Documentation() {
   Document.call(this, schema);
 
   this.addIndex('members', new MemberIndex(this));
@@ -32,11 +31,7 @@ var Documentation = function() {
     id: 'body',
     nodes: []
   });
-};
-
-Documentation.Prototype = function() {
-
-};
+}
 
 Document.extend(Documentation);
 Documentation.schema = schema;

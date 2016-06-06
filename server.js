@@ -1,5 +1,4 @@
-/* globals console */
-/* jshint strict:false */
+/* eslint-disable */
 
 var express = require('express');
 var path = require('path');
@@ -34,7 +33,7 @@ app.get('/test/test.js', function (req, res, next) {
       res.send('500');
     } else {
       // console.log('Found test files:', testfiles);
-      browserify({ debug: true })
+      browserify({ debug: true, cache: false })
         .add(path.join(__dirname, 'test', 'test-globals.js'))
         .add(testfiles.map(function(file) {
           return path.join(__dirname, file);
@@ -42,8 +41,8 @@ app.get('/test/test.js', function (req, res, next) {
         .bundle()
         .on('error', function(err){
           console.error(err.message);
-          res.status(500).send('console.log("'+err.message+'");');
-          next();
+          // res.status(500).send('console.log("'+err.message+'");');
+          // next();
         })
         .pipe(res);
     }

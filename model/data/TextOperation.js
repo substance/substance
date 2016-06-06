@@ -125,7 +125,7 @@ hasConflict = function(a, b) {
   // Insert vs Insert:
   //
   // Insertions are conflicting iff their insert position is the same.
-  if (a.type === INSERT && b.type === INSERT)  return (a.pos === b.pos);
+  if (a.type === INSERT && b.type === INSERT) return (a.pos === b.pos);
   // Delete vs Delete:
   //
   // Deletions are conflicting if their ranges overlap.
@@ -221,7 +221,7 @@ var transform = function(a, b, options) {
     a = a.clone();
     b = b.clone();
   }
-  if (a.type === INSERT && b.type === INSERT)  {
+  if (a.type === INSERT && b.type === INSERT) {
     transform_insert_insert(a, b);
   }
   else if (a.type === DELETE && b.type === DELETE) {

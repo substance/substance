@@ -1,3 +1,4 @@
+/* eslint-disable */
 module.exports = {
   'switch_text': 'Switch text',
   'hyperlink': 'Hyperlink',

@@ -1,14 +1,13 @@
-/* globals -Range */
 'use strict';
 
 var oo = require('../util/oo');
 
-var Range = function(start, end, reverse, containerId) {
+function Range(start, end, reverse, containerId) {
   this.start = start;
   this.end = end;
-  this.reverse = !!reverse;
+  this.reverse = Boolean(reverse);
   this.containerId = containerId;
-};
+}
 
 Range.Prototype = function() {
 
@@ -20,11 +19,13 @@ Range.Prototype = function() {
 
   this.equals = function(other) {
     if (this === other) return true;
-    else return (
-      this.containerId === other.containerId &&
-      this.start.equals(other.start) &&
-      this.end.equals(other.end)
-    );
+    else {
+      return (
+        this.containerId === other.containerId &&
+        this.start.equals(other.start) &&
+        this.end.equals(other.end)
+      );
+    }
   };
 
   this.isReverse = function() {

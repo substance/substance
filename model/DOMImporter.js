@@ -4,8 +4,6 @@ var last = require('lodash/last');
 var forEach = require('lodash/forEach');
 var clone = require('lodash/clone');
 var extend = require('lodash/extend');
-var error = require('../util/error');
-var warn = require('../util/warn');
 var oo = require('../util/oo');
 var uuid = require('../util/uuid');
 var ArrayIterator = require('../util/ArrayIterator');
@@ -43,11 +41,11 @@ function DOMImporter(config) {
     }
 
     if (!converter.type) {
-      error('Converter must provide the type of the associated node.', converter);
+      console.error('Converter must provide the type of the associated node.', converter);
       return;
     }
     if (!converter.matchElement && !converter.tagName) {
-      error('Converter must provide a matchElement function or a tagName property.', converter);
+      console.error('Converter must provide a matchElement function or a tagName property.', converter);
       return;
     }
     if (!converter.matchElement) {
@@ -55,7 +53,7 @@ function DOMImporter(config) {
     }
     var NodeClass = schema.getNodeClass(converter.type);
     if (!NodeClass) {
-      error('No node type defined for converter', converter.type);
+      console.error('No node type defined for converter', converter.type);
       return;
     }
     if (defaultTextType === converter.type) {
@@ -220,7 +218,7 @@ DOMImporter.Prototype = function DOMImporterPrototype() {
       if (hasDefault) {
         nodeData[name] = clone(prop.default);
       }
-    }.bind(this));
+    });
     return nodeData;
   };
 
@@ -343,7 +341,7 @@ DOMImporter.Prototype = function DOMImporterPrototype() {
 
   this.defaultConverter = function(el, converter) {
     if (!this.IGNORE_DEFAULT_WARNINGS) {
-      warn('This element is not handled by the converters you provided. This is the default implementation which just skips conversion. Override DOMImporter.defaultConverter(el, converter) to change this behavior.', el.outerHTML);
+      console.warn('This element is not handled by the converters you provided. This is the default implementation which just skips conversion. Override DOMImporter.defaultConverter(el, converter) to change this behavior.', el.outerHTML);
     }
     var defaultTextType = this.schema.getDefaultTextType();
     var defaultConverter = this._defaultBlockConverter;
@@ -389,7 +387,7 @@ DOMImporter.Prototype = function DOMImporterPrototype() {
         var inlineTypeConverter = this._getConverterForElement(el, 'inline');
         if (!inlineTypeConverter) {
           if (!this.IGNORE_DEFAULT_WARNINGS) {
-            warn('Unsupported inline element. We will not create an annotation for it, but process its children to extract annotated text.', el.outerHTML);
+            console.warn('Unsupported inline element. We will not create an annotation for it, but process its children to extract annotated text.', el.outerHTML);
           }
           // Note: this will store the result into the current context
           this.annotatedText(el);
@@ -432,7 +430,7 @@ DOMImporter.Prototype = function DOMImporterPrototype() {
         inlineNode.path = context.path.slice(0);
         state.inlineNodes.push(inlineNode);
       } else {
-        warn('Unknown element type. Taking plain text.', el.outerHTML);
+        console.warn('Unknown element type. Taking plain text.', el.outerHTML);
         text = this._prepareText(state, el.textContent);
         context.text = context.text.concat(text);
         context.offset += text.length;
@@ -463,7 +461,10 @@ DOMImporter.Prototype = function DOMImporterPrototype() {
     // In this case we wrap the block node into an InlineWrapper
     if (!converter && mode === 'inline') {
       var blockConverter = this._getConverterForElement(el, 'block');
-      if (blockConverter) {
+      // NOTE: there are some block level nodes which are also allowed as
+      // inline wrapped by an InlineWrapper
+      // TODO: we need to see if this concept is good enough
+      if (blockConverter && blockConverter.canBeInline) {
         converter = InlineWrapperConverter;
       }
     }
@@ -474,7 +475,7 @@ DOMImporter.Prototype = function DOMImporterPrototype() {
   };
 
   this._getUnsupportedNodeConverter = function() {
-    warn([
+    console.warn([
       'DOMImporter._getUnsupportedNodeConverter() is abstract.',
       'If you want to add unsupported elements to your model you should override this method.'
     ].join('\n'));

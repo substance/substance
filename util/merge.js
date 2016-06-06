@@ -7,12 +7,16 @@ var isArray = require('lodash/isArray');
 function _concatArrays(objValue, srcValue) {
   if (isArray(objValue)) {
     return objValue.concat(srcValue);
+  } else {
+    return null;
   }
 }
 
 function _replaceArrays(objValue, srcValue) {
   if (isArray(objValue)) {
     return srcValue;
+  } else {
+    return null;
   }
 }
 
@@ -26,13 +30,10 @@ function _replaceArrays(objValue, srcValue) {
 module.exports = function(a, b, options) {
   options = options || {};
   var _with = null;
-  switch (options.array) {
-    case 'replace':
-      _with = _replaceArrays;
-      break;
-    case 'concat':
-      _with = _concatArrays;
-      break;
+  if (options.array === 'replace') {
+    _with = _replaceArrays;
+  } else if (options.array === 'concat') {
+    _with = _concatArrays;
   }
   if (_with) {
     return mergeWith(a, b, _with);

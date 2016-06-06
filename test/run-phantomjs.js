@@ -1,5 +1,5 @@
-/*global phantom:false, require:false, console:false, window:false, QUnit:false */
-
+/* eslint-disable strict, no-console, indent */
+/* globals phantom */
 (function () {
   'use strict';
 
@@ -165,4 +165,4 @@
       phantom.exit(code);
     }, 0);
   }
-})();
+}());

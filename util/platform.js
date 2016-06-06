@@ -1,3 +1,4 @@
+'use strict';
 
 /**
   @module
@@ -54,12 +55,12 @@ if (typeof window !== 'undefined') {
     // var rv = ua.indexOf('rv:');
     // parseInt(ua.substring(rv + 3, ua.indexOf('.', rv)), 10);
   } else if (edge > 0) {
-     // IE 12 => return version number
-     platform.isIE = true;
-     platform.version = 12;
-     platform.isEdge = true;
-     // TODO: if we need someday, this would be the exact version number
-     parseInt(ua.substring(edge + 5, ua.indexOf('.', edge)), 10);
+    // IE 12 => return version number
+    platform.isIE = true;
+    platform.version = 12;
+    platform.isEdge = true;
+    // TODO: if we need someday, this would be the exact version number
+    parseInt(ua.substring(edge + 5, ua.indexOf('.', edge)), 10);
   }
 
   // Detect Firefox

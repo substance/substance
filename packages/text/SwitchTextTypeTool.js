@@ -117,6 +117,8 @@ SwitchTextTypeTool.Prototype = function() {
         this.toggleDropdown();
         handled = true;
         break;
+      default:
+        // nothing
     }
     if (handled) {
       event.preventDefault();

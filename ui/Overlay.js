@@ -59,7 +59,7 @@ Overlay.Prototype = function() {
       var contentWidth = this.el.htmlProp('offsetWidth');
       var contentHeight = this.el.htmlProp('offsetHeight');
       var selectionMaxWidth = hints.rectangle.width;
-      var selectionHeight = hints.rectangle.height;
+      // var selectionHeight = hints.rectangle.height;
 
       // By default, Overlays are aligned center/top to the selection
       this.el.css('top', hints.rectangle.top - contentHeight);

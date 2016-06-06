@@ -47,7 +47,7 @@ ResponsiveApplication.Prototype = function() {
 
   /*
     Used to navigate the app based on given route.
-  
+
     Example route: {documentId: 'example.xml'}
     On app level, never use setState/extendState directly as this may
     lead to invalid states.
@@ -60,13 +60,13 @@ ResponsiveApplication.Prototype = function() {
   };
 
   this._onRouteChanged = function(route) {
-    console.log('NotesApp._onRouteChanged', route);
+    // console.log('NotesApp._onRouteChanged', route);
     this.navigate(route, {replace: true});
   };
 
   this._isMobile = function() {
     if (inBrowser) {
-      return window.innerWidth < 700;  
+      return window.innerWidth < 700;
     }
   };
 
@@ -88,7 +88,7 @@ ResponsiveApplication.Prototype = function() {
   };
 
   this._getPage = function() {
-    return this.state.route.page || this.getDefaultPage();
+    return this.state.route.page || this.getDefaultPage();
   };
 
   this._getPageClass = function() {
@@ -124,7 +124,7 @@ ResponsiveApplication.Prototype = function() {
     el.append(
       this.renderPage($$)
     );
-    
+
     return el;
   };
 

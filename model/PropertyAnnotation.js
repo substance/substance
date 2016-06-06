@@ -1,7 +1,6 @@
 'use strict';
 
 var isEqual = require('lodash/isEqual');
-var warn = require('../util/warn');
 var DocumentNode = require('./DocumentNode');
 
 /**
@@ -41,6 +40,7 @@ function PropertyAnnotation() {
 
 PropertyAnnotation.Prototype = function() {
 
+  this._isAnnotation = true;
   this._isPropertyAnnotation = true;
 
   /**
@@ -51,7 +51,7 @@ PropertyAnnotation.Prototype = function() {
   this.getText = function() {
     var doc = this.getDocument();
     if (!doc) {
-      warn('Trying to use an PropertyAnnotation which is not attached to the document.');
+      console.warn('Trying to use an PropertyAnnotation which is not attached to the document.');
       return "";
     }
     var text = doc.get(this.path);

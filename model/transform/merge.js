@@ -1,7 +1,6 @@
 'use strict';
 
 var extend = require('lodash/extend');
-var info = require('../../util/info');
 var annotationHelpers = require('../annotationHelpers');
 
 var merge = function(tx, args) {
@@ -102,7 +101,7 @@ function _getNodeMerger(behavior, node, otherNode) {
   if (node.isInstanceOf('text') && otherNode.isInstanceOf('text')) {
     return _mergeTextNodes;
   }
-  info("No merge behavior defined for %s <- %s", node.type, otherNode.type);
+  console.info("No merge behavior defined for %s <- %s", node.type, otherNode.type);
   return null;
 }
 

@@ -2,7 +2,6 @@
 
 var Server = require('./Server');
 var CollabEngine = require('./CollabEngine');
-var error = require('../util/error');
 var Err = require('../util/SubstanceError');
 var forEach = require('lodash/forEach');
 
@@ -45,7 +44,7 @@ CollabServer.Prototype = function() {
     if (this.config.authenticate) {
       this.config.authenticate(req, function(err, session) {
         if (err) {
-          error(err);
+          console.error(err);
           // Send the response with some delay
           this._error(req, res, new Err('AuthenticationError', {cause: err}));
           return;
@@ -65,7 +64,7 @@ CollabServer.Prototype = function() {
     if (this.config.enhanceRequest) {
       this.config.enhanceRequest(req, function(err) {
         if (err) {
-          error('enhanceRequest returned an error', err);
+          console.error('enhanceRequest returned an error', err);
           this._error(req, res, err);
           return;
         }
@@ -99,7 +98,7 @@ CollabServer.Prototype = function() {
     if (method) {
       method.call(this, req, res);
     } else {
-      error('Method', msg.type, 'not implemented for CollabServer');
+      console.error('Method', msg.type, 'not implemented for CollabServer');
     }
   };
 

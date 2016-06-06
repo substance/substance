@@ -10,7 +10,7 @@ function ListItemComponent() {
 ListItemComponent.Prototype = function() {
 
   this.render = function($$) {
-    var node = this.props.node
+    var node = this.props.node;
     var el = $$('div')
       .addClass('sc-list-item')
       .addClass('sm-' + node.listType)
@@ -20,9 +20,9 @@ ListItemComponent.Prototype = function() {
       })
     );
     return el;
-  }
+  };
 
-}
+};
 
 Component.extend(ListItemComponent);
 

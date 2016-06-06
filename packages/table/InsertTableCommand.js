@@ -8,7 +8,7 @@ function InsertTableCommand() {
 
 InsertTableCommand.Prototype = function() {
 
-  this.createNodeData = function(tx, args) {
+  this.createNodeData = function(tx, args) { // eslint-disable-line
     // TODO: make this configurable, e.g. via args
     var nrows = 5;
     var ncols = 6;

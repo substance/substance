@@ -3,6 +3,7 @@
 var Component = require('../../ui/Component');
 var Icon = require('../../ui/FontAwesomeIcon');
 var clone = require('lodash/clone');
+
 /**
   Component to edit an existing link.
 
@@ -67,7 +68,7 @@ EditLinkTool.Prototype = function() {
 
     documentSession.transaction(function(tx) {
       tx.set([node.id, "url"], url);
-    }.bind(this));
+    });
   };
 
   this.onDelete = function(e) {

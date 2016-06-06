@@ -1,6 +1,6 @@
 'use strict';
 
-var error = require('../util/error');
+var startsWith = require('lodash/startsWith');
 var keys = require('../util/keys');
 var createSurfaceId = require('../util/createSurfaceId');
 var Coordinate = require('../model/Coordinate');
@@ -114,7 +114,7 @@ IsolatedNodeComponent.Prototype = function() {
     var node = this.props.node;
     var ComponentClass = this._getContentClass();
     if (!ComponentClass) {
-      error('Could not resolve a component for type: ' + node.type);
+      console.error('Could not resolve a component for type: ' + node.type);
       return $$('div');
     } else {
       var props = {
@@ -202,7 +202,7 @@ IsolatedNodeComponent.Prototype = function() {
       return;
     }
     // for all other cases (focused / co-focused) the surface id prefix must match
-    if (!surfaceId.startsWith(id)) return;
+    if (!startsWith(surfaceId, id)) return;
 
     if (surfaceId.length === id.length) {
       return {
@@ -216,7 +216,7 @@ IsolatedNodeComponent.Prototype = function() {
   };
 
   this.onMousedown = function(event) {
-    console.log('IsolatedNodeComponent.onMousedown', this.getId());
+    // console.log('IsolatedNodeComponent.onMousedown', this.getId());
     event.stopPropagation();
     switch (this.state.mode) {
       case 'selected':
@@ -232,7 +232,7 @@ IsolatedNodeComponent.Prototype = function() {
 
   this.onKeydown = function(event) {
     event.stopPropagation();
-    console.log('####', event.keyCode, event.metaKey, event.ctrlKey, event.shiftKey);
+    // console.log('####', event.keyCode, event.metaKey, event.ctrlKey, event.shiftKey);
     // TODO: while this works when we have an isolated node with input or CE,
     // there is no built-in way of receiving key events in other cases
     // We need a global event listener for keyboard events which dispatches to the current isolated node
@@ -248,7 +248,7 @@ IsolatedNodeComponent.Prototype = function() {
   };
 
   this._selectNode = function() {
-    console.log('IsolatedNodeComponent: selecting node.');
+    // console.log('IsolatedNodeComponent: selecting node.');
     var surface = this.context.surface;
     var doc = surface.getDocument();
     var nodeId = this.props.node.id;
@@ -280,7 +280,7 @@ IsolatedNodeComponent.getCoordinate = function(surfaceEl, node) {
       }
       return new Coordinate([nodeId], charPos);
     } else {
-      error('FIXME: expecting a data-id attribute on IsolatedNodeComponent');
+      console.error('FIXME: expecting a data-id attribute on IsolatedNodeComponent');
     }
   }
   return null;

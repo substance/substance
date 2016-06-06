@@ -24,7 +24,7 @@ SnapshotEngine.Prototype = function() {
     Returns a snapshot for a given documentId and version
   */
   this.getSnapshot = function(args, cb) {
-    if (!args || !args.documentId) {
+    if (!args || !args.documentId) {
       return cb(new Err('InvalidArgumentsError', {
         message: 'args requires a documentId'
       }));
@@ -190,8 +190,7 @@ SnapshotEngine.Prototype = function() {
       });
     }
 
-    var docFactory = schemaConfig.documentFactory;
-    var doc = new docFactory.ArticleClass();
+    var doc = schemaConfig.documentFactory.createDocument();
     return doc;
   };
 

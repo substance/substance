@@ -38,8 +38,7 @@ InsertNodeCommand.Prototype = function() {
     return insertNode(tx, args);
   };
 
-  this.createNodeData = function(tx, args) {
-    /* jshint unused:false */
+  this.createNodeData = function(tx, args) { // eslint-disable-line
     throw new Error('InsertNodeCommand.createNodeData() is abstract.');
   };
 };

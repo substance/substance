@@ -1,7 +1,7 @@
 "use strict";
+/* global WeakMap */
 
 var oo = require('../util/oo');
-var error = require('../util/error');
 var uuid = require('../util/uuid');
 var EventEmitter = require('../util/EventEmitter');
 
@@ -109,7 +109,7 @@ Server.Prototype = function() {
   /*
     When a new collaborator connects we generate a unique id for them
   */
-  this._onConnection = function(ws) {
+  this._onConnection = function(ws) {
     var collaboratorId = uuid();
     var connection = {
       collaboratorId: collaboratorId
@@ -253,7 +253,7 @@ Server.Prototype = function() {
     if (this._isWebsocketOpen(ws)) {
       ws.send(this.serializeMessage(message));
     } else {
-      error('Server#send: Websocket for collaborator', collaboratorId, 'is no longer open', message);
+      console.error('Server#send: Websocket for collaborator', collaboratorId, 'is no longer open', message);
     }
   };
 
@@ -393,7 +393,7 @@ ServerResponse.Prototype = function() {
     this.isEnhanced = true;
   };
 
-  this.setSent = function() {
+  this.setSent = function() {
     this.isSent = true;
   };
 };

@@ -2,7 +2,6 @@
 
 var extend = require('lodash/extend');
 var isString = require('lodash/isString');
-var error = require('../util/error');
 var oo = require('../util/oo');
 var Registry = require('../util/Registry');
 var Fragmenter = require('./Fragmenter');
@@ -20,7 +19,7 @@ function DOMExporter(config) {
 
   config.converters.forEach(function(converter) {
     if (!converter.type) {
-      error('Converter must provide the type of the associated node.', converter);
+      console.error('Converter must provide the type of the associated node.', converter);
       return;
     }
     this.converters.add(converter.type, converter);
@@ -59,8 +58,7 @@ DOMExporter.Prototype = function() {
       return out.join('');
     };
   */
-  this.convertDocument = function(doc) {
-    /* jshint unused:false */
+  this.convertDocument = function(doc) { // eslint-disable-line
     throw new Error('This method is abstract');
   };
 

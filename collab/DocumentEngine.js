@@ -18,7 +18,7 @@ function DocumentEngine(config) {
   this.changeStore = config.changeStore;
 
   // SnapshotEngine instance is required
-  this.snapshotEngine = config.snapshotEngine || new SnapshotEngine({
+  this.snapshotEngine = config.snapshotEngine || new SnapshotEngine({
     schemas: this.schemas,
     documentStore: this.documentStore,
     changeStore: this.changeStore
@@ -34,19 +34,30 @@ DocumentEngine.Prototype = function() {
     Returns the JSON serialized version, as a starting point
   */
   this.createDocument = function(args, cb) {
+    // TODO: schema is propbably not a good name here
+    // as it is a record containing a schema, and a factory
+    // providing an empty document
     var schemaConfig = this.schemas[args.schemaName];
     if (!schemaConfig) {
       return cb(new Err('SchemaNotFoundError', {
         message: 'Schema not found for ' + args.schemaName
       }));
     }
+
     var docFactory = schemaConfig.documentFactory;
-    var doc = docFactory.createArticle();
-    var change = docFactory.createChangeset()[0];
+    var doc = docFactory.createDocument();
+
+    // TODO: I have the feeling that this is the wrong approach.
+    // While in our tests we have seeds I don't think that this is a general pattern.
+    // A vanilla document should be just empty, or just have what its constructor
+    // is creating.
+    // To create some initial content, we should use the editor,
+    // e.g. an automated script running after creating the document.
+    // var change = docFactory.createChangeset()[0];
 
     // HACK: we use the info object for the change as well, however
     // we should be able to control this separately.
-    change.info = args.info;
+    // change.info = args.info;
 
     this.documentStore.createDocument({
       schemaName: schemaConfig.name,
@@ -61,24 +72,29 @@ DocumentEngine.Prototype = function() {
         }));
       }
 
-      this.changeStore.addChange({
+      // this.changeStore.addChange({
+      //   documentId: docRecord.documentId,
+      //   change: change
+      // }, function(err) {
+      //   if (err) {
+      //     return cb(new Err('CreateError', {
+      //       cause: err
+      //     }));
+      //   }
+      //   var converter = new JSONConverter();
+      //   cb(null, {
+      //     documentId: docRecord.documentId,
+      //     data: converter.exportDocument(doc),
+      //     version: 1
+      //   });
+      // });
+      var converter = new JSONConverter();
+      cb(null, {
         documentId: docRecord.documentId,
-        change: change
-      }, function(err) {
-        if (err) {
-          return cb(new Err('CreateError', {
-            cause: err
-          }));
-        }
-
-        var converter = new JSONConverter();
-        cb(null, {
-          documentId: docRecord.documentId,
-          data: converter.exportDocument(doc),
-          version: 1
-        });
+        data: converter.exportDocument(doc),
+        version: 1
       });
-    }.bind(this));
+    }.bind(this)); //eslint-disable-line
   };
 
   /*

@@ -18,7 +18,7 @@ var platform = require('../util/platform');
 
   @class Clipboard
 */
-var Clipboard = function(surface, config) {
+function Clipboard(surface, config) {
 
   this.surface = surface;
   var doc = surface.getDocument();
@@ -46,7 +46,7 @@ var Clipboard = function(surface, config) {
   } else {
     this.onPaste = this.onPaste.bind(this);
   }
-};
+}
 
 Clipboard.Prototype = function() {
 

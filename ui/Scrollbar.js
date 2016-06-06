@@ -2,7 +2,6 @@
 
 var Component = require('./Component');
 var each = require('lodash/each');
-var warn = require('../util/warn');
 var DefaultDOMElement = require('./DefaultDOMElement');
 
 /**
@@ -120,7 +119,7 @@ Scrollbar.Prototype = function() {
               height: height
             });
           } else {
-            warn('no ref found for highlight', nodeId);
+            console.warn('no ref found for highlight', nodeId);
           }
         }.bind(this));
       }.bind(this));

@@ -382,7 +382,7 @@ VirtualHTMLElement.Prototype = function() {
   };
 
   this.hasInnerHTML = function() {
-    return !!this._innerHTMLString;
+    return Boolean(this._innerHTMLString);
   };
 
   this._normalizeChild = function(child) {

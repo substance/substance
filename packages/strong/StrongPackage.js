@@ -6,7 +6,7 @@ var StrongCommand = require('./StrongCommand');
 
 module.exports = {
   name: 'strong',
-  configure: function(config, options) {
+  configure: function(config, options) { // eslint-disable-line
     config.addNode(Strong);
     config.addCommand(StrongCommand);
     config.addTool(StrongTool);

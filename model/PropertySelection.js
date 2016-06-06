@@ -1,4 +1,3 @@
-/* globals -Range */
 'use strict';
 
 var isEqual = require('lodash/isEqual');
@@ -6,8 +5,6 @@ var isNumber = require('lodash/isNumber');
 var Selection = require('./Selection');
 var Coordinate = require('./Coordinate');
 var Range = require('./Range');
-
-/* jshint latedef:nofunc */
 
 /**
   A selection which is bound to a property. Implements {@link model/Selection}.
@@ -50,7 +47,7 @@ function PropertySelection(path, startOffset, endOffset, reverse, surfaceId) {
     Selection direction.
     @type {Boolean}
   */
-  this.reverse = !!reverse;
+  this.reverse = Boolean(reverse);
 
   /**
     Identifier of the surface this selection should be active in.
@@ -116,8 +113,8 @@ PropertySelection.Prototype = function() {
   this.toString = function() {
     return [
       "PropertySelection(", JSON.stringify(this.path), ", ",
-        this.startOffset, " -> ", this.endOffset,
-        (this.reverse?", reverse":""),
+      this.startOffset, " -> ", this.endOffset,
+      (this.reverse?", reverse":""),
       ")"
     ].join('');
   };

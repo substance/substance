@@ -1,5 +1,5 @@
-/* globals console */
 'use strict';
+/* eslint-disable no-console */
 
 var Documentation = require('./model/Documentation');
 var Component = require('../ui/Component');
