@@ -9,7 +9,7 @@ function truncateAnnotation(tx, args) {
   var sel = args.selection;
   var anno = args.anno;
   if (!sel || !sel._isSelection) throw new Error('Argument "selection" is required.');
-  if (!anno || !sel._isAnnotation) throw new Error('Argument "anno" is required.');
+  if (!anno || !anno._isAnnotation) throw new Error('Argument "anno" is required.');
 
   var annoSel = anno.getSelection();
   var newAnnoSel = annoSel.truncateWith(sel);

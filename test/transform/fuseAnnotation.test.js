@@ -35,7 +35,7 @@ function fixture() {
 }
 
 
-QUnit.test("Fuse of two property annotations for a given property selection", function(assert) {
+QUnit.test("Fuse two property annotations for a given property selection", function(assert) {
   var doc = fixture();
 
   // a2: strong -> p1.content [0..2]
@@ -62,7 +62,7 @@ QUnit.test("Fuse of two property annotations for a given property selection", fu
   assert.equal(fusedAnno.endOffset, 6, 'fusedAnno.endOffset should be 6');
 });
 
-QUnit.test("Fuse of two conatiner annotations for a given property selection", function(assert) {
+QUnit.test("Fuse two conatiner annotations for a given property selection", function(assert) {
   var doc = fixture();
   var sel = doc.createSelection({
     type: 'property',

@@ -8,12 +8,8 @@ var containerAnnoSample = require('../fixtures/containerAnnoSample');
 
 QUnit.module('model/transform/truncateAnnotation');
 
-QUnit.test("Truncate property annotation for a given property selection", function(assert) {
+QUnit.test("Truncate property annotation with a given property selection", function(assert) {
   var doc = fixture(containerAnnoSample);
-
-  // a2: strong -> p1.content [0..2]
-  assert.ok(doc.get('a2'), 'Should have a strong annotation a2 in fixture');
-
   // Put cursor inside an the existing annotation
   var sel = doc.createSelection({
     type: 'property',
@@ -21,10 +17,13 @@ QUnit.test("Truncate property annotation for a given property selection", functi
     startOffset: 1,
     endOffset: 2
   });
+  var anno = doc.get('a2');
+  assert.isDefinedAndNotNull(anno, 'There should be "a2" in the fixture');
 
-  // Prepare and perform transformation
-  var args = {selection: sel, containerId: 'body', annotationType: 'strong'};
-  var out = truncateAnnotation(doc, args);
+  var out = truncateAnnotation(doc, {
+    anno: anno,
+    selection: sel
+  });
   var a2 = out.result;
 
   assert.ok(a2, 'a2', 'a2 should have been returned as a result');
@@ -32,27 +31,29 @@ QUnit.test("Truncate property annotation for a given property selection", functi
   assert.equal(a2.endOffset, 1, 'a2.endOffset should have changed from 2 to 1');
 });
 
-QUnit.test("Truncate container annotation for a given property selection", function(assert) {
+QUnit.test("Truncate container annotation with a given property selection", function(assert) {
   var doc = fixture(containerAnnoSample);
 
-  assert.ok(doc.get('a1'), 'Should have a container annotation a1 in fixture');
   var sel = doc.createSelection({
     type: 'property',
     path: ['p3', 'content'],
     startOffset: 1,
     endOffset: 4
   });
+  var anno = doc.get('a1');
+  assert.isDefinedAndNotNull(anno, 'There should be "a1" in the fixture');
 
-  // Prepare and perform transformation
-  var args = {selection: sel, containerId: 'body', annotationType: 'test-container-anno'};
-  var out = truncateAnnotation(doc, args);
+  var out = truncateAnnotation(doc, {
+    anno: anno,
+    selection: sel
+  });
   var a1 = out.result;
 
   assert.ok(a1, 'a1', 'a1 should have been returned as a result');
   assert.equal(a1.endOffset, 1, 'a1.endOffset should be 1');
 });
 
-QUnit.test("Truncate container annotation for a given container selection", function(assert) {
+QUnit.test("Truncate container annotation with a given container selection", function(assert) {
   var doc = fixture(containerAnnoSample);
 
   assert.ok(doc.get('a1'), 'Should have a container annotation a1 in fixture');
@@ -64,10 +65,13 @@ QUnit.test("Truncate container annotation for a given container selection", func
     endPath: ['p3', 'content'],
     endOffset: 4,
   });
+  var anno = doc.get('a1');
+  assert.isDefinedAndNotNull(anno, 'There should be "a1" in the fixture');
 
-  // Prepare and perform transformation
-  var args = {selection: sel, containerId: 'body', annotationType: 'test-container-anno'};
-  var out = truncateAnnotation(doc, args);
+  var out = truncateAnnotation(doc, {
+    anno: anno,
+    selection: sel
+  });
   var a1 = out.result;
 
   assert.ok(a1, 'a1', 'a1 should have been returned as a result');

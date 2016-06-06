@@ -31,33 +31,25 @@ function createAnnotation(tx, args) {
   var sel = args.selection;
   var annoType = args.annotationType;
   var annoData = args.annotationData;
-  var node = args.node;
-  var containerId = args.containerId;
-  if (!node && annoType) {
+  var anno = args.node;
+  if (!anno && annoType) {
     console.warn('DEPRECATED: Use node: {type: "strong"} instead of annotationType: "strong"');
-    node = {
+    anno = {
       type: annoType
     };
-    extend(node, annoData);
+    extend(anno, annoData);
   }
   if (!sel) throw new Error('selection is required.');
-  if (!node) throw new Error('node is required');
-  if (sel.isContainerSelection() && !containerId) {
-    throw new Error('containerId must be provided for container selections');
-  }
+  if (!anno) throw new Error('node is required');
   // Special case: We split the current container selection into
   // multiple property annotations
   if (args.splitContainerSelections && sel.isContainerSelection()) {
     return _createPropertyAnnotations(tx, args);
   }
-  var anno = extend({
-    id: uuid(node.type)
-  }, node);
-
-  if (helpers.isContainerAnnotation(tx, node.type)) {
+  if (helpers.isContainerAnnotation(tx, anno.type)) {
     anno.startPath = sel.startPath;
     anno.endPath = sel.endPath;
-    anno.containerId = containerId;
+    anno.containerId = sel.containerId;
   } else if (sel.isPropertySelection()) {
     anno.path = sel.path;
   } else {
