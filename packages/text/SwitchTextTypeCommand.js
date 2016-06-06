@@ -43,27 +43,17 @@ SwitchTextType.Prototype = function() {
     return currentTextType;
   };
 
-  this.getCommandState = function(context) {
-    var documentSession = context.documentSession;
+  this.getCommandState = function(props, context) {
+    var doc = context.documentSession.getDocument();
     var sel = context.documentSession.getSelection();
     var surface = context.surfaceManager.getFocusedSurface();
-    var doc = documentSession.getDocument();
-
-    if (!surface) {
-      return {
-        disabled: true,
-        active: false
-      };
-    }
-
     var newState = {
       disabled: false,
       sel: sel,
       textTypes: this.getTextTypes(context)
     };
-
     // Set disabled when not a property selection
-    if (!surface.isEnabled() || sel.isNull()) {
+    if (!surface || !surface.isEnabled() || sel.isNull()) {
       newState.disabled = true;
     } else if (sel.isContainerSelection()) {
       newState.disabled = true;
@@ -94,8 +84,8 @@ SwitchTextType.Prototype = function() {
 
     @param {String} textTypeName identifier (e.g. heading1)
   */
-  this.execute = function(context, textTypeName) {
-    var textType = this.getTextType(context, textTypeName);
+  this.execute = function(props, context) {
+    var textType = this.getTextType(context, props.textTypeName);
     var nodeData = textType.data;
     var surface = context.surfaceManager.getFocusedSurface();
     if (!surface) {

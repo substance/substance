@@ -30,6 +30,21 @@ Command.Prototype = function() {
     throw new Error('Command.execute() is abstract.');
   };
 
+  this._getDocumentSession = function(props, context) {
+    var docSession = props.documentSession || context.documentSession;
+    if (!docSession) {
+      throw new Error("'documentSession' is required.");
+    }
+    return docSession;
+  };
+
+  this._getSelection = function(props) {
+    if (!props.selection) {
+      throw new Error("'selection' is required.");
+    }
+    return props.selection;
+  };
+
 };
 
 oo.initClass(Command);

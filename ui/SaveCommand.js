@@ -8,7 +8,7 @@ function SaveCommand() {
 
 SaveCommand.Prototype = function() {
 
-  this.getCommandState = function(context) {
+  this.getCommandState = function(props, context) {
     var dirty = context.documentSession.isDirty();
     // console.log('SaveCommand.dirty', dirty);
     return {
@@ -17,7 +17,7 @@ SaveCommand.Prototype = function() {
     };
   };
 
-  this.execute = function(context) {
+  this.execute = function(props, context) {
     var documentSession = context.documentSession;
     documentSession.save();
     return {

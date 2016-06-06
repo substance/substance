@@ -173,7 +173,7 @@ AnnotationCommand.Prototype = function() {
   */
   this.getCommandState = function(props, context) { // eslint-disable-line
     context = context || {};
-    var sel = props.selection || context.documentSession.getSelection();
+    var sel = this._getSelection(props);
     // We can skip all checking if a disabled condition is met
     // E.g. we don't allow toggling of property annotations when current
     // selection is a container selection
@@ -338,14 +338,14 @@ AnnotationCommand.Prototype = function() {
   };
 
   this._checkPrecondition = function(props, context, annos, checker) {
-    var sel = _getSelection(props);
+    var sel = this._getSelection(props);
     if (!checker.call(this, annos, sel)) {
       throw new Error("AnnotationCommand: can't execute command for selection " + sel.toString());
     }
   };
 
   this._getAnnotationsForSelection = function(props) {
-    var sel = _getSelection(props);
+    var sel = this._getSelection(props);
     // HACK: currently only for property types
     if (!sel || sel.isNull() || !this._isPropertyAnnotationCommand(sel)) {
       return [];
@@ -363,8 +363,8 @@ AnnotationCommand.Prototype = function() {
   // Helper to trigger an annotation transformation
   this._applyTransform = function(props, context, transformFn) {
     // HACK: this looks a bit too flexible. Maybe we want to go for
-    var sel = _getSelection(props);
-    var documentSession = _getDocumentSession(props, context);
+    var sel = this._getSelection(props);
+    var documentSession = this._getDocumentSession(props, context);
 
     var result; // to store transform result
     if (sel.isNull()) return;
@@ -384,21 +384,6 @@ AnnotationCommand.Prototype = function() {
     });
     return result;
   };
-
-  function _getDocumentSession(props, context) {
-    var docSession = props.documentSession || context.documentSession;
-    if (!docSession) {
-      throw new Error("'documentSession' is required.");
-    }
-    return docSession;
-  }
-
-  function _getSelection(props) {
-    if (!props.selection) {
-      throw new Error("'selection' is required.");
-    }
-    return props.selection;
-  }
 
 };
 

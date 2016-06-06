@@ -84,7 +84,9 @@ SwitchTextTypeTool.Prototype = function() {
   };
 
   this.executeCommand = function(textType) {
-    this.context.commandManager.executeCommand('switch-text-type', textType);
+    this.context.commandManager.executeCommand('switch-text-type', {
+      textType: textType
+    });
   };
 
   this.getTextCommands = function() {

@@ -9,7 +9,7 @@ function InsertNodeCommand() {
 
 InsertNodeCommand.Prototype = function() {
 
-  this.getCommandState = function(context) {
+  this.getCommandState = function(props, context) {
     var sel = context.documentSession.getSelection();
     var newState = {
       disabled: true,
@@ -21,7 +21,7 @@ InsertNodeCommand.Prototype = function() {
     return newState;
   };
 
-  this.execute = function(context) {
+  this.execute = function(props, context) {
     var state = this.getCommandState(context);
     if (state.disabled) return;
     var surface = context.surface ||context.surfaceManager.getFocusedSurface();

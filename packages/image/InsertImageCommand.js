@@ -10,7 +10,7 @@ function ImageCommand() {
 
 ImageCommand.Prototype = function() {
 
-  this.getCommandState = function(context) {
+  this.getCommandState = function(props, context) {
     var documentSession = context.documentSession;
     var sel = documentSession.getSelection();
 
@@ -30,7 +30,7 @@ ImageCommand.Prototype = function() {
 
     TODO: Think about ways to make ImagCommand CLI-compatible.
   */
-  this.execute = function(context) {
+  this.execute = function(props, context) {
     var state = this.getCommandState(context);
     var surface = context.surfaceManager.getFocusedSurface();
     var fileClient = context.fileClient;

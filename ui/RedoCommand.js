@@ -8,7 +8,7 @@ function Redo() {
 
 Redo.Prototype = function() {
 
-  this.getCommandState = function(context) {
+  this.getCommandState = function(props, context) {
     var docSession = context.documentSession;
     return {
       disabled: !docSession.canRedo(),
@@ -16,7 +16,7 @@ Redo.Prototype = function() {
     };
   };
 
-  this.execute = function(context) {
+  this.execute = function(props, context) {
     var docSession = context.documentSession;
     if (docSession.canRedo()) {
       docSession.redo();
