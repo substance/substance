@@ -41,7 +41,6 @@ QUnit.test("Get text for container selection.", function(assert) {
 
 QUnit.test("Get container annotations for property selection.", function(assert) {
   var doc = fixture(containerAnnoSample);
-  var container = doc.get('main');
   var sel = doc.createSelection({
     type: 'property',
     path: ['p3', 'content'],
@@ -50,11 +49,11 @@ QUnit.test("Get container annotations for property selection.", function(assert)
   });
   var annos;
   // without options
-  annos = documentHelpers.getContainerAnnotationsForSelection(doc, sel, container);
+  annos = documentHelpers.getContainerAnnotationsForSelection(doc, sel, 'body');
   assert.equal(annos.length, 1, 'There should be one container anno');
-  var options = {
+  // filtered by type
+  annos = documentHelpers.getContainerAnnotationsForSelection(doc, sel, 'body', {
     type: 'test-container-anno'
-  };
-  annos = documentHelpers.getContainerAnnotationsForSelection(doc, sel, container, options);
+  });
   assert.equal(annos.length, 1, 'There should be one container anno');
 });

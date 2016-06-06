@@ -65,7 +65,7 @@ documentHelpers.getContainerAnnotationsForSelection = function(doc, sel, contain
   }
   options = options || {};
   var index = doc.getIndex('container-annotations');
-  var annotations = index.get(options.containerId, options.type);
+  var annotations = index.get(containerId, options.type);
   annotations = filter(annotations, function(anno) {
     return sel.overlaps(anno.getSelection());
   });
