@@ -95,7 +95,9 @@ Tool.Prototype = function() {
     Executes the associated command
   */
   this.performAction = function() {
-    this.context.commandManager.executeCommand(this.getCommandName());
+    this.context.commandManager.executeCommand(this.getCommandName(), {
+      mode: this.props.mode
+    });
   };
 };
 
