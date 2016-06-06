@@ -177,7 +177,11 @@ AbstractConfigurator.Prototype = function() {
 
   this.createExporter = function(type) {
     var ExporterClass = this.config.exporters[type];
-    return new ExporterClass();
+    var config = {
+      schema: this.getSchema(),
+      converters: this.getConverterRegistry().get(type)
+    };
+    return new ExporterClass(config);
   };
 
   this.getToolRegistry = function() {
