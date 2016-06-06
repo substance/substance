@@ -122,6 +122,13 @@ gulp.task('test:server', ['lint'], function() {
   require('./test/run');
 });
 
+gulp.task('test:tape', function(done) {
+  new Karma({
+    configFile: __dirname + '/karma.tape.conf.js',
+    singleRun: true
+  }, done).start();
+});
+
 gulp.task('test', ['lint', 'test:karma', 'test:server']);
 
 gulp.task('default', ['build']);
