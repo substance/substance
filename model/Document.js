@@ -137,8 +137,8 @@ Document.Prototype = function() {
     @param {String|String[]} path node id or path to property.
     @returns {DocumentNode|any|undefined} a Node instance, a value or undefined if not found.
   */
-  this.get = function(path) {
-    return this.data.get(path);
+  this.get = function(path, strict) {
+    return this.data.get(path, strict);
   };
 
   /**
@@ -449,7 +449,7 @@ Document.Prototype = function() {
       }
       return new PropertySelection(selData.path, selData.startOffset, selData.endOffset, selData.reverse);
     } else if (selData.type === 'container') {
-      var container = doc.get(selData.containerId);
+      var container = doc.get(selData.containerId, 'strict');
       var start = new Coordinate(selData.startPath, selData.startOffset);
       var end = new Coordinate(selData.endPath, selData.endOffset);
       var startAddress = container.getAddress(start);

@@ -59,11 +59,19 @@ Data.Prototype = function() {
     @param {String|String[]} path node id or path to property.
     @returns {Node|Object|Primitive|undefined} a Node instance, a value or undefined if not found.
    */
-  this.get = function(path) {
+  this.get = function(path, strict) {
     if (!path) {
       throw new Error('Path or id required');
     }
-    return this.nodes.get(path);
+    var result = this.nodes.get(path);
+    if (strict && result === undefined) {
+      if (isString(path)) {
+        throw new Error("Could not find node with id '"+path+"'.");
+      } else {
+        throw new Error("Property for path '"+path+"' us undefined.");
+      }
+    }
+    return result;
   };
 
   /**

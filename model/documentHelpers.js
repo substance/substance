@@ -86,7 +86,7 @@ documentHelpers.getAnnotationsForSelection = function(doc, sel, annotationType, 
   var isContainerAnno = documentHelpers.isContainerAnnotation(doc, annotationType);
 
   if (isContainerAnno) {
-    var container = doc.get(containerId);
+    var container = doc.get(containerId, 'strict');
     annos = documentHelpers.getContainerAnnotationsForSelection(doc, sel, container, {
       type: annotationType
     });
