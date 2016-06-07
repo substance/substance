@@ -80,7 +80,8 @@ IsolatedNodeComponent.Prototype = function() {
     );
 
     var container = $$('div').addClass('se-container')
-      .attr('contenteditable', false);
+      .attr('contenteditable', false)
+      .css({ 'z-index': 2*this._state.level });
 
     if (ContentClass.static.fullWidth) {
       container.addClass('sm-full-width');
@@ -96,7 +97,7 @@ IsolatedNodeComponent.Prototype = function() {
     if (this._isDisabled() || this.state.mode === 'co-focused') {
       container.addClass('sm-disabled');
       // NOTE: there are some content implementations which work better without a blocker
-      var blocker = $$('div').addClass('se-blocker').css({ 'z-index': this._state.level });
+      var blocker = $$('div').addClass('se-blocker').css({ 'z-index': 2*this._state.level+1 });
       container.append(blocker);
     }
 
