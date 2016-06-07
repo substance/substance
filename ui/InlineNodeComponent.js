@@ -29,10 +29,10 @@ InlineNodeComponent.Prototype = function() {
       });
 
     // TODO: enable this as soon we fixed the rendering issue coming up when activating this
-    // var surface = this.context.surface;
-    // if (surface && !surface.isDisabled()) {
-    //   el.on('mousedown', _onMousedown, this);
-    // }
+    var surface = this.context.surface;
+    if (surface && !surface.isDisabled()) {
+      el.on('mousedown', _onMousedown, this);
+    }
 
     return el;
   };
