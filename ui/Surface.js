@@ -105,7 +105,9 @@ Surface.Prototype = function() {
     }
 
     this.documentSession.on('update', this._onSessionUpdate, this);
-    this.documentSession.on('didUpdate', this._sendOverlayHints, this);
+    this.documentSession.on('didUpdate', this._sendOverlayHints, this, {
+      priority: -1000001
+    });
   };
 
 
@@ -1007,27 +1009,23 @@ Surface.Prototype = function() {
       return rect;
     } else {
       var nativeEl = this.el.el;
-      if (sel.isNull()) {
-        return {};
-      } else {
-        if (sel.isCollapsed()) {
-          var cursorEl = nativeEl.querySelector('.se-cursor');
-          if (cursorEl) {
-            return getBoundingClientRect(cursorEl, containerEl);
-          } else {
-            // TODO: in the most cases we actually do not have a
-            // cursor element.
-            // console.warn('FIXME: there should be a rendered cursor element.');
-            return {};
-          }
+      if (sel.isCollapsed()) {
+        var cursorEl = nativeEl.querySelector('.se-cursor');
+        if (cursorEl) {
+          return getBoundingClientRect(cursorEl, containerEl);
         } else {
-          var selFragments = nativeEl.querySelectorAll('.se-selection-fragment');
-          if (selFragments.length > 0) {
-            return getBoundingClientRect(selFragments, containerEl);
-          } else {
-            console.warn('FIXME: there should be a rendered selection fragments element.');
-            return {};
-          }
+          // TODO: in the most cases we actually do not have a
+          // cursor element.
+          // console.warn('FIXME: there should be a rendered cursor element.');
+          return {};
+        }
+      } else {
+        var selFragments = nativeEl.querySelectorAll('.se-selection-fragment');
+        if (selFragments.length > 0) {
+          return getBoundingClientRect(selFragments, containerEl);
+        } else {
+          console.warn('FIXME: there should be a rendered selection fragments element.');
+          return {};
         }
       }
     }
