@@ -194,11 +194,9 @@ ContainerEditor.Prototype = function() {
       event.preventDefault();
       this.setSelection(sel.collapse(direction));
       return;
+    } else {
+      _super._handleLeftOrRightArrowKey.call(this, event);
     }
-    window.setTimeout(function() {
-      if (!this.isMounted()) return;
-      this._updateModelSelection({ direction: direction });
-    }.bind(this));
   };
 
   this._handleEnterKey = function(event) {

@@ -307,14 +307,6 @@ Surface.Prototype = function() {
     this.emit('surface:blurred', this);
   };
 
-  this._hasNativeFocus = function() {
-    if (inBrowser) {
-      var focusedElement = window.document.activeElement;
-      return this.el.getNativeElement() === focusedElement;
-    }
-    return false;
-  };
-
   this.focus = function() {
     // console.log('Focusing surface %s explicitly with Surface.focus()', this.getId());
     // NOTE: FF is causing problems with dynamically activated contenteditables
@@ -638,36 +630,15 @@ Surface.Prototype = function() {
   };
 
   this.onNativeBlur = function() {
-    // console.log('Native blur on surface', this.getId());
-    // NOTE: deactivated this for now, as it had strange side effects
-    // we should find a better way which plays together with our update flow
-
-    // var _state = this._state;
-    // native blur does not lead to a session update,
-    // thus we need to update the selection manually
-    // if (_state.cursorFragment) {
-    //   this._updateProperty(_state.cursorFragment.key);
-    // }
+    console.log('Native blur on surface', this.getId());
+    var _state = this._state;
+    _state.hasNativeFocus = false;
   };
 
   this.onNativeFocus = function() {
-    // console.log('Native focus on surface', this.getId());
-    // NOTE: deactivated this for now, as it had strange side effects
-    // we should find a better way which plays together with our update flow
-
-    // var _state = this._state;
-    // in some cases we don't react on native focusing
-    // e.g., when the selection is done via mouse
-    // or if the selection is set implicitly
-    // if (_state.skipNextFocusEvent) {
-    //   _state.skipNextFocusEvent = false;
-    //   return;
-    // }
-    // native focus does not lead to a session update,
-    // thus we need to update the selection manually
-    // if (_state.cursorFragment) {
-    //   this._updateProperty(_state.cursorFragment.key);
-    // }
+    console.log('Native focus on surface', this.getId());
+    var _state = this._state;
+    _state.hasNativeFocus = true;
   };
 
   // Internal implementations
@@ -909,6 +880,13 @@ Surface.Prototype = function() {
       args.direction = direction;
       return this.delete(tx, args);
     }.bind(this), { action: 'delete' });
+  };
+
+  this._hasNativeFocus = function() {
+    // return Boolean(this._state.hasNativeFocus);
+    if (inBrowser) {
+      return window.document.activeElement === this.el.getNativeElement();
+    }
   };
 
   this._setSelection = function(sel) {
