@@ -59,6 +59,10 @@ IsolatedNodeComponent.Prototype = function() {
       el.addClass('sm-not-selected');
     }
 
+    if (!ContentClass.static.noStyle) {
+      el.addClass('sm-default-style');
+    }
+
     el.on('mousedown', this.onMousedown);
     // shadowing handlers of the parent surface
     // TODO: extract this into a helper so that we can reuse it anywhere where we want
