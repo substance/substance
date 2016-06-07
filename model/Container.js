@@ -20,10 +20,6 @@ var ContainerAddress = require('./ContainerAddress');
 function Container() {
   Container.super.apply(this, arguments);
 
-  // NOTE: we are caching things in this implementation
-  // which we invalidate on every change
-  // TODO: do we really need to invalidate on every change?
-  // or just container changes?
   if (!this.document.isTransactionDocument) {
     this.document.on('document:changed', this._onChange, this);
   }
@@ -77,14 +73,14 @@ Container.Prototype = function() {
     if (!isNumber(pos)) {
       pos = this.nodes.length;
     }
-    doc.update([this.id, 'nodes'], { insert: { offset: pos, value: nodeId } });
+    doc.update(this.getContentPath(), { insert: { offset: pos, value: nodeId } });
   };
 
   this.hide = function(nodeId) {
     var doc = this.getDocument();
     var pos = this.nodes.indexOf(nodeId);
     if (pos >= 0) {
-      doc.update([this.id, 'nodes'], { delete: { offset: pos } });
+      doc.update(this.getContentPath(), { delete: { offset: pos } });
     }
   };
 
@@ -117,7 +113,7 @@ Container.Prototype = function() {
   };
 
   this._onChange = function(change) {
-    if (change.isUpdated([this.id, 'nodes'])) {
+    if (change.isUpdated(this.getContentPath())) {
       this.positions = null;
     }
   };
@@ -131,6 +127,10 @@ Container.Prototype = function() {
       this.positions = positions;
     }
     return this.positions;
+  };
+
+  this.getContentPath = function() {
+    return [this.id, 'nodes'];
   };
 
 };
