@@ -50,10 +50,13 @@ IsolatedNodeComponent.Prototype = function() {
 
     var node = this.props.node;
     el.addClass('sc-isolated-node')
+      .addClass('sm-'+this.props.node.type)
       .attr("data-id", node.id);
 
     if (this.state.mode) {
       el.addClass('sm-'+this.state.mode);
+    } else {
+      el.addClass('sm-not-selected');
     }
 
     el.on('mousedown', this.onMousedown);
