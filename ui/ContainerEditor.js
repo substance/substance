@@ -88,15 +88,16 @@ ContainerEditor.Prototype = function() {
 
   this.didMount = function() {
     _super.didMount.apply(this, arguments);
-    var doc = this.getDocument();
+    // var doc = this.getDocument();
     // to do incremental updates
-    doc.on('document:changed', this.onDocumentChange, this, { priority: 100 });
+    this.container.on('nodes:changed', this.onContainerChange, this, { priority: 100 });
   };
 
   this.dispose = function() {
     _super.dispose.apply(this, arguments);
-    var doc = this.getDocument();
-    doc.off(this);
+    // var doc = this.getDocument();
+    // doc.off(this);
+    this.container.off(this);
   };
 
   this.render = function($$) {
@@ -344,34 +345,32 @@ ContainerEditor.Prototype = function() {
     }
   };
 
-  this.onDocumentChange = function(change) {
+  this.onContainerChange = function(change) {
     var doc = this.getDocument();
     // first update the container
     var renderContext = RenderingEngine.createContext(this);
     var $$ = renderContext.$$;
     var container = this.getContainer();
     var path = container.getContentPath();
-    if (change.isAffected(path)) {
-      for (var i = 0; i < change.ops.length; i++) {
-        var op = change.ops[i];
-        if (op.type === "update" && op.path[0] === path[0]) {
-          var diff = op.diff;
-          if (diff.type === "insert") {
-            var nodeId = diff.getValue();
-            var node = doc.get(nodeId);
-            var nodeEl;
-            if (node) {
-              nodeEl = this._renderNode($$, node);
-            } else {
-              // node does not exist anymore
-              // so we insert a stub element, so that the number of child
-              // elements is consistent
-              nodeEl = $$('div');
-            }
-            this.insertAt(diff.getOffset(), nodeEl);
-          } else if (diff.type === "delete") {
-            this.removeAt(diff.getOffset());
+    for (var i = 0; i < change.ops.length; i++) {
+      var op = change.ops[i];
+      if (op.type === "update" && op.path[0] === path[0]) {
+        var diff = op.diff;
+        if (diff.type === "insert") {
+          var nodeId = diff.getValue();
+          var node = doc.get(nodeId);
+          var nodeEl;
+          if (node) {
+            nodeEl = this._renderNode($$, node);
+          } else {
+            // node does not exist anymore
+            // so we insert a stub element, so that the number of child
+            // elements is consistent
+            nodeEl = $$('div');
           }
+          this.insertAt(diff.getOffset(), nodeEl);
+        } else if (diff.type === "delete") {
+          this.removeAt(diff.getOffset());
         }
       }
     }
