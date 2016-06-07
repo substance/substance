@@ -10,6 +10,8 @@ var argv = require('yargs').argv;
 var gulpif = require('gulp-if');
 var rename = require('gulp-rename');
 var eslint = require('gulp-eslint');
+var tape = require('gulp-tape');
+var tapSpec = require('tap-spec');
 var browserify = require('browserify');
 var uglify = require('gulp-uglify');
 var sourcemaps = require('gulp-sourcemaps');
@@ -122,13 +124,22 @@ gulp.task('test:server', ['lint'], function() {
   require('./test/run');
 });
 
-gulp.task('test:tape', function(done) {
+gulp.task('test:tape:browsers', ['lint'], function(done) {
   new Karma({
     configFile: __dirname + '/karma.tape.conf.js',
     singleRun: true
   }, done).start();
 });
 
+gulp.task('test:tape:server', ['lint'], function(done) {
+  return gulp.src('tests/**/*.test.js')
+    .pipe(tape({
+      reporter: tapSpec()
+    }));
+});
+
 gulp.task('test', ['lint', 'test:karma', 'test:server']);
+
+gulp.task('test:tape', ['lint', 'test:tape:browsers', 'test:tape:server']);
 
 gulp.task('default', ['build']);
