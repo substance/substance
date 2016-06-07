@@ -211,14 +211,16 @@ IsolatedNodeComponent.Prototype = function() {
     // for all other cases (focused / co-focused) the surface id prefix must match
     if (!startsWith(surfaceId, id)) return;
 
-    if (surfaceId.length === id.length) {
-      return {
-        mode: 'focused'
-      };
+    // Note: trying to distinguisd focused
+    // surfaceIds are a sequence of names joined with '/'
+    // a surface inside this node will have a path with length+1.
+    // a custom selection might just use the id of this IsolatedNode
+    var p1 = id.split('/');
+    var p2 = surfaceId.split('/');
+    if (p2.length >= p1.length && p2.length <= p1.length+1) {
+      return { mode: 'focused' };
     } else {
-      return {
-        mode: 'co-focused'
-      };
+      return { mode: 'co-focused' };
     }
   };
 
