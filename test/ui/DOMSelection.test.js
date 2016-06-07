@@ -9,6 +9,7 @@ var Document = require('../../model/Document');
 var Container = require('../../model/Container');
 var Paragraph = require('../../packages/paragraph/Paragraph');
 var ContainerSelection = require('../../model/ContainerSelection');
+var PropertySelection = require('../../model/PropertySelection');
 var oo = require('../../util/oo');
 
 require('../QUnitExtensions');
@@ -25,9 +26,9 @@ StubDoc.Prototype = function() {
   this.get = function(path) {
     if (this.nodes === null) {
       this.nodes = {};
-      this.nodes['main'] = new Container(this, {
+      this.nodes['body'] = new Container(this, {
         type: 'container',
-        id: 'main',
+        id: 'body',
         nodes: []
       });
       var propEls = this.el.findAll('*[data-path]');
@@ -39,7 +40,7 @@ StubDoc.Prototype = function() {
           id: nodeId,
           content: propEl.textContent
         });
-        this.nodes.main.nodes.push(nodeId);
+        this.nodes['body'].nodes.push(nodeId);
       }
     }
 
@@ -247,11 +248,11 @@ var withAnnosAndInlines = [
   '<div id="test1">',
     '<span id="test1_content" data-path="test1.content">',
       '<span data-offset="0" data-length="2">..</span>',
-      '<span data-inline="1">$</span>',
+      '<span data-inline="1" data-length="1" contenteditable="false">$</span>',
       '<span data-offset="3" data-length="2">..</span>',
-      '<span data-inline="1">$</span>',
+      '<span data-inline="1" data-length="1" contenteditable="false">$</span>',
       '<span id="before-last" data-offset="6" data-length="2">..</span>',
-      '<span data-inline="1">$</span>',
+      '<span data-inline="1" data-length="1" contenteditable="false">$</span>',
     '</span>',
   '</div>'
 ].join('');
@@ -328,7 +329,7 @@ QUnit.uiTest("Without hints: DOM coordinate between spans", function(assert) {
 var issue273 = [
   '<span data-path="prop.content">',
     'XXX',
-    '<span id="test" data-id="test" data-inline="1">',
+    '<span id="test" data-id="test" data-inline="1" data-length="1" contenteditable="false">',
       '[5]',
     '</span>',
     'XXX',
@@ -390,7 +391,7 @@ QUnit.webkitTest("Mapping a ContainerSelection to the DOM", function(assert) {
   var el = this.sandbox.attr('contenteditable', true)
     .html(surfaceWithParagraphs);
   var domSelection = new DOMSelection(new StubSurface(el));
-  var sel = new ContainerSelection('main', ['p1', 'content'], 1, ['p2', 'content'], 1);
+  var sel = new ContainerSelection('body', ['p1', 'content'], 1, ['p2', 'content'], 1);
   var p1Text = el.find('#p1 span').getFirstChild();
   var p2Text = el.find('#p2 span').getFirstChild();
   domSelection.setSelection(sel);
@@ -403,7 +404,7 @@ QUnit.webkitTest("Mapping a ContainerSelection to the DOM", function(assert) {
 
 QUnit.uiTest("Mapping a ContainerSelection from DOM to model", function(assert) {
   var el = this.sandbox.html(surfaceWithParagraphs);
-  var domSelection = new DOMSelection(new StubSurface(el, 'main'));
+  var domSelection = new DOMSelection(new StubSurface(el, 'body'));
   var p1Text = el.find('#p1 span').getFirstChild();
   var p2Text = el.find('#p2 span').getFirstChild();
   QUnit.setDOMSelection(p1Text, 1, p2Text, 2);
@@ -421,11 +422,51 @@ QUnit.uiTest("Mapping a ContainerSelection from DOM to model", function(assert) 
 // FF takes the anchor as we specified it (surface, 2)
 QUnit.uiTest("DOM Coordinate on surface element", function(assert) {
   var el = this.sandbox.html(surfaceWithParagraphs);
-  var domSelection = new DOMSelection(new StubSurface(el, 'main'));
+  var domSelection = new DOMSelection(new StubSurface(el, 'body'));
   var surface = el.find('#surface');
   QUnit.setDOMSelection(surface, 2, surface, 2);
   var sel = domSelection.getSelection();
   assert.ok(sel.isCollapsed, 'Selection should be collapsed.');
   assert.deepEqual(sel.startPath, ['p3', 'content'], 'startPath should be correct.');
   assert.equal(sel.startOffset, 0, 'startOffset should be correct.');
+});
+
+var textWithInlines = [
+  '<div id="test1">',
+    '<span id="test1-content" data-path="test1.content">',
+      '123',
+      '<span data-inline="1" data-length="1" contenteditable="false">$</span>',
+      '45',
+      '<span data-inline="1" data-length="1" contenteditable="false">$</span>',
+    '</span>',
+  '</div>'
+].join('');
+
+QUnit.uiTest("Setting cursor after inline node", function(assert) {
+  var el = this.sandbox.attr('contenteditable', true)
+    .html(textWithInlines);
+  var domSelection = new DOMSelection(new StubSurface(el));
+  var sel = new PropertySelection(['test1', 'content'], 4, 4);
+  var content = el.find('#test1-content');
+  var third = content.getChildAt(2);
+  domSelection.setSelection(sel);
+  var wSel = window.getSelection();
+  assert.equal(wSel.anchorNode, third.getNativeElement(), 'anchorNode should be after inline node.');
+  assert.equal(wSel.anchorOffset, 0, 'anchorOffset should be correct.');
+  assert.ok(wSel.focusNode === wSel.anchorNode, 'focusNode should be the same.');
+  assert.equal(wSel.focusOffset, 0, 'focusOffset should be correct.');
+});
+
+QUnit.uiTest("Setting cursor after inline node at end of property", function(assert) {
+  var el = this.sandbox.attr('contenteditable', true)
+    .html(textWithInlines);
+  var domSelection = new DOMSelection(new StubSurface(el));
+  var sel = new PropertySelection(['test1', 'content'], 7, 7);
+  var content = el.find('#test1-content');
+  domSelection.setSelection(sel);
+  var wSel = window.getSelection();
+  assert.equal(wSel.anchorNode, content.getNativeElement(), 'anchorNode should be after inline node.');
+  assert.equal(wSel.anchorOffset, 4, 'anchorOffset should be correct.');
+  assert.ok(wSel.focusNode === wSel.anchorNode, 'focusNode should be the same.');
+  assert.equal(wSel.focusOffset, wSel.anchorOffset, 'focusOffset should be correct.');
 });
