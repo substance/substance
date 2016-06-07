@@ -968,6 +968,9 @@ Surface.Prototype = function() {
 
   // EXPERIMENTAL: get bounding box for current selection
   this.getBoundingRectangleForSelection = function() {
+    var sel = this.getSelection();
+    if (!sel || sel.isNull() || sel.isNodeSelection() || sel.isCustomSelection()) return {};
+
     // TODO: selection rectangle should be calculated
     // relative to scrolling container, which either is
     // the parent scrollPane, or the body element
@@ -1004,7 +1007,6 @@ Surface.Prototype = function() {
       return rect;
     } else {
       var nativeEl = this.el.el;
-      var sel = this.getSelection();
       if (sel.isNull()) {
         return {};
       } else {
