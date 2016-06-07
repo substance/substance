@@ -837,7 +837,11 @@ Surface.Prototype = function() {
   };
 
   this._focus = function() {
-    if (this.el) {
+    // HACK: we must not focus explicitly in Chrome/Safari
+    // as otherwise we get a crazy auto-scroll
+    // Still, this is ok, as everything is working fine
+    // there, without that (as opposed to FF/Edge)
+    if (this.el && !platform.isWebkit) {
       this._state.skipNextFocusEvent = true;
       // ATTENTION: unfortunately, focusing the contenteditable does lead to auto-scrolling
       // in some browsers
