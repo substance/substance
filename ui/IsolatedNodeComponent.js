@@ -93,7 +93,7 @@ IsolatedNodeComponent.Prototype = function() {
     }
     container.append(this.renderContent($$));
 
-    if (this._isDisabled()) {
+    if (this._isDisabled() || this.state.mode === 'co-focused') {
       container.addClass('sm-disabled');
       // NOTE: there are some content implementations which work better without a blocker
       var blocker = $$('div').addClass('se-blocker').css({ 'z-index': this._state.level });
@@ -147,7 +147,7 @@ IsolatedNodeComponent.Prototype = function() {
   };
 
   this._isDisabled = function() {
-    return this.state.mode === 'co-selected' || this.state.mode === 'cursor' || !this.state.mode;
+    return !this.state.mode || ['co-selected', 'cursor'].indexOf(this.state.mode) > -1;
   };
 
   this._getSurfaceParent = function() {
@@ -230,7 +230,6 @@ IsolatedNodeComponent.Prototype = function() {
     switch (this.state.mode) {
       case 'selected':
       case 'focused':
-      case 'co-focused':
         break;
       default:
         event.preventDefault();
