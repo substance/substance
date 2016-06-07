@@ -23,6 +23,8 @@ function DocumentNode(doc, props) {
 
 DocumentNode.Prototype = function() {
 
+  this._isDocumentNode = true;
+
   var _super = DocumentNode.super.prototype;
 
   /**

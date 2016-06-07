@@ -545,7 +545,6 @@ Document.Prototype = function() {
     each(seed.nodes, function(nodeData) {
       this.create(nodeData);
     }.bind(this));
-
   };
 
   /**
@@ -563,7 +562,9 @@ Document.Prototype = function() {
     // console.warn('DEPRECATED: Document.toJSON(). Use model/JSONConverter instead.');
     var nodes = {};
     each(this.getNodes(), function(node) {
-      nodes[node.id] = node.toJSON();
+      if (node._isDocumentNode) {
+        nodes[node.id] = node.toJSON();
+      }
     });
     return {
       schema: [this.schema.name, this.schema.version],

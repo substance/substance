@@ -80,6 +80,9 @@ AbstractConfigurator.Prototype = function() {
     if (this.config.components[name]) {
       throw new Error(name+' already registered');
     }
+    if (!ComponentClass || !ComponentClass.prototype._isComponent) {
+      throw new Error('ComponentClass must be a subclass of ui/Component.');
+    }
     this.config.components[name] = ComponentClass;
   };
 
