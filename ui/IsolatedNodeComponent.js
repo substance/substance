@@ -50,10 +50,17 @@ IsolatedNodeComponent.Prototype = function() {
 
     var node = this.props.node;
     el.addClass('sc-isolated-node')
+      .addClass('sm-'+this.props.node.type)
       .attr("data-id", node.id);
 
     if (this.state.mode) {
       el.addClass('sm-'+this.state.mode);
+    } else {
+      el.addClass('sm-not-selected');
+    }
+
+    if (!ContentClass.static.noStyle) {
+      el.addClass('sm-default-style');
     }
 
     el.on('mousedown', this.onMousedown);
@@ -73,7 +80,8 @@ IsolatedNodeComponent.Prototype = function() {
     );
 
     var container = $$('div').addClass('se-container')
-      .attr('contenteditable', false);
+      .attr('contenteditable', false)
+      .css({ 'z-index': 2*this._state.level });
 
     if (ContentClass.static.fullWidth) {
       container.addClass('sm-full-width');
@@ -86,10 +94,10 @@ IsolatedNodeComponent.Prototype = function() {
     }
     container.append(this.renderContent($$));
 
-    if (this._isDisabled()) {
+    if (this._isDisabled() || this.state.mode === 'co-focused') {
       container.addClass('sm-disabled');
       // NOTE: there are some content implementations which work better without a blocker
-      var blocker = $$('div').addClass('se-blocker').css({ 'z-index': this._state.level });
+      var blocker = $$('div').addClass('se-blocker').css({ 'z-index': 2*this._state.level+1 });
       container.append(blocker);
     }
 
@@ -140,7 +148,7 @@ IsolatedNodeComponent.Prototype = function() {
   };
 
   this._isDisabled = function() {
-    return this.state.mode === 'co-selected' || this.state.mode === 'cursor' || !this.state.mode;
+    return !this.state.mode || ['co-selected', 'cursor'].indexOf(this.state.mode) > -1;
   };
 
   this._getSurfaceParent = function() {
@@ -204,14 +212,16 @@ IsolatedNodeComponent.Prototype = function() {
     // for all other cases (focused / co-focused) the surface id prefix must match
     if (!startsWith(surfaceId, id)) return;
 
-    if (surfaceId.length === id.length) {
-      return {
-        mode: 'focused'
-      };
+    // Note: trying to distinguisd focused
+    // surfaceIds are a sequence of names joined with '/'
+    // a surface inside this node will have a path with length+1.
+    // a custom selection might just use the id of this IsolatedNode
+    var p1 = id.split('/');
+    var p2 = surfaceId.split('/');
+    if (p2.length >= p1.length && p2.length <= p1.length+1) {
+      return { mode: 'focused' };
     } else {
-      return {
-        mode: 'co-focused'
-      };
+      return { mode: 'co-focused' };
     }
   };
 
@@ -221,7 +231,6 @@ IsolatedNodeComponent.Prototype = function() {
     switch (this.state.mode) {
       case 'selected':
       case 'focused':
-      case 'co-focused':
         break;
       default:
         event.preventDefault();

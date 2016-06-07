@@ -365,17 +365,16 @@ AnnotationCommand.Prototype = function() {
     // HACK: this looks a bit too flexible. Maybe we want to go for
     var sel = this._getSelection(props);
     var documentSession = this._getDocumentSession(props, context);
+    var surface = props.surface;
 
     var result; // to store transform result
     if (sel.isNull()) return;
     documentSession.transaction(function(tx, props) {
       tx.before.selection = sel;
+      if (surface) {
+        tx.before.surfaceId = surface.getId();
+      }
       props.selection = sel;
-      // TODO: why disable this per se?
-      props.splitContainerSelections = false;
-      // if (surface && surface.isContainerEditor()) {
-      //   props.containerId = surface.getContainerId();
-      // }
       props = transformFn(tx, props);
       if (props) {
         result = props.result;

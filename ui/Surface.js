@@ -105,7 +105,9 @@ Surface.Prototype = function() {
     }
 
     this.documentSession.on('update', this._onSessionUpdate, this);
-    this.documentSession.on('didUpdate', this._sendOverlayHints, this);
+    this.documentSession.on('didUpdate', this._sendOverlayHints, this, {
+      priority: -1000001
+    });
   };
 
 
@@ -299,20 +301,9 @@ Surface.Prototype = function() {
   };
 
   this.blur = function() {
-    if (this._hasNativeFocus()) {
+    if (this.el) {
       this.el.blur();
-    } else {
-      this._updateProperties();
     }
-    this.emit('surface:blurred', this);
-  };
-
-  this._hasNativeFocus = function() {
-    if (inBrowser) {
-      var focusedElement = window.document.activeElement;
-      return this.el.getNativeElement() === focusedElement;
-    }
-    return false;
   };
 
   this.focus = function() {
@@ -323,10 +314,7 @@ Surface.Prototype = function() {
       this.domSelection.clear();
       this.el.getNativeElement().blur();
     }
-    if (!this._hasNativeFocus()) {
-      this._focus();
-    }
-    this.emit('surface:focused', this);
+    this._focus();
   };
 
   this.rerenderDOMSelection = function() {
@@ -428,6 +416,8 @@ Surface.Prototype = function() {
    * Handle document key down events.
    */
   this.onKeyDown = function(event) {
+    // console.log('Surface.onKeyDown()', this.getId());
+
     var commandManager = this.context.commandManager;
     if ( event.which === 229 ) {
       // ignore fake IME events (emitted in IE and Chromium)
@@ -493,10 +483,10 @@ Surface.Prototype = function() {
   };
 
   this.onTextInput = function(event) {
-    if (!event.data) return;
     // console.log("TextInput:", event);
     event.preventDefault();
     event.stopPropagation();
+    if (!event.data) return;
     // necessary for handling dead keys properly
     this._state.skipNextObservation=true;
     this.transaction(function(tx, args) {
@@ -639,35 +629,14 @@ Surface.Prototype = function() {
 
   this.onNativeBlur = function() {
     // console.log('Native blur on surface', this.getId());
-    // NOTE: deactivated this for now, as it had strange side effects
-    // we should find a better way which plays together with our update flow
-
-    // var _state = this._state;
-    // native blur does not lead to a session update,
-    // thus we need to update the selection manually
-    // if (_state.cursorFragment) {
-    //   this._updateProperty(_state.cursorFragment.key);
-    // }
+    var _state = this._state;
+    _state.hasNativeFocus = false;
   };
 
   this.onNativeFocus = function() {
     // console.log('Native focus on surface', this.getId());
-    // NOTE: deactivated this for now, as it had strange side effects
-    // we should find a better way which plays together with our update flow
-
-    // var _state = this._state;
-    // in some cases we don't react on native focusing
-    // e.g., when the selection is done via mouse
-    // or if the selection is set implicitly
-    // if (_state.skipNextFocusEvent) {
-    //   _state.skipNextFocusEvent = false;
-    //   return;
-    // }
-    // native focus does not lead to a session update,
-    // thus we need to update the selection manually
-    // if (_state.cursorFragment) {
-    //   this._updateProperty(_state.cursorFragment.key);
-    // }
+    var _state = this._state;
+    _state.hasNativeFocus = true;
   };
 
   // Internal implementations
@@ -837,7 +806,12 @@ Surface.Prototype = function() {
   };
 
   this._focus = function() {
-    if (this.el) {
+    this._state.hasNativeFocus = true;
+    // HACK: we must not focus explicitly in Chrome/Safari
+    // as otherwise we get a crazy auto-scroll
+    // Still, this is ok, as everything is working fine
+    // there, without that (as opposed to FF/Edge)
+    if (this.el && !platform.isWebkit) {
       this._state.skipNextFocusEvent = true;
       // ATTENTION: unfortunately, focusing the contenteditable does lead to auto-scrolling
       // in some browsers
@@ -905,6 +879,10 @@ Surface.Prototype = function() {
       args.direction = direction;
       return this.delete(tx, args);
     }.bind(this), { action: 'delete' });
+  };
+
+  this._hasNativeFocus = function() {
+    return Boolean(this._state.hasNativeFocus);
   };
 
   this._setSelection = function(sel) {
@@ -992,6 +970,9 @@ Surface.Prototype = function() {
 
   // EXPERIMENTAL: get bounding box for current selection
   this.getBoundingRectangleForSelection = function() {
+    var sel = this.getSelection();
+    if (!sel || sel.isNull() || sel.isNodeSelection() || sel.isCustomSelection()) return {};
+
     // TODO: selection rectangle should be calculated
     // relative to scrolling container, which either is
     // the parent scrollPane, or the body element
@@ -1028,26 +1009,23 @@ Surface.Prototype = function() {
       return rect;
     } else {
       var nativeEl = this.el.el;
-      var sel = this.getSelection();
-      if (sel.isNull()) {
-        return {};
-      } else {
-        if (sel.isCollapsed()) {
-          var cursorEl = nativeEl.querySelector('.se-cursor');
-          if (cursorEl) {
-            return getBoundingClientRect(cursorEl, containerEl);
-          } else {
-            console.warn('FIXME: there should be a rendered cursor element.');
-            return {};
-          }
+      if (sel.isCollapsed()) {
+        var cursorEl = nativeEl.querySelector('.se-cursor');
+        if (cursorEl) {
+          return getBoundingClientRect(cursorEl, containerEl);
         } else {
-          var selFragments = nativeEl.querySelectorAll('.se-selection-fragment');
-          if (selFragments.length > 0) {
-            return getBoundingClientRect(selFragments, containerEl);
-          } else {
-            console.warn('FIXME: there should be a rendered selection fragments element.');
-            return {};
-          }
+          // TODO: in the most cases we actually do not have a
+          // cursor element.
+          // console.warn('FIXME: there should be a rendered cursor element.');
+          return {};
+        }
+      } else {
+        var selFragments = nativeEl.querySelectorAll('.se-selection-fragment');
+        if (selFragments.length > 0) {
+          return getBoundingClientRect(selFragments, containerEl);
+        } else {
+          console.warn('FIXME: there should be a rendered selection fragments element.');
+          return {};
         }
       }
     }

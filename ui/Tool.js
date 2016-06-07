@@ -51,7 +51,7 @@ Tool.Prototype = function() {
 
     if (this.props.disabled) {
       // make button inaccessible
-      button.attr('tabindex', -1);
+      button.attr('tabindex', -1).attr('disabled', true);
     } else {
       // make button accessible for tab-navigation
       button.attr('tabindex', 1);

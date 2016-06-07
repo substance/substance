@@ -20,7 +20,7 @@ function ProseEditor() {
 ProseEditor.Prototype = function() {
 
   this.didMount = function() {
-    this.refs.body.selectFirst();
+    // this.refs.body.selectFirst();
   };
 
   this.willReceiveProps = function(nextProps) {

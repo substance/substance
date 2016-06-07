@@ -188,6 +188,21 @@ TextPropertyComponent.Prototype = function() {
         if (length) {
           l = parseInt(length, 10);
           if (l>= charPos) {
+            // special handling for InlineNodes
+            if (child.attr('data-inline')) {
+              var nextSibling = child.getNextSibling();
+              if (nextSibling && nextSibling.isTextNode()) {
+                return {
+                  container: nextSibling.getNativeElement(),
+                  offset: 0
+                };
+              } else {
+                return {
+                  container: el.getNativeElement(),
+                  offset: el.getChildIndex(child) + 1
+                };
+              }
+            }
             return this._getDOMCoordinate(child, charPos, idx);
           } else {
             charPos -= l;
