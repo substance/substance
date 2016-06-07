@@ -19,7 +19,12 @@ function SurfaceManager(documentSession) {
   };
 
   this.documentSession.on('update', this.onSessionUpdate, this);
-  this.documentSession.on('didUpdate', this.onSessionDidUpdate, this);
+  // HACK: trying to make rerendering the DOM selection the very last
+  // TODO: we want to introduce a FlowManager, which will hopefully
+  // make this prio hack obsolete
+  this.documentSession.on('didUpdate', this.onSessionDidUpdate, this, {
+    priority: -1000000
+  });
 }
 
 SurfaceManager.Prototype = function() {
