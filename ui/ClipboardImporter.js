@@ -150,7 +150,7 @@ ClipboardImporter.Prototype = function() {
     @return {Document} the document instance
   */
   this.createDocument = function() {
-    var doc = this._createDocument();
+    var doc = this._createDocument(this.schema);
     if (!doc.get(CLIPBOARD_CONTAINER_ID)) {
       doc.create({
         type: 'container',

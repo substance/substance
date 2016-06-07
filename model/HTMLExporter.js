@@ -73,7 +73,7 @@ HTMLExporter.Prototype = function() {
           return;
         }
         var prop = converter.$$('div').attr('property', name);
-        if (node.getPropertyType(name) === 'string') {
+        if (node.getPropertyType(name) === 'string' && value) {
           prop.append(converter.annotatedText([node.id, name]));
         } else {
           prop.text(value);

@@ -90,7 +90,7 @@ ContainerEditor.Prototype = function() {
     _super.didMount.apply(this, arguments);
     var doc = this.getDocument();
     // to do incremental updates
-    doc.on('document:changed', this.onDocumentChange, this);
+    doc.on('document:changed', this.onDocumentChange, this, { priority: 100 });
   };
 
   this.dispose = function() {
@@ -103,10 +103,10 @@ ContainerEditor.Prototype = function() {
     var el = _super.render.call(this, $$);
 
     var doc = this.getDocument();
-    var containerId = this.props.containerId;
-    var containerNode = doc.get(this.props.containerId);
+    var containerId = this.getContainerId();
+    var containerNode = doc.get(containerId);
     if (!containerNode) {
-      console.warn('No container node found for ', this.props.containerId);
+      console.warn('No container node found for ', containerId);
     }
     el.addClass('sc-container-editor container-node ' + containerId)
       .attr({
@@ -219,7 +219,7 @@ ContainerEditor.Prototype = function() {
     Returns the containerId the editor is bound to
   */
   this.getContainerId = function() {
-    return this.props.containerId;
+    return this.containerId;
   };
 
   // TODO: do we really need this in addition to getContainerId?
@@ -228,8 +228,7 @@ ContainerEditor.Prototype = function() {
   };
 
   this.isEmpty = function() {
-    var doc = this.getDocument();
-    var containerNode = doc.get(this.props.containerId);
+    var containerNode = this.getContainer();
     return (containerNode && containerNode.nodes.length === 0);
   };
 
@@ -350,10 +349,12 @@ ContainerEditor.Prototype = function() {
     // first update the container
     var renderContext = RenderingEngine.createContext(this);
     var $$ = renderContext.$$;
-    if (change.isAffected([this.props.containerId, 'nodes'])) {
+    var container = this.getContainer();
+    var path = container.getContentPath();
+    if (change.isAffected(path)) {
       for (var i = 0; i < change.ops.length; i++) {
         var op = change.ops[i];
-        if (op.type === "update" && op.path[0] === this.props.containerId) {
+        if (op.type === "update" && op.path[0] === path[0]) {
           var diff = op.diff;
           if (diff.type === "insert") {
             var nodeId = diff.getValue();
