@@ -88,6 +88,10 @@ GlobalEventHandler.Prototype = function() {
   };
 
   this._dispatch = function(eventName, e) {
+    // ATTENTION: if nobody has handled the event before,
+    // we stop the browser default behavior to avoid
+    // any undesired effects.
+    event.preventDefault();
     var listener = this._getActiveListener(eventName);
     if (listener) {
       listener.handler(e);
