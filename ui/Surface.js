@@ -299,12 +299,9 @@ Surface.Prototype = function() {
   };
 
   this.blur = function() {
-    if (this._hasNativeFocus()) {
+    if (this.el) {
       this.el.blur();
-    } else {
-      this._updateProperties();
     }
-    this.emit('surface:blurred', this);
   };
 
   this.focus = function() {
@@ -315,10 +312,7 @@ Surface.Prototype = function() {
       this.domSelection.clear();
       this.el.getNativeElement().blur();
     }
-    if (!this._hasNativeFocus()) {
-      this._focus();
-    }
-    this.emit('surface:focused', this);
+    this._focus();
   };
 
   this.rerenderDOMSelection = function() {
@@ -420,6 +414,8 @@ Surface.Prototype = function() {
    * Handle document key down events.
    */
   this.onKeyDown = function(event) {
+    // console.log('Surface.onKeyDown()', this.getId());
+
     var commandManager = this.context.commandManager;
     if ( event.which === 229 ) {
       // ignore fake IME events (emitted in IE and Chromium)
@@ -485,10 +481,10 @@ Surface.Prototype = function() {
   };
 
   this.onTextInput = function(event) {
-    if (!event.data) return;
     // console.log("TextInput:", event);
     event.preventDefault();
     event.stopPropagation();
+    if (!event.data) return;
     // necessary for handling dead keys properly
     this._state.skipNextObservation=true;
     this.transaction(function(tx, args) {
@@ -630,13 +626,13 @@ Surface.Prototype = function() {
   };
 
   this.onNativeBlur = function() {
-    console.log('Native blur on surface', this.getId());
+    // console.log('Native blur on surface', this.getId());
     var _state = this._state;
     _state.hasNativeFocus = false;
   };
 
   this.onNativeFocus = function() {
-    console.log('Native focus on surface', this.getId());
+    // console.log('Native focus on surface', this.getId());
     var _state = this._state;
     _state.hasNativeFocus = true;
   };
@@ -808,6 +804,7 @@ Surface.Prototype = function() {
   };
 
   this._focus = function() {
+    this._state.hasNativeFocus = true;
     // HACK: we must not focus explicitly in Chrome/Safari
     // as otherwise we get a crazy auto-scroll
     // Still, this is ok, as everything is working fine
@@ -883,10 +880,7 @@ Surface.Prototype = function() {
   };
 
   this._hasNativeFocus = function() {
-    // return Boolean(this._state.hasNativeFocus);
-    if (inBrowser) {
-      return window.document.activeElement === this.el.getNativeElement();
-    }
+    return Boolean(this._state.hasNativeFocus);
   };
 
   this._setSelection = function(sel) {
@@ -1019,7 +1013,9 @@ Surface.Prototype = function() {
           if (cursorEl) {
             return getBoundingClientRect(cursorEl, containerEl);
           } else {
-            console.warn('FIXME: there should be a rendered cursor element.');
+            // TODO: in the most cases we actually do not have a
+            // cursor element.
+            // console.warn('FIXME: there should be a rendered cursor element.');
             return {};
           }
         } else {
