@@ -464,7 +464,7 @@ DOMImporter.Prototype = function DOMImporterPrototype() {
       // NOTE: there are some block level nodes which are also allowed as
       // inline wrapped by an InlineWrapper
       // TODO: we need to see if this concept is good enough
-      if (blockConverter && blockConverter.canBeInline) {
+      if (blockConverter && (blockConverter.canBeInline || this.config.enableInlineWrapper)) {
         converter = InlineWrapperConverter;
       }
     }
