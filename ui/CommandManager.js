@@ -2,7 +2,8 @@
 
 var oo = require('../util/oo');
 var extend = require('lodash/extend');
-var each = require('lodash/each');
+var forEach = require('lodash/forEach');
+var isEqual = require('lodash/isEqual');
 var Registry = require('../util/Registry');
 
 /*
@@ -22,13 +23,14 @@ function CommandManager(context, commands) {
 
   // Set up command registry
   this.commandRegistry = new Registry();
-  each(commands, function(CommandClass) {
+  forEach(commands, function(CommandClass) {
     var cmd = new CommandClass();
     this.commandRegistry.add(CommandClass.static.name, cmd);
   }.bind(this));
 
-  this.updateCommandStates();
   this.documentSession.on('update', this.updateCommandStates, this);
+
+  this.updateCommandStates();
 }
 
 CommandManager.Prototype = function() {
@@ -51,7 +53,10 @@ CommandManager.Prototype = function() {
     this.commandRegistry.forEach(function(cmd) {
       commandStates[cmd.getName()] = cmd.getCommandState(props, commandContext);
     });
-    this.commandStates = commandStates;
+    // poor-man's immutable style
+    if (!isEqual(this.commandStates, commandStates)) {
+      this.commandStates = commandStates;
+    }
   };
 
   /*

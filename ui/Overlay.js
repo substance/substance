@@ -12,9 +12,20 @@ var Component = require('./Component');
 */
 function Overlay() {
   Component.apply(this, arguments);
+
+  this.commandStates = this._getCommandStates();
 }
 
 Overlay.Prototype = function() {
+
+  this.shouldRerender = function() {
+    var commandStates = this._getCommandStates();
+    if (commandStates !== this.commandStates) {
+      this.commandStates = commandStates;
+      return true;
+    }
+    return false;
+  };
 
   this.render = function($$) {
     var el = $$('div').addClass('sc-overlay sm-hidden');
@@ -27,31 +38,34 @@ Overlay.Prototype = function() {
   };
 
   this.didMount = function() {
-    this.context.documentSession.on('didUpdate', this.rerender, this);
-    this._update();
+    // rerender the overlay content after anything else has been updated
+    this.context.documentSession.on('didUpdate', this._onSessionDidUpdate, this);
   };
 
   this.dispose = function() {
     this.context.documentSession.off(this);
   };
 
-  this.didUpdate = function() {
-    this._update();
-  };
-
-  // Position + show/hide
-  this._update = function() {
+  this.position = function(hints) {
     var content = this.refs.overlayContent;
-
     if (content.childNodes.length > 0) {
       // Position based on rendering hints
-      this._position();
+      this._position(hints);
       this.el.removeClass('sm-hidden');
     }
   };
 
-  this._position = function() {
-    var hints = this.props.hints;
+  this._onSessionDidUpdate = function() {
+    if (this.shouldRerender()) {
+      this.rerender();
+    }
+  };
+
+  this._getCommandStates = function() {
+    return this.context.commandManager.getCommandStates();
+  };
+
+  this._position = function(hints) {
     var overlayContent = this.refs.overlayContent;
     window.overlayContent = overlayContent;
 
@@ -64,10 +78,8 @@ Overlay.Prototype = function() {
       // By default, Overlays are aligned center/top to the selection
       this.el.css('top', hints.rectangle.top - contentHeight);
       var leftPos = hints.rectangle.left + selectionMaxWidth/2 - contentWidth/2;
-
       // Must not exceed left bound
       leftPos = Math.max(leftPos, 0);
-
       // Must not exceed right bound
       var maxLeftPos = hints.rectangle.left + selectionMaxWidth + hints.rectangle.right - contentWidth;
       leftPos = Math.min(leftPos, maxLeftPos);

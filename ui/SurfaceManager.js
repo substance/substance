@@ -201,7 +201,9 @@ SurfaceManager.Prototype = function() {
     var focusedSurface = this._state.focusedSurface;
     if (focusedSurface) {
       focusedSurface.focus();
+      // console.log('rerenderingDOMSelection', this.documentSession.getSelection().toString());
       focusedSurface.rerenderDOMSelection();
+      focusedSurface._sendOverlayHints();
     }
   };
 

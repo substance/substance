@@ -53,10 +53,6 @@ ScrollPane.Prototype = function() {
       this.context.doc.on('document:changed', this.onDocumentChange, this, { priority: -1 });
     }
 
-    this.context.documentSession.on('didUpdate', this._updateOverlay, this, {
-      priority: -1
-    });
-
     this.handleActions({
       'updateOverlayHints': this._updateOverlayHints
     });
@@ -118,15 +114,9 @@ ScrollPane.Prototype = function() {
 
   this._updateOverlayHints = function(overlayHints) {
     // Remember overlay hints for next update
-    this._overlayHints = overlayHints;
-  };
-
-  this._updateOverlay = function() {
     var overlay = this.refs.overlay;
     if (overlay) {
-      overlay.extendProps({
-        hints: this._overlayHints
-      });
+      overlay.position(overlayHints);
     }
   };
 

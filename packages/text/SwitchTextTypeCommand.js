@@ -49,7 +49,6 @@ SwitchTextType.Prototype = function() {
     var surface = context.surfaceManager.getFocusedSurface();
     var newState = {
       disabled: false,
-      sel: sel,
       textTypes: this.getTextTypes(context)
     };
     // Set disabled when not a property selection

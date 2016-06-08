@@ -105,9 +105,6 @@ Surface.Prototype = function() {
     }
 
     this.documentSession.on('update', this._onSessionUpdate, this);
-    this.documentSession.on('didUpdate', this._sendOverlayHints, this, {
-      priority: -1000001
-    });
   };
 
 
@@ -991,7 +988,7 @@ Surface.Prototype = function() {
 
     // having a DOM selection?
     if (wrange && wrange.collapsed) {
-      // unfortunately, collapsed selections to not have a boundary rectangle
+      // unfortunately, collapsed selections do not have a boundary rectangle
       // thus we need to insert a span temporarily and take its rectangle
       // if (wrange.collapsed) {
       var span = document.createElement('span');
@@ -1032,13 +1029,14 @@ Surface.Prototype = function() {
   };
 
   this._sendOverlayHints = function() {
-    // TODO: optimize! This leads to low performance on FF
-    if (this.state.mode === 'focused') {
-      var selectionRect = this.getBoundingRectangleForSelection();
-      this.send('updateOverlayHints', {
-        rectangle: selectionRect
-      });
-    }
+    // TODO: we need to rethink this.
+    // The overlay is owned by the ScrollPane.
+    // So the current solution is to send up hints
+    // which are dispatched to the overlay instance.
+    var selectionRect = this.getBoundingRectangleForSelection();
+    this.send('updateOverlayHints', {
+      rectangle: selectionRect
+    });
   };
 
 };
