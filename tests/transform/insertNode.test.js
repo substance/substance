@@ -1,6 +1,6 @@
 "use strict";
 
-var test = require('tape');
+var test = require('../test');
 
 var insertNode = require('../../model/transform/insertNode');
 var DocumentSession = require('../../model/DocumentSession');

@@ -1,6 +1,6 @@
 'use strict';
 
-var test = require('tape');
+var test = require('../test');
 
 var SnapshotStore = require('../../collab/SnapshotStore');
 var testSnapshotStore = require('../collab/testSnapshotStore');

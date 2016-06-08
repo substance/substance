@@ -1,6 +1,6 @@
 'use strict';
 
-var test = require('tape');
+var test = require('../test');
 
 var oo = require('../../util/oo');
 var Fragmenter = require('../../model/Fragmenter');

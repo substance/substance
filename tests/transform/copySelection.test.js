@@ -1,6 +1,6 @@
 "use strict";
 
-var test = require('tape');
+var test = require('../test');
 
 var copySelection = require('../../model/transform/copySelection');
 var CLIPBOARD_PROPERTY_ID = copySelection.CLIPBOARD_PROPERTY_ID;

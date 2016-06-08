@@ -1,6 +1,6 @@
 'use strict';
 
-var test = require('tape');
+var test = require('../test');
 
 var Range = require('../../model/Range');
 var Coordinate = require('../../model/Coordinate');

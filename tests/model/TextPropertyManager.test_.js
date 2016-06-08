@@ -2,7 +2,7 @@
 
 var sinon = require('sinon');
 
-var test = require('tape');
+var test = require('../test');
 
 var TextPropertyManager = require('../../model/TextPropertyManager');
 var DocumentSession = require('../../model/DocumentSession');

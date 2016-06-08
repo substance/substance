@@ -1,6 +1,6 @@
 "use strict";
 
-var test = require('tape');
+var test = require('../test');
 
 var breakNode = require('../../model/transform/breakNode');
 

@@ -1,6 +1,6 @@
 "use strict";
 
-var test = require('tape');
+var test = require('../test');
 
 var insertText = require('../../model/transform/insertText');
 var fixture = require('../fixtures/createTestArticle');

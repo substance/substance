@@ -41,19 +41,35 @@ app.get('/test/test.js', function (req, res, next) {
         .bundle()
         .on('error', function(err){
           console.error(err.message);
-          // res.status(500).send('console.log("'+err.message+'");');
-          // next();
         })
         .pipe(res);
     }
   });
 });
 
-// Provide static routes for testing
-// for accessing test/index.html and for fixtures
-// NOTE: '/base' is necessary to be compatible with karma
-app.use('/test', express.static(__dirname + '/test'));
-app.use('/base/test', express.static(__dirname + '/test'));
+// Test suite
+app.get('/tape-test/app.js', function (req, res, next) {
+  glob("tests/**/*.test.js", {}, function (er, testfiles) {
+    if (er || !testfiles || testfiles.length === 0) {
+      console.error('No tests found.');
+      res.send('500');
+    } else {
+      // console.log('Found test files:', testfiles);
+      browserify({ debug: true, cache: false })
+        .add(path.join(__dirname, 'tests', 'app.js'))
+        .add(testfiles.map(function(file) {
+          return path.join(__dirname, file);
+        }))
+        .bundle()
+        .on('error', function(err){
+          console.error(err.message);
+        })
+        .pipe(res);
+    }
+  });
+});
+app.use('/tape-test', express.static(__dirname + '/tests'));
+
 
 app.listen(PORT);
 console.log('Server is listening on %s', PORT);

@@ -1,6 +1,7 @@
 'use strict';
+/* eslint-disable */
 
-var test = require('tape');
+var test = require('../test');
 
 var ContainerAddress = require('../../model/ContainerAddress');
 

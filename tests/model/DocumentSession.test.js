@@ -1,6 +1,6 @@
 'use strict';
 
-var test = require('tape');
+var test = require('../test');
 
 var sinon = require('sinon');
 var extend = require('lodash/extend');

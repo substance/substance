@@ -1,7 +1,7 @@
 'use strict';
 /* eslint-disable consistent-return */
 
-var test = require('tape');
+var test = require('../test');
 
 var DocumentStore = require('../../collab/DocumentStore');
 var ChangeStore = require('../../collab/ChangeStore');

@@ -1,6 +1,6 @@
 "use strict";
 
-var test = require('tape');
+var test = require('../test');
 
 var fixture = require('../fixtures/createTestArticle');
 var headersAndParagraphs = require('../fixtures/headersAndParagraphs');

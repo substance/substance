@@ -1,6 +1,6 @@
 "use strict";
 
-var test = require('tape');
+var test = require('../test');
 
 var deleteSelection = require('../../model/transform/deleteSelection');
 

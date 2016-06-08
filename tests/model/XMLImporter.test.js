@@ -1,6 +1,6 @@
 'use strict';
 
-var test = require('tape');
+var test = require('../test');
 
 var TestXMLImporter = require('../model/TestXMLImporter');
 var DOMElement = require('../../ui/DefaultDOMElement');

@@ -1,6 +1,6 @@
 'use strict';
 
-var test = require('tape');
+var test = require('../test');
 
 var truncateAnnotation = require('../../model/transform/truncateAnnotation');
 

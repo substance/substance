@@ -1,6 +1,6 @@
 'use strict';
 
-var test = require('tape');
+var test = require('../test');
 
 var fuseAnnotation = require('../../model/transform/fuseAnnotation');
 var docHelpers = require('../../model/documentHelpers');

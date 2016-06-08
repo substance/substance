@@ -1,4 +1,4 @@
-var test = require('tape');
+var test = require('./test');
 
 var inBrowser = require('../util/inBrowser');
 var platform = require('../util/platform');
