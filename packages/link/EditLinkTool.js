@@ -30,7 +30,7 @@ EditLinkTool.Prototype = function() {
         .ref('url')
         // This only works on the first load. Why?
         // Is this element even preserved when unmounted and rerendered?
-        .htmlProp('autofocus', true)
+        // .htmlProp('autofocus', true)
         .on('change', this.onSave),
       $$('div').addClass('se-actions').append(
         // $$('button')
