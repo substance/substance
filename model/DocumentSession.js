@@ -58,6 +58,10 @@ DocumentSession.Prototype = function() {
     }
   };
 
+  this.getSelectionState = function() {
+    return this.selectionState;
+  };
+
   /*
     Set saveHandler via API
 

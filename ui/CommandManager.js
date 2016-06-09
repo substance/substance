@@ -87,12 +87,14 @@ CommandManager.Prototype = function() {
   // TODO: while we need it here this should go into the flow thingie later
   this._getCommandProps = function() {
     var documentSession = this.context.documentSession;
-    var sel = documentSession.getSelection();
+    var selectionState = documentSession.getSelectionState();
+    var sel = selectionState.getSelection();
     var surface = this.context.surfaceManager.getFocusedSurface();
     return {
       documentSession: documentSession,
+      selectionState: selectionState,
       surface: surface,
-      selection: sel,
+      selection: sel
     };
   };
 

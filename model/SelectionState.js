@@ -31,8 +31,9 @@ SelectionState.Prototype = function() {
   };
 
   this.getAnnotationsForType = function(type) {
-    if (this.state.annos) {
-      return this.state.annos.get(type);
+    var state = this._state;
+    if (state.annosByType) {
+      return state.annosByType.get(type) || [];
     }
     return [];
   };
@@ -72,14 +73,14 @@ SelectionState.Prototype = function() {
         annosByType.add(anno.type, anno);
       });
     }
-    state.annos = annosByType;
+    state.annosByType = annosByType;
   };
 
   this._resetState = function() {
     this._state = {
       selection: Selection.nullSelection,
       // all annotations under the current selection
-      annos: null,
+      annosByType: null,
       // flags to make node selection (IsolatedNodes) stuff more convenient
       isNodeSelection: false,
       nodeId: null,
