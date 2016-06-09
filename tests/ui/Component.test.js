@@ -1,7 +1,7 @@
 "use strict";
 /* eslint-disable no-invalid-this, indent */
 
-var UITestModule = require('../UITest').InBrowser;
+var UITest = require('../test').UI;
 
 var spy = require('../spy');
 var isEqual = require('lodash/isEqual');
@@ -72,11 +72,11 @@ function _ComponentTests(debug) {
     RenderingEngine.DEBUG = debug;
   }
 
-  function UITest(description, fn) {
-    UITestModule(description, fn, ModuleSetup);
+  function test(description, fn) {
+    UITest(description, fn, ModuleSetup);
   };
 
-  UITest("Throw error when render method is not returning an element", function(t) {
+  test("Throw error when render method is not returning an element", function(t) {
     var MyComponent = TestComponent.extend({
       render: function() {}
     });
@@ -102,7 +102,7 @@ function _ComponentTests(debug) {
 
   TestComponent.extend(SimpleComponent);
 
-  UITest("Mounting a component", function(t) {
+  test("Mounting a component", function(t) {
     enableSpies();
     // Mount to a detached element
     var el = window.document.createElement('div');
@@ -114,7 +114,7 @@ function _ComponentTests(debug) {
     t.end();
   });
 
-  UITest("Render an HTML element", function(t) {
+  test("Render an HTML element", function(t) {
     var comp = renderTestComponent(function($$) {
       return $$('div');
     });
@@ -126,7 +126,7 @@ function _ComponentTests(debug) {
     t.end();
   });
 
-  UITest("Render an element with attributes", function(t) {
+  test("Render an element with attributes", function(t) {
     var comp = renderTestComponent(function($$) {
       return $$('div').attr('data-id', 'foo');
     });
@@ -134,7 +134,7 @@ function _ComponentTests(debug) {
     t.end();
   });
 
-  UITest("Render an element with css styles", function(t) {
+  test("Render an element with css styles", function(t) {
     var comp = renderTestComponent(function($$) {
       return $$('div').css('width', '100px');
     });
@@ -142,7 +142,7 @@ function _ComponentTests(debug) {
     t.end();
   });
 
-  UITest("Render an element with classes", function(t) {
+  test("Render an element with classes", function(t) {
     var comp = renderTestComponent(function($$) {
       return $$('div').addClass('test');
     });
@@ -150,7 +150,7 @@ function _ComponentTests(debug) {
     t.end();
   });
 
-  UITest("Render an element with value", function(t) {
+  test("Render an element with value", function(t) {
     var comp = renderTestComponent(function($$) {
       return $$('input').attr('type', 'text').val('foo');
     });
@@ -158,7 +158,7 @@ function _ComponentTests(debug) {
     t.end();
   });
 
-  UITest("Render an element with plain text", function(t) {
+  test("Render an element with plain text", function(t) {
     var comp = renderTestComponent(function($$) {
       return $$('div').text('foo');
     });
@@ -166,7 +166,7 @@ function _ComponentTests(debug) {
     t.end();
   });
 
-  UITest("Render an element with custom html", function(t) {
+  test("Render an element with custom html", function(t) {
     var comp = renderTestComponent(function($$) {
       return $$('div').html('Hello <b>World</b>');
     });
@@ -179,7 +179,7 @@ function _ComponentTests(debug) {
     t.end();
   });
 
-  UITest("Rendering an element with HTML attributes etc.", function(t) {
+  test("Rendering an element with HTML attributes etc.", function(t) {
     var comp = renderTestComponent(function($$) {
       return $$('div')
         .addClass('foo')
@@ -192,7 +192,7 @@ function _ComponentTests(debug) {
     t.end();
   });
 
-  UITest("Rendering an input element with value", function(t) {
+  test("Rendering an input element with value", function(t) {
     var comp = renderTestComponent(function($$) {
       return $$('input').attr('type', 'text').val('foo');
     });
@@ -200,14 +200,14 @@ function _ComponentTests(debug) {
     t.end();
   });
 
-  UITest("Render a component", function(t) {
+  test("Render a component", function(t) {
     var comp = SimpleComponent.static.render();
     t.equal(comp.tagName.toLowerCase(), 'div', 'Element should be a "div".');
     t.ok(comp.hasClass('simple-component'), 'Element should have class "simple-component".');
     t.end();
   });
 
-  UITest("Rerender on setProps()", function(t) {
+  test("Rerender on setProps()", function(t) {
     enableSpies();
     var comp = SimpleComponent.static.render({ foo: 'bar '});
     comp.shouldRerender.reset();
@@ -218,7 +218,7 @@ function _ComponentTests(debug) {
     t.end();
   });
 
-  UITest("Rerendering triggers didUpdate()", function(t) {
+  test("Rerendering triggers didUpdate()", function(t) {
     var comp = SimpleComponent.static.render({ foo: 'bar '});
     spy(comp, 'didUpdate');
     comp.rerender();
@@ -226,7 +226,7 @@ function _ComponentTests(debug) {
     t.end();
   });
 
-  UITest("Setting props triggers willReceiveProps()", function(t) {
+  test("Setting props triggers willReceiveProps()", function(t) {
     var comp = SimpleComponent.static.render({ foo: 'bar '});
     spy(comp, 'willReceiveProps');
     comp.setProps({ foo: 'baz' });
@@ -234,7 +234,7 @@ function _ComponentTests(debug) {
     t.end();
   });
 
-  UITest("Rerender on setState()", function(t) {
+  test("Rerender on setState()", function(t) {
     enableSpies();
     var comp = SimpleComponent.static.render();
     comp.shouldRerender.reset();
@@ -245,7 +245,7 @@ function _ComponentTests(debug) {
     t.end();
   });
 
-  UITest("Setting state triggers willUpdateState()", function(t) {
+  test("Setting state triggers willUpdateState()", function(t) {
     var comp = SimpleComponent.static.render();
     spy(comp, 'willUpdateState');
     comp.setState({ foo: 'baz' });
@@ -253,7 +253,7 @@ function _ComponentTests(debug) {
     t.end();
   });
 
-  UITest("Trigger didUpdate() when state or props have changed even with shouldRerender() = false", function(t) {
+  test("Trigger didUpdate() when state or props have changed even with shouldRerender() = false", function(t) {
     function A() {
       A.super.apply(this, arguments);
       this.shouldRerender = function() {
@@ -275,7 +275,7 @@ function _ComponentTests(debug) {
     t.end();
   });
 
-  UITest("Dependency-Injection", function(t) {
+  test("Dependency-Injection", function(t) {
     function Parent() {
       Parent.super.apply(this, arguments);
     }
@@ -339,7 +339,7 @@ function _ComponentTests(debug) {
 
   /* ##################### Rerendering ##########################*/
 
-  UITest("Rerendering varying content", function(t) {
+  test("Rerendering varying content", function(t) {
     function TestComponent() {
       TestComponent.super.apply(this, arguments);
     }
@@ -386,7 +386,7 @@ function _ComponentTests(debug) {
   });
 
   // events are not supported by cheerio
-  UITest("Rendering an element with click handler", function(t) {
+  test("Rendering an element with click handler", function(t) {
 
     function ClickableComponent() {
       ClickableComponent.super.apply(this, arguments);
@@ -434,7 +434,7 @@ function _ComponentTests(debug) {
     t.end();
   });
 
-  UITest("Rendering an element with once-click handler", function(t) {
+  test("Rendering an element with once-click handler", function(t) {
     function ClickableComponent() {
       ClickableComponent.super.apply(this, arguments);
       this.clicks = 0;
@@ -460,7 +460,7 @@ function _ComponentTests(debug) {
 
   /* ##################### Nested Elements/Components ##########################*/
 
-  UITest("Render children elements", function(t) {
+  test("Render children elements", function(t) {
     var comp = renderTestComponent(function($$) {
       return $$('div').addClass('parent')
         .append($$('div').addClass('child1'))
@@ -473,7 +473,7 @@ function _ComponentTests(debug) {
     t.end();
   });
 
-  UITest("Render children components", function(t) {
+  test("Render children components", function(t) {
     var comp = renderTestComponent(function($$) {
       return $$('div').append(
         $$(SimpleComponent).addClass('a'),
@@ -490,7 +490,7 @@ function _ComponentTests(debug) {
     t.end();
   });
 
-  UITest("Render grandchildren elements", function(t) {
+  test("Render grandchildren elements", function(t) {
     var comp = renderTestComponent(function($$) {
       return $$('div').append(
         $$('div').addClass('child').append(
@@ -510,7 +510,7 @@ function _ComponentTests(debug) {
   });
 
 
-  UITest("Render nested elements passed via props", function(t) {
+  test("Render nested elements passed via props", function(t) {
     var comp = renderTestComponent(function($$) {
       return $$('div').append(
         $$(SimpleComponent, {
@@ -532,7 +532,7 @@ function _ComponentTests(debug) {
   });
 
   // didMount is only called in browser
-  UITest("Call didMount once when mounted", function(t) {
+  test("Call didMount once when mounted", function(t) {
     enableSpies();
 
     function Child() {
@@ -576,7 +576,7 @@ function _ComponentTests(debug) {
     t.end();
   });
 
-  UITest('Propagating properties to nested components', function(t) {
+  test('Propagating properties to nested components', function(t) {
     function ItemComponent() {
       ItemComponent.super.apply(this, arguments);
     }
@@ -618,7 +618,7 @@ function _ComponentTests(debug) {
     t.end();
   });
 
-  UITest("Updating HTML attributes in nested components", function(t) {
+  test("Updating HTML attributes in nested components", function(t) {
     function Child() {
       Child.super.apply(this, arguments);
 
@@ -658,7 +658,7 @@ function _ComponentTests(debug) {
     t.end();
   });
 
-  UITest("Special nesting situation", function(t) {
+  test("Special nesting situation", function(t) {
     // problem was observed in TOCPanel where components (tocEntry) are ingested via dependency-injection
     // and appended to a 'div' element (tocEntries) which then was ingested into a ScrollPane.
     // The order of _capturing must be determined correctly, i.e. first the ScrollPane needs to
@@ -711,7 +711,7 @@ function _ComponentTests(debug) {
     t.end();
   });
 
-  UITest("Special nesting situation II", function(t) {
+  test("Special nesting situation II", function(t) {
     function Parent() {
       Parent.super.apply(this, arguments);
       this.render = function($$) {
@@ -753,7 +753,7 @@ function _ComponentTests(debug) {
     t.end();
   });
 
-  UITest("Implicit retaining in 3-level nesting situation", function(t) {
+  test("Implicit retaining in 3-level nesting situation", function(t) {
     function Parent() {
       Parent.super.apply(this, arguments);
       this.render = function($$) {
@@ -797,7 +797,7 @@ function _ComponentTests(debug) {
     t.end();
   });
 
-  UITest("Edge case: ingesting a child without picking up", function(t) {
+  test("Edge case: ingesting a child without picking up", function(t) {
     function Parent() {
       Parent.super.apply(this, arguments);
       this.render = function($$) {
@@ -820,7 +820,7 @@ function _ComponentTests(debug) {
     t.end();
   });
 
-  UITest("Implicit retaining should not override higher-level rules", function(t) {
+  test("Implicit retaining should not override higher-level rules", function(t) {
     // If a child component has refs, itself should not be retained without
     // being ref'd by the parent
     function Parent() {
@@ -856,7 +856,7 @@ function _ComponentTests(debug) {
     t.end();
   });
 
-  UITest("Eventlisteners on child element", function(t) {
+  test("Eventlisteners on child element", function(t) {
     function Parent() {
       Parent.super.apply(this, arguments);
     }
@@ -895,7 +895,7 @@ function _ComponentTests(debug) {
 
   /* ##################### Refs: Preserving Components ##########################*/
 
-  UITest("Children without a ref are not retained", function(t) {
+  test("Children without a ref are not retained", function(t) {
     var comp = renderTestComponent(function($$) {
       return $$('div').append(
         $$(SimpleComponent)
@@ -910,7 +910,7 @@ function _ComponentTests(debug) {
     t.end();
   });
 
-  UITest("Render a child element with ref", function(t) {
+  test("Render a child element with ref", function(t) {
     var comp = renderTestComponent(function($$) {
       return $$('div').addClass('parent')
         .append($$('div').addClass('child').ref('foo'));
@@ -926,7 +926,7 @@ function _ComponentTests(debug) {
     t.end();
   });
 
-  UITest("Render a child component with ref", function(t) {
+  test("Render a child component with ref", function(t) {
     var comp = renderTestComponent(function($$) {
       return $$('div').append(
         $$(SimpleComponent).ref('foo')
@@ -940,7 +940,7 @@ function _ComponentTests(debug) {
     t.end();
   });
 
-  UITest("Rerendering a child component with ref triggers didUpdate()", function(t) {
+  test("Rerendering a child component with ref triggers didUpdate()", function(t) {
     var comp = renderTestComponent(function($$) {
       return $$('div').append(
         $$(SimpleComponent).ref('foo')
@@ -953,7 +953,7 @@ function _ComponentTests(debug) {
     t.end();
   });
 
-  UITest("Trigger didUpdate() on children even when shouldRerender()=false", function(t) {
+  test("Trigger didUpdate() on children even when shouldRerender()=false", function(t) {
     function Child() {
       Child.super.apply(this, arguments);
     }
@@ -977,7 +977,7 @@ function _ComponentTests(debug) {
   });
 
 
-  UITest("Refs on grandchild elements.", function(t) {
+  test("Refs on grandchild elements.", function(t) {
     var comp = renderTestComponent(function($$) {
       return $$('div').append(
         $$('div').append(
@@ -999,7 +999,7 @@ function _ComponentTests(debug) {
   });
 
   // it happened, that a grandchild component with ref was not preserved
-  UITest("Ref on grandchild component.", function(t) {
+  test("Ref on grandchild component.", function(t) {
     function Grandchild() {
       Grandchild.super.apply(this, arguments);
       this.render = function($$) {
@@ -1026,7 +1026,7 @@ function _ComponentTests(debug) {
     t.end();
   });
 
-  UITest("Retain refs owned by parent but nested in child component.", function(t) {
+  test("Retain refs owned by parent but nested in child component.", function(t) {
     // Note: the child component does not know that there is a ref
     // set by the parent. Still, the component should be retained on rerender
     function Child() {
@@ -1058,7 +1058,7 @@ function _ComponentTests(debug) {
     t.end();
   });
 
-  UITest("Should wipe a referenced component when class changes", function(t) {
+  test("Should wipe a referenced component when class changes", function(t) {
     function ComponentA() {
       ComponentA.super.apply(this, arguments);
 
@@ -1101,7 +1101,7 @@ function _ComponentTests(debug) {
     t.end();
   });
 
-  UITest('Should store refs always on owners', function(t) {
+  test('Should store refs always on owners', function(t) {
     function MyComponent() {
       MyComponent.super.apply(this, arguments);
 
@@ -1120,7 +1120,7 @@ function _ComponentTests(debug) {
     t.end();
   });
 
-  UITest("Implicitly retain elements when grandchild elements have refs.", function(t) {
+  test("Implicitly retain elements when grandchild elements have refs.", function(t) {
     var comp = renderTestComponent(function($$) {
       return $$('div').append(
         $$('div').append(
@@ -1136,7 +1136,7 @@ function _ComponentTests(debug) {
     t.end();
   });
 
-  UITest("Implicitly retain elements when passing grandchild with ref.", function(t) {
+  test("Implicitly retain elements when passing grandchild with ref.", function(t) {
     function Child() {
       Child.super.apply(this, arguments);
       this.render = function($$) {
@@ -1165,7 +1165,7 @@ function _ComponentTests(debug) {
   // ScrollPanes ref in didUpdate()
   // This is working fine when didUpdate() is called at the right time,
   // i.e., when ScrollPane has been rendered already
-  UITest("Everthing should be rendered when didUpdate() is triggered.", function(t) {
+  test("Everthing should be rendered when didUpdate() is triggered.", function(t) {
     var parentIsUpdated = false;
     function Parent() {
       Parent.super.apply(this, arguments);
@@ -1200,7 +1200,7 @@ function _ComponentTests(debug) {
 
   /* ##################### Incremental Component API ##########################*/
 
-  UITest("Component.append() should support appending text.", function(t) {
+  test("Component.append() should support appending text.", function(t) {
     var comp = SimpleComponent.static.render();
     comp.append('XXX');
     t.equal(comp.text(), 'XXX');
@@ -1209,7 +1209,7 @@ function _ComponentTests(debug) {
 
   /* ##################### Integration tests / Issues ##########################*/
 
-  UITest('Preserve components when ref matches, and rerender when props changed', function(t) {
+  test('Preserve components when ref matches, and rerender when props changed', function(t) {
     enableSpies();
 
     function ItemComponent() {
@@ -1294,7 +1294,7 @@ function _ComponentTests(debug) {
   // Note: this is more of an integration test, but I did not manage to isolate the error
   // maybe the solution gets us closer to what actually went wrong.
   // TODO: try to split into useful smaller pieces.
-  UITest("Unspecific integration test:  ref'd component must be retained", function(t) {
+  test("Unspecific integration test:  ref'd component must be retained", function(t) {
     var ComponentWithRefs = Component.extend({
       getInitialState: function() {
         return {contextId: 'hello'};
@@ -1349,7 +1349,7 @@ function _ComponentTests(debug) {
     t.end();
   });
 
-  UITest("#312: refs should be bound to the owner, not to the parent.", function(t) {
+  test("#312: refs should be bound to the owner, not to the parent.", function(t) {
     function Child() {
       Child.super.apply(this, arguments);
 

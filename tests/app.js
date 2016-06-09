@@ -6,8 +6,6 @@ var harness = require('./test');
 
 var TestSuite = require('./TestSuite');
 
-require('./model/ContainerSelection.test');
-
 window.onload = function() {
   TestSuite.static.mount({ harness: harness }, 'body')
 };

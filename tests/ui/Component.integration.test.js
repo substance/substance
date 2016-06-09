@@ -1,6 +1,6 @@
 'use strict';
 
-var UITest = require('../UITest').InBrowser;
+var test = require('../test').UI;
 
 var Component = require('../../ui/Component');
 
@@ -12,7 +12,7 @@ function component(renderFunc, props) {
   return comp;
 }
 
-UITest("Three elements", function(t) {
+test("Three elements", function(t) {
   var sandbox = t.sandbox; // eslint-disable-line
   var comp = component(function($$) {
     return $$('div').append(
