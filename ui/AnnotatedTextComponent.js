@@ -3,7 +3,7 @@
 var Fragmenter = require('../model/Fragmenter');
 var Component = require('./Component');
 var AnnotationComponent = require('./AnnotationComponent');
-var InlineWrapperComponent = require('./InlineWrapperComponent');
+var InlineNodeComponent = require('./InlineNodeComponent');
 
 /**
   Renders an anotated text. Used internally by {@link ui/TextPropertyComponent}.
@@ -79,8 +79,8 @@ AnnotatedTextComponent.Prototype = function() {
         .addClass(node.isStart?"start-anchor":"end-anchor");
     }
     var ComponentClass;
-    if (node.type === "inline-wrapper") {
-      ComponentClass = InlineWrapperComponent;
+    if (node.constructor.static.isInline) {
+      ComponentClass = InlineNodeComponent;
     } else {
       ComponentClass = componentRegistry.get(node.type);
       if (!ComponentClass) {

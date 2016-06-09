@@ -1,6 +1,9 @@
 'use strict';
 
-var AnnotationComponent = require('./AnnotationComponent');
+var isEqual = require('lodash/isEqual');
+var startsWith = require('lodash/startsWith');
+var IsolatedNodeComponent = require('./IsolatedNodeComponent');
+var InlineWrapperComponent = require('./InlineWrapperComponent');
 
 function InlineNodeComponent() {
   InlineNodeComponent.super.apply(this, arguments);
@@ -10,47 +13,82 @@ InlineNodeComponent.Prototype = function() {
 
   var _super = InlineNodeComponent.super.prototype;
 
-  // TODO: we should avoid to have a didMount hook on an abstract base class
-  this.didMount = function() {
-    _super.didMount.apply(this, arguments);
-  };
+  // use spans everywhere
+  this.__elementTag = 'span';
+  this.__slugChar = "\uFEFF";
 
-  // TODO: we should avoid to have a didMount hook on an abstract base class
-  this.dispose = function() {
-    _super.dispose.apply(this, arguments);
-  };
-
-  this.render = function($$) {
-    var el = $$('span')
-      .addClass('sc-inline-node')
-      .attr({
-        "data-inline": 1,
-        "contenteditable": false
-      });
-
-    // TODO: enable this as soon we fixed the rendering issue coming up when activating this
-    var surface = this.context.surface;
-    if (surface && !surface.isDisabled()) {
-      el.on('mousedown', _onMousedown, this);
-    }
+  this.render = function($$) { // eslint-disable-line
+    var el = _super.render.apply(this, arguments);
+    el.addClass('sc-inline-node')
+      .removeClass('sc-isolated-node')
+      .attr("data-id", this.props.node.id)
+      .attr('data-inline', '1');
 
     return el;
   };
 
-  // Note: using a closure function to not polute the prototype avoiding name-clashes
-  function _onMousedown(event) { // eslint-disable-line
-    /* eslint-disable no-invalid-this */
-    event.stopPropagation();
+  this._getContentClass = function(node) {
+    if (node.type === 'inline-wrapper') {
+      return InlineWrapperComponent;
+    } else {
+      return _super._getContentClass.call(this, node);
+    }
+  };
+
+  this._deriveStateFromSelection = function(sel) {
+    var surfaceId = sel.surfaceId;
+    if (!surfaceId) return;
+    var id = this.getId();
     var node = this.props.node;
-    var doc = this.props.node.getDocument();
+    var parentId = this._getSurfaceParent().getId();
+    var inParentSurface = (surfaceId === parentId);
+    // detect cases where this node is selected or co-selected by inspecting the selection
+    if (inParentSurface) {
+      if (sel.isPropertySelection() && !sel.isCollapsed() && isEqual(sel.path, node.path)) {
+        var nodeSel = node.getSelection();
+        if(nodeSel.equals(sel)) {
+          return {
+            mode: 'selected'
+          };
+        }
+        if (sel.contains(nodeSel)) {
+          return {
+            mode: 'co-selected'
+          };
+        }
+      }
+      return;
+    }
+    // for all other cases (focused / co-focused) the surface id prefix must match
+    if (!startsWith(surfaceId, id)) return;
+    // Note: trying to distinguisd focused
+    // surfaceIds are a sequence of names joined with '/'
+    // a surface inside this node will have a path with length+1.
+    // a custom selection might just use the id of this IsolatedNode
+    var p1 = id.split('/');
+    var p2 = surfaceId.split('/');
+    if (p2.length >= p1.length && p2.length <= p1.length+1) {
+      return { mode: 'focused' };
+    } else {
+      return { mode: 'co-focused' };
+    }
+  };
+
+  this._selectNode = function() {
+    // console.log('IsolatedNodeComponent: selecting node.');
     var surface = this.context.surface;
-    var sel = doc.createSelection(node.path, node.startOffset, node.endOffset);
-    surface.setSelection(sel);
-    /* eslint-enable no-invalid-this */
-  }
+    var doc = surface.getDocument();
+    var node = this.props.node;
+    surface.setSelection(doc.createSelection({
+      type: 'property',
+      path: node.path,
+      startOffset: node.startOffset,
+      endOffset: node.endOffset
+    }));
+  };
 
 };
 
-AnnotationComponent.extend(InlineNodeComponent);
+IsolatedNodeComponent.extend(InlineNodeComponent);
 
 module.exports = InlineNodeComponent;

@@ -23,6 +23,10 @@ IsolatedNodeComponent.Prototype = function() {
 
   this._isIsolatedNodeComponent = true;
 
+  // InlineNode uses 'span'
+  this.__elementTag = 'div';
+  this.__slugChar = "|";
+
   this.getChildContext = function() {
     return {
       surfaceParent: this
@@ -44,11 +48,13 @@ IsolatedNodeComponent.Prototype = function() {
   };
 
   this.render = function($$) {
+    var node = this.props.node;
     // console.log('##### IsolatedNodeComponent.render()', $$.capturing);
     var el = _super.render.apply(this, arguments);
-    var ContentClass = this._getContentClass() || Component;
+    el.tagName = this.__elementTag;
 
-    var node = this.props.node;
+    var ContentClass = this._getContentClass(node) || Component;
+
     el.addClass('sc-isolated-node')
       .addClass('sm-'+this.props.node.type)
       .attr("data-id", node.id);
@@ -74,12 +80,12 @@ IsolatedNodeComponent.Prototype = function() {
       .on('textInput', this._stopPropagation);
 
     el.append(
-      $$('div').addClass('se-slug').addClass('sm-before').ref('before')
+      $$(this.__elementTag).addClass('se-slug').addClass('sm-before').ref('before')
         // NOTE: better use a regular character otherwise Edge has problems
-        .append("{")
+        .append(this.__slugChar)
     );
 
-    var container = $$('div').addClass('se-container')
+    var container = $$(this.__elementTag).addClass('se-container')
       .attr('contenteditable', false)
       .css({ 'z-index': 2*this._state.level });
 
@@ -89,41 +95,40 @@ IsolatedNodeComponent.Prototype = function() {
 
     if (this.state.mode === 'cursor' && this.state.position === 'before') {
       container.append(
-        $$('div').addClass('se-cursor').addClass('sm-before').attr('contenteditable', false)
+        $$(this.__elementTag).addClass('se-cursor').addClass('sm-before').attr('contenteditable', false)
       );
     }
-    container.append(this.renderContent($$));
+    container.append(this.renderContent($$, node));
 
     if (this._isDisabled() || this.state.mode === 'co-focused') {
       container.addClass('sm-disabled');
       // NOTE: there are some content implementations which work better without a blocker
-      var blocker = $$('div').addClass('se-blocker').css({ 'z-index': 2*this._state.level+1 });
+      var blocker = $$(this.__elementTag).addClass('se-blocker').css({ 'z-index': 2*this._state.level+1 });
       container.append(blocker);
     }
 
     if (this.state.mode === 'cursor' && this.state.position === 'after') {
       container.append(
-        $$('div').addClass('se-cursor').addClass('sm-after').attr('contenteditable', false)
+        $$(this.__elementTag).addClass('se-cursor').addClass('sm-after').attr('contenteditable', false)
       );
     }
 
     el.append(container);
 
     el.append(
-      $$('div').addClass('se-slug').addClass('sm-after').ref('after')
+      $$(this.__elementTag).addClass('se-slug').addClass('sm-after').ref('after')
         // NOTE: better use a regular character otherwise Edge has problems
-        .append("}")
+        .append(this.__slugChar)
     );
 
     return el;
   };
 
-  this.renderContent = function($$) {
-    var node = this.props.node;
-    var ComponentClass = this._getContentClass();
+  this.renderContent = function($$, node) {
+    var ComponentClass = this._getContentClass(node);
     if (!ComponentClass) {
       console.error('Could not resolve a component for type: ' + node.type);
-      return $$('div');
+      return $$(this.__elementTag);
     } else {
       var props = {
         node: node,
@@ -140,8 +145,7 @@ IsolatedNodeComponent.Prototype = function() {
     return this._id;
   };
 
-  this._getContentClass = function() {
-    var node = this.props.node;
+  this._getContentClass = function(node) {
     var componentRegistry = this.context.componentRegistry;
     var ComponentClass = componentRegistry.get(node.type);
     return ComponentClass;
@@ -248,6 +252,8 @@ IsolatedNodeComponent.Prototype = function() {
     if (event.keyCode === keys.ESCAPE && this.state.mode === 'focused') {
       event.preventDefault();
       this._selectNode();
+      // TODO: Is this still necessary?
+      // The state should be set during the next update cycle.
       this.setState({ mode: 'selected' });
     }
   };
@@ -283,10 +289,7 @@ IsolatedNodeComponent.getCoordinate = function(surfaceEl, node) {
     var isolatedNodeEl = boundary.getParent();
     var nodeId = isolatedNodeEl.getAttribute('data-id');
     if (nodeId) {
-      var charPos = 0;
-      if (boundary.is('sm-after')) {
-        charPos = 1;
-      }
+      var charPos = boundary.is('sm-after') ? 1 : 0;
       return new Coordinate([nodeId], charPos);
     } else {
       console.error('FIXME: expecting a data-id attribute on IsolatedNodeComponent');
