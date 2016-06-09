@@ -38,6 +38,23 @@ SelectionState.Prototype = function() {
     return [];
   };
 
+  this.isNodeSelection = function() {
+    return this._state.isNodeSelection;
+  };
+
+  this.isFullNodeSelection = function() {
+    var state = this._state;
+    return state.isNodeSelection && state.nodeSelectionMode === 'full';
+  };
+
+  this.getNodeId = function() {
+    return this._state.nodeId;
+  };
+
+  this.getNodeSelectionMode = function() {
+    return this._state.nodeSelectionMode;
+  };
+
   this._deriveState = function(sel) {
     var doc = this.document;
 

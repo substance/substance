@@ -2,6 +2,7 @@
 
 var isEqual = require('lodash/isEqual');
 var startsWith = require('lodash/startsWith');
+var Coordinate = require('../model/Coordinate');
 var IsolatedNodeComponent = require('./IsolatedNodeComponent');
 var InlineWrapperComponent = require('./InlineWrapperComponent');
 
@@ -35,7 +36,8 @@ InlineNodeComponent.Prototype = function() {
     }
   };
 
-  this._deriveStateFromSelection = function(sel) {
+  this._deriveStateFromSelectionState = function(selState) {
+    var sel = selState.getSelection();
     var surfaceId = sel.surfaceId;
     if (!surfaceId) return;
     var id = this.getId();
@@ -47,14 +49,10 @@ InlineNodeComponent.Prototype = function() {
       if (sel.isPropertySelection() && !sel.isCollapsed() && isEqual(sel.path, node.path)) {
         var nodeSel = node.getSelection();
         if(nodeSel.equals(sel)) {
-          return {
-            mode: 'selected'
-          };
+          return { mode: 'selected' };
         }
         if (sel.contains(nodeSel)) {
-          return {
-            mode: 'co-selected'
-          };
+          return { mode: 'co-selected' };
         }
       }
       return;
@@ -90,5 +88,33 @@ InlineNodeComponent.Prototype = function() {
 };
 
 IsolatedNodeComponent.extend(InlineNodeComponent);
+
+InlineNodeComponent.getCoordinate = function(el) {
+  // special treatment for block-level isolated-nodes
+  var parent = el.getParent();
+  if (el.isTextNode() && parent.is('.se-slug')) {
+    var slug = parent;
+    var nodeEl = slug.getParent();
+    if (nodeEl.is('.sc-inline-node')) {
+      var startOffset = Number(nodeEl.getAttribute('data-offset'));
+      var len = Number(nodeEl.getAttribute('data-length'));
+      var charPos = startOffset;
+      if (slug.is('sm-after')) charPos += len;
+      var path;
+      while ( (nodeEl = nodeEl.getParent()) ) {
+        var pathStr = nodeEl.getAttribute('data-path');
+        if (pathStr) {
+          path = pathStr.split('.');
+          var coor = new Coordinate(path, charPos);
+          coor.__inInlineNode__ = true;
+          coor.__startOffset__ = startOffset;
+          coor.__endOffset__ = startOffset+len;
+          return coor;
+        }
+      }
+    }
+  }
+  return null;
+};
 
 module.exports = InlineNodeComponent;

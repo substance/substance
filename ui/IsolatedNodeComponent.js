@@ -171,7 +171,8 @@ IsolatedNodeComponent.Prototype = function() {
 
   this.onSessionUpdate = function(update) {
     if (update.selection) {
-      var newState = this._deriveStateFromSelection(update.selection);
+      var documentSession = this.context.documentSession;
+      var newState = this._deriveStateFromSelectionState(documentSession.getSelectionState());
       if (!newState && this.state.mode) {
         this.setState({});
       } else if (newState && newState.mode !== this.state.mode) {
@@ -180,7 +181,8 @@ IsolatedNodeComponent.Prototype = function() {
     }
   };
 
-  this._deriveStateFromSelection = function(sel) {
+  this._deriveStateFromSelectionState = function(selState) {
+    var sel = selState.getSelection();
     var surfaceId = sel.surfaceId;
     if (!surfaceId) return;
     var id = this.getId();
@@ -189,27 +191,16 @@ IsolatedNodeComponent.Prototype = function() {
     var inParentSurface = (surfaceId === parentId);
     // detect cases where this node is selected or co-selected by inspecting the selection
     if (inParentSurface) {
-      if (sel.isNodeSelection() && sel.getNodeId() === nodeId && sel.isEntireNodeSelected()) {
-        return {
-          mode: 'selected'
-        };
+      if (selState.isNodeSelection() && selState.getNodeId() === nodeId) {
+        var mode = selState.getNodeSelectionMode();
+        if (mode === 'full') {
+          return { mode: 'selected' };
+        } else {
+          return { mode: 'cursor', position: mode };
+        }
       }
       if (sel.isContainerSelection() && sel.containsNodeFragment(nodeId)) {
-        return {
-          mode: 'co-selected'
-        };
-      }
-      var hasCursor = (inParentSurface &&
-        sel.isContainerSelection() &&
-        sel.isCollapsed() &&
-        sel.startPath.length === 1 &&
-        sel.startPath[0] === nodeId
-      );
-      if (hasCursor) {
-        return {
-          mode: 'cursor',
-          position: sel.startOffset === 0 ? 'before' : 'after'
-        };
+        return { mode: 'co-selected' };
       }
       return;
     }
