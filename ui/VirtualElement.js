@@ -115,7 +115,7 @@ VirtualHTMLElement.Prototype = function() {
 
   this.removeClass = function(className) {
     if (this.classNames) {
-      this.classNames = this.classNames.without(className);
+      this.classNames = without(this.classNames, className);
     }
     return this;
   };
