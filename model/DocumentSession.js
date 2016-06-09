@@ -6,6 +6,7 @@ var EventEmitter = require('../util/EventEmitter');
 var TransactionDocument = require('./TransactionDocument');
 var DefaultChangeCompressor = require('./DefaultChangeCompressor');
 var Selection = require('./Selection');
+var SelectionState = require('./SelectionState');
 var DocumentChange = require('./DocumentChange');
 
 var __id__ = 0;
@@ -17,7 +18,7 @@ function DocumentSession(doc, options) {
 
   options = options || {};
   this.doc = doc;
-  this.selection = Selection.nullSelection;
+  this.selectionState = new SelectionState(doc);
 
   // the stage is a essentially a clone of this document
   // used to apply a sequence of document operations
@@ -45,7 +46,7 @@ DocumentSession.Prototype = function() {
   };
 
   this.getSelection = function() {
-    return this.selection;
+    return this.selectionState.getSelection();
   };
 
   this.setSelection = function(sel) {
@@ -100,19 +101,16 @@ DocumentSession.Prototype = function() {
     if (change) {
       this.stage._apply(change);
       this.doc._apply(change);
-      var oldSel = this.selection;
       var sel = change.after.selection;
       if (sel) {
         sel.attach(this.doc);
       }
-      this.selection = sel;
+      var selectionHasChanged = this._setSelection(sel);
       to.push(change.invert());
       var update = {
         change: change
       };
-      if (!oldSel.equals(sel)) {
-        update.selection = sel;
-      }
+      if (selectionHasChanged) update.selection = sel;
       this._triggerUpdateEvent(update, { replay: true });
     } else {
       console.warn('No change can be %s.', (which === 'undo'? 'undone':'redone'));
@@ -142,7 +140,7 @@ DocumentSession.Prototype = function() {
     }
     this.isTransacting = true;
     this.stage.reset();
-    var sel = this.selection;
+    var sel = this.getSelection();
     info = info || {};
     var surfaceId = sel.surfaceId;
     var change = this.stage._transaction(function(tx) {
@@ -171,31 +169,18 @@ DocumentSession.Prototype = function() {
     if (info && info.session !== this) {
       this.stage._apply(change);
       this._transformLocalChangeHistory(change, info);
-      var oldSelection = this.selection;
-      var newSelection = this._transformSelection(change, info);
-      this.selection = newSelection;
       var update = {
         change: change
       };
-      if (oldSelection !== newSelection) {
-        update.selection = newSelection;
-      }
+      var newSelection = this._transformSelection(change, info);
+      var selectionHasChanged = this._setSelection(newSelection);
+      if (selectionHasChanged) update.selection = newSelection;
       // this._triggerUpdateEvent(update, info);
     }
   };
 
   this._setSelection = function(sel) {
-    if (!sel) {
-      sel = Selection.nullSelection;
-    } else {
-      sel.attach(this.doc);
-    }
-    if (!sel.equals(this.selection)) {
-      this.selection = sel;
-      return true;
-    } else {
-      return false;
-    }
+    return this.selectionState.setSelection(sel);
   };
 
   this._transformLocalChangeHistory = function(externalChange) {
@@ -211,7 +196,7 @@ DocumentSession.Prototype = function() {
   };
 
   this._transformSelection = function(change) {
-    var oldSelection = this.selection;
+    var oldSelection = this.getSelection();
     var newSelection = DocumentChange.transformSelection(oldSelection, change);
     // console.log('Transformed selection', change, oldSelection.toString(), newSelection.toString());
     return newSelection;
@@ -222,9 +207,7 @@ DocumentSession.Prototype = function() {
     var update = {
       change: change
     };
-    if (selectionHasChanged) {
-      update.selection = this.selection;
-    }
+    if (selectionHasChanged) update.selection = this.getSelection();
     this._triggerUpdateEvent(update, info);
   };
 
@@ -250,15 +233,13 @@ DocumentSession.Prototype = function() {
     // discard old redo history
     this.undoneChanges = [];
 
-    var oldSelection = this.selection || Selection.nullSelection;
     var newSelection = change.after.selection || Selection.nullSelection;
-    var selectionHasChanged = !oldSelection.equals(newSelection);
+    var selectionHasChanged = this._setSelection(newSelection);
     // HACK injecting the surfaceId here...
     // TODO: we should find out where the best place is to do this
     if (!newSelection.isNull()) {
       newSelection.surfaceId = change.after.surfaceId;
     }
-    this.selection = newSelection;
     return selectionHasChanged;
   };
 
