@@ -1,9 +1,6 @@
 'use strict';
 
-// var filter = require('lodash/filter');
-var helpers = require('../model/documentHelpers');
 var Command = require('./Command');
-// Annotation transformations
 var createAnnotation = require('../model/transform/createAnnotation');
 var fuseAnnotation = require('../model/transform/fuseAnnotation');
 var expandAnnotation = require('../model/transform/expandAnnotation');
@@ -72,10 +69,6 @@ AnnotationCommand.Prototype = function() {
   this.isDisabled = function(sel) {
     if (!sel || sel.isNull() || !sel.isAttached() || sel.isCustomSelection()) {
       return true;
-    }
-    // HACK: passing the sel as it has access to the doc for the schema
-    if (this._isPropertyAnnotationCommand(sel)) {
-      return !sel.isPropertySelection();
     }
     return false;
   };
@@ -218,6 +211,7 @@ AnnotationCommand.Prototype = function() {
   // Execute command and trigger transformations
   this.execute = function(props, context) {
     props = props || {};
+    props.selection = this._getSelection(props);
     if (props.disabled) return false;
     var mode = props.mode;
     switch(mode) {
@@ -326,17 +320,6 @@ AnnotationCommand.Prototype = function() {
     };
   };
 
-  this._isPropertyAnnotationCommand = function(sel) {
-    // Note: we are using the selection to retrieve the schema
-    // we need the schema only to know if the annotationType is a property type
-    // so, it should be safe to cache this info
-    if (!this.hasOwnProperty('_hasPropertyType')) {
-      var schema = sel.getDocument().getSchema();
-      this._hasPropertyType = schema.isInstanceOf(this.getAnnotationType(), 'annotation');
-    }
-    return this._hasPropertyType;
-  };
-
   this._checkPrecondition = function(props, context, annos, checker) {
     var sel = this._getSelection(props);
     if (!checker.call(this, annos, sel)) {
@@ -345,14 +328,7 @@ AnnotationCommand.Prototype = function() {
   };
 
   this._getAnnotationsForSelection = function(props) {
-    var sel = this._getSelection(props);
-    // HACK: currently only for property types
-    if (!sel || sel.isNull() || !this._isPropertyAnnotationCommand(sel)) {
-      return [];
-    }
-    return helpers.getPropertyAnnotationsForSelection(sel.getDocument(), sel, {
-      type: this.getAnnotationType()
-    });
+    return props.selectionState.getAnnotationsForType(this.getAnnotationType());
   };
 
   /**
@@ -366,20 +342,20 @@ AnnotationCommand.Prototype = function() {
     var sel = this._getSelection(props);
     var documentSession = this._getDocumentSession(props, context);
     var surface = props.surface;
+    props.selection = sel;
 
     var result; // to store transform result
     if (sel.isNull()) return;
-    documentSession.transaction(function(tx, props) {
+    documentSession.transaction(function(tx) {
       tx.before.selection = sel;
       if (surface) {
         tx.before.surfaceId = surface.getId();
       }
-      props.selection = sel;
-      props = transformFn(tx, props);
-      if (props) {
-        result = props.result;
+      var out = transformFn(tx, props);
+      if (out) {
+        result = out.result;
       }
-      return props;
+      return out;
     });
     return result;
   };

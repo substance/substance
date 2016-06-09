@@ -92,11 +92,6 @@ TextPropertyComponent.Prototype = function() {
     } else {
       el = _super._renderFragment.apply(this, arguments);
       if (node.constructor.static.isInline) {
-        el.attr({
-          'contentEditable': false,
-          'data-inline':'1',
-          'data-length': 1
-        });
         // FIXME: enabling this reveals a bug in RenderEngine with reusing a component but reattached to a new parent.
         // el.ref(id);
       }

@@ -1,6 +1,6 @@
 'use strict';
 
-var InlineNodeComponent = require('./InlineNodeComponent');
+var Component = require('./Component');
 
 function InlineWrapperComponent() {
   InlineWrapperComponent.super.apply(this, arguments);
@@ -8,34 +8,30 @@ function InlineWrapperComponent() {
 
 InlineWrapperComponent.Prototype = function() {
 
-  var _super = InlineWrapperComponent.super.prototype;
-
   this.render = function($$) {
-    var el = _super.render.apply(this, arguments);
-    el.addClass('sc-inline-wrapper');
-
     var node = this.props.node;
     var doc = node.getDocument();
+    var el = $$('span').addClass('sc-inline-wrapper')
+      .attr('data-id', node.id);
     var wrappedNode = doc.get(node.wrappedNode);
     if (wrappedNode) {
-      var componentRegistry = this.context.componentRegistry || this.props.componentRegistry;
+      var componentRegistry = this.context.componentRegistry;
       var ComponentClass = componentRegistry.get(wrappedNode.type);
-      if (!ComponentClass) {
-        console.error('Could not resolve a component for type: ' + wrappedNode.type);
+      if (ComponentClass) {
+        el.append($$(ComponentClass, {
+          node: wrappedNode
+        }));
       } else {
-        el.append(
-          $$(ComponentClass, {
-            doc: doc,
-            node: wrappedNode
-          })
-        );
+        console.error('No component registered for node type' + wrappedNode.type);
       }
+    } else {
+      console.error('Could not find wrapped node: ' + node.wrappedNode);
     }
     return el;
   };
 
 };
 
-InlineNodeComponent.extend(InlineWrapperComponent);
+Component.extend(InlineWrapperComponent);
 
 module.exports = InlineWrapperComponent;

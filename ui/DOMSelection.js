@@ -6,6 +6,7 @@ var Coordinate = require('../model/Coordinate');
 var Range = require('../model/Range');
 var DefaultDOMElement = require('./DefaultDOMElement');
 var TextPropertyComponent = require('./TextPropertyComponent');
+var InlineNodeComponent = require('./InlineNodeComponent');
 var IsolatedNodeComponent = require('./IsolatedNodeComponent');
 
 /*
@@ -174,6 +175,13 @@ DOMSelection.Prototype = function() {
       // we return a selection for the whole node
       if (coor.__inIsolatedBlockNode__) {
         range = _createRangeForIsolatedBlockNode(coor.path[0], this.getContainerId());
+      } else if (coor.__inInlineNode__) {
+        // HACK: relying on hints left by InlineNodeComponent.getCoordinate()
+        range = _createRange(
+          new Coordinate(coor.path, coor.__startOffset__),
+          new Coordinate(coor.path, coor.__endOffset__),
+          false, this.getContainerId()
+        );
       } else {
         range = _createRange(coor, coor, false, this.getContainerId());
       }
@@ -276,26 +284,32 @@ DOMSelection.Prototype = function() {
     Moving `left` would provide the previous address, `right` would provide the next address.
     The default direction is `right`.
   */
-  this._getCoordinate = function(node, offset, options) {
+  this._getCoordinate = function(nodeEl, offset, options) {
     // Trying to apply the most common situation first
     // and after that covering known edge cases
     var surfaceEl = this.surface.el;
     var coor = null;
+    if (!coor) {
+      coor = InlineNodeComponent.getCoordinate(nodeEl, offset);
+      if (coor) {
+        coor.__inInlineNode__ = true;
+      }
+    }
     // as this is the most often case, try to map the coordinate within
     // a TextPropertyComponent
     if (!coor) {
-      coor = TextPropertyComponent.getCoordinate(surfaceEl, node, offset);
+      coor = TextPropertyComponent.getCoordinate(surfaceEl, nodeEl, offset);
     }
     // special treatment for isolated nodes
     if (!coor) {
-      coor = IsolatedNodeComponent.getCoordinate(surfaceEl, node, offset);
+      coor = IsolatedNodeComponent.getCoordinate(surfaceEl, nodeEl, offset);
       if (coor) {
         coor.__inIsolatedBlockNode__ = true;
       }
     }
     // finally fall back to a brute-force search
     if (!coor) {
-      coor = this._searchForCoordinate(node, offset, options);
+      coor = this._searchForCoordinate(nodeEl, offset, options);
     }
     return coor;
   };

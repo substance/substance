@@ -1,15 +1,13 @@
 'use strict';
 
 require('../QUnitExtensions');
-// var helpers = require('../../model/documentHelpers');
-var DocumentSession = require('../../model/DocumentSession');
 
+var DocumentSession = require('../../model/DocumentSession');
+var SelectionState = require('../../model/SelectionState');
 var AnnotationCommand = require('../../ui/AnnotationCommand');
-// var StubSurface = require('./StubSurface');
 
 var createTestArticle = require('../fixtures/createTestArticle');
 var containerAnnoSample = require('../fixtures/containerAnnoSample');
-// var getAnnos = helpers.getPropertyAnnotationsForSelection;
 
 QUnit.module('ui/AnnotationCommand');
 
@@ -45,15 +43,12 @@ function fixture() {
 
 QUnit.test("can 'create' property annotation", function(assert) {
   var doc = fixture();
+  var selectionState = new SelectionState(doc);
   var cmd = new ToggleStrongCommand();
-  var sel = doc.createSelection({
-    type: 'property',
-    path: ['p6', 'content'],
-    startOffset: 1,
-    endOffset: 6
-  });
+  var sel = doc.createSelection(['p6', 'content'], 1, 6);
+  selectionState.setSelection(sel);
   var cmdState = cmd.getCommandState({
-    selection: sel
+    selectionState: selectionState
   });
   assert.equal(cmdState.mode, 'create', "Mode should be correct.");
 });
@@ -62,16 +57,12 @@ QUnit.test("execute 'create' property annotation", function(assert) {
   var doc = fixture();
   var docSession = new DocumentSession(doc);
   var cmd = new ToggleStrongCommand();
-  var sel = doc.createSelection({
-    type: 'property',
-    path: ['p6', 'content'],
-    startOffset: 1,
-    endOffset: 6
-  });
+  var sel = doc.createSelection(['p6', 'content'], 1, 6);
+  docSession.setSelection(sel);
   var res = cmd.execute({
     mode: 'create',
-    selection: sel,
-    documentSession: docSession
+    documentSession: docSession,
+    selectionState: docSession.getSelectionState()
   });
   var newAnno = res.anno;
   assert.isDefinedAndNotNull(newAnno, 'A new anno should have been created');
@@ -84,10 +75,12 @@ QUnit.test("execute 'create' property annotation", function(assert) {
 
 QUnit.test("can 'delete' property annotation", function(assert) {
   var doc = fixture();
+  var selectionState = new SelectionState(doc);
   var cmd = new ToggleStrongCommand();
   var sel = doc.createSelection(['p1', 'content'], 5, 7);
+  selectionState.setSelection(sel);
   var cmdState = cmd.getCommandState({
-    selection: sel
+    selectionState: selectionState
   });
   assert.equal(cmdState.mode, 'delete', "Mode should be correct.");
 });
@@ -97,25 +90,23 @@ QUnit.test("execute 'delete' property annotation", function(assert) {
   var docSession = new DocumentSession(doc);
   var cmd = new ToggleStrongCommand();
   var sel = doc.createSelection(['p1', 'content'], 5, 7);
+  docSession.setSelection(sel);
   cmd.execute({
     mode: 'delete',
-    selection: sel,
-    documentSession: docSession
+    documentSession: docSession,
+    selectionState: docSession.getSelectionState()
   });
   assert.isNullOrUndefined(doc.get('a3'), 'a3 should be gone.');
 });
 
 QUnit.test("can 'expand' property annotation", function(assert) {
   var doc = fixture();
+  var selectionState = new SelectionState(doc);
   var cmd = new ToggleStrongCommand();
-  var sel = doc.createSelection({
-    type: 'property',
-    path: ['p1', 'content'],
-    startOffset: 3,
-    endOffset: 8
-  });
+  var sel = doc.createSelection(['p1', 'content'], 3, 8);
+  selectionState.setSelection(sel);
   var cmdState = cmd.getCommandState({
-    selection: sel
+    selectionState: selectionState
   });
   assert.equal(cmdState.mode, 'expand', "Mode should be 'expand'");
 });

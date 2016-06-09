@@ -233,6 +233,10 @@ Surface.Prototype = function() {
     return false;
   };
 
+  this.getContainerId = function() {
+    return null;
+  };
+
   /**
     Run a transformation as a transaction properly configured for this surface.
 
@@ -293,6 +297,7 @@ Surface.Prototype = function() {
     // the selection with this surface later
     if (sel && !sel.isNull()) {
       sel.surfaceId = this.getId();
+      sel.containerId = sel.containerId || this.getContainerId();
     }
     this._setSelection(sel);
   };

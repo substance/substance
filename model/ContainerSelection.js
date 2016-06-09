@@ -446,7 +446,7 @@ ContainerSelection.Prototype = function() {
       if (fragment instanceof Selection.Fragment) {
         sels.push(
           new PropertySelection(fragment.path, fragment.startOffset,
-            fragment.endOffset, false, this.surfaceId)
+            fragment.endOffset, false, this.containerId, this.surfaceId)
         );
       }
     }.bind(this));

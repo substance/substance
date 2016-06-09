@@ -39,10 +39,11 @@ Command.Prototype = function() {
   };
 
   this._getSelection = function(props) {
-    if (!props.selection) {
+    var sel = props.selection || props.selectionState.getSelection();
+    if (!sel) {
       throw new Error("'selection' is required.");
     }
-    return props.selection;
+    return sel;
   };
 
 };

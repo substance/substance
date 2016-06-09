@@ -161,10 +161,11 @@ ContainerEditor.Prototype = function() {
   this._handleUpOrDownArrowKey = function (event) {
     event.stopPropagation();
     var direction = (event.keyCode === keys.UP) ? 'left' : 'right';
-    var sel = this.getSelection();
+    var selState = this.getDocumentSession().getSelectionState();
+    var sel = selState.getSelection();
 
     // Note: this collapses the selection, just to let ContentEditable continue doing a cursor move
-    if (sel.isNodeSelection() && sel.isEntireNodeSelected() && !event.shiftKey) {
+    if (selState.isFullNodeSelection() && !event.shiftKey) {
       this.domSelection.collapse(direction);
     }
     // HACK: ATM we have a cursor behavior in Chrome and FF when collapsing a selection
@@ -188,9 +189,10 @@ ContainerEditor.Prototype = function() {
   this._handleLeftOrRightArrowKey = function (event) {
     event.stopPropagation();
     var direction = (event.keyCode === keys.LEFT) ? 'left' : 'right';
-    var sel = this.getSelection();
+    var selState = this.getDocumentSession().getSelectionState();
+    var sel = selState.getSelection();
     // Note: collapsing the selection and let ContentEditable still continue doing a cursor move
-    if (sel.isNodeSelection() && sel.isEntireNodeSelected() && !event.shiftKey) {
+    if (selState.isFullNodeSelection() && !event.shiftKey) {
       event.preventDefault();
       this.setSelection(sel.collapse(direction));
       return;
@@ -200,8 +202,8 @@ ContainerEditor.Prototype = function() {
   };
 
   this._handleEnterKey = function(event) {
-    var sel = this.getSelection();
-    if (sel.isNodeSelection() && sel.isEntireNodeSelected()) {
+    var selState = this.getDocumentSession().getSelectionState();
+    if (selState.isFullNodeSelection()) {
       event.preventDefault();
       event.stopPropagation();
     } else {
@@ -403,11 +405,21 @@ ContainerEditor.Prototype = function() {
   this.transaction = function(transformation, info) {
     var documentSession = this.documentSession;
     var surfaceId = this.getId();
+    var containerId = this.getContainerId();
     return documentSession.transaction(function(tx, args) {
+      var sel = tx.before.selection;
+      if (sel && !sel.isNull()) {
+        sel.containerId = sel.containerId || containerId;
+      }
       tx.before.surfaceId = surfaceId;
       args.containerId = this.getContainerId();
       args.editingBehavior = this.editingBehavior;
-      return transformation(tx, args);
+      var result = transformation(tx, args);
+      sel = result.selection;
+      if (sel && !sel.isNull()) {
+        sel.containerId = containerId;
+      }
+      return result;
     }.bind(this), info);
   };
 
