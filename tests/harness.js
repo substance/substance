@@ -60,10 +60,12 @@ var getTestArgs = function () {
 function _withExtensions(tapeish) {
 
   function _withBeforeAndAfter(args) {
+    var _before = args.opts.before;
+    var _after = args.opts.after;
     return tapeish(args.name, args.opts, function (t) {
-      if(args.opts.before) args.opts.before(t);
+      if(_before) _before(t);
       args.cb(t);
-      if(args.opts.after) args.opts.after(t);
+      if(_after) _after(t);
     });
   }
 
@@ -73,12 +75,14 @@ function _withExtensions(tapeish) {
       if (!inBrowser) {
         args.opts.skip = true;
       } else {
+        var _before = args.opts.before;
+        var _after = args.opts.after;
         args.opts.before = function(t) {
           _setupUI(t);
-          if (args.opts.before) args.opts.before(t);
+          if(_before) _before(t);
         };
         args.opts.after = function(t) {
-          if(args.opts.after) args.opts.after(t);
+          if(_after) _after(t);
           _teardownUI(t);
         };
         return _withBeforeAndAfter(args);
