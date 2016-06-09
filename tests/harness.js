@@ -9,23 +9,20 @@ var nextTick = process.nextTick;
 var harness = tape.createHarness();
 var results = harness._results;
 
-function _onResult(t, res) {
-  console.log('Received result for test', t.name, res);
-}
-
 harness.runAllTests = function() {
   var i = 0;
   function next() {
     while (i < results.tests.length) {
       var t = results.tests[i++];
-      t.once('result', _onResult.bind(null, t));
+      t.once('end', function(){ nextTick(next); });
       t.run();
-      if (!t.ended) {
-        return t.once('end', function(){ nextTick(next); });
-      }
     }
   }
   nextTick(next);
+};
+
+harness.getTests = function() {
+  return results.tests || [];
 };
 
 harness.module = function(moduleName) {

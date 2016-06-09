@@ -69,6 +69,7 @@ app.get('/tape-test/app.js', function (req, res, next) {
     }
   });
 });
+serverUtils.serveStyles(app, '/tape-test/app.css', path.join(__dirname, 'tests', 'app.scss'));
 app.use('/tape-test', express.static(__dirname + '/tests'));
 
 

@@ -1,0 +1,22 @@
+.sc-test-suite {
+  padding: 10px 10px;
+}
+
+.sc-test {
+  padding: 10px 10px;
+  border: solid 1px #ccc;
+}
+
+.sc-test-result {
+
+  padding: 5px 0px;
+
+  &.sm-ok {
+    background: rgba(green, 0.4);
+  }
+
+  &.sm-not-ok {
+    background: rgba(red, 0.4);
+  }
+
+}
