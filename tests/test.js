@@ -4,39 +4,33 @@ var tape = require('tape');
 var inBrowser = require('../util/inBrowser');
 var platform = require('../util/platform');
 var DefaultDOMElement = require('../ui/DefaultDOMElement');
+var substanceGlobals = require('../util/substanceGlobals');
 
-var nextTick = process.nextTick;
-var harness = tape.createHarness();
-var results = harness._results;
+var harness = tape;
 
-harness.runAllTests = function() {
-  var i = 0;
-  function next() {
-    while (i < results.tests.length) {
-      var t = results.tests[i++];
-      t.once('end', function(){ nextTick(next); });
-      t.run();
+if (inBrowser && substanceGlobals.TEST_UI) {
+  var nextTick = process.nextTick;
+  harness = tape.createHarness();
+  var results = harness._results;
+
+  harness.runAllTests = function() {
+    var i = 0;
+    function next() {
+      while (i < results.tests.length) {
+        var t = results.tests[i++];
+        t.once('end', function(){ nextTick(next); });
+        t.run();
+      }
     }
-  }
-  nextTick(next);
-};
-
-harness.getTests = function() {
-  return results.tests || [];
-};
-
-harness.module = function(moduleName) {
-  var tapeish = function() {
-    var args = getTestArgs.apply(null, arguments);
-    var name = moduleName + ": " + args.name;
-    var t = harness(name, args.opts, args.cb);
-    t.moduleName = moduleName;
-    return t;
+    nextTick(next);
   };
-  return _withExtensions(tapeish, false);
-};
 
-_withExtensions(harness);
+  harness.getTests = function() {
+    return results.tests || [];
+  };
+}
+
+_withExtensions(harness, true);
 
 /*
   Helpers
@@ -84,9 +78,8 @@ function _withExtensions(tapeish, addModule) {
         t.moduleName = moduleName;
         return t;
       }, false);
-    }
+    };
   }
-
 
   tapeish.UI = function() {
     var args = getTestArgs.apply(null, arguments);
@@ -144,10 +137,6 @@ function _teardownUI(t) {
   if (sandbox) {
     sandbox.remove();
   }
-}
-
-if (!inBrowser) {
-  harness = _withExtensions(tape, true);
 }
 
 module.exports = harness;

@@ -1,7 +1,7 @@
 "use strict";
 /* eslint-disable no-invalid-this */
 
-var test = require('../test').UI;
+var test = require('../test').module('ui/Surface');
 
 var Registry = require('../../util/Registry');
 var createAnnotation = require('../../model/transform/createAnnotation');
@@ -42,7 +42,7 @@ function _createApp(fixtureSeed, el) {
 }
 
 // This test was added to cover issue #82
-test("Set the selection after creating annotation.", function(t) {
+test.UI("Set the selection after creating annotation.", function(t) {
   var el = t.sandbox;
   var app = _createApp(simple, el);
   var doc = app.doc;
@@ -60,7 +60,7 @@ test("Set the selection after creating annotation.", function(t) {
   t.end();
 });
 
-test("Render a reverse selection.", function(t) {
+test.UI("Render a reverse selection.", function(t) {
   var BrowserDOMElement = require('../../ui/BrowserDOMElement');
   var el = t.sandbox;
   var app = _createApp(simple, el);
