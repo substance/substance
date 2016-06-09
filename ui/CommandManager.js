@@ -75,7 +75,8 @@ CommandManager.Prototype = function() {
       console.warn('command', commandName, 'not registered');
       return;
     }
-    props = extend(this._getCommandProps(), props);
+    var commandState = this.commandStates[commandName];
+    props = extend(this._getCommandProps(), commandState, props);
     var info = cmd.execute(props, this.getCommandContext());
     // TODO: why do we required commands to return a result?
     if (info === undefined) {

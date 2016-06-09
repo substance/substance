@@ -7,7 +7,10 @@ var documentHelpers = require('./documentHelpers');
 
 function SelectionState(doc) {
   this.document = doc;
-  this._state = this._resetState();
+
+  this.selection = Selection.nullSelection;
+  this._state = {};
+  this._resetState();
 }
 
 SelectionState.Prototype = function() {
@@ -18,16 +21,15 @@ SelectionState.Prototype = function() {
     } else {
       sel.attach(this.document);
     }
-    if (!this._state.selection.equals(sel)) {
-      this._state.selection = sel;
-      this._deriveState(sel);
-      return true;
-    }
-    return false;
+    // TODO: selection state is selection plus derived state,
+    // thus we need to return false only if both did not change
+    this._deriveState(sel);
+    this.selection = sel;
+    return true;
   };
 
   this.getSelection = function() {
-    return this._state.selection;
+    return this.selection;
   };
 
   this.getAnnotationsForType = function(type) {
@@ -58,9 +60,8 @@ SelectionState.Prototype = function() {
   this._deriveState = function(sel) {
     var doc = this.document;
 
-    var state = this._resetState();
-    state.selection = sel;
-
+    this._resetState();
+    var state = this._state;
     if (sel.isContainerSelection()) {
       state.isNodeSelection = sel.isNodeSelection();
       if (state.isNodeSelection) {
@@ -95,7 +96,6 @@ SelectionState.Prototype = function() {
 
   this._resetState = function() {
     this._state = {
-      selection: Selection.nullSelection,
       // all annotations under the current selection
       annosByType: null,
       // flags to make node selection (IsolatedNodes) stuff more convenient
