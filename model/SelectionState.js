@@ -57,6 +57,10 @@ SelectionState.Prototype = function() {
     return this._state.nodeSelectionMode;
   };
 
+  this.isInlineNodeSelection = function() {
+    return this._state.isInlineNodeSelection;
+  };
+
   this._deriveState = function(sel) {
     var doc = this.document;
 
@@ -84,6 +88,11 @@ SelectionState.Prototype = function() {
     propAnnos.forEach(function(anno) {
       annosByType.add(anno.type, anno);
     });
+
+    if (propAnnos.length === 1 && propAnnos[0].isInline()) {
+      state.isInlineNodeSelection = propAnnos[0].getSelection().equals(sel);
+    }
+
     var containerId = sel.containerId;
     if (containerId) {
       var containerAnnos = documentHelpers.getContainerAnnotationsForSelection(doc, sel, containerId);
