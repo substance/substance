@@ -403,11 +403,21 @@ ContainerEditor.Prototype = function() {
   this.transaction = function(transformation, info) {
     var documentSession = this.documentSession;
     var surfaceId = this.getId();
+    var containerId = this.getContainerId();
     return documentSession.transaction(function(tx, args) {
+      var sel = tx.before.selection;
+      if (sel && !sel.isNull()) {
+        sel.containerId = sel.containerId || containerId;
+      }
       tx.before.surfaceId = surfaceId;
       args.containerId = this.getContainerId();
       args.editingBehavior = this.editingBehavior;
-      return transformation(tx, args);
+      var result = transformation(tx, args);
+      sel = result.selection;
+      if (sel && !sel.isNull()) {
+        sel.containerId = containerId;
+      }
+      return result;
     }.bind(this), info);
   };
 
