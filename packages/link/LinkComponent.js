@@ -6,9 +6,26 @@ function LinkComponent() {
   LinkComponent.super.apply(this, arguments);
 }
 
-AnnotationComponent.extend(LinkComponent, function LinkComponentPrototype() {
-  this.render = function($$) {
-    var el = AnnotationComponent.prototype.render.call(this, $$);
+LinkComponent.Prototype = function() {
+
+  var _super = LinkComponent.super.prototype;
+
+  this.didMount = function() {
+    _super.didMount.apply(this, arguments);
+
+    var node = this.props.node;
+    node.on('properties:changed', this.rerender, this);
+  };
+
+  this.dispose = function() {
+    _super.dispose.apply(this, arguments);
+
+    var node = this.props.node;
+    node.off(this);
+  };
+
+  this.render = function($$) { // eslint-disable-line
+    var el = _super.render.apply(this, arguments);
 
     el.tagName = 'a';
     el.attr('href', this.props.node.url);
@@ -21,19 +38,8 @@ AnnotationComponent.extend(LinkComponent, function LinkComponentPrototype() {
     return el.attr("title", titleComps.join(' | '));
   };
 
-  this.didMount = function() {
-    AnnotationComponent.prototype.didMount.call(this);
-    var node = this.props.node;
-    this.doc = node.getDocument();
-    var pathEventProxy = this.doc.getEventProxy('path');
-    pathEventProxy.on([node.id, 'title'], this.rerender, this);
-    pathEventProxy.on([node.id, 'url'], this.rerender, this);
-  };
+};
 
-  this.dispose = function() {
-    AnnotationComponent.prototype.dispose.call(this);
-    this.doc.getEventProxy('path').off(this);
-  };
-});
+AnnotationComponent.extend(LinkComponent);
 
 module.exports = LinkComponent;
