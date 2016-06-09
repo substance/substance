@@ -23,7 +23,9 @@ harness.runAllTests = function() {
 
 harness.module = function(moduleName) {
   var tapeish = function() {
-    var t = harness.apply(harness, arguments);
+    var args = getTestArgs.apply(null, arguments);
+    var name = moduleName + ": " + args.name;
+    var t = harness(name, args.opts, args.cb);
     t.moduleName = moduleName;
     return t;
   };
@@ -32,8 +34,12 @@ harness.module = function(moduleName) {
 
 _withExtensions(harness);
 
+/*
+  Helpers
+*/
+
 // copied from tape/lib/test.js
-var getTestArgs = function () {
+function getTestArgs() {
   var name = '(anonymous)';
   var opts = {};
   var cb;
@@ -51,11 +57,7 @@ var getTestArgs = function () {
     }
   }
   return { name: name, opts: opts, cb: cb };
-};
-
-/*
-  Helpers
-*/
+}
 
 function _withExtensions(tapeish) {
 
