@@ -75,8 +75,8 @@ Overlay.Prototype = function() {
       var selectionMaxWidth = hints.rectangle.width;
       // var selectionHeight = hints.rectangle.height;
 
-      // By default, Overlays are aligned center/top to the selection
-      this.el.css('top', hints.rectangle.top - contentHeight);
+      // By default, Overlays are aligned center/bottom to the selection
+      this.el.css('top', hints.rectangle.top + hints.rectangle.height);
       var leftPos = hints.rectangle.left + selectionMaxWidth/2 - contentWidth/2;
       // Must not exceed left bound
       leftPos = Math.max(leftPos, 0);
