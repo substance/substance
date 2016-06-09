@@ -70,44 +70,38 @@ function _withExtensions(tapeish) {
   }
 
   tapeish.UI = function() {
-    return function() {
-      var args = getTestArgs.apply(null, arguments);
-      if (!inBrowser) {
-        args.opts.skip = true;
-      } else {
-        var _before = args.opts.before;
-        var _after = args.opts.after;
-        args.opts.before = function(t) {
-          _setupUI(t);
-          if(_before) _before(t);
-        };
-        args.opts.after = function(t) {
-          if(_after) _after(t);
-          _teardownUI(t);
-        };
-        return _withBeforeAndAfter(args);
-      }
-    };
+    var args = getTestArgs.apply(null, arguments);
+    if (!inBrowser) {
+      args.opts.skip = true;
+    } else {
+      var _before = args.opts.before;
+      var _after = args.opts.after;
+      args.opts.before = function(t) {
+        _setupUI(t);
+        if(_before) _before(t);
+      };
+      args.opts.after = function(t) {
+        if(_after) _after(t);
+        _teardownUI(t);
+      };
+    }
+    return _withBeforeAndAfter(args);
   };
 
   tapeish.FF = function() {
-    return function() {
-      var args = getTestArgs.apply(null, arguments);
-      if (!inBrowser || !platform.isFF) {
-        args.opts.skip = true;
-      }
-      return _withBeforeAndAfter(args);
-    };
+    var args = getTestArgs.apply(null, arguments);
+    if (!inBrowser || !platform.isFF) {
+      args.opts.skip = true;
+    }
+    return _withBeforeAndAfter(args);
   };
 
   tapeish.WK = function() {
-    return function() {
-      var args = getTestArgs.apply(null, arguments);
-      if (!inBrowser || !platform.isWebKit) {
-        args.opts.skip = true;
-      }
-      return _withBeforeAndAfter(args);
-    };
+    var args = getTestArgs.apply(null, arguments);
+    if (!inBrowser || !platform.isWebKit) {
+      args.opts.skip = true;
+    }
+    return _withBeforeAndAfter(args);
   };
 
   return tapeish;
