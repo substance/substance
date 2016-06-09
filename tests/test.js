@@ -77,7 +77,7 @@ function _withExtensions(tapeish, addModule) {
 
   if (addModule) {
     tapeish.module = function(moduleName) {
-      return _withExtension(function() {
+      return _withExtensions(function() {
         var args = getTestArgs.apply(null, arguments);
         var name = moduleName + ": " + args.name;
         var t = tapeish(name, args.opts, args.cb);
