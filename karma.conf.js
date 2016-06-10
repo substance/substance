@@ -24,7 +24,7 @@ module.exports = function(config) {
   });
 
   if(process.env.TRAVIS){
-    config.browsers = ['Chrome_travis_ci', 'Firefox'];
+    config.browsers = ['Firefox'];
   } else {
     var fs = require('fs');
     if (fs.existsSync(__dirname + "/karma.conf.local.js")) {
