@@ -1,5 +1,7 @@
 'use strict';
 
+var extend = require('lodash/extend');
+var isNil = require('lodash/isNil');
 var tape = require('tape');
 var inBrowser = require('../util/inBrowser');
 var platform = require('../util/platform');
@@ -9,24 +11,48 @@ var DefaultDOMElement = require('../ui/DefaultDOMElement');
 var harness = tape;
 
 if (inBrowser && substanceGlobals.TEST_UI) {
+
+  // extend tape Test
+  var Test = require('tape/lib/test');
+
+  // add a tape.Test.reset() that allows to re-run a test
+  Test.prototype.reset = function() {
+    this.readable = true;
+    this.assertCount = 0;
+    this.pendingCount = 0;
+    this._plan = undefined;
+    this._planError = null;
+    this._progeny = [];
+    this._ok = true;
+    this.calledEnd = false;
+    this.ended = false;
+  };
+
+  Test.prototype.nil =
+  Test.prototype.isNil = function (value, msg, extra) {
+    this._assert(isNil(value), {
+      message : msg,
+      operator : 'nil',
+      expected : true,
+      actual : value,
+      extra : extra
+    });
+  };
+
+  Test.prototype.notNil =
+  Test.prototype.isNotNil = function (value, msg, extra) {
+    this._assert(!isNil(value), {
+      message : msg,
+      operator : 'nil',
+      expected : true,
+      actual : value,
+      extra : extra
+    });
+  };
+
   var nextTick = process.nextTick;
   harness = tape.createHarness();
   var results = harness._results;
-
-  results.on('_push', function(t) {
-    t.reset = function() {
-      this.readable = true;
-      this.assertCount = 0;
-      this.pendingCount = 0;
-      this._plan = undefined;
-      this._planError = null;
-      this._progeny = [];
-      this._ok = true;
-      this.calledEnd = false;
-      this.ended = false;
-    };
-  });
-
 
   harness.runAllTests = function() {
     var i = 0;
@@ -111,6 +137,14 @@ function _withExtensions(tapeish, addModule) {
       }, false);
     };
   }
+
+  tapeish.withOptions = function(opts) {
+    return _withExtensions(function() {
+      var args = getTestArgs.apply(null, arguments);
+      var _opts = extend({}, opts, args.opts);
+      return tapeish(args.name, _opts, args.cb);
+    });
+  };
 
   tapeish.UI = function() {
     var args = getTestArgs.apply(null, arguments);
