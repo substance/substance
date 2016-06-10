@@ -136,6 +136,7 @@ test.UI("Get coordinate for collapsed selection", function(t) {
   t.ok(coor, "Extracted coordinate should be !== null");
   t.deepEqual(coor.path, ['test1', 'content'], 'Path should be extracted correctly.');
   t.equal(coor.offset, 5, 'Offset should be extracted correctly.');
+  t.end();
 });
 
 test.UI("Search coordinate (before)", function(t) {
@@ -147,6 +148,7 @@ test.UI("Search coordinate (before)", function(t) {
   t.ok(coor, "Extracted coordinate should be !== null");
   t.deepEqual(coor.path, ['test1', 'content'], 'Path should be extracted correctly.');
   t.equal(coor.offset, 0, 'Offset should be extracted correctly.');
+  t.end();
 });
 
 test.UI("Search coordinate (between)", function(t) {
@@ -158,6 +160,7 @@ test.UI("Search coordinate (between)", function(t) {
   t.ok(coor, "Extracted coordinate should be !== null");
   t.deepEqual(coor.path, ['test3', 'content'], 'Path should be extracted correctly.');
   t.equal(coor.offset, 0, 'Offset should be extracted correctly.');
+  t.end();
 });
 
 test.UI("Search coordinate (between, left)", function(t) {
@@ -169,6 +172,7 @@ test.UI("Search coordinate (between, left)", function(t) {
   t.ok(coor, "Extracted coordinate should be !== null");
   t.deepEqual(coor.path, ['test2', 'content'], 'Path should be extracted correctly.');
   t.equal(coor.offset, 20, 'Offset should be extracted correctly.');
+  t.end();
 });
 
 test.UI("Search coordinate (after)", function(t) {
@@ -180,6 +184,7 @@ test.UI("Search coordinate (after)", function(t) {
   t.ok(coor, "Extracted coordinate should be !== null");
   t.deepEqual(coor.path, ['test4', 'content'], 'Path should be extracted correctly.');
   t.equal(coor.offset, 19, 'Offset should be extracted correctly.');
+  t.end();
 });
 
 test.UI("coordinate via search", function(t) {
@@ -191,6 +196,7 @@ test.UI("coordinate via search", function(t) {
   t.ok(coor, "Extracted coordinate should be !== null");
   t.deepEqual(coor.path, ['test3', 'content'], 'Path should be extracted correctly.');
   t.equal(coor.offset, 0, 'Offset should be extracted correctly.');
+  t.end();
 });
 
 var emptyParagraphFixture = [
@@ -208,6 +214,7 @@ test.UI("DOM coordinate in empty paragraph", function(t) {
   t.notNil(coor, "Extracted coordinate should be mapped.");
   t.deepEqual(coor.path, ['test1', 'content'], 'Path should be extracted correctly.');
   t.equal(coor.offset, 0, 'Offset should be extracted correctly.');
+  t.end();
 });
 
 var textWithAnnotations = [
@@ -230,6 +237,7 @@ test.UI("DOM coordinate on text property level (first)", function(t) {
   t.ok(coor, "Extracted coordinate should be !== null");
   t.deepEqual(coor.path, ['test1', 'content'], 'Path should be extracted correctly.');
   t.equal(coor.offset, 0, 'Offset should be extracted correctly.');
+  t.end();
 });
 
 test.UI("DOM coordinate on text property level (last)", function(t) {
@@ -241,6 +249,7 @@ test.UI("DOM coordinate on text property level (last)", function(t) {
   t.ok(coor, "Extracted coordinate should be !== null");
   t.deepEqual(coor.path, ['test1', 'content'], 'Path should be extracted correctly.');
   t.equal(coor.offset, 8, 'Offset should be extracted correctly.');
+  t.end();
 });
 
 var withAnnosAndInlines = [
@@ -265,6 +274,7 @@ test.UI("DOM coordinate after last inline", function(t) {
   t.ok(coor, "Extracted coordinate should be !== null");
   t.deepEqual(coor.path, ['test1', 'content'], 'Path should be extracted correctly.');
   t.equal(coor.offset, 9, 'Offset should be extracted correctly.');
+  t.end();
 });
 
 test.UI("DOM selection spanning over inline at end", function(t) {
@@ -280,6 +290,7 @@ test.UI("DOM selection spanning over inline at end", function(t) {
   t.deepEqual(range.start.path, ['test1', 'content'], 'Path should be extracted correctly.');
   t.deepEqual(range.start.offset, 8, 'startOffset should be extracted correctly.');
   t.deepEqual(range.end.offset, 9, 'startOffset should be extracted correctly.');
+  t.end();
 });
 
 var withoutHints = [
@@ -301,6 +312,7 @@ test.UI("Without hints: DOM coordinate in first text node", function(t) {
   var coor = domSelection._getCoordinate(node, offset);
   t.ok(coor, "Extracted coordinate should be !== null");
   t.equal(coor.offset, 1, 'Offset should be extracted correctly.');
+  t.end();
 });
 
 test.UI("Without hints: DOM coordinate in second text node", function(t) {
@@ -311,6 +323,7 @@ test.UI("Without hints: DOM coordinate in second text node", function(t) {
   var coor = domSelection._getCoordinate(node, offset);
   t.ok(coor, "Extracted coordinate should be !== null");
   t.equal(coor.offset, 3, 'Offset should be extracted correctly.');
+  t.end();
 });
 
 test.UI("Without hints: DOM coordinate between spans", function(t) {
@@ -321,6 +334,7 @@ test.UI("Without hints: DOM coordinate between spans", function(t) {
   var coor = domSelection._getCoordinate(node, offset);
   t.ok(coor, "Extracted coordinate should be !== null");
   t.equal(coor.offset, 4, 'Offset should be extracted correctly.');
+  t.end();
 });
 
 // Test for issue #273
@@ -347,6 +361,7 @@ test.UI("Issue #273: 'Could not find char position' when clicking right above an
   coor = domSelection._getCoordinate(node, offset);
   t.ok(coor, "Extracted coordinate should be !== null");
   t.equal(coor.offset, 4, 'Offset should be extracted correctly.');
+  t.end();
 });
 
 var surfaceWithParagraphs = [
@@ -372,6 +387,7 @@ test.FF("Issue #354: Wrong selection in FF when double clicking between lines", 
   // t.ok(sel.isPropertySelection(), "Selection should be property selection.");
   t.deepEqual(range.start.path, ['p1', 'content'], 'Path should be extracted correctly.');
   t.deepEqual([range.start.offset, range.end.offset], [0, 2], 'Offsets should be extracted correctly.');
+  t.end();
 });
 
 test.UI("Issue #376: Wrong selection mapping at end of paragraph", function(t) {
@@ -384,6 +400,7 @@ test.UI("Issue #376: Wrong selection mapping at end of paragraph", function(t) {
   t.deepEqual(range.start.offset, 2, 'startOffset');
   t.deepEqual(range.end.path, ['p2', 'content'], 'endPath');
   t.deepEqual(range.end.offset, 0, 'endOffset');
+  t.end();
 });
 
 test.WK("Mapping a ContainerSelection to the DOM", function(t) {
@@ -399,6 +416,7 @@ test.WK("Mapping a ContainerSelection to the DOM", function(t) {
   t.equal(wSel.anchorOffset, 1, 'anchorOffset should be correct.');
   t.equal(wSel.focusNode, p2Text.getNativeElement(), 'focusNode should be in second paragraph.');
   t.equal(wSel.focusOffset, 1, 'focusOffset should be correct.');
+  t.end();
 });
 
 test.UI("Mapping a ContainerSelection from DOM to model", function(t) {
@@ -413,6 +431,7 @@ test.UI("Mapping a ContainerSelection from DOM to model", function(t) {
   t.equal(sel.startOffset, 1, 'startOffset should be correct.');
   t.deepEqual(sel.endPath, ['p2', 'content'], 'endPath should be correct.');
   t.equal(sel.endOffset, 2, 'endOffset should be correct.');
+  t.end();
 });
 
 // TODO: is this a real case?
@@ -428,6 +447,7 @@ test.UI("DOM Coordinate on surface element", function(t) {
   t.ok(sel.isCollapsed, 'Selection should be collapsed.');
   t.deepEqual(sel.startPath, ['p3', 'content'], 'startPath should be correct.');
   t.equal(sel.startOffset, 0, 'startOffset should be correct.');
+  t.end();
 });
 
 var textWithInlines = [
@@ -454,6 +474,7 @@ test.UI("Setting cursor after inline node", function(t) {
   t.equal(wSel.anchorOffset, 0, 'anchorOffset should be correct.');
   t.ok(wSel.focusNode === wSel.anchorNode, 'focusNode should be the same.');
   t.equal(wSel.focusOffset, 0, 'focusOffset should be correct.');
+  t.end();
 });
 
 test.UI("Setting cursor after inline node at end of property", function(t) {
@@ -468,4 +489,5 @@ test.UI("Setting cursor after inline node at end of property", function(t) {
   t.equal(wSel.anchorOffset, 4, 'anchorOffset should be correct.');
   t.ok(wSel.focusNode === wSel.anchorNode, 'focusNode should be the same.');
   t.equal(wSel.focusOffset, wSel.anchorOffset, 'focusOffset should be correct.');
+  t.end();
 });

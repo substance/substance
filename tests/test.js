@@ -10,10 +10,33 @@ var DefaultDOMElement = require('../ui/DefaultDOMElement');
 
 var harness = tape;
 
+// extend tape Test
+var Test = require('tape/lib/test');
+
+Test.prototype.nil =
+Test.prototype.isNil = function (value, msg, extra) {
+  this._assert(isNil(value), {
+    message : msg,
+    operator : 'nil',
+    expected : true,
+    actual : value,
+    extra : extra
+  });
+};
+
+Test.prototype.notNil =
+Test.prototype.isNotNil = function (value, msg, extra) {
+  this._assert(!isNil(value), {
+    message : msg,
+    operator : 'nil',
+    expected : true,
+    actual : value,
+    extra : extra
+  });
+};
+
 if (inBrowser && substanceGlobals.TEST_UI) {
 
-  // extend tape Test
-  var Test = require('tape/lib/test');
 
   // add a tape.Test.reset() that allows to re-run a test
   Test.prototype.reset = function() {
@@ -26,28 +49,6 @@ if (inBrowser && substanceGlobals.TEST_UI) {
     this._ok = true;
     this.calledEnd = false;
     this.ended = false;
-  };
-
-  Test.prototype.nil =
-  Test.prototype.isNil = function (value, msg, extra) {
-    this._assert(isNil(value), {
-      message : msg,
-      operator : 'nil',
-      expected : true,
-      actual : value,
-      extra : extra
-    });
-  };
-
-  Test.prototype.notNil =
-  Test.prototype.isNotNil = function (value, msg, extra) {
-    this._assert(!isNil(value), {
-      message : msg,
-      operator : 'nil',
-      expected : true,
-      actual : value,
-      extra : extra
-    });
   };
 
   var nextTick = process.nextTick;
