@@ -6,7 +6,7 @@ var colors = require('colors');
 
 global.QUnit = QUnit;
 
-var files = glob.sync('**/*/*.test.js', {cwd: 'test'});
+var files = glob.sync('**/*.test.js', {cwd: 'test-old'});
 // var files = glob.sync('unit/ui/Component.test.js', {cwd: 'test'});
 each(files, function(file) {
   require('./' + file);

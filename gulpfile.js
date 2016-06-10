@@ -112,16 +112,16 @@ gulp.task('test:fixtures', function() {
     .pipe(gulp.dest('test/fixtures/html/'));
 });
 
-gulp.task('test:karma', ['lint'], function(done) {
+gulp.task('test:qunit:karma', ['lint'], function(done) {
   new Karma({
     configFile: __dirname + '/karma.conf.js',
     singleRun: true
   }, done).start();
 });
 
-gulp.task('test:server', ['lint'], function() {
+gulp.task('test:qunit:server', ['lint'], function() {
   // requiring instead of doing 'node test/run.js'
-  require('./test/run');
+  require('./test-old/run');
 });
 
 gulp.task('test:tape:browsers', ['lint'], function(done) {
@@ -138,8 +138,8 @@ gulp.task('test:tape:server', ['lint'], function(done) {
     }));
 });
 
-gulp.task('test', ['lint', 'test:karma', 'test:server']);
+gulp.task('test:qunit', ['lint', 'test:qunit:karma', 'test:qunit:server']);
 
-gulp.task('test:tape', ['lint', 'test:tape:browsers', 'test:tape:server']);
+gulp.task('test', ['lint', 'test:tape:browsers', 'test:tape:server']);
 
 gulp.task('default', ['build']);
