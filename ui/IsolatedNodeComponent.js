@@ -12,8 +12,7 @@ function IsolatedNodeComponent() {
   this.name = this.props.node.id;
   this._id = createSurfaceId(this);
   this._state = {
-    selectionFragment: null,
-    level: this._getLevel()
+    selectionFragment: null
   };
 }
 
@@ -90,9 +89,12 @@ IsolatedNodeComponent.Prototype = function() {
         .append(this.__slugChar)
     );
 
+    var level = this._getLevel();
+
+
     var container = $$(this.__elementTag).addClass('se-container')
       .attr('contenteditable', false)
-      .css({ 'z-index': 2*this._state.level });
+      .css({ 'z-index': 2*level });
 
     if (ContentClass.static.fullWidth) {
       container.addClass('sm-full-width');
@@ -108,7 +110,8 @@ IsolatedNodeComponent.Prototype = function() {
     if (this._isDisabled() || this.state.mode === 'co-focused') {
       container.addClass('sm-disabled');
       // NOTE: there are some content implementations which work better without a blocker
-      var blocker = $$(this.__elementTag).addClass('se-blocker').css({ 'z-index': 2*this._state.level+1 });
+      var blocker = $$(this.__elementTag).addClass('se-blocker')
+        .css({ 'z-index': 2*level+1 });
       container.append(blocker);
     }
 
