@@ -8,13 +8,6 @@ var documentHelpers = require('../../model/documentHelpers');
 var fixture = require('../fixtures/createTestArticle');
 var containerAnnoSample = require('../fixtures/containerAnnoSample');
 
-var isNull = require('lodash/isNull');
-var isUndefined = require('lodash/isUndefined');
-
-function isDefinedAndNotNull(t, x, msg) {
-  return t.ok(!isNull(x) && !isUndefined(x), msg);
-}
-
 test("Expand-right of property annotation for a given property selection", function(t) {
   var doc = fixture(containerAnnoSample);
   var sel = doc.createSelection({
@@ -33,7 +26,7 @@ test("Expand-right of property annotation for a given property selection", funct
   });
   var a2 = out.result;
 
-  isDefinedAndNotNull(t, a2, 'a2 should have been returned as a result');
+  t.notNil(a2, 'a2 should have been returned as a result');
   t.equal(a2.startOffset, 0, 'a2.startOffset should be 0');
   t.equal(a2.endOffset, 6, 'a2.endOffset should have changed from 2 to 1');
   t.end();
@@ -49,7 +42,7 @@ test("Expand container annotation for a given property selection (right expansio
     endOffset: 6
   });
   var anno = doc.get('a1');
-  isDefinedAndNotNull(t, anno, 'There should be container annotation "a1" in the fixture');
+  t.notNil(anno, 'There should be container annotation "a1" in the fixture');
   var out = expandAnnotation(doc, {
     selection: sel,
     anno: anno
@@ -73,7 +66,7 @@ test("Expand container annotation for a given container selection (expand right)
     endOffset: 6,
   });
   var anno = doc.get('a1');
-  isDefinedAndNotNull(t, anno, 'There should be container annotation "a1" in the fixture');
+  t.notNil(anno, 'There should be container annotation "a1" in the fixture');
   var out = expandAnnotation(doc, {
     selection: sel,
     anno: anno

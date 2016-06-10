@@ -6,13 +6,6 @@ var fixture = require('../fixtures/createTestArticle');
 var headersAndParagraphs = require('../fixtures/headersAndParagraphs');
 var deleteCharacter = require('../../model/transform/deleteCharacter');
 
-var isNull = require('lodash/isNull');
-var isUndefined = require('lodash/isUndefined');
-
-function isNullOrUndefined(t, x, msg) {
-  return t.ok(isNull(x) || isUndefined(x), msg);
-}
-
 test("Backspacing", function(t) {
   var doc = fixture(headersAndParagraphs);
   var sel = doc.createSelection({
@@ -50,7 +43,7 @@ test("Backspacing into previous component", function(t) {
   var out = deleteCharacter(doc, args);
   var selection = out.selection;
   t.equal(doc.get(['h2', 'content']), 'Section 2Paragraph with annotation', 'Content of p2 should have been merged into h2.');
-  isNullOrUndefined(t, doc.get('p2'), 'p2 should be gone.');
+  t.isNil(doc.get('p2'), 'p2 should be gone.');
   t.ok(selection.isCollapsed(), 'Selection should be collapsed.');
   t.equal(selection.startOffset, 9, 'Cursor should be before the first character of the merged text.');
   t.end();

@@ -7,13 +7,6 @@ var truncateAnnotation = require('../../model/transform/truncateAnnotation');
 var fixture = require('../fixtures/createTestArticle');
 var containerAnnoSample = require('../fixtures/containerAnnoSample');
 
-var isNull = require('lodash/isNull');
-var isUndefined = require('lodash/isUndefined');
-
-function isDefinedAndNotNull(t, x, msg) {
-  return t.ok(!isNull(x) && !isUndefined(x), msg);
-}
-
 test("Truncate property annotation with a given property selection", function(t) {
   var doc = fixture(containerAnnoSample);
   // Put cursor inside an the existing annotation
@@ -24,7 +17,7 @@ test("Truncate property annotation with a given property selection", function(t)
     endOffset: 2
   });
   var anno = doc.get('a2');
-  isDefinedAndNotNull(t, anno, 'There should be "a2" in the fixture');
+  t.notNil(anno, 'There should be "a2" in the fixture');
 
   var out = truncateAnnotation(doc, {
     anno: anno,
@@ -48,7 +41,7 @@ test("Truncate container annotation with a given property selection", function(t
     endOffset: 4
   });
   var anno = doc.get('a1');
-  isDefinedAndNotNull(t, anno, 'There should be "a1" in the fixture');
+  t.notNil(anno, 'There should be "a1" in the fixture');
 
   var out = truncateAnnotation(doc, {
     anno: anno,
@@ -74,7 +67,7 @@ test("Truncate container annotation with a given container selection", function(
     endOffset: 4,
   });
   var anno = doc.get('a1');
-  isDefinedAndNotNull(t, anno, 'There should be "a1" in the fixture');
+  t.notNil(anno, 'There should be "a1" in the fixture');
 
   var out = truncateAnnotation(doc, {
     anno: anno,

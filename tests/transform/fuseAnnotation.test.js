@@ -7,17 +7,6 @@ var docHelpers = require('../../model/documentHelpers');
 var createTestArticle = require('../fixtures/createTestArticle');
 var containerAnnoSample = require('../fixtures/containerAnnoSample');
 
-var isNull = require('lodash/isNull');
-var isUndefined = require('lodash/isUndefined');
-
-function isNullOrUndefined(t, x, msg) {
-  return t.ok(isNull(x) || isUndefined(x), msg);
-}
-
-function isDefinedAndNotNull(t, x, msg) {
-  return t.ok(!isNull(x) && !isUndefined(x), msg);
-}
-
 function fixture() {
   var doc = createTestArticle(containerAnnoSample);
 
@@ -63,8 +52,8 @@ test("Fuse two property annotations for a given property selection", function(t)
   var out = fuseAnnotation(doc, { annos: annos });
   var fusedAnno = out.result;
 
-  isNullOrUndefined(t, doc.get('a2'), 'a2 should be gone.');
-  isNullOrUndefined(t, doc.get('a3'), 'a3 should be gone.');
+  t.isNil(doc.get('a2'), 'a2 should be gone.');
+  t.isNil(doc.get('a3'), 'a3 should be gone.');
   t.ok(fusedAnno, 'fusedAnno should have been returned as a result');
 
   t.equal(fusedAnno.startOffset, 0, 'fusedAnno.startOffset should be 0');
@@ -90,9 +79,9 @@ test("Fuse two conatiner annotations for a given property selection", function(t
   });
   var fusedAnno = out.result;
 
-  isDefinedAndNotNull(t, fusedAnno, 'fusedAnno should have been returned as a result of transformation');
-  isNullOrUndefined(t, doc.get('a1'), 'a1 should be gone.');
-  isNullOrUndefined(t, doc.get('a4'), 'a4 should be gone.');
+  t.notNil(fusedAnno, 'fusedAnno should have been returned as a result of transformation');
+  t.isNil(doc.get('a1'), 'a1 should be gone.');
+  t.isNil(doc.get('a4'), 'a4 should be gone.');
 
   t.deepEqual(fusedAnno.startPath, ['p1', 'content'], 'a1.startPath should be p1.content');
   t.equal(fusedAnno.startOffset, 5, 'fusedAnno.startOffset should be 5');

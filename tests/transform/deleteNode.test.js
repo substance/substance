@@ -4,20 +4,8 @@ var test = require('../test').module('transform/deleteNode');
 
 var DocumentSession = require('../../model/DocumentSession');
 var deleteNode = require('../../model/transform/deleteNode');
-
 var fixture = require('../fixtures/createTestArticle');
 var containerAnnoSample = require('../fixtures/containerAnnoSample');
-
-var isNull = require('lodash/isNull');
-var isUndefined = require('lodash/isUndefined');
-
-function isNullOrUndefined(t, x, msg) {
-  return t.ok(isNull(x) || isUndefined(x), msg);
-}
-
-function isDefinedAndNotNull(t, x, msg) {
-  return t.ok(!isNull(x) && !isUndefined(x), msg);
-}
 
 test("Delete a plain node", function(t) {
   var doc = fixture(containerAnnoSample);
@@ -26,7 +14,7 @@ test("Delete a plain node", function(t) {
     args.nodeId = "p4";
     deleteNode(tx, args);
   });
-  isNullOrUndefined(t, doc.get('p4'), "Node should have been deleted.");
+  t.isNil(doc.get('p4'), "Node should have been deleted.");
   t.end();
 });
 
@@ -41,13 +29,13 @@ test("Delete annotations when deleting a node", function(t) {
       startOffset: 0, endOffset: 5
     });
   });
-  isDefinedAndNotNull(t, doc.get("test-anno"));
+  t.notNil(doc.get("test-anno"));
 
   docSession.transaction(function(tx, args) {
     args.nodeId = "p4";
     deleteNode(tx, args);
   });
- isNullOrUndefined(t, doc.get("test-anno"), "Annotation should have been deleted too.");
+  t.isNil(doc.get("test-anno"), "Annotation should have been deleted too.");
   t.end();
 });
 

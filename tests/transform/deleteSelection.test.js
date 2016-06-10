@@ -9,13 +9,6 @@ var simple = require('../fixtures/simple');
 var headersAndParagraphs = require('../fixtures/headersAndParagraphs');
 var containerAnnoSample = require('../fixtures/containerAnnoSample');
 
-var isNull = require('lodash/isNull');
-var isUndefined = require('lodash/isUndefined');
-
-function isNullOrUndefined(t, x, msg) {
-  return t.ok(isNull(x) || isUndefined(x), msg);
-}
-
 test("Deleting a property selection", function(t) {
   var doc = fixture(headersAndParagraphs);
   var sel = doc.createSelection({
@@ -117,7 +110,7 @@ test("Deleting a paragraph", function(t) {
   });
   var args = {selection: sel, containerId: 'body'};
   deleteSelection(doc, args);
-  isNullOrUndefined(t, doc.get('p1'), 'Paragraph should be deleted ...');
+  t.isNil(doc.get('p1'), 'Paragraph should be deleted ...');
   t.equal(body.nodes.indexOf('p1'), -1, '... and hidden.');
   t.end();
 });
@@ -176,8 +169,8 @@ test("Trying to delete a structured node partially", function(t) {
   var args = { selection: sel, containerId: 'body' };
   var out = deleteSelection(doc, args);
   var container = doc.get('body');
-  isNullOrUndefined(t, doc.get('p1'), 'p1 should have been deleted');
-  isNullOrUndefined(t, doc.get('sn1'), 'sn1 should have been deleted');
+  t.isNil(doc.get('p1'), 'p1 should have been deleted');
+  t.isNil(doc.get('sn1'), 'sn1 should have been deleted');
   // Check selection
   t.ok(out.selection.isCollapsed(), "Selection should be collapsed (Cursor).");
   var address = container.getAddress(out.selection.start);

@@ -1,9 +1,4 @@
-var isNull = require('lodash/isNull');
-var isUndefined = require('lodash/isUndefined');
-
-function isNullOrUndefined(t, x, msg) {
-  return t.ok(isNull(x) || isUndefined(x), msg);
-}
+'use strict';
 
 function testDocumentStore(store, test) {
 
@@ -48,7 +43,7 @@ function testDocumentStore(store, test) {
 
     store.createDocument(newDoc, function(err, doc) {
       t.equal(err.name, 'DocumentStore.CreateError', 'Should give a create error');
-      isNullOrUndefined(t, doc, 'doc should be undefined');
+      t.isNil(doc, 'doc should be undefined');
       t.end();
     });
   });
@@ -96,7 +91,7 @@ function testDocumentStore(store, test) {
   test('Update a document that does not exist', function(t) {
     store.updateDocument('doc-x', {schemaName: 'blog-article'}, function(err, doc) {
       t.equal(err.name, 'DocumentStore.UpdateError', 'should return an update error.');
-      isNullOrUndefined(t, doc, 'doc should be undefined');
+      t.isNil(doc, 'doc should be undefined');
       t.end();
     });
   });
@@ -113,7 +108,7 @@ function testDocumentStore(store, test) {
 
       store.getDocument('test-doc', function(err, doc) {
         t.equal(err.name, 'DocumentStore.ReadError', 'Should give a read error for deleted document');
-        isNullOrUndefined(t, doc, 'doc should be undefined');
+        t.isNil(doc, 'doc should be undefined');
         t.end();
       });
     });
@@ -122,7 +117,7 @@ function testDocumentStore(store, test) {
   test('Delete document that does not exist', function(t) {
     store.deleteDocument('doc-x', function(err, doc) {
       t.equal(err.name, 'DocumentStore.DeleteError', 'Should give a delete error');
-      isNullOrUndefined(t, doc, 'doc should be undefined');
+      t.isNil(doc, 'doc should be undefined');
       t.end();
     });
   });

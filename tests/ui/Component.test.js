@@ -1,74 +1,25 @@
 "use strict";
 /* eslint-disable no-invalid-this, indent */
 
-var test = require('../test').module('ui/Component');
-
 var spy = require('../spy');
 var isEqual = require('lodash/isEqual');
-var isNull = require('lodash/isNull');
-var isUndefined = require('lodash/isUndefined');
 
 var Component = require('../../ui/Component');
-var RenderingEngine = require('../../ui/RenderingEngine');
 
-var _withSpiesEnabled = false;
+function ComponentTests(debug) {
 
-function isNullOrUndefined(t, x, msg) {
-  return t.ok(isNull(x) || isUndefined(x), msg);
-}
+  var substanceGlobals = require('../../util/substanceGlobals');
 
-function isDefinedAndNotNull(t, x, msg) {
-  return t.ok(!isNull(x) && !isUndefined(x), msg);
-}
+  var test = require('../test')
+    .module('ui/Component' + (debug ? ' (debug)' : '' ));
 
-function enableSpies() {
-  _withSpiesEnabled = true;
-}
-
-function TestComponent() {
-  TestComponent.super.apply(this, arguments);
-
-  if (_withSpiesEnabled) {
-    this._enableSpies();
+  if (debug) {
+    test = test.withOptions({
+      before: function() {
+        substanceGlobals.DEBUG_RENDERING = true;
+      }
+    });
   }
-}
-
-TestComponent.Prototype = function() {
-
-  this._enableSpies = function() {
-    ['didMount','didUpdate','dispose','shouldRerender','render'].forEach(function(name) {
-      spy(this, name);
-    }.bind(this));
-  };
-
-  this._disableSpies = function() {
-    ['didMount','didUpdate','dispose','shouldRerender','render'].forEach(function(name) {
-      this[name].restore();
-    }.bind(this));
-  };
-};
-
-Component.extend(TestComponent);
-
-function renderTestComponent(renderFunc, props) {
-  var comp = new TestComponent();
-  if (renderFunc) {
-    comp.render = renderFunc;
-  }
-  if (props) {
-    comp.setProps(props);
-  } else {
-    comp.rerender();
-  }
-  return comp;
-}
-
-function _ComponentTests(debug) {
-
-  // function ModuleSetup() {
-  //   _withSpiesEnabled = false;
-  //   RenderingEngine.DEBUG = debug;
-  // }
 
   test("Throw error when render method is not returning an element", function(t) {
     var MyComponent = TestComponent.extend({
@@ -97,7 +48,6 @@ function _ComponentTests(debug) {
   TestComponent.extend(SimpleComponent);
 
   test.UI("Mounting a component", function(t) {
-    enableSpies();
     // Mount to a detached element
     var el = window.document.createElement('div');
     var comp = Component.mount(SimpleComponent, el);
@@ -168,7 +118,7 @@ function _ComponentTests(debug) {
     // not on the Component API, as Component#find will only provide
     // elements which are Component instance.
     var b = comp.el.find('b');
-    isDefinedAndNotNull(t, b, 'Element should have rendered HTML as content.');
+    t.notNil(b, 'Element should have rendered HTML as content.');
     t.equal(b.textContent, 'World','Rendered element should have right content.');
     t.end();
   });
@@ -202,7 +152,6 @@ function _ComponentTests(debug) {
   });
 
   test("Rerender on setProps()", function(t) {
-    enableSpies();
     var comp = SimpleComponent.static.render({ foo: 'bar '});
     comp.shouldRerender.reset();
     comp.render.reset();
@@ -229,7 +178,6 @@ function _ComponentTests(debug) {
   });
 
   test("Rerender on setState()", function(t) {
-    enableSpies();
     var comp = SimpleComponent.static.render();
     comp.shouldRerender.reset();
     comp.render.reset();
@@ -322,12 +270,12 @@ function _ComponentTests(debug) {
     var a = comp.refs.a;
     var b = comp.refs.b;
     var c = comp.refs.c;
-    isDefinedAndNotNull(t, a.context.foo, "'a' should have a property 'foo' in its context");
-    isNullOrUndefined(t, a.context.bar, ".. but not 'bar'");
-    isDefinedAndNotNull(t, b.context.foo, "'b' should have a property 'foo' in its context");
-    isNullOrUndefined(t, b.context.bar, ".. but not 'bar'");
-    isDefinedAndNotNull(t, c.context.foo, "'c' should have a property 'foo' in its context");
-    isDefinedAndNotNull(t, c.context.bar, ".. and also 'bar'");
+    t.notNil(a.context.foo, "'a' should have a property 'foo' in its context");
+    t.isNil(a.context.bar, ".. but not 'bar'");
+    t.notNil(b.context.foo, "'b' should have a property 'foo' in its context");
+    t.isNil(b.context.bar, ".. but not 'bar'");
+    t.notNil(c.context.foo, "'c' should have a property 'foo' in its context");
+    t.notNil(c.context.bar, ".. and also 'bar'");
     t.end();
   });
 
@@ -527,7 +475,6 @@ function _ComponentTests(debug) {
 
   // didMount is only called in browser
   test.UI("Call didMount once when mounted", function(t) {
-    enableSpies();
 
     function Child() {
       Child.super.apply(this, arguments);
@@ -698,9 +645,9 @@ function _ComponentTests(debug) {
     var comp = Parent.static.render();
     var foo = comp.refs.foo;
     var bar = comp.refs.bar;
-    isDefinedAndNotNull(t, foo, "Component should have a ref 'foo'.");
+    t.notNil(foo, "Component should have a ref 'foo'.");
     t.equal(foo.textContent, 'foo', "foo should have textContent 'foo'");
-    isDefinedAndNotNull(t, bar, "Component should have a ref 'bar'.");
+    t.notNil(bar, "Component should have a ref 'bar'.");
     t.equal(bar.textContent, 'bar', "bar should have textContent 'bar'");
     t.end();
   });
@@ -739,8 +686,8 @@ function _ComponentTests(debug) {
     var comp = Parent.static.render();
     var child = comp.refs.child;
     var grandchild = comp.refs.grandchild;
-    isDefinedAndNotNull(t, child, "Child should be referenced.");
-    isDefinedAndNotNull(t, grandchild, "Grandchild should be referenced.");
+    t.notNil(child, "Child should be referenced.");
+    t.notNil(grandchild, "Grandchild should be referenced.");
     comp.rerender();
     t.ok(child === comp.refs.child, "Child should have been retained.");
     t.ok(grandchild === comp.refs.grandchild, "Grandchild should have been retained.");
@@ -839,7 +786,7 @@ function _ComponentTests(debug) {
     Component.extend(Child);
     var comp = Parent.static.render();
     var child = comp.find('.child');
-    isDefinedAndNotNull(t, child, "Child should exist.");
+    t.notNil(child, "Child should exist.");
     var foo = child.refs.foo;
     child.rerender();
     t.ok(child.refs.foo === foo, "'foo' should have been retained.");
@@ -909,7 +856,7 @@ function _ComponentTests(debug) {
       return $$('div').addClass('parent')
         .append($$('div').addClass('child').ref('foo'));
     });
-    isDefinedAndNotNull(t, comp.refs.foo, 'Component should have a ref "foo".');
+    t.notNil(comp.refs.foo, 'Component should have a ref "foo".');
     t.ok(comp.refs.foo.hasClass('child'), 'Referenced component should have class "child".');
     // check that the instance is retained after rerender
     var child = comp.refs.foo;
@@ -980,14 +927,14 @@ function _ComponentTests(debug) {
       );
     }, { grandChildRef: "foo"});
 
-    isDefinedAndNotNull(t, comp.refs.foo, "Ref 'foo' should be set.");
+    t.notNil(comp.refs.foo, "Ref 'foo' should be set.");
     var foo = comp.refs.foo;
     comp.rerender();
     t.ok(foo === comp.refs.foo, "Referenced grandchild should have been retained.");
     spy(foo, 'dispose');
     comp.setProps({ grandChildRef: "bar" });
     t.ok(foo.dispose.callCount > 0, "Former grandchild should have been disposed.");
-    isDefinedAndNotNull(t, comp.refs.bar, "Ref 'bar' should be set.");
+    t.notNil(comp.refs.bar, "Ref 'bar' should be set.");
     t.ok(foo !== comp.refs.bar, "Grandchild should have been recreated.");
     t.end();
   });
@@ -1012,10 +959,10 @@ function _ComponentTests(debug) {
       );
       return el;
     });
-    isDefinedAndNotNull(t, comp.refs.grandchild, "Ref 'grandchild' should be set.");
+    t.notNil(comp.refs.grandchild, "Ref 'grandchild' should be set.");
     var grandchild = comp.refs.grandchild;
     comp.rerender();
-    isDefinedAndNotNull(t, comp.refs.grandchild, "Ref 'grandchild' should be set.");
+    t.notNil(comp.refs.grandchild, "Ref 'grandchild' should be set.");
     t.ok(comp.refs.grandchild === grandchild, "'grandchild' should be the same");
     t.end();
   });
@@ -1045,7 +992,7 @@ function _ComponentTests(debug) {
       );
       return el;
     });
-    isDefinedAndNotNull(t, comp.refs.grandchild, "Ref 'grandchild' should be set.");
+    t.notNil(comp.refs.grandchild, "Ref 'grandchild' should be set.");
     var grandchild = comp.refs.grandchild;
     comp.rerender();
     t.ok(comp.refs.grandchild === grandchild, "'grandchild' should be the same");
@@ -1204,7 +1151,6 @@ function _ComponentTests(debug) {
   /* ##################### Integration tests / Issues ##########################*/
 
   test('Preserve components when ref matches, and rerender when props changed', function(t) {
-    enableSpies();
 
     function ItemComponent() {
       ItemComponent.super.apply(this, arguments);
@@ -1369,14 +1315,49 @@ function _ComponentTests(debug) {
     TestComponent.extend(Parent);
 
     var comp = Parent.static.render();
-    isDefinedAndNotNull(t, comp.refs.foo, 'Ref should be bound to owner.');
+    t.notNil(comp.refs.foo, 'Ref should be bound to owner.');
     t.equal(comp.refs.foo.text(), 'foo', 'Ref should point to the right component.');
     t.end();
   });
 
 }
 
+function TestComponent() {
+  TestComponent.super.apply(this, arguments);
+  this._enableSpies();
+}
+
+TestComponent.Prototype = function() {
+
+  this._enableSpies = function() {
+    ['didMount','didUpdate','dispose','shouldRerender','render'].forEach(function(name) {
+      spy(this, name);
+    }.bind(this));
+  };
+
+  this._disableSpies = function() {
+    ['didMount','didUpdate','dispose','shouldRerender','render'].forEach(function(name) {
+      this[name].restore();
+    }.bind(this));
+  };
+};
+
+Component.extend(TestComponent);
+
+function renderTestComponent(renderFunc, props) {
+  var comp = new TestComponent();
+  if (renderFunc) {
+    comp.render = renderFunc;
+  }
+  if (props) {
+    comp.setProps(props);
+  } else {
+    comp.rerender();
+  }
+  return comp;
+}
+
 // with RenderingEngine in debug mode
-_ComponentTests(true);
+ComponentTests('debug');
 // and without
-_ComponentTests(false);
+ComponentTests();

@@ -7,13 +7,6 @@ var merge = require('../../model/transform/merge');
 var fixture = require('../fixtures/createTestArticle');
 var headersAndParagraphs = require('../fixtures/headersAndParagraphs');
 
-var isNull = require('lodash/isNull');
-var isUndefined = require('lodash/isUndefined');
-
-function isNullOrUndefined(t, x, msg) {
-  return t.ok(isNull(x) || isUndefined(x), msg);
-}
-
 test("Merging two paragraphs", function(t) {
   var doc = fixture(headersAndParagraphs);
   var sel = doc.createSelection({
@@ -25,7 +18,7 @@ test("Merging two paragraphs", function(t) {
   var out = merge(doc, args);
   var selection = out.selection;
   t.equal(doc.get(['h2', 'content']), 'Section 2Paragraph with annotation', 'Content of p2 should have been merged into h2.');
-  isNullOrUndefined(t, doc.get('p2'), 'p2 should be gone.');
+  t.isNil(doc.get('p2'), 'p2 should be gone.');
   var anno = doc.get('em1');
   t.deepEqual(anno.path, ['h2', 'content'], 'Annotation should have been transferred to h2.');
   t.deepEqual([anno.startOffset, anno.endOffset], [24, 34], 'Annotation should have been placed correctly.');

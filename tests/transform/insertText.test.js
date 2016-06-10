@@ -107,6 +107,6 @@ test("insert text at right annotation boundary", function(t) {
 //   var args = {selection: sel, text: 'test' };
 //   insertText(doc, args);
 //   var anno = doc.get('em1');
-//   t.isDefinedAndNotNull(anno, "Annotation should still exist.");
+//   t.notNil(anno, "Annotation should still exist.");
 //   t.equal(anno.endOffset, 19, 'Annotation endOffset should be updated.');
 // });

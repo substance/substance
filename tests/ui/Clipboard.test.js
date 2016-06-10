@@ -35,17 +35,6 @@ var clipboardConfig = {
   converterRegistry: converterRegistry
 };
 
-var isNull = require('lodash/isNull');
-var isUndefined = require('lodash/isUndefined');
-
-function isDefinedAndNotNull(t, x, msg) {
-  return t.ok(!isNull(x) && !isUndefined(x), msg);
-}
-
-// function ClipboardSetup() {
-//   Clipboard.NO_CATCH = true;
-// }
-
 function ClipboardEventData() {
   this.data = {};
 
@@ -80,12 +69,12 @@ test.UI("Copying HTML, and plain text", function(t) {
   clipboard.onCopy(event);
 
   var clipboardData = event.clipboardData;
-  isDefinedAndNotNull(t, clipboardData.data['text/plain'], "Clipboard should contain plain text data.");
-  isDefinedAndNotNull(t, clipboardData.data['text/html'], "Clipboard should contain HTML data.");
+  t.notNil(clipboardData.data['text/plain'], "Clipboard should contain plain text data.");
+  t.notNil(clipboardData.data['text/html'], "Clipboard should contain HTML data.");
 
   var htmlDoc = DOMElement.parseHTML(clipboardData.data['text/html']);
   var body = htmlDoc.find('body');
-  isDefinedAndNotNull(t, body, 'The copied HTML should always be a full HTML document string, containing a body element.');
+  t.notNil(body, 'The copied HTML should always be a full HTML document string, containing a body element.');
   t.end();
 });
 
@@ -310,9 +299,7 @@ test.UI("Browser - Firefox (Linux) - Whole Page", function(t) {
     editor.clipboard.onPaste(event);
     // make sure HTML paste succeeded, by checking against the result of plain text insertion
     t.notOk(doc.get('p1').getText() === '0XXX123456789', "HTML conversion and paste should have been successful (not fall back to plain-text).");
-    var second = doc.get('body').getNodeAt(1);
-    t.equal(second.type, 'paragraph', 'Second node should be a paragraph.');
-    t.equal(second.getText().substring(0, 9), "A synonym", ".. which should start with 'A synonym...'");
+    t.ok(doc.get('body').getLength() > 30, 'There should be a lot of paragraphs')
     t.end();
   });
 });

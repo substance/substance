@@ -2,14 +2,7 @@
 
 var test = require('../test').module('util/TreeIndex');
 
-var isNull = require('lodash/isNull');
-var isUndefined = require('lodash/isUndefined');
-
 var TreeIndex = require('../../util/TreeIndex');
-
-function isNullOrUndefined(t, x, msg) {
-  return t.ok(isNull(x) || isUndefined(x), msg);
-}
 
 test("Setting and getting values from a TreeIndex", function(t) {
   var adapter = new TreeIndex();
@@ -24,13 +17,13 @@ test("Getting with invalid arguments", function(t) {
   var adapter = new TreeIndex();
   adapter.set(['a'], 1);
   adapter.set(['c', 'b'], 2);
-  isNullOrUndefined(t, adapter.get('e'), 'Should return no value for unknown id');
-  isNullOrUndefined(t, adapter.get(['c', 'd']), 'Should return no value for unknown path');
-  isNullOrUndefined(t, adapter.get(null), 'Should return no value for null');
-  isNullOrUndefined(t, adapter.get(), 'Should return no value for no path');
-  isNullOrUndefined(t, adapter.get([]), 'Should return no value for empty path');
-  isNullOrUndefined(t, adapter.get({}), 'Should return no value for object');
-  isNullOrUndefined(t, adapter.get(1), 'Should return no value for a number');
+  t.isNil(adapter.get('e'), 'Should return no value for unknown id');
+  t.isNil(adapter.get(['c', 'd']), 'Should return no value for unknown path');
+  t.isNil(adapter.get(null), 'Should return no value for null');
+  t.isNil(adapter.get(), 'Should return no value for no path');
+  t.isNil(adapter.get([]), 'Should return no value for empty path');
+  t.isNil(adapter.get({}), 'Should return no value for object');
+  t.isNil(adapter.get(1), 'Should return no value for a number');
   t.end();
 });
 
@@ -66,6 +59,6 @@ test("Arrays: basic usage", function(t) {
   adapter.remove(['a', 'b'], 2);
   t.deepEqual(adapter.get(['a', 'b']), [3], 'Only one value should be left after removal.');
   adapter.delete(['a','b']);
-  isNullOrUndefined(t, adapter.get(['a', 'b']), 'Value should now be deleted.');
+  t.isNil(adapter.get(['a', 'b']), 'Value should now be deleted.');
   t.end();
 });

@@ -1,9 +1,6 @@
 'use strict';
 /* eslint-disable consistent-return */
 
-var isNull = require('lodash/isNull');
-var isUndefined = require('lodash/isUndefined');
-
 var DocumentStore = require('../../collab/DocumentStore');
 var ChangeStore = require('../../collab/ChangeStore');
 var DocumentEngine = require('../../collab/DocumentEngine');
@@ -19,10 +16,6 @@ var insertParagraph = require('../fixtures/insertParagraph');
 var insertText = require('../fixtures/insertText');
 
 var test = require('../test').module('collab/CollabEngine');
-
-function isNullOrUndefined(t, x, msg) {
-  return t.ok(isNull(x) || isUndefined(x), msg);
-}
 
 // Equivalent to the 'test-doc' that is in the backend seed.
 var testDoc = createTestArticle(twoParagraphs);
@@ -69,13 +62,13 @@ function setup(cb, t) {
       cb(t);
     });
   });
-};
+}
 
 function setupTest(description, fn) {
   test(description, function (t) {
     setup(fn, t);
   });
-};
+}
 
 setupTest('New collaborator enters with latest version', function(t) {
   collabEngine.sync({
@@ -84,7 +77,7 @@ setupTest('New collaborator enters with latest version', function(t) {
     version: 1,
     change: fakeChange
   }, function(err, result) {
-    isNullOrUndefined(t, err, 'Should not error');
+    t.isNil(err, 'Should not error');
     t.equal(result.version, 1);
     t.end();
   });
@@ -97,7 +90,7 @@ setupTest('New collaborator enters with an outdated version', function(t) {
     version: 0,
     change: fakeChange
   }, function(err, result) {
-    isNullOrUndefined(t, err, 'Should not error');
+    t.isNil(err, 'Should not error');
     t.equal(result.version, 1);
     t.end();
   });
@@ -114,7 +107,7 @@ setupTest('New collaborator enters with a new fast-forward change', function(t) 
   //   version: 1,
   //   change: exampleChange
   // }, function(err, result) {
-  //   isNullOrUndefined(t, err, 'Should not error');
+  //   t.isNil(err, 'Should not error');
   //   t.equal(result.version, 2);
   //   done();
   // });
@@ -144,7 +137,7 @@ setupTest('New collaborator enters with a change that needs rebasing', function(
   //   version: 1,
   //   change: insertTextChange1
   // }, function(err, result) {
-  //   isNullOrUndefined(t, err, 'Should not error');
+  //   t.isNil(err, 'Should not error');
   //   t.equal(result.version, 2);
 
   //   collabEngine.sync({
@@ -153,7 +146,7 @@ setupTest('New collaborator enters with a change that needs rebasing', function(
   //     version: 1,
   //     change: insertTextChange2
   //   }, function(err, result) {
-  //     isNullOrUndefined(t, err, 'Should not error');
+  //     t.isNil(err, 'Should not error');
   //     t.equal(result.version, 3);
   //     t.ok(result.serverChange, 'There should be a server change');
   //     t.notDeepEqual(result.change, insertTextChange2, 'Tranformed change should differ from original change');
@@ -177,7 +170,7 @@ setupTest('Two collaborators enter', function(t) {
       change: fakeChange
     }, function(err, result) {
       t.ok(result, 'connect result should be set');
-      isNullOrUndefined(t, err, 'Should not error');
+      t.isNil(err, 'Should not error');
       var collaboratorIds = collabEngine.getCollaboratorIds('test-doc', 'collab-2');
       t.deepEqual(collaboratorIds, ['collab-1'], 'Should return one collaboratorId');
       collaboratorIds = collabEngine.getCollaboratorIds('test-doc', 'collab-1');
@@ -198,7 +191,7 @@ setupTest('Collaborator does a fast-forward sync', function(t) {
   //   version: 1,
   //   change: fakeChange
   // }, function(err, result) {
-  //   isNullOrUndefined(t, err, 'Should not error on enter');
+  //   t.isNil(err, 'Should not error on enter');
   //   t.ok(result, 'connect should produce a result object');
   //   collabEngine.sync({
   //     collaboratorId: 'collab-1',

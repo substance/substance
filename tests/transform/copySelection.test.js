@@ -9,13 +9,6 @@ var fixture = require('../fixtures/createTestArticle');
 var simple = require('../fixtures/simple');
 var headersAndParagraphs = require('../fixtures/headersAndParagraphs');
 
-var isNull = require('lodash/isNull');
-var isUndefined = require('lodash/isUndefined');
-
-function isDefinedAndNotNull(t, x, msg) {
-  return t.ok(!isNull(x) && !isUndefined(x), msg);
-}
-
 test("Copying a property selection", function(t) {
   var doc = fixture(headersAndParagraphs);
   var sel = doc.createSelection({
@@ -28,7 +21,7 @@ test("Copying a property selection", function(t) {
   var out = copySelection(doc, args);
   var copy = out.doc;
   var textNode = copy.get(CLIPBOARD_PROPERTY_ID);
-  isDefinedAndNotNull(t, textNode, 'There should be a text node for the property fragment.');
+  t.notNil(textNode, 'There should be a text node for the property fragment.');
   t.equal(textNode.content, 'graph', 'Selected text should be copied.');
   t.end();
 });
@@ -67,7 +60,7 @@ test("Copying a container selection", function(t) {
   var out = copySelection(doc, args);
   var copy = out.doc;
   var content = copy.get('clipboard_content');
-  isDefinedAndNotNull(t, content, 'There should be a container node with id "content".');
+  t.notNil(content, 'There should be a container node with id "content".');
   // 4 nodes? 'body', 'clipboard_content', 'p1', 'p2'
   t.equal(content.nodes.length, 4, 'There should be 4 nodes in the copied document.');
   var first = copy.get(content.nodes[0]);
@@ -99,7 +92,7 @@ test("Copying a node without editable properties", function(t) {
   var out = copySelection(doc, args);
   var copy = out.doc;
   var img = copy.get('i1');
-  isDefinedAndNotNull(t, img, 'The image should be copied.');
+  t.notNil(img, 'The image should be copied.');
   t.end();
 });
 
@@ -141,7 +134,7 @@ test("Copying a node without properties", function(t) {
   var out = copySelection(doc, args);
   var copy = out.doc;
   var img = copy.get('i1');
-  isDefinedAndNotNull(t, img, 'The image should be copied.');
+  t.notNil(img, 'The image should be copied.');
   t.equal(img.src, 'foo');
   t.end();
 });
