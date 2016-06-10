@@ -1,6 +1,6 @@
 "use strict";
 
-var test = require('../test');
+var test = require('../test').module('transform/breakNode');
 
 var breakNode = require('../../model/transform/breakNode');
 

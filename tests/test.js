@@ -85,17 +85,6 @@ function _withExtensions(tapeish, addModule) {
     var args = getTestArgs.apply(null, arguments);
     if (!inBrowser) {
       args.opts.skip = true;
-    } else {
-      var _before = args.opts.before;
-      var _after = args.opts.after;
-      args.opts.before = function(t) {
-        _setupUI(t);
-        if(_before) _before(t);
-      };
-      args.opts.after = function(t) {
-        if(_after) _after(t);
-        _teardownUI(t);
-      };
     }
     return _withBeforeAndAfter(args);
   };
@@ -120,23 +109,9 @@ function _withExtensions(tapeish, addModule) {
 }
 
 function _setupUI(t) {
-  var fixtureElement = window.document.querySelector('#qunit-fixture');
-  if (!fixtureElement) {
-    fixtureElement = window.document.createElement('div');
-    fixtureElement.id = "qunit-fixture";
-    window.document.querySelector('body').appendChild(fixtureElement);
-  }
-  var sandboxEl = window.document.createElement('div');
-  sandboxEl.id = 'sandbox-'+t.test.id;
-  fixtureElement.appendChild(sandboxEl);
-  t.sandbox = DefaultDOMElement.wrapNativeElement(sandboxEl);
 }
 
 function _teardownUI(t) {
-  var sandbox = t.sandbox;
-  if (sandbox) {
-    sandbox.remove();
-  }
 }
 
 module.exports = harness;

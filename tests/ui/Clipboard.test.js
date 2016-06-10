@@ -153,7 +153,7 @@ test.UI("Copying a container selection", function(t) {
   t.end();
 });
 
-function _containerEditorSample() {
+function _containerEditorSample(t) {
   var doc = fixture(simple);
   var app = Component.mount(TestContainerEditor, {
     context: {
@@ -162,7 +162,7 @@ function _containerEditorSample() {
       converterRegistry: converterRegistry
     },
     node: doc.get('body')
-  }, '#qunit-fixture');
+  }, t.sandbox);
   var editor = app.refs.editor;
   var sel = doc.createSelection({
     type: 'property',
@@ -178,7 +178,7 @@ function _containerEditorSample() {
 }
 
 test.UI("Pasting text into ContainerEditor using 'text/plain'.", function(t) {
-  var editor = _containerEditorSample();
+  var editor = _containerEditorSample(t);
   var doc = editor.getDocument();
   var event = new ClipboardEvent();
   event.clipboardData.setData('text/plain', 'XXX');
@@ -188,7 +188,7 @@ test.UI("Pasting text into ContainerEditor using 'text/plain'.", function(t) {
 });
 
 test.UI("Pasting without any data given.", function(t) {
-  var editor = _containerEditorSample();
+  var editor = _containerEditorSample(t);
   var doc = editor.getDocument();
   var event = new ClipboardEvent();
   editor.clipboard.onPaste(event);
@@ -198,7 +198,7 @@ test.UI("Pasting without any data given.", function(t) {
 
 
 test.UI("Pasting text into ContainerEditor using 'text/html'.", function(t) {
-  var editor = _containerEditorSample();
+  var editor = _containerEditorSample(t);
   var doc = editor.getDocument();
   var TEXT = 'XXX';
   var event = new ClipboardEvent();
@@ -210,7 +210,7 @@ test.UI("Pasting text into ContainerEditor using 'text/html'.", function(t) {
 });
 
 function _fixtureTest(t, fixture, impl, forceWindows) {
-  var editor = _containerEditorSample();
+  var editor = _containerEditorSample(t);
   if (forceWindows) {
     // NOTE: faking 'Windows' mode in importer so that
     // the correct implementation will be used

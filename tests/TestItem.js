@@ -31,21 +31,34 @@ TestItem.Prototype = function() {
     var el = $$('div').addClass('sc-test');
     el.append($$('div').addClass('se-name').append(test.name));
     el.append($$('div').addClass('se-results').ref('results'));
+    el.append($$('div').addClass('se.sandbox').ref('sandbox'));
     return el;
   };
 
   this.onStart = function() {
+    var test = this.props.test;
+    if (test.skip) this.el.addClass('sm-skip');
+    else this.el.removeClass('sm-skip');
     this.refs.results.empty();
+    this.props.test.sandbox = this.refs.sandbox.el;
   };
 
   this.onResult = function(result) {
     var renderContext = RenderingEngine.createContext(this);
     var $$ = renderContext.$$;
-    this.refs.results.append($$(ResultItem, { result: result }));
+    this.refs.results.append($$(ResultItem, {
+      test: this.props.test,
+      result: result
+    }));
   };
 
   this.onEnd = function() {
-    // console.log('Finished test %s', this.props.test.name);
+    var test = this.props.test;
+    if (test.ok) {
+      this.el.addClass('sm-ok');
+    } else if (!test.skip) {
+      this.el.addClass('sm-not-ok');
+    }
   };
 
 };

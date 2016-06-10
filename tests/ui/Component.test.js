@@ -103,7 +103,7 @@ function _ComponentTests(debug) {
     var comp = Component.mount(SimpleComponent, el);
     t.equal(comp.didMount.callCount, 0, "didMount must not be called when mounting to detached elements");
     // Mount to an existing DOM element
-    comp = Component.mount(SimpleComponent, window.document.querySelector('#qunit-fixture'));
+    comp = Component.mount(SimpleComponent, t.sandbox);
     t.equal(comp.didMount.callCount, 1, "didMount should have been called");
     t.end();
   });
@@ -558,7 +558,7 @@ function _ComponentTests(debug) {
     }
     TestComponent.extend(Parent);
 
-    var comp = Component.mount(Parent, '#qunit-fixture');
+    var comp = Component.mount(Parent, t.sandbox);
     var childComp = comp.refs.child;
     var grandChildComp = childComp.refs.child;
     t.equal(childComp.didMount.callCount, 1, "Child's didMount should have been called only once.");

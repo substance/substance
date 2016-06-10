@@ -25,7 +25,7 @@ test.UI("Get coordinate of empty property", function(t) {
   var comp = Component.mount(TextPropertyComponent, {
     doc: doc,
     path: ['empty', 'content']
-  }, '#qunit-fixture');
+  }, t.sandbox);
 
   var coor = comp.getDOMCoordinate(0);
 
