@@ -33,6 +33,11 @@ IsolatedNodeComponent.Prototype = function() {
     };
   };
 
+  this.getInitialState = function() {
+    var selState = this.context.documentSession.getSelectionState();
+    return this._deriveStateFromSelectionState(selState);
+  };
+
   this.didMount = function() {
     _super.didMount.call(this);
 

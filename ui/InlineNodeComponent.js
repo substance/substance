@@ -20,6 +20,7 @@ InlineNodeComponent.Prototype = function() {
 
   this.render = function($$) { // eslint-disable-line
     var el = _super.render.apply(this, arguments);
+
     el.addClass('sc-inline-node')
       .removeClass('sc-isolated-node')
       .attr("data-id", this.props.node.id)
