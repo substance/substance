@@ -1,6 +1,6 @@
 'use strict';
 
-var InlineNode = require('./InlineNode');
+var InlineNode = require('../../model/InlineNode');
 
 function InlineWrapper() {
   InlineWrapper.super.apply(this, arguments);

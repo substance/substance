@@ -1,6 +1,6 @@
 'use strict';
 
-var Component = require('./Component');
+var Component = require('../../ui/Component');
 
 function InlineWrapperComponent() {
   InlineWrapperComponent.super.apply(this, arguments);

@@ -8,7 +8,6 @@ var oo = require('../util/oo');
 // var uuid = require('../util/uuid');
 var createCountingIdGenerator = require('../util/createCountingIdGenerator');
 var ArrayIterator = require('../util/ArrayIterator');
-var InlineWrapperConverter = require('./InlineWrapperConverter');
 
 /**
   A generic base implementation for XML/HTML importers.
@@ -57,7 +56,7 @@ function DOMImporter(config) {
       console.error('No node type defined for converter', converter.type);
       return;
     }
-    if (defaultTextType === converter.type) {
+    if (!this._defaultBlockConverter && defaultTextType === converter.type) {
       this._defaultBlockConverter = converter;
     }
 
@@ -461,44 +460,11 @@ DOMImporter.Prototype = function DOMImporterPrototype() {
         break;
       }
     }
-
-    // there are some block nodes which are used as inline nodes as well.
-    // In this case we wrap the block node into an InlineWrapper
-    if (!converter && mode === 'inline') {
-      converter = this._getUnsupportedInlineNodeConverter(el, 'inline');
-
-      if (!converter) {
-        var blockConverter = this._getConverterForElement(el, 'block');
-        // NOTE: there are some block level nodes which are also allowed as
-        // inline wrapped by an InlineWrapper
-        // TODO: we need to see if this concept is good enough
-        if (blockConverter && (blockConverter.canBeInline || this.config.enableInlineWrapper)) {
-          converter = InlineWrapperConverter;
-        }
-      }
-    }
-    if (!converter) {
-      converter = this._getUnsupportedNodeConverter();
-    }
     return converter;
   };
 
-  this._getUnsupportedNodeConverter = function() {
-    console.warn([
-      'DOMImporter._getUnsupportedNodeConverter() is abstract.',
-      'If you want to add unsupported elements to your model you should override this method.'
-    ].join('\n'));
-  };
-
-  this._getUnsupportedInlineNodeConverter = function() {
-    console.warn([
-      'DOMImporter._getUnsupportedInlineNodeConverter() is abstract.',
-      'If you want to add unsupported elements to your model you should override this method.'
-    ].join('\n'));
-  };
-
   this._converterCanBeApplied = function(converter, el) {
-    return converter.matchElement(el);
+    return converter.matchElement(el, converter);
   };
 
   this._createElement = function(tagName) {
