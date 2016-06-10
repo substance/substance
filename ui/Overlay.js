@@ -71,7 +71,7 @@ Overlay.Prototype = function() {
 
     if (hints) {
       var contentWidth = this.el.htmlProp('offsetWidth');
-      var contentHeight = this.el.htmlProp('offsetHeight');
+      // var contentHeight = this.el.htmlProp('offsetHeight');
       var selectionMaxWidth = hints.rectangle.width;
       // var selectionHeight = hints.rectangle.height;
 

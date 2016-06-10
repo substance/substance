@@ -336,7 +336,7 @@ DOMImporter.Prototype = function DOMImporterPrototype() {
     if (id) return id;
 
     var root = el.getRoot();
-    var id = this.nextId(type);
+    id = this.nextId(type);
     while (this.state.ids[id] || root.find('#'+id)) {
       id = this.nextId(type);
     }
