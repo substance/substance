@@ -1,0 +1,45 @@
+.sc-prompt {
+
+  .se-arrow {
+    margin: 0 auto;
+    width: 0;
+    height: 0;
+    border-style: solid;
+    border-width: 0 4px 8px 4px;
+    border-color: transparent transparent #2E2E2C transparent;
+  }
+
+  .se-content {
+    border-radius: 2px;
+    background: #2E2E2C;
+    overflow: auto;
+    color: rgba(255,255,255, 0.7);
+
+    .se-label {
+      float: left;
+      padding: 5px;
+      padding-left: 10px;
+      line-height: 30px;
+      font-size: $small-font-size;
+    }
+
+    .se-action {
+      display: block;
+      outline: none;
+      float: left;
+      height: 40px;
+      text-align: center;
+      padding: 5px;
+      min-width: 40px;
+      color: #fff;
+    }
+
+    .se-separator {
+      float: left;
+      width: 1px;
+      height: 30px;
+      margin: 5px 5px;
+      background: rgba(255,255,255, 0.3);
+    }
+  }
+}
