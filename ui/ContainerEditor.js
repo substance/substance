@@ -74,6 +74,8 @@ ContainerEditor.Prototype = function() {
 
   var _super = Object.getPrototypeOf(this);
 
+  this._isContainerEditor = true;
+
   // Note: this component is self managed
   this.shouldRerender = function() {
     // TODO: we should still detect when the document has changed,
