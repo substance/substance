@@ -11,14 +11,11 @@ Dual licensed under the MIT and GPL licenses.
 /**
  * Generates a unique id.
  *
- * @method uuid
  * @param {String} [prefix] if provided the UUID will be prefixed.
  * @param {Number} [len] if provided a UUID with given length will be created.
  * @return A generated uuid.
- *
- * @memberof module:Basics
  */
-module.exports = function(prefix, len) {
+function uuid(prefix, len) {
   if (prefix && prefix[prefix.length-1] !== "-") {
     prefix = prefix.concat("-");
   }
@@ -46,4 +43,6 @@ module.exports = function(prefix, len) {
     }
   }
   return (prefix ? prefix : "") + uuid.join('');
-};
+}
+
+module.exports = uuid;

@@ -5,7 +5,8 @@ var forEach = require('lodash/forEach');
 var clone = require('lodash/clone');
 var extend = require('lodash/extend');
 var oo = require('../util/oo');
-var uuid = require('../util/uuid');
+// var uuid = require('../util/uuid');
+var createCountingIdGenerator = require('../util/createCountingIdGenerator');
 var ArrayIterator = require('../util/ArrayIterator');
 var InlineWrapperConverter = require('./InlineWrapperConverter');
 
@@ -327,13 +328,16 @@ DOMImporter.Prototype = function DOMImporterPrototype() {
     // however we would need to be careful as there might be another
     // element in the HTML coming with that id
     // For now we use shas
-    return uuid(prefix);
+    return this.state.uuid(prefix);
   };
 
   this.getIdForElement = function(el, type) {
-    var id = el.getAttribute(this.config.idAttribute) || this.nextId(type);
-    // TODO: check for collisions
-    while (this.state.ids[id]) {
+    var id = el.getAttribute(this.config.idAttribute);
+    if (id && !this.state.ids[id]) return id;
+
+    var root = el.getRoot();
+    id = this.nextId(type);
+    while (this.state.ids[id] || root.find('#'+id)) {
       id = this.nextId(type);
     }
     return id;
@@ -645,6 +649,10 @@ DOMImporter.State.Prototype = function() {
     this.lastChar = "";
     this.skipTypes = {};
     this.ignoreAnnotations = false;
+
+    // experimental: trying to generate simpler ids during import
+    // this.uuid = uuid;
+    this.uuid = createCountingIdGenerator();
   };
 
   this.pushElementContext = function(tagName) {

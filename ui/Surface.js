@@ -824,6 +824,17 @@ Surface.Prototype = function() {
 
   this._handleLeftOrRightArrowKey = function (event) {
     event.stopPropagation();
+
+    var direction = (event.keyCode === keys.LEFT) ? 'left' : 'right';
+    var selState = this.getDocumentSession().getSelectionState();
+    var sel = selState.getSelection();
+    // Note: collapsing the selection and let ContentEditable still continue doing a cursor move
+    if (selState.isInlineNodeSelection() && !event.shiftKey) {
+      event.preventDefault();
+      this.setSelection(sel.collapse(direction));
+      return;
+    }
+
     // Note: we need this timeout so that CE updates the DOM selection first
     // before we map it to the model
     window.setTimeout(function() {
