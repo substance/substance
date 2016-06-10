@@ -19,7 +19,8 @@ InlineWrapperComponent.Prototype = function() {
       var ComponentClass = componentRegistry.get(wrappedNode.type);
       if (ComponentClass) {
         el.append($$(ComponentClass, {
-          node: wrappedNode
+          node: wrappedNode,
+          disabled: this.props.disabled
         }));
       } else {
         console.error('No component registered for node type' + wrappedNode.type);
