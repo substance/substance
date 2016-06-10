@@ -5,7 +5,6 @@ var DocumentNode = require('./DocumentNode');
 var Container = require('./Container');
 var PropertyAnnotation = require('./PropertyAnnotation');
 var ContainerAnnotation = require('./ContainerAnnotation');
-var InlineWrapper = require('./InlineWrapper');
 
 /**
   Used to define custom article formats. Predefined node types can be combined with custom ones.
@@ -61,7 +60,7 @@ DocumentSchema.Prototype = function() {
   };
 
   this.getBuiltIns = function() {
-    return [DocumentNode, PropertyAnnotation, Container, ContainerAnnotation, InlineWrapper];
+    return [DocumentNode, PropertyAnnotation, Container, ContainerAnnotation];
   };
 
 };

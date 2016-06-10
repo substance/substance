@@ -4,7 +4,6 @@ var isEqual = require('lodash/isEqual');
 var startsWith = require('lodash/startsWith');
 var Coordinate = require('../model/Coordinate');
 var IsolatedNodeComponent = require('./IsolatedNodeComponent');
-var InlineWrapperComponent = require('./InlineWrapperComponent');
 
 function InlineNodeComponent() {
   InlineNodeComponent.super.apply(this, arguments);
@@ -30,11 +29,7 @@ InlineNodeComponent.Prototype = function() {
   };
 
   this._getContentClass = function(node) {
-    if (node.type === 'inline-wrapper') {
-      return InlineWrapperComponent;
-    } else {
-      return _super._getContentClass.call(this, node);
-    }
+    return _super._getContentClass.call(this, node);
   };
 
   this._deriveStateFromSelectionState = function(selState) {
