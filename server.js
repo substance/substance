@@ -49,15 +49,15 @@ app.get('/test-old/test.js', function (req, res, next) {
 app.use('/test-old', express.static(__dirname + '/test'));
 
 // Test suite
-app.get('/tape-test/app.js', function (req, res, next) {
-  glob("tests/**/*.test.js", {}, function (er, testfiles) {
+app.get('/test/app.js', function (req, res, next) {
+  glob("test/**/*.test.js", {}, function (er, testfiles) {
     if (er || !testfiles || testfiles.length === 0) {
       console.error('No tests found.');
       res.send('500');
     } else {
       // console.log('Found test files:', testfiles);
       browserify({ debug: true, cache: false })
-        .add(path.join(__dirname, 'tests', 'app.js'))
+        .add(path.join(__dirname, 'test', 'app.js'))
         .add(testfiles.map(function(file) {
           return path.join(__dirname, file);
         }))
@@ -69,8 +69,8 @@ app.get('/tape-test/app.js', function (req, res, next) {
     }
   });
 });
-serverUtils.serveStyles(app, '/tape-test/app.css', path.join(__dirname, 'tests', 'app.scss'));
-app.use('/tape-test', express.static(__dirname + '/tests'));
+serverUtils.serveStyles(app, '/test/app.css', path.join(__dirname, 'test', 'app.scss'));
+app.use('/test', express.static(__dirname + '/test'));
 
 
 app.listen(PORT);
