@@ -333,7 +333,7 @@ DOMImporter.Prototype = function DOMImporterPrototype() {
 
   this.getIdForElement = function(el, type) {
     var id = el.getAttribute(this.config.idAttribute);
-    if (id) return id;
+    if (id && !this.state.ids[id]) return id;
 
     var root = el.getRoot();
     id = this.nextId(type);
