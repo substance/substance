@@ -56,7 +56,7 @@ function DOMImporter(config) {
       console.error('No node type defined for converter', converter.type);
       return;
     }
-    if (defaultTextType === converter.type) {
+    if (!this._defaultBlockConverter && defaultTextType === converter.type) {
       this._defaultBlockConverter = converter;
     }
 
@@ -459,9 +459,6 @@ DOMImporter.Prototype = function DOMImporterPrototype() {
         converter = converters[i];
         break;
       }
-    }
-    if (!converter) {
-      throw new Error('No converter found for ' + el.tagName);
     }
     return converter;
   };

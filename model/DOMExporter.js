@@ -11,19 +11,23 @@ function DOMExporter(config) {
   if (!config.converters) {
     throw new Error('config.converters is mandatory');
   }
-  this.converters = new Registry();
+  if (!config.converters._isRegistry) {
+    this.converters = new Registry();
+    config.converters.forEach(function(converter) {
+      if (!converter.type) {
+        console.error('Converter must provide the type of the associated node.', converter);
+        return;
+      }
+      this.converters.add(converter.type, converter);
+    }.bind(this));
+  } else {
+    this.converters = config.converters;
+  }
+
   this.state = {
     doc: null
   };
   this.config = extend({idAttribute: 'id'}, config);
-
-  config.converters.forEach(function(converter) {
-    if (!converter.type) {
-      console.error('Converter must provide the type of the associated node.', converter);
-      return;
-    }
-    this.converters.add(converter.type, converter);
-  }.bind(this));
 
   // NOTE: Subclasses (HTMLExporter and XMLExporter) must initialize this
   // with a proper DOMElement instance which is used to create new elements.

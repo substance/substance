@@ -2,6 +2,8 @@
 
 var isArray = require('lodash/isArray');
 var extend = require('lodash/extend');
+var forEach = require('lodash/forEach');
+var Registry = require('../util/Registry');
 var HTMLImporter = require('../model/HTMLImporter');
 var DefaultDOMElement = require('./DefaultDOMElement');
 var JSONConverter = require('../model/JSONConverter');
@@ -15,6 +17,8 @@ var CLIPBOARD_PROPERTY_ID = require('../model/transform/copySelection').CLIPBOAR
 */
 
 function ClipboardImporter(config) {
+  ClipboardImporter._addConverters(config);
+
   if (!config.schema) {
     throw new Error('Missing argument: config.schema is required.');
   }
@@ -171,5 +175,28 @@ HTMLImporter.extend(ClipboardImporter);
 
 ClipboardImporter.CLIPBOARD_CONTAINER_ID = CLIPBOARD_CONTAINER_ID;
 ClipboardImporter.CLIPBOARD_PROPERTY_ID = CLIPBOARD_PROPERTY_ID;
+
+var _converters = {
+  'catch-all-block': {
+    type: 'paragraph',
+    matchElement: function(el) { return el.is('div'); },
+    import: function(el, node, converter) {
+      node.content = converter.annotatedText(el, [node.id, 'content']);
+    }
+  }
+};
+
+ClipboardImporter._addConverters = function(config) {
+  if (config.converters) {
+    var registry = new Registry();
+    config.converters.forEach(function(conv, name) {
+      registry.add(name, conv);
+    });
+    forEach(_converters, function(converter, name) {
+      registry.add(name, converter);
+    });
+    config.converters = registry;
+  }
+};
 
 module.exports = ClipboardImporter;

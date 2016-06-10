@@ -27,6 +27,8 @@ function Registry(entries) {
 
 Registry.Prototype = function() {
 
+  this._isRegistry = true;
+
   /**
    * Check if an entry is registered for a given name.
    *

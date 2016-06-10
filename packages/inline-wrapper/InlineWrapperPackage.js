@@ -21,7 +21,7 @@ module.exports = {
     if (options.converters) {
       options.converters.forEach(function(name) {
         config.addConverter(name, InlineWrapperConverter);
-      })
+      });
     }
   }
 };
