@@ -13,11 +13,29 @@ if (inBrowser && substanceGlobals.TEST_UI) {
   harness = tape.createHarness();
   var results = harness._results;
 
+  results.on('_push', function(t) {
+    t.reset = function() {
+      this.readable = true;
+      this.assertCount = 0;
+      this.pendingCount = 0;
+      this._plan = undefined;
+      this._planError = null;
+      this._progeny = [];
+      this._ok = true;
+      this.calledEnd = false;
+      this.ended = false;
+    };
+  });
+
+  harness.reset = function(t) {
+  };
+
   harness.runAllTests = function() {
     var i = 0;
     function next() {
       while (i < results.tests.length) {
         var t = results.tests[i++];
+        t.reset();
         t.once('end', function(){ nextTick(next); });
         t.run();
       }
