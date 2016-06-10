@@ -457,15 +457,20 @@ DOMImporter.Prototype = function DOMImporterPrototype() {
         break;
       }
     }
+
     // there are some block nodes which are used as inline nodes as well.
     // In this case we wrap the block node into an InlineWrapper
     if (!converter && mode === 'inline') {
-      var blockConverter = this._getConverterForElement(el, 'block');
-      // NOTE: there are some block level nodes which are also allowed as
-      // inline wrapped by an InlineWrapper
-      // TODO: we need to see if this concept is good enough
-      if (blockConverter && (blockConverter.canBeInline || this.config.enableInlineWrapper)) {
-        converter = InlineWrapperConverter;
+      converter = this._getUnsupportedInlineNodeConverter(el, 'inline');
+
+      if (!converter) {
+        var blockConverter = this._getConverterForElement(el, 'block');
+        // NOTE: there are some block level nodes which are also allowed as
+        // inline wrapped by an InlineWrapper
+        // TODO: we need to see if this concept is good enough
+        if (blockConverter && (blockConverter.canBeInline || this.config.enableInlineWrapper)) {
+          converter = InlineWrapperConverter;
+        }
       }
     }
     if (!converter) {
@@ -477,6 +482,13 @@ DOMImporter.Prototype = function DOMImporterPrototype() {
   this._getUnsupportedNodeConverter = function() {
     console.warn([
       'DOMImporter._getUnsupportedNodeConverter() is abstract.',
+      'If you want to add unsupported elements to your model you should override this method.'
+    ].join('\n'));
+  };
+
+  this._getUnsupportedInlineNodeConverter = function() {
+    console.warn([
+      'DOMImporter._getUnsupportedInlineNodeConverter() is abstract.',
       'If you want to add unsupported elements to your model you should override this method.'
     ].join('\n'));
   };
