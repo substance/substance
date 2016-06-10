@@ -4,6 +4,7 @@ var tape = require('tape');
 var inBrowser = require('../util/inBrowser');
 var platform = require('../util/platform');
 var substanceGlobals = require('../util/substanceGlobals');
+var DefaultDOMElement = require('../ui/DefaultDOMElement');
 
 var harness = tape;
 
@@ -89,9 +90,12 @@ function _withExtensions(tapeish, addModule) {
   function _withBeforeAndAfter(args) {
     var _before = args.opts.before;
     var _after = args.opts.after;
+    var _setupUI = args.opts.setupUI;
     return tapeish(args.name, args.opts, function (t) {
       if(_before) _before(t);
+      if(_setupUI) _setupSandbox(t);
       args.cb(t);
+      if(_setupUI) _teardownSandbox(t);
       if(_after) _after(t);
     });
   }
@@ -113,6 +117,7 @@ function _withExtensions(tapeish, addModule) {
     if (!inBrowser) {
       args.opts.skip = true;
     }
+    if(inBrowser && !substanceGlobals.TEST_UI) args.opts.setupUI = true;
     return _withBeforeAndAfter(args);
   };
 
@@ -133,6 +138,26 @@ function _withExtensions(tapeish, addModule) {
   };
 
   return tapeish;
+}
+
+function _setupSandbox(t) {
+  var fixtureElement = window.document.querySelector('#qunit-fixture');
+  if (!fixtureElement) {
+    fixtureElement = window.document.createElement('div');
+    fixtureElement.id = "qunit-fixture";
+    window.document.querySelector('body').appendChild(fixtureElement);
+  }
+  var sandboxEl = window.document.createElement('div');
+  sandboxEl.id = 'sandbox-'+t.test.id;
+  fixtureElement.appendChild(sandboxEl);
+  t.sandbox = DefaultDOMElement.wrapNativeElement(sandboxEl);
+}
+
+function _teardownSandbox(t) {
+  var sandbox = t.sandbox;
+  if (sandbox) {
+    sandbox.remove();
+  }
 }
 
 module.exports = harness;
