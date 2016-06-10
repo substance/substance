@@ -1,8 +1,8 @@
 'use strict';
 
 var Component = require('../../ui/Component');
-var Icon = require('../../ui/FontAwesomeIcon');
 var clone = require('lodash/clone');
+var Prompt = require('../../ui/Prompt');
 
 /**
   Component to edit an existing link.
@@ -17,42 +17,16 @@ function EditLinkTool() {
 EditLinkTool.Prototype = function() {
 
   this.render = function($$) {
-    var node = this.props.node;
+    // var node = this.props.node;
     var el = $$('div').addClass('sc-edit-link-tool');
 
     el.append(
-      $$('input')
-        .attr({
-          type: 'text',
-          placeholder: 'http://example.com',
-          value: node.url
-        })
-        .ref('url')
-        // This only works on the first load. Why?
-        // Is this element even preserved when unmounted and rerendered?
-        // .htmlProp('autofocus', true)
-        .on('change', this.onSave),
-      $$('div').addClass('se-actions').append(
-        // $$('button')
-        //   .attr({title: this.i18n.t('save')})
-        //   .addClass('se-action').append(
-        //     $$(Icon, {icon: 'fa-check'})
-        //   )
-        //   .on('click', this.onSave),
-        $$('a')
-          .attr({
-            title: this.i18n.t('open-link'),
-            href: node.url,
-            target: '_blank'
-          })
-          .addClass('se-action').append(
-            $$(Icon, {icon: 'fa-external-link'})
-          ),
-        $$('button')
-          .attr({title: this.i18n.t('delete')})
-          .addClass('se-action').append(
-            $$(Icon, {icon: 'fa-trash-o'})
-          )
+      $$(Prompt).append(
+        // $$(Prompt.Input, {path: [node.id, 'url']}),
+        $$(Prompt.Label, {label: 'TODO: provide link editor'}),
+        $$(Prompt.Separator),
+        $$(Prompt.Action, {name: 'open-link', title: this.i18n.t('open-link')}),
+        $$(Prompt.Action, {name: 'delete', title: this.i18n.t('delete')})
           .on('click', this.onDelete)
       )
     );

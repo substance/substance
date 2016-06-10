@@ -17,5 +17,6 @@ module.exports = {
     config.addTool(LinkTool);
     config.addTool(EditLinkTool, { overlay: true });
     config.addIcon(LinkCommand.static.name, { 'fontawesome': 'fa-link'});
+    config.addIcon('open-link', { 'fontawesome': 'fa-external-link' });
   }
 };
