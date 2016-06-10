@@ -13,7 +13,7 @@ module.exports = function spy(self, name) {
   };
   spyFunction.reset = function() {
     spyFunction.callCount = 0;
-  }
+  };
   self[name] = spyFunction;
   return spyFunction;
 };

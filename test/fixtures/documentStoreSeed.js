@@ -1,3 +1,5 @@
+'use strict';
+
 // Fixture for documentStore
 var documentStoreSeed = {
   'test-doc': {

@@ -1,6 +1,5 @@
 'use strict';
 
-require('../QUnitExtensions');
 var Surface = require('../../ui/Surface');
 var DocumentSession = require('../../model/DocumentSession');
 

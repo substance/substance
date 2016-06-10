@@ -1,12 +1,10 @@
 'use strict';
 
-require('../QUnitExtensions');
+var test = require('../test').module('model/Fragmenter');
 
 var oo = require('../../util/oo');
 var Fragmenter = require('../../model/Fragmenter');
 // var DOMElement = require('../../ui/DOMElement');
-
-QUnit.module('model/Fragmenter');
 
 // - nodes with lower level should be split less often
 // - inline nodes must not be split at all
@@ -89,51 +87,58 @@ var _render = function(text, annotations, opts) {
 //   return '<div>' + html + '</div>';
 // };
 
-QUnit.test("No annos.", function(assert) {
+test("No annos.", function(t) {
   var annos = [];
   var html = _render(TEXT, annos);
-  assert.equal(html, TEXT);
+  t.equal(html, TEXT);
+  t.end();
 });
 
-QUnit.test("With one anno.", function(assert) {
+test("With one anno.", function(t) {
   var annos = [new Anno('b', 'b1', 3, 6)];
   var html = _render(TEXT, annos);
-  assert.equal(html, 'ABC<b>DEF</b>GHI');
+  t.equal(html, 'ABC<b>DEF</b>GHI');
+  t.end();
 });
 
-QUnit.test("With one anchor.", function(assert) {
+test("With one anchor.", function(t) {
   var annos = [new Anno('a', 'a1', 3, 3, {
     isAnchor: true
   })];
   var html = _render(TEXT, annos);
-  assert.equal(html, 'ABC<a></a>DEFGHI');
+  t.equal(html, 'ABC<a></a>DEFGHI');
+  t.end();
 });
 
-QUnit.test("With one inline.", function(assert) {
+test("With one inline.", function(t) {
   var annos = [new Anno('i', 'i1', 3, 4)];
   var html = _render(TEXT, annos);
-  assert.equal(html, 'ABC<i>D</i>EFGHI');
+  t.equal(html, 'ABC<i>D</i>EFGHI');
+  t.end();
 });
 
-QUnit.test("One nested anno.", function(assert) {
+test("One nested anno.", function(t) {
   var annos = [new Anno('b', 'b1', 3, 6), new Anno('i', 'i1', 4, 5)];
   var html = _render(TEXT, annos);
-  assert.equal(html, 'ABC<b>D<i>E</i>F</b>GHI');
+  t.equal(html, 'ABC<b>D<i>E</i>F</b>GHI');
+  t.end();
 });
 
-QUnit.test("Overlapping annos.", function(assert) {
+test("Overlapping annos.", function(t) {
   var annos = [new Anno('b', 'b1', 3, 6), new Anno('i', 'i1', 4, 8)];
   var html = _render(TEXT, annos);
-  assert.equal(html, 'ABC<b>D<i>EF</i></b><i>GH</i>I');
+  t.equal(html, 'ABC<b>D<i>EF</i></b><i>GH</i>I');
+  t.end();
 });
 
-QUnit.test("Equal annos.", function(assert) {
+test("Equal annos.", function(t) {
   var annos = [new Anno('b', 'b1', 3, 6), new Anno('i', 'i1', 3, 6)];
   var html = _render(TEXT, annos);
-  assert.equal(html, 'ABC<b><i>DEF</i></b>GHI');
+  t.equal(html, 'ABC<b><i>DEF</i></b>GHI');
+  t.end();
 });
 
-QUnit.test("Overlapping with fragmentation hint.", function(assert) {
+test("Overlapping with fragmentation hint.", function(t) {
   var annos = [
     new Anno('b', 'b1', 3, 6),
     new Anno('a', 'link1', 4, 8, {
@@ -141,10 +146,11 @@ QUnit.test("Overlapping with fragmentation hint.", function(assert) {
     })
   ];
   var html = _render(TEXT, annos);
-  assert.equal(html, 'ABC<b>D</b><a><b>EF</b>GH</a>I');
+  t.equal(html, 'ABC<b>D</b><a><b>EF</b>GH</a>I');
+  t.end();
 });
 
-QUnit.test("Anchors should rendered as early as possible.", function(assert) {
+test("Anchors should rendered as early as possible.", function(t) {
   var annos = [
     new Anno('b', 'b1', 3, 6),
     new Anno('a', 'a1', 3, 3, {
@@ -152,11 +158,12 @@ QUnit.test("Anchors should rendered as early as possible.", function(assert) {
     })
   ];
   var html = _render(TEXT, annos);
-  assert.equal(html, 'ABC<a></a><b>DEF</b>GHI');
+  t.equal(html, 'ABC<a></a><b>DEF</b>GHI');
+  t.end();
 });
 
 
-QUnit.test("Two subsequent inline nodes.", function(assert) {
+test("Two subsequent inline nodes.", function(t) {
   var annos = [
     new Anno('a', 'inline1', 3, 4, {
       isInline: true
@@ -166,19 +173,21 @@ QUnit.test("Two subsequent inline nodes.", function(assert) {
     })
   ];
   var html = _render(TEXT, annos);
-  assert.equal(html, 'ABC<a>D</a><b>E</b>FGHI');
+  t.equal(html, 'ABC<a>D</a><b>E</b>FGHI');
+  t.end();
 });
 
-QUnit.test("Collapsed annotation.", function(assert) {
+test("Collapsed annotation.", function(t) {
   var annos = [
     new Anno('a', 'a1', 0, 0, {
     })
   ];
   var html = _render(TEXT, annos);
-  assert.equal(html, '<a></a>ABCDEFGHI');
+  t.equal(html, '<a></a>ABCDEFGHI');
+  t.end();
 });
 
-QUnit.test("Two collapsed annotations.", function(assert) {
+test("Two collapsed annotations.", function(t) {
   var annos = [
     new Anno('a', 'a1', 0, 0, {
     }),
@@ -186,10 +195,11 @@ QUnit.test("Two collapsed annotations.", function(assert) {
     })
   ];
   var html = _render(TEXT, annos);
-  assert.equal(html, '<a></a><b></b>ABCDEFGHI');
+  t.equal(html, '<a></a><b></b>ABCDEFGHI');
+  t.end();
 });
 
-QUnit.test("Anchors should not fragment other annotations.", function(assert) {
+test("Anchors should not fragment other annotations.", function(t) {
   var annos = [
     new Anno('a', 'a1', 3, 6),
     new Anno('b', 'b1', 4, 4, {
@@ -197,5 +207,6 @@ QUnit.test("Anchors should not fragment other annotations.", function(assert) {
     })
   ];
   var html = _render(TEXT, annos);
-  assert.equal(html, 'ABC<a>D<b></b>EF</a>GHI');
+  t.equal(html, 'ABC<a>D<b></b>EF</a>GHI');
+  t.end();
 });

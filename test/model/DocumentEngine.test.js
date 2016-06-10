@@ -1,7 +1,7 @@
 'use strict';
 /* eslint-disable consistent-return */
 
-require('../QUnitExtensions');
+var test = require('../test').module('model/DocumentEngine');
 
 var DocumentStore = require('../../collab/DocumentStore');
 var ChangeStore = require('../../collab/ChangeStore');
@@ -28,20 +28,23 @@ var documentEngine = new DocumentEngine({
   }
 });
 
-QUnit.module('collab/DocumentEngine', {
-  beforeEach: function(assert) {
-    var done = assert.async();
-    var newDocumentStoreSeed = JSON.parse(JSON.stringify(documentStoreSeed));
-    var newChangeStoreSeed = JSON.parse(JSON.stringify(changeStoreSeed));
-    documentStore.seed(newDocumentStoreSeed, function(err) {
+function setup(cb, t) {
+  var newDocumentStoreSeed = JSON.parse(JSON.stringify(documentStoreSeed));
+  var newChangeStoreSeed = JSON.parse(JSON.stringify(changeStoreSeed));
+  documentStore.seed(newDocumentStoreSeed, function(err) {
+    if (err) return console.error(err);
+    changeStore.seed(newChangeStoreSeed, function(err) {
       if (err) return console.error(err);
-      changeStore.seed(newChangeStoreSeed, function(err) {
-        if (err) return console.error(err);
-        done();
-      });
+      cb(t);
     });
-  }
-});
+  });
+}
+
+function setupTest(description, fn) {
+  test(description, function (t) {
+    setup(fn, t);
+  });
+}
 
 // Runs the offical backend test suite
-testDocumentEngine(documentEngine, QUnit);
+testDocumentEngine(documentEngine, setupTest);

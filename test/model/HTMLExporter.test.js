@@ -1,6 +1,7 @@
 'use strict';
 
-require('../QUnitExtensions');
+var test = require('../test').module('model/HTMLExporter');
+
 var TestHTMLExporter = require('../model/TestHTMLExporter');
 var TestArticle = require('../model/TestArticle');
 
@@ -10,52 +11,63 @@ var simple = require('../fixtures/simple');
 var exporter;
 var doc;
 
-QUnit.module('model/HTMLExporter', {
-  beforeEach: function() {
-    exporter = new TestHTMLExporter();
-    doc = new TestArticle();
-  },
-  afterEach: function() {
-    exporter = null;
-  }
-});
+function setup() {
+  exporter = new TestHTMLExporter();
+  doc = new TestArticle();
+}
+
+function teardown() {
+  exporter = null;
+}
+
+function setupTest(description, fn) {
+  test(description, function (t) {
+    setup();
+    fn(t);
+    teardown();
+  });
+}
 
 var CONTENT = '0123456789';
 
-QUnit.test("Exporting paragraph", function(assert) {
+setupTest("Exporting paragraph", function(t) {
   var p1 = doc.create({ type: 'paragraph', id: 'p1', content: CONTENT });
   var el = exporter.convertNode(p1);
   var actual = el.outerHTML;
   var expected = '<p data-id="p1">' + CONTENT + '</p>';
-  assert.equal(actual, expected);
+  t.equal(actual, expected);
+  t.end();
 });
 
-QUnit.test("Exporting paragraph with strong", function(assert) {
+setupTest("Exporting paragraph with strong", function(t) {
   var p1 = doc.create({ type: 'paragraph', id: 'p1', content: CONTENT });
   doc.create({ type: 'strong', id: 's1', path: ['p1', 'content'], startOffset: 4, endOffset: 7});
   var el = exporter.convertNode(p1);
   var actual = el.outerHTML;
   var expected = '<p data-id="p1">0123<strong data-id="s1">456</strong>789</p>';
-  assert.equal(actual, expected);
+  t.equal(actual, expected);
+  t.end();
 });
 
-QUnit.test("Exporting h1", function(assert) {
+setupTest("Exporting h1", function(t) {
   var h1 = doc.create({ type: 'heading', id: 'h1', level: 1, content: CONTENT });
   var el = exporter.convertNode(h1);
   var actual = el.outerHTML;
   var expected = '<h1 data-id="h1">' + CONTENT + '</h1>';
-  assert.equal(actual, expected);
+  t.equal(actual, expected);
+  t.end();
 });
 
-QUnit.test("Exporting h2", function(assert) {
+setupTest("Exporting h2", function(t) {
   var h2 = doc.create({ type: 'heading', id: 'h2', level: 2, content: CONTENT });
   var el = exporter.convertNode(h2);
   var actual = el.outerHTML;
   var expected = '<h2 data-id="h2">' + CONTENT + '</h2>';
-  assert.equal(actual, expected);
+  t.equal(actual, expected);
+  t.end();
 });
 
-QUnit.test("Exporting simple document", function(assert) {
+setupTest("Exporting simple document", function(t) {
   var doc = fixture(simple);
   var rootEl = exporter.exportDocument(doc);
   var body = rootEl.find('body');
@@ -66,20 +78,22 @@ QUnit.test("Exporting simple document", function(assert) {
     '<p data-id="p3">' + CONTENT + '</p>',
     '<p data-id="p4">' + CONTENT + '</p>'
   ].join('');
-  assert.equal(actual, expected);
+  t.equal(actual, expected);
+  t.end();
 });
 
-QUnit.test("Exporting a link", function(assert) {
+setupTest("Exporting a link", function(t) {
   var p1 = doc.create({ type: 'paragraph', id: 'p1', content: CONTENT });
   doc.create({ type: 'link', id: 'l1', path: ['p1', 'content'], startOffset: 4, endOffset: 7, url: 'foo', title: 'bar' });
   var el = exporter.convertNode(p1);
   var childNodes = el.getChildNodes();
-  assert.equal(childNodes.length, 3);
-  assert.equal(childNodes[0].textContent, "0123");
-  assert.equal(childNodes[1].textContent, "456");
-  assert.equal(childNodes[2].textContent, "789");
+  t.equal(childNodes.length, 3);
+  t.equal(childNodes[0].textContent, "0123");
+  t.equal(childNodes[1].textContent, "456");
+  t.equal(childNodes[2].textContent, "789");
   var a = childNodes[1];
-  assert.equal(a.attr('data-id'), 'l1');
-  assert.equal(a.attr('href'), 'foo');
-  assert.equal(a.attr('title'), 'bar');
+  t.equal(a.attr('data-id'), 'l1');
+  t.equal(a.attr('href'), 'foo');
+  t.equal(a.attr('title'), 'bar');
+  t.end();
 });

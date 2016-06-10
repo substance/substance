@@ -10,6 +10,8 @@ var argv = require('yargs').argv;
 var gulpif = require('gulp-if');
 var rename = require('gulp-rename');
 var eslint = require('gulp-eslint');
+var tape = require('gulp-tape');
+var tapSpec = require('tap-spec');
 var browserify = require('browserify');
 var uglify = require('gulp-uglify');
 var sourcemaps = require('gulp-sourcemaps');
@@ -70,8 +72,7 @@ gulp.task('lint', function() {
     './packages/**/*.js',
     './ui/**/*.js',
     './util/**/*.js',
-    './test/model/*.js',
-    './test/unit/**/*.js'
+    './test/**/*.js'
   ]).pipe(eslint())
     .pipe(eslint.format())
     .pipe(eslint.failAfterError());
@@ -110,18 +111,34 @@ gulp.task('test:fixtures', function() {
     .pipe(gulp.dest('test/fixtures/html/'));
 });
 
-gulp.task('test:karma', ['lint'], function(done) {
+gulp.task('test:qunit:karma', ['lint'], function(done) {
+  new Karma({
+    configFile: __dirname + '/karma.qunit.conf.js',
+    singleRun: true
+  }, done).start();
+});
+
+gulp.task('test:qunit:server', ['lint'], function() {
+  // requiring instead of doing 'node test/run.js'
+  require('./test-old/run');
+});
+
+gulp.task('test:browsers', ['lint'], function(done) {
   new Karma({
     configFile: __dirname + '/karma.conf.js',
     singleRun: true
   }, done).start();
 });
 
-gulp.task('test:server', ['lint'], function() {
-  // requiring instead of doing 'node test/run.js'
-  require('./test/run');
+gulp.task('test:server', ['lint'], function(done) {
+  return gulp.src('test/**/*.test.js')
+    .pipe(tape({
+      reporter: tapSpec()
+    }));
 });
 
-gulp.task('test', ['lint', 'test:karma', 'test:server']);
+gulp.task('test:qunit', ['lint', 'test:qunit:karma', 'test:qunit:server']);
+
+gulp.task('test', ['lint', 'test:browsers', 'test:server']);
 
 gulp.task('default', ['build']);

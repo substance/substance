@@ -1,15 +1,14 @@
 'use strict';
 
-require('../QUnitExtensions');
+var test = require('../test').module('transform/expandAnnotation');
+
 var expandAnnotation = require('../../model/transform/expandAnnotation');
 var documentHelpers = require('../../model/documentHelpers');
 
 var fixture = require('../fixtures/createTestArticle');
 var containerAnnoSample = require('../fixtures/containerAnnoSample');
 
-QUnit.module('model/transform/expandAnnotation');
-
-QUnit.test("Expand-right of property annotation for a given property selection", function(assert) {
+test("Expand-right of property annotation for a given property selection", function(t) {
   var doc = fixture(containerAnnoSample);
   var sel = doc.createSelection({
     type: 'property',
@@ -20,19 +19,20 @@ QUnit.test("Expand-right of property annotation for a given property selection",
   var annos = documentHelpers.getPropertyAnnotationsForSelection(doc, sel, {
     type: 'strong'
   });
-  assert.equal(annos.length, 1, 'There should be one strong annotation in the fixture');
+  t.equal(annos.length, 1, 'There should be one strong annotation in the fixture');
   var out = expandAnnotation(doc, {
     selection: sel,
     anno: annos[0]
   });
   var a2 = out.result;
 
-  assert.isDefinedAndNotNull(a2, 'a2 should have been returned as a result');
-  assert.equal(a2.startOffset, 0, 'a2.startOffset should be 0');
-  assert.equal(a2.endOffset, 6, 'a2.endOffset should have changed from 2 to 1');
+  t.notNil(a2, 'a2 should have been returned as a result');
+  t.equal(a2.startOffset, 0, 'a2.startOffset should be 0');
+  t.equal(a2.endOffset, 6, 'a2.endOffset should have changed from 2 to 1');
+  t.end();
 });
 
-QUnit.test("Expand container annotation for a given property selection (right expansion)", function(assert) {
+test("Expand container annotation for a given property selection (right expansion)", function(t) {
   var doc = fixture(containerAnnoSample);
 
   var sel = doc.createSelection({
@@ -42,18 +42,19 @@ QUnit.test("Expand container annotation for a given property selection (right ex
     endOffset: 6
   });
   var anno = doc.get('a1');
-  assert.isDefinedAndNotNull(anno, 'There should be container annotation "a1" in the fixture');
+  t.notNil(anno, 'There should be container annotation "a1" in the fixture');
   var out = expandAnnotation(doc, {
     selection: sel,
     anno: anno
   });
   var a1 = out.result;
 
-  assert.ok(a1, 'a1 should have been returned as a result');
-  assert.equal(a1.endOffset, 6, 'a1.endOffset should be 6');
+  t.ok(a1, 'a1 should have been returned as a result');
+  t.equal(a1.endOffset, 6, 'a1.endOffset should be 6');
+  t.end();
 });
 
-QUnit.test("Expand container annotation for a given container selection (expand right)", function(assert) {
+test("Expand container annotation for a given container selection (expand right)", function(t) {
   var doc = fixture(containerAnnoSample);
 
   var sel = doc.createSelection({
@@ -65,14 +66,15 @@ QUnit.test("Expand container annotation for a given container selection (expand 
     endOffset: 6,
   });
   var anno = doc.get('a1');
-  assert.isDefinedAndNotNull(anno, 'There should be container annotation "a1" in the fixture');
+  t.notNil(anno, 'There should be container annotation "a1" in the fixture');
   var out = expandAnnotation(doc, {
     selection: sel,
     anno: anno
   });
   var a1 = out.result;
 
-  assert.ok(a1, 'a1 should have been returned as a result');
-  assert.deepEqual(a1.endPath, ['p3', 'content'], 'a1.endPath should be p2.content');
-  assert.equal(a1.endOffset, 6, 'a1.endOffset should be 6');
+  t.ok(a1, 'a1 should have been returned as a result');
+  t.deepEqual(a1.endPath, ['p3', 'content'], 'a1.endPath should be p2.content');
+  t.equal(a1.endOffset, 6, 'a1.endOffset should be 6');
+  t.end();
 });

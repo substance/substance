@@ -2,16 +2,15 @@
 
 var warn = require('./warn');
 /**
-  A scope to store global variables.
-
-  Note: We are using global variables only for debugging.
+  A place to store global variables.
 */
-var substanceGlobals = {
-};
+var substanceGlobals = {};
 
 if (global.hasOwnProperty('Substance')) {
   warn('global.Substance is already defined.');
+  substanceGlobals = global.Substance;
+} else {
+  global.Substance = substanceGlobals;
 }
-global.Substance = substanceGlobals;
 
 module.exports = substanceGlobals;

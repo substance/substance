@@ -11,10 +11,9 @@ var Paragraph = require('../../packages/paragraph/Paragraph');
 var ContainerSelection = require('../../model/ContainerSelection');
 var PropertySelection = require('../../model/PropertySelection');
 var oo = require('../../util/oo');
+var setDOMSelection = require('../setDOMSelection');
 
-require('../QUnitExtensions');
-
-QUnit.uiModule('ui/DOMSelection');
+var test = require('../test').module('ui/DOMSelection');
 
 function StubDoc(el) {
   this.el = el;
@@ -128,70 +127,76 @@ var mixedFixture = [
   '<div id="after">After</div>'
 ].join('');
 
-QUnit.uiTest("Get coordinate for collapsed selection", function(assert) {
-  var el = this.sandbox.html(singlePropertyFixture);
+test.UI("Get coordinate for collapsed selection", function(t) {
+  var el = t.sandbox.html(singlePropertyFixture);
   var domSelection = new DOMSelection(new StubSurface(el));
   var node = el.find('#test1 > span').getFirstChild();
   var offset = 5;
   var coor = domSelection._getCoordinate(node, offset);
-  assert.ok(coor, "Extracted coordinate should be !== null");
-  assert.deepEqual(coor.path, ['test1', 'content'], 'Path should be extracted correctly.');
-  assert.equal(coor.offset, 5, 'Offset should be extracted correctly.');
+  t.ok(coor, "Extracted coordinate should be !== null");
+  t.deepEqual(coor.path, ['test1', 'content'], 'Path should be extracted correctly.');
+  t.equal(coor.offset, 5, 'Offset should be extracted correctly.');
+  t.end();
 });
 
-QUnit.uiTest("Search coordinate (before)", function(assert) {
-  var el = this.sandbox.html(mixedFixture);
+test.UI("Search coordinate (before)", function(t) {
+  var el = t.sandbox.html(mixedFixture);
   var domSelection = new DOMSelection(new StubSurface(el));
   var node = el.find('#before').getFirstChild();
   var offset = 1;
   var coor = domSelection._searchForCoordinate(node, offset, {});
-  assert.ok(coor, "Extracted coordinate should be !== null");
-  assert.deepEqual(coor.path, ['test1', 'content'], 'Path should be extracted correctly.');
-  assert.equal(coor.offset, 0, 'Offset should be extracted correctly.');
+  t.ok(coor, "Extracted coordinate should be !== null");
+  t.deepEqual(coor.path, ['test1', 'content'], 'Path should be extracted correctly.');
+  t.equal(coor.offset, 0, 'Offset should be extracted correctly.');
+  t.end();
 });
 
-QUnit.uiTest("Search coordinate (between)", function(assert) {
-  var el = this.sandbox.html(mixedFixture);
+test.UI("Search coordinate (between)", function(t) {
+  var el = t.sandbox.html(mixedFixture);
   var domSelection = new DOMSelection(new StubSurface(el));
   var node = el.find('#between').getFirstChild();
   var offset = 1;
   var coor = domSelection._searchForCoordinate(node, offset, {});
-  assert.ok(coor, "Extracted coordinate should be !== null");
-  assert.deepEqual(coor.path, ['test3', 'content'], 'Path should be extracted correctly.');
-  assert.equal(coor.offset, 0, 'Offset should be extracted correctly.');
+  t.ok(coor, "Extracted coordinate should be !== null");
+  t.deepEqual(coor.path, ['test3', 'content'], 'Path should be extracted correctly.');
+  t.equal(coor.offset, 0, 'Offset should be extracted correctly.');
+  t.end();
 });
 
-QUnit.uiTest("Search coordinate (between, left)", function(assert) {
-  var el = this.sandbox.html(mixedFixture);
+test.UI("Search coordinate (between, left)", function(t) {
+  var el = t.sandbox.html(mixedFixture);
   var domSelection = new DOMSelection(new StubSurface(el));
   var node = el.find('#between').getFirstChild();
   var offset = 1;
   var coor = domSelection._searchForCoordinate(node, offset, {direction: 'left'});
-  assert.ok(coor, "Extracted coordinate should be !== null");
-  assert.deepEqual(coor.path, ['test2', 'content'], 'Path should be extracted correctly.');
-  assert.equal(coor.offset, 20, 'Offset should be extracted correctly.');
+  t.ok(coor, "Extracted coordinate should be !== null");
+  t.deepEqual(coor.path, ['test2', 'content'], 'Path should be extracted correctly.');
+  t.equal(coor.offset, 20, 'Offset should be extracted correctly.');
+  t.end();
 });
 
-QUnit.uiTest("Search coordinate (after)", function(assert) {
-  var el = this.sandbox.html(mixedFixture);
+test.UI("Search coordinate (after)", function(t) {
+  var el = t.sandbox.html(mixedFixture);
   var domSelection = new DOMSelection(new StubSurface(el));
   var node = el.find('#after').getFirstChild();
   var offset = 1;
   var coor = domSelection._searchForCoordinate(node, offset, {direction: 'left'});
-  assert.ok(coor, "Extracted coordinate should be !== null");
-  assert.deepEqual(coor.path, ['test4', 'content'], 'Path should be extracted correctly.');
-  assert.equal(coor.offset, 19, 'Offset should be extracted correctly.');
+  t.ok(coor, "Extracted coordinate should be !== null");
+  t.deepEqual(coor.path, ['test4', 'content'], 'Path should be extracted correctly.');
+  t.equal(coor.offset, 19, 'Offset should be extracted correctly.');
+  t.end();
 });
 
-QUnit.uiTest("coordinate via search", function(assert) {
-  var el = this.sandbox.html(mixedFixture);
+test.UI("coordinate via search", function(t) {
+  var el = t.sandbox.html(mixedFixture);
   var domSelection = new DOMSelection(new StubSurface(el));
   var node = el.find('#between').getFirstChild();
   var offset = 1;
   var coor = domSelection._searchForCoordinate(node, offset);
-  assert.ok(coor, "Extracted coordinate should be !== null");
-  assert.deepEqual(coor.path, ['test3', 'content'], 'Path should be extracted correctly.');
-  assert.equal(coor.offset, 0, 'Offset should be extracted correctly.');
+  t.ok(coor, "Extracted coordinate should be !== null");
+  t.deepEqual(coor.path, ['test3', 'content'], 'Path should be extracted correctly.');
+  t.equal(coor.offset, 0, 'Offset should be extracted correctly.');
+  t.end();
 });
 
 var emptyParagraphFixture = [
@@ -200,15 +205,16 @@ var emptyParagraphFixture = [
   '</div>'
 ].join('');
 
-QUnit.uiTest("DOM coordinate in empty paragraph", function(assert) {
-  var el = this.sandbox.html(emptyParagraphFixture);
+test.UI("DOM coordinate in empty paragraph", function(t) {
+  var el = t.sandbox.html(emptyParagraphFixture);
   var domSelection = new DOMSelection(new StubSurface(el));
   var node = el.find('#test1');
   var offset = 0;
   var coor = domSelection._getCoordinate(node, offset);
-  assert.isDefinedAndNotNull(coor, "Extracted coordinate should be mapped.");
-  assert.deepEqual(coor.path, ['test1', 'content'], 'Path should be extracted correctly.');
-  assert.equal(coor.offset, 0, 'Offset should be extracted correctly.');
+  t.notNil(coor, "Extracted coordinate should be mapped.");
+  t.deepEqual(coor.path, ['test1', 'content'], 'Path should be extracted correctly.');
+  t.equal(coor.offset, 0, 'Offset should be extracted correctly.');
+  t.end();
 });
 
 var textWithAnnotations = [
@@ -222,26 +228,28 @@ var textWithAnnotations = [
   '</div>'
 ].join('');
 
-QUnit.uiTest("DOM coordinate on text property level (first)", function(assert) {
-  var el = this.sandbox.html(textWithAnnotations);
+test.UI("DOM coordinate on text property level (first)", function(t) {
+  var el = t.sandbox.html(textWithAnnotations);
   var domSelection = new DOMSelection(new StubSurface(el));
   var node = el.find('#test1_content');
   var offset = 0;
   var coor = domSelection._getCoordinate(node, offset);
-  assert.ok(coor, "Extracted coordinate should be !== null");
-  assert.deepEqual(coor.path, ['test1', 'content'], 'Path should be extracted correctly.');
-  assert.equal(coor.offset, 0, 'Offset should be extracted correctly.');
+  t.ok(coor, "Extracted coordinate should be !== null");
+  t.deepEqual(coor.path, ['test1', 'content'], 'Path should be extracted correctly.');
+  t.equal(coor.offset, 0, 'Offset should be extracted correctly.');
+  t.end();
 });
 
-QUnit.uiTest("DOM coordinate on text property level (last)", function(assert) {
-  var el = this.sandbox.html(textWithAnnotations);
+test.UI("DOM coordinate on text property level (last)", function(t) {
+  var el = t.sandbox.html(textWithAnnotations);
   var domSelection = new DOMSelection(new StubSurface(el));
   var node = el.find('#test1_content');
   var offset = 4;
   var coor = domSelection._getCoordinate(node, offset);
-  assert.ok(coor, "Extracted coordinate should be !== null");
-  assert.deepEqual(coor.path, ['test1', 'content'], 'Path should be extracted correctly.');
-  assert.equal(coor.offset, 8, 'Offset should be extracted correctly.');
+  t.ok(coor, "Extracted coordinate should be !== null");
+  t.deepEqual(coor.path, ['test1', 'content'], 'Path should be extracted correctly.');
+  t.equal(coor.offset, 8, 'Offset should be extracted correctly.');
+  t.end();
 });
 
 var withAnnosAndInlines = [
@@ -257,30 +265,32 @@ var withAnnosAndInlines = [
   '</div>'
 ].join('');
 
-QUnit.uiTest("DOM coordinate after last inline", function(assert) {
-  var el = this.sandbox.html(withAnnosAndInlines);
+test.UI("DOM coordinate after last inline", function(t) {
+  var el = t.sandbox.html(withAnnosAndInlines);
   var domSelection = new DOMSelection(new StubSurface(el));
   var node = el.find('#test1_content');
   var offset = 6;
   var coor = domSelection._getCoordinate(node, offset);
-  assert.ok(coor, "Extracted coordinate should be !== null");
-  assert.deepEqual(coor.path, ['test1', 'content'], 'Path should be extracted correctly.');
-  assert.equal(coor.offset, 9, 'Offset should be extracted correctly.');
+  t.ok(coor, "Extracted coordinate should be !== null");
+  t.deepEqual(coor.path, ['test1', 'content'], 'Path should be extracted correctly.');
+  t.equal(coor.offset, 9, 'Offset should be extracted correctly.');
+  t.end();
 });
 
-QUnit.uiTest("DOM selection spanning over inline at end", function(assert) {
-  var el = this.sandbox.html(withAnnosAndInlines);
+test.UI("DOM selection spanning over inline at end", function(t) {
+  var el = t.sandbox.html(withAnnosAndInlines);
   var domSelection = new DOMSelection(new StubSurface(el));
   var anchorNode = el.find('#before-last').getFirstChild();
   var anchorOffset = 2;
   var focusNode = el.find('#test1_content');
   var focusOffset = 6;
   var range = domSelection._getRange(anchorNode, anchorOffset, focusNode, focusOffset);
-  assert.ok(range, "Range should be !== null");
-  assert.notOk(range.reverse, "Selection should be forward");
-  assert.deepEqual(range.start.path, ['test1', 'content'], 'Path should be extracted correctly.');
-  assert.deepEqual(range.start.offset, 8, 'startOffset should be extracted correctly.');
-  assert.deepEqual(range.end.offset, 9, 'startOffset should be extracted correctly.');
+  t.ok(range, "Range should be !== null");
+  t.notOk(range.reverse, "Selection should be forward");
+  t.deepEqual(range.start.path, ['test1', 'content'], 'Path should be extracted correctly.');
+  t.deepEqual(range.start.offset, 8, 'startOffset should be extracted correctly.');
+  t.deepEqual(range.end.offset, 9, 'startOffset should be extracted correctly.');
+  t.end();
 });
 
 var withoutHints = [
@@ -294,34 +304,37 @@ var withoutHints = [
   '</div>'
 ].join('');
 
-QUnit.uiTest("Without hints: DOM coordinate in first text node", function(assert) {
-  var el = this.sandbox.html(withoutHints);
+test.UI("Without hints: DOM coordinate in first text node", function(t) {
+  var el = t.sandbox.html(withoutHints);
   var domSelection = new DOMSelection(new StubSurface(el));
   var node = el.find('#test1_content').getFirstChild().getFirstChild();
   var offset = 1;
   var coor = domSelection._getCoordinate(node, offset);
-  assert.ok(coor, "Extracted coordinate should be !== null");
-  assert.equal(coor.offset, 1, 'Offset should be extracted correctly.');
+  t.ok(coor, "Extracted coordinate should be !== null");
+  t.equal(coor.offset, 1, 'Offset should be extracted correctly.');
+  t.end();
 });
 
-QUnit.uiTest("Without hints: DOM coordinate in second text node", function(assert) {
-  var el = this.sandbox.html(withoutHints);
+test.UI("Without hints: DOM coordinate in second text node", function(t) {
+  var el = t.sandbox.html(withoutHints);
   var domSelection = new DOMSelection(new StubSurface(el));
   var node = el.find('#test1_content').getChildAt(1).getFirstChild();
   var offset = 1;
   var coor = domSelection._getCoordinate(node, offset);
-  assert.ok(coor, "Extracted coordinate should be !== null");
-  assert.equal(coor.offset, 3, 'Offset should be extracted correctly.');
+  t.ok(coor, "Extracted coordinate should be !== null");
+  t.equal(coor.offset, 3, 'Offset should be extracted correctly.');
+  t.end();
 });
 
-QUnit.uiTest("Without hints: DOM coordinate between spans", function(assert) {
-  var el = this.sandbox.html(withoutHints);
+test.UI("Without hints: DOM coordinate between spans", function(t) {
+  var el = t.sandbox.html(withoutHints);
   var domSelection = new DOMSelection(new StubSurface(el));
   var node = el.find('#test1_content');
   var offset = 2;
   var coor = domSelection._getCoordinate(node, offset);
-  assert.ok(coor, "Extracted coordinate should be !== null");
-  assert.equal(coor.offset, 4, 'Offset should be extracted correctly.');
+  t.ok(coor, "Extracted coordinate should be !== null");
+  t.equal(coor.offset, 4, 'Offset should be extracted correctly.');
+  t.end();
 });
 
 // Test for issue #273
@@ -336,18 +349,19 @@ var issue273 = [
   '</span>'
 ].join('');
 
-QUnit.uiTest("Issue #273: 'Could not find char position' when clicking right above an inline node", function(assert) {
-  var el = this.sandbox.html(issue273);
+test.UI("Issue #273: 'Could not find char position' when clicking right above an inline node", function(t) {
+  var el = t.sandbox.html(issue273);
   var domSelection = new DOMSelection(new StubSurface(el));
   var node = el.find('#test').getFirstChild();
   var offset = 0;
   var coor = domSelection._getCoordinate(node, offset);
-  assert.ok(coor, "Extracted coordinate should be !== null");
-  assert.equal(coor.offset, 3, 'Offset should be extracted correctly.');
+  t.ok(coor, "Extracted coordinate should be !== null");
+  t.equal(coor.offset, 3, 'Offset should be extracted correctly.');
   offset = 2;
   coor = domSelection._getCoordinate(node, offset);
-  assert.ok(coor, "Extracted coordinate should be !== null");
-  assert.equal(coor.offset, 4, 'Offset should be extracted correctly.');
+  t.ok(coor, "Extracted coordinate should be !== null");
+  t.equal(coor.offset, 4, 'Offset should be extracted correctly.');
+  t.end();
 });
 
 var surfaceWithParagraphs = [
@@ -364,31 +378,33 @@ var surfaceWithParagraphs = [
   '</div>'
 ].join('');
 
-QUnit.firefoxTest("Issue #354: Wrong selection in FF when double clicking between lines", function(assert) {
-  var el = this.sandbox.html(surfaceWithParagraphs);
+test.FF("Issue #354: Wrong selection in FF when double clicking between lines", function(t) {
+  var el = t.sandbox.html(surfaceWithParagraphs);
   var domSelection = new DOMSelection(new StubSurface(el));
   var surface = el.find('#surface');
-  QUnit.setDOMSelection(surface, 0, surface, 1);
+  setDOMSelection(surface, 0, surface, 1);
   var range = domSelection.mapDOMSelection();
-  // assert.ok(sel.isPropertySelection(), "Selection should be property selection.");
-  assert.deepEqual(range.start.path, ['p1', 'content'], 'Path should be extracted correctly.');
-  assert.deepEqual([range.start.offset, range.end.offset], [0, 2], 'Offsets should be extracted correctly.');
+  // t.ok(sel.isPropertySelection(), "Selection should be property selection.");
+  t.deepEqual(range.start.path, ['p1', 'content'], 'Path should be extracted correctly.');
+  t.deepEqual([range.start.offset, range.end.offset], [0, 2], 'Offsets should be extracted correctly.');
+  t.end();
 });
 
-QUnit.uiTest("Issue #376: Wrong selection mapping at end of paragraph", function(assert) {
-  var el = this.sandbox.html(surfaceWithParagraphs);
+test.UI("Issue #376: Wrong selection mapping at end of paragraph", function(t) {
+  var el = t.sandbox.html(surfaceWithParagraphs);
   var domSelection = new DOMSelection(new StubSurface(el));
   var p1span = el.find('#p1 span');
   var p2 = el.find('#p2');
   var range = domSelection._getRange(p1span, 1, p2, 0);
-  assert.deepEqual(range.start.path, ['p1', 'content'], 'startPath');
-  assert.deepEqual(range.start.offset, 2, 'startOffset');
-  assert.deepEqual(range.end.path, ['p2', 'content'], 'endPath');
-  assert.deepEqual(range.end.offset, 0, 'endOffset');
+  t.deepEqual(range.start.path, ['p1', 'content'], 'startPath');
+  t.deepEqual(range.start.offset, 2, 'startOffset');
+  t.deepEqual(range.end.path, ['p2', 'content'], 'endPath');
+  t.deepEqual(range.end.offset, 0, 'endOffset');
+  t.end();
 });
 
-QUnit.webkitTest("Mapping a ContainerSelection to the DOM", function(assert) {
-  var el = this.sandbox.attr('contenteditable', true)
+test.WK("Mapping a ContainerSelection to the DOM", function(t) {
+  var el = t.sandbox.attr('contenteditable', true)
     .html(surfaceWithParagraphs);
   var domSelection = new DOMSelection(new StubSurface(el));
   var sel = new ContainerSelection('body', ['p1', 'content'], 1, ['p2', 'content'], 1);
@@ -396,39 +412,42 @@ QUnit.webkitTest("Mapping a ContainerSelection to the DOM", function(assert) {
   var p2Text = el.find('#p2 span').getFirstChild();
   domSelection.setSelection(sel);
   var wSel = window.getSelection();
-  assert.equal(wSel.anchorNode, p1Text.getNativeElement(), 'anchorNode should be in first paragraph.');
-  assert.equal(wSel.anchorOffset, 1, 'anchorOffset should be correct.');
-  assert.equal(wSel.focusNode, p2Text.getNativeElement(), 'focusNode should be in second paragraph.');
-  assert.equal(wSel.focusOffset, 1, 'focusOffset should be correct.');
+  t.equal(wSel.anchorNode, p1Text.getNativeElement(), 'anchorNode should be in first paragraph.');
+  t.equal(wSel.anchorOffset, 1, 'anchorOffset should be correct.');
+  t.equal(wSel.focusNode, p2Text.getNativeElement(), 'focusNode should be in second paragraph.');
+  t.equal(wSel.focusOffset, 1, 'focusOffset should be correct.');
+  t.end();
 });
 
-QUnit.uiTest("Mapping a ContainerSelection from DOM to model", function(assert) {
-  var el = this.sandbox.html(surfaceWithParagraphs);
+test.UI("Mapping a ContainerSelection from DOM to model", function(t) {
+  var el = t.sandbox.html(surfaceWithParagraphs);
   var domSelection = new DOMSelection(new StubSurface(el, 'body'));
   var p1Text = el.find('#p1 span').getFirstChild();
   var p2Text = el.find('#p2 span').getFirstChild();
-  QUnit.setDOMSelection(p1Text, 1, p2Text, 2);
+  setDOMSelection(p1Text, 1, p2Text, 2);
   var sel = domSelection.getSelection();
-  assert.ok(sel.isContainerSelection(), 'Should be a container selection.');
-  assert.deepEqual(sel.startPath, ['p1', 'content'], 'startPath should be correct.');
-  assert.equal(sel.startOffset, 1, 'startOffset should be correct.');
-  assert.deepEqual(sel.endPath, ['p2', 'content'], 'endPath should be correct.');
-  assert.equal(sel.endOffset, 2, 'endOffset should be correct.');
+  t.ok(sel.isContainerSelection(), 'Should be a container selection.');
+  t.deepEqual(sel.startPath, ['p1', 'content'], 'startPath should be correct.');
+  t.equal(sel.startOffset, 1, 'startOffset should be correct.');
+  t.deepEqual(sel.endPath, ['p2', 'content'], 'endPath should be correct.');
+  t.equal(sel.endOffset, 2, 'endOffset should be correct.');
+  t.end();
 });
 
 // TODO: is this a real case?
 // This works in Chrome but not in FF
 // Chrome maps the anchor to a textNode (text, 0) which is working fine
 // FF takes the anchor as we specified it (surface, 2)
-QUnit.uiTest("DOM Coordinate on surface element", function(assert) {
-  var el = this.sandbox.html(surfaceWithParagraphs);
+test.UI("DOM Coordinate on surface element", function(t) {
+  var el = t.sandbox.html(surfaceWithParagraphs);
   var domSelection = new DOMSelection(new StubSurface(el, 'body'));
   var surface = el.find('#surface');
-  QUnit.setDOMSelection(surface, 2, surface, 2);
+  setDOMSelection(surface, 2, surface, 2);
   var sel = domSelection.getSelection();
-  assert.ok(sel.isCollapsed, 'Selection should be collapsed.');
-  assert.deepEqual(sel.startPath, ['p3', 'content'], 'startPath should be correct.');
-  assert.equal(sel.startOffset, 0, 'startOffset should be correct.');
+  t.ok(sel.isCollapsed, 'Selection should be collapsed.');
+  t.deepEqual(sel.startPath, ['p3', 'content'], 'startPath should be correct.');
+  t.equal(sel.startOffset, 0, 'startOffset should be correct.');
+  t.end();
 });
 
 var textWithInlines = [
@@ -442,8 +461,8 @@ var textWithInlines = [
   '</div>'
 ].join('');
 
-QUnit.uiTest("Setting cursor after inline node", function(assert) {
-  var el = this.sandbox.attr('contenteditable', true)
+test.UI("Setting cursor after inline node", function(t) {
+  var el = t.sandbox.attr('contenteditable', true)
     .html(textWithInlines);
   var domSelection = new DOMSelection(new StubSurface(el));
   var sel = new PropertySelection(['test1', 'content'], 4, 4);
@@ -451,22 +470,24 @@ QUnit.uiTest("Setting cursor after inline node", function(assert) {
   var third = content.getChildAt(2);
   domSelection.setSelection(sel);
   var wSel = window.getSelection();
-  assert.equal(wSel.anchorNode, third.getNativeElement(), 'anchorNode should be after inline node.');
-  assert.equal(wSel.anchorOffset, 0, 'anchorOffset should be correct.');
-  assert.ok(wSel.focusNode === wSel.anchorNode, 'focusNode should be the same.');
-  assert.equal(wSel.focusOffset, 0, 'focusOffset should be correct.');
+  t.equal(wSel.anchorNode, third.getNativeElement(), 'anchorNode should be after inline node.');
+  t.equal(wSel.anchorOffset, 0, 'anchorOffset should be correct.');
+  t.ok(wSel.focusNode === wSel.anchorNode, 'focusNode should be the same.');
+  t.equal(wSel.focusOffset, 0, 'focusOffset should be correct.');
+  t.end();
 });
 
-QUnit.uiTest("Setting cursor after inline node at end of property", function(assert) {
-  var el = this.sandbox.attr('contenteditable', true)
+test.UI("Setting cursor after inline node at end of property", function(t) {
+  var el = t.sandbox.attr('contenteditable', true)
     .html(textWithInlines);
   var domSelection = new DOMSelection(new StubSurface(el));
   var sel = new PropertySelection(['test1', 'content'], 7, 7);
   var content = el.find('#test1-content');
   domSelection.setSelection(sel);
   var wSel = window.getSelection();
-  assert.equal(wSel.anchorNode, content.getNativeElement(), 'anchorNode should be after inline node.');
-  assert.equal(wSel.anchorOffset, 4, 'anchorOffset should be correct.');
-  assert.ok(wSel.focusNode === wSel.anchorNode, 'focusNode should be the same.');
-  assert.equal(wSel.focusOffset, wSel.anchorOffset, 'focusOffset should be correct.');
+  t.equal(wSel.anchorNode, content.getNativeElement(), 'anchorNode should be after inline node.');
+  t.equal(wSel.anchorOffset, 4, 'anchorOffset should be correct.');
+  t.ok(wSel.focusNode === wSel.anchorNode, 'focusNode should be the same.');
+  t.equal(wSel.focusOffset, wSel.anchorOffset, 'focusOffset should be correct.');
+  t.end();
 });

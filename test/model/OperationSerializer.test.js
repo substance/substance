@@ -1,158 +1,172 @@
 'use strict';
 
-require('../QUnitExtensions');
+var test = require('../test').module('model/OperationSerializer');
 
 var OperationSerializer = require('../../model/data/OperationSerializer');
 var ObjectOperation = require('../../model/data/ObjectOperation');
 var TextOperation = require('../../model/data/TextOperation');
 var ArrayOperation = require('../../model/data/ArrayOperation');
 
-QUnit.module('model/data/OperationSerializer');
-
-QUnit.test('Serializing create', function(assert) {
+test('Serializing create', function(t) {
   var p = { id: 'p1', type: 'paragraph', content: 'foo' };
   var op = ObjectOperation.Create(['p1'], p);
   var io = new OperationSerializer();
   var data = io.serialize(op);
-  assert.deepEqual(data, ['c', p.id, p]);
+  t.deepEqual(data, ['c', p.id, p]);
+  t.end();
 });
 
-QUnit.test('Deserializing create', function(assert) {
+test('Deserializing create', function(t) {
   var p = { id: 'p1', type: 'paragraph', content: 'foo' };
   var io = new OperationSerializer();
   var data = ['c', 'p1', p];
   var op = io.deserialize(data);
-  assert.ok(op.type, 'create');
-  assert.deepEqual(op.getValue(), p);
+  t.ok(op.type, 'create');
+  t.deepEqual(op.getValue(), p);
+  t.end();
 });
 
-QUnit.test('Serializing delete', function(assert) {
+test('Serializing delete', function(t) {
   var p = { id: 'p1', type: 'paragraph', content: 'foo' };
   var op = ObjectOperation.Delete(['p1'], p);
   var io = new OperationSerializer();
   var data = io.serialize(op);
-  assert.deepEqual(data, ['d', p.id, p]);
+  t.deepEqual(data, ['d', p.id, p]);
+  t.end();
 });
 
-QUnit.test('Deserializing delete', function(assert) {
+test('Deserializing delete', function(t) {
   var p = { id: 'p1', type: 'paragraph', content: 'foo' };
   var io = new OperationSerializer();
   var data = ['d', 'p1', p];
   var op = io.deserialize(data);
-  assert.ok(op.type, 'delete');
-  assert.deepEqual(op.getValue(), p);
+  t.ok(op.type, 'delete');
+  t.deepEqual(op.getValue(), p);
+  t.end();
 });
 
-QUnit.test('Serializing set', function(assert) {
+test('Serializing set', function(t) {
   var op = ObjectOperation.Set(['p1', 'content'], 'foo', 'bar');
   var io = new OperationSerializer();
   var data = io.serialize(op);
-  assert.deepEqual(data, ['s', 'p1.content', 'bar', 'foo']);
+  t.deepEqual(data, ['s', 'p1.content', 'bar', 'foo']);
+  t.end();
 });
 
-QUnit.test('Serializing set with null', function(assert) {
+test('Serializing set with null', function(t) {
   var op = ObjectOperation.Set(['p1', 'content'], null, null);
   var io = new OperationSerializer();
   var data = io.serialize(op);
-  assert.deepEqual(data, ['s', 'p1.content', null, null]);
+  t.deepEqual(data, ['s', 'p1.content', null, null]);
+  t.end();
 });
 
-QUnit.test('Serializing set with undefined', function(assert) {
+test('Serializing set with undefined', function(t) {
   // ATTENTION: undefined is not a valid JSON value, so it gets replaced
   // by null
   var op = ObjectOperation.Set(['p1', 'content'], undefined, undefined);
   var io = new OperationSerializer();
   var data = io.serialize(op);
-  assert.deepEqual(data, ['s', 'p1.content', undefined, undefined]);
+  t.deepEqual(data, ['s', 'p1.content', undefined, undefined]);
+  t.end();
 });
 
-QUnit.test('Deserializing set', function(assert) {
+test('Deserializing set', function(t) {
   var io = new OperationSerializer();
   var data = ['s', 'p1.content', 'bar', 'foo'];
   var op = io.deserialize(data);
-  assert.equal(op.type, 'set');
-  assert.deepEqual(op.getPath(), ['p1', 'content']);
-  assert.deepEqual(op.getValue(), 'bar');
-  assert.deepEqual(op.getOldValue(), 'foo');
+  t.equal(op.type, 'set');
+  t.deepEqual(op.getPath(), ['p1', 'content']);
+  t.deepEqual(op.getValue(), 'bar');
+  t.deepEqual(op.getOldValue(), 'foo');
+  t.end();
 });
 
 
-QUnit.test('Serializing text insert', function(assert) {
+test('Serializing text insert', function(t) {
   var op = ObjectOperation.Update(['p1', 'content'], TextOperation.Insert(3, 'foo'));
   var io = new OperationSerializer();
   var data = io.serialize(op);
-  assert.deepEqual(data, ['u', 'p1.content', 't+', 3, 'foo']);
+  t.deepEqual(data, ['u', 'p1.content', 't+', 3, 'foo']);
+  t.end();
 });
 
-QUnit.test('Deserializing text insert', function(assert) {
+test('Deserializing text insert', function(t) {
   var io = new OperationSerializer();
   var data = ['u', 'p1.content', 't+', 3, 'foo'];
   var op = io.deserialize(data);
-  assert.ok(op.type, 'update');
-  assert.deepEqual(op.getPath(), ['p1', 'content']);
+  t.ok(op.type, 'update');
+  t.deepEqual(op.getPath(), ['p1', 'content']);
   var valueOp = op.getValueOp();
-  assert.ok(valueOp instanceof TextOperation, 'Value operation should be a TextOperation');
-  assert.equal(valueOp.type, 'insert');
-  assert.equal(valueOp.pos, 3);
-  assert.equal(valueOp.str, 'foo');
+  t.ok(valueOp instanceof TextOperation, 'Value operation should be a TextOperation');
+  t.equal(valueOp.type, 'insert');
+  t.equal(valueOp.pos, 3);
+  t.equal(valueOp.str, 'foo');
+  t.end();
 });
 
-QUnit.test('Serializing text delete', function(assert) {
+test('Serializing text delete', function(t) {
   var op = ObjectOperation.Update(['p1', 'content'], TextOperation.Delete(3, 'foo'));
   var io = new OperationSerializer();
   var data = io.serialize(op);
-  assert.deepEqual(data, ['u', 'p1.content', 't-', 3, 'foo']);
+  t.deepEqual(data, ['u', 'p1.content', 't-', 3, 'foo']);
+  t.end();
 });
 
-QUnit.test('Deserializing text delete', function(assert) {
+test('Deserializing text delete', function(t) {
   var io = new OperationSerializer();
   var data = ['u', 'p1.content', 't-', 3, 'foo'];
   var op = io.deserialize(data);
-  assert.ok(op.type, 'update');
-  assert.deepEqual(op.getPath(), ['p1', 'content']);
+  t.ok(op.type, 'update');
+  t.deepEqual(op.getPath(), ['p1', 'content']);
   var valueOp = op.getValueOp();
-  assert.ok(valueOp instanceof TextOperation, 'Value operation should be a TextOperation');
-  assert.equal(valueOp.type, 'delete');
-  assert.equal(valueOp.pos, 3);
-  assert.equal(valueOp.str, 'foo');
+  t.ok(valueOp instanceof TextOperation, 'Value operation should be a TextOperation');
+  t.equal(valueOp.type, 'delete');
+  t.equal(valueOp.pos, 3);
+  t.equal(valueOp.str, 'foo');
+  t.end();
 });
 
-QUnit.test('Serializing an array insert', function(assert) {
+test('Serializing an array insert', function(t) {
   var op = ObjectOperation.Update(['test', 'numbers'], ArrayOperation.Insert(3, 1234));
   var io = new OperationSerializer();
   var data = io.serialize(op);
-  assert.deepEqual(data, ['u', 'test.numbers', 'a+', 3, 1234]);
+  t.deepEqual(data, ['u', 'test.numbers', 'a+', 3, 1234]);
+  t.end();
 });
 
-QUnit.test('Deserializing an array insert', function(assert) {
+test('Deserializing an array insert', function(t) {
   var io = new OperationSerializer();
   var data = ['u', 'test.numbers', 'a+', 3, 1234];
   var op = io.deserialize(data);
-  assert.ok(op.type, 'update');
-  assert.deepEqual(op.getPath(), ['test', 'numbers']);
+  t.ok(op.type, 'update');
+  t.deepEqual(op.getPath(), ['test', 'numbers']);
   var valueOp = op.getValueOp();
-  assert.ok(valueOp instanceof ArrayOperation, 'Value operation should be a ArrayOperation');
-  assert.equal(valueOp.type, 'insert');
-  assert.equal(valueOp.pos, 3);
-  assert.equal(valueOp.val, 1234);
+  t.ok(valueOp instanceof ArrayOperation, 'Value operation should be a ArrayOperation');
+  t.equal(valueOp.type, 'insert');
+  t.equal(valueOp.pos, 3);
+  t.equal(valueOp.val, 1234);
+  t.end();
 });
 
-QUnit.test('Serializing an array delete', function(assert) {
+test('Serializing an array delete', function(t) {
   var op = ObjectOperation.Update(['test', 'numbers'], ArrayOperation.Delete(3, 1234));
   var io = new OperationSerializer();
   var data = io.serialize(op);
-  assert.deepEqual(data, ['u', 'test.numbers', 'a-', 3, 1234]);
+  t.deepEqual(data, ['u', 'test.numbers', 'a-', 3, 1234]);
+  t.end();
 });
 
-QUnit.test('Deserializing an array delete', function(assert) {
+test('Deserializing an array delete', function(t) {
   var io = new OperationSerializer();
   var data = ['u', 'test.numbers', 'a-', 3, 1234];
   var op = io.deserialize(data);
-  assert.ok(op.type, 'update');
-  assert.deepEqual(op.getPath(), ['test', 'numbers']);
+  t.ok(op.type, 'update');
+  t.deepEqual(op.getPath(), ['test', 'numbers']);
   var valueOp = op.getValueOp();
-  assert.ok(valueOp instanceof ArrayOperation, 'Value operation should be a ArrayOperation');
-  assert.equal(valueOp.type, 'delete');
-  assert.equal(valueOp.pos, 3);
-  assert.equal(valueOp.val, 1234);
+  t.ok(valueOp instanceof ArrayOperation, 'Value operation should be a ArrayOperation');
+  t.equal(valueOp.type, 'delete');
+  t.equal(valueOp.pos, 3);
+  t.equal(valueOp.val, 1234);
+  t.end();
 });

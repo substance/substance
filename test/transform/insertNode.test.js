@@ -1,13 +1,12 @@
 "use strict";
 
-require('../QUnitExtensions');
+var test = require('../test').module('transform/insertNode');
+
 var insertNode = require('../../model/transform/insertNode');
 var DocumentSession = require('../../model/DocumentSession');
 
 var fixture = require('../fixtures/createTestArticle');
 var simple = require('../fixtures/simple');
-
-QUnit.module('model/transform/insertNode');
 
 var testNode = {
   type: "paragraph",
@@ -21,24 +20,25 @@ var selectionInFirstParagraph = {
   startOffset: 5, endOffset: 5
 };
 
-QUnit.test("InsertNode usage", function(assert) {
+test("InsertNode usage", function(t) {
   var doc = fixture(simple);
   // mandatory: containerId, selection, node
-  assert.throws(function() {
+  t.throws(function() {
     insertNode(doc, {});
   });
-  assert.throws(function() {
+  t.throws(function() {
     insertNode(doc, {selection: true, node: true});
   });
-  assert.throws(function() {
+  t.throws(function() {
     insertNode(doc, {containerId: true, node: true});
   });
-  assert.throws(function() {
+  t.throws(function() {
     insertNode(doc, {containerId: true, selection: true});
   });
+  t.end();
 });
 
-QUnit.test("Insert node should break node.", function(assert) {
+test("Insert node should break node.", function(t) {
   var doc = fixture(simple);
   var docSession = new DocumentSession(doc);
   docSession.transaction(function(tx, args) {
@@ -52,13 +52,14 @@ QUnit.test("Insert node should break node.", function(assert) {
   var node1 = container.getChildAt(0);
   var node2 = container.getChildAt(1);
   var node3 = container.getChildAt(2);
-  assert.equal(node1.id, 'p1', "First node should be p1.");
-  assert.equal(node1.content, '01234', "p1.content should have been truncated correctly.");
-  assert.equal(node2.id, 'new-node', "Second node should be this inserted node.");
-  assert.equal(node3.content, '56789', "The tail of p1.content should have been inserted into the 3rd node.");
+  t.equal(node1.id, 'p1', "First node should be p1.");
+  t.equal(node1.content, '01234', "p1.content should have been truncated correctly.");
+  t.equal(node2.id, 'new-node', "Second node should be this inserted node.");
+  t.equal(node3.content, '56789', "The tail of p1.content should have been inserted into the 3rd node.");
+  t.end();
 });
 
-QUnit.test("Inserting an existing node should be possible", function(assert) {
+test("Inserting an existing node should be possible", function(t) {
   var doc = fixture(simple);
   var docSession = new DocumentSession(doc);
   docSession.transaction(function(tx, args) {
@@ -68,10 +69,11 @@ QUnit.test("Inserting an existing node should be possible", function(assert) {
     args.node = testNode;
     insertNode(tx, args);
   });
-  assert.ok(true, "Should not have thrown.");
+  t.ok(true, "Should not have thrown.");
+  t.end();
 });
 
-QUnit.test("Selection after insert.", function(assert) {
+test("Selection after insert.", function(t) {
   var doc = fixture(simple);
   var sel;
   var docSession = new DocumentSession(doc);
@@ -82,7 +84,8 @@ QUnit.test("Selection after insert.", function(assert) {
     var out = insertNode(tx, args);
     sel = out.selection;
   });
-  assert.ok(sel.isCollapsed(), "Should be collapsed.");
-  assert.deepEqual(sel.path, ["new-node", "content"], "Cursor should be inside of inserted node.");
-  assert.equal(sel.startOffset, 0, "Cursor should be at the beginning.");
+  t.ok(sel.isCollapsed(), "Should be collapsed.");
+  t.deepEqual(sel.path, ["new-node", "content"], "Cursor should be inside of inserted node.");
+  t.equal(sel.startOffset, 0, "Cursor should be at the beginning.");
+  t.end();
 });

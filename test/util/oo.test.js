@@ -1,9 +1,8 @@
 "use strict";
 
-require('../QUnitExtensions');
-var oo = require('../../util/oo');
+var test = require('../test').module('util/oo');
 
-QUnit.module('util/oo');
+var oo = require('../../util/oo');
 
 function A() {}
 oo.initClass(A);
@@ -11,39 +10,43 @@ A.prototype.bla = function() {
   return "bla";
 };
 
-QUnit.test("Class.extend without a protoype", function(assert) {
+test("Class.extend without a protoype", function(t) {
   var B = A.extend();
   var b = new B();
-  assert.equal(b.bla(), 'bla', 'B should have inherited method A#bla().');
+  t.equal(b.bla(), 'bla', 'B should have inherited method A#bla().');
+  t.end();
 });
 
-QUnit.test("Class.extend with a protoype object", function(assert) {
+test("Class.extend with a protoype object", function(t) {
   var B = A.extend({
     blupp: function() {
       return "blupp";
     }
   });
   var b = new B();
-  assert.equal(b.blupp(), 'blupp', 'B should have a prototype function blupp().');
+  t.equal(b.blupp(), 'blupp', 'B should have a prototype function blupp().');
+  t.end();
 });
 
-QUnit.test("Class.extend with static properties", function(assert) {
+test("Class.extend with static properties", function(t) {
   var B = A.extend({
     static: {
       name: "foo"
     }
   });
-  assert.equal(B.static.name, 'foo', 'B should have a static property "name".');
+  t.equal(B.static.name, 'foo', 'B should have a static property "name".');
+  t.end();
 });
 
-QUnit.test("Class.extend with a ChildClass", function(assert) {
+test("Class.extend with a ChildClass", function(t) {
   function B() {}
   A.extend(B);
   var b = new B();
-  assert.equal(b.bla(), 'bla', 'B should have inherited method A#bla().');
+  t.equal(b.bla(), 'bla', 'B should have inherited method A#bla().');
+  t.end();
 });
 
-QUnit.test("Class.extend with a ChildClass and a prototype object", function(assert) {
+test("Class.extend with a ChildClass and a prototype object", function(t) {
   function B() {}
   A.extend(B, {
     blupp: function() {
@@ -51,10 +54,11 @@ QUnit.test("Class.extend with a ChildClass and a prototype object", function(ass
     }
   });
   var b = new B();
-  assert.equal(b.blupp(), 'blupp', 'B should have a prototype function blupp().');
+  t.equal(b.blupp(), 'blupp', 'B should have a prototype function blupp().');
+  t.end();
 });
 
-QUnit.test("Class.extend with a ChildClass and a Prototype function", function(assert) {
+test("Class.extend with a ChildClass and a Prototype function", function(t) {
   function B() {}
   A.extend(B, function() {
     //eslint-disable-next-line no-invalid-this
@@ -63,10 +67,11 @@ QUnit.test("Class.extend with a ChildClass and a Prototype function", function(a
     };
   });
   var b = new B();
-  assert.equal(b.blupp(), 'blupp', 'B should have a prototype function blupp().');
+  t.equal(b.blupp(), 'blupp', 'B should have a prototype function blupp().');
+  t.end();
 });
 
-QUnit.test("Legacy: Class.extend with a ChildClass with ChildClass.Prototype", function(assert) {
+test("Legacy: Class.extend with a ChildClass with ChildClass.Prototype", function(t) {
   function B() {}
   B.Prototype = function() {
     this.blupp = function() {
@@ -75,10 +80,11 @@ QUnit.test("Legacy: Class.extend with a ChildClass with ChildClass.Prototype", f
   };
   A.extend(B);
   var b = new B();
-  assert.equal(b.blupp(), 'blupp', 'B should have a prototype function blupp().');
+  t.equal(b.blupp(), 'blupp', 'B should have a prototype function blupp().');
+  t.end();
 });
 
-QUnit.test("Class.extend with a ChildClass and mixins.", function(assert) {
+test("Class.extend with a ChildClass and mixins.", function(t) {
   function B() {}
   var MixinA = {
     foo: "foo"
@@ -88,11 +94,12 @@ QUnit.test("Class.extend with a ChildClass and mixins.", function(assert) {
   };
   A.extend(B, MixinA, MixinB);
   var b = new B();
-  assert.equal(b.foo, 'foo', 'b should have a prototype property foo.');
-  assert.equal(b.bar, 'bar', 'b should have a prototype property bar.');
+  t.equal(b.foo, 'foo', 'b should have a prototype property foo.');
+  t.equal(b.bar, 'bar', 'b should have a prototype property bar.');
+  t.end();
 });
 
-QUnit.test("Class.extend with ChildClass, mixins, and a prototype function.", function(assert) {
+test("Class.extend with ChildClass, mixins, and a prototype function.", function(t) {
   function B() {}
   var MixinA = {
     foo: "foo",
@@ -107,6 +114,7 @@ QUnit.test("Class.extend with ChildClass, mixins, and a prototype function.", fu
     };
   });
   var b = new B();
-  assert.equal(b.foo, 'foo', 'b should have a prototype property foo.');
-  assert.equal(b.blupp(), 'blupp', 'b should have a prototype method blupp() coming from the Prototype function.');
+  t.equal(b.foo, 'foo', 'b should have a prototype property foo.');
+  t.equal(b.blupp(), 'blupp', 'b should have a prototype method blupp() coming from the Prototype function.');
+  t.end();
 });

@@ -1,6 +1,7 @@
 'use strict';
 
-require('../QUnitExtensions');
+var test = require('../test').module('model/ContainerSelection');
+
 var Range = require('../../model/Range');
 var Coordinate = require('../../model/Coordinate');
 var ContainerSelection = require('../../model/ContainerSelection');
@@ -9,43 +10,45 @@ var fixture = require('../fixtures/createTestArticle');
 var simple = require('../fixtures/simple');
 var containerAnnoSample = require('../fixtures/containerAnnoSample');
 
-QUnit.module('model/ContainerSelection');
-
-QUnit.test("Creating a ContainerSelection", function(assert) {
+test("Creating a ContainerSelection", function(t) {
   var sel = new ContainerSelection('body',['p1', 'content'], 1, ['p2', 'content'], 2);
-  assert.ok(sel.isContainerSelection(), 'Should be a container selection.');
-  assert.ok(!sel.isNull(), 'Should not be null.');
-  assert.deepEqual(sel.startPath, ['p1', 'content'], 'startPath should be correct.');
-  assert.equal(sel.startOffset, 1, 'startOffset should be correct.');
-  assert.deepEqual(sel.endPath, ['p2', 'content'], 'endPath should be correct.');
-  assert.equal(sel.endOffset, 2, 'endOffset should be correct.');
-  assert.ok(!sel.isReverse(), 'Selection should not be reverse');
+  t.ok(sel.isContainerSelection(), 'Should be a container selection.');
+  t.ok(!sel.isNull(), 'Should not be null.');
+  t.deepEqual(sel.startPath, ['p1', 'content'], 'startPath should be correct.');
+  t.equal(sel.startOffset, 1, 'startOffset should be correct.');
+  t.deepEqual(sel.endPath, ['p2', 'content'], 'endPath should be correct.');
+  t.equal(sel.endOffset, 2, 'endOffset should be correct.');
+  t.ok(!sel.isReverse(), 'Selection should not be reverse');
+  t.end();
 });
 
-QUnit.test("Creating a ContainerSelection using a Range", function(assert) {
+test("Creating a ContainerSelection using a Range", function(t) {
   var doc = fixture(simple);
   var range = new Range(new Coordinate(['p1', 'content'], 1), new Coordinate(['p2', 'content'], 2), false, 'body');
   var sel = doc.createSelection(range);
-  assert.ok(sel.isContainerSelection(), 'Should be a container selection.');
-  assert.deepEqual(sel.startPath, ['p1', 'content'], 'startPath should be correct.');
-  assert.equal(sel.startOffset, 1, 'startOffset should be correct.');
-  assert.deepEqual(sel.endPath, ['p2', 'content'], 'endPath should be correct.');
-  assert.equal(sel.endOffset, 2, 'endOffset should be correct.');
-  assert.ok(!sel.isReverse(), 'Selection should not be reverse');
+  t.ok(sel.isContainerSelection(), 'Should be a container selection.');
+  t.deepEqual(sel.startPath, ['p1', 'content'], 'startPath should be correct.');
+  t.equal(sel.startOffset, 1, 'startOffset should be correct.');
+  t.deepEqual(sel.endPath, ['p2', 'content'], 'endPath should be correct.');
+  t.equal(sel.endOffset, 2, 'endOffset should be correct.');
+  t.ok(!sel.isReverse(), 'Selection should not be reverse');
+  t.end();
 });
 
-QUnit.test("Collapsed ContainerSelection", function(assert) {
+test("Collapsed ContainerSelection", function(t) {
   var sel = new ContainerSelection('body', ['p1', 'content'], 1, ['p1', 'content'], 1);
-  assert.ok(sel.isContainerSelection(), 'Should be a container selection.');
-  assert.ok(sel.isCollapsed(), 'Selection should be collapsed.');
+  t.ok(sel.isContainerSelection(), 'Should be a container selection.');
+  t.ok(sel.isCollapsed(), 'Selection should be collapsed.');
+  t.end();
 });
 
-QUnit.test("Reverse ContainerSelection", function(assert) {
+test("Reverse ContainerSelection", function(t) {
   var sel = new ContainerSelection('body', ['p1', 'content'], 1, ['p1', 'content'], 3, true);
-  assert.ok(sel.isReverse(), 'Selection should be reverse.');
+  t.ok(sel.isReverse(), 'Selection should be reverse.');
+  t.end();
 });
 
-QUnit.test("isInsideOf: strictly inside other", function(assert) {
+test("isInsideOf: strictly inside other", function(t) {
   var doc = fixture(containerAnnoSample);
   var sel = doc.createSelection({
     type: 'container',
@@ -63,11 +66,12 @@ QUnit.test("isInsideOf: strictly inside other", function(assert) {
     endPath: ['p3', 'content'],
     endOffset: 5,
   });
-  assert.ok(sel.isInsideOf(other), 'should be inside');
-  assert.ok(sel.isInsideOf(other, true), 'should be strictly inside');
+  t.ok(sel.isInsideOf(other), 'should be inside');
+  t.ok(sel.isInsideOf(other, true), 'should be strictly inside');
+  t.end();
 });
 
-QUnit.test("isInsideOf: not-strictly inside other", function(assert) {
+test("isInsideOf: not-strictly inside other", function(t) {
   var doc = fixture(containerAnnoSample);
   var sel = doc.createSelection({
     type: 'container',
@@ -85,11 +89,12 @@ QUnit.test("isInsideOf: not-strictly inside other", function(assert) {
     endPath: ['p3', 'content'],
     endOffset: 5,
   });
-  assert.ok(sel.isInsideOf(other), 'should be inside');
-  assert.notOk(sel.isInsideOf(other, true), 'should not be strictly inside');
+  t.ok(sel.isInsideOf(other), 'should be inside');
+  t.notOk(sel.isInsideOf(other, true), 'should not be strictly inside');
+  t.end();
 });
 
-QUnit.test("isInsideOf: inside a PropertySelection", function(assert) {
+test("isInsideOf: inside a PropertySelection", function(t) {
   var doc = fixture(containerAnnoSample);
   var sel = doc.createSelection({
     type: 'container',
@@ -105,10 +110,11 @@ QUnit.test("isInsideOf: inside a PropertySelection", function(assert) {
     startOffset: 1,
     endOffset: 8,
   });
-  assert.ok(sel.isInsideOf(other), 'should be inside');
+  t.ok(sel.isInsideOf(other), 'should be inside');
+  t.end();
 });
 
-QUnit.test("isInsideOf: not inside", function(assert) {
+test("isInsideOf: not inside", function(t) {
   var doc = fixture(containerAnnoSample);
   var other = doc.createSelection({
     type: 'container',
@@ -127,7 +133,7 @@ QUnit.test("isInsideOf: not inside", function(assert) {
     endPath: ['p3', 'content'],
     endOffset: 6,
   });
-  assert.notOk(sel.isInsideOf(other), 'should not be inside');
+  t.notOk(sel.isInsideOf(other), 'should not be inside');
   // left-boundary not inside
   sel = doc.createSelection({
     type: 'container',
@@ -137,7 +143,7 @@ QUnit.test("isInsideOf: not inside", function(assert) {
     endPath: ['p2', 'content'],
     endOffset: 2,
   });
-  assert.notOk(sel.isInsideOf(other), 'should not be inside');
+  t.notOk(sel.isInsideOf(other), 'should not be inside');
   // right-boundary not inside
   sel = doc.createSelection({
     type: 'container',
@@ -147,13 +153,14 @@ QUnit.test("isInsideOf: not inside", function(assert) {
     endPath: ['p3', 'content'],
     endOffset: 7,
   });
-  assert.notOk(sel.isInsideOf(other), 'should not be inside');
+  t.notOk(sel.isInsideOf(other), 'should not be inside');
 
   var nullSel = doc.createSelection(null);
-  assert.notOk(sel.isInsideOf(nullSel), 'should not be inside null selection');
+  t.notOk(sel.isInsideOf(nullSel), 'should not be inside null selection');
+  t.end();
 });
 
-QUnit.test("overlaps with other ContainerSelection", function(assert) {
+test("overlaps with other ContainerSelection", function(t) {
   var doc = fixture(containerAnnoSample);
   var sel = doc.createSelection({
     type: 'container',
@@ -172,7 +179,7 @@ QUnit.test("overlaps with other ContainerSelection", function(assert) {
     endPath: ['p3', 'content'],
     endOffset: 6,
   });
-  assert.ok(sel.overlaps(other));
+  t.ok(sel.overlaps(other));
   // inside
   other = doc.createSelection({
     type: 'container',
@@ -182,7 +189,7 @@ QUnit.test("overlaps with other ContainerSelection", function(assert) {
     endPath: ['p3', 'content'],
     endOffset: 5,
   });
-  assert.ok(sel.overlaps(other));
+  t.ok(sel.overlaps(other));
   // contained
   other = doc.createSelection({
     type: 'container',
@@ -192,7 +199,7 @@ QUnit.test("overlaps with other ContainerSelection", function(assert) {
     endPath: ['p3', 'content'],
     endOffset: 8,
   });
-  assert.ok(sel.overlaps(other));
+  t.ok(sel.overlaps(other));
   // left
   other = doc.createSelection({
     type: 'container',
@@ -202,7 +209,7 @@ QUnit.test("overlaps with other ContainerSelection", function(assert) {
     endPath: ['p2', 'content'],
     endOffset: 1,
   });
-  assert.ok(sel.overlaps(other));
+  t.ok(sel.overlaps(other));
   // right
   other = doc.createSelection({
     type: 'container',
@@ -212,27 +219,30 @@ QUnit.test("overlaps with other ContainerSelection", function(assert) {
     endPath: ['p3', 'content'],
     endOffset: 8,
   });
-  assert.ok(sel.overlaps(other));
+  t.ok(sel.overlaps(other));
+  t.end();
 });
 
 
-QUnit.test("Collapsing to the left", function(assert) {
+test("Collapsing to the left", function(t) {
   var sel = new ContainerSelection('body', ['p1', 'content'], 1, ['p3', 'content'], 3);
   sel = sel.collapse('left');
-  assert.ok(sel.isCollapsed(), 'should be collapsed');
-  assert.deepEqual(sel.startPath, ['p1', 'content']);
-  assert.equal(sel.startOffset, 1);
+  t.ok(sel.isCollapsed(), 'should be collapsed');
+  t.deepEqual(sel.startPath, ['p1', 'content']);
+  t.equal(sel.startOffset, 1);
+  t.end();
 });
 
-QUnit.test("Collapsing to the right", function(assert) {
+test("Collapsing to the right", function(t) {
   var sel = new ContainerSelection('body', ['p1', 'content'], 1, ['p3', 'content'], 3);
   sel = sel.collapse('right');
-  assert.ok(sel.isCollapsed(), 'should be collapsed');
-  assert.deepEqual(sel.startPath, ['p3', 'content']);
-  assert.equal(sel.startOffset, 3);
+  t.ok(sel.isCollapsed(), 'should be collapsed');
+  t.deepEqual(sel.startPath, ['p3', 'content']);
+  t.equal(sel.startOffset, 3);
+  t.end();
 });
 
-QUnit.test("Expanding: other is inside", function(assert) {
+test("Expanding: other is inside", function(t) {
   var doc = fixture(containerAnnoSample);
   var sel = doc.createSelection({
     type: 'container',
@@ -249,10 +259,11 @@ QUnit.test("Expanding: other is inside", function(assert) {
     endOffset: 8
   });
   var newSel = sel.expand(other);
-  assert.ok(newSel.equals(sel), "Selection should not have changed.");
+  t.ok(newSel.equals(sel), "Selection should not have changed.");
+  t.end();
 });
 
-QUnit.test("Expand: is inside other", function(assert) {
+test("Expand: is inside other", function(t) {
   var doc = fixture(containerAnnoSample);
   var sel = doc.createSelection({
     type: 'container',
@@ -271,10 +282,11 @@ QUnit.test("Expand: is inside other", function(assert) {
     endOffset: 5,
   });
   var newSel = sel.expand(other);
-  assert.ok(newSel.equals(other));
+  t.ok(newSel.equals(other));
+  t.end();
 });
 
-QUnit.test("Expand right", function(assert) {
+test("Expand right", function(t) {
   var doc = fixture(containerAnnoSample);
   var sel = doc.createSelection({
     type: 'container',
@@ -293,11 +305,12 @@ QUnit.test("Expand right", function(assert) {
     endOffset: 6,
   });
   var newSel = sel.expand(other);
-  assert.ok(newSel.start.equals(sel.start));
-  assert.ok(newSel.end.equals(other.end));
+  t.ok(newSel.start.equals(sel.start));
+  t.ok(newSel.end.equals(other.end));
+  t.end();
 });
 
-QUnit.test("Expand left", function(assert) {
+test("Expand left", function(t) {
   var doc = fixture(containerAnnoSample);
   var sel = doc.createSelection({
     type: 'container',
@@ -316,11 +329,12 @@ QUnit.test("Expand left", function(assert) {
     endOffset: 2,
   });
   var newSel = sel.expand(other);
-  assert.ok(newSel.start.equals(other.start));
-  assert.ok(newSel.end.equals(sel.end));
+  t.ok(newSel.start.equals(other.start));
+  t.ok(newSel.end.equals(sel.end));
+  t.end();
 });
 
-QUnit.test("Expand left with PropertySelection", function(assert) {
+test("Expand left with PropertySelection", function(t) {
   var doc = fixture(containerAnnoSample);
   var sel = doc.createSelection({
     type: 'container',
@@ -337,11 +351,12 @@ QUnit.test("Expand left with PropertySelection", function(assert) {
     endOffset: 6
   });
   var newSel = sel.expand(other);
-  assert.ok(newSel.start.equals(other.start));
-  assert.ok(newSel.end.equals(sel.end));
+  t.ok(newSel.start.equals(other.start));
+  t.ok(newSel.end.equals(sel.end));
+  t.end();
 });
 
-QUnit.test("Expand right with PropertySelection", function(assert) {
+test("Expand right with PropertySelection", function(t) {
   var doc = fixture(containerAnnoSample);
   var sel = doc.createSelection({
     type: 'container',
@@ -358,11 +373,12 @@ QUnit.test("Expand right with PropertySelection", function(assert) {
     endOffset: 6
   });
   var newSel = sel.expand(other);
-  assert.ok(newSel.start.equals(sel.start));
-  assert.ok(newSel.end.equals(other.end));
+  t.ok(newSel.start.equals(sel.start));
+  t.ok(newSel.end.equals(other.end));
+  t.end();
 });
 
-QUnit.test("Truncate with other ContainerSelection", function(assert) {
+test("Truncate with other ContainerSelection", function(t) {
   var doc = fixture(containerAnnoSample);
   var sel = doc.createSelection({
     type: 'container',
@@ -382,8 +398,8 @@ QUnit.test("Truncate with other ContainerSelection", function(assert) {
     endOffset: 1,
   });
   var newSel = sel.truncateWith(other);
-  assert.ok(newSel.start.equals(other.end));
-  assert.ok(newSel.end.equals(sel.end));
+  t.ok(newSel.start.equals(other.end));
+  t.ok(newSel.end.equals(sel.end));
   // right side overlapping
   other = doc.createSelection({
     type: 'container',
@@ -394,11 +410,11 @@ QUnit.test("Truncate with other ContainerSelection", function(assert) {
     endOffset: 8,
   });
   newSel = sel.truncateWith(other);
-  assert.ok(newSel.start.equals(sel.start));
-  assert.ok(newSel.end.equals(other.start));
+  t.ok(newSel.start.equals(sel.start));
+  t.ok(newSel.end.equals(other.start));
   // equal
   newSel = sel.truncateWith(sel);
-  assert.ok(newSel.isNull());
+  t.ok(newSel.isNull());
   // wrapping
   other = doc.createSelection({
     type: 'container',
@@ -409,7 +425,7 @@ QUnit.test("Truncate with other ContainerSelection", function(assert) {
     endOffset: 8,
   });
   newSel = sel.truncateWith(other);
-  assert.ok(newSel.isNull());
+  t.ok(newSel.isNull());
   // left side aligned
   other = doc.createSelection({
     type: 'container',
@@ -420,8 +436,8 @@ QUnit.test("Truncate with other ContainerSelection", function(assert) {
     endOffset: 1,
   });
   newSel = sel.truncateWith(other);
-  assert.ok(newSel.start.equals(other.end));
-  assert.ok(newSel.end.equals(sel.end));
+  t.ok(newSel.start.equals(other.end));
+  t.ok(newSel.end.equals(sel.end));
   // right side aligned
   other = doc.createSelection({
     type: 'container',
@@ -432,11 +448,12 @@ QUnit.test("Truncate with other ContainerSelection", function(assert) {
     endOffset: 4,
   });
   newSel = sel.truncateWith(other);
-  assert.ok(newSel.start.equals(sel.start));
-  assert.ok(newSel.end.equals(other.start));
+  t.ok(newSel.start.equals(sel.start));
+  t.ok(newSel.end.equals(other.start));
+  t.end();
 });
 
-QUnit.test("getFragments: start and end are property coordinates (partial)", function(assert) {
+test("getFragments: start and end are property coordinates (partial)", function(t) {
   var doc = fixture(simple);
   var startPath = ['p1', 'content'];
   var sel = doc.createSelection({
@@ -448,13 +465,14 @@ QUnit.test("getFragments: start and end are property coordinates (partial)", fun
     endOffset: 3
   });
   var fragments = sel.getFragments();
-  assert.equal(fragments.length, 1, "Should provide one fragment");
+  t.equal(fragments.length, 1, "Should provide one fragment");
   var fragment = fragments[0];
-  assert.ok(fragment.isPropertyFragment(), "... which should be a property fragment");
-  assert.ok(fragment.isPartial(), "... and it should be partial");
+  t.ok(fragment.isPropertyFragment(), "... which should be a property fragment");
+  t.ok(fragment.isPartial(), "... and it should be partial");
+  t.end();
 });
 
-QUnit.test("getFragments: start and end are property coordinates (fully)", function(assert) {
+test("getFragments: start and end are property coordinates (fully)", function(t) {
   var doc = fixture(simple);
   var startPath = ['p1', 'content'];
   var text = doc.get(startPath);
@@ -467,13 +485,14 @@ QUnit.test("getFragments: start and end are property coordinates (fully)", funct
     endOffset: text.length
   });
   var fragments = sel.getFragments();
-  assert.equal(fragments.length, 1, "Should provide one fragment");
+  t.equal(fragments.length, 1, "Should provide one fragment");
   var fragment = fragments[0];
-  assert.ok(fragment.isPropertyFragment(), "... which should be a property fragment");
-  assert.notOk(fragment.isPartial(), "... should not be partial.");
+  t.ok(fragment.isPropertyFragment(), "... which should be a property fragment");
+  t.notOk(fragment.isPartial(), "... should not be partial.");
+  t.end();
 });
 
-QUnit.test("getFragments: start is node coordinate (before) and end is property coordinate (partial)", function(assert) {
+test("getFragments: start is node coordinate (before) and end is property coordinate (partial)", function(t) {
   var doc = fixture(simple);
   var sel = doc.createSelection({
     type: 'container',
@@ -484,13 +503,14 @@ QUnit.test("getFragments: start is node coordinate (before) and end is property 
     endOffset: 3
   });
   var fragments = sel.getFragments();
-  assert.equal(fragments.length, 1, "Should provide one fragment");
+  t.equal(fragments.length, 1, "Should provide one fragment");
   var fragment = fragments[0];
-  assert.ok(fragment.isPropertyFragment(), "... which should be a property fragment");
-  assert.ok(fragment.isPartial(), ".... should be partial.");
+  t.ok(fragment.isPropertyFragment(), "... which should be a property fragment");
+  t.ok(fragment.isPartial(), ".... should be partial.");
+  t.end();
 });
 
-QUnit.test("getFragments: start is node coordinate (before) and end is property coordinate (full)", function(assert) {
+test("getFragments: start is node coordinate (before) and end is property coordinate (full)", function(t) {
   var doc = fixture(simple);
   var text = doc.get(['p1', 'content']);
   var sel = doc.createSelection({
@@ -502,13 +522,14 @@ QUnit.test("getFragments: start is node coordinate (before) and end is property 
     endOffset: text.length
   });
   var fragments = sel.getFragments();
-  assert.equal(fragments.length, 1, "Should provide one fragment");
+  t.equal(fragments.length, 1, "Should provide one fragment");
   var fragment = fragments[0];
-  assert.ok(fragment.isPropertyFragment(), "... which should be a property fragment");
-  assert.notOk(fragment.isPartial(), "... should not be partial.");
+  t.ok(fragment.isPropertyFragment(), "... which should be a property fragment");
+  t.notOk(fragment.isPartial(), "... should not be partial.");
+  t.end();
 });
 
-QUnit.test("[Edge case] getFragments: start is node coordinate (after) and end is property coordinate (partial)", function(assert) {
+test("[Edge case] getFragments: start is node coordinate (after) and end is property coordinate (partial)", function(t) {
   var doc = fixture(simple);
   // this means, the start coordinate is after the end coordinate
   var sel = doc.createSelection({
@@ -520,13 +541,14 @@ QUnit.test("[Edge case] getFragments: start is node coordinate (after) and end i
     endOffset: 3
   });
   var fragments = sel.getFragments();
-  assert.equal(fragments.length, 1, "Should provide one fragment");
+  t.equal(fragments.length, 1, "Should provide one fragment");
   var fragment = fragments[0];
-  assert.ok(fragment.isPropertyFragment(), "... which should be a property fragment");
-  assert.ok(fragment.isPartial(), "... should be partial.");
+  t.ok(fragment.isPropertyFragment(), "... which should be a property fragment");
+  t.ok(fragment.isPartial(), "... should be partial.");
+  t.end();
 });
 
-QUnit.test("getFragments: start is property coordinate (partial) and end node coordinate", function(assert) {
+test("getFragments: start is property coordinate (partial) and end node coordinate", function(t) {
   var doc = fixture(simple);
   var sel = doc.createSelection({
     type: 'container',
@@ -537,13 +559,14 @@ QUnit.test("getFragments: start is property coordinate (partial) and end node co
     endOffset: 1
   });
   var fragments = sel.getFragments();
-  assert.equal(fragments.length, 1, "Should provide one fragment");
+  t.equal(fragments.length, 1, "Should provide one fragment");
   var fragment = fragments[0];
-  assert.ok(fragment.isPropertyFragment(), "... which should be a property fragment");
-  assert.ok(fragment.isPartial(), "... should be partial");
+  t.ok(fragment.isPropertyFragment(), "... which should be a property fragment");
+  t.ok(fragment.isPartial(), "... should be partial");
+  t.end();
 });
 
-QUnit.test("getFragments: start is property coordinate (full) and end node coordinate", function(assert) {
+test("getFragments: start is property coordinate (full) and end node coordinate", function(t) {
   var doc = fixture(simple);
   var sel = doc.createSelection({
     type: 'container',
@@ -554,13 +577,14 @@ QUnit.test("getFragments: start is property coordinate (full) and end node coord
     endOffset: 1
   });
   var fragments = sel.getFragments();
-  assert.equal(fragments.length, 1, "Should provide one fragment");
+  t.equal(fragments.length, 1, "Should provide one fragment");
   var fragment = fragments[0];
-  assert.ok(fragment.isPropertyFragment(), "... which should be a property fragment");
-  assert.notOk(fragment.isPartial(), "... should not be partial.");
+  t.ok(fragment.isPropertyFragment(), "... which should be a property fragment");
+  t.notOk(fragment.isPartial(), "... should not be partial.");
+  t.end();
 });
 
-QUnit.test("containsNode: inner node", function(assert) {
+test("containsNode: inner node", function(t) {
   var doc = fixture(simple);
   var sel = doc.createSelection({
     type: 'container',
@@ -570,10 +594,11 @@ QUnit.test("containsNode: inner node", function(assert) {
     endPath: ['p3', 'content'],
     endOffset: 3
   });
-  assert.ok(sel.containsNode('p2'), 'Should contain p2.');
+  t.ok(sel.containsNode('p2'), 'Should contain p2.');
+  t.end();
 });
 
-QUnit.test("containsNode: outer nodes", function(assert) {
+test("containsNode: outer nodes", function(t) {
   var doc = fixture(simple);
   var sel = doc.createSelection({
     type: 'container',
@@ -583,11 +608,12 @@ QUnit.test("containsNode: outer nodes", function(assert) {
     endPath: ['p3', 'content'],
     endOffset: 3
   });
-  assert.notOk(sel.containsNode('p1'), 'Should contain p1.');
-  assert.notOk(sel.containsNode('p4'), 'Should contain p4.');
+  t.notOk(sel.containsNode('p1'), 'Should contain p1.');
+  t.notOk(sel.containsNode('p4'), 'Should contain p4.');
+  t.end();
 });
 
-QUnit.test("containsNode: start/end is nodeFragment", function(assert) {
+test("containsNode: start/end is nodeFragment", function(t) {
   var doc = fixture(simple);
   var sel = doc.createSelection({
     type: 'container',
@@ -597,7 +623,7 @@ QUnit.test("containsNode: start/end is nodeFragment", function(assert) {
     endPath: ['p1'],
     endOffset: 1
   });
-  assert.ok(sel.containsNode('p1'), 'Should contain node.');
+  t.ok(sel.containsNode('p1'), 'Should contain node.');
   sel = doc.createSelection({
     type: 'container',
     containerId: 'body',
@@ -606,10 +632,11 @@ QUnit.test("containsNode: start/end is nodeFragment", function(assert) {
     endPath: ['p2'],
     endOffset: 1
   });
-  assert.ok(sel.containsNode('p2'), 'Should contain node.');
+  t.ok(sel.containsNode('p2'), 'Should contain node.');
+  t.end();
 });
 
-QUnit.test("containsNode: with partial node fragment", function(assert) {
+test("containsNode: with partial node fragment", function(t) {
   var doc = fixture(simple);
   var sel = doc.createSelection({
     type: 'container',
@@ -619,7 +646,7 @@ QUnit.test("containsNode: with partial node fragment", function(assert) {
     endPath: ['p2'],
     endOffset: 1
   });
-  assert.notOk(sel.containsNode('p1'), 'Should contain node.');
+  t.notOk(sel.containsNode('p1'), 'Should contain node.');
   sel = doc.createSelection({
     type: 'container',
     containerId: 'body',
@@ -628,11 +655,12 @@ QUnit.test("containsNode: with partial node fragment", function(assert) {
     endPath: ['p2'],
     endOffset: 0
   });
-  assert.notOk(sel.containsNode('p2'), 'Should contain node.');
+  t.notOk(sel.containsNode('p2'), 'Should contain node.');
+  t.end();
 });
 
 
-QUnit.test("[Edge Case] getFragments: start is property coordinate (partial) and end node coordinate (before)", function(assert) {
+test("[Edge Case] getFragments: start is property coordinate (partial) and end node coordinate (before)", function(t) {
   var doc = fixture(simple);
   var sel = doc.createSelection({
     type: 'container',
@@ -643,13 +671,14 @@ QUnit.test("[Edge Case] getFragments: start is property coordinate (partial) and
     endOffset: 0
   });
   var fragments = sel.getFragments();
-  assert.equal(fragments.length, 1, "Should provide one fragment");
+  t.equal(fragments.length, 1, "Should provide one fragment");
   var fragment = fragments[0];
-  assert.ok(fragment.isPropertyFragment(), "... which should be a property fragment");
-  assert.ok(fragment.isPartial(), "... should be partial");
+  t.ok(fragment.isPropertyFragment(), "... which should be a property fragment");
+  t.ok(fragment.isPartial(), "... should be partial");
+  t.end();
 });
 
-QUnit.test("getFragments: start and end are node coordinates", function(assert) {
+test("getFragments: start and end are node coordinates", function(t) {
   var doc = fixture(simple);
   var sel = doc.createSelection({
     type: 'container',
@@ -660,12 +689,13 @@ QUnit.test("getFragments: start and end are node coordinates", function(assert) 
     endOffset: 1
   });
   var fragments = sel.getFragments();
-  assert.equal(fragments.length, 1, "Should provide one fragment");
+  t.equal(fragments.length, 1, "Should provide one fragment");
   var fragment = fragments[0];
-  assert.ok(fragment.isNodeFragment(), "... which should be a property fragment");
+  t.ok(fragment.isNodeFragment(), "... which should be a property fragment");
+  t.end();
 });
 
-QUnit.test("[Edge Case] getFragments: start and end are node coordinates (reverse)", function(assert) {
+test("[Edge Case] getFragments: start and end are node coordinates (reverse)", function(t) {
   var doc = fixture(simple);
   var sel = doc.createSelection({
     type: 'container',
@@ -676,12 +706,13 @@ QUnit.test("[Edge Case] getFragments: start and end are node coordinates (revers
     endOffset: 0
   });
   var fragments = sel.getFragments();
-  assert.equal(fragments.length, 1, "Should provide one fragment");
+  t.equal(fragments.length, 1, "Should provide one fragment");
   var fragment = fragments[0];
-  assert.ok(fragment.isNodeFragment(), "... which should be a property fragment");
+  t.ok(fragment.isNodeFragment(), "... which should be a property fragment");
+  t.end();
 });
 
-QUnit.test("isNodeSelection()", function(assert) {
+test("isNodeSelection()", function(t) {
   var doc = fixture(simple);
   // valid NodeSelection
   var sel = doc.createSelection({
@@ -692,8 +723,8 @@ QUnit.test("isNodeSelection()", function(assert) {
     endPath: ['p1'],
     endOffset: 1
   });
-  assert.ok(sel.isNodeSelection(), "selection should be a node selection");
-  assert.ok(sel.isEntireNodeSelected(), "selection should be span over the entire node");
+  t.ok(sel.isNodeSelection(), "selection should be a node selection");
+  t.ok(sel.isEntireNodeSelected(), "selection should be span over the entire node");
   // not a NodeSelection (but within one node)
   sel = doc.createSelection({
     type: 'container',
@@ -703,8 +734,8 @@ QUnit.test("isNodeSelection()", function(assert) {
     endPath: ['p1'],
     endOffset: 1
   });
-  assert.ok(sel.isNodeSelection(), "selection should be a node selection");
-  assert.notOk(sel.isEntireNodeSelected(), "selection should not span over the entire node");
+  t.ok(sel.isNodeSelection(), "selection should be a node selection");
+  t.notOk(sel.isEntireNodeSelected(), "selection should not span over the entire node");
   // not a NodeSelection (is spanning multiple nodes)
   sel = doc.createSelection({
     type: 'container',
@@ -714,5 +745,6 @@ QUnit.test("isNodeSelection()", function(assert) {
     endPath: ['p2'],
     endOffset: 1
   });
-  assert.notOk(sel.isNodeSelection(), "selection should not be a node selection");
+  t.notOk(sel.isNodeSelection(), "selection should not be a node selection");
+  t.end();
 });

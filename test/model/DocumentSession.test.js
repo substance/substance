@@ -1,16 +1,17 @@
 'use strict';
 
-require('../QUnitExtensions');
+var test = require('../test').module('model/DocumentSession');
+
 var sinon = require('sinon');
 var extend = require('lodash/extend');
+var isUndefined = require('lodash/isUndefined');
+var isNull = require('lodash/isNull');
 var DocumentSession = require('../../model/DocumentSession');
 
 var fixture = require('../fixtures/createTestArticle');
 var simple = require('../fixtures/simple');
 
-QUnit.module('model/DocumentSession');
-
-QUnit.test("Transaction: before and after state.", function(assert) {
+test("Transaction: before and after state.", function(t) {
   var doc = fixture(simple);
   var docSession = new DocumentSession(doc);
   var change = null;
@@ -30,44 +31,47 @@ QUnit.test("Transaction: before and after state.", function(assert) {
     args.selection = doc.createSelection(['p1', 'content'], 2);
     return args;
   });
-  assert.ok(change !== null, "Change should be applied.");
-  assert.ok(change.before !== null, "Change should have before state.");
-  assert.ok(change.after !== null, "Change should have after state.");
-  assert.deepEqual(change.before, beforeState, "Change.before should be the same.");
-  assert.ok(change.after.selection.equals(afterState.selection), "Change.after.selection should be set correctly.");
-  assert.equal(change.after.some, beforeState.some, "Not updated state variables should be forwarded.");
+  t.ok(change !== null, "Change should be applied.");
+  t.ok(change.before !== null, "Change should have before state.");
+  t.ok(change.after !== null, "Change should have after state.");
+  t.deepEqual(change.before, beforeState, "Change.before should be the same.");
+  t.ok(change.after.selection.equals(afterState.selection), "Change.after.selection should be set correctly.");
+  t.equal(change.after.some, beforeState.some, "Not updated state variables should be forwarded.");
+  t.end();
 });
 
-QUnit.test("Keeping TransactionDocument up-to-date.", function(assert) {
+test("Keeping TransactionDocument up-to-date.", function(t) {
   var doc = fixture(simple);
   var docSession = new DocumentSession(doc);
   docSession.stage._apply = sinon.spy(docSession.stage, '_apply');
 
   doc.create({ type: 'paragraph', id: 'foo', content: 'foo'});
   var p = docSession.stage.get('foo');
-  assert.equal(docSession.stage._apply.callCount, 1, "Stage should have been updated.");
-  assert.isDefinedAndNotNull(p, "Stage should contain new paragraph node.");
-  assert.equal(p.content, "foo");
+  t.equal(docSession.stage._apply.callCount, 1, "Stage should have been updated.");
+  t.ok(!isUndefined(p) && !isNull(p), "Stage should contain new paragraph node.");
+  t.equal(p.content, "foo");
+  t.end();
 });
 
-QUnit.test("Undoing and redoing a change.", function(assert) {
+test("Undoing and redoing a change.", function(t) {
   var doc = fixture(simple);
   var docSession = new DocumentSession(doc);
   docSession.transaction(function(tx) {
     tx.update(['p1', 'content'], { insert: {offset: 3, value: "XXX"} });
   });
 
-  assert.equal(doc.get(['p1', 'content']), '012XXX3456789', 'Text should have been inserted.');
-  assert.equal(docSession.canUndo(), true, 'Undo should be possible');
+  t.equal(doc.get(['p1', 'content']), '012XXX3456789', 'Text should have been inserted.');
+  t.equal(docSession.canUndo(), true, 'Undo should be possible');
   docSession.undo();
-  assert.equal(doc.get(['p1', 'content']), '0123456789', 'Original text should have been recovered.');
-  assert.equal(docSession.canUndo(), false, 'Undo should be disabled');
-  assert.equal(docSession.canRedo(), true, 'Redo should be possible');
+  t.equal(doc.get(['p1', 'content']), '0123456789', 'Original text should have been recovered.');
+  t.equal(docSession.canUndo(), false, 'Undo should be disabled');
+  t.equal(docSession.canRedo(), true, 'Redo should be possible');
   docSession.redo();
-  assert.equal(doc.get(['p1', 'content']), '012XXX3456789', 'Text should have been changed again.');
+  t.equal(doc.get(['p1', 'content']), '012XXX3456789', 'Text should have been changed again.');
+  t.end();
 });
 
-QUnit.test("Selections after undo/redo.", function(assert) {
+test("Selections after undo/redo.", function(t) {
   var doc = fixture(simple);
   var docSession = new DocumentSession(doc);
   var path = ['p1', 'content'];
@@ -79,14 +83,14 @@ QUnit.test("Selections after undo/redo.", function(assert) {
   });
   docSession.undo();
   var sel = docSession.getSelection();
-  assert.ok(sel.equals(doc.createSelection(path, 3)), 'Selection should be set correctly after undo.');
+  t.ok(sel.equals(doc.createSelection(path, 3)), 'Selection should be set correctly after undo.');
   docSession.redo();
   sel = docSession.getSelection();
-  assert.ok(sel.equals(doc.createSelection(path, 6)), 'Selection should be set correctly after redo.');
+  t.ok(sel.equals(doc.createSelection(path, 6)), 'Selection should be set correctly after redo.');
+  t.end();
 });
 
-
-QUnit.test("Undoing and redoing a change after external change.", function(assert) {
+test("Undoing and redoing a change after external change.", function(t) {
   var doc = fixture(simple);
   var docSession = new DocumentSession(doc);
   docSession.transaction(function(tx) {
@@ -96,17 +100,18 @@ QUnit.test("Undoing and redoing a change after external change.", function(asser
   // thus undo/redo should not touch this
   doc.update(['p1', 'content'], { insert: {offset: 3, value: "YYY"} });
 
-  assert.equal(doc.get(['p1', 'content']), '012YYYXXX3456789', 'Text should have been inserted.');
-  assert.equal(docSession.canUndo(), true, 'Undo should be possible');
+  t.equal(doc.get(['p1', 'content']), '012YYYXXX3456789', 'Text should have been inserted.');
+  t.equal(docSession.canUndo(), true, 'Undo should be possible');
   docSession.undo();
-  assert.equal(doc.get(['p1', 'content']), '012YYY3456789', 'Original text should have been recovered.');
-  assert.equal(docSession.canUndo(), false, 'Undo should be disabled');
-  assert.equal(docSession.canRedo(), true, 'Redo should be possible');
+  t.equal(doc.get(['p1', 'content']), '012YYY3456789', 'Original text should have been recovered.');
+  t.equal(docSession.canUndo(), false, 'Undo should be disabled');
+  t.equal(docSession.canRedo(), true, 'Redo should be possible');
   docSession.redo();
-  assert.equal(doc.get(['p1', 'content']), '012YYYXXX3456789', 'Text should have been changed again.');
+  t.equal(doc.get(['p1', 'content']), '012YYYXXX3456789', 'Text should have been changed again.');
+  t.end();
 });
 
-QUnit.test("Undoing and redoing a change after external change (II).", function(assert) {
+test("Undoing and redoing a change after external change (II).", function(t) {
   var doc = fixture(simple);
   var docSession = new DocumentSession(doc);
   docSession.transaction(function(tx) {
@@ -119,18 +124,19 @@ QUnit.test("Undoing and redoing a change after external change (II).", function(
   // thus undo/redo should not touch this
   doc.update(['p1', 'content'], { insert: {offset: 6, value: "YYY"} });
 
-  assert.equal(doc.get(['p1', 'content']), '012XXXYYYZZZ3456789', 'Text should have been inserted.');
+  t.equal(doc.get(['p1', 'content']), '012XXXYYYZZZ3456789', 'Text should have been inserted.');
   docSession.undo();
-  assert.equal(doc.get(['p1', 'content']), '012XXXYYY3456789', 'Correct after first undo.');
+  t.equal(doc.get(['p1', 'content']), '012XXXYYY3456789', 'Correct after first undo.');
   docSession.undo();
-  assert.equal(doc.get(['p1', 'content']), '012YYY3456789', 'Correct after second undo');
+  t.equal(doc.get(['p1', 'content']), '012YYY3456789', 'Correct after second undo');
   docSession.redo();
-  assert.equal(doc.get(['p1', 'content']), '012XXXYYY3456789', 'Correct after first redo.');
+  t.equal(doc.get(['p1', 'content']), '012XXXYYY3456789', 'Correct after first redo.');
   docSession.redo();
-  assert.equal(doc.get(['p1', 'content']), '012XXXYYYZZZ3456789', 'Correct after second undo.');
+  t.equal(doc.get(['p1', 'content']), '012XXXYYYZZZ3456789', 'Correct after second undo.');
+  t.end();
 });
 
-QUnit.test("Undo/Redo with two DocumentSessions.", function(assert) {
+test("Undo/Redo with two DocumentSessions.", function(t) {
   // This is not testing the real-time collab hub, just the general ability of
   // DocumentSession to react on external changes
   var doc = fixture(simple);
@@ -145,13 +151,14 @@ QUnit.test("Undo/Redo with two DocumentSessions.", function(assert) {
   session1.transaction(function(tx) {
     tx.update(['p1', 'content'], { insert: {offset: 9, value: "ZZZ"} });
   });
-  assert.equal(doc.get(['p1', 'content']), '012XXXYYYZZZ3456789', 'Text should have been inserted.');
+  t.equal(doc.get(['p1', 'content']), '012XXXYYYZZZ3456789', 'Text should have been inserted.');
   session2.undo();
-  assert.equal(doc.get(['p1', 'content']), '012XXXZZZ3456789', 'session2.undo()');
+  t.equal(doc.get(['p1', 'content']), '012XXXZZZ3456789', 'session2.undo()');
   session1.undo();
-  assert.equal(doc.get(['p1', 'content']), '012XXX3456789', 'session1.undo()');
+  t.equal(doc.get(['p1', 'content']), '012XXX3456789', 'session1.undo()');
   session2.redo();
-  assert.equal(doc.get(['p1', 'content']), '012XXXYYY3456789', 'session2.redo()');
+  t.equal(doc.get(['p1', 'content']), '012XXXYYY3456789', 'session2.redo()');
   session1.undo();
-  assert.equal(doc.get(['p1', 'content']), '012YYY3456789', 'session1.undo()');
+  t.equal(doc.get(['p1', 'content']), '012YYY3456789', 'session1.undo()');
+  t.end();
 });

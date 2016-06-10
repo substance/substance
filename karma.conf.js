@@ -1,7 +1,7 @@
 module.exports = function(config) {
   config.set({
     basePath: '.',
-    frameworks: ['browserify', 'source-map-support', 'qunit'],
+    frameworks: ['browserify', 'tap'],
     files: [
       'test/**/*.test.js',
       { pattern: 'test/fixtures/**/*.html', included: false, served: true },
@@ -16,6 +16,7 @@ module.exports = function(config) {
           flags: ['--no-sandbox']
       }
     },
+    reporters: ['tape'],
     singleRun: true,
     browserify: {
       debug: true // include inline source maps
@@ -23,7 +24,7 @@ module.exports = function(config) {
   });
 
   if(process.env.TRAVIS){
-    config.browsers = ['Chrome_travis_ci', 'Firefox'];
+    config.browsers = ['Firefox'];
   } else {
     var fs = require('fs');
     if (fs.existsSync(__dirname + "/karma.conf.local.js")) {

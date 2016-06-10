@@ -1,6 +1,7 @@
 'use strict';
 
-require('../QUnitExtensions');
+var test = require('../test').module('model/PathEventProxy');
+
 var DocumentSession = require('../../model/DocumentSession');
 
 var fixture = require('../fixtures/createTestArticle');
@@ -15,29 +16,29 @@ function docWithTestNodes(tx) {
   });
 }
 
-QUnit.module('model/PathEventProxy');
-
-QUnit.test("Updating a property", function(assert) {
+test("Updating a property", function(t) {
   var doc = fixture(docWithTestNodes);
   var callCount = 0;
   doc.getEventProxy('path').on(['test', 'arrayVal'], function() {
     callCount++;
   });
   doc.update(['test', 'arrayVal'], { insert: { offset: 1, value: '1000' } } );
-  assert.equal(callCount, 1, "Event proxy listener should have been called.");
+  t.equal(callCount, 1, "Event proxy listener should have been called.");
+  t.end();
 });
 
-QUnit.test("Setting a property", function(assert) {
+test("Setting a property", function(t) {
   var doc = fixture(docWithTestNodes);
   var callCount = 0;
   doc.getEventProxy('path').on(['test', 'arrayVal'], function() {
     callCount++;
   });
   doc.set(['test', 'arrayVal'], [1,1,1]);
-  assert.equal(callCount, 1, "Event proxy listener should have been called.");
+  t.equal(callCount, 1, "Event proxy listener should have been called.");
+  t.end();
 });
 
-QUnit.test("Setting a property and deleting the node afterwards", function(assert) {
+test("Setting a property and deleting the node afterwards", function(t) {
   var doc = fixture(docWithTestNodes);
   var docSession = new DocumentSession(doc);
   var callCount = 0;
@@ -48,5 +49,6 @@ QUnit.test("Setting a property and deleting the node afterwards", function(asser
     tx.set(['test', 'arrayVal'], [1,1,1]);
     tx.delete('test');
   });
-  assert.equal(callCount, 0, "Event proxy listener doesn't get called when node is deleted.");
+  t.equal(callCount, 0, "Event proxy listener doesn't get called when node is deleted.");
+  t.end();
 });

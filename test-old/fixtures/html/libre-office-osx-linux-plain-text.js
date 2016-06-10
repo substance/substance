@@ -1,0 +1,2 @@
+'use strict';
+module.exports="<!DOCTYPE HTML PUBLIC \"-//W3C//DTD HTML 4.0 Transitional//EN\">\n<html>\n<head>\n  <meta http-equiv=\"content-type\" content=\"text/html; charset=utf-8\"/>\n  <title></title>\n  <meta name=\"generator\" content=\"LibreOffice 5.0.3.2 (MacOSX)\"/>\n  <style type=\"text/css\">\n    @page { margin: 0.79in }\n    p { margin-bottom: 0.08in }\n    a:link { so-language: zxx }\n  </style>\n</head>\n<body lang=\"en\" dir=\"ltr\">\n<p style=\"margin-bottom: 0in\">XXX</p>\n</body>\n</html>";

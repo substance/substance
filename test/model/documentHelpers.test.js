@@ -1,21 +1,21 @@
 'use strict';
 
-require('../QUnitExtensions');
+var test = require('../test');
+
 var documentHelpers = require('../../model/documentHelpers');
 
 var fixture = require('../fixtures/createTestArticle');
 var simple = require('../fixtures/simple');
 var containerAnnoSample = require('../fixtures/containerAnnoSample');
 
-QUnit.module('model/documentHelpers');
-
-QUnit.test("Get text for null selection.", function(assert) {
+test("Get text for null selection.", function(t) {
   var doc = fixture(simple);
-  assert.equal(documentHelpers.getTextForSelection(doc, null), "", "Should be empty for null selection.");
-  assert.equal(documentHelpers.getTextForSelection(doc, doc.createSelection(null)), "", "Should be empty for null selection.");
+  t.equal(documentHelpers.getTextForSelection(doc, null), "", "Should be empty for null selection.");
+  t.equal(documentHelpers.getTextForSelection(doc, doc.createSelection(null)), "", "Should be empty for null selection.");
+  t.end();
 });
 
-QUnit.test("Get text for property selection.", function(assert) {
+test("Get text for property selection.", function(t) {
   var doc = fixture(simple);
   var sel = doc.createSelection({
     type: "property",
@@ -23,10 +23,11 @@ QUnit.test("Get text for property selection.", function(assert) {
     startOffset: 0,
     endOffset: 5
   });
-  assert.equal(documentHelpers.getTextForSelection(doc, sel), "01234");
+  t.equal(documentHelpers.getTextForSelection(doc, sel), "01234");
+  t.end();
 });
 
-QUnit.test("Get text for container selection.", function(assert) {
+test("Get text for container selection.", function(t) {
   var doc = fixture(simple);
   var sel = doc.createSelection({
     type: "container",
@@ -36,10 +37,11 @@ QUnit.test("Get text for container selection.", function(assert) {
     endPath: ["p2", "content"],
     endOffset: 5
   });
-  assert.equal(documentHelpers.getTextForSelection(doc, sel), "56789\n01234");
+  t.equal(documentHelpers.getTextForSelection(doc, sel), "56789\n01234");
+  t.end();
 });
 
-QUnit.test("Get container annotations for property selection.", function(assert) {
+test("Get container annotations for property selection.", function(t) {
   var doc = fixture(containerAnnoSample);
   var sel = doc.createSelection({
     type: 'property',
@@ -50,10 +52,11 @@ QUnit.test("Get container annotations for property selection.", function(assert)
   var annos;
   // without options
   annos = documentHelpers.getContainerAnnotationsForSelection(doc, sel, 'body');
-  assert.equal(annos.length, 1, 'There should be one container anno');
+  t.equal(annos.length, 1, 'There should be one container anno');
   // filtered by type
   annos = documentHelpers.getContainerAnnotationsForSelection(doc, sel, 'body', {
     type: 'test-container-anno'
   });
-  assert.equal(annos.length, 1, 'There should be one container anno');
+  t.equal(annos.length, 1, 'There should be one container anno');
+  t.end();
 });

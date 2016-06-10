@@ -1,13 +1,12 @@
 "use strict";
 
-require('../QUnitExtensions');
+var test = require('../test').module('transform/deleteCharacter');
+
 var fixture = require('../fixtures/createTestArticle');
 var headersAndParagraphs = require('../fixtures/headersAndParagraphs');
 var deleteCharacter = require('../../model/transform/deleteCharacter');
 
-QUnit.module('model/transform/deleteCharacter');
-
-QUnit.test("Backspacing", function(assert) {
+test("Backspacing", function(t) {
   var doc = fixture(headersAndParagraphs);
   var sel = doc.createSelection({
     type: 'property',
@@ -16,10 +15,11 @@ QUnit.test("Backspacing", function(assert) {
   });
   var args = {selection: sel, direction: 'left'};
   deleteCharacter(doc, args);
-  assert.equal(doc.get(['p2', 'content']), 'Pargraph with annotation', 'Character should be deleted.');
+  t.equal(doc.get(['p2', 'content']), 'Pargraph with annotation', 'Character should be deleted.');
+  t.end();
 });
 
-QUnit.test("Deleting a character", function(assert) {
+test("Deleting a character", function(t) {
   var doc = fixture(headersAndParagraphs);
   var sel = doc.createSelection({
     type: 'property',
@@ -28,10 +28,11 @@ QUnit.test("Deleting a character", function(assert) {
   });
   var args = {selection: sel, direction: 'right'};
   deleteCharacter(doc, args);
-  assert.equal(doc.get(['p2', 'content']), 'Pararaph with annotation', 'Character should be deleted.');
+  t.equal(doc.get(['p2', 'content']), 'Pararaph with annotation', 'Character should be deleted.');
+  t.end();
 });
 
-QUnit.test("Backspacing into previous component", function(assert) {
+test("Backspacing into previous component", function(t) {
   var doc = fixture(headersAndParagraphs);
   var sel = doc.createSelection({
     type: 'property',
@@ -41,8 +42,9 @@ QUnit.test("Backspacing into previous component", function(assert) {
   var args = {selection: sel, containerId: 'body', direction: 'left'};
   var out = deleteCharacter(doc, args);
   var selection = out.selection;
-  assert.equal(doc.get(['h2', 'content']), 'Section 2Paragraph with annotation', 'Content of p2 should have been merged into h2.');
-  assert.isNullOrUndefined(doc.get('p2'), 'p2 should be gone.');
-  assert.ok(selection.isCollapsed(), 'Selection should be collapsed.');
-  assert.equal(selection.startOffset, 9, 'Cursor should be before the first character of the merged text.');
+  t.equal(doc.get(['h2', 'content']), 'Section 2Paragraph with annotation', 'Content of p2 should have been merged into h2.');
+  t.isNil(doc.get('p2'), 'p2 should be gone.');
+  t.ok(selection.isCollapsed(), 'Selection should be collapsed.');
+  t.equal(selection.startOffset, 9, 'Cursor should be before the first character of the merged text.');
+  t.end();
 });

@@ -1,6 +1,7 @@
 "use strict";
 
-require('../QUnitExtensions');
+var test = require('../test').module('transform/paste');
+
 var paste = require('../../model/transform/paste');
 var copySelection = require('../../model/transform/copySelection');
 
@@ -11,9 +12,7 @@ var simple = require('../fixtures/simple');
 var CLIPBOARD_CONTAINER_ID = copySelection.CLIPBOARD_CONTAINER_ID;
 var CLIPBOARD_PROPERTY_ID = copySelection.CLIPBOARD_PROPERTY_ID;
 
-QUnit.module('model/transform/paste');
-
-QUnit.test("Pasting plain text", function(assert) {
+test("Pasting plain text", function(t) {
   var doc = fixture(simple);
   var sel = doc.createSelection({
     type: 'property',
@@ -23,10 +22,11 @@ QUnit.test("Pasting plain text", function(assert) {
   var args = {selection: sel, text: 'XXX'};
   paste(doc, args);
   var p1 = doc.get('p1');
-  assert.equal(p1.content, '012XXX3456789');
+  t.equal(p1.content, '012XXX3456789');
+  t.end();
 });
 
-QUnit.test("Pasting a single paragraph", function(assert) {
+test("Pasting a single paragraph", function(t) {
   var doc = fixture(simple);
   var pasteDoc = doc.newInstance();
   var container = pasteDoc.create({
@@ -48,10 +48,11 @@ QUnit.test("Pasting a single paragraph", function(assert) {
   var args = {selection: sel, doc: pasteDoc};
   paste(doc, args);
   var p1 = doc.get('p1');
-  assert.equal(p1.content, '012AABBCC3456789', 'Plain text should be inserted.');
+  t.equal(p1.content, '012AABBCC3456789', 'Plain text should be inserted.');
+  t.end();
 });
 
-QUnit.test("Pasting annotated text", function(assert) {
+test("Pasting annotated text", function(t) {
   var doc = fixture(simple);
   var sel = doc.createSelection({
     type: 'property',
@@ -80,13 +81,14 @@ QUnit.test("Pasting annotated text", function(assert) {
   var args = {selection: sel, doc: pasteDoc};
   paste(doc, args);
   var p1 = doc.get('p1');
-  assert.equal(p1.content, '012AABBCC3456789', 'Plain text should be inserted.');
+  t.equal(p1.content, '012AABBCC3456789', 'Plain text should be inserted.');
   var s1 = doc.get('s1');
-  assert.deepEqual(s1.path, [p1.id, 'content'], 'Annotation is bound to the correct path.');
-  assert.deepEqual([s1.startOffset, s1.endOffset], [5, 7], 'Annotation has correct range.');
+  t.deepEqual(s1.path, [p1.id, 'content'], 'Annotation is bound to the correct path.');
+  t.deepEqual([s1.startOffset, s1.endOffset], [5, 7], 'Annotation has correct range.');
+  t.end();
 });
 
-QUnit.test("Pasting two paragraphs", function(assert) {
+test("Pasting two paragraphs", function(t) {
   var doc = fixture(simple);
   var pasteDoc = doc.newInstance();
   var container = pasteDoc.create({
@@ -115,13 +117,14 @@ QUnit.test("Pasting two paragraphs", function(assert) {
   paste(doc, args);
   var body = doc.get('body');
   var p1 = doc.get('p1');
-  assert.equal(p1.content, '012AA', 'First part should be inserted into first paragraph.');
-  assert.equal(body.nodes[1], test2.id, 'Second part should go into a single paragraph.');
-  assert.equal(doc.get(body.nodes[2]).content, '3456789', 'Remaining part of first paragraph should be in a new paragraph.');
-  assert.equal(body.nodes[3], 'p2', 'After that should follow p2.');
+  t.equal(p1.content, '012AA', 'First part should be inserted into first paragraph.');
+  t.equal(body.nodes[1], test2.id, 'Second part should go into a single paragraph.');
+  t.equal(doc.get(body.nodes[2]).content, '3456789', 'Remaining part of first paragraph should be in a new paragraph.');
+  t.equal(body.nodes[3], 'p2', 'After that should follow p2.');
+  t.end();
 });
 
-// QUnit.test("Pasting a table", function(assert) {
+// test("Pasting a table", function(t) {
 //   var doc = fixture(simple);
 //   var pasteDoc = doc.newInstance();
 //   var tsv = [
@@ -146,8 +149,8 @@ QUnit.test("Pasting two paragraphs", function(assert) {
 //   paste(doc, args);
 //   var body = doc.get('body');
 //   var p1 = doc.get('p1');
-//   assert.equal(p1.content, '012', 'First paragraph should be truncated.');
-//   assert.equal(doc.get(body.nodes[2]).content, '3456789', 'Remaining part of first paragraph should be in a new paragraph.');
-//   assert.equal(body.nodes[1], table.id, 'Table should be inserted between two paragraphs.');
-//   assert.equal(doc.get(table.id).toTSV(), tsv, 'TSV should be correct.');
+//   t.equal(p1.content, '012', 'First paragraph should be truncated.');
+//   t.equal(doc.get(body.nodes[2]).content, '3456789', 'Remaining part of first paragraph should be in a new paragraph.');
+//   t.equal(body.nodes[1], table.id, 'Table should be inserted between two paragraphs.');
+//   t.equal(doc.get(table.id).toTSV(), tsv, 'TSV should be correct.');
 // });

@@ -1,7 +1,7 @@
 "use strict";
 /* eslint-disable no-invalid-this */
 
-require('../QUnitExtensions');
+var test = require('../test').module('ui/Surface');
 
 var Registry = require('../../util/Registry');
 var createAnnotation = require('../../model/transform/createAnnotation');
@@ -20,8 +20,6 @@ var componentRegistry = new Registry({
   "emphasis": require('../../ui/AnnotationComponent'),
   "link": require('../../packages/link/LinkComponent'),
 });
-
-QUnit.uiModule('ui/Surface');
 
 function _createApp(fixtureSeed, el) {
   var doc = fixture(fixtureSeed);
@@ -44,8 +42,8 @@ function _createApp(fixtureSeed, el) {
 }
 
 // This test was added to cover issue #82
-QUnit.uiTest("Set the selection after creating annotation.", function(assert) {
-  var el = this.sandbox;
+test.UI("Set the selection after creating annotation.", function(t) {
+  var el = t.sandbox;
   var app = _createApp(simple, el);
   var doc = app.doc;
   var surface = app.surface;
@@ -57,13 +55,14 @@ QUnit.uiTest("Set the selection after creating annotation.", function(assert) {
   });
   var wsel = window.getSelection();
   var newSel = surface.domSelection.getSelection();
-  assert.equal(wsel.rangeCount, 1, "There should be a DOM selection.");
-  assert.equal(newSel.toString(), sel.toString(), "New selection should be equal to initial selection.");
+  t.equal(wsel.rangeCount, 1, "There should be a DOM selection.");
+  t.equal(newSel.toString(), sel.toString(), "New selection should be equal to initial selection.");
+  t.end();
 });
 
-QUnit.uiTest("Render a reverse selection.", function(assert) {
+test.UI("Render a reverse selection.", function(t) {
   var BrowserDOMElement = require('../../ui/BrowserDOMElement');
-  var el = this.sandbox;
+  var el = t.sandbox;
   var app = _createApp(simple, el);
   var doc = app.doc;
   var surface = app.surface;
@@ -78,5 +77,6 @@ QUnit.uiTest("Render a reverse selection.", function(assert) {
   });
   surface.setSelection(sel);
   var wsel = BrowserDOMElement.getWindowSelection();
-  assert.ok(BrowserDOMElement.isReverse(wsel.anchorNode, wsel.anchorOffset, wsel.focusNode, wsel.focusOffset));
+  t.ok(BrowserDOMElement.isReverse(wsel.anchorNode, wsel.anchorOffset, wsel.focusNode, wsel.focusOffset));
+  t.end();
 });

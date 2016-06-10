@@ -1,15 +1,14 @@
 'use strict';
 
-require('../QUnitExtensions');
+var test = require('../test').module('transform/createAnnotation');
+
 var createAnnotation = require('../../model/transform/createAnnotation');
 var docHelpers = require('../../model/documentHelpers');
 
 var fixture = require('../fixtures/createTestArticle');
 var headersAndParagraphs = require('../fixtures/headersAndParagraphs');
 
-QUnit.module('model/transform/createAnnotation');
-
-QUnit.test("Create property annotation for a given property selection", function(assert) {
+test("Create property annotation for a given property selection", function(t) {
   var doc = fixture(headersAndParagraphs);
 
   // Selected text 'Paragraph' in p1
@@ -25,15 +24,16 @@ QUnit.test("Create property annotation for a given property selection", function
   var out = createAnnotation(doc, args);
 
   var anno = out.result;
-  assert.ok(anno, 'A new annotation should be present');
-  assert.equal(anno.type, 'strong', 'Anno type should be strong');
+  t.ok(anno, 'A new annotation should be present');
+  t.equal(anno.type, 'strong', 'Anno type should be strong');
 
   var annoText = out.result.getText();
   var selText = docHelpers.getTextForSelection(doc, sel);
-  assert.equal(annoText, selText, 'New annotation should have the same text as the original selection');
+  t.equal(annoText, selText, 'New annotation should have the same text as the original selection');
+  t.end();
 });
 
-QUnit.test("Create container annotation for a given container selection", function(assert) {
+test("Create container annotation for a given container selection", function(t) {
   var doc = fixture(headersAndParagraphs);
 
   // Selected text 'Paragraph' in p1
@@ -51,10 +51,11 @@ QUnit.test("Create container annotation for a given container selection", functi
   var out = createAnnotation(doc, args);
 
   var anno = out.result;
-  assert.ok(anno, 'A new annotation should be present');
-  assert.equal(anno.type, 'test-container-anno', 'Anno type should be strong');
+  t.ok(anno, 'A new annotation should be present');
+  t.equal(anno.type, 'test-container-anno', 'Anno type should be strong');
 
   var annoText = out.result.getText();
   var selText = docHelpers.getTextForSelection(doc, sel);
-  assert.equal(annoText, selText, 'New annotation should have the same text as the original selection');
+  t.equal(annoText, selText, 'New annotation should have the same text as the original selection');
+  t.end();
 });

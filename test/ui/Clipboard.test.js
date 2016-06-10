@@ -1,6 +1,6 @@
 "use strict";
 
-require('../QUnitExtensions');
+var test = require('../test').module('ui/Clipboard');
 
 var DocumentSession = require('../../model/DocumentSession');
 var Registry = require('../../util/Registry');
@@ -35,12 +35,6 @@ var clipboardConfig = {
   converterRegistry: converterRegistry
 };
 
-QUnit.uiModule('ui/Clipboard', {
-  beforeEach: function() {
-    Clipboard.NO_CATCH = QUnit.config.notrycatch;
-  }
-});
-
 function ClipboardEventData() {
   this.data = {};
 
@@ -65,7 +59,7 @@ function ClipboardEvent() {
   this.stopPropagation = function() {};
 }
 
-QUnit.uiTest("Copying HTML, and plain text", function(assert) {
+test.UI("Copying HTML, and plain text", function(t) {
   var doc = fixture(simple);
   var surface = new StubSurface(doc, null, 'body');
   var clipboard = new Clipboard(surface, clipboardConfig);
@@ -75,15 +69,16 @@ QUnit.uiTest("Copying HTML, and plain text", function(assert) {
   clipboard.onCopy(event);
 
   var clipboardData = event.clipboardData;
-  assert.isDefinedAndNotNull(clipboardData.data['text/plain'], "Clipboard should contain plain text data.");
-  assert.isDefinedAndNotNull(clipboardData.data['text/html'], "Clipboard should contain HTML data.");
+  t.notNil(clipboardData.data['text/plain'], "Clipboard should contain plain text data.");
+  t.notNil(clipboardData.data['text/html'], "Clipboard should contain HTML data.");
 
   var htmlDoc = DOMElement.parseHTML(clipboardData.data['text/html']);
   var body = htmlDoc.find('body');
-  assert.isDefinedAndNotNull(body, 'The copied HTML should always be a full HTML document string, containing a body element.');
+  t.notNil(body, 'The copied HTML should always be a full HTML document string, containing a body element.');
+  t.end();
 });
 
-QUnit.uiTest("Copying a property selection", function(assert) {
+test.UI("Copying a property selection", function(t) {
   var doc = fixture(simple);
   var surface = new StubSurface(doc, null, 'body');
   var clipboard = new Clipboard(surface, clipboardConfig);
@@ -95,18 +90,19 @@ QUnit.uiTest("Copying a property selection", function(assert) {
   clipboard.onCopy(event);
 
   var clipboardData = event.clipboardData;
-  assert.equal(clipboardData.data['text/plain'], TEXT, "Plain text should be correct.");
+  t.equal(clipboardData.data['text/plain'], TEXT, "Plain text should be correct.");
 
   var htmlDoc = DOMElement.parseHTML(clipboardData.data['text/html']);
   var body = htmlDoc.find('body');
   var childNodes = body.getChildNodes();
-  assert.equal(childNodes.length, 1, "There should be only one element");
+  t.equal(childNodes.length, 1, "There should be only one element");
   var el = childNodes[0];
-  assert.equal(el.nodeType, 'text', "HTML element should be a text node.");
-  assert.equal(el.text(), TEXT, "HTML text should be correct.");
+  t.equal(el.nodeType, 'text', "HTML element should be a text node.");
+  t.equal(el.text(), TEXT, "HTML text should be correct.");
+  t.end();
 });
 
-QUnit.uiTest("Copying a container selection", function(assert) {
+test.UI("Copying a container selection", function(t) {
   var doc = fixture(simple);
   var surface = new StubSurface(doc, null, 'body');
   var clipboard = new Clipboard(surface, clipboardConfig);
@@ -129,23 +125,24 @@ QUnit.uiTest("Copying a container selection", function(assert) {
   clipboard.onCopy(event);
 
   var clipboardData = event.clipboardData;
-  assert.equal(clipboardData.data['text/plain'], TEXT.join('\n'), "Plain text should be correct.");
+  t.equal(clipboardData.data['text/plain'], TEXT.join('\n'), "Plain text should be correct.");
 
   var htmlDoc = DOMElement.parseHTML(clipboardData.data['text/html']);
   var elements = htmlDoc.find('body').getChildren();
-  assert.equal(elements.length, 3, "HTML should consist of three elements.");
+  t.equal(elements.length, 3, "HTML should consist of three elements.");
   var p1 = elements[0];
-  assert.equal(p1.attr('data-id'), 'p1', "First element should have correct data-id.");
-  assert.equal(p1.text(), TEXT[0], "First element should have correct text content.");
+  t.equal(p1.attr('data-id'), 'p1', "First element should have correct data-id.");
+  t.equal(p1.text(), TEXT[0], "First element should have correct text content.");
   var p2 = elements[1];
-  assert.equal(p2.attr('data-id'), 'p2', "Second element should have correct data-id.");
-  assert.equal(p2.text(), TEXT[1], "Second element should have correct text content.");
+  t.equal(p2.attr('data-id'), 'p2', "Second element should have correct data-id.");
+  t.equal(p2.text(), TEXT[1], "Second element should have correct text content.");
   var p3 = elements[2];
-  assert.equal(p3.attr('data-id'), 'p3', "Third element should have correct data-id.");
-  assert.equal(p3.text(), TEXT[2], "Third element should have correct text content.");
+  t.equal(p3.attr('data-id'), 'p3', "Third element should have correct data-id.");
+  t.equal(p3.text(), TEXT[2], "Third element should have correct text content.");
+  t.end();
 });
 
-function _containerEditorSample() {
+function _containerEditorSample(t) {
   var doc = fixture(simple);
   var app = Component.mount(TestContainerEditor, {
     context: {
@@ -154,7 +151,7 @@ function _containerEditorSample() {
       converterRegistry: converterRegistry
     },
     node: doc.get('body')
-  }, '#qunit-fixture');
+  }, t.sandbox);
   var editor = app.refs.editor;
   var sel = doc.createSelection({
     type: 'property',
@@ -169,37 +166,40 @@ function _containerEditorSample() {
   return editor;
 }
 
-QUnit.uiTest("Pasting text into ContainerEditor using 'text/plain'.", function(assert) {
-  var editor = _containerEditorSample();
+test.UI("Pasting text into ContainerEditor using 'text/plain'.", function(t) {
+  var editor = _containerEditorSample(t);
   var doc = editor.getDocument();
   var event = new ClipboardEvent();
   event.clipboardData.setData('text/plain', 'XXX');
   editor.clipboard.onPaste(event);
-  assert.equal(doc.get(['p1', 'content']), '0XXX123456789', "Plain text should be correct.");
+  t.equal(doc.get(['p1', 'content']), '0XXX123456789', "Plain text should be correct.");
+  t.end();
 });
 
-QUnit.uiTest("Pasting without any data given.", function(assert) {
-  var editor = _containerEditorSample();
+test.UI("Pasting without any data given.", function(t) {
+  var editor = _containerEditorSample(t);
   var doc = editor.getDocument();
   var event = new ClipboardEvent();
   editor.clipboard.onPaste(event);
-  assert.equal(doc.get(['p1', 'content']), '0123456789', "Text should be still the same.");
+  t.equal(doc.get(['p1', 'content']), '0123456789', "Text should be still the same.");
+  t.end();
 });
 
 
-QUnit.uiTest("Pasting text into ContainerEditor using 'text/html'.", function(assert) {
-  var editor = _containerEditorSample();
+test.UI("Pasting text into ContainerEditor using 'text/html'.", function(t) {
+  var editor = _containerEditorSample(t);
   var doc = editor.getDocument();
   var TEXT = 'XXX';
   var event = new ClipboardEvent();
   event.clipboardData.setData('text/plain', TEXT);
   event.clipboardData.setData('text/html', TEXT);
   editor.clipboard.onPaste(event);
-  assert.equal(doc.get(['p1', 'content']), '0XXX123456789', "Plain text should be correct.");
+  t.equal(doc.get(['p1', 'content']), '0XXX123456789', "Plain text should be correct.");
+  t.end();
 });
 
-function _fixtureTest(assert, fixture, impl, forceWindows) {
-  var editor = _containerEditorSample();
+function _fixtureTest(t, fixture, impl, forceWindows) {
+  var editor = _containerEditorSample(t);
   if (forceWindows) {
     // NOTE: faking 'Windows' mode in importer so that
     // the correct implementation will be used
@@ -208,34 +208,36 @@ function _fixtureTest(assert, fixture, impl, forceWindows) {
   impl(editor, fixture);
 }
 
-function _plainTextTest(assert, fixture, forceWindows) {
-  _fixtureTest(assert, fixture, function(editor, html) {
+function _plainTextTest(t, fixture, forceWindows) {
+  _fixtureTest(t, fixture, function(editor, html) {
     var doc = editor.getDocument();
     var event = new ClipboardEvent();
     event.clipboardData.setData('text/plain', '');
     event.clipboardData.setData('text/html', html);
     editor.clipboard.onPaste(event);
-    assert.equal(doc.get(['p1', 'content']), '0XXX123456789', "Content should have been pasted correctly.");
+    t.equal(doc.get(['p1', 'content']), '0XXX123456789', "Content should have been pasted correctly.");
+    t.end();
   }, forceWindows);
 }
 
-function _annotatedTextTest(assert, fixture, forceWindows) {
-  _fixtureTest(assert, fixture, function(editor, html) {
+function _annotatedTextTest(t, fixture, forceWindows) {
+  _fixtureTest(t, fixture, function(editor, html) {
     var doc = editor.getDocument();
     var event = new ClipboardEvent();
     event.clipboardData.setData('text/plain', '');
     event.clipboardData.setData('text/html', html);
     editor.clipboard.onPaste(event);
-    assert.equal(doc.get(['p1', 'content']), '0XXX123456789', "Content should have been pasted correctly.");
+    t.equal(doc.get(['p1', 'content']), '0XXX123456789', "Content should have been pasted correctly.");
     var annotations = doc.getIndex('annotations').get(['p1', 'content']);
-    assert.equal(annotations.length, 1, "There should be one annotation on the property now.");
+    t.equal(annotations.length, 1, "There should be one annotation on the property now.");
     var anno = annotations[0];
-    assert.equal(anno.type, 'link', "The annotation should be a link.");
+    t.equal(anno.type, 'link', "The annotation should be a link.");
+    t.end();
   }, forceWindows);
 }
 
-function _twoParagraphsTest(assert, fixture, forceWindows) {
-  _fixtureTest(assert, fixture, function(editor, html) {
+function _twoParagraphsTest(t, fixture, forceWindows) {
+  _fixtureTest(t, fixture, function(editor, html) {
     var doc = editor.getDocument();
     var event = new ClipboardEvent();
     event.clipboardData.setData('text/plain', '');
@@ -243,143 +245,145 @@ function _twoParagraphsTest(assert, fixture, forceWindows) {
     editor.clipboard.onPaste(event);
     var body = doc.get('body');
     var p1 = body.getChildAt(0);
-    assert.equal(p1.content, '0AAA', "First paragraph should be truncated.");
+    t.equal(p1.content, '0AAA', "First paragraph should be truncated.");
     var p2 = body.getChildAt(1);
-    assert.equal(p2.content, 'BBB', "Second paragraph should contain 'BBB'.");
+    t.equal(p2.content, 'BBB', "Second paragraph should contain 'BBB'.");
     var p3 = body.getChildAt(2);
-    assert.equal(p3.content, '123456789', "Remainder of original p1 should go into forth paragraph.");
+    t.equal(p3.content, '123456789', "Remainder of original p1 should go into forth paragraph.");
+    t.end();
   }, forceWindows);
 }
 
-QUnit.uiTest("Browser - Chrome (OSX/Linux) - Plain Text", function(assert) {
-  _plainTextTest(assert, require('../fixtures/html/browser-linux-plain-text'));
+test.UI("Browser - Chrome (OSX/Linux) - Plain Text", function(t) {
+  _plainTextTest(t, require('../fixtures/html/browser-linux-plain-text'));
 });
 
-QUnit.uiTest("Browser - Chrome (OSX/Linux) - Annotated Text", function(assert) {
-  _annotatedTextTest(assert, require('../fixtures/html/browser-linux-annotated-text'));
+test.UI("Browser - Chrome (OSX/Linux) - Annotated Text", function(t) {
+  _annotatedTextTest(t, require('../fixtures/html/browser-linux-annotated-text'));
 });
 
-QUnit.uiTest("Browser - Chrome (OSX/Linux) - Two Paragraphs", function(assert) {
-  _twoParagraphsTest(assert, require('../fixtures/html/browser-linux-two-paragraphs'));
+test.UI("Browser - Chrome (OSX/Linux) - Two Paragraphs", function(t) {
+  _twoParagraphsTest(t, require('../fixtures/html/browser-linux-two-paragraphs'));
 });
 
-QUnit.uiTest("Browser - Chrome (Windows) - Plain Text", function(assert) {
-  _plainTextTest(assert, require('../fixtures/html/browser-windows-plain-text'), 'forceWindows');
+test.UI("Browser - Chrome (Windows) - Plain Text", function(t) {
+  _plainTextTest(t, require('../fixtures/html/browser-windows-plain-text'), 'forceWindows');
 });
 
-QUnit.uiTest("Browser - Chrome (Windows) - Annotated Text", function(assert) {
-  _annotatedTextTest(assert, require('../fixtures/html/browser-windows-annotated-text'), 'forceWindows');
+test.UI("Browser - Chrome (Windows) - Annotated Text", function(t) {
+  _annotatedTextTest(t, require('../fixtures/html/browser-windows-annotated-text'), 'forceWindows');
 });
 
-QUnit.uiTest("Browser - Chrome (Windows) - Two Paragraphs", function(assert) {
-  _twoParagraphsTest(assert, require('../fixtures/html/browser-windows-two-paragraphs'), 'forceWindows');
+test.UI("Browser - Chrome (Windows) - Two Paragraphs", function(t) {
+  _twoParagraphsTest(t, require('../fixtures/html/browser-windows-two-paragraphs'), 'forceWindows');
 });
 
-QUnit.uiTest("Browser - Firefox (Linux) - Plain Text", function(assert) {
-  _plainTextTest(assert, require('../fixtures/html/browser-linux-firefox-plain-text'));
+test.UI("Browser - Firefox (Linux) - Plain Text", function(t) {
+  _plainTextTest(t, require('../fixtures/html/browser-linux-firefox-plain-text'));
 });
 
-QUnit.uiTest("Browser - Firefox (Linux) - Annotated Text", function(assert) {
-  _annotatedTextTest(assert, require('../fixtures/html/browser-linux-firefox-annotated-text'));
+test.UI("Browser - Firefox (Linux) - Annotated Text", function(t) {
+  _annotatedTextTest(t, require('../fixtures/html/browser-linux-firefox-annotated-text'));
 });
 
-QUnit.uiTest("Browser - Firefox (Linux) - Two Paragraphs", function(assert) {
-  _twoParagraphsTest(assert, require('../fixtures/html/browser-linux-firefox-two-paragraphs'));
+test.UI("Browser - Firefox (Linux) - Two Paragraphs", function(t) {
+  _twoParagraphsTest(t, require('../fixtures/html/browser-linux-firefox-two-paragraphs'));
 });
 
-QUnit.uiTest("Browser - Firefox (Linux) - Whole Page", function(assert) {
-  _fixtureTest(assert, require('../fixtures/html/browser-linux-firefox-whole-page'), function(editor, html) {
+test.UI("Browser - Firefox (Linux) - Whole Page", function(t) {
+  _fixtureTest(t, require('../fixtures/html/browser-linux-firefox-whole-page'), function(editor, html) {
     var doc = editor.getDocument();
     var event = new ClipboardEvent();
     event.clipboardData.setData('text/plain', 'XXX');
     event.clipboardData.setData('text/html', html);
     editor.clipboard.onPaste(event);
     // make sure HTML paste succeeded, by checking against the result of plain text insertion
-    assert.notOk(doc.get('p1').getText() === '0XXX123456789', "HTML conversion and paste should have been successful (not fall back to plain-text).");
-    assert.ok(doc.get('body').getLength() > 30, 'There should be a lot of paragraphs');
+    t.notOk(doc.get('p1').getText() === '0XXX123456789', "HTML conversion and paste should have been successful (not fall back to plain-text).");
+    t.ok(doc.get('body').getLength() > 30, 'There should be a lot of paragraphs');
+    t.end();
   });
 });
 
-QUnit.uiTest("Browser - Firefox (OSX) - Plain Text", function(assert) {
-  _plainTextTest(assert, require('../fixtures/html/browser-osx-firefox-plain-text'));
+test.UI("Browser - Firefox (OSX) - Plain Text", function(t) {
+  _plainTextTest(t, require('../fixtures/html/browser-osx-firefox-plain-text'));
 });
 
-QUnit.uiTest("Browser - Firefox (OSX) - Annotated Text", function(assert) {
-  _annotatedTextTest(assert, require('../fixtures/html/browser-osx-firefox-annotated-text'));
+test.UI("Browser - Firefox (OSX) - Annotated Text", function(t) {
+  _annotatedTextTest(t, require('../fixtures/html/browser-osx-firefox-annotated-text'));
 });
 
-QUnit.uiTest("Browser - Firefox (OSX) - Two Paragraphs", function(assert) {
-  _twoParagraphsTest(assert, require('../fixtures/html/browser-osx-firefox-two-paragraphs'));
+test.UI("Browser - Firefox (OSX) - Two Paragraphs", function(t) {
+  _twoParagraphsTest(t, require('../fixtures/html/browser-osx-firefox-two-paragraphs'));
 });
 
-QUnit.uiTest("Browser - Firefox (Windows) - Plain Text", function(assert) {
-  _plainTextTest(assert, require('../fixtures/html/browser-windows-firefox-plain-text'), 'forceWindows');
+test.UI("Browser - Firefox (Windows) - Plain Text", function(t) {
+  _plainTextTest(t, require('../fixtures/html/browser-windows-firefox-plain-text'), 'forceWindows');
 });
 
-QUnit.uiTest("Browser - Firefox (Windows) - Annotated Text", function(assert) {
-  _annotatedTextTest(assert, require('../fixtures/html/browser-windows-firefox-annotated-text'), 'forceWindows');
+test.UI("Browser - Firefox (Windows) - Annotated Text", function(t) {
+  _annotatedTextTest(t, require('../fixtures/html/browser-windows-firefox-annotated-text'), 'forceWindows');
 });
 
-QUnit.uiTest("Browser - Firefox (Windows) - Two Paragraphs", function(assert) {
-  _twoParagraphsTest(assert, require('../fixtures/html/browser-windows-firefox-two-paragraphs'), 'forceWindows');
+test.UI("Browser - Firefox (Windows) - Two Paragraphs", function(t) {
+  _twoParagraphsTest(t, require('../fixtures/html/browser-windows-firefox-two-paragraphs'), 'forceWindows');
 });
 
-QUnit.uiTest("Browser - Edge (Windows) - Plain Text", function(assert) {
-  _plainTextTest(assert, require('../fixtures/html/browser-windows-edge-plain-text'), 'forceWindows');
+test.UI("Browser - Edge (Windows) - Plain Text", function(t) {
+  _plainTextTest(t, require('../fixtures/html/browser-windows-edge-plain-text'), 'forceWindows');
 });
 
-QUnit.uiTest("Browser - Edge (Windows) - Annotated Text", function(assert) {
-  _annotatedTextTest(assert, require('../fixtures/html/browser-windows-edge-annotated-text'), 'forceWindows');
+test.UI("Browser - Edge (Windows) - Annotated Text", function(t) {
+  _annotatedTextTest(t, require('../fixtures/html/browser-windows-edge-annotated-text'), 'forceWindows');
 });
 
-QUnit.uiTest("Browser - Edge (Windows) - Two Paragraphs", function(assert) {
-  _twoParagraphsTest(assert, require('../fixtures/html/browser-windows-edge-two-paragraphs'), 'forceWindows');
+test.UI("Browser - Edge (Windows) - Two Paragraphs", function(t) {
+  _twoParagraphsTest(t, require('../fixtures/html/browser-windows-edge-two-paragraphs'), 'forceWindows');
 });
 
-QUnit.uiTest("GoogleDocs - Chrome (OSX/Linux) - Plain Text", function(assert) {
-  _plainTextTest(assert, require('../fixtures/html/google-docs-osx-linux-chrome-plain-text'));
+test.UI("GoogleDocs - Chrome (OSX/Linux) - Plain Text", function(t) {
+  _plainTextTest(t, require('../fixtures/html/google-docs-osx-linux-chrome-plain-text'));
 });
 
-QUnit.uiTest("GoogleDocs - Chrome (OSX/Linux) - Annotated Text", function(assert) {
-  _annotatedTextTest(assert, require('../fixtures/html/google-docs-osx-linux-chrome-annotated-text'));
+test.UI("GoogleDocs - Chrome (OSX/Linux) - Annotated Text", function(t) {
+  _annotatedTextTest(t, require('../fixtures/html/google-docs-osx-linux-chrome-annotated-text'));
 });
 
-QUnit.uiTest("GoogleDocs - Chrome (OSX/Linux) - Two Paragraphs", function(assert) {
-  _twoParagraphsTest(assert, require('../fixtures/html/google-docs-osx-linux-chrome-two-paragraphs'));
+test.UI("GoogleDocs - Chrome (OSX/Linux) - Two Paragraphs", function(t) {
+  _twoParagraphsTest(t, require('../fixtures/html/google-docs-osx-linux-chrome-two-paragraphs'));
 });
 
-QUnit.uiTest("GoogleDocs - Firefox (Linux) - Plain Text", function(assert) {
-  _plainTextTest(assert, require('../fixtures/html/google-docs-linux-firefox-plain-text'));
+test.UI("GoogleDocs - Firefox (Linux) - Plain Text", function(t) {
+  _plainTextTest(t, require('../fixtures/html/google-docs-linux-firefox-plain-text'));
 });
 
-QUnit.uiTest("GoogleDocs - Firefox (Linux) - Annotated Text", function(assert) {
-  _annotatedTextTest(assert, require('../fixtures/html/google-docs-linux-firefox-annotated-text'));
+test.UI("GoogleDocs - Firefox (Linux) - Annotated Text", function(t) {
+  _annotatedTextTest(t, require('../fixtures/html/google-docs-linux-firefox-annotated-text'));
 });
 
-QUnit.uiTest("GoogleDocs - Firefox (OSX) - Plain Text", function(assert) {
-  _plainTextTest(assert, require('../fixtures/html/google-docs-osx-firefox-plain-text'));
+test.UI("GoogleDocs - Firefox (OSX) - Plain Text", function(t) {
+  _plainTextTest(t, require('../fixtures/html/google-docs-osx-firefox-plain-text'));
 });
 
-QUnit.uiTest("LibreOffice (OSX/Linux) - Plain Text", function(assert) {
-  _plainTextTest(assert, require('../fixtures/html/libre-office-osx-linux-plain-text'));
+test.UI("LibreOffice (OSX/Linux) - Plain Text", function(t) {
+  _plainTextTest(t, require('../fixtures/html/libre-office-osx-linux-plain-text'));
 });
 
-QUnit.uiTest("LibreOffice (OSX/Linux) - Annotated Text", function(assert) {
-  _annotatedTextTest(assert, require('../fixtures/html/libre-office-osx-linux-annotated-text'));
+test.UI("LibreOffice (OSX/Linux) - Annotated Text", function(t) {
+  _annotatedTextTest(t, require('../fixtures/html/libre-office-osx-linux-annotated-text'));
 });
 
-QUnit.uiTest("LibreOffice (OSX/Linux) - Two Paragraphs", function(assert) {
-  _twoParagraphsTest(assert, require('../fixtures/html/libre-office-osx-linux-two-paragraphs'));
+test.UI("LibreOffice (OSX/Linux) - Two Paragraphs", function(t) {
+  _twoParagraphsTest(t, require('../fixtures/html/libre-office-osx-linux-two-paragraphs'));
 });
 
-QUnit.uiTest("Microsoft Word 11 (OSX) - Plain Text", function(assert) {
-  _plainTextTest(assert, require('../fixtures/html/word-11-osx-plain-text'));
+test.UI("Microsoft Word 11 (OSX) - Plain Text", function(t) {
+  _plainTextTest(t, require('../fixtures/html/word-11-osx-plain-text'));
 });
 
-QUnit.uiTest("Microsoft Word 11 (OSX) - Annotated Text", function(assert) {
-  _annotatedTextTest(assert, require('../fixtures/html/word-11-osx-annotated-text'));
+test.UI("Microsoft Word 11 (OSX) - Annotated Text", function(t) {
+  _annotatedTextTest(t, require('../fixtures/html/word-11-osx-annotated-text'));
 });
 
-QUnit.uiTest("Microsoft Word 11 (OSX) - Two Paragraphs", function(assert) {
-  _twoParagraphsTest(assert, require('../fixtures/html/word-11-osx-two-paragraphs'));
+test.UI("Microsoft Word 11 (OSX) - Two Paragraphs", function(t) {
+  _twoParagraphsTest(t, require('../fixtures/html/word-11-osx-two-paragraphs'));
 });

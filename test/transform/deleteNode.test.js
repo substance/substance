@@ -1,25 +1,24 @@
 "use strict";
 
-require('../QUnitExtensions');
+var test = require('../test').module('transform/deleteNode');
+
 var DocumentSession = require('../../model/DocumentSession');
 var deleteNode = require('../../model/transform/deleteNode');
-
 var fixture = require('../fixtures/createTestArticle');
 var containerAnnoSample = require('../fixtures/containerAnnoSample');
 
-QUnit.module('model/transform/deleteNode');
-
-QUnit.test("Delete a plain node", function(assert) {
+test("Delete a plain node", function(t) {
   var doc = fixture(containerAnnoSample);
   var docSession = new DocumentSession(doc);
   docSession.transaction(function(tx, args) {
     args.nodeId = "p4";
     deleteNode(tx, args);
   });
-  assert.isNullOrUndefined(doc.get('p4'), "Node should have been deleted.");
+  t.isNil(doc.get('p4'), "Node should have been deleted.");
+  t.end();
 });
 
-QUnit.test("Delete annotations when deleting a node", function(assert) {
+test("Delete annotations when deleting a node", function(t) {
   var doc = fixture(containerAnnoSample);
   var docSession = new DocumentSession(doc);
   docSession.transaction(function(tx) {
@@ -30,16 +29,17 @@ QUnit.test("Delete annotations when deleting a node", function(assert) {
       startOffset: 0, endOffset: 5
     });
   });
-  assert.isDefinedAndNotNull(doc.get("test-anno"));
+  t.notNil(doc.get("test-anno"));
 
   docSession.transaction(function(tx, args) {
     args.nodeId = "p4";
     deleteNode(tx, args);
   });
-  assert.isNullOrUndefined(doc.get("test-anno"), "Annotation should have been deleted too.");
+  t.isNil(doc.get("test-anno"), "Annotation should have been deleted too.");
+  t.end();
 });
 
-QUnit.test("Move startAnchor of container annotation to next node.", function(assert) {
+test("Move startAnchor of container annotation to next node.", function(t) {
   var doc = fixture(containerAnnoSample);
   var docSession = new DocumentSession(doc);
   docSession.transaction(function(tx, args) {
@@ -47,11 +47,12 @@ QUnit.test("Move startAnchor of container annotation to next node.", function(as
     deleteNode(tx, args);
   });
   var anno = doc.get('a1');
-  assert.deepEqual(anno.startPath, ["p2", "content"], "Start anchor should now be on second paragraph.");
-  assert.equal(anno.startOffset, 0);
+  t.deepEqual(anno.startPath, ["p2", "content"], "Start anchor should now be on second paragraph.");
+  t.equal(anno.startOffset, 0);
+  t.end();
 });
 
-QUnit.test("Move endAnchor of container annotation to previous node.", function(assert) {
+test("Move endAnchor of container annotation to previous node.", function(t) {
   var doc = fixture(containerAnnoSample);
   var docSession = new DocumentSession(doc);
   docSession.transaction(function(tx, args) {
@@ -60,6 +61,7 @@ QUnit.test("Move endAnchor of container annotation to previous node.", function(
   });
   var anno = doc.get('a1');
   var p2 = doc.get('p2');
-  assert.deepEqual(anno.endPath, ["p2", "content"], "End anchor should now be on second paragraph.");
-  assert.equal(anno.endOffset, p2.content.length);
+  t.deepEqual(anno.endPath, ["p2", "content"], "End anchor should now be on second paragraph.");
+  t.equal(anno.endOffset, p2.content.length);
+  t.end();
 });
