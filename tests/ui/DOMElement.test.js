@@ -1,6 +1,6 @@
 'use strict';
 
-var test = require('../test');
+var test = require('../test').module('ui/DOMElement');
 
 var isNull = require('lodash/isNull');
 var isUndefined = require('lodash/isUndefined');

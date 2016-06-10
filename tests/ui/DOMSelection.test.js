@@ -1,9 +1,8 @@
 "use strict";
 /* eslint-disable no-invalid-this, indent */
 
-var test = require('../test').UI;
-var testFF = require('../test').FF;
-var testWK = require('../test').WK;
+var test = require('../test').module('ui/DOMSelection');
+
 
 var get = require('lodash/get');
 var isArray = require('lodash/isArray');
@@ -34,7 +33,7 @@ function setDOMSelection(startNode, startOffset, endNode, endOffset) {
   range.setEnd(endNode, endOffset);
   sel.removeAllRanges();
   sel.addRange(range);
-};
+}
 
 function StubDoc(el) {
   this.el = el;
@@ -148,7 +147,7 @@ var mixedFixture = [
   '<div id="after">After</div>'
 ].join('');
 
-test("Get coordinate for collapsed selection", function(t) {
+test.UI("Get coordinate for collapsed selection", function(t) {
   var el = t.sandbox.html(singlePropertyFixture);
   var domSelection = new DOMSelection(new StubSurface(el));
   var node = el.find('#test1 > span').getFirstChild();
@@ -160,7 +159,7 @@ test("Get coordinate for collapsed selection", function(t) {
   t.end();
 });
 
-test("Search coordinate (before)", function(t) {
+test.UI("Search coordinate (before)", function(t) {
   var el = t.sandbox.html(mixedFixture);
   var domSelection = new DOMSelection(new StubSurface(el));
   var node = el.find('#before').getFirstChild();
@@ -172,7 +171,7 @@ test("Search coordinate (before)", function(t) {
   t.end();
 });
 
-test("Search coordinate (between)", function(t) {
+test.UI("Search coordinate (between)", function(t) {
   var el = t.sandbox.html(mixedFixture);
   var domSelection = new DOMSelection(new StubSurface(el));
   var node = el.find('#between').getFirstChild();
@@ -184,7 +183,7 @@ test("Search coordinate (between)", function(t) {
   t.end();
 });
 
-test("Search coordinate (between, left)", function(t) {
+test.UI("Search coordinate (between, left)", function(t) {
   var el = t.sandbox.html(mixedFixture);
   var domSelection = new DOMSelection(new StubSurface(el));
   var node = el.find('#between').getFirstChild();
@@ -196,7 +195,7 @@ test("Search coordinate (between, left)", function(t) {
   t.end();
 });
 
-test("Search coordinate (after)", function(t) {
+test.UI("Search coordinate (after)", function(t) {
   var el = t.sandbox.html(mixedFixture);
   var domSelection = new DOMSelection(new StubSurface(el));
   var node = el.find('#after').getFirstChild();
@@ -208,7 +207,7 @@ test("Search coordinate (after)", function(t) {
   t.end();
 });
 
-test("coordinate via search", function(t) {
+test.UI("coordinate via search", function(t) {
   var el = t.sandbox.html(mixedFixture);
   var domSelection = new DOMSelection(new StubSurface(el));
   var node = el.find('#between').getFirstChild();
@@ -226,7 +225,7 @@ var emptyParagraphFixture = [
   '</div>'
 ].join('');
 
-test("DOM coordinate in empty paragraph", function(t) {
+test.UI("DOM coordinate in empty paragraph", function(t) {
   var el = t.sandbox.html(emptyParagraphFixture);
   var domSelection = new DOMSelection(new StubSurface(el));
   var node = el.find('#test1');
@@ -249,7 +248,7 @@ var textWithAnnotations = [
   '</div>'
 ].join('');
 
-test("DOM coordinate on text property level (first)", function(t) {
+test.UI("DOM coordinate on text property level (first)", function(t) {
   var el = t.sandbox.html(textWithAnnotations);
   var domSelection = new DOMSelection(new StubSurface(el));
   var node = el.find('#test1_content');
@@ -261,7 +260,7 @@ test("DOM coordinate on text property level (first)", function(t) {
   t.end();
 });
 
-test("DOM coordinate on text property level (last)", function(t) {
+test.UI("DOM coordinate on text property level (last)", function(t) {
   var el = t.sandbox.html(textWithAnnotations);
   var domSelection = new DOMSelection(new StubSurface(el));
   var node = el.find('#test1_content');
@@ -286,7 +285,7 @@ var withAnnosAndInlines = [
   '</div>'
 ].join('');
 
-test("DOM coordinate after last inline", function(t) {
+test.UI("DOM coordinate after last inline", function(t) {
   var el = t.sandbox.html(withAnnosAndInlines);
   var domSelection = new DOMSelection(new StubSurface(el));
   var node = el.find('#test1_content');
@@ -298,7 +297,7 @@ test("DOM coordinate after last inline", function(t) {
   t.end();
 });
 
-test("DOM selection spanning over inline at end", function(t) {
+test.UI("DOM selection spanning over inline at end", function(t) {
   var el = t.sandbox.html(withAnnosAndInlines);
   var domSelection = new DOMSelection(new StubSurface(el));
   var anchorNode = el.find('#before-last').getFirstChild();
@@ -325,7 +324,7 @@ var withoutHints = [
   '</div>'
 ].join('');
 
-test("Without hints: DOM coordinate in first text node", function(t) {
+test.UI("Without hints: DOM coordinate in first text node", function(t) {
   var el = t.sandbox.html(withoutHints);
   var domSelection = new DOMSelection(new StubSurface(el));
   var node = el.find('#test1_content').getFirstChild().getFirstChild();
@@ -336,7 +335,7 @@ test("Without hints: DOM coordinate in first text node", function(t) {
   t.end();
 });
 
-test("Without hints: DOM coordinate in second text node", function(t) {
+test.UI("Without hints: DOM coordinate in second text node", function(t) {
   var el = t.sandbox.html(withoutHints);
   var domSelection = new DOMSelection(new StubSurface(el));
   var node = el.find('#test1_content').getChildAt(1).getFirstChild();
@@ -347,7 +346,7 @@ test("Without hints: DOM coordinate in second text node", function(t) {
   t.end();
 });
 
-test("Without hints: DOM coordinate between spans", function(t) {
+test.UI("Without hints: DOM coordinate between spans", function(t) {
   var el = t.sandbox.html(withoutHints);
   var domSelection = new DOMSelection(new StubSurface(el));
   var node = el.find('#test1_content');
@@ -370,7 +369,7 @@ var issue273 = [
   '</span>'
 ].join('');
 
-test("Issue #273: 'Could not find char position' when clicking right above an inline node", function(t) {
+test.UI("Issue #273: 'Could not find char position' when clicking right above an inline node", function(t) {
   var el = t.sandbox.html(issue273);
   var domSelection = new DOMSelection(new StubSurface(el));
   var node = el.find('#test').getFirstChild();
@@ -399,7 +398,7 @@ var surfaceWithParagraphs = [
   '</div>'
 ].join('');
 
-testFF("Issue #354: Wrong selection in FF when double clicking between lines", function(t) {
+test.FF("Issue #354: Wrong selection in FF when double clicking between lines", function(t) {
   var el = t.sandbox.html(surfaceWithParagraphs);
   var domSelection = new DOMSelection(new StubSurface(el));
   var surface = el.find('#surface');
@@ -411,7 +410,7 @@ testFF("Issue #354: Wrong selection in FF when double clicking between lines", f
   t.end();
 });
 
-test("Issue #376: Wrong selection mapping at end of paragraph", function(t) {
+test.UI("Issue #376: Wrong selection mapping at end of paragraph", function(t) {
   var el = t.sandbox.html(surfaceWithParagraphs);
   var domSelection = new DOMSelection(new StubSurface(el));
   var p1span = el.find('#p1 span');
@@ -424,7 +423,7 @@ test("Issue #376: Wrong selection mapping at end of paragraph", function(t) {
   t.end();
 });
 
-testWK("Mapping a ContainerSelection to the DOM", function(t) {
+test.WK("Mapping a ContainerSelection to the DOM", function(t) {
   var el = t.sandbox.attr('contenteditable', true)
     .html(surfaceWithParagraphs);
   var domSelection = new DOMSelection(new StubSurface(el));
@@ -440,7 +439,7 @@ testWK("Mapping a ContainerSelection to the DOM", function(t) {
   t.end();
 });
 
-test("Mapping a ContainerSelection from DOM to model", function(t) {
+test.UI("Mapping a ContainerSelection from DOM to model", function(t) {
   var el = t.sandbox.html(surfaceWithParagraphs);
   var domSelection = new DOMSelection(new StubSurface(el, 'main'));
   var p1Text = el.find('#p1 span').getFirstChild();
@@ -459,7 +458,7 @@ test("Mapping a ContainerSelection from DOM to model", function(t) {
 // This works in Chrome but not in FF
 // Chrome maps the anchor to a textNode (text, 0) which is working fine
 // FF takes the anchor as we specified it (surface, 2)
-test("DOM Coordinate on surface element", function(t) {
+test.UI("DOM Coordinate on surface element", function(t) {
   var el = t.sandbox.html(surfaceWithParagraphs);
   var domSelection = new DOMSelection(new StubSurface(el, 'main'));
   var surface = el.find('#surface');

@@ -1,6 +1,6 @@
 'use strict';
 
-var test = require('../test').UI;
+var test = require('../test').module('ui/Component (integration)');
 
 var Component = require('../../ui/Component');
 
@@ -12,7 +12,7 @@ function component(renderFunc, props) {
   return comp;
 }
 
-test("Three elements", function(t) {
+test.UI("Three elements", function(t) {
   var sandbox = t.sandbox; // eslint-disable-line
   var comp = component(function($$) {
     return $$('div').append(

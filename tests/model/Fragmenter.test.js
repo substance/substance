@@ -1,6 +1,6 @@
 'use strict';
 
-var test = require('../test');
+var test = require('../test').module('model/Fragmenter');
 
 var oo = require('../../util/oo');
 var Fragmenter = require('../../model/Fragmenter');

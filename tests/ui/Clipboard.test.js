@@ -1,6 +1,6 @@
 "use strict";
 
-var UITest = require('../test').UI;
+var test = require('../test').module('ui/Clipboard');
 
 var DocumentSession = require('../../model/DocumentSession');
 var Registry = require('../../util/Registry');
@@ -42,13 +42,9 @@ function isDefinedAndNotNull(t, x, msg) {
   return t.ok(!isNull(x) && !isUndefined(x), msg);
 }
 
-function ClipboardSetup() {
-  Clipboard.NO_CATCH = true;
-}
-
-function test(description, fn) {
-  UITest(description, fn, ClipboardSetup);
-};
+// function ClipboardSetup() {
+//   Clipboard.NO_CATCH = true;
+// }
 
 function ClipboardEventData() {
   this.data = {};
@@ -74,7 +70,7 @@ function ClipboardEvent() {
   this.stopPropagation = function() {};
 }
 
-test("Copying HTML, and plain text", function(t) {
+test.UI("Copying HTML, and plain text", function(t) {
   var doc = fixture(simple);
   var surface = new StubSurface(doc, null, 'body');
   var clipboard = new Clipboard(surface, clipboardConfig);
@@ -93,7 +89,7 @@ test("Copying HTML, and plain text", function(t) {
   t.end();
 });
 
-test("Copying a property selection", function(t) {
+test.UI("Copying a property selection", function(t) {
   var doc = fixture(simple);
   var surface = new StubSurface(doc, null, 'body');
   var clipboard = new Clipboard(surface, clipboardConfig);
@@ -117,7 +113,7 @@ test("Copying a property selection", function(t) {
   t.end();
 });
 
-test("Copying a container selection", function(t) {
+test.UI("Copying a container selection", function(t) {
   var doc = fixture(simple);
   var surface = new StubSurface(doc, null, 'body');
   var clipboard = new Clipboard(surface, clipboardConfig);
@@ -181,7 +177,7 @@ function _containerEditorSample() {
   return editor;
 }
 
-test("Pasting text into ContainerEditor using 'text/plain'.", function(t) {
+test.UI("Pasting text into ContainerEditor using 'text/plain'.", function(t) {
   var editor = _containerEditorSample();
   var doc = editor.getDocument();
   var event = new ClipboardEvent();
@@ -191,7 +187,7 @@ test("Pasting text into ContainerEditor using 'text/plain'.", function(t) {
   t.end();
 });
 
-test("Pasting without any data given.", function(t) {
+test.UI("Pasting without any data given.", function(t) {
   var editor = _containerEditorSample();
   var doc = editor.getDocument();
   var event = new ClipboardEvent();
@@ -201,7 +197,7 @@ test("Pasting without any data given.", function(t) {
 });
 
 
-test("Pasting text into ContainerEditor using 'text/html'.", function(t) {
+test.UI("Pasting text into ContainerEditor using 'text/html'.", function(t) {
   var editor = _containerEditorSample();
   var doc = editor.getDocument();
   var TEXT = 'XXX';
@@ -269,43 +265,43 @@ function _twoParagraphsTest(t, fixture, forceWindows) {
   }, forceWindows);
 }
 
-test("Browser - Chrome (OSX/Linux) - Plain Text", function(t) {
+test.UI("Browser - Chrome (OSX/Linux) - Plain Text", function(t) {
   _plainTextTest(t, require('../fixtures/html/browser-linux-plain-text'));
 });
 
-test("Browser - Chrome (OSX/Linux) - Annotated Text", function(t) {
+test.UI("Browser - Chrome (OSX/Linux) - Annotated Text", function(t) {
   _annotatedTextTest(t, require('../fixtures/html/browser-linux-annotated-text'));
 });
 
-test("Browser - Chrome (OSX/Linux) - Two Paragraphs", function(t) {
+test.UI("Browser - Chrome (OSX/Linux) - Two Paragraphs", function(t) {
   _twoParagraphsTest(t, require('../fixtures/html/browser-linux-two-paragraphs'));
 });
 
-test("Browser - Chrome (Windows) - Plain Text", function(t) {
+test.UI("Browser - Chrome (Windows) - Plain Text", function(t) {
   _plainTextTest(t, require('../fixtures/html/browser-windows-plain-text'), 'forceWindows');
 });
 
-test("Browser - Chrome (Windows) - Annotated Text", function(t) {
+test.UI("Browser - Chrome (Windows) - Annotated Text", function(t) {
   _annotatedTextTest(t, require('../fixtures/html/browser-windows-annotated-text'), 'forceWindows');
 });
 
-test("Browser - Chrome (Windows) - Two Paragraphs", function(t) {
+test.UI("Browser - Chrome (Windows) - Two Paragraphs", function(t) {
   _twoParagraphsTest(t, require('../fixtures/html/browser-windows-two-paragraphs'), 'forceWindows');
 });
 
-test("Browser - Firefox (Linux) - Plain Text", function(t) {
+test.UI("Browser - Firefox (Linux) - Plain Text", function(t) {
   _plainTextTest(t, require('../fixtures/html/browser-linux-firefox-plain-text'));
 });
 
-test("Browser - Firefox (Linux) - Annotated Text", function(t) {
+test.UI("Browser - Firefox (Linux) - Annotated Text", function(t) {
   _annotatedTextTest(t, require('../fixtures/html/browser-linux-firefox-annotated-text'));
 });
 
-test("Browser - Firefox (Linux) - Two Paragraphs", function(t) {
+test.UI("Browser - Firefox (Linux) - Two Paragraphs", function(t) {
   _twoParagraphsTest(t, require('../fixtures/html/browser-linux-firefox-two-paragraphs'));
 });
 
-test("Browser - Firefox (Linux) - Whole Page", function(t) {
+test.UI("Browser - Firefox (Linux) - Whole Page", function(t) {
   _fixtureTest(t, require('../fixtures/html/browser-linux-firefox-whole-page'), function(editor, html) {
     var doc = editor.getDocument();
     var event = new ClipboardEvent();
@@ -321,86 +317,86 @@ test("Browser - Firefox (Linux) - Whole Page", function(t) {
   });
 });
 
-test("Browser - Firefox (OSX) - Plain Text", function(t) {
+test.UI("Browser - Firefox (OSX) - Plain Text", function(t) {
   _plainTextTest(t, require('../fixtures/html/browser-osx-firefox-plain-text'));
 });
 
-test("Browser - Firefox (OSX) - Annotated Text", function(t) {
+test.UI("Browser - Firefox (OSX) - Annotated Text", function(t) {
   _annotatedTextTest(t, require('../fixtures/html/browser-osx-firefox-annotated-text'));
 });
 
-test("Browser - Firefox (OSX) - Two Paragraphs", function(t) {
+test.UI("Browser - Firefox (OSX) - Two Paragraphs", function(t) {
   _twoParagraphsTest(t, require('../fixtures/html/browser-osx-firefox-two-paragraphs'));
 });
 
-test("Browser - Firefox (Windows) - Plain Text", function(t) {
+test.UI("Browser - Firefox (Windows) - Plain Text", function(t) {
   _plainTextTest(t, require('../fixtures/html/browser-windows-firefox-plain-text'), 'forceWindows');
 });
 
-test("Browser - Firefox (Windows) - Annotated Text", function(t) {
+test.UI("Browser - Firefox (Windows) - Annotated Text", function(t) {
   _annotatedTextTest(t, require('../fixtures/html/browser-windows-firefox-annotated-text'), 'forceWindows');
 });
 
-test("Browser - Firefox (Windows) - Two Paragraphs", function(t) {
+test.UI("Browser - Firefox (Windows) - Two Paragraphs", function(t) {
   _twoParagraphsTest(t, require('../fixtures/html/browser-windows-firefox-two-paragraphs'), 'forceWindows');
 });
 
-test("Browser - Edge (Windows) - Plain Text", function(t) {
+test.UI("Browser - Edge (Windows) - Plain Text", function(t) {
   _plainTextTest(t, require('../fixtures/html/browser-windows-edge-plain-text'), 'forceWindows');
 });
 
-test("Browser - Edge (Windows) - Annotated Text", function(t) {
+test.UI("Browser - Edge (Windows) - Annotated Text", function(t) {
   _annotatedTextTest(t, require('../fixtures/html/browser-windows-edge-annotated-text'), 'forceWindows');
 });
 
-test("Browser - Edge (Windows) - Two Paragraphs", function(t) {
+test.UI("Browser - Edge (Windows) - Two Paragraphs", function(t) {
   _twoParagraphsTest(t, require('../fixtures/html/browser-windows-edge-two-paragraphs'), 'forceWindows');
 });
 
-test("GoogleDocs - Chrome (OSX/Linux) - Plain Text", function(t) {
+test.UI("GoogleDocs - Chrome (OSX/Linux) - Plain Text", function(t) {
   _plainTextTest(t, require('../fixtures/html/google-docs-osx-linux-chrome-plain-text'));
 });
 
-test("GoogleDocs - Chrome (OSX/Linux) - Annotated Text", function(t) {
+test.UI("GoogleDocs - Chrome (OSX/Linux) - Annotated Text", function(t) {
   _annotatedTextTest(t, require('../fixtures/html/google-docs-osx-linux-chrome-annotated-text'));
 });
 
-test("GoogleDocs - Chrome (OSX/Linux) - Two Paragraphs", function(t) {
+test.UI("GoogleDocs - Chrome (OSX/Linux) - Two Paragraphs", function(t) {
   _twoParagraphsTest(t, require('../fixtures/html/google-docs-osx-linux-chrome-two-paragraphs'));
 });
 
-test("GoogleDocs - Firefox (Linux) - Plain Text", function(t) {
+test.UI("GoogleDocs - Firefox (Linux) - Plain Text", function(t) {
   _plainTextTest(t, require('../fixtures/html/google-docs-linux-firefox-plain-text'));
 });
 
-test("GoogleDocs - Firefox (Linux) - Annotated Text", function(t) {
+test.UI("GoogleDocs - Firefox (Linux) - Annotated Text", function(t) {
   _annotatedTextTest(t, require('../fixtures/html/google-docs-linux-firefox-annotated-text'));
 });
 
-test("GoogleDocs - Firefox (OSX) - Plain Text", function(t) {
+test.UI("GoogleDocs - Firefox (OSX) - Plain Text", function(t) {
   _plainTextTest(t, require('../fixtures/html/google-docs-osx-firefox-plain-text'));
 });
 
-test("LibreOffice (OSX/Linux) - Plain Text", function(t) {
+test.UI("LibreOffice (OSX/Linux) - Plain Text", function(t) {
   _plainTextTest(t, require('../fixtures/html/libre-office-osx-linux-plain-text'));
 });
 
-test("LibreOffice (OSX/Linux) - Annotated Text", function(t) {
+test.UI("LibreOffice (OSX/Linux) - Annotated Text", function(t) {
   _annotatedTextTest(t, require('../fixtures/html/libre-office-osx-linux-annotated-text'));
 });
 
-test("LibreOffice (OSX/Linux) - Two Paragraphs", function(t) {
+test.UI("LibreOffice (OSX/Linux) - Two Paragraphs", function(t) {
   _twoParagraphsTest(t, require('../fixtures/html/libre-office-osx-linux-two-paragraphs'));
 });
 
-test("Microsoft Word 11 (OSX) - Plain Text", function(t) {
+test.UI("Microsoft Word 11 (OSX) - Plain Text", function(t) {
   _plainTextTest(t, require('../fixtures/html/word-11-osx-plain-text'));
 });
 
-test("Microsoft Word 11 (OSX) - Annotated Text", function(t) {
+test.UI("Microsoft Word 11 (OSX) - Annotated Text", function(t) {
   _annotatedTextTest(t, require('../fixtures/html/word-11-osx-annotated-text'));
 });
 
-test("Microsoft Word 11 (OSX) - Two Paragraphs", function(t) {
+test.UI("Microsoft Word 11 (OSX) - Two Paragraphs", function(t) {
   _twoParagraphsTest(t, require('../fixtures/html/word-11-osx-two-paragraphs'));
 });

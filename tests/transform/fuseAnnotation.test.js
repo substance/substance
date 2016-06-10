@@ -1,6 +1,6 @@
 'use strict';
 
-var test = require('../test');
+var test = require('../test').module('transform/fuseAnnotation');
 
 var fuseAnnotation = require('../../model/transform/fuseAnnotation');
 var docHelpers = require('../../model/documentHelpers');

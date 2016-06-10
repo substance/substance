@@ -1,6 +1,6 @@
 "use strict";
 
-var test = require('../test').UI;
+var test = require('../test').module('ui/TextPropertyComponent');
 
 var isNull = require('lodash/isNull');
 var isUndefined = require('lodash/isUndefined');
@@ -15,7 +15,7 @@ function isDefinedAndNotNull(t, x, msg) {
   return t.ok(!isNull(x) && !isUndefined(x), msg);
 }
 
-test("Get coordinate of empty property", function(t) {
+test.UI("Get coordinate of empty property", function(t) {
   var doc = fixture(simple);
   doc.create({
     type: 'paragraph',

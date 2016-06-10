@@ -1,6 +1,6 @@
 'use strict';
 
-var test = require('../test');
+var test = require('../test').module('model/HTMLImporter');
 
 var TestHTMLImporter = require('../model/TestHTMLImporter');
 var DOMElement = require('../../ui/DefaultDOMElement');

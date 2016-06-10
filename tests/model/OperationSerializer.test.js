@@ -1,6 +1,6 @@
 'use strict';
 
-var test = require('../test');
+var test = require('../test').module('model/OperationSerializer');
 
 var OperationSerializer = require('../../model/data/OperationSerializer');
 var ObjectOperation = require('../../model/data/ObjectOperation');

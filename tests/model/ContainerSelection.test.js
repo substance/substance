@@ -1,6 +1,6 @@
 'use strict';
 
-var test = require('../test');
+var test = require('../test').module('model/ContainerSelection');
 
 var Range = require('../../model/Range');
 var Coordinate = require('../../model/Coordinate');

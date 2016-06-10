@@ -1,6 +1,6 @@
 'use strict';
 
-var test = require('../test');
+var test = require('../test').module('collab/SnapshotStore');
 
 var SnapshotStore = require('../../collab/SnapshotStore');
 var testSnapshotStore = require('../collab/testSnapshotStore');

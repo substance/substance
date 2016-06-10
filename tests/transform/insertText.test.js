@@ -1,6 +1,6 @@
 "use strict";
 
-var test = require('../test');
+var test = require('../test').module('transform/insertText');
 
 var insertText = require('../../model/transform/insertText');
 var fixture = require('../fixtures/createTestArticle');

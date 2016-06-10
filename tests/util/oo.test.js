@@ -1,9 +1,8 @@
 "use strict";
 
-var oo = require('../../util/oo');
+var test = require('../test').module('util/oo');
 
-var test = require('../test')
-  .module('util/oo');
+var oo = require('../../util/oo');
 
 function A() {}
 oo.initClass(A);

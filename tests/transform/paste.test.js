@@ -1,6 +1,6 @@
 "use strict";
 
-var test = require('../test');
+var test = require('../test').module('transform/paste');
 
 var paste = require('../../model/transform/paste');
 var copySelection = require('../../model/transform/copySelection');

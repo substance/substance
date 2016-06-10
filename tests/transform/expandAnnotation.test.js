@@ -1,6 +1,6 @@
 'use strict';
 
-var test = require('../test');
+var test = require('../test').module('transform/expandAnnotation');
 
 var expandAnnotation = require('../../model/transform/expandAnnotation');
 var documentHelpers = require('../../model/documentHelpers');

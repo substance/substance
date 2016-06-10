@@ -1,6 +1,6 @@
 'use strict';
 
-var test = require('../test');
+var test = require('../test').module('model/DocumentSession');
 
 var sinon = require('sinon');
 var extend = require('lodash/extend');

@@ -1,7 +1,7 @@
 'use strict';
 /* eslint-disable */
 
-var test = require('../test');
+var test = require('../test').module('model/ContainerAddress');
 
 var ContainerAddress = require('../../model/ContainerAddress');
 

@@ -1,6 +1,6 @@
 "use strict";
 
-var test = require('../test');
+var test = require('../test').module('transform/deleteCharacter');
 
 var fixture = require('../fixtures/createTestArticle');
 var headersAndParagraphs = require('../fixtures/headersAndParagraphs');

@@ -1,6 +1,6 @@
 'use strict';
 
-var test = require('../test');
+var test = require('../test').module('model/Document');
 
 var fixture = require('../fixtures/createTestArticle');
 var simple = require('../fixtures/simple');

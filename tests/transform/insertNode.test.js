@@ -1,6 +1,6 @@
 "use strict";
 
-var test = require('../test');
+var test = require('../test').module('transform/insertNode');
 
 var insertNode = require('../../model/transform/insertNode');
 var DocumentSession = require('../../model/DocumentSession');

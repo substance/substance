@@ -1,6 +1,6 @@
 'use strict';
 
-var test = require('../test');
+var test = require('../test').module('model/HTMLExporter');
 
 var TestHTMLExporter = require('../model/TestHTMLExporter');
 var TestArticle = require('../model/TestArticle');

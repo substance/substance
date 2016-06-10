@@ -1,7 +1,7 @@
 "use strict";
 /* eslint-disable no-invalid-this, indent */
 
-var UITest = require('../test').UI;
+var test = require('../test').module('ui/Component');
 
 var spy = require('../spy');
 var isEqual = require('lodash/isEqual');
@@ -65,16 +65,10 @@ function renderTestComponent(renderFunc, props) {
 
 function _ComponentTests(debug) {
 
-  console.log('ui/Component'+(debug?'(debug)':''));
-
-  function ModuleSetup() {
-    _withSpiesEnabled = false;
-    RenderingEngine.DEBUG = debug;
-  }
-
-  function test(description, fn) {
-    UITest(description, fn, ModuleSetup);
-  };
+  // function ModuleSetup() {
+  //   _withSpiesEnabled = false;
+  //   RenderingEngine.DEBUG = debug;
+  // }
 
   test("Throw error when render method is not returning an element", function(t) {
     var MyComponent = TestComponent.extend({
@@ -102,7 +96,7 @@ function _ComponentTests(debug) {
 
   TestComponent.extend(SimpleComponent);
 
-  test("Mounting a component", function(t) {
+  test.UI("Mounting a component", function(t) {
     enableSpies();
     // Mount to a detached element
     var el = window.document.createElement('div');
@@ -386,7 +380,7 @@ function _ComponentTests(debug) {
   });
 
   // events are not supported by cheerio
-  test("Rendering an element with click handler", function(t) {
+  test.UI("Rendering an element with click handler", function(t) {
 
     function ClickableComponent() {
       ClickableComponent.super.apply(this, arguments);
@@ -434,7 +428,7 @@ function _ComponentTests(debug) {
     t.end();
   });
 
-  test("Rendering an element with once-click handler", function(t) {
+  test.UI("Rendering an element with once-click handler", function(t) {
     function ClickableComponent() {
       ClickableComponent.super.apply(this, arguments);
       this.clicks = 0;
@@ -532,7 +526,7 @@ function _ComponentTests(debug) {
   });
 
   // didMount is only called in browser
-  test("Call didMount once when mounted", function(t) {
+  test.UI("Call didMount once when mounted", function(t) {
     enableSpies();
 
     function Child() {
@@ -856,7 +850,7 @@ function _ComponentTests(debug) {
     t.end();
   });
 
-  test("Eventlisteners on child element", function(t) {
+  test.UI("Eventlisteners on child element", function(t) {
     function Parent() {
       Parent.super.apply(this, arguments);
     }

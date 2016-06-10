@@ -1,7 +1,7 @@
 'use strict';
 /* eslint-disable consistent-return */
 
-var test = require('../test');
+var test = require('../test').module('collab/SnapshotEngine');
 
 var DocumentStore = require('../../collab/DocumentStore');
 var SnapshotStore = require('../../collab/SnapshotStore');

@@ -1,6 +1,6 @@
 'use strict';
 
-var test = require('../test');
+var test = require('../test').module('model/XMLImporter');
 
 var TestXMLImporter = require('../model/TestXMLImporter');
 var DOMElement = require('../../ui/DefaultDOMElement');

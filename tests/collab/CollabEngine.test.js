@@ -1,8 +1,6 @@
 'use strict';
 /* eslint-disable consistent-return */
 
-var test = require('../test');
-
 var isNull = require('lodash/isNull');
 var isUndefined = require('lodash/isUndefined');
 
@@ -19,6 +17,8 @@ var changeStoreSeed = require('../fixtures/changeStoreSeed');
 var twoParagraphs = require('../fixtures/twoParagraphs');
 var insertParagraph = require('../fixtures/insertParagraph');
 var insertText = require('../fixtures/insertText');
+
+var test = require('../test').module('collab/CollabEngine');
 
 function isNullOrUndefined(t, x, msg) {
   return t.ok(isNull(x) || isUndefined(x), msg);

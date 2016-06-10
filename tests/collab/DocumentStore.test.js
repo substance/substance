@@ -1,11 +1,11 @@
 'use strict';
 
-var test = require('../test');
-
 var DocumentStore = require('../../collab/DocumentStore');
 var testDocumentStore = require('./testDocumentStore');
 var documentStoreSeed = require('../fixtures/documentStoreSeed');
 var store = new DocumentStore();
+
+var test = require('../test').module('collab/DocumentStore');
 
 function setup(cb, t) {
   // Make sure we create a new seed instance, as data ops

@@ -1,6 +1,6 @@
 "use strict";
 
-var test = require('../test');
+var test = require('../test').module('transform/merge');
 
 var merge = require('../../model/transform/merge');
 
