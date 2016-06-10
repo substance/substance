@@ -17,10 +17,12 @@ ResultItem.Prototype = function() {
     var result = this.props.result;
     var el = $$('div').addClass('sc-test-result');
     el.append($$('div').addClass('se-name').append(result.name));
-    if (result.ok) {
-      el.addClass('sm-ok');
-    } else if (!test.skip) {
-      el.addClass('sm-not-ok');
+    if (!test._skip) {
+      if (result.ok) {
+        el.addClass('sm-ok');
+      } else {
+        el.addClass('sm-not-ok');
+      }
     }
     return el;
   };
