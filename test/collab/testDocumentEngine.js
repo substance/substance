@@ -1,8 +1,5 @@
 'use strict';
 
-var isNull = require('lodash/isNull');
-var isUndefined = require('lodash/isUndefined');
-
 function testDocumentEngine(documentEngine, test) {
 
   // Document API
@@ -23,7 +20,7 @@ function testDocumentEngine(documentEngine, test) {
       schemaName: 'prose-article'
     }, function(err, doc) {
       t.ok(doc.data, 'valid doc snapshot expected');
-       t.end();
+      t.end();
     });
   });
 
@@ -42,7 +39,7 @@ function testDocumentEngine(documentEngine, test) {
       t.ok(!err, 'Should delete a document');
       documentEngine.getDocument({documentId: 'test-doc'}, function(err, doc) {
         t.ok(err, 'Should print an error that document does not exist');
-        t.ok(isUndefined(doc) || isNull(doc), 'doc should be undefined');
+        t.isNil(doc, 'doc should be undefined');
 
         // Test if there are still changes for that doc after deletion
         var args = {

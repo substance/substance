@@ -299,7 +299,7 @@ test.UI("Browser - Firefox (Linux) - Whole Page", function(t) {
     editor.clipboard.onPaste(event);
     // make sure HTML paste succeeded, by checking against the result of plain text insertion
     t.notOk(doc.get('p1').getText() === '0XXX123456789', "HTML conversion and paste should have been successful (not fall back to plain-text).");
-    t.ok(doc.get('body').getLength() > 30, 'There should be a lot of paragraphs')
+    t.ok(doc.get('body').getLength() > 30, 'There should be a lot of paragraphs');
     t.end();
   });
 });

@@ -1,3 +1,5 @@
+'use strict';
+
 /**
  @class
  @export
@@ -17,7 +19,7 @@ MyClass.Prototype = function() {
     @type String
   */
   this.bar = 'bar';
-}
+};
 
 // classical prototype approach
 

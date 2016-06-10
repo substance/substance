@@ -60,7 +60,7 @@ TestWebSocket.Prototype = function() {
   /*
     Emulating native removeEventListener API
   */
-  this.removeEventListener = function(eventName, handler) {
+  this.removeEventListener = function(eventName) {
     delete this['on'+eventName];
   };
 

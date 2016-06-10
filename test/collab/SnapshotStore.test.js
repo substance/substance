@@ -18,13 +18,13 @@ function setup(cb, t) {
       cb(t);
     }
   });
-};
+}
 
 function setupTest(description, fn) {
   test(description, function (t) {
     setup(fn, t);
   });
-};
+}
 
 // Runs the offical backend test suite
 testSnapshotStore(store, setupTest);

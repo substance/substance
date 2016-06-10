@@ -1,3 +1,4 @@
+'use strict';
 // Please see snapshotStoreSeed.js for the used fixture data
 
 function testSnapshotEngine(snapshotEngine, docFactory, test) {

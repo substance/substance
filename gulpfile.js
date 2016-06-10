@@ -72,8 +72,7 @@ gulp.task('lint', function() {
     './packages/**/*.js',
     './ui/**/*.js',
     './util/**/*.js',
-    './test/model/*.js',
-    './test/unit/**/*.js'
+    './test/**/*.js'
   ]).pipe(eslint())
     .pipe(eslint.format())
     .pipe(eslint.failAfterError());
@@ -114,7 +113,7 @@ gulp.task('test:fixtures', function() {
 
 gulp.task('test:qunit:karma', ['lint'], function(done) {
   new Karma({
-    configFile: __dirname + '/karma.conf.js',
+    configFile: __dirname + '/karma.qunit.conf.js',
     singleRun: true
   }, done).start();
 });
@@ -124,15 +123,15 @@ gulp.task('test:qunit:server', ['lint'], function() {
   require('./test-old/run');
 });
 
-gulp.task('test:tape:browsers', ['lint'], function(done) {
+gulp.task('test:browsers', ['lint'], function(done) {
   new Karma({
-    configFile: __dirname + '/karma.tape.conf.js',
+    configFile: __dirname + '/karma.conf.js',
     singleRun: true
   }, done).start();
 });
 
-gulp.task('test:tape:server', ['lint'], function(done) {
-  return gulp.src('tests/**/*.test.js')
+gulp.task('test:server', ['lint'], function(done) {
+  return gulp.src('test/**/*.test.js')
     .pipe(tape({
       reporter: tapSpec()
     }));
@@ -140,6 +139,6 @@ gulp.task('test:tape:server', ['lint'], function(done) {
 
 gulp.task('test:qunit', ['lint', 'test:qunit:karma', 'test:qunit:server']);
 
-gulp.task('test', ['lint', 'test:tape:browsers', 'test:tape:server']);
+gulp.task('test', ['lint', 'test:browsers', 'test:server']);
 
 gulp.task('default', ['build']);

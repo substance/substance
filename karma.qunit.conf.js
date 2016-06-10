@@ -1,13 +1,13 @@
 module.exports = function(config) {
   config.set({
     basePath: '.',
-    frameworks: ['browserify', 'tap'],
+    frameworks: ['browserify', 'source-map-support', 'qunit'],
     files: [
-      'test/**/*.test.js',
-      { pattern: 'test/fixtures/**/*.html', included: false, served: true },
+      'test-old/**/*.test.js',
+      { pattern: 'test-old/fixtures/**/*.html', included: false, served: true },
     ],
     preprocessors: {
-      'test/**/*.test.js': ['browserify']
+      'test-old/**/*.test.js': ['browserify']
     },
     browsers: ['Chrome'],
     customLaunchers: {
@@ -16,7 +16,6 @@ module.exports = function(config) {
           flags: ['--no-sandbox']
       }
     },
-    reporters: ['tape'],
     singleRun: true,
     browserify: {
       debug: true // include inline source maps

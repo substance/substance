@@ -62,13 +62,13 @@ function setup(cb, t) {
       });
     });
   });
-};
+}
 
 function setupTest(description, fn) {
   test(description, function (t) {
     setup(fn, t);
   });
-};
+}
 
 // Run the generic testsuite with an engine that does not have a store attached
 testSnapshotEngine(snapshotEngine, documentFactory, setupTest);

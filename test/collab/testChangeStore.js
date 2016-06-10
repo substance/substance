@@ -1,3 +1,5 @@
+'use strict';
+
 function testChangeStore(store, test) {
   /*
     Create

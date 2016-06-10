@@ -15,13 +15,13 @@ function setup(cb, t) {
     if (err) console.error(err);
     else cb(t);
   });
-};
+}
 
 function setupTest(description, fn) {
   test(description, function (t) {
     setup(fn, t);
   });
-};
+}
 
 // Runs the offical backend test suite
 testDocumentStore(store, setupTest);

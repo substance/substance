@@ -1,3 +1,5 @@
+'use strict';
+
 // Please see snapshotStoreSeed.js for the used fixture data
 
 function testSnapshotEngineWithPersistence(snapshotEngine, docFactory, test) {

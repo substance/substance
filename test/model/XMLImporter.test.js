@@ -9,11 +9,11 @@ var importer;
 
 function setup() {
   importer = new TestXMLImporter();
-};
+}
 
 function teardown() {
   importer = null;
-};
+}
 
 function setupTest(description, fn) {
   test(description, function (t) {
@@ -21,7 +21,7 @@ function setupTest(description, fn) {
     fn(t);
     teardown();
   });
-};
+}
 
 var CONTENT = '0123456789';
 
