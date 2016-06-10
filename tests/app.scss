@@ -1,10 +1,18 @@
 .sc-test-suite {
   padding: 10px 10px;
+
+  > .se-toolbar {
+    height: 50px;
+  }
 }
 
 .sc-test {
   border: solid 1px #ccc;
   position: relative;
+
+  &.sm-hidden {
+    display: none;
+  }
 
   > .se-controls {
     position: absolute;

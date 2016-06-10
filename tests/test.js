@@ -3,7 +3,6 @@
 var tape = require('tape');
 var inBrowser = require('../util/inBrowser');
 var platform = require('../util/platform');
-var DefaultDOMElement = require('../ui/DefaultDOMElement');
 var substanceGlobals = require('../util/substanceGlobals');
 
 var harness = tape;
@@ -27,14 +26,24 @@ if (inBrowser && substanceGlobals.TEST_UI) {
     };
   });
 
-  harness.reset = function(t) {
-  };
 
   harness.runAllTests = function() {
     var i = 0;
     function next() {
       while (i < results.tests.length) {
         var t = results.tests[i++];
+        t.reset();
+        t.once('end', function(){ nextTick(next); });
+        t.run();
+      }
+    }
+    nextTick(next);
+  };
+
+  harness.runTests = function(tests) {
+    function next() {
+      while (tests.length > 0) {
+        var t = tests.shift();
         t.reset();
         t.once('end', function(){ nextTick(next); });
         t.run();
@@ -124,12 +133,6 @@ function _withExtensions(tapeish, addModule) {
   };
 
   return tapeish;
-}
-
-function _setupUI(t) {
-}
-
-function _teardownUI(t) {
 }
 
 module.exports = harness;
