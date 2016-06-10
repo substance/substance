@@ -11,7 +11,7 @@ function SurfaceManager(documentSession) {
   this.surfaces = {};
 
   this._state = {
-    focusedSurface: null,
+    focusedSurfaceId: null,
     // grouped by surfaceId and the by fragment type ('selection' | collaboratorId)
     fragments: {},
     selection: null,
@@ -42,9 +42,6 @@ SurfaceManager.Prototype = function() {
   this.getSurface = function(name) {
     if (name) {
       return this.surfaces[name];
-    } else {
-      console.warn('Deprecated: Use getFocusedSurface. Always provide a name for getSurface otherwise.');
-      return this.getFocusedSurface();
     }
   };
 
@@ -54,7 +51,9 @@ SurfaceManager.Prototype = function() {
    * @return {ui/Surface} Surface instance
    */
   this.getFocusedSurface = function() {
-    return this._state.focusedSurface;
+    if (this._state.focusedSurfaceId) {
+      return this.getSurface(this._state.focusedSurfaceId);
+    }
   };
 
   /**
@@ -76,9 +75,10 @@ SurfaceManager.Prototype = function() {
     var surfaceId = surface.getId();
     var registeredSurface = this.surfaces[surfaceId];
     if (registeredSurface === surface) {
+      var focusedSurface = this.getFocusedSurface();
       delete this.surfaces[surfaceId];
-      if (surface && this.focusedSurface === surface) {
-        this._state.focusedSurface = null;
+      if (surface && focusedSurface === surface) {
+        this._state.focusedSurfaceId = null;
       }
     }
   };
@@ -90,7 +90,7 @@ SurfaceManager.Prototype = function() {
     var updatedSurfaces = {};
     if (update.selection) {
       var focusedSurface = this.surfaces[update.selection.surfaceId];
-      _state.focusedSurface = focusedSurface;
+      _state.focusedSurfaceId = update.selection.surfaceId;
       if (focusedSurface) {
         focusedSurface._focus();
       } else if (update.selection.isCustomSelection() && inBrowser) {
@@ -198,7 +198,7 @@ SurfaceManager.Prototype = function() {
   this.onSessionDidUpdate = function() {
     // at the end of the update flow, make sure the surface is focused
     // and displays the right DOM selection.
-    var focusedSurface = this._state.focusedSurface;
+    var focusedSurface = this.getFocusedSurface();
     if (focusedSurface) {
       focusedSurface.focus();
       // console.log('rerenderingDOMSelection', this.documentSession.getSelection().toString());
