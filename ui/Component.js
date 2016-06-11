@@ -287,6 +287,16 @@ Component.Prototype = function() {
    */
   this.dispose = function() {};
 
+  /*
+    Attention: this is used when a preserved component is relocated.
+    E.g., rendered with a new parent.
+  */
+  this._setParent = function(newParent) {
+    this.parent = newParent;
+    this.context = this._getContext() || {};
+    Object.freeze(this.context);
+  };
+
   /**
     Send an action request to the parent component, bubbling up the component
     hierarchy until an action handler is found.

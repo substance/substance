@@ -193,6 +193,10 @@ RenderingEngine.Prototype = function() {
         if (!childComp) {
           // console.log('Removing orphaned DOM element.');
           comp.el.removeChild(node);
+        }
+        // skip relocated components
+        else if (childComp.__isRelocated__) {
+          // skip
         } else {
           oldChildren.push(childComp);
         }
@@ -222,6 +226,11 @@ RenderingEngine.Prototype = function() {
         }
 
         newComp = virtualComp._comp;
+        // ATTENTION: relocating a component does not update its context
+        if (newComp.__isRelocated__) {
+          newComp._setParent(comp);
+        }
+
         console.assert(newComp, 'Component instance should now be available.');
         // append remaining new ones if no old one is left
         if (virtualComp && !oldComp) {
@@ -358,6 +367,7 @@ RenderingEngine.Prototype = function() {
   function _clearIsMapped(comp) {
     while(comp) {
       delete comp.__isMapped__;
+      delete comp.__isRelocated__;
       comp = comp.getParent();
     }
   }
@@ -369,37 +379,83 @@ RenderingEngine.Prototype = function() {
     This is then applied to the ancestors leading to an implicit
     mapping of parent elements, which makes
   */
+  // function _mapComponents(comp, vc) {
+  //   while (comp && vc) {
+  //     // Stop if one them has been mapped already
+  //     // or the virtual element has its own component already
+  //     // or if virtual element and component do not match semantically
+  //     // Note: the owner component is mapped at very first, so this
+  //     // recursion will stop at the owner at the latest.
+  //     if (vc.__isMapped__ || comp.__isMapped__ ||
+  //         vc._comp || !_isOfSameType(comp, vc))
+  //     {
+  //       break;
+  //     }
+  //     vc._comp = comp;
+  //     vc.__isMapped__ = true;
+  //     // TODO: can we somehow avoid poluting the component?
+  //     comp.__isMapped__ = true;
+  //     comp = comp.getParent();
+  //     if (vc.parent) {
+  //       vc = vc.parent;
+  //     }
+  //     // to be able to support implicit retaining of elements
+  //     // we need to propagate mapping through the 'preliminary' parent chain
+  //     // i.e. not taking the real parents as rendered, but the Components into which
+  //     // we have passed children (via vel.append() or vel.outlet().append())
+  //     else if (vc._preliminaryParent) {
+  //       while (comp && comp._isElementComponent) {
+  //         comp = comp.getParent();
+  //       }
+  //       vc = vc._preliminaryParent;
+  //     }
+  //   }
+  // }
+
   function _mapComponents(comp, vc) {
-    while (comp && vc) {
-      // Stop if one them has been mapped already
-      // or the virtual element has its own component already
-      // or if virtual element and component do not match semantically
-      // Note: the owner component is mapped at very first, so this
-      // recursion will stop at the owner at the latest.
-      if (vc.__isMapped__ || comp.__isMapped__ ||
-          vc._comp || !_isOfSameType(comp, vc))
-      {
-        break;
-      }
-      vc._comp = comp;
-      vc.__isMapped__ = true;
-      // TODO: can we somehow avoid poluting the component?
-      comp.__isMapped__ = true;
-      comp = comp.getParent();
-      if (vc.parent) {
-        vc = vc.parent;
-      }
-      // to be able to support implicit retaining of elements
-      // we need to propagate mapping through the 'preliminary' parent chain
-      // i.e. not taking the real parents as rendered, but the Components into which
-      // we have passed children (via vel.append() or vel.outlet().append())
-      else if (vc._preliminaryParent) {
-        while (comp && comp._isElementComponent) {
-          comp = comp.getParent();
-        }
-        vc = vc._preliminaryParent;
-      }
+    if (!comp && !vc) return true;
+    if (!comp || !vc) return false;
+    // Stop if one them has been mapped already
+    // or the virtual element has its own component already
+    // or if virtual element and component do not match semantically
+    // Note: the owner component is mapped at very first, so this
+    // recursion will stop at the owner at the latest.
+    if (vc.__isMapped || comp.__isMapped__) {
+      return vc._comp === comp;
     }
+    if (vc._comp) {
+      vc.__isMapped__ = true;
+      comp.__isMapped__ = true;
+      return true;
+    }
+    if (!_isOfSameType(comp, vc)) {
+      return false;
+    }
+
+    vc._comp = comp;
+    vc.__isMapped__ = true;
+    // TODO: can we somehow avoid poluting the component?
+    comp.__isMapped__ = true;
+
+    var canMapParent;
+    var parent = comp.getParent();
+    if (vc.parent) {
+      canMapParent = _mapComponents(parent, vc.parent);
+    }
+    // to be able to support implicit retaining of elements
+    // we need to propagate mapping through the 'preliminary' parent chain
+    // i.e. not taking the real parents as rendered, but the Components into which
+    // we have passed children (via vel.append() or vel.outlet().append())
+    else if (vc._preliminaryParent) {
+      while (parent && parent._isElementComponent) {
+        parent = parent.getParent();
+      }
+      canMapParent = _mapComponents(parent, vc._preliminaryParent);
+    }
+    if (!canMapParent) {
+      comp.__isRelocated__ = true;
+    }
+    return canMapParent;
   }
 
   function _isOfSameType(comp, vc) {
