@@ -7,13 +7,13 @@ module.exports = function(config) {
       { pattern: 'test/fixtures/**/*.html', included: false, served: true },
     ],
     preprocessors: {
-      'test/**/*.test.js': ['browserify']
+      'test/**/*.js': ['browserify']
     },
     browsers: ['Chrome'],
     customLaunchers: {
-      Chrome_travis_ci: {
+      ChromeTravis: {
         base: 'Chrome',
-          flags: ['--no-sandbox']
+        flags: ['--no-sandbox']
       }
     },
     reporters: ['tape'],
@@ -22,15 +22,4 @@ module.exports = function(config) {
       debug: true // include inline source maps
     }
   });
-
-  if(process.env.TRAVIS){
-    config.browsers = ['Firefox'];
-  } else {
-    var fs = require('fs');
-    if (fs.existsSync(__dirname + "/karma.conf.local.js")) {
-      var localConfig = require('./karma.conf.local');
-      var merge = require('./util/merge');
-      merge(config, localConfig, { array: 'replace' });
-    }
-  }
 };

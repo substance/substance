@@ -111,26 +111,41 @@ gulp.task('test:fixtures', function() {
     .pipe(gulp.dest('test/fixtures/html/'));
 });
 
-gulp.task('test:qunit:karma', ['lint'], function(done) {
+gulp.task('test:qunit:karma', function(done) {
   new Karma({
     configFile: __dirname + '/karma.qunit.conf.js',
     singleRun: true
   }, done).start();
 });
 
-gulp.task('test:qunit:server', ['lint'], function() {
+gulp.task('test:qunit:server', function() {
   // requiring instead of doing 'node test/run.js'
   require('./test-old/run');
 });
 
-gulp.task('test:browsers', ['lint'], function(done) {
+function _testBrowser(browser, done) {
   new Karma({
     configFile: __dirname + '/karma.conf.js',
+    browsers: [browser],
     singleRun: true
   }, done).start();
+}
+
+gulp.task('test:chrome', function(done) {
+  if(process.env.TRAVIS) {
+    _testBrowser('ChromeTravis', done);
+  } else {
+    _testBrowser('Chrome', done);
+  }
 });
 
-gulp.task('test:server', ['lint'], function(done) {
+gulp.task('test:firefox', function(done) {
+  _testBrowser('Firefox', done);
+});
+
+gulp.task('test:browsers', ['test:chrome', 'test:firefox']);
+
+gulp.task('test:server', function(done) {
   return gulp.src('test/**/*.test.js')
     .pipe(tape({
       reporter: tapSpec()
