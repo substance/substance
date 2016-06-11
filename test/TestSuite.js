@@ -3,7 +3,7 @@
 var isEqual = require('lodash/isEqual');
 var startsWith = require('lodash/startsWith');
 var Component = require('../ui/Component');
-var DefaultDOMElement = require('../ui/DefaultDOMElement');
+// var DefaultDOMElement = require('../ui/DefaultDOMElement');
 var TestItem = require('./TestItem');
 var Router = require('../ui/Router');
 
@@ -22,9 +22,6 @@ function TestSuite() {
 TestSuite.Prototype = function() {
 
   this.didMount = function() {
-    var document = DefaultDOMElement.wrapNativeElement(window.document);
-    document.on('keypress', this.onKeypress, this);
-
     this.router.on('route:changed', this.onRouteChange, this);
     this.router.start();
 
@@ -32,9 +29,6 @@ TestSuite.Prototype = function() {
   };
 
   this.dispose = function() {
-    var document = DefaultDOMElement.wrapNativeElement(window.document);
-    document.off(this);
-
     this.router.off(this);
   };
 
@@ -47,6 +41,7 @@ TestSuite.Prototype = function() {
     var el = $$('div').addClass('sc-test-suite');
 
     var state = this.state;
+    var filter = this.state.filter || '';
 
     var toolbar = $$('div').addClass('se-toolbar');
     var moduleSelect = $$('select').ref('moduleNames');
@@ -62,7 +57,11 @@ TestSuite.Prototype = function() {
     el.append(toolbar);
     var tests = $$('div').addClass('se-tests').ref('tests');
     this.props.harness.getTests().forEach(function(test) {
-      tests.append($$(TestItem, { test: test }));
+      var testItem = $$(TestItem, { test: test });
+      if (!_filter(test.moduleName, filter)) {
+        testItem.addClass('sm-hidden');
+      }
+      tests.append(testItem);
     });
     el.append(tests);
 
@@ -81,7 +80,7 @@ TestSuite.Prototype = function() {
     var filter = this.state.filter || '';
     testItems.forEach(function(testItem) {
       var t = testItem.props.test;
-      if(startsWith(t.moduleName, filter)) {
+      if(_filter(t.moduleName, filter)) {
         testItem.removeClass('sm-hidden');
         tests.push(t);
       } else {
@@ -91,24 +90,16 @@ TestSuite.Prototype = function() {
     this.props.harness.runTests(tests);
   };
 
+  function _filter(name, f) {
+    return startsWith(name, f);
+  }
+
   this.onModuleSelect = function() {
     var filter = this.refs.moduleNames.htmlProp('value');
     this.extendState({
       filter: filter
     });
     this.updateRoute();
-  };
-
-  this.onKeypress = function(event) {
-    // console.log('####', event);
-    var handled = false;
-    if (event.key === 'r') {
-      this.runTests();
-      handled = true;
-    }
-    if (handled) {
-      event.preventDefault();
-    }
   };
 
   this.updateRoute = function() {

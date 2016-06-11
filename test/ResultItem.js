@@ -16,14 +16,14 @@ ResultItem.Prototype = function() {
     var test = this.props.test;
     var result = this.props.result;
     var el = $$('div').addClass('sc-test-result');
-    el.append($$('div').addClass('se-name').append(result.name));
     if (!test._skip) {
       if (result.ok) {
-        el.addClass('sm-ok');
+        el.append($$('span').addClass('se-status sm-ok').append("\u2713"));
       } else {
-        el.addClass('sm-not-ok');
+        el.append($$('span').addClass('se-status sm-not-ok').append("\u26A0"));
       }
     }
+    el.append($$('span').addClass('se-description').append(result.name));
     return el;
   };
 

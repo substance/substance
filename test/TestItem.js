@@ -73,7 +73,7 @@ TestItem.Prototype = function() {
     var test = this.props.test;
     if (test._skip) {
       this.el.addClass('sm-skip');
-    } else if (test.ok) {
+    } else if (test._ok) {
       this.el.addClass('sm-ok');
     } else {
       this.el.addClass('sm-not-ok');

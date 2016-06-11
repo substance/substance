@@ -37,7 +37,6 @@ Test.prototype.isNotNil = function (value, msg, extra) {
 
 if (inBrowser && substanceGlobals.TEST_UI) {
 
-
   // add a tape.Test.reset() that allows to re-run a test
   Test.prototype.reset = function() {
     this.readable = true;
@@ -51,26 +50,27 @@ if (inBrowser && substanceGlobals.TEST_UI) {
     this.ended = false;
   };
 
+  var _run = Test.prototype.run;
+  Test.prototype.run = function() {
+    var _ok = false;
+    try {
+      _run.apply(this, arguments);
+      _ok = true;
+    } finally {
+      if (!_ok) {
+        this._ok = false;
+        this.emit('end');
+      }
+    }
+  };
+
   var nextTick = process.nextTick;
   harness = tape.createHarness();
   var results = harness._results;
 
-  harness.runAllTests = function() {
-    var i = 0;
-    function next() {
-      while (i < results.tests.length) {
-        var t = results.tests[i++];
-        t.reset();
-        t.once('end', function(){ nextTick(next); });
-        t.run();
-      }
-    }
-    nextTick(next);
-  };
-
   harness.runTests = function(tests) {
     function next() {
-      while (tests.length > 0) {
+      if (tests.length > 0) {
         var t = tests.shift();
         t.reset();
         t.once('end', function(){ nextTick(next); });
