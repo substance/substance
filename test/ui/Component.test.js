@@ -1320,6 +1320,27 @@ function ComponentTests(debug) {
     t.end();
   });
 
+  test('#635: Relocating a preserved component', function(t) {
+    function Parent() {
+      Parent.super.apply(this, arguments);
+      this.render = function($$) {
+        var el = $$('div');
+        if (this.props.nested) {
+          el.append($$('div').append($$(SimpleComponent).ref('foo')));
+        } else {
+          el.append($$(SimpleComponent).ref('foo'));
+        }
+        return el;
+      };
+    }
+    TestComponent.extend(Parent);
+    var comp = Parent.static.render();
+    t.equal(comp.refs.foo.getParent(), comp, "The first time 'foo' should be direct child.");
+    comp.setProps({ nested: true });
+    t.equal(comp.refs.foo.getParent().getParent(), comp, "The second time 'foo' should be grand-child.");
+    t.end();
+  });
+
 }
 
 function TestComponent() {
