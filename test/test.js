@@ -69,6 +69,7 @@ if (inBrowser && substanceGlobals.TEST_UI) {
   var results = harness._results;
 
   harness.runTests = function(tests) {
+    tests = tests.slice();
     function next() {
       if (tests.length > 0) {
         var t = tests.shift();
