@@ -17,15 +17,22 @@ function EditLinkTool() {
 EditLinkTool.Prototype = function() {
 
   this.render = function($$) {
-    // var node = this.props.node;
+    var node = this.props.node;
     var el = $$('div').addClass('sc-edit-link-tool');
 
     el.append(
       $$(Prompt).append(
-        // $$(Prompt.Input, {path: [node.id, 'url']}),
-        $$(Prompt.Label, {label: 'TODO: provide link editor'}),
+        $$(Prompt.Input, {
+          type: 'url',
+          path: [node.id, 'url'],
+          placeholder: 'Paste or type a link url'
+        }),
         $$(Prompt.Separator),
-        $$(Prompt.Action, {name: 'open-link', title: this.i18n.t('open-link')}),
+        $$(Prompt.Link, {
+          name: 'open-link',
+          href: node.url,
+          title: this.i18n.t('open-link')
+        }),
         $$(Prompt.Action, {name: 'delete', title: this.i18n.t('delete')})
           .on('click', this.onDelete)
       )
