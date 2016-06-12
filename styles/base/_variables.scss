@@ -36,7 +36,9 @@ $lighten-color-4: rgba(0,0,0,0.50);
 $lighten-color-5: rgba(0,0,0,0.75);
 
 $link-color: #1795CD;
-$focus-outline-color: #1795CD;// #5BE3FF;
+
+// We disable this for now, as accessibility needs more discussion
+$focus-outline-color: transparent; // #1795CD;// #5BE3FF;
 
 // Font colors
 $default-text-color: rgba(0,0,0,0.75);

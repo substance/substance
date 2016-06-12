@@ -3,7 +3,6 @@
 */
 
 .sc-overlay {
-  @include shadow();
 
   z-index: 200;
   position: absolute;
