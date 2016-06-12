@@ -1,6 +1,5 @@
 'use strict';
 
-// var isEqual = require('lodash/isEqual');
 var startsWith = require('lodash/startsWith');
 var clone = require('lodash/clone');
 var Component = require('../ui/Component');
@@ -53,6 +52,7 @@ TestSuite.Prototype = function() {
       moduleSelect.append(option);
     });
     moduleSelect.on('change', this.onModuleSelect);
+    toolbar.append($$('div').addClass('logo').append('Substance TestSuite'))
     toolbar.append(moduleSelect);
     toolbar.append(
       $$('div').append(
@@ -63,6 +63,7 @@ TestSuite.Prototype = function() {
     );
 
     el.append(toolbar);
+
     var tests = $$('div').addClass('se-tests').ref('tests');
     this.props.harness.getTests().forEach(function(test) {
       var testItem = $$(TestItem, { test: test });
@@ -71,6 +72,7 @@ TestSuite.Prototype = function() {
       }
       tests.append(testItem);
     });
+
     el.append(tests);
 
     if (this.state.hideSuccessful) {
