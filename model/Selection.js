@@ -230,7 +230,7 @@ Selection.fromJSON = function(json) {
       var CustomSelection = require('./CustomSelection');
       return CustomSelection.fromJSON(json);
     default:
-      console.error('Selection.fromJSON(): unsupported selection data', json);
+      // console.error('Selection.fromJSON(): unsupported selection data', json);
       return Selection.nullSelection;
   }
 };
