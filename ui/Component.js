@@ -135,6 +135,15 @@ Component.Prototype = function() {
     return comp;
   };
 
+  /*
+    Short hand for using labelProvider API
+  */
+  this.getLabel = function(name) {
+    var labelProvider = this.context.labelProvider;
+    if (!labelProvider) throw new Error('Missing labelProvider.');
+    return labelProvider.getLabel(name);
+  };
+
   /**
     Render the component.
 
