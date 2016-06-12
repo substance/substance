@@ -93,7 +93,7 @@ TextPropertyComponent.Prototype = function() {
       el = _super._renderFragment.apply(this, arguments);
       if (node.constructor.static.isInline) {
         // FIXME: enabling this reveals a bug in RenderEngine with reusing a component but reattached to a new parent.
-        // el.ref(id);
+        el.ref(id);
       }
       // Adding refs here, enables preservative rerendering
       // TODO: while this solves problems with rerendering inline nodes
