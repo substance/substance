@@ -76,6 +76,7 @@ ProseEditor.Prototype = function() {
     this.converterRegistry = configurator.getConverterRegistry();
     this.globalEventHandler = new GlobalEventHandler(this.documentSession, this.surfaceManager);
     this.editingBehavior = configurator.getEditingBehavior();
+    this.labelProvider = configurator.getLabelProvider();
   };
 
   this.getCommandContext = function() {
@@ -106,6 +107,7 @@ ProseEditor.Prototype = function() {
       commandManager: this.commandManager,
       toolRegistry: this.toolRegistry,
       i18n: this.i18nInstance,
+      labelProvider: this.labelProvider,
       converterRegistry: this.converterRegistry,
       globalEventHandler: this.globalEventHandler,
       editingBehavior: this.editingBehavior

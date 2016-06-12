@@ -66,7 +66,8 @@ Tool.Prototype = function() {
   };
 
   this.getTitle = function() {
-    var title = this.props.title || this.i18n.t(this.getName());
+    var labelProvider = this.context.labelProvider;
+    var title = this.props.title || labelProvider.getLabel(this.getName());
     // Used only by annotation tool so far
     if (this.props.mode) {
       title = [capitalize(this.props.mode), title].join(' ');

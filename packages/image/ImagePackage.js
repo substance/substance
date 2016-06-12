@@ -13,5 +13,9 @@ module.exports = {
     config.addCommand(InsertImageCommand);
     config.addTool(InsertImageTool);
     config.addIcon(InsertImageCommand.static.name, { 'fontawesome': 'fa-image' });
+    config.addLabel('image', {
+      en: 'Image',
+      de: 'Bild'
+    });
   }
 };

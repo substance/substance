@@ -11,6 +11,10 @@ module.exports = {
     config.addCommand(SuperscriptCommand);
     config.addTool(SuperscriptTool);
     config.addIcon(SuperscriptCommand.static.name, { 'fontawesome': 'fa-superscript' });
+    config.addLabel('superscript', {
+      en: 'Superscript',
+      de: 'Hochgestellt'
+    });
   }
 };
 

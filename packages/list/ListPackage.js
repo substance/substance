@@ -16,5 +16,9 @@ module.exports = {
     });
     config.addEditingBehavior(ListEditing);
     config.addMacro(ListMacro);
+    config.addLabel('list', {
+      en: 'List',
+      de: 'Liste'
+    });
   }
 };

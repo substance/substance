@@ -11,5 +11,9 @@ module.exports = {
     config.addCommand(SubscriptCommand);
     config.addTool(SubscriptTool);
     config.addIcon(SubscriptCommand.static.name, { 'fontawesome': 'fa-subscript' });
+    config.addLabel('subscript', {
+      en: 'Subscript',
+      de: 'Tiefgestellt'
+    });
   }
 };

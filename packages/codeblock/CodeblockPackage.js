@@ -14,5 +14,10 @@ module.exports = {
       name: 'codeblock',
       data: {type: 'codeblock'}
     });
+
+    config.addLabel('codeblock', {
+      en: 'Codeblock',
+      de: 'Codeblock'
+    });
   }
 };

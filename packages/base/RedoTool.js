@@ -1,6 +1,6 @@
 'use strict';
 
-var Tool = require('./Tool');
+var Tool = require('../../ui/Tool');
 
 function RedoTool() {
   RedoTool.super.apply(this, arguments);

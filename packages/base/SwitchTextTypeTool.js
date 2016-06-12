@@ -30,7 +30,9 @@ SwitchTextTypeTool.Prototype = function() {
     this._focusToggle();
   };
 
+
   this.render = function($$) {
+    var labelProvider = this.context.labelProvider;
     var textTypeName = 'No selection';
 
     if (this.props.currentTextType) {
@@ -40,8 +42,8 @@ SwitchTextTypeTool.Prototype = function() {
 
     var toggleButton = $$('button').ref('toggle')
       .addClass('se-toggle')
-      .attr('title', this.i18n.t('switch_text'))
-      .append(this.i18n.t(textTypeName))
+      .attr('title', labelProvider.getLabel('switch_text'))
+      .append(labelProvider.getLabel(textTypeName))
       .on('click', this.toggleAvailableTextTypes);
 
     if (this.props.disabled || !this.props.currentTextType) {
@@ -62,7 +64,7 @@ SwitchTextTypeTool.Prototype = function() {
         var button = $$('button')
             .addClass('se-option sm-'+textType.name)
             .attr('data-type', textType.name)
-            .append(this.i18n.t(textType.name))
+            .append(labelProvider.getLabel(textType.name))
             .on('click', this.handleClick);
         options.append(button);
       }.bind(this));
