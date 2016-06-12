@@ -192,8 +192,9 @@ ScrollPane.Prototype = function() {
     @param {DOMNode} el DOM node that lives inside the
   */
   this.getPanelOffsetForElement = function(el) {
+    var nativeEl = el.el;
     var contentContainerEl = this.refs.content.el.el;
-    var rect = getBoundingClientRect(el, contentContainerEl);
+    var rect = getBoundingClientRect(nativeEl, contentContainerEl);
     return rect.top;
   };
 
