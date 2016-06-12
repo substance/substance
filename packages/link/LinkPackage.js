@@ -9,7 +9,7 @@ var EditLinkTool = require('./EditLinkTool');
 
 module.exports = {
   name: 'link',
-  configure: function(config, options) { // eslint-disable-line
+  configure: function(config) {
     config.addNode(Link);
     config.addComponent(Link.static.name, LinkComponent);
     config.addConverter('html', LinkHTMLConverter);
@@ -18,5 +18,9 @@ module.exports = {
     config.addTool(EditLinkTool, { overlay: true });
     config.addIcon(LinkCommand.static.name, { 'fontawesome': 'fa-link'});
     config.addIcon('open-link', { 'fontawesome': 'fa-external-link' });
+    config.addLabel('link', {
+      en: 'Link',
+      de: 'Link'
+    });
   }
 };

@@ -1,6 +1,6 @@
 'use strict';
 
-var Command = require('./Command');
+var Command = require('../../ui/Command');
 
 function Undo() {
   Undo.super.apply(this, arguments);

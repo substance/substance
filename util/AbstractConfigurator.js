@@ -3,6 +3,7 @@
 var oo = require('./oo');
 var forEach = require('lodash/forEach');
 var extend = require('lodash/extend');
+var isString = require('lodash/isString');
 var DocumentSchema = require('../model/DocumentSchema');
 var EditingBehavior = require('../model/EditingBehavior');
 var Registry = require('../util/Registry');
@@ -27,6 +28,7 @@ function AbstractConfigurator() {
     editingBehaviors: [],
     macros: [],
     icons: {},
+    labels: {},
     saveHandler: SaveHandlerStub,
     fileClient: FileClientStub
   };
@@ -107,6 +109,24 @@ AbstractConfigurator.Prototype = function() {
       this.config.icons[iconName] = iconConfig;
     }
     extend(iconConfig, options);
+  };
+
+  /*
+    Define a new label
+    label is either a string or a hash with translations.
+    If string is provided 'en' is used as the language.
+  */
+  this.addLabel = function(labelName, label) {
+    if (isString(label)) {
+      this.config.labels['en'][labelName] = label;
+    } else {
+      forEach(label, function(label, lang) {
+        if (!this.config.labels[lang]) {
+          this.config.labels[lang] = {};
+        }
+        this.config.labels[lang][labelName] = label;
+      }.bind(this));
+    }
   };
 
   this.addTextType = function(textType, options) {
@@ -257,6 +277,10 @@ AbstractConfigurator.Prototype = function() {
   };
 
   this.getI18nInstance = function() {
+    throw new Error('This method is abstract.');
+  };
+
+  this.getLabelProvider = function() {
     throw new Error('This method is abstract.');
   };
 

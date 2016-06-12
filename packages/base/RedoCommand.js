@@ -1,6 +1,6 @@
 'use strict';
 
-var Command = require('./Command');
+var Command = require('../../ui/Command');
 
 function Redo() {
   Redo.super.apply(this, arguments);

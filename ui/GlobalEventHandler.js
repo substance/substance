@@ -24,9 +24,7 @@ var DOMElement = require('./DOMElement');
 function GlobalEventHandler(documentSession, surfaceManager) {
   this.documentSession = documentSession;
   this.surfaceManager = surfaceManager;
-
   this.listeners = [];
-
   this.initialize();
 }
 

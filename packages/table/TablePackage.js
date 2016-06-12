@@ -13,5 +13,9 @@ module.exports = {
     config.addCommand(InsertTableCommand);
     config.addTool(InsertTableTool);
     config.addIcon(InsertTableCommand.static.name, { 'fontawesome': 'fa-table' } );
+    config.addLabel('table', {
+      en: 'Table',
+      de: 'Tabelle'
+    });
   }
 };

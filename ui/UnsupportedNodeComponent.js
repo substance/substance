@@ -10,9 +10,9 @@ UnsupportedNodeComponent.Prototype = function() {
 
   this.render = function($$) {
     return $$('pre')
-      .addClass("content-node unsupported")
+      .addClass('content-node unsupported')
       .attr({
-        "data-id": this.props.node.id,
+        'data-id': this.props.node.id,
         contentEditable: false
       })
       .append(

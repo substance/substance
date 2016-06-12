@@ -14,5 +14,9 @@ module.exports = {
       name: 'blockquote',
       data: {type: 'blockquote'}
     });
+    config.addLabel('blockquote', {
+      en: 'Blockquote',
+      de: 'Blockzitat'
+    });
   }
 };

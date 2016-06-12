@@ -6,6 +6,7 @@ var FontAwesomeIconProvider = require('../ui/FontAwesomeIconProvider');
 // Setup default I18n
 var I18n = require('../ui/i18n');
 I18n.instance.load(require('../i18n/en'));
+var LabelProvider = require('../ui/DefaultLabelProvider');
 
 /*
   Default Configurator for Substance editors
@@ -31,6 +32,10 @@ Configurator.Prototype = function() {
 
   this.getI18nInstance = function() {
     return I18n.instance;
+  };
+
+  this.getLabelProvider = function() {
+    return new LabelProvider(this.config.labels);
   };
 
 };
