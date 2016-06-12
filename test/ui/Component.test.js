@@ -3,23 +3,21 @@
 
 var spy = require('../spy');
 var isEqual = require('lodash/isEqual');
-
 var Component = require('../../ui/Component');
+var TestComponent = require('./TestComponent');
+var Simple = TestComponent.Simple;
 
 function ComponentTests(debug) {
 
   var substanceGlobals = require('../../util/substanceGlobals');
 
   var test = require('../test')
-    .module('ui/Component' + (debug ? ' (debug)' : '' ));
-
-  if (debug) {
-    test = test.withOptions({
+    .module('ui/Component' + (debug ? ' (debug)' : '' ))
+    .withOptions({
       before: function() {
-        substanceGlobals.DEBUG_RENDERING = true;
+        substanceGlobals.DEBUG_RENDERING = Boolean(debug);
       }
     });
-  }
 
   test("Throw error when render method is not returning an element", function(t) {
     var MyComponent = TestComponent.extend({
@@ -31,39 +29,23 @@ function ComponentTests(debug) {
     t.end();
   });
 
-  function SimpleComponent() {
-    SimpleComponent.super.apply(this, arguments);
-  }
-
-  SimpleComponent.Prototype = function() {
-    this.render = function($$) {
-      var el = $$('div').addClass('simple-component');
-      if (this.props.children) {
-        el.append(this.props.children);
-      }
-      return el;
-    };
-  };
-
-  TestComponent.extend(SimpleComponent);
-
   test.UI("Mounting a component", function(t) {
     // Mount to a detached element
     var el = window.document.createElement('div');
-    var comp = Component.mount(SimpleComponent, el);
+    var comp = Component.mount(Simple, el);
     t.equal(comp.didMount.callCount, 0, "didMount must not be called when mounting to detached elements");
     // Mount to an existing DOM element
-    comp = Component.mount(SimpleComponent, t.sandbox);
+    comp = Component.mount(Simple, t.sandbox);
     t.equal(comp.didMount.callCount, 1, "didMount should have been called");
     t.end();
   });
 
   test("Render an HTML element", function(t) {
-    var comp = renderTestComponent(function($$) {
+    var comp = TestComponent.create(function($$) {
       return $$('div');
     });
     t.equal(comp.tagName, 'div', 'Element should be a "div".');
-    comp = renderTestComponent(function($$) {
+    comp = TestComponent.create(function($$) {
       return $$('span');
     });
     t.equal(comp.tagName, 'span', 'Element should be a "span".');
@@ -71,7 +53,7 @@ function ComponentTests(debug) {
   });
 
   test("Render an element with attributes", function(t) {
-    var comp = renderTestComponent(function($$) {
+    var comp = TestComponent.create(function($$) {
       return $$('div').attr('data-id', 'foo');
     });
     t.equal(comp.attr('data-id'), 'foo', 'Element should be have data-id="foo".');
@@ -79,7 +61,7 @@ function ComponentTests(debug) {
   });
 
   test("Render an element with css styles", function(t) {
-    var comp = renderTestComponent(function($$) {
+    var comp = TestComponent.create(function($$) {
       return $$('div').css('width', '100px');
     });
     t.equal(comp.css('width'), '100px', 'Element should have a css width of 100px.');
@@ -87,7 +69,7 @@ function ComponentTests(debug) {
   });
 
   test("Render an element with classes", function(t) {
-    var comp = renderTestComponent(function($$) {
+    var comp = TestComponent.create(function($$) {
       return $$('div').addClass('test');
     });
     t.ok(comp.hasClass('test'), 'Element should have class "test".');
@@ -95,7 +77,7 @@ function ComponentTests(debug) {
   });
 
   test("Render an element with value", function(t) {
-    var comp = renderTestComponent(function($$) {
+    var comp = TestComponent.create(function($$) {
       return $$('input').attr('type', 'text').val('foo');
     });
     t.equal(comp.val(), 'foo', 'Value should be set.');
@@ -103,7 +85,7 @@ function ComponentTests(debug) {
   });
 
   test("Render an element with plain text", function(t) {
-    var comp = renderTestComponent(function($$) {
+    var comp = TestComponent.create(function($$) {
       return $$('div').text('foo');
     });
     t.equal(comp.textContent, 'foo','textContent should be set.');
@@ -111,7 +93,7 @@ function ComponentTests(debug) {
   });
 
   test("Render an element with custom html", function(t) {
-    var comp = renderTestComponent(function($$) {
+    var comp = TestComponent.create(function($$) {
       return $$('div').html('Hello <b>World</b>');
     });
     // ATTENTION: it is important to call find() on the element API
@@ -124,7 +106,7 @@ function ComponentTests(debug) {
   });
 
   test("Rendering an element with HTML attributes etc.", function(t) {
-    var comp = renderTestComponent(function($$) {
+    var comp = TestComponent.create(function($$) {
       return $$('div')
         .addClass('foo')
         .attr('data-id', 'foo')
@@ -137,7 +119,7 @@ function ComponentTests(debug) {
   });
 
   test("Rendering an input element with value", function(t) {
-    var comp = renderTestComponent(function($$) {
+    var comp = TestComponent.create(function($$) {
       return $$('input').attr('type', 'text').val('foo');
     });
     t.equal(comp.val(), 'foo', 'Input field should have value "foo".');
@@ -145,14 +127,14 @@ function ComponentTests(debug) {
   });
 
   test("Render a component", function(t) {
-    var comp = SimpleComponent.static.render();
+    var comp = Simple.static.render();
     t.equal(comp.tagName.toLowerCase(), 'div', 'Element should be a "div".');
     t.ok(comp.hasClass('simple-component'), 'Element should have class "simple-component".');
     t.end();
   });
 
   test("Rerender on setProps()", function(t) {
-    var comp = SimpleComponent.static.render({ foo: 'bar '});
+    var comp = Simple.static.render({ foo: 'bar '});
     comp.shouldRerender.reset();
     comp.render.reset();
     comp.setProps({ foo: 'baz' });
@@ -162,7 +144,7 @@ function ComponentTests(debug) {
   });
 
   test("Rerendering triggers didUpdate()", function(t) {
-    var comp = SimpleComponent.static.render({ foo: 'bar '});
+    var comp = Simple.static.render({ foo: 'bar '});
     spy(comp, 'didUpdate');
     comp.rerender();
     t.ok(comp.didUpdate.callCount === 1, "didUpdate() should have been called once.");
@@ -170,7 +152,7 @@ function ComponentTests(debug) {
   });
 
   test("Setting props triggers willReceiveProps()", function(t) {
-    var comp = SimpleComponent.static.render({ foo: 'bar '});
+    var comp = Simple.static.render({ foo: 'bar '});
     spy(comp, 'willReceiveProps');
     comp.setProps({ foo: 'baz' });
     t.ok(comp.willReceiveProps.callCount === 1, "willReceiveProps() should have been called once.");
@@ -178,7 +160,7 @@ function ComponentTests(debug) {
   });
 
   test("Rerender on setState()", function(t) {
-    var comp = SimpleComponent.static.render();
+    var comp = Simple.static.render();
     comp.shouldRerender.reset();
     comp.render.reset();
     comp.setState({ foo: 'baz' });
@@ -188,7 +170,7 @@ function ComponentTests(debug) {
   });
 
   test("Setting state triggers willUpdateState()", function(t) {
-    var comp = SimpleComponent.static.render();
+    var comp = Simple.static.render();
     spy(comp, 'willUpdateState');
     comp.setState({ foo: 'baz' });
     t.ok(comp.willUpdateState.callCount === 1, "willUpdateState() should have been called once.");
@@ -403,7 +385,7 @@ function ComponentTests(debug) {
   /* ##################### Nested Elements/Components ##########################*/
 
   test("Render children elements", function(t) {
-    var comp = renderTestComponent(function($$) {
+    var comp = TestComponent.create(function($$) {
       return $$('div').addClass('parent')
         .append($$('div').addClass('child1'))
         .append($$('div').addClass('child2'));
@@ -416,24 +398,24 @@ function ComponentTests(debug) {
   });
 
   test("Render children components", function(t) {
-    var comp = renderTestComponent(function($$) {
+    var comp = TestComponent.create(function($$) {
       return $$('div').append(
-        $$(SimpleComponent).addClass('a'),
-        $$(SimpleComponent).addClass('b')
+        $$(Simple).addClass('a'),
+        $$(Simple).addClass('b')
       );
     });
     t.equal(comp.getChildCount(), 2, "Component should have two children");
     var first = comp.getChildAt(0);
     var second = comp.getChildAt(1);
-    t.ok(first instanceof SimpleComponent, 'First child should be a SimpleComponent');
+    t.ok(first instanceof Simple, 'First child should be a Simple');
     t.ok(first.hasClass('a'), '.. and should have class "a".');
-    t.ok(second instanceof SimpleComponent, 'Second child should be a SimpleComponent');
+    t.ok(second instanceof Simple, 'Second child should be a Simple');
     t.ok(second.hasClass('b'), '.. and should have class "b".');
     t.end();
   });
 
   test("Render grandchildren elements", function(t) {
-    var comp = renderTestComponent(function($$) {
+    var comp = TestComponent.create(function($$) {
       return $$('div').append(
         $$('div').addClass('child').append(
           $$('div').addClass('a'),
@@ -453,9 +435,9 @@ function ComponentTests(debug) {
 
 
   test("Render nested elements passed via props", function(t) {
-    var comp = renderTestComponent(function($$) {
+    var comp = TestComponent.create(function($$) {
       return $$('div').append(
-        $$(SimpleComponent, {
+        $$(Simple, {
           children: [
             $$('div').addClass('a'),
             $$('div').addClass('b')
@@ -484,7 +466,7 @@ function ComponentTests(debug) {
           return $$('div').append('Loading...');
         } else {
           return $$('div').append(
-            $$(SimpleComponent).ref('child')
+            $$(Simple).ref('child')
           );
         }
       };
@@ -837,9 +819,9 @@ function ComponentTests(debug) {
   /* ##################### Refs: Preserving Components ##########################*/
 
   test("Children without a ref are not retained", function(t) {
-    var comp = renderTestComponent(function($$) {
+    var comp = TestComponent.create(function($$) {
       return $$('div').append(
-        $$(SimpleComponent)
+        $$(Simple)
       );
     });
     var child = comp.getChildAt(0);
@@ -852,7 +834,7 @@ function ComponentTests(debug) {
   });
 
   test("Render a child element with ref", function(t) {
-    var comp = renderTestComponent(function($$) {
+    var comp = TestComponent.create(function($$) {
       return $$('div').addClass('parent')
         .append($$('div').addClass('child').ref('foo'));
     });
@@ -868,9 +850,9 @@ function ComponentTests(debug) {
   });
 
   test("Render a child component with ref", function(t) {
-    var comp = renderTestComponent(function($$) {
+    var comp = TestComponent.create(function($$) {
       return $$('div').append(
-        $$(SimpleComponent).ref('foo')
+        $$(Simple).ref('foo')
       );
     });
     var child = comp.refs.foo;
@@ -882,9 +864,9 @@ function ComponentTests(debug) {
   });
 
   test("Rerendering a child component with ref triggers didUpdate()", function(t) {
-    var comp = renderTestComponent(function($$) {
+    var comp = TestComponent.create(function($$) {
       return $$('div').append(
-        $$(SimpleComponent).ref('foo')
+        $$(Simple).ref('foo')
       );
     });
     var child = comp.refs.foo;
@@ -904,7 +886,7 @@ function ComponentTests(debug) {
       };
     };
     Component.extend(Child);
-    var comp = renderTestComponent(function($$) {
+    var comp = TestComponent.create(function($$) {
       return $$('div').append(
         // change prop randomly
         $$(Child, {foo: Date.now()}).ref('foo')
@@ -919,7 +901,7 @@ function ComponentTests(debug) {
 
 
   test("Refs on grandchild elements.", function(t) {
-    var comp = renderTestComponent(function($$) {
+    var comp = TestComponent.create(function($$) {
       return $$('div').append(
         $$('div').append(
           $$('div').ref(this.props.grandChildRef)
@@ -949,7 +931,7 @@ function ComponentTests(debug) {
     }
     TestComponent.extend(Grandchild);
 
-    var comp = renderTestComponent(function($$) {
+    var comp = TestComponent.create(function($$) {
       var el = $$('div');
       el.append(
         $$('div').append(
@@ -980,7 +962,7 @@ function ComponentTests(debug) {
     }
     TestComponent.extend(Child);
 
-    var comp = renderTestComponent(function($$) {
+    var comp = TestComponent.create(function($$) {
       var el = $$('div');
       el.append(
         $$('div').append(
@@ -1048,7 +1030,7 @@ function ComponentTests(debug) {
 
       this.render = function($$) {
         return $$('div').append(
-          $$(SimpleComponent).append(
+          $$(Simple).append(
             $$('div').ref('helloComp')
           ).ref('simpleComp')
         );
@@ -1062,7 +1044,7 @@ function ComponentTests(debug) {
   });
 
   test("Implicitly retain elements when grandchild elements have refs.", function(t) {
-    var comp = renderTestComponent(function($$) {
+    var comp = TestComponent.create(function($$) {
       return $$('div').append(
         $$('div').append(
           $$('div').ref(this.props.grandChildRef)
@@ -1088,7 +1070,7 @@ function ComponentTests(debug) {
     }
     TestComponent.extend(Child);
 
-    var comp = renderTestComponent(function($$) {
+    var comp = TestComponent.create(function($$) {
       var grandchild = $$('div').ref('grandchild');
       return $$('div').append(
         $$(Child).append(grandchild)
@@ -1142,7 +1124,7 @@ function ComponentTests(debug) {
   /* ##################### Incremental Component API ##########################*/
 
   test("Component.append() should support appending text.", function(t) {
-    var comp = SimpleComponent.static.render();
+    var comp = Simple.static.render();
     comp.append('XXX');
     t.equal(comp.text(), 'XXX');
     t.end();
@@ -1247,24 +1229,24 @@ function ComponentTests(debug) {
         workspace.append(
           // Main (left column)
           $$('div').ref('main').addClass("le-main").append(
-            $$(SimpleComponent).ref('toolbar').append($$(SimpleComponent)),
+            $$(Simple).ref('toolbar').append($$(Simple)),
 
-            $$(SimpleComponent).ref('contentPanel').append(
-              $$(SimpleComponent).ref('coverEditor'),
+            $$(Simple).ref('contentPanel').append(
+              $$(Simple).ref('coverEditor'),
 
               // The full fledged document (ContainerEditor)
               $$("div").ref('content').addClass('document-content').append(
-                $$(SimpleComponent, {
+                $$(Simple, {
                 }).ref('mainEditor')
               ),
-              $$(SimpleComponent).ref('bib')
+              $$(Simple).ref('bib')
             )
           )
         );
 
         // Context section (right column)
         workspace.append(
-          $$(SimpleComponent, {
+          $$(Simple, {
           }).ref(this.state.contextId)
         );
 
@@ -1272,7 +1254,7 @@ function ComponentTests(debug) {
 
         // Status bar
         el.append(
-          $$(SimpleComponent, {}).ref('statusBar')
+          $$(Simple, {}).ref('statusBar')
         );
         return el;
       }
@@ -1325,57 +1307,35 @@ function ComponentTests(debug) {
       Parent.super.apply(this, arguments);
       this.render = function($$) {
         var el = $$('div');
+        el.append('X');
         if (this.props.nested) {
-          el.append($$('div').append($$(SimpleComponent).ref('foo')));
+          el.append(
+            $$('div').append(
+              $$(Simple).ref('foo').append('Y')
+            )
+          );
         } else {
-          el.append($$(SimpleComponent).ref('foo'));
+          el.append(
+            $$(Simple).ref('foo').append('Y')
+          );
         }
+        el.append('Z');
         return el;
       };
     }
     TestComponent.extend(Parent);
     var comp = Parent.static.render();
-    t.equal(comp.refs.foo.getParent(), comp, "The first time 'foo' should be direct child.");
+    t.equal(comp.refs.foo.getParent(), comp, "First 'foo' should be direct child.");
+    t.equal(comp.el.textContent, 'XYZ', "... and content should be correct.");
     comp.setProps({ nested: true });
-    t.equal(comp.refs.foo.getParent().getParent(), comp, "The second time 'foo' should be grand-child.");
+    t.equal(comp.refs.foo.getParent().getParent(), comp, "Then 'foo' should be grand-child.");
+    t.equal(comp.el.textContent, 'XYZ', "... and content should be complete.");
+    comp.setProps({});
+    t.equal(comp.refs.foo.getParent(), comp, "At last 'foo' should be direct child again.");
+    t.equal(comp.el.textContent, 'XYZ', "... and content should be correct.");
     t.end();
   });
 
-}
-
-function TestComponent() {
-  TestComponent.super.apply(this, arguments);
-  this._enableSpies();
-}
-
-TestComponent.Prototype = function() {
-
-  this._enableSpies = function() {
-    ['didMount','didUpdate','dispose','shouldRerender','render'].forEach(function(name) {
-      spy(this, name);
-    }.bind(this));
-  };
-
-  this._disableSpies = function() {
-    ['didMount','didUpdate','dispose','shouldRerender','render'].forEach(function(name) {
-      this[name].restore();
-    }.bind(this));
-  };
-};
-
-Component.extend(TestComponent);
-
-function renderTestComponent(renderFunc, props) {
-  var comp = new TestComponent();
-  if (renderFunc) {
-    comp.render = renderFunc;
-  }
-  if (props) {
-    comp.setProps(props);
-  } else {
-    comp.rerender();
-  }
-  return comp;
 }
 
 // with RenderingEngine in debug mode
