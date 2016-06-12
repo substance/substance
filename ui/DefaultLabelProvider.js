@@ -6,10 +6,10 @@ var oo = require('../util/oo');
  Default label provider implementation
 */
 
-var LabelProvider = function(labels, lang) {
+function LabelProvider(labels, lang) {
   this.lang = lang || 'en';
   this.labels = labels;
-};
+}
 
 LabelProvider.Prototype = function() {
 
