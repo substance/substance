@@ -20,5 +20,9 @@ module.exports = {
       en: 'List',
       de: 'Liste'
     });
+    config.addLabel('list-item', {
+      en: 'List',
+      de: 'Liste'
+    });
   }
 };
