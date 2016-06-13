@@ -69,7 +69,6 @@ EventEmitter.Prototype = function() {
    * Disconnect a listener (all bindings).
    *
    * @method disconnect
-   * @memberof module:util.EventEmitter.prototype
    * @param {Object} listener
    * @chainable
    */

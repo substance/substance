@@ -4,7 +4,7 @@ var platform = require('../util/platform');
 var Component = require('./Component');
 var Scrollbar = require('./Scrollbar');
 var Overlay = require('./Overlay');
-var getBoundingClientRect = require('../util/getBoundingClientRect');
+var getRelativeBoundingRect = require('../util/getRelativeBoundingRect');
 
 /**
   Wraps content in a scroll pane.
@@ -194,7 +194,7 @@ ScrollPane.Prototype = function() {
   this.getPanelOffsetForElement = function(el) {
     var nativeEl = el.el;
     var contentContainerEl = this.refs.content.el.el;
-    var rect = getBoundingClientRect(nativeEl, contentContainerEl);
+    var rect = getRelativeBoundingRect(nativeEl, contentContainerEl);
     return rect.top;
   };
 

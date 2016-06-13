@@ -5,7 +5,7 @@ var isUndefined = require('lodash/isUndefined');
 var startsWith = require('lodash/startsWith');
 var inBrowser = require('../util/inBrowser');
 var createSurfaceId = require('../util/createSurfaceId');
-var getBoundingClientRect = require('../util/getBoundingClientRect');
+var getRelativeBoundingRect = require('../util/getRelativeBoundingRect');
 var keys = require('../util/keys');
 var platform = require('../util/platform');
 var copySelection = require('../model/transform/copySelection');
@@ -1013,7 +1013,7 @@ Surface.Prototype = function() {
       this._state.skipNextObservation = true;
       span.appendChild(window.document.createTextNode("\u200b"));
       wrange.insertNode(span);
-      var rect = getBoundingClientRect(span, containerEl);
+      var rect = getRelativeBoundingRect(span, containerEl);
       var spanParent = span.parentNode;
       this._state.skipNextObservation = true;
       spanParent.removeChild(span);
@@ -1030,7 +1030,7 @@ Surface.Prototype = function() {
       if (sel.isCollapsed()) {
         var cursorEl = nativeEl.querySelector('.se-cursor');
         if (cursorEl) {
-          return getBoundingClientRect(cursorEl, containerEl);
+          return getRelativeBoundingRect(cursorEl, containerEl);
         } else {
           // TODO: in the most cases we actually do not have a
           // cursor element.
@@ -1040,7 +1040,7 @@ Surface.Prototype = function() {
       } else {
         var selFragments = nativeEl.querySelectorAll('.se-selection-fragment');
         if (selFragments.length > 0) {
-          return getBoundingClientRect(selFragments, containerEl);
+          return getRelativeBoundingRect(selFragments, containerEl);
         } else {
           console.warn('FIXME: there should be a rendered selection fragments element.');
           return {};

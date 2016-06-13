@@ -2,7 +2,6 @@
 
 var forEach = require('lodash/forEach');
 var map = require('lodash/map');
-var toArray = require('./toArray');
 
 /*
   Calculate a bounding rectangle for a set of rectangles.
@@ -10,7 +9,6 @@ var toArray = require('./toArray');
   Note: Here, `bounds.right` and `bounds.bottom` are relative to
   the left top of the viewport.
 */
-
 function _getBoundingRect(rects) {
   var bounds = {
     left: Number.POSITIVE_INFINITY,
@@ -47,10 +45,9 @@ function _getBoundingRect(rects) {
   clientRects. A selection fragment, for example, may appear as a multi-line span
   element that consists of a single client rect per line of text in variable widths.
 */
-
 function _getBoundingOffsetsRect(el, relativeParentEl) {
   var relativeParentElRect = relativeParentEl.getBoundingClientRect();
-  var elRect = _getBoundingRect(toArray(el.getClientRects()));
+  var elRect = _getBoundingRect(el.getClientRects());
 
   var left = elRect.left - relativeParentElRect.left;
   var top = elRect.top - relativeParentElRect.top;
@@ -65,13 +62,16 @@ function _getBoundingOffsetsRect(el, relativeParentEl) {
 }
 
 /**
-  Get bounding rectangle relative to a given parent element.
+  Get bounding rectangle relative to a given parent element. Allows multiple
+  elements being passed (we need this for selections that consist of multiple
+  selection fragments). Takes a relative parent element that is used as a
+  reference point, instead of the browser's viewport.
 
-  Allows multiple elements being passed (we need this for selections that
-  consist of multiple selection fragments) takes a relative parent element that
-  is used as a reference point, instead of the browser's viewport.
+  @param {Array} els elements to compute the bounding rectangle for
+  @param {DOMElement} containerEl relative parent used as a reference point
+  @return {object} rectangle description with left, top, right, bottom, width and height
 */
-function getBoundingClientRect(els, containerEl) {
+function getRelativeBoundingRect(els, containerEl) {
   if (els.length === undefined) {
     els = [els];
   }
@@ -91,4 +91,4 @@ function getBoundingClientRect(els, containerEl) {
   };
 }
 
-module.exports = getBoundingClientRect;
+module.exports = getRelativeBoundingRect;
