@@ -2,6 +2,7 @@
 
 var isString = require('lodash/isString');
 var Selection = require('./Selection');
+var Coordinate = require('./Coordinate');
 
 function NodeSelection(containerId, nodeId, mode, reverse) {
   Selection.call(this);
