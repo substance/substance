@@ -1,2 +1,0 @@
-'use strict';
-module.exports="<html><head><meta http-equiv=\"content-type\" content=\"text/html; charset=utf-8\"></head><body>XXX</body></html>\n";
