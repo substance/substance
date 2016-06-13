@@ -54,7 +54,7 @@ ProseEditor.Prototype = function() {
   };
 
   this._initialize = function(props) {
-    var configurator = this.props.configurator;
+    var configurator = props.configurator;
     var commands = configurator.getCommands();
 
     if (!props.documentSession) {

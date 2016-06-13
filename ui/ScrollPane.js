@@ -15,7 +15,7 @@ var getBoundingClientRect = require('../util/getBoundingClientRect');
   @prop {String} scrollbarType 'native' or 'substance' for a more advanced visual scrollbar. Defaults to 'native'
   @prop {String} [scrollbarPosition] 'left' or 'right' only relevant when scrollBarType: 'substance'. Defaults to 'right'
   @prop {ui/Highlights} [highlights] object that maintains highlights and can be manipulated from different sources
-  @prop {ui/TOC} [toc] object that maintains table of content entries
+  @prop {ui/TOCProvider} [tocProvider] object that maintains table of content entries
 
   @example
 
@@ -25,7 +25,7 @@ var getBoundingClientRect = require('../util/getBoundingClientRect');
     scrollbarPosition: 'left', // defaults to right
     onScroll: this.onScroll.bind(this),
     highlights: this.contentHighlights,
-    toc: this.toc
+    tocProvider: this.tocProvider
   })
   ```
  */
@@ -137,9 +137,9 @@ ScrollPane.Prototype = function() {
     if (this.props.onScroll) {
       this.props.onScroll(scrollPos, scrollable);
     }
-    // Update TOC if provided
-    if (this.props.toc) {
-      this.context.toc.markActiveEntry(this);
+    // Update TOCProvider given
+    if (this.props.tocProvider) {
+      this.props.tocProvider.markActiveEntry(this);
     }
     this.emit('scroll', scrollPos, scrollable);
   };

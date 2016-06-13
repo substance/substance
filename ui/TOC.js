@@ -1,159 +1,80 @@
 "use strict";
 
-var each = require('lodash/each');
-var includes = require('lodash/includes');
-var EventEmitter = require('../util/EventEmitter');
+var Component = require('./Component');
+var ScrollPane = require('./ScrollPane');
+var Icon = require('./FontAwesomeIcon');
 
-/**
-  Manages a table of content for a container. Default implementation considers
-  all headings as TOC entries. You can extend this implementation and override
-  `computeEntries`. Instantiate this class on controller level and pass it to relevant components
-  (such as {@link ui/TOCPanel} and {@link ui/ScrollPane}).
-
-  @class TOC
-  @component
-
-  @prop {Controller}
- */
-
-function TOC(controller) {
-  EventEmitter.apply(this, arguments);
-  this.controller = controller;
-
-  this.entries = this.computeEntries();
-  if (this.entries.length > 0) {
-    this.activeEntry = this.entries[0].id;
-  } else {
-    this.activeEntry = null;
-  }
-
-  var doc = this.getDocument();
-  doc.on('document:changed', this.handleDocumentChange, this);
+function TOC() {
+  Component.apply(this, arguments);
 }
 
 TOC.Prototype = function() {
 
+  this.didMount = function() {
+    var tocProvider = this.context.tocProvider;
+    tocProvider.on('toc:updated', this.onTOCUpdated, this);
+  };
+
   this.dispose = function() {
-    var doc = this.getDocument();
-    doc.disconnect(this);
+    var tocProvider = this.context.tocProvider;
+    tocProvider.off(this);
   };
 
-  // Inspects a document change and recomputes the
-  // entries if necessary
-  this.handleDocumentChange = function(change) {
-    var doc = this.getDocument();
-    var needsUpdate = false;
-    var tocTypes = this.constructor.static.tocTypes;
+  this.render = function($$) {
+    var tocProvider = this.context.tocProvider;
+    var activeEntry = tocProvider.activeEntry;
 
-    // HACK: this is not totally correct but works.
-    // Actually, the TOC should be updated if tocType nodes
-    // get inserted or removed from the container, plus any property changes
-    // This implementation just checks for changes of the node type
-    // not the container, but as we usually create and show in
-    // a single transaction this works.
-    for (var i = 0; i < change.ops.length; i++) {
-      var op = change.ops[i];
-      var nodeType;
-      if (op.isCreate() || op.isDelete()) {
-        var nodeData = op.getValue();
-        nodeType = nodeData.type;
-        if (includes(tocTypes, nodeType)) {
-          needsUpdate = true;
-          break;
-        }
-      } else {
-        var id = op.path[0];
-        var node = doc.get(id);
-        if (node && includes(tocTypes, node.type)) {
-          needsUpdate = true;
-          break;
-        }
+    var tocEntries = $$("div")
+      .addClass("se-toc-entries")
+      .ref('tocEntries');
+
+    var entries = tocProvider.getEntries();
+    for (var i = 0; i < entries.length; i++) {
+      var entry = entries[i];
+      var level = entry.level;
+
+      var tocEntryEl = $$('a')
+        .addClass('se-toc-entry')
+        .addClass('sm-level-'+level)
+        .attr({
+          href: "#",
+          "data-id": entry.id,
+        })
+        .ref(entry.id)
+        .on('click', this.handleClick)
+        .append(
+          $$(Icon, {icon: 'fa-caret-right'}),
+          entry.name
+        );
+      if (activeEntry === entry.id) {
+        tocEntryEl.addClass("sm-active");
       }
+      tocEntries.append(tocEntryEl);
     }
-    if (needsUpdate) {
-      this.entries = this.computeEntries();
-      this.emit('toc:updated');
-    }
-  };
 
-  this.computeEntries = function() {
-    var doc = this.getDocument();
-    var config = this.controller.getConfig();
-    var entries = [];
-    var contentNodes = doc.get(config.containerId).nodes;
-    each(contentNodes, function(nodeId) {
-      var node = doc.get(nodeId);
-      if (node.type === 'heading') {
-        entries.push({
-          id: node.id,
-          name: node.content,
-          level: node.level,
-          node: node
-        });
-      }
-    });
-    return entries;
-  };
-
-  this.getEntries = function() {
-    return this.entries;
+    var el = $$('div').addClass('sc-toc-panel').append(
+      $$(ScrollPane).ref('panelEl').append(
+        tocEntries
+      )
+    );
+    return el;
   };
 
   this.getDocument = function() {
-    return this.controller.getDocument();
+    return this.context.doc;
   };
 
-  this.getConfig = function() {
-    return this.controller.getConfig();
+  this.onTOCUpdated = function() {
+    this.rerender();
   };
 
-  this.markActiveEntry = function(scrollPane) {
-    var panelContent = scrollPane.getContentElement();
-    var contentHeight = scrollPane.getContentHeight();
-    var scrollPaneHeight = scrollPane.getHeight();
-    var scrollPos = scrollPane.getScrollPosition();
-
-    var scrollBottom = scrollPos + scrollPaneHeight;
-    var regularScanline = scrollPos;
-    var smartScanline = 2 * scrollBottom - contentHeight;
-    var scanline = Math.max(regularScanline, smartScanline);
-
-    // For debugging purposes
-    // TODO: FIXME this code does not make sense anymore.
-    //       The scanline should be part of the scrolled content not the scrollbar
-    // To activate remove display:none for .scanline in the CSS
-    // $('.se-scanline').css({
-    //   top: (scanline - scrollTop)+'px'
-    // });
-
-    var tocNodes = this.computeEntries();
-    if (tocNodes.length === 0) return;
-
-    // Use first toc node as default
-    var activeEntry = tocNodes[0].id;
-    for (var i = tocNodes.length - 1; i >= 0; i--) {
-      var tocNode = tocNodes[i];
-      var nodeEl = panelContent.find('[data-id="'+tocNode.id+'"]');
-      if (!nodeEl) {
-        console.warn('Not found in Content panel', tocNode.id);
-        return;
-      }
-      var panelOffset = scrollPane.getPanelOffsetForElement(nodeEl);
-      if (scanline >= panelOffset) {
-        activeEntry = tocNode.id;
-        break;
-      }
-    }
-
-    if (this.activeEntry !== activeEntry) {
-      this.activeEntry = activeEntry;
-      this.emit('toc:updated');
-    }
+  this.handleClick = function(e) {
+    var nodeId = e.currentTarget.dataset.id;
+    e.preventDefault();
+    this.send('tocEntrySelected', nodeId);
   };
 };
 
-EventEmitter.extend(TOC);
-
-TOC.static.tocTypes = ['heading'];
+Component.extend(TOC);
 
 module.exports = TOC;
