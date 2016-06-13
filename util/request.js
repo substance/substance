@@ -1,26 +1,20 @@
 'use strict';
 
-var $ = require('./jquery');
-var error = require('./error');
-
 module.exports = function request(method, url, data, cb) {
-  var ajaxOpts = {
-    type: method,
-    url: url,
-    contentType: "application/json; charset=UTF-8",
-    // dataType: "json",
-    success: function(data) {
-      cb(null, data);
-    },
-    error: function(err) {
-      error(err);
-      cb(err.responseText);
+  var request = new XMLHttpRequest();
+  request.open(method, url, true);
+  request.setRequestHeader('Content-Type', 'application/json; charset=UTF-8');
+  request.onload = function() {
+    if (request.status >= 200 && request.status < 400) {
+      cb(null, request.responseText);
+    } else {
+      return cb(new Error('Request failed. Returned status: ' + request.status));
     }
   };
 
   if (data) {
-    ajaxOpts.data = JSON.stringify(data);
+    request.send(JSON.stringify(data));
+  } else {
+    request.send();
   }
-
-  $.ajax(ajaxOpts);
 };
