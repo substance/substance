@@ -417,11 +417,13 @@ ContainerEditor.Prototype = function() {
       args.containerId = this.getContainerId();
       args.editingBehavior = this.editingBehavior;
       var result = transformation(tx, args);
-      sel = result.selection;
-      if (sel && !sel.isNull()) {
-        sel.containerId = containerId;
+      if (result) {
+        sel = result.selection;
+        if (sel && !sel.isNull()) {
+          sel.containerId = containerId;
+        }
+        return result;
       }
-      return result;
     }.bind(this), info);
   };
 
