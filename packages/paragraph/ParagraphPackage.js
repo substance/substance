@@ -14,5 +14,9 @@ module.exports = {
       name: 'paragraph',
       data: {type: 'paragraph'}
     });
+    config.addLabel('paragraph', {
+      en: 'Paragraph',
+      de: 'Paragraph'
+    });
   }
 };
