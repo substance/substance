@@ -92,7 +92,7 @@ ContainerEditor.Prototype = function() {
     _super.didMount.apply(this, arguments);
     // var doc = this.getDocument();
     // to do incremental updates
-    this.container.on('nodes:changed', this.onContainerChange, this, { priority: 100 });
+    this.container.on('nodes:changed', this.onContainerChange, this);
   };
 
   this.dispose = function() {
