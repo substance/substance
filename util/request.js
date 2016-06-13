@@ -6,7 +6,9 @@ module.exports = function request(method, url, data, cb) {
   request.setRequestHeader('Content-Type', 'application/json; charset=UTF-8');
   request.onload = function() {
     if (request.status >= 200 && request.status < 400) {
-      cb(null, request.responseText);
+      var res = request.responseText;
+      if(isJson(res)) res = JSON.parse(res); 
+      cb(null, res);
     } else {
       return cb(new Error('Request failed. Returned status: ' + request.status));
     }
@@ -18,3 +20,12 @@ module.exports = function request(method, url, data, cb) {
     request.send();
   }
 };
+
+function isJson(str) {
+  try {
+    JSON.parse(str);
+  } catch (e) {
+    return false;
+  }
+  return true;
+}
