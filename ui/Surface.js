@@ -1019,6 +1019,11 @@ Surface.Prototype = function() {
       spanParent.removeChild(span);
       // Glue any broken text nodes back together
       spanParent.normalize();
+      // HACK: in FF the DOM selection gets corrupted
+      // by the span-insertion above
+      if (platform.isFF) {
+        this.rerenderDOMSelection();
+      }
       return rect;
     } else {
       var nativeEl = this.el.el;
