@@ -226,6 +226,13 @@ RenderingEngine.Prototype = function() {
           break;
         }
 
+        // Try to reuse TextNodes to avoid unnecesary DOM manipulations
+        if (oldComp && oldComp.el.isTextNode() &&
+            virtualComp && virtualComp._isVirtualTextNode &&
+            oldComp.el.textContent === virtualComp.text ) {
+          continue;
+        }
+
         if (!state.isRendered(virtualComp)) {
           _render(state, virtualComp);
         }
