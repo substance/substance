@@ -17,5 +17,9 @@ module.exports = {
       en: 'Redo',
       de: 'Wiederherstellen'
     });
+    config.addLabel('container-selection', {
+      en: 'Multiple Elements',
+      de: 'Mehrere Elemente'
+    });
   }
 };

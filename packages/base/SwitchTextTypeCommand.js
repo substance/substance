@@ -69,7 +69,7 @@ SwitchTextType.Prototype = function() {
         if (!newState.currentTextType) {
           // We 'abuse' the currentTextType field by providing a property
           // identifier that is translated into a name using an i18n resolve.
-          // E.g. this.i18n('figure.caption') -> Figre Caption
+          // E.g. this.i18n('figure.caption') -> Figure Caption
           newState.currentTextType = {name: [node.type, path[1]].join('.')};
           newState.disabled = true;
         }
@@ -84,7 +84,7 @@ SwitchTextType.Prototype = function() {
     @param {String} textTypeName identifier (e.g. heading1)
   */
   this.execute = function(props, context) {
-    var textType = this.getTextType(context, props.textTypeName);
+    var textType = this.getTextType(context, props.textType);
     var nodeData = textType.data;
     var surface = context.surfaceManager.getFocusedSurface();
     if (!surface) {
