@@ -77,15 +77,15 @@ function _deleteContainerSelection(tx, args) {
         });
       } else {
         var nodeId = fragment.path[0];
-        container.hide(nodeId);
         deleteNode(tx, extend({}, args, {
-          nodeId: nodeId
+          nodeId: nodeId,
+          containerId: container.id
         }));
       }
     } else if (fragment.isNodeFragment()) {
-      container.hide(fragment.nodeId);
       deleteNode(tx, extend({}, args, {
-        nodeId: fragment.nodeId
+        nodeId: fragment.nodeId,
+        containerId: container.id
       }));
     }
   }

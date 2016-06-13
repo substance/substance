@@ -9,11 +9,17 @@ var each = require('lodash/each');
  * @param args object with fields: `nodeId`.
  */
 function deleteNode(tx, args) {
-  if (!args.nodeId) {
+  var nodeId = args.nodeId;
+  if (!nodeId) {
     throw new Error('Parameter `nodeId` is mandatory.');
   }
-  var nodeId = args.nodeId;
   var node = tx.get(nodeId);
+  if (!node) {
+    throw new Error("Invalid 'nodeId'. Node does not exist.");
+  }
+  // optional: containerId - will hide the node before removing it
+  var containerId = args.containerId
+
   // remove all associated annotations
   var annos = tx.getIndex('annotations').get(nodeId);
   var i;
@@ -62,17 +68,25 @@ function deleteNode(tx, args) {
       }
     }
   }
+  if (containerId) {
+    // hide the node from the one container if provided
+    var container = tx.get(containerId);
+    container.hide(nodeId);
+  }
+  // hiding automatically is causing troubles with nested containers
+  //  else {
+  //   // or hide it from all containers
+  //   each(tx.getIndex('type').get('container'), function(container) {
+  //     container.hide(nodeId);
+  //   });
+  // }
+
   // delete nested nodes
   if (node.hasChildren()) {
     node.getChildren().forEach(function(child) {
       deleteNode(tx, { nodeId: child.id });
     });
   }
-  // hide node from all containers
-  each(tx.getIndex('type').get('container'), function(container) {
-    // remove from view first
-    container.hide(nodeId);
-  });
   // finally delete the node itself
   tx.delete(nodeId);
   return args;

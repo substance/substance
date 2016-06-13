@@ -49,12 +49,6 @@ function switchTextType(tx, args) {
   newNode = tx.create(newNode);
   annotationHelpers.transferAnnotations(tx, path, 0, newPath, 0);
 
-  // TODO: should work without a given container
-  // _.each(tx.getContainers(), function(container) {
-  //   pos = container.getPosition(nodeId);
-  //   ....
-  // });
-
   // hide the old one, show the new node
   var container = tx.get(args.containerId);
   var pos = container.getPosition(nodeId);
