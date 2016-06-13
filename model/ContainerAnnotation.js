@@ -21,7 +21,7 @@ var documentHelpers = require('./documentHelpers');
   {
     "id": "subject_reference_1",
     "type": "subject_reference",
-    "container": "content",
+    "containerId": "content",
     "startPath": ["text_2", "content"],
     "startOffset": 100,
     "endPath": ["text_4", "content"],
