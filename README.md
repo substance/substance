@@ -17,7 +17,7 @@ Incremental document updates (undoable operations)                          | �
 Transformations for document manipulation                                   | ✓
 Custom editing toolbars                                                     | ✓
 Commands for controlling the editor                                         | ✓
-I18N support                                                                | ✓
+Multi-language support                                                      | ✓
 Realtime collaboration                                                      | ✓
 Persistence API for documents                                               | ✓
 Text Macros                                                                 | ✓
@@ -96,6 +96,7 @@ $ npm run doc
 - Mobile support
 - Improved Unicode support
 - Advanced list support
+- Advanced table support
 
 *ETA: Fall 2016*
 
