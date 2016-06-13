@@ -1,0 +1,13 @@
+.sc-prose-editor {
+
+  .sc-container-editor {
+    padding: 20px;
+    > * {
+      padding-bottom: 20px;
+    }
+  }
+
+  .sc-prose-editor-tools {
+    border-bottom: 1px solid $border-color;
+  }
+}

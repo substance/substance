@@ -12,7 +12,7 @@ function ProseEditorTools() {
 ProseEditorTools.Prototype = function() {
 
   this.render = function($$) {
-    var el = $$("div").addClass('sc-example-toolbar');
+    var el = $$("div").addClass('sc-prose-editor-tools');
     var commandStates = this.props.commandStates;
     var toolRegistry = this.context.toolRegistry;
 

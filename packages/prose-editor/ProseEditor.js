@@ -114,7 +114,7 @@ ProseEditor.Prototype = function() {
 
   this.render = function($$) {
     var configurator = this.props.configurator;
-    return $$('div').addClass('sc-editor').append(
+    return $$('div').addClass('sc-prose-editor').append(
       $$(SplitPane, {splitType: 'horizontal'}).append(
         $$(Toolbar, {
           content: ProseEditorTools
