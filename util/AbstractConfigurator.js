@@ -118,6 +118,9 @@ AbstractConfigurator.Prototype = function() {
   */
   this.addLabel = function(labelName, label) {
     if (isString(label)) {
+      if(!this.config.labels['en']) {
+        this.config.labels['en'] = {};
+      }
       this.config.labels['en'][labelName] = label;
     } else {
       forEach(label, function(label, lang) {

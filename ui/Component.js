@@ -9,7 +9,6 @@ var RenderingEngine = require('./RenderingEngine');
 var VirtualElement = require('./VirtualElement');
 var DOMElement = require('./DOMElement');
 var DefaultDOMElement = require('./DefaultDOMElement');
-var I18n = require('./i18n');
 var inBrowser = require('../util/inBrowser');
 
 var __id__ = 0;
@@ -620,12 +619,6 @@ function _unwrapCompStrict(el) {
 function notNull(n) { return n; }
 
 Component.unwrap = _unwrapComp;
-
-/**
- * Adding a property which is providing an i18n service
- * which should be received via depency injection.
- */
-I18n.mixin(Component);
 
 Component.static.render = function(props) {
   props = props || {};

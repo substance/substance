@@ -5,9 +5,6 @@ var DefaultDOMElement = require('substance/ui/DefaultDOMElement');
 var Component = require('substance/ui/Component');
 var cloneDeep = require('lodash/cloneDeep');
 
-var I18n = require('substance/ui/i18n');
-I18n.instance.load(require('../i18n/en'));
-
 function ResponsiveApplication() {
   Component.apply(this, arguments);
 

@@ -60,7 +60,7 @@ Component.extend(Toolbar);
 
   ```
   $$(Toolbar.Dropdown, {label: $$(Icon, {icon: 'fa-image'}),}).append(
-    $$(InsertFigureTool).append(this.i18n.t('insert'))
+    $$(InsertFigureTool).append(this.getLabel('insert'))
   )
   ```
 */

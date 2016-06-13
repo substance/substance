@@ -68,8 +68,8 @@ SwitchTextType.Prototype = function() {
         }
         if (!newState.currentTextType) {
           // We 'abuse' the currentTextType field by providing a property
-          // identifier that is translated into a name using an i18n resolve.
-          // E.g. this.i18n('figure.caption') -> Figure Caption
+          // identifier that is translated into a name using an default label set.
+          // E.g. this.getLabel('figure.caption') -> Figure Caption
           newState.currentTextType = {name: [node.type, path[1]].join('.')};
           newState.disabled = true;
         }
