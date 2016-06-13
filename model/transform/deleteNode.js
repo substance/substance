@@ -1,6 +1,6 @@
 'use strict';
 
-var each = require('lodash/each');
+// var each = require('lodash/each');
 
 /*
  * Delete a node and all annotations attached to it,
@@ -18,7 +18,8 @@ function deleteNode(tx, args) {
     throw new Error("Invalid 'nodeId'. Node does not exist.");
   }
   // optional: containerId - will hide the node before removing it
-  var containerId = args.containerId
+  var containerId = args.containerId;
+  var container;
 
   // remove all associated annotations
   var annos = tx.getIndex('annotations').get(nodeId);
@@ -32,7 +33,7 @@ function deleteNode(tx, args) {
   var anchors = tx.getIndex('container-annotation-anchors').get(nodeId);
   for (i = 0; i < anchors.length; i++) {
     var anchor = anchors[i];
-    var container = tx.get(anchor.containerId);
+    container = tx.get(anchor.containerId);
     // Note: during the course of this loop we might have deleted the node already
     // so, don't do it again
     if (!tx.get(anchor.id)) continue;
@@ -70,7 +71,7 @@ function deleteNode(tx, args) {
   }
   if (containerId) {
     // hide the node from the one container if provided
-    var container = tx.get(containerId);
+    container = tx.get(containerId);
     container.hide(nodeId);
   }
   // hiding automatically is causing troubles with nested containers
