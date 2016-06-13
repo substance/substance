@@ -17,5 +17,9 @@ module.exports = {
       en: 'Image',
       de: 'Bild'
     });
+    config.addLabel('insert-image', {
+      en: 'Insert image',
+      de: 'Bild einfügen'
+    });
   }
 };
