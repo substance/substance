@@ -3,6 +3,7 @@
 var oo = require('../util/oo');
 var extend = require('lodash/extend');
 var each = require('lodash/each');
+var isString = require('lodash/isString');
 
 var ENTER = 1;
 var EXIT = -1;
@@ -44,7 +45,10 @@ function Fragmenter(options) {
 Fragmenter.Prototype = function() {
 
   this.start = function(rootContext, text, annotations) {
-    return this._start(rootContext, text, annotations);
+    if (!isString(text)) {
+      throw new Error("Illegal argument: 'text' must be a String, but was " + text);
+    }
+    this._start(rootContext, text, annotations);
   };
 
   this.onText = function(context, text, entry) { // eslint-disable-line
