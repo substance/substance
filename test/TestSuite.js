@@ -1,6 +1,6 @@
 'use strict';
 
-var isEqual = require('lodash/isEqual');
+// var isEqual = require('lodash/isEqual');
 var startsWith = require('lodash/startsWith');
 var Component = require('../ui/Component');
 // var DefaultDOMElement = require('../ui/DefaultDOMElement');
@@ -68,10 +68,8 @@ TestSuite.Prototype = function() {
     return el;
   };
 
-  this.didUpdate = function(oldProps, oldState) {
-    if (!isEqual(oldState, this.state)) {
-      this.runTests();
-    }
+  this.didUpdate = function() {
+    this.runTests();
   };
 
   this.runTests = function() {
