@@ -1,2 +1,0 @@
-'use strict';
-module.exports="<html><body>\n<!--StartFragment-->X<a href=\"https://en.wikipedia.org/wiki/United_States_Senate_election_in_Illinois,_2004\" title=\"United States Senate election in Illinois, 2004\">X</a>X<!--EndFragment-->\n</body>\n</html>";

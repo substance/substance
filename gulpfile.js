@@ -111,18 +111,6 @@ gulp.task('test:fixtures', function() {
     .pipe(gulp.dest('test/fixtures/html/'));
 });
 
-gulp.task('test:qunit:karma', function(done) {
-  new Karma({
-    configFile: __dirname + '/karma.qunit.conf.js',
-    singleRun: true
-  }, done).start();
-});
-
-gulp.task('test:qunit:server', function() {
-  // requiring instead of doing 'node test/run.js'
-  require('./test-old/run');
-});
-
 function _testBrowser(browser, done) {
   new Karma({
     configFile: __dirname + '/karma.conf.js',

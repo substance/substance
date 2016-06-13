@@ -24,29 +24,6 @@ serverUtils.serveStyles(app, '/docs/app.css', path.join(__dirname, 'doc', 'app.s
 serverUtils.serveJS(app, '/docs/app.js', path.join(__dirname, 'doc', 'app.js'));
 
 // Test suite
-app.get('/test-old/test.js', function (req, res, next) {
-  glob("test-old/**/*.test.js", {}, function (er, testfiles) {
-    if (er || !testfiles || testfiles.length === 0) {
-      console.error('No tests found.');
-      res.send('500');
-    } else {
-      // console.log('Found test files:', testfiles);
-      browserify({ debug: true, cache: false })
-        .add(path.join(__dirname, 'test-old', 'test-globals.js'))
-        .add(testfiles.map(function(file) {
-          return path.join(__dirname, file);
-        }))
-        .bundle()
-        .on('error', function(err){
-          console.error(err.message);
-        })
-        .pipe(res);
-    }
-  });
-});
-app.use('/test-old', express.static(__dirname + '/test'));
-
-// Test suite
 app.get('/test/app.js', function (req, res, next) {
   glob("test/**/*.test.js", {}, function (er, testfiles) {
     if (er || !testfiles || testfiles.length === 0) {
