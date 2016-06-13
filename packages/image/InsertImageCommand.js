@@ -31,7 +31,7 @@ ImageCommand.Prototype = function() {
     TODO: Think about ways to make ImagCommand CLI-compatible.
   */
   this.execute = function(props, context) {
-    var state = this.getCommandState(context);
+    var state = this.getCommandState(props, context);
     var surface = context.surfaceManager.getFocusedSurface();
     var fileClient = context.fileClient;
 
