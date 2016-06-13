@@ -19,6 +19,8 @@ var Selection = require('./Selection');
 var Coordinate = require('./Coordinate');
 var Range = require('./Range');
 var docHelpers = require('./documentHelpers');
+var JSONConverter = require('./JSONConverter');
+var converter = new JSONConverter();
 
 var __id__ = 0;
 
@@ -550,26 +552,10 @@ Document.Prototype = function() {
   /**
     Convert to JSON.
 
-    DEPRECATED: We moved away from having JSON as first-class exchange format.
-    We will remove this soon.
-
-    @private
     @returns {Object} Plain content.
-    @deprecated
   */
   this.toJSON = function() {
-    // TODO: deprecate this
-    // console.warn('DEPRECATED: Document.toJSON(). Use model/JSONConverter instead.');
-    var nodes = {};
-    each(this.getNodes(), function(node) {
-      if (node._isDocumentNode) {
-        nodes[node.id] = node.toJSON();
-      }
-    });
-    return {
-      schema: [this.schema.name, this.schema.version],
-      nodes: nodes
-    };
+    return converter.exportDocument(this);
   };
 
   this.getTextForSelection = function(sel) {
