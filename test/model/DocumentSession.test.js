@@ -2,7 +2,6 @@
 
 var test = require('../test').module('model/DocumentSession');
 
-var sinon = require('sinon');
 var extend = require('lodash/extend');
 var isUndefined = require('lodash/isUndefined');
 var isNull = require('lodash/isNull');
@@ -10,6 +9,8 @@ var DocumentSession = require('../../model/DocumentSession');
 
 var fixture = require('../fixtures/createTestArticle');
 var simple = require('../fixtures/simple');
+var spy = require('../spy');
+
 
 test("Transaction: before and after state.", function(t) {
   var doc = fixture(simple);
@@ -43,7 +44,7 @@ test("Transaction: before and after state.", function(t) {
 test("Keeping TransactionDocument up-to-date.", function(t) {
   var doc = fixture(simple);
   var docSession = new DocumentSession(doc);
-  docSession.stage._apply = sinon.spy(docSession.stage, '_apply');
+  docSession.stage._apply = spy(docSession.stage, '_apply');
 
   doc.create({ type: 'paragraph', id: 'foo', content: 'foo'});
   var p = docSession.stage.get('foo');
