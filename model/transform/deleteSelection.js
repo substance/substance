@@ -76,8 +76,10 @@ function _deleteContainerSelection(tx, args) {
           selection: fragment
         });
       } else {
+        var nodeId = fragment.path[0];
+        container.hide(nodeId);
         deleteNode(tx, extend({}, args, {
-          nodeId: fragment.path[0]
+          nodeId: nodeId
         }));
       }
     } else if (fragment.isNodeFragment()) {
