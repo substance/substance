@@ -31,9 +31,9 @@ EditLinkTool.Prototype = function() {
         $$(Prompt.Link, {
           name: 'open-link',
           href: node.url,
-          title: this.i18n.t('open-link')
+          title: this.getLabel('open-link')
         }),
-        $$(Prompt.Action, {name: 'delete', title: this.i18n.t('delete')})
+        $$(Prompt.Action, {name: 'delete', title: this.getLabel('delete')})
           .on('click', this.onDelete)
       )
     );

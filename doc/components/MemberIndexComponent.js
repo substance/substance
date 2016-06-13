@@ -39,7 +39,7 @@ MemberIndexComponent.Prototype = function() {
       var cat = categories[group];
       var catEl = _super._renderMemberCategory.call(this, $$, cat, members);
       catEl.insertAt(0,
-        $$('span').addClass('se-label').append(this.i18n.t('inherited-' + cat.name))
+        $$('span').addClass('se-label').append(this.getLabel('inherited-' + cat.name))
       );
       elements.push(catEl);
     }.bind(this));
@@ -49,7 +49,7 @@ MemberIndexComponent.Prototype = function() {
   this._renderMemberCategory = function($$, cat) {
     var catEl = _super._renderMemberCategory.apply(this, arguments);
     catEl.insertAt(0,
-      $$('span').addClass('se-label').append(this.i18n.t(cat.name))
+      $$('span').addClass('se-label').append(this.getLabel(cat.name))
     );
     return catEl;
   };

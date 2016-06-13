@@ -67,7 +67,6 @@ ProseEditor.Prototype = function() {
     this.documentSession.setSaveHandler(this.saveHandler);
     this.componentRegistry = configurator.getComponentRegistry();
     this.toolRegistry = configurator.getToolRegistry();
-    this.i18nInstance = configurator.getI18nInstance();
     this.surfaceManager = new SurfaceManager(this.documentSession);
     this.fileClient = configurator.getFileClient();
     this.commandManager = new CommandManager(this.getCommandContext(), commands);
@@ -106,7 +105,6 @@ ProseEditor.Prototype = function() {
       surfaceManager: this.surfaceManager,
       commandManager: this.commandManager,
       toolRegistry: this.toolRegistry,
-      i18n: this.i18nInstance,
       labelProvider: this.labelProvider,
       converterRegistry: this.converterRegistry,
       globalEventHandler: this.globalEventHandler,

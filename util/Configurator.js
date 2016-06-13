@@ -3,9 +3,7 @@
 var AbstractConfigurator = require('./AbstractConfigurator');
 var FontAwesomeIconProvider = require('../ui/FontAwesomeIconProvider');
 
-// Setup default I18n
-var I18n = require('../ui/i18n');
-I18n.instance.load(require('../i18n/en'));
+// Setup default label provider
 var LabelProvider = require('../ui/DefaultLabelProvider');
 
 /*
@@ -28,10 +26,6 @@ Configurator.Prototype = function() {
 
   this.getIconProvider = function() {
     return new FontAwesomeIconProvider(this.config.icons);
-  };
-
-  this.getI18nInstance = function() {
-    return I18n.instance;
   };
 
   this.getLabelProvider = function() {

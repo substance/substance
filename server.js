@@ -15,8 +15,6 @@ var serverUtils = require('./util/server');
 app.use('/docs', express.static(path.join(__dirname, 'doc/assets')));
 app.use('/docs/fonts', express.static(path.join(__dirname, 'node_modules/font-awesome/fonts')));
 
-app.use('/i18n', express.static(path.join(__dirname, 'i18n')));
-
 app.get('/docs/documentation.json', function(req, res) {
   var nodes = generate(config);
   res.json(nodes);
