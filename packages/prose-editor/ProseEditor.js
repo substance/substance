@@ -37,7 +37,7 @@ ProseEditor.Prototype = function() {
     in your custom Controller class, don't forget the super call.
   */
   this.dispose = function() {
-    this._disposeController();
+    this._dispose();
   };
 
   this._dispose = function() {
