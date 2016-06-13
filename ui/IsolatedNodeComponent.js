@@ -267,12 +267,10 @@ IsolatedNodeComponent.Prototype = function() {
     var doc = surface.getDocument();
     var nodeId = this.props.node.id;
     surface.setSelection(doc.createSelection({
-      type: 'container',
+      type: 'node',
       containerId: surface.getContainerId(),
-      startPath: [nodeId],
-      startOffset: 0,
-      endPath: [nodeId],
-      endOffset: 1
+      nodeId: nodeId,
+      mode: 'full'
     }));
   };
 
@@ -311,6 +309,19 @@ IsolatedNodeComponent.getDOMCoordinate = function(comp, coor) {
     };
   }
   return domCoor;
+};
+
+IsolatedNodeComponent.getDOMCoordinates = function(comp) {
+  return {
+    start: {
+      container: comp.refs.before.getNativeElement(),
+      offset: 0
+    },
+    end: {
+      container: comp.refs.after.getNativeElement(),
+      offset: 1
+    }
+  };
 };
 
 module.exports = IsolatedNodeComponent;

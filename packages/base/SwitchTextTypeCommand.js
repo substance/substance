@@ -74,6 +74,10 @@ SwitchTextType.Prototype = function() {
           newState.disabled = true;
         }
       }
+    } else if (sel.isNodeSelection()) {
+      var node = doc.get(sel.getNodeId());
+      newState.currentTextType = {name: node.type};
+      newState.disabled = true;
     } else if (sel.isCustomSelection()) {
       newState.currentTextType = {name: 'custom'};
       newState.disabled = true;

@@ -380,21 +380,32 @@ Document.Prototype = function() {
 
 
   function _createSelection() {
-    var doc = this; // eslint-disable-line
     var PropertySelection = require('./PropertySelection');
     var ContainerSelection = require('./ContainerSelection');
+    var NodeSelection = require('./NodeSelection');
+
+    var doc = this; // eslint-disable-line
     var coor, range, path, startOffset, endOffset;
     if (arguments.length === 1 && arguments[0] === null) {
       return Selection.nullSelection;
     }
     if (arguments[0] instanceof Coordinate) {
       coor = arguments[0];
-      return new PropertySelection(coor.path, coor.offset, coor.offset);
+      if (coor.isNodeCoordinate()) {
+        return NodeSelection._createFromCoordinate(coor);
+      } else {
+        return new PropertySelection(coor.path, coor.offset, coor.offset);
+      }
     }
     else if (arguments[0] instanceof Range) {
       range = arguments[0];
-      if (isEqual(range.start.path, range.end.path) && !range.start.isNodeCoordinate()) {
-        return new PropertySelection(range.start.path, range.start.offset, range.end.offset, range.reverse, range.containerId);
+      var inOneNode = isEqual(range.start.path, range.end.path);
+      if (inOneNode) {
+        if (range.start.isNodeCoordinate()) {
+          return NodeSelection._createFromRange(range);
+        } else {
+          return new PropertySelection(range.start.path, range.start.offset, range.end.offset, range.reverse, range.containerId);
+        }
       } else {
         return new ContainerSelection(range.containerId, range.start.path, range.start.offset, range.end.path, range.end.offset, range.reverse);
       }
@@ -434,6 +445,8 @@ Document.Prototype = function() {
   function _createSelectionFromData(doc, selData) {
     var PropertySelection = require('./PropertySelection');
     var ContainerSelection = require('./ContainerSelection');
+    var NodeSelection = require('./NodeSelection');
+    var CustomSelection = require('./CustomSelection');
     var tmp;
     if (selData.type === 'property') {
       if (selData.endOffset === null || selData.endOffset === undefined) {
@@ -479,6 +492,13 @@ Document.Prototype = function() {
       _allignCoordinate(doc, end, false);
 
       return new ContainerSelection(container.id, start.path, start.offset, end.path, end.offset, isReverse);
+    }
+    else if (selData.type === 'node') {
+      return NodeSelection.fromJSON(selData);
+    } else if (selData.type === 'custom') {
+      return CustomSelection.fromJSON(selData);
+    } else {
+      throw new Error('Illegal selection type', selData);
     }
   }
 

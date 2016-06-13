@@ -17,16 +17,24 @@ var CLIPBOARD_PROPERTY_ID = "clipboard_property";
 
 function copySelection(doc, args) {
   var selection = args.selection;
-  if (selection.isNull()) {
+  if (!selection || !selection._isSelection) {
+    throw new Error("'selection' is mandatory.");
+  }
+  if (selection.isNull() || selection.isCollapsed()) {
     args.doc = null;
   }
+
   // return a simplified version if only a piece of text is selected
   else if (selection.isPropertySelection()) {
     args.doc = _copyPropertySelection(doc, selection);
   }
   else if (selection.isContainerSelection()) {
     args.doc = _copyContainerSelection(doc, selection);
-  } else {
+  }
+  else if (selection.isNodeSelection()) {
+    args.doc = _copyNodeSelection(doc, selection);
+  }
+  else {
     console.error('Copy is not yet supported for selection type.');
     args.doc = null;
   }
@@ -124,6 +132,22 @@ function _copyContainerSelection(doc, selection) {
     annotationHelpers.deletedText(copy, path, offset, text.length);
   }
 
+  return copy;
+}
+
+function _copyNodeSelection(doc, selection) {
+  var copy = doc.newInstance();
+  var container = doc.get(selection.containerId);
+  // create a new container
+  var containerNode = copy.create({
+    type: 'container',
+    id: CLIPBOARD_CONTAINER_ID,
+    nodes: []
+  });
+  var nodeId = selection.getNodeId();
+  var node = doc.get(nodeId);
+  _copyNode(copy, node, container, {});
+  containerNode.show(node.id);
   return copy;
 }
 

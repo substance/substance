@@ -3,7 +3,6 @@
 var extend = require('lodash/extend');
 var last = require('lodash/last');
 var uuid = require('../../util/uuid');
-var deleteCharacter = require('./deleteCharacter');
 var deleteNode = require('./deleteNode');
 var merge = require('./merge');
 var updateAnnotations = require('./updateAnnotations');
@@ -26,11 +25,13 @@ var updateAnnotations = require('./updateAnnotations');
 function deleteSelection(tx, args) {
   var selection = args.selection;
   if (selection.isCollapsed()) {
-    args = deleteCharacter(tx, args);
+    // nothing
   } else if (selection.isPropertySelection()) {
     args = _deletePropertySelection(tx, args);
-  } else {
+  } else if (selection.isContainerSelection()) {
     args = _deleteContainerSelection(tx, args);
+  } else if (selection.isNodeSelection()) {
+    args = _deleteNodeSelection(tx, args);
   }
   return args;
 }
@@ -141,6 +142,32 @@ function _deleteContainerSelection(tx, args) {
   }
 
   return args;
+}
+
+function _deleteNodeSelection(tx, args) {
+  var sel = args.selection;
+  if (!sel || !sel.isNodeSelection()) {
+    throw new Error("'sel' must be a NodeSelection");
+  }
+  if (!sel.isFull()) {
+    return args;
+  }
+  var nodeId = sel.getNodeId();
+  var containerId = sel.containerId;
+  var container = tx.get(containerId);
+  var pos = container.getPosition(nodeId);
+  deleteNode(tx, {
+    nodeId: nodeId,
+    containerId: containerId
+  });
+  var newNode = tx.create({
+    type: tx.getSchema().getDefaultTextType(),
+    content: ""
+  });
+  container.show(newNode.id, pos);
+  return {
+    selection: tx.createSelection([newNode.id, 'content'], 0)
+  };
 }
 
 module.exports = deleteSelection;

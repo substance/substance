@@ -84,26 +84,14 @@ Selection.Prototype = function() {
     return false;
   };
 
+  /**
+    @returns {Boolean} true if selection is a {@link model/NodeSelection}
+  */
   this.isNodeSelection = function() {
     return false;
   };
 
-  this.isEntireNodeSelected = function() {
-    return false;
-  };
-
-  this.getNodeId = function() {
-    return null;
-  };
-
   this.isCustomSelection = function() {
-    return false;
-  };
-
-  /**
-    @returns {Boolean} true if selection is a {@link model/TableSelection}
-  */
-  this.isTableSelection = function() {
     return false;
   };
 
@@ -226,6 +214,9 @@ Selection.fromJSON = function(json) {
     case 'container':
       var ContainerSelection = require('./ContainerSelection');
       return ContainerSelection.fromJSON(json);
+    case 'node':
+      var NodeSelection = require('./NodeSelection');
+      return NodeSelection.fromJSON(json);
     case 'custom':
       var CustomSelection = require('./CustomSelection');
       return CustomSelection.fromJSON(json);

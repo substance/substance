@@ -28,7 +28,7 @@ function breakNode(tx, args) {
   var behavior = args.editingBehavior;
 
   // default breaking behavior for node selections
-  if (sel.isNodeSelection() && !sel.isEntireNodeSelected()) {
+  if (sel.isNodeSelection() && !sel.isFull()) {
     return breakWholeNode(tx, args);
   } else if (behavior && behavior.canBreak(node.type)) {
     var breaker = behavior.getBreaker(node.type);
@@ -120,7 +120,7 @@ function breakWholeNode(tx, args) {
     content: ""
   });
   var newSel;
-  if (sel.startOffset === 0) {
+  if (sel.isBefore()) {
     container.show(newNode.id, nodePos);
     // in this case the selection does not change
     newSel = sel;
