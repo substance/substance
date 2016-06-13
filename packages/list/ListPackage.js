@@ -7,7 +7,7 @@ var ListMacro = require('./ListMacro');
 
 module.exports = {
   name: 'list-item',
-  configure: function(config) {
+  configure: function(config, options) {
     config.addNode(ListItem);
     config.addComponent(ListItem.static.name, ListItemComponent);
     config.addTextType({
@@ -15,7 +15,9 @@ module.exports = {
       data: { type: 'list-item' }
     });
     config.addEditingBehavior(ListEditing);
-    config.addMacro(ListMacro);
+    if (options.enableMacro) {
+      config.addMacro(ListMacro);
+    }
     config.addLabel('list', {
       en: 'List',
       de: 'Liste'
