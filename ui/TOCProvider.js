@@ -35,7 +35,7 @@ TOCProvider.Prototype = function() {
 
   this.dispose = function() {
     var doc = this.getDocument();
-    this.document.disconnect(this);
+    doc.disconnect(this);
   };
 
   // Inspects a document change and recomputes the
