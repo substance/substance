@@ -178,7 +178,7 @@ BrowserDOMElement.Prototype = function() {
     if (!isString(innerHTML)) {
       var frag = this.el.ownerDocument.createDocumentFragment();
       for (var c = this.el.firstChild; c; c = c.nextSibling) {
-        frag.appendChild(c.clone(true));
+        frag.appendChild(c.cloneNode(true));
       }
       var xs = new window.XMLSerializer();
       innerHTML = xs.serializeToString(frag);
@@ -192,7 +192,12 @@ BrowserDOMElement.Prototype = function() {
   };
 
   this.getOuterHTML = function() {
-    return this.el.outerHTML;
+    var outerHTML = this.el.outerHTML;
+    if (!isString(outerHTML)) {
+      var xs = new window.XMLSerializer();
+      outerHTML = xs.serializeToString(this.el);
+    }
+    return outerHTML;
   };
 
   this.addEventListener = function(eventName, handler, options) {
