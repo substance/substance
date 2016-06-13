@@ -1,6 +1,5 @@
 'use strict';
 
-var clone = require('lodash/clone');
 var forEach = require('lodash/forEach');
 var oo = require('../util/oo');
 var Icon = require('./FontAwesomeIcon');
