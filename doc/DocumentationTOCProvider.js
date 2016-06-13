@@ -1,17 +1,17 @@
 'use strict';
 
-var TOC = require('../ui/TOC');
-var each = require('lodash/each');
+var TOCProvider = require('../ui/TOCProvider');
+var each = require('lodash/forEach');
 
-function DocumentationTOC() {
-  TOC.apply(this, arguments);
+function DocumentationTOCProvider() {
+  DocumentationTOCProvider.super.apply(this, arguments);
 }
 
-DocumentationTOC.Prototype = function() {
+DocumentationTOCProvider.Prototype = function() {
 
   this.computeEntries = function() {
     var doc = this.getDocument();
-    var config = this.getConfig();
+    var config = this.config;
 
     var entries = [];
     var contentNodes = doc.get('body').nodes;
@@ -41,8 +41,8 @@ DocumentationTOC.Prototype = function() {
   };
 };
 
-TOC.extend(DocumentationTOC);
+TOCProvider.extend(DocumentationTOCProvider);
 
-DocumentationTOC.static.tocTypes = ['namespace', 'class', 'function', 'module'];
+DocumentationTOCProvider.static.tocTypes = ['namespace', 'class', 'function', 'module'];
 
-module.exports = DocumentationTOC;
+module.exports = DocumentationTOCProvider;
