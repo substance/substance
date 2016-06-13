@@ -22,7 +22,7 @@ InsertNodeCommand.Prototype = function() {
   };
 
   this.execute = function(props, context) {
-    var state = this.getCommandState(context);
+    var state = this.getCommandState(props, context);
     if (state.disabled) return;
     var surface = context.surface ||context.surfaceManager.getFocusedSurface();
     if (surface) {
