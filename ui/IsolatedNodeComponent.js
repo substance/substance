@@ -14,6 +14,8 @@ function IsolatedNodeComponent() {
   this._state = {
     selectionFragment: null
   };
+
+  this.handleAction('escape', this._escape);
 }
 
 IsolatedNodeComponent.Prototype = function() {
@@ -251,11 +253,15 @@ IsolatedNodeComponent.Prototype = function() {
     // We need a global event listener for keyboard events which dispatches to the current isolated node
     if (event.keyCode === keys.ESCAPE && this.state.mode === 'focused') {
       event.preventDefault();
-      this._selectNode();
-      // TODO: Is this still necessary?
-      // The state should be set during the next update cycle.
-      this.setState({ mode: 'selected' });
+      this._escape();
     }
+  };
+
+  this._escape = function() {
+    this._selectNode();
+    // TODO: Is this still necessary?
+    // The state should be set during the next update cycle.
+    this.setState({ mode: 'selected' });
   };
 
   this._stopPropagation = function(event) {
