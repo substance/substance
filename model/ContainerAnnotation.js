@@ -21,7 +21,7 @@ var documentHelpers = require('./documentHelpers');
   {
     "id": "subject_reference_1",
     "type": "subject_reference",
-    "container": "content",
+    "containerId": "content",
     "startPath": ["text_2", "content"],
     "startOffset": 100,
     "endPath": ["text_4", "content"],
@@ -36,6 +36,7 @@ function ContainerAnnotation() {
 
 ContainerAnnotation.Prototype = function() {
 
+  this._isAnnotation = true;
   this._isContainerAnnotation = true;
 
   /**
@@ -66,7 +67,7 @@ ContainerAnnotation.Prototype = function() {
     }
     return doc.createSelection({
       type: "container",
-      containerId: this.container,
+      containerId: this.containerId,
       startPath: this.startPath,
       startOffset: this.startOffset,
       endPath: this.endPath,
@@ -107,7 +108,7 @@ ContainerAnnotation.Prototype = function() {
   this.getFragments = function() {
     var fragments = [];
     var doc = this.getDocument();
-    var container = doc.get(this.container);
+    var container = doc.get(this.containerId);
     var paths = container.getPathRange(this.startPath, this.endPath);
     if (paths.length === 1) {
       fragments.push(new ContainerAnnotation.Fragment(this, paths[0], "property"));
@@ -141,8 +142,7 @@ DocumentNode.extend(ContainerAnnotation);
 ContainerAnnotation.static.name = "container-annotation";
 
 ContainerAnnotation.static.defineSchema({
-  // id of container node
-  container: "container",
+  containerId: "string",
   startPath: ["string"],
   startOffset: "number",
   endPath: ["string"],
@@ -168,8 +168,8 @@ ContainerAnnotation.Anchor = function(anno, isStart) {
   // TODO: remove this.node in favor of this.anno
   this.node = anno;
   this.id = anno.id;
-  this.container = anno.container;
-  this.isStart = !!isStart;
+  this.containerId = anno.containerId;
+  this.isStart = Boolean(isStart);
   Object.freeze(this);
 };
 

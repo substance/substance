@@ -4,39 +4,19 @@ var Component = require('./Component');
 var capitalize = require('lodash/capitalize');
 
 /**
-  Abstract Tool interface for editing and annotation tools.
+  Default Tool implementation
 
   A tool must be associated with a Command, which holds all the logic, while the tool
   is just the visual representation of the command state.
 
-  Like with {@link ui/Command} are two categories of tools, {@link ui/SurfaceTool}
-  and {@link ui/ControllerTool}.
-
   @class
   @component
 */
-
 function Tool() {
   Tool.super.apply(this, arguments);
 }
 
 Tool.Prototype = function() {
-
-  /*
-    Initialize toolstate. Obtained from the toolmanager by asking for
-    the associated command state.
-  */
-  this.getInitialState = function() {
-    return this.context.toolManager.getCommandState(this);
-  };
-
-  this.didMount = function() {
-    this.context.toolManager.registerTool(this);
-  };
-
-  this.dispose = function() {
-    this.context.toolManager.unregisterTool(this);
-  };
 
   /**
     Default tool rendering. You can override this method to provide your custom markup
@@ -51,33 +31,27 @@ Tool.Prototype = function() {
       el.attr('aria-label', title);
     }
     //.sm-disabled
-    if (this.state.disabled) {
+    if (this.props.disabled) {
       el.addClass('sm-disabled');
     }
     // .sm-active
-    if (this.state.active) {
+    if (this.props.active) {
       el.addClass('sm-active');
-    }
-    // .sm-<mode>
-    // TODO: it seems that the mode class is not following the 'sm-' prefix-rules
-    if (this.state.mode) {
-      el.addClass(this.state.mode);
     }
 
     // button
     el.append(this.renderButton($$));
-
     return el;
   };
 
   this.renderButton = function($$) {
     var button = $$('button')
       .on('click', this.onClick)
-      .append(this.props.children);
+      .append(this.renderIcon($$));
 
-    if (this.state.disabled) {
+    if (this.props.disabled) {
       // make button inaccessible
-      button.attr('tabindex', -1);
+      button.attr('tabindex', -1).attr('disabled', true);
     } else {
       // make button accessible for tab-navigation
       button.attr('tabindex', 1);
@@ -85,20 +59,20 @@ Tool.Prototype = function() {
     return button;
   };
 
-  this.getTitle = function() {
-    var title = this.props.title || this.i18n.t(this.getName());
-    // Used only by annotation tool so far
-    if (this.state.mode) {
-      title = [capitalize(this.state.mode), title].join(' ');
-    }
-    return title;
+  this.renderIcon = function($$) {
+    var commandName = this.getCommandName();
+    var iconEl = this.context.iconProvider.renderIcon($$, commandName);
+    return iconEl;
   };
 
-  /**
-    Get controller context
-  */
-  this.getController = function() {
-    return this.context.controller;
+  this.getTitle = function() {
+    var labelProvider = this.context.labelProvider;
+    var title = this.props.title || labelProvider.getLabel(this.getName());
+    // Used only by annotation tool so far
+    if (this.props.mode) {
+      title = [capitalize(this.props.mode), title].join(' ');
+    }
+    return title;
   };
 
   /**
@@ -115,12 +89,17 @@ Tool.Prototype = function() {
   this.onClick = function(e) {
     e.preventDefault();
     e.stopPropagation();
-    if (this.state.disabled) {
-      return;
-    }
-    this.performAction();
+    if (!this.props.disabled) this.performAction();
   };
 
+  /**
+    Executes the associated command
+  */
+  this.performAction = function() {
+    this.context.commandManager.executeCommand(this.getCommandName(), {
+      mode: this.props.mode
+    });
+  };
 };
 
 Component.extend(Tool);

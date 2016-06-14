@@ -1,8 +1,10 @@
+'use strict';
+
 var DocumentSession = require('./DocumentSession');
 
 /*
   Creates a factory for documents and the correspondent initial changeset
-  
+
   @param {String} name schema identifier
   @param {String} schema schema version
 
@@ -17,7 +19,7 @@ var DocumentSession = require('./DocumentSession');
     });
     body.show('p1');
   });
-  
+
   myDocFactory.ArticleClass;
   myDocFactory.createEmptyArticle();
   myDocFactory.createArticle();

@@ -102,8 +102,7 @@ HTMLImporter.Prototype = function() {
       };
     ```
   */
-  this.convertDocument = function(documentEl) {
-    /* jshint unused:false */
+  this.convertDocument = function(documentEl) { // eslint-disable-line
     throw new Error('This method is abstract');
   };
 

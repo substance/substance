@@ -15,7 +15,7 @@ var TreeIndex = require('../../util/TreeIndex');
   @class
   @abstract
  */
-var NodeIndex = function() {
+function NodeIndex() {
   /**
    * Internal storage.
    *
@@ -23,7 +23,7 @@ var NodeIndex = function() {
    * @private
    */
   this.index = new TreeIndex();
-};
+}
 
 NodeIndex.Prototype = function() {
 
@@ -183,6 +183,12 @@ NodeIndex.create = function(prototype) {
     return NodeIndex.create(prototype);
   };
   return index;
+};
+
+NodeIndex.filterByType = function(type) {
+  return function(node) {
+    return node.isInstanceOf(type);
+  };
 };
 
 module.exports = NodeIndex;

@@ -52,7 +52,7 @@ HTMLExporter.Prototype = function() {
   var defaultAnnotationConverter = {
     tagName: 'span',
     export: function(node, el) {
-      el = el.withTagName('span');
+      el.tagName = 'span';
       el.attr('data-type', node.type);
       var properties = node.toJSON();
       each(properties, function(value, name) {
@@ -73,7 +73,7 @@ HTMLExporter.Prototype = function() {
           return;
         }
         var prop = converter.$$('div').attr('property', name);
-        if (node.getPropertyType(name) === 'string') {
+        if (node.getPropertyType(name) === 'string' && value) {
           prop.append(converter.annotatedText([node.id, name]));
         } else {
           prop.text(value);

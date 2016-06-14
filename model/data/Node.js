@@ -1,5 +1,3 @@
-/* jshint latedef:nofunc */
-
 'use strict';
 
 var isBoolean = require('lodash/isBoolean');
@@ -148,7 +146,7 @@ Object.defineProperty(Node.prototype, 'type', {
   @private
   @returns {Boolean}
  */
- Node.isInstanceOf = function(NodeClass, typeName) {
+Node.isInstanceOf = function(NodeClass, typeName) {
   var staticData = NodeClass.static;
   while (staticData && staticData.name !== "node") {
     if (staticData && staticData.name === typeName) {

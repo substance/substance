@@ -1,5 +1,5 @@
-/*jshint unused:false */
 "use strict";
+/* eslint-disable no-unused-vars */
 
 var isEqual = require('lodash/isEqual');
 var oo = require('../util/oo');

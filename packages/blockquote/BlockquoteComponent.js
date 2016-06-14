@@ -1,25 +1,22 @@
 'use strict';
 
-var Component = require('../../ui/Component');
-var TextProperty = require('../../ui/TextPropertyComponent');
+var TextBlockComponent = require('../../ui/TextBlockComponent');
 
-function Blockquote() {
-  Blockquote.super.apply(this, arguments);
+function BlockquoteComponent() {
+  BlockquoteComponent.super.apply(this, arguments);
 }
 
-Blockquote.Prototype = function() {
+BlockquoteComponent.Prototype = function() {
+
+  var _super = BlockquoteComponent.super.prototype;
 
   this.render = function($$) {
-    return $$('div')
-      .addClass('sc-blockquote')
-      .attr('data-id', this.props.node.id)
-      .append($$(TextProperty, {
-        path: [this.props.node.id, 'content']
-      }));
+    var el = _super.render.call(this, $$);
+    return el.addClass('sc-blockquote');
   };
 
 };
 
-Component.extend(Blockquote);
+TextBlockComponent.extend(BlockquoteComponent);
 
-module.exports = Blockquote;
+module.exports = BlockquoteComponent;

@@ -1,6 +1,7 @@
 'use strict';
 
 var isString = require('lodash/isString');
+var isNumber = require('lodash/isNumber');
 var map = require('lodash/map');
 var filter = require('lodash/filter');
 var TreeIndex = require('../util/TreeIndex');
@@ -20,17 +21,17 @@ var DocumentIndex = require('./DocumentIndex');
 //
 //    aIndex.get(["text_1", "content"], 23, 45);
 
-var AnnotationIndex = function() {
+function AnnotationIndex() {
   this.byPath = new TreeIndex();
   this.byType = new TreeIndex();
-};
+}
 
 AnnotationIndex.Prototype = function() {
 
   this.property = "path";
 
   this.select = function(node) {
-    return !!node._isPropertyAnnotation;
+    return Boolean(node._isPropertyAnnotation);
   };
 
   this.reset = function(data) {
@@ -48,13 +49,11 @@ AnnotationIndex.Prototype = function() {
       annotations = this.byPath.get(path);
     }
     annotations = map(annotations);
-    /* jshint eqnull:true */
-    // null check for null or undefined
-    if (start != null) {
+    if (isNumber(start)) {
       annotations = filter(annotations, AnnotationIndex.filterByRange(start, end));
     }
     if (type) {
-      annotations = filter(annotations, AnnotationIndex.filterByType(type));
+      annotations = filter(annotations, DocumentIndex.filterByType(type));
     }
     return annotations;
   };
@@ -86,18 +85,10 @@ AnnotationIndex.filterByRange = function(start, end) {
     var aEnd = anno.endOffset;
     var overlap = (aEnd >= start);
     // Note: it is allowed to omit the end part
-    /* jshint eqnull: true */
-    if (end != null) {
+    if (isNumber(end)) {
       overlap = overlap && (aStart <= end);
     }
-    /* jshint eqnull: false */
     return overlap;
-  };
-};
-
-AnnotationIndex.filterByType = function(type) {
-  return function(anno) {
-    return anno.isInstanceOf(type);
   };
 };
 

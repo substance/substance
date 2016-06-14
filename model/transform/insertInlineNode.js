@@ -11,7 +11,7 @@ var createAnnotation = require('./createAnnotation');
   @return {Object} object with updated selection
 
   @example
-  
+
   ```js
   insertInlineNode(tx, {
     selection: bodyEditor.getSelection(),
@@ -27,7 +27,7 @@ function insertInlineNode(tx, args) {
   // 1. Insert fake character the inline node will stick
   var tmp = insertText(tx, {
     selection: args.selection,
-    text: '$'
+    text: "\uFEFF"
   });
 
   var inlineNodeSel = tx.createSelection({
@@ -40,7 +40,6 @@ function insertInlineNode(tx, args) {
   // 2. Create citation annotation
   args.node = args.node;
   args.selection = inlineNodeSel;
-  args.containerId = args.containerId;
   args = createAnnotation(tx, args);
   return args;
 }

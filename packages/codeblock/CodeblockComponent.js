@@ -1,25 +1,22 @@
 'use strict';
 
-var Component = require('../../ui/Component');
-var TextProperty = require('../../ui/TextPropertyComponent');
+var TextBlockComponent = require('../../ui/TextBlockComponent');
 
-function Codeblock() {
-  Codeblock.super.apply(this, arguments);
+function CodeblockComponent() {
+  CodeblockComponent.super.apply(this, arguments);
 }
 
-Codeblock.Prototype = function() {
+CodeblockComponent.Prototype = function() {
+
+  var _super = CodeblockComponent.super.prototype;
 
   this.render = function($$) {
-    return $$('div')
-      .addClass('sc-codeblock')
-      .attr('data-id', this.props.node.id)
-      .append($$(TextProperty, {
-        path: [ this.props.node.id, "content"]
-      }));
+    var el = _super.render.call(this, $$);
+    return el.addClass('sc-codeblock');
   };
 
 };
 
-Component.extend(Codeblock);
+TextBlockComponent.extend(CodeblockComponent);
 
-module.exports = Codeblock;
+module.exports = CodeblockComponent;

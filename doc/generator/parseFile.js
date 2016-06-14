@@ -1,4 +1,6 @@
-/* jshint latedef: false */
+'use strict';
+/* eslint-disable no-console */
+
 var oo = require('../../util/oo');
 var fs = require('fs');
 var path = require('path');
@@ -13,7 +15,7 @@ dox.setMarkdownConverter(markdown);
  * which can be used to create a {doc/model/Documentation} instance.
  */
 function parseFile(jsFile) {
-  var parser = new _Parser(jsFile);
+  var parser = new Parser(jsFile);
   var nodes = parser.parse();
   return nodes;
 }
@@ -24,14 +26,14 @@ function parseFile(jsFile) {
  * @class
  * @private
  */
-function _Parser(jsFile) {
+function Parser(jsFile) {
   this.file = jsFile;
   this.folder = path.dirname(jsFile);
   this.name = path.basename(jsFile, '.js');
   this.id = jsFile.slice(0,-3);
 }
 
-_Parser.Prototype = function() {
+Parser.Prototype = function() {
 
   this.parse = function() {
     var js = fs.readFileSync(this.file, 'utf8');
@@ -160,6 +162,7 @@ _Parser.Prototype = function() {
   };
 
   var STATIC_PROP = /(.+)\.static/;
+  var _typeTagMatcher = /^\s*(\{[^@][^{]+\})\s+([\w\/]+)\s+(.+)/;
 
   /**
    * Prepares a parsed block/entity.
@@ -290,8 +293,6 @@ _Parser.Prototype = function() {
     "module": true,
     "function": true
   };
-
-  var _typeTagMatcher = /^\s*(\{[^@][^{]+\})\s+([\w\/]+)\s+(.+)/;
 
   function _prepareParam(tag) {
     var shortTypes = tag.types.map(function(type) {
@@ -424,13 +425,14 @@ _Parser.Prototype = function() {
 
   function _extractExample(str) {
     var firstLineBreak = str.indexOf("\n");
-    var header, body;
+    // var header;
+    var body;
     if (firstLineBreak >= 0) {
-      header = str.slice(0, firstLineBreak).trim();
+      // header = str.slice(0, firstLineBreak).trim();
       body = str.slice(firstLineBreak);
       body = dox.trimIndentation(body);
     } else {
-      header = undefined;
+      // header = undefined;
       body = str.trim();
     }
     return markdown.toHtml(body);
@@ -509,6 +511,6 @@ _Parser.Prototype = function() {
 
 };
 
-oo.initClass(_Parser);
+oo.initClass(Parser);
 
 module.exports = parseFile;

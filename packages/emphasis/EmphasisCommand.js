@@ -8,6 +8,5 @@ function EmphasisCommand() {
 AnnotationCommand.extend(EmphasisCommand);
 
 EmphasisCommand.static.name = 'emphasis';
-EmphasisCommand.static.annotationType = 'emphasis';
 
 module.exports = EmphasisCommand;

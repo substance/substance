@@ -18,12 +18,12 @@ var without = require('lodash/without');
   ```
 */
 
-var Highlights = function(doc) {
+function Highlights(doc) {
   EventEmitter.apply(this, arguments);
 
   this.doc = doc;
   this._highlights = {};
-};
+}
 
 Highlights.Prototype = function() {
 
@@ -70,13 +70,13 @@ Highlights.Prototype = function() {
         if (node) {
           node.setHighlighted(false, scope);
         }
-      }.bind(this));
+      });
 
       each(toBeAdded, function(nodeId) {
         var node = doc.get(nodeId);
         node.setHighlighted(true, scope);
-      }.bind(this));
-    }.bind(this));
+      });
+    });
 
     this._highlights = highlights;
     this.emit('highlights:updated', highlights);

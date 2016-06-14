@@ -2,7 +2,7 @@
 
 var each = require('lodash/each');
 var Component = require('../../ui/Component');
-var UnsupportedNode = require('../../ui/UnsupportedNode');
+var UnsupportedNode = require('../../ui/UnsupportedNodeComponent');
 
 function MemberContainerComponent() {
   MemberContainerComponent.super.apply(this, arguments);

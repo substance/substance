@@ -1,0 +1,81 @@
+.sc-test-suite {
+  padding: 10px 10px;
+
+  > .se-toolbar {
+    height: 50px;
+  }
+}
+
+.sc-test {
+  border: solid 1px #ccc;
+  position: relative;
+  cursor: default;
+
+  &.sm-hidden {
+    display: none;
+  }
+
+  > .se-controls {
+    position: absolute;
+    right: 10px;
+    top: 5px;
+  }
+
+  > .se-header {
+    padding: 10px 10px;
+  }
+
+  > .se-body {
+    padding: 10px 20px;
+    // display: none;
+  }
+
+  &.sm-ok {
+    > .se-header {
+      background: rgba(green, 0.4);
+    }
+  }
+
+  &.sm-not-ok {
+    > .se-header {
+      background: rgba(red, 0.4);
+    }
+  }
+
+  &.sm-skip {
+    background: #ddd;
+    font-style: italic;
+    opacity: 0.5;
+  }
+
+
+  &.sm-expanded {
+    .se-body {
+      display: block;
+    }
+  }
+}
+
+.sc-test-result {
+
+  padding: 5px;
+
+  > .se-status {
+    padding: 2px 5px;
+
+    &.sm-ok {
+      color: green;
+    }
+
+    &.sm-not-ok {
+      background: rgba(red, 0.4);
+    }
+
+  }
+
+  > .se-description {
+    padding: 2px 5px;
+    margin-left: 10px;
+  }
+
+}

@@ -1,42 +1,79 @@
-/* jshint latedef: false */
 'use strict';
 
 var extend = require('lodash/extend');
 var annotationHelpers = require('../annotationHelpers');
+var deleteNode = require('./deleteNode');
 
 var merge = function(tx, args) {
   var containerId = args.containerId;
   var path = args.path;
   var direction = args.direction;
-  if (!containerId||!path||!direction) {
+  if (!containerId || !path || !direction) {
     throw new Error('Insufficient arguments! mandatory fields: `containerId`, `path`, `direction`');
   }
   var container = tx.get(containerId);
   var nodeId = path[0];
+  var node = tx.get(nodeId);
   var nodePos = container.getPosition(nodeId);
   var l = container.getLength();
   var tmp;
   if (direction === 'right' && nodePos < l-1) {
     var nextNodeId = container.nodes[nodePos+1];
-    tmp = _mergeNodes(tx, extend({}, args, {
-      containerId: containerId,
-      firstNodeId: nodeId,
-      secondNodeId: nextNodeId
-    }));
-    args.selection = tmp.selection;
+    var nextNode = tx.get(nextNodeId);
+    if (node.isText() && node.getText().length === 0) {
+      deleteNode(tx, {
+        nodeId: nodeId,
+        containerId: containerId
+      });
+      if (nextNode.isText()) {
+        args.selection = tx.createSelection(nextNodeId, 0);
+      } else {
+        args.selection = tx.createSelection({
+          type: 'node',
+          nodeId: nextNodeId,
+          containerId: containerId,
+          mode: 'full'
+        });
+      }
+    } else {
+      tmp = _mergeNodes(tx, extend({}, args, {
+        containerId: containerId,
+        firstNodeId: nodeId,
+        secondNodeId: nextNodeId
+      }));
+      args.selection = tmp.selection;
+    }
   } else if (direction === 'left' && nodePos > 0) {
     var previousNodeId = container.nodes[nodePos-1];
-    tmp = _mergeNodes(tx, extend({}, args, {
-      containerId: containerId,
-      firstNodeId: previousNodeId,
-      secondNodeId: nodeId
-    }));
-    args.selection = tmp.selection;
+    var previousNode = tx.get(previousNodeId);
+    if (node.isText() && node.getText().length === 0) {
+      deleteNode(tx, {
+        nodeId: nodeId,
+        containerId: containerId
+      });
+      if (previousNode.isText()) {
+        args.selection = tx.createSelection(previousNode.getTextPath(), previousNode.getText().length);
+      } else {
+        args.selection = tx.createSelection({
+          type: 'node',
+          nodeId: previousNodeId,
+          containerId: containerId,
+          mode: 'full'
+        });
+      }
+    } else {
+      tmp = _mergeNodes(tx, extend({}, args, {
+        containerId: containerId,
+        firstNodeId: previousNodeId,
+        secondNodeId: nodeId
+      }));
+      args.selection = tmp.selection;
+    }
   }
   return args;
 };
 
-var _mergeNodes = function(tx, args) {
+function _mergeNodes(tx, args) {
   var firstNodeId = args.firstNodeId;
   var secondNodeId = args.secondNodeId;
   var firstNode = tx.get(firstNodeId);
@@ -44,14 +81,14 @@ var _mergeNodes = function(tx, args) {
   // most often a merge happens between two different nodes (e.g., 2 paragraphs)
   var mergeTrafo = _getNodeMerger(args.editingBehavior, firstNode, secondNode);
   if (mergeTrafo) {
-    return mergeTrafo.call(this, tx, extend({}, args, {
+    return mergeTrafo(tx, extend({}, args, {
       containerId: args.containerId,
       first: firstNode,
       second: secondNode
     }));
   }
   return args;
-};
+}
 
 function _getNodeMerger(behavior, node, otherNode) {
   if (behavior) {
@@ -106,7 +143,7 @@ function _getNodeMerger(behavior, node, otherNode) {
   return null;
 }
 
-var _mergeTextNodes = function(tx, args) {
+function _mergeTextNodes(tx, args) {
   var containerId = args.containerId;
   var first = args.first;
   var second = args.second;
@@ -146,6 +183,6 @@ var _mergeTextNodes = function(tx, args) {
   }
   args.selection = selection;
   return args;
-};
+}
 
 module.exports = merge;

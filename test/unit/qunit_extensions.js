@@ -1,2 +1,0 @@
-// for legacy
-require('../QUnitExtensions');

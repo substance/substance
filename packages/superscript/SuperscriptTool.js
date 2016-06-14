@@ -1,11 +1,11 @@
 'use strict';
 
-var SurfaceTool = require('../../ui/SurfaceTool');
+var AnnotationTool = require('../../ui/AnnotationTool');
 
 function SuperscriptTool() {
   SuperscriptTool.super.apply(this, arguments);
 }
-SurfaceTool.extend(SuperscriptTool);
+AnnotationTool.extend(SuperscriptTool);
 
 SuperscriptTool.static.name = 'superscript';
 

@@ -26,9 +26,25 @@ function Toolbar() {
 
 Toolbar.Prototype = function() {
 
+  this.didMount = function() {
+    this.context.documentSession.on('didUpdate', this.rerender, this);
+  };
+
+  this.dispose = function() {
+    this.context.documentSession.off(this);
+  };
+
   this.render = function($$) {
-    var el = $$("div").addClass("sc-toolbar");
+    var el = $$('div').addClass('sc-toolbar');
+    var commandStates = this.context.commandManager.getCommandStates();
+    var ComponentClass = this.props.content;
+
+    el.append($$(ComponentClass, {
+      commandStates: commandStates
+    }).ref('toolbarContent'));
+
     el.append(this.props.children);
+
     return el;
   };
 };
@@ -44,7 +60,7 @@ Component.extend(Toolbar);
 
   ```
   $$(Toolbar.Dropdown, {label: $$(Icon, {icon: 'fa-image'}),}).append(
-    $$(InsertFigureTool).append(this.i18n.t('insert'))
+    $$(InsertFigureTool).append(this.getLabel('insert'))
   )
   ```
 */
@@ -121,7 +137,6 @@ Component.extend(Dropdown);
   )
   ```
 */
-
 function Group() {
   Component.apply(this, arguments);
 }

@@ -2,7 +2,6 @@
 
 var HtmlExporter = require('../model/HTMLExporter');
 var ClipboardImporter = require('./ClipboardImporter');
-var converters = ClipboardImporter.converters;
 var CLIPBOARD_CONTAINER_ID = ClipboardImporter.CLIPBOARD_CONTAINER_ID;
 var CLIPBOARD_PROPERTY_ID = ClipboardImporter.CLIPBOARD_PROPERTY_ID;
 var JSONConverter = require('../model/JSONConverter');
@@ -10,10 +9,8 @@ var JSONConverter = require('../model/JSONConverter');
 /**
   Export HTML from clipboard. Used for inter-application copy'n'paste.
 */
-function ClipboardExporter() {
-  ClipboardExporter.super.call(this, {
-    converters: converters
-  });
+function ClipboardExporter(config) {
+  ClipboardExporter.super.call(this, config);
 }
 
 ClipboardExporter.Prototype = function() {

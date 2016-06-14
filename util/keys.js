@@ -1,3 +1,4 @@
+/* eslint-disable strict */
 module.exports = {
   UNDEFINED: 0,
   BACKSPACE: 8,

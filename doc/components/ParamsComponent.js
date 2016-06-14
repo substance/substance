@@ -16,7 +16,7 @@ ParamsComponent.Prototype = function() {
     var returns = this.props.returns;
 
     if (params.length > 0) {
-      el.append($$('div').addClass('se-label').append(this.i18n.t(this.props.label || 'parameters')));
+      el.append($$('div').addClass('se-label').append(this.getLabel(this.props.label || 'parameters')));
 
       var paramsTable = $$('table').addClass('se-params-table');
       params.forEach(function(param) {
@@ -41,7 +41,7 @@ ParamsComponent.Prototype = function() {
       if (returns.type) {
         returnTypeNode = doc.get(returns.type);
       }
-      el.append($$('div').addClass('se-returns se-label').append(this.i18n.t('returns')));
+      el.append($$('div').addClass('se-returns se-label').append(this.getLabel('returns')));
       el.append(
         $$('table').addClass('se-params-table').append(
           $$('tr').addClass('se-param').append(

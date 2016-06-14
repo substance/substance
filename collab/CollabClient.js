@@ -14,7 +14,7 @@ function CollabClient(config) {
   this.__id__ = __id__++;
   this.config = config;
   this.connection = config.connection;
-  
+
   // Hard-coded for now
   this.scope = 'substance/collab';
 
@@ -46,7 +46,7 @@ CollabClient.Prototype = function() {
     if (msg.scope === this.scope) {
       this.emit('message', msg);
     } else {
-      // console.info('Message ignored. Not sent in hub scope', msg);
+      console.info('Message ignored. Not sent in hub scope', msg);
     }
   };
 
@@ -55,7 +55,7 @@ CollabClient.Prototype = function() {
   */
   this.send = function(msg) {
     if (!this.connection.isOpen()) {
-      console.error('Message could not be sent. Connection not open.', msg);
+      console.warn('Message could not be sent. Connection not open.', msg);
       return;
     }
 

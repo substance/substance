@@ -42,12 +42,12 @@ HeadingComponent.Prototype = function() {
     // details: a line saying something like Class defined in '...', extends '...'
     var details = $$('div').addClass('se-details').addClass(type);
     var detailsLabel = $$('strong').addClass('se-type');
-    detailsLabel.append(this.i18n.t(specificType));
+    detailsLabel.append(this.getLabel(specificType));
     details.append(detailsLabel);
 
     details.append(
       $$('span').addClass('se-source').append(
-        $$('span').append(' ' + this.i18n.t('defined-in') + ' '),
+        $$('span').append(' ' + this.getLabel('defined-in') + ' '),
         $$(SourceLink, {node: node})
       )
     );
@@ -55,7 +55,7 @@ HeadingComponent.Prototype = function() {
       var superClassNode = doc.get(node.superClass);
       details.append(
         $$('span').addClass('se-extends').append(
-          $$('span').append(' ' + this.i18n.t('extends') + ' '),
+          $$('span').append(' ' + this.getLabel('extends') + ' '),
           $$(CrossLink, {node: superClassNode})
         )
       );

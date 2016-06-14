@@ -24,19 +24,16 @@ function Modal() {
 }
 
 Modal.Prototype = function() {
-  this._closeModal = function(e) {
-    var closeSurfaceClick = e.target.classList.contains('sc-modal');
-    if (closeSurfaceClick) {
-      this.send('closeModal');
-    }
-  };
 
   this.render = function($$) {
     var el = $$('div').addClass('sc-modal');
+
+    // TODO: don't think that this is good enough. Right the modal is closed by any unhandled click.
+    // Need to be discussed.
     el.on('click', this._closeModal);
 
     if (this.props.width) {
-      el.addClass('sm-width-'+this.props.width);  
+      el.addClass('sm-width-'+this.props.width);
     }
 
     el.append(
@@ -46,6 +43,14 @@ Modal.Prototype = function() {
     );
     return el;
   };
+
+  this._closeModal = function(e) {
+    var closeSurfaceClick = e.target.classList.contains('sc-modal');
+    if (closeSurfaceClick) {
+      this.send('closeModal');
+    }
+  };
+
 };
 
 Component.extend(Modal);

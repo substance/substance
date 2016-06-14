@@ -1,8 +1,8 @@
 'use strict';
 
-var oo = require('../util/oo');
 var isArray = require('lodash/isArray');
 var each = require('lodash/each');
+var oo = require('../util/oo');
 
 function JSONConverter() {}
 
@@ -46,7 +46,9 @@ JSONConverter.Prototype = function() {
       nodes: []
     };
     each(doc.getNodes(), function(node) {
-      json.nodes.push(node.toJSON());
+      if (node._isDocumentNode) {
+        json.nodes.push(node.toJSON());
+      }
     });
     return json;
   };

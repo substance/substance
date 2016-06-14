@@ -5,11 +5,11 @@
  */
 module.exports = {
 
-  type: "emphasis",
-  tagName: "em",
+  type: 'emphasis',
+  tagName: 'em',
 
   matchElement: function(el) {
-    return el.is("em, i");
-  },
+    return el.is('em, i');
+  }
 
 };

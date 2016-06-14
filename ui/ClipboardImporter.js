@@ -1,9 +1,9 @@
-/* global navigator */
-
 'use strict';
 
 var isArray = require('lodash/isArray');
 var extend = require('lodash/extend');
+var forEach = require('lodash/forEach');
+var Registry = require('../util/Registry');
 var HTMLImporter = require('../model/HTMLImporter');
 var DefaultDOMElement = require('./DefaultDOMElement');
 var JSONConverter = require('../model/JSONConverter');
@@ -12,28 +12,13 @@ var JSONConverter = require('../model/JSONConverter');
 var CLIPBOARD_CONTAINER_ID = require('../model/transform/copySelection').CLIPBOARD_CONTAINER_ID;
 var CLIPBOARD_PROPERTY_ID = require('../model/transform/copySelection').CLIPBOARD_PROPERTY_ID;
 
-var converters = [
-  require('../packages/paragraph/ParagraphHTMLConverter'),
-  require('../packages/heading/HeadingHTMLConverter'),
-  require('../packages/emphasis/EmphasisHTMLConverter'),
-  require('../packages/strong/StrongHTMLConverter'),
-  require('../packages/code/CodeHTMLConverter'),
-  require('../packages/superscript/SuperscriptHTMLConverter'),
-  require('../packages/subscript/SubscriptHTMLConverter'),
-  require('../packages/link/LinkHTMLConverter'),
-  require('../packages/table/TableHTMLConverter'),
-  require('../packages/table/TableSectionHTMLConverter'),
-  require('../packages/table/TableRowHTMLConverter'),
-  require('../packages/table/TableCellHTMLConverter'),
-  require('../packages/list/ListHTMLConverter'),
-  require('../packages/list/ListItemHTMLConverter'),
-];
-
 /**
   Import HTML from clipboard. Used for inter-application copy'n'paste.
 */
 
 function ClipboardImporter(config) {
+  ClipboardImporter._addConverters(config);
+
   if (!config.schema) {
     throw new Error('Missing argument: config.schema is required.');
   }
@@ -42,8 +27,7 @@ function ClipboardImporter(config) {
 
   extend(config, {
     trimWhitespaces: true,
-    REMOVE_INNER_WS: true,
-    converters: converters
+    REMOVE_INNER_WS: true
   });
   ClipboardImporter.super.call(this, config);
 
@@ -170,7 +154,7 @@ ClipboardImporter.Prototype = function() {
     @return {Document} the document instance
   */
   this.createDocument = function() {
-    var doc = this._createDocument();
+    var doc = this._createDocument(this.schema);
     if (!doc.get(CLIPBOARD_CONTAINER_ID)) {
       doc.create({
         type: 'container',
@@ -181,12 +165,38 @@ ClipboardImporter.Prototype = function() {
     return doc;
   };
 
+  this._getUnsupportedNodeConverter = function() {
+    // nothing
+  };
+
 };
 
 HTMLImporter.extend(ClipboardImporter);
 
-ClipboardImporter.converters = converters;
 ClipboardImporter.CLIPBOARD_CONTAINER_ID = CLIPBOARD_CONTAINER_ID;
 ClipboardImporter.CLIPBOARD_PROPERTY_ID = CLIPBOARD_PROPERTY_ID;
+
+var _converters = {
+  'catch-all-block': {
+    type: 'paragraph',
+    matchElement: function(el) { return el.is('div'); },
+    import: function(el, node, converter) {
+      node.content = converter.annotatedText(el, [node.id, 'content']);
+    }
+  }
+};
+
+ClipboardImporter._addConverters = function(config) {
+  if (config.converters) {
+    var registry = new Registry();
+    config.converters.forEach(function(conv, name) {
+      registry.add(name, conv);
+    });
+    forEach(_converters, function(converter, name) {
+      registry.add(name, converter);
+    });
+    config.converters = registry;
+  }
+};
 
 module.exports = ClipboardImporter;
