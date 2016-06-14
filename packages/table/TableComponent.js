@@ -7,9 +7,7 @@ var DefaultDOMElement = require('../../ui/DefaultDOMElement');
 var TextPropertyEditor = require('../../ui/TextPropertyEditor');
 var tableHelpers = require('./tableHelpers');
 var keys = require('../../util/keys');
-
-// doh: we don't do $el.position() properly yet
-var $ = require('../../util/jquery');
+var getRelativeBoundingRect = require('../../util/getRelativeBoundingRect');
 
 function TableComponent() {
   TableComponent.super.apply(this, arguments);
@@ -275,18 +273,13 @@ TableComponent.Prototype = function() {
     var maxCol = Math.max(sel.data.startCol, sel.data.endCol);
     var startCell = this._getCell(minRow, minCol);
     var endCell = this._getCell(maxRow, maxCol);
-    // TODO: we need to fix BrowserDOMElement so that we get the right values;
+
     var startEl = startCell.getNativeElement();
     var endEl = endCell.getNativeElement();
-    var pos1 = $(startEl).position();
-    var pos2 = $(endEl).position();
-    var rect2 = endEl.getBoundingClientRect();
-    this.refs.selection.css({
-      top: pos1.top,
-      left: pos1.left,
-      height: pos2.top - pos1.top + rect2.height,
-      width: pos2.left - pos1.left + rect2.width
-    }).addClass('sm-visible');
+    var tableEl = this.el.el;
+    // Get the  bounding rect for startEl, endEl relative to tableEl
+    var selRect = getRelativeBoundingRect([startEl, endEl], tableEl);
+    this.refs.selection.css(selRect).addClass('sm-visible');
   };
 
   this._getCell = function(row, col) {
