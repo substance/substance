@@ -195,7 +195,8 @@ SurfaceManager.Prototype = function() {
     }.bind(this));
   };
 
-  this.onSessionDidUpdate = function() {
+  this.onSessionDidUpdate = function(update, info) {
+    if (info.skipSelection) return;
     // at the end of the update flow, make sure the surface is focused
     // and displays the right DOM selection.
     var focusedSurface = this.getFocusedSurface();
