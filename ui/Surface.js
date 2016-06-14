@@ -442,6 +442,12 @@ Surface.Prototype = function() {
       case keys.BACKSPACE:
       case keys.DELETE:
         return this._handleDeleteKey(event);
+      case keys.HOME:
+      case keys.END:
+        return this._handleHomeOrEndKey(event);
+      case keys.PAGEUP:
+      case keys.PAGEDOWN:
+        return this._handlePageUpOrDownKey(event);
       default:
         break;
     }
@@ -857,6 +863,32 @@ Surface.Prototype = function() {
       if (!this.isMounted()) return;
       var options = {
         direction: (event.keyCode === keys.UP) ? 'left' : 'right'
+      };
+      this._updateModelSelection(options);
+    }.bind(this));
+  };
+
+  this._handleHomeOrEndKey = function (event) {
+    event.stopPropagation();
+    // Note: we need this timeout so that CE updates the DOM selection first
+    // before we map it to the model
+    window.setTimeout(function() {
+      if (!this.isMounted()) return;
+      var options = {
+        direction: (event.keyCode === keys.HOME) ? 'left' : 'right'
+      };
+      this._updateModelSelection(options);
+    }.bind(this));
+  };
+
+  this._handlePageUpOrDownKey = function (event) {
+    event.stopPropagation();
+    // Note: we need this timeout so that CE updates the DOM selection first
+    // before we map it to the model
+    window.setTimeout(function() {
+      if (!this.isMounted()) return;
+      var options = {
+        direction: (event.keyCode === keys.PAGEUP) ? 'left' : 'right'
       };
       this._updateModelSelection(options);
     }.bind(this));
