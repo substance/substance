@@ -22,9 +22,10 @@ var deleteCharacter = function(tx, args) {
     console.warn("'deleteChar' can only be used with collapsed PropertySelections");
     return args;
   }
-  var prop = tx.get(sel.path);
+  var path = sel.path;
+  var text = tx.get(path);
   if ((sel.startOffset === 0 && direction === 'left') ||
-      (sel.startOffset === prop.length && direction === 'right')) {
+      (sel.startOffset === text.length && direction === 'right')) {
     // only try to merge if a containerId is given
     if (containerId) {
       var tmp = merge(tx, extend({}, args, {
