@@ -2,6 +2,7 @@
 
 // var isEqual = require('lodash/isEqual');
 var startsWith = require('lodash/startsWith');
+var clone = require('lodash/clone');
 var Component = require('../ui/Component');
 // var DefaultDOMElement = require('../ui/DefaultDOMElement');
 var TestItem = require('./TestItem');
@@ -53,6 +54,13 @@ TestSuite.Prototype = function() {
     });
     moduleSelect.on('change', this.onModuleSelect);
     toolbar.append(moduleSelect);
+    toolbar.append(
+      $$('div').append(
+        $$('input').attr({ type: 'checkbox' })
+          .on('change', this.onToggleHideSuccessful).ref('hideCheckbox'),
+        $$('label').append('Only show failed tests only')
+      )
+    );
 
     el.append(toolbar);
     var tests = $$('div').addClass('se-tests').ref('tests');
@@ -64,6 +72,10 @@ TestSuite.Prototype = function() {
       tests.append(testItem);
     });
     el.append(tests);
+
+    if (this.state.hideSuccessful) {
+      el.addClass('sm-hide-successful');
+    }
 
     return el;
   };
@@ -106,6 +118,20 @@ TestSuite.Prototype = function() {
 
   this.onRouteChange = function(newState) {
     this.setState(newState);
+  };
+
+  this.onToggleHideSuccessful = function() {
+    var checked = this.refs.hideCheckbox.htmlProp('checked');
+    if (checked) {
+      this.extendState({
+        hideSuccessful: checked
+      });
+    } else {
+      var newState = clone(this.state);
+      delete newState.hideSuccessful;
+      this.setState(newState);
+    }
+    this.updateRoute();
   };
 
 };

@@ -3,6 +3,24 @@
 
   > .se-toolbar {
     height: 50px;
+
+    > * {
+      display: inline-block;
+    }
+
+    > * + * {
+      margin-left: 10px;
+    }
+  }
+
+  &.sm-hide-successful {
+
+    .sc-test.sm-ok, .sc-test.sm-skip {
+      display:none;
+    }
+    .sc-test.sm-not-ok {
+      display:block;
+    }
   }
 }
 
