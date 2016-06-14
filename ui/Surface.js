@@ -10,6 +10,7 @@ var keys = require('../util/keys');
 var platform = require('../util/platform');
 var copySelection = require('../model/transform/copySelection');
 var deleteSelection = require('../model/transform/deleteSelection');
+var deleteCharacter = require('../model/transform/deleteCharacter');
 var insertText = require('../model/transform/insertText');
 var Clipboard = require('./Clipboard');
 var Component = require('./Component');
@@ -375,7 +376,12 @@ Surface.Prototype = function() {
     Performs a {@link model/transform/deleteSelection} transformation
   */
   this.delete = function(tx, args) {
-    return deleteSelection(tx, args);
+    var sel = args.selection;
+    if (sel.isPropertySelection() && sel.isCollapsed()) {
+      return deleteCharacter(tx, args);
+    } else {
+      return deleteSelection(tx, args);
+    }
   };
 
   // No breaking in properties, insert softbreak instead

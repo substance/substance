@@ -276,9 +276,7 @@ ContainerEditor.Prototype = function() {
     Performs a {@link model/transform/breakNode} transformation
   */
   this.break = function(tx, args) {
-    if (args.selection.isPropertySelection() || args.selection.isContainerSelection()) {
-      return breakNode(tx, args);
-    }
+    return breakNode(tx, args);
   };
 
   /**
