@@ -40,23 +40,6 @@ SelectionState.Prototype = function() {
     return [];
   };
 
-  this.isNodeSelection = function() {
-    return this._state.isNodeSelection;
-  };
-
-  this.isFullNodeSelection = function() {
-    var state = this._state;
-    return state.isNodeSelection && state.nodeSelectionMode === 'full';
-  };
-
-  this.getNodeId = function() {
-    return this._state.nodeId;
-  };
-
-  this.getNodeSelectionMode = function() {
-    return this._state.nodeSelectionMode;
-  };
-
   this.isInlineNodeSelection = function() {
     return this._state.isInlineNodeSelection;
   };
@@ -66,21 +49,6 @@ SelectionState.Prototype = function() {
 
     this._resetState();
     var state = this._state;
-    if (sel.isContainerSelection()) {
-      state.isNodeSelection = sel.isNodeSelection();
-      if (state.isNodeSelection) {
-        state.nodeId = sel.getNodeId();
-        if (sel.isEntireNodeSelected()) {
-          state.nodeSelectionMode = 'full';
-        } else if (sel.startOffset === 0 && sel.endOffset === 0) {
-          state.nodeSelectionMode = 'before';
-        } else if (sel.startOffset === 1 && sel.endOffset === 1) {
-          state.nodeSelectionMode = 'after';
-        } else {
-          throw new Error('Illegal selection state.');
-        }
-      }
-    }
 
     // create a mapping by type for the currently selected annotations
     var annosByType = new TreeIndex.Arrays();

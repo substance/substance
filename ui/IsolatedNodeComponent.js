@@ -199,12 +199,13 @@ IsolatedNodeComponent.Prototype = function() {
     var inParentSurface = (surfaceId === parentId);
     // detect cases where this node is selected or co-selected by inspecting the selection
     if (inParentSurface) {
-      if (selState.isNodeSelection() && selState.getNodeId() === nodeId) {
-        var mode = selState.getNodeSelectionMode();
-        if (mode === 'full') {
+      if (sel.isNodeSelection() && sel.getNodeId() === nodeId) {
+        if (sel.isFull()) {
           return { mode: 'selected' };
-        } else {
-          return { mode: 'cursor', position: mode };
+        } else if (sel.isBefore()) {
+          return { mode: 'cursor', position: 'before' };
+        } else if (sel.isAfter()) {
+          return { mode: 'cursor', position: 'after' };
         }
       }
       if (sel.isContainerSelection() && sel.containsNodeFragment(nodeId)) {

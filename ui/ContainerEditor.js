@@ -167,7 +167,7 @@ ContainerEditor.Prototype = function() {
     var sel = selState.getSelection();
 
     // Note: this collapses the selection, just to let ContentEditable continue doing a cursor move
-    if (selState.isFullNodeSelection() && !event.shiftKey) {
+    if (sel.isNodeSelection() && sel.isFull() && !event.shiftKey) {
       this.domSelection.collapse(direction);
     }
     // HACK: ATM we have a cursor behavior in Chrome and FF when collapsing a selection
@@ -194,7 +194,7 @@ ContainerEditor.Prototype = function() {
     var selState = this.getDocumentSession().getSelectionState();
     var sel = selState.getSelection();
     // Note: collapsing the selection and let ContentEditable still continue doing a cursor move
-    if (selState.isFullNodeSelection() && !event.shiftKey) {
+    if (sel.isNodeSelection() && sel.isFull() && !event.shiftKey) {
       event.preventDefault();
       this.setSelection(sel.collapse(direction));
       return;
@@ -204,8 +204,8 @@ ContainerEditor.Prototype = function() {
   };
 
   this._handleEnterKey = function(event) {
-    var selState = this.getDocumentSession().getSelectionState();
-    if (selState.isFullNodeSelection()) {
+    var sel = this.getDocumentSession().getSelection();
+    if (sel.isNodeSelection() && sel.isFull()) {
       event.preventDefault();
       event.stopPropagation();
     } else {

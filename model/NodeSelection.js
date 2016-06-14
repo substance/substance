@@ -4,7 +4,7 @@ var isString = require('lodash/isString');
 var Selection = require('./Selection');
 var Coordinate = require('./Coordinate');
 
-function NodeSelection(containerId, nodeId, mode, reverse) {
+function NodeSelection(containerId, nodeId, mode, reverse, surfaceId) {
   Selection.call(this);
 
   if (!isString(containerId)) {
@@ -21,6 +21,7 @@ function NodeSelection(containerId, nodeId, mode, reverse) {
   this.nodeId = nodeId;
   this.mode = mode;
   this.reverse = Boolean(reverse);
+  this.surfaceId = surfaceId;
 }
 
 NodeSelection.Prototype = function() {
@@ -70,8 +71,27 @@ NodeSelection.Prototype = function() {
       containerId: this.containerId,
       nodeId: this.nodeId,
       mode: this.mode,
-      reverse: this.reverse
+      reverse: this.reverse,
+      surfaceId: this.surfaceId
     };
+  };
+
+  this.collapse = function(direction) {
+    if (direction === 'left') {
+      if (this.isBefore()) {
+        return this;
+      } else {
+        return new NodeSelection(this.containerId, this.nodeId, 'before', this.reverse, this.surfaceId);
+      }
+    } else if (direction === 'right') {
+      if (this.isAfter()) {
+        return this;
+      } else {
+        return new NodeSelection(this.containerId, this.nodeId, 'after', this.reverse, this.surfaceId);
+      }
+    } else {
+      throw new Error("'direction' must be either 'left' or 'right'");
+    }
   };
 
   this._getCoordinate = function() {
