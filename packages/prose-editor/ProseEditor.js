@@ -4,8 +4,6 @@ var ContainerEditor = require('../../ui/ContainerEditor');
 var Component = require('../../ui/Component');
 var SplitPane = require('../../ui/SplitPane');
 var ScrollPane = require('../../ui/ScrollPane');
-var Toolbar = require('../../ui/Toolbar');
-var ProseEditorTools = require('./ProseEditorTools');
 var ProseEditorOverlay = require('./ProseEditorOverlay');
 var CommandManager = require('../../ui/CommandManager');
 var SurfaceManager = require('../../ui/SurfaceManager');
@@ -21,6 +19,7 @@ ProseEditor.Prototype = function() {
 
   this.didMount = function() {
     // this.refs.body.selectFirst();
+    this.documentSession.on('didUpdate', this._documentSessionUpdated, this);
   };
 
   this.willReceiveProps = function(nextProps) {
@@ -44,6 +43,7 @@ ProseEditor.Prototype = function() {
     this.surfaceManager.dispose();
     this.commandManager.dispose();
     this.globalEventHandler.dispose();
+    this.documentSession.off(this);
     // Note: we need to clear everything, as the childContext
     // changes which is immutable
     this.empty();
@@ -112,13 +112,24 @@ ProseEditor.Prototype = function() {
     };
   };
 
+
+  this._documentSessionUpdated = function() {
+    var commandStates = this.commandManager.getCommandStates();
+    this.refs.toolbar.setProps({
+      commandStates: commandStates
+    });
+  };
+
   this.render = function($$) {
     var configurator = this.props.configurator;
+    var commandStates = this.commandManager.getCommandStates();
+    var ToolbarClass = configurator.getToolbarClass();
+
     return $$('div').addClass('sc-prose-editor').append(
       $$(SplitPane, {splitType: 'horizontal'}).append(
-        $$(Toolbar, {
-          content: ProseEditorTools
-        }),
+        $$(ToolbarClass, {
+          commandStates: commandStates
+        }).ref('toolbar'),
         $$(ScrollPane, {
           scrollbarType: 'substance',
           scrollbarPosition: 'right',

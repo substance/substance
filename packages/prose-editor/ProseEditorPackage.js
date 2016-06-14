@@ -13,6 +13,7 @@ var StrongPackage = require('../strong/StrongPackage');
 var CodePackage = require('../code/CodePackage');
 var SubscriptPackage = require('../subscript/SubscriptPackage');
 var SuperscriptPackage = require('../superscript/SuperscriptPackage');
+var ProseEditorToolbar = require('./ProseEditorToolbar');
 
 // Article Class
 var ProseArticle = require('./ProseArticle');
@@ -25,6 +26,8 @@ module.exports = {
       ArticleClass: ProseArticle,
       defaultTextType: 'paragraph'
     });
+
+    config.setToolbarClass(ProseEditorToolbar);
 
     // Now import base packages
     config.import(BasePackage);

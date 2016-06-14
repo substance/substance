@@ -30,7 +30,8 @@ function AbstractConfigurator() {
     icons: {},
     labels: {},
     saveHandler: SaveHandlerStub,
-    fileClient: FileClientStub
+    fileClient: FileClientStub,
+    ToolbarClass: null
   };
 }
 
@@ -149,6 +150,10 @@ AbstractConfigurator.Prototype = function() {
 
   this.setSaveHandler = function(saveHandler) {
     this.config.saveHandler = saveHandler;
+  };
+
+  this.setToolbarClass = function(ToolbarClass) {
+    this.config.ToolbarClass = ToolbarClass;
   };
 
   this.setFileClient = function(fileClient) {
@@ -297,6 +302,10 @@ AbstractConfigurator.Prototype = function() {
 
   this.getMacros = function() {
     return this.config.macros;
+  };
+
+  this.getToolbarClass = function() {
+    return this.config.ToolbarClass;
   };
 };
 
