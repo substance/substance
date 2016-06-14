@@ -9,11 +9,12 @@ function getColumnName(col) {
     throw new Error('Illegal argument.');
   }
   var name = "";
-  while(col > 0) {
+  while(col >= 0) {
     var mod = col % ALPHABET.length;
     col = Math.floor(col/ALPHABET.length);
     name = ALPHABET[mod] + name;
     if (col > 0) col--;
+    else break;
   }
   return name;
 }
