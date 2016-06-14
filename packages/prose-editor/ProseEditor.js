@@ -125,9 +125,9 @@ ProseEditor.Prototype = function() {
           overlay: ProseEditorOverlay,
         }).append(
           $$(ContainerEditor, {
+            disabled: this.props.disabled,
             documentSession: this.documentSession,
-            containerId: 'body',
-            name: 'body',
+            node: this.doc.get('body'),
             commands: configurator.getSurfaceCommandNames(),
             textTypes: configurator.getTextTypes()
           }).ref('body')
