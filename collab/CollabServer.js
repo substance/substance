@@ -123,6 +123,7 @@ CollabServer.Prototype = function() {
 
       // Send the response
       res.send({
+        scope: this.scope,
         type: 'syncDone',
         documentId: args.documentId,
         version: result.version,
@@ -134,6 +135,7 @@ CollabServer.Prototype = function() {
       // console.log('CollabServer.connect: update is broadcasted to collaborators', Object.keys(collaborators));
       forEach(collaborators, function(collaborator) {
         this.send(collaborator.collaboratorId, {
+          scope: this.scope,
           type: 'update',
           documentId: args.documentId,
           version: result.version,
@@ -157,6 +159,7 @@ CollabServer.Prototype = function() {
     this._disconnectDocument(collaboratorId, documentId);
     // Notify client that disconnect has completed successfully
     res.send({
+      scope: this.scope,
       type: 'disconnectDone',
       documentId: args.documentId
     });
