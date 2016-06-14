@@ -1336,6 +1336,49 @@ function ComponentTests(debug) {
     t.end();
   });
 
+  test.UI("Combine props and children via append", function(t) {
+    function Toolbar() {
+      TestComponent.super.apply(this, arguments);
+
+      this.render = function($$) {
+        var el = $$('div').append(
+          $$(Simple, this.props.strong).append('Strong')
+        );
+        return el;
+      };
+    }
+    TestComponent.extend(Toolbar);
+
+    var toolState = {strong: {active: true}};
+    Toolbar.static.render(toolState);
+    // the original toolState object should not have been changed
+    t.ok(isEqual(toolState, {strong: {active: true}}), "props object should not have been touched");
+    t.end();
+  });
+
+  test("Pass-through props and add children via append", function(t) {
+    function MyComponent() {
+      TestComponent.super.apply(this, arguments);
+
+      this.render = function($$) {
+        var el = $$('div').append(
+          $$(Simple, this.props).append('Child 1')
+        );
+        return el;
+      };
+    }
+    TestComponent.extend(MyComponent);
+
+    var props = {foo: 'bar'};
+    var comp = MyComponent.static.render(props);
+    var simple = comp.getChildAt(0);
+    t.notNil(simple, 'Should have a child component.');
+    t.equal(simple.props.foo, props.foo, '.. with props past through');
+    t.equal(simple.props.children.length, 1, '.. with props.children having one element');
+    t.equal(simple.textContent, 'Child 1', '.. with correct text content');
+    t.end();
+  });
+
 }
 
 // with RenderingEngine in debug mode

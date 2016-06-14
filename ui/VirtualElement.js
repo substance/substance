@@ -622,7 +622,8 @@ VirtualElement.createElement = function() {
     }
     var props = {};
     if (arguments.length === 2) {
-      props = arguments[1];
+      // shallow cloning the original object
+      props = clone(arguments[1]);
     }
     content = new VirtualComponent(arguments[0], props);
   } else if (arguments[0] === undefined) {
