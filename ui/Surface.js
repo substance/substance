@@ -104,7 +104,6 @@ Surface.Prototype = function() {
       // this.domObserver = new window.MutationObserver(this.onDomMutations.bind(this));
       // this.domObserver.observe(this.el.getNativeElement(), { subtree: true, characterData: true, characterDataOldValue: true });
     }
-
     this.documentSession.on('update', this._onSessionUpdate, this);
   };
 
@@ -310,6 +309,7 @@ Surface.Prototype = function() {
   };
 
   this.focus = function() {
+    if (this.isDisabled()) return;
     // console.log('Focusing surface %s explicitly with Surface.focus()', this.getId());
     // NOTE: FF is causing problems with dynamically activated contenteditables
     // and focusing
@@ -321,11 +321,8 @@ Surface.Prototype = function() {
   };
 
   this.rerenderDOMSelection = function() {
-    if (inBrowser &&
-      // HACK: in our examples we are hosting two instances of one editor
-      // which reside in IFrames. To avoid competing DOM selection updates
-      // we update only the one which as a focused document.
-      (!Surface.MULTIPLE_APPS_ON_PAGE || window.document.hasFocus())) {
+    if (this.isDisabled()) return;
+    if (inBrowser) {
       // console.log('Surface.rerenderDOMSelection', this.__id__);
       var sel = this.getSelection();
       if (sel.surfaceId === this.getId()) {
@@ -990,7 +987,9 @@ Surface.Prototype = function() {
   // EXPERIMENTAL: get bounding box for current selection
   this.getBoundingRectangleForSelection = function() {
     var sel = this.getSelection();
-    if (!sel || sel.isNull() || sel.isNodeSelection() || sel.isCustomSelection()) return {};
+    if (this.isDisabled() ||
+        !sel || sel.isNull() ||
+        sel.isNodeSelection() || sel.isCustomSelection()) return {};
 
     // TODO: selection rectangle should be calculated
     // relative to scrolling container, which either is

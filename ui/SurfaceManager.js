@@ -91,7 +91,7 @@ SurfaceManager.Prototype = function() {
     if (update.selection) {
       var focusedSurface = this.surfaces[update.selection.surfaceId];
       _state.focusedSurfaceId = update.selection.surfaceId;
-      if (focusedSurface) {
+      if (focusedSurface && !focusedSurface.isDisabled()) {
         focusedSurface._focus();
       } else if (update.selection.isCustomSelection() && inBrowser) {
         // HACK: removing DOM selection *and* blurring when having a CustomSelection
@@ -199,7 +199,7 @@ SurfaceManager.Prototype = function() {
     // at the end of the update flow, make sure the surface is focused
     // and displays the right DOM selection.
     var focusedSurface = this.getFocusedSurface();
-    if (focusedSurface) {
+    if (focusedSurface && !focusedSurface.isDisabled()) {
       focusedSurface.focus();
       // console.log('rerenderingDOMSelection', this.documentSession.getSelection().toString());
       focusedSurface.rerenderDOMSelection();

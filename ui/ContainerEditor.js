@@ -77,7 +77,8 @@ ContainerEditor.Prototype = function() {
   this._isContainerEditor = true;
 
   // Note: this component is self managed
-  this.shouldRerender = function() {
+  this.shouldRerender = function(newProps) {
+    if (newProps.disabled !== this.props.disabled) return true;
     // TODO: we should still detect when the document has changed,
     // see https://github.com/substance/substance/issues/543
     return false;
