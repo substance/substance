@@ -11,10 +11,16 @@ function RenderingEngine() {}
 
 RenderingEngine.Prototype = function() {
 
-  this._render = function(comp) {
+  this._render = function(comp, oldProps, oldState) {
     // var t0 = Date.now();
     var vel = _createWrappingVirtualComponent(comp);
     var state = new RenderingEngine.State();
+    if (oldProps) {
+      state.setOldProps(vel, oldProps);
+    }
+    if (oldState) {
+      state.setOldState(vel, oldState);
+    }
     try {
       _capture(state, vel, 'forceCapture');
       if (vel._isVirtualComponent) {
@@ -89,14 +95,12 @@ RenderingEngine.Prototype = function() {
       // as it has already been cleared that a rerender is necessary
       if (forceCapture) {
         needRerender = true;
-        vel.__oldState__ = comp.state;
-        vel.__oldProps__ = comp.props;
       } else {
-        // NOTE: don't ask if shouldRerender if no element is there yet
+        // NOTE: don't ask shouldRerender if no element is there yet
         needRerender = !comp.el || comp.shouldRerender(vel.props);
         comp.__htmlConfig__ = vel._copyHTMLConfig();
-        vel.__oldState__ = comp.state;
-        vel.__oldProps__ = comp.props;
+        state.setOldProps(vel, comp.props);
+        state.setOldState(vel, comp.state);
         // updates prop triggering willReceiveProps
         comp._setProps(vel.props);
         if (!state.isNew(vel)) {
@@ -300,7 +304,7 @@ RenderingEngine.Prototype = function() {
         vel._content.children.forEach(_triggerUpdate.bind(null, state));
       }
       if (state.isUpdated(vel)) {
-        vel._comp.didUpdate(vel.__oldProps__, vel.__oldState__);
+        vel._comp.didUpdate(state.getOldProps(vel), state.getOldState(vel));
       }
     } else if (vel._isVirtualHTMLElement) {
       vel.children.forEach(_triggerUpdate.bind(null, state));
@@ -736,6 +740,22 @@ State.Prototype = function() {
 
   this.isRendered = function(vc) {
     return Boolean(this.get(vc, 'rendered'));
+  };
+
+  this.setOldProps = function(vc, oldProps) {
+    this.set(vc, 'oldProps', oldProps);
+  };
+
+  this.getOldProps = function(vc) {
+    return this.get(vc, 'oldProps');
+  };
+
+  this.setOldState = function(vc, oldState) {
+    this.set(vc, 'oldState', oldState);
+  };
+
+  this.getOldState = function(vc) {
+    return this.get(vc, 'oldState');
   };
 
 };

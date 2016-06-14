@@ -886,6 +886,7 @@ function ComponentTests(debug) {
       };
     };
     Component.extend(Child);
+
     var comp = TestComponent.create(function($$) {
       return $$('div').append(
         // change prop randomly
@@ -899,6 +900,41 @@ function ComponentTests(debug) {
     t.end();
   });
 
+  test.UI("didUpdate() provides old props and old state", function(t) {
+    var oldProps = null;
+    var oldState = null;
+    function MyComponent() {
+      MyComponent.super.apply(this, arguments);
+    }
+    MyComponent.Prototype = function() {
+      this.getInitialState = function() {
+        return {
+          val: 1
+        };
+      };
+      this.didUpdate = function(_oldProps, _oldState) {
+        oldProps = _oldProps;
+        oldState = _oldState;
+      };
+    };
+    Component.extend(MyComponent);
+    var comp = MyComponent.static.mount({
+      val: 'a'
+    }, t.sandbox);
+    comp.setState({ val: 2 });
+    t.notNil(oldProps, 'old props should have been provided');
+    t.equal(oldProps.val, 'a', 'old props should contain original value');
+    t.notNil(oldState, 'old state should have been provided');
+    t.equal(oldState.val, 1, 'old state should contain original value');
+    oldProps = null;
+    oldState = null;
+    comp.setProps({ val: 'b' });
+    t.notNil(oldProps, 'old props should have been provided');
+    t.equal(oldProps.val, 'a', 'old props should contain original value');
+    t.notNil(oldState, 'old state should have been provided');
+    t.equal(oldState.val, 2, 'old state should contain original value');
+    t.end();
+  });
 
   test("Refs on grandchild elements.", function(t) {
     var comp = TestComponent.create(function($$) {

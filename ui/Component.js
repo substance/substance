@@ -191,23 +191,25 @@ Component.Prototype = function() {
    * Call this to manually trigger a rerender.
    */
   this.rerender = function() {
-    var oldProps = this.props;
-    var oldState = this.state;
-    this._render();
+    this._rerender(this.props, this.state);
+  };
+
+  this._rerender = function(oldProps, oldState) {
+    this._render(oldProps, oldState);
     // when this component is not mounted still trigger didUpdate()
     if (!this.isMounted()) {
       this.didUpdate(oldProps, oldState);
     }
   };
 
-  this._render = function() {
+  this._render = function(oldProps, oldState) {
     if (this.__isRendering__) {
       throw new Error('Component is rendering already.');
     }
     this.__isRendering__ = true;
     try {
       var engine = new RenderingEngine();
-      engine._render(this);
+      engine._render(this, oldProps, oldState);
     } finally {
       delete this.__isRendering__;
     }
@@ -390,7 +392,7 @@ Component.Prototype = function() {
     this.state = newState || {};
     Object.freeze(this.state);
     if (needRerender) {
-      this.rerender();
+      this._rerender(oldProps, oldState);
     } else if (!this.__isSettingProps__) {
       this.didUpdate(oldProps, oldState);
     }
@@ -431,7 +433,7 @@ Component.Prototype = function() {
     var needRerender = this.shouldRerender(newProps, this.state);
     this._setProps(newProps);
     if (needRerender) {
-      this.rerender();
+      this._rerender(oldProps, oldState);
     } else {
       this.didUpdate(oldProps, oldState);
     }
