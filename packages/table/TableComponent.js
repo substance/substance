@@ -188,7 +188,7 @@ TableComponent.Prototype = function() {
   this.onSessionDidUpdate = function(update) {
     if (update.selection) {
       var sel = this.getSelection();
-      if (sel && sel.getType() === 'table') {
+      if (sel && sel.isCustomSelection() && sel.getCustomType() === 'table') {
         this._renderSelection(sel);
       }
     }

@@ -13,29 +13,37 @@ var updateAnnotations = require('./updateAnnotations');
 var deleteCharacter = function(tx, args) {
   var sel = args.selection;
   var direction = args.direction;
+  var containerId = args.containerId;
   var startChar, endChar;
   if (!sel.isCollapsed()) {
     throw new Error('Selection must be collapsed for transformation "deleteCharacter"');
   }
-  var prop = tx.get(sel.path);
+  if (!sel.isPropertySelection()) {
+    console.warn("'deleteChar' can only be used with collapsed PropertySelections");
+    return args;
+  }
+  var path = sel.path;
+  var text = tx.get(path);
   if ((sel.startOffset === 0 && direction === 'left') ||
-      (sel.startOffset === prop.length && direction === 'right')) {
-    var tmp = merge(tx, extend({}, args, {
-      selection: sel,
-      containerId: args.containerId,
-      path: sel.path,
-      direction: direction
-    }));
-    sel = tmp.selection;
+      (sel.startOffset === text.length && direction === 'right')) {
+    // only try to merge if a containerId is given
+    if (containerId) {
+      var tmp = merge(tx, extend({}, args, {
+        selection: sel,
+        containerId: containerId,
+        path: sel.path,
+        direction: direction
+      }));
+      args.selection = tmp.selection;
+    }
   } else {
     // simple delete one character
     startChar = (direction === 'left') ? sel.startOffset-1 : sel.startOffset;
     endChar = startChar+1;
     var op = tx.update(sel.path, { delete: { start: startChar, end: endChar } });
     updateAnnotations(tx, { op: op });
-    sel = tx.createSelection(sel.path, startChar);
+    args.selection = tx.createSelection(sel.path, startChar);
   }
-  args.selection = sel;
   return args;
 };
 

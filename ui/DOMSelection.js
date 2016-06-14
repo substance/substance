@@ -59,25 +59,60 @@ DOMSelection.Prototype = function() {
   this.setSelection = function(sel) {
     // console.log('### DOMSelection: setting selection', sel.toString());
     var wSel = window.getSelection();
-    if (sel.isNull()) {
+    if (sel.isNull() || sel.isCustomSelection()) {
       this.clear();
       return;
     }
-    var start = this._getDOMCoordinate(sel.start);
-    if (!start) {
-      console.warn('FIXME: selection seems to be invalid.');
-      this.clear();
-      return;
-    }
-    var end;
-    if (sel.isCollapsed()) {
-      end = start;
-    } else {
-      end = this._getDOMCoordinate(sel.end);
-      if (!end) {
+    var start, end;
+    if (sel.isPropertySelection() || sel.isContainerSelection()) {
+      start = this._getDOMCoordinate(sel.start);
+      if (!start) {
         console.warn('FIXME: selection seems to be invalid.');
         this.clear();
         return;
+      }
+      if (sel.isCollapsed()) {
+        end = start;
+      } else {
+        end = this._getDOMCoordinate(sel.end);
+        if (!end) {
+          console.warn('FIXME: selection seems to be invalid.');
+          this.clear();
+          return;
+        }
+      }
+    } else if (sel.isNodeSelection()) {
+      var comp = this.surface.find('*[data-id="'+sel.getNodeId()+'"]');
+      if (!comp) {
+        console.error('Could not find component with id', sel.getNodeId());
+        this.clear();
+        return;
+      }
+      if (comp._isIsolatedNodeComponent) {
+        var coors = IsolatedNodeComponent.getDOMCoordinates(comp);
+        if (sel.isFull()) {
+          start = coors.start;
+          end = coors.end;
+        } else if (sel.isBefore()) {
+          start = end = coors.start;
+        } else {
+          start = end = coors.end;
+        }
+      } else {
+        var _nodeEl = comp.el;
+        start = {
+          container: _nodeEl.getNativeElement(),
+          offset: 0
+        };
+        end = {
+          container: _nodeEl.getNativeElement(),
+          offset: _nodeEl.getChildCount()
+        };
+        if (sel.isBefore()) {
+          end = start;
+        } else if (sel.isAfter()) {
+          start = end;
+        }
       }
     }
     // console.log('Model->DOMSelection: mapped to DOM coordinates', start.container, start.offset, end.container, end.offset, 'isReverse?', sel.isReverse());

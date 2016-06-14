@@ -24,13 +24,20 @@ function breakNode(tx, args) {
     args = deleteSelection(tx, args);
   }
   var sel = args.selection;
+
+  // default breaking behavior for node selections
+  if (sel.isNodeSelection()) {
+    if (!sel.isFull()) {
+      return breakWholeNode(tx, args);
+    } else {
+      return args;
+    }
+  }
+
   var node = tx.get(sel.start.path[0]);
   var behavior = args.editingBehavior;
 
-  // default breaking behavior for node selections
-  if (sel.isNodeSelection() && !sel.isEntireNodeSelected()) {
-    return breakWholeNode(tx, args);
-  } else if (behavior && behavior.canBreak(node.type)) {
+  if (behavior && behavior.canBreak(node.type)) {
     var breaker = behavior.getBreaker(node.type);
     return breaker.call(breaker, tx, args);
   } else if (node.isText()) {
@@ -120,7 +127,7 @@ function breakWholeNode(tx, args) {
     content: ""
   });
   var newSel;
-  if (sel.startOffset === 0) {
+  if (sel.isBefore()) {
     container.show(newNode.id, nodePos);
     // in this case the selection does not change
     newSel = sel;

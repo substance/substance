@@ -199,12 +199,13 @@ IsolatedNodeComponent.Prototype = function() {
     var inParentSurface = (surfaceId === parentId);
     // detect cases where this node is selected or co-selected by inspecting the selection
     if (inParentSurface) {
-      if (selState.isNodeSelection() && selState.getNodeId() === nodeId) {
-        var mode = selState.getNodeSelectionMode();
-        if (mode === 'full') {
+      if (sel.isNodeSelection() && sel.getNodeId() === nodeId) {
+        if (sel.isFull()) {
           return { mode: 'selected' };
-        } else {
-          return { mode: 'cursor', position: mode };
+        } else if (sel.isBefore()) {
+          return { mode: 'cursor', position: 'before' };
+        } else if (sel.isAfter()) {
+          return { mode: 'cursor', position: 'after' };
         }
       }
       if (sel.isContainerSelection() && sel.containsNodeFragment(nodeId)) {
@@ -267,12 +268,10 @@ IsolatedNodeComponent.Prototype = function() {
     var doc = surface.getDocument();
     var nodeId = this.props.node.id;
     surface.setSelection(doc.createSelection({
-      type: 'container',
+      type: 'node',
       containerId: surface.getContainerId(),
-      startPath: [nodeId],
-      startOffset: 0,
-      endPath: [nodeId],
-      endOffset: 1
+      nodeId: nodeId,
+      mode: 'full'
     }));
   };
 
@@ -311,6 +310,19 @@ IsolatedNodeComponent.getDOMCoordinate = function(comp, coor) {
     };
   }
   return domCoor;
+};
+
+IsolatedNodeComponent.getDOMCoordinates = function(comp) {
+  return {
+    start: {
+      container: comp.refs.before.getNativeElement(),
+      offset: 0
+    },
+    end: {
+      container: comp.refs.after.getNativeElement(),
+      offset: 1
+    }
+  };
 };
 
 module.exports = IsolatedNodeComponent;

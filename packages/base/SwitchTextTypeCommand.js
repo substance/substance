@@ -47,6 +47,7 @@ SwitchTextType.Prototype = function() {
     var doc = context.documentSession.getDocument();
     var sel = context.documentSession.getSelection();
     var surface = context.surfaceManager.getFocusedSurface();
+    var node;
     var newState = {
       disabled: false,
       textTypes: this.getTextTypes(context)
@@ -59,7 +60,7 @@ SwitchTextType.Prototype = function() {
       newState.currentTextType = {name: 'container-selection'};
     } else if (sel.isPropertySelection()) {
       var path = sel.getPath();
-      var node = doc.get(path[0]);
+      node = doc.get(path[0]);
       // There are cases where path points to an already deleted node,
       // so we need to guard node
       if (node) {
@@ -74,6 +75,10 @@ SwitchTextType.Prototype = function() {
           newState.disabled = true;
         }
       }
+    } else if (sel.isNodeSelection()) {
+      node = doc.get(sel.getNodeId());
+      newState.currentTextType = {name: node.type};
+      newState.disabled = true;
     } else if (sel.isCustomSelection()) {
       newState.currentTextType = {name: 'custom'};
       newState.disabled = true;

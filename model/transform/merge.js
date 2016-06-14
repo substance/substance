@@ -2,35 +2,73 @@
 
 var extend = require('lodash/extend');
 var annotationHelpers = require('../annotationHelpers');
+var deleteNode = require('./deleteNode');
 
 var merge = function(tx, args) {
   var containerId = args.containerId;
   var path = args.path;
   var direction = args.direction;
-  if (!containerId||!path||!direction) {
+  if (!containerId || !path || !direction) {
     throw new Error('Insufficient arguments! mandatory fields: `containerId`, `path`, `direction`');
   }
   var container = tx.get(containerId);
   var nodeId = path[0];
+  var node = tx.get(nodeId);
   var nodePos = container.getPosition(nodeId);
   var l = container.getLength();
   var tmp;
   if (direction === 'right' && nodePos < l-1) {
     var nextNodeId = container.nodes[nodePos+1];
-    tmp = _mergeNodes(tx, extend({}, args, {
-      containerId: containerId,
-      firstNodeId: nodeId,
-      secondNodeId: nextNodeId
-    }));
-    args.selection = tmp.selection;
+    var nextNode = tx.get(nextNodeId);
+    if (node.isText() && node.getText().length === 0) {
+      deleteNode(tx, {
+        nodeId: nodeId,
+        containerId: containerId
+      });
+      if (nextNode.isText()) {
+        args.selection = tx.createSelection(nextNodeId, 0);
+      } else {
+        args.selection = tx.createSelection({
+          type: 'node',
+          nodeId: nextNodeId,
+          containerId: containerId,
+          mode: 'full'
+        });
+      }
+    } else {
+      tmp = _mergeNodes(tx, extend({}, args, {
+        containerId: containerId,
+        firstNodeId: nodeId,
+        secondNodeId: nextNodeId
+      }));
+      args.selection = tmp.selection;
+    }
   } else if (direction === 'left' && nodePos > 0) {
     var previousNodeId = container.nodes[nodePos-1];
-    tmp = _mergeNodes(tx, extend({}, args, {
-      containerId: containerId,
-      firstNodeId: previousNodeId,
-      secondNodeId: nodeId
-    }));
-    args.selection = tmp.selection;
+    var previousNode = tx.get(previousNodeId);
+    if (node.isText() && node.getText().length === 0) {
+      deleteNode(tx, {
+        nodeId: nodeId,
+        containerId: containerId
+      });
+      if (previousNode.isText()) {
+        args.selection = tx.createSelection(previousNode.getTextPath(), previousNode.getText().length);
+      } else {
+        args.selection = tx.createSelection({
+          type: 'node',
+          nodeId: previousNodeId,
+          containerId: containerId,
+          mode: 'full'
+        });
+      }
+    } else {
+      tmp = _mergeNodes(tx, extend({}, args, {
+        containerId: containerId,
+        firstNodeId: previousNodeId,
+        secondNodeId: nodeId
+      }));
+      args.selection = tmp.selection;
+    }
   }
   return args;
 };

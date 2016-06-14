@@ -29,21 +29,24 @@ var helpers = require('../documentHelpers');
 
 function createAnnotation(tx, args) {
   var sel = args.selection;
+  if (!sel) throw new Error('selection is required.');
   var annoType = args.annotationType;
   var annoData = args.annotationData;
   var anno = args.node;
   if (!anno && annoType) {
     console.warn('DEPRECATED: Use node: {type: "strong"} instead of annotationType: "strong"');
-    anno = {
-      type: annoType
-    };
+    anno = { type: annoType };
     extend(anno, annoData);
   }
-  if (!sel) throw new Error('selection is required.');
   if (!anno) throw new Error('node is required');
+
+  if (!sel.isPropertySelection() && !sel.isContainerSelection() || sel.isCollapsed()) {
+    // the selection must be expanded and of type Property- or ContainerSelection
+    throw new Error("Invalid selection for createAnnotation");
+  }
   // Special case: We split the current container selection into
   // multiple property annotations
-  if (args.splitContainerSelections && sel.isContainerSelection()) {
+  if (sel.isContainerSelection() && args.splitContainerSelections) {
     return _createPropertyAnnotations(tx, args);
   }
   if (helpers.isContainerAnnotation(tx, anno.type)) {
@@ -57,7 +60,6 @@ function createAnnotation(tx, args) {
   }
   anno.startOffset = sel.startOffset;
   anno.endOffset = sel.endOffset;
-
   args.result = tx.create(anno);
   return args;
 }
