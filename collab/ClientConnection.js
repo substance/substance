@@ -1,7 +1,7 @@
 "use strict";
 
 var EventEmitter = require('../util/EventEmitter');
-var Err = require('../util/Error');
+var Err = require('../util/SubstanceError');
 var __id__ = 0;
 
 /**
@@ -59,7 +59,7 @@ ClientConnection.Prototype = function() {
   this._onConnectionClose = function() {
     this._disconnect();
     this.emit('close');
-    console.log('websocket connection closed. Attempting to reconnect in 5s.');
+    console.info('websocket connection closed. Attempting to reconnect in 5s.');
     setTimeout(function() {
       this._connect();
     }.bind(this), 5000);

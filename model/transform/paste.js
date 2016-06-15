@@ -11,8 +11,6 @@ var breakNode = require('./breakNode');
 var CLIPBOARD_CONTAINER_ID = require('./copySelection').CLIPBOARD_CONTAINER_ID;
 var CLIPBOARD_PROPERTY_ID = require('./copySelection').CLIPBOARD_PROPERTY_ID;
 
-/* jshint latedef: false */
-
 /**
   Pastes clipboard content at the current selection
 
@@ -29,7 +27,7 @@ var paste = function(tx, args) {
   }
   // TODO: is there a better way to detect that this paste is happening within a
   // container?
-  var inContainer = !!args.containerId;
+  var inContainer = Boolean(args.containerId);
   var pasteDoc = args.doc;
 
   // when we are in a container, we interpret line-breaks

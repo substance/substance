@@ -1,3 +1,25 @@
+## Beta 4
+
+- Added support for realtime collaboration
+- Added persistence interfaces to store versions and snaphots on the server
+- Added a package system to provide a simple plugin mechanism
+- Introduced the concept of an `IsolatedNode` enabling arbitrary complex editors and external components (such code editors)
+- Optimized rendering engine
+- Enabled server side rendering
+- Added support for text macros
+- Added `IconProvider` to generalize icon usage and make them configurable in packages
+- Added `LabelProvider` for configurable multi language support
+- Improved `ProseEditor` that can be extended through packages
+- Improved `Component` API, with first-class debugging support
+- Generalized commands and tools
+- Added first version of tables and lists
+- Improved XML/HTML import/export API
+- Ported test suite from `QUnit` over to `tape`
+- Fixed hundreds of issues and bugs
+- Improved cross-browser compatibility
+- Added many examples documenting core features
+- Removed jQuery dependency
+
 ## Beta 3
 
 - Added a Router implementation that can serialize component states to hash fragments

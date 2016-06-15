@@ -1,29 +1,22 @@
 'use strict';
 
-var Component = require('../../ui/Component');
-var TextProperty = require('../../ui/TextPropertyComponent');
+var TextBlockComponent = require('../../ui/TextBlockComponent');
 
 function ParagraphComponent() {
-  Component.apply(this, arguments);
+  ParagraphComponent.super.apply(this, arguments);
 }
 
 ParagraphComponent.Prototype = function() {
 
-  this.render = function($$) {
-    return $$('div')
-      .addClass(this.getClassNames())
-      .attr("data-id", this.props.node.id)
-      .append($$(TextProperty, {
-        path: [ this.props.node.id, "content"]
-      }));
-  };
+  var _super = ParagraphComponent.super.prototype;
 
-  this.getClassNames = function() {
-    return 'sc-paragraph';
+  this.render = function($$) {
+    var el = _super.render.call(this, $$);
+    return el.addClass('sc-paragraph');
   };
 
 };
 
-Component.extend(ParagraphComponent);
+TextBlockComponent.extend(ParagraphComponent);
 
 module.exports = ParagraphComponent;

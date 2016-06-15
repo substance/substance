@@ -1,4 +1,6 @@
 #!/env/node
+/* eslint-disable */
+
 var config = require('../config.json');
 var generate = require('../generator/generate');
 var each = require('lodash/each');

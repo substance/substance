@@ -1,4 +1,5 @@
-/* jshint latedef:false */
+'use strict';
+
 var commonmark = require('commonmark');
 var reader = new commonmark.Parser();
 var highlightjs = require('highlight.js');

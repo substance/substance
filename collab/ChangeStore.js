@@ -1,7 +1,7 @@
 'use strict';
 
 var oo = require('../util/oo');
-var Err = require('../util/Error');
+var Err = require('../util/SubstanceError');
 
 /*
   Implements Substance ChangeStore API. This is just a dumb store.
@@ -16,8 +16,8 @@ ChangeStore.Prototype = function() {
   /*
     Gets changes for a given document
 
-    @param {String} args.documentId document id
-    @param {Number} args.sinceVersion since which change
+    @param {String} args.documentId document id
+    @param {Number} args.sinceVersion since which change
   */
   this.getChanges = function(args, cb) {
     var changes = this._getChanges(args.documentId);
@@ -44,7 +44,7 @@ ChangeStore.Prototype = function() {
         message: 'Illegal version arguments "sinceVersion":' +args.sinceVersion+ ', toVersion":' +args.toVersion
       }));
     }
-    
+
     var version = this._getVersion(args.documentId);
 
     var res;

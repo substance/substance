@@ -6,10 +6,10 @@ var map = require('lodash/map');
 var extend = require('lodash/extend');
 var DocumentChange = require('../model/DocumentChange');
 var Selection = require('../model/Selection');
-var Err = require('../util/Error');
+var Err = require('../util/SubstanceError');
 
 /*
-  Engine for realizing collaborative editing. Implements the server-methods of 
+  Engine for realizing collaborative editing. Implements the server-methods of
   the real time editing as a reusable library.
 */
 function CollabEngine(documentEngine) {
@@ -69,8 +69,8 @@ CollabEngine.Prototype = function() {
   this.getDocumentIds = function(collaboratorId) {
     var collaborator = this._collaborators[collaboratorId];
     if (!collaborator) {
-      console.log('CollabEngine.getDocumentIds', collaboratorId, 'not found');
-      console.log('CollabEngine._collaborators', this._collaborators);
+      // console.log('CollabEngine.getDocumentIds', collaboratorId, 'not found');
+      // console.log('CollabEngine._collaborators', this._collaborators);
       return [];
     }
     return Object.keys(collaborator.documents);
@@ -91,7 +91,7 @@ CollabEngine.Prototype = function() {
         entry = extend({}, collab.info, entry);
         collaborators[collab.collaboratorId] = entry;
       }
-    }.bind(this));
+    });
     return collaborators;
   };
 
@@ -128,10 +128,10 @@ CollabEngine.Prototype = function() {
   /*
     Internal implementation of sync
 
-    @param {String} args.collaboratorId collaboratorId
-    @param {String} args.documentId document id
-    @param {Number} args.version client version
-    @param {Number} args.change new change
+    @param {String} args.collaboratorId collaboratorId
+    @param {String} args.documentId document id
+    @param {Number} args.version client version
+    @param {Number} args.change new change
 
     OUT: version, changes, version
   */
@@ -164,7 +164,7 @@ CollabEngine.Prototype = function() {
       if (collaborator.selection) {
         var sel = Selection.fromJSON(collaborator.selection);
         change = this.deserializeChange(change);
-        DocumentChange.transformSelection(sel, change);
+        sel = DocumentChange.transformSelection(sel, change);
         // Write back the transformed selection to the server state
         this._updateSelection(collaborator.collaboratorId, documentId, sel.toJSON());
       }
@@ -176,7 +176,7 @@ CollabEngine.Prototype = function() {
   */
   this._syncFF = function(args, cb) {
     this._updateCollaboratorSelections(args.documentId, args.change);
-    
+
     // HACK: On connect we may receive a nop that only has selection data.
     // We don't want to store such changes.
     // TODO: it would be nice if we could handle this in a different
@@ -189,7 +189,7 @@ CollabEngine.Prototype = function() {
         version: args.version
       });
     }
-    
+
     // Store the commit
     this.documentEngine.addChange({
       documentId: args.documentId,
@@ -203,7 +203,7 @@ CollabEngine.Prototype = function() {
         // changes: [], // no changes missed in fast-forward scenario
         version: serverVersion
       });
-    }.bind(this));
+    });
   };
 
   /*
@@ -244,7 +244,7 @@ CollabEngine.Prototype = function() {
           serverChange: rebased.serverChange, // collaborators must be notified
           version: serverVersion
         });
-      }.bind(this));
+      });
     }.bind(this));
   };
 
@@ -267,7 +267,7 @@ CollabEngine.Prototype = function() {
         return ops.concat(change.ops);
       }, []);
       var serverChange = new DocumentChange(ops, {}, {});
-      
+
       cb(null, {
         change: this.serializeChange(a),
         serverChange: this.serializeChange(serverChange),

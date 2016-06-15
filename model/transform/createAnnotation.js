@@ -1,5 +1,4 @@
 "use strict";
-/* jshint latedef: false */
 
 var extend = require('lodash/extend');
 var uuid = require('../../util/uuid');
@@ -8,13 +7,10 @@ var helpers = require('../documentHelpers');
 /**
   For a given container selection create property selections of a given type
 
-  @function
-
   @param {model/TransactionDocument} tx the document instance
-  @param {Object} args object with transformation arguments `selection`, `containerId`, `annotationType` and `annotationData`
-  @scopedparam {model/Selection} args.selection A document selection
-  @scopedparam {String} args.containerId a valid container id
-  @scopedparam {Object} args.node data describing the annotation node
+  @param {model/Selection} args.selection A document selection
+  @param {String} args.containerId a valid container id
+  @param {Object} args.node data describing the annotation node
 
   @example
 
@@ -33,41 +29,30 @@ var helpers = require('../documentHelpers');
 
 function createAnnotation(tx, args) {
   var sel = args.selection;
+  if (!sel) throw new Error('selection is required.');
   var annoType = args.annotationType;
   var annoData = args.annotationData;
-  var node = args.node;
-  var containerId = args.containerId;
-
-  if (!node && annoType) {
+  var anno = args.node;
+  if (!anno && annoType) {
     console.warn('DEPRECATED: Use node: {type: "strong"} instead of annotationType: "strong"');
-    node = {
-      type: annoType
-    };
-    extend(node, annoData);
+    anno = { type: annoType };
+    extend(anno, annoData);
   }
+  if (!anno) throw new Error('node is required');
 
-  if (!sel) {
-    throw new Error('selection is required.');
-  }
-  if (!node) {
-    throw new Error('node is required');
-  }
-  if (sel.isContainerSelection() && !containerId) {
-    throw new Error('containerId must be provided for container selections');
+  if (!sel.isPropertySelection() && !sel.isContainerSelection() || sel.isCollapsed()) {
+    // the selection must be expanded and of type Property- or ContainerSelection
+    throw new Error("Invalid selection for createAnnotation");
   }
   // Special case: We split the current container selection into
   // multiple property annotations
-  if (args.splitContainerSelections && sel.isContainerSelection()) {
+  if (sel.isContainerSelection() && args.splitContainerSelections) {
     return _createPropertyAnnotations(tx, args);
   }
-  var anno = extend({
-    id: uuid(node.type)
-  }, node);
-
-  if (helpers.isContainerAnnotation(tx, node.type)) {
+  if (helpers.isContainerAnnotation(tx, anno.type)) {
     anno.startPath = sel.startPath;
     anno.endPath = sel.endPath;
-    anno.container = containerId;
+    anno.containerId = sel.containerId;
   } else if (sel.isPropertySelection()) {
     anno.path = sel.path;
   } else {
@@ -75,7 +60,6 @@ function createAnnotation(tx, args) {
   }
   anno.startOffset = sel.startOffset;
   anno.endOffset = sel.endOffset;
-  // start the transaction with an initial selection
   args.result = tx.create(anno);
   return args;
 }

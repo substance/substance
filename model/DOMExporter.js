@@ -1,29 +1,33 @@
 "use strict";
 
-var oo = require('../util/oo');
 var extend = require('lodash/extend');
 var isString = require('lodash/isString');
-var Fragmenter = require('./Fragmenter');
+var oo = require('../util/oo');
 var Registry = require('../util/Registry');
+var Fragmenter = require('./Fragmenter');
 var encodeXMLEntities = require('../util/encodeXMLEntities');
 
 function DOMExporter(config) {
   if (!config.converters) {
     throw new Error('config.converters is mandatory');
   }
-  this.converters = new Registry();
+  if (!config.converters._isRegistry) {
+    this.converters = new Registry();
+    config.converters.forEach(function(converter) {
+      if (!converter.type) {
+        console.error('Converter must provide the type of the associated node.', converter);
+        return;
+      }
+      this.converters.add(converter.type, converter);
+    }.bind(this));
+  } else {
+    this.converters = config.converters;
+  }
+
   this.state = {
     doc: null
   };
   this.config = extend({idAttribute: 'id'}, config);
-
-  config.converters.forEach(function(converter) {
-    if (!converter.type) {
-      console.error('Converter must provide the type of the associated node.', converter);
-      return;
-    }
-    this.converters.add(converter.type, converter);
-  }.bind(this));
 
   // NOTE: Subclasses (HTMLExporter and XMLExporter) must initialize this
   // with a proper DOMElement instance which is used to create new elements.
@@ -58,8 +62,7 @@ DOMExporter.Prototype = function() {
       return out.join('');
     };
   */
-  this.convertDocument = function(doc) {
-    /* jshint unused:false */
+  this.convertDocument = function(doc) { // eslint-disable-line
     throw new Error('This method is abstract');
   };
 

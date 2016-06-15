@@ -1,15 +1,16 @@
 'use strict';
 
-var oo = require('../util/oo');
-var each = require('lodash/each');
+var forEach = require('lodash/forEach');
 var isEqual = require('lodash/isEqual');
+var isArray = require('lodash/isArray');
+var oo = require('../util/oo');
 var TreeIndex = require('../util/TreeIndex');
 
-var PathEventProxy = function(doc) {
+function PathEventProxy(doc) {
   this.listeners = new TreeIndex.Arrays();
   this._list = [];
   this.doc = doc;
-};
+}
 
 PathEventProxy.Prototype = function() {
 
@@ -31,7 +32,7 @@ PathEventProxy.Prototype = function() {
 
   this.disconnect = function(listener) {
     console.warn('DEPRECATED: use proxy.off(this) instead');
-    this._removeAll(listener);
+    this.off(listener);
   };
 
   this.onDocumentChanged = function(change, info, doc) {
@@ -40,12 +41,13 @@ PathEventProxy.Prototype = function() {
       return;
     }
     var listeners = this.listeners;
-    change.updated.forEach(function(_, path) {
-      var scopedListeners = listeners.get(path);
-      each(scopedListeners, function(entry) {
+    forEach(change.updated, function(_, pathStr) {
+      var scopedListeners = listeners.get(pathStr.split(','));
+      if (isArray(scopedListeners)) scopedListeners = scopedListeners.slice(0);
+      forEach(scopedListeners, function(entry) {
         entry.method.call(entry.listener, change, info, doc);
       });
-    }.bind(this));
+    });
   };
 
   this._add = function(listener, path, method) {
@@ -61,9 +63,9 @@ PathEventProxy.Prototype = function() {
     for (var i = 0; i < this._list.length; i++) {
       var item = this._list[i];
       var match = (
-        (!path     || isEqual(item.path, path)) &&
+        (!path || isEqual(item.path, path)) &&
         (!listener || item.listener === listener) &&
-        (!method   || item.method !== method)
+        (!method || item.method !== method)
       );
       if (match) {
         var entry = this._list[i];

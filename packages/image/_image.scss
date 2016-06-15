@@ -3,3 +3,11 @@
   display: block;
   margin: 0px auto;
 }
+
+.sc-insert-image-tool {
+  > input {
+    position: fixed;
+    top: -1000px;
+    left: -1000px;
+  }
+}

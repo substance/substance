@@ -1,6 +1,8 @@
 'use strict';
 
+var forEach = require('lodash/forEach');
 var oo = require('./oo');
+var warn = require('./warn');
 
 // just as a reference to detect name collisions
 // with native Object properties
@@ -12,13 +14,20 @@ var _obj = {};
  * @class Registry
  * @private
  */
-function Registry() {
+function Registry(entries) {
   this.entries = {};
-  // used to control order
   this.names = [];
+
+  if (entries) {
+    forEach(entries, function(entry, name) {
+      this.add(name, entry);
+    }.bind(this));
+  }
 }
 
 Registry.Prototype = function() {
+
+  this._isRegistry = true;
 
   /**
    * Check if an entry is registered for a given name.
@@ -86,23 +95,27 @@ Registry.Prototype = function() {
     return this.entries[name];
   };
 
-  /**
+  /*
    * Iterate all registered entries in the order they were registered.
    *
    * @param {Function} callback with signature function(entry, name)
    * @param {Object} execution context
-   * @method each
-   * @memberof module:Basics.Registry.prototype
    */
   this.each = function(callback, ctx) {
+    warn('DEPRECATED: use Registry.forEach(cb) instead');
+    return this.forEach(callback.bind(ctx));
+  };
+
+  this.forEach = function(callback) {
     for (var i = 0; i < this.names.length; i++) {
       var name = this.names[i];
-      var _continue = callback.call(ctx, this.entries[name], name);
+      var _continue = callback(this.entries[name], name);
       if (_continue === false) {
         break;
       }
     }
   };
+
 };
 
 oo.initClass(Registry);

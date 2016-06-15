@@ -17,8 +17,8 @@ function Selection() {
   // Internal stuff
   var _internal = {};
   Object.defineProperty(this, "_internal", {
-      enumerable: false,
-      value: _internal
+    enumerable: false,
+    value: _internal
   });
     // set when attached to document
   _internal.doc = null;
@@ -27,6 +27,14 @@ function Selection() {
 Selection.Prototype = function() {
 
   this._isSelection = true;
+
+  this.clone = function() {
+    var newSel = this._clone();
+    if (this._internal.doc) {
+      newSel.attach(this._internal.doc);
+    }
+    return newSel;
+  };
 
   /**
     @returns {Document} The attached document instance
@@ -37,6 +45,10 @@ Selection.Prototype = function() {
       throw new Error('Selection is not attached to a document.');
     }
     return doc;
+  };
+
+  this.isAttached = function() {
+    return Boolean(this._internal.doc);
   };
 
   /**
@@ -72,18 +84,14 @@ Selection.Prototype = function() {
     return false;
   };
 
+  /**
+    @returns {Boolean} true if selection is a {@link model/NodeSelection}
+  */
   this.isNodeSelection = function() {
     return false;
   };
 
   this.isCustomSelection = function() {
-    return false;
-  };
-
-  /**
-    @returns {Boolean} true if selection is a {@link model/TableSelection}
-  */
-  this.isTableSelection = function() {
     return false;
   };
 
@@ -101,6 +109,10 @@ Selection.Prototype = function() {
     return false;
   };
 
+  this.getType = function() {
+    throw new Error('Selection.getType() is abstract.');
+  };
+
   /**
     @returns {Boolean} true if selection equals `other` selection
   */
@@ -110,6 +122,8 @@ Selection.Prototype = function() {
     } else if (!other) {
       return false;
     } else if (this.isNull() !== other.isNull()) {
+      return false;
+    } else if (this.getType() !== other.getType()) {
       return false;
     } else {
       // Note: returning true here, so that sub-classes
@@ -165,6 +179,10 @@ Selection.NullSelection.Prototype = function() {
     return true;
   };
 
+  this.getType = function() {
+    return 'null';
+  };
+
   this.toJSON = function() {
     return null;
   };
@@ -196,12 +214,14 @@ Selection.fromJSON = function(json) {
     case 'container':
       var ContainerSelection = require('./ContainerSelection');
       return ContainerSelection.fromJSON(json);
+    case 'node':
+      var NodeSelection = require('./NodeSelection');
+      return NodeSelection.fromJSON(json);
     case 'custom':
       var CustomSelection = require('./CustomSelection');
       return CustomSelection.fromJSON(json);
-    case 'default':
-      // TODO: what if we have custom selections?
-      console.error('Selection.fromJSON(): unsupported selection data', json);
+    default:
+      // console.error('Selection.fromJSON(): unsupported selection data', json);
       return Selection.nullSelection;
   }
 };
@@ -225,7 +245,7 @@ Selection.Fragment = function(path, startOffset, endOffset, full) {
   this.path = path;
   this.startOffset = startOffset;
   this.endOffset = endOffset || startOffset;
-  this.full = !!full;
+  this.full = Boolean(full);
 };
 
 Selection.Fragment.Prototype = function() {
@@ -268,6 +288,7 @@ Selection.NodeFragment = function(nodeId) {
 
   this.type = "node-fragment";
   this.nodeId = nodeId;
+  this.path = [nodeId];
 };
 
 Selection.NodeFragment.Prototype = function() {

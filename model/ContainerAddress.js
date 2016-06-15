@@ -10,7 +10,7 @@ function ContainerAddress(pos, offset) {
 ContainerAddress.Prototype = function() {
 
   this.isBefore = function(other, strict) {
-    strict = !!strict;
+    strict = Boolean(strict);
     if (this.pos < other.pos) {
       return true;
     } else if (this.pos > other.pos) {

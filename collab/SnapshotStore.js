@@ -1,7 +1,7 @@
 'use strict';
 
 var oo = require('../util/oo');
-var Err = require('../util/Error');
+var Err = require('../util/SubstanceError');
 
 /*
   Implements Substance SnapshotStore API. This is just a dumb store.
@@ -20,7 +20,7 @@ SnapshotStore.Prototype = function() {
   /*
     Get Snapshot by documentId and version. If no version is provided
     the highest version available is returned
-    
+
     @return {Object} snapshot record
   */
   this.getSnapshot = function(args, cb) {

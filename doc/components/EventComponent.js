@@ -24,7 +24,7 @@ EventComponent.Prototype = function() {
           .on('click', this.onClick)
           .append($$('span').addClass('se-name').append(node.name)),
         $$('div').addClass('se-source').append(
-          $$('strong').append(this.i18n.t('event')),
+          $$('strong').append(this.getLabel('event')),
           $$('span').append(' defined in '),
           $$(SourceLink, {node: node})
         )

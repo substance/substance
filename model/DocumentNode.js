@@ -11,6 +11,31 @@ var DataNode = require('./data/Node');
 
   @param {model/Document} doc A document instance
   @param {object} node properties
+  @example
+
+  The following example shows how a new node type is defined.
+
+
+  ```js
+  function Todo() {
+    Todo.super.apply(this, arguments);
+  }
+  TextBlock.extend(Todo);
+  Todo.static.name = 'todo';
+  Todo.static.defineSchema({
+    content: 'text',
+    done: { type: 'bool', default: false }
+  });
+  ```
+
+  The following
+    data types are supported:
+
+      - `string` bare metal string data type
+      - `text` a string that carries annotations
+      - `number` numeric values
+      - `bool` boolean values
+      - 'id' a node id referencing another node in the document
 */
 
 function DocumentNode(doc, props) {
@@ -22,6 +47,8 @@ function DocumentNode(doc, props) {
 }
 
 DocumentNode.Prototype = function() {
+
+  this._isDocumentNode = true;
 
   var _super = DocumentNode.super.prototype;
 
@@ -42,7 +69,7 @@ DocumentNode.Prototype = function() {
     @returns {Boolean}
   */
   this.hasParent = function() {
-    return !!this.parent;
+    return Boolean(this.parent);
   };
 
   /**
@@ -66,8 +93,7 @@ DocumentNode.Prototype = function() {
 
     @returns {Number} default: -1
   */
-  this.getChildIndex = function(child) {
-    /* jshint unused:false */
+  this.getChildIndex = function(child) { // eslint-disable-line
     return -1;
   };
 
@@ -76,8 +102,7 @@ DocumentNode.Prototype = function() {
 
     @returns {DocumentNode} default: null
   */
-  this.getChildAt = function(idx) {
-    /* jshint unused:false */
+  this.getChildAt = function(idx) { // eslint-disable-line
     return null;
   };
 

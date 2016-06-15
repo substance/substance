@@ -1,5 +1,3 @@
-/* jshint latedef:nofunc */
-
 'use strict';
 
 var isObject = require('lodash/isObject');
@@ -189,7 +187,7 @@ oo.initClass = function(clazz) {
  * oo.inherit(Child, Parent);
  * ```
  */
-oo.inherit =  function(clazz, parentClazz) {
+oo.inherit = function(clazz, parentClazz) {
   if (!clazz.__is_initialized__) {
     oo.initClass(clazz);
   }

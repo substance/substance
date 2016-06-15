@@ -2,12 +2,10 @@
 
 var NodeIndex = require('./data/NodeIndex');
 
-/**
-
-*/
-function DocumentIndex() {
-}
+function DocumentIndex() {}
 
 NodeIndex.extend(DocumentIndex);
+
+DocumentIndex.filterByType = NodeIndex.filterByType;
 
 module.exports = NodeIndex;

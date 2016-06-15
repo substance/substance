@@ -59,7 +59,7 @@ function ContainerSelection(containerId, startPath, startOffset, endPath, endOff
   this.endOffset = endOffset;
 
 
-  this.reverse = !!reverse;
+  this.reverse = Boolean(reverse);
 
   this.surfaceId = surfaceId;
 
@@ -95,14 +95,8 @@ ContainerSelection.Prototype = function() {
     return true;
   };
 
-  this.isNodeSelection = function() {
-    return (
-      this.startPath.length === 1 &&
-      this.endPath.length === 1 &&
-      (this.reverse ?
-        this.endOffset === 0 && this.startOffset === 1 :
-        this.startOffset === 0 && this.endOffset === 1)
-    );
+  this.getType = function() {
+    return 'container';
   };
 
   this.isNull = function() {
@@ -126,7 +120,7 @@ ContainerSelection.Prototype = function() {
   };
 
   this.toString = function() {
-    return "ContainerSelection("+ JSON.stringify(this.startPath) + ":" + this.startOffset + " -> " +  JSON.stringify(this.endPath) + ":" + this.endOffset + (this.reverse ? ", reverse" : "") + ")";
+    return "ContainerSelection("+ JSON.stringify(this.startPath) + ":" + this.startOffset + " -> " + JSON.stringify(this.endPath) + ":" + this.endOffset + (this.reverse ? ", reverse" : "") + ")";
   };
 
   /**
@@ -143,7 +137,7 @@ ContainerSelection.Prototype = function() {
     // Note: this gets called from PropertySelection.contains()
     // because this implementation can deal with mixed selection types.
     if (other.isNull()) return false;
-    strict = !!strict;
+    strict = Boolean(strict);
     var r1 = this._range(this);
     var r2 = this._range(other);
     return (r2.start.isBefore(r1.start, strict) &&
@@ -154,11 +148,25 @@ ContainerSelection.Prototype = function() {
     // Note: this gets called from PropertySelection.isInsideOf()
     // because this implementation can deal with mixed selection types.
     if (other.isNull()) return false;
-    strict = !!strict;
+    strict = Boolean(strict);
     var r1 = this._range(this);
     var r2 = this._range(other);
     return (r1.start.isBefore(r2.start, strict) &&
       r2.end.isBefore(r1.end, strict));
+  };
+
+  this.containsNodeFragment = function(nodeId, strict) {
+    var container = this.getContainer();
+    var coor = new Coordinate([nodeId], 0);
+    var address = container.getAddress(coor);
+    var r = this._range(this);
+    // console.log('ContainerSelection.containsNodeFragment', address, 'is within', r.start, '->', r.end, '?');
+    var contained = r.start.isBefore(address, strict);
+    if (contained) {
+      address.offset = 1;
+      contained = r.end.isAfter(address, strict);
+    }
+    return contained;
   };
 
   this.overlaps = function(other) {
@@ -420,11 +428,15 @@ ContainerSelection.Prototype = function() {
       if (fragment instanceof Selection.Fragment) {
         sels.push(
           new PropertySelection(fragment.path, fragment.startOffset,
-            fragment.endOffset, false, this.surfaceId)
+            fragment.endOffset, false, this.containerId, this.surfaceId)
         );
       }
-    });
+    }.bind(this));
     return sels;
+  };
+
+  this._clone = function() {
+    return new ContainerSelection(this.containerId, this.startPath, this.startOffset, this.endPath, this.endOffset, this.reverse, this.surfaceId);
   };
 
   this._range = function(sel) {
@@ -453,7 +465,7 @@ ContainerSelection.Prototype = function() {
     return addressRange;
   };
 
-  var _createNewSelection = function(containerSel, start, end) {
+  function _createNewSelection(containerSel, start, end) {
     var newSel = new ContainerSelection(containerSel.containerId,
       start.path, start.offset, end.path, end.offset, false, containerSel.surfaceId);
     // we need to attach the new selection
@@ -462,7 +474,7 @@ ContainerSelection.Prototype = function() {
       newSel.attach(doc);
     }
     return newSel;
-  };
+  }
 };
 
 Selection.extend(ContainerSelection);
@@ -511,7 +523,7 @@ ContainerSelection.fromJSON = function(properties) {
   var endPath = properties.endPath || properties.startPath;
   var startOffset = properties.startOffset;
   var endOffset = properties.endOffset;
-  var reverse = !!properties.reverse;
+  var reverse = Boolean(properties.reverse);
   // Note: to be able to associate selections with surfaces we decided
   // to introduce this optional property
   var surfaceId = properties.surfaceId;

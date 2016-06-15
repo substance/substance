@@ -1,11 +1,11 @@
 'use strict';
 
-var SurfaceTool = require('../../ui/SurfaceTool');
+var AnnotationTool = require('../../ui/AnnotationTool');
 
 function StrongTool() {
   StrongTool.super.apply(this, arguments);
 }
-SurfaceTool.extend(StrongTool);
+AnnotationTool.extend(StrongTool);
 
 StrongTool.static.name = 'strong';
 

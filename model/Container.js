@@ -1,10 +1,11 @@
 'use strict';
 
 var extend = require('lodash/extend');
+var isNumber = require('lodash/isNumber');
+var isString = require('lodash/isString');
 var DocumentNode = require('./DocumentNode');
 var ParentNodeMixin = require('./ParentNodeMixin');
 var ContainerAddress = require('./ContainerAddress');
-var Coordinate = require('./Coordinate');
 
 /**
   A Container represents a list of nodes.
@@ -20,13 +21,14 @@ var Coordinate = require('./Coordinate');
 function Container() {
   Container.super.apply(this, arguments);
 
-  // TODO: we need to revisit the event proxy implementation
   if (!this.document.isTransactionDocument) {
     this.document.on('document:changed', this._onChange, this);
   }
 }
 
 Container.Prototype = function() {
+
+  this._isContainer = true;
 
   extend(this, ParentNodeMixin);
 
@@ -63,27 +65,34 @@ Container.Prototype = function() {
     return nodes;
   };
 
+  this.getNodeAt = function(pos) {
+    return this.getDocument().get(this.nodes[pos]);
+  };
+
   this.show = function(nodeId, pos) {
     var doc = this.getDocument();
-    // Note: checking with ==  is what we want here
-    /* jshint eqnull: true */
-    if (pos == null) {
+    var arg1 = arguments[0];
+    if (!isString(arg1)) {
+      if (arg1._isNode) {
+        nodeId = arg1.id;
+      }
+    }
+    if (!isNumber(pos)) {
       pos = this.nodes.length;
     }
-    /* jshint eqnull: false */
-    doc.update([this.id, 'nodes'], { insert: { offset: pos, value: nodeId } });
+    doc.update(this.getContentPath(), { insert: { offset: pos, value: nodeId } });
   };
 
   this.hide = function(nodeId) {
     var doc = this.getDocument();
     var pos = this.nodes.indexOf(nodeId);
     if (pos >= 0) {
-      doc.update([this.id, 'nodes'], { delete: { offset: pos } });
+      doc.update(this.getContentPath(), { delete: { offset: pos } });
     }
   };
 
   this.getAddress = function(coor) {
-    if (! (coor instanceof Coordinate)) {
+    if (!coor._isCoordinate) {
       // we have broken with an earlier version of this API
       throw new Error('Illegal argument: Container.getAddress(coor) expects a Coordinate instance.');
     }
@@ -111,7 +120,7 @@ Container.Prototype = function() {
   };
 
   this._onChange = function(change) {
-    if (change.isUpdated([this.id, 'nodes'])) {
+    if (change.isUpdated(this.getContentPath())) {
       this.positions = null;
     }
   };
@@ -119,12 +128,16 @@ Container.Prototype = function() {
   this._getCachedPositions = function() {
     if (!this.positions) {
       var positions = {};
-      this.nodes.map(function(id, pos) {
+      this.nodes.forEach(function(id, pos) {
         positions[id] = pos;
       });
       this.positions = positions;
     }
     return this.positions;
+  };
+
+  this.getContentPath = function() {
+    return [this.id, 'nodes'];
   };
 
 };

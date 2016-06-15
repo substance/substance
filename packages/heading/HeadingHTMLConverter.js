@@ -12,7 +12,7 @@ module.exports = {
   },
 
   import: function(el, node, converter) {
-    node.level = parseInt(''+el.tagName[1], 10);
+    node.level = Number(el.tagName[1]);
     node.content = converter.annotatedText(el, [node.id, 'content']);
   },
 

@@ -1,9 +1,10 @@
 'use strict';
 
 var ContainerRenderer = require('./components/ContainerRenderer');
-var DocumentationController = require('./DocumentationController');
+var DocumentationTOCProvider = require('./DocumentationTOCProvider');
+var Component = require('../ui/Component');
 var Cover = require('./components/CoverComponent');
-var TabbedPane = require('../ui/TabbedPane');
+var TOC = require('../ui/TOC');
 var SplitPane = require('../ui/SplitPane');
 var ScrollPane = require('../ui/ScrollPane');
 var DocumentationRouter = require('./DocumentationRouter');
@@ -11,12 +12,44 @@ var DocumentationRouter = require('./DocumentationRouter');
 function DocumentationReader() {
   DocumentationReader.super.apply(this, arguments);
 
-  this.router = new DocumentationRouter(this);
+  this._initialize(this.props);
+
+  this.handleActions({
+    'switchState': this.switchState,
+    'extendState': this.extendState,
+    'tocEntrySelected': this.focusNode,
+    'focusNode': this.focusNode
+  });
 }
 
 DocumentationReader.Prototype = function() {
 
-  var _super = DocumentationReader.super.prototype;
+  this._initialize = function(props) {
+    var configurator = props.configurator;
+
+    this.config = DocumentationReader.static.config;
+    this.router = new DocumentationRouter(this);
+    this.router.on('route:changed', this._onRouteChanged, this);
+    this.tocProvider = new DocumentationTOCProvider(this.props.doc, this.config);
+    this.componentRegistry = configurator.getComponentRegistry();
+    this.iconProvider = configurator.getIconProvider();
+    this.labelProvider = configurator.getLabelProvider();
+  };
+
+  this.getChildContext = function() {
+    return {
+      doc: this.getDocument(),
+      config: this.config,
+      tocProvider: this.tocProvider,
+      componentRegistry: this.componentRegistry,
+      iconProvider: this.iconProvider,
+      labelProvider: this.labelProvider
+    };
+  };
+
+  this.getDocument = function() {
+    return this.props.doc;
+  };
 
   // this increases rerendering speed alot.
   // A deep rerender takes quite a time (about 400ms) because of the many components.
@@ -26,13 +59,45 @@ DocumentationReader.Prototype = function() {
     return false;
   };
 
+  this.navigate = function(route, opts) {
+    this.extendState(route);
+    this.router.writeRoute(route, opts);
+  };
+
+  this._onRouteChanged = function(route) {
+    this.navigate(route, {replace: true});
+  };
+
+  this.dispose = function() {
+    this.router.dispose();
+  };
+
+  // Action handlers
+  // ---------------
+
+  this.focusNode = function(nodeId) {
+    this.navigate({
+      nodeId: nodeId
+    });
+  };
+
+  this.switchState = function(newState) {
+    this.navigate(newState);
+  };
+
+  this.jumpToNode = function(nodeId) {
+    this.tocProvider.emit("entry:selected", nodeId);
+  };
+
   this.didMount = function() {
-    _super.didMount.call(this);
+    var route = this.router.readRoute();
+    // Replaces the current entry without creating new history entry
+    // or triggering hashchange
+    this.navigate(route, {replace: true});
     this._updateScrollPosition();
   };
 
   this.didUpdate = function() {
-    _super.didUpdate.call(this);
     this._updateScrollPosition();
   };
 
@@ -46,53 +111,29 @@ DocumentationReader.Prototype = function() {
   };
 
   this._renderContextSection = function($$) {
-    var config = this.getConfig();
-    var panelProps = this._panelPropsFromState();
-    var contextId = this.state.contextId;
-    var panels = config.panels || {};
-    var panelConfig = panels[this.state.contextId] || {};
-    var tabOrder = config.tabOrder;
-    var PanelComponentClass = this.componentRegistry.get(contextId);
-
-    var tabs = tabOrder.map(function(contextId) {
-      return {
-        id: contextId,
-        name: this.i18n.t(contextId)
-      };
-    }.bind(this));
-
-    var el = $$('div').addClass('se-context-section').ref('contextSection');
-    var panelEl = $$(PanelComponentClass, panelProps).ref(contextId);
-
-    // Use full space if panel is configured as a dialog
-    if (panelConfig.isDialog) {
-      el.append(panelEl);
-    } else {
-      el.append(
-        $$(TabbedPane, {
-          activeTab: contextId,
-          tabs: tabs,
-        }).ref(this.state.contextId).append(
-          panelEl
-        )
+    var el = $$('div')
+      .addClass('se-context-section')
+      .ref('contextSection')
+      .append(
+        $$(TOC)
       );
-    }
+
     return el;
   };
 
   this._renderMainSection = function($$) {
-    var config = this.getConfig();
+    var config = this.config;
     var doc = this.props.doc;
     var meta = doc.get('meta');
 
     return $$('div').ref('main').addClass('se-main-section').append(
       $$(ScrollPane, {
-        toc: this.toc
+        tocProvider: this.tocProvider
       }).ref('contentPanel').append(
         $$(Cover, {node: meta}).ref('cover'),
         $$(ContainerRenderer, {
           containerId: config.containerId
-        }).ref('mainAnnotator')
+        }).ref('containerRenderer')
       )
     );
   };
@@ -102,35 +143,13 @@ DocumentationReader.Prototype = function() {
       this.refs.contentPanel.scrollTo(this.state.nodeId);
     }
   };
-
 };
 
-DocumentationController.extend(DocumentationReader);
+Component.extend(DocumentationReader);
 
+// TODO: we should move this into a DocumentationConfigurator API
 DocumentationReader.static.config = {
-  // Controller specific configuration (required)
-  controller: {
-    // Component registry
-    components: {
-      'namespace': require('./components/NamespaceComponent'),
-      'function': require('./components/FunctionComponent'),
-      'class': require('./components/SubstanceClassComponent'),
-      'ctor': require('./components/ConstructorComponent'),
-      'method': require('./components/MethodComponent'),
-      'module': require('./components/ModuleComponent'),
-      'property': require('./components/PropertyComponent'),
-      'event': require('./components/EventComponent'),
-      'toc': require('../ui/TOCPanel')
-    }
-  },
-  panels: {
-    'toc': {
-      isDialog: true
-    }
-  },
-  tabOrder: ['toc'],
   containerId: 'body',
-  isEditable: false,
   skipAbstractClasses: false,
   skipPrivateMethods: true
 };

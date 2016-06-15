@@ -2,7 +2,7 @@
 
 var Server = require('./Server');
 var CollabEngine = require('./CollabEngine');
-var Err = require('../util/Error');
+var Err = require('../util/SubstanceError');
 var forEach = require('lodash/forEach');
 
 /*
@@ -80,7 +80,7 @@ CollabServer.Prototype = function() {
     Called when a collaborator disconnects
   */
   this.onDisconnect = function(collaboratorId) {
-    console.log('CollabServer.onDisconnect ', collaboratorId);
+    // console.log('CollabServer.onDisconnect ', collaboratorId);
     // All documents collaborator is currently collaborating to
     var documentIds = this.collabEngine.getDocumentIds(collaboratorId);
     documentIds.forEach(function(documentId) {
@@ -123,6 +123,7 @@ CollabServer.Prototype = function() {
 
       // Send the response
       res.send({
+        scope: this.scope,
         type: 'syncDone',
         documentId: args.documentId,
         version: result.version,
@@ -134,6 +135,7 @@ CollabServer.Prototype = function() {
       // console.log('CollabServer.connect: update is broadcasted to collaborators', Object.keys(collaborators));
       forEach(collaborators, function(collaborator) {
         this.send(collaborator.collaboratorId, {
+          scope: this.scope,
           type: 'update',
           documentId: args.documentId,
           version: result.version,
@@ -157,6 +159,7 @@ CollabServer.Prototype = function() {
     this._disconnectDocument(collaboratorId, documentId);
     // Notify client that disconnect has completed successfully
     res.send({
+      scope: this.scope,
       type: 'disconnectDone',
       documentId: args.documentId
     });

@@ -1,202 +1,317 @@
 'use strict';
 
-var each = require('lodash/each');
-var $ = require('../../util/jquery');
 var Component = require('../../ui/Component');
-var TextProperty = require('../../ui/TextPropertyComponent');
-var TableSelection = require('../../model/TableSelection');
+var CustomSelection = require('../../model/CustomSelection');
+var DefaultDOMElement = require('../../ui/DefaultDOMElement');
+var tableHelpers = require('./tableHelpers');
+var keys = require('../../util/keys');
+var getRelativeBoundingRect = require('../../util/getRelativeBoundingRect');
+var TextCellContent = require('./TextCellContent');
 
 function TableComponent() {
   TableComponent.super.apply(this, arguments);
+
+  if (this.context.surfaceParent) {
+    this.surfaceId = this.context.surfaceParent.getId();
+  } else {
+    this.surfaceId = this.props.node.id;
+  }
+
+  this._selectedCells = {};
 }
 
 TableComponent.Prototype = function() {
 
   this.didMount = function() {
-    this.context.surface.on("selection:changed", this.onSelectionChange, this);
+    var documentSession = this.getDocumentSession();
+    documentSession.on('didUpdate', this.onSessionDidUpdate, this);
+
+    var globalEventHandler = this.context.globalEventHandler;
+    if (globalEventHandler) {
+      globalEventHandler.on('keydown', this.onKeydown, this, { id: this.surfaceId });
+    }
   };
 
   this.dispose = function() {
-    this.context.surface.off(this);
-  };
+    var documentSession = this.getDocumentSession();
+    documentSession.off(this);
 
-  this.getInitialState = function() {
-    return { mode: 'table' };
+    var globalEventHandler = this.context.globalEventHandler;
+    if (globalEventHandler) {
+      globalEventHandler.off(this);
+    }
   };
 
   this.render = function($$) {
-    var tableEl = $$('table')
-      .addClass("content-node table")
-      .attr({
-        "data-id": this.props.node.id,
-        contentEditable: false
-      });
-    if (this.state.mode === "table") {
-      tableEl.addClass('table-editing-mode');
-    } else if (this.state.mode === "cell") {
-      tableEl.addClass('cell-editing-mode');
-    }
-    // HACK: make sure row col indexes are up2date
-    this.props.node.getMatrix();
-    tableEl.append(this.renderTableContent($$));
-    return tableEl;
-  };
-
-  this.renderTableContent = function($$) {
-    var content = [];
-    each(this.props.node.getSections(), function(sec) {
-      var secEl = $$("t"+sec.sectionType).key(sec.id);
-      each(sec.getRows(), function(row) {
-        var rowEl = $$("tr").attr({"data-id": row.id, contentEditable:false});
-        each(row.getCells(), function(cell) {
-          var cellEl = $$((cell.cellType === 'head') ? 'th' : 'td')
-            .attr({
-              "data-id": cell.id,
-              "data-row": cell.rowIdx,
-              "data-col": cell.colIdx,
-            })
-            .on('mousedown', this.onMouseDown)
-            .on('doubleclick', this.onDoubleClick);
-          if (cell.colspan) {
-            cellEl.attr("colspan", cell.colspan);
-          }
-          if (cell.rowspan) {
-            cellEl.attr('rowspan', cell.rowspan);
-          }
-          if (this.state.mode === "cell") {
-            if (cell.rowIdx === this.state.row && cell.colIdx === this.state.col) {
-              cellEl.attr('contentEditable', true);
-            }
-          }
-          cellEl.append($$(TextProperty, {
-            path: [ cell.id, "content"]
-          }));
-          rowEl.append(cellEl);
-        }.bind(this));
-        secEl.append(rowEl);
-      }.bind(this));
-      content.push(secEl);
-    }.bind(this));
-    return content;
-  };
-
-  this.onDoubleClick = function(e) {
-    e.preventDefault();
-    e.stopPropagation();
-    var surface = this.context.surface;
-    var $cell = $(e.currentTarget);
-    var cellId = $cell.data('id');
-    // switch the state
-    this.setState({
-      mode: "cell",
-      cellId: cellId,
-      row: $cell.data('row'),
-      col: $cell.data('col')
-    }, function() {
-      var doc = surface.getDocument();
-      var path = [cellId, 'content'];
-      var text = doc.get(path);
-      surface.setSelection({
-        type: 'property',
-        path: path,
-        startOffset: text.length,
-      });
-    });
-  };
-
-  this.onMouseDown = function(e) {
-    var $el = this.$el;
-    var surface = this.context.surface;
-    var doc = surface.getDocument();
-    var id = this.props.node.id;
-    var self = this;
-    // 1. get the anchor cell (for click or select)
-    var $cell = $(e.currentTarget);
-
-    if (this.state.mode === "cell" && this.state.cellId === $cell.data('id')) {
-      // do not override selection behavior within a cell
-      return;
-    }
-    e.preventDefault();
-    e.stopPropagation();
-
-    var $startCell = $cell;
-    var $endCell = $cell;
-    var rectangle = new TableSelection.Rectangle(
-      $startCell.data('row'),
-      $startCell.data('col'),
-      $endCell.data('row'),
-      $endCell.data('col')
-    );
-    // 2. enable onMouseOver delegate which updates the displayed selection region
-    var onMouseOver = function(e) {
-      $endCell = $(e.currentTarget);
-      rectangle = new TableSelection.Rectangle($startCell.data('row'), $startCell.data('col'),
-        $endCell.data('row'), $endCell.data('col'));
-      self._updateSelection(rectangle);
-    };
-    $el.on('mouseenter', 'th,td', onMouseOver);
-    // 3. enable onMouseUp hook: stop dragging the selection and
-    // finally set the Surface's selection
-    $(window).one('mouseup', function(e) {
-      e.stopPropagation();
-      e.preventDefault();
-      $el.off('mouseenter', 'th,td', onMouseOver);
-      var tableSelection = doc.createSelection({
-        type: 'table',
-        tableId: id,
-        rectangle: rectangle
-      });
-      surface.setSelection(tableSelection);
-    });
-  };
-
-  this.onSelectionChange = function(sel) {
     var node = this.props.node;
-    var id = node.id;
-    if (this.hasSelection) {
-      this._clearSelection();
+
+    var el = $$('div').addClass('sc-table');
+
+    var tableEl = $$('table');
+    var cellEntries = node.cells;
+
+    var nrows = node.getRowCount();
+    var ncols = node.getColCount();
+    var i,j;
+
+    var thead = $$('thead').addClass('se-head');
+    var colControls = $$('tr').addClass('se-column-controls');
+    colControls.append($$('td').addClass('se-corner-tl'));
+    colControls.append($$('td').addClass('se-hspace'));
+    for (j = 0; j < ncols; j++) {
+      colControls.append(
+        $$('td').addClass('se-column-handle').attr('data-col', j).ref('col-handle'+j)
+          .on('mousedown', this._onColumnHandle)
+          .append(tableHelpers.getColumnName(j))
+      );
     }
-    if (this.state.mode === "cell") {
-      if (!sel.isPropertySelection() || sel.start.path[0] !== this.state.cellId) {
-        var self = this;
-        this.setState({
-          mode: "table"
-        }, function() {
-          if (sel.isTableSelection() && sel.getTableId() === id) {
-            self._updateSelection(sel.rectangle);
-          }
-        });
+    colControls.append($$('td').addClass('se-hspace'));
+    thead.append(colControls);
+    thead.append($$('tr').addClass('se-vspace'));
+
+    var tbody = $$('tbody').addClass('se-body').ref('body');
+    for (i = 0; i < nrows; i++) {
+      var row = cellEntries[i];
+      var rowEl = $$('tr').addClass('se-row').attr('data-row', i);
+
+      rowEl.append(
+        $$('td').addClass('se-row-handle').attr('data-row', i).ref('row-handle'+i)
+          .on('mousedown', this._onRowHandle)
+          .append(tableHelpers.getRowName(i))
+      );
+      rowEl.append($$('td').addClass('se-hspace'));
+
+      console.assert(row.length === ncols, 'row should be complete.');
+      for (j = 0; j < ncols; j++) {
+        var cellId = row[j];
+        var cellEl = this.renderCell($$, cellId);
+        cellEl.attr('data-col', j)
+          .on('mousedown', this._onCell);
+        rowEl.append(cellEl);
       }
+      rowEl.append($$('td').addClass('se-hspace'));
+
+      tbody.append(rowEl);
+    }
+
+    var tfoot = $$('tfoot').addClass('se-foot');
+    tfoot.append($$('tr').addClass('se-vspace'));
+    colControls = $$('tr').addClass('se-column-controls');
+    colControls.append($$('td').addClass('se-corner-bl'));
+    colControls.append($$('td').addClass('se-hspace'));
+    for (j = 0; j < ncols; j++) {
+      colControls.append($$('td').addClass('se-hspace'));
+    }
+    colControls.append($$('td').addClass('se-hspace'));
+    tfoot.append(colControls);
+
+    tableEl.append(thead);
+    tableEl.append(tbody);
+    tableEl.append(tfoot);
+
+    el.append(tableEl);
+
+    // selection as an overlay
+    el.append(
+      $$('div').addClass('se-selection').ref('selection')
+        .on('mousedown', this._whenClickingOnSelection)
+    );
+
+    return el;
+  };
+
+  this.renderCell = function($$, cellId) {
+    var cellEl = $$('td').addClass('se-cell');
+    var doc = this.props.node.getDocument();
+    var cellContent = doc.get(cellId);
+    if (cellContent) {
+      // TODO: we need to derive disabled state
+      // 1. if table is disabled all cells are disabled
+      // 2. if sel is TableSelection then cell is disabled if not in table selection range
+      // 3. else cell is disabled if not focused/co-focused
+      cellEl.append(
+        $$(TextCellContent, {
+          disabled: !this._selectedCells[cellId],
+          node: cellContent,
+        }).ref(cellId)
+      );
+    }
+
+    return cellEl;
+  };
+
+  this.getId = function() {
+    return this.surfaceId;
+  };
+
+  this.getDocumentSession = function() {
+    return this.context.documentSession;
+  };
+
+  this.getSelection = function() {
+    var documentSession = this.getDocumentSession();
+    var sel = documentSession.getSelection();
+    if (sel && sel.isCustomSelection() && sel.getCustomType() === 'table' && sel.surfaceId === this.getId()) {
+      return sel;
     } else {
-      if (sel.isTableSelection() && sel.getTableId() === id) {
-        this._updateSelection(sel.rectangle);
+      return null;
+    }
+  };
+
+  this._setSelection = function(startRow, startCol, endRow, endCol) {
+    var documentSession = this.getDocumentSession();
+    documentSession.setSelection(new CustomSelection('table', {
+      startRow: startRow, startCol: startCol,
+      endRow: endRow, endCol: endCol
+    }, this.getId()));
+  };
+
+  this.onSessionDidUpdate = function(update) {
+    if (update.selection) {
+      var sel = this.getSelection();
+      this._selectedCells = {};
+      if (sel) {
+        var rect = this._getRectangle(sel);
+        for(var i=rect.minRow; i<=rect.maxRow; i++) {
+          for(var j=rect.minCol; j<=rect.maxCol; j++) {
+            var cellId = this.props.node.cells[i][j];
+            this._selectedCells[cellId] = true;
+          }
+        }
+        this._renderSelection(sel);
       }
     }
   };
 
-  this._updateSelection = function(rectangle) {
-    var $el = this.$el;
-    var $cells = $el.find('th,td');
-    $cells.each(function() {
-      var $cell = $(this);
-      var row = $cell.data('row');
-      var col = $cell.data('col');
-      if (row >= rectangle.start.row && row <= rectangle.end.row &&
-        col >= rectangle.start.col && col <= rectangle.end.col) {
-        $cell.addClass("selected");
-      } else {
-        $cell.removeClass("selected");
-      }
-    });
-    this.hasSelection = true;
+  this.onKeydown = function(e) {
+    var handled = false;
+    switch (e.keyCode) {
+      case keys.LEFT:
+        this._changeSelection(0, -1, e.shiftKey);
+        handled = true;
+        break;
+      case keys.RIGHT:
+        this._changeSelection(0, 1, e.shiftKey);
+        handled = true;
+        break;
+      case keys.DOWN:
+        this._changeSelection(1, 0, e.shiftKey);
+        handled = true;
+        break;
+      case keys.UP:
+        this._changeSelection(-1, 0, e.shiftKey);
+        handled = true;
+        break;
+      default:
+        // nothing
+    }
+    if (handled) {
+      e.preventDefault();
+    }
   };
 
-  this._clearSelection = function() {
-    var $el = this.$el;
-    var $cells = $el.find('th,td');
-    $cells.removeClass('selected');
-    this.hasSelection = false;
+  this._onColumnHandle = function(e) {
+    e.stopPropagation();
+    e.preventDefault();
+    var el = DefaultDOMElement.wrapNativeElement(e.currentTarget);
+    var col = parseInt(el.attr('data-col'), 10);
+    var rowCount = this.props.node.getRowCount();
+    this._setSelection(0, col, rowCount-1, col);
+  };
+
+  this._onRowHandle = function(e) {
+    e.stopPropagation();
+    e.preventDefault();
+    var el = DefaultDOMElement.wrapNativeElement(e.currentTarget);
+    var row = parseInt(el.attr('data-row'), 10);
+    var colCount = this.props.node.getColCount();
+    this._setSelection(row, 0, row, colCount-1);
+  };
+
+  this._onCell = function(e) {
+    e.stopPropagation();
+    e.preventDefault();
+
+    var el = DefaultDOMElement.wrapNativeElement(e.currentTarget);
+    var col = parseInt(el.attr('data-col'), 10);
+    var row = parseInt(el.parentNode.attr('data-row'), 10);
+
+    this._setSelection(row, col, row, col);
+  };
+
+  this._changeSelection = function(rowInc, colInc, expand) {
+    var sel = this.getSelection();
+    if (sel) {
+      var maxRow = this.props.node.getRowCount()-1;
+      var maxCol = this.props.node.getColCount()-1;
+      if (expand) {
+        var endRow = Math.max(0, Math.min(sel.data.endRow + rowInc, maxRow));
+        var endCol = Math.max(0, Math.min(sel.data.endCol + colInc, maxCol));
+        this._setSelection(sel.data.startRow, sel.data.startCol, endRow, endCol);
+      } else {
+        var row = Math.max(0, Math.min(sel.data.endRow + rowInc, maxRow));
+        var col = Math.max(0, Math.min(sel.data.endCol + colInc, maxCol));
+        this._setSelection(row, col, row, col);
+      }
+    }
+  };
+
+  this._getRectangle = function(sel) {
+    return {
+      minRow: Math.min(sel.data.startRow, sel.data.endRow),
+      maxRow: Math.max(sel.data.startRow, sel.data.endRow),
+      minCol: Math.min(sel.data.startCol, sel.data.endCol),
+      maxCol: Math.max(sel.data.startCol, sel.data.endCol)
+    };
+  };
+
+  this._renderSelection = function() {
+    var sel = this.getSelection();
+    if (!sel) return;
+
+    var rect = this._getRectangle(sel);
+
+    var startCell = this._getCell(rect.minRow, rect.minCol);
+    var endCell = this._getCell(rect.maxRow, rect.maxCol);
+
+    var startEl = startCell.getNativeElement();
+    var endEl = endCell.getNativeElement();
+    var tableEl = this.el.el;
+    // Get the  bounding rect for startEl, endEl relative to tableEl
+    var selRect = getRelativeBoundingRect([startEl, endEl], tableEl);
+    this.refs.selection.css(selRect).addClass('sm-visible');
+    this._enableCells();
+  };
+
+  this._enableCells = function() {
+    var node = this.props.node;
+    for(var i=0; i<node.cells.length; i++) {
+      var row = node.cells[i];
+      for(var j=0; j<row.length; j++) {
+        var cellId = row[j];
+        var cell = this._getCell(i, j).getChildAt(0);
+        if (this._selectedCells[cellId]) {
+          cell.extendProps({ disabled: false });
+        } else {
+          cell.extendProps({ disabled: true });
+        }
+      }
+    }
+  };
+
+  this._getCell = function(row, col) {
+    var rowEl = this.refs.body.getChildAt(row);
+    // +2 because we have a row handle plus a spacer cell
+    var cellEl = rowEl.getChildAt(col + 2);
+    return cellEl;
+  };
+
+  this._whenClickingOnSelection = function(e) { //eslint-disable-line
+    // HACK: invalidating the selection so that we can click the selection overlay away
+    this.context.documentSession.setSelection(new CustomSelection('null', {}, this.getId()));
+    this.refs.selection.css({
+      height: '0px', width: '0px'
+    }).removeClass('sm-visible');
   };
 };
 

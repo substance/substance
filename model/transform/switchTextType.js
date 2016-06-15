@@ -46,14 +46,8 @@ function switchTextType(tx, args) {
     content: node.content
   }, data);
   var newPath = [newNode.id, 'content'];
-  tx.create(newNode);
+  newNode = tx.create(newNode);
   annotationHelpers.transferAnnotations(tx, path, 0, newPath, 0);
-
-  // TODO: should work without a given container
-  // _.each(tx.getContainers(), function(container) {
-  //   pos = container.getPosition(nodeId);
-  //   ....
-  // });
 
   // hide the old one, show the new node
   var container = tx.get(args.containerId);
@@ -66,6 +60,7 @@ function switchTextType(tx, args) {
   deleteNode(tx, { nodeId: node.id });
 
   args.selection = tx.createSelection(newPath, sel.startOffset, sel.endOffset);
+  args.node = newNode;
 
   return args;
 }

@@ -1,5 +1,6 @@
 'use strict';
 
+var each = require('lodash/each');
 var oo = require('../../util/oo');
 var NodeRegistry = require('./NodeRegistry');
 var Node = require('./Node');
@@ -49,14 +50,13 @@ Schema.Prototype = function() {
   */
   this.addNodes = function(nodes) {
     if (!nodes) return;
-    for (var i = 0; i < nodes.length; i++) {
-      var NodeClass = nodes[i];
-      if (!NodeClass.static) {
+    each(nodes, function(NodeClass) {
+      if (!NodeClass.prototype._isNode) {
         console.error('Illegal node class: ', NodeClass);
-        continue;
+      } else {
+        this.addNode(NodeClass);
       }
-      this.addNode(NodeClass);
-    }
+    }.bind(this));
   };
 
   this.addNode = function(NodeClass) {
@@ -133,13 +133,8 @@ Schema.Prototype = function() {
       console.error('Unknown node type ', type);
       return null;
     }
-    return _getNodeSchema(NodeClass);
-  };
-
-  var _getNodeSchema = function(NodeClass) {
     return NodeClass.static.schema;
   };
-
 };
 
 oo.initClass(Schema);

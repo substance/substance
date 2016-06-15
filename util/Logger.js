@@ -2,15 +2,11 @@
 
 var EventEmitter = require("./EventEmitter");
 
-// Logger
-// ----------------
-//
-
-var Logger = function() {
+function Logger() {
   EventEmitter.call(this);
 
   this.messages = [];
-};
+}
 
 Logger.Prototype = function() {
 

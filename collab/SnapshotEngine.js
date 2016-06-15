@@ -1,8 +1,10 @@
+'use strict';
+
 var oo = require('../util/oo');
 var JSONConverter = require('../model/JSONConverter');
 var converter = new JSONConverter();
 var each = require('lodash/each');
-var Err = require('../util/Error');
+var Err = require('../util/SubstanceError');
 
 /**
   API for creating and retrieving snapshots of documents
@@ -22,7 +24,7 @@ SnapshotEngine.Prototype = function() {
     Returns a snapshot for a given documentId and version
   */
   this.getSnapshot = function(args, cb) {
-    if (!args || !args.documentId) {
+    if (!args || !args.documentId) {
       return cb(new Err('InvalidArgumentsError', {
         message: 'args requires a documentId'
       }));
@@ -60,8 +62,8 @@ SnapshotEngine.Prototype = function() {
     }
     this._computeSnapshot(args, function(err, snapshot) {
       if (err) return cb(err);
-      this.snapshotStore.createSnapshot(snapshot, cb);
-    });
+      this.snapshotStore.saveSnapshot(snapshot, cb);
+    }.bind(this));
   };
 
   /*
@@ -181,15 +183,14 @@ SnapshotEngine.Prototype = function() {
   */
   this._createDocumentInstance = function(schemaName) {
     var schemaConfig = this.schemas[schemaName];
-    
+
     if (!schemaConfig) {
       throw new Err('SnapshotEngine.SchemaNotFoundError', {
         message:'Schema ' + schemaName + ' not found'
       });
     }
 
-    var docFactory = schemaConfig.documentFactory;
-    var doc = new docFactory.ArticleClass();
+    var doc = schemaConfig.documentFactory.createDocument();
     return doc;
   };
 

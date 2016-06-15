@@ -1,99 +1,9 @@
 "use strict";
+/* global WeakMap */
 
-var EventEmitter = require('../util/EventEmitter');
 var oo = require('../util/oo');
 var uuid = require('../util/uuid');
-
-/*
-  ServerRequest
-*/
-
-function ServerRequest(message, ws) {
-  this.message = message;
-  this.ws = ws;
-  this.isAuthenticated = false;
-  this.isAuhorized = false;
-}
-
-ServerRequest.Prototype = function() {
-  /*
-    Marks a request as authenticated
-  */  
-  this.setAuthenticated = function(session) {
-    this.isAuthenticated = true;
-    this.session = session;
-  };
-
-  /*
-    Marks a request as authorized (authorizationData is optional)
-  */
-  this.setAuthorized = function(authorizationData) {
-    this.isAuthorized = true;
-    this.authorizationData = authorizationData;
-  };
-
-  /*
-    Sets the isEnhanced flag
-  */
-  this.setEnhanced = function() {
-    this.isEnhanced = true;
-  };
-};
-
-oo.initClass(ServerRequest);
-
-/*
-  ServerResponse
-*/
-function ServerResponse() {
-  this.isReady = false; // once the response has been set using send
-  this.isEnhanced = false; // after response has been enhanced by enhancer
-  this.isSent = false; // after response has been sent
-  this.err = null;
-  this.data = null;
-}
-
-ServerResponse.Prototype = function() {
-  
-  /*
-    Sends an error response
-
-    @example
-
-    ```js
-    res.error({
-      type: 'syncError',
-      errorName: 'AuthenticationError',
-      documentId: 'doc-1'
-    });
-    ```
-  */
-  this.error = function(err) {
-    this.err = err;
-    this.isReady = true;
-  };
-
-  /*
-    Send response data
-  */
-  this.send = function(data) {
-    this.data = data;
-    this.isReady = true;
-  };
-
-  /*
-    Sets the isEnhanced flag
-  */
-  this.setEnhanced = function() {
-    this.isEnhanced = true;
-  };
-
-  this.setSent = function() {
-    this.isSent = true;
-  };
-};
-
-oo.initClass(ServerResponse);
+var EventEmitter = require('../util/EventEmitter');
 
 /**
   Server
@@ -102,7 +12,7 @@ oo.initClass(ServerResponse);
 */
 function Server(config) {
   Server.super.apply(this);
-  
+
   this.config = config;
   this._onConnection = this._onConnection.bind(this);
 }
@@ -199,7 +109,7 @@ Server.Prototype = function() {
   /*
     When a new collaborator connects we generate a unique id for them
   */
-  this._onConnection = function(ws) {
+  this._onConnection = function(ws) {
     var collaboratorId = uuid();
     var connection = {
       collaboratorId: collaboratorId
@@ -223,7 +133,7 @@ Server.Prototype = function() {
     var collaboratorId = conn.collaboratorId;
 
     this.onDisconnect(collaboratorId);
-    
+
     // Remove the connection records
     delete this._collaborators[collaboratorId];
     this._connections.delete(ws);
@@ -231,7 +141,7 @@ Server.Prototype = function() {
 
   /*
     Implements state machine for handling the request response cycle
-    
+
     __initial -        > authenticated      -> __authenticated, __error
     __authenticated   -> authorize          -> __authorized, __error
     __authorized      -> enhanceRequest     -> __requestEnhanced, __error
@@ -262,8 +172,8 @@ Server.Prototype = function() {
     return req.isAuthenticated && req.isAuthorized && res.isReady && res.data && !res.isEnhanced;
   };
 
-  this.__enhanced = function(req, res) {   
-    return res.isReady && res.isEnhanced && !res.isSent;    
+  this.__enhanced = function(req, res) {
+    return res.isReady && res.isEnhanced && !res.isSent;
   };
 
   this.__error = function(req, res) {
@@ -338,10 +248,10 @@ Server.Prototype = function() {
     if (!message.scope && this.config.scope) {
       message.scope = this.config.scope;
     }
-    
+
     var ws = this._collaborators[collaboratorId].connection;
     if (this._isWebsocketOpen(ws)) {
-      ws.send(this.serializeMessage(message));  
+      ws.send(this.serializeMessage(message));
     } else {
       console.error('Server#send: Websocket for collaborator', collaboratorId, 'is no longer open', message);
     }
@@ -383,7 +293,7 @@ Server.Prototype = function() {
       // We attach a unique collaborator id to each message
       msg.collaboratorId = conn.collaboratorId;
       var req = new ServerRequest(msg, ws);
-      this._processRequest(req);      
+      this._processRequest(req);
     }
   };
 
@@ -398,5 +308,96 @@ Server.Prototype = function() {
 };
 
 EventEmitter.extend(Server);
+
+/*
+  ServerRequest
+*/
+
+function ServerRequest(message, ws) {
+  this.message = message;
+  this.ws = ws;
+  this.isAuthenticated = false;
+  this.isAuhorized = false;
+}
+
+ServerRequest.Prototype = function() {
+  /*
+    Marks a request as authenticated
+  */
+  this.setAuthenticated = function(session) {
+    this.isAuthenticated = true;
+    this.session = session;
+  };
+
+  /*
+    Marks a request as authorized (authorizationData is optional)
+  */
+  this.setAuthorized = function(authorizationData) {
+    this.isAuthorized = true;
+    this.authorizationData = authorizationData;
+  };
+
+  /*
+    Sets the isEnhanced flag
+  */
+  this.setEnhanced = function() {
+    this.isEnhanced = true;
+  };
+};
+
+oo.initClass(ServerRequest);
+
+/*
+  ServerResponse
+*/
+function ServerResponse() {
+  this.isReady = false; // once the response has been set using send
+  this.isEnhanced = false; // after response has been enhanced by enhancer
+  this.isSent = false; // after response has been sent
+  this.err = null;
+  this.data = null;
+}
+
+ServerResponse.Prototype = function() {
+
+  /*
+    Sends an error response
+
+    @example
+
+    ```js
+    res.error({
+      type: 'syncError',
+      errorName: 'AuthenticationError',
+      documentId: 'doc-1'
+    });
+    ```
+  */
+  this.error = function(err) {
+    this.err = err;
+    this.isReady = true;
+  };
+
+  /*
+    Send response data
+  */
+  this.send = function(data) {
+    this.data = data;
+    this.isReady = true;
+  };
+
+  /*
+    Sets the isEnhanced flag
+  */
+  this.setEnhanced = function() {
+    this.isEnhanced = true;
+  };
+
+  this.setSent = function() {
+    this.isSent = true;
+  };
+};
+
+oo.initClass(ServerResponse);
 
 module.exports = Server;

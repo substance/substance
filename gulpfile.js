@@ -1,14 +1,21 @@
+'use strict';
+/* eslint-disable no-console */
+
 var gulp = require('gulp');
 var source = require('vinyl-source-stream');
 var buffer = require('vinyl-buffer');
+var transform = require('vinyl-transform');
 var gutil = require('gulp-util');
 var argv = require('yargs').argv;
 var gulpif = require('gulp-if');
 var rename = require('gulp-rename');
-var jshint = require('gulp-jshint');
+var eslint = require('gulp-eslint');
+var tape = require('gulp-tape');
+var tapSpec = require('tap-spec');
 var browserify = require('browserify');
 var uglify = require('gulp-uglify');
 var sourcemaps = require('gulp-sourcemaps');
+var mapStream = require('map-stream');
 var generate = require('./doc/generator/generate');
 var config = require('./doc/config.json');
 var sass = require('gulp-sass');
@@ -49,7 +56,7 @@ gulp.task('doc:bundle', function () {
     }))
     .on('error', function (error) {
       console.log(error.stack);
-      this.emit('end');
+      this.emit('end'); // eslint-disable-line
     })
     .pipe(uglify())
     .pipe(gulp.dest('./dist'));
@@ -59,23 +66,24 @@ gulp.task('doc', ['doc:sass', 'doc:bundle', 'doc:assets', 'doc:data']);
 
 gulp.task('lint', function() {
   return gulp.src([
+    './collab/**/*.js',
     './doc/**/*.js',
     './model/**/*.js',
     './packages/**/*.js',
     './ui/**/*.js',
     './util/**/*.js',
-    './test/model/*.js',
-    './test/unit/**/*.js'
-  ]).pipe(jshint())
-    .pipe(jshint.reporter('default'))
-    .pipe(jshint.reporter("fail"));
+    './test/**/*.js'
+  ]).pipe(eslint())
+    .pipe(eslint.format())
+    .pipe(eslint.failAfterError());
 });
+
 
 gulp.task('build', ['lint'], function() {
   return browserify({
-      entries: './browser.js',
-      debug: true
-    }).bundle()
+    entries: './browser.js',
+    debug: true
+  }).bundle()
     .pipe(source('substance.js'))
     .pipe(buffer())
     .pipe(sourcemaps.init({loadMaps: true}))
@@ -86,18 +94,54 @@ gulp.task('build', ['lint'], function() {
     .pipe(gulp.dest('./dist'));
 });
 
-gulp.task('test:karma', ['lint'], function(done) {
+var html2js = transform(function(filename) {
+  return mapStream(function(chunk, next) {
+    console.log('### Compiling ', filename);
+    var wrapped = "'use strict';\nmodule.exports="+JSON.stringify(chunk.toString())+";";
+    return next(null, wrapped);
+  });
+});
+
+gulp.task('test:fixtures', function() {
+  return gulp.src('./test/fixtures/html/*.html')
+    .pipe(html2js)
+    .pipe(rename(function(path) {
+      path.extname = ".js";
+    }))
+    .pipe(gulp.dest('test/fixtures/html/'));
+});
+
+function _testBrowser(browser, done) {
   new Karma({
     configFile: __dirname + '/karma.conf.js',
+    browsers: [browser],
     singleRun: true
   }, done).start();
+}
+
+gulp.task('test:chrome', ['lint'], function(done) {
+  if(process.env.TRAVIS) {
+    _testBrowser('ChromeTravis', done);
+  } else {
+    _testBrowser('Chrome', done);
+  }
 });
 
-gulp.task('test:server', ['lint'], function() {
-  // requiring instead of doing 'node test/run.js'
-  require('./test/run');
+gulp.task('test:firefox', ['lint'], function(done) {
+  _testBrowser('Firefox', done);
 });
 
-gulp.task('test', ['lint', 'test:karma', 'test:server']);
+gulp.task('test:browsers', ['test:chrome', 'test:firefox']);
+
+gulp.task('test:server', ['lint'], function(done) {
+  return gulp.src('test/**/*.test.js')
+    .pipe(tape({
+      reporter: tapSpec()
+    }));
+});
+
+gulp.task('test:qunit', ['lint', 'test:qunit:karma', 'test:qunit:server']);
+
+gulp.task('test', ['lint', 'test:browsers', 'test:server']);
 
 gulp.task('default', ['build']);

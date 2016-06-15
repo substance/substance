@@ -1,10 +1,9 @@
 'use strict';
 
 var oo = require("./oo");
-var each = require('lodash/each');
+var forEach = require('lodash/forEach');
 var isObject = require('lodash/isObject');
-
-var DEBUG = false;
+var warn = require('./warn');
 
 /**
   Event support.
@@ -27,17 +26,13 @@ EventEmitter.Prototype = function() {
    */
   this.emit = function (event) {
     if (event in this.__events__) {
-      if (DEBUG) {
-        console.log("Emitting event %s (%d listeners) on", event, Object.keys(this.__events__[event]).length, this);
-      }
+      // console.log("Emitting event %s (%d listeners) on", event, this.__events__[event].length, this);
       // Clone the list of bindings so that handlers can remove or add handlers during the call.
       var bindings = this.__events__[event].slice();
       var args = Array.prototype.slice.call(arguments, 1);
       for (var i = 0, len = bindings.length; i < len; i++) {
         var binding = bindings[i];
-        // if (DEBUG) {
-        //   console.log("- triggering %s", binding.context.constructor.name);
-        // }
+        // console.log("- triggering %s", binding.context.constructor.name);
         binding.method.apply(binding.context, args);
       }
       return true;
@@ -65,9 +60,8 @@ EventEmitter.Prototype = function() {
    * @param {Number} hash with `priority` as ordering hint (default is 0).
    * @chainable
    */
-  this.connect = function (obj, methods, options) {
-    console.warn('DEPRECATED: Use EventEmitter.on(event, method, context) instead.');
-    /* jshint unused:false */
+  this.connect = function (obj, methods, options) { // eslint-disable-line no-unused-vars
+    warn('DEPRECATED: Use EventEmitter.on(event, method, context) instead.');
     return _connect.apply(this, arguments);
   };
 
@@ -75,12 +69,11 @@ EventEmitter.Prototype = function() {
    * Disconnect a listener (all bindings).
    *
    * @method disconnect
-   * @memberof module:util.EventEmitter.prototype
    * @param {Object} listener
    * @chainable
    */
   this.disconnect = function(listener) {
-    console.warn('DEPRECATED: Use EventEmitter.off(listener) instead.');
+    warn('DEPRECATED: Use EventEmitter.off(listener) instead.');
     return _disconnect.call(this, listener);
   };
 
@@ -109,8 +102,7 @@ EventEmitter.Prototype = function() {
    * @param {Object} context
    * @param {Object} options
    */
-  this.off = function(event, method, context) {
-    /* jshint unused:false */
+  this.off = function(event, method, context) { // eslint-disable-line no-unused-vars
     if (arguments.length === 1 && isObject(arguments[0])) {
       _disconnect.call(this, arguments[0]);
     } else {
@@ -149,7 +141,7 @@ EventEmitter.Prototype = function() {
    * @private
    */
   function _on(event, method, context, priority) {
-    /*jshint validthis:true */
+    /* eslint-disable no-invalid-this */
     var bindings;
     validateMethod( method, context );
     if (this.__events__.hasOwnProperty(event)) {
@@ -165,6 +157,7 @@ EventEmitter.Prototype = function() {
       priority: priority
     });
     return this;
+    /*eslint-enable no-invalid-this */
   }
 
   /**
@@ -176,7 +169,7 @@ EventEmitter.Prototype = function() {
    * @private
    */
   function _off(event, method, context) {
-    /*jshint validthis:true */
+    /* eslint-disable no-invalid-this */
     var i, bindings;
     if ( arguments.length === 1 ) {
       // Remove all bindings for event
@@ -205,6 +198,7 @@ EventEmitter.Prototype = function() {
       delete this.__events__[event];
     }
     return this;
+    /* eslint-enable no-invalid-this */
   }
 
   /**
@@ -213,17 +207,17 @@ EventEmitter.Prototype = function() {
    * @private
    */
   function _connect(obj, methods, options) {
-    /*jshint validthis:true */
+    /* eslint-disable no-invalid-this */
     var priority = 0;
     if (arguments.length === 3) {
       priority = options.priority || priority;
     }
-    for ( var event in methods ) {
-      var method = methods[event];
-      _on.call(this,event, method, obj, priority);
-    }
-    this.__events__[event].sort(byPriorityDescending);
+    forEach(methods, function(method, event) {
+      _on.call(this, event, method, obj, priority);
+      this.__events__[event].sort(byPriorityDescending);
+    }.bind(this));
     return this;
+    /* eslint-enable no-invalid-this */
   }
 
   /**
@@ -232,28 +226,28 @@ EventEmitter.Prototype = function() {
    * @private
    */
   function _disconnect(context) {
-    /*jshint validthis:true */
-    var i, event, bindings;
+    /* eslint-disable no-invalid-this */
     // Remove all connections to the context
-    for ( event in this.__events__ ) {
-      bindings = this.__events__[event];
-      i = bindings.length;
-      while ( i-- ) {
-        // bindings[i] may have been removed by the previous step's
-        // this.off so check it still exists
-        if ( bindings[i] && bindings[i].context === context ) {
-          _off.call(this, event, bindings[i].method, context );
+    forEach(this.__events__, function(bindings, event) {
+      for (var i = bindings.length-1; i>=0; i--) {
+        // bindings[i] may have been removed by the previous steps
+        // so check it still exists
+        if (bindings[i] && bindings[i].context === context) {
+          _off.call(this, event, bindings[i].method, context);
         }
       }
-    }
+    }.bind(this));
     return this;
+    /* eslint-enable no-invalid-this */
   }
 
   this._debugEvents = function() {
+    /* eslint-disable no-console */
     console.log('### EventEmitter: ', this);
-    each(this.__events__, function(handlers, name) {
+    forEach(this.__events__, function(handlers, name) {
       console.log("- %s listeners for %s: ", handlers.length, name, handlers);
-    }.bind(this));
+    });
+    /* eslint-enable no-console */
   };
 };
 
