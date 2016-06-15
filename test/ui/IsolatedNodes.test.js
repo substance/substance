@@ -63,9 +63,9 @@ test("IsolatedNodes should be 'not-selected' when selection is somewhere else", 
 test("IsolatedNode should be 'selected' with node selection", function(t) {
   var env = _setup(nestedContainers);
   var doc = env.doc;
-  var body = env.app.find('.sc-container-editor[data-id="body"]');
+  var bodyEditor = env.app.find('.sc-container-editor[data-id="body"]');
   var isolatedNodes = env.app.findAll('.sc-isolated-node');
-  body.setSelection(doc.createSelection({
+  bodyEditor.setSelection(doc.createSelection({
     type: 'node', containerId: 'body', nodeId: 'c1', mode: 'full'
   }));
   var expected = {
@@ -82,15 +82,34 @@ test("IsolatedNode should be 'selected' with node selection", function(t) {
 test("IsolatedNode should be 'co-selected' with spanning container selection", function(t) {
   var env = _setup(nestedContainers);
   var doc = env.doc;
-  var body = env.app.find('.sc-container-editor[data-id="body"]');
+  var bodyEditor = env.app.find('.sc-container-editor[data-id="body"]');
   var isolatedNodes = env.app.findAll('.sc-isolated-node');
-  body.setSelection(doc.createSelection({
+  bodyEditor.setSelection(doc.createSelection({
     type: 'container', containerId: 'body',
     startPath: ['p1', 'content'], startOffset: 1,
     endPath: ['p2', 'content'], endOffset: 2
   }));
   var expected = {
     'body/c1': 'co-selected',
+    // Note: 'co-selection' does not propagate down
+    // it is a state related to the parent container
+    'body/c1/c2': undefined,
+  };
+  isolatedNodes.forEach(function(isolated){
+    var id = isolated.getId();
+    t.equal(isolated.getMode(), expected[id], "mode of isolated node '" + id + "' should be correct");
+  });
+  t.end();
+});
+
+test("IsolatedNode should be 'focused' when having the selection", function(t) {
+  var env = _setup(nestedContainers);
+  var doc = env.doc;
+  var bodyEditor = env.app.find('.sc-container-editor[data-id="body"]');
+  var isolatedNodes = env.app.findAll('.sc-isolated-node');
+  bodyEditor.setSelection(doc.createSelection(['c1_p1', 'content'], 0));
+  var expected = {
+    'body/c1': 'focused',
     'body/c1/c2': undefined,
   };
   isolatedNodes.forEach(function(isolated){
