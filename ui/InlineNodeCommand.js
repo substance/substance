@@ -38,7 +38,7 @@ InlineNodeCommand.Prototype = function() {
     }
 
     var annos = this._getAnnotationsForSelection(props, context);
-    if (annos.length === 1) {
+    if (annos.length === 1 && annos[0].getSelection().equals(sel)) {
       newState.active = true;
       newState.node = annos[0];
     }
