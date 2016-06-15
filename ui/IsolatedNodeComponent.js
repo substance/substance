@@ -16,6 +16,7 @@ function IsolatedNodeComponent() {
   };
 
   this.handleAction('escape', this._escape);
+  this.ContentClass = this._getContentClass(this.props.node) || Component;
 }
 
 IsolatedNodeComponent.Prototype = function() {
@@ -59,7 +60,7 @@ IsolatedNodeComponent.Prototype = function() {
     var el = _super.render.apply(this, arguments);
     el.tagName = this.__elementTag;
 
-    var ContentClass = this._getContentClass(node) || Component;
+    var ContentClass = this.ContentClass;
 
     el.addClass('sc-isolated-node')
       .addClass('sm-'+this.props.node.type)
@@ -135,14 +136,15 @@ IsolatedNodeComponent.Prototype = function() {
   };
 
   this.renderContent = function($$, node) {
-    var ComponentClass = this._getContentClass(node);
+    var ComponentClass = this.ContentClass;
     if (!ComponentClass) {
       console.error('Could not resolve a component for type: ' + node.type);
       return $$(this.__elementTag);
     } else {
       var props = {
         node: node,
-        disabled: this._isDisabled()
+        disabled: this._isDisabled(),
+        isolatedNodeState: this.state.mode
       };
       if (this.state.mode === 'focused') {
         props.focused = true;
@@ -153,6 +155,30 @@ IsolatedNodeComponent.Prototype = function() {
 
   this.getId = function() {
     return this._id;
+  };
+
+  this.getMode = function() {
+    return this.state.mode;
+  };
+
+  this.isNotSelected = function() {
+    return !this.state.mode;
+  };
+
+  this.isSelected = function() {
+    return this.state.mode === 'selected';
+  };
+
+  this.isCoSelected = function() {
+    return this.state.mode === 'co-selected';
+  };
+
+  this.isFocused = function() {
+    return this.state.mode === 'focused';
+  };
+
+  this.isCoFocused = function() {
+    return this.state.mode === 'co-focused';
   };
 
   this._getContentClass = function(node) {
@@ -215,19 +241,17 @@ IsolatedNodeComponent.Prototype = function() {
       }
       return;
     }
-    // for all other cases (focused / co-focused) the surface id prefix must match
-    if (!startsWith(surfaceId, id)) return;
-
-    // Note: trying to distinguisd focused
-    // surfaceIds are a sequence of names joined with '/'
-    // a surface inside this node will have a path with length+1.
-    // a custom selection might just use the id of this IsolatedNode
-    var p1 = id.split('/');
-    var p2 = surfaceId.split('/');
-    if (p2.length >= p1.length && p2.length <= p1.length+1) {
+    if (sel.isCustomSelection() && id === surfaceId) {
       return { mode: 'focused' };
-    } else {
-      return { mode: 'co-focused' };
+    }
+    // HACK: a looks a bit hacky and is, but
+    // fine for now. The structure of surfaceId is only exploited here
+    else if (startsWith(surfaceId, id)) {
+      if (surfaceId[id.length] === '/' && surfaceId.indexOf('/', id.length+1) < 0) {
+        return { mode: 'focused' };
+      } else {
+        return { mode: 'co-focused' };
+      }
     }
   };
 

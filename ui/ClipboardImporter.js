@@ -7,6 +7,7 @@ var Registry = require('../util/Registry');
 var HTMLImporter = require('../model/HTMLImporter');
 var DefaultDOMElement = require('./DefaultDOMElement');
 var JSONConverter = require('../model/JSONConverter');
+var platform = require('../util/platform');
 
 // Note: sharing the symbol with the transformation
 var CLIPBOARD_CONTAINER_ID = require('../model/transform/copySelection').CLIPBOARD_CONTAINER_ID;
@@ -31,7 +32,9 @@ function ClipboardImporter(config) {
   });
   ClipboardImporter.super.call(this, config);
 
-  this._isWindows = (navigator && navigator.appVersion && navigator.appVersion.indexOf("Win") !== -1);
+  // ATTENTION: this is only here so we can enfore windows conversion
+  // mode from within tests
+  this._isWindows = platform.isWindows;
 }
 
 ClipboardImporter.Prototype = function() {

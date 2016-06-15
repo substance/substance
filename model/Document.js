@@ -462,7 +462,7 @@ Document.Prototype = function() {
           selData.reverse = false;
         }
       }
-      return new PropertySelection(selData.path, selData.startOffset, selData.endOffset, selData.reverse, selData.containerId);
+      return new PropertySelection(selData.path, selData.startOffset, selData.endOffset, selData.reverse, selData.containerId, selData.surfaceId);
     } else if (selData.type === 'container') {
       var container = doc.get(selData.containerId, 'strict');
       var start = new Coordinate(selData.startPath, selData.startOffset);
@@ -491,7 +491,7 @@ Document.Prototype = function() {
       _allignCoordinate(doc, start, true);
       _allignCoordinate(doc, end, false);
 
-      return new ContainerSelection(container.id, start.path, start.offset, end.path, end.offset, isReverse);
+      return new ContainerSelection(container.id, start.path, start.offset, end.path, end.offset, isReverse, selData.surfaceId);
     }
     else if (selData.type === 'node') {
       return NodeSelection.fromJSON(selData);

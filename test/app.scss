@@ -78,7 +78,11 @@
 
   padding: 5px;
 
-  > .se-status {
+  > * + * {
+    margin-top: 10px;
+  }
+
+  .se-status {
     padding: 2px 5px;
 
     &.sm-ok {
@@ -91,9 +95,14 @@
 
   }
 
-  > .se-description {
+  .se-description {
     padding: 2px 5px;
     margin-left: 10px;
+  }
+
+  .se-diff {
+    background: rgba(red, 0.2);
+    padding: 10px 40px;
   }
 
 }

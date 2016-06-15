@@ -4,6 +4,7 @@ var isString = require('lodash/isString');
 var last = require('lodash/last');
 var extend = require('lodash/extend');
 var clone = require('lodash/clone');
+var map = require('lodash/map');
 var $ = require('../util/cheerio.customized');
 var DOMElement = require('./DOMElement');
 
@@ -314,7 +315,7 @@ CheerioDOMElement.Prototype = function() {
   this.findAll = function(cssSelector) {
     var result = this.$el.find(cssSelector);
     if (result.length > 0) {
-      return result.map(function(el) {
+      return map(result, function(el) {
         return this._wrapNativeElement(el);
       }.bind(this));
     } else {

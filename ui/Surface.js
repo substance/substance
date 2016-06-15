@@ -3,11 +3,11 @@
 var forEach = require('lodash/forEach');
 var isUndefined = require('lodash/isUndefined');
 var startsWith = require('lodash/startsWith');
-var inBrowser = require('../util/inBrowser');
 var createSurfaceId = require('../util/createSurfaceId');
 var getRelativeBoundingRect = require('../util/getRelativeBoundingRect');
 var keys = require('../util/keys');
 var platform = require('../util/platform');
+var inBrowser = require('../util/inBrowser');
 var copySelection = require('../model/transform/copySelection');
 var deleteSelection = require('../model/transform/deleteSelection');
 var deleteCharacter = require('../model/transform/deleteCharacter');
@@ -146,7 +146,7 @@ Surface.Prototype = function() {
         // as it contains the actual inserted string.
         // Though, it is not available in FF and not working properly in IE
         // where we fall back to a ContentEditable backed implementation.
-        if (window.TextEvent && !platform.isIE) {
+        if (inBrowser && window.TextEvent && !platform.isIE) {
           el.on('textInput', this.onTextInput);
         } else {
           el.on('keypress', this.onTextInputShim);
