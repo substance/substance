@@ -1,5 +1,7 @@
 'use strict';
 
+var inBrowser = require('./inBrowser');
+
 /**
   @module
 
@@ -30,6 +32,10 @@ var platform = {
     ATTENTION: at the moment only extracted for IE
   */
   version: -1,
+
+  // TODO: make sure that this is implemented correctly
+
+  isWindows: (inBrowser && window.navigator !== undefined && window.navigator.appVersion && window.navigator.appVersion.indexOf("Win") !== -1),
 
 };
 

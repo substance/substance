@@ -7,6 +7,7 @@ var Registry = require('../util/Registry');
 var HTMLImporter = require('../model/HTMLImporter');
 var DefaultDOMElement = require('./DefaultDOMElement');
 var JSONConverter = require('../model/JSONConverter');
+var platform = require('../util/platform');
 
 // Note: sharing the symbol with the transformation
 var CLIPBOARD_CONTAINER_ID = require('../model/transform/copySelection').CLIPBOARD_CONTAINER_ID;
@@ -30,8 +31,6 @@ function ClipboardImporter(config) {
     REMOVE_INNER_WS: true
   });
   ClipboardImporter.super.call(this, config);
-
-  this._isWindows = (navigator && navigator.appVersion && navigator.appVersion.indexOf("Win") !== -1);
 }
 
 ClipboardImporter.Prototype = function() {
@@ -42,7 +41,7 @@ ClipboardImporter.Prototype = function() {
   this.importDocument = function(html) {
     var body, el;
 
-    if (this._isWindows) {
+    if (platform.isWindows) {
       // Under windows we can exploit <!--StartFragment--> and <!--EndFragment-->
       // to have an easier life
       var match = /<!--StartFragment\-->(.*)<!--EndFragment-->/.exec(html);
