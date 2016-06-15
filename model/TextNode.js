@@ -25,7 +25,7 @@ TextNode.Prototype = function() {
   };
 
   this.isEmpty = function() {
-    return !Boolean(this.content);
+    return !this.content;
   };
 
 };
