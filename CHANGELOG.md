@@ -2,17 +2,22 @@
 
 - Added support for realtime collaboration
 - Added persistence interfaces to store versions and snaphots on the server
-- Added package support to provide a simple plugin mechanism
+- Added a package system to provide a simple plugin mechanism
+- Introduced the concept of an `IsolatedNode` enabling arbitrary complex editors and external components (such code editors)
+- Optimized rendering engine
+- Enabled server side rendering
 - Added support for text macros
-- Support for isolated nodes (#602)
-- Added IconProvider to generalize icon usage and make them configurable in packages
-- Added LabelProvider for configurable multi language support
-- Ported test suite from QUnit over to Tape
-- Improved ProseEditor that can be extended through packages
-- Improved Component API, with first-class debugging support
-- Further generalized commands and tools
-- Fixed numerous bugs (TODO: be more specific here)
-
+- Added `IconProvider` to generalize icon usage and make them configurable in packages
+- Added `LabelProvider` for configurable multi language support
+- Improved `ProseEditor` that can be extended through packages
+- Improved `Component` API, with first-class debugging support
+- Generalized commands and tools
+- Added first version of tables and lists
+- Improved XML/HTML import/export API
+- Ported test suite from `QUnit` over to `tape`
+- Fixed hundreds of issues and bugs
+- Improved cross-browser compatibility
+- Added many examples documenting core features
 
 ## Beta 3
 
