@@ -105,12 +105,39 @@ test("IsolatedNode should be 'co-selected' with spanning container selection", f
 test("IsolatedNode should be 'focused' when having the selection", function(t) {
   var env = _setup(nestedContainers);
   var doc = env.doc;
-  var bodyEditor = env.app.find('.sc-container-editor[data-id="body"]');
+  var documentSession = env.documentSession;
   var isolatedNodes = env.app.findAll('.sc-isolated-node');
-  bodyEditor.setSelection(doc.createSelection(['c1_p1', 'content'], 0));
+  documentSession.setSelection(doc.createSelection({
+    type: 'property',
+    path: ['c1_p1', 'content'],
+    startOffset: 0,
+    surfaceId: 'body/c1'
+  }));
   var expected = {
     'body/c1': 'focused',
     'body/c1/c2': undefined,
+  };
+  isolatedNodes.forEach(function(isolated){
+    var id = isolated.getId();
+    t.equal(isolated.getMode(), expected[id], "mode of isolated node '" + id + "' should be correct");
+  });
+  t.end();
+});
+
+test("IsolatedNode should be 'co-focused' when child is having the selection", function(t) {
+  var env = _setup(nestedContainers);
+  var doc = env.doc;
+  var documentSession = env.documentSession;
+  var isolatedNodes = env.app.findAll('.sc-isolated-node');
+  documentSession.setSelection(doc.createSelection({
+    type: 'property',
+    path: ['c2_p1', 'content'],
+    startOffset: 0,
+    surfaceId: 'body/c1/c2'
+  }));
+  var expected = {
+    'body/c1': 'co-focused',
+    'body/c1/c2': 'focused',
   };
   isolatedNodes.forEach(function(isolated){
     var id = isolated.getId();
