@@ -56,54 +56,56 @@ function testChangeStore(store, test) {
   });
 
   test("Return all changes of test-doc-2 by not specifying sinceVersion", function(t) {
-    console.error('THIS TEST NEEDS TO BE FIXED.');
-    t.ok(true, 'This test has been disabled');
-    t.end();
-    // var done = t.async();
-    // var args = {
-    //   documentId: 'test-doc-2'
-    // };
-    // store.getChanges(args, function(err, result) {
-    //   t.notOk(err, 'Should not error');
-    //   t.equal(result.changes.length, 3, 'Should be only one change');
-    //   t.equal(result.version, 3, 'Document version should be 1');
-    //   done();
-    // });
+    var args = {
+      documentId: 'test-doc-2'
+    };
+    store.getChanges(args, function(err, result) {
+      t.notOk(err, 'Should not error');
+      t.equal(result.changes.length, 1, 'Should be only one change');
+      t.equal(result.version, 1, 'Document version should be 1');
+      t.end();
+    });
   });
 
   test("Should return no changes if sinceVersion = actual version", function(t) {
-    console.error('THIS TEST NEEDS TO BE FIXED.');
-    t.ok(true, 'This test has been disabled');
-    t.end();
-    // var done = t.async();
-    // var args = {
-    //   documentId: 'test-doc-2',
-    //   sinceVersion: 3
-    // };
-    // store.getChanges(args, function(err, result) {
-    //   t.notOk(err, 'Should not error');
-    //   t.equal(result.changes.length, 0, 'Should have zero changes');
-    //   t.equal(result.version, 3, 'Document version should be 1');
-    //   done();
-    // });
+    var args = {
+      documentId: 'test-doc-2',
+      sinceVersion: 1
+    };
+    store.getChanges(args, function(err, result) {
+      t.notOk(err, 'Should not error');
+      t.equal(result.changes.length, 0, 'Should have zero changes');
+      t.equal(result.version, 1, 'Document version should be 1');
+      t.end();
+    });
   });
 
   test("Return changes of test-doc-2 between version 1 and version 2", function(t) {
-    console.error('THIS TEST NEEDS TO BE FIXED.');
-    t.ok(true, 'This test has been disabled');
-    t.end();
-    // var done = t.async();
-    // var args = {
-    //   documentId: 'test-doc-2',
-    //   sinceVersion: 1,
-    //   toVersion: 2
-    // };
-    // store.getChanges(args, function(err, result) {
-    //   t.notOk(err, 'Should not error');
-    //   t.equal(result.changes.length, 1, 'Should be only one change');
-    //   t.equal(result.version, 3, 'Latest version should be 3');
-    //   done();
-    // });
+    var args = {
+      documentId: 'test-doc-2',
+      change: {
+        ops: [{some: 'operation'}],
+        info: {
+          userId: 'testuser'
+        }
+      }
+    };
+    // Add two changes
+    store.addChange(args, function() {
+      store.addChange(args, function() {
+        var args = {
+          documentId: 'test-doc-2',
+          sinceVersion: 1,
+          toVersion: 2
+        };
+        store.getChanges(args, function(err, result) {
+          t.notOk(err, 'Should not error');
+          t.equal(result.changes.length, 1, 'Should be only one change');
+          t.equal(result.version, 3, 'Latest version should be 3');
+          t.end();
+        });
+      });
+    });
   });
 
   test("Invalid use of getChanges sinceVersion argument", function(t) {
