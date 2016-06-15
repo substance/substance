@@ -2,6 +2,7 @@
 
 var forEach = require('lodash/forEach');
 var isEqual = require('lodash/isEqual');
+var isArray = require('lodash/isArray');
 var oo = require('../util/oo');
 var TreeIndex = require('../util/TreeIndex');
 
@@ -42,6 +43,7 @@ PathEventProxy.Prototype = function() {
     var listeners = this.listeners;
     forEach(change.updated, function(_, pathStr) {
       var scopedListeners = listeners.get(pathStr.split(','));
+      if (isArray(scopedListeners)) scopedListeners = scopedListeners.slice(0);
       forEach(scopedListeners, function(entry) {
         entry.method.call(entry.listener, change, info, doc);
       });
