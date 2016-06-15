@@ -1,4 +1,7 @@
 language: node_js
+cache:
+  directories:
+    - node_modules
 addons:
   firefox: "45.0"
 node_js:
