@@ -70,7 +70,7 @@ test("IsolatedNode should be 'selected' with node selection", function(t) {
   }));
   var expected = {
     'body/c1': 'selected',
-    'body/c1/c2': undefined,
+    'body/c1/c1/c2': undefined,
   };
   isolatedNodes.forEach(function(isolated){
     var id = isolated.getId();
@@ -93,7 +93,7 @@ test("IsolatedNode should be 'co-selected' with spanning container selection", f
     'body/c1': 'co-selected',
     // Note: 'co-selection' does not propagate down
     // it is a state related to the parent container
-    'body/c1/c2': undefined,
+    'body/c1/c1/c2/c2': undefined,
   };
   isolatedNodes.forEach(function(isolated){
     var id = isolated.getId();
@@ -111,11 +111,11 @@ test("IsolatedNode should be 'focused' when having the selection", function(t) {
     type: 'property',
     path: ['c1_p1', 'content'],
     startOffset: 0,
-    surfaceId: 'body/c1'
+    surfaceId: 'body/c1/c1'
   }));
   var expected = {
     'body/c1': 'focused',
-    'body/c1/c2': undefined,
+    'body/c1/c1/c2': undefined,
   };
   isolatedNodes.forEach(function(isolated){
     var id = isolated.getId();
@@ -133,11 +133,11 @@ test("IsolatedNode should be 'co-focused' when child is having the selection", f
     type: 'property',
     path: ['c2_p1', 'content'],
     startOffset: 0,
-    surfaceId: 'body/c1/c2'
+    surfaceId: 'body/c1/c1/c2/c2'
   }));
   var expected = {
     'body/c1': 'co-focused',
-    'body/c1/c2': 'focused',
+    'body/c1/c1/c2': 'focused',
   };
   isolatedNodes.forEach(function(isolated){
     var id = isolated.getId();

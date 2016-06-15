@@ -16,6 +16,7 @@ function IsolatedNodeComponent() {
   };
 
   this.handleAction('escape', this._escape);
+  this.ContentClass = this._getContentClass(this.props.node) || Component;
 }
 
 IsolatedNodeComponent.Prototype = function() {
@@ -59,7 +60,7 @@ IsolatedNodeComponent.Prototype = function() {
     var el = _super.render.apply(this, arguments);
     el.tagName = this.__elementTag;
 
-    var ContentClass = this._getContentClass(node) || Component;
+    var ContentClass = this.ContentClass;
 
     el.addClass('sc-isolated-node')
       .addClass('sm-'+this.props.node.type)
@@ -135,14 +136,15 @@ IsolatedNodeComponent.Prototype = function() {
   };
 
   this.renderContent = function($$, node) {
-    var ComponentClass = this._getContentClass(node);
+    var ComponentClass = this.ContentClass;
     if (!ComponentClass) {
       console.error('Could not resolve a component for type: ' + node.type);
       return $$(this.__elementTag);
     } else {
       var props = {
         node: node,
-        disabled: this._isDisabled()
+        disabled: this._isDisabled(),
+        isolatedNodeState: this.state
       };
       if (this.state.mode === 'focused') {
         props.focused = true;
@@ -239,10 +241,17 @@ IsolatedNodeComponent.Prototype = function() {
       }
       return;
     }
-    if (id === surfaceId) {
+    if (sel.isCustomSelection() && id === surfaceId) {
       return { mode: 'focused' };
-    } else if (startsWith(surfaceId, id)) {
-      return { mode: 'co-focused' };
+    }
+    // HACK: a looks a bit hacky and is, but
+    // fine for now. The structure of surfaceId is only exploited here
+    else if (startsWith(surfaceId, id)) {
+      if (surfaceId[id.length] === '/' && surfaceId.indexOf('/', id.length+1) < 0) {
+        return { mode: 'focused' };
+      } else {
+        return { mode: 'co-focused' };
+      }
     }
   };
 
