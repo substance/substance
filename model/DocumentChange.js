@@ -1,16 +1,14 @@
-/* jshint latedef:nofunc */
-
 'use strict';
 
 var isEqual = require('lodash/isEqual');
 var isObject = require('lodash/isObject');
 var isArray = require('lodash/isArray');
 var map = require('lodash/map');
+var forEach = require('lodash/forEach');
 var clone = require('lodash/clone');
 var cloneDeep = require('lodash/cloneDeep');
 var oo = require('../util/oo');
 var uuid = require('../util/uuid');
-var TreeIndex = require('../util/TreeIndex');
 var OperationSerializer = require('./data/OperationSerializer');
 var ObjectOperation = require('./data/ObjectOperation');
 var Selection = require('./Selection');
@@ -39,9 +37,6 @@ var Selection = require('./Selection');
 function DocumentChange(ops, before, after) {
   if (arguments.length === 1 && isObject(arguments[0])) {
     var data = arguments[0];
-    // TODO: check if we really still need sessionId as we use dynamic
-    // collaboratorIds now for the CollabServer
-    this.sessionId = data.sessionId;
     // a unique id for the change
     this.sha = data.sha;
     // when the change has been applied
@@ -81,7 +76,7 @@ DocumentChange.Prototype = function() {
     var ops = this.ops;
     var created = {};
     var deleted = {};
-    var updated = new TreeIndex();
+    var updated = {};
     var affectedContainerAnnos = [];
 
     // TODO: we will introduce a special operation type for coordinates
@@ -94,11 +89,11 @@ DocumentChange.Prototype = function() {
           // HACK: detecting annotation changes in an opportunistic way
           if (node.hasOwnProperty('startOffset')) {
             path = node.path || node.startPath;
-            updated.set(path, true);
+            updated[path] = true;
           }
           if (node.hasOwnProperty('endPath')) {
             path = node.endPath;
-            updated.set(path, true);
+            updated[path] = true;
           }
           break;
         case "update":
@@ -110,7 +105,7 @@ DocumentChange.Prototype = function() {
             if (node.isPropertyAnnotation()) {
               if ((propName === 'path' || propName === 'startOffset' ||
                    propName === 'endOffset') && !deleted[node.path[0]]) {
-                updated.set(node.path, true);
+                updated[node.path] = true;
               }
             } else if (node.isContainerAnnotation()) {
               if (propName === 'startPath' || propName === 'startOffset' ||
@@ -120,6 +115,8 @@ DocumentChange.Prototype = function() {
             }
           }
           break;
+        default:
+          throw new Error('Illegal state');
       }
     }
 
@@ -131,18 +128,17 @@ DocumentChange.Prototype = function() {
       }
       if (op.type === "delete") {
         delete created[op.val.id];
-        delete updated[op.val.id];
         deleted[op.val.id] = op.val;
       }
       if (op.type === "set" || op.type === "update") {
         // The old as well the new one is affected
-        updated.set(op.path, true);
+        updated[op.path] = true;
       }
       _checkAnnotation(op);
     }
 
     affectedContainerAnnos.forEach(function(anno) {
-      var container = doc.get(anno.container);
+      var container = doc.get(anno.containerId, 'strict');
       var startPos = container.getPosition(anno.startPath[0]);
       var endPos = container.getPosition(anno.endPath[0]);
       for (var pos = startPos; pos <= endPos; pos++) {
@@ -154,10 +150,20 @@ DocumentChange.Prototype = function() {
           path = [node.id];
         }
         if (!deleted[node.id]) {
-          updated.set(path, true);
+          updated[path] = true;
         }
       }
     });
+
+    // remove all deleted nodes from updated
+    if(Object.keys(deleted).length > 0) {
+      forEach(updated, function(_, key) {
+        var nodeId = key.split(',')[0];
+        if (deleted[nodeId]) {
+          delete updated[key];
+        }
+      });
+    }
 
     this.created = created;
     this.deleted = deleted;
@@ -185,7 +191,7 @@ DocumentChange.Prototype = function() {
   // ===============================================
 
   this.isAffected = function(path) {
-    return !!this.updated.get(path);
+    return this.updated[path];
   };
 
   this.isUpdated = this.isAffected;
@@ -210,8 +216,6 @@ DocumentChange.Prototype = function() {
 
   this.toJSON = function() {
     var data = {
-      // to connect the selection with a user
-      sessionId: this.sessionId,
       // to identify this change
       sha: this.sha,
       // before state
@@ -344,7 +348,15 @@ function _transformSelectionInplace(sel, a) {
   return hasChanged;
 }
 
-DocumentChange.transformSelection = _transformSelectionInplace;
+DocumentChange.transformSelection = function(sel, a) {
+  var newSel = sel.clone();
+  var hasChanged = _transformSelectionInplace(newSel, a);
+  if (hasChanged) {
+    return newSel;
+  } else {
+    return sel;
+  }
+};
 
 function _transformCoordinateInplace(coor, op) {
   if (!isEqual(op.path, coor.path)) return false;

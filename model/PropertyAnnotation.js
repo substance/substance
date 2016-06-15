@@ -40,6 +40,7 @@ function PropertyAnnotation() {
 
 PropertyAnnotation.Prototype = function() {
 
+  this._isAnnotation = true;
   this._isPropertyAnnotation = true;
 
   /**

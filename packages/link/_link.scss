@@ -2,46 +2,29 @@
   color: #2079DC;
 }
 
-// Link tool prompt (also used for Embeds)
+.sc-edit-link-tool {
 
-.sc-link-tool {
+  // Maybe better set from outside
+  display: inline-block;
 
-  .se-prompt {
-    padding: 15px;
-    padding-bottom: 0px;
+  input {
+    display: inline-block;
+    width: 200px;
+    border: none;
+    padding: 0px 10px;
+    font-size: $small-font-size;
+  }
 
-    background: white;
-    @include shadow;
-    @include border;
-    
-    position: absolute;
-    left: -150px;
-    top: 40px;
-    z-index: 50000;
-    width: 300px;
+  .se-actions {
+    display: inline-block;
 
-    .se-prompt-title {
-      font-size: 16px;
-      font-weight: bold;
-    }
-
-    a.se-delete-link {
-      position: absolute;
-      top: 15px;
-      right: 15px;
-      font-size: 13px;
-      color: red;
-    }
-
-    input {
-      margin: 15px 0;
-      width: 100%;
-      font-size: 14px;
-      display: block;
-      border: 1px solid #ddd;
-
-      min-width: auto;
-      padding: 0 10px;
+    // TODO: Redundant with .se-tool button styles
+    .se-action {
+      display: inline-block;
+      height: 30px;
+      min-width: 30px;
+      text-align: center;
     }
   }
+
 }

@@ -15,14 +15,12 @@ var INSERT = "insert";
   @class
   @extends Operation
 */
-var ArrayOperation = function(data) {
+function ArrayOperation(data) {
   Operation.call(this);
 
-  /* jshint eqnull: true */
-  if (!data || data.type == null) {
+  if (!data || !data.type) {
     throw new Error("Illegal argument: insufficient data.");
   }
-  /* jshint eqnull: false */
   this.type = data.type;
   if (this.type === NOP) return;
 
@@ -36,7 +34,7 @@ var ArrayOperation = function(data) {
   if (!isNumber(this.pos) || this.pos < 0) {
     throw new Error("Illegal argument: expecting positive number as pos.");
   }
-};
+}
 
 ArrayOperation.fromJSON = function(data) {
   return new ArrayOperation(data);
@@ -146,7 +144,7 @@ function transform_insert_insert(a, b) {
     b.pos += 1;
   }
   // a after b
-  else  {
+  else {
     a.pos += 1;
   }
 }
@@ -191,10 +189,10 @@ var transform = function(a, b, options) {
     a = a.clone();
     b = b.clone();
   }
-  if (a.type === NOP || b.type === NOP)  {
+  if (a.type === NOP || b.type === NOP) {
     // nothing to transform
   }
-  else if (a.type === INSERT && b.type === INSERT)  {
+  else if (a.type === INSERT && b.type === INSERT) {
     transform_insert_insert(a, b);
   }
   else if (a.type === DELETE && b.type === DELETE) {

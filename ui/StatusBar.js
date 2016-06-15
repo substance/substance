@@ -39,7 +39,7 @@ StatusBar.Prototype = function() {
 
   this.render = function($$) {
     var meta = this.props.doc.getDocumentMeta();
-    var title = meta ? meta.title : this.i18n.t('untitled');
+    var title = meta ? meta.title : this.getLabel('untitled');
     var message = this.state.message;
 
     var el = $$('div').addClass("status-bar-component fill-light");

@@ -1,13 +1,13 @@
 'use strict';
 
-var oo = require('../util/oo');
 var last = require('lodash/last');
-var each = require('lodash/each');
+var forEach = require('lodash/forEach');
 var clone = require('lodash/clone');
 var extend = require('lodash/extend');
-var uuid = require('../util/uuid');
+var oo = require('../util/oo');
+// var uuid = require('../util/uuid');
+var createCountingIdGenerator = require('../util/createCountingIdGenerator');
 var ArrayIterator = require('../util/ArrayIterator');
-var InlineWrapperConverter = require('./InlineWrapperConverter');
 
 /**
   A generic base implementation for XML/HTML importers.
@@ -34,7 +34,7 @@ function DOMImporter(config) {
   config.converters.forEach(function(Converter) {
     var converter;
     if (typeof Converter === 'function') {
-      console.log('installing converter', Converter);
+      // console.log('installing converter', Converter);
       converter = new Converter();
     } else {
       converter = Converter;
@@ -56,7 +56,7 @@ function DOMImporter(config) {
       console.error('No node type defined for converter', converter.type);
       return;
     }
-    if (defaultTextType === converter.type) {
+    if (!this._defaultBlockConverter && defaultTextType === converter.type) {
       this._defaultBlockConverter = converter;
     }
 
@@ -79,14 +79,14 @@ DOMImporter.Prototype = function DOMImporterPrototype() {
     this.state.reset();
   };
 
-  this.createDocument = function() {
-    var doc = this._createDocument();
+  this.createDocument = function(schema) {
+    var doc = this._createDocument(schema);
     return doc;
   };
 
   this.generateDocument = function() {
     // creating all nodes
-    var doc = this.createDocument();
+    var doc = this.createDocument(this.config.schema);
     this.state.nodes.forEach(function(node) {
       // delete if the node exists already
       if (doc.get(node.id)) {
@@ -104,9 +104,9 @@ DOMImporter.Prototype = function DOMImporterPrototype() {
     return doc;
   };
 
-  this._createDocument = function() {
+  this._createDocument = function(schema) {
     // create an empty document and initialize the container if not present
-    var doc = new this.config.DocumentClass();
+    var doc = new this.config.DocumentClass(schema);
     return doc;
   };
 
@@ -211,14 +211,14 @@ DOMImporter.Prototype = function DOMImporterPrototype() {
       id: this.getIdForElement(el, type)
     };
     var NodeClass = this.schema.getNodeClass(type);
-    each(NodeClass.static.schema, function(prop, name) {
+    forEach(NodeClass.static.schema, function(prop, name) {
       // check integrity of provided props, such as type correctness,
       // and mandatory properties
       var hasDefault = prop.hasOwnProperty('default');
       if (hasDefault) {
         nodeData[name] = clone(prop.default);
       }
-    }.bind(this));
+    });
     return nodeData;
   };
 
@@ -327,13 +327,16 @@ DOMImporter.Prototype = function DOMImporterPrototype() {
     // however we would need to be careful as there might be another
     // element in the HTML coming with that id
     // For now we use shas
-    return uuid(prefix);
+    return this.state.uuid(prefix);
   };
 
   this.getIdForElement = function(el, type) {
-    var id = el.getAttribute(this.config.idAttribute) || this.nextId(type);
-    // TODO: check for collisions
-    while (this.state.ids[id]) {
+    var id = el.getAttribute(this.config.idAttribute);
+    if (id && !this.state.ids[id]) return id;
+
+    var root = el.getRoot();
+    id = this.nextId(type);
+    while (this.state.ids[id] || root.find('#'+id)) {
       id = this.nextId(type);
     }
     return id;
@@ -457,27 +460,11 @@ DOMImporter.Prototype = function DOMImporterPrototype() {
         break;
       }
     }
-    // there are some block nodes which are used as inline nodes as well.
-    // In this case we wrap the block node into an InlineWrapper
-    if (!converter && mode === 'inline') {
-      var blockConverter = this._getConverterForElement(el, 'block');
-      if (blockConverter) {
-        converter = InlineWrapperConverter;
-      }
-    }
-    if (!converter) {
-      converter = this._getUnsupportedNodeConverter();
-    }
     return converter;
   };
 
-  this._getUnsupportedNodeConverter = function() {
-    console.warn('DOMImporter._getUnsupportedNodeConverter() is abstract.' +
-         '\nIf you want to add unsupported elements to your model you should override this method.');
-  };
-
   this._converterCanBeApplied = function(converter, el) {
-    return converter.matchElement(el);
+    return converter.matchElement(el, converter);
   };
 
   this._createElement = function(tagName) {
@@ -628,6 +615,10 @@ DOMImporter.State.Prototype = function() {
     this.lastChar = "";
     this.skipTypes = {};
     this.ignoreAnnotations = false;
+
+    // experimental: trying to generate simpler ids during import
+    // this.uuid = uuid;
+    this.uuid = createCountingIdGenerator();
   };
 
   this.pushElementContext = function(tagName) {

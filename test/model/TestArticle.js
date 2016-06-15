@@ -3,7 +3,7 @@
 var Document = require('../../model/Document');
 var schema = require('./TestSchema');
 
-var TestArticle = function() {
+function TestArticle() {
   TestArticle.super.call(this, schema);
 
   this.create({
@@ -13,15 +13,17 @@ var TestArticle = function() {
   });
   this.create({
     type: "container",
-    id: "main",
+    id: "body",
     nodes: []
   });
-};
+}
 
-Document.extend(TestArticle, function TestArticlePrototype() {
+TestArticle.Prototype = function() {
   this.getDocumentMeta = function() {
     return this.get('meta');
   };
-});
+};
+
+Document.extend(TestArticle);
 
 module.exports = TestArticle;

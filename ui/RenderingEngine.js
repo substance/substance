@@ -2,7 +2,8 @@
 
 var each = require('lodash/each');
 var oo = require('../util/oo');
-var inBrowser = require('../util/inBrowser');
+var uuid = require('../util/uuid');
+var substanceGlobals = require('../util/substanceGlobals');
 var VirtualElement = require('./VirtualElement');
 var DefaultDOMElement = require('./DefaultDOMElement');
 
@@ -10,16 +11,27 @@ function RenderingEngine() {}
 
 RenderingEngine.Prototype = function() {
 
-  this._render = function(comp) {
+  this._render = function(comp, oldProps, oldState) {
     // var t0 = Date.now();
     var vel = _createWrappingVirtualComponent(comp);
-    _capture(vel, 'forceCapture');
-    if (vel._isVirtualComponent) {
-      _render(vel._content);
-    } else {
-      _render(vel);
+    var state = new RenderingEngine.State();
+    if (oldProps) {
+      state.setOldProps(vel, oldProps);
     }
-    _triggerUpdate(vel);
+    if (oldState) {
+      state.setOldState(vel, oldState);
+    }
+    try {
+      _capture(state, vel, 'forceCapture');
+      if (vel._isVirtualComponent) {
+        _render(state, vel._content);
+      } else {
+        _render(state, vel);
+      }
+      _triggerUpdate(state, vel);
+    } finally {
+      state.dispose();
+    }
     // console.log("RenderingEngine: finished rendering in %s ms", Date.now()-t0);
   };
 
@@ -27,20 +39,25 @@ RenderingEngine.Prototype = function() {
   this._renderChild = function(comp, vel) {
     // HACK: to make this work with the rest of the implementation
     // we ingest a fake parent
+    var state = new RenderingEngine.State();
     vel.parent = { _comp: comp };
-    _capture(vel);
-    _render(vel);
-    return vel._comp;
+    try {
+      _capture(state, vel);
+      _render(state, vel);
+      return vel._comp;
+    } finally {
+      state.dispose();
+    }
   };
 
-  function _create(vel) {
+  function _create(state, vel) {
     var Component = require('./Component');
     var comp = vel._comp;
     console.assert(!comp, "Component instance should not exist when this method is used.");
     var parent = vel.parent._comp;
     // making sure the parent components have been instantiated
     if (!parent) {
-      parent = _create(vel.parent);
+      parent = _create(state, vel.parent);
     }
     if (vel._isVirtualComponent) {
       console.assert(parent, "A Component should have a parent.");
@@ -51,19 +68,25 @@ RenderingEngine.Prototype = function() {
     } else if (vel._isVirtualTextNode) {
       comp = new Component.TextNode(parent, vel);
     }
+    if (vel._ref) {
+      comp._ref = vel._ref;
+    }
+    if (vel._owner) {
+      comp._owner = vel._owner._comp;
+    }
     vel._comp = comp;
     return comp;
   }
 
-  function _capture(vel, forceCapture) {
-    if (vel.__isCaptured__) {
+  function _capture(state, vel, forceCapture) {
+    if (state.isCaptured(vel)) {
       return vel;
     }
     // a captured VirtualElement has a component instance attached
     var comp = vel._comp;
     if (!comp) {
-      comp = _create(vel);
-      vel.__isNew__ = true;
+      comp = _create(state, vel);
+      state.setNew(vel);
     }
     if (vel._isVirtualComponent) {
       var needRerender;
@@ -73,19 +96,21 @@ RenderingEngine.Prototype = function() {
       if (forceCapture) {
         needRerender = true;
       } else {
-        // NOTE: don't ask if shouldRerender if no element is there yet
+        // NOTE: don't ask shouldRerender if no element is there yet
         needRerender = !comp.el || comp.shouldRerender(vel.props);
         comp.__htmlConfig__ = vel._copyHTMLConfig();
+        state.setOldProps(vel, comp.props);
+        state.setOldState(vel, comp.state);
         // updates prop triggering willReceiveProps
         comp._setProps(vel.props);
-        if (!vel.__isNew__) {
-          vel.__isUpdated__ = true;
+        if (!state.isNew(vel)) {
+          state.setUpdated(vel);
         }
       }
       if (needRerender) {
         var context = new CaptureContext(vel);
         var content = comp.render(context.$$);
-        if (!content || !content._isVirtualHTMLElement) {
+        if (!content || !content._isVirtualHTMLElement) {
           throw new Error("Component.render must return VirtualHTMLElement");
         }
 
@@ -94,14 +119,14 @@ RenderingEngine.Prototype = function() {
         }
         content._comp = comp;
         vel._content = content;
-        if (!vel.__isNew__ && comp.isMounted()) {
-          vel.__isUpdated__ = true;
+        if (!state.isNew(vel) && comp.isMounted()) {
+          state.setUpdated(vel);
         }
         // Mapping: map virtual elements to existing components based on refs
-        _prepareVirtualComponent(comp, content);
+        _prepareVirtualComponent(state, comp, content);
         // Descending
         // TODO: only do this in DEBUG mode
-        if (RenderingEngine.DEBUG) {
+        if (substanceGlobals.DEBUG_RENDERING) {
           // in this case we use the render() function as iterating function, where
           // $$ is a function which creates components and renders them recursively.
           // first we can create all element components that can be reached
@@ -109,21 +134,21 @@ RenderingEngine.Prototype = function() {
           var stack = content.children.slice(0);
           while (stack.length) {
             var child = stack.shift();
-            if (child.__isCaptured__ || child._isVirtualComponent) {
+            if (state.isCaptured(child) || child._isVirtualComponent) {
               continue;
             }
             if (!child._comp) {
-              _create(child);
+              _create(state, child);
             }
             if (child._isVirtualHTMLElement && child.children.length > 0) {
               stack = stack.concat(child.children);
             }
-            child.__isCaptured__ = true;
+            state.setCaptured(child);
           }
-          content.__isCaptured__ = true;
+          state.setCaptured(content);
           // then we run comp.render($$) with a special $$ that captures VirtualComponent's
           // recursively
-          var descendingContext = new DescendingContext(context);
+          var descendingContext = new DescendingContext(state, context);
           while (descendingContext.hasPendingCaptures()) {
             descendingContext.reset();
             comp.render(descendingContext.$$);
@@ -131,34 +156,32 @@ RenderingEngine.Prototype = function() {
         } else {
           // a VirtualComponent has its content as a VirtualHTMLElement
           // which needs to be captured recursively
-          _capture(vel._content);
+          _capture(state, vel._content);
         }
       } else {
-        vel.__skip__ = true;
+        state.setSkipped(vel);
       }
     } else if (vel._isVirtualHTMLElement) {
       for (var i = 0; i < vel.children.length; i++) {
-        _capture(vel.children[i]);
+        _capture(state, vel.children[i]);
       }
     }
-    vel.__isCaptured__ = true;
+    state.setCaptured(vel);
     return vel;
   }
 
-  function _render(vel) {
-    var state = { removed: [] };
-    if (vel.__skip__) {
-      return;
-    }
+  function _render(state, vel) {
+    if (state.isSkipped(vel)) return;
+
     // before changes can be applied, a VirtualElement must have been captured
-    console.assert(vel.__isCaptured__, 'VirtualElement must be captured before rendering');
+    console.assert(state.isCaptured(vel), 'VirtualElement must be captured before rendering');
 
     var comp = vel._comp;
     console.assert(comp && comp._isComponent, "A captured VirtualElement must have a component instance attached.");
 
     // VirtualComponents apply changes to its content element
     if (vel._isVirtualComponent) {
-      _render(vel._content);
+      _render(state, vel._content);
       return;
     }
     // render the element
@@ -180,8 +203,8 @@ RenderingEngine.Prototype = function() {
       var oldChildren = [];
       comp.el.getChildNodes().forEach(function(node) {
         var childComp = node._comp;
-        if (!childComp) {
-          console.log('Removing orphaned DOM element.');
+        // remove orphaned nodes and relocated components
+        if (!childComp || state.isRelocated(childComp)) {
           comp.el.removeChild(node);
         } else {
           oldChildren.push(childComp);
@@ -195,7 +218,7 @@ RenderingEngine.Prototype = function() {
         // to detach one of them from the DOM, and reinsert it later at the new position
         do {
           oldComp = oldChildren[pos1++];
-        } while (oldComp && oldComp.__isDetached__);
+        } while (oldComp && (state.isDetached(oldComp)));
 
         virtualComp = newChildren[pos2++];
         // remove remaining old ones if no new one is left
@@ -207,31 +230,44 @@ RenderingEngine.Prototype = function() {
           break;
         }
 
-        if (!virtualComp.__isRendered__) {
-          _render(virtualComp);
+        // Try to reuse TextNodes to avoid unnecesary DOM manipulations
+        if (oldComp && oldComp.el.isTextNode() &&
+            virtualComp && virtualComp._isVirtualTextNode &&
+            oldComp.el.textContent === virtualComp.text ) {
+          continue;
+        }
+
+        if (!state.isRendered(virtualComp)) {
+          _render(state, virtualComp);
         }
 
         newComp = virtualComp._comp;
+
+        // ATTENTION: relocating a component does not update its context
+        if (state.isRelocated(newComp)) {
+          newComp._setParent(comp);
+        }
+
         console.assert(newComp, 'Component instance should now be available.');
         // append remaining new ones if no old one is left
         if (virtualComp && !oldComp) {
-          _appendChild(comp, newComp);
+          _appendChild(state, comp, newComp);
           continue;
         }
         // Differential update
-        else if (virtualComp.__isMapped__) {
+        else if (state.isMapped(virtualComp)) {
           // identity
           if (newComp === oldComp) {
             // no structural change
           } else {
             // the order of elements with ref has changed
-            // TODO: think of a better way than just removing
+            state.setDetached(oldComp);
             _removeChild(state, comp, oldComp);
             pos2--;
           }
         }
-        else if (oldComp.__isMapped__) {
-          _insertChildBefore(comp, newComp, oldComp);
+        else if (state.isMapped(oldComp)) {
+          _insertChildBefore(state, comp, newComp, oldComp);
           pos1--;
         } else {
           // both elements are not mapped
@@ -242,12 +278,6 @@ RenderingEngine.Prototype = function() {
         }
       }
     }
-    // finally dispose all removed elements (which have not been relocated)
-    state.removed.forEach(function(comp) {
-      if (comp.__isDetached__) {
-        comp.triggerDispose();
-      }
-    });
 
     // HACK: a temporary solution to handle refs owned by an ancestor
     // is to store them here as well, so that we can map virtual components
@@ -265,49 +295,50 @@ RenderingEngine.Prototype = function() {
     comp.refs = refs;
     comp.__foreignRefs__ = foreignRefs;
 
-    vel.__isRendered__ = true;
+    state.setRendered(vel);
   }
 
-  function _triggerUpdate(vel) {
+  function _triggerUpdate(state, vel) {
     if (vel._isVirtualComponent) {
-      if (!vel.__skip__) {
-        vel._content.children.forEach(_triggerUpdate);
+      if (!state.isSkipped(vel)) {
+        vel._content.children.forEach(_triggerUpdate.bind(null, state));
       }
-      if (vel.__isUpdated__) {
-        vel._comp.didUpdate();
+      if (state.isUpdated(vel)) {
+        vel._comp.didUpdate(state.getOldProps(vel), state.getOldState(vel));
       }
     } else if (vel._isVirtualHTMLElement) {
-      vel.children.forEach(_triggerUpdate);
+      vel.children.forEach(_triggerUpdate.bind(null, state));
     }
   }
 
-  function _appendChild(parent, child) {
+  function _appendChild(state, parent, child) {
     parent.el.appendChild(child.el);
-    _triggerDidMount(parent, child);
+    _triggerDidMount(state, parent, child);
   }
 
   function _replaceChild(state, parent, oldChild, newChild) {
     parent.el.replaceChild(oldChild.el, newChild.el);
-    oldChild.__isDetached__ = true;
-    state.removed.push(oldChild);
-    _triggerDidMount(parent, newChild);
+    if (!state.isDetached(oldChild)) {
+      oldChild.triggerDispose();
+    }
+    _triggerDidMount(state, parent, newChild);
   }
 
-  function _insertChildBefore(parent, child, before) {
+  function _insertChildBefore(state, parent, child, before) {
     parent.el.insertBefore(child.el, before.el);
-    _triggerDidMount(parent, child);
+    _triggerDidMount(state, parent, child);
   }
 
   function _removeChild(state, parent, child) {
     parent.el.removeChild(child.el);
-    child.__isDetached__ = true;
-    state.removed.push(child);
+    if (!state.isDetached(child)) {
+      child.triggerDispose();
+    }
   }
 
-  function _triggerDidMount(parent, child) {
-    if (child.__isDetached__) {
-      delete child.__isDetached__;
-    } else if (parent.isMounted()) {
+  function _triggerDidMount(state, parent, child) {
+    if (!state.isDetached(child) &&
+        parent.isMounted() && !child.isMounted()) {
       child.triggerDidMount(true);
     }
   }
@@ -319,7 +350,7 @@ RenderingEngine.Prototype = function() {
     It sets the _comp references in the new version where its ancestors
     can be mapped to corresponding virtual components in the old version.
   */
-  function _prepareVirtualComponent(comp, vc) {
+  function _prepareVirtualComponent(state, comp, vc) {
     var newRefs = {};
     var foreignRefs = {};
     // TODO: iron this out. refs are stored on the context
@@ -332,24 +363,15 @@ RenderingEngine.Prototype = function() {
     }
     var oldRefs = comp.refs;
     var oldForeignRefs = comp.__foreignRefs__;
-    each(oldRefs, _clearIsMapped);
-    each(oldForeignRefs, _clearIsMapped);
     // map virtual components to existing ones
     each(newRefs, function(vc, ref) {
       var comp = oldRefs[ref];
-      if (comp) _mapComponents(comp, vc);
+      if (comp) _mapComponents(state, comp, vc);
     });
     each(foreignRefs, function(vc, ref) {
       var comp = oldForeignRefs[ref];
-      if (comp) _mapComponents(comp, vc);
+      if (comp) _mapComponents(state, comp, vc);
     });
-  }
-
-  function _clearIsMapped(comp) {
-    while(comp) {
-      delete comp.__isMapped__;
-      comp = comp.getParent();
-    }
   }
 
   /*
@@ -359,25 +381,55 @@ RenderingEngine.Prototype = function() {
     This is then applied to the ancestors leading to an implicit
     mapping of parent elements, which makes
   */
-  function _mapComponents(comp, vc) {
-    while (comp && vc) {
-      // Stop if one them has been mapped already
-      // or the virtual element has its own component already
-      // or if virtual element and component do not match semantically
-      // Note: the owner component is mapped at very first, so this
-      // recursion will stop at the owner at the latest.
-      if (vc.__isMapped__ || comp.__isMapped__ ||
-          vc._comp || !_isOfSameType(comp, vc))
-      {
-        break;
-      }
-      vc._comp = comp;
-      vc.__isMapped__ = true;
-      // TODO: can we somehow avoid poluting the component?
-      comp.__isMapped__ = true;
-      comp = comp.getParent();
-      vc = vc.getParent();
+
+  function _mapComponents(state, comp, vc) {
+    if (!comp && !vc) return true;
+    if (!comp || !vc) return false;
+    // Stop if one them has been mapped already
+    // or the virtual element has its own component already
+    // or if virtual element and component do not match semantically
+    // Note: the owner component is mapped at very first, so this
+    // recursion will stop at the owner at the latest.
+    if (state.isMapped(vc) || state.isMapped(comp)) {
+      return vc._comp === comp;
     }
+    if (vc._comp) {
+      if (vc._comp === comp) {
+        state.setMapped(vc);
+        state.setMapped(comp);
+        return true;
+      } else {
+        return false;
+      }
+    }
+    if (!_isOfSameType(comp, vc)) {
+      return false;
+    }
+
+    vc._comp = comp;
+    state.setMapped(vc);
+    state.setMapped(comp);
+
+    var canMapParent;
+    var parent = comp.getParent();
+    if (vc.parent) {
+      canMapParent = _mapComponents(state, parent, vc.parent);
+    }
+    // to be able to support implicit retaining of elements
+    // we need to propagate mapping through the 'preliminary' parent chain
+    // i.e. not taking the real parents as rendered, but the Components into which
+    // we have passed children (via vel.append() or vel.outlet().append())
+    else if (vc._preliminaryParent) {
+      while (parent && parent._isElementComponent) {
+        parent = parent.getParent();
+      }
+      canMapParent = _mapComponents(state, parent, vc._preliminaryParent);
+    }
+    if (!canMapParent) {
+      state.setRelocated(vc);
+      state.setRelocated(comp);
+    }
+    return canMapParent;
   }
 
   function _isOfSameType(comp, vc) {
@@ -464,8 +516,8 @@ RenderingEngine.Prototype = function() {
       if (newHash.hasOwnProperty(key)) {
         var oldVal = oldHash[key];
         var newVal = newHash[key];
+        updatedKeys[key] = true;
         if (oldVal !== newVal) {
-          updatedKeys[key] = true;
           update(key, newVal);
         }
       }
@@ -479,20 +531,18 @@ RenderingEngine.Prototype = function() {
 
   function _updateListeners(args) {
     var el = args.el;
-    var oldListeners = args.oldListeners || [];
-    var newListeners = args.newListeners || [];
     // NOTE: considering the low number of listeners
-    // it is quicker to just remove and add instead of computing the minimal update
-    var i;
-    for (i=0; i<oldListeners.length;i++) {
-      el.removeEventListener(oldListeners[i]);
-    }
-    for (i=0; i<newListeners.length;i++) {
+    // it is quicker to just remove all
+    // and add again instead of computing the minimal update
+    var newListeners = args.newListeners || [];
+    el.removeAllEventListeners();
+    for (var i=0; i<newListeners.length;i++) {
       el.addEventListener(newListeners[i]);
     }
   }
 
-  function DescendingContext(captureContext) {
+  function DescendingContext(state, captureContext) {
+    this.state = state;
     this.owner = captureContext.owner;
     this.refs = {};
     this.foreignRefs = {};
@@ -504,14 +554,16 @@ RenderingEngine.Prototype = function() {
     this.$$ = this._createComponent.bind(this);
   }
   DescendingContext.Prototype = function() {
+
     this._createComponent = function() {
+      var state = this.state;
       var vel = this.elements[this.pos++];
       // only capture VirtualComponent's with a captured parent
       // all others have been captured at this point already
       // or will either be captured by a different owner
-      if (!vel.__isCaptured__ && vel._isVirtualComponent &&
-           vel.parent && vel.parent.__isCaptured__) {
-        _capture(vel);
+      if (!state.isCaptured(vel) && vel._isVirtualComponent &&
+           vel.parent && state.isCaptured(vel.parent)) {
+        _capture(state, vel);
         this.updates++;
         this.remaining--;
       }
@@ -538,7 +590,7 @@ RenderingEngine.Prototype = function() {
     };
     this._ancestorsReady = function(vel) {
       while (vel) {
-        if (vel.__isCaptured__ ||
+        if (this.state.isCaptured(vel) ||
             // TODO: iron this out
             vel === this.owner || vel === this.owner._content) {
           return true;
@@ -549,6 +601,12 @@ RenderingEngine.Prototype = function() {
     };
   };
   oo.initClass(DescendingContext);
+
+  RenderingEngine._internal = {
+    _capture: _capture,
+    _wrap: _createWrappingVirtualComponent,
+  };
+
 };
 
 oo.initClass(RenderingEngine);
@@ -589,12 +647,121 @@ RenderingEngine.createContext = function(comp) {
   return new CaptureContext(vel);
 };
 
-RenderingEngine.DEBUG = true;
-
-if (inBrowser) {
-  if (window.SUBSTANCE_DEBUG_RENDERING) {
-    RenderingEngine.DEBUG = !!window.SUBSTANCE_DEBUG_RENDERING;
-  }
+function State() {
+  this.poluted = [];
+  this.id = "__"+uuid();
 }
+
+State.Prototype = function() {
+
+  this.dispose = function() {
+    var id = this.id;
+    this.poluted.forEach(function(obj) {
+      delete obj[id];
+    });
+  };
+
+  this.set = function(obj, key, val) {
+    var info = obj[this.id];
+    if (!info) {
+      info = {};
+      obj[this.id] = info;
+    }
+    info[key] = val;
+  };
+
+  this.get = function(obj, key) {
+    var info = obj[this.id];
+    if (info) {
+      return info[key];
+    }
+  };
+
+  this.setMapped = function(c) {
+    this.set(c, 'mapped', true);
+  };
+
+
+  this.isMapped = function(c) {
+    return Boolean(this.get(c, 'mapped'));
+  };
+
+  this.setRelocated = function(c) {
+    this.set(c, 'relocated', true);
+  };
+
+  this.isRelocated = function(c) {
+    return Boolean(this.get(c, 'relocated'));
+  };
+
+  this.setDetached = function(c) {
+    this.set(c, 'detached', true);
+  };
+
+  this.isDetached = function(c) {
+    return Boolean(this.get(c, 'detached'));
+  };
+
+  this.setCaptured = function(vc) {
+    this.set(vc, 'captured', true);
+  };
+
+  this.isCaptured = function(vc) {
+    return Boolean(this.get(vc, 'captured'));
+  };
+
+  this.setNew = function(vc) {
+    this.set(vc, 'created', true);
+  };
+
+  this.isNew = function(vc) {
+    return Boolean(this.get(vc, 'created'));
+  };
+
+  this.setUpdated = function(vc) {
+    this.set(vc, 'updated', true);
+  };
+
+  this.isUpdated = function(vc) {
+    return Boolean(this.get(vc, 'updated'));
+  };
+
+  this.setSkipped = function(vc) {
+    this.set(vc, 'skipped', true);
+  };
+
+  this.isSkipped = function(vc) {
+    return Boolean(this.get(vc, 'skipped'));
+  };
+
+  this.setRendered = function(vc) {
+    this.set(vc, 'rendered', true);
+  };
+
+  this.isRendered = function(vc) {
+    return Boolean(this.get(vc, 'rendered'));
+  };
+
+  this.setOldProps = function(vc, oldProps) {
+    this.set(vc, 'oldProps', oldProps);
+  };
+
+  this.getOldProps = function(vc) {
+    return this.get(vc, 'oldProps');
+  };
+
+  this.setOldState = function(vc, oldState) {
+    this.set(vc, 'oldState', oldState);
+  };
+
+  this.getOldState = function(vc) {
+    return this.get(vc, 'oldState');
+  };
+
+};
+
+oo.initClass(State);
+
+RenderingEngine.State = State;
 
 module.exports = RenderingEngine;

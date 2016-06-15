@@ -45,19 +45,19 @@ strong {
 /* Links */
 a {
   color: $link-color;
-  text-decoration:none; 
+  text-decoration:none;
 
   // &.active, &:hover {
   //   color:#63b6e5;
   // }
 
   &:focus {
-    outline: 1px solid $focus-outline-color;  
+    outline: 1px solid $focus-outline-color;
   }
 }
 
 button {
   &:focus {
-    outline: 1px solid $focus-outline-color;  
+    outline: 1px solid $focus-outline-color;
   }
 }

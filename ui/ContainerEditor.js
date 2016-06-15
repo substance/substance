@@ -4,16 +4,16 @@ var isString = require('lodash/isString');
 var each = require('lodash/each');
 var last = require('lodash/last');
 var uuid = require('../util/uuid');
+var keys = require('../util/keys');
+var platform = require('../util/platform');
 var EditingBehavior = require('../model/EditingBehavior');
-var insertText = require('../model/transform/insertText');
-var copySelection = require('../model/transform/copySelection');
-var deleteSelection = require('../model/transform/deleteSelection');
 var breakNode = require('../model/transform/breakNode');
 var insertNode = require('../model/transform/insertNode');
 var switchTextType = require('../model/transform/switchTextType');
 var paste = require('../model/transform/paste');
 var Surface = require('./Surface');
 var RenderingEngine = require('./RenderingEngine');
+var IsolatedNodeComponent = require('./IsolatedNodeComponent');
 
 /**
   Represents a flow editor that manages a sequence of nodes in a container. Needs to be
@@ -47,47 +47,75 @@ var RenderingEngine = require('./RenderingEngine');
   ```
  */
 
-function ContainerEditor() {
-  Surface.apply(this, arguments);
+function ContainerEditor(parent, props) {
+  // default props derived from the given props
+  props.containerId = props.containerId || props.node.id;
+  props.name = props.name || props.containerId || props.node.id;
+
+  ContainerEditor.super.apply(this, arguments);
 
   this.containerId = this.props.containerId;
-  if (!isString(this.props.containerId)) {
-    throw new Error("Illegal argument: Expecting containerId.");
+  if (!isString(this.containerId)) {
+    throw new Error("Property 'containerId' is mandatory.");
   }
   var doc = this.getDocument();
   this.container = doc.get(this.containerId);
   if (!this.container) {
     throw new Error('Container with id ' + this.containerId + ' does not exist.');
   }
-  this.editingBehavior = new EditingBehavior();
+
+  this.editingBehavior = this.context.editingBehavior || new EditingBehavior();
+
+  // derive internal state variables
+  ContainerEditor.prototype._deriveInternalState.call(this, this.props);
 }
 
 ContainerEditor.Prototype = function() {
 
   var _super = Object.getPrototypeOf(this);
 
+  this._isContainerEditor = true;
+
   // Note: this component is self managed
-  this.shouldRerender = function() {
+  this.shouldRerender = function(newProps) {
+    if (newProps.disabled !== this.props.disabled) return true;
     // TODO: we should still detect when the document has changed,
     // see https://github.com/substance/substance/issues/543
     return false;
   };
 
+  this.willReceiveProps = function(newProps) {
+    _super.willReceiveProps.apply(this, arguments);
+    ContainerEditor.prototype._deriveInternalState.call(this, newProps);
+  };
+
+  this.didMount = function() {
+    _super.didMount.apply(this, arguments);
+    // var doc = this.getDocument();
+    // to do incremental updates
+    this.container.on('nodes:changed', this.onContainerChange, this);
+  };
+
+  this.dispose = function() {
+    _super.dispose.apply(this, arguments);
+    // var doc = this.getDocument();
+    // doc.off(this);
+    this.container.off(this);
+  };
+
   this.render = function($$) {
-    var el = _super.render.apply(this, arguments);
+    var el = _super.render.call(this, $$);
 
     var doc = this.getDocument();
-    var containerId = this.props.containerId;
-    var containerNode = doc.get(this.props.containerId);
+    var containerId = this.getContainerId();
+    var containerNode = doc.get(containerId);
     if (!containerNode) {
-      console.warn('No container node found for ', this.props.containerId);
+      console.warn('No container node found for ', containerId);
     }
-    var isEditable = this.isEditable();
     el.addClass('sc-container-editor container-node ' + containerId)
       .attr({
         spellCheck: false,
-        "data-id": containerId,
-        "contenteditable": isEditable
+        "data-id": containerId
       });
 
     if (this.isEmpty()) {
@@ -96,12 +124,94 @@ ContainerEditor.Prototype = function() {
       );
     } else {
       // node components
-      each(containerNode.nodes, function(nodeId) {
-        el.append(this._renderNode($$, nodeId));
+      each(containerNode.getNodes(), function(node) {
+        el.append(this._renderNode($$, node));
       }.bind(this));
     }
 
+    if (!this.props.disabled) {
+      el.addClass('sm-enabled');
+      el.setAttribute('contenteditable', true);
+    }
+
     return el;
+  };
+
+  this._renderNode = function($$, node) {
+    if (!node) throw new Error('Illegal argument');
+    if (node.isText()) {
+      return _super.renderNode.call(this, $$, node);
+    } else {
+      var componentRegistry = this.context.componentRegistry;
+      var ComponentClass = componentRegistry.get(node.type);
+      if (ComponentClass.prototype._isIsolatedNodeComponent) {
+        return $$(ComponentClass, { node: node }).ref(node.id);
+      } else {
+        return $$(IsolatedNodeComponent, { node: node }).ref(node.id);
+      }
+    }
+  };
+
+  this._deriveInternalState = function(props) {
+    var _state = this._state;
+    if (!props.hasOwnProperty('enabled') || props.enabled) {
+      _state.enabled = true;
+    } else {
+      _state.enabled = false;
+    }
+  };
+
+  this._handleUpOrDownArrowKey = function (event) {
+    event.stopPropagation();
+    var direction = (event.keyCode === keys.UP) ? 'left' : 'right';
+    var selState = this.getDocumentSession().getSelectionState();
+    var sel = selState.getSelection();
+
+    // Note: this collapses the selection, just to let ContentEditable continue doing a cursor move
+    if (sel.isNodeSelection() && sel.isFull() && !event.shiftKey) {
+      this.domSelection.collapse(direction);
+    }
+    // HACK: ATM we have a cursor behavior in Chrome and FF when collapsing a selection
+    // e.g. have a selection from up-to-down and the press up, seems to move the focus
+    else if (!platform.isIE && !sel.isCollapsed() && !event.shiftKey) {
+      var doc = this.getDocument();
+      if (direction === 'left') {
+        this.setSelection(doc.createSelection(sel.start.path, sel.start.offset));
+      } else {
+        this.setSelection(doc.createSelection(sel.end.path, sel.end.offset));
+      }
+    }
+    // Note: we need this timeout so that CE updates the DOM selection first
+    // before we try to map it to the model
+    window.setTimeout(function() {
+      if (!this.isMounted()) return;
+      this._updateModelSelection({ direction: direction });
+    }.bind(this));
+  };
+
+  this._handleLeftOrRightArrowKey = function (event) {
+    event.stopPropagation();
+    var direction = (event.keyCode === keys.LEFT) ? 'left' : 'right';
+    var selState = this.getDocumentSession().getSelectionState();
+    var sel = selState.getSelection();
+    // Note: collapsing the selection and let ContentEditable still continue doing a cursor move
+    if (sel.isNodeSelection() && sel.isFull() && !event.shiftKey) {
+      event.preventDefault();
+      this.setSelection(sel.collapse(direction));
+      return;
+    } else {
+      _super._handleLeftOrRightArrowKey.call(this, event);
+    }
+  };
+
+  this._handleEnterKey = function(event) {
+    var sel = this.getDocumentSession().getSelection();
+    if (sel.isNodeSelection() && sel.isFull()) {
+      event.preventDefault();
+      event.stopPropagation();
+    } else {
+      _super._handleEnterKey.apply(this, arguments);
+    }
   };
 
   // Used by Clipboard
@@ -113,7 +223,7 @@ ContainerEditor.Prototype = function() {
     Returns the containerId the editor is bound to
   */
   this.getContainerId = function() {
-    return this.props.containerId;
+    return this.containerId;
   };
 
   // TODO: do we really need this in addition to getContainerId?
@@ -122,8 +232,7 @@ ContainerEditor.Prototype = function() {
   };
 
   this.isEmpty = function() {
-    var doc = this.getDocument();
-    var containerNode = doc.get(this.props.containerId);
+    var containerNode = this.getContainer();
     return (containerNode && containerNode.nodes.length === 0);
   };
 
@@ -149,7 +258,7 @@ ContainerEditor.Prototype = function() {
     return this.textTypes || [];
   };
 
-  // Used by TextTool
+  // Used by SwitchTextTypeTool
   // TODO: Filter by enabled commands for this Surface
   this.getTextCommands = function() {
     var textCommands = {};
@@ -161,43 +270,20 @@ ContainerEditor.Prototype = function() {
     return textCommands;
   };
 
-  this.enable = function() {
-    // As opposed to a ContainerEditor, a regular Surface
-    // is not a ContentEditable -- but every contained TextProperty
-    this.attr('contentEditable', true);
-    this.enabled = true;
-  };
-
-  this.disable = function() {
-    this.removeAttr('contentEditable');
-    this.enabled = false;
-  };
-
   /* Editing behavior */
 
-  /**
-    Performs a {@link model/transform/deleteSelection} transformation
-  */
-  this.delete = function(tx, args) {
-    this._prepareArgs(args);
-    return deleteSelection(tx, args);
-  };
 
   /**
     Performs a {@link model/transform/breakNode} transformation
   */
   this.break = function(tx, args) {
-    this._prepareArgs(args);
-    if (args.selection.isPropertySelection() || args.selection.isContainerSelection()) {
-      return breakNode(tx, args);
-    }
+    return breakNode(tx, args);
   };
 
   /**
     Performs an {@link model/transform/insertNode} transformation
   */
   this.insertNode = function(tx, args) {
-    this._prepareArgs(args);
     if (args.selection.isPropertySelection() || args.selection.isContainerSelection()) {
       return insertNode(tx, args);
     }
@@ -207,7 +293,6 @@ ContainerEditor.Prototype = function() {
    * Performs a {@link model/transform/switchTextType} transformation
    */
   this.switchType = function(tx, args) {
-    this._prepareArgs(args);
     if (args.selection.isPropertySelection()) {
       return switchTextType(tx, args);
     }
@@ -239,7 +324,7 @@ ContainerEditor.Prototype = function() {
     var doc = this.getDocument();
     var nodes = this.getContainer().nodes;
     if (nodes.length === 0) {
-      console.info('ContainerEditor.selectFirst(): Container is empty.');
+      console.warn('ContainerEditor.selectFirst(): Container is empty.');
       return;
     }
     var node = doc.get(nodes[0]);
@@ -256,57 +341,40 @@ ContainerEditor.Prototype = function() {
     Performs a {@link model/transform/paste} transformation
   */
   this.paste = function(tx, args) {
-    this._prepareArgs(args);
     if (args.selection.isPropertySelection() || args.selection.isContainerSelection()) {
       return paste(tx, args);
     }
   };
 
-  /**
-    Performs an {@link model/transform/insertText} transformation
-  */
-  this.insertText = function(tx, args) {
-    if (args.selection.isPropertySelection() || args.selection.isContainerSelection()) {
-      return insertText(tx, args);
-    }
-  };
-
-  /**
-    Inserts a soft break
-  */
-  this.softBreak = function(tx, args) {
-    args.text = "\n";
-    return this.insertText(tx, args);
-  };
-
-  /**
-    Copy the current selection. Performs a {@link model/transform/copySelection}
-    transformation.
-  */
-  this.copy = function(doc, selection) {
-    var result = copySelection(doc, { selection: selection });
-    return result.doc;
-  };
-
-  this.onDocumentChange = function(change) {
+  this.onContainerChange = function(change) {
+    var doc = this.getDocument();
     // first update the container
     var renderContext = RenderingEngine.createContext(this);
-    if (change.isAffected([this.props.containerId, 'nodes'])) {
-      for (var i = 0; i < change.ops.length; i++) {
-        var op = change.ops[i];
-        if (op.type === "update" && op.path[0] === this.props.containerId) {
-          var diff = op.diff;
-          if (diff.type === "insert") {
-            var nodeEl = this._renderNode(renderContext.$$, diff.getValue());
-            this.insertAt(diff.getOffset(), nodeEl);
-          } else if (diff.type === "delete") {
-            this.removeAt(diff.getOffset());
+    var $$ = renderContext.$$;
+    var container = this.getContainer();
+    var path = container.getContentPath();
+    for (var i = 0; i < change.ops.length; i++) {
+      var op = change.ops[i];
+      if (op.type === "update" && op.path[0] === path[0]) {
+        var diff = op.diff;
+        if (diff.type === "insert") {
+          var nodeId = diff.getValue();
+          var node = doc.get(nodeId);
+          var nodeEl;
+          if (node) {
+            nodeEl = this._renderNode($$, node);
+          } else {
+            // node does not exist anymore
+            // so we insert a stub element, so that the number of child
+            // elements is consistent
+            nodeEl = $$('div');
           }
+          this.insertAt(diff.getOffset(), nodeEl);
+        } else if (diff.type === "delete") {
+          this.removeAt(diff.getOffset());
         }
       }
     }
-    // do other stuff such as rerendering text properties
-    _super.onDocumentChange.apply(this, arguments);
   };
 
   // Create a first text element
@@ -335,13 +403,33 @@ ContainerEditor.Prototype = function() {
     this.setSelection(newSel);
   };
 
-  this._prepareArgs = function(args) {
-    args.containerId = this.getContainerId();
-    args.editingBehavior = this.editingBehavior;
+  this.transaction = function(transformation, info) {
+    var documentSession = this.documentSession;
+    var surfaceId = this.getId();
+    var containerId = this.getContainerId();
+    return documentSession.transaction(function(tx, args) {
+      var sel = tx.before.selection;
+      if (sel && !sel.isNull()) {
+        sel.containerId = sel.containerId || containerId;
+      }
+      tx.before.surfaceId = surfaceId;
+      args.containerId = this.getContainerId();
+      args.editingBehavior = this.editingBehavior;
+      var result = transformation(tx, args);
+      if (result) {
+        sel = result.selection;
+        if (sel && !sel.isNull()) {
+          sel.containerId = containerId;
+        }
+        return result;
+      }
+    }.bind(this), info);
   };
 
 };
 
 Surface.extend(ContainerEditor);
+
+ContainerEditor.static.isContainerEditor = true;
 
 module.exports = ContainerEditor;

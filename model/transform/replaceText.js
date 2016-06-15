@@ -1,4 +1,3 @@
-/* jshint latedef: false */
 'use strict';
 
 var extend = require('lodash/extend');

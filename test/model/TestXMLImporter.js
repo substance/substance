@@ -11,12 +11,6 @@ var converters = [
   require('../../packages/emphasis/EmphasisXMLConverter'),
   require('../../packages/strong/StrongXMLConverter'),
   require('../../packages/link/LinkXMLConverter'),
-  require('../../packages/table/TableXMLConverter'),
-  require('../../packages/table/TableSectionXMLConverter'),
-  require('../../packages/table/TableRowXMLConverter'),
-  require('../../packages/table/TableCellXMLConverter'),
-  require('../../packages/list/ListXMLConverter'),
-  require('../../packages/list/ListItemXMLConverter'),
   require('./TestMetaNodeXMLConverter')
 ];
 
@@ -28,14 +22,16 @@ function TestXMLImporter() {
   });
 }
 
-XMLImporter.extend(TestXMLImporter, function() {
+TestXMLImporter.Prototype = function() {
 
   this.convertDocument = function(documentEl) {
     var bodyEl = documentEl.find('body');
-    this.convertContainer(bodyEl.children, 'main');
+    this.convertContainer(bodyEl.children, 'body');
   };
 
-});
+};
+
+XMLImporter.extend(TestXMLImporter);
 
 TestXMLImporter.converters = converters;
 

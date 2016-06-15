@@ -1,12 +1,12 @@
 'use strict';
 
-var SurfaceTool = require('../../ui/SurfaceTool');
+var AnnotationTool = require('../../ui/AnnotationTool');
 
 function CodeTool() {
-  SurfaceTool.apply(this, arguments);
+  AnnotationTool.apply(this, arguments);
 }
 
-SurfaceTool.extend(CodeTool);
+AnnotationTool.extend(CodeTool);
 
 CodeTool.static.name = 'code';
 

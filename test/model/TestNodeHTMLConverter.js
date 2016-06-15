@@ -1,3 +1,4 @@
+'use strict';
 
 module.exports = {
 
@@ -6,7 +7,7 @@ module.exports = {
   },
 
   import: function(el, node) {
-    node.boolVal = !!el.data('boolVal');
+    node.boolVal = Boolean(el.data('boolVal'));
     node.stringVal = el.data('stringVal') || "";
     node.arrayVal = (el.data('arrayVal') || "").split(/\s*,\s*/);
     var script = el.find('script');

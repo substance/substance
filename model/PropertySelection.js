@@ -6,8 +6,6 @@ var Selection = require('./Selection');
 var Coordinate = require('./Coordinate');
 var Range = require('./Range');
 
-/* jshint latedef:nofunc */
-
 /**
   A selection which is bound to a property. Implements {@link model/Selection}.
 
@@ -24,7 +22,7 @@ var Range = require('./Range');
     endOffset: 6
   });
 */
-function PropertySelection(path, startOffset, endOffset, reverse, surfaceId) {
+function PropertySelection(path, startOffset, endOffset, reverse, containerId, surfaceId) {
   Selection.call(this);
 
   /**
@@ -49,7 +47,9 @@ function PropertySelection(path, startOffset, endOffset, reverse, surfaceId) {
     Selection direction.
     @type {Boolean}
   */
-  this.reverse = !!reverse;
+  this.reverse = Boolean(reverse);
+
+  this.containerId = containerId;
 
   /**
     Identifier of the surface this selection should be active in.
@@ -81,12 +81,17 @@ PropertySelection.Prototype = function() {
       startOffset: this.startOffset,
       endOffset: this.endOffset,
       reverse: this.reverse,
+      containerId: this.containerId,
       surfaceId: this.surfaceId
     };
   };
 
   this.isPropertySelection = function() {
     return true;
+  };
+
+  this.getType = function() {
+    return 'property';
   };
 
   this.isNull = function() {
@@ -111,8 +116,8 @@ PropertySelection.Prototype = function() {
   this.toString = function() {
     return [
       "PropertySelection(", JSON.stringify(this.path), ", ",
-        this.startOffset, " -> ", this.endOffset,
-        (this.reverse?", reverse":""),
+      this.startOffset, " -> ", this.endOffset,
+      (this.reverse?", reverse":""),
       ")"
     ].join('');
   };
@@ -147,6 +152,10 @@ PropertySelection.Prototype = function() {
   */
   this.getPath = function() {
     return this.path;
+  };
+
+  this.getNodeId = function() {
+    return this.path[0];
   };
 
   /**
@@ -353,7 +362,7 @@ PropertySelection.Prototype = function() {
     @returns {Selection} a new selection
   */
   this.createWithNewRange = function(startOffset, endOffset) {
-    var sel = new PropertySelection(this.path, startOffset, endOffset, false, this.surfaceId);
+    var sel = new PropertySelection(this.path, startOffset, endOffset, false, this.containerId, this.surfaceId);
     var doc = this._internal.doc;
     if (doc) {
       sel.attach(doc);
@@ -382,6 +391,11 @@ PropertySelection.Prototype = function() {
     this._internal.fragments = fragments;
     return fragments;
   };
+
+  this._clone = function() {
+    return new PropertySelection(this.path, this.startOffset, this.endOffset, this.reverse, this.containerId, this.surfaceId);
+  };
+
 };
 
 Selection.extend(PropertySelection);
@@ -437,8 +451,9 @@ PropertySelection.fromJSON = function(json) {
   var startOffset = json.startOffset;
   var endOffset = json.hasOwnProperty('endOffset') ? json.endOffset : json.startOffset;
   var reverse = json.reverse;
+  var containerId = json.containerId;
   var surfaceId = json.surfaceId;
-  return new PropertySelection(path, startOffset, endOffset, reverse, surfaceId);
+  return new PropertySelection(path, startOffset, endOffset, reverse, containerId, surfaceId);
 };
 
 /*
@@ -492,6 +507,14 @@ Object.defineProperties(RangeAdapter.prototype, {
     },
     set: function(reverse) {
       this._sel.reverse = reverse;
+    }
+  },
+  containerId: {
+    get: function() {
+      return this._sel.containerId;
+    },
+    set: function(containerId) {
+      this._sel.containerId = containerId;
     }
   },
   surfaceId: {

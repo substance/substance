@@ -5,26 +5,42 @@ var isEqual = require('lodash/isEqual');
 
 var Selection = require('./Selection');
 
-function CustomSelection(data) {
+/*
+  @
+*/
+function CustomSelection(customType, data, surfaceId) {
   Selection.call(this);
 
+  this.customType = customType;
   this.data = data;
+
+  this.surfaceId = surfaceId;
 }
 
 CustomSelection.Prototype = function() {
 
   this.toString = function() {
-    return "custom(", JSON.stringify(this.data) + ")";
+    return "custom(" + this.customType + ', ' + JSON.stringify(this.data) + ")";
   };
 
   this.isCustomSelection = function() {
     return true;
   };
 
+  this.getType = function() {
+    return 'custom';
+  };
+
+  this.getCustomType = function() {
+    return this.customType;
+  };
+
   this.toJSON = function() {
     return {
       type: 'custom',
-      data: cloneDeep(this.data)
+      customType: this.customType,
+      data: cloneDeep(this.data),
+      surfaceId: this.surfaceId
     };
   };
 
@@ -41,7 +57,7 @@ CustomSelection.Prototype = function() {
 Selection.extend(CustomSelection);
 
 CustomSelection.fromJSON = function(json) {
-  return new CustomSelection(json.data || {});
+  return new CustomSelection(json.customType, json.data || {}, json.surfaceId);
 };
 
 module.exports = CustomSelection;

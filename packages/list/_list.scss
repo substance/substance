@@ -1,51 +1,21 @@
-/**
- * Substance List styles
- * -------
- *
- * Used for ordered lists
- *
- * Supports nesting only up to level-4
- */
+.sc-list-item {
+  margin: 0 0 0 $default-padding;
+  position: relative;
 
-.sc-li {
-  &.level-2 { margin-left: 20px; }
-  &.level-3 { margin-left: 40px; }
-  &.level-4 { margin-left: 60px; }
+  &:last-of-type {
+    margin-bottom: $default-padding;
+  }
 
-  /* Spacing */
-  &.se-list-start { padding-top: 20px; }
-  &.se-list-end { padding-bottom: 20px; }
+  &.sm-unordered:before {
+    position: absolute;
+    content: "•";
+    left: -20px;
+  }
 }
 
-
-/**
- * Unordered lists
- * -------
- */
-
-ul.sc-list > .sc-li::before {
-  content: "▪ ";
+.sc-list-item + :not(.sc-list-item) {
+  margin-top: $default-padding;
 }
 
-/**
- * Ordered lists
- * -------
- *
- * Use CSS counters and support nesting up to level 4
- */
-
-/* When a new list occurs counters are reset */
-
-.se-list-start { counter-reset: level1 level2 level3 level4 !important; }
-/* Resets for individual levels */
-
-ol.sc-list > .sc-li.level-1 { counter-reset: level2 level3 level4; }
-ol.sc-list > .sc-li.level-2 { counter-reset: level3 level4; }
-ol.sc-list > .sc-li.level-3 { counter-reset: level4; }
-
-/* Counter displays for levels 1-3 */
-
-ol.sc-list > .sc-li.level-1::before { counter-increment: level1; content: counter(level1) ". "; }
-ol.sc-list > .sc-li.level-2::before { counter-increment: level2; content: counter(level1) "." counter(level2) ". " ; }
-ol.sc-list > .sc-li.level-3::before { counter-increment: level3; content: counter(level1) "." counter(level2) "." counter(level3) ". "; }
-ol.sc-list > .sc-li.level-4::before { counter-increment: level4; content: counter(level1) "." counter(level2) "." counter(level3) "." counter(level4) ". "; }
+// https://github.com/substance/substance/blob/af28562ad44e948dfd455230114a5a206dbbe912/packages/list/_list.scss
+// TODO: Consider levels and ordered lists

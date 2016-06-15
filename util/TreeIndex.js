@@ -17,7 +17,7 @@ function TreeNode() {}
  * @memberof module:Basics
  * @example
  *
- * var pathAdapter = new TreeIndex({a: "aVal", b: {b1: 'b1Val', b2: 'b2Val'}});
+ * var index = new TreeIndex({a: "aVal", b: {b1: 'b1Val', b2: 'b2Val'}});
  */
 
 function TreeIndex() {}
@@ -62,7 +62,9 @@ TreeIndex.Prototype = function() {
     if (isString(path)) {
       path = [path];
     }
-    setWith(this, path, value, function(val) { if (!val) return new TreeNode(); });
+    setWith(this, path, value, function(val) {
+      if (!val) return new TreeNode();
+    });
   };
 
   this.delete = function(path) {
@@ -149,17 +151,21 @@ TreeIndex.Arrays.Prototype = function() {
       throw new Error('Illegal arguments.');
     }
     var arr;
+
+    // We are using setWith, as it allows us to create nodes on the way down
+    // setWith can be controlled via a hook called for each key in the path
+    // If val is not defined, a new node must be created and returned.
+    // If val is defined, then we must return undefined to keep the original tree node
+    // __dummy__ is necessary as setWith is used to set a value, but we want
+    // to append to the array
     setWith(this, path.concat(['__values__','__dummy__']), undefined, function(val, key) {
       if (key === '__values__') {
-        if (!val) {
-          arr = [];
-          return arr;
-        } else {
-          arr = val;
-        }
+        if (!val) val = [];
+        arr = val;
       } else if (!val) {
-        return new TreeNode();
+        val = new TreeNode();
       }
+      return val;
     });
     delete arr.__dummy__;
     arr.push(value);

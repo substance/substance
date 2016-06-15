@@ -27,7 +27,7 @@ var ParentNodeMixin = {
     var childrenIds = this[this.getChildrenProperty()];
     return childrenIds.map(function(id) {
       return doc.get(id);
-    }.bind(this));
+    });
   },
 
   getChildAt: function(idx) {

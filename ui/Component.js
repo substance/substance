@@ -9,7 +9,6 @@ var RenderingEngine = require('./RenderingEngine');
 var VirtualElement = require('./VirtualElement');
 var DOMElement = require('./DOMElement');
 var DefaultDOMElement = require('./DefaultDOMElement');
-var I18n = require('./i18n');
 var inBrowser = require('../util/inBrowser');
 
 var __id__ = 0;
@@ -135,6 +134,15 @@ Component.Prototype = function() {
     return comp;
   };
 
+  /*
+    Short hand for using labelProvider API
+  */
+  this.getLabel = function(name) {
+    var labelProvider = this.context.labelProvider;
+    if (!labelProvider) throw new Error('Missing labelProvider.');
+    return labelProvider.getLabel(name);
+  };
+
   /**
     Render the component.
 
@@ -147,7 +155,6 @@ Component.Prototype = function() {
     @return {VirtualNode} VirtualNode created using $$
    */
   this.render = function($$) {
-    /* jshint unused:false */
     /* istanbul ignore next */
     return $$('div');
   };
@@ -174,8 +181,7 @@ Component.Prototype = function() {
    *
    * @return a boolean indicating whether rerender() should be run.
    */
-  this.shouldRerender = function(newProps) {
-    /* jshint unused: false */
+  this.shouldRerender = function(newProps) { // eslint-disable-line
     return true;
   };
 
@@ -185,21 +191,25 @@ Component.Prototype = function() {
    * Call this to manually trigger a rerender.
    */
   this.rerender = function() {
-    this._render();
+    this._rerender(this.props, this.state);
+  };
+
+  this._rerender = function(oldProps, oldState) {
+    this._render(oldProps, oldState);
     // when this component is not mounted still trigger didUpdate()
     if (!this.isMounted()) {
-      this.didUpdate();
+      this.didUpdate(oldProps, oldState);
     }
   };
 
-  this._render = function() {
+  this._render = function(oldProps, oldState) {
     if (this.__isRendering__) {
       throw new Error('Component is rendering already.');
     }
     this.__isRendering__ = true;
     try {
       var engine = new RenderingEngine();
-      engine._render(this);
+      engine._render(this, oldProps, oldState);
     } finally {
       delete this.__isRendering__;
     }
@@ -287,6 +297,16 @@ Component.Prototype = function() {
    */
   this.dispose = function() {};
 
+  /*
+    Attention: this is used when a preserved component is relocated.
+    E.g., rendered with a new parent.
+  */
+  this._setParent = function(newParent) {
+    this.parent = newParent;
+    this.context = this._getContext() || {};
+    Object.freeze(this.context);
+  };
+
   /**
     Send an action request to the parent component, bubbling up the component
     hierarchy until an action handler is found.
@@ -361,6 +381,8 @@ Component.Prototype = function() {
     Usually this is used by the component itself.
   */
   this.setState = function(newState) {
+    var oldProps = this.props;
+    var oldState = this.state;
     // Note: while setting props it is allowed to call this.setState()
     // which will not lead to an extra rerender
     var needRerender = !this.__isSettingProps__ &&
@@ -370,9 +392,9 @@ Component.Prototype = function() {
     this.state = newState || {};
     Object.freeze(this.state);
     if (needRerender) {
-      this.rerender();
+      this._rerender(oldProps, oldState);
     } else if (!this.__isSettingProps__) {
-      this.didUpdate();
+      this.didUpdate(oldProps, oldState);
     }
   };
 
@@ -388,7 +410,8 @@ Component.Prototype = function() {
   /**
     Called before state is changed.
   */
-  this.willUpdateState = function(newState) { /* jshint unused: false */ };
+  this.willUpdateState = function(newState) { // eslint-disable-line
+  };
 
   /**
     Get the current properties
@@ -405,12 +428,14 @@ Component.Prototype = function() {
     @param {object} an object with properties
   */
   this.setProps = function(newProps) {
+    var oldProps = this.props;
+    var oldState = this.state;
     var needRerender = this.shouldRerender(newProps, this.state);
     this._setProps(newProps);
     if (needRerender) {
-      this.rerender();
+      this._rerender(oldProps, oldState);
     } else {
-      this.didUpdate();
+      this.didUpdate(oldProps, oldState);
     }
   };
 
@@ -443,7 +468,8 @@ Component.Prototype = function() {
     For example you can use this to derive state from props.
     @param {object} newProps
   */
-  this.willReceiveProps = function(newProps) { /* jshint unused: false */ };
+  this.willReceiveProps = function(newProps) { // eslint-disable-line
+  };
 
   this.getChildNodes = function() {
     if (!this.el) return [];
@@ -478,25 +504,23 @@ Component.Prototype = function() {
     this.insertAt(this.getChildCount(), child);
   };
 
-  this.insertAt = function(pos, child) {
-    if (isString(child)) {
-      child = new VirtualElement.TextNode(child);
+  this.insertAt = function(pos, childEl) {
+    if (isString(childEl)) {
+      childEl = new VirtualElement.TextNode(childEl);
     }
-    if (!child._isVirtualElement) {
+    if (!childEl._isVirtualElement) {
       throw new Error('Invalid argument: "child" must be a VirtualElement.');
     }
-    var comp = new RenderingEngine()._renderChild(this, child);
-    this.el.insertAt(pos, comp.el);
-    if (this.isMounted()) {
-      comp.triggerDidMount(true);
-    }
+    var child = new RenderingEngine()._renderChild(this, childEl);
+    this.el.insertAt(pos, child.el);
+    _mountChild(this, child);
   };
 
   this.removeAt = function(pos) {
     var childEl = this.el.getChildAt(pos);
     if (childEl) {
-      var comp = _unwrapCompStrict(childEl);
-      comp.triggerDispose();
+      var child = _unwrapCompStrict(childEl);
+      _disposeChild(child);
       this.el.removeAt(pos);
     }
   };
@@ -505,7 +529,8 @@ Component.Prototype = function() {
     if (!child || !child._isComponent) {
       throw new Error('removeChild(): Illegal arguments. Expecting a Component instance.');
     }
-    child.triggerDispose();
+    // TODO: remove ref from owner
+    _disposeChild(child);
     this.el.removeChild(child.el);
   };
 
@@ -515,17 +540,34 @@ Component.Prototype = function() {
       throw new Error('replaceChild(): Illegal arguments. Expecting BrowserDOMElement instances.');
     }
     // Attention: Node.replaceChild has weird semantics
-    oldChild.triggerDispose();
+    _disposeChild(oldChild);
     this.el.replaceChild(newChild.el, oldChild.el);
     if (this.isMounted()) {
       newChild.triggerDidMount(true);
     }
   };
 
+  function _disposeChild(child) {
+    child.triggerDispose();
+    if (child._owner && child._ref) {
+      console.assert(child._owner.refs[child._ref] === child, "Owner's ref should point to this child instance.");
+      delete child._owner.refs[child._ref];
+    }
+  }
+
+  function _mountChild(parent, child) {
+    if (parent.isMounted()) {
+      child.triggerDidMount(true);
+    }
+    if (child._owner && child._ref) {
+      child._owner.refs[child._ref] = child;
+    }
+  }
+
   this.empty = function() {
     if (this.el) {
-      this.childNodes.forEach(function(child) {
-        child.triggerDispose();
+      this.getChildNodes().forEach(function(child) {
+        _disposeChild(child);
       });
       this.el.empty();
     }
@@ -533,7 +575,7 @@ Component.Prototype = function() {
   };
 
   this.remove = function() {
-    this.triggerDispose();
+    _disposeChild(this);
     this.el.remove();
   };
 
@@ -550,15 +592,15 @@ Component.Prototype = function() {
   };
 
   this.addEventListener = function() {
-    throw "Not supported.";
+    throw new Error("Not supported.");
   };
 
   this.removeEventListener = function() {
-    throw "Not supported.";
+    throw new Error("Not supported.");
   };
 
   this.insertBefore = function() {
-    throw "Not supported.";
+    throw new Error("Not supported.");
   };
 
 };
@@ -579,12 +621,6 @@ function _unwrapCompStrict(el) {
 function notNull(n) { return n; }
 
 Component.unwrap = _unwrapComp;
-
-/**
- * Adding a property which is providing an i18n service
- * which should be received via depency injection.
- */
-I18n.mixin(Component);
 
 Component.static.render = function(props) {
   props = props || {};
@@ -673,9 +709,9 @@ Component.TextNode = TextNodeComponent;
 Object.defineProperty(Component, '$$', {
   get: function() {
     throw new Error([
-     "With Substance Beta 4 we introduced a breaking change.",
-     "We needed to turn the former static Component.$$ into a contextualized implementation, which is now served via Component.render($$).",
-     "FIX: change your signature of 'this.render()' in all your Components to 'this.render($$)"
+      "With Substance Beta 4 we introduced a breaking change.",
+      "We needed to turn the former static Component.$$ into a contextualized implementation, which is now served via Component.render($$).",
+      "FIX: change your signature of 'this.render()' in all your Components to 'this.render($$)"
     ].join("\n"));
   }
 });

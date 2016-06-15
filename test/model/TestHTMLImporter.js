@@ -10,12 +10,6 @@ var converters = [
   require('../../packages/emphasis/EmphasisHTMLConverter'),
   require('../../packages/strong/StrongHTMLConverter'),
   require('../../packages/link/LinkHTMLConverter'),
-  require('../../packages/table/TableHTMLConverter'),
-  require('../../packages/table/TableSectionHTMLConverter'),
-  require('../../packages/table/TableRowHTMLConverter'),
-  require('../../packages/table/TableCellHTMLConverter'),
-  require('../../packages/list/ListHTMLConverter'),
-  require('../../packages/list/ListItemHTMLConverter'),
 ];
 
 function TestHTMLImporter() {
@@ -26,14 +20,16 @@ function TestHTMLImporter() {
   });
 }
 
-HTMLImporter.extend(TestHTMLImporter, function() {
+TestHTMLImporter.Prototype = function() {
 
   this.convertDocument = function(documentEl) {
     var bodyEl = documentEl.find('body');
-    this.convertContainer(bodyEl.children, 'main');
+    this.convertContainer(bodyEl.children, 'body');
   };
 
-});
+};
+
+HTMLImporter.extend(TestHTMLImporter);
 
 TestHTMLImporter.converters = converters;
 

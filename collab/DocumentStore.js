@@ -2,7 +2,7 @@
 
 var oo = require('../util/oo');
 var extend = require('lodash/extend');
-var Err = require('../util/Error');
+var Err = require('../util/SubstanceError');
 var uuid = require('../util/uuid');
 
 /*
@@ -17,7 +17,7 @@ DocumentStore.Prototype = function() {
 
   /*
     Create a new document record
-    
+
     @return {Object} document record
   */
   this.createDocument = function(props, cb) {
@@ -39,7 +39,7 @@ DocumentStore.Prototype = function() {
 
   /*
     Get document by documentId
-  */  
+  */
   this.getDocument = function(documentId, cb) {
     var doc = this._getDocument(documentId);
     if (!doc) {
@@ -109,14 +109,14 @@ DocumentStore.Prototype = function() {
   this._getDocument = function(documentId) {
     return this._documents[documentId];
   };
-  
+
   this._updateDocument = function(documentId, props) {
     var doc = this._documents[documentId];
     extend(doc, props);
   };
 
   this._documentExists = function(documentId) {
-    return !!this._documents[documentId];
+    return Boolean(this._documents[documentId]);
   };
 };
 

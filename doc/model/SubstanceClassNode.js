@@ -13,7 +13,7 @@ SubstanceClassNode.Prototype = function() {
   this.getSpecificType = function() {
     var isComponent = false;
     if (this.tags.length > 0) {
-      isComponent = !!find(this.tags, 'type', 'component');
+      isComponent = Boolean(find(this.tags, 'type', 'component'));
     }
 
     if (isComponent) {

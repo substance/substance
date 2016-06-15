@@ -1,9 +1,8 @@
-/* jshint latedef:nofunc */
 'use strict';
 
 var isNumber = require('lodash/isNumber');
-var AnnotatedTextComponent = require('./AnnotatedTextComponent');
 var Coordinate = require('../model/Coordinate');
+var AnnotatedTextComponent = require('./AnnotatedTextComponent');
 
 /**
   Renders a text property. Used internally by different components to render editable text.
@@ -30,7 +29,7 @@ function TextPropertyComponent() {
 
 TextPropertyComponent.Prototype = function() {
 
-  var _super = Object.getPrototypeOf(this);
+  var _super = TextPropertyComponent.super.prototype;
 
   this.didMount = function() {
     _super.didMount.call(this);
@@ -58,8 +57,12 @@ TextPropertyComponent.Prototype = function() {
         spellCheck: false,
       })
       .css({
-        whiteSpace: 'pre-wrap'
+        'white-space': 'pre-wrap'
       });
+
+    if (this.props.editable) {
+      el.attr('contentEditable', true);
+    }
 
     el.append($$('br'));
     return el;
@@ -81,34 +84,27 @@ TextPropertyComponent.Prototype = function() {
       }
 
       if (node.collaborator) {
-        el.addClass('sm-collaborator-'+node.collaborator.colorIndex);
+        var collaboratorIndex = node.collaborator.colorIndex;
+        el.addClass('sm-collaborator-'+collaboratorIndex);
       } else {
         el.addClass('sm-local-user');
       }
     } else {
       el = _super._renderFragment.apply(this, arguments);
       if (node.constructor.static.isInline) {
-        el.attr({
-          'contentEditable': false,
-          'data-inline':'1',
-          'data-length': 1
-        });
+        // FIXME: enabling this reveals a bug in RenderEngine with reusing a component but reattached to a new parent.
+        el.ref(id);
       }
       // Adding refs here, enables preservative rerendering
       // TODO: while this solves problems with rerendering inline nodes
       // with external content, it decreases the overall performance too much.
       // We should optimize the component first before we can enable this.
-      if (this.context.config && this.context.config.preservativeTextPropertyRendering) {
+      else if (this.context.config && this.context.config.preservativeTextPropertyRendering) {
         el.ref(id + '@' + fragment.counter);
       }
     }
     el.attr('data-offset', fragment.pos);
     return el;
-  };
-
-  this._finishFragment = function(fragment, context, parentContext) {
-    context.attr('data-length', fragment.length);
-    parentContext.append(context);
   };
 
   this.getPath = function() {
@@ -122,12 +118,9 @@ TextPropertyComponent.Prototype = function() {
   this.getAnnotations = function() {
     var path = this.getPath();
     var annotations = this.getDocument().getIndex('annotations').get(path);
-    var surface = this.getSurface();
-    if (surface) {
-      var fragments = surface._getFragments(path);
-      if (fragments) {
-        annotations = annotations.concat(fragments);
-      }
+    var fragments = this.props.fragments;
+    if (fragments) {
+      annotations = annotations.concat(fragments);
     }
     return annotations;
   };
@@ -160,6 +153,11 @@ TextPropertyComponent.Prototype = function() {
     return this._getDOMCoordinate(this.el, charPos);
   };
 
+  this._finishFragment = function(fragment, context, parentContext) {
+    context.attr('data-length', fragment.length);
+    parentContext.append(context);
+  };
+
   this._getDOMCoordinate = function(el, charPos) {
     var l;
     var idx = 0;
@@ -185,6 +183,21 @@ TextPropertyComponent.Prototype = function() {
         if (length) {
           l = parseInt(length, 10);
           if (l>= charPos) {
+            // special handling for InlineNodes
+            if (child.attr('data-inline')) {
+              var nextSibling = child.getNextSibling();
+              if (nextSibling && nextSibling.isTextNode()) {
+                return {
+                  container: nextSibling.getNativeElement(),
+                  offset: 0
+                };
+              } else {
+                return {
+                  container: el.getNativeElement(),
+                  offset: el.getChildIndex(child) + 1
+                };
+              }
+            }
             return this._getDOMCoordinate(child, charPos, idx);
           } else {
             charPos -= l;
@@ -226,10 +239,7 @@ function _getPropertyContext(root, node, offset) {
     node: node,
     offset: offset
   };
-  while (true) {
-    if (!node || node === root) {
-      return null;
-    }
+  while (node && node !== root) {
     if (node.isElementNode()) {
       var path = node.getAttribute('data-path');
       if (path) {

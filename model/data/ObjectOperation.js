@@ -19,7 +19,7 @@ var SET = 'set';
   @class
   @extends Operation
 */
-var ObjectOperation = function(data) {
+function ObjectOperation(data) {
   Operation.call(this);
   if (!data) {
     throw new Error('Data of ObjectOperation is missing.');
@@ -61,20 +61,20 @@ var ObjectOperation = function(data) {
   } else {
     throw new Error('Invalid type: '+ data.type);
   }
-};
+}
 
 ObjectOperation.fromJSON = function(data) {
   data = cloneDeep(data);
   if (data.type === "update") {
     switch (data.propertyType) {
-    case "string":
-      data.diff = TextOperation.fromJSON(data.diff);
-      break;
-    case "array":
-      data.diff = ArrayOperation.fromJSON(data.diff);
-      break;
-    default:
-      throw new Error("Unsupported update diff:" + JSON.stringify(data.diff));
+      case "string":
+        data.diff = TextOperation.fromJSON(data.diff);
+        break;
+      case "array":
+        data.diff = ArrayOperation.fromJSON(data.diff);
+        break;
+      default:
+        throw new Error("Unsupported update diff:" + JSON.stringify(data.diff));
     }
   }
   var op = new ObjectOperation(data);
@@ -244,6 +244,10 @@ ObjectOperation.Prototype = function() {
         return ["(>>,", JSON.stringify(this.path), this.propertyType, this.diff.toString(), ")"].join('');
       case SET:
         return ["(=,", JSON.stringify(this.path), this.val, this.original, ")"].join('');
+      case NOP:
+        return "NOP";
+      default:
+        throw new Error('Invalid type');
     }
   };
 };
@@ -354,6 +358,7 @@ CODE[DELETE] = _DELETE;
 CODE[UPDATE] = _UPDATE;
 CODE[SET] = _SET;
 
+/* eslint-disable no-multi-spaces */
 var __transform__ = [];
 __transform__[_DELETE | _DELETE] = transform_delete_delete;
 __transform__[_DELETE | _CREATE] = transform_delete_create;
@@ -365,6 +370,7 @@ __transform__[_CREATE | _SET   ] = transform_create_set;
 __transform__[_DELETE | _SET   ] = transform_delete_set;
 __transform__[_UPDATE | _SET   ] = transform_update_set;
 __transform__[_SET    | _SET   ] = transform_set_set;
+/* eslint-enable no-multi-spaces */
 
 var transform = function(a, b, options) {
   options = options || {};
@@ -412,16 +418,6 @@ ObjectOperation.Delete = function(idOrPath, val) {
 };
 
 ObjectOperation.Update = function(path, op) {
-  var propertyType;
-  if (op._isTextOperation) {
-    propertyType = "string";
-  }
-  else if (op._isArrayOperation) {
-    propertyType = "array";
-  }
-  else {
-    throw new Error('Unsupported type for operational changes');
-  }
   return new ObjectOperation({
     type: UPDATE,
     path: path,

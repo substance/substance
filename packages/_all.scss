@@ -1,12 +1,11 @@
 // Packages
-@import './text/_switch-text-type-tool';
+@import './base/_base';
 @import './paragraph/_paragraph';
 @import './heading/_heading';
 @import './blockquote/_blockquote';
 @import './codeblock/_codeblock';
 @import './list/_list';
 @import './link/_link';
-@import './embed/_embed';
 @import './image/_image';
 @import './table/_table';
 @import './emphasis/_emphasis';
@@ -14,3 +13,4 @@
 @import './subscript/_subscript';
 @import './superscript/_superscript';
 @import './code/_code';
+@import './prose-editor/_prose-editor';

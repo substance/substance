@@ -3,7 +3,7 @@
 var Fragmenter = require('../model/Fragmenter');
 var Component = require('./Component');
 var AnnotationComponent = require('./AnnotationComponent');
-var InlineWrapperComponent = require('./InlineWrapperComponent');
+var InlineNodeComponent = require('./InlineNodeComponent');
 
 /**
   Renders an anotated text. Used internally by {@link ui/TextPropertyComponent}.
@@ -18,6 +18,10 @@ function AnnotatedTextComponent() {
 }
 
 AnnotatedTextComponent.Prototype = function() {
+
+  // TODO: this component should listen on changes to the property
+  // Otherwise will not be updated.
+  // Note that in contrast, TextPropertyComponents get updated by Surface.
 
   /**
     Node render implementation. Use model/Fragmenter for rendering of annotations.
@@ -75,12 +79,12 @@ AnnotatedTextComponent.Prototype = function() {
         .addClass(node.isStart?"start-anchor":"end-anchor");
     }
     var ComponentClass;
-    if (node.type === "inline-wrapper") {
-      ComponentClass = InlineWrapperComponent;
+    if (node.constructor.static.isInline) {
+      ComponentClass = InlineNodeComponent;
     } else {
       ComponentClass = componentRegistry.get(node.type);
       if (!ComponentClass) {
-        console.warn('No component registered for type %s. Using AnnotationComponent.', node.type);
+        // console.warn('No component registered for type %s. Using AnnotationComponent.', node.type);
         ComponentClass = AnnotationComponent;
       }
     }

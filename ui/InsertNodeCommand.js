@@ -1,6 +1,6 @@
 'use strict';
 
-var SurfaceCommand = require('./SurfaceCommand');
+var Command = require('./Command');
 var insertNode = require('../model/transform/insertNode');
 
 function InsertNodeCommand() {
@@ -9,8 +9,8 @@ function InsertNodeCommand() {
 
 InsertNodeCommand.Prototype = function() {
 
-  this.getCommandState = function() {
-    var sel = this.getSelection();
+  this.getCommandState = function(props, context) {
+    var sel = context.documentSession.getSelection();
     var newState = {
       disabled: true,
       active: false
@@ -21,13 +21,15 @@ InsertNodeCommand.Prototype = function() {
     return newState;
   };
 
-  this.execute = function() {
-    var state = this.getCommandState();
+  this.execute = function(props, context) {
+    var state = this.getCommandState(props, context);
     if (state.disabled) return;
-    var surface = this.getSurface();
-    surface.transaction(function(tx, args) {
-      return this.insertNode(tx, args);
-    }.bind(this));
+    var surface = context.surface ||context.surfaceManager.getFocusedSurface();
+    if (surface) {
+      surface.transaction(function(tx, args) {
+        return this.insertNode(tx, args);
+      }.bind(this));
+    }
     return true;
   };
 
@@ -36,13 +38,11 @@ InsertNodeCommand.Prototype = function() {
     return insertNode(tx, args);
   };
 
-  this.createNodeData = function(tx, args) {
-    /* jshint unused:false */
+  this.createNodeData = function(tx, args) { // eslint-disable-line
     throw new Error('InsertNodeCommand.createNodeData() is abstract.');
   };
 };
 
-
-SurfaceCommand.extend(InsertNodeCommand);
+Command.extend(InsertNodeCommand);
 
 module.exports = InsertNodeCommand;

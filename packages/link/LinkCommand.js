@@ -10,15 +10,21 @@ LinkCommand.Prototype = function() {
 
   this.getAnnotationData = function() {
     return {
-      url: "",
-      title: ""
+      url: ""
     };
   };
 
+  this.canFuse = function() {
+    return false;
+  };
+
   // When there's some overlap with only a single annotation we do an expand
-  this.canEdit = function(annos, sel) {
-    // jshint unused: false
+  this.canEdit = function(annos, sel) { // eslint-disable-line
     return annos.length === 1;
+  };
+
+  this.canDelete = function(annos, sel) { // eslint-disable-line
+    return false;
   };
 
 };
@@ -26,6 +32,5 @@ LinkCommand.Prototype = function() {
 AnnotationCommand.extend(LinkCommand);
 
 LinkCommand.static.name = 'link';
-LinkCommand.static.annotationType = 'link';
 
 module.exports = LinkCommand;

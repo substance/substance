@@ -30,7 +30,8 @@ var insertText = function(tx, args) {
     throw new Error('Argument `text` is mandatory for transformation `insertText`.');
   }
   if (!(sel.isPropertySelection() || sel.isContainerSelection())) {
-    throw new Error('Selection must be property or container selection.');
+    console.error("Selection must be a Property- or ContainerSelection.");
+    return args;
   }
   // Extra transformation for replacing text, as there are edge cases
   if (!sel.isCollapsed()) {

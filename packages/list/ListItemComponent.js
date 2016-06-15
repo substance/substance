@@ -10,13 +10,18 @@ function ListItemComponent() {
 ListItemComponent.Prototype = function() {
 
   this.render = function($$) {
-    var item = this.props.node;
-    var doc = item.getDocument();
-    var el = $$('li').addClass('sc-li')
-      .attr('data-id', item.id)
-      .append($$(TextProperty, { doc: doc, path: [item.id, 'content'] }));
+    var node = this.props.node;
+    var el = $$('div')
+      .addClass('sc-list-item')
+      .addClass('sm-' + node.listType)
+      .attr('data-id', this.props.node.id)
+      .append($$(TextProperty, {
+        path: [ this.props.node.id, 'content']
+      })
+    );
     return el;
   };
+
 };
 
 Component.extend(ListItemComponent);

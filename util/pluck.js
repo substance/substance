@@ -1,3 +1,5 @@
+'use strict';
+
 var map = require('lodash/map');
 
 module.exports = function(collection, prop) {

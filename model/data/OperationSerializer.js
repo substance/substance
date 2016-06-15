@@ -1,4 +1,3 @@
-/* jshint latedef:nofunc */
 "use strict";
 
 var isArray = require('lodash/isArray');
@@ -145,6 +144,8 @@ OperationSerializer.Prototype = function() {
         diff = this.deserializePrimitiveOp(str, tokenizer);
         op = ObjectOperation.Update(path, diff);
         break;
+      default:
+        throw new Error('Illegal type for ObjectOperation: '+ type);
     }
     return op;
   };
@@ -217,7 +218,7 @@ Tokenizer.Prototype = function() {
       if (isNumber(token)) {
         number = token;
       } else {
-        number = parseInt(this.tokens[this.pos]);
+        number = parseInt(this.tokens[this.pos], 10);
       }
       return number;
     } catch (err) {

@@ -5,10 +5,11 @@ var isObject = require('lodash/isObject');
 var isArray = require('lodash/isArray');
 var isString = require('lodash/isString');
 var each = require('lodash/each');
-var EventEmitter = require('../util/EventEmitter');
 var uuid = require('../util/uuid');
+var EventEmitter = require('../util/EventEmitter');
 var DocumentIndex = require('./DocumentIndex');
 var AnnotationIndex = require('./AnnotationIndex');
+var ContainerAnnotationIndex = require('./ContainerAnnotationIndex');
 var AnchorIndex = require('./AnchorIndex');
 var DocumentChange = require('./DocumentChange');
 var PathEventProxy = require('./PathEventProxy');
@@ -18,6 +19,8 @@ var Selection = require('./Selection');
 var Coordinate = require('./Coordinate');
 var Range = require('./Range');
 var docHelpers = require('./documentHelpers');
+var JSONConverter = require('./JSONConverter');
+var converter = new JSONConverter();
 
 var __id__ = 0;
 
@@ -58,6 +61,10 @@ function Document(schema) {
   Document.super.apply(this);
 
   this.__id__ = __id__++;
+  if (!schema) {
+    throw new Error('A document needs a schema for reflection.');
+  }
+
   this.schema = schema;
   this.nodeFactory = new DocumentNodeFactory(this);
   this.data = new IncrementalData(schema, {
@@ -72,7 +79,10 @@ function Document(schema) {
   // special index for (property-scoped) annotations
   this.addIndex('annotations', new AnnotationIndex());
 
-  // special index for (contaoiner-scoped) annotations
+  // TODO: these are only necessary if there is a container annotation
+  // in the schema
+  // special index for (container-scoped) annotations
+  this.addIndex('container-annotations', new ContainerAnnotationIndex());
   this.addIndex('container-annotation-anchors', new AnchorIndex());
 
   // change event proxies are triggered after a document change has been applied
@@ -92,6 +102,8 @@ function Document(schema) {
 }
 
 Document.Prototype = function() {
+
+  this._isDocument = true;
 
   this.addIndex = function(name, index) {
     return this.data.addIndex(name, index);
@@ -127,8 +139,8 @@ Document.Prototype = function() {
     @param {String|String[]} path node id or path to property.
     @returns {DocumentNode|any|undefined} a Node instance, a value or undefined if not found.
   */
-  this.get = function(path) {
-    return this.data.get(path);
+  this.get = function(path, strict) {
+    return this.data.get(path, strict);
   };
 
   /**
@@ -325,7 +337,7 @@ Document.Prototype = function() {
     Every selection implementation provides its own
     parameter format which is basically a JSON representation.
 
-    @param {model/Selection} sel An object describing the selection.
+    @param {model/Selection} sel An object describing the selection.
 
     @example
 
@@ -359,161 +371,148 @@ Document.Prototype = function() {
     ```
   */
   this.createSelection = function() {
+    var sel = _createSelection.apply(this, arguments);
+    if (!sel.isNull()) {
+      sel.attach(this);
+    }
+    return sel;
+  };
+
+
+  function _createSelection() {
     var PropertySelection = require('./PropertySelection');
     var ContainerSelection = require('./ContainerSelection');
-    var coor, range;
+    var NodeSelection = require('./NodeSelection');
+
+    var doc = this; // eslint-disable-line
+    var coor, range, path, startOffset, endOffset;
     if (arguments.length === 1 && arguments[0] === null) {
       return Selection.nullSelection;
     }
-    var selData = null;
     if (arguments[0] instanceof Coordinate) {
       coor = arguments[0];
-      selData = {
-        type: 'property',
-        path: coor.start.path,
-        startOffset: coor.start.offset,
-        endOffset: coor.end.offset
-      };
+      if (coor.isNodeCoordinate()) {
+        return NodeSelection._createFromCoordinate(coor);
+      } else {
+        return new PropertySelection(coor.path, coor.offset, coor.offset);
+      }
     }
-    // TODO: make sure that range.reverse is ok
     else if (arguments[0] instanceof Range) {
       range = arguments[0];
-      if (isEqual(range.start.path, range.end.path) && !range.start.isNodeCoordinate()) {
-        selData = {
-          type: 'property',
-          path: range.start.path,
-          startOffset: range.start.offset,
-          endOffset: range.end.offset
-        };
+      var inOneNode = isEqual(range.start.path, range.end.path);
+      if (inOneNode) {
+        if (range.start.isNodeCoordinate()) {
+          return NodeSelection._createFromRange(range);
+        } else {
+          return new PropertySelection(range.start.path, range.start.offset, range.end.offset, range.reverse, range.containerId);
+        }
       } else {
-        selData = {
-          type: 'container',
-          containerId: range.containerId,
-          startPath: range.start.path,
-          startOffset: range.start.offset,
-          endPath: range.end.path,
-          endOffset: range.end.offset
-        };
+        return new ContainerSelection(range.containerId, range.start.path, range.start.offset, range.end.path, range.end.offset, range.reverse);
       }
     }
     else if (arguments.length === 1 && isObject(arguments[0])) {
-      selData = arguments[0];
+      return _createSelectionFromData(doc, arguments[0]);
     }
     // createSelection(startPath, startOffset)
     else if (arguments.length === 2 && isArray(arguments[0])) {
-      selData = {
-        type: 'property',
-        path: arguments[0],
-        startOffset: arguments[1],
-        endOffset: arguments[1]
-      };
+      path = arguments[0];
+      startOffset = arguments[1];
+      return new PropertySelection(path, startOffset, startOffset);
     }
     // createSelection(startPath, startOffset, endOffset)
     else if (arguments.length === 3 && isArray(arguments[0])) {
-      selData = {
-        type: 'property',
-        path: arguments[0],
-        startOffset: arguments[1],
-        endOffset: arguments[2]
-      };
+      path = arguments[0];
+      startOffset = arguments[1];
+      endOffset = arguments[2];
+      return new PropertySelection(path, startOffset, endOffset, startOffset>endOffset);
     }
     // createSelection(containerId, startPath, startOffset, endPath, endOffset)
     else if (arguments.length === 5 && isString(arguments[0])) {
-      selData = {
+      return _createSelectionFromData(doc, {
         type: 'container',
         containerId: arguments[0],
         startPath: arguments[1],
         startOffset: arguments[2],
         endPath: arguments[3],
         endOffset: arguments[4]
-      };
+      });
     } else {
       console.error('Illegal arguments for Selection.create().', arguments);
       return Selection.nullSelection;
     }
+  }
 
-    var sel, tmp;
-
-    if (!selData) {
-      //fix if this is thrown
-      throw new Error('Illegal state.');
-    }
+  function _createSelectionFromData(doc, selData) {
+    var PropertySelection = require('./PropertySelection');
+    var ContainerSelection = require('./ContainerSelection');
+    var NodeSelection = require('./NodeSelection');
+    var CustomSelection = require('./CustomSelection');
+    var tmp;
     if (selData.type === 'property') {
       if (selData.endOffset === null || selData.endOffset === undefined) {
         selData.endOffset = selData.startOffset;
       }
-      if (selData.startOffset>selData.endOffset) {
-        tmp = selData.startOffset;
-        selData.startOffset = selData.endOffset;
-        selData.endOffset = tmp;
-        selData.reverse = true;
-      }
-      sel = new PropertySelection(selData.path, selData.startOffset, selData.endOffset, selData.reverse);
-    } else if (selData.type === 'container') {
-      var container = this.get(selData.containerId);
-      var startNodeId = selData.startPath[0];
-      var endNodeId = selData.endPath[0];
-      var startPos = container.getPosition(startNodeId);
-      var endPos = container.getPosition(endNodeId);
-      var startNode = this.get(startNodeId);
-      var endNode = this.get(endNodeId);
-      if (!startNode) {
-        throw new Error('Illegal argument: node with id ' + startNodeId + ' does not exist');
-      }
-      if (!endNode) {
-        throw new Error('Illegal argument: node with id ' + endNodeId + ' does not exist');
-      }
-      // ATTENTION: since Beta4 we are not supporting partial
-      // selections of nodes other than text nodes
-      if (selData.startPath.length > 1) {
-        if (!startNode.isText()) {
-          console.warn('Selecting a non-textish node partially is not supported. Select the full node.');
-          selData.startPath = [startNodeId];
-          selData.startOffset = 0;
-        }
-      }
-      if (selData.endPath.length > 1) {
-        if (!endNode.isText()) {
-          console.warn('Selecting a non-textish node partially is not supported. Select the full node.');
-          selData.endPath = [endNodeId];
-          selData.endOffset = 1;
-        }
-      }
-
-      if (startPos < endPos) {
-        sel = new ContainerSelection(selData.containerId, selData.startPath, selData.startOffset, selData.endPath, selData.endOffset, false);
-      } else if (endPos < startPos) {
-        sel = new ContainerSelection(selData.containerId, selData.endPath, selData.endOffset, selData.startPath, selData.startOffset, true);
-      } else {
-        // now we are in the same node
-        // TODO: bring node and property coors into correct order
-        if (selData.startPath.length > 1 && selData.endPath.length > 1) {
-          if (selData.startOffset > selData.endOffset) {
-            tmp = selData.startOffset;
-            selData.startOffset = selData.endOffset;
-            selData.endOffset = tmp;
-            selData.reverse = true;
-          }
-        } else if (
-          (selData.startPath.length === 1 && selData.endPath.length > 1 && selData.startOffset > 0) ||
-          (selData.startPath.length > 1 && selData.endPath.length === 1 && selData.endOffset === 0) ||
-          (selData.startPath.length === 1 && selData.endPath.length === 1 && selData.endOffset === 0)
-        ) {
-          tmp = selData.startPath;
-          selData.startPath = selData.endPath;
-          selData.endPath = tmp;
+      if (!selData.hasOwnProperty('reverse')) {
+        if (selData.startOffset>selData.endOffset) {
           tmp = selData.startOffset;
           selData.startOffset = selData.endOffset;
           selData.endOffset = tmp;
           selData.reverse = true;
+        } else {
+          selData.reverse = false;
         }
-        sel = new ContainerSelection(selData.containerId, selData.startPath, selData.startOffset, selData.endPath, selData.endOffset, selData.reverse);
+      }
+      return new PropertySelection(selData.path, selData.startOffset, selData.endOffset, selData.reverse, selData.containerId);
+    } else if (selData.type === 'container') {
+      var container = doc.get(selData.containerId, 'strict');
+      var start = new Coordinate(selData.startPath, selData.startOffset);
+      var end = new Coordinate(selData.endPath, selData.endOffset);
+      var startAddress = container.getAddress(start);
+      var endAddress = container.getAddress(end);
+      var isReverse = selData.reverse;
+      if (!startAddress) {
+        throw new Error('Invalid arguments for ContainerSelection: ', start.toString());
+      }
+      if (!endAddress) {
+        throw new Error('Invalid arguments for ContainerSelection: ', end.toString());
+      }
+      if (!selData.hasOwnProperty('reverse')) {
+        isReverse = endAddress.isBefore(startAddress, 'strict');
+        if (isReverse) {
+          tmp = start;
+          start = end;
+          end = tmp;
+        }
+      }
+
+      // ATTENTION: since Beta4 we are not supporting partial
+      // selections of nodes other than text nodes
+      // Thus we are turning other property coordinates into node coordinates
+      _allignCoordinate(doc, start, true);
+      _allignCoordinate(doc, end, false);
+
+      return new ContainerSelection(container.id, start.path, start.offset, end.path, end.offset, isReverse);
+    }
+    else if (selData.type === 'node') {
+      return NodeSelection.fromJSON(selData);
+    } else if (selData.type === 'custom') {
+      return CustomSelection.fromJSON(selData);
+    } else {
+      throw new Error('Illegal selection type', selData);
+    }
+  }
+
+  function _allignCoordinate(doc, coor, isStart) {
+    if (!coor.isNodeCoordinate()) {
+      var nodeId = coor.getNodeId();
+      var node = doc.get(nodeId);
+      if (!node.isText()) {
+        console.warn('Selecting a non-textish node partially is not supported. Select the full node.');
+        coor.path = [nodeId];
+        coor.offset = isStart ? 0 : 1;
       }
     }
-
-    sel.attach(this);
-    return sel;
-  };
+  }
 
   this.getEventProxy = function(name) {
     return this.eventProxies[name];
@@ -568,30 +567,15 @@ Document.Prototype = function() {
     each(seed.nodes, function(nodeData) {
       this.create(nodeData);
     }.bind(this));
-
   };
 
   /**
     Convert to JSON.
 
-    DEPRECATED: We moved away from having JSON as first-class exchange format.
-    We will remove this soon.
-
-    @private
     @returns {Object} Plain content.
-    @deprecated
   */
   this.toJSON = function() {
-    // TODO: deprecate this
-    // console.warn('DEPRECATED: Document.toJSON(). Use model/JSONConverter instead.');
-    var nodes = {};
-    each(this.getNodes(), function(node) {
-      nodes[node.id] = node.toJSON();
-    });
-    return {
-      schema: [this.schema.name, this.schema.version],
-      nodes: nodes
-    };
+    return converter.exportDocument(this);
   };
 
   this.getTextForSelection = function(sel) {

@@ -1,12 +1,12 @@
 'use strict';
 
-var Node = require('../../model/DocumentNode');
+var DocumentNode = require('../../model/DocumentNode');
 
 function MetaNode() {
   MetaNode.super.apply(this, arguments);
 }
 
-Node.extend(MetaNode);
+DocumentNode.extend(MetaNode);
 
 MetaNode.static.name = 'meta';
 
