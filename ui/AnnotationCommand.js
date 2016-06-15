@@ -67,7 +67,7 @@ AnnotationCommand.Prototype = function() {
     @returns {Boolean} Whether or not command could be executed.
    */
   this.isDisabled = function(sel) {
-    if (!sel || sel.isNull() || !sel.isAttached() || sel.isCustomSelection() || sel.isNodeSelection()) {
+    if (!sel || sel.isNull() || !sel.isAttached() || sel.isCustomSelection() || sel.isNodeSelection()) {
       return true;
     }
     return false;
