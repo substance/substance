@@ -71,7 +71,7 @@ function _deleteCharacterWithNodeSelection(tx, args) {
   var nodeId = sel.getNodeId();
   var container = tx.get(containerId);
   var pos, text;
-  if (sel.isFull() || ( sel.isBefore() && direction === 'right') ) {
+  if (sel.isFull() || ( sel.isBefore() && direction === 'right') || (sel.isAfter() && direction === 'left')) {
     return deleteNode(tx, {
       nodeId: nodeId,
       containerId: containerId
