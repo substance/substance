@@ -10,9 +10,11 @@ var Registry = require('../util/Registry');
 var FileClientStub = require('../ui/FileClientStub');
 var SaveHandlerStub = require('../ui/SaveHandlerStub');
 
-/*
-  Abstract Configurator for Substance editors.
-*/
+/**
+ * Abstract Configurator for Substance editors.
+ *
+ * @module
+ */
 function AbstractConfigurator() {
   this.config = {
     schema: {},
@@ -44,6 +46,9 @@ AbstractConfigurator.Prototype = function() {
     this.config.schema = schema;
   };
 
+  /**
+   * @param {String} NodeClass node class name.
+   */
   this.addNode = function(NodeClass) {
     var name = NodeClass.static.name;
     if (!name) {
@@ -75,6 +80,9 @@ AbstractConfigurator.Prototype = function() {
     this.config.exporters[type] = ExporterClass;
   };
 
+  /**
+    @param {String} sassFilePath path to sass style file.
+   */
   this.addStyle = function(sassFilePath) {
     this.config.styles.push(sassFilePath);
   };
@@ -112,7 +120,10 @@ AbstractConfigurator.Prototype = function() {
     extend(iconConfig, options);
   };
 
-  /*
+  /**
+    @param {String} labelName name of label.
+    @param {String} label label.
+
     Define a new label
     label is either a string or a hash with translations.
     If string is provided 'en' is used as the language.
