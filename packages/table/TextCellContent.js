@@ -22,7 +22,7 @@ TextCellContent.Prototype = function() {
     el.append($$(TextPropertyEditor, {
       path: path,
       disabled: this.props.disabled
-    }));
+    }).ref('editor'));
 
     return el;
   };
