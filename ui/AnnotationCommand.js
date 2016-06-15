@@ -67,7 +67,10 @@ AnnotationCommand.Prototype = function() {
     @returns {Boolean} Whether or not command could be executed.
    */
   this.isDisabled = function(sel) {
-    if (!sel || sel.isNull() || !sel.isAttached() || sel.isCustomSelection() || sel.isNodeSelection()) {
+    // TODO: Container selections should be valid if the annotation type
+    // is a container annotation. Currently we only allow property selections.
+    if (!sel || sel.isNull() || !sel.isAttached() || sel.isCustomSelection()||
+        sel.isNodeSelection() || sel.isContainerSelection()) {
       return true;
     }
     return false;
