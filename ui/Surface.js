@@ -374,10 +374,11 @@ Surface.Prototype = function() {
   */
   this.delete = function(tx, args) {
     var sel = args.selection;
-    if (sel.isPropertySelection() && sel.isCollapsed()) {
-      return deleteCharacter(tx, args);
-    } else {
+    if (!sel.isCollapsed()) {
       return deleteSelection(tx, args);
+    }
+    else if (sel.isPropertySelection() || sel.isNodeSelection()) {
+      return deleteCharacter(tx, args);
     }
   };
 
