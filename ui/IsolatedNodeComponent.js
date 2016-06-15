@@ -155,6 +155,30 @@ IsolatedNodeComponent.Prototype = function() {
     return this._id;
   };
 
+  this.getMode = function() {
+    return this.state.mode;
+  };
+
+  this.isNotSelected = function() {
+    return !this.state.mode;
+  };
+
+  this.isSelected = function() {
+    return this.state.mode === 'selected';
+  };
+
+  this.isCoSelected = function() {
+    return this.state.mode === 'co-selected';
+  };
+
+  this.isFocused = function() {
+    return this.state.mode === 'focused';
+  };
+
+  this.isCoFocused = function() {
+    return this.state.mode === 'co-focused';
+  };
+
   this._getContentClass = function(node) {
     var componentRegistry = this.context.componentRegistry;
     var ComponentClass = componentRegistry.get(node.type);
