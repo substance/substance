@@ -2,6 +2,7 @@
 
 var extend = require('lodash/extend');
 var isNumber = require('lodash/isNumber');
+var isString = require('lodash/isString');
 var DocumentNode = require('./DocumentNode');
 var ParentNodeMixin = require('./ParentNodeMixin');
 var ContainerAddress = require('./ContainerAddress');
@@ -70,6 +71,12 @@ Container.Prototype = function() {
 
   this.show = function(nodeId, pos) {
     var doc = this.getDocument();
+    var arg1 = arguments[0];
+    if (!isString(arg1)) {
+      if (arg1._isNode) {
+        nodeId = arg1.id;
+      }
+    }
     if (!isNumber(pos)) {
       pos = this.nodes.length;
     }
