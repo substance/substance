@@ -23,6 +23,11 @@ TextNode.Prototype = function() {
   this.getText = function() {
     return this.content;
   };
+
+  this.isEmpty = function() {
+    return !this.content;
+  };
+
 };
 
 DocumentNode.extend(TextNode);

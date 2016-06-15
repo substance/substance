@@ -119,7 +119,7 @@ function _testBrowser(browser, done) {
   }, done).start();
 }
 
-gulp.task('test:chrome', function(done) {
+gulp.task('test:chrome', ['lint'], function(done) {
   if(process.env.TRAVIS) {
     _testBrowser('ChromeTravis', done);
   } else {
@@ -127,13 +127,13 @@ gulp.task('test:chrome', function(done) {
   }
 });
 
-gulp.task('test:firefox', function(done) {
+gulp.task('test:firefox', ['lint'], function(done) {
   _testBrowser('Firefox', done);
 });
 
 gulp.task('test:browsers', ['test:chrome', 'test:firefox']);
 
-gulp.task('test:server', function(done) {
+gulp.task('test:server', ['lint'], function(done) {
   return gulp.src('test/**/*.test.js')
     .pipe(tape({
       reporter: tapSpec()
