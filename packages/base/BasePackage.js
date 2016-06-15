@@ -26,12 +26,12 @@ module.exports = {
       de: 'Wiederherstellen'
     });
     config.addLabel('container-selection', {
-      en: 'Multiple Elements',
-      de: 'Mehrere Elemente'
+      en: 'Container',
+      de: 'Container'
     });
     config.addLabel('container', {
-      en: 'Multiple Elements',
-      de: 'Mehrere Elemente'
+      en: 'Container',
+      de: 'Container'
     });
   }
 };
