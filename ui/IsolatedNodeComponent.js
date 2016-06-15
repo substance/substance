@@ -144,7 +144,7 @@ IsolatedNodeComponent.Prototype = function() {
       var props = {
         node: node,
         disabled: this._isDisabled(),
-        isolatedNodeState: this.state
+        isolatedNodeState: this.state.mode
       };
       if (this.state.mode === 'focused') {
         props.focused = true;
