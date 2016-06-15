@@ -3,7 +3,6 @@
 var platform = require('../util/platform');
 var Component = require('./Component');
 var Scrollbar = require('./Scrollbar');
-var Overlay = require('./Overlay');
 var getRelativeBoundingRect = require('../util/getRelativeBoundingRect');
 
 /**
@@ -95,7 +94,9 @@ ScrollPane.Prototype = function() {
     }
 
     if (this.props.overlay) {
-      overlay = $$(Overlay, {
+      var componentRegistry = this.context.componentRegistry;
+      var OverlayClass = componentRegistry.get('overlay');
+      overlay = $$(OverlayClass, {
         overlay: this.props.overlay
       }).ref('overlay');
     }
