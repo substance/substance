@@ -1,7 +1,8 @@
 'use strict';
 
-var Component = require('./Component');
 var capitalize = require('lodash/capitalize');
+var extend = require('lodash/extend');
+var Component = require('./Component');
 
 /**
   Default Tool implementation
@@ -25,6 +26,11 @@ Tool.Prototype = function() {
     var el = $$('div')
       .addClass('se-tool');
 
+    var customClassNames = this.getClassNames();
+    if (customClassNames) {
+      el.addClass(customClassNames);
+    }
+
     var title = this.getTitle();
     if (title) {
       el.attr('title', title);
@@ -42,6 +48,10 @@ Tool.Prototype = function() {
     // button
     el.append(this.renderButton($$));
     return el;
+  };
+
+  this.getClassNames = function() {
+    return '';
   };
 
   this.renderButton = function($$) {
@@ -95,10 +105,10 @@ Tool.Prototype = function() {
   /**
     Executes the associated command
   */
-  this.performAction = function() {
-    this.context.commandManager.executeCommand(this.getCommandName(), {
+  this.performAction = function(props) {
+    this.context.commandManager.executeCommand(this.getCommandName(), extend({
       mode: this.props.mode
-    });
+    }, props));
   };
 };
 
