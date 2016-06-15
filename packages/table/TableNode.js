@@ -30,7 +30,7 @@ TableNode.static.defineSchema({
   // HACK: very low-levelish schema, where the objects will be entries
   // like `{ content: 'p1'}` plus maybe some more meta such as `cellType`
   // TODO: refine when we know exactly what we need
-  "cells": { type: ['array', 'array', 'object'], default: [] }
+  "cells": { type: ['array', 'array', 'id'], default: [] }
 });
 
 module.exports = TableNode;

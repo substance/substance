@@ -2,12 +2,11 @@
 
 var Component = require('../../ui/Component');
 var CustomSelection = require('../../model/CustomSelection');
-var ContainerEditor = require('../../ui/ContainerEditor');
 var DefaultDOMElement = require('../../ui/DefaultDOMElement');
-var TextPropertyEditor = require('../../ui/TextPropertyEditor');
 var tableHelpers = require('./tableHelpers');
 var keys = require('../../util/keys');
 var getRelativeBoundingRect = require('../../util/getRelativeBoundingRect');
+var TextCellContent = require('./TextCellContent');
 
 function TableComponent() {
   TableComponent.super.apply(this, arguments);
@@ -17,6 +16,8 @@ function TableComponent() {
   } else {
     this.surfaceId = this.props.node.id;
   }
+
+  this._selectedCells = {};
 }
 
 TableComponent.Prototype = function() {
@@ -82,8 +83,8 @@ TableComponent.Prototype = function() {
 
       console.assert(row.length === ncols, 'row should be complete.');
       for (j = 0; j < ncols; j++) {
-        var cellEntry = row[j];
-        var cellEl = this.renderCell($$, cellEntry);
+        var cellId = row[j];
+        var cellEl = this.renderCell($$, cellId);
         cellEl.attr('data-col', j)
           .on('mousedown', this._onCell);
         rowEl.append(cellEl);
@@ -119,42 +120,24 @@ TableComponent.Prototype = function() {
     return el;
   };
 
-  this.renderCell = function($$, cellEntry) {
+  this.renderCell = function($$, cellId) {
     var cellEl = $$('td').addClass('se-cell');
     var doc = this.props.node.getDocument();
-    if (cellEntry) {
-      var id = cellEntry.content;
-      var cellContent = doc.get(id);
-      if (cellContent) {
-        var cellContentEl = this.renderCellContent($$, cellContent);
-        cellContentEl.ref(id);
-        cellEl.append(cellContentEl);
-      }
+    var cellContent = doc.get(cellId);
+    if (cellContent) {
+      // TODO: we need to derive disabled state
+      // 1. if table is disabled all cells are disabled
+      // 2. if sel is TableSelection then cell is disabled if not in table selection range
+      // 3. else cell is disabled if not focused/co-focused
+      cellEl.append(
+        $$(TextCellContent, {
+          disabled: !this._selectedCells[cellId],
+          node: cellContent,
+        }).ref(cellId)
+      );
     }
-    return cellEl;
-  };
 
-  this.renderCellContent = function($$, cellContent) {
-    var el;
-    // TODO: what if this is used in a read-only environment?
-    if (cellContent.isText()) {
-      el = $$(TextPropertyEditor, {
-        disabled: this.props.disabled,
-        path: cellContent.getTextPath()
-      });
-    } else if (cellContent._isContainer) {
-      el = $$(ContainerEditor, {
-        disabled: this.props.disabled,
-        node: cellContent
-      });
-    } else {
-      var componentRegistry = this.context.componentRegistry;
-      var ComponentClass = componentRegistry.get(cellContent.type);
-      if (ComponentClass) {
-        el = $$(ComponentClass, { node: cellContent });
-      }
-    }
-    return el;
+    return cellEl;
   };
 
   this.getId = function() {
@@ -168,7 +151,7 @@ TableComponent.Prototype = function() {
   this.getSelection = function() {
     var documentSession = this.getDocumentSession();
     var sel = documentSession.getSelection();
-    if (sel.surfaceId === this.getId()) {
+    if (sel && sel.isCustomSelection() && sel.getCustomType() === 'table' && sel.surfaceId === this.getId()) {
       return sel;
     } else {
       return null;
@@ -186,7 +169,15 @@ TableComponent.Prototype = function() {
   this.onSessionDidUpdate = function(update) {
     if (update.selection) {
       var sel = this.getSelection();
-      if (sel && sel.isCustomSelection() && sel.getCustomType() === 'table') {
+      this._selectedCells = {};
+      if (sel) {
+        var rect = this._getRectangle(sel);
+        for(var i=rect.minRow; i<=rect.maxRow; i++) {
+          for(var j=rect.minCol; j<=rect.maxCol; j++) {
+            var cellId = this.props.node.cells[i][j];
+            this._selectedCells[cellId] = true;
+          }
+        }
         this._renderSelection(sel);
       }
     }
@@ -265,14 +256,23 @@ TableComponent.Prototype = function() {
     }
   };
 
+  this._getRectangle = function(sel) {
+    return {
+      minRow: Math.min(sel.data.startRow, sel.data.endRow),
+      maxRow: Math.max(sel.data.startRow, sel.data.endRow),
+      minCol: Math.min(sel.data.startCol, sel.data.endCol),
+      maxCol: Math.max(sel.data.startCol, sel.data.endCol)
+    };
+  };
+
   this._renderSelection = function() {
     var sel = this.getSelection();
-    var minRow = Math.min(sel.data.startRow, sel.data.endRow);
-    var maxRow = Math.max(sel.data.startRow, sel.data.endRow);
-    var minCol = Math.min(sel.data.startCol, sel.data.endCol);
-    var maxCol = Math.max(sel.data.startCol, sel.data.endCol);
-    var startCell = this._getCell(minRow, minCol);
-    var endCell = this._getCell(maxRow, maxCol);
+    if (!sel) return;
+
+    var rect = this._getRectangle(sel);
+
+    var startCell = this._getCell(rect.minRow, rect.minCol);
+    var endCell = this._getCell(rect.maxRow, rect.maxCol);
 
     var startEl = startCell.getNativeElement();
     var endEl = endCell.getNativeElement();
@@ -280,6 +280,23 @@ TableComponent.Prototype = function() {
     // Get the  bounding rect for startEl, endEl relative to tableEl
     var selRect = getRelativeBoundingRect([startEl, endEl], tableEl);
     this.refs.selection.css(selRect).addClass('sm-visible');
+    this._enableCells();
+  };
+
+  this._enableCells = function() {
+    var node = this.props.node;
+    for(var i=0; i<node.cells.length; i++) {
+      var row = node.cells[i];
+      for(var j=0; j<row.length; j++) {
+        var cellId = row[j];
+        var cell = this._getCell(i, j).getChildAt(0);
+        if (this._selectedCells[cellId]) {
+          cell.extendProps({ disabled: false });
+        } else {
+          cell.extendProps({ disabled: true });
+        }
+      }
+    }
   };
 
   this._getCell = function(row, col) {
