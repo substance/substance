@@ -14,6 +14,7 @@ var CodePackage = require('../code/CodePackage');
 var SubscriptPackage = require('../subscript/SubscriptPackage');
 var SuperscriptPackage = require('../superscript/SuperscriptPackage');
 var ProseEditorToolbar = require('./ProseEditorToolbar');
+var Overlay = require('../../ui/Overlay');
 
 // Article Class
 var ProseArticle = require('./ProseArticle');
@@ -28,6 +29,7 @@ module.exports = {
     });
 
     config.setToolbarClass(ProseEditorToolbar);
+    config.addComponent('overlay', Overlay);
 
     // Now import base packages
     config.import(BasePackage);

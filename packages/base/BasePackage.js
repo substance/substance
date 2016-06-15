@@ -37,6 +37,5 @@ module.exports = {
       en: 'Insert Container',
       de: 'Container einfügen'
     });
-
   }
 };
