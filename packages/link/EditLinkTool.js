@@ -40,18 +40,6 @@ EditLinkTool.Prototype = function() {
     return el;
   };
 
-  this.onSave = function(e) {
-    e.preventDefault();
-
-    var node = this.props.node;
-    var documentSession = this.context.documentSession;
-    var url = this.refs.url.val();
-
-    documentSession.transaction(function(tx) {
-      tx.set([node.id, "url"], url);
-    });
-  };
-
   this.onDelete = function(e) {
     e.preventDefault();
     var node = this.props.node;

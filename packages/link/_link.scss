@@ -1,30 +1,3 @@
 .sc-link {
   color: #2079DC;
 }
-
-.sc-edit-link-tool {
-
-  // Maybe better set from outside
-  display: inline-block;
-
-  input {
-    display: inline-block;
-    width: 200px;
-    border: none;
-    padding: 0px 10px;
-    font-size: $small-font-size;
-  }
-
-  .se-actions {
-    display: inline-block;
-
-    // TODO: Redundant with .se-tool button styles
-    .se-action {
-      display: inline-block;
-      height: 30px;
-      min-width: 30px;
-      text-align: center;
-    }
-  }
-
-}
