@@ -29,5 +29,9 @@ module.exports = {
       en: 'Multiple Elements',
       de: 'Mehrere Elemente'
     });
+    config.addLabel('container', {
+      en: 'Multiple Elements',
+      de: 'Mehrere Elemente'
+    });
   }
 };
