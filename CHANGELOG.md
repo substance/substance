@@ -18,6 +18,7 @@
 - Fixed hundreds of issues and bugs
 - Improved cross-browser compatibility
 - Added many examples documenting core features
+- Removed jQuery dependency
 
 ## Beta 3
 
