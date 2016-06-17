@@ -206,6 +206,7 @@ DOMSelection.Prototype = function() {
     var anchorNode = DefaultDOMElement.wrapNativeElement(wSel.anchorNode);
     if (wSel.isCollapsed) {
       var coor = this._getCoordinate(anchorNode, wSel.anchorOffset, options);
+      if (!coor) return null;
       // EXPERIMENTAL: when the cursor is in an IsolatedNode
       // we return a selection for the whole node
       if (coor.__inIsolatedBlockNode__) {
