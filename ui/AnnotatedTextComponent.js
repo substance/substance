@@ -11,6 +11,8 @@ var InlineNodeComponent = require('./InlineNodeComponent');
   @class
   @component
   @extends ui/Component
+
+  @prop {String[]} path The property to be rendered.
 */
 
 function AnnotatedTextComponent() {
@@ -38,23 +40,27 @@ AnnotatedTextComponent.Prototype = function() {
   };
 
   this.getText = function() {
-    return this.props.text;
+    return this.getDocument().get(this.props.path) || '';
   };
 
   this.getAnnotations = function() {
-    return this.props.annotations || [];
+    return this.getDocument().getIndex('annotations').get(this.props.path);
   };
 
   this._renderContent = function($$) {
     var text = this.getText();
     var annotations = this.getAnnotations();
     var el = $$(this.props.tagName || 'span');
-    var fragmenter = new Fragmenter({
-      onText: this._renderTextNode.bind(this),
-      onEnter: this._renderFragment.bind(this, $$),
-      onExit: this._finishFragment.bind(this)
-    });
-    fragmenter.start(el, text, annotations);
+    if (annotations && annotations.length > 0) {
+      var fragmenter = new Fragmenter({
+        onText: this._renderTextNode.bind(this),
+        onEnter: this._renderFragment.bind(this, $$),
+        onExit: this._finishFragment.bind(this)
+      });
+      fragmenter.start(el, text, annotations);
+    } else {
+      el.append(text);
+    }
     return el;
   };
 
