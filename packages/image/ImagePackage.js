@@ -17,6 +17,7 @@ module.exports = {
       en: 'Image',
       de: 'Bild'
     });
+    config.addStyle(__dirname +'/_image.scss');
     config.addLabel('insert-image', {
       en: 'Insert image',
       de: 'Bild einfügen'

@@ -11,7 +11,7 @@ module.exports = {
     config.addCommand(StrongCommand);
     config.addTool(StrongTool);
     config.addIcon(StrongCommand.static.name, { 'fontawesome': 'fa-bold' });
-
+    config.addStyle(__dirname +'/_strong.scss');
     config.addLabel('strong', {
       en: 'Strong emphasis',
       de: 'Starke Betonung'

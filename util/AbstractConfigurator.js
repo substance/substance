@@ -182,6 +182,10 @@ AbstractConfigurator.Prototype = function() {
     return this.config;
   };
 
+  this.getStyles = function() {
+    return this.config.styles;
+  };
+
   this.getSchema = function() {
     var schemaConfig = this.config.schema;
     // TODO: We may want to remove passing a schema version as
