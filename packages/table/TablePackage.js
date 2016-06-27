@@ -12,7 +12,8 @@ module.exports = {
     config.addComponent(TableNode.static.name, TableComponent);
     config.addCommand(InsertTableCommand);
     config.addTool(InsertTableTool);
-    config.addIcon(InsertTableCommand.static.name, { 'fontawesome': 'fa-table' } );
+    config.addIcon(InsertTableCommand.static.name, { 'fontawesome': 'fa-table' });
+    config.addStyle(__dirname +'/_table.scss');
     config.addLabel('table', {
       en: 'Table',
       de: 'Tabelle'

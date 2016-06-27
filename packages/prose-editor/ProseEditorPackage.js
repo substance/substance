@@ -21,18 +21,19 @@ var ProseArticle = require('./ProseArticle');
 
 module.exports = {
   name: 'prose-editor',
-  configure: function(config) {
+  configure: function(config, options) {
     config.defineSchema({
       name: 'prose-article',
       ArticleClass: ProseArticle,
       defaultTextType: 'paragraph'
     });
-
     config.setToolbarClass(ProseEditorToolbar);
     config.addComponent('overlay', Overlay);
-
     // Now import base packages
-    config.import(BasePackage);
+    config.import(BasePackage, {
+      noBaseStyles: options.noBaseStyles
+    });
+    config.addStyle(__dirname +'/_prose-editor.scss');
     config.import(ParagraphPackage);
     config.import(HeadingPackage);
     config.import(CodeblockPackage);

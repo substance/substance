@@ -11,11 +11,10 @@ module.exports = {
     config.addCommand(CodeCommand);
     config.addTool(CodeTool);
     config.addIcon('code', { 'fontawesome': 'fa-code' });
-
+    config.addStyle(__dirname +'/_code.scss');
     config.addLabel('code', {
       en: 'Code',
       de: 'Code'
     });
   }
 };
-

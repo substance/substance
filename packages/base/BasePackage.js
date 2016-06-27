@@ -1,8 +1,10 @@
 'use strict';
 
+var path = require('path');
+
 module.exports = {
   name: 'base',
-  configure: function(config) {
+  configure: function(config, options) {
     config.addCommand(require('./SwitchTextTypeCommand'));
     config.addCommand(require('./UndoCommand'));
     config.addCommand(require('./RedoCommand'));
@@ -16,6 +18,18 @@ module.exports = {
     config.addIcon('delete', { 'fontawesome': 'fa-times' });
     config.addIcon('expand', { 'fontawesome': 'fa-arrows-h' });
     config.addIcon('truncate', { 'fontawesome': 'fa-arrows-h' });
+
+    // Substance base styles
+    if (!options.noBaseStyles) {
+      config.addStyle(path.join(__dirname, '..', '..', 'styles', 'base', '_all'));
+    }
+
+    // Styles
+    config.addStyle(__dirname +'/_base.scss');
+
+    // Core component styles
+    config.addStyle(path.join(__dirname, '..', '..', 'styles', 'components', '_all'));
+
     // Labels
     config.addLabel('undo', {
       en: 'Undo',

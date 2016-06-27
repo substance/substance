@@ -5,6 +5,9 @@ var browserify = require('browserify');
 var sass = require('node-sass');
 var fs = require('fs');
 var each = require('lodash/each');
+var isString = require('lodash/isString');
+var Configurator = require('./Configurator');
+
 
 /**
   @module
@@ -47,7 +50,7 @@ server.serveJS = function(expressApp, route, sourcePath) {
 
   @param {ExpressApplication} expressApp Express.js application instance
   @param {String} route Express route under which the styles should be served
-  @param {String} sourcePath entry point for sass compilation
+  @param {Object} props either a configPath or a scssPath must be provided
 
   @example
 
@@ -55,14 +58,34 @@ server.serveJS = function(expressApp, route, sourcePath) {
   server.serveStyles(app, '/app.css', path.join(__dirname, 'src', 'app.scss'));
   ```
 */
-server.serveStyles = function(expressApp, route, sourcePath) {
+server.serveStyles = function(expressApp, route, props) {
+  if (isString(props)) {
+    console.warn("DEPRECATED: Use serveStyles(expressApp, '/app.css', {scssPath: 'app.scss'}");
+    props = {
+      scssPath: props
+    };
+  }
+
   expressApp.get(route, function(req, res) {
-    sass.render({
-      file: sourcePath,
+    var sassOptions = {
       sourceMap: true,
       sourceMapEmbed: true,
-      outFile: 'app.css',
-    }, function(err, result) {
+      outFile: 'app.css'
+    };
+
+    if (props.configPath) {
+      var config = require(props.configPath);
+      var configurator = new Configurator(config);
+      var scssFiles = configurator.getStyles();
+      var scssContent = scssFiles.map(function(scssFile) {
+        return "@import '"+scssFile+"';";
+      }).join('\n');
+      sassOptions.data = scssContent;
+    } else {
+      sassOptions.file = props.scssPath;
+    }
+
+    sass.render(sassOptions, function(err, result) {
       if (err) {
         console.error(err);
         res.status(400).json(err);
