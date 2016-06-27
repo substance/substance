@@ -114,14 +114,6 @@ TOCProvider.Prototype = function() {
     var smartScanline = 2 * scrollBottom - contentHeight;
     var scanline = Math.max(regularScanline, smartScanline);
 
-    // For debugging purposes
-    // TODO: FIXME this code does not make sense anymore.
-    //       The scanline should be part of the scrolled content not the scrollbar
-    // To activate remove display:none for .scanline in the CSS
-    // $('.se-scanline').css({
-    //   top: (scanline - scrollTop)+'px'
-    // });
-
     var tocNodes = this.computeEntries();
     if (tocNodes.length === 0) return;
 
