@@ -1,6 +1,7 @@
 "use strict";
 
 var extend = require('lodash/extend');
+var isPlainObject = require('lodash/isPlainObject');
 var oo = require('../util/oo');
 var EventEmitter = require('../util/EventEmitter');
 var TransactionDocument = require('./TransactionDocument');
@@ -50,12 +51,19 @@ DocumentSession.Prototype = function() {
   };
 
   this.setSelection = function(sel) {
+    if (sel && isPlainObject(sel)) {
+      sel = this.doc.createSelection(sel);
+    }
     var selectionHasChanged = this._setSelection(sel);
     if(selectionHasChanged) {
       this._triggerUpdateEvent({
         selection: sel
       });
     }
+  };
+
+  this.createSelection = function() {
+    return this.doc.createSelection.apply(this.doc, arguments);
   };
 
   this.getSelectionState = function() {

@@ -67,7 +67,9 @@ TextPropertyComponent.Prototype = function() {
       el.attr('contentEditable', true);
     }
 
-    el.append($$('br'));
+    if (!this.props.withoutBreak) {
+      el.append($$('br'));
+    }
     return el;
   };
 
