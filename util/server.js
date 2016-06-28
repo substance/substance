@@ -2,6 +2,7 @@
 /* eslint-disable no-console */
 
 var browserify = require('browserify');
+var glob = require('glob');
 var sass = require('node-sass');
 var fs = require('fs');
 var path = require('path');
@@ -118,6 +119,43 @@ server.serveHTML = function(expressApp, route, sourcePath, config) {
       res.send(html);
     });
   });
+};
+
+server.serveTestSuite = function(expressApp, globPattern, options) {
+  options = options || {};
+  var cwd = process.cwd();
+  // Test suite
+  expressApp.get('/test/test.js', function (req, res) {
+    glob(globPattern, {}, function (er, testfiles) {
+      if (er || !testfiles || testfiles.length === 0) {
+        console.error('No tests found.');
+        res.send('500');
+      } else {
+        // console.log('Found test files:', testfiles);
+        var b = browserify({ debug: true, cache: false });
+        if (options.transforms) {
+          options.transforms.forEach(function(t) {
+            b.transform(t);
+          });
+        }
+        // NOTE: adding this file first as this will launch
+        // our customized version of tape for the browser.
+        b.add(path.join(cwd, 'test', 'app.js'))
+        b.add(testfiles.map(function(file) {
+            return path.join(cwd, file);
+          }))
+          .bundle()
+          .on('error', function(err){
+            console.error(err.message);
+          })
+          .pipe(res);
+      }
+    });
+  });
+  expressApp.get('/test/index.html', function(req, res) {
+    res.sendFile(path.join(__dirname, '..', 'test', 'index.html'));
+  });
+  server.serveStyles(expressApp, '/test/test.css', path.join(__dirname, '..', 'test', 'test.scss'));
 };
 
 
