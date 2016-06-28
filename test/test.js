@@ -146,8 +146,7 @@ var defaultExtensions = {
   },
 };
 
-_addExtensions(defaultExtensions, harness, true);
-
+harness = _addExtensions(defaultExtensions, harness, true);
 
 function _addExtensions(extensions, tapeish, addModule) {
 
@@ -174,8 +173,9 @@ function _addExtensions(extensions, tapeish, addModule) {
   tapeish.withExtension = function(name, fn) {
     var exts = clone(extensions);
     exts[name] = fn;
+    // wrapping tapeish to create a new tapeish with new extensions
     return _addExtensions(exts, function() {
-      return fn.apply(tapeish, arguments);
+      return tapeish.apply(tapeish, arguments);
     }, true);
   };
 
