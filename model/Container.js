@@ -21,7 +21,9 @@ var ContainerAddress = require('./ContainerAddress');
 function Container() {
   Container.super.apply(this, arguments);
 
-  if (!this.document.isTransactionDocument) {
+  // HACK: we invalidate cached positions on every change
+  // NOTE, that in trans action docs we don't do caching
+  if (this.document && !this.document.isTransactionDocument) {
     this.document.on('document:changed', this._onChange, this);
   }
 }
@@ -39,7 +41,7 @@ Container.Prototype = function() {
   this.getPosition = function(nodeId) {
     // HACK: ATM we are caching only in the real Document
     // i.e., which is connected to the UI etc.
-    if (this.document.isTransactionDocument) {
+    if (this.document && this.document.isTransactionDocument) {
       return this.nodes.indexOf(nodeId);
     } else {
       var positions = this._getCachedPositions();
