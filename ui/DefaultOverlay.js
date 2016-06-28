@@ -26,7 +26,7 @@ DefaultOverlay.Prototype = function() {
   };
 
   this.getClassNames = function() {
-    return "sc-overlay";
+    return "sc-default-overlay";
   };
 
 };
