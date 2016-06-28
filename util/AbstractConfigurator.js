@@ -9,6 +9,7 @@ var EditingBehavior = require('../model/EditingBehavior');
 var Registry = require('../util/Registry');
 var FileClientStub = require('../ui/FileClientStub');
 var SaveHandlerStub = require('../ui/SaveHandlerStub');
+var path = require('path');
 
 /**
  * Abstract Configurator for Substance editors.
@@ -81,9 +82,16 @@ AbstractConfigurator.Prototype = function() {
   };
 
   /**
-    @param {String} sassFilePath path to sass style file.
-   */
-  this.addStyle = function(sassFilePath) {
+    Register a new Sass style. Each argument is a path fragment.
+
+    @example
+
+    ```js
+    config.addStyle(__dirname, '..', '_strong.scss');
+    ```
+  */
+  this.addStyle = function() {
+    var sassFilePath = path.join.apply(this, arguments);
     this.config.styles.push(sassFilePath);
   };
 

@@ -1,7 +1,5 @@
 'use strict';
 
-var path = require('path');
-
 module.exports = {
   name: 'base',
   configure: function(config, options) {
@@ -21,14 +19,14 @@ module.exports = {
 
     // Substance base styles
     if (!options.noBaseStyles) {
-      config.addStyle(path.join(__dirname, '..', '..', 'styles', 'base', '_all'));
+      config.addStyle(__dirname, '..', '..', 'styles', 'base', '_all');
     }
 
     // Styles
-    config.addStyle(path.join(__dirname, '_base.scss'));
+    config.addStyle(__dirname, '_base.scss');
 
     // Core component styles
-    config.addStyle(path.join(__dirname, '..', '..', 'styles', 'components', '_all'));
+    config.addStyle(__dirname, '..', '..', 'styles', 'components', '_all');
 
     // Labels
     config.addLabel('undo', {

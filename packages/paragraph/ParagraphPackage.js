@@ -3,7 +3,6 @@
 var Paragraph = require('./Paragraph');
 var ParagraphComponent = require('./ParagraphComponent');
 var ParagraphHTMLConverter = require('./ParagraphHTMLConverter');
-var path = require('path');
 
 module.exports = {
   name: 'paragraph',
@@ -15,7 +14,7 @@ module.exports = {
       name: 'paragraph',
       data: {type: 'paragraph'}
     });
-    config.addStyle(path.join(__dirname, '_paragraph.scss'));
+    config.addStyle(__dirname, '_paragraph.scss');
     config.addLabel('paragraph', {
       en: 'Paragraph',
       de: 'Paragraph'

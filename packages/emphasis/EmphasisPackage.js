@@ -5,7 +5,6 @@ var EmphasisTool = require('./EmphasisTool');
 var EmphasisCommand = require('./EmphasisCommand');
 var EmphasisHTMLConverter = require('./EmphasisHTMLConverter');
 var EmphasisXMLConverter = require('./EmphasisXMLConverter');
-var path = require('path');
 
 module.exports = {
   name: 'emphasis',
@@ -15,7 +14,7 @@ module.exports = {
     config.addTool(EmphasisTool);
     config.addConverter('html', EmphasisHTMLConverter);
     config.addConverter('xml', EmphasisXMLConverter);
-    config.addStyle(path.join(__dirname, '_emphasis.scss'));
+    config.addStyle(__dirname, '_emphasis.scss');
 
     config.addIcon('emphasis', { 'fontawesome': 'fa-italic' });
     config.addLabel('emphasis', {
