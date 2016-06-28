@@ -40,9 +40,9 @@ var DataNode = require('./data/Node');
 
 function DocumentNode(doc, props) {
   DataNode.call(this, props);
-  if (!doc) {
-    throw new Error('Document instance is mandatory.');
-  }
+  // being less strict here allows us to create a detached node
+  // which can be useful for testing
+  // if (!doc) throw new Error('Document instance is mandatory.');
   this.document = doc;
 }
 
