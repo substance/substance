@@ -128,22 +128,21 @@ function _withBeforeAndAfter(tapeish, args) {
 }
 
 var defaultExtensions = {
-  withOptions: function(tapeish, args, opts) {
-    var _opts = extend({}, opts, args.opts);
-    return tapeish(args.name, _opts, args.cb);
-  },
-  UI: function(tapeish, args) {
+  UI: function() {
+    var args = this.getTestArgs(arguments);
     if (!inBrowser) args.opts.skip = true;
     if(inBrowser && !substanceGlobals.TEST_UI) args.opts.setupUI = true;
-    return _withBeforeAndAfter(tapeish, args);
+    return _withBeforeAndAfter(this, args);
   },
-  FF: function(tapeish, args) {
+  FF: function() {
+    var args = this.getTestArgs(arguments);
     if (!inBrowser || !platform.isFF) args.opts.skip = true;
-    return tapeish.UI(args.name, args.opts, args.cb);
+    return this.UI(args.name, args.opts, args.cb);
   },
-  WK: function(tapeish, args) {
+  WK: function() {
+    var args = this.getTestArgs(arguments);
     if (!inBrowser || !platform.isWebKit) args.opts.skip = true;
-    return tapeish.UI(args.name, args.opts, args.cb);
+    return this.UI(args.name, args.opts, args.cb);
   },
 };
 
@@ -164,21 +163,29 @@ function _addExtensions(extensions, tapeish, addModule) {
     };
   }
 
+  tapeish.withOptions = function(opts) {
+    return _addExtensions(extensions, function() {
+      var args = getTestArgs.apply(null, arguments);
+      var _opts = extend({}, opts, args.opts);
+      return tapeish(args.name, _opts, args.cb);
+    });
+  };
+
   tapeish.withExtension = function(name, fn) {
     var exts = clone(extensions);
     exts[name] = fn;
     return _addExtensions(exts, function() {
-      var args = getTestArgs.apply(null, arguments);
-      return fn.apply(null, [tapeish, args].concat(arguments));
-    });
+      return fn.apply(tapeish, arguments);
+    }, true);
+  };
+
+  tapeish.getTestArgs = function(args) {
+    return getTestArgs.apply(null, args);
   };
 
   forEach(extensions, function(fn, name) {
     tapeish[name] = function() {
-      return _addExtensions(extensions, function() {
-        var args = getTestArgs.apply(null, arguments);
-        return fn.apply(null, [tapeish, args].concat(arguments));
-      });
+      return fn.apply(tapeish, arguments);
     };
   });
 
