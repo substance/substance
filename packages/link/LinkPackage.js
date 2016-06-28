@@ -16,6 +16,7 @@ module.exports = {
     config.addCommand(LinkCommand);
     config.addTool(LinkTool);
     config.addTool(EditLinkTool, { overlay: true });
+    config.addStyle(__dirname, '_link.scss');
     config.addIcon(LinkCommand.static.name, { 'fontawesome': 'fa-link'});
     config.addIcon('open-link', { 'fontawesome': 'fa-external-link' });
     config.addLabel('link', {

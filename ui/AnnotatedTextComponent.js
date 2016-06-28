@@ -11,6 +11,8 @@ var InlineNodeComponent = require('./InlineNodeComponent');
   @class
   @component
   @extends ui/Component
+
+  @prop {String[]} path The property to be rendered.
 */
 
 function AnnotatedTextComponent() {
@@ -38,23 +40,27 @@ AnnotatedTextComponent.Prototype = function() {
   };
 
   this.getText = function() {
-    return this.props.text;
+    return this.getDocument().get(this.props.path) || '';
   };
 
   this.getAnnotations = function() {
-    return this.props.annotations || [];
+    return this.getDocument().getIndex('annotations').get(this.props.path);
   };
 
   this._renderContent = function($$) {
     var text = this.getText();
     var annotations = this.getAnnotations();
     var el = $$(this.props.tagName || 'span');
-    var fragmenter = new Fragmenter({
-      onText: this._renderTextNode.bind(this),
-      onEnter: this._renderFragment.bind(this, $$),
-      onExit: this._finishFragment.bind(this)
-    });
-    fragmenter.start(el, text, annotations);
+    if (annotations && annotations.length > 0) {
+      var fragmenter = new Fragmenter({
+        onText: this._renderTextNode.bind(this),
+        onEnter: this._renderFragment.bind(this, $$),
+        onExit: this._finishFragment.bind(this)
+      });
+      fragmenter.start(el, text, annotations);
+    } else {
+      el.append(text);
+    }
     return el;
   };
 
@@ -78,15 +84,13 @@ AnnotatedTextComponent.Prototype = function() {
         .addClass(node.anno.getTypeNames().join(' ').replace(/_/g, "-"))
         .addClass(node.isStart?"start-anchor":"end-anchor");
     }
-    var ComponentClass;
-    if (node.constructor.static.isInline) {
+    var ComponentClass = componentRegistry.get(node.type) || AnnotationComponent;
+    if (node.constructor.static.isInline &&
+        // opt-out for custom implementations
+        !ComponentClass.static.isCustom &&
+        // also no extra wrapping if the node is already an inline node
+        !ComponentClass.prototype._isInlineNodeComponent) {
       ComponentClass = InlineNodeComponent;
-    } else {
-      ComponentClass = componentRegistry.get(node.type);
-      if (!ComponentClass) {
-        // console.warn('No component registered for type %s. Using AnnotationComponent.', node.type);
-        ComponentClass = AnnotationComponent;
-      }
     }
     var el = $$(ComponentClass, { doc: doc, node: node });
     return el;

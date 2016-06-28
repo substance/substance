@@ -22,6 +22,8 @@ module.exports = {
       name: 'heading3',
       data: {type: 'heading', level: 3}
     });
+    config.addStyle(__dirname, '_heading.scss');
+
     config.addLabel('heading1', {
       en: 'Heading 1',
       de: 'Überschrift 1'

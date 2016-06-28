@@ -147,7 +147,7 @@ DOMExporter.Prototype = function() {
       el.attr(this.config.idAttribute, anno.id);
       el.append(context.children);
       if (converter.export) {
-        converter.export(anno, el, self);
+        el = converter.export(anno, el, self) || el;
       }
       parentContext.children.push(el);
     }.bind(this);

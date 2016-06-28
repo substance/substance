@@ -14,8 +14,9 @@ module.exports = {
     config.addTool(EmphasisTool);
     config.addConverter('html', EmphasisHTMLConverter);
     config.addConverter('xml', EmphasisXMLConverter);
-    config.addIcon('emphasis', { 'fontawesome': 'fa-italic' });
+    config.addStyle(__dirname, '_emphasis.scss');
 
+    config.addIcon('emphasis', { 'fontawesome': 'fa-italic' });
     config.addLabel('emphasis', {
       en: 'Emphasis',
       de: 'Betonung'

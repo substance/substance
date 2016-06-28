@@ -128,9 +128,9 @@ DOMImporter.Prototype = function DOMImporterPrototype() {
       var node;
       if (blockTypeConverter) {
         node = this._nodeData(el, blockTypeConverter.type);
-        state.pushElementContext(el.tagName);
+        state.pushContext(el.tagName, blockTypeConverter);
         node = blockTypeConverter.import(el, node, this) || node;
-        state.popElementContext();
+        state.popContext();
         this._createAndShow(node);
       } else {
         if (el.isCommentNode()) {
@@ -177,9 +177,9 @@ DOMImporter.Prototype = function DOMImporterPrototype() {
     var converter = this._getConverterForElement(el, mode);
     if (converter) {
       node = this._nodeData(el, converter.type);
-      this.state.pushElementContext(el.tagName);
+      this.state.pushContext(el.tagName, converter);
       node = converter.import(el, node, this) || node;
-      this.state.popElementContext();
+      this.state.popContext();
       this.createNode(node);
     } else {
       throw new Error('No converter found for '+el.tagName);
@@ -271,9 +271,7 @@ DOMImporter.Prototype = function DOMImporterPrototype() {
     this.state.lastChar = '';
     var text;
     var iterator = el.getChildNodeIterator();
-    this.state.pushElementContext(el.tagName);
     text = this._annotatedText(iterator);
-    this.state.popElementContext();
     if (path) {
       state.stack.pop();
       state.preserveWhitespace = false;
@@ -352,9 +350,9 @@ DOMImporter.Prototype = function DOMImporterPrototype() {
       throw new Error('Could not find converter for default type ', defaultTextType);
     }
     var node = this._nodeData(el, defaultTextType);
-    this.state.pushElementContext(el.tagName);
+    this.state.pushContext(el.tagName, converter);
     node = defaultConverter.import(el, node, converter) || node;
-    this.state.popElementContext();
+    this.state.popContext();
     return node;
   };
 
@@ -388,6 +386,7 @@ DOMImporter.Prototype = function DOMImporterPrototype() {
         continue;
       } else if (el.isElementNode()) {
         var inlineTypeConverter = this._getConverterForElement(el, 'inline');
+        // if no inline converter is found we just traverse deeper
         if (!inlineTypeConverter) {
           if (!this.IGNORE_DEFAULT_WARNINGS) {
             console.warn('Unsupported inline element. We will not create an annotation for it, but process its children to extract annotated text.', el.outerHTML);
@@ -405,9 +404,9 @@ DOMImporter.Prototype = function DOMImporterPrototype() {
         if (inlineTypeConverter.import) {
           // push a new context so we can deal with reentrant calls
           state.stack.push({ path: context.path, offset: startOffset, text: ""});
-          state.pushElementContext(el.tagName);
+          state.pushContext(el.tagName, inlineTypeConverter);
           inlineNode = inlineTypeConverter.import(el, inlineNode, this) || inlineNode;
-          state.popElementContext();
+          state.popContext();
 
           var NodeClass = this.schema.getNodeClass(inlineType);
           // inline nodes are attached to an invisible character
@@ -621,15 +620,15 @@ DOMImporter.State.Prototype = function() {
     this.uuid = createCountingIdGenerator();
   };
 
-  this.pushElementContext = function(tagName) {
-    this.contexts.push({ tagName: tagName });
+  this.pushContext = function(tagName, converter) {
+    this.contexts.push({ tagName: tagName, converter: converter});
   };
 
-  this.popElementContext = function() {
+  this.popContext = function() {
     return this.contexts.pop();
   };
 
-  this.getCurrentElementContext = function() {
+  this.getCurrentContext = function() {
     return last(this.contexts);
   };
 

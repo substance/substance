@@ -13,6 +13,8 @@ InlineNodeComponent.Prototype = function() {
 
   var _super = InlineNodeComponent.super.prototype;
 
+  this._isInlineNodeComponent = true;
+
   // use spans everywhere
   this.__elementTag = 'span';
   this.__slugChar = "\uFEFF";

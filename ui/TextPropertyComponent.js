@@ -5,7 +5,8 @@ var Coordinate = require('../model/Coordinate');
 var AnnotatedTextComponent = require('./AnnotatedTextComponent');
 
 /**
-  Renders a text property. Used internally by different components to render editable text.
+  Renders a text property. Used internally by different components to render
+  editable text.
 
   @class
   @component
@@ -33,6 +34,8 @@ TextPropertyComponent.Prototype = function() {
 
   this.didMount = function() {
     _super.didMount.call(this);
+    // TODO: instead of letting Surface manage TextProperties
+    // we should instead use the Flow in future
     var surface = this.getSurface();
     if (surface) {
       surface._registerTextProperty(this);
@@ -64,7 +67,9 @@ TextPropertyComponent.Prototype = function() {
       el.attr('contentEditable', true);
     }
 
-    el.append($$('br'));
+    if (!this.props.withoutBreak) {
+      el.append($$('br'));
+    }
     return el;
   };
 
@@ -92,7 +97,6 @@ TextPropertyComponent.Prototype = function() {
     } else {
       el = _super._renderFragment.apply(this, arguments);
       if (node.constructor.static.isInline) {
-        // FIXME: enabling this reveals a bug in RenderEngine with reusing a component but reattached to a new parent.
         el.ref(id);
       }
       // Adding refs here, enables preservative rerendering
@@ -123,10 +127,6 @@ TextPropertyComponent.Prototype = function() {
       annotations = annotations.concat(fragments);
     }
     return annotations;
-  };
-
-  this.setFragments = function() {
-    this.children[0].extendProps({ annotations: this.getAnnotations() });
   };
 
   this.getDocument = function() {

@@ -1,32 +1,19 @@
 'use strict';
 
-var Component = require('../../ui/Component');
+var DefaultOverlay = require('../../ui/DefaultOverlay');
 
 function ProseEditorOverlay() {
-  Component.apply(this, arguments);
+  ProseEditorOverlay.super.apply(this, arguments);
 }
 
 ProseEditorOverlay.Prototype = function() {
 
-  this.render = function($$) {
-    var el = $$('div').addClass('sc-prose-editor-overlay');
-    var commandStates = this.props.commandStates;
-    var toolRegistry = this.context.toolRegistry;
-
-    toolRegistry.forEach(function(tool) {
-      if (tool.options.overlay) {
-        var toolProps = tool.Class.static.getProps(commandStates);
-        if (toolProps) {
-          el.append(
-            $$(tool.Class, toolProps)
-          );
-        }
-      }
-    });
-    return el;
+  this.getClassNames = function() {
+    return 'sc-prose-editor-overlay';
   };
+
 };
 
-Component.extend(ProseEditorOverlay);
+DefaultOverlay.extend(ProseEditorOverlay);
 
 module.exports = ProseEditorOverlay;

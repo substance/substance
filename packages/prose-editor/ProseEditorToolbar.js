@@ -1,34 +1,19 @@
 'use strict';
 
-var Component = require('../../ui/Component');
-var ToolGroup = require('../../ui/ToolGroup');
+var Toolbar = require('../../ui/Toolbar');
 
 function ProseEditorToolbar() {
-  Component.apply(this, arguments);
+  ProseEditorToolbar.super.apply(this, arguments);
 }
 
 ProseEditorToolbar.Prototype = function() {
 
-  this.render = function($$) {
-    var el = $$("div").addClass('sc-prose-editor-toolbar');
-    var commandStates = this.props.commandStates;
-    var toolRegistry = this.context.toolRegistry;
-
-    var tools = [];
-    toolRegistry.forEach(function(tool, name) {
-      if (!tool.options.overlay) {
-        tools.push(
-          $$(tool.Class, commandStates[name])
-        );
-      }
-    });
-
-    el.append(
-      $$(ToolGroup).append(tools)
-    );
-    return el;
+  this.getClassNames = function() {
+    return 'sc-prose-editor-toolbar';
   };
+
 };
 
-Component.extend(ProseEditorToolbar);
+Toolbar.extend(ProseEditorToolbar);
+
 module.exports = ProseEditorToolbar;

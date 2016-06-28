@@ -14,6 +14,7 @@ module.exports = {
       name: 'list-item',
       data: { type: 'list-item' }
     });
+    config.addStyle(__dirname, '_list.scss');
     config.addEditingBehavior(ListEditing);
     if (options.enableMacro) {
       config.addMacro(ListMacro);
