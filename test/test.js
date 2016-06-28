@@ -1,6 +1,9 @@
+
 'use strict';
 
+var clone = require('lodash/clone');
 var extend = require('lodash/extend');
+var forEach = require('lodash/forEach');
 var isNil = require('lodash/isNil');
 var tape = require('tape');
 var inBrowser = require('../util/inBrowser');
@@ -86,8 +89,6 @@ if (inBrowser && substanceGlobals.TEST_UI) {
   };
 }
 
-_withExtensions(harness, true);
-
 /*
   Helpers
 */
@@ -113,24 +114,47 @@ function getTestArgs() {
   return { name: name, opts: opts, cb: cb };
 }
 
-function _withExtensions(tapeish, addModule) {
+function _withBeforeAndAfter(tapeish, args) {
+  var _before = args.opts.before;
+  var _after = args.opts.after;
+  var _setupUI = args.opts.setupUI;
+  return tapeish(args.name, args.opts, function (t) {
+    if(_before) _before(t);
+    if(_setupUI) _setupSandbox(t);
+    args.cb(t);
+    if(_setupUI) _teardownSandbox(t);
+    if(_after) _after(t);
+  });
+}
 
-  function _withBeforeAndAfter(args) {
-    var _before = args.opts.before;
-    var _after = args.opts.after;
-    var _setupUI = args.opts.setupUI;
-    return tapeish(args.name, args.opts, function (t) {
-      if(_before) _before(t);
-      if(_setupUI) _setupSandbox(t);
-      args.cb(t);
-      if(_setupUI) _teardownSandbox(t);
-      if(_after) _after(t);
-    });
-  }
+var defaultExtensions = {
+  withOptions: function(tapeish, args, opts) {
+    var _opts = extend({}, opts, args.opts);
+    return tapeish(args.name, _opts, args.cb);
+  },
+  UI: function(tapeish, args) {
+    if (!inBrowser) args.opts.skip = true;
+    if(inBrowser && !substanceGlobals.TEST_UI) args.opts.setupUI = true;
+    return _withBeforeAndAfter(tapeish, args);
+  },
+  FF: function(tapeish, args) {
+    if (!inBrowser || !platform.isFF) args.opts.skip = true;
+    return tapeish.UI(args.name, args.opts, args.cb);
+  },
+  WK: function(tapeish, args) {
+    if (!inBrowser || !platform.isWebKit) args.opts.skip = true;
+    return tapeish.UI(args.name, args.opts, args.cb);
+  },
+};
+
+_addExtensions(defaultExtensions, harness, true);
+
+
+function _addExtensions(extensions, tapeish, addModule) {
 
   if (addModule) {
     tapeish.module = function(moduleName) {
-      return _withExtensions(function() {
+      return _addExtensions(extensions, function() {
         var args = getTestArgs.apply(null, arguments);
         var name = moduleName + ": " + args.name;
         var t = tapeish(name, args.opts, args.cb);
@@ -140,38 +164,23 @@ function _withExtensions(tapeish, addModule) {
     };
   }
 
-  tapeish.withOptions = function(opts) {
-    return _withExtensions(function() {
+  tapeish.withExtension = function(name, fn) {
+    var exts = clone(extensions);
+    exts[name] = fn;
+    return _addExtensions(exts, function() {
       var args = getTestArgs.apply(null, arguments);
-      var _opts = extend({}, opts, args.opts);
-      return tapeish(args.name, _opts, args.cb);
+      return fn.apply(null, [tapeish, args].concat(arguments));
     });
   };
 
-  tapeish.UI = function() {
-    var args = getTestArgs.apply(null, arguments);
-    if (!inBrowser) {
-      args.opts.skip = true;
-    }
-    if(inBrowser && !substanceGlobals.TEST_UI) args.opts.setupUI = true;
-    return _withBeforeAndAfter(args);
-  };
-
-  tapeish.FF = function() {
-    var args = getTestArgs.apply(null, arguments);
-    if (!inBrowser || !platform.isFF) {
-      args.opts.skip = true;
-    }
-    return tapeish.UI(args.name, args.opts, args.cb);
-  };
-
-  tapeish.WK = function() {
-    var args = getTestArgs.apply(null, arguments);
-    if (!inBrowser || !platform.isWebKit) {
-      args.opts.skip = true;
-    }
-    return tapeish.UI(args.name, args.opts, args.cb);
-  };
+  forEach(extensions, function(fn, name) {
+    tapeish[name] = function() {
+      return _addExtensions(extensions, function() {
+        var args = getTestArgs.apply(null, arguments);
+        return fn.apply(null, [tapeish, args].concat(arguments));
+      });
+    };
+  });
 
   return tapeish;
 }
