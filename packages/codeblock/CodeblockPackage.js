@@ -3,6 +3,7 @@
 var Codeblock = require('./Codeblock');
 var CodeblockComponent = require('./CodeblockComponent');
 var CodeblockHTMLConverter = require('./CodeblockHTMLConverter');
+var path = require('path');
 
 module.exports = {
   name: 'codeblock',
@@ -14,7 +15,7 @@ module.exports = {
       name: 'codeblock',
       data: {type: 'codeblock'}
     });
-    config.addStyle(__dirname +'/_codeblock.scss');
+    config.addStyle(path.join(__dirname, '_codeblock.scss'));
     config.addLabel('codeblock', {
       en: 'Codeblock',
       de: 'Codeblock'

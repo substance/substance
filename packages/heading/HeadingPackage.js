@@ -3,6 +3,7 @@
 var Heading = require('./Heading');
 var HeadingComponent = require('./HeadingComponent');
 var HeadingHTMLConverter = require('./HeadingHTMLConverter');
+var path = require('path');
 
 module.exports = {
   name: 'heading',
@@ -22,7 +23,8 @@ module.exports = {
       name: 'heading3',
       data: {type: 'heading', level: 3}
     });
-    config.addStyle(__dirname +'/_heading.scss');
+    config.addStyle(path.join(__dirname, '_heading.scss'));
+
     config.addLabel('heading1', {
       en: 'Heading 1',
       de: 'Überschrift 1'

@@ -4,6 +4,7 @@ var ListItem = require('./ListItem');
 var ListItemComponent = require('./ListItemComponent');
 var ListEditing = require('./ListEditing');
 var ListMacro = require('./ListMacro');
+var path = require('path');
 
 module.exports = {
   name: 'list-item',
@@ -14,7 +15,7 @@ module.exports = {
       name: 'list-item',
       data: { type: 'list-item' }
     });
-    config.addStyle(__dirname +'/_list.scss');
+    config.addStyle(path.join(__dirname, '_list.scss'));
     config.addEditingBehavior(ListEditing);
     if (options.enableMacro) {
       config.addMacro(ListMacro);

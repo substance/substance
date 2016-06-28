@@ -25,7 +25,7 @@ module.exports = {
     }
 
     // Styles
-    config.addStyle(__dirname +'/_base.scss');
+    config.addStyle(path.join(__dirname, '_base.scss'));
 
     // Core component styles
     config.addStyle(path.join(__dirname, '..', '..', 'styles', 'components', '_all'));

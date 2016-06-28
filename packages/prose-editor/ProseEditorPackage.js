@@ -15,6 +15,7 @@ var SubscriptPackage = require('../subscript/SubscriptPackage');
 var SuperscriptPackage = require('../superscript/SuperscriptPackage');
 var ProseEditorToolbar = require('./ProseEditorToolbar');
 var Overlay = require('../../ui/Overlay');
+var path = require('path');
 
 // Article Class
 var ProseArticle = require('./ProseArticle');
@@ -33,7 +34,8 @@ module.exports = {
     config.import(BasePackage, {
       noBaseStyles: options.noBaseStyles
     });
-    config.addStyle(__dirname +'/_prose-editor.scss');
+
+    config.addStyle(path.join(__dirname, '_prose-editor.scss'));
     config.import(ParagraphPackage);
     config.import(HeadingPackage);
     config.import(CodeblockPackage);
