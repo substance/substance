@@ -79,14 +79,30 @@ DOMImporter.Prototype = function DOMImporterPrototype() {
     this.state.reset();
   };
 
-  this.createDocument = function(schema) {
-    var doc = this._createDocument(schema);
+  this.createDocument = function() {
+    this.state.doc = this._createDocument(this.config.schema);
+    return this.state.doc;
+  };
+
+  // Note: this is e.g. shared by ClipboardImporter which has a different
+  // implementation of this.createDocument()
+  this._createDocument = function(schema) {
+    // create an empty document and initialize the container if not present
+    var doc = new this.config.DocumentClass(schema);
     return doc;
   };
 
+  // should be called at the end to finish conversion
+  // For instance, the creation of annotation is deferred
+  // to make sure that the nodes they are attached to are created first
+  // TODO: we might want to rethink this in future
+  // as it makes this a bit more complicated
   this.generateDocument = function() {
+    var doc = this.state.doc;
+    if (!doc) {
+      doc = this.createDocument();
+    }
     // creating all nodes
-    var doc = this.createDocument(this.config.schema);
     this.state.nodes.forEach(function(node) {
       // delete if the node exists already
       if (doc.get(node.id)) {
@@ -101,12 +117,6 @@ DOMImporter.Prototype = function DOMImporterPrototype() {
       }
       doc.create(node);
     });
-    return doc;
-  };
-
-  this._createDocument = function(schema) {
-    // create an empty document and initialize the container if not present
-    var doc = new this.config.DocumentClass(schema);
     return doc;
   };
 
@@ -168,7 +178,9 @@ DOMImporter.Prototype = function DOMImporterPrototype() {
     @returns {object} the created node as JSON
    */
   this.convertElement = function(el) {
-    var node = this._convertElement(el);
+    var nodeData = this._convertElement(el);
+    var NodeClass = this.schema.getNodeClass(nodeData.type);
+    var node = new NodeClass(this.state.doc, nodeData);
     return node;
   };
 

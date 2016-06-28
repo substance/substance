@@ -66,9 +66,10 @@ HTMLImporter.Prototype = function() {
   this.importDocument = function(html) {
     this.reset();
     var parsed = DefaultDOMElement.parseHTML(html);
+    // creating all nodes
     this.convertDocument(parsed);
-    var doc = this.generateDocument();
-    return doc;
+    this.generateDocument();
+    return this.state.doc;
   };
 
   /**
