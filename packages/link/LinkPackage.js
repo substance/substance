@@ -6,7 +6,6 @@ var LinkCommand = require('./LinkCommand');
 var LinkHTMLConverter = require('./LinkHTMLConverter');
 var LinkTool = require('./LinkTool');
 var EditLinkTool = require('./EditLinkTool');
-var path = require('path');
 
 module.exports = {
   name: 'link',
@@ -17,7 +16,7 @@ module.exports = {
     config.addCommand(LinkCommand);
     config.addTool(LinkTool);
     config.addTool(EditLinkTool, { overlay: true });
-    config.addStyle(path.join(__dirname, '_link.scss'));
+    config.addStyle(__dirname, '_link.scss');
     config.addIcon(LinkCommand.static.name, { 'fontawesome': 'fa-link'});
     config.addIcon('open-link', { 'fontawesome': 'fa-external-link' });
     config.addLabel('link', {
