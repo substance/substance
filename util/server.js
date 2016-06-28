@@ -152,8 +152,12 @@ server.serveTestSuite = function(expressApp, globPattern, options) {
       }
     });
   });
-  expressApp.get('/test/index.html', function(req, res) {
+  var serveTestPage = function(req, res) {
     res.sendFile(path.join(__dirname, '..', 'test', 'index.html'));
+  };
+  expressApp.get('/test/index.html', serveTestPage);
+  expressApp.get('/test', function(req, res) {
+    res.redirect('/test/index.html');
   });
   server.serveStyles(expressApp, '/test/test.css', path.join(__dirname, '..', 'test', 'test.scss'));
 };
