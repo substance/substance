@@ -140,7 +140,7 @@ server.serveTestSuite = function(expressApp, globPattern, options) {
         }
         // NOTE: adding this file first as this will launch
         // our customized version of tape for the browser.
-        b.add(path.join(cwd, 'test', 'app.js'));
+        b.add(path.join(__dirname, '..', 'test', 'app.js'));
         b.add(testfiles.map(function(file) {
           return path.join(cwd, file);
         }))
