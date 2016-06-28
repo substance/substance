@@ -178,9 +178,13 @@ DOMImporter.Prototype = function DOMImporterPrototype() {
     @returns {object} the created node as JSON
    */
   this.convertElement = function(el) {
+    var doc = this.state.doc;
     var nodeData = this._convertElement(el);
     var NodeClass = this.schema.getNodeClass(nodeData.type);
-    var node = new NodeClass(this.state.doc, nodeData);
+    var node = new NodeClass(doc, nodeData);
+    if (doc) {
+      doc.create(node);
+    }
     return node;
   };
 
