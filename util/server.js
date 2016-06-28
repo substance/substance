@@ -75,7 +75,8 @@ server.serveStyles = function(expressApp, route, props) {
 
     if (props.configPath) {
       var config = require(props.configPath);
-      var configurator = new Configurator(config);
+      var ConfiguratorClass = props.ConfiguratorClass || Configurator;
+      var configurator = new ConfiguratorClass(config);
       var scssFiles = configurator.getStyles();
       var scssContent = scssFiles.map(function(scssFile) {
         return "@import '"+scssFile+"';";
