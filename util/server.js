@@ -4,6 +4,7 @@
 var browserify = require('browserify');
 var sass = require('node-sass');
 var fs = require('fs');
+var path = require('path');
 var each = require('lodash/each');
 var isString = require('lodash/isString');
 var Configurator = require('./Configurator');
@@ -78,8 +79,10 @@ server.serveStyles = function(expressApp, route, props) {
       var ConfiguratorClass = props.ConfiguratorClass || Configurator;
       var configurator = new ConfiguratorClass(config);
       var scssFiles = configurator.getStyles();
+      var cwd = process.cwd();
       var scssContent = scssFiles.map(function(scssFile) {
-        return "@import '"+scssFile+"';";
+        var relPath = String(path.relative(cwd, scssFile)).split(path.sep).join('/');
+        return "@import '"+relPath+"';";
       }).join('\n');
       sassOptions.data = scssContent;
     } else {
