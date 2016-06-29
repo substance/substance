@@ -180,10 +180,12 @@ DOMImporter.Prototype = function DOMImporterPrototype() {
   this.convertElement = function(el) {
     var doc = this.state.doc;
     var nodeData = this._convertElement(el);
-    var NodeClass = this.schema.getNodeClass(nodeData.type);
-    var node = new NodeClass(doc, nodeData);
+    var node;
     if (doc) {
-      doc.create(node);
+      node = doc.create(nodeData);
+    } else {
+      var NodeClass = this.schema.getNodeClass(nodeData.type);
+      node = new NodeClass(doc, nodeData);
     }
     return node;
   };
