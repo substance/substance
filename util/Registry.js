@@ -116,6 +116,24 @@ Registry.Prototype = function() {
     }
   };
 
+  this.map = function(callback) {
+    var result = [];
+    this.forEach(function(entry, name) {
+      result.push(callback(entry, name));
+    });
+    return result;
+  };
+
+  this.filter = function(callback) {
+    var result = [];
+    this.forEach(function(entry, name) {
+      if (callback(entry, name)) {
+        result.push(entry);
+      }
+    });
+    return result;
+  };
+
 };
 
 oo.initClass(Registry);

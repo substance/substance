@@ -29,7 +29,7 @@ setupTest("Importing paragraph", function(t) {
   var xml = '<p id="p1">' + CONTENT + '</p>';
   var el = DOMElement.parseXML(xml);
   var node = importer.convertElement(el);
-  t.deepEqual(node, {
+  t.deepEqual(node.toJSON(), {
     id: "p1",
     type: "paragraph",
     content: CONTENT
@@ -53,7 +53,7 @@ setupTest("Importing h1", function(t) {
   var xml = '<h1 id="h1">' + CONTENT + '</h1>';
   var el = DOMElement.parseXML(xml);
   var node = importer.convertElement(el);
-  t.deepEqual(node, {
+  t.deepEqual(node.toJSON(), {
     id: "h1",
     type: "heading",
     level: 1,
@@ -66,7 +66,7 @@ setupTest("Importing h2", function(t) {
   var xml = '<h2 id="h2">' + CONTENT + '</h2>';
   var el = DOMElement.parseXML(xml);
   var node = importer.convertElement(el);
-  t.deepEqual(node, {
+  t.deepEqual(node.toJSON(), {
     id: "h2",
     type: "heading",
     level: 2,
@@ -80,7 +80,7 @@ setupTest("Importing meta", function(t) {
   var el = DOMElement.parseXML(xml);
   var node = importer.convertElement(el);
 
-  t.deepEqual(node, {
+  t.deepEqual(node.toJSON(), {
     id: 'meta',
     type: 'meta',
     title: CONTENT
@@ -92,7 +92,7 @@ setupTest("Importing image", function(t) {
   var xml = '<image id="img1" src="someimage.png" preview-src="someimagepreview.png"/>';
   var el = DOMElement.parseXML(xml);
   var node = importer.convertElement(el);
-  t.deepEqual(node, {
+  t.deepEqual(node.toJSON(), {
     id: 'img1',
     type: 'image',
     src: 'someimage.png',
