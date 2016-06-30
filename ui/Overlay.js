@@ -18,15 +18,6 @@ function Overlay() {
 
 Overlay.Prototype = function() {
 
-  this.shouldRerender = function() {
-    var commandStates = this._getCommandStates();
-    if (commandStates !== this.commandStates) {
-      this.commandStates = commandStates;
-      return true;
-    }
-    return false;
-  };
-
   this.render = function($$) {
     var el = $$('div').addClass('sc-overlay sm-hidden');
     var commandStates = this.context.commandManager.getCommandStates();
