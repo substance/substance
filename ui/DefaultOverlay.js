@@ -16,8 +16,9 @@ DefaultOverlay.Prototype = function() {
       if (tool.options.overlay) {
         var toolProps = tool.Class.static.getProps(commandStates);
         if (toolProps) {
+          var toolName = tool.Class.static.name;
           el.append(
-            $$(tool.Class, toolProps)
+            $$(tool.Class, toolProps).ref(toolName)
           );
         }
       }
