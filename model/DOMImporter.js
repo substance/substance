@@ -39,7 +39,6 @@ function DOMImporter(config) {
     } else {
       converter = Converter;
     }
-
     if (!converter.type) {
       console.error('Converter must provide the type of the associated node.', converter);
       return;
@@ -58,6 +57,9 @@ function DOMImporter(config) {
     }
     if (!this._defaultBlockConverter && defaultTextType === converter.type) {
       this._defaultBlockConverter = converter;
+    }
+    if (NodeClass.static.isPropertyAnnotation) {
+      this._addDefaultAnnotationImporter(converter);
     }
 
     this._allConverters.push(converter);
@@ -196,6 +198,7 @@ DOMImporter.Prototype = function DOMImporterPrototype() {
     if (converter) {
       node = this._nodeData(el, converter.type);
       this.state.pushContext(el.tagName, converter);
+      if (!converter.import) console.error(converter);
       node = converter.import(el, node, this) || node;
       this.state.popContext();
       this.createNode(node);
@@ -479,6 +482,25 @@ DOMImporter.Prototype = function DOMImporterPrototype() {
     }
     return converter;
   };
+
+  this._addDefaultAnnotationImporter = function(converter) {
+    if (!converter.import) {
+      // annotation converter needs to call back to process remaining text
+      converter.import = function(el, node, self) {
+        // if there is no context, this is called stand-alone
+        // i.e., user tries to convert an annotation element
+        // directly, not part of a block element, such as a paragraph
+        if (self.state.stack.length === 0) {
+          node.path = [node.id, 'content'];
+          node.content = self.annotatedText(el, node.path);
+          node.startOffset = 0;
+          node.endOffset = node.content.length;
+        } else {
+          self.annotatedText(el);
+        }
+      };
+    }
+  }
 
   this._converterCanBeApplied = function(converter, el) {
     return converter.matchElement(el, converter);

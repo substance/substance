@@ -117,7 +117,10 @@ PropertyAnnotation.static.name = "annotation";
 PropertyAnnotation.static.defineSchema({
   path: ["string"],
   startOffset: "number",
-  endOffset: "number"
+  endOffset: "number",
+  // this is only used when an annotation is used 'stand-alone'
+  // i.e. not attached to a property
+  content: { type: "string", optional: true}
 });
 
 PropertyAnnotation.static.isPropertyAnnotation = true;
