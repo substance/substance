@@ -13,7 +13,13 @@ function DOMExporter(config) {
   }
   if (!config.converters._isRegistry) {
     this.converters = new Registry();
-    config.converters.forEach(function(converter) {
+    config.converters.forEach(function(Converter) {
+      var converter;
+      if (typeof Converter === 'function') {
+        converter = new Converter();
+      } else {
+        converter = Converter;
+      }
       if (!converter.type) {
         console.error('Converter must provide the type of the associated node.', converter);
         return;
