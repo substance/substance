@@ -500,7 +500,7 @@ DOMImporter.Prototype = function DOMImporterPrototype() {
         }
       };
     }
-  }
+  };
 
   this._converterCanBeApplied = function(converter, el) {
     return converter.matchElement(el, converter);

@@ -49,7 +49,7 @@ function Node(props) {
     } else {
       // property is optional
     }
-  };
+  }
 }
 
 Node.Prototype = function() {
