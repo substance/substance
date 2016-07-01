@@ -72,9 +72,9 @@ server.serveStyles = function(expressApp, route, props) {
     var sassOptions = {
       sourceMap: true,
       sourceMapEmbed: true,
-      outFile: 'app.css'
+      sourceMapContents: true,
+      outFile: props.scssPath
     };
-
     if (props.configPath) {
       var config = require(props.configPath);
       var ConfiguratorClass = props.ConfiguratorClass || Configurator;
@@ -89,7 +89,6 @@ server.serveStyles = function(expressApp, route, props) {
     } else {
       sassOptions.file = props.scssPath;
     }
-
     sass.render(sassOptions, function(err, result) {
       if (err) {
         console.error(err);
