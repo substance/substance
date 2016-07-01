@@ -10,6 +10,7 @@ var argv = require('yargs').argv;
 var gulpif = require('gulp-if');
 var rename = require('gulp-rename');
 var eslint = require('gulp-eslint');
+var sassLint = require('gulp-sass-lint');
 var tape = require('gulp-tape');
 var tapSpec = require('tap-spec');
 var browserify = require('browserify');
@@ -64,7 +65,7 @@ gulp.task('doc:bundle', function () {
 
 gulp.task('doc', ['doc:sass', 'doc:bundle', 'doc:assets', 'doc:data']);
 
-gulp.task('lint', function() {
+gulp.task('lint:js', function() {
   return gulp.src([
     './collab/**/*.js',
     './doc/**/*.js',
@@ -78,6 +79,21 @@ gulp.task('lint', function() {
     .pipe(eslint.failAfterError());
 });
 
+gulp.task('lint:sass', function () {
+  return gulp.src([
+    './packages/**/*.scss',
+    './styles/**/*.scss',
+    './doc/**/*.scss',
+    './test/**/*.scss'
+  ])
+  .pipe(sassLint({
+    configFile: '.sass-lint.yml'
+  }))
+  .pipe(sassLint.format())
+  .pipe(sassLint.failOnError());
+});
+
+gulp.task('lint', ['lint:js', 'lint:sass']);
 
 gulp.task('build', ['lint'], function() {
   return browserify({
@@ -133,7 +149,7 @@ gulp.task('test:firefox', ['lint'], function(done) {
 
 gulp.task('test:browsers', ['test:chrome', 'test:firefox']);
 
-gulp.task('test:server', ['lint'], function(done) {
+gulp.task('test:server', ['lint'], function() {
   return gulp.src('test/**/*.test.js')
     .pipe(tape({
       reporter: tapSpec()
