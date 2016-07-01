@@ -629,6 +629,10 @@ BrowserDOMElement.parseMarkup = function(str, format, isFullDoc) {
       doc = parser.parseFromString(str, 'text/xml');
     }
     if (doc) {
+      var parserError = doc.querySelector('parsererror');
+      if (parserError) {
+        throw new Error("ParserError: could not parse " + str);
+      }
       if (format === 'html') {
         if (isFullDoc) {
           nativeEls = [doc.querySelector('html')];
