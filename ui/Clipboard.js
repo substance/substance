@@ -1,11 +1,11 @@
 "use strict";
 
 var oo = require('../util/oo');
+var platform = require('../util/platform');
+var substanceGlobals = require('../util/substanceGlobals');
 var documentHelpers = require('../model/documentHelpers');
 var ClipboardImporter = require('./ClipboardImporter');
 var ClipboardExporter = require('./ClipboardExporter');
-var substanceGlobals = require('../util/substanceGlobals');
-var platform = require('../util/platform');
 
 /**
   The Clipboard is a Component which should be rendered as a sibling component
@@ -36,16 +36,6 @@ function Clipboard(surface, config) {
 
   this.htmlImporter = new ClipboardImporter(_config);
   this.htmlExporter = new ClipboardExporter(_config);
-
-  this.onCopy = this.onCopy.bind(this);
-  this.onCut = this.onCut.bind(this);
-
-  if (platform.isIE) {
-    this.onBeforePasteShim = this.onBeforePasteShim.bind(this);
-    this.onPasteShim = this.onPasteShim.bind(this);
-  } else {
-    this.onPaste = this.onPaste.bind(this);
-  }
 }
 
 Clipboard.Prototype = function() {
@@ -56,62 +46,22 @@ Clipboard.Prototype = function() {
 
   /*
     Called by to enable clipboard handling on a given root element.
-
-    @private
-    @param {util/jquery} a jQuery wrapped element
   */
   this.attach = function(el) {
-    // WORKAROUND: Edge is not permitting access the clipboard during onCopy
-    if (!platform.isEdge) {
-      el.addEventListener('copy', this.onCopy, { context: this });
-    }
-    el.addEventListener('cut', this.onCut, { context: this });
-    if (this.isIe) {
-      el.addEventListener('beforepaste', this.onBeforePasteShim, { context: this });
-      el.addEventListener('paste', this.onPasteShim, { context: this });
+    el.on('copy', this.onCopy, this);
+    el.on('cut', this.onCut, this);
+    if (platform.isIE && !platform.isEdge) {
+      el.on('beforepaste', this.onBeforePasteShim, this);
     } else {
-      el.addEventListener('paste', this.onPaste, { context: this });
+      el.on('paste', this.onPaste, this);
     }
-  };
-
-  this.didMount = function() {
-    var el = this.surface;
-    // Note: we need a hidden content-editable element to be able to intercept native pasting.
-    // We put this element into document.body and share it among all Clipboard instances.
-    // This element must be content-editable, thus it must not have `display:none` or `visibility:hidden`,
-    // To hide it from the view we use a zero width and position it outside of the screen.
-    if (!Clipboard._sharedPasteElement) {
-      var root = el.getRoot();
-      var body = root.find('body');
-      if (body) {
-        var _sharedPasteElement = body.createElement('div')
-          .attr('contenteditable', true)
-          .attr('tabindex', -1)
-          .css({
-            position: 'fixed',
-            opacity: '0.0',
-            bottom: '-1000px',
-            width: '0px'
-          });
-        Clipboard._sharedPasteElement = _sharedPasteElement;
-        body.append(_sharedPasteElement);
-      }
-    }
-    this.el = Clipboard._sharedPasteElement;
   };
 
   /*
     Called by to disable clipboard handling.
   */
-  this.detach = function(rootElement) {
-    rootElement.off('copy', this.onCopy);
-    rootElement.off('cut', this.onCut);
-    if (this.isIe) {
-      rootElement.off('beforepaste', this.onBeforePasteShim);
-      rootElement.off('paste', this.onPasteShim);
-    } else {
-      rootElement.off('paste', this.onPaste);
-    }
+  this.detach = function(el) {
+    el.off(this);
   };
 
   /*
@@ -128,11 +78,15 @@ Clipboard.Prototype = function() {
     Clipboard.clipboardData = clipboardData;
     // FOR DEBUGGING
     substanceGlobals.clipboardData = clipboardData;
+    substanceGlobals._clipboardData = event.clipboardData;
     if (event.clipboardData && clipboardData.doc) {
       event.preventDefault();
       // store as plain text and html
       event.clipboardData.setData('text/plain', clipboardData.text);
-      event.clipboardData.setData('text/html', clipboardData.html);
+      // WORKAROUND: under IE and Edge it is not permitted to set 'text/html'
+      if (!platform.isIE && !platform.isEdge) {
+        event.clipboardData.setData('text/html', clipboardData.html);
+      }
     }
   };
 
@@ -181,16 +135,24 @@ Clipboard.Prototype = function() {
       html = clipboardData.getData('text/html');
     }
 
-    // FOR DEBUGGING
-    substanceGlobals.clipboardData = {
-      text: plainText,
-      html: html
-    };
+    // HACK: to allow at least in app copy and paste under Edge (which blocks HTML)
+    // we guess by comparing the old and new plain text
+    if (platform.isEdge &&
+        substanceGlobals.clipboardData &&
+        substanceGlobals.clipboardData.text === plainText) {
+      html = substanceGlobals.clipboardData.html;
+    } else {
+      substanceGlobals.clipboardData = {
+        text: plainText,
+        html: html
+      };
+    }
+
     // console.log('onPaste(): html = ', html);
 
     // WORKAROUND: FF does not provide HTML coming in from other applications
     // so fall back to pasting plain text
-    if (this.isFF && !html) {
+    if (platform.isFF && !html) {
       this._pastePlainText(plainText);
       return;
     }
@@ -230,26 +192,49 @@ Clipboard.Prototype = function() {
     if (!surface) return;
     // console.log("Clipboard.onBeforePasteShim...");
     // HACK: need to work on the native element here
-    var el = this._getNativeElement();
+    var pasteEl = this._createPasteBin();
+    var el = pasteEl.getNativeElement();
     el.focus();
-    var range = document.createRange();
-    range.selectNodeContents(el);
-    var selection = window.getSelection();
-    selection.removeAllRanges();
-    selection.addRange(range);
+    var range = window.document.createRange();
+    range.setStart(el.firstChild, 0);
+    range.setEnd(el.firstChild, 1);
+    var wsel = window.getSelection();
+    wsel.removeAllRanges();
+    wsel.addRange(range);
   };
 
-  this.onPasteShim = function() {
-    // HACK: need to work on the native element here
-    var el = this.el;
-    el.innerHTML = "";
-    var sel = this.surface.getSelection();
+  // creates a contenteditable element which is used
+  // to redirect a native paste into
+  this._createPasteBin = function() {
+    var el = this.surface.el.createElement('div')
+      .attr('contenteditable', true)
+      .attr('tabindex', -1)
+      .css({
+        position: 'fixed',
+        opacity: '0.0',
+        bottom: '-1000px',
+        // width: '0px'
+      })
+      .append(" ")
+      .on('beforepaste', function(event) {
+        event.stopPropagation();
+      })
+      .on('paste', function(event) {
+        this.onPasteShim(el);
+        event.stopPropagation();
+      }.bind(this));
+    this.surface.el.appendChild(el);
+    return el;
+  };
+
+  this.onPasteShim = function(pasteEl) {
     // NOTE: this delay is necessary to let the browser paste into the paste bin
     window.setTimeout(function() {
-      this.surface.selection = sel;
-      var html = el.innerHTML;
-      var text = el.textContent;
-      el.innerHTML = "";
+      // console.log('Clipboard.onPasteShim()...');
+      var html = pasteEl.innerHTML;
+      var text = pasteEl.textContent;
+      // console.log('### ... text: %s, html: %s', text, html);
+      pasteEl.remove();
       // FOR DEBUGGING
       substanceGlobals.clipboardData = {
         text: text,
@@ -278,7 +263,7 @@ Clipboard.Prototype = function() {
     var clipboardText = "";
     var clipboardHtml = "";
     if (!sel.isCollapsed()) {
-      clipboardText = documentHelpers.getTextForSelection(doc, sel);
+      clipboardText = documentHelpers.getTextForSelection(doc, sel) || "";
       clipboardDoc = surface.copy(doc, sel);
       clipboardHtml = this.htmlExporter.exportDocument(clipboardDoc);
     }
@@ -311,9 +296,6 @@ Clipboard.Prototype = function() {
     }
   };
 
-  this._getNativeElement = function() {
-    return this.el.el;
-  };
 };
 
 oo.initClass(Clipboard);
