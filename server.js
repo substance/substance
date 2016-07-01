@@ -20,7 +20,7 @@ app.get('/docs/documentation.json', function(req, res) {
   res.json(nodes);
 });
 
-serverUtils.serveStyles(app, '/docs/app.css', path.join(__dirname, 'doc', 'app.scss'));
+serverUtils.serveStyles(app, '/docs/app.css', {scssPath: path.join(__dirname, 'doc', 'app.scss')});
 serverUtils.serveJS(app, '/docs/app.js', path.join(__dirname, 'doc', 'app.js'));
 
 serverUtils.serveTestSuite(app, "test/**/*.test.js");

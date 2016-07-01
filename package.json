@@ -49,7 +49,7 @@
     "karma-tap": "1.0.4",
     "karma-tape-reporter": "1.0.3",
     "map-stream": "0.0.6",
-    "node-sass": "3.7.0",
+    "node-sass": "3.8.0",
     "promise": "7.1.1",
     "tap-spec": "4.1.1",
     "tape": "4.5.1",
