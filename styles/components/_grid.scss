@@ -24,19 +24,13 @@
     > .se-cell {
       position: relative;
       float: left;
-    }
 
-    > .se-cell + .se-cell {
-      margin-left: 1.6%;
-    }
-
-    // scw = single column width
-    // m = margin (1.6%)
-    // mc = maximum columns (12)
-    // cw = column width for a particular column (1-12)
-    // scw = (100 – (m * (mc – 1))) / mc
-    // cw = (scw * cs) + (m * (cs – 1))
-    > .se-cell {
+      // scw = single column width
+      // m = margin (1.6%)
+      // mc = maximum columns (12)
+      // cw = column width for a particular column (1-12)
+      // scw = (100 – (m * (mc – 1))) / mc
+      // cw = (scw * cs) + (m * (cs – 1))
       &.sm-column-1  { float:left; width: 6.86666666667%; }
       &.sm-column-2  { float:left; width: 15.3333333333%; }
       &.sm-column-3  { float:left; width: 23.8%; }
@@ -48,8 +42,13 @@
       &.sm-column-9  { float:left; width: 74.6%; }
       &.sm-column-10 { float:left; width: 83.0666666667%; }
       &.sm-column-11 { float:left; width: 91.5333333333%; }
-      &.sm-column-12 { width:100%; display:block; }    
+      &.sm-column-12 { width:100%; display:block; }
     }
+
+    > .se-cell + .se-cell {
+      margin-left: 1.6%;
+    }
+
   }
 
   // Override for mobile.

@@ -15,30 +15,30 @@ DEPRECATED: don't use!
   overflow:hidden;
 }
 
-.sh-hidden { display: none !important; }
- 
+.sh-hidden { display: none !important; } // sass-lint:disable-line
+
 /* Typography */
 .sh-small { font-size: $small-font-size; }
 .sh-large { font-size: $large-font-size; }
 .sh-xlarge { font-size: $xlarge-font-size; }
 .sh-center { text-align: center; }
 .sh-right-align { text-align: right; }
- 
+
 /* Borders */
 .sh-border { border: 1px solid $border-color; }
 .sh-border-left { border-left: 1px solid $border-color;}
 .sh-border-right { border-right: 1px solid $border-color; }
 .sh-border-top { border-top: 1px solid $border-color; }
 .sh-border-bottom { border-bottom: 1px solid $border-color; }
- 
+
 /* Deemphasis */
-.sh-quiet { color: $light-text-color }
+.sh-quiet { color: $light-text-color; }
 .sh-dark .sh-quiet { color: rgba(255,255,255,.5); }
- 
+
 /* Floating */
 .sh-float-left { float: left !important; }
 .sh-float-right { float: right !important; }
- 
+
 /* Clearfix - see http://www.positioniseverything.net/easyclearing.html */
 .sh-clearfix { display:block; }
 .sh-clearfix:after {

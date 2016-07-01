@@ -52,7 +52,7 @@
       display: block;
       padding: 5px 10px;
 
-      width:100%; // needed to make buttons render like block elements
+      width: 100%; // needed to make buttons render like block elements
 
       &:hover, &:focus {
         @include dark-fill(0.05);

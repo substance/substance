@@ -20,7 +20,7 @@
     // on the element). Size can either be a percentage or px value.
     &.sm-sized {
       // don't grow, don't shrink, use width or height for size determination
-      flex: 0 0 auto;    
+      flex: 0 0 auto;
     }
 
     &.sm-auto-fill {
