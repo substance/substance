@@ -39,7 +39,6 @@ function DOMImporter(config) {
     } else {
       converter = Converter;
     }
-
     if (!converter.type) {
       console.error('Converter must provide the type of the associated node.', converter);
       return;
@@ -196,13 +195,36 @@ DOMImporter.Prototype = function DOMImporterPrototype() {
     if (converter) {
       node = this._nodeData(el, converter.type);
       this.state.pushContext(el.tagName, converter);
-      node = converter.import(el, node, this) || node;
+      if (!converter.import) {
+        // Note: special treatment for property annotations
+        // i.e. if someone calls `importer.convertElement(annoEl)`
+        // usually, annotations are imported in the course of `importer.annotatedText(..)`
+        // The peculiarity here is that in such a case, it is not
+        // not clear, which property the annotation is attached to
+        if (this.schema.isInstanceOf(converter.type, 'annotation')) {
+          this._convertPropertyAnnotation(el, node);
+        } else {
+          throw new Error('Converter does not implement `import`');
+        }
+      } else {
+        node = converter.import(el, node, this) || node;
+      }
       this.state.popContext();
       this.createNode(node);
     } else {
       throw new Error('No converter found for '+el.tagName);
     }
     return node;
+  };
+
+  this._convertPropertyAnnotation = function(el, node) {
+    // if there is no context, this is called stand-alone
+    // i.e., user tries to convert an annotation element
+    // directly, not part of a block element, such as a paragraph
+    node.path = [node.id, 'content'];
+    node.content = this.annotatedText(el, node.path);
+    node.startOffset = 0;
+    node.endOffset = node.content.length;
   };
 
   this.createNode = function(node) {

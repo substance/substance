@@ -13,7 +13,13 @@ function DOMExporter(config) {
   }
   if (!config.converters._isRegistry) {
     this.converters = new Registry();
-    config.converters.forEach(function(converter) {
+    config.converters.forEach(function(Converter) {
+      var converter;
+      if (typeof Converter === 'function') {
+        converter = new Converter();
+      } else {
+        converter = Converter;
+      }
       if (!converter.type) {
         console.error('Converter must provide the type of the associated node.', converter);
         return;
@@ -88,8 +94,12 @@ DOMExporter.Prototype = function() {
     } else {
       this.state.doc = node.getDocument();
     }
-
     var converter = this.getNodeConverter(node);
+    // special treatment for annotations, i.e. if someone calls
+    // `exporter.convertNode(anno)`
+    if (node.isPropertyAnnotation() && (!converter || !converter.export)) {
+      return this._convertPropertyAnnotation(node);
+    }
     if (!converter) {
       converter = this.getDefaultBlockConverter();
     }
@@ -116,10 +126,34 @@ DOMExporter.Prototype = function() {
   };
 
   this.annotatedText = function(path) {
-    var self = this;
     var doc = this.state.doc;
-    var annotations = doc.getIndex('annotations').get(path);
     var text = doc.get(path);
+    var annotations = doc.getIndex('annotations').get(path);
+    return this._annotatedText(text, annotations);
+  };
+
+  this.getNodeConverter = function(node) {
+    return this.converters.get(node.type);
+  };
+
+  this.getDefaultBlockConverter = function() {
+    throw new Error('This method is abstract.');
+  };
+
+  this.getDefaultPropertyAnnotationConverter = function() {
+    throw new Error('This method is abstract.');
+  };
+
+  this.getDocument = function() {
+    return this.state.doc;
+  };
+
+  this.createElement = function(str) {
+    return this._el.createElement(str);
+  };
+
+  this._annotatedText = function(text, annotations) {
+    var self = this;
 
     var annotator = new Fragmenter();
     annotator.onText = function(context, text) {
@@ -156,24 +190,17 @@ DOMExporter.Prototype = function() {
     return wrapper.children;
   };
 
-  this.getNodeConverter = function(node) {
-    return this.converters.get(node.type);
-  };
-
-  this.getDefaultBlockConverter = function() {
-    throw new Error('This method is abstract.');
-  };
-
-  this.getDefaultPropertyAnnotationConverter = function() {
-    throw new Error('This method is abstract.');
-  };
-
-  this.getDocument = function() {
-    return this.state.doc;
-  };
-
-  this.createElement = function(str) {
-    return this._el.createElement(str);
+  /*
+    This is used when someone calls `exporter.convertNode(anno)`
+    Usually, annotations are converted by calling exporter.annotatedText(path).
+    Still it makes sense to be able to export just a fragment containing just
+    the annotation element.
+  */
+  this._convertPropertyAnnotation = function(anno) {
+    // take only the annotations within the range of the anno
+    var wrapper = this.$$('div').append(this.annotatedText(anno.path));
+    var el = wrapper.find('['+this.config.idAttribute+'="'+anno.id+'"]');
+    return el;
   };
 
 };

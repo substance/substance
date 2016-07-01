@@ -30,7 +30,10 @@ function Node(props) {
     throw new Error('Every NodeClass must provide a static property "name".');
   }
 
-  each(NodeClass.static.schema, function(prop, name) {
+  var schema = NodeClass.static.schema;
+  for (var name in schema) {
+    if (!schema.hasOwnProperty(name)) continue;
+    var prop = schema[name];
     // check integrity of provided props, such as type correctness,
     // and mandatory properties
     var propIsGiven = (props[name] !== undefined);
@@ -46,7 +49,7 @@ function Node(props) {
     } else {
       // property is optional
     }
-  }.bind(this));
+  }
 }
 
 Node.Prototype = function() {
