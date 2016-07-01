@@ -44,8 +44,8 @@ setupTest("Importing paragraph with strong", function(t) {
   var doc = importer.generateDocument();
   var p1 = doc.get('p1');
   var s1 = doc.get('s1');
-  t.equal(CONTENT, p1.content);
-  t.equal('456', s1.getText());
+  t.equal(CONTENT, p1.content, 'paragraph should have correct content');
+  t.equal('456', s1.getText(), 'annotation should provide correct text');
   t.end();
 });
 
