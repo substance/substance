@@ -100,7 +100,6 @@ Surface.Prototype = function() {
     }
     if (!this.isReadonly() && inBrowser) {
       this.domSelection = new DOMSelection(this);
-      this.clipboard.didMount();
       // this.domObserver = new window.MutationObserver(this.onDomMutations.bind(this));
       // this.domObserver.observe(this.el.getNativeElement(), { subtree: true, characterData: true, characterDataOldValue: true });
     }
