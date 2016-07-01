@@ -14,6 +14,9 @@ var inBrowser = require('./inBrowser');
   ```
 */
 var platform = {
+
+  inBrowser: inBrowser,
+
   /**
     True if user agent is Internet Explorer or Microsoft Edge.
   */
@@ -63,8 +66,8 @@ if (typeof window !== 'undefined') {
   } else if (edge > 0) {
     // IE 12 => return version number
     platform.isIE = true;
-    platform.version = 12;
     platform.isEdge = true;
+    platform.version = 12;
     // TODO: if we need someday, this would be the exact version number
     parseInt(ua.substring(edge + 5, ua.indexOf('.', edge)), 10);
   }
