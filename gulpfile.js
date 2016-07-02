@@ -22,7 +22,10 @@ var config = require('./doc/config.json');
 var sass = require('gulp-sass');
 var through2 = require('through2');
 var fs = require('fs');
+var glob = require('glob');
 var Karma = require('karma').Server;
+var istanbul = require('istanbul');
+var coveralls = require('gulp-coveralls');
 
 gulp.task('doc:sass', function() {
   gulp.src('./doc/app.scss')
@@ -159,5 +162,29 @@ gulp.task('test:server', ['lint'], function() {
 gulp.task('test:qunit', ['lint', 'test:qunit:karma', 'test:qunit:server']);
 
 gulp.task('test', ['lint', 'test:browsers', 'test:server']);
+
+// this task depends on results created by 'test' but we don't want
+// to run tests again when this is called
+gulp.task('coverage', function(done) {
+  var collector = new istanbul.Collector();
+  var reporter = new istanbul.Reporter(null, './coverage/report');
+  reporter.addAll(['lcovonly']);
+  glob("./coverage/**/coverage*.json", {}, function (err, files) {
+    files.forEach(function (file) {
+      var coverageObject = JSON.parse(fs.readFileSync(file, 'utf8'));
+      collector.add(coverageObject);
+    });
+    files.forEach(function(f) {
+      console.log('Adding coverage file '+f);
+      collector.add(JSON.parse(fs.readFileSync(f, 'utf8')));
+    });
+    reporter.write(collector, false, done);
+  });
+});
+
+gulp.task('coveralls', ['coverage'], function() {
+  gulp.src('test/coverage/report/lcov.info')
+    .pipe(coveralls());
+});
 
 gulp.task('default', ['build']);

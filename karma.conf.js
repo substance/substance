@@ -16,10 +16,20 @@ module.exports = function(config) {
         flags: ['--no-sandbox']
       }
     },
-    reporters: ['tape'],
     singleRun: true,
     browserify: {
-      debug: true // include inline source maps
-    }
+      debug: true, // include inline source maps
+      transform: ['browserify-istanbul']
+    },
+    reporters: ['tape', 'coverage'],
+    coverageReporter: {
+      reporters : [{
+        type: 'json',
+        dir: 'coverage',
+        subdir: function(browser) {
+          return browser.toLowerCase().split(/[ /-]/)[0];
+        }
+      }]
+    },
   });
 };
