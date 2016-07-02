@@ -1,9 +1,7 @@
-/* eslint-disable */
+/* eslint-disable strict, no-console */
 
 var express = require('express');
 var path = require('path');
-var glob = require('glob');
-var browserify = require('browserify');
 var PORT = process.env.PORT || 4201;
 var app = express();
 
