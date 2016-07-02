@@ -7,6 +7,7 @@ var isString = require('lodash/isString');
 var DocumentSchema = require('../model/DocumentSchema');
 var EditingBehavior = require('../model/EditingBehavior');
 var Registry = require('../util/Registry');
+var ComponentRegistry = require('../ui/ComponentRegistry');
 var FileClientStub = require('../ui/FileClientStub');
 var SaveHandlerStub = require('../ui/SaveHandlerStub');
 var path = require('path');
@@ -239,7 +240,11 @@ AbstractConfigurator.Prototype = function() {
   };
 
   this.getToolRegistry = function() {
-    var toolRegistry = new Registry();
+    var toolRegistry = new Registry(null, function(tool) {
+      if (!tool._isTool) {
+        throw new Error('Tool registry: wrong type. Expected a Tool instance.');
+      }
+    });
     forEach(this.config.tools, function(tool) {
       toolRegistry.add(tool.Class.static.name, tool);
     });
@@ -247,7 +252,7 @@ AbstractConfigurator.Prototype = function() {
   };
 
   this.getComponentRegistry = function() {
-    var componentRegistry = new Registry();
+    var componentRegistry = new ComponentRegistry();
     forEach(this.config.components, function(ComponentClass, name) {
       componentRegistry.add(name, ComponentClass);
     });
