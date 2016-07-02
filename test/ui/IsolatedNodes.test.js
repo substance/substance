@@ -145,3 +145,44 @@ test("IsolatedNode should be 'co-focused' when child is having the selection", f
   });
   t.end();
 });
+
+function _twoStructuredNodes(doc) {
+  var body = doc.get('body');
+  body.show(doc.create({
+    type: 'structured-node',
+    id: 'sn',
+    title: 'Foo'
+  }));
+  body.show(doc.create({
+    type: 'structured-node',
+    id: 'sn2',
+    title: 'Bar'
+  }));
+}
+
+// revealed issue #696
+test("IsolatedNode should be robust 'co-focused' w.r.t. prefix of surface id", function(t) {
+  // as experienced in #696 it happened that co-focused state was infered just
+  // by using startsWith on the surface path. This was leading to wrong
+  // co-focused states when e.g. two isolated nodes `body/entity` and `body/entity-1`
+  // exist. I.e. one surfaceId was a prefix of another one.
+  var env = _setup(_twoStructuredNodes);
+  var doc = env.doc;
+  var documentSession = env.documentSession;
+  var isolatedNodes = env.app.findAll('.sc-isolated-node');
+  documentSession.setSelection(doc.createSelection({
+    type: 'property',
+    path: ['c2_p1', 'content'],
+    startOffset: 0,
+    surfaceId: 'body/sn2/sn2.title'
+  }));
+  var expected = {
+    'body/sn': undefined,
+    'body/sn2': 'focused',
+  };
+  isolatedNodes.forEach(function(isolated){
+    var id = isolated.getId();
+    t.equal(isolated.getMode(), expected[id], "mode of isolated node '" + id + "' should be correct");
+  });
+  t.end();
+});
