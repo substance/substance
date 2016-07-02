@@ -12,7 +12,7 @@
   "main": "index.js",
   "scripts": {
     "test": "gulp test",
-    "coverage": "gulp coverage",
+    "coveralls": "gulp coveralls",
     "doc": "gulp doc"
   },
   "author": "",

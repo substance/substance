@@ -12,6 +12,7 @@ before_script:
     - 'export DISPLAY=:99.0'
     - 'sh -e /etc/init.d/xvfb start'
     - 'npm install'
+after_success: npm run coveralls
 webhooks:
   urls:
     - https://webhooks.gitter.im/e/2186a68c76bf266e2876
