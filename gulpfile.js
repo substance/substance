@@ -168,8 +168,8 @@ gulp.task('test', ['lint', 'test:browsers', 'test:server']);
 gulp.task('coverage', function(done) {
   var collector = new istanbul.Collector();
   var reporter = new istanbul.Reporter(null, './coverage/report');
-  reporter.addAll(['lcovonly']);
-  glob("./coverage/**/coverage*.json", {}, function (err, files) {
+  reporter.addAll(['lcov']);
+  glob("./coverage/json/**/coverage*.json", {}, function (err, files) {
     files.forEach(function (file) {
       var coverageObject = JSON.parse(fs.readFileSync(file, 'utf8'));
       collector.add(coverageObject);

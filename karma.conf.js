@@ -25,7 +25,13 @@ module.exports = function(config) {
     coverageReporter: {
       reporters : [{
         type: 'json',
-        dir: 'coverage',
+        dir: 'coverage/json',
+        subdir: function(browser) {
+          return browser.toLowerCase().split(/[ /-]/)[0];
+        }
+      }, {
+        type: 'html',
+        dir: 'coverage/html',
         subdir: function(browser) {
           return browser.toLowerCase().split(/[ /-]/)[0];
         }
