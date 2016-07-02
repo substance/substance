@@ -30,7 +30,7 @@ var converterRegistry = new Registry({
     "strong": require('../../packages/strong/StrongHTMLConverter'),
     "emphasis": require('../../packages/emphasis/EmphasisHTMLConverter'),
     "link": require('../../packages/link/LinkHTMLConverter'),
-    "codeblock": require('../../packages/codeblock/CodeBlockHTMLConverter'),
+    "codeblock": require('../../packages/codeblock/CodeblockHTMLConverter'),
   })
 });
 
