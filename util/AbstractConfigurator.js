@@ -240,11 +240,7 @@ AbstractConfigurator.Prototype = function() {
   };
 
   this.getToolRegistry = function() {
-    var toolRegistry = new Registry(null, function(tool) {
-      if (!tool._isTool) {
-        throw new Error('Tool registry: wrong type. Expected a Tool instance.');
-      }
-    });
+    var toolRegistry = new Registry();
     forEach(this.config.tools, function(tool) {
       toolRegistry.add(tool.Class.static.name, tool);
     });
