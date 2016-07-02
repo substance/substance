@@ -28,6 +28,7 @@ rules:
   no-ids: 1
   no-important: 0
   no-invalid-hex: 1
+  no-invalid-whitespace: 1
   no-mergeable-selectors: 1
   no-misspelled-properties: 1
   no-qualifying-elements: 0
