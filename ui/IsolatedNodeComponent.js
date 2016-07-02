@@ -244,13 +244,22 @@ IsolatedNodeComponent.Prototype = function() {
     if (sel.isCustomSelection() && id === surfaceId) {
       return { mode: 'focused' };
     }
-    // HACK: a looks a bit hacky and is, but
-    // fine for now. The structure of surfaceId is only exploited here
+    // HACK: a looks a bit hacky.
+    // Fine for now.
+    // TODO: we should think about switching to surfacePath, instead of surfaceId
     else if (startsWith(surfaceId, id)) {
-      if (surfaceId[id.length] === '/' && surfaceId.indexOf('/', id.length+1) < 0) {
-        return { mode: 'focused' };
+      var path1 = id.split('/');
+      var path2 = surfaceId.split('/');
+      var len1 = path1.length;
+      var len2 = path2.length;
+      if (len2 > len1 && path1[len1-1] === path2[len1-1]) {
+        if (len2 === len1 + 1) {
+          return { mode: 'focused' };
+        } else {
+          return { mode: 'co-focused' };
+        }
       } else {
-        return { mode: 'co-focused' };
+        return null;
       }
     }
   };
