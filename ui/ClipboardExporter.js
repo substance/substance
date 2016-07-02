@@ -34,12 +34,13 @@ ClipboardExporter.Prototype = function() {
       }).join('');
     }
     var jsonConverter = new JSONConverter();
-    var json = [
+    var jsonStr = JSON.stringify(jsonConverter.exportDocument(doc));
+    var meta = [
       "<meta name='substance' content='",
-      JSON.stringify(jsonConverter.exportDocument(doc)),
+      btoa(jsonStr),
       "'>"
     ].join('');
-    return '<html><head>' +json+ '</head><body>' + html + '</body></html>';
+    return '<html><head>' +meta+ '</head><body>' + html + '</body></html>';
   };
 
   /**
