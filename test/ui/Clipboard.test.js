@@ -4,6 +4,7 @@ var test = require('../test').module('ui/Clipboard');
 
 var DocumentSession = require('../../model/DocumentSession');
 var Registry = require('../../util/Registry');
+var ComponentRegistry = require('../../ui/ComponentRegistry');
 var Clipboard = require('../../ui/Clipboard');
 var DOMElement = require('../../ui/DOMElement');
 var Component = require('../../ui/Component');
@@ -13,12 +14,13 @@ var TestContainerEditor = require('./TestContainerEditor');
 var fixture = require('../fixtures/createTestArticle');
 var simple = require('../fixtures/simple');
 
-var componentRegistry = new Registry({
+var componentRegistry = new ComponentRegistry({
   "paragraph": require('../../packages/paragraph/ParagraphComponent'),
   "heading": require('../../packages/heading/HeadingComponent'),
   "strong": require('../../ui/AnnotationComponent'),
   "emphasis": require('../../ui/AnnotationComponent'),
   "link": require('../../packages/link/LinkComponent'),
+  "codeblock": require('../../packages/codeblock/CodeblockComponent'),
 });
 
 var converterRegistry = new Registry({
@@ -28,6 +30,7 @@ var converterRegistry = new Registry({
     "strong": require('../../packages/strong/StrongHTMLConverter'),
     "emphasis": require('../../packages/emphasis/EmphasisHTMLConverter'),
     "link": require('../../packages/link/LinkHTMLConverter'),
+    "codeblock": require('../../packages/codeblock/CodeblockHTMLConverter'),
   })
 });
 
@@ -195,6 +198,41 @@ test.UI("Pasting text into ContainerEditor using 'text/html'.", function(t) {
   event.clipboardData.setData('text/html', TEXT);
   editor.clipboard.onPaste(event);
   t.equal(doc.get(['p1', 'content']), '0XXX123456789', "Plain text should be correct.");
+  t.end();
+});
+
+// this test revealed #700: the problem was that in source code there where
+// `"` and `'` characters which did not survive the way through HTML correctly
+test.UI("Copy and Pasting source code.", function(t) {
+  var editor = _containerEditorSample(t);
+  var doc = editor.getDocument();
+  var body = doc.get('body');
+  var cb = doc.create({
+    type: 'codeblock',
+    id: 'cb1',
+    content: [
+      "function hello_world() {",
+      "  alert('Hello World!');",
+      "}"
+    ].join("\n")
+  });
+  body.show(cb, body.getPosition('p1')+1);
+  editor.setSelection(doc.createSelection({
+    type: 'container',
+    containerId: 'body',
+    startPath: ['p1', 'content'],
+    startOffset: 1,
+    endPath: ['p2', 'content'],
+    endOffset: 1
+  }));
+  var event = new ClipboardEvent();
+  editor.clipboard.onCut(event);
+  var cb2 = doc.get('cb1');
+  t.isNil(cb2, "Codeblock should have been cutted.");
+  editor.clipboard.onPaste(event);
+  cb2 = doc.get('cb1');
+  t.notNil(cb2, "Codeblock should have been pasted.");
+  t.deepEqual(cb2.toJSON(), cb.toJSON(), "Codeblock should have been pasted correctly.");
   t.end();
 });
 

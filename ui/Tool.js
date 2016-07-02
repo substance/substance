@@ -19,6 +19,8 @@ function Tool() {
 
 Tool.Prototype = function() {
 
+  this._isTool = true;
+
   /**
     Default tool rendering. You can override this method to provide your custom markup
   */

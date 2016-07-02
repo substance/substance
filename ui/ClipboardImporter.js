@@ -62,7 +62,8 @@ ClipboardImporter.Prototype = function() {
       el = DefaultDOMElement.parseHTML(html);
       var substanceData = el.find('meta[name="substance"]');
       if (substanceData) {
-        var jsonStr = substanceData.attr('content');
+        var jsonStr = atob(substanceData.attr('content'));
+        jsonStr = decodeURIComponent(jsonStr);
         try {
           return this.importFromJSON(jsonStr);
         } catch(err) {
