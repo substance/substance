@@ -1,4 +1,3 @@
-
 'use strict';
 
 var clone = require('lodash/clone');
@@ -77,7 +76,10 @@ if (inBrowser && substanceGlobals.TEST_UI) {
     }
   };
 
-  var nextTick = process.nextTick;
+  // Using a timeout feels better, as the UI gets updated while
+  // it is running.
+  // var nextTick = process.nextTick;
+  var nextTick = function(f) { window.setTimeout(f, 0); };
   harness = tape.createHarness();
   var results = harness._results;
 
