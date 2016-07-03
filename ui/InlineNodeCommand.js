@@ -70,7 +70,7 @@ InlineNodeCommand.Prototype = function() {
   this.createNodeData = function(tx, args) { // eslint-disable-line
     return {
       type: this.constructor.static.name
-    }
+    };
   };
 
 };
