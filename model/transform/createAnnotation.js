@@ -17,8 +17,6 @@ var helpers = require('../documentHelpers');
   ```js
   createAnnotation(tx, {
     selection: bodyEditor.getSelection(),
-    containerId: bodyEditor.getContainerId(),
-
     node: {
       type: 'link',
       url: 'http://example.com'

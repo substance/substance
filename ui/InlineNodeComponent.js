@@ -57,6 +57,7 @@ InlineNodeComponent.Prototype = function() {
     }
     // for all other cases (focused / co-focused) the surface id prefix must match
     if (!startsWith(surfaceId, id)) return;
+
     // Note: trying to distinguisd focused
     // surfaceIds are a sequence of names joined with '/'
     // a surface inside this node will have a path with length+1.

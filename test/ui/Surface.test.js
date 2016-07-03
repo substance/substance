@@ -56,7 +56,7 @@ test.UI("Set the selection after creating annotation.", function(t) {
   var wsel = window.getSelection();
   var newSel = surface.domSelection.getSelection();
   t.equal(wsel.rangeCount, 1, "There should be a DOM selection.");
-  t.equal(newSel.toString(), sel.toString(), "New selection should be equal to initial selection.");
+  t.ok(newSel.equals(sel), "New selection should be equal to initial selection.");
   t.end();
 });
 

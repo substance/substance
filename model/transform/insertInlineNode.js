@@ -15,7 +15,6 @@ var createAnnotation = require('./createAnnotation');
   ```js
   insertInlineNode(tx, {
     selection: bodyEditor.getSelection(),
-    containerId: bodyEditor.getContainerId(),
     node: {
       type: 'citation'
     }
