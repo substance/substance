@@ -68,7 +68,9 @@ InlineNodeCommand.Prototype = function() {
   };
 
   this.createNodeData = function(tx, args) { // eslint-disable-line
-    throw new Error('InsertNodeCommand.createNodeData() is abstract.');
+    return {
+      type: this.constructor.static.name
+    };
   };
 
 };

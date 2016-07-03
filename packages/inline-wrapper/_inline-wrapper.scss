@@ -1,0 +1,25 @@
+.sc-inline-wrapper {
+  display: block;
+  margin-top: 10px;
+
+  > .se-container {
+    display: block;
+  }
+
+  &.sm-default-style {
+    &.sm-selected, &.sm-co-selected {
+      > .se-container {
+        background: rgba(163,205,253, 0.6);
+        outline: 2px solid;
+        outline-color: $local-selection-color;
+      }
+    }
+    &.sm-focused, &.sm-co-focused {
+      > .se-container {
+        // background: rgba(163,205,253, 0.6);
+        outline: 2px solid;
+        outline-color: $local-selection-color;
+      }
+    }
+  }
+}

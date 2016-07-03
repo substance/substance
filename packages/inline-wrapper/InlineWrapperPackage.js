@@ -18,6 +18,7 @@ module.exports = {
   configure: function(config, options) {
     config.addNode(InlineWrapper);
     config.addComponent(InlineWrapper.static.name, InlineWrapperComponent);
+    config.addStyle(__dirname+'/_inline-wrapper.scss');
     if (options.converters) {
       options.converters.forEach(function(name) {
         config.addConverter(name, InlineWrapperConverter);
