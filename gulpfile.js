@@ -25,7 +25,6 @@ var fs = require('fs');
 var glob = require('glob');
 var Karma = require('karma').Server;
 var istanbul = require('istanbul');
-var coveralls = require('gulp-coveralls');
 
 gulp.task('doc:sass', function() {
   gulp.src('./doc/app.scss')
@@ -180,11 +179,6 @@ gulp.task('coverage', function(done) {
     });
     reporter.write(collector, false, done);
   });
-});
-
-gulp.task('coveralls', ['coverage'], function() {
-  gulp.src('test/coverage/report/lcov.info')
-    .pipe(coveralls());
 });
 
 gulp.task('default', ['build']);
