@@ -1,8 +1,29 @@
+body {
+  margin: 0;
+}
+
 .sc-test-suite {
-  padding: 10px 10px;
+
+  font-family: Sans-Serif;
+
+  > .se-header {
+    padding: 20px;
+    color: rgba(255, 255, 255, 0.7);
+    background: #3B4749;
+
+    > .se-logo {
+      color: #fff;
+      font-family: Josefin Sans, Sans-Serif;
+      font-size: 40px;
+      font-weight: 600;
+    }
+  }
 
   > .se-toolbar {
-    height: 50px;
+    padding: 10px 10px;
+    background: #eee;
+    // height: 50px;
+
 
     > * {
       display: inline-block;
@@ -11,6 +32,10 @@
     > * + * {
       margin-left: 10px;
     }
+  }
+
+  > .se-body {
+    padding: 10px 0px;
   }
 
   &.sm-hide-successful {
