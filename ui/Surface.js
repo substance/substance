@@ -556,7 +556,7 @@ Surface.Prototype = function() {
   // though, there are some things which do not work well cross-browser
   // particularly, double- and triple clicks.
   this.onMouseDown = function(event) {
-    // console.log('mousedown on', this.name);
+    // console.log('mousedown on', this.getId());
     event.stopPropagation();
 
     // special treatment for triple clicks
@@ -607,6 +607,7 @@ Surface.Prototype = function() {
   };
 
   this.onMouseUp = function() {
+    // console.log('mouseup on', this.getId());
     // ATTENTION: this delay is necessary for cases the user clicks
     // into an existing selection. In this case the window selection still
     // holds the old value, and is set to the correct selection after this

@@ -196,13 +196,16 @@ SurfaceManager.Prototype = function() {
   };
 
   this.onSessionDidUpdate = function(update, info) {
-    if (info.skipSelection) return;
+    if (info.skipSelection) {
+      // console.log('Skipping selection update.');
+      return;
+    }
     // at the end of the update flow, make sure the surface is focused
     // and displays the right DOM selection.
     var focusedSurface = this.getFocusedSurface();
     if (focusedSurface && !focusedSurface.isDisabled()) {
+      // console.log('Rendering selection on surface', focusedSurface.getId(), this.documentSession.getSelection().toString());
       focusedSurface.focus();
-      // console.log('rerenderingDOMSelection', this.documentSession.getSelection().toString());
       focusedSurface.rerenderDOMSelection();
       focusedSurface._sendOverlayHints();
     }
