@@ -125,8 +125,8 @@ server.serveTestSuite = function(expressApp, globPattern, options) {
   var cwd = process.cwd();
   // Test suite
   expressApp.get('/test/test.js', function (req, res) {
-    glob(globPattern, {}, function (er, testfiles) {
-      if (er || !testfiles || testfiles.length === 0) {
+    glob(globPattern, {}, function (err, testfiles) {
+      if (err || !testfiles || testfiles.length === 0) {
         console.error('No tests found.');
         res.send('500');
       } else {

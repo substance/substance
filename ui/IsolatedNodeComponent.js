@@ -244,8 +244,7 @@ IsolatedNodeComponent.Prototype = function() {
     if (sel.isCustomSelection() && id === surfaceId) {
       return { mode: 'focused' };
     }
-    // HACK: a looks a bit hacky.
-    // Fine for now.
+    // HACK: a looks a bit hacky. Fine for now.
     // TODO: we should think about switching to surfacePath, instead of surfaceId
     else if (startsWith(surfaceId, id)) {
       var path1 = id.split('/');

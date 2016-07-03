@@ -76,6 +76,18 @@ NodeSelection.Prototype = function() {
     };
   };
 
+  this.toString = function() {
+    /* istanbul ignore next */
+    return [
+      "NodeSelection(",
+      this.containerId, ".", this.nodeId, ", ",
+      this.mode, ", ",
+      (this.reverse?", reverse":""),
+      (this.surfaceId?(", "+this.surfaceId):""),
+      ")"
+    ].join('');
+  };
+
   this.collapse = function(direction) {
     if (direction === 'left') {
       if (this.isBefore()) {

@@ -19,10 +19,6 @@ function CustomSelection(customType, data, surfaceId) {
 
 CustomSelection.Prototype = function() {
 
-  this.toString = function() {
-    return "custom(" + this.customType + ', ' + JSON.stringify(this.data) + ")";
-  };
-
   this.isCustomSelection = function() {
     return true;
   };
@@ -42,6 +38,16 @@ CustomSelection.Prototype = function() {
       data: cloneDeep(this.data),
       surfaceId: this.surfaceId
     };
+  };
+
+  this.toString = function() {
+    /* istanbul ignore next */
+    return [
+      'CustomSelection(',
+      this.customType,', ',
+      JSON.stringify(this.data),
+      ")"
+    ].join('');
   };
 
   this.equals = function(other) {

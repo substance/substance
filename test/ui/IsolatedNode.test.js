@@ -1,44 +1,12 @@
 "use strict";
 
-var DocumentSession = require('../../model/DocumentSession');
-var Component = require('../../ui/Component');
-var ContainerEditor = require('../../ui/ContainerEditor');
-var createTestArticle = require('../fixtures/createTestArticle');
-var createTestComponentRegistry = require('../fixtures/createTestComponentRegistry');
+var setup = require('./setupContainerEditor');
 var nestedContainers = require('../fixtures/nestedContainers');
 
-var test = require('../test').module('ui/IsolatedNodes');
-
-function _setup(fixture) {
-  var doc = createTestArticle(fixture);
-  var docSession = new DocumentSession(doc);
-  var componentRegistry = createTestComponentRegistry();
-  var App = Component.extend({
-    getChildContext: function() {
-      return {
-        documentSession: docSession,
-        document: doc,
-        componentRegistry: componentRegistry
-      };
-    },
-    render: function($$) {
-      return $$('div').append($$(ContainerEditor, {
-        node: doc.get('body')
-      }).ref('editor'));
-    },
-  });
-  var app = App.static.render();
-  // faking a mounted scenario
-  app.triggerDidMount();
-  return {
-    documentSession: docSession,
-    doc: doc,
-    app: app
-  };
-}
+var test = require('../test').module('ui/IsolatedNode');
 
 test("IsolatedNodes should be 'not-selected' when selection is null", function(t) {
-  var env = _setup(nestedContainers);
+  var env = setup(nestedContainers);
   var documentSession = env.documentSession;
   var isolatedNodes = env.app.findAll('.sc-isolated-node');
   documentSession.setSelection(null);
@@ -49,7 +17,7 @@ test("IsolatedNodes should be 'not-selected' when selection is null", function(t
 });
 
 test("IsolatedNodes should be 'not-selected' when selection is somewhere else", function(t) {
-  var env = _setup(nestedContainers);
+  var env = setup(nestedContainers);
   var documentSession = env.documentSession;
   var doc = documentSession.getDocument();
   var isolatedNodes = env.app.findAll('.sc-isolated-node');
@@ -61,7 +29,7 @@ test("IsolatedNodes should be 'not-selected' when selection is somewhere else", 
 });
 
 test("IsolatedNode should be 'selected' with node selection", function(t) {
-  var env = _setup(nestedContainers);
+  var env = setup(nestedContainers);
   var doc = env.doc;
   var bodyEditor = env.app.find('.sc-container-editor[data-id="body"]');
   var isolatedNodes = env.app.findAll('.sc-isolated-node');
@@ -80,7 +48,7 @@ test("IsolatedNode should be 'selected' with node selection", function(t) {
 });
 
 test("IsolatedNode should be 'co-selected' with spanning container selection", function(t) {
-  var env = _setup(nestedContainers);
+  var env = setup(nestedContainers);
   var doc = env.doc;
   var bodyEditor = env.app.find('.sc-container-editor[data-id="body"]');
   var isolatedNodes = env.app.findAll('.sc-isolated-node');
@@ -103,7 +71,7 @@ test("IsolatedNode should be 'co-selected' with spanning container selection", f
 });
 
 test("IsolatedNode should be 'focused' when having the selection", function(t) {
-  var env = _setup(nestedContainers);
+  var env = setup(nestedContainers);
   var doc = env.doc;
   var documentSession = env.documentSession;
   var isolatedNodes = env.app.findAll('.sc-isolated-node');
@@ -125,7 +93,7 @@ test("IsolatedNode should be 'focused' when having the selection", function(t) {
 });
 
 test("IsolatedNode should be 'co-focused' when child is having the selection", function(t) {
-  var env = _setup(nestedContainers);
+  var env = setup(nestedContainers);
   var doc = env.doc;
   var documentSession = env.documentSession;
   var isolatedNodes = env.app.findAll('.sc-isolated-node');
@@ -166,7 +134,7 @@ test("IsolatedNode should be robust 'co-focused' w.r.t. prefix of surface id", f
   // by using startsWith on the surface path. This was leading to wrong
   // co-focused states when e.g. two isolated nodes `body/entity` and `body/entity-1`
   // exist. I.e. one surfaceId was a prefix of another one.
-  var env = _setup(_twoStructuredNodes);
+  var env = setup(_twoStructuredNodes);
   var doc = env.doc;
   var documentSession = env.documentSession;
   var isolatedNodes = env.app.findAll('.sc-isolated-node');

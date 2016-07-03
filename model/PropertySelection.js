@@ -114,10 +114,12 @@ PropertySelection.Prototype = function() {
   };
 
   this.toString = function() {
+    /* istanbul ignore next */
     return [
       "PropertySelection(", JSON.stringify(this.path), ", ",
       this.startOffset, " -> ", this.endOffset,
       (this.reverse?", reverse":""),
+      (this.surfaceId?(", "+this.surfaceId):""),
       ")"
     ].join('');
   };

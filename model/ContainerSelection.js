@@ -120,7 +120,17 @@ ContainerSelection.Prototype = function() {
   };
 
   this.toString = function() {
-    return "ContainerSelection("+ JSON.stringify(this.startPath) + ":" + this.startOffset + " -> " + JSON.stringify(this.endPath) + ":" + this.endOffset + (this.reverse ? ", reverse" : "") + ")";
+    /* istanbul ignore next */
+    return [
+      "ContainerSelection(",
+      this.containerId, ", ",
+      JSON.stringify(this.startPath), ", ", this.startOffset,
+      " -> ",
+      JSON.stringify(this.startPath), ", ", this.endOffset,
+      (this.reverse?", reverse":""),
+      (this.surfaceId?(", "+this.surfaceId):""),
+      ")"
+    ].join('');
   };
 
   /**

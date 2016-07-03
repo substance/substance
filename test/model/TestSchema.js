@@ -12,6 +12,7 @@ var Strong = require('../../packages/strong/Strong');
 var Link = require('../../packages/link/Link');
 var Image = require('../../packages/image/Image');
 var Codeblock = require('../../packages/codeblock/Codeblock');
+var InlineWrapper = require('../../packages/inline-wrapper/InlineWrapper');
 
 var schema = new Schema("test-article", "1.0.0");
 
@@ -30,7 +31,8 @@ schema.addNodes([
   Codeblock,
   TestNode,
   TestContainerAnnotation,
-  TestStructuredNode
+  TestStructuredNode,
+  InlineWrapper
 ]);
 
 module.exports = schema;
