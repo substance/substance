@@ -52,7 +52,7 @@ TestSuite.Prototype = function() {
       moduleSelect.append(option);
     });
     moduleSelect.on('change', this.onModuleSelect);
-    toolbar.append($$('div').addClass('logo').append('Substance TestSuite'))
+    toolbar.append($$('div').addClass('logo').append('Substance TestSuite'));
     toolbar.append(moduleSelect);
     toolbar.append(
       $$('div').append(
