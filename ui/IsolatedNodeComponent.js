@@ -54,15 +54,17 @@ IsolatedNodeComponent.Prototype = function() {
     docSession.off(this);
   };
 
+  this.getClassNames = function() {
+    return 'sc-isolated-node';
+  };
+
   this.render = function($$) {
     var node = this.props.node;
+    var ContentClass = this.ContentClass;
     // console.log('##### IsolatedNodeComponent.render()', $$.capturing);
     var el = _super.render.apply(this, arguments);
     el.tagName = this.__elementTag;
-
-    var ContentClass = this.ContentClass;
-
-    el.addClass('sc-isolated-node')
+    el.addClass(this.getClassNames())
       .addClass('sm-'+this.props.node.type)
       .attr("data-id", node.id);
 
@@ -110,7 +112,7 @@ IsolatedNodeComponent.Prototype = function() {
     }
     container.append(this.renderContent($$, node));
 
-    if (this._isDisabled() || this.state.mode === 'co-focused') {
+    if (this.isDisabled() || this.state.mode === 'co-focused') {
       container.addClass('sm-disabled');
       // NOTE: there are some content implementations which work better without a blocker
       var blocker = $$(this.__elementTag).addClass('se-blocker')
@@ -143,7 +145,7 @@ IsolatedNodeComponent.Prototype = function() {
     } else {
       var props = {
         node: node,
-        disabled: this._isDisabled(),
+        disabled: this.isDisabled(),
         isolatedNodeState: this.state.mode
       };
       if (this.state.mode === 'focused') {
@@ -187,9 +189,11 @@ IsolatedNodeComponent.Prototype = function() {
     return ComponentClass;
   };
 
-  this._isDisabled = function() {
+  this.isDisabled = function() {
     return !this.state.mode || ['co-selected', 'cursor'].indexOf(this.state.mode) > -1;
   };
+
+  this._isDisabled = this.isDisabled;
 
   this._getSurfaceParent = function() {
     return this.context.surface;
