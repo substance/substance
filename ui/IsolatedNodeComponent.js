@@ -112,7 +112,7 @@ IsolatedNodeComponent.Prototype = function() {
     }
     container.append(this.renderContent($$, node));
 
-    if (this.isDisabled() || this.state.mode === 'co-focused') {
+    if (this.isDisabled()) {
       container.addClass('sm-disabled');
       // NOTE: there are some content implementations which work better without a blocker
       var blocker = $$(this.__elementTag).addClass('se-blocker')
