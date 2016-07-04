@@ -194,18 +194,15 @@ DOMImporter.Prototype = function DOMImporterPrototype() {
     var converter = this._getConverterForElement(el, mode);
     if (converter) {
       node = this._nodeData(el, converter.type);
+      var NodeClass = this.schema.getNodeClass(node.type);
       this.state.pushContext(el.tagName, converter);
-      if (!converter.import) {
-        // Note: special treatment for property annotations
-        // i.e. if someone calls `importer.convertElement(annoEl)`
-        // usually, annotations are imported in the course of `importer.annotatedText(..)`
-        // The peculiarity here is that in such a case, it is not
-        // not clear, which property the annotation is attached to
-        if (this.schema.isInstanceOf(converter.type, 'annotation')) {
-          this._convertPropertyAnnotation(el, node);
-        } else {
-          throw new Error('Converter does not implement `import`');
-        }
+      // Note: special treatment for property annotations and inline nodes
+      // i.e. if someone calls `importer.convertElement(annoEl)`
+      // usually, annotations are imported in the course of `importer.annotatedText(..)`
+      // The peculiarity here is that in such a case, it is not
+      // not clear, which property the annotation is attached to
+      if (NodeClass.static.isPropertyAnnotation) {
+        this._convertPropertyAnnotation(el, node);
       } else {
         node = converter.import(el, node, this) || node;
       }
