@@ -97,26 +97,38 @@ DOMImporter.Prototype = function DOMImporterPrototype() {
   // TODO: we might want to rethink this in future
   // as it makes this a bit more complicated
   this.generateDocument = function() {
-    var doc = this.state.doc;
-    if (!doc) {
-      doc = this.createDocument();
+    if (!this.state.doc) {
+      this.state.doc = this.createDocument();
     }
+    var doc = this.state.doc;
+    this._createNodes();
+    return doc;
+  };
+
+  this._createNodes = function() {
+    var state = this.state;
+    var doc = state.doc;
     // creating all nodes
-    this.state.nodes.forEach(function(node) {
+    state.nodes.forEach(function(node) {
       // delete if the node exists already
       if (doc.get(node.id)) {
         doc.delete(node.id);
       }
       doc.create(node);
     });
+    this._createInlineNodes();
+  };
+
+  this._createInlineNodes = function() {
+    var state = this.state;
+    var doc = state.doc;
     // creating annotations afterwards so that the targeted nodes exist for sure
-    this.state.inlineNodes.forEach(function(node) {
+    state.inlineNodes.forEach(function(node) {
       if (doc.get(node.id)) {
         doc.delete(node.id);
       }
       doc.create(node);
     });
-    return doc;
   };
 
   /**
@@ -232,7 +244,8 @@ DOMImporter.Prototype = function DOMImporterPrototype() {
     node._content = '$';
     node.startOffset = 0;
     node.endOffset = 1;
-    return converter.import(el, node, this);
+    node = converter.import(el, node, this);
+    return node;
   };
 
   this.createNode = function(node) {
