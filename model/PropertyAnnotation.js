@@ -120,7 +120,7 @@ PropertyAnnotation.static.defineSchema({
   endOffset: "number",
   // this is only used when an annotation is used 'stand-alone'
   // i.e. not attached to a property
-  content: { type: "string", optional: true}
+  _content: { type: "string", optional: true}
 });
 
 PropertyAnnotation.static.isPropertyAnnotation = true;

@@ -201,7 +201,10 @@ DOMImporter.Prototype = function DOMImporterPrototype() {
       // usually, annotations are imported in the course of `importer.annotatedText(..)`
       // The peculiarity here is that in such a case, it is not
       // not clear, which property the annotation is attached to
-      if (NodeClass.static.isPropertyAnnotation) {
+      if (NodeClass.static.isInline) {
+        this._convertInlineNode(el, node, converter);
+      }
+      else if (NodeClass.static.isPropertyAnnotation) {
         this._convertPropertyAnnotation(el, node);
       } else {
         node = converter.import(el, node, this) || node;
@@ -218,10 +221,18 @@ DOMImporter.Prototype = function DOMImporterPrototype() {
     // if there is no context, this is called stand-alone
     // i.e., user tries to convert an annotation element
     // directly, not part of a block element, such as a paragraph
-    node.path = [node.id, 'content'];
-    node.content = this.annotatedText(el, node.path);
+    node.path = [node.id, '_content'];
+    node._content = this.annotatedText(el, node.path);
     node.startOffset = 0;
-    node.endOffset = node.content.length;
+    node.endOffset = node._content.length;
+  };
+
+  this._convertInlineNode = function(el, node, converter) {
+    node.path = [node.id, 'content'];
+    node._content = '$';
+    node.startOffset = 0;
+    node.endOffset = 1;
+    return converter.import(el, node, this);
   };
 
   this.createNode = function(node) {
