@@ -1,12 +1,16 @@
 .sc-prose-editor {
 
-
   .sc-container-editor {
-    padding: 20px;
+    padding: $default-padding;
 
     // Add padding to each child except last one
     > * + * {
-      padding-top: 20px;
+      padding-top: $default-padding;
+    }
+
+    // smaller gap between list-items
+    .sc-list-item + .sc-list-item {
+      padding-top: 0.5 * $default-padding;
     }
   }
 

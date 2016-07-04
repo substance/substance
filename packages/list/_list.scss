@@ -2,19 +2,11 @@
   margin: 0 0 0 $default-padding;
   position: relative;
 
-  &:last-of-type {
-    margin-bottom: $default-padding;
-  }
-
   &.sm-unordered:before {
     position: absolute;
     content: "•";
     left: -20px;
   }
-}
-
-.sc-list-item + :not(.sc-list-item) {
-  margin-top: $default-padding;
 }
 
 // https://github.com/substance/substance/blob/af28562ad44e948dfd455230114a5a206dbbe912/packages/list/_list.scss
