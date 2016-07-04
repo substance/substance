@@ -3,6 +3,8 @@
 var isNumber = require('lodash/isNumber');
 var Coordinate = require('../model/Coordinate');
 var AnnotatedTextComponent = require('./AnnotatedTextComponent');
+var CursorComponent = require('./CursorComponent');
+var SelectionFragmentComponent = require('./SelectionFragmentComponent');
 
 /**
   Renders a text property. Used internally by different components to render
@@ -77,23 +79,10 @@ TextPropertyComponent.Prototype = function() {
     var node = fragment.node;
     var id = node.id;
     var el;
-    if (node.type === 'cursor' || node.type === 'selection-fragment') {
-      el = $$('span').addClass('se-'+node.type);
-
-      if (node.type === 'cursor') {
-        // Add zero-width character. Since we have a non-empty element, the
-        // outline style set on the cursor would not be visible in certain
-        // scenarios (e.g. when cursor is at the very beginning of a text.
-        el.append("\uFEFF");
-        el.append($$('div').addClass('se-cursor-inner'));
-      }
-
-      if (node.collaborator) {
-        var collaboratorIndex = node.collaborator.colorIndex;
-        el.addClass('sm-collaborator-'+collaboratorIndex);
-      } else {
-        el.addClass('sm-local-user');
-      }
+    if (node.type === 'cursor') {
+      el = $$(CursorComponent, { collaborator: node.collaborator });
+    } else if (node.type === 'selection-fragment') {
+      el = $$(SelectionFragmentComponent, { collaborator: node.collaborator });
     } else {
       el = _super._renderFragment.apply(this, arguments);
       if (node.constructor.static.isInline) {
