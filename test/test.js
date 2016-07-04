@@ -1,4 +1,3 @@
-
 'use strict';
 
 var clone = require('lodash/clone');
@@ -51,15 +50,25 @@ if (inBrowser && substanceGlobals.TEST_UI) {
     this._ok = true;
     this.calledEnd = false;
     this.ended = false;
+    this.runtime = -1;
   };
 
   var _run = Test.prototype.run;
   Test.prototype.run = function() {
     var _ok = false;
     try {
+      this.reset();
+      var start = Date.now();
+      this.once('end', function() {
+        this.runtime = Math.round(Date.now() - start);
+      }.bind(this));
       _run.apply(this, arguments);
       _ok = true;
-    } finally {
+    }
+    // Using *finally* without *catch* enables us to use browser's
+    // 'Stop on uncaught exceptions', but still making sure
+    // that 'end' is emitted
+    finally {
       if (!_ok) {
         this._ok = false;
         this.emit('end');
@@ -67,7 +76,10 @@ if (inBrowser && substanceGlobals.TEST_UI) {
     }
   };
 
-  var nextTick = process.nextTick;
+  // Using a timeout feels better, as the UI gets updated while
+  // it is running.
+  // var nextTick = process.nextTick;
+  var nextTick = function(f) { window.setTimeout(f, 0); };
   harness = tape.createHarness();
   var results = harness._results;
 
@@ -76,8 +88,9 @@ if (inBrowser && substanceGlobals.TEST_UI) {
     function next() {
       if (tests.length > 0) {
         var t = tests.shift();
-        t.reset();
-        t.once('end', function(){ nextTick(next); });
+        t.once('end', function(){
+          nextTick(next);
+        });
         t.run();
       }
     }
