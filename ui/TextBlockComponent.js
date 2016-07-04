@@ -1,6 +1,6 @@
 'use strict';
 
-var BlockNodeComponent = require('./BlockNodeComponent');
+var NodeComponent = require('./NodeComponent');
 var TextProperty = require('./TextPropertyComponent');
 
 function TextBlockComponent() {
@@ -21,6 +21,6 @@ TextBlockComponent.Prototype = function() {
 
 };
 
-BlockNodeComponent.extend(TextBlockComponent);
+NodeComponent.extend(TextBlockComponent);
 
 module.exports = TextBlockComponent;

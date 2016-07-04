@@ -11,13 +11,17 @@ NodeComponent.Prototype = function() {
   this.render = function($$) {
     var tagName = this.getTagName();
     var el = $$(tagName)
-      .attr("data-id", this.props.node.id)
-      .addClass('sc-node');
+      .attr('data-id', this.props.node.id)
+      .addClass(this.getClassNames());
     return el;
   };
 
   this.getTagName = function() {
     return 'div';
+  };
+
+  this.getClassNames = function() {
+    return '';
   };
 
 };
