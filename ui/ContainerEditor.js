@@ -1,7 +1,6 @@
 'use strict';
 
 var isString = require('lodash/isString');
-var each = require('lodash/each');
 var last = require('lodash/last');
 var uuid = require('../util/uuid');
 var keys = require('../util/keys');
@@ -123,9 +122,8 @@ ContainerEditor.Prototype = function() {
         $$('a').attr('href', '#').append('Start writing').on('click', this.onCreateText)
       );
     } else {
-      // node components
-      each(containerNode.getNodes(), function(node) {
-        el.append(this._renderNode($$, node));
+      containerNode.getNodes().forEach(function(node) {
+        el.append(this._renderNode($$, node).ref(node.id));
       }.bind(this));
     }
 
@@ -271,7 +269,6 @@ ContainerEditor.Prototype = function() {
   };
 
   /* Editing behavior */
-
 
   /**
     Performs a {@link model/transform/breakNode} transformation

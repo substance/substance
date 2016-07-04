@@ -58,6 +58,7 @@ TextPropertyEditor.Prototype = function() {
         withoutBreak: this.props.withoutBreak
       })
     );
+
     return el;
   };
 
