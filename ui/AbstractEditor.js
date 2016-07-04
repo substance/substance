@@ -5,6 +5,7 @@ var CommandManager = require('./CommandManager');
 var SurfaceManager = require('./SurfaceManager');
 var MacroManager = require('./MacroManager');
 var GlobalEventHandler = require('./GlobalEventHandler');
+var DragManager = require('./DragManager');
 
 function AbstractEditor() {
   AbstractEditor.super.apply(this, arguments);
@@ -54,7 +55,8 @@ AbstractEditor.Prototype = function() {
       labelProvider: this.labelProvider,
       converterRegistry: this.converterRegistry,
       globalEventHandler: this.globalEventHandler,
-      editingBehavior: this.editingBehavior
+      editingBehavior: this.editingBehavior,
+      dragManager: this.dragManager,
     };
   };
 
@@ -71,6 +73,7 @@ AbstractEditor.Prototype = function() {
     this.componentRegistry = configurator.getComponentRegistry();
     this.toolRegistry = configurator.getToolRegistry();
     this.surfaceManager = new SurfaceManager(this.documentSession);
+    this.dragManager = new DragManager();
     this.fileClient = configurator.getFileClient();
     this.commandManager = new CommandManager(this.getCommandContext(), commands);
     this.macroManager = new MacroManager(this.getMacroContext(), configurator.getMacros());

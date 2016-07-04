@@ -155,13 +155,17 @@ Surface.Prototype = function() {
         // Mouse Events
         el.on('mousedown', this.onMouseDown);
         // disable drag'n'drop
-        el.on('dragstart', this.onDragStart);
         // we will react on this to render a custom selection
         el.on('focus', this.onNativeFocus);
         el.on('blur', this.onNativeBlur);
         // activate the clipboard
         this.clipboard.attach(el);
       }
+
+      if (this.context.dragManager) {
+        el.on('drop', this.onDrop);
+      }
+
     }
     return el;
   };
@@ -634,9 +638,9 @@ Surface.Prototype = function() {
     console.info("We want to enable a DOM MutationObserver which catches all changes made by native interfaces (such as spell corrections, etc). Lookout for this message and try to set Surface.skipNextObservation=true when you know that you will mutate the DOM.", e);
   };
 
-  this.onDragStart = function(event) {
-    event.preventDefault();
-    event.stopPropagation();
+  this.onDrop = function(event) {
+    // console.log('Received drop on Surface', this.getId(), event);
+    this.context.dragManager.onDrop(event);
   };
 
   this.onNativeBlur = function() {

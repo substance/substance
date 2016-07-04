@@ -88,6 +88,11 @@ IsolatedNodeComponent.Prototype = function() {
       .on('compositionstart', this._stopPropagation)
       .on('textInput', this._stopPropagation);
 
+    if (this.context.dragManager) {
+      el.on('dragstart', this.onDragstart);
+      el.on('drop', this.onDrop);
+    }
+
     el.append(
       $$(this.__elementTag).addClass('se-slug').addClass('sm-before').ref('before')
         // NOTE: better use a regular character otherwise Edge has problems
@@ -291,6 +296,16 @@ IsolatedNodeComponent.Prototype = function() {
       event.preventDefault();
       this._escape();
     }
+  };
+
+  this.onDragstart = function(event) {
+    // console.log('Start dragging on', this.getId());
+    this.context.dragManager.onDragstart(event);
+  };
+
+  this.onDrop = function(event) {
+    // console.log('Received drop on IsolatedNode', this.getId());
+    this.context.dragManager.onDrop(event);
   };
 
   this._escape = function() {
