@@ -6,6 +6,12 @@ function InlineWrapper() {
   InlineWrapper.super.apply(this, arguments);
 }
 
+InlineWrapper.Prototype = function() {
+  this.getWrappedNode = function() {
+    return this.getDocument().get(this.wrappedNode);
+  };
+};
+
 InlineNode.extend(InlineWrapper);
 
 InlineWrapper.static.name = 'inline-wrapper';
