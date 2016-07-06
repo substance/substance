@@ -4,14 +4,11 @@ var isArray = require('lodash/isArray');
 var extend = require('lodash/extend');
 var forEach = require('lodash/forEach');
 var Registry = require('../util/Registry');
+var Document = require('../model/Document');
 var HTMLImporter = require('../model/HTMLImporter');
 var DefaultDOMElement = require('./DefaultDOMElement');
 var JSONConverter = require('../model/JSONConverter');
 var platform = require('../util/platform');
-
-// Note: sharing the symbol with the transformation
-var CLIPBOARD_CONTAINER_ID = require('../model/transform/copySelection').CLIPBOARD_CONTAINER_ID;
-var CLIPBOARD_PROPERTY_ID = require('../model/transform/copySelection').CLIPBOARD_PROPERTY_ID;
 
 /**
   Import HTML from clipboard. Used for inter-application copy'n'paste.
@@ -35,6 +32,8 @@ function ClipboardImporter(config) {
   // ATTENTION: this is only here so we can enfore windows conversion
   // mode from within tests
   this._isWindows = platform.isWindows;
+
+  this._emptyDoc = this._createDocument(this.schema);
 }
 
 ClipboardImporter.Prototype = function() {
@@ -122,7 +121,7 @@ ClipboardImporter.Prototype = function() {
     @param {String} body body element of given HTML document
   */
   this.convertBody = function(body) {
-    this.convertContainer(body.childNodes, CLIPBOARD_CONTAINER_ID);
+    this.convertContainer(body.childNodes, Document.SNIPPET_ID);
   };
 
   this._wrapInlineElementsIntoBlockElement = function(childIterator) {
@@ -141,7 +140,7 @@ ClipboardImporter.Prototype = function() {
     // Instead of detecting this case up-front we just set the proper id
     // and hope that all goes well.
     // Note: when this is called a second time, the id will be overridden.
-    wrapper.attr('data-id', CLIPBOARD_PROPERTY_ID);
+    wrapper.attr('data-id', Document.TEXT_SNIPPET_ID);
     var node = this.defaultConverter(wrapper, this);
     if (node) {
       if (!node.type) {
@@ -158,15 +157,7 @@ ClipboardImporter.Prototype = function() {
     @return {Document} the document instance
   */
   this.createDocument = function() {
-    var doc = this._createDocument(this.schema);
-    if (!doc.get(CLIPBOARD_CONTAINER_ID)) {
-      doc.create({
-        type: 'container',
-        id: CLIPBOARD_CONTAINER_ID,
-        nodes: []
-      });
-    }
-    return doc;
+    return this._emptyDoc.createSnippet();
   };
 
   this._getUnsupportedNodeConverter = function() {
@@ -176,9 +167,6 @@ ClipboardImporter.Prototype = function() {
 };
 
 HTMLImporter.extend(ClipboardImporter);
-
-ClipboardImporter.CLIPBOARD_CONTAINER_ID = CLIPBOARD_CONTAINER_ID;
-ClipboardImporter.CLIPBOARD_PROPERTY_ID = CLIPBOARD_PROPERTY_ID;
 
 var _converters = {
   'catch-all-block': {

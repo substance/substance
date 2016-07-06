@@ -3,7 +3,7 @@
 var test = require('../test').module('transform/copySelection');
 
 var copySelection = require('../../model/transform/copySelection');
-var CLIPBOARD_PROPERTY_ID = copySelection.CLIPBOARD_PROPERTY_ID;
+var Document = require('../../model/Document');
 
 var fixture = require('../fixtures/createTestArticle');
 var simple = require('../fixtures/simple');
@@ -20,7 +20,7 @@ test("Copying a property selection", function(t) {
   var args = {selection: sel};
   var out = copySelection(doc, args);
   var copy = out.doc;
-  var textNode = copy.get(CLIPBOARD_PROPERTY_ID);
+  var textNode = copy.get(Document.TEXT_SNIPPET_ID);
   t.notNil(textNode, 'There should be a text node for the property fragment.');
   t.equal(textNode.content, 'graph', 'Selected text should be copied.');
   t.end();
@@ -37,8 +37,8 @@ test("Copying a property selection with annotated text", function(t) {
   var args = {selection: sel};
   var out = copySelection(doc, args);
   var copy = out.doc;
-  t.equal(copy.get([CLIPBOARD_PROPERTY_ID, 'content']), 'with anno', 'Selected text should be copied.');
-  var annos = copy.getIndex('annotations').get([CLIPBOARD_PROPERTY_ID, 'content']);
+  t.equal(copy.get([Document.TEXT_SNIPPET_ID, 'content']), 'with anno', 'Selected text should be copied.');
+  var annos = copy.getIndex('annotations').get([Document.TEXT_SNIPPET_ID, 'content']);
   t.equal(annos.length, 1, 'There should be one annotation on copied text.');
   var anno = annos[0];
   t.equal(anno.type, "emphasis", "The annotation should be 'emphasis'.");
@@ -59,9 +59,9 @@ test("Copying a container selection", function(t) {
   var args = {selection: sel};
   var out = copySelection(doc, args);
   var copy = out.doc;
-  var content = copy.get('clipboard_content');
+  var content = copy.get(Document.SNIPPET_ID);
   t.notNil(content, 'There should be a container node with id "content".');
-  // 4 nodes? 'body', 'clipboard_content', 'p1', 'p2'
+  // 4 nodes? 'body', 'snippets', 'p1', 'p2'
   t.equal(content.nodes.length, 4, 'There should be 4 nodes in the copied document.');
   var first = copy.get(content.nodes[0]);
   t.equal(first.type, 'heading', "The first node should be a heading.");

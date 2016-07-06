@@ -5,6 +5,7 @@ var CommandManager = require('./CommandManager');
 var SurfaceManager = require('./SurfaceManager');
 var MacroManager = require('./MacroManager');
 var GlobalEventHandler = require('./GlobalEventHandler');
+var DragManager = require('./DragManager');
 
 function AbstractEditor() {
   AbstractEditor.super.apply(this, arguments);
@@ -35,6 +36,7 @@ AbstractEditor.Prototype = function() {
     this.surfaceManager.dispose();
     this.commandManager.dispose();
     this.globalEventHandler.dispose();
+    this.dragManager.dispose();
     this.documentSession.off(this);
     // Note: we need to clear everything, as the childContext
     // changes which is immutable
@@ -54,7 +56,8 @@ AbstractEditor.Prototype = function() {
       labelProvider: this.labelProvider,
       converterRegistry: this.converterRegistry,
       globalEventHandler: this.globalEventHandler,
-      editingBehavior: this.editingBehavior
+      editingBehavior: this.editingBehavior,
+      dragManager: this.dragManager,
     };
   };
 
@@ -73,6 +76,11 @@ AbstractEditor.Prototype = function() {
     this.surfaceManager = new SurfaceManager(this.documentSession);
     this.fileClient = configurator.getFileClient();
     this.commandManager = new CommandManager(this.getCommandContext(), commands);
+    this.dragManager = new DragManager(configurator.createDragHandlers(), {
+      documentSession: this.documentSession,
+      surfaceManager: this.surfaceManager,
+      commandManager: this.commandManager,
+    });
     this.macroManager = new MacroManager(this.getMacroContext(), configurator.getMacros());
     this.iconProvider = configurator.getIconProvider();
     this.converterRegistry = configurator.getConverterRegistry();

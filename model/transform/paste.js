@@ -3,13 +3,11 @@
 var last = require('lodash/last');
 var each = require('lodash/each');
 var uuid = require('../../util/uuid');
+var Document = require('../Document');
 var annotationHelpers = require('../annotationHelpers');
 var deleteSelection = require('./deleteSelection');
 var insertText = require('./insertText');
 var breakNode = require('./breakNode');
-
-var CLIPBOARD_CONTAINER_ID = require('./copySelection').CLIPBOARD_CONTAINER_ID;
-var CLIPBOARD_PROPERTY_ID = require('./copySelection').CLIPBOARD_PROPERTY_ID;
 
 /**
   Pastes clipboard content at the current selection
@@ -21,7 +19,9 @@ var CLIPBOARD_PROPERTY_ID = require('./copySelection').CLIPBOARD_PROPERTY_ID;
 
 var paste = function(tx, args) {
   args.text = args.text || '';
-  if (args.selection.isNull()) {
+  var sel = args.selection;
+  if (!sel || sel.isNull()) {
+    // TODO: we should throw
     console.error("Can not paste, without selection.");
     return args;
   }
@@ -40,11 +40,11 @@ var paste = function(tx, args) {
       return insertText(tx, args);
     }
   }
-  if (!args.selection.isCollapsed()) {
+  if (!sel.isCollapsed()) {
     var tmp = deleteSelection(tx, args);
     args.selection = tmp.selection;
   }
-  var nodes = pasteDoc.get(CLIPBOARD_CONTAINER_ID).nodes;
+  var nodes = pasteDoc.get(Document.SNIPPET_ID).nodes;
   var schema = tx.getSchema();
 
   if (nodes.length > 0) {
@@ -73,13 +73,13 @@ function _convertPlainTextToDocument(tx, args) {
   var pasteDoc = tx.newInstance();
   var container = pasteDoc.create({
     type: 'container',
-    id: CLIPBOARD_CONTAINER_ID,
+    id: Document.SNIPPET_ID,
     nodes: []
   });
   var node;
   if (lines.length === 1) {
     node = pasteDoc.create({
-      id: CLIPBOARD_PROPERTY_ID,
+      id: Document.TEXT_SNIPPET_ID,
       type: defaultTextType,
       content: lines[0]
     });
@@ -99,21 +99,21 @@ function _convertPlainTextToDocument(tx, args) {
 
 function _pasteAnnotatedText(tx, args) {
   var copy = args.doc;
-  var selection = args.selection;
+  var sel = args.selection;
 
-  var nodes = copy.get(CLIPBOARD_CONTAINER_ID).nodes;
+  var nodes = copy.get(Document.SNIPPET_ID).nodes;
   var textPath = [nodes[0], 'content'];
   var text = copy.get(textPath);
   var annotations = copy.getIndex('annotations').get(textPath);
   // insert plain text
-  var path = selection.start.path;
-  var offset = selection.start.offset;
+  var path = sel.start.path;
+  var offset = sel.start.offset;
   tx.update(path, { insert: { offset: offset, value: text } } );
-  annotationHelpers.insertedText(tx, selection.start, text.length);
-  selection = tx.createSelection({
+  annotationHelpers.insertedText(tx, sel.start, text.length);
+  sel = tx.createSelection({
     type: 'property',
-    path: selection.start.path,
-    startOffset: selection.start.offset+text.length
+    path: sel.start.path,
+    startOffset: sel.start.offset+text.length
   });
   // copy annotations
   each(annotations, function(anno) {
@@ -126,27 +126,27 @@ function _pasteAnnotatedText(tx, args) {
     }
     tx.create(data);
   });
-  args.selection = selection;
+  args.selection = sel;
   return args;
 }
 
 function _pasteDocument(tx, args) {
   var pasteDoc = args.doc;
   var containerId = args.containerId;
-  var selection = args.selection;
+  var sel = args.selection;
   var container = tx.get(containerId);
 
-  var startPath = selection.start.path;
-  var startPos = container.getPosition(selection.start.getNodeId());
+  var startPath = sel.start.path;
+  var startPos = container.getPosition(sel.start.getNodeId());
   var text = tx.get(startPath);
   var insertPos;
   // Break, unless we are at the last character of a node,
   // then we can simply insert after the node
-  if ( text.length === selection.start.offset ) {
+  if ( text.length === sel.start.offset ) {
     insertPos = startPos + 1;
   } else {
     var result = breakNode(tx, args);
-    selection = result.selection;
+    sel = result.selection;
     insertPos = startPos + 1;
   }
   // TODO how should this check be useful?
@@ -154,7 +154,7 @@ function _pasteDocument(tx, args) {
     console.error('Could not find insertion position in ContainerNode.');
   }
   // transfer nodes from content document
-  var nodeIds = pasteDoc.get(CLIPBOARD_CONTAINER_ID).nodes;
+  var nodeIds = pasteDoc.get(Document.SNIPPET_ID).nodes;
   var annoIndex = pasteDoc.getIndex('annotations');
   var insertedNodes = [];
   for (var i = 0; i < nodeIds.length; i++) {

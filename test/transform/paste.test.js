@@ -2,15 +2,11 @@
 
 var test = require('../test').module('transform/paste');
 
+var Document = require('../../model/Document');
 var paste = require('../../model/transform/paste');
-var copySelection = require('../../model/transform/copySelection');
 
 var fixture = require('../fixtures/createTestArticle');
 var simple = require('../fixtures/simple');
-
-// var Table = require('../../packages/table/Table');
-var CLIPBOARD_CONTAINER_ID = copySelection.CLIPBOARD_CONTAINER_ID;
-var CLIPBOARD_PROPERTY_ID = copySelection.CLIPBOARD_PROPERTY_ID;
 
 test("Pasting plain text", function(t) {
   var doc = fixture(simple);
@@ -28,15 +24,11 @@ test("Pasting plain text", function(t) {
 
 test("Pasting a single paragraph", function(t) {
   var doc = fixture(simple);
-  var pasteDoc = doc.newInstance();
-  var container = pasteDoc.create({
-    type: "container",
-    id: CLIPBOARD_CONTAINER_ID,
-    nodes: []
-  });
+  var pasteDoc = doc.createSnippet();
+  var container = pasteDoc.getContainer();
   var p = pasteDoc.create({
     type: 'paragraph',
-    id: CLIPBOARD_PROPERTY_ID,
+    id: Document.TEXT_SNIPPET_ID,
     content: 'AABBCC'
   });
   container.show(p.id);
@@ -59,15 +51,11 @@ test("Pasting annotated text", function(t) {
     path: ['p1', 'content'],
     startOffset: 3
   });
-  var pasteDoc = doc.newInstance();
-  var container = pasteDoc.create({
-    type: "container",
-    id: CLIPBOARD_CONTAINER_ID,
-    nodes: []
-  });
+  var pasteDoc = doc.createSnippet();
+  var container = pasteDoc.getContainer();
   var p = pasteDoc.create({
     type: 'paragraph',
-    id: CLIPBOARD_PROPERTY_ID,
+    id: Document.TEXT_SNIPPET_ID,
     content: 'AABBCC'
   });
   container.show(p.id);
@@ -90,12 +78,8 @@ test("Pasting annotated text", function(t) {
 
 test("Pasting two paragraphs", function(t) {
   var doc = fixture(simple);
-  var pasteDoc = doc.newInstance();
-  var container = pasteDoc.create({
-    type: "container",
-    id: CLIPBOARD_CONTAINER_ID,
-    nodes: []
-  });
+  var pasteDoc = doc.createSnippet();
+  var container = pasteDoc.getContainer();
   var test1 = pasteDoc.create({
     type: 'paragraph',
     id: 'test1',
@@ -135,7 +119,7 @@ test("Pasting two paragraphs", function(t) {
 //   ].join('\n');
 //   var container = pasteDoc.create({
 //     type: "container",
-//     id: CLIPBOARD_CONTAINER_ID,
+//     id: Document.SNIPPET_ID,
 //     nodes: []
 //   });
 //   var table = Table.fromTSV(pasteDoc, tsv);

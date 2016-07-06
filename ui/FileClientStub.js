@@ -1,16 +1,31 @@
 'use strict';
 
 var oo = require('../util/oo');
+var EventEmitter = require('../util/EventEmitter');
 
 var FileClientStub = function() {
 };
 
 FileClientStub.Prototype = function() {
+
   this.uploadFile = function(file, cb) {
-    // Default file upload implementation
-    // We just return a temporary objectUrl
-    var fileUrl = window.URL.createObjectURL(file);
-    cb(null, fileUrl);
+    var delay = 50;
+    var steps = (file.size / 500000) * (1000 / delay);
+    var i = 0;
+    var channel = new EventEmitter();
+    var _step = function() {
+      if (i++ < steps) {
+        channel.emit('progress', (i-1)/(steps));
+        window.setTimeout(_step, delay);
+      } else {
+        // Default file upload implementation
+        // We just return a temporary objectUrl
+        var fileUrl = window.URL.createObjectURL(file);
+        cb(null, fileUrl);
+      }
+    };
+    _step();
+    return channel;
   };
 };
 

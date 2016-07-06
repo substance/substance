@@ -34,6 +34,8 @@ TextPropertyComponent.Prototype = function() {
 
   var _super = TextPropertyComponent.super.prototype;
 
+  this._isTextPropertyComponent = true;
+
   this.didMount = function() {
     _super.didMount.call(this);
     // TODO: instead of letting Surface manage TextProperties
@@ -65,8 +67,8 @@ TextPropertyComponent.Prototype = function() {
         'white-space': 'pre-wrap'
       });
 
-    if (this.props.editable) {
-      el.attr('contentEditable', true);
+    if (this.context.dragManager) {
+      el.on('drop', this.onDrop);
     }
 
     if (!this.props.withoutBreak) {
@@ -98,6 +100,11 @@ TextPropertyComponent.Prototype = function() {
     }
     el.attr('data-offset', fragment.pos);
     return el;
+  };
+
+  this.onDrop = function(event) {
+    // console.log('Received drop on TextProperty', this.getPath());
+    this.context.dragManager.onDrop(event);
   };
 
   this.getPath = function() {
