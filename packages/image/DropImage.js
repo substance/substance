@@ -21,6 +21,8 @@ DropImage.Prototype = function() {
     });
     if (files.length === 0) return;
     context.commandManager.executeCommand(InsertImageCommand.static.name, props);
+    // this lets DropManager know that drop was handled
+    return true;
   };
 
 };
