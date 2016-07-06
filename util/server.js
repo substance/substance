@@ -3,13 +3,11 @@
 
 var browserify = require('browserify');
 var glob = require('glob');
-var sass = require('node-sass');
 var fs = require('fs');
 var path = require('path');
 var each = require('lodash/each');
 var isString = require('lodash/isString');
-var Configurator = require('./Configurator');
-
+var bundleStyles = require('./bundleStyles');
 
 /**
   @module
@@ -67,35 +65,14 @@ server.serveStyles = function(expressApp, route, props) {
       scssPath: props
     };
   }
-
   expressApp.get(route, function(req, res) {
-    var sassOptions = {
-      sourceMap: true,
-      sourceMapEmbed: true,
-      sourceMapContents: true,
-      outFile: props.scssPath
-    };
-    if (props.configPath) {
-      var config = require(props.configPath);
-      var ConfiguratorClass = props.ConfiguratorClass || Configurator;
-      var configurator = new ConfiguratorClass(config);
-      var scssFiles = configurator.getStyles();
-      var cwd = process.cwd();
-      var scssContent = scssFiles.map(function(scssFile) {
-        var relPath = String(path.relative(cwd, scssFile)).split(path.sep).join('/');
-        return "@import '"+relPath+"';";
-      }).join('\n');
-      sassOptions.data = scssContent;
-    } else {
-      sassOptions.file = props.scssPath;
-    }
-    sass.render(sassOptions, function(err, result) {
+    bundleStyles(props, function(err, css) {
       if (err) {
         console.error(err);
         res.status(400).json(err);
       } else {
         res.set('Content-Type', 'text/css');
-        res.send(result.css);
+        res.send(css);
       }
     });
   });
