@@ -87,7 +87,7 @@ ImageCommand.Prototype = function() {
         }
       });
       channel.on('progress', function(progress) {
-        console.log('Progress', progress);
+        // console.log('Progress', progress);
         node.emit('upload:progress', progress);
       });
     });

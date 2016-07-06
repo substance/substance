@@ -21,7 +21,7 @@ DragManager.Prototype = function() {
 
   this.onDragenter = function(event) { // eslint-disable-line
     // we could emit an event, so that listeners could expose drop targets
-    console.log('DragManager.onDragenter', event);
+    // console.log('DragManager.onDragenter', event);
   };
 
   this.onDragstart = function(event) { // eslint-disable-line
