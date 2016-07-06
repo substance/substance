@@ -994,6 +994,11 @@ DOMElement.parseXML = function(xml) {
   return DefaultDOMElement.parseXML(xml);
 };
 
+DOMElement.wrapNativeElement = function(nativeEl) {
+  var DefaultDOMElement = require('./DefaultDOMElement');
+  return DefaultDOMElement.wrapNativeElement(nativeEl);
+};
+
 function DOMElementDelegator() {
   this.el = null;
 }

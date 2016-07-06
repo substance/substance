@@ -720,4 +720,11 @@ Component.unwrapDOMElement = function(el) {
   return _unwrapComp(el);
 };
 
+Component.getComponentFromNativeElement = function(nativeEl) {
+  // while it sounds strange to wrap a native element
+  // first, it makes sense after all, as DefaultDOMElement.wrapNativeElement()
+  // provides the DOMElement instance of a previously wrapped native element.
+  return _unwrapComp(DefaultDOMElement.wrapNativeElement(nativeEl));
+};
+
 module.exports = Component;

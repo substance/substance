@@ -34,6 +34,8 @@ TextPropertyComponent.Prototype = function() {
 
   var _super = TextPropertyComponent.super.prototype;
 
+  this._isTextPropertyComponent = true;
+
   this.didMount = function() {
     _super.didMount.call(this);
     // TODO: instead of letting Surface manage TextProperties

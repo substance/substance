@@ -86,6 +86,8 @@ function Surface() {
 
 Surface.Prototype = function() {
 
+  this._isSurface = true;
+
   this.getChildContext = function() {
     return {
       surface: this,
@@ -1011,13 +1013,23 @@ Surface.Prototype = function() {
   this._prepareArgs = function(args) { // eslint-disable-line
   };
 
-  this.setSelectionFromEvent = function(evt) {
+  // Experimental: used by DragManager
+  this.getSelectionFromEvent = function(event) {
     if (this.domSelection) {
+      var domRange = Surface.getDOMRangeFromEvent(event);
+      var sel = this.domSelection.getSelectionForDOMRange(domRange);
+      sel.surfaceId = this.getId();
+      return sel;
+    }
+  };
+
+  this.setSelectionFromEvent = function(event) {
+    var sel = this.getSelectionFromEvent(event);
+    if (sel) {
       this._state.skipNextFocusEvent = true;
-      var domRange = Surface.getDOMRangeFromEvent(evt);
-      var range = this.domSelection.getSelectionFromDOMRange(domRange);
-      var sel = this.getDocument().createSelection(range);
       this.setSelection(sel);
+    } else {
+      console.error('Could not create a selection from event.');
     }
   };
 

@@ -2,8 +2,12 @@
 
 var oo = require('../util/oo');
 var DefaultDOMElement = require('./DefaultDOMElement');
+var Component = require('./Component');
 
-function DragManager() {
+function DragManager(dndHandlers, context) {
+  this.context = context;
+  this.dndHandlers = dndHandlers;
+
   var documentEl = DefaultDOMElement.wrapNativeElement(window.document);
   documentEl.on('dragenter', this.onDragenter, this);
 }
@@ -17,7 +21,7 @@ DragManager.Prototype = function() {
 
   this.onDragenter = function(event) { // eslint-disable-line
     // we could emit an event, so that listeners could expose drop targets
-    // console.log('DragManager.onDragenter');
+    console.log('DragManager.onDragenter', event);
   };
 
   this.onDragstart = function(event) { // eslint-disable-line
@@ -26,18 +30,49 @@ DragManager.Prototype = function() {
   };
 
   this.onDrop = function(event) {
+    var props = _createProps(event);
+    for (var i = 0; i < this.dndHandlers.length; i++) {
+      var handler = this.dndHandlers[i];
+      var _break = handler.drop(props, this.context);
+      if (_break) break;
+    }
     event.stopPropagation();
     event.preventDefault();
-    console.log('DragManager: drop request on', event.target, 'data:', this._copyDataTransfer(event.dataTransfer));
   };
 
-  this._copyDataTransfer = function(dataTransfer) {
-    return {
-      types: dataTransfer.types,
-      items: Array.prototype.slice.call(dataTransfer.items),
-      files: Array.prototype.slice.call(dataTransfer.files)
+  function _createProps(event) {
+    var props = {
+      target: event.target,
     };
-  };
+    var dataTransfer = event.dataTransfer;
+    if (dataTransfer) {
+      props.types = dataTransfer.types;
+      props.items = Array.prototype.slice.call(dataTransfer.items);
+      props.files = Array.prototype.slice.call(dataTransfer.files);
+    }
+    // try to get information about the component
+    var comp = Component.getComponentFromNativeElement(event.target);
+    if (comp) {
+      props.comp = comp;
+      if (comp._isSurface) {
+        props.surface = comp;
+      } else if (comp.context.surface) {
+        props.surface = comp.context.surface;
+      }
+      if (props.surface) {
+        var sel = props.surface.getSelectionFromEvent(event);
+        if (sel) {
+          props.selection = sel;
+        }
+      }
+      var node = comp.props.node;
+      if (node) props.node = node;
+      if (comp._isTextPropertyComponent) {
+        props.path = comp.props.path;
+      }
+    }
+    return props;
+  }
 
 };
 
