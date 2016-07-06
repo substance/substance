@@ -26,10 +26,9 @@ InsertImageTool.Prototype = function() {
   };
 
   this.onFileSelect = function(e) {
-    // Pick the first file
-    var file = e.currentTarget.files[0];
+    var files = e.currentTarget.files;
     this.performAction({
-      file: file
+      files: Array.prototype.slice.call(files)
     });
   };
 

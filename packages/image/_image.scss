@@ -1,7 +1,17 @@
 .sc-image {
+  position: relative;
   max-width: 100%;
   display: block;
   margin: 0px auto;
+
+  img {
+    max-width: 1600px;
+  }
+
+  .se-progress-bar {
+    width: 400px;
+    height: 300px;
+  }
 }
 
 .sc-insert-image-tool {

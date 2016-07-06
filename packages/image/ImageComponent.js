@@ -1,6 +1,7 @@
 'use strict';
 
-var BlockNodeComponent = require('../../ui/BlockNodeComponent');
+var NodeComponent = require('../../ui/NodeComponent');
+var percentage = require('../../util/percentage');
 
 function ImageComponent() {
   ImageComponent.super.apply(this, arguments);
@@ -12,8 +13,12 @@ ImageComponent.Prototype = function() {
 
   this.didMount = function() {
     _super.didMount.call(this);
-
-    this.props.node.on('src:changed', this.rerender, this);
+    var node = this.props.node;
+    node.on('src:changed', this.rerender, this);
+    // TODO: we should try to factor this out for reuse
+    node.on('upload:started', this.onUploadStarted, this);
+    node.on('upload:progress', this.onUploadProgress, this);
+    node.on('upload:finished', this.onUploadFinished, this);
   };
 
   this.dispose = function() {
@@ -22,21 +27,41 @@ ImageComponent.Prototype = function() {
     this.props.node.off(this);
   };
 
-  this.getTagName = function() {
-    return 'img';
-  };
-
   this.render = function($$) {
     var el = _super.render.call(this, $$);
-    el.addClass('sc-image')
-      .attr({
+    el.addClass('sc-image');
+
+    el.append(
+      $$('img').attr({
         src: this.props.node.src,
-      });
+      }).ref('image')
+    );
+
+    if (this.state.uploading) {
+      var progressBar = $$('div')
+        .addClass('se-progress-bar')
+        .ref('progressBar')
+        .append('Uploading: ' + percentage(this.state.progress));
+      el.append(progressBar);
+    }
+
     return el;
+  };
+
+  this.onUploadStarted = function() {
+    this.setState({ uploading: true, progress: 0 });
+  };
+
+  this.onUploadProgress = function(progress) {
+    this.setState({ uploading: true, progress: progress });
+  };
+
+  this.onUploadFinished = function() {
+    this.setState({});
   };
 
 };
 
-BlockNodeComponent.extend(ImageComponent);
+NodeComponent.extend(ImageComponent);
 
 module.exports = ImageComponent;
