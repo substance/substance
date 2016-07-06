@@ -1,6 +1,9 @@
 'use strict';
 
+/* globals Promise */
+
 var sass = require('node-sass');
+var extend = require('lodash/extend');
 
 // use this from within another process
 // cb is optional
@@ -10,12 +13,17 @@ module.exports = function(params, cb) {
     var child = cp.fork(require.resolve('./_bundleStyles'));
     child.on('message', function(resultStr) {
       var scssContent = JSON.parse(resultStr);
-      var sassOptions = {
-        sourceMap: true,
-        sourceMapEmbed: true,
-        sourceMapContents: true,
-        // outFile: params.scssPath
-      };
+      var sassOptions = {};
+      // per default source maps are enabled and embedded
+      // only if explicitely disabled this is not done
+      if (!params.sass || params.sass.sourceMap !== false) {
+        sassOptions = {
+          sourceMap: true,
+          sourceMapEmbed: true,
+          sourceMapContents: true,
+        };
+      }
+      sassOptions = extend(sassOptions, params.sass);
       sassOptions.data = scssContent;
       sass.render(sassOptions, function(err, result) {
         if (err) reject(err);

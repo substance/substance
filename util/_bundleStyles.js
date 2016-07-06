@@ -1,3 +1,5 @@
+'use strict';
+
 // worker for sub-process
 
 var path = require('path');
