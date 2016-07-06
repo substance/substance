@@ -3,10 +3,8 @@
 var cloneDeep = require('lodash/cloneDeep');
 var each = require('lodash/each');
 var last = require('lodash/last');
+var Document = require('../Document');
 var annotationHelpers = require('../annotationHelpers');
-
-var CLIPBOARD_CONTAINER_ID = "clipboard_content";
-var CLIPBOARD_PROPERTY_ID = "clipboard_property";
 
 /**
   Creates a new document instance containing only the selected content
@@ -42,34 +40,27 @@ function copySelection(doc, args) {
 }
 
 function _copyPropertySelection(doc, selection) {
-  var copy = doc.newInstance();
   var path = selection.start.path;
   var offset = selection.start.offset;
   var endOffset = selection.end.offset;
   var text = doc.get(path);
-  var containerNode = copy.get(CLIPBOARD_CONTAINER_ID);
-  if (!containerNode) {
-    containerNode = copy.create({
-      type: 'container',
-      id: CLIPBOARD_CONTAINER_ID,
-      nodes: []
-    });
-  }
-  copy.create({
+  var snippet = doc.createSnippet();
+  var containerNode = snippet.getContainer();
+  snippet.create({
     type: doc.schema.getDefaultTextType(),
-    id: CLIPBOARD_PROPERTY_ID,
+    id: Document.TEXT_SNIPPET_ID,
     content: text.substring(offset, endOffset)
   });
-  containerNode.show(CLIPBOARD_PROPERTY_ID);
+  containerNode.show(Document.TEXT_SNIPPET_ID);
   var annotations = doc.getIndex('annotations').get(path, offset, endOffset);
   each(annotations, function(anno) {
     var data = cloneDeep(anno.toJSON());
-    data.path = [CLIPBOARD_PROPERTY_ID, 'content'];
+    data.path = [Document.TEXT_SNIPPET_ID, 'content'];
     data.startOffset = Math.max(offset, anno.startOffset)-offset;
     data.endOffset = Math.min(endOffset, anno.endOffset)-offset;
-    copy.create(data);
+    snippet.create(data);
   });
-  return copy;
+  return snippet;
 }
 
 // TODO: copying nested nodes is not straight-forward,
@@ -77,23 +68,13 @@ function _copyPropertySelection(doc, selection) {
 // Basically this needs to be implemented for each nested node.
 // The default implementation ignores partially selected nested nodes.
 function _copyContainerSelection(doc, selection) {
-  var copy = doc.newInstance();
   var container = doc.get(selection.containerId);
-  // create a new container
-  var containerNode = copy.create({
-    type: 'container',
-    id: CLIPBOARD_CONTAINER_ID,
-    nodes: []
-  });
+  var snippet = doc.createSnippet();
+  var containerNode = snippet.getContainer();
 
   var fragments = selection.getFragments();
-
-  if (fragments.length === 0) {
-    return copy;
-  }
-
+  if (fragments.length === 0) return snippet;
   var created = {};
-
   // copy nodes and annotations.
   for (var i = 0; i < fragments.length; i++) {
     var fragment = fragments[i];
@@ -101,7 +82,7 @@ function _copyContainerSelection(doc, selection) {
     var node = doc.get(nodeId);
     // skip created nodes
     if (!created[nodeId]) {
-      _copyNode(copy, node, container, created);
+      _copyNode(snippet, node, container, created);
       containerNode.show(nodeId);
     }
   }
@@ -115,10 +96,10 @@ function _copyContainerSelection(doc, selection) {
     path = firstFragment.path;
     offset = firstFragment.startOffset;
     text = doc.get(path);
-    copy.update(path, {
+    snippet.update(path, {
       delete: { start: 0, end: offset }
     });
-    annotationHelpers.deletedText(copy, path, 0, offset);
+    annotationHelpers.deletedText(snippet, path, 0, offset);
   }
 
   // if last is a is a text node, remove part before the selection
@@ -126,29 +107,24 @@ function _copyContainerSelection(doc, selection) {
     path = lastFragment.path;
     offset = lastFragment.endOffset;
     text = doc.get(path);
-    copy.update(path, {
+    snippet.update(path, {
       delete: { start: offset, end: text.length }
     });
-    annotationHelpers.deletedText(copy, path, offset, text.length);
+    annotationHelpers.deletedText(snippet, path, offset, text.length);
   }
 
-  return copy;
+  return snippet;
 }
 
 function _copyNodeSelection(doc, selection) {
-  var copy = doc.newInstance();
   var container = doc.get(selection.containerId);
-  // create a new container
-  var containerNode = copy.create({
-    type: 'container',
-    id: CLIPBOARD_CONTAINER_ID,
-    nodes: []
-  });
+  var snippet = doc.createSnippet();
+  var containerNode = snippet.getContainer();
   var nodeId = selection.getNodeId();
   var node = doc.get(nodeId);
-  _copyNode(copy, node, container, {});
+  _copyNode(snippet, node, container, {});
   containerNode.show(node.id);
-  return copy;
+  return snippet;
 }
 
 function _copyNode(doc, node, container, created) {
@@ -169,8 +145,5 @@ function _copyNode(doc, node, container, created) {
     doc.create(cloneDeep(anno.toJSON()));
   });
 }
-
-copySelection.CLIPBOARD_CONTAINER_ID = CLIPBOARD_CONTAINER_ID;
-copySelection.CLIPBOARD_PROPERTY_ID = CLIPBOARD_PROPERTY_ID;
 
 module.exports = copySelection;

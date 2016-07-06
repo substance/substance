@@ -523,6 +523,22 @@ Document.Prototype = function() {
     return new DocumentClass(this.schema);
   };
 
+  // useful in combination with paste transformation
+  this.createSnippet = function() {
+    var snippet = this.newInstance();
+    var snippetContainer = snippet.create({
+      type: 'container',
+      id: Document.SNIPPET_ID
+    });
+    snippet.getContainer = function() {
+      return snippetContainer;
+    };
+    snippet.show = function() {
+      snippetContainer.show.apply(snippetContainer, arguments);
+    };
+    return snippet;
+  };
+
   this.fromSnapshot = function(data) {
     var doc = this.newInstance();
     doc.loadSeed(data);
@@ -620,5 +636,10 @@ Document.Prototype = function() {
 };
 
 EventEmitter.extend(Document);
+
+// used by transforms copy, paste
+// and by ClipboardImporter/Exporter
+Document.SNIPPET_ID = "snippet";
+Document.TEXT_SNIPPET_ID = "text-snippet";
 
 module.exports = Document;
