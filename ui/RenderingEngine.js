@@ -666,6 +666,7 @@ State.Prototype = function() {
     if (!info) {
       info = {};
       obj[this.id] = info;
+      this.poluted.push(obj);
     }
     info[key] = val;
   };
