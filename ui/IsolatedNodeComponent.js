@@ -121,7 +121,9 @@ IsolatedNodeComponent.Prototype = function() {
       container.addClass('sm-disabled');
       // NOTE: there are some content implementations which work better without a blocker
       var blocker = $$(this.__elementTag).addClass('se-blocker')
-        .css({ 'z-index': 2*level+1 });
+        .css({ 'z-index': 2*level+1 })
+        .attr("draggable", true)
+        .on('dragstart', this.onDragstart);
       container.append(blocker);
     }
 

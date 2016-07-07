@@ -8,8 +8,7 @@ function DragManager(dndHandlers, context) {
   this.context = context;
   this.dndHandlers = dndHandlers;
 
-  var documentEl = DefaultDOMElement.wrapNativeElement(window.document);
-  documentEl.on('dragenter', this.onDragenter, this);
+  this._source = null;
 }
 
 DragManager.Prototype = function() {
@@ -19,59 +18,99 @@ DragManager.Prototype = function() {
     documentEl.off(this);
   };
 
-  this.onDragenter = function(event) { // eslint-disable-line
-    // we could emit an event, so that listeners could expose drop targets
-    // console.log('DragManager.onDragenter', event);
-  };
-
-  this.onDragstart = function(event) { // eslint-disable-line
+  this.onDragStart = function(event, component) { // eslint-disable-line
     // dito: trigger listeners to expose drop targets
-    // console.log('DragManager.onDragstart');
-  };
+    // console.log('DragManager.onDragStart');
+    event.dataTransfer.effectAllowed = 'all';
+    event.dataTransfer.setData('text/html', event.target.outerHTML);
+    event.stopPropagation();
 
-  this.onDrop = function(event) {
-    var props = _createProps(event);
+    this._source = {
+      component: component
+    };
+
     for (var i = 0; i < this.dndHandlers.length; i++) {
       var handler = this.dndHandlers[i];
-      var _break = handler.drop(props, this.context);
-      if (_break) break;
+      handler.dragStart(this._source, this.context);
     }
-    event.stopPropagation();
-    event.preventDefault();
   };
 
-  function _createProps(event) {
-    var props = {
-      target: event.target,
+  this.onDragEnter = function(event, component) { // eslint-disable-line
+    // we could emit an event, so that listeners could expose drop targets
+    console.log('DragManager.onDragEnter', event);
+    event.stopPropagation();
+  };
+
+  this.onDragOver = function(event, component) { // eslint-disable-line
+    // prevent default to allow drop
+    event.preventDefault();
+    event.stopPropagation();
+  };
+
+  this.onDrop = function(event, component) {
+    event.preventDefault();
+    event.stopPropagation();
+    console.log('DragManager.onDragEnter', event);
+    var params = {
+      source: this._source,
+      target: _getTargetInfo(event, component),
+      data: _getData(event)
     };
+    var i, handler;
+    for (i = 0; i < this.dndHandlers.length; i++) {
+      handler = this.dndHandlers[i];
+      var _break = handler.drop(params, this.context);
+      if (_break) break;
+    }
+    for (i = 0; i < this.dndHandlers.length; i++) {
+      handler = this.dndHandlers[i];
+      handler.dragEnd(params, this.context);
+    }
+  };
+
+  function _getData(event) {
     var dataTransfer = event.dataTransfer;
     if (dataTransfer) {
-      props.types = dataTransfer.types;
-      props.items = Array.prototype.slice.call(dataTransfer.items);
-      props.files = Array.prototype.slice.call(dataTransfer.files);
+      return {
+        types: dataTransfer.types,
+        items: Array.prototype.slice.call(dataTransfer.items),
+        files: Array.prototype.slice.call(dataTransfer.files)
+      };
     }
+  }
+
+  function _getTargetInfo(event) {
+    var target = {
+      element: DefaultDOMElement.wrapNativeElement(event.target)
+    };
     // try to get information about the component
     var comp = Component.getComponentFromNativeElement(event.target);
+    comp = _getComponent(comp);
     if (comp) {
-      props.comp = comp;
-      if (comp._isSurface) {
-        props.surface = comp;
+      target.comp = comp;
+      if (target._isSurface) {
+        target.surface = comp;
       } else if (comp.context.surface) {
-        props.surface = comp.context.surface;
+        target.surface = comp.context.surface;
       }
-      if (props.surface) {
-        var sel = props.surface.getSelectionFromEvent(event);
-        if (sel) {
-          props.selection = sel;
-        }
+      if (target.surface) {
+        var sel = target.surface.getSelectionFromEvent(event);
+        if (sel) target.selection = sel;
       }
       var node = comp.props.node;
-      if (node) props.node = node;
+      if (node) target.node = node;
       if (comp._isTextPropertyComponent) {
-        props.path = comp.props.path;
+        target.path = comp.props.path;
       }
     }
-    return props;
+    return target;
+  }
+
+  function _getComponent(comp) {
+    if (comp._isTextNodeComponent || comp._isElementComponent) {
+      return _getComponent(comp.getParent());
+    }
+    return comp;
   }
 
 };

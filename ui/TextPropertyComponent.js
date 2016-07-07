@@ -68,7 +68,9 @@ TextPropertyComponent.Prototype = function() {
       });
 
     if (this.context.dragManager) {
-      el.on('drop', this.onDrop);
+      el.on('dragenter', this.onDragEnter)
+        .on('dragover', this.onDragOver)
+        .on('drop', this.onDrop);
     }
 
     if (!this.props.withoutBreak) {
@@ -102,9 +104,17 @@ TextPropertyComponent.Prototype = function() {
     return el;
   };
 
+  this.onDragEnter = function(event) {
+    event.preventDefault();
+  };
+
+  this.onDragOver = function(event) {
+    event.preventDefault();
+  };
+
   this.onDrop = function(event) {
     // console.log('Received drop on TextProperty', this.getPath());
-    this.context.dragManager.onDrop(event);
+    this.context.dragManager.onDrop(event, this);
   };
 
   this.getPath = function() {

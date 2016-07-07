@@ -1,6 +1,16 @@
 .sc-inline-node {
   cursor: default;
 
+  > .se-container {
+    position: relative;
+
+    > .se-blocker {
+      position: absolute;
+      top:0; bottom: 0; left: 0; right: 0;
+    }
+
+  }
+
   > .se-slug {
     opacity: 0;
   }
