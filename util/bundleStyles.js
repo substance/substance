@@ -21,7 +21,7 @@ module.exports = function(params, cb) {
     }
     sassOptions = extend(sassOptions, params.sass);
     if (params.scssPath) {
-      sassOptions.file = paras.scssPath;
+      sassOptions.file = params.scssPath;
       sass.render(sassOptions, function(err, result) {
         if (err) cb(err);
         else cb(null, result.css);
