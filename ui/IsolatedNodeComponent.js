@@ -68,6 +68,8 @@ IsolatedNodeComponent.Prototype = function() {
       .addClass('sm-'+this.props.node.type)
       .attr("data-id", node.id);
 
+    var disabled = this.isDisabled();
+
     if (this.state.mode) {
       el.addClass('sm-'+this.state.mode);
     } else {
@@ -78,20 +80,15 @@ IsolatedNodeComponent.Prototype = function() {
       el.addClass('sm-default-style');
     }
 
-    el.on('mousedown', this.onMousedown);
     // shadowing handlers of the parent surface
     // TODO: extract this into a helper so that we can reuse it anywhere where we want
     // to prevent propagation to the parent surface
     el.on('keydown', this.onKeydown)
+      .on('mousedown', this._stopPropagation)
       .on('keypress', this._stopPropagation)
       .on('keyup', this._stopPropagation)
       .on('compositionstart', this._stopPropagation)
       .on('textInput', this._stopPropagation);
-
-    if (this.context.dragManager) {
-      el.on('dragstart', this.onDragstart);
-      el.on('drop', this.onDrop);
-    }
 
     el.append(
       $$(this.__elementTag).addClass('se-slug').addClass('sm-before').ref('before')
@@ -100,7 +97,6 @@ IsolatedNodeComponent.Prototype = function() {
     );
 
     var level = this._getLevel();
-
 
     var container = $$(this.__elementTag).addClass('se-container')
       .attr('contenteditable', false)
@@ -117,14 +113,28 @@ IsolatedNodeComponent.Prototype = function() {
     }
     container.append(this.renderContent($$, node));
 
-    if (this.isDisabled()) {
+    if (disabled) {
       container.addClass('sm-disabled');
-      // NOTE: there are some content implementations which work better without a blocker
-      var blocker = $$(this.__elementTag).addClass('se-blocker')
-        .css({ 'z-index': 2*level+1 })
-        .attr("draggable", true)
-        .on('dragstart', this.onDragstart);
-      container.append(blocker);
+      if (this.shouldRenderBlocker()) {
+        // NOTE: there are some content implementations which work better without a blocker
+        var blocker = $$(this.__elementTag).addClass('se-blocker')
+          .css({ 'z-index': 2*level+1 });
+        container.append(blocker);
+      }
+      if (this.shouldSelectOnClick()) {
+        // select the node on click
+        el.on('click', this.onClick);
+      }
+    }
+
+    if (this.context.dragManager &&
+        this.state.mode !== 'focused' &&
+        this.state.mode !== 'co-focused') {
+      el.attr("draggable", true);
+      el.on('dragstart', this.onDragStart)
+        .on('dragenter', this.onDragEnter)
+        .on('dragover', this.onDragOver)
+        .on('drop', this.onDrop);
     }
 
     if (this.state.mode === 'cursor' && this.state.position === 'after') {
@@ -160,6 +170,14 @@ IsolatedNodeComponent.Prototype = function() {
       }
       return $$(ComponentClass, props).ref('content');
     }
+  };
+
+  this.shouldRenderBlocker = function() {
+    return true;
+  };
+
+  this.shouldSelectOnClick = function() {
+    return this.state.mode !== 'focused' && this.state.mpde !== 'co-focused';
   };
 
   this.getId = function() {
@@ -221,9 +239,9 @@ IsolatedNodeComponent.Prototype = function() {
       var documentSession = this.context.documentSession;
       var newState = this._deriveStateFromSelectionState(documentSession.getSelectionState());
       if (!newState && this.state.mode) {
-        this.setState({});
+        this.extendState({ mode: null });
       } else if (newState && newState.mode !== this.state.mode) {
-        this.setState(newState);
+        this.extendState(newState);
       }
     }
   };
@@ -275,17 +293,13 @@ IsolatedNodeComponent.Prototype = function() {
   };
 
   this.onMousedown = function(event) {
-    // console.log('IsolatedNodeComponent.onMousedown', this.getId());
+    console.log('IsolatedNodeComponent.onMousedown', this.getId());
     event.stopPropagation();
-    switch (this.state.mode) {
-      case 'selected':
-      case 'focused':
-        break;
-      default:
-        event.preventDefault();
-        this._selectNode();
-        this.setState({ mode: 'selected' });
-    }
+  };
+
+  this.onClick = function(event) {
+    event.preventDefault();
+    this._selectNode();
   };
 
   this.onKeydown = function(event) {
@@ -300,21 +314,26 @@ IsolatedNodeComponent.Prototype = function() {
     }
   };
 
-  this.onDragstart = function(event) {
-    // console.log('Start dragging on', this.getId());
-    this.context.dragManager.onDragstart(event);
+  this.onDragStart = function(event) {
+    // console.log('Received drop on IsolatedNode', this.getId());
+    this.context.dragManager.onDragStart(event, this);
+  };
+
+  this.onDragEnter = function(event) {
+    event.preventDefault();
+  };
+
+  this.onDragOver = function(event) {
+    event.preventDefault();
   };
 
   this.onDrop = function(event) {
     // console.log('Received drop on IsolatedNode', this.getId());
-    this.context.dragManager.onDrop(event);
+    this.context.dragManager.onDrop(event, this);
   };
 
   this._escape = function() {
     this._selectNode();
-    // TODO: Is this still necessary?
-    // The state should be set during the next update cycle.
-    this.setState({ mode: 'selected' });
   };
 
   this._stopPropagation = function(event) {
