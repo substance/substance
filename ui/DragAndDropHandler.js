@@ -8,11 +8,15 @@ DragAndDropHandler.Prototype = function() {
 
   this._isDragAndDropHandler = true;
 
-  this.dragStart = function(event, context) { // eslint-disable-line
+  this.dragStart = function(params, context) { // eslint-disable-line
     // nothing
   };
 
-  this.drop = function(event, context) { // eslint-disable-line
+  this.drop = function(params, context) { // eslint-disable-line
+    // nothing
+  };
+
+  this.dragEnd = function(params, context) { // eslint-disable-line
     // nothing
   };
 

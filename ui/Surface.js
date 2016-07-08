@@ -561,9 +561,10 @@ Surface.Prototype = function() {
   // to be redesigned. The current implementation works basically
   // though, there are some things which do not work well cross-browser
   // particularly, double- and triple clicks.
+  // also it turned out to be problematic to react on mouse down instantly
   this.onMouseDown = function(event) {
     // console.log('mousedown on', this.getId());
-    event.stopPropagation();
+    // event.stopPropagation();
 
     // special treatment for triple clicks
     if (!(platform.isIE && platform.version<12) && event.detail >= 3) {
@@ -594,16 +595,16 @@ Surface.Prototype = function() {
     // we could maybe map the selection during the drag, but finally once after mouse is released.
     // TODO: this needs to be solved properly; be aware of browser incompatibilities
     // HACK: not working in IE which then does not allow a range selection anymore
-    if (!platform.isIE) {
-      // HACK: clearing the DOM selection, otherwise we have troubles with the old selection being in the way for the next selection
-      this.domSelection.clear();
-      setTimeout(function() {
-        if (this.domSelection) {
-          var sel = this.domSelection.getSelection();
-          this.setSelection(sel);
-        }
-      }.bind(this));
-    }
+    // if (!platform.isIE) {
+    //   // HACK: clearing the DOM selection, otherwise we have troubles with the old selection being in the way for the next selection
+    //   this.domSelection.clear();
+    //   setTimeout(function() {
+    //     if (this.domSelection) {
+    //       var sel = this.domSelection.getSelection();
+    //       this.setSelection(sel);
+    //     }
+    //   }.bind(this));
+    // }
 
     // Bind mouseup to the whole document in case of dragging out of the surface
     if (this.documentEl) {
@@ -642,7 +643,7 @@ Surface.Prototype = function() {
 
   this.onDrop = function(event) {
     // console.log('Received drop on Surface', this.getId(), event);
-    this.context.dragManager.onDrop(event);
+    this.context.dragManager.onDrop(event, this);
   };
 
   this.onNativeBlur = function() {
