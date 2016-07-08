@@ -103,5 +103,5 @@ $ npm run doc
 ### 1.0 Final
 
 - Complete documentation
-- Full test coverage (Current Coverage Status: [![Current Coverage Status](https://coveralls.io/repos/github/substance/substance/badge.svg?branch=devel)](https://coveralls.io/github/substance/substance?branch=devel))
+- Full test coverage (Current Coverage Status: [![Current Coverage Status](https://coveralls.io/repos/github/substance/substance/badge.svg?branch=develop)](https://coveralls.io/github/substance/substance?branch=develop))
 - Final versions of API's
