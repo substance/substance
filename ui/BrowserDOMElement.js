@@ -440,7 +440,7 @@ BrowserDOMElement.Prototype = function() {
     if (!child.el._wrapper) {
       child.el._wrapper = child;
     }
-    console.assert(child.el._wrapper === child, "Expecting a backlink between native element and CheerioDOMElement");
+    console.assert(child.el._wrapper === child, "The backlink to the wrapper should be consistent");
     return child.getNativeElement();
   };
 

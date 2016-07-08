@@ -6,9 +6,12 @@ var extend = require('lodash/extend');
 var clone = require('lodash/clone');
 var map = require('lodash/map');
 var $ = require('../util/cheerio.customized');
+var EventEmitter = require('../util/EventEmitter');
 var DOMElement = require('./DOMElement');
 
 function CheerioDOMElement(el) {
+  EventEmitter.call(this);
+
   this.el = el;
   this.$el = $(el);
   el._wrapper = this;
@@ -16,6 +19,8 @@ function CheerioDOMElement(el) {
 }
 
 CheerioDOMElement.Prototype = function() {
+
+  extend(this, EventEmitter.prototype);
 
   this._isCheerioDOMElement = true;
 
@@ -430,6 +435,10 @@ CheerioDOMElement.Prototype = function() {
       el = el.parent;
     }
     return false;
+  };
+
+  this.click = function() {
+    this.emit('click');
   };
 
 };
