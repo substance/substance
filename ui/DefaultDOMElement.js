@@ -13,13 +13,11 @@ if (inBrowser) {
 var DefaultDOMElement = {};
 
 DefaultDOMElement.createTextNode = function(text) {
-  var el = DOMElementImpl.createTextNode(text);
-  return new DOMElementImpl(el);
+  return DOMElementImpl.createTextNode(text);
 };
 
 DefaultDOMElement.createElement = function(tagName) {
-  var el = DOMElementImpl.createElement(tagName);
-  return new DOMElementImpl(el);
+  return DOMElementImpl.createElement(tagName);
 };
 
 DefaultDOMElement._create = function(el) {

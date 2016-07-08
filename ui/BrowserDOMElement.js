@@ -115,7 +115,10 @@ BrowserDOMElement.Prototype = function() {
     this.eventListeners.forEach(function(listener) {
       newEl.addEventListener(listener.eventName, listener.handler, listener.capture);
     });
-    this._replaceNativeEl(newEl);
+
+    newEl.append(this.getChildNodes());
+
+    this._replaceNativeEl(newEl.getNativeElement());
     return this;
   };
 
@@ -437,7 +440,7 @@ BrowserDOMElement.Prototype = function() {
     if (!child.el._wrapper) {
       child.el._wrapper = child;
     }
-    console.assert(child.el._wrapper === child, "Expecting a backlink between native element and CheerioDOMElement");
+    console.assert(child.el._wrapper === child, "The backlink to the wrapper should be consistent");
     return child.getNativeElement();
   };
 
@@ -602,11 +605,15 @@ DOMElement.extend(BrowserDOMElement);
 DOMElement._defineProperties(BrowserDOMElement, DOMElement._propertyNames);
 
 BrowserDOMElement.createTextNode = function(text) {
-  return window.document.createTextNode(text);
+  return BrowserDOMElement.wrapNativeElement(
+    window.document.createTextNode(text)
+  );
 };
 
 BrowserDOMElement.createElement = function(tagName) {
-  return window.document.createElement(tagName);
+  return BrowserDOMElement.wrapNativeElement(
+    window.document.createElement(tagName)
+  );
 };
 
 BrowserDOMElement.parseMarkup = function(str, format, isFullDoc) {

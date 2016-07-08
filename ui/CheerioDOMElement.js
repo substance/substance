@@ -6,9 +6,12 @@ var extend = require('lodash/extend');
 var clone = require('lodash/clone');
 var map = require('lodash/map');
 var $ = require('../util/cheerio.customized');
+var EventEmitter = require('../util/EventEmitter');
 var DOMElement = require('./DOMElement');
 
 function CheerioDOMElement(el) {
+  EventEmitter.call(this);
+
   this.el = el;
   this.$el = $(el);
   el._wrapper = this;
@@ -16,6 +19,8 @@ function CheerioDOMElement(el) {
 }
 
 CheerioDOMElement.Prototype = function() {
+
+  extend(this, EventEmitter.prototype);
 
   this._isCheerioDOMElement = true;
 
@@ -432,6 +437,10 @@ CheerioDOMElement.Prototype = function() {
     return false;
   };
 
+  this.click = function() {
+    this.emit('click');
+  };
+
 };
 
 DOMElement.extend(CheerioDOMElement);
@@ -439,11 +448,15 @@ DOMElement.extend(CheerioDOMElement);
 DOMElement._defineProperties(CheerioDOMElement, DOMElement._propertyNames);
 
 CheerioDOMElement.createTextNode = function(text) {
-  return $._createTextNode(text);
+  return CheerioDOMElement.wrapNativeElement(
+    $._createTextNode(text)
+  );
 };
 
 CheerioDOMElement.createElement = function(tagName) {
-  return $('<' + tagName + '>')[0];
+  return CheerioDOMElement.wrapNativeElement(
+    $('<' + tagName + '>')[0]
+  );
 };
 
 CheerioDOMElement.parseMarkup = function(str, format) {

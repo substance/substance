@@ -25,7 +25,7 @@ ResultItem.Prototype = function() {
         header.append($$('span').addClass('se-status sm-not-ok').append("\u26A0"));
       }
     }
-    header.append($$('span').addClass('se-description').append(result.name));
+    header.append($$('span').addClass('se-description').append(String(result.name)));
     el.append(header);
 
     if (!test._skip && !result.ok && result.operator === "equal") {

@@ -701,6 +701,15 @@ TextNodeComponent.Prototype = function() {
       this.el._replaceNativeEl(newEl.getNativeElement());
     }
   };
+
+  this.getChildNodes = function() {
+    return [];
+  };
+
+  this.getChildren = function() {
+    return [];
+  };
+
 };
 
 Component.extend(TextNodeComponent);
