@@ -1,10 +1,9 @@
 'use strict';
 
-var oo = require('../util/oo');
-var EventEmitter = require('../util/EventEmitter');
+var oo = require('../../util/oo');
+var EventEmitter = require('../../util/EventEmitter');
 
-var FileClientStub = function() {
-};
+var FileClientStub = function() {};
 
 FileClientStub.Prototype = function() {
 

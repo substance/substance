@@ -8,8 +8,6 @@ var DocumentSchema = require('../model/DocumentSchema');
 var EditingBehavior = require('../model/EditingBehavior');
 var Registry = require('../util/Registry');
 var ComponentRegistry = require('../ui/ComponentRegistry');
-var FileClientStub = require('../ui/FileClientStub');
-var SaveHandlerStub = require('../ui/SaveHandlerStub');
 var path = require('path');
 
 /**
@@ -33,10 +31,7 @@ function AbstractConfigurator() {
     macros: [],
     dndHandlers: [],
     icons: {},
-    labels: {},
-    saveHandler: SaveHandlerStub,
-    fileClient: FileClientStub,
-    ToolbarClass: null
+    labels: {}
   };
 }
 
@@ -176,20 +171,9 @@ AbstractConfigurator.Prototype = function() {
     this.config.dndHandlers.push(DragAndDropHandlerClass);
   };
 
-  this.setSaveHandler = function(saveHandler) {
-    this.config.saveHandler = saveHandler;
-  };
-
-  this.setToolbarClass = function(ToolbarClass) {
-    this.config.ToolbarClass = ToolbarClass;
-  };
-
-  this.setFileClient = function(fileClient) {
-    this.config.fileClient = fileClient;
-  };
-
   this.import = function(pkg, options) {
     pkg.configure(this, options || {});
+    return this;
   };
 
   // Config Interpreter APIs
@@ -296,16 +280,6 @@ AbstractConfigurator.Prototype = function() {
     return this.converterRegistry;
   };
 
-  this.getFileClient = function() {
-    var FileClientClass = this.config.fileClient;
-    return new FileClientClass();
-  };
-
-  this.getSaveHandler = function() {
-    var SaveHandlerClass = this.config.saveHandler;
-    return new SaveHandlerClass();
-  };
-
   this.getIconProvider = function() {
     throw new Error('This method is abstract');
   };
@@ -314,10 +288,6 @@ AbstractConfigurator.Prototype = function() {
     return this.config.textTypes.map(function(t) {
       return t.spec;
     });
-  };
-
-  this.getI18nInstance = function() {
-    throw new Error('This method is abstract.');
   };
 
   this.getLabelProvider = function() {
@@ -334,10 +304,6 @@ AbstractConfigurator.Prototype = function() {
 
   this.getMacros = function() {
     return this.config.macros;
-  };
-
-  this.getToolbarClass = function() {
-    return this.config.ToolbarClass;
   };
 
   this.createDragHandlers = function() {

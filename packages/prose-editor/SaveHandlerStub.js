@@ -1,6 +1,6 @@
 'use strict';
 
-var oo = require('../util/oo');
+var oo = require('../../util/oo');
 
 var SaveHandlerStub = function() {
 };
