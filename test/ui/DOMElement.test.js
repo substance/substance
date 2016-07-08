@@ -1,6 +1,7 @@
 'use strict';
 
 var test = require('../test').module('ui/DOMElement');
+var spy = require('../spy');
 
 var DOMElement = require('../../ui/DefaultDOMElement');
 
@@ -88,4 +89,19 @@ test("removeClass", function(t) {
   p.removeClass('foo');
   t.notOk(p.hasClass('foo'), 'Element should not have class "foo".');
   t.end();
+});
+
+test("setTagName", function(t) {
+  var el = DOMElement.parseHTML('<p class="foo">ABC<b>DEF</b>GHI</p>');
+  var onClick = spy();
+  el.on('click', onClick);
+  // this call is brutal as a new element needs to be created
+  // and all the content and attributes be copied over
+  el.setTagName('h1');
+  t.equal(el.tagName, 'h1', 'Now the element should be a heading');
+  t.equal(el.textContent, 'ABCDEFGHI', '.. its text content should have been preserved');
+  t.equal(el.getChildCount(), 3, '.. and its children should still be there');
+  t.notNil(el.find('b'), '.. including the <b> element');
+  el.click();
+  t.equal(onClick.callCount, 1, '.. and even the click handler should still work');
 });
