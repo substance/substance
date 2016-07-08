@@ -460,7 +460,7 @@ RenderingEngine.Prototype = function() {
     var el = comp.el;
     console.assert(el, "Component's element should exist at this point.");
     var tagName = el.getTagName();
-    if (vel.tagName !== tagName) {
+    if (vel.tagName.toLowerCase() !== tagName) {
       el.setTagName(vel.tagName);
     }
     _updateHash({
