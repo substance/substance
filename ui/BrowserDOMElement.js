@@ -602,11 +602,15 @@ DOMElement.extend(BrowserDOMElement);
 DOMElement._defineProperties(BrowserDOMElement, DOMElement._propertyNames);
 
 BrowserDOMElement.createTextNode = function(text) {
-  return window.document.createTextNode(text);
+  return BrowserDOMElement.wrapNativeElement(
+    window.document.createTextNode(text)
+  );
 };
 
 BrowserDOMElement.createElement = function(tagName) {
-  return window.document.createElement(tagName);
+  return BrowserDOMElement.wrapNativeElement(
+    window.document.createElement(tagName)
+  );
 };
 
 BrowserDOMElement.parseMarkup = function(str, format, isFullDoc) {

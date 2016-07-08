@@ -439,11 +439,15 @@ DOMElement.extend(CheerioDOMElement);
 DOMElement._defineProperties(CheerioDOMElement, DOMElement._propertyNames);
 
 CheerioDOMElement.createTextNode = function(text) {
-  return $._createTextNode(text);
+  return CheerioDOMElement.wrapNativeElement(
+    $._createTextNode(text)
+  );
 };
 
 CheerioDOMElement.createElement = function(tagName) {
-  return $('<' + tagName + '>')[0];
+  return CheerioDOMElement.wrapNativeElement(
+    $('<' + tagName + '>')[0]
+  );
 };
 
 CheerioDOMElement.parseMarkup = function(str, format) {
