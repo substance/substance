@@ -104,4 +104,5 @@ test("setTagName", function(t) {
   t.notNil(el.find('b'), '.. including the <b> element');
   el.click();
   t.equal(onClick.callCount, 1, '.. and even the click handler should still work');
+  t.end();
 });
