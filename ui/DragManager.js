@@ -37,7 +37,7 @@ DragManager.Prototype = function() {
 
   this.onDragEnter = function(event, component) { // eslint-disable-line
     // we could emit an event, so that listeners could expose drop targets
-    console.log('DragManager.onDragEnter', event);
+    // console.log('DragManager.onDragEnter', event);
     event.stopPropagation();
   };
 
@@ -50,7 +50,7 @@ DragManager.Prototype = function() {
   this.onDrop = function(event, component) {
     event.preventDefault();
     event.stopPropagation();
-    console.log('DragManager.onDragEnter', event);
+    // console.log('DragManager.onDragEnter', event);
     var params = {
       source: this._source,
       target: _getTargetInfo(event, component),

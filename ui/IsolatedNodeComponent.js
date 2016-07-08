@@ -293,7 +293,7 @@ IsolatedNodeComponent.Prototype = function() {
   };
 
   this.onMousedown = function(event) {
-    console.log('IsolatedNodeComponent.onMousedown', this.getId());
+    // console.log('IsolatedNodeComponent.onMousedown', this.getId());
     event.stopPropagation();
   };
 
