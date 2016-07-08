@@ -81,12 +81,27 @@ test('Detecting relocation when injecting a new parent element', function(t) {
 
 // ATTENTION: this is broken in server environment
 test.UI('Detecting relocation when injecting components (TextProperty use-case)', function(t) {
+  /*
+    This simulates a situation found often when rendering a TextProperty.
+    Say a text property contains an inline node.
+    Regularly, the content looks roughly like this:
+    ```
+      AAAA<div class="inline-node">BBBB</div>CCCC
+    ```
+    When selected there is a wrapper around this
+    ```
+      AAAA<div class='selection'><div>BBBB</div></div>CCCC
+    ```
+    Adding and removing this selection element leads to a situation
+    where the inline node needs to be attached to varying parent
+    elements.
+  */
   function _render($$) {
     var el = $$('div');
     var parent = el;
     el.append('AAAA');
     if (this.props.extraLayer) {
-      var middle = $$('Simple').ref('selection');
+      var middle = $$(Simple).ref('selection');
       el.append(middle);
       parent = middle;
     }
