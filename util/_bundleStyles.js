@@ -11,7 +11,7 @@ process.on('message', function(paramStr) {
   var mainPackagePath = params.configPath;
   var Configurator = require(configuratorPath);
   var MainPackage = require(mainPackagePath);
-  var configurator = new Configurator(MainPackage);
+  var configurator = new Configurator().import(MainPackage);
   var scssFiles = configurator.getStyles();
   var result = scssFiles.map(function(scssFile) {
     var relPath = String(path.relative(rootDir, scssFile)).split(path.sep).join('/');

@@ -7,19 +7,13 @@ var FontAwesomeIconProvider = require('../ui/FontAwesomeIconProvider');
 var LabelProvider = require('../ui/DefaultLabelProvider');
 
 /*
-  Default Configurator for Substance editors
+  Default Configurator for most Substance apps
 
-  This works well for single-column apps (such as ProseEditor).
-  Write your own Configurator for apps that require more complex
-  configuration (e.g. when there are multiple surfaces involved
-  each coming with different textTypes, enabled commands etc.)
+  If you need app-specific API's just extend
+  and configure your custom configurator.
 */
 function Configurator(firstPackage) {
   AbstractConfigurator.call(this);
-
-  if (firstPackage) {
-    this.import(firstPackage);
-  }
 }
 
 Configurator.Prototype = function() {
