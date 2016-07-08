@@ -12,7 +12,7 @@ var LabelProvider = require('../ui/DefaultLabelProvider');
   If you need app-specific API's just extend
   and configure your custom configurator.
 */
-function Configurator(firstPackage) {
+function Configurator() {
   AbstractConfigurator.call(this);
 }
 
