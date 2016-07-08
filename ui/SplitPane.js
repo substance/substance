@@ -16,10 +16,10 @@ var Component = require('./Component');
 
   ```js
   $$(SplitPane, {
-    sizeA: '30%'
+    sizeA: '30%',
     splitType: 'horizontal'
   }).append(
-    $$('div').append('Pane A')
+    $$('div').append('Pane A'),
     $$('div').append('Pane B')
   )
   ```
