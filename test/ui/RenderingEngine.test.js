@@ -79,8 +79,7 @@ test('Detecting relocation when injecting a new parent element', function(t) {
   t.end();
 });
 
-// ATTENTION: this is broken in server environment
-test.UI('Detecting relocation when injecting components (TextProperty use-case)', function(t) {
+test('Detecting relocation when injecting components (TextProperty use-case)', function(t) {
   /*
     This simulates a situation found often when rendering a TextProperty.
     Say a text property contains an inline node.
