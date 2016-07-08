@@ -115,7 +115,10 @@ BrowserDOMElement.Prototype = function() {
     this.eventListeners.forEach(function(listener) {
       newEl.addEventListener(listener.eventName, listener.handler, listener.capture);
     });
-    this._replaceNativeEl(newEl);
+
+    newEl.append(this.getChildNodes());
+
+    this._replaceNativeEl(newEl.getNativeElement());
     return this;
   };
 
