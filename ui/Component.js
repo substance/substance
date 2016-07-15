@@ -134,6 +134,10 @@ Component.Prototype = function() {
     return comp;
   };
 
+  this.getNativeElement = function() {
+    return this.el.getNativeElement();
+  };
+
   /*
     Short hand for using labelProvider API
   */
