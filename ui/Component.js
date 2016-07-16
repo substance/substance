@@ -164,6 +164,9 @@ Component.Prototype = function() {
   };
 
   this.mount = function(el) {
+    if (!el) {
+      throw new Error('Element is required.');
+    }
     if (!this.el) {
       this._render();
     }

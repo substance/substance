@@ -2,6 +2,7 @@
 
 var clone = require('lodash/clone');
 var extend = require('lodash/extend');
+var flattenDeep = require('lodash/flattenDeep');
 var isArray = require('lodash/isArray');
 var isFunction = require('lodash/isFunction');
 var isNil = require('lodash/isNil');
@@ -649,7 +650,7 @@ VirtualElement.createElement = function() {
   // allow a notation similar to React.createElement
   // $$(MyComponent, {}, ...children)
   if (arguments.length > 2) {
-    content.append(Array.prototype.slice.call(arguments, 2));
+    content.append(flattenDeep(Array.prototype.slice.call(arguments, 2)));
   }
   return content;
 };
