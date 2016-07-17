@@ -3,6 +3,7 @@
 
 var path = require('path');
 var each = require('lodash/each');
+var extend = require('lodash/extend');
 var isString = require('lodash/isString');
 
 /**
@@ -29,16 +30,19 @@ var server = {};
   server.serveJS(app, 'app.js', path.join(__dirname, 'src', 'app.js'));
   ```
 */
-server.serveJS = function(expressApp, route, sourcePath) {
-  var browserify = require('browserify');
+server.serveJS = function(expressApp, route, sourcePath, options) {
+  var _browserify = require('./_browserify');
+  var params = extend(options, { sourcePath: sourcePath });
   expressApp.get(route, function(req, res) {
-    browserify({ debug: true, cache: false })
-      .add(sourcePath)
-      .bundle()
-      .on('error', function(err) {
+    var startTime = Date.now();
+    _browserify(params, function(err, buf) {
+      console.info('browserify finished after %s ms', Date.now()-startTime);
+      if (err) {
         console.error(err.message);
-      })
-      .pipe(res);
+      } else {
+        res.status(200).send(buf);
+      }
+    });
   });
 };
 
