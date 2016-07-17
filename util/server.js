@@ -31,11 +31,11 @@ var server = {};
   ```
 */
 server.serveJS = function(expressApp, route, sourcePath, options) {
-  var _browserify = require('./_browserify');
+  var bundleJS = require('./bundleJS');
   var params = extend(options, { sourcePath: sourcePath });
   expressApp.get(route, function(req, res) {
     var startTime = Date.now();
-    _browserify(params, function(err, buf) {
+    bundleJS(params, function(err, buf) {
       console.info('browserify finished after %s ms', Date.now()-startTime);
       if (err) {
         console.error(err.message);
