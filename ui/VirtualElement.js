@@ -6,6 +6,7 @@ var flattenDeep = require('lodash/flattenDeep');
 var isArray = require('lodash/isArray');
 var isFunction = require('lodash/isFunction');
 var isNil = require('lodash/isNil');
+var isPlainObject = require('lodash/isPlainObject');
 var isString = require('lodash/isString');
 var map = require('lodash/map');
 var omit = require('lodash/omit');
@@ -625,14 +626,28 @@ VirtualElement.createElement = function() {
   } else {
     throw new Error('Illegal usage of $$()');
   }
-  var props = clone(_second) || {};
   // some props are mapped to built-ins
-  var _keys = ["class", "ref"];
-  var _vals = {};
-  _keys.forEach(function(name) {
-    _vals[name] = props[name];
-    delete props[name];
-  });
+  var props = {};
+  var classNames, ref;
+  var eventHandlers = [];
+  for(var key in _second) {
+    if (!_second.hasOwnProperty(key)) continue;
+    var val = _second[key];
+    switch(key) {
+      case 'class':
+        classNames = val;
+        break;
+      case 'ref':
+        ref = val;
+        break;
+      default:
+        if (key.slice(0,2) === 'on') {
+          eventHandlers.push({ name: key.slice(2), handler: val });
+        } else {
+          props[key] = val;
+        }
+    }
+  }
   if (type === 'element') {
     content = new VirtualHTMLElement(_first);
     // remaining props are attributes
@@ -641,12 +656,22 @@ VirtualElement.createElement = function() {
   } else {
     content = new VirtualComponent(_first, props);
   }
-  if (_vals['class']) {
-    content.addClass(_vals['class']);
+  if (classNames) {
+    content.addClass(classNames);
   }
-  if (_vals.ref) {
-    content.ref(_vals.ref);
+  if (ref) {
+    content.ref(ref);
   }
+  eventHandlers.forEach(function(h) {
+    if (isFunction(h.handler)) {
+      content.on(h.name, h.handler);
+    } else if (isPlainObject(h.handler)) {
+      var params = h.handler;
+      content.on(h.name, params.handler, params.context, params);
+    } else {
+      throw new Error('Illegal arguments for $$(_,{ on'+h.name+'})');
+    }
+  });
   // allow a notation similar to React.createElement
   // $$(MyComponent, {}, ...children)
   if (arguments.length > 2) {
