@@ -571,7 +571,7 @@ RenderingEngine.Prototype = function() {
       // as expected.
       // TODO: instead of creating a new VirtualElement each time, we could return
       // an immutable wrapper for the already recorded element.
-      vel = VirtualElement.createElement.apply(null, arguments);
+      vel = VirtualElement.createElement.apply(this, arguments);
       // these variables need to be set make the 'ref()' API work
       vel._context = this;
       vel._owner = this.owner;
@@ -622,7 +622,7 @@ function CaptureContext(owner) {
 }
 
 CaptureContext.prototype._createComponent = function() {
-  var vel = VirtualElement.createElement.apply(null, arguments);
+  var vel = VirtualElement.createElement.apply(this, arguments);
   vel._context = this;
   vel._owner = this.owner;
   if (vel._isVirtualComponent) {

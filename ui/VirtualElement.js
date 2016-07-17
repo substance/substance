@@ -656,6 +656,9 @@ VirtualElement.createElement = function() {
   } else {
     content = new VirtualComponent(_first, props);
   }
+  // HACK: this is set to the current context by RenderingEngine
+  // otherwise this will provide rubbish
+  content._owner = this.owner;
   if (classNames) {
     content.addClass(classNames);
   }
