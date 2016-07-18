@@ -72,10 +72,16 @@ function _deleteCharacterWithNodeSelection(tx, args) {
   var container = tx.get(containerId);
   var pos, text;
   if (sel.isFull() || ( sel.isBefore() && direction === 'right') || (sel.isAfter() && direction === 'left')) {
-    return deleteNode(tx, {
+    pos = container.getPosition(nodeId);
+    deleteNode(tx, {
       nodeId: nodeId,
       containerId: containerId
     });
+    var newNode = tx.create({
+      type: tx.getSchema().getDefaultTextType(),
+      content: ""
+    });
+    container.show(newNode.id, pos);
   } else if (sel.isBefore() && direction === 'left') {
     pos = container.getPosition(nodeId);
     if (pos > 0) {
