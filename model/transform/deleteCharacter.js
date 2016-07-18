@@ -82,6 +82,9 @@ function _deleteCharacterWithNodeSelection(tx, args) {
       content: ""
     });
     container.show(newNode.id, pos);
+    return {
+      selection: tx.createSelection([newNode.id, 'content'], 0)
+    };
   } else if (sel.isBefore() && direction === 'left') {
     pos = container.getPosition(nodeId);
     if (pos > 0) {
