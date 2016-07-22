@@ -237,7 +237,7 @@ AbstractConfigurator.Prototype = function() {
   this.getToolRegistry = function() {
     var toolRegistry = new Registry();
     forEach(this.config.tools, function(item, name) {
-      toolRegistry.add(item.name, tool);
+      toolRegistry.add(name, item);
     });
     return toolRegistry;
   };
@@ -252,7 +252,7 @@ AbstractConfigurator.Prototype = function() {
 
   this.getCommands = function() {
     return map(this.config.commands, function(item, name) {
-      new item.CommandClass(extend({name: name}), item.options));
+      new item.CommandClass(extend({name: name}, item.options));
     });
   };
 
