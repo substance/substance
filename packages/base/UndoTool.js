@@ -1,12 +1,3 @@
 'use strict';
-
-var Tool = require('../../ui/Tool');
-
-function UndoTool() {
-  UndoTool.super.apply(this, arguments);
-}
-
-Tool.extend(UndoTool);
-UndoTool.static.name = 'undo';
-
-module.exports = UndoTool;
+// just for legacy
+module.exports = require('../../ui/Tool');

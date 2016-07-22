@@ -21,6 +21,6 @@ TestContainerComponent.Prototype = function() {
 
 Component.extend(TestContainerComponent);
 
-TestContainerComponent.static.fullWidth = true;
+TestContainerComponent.fullWidth = true;
 
 module.exports = TestContainerComponent;

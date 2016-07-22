@@ -21,8 +21,8 @@ var DataNode = require('./data/Node');
     Todo.super.apply(this, arguments);
   }
   TextBlock.extend(Todo);
-  Todo.static.name = 'todo';
-  Todo.static.defineSchema({
+  Todo.define({
+    type: 'todo',
     content: 'text',
     done: { type: 'bool', default: false }
   });
@@ -131,50 +131,6 @@ DocumentNode.Prototype = function() {
     return node;
   };
 
-  /**
-    This is used to be able to traverse all properties in a container.
-    This is particularly necessary for strucuted nodes, with more than one editable
-    text property.
-
-    @example
-
-    For a figure node with `title`, `img`, and `caption` this could look
-    be done this way:
-
-    ```
-    Figure.static.addressablePropertyNames = ['title', 'caption']
-    ```
-
-    The img itself does not need to be addressable, as it can't be edited in the text editor.
-
-    Alternatvely you can use the `text` data type in the schema, which implicitly makes
-    these properties addressable.
-
-    ```
-    Figure.static.defineSchema({
-      title: "text",
-      img: "string",
-      caption: "text"
-    });
-    ```
-
-    @private
-    @returns {String[]} an array of property names
-  */
-  this.getAddressablePropertyNames = function() {
-    var addressablePropertyNames = this.constructor.static.addressablePropertyNames;
-    return addressablePropertyNames || [];
-  };
-
-  this.hasAddressableProperties = function() {
-    return this.getAddressablePropertyNames().length > 0;
-  };
-
-  this.getPropertyNameAt = function(idx) {
-    var propertyNames = this.constructor.static.addressablePropertyNames || [];
-    return propertyNames[idx];
-  };
-
   // TODO: should this really be here?
   // volatile property necessary to render highlighted node differently
   // TODO: We should get this out here
@@ -194,7 +150,7 @@ DocumentNode.Prototype = function() {
     var match = _matchPropertyEvent(eventName);
     if (match) {
       var propertyName = match[1];
-      if (this.constructor.static.schema[propertyName]) {
+      if (this.constructor.schema[propertyName]) {
         var doc = this.getDocument();
         doc.getEventProxy('path')
           .on([this.id, propertyName], handler, ctx);
@@ -246,35 +202,35 @@ DocumentNode.Prototype = function() {
     @returns {Boolean} true if node is a block node (e.g. Paragraph, Figure, List, Table)
   */
   this.isBlock = function() {
-    return this.constructor.static.isBlock;
+    return this.constructor.isBlock;
   };
 
   /**
     @returns {Boolean} true if node is a text node (e.g. Paragraph, Codebock)
   */
   this.isText = function() {
-    return this.constructor.static.isText;
+    return this.constructor.isText;
   };
 
   /**
     @returns {Boolean} true if node is an annotation node (e.g. Strong)
   */
   this.isPropertyAnnotation = function() {
-    return this.constructor.static.isPropertyAnnotation;
+    return this.constructor.isPropertyAnnotation;
   };
 
   /**
     @returns {Boolean} true if node is an inline node (e.g. Citation)
   */
   this.isInline = function() {
-    return this.constructor.static.isInline;
+    return this.constructor.isInline;
   };
 
   /**
     @returns {Boolean} true if node is a container annotation (e.g. multiparagraph comment)
   */
   this.isContainerAnnotation = function() {
-    return this.constructor.static.isContainerAnnotation;
+    return this.constructor.isContainerAnnotation;
   };
 
 };
@@ -282,46 +238,39 @@ DocumentNode.Prototype = function() {
 DataNode.extend(DocumentNode);
 
 /**
-  The node's name is used to register it in the DocumentSchema.
-
-  @type {String} default: 'node'
-*/
-DocumentNode.static.name = 'node';
-
-/**
   Declares a node to be treated as block-type node.
 
   BlockNodes are considers the direct descendant of `Container` nodes.
   @type {Boolean} default: false
 */
-DocumentNode.static.isBlock = false;
+DocumentNode.isBlock = false;
 
 /**
   Declares a node to be treated as text-ish node.
 
   @type {Boolean} default: false
 */
-DocumentNode.static.isText = false;
+DocumentNode.isText = false;
 
 /**
   Declares a node to be treated as {@link model/PropertyAnnotation}.
 
   @type {Boolean} default: false
 */
-DocumentNode.static.isPropertyAnnotation = false;
+DocumentNode.isPropertyAnnotation = false;
 
 /**
   Declares a node to be treated as {@link model/ContainerAnnotation}.
 
   @type {Boolean} default: false
 */
-DocumentNode.static.isContainerAnnotation = false;
+DocumentNode.isContainerAnnotation = false;
 
 /**
   Declares a node to be treated as {@link model/InlineNode}.
 
   @type {Boolean} default: false
 */
-DocumentNode.static.isInline = false;
+DocumentNode.isInline = false;
 
 module.exports = DocumentNode;

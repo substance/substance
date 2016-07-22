@@ -17,7 +17,7 @@ function EditLinkTool() {
 EditLinkTool.Prototype = function() {
 
   this.getUrlPath = function() {
-    var propPath = this.constructor.static.urlPropertyPath;
+    var propPath = this.constructor.urlPropertyPath;
     return [this.props.node.id].concat(propPath);
   };
 
@@ -61,10 +61,9 @@ EditLinkTool.Prototype = function() {
 
 Component.extend(EditLinkTool);
 
-EditLinkTool.static.urlPropertyPath = ['url'];
-EditLinkTool.static.name = 'edit-link';
+EditLinkTool.urlPropertyPath = ['url'];
 
-EditLinkTool.static.getProps = function(commandStates) {
+EditLinkTool.getProps = function(commandStates) {
   if (commandStates.link.mode === 'edit') {
     return clone(commandStates.link);
   } else {

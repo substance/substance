@@ -14,11 +14,10 @@ DefaultOverlay.Prototype = function() {
     var toolRegistry = this.context.toolRegistry;
     toolRegistry.forEach(function(tool) {
       if (tool.options.overlay) {
-        var toolProps = tool.Class.static.getProps(commandStates);
+        var toolProps = tool.Class.getProps(commandStates);
         if (toolProps) {
-          var toolName = tool.Class.static.name;
           el.append(
-            $$(tool.Class, toolProps).ref(toolName)
+            $$(tool.Class, toolProps).ref(tool.name)
           );
         }
       }

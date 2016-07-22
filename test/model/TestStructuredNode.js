@@ -8,13 +8,13 @@ function StructuredNode() {
 
 DocumentNode.extend(StructuredNode);
 
-StructuredNode.static.name = "structured-node";
-StructuredNode.static.defineSchema({
+StructuredNode.define({
+  type: "structured-node",
   title: "text",
   body: "text",
   caption: "text"
 });
 
-StructuredNode.static.isBlock = true;
+StructuredNode.isBlock = true;
 
 module.exports = StructuredNode;

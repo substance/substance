@@ -27,9 +27,8 @@ NamespaceNode.Prototype = function() {
 
 DocumentNode.extend(NamespaceNode, MemberContainerMixin);
 
-NamespaceNode.static.name = 'namespace';
-
-NamespaceNode.static.defineSchema({
+NamespaceNode.define({
+  type: 'namespace',
   parent: { type: 'id', optional: true },
   name: 'string',
   description: { type: 'string', optional: true }, // HTML
@@ -38,6 +37,6 @@ NamespaceNode.static.defineSchema({
   members: { type: ['array', 'id'], default: [] },
 });
 
-NamespaceNode.static.isBlock = true;
+NamespaceNode.isBlock = true;
 
 module.exports = NamespaceNode;

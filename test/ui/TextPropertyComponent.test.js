@@ -15,7 +15,7 @@ test.UI("Get coordinate of empty property", function(t) {
     id: 'empty',
     content: ''
   });
-  var comp = Component.mount(TextPropertyComponent, {
+  var comp = TextPropertyComponent.mount({
     doc: doc,
     path: ['empty', 'content']
   }, t.sandbox);

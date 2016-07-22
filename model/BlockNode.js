@@ -8,6 +8,6 @@ function BlockNode() {
 
 DocumentNode.extend(BlockNode);
 
-BlockNode.static.isBlock = true;
+BlockNode.isBlock = true;
 
 module.exports = BlockNode;

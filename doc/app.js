@@ -7,7 +7,6 @@ var DocumentationReader = require('./DocumentationReader');
 var importDocumentation = require('./model/importDocumentation');
 var request = require('../util/request');
 var Configurator = require('../util/Configurator');
-var configurator = new Configurator(require('./DocumentationReaderConfig'));
 
 var _loadDocument = function(cb) {
   // var t = Date.now();
@@ -28,7 +27,9 @@ window.onload = function() {
   var doc = new Documentation();
   window.doc = doc;
   _loadDocument(function(err, doc) {
-    Component.mount(DocumentationReader, {
+    var config = require('./DocumentationReaderConfig');
+    var configurator = new Configurator().import(config);
+    DocumentationReader.mount({
       doc: doc,
       configurator: configurator
     }, 'body');

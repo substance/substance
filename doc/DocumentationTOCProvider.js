@@ -43,6 +43,6 @@ DocumentationTOCProvider.Prototype = function() {
 
 TOCProvider.extend(DocumentationTOCProvider);
 
-DocumentationTOCProvider.static.tocTypes = ['namespace', 'class', 'function', 'module'];
+DocumentationTOCProvider.tocTypes = ['namespace', 'class', 'function', 'module'];
 
 module.exports = DocumentationTOCProvider;

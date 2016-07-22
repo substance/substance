@@ -8,6 +8,6 @@ function Blockquote() {
 
 TextBlock.extend(Blockquote);
 
-Blockquote.static.name = "blockquote";
+Blockquote.type = "blockquote";
 
 module.exports = Blockquote;

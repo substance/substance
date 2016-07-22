@@ -76,7 +76,7 @@ IsolatedNodeComponent.Prototype = function() {
       el.addClass('sm-not-selected');
     }
 
-    if (!ContentClass.static.noStyle) {
+    if (!ContentClass.noStyle) {
       el.addClass('sm-default-style');
     }
 
@@ -102,7 +102,7 @@ IsolatedNodeComponent.Prototype = function() {
       .attr('contenteditable', false)
       .css({ 'z-index': 2*level });
 
-    if (ContentClass.static.fullWidth) {
+    if (ContentClass.fullWidth) {
       container.addClass('sm-full-width');
     }
 

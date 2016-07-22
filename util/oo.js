@@ -13,10 +13,6 @@ var oo = {};
 /**
   Initialize a class.
 
-  After initializing a class has a `static` scope which can be used for static properties
-  and functions. These static members get inherited by subclasses, which makes this approach
-  as close as possible to ES6.
-
   An initialized class has an `extend` function which can be used to derive subclasses.
 
   @param {Constructor} clazz
@@ -32,15 +28,6 @@ var oo = {};
 
   #### Extending a class
 
-  The simplest way to create a subclass is
-
-  ```
-  var Foo = MyClass.extend()
-  ```
-
-  This is the disadvantage, that the created class is anonymous, i.e., in a debugger it
-  does not have a senseful name.
-
   The preferred way is to extend a subclass this way:
 
   ```
@@ -50,87 +37,11 @@ var oo = {};
   MyClass.extend(Foo);
   ```
 
-  This correnponds to what would do in ES6 with
+  In ES6 this would be equivalent too
 
   ```
   class Foo extends MyClass {}
   ```
-
-  It is also possible to derive a class and provide a prototype as an object:
-
-  ```
-  var Foo = MyClass.extend({
-    bla: function() { return "bla"; }
-  });
-  ```
-
-  Again the result is an anonymous class, without the ability to show a meaningful name in a
-  debugger.
-
-  If you want to define a prototype, the preferred way is extending an already defined class:
-
-  ```
-  function Foo() {
-    Foo.super.apply(this, arguments);
-  }
-  MyClass.extend(Foo, {
-    bla: function() { return "bla"; }
-  });
-  ```
-
-  If you prefer to write prototypes as functions you should do it this way:
-
-  ```
-  function Foo() {
-    Foo.super.apply(this, arguments);
-  }
-  MyClass.extend(Foo, function() {
-    this.bla = function() { return "bla"; };
-  });
-  ```
-
-  In that case the protoype is an anonymous class, i.e. it won't have a meaningful name in the debugger.
-
-  To overcome this you can give the prototype function a name:
-
-  ```
-  function Foo() {
-    Foo.super.apply(this, arguments);
-  }
-  MyClass.extend(Foo, function FooPrototype() {
-    this.bla = function() { return "bla"; };
-  });
-  ```
-
-  #### Static variables
-
-  Static variables can either be set directly on the `static` scope:
-
-  ```
-  var Foo = MyClass.extend();
-  Foo.static.foo = "foo"
-  ```
-
-  Or with a prototype you can provide them in a `static` object property of the prototype:
-
-  ```
-  MyClass.extend({
-    static: {
-      foo: "foo"
-    }
-  });
-  MyClass.static.foo -> "foo"
-  ```
-
-  A static scope of a class comes with a reference to its owning class. I.e.,
-
-  ```
-  MyClass.static.__class__
-  ```
-
-  Gives gives access to `MyClass`.
-
-
   #### Mix-ins
 
   Mixins must be plain objects. They get merged into the created prototype.
@@ -145,20 +56,6 @@ var oo = {};
   MyClass.extend(Foo, MyMixin);
   ```
 
-  This is also possible in combination with prototype functions.
-
-  ```
-  var MyMixin = {
-    foo: "foo";
-    bar: "bar";
-  };
-  function Foo() {
-    Foo.super.apply(this, arguments);
-  }
-  MyClass.extend(Foo, MyMixin, function() {
-    this.bar = "this wins"
-  });
-  ```
   Mixins never override existing prototype functions, or already other mixed in members.
 
 */
@@ -214,8 +111,17 @@ function _initClass(clazz) {
     clazz.prototype = new clazz.Prototype();
     clazz.prototype.constructor = clazz;
   }
-  var StaticScope = _StaticScope();
-  clazz.static = clazz.static || new StaticScope(clazz);
+  // legacy: formerly we had a static scope on each
+  // class which has been removed
+  // Now, static properties are copied, as they were final static
+  Object.defineProperties(clazz.prototype, {
+    'static': {
+      enumerable: false,
+      configurable: true,
+      get: function() { return clazz; }
+    }
+  });
+  _makeExtensible(clazz);
   clazz.__is_initialized__ = true;
 }
 
@@ -254,30 +160,27 @@ function _inherit(ChildClass, ParentClass) {
   // provide a shortcut to the parent class
   // ChildClass.prototype.super = ParentClass;
   // Extend static properties - always initialize both sides
-  var StaticScope = _StaticScope();
-  if (ParentClass.static) {
-    StaticScope.prototype = ParentClass.static;
-  }
-  ChildClass.static = new StaticScope(ChildClass);
-  if (ChildClass.static._makeExtendFunction) {
-    ChildClass.extend = ChildClass.static._makeExtendFunction(ChildClass);
-  } else {
-    _makeExtensible(ChildClass);
+  _copyStaticProperties(ChildClass, ParentClass);
+  _makeExtensible(ChildClass);
+  ChildClass.__is_initialized__ = true;
+}
+
+function _copyStaticProperties(ChildClass, ParentClass) {
+  // console.log('_copyStaticProperties', ChildClass, ParentClass);
+  for (var prop in ParentClass) {
+    if (!ParentClass.hasOwnProperty(prop)) continue;
+    if (prop === 'Prototype' ||
+        prop === 'super' ||
+        prop === 'extend' ||
+        prop === 'name' ||
+        prop === '__is_initialized__') continue;
+    // console.log('.. copying property "%s"', prop);
+    ChildClass[prop] = ParentClass[prop];
   }
 }
 
-function _afterClassInitHook(childClazz) {
-  var proto = childClazz.prototype;
-  for(var key in proto) {
-    if (key === "constructor" ||
-        key === "__class__" ||
-        !proto.hasOwnProperty(key)) continue;
-    // built-in: extend class.static with prototype.static
-    if (key === 'static') {
-      _copyStaticProps(childClazz.static, proto.static);
-      continue;
-    }
-  }
+function _afterClassInitHook() {
+  // obsolete
 }
 
 /*
@@ -287,22 +190,19 @@ function _afterClassInitHook(childClazz) {
   extend(Function, {}) -> inherit with a proto
   extend(Function, Function) -> inheritance with prototype function
 */
-function _extendClass(ParentClass) {
-
+function _extendClass() {
+  var ParentClass = this;
   // this ctor is used when extend is not provided with a constructor function.
   function AnonymousClass() {
     ParentClass.apply(this, arguments);
-
     if (this.initialize) {
       this.initialize();
     }
   }
-
-  var args = Array.prototype.slice.call(arguments, 1);
+  var args = arguments;
   //var childOrProto = args[args.length-1];
   var ChildClass;
   var mixins = [];
-
   // the first argument must be a Class constructor, otherwise we will use an anonymous ctor.
   var idx = 0;
   if (isFunction(args[0])) {
@@ -348,48 +248,24 @@ function _mixin(Clazz, mixin) {
   var proto = Clazz.prototype;
   for(var key in mixin) {
     if (mixin.hasOwnProperty(key)) {
-      // built-in: extend class.static with prototype.static
-      if (key === 'static') {
-        _copyStaticProps(Clazz.static, mixin.static);
-        continue;
-      } else {
-        if (!proto.hasOwnProperty(key)) {
-          proto[key] = mixin[key];
-        }
+      if (!proto.hasOwnProperty(key)) {
+        proto[key] = mixin[key];
       }
     }
   }
 }
 
-function _makeExtensible(clazz) {
-  if (!clazz.static) {
-    oo.initClass(clazz);
+function _createExtend(clazz) {
+  return function() {
+    return _extendClass.apply(clazz, arguments)
   }
-  clazz.static._makeExtendFunction = function(parentClazz) {
-    return _extendClass.bind(clazz, parentClazz);
-  };
-  clazz.extend = clazz.static._makeExtendFunction(clazz);
+}
+
+function _makeExtensible(clazz) {
+  // console.log('Adding extend to ', clazz);
+  clazz.extend = _createExtend(clazz);
 }
 
 oo.makeExtensible = _makeExtensible;
-
-function _StaticScope() {
-  return function StaticScope(clazz) {
-    this.__class__ = clazz;
-  };
-}
-
-function _copyStaticProps(staticProps, parentStaticProps) {
-  for ( var key in parentStaticProps ) {
-    if ( key === 'constructor' ||
-         key === '__class__' ||
-         !parentStaticProps.hasOwnProperty( key ) ||
-         // don't overwrite static properties
-         staticProps.hasOwnProperty(key) ) {
-      continue;
-    }
-    staticProps[key] = parentStaticProps[key];
-  }
-}
 
 module.exports = oo;

@@ -43,7 +43,7 @@ TOCProvider.Prototype = function() {
   this.handleDocumentChange = function(change) {
     var doc = this.getDocument();
     var needsUpdate = false;
-    var tocTypes = this.constructor.static.tocTypes;
+    var tocTypes = this.constructor.tocTypes;
 
     // HACK: this is not totally correct but works.
     // Actually, the TOC should be updated if tocType nodes
@@ -142,6 +142,6 @@ TOCProvider.Prototype = function() {
 
 EventEmitter.extend(TOCProvider);
 
-TOCProvider.static.tocTypes = ['heading'];
+TOCProvider.tocTypes = ['heading'];
 
 module.exports = TOCProvider;

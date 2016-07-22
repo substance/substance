@@ -85,9 +85,9 @@ AnnotatedTextComponent.Prototype = function() {
         .addClass(node.isStart?"start-anchor":"end-anchor");
     }
     var ComponentClass = componentRegistry.get(node.type) || AnnotationComponent;
-    if (node.constructor.static.isInline &&
+    if (node.constructor.isInline &&
         // opt-out for custom implementations
-        !ComponentClass.static.isCustom &&
+        !ComponentClass.isCustom &&
         // also no extra wrapping if the node is already an inline node
         !ComponentClass.prototype._isInlineNodeComponent) {
       ComponentClass = InlineNodeComponent;

@@ -1,23 +1,23 @@
 'use strict';
 
+var AnnotationTool = require('../../ui/AnnotationTool');
 var Link = require('./Link');
 var LinkComponent = require('./LinkComponent');
 var LinkCommand = require('./LinkCommand');
 var LinkHTMLConverter = require('./LinkHTMLConverter');
-var LinkTool = require('./LinkTool');
 var EditLinkTool = require('./EditLinkTool');
 
 module.exports = {
   name: 'link',
   configure: function(config) {
     config.addNode(Link);
-    config.addComponent(Link.static.name, LinkComponent);
+    config.addComponent('link', LinkComponent);
+    config.addCommand('link', LinkCommand);
+    config.addTool('link', AnnotationTool);
+    config.addTool('edit-link', EditLinkTool, { overlay: true });
     config.addConverter('html', LinkHTMLConverter);
-    config.addCommand(LinkCommand);
-    config.addTool(LinkTool);
-    config.addTool(EditLinkTool, { overlay: true });
     config.addStyle(__dirname, '_link.scss');
-    config.addIcon(LinkCommand.static.name, { 'fontawesome': 'fa-link'});
+    config.addIcon('link', { 'fontawesome': 'fa-link'});
     config.addIcon('open-link', { 'fontawesome': 'fa-external-link' });
     config.addLabel('link', {
       en: 'Link',

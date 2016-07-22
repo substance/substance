@@ -21,7 +21,7 @@ FunctionComponent.Prototype = function() {
       .attr("data-id", node.id);
     // header
     var args = pluck(node.params, 'name').join(', ');
-    var headingName = [node.name, '(', args, ')'];
+    var headingName = [node.type, '(', args, ')'];
     el.append($$(Heading, {node: node, name: headingName}));
     //signature
     // el.append($$(Signature, {node: node}));

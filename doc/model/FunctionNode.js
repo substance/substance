@@ -8,15 +8,14 @@ function FunctionNode() {
 
 DocumentedNode.extend(FunctionNode);
 
-FunctionNode.static.name = 'function';
-
-FunctionNode.static.defineSchema({
+FunctionNode.define({
+  type: 'function',
   parent: 'id',
   name: 'string',
   params: { type: ['array', 'object'], default: [] }, // [{name: 'doc', type: 'model/Document', description: 'A Substance document instance'}]
   returns: { type: 'object', optional: true }, // {type: 'model/Document', description: 'The updated document'}
 });
 
-FunctionNode.static.isBlock = true;
+FunctionNode.isBlock = true;
 
 module.exports = FunctionNode;

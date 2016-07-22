@@ -53,8 +53,8 @@ ClassNode.Prototype = function() {
 
 DocumentedNode.extend(ClassNode, MemberContainerMixin);
 
-ClassNode.static.name = 'class';
-ClassNode.static.defineSchema({
+ClassNode.define({
+  type: 'class',
   parent: 'id',
   name: 'string',
   members: { type: ['array', 'id'], default: [] },
@@ -63,7 +63,7 @@ ClassNode.static.defineSchema({
   superClass: { type: 'id', optional: true }, // only when @extends is defined
 });
 
-ClassNode.static.isBlock = true;
+ClassNode.isBlock = true;
 
 module.exports = ClassNode;
 

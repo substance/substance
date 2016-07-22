@@ -24,9 +24,9 @@ TableNode.Prototype = function() {
 
 BlockNode.extend(TableNode);
 
-TableNode.static.name = "table";
+TableNode.type = "table";
 
-TableNode.static.defineSchema({
+TableNode.define({
   // HACK: very low-levelish schema, where the objects will be entries
   // like `{ content: 'p1'}` plus maybe some more meta such as `cellType`
   // TODO: refine when we know exactly what we need

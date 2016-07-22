@@ -9,7 +9,7 @@ module.exports = {
   name: 'list-item',
   configure: function(config, options) {
     config.addNode(ListItem);
-    config.addComponent(ListItem.static.name, ListItemComponent);
+    config.addComponent(ListItem.type, ListItemComponent);
     config.addTextType({
       name: 'list-item',
       data: { type: 'list-item' }

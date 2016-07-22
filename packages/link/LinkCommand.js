@@ -3,7 +3,10 @@
 var AnnotationCommand = require('../../ui/AnnotationCommand');
 
 function LinkCommand() {
-  LinkCommand.super.apply(this, arguments);
+  LinkCommand.super.apply(this, {
+    name: 'link',
+    nodeType: 'link'
+  });
 }
 
 LinkCommand.Prototype = function() {
@@ -30,7 +33,5 @@ LinkCommand.Prototype = function() {
 };
 
 AnnotationCommand.extend(LinkCommand);
-
-LinkCommand.static.name = 'link';
 
 module.exports = LinkCommand;

@@ -261,7 +261,7 @@ ContainerEditor.Prototype = function() {
   this.getTextCommands = function() {
     var textCommands = {};
     this.commandRegistry.each(function(cmd) {
-      if (cmd.constructor.static.textTypeName) {
+      if (cmd.constructor.textTypeName) {
         textCommands[cmd.getName()] = cmd;
       }
     });
@@ -427,6 +427,6 @@ ContainerEditor.Prototype = function() {
 
 Surface.extend(ContainerEditor);
 
-ContainerEditor.static.isContainerEditor = true;
+ContainerEditor.isContainerEditor = true;
 
 module.exports = ContainerEditor;

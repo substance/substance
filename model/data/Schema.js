@@ -32,7 +32,7 @@ function Schema(name, version) {
   */
   this.nodeRegistry = new NodeRegistry();
   /**
-    @type {Array} all Node classes which have `Node.static.tocType = true`
+    @type {Array} all Node classes which have `Node.tocType = true`
     @private
   */
   this.tocTypes = [];
@@ -61,8 +61,8 @@ Schema.Prototype = function() {
 
   this.addNode = function(NodeClass) {
     this.nodeRegistry.register(NodeClass);
-    if (NodeClass.static.tocType) {
-      this.tocTypes.push(NodeClass.static.name);
+    if (NodeClass.tocType) {
+      this.tocTypes.push(NodeClass.type);
     }
   };
 
@@ -96,7 +96,7 @@ Schema.Prototype = function() {
   this.isInstanceOf = function(type, parentType) {
     var NodeClass = this.getNodeClass(type);
     if (NodeClass) {
-      return Node.static.isInstanceOf(NodeClass, parentType);
+      return Node.isInstanceOf(NodeClass, parentType);
     }
     return false;
   };
@@ -133,7 +133,7 @@ Schema.Prototype = function() {
       console.error('Unknown node type ', type);
       return null;
     }
-    return NodeClass.static.schema;
+    return NodeClass.schema;
   };
 };
 

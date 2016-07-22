@@ -8,6 +8,6 @@ function InlineNode() {
 
 PropertyAnnotation.extend(InlineNode);
 
-InlineNode.static.isInline = true;
+InlineNode.isInline = true;
 
 module.exports = InlineNode;

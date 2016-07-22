@@ -255,15 +255,6 @@ Parser.Prototype = function() {
 
     entity.tags = refinedTags;
 
-    // support for `static` props defined this way 'Foo.static.foo'
-    if (entity.ctx && entity.ctx.receiver) {
-      var match = STATIC_PROP.exec(entity.ctx.receiver);
-      if (match) {
-        entity.ctx.receiver = match[1];
-        entity.isStatic = true;
-      }
-    }
-
     if (!entity.id) {
       var id = "";
       if (entity.ctx) {

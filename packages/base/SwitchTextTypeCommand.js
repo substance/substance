@@ -5,11 +5,11 @@ var _isMatch = require('lodash/isMatch');
 var _find = require('lodash/find');
 var _clone = require('lodash/clone');
 
-function SwitchTextType() {
-  Command.apply(this, arguments);
+function SwitchTextTypeCommand(options) {
+  Command.apply(this, 'switch-text-type', options);
 }
 
-SwitchTextType.Prototype = function() {
+SwitchTextTypeCommand.Prototype = function() {
 
   // Available text types on the surface
   this.getTextTypes = function(context) {
@@ -24,7 +24,7 @@ SwitchTextType.Prototype = function() {
   this.getTextType = function(context, textTypeName) {
     var textTypes = this.getTextTypes(context);
     return _find(textTypes, function(t) {
-      return t.name === textTypeName;
+      return t.type === textTypeName;
     });
   };
 
@@ -107,7 +107,6 @@ SwitchTextType.Prototype = function() {
   };
 };
 
-Command.extend(SwitchTextType);
-SwitchTextType.static.name = 'switch-text-type';
+Command.extend(SwitchTextTypeCommand);
 
-module.exports = SwitchTextType;
+module.exports = SwitchTextTypeCommand;

@@ -32,10 +32,10 @@ TextNode.Prototype = function() {
 
 DocumentNode.extend(TextNode);
 
-TextNode.static.name = "text";
-TextNode.static.isText = true;
+TextNode.isText = true;
 
-TextNode.static.defineSchema({
+TextNode.define({
+  type: "text",
   content: 'text'
 });
 

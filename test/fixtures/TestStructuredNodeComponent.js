@@ -35,6 +35,6 @@ TestStructuredNodeComponent.Prototype = function() {
 
 Component.extend(TestStructuredNodeComponent);
 
-TestStructuredNodeComponent.static.fullWidth = true;
+TestStructuredNodeComponent.fullWidth = true;
 
 module.exports = TestStructuredNodeComponent;

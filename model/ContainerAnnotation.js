@@ -139,9 +139,8 @@ ContainerAnnotation.Prototype = function() {
 
 DocumentNode.extend(ContainerAnnotation);
 
-ContainerAnnotation.static.name = "container-annotation";
-
-ContainerAnnotation.static.defineSchema({
+ContainerAnnotation.define({
+  type: "container-annotation",
   containerId: "string",
   startPath: ["string"],
   startOffset: "number",
@@ -149,7 +148,7 @@ ContainerAnnotation.static.defineSchema({
   endOffset: "number"
 });
 
-ContainerAnnotation.static.isContainerAnnotation = true;
+ContainerAnnotation.isContainerAnnotation = true;
 
 /**
   @class
@@ -234,7 +233,7 @@ ContainerAnnotation.Fragment.Prototype = function() {
 
 EventEmitter.extend(ContainerAnnotation.Fragment);
 
-ContainerAnnotation.Fragment.static.fragmentation = Number.MAX_VALUE;
+ContainerAnnotation.Fragment.fragmentation = Number.MAX_VALUE;
 
 Object.defineProperties(ContainerAnnotation.Fragment.prototype, {
   startOffset: {

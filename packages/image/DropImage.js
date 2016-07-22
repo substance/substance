@@ -21,7 +21,7 @@ DropImage.Prototype = function() {
       return startsWith(file.type, 'image');
     });
     if (files.length === 0) return;
-    context.commandManager.executeCommand(InsertImageCommand.static.name, {
+    context.commandManager.executeCommand(InsertImageCommand.type, {
       surface: surface,
       selection: selection,
       files: files

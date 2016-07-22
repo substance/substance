@@ -8,9 +8,8 @@ function MetaNode() {
 
 DocumentNode.extend(MetaNode);
 
-MetaNode.static.name = 'meta';
-
-MetaNode.static.defineSchema({
+MetaNode.define({
+  type: 'meta',
   description: 'string', // HTML
   repository: 'string', // https://github.com/substance/substance
   sha: 'string',

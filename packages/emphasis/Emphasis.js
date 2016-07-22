@@ -9,9 +9,9 @@ function Emphasis() {
 
 PropertyAnnotation.extend(Emphasis);
 
-Emphasis.static.name = "emphasis";
+Emphasis.type = "emphasis";
 
 // hint for rendering in presence of overlapping annotations
-Emphasis.static.fragmentation = Fragmenter.ANY;
+Emphasis.fragmentation = Fragmenter.ANY;
 
 module.exports = Emphasis;

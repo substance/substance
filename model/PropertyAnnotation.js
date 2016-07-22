@@ -112,9 +112,8 @@ PropertyAnnotation.Prototype = function() {
 
 DocumentNode.extend(PropertyAnnotation);
 
-PropertyAnnotation.static.name = "annotation";
-
-PropertyAnnotation.static.defineSchema({
+PropertyAnnotation.define({
+  type: "annotation",
   path: ["string"],
   startOffset: "number",
   endOffset: "number",
@@ -123,7 +122,7 @@ PropertyAnnotation.static.defineSchema({
   _content: { type: "string", optional: true}
 });
 
-PropertyAnnotation.static.isPropertyAnnotation = true;
+PropertyAnnotation.isPropertyAnnotation = true;
 
 // these properties making PropertyAnnotation compatible with ContainerAnnotations
 Object.defineProperties(PropertyAnnotation.prototype, {

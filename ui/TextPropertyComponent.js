@@ -89,7 +89,7 @@ TextPropertyComponent.Prototype = function() {
       el = $$(SelectionFragmentComponent, { collaborator: node.collaborator });
     } else {
       el = _super._renderFragment.apply(this, arguments);
-      if (node.constructor.static.isInline) {
+      if (node.constructor.isInline) {
         el.ref(id);
       }
       // Adding refs here, enables preservative rerendering

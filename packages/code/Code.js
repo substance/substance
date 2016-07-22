@@ -7,6 +7,6 @@ function Code() {
 }
 PropertyAnnotation.extend(Code);
 
-Code.static.name = 'code';
+Code.type = 'code';
 
 module.exports = Code;

@@ -61,7 +61,7 @@ function DOMImporter(config) {
 
     this._allConverters.push(converter);
     // Defaults to _blockConverters
-    if (NodeClass.static.isPropertyAnnotation) {
+    if (NodeClass.isPropertyAnnotation) {
       this._propertyAnnotationConverters.push(converter);
     } else {
       this._blockConverters.push(converter);
@@ -213,10 +213,10 @@ DOMImporter.Prototype = function DOMImporterPrototype() {
       // usually, annotations are imported in the course of `importer.annotatedText(..)`
       // The peculiarity here is that in such a case, it is not
       // not clear, which property the annotation is attached to
-      if (NodeClass.static.isInline) {
+      if (NodeClass.isInline) {
         this._convertInlineNode(el, node, converter);
       }
-      else if (NodeClass.static.isPropertyAnnotation) {
+      else if (NodeClass.isPropertyAnnotation) {
         this._convertPropertyAnnotation(el, node);
       } else {
         node = converter.import(el, node, this) || node;
@@ -272,7 +272,7 @@ DOMImporter.Prototype = function DOMImporterPrototype() {
       id: this.getIdForElement(el, type)
     };
     var NodeClass = this.schema.getNodeClass(type);
-    forEach(NodeClass.static.schema, function(prop, name) {
+    forEach(NodeClass.schema, function(prop, name) {
       // check integrity of provided props, such as type correctness,
       // and mandatory properties
       var hasDefault = prop.hasOwnProperty('default');
@@ -471,7 +471,7 @@ DOMImporter.Prototype = function DOMImporterPrototype() {
 
           var NodeClass = this.schema.getNodeClass(inlineType);
           // inline nodes are attached to an invisible character
-          if (NodeClass.static.isInline) {
+          if (NodeClass.isInline) {
             this.customText("\u200B");
           } else {
             // We call this to descent into the element

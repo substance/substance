@@ -27,7 +27,7 @@ DocumentationReader.Prototype = function() {
   this._initialize = function(props) {
     var configurator = props.configurator;
 
-    this.config = DocumentationReader.static.config;
+    this.config = DocumentationReader.config;
     this.router = new DocumentationRouter(this);
     this.router.on('route:changed', this._onRouteChanged, this);
     this.tocProvider = new DocumentationTOCProvider(this.props.doc, this.config);
@@ -148,7 +148,7 @@ DocumentationReader.Prototype = function() {
 Component.extend(DocumentationReader);
 
 // TODO: we should move this into a DocumentationConfigurator API
-DocumentationReader.static.config = {
+DocumentationReader.config = {
   containerId: 'body',
   skipAbstractClasses: false,
   skipPrivateMethods: true

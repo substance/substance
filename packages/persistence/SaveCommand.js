@@ -3,7 +3,7 @@
 var Command = require('../../ui/Command');
 
 function SaveCommand() {
-  SaveCommand.super.apply(this, arguments);
+  SaveCommand.super.call(this, { name: 'save' });
 }
 
 SaveCommand.Prototype = function() {
@@ -25,6 +25,5 @@ SaveCommand.Prototype = function() {
 };
 
 Command.extend(SaveCommand);
-SaveCommand.static.name = 'save';
 
 module.exports = SaveCommand;

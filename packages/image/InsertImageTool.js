@@ -36,6 +36,4 @@ InsertImageTool.Prototype = function() {
 
 Tool.extend(InsertImageTool);
 
-InsertImageTool.static.name = 'insert-image';
-
 module.exports = InsertImageTool;

@@ -24,7 +24,7 @@ function ComponentTests(debug) {
       render: function() {}
     });
     t.throws(function() {
-      MyComponent.static.render();
+      MyComponent.render();
     }, "Should throw an exception when render does not return an element");
     t.end();
   });
@@ -32,10 +32,10 @@ function ComponentTests(debug) {
   test.UI("Mounting a component", function(t) {
     // Mount to a detached element
     var el = window.document.createElement('div');
-    var comp = Component.mount(Simple, el);
+    var comp = Simple.mount(el);
     t.equal(comp.didMount.callCount, 0, "didMount must not be called when mounting to detached elements");
     // Mount to an existing DOM element
-    comp = Component.mount(Simple, t.sandbox);
+    comp = Simple.mount(t.sandbox);
     t.equal(comp.didMount.callCount, 1, "didMount should have been called");
     t.end();
   });
@@ -127,14 +127,14 @@ function ComponentTests(debug) {
   });
 
   test("Render a component", function(t) {
-    var comp = Simple.static.render();
+    var comp = Simple.render();
     t.equal(comp.tagName.toLowerCase(), 'div', 'Element should be a "div".');
     t.ok(comp.hasClass('simple-component'), 'Element should have class "simple-component".');
     t.end();
   });
 
   test("Rerender on setProps()", function(t) {
-    var comp = Simple.static.render({ foo: 'bar '});
+    var comp = Simple.render({ foo: 'bar '});
     comp.shouldRerender.reset();
     comp.render.reset();
     comp.setProps({ foo: 'baz' });
@@ -144,7 +144,7 @@ function ComponentTests(debug) {
   });
 
   test("Rerendering triggers didUpdate()", function(t) {
-    var comp = Simple.static.render({ foo: 'bar '});
+    var comp = Simple.render({ foo: 'bar '});
     spy(comp, 'didUpdate');
     comp.rerender();
     t.ok(comp.didUpdate.callCount === 1, "didUpdate() should have been called once.");
@@ -152,7 +152,7 @@ function ComponentTests(debug) {
   });
 
   test("Setting props triggers willReceiveProps()", function(t) {
-    var comp = Simple.static.render({ foo: 'bar '});
+    var comp = Simple.render({ foo: 'bar '});
     spy(comp, 'willReceiveProps');
     comp.setProps({ foo: 'baz' });
     t.ok(comp.willReceiveProps.callCount === 1, "willReceiveProps() should have been called once.");
@@ -160,7 +160,7 @@ function ComponentTests(debug) {
   });
 
   test("Rerender on setState()", function(t) {
-    var comp = Simple.static.render();
+    var comp = Simple.render();
     comp.shouldRerender.reset();
     comp.render.reset();
     comp.setState({ foo: 'baz' });
@@ -170,7 +170,7 @@ function ComponentTests(debug) {
   });
 
   test("Setting state triggers willUpdateState()", function(t) {
-    var comp = Simple.static.render();
+    var comp = Simple.render();
     spy(comp, 'willUpdateState');
     comp.setState({ foo: 'baz' });
     t.ok(comp.willUpdateState.callCount === 1, "willUpdateState() should have been called once.");
@@ -188,7 +188,7 @@ function ComponentTests(debug) {
       };
     }
     Component.extend(A);
-    var comp = A.static.render();
+    var comp = A.render();
     spy(comp, 'didUpdate');
     // component will not rerender but still should trigger didUpdate()
     comp.setProps({foo: 'bar'});
@@ -248,7 +248,7 @@ function ComponentTests(debug) {
     };
     Component.extend(Wrapper);
 
-    var comp = Parent.static.render({name: 'foo'});
+    var comp = Parent.render({name: 'foo'});
     var a = comp.refs.a;
     var b = comp.refs.b;
     var c = comp.refs.c;
@@ -290,7 +290,7 @@ function ComponentTests(debug) {
       };
     };
     Component.extend(TestComponent);
-    var comp = TestComponent.static.render();
+    var comp = TestComponent.render();
     var childNodes = comp.el.getChildNodes();
     t.equal(childNodes.length, 2, '# Component should have two children in mode 0');
     t.ok(childNodes[0].isTextNode(), '__first should be a TextNode');
@@ -335,7 +335,7 @@ function ComponentTests(debug) {
     Component.extend(ClickableComponent);
 
     // first render without a click handler
-    var comp = ClickableComponent.static.render();
+    var comp = ClickableComponent.render();
 
     comp.click();
     t.equal(comp.value, 0, 'Handler should not have been triggered');
@@ -374,7 +374,7 @@ function ComponentTests(debug) {
     };
     Component.extend(ClickableComponent);
 
-    var comp = ClickableComponent.static.render();
+    var comp = ClickableComponent.render();
     comp.click();
     t.equal(comp.clicks, 1, 'Handler should have been triggered');
     comp.click();
@@ -487,7 +487,7 @@ function ComponentTests(debug) {
     }
     TestComponent.extend(Parent);
 
-    var comp = Component.mount(Parent, t.sandbox);
+    var comp = Parent.mount(t.sandbox);
     var childComp = comp.refs.child;
     var grandChildComp = childComp.refs.child;
     t.equal(childComp.didMount.callCount, 1, "Child's didMount should have been called only once.");
@@ -524,7 +524,7 @@ function ComponentTests(debug) {
     };
     TestComponent.extend(CompositeComponent);
 
-    var comp = CompositeComponent.static.render({
+    var comp = CompositeComponent.render({
       items: [ {name: 'A'}, {name: 'B'} ]
     });
     t.equal(comp.getChildCount(), 2, 'Component should have two children.');
@@ -571,7 +571,7 @@ function ComponentTests(debug) {
     }
     TestComponent.extend(Parent);
 
-    var comp = Parent.static.render();
+    var comp = Parent.render();
     comp.setProps({ childAttr: { "data-id": "child" } });
     t.equal(comp.refs.child.attr('data-id'), 'child', "Child component should have updated attribute.");
     comp.setProps({ childClass: "child" });
@@ -624,7 +624,7 @@ function ComponentTests(debug) {
     }
     TestComponent.extend(GrandChild);
 
-    var comp = Parent.static.render();
+    var comp = Parent.render();
     var foo = comp.refs.foo;
     var bar = comp.refs.bar;
     t.notNil(foo, "Component should have a ref 'foo'.");
@@ -665,7 +665,7 @@ function ComponentTests(debug) {
       };
     }
     Component.extend(Grandchild);
-    var comp = Parent.static.render();
+    var comp = Parent.render();
     var child = comp.refs.child;
     var grandchild = comp.refs.grandchild;
     t.notNil(child, "Child should be referenced.");
@@ -712,7 +712,7 @@ function ComponentTests(debug) {
       };
     }
     Component.extend(Grandchild);
-    var comp = Parent.static.render();
+    var comp = Parent.render();
     var wrapper = comp.find('.wrapper');
     comp.rerender();
     var wrapper2 = comp.find('.wrapper');
@@ -737,7 +737,7 @@ function ComponentTests(debug) {
       };
     }
     Component.extend(Child);
-    var comp = Parent.static.render();
+    var comp = Parent.render();
     t.equal(comp.el.getChildCount(), 1, "Should have 1 child");
     t.equal(comp.el.textContent, '', "textContent should be empty");
     t.end();
@@ -766,7 +766,7 @@ function ComponentTests(debug) {
       };
     }
     Component.extend(Child);
-    var comp = Parent.static.render();
+    var comp = Parent.render();
     var child = comp.find('.child');
     t.notNil(child, "Child should exist.");
     var foo = child.refs.foo;
@@ -804,7 +804,7 @@ function ComponentTests(debug) {
     };
     Component.extend(Child);
 
-    var comp = Parent.static.render();
+    var comp = Parent.render();
     var child = comp.refs.child;
     child.click();
     t.equal(child.clicks, 1, 'Handler should have been triggered');
@@ -918,7 +918,7 @@ function ComponentTests(debug) {
       };
     };
     Component.extend(MyComponent);
-    var comp = MyComponent.static.mount({
+    var comp = MyComponent.mount({
       val: 'a'
     }, t.sandbox);
     comp.setState({ val: 2 });
@@ -1053,7 +1053,7 @@ function ComponentTests(debug) {
     }
     TestComponent.extend(MainComponent);
 
-    var comp = MainComponent.static.render({context: 'A'});
+    var comp = MainComponent.render({context: 'A'});
     t.ok(comp.refs.context instanceof ComponentA, 'Context should be of instance ComponentA');
     comp.setProps({context: 'B'});
     t.ok(comp.refs.context instanceof ComponentB, 'Context should be of instance ComponentB');
@@ -1074,7 +1074,7 @@ function ComponentTests(debug) {
     }
     TestComponent.extend(MyComponent);
 
-    var comp = MyComponent.static.render(MyComponent);
+    var comp = MyComponent.render(MyComponent);
     t.ok(comp.refs.helloComp, 'There should stil be a ref to the helloComp element/component');
     t.end();
   });
@@ -1148,7 +1148,7 @@ function ComponentTests(debug) {
     }
     Component.extend(Child);
 
-    var comp = Parent.static.render();
+    var comp = Parent.render();
     // didUpdate() should not have been called (no rerender)
     t.notOk(parentIsUpdated, 'Initially child.didUpdate() should not have been called.');
     comp.rerender();
@@ -1160,7 +1160,7 @@ function ComponentTests(debug) {
   /* ##################### Incremental Component API ##########################*/
 
   test("Component.append() should support appending text.", function(t) {
-    var comp = Simple.static.render();
+    var comp = Simple.render();
     comp.append('XXX');
     t.equal(comp.text(), 'XXX');
     t.end();
@@ -1199,7 +1199,7 @@ function ComponentTests(debug) {
     TestComponent.extend(CompositeComponent);
 
     // Initial mount
-    var comp = CompositeComponent.static.render({
+    var comp = CompositeComponent.render({
       items: [
         {ref: 'a', name: 'A'},
         {ref: 'b', name: 'B'},
@@ -1296,7 +1296,7 @@ function ComponentTests(debug) {
       }
     });
 
-    var comp = ComponentWithRefs.static.render();
+    var comp = ComponentWithRefs.render();
     t.ok(comp.refs.contentPanel, 'There should be a ref to the contentPanel component');
     comp.setState({contextId: 'foo'});
     t.ok(comp.refs.contentPanel, 'There should stil be a ref to the contentPanel component');
@@ -1332,7 +1332,7 @@ function ComponentTests(debug) {
     }
     TestComponent.extend(Parent);
 
-    var comp = Parent.static.render();
+    var comp = Parent.render();
     t.notNil(comp.refs.foo, 'Ref should be bound to owner.');
     t.equal(comp.refs.foo.text(), 'foo', 'Ref should point to the right component.');
     t.end();
@@ -1360,7 +1360,7 @@ function ComponentTests(debug) {
       };
     }
     TestComponent.extend(Parent);
-    var comp = Parent.static.render();
+    var comp = Parent.render();
     t.equal(comp.refs.foo.getParent(), comp, "First 'foo' should be direct child.");
     t.equal(comp.el.textContent, 'XYZ', "... and content should be correct.");
     comp.setProps({ nested: true });
@@ -1386,7 +1386,7 @@ function ComponentTests(debug) {
     TestComponent.extend(Toolbar);
 
     var toolState = {strong: {active: true}};
-    Toolbar.static.render(toolState);
+    Toolbar.render(toolState);
     // the original toolState object should not have been changed
     t.ok(isEqual(toolState, {strong: {active: true}}), "props object should not have been touched");
     t.end();
@@ -1406,7 +1406,7 @@ function ComponentTests(debug) {
     TestComponent.extend(MyComponent);
 
     var props = {foo: 'bar'};
-    var comp = MyComponent.static.render(props);
+    var comp = MyComponent.render(props);
     var simple = comp.getChildAt(0);
     t.notNil(simple, 'Should have a child component.');
     t.equal(simple.props.foo, props.foo, '.. with props past through');

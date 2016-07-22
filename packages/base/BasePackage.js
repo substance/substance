@@ -1,14 +1,22 @@
 'use strict';
 
+var SwitchTextTypeCommand = require('./SwitchTextTypeCommand');
+var SwitchTextTypeTool = require('./SwitchTextTypeTool');
+var UndoCommand = require('./UndoCommand');
+var RedoCommand = require('./RedoCommand');
+var Tool = require('../../ui/Tool');
+
 module.exports = {
   name: 'base',
   configure: function(config, options) {
-    config.addCommand(require('./SwitchTextTypeCommand'));
-    config.addCommand(require('./UndoCommand'));
-    config.addCommand(require('./RedoCommand'));
-    config.addTool(require('./UndoTool'));
-    config.addTool(require('./RedoTool'));
-    config.addTool(require('./SwitchTextTypeTool'));
+    // Commands
+    config.addCommand(SwitchTextTypeCommand);
+    config.addCommand(UndoCommand);
+    config.addCommand(RedoCommand);
+    // Tools
+    config.addTool(SwitchTextTypeCommand.commandName, SwitchTextTypeTool);
+    config.addTool('undo', Tool);
+    config.addTool('redo', Tool);
     // Icons
     config.addIcon('undo', { 'fontawesome': 'fa-undo' });
     config.addIcon('redo', { 'fontawesome': 'fa-repeat' });

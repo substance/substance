@@ -2,6 +2,7 @@
 
 var oo = require('./oo');
 var forEach = require('lodash/forEach');
+var map = require('lodash/map');
 var extend = require('lodash/extend');
 var isString = require('lodash/isString');
 var DocumentSchema = require('../model/DocumentSchema');
@@ -48,14 +49,14 @@ AbstractConfigurator.Prototype = function() {
    * @param {String} NodeClass node class name.
    */
   this.addNode = function(NodeClass) {
-    var name = NodeClass.static.name;
-    if (!name) {
-      throw new Error('A NodeClass must have a name.');
+    var type = NodeClass.type;
+    if (!type) {
+      throw new Error('A NodeClass must have a type.');
     }
-    if (this.config.nodes[name]) {
-      throw new Error('NodeClass with this name is already registered: ' + name);
+    if (this.config.nodes[type]) {
+      throw new Error('NodeClass with this type name is already registered: ' + name);
     }
-    this.config.nodes[name] = NodeClass;
+    this.config.nodes[type] = NodeClass;
   };
 
   this.addConverter = function(type, converter) {
@@ -102,18 +103,20 @@ AbstractConfigurator.Prototype = function() {
     this.config.components[name] = ComponentClass;
   };
 
-  this.addCommand = function(CommandClass, options) {
-    this.config.commands.push({
-      Class: CommandClass,
+  this.addCommand = function(name, CommandClass, options) {
+    this.config.commands[name] = {
+      name: name,
+      CommandClass: CommandClass,
       options: options || {}
-    });
+    };
   };
 
-  this.addTool = function(ToolClass, options) {
-    this.config.tools.push({
+  this.addTool = function(name, ToolClass, options) {
+    this.config.tools[name] = {
+      name: name,
       Class: ToolClass,
       options: options || {}
-    });
+    };
   };
 
   this.addIcon = function(iconName, options) {
@@ -233,8 +236,8 @@ AbstractConfigurator.Prototype = function() {
 
   this.getToolRegistry = function() {
     var toolRegistry = new Registry();
-    forEach(this.config.tools, function(tool) {
-      toolRegistry.add(tool.Class.static.name, tool);
+    forEach(this.config.tools, function(item, name) {
+      toolRegistry.add(item.name, tool);
     });
     return toolRegistry;
   };
@@ -248,17 +251,15 @@ AbstractConfigurator.Prototype = function() {
   };
 
   this.getCommands = function() {
-    var commands = this.config.commands;
-    var CommandClasses = commands.map(function(c) {
-      return c.Class;
+    return map(this.config.commands, function(item, name) {
+      new item.CommandClass(extend({name: name}), item.options));
     });
-    return CommandClasses;
   };
 
   this.getSurfaceCommandNames = function() {
     var commands = this.getCommands();
     var commandNames = commands.map(function(C) {
-      return C.static.name;
+      return C.type;
     });
     return commandNames;
   };

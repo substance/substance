@@ -9,9 +9,9 @@ function Subscript() {
 
 PropertyAnnotation.extend(Subscript);
 
-Subscript.static.name = 'subscript';
+Subscript.type = 'subscript';
 
 // hint for rendering in presence of overlapping annotations
-Subscript.static.fragmentation = Fragmenter.ANY;
+Subscript.fragmentation = Fragmenter.ANY;
 
 module.exports = Subscript;

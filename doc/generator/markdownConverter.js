@@ -88,7 +88,7 @@ function convertCodeLinks(parsed) {
         pre.literal = node.literal.slice(0, match.index);
         var link = new commonmark.Node('Html', sourceposLink);
         // Note: using server-side rendering here
-        var crossLink = CrossLinkComponent.static.render({ node: { id: id }, children: [id]});
+        var crossLink = CrossLinkComponent.render({ node: { id: id }, children: [id]});
         link.literal = crossLink.outerHTML;
         var post = new commonmark.Node('Text', sourceposPost);
         post.literal = node.literal.slice(match.index+match[0].length);

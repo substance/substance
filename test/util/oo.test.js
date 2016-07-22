@@ -28,16 +28,6 @@ test("Class.extend with a protoype object", function(t) {
   t.end();
 });
 
-test("Class.extend with static properties", function(t) {
-  var B = A.extend({
-    static: {
-      name: "foo"
-    }
-  });
-  t.equal(B.static.name, 'foo', 'B should have a static property "name".');
-  t.end();
-});
-
 test("Class.extend with a ChildClass", function(t) {
   function B() {}
   A.extend(B);
