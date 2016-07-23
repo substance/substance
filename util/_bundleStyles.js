@@ -14,8 +14,17 @@ process.on('message', function(paramStr) {
   // they must have babel-register and es2015 installed
   if (params.es6 || params.jsx) {
     var plugins = [];
-    if (params.es6) {
+    if (params.es6 === true || params.es6 === "full") {
       plugins = plugins.concat(require('./_es6-babel-plugins'));
+    } else if (params.es6 === "modules") {
+      plugins.push(
+        // support for es6 import/export
+        // Note: the rest of es6 is supported natively by chrome
+        ["transform-es2015-modules-commonjs-simple", {
+          "noMangle": true,
+          "addExports": true
+        }]
+      );
     }
     if (params.jsx) {
       plugins.push("syntax-jsx");
