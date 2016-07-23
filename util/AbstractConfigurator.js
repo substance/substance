@@ -25,8 +25,8 @@ function AbstractConfigurator() {
     converters: {},
     importers: {},
     exporters: {},
-    commands: [],
-    tools: [],
+    commands: {},
+    tools: {},
     textTypes: [],
     editingBehaviors: [],
     macros: [],
@@ -252,7 +252,7 @@ AbstractConfigurator.Prototype = function() {
 
   this.getCommands = function() {
     return map(this.config.commands, function(item, name) {
-      new item.CommandClass(extend({name: name}, item.options));
+      return new item.CommandClass(extend({name: name}, item.options));
     });
   };
 

@@ -6,12 +6,10 @@ var insertInlineNode = require('../model/transform/insertInlineNode');
 function InlineNodeCommand() {
   InlineNodeCommand.super.apply(this, arguments);
 
-  if (!this.constructor.nodeType) {
-    // legacy:
-    this.constructor.nodeType = (this.constructor.annotationType);
-    if (!this.constructor.nodeType) {
-      throw new Error("Every AnnotationCommand must have a static property 'annotationType'");
-    }
+  this.nodeType = this.params.nodeType;
+
+  if (!this.params.nodeType) {
+    throw new Error("Every AnnotationCommand must have an 'nodeType'");
   }
 }
 
@@ -23,7 +21,7 @@ InlineNodeCommand.Prototype = function() {
     @returns {String} The annotation's type.
    */
   this.getNodeType = function() {
-    return this.constructor.nodeType;
+    return this.nodeType;
   };
 
   // legacy

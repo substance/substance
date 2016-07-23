@@ -16,8 +16,11 @@ Toolbar.Prototype = function() {
     var tools = [];
     toolRegistry.forEach(function(tool, name) {
       if (!tool.options.overlay) {
+        var toolProps = commandStates[name];
+        // HACK: Also always include tool name which is equal to command name
+        toolProps.name = name;
         tools.push(
-          $$(tool.Class, commandStates[name])
+          $$(tool.Class, toolProps)
         );
       }
     });
