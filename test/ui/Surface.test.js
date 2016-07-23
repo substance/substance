@@ -7,7 +7,6 @@ var Registry = require('../../util/Registry');
 var createAnnotation = require('../../model/transform/createAnnotation');
 var DocumentSession = require('../../model/DocumentSession');
 var SurfaceManager = require('../../ui/SurfaceManager');
-var Component = require('../../ui/Component');
 
 var TestContainerEditor = require('./TestContainerEditor');
 var fixture = require('../fixtures/createTestArticle');

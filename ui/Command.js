@@ -8,7 +8,7 @@ var oo = require('../util/oo');
  @class
 */
 
-var Command = function(params) {
+function Command(params) {
   this.params = params || {};
   this.name = this.params.name;
   if (!this.name) {

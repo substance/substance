@@ -161,7 +161,6 @@ Parser.Prototype = function() {
     return nodes;
   };
 
-  var STATIC_PROP = /(.+)\.static/;
   var _typeTagMatcher = /^\s*(\{[^@][^{]+\})\s+([\w\/]+)\s+(.+)/;
 
   /**

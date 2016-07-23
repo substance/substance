@@ -191,7 +191,7 @@ function _afterClassInitHook() {
   extend(Function, Function) -> inheritance with prototype function
 */
 function _extendClass() {
-  var ParentClass = this;
+  var ParentClass = this; // eslint-disable-line
   // this ctor is used when extend is not provided with a constructor function.
   function AnonymousClass() {
     ParentClass.apply(this, arguments);
@@ -257,8 +257,8 @@ function _mixin(Clazz, mixin) {
 
 function _createExtend(clazz) {
   return function() {
-    return _extendClass.apply(clazz, arguments)
-  }
+    return _extendClass.apply(clazz, arguments);
+  };
 }
 
 function _makeExtensible(clazz) {
