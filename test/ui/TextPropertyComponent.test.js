@@ -1,8 +1,6 @@
 "use strict";
 
 var test = require('../test').module('ui/TextPropertyComponent');
-
-var Component = require('../../ui/Component');
 var TextPropertyComponent = require('../../ui/TextPropertyComponent');
 
 var fixture = require('../fixtures/createTestArticle');

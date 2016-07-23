@@ -2,7 +2,6 @@
 /* eslint-disable no-console */
 
 var Documentation = require('./model/Documentation');
-var Component = require('../ui/Component');
 var DocumentationReader = require('./DocumentationReader');
 var importDocumentation = require('./model/importDocumentation');
 var request = require('../util/request');
