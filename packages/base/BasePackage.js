@@ -10,11 +10,11 @@ module.exports = {
   name: 'base',
   configure: function(config, options) {
     // Commands
-    config.addCommand(SwitchTextTypeCommand);
-    config.addCommand(UndoCommand);
-    config.addCommand(RedoCommand);
+    config.addCommand('switch-text-type', SwitchTextTypeCommand);
+    config.addCommand('undo', UndoCommand);
+    config.addCommand('redo', RedoCommand);
     // Tools
-    config.addTool(SwitchTextTypeCommand.commandName, SwitchTextTypeTool);
+    config.addTool('switch-text-type', SwitchTextTypeTool);
     config.addTool('undo', Tool);
     config.addTool('redo', Tool);
     // Icons

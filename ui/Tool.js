@@ -87,8 +87,15 @@ Tool.Prototype = function() {
     return title;
   };
 
+  /*
+    For now always same as tool name
+  */
   this.getCommandName = function() {
-    return this.constructor.commandName;
+    return this.getName();
+  };
+
+  this.getName = function() {
+    return this.props.name;
   };
 
   this.onClick = function(e) {

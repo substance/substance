@@ -5,8 +5,8 @@ var _isMatch = require('lodash/isMatch');
 var _find = require('lodash/find');
 var _clone = require('lodash/clone');
 
-function SwitchTextTypeCommand(options) {
-  Command.apply(this, 'switch-text-type', options);
+function SwitchTextTypeCommand() {
+  SwitchTextTypeCommand.super.apply(this, arguments);
 }
 
 SwitchTextTypeCommand.Prototype = function() {

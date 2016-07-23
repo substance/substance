@@ -12,7 +12,7 @@ module.exports = {
   configure: function(config) {
     config.addNode(Link);
     config.addComponent('link', LinkComponent);
-    config.addCommand('link', LinkCommand);
+    config.addCommand('link', LinkCommand, {nodeType: 'link'});
     config.addTool('link', AnnotationTool);
     config.addTool('edit-link', EditLinkTool, { overlay: true });
     config.addConverter('html', LinkHTMLConverter);

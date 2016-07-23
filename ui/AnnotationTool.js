@@ -23,7 +23,7 @@ AnnotationTool.Prototype = function() {
 
   this.renderButton = function($$) {
     var el = _super.renderButton.call(this, $$);
-    el.append(this.renderMode($$));  
+    el.append(this.renderMode($$));
     return el;
   };
 
@@ -38,7 +38,7 @@ AnnotationTool.Prototype = function() {
     if (iconEl) {
       el.append(iconEl);
     }
-    
+
     return el;
   };
 };
