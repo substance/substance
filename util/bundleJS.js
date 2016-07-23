@@ -1,5 +1,6 @@
 'use strict';
 
+var cloneDeep = require('lodash/cloneDeep');
 var extend = require('lodash/extend');
 var browserify = require('browserify');
 
@@ -23,7 +24,7 @@ module.exports = function bundleJS(params, cb) {
   }
   var b = browserify(opts).add(params.sourcePath);
   if (params.babel) {
-    b = b.transform("babelify", params.babel);
+    b = b.transform("babelify", cloneDeep(params.babel));
   }
   b.bundle(function(err, buf) {
     if (err) {

@@ -2,6 +2,7 @@
 
 // worker for sub-process
 
+var cloneDeep = require('lodash/cloneDeep');
 var path = require('path');
 
 process.on('message', function(paramStr) {
@@ -13,7 +14,7 @@ process.on('message', function(paramStr) {
   // they must use node6 and have babel-plugin-transfprm-es2015-
   // they must have babel-register and es2015 installed
   if (params.babel) {
-    require(path.join(params.rootDir, 'node_modules', 'babel-register'))(params.babel);
+    require(path.join(params.rootDir, 'node_modules', 'babel-register'))(cloneDeep(params.babel));
   }
   var Configurator = require(configuratorPath);
   var MainPackage = require(mainPackagePath);
