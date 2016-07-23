@@ -6,22 +6,8 @@ var browserify = require('browserify');
 
 module.exports = function bundleJS(params, cb) {
   if (!params.sourcePath) throw new Error("'sourcePath' is required");
-  params = extend({
-    jsx: false,
-    es6: false,
-    cache: true,
-  }, params);
-  var opts = {
-    debug: true,
-    extensions: []
-  };
-  if (params.cache) {
-    opts.cache = {};
-    opts.packageCache = {};
-  }
-  if (params.jsx) {
-    opts.extensions.push('.jsx');
-  }
+  var opts = extend({}, params.browserify);
+  // console.log('#### browserify options', opts);
   var b = browserify(opts).add(params.sourcePath);
   if (params.babel) {
     b = b.transform("babelify", cloneDeep(params.babel));
@@ -33,4 +19,5 @@ module.exports = function bundleJS(params, cb) {
       cb(null, buf);
     }
   });
-}
+};
+

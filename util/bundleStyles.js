@@ -27,6 +27,7 @@ module.exports = function(params, cb) {
         else cb(null, result.css);
       });
     } else {
+      console.log('Bundling styles using a child process');
       var cp = require('child_process');
       var child = cp.fork(require.resolve('./_bundleStyles'));
       child.on('message', function(resultStr) {

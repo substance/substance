@@ -14,7 +14,9 @@ process.on('message', function(paramStr) {
   // they must use node6 and have babel-plugin-transfprm-es2015-
   // they must have babel-register and es2015 installed
   if (params.babel) {
-    require(path.join(params.rootDir, 'node_modules', 'babel-register'))(cloneDeep(params.babel));
+    var babelParams = cloneDeep(params.babel);
+    var babelRegister = path.join(params.rootDir, 'node_modules', 'babel-register');
+    require(babelRegister)(babelParams);
   }
   var Configurator = require(configuratorPath);
   var MainPackage = require(mainPackagePath);

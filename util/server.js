@@ -35,11 +35,13 @@ server.serveJS = function(expressApp, route, sourcePath, options) {
   var params = extend(options, { sourcePath: sourcePath });
   expressApp.get(route, function(req, res) {
     var startTime = Date.now();
+    console.log('### Serving %s using browserify', sourcePath);
     bundleJS(params, function(err, buf) {
-      console.info('browserify finished after %s ms', Date.now()-startTime);
       if (err) {
+        console.error('browserify failed:');
         console.error(err.message);
       } else {
+        console.info('browserify finished after %s ms', Date.now()-startTime);
         res.status(200).send(buf);
       }
     });
