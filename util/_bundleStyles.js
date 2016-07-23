@@ -12,33 +12,8 @@ process.on('message', function(paramStr) {
   // ATTENTION: if someone wants to use es6 in their project
   // they must use node6 and have babel-plugin-transfprm-es2015-
   // they must have babel-register and es2015 installed
-  if (params.es6 || params.jsx) {
-    var plugins = [];
-    if (params.es6 === true || params.es6 === "full") {
-      plugins = plugins.concat(require('./_es6-babel-plugins'));
-    } else if (params.es6 === "modules") {
-      plugins.push(
-        // support for es6 import/export
-        // Note: the rest of es6 is supported natively by chrome
-        ["transform-es2015-modules-commonjs-simple", {
-          "noMangle": true,
-          "addExports": true
-        }]
-      );
-    }
-    if (params.jsx) {
-      plugins.push("syntax-jsx");
-      plugins.push(
-        [ "transform-react-jsx", {
-          // this will generate calls such as in
-          // $$(MyComp, props, ...children)
-          "pragma": "$$"
-        }]
-      );
-    }
-    require(path.join(params.rootDir, 'node_modules', 'babel-register'))({
-      plugins: plugins
-    });
+  if (params.babel) {
+    require(path.join(params.rootDir, 'node_modules', 'babel-register'))(params.babel);
   }
   var Configurator = require(configuratorPath);
   var MainPackage = require(mainPackagePath);
