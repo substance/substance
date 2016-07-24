@@ -104,6 +104,12 @@ AbstractConfigurator.Prototype = function() {
   };
 
   this.addCommand = function(name, CommandClass, options) {
+    if (!isString(name)) {
+      throw new Error("Expecting 'name' to be a String");
+    }
+    if (!CommandClass.prototype._isCommand) {
+      throw new Error("Expecting 'CommandClass' to be of type ui/Command.");
+    }
     this.config.commands[name] = {
       name: name,
       CommandClass: CommandClass,
@@ -112,6 +118,12 @@ AbstractConfigurator.Prototype = function() {
   };
 
   this.addTool = function(name, ToolClass, options) {
+    if (!isString(name)) {
+      throw new Error("Expecting 'name' to be a String");
+    }
+    if (!ToolClass.prototype._isTool) {
+      throw new Error("Expecting 'ToolClass' to be of type ui/Tool.");
+    }
     this.config.tools[name] = {
       name: name,
       Class: ToolClass,

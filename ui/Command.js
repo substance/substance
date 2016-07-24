@@ -18,6 +18,8 @@ function Command(params) {
 
 Command.Prototype = function() {
 
+  this._isCommand = true;
+
   this.getName = function() {
     return this.name;
   };
