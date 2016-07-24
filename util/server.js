@@ -30,12 +30,11 @@ var server = {};
   server.serveJS(app, 'app.js', path.join(__dirname, 'src', 'app.js'));
   ```
 */
-server.serveJS = function(expressApp, route, sourcePath, options) {
+server.serveJS = function(expressApp, route, params) {
   var bundleJS = require('./bundleJS');
-  var params = extend(options, { sourcePath: sourcePath });
   expressApp.get(route, function(req, res) {
     var startTime = Date.now();
-    console.log('### Serving %s using browserify', sourcePath);
+    console.log('### Serving %s using browserify', params.sourcePath);
     bundleJS(params, function(err, buf) {
       if (err) {
         console.error('browserify failed:');

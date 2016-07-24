@@ -1,11 +1,11 @@
 'use strict';
 
-var Component = require('../../ui/Component');
+var Tool = require('../../ui/Tool');
 var clone = require('lodash/clone');
 var Prompt = require('../../ui/Prompt');
 
 /**
-  Component to edit an existing link.
+  Tool to edit an existing link.
 
   Designed so that it can be used either in a toolbar, or within
   an overlay on the Surface.
@@ -59,7 +59,7 @@ EditLinkTool.Prototype = function() {
   };
 };
 
-Component.extend(EditLinkTool);
+Tool.extend(EditLinkTool);
 
 EditLinkTool.urlPropertyPath = ['url'];
 

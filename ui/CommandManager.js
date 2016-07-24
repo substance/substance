@@ -23,11 +23,11 @@ function CommandManager(context, commands) {
 
   // Set up command registry
   this.commandRegistry = new Registry();
-  forEach(commands, function(command, name) {
-    if(command._isCommand) {
+  forEach(commands, function(command) {
+    if(!command._isCommand) {
       throw new Error("Expecting instances of ui/Command.");
     }
-    this.commandRegistry.add(name, command);
+    this.commandRegistry.add(command.name, command);
   }.bind(this));
 
   this.documentSession.on('update', this.updateCommandStates, this);
