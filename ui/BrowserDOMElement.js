@@ -538,6 +538,9 @@ BrowserDOMElement.Prototype = function() {
       parentNode.replaceChild(newEl, oldEl);
     }
     this.el = newEl;
+    // HACK: we need the correct backlink
+    this.el._wrapper = this;
+
   };
 
   this._getChildNodeCount = function() {
