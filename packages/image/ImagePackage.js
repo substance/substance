@@ -2,6 +2,8 @@
 
 var ImageNode = require('./Image');
 var ImageComponent = require('./ImageComponent');
+var ImageHTMLConverter = require('./ImageHTMLConverter');
+var ImageXMLConverter = require('./ImageXMLConverter');
 var InsertImageCommand = require('./InsertImageCommand');
 var InsertImageTool = require('./InsertImageTool');
 var DropImage = require('./DropImage');
@@ -11,6 +13,8 @@ module.exports = {
   configure: function(config) {
     config.addNode(ImageNode);
     config.addComponent(ImageNode.static.name, ImageComponent);
+    config.addConverter('html', ImageHTMLConverter);
+    config.addConverter('xml', ImageXMLConverter);
     config.addCommand(InsertImageCommand);
     config.addTool(InsertImageTool);
     config.addIcon(InsertImageCommand.static.name, { 'fontawesome': 'fa-image' });

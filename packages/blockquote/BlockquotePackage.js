@@ -3,6 +3,7 @@
 var Blockquote = require('./Blockquote');
 var BlockquoteComponent = require('./BlockquoteComponent');
 var BlockquoteHTMLConverter = require('./BlockquoteHTMLConverter');
+var BlockquoteXMLConverter = require('./BlockquoteXMLConverter');
 
 module.exports = {
   name: 'blockquote',
@@ -10,6 +11,7 @@ module.exports = {
     config.addNode(Blockquote);
     config.addComponent(Blockquote.static.name, BlockquoteComponent);
     config.addConverter('html', BlockquoteHTMLConverter);
+    config.addConverter('xml', BlockquoteXMLConverter);
     config.addStyle(__dirname, '_blockquote.scss');
     config.addTextType({
       name: 'blockquote',

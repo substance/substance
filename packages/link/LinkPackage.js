@@ -4,6 +4,7 @@ var Link = require('./Link');
 var LinkComponent = require('./LinkComponent');
 var LinkCommand = require('./LinkCommand');
 var LinkHTMLConverter = require('./LinkHTMLConverter');
+var LinkXMLConverter = require('./LinkXMLConverter');
 var LinkTool = require('./LinkTool');
 var EditLinkTool = require('./EditLinkTool');
 
@@ -13,6 +14,7 @@ module.exports = {
     config.addNode(Link);
     config.addComponent(Link.static.name, LinkComponent);
     config.addConverter('html', LinkHTMLConverter);
+    config.addConverter('xml', LinkXMLConverter);
     config.addCommand(LinkCommand);
     config.addTool(LinkTool);
     config.addTool(EditLinkTool, { overlay: true });

@@ -3,6 +3,7 @@
 var Heading = require('./Heading');
 var HeadingComponent = require('./HeadingComponent');
 var HeadingHTMLConverter = require('./HeadingHTMLConverter');
+var HeadingXMLConverter = require('./HeadingXMLConverter');
 
 module.exports = {
   name: 'heading',
@@ -10,6 +11,7 @@ module.exports = {
     config.addNode(Heading);
     config.addComponent(Heading.static.name, HeadingComponent);
     config.addConverter('html', HeadingHTMLConverter);
+    config.addConverter('xml', HeadingXMLConverter);
     config.addTextType({
       name: 'heading1',
       data: {type: 'heading', level: 1}
