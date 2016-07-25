@@ -3,7 +3,6 @@
 
 var path = require('path');
 var each = require('lodash/each');
-var extend = require('lodash/extend');
 var isString = require('lodash/isString');
 
 /**
