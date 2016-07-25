@@ -24,11 +24,17 @@ var truncateAnnotation = require('../model/transform/truncateAnnotation');
 
   var SmallCapsCommand = AnnotationCommand.extend();
 
-  SmallCapsCommand.static.name = 'smallcaps';
+  SmallCapsCommand.nodeType = 'smallcaps';
   ```
 */
-function AnnotationCommand() {
-  Command.call(this);
+function AnnotationCommand(params) {
+  AnnotationCommand.super.call(this, params);
+
+  this.nodeType = this.params.nodeType;
+
+  if (!this.nodeType) {
+    throw new Error("'nodeType' is required");
+  }
 }
 
 AnnotationCommand.Prototype = function() {
@@ -39,14 +45,7 @@ AnnotationCommand.Prototype = function() {
     @returns {String} The annotation's type.
    */
   this.getAnnotationType = function() {
-    // Note: AnnotationCommand.static.annotationType is only necessary if
-    // it is different to Annotation.static.name
-    var annotationType = this.constructor.static.annotationType || this.constructor.static.name;
-    if (annotationType) {
-      return annotationType;
-    } else {
-      throw new Error('Contract: AnnotationCommand.static.annotationType should be associated to a document annotation type.');
-    }
+    return this.nodeType;
   };
 
   /**

@@ -8,9 +8,9 @@ function ListItem() {
 
 TextBlock.extend(ListItem);
 
-ListItem.static.name = 'list-item';
+ListItem.type = 'list-item';
 
-ListItem.static.defineSchema({
+ListItem.define({
   listType: { type: 'string', default: 'unordered' },
   level: { type: 'number', default: 1 }
 });

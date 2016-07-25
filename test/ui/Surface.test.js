@@ -7,7 +7,6 @@ var Registry = require('../../util/Registry');
 var createAnnotation = require('../../model/transform/createAnnotation');
 var DocumentSession = require('../../model/DocumentSession');
 var SurfaceManager = require('../../ui/SurfaceManager');
-var Component = require('../../ui/Component');
 
 var TestContainerEditor = require('./TestContainerEditor');
 var fixture = require('../fixtures/createTestArticle');
@@ -25,7 +24,7 @@ function _createApp(fixtureSeed, el) {
   var doc = fixture(fixtureSeed);
   var documentSession = new DocumentSession(doc);
   var surfaceManager = new SurfaceManager(documentSession);
-  var app = Component.mount(TestContainerEditor, {
+  var app = TestContainerEditor.mount({
     context: {
       documentSession: documentSession,
       surfaceManager: surfaceManager,

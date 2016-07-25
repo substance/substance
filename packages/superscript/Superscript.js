@@ -9,9 +9,9 @@ function Superscript() {
 
 PropertyAnnotation.extend(Superscript);
 
-Superscript.static.name = 'superscript';
+Superscript.type = 'superscript';
 
 // hint for rendering in presence of overlapping annotations
-Superscript.static.fragmentation = Fragmenter.ANY;
+Superscript.fragmentation = Fragmenter.ANY;
 
 module.exports = Superscript;

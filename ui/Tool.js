@@ -87,15 +87,15 @@ Tool.Prototype = function() {
     return title;
   };
 
-  /**
-    Get tool registration name
+  /*
+    For now always same as tool name
   */
-  this.getName = function() {
-    return this.constructor.static.name;
+  this.getCommandName = function() {
+    return this.getName();
   };
 
-  this.getCommandName = function() {
-    return this.constructor.static.command || this.constructor.static.name;
+  this.getName = function() {
+    return this.props.name;
   };
 
   this.onClick = function(e) {

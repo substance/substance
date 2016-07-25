@@ -437,8 +437,11 @@ DOMElement.Prototype = function() {
     Registers an Element event handler.
 
     @param {String} event The event name.
-    @param {String} [selector] A css selector which is used to filter events by evaluating `event.target.is(selector)`.
     @param {Function} handler The handler function.
+    @param {Object} [context] context where the function should be bound to
+    @param {Object} [options]
+    @param {Object} [options.selector] for event delegation
+    @param {Object} [options.capture] to register the event in the event's capture phase (bubbling top-down)
     @returns {this}
   */
   this.on = function(eventName, handler, context, options) {

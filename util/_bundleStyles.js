@@ -2,6 +2,7 @@
 
 // worker for sub-process
 
+var cloneDeep = require('lodash/cloneDeep');
 var path = require('path');
 
 process.on('message', function(paramStr) {
@@ -9,6 +10,14 @@ process.on('message', function(paramStr) {
   var rootDir = params.rootDir;
   var configuratorPath = params.configuratorPath;
   var mainPackagePath = params.configPath;
+  // ATTENTION: if someone wants to use es6 in their project
+  // they must use node6 and have babel-plugin-transfprm-es2015-
+  // they must have babel-register and es2015 installed
+  if (params.babel) {
+    var babelParams = cloneDeep(params.babel);
+    var babelRegister = path.join(params.rootDir, 'node_modules', 'babel-register');
+    require(babelRegister)(babelParams);
+  }
   var Configurator = require(configuratorPath);
   var MainPackage = require(mainPackagePath);
   var configurator = new Configurator().import(MainPackage);

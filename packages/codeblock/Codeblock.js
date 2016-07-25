@@ -8,6 +8,6 @@ function Codeblock() {
 
 TextBlock.extend(Codeblock);
 
-Codeblock.static.name = "codeblock";
+Codeblock.type = "codeblock";
 
 module.exports = Codeblock;

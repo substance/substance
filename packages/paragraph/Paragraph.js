@@ -8,6 +8,6 @@ function Paragraph() {
 
 TextBlock.extend(Paragraph);
 
-Paragraph.static.name = "paragraph";
+Paragraph.type = "paragraph";
 
 module.exports = Paragraph;

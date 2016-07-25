@@ -1,13 +1,14 @@
 'use strict';
 
+var SaveCommand = require('./SaveCommand');
+var Tool = require('../../ui/Tool');
+
 module.exports = {
   name: 'persistence',
   configure: function(config) {
-    config.addCommand(require('./SaveCommand'));
-    config.addTool(require('./SaveTool'));
-    // Icons
+    config.addCommand('save', SaveCommand);
+    config.addTool('save', Tool);
     config.addIcon('save', { 'fontawesome': 'fa-save' });
-    // Labels
     config.addLabel('save', {
       en: 'Save',
       de: 'Speichern'

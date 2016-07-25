@@ -5,6 +5,12 @@ var insertInlineNode = require('../model/transform/insertInlineNode');
 
 function InlineNodeCommand() {
   InlineNodeCommand.super.apply(this, arguments);
+
+  this.nodeType = this.params.nodeType;
+
+  if (!this.params.nodeType) {
+    throw new Error("Every AnnotationCommand must have an 'nodeType'");
+  }
 }
 
 InlineNodeCommand.Prototype = function() {
@@ -14,15 +20,14 @@ InlineNodeCommand.Prototype = function() {
 
     @returns {String} The annotation's type.
    */
+  this.getNodeType = function() {
+    return this.nodeType;
+  };
+
+  // legacy
   this.getAnnotationType = function() {
-    // Note: AnnotationCommand.static.annotationType is only necessary if
-    // it is different to Annotation.static.name
-    var annotationType = this.constructor.static.annotationType || this.constructor.static.name;
-    if (annotationType) {
-      return annotationType;
-    } else {
-      throw new Error('Contract: AnnotationCommand.static.annotationType should be associated to a document annotation type.');
-    }
+    console.warn('DEPRECATED: ust InlineNodeCommand.getNodeType() instead.');
+    return this.getNodeType();
   };
 
   this.getCommandState = function(props, context) {
@@ -47,7 +52,7 @@ InlineNodeCommand.Prototype = function() {
   };
 
   this._getAnnotationsForSelection = function(props) {
-    return props.selectionState.getAnnotationsForType(this.getAnnotationType());
+    return props.selectionState.getAnnotationsForType(this.getNodeType());
   };
 
   this.execute = function(props, context) {
@@ -69,7 +74,7 @@ InlineNodeCommand.Prototype = function() {
 
   this.createNodeData = function(tx, args) { // eslint-disable-line
     return {
-      type: this.constructor.static.name
+      type: this.constructor.type
     };
   };
 

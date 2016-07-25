@@ -1,11 +1,14 @@
 'use strict';
 
-var isFunction = require('lodash/isFunction');
-var isString = require('lodash/isString');
-var isArray = require('lodash/isArray');
-var map = require('lodash/map');
 var clone = require('lodash/clone');
 var extend = require('lodash/extend');
+var flattenDeep = require('lodash/flattenDeep');
+var isArray = require('lodash/isArray');
+var isFunction = require('lodash/isFunction');
+var isNil = require('lodash/isNil');
+var isPlainObject = require('lodash/isPlainObject');
+var isString = require('lodash/isString');
+var map = require('lodash/map');
 var omit = require('lodash/omit');
 var without = require('lodash/without');
 var DOMElement = require('./DOMElement');
@@ -610,26 +613,72 @@ VirtualElement.TextNode = VirtualTextNode;
   ```
 */
 VirtualElement.createElement = function() {
-  var content = null;
-  if (isString(arguments[0])) {
-    if (arguments.length !== 1) {
-      throw new Error('Illegal usage of VirtualElement.createElement()');
-    }
-    content = new VirtualHTMLElement(arguments[0]);
-  } else if (isFunction(arguments[0]) && arguments[0].prototype._isComponent) {
-    if (arguments.length < 1 || arguments.length > 2) {
-      throw new Error('Illegal usage of VirtualElement.createElement()');
-    }
-    var props = {};
-    if (arguments.length === 2) {
-      // shallow cloning the original object
-      props = clone(arguments[1]);
-    }
-    content = new VirtualComponent(arguments[0], props);
-  } else if (arguments[0] === undefined) {
-    throw new Error('Provided Component was undefined.');
+  var content;
+  var _first = arguments[0];
+  var _second = arguments[1];
+  var type;
+  if (isString(_first)) {
+    type = "element";
+  } else if (isFunction(_first) && _first.prototype._isComponent) {
+    type = "component";
+  } else if (isNil(_first)) {
+    throw new Error('$$(null): provided argument was null or undefined.');
   } else {
-    throw new Error('Illegal usage of VirtualElement.createElement()');
+    throw new Error('Illegal usage of $$()');
+  }
+  // some props are mapped to built-ins
+  var props = {};
+  var classNames, ref;
+  var eventHandlers = [];
+  for(var key in _second) {
+    if (!_second.hasOwnProperty(key)) continue;
+    var val = _second[key];
+    switch(key) {
+      case 'class':
+        classNames = val;
+        break;
+      case 'ref':
+        ref = val;
+        break;
+      default:
+        if (key.slice(0,2) === 'on') {
+          eventHandlers.push({ name: key.slice(2), handler: val });
+        } else {
+          props[key] = val;
+        }
+    }
+  }
+  if (type === 'element') {
+    content = new VirtualHTMLElement(_first);
+    // remaining props are attributes
+    // TODO: should we make sure that these are only string values?
+    content.attr(props);
+  } else {
+    content = new VirtualComponent(_first, props);
+  }
+  // HACK: this is set to the current context by RenderingEngine
+  // otherwise this will provide rubbish
+  content._owner = this.owner;
+  if (classNames) {
+    content.addClass(classNames);
+  }
+  if (ref) {
+    content.ref(ref);
+  }
+  eventHandlers.forEach(function(h) {
+    if (isFunction(h.handler)) {
+      content.on(h.name, h.handler);
+    } else if (isPlainObject(h.handler)) {
+      var params = h.handler;
+      content.on(h.name, params.handler, params.context, params);
+    } else {
+      throw new Error('Illegal arguments for $$(_,{ on'+h.name+'})');
+    }
+  });
+  // allow a notation similar to React.createElement
+  // $$(MyComponent, {}, ...children)
+  if (arguments.length > 2) {
+    content.append(flattenDeep(Array.prototype.slice.call(arguments, 2)));
   }
   return content;
 };

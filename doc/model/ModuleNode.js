@@ -23,14 +23,13 @@ ModuleNode.Prototype = function() {
 
 DocumentedNode.extend(ModuleNode, MemberContainerMixin);
 
-ModuleNode.static.name = 'module';
-
-ModuleNode.static.defineSchema({
+ModuleNode.define({
+  type: 'module',
   parent: 'id',
   name: 'string',
   members: { type: ['array', 'property'], default: [] }, // ['model/documentHelpers.getAllAnnotations']
 });
 
-ModuleNode.static.isBlock = true;
+ModuleNode.isBlock = true;
 
 module.exports = ModuleNode;

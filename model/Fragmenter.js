@@ -118,8 +118,8 @@ Fragmenter.Prototype = function() {
           length: 0
         });
       } else {
-        // TODO better naming, `Node.static.level` does not say enough
-        // Better would be `Node.static.fragmentation = Fragmenter.SHOULD_NOT_SPLIT;`
+        // TODO better naming, `Node.level` does not say enough
+        // Better would be `Node.fragmentation = Fragmenter.SHOULD_NOT_SPLIT;`
         // meaning, that the fragmenter should try to render the fragment as one single
         // element, and not splitting it up on different stack levels.
         // E.g. When bold an link are overlapping
@@ -131,8 +131,8 @@ Fragmenter.Prototype = function() {
         var isInline = (a.isInline ? a.isInline() : false);
         if (isInline) {
           l = Number.MAX_VALUE;
-        } else if (a.constructor.static && a.constructor.static.hasOwnProperty('fragmentation')) {
-          l = a.constructor.static.fragmentation;
+        } else if (a.constructor.hasOwnProperty('fragmentation')) {
+          l = a.constructor.fragmentation;
         } else if (a.hasOwnProperty('fragmentationHint')) {
           l = a.fragmentationHint;
         }

@@ -7,7 +7,6 @@ var Registry = require('../../util/Registry');
 var ComponentRegistry = require('../../ui/ComponentRegistry');
 var Clipboard = require('../../ui/Clipboard');
 var DOMElement = require('../../ui/DOMElement');
-var Component = require('../../ui/Component');
 var StubSurface = require('./StubSurface');
 var TestContainerEditor = require('./TestContainerEditor');
 
@@ -147,7 +146,7 @@ test.UI("Copying a container selection", function(t) {
 
 function _containerEditorSample(t) {
   var doc = fixture(simple);
-  var app = Component.mount(TestContainerEditor, {
+  var app = TestContainerEditor.mount({
     context: {
       documentSession: new DocumentSession(doc),
       componentRegistry: componentRegistry,

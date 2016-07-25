@@ -8,12 +8,20 @@ var oo = require('../util/oo');
  @class
 */
 
-var Command = function() {};
+function Command(params) {
+  this.params = params || {};
+  this.name = this.params.name;
+  if (!this.name) {
+    throw new Error("'name' is required");
+  }
+}
 
 Command.Prototype = function() {
 
+  this._isCommand = true;
+
   this.getName = function() {
-    return this.constructor.static.name;
+    return this.name;
   };
 
   this.getCommandState = function(props, context) { // eslint-disable-line

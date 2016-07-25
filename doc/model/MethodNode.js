@@ -8,9 +8,8 @@ function MethodNode() {
 
 DocumentedNode.extend(MethodNode);
 
-MethodNode.static.name = 'method';
-
-MethodNode.static.defineSchema({
+MethodNode.define({
+  type: 'method',
   parent: 'id', // id of parent class or module
   name: 'string',
   params: { type: ['array', 'object'], default: [] }, // [{name: 'doc', type: 'model/Document', description: 'A Substance document instance'}]

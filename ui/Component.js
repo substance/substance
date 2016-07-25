@@ -60,10 +60,7 @@ var __id__ = 0;
   And mount it to a DOM Element:
 
   ```
-  Component.mount(
-    $$(HelloMessage, {name: 'John'}),
-    document.body
-  );
+    HelloMessage.mount({name: 'John'}, document.body);
   ```
 */
 function Component(parent, props) {
@@ -134,6 +131,10 @@ Component.Prototype = function() {
     return comp;
   };
 
+  this.getNativeElement = function() {
+    return this.el.getNativeElement();
+  };
+
   /*
     Short hand for using labelProvider API
   */
@@ -160,6 +161,9 @@ Component.Prototype = function() {
   };
 
   this.mount = function(el) {
+    if (!el) {
+      throw new Error('Element is required.');
+    }
     if (!this.el) {
       this._render();
     }
@@ -230,7 +234,7 @@ Component.Prototype = function() {
    *
    * ```
    * var frag = document.createDocumentFragment();
-   * var comp = Component.mount($$(MyComponent), frag);
+   * var comp = MyComponent.mount(frag);
    * ...
    * $('body').append(frag);
    * comp.triggerDidMount();
@@ -622,19 +626,20 @@ function notNull(n) { return n; }
 
 Component.unwrap = _unwrapComp;
 
-Component.static.render = function(props) {
+Component.render = function(props) {
   props = props || {};
-  var ComponentClass = this.__class__;
+  var ComponentClass = this;
   var comp = new ComponentClass(null, props);
   comp._render();
   return comp;
 };
 
-Component.static.mount = function(props, el) {
+Component.mount = function(props, el) {
   if (arguments.length === 1) {
     props = {};
     el = arguments[0];
   }
+  if (!el) throw new Error("'el' is required.");
   if (isString(el)) {
     var selector = el;
     if (inBrowser) {
@@ -646,18 +651,10 @@ Component.static.mount = function(props, el) {
   if (!el._isDOMElement) {
     el = new DefaultDOMElement.wrapNativeElement(el);
   }
-  var ComponentClass = this.__class__;
+  var ComponentClass = this;
   var comp = new ComponentClass(null, props);
   comp.mount(el);
   return comp;
-};
-
-Component.mount = function(ComponentClass, props, el) {
-  if (arguments.length === 2) {
-    props = {};
-    el = arguments[1];
-  }
-  return ComponentClass.static.mount(props, el);
 };
 
 function ElementComponent(parent, virtualComp) {

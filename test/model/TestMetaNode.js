@@ -8,10 +8,9 @@ function TestMetaNode() {
 
 DocumentNode.extend(TestMetaNode);
 
-TestMetaNode.static.name = 'meta';
-
-TestMetaNode.static.defineSchema({
-  'title': 'text'
+TestMetaNode.define({
+  type: 'meta',
+  title: 'text'
 });
 
 module.exports = TestMetaNode;

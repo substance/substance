@@ -3,7 +3,7 @@
 var Command = require('../../ui/Command');
 
 function Undo() {
-  Undo.super.apply(this, arguments);
+  Command.call(this, { name: 'undo' });
 }
 
 Undo.Prototype = function() {
@@ -27,7 +27,5 @@ Undo.Prototype = function() {
 };
 
 Command.extend(Undo);
-
-Undo.static.name = 'undo';
 
 module.exports = Undo;

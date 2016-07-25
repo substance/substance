@@ -16,9 +16,8 @@ DocumentedNode.Prototype = function() {
 
 DocumentNode.extend(DocumentedNode);
 
-DocumentedNode.static.name = 'source-code';
-
-DocumentedNode.static.defineSchema({
+DocumentedNode.define({
+  type: 'source-code',
   description: { type: 'string', optional: true }, // HTML
   example: { type: 'string', optional: true }, // HTML
   sourceFile: 'string', // ui/Component.js
@@ -27,6 +26,6 @@ DocumentedNode.static.defineSchema({
   tags: { type: ['array', 'object'], default: [] }, // [ { name: 'type', string: '...', html: '...'}]
 });
 
-DocumentedNode.static.isBlock = true;
+DocumentedNode.isBlock = true;
 
 module.exports = DocumentedNode;

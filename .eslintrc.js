@@ -6,7 +6,7 @@ module.exports = {
   },
   "extends": "eslint:recommended",
   "globals": {
-    "QUnit": true
+    "Promise": true
   },
   "rules": {
     // 0 - off, 1 - warning, 2 - error

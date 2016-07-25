@@ -146,9 +146,8 @@ Container.Prototype = function() {
 
 DocumentNode.extend(Container);
 
-Container.static.name = "container";
-
-Container.static.defineSchema({
+Container.define({
+  type: "container",
   nodes: { type: ['id'], default: [] }
 });
 

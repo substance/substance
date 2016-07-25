@@ -8,6 +8,6 @@ function TestContainerAnnotation() {
 
 ContainerAnnotation.extend(TestContainerAnnotation);
 
-TestContainerAnnotation.static.name = 'test-container-anno';
+TestContainerAnnotation.type = 'test-container-anno';
 
 module.exports = TestContainerAnnotation;

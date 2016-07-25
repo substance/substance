@@ -4,7 +4,7 @@ var InsertNodeCommand = require('../../ui/InsertNodeCommand');
 var uuid = require('../../util/uuid');
 
 function InsertTableCommand() {
-  InsertTableCommand.super.apply(this, arguments);
+  InsertTableCommand.super.apply(this, { name: 'insert-table' });
 }
 
 InsertTableCommand.Prototype = function() {
@@ -35,7 +35,5 @@ InsertTableCommand.Prototype = function() {
 };
 
 InsertNodeCommand.extend(InsertTableCommand);
-
-InsertTableCommand.static.name = 'insert-table';
 
 module.exports = InsertTableCommand;

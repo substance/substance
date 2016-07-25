@@ -9,14 +9,13 @@ function Link() {
 
 PropertyAnnotation.extend(Link);
 
-Link.static.name = "link";
-
-Link.static.defineSchema({
+Link.define({
+  type: "link",
   title: { type: 'string', optional: true },
   url: { type: 'string', 'default': 'http://'}
 });
 
 // in presence of overlapping annotations will try to render this as one element
-Link.static.fragmentation = Fragmenter.SHOULD_NOT_SPLIT;
+Link.fragmentation = Fragmenter.SHOULD_NOT_SPLIT;
 
 module.exports = Link;

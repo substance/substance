@@ -8,9 +8,8 @@ function PropertyNode() {
 
 DocumentedNode.extend(PropertyNode);
 
-PropertyNode.static.name = 'property';
-
-PropertyNode.static.defineSchema({
+PropertyNode.define({
+  type: 'property',
   parent: 'id', // id of parent class or module
   name: 'string',
   dataType: { type: 'string', optional: true },

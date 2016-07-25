@@ -1,13 +1,9 @@
 "use strict";
 /* eslint-disable no-console */
 
-var browserify = require('browserify');
-var glob = require('glob');
-var fs = require('fs');
 var path = require('path');
 var each = require('lodash/each');
 var isString = require('lodash/isString');
-var bundleStyles = require('./bundleStyles');
 
 /**
   @module
@@ -33,15 +29,20 @@ var server = {};
   server.serveJS(app, 'app.js', path.join(__dirname, 'src', 'app.js'));
   ```
 */
-server.serveJS = function(expressApp, route, sourcePath) {
+server.serveJS = function(expressApp, route, params) {
+  var bundleJS = require('./bundleJS');
   expressApp.get(route, function(req, res) {
-    browserify({ debug: true, cache: false })
-      .add(sourcePath)
-      .bundle()
-      .on('error', function(err) {
+    var startTime = Date.now();
+    console.log('### Serving %s using browserify', params.sourcePath);
+    bundleJS(params, function(err, buf) {
+      if (err) {
+        console.error('browserify failed:');
         console.error(err.message);
-      })
-      .pipe(res);
+      } else {
+        console.info('browserify finished after %s ms', Date.now()-startTime);
+        res.status(200).send(buf);
+      }
+    });
   });
 };
 
@@ -59,6 +60,7 @@ server.serveJS = function(expressApp, route, sourcePath) {
   ```
 */
 server.serveStyles = function(expressApp, route, props) {
+  var bundleStyles = require('./bundleStyles');
   if (isString(props)) {
     console.warn("DEPRECATED: Use serveStyles(expressApp, '/app.css', {scssPath: 'app.scss'}");
     props = {
@@ -79,6 +81,7 @@ server.serveStyles = function(expressApp, route, props) {
 };
 
 server.serveHTML = function(expressApp, route, sourcePath, config) {
+  var fs = require('fs');
   expressApp.get(route, function(req, res) {
     fs.readFile(sourcePath, function (err, data) {
       if (err) {
@@ -98,6 +101,8 @@ server.serveHTML = function(expressApp, route, sourcePath, config) {
 };
 
 server.serveTestSuite = function(expressApp, globPattern, options) {
+  var browserify = require('browserify');
+  var glob = require('glob');
   options = options || {};
   var cwd = process.cwd();
   // Test suite

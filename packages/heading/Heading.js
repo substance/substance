@@ -8,10 +8,9 @@ function Heading() {
 
 TextBlock.extend(Heading);
 
-Heading.static.name = "heading";
-
-Heading.static.defineSchema({
-  "level": { type: "number", default: 1 }
+Heading.define({
+  type: "heading",
+  level: { type: "number", default: 1 }
 });
 
 module.exports = Heading;

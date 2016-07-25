@@ -14,9 +14,8 @@ InlineWrapper.Prototype = function() {
 
 InlineNode.extend(InlineWrapper);
 
-InlineWrapper.static.name = 'inline-wrapper';
-
-InlineWrapper.static.defineSchema({
+InlineWrapper.define({
+  type: 'inline-wrapper',
   wrappedNode: 'id'
 });
 

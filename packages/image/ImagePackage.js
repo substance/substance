@@ -10,10 +10,10 @@ module.exports = {
   name: 'image',
   configure: function(config) {
     config.addNode(ImageNode);
-    config.addComponent(ImageNode.static.name, ImageComponent);
-    config.addCommand(InsertImageCommand);
-    config.addTool(InsertImageTool);
-    config.addIcon(InsertImageCommand.static.name, { 'fontawesome': 'fa-image' });
+    config.addComponent('image', ImageComponent);
+    config.addCommand('insert-image', InsertImageCommand);
+    config.addTool('insert-image', InsertImageTool);
+    config.addIcon('insert-image', { 'fontawesome': 'fa-image' });
     config.addLabel('image', {
       en: 'Image',
       de: 'Bild'

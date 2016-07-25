@@ -13,8 +13,6 @@ HeadingComponent.Prototype = function() {
   this.render = function($$) {
     var node = this.props.node;
     var doc = node.getDocument();
-
-    var name = node.name;
     var type = node.type;
     var specificType = node.getSpecificType();
     var el = $$('div').addClass('sc-doc-heading');

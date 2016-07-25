@@ -8,7 +8,7 @@ module.exports = {
   name: 'blockquote',
   configure: function(config) {
     config.addNode(Blockquote);
-    config.addComponent(Blockquote.static.name, BlockquoteComponent);
+    config.addComponent(Blockquote.type, BlockquoteComponent);
     config.addConverter('html', BlockquoteHTMLConverter);
     config.addStyle(__dirname, '_blockquote.scss');
     config.addTextType({

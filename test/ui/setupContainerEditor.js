@@ -26,9 +26,9 @@ module.exports = function setupContainerEditor(fixture, el) {
   });
   var app;
   if (el) {
-    app = App.static.mount(el);
+    app = App.mount(el);
   } else {
-    app = App.static.render();
+    app = App.render();
     // faking a mounted scenario
     app.triggerDidMount();
   }

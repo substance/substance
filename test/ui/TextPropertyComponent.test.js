@@ -1,8 +1,6 @@
 "use strict";
 
 var test = require('../test').module('ui/TextPropertyComponent');
-
-var Component = require('../../ui/Component');
 var TextPropertyComponent = require('../../ui/TextPropertyComponent');
 
 var fixture = require('../fixtures/createTestArticle');
@@ -15,7 +13,7 @@ test.UI("Get coordinate of empty property", function(t) {
     id: 'empty',
     content: ''
   });
-  var comp = Component.mount(TextPropertyComponent, {
+  var comp = TextPropertyComponent.mount({
     doc: doc,
     path: ['empty', 'content']
   }, t.sandbox);

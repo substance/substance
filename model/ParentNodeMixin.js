@@ -15,7 +15,7 @@ var ParentNodeMixin = {
   },
 
   getChildrenProperty: function() {
-    throw new Error('ParentNodeMixin.getChildrenProperty is abstract and must be implemented in ' + this.constructor.name + '.');
+    throw new Error('ParentNodeMixin.getChildrenProperty is abstract and must be implemented in ' + this.type + '.');
   },
 
   getChildIndex: function(child) {

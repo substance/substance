@@ -9,12 +9,11 @@ var AnnotationCommand = require('../../ui/AnnotationCommand');
 var createTestArticle = require('../fixtures/createTestArticle');
 var containerAnnoSample = require('../fixtures/containerAnnoSample');
 
-var ToggleStrongCommand = AnnotationCommand.extend({
-  static: {
-    name: 'toggleStrong',
-    annotationType: 'strong'
-  }
-});
+function ToggleStrongCommand() {
+  ToggleStrongCommand.super.call(this, { name: 'strong', nodeType: 'strong' });
+}
+
+AnnotationCommand.extend(ToggleStrongCommand);
 
 function fixture() {
   var doc = createTestArticle(containerAnnoSample);

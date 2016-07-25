@@ -22,7 +22,7 @@ EventComponent.Prototype = function() {
       $$('div').addClass('sc-signature').append(
         $$('a').attr({href: '#'}).addClass('se-declaration')
           .on('click', this.onClick)
-          .append($$('span').addClass('se-name').append(node.name)),
+          .append($$('span').addClass('se-name').append(node.type)),
         $$('div').addClass('se-source').append(
           $$('strong').append(this.getLabel('event')),
           $$('span').append(' defined in '),

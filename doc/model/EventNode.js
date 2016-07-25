@@ -8,14 +8,13 @@ function EventNode() {
 
 DocumentedNode.extend(EventNode);
 
-EventNode.static.name = 'event';
-
-EventNode.static.defineSchema({
+EventNode.define({
+  type: 'event',
   parent: 'id',
   name: 'string',
   params: { type: ['array', 'object'], default: [] } // [{name: 'doc', type: 'model/Document', description: 'A Substance document instance'}]
 });
 
-EventNode.static.isBlock = true;
+EventNode.isBlock = true;
 
 module.exports = EventNode;

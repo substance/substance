@@ -4,7 +4,7 @@ var Command = require('../../ui/Command');
 var paste = require('../../model/transform/paste');
 
 function ImageCommand() {
-  ImageCommand.super.apply(this, arguments);
+  ImageCommand.super.call(this, { name: 'insert-image' });
 }
 
 ImageCommand.Prototype = function() {
@@ -100,7 +100,5 @@ ImageCommand.Prototype = function() {
 };
 
 Command.extend(ImageCommand);
-
-ImageCommand.static.name = 'insert-image';
 
 module.exports = ImageCommand;

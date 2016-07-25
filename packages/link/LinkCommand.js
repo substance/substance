@@ -31,6 +31,4 @@ LinkCommand.Prototype = function() {
 
 AnnotationCommand.extend(LinkCommand);
 
-LinkCommand.static.name = 'link';
-
 module.exports = LinkCommand;

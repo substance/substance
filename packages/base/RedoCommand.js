@@ -3,7 +3,7 @@
 var Command = require('../../ui/Command');
 
 function Redo() {
-  Redo.super.apply(this, arguments);
+  Command.call(this, { name: 'redo' });
 }
 
 Redo.Prototype = function() {
@@ -28,7 +28,5 @@ Redo.Prototype = function() {
 };
 
 Command.extend(Redo);
-
-Redo.static.name = 'redo';
 
 module.exports = Redo;
