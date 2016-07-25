@@ -424,6 +424,8 @@ CheerioDOMElement.Prototype = function() {
     this.$el.replaceWith($newEl);
     this.el = newEl;
     this.$el = $newEl;
+    // HACK: we need the correct backlink
+    this.el._wrapper = this;
   };
 
   this.isInDocument = function() {
