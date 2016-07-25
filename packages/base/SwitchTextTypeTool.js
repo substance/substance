@@ -36,7 +36,7 @@ SwitchTextTypeTool.Prototype = function() {
     var textTypeName = 'No selection';
 
     if (this.props.currentTextType) {
-      textTypeName = this.props.currentTextType.type;
+      textTypeName = this.props.currentTextType.data.type;
     }
     var el = $$('div').addClass('sc-switch-text-type');
 
@@ -61,10 +61,11 @@ SwitchTextTypeTool.Prototype = function() {
       // dropdown options
       var options = $$('div').addClass("se-options").ref('options');
       each(this.props.textTypes, function(textType) {
+        var type = textType.data.type;
         var button = $$('button')
-            .addClass('se-option sm-'+textType.type)
-            .attr('data-type', textType.type)
-            .append(labelProvider.getLabel(textType.type))
+            .addClass('se-option sm-'+type)
+            .attr('data-type', type)
+            .append(labelProvider.getLabel(type))
             .on('click', this.handleClick);
         options.append(button);
       }.bind(this));
