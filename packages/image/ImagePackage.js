@@ -13,11 +13,11 @@ module.exports = {
   configure: function(config) {
     config.addNode(ImageNode);
     config.addComponent('image', ImageComponent);
+    config.addConverter('html', ImageHTMLConverter);
+    config.addConverter('xml', ImageXMLConverter);
     config.addCommand('insert-image', InsertImageCommand);
     config.addTool('insert-image', InsertImageTool);
     config.addIcon('insert-image', { 'fontawesome': 'fa-image' });
-    config.addConverter('html', ImageHTMLConverter);
-    config.addConverter('xml', ImageXMLConverter);
     config.addStyle(__dirname, '_image.scss');
     config.addLabel('image', {
       en: 'Image',
