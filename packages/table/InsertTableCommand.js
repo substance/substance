@@ -4,7 +4,7 @@ var InsertNodeCommand = require('../../ui/InsertNodeCommand');
 var uuid = require('../../util/uuid');
 
 function InsertTableCommand() {
-  InsertTableCommand.super.apply(this, { name: 'insert-table' });
+  InsertTableCommand.super.call(this, { name: 'insert-table' });
 }
 
 InsertTableCommand.Prototype = function() {
