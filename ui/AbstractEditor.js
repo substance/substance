@@ -91,6 +91,7 @@ AbstractEditor.Prototype = function() {
 
   this.getCommandContext = function() {
     return {
+      editor: this,
       documentSession: this.documentSession,
       surfaceManager: this.surfaceManager,
       fileClient: this.fileClient,
