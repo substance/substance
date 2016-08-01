@@ -10,7 +10,7 @@ var Err = require('../util/SubstanceError');
   API for creating and retrieving snapshots of documents
 */
 function SnapshotEngine(config) {
-  this.schemas = config.schemas;
+  this.configurator = config.configurator;
   this.changeStore = config.changeStore;
   this.documentStore = config.documentStore;
 
@@ -182,15 +182,14 @@ SnapshotEngine.Prototype = function() {
     on given schema configuration
   */
   this._createDocumentInstance = function(schemaName) {
-    var schemaConfig = this.schemas[schemaName];
+    var schema = this.configurator.getSchema();
 
-    if (!schemaConfig) {
+    if (schema.name !== schemaName) {
       throw new Err('SnapshotEngine.SchemaNotFoundError', {
         message:'Schema ' + schemaName + ' not found'
       });
     }
-
-    var doc = schemaConfig.documentFactory.createDocument();
+    var doc = this.configurator.createArticle();
     return doc;
   };
 
