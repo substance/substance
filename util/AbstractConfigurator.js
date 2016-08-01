@@ -145,7 +145,7 @@ AbstractConfigurator.Prototype = function() {
     @param {String} label label.
 
     Define a new label
-    label is either a string or a hash with translations.
+    Label is either a string or a hash with translations.
     If string is provided 'en' is used as the language.
   */
   this.addLabel = function(labelName, label) {
@@ -162,6 +162,34 @@ AbstractConfigurator.Prototype = function() {
         this.config.labels[lang][labelName] = label;
       }.bind(this));
     }
+  };
+
+  /**
+    @param seed Seed function.
+
+    Define a seed function
+    Seed function is a transaction function.
+
+    @example
+
+    ```js
+    var seedFn = function(tx) {
+      var body = tx.get('body');
+
+      tx.create({
+        id: 'p1',
+        type: 'paragraph',
+        content: 'This is your new paragraph!'
+      });
+      body.show('p1');
+    };
+
+    config.addSeed(seedFn);
+    ```
+  */
+
+  this.addSeed = function(seed) {
+    this.config.seed = seed;
   };
 
   this.addTextType = function(textType, options) {
@@ -295,6 +323,10 @@ AbstractConfigurator.Prototype = function() {
 
   this.getIconProvider = function() {
     throw new Error('This method is abstract');
+  };
+
+  this.getSeed = function() {
+    return this.config.seed;
   };
 
   this.getTextTypes = function() {
