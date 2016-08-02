@@ -8,24 +8,28 @@ var ChangeStore = require('../../collab/ChangeStore');
 var DocumentEngine = require('../../collab/DocumentEngine');
 var testDocumentEngine = require('../collab/testDocumentEngine');
 
-var createTestDocumentFactory = require('../fixtures/createTestDocumentFactory');
-var twoParagraphs = require('../fixtures/twoParagraphs');
+var Configurator = require('../../util/Configurator');
+var TestArticle = require('./TestArticle');
+var TestMetaNode = require('./TestMetaNode');
+
 var documentStoreSeed = require('../fixtures/documentStoreSeed');
 var changeStoreSeed = require('../fixtures/changeStoreSeed');
+
+var configurator = new Configurator();
+configurator.defineSchema({
+  name: 'prose-article',
+  ArticleClass: TestArticle,
+  defaultTextType: 'paragraph'
+});
+configurator.addNode(TestMetaNode);
 
 var documentStore = new DocumentStore();
 var changeStore = new ChangeStore();
 
 var documentEngine = new DocumentEngine({
+  configurator: configurator,
   documentStore: documentStore,
-  changeStore: changeStore,
-  schemas: {
-    'prose-article': {
-      name: 'prose-article',
-      version: '1.0.0',
-      documentFactory: createTestDocumentFactory(twoParagraphs)
-    }
-  }
+  changeStore: changeStore
 });
 
 function setup(cb, t) {
