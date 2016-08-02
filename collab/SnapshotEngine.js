@@ -16,6 +16,10 @@ function SnapshotEngine(config) {
 
   // Optional
   this.snapshotStore = config.snapshotStore;
+  // Snapshot creation frequency,
+  // e.g. if it's equals 15 then every
+  // 15th version will be saved as snapshot
+  this.frequency = config.frequency || 1;
 }
 
 SnapshotEngine.Prototype = function() {
@@ -41,8 +45,8 @@ SnapshotEngine.Prototype = function() {
 
     TODO: this could potentially live in DocumentEngine
   */
-  this.requestSnapshot = function(documentId, cb) {
-    if (this.snapshotStore) {
+  this.requestSnapshot = function(documentId, version, cb) {
+    if (this.snapshotStore && version % this.frequency === 0) {
       this.createSnapshot({
         documentId: documentId
       }, cb);
@@ -75,14 +79,14 @@ SnapshotEngine.Prototype = function() {
     this.documentStore.getDocument(args.documentId, function(err, docRecord) {
       if (err) return cb(err);
 
-      if (!args.version) {
+      if (args.version === undefined) {
         args.version = docRecord.version; // set version to the latest version
       }
 
       // We add the docRecord to the args object
       args.docRecord = docRecord;
 
-      if (this.snapshotStore) {
+      if (this.snapshotStore && args.version !== 0) {
         this._computeSnapshotSmart(args, cb);
       } else {
         this._computeSnapshotDumb(args, cb);
@@ -125,7 +129,7 @@ SnapshotEngine.Prototype = function() {
       }
 
       doc = this._createDocumentInstance(docRecord.schemaName);
-      if (snapshot.data) {
+      if (snapshot) {
         doc = converter.importDocument(doc, snapshot.data);
       }
 
