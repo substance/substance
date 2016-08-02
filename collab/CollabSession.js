@@ -250,6 +250,7 @@ CollabSession.Prototype = function() {
       var collaboratorsChange = this._updateCollaborators(collaborators);
       if (collaboratorsChange) {
         update.collaborators = collaboratorsChange;
+        this.emit('collaborators:changed');
       }
       this._triggerUpdateEvent(update, { remote: true });
     } else {
