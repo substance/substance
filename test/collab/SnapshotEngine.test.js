@@ -14,8 +14,6 @@ var TestMetaNode = require('../model/TestMetaNode');
  
 var testSnapshotEngine = require('./testSnapshotEngine');
 var testSnapshotEngineWithStore = require('./testSnapshotEngineWithStore');
-var createTestDocumentFactory = require('../fixtures/createTestDocumentFactory');
-var twoParagraphs = require('../fixtures/twoParagraphs');
 var documentStoreSeed = require('../fixtures/documentStoreSeed');
 var changeStoreSeed = require('../fixtures/changeStoreSeed');
 var snapshotStoreSeed = require('../fixtures/snapshotStoreSeed');
@@ -30,7 +28,6 @@ configurator.defineSchema({
 });
 configurator.addNode(TestMetaNode);
 
-var documentFactory = createTestDocumentFactory(twoParagraphs);
 var documentStore = new DocumentStore();
 var changeStore = new ChangeStore();
 var snapshotEngine = new SnapshotEngine({
@@ -72,9 +69,9 @@ function setupTest(description, fn) {
 }
 
 // Run the generic testsuite with an engine that does not have a store attached
-testSnapshotEngine(snapshotEngine, documentFactory, setupTest);
+testSnapshotEngine(snapshotEngine, setupTest);
 // Run the same testsuite but this time with a store
-testSnapshotEngine(snapshotEngineWithStore, documentFactory, setupTest);
+testSnapshotEngine(snapshotEngineWithStore, setupTest);
 
 // Run tests that are only relevant when a snapshot store is provided to the engine
-testSnapshotEngineWithStore(snapshotEngineWithStore, documentFactory, setupTest);
+testSnapshotEngineWithStore(snapshotEngineWithStore, setupTest);
