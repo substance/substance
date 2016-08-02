@@ -164,7 +164,7 @@ DocumentEngine.Prototype = function() {
           info: args.documentInfo
         }, function(err) {
           if (err) return cb(err);
-          this.snapshotEngine.requestSnapshot(args.documentId, function() {
+          this.snapshotEngine.requestSnapshot(args.documentId, newVersion, function() {
             // no matter if errored or not we will complete the addChange
             // successfully
             cb(null, newVersion);
