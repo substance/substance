@@ -173,6 +173,7 @@ CollabServer.Prototype = function() {
     collaborators[collaboratorId] = null;
 
     this.broadCast(collaboratorIds, {
+      scope: this.scope,
       type: 'update',
       documentId: documentId,
       // Removes the entry

@@ -30,7 +30,7 @@ function CollabSession(doc, config) {
     console.warn('config.docId is deprecated: Use config.documentId instead');
   }
 
-  this.version = config.version || config.docVersion;
+  this.version = config.version;
   this.documentId = config.documentId || config.docId;
 
   if (config.autoSync !== undefined) {
@@ -43,7 +43,7 @@ function CollabSession(doc, config) {
     throw new Err('InvalidArgumentsError', {message: 'documentId is mandatory'});
   }
 
-  if (!this.version) {
+  if (typeof this.version === undefined) {
     throw new Err('InvalidArgumentsError', {message: 'version is mandatory'});
   }
 
@@ -250,6 +250,7 @@ CollabSession.Prototype = function() {
       var collaboratorsChange = this._updateCollaborators(collaborators);
       if (collaboratorsChange) {
         update.collaborators = collaboratorsChange;
+        this.emit('collaborators:changed');
       }
       this._triggerUpdateEvent(update, { remote: true });
     } else {

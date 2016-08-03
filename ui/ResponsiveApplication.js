@@ -1,8 +1,8 @@
 'use strict';
 
-var inBrowser = require('substance/util/inBrowser');
-var DefaultDOMElement = require('substance/ui/DefaultDOMElement');
-var Component = require('substance/ui/Component');
+var inBrowser = require('../util/inBrowser');
+var DefaultDOMElement = require('../ui/DefaultDOMElement');
+var Component = require('../ui/Component');
 var cloneDeep = require('lodash/cloneDeep');
 
 function ResponsiveApplication() {

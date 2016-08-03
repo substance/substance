@@ -10,12 +10,16 @@ var Err = require('../util/SubstanceError');
   API for creating and retrieving snapshots of documents
 */
 function SnapshotEngine(config) {
-  this.schemas = config.schemas;
+  this.configurator = config.configurator;
   this.changeStore = config.changeStore;
   this.documentStore = config.documentStore;
 
   // Optional
   this.snapshotStore = config.snapshotStore;
+  // Snapshot creation frequency,
+  // e.g. if it's equals 15 then every
+  // 15th version will be saved as snapshot
+  this.frequency = config.frequency || 1;
 }
 
 SnapshotEngine.Prototype = function() {
@@ -41,8 +45,8 @@ SnapshotEngine.Prototype = function() {
 
     TODO: this could potentially live in DocumentEngine
   */
-  this.requestSnapshot = function(documentId, cb) {
-    if (this.snapshotStore) {
+  this.requestSnapshot = function(documentId, version, cb) {
+    if (this.snapshotStore && version % this.frequency === 0) {
       this.createSnapshot({
         documentId: documentId
       }, cb);
@@ -75,14 +79,14 @@ SnapshotEngine.Prototype = function() {
     this.documentStore.getDocument(args.documentId, function(err, docRecord) {
       if (err) return cb(err);
 
-      if (!args.version) {
+      if (args.version === undefined) {
         args.version = docRecord.version; // set version to the latest version
       }
 
       // We add the docRecord to the args object
       args.docRecord = docRecord;
 
-      if (this.snapshotStore) {
+      if (this.snapshotStore && args.version !== 0) {
         this._computeSnapshotSmart(args, cb);
       } else {
         this._computeSnapshotDumb(args, cb);
@@ -125,7 +129,7 @@ SnapshotEngine.Prototype = function() {
       }
 
       doc = this._createDocumentInstance(docRecord.schemaName);
-      if (snapshot.data) {
+      if (snapshot) {
         doc = converter.importDocument(doc, snapshot.data);
       }
 
@@ -182,15 +186,14 @@ SnapshotEngine.Prototype = function() {
     on given schema configuration
   */
   this._createDocumentInstance = function(schemaName) {
-    var schemaConfig = this.schemas[schemaName];
+    var schema = this.configurator.getSchema();
 
-    if (!schemaConfig) {
+    if (schema.name !== schemaName) {
       throw new Err('SnapshotEngine.SchemaNotFoundError', {
         message:'Schema ' + schemaName + ' not found'
       });
     }
-
-    var doc = schemaConfig.documentFactory.createDocument();
+    var doc = this.configurator.createArticle();
     return doc;
   };
 

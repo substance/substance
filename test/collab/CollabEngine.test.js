@@ -6,12 +6,12 @@ var ChangeStore = require('../../collab/ChangeStore');
 var DocumentEngine = require('../../collab/DocumentEngine');
 var CollabEngine = require('../../collab/CollabEngine');
 
-var createTestDocumentFactory = require('../fixtures/createTestDocumentFactory');
+// var createTestDocumentFactory = require('../fixtures/createTestDocumentFactory');
 // var createTestArticle = require('../fixtures/createTestArticle');
 // var createChangeset = require('../fixtures/createChangeset');
 var documentStoreSeed = require('../fixtures/documentStoreSeed');
 var changeStoreSeed = require('../fixtures/changeStoreSeed');
-var twoParagraphs = require('../fixtures/twoParagraphs');
+// var twoParagraphs = require('../fixtures/twoParagraphs');
 // var insertParagraph = require('../fixtures/insertParagraph');
 // var insertText = require('../fixtures/insertText');
 
@@ -29,14 +29,7 @@ var changeStore = new ChangeStore();
 
 var documentEngine = new DocumentEngine({
   documentStore: documentStore,
-  changeStore: changeStore,
-  schemas: {
-    'prose-article': {
-      name: 'prose-article',
-      version: '1.0.0',
-      documentFactory: createTestDocumentFactory(twoParagraphs)
-    }
-  }
+  changeStore: changeStore
 });
 
 var fakeChange = {

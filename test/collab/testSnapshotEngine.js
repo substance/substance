@@ -1,7 +1,7 @@
 'use strict';
 // Please see snapshotStoreSeed.js for the used fixture data
 
-function testSnapshotEngine(snapshotEngine, docFactory, test) {
+function testSnapshotEngine(snapshotEngine, test) {
   test('Compute a new snapshot', function(t) {
     snapshotEngine.getSnapshot({documentId: 'test-doc'}, function(err, snapshot) {
       t.notOk(err, 'There should be no error');

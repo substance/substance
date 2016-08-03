@@ -8,41 +8,39 @@ var SnapshotStore = require('../../collab/SnapshotStore');
 var ChangeStore = require('../../collab/ChangeStore');
 var SnapshotEngine = require('../../collab/SnapshotEngine');
 
+var Configurator = require('../../util/Configurator');
+var TestArticle = require('../model/TestArticle');
+var TestMetaNode = require('../model/TestMetaNode');
+ 
 var testSnapshotEngine = require('./testSnapshotEngine');
 var testSnapshotEngineWithStore = require('./testSnapshotEngineWithStore');
-var createTestDocumentFactory = require('../fixtures/createTestDocumentFactory');
-var twoParagraphs = require('../fixtures/twoParagraphs');
 var documentStoreSeed = require('../fixtures/documentStoreSeed');
 var changeStoreSeed = require('../fixtures/changeStoreSeed');
 var snapshotStoreSeed = require('../fixtures/snapshotStoreSeed');
 
 // Setup store instances
-var documentFactory = createTestDocumentFactory(twoParagraphs);
+
+var configurator = new Configurator();
+configurator.defineSchema({
+  name: 'prose-article',
+  ArticleClass: TestArticle,
+  defaultTextType: 'paragraph'
+});
+configurator.addNode(TestMetaNode);
+
 var documentStore = new DocumentStore();
 var changeStore = new ChangeStore();
 var snapshotEngine = new SnapshotEngine({
+  configurator: configurator,
   documentStore: documentStore,
   changeStore: changeStore,
-  schemas: {
-    'prose-article': {
-      name: 'prose-article',
-      version: '1.0.0',
-      documentFactory: documentFactory
-    }
-  }
 });
 var snapshotStore = new SnapshotStore();
 var snapshotEngineWithStore = new SnapshotEngine({
+  configurator: configurator,
   documentStore: documentStore,
   changeStore: changeStore,
-  snapshotStore: snapshotStore,
-  schemas: {
-    'prose-article': {
-      name: 'prose-article',
-      version: '1.0.0',
-      documentFactory: documentFactory
-    }
-  }
+  snapshotStore: snapshotStore
 });
 
 function setup(cb, t) {
@@ -71,9 +69,9 @@ function setupTest(description, fn) {
 }
 
 // Run the generic testsuite with an engine that does not have a store attached
-testSnapshotEngine(snapshotEngine, documentFactory, setupTest);
+testSnapshotEngine(snapshotEngine, setupTest);
 // Run the same testsuite but this time with a store
-testSnapshotEngine(snapshotEngineWithStore, documentFactory, setupTest);
+testSnapshotEngine(snapshotEngineWithStore, setupTest);
 
 // Run tests that are only relevant when a snapshot store is provided to the engine
-testSnapshotEngineWithStore(snapshotEngineWithStore, documentFactory, setupTest);
+testSnapshotEngineWithStore(snapshotEngineWithStore, setupTest);
