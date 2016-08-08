@@ -2,11 +2,11 @@ $fa-font-path:  "./fonts" !default;
 @import "../node_modules/font-awesome/scss/font-awesome";
 
 // Substance base styles
-@import '../styles/base/index';
+@import '../styles/base/_all';
 
 // Substance core and official packages
 @import '../styles/components/_all';
-@import '../packages/_all';
+@import '../packages/base/_all';
 
 // DocumentationReader component styles
 @import './styles/_variables';

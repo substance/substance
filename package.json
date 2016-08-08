@@ -23,7 +23,8 @@
     "lodash": "4.13.1"
   },
   "devDependencies": {
-    "browserify": "substance/node-browserify#d3caeb6dcdaa97a258d099c7231a57f0f60ec876",
+    "browserify": ">=10 <14",
+    "watchify" : ">=3 <4",
     "browserify-istanbul": "^2.0.0",
     "commonmark": "0.22.1",
     "coveralls": "^2.11.9",
