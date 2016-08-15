@@ -253,7 +253,7 @@ class CheerioDOMElement extends DOMElement {
 
   isElementNode() {
     // cheerio specific
-    return this.el.type === "tag"
+    return this.el.type === "tag" || this.el.type === "script"
   }
 
   isCommentNode() {
