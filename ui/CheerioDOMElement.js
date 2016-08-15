@@ -256,7 +256,7 @@ CheerioDOMElement.Prototype = function() {
 
   this.isElementNode = function() {
     // cheerio specific
-    return this.el.type === "tag";
+    return this.el.type === "tag" || this.el.type === "script";
   };
 
   this.isCommentNode = function() {
