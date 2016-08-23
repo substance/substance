@@ -471,7 +471,11 @@ CheerioDOMElement.parseMarkup = function(str, format) {
     }
     return new CheerioDOMElement(doc)
   } else {
-    nativeEls = $.parseXML(str)
+    if (format === 'xml') {
+      nativeEls = $.parseXML(str)
+    } else {
+      nativeEls = $.parseHTML(str)
+    }
   }
   let elements = nativeEls.map(function(el) {
     return new CheerioDOMElement(el)
