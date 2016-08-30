@@ -114,7 +114,7 @@ AbstractEditor.Prototype = function() {
     var toolbar = this.getToolbar();
     if (toolbar) {
       var commandStates = this.commandManager.getCommandStates();
-      this.refs.toolbar.setProps({
+      toolbar.setProps({
         commandStates: commandStates
       });
     }
