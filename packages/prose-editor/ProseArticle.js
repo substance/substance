@@ -1,6 +1,6 @@
 'use strict';
 
-var Document = require('../../model/Document');
+import Document from '../../model/Document'
 
 function ProseArticle(schema) {
   Document.call(this, schema);
@@ -21,4 +21,4 @@ ProseArticle.Prototype = function() {
 
 Document.extend(ProseArticle);
 
-module.exports = ProseArticle;
+export default ProseArticle;

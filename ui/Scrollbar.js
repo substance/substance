@@ -1,8 +1,8 @@
 'use strict';
 
-var Component = require('./Component');
-var each = require('lodash/each');
-var DefaultDOMElement = require('./DefaultDOMElement');
+import Component from './Component'
+import each from 'lodash/each'
+import DefaultDOMElement from './DefaultDOMElement'
 
 /**
   A rich scrollbar implementation that supports highlights.   Usually
@@ -186,4 +186,4 @@ Scrollbar.Prototype = function() {
 Component.extend(Scrollbar);
 Scrollbar.overlayMinHeight = 2;
 
-module.exports = Scrollbar;
+export default Scrollbar;

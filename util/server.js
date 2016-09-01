@@ -1,16 +1,16 @@
 "use strict";
 /* eslint-disable no-console */
 
-var path = require('path');
-var each = require('lodash/each');
-var isString = require('lodash/isString');
+import path from 'path'
+import each from 'lodash/each'
+import isString from 'lodash/isString'
 
 /**
   @module
   @example
 
   ```js
-  var server = require('substance/util/server');
+  import server from 'substance/util/server'
   ```
 */
 var server = {};
@@ -30,7 +30,7 @@ var server = {};
   ```
 */
 server.serveJS = function(expressApp, route, params) {
-  var bundleJS = require('./bundleJS');
+  import bundleJS from './bundleJS'
   expressApp.get(route, function(req, res) {
     var startTime = Date.now();
     console.log('### Serving %s using browserify', params.sourcePath);
@@ -60,7 +60,7 @@ server.serveJS = function(expressApp, route, params) {
   ```
 */
 server.serveStyles = function(expressApp, route, props) {
-  var bundleStyles = require('./bundleStyles');
+  import bundleStyles from './bundleStyles'
   if (isString(props)) {
     console.warn("DEPRECATED: Use serveStyles(expressApp, '/app.css', {scssPath: 'app.scss'}");
     props = {
@@ -81,7 +81,7 @@ server.serveStyles = function(expressApp, route, props) {
 };
 
 server.serveHTML = function(expressApp, route, sourcePath, config) {
-  var fs = require('fs');
+  import fs from 'fs'
   expressApp.get(route, function(req, res) {
     fs.readFile(sourcePath, function (err, data) {
       if (err) {
@@ -101,8 +101,8 @@ server.serveHTML = function(expressApp, route, sourcePath, config) {
 };
 
 server.serveTestSuite = function(expressApp, globPattern, options) {
-  var browserify = require('browserify');
-  var glob = require('glob');
+  import browserify from 'browserify'
+  import glob from 'glob'
   options = options || {};
   var cwd = process.cwd();
   // Test suite
@@ -143,4 +143,4 @@ server.serveTestSuite = function(expressApp, globPattern, options) {
 };
 
 
-module.exports = server;
+export default server;

@@ -14,4 +14,4 @@ function DelegatedEvent(owner, selectedTarget, originalEvent) {
   this.originalEvent = originalEvent;
 }
 
-module.exports = DelegatedEvent;
+export default DelegatedEvent;

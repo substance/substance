@@ -1,9 +1,9 @@
 'use strict';
 
-var extend = require('lodash/extend');
-var uuid = require('../../util/uuid');
-var annotationHelpers = require('../annotationHelpers');
-var deleteNode = require('./deleteNode');
+import extend from 'lodash/extend'
+import uuid from '../../util/uuid'
+import annotationHelpers from '../annotationHelpers'
+import deleteNode from './deleteNode'
 
 /**
   Switch text type for a given node. E.g. from `paragraph` to `heading`.
@@ -65,4 +65,4 @@ function switchTextType(tx, args) {
   return args;
 }
 
-module.exports = switchTextType;
+export default switchTextType;

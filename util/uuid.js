@@ -45,4 +45,4 @@ function uuid(prefix, len) {
   return (prefix ? prefix : "") + uuid.join('');
 }
 
-module.exports = uuid;
+export default uuid;

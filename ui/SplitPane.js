@@ -1,6 +1,6 @@
 'use strict';
 
-var Component = require('./Component');
+import Component from './Component'
 
 /**
   A split view layout component. Takes properties for configuration and 2 children via append.
@@ -78,4 +78,4 @@ SplitPane.Prototype = function() {
 
 Component.extend(SplitPane);
 
-module.exports = SplitPane;
+export default SplitPane;

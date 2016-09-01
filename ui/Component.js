@@ -1,15 +1,15 @@
 'use strict';
 
-var isString = require('lodash/isString');
-var isFunction = require('lodash/isFunction');
-var extend = require('lodash/extend');
-var each = require('lodash/each');
-var EventEmitter = require('../util/EventEmitter');
-var RenderingEngine = require('./RenderingEngine');
-var VirtualElement = require('./VirtualElement');
-var DOMElement = require('./DOMElement');
-var DefaultDOMElement = require('./DefaultDOMElement');
-var inBrowser = require('../util/inBrowser');
+import isString from 'lodash/isString'
+import isFunction from 'lodash/isFunction'
+import extend from 'lodash/extend'
+import each from 'lodash/each'
+import EventEmitter from '../util/EventEmitter'
+import RenderingEngine from './RenderingEngine'
+import VirtualElement from './VirtualElement'
+import DOMElement from './DOMElement'
+import DefaultDOMElement from './DefaultDOMElement'
+import inBrowser from '../util/inBrowser'
 
 var __id__ = 0;
 
@@ -733,4 +733,4 @@ Component.getComponentFromNativeElement = function(nativeEl) {
   return _unwrapComp(DefaultDOMElement.wrapNativeElement(nativeEl));
 };
 
-module.exports = Component;
+export default Component;

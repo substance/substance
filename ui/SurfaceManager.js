@@ -1,9 +1,9 @@
 'use strict';
 
-var forEach = require('lodash/forEach');
-var clone = require('lodash/clone');
-var oo = require('../util/oo');
-var inBrowser = require('../util/inBrowser');
+import forEach from 'lodash/forEach'
+import clone from 'lodash/clone'
+import oo from '../util/oo'
+import inBrowser from '../util/inBrowser'
 
 function SurfaceManager(documentSession) {
   this.documentSession = documentSession;
@@ -215,4 +215,4 @@ SurfaceManager.Prototype = function() {
 
 oo.initClass(SurfaceManager);
 
-module.exports = SurfaceManager;
+export default SurfaceManager;

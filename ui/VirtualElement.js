@@ -1,17 +1,17 @@
 'use strict';
 
-var clone = require('lodash/clone');
-var extend = require('lodash/extend');
-var flattenDeep = require('lodash/flattenDeep');
-var isArray = require('lodash/isArray');
-var isFunction = require('lodash/isFunction');
-var isNil = require('lodash/isNil');
-var isPlainObject = require('lodash/isPlainObject');
-var isString = require('lodash/isString');
-var map = require('lodash/map');
-var omit = require('lodash/omit');
-var without = require('lodash/without');
-var DOMElement = require('./DOMElement');
+import clone from 'lodash/clone'
+import extend from 'lodash/extend'
+import flattenDeep from 'lodash/flattenDeep'
+import isArray from 'lodash/isArray'
+import isFunction from 'lodash/isFunction'
+import isNil from 'lodash/isNil'
+import isPlainObject from 'lodash/isPlainObject'
+import isString from 'lodash/isString'
+import map from 'lodash/map'
+import omit from 'lodash/omit'
+import without from 'lodash/without'
+import DOMElement from './DOMElement'
 
 /**
   A virtual {@link ui/DOMElement} which is used by the {@link ui/Component} API.
@@ -683,4 +683,4 @@ VirtualElement.createElement = function() {
   return content;
 };
 
-module.exports = VirtualElement;
+export default VirtualElement;

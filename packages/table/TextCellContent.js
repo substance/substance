@@ -1,7 +1,7 @@
 'use strict';
 
-var Component = require('../../ui/Component');
-var TextPropertyEditor = require('../../ui/TextPropertyEditor');
+import Component from '../../ui/Component'
+import TextPropertyEditor from '../../ui/TextPropertyEditor'
 
 function TextCellContent() {
   TextCellContent.super.apply(this, arguments);
@@ -31,4 +31,4 @@ TextCellContent.Prototype = function() {
 
 Component.extend(TextCellContent);
 
-module.exports = TextCellContent;
+export default TextCellContent;

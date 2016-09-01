@@ -1,7 +1,7 @@
 "use strict";
 
-var oo = require('../util/oo');
-var request = require('../util/request');
+import oo from '../util/oo'
+import request from '../util/request'
 
 /*
   HTTP client for talking with DocumentServer
@@ -62,4 +62,4 @@ DocumentClient.Prototype = function() {
 
 oo.initClass(DocumentClient);
 
-module.exports = DocumentClient;
+export default DocumentClient;

@@ -1,6 +1,6 @@
 'use strict';
 
-var Component = require('./Component');
+import Component from './Component'
 
 function SelectionFragmentComponent() {
   SelectionFragmentComponent.super.apply(this, arguments);
@@ -25,4 +25,4 @@ SelectionFragmentComponent.Prototype = function() {
 
 Component.extend(SelectionFragmentComponent);
 
-module.exports = SelectionFragmentComponent;
+export default SelectionFragmentComponent;

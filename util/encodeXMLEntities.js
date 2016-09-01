@@ -13,4 +13,4 @@ function encodeXMLEntities(str) {
     .replace(/"/g, '&quot;');
 }
 
-module.exports = encodeXMLEntities;
+export default encodeXMLEntities;

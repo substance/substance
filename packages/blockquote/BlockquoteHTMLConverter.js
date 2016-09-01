@@ -3,7 +3,7 @@
 /*
  * HTML converter for Blockquote.
  */
-module.exports = {
+export default {
 
   type: 'blockquote',
   tagName: 'blockquote',

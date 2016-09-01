@@ -1,7 +1,7 @@
 'use strict';
 
-var InsertNodeCommand = require('../../ui/InsertNodeCommand');
-var uuid = require('../../util/uuid');
+import InsertNodeCommand from '../../ui/InsertNodeCommand'
+import uuid from '../../util/uuid'
 
 function InsertTableCommand() {
   InsertTableCommand.super.call(this, { name: 'insert-table' });
@@ -36,4 +36,4 @@ InsertTableCommand.Prototype = function() {
 
 InsertNodeCommand.extend(InsertTableCommand);
 
-module.exports = InsertTableCommand;
+export default InsertTableCommand;

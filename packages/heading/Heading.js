@@ -1,6 +1,6 @@
 'use strict';
 
-var TextBlock = require('../../model/TextBlock');
+import TextBlock from '../../model/TextBlock'
 
 function Heading() {
   Heading.super.apply(this, arguments);
@@ -13,4 +13,4 @@ Heading.define({
   level: { type: "number", default: 1 }
 });
 
-module.exports = Heading;
+export default Heading;

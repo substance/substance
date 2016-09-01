@@ -1,11 +1,12 @@
 'use strict';
 
-var Blockquote = require('./Blockquote');
-var BlockquoteComponent = require('./BlockquoteComponent');
-var BlockquoteHTMLConverter = require('./BlockquoteHTMLConverter');
-var BlockquoteXMLConverter = require('./BlockquoteXMLConverter');
+import Blockquote from './Blockquote'
+import BlockquoteComponent from './BlockquoteComponent'
+import BlockquoteHTMLConverter from './BlockquoteHTMLConverter'
+import BlockquoteXMLConverter from './BlockquoteXMLConverter'
 
-module.exports = {
+
+export default {
   name: 'blockquote',
   configure: function(config) {
     config.addNode(Blockquote);
@@ -20,5 +21,8 @@ module.exports = {
       en: 'Blockquote',
       de: 'Blockzitat'
     });
-  }
+  },
+  Blockquote: Blockquote,
+  BlockquoteComponent: BlockquoteComponent,
+  BlockquoteHTMLConverter: BlockquoteHTMLConverter
 };

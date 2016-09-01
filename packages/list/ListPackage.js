@@ -1,11 +1,12 @@
 'use strict';
 
-var ListItem = require('./ListItem');
-var ListItemComponent = require('./ListItemComponent');
-var ListEditing = require('./ListEditing');
-var ListMacro = require('./ListMacro');
+import ListItem from './ListItem'
+import ListItemComponent from './ListItemComponent'
+import ListEditing from './ListEditing'
+import ListMacro from './ListMacro'
 
-module.exports = {
+
+export default {
   name: 'list-item',
   configure: function(config, options) {
     config.addNode(ListItem);
@@ -26,5 +27,9 @@ module.exports = {
       en: 'List',
       de: 'Liste'
     });
-  }
+  },
+  ListItem: ListItem,
+  ListItemComponent: ListItemComponent,
+  ListEditing: ListEditing,
+  ListMacro: ListMacro,
 };

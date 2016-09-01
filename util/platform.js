@@ -1,6 +1,6 @@
 'use strict';
 
-var inBrowser = require('./inBrowser');
+import inBrowser from './inBrowser'
 
 /**
   @module
@@ -10,7 +10,7 @@ var inBrowser = require('./inBrowser');
   @example
 
   ```js
-  var platform = require('substance/util/platform');
+  import platform from 'substance/util/platform'
   ```
 */
 var platform = {
@@ -79,4 +79,4 @@ if (typeof window !== 'undefined') {
   platform.isWebkit = !platform.isFF && !platform.isIE;
 }
 
-module.exports = platform;
+export default platform;

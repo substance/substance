@@ -1,11 +1,11 @@
 'use strict';
 
-var isString = require('lodash/isString');
-var isArray = require('lodash/isArray');
-var get = require('lodash/get');
-var setWith = require('lodash/setWith');
-var oo = require('./oo');
-var deleteFromArray = require('./deleteFromArray');
+import isString from 'lodash/isString'
+import isArray from 'lodash/isArray'
+import get from 'lodash/get'
+import setWith from 'lodash/setWith'
+import oo from './oo'
+import deleteFromArray from './deleteFromArray'
 
 function TreeNode() {}
 
@@ -191,4 +191,4 @@ TreeIndex.Arrays.Prototype = function() {
 
 TreeIndex.extend(TreeIndex.Arrays);
 
-module.exports = TreeIndex;
+export default TreeIndex;

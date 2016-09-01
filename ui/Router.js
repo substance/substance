@@ -1,8 +1,8 @@
 'use strict';
 
-var each = require('lodash/each');
-var EventEmitter = require('../util/EventEmitter');
-var DefaultDOMElement = require('./DefaultDOMElement');
+import each from 'lodash/each'
+import EventEmitter from '../util/EventEmitter'
+import DefaultDOMElement from './DefaultDOMElement'
 
 function Router() {
   EventEmitter.apply(this, arguments);
@@ -134,4 +134,4 @@ Router.routeStringToObject = function(routeStr) {
   return obj;
 };
 
-module.exports = Router;
+export default Router;

@@ -1,6 +1,6 @@
 'use strict';
 
-var InlineNode = require('../../model/InlineNode');
+import InlineNode from '../../model/InlineNode'
 
 function InlineWrapper() {
   InlineWrapper.super.apply(this, arguments);
@@ -19,4 +19,4 @@ InlineWrapper.define({
   wrappedNode: 'id'
 });
 
-module.exports = InlineWrapper;
+export default InlineWrapper;

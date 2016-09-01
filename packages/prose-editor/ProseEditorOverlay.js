@@ -1,6 +1,6 @@
 'use strict';
 
-var DefaultOverlay = require('../../ui/DefaultOverlay');
+import DefaultOverlay from '../../ui/DefaultOverlay'
 
 function ProseEditorOverlay() {
   ProseEditorOverlay.super.apply(this, arguments);
@@ -16,4 +16,4 @@ ProseEditorOverlay.Prototype = function() {
 
 DefaultOverlay.extend(ProseEditorOverlay);
 
-module.exports = ProseEditorOverlay;
+export default ProseEditorOverlay;

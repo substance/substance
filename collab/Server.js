@@ -1,9 +1,9 @@
 "use strict";
 /* global WeakMap */
 
-var oo = require('../util/oo');
-var uuid = require('../util/uuid');
-var EventEmitter = require('../util/EventEmitter');
+import oo from '../util/oo'
+import uuid from '../util/uuid'
+import EventEmitter from '../util/EventEmitter'
 
 /**
   Server
@@ -400,4 +400,4 @@ ServerResponse.Prototype = function() {
 
 oo.initClass(ServerResponse);
 
-module.exports = Server;
+export default Server;

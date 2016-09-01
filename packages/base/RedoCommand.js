@@ -1,6 +1,6 @@
 'use strict';
 
-var Command = require('../../ui/Command');
+import Command from '../../ui/Command'
 
 function Redo(params) {
   Command.call(this, params);
@@ -29,4 +29,4 @@ Redo.Prototype = function() {
 
 Command.extend(Redo);
 
-module.exports = Redo;
+export default Redo;

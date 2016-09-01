@@ -1,13 +1,13 @@
 'use strict';
 
-var isEqual = require('lodash/isEqual');
-var last = require('lodash/last');
-var each = require('lodash/each');
-var EventEmitter = require('../util/EventEmitter');
-var DocumentNode = require('./DocumentNode');
-var Selection = require('./Selection');
-var Anchor = require('./Anchor');
-var documentHelpers = require('./documentHelpers');
+import isEqual from 'lodash/isEqual'
+import last from 'lodash/last'
+import each from 'lodash/each'
+import EventEmitter from '../util/EventEmitter'
+import DocumentNode from './DocumentNode'
+import Selection from './Selection'
+import Anchor from './Anchor'
+import documentHelpers from './documentHelpers'
 
 /**
   Describes an annotation sticking on a container that can span over multiple
@@ -252,4 +252,4 @@ Object.defineProperties(ContainerAnnotation.Fragment.prototype, {
   }
 });
 
-module.exports = ContainerAnnotation;
+export default ContainerAnnotation;

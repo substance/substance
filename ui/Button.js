@@ -1,6 +1,6 @@
 'use strict';
 
-var Component = require('./Component');
+import Component from './Component'
 
 function Button() {
   Component.apply(this, arguments);
@@ -19,4 +19,4 @@ Button.Prototype = function() {
 };
 
 Component.extend(Button);
-module.exports = Button;
+export default Button;

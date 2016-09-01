@@ -1,9 +1,9 @@
 'use strict';
 
-var inBrowser = require('../util/inBrowser');
-var DefaultDOMElement = require('../ui/DefaultDOMElement');
-var Component = require('../ui/Component');
-var cloneDeep = require('lodash/cloneDeep');
+import inBrowser from '../util/inBrowser'
+import DefaultDOMElement from '../ui/DefaultDOMElement'
+import Component from '../ui/Component'
+import cloneDeep from 'lodash/cloneDeep'
 
 function ResponsiveApplication() {
   Component.apply(this, arguments);
@@ -128,4 +128,5 @@ ResponsiveApplication.Prototype = function() {
 };
 
 Component.extend(ResponsiveApplication);
-module.exports = ResponsiveApplication;
+
+export default ResponsiveApplication;

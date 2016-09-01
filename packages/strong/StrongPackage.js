@@ -1,13 +1,13 @@
 'use strict';
 
-var Strong = require('./Strong');
-var StrongHTMLConverter = require('./StrongHTMLConverter');
-var StrongXMLConverter = require('./StrongXMLConverter');
-var AnnotationCommand = require('../../ui/AnnotationCommand');
-var AnnotationComponent = require('../../ui/AnnotationComponent');
-var AnnotationTool = require('../../ui/AnnotationTool');
+import Strong from './Strong'
+import StrongHTMLConverter from './StrongHTMLConverter'
+import StrongXMLConverter from './StrongXMLConverter'
+import AnnotationCommand from '../../ui/AnnotationCommand'
+import AnnotationComponent from '../../ui/AnnotationComponent'
+import AnnotationTool from '../../ui/AnnotationTool'
 
-module.exports = {
+export default {
   name: 'strong',
   configure: function(config) {
     config.addNode(Strong);
@@ -21,5 +21,7 @@ module.exports = {
       en: 'Strong emphasis',
       de: 'Starke Betonung'
     });
-  }
+  },
+  Strong: Strong,
+  StrongHTMLConverter: StrongHTMLConverter
 };

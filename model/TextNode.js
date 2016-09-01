@@ -1,6 +1,6 @@
 'use strict';
 
-var DocumentNode = require('./DocumentNode');
+import DocumentNode from './DocumentNode'
 
 /**
   A base class for all text-ish nodes, such as Paragraphs, Headings,
@@ -39,4 +39,4 @@ TextNode.define({
   content: 'text'
 });
 
-module.exports = TextNode;
+export default TextNode;

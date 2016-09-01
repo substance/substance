@@ -1,10 +1,10 @@
 'use strict';
 
-var oo = require('../../util/oo');
-var isArray = require('lodash/isArray');
-var each = require('lodash/each');
-var extend = require('lodash/extend');
-var TreeIndex = require('../../util/TreeIndex');
+import oo from '../../util/oo'
+import isArray from 'lodash/isArray'
+import each from 'lodash/each'
+import extend from 'lodash/extend'
+import TreeIndex from '../../util/TreeIndex'
 
 /**
   Index for Nodes.
@@ -191,4 +191,4 @@ NodeIndex.filterByType = function(type) {
   };
 };
 
-module.exports = NodeIndex;
+export default NodeIndex;

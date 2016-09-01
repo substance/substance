@@ -2,8 +2,8 @@
 
 // worker for sub-process
 
-var cloneDeep = require('lodash/cloneDeep');
-var path = require('path');
+import cloneDeep from 'lodash/cloneDeep'
+import path from 'path'
 
 process.on('message', function(paramStr) {
   var params = JSON.parse(paramStr);
@@ -18,8 +18,8 @@ process.on('message', function(paramStr) {
     var babelRegister = path.join(params.rootDir, 'node_modules', 'babel-register');
     require(babelRegister)(babelParams);
   }
-  var Configurator = require(configuratorPath);
-  var MainPackage = require(mainPackagePath);
+  import Configurator from configuratorPath
+  import MainPackage from mainPackagePath
   var configurator = new Configurator().import(MainPackage);
   var scssFiles = configurator.getStyles();
   var result = scssFiles.map(function(scssFile) {

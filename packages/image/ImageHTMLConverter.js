@@ -3,7 +3,7 @@
 /*
  * HTML converter for Paragraphs.
  */
-module.exports = {
+export default {
 
   type: 'image',
   tagName: 'img',

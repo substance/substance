@@ -1,22 +1,22 @@
 'use strict';
 
-var Component = require('./Component');
+import Component from './Component'
 
 /**
-  Overlay component
+  OverlayContainer component
 
   Used internally by surface to place overlay relative to selection/cursor
 
   @class
   @component
 */
-function Overlay() {
+function OverlayContainer() {
   Component.apply(this, arguments);
 
   this.commandStates = this._getCommandStates();
 }
 
-Overlay.Prototype = function() {
+OverlayContainer.Prototype = function() {
 
   this.render = function($$) {
     var el = $$('div').addClass('sc-overlay sm-hidden');
@@ -74,5 +74,6 @@ Overlay.Prototype = function() {
   };
 };
 
-Component.extend(Overlay);
-module.exports = Overlay;
+Component.extend(OverlayContainer);
+
+export default OverlayContainer;

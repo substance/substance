@@ -1,6 +1,6 @@
 'use strict';
 
-var Command = require('../../ui/Command');
+import Command from '../../ui/Command'
 
 function Undo(params) {
   Command.call(this, params);
@@ -28,4 +28,4 @@ Undo.Prototype = function() {
 
 Command.extend(Undo);
 
-module.exports = Undo;
+export default Undo;

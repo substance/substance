@@ -1,13 +1,14 @@
 'use strict';
 
-var Emphasis = require('./Emphasis');
-var EmphasisHTMLConverter = require('./EmphasisHTMLConverter');
-var EmphasisXMLConverter = require('./EmphasisXMLConverter');
-var AnnotationCommand = require('../../ui/AnnotationCommand');
-var AnnotationComponent = require('../../ui/AnnotationComponent');
-var AnnotationTool = require('../../ui/AnnotationTool');
+import Emphasis from './Emphasis'
+import EmphasisHTMLConverter from './EmphasisHTMLConverter'
+import EmphasisXMLConverter from './EmphasisXMLConverter'
+import AnnotationCommand from '../../ui/AnnotationCommand'
+import AnnotationComponent from '../../ui/AnnotationComponent'
+import AnnotationTool from '../../ui/AnnotationTool'
 
-module.exports = {
+
+export default {
   name: 'emphasis',
   configure: function(config) {
     config.addNode(Emphasis);
@@ -21,6 +22,7 @@ module.exports = {
       en: 'Emphasis',
       de: 'Betonung'
     });
-  }
+  },
+  Emphasis: Emphasis,
+  EmphasisHTMLConverter: EmphasisHTMLConverter
 };
-

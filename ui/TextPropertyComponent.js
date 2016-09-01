@@ -1,10 +1,10 @@
 'use strict';
 
-var isNumber = require('lodash/isNumber');
-var Coordinate = require('../model/Coordinate');
-var AnnotatedTextComponent = require('./AnnotatedTextComponent');
-var CursorComponent = require('./CursorComponent');
-var SelectionFragmentComponent = require('./SelectionFragmentComponent');
+import isNumber from 'lodash/isNumber'
+import Coordinate from '../model/Coordinate'
+import AnnotatedTextComponent from './AnnotatedTextComponent'
+import CursorComponent from './CursorComponent'
+import SelectionFragmentComponent from './SelectionFragmentComponent'
 
 /**
   Renders a text property. Used internally by different components to render
@@ -360,4 +360,4 @@ function _countCharacters(el, maxIdx) {
   return charPos;
 }
 
-module.exports = TextPropertyComponent;
+export default TextPropertyComponent;

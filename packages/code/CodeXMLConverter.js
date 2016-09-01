@@ -1,3 +1,1 @@
-'use strict';
-
-module.exports = require('./CodeHTMLConverter');
+export { default } from './CodeHTMLConverter'

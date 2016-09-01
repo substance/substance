@@ -1,11 +1,11 @@
 'use strict';
 
-var Component = require('./Component');
-var CommandManager = require('./CommandManager');
-var SurfaceManager = require('./SurfaceManager');
-var MacroManager = require('./MacroManager');
-var GlobalEventHandler = require('./GlobalEventHandler');
-var DragManager = require('./DragManager');
+import Component from './Component'
+import CommandManager from './CommandManager'
+import SurfaceManager from './SurfaceManager'
+import MacroManager from './MacroManager'
+import GlobalEventHandler from './GlobalEventHandler'
+import DragManager from './DragManager'
 
 function AbstractEditor() {
   AbstractEditor.super.apply(this, arguments);
@@ -123,4 +123,4 @@ AbstractEditor.Prototype = function() {
 
 Component.extend(AbstractEditor);
 
-module.exports = AbstractEditor;
+export default AbstractEditor;

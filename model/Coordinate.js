@@ -1,9 +1,9 @@
 'use strict';
 
-var isArray = require('lodash/isArray');
-var isNumber = require('lodash/isNumber');
-var isEqual = require('lodash/isEqual');
-var oo = require('../util/oo');
+import isArray from 'lodash/isArray'
+import isNumber from 'lodash/isNumber'
+import isEqual from 'lodash/isEqual'
+import oo from '../util/oo'
 
 // path: the address of a property, such as ['text_1', 'content']
 // offset: the position in the property
@@ -79,4 +79,4 @@ Coordinate.Prototype = function() {
 
 oo.initClass(Coordinate);
 
-module.exports = Coordinate;
+export default Coordinate;

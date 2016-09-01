@@ -1,10 +1,10 @@
 'use strict';
 
-var oo = require('../util/oo');
-var extend = require('lodash/extend');
-var forEach = require('lodash/forEach');
-var isEqual = require('lodash/isEqual');
-var Registry = require('../util/Registry');
+import oo from '../util/oo'
+import extend from 'lodash/extend'
+import forEach from 'lodash/forEach'
+import isEqual from 'lodash/isEqual'
+import Registry from '../util/Registry'
 
 /*
   Listens to changes on the document and selection and updates registered tools accordingly.
@@ -105,4 +105,4 @@ CommandManager.Prototype = function() {
 
 oo.initClass(CommandManager);
 
-module.exports = CommandManager;
+export default CommandManager;

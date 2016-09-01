@@ -1,6 +1,6 @@
 'use strict';
 
-var TextBlockComponent = require('../../ui/TextBlockComponent');
+import TextBlockComponent from '../../ui/TextBlockComponent'
 
 function ParagraphComponent() {
   ParagraphComponent.super.apply(this, arguments);
@@ -19,4 +19,4 @@ ParagraphComponent.Prototype = function() {
 
 TextBlockComponent.extend(ParagraphComponent);
 
-module.exports = ParagraphComponent;
+export default ParagraphComponent;

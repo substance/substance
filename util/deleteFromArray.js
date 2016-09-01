@@ -9,4 +9,4 @@ function deleteFromArray(array, value) {
   }
 }
 
-module.exports = deleteFromArray;
+export default deleteFromArray;

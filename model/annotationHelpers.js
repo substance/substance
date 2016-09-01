@@ -1,8 +1,8 @@
 "use strict";
 
-var each = require('lodash/each');
-var uniq = require('lodash/uniq');
-var uuid = require('../util/uuid');
+import each from 'lodash/each'
+import uniq from 'lodash/uniq'
+import uuid from '../util/uuid'
 
 // TODO: this should be implemented as transformations
 
@@ -205,7 +205,7 @@ var transferAnnotations = function(doc, path, offset, newPath, newOffset) {
   });
 };
 
-module.exports = {
+export default {
   insertedText: insertedText,
   deletedText: deletedText,
   transferAnnotations: transferAnnotations

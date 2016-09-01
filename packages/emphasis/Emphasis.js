@@ -1,7 +1,7 @@
 'use strict';
 
-var PropertyAnnotation = require('../../model/PropertyAnnotation');
-var Fragmenter = require('../../model/Fragmenter');
+import PropertyAnnotation from '../../model/PropertyAnnotation'
+import Fragmenter from '../../model/Fragmenter'
 
 function Emphasis() {
   Emphasis.super.apply(this, arguments);
@@ -14,4 +14,4 @@ Emphasis.type = "emphasis";
 // hint for rendering in presence of overlapping annotations
 Emphasis.fragmentation = Fragmenter.ANY;
 
-module.exports = Emphasis;
+export default Emphasis;

@@ -1,10 +1,10 @@
 'use strict';
 
-var Command = require('./Command');
-var createAnnotation = require('../model/transform/createAnnotation');
-var fuseAnnotation = require('../model/transform/fuseAnnotation');
-var expandAnnotation = require('../model/transform/expandAnnotation');
-var truncateAnnotation = require('../model/transform/truncateAnnotation');
+import Command from './Command'
+import createAnnotation from '../model/transform/createAnnotation'
+import fuseAnnotation from '../model/transform/fuseAnnotation'
+import expandAnnotation from '../model/transform/expandAnnotation'
+import truncateAnnotation from '../model/transform/truncateAnnotation'
 
 /**
   A class for commands intended to be executed on the annotations.
@@ -16,7 +16,7 @@ var truncateAnnotation = require('../model/transform/truncateAnnotation');
   @example
 
   ```js
-  var AnnotationCommand = require('substance/ui/AnnotationCommand');
+  import AnnotationCommand from 'substance/ui/AnnotationCommand'
 
   function SmallCapsCommand() {
     SmallCaps.super.apply(this, arguments);
@@ -366,4 +366,4 @@ AnnotationCommand.Prototype = function() {
 
 Command.extend(AnnotationCommand);
 
-module.exports = AnnotationCommand;
+export default AnnotationCommand;

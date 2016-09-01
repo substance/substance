@@ -1,9 +1,9 @@
 'use strict';
 
-var Server = require('./Server');
-var CollabEngine = require('./CollabEngine');
-var Err = require('../util/SubstanceError');
-var forEach = require('lodash/forEach');
+import Server from './Server'
+import CollabEngine from './CollabEngine'
+import Err from '../util/SubstanceError'
+import forEach from 'lodash/forEach'
 
 /*
   Implements Substance CollabServer API.
@@ -189,4 +189,4 @@ CollabServer.Prototype = function() {
 };
 
 Server.extend(CollabServer);
-module.exports = CollabServer;
+export default CollabServer;

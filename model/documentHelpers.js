@@ -1,16 +1,16 @@
 'use strict';
 
-var isString = require('lodash/isString');
-var filter = require('lodash/filter');
-var DocumentIndex = require('./DocumentIndex');
-var Selection = require('./Selection');
+import isString from 'lodash/isString'
+import filter from 'lodash/filter'
+import DocumentIndex from './DocumentIndex'
+import Selection from './Selection'
 
 /**
   @module
   @example
 
   ```js
-  var documentHelpers = require('substance/model/documentHelpers');
+  import documentHelpers from 'substance/model/documentHelpers'
   documentHelpers.isContainerAnnotation(doc, 'comment')
   ```
 */
@@ -128,4 +128,4 @@ documentHelpers.getTextForSelection = function(doc, sel) {
   }
 };
 
-module.exports = documentHelpers;
+export default documentHelpers;

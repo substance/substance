@@ -1,13 +1,13 @@
-'use strict';
-
-var inBrowser = require('../util/inBrowser');
+import inBrowser from '../util/inBrowser'
+import BrowserDOMElement from './BrowserDOMElement.js'
+import CheerioDOMElement from './CheerioDOMElement.js'
 
 var DOMElementImpl;
 
 if (inBrowser) {
-  DOMElementImpl = require('./BrowserDOMElement.js');
+  DOMElementImpl = BrowserDOMElement;
 } else {
-  DOMElementImpl = require('./CheerioDOMElement.js');
+  DOMElementImpl = CheerioDOMElement;
 }
 
 var DefaultDOMElement = {};
@@ -76,4 +76,4 @@ DefaultDOMElement.isReverse = function(anchorNode, anchorOffset, focusNode, focu
   }
 };
 
-module.exports = DefaultDOMElement;
+export default DefaultDOMElement;

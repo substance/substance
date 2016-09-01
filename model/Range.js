@@ -1,6 +1,6 @@
 'use strict';
 
-var oo = require('../util/oo');
+import oo from '../util/oo'
 
 function Range(start, end, reverse, containerId) {
   this.start = start;
@@ -44,4 +44,4 @@ Range.Prototype = function() {
 
 oo.initClass(Range);
 
-module.exports = Range;
+export default Range;

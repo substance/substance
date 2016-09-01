@@ -1,7 +1,7 @@
 'use strict';
 
-var oo = require('../util/oo');
-var Err = require('../util/SubstanceError');
+import oo from '../util/oo'
+import Err from '../util/SubstanceError'
 
 /*
   Implements Substance SnapshotStore API. This is just a dumb store.
@@ -136,4 +136,5 @@ SnapshotStore.Prototype = function() {
 
 
 oo.initClass(SnapshotStore);
-module.exports = SnapshotStore;
+
+export default SnapshotStore;

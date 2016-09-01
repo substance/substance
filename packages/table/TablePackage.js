@@ -1,11 +1,11 @@
 'use strict';
 
-var TableNode = require('./TableNode');
-var TableComponent = require('./TableComponent');
-var InsertTableCommand = require('./InsertTableCommand');
-var Tool = require('../../ui/Tool');
+import TableNode from './TableNode'
+import TableComponent from './TableComponent'
+import InsertTableCommand from './InsertTableCommand'
+import Tool from '../../ui/Tool'
 
-module.exports = {
+export default {
   name: 'table',
   configure: function(config) {
     config.addNode(TableNode);
@@ -17,5 +17,8 @@ module.exports = {
       en: 'Table',
       de: 'Tabelle'
     });
-  }
+  },
+  Table: TableNode,
+  TableComponent: TableComponent,
+  InsertTableCommand: InsertTableCommand
 };

@@ -3,7 +3,7 @@
 /*
  * HTML converter for Strong.
  */
-module.exports = {
+export default {
 
   type: "strong",
   tagName: "strong",

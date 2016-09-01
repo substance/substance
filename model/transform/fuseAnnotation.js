@@ -1,8 +1,8 @@
 'use strict';
 
-var each = require('lodash/each');
-var isArray = require('lodash/isArray');
-var createAnnotation = require('./createAnnotation');
+import each from 'lodash/each'
+import isArray from 'lodash/isArray'
+import createAnnotation from './createAnnotation'
 
 /*
  @param {model/Document} tx
@@ -36,4 +36,4 @@ function fuseAnnotation(tx, args) {
   return createAnnotation(tx, args);
 }
 
-module.exports = fuseAnnotation;
+export default fuseAnnotation;

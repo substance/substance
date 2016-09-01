@@ -1,14 +1,14 @@
 'use strict';
 
-var isArray = require('lodash/isArray');
-var extend = require('lodash/extend');
-var forEach = require('lodash/forEach');
-var Registry = require('../util/Registry');
-var Document = require('../model/Document');
-var HTMLImporter = require('../model/HTMLImporter');
-var DefaultDOMElement = require('./DefaultDOMElement');
-var JSONConverter = require('../model/JSONConverter');
-var platform = require('../util/platform');
+import isArray from 'lodash/isArray'
+import extend from 'lodash/extend'
+import forEach from 'lodash/forEach'
+import Registry from '../util/Registry'
+import Document from '../model/Document'
+import HTMLImporter from '../model/HTMLImporter'
+import DefaultDOMElement from './DefaultDOMElement'
+import JSONConverter from '../model/JSONConverter'
+import platform from '../util/platform'
 
 /**
   Import HTML from clipboard. Used for inter-application copy'n'paste.
@@ -191,4 +191,4 @@ ClipboardImporter._addConverters = function(config) {
   }
 };
 
-module.exports = ClipboardImporter;
+export default ClipboardImporter;

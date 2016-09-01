@@ -1,8 +1,8 @@
 'use strict';
 
-var extend = require('lodash/extend');
-var annotationHelpers = require('../annotationHelpers');
-var deleteNode = require('./deleteNode');
+import extend from 'lodash/extend'
+import annotationHelpers from '../annotationHelpers'
+import deleteNode from './deleteNode'
 
 var merge = function(tx, args) {
   var containerId = args.containerId;
@@ -185,4 +185,4 @@ function _mergeTextNodes(tx, args) {
   return args;
 }
 
-module.exports = merge;
+export default merge;

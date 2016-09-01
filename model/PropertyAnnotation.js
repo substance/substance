@@ -1,7 +1,7 @@
 'use strict';
 
-var isEqual = require('lodash/isEqual');
-var DocumentNode = require('./DocumentNode');
+import isEqual from 'lodash/isEqual'
+import DocumentNode from './DocumentNode'
 
 /**
   A property annotation can be used to overlay text and give it a special meaning.
@@ -138,4 +138,4 @@ Object.defineProperties(PropertyAnnotation.prototype, {
   }
 });
 
-module.exports = PropertyAnnotation;
+export default PropertyAnnotation;

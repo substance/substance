@@ -1,10 +1,10 @@
 'use strict';
 
-var oo = require('../util/oo');
-var JSONConverter = require('../model/JSONConverter');
+import oo from '../util/oo'
+import JSONConverter from '../model/JSONConverter'
 var converter = new JSONConverter();
-var each = require('lodash/each');
-var Err = require('../util/SubstanceError');
+import each from 'lodash/each'
+import Err from '../util/SubstanceError'
 
 /**
   API for creating and retrieving snapshots of documents
@@ -212,4 +212,4 @@ SnapshotEngine.Prototype = function() {
 
 oo.initClass(SnapshotEngine);
 
-module.exports = SnapshotEngine;
+export default SnapshotEngine;

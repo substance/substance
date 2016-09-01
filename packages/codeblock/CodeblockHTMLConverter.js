@@ -3,7 +3,7 @@
 /*
  * HTML converter for Codeblock.
  */
-module.exports = {
+export default {
 
   type: 'codeblock',
   tagName: 'pre',

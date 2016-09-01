@@ -1,12 +1,12 @@
 "use strict";
 
-var isArray = require('lodash/isArray');
-var isNumber = require('lodash/isNumber');
-var isObject = require('lodash/isObject');
-var oo = require('../../util/oo');
-var ObjectOperation = require('./ObjectOperation');
-var TextOperation = require('./TextOperation');
-var ArrayOperation = require('./ArrayOperation');
+import isArray from 'lodash/isArray'
+import isNumber from 'lodash/isNumber'
+import isObject from 'lodash/isObject'
+import oo from '../../util/oo'
+import ObjectOperation from './ObjectOperation'
+import TextOperation from './TextOperation'
+import ArrayOperation from './ArrayOperation'
 
 /*
   Specification:
@@ -258,4 +258,4 @@ oo.initClass(Tokenizer);
 
 OperationSerializer.Tokenizer = Tokenizer;
 
-module.exports = OperationSerializer;
+export default OperationSerializer;

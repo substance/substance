@@ -1,11 +1,12 @@
 'use strict';
 
-var Heading = require('./Heading');
-var HeadingComponent = require('./HeadingComponent');
-var HeadingHTMLConverter = require('./HeadingHTMLConverter');
-var HeadingXMLConverter = require('./HeadingXMLConverter');
+import Heading from './Heading'
+import HeadingComponent from './HeadingComponent'
+import HeadingHTMLConverter from './HeadingHTMLConverter'
+import HeadingXMLConverter from './HeadingXMLConverter'
 
-module.exports = {
+
+export default {
   name: 'heading',
   configure: function(config) {
     config.addNode(Heading);
@@ -36,5 +37,8 @@ module.exports = {
       en: 'Heading 3',
       de: 'Überschrift 3'
     });
-  }
+  },
+  Heading: Heading,
+  HeadingComponent: HeadingComponent,
+  HeadingHTMLConverter: HeadingHTMLConverter
 };

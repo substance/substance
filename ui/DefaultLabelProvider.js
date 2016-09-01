@@ -1,6 +1,6 @@
 'use strict';
 
-var oo = require('../util/oo');
+import oo from '../util/oo'
 
 /**
  Default label provider implementation
@@ -22,4 +22,4 @@ LabelProvider.Prototype = function() {
 
 oo.initClass(LabelProvider);
 
-module.exports = LabelProvider;
+export default LabelProvider;

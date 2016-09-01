@@ -3,7 +3,7 @@
 /*
  * HTML converter for Superscript.
  */
-module.exports = {
+export default {
   type: 'superscript',
   tagName: 'sup',
 };

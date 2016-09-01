@@ -1,3 +1,2 @@
-'use strict';
 // just for legacy
-module.exports = require('../../ui/Tool');
+export { default } from '../../ui/Tool'

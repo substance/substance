@@ -1,13 +1,13 @@
 "use strict";
 
-var last = require('lodash/last');
-var oo = require('../util/oo');
-var Coordinate = require('../model/Coordinate');
-var Range = require('../model/Range');
-var DefaultDOMElement = require('./DefaultDOMElement');
-var TextPropertyComponent = require('./TextPropertyComponent');
-var InlineNodeComponent = require('./InlineNodeComponent');
-var IsolatedNodeComponent = require('./IsolatedNodeComponent');
+import last from 'lodash/last'
+import oo from '../util/oo'
+import Coordinate from '../model/Coordinate'
+import Range from '../model/Range'
+import DefaultDOMElement from './DefaultDOMElement'
+import TextPropertyComponent from './TextPropertyComponent'
+import InlineNodeComponent from './InlineNodeComponent'
+import IsolatedNodeComponent from './IsolatedNodeComponent'
 
 /*
  * A class that maps DOM selections to model selections.
@@ -507,4 +507,4 @@ DOMSelection.Prototype = function() {
 
 oo.initClass(DOMSelection);
 
-module.exports = DOMSelection;
+export default DOMSelection;

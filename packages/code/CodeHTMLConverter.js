@@ -3,7 +3,7 @@
 /*
  * HTML converter for Code.
  */
-module.exports = {
+export default {
 
   type: 'code',
   tagName: 'code',

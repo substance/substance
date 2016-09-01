@@ -1,6 +1,6 @@
 'use strict';
 
-var TextBlock = require('../../model/TextBlock');
+import TextBlock from '../../model/TextBlock'
 
 function ListItem() {
   ListItem.super.apply(this, arguments);
@@ -15,4 +15,4 @@ ListItem.define({
   level: { type: 'number', default: 1 }
 });
 
-module.exports = ListItem;
+export default ListItem;

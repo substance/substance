@@ -1,25 +1,25 @@
-'use strict';
-
 // Base packages
-var BasePackage = require('../base/BasePackage');
-var ParagraphPackage = require('../paragraph/ParagraphPackage');
-var HeadingPackage = require('../heading/HeadingPackage');
-var CodeblockPackage = require('../codeblock/CodeblockPackage');
-var BlockquotePackage = require('../blockquote/BlockquotePackage');
-var ListPackage = require('../list/ListPackage');
-var LinkPackage = require('../link/LinkPackage');
-var EmphasisPackage = require('../emphasis/EmphasisPackage');
-var StrongPackage = require('../strong/StrongPackage');
-var CodePackage = require('../code/CodePackage');
-var SubscriptPackage = require('../subscript/SubscriptPackage');
-var SuperscriptPackage = require('../superscript/SuperscriptPackage');
-var ProseEditorToolbar = require('./ProseEditorToolbar');
-var Overlay = require('../../ui/Overlay');
+import BasePackage from '../base/BasePackage'
+import ParagraphPackage from '../paragraph/ParagraphPackage'
+import HeadingPackage from '../heading/HeadingPackage'
+import CodeblockPackage from '../codeblock/CodeblockPackage'
+import BlockquotePackage from '../blockquote/BlockquotePackage'
+import ListPackage from '../list/ListPackage'
+import LinkPackage from '../link/LinkPackage'
+import EmphasisPackage from '../emphasis/EmphasisPackage'
+import StrongPackage from '../strong/StrongPackage'
+import CodePackage from '../code/CodePackage'
+import SubscriptPackage from '../subscript/SubscriptPackage'
+import SuperscriptPackage from '../superscript/SuperscriptPackage'
 
-// Article Class
-var ProseArticle = require('./ProseArticle');
+import ProseArticle from './ProseArticle'
+import ProseEditor from './ProseEditor'
+import ProseEditorConfigurator from './ProseEditorConfigurator'
+import ProseEditorOverlay from './ProseEditorOverlay'
+import ProseEditorToolbar from './ProseEditorToolbar'
 
-module.exports = {
+
+export default {
   name: 'prose-editor',
   configure: function(config, options) {
     config.defineSchema({
@@ -28,7 +28,6 @@ module.exports = {
       defaultTextType: 'paragraph'
     });
     config.setToolbarClass(ProseEditorToolbar);
-    config.addComponent('overlay', Overlay);
     // Now import base packages
     config.import(BasePackage, {
       noBaseStyles: options.noBaseStyles
@@ -45,5 +44,12 @@ module.exports = {
     config.import(SuperscriptPackage);
     config.import(CodePackage);
     config.import(LinkPackage);
-  }
+
+    config.addStyle(style);
+  },
+  ProseArticle: ProseArticle,
+  ProseEditor: ProseEditor,
+  Configurator: ProseEditorConfigurator,
+  Toolbar: ProseEditorToolbar,
+  Overlay: ProseEditorOverlay,
 };

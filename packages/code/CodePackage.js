@@ -1,13 +1,13 @@
 'use strict';
 
-var Code = require('./Code');
-var CodeHTMLConverter = require('./CodeHTMLConverter');
-var CodeXMLConverter = require('./CodeXMLConverter');
-var AnnotationComponent = require('../../ui/AnnotationComponent');
-var AnnotationCommand = require('../../ui/AnnotationCommand');
-var AnnotationTool = require('../../ui/AnnotationTool');
+import Code from './Code'
+import CodeHTMLConverter from './CodeHTMLConverter'
+import CodeXMLConverter from './CodeXMLConverter'
+import AnnotationComponent from '../../ui/AnnotationComponent'
+import AnnotationCommand from '../../ui/AnnotationCommand'
+import AnnotationTool from '../../ui/AnnotationTool'
 
-module.exports = {
+export default {
   name: 'code',
   configure: function(config) {
     config.addNode(Code);
@@ -21,5 +21,7 @@ module.exports = {
       en: 'Code',
       de: 'Code'
     });
-  }
+  },
+  Code: Code,
+  CodeHTMLConverter: CodeHTMLConverter
 };

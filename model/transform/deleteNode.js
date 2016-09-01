@@ -1,6 +1,6 @@
 'use strict';
 
-// var each = require('lodash/each');
+// import each from 'lodash/each'
 
 /*
  * Delete a node and all annotations attached to it,
@@ -93,4 +93,4 @@ function deleteNode(tx, args) {
   return args;
 }
 
-module.exports = deleteNode;
+export default deleteNode;

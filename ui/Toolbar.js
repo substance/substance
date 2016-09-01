@@ -1,7 +1,5 @@
-'use strict';
-
-var Component = require('./Component');
-var ToolGroup = require('./ToolGroup');
+import Component from './Component'
+import ToolGroup from './ToolGroup'
 
 function Toolbar() {
   Component.apply(this, arguments);
@@ -37,4 +35,4 @@ Toolbar.Prototype = function() {
 };
 
 Component.extend(Toolbar);
-module.exports = Toolbar;
+export default Toolbar;

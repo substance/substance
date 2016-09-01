@@ -1,7 +1,7 @@
 'use strict';
 
-var Command = require('../../ui/Command');
-var paste = require('../../model/transform/paste');
+import Command from '../../ui/Command'
+import paste from '../../model/transform/paste'
 
 function ImageCommand() {
   ImageCommand.super.call(this, { name: 'insert-image' });
@@ -101,4 +101,4 @@ ImageCommand.Prototype = function() {
 
 Command.extend(ImageCommand);
 
-module.exports = ImageCommand;
+export default ImageCommand;

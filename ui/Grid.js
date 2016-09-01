@@ -1,6 +1,6 @@
 'use strict';
 
-var Component = require('./Component');
+import Component from './Component'
 
 /*
   Simple component for realizing grid layouts
@@ -63,4 +63,4 @@ Component.extend(Cell);
 Grid.Row = Row;
 Grid.Cell = Cell;
 
-module.exports = Grid;
+export default Grid;

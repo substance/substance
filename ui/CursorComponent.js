@@ -1,6 +1,6 @@
 'use strict';
 
-var Component = require('./Component');
+import Component from './Component'
 
 function CursorComponent() {
   CursorComponent.super.apply(this, arguments);
@@ -31,4 +31,4 @@ CursorComponent.Prototype = function() {
 
 Component.extend(CursorComponent);
 
-module.exports = CursorComponent;
+export default CursorComponent;

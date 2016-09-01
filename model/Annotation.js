@@ -1,3 +1,1 @@
-'use strict';
-
-module.exports = require('./PropertyAnnotation');
+export { default } from './PropertyAnnotation'

@@ -1,9 +1,9 @@
 'use strict';
 
-var Command = require('../../ui/Command');
-var _isMatch = require('lodash/isMatch');
-var _find = require('lodash/find');
-var _clone = require('lodash/clone');
+import Command from '../../ui/Command'
+import _isMatch from 'lodash/isMatch'
+import _find from 'lodash/find'
+import _clone from 'lodash/clone'
 
 function SwitchTextTypeCommand() {
   SwitchTextTypeCommand.super.apply(this, arguments);
@@ -109,4 +109,4 @@ SwitchTextTypeCommand.Prototype = function() {
 
 Command.extend(SwitchTextTypeCommand);
 
-module.exports = SwitchTextTypeCommand;
+export default SwitchTextTypeCommand;

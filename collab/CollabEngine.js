@@ -1,12 +1,12 @@
 "use strict";
 
-var EventEmitter = require('../util/EventEmitter');
-var forEach = require('lodash/forEach');
-var map = require('lodash/map');
-var extend = require('lodash/extend');
-var DocumentChange = require('../model/DocumentChange');
-var Selection = require('../model/Selection');
-var Err = require('../util/SubstanceError');
+import EventEmitter from '../util/EventEmitter'
+import forEach from 'lodash/forEach'
+import map from 'lodash/map'
+import extend from 'lodash/extend'
+import DocumentChange from '../model/DocumentChange'
+import Selection from '../model/Selection'
+import Err from '../util/SubstanceError'
 
 /*
   Engine for realizing collaborative editing. Implements the server-methods of
@@ -304,4 +304,4 @@ CollabEngine.Prototype = function() {
 
 EventEmitter.extend(CollabEngine);
 
-module.exports = CollabEngine;
+export default CollabEngine;

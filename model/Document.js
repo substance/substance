@@ -1,25 +1,27 @@
-'use strict';
-
-var isEqual = require('lodash/isEqual');
-var isObject = require('lodash/isObject');
-var isArray = require('lodash/isArray');
-var isString = require('lodash/isString');
-var each = require('lodash/each');
-var uuid = require('../util/uuid');
-var EventEmitter = require('../util/EventEmitter');
-var DocumentIndex = require('./DocumentIndex');
-var AnnotationIndex = require('./AnnotationIndex');
-var ContainerAnnotationIndex = require('./ContainerAnnotationIndex');
-var AnchorIndex = require('./AnchorIndex');
-var DocumentChange = require('./DocumentChange');
-var PathEventProxy = require('./PathEventProxy');
-var IncrementalData = require('./data/IncrementalData');
-var DocumentNodeFactory = require('./DocumentNodeFactory');
-var Selection = require('./Selection');
-var Coordinate = require('./Coordinate');
-var Range = require('./Range');
-var docHelpers = require('./documentHelpers');
-var JSONConverter = require('./JSONConverter');
+import isEqual from 'lodash/isEqual'
+import isObject from 'lodash/isObject'
+import isArray from 'lodash/isArray'
+import isString from 'lodash/isString'
+import each from 'lodash/each'
+import uuid from '../util/uuid'
+import EventEmitter from '../util/EventEmitter'
+import DocumentIndex from './DocumentIndex'
+import AnnotationIndex from './AnnotationIndex'
+import ContainerAnnotationIndex from './ContainerAnnotationIndex'
+import AnchorIndex from './AnchorIndex'
+import DocumentChange from './DocumentChange'
+import PathEventProxy from './PathEventProxy'
+import IncrementalData from './data/IncrementalData'
+import DocumentNodeFactory from './DocumentNodeFactory'
+import Selection from './Selection'
+import PropertySelection from './PropertySelection'
+import ContainerSelection from './ContainerSelection'
+import NodeSelection from './NodeSelection'
+import CustomSelection from './CustomSelection'
+import Coordinate from './Coordinate'
+import Range from './Range'
+import docHelpers from './documentHelpers'
+import JSONConverter from './JSONConverter'
 var converter = new JSONConverter();
 
 var __id__ = 0;
@@ -34,8 +36,8 @@ var __id__ = 0;
   @example
 
   ```js
-  var Document = require('substance/model/Document');
-  var articleSchema = require('./myArticleSchema');
+  import Document from 'substance/model/Document'
+  import articleSchema from './myArticleSchema'
   var Article = function() {
     Article.super.call(articleSchema);
 
@@ -380,10 +382,6 @@ Document.Prototype = function() {
 
 
   function _createSelection() {
-    var PropertySelection = require('./PropertySelection');
-    var ContainerSelection = require('./ContainerSelection');
-    var NodeSelection = require('./NodeSelection');
-
     var doc = this; // eslint-disable-line
     var coor, range, path, startOffset, endOffset;
     if (arguments.length === 1 && arguments[0] === null) {
@@ -443,10 +441,6 @@ Document.Prototype = function() {
   }
 
   function _createSelectionFromData(doc, selData) {
-    var PropertySelection = require('./PropertySelection');
-    var ContainerSelection = require('./ContainerSelection');
-    var NodeSelection = require('./NodeSelection');
-    var CustomSelection = require('./CustomSelection');
     var tmp;
     if (selData.type === 'property') {
       if (selData.endOffset === null || selData.endOffset === undefined) {
@@ -642,4 +636,4 @@ EventEmitter.extend(Document);
 Document.SNIPPET_ID = "snippet";
 Document.TEXT_SNIPPET_ID = "text-snippet";
 
-module.exports = Document;
+export default Document;

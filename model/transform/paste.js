@@ -1,13 +1,13 @@
 'use strict';
 
-var last = require('lodash/last');
-var each = require('lodash/each');
-var uuid = require('../../util/uuid');
-var Document = require('../Document');
-var annotationHelpers = require('../annotationHelpers');
-var deleteSelection = require('./deleteSelection');
-var insertText = require('./insertText');
-var breakNode = require('./breakNode');
+import last from 'lodash/last'
+import each from 'lodash/each'
+import uuid from '../../util/uuid'
+import Document from '../Document'
+import annotationHelpers from '../annotationHelpers'
+import deleteSelection from './deleteSelection'
+import insertText from './insertText'
+import breakNode from './breakNode'
 
 /**
   Pastes clipboard content at the current selection
@@ -212,4 +212,4 @@ function _copyNode(tx, pasteNode) {
   return tx.create(data);
 }
 
-module.exports = paste;
+export default paste;

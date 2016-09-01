@@ -1,7 +1,7 @@
 'use strict';
 
-var Command = require('./Command');
-var insertNode = require('../model/transform/insertNode');
+import Command from './Command'
+import insertNode from '../model/transform/insertNode'
 
 function InsertNodeCommand() {
   InsertNodeCommand.super.apply(this, arguments);
@@ -45,4 +45,4 @@ InsertNodeCommand.Prototype = function() {
 
 Command.extend(InsertNodeCommand);
 
-module.exports = InsertNodeCommand;
+export default InsertNodeCommand;

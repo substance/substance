@@ -1,22 +1,22 @@
 'use strict';
 
-var forEach = require('lodash/forEach');
-var isUndefined = require('lodash/isUndefined');
-var startsWith = require('lodash/startsWith');
-var createSurfaceId = require('../util/createSurfaceId');
-var getRelativeBoundingRect = require('../util/getRelativeBoundingRect');
-var keys = require('../util/keys');
-var platform = require('../util/platform');
-var inBrowser = require('../util/inBrowser');
-var copySelection = require('../model/transform/copySelection');
-var deleteSelection = require('../model/transform/deleteSelection');
-var deleteCharacter = require('../model/transform/deleteCharacter');
-var insertText = require('../model/transform/insertText');
-var Clipboard = require('./Clipboard');
-var Component = require('./Component');
-var DefaultDOMElement = require('./DefaultDOMElement');
-var DOMSelection = require('./DOMSelection');
-var UnsupportedNode = require('./UnsupportedNodeComponent');
+import forEach from 'lodash/forEach'
+import isUndefined from 'lodash/isUndefined'
+import startsWith from 'lodash/startsWith'
+import createSurfaceId from '../util/createSurfaceId'
+import getRelativeBoundingRect from '../util/getRelativeBoundingRect'
+import keys from '../util/keys'
+import platform from '../util/platform'
+import inBrowser from '../util/inBrowser'
+import copySelection from '../model/transform/copySelection'
+import deleteSelection from '../model/transform/deleteSelection'
+import deleteCharacter from '../model/transform/deleteCharacter'
+import insertText from '../model/transform/insertText'
+import Clipboard from './Clipboard'
+import Component from './Component'
+import DefaultDOMElement from './DefaultDOMElement'
+import DOMSelection from './DOMSelection'
+import UnsupportedNode from './UnsupportedNodeComponent'
 
 /**
    Abstract interface for editing components.
@@ -1154,4 +1154,4 @@ Surface.getDOMRangeFromEvent = function(evt) {
   return range;
 };
 
-module.exports = Surface;
+export default Surface;

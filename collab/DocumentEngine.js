@@ -1,9 +1,9 @@
 "use strict";
 
-var EventEmitter = require('../util/EventEmitter');
-var JSONConverter = require('../model/JSONConverter');
-var Err = require('../util/SubstanceError');
-var SnapshotEngine = require('./SnapshotEngine');
+import EventEmitter from '../util/EventEmitter'
+import JSONConverter from '../model/JSONConverter'
+import Err from '../util/SubstanceError'
+import SnapshotEngine from './SnapshotEngine'
 
 /*
   DocumentEngine
@@ -178,4 +178,4 @@ DocumentEngine.Prototype = function() {
 
 EventEmitter.extend(DocumentEngine);
 
-module.exports = DocumentEngine;
+export default DocumentEngine;

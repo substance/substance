@@ -18,4 +18,4 @@ function expandAnnotation(tx, args) {
   return args;
 }
 
-module.exports = expandAnnotation;
+export default expandAnnotation;

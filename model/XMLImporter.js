@@ -1,8 +1,8 @@
 'use strict';
 
-var DOMImporter = require('./DOMImporter');
-var DefaultDOMElement = require('../ui/DefaultDOMElement');
-var extend = require('lodash/extend');
+import DOMImporter from './DOMImporter'
+import DefaultDOMElement from '../ui/DefaultDOMElement'
+import extend from 'lodash/extend'
 
 /**
   @class
@@ -16,9 +16,9 @@ var extend = require('lodash/extend');
   Below is a full example taken from [Lens](https://github.com/substance/lens/blob/master/model/LensArticleImporter.js).
 
   ```js
-  var XMLImporter = require('substance/model/XMLImporter');
-  var articleSchema = require('./articleSchema');
-  var LensArticle = require('./LensArticle');
+  import XMLImporter from 'substance/model/XMLImporter'
+  import articleSchema from './articleSchema'
+  import LensArticle from './LensArticle'
 
   var converters = [
     require('substance/packages/paragraph/ParagraphHTMLConverter'),
@@ -103,4 +103,4 @@ XMLImporter.Prototype = function() {
 
 DOMImporter.extend(XMLImporter);
 
-module.exports = XMLImporter;
+export default XMLImporter;

@@ -2,12 +2,12 @@
 
 /* globals Promise */
 
-var sass = require('node-sass');
-var extend = require('lodash/extend');
+import sass from 'node-sass'
+import extend from 'lodash/extend'
 
 // use this from within another process
 // cb is optional
-module.exports = function(params, cb) {
+export default function(params, cb) {
   return new Promise(function(resolve, reject) {
     var sassOptions = {};
     // per default source maps are enabled and embedded
@@ -28,7 +28,7 @@ module.exports = function(params, cb) {
       });
     } else {
       console.info('Bundling styles for package %s', params.mainPackagePath);
-      var cp = require('child_process');
+      import cp from 'child_process'
       var child = cp.fork(require.resolve('./_bundleStyles'));
       child.on('message', function(resultStr) {
         var scssContent = JSON.parse(resultStr);

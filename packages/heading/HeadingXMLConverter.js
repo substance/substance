@@ -1,3 +1,1 @@
-'use strict';
-
-module.exports = require('./HeadingHTMLConverter');
+export { default } from './HeadingHTMLConverter'

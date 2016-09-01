@@ -1,8 +1,8 @@
 'use strict';
 
-var oo = require('../util/oo');
-var DefaultDOMElement = require('./DefaultDOMElement');
-var Component = require('./Component');
+import oo from '../util/oo'
+import DefaultDOMElement from './DefaultDOMElement'
+import Component from './Component'
 
 function DragManager(dndHandlers, context) {
   this.context = context;
@@ -117,4 +117,4 @@ DragManager.Prototype = function() {
 
 oo.initClass(DragManager);
 
-module.exports = DragManager;
+export default DragManager;

@@ -1,6 +1,6 @@
 'use strict';
 
-var Component = require('./Component');
+import Component from './Component'
 
 function Prompt() {
   Prompt.super.apply(this, arguments);
@@ -150,4 +150,4 @@ Prompt.Link = Link;
 Prompt.Input = Input;
 Prompt.Separator = Separator;
 
-module.exports = Prompt;
+export default Prompt;

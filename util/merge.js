@@ -1,8 +1,8 @@
 'use strict';
 
-var merge = require('lodash/merge');
-var mergeWith = require('lodash/mergeWith');
-var isArray = require('lodash/isArray');
+import merge from 'lodash/merge'
+import mergeWith from 'lodash/mergeWith'
+import isArray from 'lodash/isArray'
 
 function _concatArrays(objValue, srcValue) {
   if (isArray(objValue)) {
@@ -27,7 +27,7 @@ function _replaceArrays(objValue, srcValue) {
   The default implementation overwrites elements.
    get concatenated rather than overwritten.
 */
-module.exports = function(a, b, options) {
+export default function(a, b, options) {
   options = options || {};
   var _with = null;
   if (options.array === 'replace') {

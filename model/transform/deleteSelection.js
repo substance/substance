@@ -1,11 +1,11 @@
 'use strict';
 
-var extend = require('lodash/extend');
-var last = require('lodash/last');
-var uuid = require('../../util/uuid');
-var deleteNode = require('./deleteNode');
-var merge = require('./merge');
-var updateAnnotations = require('./updateAnnotations');
+import extend from 'lodash/extend'
+import last from 'lodash/last'
+import uuid from '../../util/uuid'
+import deleteNode from './deleteNode'
+import merge from './merge'
+import updateAnnotations from './updateAnnotations'
 
 /**
   Deletes a given selection.
@@ -170,4 +170,4 @@ function _deleteNodeSelection(tx, args) {
   };
 }
 
-module.exports = deleteSelection;
+export default deleteSelection;

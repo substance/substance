@@ -1,6 +1,6 @@
 "use strict";
 
-var EventEmitter = require("./EventEmitter");
+import EventEmitter from "./EventEmitter"
 
 function Logger() {
   EventEmitter.call(this);
@@ -40,4 +40,4 @@ Logger.Prototype = function() {
 
 EventEmitter.extend(Logger);
 
-module.exports = Logger;
+export default Logger;

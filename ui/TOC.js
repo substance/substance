@@ -1,8 +1,8 @@
 "use strict";
 
-var Component = require('./Component');
-var ScrollPane = require('./ScrollPane');
-var Icon = require('./FontAwesomeIcon');
+import Component from './Component'
+import ScrollPane from './ScrollPane'
+import Icon from './FontAwesomeIcon'
 
 function TOC() {
   Component.apply(this, arguments);
@@ -77,4 +77,4 @@ TOC.Prototype = function() {
 
 Component.extend(TOC);
 
-module.exports = TOC;
+export default TOC;

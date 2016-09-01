@@ -4,4 +4,4 @@
 // which is not there in a real browser env
 var inBrowser = ( typeof window !== 'undefined');
 
-module.exports = inBrowser;
+export default inBrowser;

@@ -9,10 +9,10 @@
   This implementation is just a prototype and might change with the next releases.
 */
 
-var oo = require('../util/oo');
-var inBrowser = require('../util/inBrowser');
-var DefaultDOMElement = require('./DefaultDOMElement');
-var DOMElement = require('./DOMElement');
+import oo from '../util/oo'
+import inBrowser from '../util/inBrowser'
+import DefaultDOMElement from './DefaultDOMElement'
+import DOMElement from './DOMElement'
 
 /*
   TODO: to be 100% safe we would need to introduce a hidden contenteditable
@@ -95,4 +95,4 @@ GlobalEventHandler.Prototype = function() {
 
 oo.initClass(GlobalEventHandler);
 
-module.exports = GlobalEventHandler;
+export default GlobalEventHandler;

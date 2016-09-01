@@ -1,13 +1,13 @@
 'use strict';
 
-var Superscript = require('./Superscript');
-var SuperscriptHTMLConverter = require('./SuperscriptHTMLConverter');
-var SuperscriptXMLConverter = require('./SuperscriptXMLConverter');
-var AnnotationCommand = require('../../ui/AnnotationCommand');
-var AnnotationComponent = require('../../ui/AnnotationComponent');
-var AnnotationTool = require('../../ui/AnnotationTool');
+import Superscript from './Superscript'
+import SuperscriptHTMLConverter from './SuperscriptHTMLConverter'
+import SuperscriptXMLConverter from './SuperscriptXMLConverter'
+import AnnotationCommand from '../../ui/AnnotationCommand'
+import AnnotationComponent from '../../ui/AnnotationComponent'
+import AnnotationTool from '../../ui/AnnotationTool'
 
-module.exports = {
+export default {
   name: 'superscript',
   configure: function(config) {
     config.addNode(Superscript);
@@ -21,5 +21,7 @@ module.exports = {
       en: 'Superscript',
       de: 'Hochgestellt'
     });
-  }
+  },
+  Superscript: Superscript,
+  SuperscriptHTMLConverter: SuperscriptHTMLConverter
 };

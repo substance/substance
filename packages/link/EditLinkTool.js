@@ -1,8 +1,8 @@
 'use strict';
 
-var Tool = require('../../ui/Tool');
-var clone = require('lodash/clone');
-var Prompt = require('../../ui/Prompt');
+import Tool from '../../ui/Tool'
+import clone from 'lodash/clone'
+import Prompt from '../../ui/Prompt'
 
 /**
   Tool to edit an existing link.
@@ -71,4 +71,4 @@ EditLinkTool.getProps = function(commandStates) {
   }
 };
 
-module.exports = EditLinkTool;
+export default EditLinkTool;

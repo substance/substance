@@ -1,6 +1,6 @@
 'use strict';
 
-var Component = require('./Component');
+import Component from './Component'
 
 /**
   Modal dialog component
@@ -54,4 +54,4 @@ Modal.Prototype = function() {
 };
 
 Component.extend(Modal);
-module.exports = Modal;
+export default Modal;

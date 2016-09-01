@@ -1,9 +1,6 @@
-'use strict';
-
-var oo = require("./oo");
-var forEach = require('lodash/forEach');
-var isObject = require('lodash/isObject');
-var warn = require('./warn');
+import oo from "./oo"
+import forEach from 'lodash/forEach'
+import isObject from 'lodash/isObject'
 
 /**
   Event support.
@@ -61,7 +58,7 @@ EventEmitter.Prototype = function() {
    * @chainable
    */
   this.connect = function (obj, methods, options) { // eslint-disable-line no-unused-vars
-    warn('DEPRECATED: Use EventEmitter.on(event, method, context) instead.');
+    console.warn('DEPRECATED: Use EventEmitter.on(event, method, context) instead.');
     return _connect.apply(this, arguments);
   };
 
@@ -73,7 +70,7 @@ EventEmitter.Prototype = function() {
    * @chainable
    */
   this.disconnect = function(listener) {
-    warn('DEPRECATED: Use EventEmitter.off(listener) instead.');
+    console.warn('DEPRECATED: Use EventEmitter.off(listener) instead.');
     return _disconnect.call(this, listener);
   };
 
@@ -253,4 +250,4 @@ EventEmitter.Prototype = function() {
 
 oo.initClass(EventEmitter);
 
-module.exports = EventEmitter;
+export default EventEmitter;

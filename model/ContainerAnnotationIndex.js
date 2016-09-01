@@ -1,10 +1,10 @@
 'use strict';
 
-var isString = require('lodash/isString');
-var map = require('lodash/map');
-var filter = require('lodash/filter');
-var TreeIndex = require('../util/TreeIndex');
-var DocumentIndex = require('./DocumentIndex');
+import isString from 'lodash/isString'
+import map from 'lodash/map'
+import filter from 'lodash/filter'
+import TreeIndex from '../util/TreeIndex'
+import DocumentIndex from './DocumentIndex'
 
 function ContainerAnnotationIndex() {
   this.byId = new TreeIndex();
@@ -45,4 +45,4 @@ ContainerAnnotationIndex.Prototype = function() {
 
 DocumentIndex.extend(ContainerAnnotationIndex);
 
-module.exports = ContainerAnnotationIndex;
+export default ContainerAnnotationIndex;

@@ -1,6 +1,6 @@
 'use strict';
 
-var Registry = require('../../util/Registry');
+import Registry from '../../util/Registry'
 
 /**
   Registry for Nodes.
@@ -38,4 +38,4 @@ NodeRegistry.Prototype = function() {
 
 Registry.extend(NodeRegistry);
 
-module.exports = NodeRegistry;
+export default NodeRegistry;

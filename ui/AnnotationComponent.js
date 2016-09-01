@@ -1,6 +1,6 @@
 "use strict";
 
-var Component = require('./Component');
+import Component from './Component'
 
 /**
   Renders an annotation. Used internally by different components (e.g. ui/AnnotatedTextComponent)
@@ -66,4 +66,4 @@ AnnotationComponent.Prototype = function() {
 
 Component.extend(AnnotationComponent);
 
-module.exports = AnnotationComponent;
+export default AnnotationComponent;
