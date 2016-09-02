@@ -1,0 +1,15 @@
+.sc-list-item {
+  margin: 0 0 0  var(--default-padding);
+  position: relative;
+}
+
+.sc-list-item.sm-unordered:before {
+  position: absolute;
+  content: "•";
+  left: -20px;
+}
+
+/*
+  https://github.com/substance/substance/blob/af28562ad44e948dfd455230114a5a206dbbe912/packages/list/_list.scss
+  TODO: Consider levels and ordered lists
+*/

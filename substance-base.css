@@ -1,0 +1,7 @@
+/*
+  Provides basic page styles. Used by Substance examples.
+  Useful when building a Substance app, do not include if
+  you embed Substance components into an existing page.
+*/
+@import './_reset.css';
+@import './_page-styles.css';

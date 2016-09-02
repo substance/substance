@@ -1,0 +1,8 @@
+.sc-blockquote {
+  border-left: 2px solid var(--border-color);
+  padding-left: 30px;
+}
+
+.sc-switch-text-type .se-option.sm-blockquote {
+  border-left: 2px solid var(--border-color);
+}

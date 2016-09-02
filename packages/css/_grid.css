@@ -1,0 +1,42 @@
+/* See: http://www.sitepoint.com/understanding-css-grid-systems */
+
+.sc-grid {}
+
+/* Make sure we use the border box model */
+.sc-grid > .se-row,
+.sc-grid > .se-cell { box-sizing: border-box; }
+.sc-grid > .se-row:before,
+.sc-grid > .se-row:after { content: " "; display: table; }
+.sc-grid > .se-row:after { clear: both; }
+/* Row styles */
+.sc-grid > .se-row { /* overflow: hidden; clear floats */ }
+.sc-grid > .se-row > .se-cell { position: relative; position: relative; }
+
+/*
+  scw = single column width
+  m = margin (1.6%)
+  mc = maximum columns (12)
+  cw = column width for a particular column (1-12)
+  scw = (100 – (m * (mc – 1))) / mc
+  cw = (scw * cs) + (m * (cs – 1))
+*/
+.sc-grid > .se-row > .se-cell.sm-column-1  { float:left; width: 6.86666666667%; }
+.sc-grid > .se-row > .se-cell.sm-column-2  { float:left; width: 15.3333333333%; }
+.sc-grid > .se-row > .se-cell.sm-column-3  { float:left; width: 23.8%; }
+.sc-grid > .se-row > .se-cell.sm-column-4  { float:left; width: 32.2666666667%; }
+.sc-grid > .se-row > .se-cell.sm-column-5  { float:left; width: 40.7333333333%; }
+.sc-grid > .se-row > .se-cell.sm-column-6  { float:left; width: 49.2%; }
+.sc-grid > .se-row > .se-cell.sm-column-7  { float:left; width: 57.6666666667%; }
+.sc-grid > .se-row > .se-cell.sm-column-8  { float:left; width: 66.1333333333%; }
+.sc-grid > .se-row > .se-cell.sm-column-9  { float:left; width: 74.6%; }
+.sc-grid > .se-row > .se-cell.sm-column-10 { float:left; width: 83.0666666667%; }
+.sc-grid > .se-row > .se-cell.sm-column-11 { float:left; width: 91.5333333333%; }
+.sc-grid > .se-row > .se-cell.sm-column-12 { width:100%; display:block; }
+
+.sc-grid > .se-row > .se-cell + .se-cell { margin-left: 1.6%; }
+
+/* Override for mobile */
+.sc-grid.sm-mobile {}
+.sc-grid.sm-mobile > .se-row {}
+.sc-grid.sm-mobile > .se-row > .se-cell + .se-cell { margin-left: 0; }
+.sc-grid.sm-mobile > .se-row > .se-cell { float: none; width: auto; }

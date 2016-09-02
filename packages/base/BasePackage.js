@@ -25,14 +25,6 @@ module.exports = {
     config.addIcon('expand', { 'fontawesome': 'fa-arrows-h' });
     config.addIcon('truncate', { 'fontawesome': 'fa-arrows-h' });
 
-    // Substance base styles
-    if (!options.noBaseStyles) {
-      config.addStyle(__dirname, '..', '..', 'styles', 'base', '_all');
-    }
-
-    // Styles
-    config.addStyle(__dirname, '_base.scss');
-
     // Core component styles
     config.addStyle(__dirname, '..', '..', 'styles', 'components', '_all');
 

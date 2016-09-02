@@ -1,0 +1,18 @@
+.sc-split-pane {
+  display: flex;
+  flex-flow: row nowrap;
+  /* Serves as anchor for absolute positioning for child components */
+  position: absolute;
+  left: 0px;
+  right: 0px;
+  top: 0px;
+  bottom: 0px;
+}
+.sc-split-pane.sm-horizontal { flex-flow: column nowrap; }
+.sc-split-pane > .se-pane { position: relative; }
+/* This should be fixed according to the configured size (set directly
+on the element). Size can either be a percentage or px value.
+Don't grow, don't shrink, use width or height for size determination */
+.sc-split-pane > .se-pane.sm-sized { flex: 0 0 auto; }
+/* Just grow and take up the rest of the available space */
+.sc-split-pane > .se-pane.sm-auto-fill { flex-grow: 1; }

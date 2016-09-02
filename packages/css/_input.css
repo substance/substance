@@ -1,0 +1,16 @@
+.sc-input {
+  width: 100%;
+  max-width: 500px;
+  height: var(--base-height);
+  line-height: var(--base-height);
+}
+.sc-input.short {
+  height: var(--short-height);
+}
+.sc-input:focus {
+  background: #fff;
+  border-color: var(--focus-outline-color);
+}
+.sc-input.sm-centered {
+  text-align: center;
+}

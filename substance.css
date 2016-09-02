@@ -1,0 +1,6 @@
+/*
+  Provides all component styles. Does not provide any page styles,
+  such as fonts and colors for links etc.
+*/
+@import './_variables.css';
+@import './packages/_index.css';
