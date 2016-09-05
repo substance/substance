@@ -140,7 +140,6 @@ server.serveTestSuite = function(expressApp, globPattern, options) {
   expressApp.get('/test', function(req, res) {
     res.redirect('/test/index.html');
   });
-  server.serveStyles(expressApp, '/test/test.css', {scssPath: path.join(__dirname, '..', 'test', 'test.scss')});
 };
 
 
