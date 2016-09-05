@@ -9,7 +9,6 @@ var DocumentSchema = require('../model/DocumentSchema');
 var EditingBehavior = require('../model/EditingBehavior');
 var Registry = require('../util/Registry');
 var ComponentRegistry = require('../ui/ComponentRegistry');
-var path = require('path');
 
 /**
  * Abstract Configurator for Substance editors.

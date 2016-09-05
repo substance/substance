@@ -1,6 +1,5 @@
 'use strict';
 /* eslint-disable no-console */
-
 var gulp = require('gulp');
 var source = require('vinyl-source-stream');
 var buffer = require('vinyl-buffer');
@@ -10,7 +9,6 @@ var argv = require('yargs').argv;
 var gulpif = require('gulp-if');
 var rename = require('gulp-rename');
 var eslint = require('gulp-eslint');
-var sassLint = require('gulp-sass-lint');
 var tape = require('gulp-tape');
 var tapSpec = require('tap-spec');
 var browserify = require('browserify');
@@ -19,18 +17,11 @@ var sourcemaps = require('gulp-sourcemaps');
 var mapStream = require('map-stream');
 var generate = require('./doc/generator/generate');
 var config = require('./doc/config.json');
-var sass = require('gulp-sass');
 var through2 = require('through2');
 var fs = require('fs');
 var glob = require('glob');
 var Karma = require('karma').Server;
 var istanbul = require('istanbul');
-
-gulp.task('doc:sass', function() {
-  gulp.src('./doc/app.scss')
-    .pipe(sass().on('error', sass.logError))
-    .pipe(gulp.dest('./dist'));
-});
 
 gulp.task('doc:assets', function () {
   gulp.src('./doc/assets/**/*', {base:"./doc/assets"})
@@ -65,7 +56,7 @@ gulp.task('doc:bundle', function () {
     .pipe(gulp.dest('./dist'));
 });
 
-gulp.task('doc', ['doc:sass', 'doc:bundle', 'doc:assets', 'doc:data']);
+gulp.task('doc', ['doc:bundle', 'doc:assets', 'doc:data']);
 
 gulp.task('lint:js', function() {
   return gulp.src([
@@ -81,21 +72,7 @@ gulp.task('lint:js', function() {
     .pipe(eslint.failAfterError());
 });
 
-gulp.task('lint:sass', function () {
-  return gulp.src([
-    './packages/**/*.scss',
-    './styles/**/*.scss',
-    './doc/**/*.scss',
-    './test/**/*.scss'
-  ])
-  .pipe(sassLint({
-    configFile: '.sass-lint.yml'
-  }))
-  .pipe(sassLint.format())
-  .pipe(sassLint.failOnError());
-});
-
-gulp.task('lint', ['lint:js', 'lint:sass']);
+gulp.task('lint', ['lint:js']);
 
 gulp.task('build', ['lint'], function() {
   return browserify({
