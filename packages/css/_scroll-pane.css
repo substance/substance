@@ -8,7 +8,6 @@
   right: 0px;
 }
 /* Substance scrollbar active */
-.sc-scroll-pane.sm-substance-scrollbar {
 /* Make space for Substance Scrollbar on the left side */
 .sc-scroll-pane.sm-substance-scrollbar.sm-scrollbar-position-left .se-scrollable {
   left: 20px;
