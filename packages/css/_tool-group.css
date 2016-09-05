@@ -3,12 +3,7 @@
   display: inline-block;
 }
 
-.sc-tool-group .se-tool {
-  line-height: normal;
-  display: inline-block;
-  position: relative;
-}
-
+.sc-tool-group .se-tool { line-height: normal; display: inline-block; position: relative; }
 .sc-tool-group .se-tool button {
   position: relative;
   margin: 5px;
@@ -24,3 +19,5 @@
 .sc-tool-group .se-tool.sm-disabled { opacity: 0.2; cursor: default; }
 .sc-tool-group .se-tool.sm-disabled:hover { background: none; }
 
+/* Some tools add a mode icon, which we position here */
+.se-tool .se-mode { position: absolute; top: 3px; right: 3px; font-size: 7px; }
