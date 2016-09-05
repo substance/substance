@@ -16,7 +16,6 @@ module.exports = {
     config.addComponent('emphasis', AnnotationComponent);
     config.addCommand('emphasis', AnnotationCommand, { nodeType: Emphasis.type });
     config.addTool('emphasis', AnnotationTool);
-    config.addStyle(__dirname, '_emphasis.scss');
     config.addIcon('emphasis', { 'fontawesome': 'fa-italic' });
     config.addLabel('emphasis', {
       en: 'Emphasis',

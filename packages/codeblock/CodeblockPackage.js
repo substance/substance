@@ -16,7 +16,6 @@ module.exports = {
       name: 'codeblock',
       data: {type: 'codeblock'}
     });
-    config.addStyle(__dirname, '_codeblock.scss');
     config.addLabel('codeblock', {
       en: 'Codeblock',
       de: 'Codeblock'

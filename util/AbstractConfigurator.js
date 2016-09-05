@@ -19,7 +19,6 @@ var path = require('path');
 function AbstractConfigurator() {
   this.config = {
     schema: {},
-    styles: [],
     nodes: {},
     components: {},
     converters: {},
@@ -77,20 +76,6 @@ AbstractConfigurator.Prototype = function() {
 
   this.addExporter = function(type, ExporterClass) {
     this.config.exporters[type] = ExporterClass;
-  };
-
-  /**
-    Register a new Sass style. Each argument is a path fragment.
-
-    @example
-
-    ```js
-    config.addStyle(__dirname, '..', '_strong.scss');
-    ```
-  */
-  this.addStyle = function() {
-    var sassFilePath = path.join.apply(this, arguments);
-    this.config.styles.push(sassFilePath);
   };
 
   this.addComponent = function(name, ComponentClass) {

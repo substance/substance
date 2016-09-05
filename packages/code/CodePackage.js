@@ -17,7 +17,6 @@ module.exports = {
     config.addCommand('code', AnnotationCommand, { nodeType: Code.type });
     config.addTool('code', AnnotationTool);
     config.addIcon('code', { 'fontawesome': 'fa-code' });
-    config.addStyle(__dirname, '_code.scss');
     config.addLabel('code', {
       en: 'Code',
       de: 'Code'
