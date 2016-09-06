@@ -58,6 +58,10 @@ CustomSelection.Prototype = function() {
     );
   };
 
+  this._clone = function() {
+    return new CustomSelection(this.customType, this.data, this.surfaceId);
+  };
+
 };
 
 Selection.extend(CustomSelection);

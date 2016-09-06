@@ -1,0 +1,14 @@
+/* Surface
+----------------------------------------------------*/
+.sc-surface {}
+/* Non-Editables should have a regular cursor */
+.sc-surface *[contenteditable="false"] { cursor: default; }
+.sc-surface *[contenteditable="true"] { cursor: text; }
+// We want Firefox to have a transparent native selection
+::-moz-selection { background: rgba(77, 149, 233, 0.46); }
+.sm-selected-node { outline: 2px solid; outline-color: var(--local-selection-color); }
+.sm-selected-node.sm-collaborator-1 { outline-color: var(--collaborator-color-1); }
+.sm-selected-node.sm-collaborator-2 { outline-color: var(--collaborator-color-2); }
+.sm-selected-node.sm-collaborator-3 { outline-color: var(--collaborator-color-3); }
+.sm-selected-node.sm-collaborator-4 { outline-color: var(--collaborator-color-4); }
+.sm-selected-node.sm-collaborator-5 { outline-color: var(--collaborator-color-5); }

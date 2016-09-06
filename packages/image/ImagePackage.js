@@ -18,7 +18,6 @@ module.exports = {
     config.addCommand('insert-image', InsertImageCommand);
     config.addTool('insert-image', InsertImageTool);
     config.addIcon('insert-image', { 'fontawesome': 'fa-image' });
-    config.addStyle(__dirname, '_image.scss');
     config.addLabel('image', {
       en: 'Image',
       de: 'Bild'

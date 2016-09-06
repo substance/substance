@@ -13,7 +13,6 @@ module.exports = {
     config.addCommand('insert-table', InsertTableCommand);
     config.addTool('insert-table', Tool);
     config.addIcon('insert-table', { 'fontawesome': 'fa-table' });
-    config.addStyle(__dirname, '/_table.scss');
     config.addLabel('table', {
       en: 'Table',
       de: 'Tabelle'

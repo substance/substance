@@ -1,0 +1,6 @@
+.sc-code {
+  font-family: var(--font-family-code);
+  font-size: var(--font-size-code);
+  background: var(--lighten-color-1);
+  padding: 2px 0px;
+}

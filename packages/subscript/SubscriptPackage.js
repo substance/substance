@@ -17,7 +17,6 @@ module.exports = {
     config.addCommand('subscript', AnnotationCommand, { nodeType: 'subscript' });
     config.addTool('subscript', AnnotationTool);
     config.addIcon('subscript', { 'fontawesome': 'fa-subscript' });
-    config.addStyle(__dirname, '_subscript.scss');
     config.addLabel('subscript', {
       en: 'Subscript',
       de: 'Tiefgestellt'

@@ -34,7 +34,6 @@ module.exports = {
       noBaseStyles: options.noBaseStyles
     });
 
-    config.addStyle(__dirname, '_prose-editor.scss');
     config.import(ParagraphPackage);
     config.import(HeadingPackage);
     config.import(CodeblockPackage);

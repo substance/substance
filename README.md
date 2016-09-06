@@ -90,7 +90,13 @@ $ npm run doc
 
 ### Beta 5
 
-*ETA: July 2016*
+*ETA: September 2016*
+
+- Stabilized Beta 4 features
+- ES6 support
+- Pure CSS for easier integration
+
+### Beta 6
 
 - Key bindings
 - Mobile support
@@ -98,7 +104,6 @@ $ npm run doc
 - Advanced list support
 - Advanced table support
 
-*ETA: Fall 2016*
 
 ### 1.0 Final
 

@@ -1,0 +1,50 @@
+/* Inline Elements: Defaults
+------------------------------------------------------- */
+
+body,
+input,
+textarea {
+  color: var(--default-text-color);
+  font-family: -apple-system, ".SFNSText-Regular", "San Francisco", "Roboto", "Segoe UI", "Helvetica Neue", "Arial", sans-serif;
+  font-size: var(--default-font-size);
+  min-height: 30px;
+  line-height: 1.5;
+  -webkit-font-smoothing:antialiased;
+}
+
+h1, h2, h3, h4, h5, h6 {
+  font-weight: var(--strong-font-weight);
+  margin:0;
+}
+
+h1 {
+  font-size: var(--h1-font-size);
+}
+
+h2 {
+  font-size: var(--h2-font-size);
+}
+
+h3 {
+  font-size: var(--h3-font-size);
+}
+
+/* Not recommended to use */
+h4, h5, h6 { font-size: var(--h4-font-size); }
+
+.strong,
+strong { font-weight: var(--strong-font-weight); }
+
+.emphasis, em { font-style: italic; }
+
+/* Links */
+a {
+  color: var(--link-color);
+  text-decoration:none;
+}
+a:focus {
+  outline: 1px solid var(--focus-outline-color);
+}
+button:focus {
+  outline: 1px solid var(--focus-outline-color);
+}

@@ -1,0 +1,6 @@
+.sc-module {
+  margin-bottom: var(--subsection-margin-bottom);
+}
+.sc-module > .se-description {
+  margin-bottom: var(--node-margin-bottom);
+}

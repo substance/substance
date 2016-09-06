@@ -24,7 +24,7 @@ SwitchTextTypeCommand.Prototype = function() {
   this.getTextType = function(context, textTypeName) {
     var textTypes = this.getTextTypes(context);
     return _find(textTypes, function(t) {
-      return t.type === textTypeName;
+      return t.name === textTypeName;
     });
   };
 

@@ -1,0 +1,15 @@
+.sc-prose-editor {}
+.sc-prose-editor .sc-container-editor {
+  padding:  var(--default-padding);
+}
+/* Add padding to each child except last one */
+.sc-prose-editor .sc-container-editor > * + * {
+  padding-top:  var(--default-padding);
+}
+/* Smaller gap between list-items */
+.sc-prose-editor .sc-container-editor .sc-list-item + .sc-list-item {
+  padding-top: 0.5 *  var(--default-padding);
+}
+.sc-prose-editor .sc-prose-editor-toolbar {
+  border-bottom: 1px solid  var(--border-color);
+}

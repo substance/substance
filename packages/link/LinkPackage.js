@@ -18,7 +18,6 @@ module.exports = {
     config.addCommand('link', LinkCommand, {nodeType: 'link'});
     config.addTool('link', AnnotationTool);
     config.addTool('edit-link', EditLinkTool, { overlay: true });
-    config.addStyle(__dirname, '_link.scss');
     config.addIcon('link', { 'fontawesome': 'fa-link'});
     config.addIcon('open-link', { 'fontawesome': 'fa-external-link' });
     config.addLabel('link', {

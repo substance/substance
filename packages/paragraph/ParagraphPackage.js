@@ -16,7 +16,6 @@ module.exports = {
       name: 'paragraph',
       data: {type: 'paragraph'}
     });
-    config.addStyle(__dirname, '_paragraph.scss');
     config.addLabel('paragraph', {
       en: 'Paragraph',
       de: 'Paragraph'

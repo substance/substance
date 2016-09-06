@@ -1,0 +1,51 @@
+@import url('./font-awesome/css/font-awesome.min.css');
+@import url('./highlight.js/styles/github.css');
+
+@import './substance.css';
+@import './substance-reset.css';
+@import './substance-pagestyle.css';
+
+/* DocumentationReader component styles */
+@import './styles/_variables.css';
+@import './styles/_globals.css';
+@import './styles/components/_namespace.css';
+@import './styles/components/_class.css';
+@import './styles/components/_module.css';
+@import './styles/components/_function.css';
+@import './styles/components/_heading.css';
+@import './styles/components/_method.css';
+@import './styles/components/_property.css';
+@import './styles/components/_event.css';
+@import './styles/components/_signature.css';
+@import './styles/components/_params.css';
+@import './styles/components/_example.css';
+@import './styles/components/_cover.css';
+@import './styles/components/_member-index.css';
+
+pre {
+  font-size: var(--font-size-codeblock);
+  font-family: var(--font-family-code);
+  margin-bottom: var(--node-margin-bottom);
+}
+body {
+  font-size: var(--font-size-normal);
+  overflow: hidden;
+}
+.sc-documentation-toc-panel {
+  top: 0px;
+}
+.sc-documentation-reader {
+  position: absolute;
+  top: 0px;
+  left: 0px;
+  right: 0px;
+  bottom: 0px;
+}
+.sc-documentation-reader .se-main-section .se-content {
+  padding: 40px;
+}
+.sc-documentation-reader .se-context-section {
+  border-right: 1px solid #ddd;
+  background-color: #fafafa;
+  box-shadow: inset 0 0 10px rgba(0, 0, 0, 0.05);
+}

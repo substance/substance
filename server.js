@@ -1,27 +1,33 @@
 /* eslint-disable strict, no-console */
-
 var express = require('express');
 var path = require('path');
 var PORT = process.env.PORT || 4201;
 var app = express();
-
 var config = require('./doc/config.json');
 var generate = require('./doc/generator/generate');
 var serverUtils = require('./util/server');
-
-// use static server
-app.use('/docs', express.static(path.join(__dirname, 'doc/assets')));
-app.use('/docs/fonts', express.static(path.join(__dirname, 'node_modules/font-awesome/fonts')));
+var browserifyConfig = {
+  debug: true
+};
 
 app.get('/docs/documentation.json', function(req, res) {
   var nodes = generate(config);
   res.json(nodes);
 });
 
-serverUtils.serveStyles(app, '/docs/app.css', {scssPath: path.join(__dirname, 'doc', 'app.scss')});
-serverUtils.serveJS(app, '/docs/app.js', path.join(__dirname, 'doc', 'app.js'));
+serverUtils.serveJS(app, '/docs/app.js', {
+  sourcePath: path.join(__dirname, 'doc', 'app.js'),
+  browserify: browserifyConfig,
+});
 
 serverUtils.serveTestSuite(app, "test/**/*.test.js");
+
+// TODO: Use Substance bundler instead for static serving tasks
+app.use('/test/test.css', express.static(path.join(__dirname, 'test', 'test.css')));
+app.use('/docs', express.static(path.join(__dirname, 'doc')));
+app.use('/docs', express.static(path.join(__dirname, 'doc/assets')));
+app.use('/docs', express.static(path.join(__dirname, 'node_modules')));
+app.use('/docs', express.static(path.join(__dirname)));
 
 app.listen(PORT);
 console.log('Server is listening on %s', PORT);

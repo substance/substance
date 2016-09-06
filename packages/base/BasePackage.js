@@ -8,7 +8,7 @@ var Tool = require('../../ui/Tool');
 
 module.exports = {
   name: 'base',
-  configure: function(config, options) {
+  configure: function(config) {
     // Commands
     config.addCommand('switch-text-type', SwitchTextTypeCommand);
     config.addCommand('undo', UndoCommand);
@@ -24,17 +24,6 @@ module.exports = {
     config.addIcon('delete', { 'fontawesome': 'fa-times' });
     config.addIcon('expand', { 'fontawesome': 'fa-arrows-h' });
     config.addIcon('truncate', { 'fontawesome': 'fa-arrows-h' });
-
-    // Substance base styles
-    if (!options.noBaseStyles) {
-      config.addStyle(__dirname, '..', '..', 'styles', 'base', '_all');
-    }
-
-    // Styles
-    config.addStyle(__dirname, '_base.scss');
-
-    // Core component styles
-    config.addStyle(__dirname, '..', '..', 'styles', 'components', '_all');
 
     // Labels
     config.addLabel('undo', {

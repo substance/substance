@@ -398,7 +398,7 @@ CollabSession.Prototype = function() {
       change: change
     };
     if (selectionHasChanged) {
-      update.selection = this.selection;
+      update.selection = this.getSelection();
     }
     if (collaboratorsChange) {
       update.collaborators = collaboratorsChange;

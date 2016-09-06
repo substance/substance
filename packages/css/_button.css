@@ -1,0 +1,13 @@
+.sc-button {
+  padding: 0px var(--default-padding);
+  text-align: center;
+  height: 40px;
+  font-size: var(--small-font-size);
+  color: var(--button-color);
+  font-weight: var(--strong-font-weight);
+  display: inline-block;
+  border: 1px solid var(--button-color);
+  border-radius: 3px;
+}
+
+.sc-button:disabled { opacity: 0.4; cursor: not-allowed; }
