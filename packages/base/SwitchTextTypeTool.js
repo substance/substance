@@ -63,7 +63,7 @@ SwitchTextTypeTool.Prototype = function() {
       each(this.props.textTypes, function(textType) {
         var button = $$('button')
             .addClass('se-option sm-'+textType.name)
-            .attr('data-type', textType.data.type)
+            .attr('data-type', textType.name)
             .append(labelProvider.getLabel(textType.name))
             .on('click', this.handleClick);
         options.append(button);
