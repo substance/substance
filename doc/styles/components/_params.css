@@ -1,0 +1,20 @@
+.sc-params .se-label {
+  font-size: var(--font-size-small);
+  padding-bottom: 10px;
+  font-weight: bold;
+}
+.sc-params > .se-params-table {
+  font-size: var(--font-size-small);
+  margin-left: 20px;
+}
+.sc-params > .se-params-table .se-param-name {
+  font-weight: bold;
+  padding-right: 20px;
+}
+.sc-params > .se-params-table .se-param-type {
+  padding-right: 20px;
+  color: #999;
+}
+.sc-params > .se-params-table + .se-returns {
+  margin-top: 10px;
+}

@@ -1,0 +1,35 @@
+.sc-text-property { white-space: pre-wrap; }
+.sc-text-property .se-cursor { position: relative; }
+.sc-text-property .se-cursor .se-cursor-inner {
+  position: absolute;
+  top: 0px;
+  bottom: 0px;
+  left: 0px;
+  width: 1px;
+  background: #999;
+}
+/* Cursor */
+.sc-text-property .se-cursor.sm-collaborator-1  .se-cursor-inner { background: var(--collaborator-color-1); }
+.sc-text-property .se-cursor.sm-collaborator-2  .se-cursor-inner { background: var(--collaborator-color-2); }
+.sc-text-property .se-cursor.sm-collaborator-3  .se-cursor-inner { background: var(--collaborator-color-3); }
+.sc-text-property .se-cursor.sm-collaborator-4  .se-cursor-inner { background: var(--collaborator-color-4); }
+.sc-text-property .se-cursor.sm-collaborator-5  .se-cursor-inner { background: var(--collaborator-color-5); }
+.sc-text-property .se-cursor.sm-collaborator-6  .se-cursor-inner { background: var(--collaborator-color-6); }
+.sc-text-property .se-cursor.sm-collaborator-7  .se-cursor-inner { background: var(--collaborator-color-7); }
+.sc-text-property .se-cursor.sm-collaborator-8  .se-cursor-inner { background: var(--collaborator-color-8); }
+.sc-text-property .se-cursor.sm-collaborator-9  .se-cursor-inner { background: var(--collaborator-color-9); }
+.sc-text-property .se-cursor.sm-collaborator-10 .se-cursor-inner { background: var(--collaborator-color-10); }
+/* Selection Fragment */
+.sc-text-property .se-selection-fragment { background-color: #ddd; }
+.sc-text-property .se-selection-fragment.sm-collaborator-1  { background: rgba(--collaborator-color-1, 0.30); }
+.sc-text-property .se-selection-fragment.sm-collaborator-2  { background: rgba(--collaborator-color-2, 0.30); }
+.sc-text-property .se-selection-fragment.sm-collaborator-3  { background: rgba(--collaborator-color-3, 0.30); }
+.sc-text-property .se-selection-fragment.sm-collaborator-4  { background: rgba(--collaborator-color-4, 0.30); }
+.sc-text-property .se-selection-fragment.sm-collaborator-5  { background: rgba(--collaborator-color-5, 0.30); }
+.sc-text-property .se-selection-fragment.sm-collaborator-6  { background: rgba(--collaborator-color-6, 0.30); }
+.sc-text-property .se-selection-fragment.sm-collaborator-7  { background: rgba(--collaborator-color-7, 0.30); }
+.sc-text-property .se-selection-fragment.sm-collaborator-8  { background: rgba(--collaborator-color-8, 0.30); }
+.sc-text-property .se-selection-fragment.sm-collaborator-9  { background: rgba(--collaborator-color-9, 0.30); }
+.sc-text-property .se-selection-fragment.sm-collaborator-10 { background: rgba(--collaborator-color-10, 0.30); }
+.sc-text-property .se-container-annotation.se-anchor { position: relative; }
+.sc-text-property .sm-highlighted { background: #ddd; }

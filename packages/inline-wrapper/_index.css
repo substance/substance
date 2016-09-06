@@ -1,0 +1,13 @@
+.sc-inline-wrapper { display: block; margin-top: 10px; }
+.sc-inline-wrapper > .se-container { display: block; }
+.sc-inline-wrapper.sm-default-style.sm-selected > .se-container,
+.sc-inline-wrapper.sm-default-style.sm-co-selected > .se-container {
+  background: rgba(163,205,253, 0.6);
+  outline: 2px solid;
+  outline-color: var(--local-selection-color);
+}
+.sc-inline-wrapper.sm-default-style.sm-focused > .se-container,
+.sc-inline-wrapper.sm-default-style.sm-co-focused > .se-container {
+  outline: 2px solid;
+  outline-color: var(--local-selection-color);
+}

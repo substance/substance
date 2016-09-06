@@ -1,0 +1,5 @@
+.sc-class { margin-bottom: var(--subsection-margin-bottom); }
+.sc-class > .se-description { margin-bottom: var(--node-margin-bottom); }
+.sc-class > .se-constructor { margin-bottom: var(--node-margin-bottom); }
+.sc-class > .sc-example { margin-bottom: var(--subsection-margin-bottom); }
+.sc-class > .sc-params { margin-bottom: var(--node-margin-bottom); }

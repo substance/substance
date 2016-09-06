@@ -1,0 +1,11 @@
+.sc-function {
+  margin-bottom: var(--subsection-margin-bottom);
+}
+
+.sc-function > .sc-signature {
+  margin-bottom: var(--node-margin-bottom);
+}
+
+.sc-function > .se-description {
+  margin-bottom: var(--node-margin-bottom);
+}

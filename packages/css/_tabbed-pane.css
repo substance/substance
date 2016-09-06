@@ -1,0 +1,15 @@
+.sc-tabbed-pane { position: absolute; top: 0px; left: 0px; right: 0px; bottom: 0px; }
+.sc-tabbed-pane .se-tabs { height: 40px; border-bottom: 1px solid #ddd; }
+.sc-tabbed-pane .se-tabs .se-tab {
+  display: block;
+  float: left;
+  height: 40px;
+  line-height: 40px;
+  padding: 0px 20px;
+  color: #444;
+  font-size: 12px;
+  font-weight: 600;
+}
+.sc-tabbed-pane .se-tabs .se-tab:hover { background: #eee; border-bottom: 1px solid #bbb; }
+.sc-tabbed-pane .se-tabs .se-tab.sm-active { background: #eee; border-bottom: 1px solid #444; }
+.sc-tabbed-pane .se-tab-content { position: absolute; top: 40px; left: 0px; right: 0px; bottom: 0px; }

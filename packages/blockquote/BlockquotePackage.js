@@ -12,7 +12,6 @@ module.exports = {
     config.addComponent(Blockquote.type, BlockquoteComponent);
     config.addConverter('html', BlockquoteHTMLConverter);
     config.addConverter('xml', BlockquoteXMLConverter);
-    config.addStyle(__dirname, '_blockquote.scss');
     config.addTextType({
       name: 'blockquote',
       data: {type: 'blockquote'}

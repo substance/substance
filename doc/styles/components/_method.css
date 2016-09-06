@@ -1,0 +1,9 @@
+.sc-method {
+  margin-bottom: var(--node-margin-bottom);
+}
+.sc-method > .sc-signature {
+  margin-bottom: var(--node-margin-bottom);
+}
+.sc-method > .se-description {
+  margin-bottom: var(--node-margin-bottom);
+}
