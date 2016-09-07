@@ -2,8 +2,8 @@
 
 var Command = require('../../ui/Command');
 
-function Redo() {
-  Command.call(this, { name: 'redo' });
+function Redo(params) {
+  Command.call(this, params);
 }
 
 Redo.Prototype = function() {

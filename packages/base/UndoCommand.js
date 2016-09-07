@@ -2,8 +2,8 @@
 
 var Command = require('../../ui/Command');
 
-function Undo() {
-  Command.call(this, { name: 'undo' });
+function Undo(params) {
+  Command.call(this, params);
 }
 
 Undo.Prototype = function() {
