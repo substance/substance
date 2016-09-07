@@ -68,6 +68,9 @@ TransactionDocument.Prototype = function() {
     if (!nodeData.id) {
       nodeData.id = uuid(nodeData.type);
     }
+    if (!nodeData.type) {
+      throw new Error('No node type provided');
+    }
     var op = this.data.create(nodeData);
     if (!op) return;
     this.ops.push(op);
