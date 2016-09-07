@@ -114,6 +114,10 @@ NodeSelection.Prototype = function() {
     }
   };
 
+  this._clone = function() {
+    return new NodeSelection(this.containerId, this.nodeId, this.mode, this.reverse, this.surfaceId);
+  };
+
 };
 
 Selection.extend(NodeSelection);
