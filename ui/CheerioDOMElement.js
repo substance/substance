@@ -256,7 +256,7 @@ CheerioDOMElement.Prototype = function() {
 
   this.isElementNode = function() {
     // cheerio specific
-    return this.el.type === "tag";
+    return this.el.type === "tag" || this.el.type === "script";
   };
 
   this.isCommentNode = function() {
@@ -474,7 +474,11 @@ CheerioDOMElement.parseMarkup = function(str, format) {
     }
     return new CheerioDOMElement(doc);
   } else {
-    nativeEls = $.parseXML(str);
+    if (format === 'xml') {
+      nativeEls = $.parseXML(str);
+    } else {
+      nativeEls = $.parseHTML(str);
+    }
   }
   var elements = nativeEls.map(function(el) {
     return new CheerioDOMElement(el);

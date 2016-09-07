@@ -45,7 +45,7 @@ CollabClient.Prototype = function() {
   this._onMessage = function(msg) {
     if (msg.scope === this.scope) {
       this.emit('message', msg);
-    } else {
+    } else if (msg.scope !== '_internal') {
       console.info('Message ignored. Not sent in hub scope', msg);
     }
   };
