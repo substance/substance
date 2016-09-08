@@ -993,27 +993,6 @@ DOMElement._defineProperties = function(DOMElementClass, propertyNames) {
   });
 };
 
-/**
-  Parses a given HTML string.
-
-  @param {String} html HTML string
-  @returns {Array<ui/DefaultDOMElement>} parsed elements
-*/
-DOMElement.parseHTML = function(html) {
-  var DefaultDOMElement = require('./DefaultDOMElement');
-  return DefaultDOMElement.parseHTML(html);
-};
-
-DOMElement.parseXML = function(xml) {
-  var DefaultDOMElement = require('./DefaultDOMElement');
-  return DefaultDOMElement.parseXML(xml);
-};
-
-DOMElement.wrapNativeElement = function(nativeEl) {
-  var DefaultDOMElement = require('./DefaultDOMElement');
-  return DefaultDOMElement.wrapNativeElement(nativeEl);
-};
-
 function DOMElementDelegator() {
   this.el = null;
 }

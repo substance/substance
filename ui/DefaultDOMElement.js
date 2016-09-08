@@ -56,10 +56,8 @@ DefaultDOMElement.parseXML = function(xml, fullDoc) {
 DefaultDOMElement.wrapNativeElement = function(el) {
   if (el) {
     if (inBrowser && (el instanceof window.Node || el === window) ) {
-      var BrowserDOMElement = require('./BrowserDOMElement');
       return BrowserDOMElement.wrapNativeElement(el);
     } else if (el.root && el.root.type === "root" ) {
-      var CheerioDOMElement = require('./CheerioDOMElement');
       return CheerioDOMElement.wrapNativeElement(el);
     }
   } else {
@@ -69,7 +67,6 @@ DefaultDOMElement.wrapNativeElement = function(el) {
 
 DefaultDOMElement.isReverse = function(anchorNode, anchorOffset, focusNode, focusOffset) {
   if (inBrowser ) {
-    var BrowserDOMElement = require('./BrowserDOMElement');
     return BrowserDOMElement.isReverse(anchorNode, anchorOffset, focusNode, focusOffset);
   } else {
     throw new Error('Not implemented.');
