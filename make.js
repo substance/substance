@@ -1,17 +1,26 @@
-var bundler = require('substance-bundler');
+var b = require('substance-bundler');
 
-bundler.configure({
-  js: {
-    // lodash is cjs
-    commonjs: ['node_modules/lodash/**'],
-    // leave cheerio et. al untouched
-    external: ['cheerio', 'dom-serializer'],
-  }
-})
+b.task('clean', function() {
+  b.rm('./dist');
+});
 
-bundler.rm('./dist');
+b.task('css', function() {
+  b.copy('*.css', 'dist/');
+  b.copy('packages/**/*.css', 'dist/');
+});
 
-bundler.js('./index.es.js', [
-  { dest: './dist/substance.js', format: 'cjs' },
-  { dest: './dist/substance.es.js', format: 'es' },
-]);
+// bundle for the browser
+b.task('browser', function() {
+  b.js('./index.es.js', {
+    // leave out server side dependencies
+    ignore: ['cheerio', 'dom-serializer'],
+    nodeResolve: { include: ['node_modules/lodash/**'] },
+    commonjs: { include: ['node_modules/lodash/**'] },
+    targets: [
+      { dest: './dist/substance.js', format: 'umd', moduleName: 'substance' },
+      { dest: './dist/substance.es6.js', format: 'es' }
+    ]
+  });
+});
+
+b.task('default', ['clean', 'css', 'browser'])
