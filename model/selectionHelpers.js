@@ -8,13 +8,13 @@ export function fromJSON(json) {
   var type = json.type;
   switch(type) {
     case 'property':
-      return propertySelectionFromJSON(json);
+      return PropertySelection.fromJSON(json);
     case 'container':
-      return containerSelectionFromJSON(json);
+      return ContainerSelection.fromJSON(json);
     case 'node':
-      return nodeSelectionFromJSON(json);
+      return NodeSelection.fromJSON(json);
     case 'custom':
-      return customSelectionFromJSON(json);
+      return CustomSelection.fromJSON(json);
     default:
       // console.error('Selection.fromJSON(): unsupported selection data', json);
       return Selection.nullSelection;
