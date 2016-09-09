@@ -1,6 +1,4 @@
-"use strict";
-
-import each from 'lodash/each'
+import forEach from 'lodash/forEach'
 import uniq from 'lodash/uniq'
 import uuid from '../util/uuid'
 
@@ -11,11 +9,11 @@ import uuid from '../util/uuid'
 //
 // As we treat annotations as overlay of plain text we need to keep them up-to-date during editing.
 
-var insertedText = function(doc, coordinate, length) {
+function insertedText(doc, coordinate, length) {
   if (!length) return;
   var index = doc.getIndex('annotations');
   var annotations = index.get(coordinate.path);
-  each(annotations, function(anno) {
+  forEach(annotations, function(anno) {
     var pos = coordinate.offset;
     var start = anno.startOffset;
     var end = anno.endOffset;
@@ -40,7 +38,7 @@ var insertedText = function(doc, coordinate, length) {
   // same for container annotation anchors
   index = doc.getIndex('container-annotation-anchors');
   var anchors = index.get(coordinate.path);
-  each(anchors, function(anchor) {
+  forEach(anchors, function(anchor) {
     var pos = coordinate.offset;
     var start = anchor.offset;
     var changed = false;
@@ -54,15 +52,15 @@ var insertedText = function(doc, coordinate, length) {
       doc.set([anchor.id, property], start);
     }
   });
-};
+}
 
 // TODO: clean up replaceText support hackz
-var deletedText = function(doc, path, startOffset, endOffset) {
+function deletedText(doc, path, startOffset, endOffset) {
   if (startOffset === endOffset) return;
   var index = doc.getIndex('annotations');
   var annotations = index.get(path);
   var length = endOffset - startOffset;
-  each(annotations, function(anno) {
+  forEach(annotations, function(anno) {
     var pos1 = startOffset;
     var pos2 = endOffset;
     var start = anno.startOffset;
@@ -98,7 +96,7 @@ var deletedText = function(doc, path, startOffset, endOffset) {
   index = doc.getIndex('container-annotation-anchors');
   var anchors = index.get(path);
   var containerAnnoIds = [];
-  each(anchors, function(anchor) {
+  forEach(anchors, function(anchor) {
     containerAnnoIds.push(anchor.id);
     var pos1 = startOffset;
     var pos2 = endOffset;
@@ -122,7 +120,7 @@ var deletedText = function(doc, path, startOffset, endOffset) {
     }
   });
   // check all anchors after that if they have collapsed and remove the annotation in that case
-  each(uniq(containerAnnoIds), function(id) {
+  forEach(uniq(containerAnnoIds), function(id) {
     var anno = doc.get(id);
     var annoSel = anno.getSelection();
     if(annoSel.isCollapsed()) {
@@ -130,13 +128,13 @@ var deletedText = function(doc, path, startOffset, endOffset) {
       doc.delete(id);
     }
   });
-};
+}
 
 // used when breaking a node to transfer annotations to the new property
-var transferAnnotations = function(doc, path, offset, newPath, newOffset) {
+function transferAnnotations(doc, path, offset, newPath, newOffset) {
   var index = doc.getIndex('annotations');
   var annotations = index.get(path, offset);
-  each(annotations, function(a) {
+  forEach(annotations, function(a) {
     var isInside = (offset > a.startOffset && offset < a.endOffset);
     var start = a.startOffset;
     var end = a.endOffset;
@@ -184,7 +182,7 @@ var transferAnnotations = function(doc, path, offset, newPath, newOffset) {
   index = doc.getIndex('container-annotation-anchors');
   var anchors = index.get(path);
   var containerAnnoIds = [];
-  each(anchors, function(anchor) {
+  forEach(anchors, function(anchor) {
     containerAnnoIds.push(anchor.id);
     var start = anchor.offset;
     if (offset <= start) {
@@ -195,7 +193,7 @@ var transferAnnotations = function(doc, path, offset, newPath, newOffset) {
     }
   });
   // check all anchors after that if they have collapsed and remove the annotation in that case
-  each(uniq(containerAnnoIds), function(id) {
+  forEach(uniq(containerAnnoIds), function(id) {
     var anno = doc.get(id);
     var annoSel = anno.getSelection();
     if(annoSel.isCollapsed()) {
@@ -203,10 +201,10 @@ var transferAnnotations = function(doc, path, offset, newPath, newOffset) {
       doc.delete(id);
     }
   });
-};
+}
 
 export default {
   insertedText: insertedText,
   deletedText: deletedText,
   transferAnnotations: transferAnnotations
-};
+}
