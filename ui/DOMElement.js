@@ -862,6 +862,18 @@ DOMElement.Prototype = function() {
     return { top: 0, left: 0 };
   };
 
+  /**
+    Get element factory conveniently
+
+    @example
+
+    var $$ = el.getElementFactory();
+    $$('div').append('bla')
+  */
+  this.getElementFactory = function() {
+    return this.createElement.bind(this);
+  };
+
 };
 
 oo.initClass(DOMElement);
