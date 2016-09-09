@@ -9,18 +9,30 @@ b.task('css', function() {
   b.copy('packages/**/*.css', 'dist/');
 });
 
-// bundle for the browser
-b.task('browser', function() {
+b.task('browser:umd', function() {
   b.js('./index.es.js', {
-    // leave out server side dependencies
     ignore: ['cheerio', 'dom-serializer'],
-    nodeResolve: { include: ['node_modules/lodash/**'] },
     commonjs: { include: ['node_modules/lodash/**'] },
-    targets: [
-      { dest: './dist/substance.js', format: 'umd', moduleName: 'substance' },
-      { dest: './dist/substance.es6.js', format: 'es' }
-    ]
+    dest: './dist/substance.js',
+    format: 'umd',
+    moduleName: 'substance',
+    sourceMapRoot: __dirname,
+    sourceMapPrefix: 'substance'
+  });
+})
+
+// bundle for the browser
+b.task('browser:es6', function() {
+  b.js('./index.es.js', {
+    ignore: ['cheerio', 'dom-serializer'],
+    commonjs: { include: ['node_modules/lodash/**'] },
+    dest: './dist/substance.es6.js',
+    format: 'es',
+    sourceMapRoot: __dirname,
+    sourceMapPrefix: 'substance'
   });
 });
+
+b.task('browser', ['browser:umd', 'browser:es6'])
 
 b.task('default', ['clean', 'css', 'browser'])
