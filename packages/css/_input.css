@@ -3,13 +3,14 @@
   max-width: 500px;
   height: var(--base-height);
   line-height: var(--base-height);
+  border: 1px solid var(--border-color);
 }
 .sc-input.short {
   height: var(--short-height);
 }
 .sc-input:focus {
   background: #fff;
-  border-color: var(--focus-outline-color);
+  border: 1px solid var(--dark-border-color);
 }
 .sc-input.sm-centered {
   text-align: center;

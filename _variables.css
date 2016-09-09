@@ -14,6 +14,7 @@
 
   /* Colors */
   --border-color: #E0E4E4;
+  --dark-border-color: #777;
 
   /* Used by Button component */
   --button-color: rgba(0,0,0,0.75);
