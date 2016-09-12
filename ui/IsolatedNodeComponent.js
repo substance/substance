@@ -1,10 +1,10 @@
 'use strict';
 
-var startsWith = require('lodash/startsWith');
-var keys = require('../util/keys');
-var createSurfaceId = require('../util/createSurfaceId');
-var Coordinate = require('../model/Coordinate');
-var Component = require('./Component');
+import startsWith from 'lodash/startsWith'
+import keys from '../util/keys'
+import createSurfaceId from '../util/createSurfaceId'
+import Coordinate from '../model/Coordinate'
+import Component from './Component'
 
 function IsolatedNodeComponent() {
   IsolatedNodeComponent.super.apply(this, arguments);
@@ -403,4 +403,4 @@ IsolatedNodeComponent.getDOMCoordinates = function(comp) {
   };
 };
 
-module.exports = IsolatedNodeComponent;
+export default IsolatedNodeComponent;

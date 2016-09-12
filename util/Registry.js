@@ -1,8 +1,5 @@
-'use strict';
-
-var forEach = require('lodash/forEach');
-var oo = require('./oo');
-var warn = require('./warn');
+import forEach from 'lodash/forEach'
+import oo from './oo'
 
 // just as a reference to detect name collisions
 // with native Object properties
@@ -106,7 +103,7 @@ Registry.Prototype = function() {
    * @param {Object} execution context
    */
   this.each = function(callback, ctx) {
-    warn('DEPRECATED: use Registry.forEach(cb) instead');
+    console.warn('DEPRECATED: use Registry.forEach(cb) instead');
     return this.forEach(callback.bind(ctx));
   };
 
@@ -142,4 +139,4 @@ Registry.Prototype = function() {
 
 oo.initClass(Registry);
 
-module.exports = Registry;
+export default Registry;

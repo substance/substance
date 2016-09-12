@@ -1,12 +1,13 @@
 'use strict';
 
-var SwitchTextTypeCommand = require('./SwitchTextTypeCommand');
-var SwitchTextTypeTool = require('./SwitchTextTypeTool');
-var UndoCommand = require('./UndoCommand');
-var RedoCommand = require('./RedoCommand');
-var Tool = require('../../ui/Tool');
+import SwitchTextTypeCommand from './SwitchTextTypeCommand'
+import SwitchTextTypeTool from './SwitchTextTypeTool'
+import UndoCommand from './UndoCommand'
+import RedoCommand from './RedoCommand'
+import Tool from '../../ui/Tool'
 
-module.exports = {
+
+export default {
   name: 'base',
   configure: function(config) {
     // Commands

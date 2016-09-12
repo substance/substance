@@ -1,9 +1,9 @@
 'use strict';
 
-var oo = require('../util/oo');
-var TreeIndex = require('../util/TreeIndex');
-var Selection = require('./Selection');
-var documentHelpers = require('./documentHelpers');
+import oo from '../util/oo'
+import TreeIndex from '../util/TreeIndex'
+import Selection from './Selection'
+import documentHelpers from './documentHelpers'
 
 function SelectionState(doc) {
   this.document = doc;
@@ -89,4 +89,4 @@ SelectionState.Prototype = function() {
 
 oo.initClass(SelectionState);
 
-module.exports = SelectionState;
+export default SelectionState;

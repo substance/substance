@@ -1,9 +1,9 @@
 'use strict';
 
-var isEqual = require('lodash/isEqual');
-var startsWith = require('lodash/startsWith');
-var Coordinate = require('../model/Coordinate');
-var IsolatedNodeComponent = require('./IsolatedNodeComponent');
+import isEqual from 'lodash/isEqual'
+import startsWith from 'lodash/startsWith'
+import Coordinate from '../model/Coordinate'
+import IsolatedNodeComponent from './IsolatedNodeComponent'
 
 function InlineNodeComponent() {
   InlineNodeComponent.super.apply(this, arguments);
@@ -111,4 +111,4 @@ InlineNodeComponent.getCoordinate = function(el) {
   return null;
 };
 
-module.exports = InlineNodeComponent;
+export default InlineNodeComponent;

@@ -1,7 +1,7 @@
 'use strict';
 
-var replaceText = require('./replaceText');
-var updateAnnotations = require('./updateAnnotations');
+import replaceText from './replaceText'
+import updateAnnotations from './updateAnnotations'
 
 /**
   Inserts text at the given selection.
@@ -48,4 +48,4 @@ var insertText = function(tx, args) {
   return args;
 };
 
-module.exports = insertText;
+export default insertText;

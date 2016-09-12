@@ -1,6 +1,6 @@
 'use strict';
 
-var NodeIndex = require('./data/NodeIndex');
+import NodeIndex from './data/NodeIndex'
 
 function DocumentIndex() {}
 
@@ -8,4 +8,4 @@ NodeIndex.extend(DocumentIndex);
 
 DocumentIndex.filterByType = NodeIndex.filterByType;
 
-module.exports = NodeIndex;
+export default NodeIndex;

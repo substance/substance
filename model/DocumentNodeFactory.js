@@ -1,6 +1,6 @@
 'use strict';
 
-var oo = require('../util/oo');
+import oo from '../util/oo'
 
 function DocumentNodeFactory(doc) {
   this.doc = doc;
@@ -20,4 +20,4 @@ DocumentNodeFactory.Prototype = function() {
 
 oo.initClass(DocumentNodeFactory);
 
-module.exports = DocumentNodeFactory;
+export default DocumentNodeFactory;

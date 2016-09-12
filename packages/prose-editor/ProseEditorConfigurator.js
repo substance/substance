@@ -1,7 +1,7 @@
-'use strict';
-var Configurator = require('../../util/Configurator');
-var FileClientStub = require('./FileClientStub');
-var SaveHandlerStub = require('./SaveHandlerStub');
+import Configurator from '../../util/Configurator'
+import FileClientStub from './FileClientStub'
+import SaveHandlerStub from './SaveHandlerStub'
+import DefaultToolbar from '../../ui/Toolbar'
 
 /*
   This works well for single-column apps (such as ProseEditor).
@@ -15,7 +15,7 @@ function ProseEditorConfigurator() {
   // Extend configuration
   this.config.saveHandler = new SaveHandlerStub();
   this.config.fileClient = new FileClientStub();
-  this.config.ToolbarClass = null;
+  this.config.ToolbarClass = DefaultToolbar;
 }
 
 ProseEditorConfigurator.Prototype = function() {
@@ -47,4 +47,4 @@ ProseEditorConfigurator.Prototype = function() {
 
 Configurator.extend(ProseEditorConfigurator);
 
-module.exports = ProseEditorConfigurator;
+export default ProseEditorConfigurator;

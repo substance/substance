@@ -1,6 +1,6 @@
 'use strict';
 
-var Registry = require('./Registry');
+import Registry from './Registry'
 
 /*
  * Simple factory implementation.
@@ -39,4 +39,4 @@ Factory.Prototype = function() {
 
 Registry.extend(Factory);
 
-module.exports = Factory;
+export default Factory;

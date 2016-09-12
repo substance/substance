@@ -1,9 +1,9 @@
 'use strict';
 
-var oo = require('../util/oo');
-var extend = require('lodash/extend');
-var Err = require('../util/SubstanceError');
-var uuid = require('../util/uuid');
+import oo from '../util/oo'
+import extend from 'lodash/extend'
+import Err from '../util/SubstanceError'
+import uuid from '../util/uuid'
 
 /*
   Implements Substance DocumentStore API. This is just a dumb store.
@@ -122,4 +122,4 @@ DocumentStore.Prototype = function() {
 
 
 oo.initClass(DocumentStore);
-module.exports = DocumentStore;
+export default DocumentStore;

@@ -1,6 +1,6 @@
 'use strict';
 
-var oo = require('../util/oo');
+import oo from '../util/oo'
 
 /**
  Abstract interface for commands.
@@ -58,4 +58,4 @@ Command.Prototype = function() {
 
 oo.initClass(Command);
 
-module.exports = Command;
+export default Command;

@@ -1,6 +1,6 @@
 'use strict';
 
-var Component = require('./Component');
+import Component from './Component'
 
 /**
   @class ToolGroup
@@ -30,4 +30,4 @@ ToolGroup.Prototype = function() {
 
 Component.extend(ToolGroup);
 
-module.exports = ToolGroup;
+export default ToolGroup;

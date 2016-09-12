@@ -1,8 +1,8 @@
 'use strict';
 
-var forEach = require('lodash/forEach');
-var oo = require('../util/oo');
-var Icon = require('./FontAwesomeIcon');
+import forEach from 'lodash/forEach'
+import oo from '../util/oo'
+import Icon from './FontAwesomeIcon'
 
 function FontAwesomeIconProvider(icons) {
   this.map = {};
@@ -30,4 +30,4 @@ FontAwesomeIconProvider.Prototype = function() {
 
 oo.initClass(FontAwesomeIconProvider);
 
-module.exports = FontAwesomeIconProvider;
+export default FontAwesomeIconProvider;

@@ -1,7 +1,7 @@
 'use strict';
 
-var each = require('lodash/each');
-var ContainerEditor = require('./ContainerEditor');
+import each from 'lodash/each'
+import ContainerEditor from './ContainerEditor'
 
 /**
   Represents a flow annotator that manages a sequence of nodes in a container. Needs to
@@ -58,4 +58,4 @@ ContainerAnnotator.Prototype = function() {
 
 ContainerEditor.extend(ContainerAnnotator);
 
-module.exports = ContainerAnnotator;
+export default ContainerAnnotator;

@@ -1,6 +1,6 @@
 'use strict';
 
-var Toolbar = require('../../ui/Toolbar');
+import Toolbar from '../../ui/Toolbar'
 
 function ProseEditorToolbar() {
   ProseEditorToolbar.super.apply(this, arguments);
@@ -16,4 +16,4 @@ ProseEditorToolbar.Prototype = function() {
 
 Toolbar.extend(ProseEditorToolbar);
 
-module.exports = ProseEditorToolbar;
+export default ProseEditorToolbar;

@@ -1,9 +1,10 @@
 'use strict';
 
-var platform = require('../util/platform');
-var Component = require('./Component');
-var Scrollbar = require('./Scrollbar');
-var getRelativeBoundingRect = require('../util/getRelativeBoundingRect');
+import platform from '../util/platform'
+import Component from './Component'
+import Scrollbar from './Scrollbar'
+import OverlayContainer from './OverlayContainer'
+import getRelativeBoundingRect from '../util/getRelativeBoundingRect'
 
 /**
   Wraps content in a scroll pane.
@@ -95,8 +96,12 @@ ScrollPane.Prototype = function() {
 
     if (this.props.overlay) {
       var componentRegistry = this.context.componentRegistry;
-      var OverlayClass = componentRegistry.get('overlay');
-      overlay = $$(OverlayClass, {
+      // TODO: rework this. ATM we have a component `ui/Overlay`
+      // which does the positioning and gets a prop `overlay` being
+      // the actual, custom component to render the content.
+      // Hard-wiring the internal class for now, as all current implementations
+      // use the same impl.
+      overlay = $$(OverlayContainer, {
         overlay: this.props.overlay
       }).ref('overlay');
     }
@@ -218,4 +223,4 @@ ScrollPane.Prototype = function() {
 
 Component.extend(ScrollPane);
 
-module.exports = ScrollPane;
+export default ScrollPane;

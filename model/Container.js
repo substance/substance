@@ -1,11 +1,11 @@
 'use strict';
 
-var extend = require('lodash/extend');
-var isNumber = require('lodash/isNumber');
-var isString = require('lodash/isString');
-var DocumentNode = require('./DocumentNode');
-var ParentNodeMixin = require('./ParentNodeMixin');
-var ContainerAddress = require('./ContainerAddress');
+import extend from 'lodash/extend'
+import isNumber from 'lodash/isNumber'
+import isString from 'lodash/isString'
+import DocumentNode from './DocumentNode'
+import ParentNodeMixin from './ParentNodeMixin'
+import ContainerAddress from './ContainerAddress'
 
 /**
   A Container represents a list of nodes.
@@ -158,4 +158,4 @@ Object.defineProperty(Container.prototype, 'length', {
   }
 });
 
-module.exports = Container;
+export default Container;

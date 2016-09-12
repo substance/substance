@@ -3,7 +3,7 @@
 /*
    HTML converter for Subscript.
 */
-module.exports = {
+export default {
   type: 'subscript',
   tagName: 'sub',
 };

@@ -1,6 +1,6 @@
-'use strict';
-
-var extend = require('lodash/extend');
+import extend from 'lodash/extend'
+import cheerio from 'cheerio'
+import serialize from 'dom-serializer'
 
 var $ = null;
 
@@ -21,7 +21,6 @@ function _createElement(data) {
 }
 
 if (!$) {
-  var cheerio = require('cheerio');
   if (cheerio.prototype) {
     cheerio.prototype.prop = cheerio.prototype.attr;
     cheerio.prototype.removeProp = cheerio.prototype.removeAttr;
@@ -68,11 +67,10 @@ if (!$) {
     };
 
     $._serialize = function(el) {
-      var serialize = require('dom-serializer');
       var opts = el.options || (el.root && el.root.options);
       return serialize(el, opts);
     };
   }
 }
 
-module.exports = $;
+export default $;

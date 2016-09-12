@@ -1,14 +1,14 @@
 "use strict";
 /* eslint-disable no-unused-vars */
 
-var oo = require('../util/oo');
-var isFunction = require('lodash/isFunction');
-var isObject = require('lodash/isObject');
-var isString = require('lodash/isString');
-var isArray = require('lodash/isArray');
-var findIndex = require('lodash/findIndex');
-var forEach = require('lodash/forEach');
-var ArrayIterator = require('../util/ArrayIterator');
+import oo from '../util/oo'
+import isFunction from 'lodash/isFunction'
+import isObject from 'lodash/isObject'
+import isString from 'lodash/isString'
+import isArray from 'lodash/isArray'
+import findIndex from 'lodash/findIndex'
+import forEach from 'lodash/forEach'
+import ArrayIterator from '../util/ArrayIterator'
 
 /**
   A unified interface for DOM elements used by Substance.
@@ -993,27 +993,6 @@ DOMElement._defineProperties = function(DOMElementClass, propertyNames) {
   });
 };
 
-/**
-  Parses a given HTML string.
-
-  @param {String} html HTML string
-  @returns {Array<ui/DefaultDOMElement>} parsed elements
-*/
-DOMElement.parseHTML = function(html) {
-  var DefaultDOMElement = require('./DefaultDOMElement');
-  return DefaultDOMElement.parseHTML(html);
-};
-
-DOMElement.parseXML = function(xml) {
-  var DefaultDOMElement = require('./DefaultDOMElement');
-  return DefaultDOMElement.parseXML(xml);
-};
-
-DOMElement.wrapNativeElement = function(nativeEl) {
-  var DefaultDOMElement = require('./DefaultDOMElement');
-  return DefaultDOMElement.wrapNativeElement(nativeEl);
-};
-
 function DOMElementDelegator() {
   this.el = null;
 }
@@ -1179,4 +1158,4 @@ oo.initClass(TextNode);
 
 DOMElement.TextNode = TextNode;
 
-module.exports = DOMElement;
+export default DOMElement;

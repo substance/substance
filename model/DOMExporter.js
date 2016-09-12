@@ -1,11 +1,11 @@
 "use strict";
 
-var extend = require('lodash/extend');
-var isString = require('lodash/isString');
-var oo = require('../util/oo');
-var Registry = require('../util/Registry');
-var Fragmenter = require('./Fragmenter');
-var encodeXMLEntities = require('../util/encodeXMLEntities');
+import extend from 'lodash/extend'
+import isString from 'lodash/isString'
+import oo from '../util/oo'
+import Registry from '../util/Registry'
+import Fragmenter from './Fragmenter'
+import encodeXMLEntities from '../util/encodeXMLEntities'
 
 function DOMExporter(config) {
   if (!config.converters) {
@@ -207,4 +207,4 @@ DOMExporter.Prototype = function() {
 
 oo.initClass(DOMExporter);
 
-module.exports = DOMExporter;
+export default DOMExporter;

@@ -1,7 +1,7 @@
 'use strict';
 
-var PropertyAnnotation = require('../../model/PropertyAnnotation');
-var Fragmenter = require('../../model/Fragmenter');
+import PropertyAnnotation from '../../model/PropertyAnnotation'
+import Fragmenter from '../../model/Fragmenter'
 
 function Link() {
   Link.super.apply(this, arguments);
@@ -18,4 +18,4 @@ Link.define({
 // in presence of overlapping annotations will try to render this as one element
 Link.fragmentation = Fragmenter.SHOULD_NOT_SPLIT;
 
-module.exports = Link;
+export default Link;

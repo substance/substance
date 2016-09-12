@@ -1,9 +1,9 @@
 'use strict';
 
-var SaveCommand = require('./SaveCommand');
-var Tool = require('../../ui/Tool');
+import SaveCommand from './SaveCommand'
+import Tool from '../../ui/Tool'
 
-module.exports = {
+export default {
   name: 'persistence',
   configure: function(config) {
     config.addCommand('save', SaveCommand);
@@ -13,5 +13,6 @@ module.exports = {
       en: 'Save',
       de: 'Speichern'
     });
-  }
+  },
+  SaveCommand: SaveCommand,
 };

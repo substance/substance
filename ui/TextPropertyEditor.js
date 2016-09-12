@@ -1,7 +1,7 @@
 'use strict';
 
-var Surface = require('./Surface');
-var TextProperty = require('./TextPropertyComponent');
+import Surface from './Surface'
+import TextProperty from './TextPropertyComponent'
 
 /**
   Editor for a text property (annotated string). Needs to be
@@ -82,4 +82,4 @@ TextPropertyEditor.Prototype = function() {
 
 Surface.extend(TextPropertyEditor);
 
-module.exports = TextPropertyEditor;
+export default TextPropertyEditor;

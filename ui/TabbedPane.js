@@ -1,7 +1,7 @@
 'use strict';
 
-var Component = require('./Component');
-var each = require('lodash/each');
+import Component from './Component'
+import each from 'lodash/each'
 
 /**
   A tabbed pane layout component. The actual content is specified via append.
@@ -72,4 +72,4 @@ TabbedPane.Prototype = function() {
 
 Component.extend(TabbedPane);
 
-module.exports = TabbedPane;
+export default TabbedPane;

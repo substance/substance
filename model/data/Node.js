@@ -1,14 +1,14 @@
 'use strict';
 
-var isBoolean = require('lodash/isBoolean');
-var isNumber = require('lodash/isNumber');
-var isString = require('lodash/isString');
-var isArray = require('lodash/isArray');
-var isObject = require('lodash/isObject');
-var cloneDeep = require('lodash/cloneDeep');
-var each = require('lodash/each');
-var extend = require('lodash/extend');
-var EventEmitter = require('../../util/EventEmitter');
+import isBoolean from 'lodash/isBoolean'
+import isNumber from 'lodash/isNumber'
+import isString from 'lodash/isString'
+import isArray from 'lodash/isArray'
+import isObject from 'lodash/isObject'
+import cloneDeep from 'lodash/cloneDeep'
+import each from 'lodash/each'
+import extend from 'lodash/extend'
+import EventEmitter from '../../util/EventEmitter'
 
 /**
   Base node implementation.
@@ -209,7 +209,7 @@ function _unfoldedSchema(NodeClass, compiledSchema) {
     }
   }
   schemas.unshift({});
-  return extend.apply(null, schemas);
+  return Object.assign.apply(null, schemas);
 }
 
 function _extractDefaultProps(NodeClass) {
@@ -251,4 +251,4 @@ function _checked(prop, value) {
   return value;
 }
 
-module.exports = Node;
+export default Node;

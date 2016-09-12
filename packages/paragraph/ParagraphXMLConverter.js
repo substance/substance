@@ -1,3 +1,1 @@
-'use strict';
-
-module.exports = require('./ParagraphHTMLConverter');
+export {default} from './ParagraphHTMLConverter'

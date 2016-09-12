@@ -1,7 +1,7 @@
 'use strict';
 
-var oo = require('../util/oo');
-var Err = require('../util/SubstanceError');
+import oo from '../util/oo'
+import Err from '../util/SubstanceError'
 
 /*
   Implements Substance ChangeStore API. This is just a dumb store.
@@ -136,4 +136,5 @@ ChangeStore.Prototype = function() {
 };
 
 oo.initClass(ChangeStore);
-module.exports = ChangeStore;
+
+export default ChangeStore;

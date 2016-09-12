@@ -1,6 +1,6 @@
 'use strict';
 
-var InlineNodeComponent = require('../../ui/InlineNodeComponent');
+import InlineNodeComponent from '../../ui/InlineNodeComponent'
 
 function InlineWrapperComponent() {
   InlineWrapperComponent.super.apply(this, arguments);
@@ -39,4 +39,4 @@ InlineWrapperComponent.Prototype = function() {
 
 InlineNodeComponent.extend(InlineWrapperComponent);
 
-module.exports = InlineWrapperComponent;
+export default InlineWrapperComponent;

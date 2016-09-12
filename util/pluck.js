@@ -1,7 +1,7 @@
 'use strict';
 
-var map = require('lodash/map');
+import map from 'lodash/map'
 
-module.exports = function(collection, prop) {
+export default function(collection, prop) {
   return map(collection, function(item) { return item[prop]; });
 };

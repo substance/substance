@@ -1,13 +1,13 @@
 'use strict';
 
-var isFunction = require('lodash/isFunction');
-var extend = require('lodash/extend');
-var each = require('lodash/each');
-var uuid = require('../util/uuid');
-var Document = require('./Document');
-var DocumentChange = require('./DocumentChange');
-var IncrementalData = require('./data/IncrementalData');
-var DocumentNodeFactory = require('./DocumentNodeFactory');
+import isFunction from 'lodash/isFunction'
+import extend from 'lodash/extend'
+import each from 'lodash/each'
+import uuid from '../util/uuid'
+import Document from './Document'
+import DocumentChange from './DocumentChange'
+import IncrementalData from './data/IncrementalData'
+import DocumentNodeFactory from './DocumentNodeFactory'
 
 var __id__ = 0;
 
@@ -190,4 +190,4 @@ TransactionDocument.Prototype = function() {
 
 Document.extend(TransactionDocument);
 
-module.exports = TransactionDocument;
+export default TransactionDocument;

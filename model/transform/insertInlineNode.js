@@ -1,7 +1,7 @@
 'use strict';
 
-var insertText = require('./insertText');
-var createAnnotation = require('./createAnnotation');
+import insertText from './insertText'
+import createAnnotation from './createAnnotation'
 
 /**
   Inserts a new inline node at the given selection/cursor.
@@ -43,4 +43,4 @@ function insertInlineNode(tx, args) {
   return args;
 }
 
-module.exports = insertInlineNode;
+export default insertInlineNode;

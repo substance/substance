@@ -1,13 +1,13 @@
 'use strict';
 
-var Subscript = require('./Subscript');
-var SubscriptHTMLConverter = require('./SubscriptHTMLConverter');
-var SubscriptXMLConverter = require('./SubscriptXMLConverter');
-var AnnotationCommand = require('../../ui/AnnotationCommand');
-var AnnotationComponent = require('../../ui/AnnotationComponent');
-var AnnotationTool = require('../../ui/AnnotationTool');
+import Subscript from './Subscript'
+import SubscriptHTMLConverter from './SubscriptHTMLConverter'
+import SubscriptXMLConverter from './SubscriptXMLConverter'
+import AnnotationCommand from '../../ui/AnnotationCommand'
+import AnnotationComponent from '../../ui/AnnotationComponent'
+import AnnotationTool from '../../ui/AnnotationTool'
 
-module.exports = {
+export default {
   name: 'subscript',
   configure: function(config) {
     config.addNode(Subscript);
@@ -21,5 +21,7 @@ module.exports = {
       en: 'Subscript',
       de: 'Tiefgestellt'
     });
-  }
+  },
+  Subscript: Subscript,
+  SubscriptHTMLConverter: SubscriptHTMLConverter,
 };

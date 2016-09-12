@@ -1,8 +1,8 @@
 'use strict';
 
-var filter = require('lodash/filter');
-var TreeIndex = require('../util/TreeIndex');
-var DocumentIndex = require('./DocumentIndex');
+import filter from 'lodash/filter'
+import TreeIndex from '../util/TreeIndex'
+import DocumentIndex from './DocumentIndex'
 
 function AnchorIndex(doc) {
   this.doc = doc;
@@ -69,4 +69,4 @@ AnchorIndex.Prototype = function() {
 
 DocumentIndex.extend(AnchorIndex);
 
-module.exports = AnchorIndex;
+export default AnchorIndex;

@@ -1,8 +1,8 @@
 'use strict';
 
-var extend = require('lodash/extend');
-var deleteSelection = require('./deleteSelection');
-var updateAnnotations = require('./updateAnnotations');
+import extend from 'lodash/extend'
+import deleteSelection from './deleteSelection'
+import updateAnnotations from './updateAnnotations'
 
 /*
  * TODO: there is a use-case where this implementation does not suffice:
@@ -30,4 +30,4 @@ function _defaultReplace(tx, args) {
   return args;
 }
 
-module.exports = replaceText;
+export default replaceText;

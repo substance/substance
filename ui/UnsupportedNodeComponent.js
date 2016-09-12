@@ -1,6 +1,6 @@
 'use strict';
 
-var Component = require('./Component');
+import Component from './Component'
 
 function UnsupportedNodeComponent() {
   Component.apply(this, arguments);
@@ -23,4 +23,4 @@ UnsupportedNodeComponent.Prototype = function() {
 
 Component.extend(UnsupportedNodeComponent);
 
-module.exports = UnsupportedNodeComponent;
+export default UnsupportedNodeComponent;

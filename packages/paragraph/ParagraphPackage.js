@@ -1,11 +1,12 @@
 'use strict';
 
-var Paragraph = require('./Paragraph');
-var ParagraphComponent = require('./ParagraphComponent');
-var ParagraphHTMLConverter = require('./ParagraphHTMLConverter');
-var ParagraphXMLConverter = require('./ParagraphXMLConverter');
+import Paragraph from './Paragraph'
+import ParagraphComponent from './ParagraphComponent'
+import ParagraphHTMLConverter from './ParagraphHTMLConverter'
+import ParagraphXMLConverter from './ParagraphXMLConverter'
 
-module.exports = {
+
+export default {
   name: 'paragraph',
   configure: function(config) {
     config.addNode(Paragraph);
@@ -24,5 +25,8 @@ module.exports = {
       en: 'Paragraph',
       de: 'Paragraph'
     });
-  }
+  },
+  Paragraph: Paragraph,
+  ParagraphComponent: ParagraphComponent,
+  ParagraphHTMLConverter: ParagraphHTMLConverter
 };

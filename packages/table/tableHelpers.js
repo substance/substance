@@ -1,6 +1,6 @@
 'use strict';
 
-var isNumber = require('lodash/isNumber');
+import isNumber from 'lodash/isNumber'
 
 var ALPHABET = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
 
@@ -46,7 +46,7 @@ function getRowColFromId(id) {
   ];
 }
 
-module.exports = {
+export default {
   getColumnName: getColumnName,
   getRowName: getRowName,
   getColumnIndex: getColumnIndex,

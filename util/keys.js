@@ -1,5 +1,5 @@
 /* eslint-disable strict */
-module.exports = {
+export default {
   UNDEFINED: 0,
   BACKSPACE: 8,
   DELETE: 46,

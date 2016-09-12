@@ -1,7 +1,7 @@
 'use strict';
 
-var PropertyAnnotation = require('../../model/PropertyAnnotation');
-var Fragmenter = require('../../model/Fragmenter');
+import PropertyAnnotation from '../../model/PropertyAnnotation'
+import Fragmenter from '../../model/Fragmenter'
 
 function Strong() {
   Strong.super.apply(this, arguments);
@@ -15,4 +15,4 @@ Strong.type = "strong";
 // annotation gets fragmented more often
 Strong.fragmentation = Fragmenter.ANY;
 
-module.exports = Strong;
+export default Strong;

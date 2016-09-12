@@ -1,8 +1,8 @@
 'use strict';
 
-var EventEmitter = require('../util/EventEmitter');
-var each = require('lodash/each');
-var without = require('lodash/without');
+import EventEmitter from '../util/EventEmitter'
+import each from 'lodash/each'
+import without from 'lodash/without'
 
 /**
   Manages highlights. Used by {@link ui/ScrollPane}.
@@ -91,4 +91,4 @@ Highlights.Prototype = function() {
 
 EventEmitter.extend(Highlights);
 
-module.exports = Highlights;
+export default Highlights;

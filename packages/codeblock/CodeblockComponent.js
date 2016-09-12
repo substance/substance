@@ -1,6 +1,6 @@
 'use strict';
 
-var TextBlockComponent = require('../../ui/TextBlockComponent');
+import TextBlockComponent from '../../ui/TextBlockComponent'
 
 function CodeblockComponent() {
   CodeblockComponent.super.apply(this, arguments);
@@ -19,4 +19,4 @@ CodeblockComponent.Prototype = function() {
 
 TextBlockComponent.extend(CodeblockComponent);
 
-module.exports = CodeblockComponent;
+export default CodeblockComponent;

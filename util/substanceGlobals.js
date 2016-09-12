@@ -1,16 +1,15 @@
-'use strict';
-
-var warn = require('./warn');
 /**
   A place to store global variables.
 */
 var substanceGlobals = {};
 
-if (global.hasOwnProperty('Substance')) {
-  warn('global.Substance is already defined.');
-  substanceGlobals = global.Substance;
+var _global = (typeof global !== 'undefined') ? global : window
+
+if (_global.hasOwnProperty('Substance')) {
+  console.warn('global.Substance is already defined.');
+  substanceGlobals = _global.Substance;
 } else {
-  global.Substance = substanceGlobals;
+  _global.Substance = substanceGlobals;
 }
 
-module.exports = substanceGlobals;
+export default substanceGlobals;

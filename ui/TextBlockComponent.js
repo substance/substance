@@ -1,7 +1,7 @@
 'use strict';
 
-var NodeComponent = require('./NodeComponent');
-var TextProperty = require('./TextPropertyComponent');
+import NodeComponent from './NodeComponent'
+import TextProperty from './TextPropertyComponent'
 
 function TextBlockComponent() {
   TextBlockComponent.super.apply(this, arguments);
@@ -23,4 +23,4 @@ TextBlockComponent.Prototype = function() {
 
 NodeComponent.extend(TextBlockComponent);
 
-module.exports = TextBlockComponent;
+export default TextBlockComponent;

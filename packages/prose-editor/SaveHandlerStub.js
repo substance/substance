@@ -1,6 +1,6 @@
 'use strict';
 
-var oo = require('../../util/oo');
+import oo from '../../util/oo'
 
 var SaveHandlerStub = function() {
 };
@@ -14,4 +14,4 @@ SaveHandlerStub.Prototype = function() {
 
 oo.initClass(SaveHandlerStub);
 
-module.exports = SaveHandlerStub;
+export default SaveHandlerStub;

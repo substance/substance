@@ -1,14 +1,13 @@
-'use strict';
+import ImageNode from './Image'
+import ImageComponent from './ImageComponent'
+import ImageHTMLConverter from './ImageHTMLConverter'
+import ImageXMLConverter from './ImageXMLConverter'
+import InsertImageCommand from './InsertImageCommand'
+import InsertImageTool from './InsertImageTool'
+import DropImage from './DropImage'
 
-var ImageNode = require('./Image');
-var ImageComponent = require('./ImageComponent');
-var ImageHTMLConverter = require('./ImageHTMLConverter');
-var ImageXMLConverter = require('./ImageXMLConverter');
-var InsertImageCommand = require('./InsertImageCommand');
-var InsertImageTool = require('./InsertImageTool');
-var DropImage = require('./DropImage');
 
-module.exports = {
+export default {
   name: 'image',
   configure: function(config) {
     config.addNode(ImageNode);
@@ -27,5 +26,11 @@ module.exports = {
       de: 'Bild einfügen'
     });
     config.addDragAndDrop(DropImage);
-  }
+  },
+  ImageNode: ImageNode,
+  ImageComponent: ImageComponent,
+  ImageHTMLConverter: ImageHTMLConverter,
+  InsertImageCommand: InsertImageCommand,
+  InsertImageTool: InsertImageTool,
+  DropImage: DropImage
 };

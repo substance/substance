@@ -1,12 +1,12 @@
 'use strict';
 
-var isString = require('lodash/isString');
-var isArray = require('lodash/isArray');
-var cloneDeep = require('lodash/cloneDeep');
-var Data = require('./Data');
-var ObjectOperation = require('./ObjectOperation');
-var ArrayOperation = require('./ArrayOperation');
-var TextOperation = require('./TextOperation');
+import isString from 'lodash/isString'
+import isArray from 'lodash/isArray'
+import cloneDeep from 'lodash/cloneDeep'
+import Data from './Data'
+import ObjectOperation from './ObjectOperation'
+import ArrayOperation from './ArrayOperation'
+import TextOperation from './TextOperation'
 
 /**
   Incremental data storage implemention.
@@ -185,4 +185,4 @@ IncrementalData.Prototype = function() {
 
 Data.extend(IncrementalData);
 
-module.exports = IncrementalData;
+export default IncrementalData;

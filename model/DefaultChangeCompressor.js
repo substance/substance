@@ -1,9 +1,9 @@
 "use strict";
 /* eslint-disable no-unused-vars */
 
-var isEqual = require('lodash/isEqual');
-var oo = require('../util/oo');
-var ObjectOperation = require('./data/ObjectOperation');
+import isEqual from 'lodash/isEqual'
+import oo from '../util/oo'
+import ObjectOperation from './data/ObjectOperation'
 
 var MAXIMUM_CHANGE_DURATION = 1500;
 
@@ -90,4 +90,4 @@ DefaultChangeCompressor.Prototype = function() {
 
 oo.initClass(DefaultChangeCompressor);
 
-module.exports = DefaultChangeCompressor;
+export default DefaultChangeCompressor;

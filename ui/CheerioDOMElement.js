@@ -1,13 +1,13 @@
 'use strict';
 
-var isString = require('lodash/isString');
-var last = require('lodash/last');
-var extend = require('lodash/extend');
-var clone = require('lodash/clone');
-var map = require('lodash/map');
-var $ = require('../util/cheerio.customized');
-var EventEmitter = require('../util/EventEmitter');
-var DOMElement = require('./DOMElement');
+import isString from 'lodash/isString'
+import last from 'lodash/last'
+import extend from 'lodash/extend'
+import clone from 'lodash/clone'
+import map from 'lodash/map'
+import $ from '../util/cheerio.customized'
+import EventEmitter from '../util/EventEmitter'
+import DOMElement from './DOMElement'
 
 function CheerioDOMElement(el) {
   EventEmitter.call(this);
@@ -494,4 +494,4 @@ CheerioDOMElement.wrapNativeElement = function(el) {
   }
 };
 
-module.exports = CheerioDOMElement;
+export default CheerioDOMElement;

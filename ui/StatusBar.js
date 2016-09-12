@@ -1,6 +1,6 @@
 "use strict";
 
-var Component = require('./Component');
+import Component from './Component'
 
 var ICONS_FOR_TYPE = {
   "error": "fa-exclamation-circle",
@@ -69,4 +69,4 @@ StatusBar.Prototype = function() {
 
 Component.extend(StatusBar);
 
-module.exports = StatusBar;
+export default StatusBar;

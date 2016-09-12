@@ -1,18 +1,18 @@
 'use strict';
 
-var isString = require('lodash/isString');
-var last = require('lodash/last');
-var uuid = require('../util/uuid');
-var keys = require('../util/keys');
-var platform = require('../util/platform');
-var EditingBehavior = require('../model/EditingBehavior');
-var breakNode = require('../model/transform/breakNode');
-var insertNode = require('../model/transform/insertNode');
-var switchTextType = require('../model/transform/switchTextType');
-var paste = require('../model/transform/paste');
-var Surface = require('./Surface');
-var RenderingEngine = require('./RenderingEngine');
-var IsolatedNodeComponent = require('./IsolatedNodeComponent');
+import isString from 'lodash/isString'
+import last from 'lodash/last'
+import uuid from '../util/uuid'
+import keys from '../util/keys'
+import platform from '../util/platform'
+import EditingBehavior from '../model/EditingBehavior'
+import breakNode from '../model/transform/breakNode'
+import insertNode from '../model/transform/insertNode'
+import switchTextType from '../model/transform/switchTextType'
+import paste from '../model/transform/paste'
+import Surface from './Surface'
+import RenderingEngine from './RenderingEngine'
+import IsolatedNodeComponent from './IsolatedNodeComponent'
 
 /**
   Represents a flow editor that manages a sequence of nodes in a container. Needs to be
@@ -429,4 +429,4 @@ Surface.extend(ContainerEditor);
 
 ContainerEditor.isContainerEditor = true;
 
-module.exports = ContainerEditor;
+export default ContainerEditor;

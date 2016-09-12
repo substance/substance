@@ -1,6 +1,6 @@
 "use strict";
 
-var EventEmitter = require('../util/EventEmitter');
+import EventEmitter from '../util/EventEmitter'
 var __id__ = 0;
 
 /**
@@ -80,4 +80,4 @@ CollabClient.Prototype = function() {
 
 EventEmitter.extend(CollabClient);
 
-module.exports = CollabClient;
+export default CollabClient;

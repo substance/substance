@@ -1,8 +1,8 @@
 "use strict";
 
-var extend = require('lodash/extend');
-var uuid = require('../../util/uuid');
-var helpers = require('../documentHelpers');
+import extend from 'lodash/extend'
+import uuid from '../../util/uuid'
+import helpers from '../documentHelpers'
 
 /**
   For a given container selection create property selections of a given type
@@ -84,4 +84,4 @@ function _createPropertyAnnotations(tx, args) {
   }
 }
 
-module.exports = createAnnotation;
+export default createAnnotation;

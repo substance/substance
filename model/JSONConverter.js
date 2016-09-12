@@ -1,8 +1,8 @@
 'use strict';
 
-var isArray = require('lodash/isArray');
-var each = require('lodash/each');
-var oo = require('../util/oo');
+import isArray from 'lodash/isArray'
+import each from 'lodash/each'
+import oo from '../util/oo'
 
 function JSONConverter() {}
 
@@ -56,4 +56,4 @@ JSONConverter.Prototype = function() {
 
 oo.initClass(JSONConverter);
 
-module.exports = JSONConverter;
+export default JSONConverter;

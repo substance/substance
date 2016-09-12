@@ -1,8 +1,8 @@
 "use strict";
 
-var each = require('lodash/each');
-var includes = require('lodash/includes');
-var EventEmitter = require('../util/EventEmitter');
+import each from 'lodash/each'
+import includes from 'lodash/includes'
+import EventEmitter from '../util/EventEmitter'
 
 /**
   Manages a table of content for a container. Default implementation considers
@@ -144,4 +144,4 @@ EventEmitter.extend(TOCProvider);
 
 TOCProvider.tocTypes = ['heading'];
 
-module.exports = TOCProvider;
+export default TOCProvider;

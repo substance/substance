@@ -1,8 +1,8 @@
 "use strict";
 
-var Document = require('../model/Document');
-var HtmlExporter = require('../model/HTMLExporter');
-var JSONConverter = require('../model/JSONConverter');
+import Document from '../model/Document'
+import HtmlExporter from '../model/HTMLExporter'
+import JSONConverter from '../model/JSONConverter'
 
 /**
   Export HTML from clipboard. Used for inter-application copy'n'paste.
@@ -61,4 +61,4 @@ ClipboardExporter.Prototype = function() {
 
 HtmlExporter.extend(ClipboardExporter);
 
-module.exports = ClipboardExporter;
+export default ClipboardExporter;

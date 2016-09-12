@@ -1,6 +1,6 @@
 'use strict';
 
-var Registry = require('../util/Registry');
+import Registry from '../util/Registry'
 
 function ComponentRegistry(entries) {
   Registry.call(this, entries, function(ComponentClass) {
@@ -12,4 +12,4 @@ function ComponentRegistry(entries) {
 
 Registry.extend(ComponentRegistry);
 
-module.exports = ComponentRegistry;
+export default ComponentRegistry;

@@ -1,10 +1,10 @@
 'use strict';
 
-var AbstractEditor = require('../../ui/AbstractEditor');
-var ContainerEditor = require('../../ui/ContainerEditor');
-var SplitPane = require('../../ui/SplitPane');
-var ScrollPane = require('../../ui/ScrollPane');
-var ProseEditorOverlay = require('./ProseEditorOverlay');
+import AbstractEditor from '../../ui/AbstractEditor'
+import ContainerEditor from '../../ui/ContainerEditor'
+import SplitPane from '../../ui/SplitPane'
+import ScrollPane from '../../ui/ScrollPane'
+import ProseEditorOverlay from './ProseEditorOverlay'
 
 function ProseEditor() {
   ProseEditor.super.apply(this, arguments);
@@ -67,4 +67,4 @@ ProseEditor.Prototype = function() {
 
 AbstractEditor.extend(ProseEditor);
 
-module.exports = ProseEditor;
+export default ProseEditor;

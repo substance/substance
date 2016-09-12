@@ -1,8 +1,8 @@
 'use strict';
 
-var breakList = require('./breakList');
+import breakList from './breakList'
 
-module.exports = {
+export default {
 
   register: function(behavior) {
     behavior

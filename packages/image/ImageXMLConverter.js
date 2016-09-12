@@ -3,7 +3,7 @@
 /*
  * XML converter for Images.
  */
-module.exports = {
+export default {
 
   type: 'image',
   tagName: 'image',

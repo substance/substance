@@ -1,11 +1,10 @@
-"use strict";
-
-var each = require('lodash/each');
-var oo = require('../util/oo');
-var uuid = require('../util/uuid');
-var substanceGlobals = require('../util/substanceGlobals');
-var VirtualElement = require('./VirtualElement');
-var DefaultDOMElement = require('./DefaultDOMElement');
+import each from 'lodash/each'
+import oo from '../util/oo'
+import uuid from '../util/uuid'
+import substanceGlobals from '../util/substanceGlobals'
+import VirtualElement from './VirtualElement'
+import DefaultDOMElement from './DefaultDOMElement'
+import Component from './Component'
 
 function RenderingEngine() {}
 
@@ -51,7 +50,6 @@ RenderingEngine.Prototype = function() {
   };
 
   function _create(state, vel) {
-    var Component = require('./Component');
     var comp = vel._comp;
     console.assert(!comp, "Component instance should not exist when this method is used.");
     var parent = vel.parent._comp;
@@ -765,4 +763,4 @@ oo.initClass(State);
 
 RenderingEngine.State = State;
 
-module.exports = RenderingEngine;
+export default RenderingEngine;

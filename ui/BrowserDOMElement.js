@@ -1,16 +1,10 @@
 'use strict';
 
-var isString = require('lodash/isString');
-var isNumber = require('lodash/isNumber');
-var oo = require('../util/oo');
-var DOMElement = require('./DOMElement');
-var DelegatedEvent = require('./DelegatedEvent');
-
-var elProto = window.Element.prototype;
-var matches = (
-  elProto.matches || elProto.matchesSelector ||
-  elProto.msMatchesSelector || elProto.webkitMatchesSelector
-);
+import isString from 'lodash/isString'
+import isNumber from 'lodash/isNumber'
+import oo from '../util/oo'
+import DOMElement from './DOMElement'
+import DelegatedEvent from './DelegatedEvent'
 
 function BrowserDOMElement(el) {
   console.assert(el instanceof window.Node, "Expecting native DOM node.");
@@ -228,7 +222,7 @@ BrowserDOMElement.Prototype = function() {
     return function(event) {
       var nativeEl = event.target;
       while(nativeEl) {
-        if (matches.call(nativeEl, selector)) {
+        if (matches(nativeEl, selector)) {
           handler(new DelegatedEvent(context, event.target, event));
           break;
         }
@@ -373,7 +367,7 @@ BrowserDOMElement.Prototype = function() {
     // Element.matches might not be supported by some mobile browsers
     var el = this.el;
     if (this.isElementNode()) {
-      return matches.call(el, cssSelector);
+      return matches(el, cssSelector);
     } else {
       return false;
     }
@@ -746,7 +740,8 @@ BrowserDOMElement.getBrowserWindow = function() {
   return new BrowserWindow(window);
 };
 
-var _r1, _r2;
+var _r1;
+var _r2;
 
 BrowserDOMElement.isReverse = function(anchorNode, anchorOffset, focusNode, focusOffset) {
   // the selection is reversed when the focus propertyEl is before
@@ -777,4 +772,13 @@ BrowserDOMElement.getWindowSelection = function() {
   return result;
 };
 
-module.exports = BrowserDOMElement;
+function matches(el, selector) {
+  var elProto = window.Element.prototype;
+  var _matches = (
+    elProto.matches || elProto.matchesSelector ||
+    elProto.msMatchesSelector || elProto.webkitMatchesSelector
+  );
+  return _matches.call(el, selector);
+}
+
+export default BrowserDOMElement;

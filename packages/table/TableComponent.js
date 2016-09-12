@@ -1,12 +1,12 @@
 'use strict';
 
-var Component = require('../../ui/Component');
-var CustomSelection = require('../../model/CustomSelection');
-var DefaultDOMElement = require('../../ui/DefaultDOMElement');
-var tableHelpers = require('./tableHelpers');
-var keys = require('../../util/keys');
-var getRelativeBoundingRect = require('../../util/getRelativeBoundingRect');
-var TextCellContent = require('./TextCellContent');
+import Component from '../../ui/Component'
+import CustomSelection from '../../model/CustomSelection'
+import DefaultDOMElement from '../../ui/DefaultDOMElement'
+import tableHelpers from './tableHelpers'
+import keys from '../../util/keys'
+import getRelativeBoundingRect from '../../util/getRelativeBoundingRect'
+import TextCellContent from './TextCellContent'
 
 function TableComponent() {
   TableComponent.super.apply(this, arguments);
@@ -317,4 +317,4 @@ TableComponent.Prototype = function() {
 
 Component.extend(TableComponent);
 
-module.exports = TableComponent;
+export default TableComponent;

@@ -1,6 +1,6 @@
 'use strict';
 
-var AnnotationCommand = require('../../ui/AnnotationCommand');
+import AnnotationCommand from '../../ui/AnnotationCommand'
 
 function LinkCommand() {
   LinkCommand.super.apply(this, arguments);
@@ -31,4 +31,4 @@ LinkCommand.Prototype = function() {
 
 AnnotationCommand.extend(LinkCommand);
 
-module.exports = LinkCommand;
+export default LinkCommand;

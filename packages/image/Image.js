@@ -1,6 +1,6 @@
 'use strict';
 
-var DocumentNode = require('../../model/DocumentNode');
+import DocumentNode from '../../model/DocumentNode'
 
 function Image() {
   Image.super.apply(this, arguments);
@@ -14,4 +14,4 @@ Image.define({
   previewSrc: { type: "string", optional: true }
 });
 
-module.exports = Image;
+export default Image;

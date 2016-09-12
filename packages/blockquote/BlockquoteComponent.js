@@ -1,6 +1,6 @@
 'use strict';
 
-var TextBlockComponent = require('../../ui/TextBlockComponent');
+import TextBlockComponent from '../../ui/TextBlockComponent'
 
 function BlockquoteComponent() {
   BlockquoteComponent.super.apply(this, arguments);
@@ -19,4 +19,4 @@ BlockquoteComponent.Prototype = function() {
 
 TextBlockComponent.extend(BlockquoteComponent);
 
-module.exports = BlockquoteComponent;
+export default BlockquoteComponent;

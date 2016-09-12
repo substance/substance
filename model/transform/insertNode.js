@@ -1,8 +1,8 @@
 'use strict';
 
-var deleteSelection = require('./deleteSelection');
-var breakNode = require('./breakNode');
-var uuid = require('../../util/uuid');
+import deleteSelection from './deleteSelection'
+import breakNode from './breakNode'
+import uuid from '../../util/uuid'
 
 /**
   Inserts a new node at the given selection/cursor.
@@ -85,4 +85,4 @@ function insertNode(tx, args) {
   return args;
 }
 
-module.exports = insertNode;
+export default insertNode;

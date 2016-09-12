@@ -1,19 +1,10 @@
-'use strict';
-
-var HTMLImporter = require('../../model/HTMLImporter');
-var ProseArticle = require('./ProseArticle');
+import HTMLImporter from '../../model/HTMLImporter'
+import ProseArticle from './ProseArticle'
 var schema = ProseArticle.schema;
 
-var converters = [
-  require('../paragraph/ParagraphHTMLConverter'),
-  require('../heading/HeadingHTMLConverter'),
-  require('../codeblock/CodeBlockHTMLConverter'),
-  require('../image/ImageHTMLConverter'),
-  require('../strong/StrongHTMLConverter'),
-  require('../emphasis/EmphasisHTMLConverter'),
-  require('../link/LinkHTMLConverter'),
-];
+var converters = [];
 
+// TODO: FIX this. Should be used together with configurator
 function ProseArticleImporter() {
   ProseArticleImporter.super.call(this, {
     schema: schema,
@@ -37,4 +28,4 @@ HTMLImporter.extend(ProseArticleImporter);
 
 ProseArticleImporter.converters = converters;
 
-module.exports = ProseArticleImporter;
+export default ProseArticleImporter;

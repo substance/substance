@@ -1,9 +1,9 @@
 'use strict';
 
-var isString = require('lodash/isString');
-var isNumber = require('lodash/isNumber');
-var Operation = require('./Operation');
-var Conflict = require('./Conflict');
+import isString from 'lodash/isString'
+import isNumber from 'lodash/isNumber'
+import Operation from './Operation'
+import Conflict from './Conflict'
 
 var INSERT = "insert";
 var DELETE = "delete";
@@ -250,4 +250,4 @@ TextOperation.Delete = function(pos, str) {
 TextOperation.INSERT = INSERT;
 TextOperation.DELETE = DELETE;
 
-module.exports = TextOperation;
+export default TextOperation;

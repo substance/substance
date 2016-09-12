@@ -1,6 +1,6 @@
 'use strict';
 
-var oo = require('../util/oo');
+import oo from '../util/oo'
 
 /*
   DocumentServer module. Can be bound to an express instance
@@ -63,4 +63,4 @@ DocumentServer.Prototype = function() {
 };
 
 oo.initClass(DocumentServer);
-module.exports = DocumentServer;
+export default DocumentServer;

@@ -1,13 +1,13 @@
 'use strict';
 
-var last = require('lodash/last');
-var forEach = require('lodash/forEach');
-var clone = require('lodash/clone');
-var extend = require('lodash/extend');
-var oo = require('../util/oo');
-// var uuid = require('../util/uuid');
-var createCountingIdGenerator = require('../util/createCountingIdGenerator');
-var ArrayIterator = require('../util/ArrayIterator');
+import last from 'lodash/last'
+import forEach from 'lodash/forEach'
+import clone from 'lodash/clone'
+import extend from 'lodash/extend'
+import oo from '../util/oo'
+// import uuid from '../util/uuid'
+import createCountingIdGenerator from '../util/createCountingIdGenerator'
+import ArrayIterator from '../util/ArrayIterator'
 
 /**
   A generic base implementation for XML/HTML importers.
@@ -697,4 +697,4 @@ DOMImporter.State.Prototype = function() {
 
 oo.initClass(DOMImporter.State);
 
-module.exports = DOMImporter;
+export default DOMImporter;

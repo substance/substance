@@ -1,8 +1,8 @@
 'use strict';
 
-var capitalize = require('lodash/capitalize');
-var extend = require('lodash/extend');
-var Component = require('./Component');
+import capitalize from 'lodash/capitalize'
+import extend from 'lodash/extend'
+import Component from './Component'
 
 /**
   Default Tool implementation
@@ -116,4 +116,4 @@ Tool.Prototype = function() {
 
 Component.extend(Tool);
 
-module.exports = Tool;
+export default Tool;

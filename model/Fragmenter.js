@@ -1,9 +1,9 @@
 "use strict";
 
-var oo = require('../util/oo');
-var extend = require('lodash/extend');
-var each = require('lodash/each');
-var isString = require('lodash/isString');
+import oo from '../util/oo'
+import extend from 'lodash/extend'
+import each from 'lodash/each'
+import isString from 'lodash/isString'
 
 var ENTER = 1;
 var EXIT = -1;
@@ -324,4 +324,4 @@ Fragmenter.NORMAL = 10;
 Fragmenter.ANY = 100;
 Fragmenter.ALWAYS_ON_TOP = Number.MAX_VALUE;
 
-module.exports = Fragmenter;
+export default Fragmenter;

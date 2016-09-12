@@ -1,9 +1,9 @@
 'use strict';
 
-var Fragmenter = require('../model/Fragmenter');
-var Component = require('./Component');
-var AnnotationComponent = require('./AnnotationComponent');
-var InlineNodeComponent = require('./InlineNodeComponent');
+import Fragmenter from '../model/Fragmenter'
+import Component from './Component'
+import AnnotationComponent from './AnnotationComponent'
+import InlineNodeComponent from './InlineNodeComponent'
 
 /**
   Renders an anotated text. Used internally by {@link ui/TextPropertyComponent}.
@@ -117,4 +117,4 @@ AnnotatedTextComponent.Prototype = function() {
 
 Component.extend(AnnotatedTextComponent);
 
-module.exports = AnnotatedTextComponent;
+export default AnnotatedTextComponent;

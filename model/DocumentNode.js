@@ -1,7 +1,7 @@
 'use strict';
 
-var each = require('lodash/each');
-var DataNode = require('./data/Node');
+import each from 'lodash/each'
+import DataNode from './data/Node'
 
 /**
   Base node type for document nodes.
@@ -273,4 +273,4 @@ DocumentNode.isContainerAnnotation = false;
 */
 DocumentNode.isInline = false;
 
-module.exports = DocumentNode;
+export default DocumentNode;

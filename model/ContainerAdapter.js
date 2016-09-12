@@ -1,6 +1,6 @@
 'use strict';
 
-var Container = require('./Container');
+import Container from './Container'
 
 function ContainerAdapter(doc, path) {
   this.document = doc;
@@ -32,4 +32,4 @@ Object.defineProperties(ContainerAdapter.prototype, {
   }
 });
 
-module.exports = ContainerAdapter;
+export default ContainerAdapter;

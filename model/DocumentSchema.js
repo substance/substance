@@ -1,10 +1,10 @@
 'use strict';
 
-var Schema = require('./data/Schema');
-var DocumentNode = require('./DocumentNode');
-var Container = require('./Container');
-var PropertyAnnotation = require('./PropertyAnnotation');
-var ContainerAnnotation = require('./ContainerAnnotation');
+import Schema from './data/Schema'
+import DocumentNode from './DocumentNode'
+import Container from './Container'
+import PropertyAnnotation from './PropertyAnnotation'
+import ContainerAnnotation from './ContainerAnnotation'
 
 /**
   Used to define custom article formats. Predefined node types can be combined with custom ones.
@@ -16,10 +16,10 @@ var ContainerAnnotation = require('./ContainerAnnotation');
   @example
 
   ```js
-  var Paragraph = require('substance/packages/paragraph/Paragraph');
-  var Emphasis = require('substance/packages/emphasis/Emphasis');
-  var Strong = require('substance/packages/emphasis/Strong');
-  var PropertyAnnotation = require('substance/ui/PropertyAnnotation');
+  import Paragraph from 'substance/packages/paragraph/Paragraph'
+  import Emphasis from 'substance/packages/emphasis/Emphasis'
+  import Strong from 'substance/packages/emphasis/Strong'
+  import PropertyAnnotation from 'substance/ui/PropertyAnnotation'
 
   var Comment = PropertyAnnotation.extend({
     name: 'comment',
@@ -67,4 +67,4 @@ DocumentSchema.Prototype = function() {
 
 Schema.extend(DocumentSchema);
 
-module.exports = DocumentSchema;
+export default DocumentSchema;

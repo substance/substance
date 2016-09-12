@@ -1,6 +1,6 @@
 'use strict';
 
-var BlockNode = require('../../model/BlockNode');
+import BlockNode from '../../model/BlockNode'
 
 function TableNode() {
   TableNode.super.apply(this, arguments);
@@ -33,4 +33,4 @@ TableNode.define({
   "cells": { type: ['array', 'array', 'id'], default: [] }
 });
 
-module.exports = TableNode;
+export default TableNode;

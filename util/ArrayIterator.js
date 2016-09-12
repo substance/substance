@@ -1,6 +1,6 @@
 'use strict';
 
-var oo = require('./oo');
+import oo from './oo'
 
 /*
   An iterator for arrays.
@@ -48,4 +48,4 @@ ArrayIterator.Prototype = function() {
 
 oo.initClass(ArrayIterator);
 
-module.exports = ArrayIterator;
+export default ArrayIterator;

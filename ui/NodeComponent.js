@@ -1,6 +1,6 @@
 'use strict';
 
-var Component = require('./Component');
+import Component from './Component'
 
 function NodeComponent() {
   NodeComponent.super.apply(this, arguments);
@@ -28,4 +28,4 @@ NodeComponent.Prototype = function() {
 
 Component.extend(NodeComponent);
 
-module.exports = NodeComponent;
+export default NodeComponent;

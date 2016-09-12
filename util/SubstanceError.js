@@ -1,6 +1,6 @@
 'use strict';
 
-var oo = require('./oo');
+import oo from './oo'
 
 /**
   Custom error object for all Substance related errors
@@ -8,7 +8,7 @@ var oo = require('./oo');
   @example
 
   ```js
-  var Err = require('substance/util/SubstanceError');
+  import Err from 'substance/util/SubstanceError'
   throw new Err('Document.SelectionUpdateError', {message: 'Could not update selection.'});
   ```
 
@@ -76,4 +76,4 @@ SubstanceError.fromJSON = function(err) {
   return error;
 };
 
-module.exports = SubstanceError;
+export default SubstanceError;

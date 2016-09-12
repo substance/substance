@@ -1,8 +1,8 @@
 'use strict';
 
-var startsWith = require('lodash/startsWith');
-var DragAndDropHandler = require('../../ui/DragAndDropHandler');
-var InsertImageCommand = require('./InsertImageCommand');
+import startsWith from 'lodash/startsWith'
+import DragAndDropHandler from '../../ui/DragAndDropHandler'
+import InsertImageCommand from './InsertImageCommand'
 
 function DropImage() {}
 
@@ -34,4 +34,4 @@ DropImage.Prototype = function() {
 
 DragAndDropHandler.extend(DropImage);
 
-module.exports = DropImage;
+export default DropImage;

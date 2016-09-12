@@ -48,4 +48,4 @@ var ParentNodeMixin = {
 
 };
 
-module.exports = ParentNodeMixin;
+export default ParentNodeMixin;

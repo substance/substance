@@ -1,13 +1,13 @@
 'use strict';
 
-var debounce = require('lodash/debounce');
-var forEach = require('lodash/forEach');
-var clone = require('lodash/clone');
-var cloneDeep = require('lodash/cloneDeep');
-var Err = require('../util/SubstanceError');
-var DocumentSession = require('../model/DocumentSession');
-var DocumentChange = require('../model/DocumentChange');
-var Selection = require('../model/Selection');
+import debounce from 'lodash/debounce'
+import forEach from 'lodash/forEach'
+import clone from 'lodash/clone'
+import cloneDeep from 'lodash/cloneDeep'
+import Err from '../util/SubstanceError'
+import DocumentSession from '../model/DocumentSession'
+import DocumentChange from '../model/DocumentChange'
+import Selection from '../model/Selection'
 
 /*
   Session that is connected to a Substance Hub allowing
@@ -594,4 +594,4 @@ CollabSession.Prototype = function() {
 
 DocumentSession.extend(CollabSession);
 
-module.exports = CollabSession;
+export default CollabSession;

@@ -1,6 +1,6 @@
 'use strict';
 
-var oo = require('../util/oo');
+import oo from '../util/oo'
 
 function DragAndDropHandler() {}
 
@@ -24,4 +24,4 @@ DragAndDropHandler.Prototype = function() {
 
 oo.initClass(DragAndDropHandler);
 
-module.exports = DragAndDropHandler;
+export default DragAndDropHandler;

@@ -1,7 +1,7 @@
 'use strict';
 
-var isObject = require('lodash/isObject');
-var isFunction = require('lodash/isFunction');
+import isObject from 'lodash/isObject'
+import isFunction from 'lodash/isFunction'
 
 /**
  * Helpers for oo programming.
@@ -73,7 +73,7 @@ oo.initClass = function(clazz) {
  * @example
  *
  * ```js
- * var oo = require('substance/basics/oo');
+ * import oo from 'substance/basics/oo'
  * var Parent = function() {};
  * Parent.Prototype = function() {
  *   this.foo = function() { return 'foo'; }
@@ -91,6 +91,8 @@ oo.inherit = function(clazz, parentClazz) {
   _inherit(clazz, parentClazz);
   _afterClassInitHook(clazz);
 };
+
+oo.inherits = oo.inherit;
 
 /*
  * @param clazz {Constructor} class constructor
@@ -268,4 +270,4 @@ function _makeExtensible(clazz) {
 
 oo.makeExtensible = _makeExtensible;
 
-module.exports = oo;
+export default oo;

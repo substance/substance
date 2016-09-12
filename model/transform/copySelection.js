@@ -1,10 +1,10 @@
 'use strict';
 
-var cloneDeep = require('lodash/cloneDeep');
-var each = require('lodash/each');
-var last = require('lodash/last');
-var Document = require('../Document');
-var annotationHelpers = require('../annotationHelpers');
+import cloneDeep from 'lodash/cloneDeep'
+import each from 'lodash/each'
+import last from 'lodash/last'
+import Document from '../Document'
+import annotationHelpers from '../annotationHelpers'
 
 /**
   Creates a new document instance containing only the selected content
@@ -146,4 +146,4 @@ function _copyNode(doc, node, container, created) {
   });
 }
 
-module.exports = copySelection;
+export default copySelection;

@@ -1,9 +1,9 @@
 'use strict';
 
-var uuid = require('../../util/uuid');
-var annotationHelpers = require('../../model/annotationHelpers');
+import uuid from '../../util/uuid'
+import annotationHelpers from '../../model/annotationHelpers'
 
-module.exports = function(tx, args) {
+export default function(tx, args) {
   var sel = args.selection;
   var containerId = args.containerId;
   if (!sel.isPropertySelection()) {

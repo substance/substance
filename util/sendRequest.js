@@ -2,7 +2,7 @@
 
 /* globals Promise */
 
-module.exports = function sendRequest(params, cb) {
+export default function sendRequest(params, cb) {
   return new Promise(function(resolve, reject) {
     var method = (params.method || 'GET').toUpperCase();
     var url = params.url;

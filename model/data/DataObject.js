@@ -1,11 +1,11 @@
 'use strict';
 
-var isString = require('lodash/isString');
-var isArray = require('lodash/isArray');
-var get = require('lodash/get');
-var setWith = require('lodash/setWith');
-var unset = require('lodash/unset');
-var oo = require('../../util/oo');
+import isString from 'lodash/isString'
+import isArray from 'lodash/isArray'
+import get from 'lodash/get'
+import setWith from 'lodash/setWith'
+import unset from 'lodash/unset'
+import oo from '../../util/oo'
 
 /*
   An object that can be access via path API.
@@ -98,4 +98,4 @@ DataObject.Prototype = function() {
 
 oo.initClass(DataObject);
 
-module.exports = DataObject;
+export default DataObject;

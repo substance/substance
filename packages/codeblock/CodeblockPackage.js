@@ -1,11 +1,11 @@
 'use strict';
 
-var Codeblock = require('./Codeblock');
-var CodeblockComponent = require('./CodeblockComponent');
-var CodeblockHTMLConverter = require('./CodeblockHTMLConverter');
-var CodeblockXMLConverter = require('./CodeblockXMLConverter');
+import Codeblock from './Codeblock'
+import CodeblockComponent from './CodeblockComponent'
+import CodeblockHTMLConverter from './CodeblockHTMLConverter'
+import CodeblockXMLConverter from './CodeblockXMLConverter'
 
-module.exports = {
+export default {
   name: 'codeblock',
   configure: function(config) {
     config.addNode(Codeblock);
@@ -20,5 +20,8 @@ module.exports = {
       en: 'Codeblock',
       de: 'Codeblock'
     });
-  }
+  },
+  Codeblock: Codeblock,
+  CodeblockComponent: CodeblockComponent,
+  CodeblockHTMLConverter: CodeblockHTMLConverter
 };

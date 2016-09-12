@@ -1,7 +1,7 @@
 'use strict';
 
-var Component = require('../../ui/Component');
-var TextProperty = require('../../ui/TextPropertyComponent');
+import Component from '../../ui/Component'
+import TextProperty from '../../ui/TextPropertyComponent'
 
 function ListItemComponent() {
   ListItemComponent.super.apply(this, arguments);
@@ -26,4 +26,4 @@ ListItemComponent.Prototype = function() {
 
 Component.extend(ListItemComponent);
 
-module.exports = ListItemComponent;
+export default ListItemComponent;

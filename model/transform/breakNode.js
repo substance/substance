@@ -1,8 +1,8 @@
 'use strict';
 
-var uuid = require('../../util/uuid');
-var deleteSelection = require('./deleteSelection');
-var annotationHelpers = require('../annotationHelpers');
+import uuid from '../../util/uuid'
+import deleteSelection from './deleteSelection'
+import annotationHelpers from '../annotationHelpers'
 
 /**
   A transformation that breaks a node at the current position,
@@ -140,4 +140,4 @@ function breakWholeNode(tx, args) {
   return args;
 }
 
-module.exports = breakNode;
+export default breakNode;

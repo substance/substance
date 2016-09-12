@@ -1,11 +1,11 @@
 'use strict';
 
-var isString = require('lodash/isString');
-var isNumber = require('lodash/isNumber');
-var map = require('lodash/map');
-var filter = require('lodash/filter');
-var TreeIndex = require('../util/TreeIndex');
-var DocumentIndex = require('./DocumentIndex');
+import isString from 'lodash/isString'
+import isNumber from 'lodash/isNumber'
+import map from 'lodash/map'
+import filter from 'lodash/filter'
+import TreeIndex from '../util/TreeIndex'
+import DocumentIndex from './DocumentIndex'
 
 // PropertyAnnotation Index
 // ----------------
@@ -92,4 +92,4 @@ AnnotationIndex.filterByRange = function(start, end) {
   };
 };
 
-module.exports = AnnotationIndex;
+export default AnnotationIndex;

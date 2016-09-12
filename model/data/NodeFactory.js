@@ -1,6 +1,6 @@
 'use strict';
 
-var oo = require('../../util/oo');
+import oo from '../../util/oo'
 
 function NodeFactory(nodeRegistry) {
   this.nodeRegistry = nodeRegistry;
@@ -20,4 +20,4 @@ NodeFactory.Prototype = function() {
 
 oo.initClass(NodeFactory);
 
-module.exports = NodeFactory;
+export default NodeFactory;

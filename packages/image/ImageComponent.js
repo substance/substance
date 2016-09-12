@@ -1,7 +1,7 @@
 'use strict';
 
-var NodeComponent = require('../../ui/NodeComponent');
-var percentage = require('../../util/percentage');
+import NodeComponent from '../../ui/NodeComponent'
+import percentage from '../../util/percentage'
 
 function ImageComponent() {
   ImageComponent.super.apply(this, arguments);
@@ -64,4 +64,4 @@ ImageComponent.Prototype = function() {
 
 NodeComponent.extend(ImageComponent);
 
-module.exports = ImageComponent;
+export default ImageComponent;

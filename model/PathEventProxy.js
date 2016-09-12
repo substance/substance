@@ -1,10 +1,10 @@
 'use strict';
 
-var forEach = require('lodash/forEach');
-var isEqual = require('lodash/isEqual');
-var isArray = require('lodash/isArray');
-var oo = require('../util/oo');
-var TreeIndex = require('../util/TreeIndex');
+import forEach from 'lodash/forEach'
+import isEqual from 'lodash/isEqual'
+import isArray from 'lodash/isArray'
+import oo from '../util/oo'
+import TreeIndex from '../util/TreeIndex'
 
 function PathEventProxy(doc) {
   this.listeners = new TreeIndex.Arrays();
@@ -79,4 +79,4 @@ PathEventProxy.Prototype = function() {
 
 oo.initClass(PathEventProxy);
 
-module.exports = PathEventProxy;
+export default PathEventProxy;

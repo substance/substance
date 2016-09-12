@@ -18,4 +18,4 @@ function truncateAnnotation(tx, args) {
   return args;
 }
 
-module.exports = truncateAnnotation;
+export default truncateAnnotation;

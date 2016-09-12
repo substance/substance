@@ -1,11 +1,11 @@
 'use strict';
 
-var isNumber = require('lodash/isNumber');
-var isEqual = require('lodash/isEqual');
-var cloneDeep = require('lodash/cloneDeep');
+import isNumber from 'lodash/isNumber'
+import isEqual from 'lodash/isEqual'
+import cloneDeep from 'lodash/cloneDeep'
 
-var Operation = require('./Operation');
-var Conflict = require('./Conflict');
+import Operation from './Operation'
+import Conflict from './Conflict'
 
 var NOP = "NOP";
 var DELETE = "delete";
@@ -224,4 +224,4 @@ ArrayOperation.INSERT = INSERT;
 // Export
 // ========
 
-module.exports = ArrayOperation;
+export default ArrayOperation;

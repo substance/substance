@@ -1,6 +1,6 @@
 'use strict';
 
-var Tool = require('./Tool');
+import Tool from './Tool'
 
 /*
  * Abstract class for annotation tools like StrongTool, EmphasisTool, LinkTool.
@@ -44,4 +44,4 @@ AnnotationTool.Prototype = function() {
 };
 
 Tool.extend(AnnotationTool);
-module.exports = AnnotationTool;
+export default AnnotationTool;

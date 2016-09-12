@@ -1,9 +1,9 @@
 'use strict';
 
-var each = require('lodash/each');
-var oo = require('../../util/oo');
-var NodeRegistry = require('./NodeRegistry');
-var Node = require('./Node');
+import each from 'lodash/each'
+import oo from '../../util/oo'
+import NodeRegistry from './NodeRegistry'
+import Node from './Node'
 
 /**
   Schema for Data Objects.
@@ -139,4 +139,4 @@ Schema.Prototype = function() {
 
 oo.initClass(Schema);
 
-module.exports = Schema;
+export default Schema;

@@ -1,12 +1,12 @@
 'use strict';
 
-var isArray = require('lodash/isArray');
-var isString = require('lodash/isString');
-var each = require('lodash/each');
-var cloneDeep = require('lodash/cloneDeep');
-var EventEmitter = require('../../util/EventEmitter');
-var DataObject = require('./DataObject');
-var NodeFactory = require('./NodeFactory');
+import isArray from 'lodash/isArray'
+import isString from 'lodash/isString'
+import each from 'lodash/each'
+import cloneDeep from 'lodash/cloneDeep'
+import EventEmitter from '../../util/EventEmitter'
+import DataObject from './DataObject'
+import NodeFactory from './NodeFactory'
 
 /**
   A data storage implemention that supports data defined via a {@link model/data/Schema},
@@ -331,4 +331,4 @@ Data.Prototype = function() {
 
 EventEmitter.extend(Data);
 
-module.exports = Data;
+export default Data;

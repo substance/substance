@@ -1,8 +1,8 @@
 'use strict';
 
-var Surface = require('./Surface');
-var TextPropertyManager = require('../model/TextPropertyManager');
-var TextProperty = require('./TextPropertyComponent');
+import Surface from './Surface'
+import TextPropertyManager from '../model/TextPropertyManager'
+import TextProperty from './TextPropertyComponent'
 
 /**
   Annotator for a text property. Needs to be instantiated inside a {@link ui/Controller}
@@ -55,4 +55,4 @@ TextPropertyAnnotator.Prototype = function() {
 
 Surface.extend(TextPropertyAnnotator);
 
-module.exports = TextPropertyAnnotator;
+export default TextPropertyAnnotator;

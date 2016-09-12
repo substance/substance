@@ -1,14 +1,14 @@
 "use strict";
 
-var extend = require('lodash/extend');
-var isPlainObject = require('lodash/isPlainObject');
-var oo = require('../util/oo');
-var EventEmitter = require('../util/EventEmitter');
-var TransactionDocument = require('./TransactionDocument');
-var DefaultChangeCompressor = require('./DefaultChangeCompressor');
-var Selection = require('./Selection');
-var SelectionState = require('./SelectionState');
-var DocumentChange = require('./DocumentChange');
+import extend from 'lodash/extend'
+import isPlainObject from 'lodash/isPlainObject'
+import oo from '../util/oo'
+import EventEmitter from '../util/EventEmitter'
+import TransactionDocument from './TransactionDocument'
+import DefaultChangeCompressor from './DefaultChangeCompressor'
+import Selection from './Selection'
+import SelectionState from './SelectionState'
+import DocumentChange from './DocumentChange'
 
 var __id__ = 0;
 
@@ -317,4 +317,4 @@ DocumentSession.Prototype = function() {
 
 oo.inherit(DocumentSession, EventEmitter);
 
-module.exports = DocumentSession;
+export default DocumentSession;

@@ -1,6 +1,6 @@
 'use strict';
 
-var oo = require('../util/oo');
+import oo from '../util/oo'
 
 function MacroManager(context, macros) {
   this.context = context;
@@ -55,4 +55,4 @@ MacroManager.Prototype = function() {
 
 oo.initClass(MacroManager);
 
-module.exports = MacroManager;
+export default MacroManager;

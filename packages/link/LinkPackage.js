@@ -1,14 +1,15 @@
 'use strict';
 
-var Link = require('./Link');
-var LinkComponent = require('./LinkComponent');
-var LinkCommand = require('./LinkCommand');
-var LinkHTMLConverter = require('./LinkHTMLConverter');
-var LinkXMLConverter = require('./LinkXMLConverter');
-var AnnotationTool = require('../../ui/AnnotationTool');
-var EditLinkTool = require('./EditLinkTool');
+import Link from './Link'
+import LinkComponent from './LinkComponent'
+import LinkCommand from './LinkCommand'
+import LinkHTMLConverter from './LinkHTMLConverter'
+import LinkXMLConverter from './LinkXMLConverter'
+import AnnotationTool from '../../ui/AnnotationTool'
+import EditLinkTool from './EditLinkTool'
 
-module.exports = {
+
+export default {
   name: 'link',
   configure: function(config) {
     config.addNode(Link);
@@ -24,5 +25,9 @@ module.exports = {
       en: 'Link',
       de: 'Link'
     });
-  }
+  },
+  Link: Link,
+  LinkComponent: LinkComponent,
+  LinkCommand: LinkCommand,
+  EditLinkTool: EditLinkTool,
 };

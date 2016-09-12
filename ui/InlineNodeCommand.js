@@ -1,7 +1,7 @@
 'use strict';
 
-var Command = require('./Command');
-var insertInlineNode = require('../model/transform/insertInlineNode');
+import Command from './Command'
+import insertInlineNode from '../model/transform/insertInlineNode'
 
 function InlineNodeCommand() {
   InlineNodeCommand.super.apply(this, arguments);
@@ -82,4 +82,4 @@ InlineNodeCommand.Prototype = function() {
 
 Command.extend(InlineNodeCommand);
 
-module.exports = InlineNodeCommand;
+export default InlineNodeCommand;

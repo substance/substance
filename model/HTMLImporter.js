@@ -1,8 +1,8 @@
 'use strict';
 
-var DOMImporter = require('./DOMImporter');
-var DefaultDOMElement = require('../ui/DefaultDOMElement');
-var extend = require('lodash/extend');
+import DOMImporter from './DOMImporter'
+import DefaultDOMElement from '../ui/DefaultDOMElement'
+import extend from 'lodash/extend'
 
 /**
   @class
@@ -10,47 +10,6 @@ var extend = require('lodash/extend');
 
   Base class for custom HTML importers. If you want to use XML as your
   exchange format see {@link model/XMLImporter}.
-
-  @example
-
-  Below is a full example taken from the [Notepad](https://github.com/substance/examples/blob/master/converter/NoteImporter.js) example.
-
-  ```js
-  var HTMLImporter = require('substance/model/HTMLImporter');
-  var noteSchema = require('../note/noteSchema');
-  var Note = require('../note/Note');
-
-  var converters = [
-    require('substance/packages/paragraph/ParagraphHTMLConverter'),
-    require('substance/packages/blockquote/BlockquoteHTMLConverter'),
-    require('substance/packages/codeblock/CodeblockHTMLConverter'),
-    require('substance/packages/heading/HeadingHTMLConverter'),
-    require('substance/packages/strong/StrongHTMLConverter'),
-    require('substance/packages/emphasis/EmphasisHTMLConverter'),
-    require('substance/packages/link/LinkHTMLConverter'),
-    require('./MarkHTMLConverter'),
-    require('./TodoHTMLConverter')
-  ];
-
-  function NoteImporter() {
-    NoteImporter.super.call(this, {
-      schema: noteSchema,
-      converters: converters,
-      DocumentClass: Note
-    });
-  }
-
-  NoteImporter.Prototype = function() {
-    this.convertDocument = function(bodyEls) {
-      this.convertContainer(bodyEls, 'body');
-    };
-  };
-
-  // Expose converters so we can reuse them in NoteHtmlExporter
-  NoteImporter.converters = converters;
-
-  HTMLImporter.extend(NoteImporter);
-  ```
 */
 
 function HTMLImporter(config) {
@@ -111,4 +70,4 @@ HTMLImporter.Prototype = function() {
 
 DOMImporter.extend(HTMLImporter);
 
-module.exports = HTMLImporter;
+export default HTMLImporter;

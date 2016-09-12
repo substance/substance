@@ -1,8 +1,8 @@
 'use strict';
 
-var each = require('lodash/each');
-var Tool = require('../../ui/Tool');
-var keys = require('../../util/keys');
+import each from 'lodash/each'
+import Tool from '../../ui/Tool'
+import keys from '../../util/keys'
 
 /**
   SwitchTextTypeTool. Implements the SurfaceTool API.
@@ -169,4 +169,4 @@ Tool.extend(SwitchTextTypeTool);
 
 SwitchTextTypeTool.command = 'switch-text-type';
 
-module.exports = SwitchTextTypeTool;
+export default SwitchTextTypeTool;

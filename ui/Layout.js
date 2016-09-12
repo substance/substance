@@ -1,6 +1,6 @@
 'use strict';
 
-var Component = require('./Component');
+import Component from './Component'
 
 /**
   Layout component for simple layout tasks, without having to write CSS
@@ -44,4 +44,4 @@ Layout.Prototype = function() {
 };
 
 Component.extend(Layout);
-module.exports = Layout;
+export default Layout;

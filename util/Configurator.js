@@ -1,10 +1,10 @@
 'use strict';
 
-var AbstractConfigurator = require('./AbstractConfigurator');
-var FontAwesomeIconProvider = require('../ui/FontAwesomeIconProvider');
+import AbstractConfigurator from './AbstractConfigurator'
+import FontAwesomeIconProvider from '../ui/FontAwesomeIconProvider'
 
 // Setup default label provider
-var LabelProvider = require('../ui/DefaultLabelProvider');
+import LabelProvider from '../ui/DefaultLabelProvider'
 
 /*
   Default Configurator for most Substance apps
@@ -30,4 +30,4 @@ Configurator.Prototype = function() {
 
 AbstractConfigurator.extend(Configurator);
 
-module.exports = Configurator;
+export default Configurator;

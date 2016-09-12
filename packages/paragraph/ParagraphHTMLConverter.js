@@ -3,7 +3,7 @@
 /*
  * HTML converter for Paragraph.
  */
-module.exports = {
+export default {
 
   type: 'paragraph',
   tagName: 'p',

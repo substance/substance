@@ -1,7 +1,7 @@
 "use strict";
 
-var annotationHelpers = require('../annotationHelpers');
-var Coordinate = require('../Coordinate');
+import annotationHelpers from '../annotationHelpers'
+import Coordinate from '../Coordinate'
 
 function updateAnnotations(tx, args) {
   var op = args.op;
@@ -32,4 +32,4 @@ function _updateAfterDelete(tx, args) {
   return args;
 }
 
-module.exports = updateAnnotations;
+export default updateAnnotations;

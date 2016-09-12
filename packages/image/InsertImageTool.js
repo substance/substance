@@ -1,6 +1,6 @@
 'use strict';
 
-var Tool = require('../../ui/Tool');
+import Tool from '../../ui/Tool'
 
 function InsertImageTool() {
   InsertImageTool.super.apply(this, arguments);
@@ -36,4 +36,4 @@ InsertImageTool.Prototype = function() {
 
 Tool.extend(InsertImageTool);
 
-module.exports = InsertImageTool;
+export default InsertImageTool;

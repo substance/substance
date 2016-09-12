@@ -1,6 +1,6 @@
 "use strict";
 
-var ClientConnection = require('./ClientConnection');
+import ClientConnection from './ClientConnection'
 
 /**
   Browser WebSocket abstraction. Handles reconnects etc.
@@ -18,4 +18,5 @@ WebSocketConnection.Prototype = function() {
 };
 
 ClientConnection.extend(WebSocketConnection);
-module.exports = WebSocketConnection;
+
+export default WebSocketConnection;

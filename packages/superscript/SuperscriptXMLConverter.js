@@ -1,3 +1,1 @@
-'use strict';
-
-module.exports = require('./SuperscriptHTMLConverter');
+export { default } from './SuperscriptHTMLConverter'

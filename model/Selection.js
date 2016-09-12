@@ -1,8 +1,5 @@
-'use strict';
-
-var oo = require('../util/oo');
-var EventEmitter = require('../util/EventEmitter');
-var Anchor = require('./Anchor');
+import EventEmitter from '../util/EventEmitter'
+import Anchor from './Anchor'
 
 /**
   A document selection. Refers to a Substance document model, not to the DOM.
@@ -13,43 +10,44 @@ var Anchor = require('./Anchor');
   @abstract
 */
 
-function Selection() {
-  // Internal stuff
-  var _internal = {};
-  Object.defineProperty(this, "_internal", {
-    enumerable: false,
-    value: _internal
-  });
-    // set when attached to document
-  _internal.doc = null;
-}
+class Selection {
 
-Selection.Prototype = function() {
+  constructor() {
+    // Internal stuff
+    var _internal = {};
+    Object.defineProperty(this, "_internal", {
+      enumerable: false,
+      value: _internal
+    });
+      // set when attached to document
+    _internal.doc = null;
+  }
 
-  this._isSelection = true;
+  // for duck-typed instanceof
+  get _isSelection() { return true; }
 
-  this.clone = function() {
+  clone() {
     var newSel = this._clone();
     if (this._internal.doc) {
       newSel.attach(this._internal.doc);
     }
     return newSel;
-  };
+  }
 
   /**
     @returns {Document} The attached document instance
   */
-  this.getDocument = function() {
+  getDocument() {
     var doc = this._internal.doc;
     if (!doc) {
       throw new Error('Selection is not attached to a document.');
     }
     return doc;
-  };
+  }
 
-  this.isAttached = function() {
+  isAttached() {
     return Boolean(this._internal.doc);
-  };
+  }
 
   /**
     Attach document to the selection.
@@ -58,65 +56,51 @@ Selection.Prototype = function() {
     @param {Document} doc document to attach
     @returns {this}
   */
-  this.attach = function(doc) {
+  attach(doc) {
     this._internal.doc = doc;
     return this;
-  };
+  }
 
   /**
     @returns {Boolean} true when selection is null.
   */
-  this.isNull = function() {
-    return false;
-  };
+  isNull() { return false; }
 
   /**
     @returns {Boolean} true for property selections
   */
-  this.isPropertySelection = function() {
-    return false;
-  };
+  isPropertySelection() { return false; }
 
   /**
     @returns {Boolean} true if selection is a {@link model/ContainerSelection}
   */
-  this.isContainerSelection = function() {
-    return false;
-  };
+  isContainerSelection() { return false; }
 
   /**
     @returns {Boolean} true if selection is a {@link model/NodeSelection}
   */
-  this.isNodeSelection = function() {
-    return false;
-  };
+  isNodeSelection() { return false; }
 
-  this.isCustomSelection = function() {
-    return false;
-  };
+  isCustomSelection() { return false; }
 
   /**
     @returns {Boolean} true when selection is collapsed
   */
-  this.isCollapsed = function() {
-    return true;
-  };
+  isCollapsed() { return true; }
 
   /**
     @returns {Boolean} true if startOffset < endOffset
   */
-  this.isReverse = function() {
-    return false;
-  };
+  isReverse() { return false; }
 
-  this.getType = function() {
+  getType() {
     throw new Error('Selection.getType() is abstract.');
-  };
+  }
 
   /**
     @returns {Boolean} true if selection equals `other` selection
   */
-  this.equals = function(other) {
+  equals(other) {
     if (this === other) {
       return true ;
     } else if (!other) {
@@ -130,14 +114,14 @@ Selection.Prototype = function() {
       // can call this as a predicate in their expression
       return true;
     }
-  };
+  }
 
   /**
     @returns {String} This selection as human readable string.
   */
-  this.toString = function() {
+  toString() {
     return "null";
-  };
+  }
 
   /**
     Convert container selection to JSON.
@@ -145,9 +129,9 @@ Selection.Prototype = function() {
     @abstract
     @returns {Object}
   */
-  this.toJSON = function() {
+  toJSON() {
     throw new Error('This method is abstract.');
-  };
+  }
 
   /**
     Get selection fragments for this selection.
@@ -155,13 +139,10 @@ Selection.Prototype = function() {
     A selection fragment is bound to a single property.
     @returns {Selection.Fragment[]}
   */
-  this.getFragments = function() {
+  getFragments() {
     return [];
-  };
-
-};
-
-oo.initClass(Selection);
+  }
+}
 
 /**
   Class to represent null selections.
@@ -170,29 +151,24 @@ oo.initClass(Selection);
   @class
 */
 
-Selection.NullSelection = function() {
-  Selection.call(this);
-};
+class NullSelection extends Selection {
 
-Selection.NullSelection.Prototype = function() {
-  this.isNull = function() {
+  isNull() {
     return true;
-  };
+  }
 
-  this.getType = function() {
+  getType() {
     return 'null';
-  };
+  }
 
-  this.toJSON = function() {
+  toJSON() {
     return null;
-  };
+  }
 
-  this.clone = function() {
+  clone() {
     return this;
-  };
-};
-
-Selection.extend(Selection.NullSelection);
+  }
+}
 
 /**
   We use a singleton to represent NullSelections.
@@ -200,35 +176,7 @@ Selection.extend(Selection.NullSelection);
   @type {model/Selection}
 */
 
-Selection.nullSelection = Object.freeze(new Selection.NullSelection());
-
-Selection.fromJSON = function(json) {
-  if (!json) {
-    return Selection.nullSelection;
-  }
-  var type = json.type;
-  switch(type) {
-    case 'property':
-      var PropertySelection = require('./PropertySelection');
-      return PropertySelection.fromJSON(json);
-    case 'container':
-      var ContainerSelection = require('./ContainerSelection');
-      return ContainerSelection.fromJSON(json);
-    case 'node':
-      var NodeSelection = require('./NodeSelection');
-      return NodeSelection.fromJSON(json);
-    case 'custom':
-      var CustomSelection = require('./CustomSelection');
-      return CustomSelection.fromJSON(json);
-    default:
-      // console.error('Selection.fromJSON(): unsupported selection data', json);
-      return Selection.nullSelection;
-  }
-};
-
-Selection.create = function() {
-  throw new Error('Selection.create() has been removed as it is not possible to create selections consistently without looking into the document.');
-};
+Selection.nullSelection = Object.freeze(new NullSelection());
 
 /**
   A selection fragment. Used when we split a {@link model/ContainerSelection}
@@ -352,4 +300,4 @@ Selection.Cursor.Prototype = function() {
 
 Anchor.extend(Selection.Cursor);
 
-module.exports = Selection;
+export default Selection

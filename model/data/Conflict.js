@@ -7,4 +7,4 @@ function Conflict(a, b) {
 }
 Conflict.prototype = Error.prototype;
 
-module.exports = Conflict;
+export default Conflict;

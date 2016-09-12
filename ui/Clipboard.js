@@ -1,11 +1,11 @@
 "use strict";
 
-var oo = require('../util/oo');
-var platform = require('../util/platform');
-var substanceGlobals = require('../util/substanceGlobals');
-var documentHelpers = require('../model/documentHelpers');
-var ClipboardImporter = require('./ClipboardImporter');
-var ClipboardExporter = require('./ClipboardExporter');
+import oo from '../util/oo'
+import platform from '../util/platform'
+import substanceGlobals from '../util/substanceGlobals'
+import documentHelpers from '../model/documentHelpers'
+import ClipboardImporter from './ClipboardImporter'
+import ClipboardExporter from './ClipboardExporter'
 
 /**
   The Clipboard is a Component which should be rendered as a sibling component
@@ -310,4 +310,4 @@ Clipboard.clipboardData = {
 };
 
 
-module.exports = Clipboard;
+export default Clipboard;

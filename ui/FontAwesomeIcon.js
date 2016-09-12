@@ -1,6 +1,6 @@
 'use strict';
 
-var Component = require('./Component');
+import Component from './Component'
 
 function FontAwesomeIcon() {
   FontAwesomeIcon.super.apply(this, arguments);
@@ -16,4 +16,4 @@ FontAwesomeIcon.Prototype = function() {
 
 Component.extend(FontAwesomeIcon);
 
-module.exports = FontAwesomeIcon;
+export default FontAwesomeIcon;

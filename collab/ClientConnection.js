@@ -1,7 +1,7 @@
 "use strict";
 
-var EventEmitter = require('../util/EventEmitter');
-var Err = require('../util/SubstanceError');
+import EventEmitter from '../util/EventEmitter'
+import Err from '../util/SubstanceError'
 var __id__ = 0;
 
 /**
@@ -102,4 +102,4 @@ ClientConnection.Prototype = function() {
 };
 
 EventEmitter.extend(ClientConnection);
-module.exports = ClientConnection;
+export default ClientConnection;

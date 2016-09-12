@@ -1,6 +1,6 @@
 'use strict';
 
-var oo = require('../util/oo');
+import oo from '../util/oo'
 
 function ContainerAddress(pos, offset) {
   this.pos = pos;
@@ -42,4 +42,4 @@ ContainerAddress.Prototype = function() {
 
 oo.initClass(ContainerAddress);
 
-module.exports = ContainerAddress;
+export default ContainerAddress;

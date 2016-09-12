@@ -1,7 +1,7 @@
 'use strict';
 
-var oo = require('../../util/oo');
-var EventEmitter = require('../../util/EventEmitter');
+import oo from '../../util/oo'
+import EventEmitter from '../../util/EventEmitter'
 
 var FileClientStub = function() {};
 
@@ -30,4 +30,4 @@ FileClientStub.Prototype = function() {
 
 oo.initClass(FileClientStub);
 
-module.exports = FileClientStub;
+export default FileClientStub;

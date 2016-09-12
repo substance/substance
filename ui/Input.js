@@ -1,6 +1,6 @@
 'use strict';
 
-var Component = require('./Component');
+import Component from './Component'
 
 function Input() {
   Component.apply(this, arguments);
@@ -25,4 +25,4 @@ Input.Prototype = function() {
 };
 
 Component.extend(Input);
-module.exports = Input;
+export default Input;

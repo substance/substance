@@ -1,6 +1,6 @@
 'use strict';
 
-var AnnotationComponent = require('../../ui/AnnotationComponent');
+import AnnotationComponent from '../../ui/AnnotationComponent'
 
 function LinkComponent() {
   LinkComponent.super.apply(this, arguments);
@@ -42,4 +42,4 @@ LinkComponent.Prototype = function() {
 
 AnnotationComponent.extend(LinkComponent);
 
-module.exports = LinkComponent;
+export default LinkComponent;

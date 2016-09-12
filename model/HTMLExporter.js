@@ -1,12 +1,12 @@
 'use strict';
 
-var DOMExporter = require('./DOMExporter');
-var DefaultDOMElement = require('../ui/DefaultDOMElement');
-var extend = require('lodash/extend');
-var each = require('lodash/each');
-var isBoolean = require('lodash/isBoolean');
-var isNumber = require('lodash/isNumber');
-var isString = require('lodash/isString');
+import DOMExporter from './DOMExporter'
+import DefaultDOMElement from '../ui/DefaultDOMElement'
+import extend from 'lodash/extend'
+import each from 'lodash/each'
+import isBoolean from 'lodash/isBoolean'
+import isNumber from 'lodash/isNumber'
+import isString from 'lodash/isString'
 
 /**
   @class
@@ -15,23 +15,6 @@ var isString = require('lodash/isString');
   Base class for custom HTML exporters. If you want to use XML as your
   exchange format see {@link model/XMLExporter}.
 
-  @example
-
-  Below is a full example taken from the [Notepad](https://github.com/substance/examples/blob/master/converter/NoteExporter.js) example.
-
-  ```js
-  var HTMLExporter = require('substance/model/HTMLExporter');
-  var converters = require('./NoteImporter').converters;
-
-  function NoteExporter() {
-    NoteExporter.super.call(this, {
-      converters: converters,
-      containerId: 'body'
-    });
-  }
-
-  HTMLExporter.extend(NoteExporter);
-  ```
 */
 
 function HTMLExporter(config) {
@@ -95,4 +78,4 @@ HTMLExporter.Prototype = function() {
 
 DOMExporter.extend(HTMLExporter);
 
-module.exports = HTMLExporter;
+export default HTMLExporter;

@@ -1,6 +1,6 @@
 'use strict';
 
-var Command = require('../../ui/Command');
+import Command from '../../ui/Command'
 
 function SaveCommand() {
   SaveCommand.super.call(this, { name: 'save' });
@@ -26,4 +26,4 @@ SaveCommand.Prototype = function() {
 
 Command.extend(SaveCommand);
 
-module.exports = SaveCommand;
+export default SaveCommand;

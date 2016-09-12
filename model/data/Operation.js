@@ -1,6 +1,6 @@
 'use strict';
 
-var oo = require('../../util/oo');
+import oo from '../../util/oo'
 
 /*
   @class
@@ -13,4 +13,4 @@ Operation.Prototype = function() {
 
 oo.initClass(Operation);
 
-module.exports = Operation;
+export default Operation;

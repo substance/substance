@@ -1,6 +1,6 @@
 'use strict';
 
-var TextBlockComponent = require('../../ui/TextBlockComponent');
+import TextBlockComponent from '../../ui/TextBlockComponent'
 
 function HeadingComponent() {
   HeadingComponent.super.apply(this, arguments);
@@ -19,4 +19,4 @@ HeadingComponent.Prototype = function() {
 
 TextBlockComponent.extend(HeadingComponent);
 
-module.exports = HeadingComponent;
+export default HeadingComponent;

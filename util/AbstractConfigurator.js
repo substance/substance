@@ -1,14 +1,15 @@
 'use strict';
 
-var oo = require('./oo');
-var forEach = require('lodash/forEach');
-var map = require('lodash/map');
-var extend = require('lodash/extend');
-var isString = require('lodash/isString');
-var DocumentSchema = require('../model/DocumentSchema');
-var EditingBehavior = require('../model/EditingBehavior');
-var Registry = require('../util/Registry');
-var ComponentRegistry = require('../ui/ComponentRegistry');
+import oo from './oo'
+import forEach from 'lodash/forEach'
+import map from 'lodash/map'
+import extend from 'lodash/extend'
+import isString from 'lodash/isString'
+import isPlainObject from 'lodash/isPlainObject'
+import DocumentSchema from '../model/DocumentSchema'
+import EditingBehavior from '../model/EditingBehavior'
+import Registry from '../util/Registry'
+import ComponentRegistry from '../ui/ComponentRegistry'
 
 /**
  * Abstract Configurator for Substance editors.
@@ -345,4 +346,4 @@ AbstractConfigurator.Prototype = function() {
 
 oo.initClass(AbstractConfigurator);
 
-module.exports = AbstractConfigurator;
+export default AbstractConfigurator;

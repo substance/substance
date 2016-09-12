@@ -1,9 +1,9 @@
 'use strict';
 
-var extend = require('lodash/extend');
-var merge = require('./merge');
-var updateAnnotations = require('./updateAnnotations');
-var deleteNode = require('./deleteNode');
+import extend from 'lodash/extend'
+import merge from './merge'
+import updateAnnotations from './updateAnnotations'
+import deleteNode from './deleteNode'
 
 /*
   The behavior when you press delete or backspace.
@@ -112,4 +112,4 @@ function _deleteCharacterWithNodeSelection(tx, args) {
   };
 }
 
-module.exports = deleteCharacter;
+export default deleteCharacter;

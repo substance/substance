@@ -1,7 +1,7 @@
 'use strict';
 
-var switchTextType = require('../../model/transform/switchTextType');
-var deleteSelection = require('../../model/transform/deleteSelection');
+import switchTextType from '../../model/transform/switchTextType'
+import deleteSelection from '../../model/transform/deleteSelection'
 
 var ListMacro = {
 
@@ -39,4 +39,4 @@ var ListMacro = {
 
 };
 
-module.exports = ListMacro;
+export default ListMacro;

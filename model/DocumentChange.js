@@ -1,17 +1,18 @@
 'use strict';
 
-var isEqual = require('lodash/isEqual');
-var isObject = require('lodash/isObject');
-var isArray = require('lodash/isArray');
-var map = require('lodash/map');
-var forEach = require('lodash/forEach');
-var clone = require('lodash/clone');
-var cloneDeep = require('lodash/cloneDeep');
-var oo = require('../util/oo');
-var uuid = require('../util/uuid');
-var OperationSerializer = require('./data/OperationSerializer');
-var ObjectOperation = require('./data/ObjectOperation');
-var Selection = require('./Selection');
+import isEqual from 'lodash/isEqual'
+import isObject from 'lodash/isObject'
+import isArray from 'lodash/isArray'
+import map from 'lodash/map'
+import forEach from 'lodash/forEach'
+import clone from 'lodash/clone'
+import cloneDeep from 'lodash/cloneDeep'
+import oo from '../util/oo'
+import uuid from '../util/uuid'
+import OperationSerializer from './data/OperationSerializer'
+import ObjectOperation from './data/ObjectOperation'
+import Selection from './Selection'
+import { fromJSON as selectionFromJSON } from './selectionHelpers'
 
 /*
 
@@ -254,10 +255,10 @@ DocumentChange.deserialize = function(str) {
     return opSerializer.deserialize(opData);
   });
   if (data.before.selection) {
-    data.before.selection = Selection.fromJSON(data.before.selection);
+    data.before.selection = selectionFromJSON(data.before.selection);
   }
   if (data.after.selection) {
-    data.after.selection = Selection.fromJSON(data.after.selection);
+    data.after.selection = selectionFromJSON(data.after.selection);
   }
   return new DocumentChange(data);
 };
@@ -268,8 +269,8 @@ DocumentChange.fromJSON = function(data) {
   change.ops = data.ops.map(function(opData) {
     return ObjectOperation.fromJSON(opData);
   });
-  change.before.selection = Selection.fromJSON(data.before.selection);
-  change.after.selection = Selection.fromJSON(data.after.selection);
+  change.before.selection = selectionFromJSON(data.before.selection);
+  change.after.selection = selectionFromJSON(data.after.selection);
   return new DocumentChange(change);
 };
 
@@ -379,4 +380,4 @@ function _transformCoordinateInplace(coor, op) {
   return hasChanged;
 }
 
-module.exports = DocumentChange;
+export default DocumentChange;

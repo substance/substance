@@ -1,11 +1,10 @@
-'use strict';
+import isNumber from 'lodash/isNumber'
+import Coordinate from './Coordinate'
+import Selection from './Selection'
+import PropertySelection from './PropertySelection'
 
-var isNumber = require('lodash/isNumber');
-var Coordinate = require('./Coordinate');
-var Selection = require('./Selection');
-var PropertySelection = require('./PropertySelection');
-var CoordinateAdapter = PropertySelection.CoordinateAdapter;
-var RangeAdapter = PropertySelection.RangeAdapter;
+const CoordinateAdapter = PropertySelection.CoordinateAdapter
+const RangeAdapter = PropertySelection.RangeAdapter
 
 /**
   A selection spanning multiple nodes.
@@ -26,57 +25,60 @@ var RangeAdapter = PropertySelection.RangeAdapter;
   });
   ```
 */
-function ContainerSelection(containerId, startPath, startOffset, endPath, endOffset, reverse, surfaceId) {
-  Selection.call(this);
+class ContainerSelection extends Selection {
 
-  /**
-    @type {String}
-  */
-  this.containerId = containerId;
+  constructor(containerId, startPath, startOffset, endPath, endOffset, reverse, surfaceId) {
+    super()
 
-  /**
-    The path of the property where this annotations starts.
-    @type {String[]}
-  */
-  this.startPath = startPath;
+    /**
+      @type {String}
+    */
+    this.containerId = containerId;
 
-  /**
-    The character position where this annotations starts.
-    @type {Number}
-  */
-  this.startOffset = startOffset;
+    /**
+      The path of the property where this annotations starts.
+      @type {String[]}
+    */
+    this.startPath = startPath;
 
-  /**
-    The path of the property where this annotations ends.
-    @type {String[]}
-  */
-  this.endPath = endPath;
+    /**
+      The character position where this annotations starts.
+      @type {Number}
+    */
+    this.startOffset = startOffset;
 
-  /**
-    The character position where this annotations ends.
-    @type {Number}
-  */
-  this.endOffset = endOffset;
+    /**
+      The path of the property where this annotations ends.
+      @type {String[]}
+    */
+    this.endPath = endPath;
+
+    /**
+      The character position where this annotations ends.
+      @type {Number}
+    */
+    this.endOffset = endOffset;
 
 
-  this.reverse = Boolean(reverse);
+    this.reverse = Boolean(reverse);
 
-  this.surfaceId = surfaceId;
+    this.surfaceId = surfaceId;
 
-  if (!this.containerId || !this.startPath || !isNumber(this.startOffset) ||
-   !this.endPath || !isNumber(this.endOffset) ) {
-    throw new Error('Invalid arguments: `containerId`, `startPath`, `startOffset`, `endPath`, and `endOffset` are mandatory');
+    if (!this.containerId || !this.startPath || !isNumber(this.startOffset) ||
+     !this.endPath || !isNumber(this.endOffset) ) {
+      throw new Error('Invalid arguments: `containerId`, `startPath`, `startOffset`, `endPath`, and `endOffset` are mandatory');
+    }
+
+    // dynamic adapters for Coordinate oriented implementations
+    this._internal.start = new CoordinateAdapter(this, 'startPath', 'startOffset');
+    this._internal.end = new CoordinateAdapter(this, 'endPath', 'endOffset');
+    this._internal.range = new RangeAdapter(this);
   }
 
-  // dynamic adapters for Coordinate oriented implementations
-  this._internal.start = new CoordinateAdapter(this, 'startPath', 'startOffset');
-  this._internal.end = new CoordinateAdapter(this, 'endPath', 'endOffset');
-  this._internal.range = new RangeAdapter(this);
-}
+  // for duck-typed instanceof
+  get _isContainerSelection() { return true }
 
-ContainerSelection.Prototype = function() {
-
-  this.toJSON = function() {
+  toJSON() {
     return {
       type: 'container',
       containerId: this.containerId,
@@ -87,39 +89,38 @@ ContainerSelection.Prototype = function() {
       reverse: this.reverse,
       surfaceId: this.surfaceId
     };
-  };
+  }
 
-  this._isContainerSelection = true;
 
-  this.isContainerSelection = function() {
+  isContainerSelection() {
     return true;
-  };
+  }
 
-  this.getType = function() {
+  getType() {
     return 'container';
-  };
+  }
 
-  this.isNull = function() {
+  isNull() {
     return false;
-  };
+  }
 
-  this.isCollapsed = function() {
+  isCollapsed() {
     return this.start.equals(this.end);
-  };
+  }
 
-  this.isReverse = function() {
+  isReverse() {
     return this.reverse;
-  };
+  }
 
-  this.equals = function(other) {
+  equals(other) {
     return (
       Selection.prototype.equals.call(this, other) &&
       this.containerId === other.containerId &&
       (this.start.equals(other.start) && this.end.equals(other.end))
     );
-  };
+  }
 
-  this.toString = function() {
+  toString() {
     /* istanbul ignore next */
     return [
       "ContainerSelection(",
@@ -131,19 +132,19 @@ ContainerSelection.Prototype = function() {
       (this.surfaceId?(", "+this.surfaceId):""),
       ")"
     ].join('');
-  };
+  }
 
   /**
     @return {model/Container} The container node instance for this selection.
   */
-  this.getContainer = function() {
+  getContainer() {
     if (!this._internal.container) {
       this._internal.container = this.getDocument().get(this.containerId);
     }
     return this._internal.container;
-  };
+  }
 
-  this.isInsideOf = function(other, strict) {
+  isInsideOf(other, strict) {
     // Note: this gets called from PropertySelection.contains()
     // because this implementation can deal with mixed selection types.
     if (other.isNull()) return false;
@@ -152,9 +153,9 @@ ContainerSelection.Prototype = function() {
     var r2 = this._range(other);
     return (r2.start.isBefore(r1.start, strict) &&
       r1.end.isBefore(r2.end, strict));
-  };
+  }
 
-  this.contains = function(other, strict) {
+  contains(other, strict) {
     // Note: this gets called from PropertySelection.isInsideOf()
     // because this implementation can deal with mixed selection types.
     if (other.isNull()) return false;
@@ -163,9 +164,9 @@ ContainerSelection.Prototype = function() {
     var r2 = this._range(other);
     return (r1.start.isBefore(r2.start, strict) &&
       r2.end.isBefore(r1.end, strict));
-  };
+  }
 
-  this.containsNodeFragment = function(nodeId, strict) {
+  containsNodeFragment(nodeId, strict) {
     var container = this.getContainer();
     var coor = new Coordinate([nodeId], 0);
     var address = container.getAddress(coor);
@@ -177,29 +178,29 @@ ContainerSelection.Prototype = function() {
       contained = r.end.isAfter(address, strict);
     }
     return contained;
-  };
+  }
 
-  this.overlaps = function(other) {
+  overlaps(other) {
     var r1 = this._range(this);
     var r2 = this._range(other);
     // it overlaps if they are not disjunct
     return !(r1.end.isBefore(r2.start, false) ||
       r2.end.isBefore(r1.start, false));
-  };
+  }
 
-  this.isLeftAlignedWith = function(other) {
+  isLeftAlignedWith(other) {
     var r1 = this._range(this);
     var r2 = this._range(other);
     return r1.start.isEqual(r2.start);
-  };
+  }
 
-  this.isRightAlignedWith = function(other) {
+  isRightAlignedWith(other) {
     var r1 = this._range(this);
     var r2 = this._range(other);
     return r1.end.isEqual(r2.end);
-  };
+  }
 
-  this.containsNode = function(nodeId) {
+  containsNode(nodeId) {
     var container = this.getContainer();
     var startPos = container.getPosition(this.startPath[0]);
     var endPos = container.getPosition(this.endPath[0]);
@@ -210,7 +211,7 @@ ContainerSelection.Prototype = function() {
       return false;
     }
     return true;
-  };
+  }
 
   /**
     Collapse a selection to chosen direction.
@@ -218,7 +219,7 @@ ContainerSelection.Prototype = function() {
     @param {String} direction either left of right
     @returns {PropertySelection}
   */
-  this.collapse = function(direction) {
+  collapse(direction) {
     var coor;
     if (direction === 'left') {
       coor = this.start;
@@ -226,10 +227,9 @@ ContainerSelection.Prototype = function() {
       coor = this.end;
     }
     return _createNewSelection(this, coor, coor);
-  };
+  }
 
-
-  this.expand = function(other) {
+  expand(other) {
     var r1 = this._range(this);
     var r2 = this._range(other);
     var start;
@@ -251,9 +251,9 @@ ContainerSelection.Prototype = function() {
     }
 
     return _createNewSelection(this, start, end);
-  };
+  }
 
-  this.truncateWith = function(other) {
+  truncateWith(other) {
     if (other.isInsideOf(this, 'strict')) {
       // the other selection should overlap only on one side
       throw new Error('Can not truncate with a contained selections');
@@ -292,7 +292,7 @@ ContainerSelection.Prototype = function() {
       throw new Error('Could not determine coordinates for truncate. Check input');
     }
     return _createNewSelection(this, start, end);
-  };
+  }
 
   /**
     Helper to create selection fragments for this ContainerSelection.
@@ -301,7 +301,7 @@ ContainerSelection.Prototype = function() {
 
     @returns {Selection.Fragment[]} Fragments resulting from splitting this into property selections.
   */
-  this.getFragments = function() {
+  getFragments() {
     if(this._internal.fragments) {
       return this._internal.fragments;
     }
@@ -424,14 +424,14 @@ ContainerSelection.Prototype = function() {
     this._internal.fragments = fragments;
 
     return fragments;
-  };
+  }
 
   /**
     Splits a container selection into property selections.
 
     @returns {PropertySelection[]}
   */
-  this.splitIntoPropertySelections = function() {
+  splitIntoPropertySelections() {
     var sels = [];
     var fragments = this.getFragments();
     fragments.forEach(function(fragment) {
@@ -443,13 +443,13 @@ ContainerSelection.Prototype = function() {
       }
     }.bind(this));
     return sels;
-  };
+  }
 
-  this._clone = function() {
+  _clone() {
     return new ContainerSelection(this.containerId, this.startPath, this.startOffset, this.endPath, this.endOffset, this.reverse, this.surfaceId);
-  };
+  }
 
-  this._range = function(sel) {
+  _range(sel) {
     // EXPERIMENTAL: caching the internal address based range
     // as we use it very often.
     // However, this is dangerous as this data can get invalid by a change
@@ -473,21 +473,19 @@ ContainerSelection.Prototype = function() {
       sel._internal.addressRange = addressRange;
     }
     return addressRange;
-  };
-
-  function _createNewSelection(containerSel, start, end) {
-    var newSel = new ContainerSelection(containerSel.containerId,
-      start.path, start.offset, end.path, end.offset, false, containerSel.surfaceId);
-    // we need to attach the new selection
-    var doc = containerSel._internal.doc;
-    if (doc) {
-      newSel.attach(doc);
-    }
-    return newSel;
   }
-};
+}
 
-Selection.extend(ContainerSelection);
+function _createNewSelection(containerSel, start, end) {
+  var newSel = new ContainerSelection(containerSel.containerId,
+    start.path, start.offset, end.path, end.offset, false, containerSel.surfaceId);
+  // we need to attach the new selection
+  var doc = containerSel._internal.doc;
+  if (doc) {
+    newSel.attach(doc);
+  }
+  return newSel;
+}
 
 Object.defineProperties(ContainerSelection.prototype, {
   path: {
@@ -539,6 +537,6 @@ ContainerSelection.fromJSON = function(properties) {
   var surfaceId = properties.surfaceId;
   var sel = new ContainerSelection(containerId, startPath, startOffset, endPath, endOffset, reverse, surfaceId);
   return sel;
-};
+}
 
-module.exports = ContainerSelection;
+export default ContainerSelection

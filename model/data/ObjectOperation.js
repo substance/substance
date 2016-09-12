@@ -1,13 +1,13 @@
 'use strict';
 
-var isString = require('lodash/isString');
-var isEqual = require('lodash/isEqual');
-var cloneDeep = require('lodash/cloneDeep');
-var DataObject = require('./DataObject');
-var Operation = require('./Operation');
-var TextOperation = require('./TextOperation');
-var ArrayOperation = require('./ArrayOperation');
-var Conflict = require('./Conflict');
+import isString from 'lodash/isString'
+import isEqual from 'lodash/isEqual'
+import cloneDeep from 'lodash/cloneDeep'
+import DataObject from './DataObject'
+import Operation from './Operation'
+import TextOperation from './TextOperation'
+import ArrayOperation from './ArrayOperation'
+import Conflict from './Conflict'
 
 var NOP = "NOP";
 var CREATE = "create";
@@ -440,4 +440,4 @@ ObjectOperation.DELETE = DELETE;
 ObjectOperation.UPDATE = UPDATE;
 ObjectOperation.SET = SET;
 
-module.exports = ObjectOperation;
+export default ObjectOperation;

@@ -1,13 +1,13 @@
-'use strict';
-
-var inBrowser = require('../util/inBrowser');
+import inBrowser from '../util/inBrowser'
+import BrowserDOMElement from './BrowserDOMElement.js'
+import CheerioDOMElement from './CheerioDOMElement.js'
 
 var DOMElementImpl;
 
 if (inBrowser) {
-  DOMElementImpl = require('./BrowserDOMElement.js');
+  DOMElementImpl = BrowserDOMElement;
 } else {
-  DOMElementImpl = require('./CheerioDOMElement.js');
+  DOMElementImpl = CheerioDOMElement;
 }
 
 var DefaultDOMElement = {};
@@ -56,10 +56,8 @@ DefaultDOMElement.parseXML = function(xml, fullDoc) {
 DefaultDOMElement.wrapNativeElement = function(el) {
   if (el) {
     if (inBrowser && (el instanceof window.Node || el === window) ) {
-      var BrowserDOMElement = require('./BrowserDOMElement');
       return BrowserDOMElement.wrapNativeElement(el);
     } else if (el.root && el.root.type === "root" ) {
-      var CheerioDOMElement = require('./CheerioDOMElement');
       return CheerioDOMElement.wrapNativeElement(el);
     }
   } else {
@@ -69,11 +67,10 @@ DefaultDOMElement.wrapNativeElement = function(el) {
 
 DefaultDOMElement.isReverse = function(anchorNode, anchorOffset, focusNode, focusOffset) {
   if (inBrowser ) {
-    var BrowserDOMElement = require('./BrowserDOMElement');
     return BrowserDOMElement.isReverse(anchorNode, anchorOffset, focusNode, focusOffset);
   } else {
     throw new Error('Not implemented.');
   }
 };
 
-module.exports = DefaultDOMElement;
+export default DefaultDOMElement;
