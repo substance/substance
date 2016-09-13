@@ -33,6 +33,17 @@ b.task('browser:es6', function() {
   });
 });
 
+b.task('server:cjs', function() {
+  b.js('./index.es.js', {
+    external: ['substance-cheerio'],
+    commonjs: { include: ['node_modules/**'] },
+    dest: './dist/substance.cjs.js',
+    format: 'cjs',
+    sourceMapRoot: __dirname,
+    sourceMapPrefix: 'substance'
+  });
+});
+
 b.task('browser', ['browser:umd', 'browser:es6'])
 
 b.task('default', ['clean', 'css', 'browser'])
