@@ -1,11 +1,9 @@
-'use strict';
-
 import isString from 'lodash/isString'
 import last from 'lodash/last'
 import extend from 'lodash/extend'
 import clone from 'lodash/clone'
 import map from 'lodash/map'
-import $ from '../util/cheerio.customized'
+import $ from 'substance-cheerio'
 import EventEmitter from '../util/EventEmitter'
 import DOMElement from './DOMElement'
 

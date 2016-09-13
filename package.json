@@ -19,8 +19,7 @@
   "author": "",
   "license": "MIT",
   "dependencies": {
-    "cheerio": "0.20.0",
-    "dom-serializer": "0.1.0",
+    "substance-cheerio": "^0.1.0",
     "lodash": "4.13.1"
   },
   "devDependencies": {

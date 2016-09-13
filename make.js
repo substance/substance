@@ -11,7 +11,7 @@ b.task('css', function() {
 
 b.task('browser:umd', function() {
   b.js('./index.es.js', {
-    ignore: ['cheerio', 'dom-serializer'],
+    ignore: ['substance-cheerio'],
     commonjs: { include: ['node_modules/lodash/**'] },
     dest: './dist/substance.js',
     format: 'umd',
@@ -24,7 +24,7 @@ b.task('browser:umd', function() {
 // bundle for the browser
 b.task('browser:es6', function() {
   b.js('./index.es.js', {
-    ignore: ['cheerio', 'dom-serializer'],
+    ignore: ['substance-cheerio'],
     commonjs: { include: ['node_modules/lodash/**'] },
     dest: './dist/substance.es6.js',
     format: 'es',
