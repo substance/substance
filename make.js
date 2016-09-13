@@ -46,4 +46,6 @@ b.task('server:cjs', function() {
 
 b.task('browser', ['browser:umd', 'browser:es6'])
 
-b.task('default', ['clean', 'css', 'browser'])
+b.task('server', ['server:cjs'])
+
+b.task('default', ['clean', 'css', 'browser', 'server'])
