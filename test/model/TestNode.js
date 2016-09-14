@@ -1,12 +1,6 @@
-'use strict';
+import DocumentNode from '../../model/DocumentNode'
 
-var DocumentNode = require('../../model/DocumentNode');
-
-function TestNode() {
-  TestNode.super.apply(this, arguments);
-}
-
-DocumentNode.extend(TestNode);
+class TestNode extends DocumentNode {}
 
 TestNode.define({
   type: "test-node",
@@ -14,8 +8,8 @@ TestNode.define({
   stringVal: { type: "string", default: "" },
   arrayVal: { type: ["array","string"], default: [] },
   objectVal: { type: "object", default: {} },
-});
+})
 
-TestNode.isBlock = true;
+TestNode.isBlock = true
 
-module.exports = TestNode;
+export default TestNode

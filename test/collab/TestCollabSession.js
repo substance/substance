@@ -1,67 +1,60 @@
-'use strict';
+import CollabSession from '../../collab/CollabSession'
+import DocumentChange from '../../model/DocumentChange'
 
-var CollabSession = require('../../collab/CollabSession');
-var DocumentChange = require('../../model/DocumentChange');
+class TestCollabSession extends CollabSession {
 
-function TestCollabSession() {
-  this._incomingMessages = [];
-  this._outgoingMessages = [];
-
-  TestCollabSession.super.apply(this, arguments);
-}
-
-TestCollabSession.Prototype = function() {
-
-  var _super = TestCollabSession.super.prototype;
+  constructor(...args) {
+    super(...args)
+    this._incomingMessages = []
+    this._outgoingMessages = []
+  }
 
   /*
     We log received messages so we can later dump the session
     history and replay in test cases.
   */
-  this._onMessage = function(msg) {
+  _onMessage(...args) {
     if (this.config.logging) {
-      this._incomingMessages.push(msg);      
+      this._incomingMessages.push(args[0])
     }
-    _super._onMessage.apply(this, arguments);
-  };
+    super._onMessage(...args)
+  }
 
   /*
     We log sent messages so we can later dump the session
     history and replay in test cases.
   */
-  this._onSend = function(msg) {
+  _onSend(...args) {
     if (this.config.logging) {
-      this._outgoingMessages = [];
-      this._outgoingMessages.push(msg);      
+      this._outgoingMessages = []
+      this._outgoingMessages.push(args[0])
     }
-    _super._onSend.apply(this, arguments);
-  };
+    super._onSend(...args)
+  }
 
-  this.dumpIncomingMessages = function() {
-    return JSON.stringify(this._incomingMessages, null, '  ');
-  };
+  dumpIncomingMessages() {
+    return JSON.stringify(this._incomingMessages, null, '  ')
+  }
 
-  this.dumpOutgoingMessages = function() {
-    return JSON.stringify(this._outgoingMessages, null, '  ');
-  };
+  dumpOutgoingMessages() {
+    return JSON.stringify(this._outgoingMessages, null, '  ')
+  }
 
-  this.serializeMessage = function(msg) {
-    return msg;
-  };
+  serializeMessage(msg) {
+    return msg
+  }
 
-  this.deserializeMessage = function(msg) {
-    return msg;
-  };
+  deserializeMessage(msg) {
+    return msg
+  }
 
-  this.serializeChange = function(change) {
-    return change.toJSON();
-  };
+  serializeChange(change) {
+    return change.toJSON()
+  }
 
-  this.deserializeChange = function(serializedChange) {
-    return DocumentChange.fromJSON(serializedChange);
-  };
-};
+  deserializeChange(serializedChange) {
+    return DocumentChange.fromJSON(serializedChange)
+  }
+}
 
-CollabSession.extend(TestCollabSession);
-
-module.exports = TestCollabSession;
+export default TestCollabSession

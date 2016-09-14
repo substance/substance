@@ -1,23 +1,15 @@
-'use strict';
+import CollabServer from '../../collab/CollabServer'
 
-var CollabServer = require('../../collab/CollabServer');
+class TestCollabServer extends CollabServer {
 
-function TestCollabServer() {
-  TestCollabServer.super.apply(this, arguments);
+  serializeMessage(msg) {
+    return msg
+  }
+
+  deserializeMessage(msg) {
+    return msg
+  }
+
 }
 
-TestCollabServer.Prototype = function() {
-
-  this.serializeMessage = function(msg) {
-    return msg;
-  };
-
-  this.deserializeMessage = function(msg) {
-    return msg;
-  };
-
-};
-
-CollabServer.extend(TestCollabServer);
-
-module.exports = TestCollabServer;
+export default TestCollabServer

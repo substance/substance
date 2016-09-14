@@ -1,13 +1,11 @@
-'use strict';
+import isFunction from 'lodash/isFunction'
+import DocumentSession from '../../model/DocumentSession'
 
-var isFunction = require('lodash/isFunction');
-var DocumentSession = require('../../model/DocumentSession');
-
-module.exports = function createChangeset(doc, fn) {
+export default function createChangeset(doc, fn) {
   if (!doc._isDocument || !isFunction(fn)) {
-    throw new Error('Illegal arguments');
+    throw new Error('Illegal arguments')
   }
-  var session = new DocumentSession(doc);
-  var change = session.transaction(fn);
-  return [change.toJSON()];
-};
+  var session = new DocumentSession(doc)
+  var change = session.transaction(fn)
+  return [change.toJSON()]
+}

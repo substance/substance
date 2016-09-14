@@ -1,16 +1,10 @@
-'use strict';
+import DocumentNode from '../../model/DocumentNode'
 
-var DocumentNode = require('../../model/DocumentNode');
-
-function TestMetaNode() {
-  TestMetaNode.super.apply(this, arguments);
-}
-
-DocumentNode.extend(TestMetaNode);
+class TestMetaNode extends DocumentNode {}
 
 TestMetaNode.define({
   type: 'meta',
   title: 'text'
-});
+})
 
-module.exports = TestMetaNode;
+export default TestMetaNode

@@ -1,26 +1,19 @@
-'use strict';
+import Component from '../../ui/Component'
+import ContainerEditor from '../../ui/ContainerEditor'
 
-var Component = require('../../ui/Component');
-var ContainerEditor = require('../../ui/ContainerEditor');
+class TestContainerComponent extends Component {
 
-function TestContainerComponent() {
-  TestContainerComponent.super.apply(this, arguments);
-}
-
-TestContainerComponent.Prototype = function() {
-  this.render = function($$) {
-    var el = $$('div').addClass('sc-container');
+  render($$) {
+    var el = $$('div').addClass('sc-container')
     el.append(
       $$(ContainerEditor, {
         node: this.props.node
       }).ref('editor')
-    );
-    return el;
-  };
-};
+    )
+    return el
+  }
+}
 
-Component.extend(TestContainerComponent);
+TestContainerComponent.fullWidth = true
 
-TestContainerComponent.fullWidth = true;
-
-module.exports = TestContainerComponent;
+export default TestContainerComponent

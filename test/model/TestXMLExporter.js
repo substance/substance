@@ -1,28 +1,22 @@
-'use strict';
+import XMLExporter from '../../model/XMLExporter'
+import converters from './TestXMLImporter'.converters
+import DefaultDOMElement from '../../ui/DefaultDOMElement'
 
-var XMLExporter = require('../../model/XMLExporter');
-var converters = require('./TestXMLImporter').converters;
-var DefaultDOMElement = require('../../ui/DefaultDOMElement');
+class TestXMLExporter extends XMLExporter {
 
-function TestXMLExporter() {
-  TestXMLExporter.super.call(this, {
-    converters: converters
-  });
-}
+  constructor() {
+    super({ converters: converters })
+  }
 
-TestXMLExporter.Prototype = function() {
-
-  this.convertDocument = function(doc) {
-    var articleEl = DefaultDOMElement.parseXML('<article></article>');
-    var body = doc.get('body');
+  convertDocument(doc) {
+    var articleEl = DefaultDOMElement.parseXML('<article></article>')
+    var body = doc.get('body')
     articleEl.append(
       this.convertContainer(body)
-    );
-    return articleEl;
-  };
+    )
+    return articleEl
+  }
 
-};
+}
 
-XMLExporter.extend(TestXMLExporter);
-
-module.exports = TestXMLExporter;
+export default TestXMLExporter

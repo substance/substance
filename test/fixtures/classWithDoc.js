@@ -1,5 +1,3 @@
-'use strict';
-
 /**
  @class
  @export
@@ -12,37 +10,37 @@ MyClass.Prototype = function() {
   /**
     FOO
   */
-  this.foo = function() {};
+  this.foo = function() {}
 
   /**
     BAR
     @type String
   */
-  this.bar = 'bar';
-};
+  this.bar = 'bar'
+}
 
 // classical prototype approach
 
 /**
   BLA
 */
-MyClass.prototype.bla = function() {};
+MyClass.prototype.bla = function() {}
 
 /**
   BLUPP
   @type String
 */
-MyClass.prototype.blupp = 'blupp';
+MyClass.prototype.blupp = 'blupp'
 
 // static
 
 /**
   ZIP
 */
-MyClass.zip = function() {};
+MyClass.zip = function() {}
 
 /**
   ZAP
   @type String
 */
-MyClass.zap = 'zap';
+MyClass.zap = 'zap'
