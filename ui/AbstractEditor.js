@@ -9,7 +9,6 @@ import DragManager from './DragManager'
 
 function AbstractEditor() {
   AbstractEditor.super.apply(this, arguments);
-
   this._initialize(this.props);
 }
 
@@ -52,7 +51,7 @@ AbstractEditor.Prototype = function() {
       componentRegistry: this.componentRegistry,
       surfaceManager: this.surfaceManager,
       commandManager: this.commandManager,
-      toolRegistry: this.toolRegistry,
+      tools: this.tools,
       labelProvider: this.labelProvider,
       converterRegistry: this.converterRegistry,
       globalEventHandler: this.globalEventHandler,
@@ -72,7 +71,7 @@ AbstractEditor.Prototype = function() {
     this.saveHandler = configurator.getSaveHandler();
     this.documentSession.setSaveHandler(this.saveHandler);
     this.componentRegistry = configurator.getComponentRegistry();
-    this.toolRegistry = configurator.getToolRegistry();
+    this.tools = configurator.getTools();
     this.surfaceManager = new SurfaceManager(this.documentSession);
     this.fileClient = configurator.getFileClient();
     this.commandManager = new CommandManager(this.getCommandContext(), commands);

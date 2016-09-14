@@ -59,6 +59,9 @@ export { default as SubscriptPackage } from './packages/subscript/SubscriptPacka
 export { default as SuperscriptPackage } from './packages/superscript/SuperscriptPackage'
 export { default as TablePackage } from './packages/table/TablePackage'
 
+// Tools package
+export { default as ToolDropdown } from './packages/tools/ToolDropdown'
+
 // ui
 export { default as AnnotationCommand } from './ui/AnnotationCommand'
 export { default as AnnotationComponent } from './ui/AnnotationComponent'
@@ -84,6 +87,7 @@ export { default as TOC } from './ui/TOC'
 export { default as TOCProvider } from './ui/TOCProvider'
 export { default as Tool } from './ui/Tool'
 export { default as Toolbar } from './ui/Toolbar'
+export { default as ToolGroup } from './ui/ToolGroup'
 
 // util
 export { default as ArrayIterator } from './util/ArrayIterator'

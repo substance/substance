@@ -1,5 +1,3 @@
-'use strict';
-
 import Component from './Component'
 
 /*
@@ -17,15 +15,15 @@ DefaultOverlay.Prototype = function() {
   this.render = function($$) {
     var el = $$('div').addClass(this.getClassNames());
     var commandStates = this.props.commandStates;
-    var toolRegistry = this.context.toolRegistry;
-    toolRegistry.forEach(function(tool) {
-      if (tool.options.overlay) {
-        var toolProps = tool.Class.getProps(commandStates);
-        if (toolProps) {
-          el.append(
-            $$(tool.Class, toolProps).ref(tool.name)
-          );
-        }
+    var tools = this.context.tools;
+    var overlayTools = tools.get('overlay');
+
+    overlayTools.forEach(function(tool) {
+      var toolProps = tool.Class.getProps(commandStates);
+      if (toolProps) {
+        el.append(
+          $$(tool.Class, toolProps).ref(tool.name)
+        );
       }
     });
     return el;

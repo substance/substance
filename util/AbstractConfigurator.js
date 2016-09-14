@@ -1,11 +1,6 @@
-'use strict';
-
-import oo from './oo'
 import forEach from 'lodash/forEach'
 import map from 'lodash/map'
-import extend from 'lodash/extend'
 import isString from 'lodash/isString'
-import isPlainObject from 'lodash/isPlainObject'
 import DocumentSchema from '../model/DocumentSchema'
 import EditingBehavior from '../model/EditingBehavior'
 import Registry from '../util/Registry'
@@ -16,114 +11,123 @@ import ComponentRegistry from '../ui/ComponentRegistry'
  *
  * @module
  */
-function AbstractConfigurator() {
-  this.config = {
-    schema: {},
-    nodes: {},
-    components: {},
-    converters: {},
-    importers: {},
-    exporters: {},
-    commands: {},
-    tools: {},
-    textTypes: [],
-    editingBehaviors: [],
-    macros: [],
-    dndHandlers: [],
-    icons: {},
-    labels: {}
-  };
-}
-
-AbstractConfigurator.Prototype = function() {
+class AbstractConfigurator {
+  constructor() {
+    this.config = {
+      schema: {},
+      nodes: {},
+      components: {},
+      converters: {},
+      importers: {},
+      exporters: {},
+      commands: {},
+      tools: new Map(),
+      textTypes: [],
+      editingBehaviors: [],
+      macros: [],
+      dndHandlers: [],
+      icons: {},
+      labels: {}
+    }
+  }
 
   // Record phase API
   // ------------------------
 
-  this.defineSchema = function(schema) {
-    this.config.schema = schema;
-  };
+  defineSchema(schema) {
+    this.config.schema = schema
+  }
 
   /**
    * @param {String} NodeClass node class name.
    */
-  this.addNode = function(NodeClass) {
-    var type = NodeClass.type;
+  addNode(NodeClass) {
+    var type = NodeClass.type
     if (!type) {
-      throw new Error('A NodeClass must have a type.');
+      throw new Error('A NodeClass must have a type.')
     }
     if (this.config.nodes[type]) {
-      throw new Error('NodeClass with this type name is already registered: ' + name);
+      throw new Error('NodeClass with this type name is already registered: ' + name)
     }
-    this.config.nodes[type] = NodeClass;
-  };
+    this.config.nodes[type] = NodeClass
+  }
 
-  this.addConverter = function(type, converter) {
-    var converters = this.config.converters[type];
+  addConverter(type, converter) {
+    var converters = this.config.converters[type]
     if (!converters) {
-      converters = {};
-      this.config.converters[type] = converters;
+      converters = {}
+      this.config.converters[type] = converters
     }
     if (!converter.type) {
-      throw new Error('A converter needs an associated type.');
+      throw new Error('A converter needs an associated type.')
     }
-    converters[converter.type] = converter;
-  };
+    converters[converter.type] = converter
+  }
 
-  this.addImporter = function(type, ImporterClass) {
-    this.config.importers[type] = ImporterClass;
-  };
+  addImporter(type, ImporterClass) {
+    this.config.importers[type] = ImporterClass
+  }
 
-  this.addExporter = function(type, ExporterClass) {
-    this.config.exporters[type] = ExporterClass;
-  };
+  addExporter(type, ExporterClass) {
+    this.config.exporters[type] = ExporterClass
+  }
 
-  this.addComponent = function(name, ComponentClass) {
+  addComponent(name, ComponentClass) {
     if (this.config.components[name]) {
-      throw new Error(name+' already registered');
+      throw new Error(name+' already registered')
     }
     if (!ComponentClass || !ComponentClass.prototype._isComponent) {
-      throw new Error('ComponentClass must be a subclass of ui/Component.');
+      throw new Error('ComponentClass must be a subclass of ui/Component.')
     }
-    this.config.components[name] = ComponentClass;
-  };
+    this.config.components[name] = ComponentClass
+  }
 
-  this.addCommand = function(name, CommandClass, options) {
+  addCommand(name, CommandClass, options) {
     if (!isString(name)) {
-      throw new Error("Expecting 'name' to be a String");
+      throw new Error("Expecting 'name' to be a String")
     }
     if (!CommandClass.prototype._isCommand) {
-      throw new Error("Expecting 'CommandClass' to be of type ui/Command.");
+      throw new Error("Expecting 'CommandClass' to be of type ui/Command.")
     }
     this.config.commands[name] = {
       name: name,
       CommandClass: CommandClass,
       options: options || {}
-    };
-  };
+    }
+  }
 
-  this.addTool = function(name, ToolClass, options) {
+  addTool(name, ToolClass, options) {
+    options = options || {};
     if (!isString(name)) {
-      throw new Error("Expecting 'name' to be a String");
+      throw new Error("Expecting 'name' to be a String")
     }
     if (!ToolClass.prototype._isTool) {
-      throw new Error("Expecting 'ToolClass' to be of type ui/Tool.");
+      throw new Error("Expecting 'ToolClass' to be of type ui/Tool.")
     }
-    this.config.tools[name] = {
+    var toolTarget = options.target
+    if (!toolTarget && options.overlay) {
+      toolTarget = 'overlay'
+    } else if (!toolTarget) {
+      toolTarget = 'default'
+    }
+    if (!this.config.tools.has(toolTarget)) {
+      this.config.tools.set(toolTarget, new Map());
+    }
+    this.config.tools.get(toolTarget).set(name, {
       name: name,
       Class: ToolClass,
       options: options || {}
-    };
-  };
+    })
+  }
 
-  this.addIcon = function(iconName, options) {
-    var iconConfig = this.config.icons[iconName];
+  addIcon(iconName, options) {
+    var iconConfig = this.config.icons[iconName]
     if (!iconConfig) {
-      iconConfig = {};
-      this.config.icons[iconName] = iconConfig;
+      iconConfig = {}
+      this.config.icons[iconName] = iconConfig
     }
-    extend(iconConfig, options);
-  };
+    Object.assign(iconConfig, options)
+  }
 
   /**
     @param {String} labelName name of label.
@@ -133,21 +137,21 @@ AbstractConfigurator.Prototype = function() {
     Label is either a string or a hash with translations.
     If string is provided 'en' is used as the language.
   */
-  this.addLabel = function(labelName, label) {
+  addLabel(labelName, label) {
     if (isString(label)) {
       if(!this.config.labels['en']) {
-        this.config.labels['en'] = {};
+        this.config.labels['en'] = {}
       }
-      this.config.labels['en'][labelName] = label;
+      this.config.labels['en'][labelName] = label
     } else {
       forEach(label, function(label, lang) {
         if (!this.config.labels[lang]) {
-          this.config.labels[lang] = {};
+          this.config.labels[lang] = {}
         }
-        this.config.labels[lang][labelName] = label;
-      }.bind(this));
+        this.config.labels[lang][labelName] = label
+      }.bind(this))
     }
-  };
+  }
 
   /**
     @param seed Seed function.
@@ -173,121 +177,114 @@ AbstractConfigurator.Prototype = function() {
     ```
   */
 
-  this.addSeed = function(seed) {
-    this.config.seed = seed;
-  };
+  addSeed(seed) {
+    this.config.seed = seed
+  }
 
-  this.addTextType = function(textType, options) {
+  addTextType(textType, options) {
     this.config.textTypes.push({
       spec: textType,
       options: options || {}
-    });
-  };
+    })
+  }
 
-  this.addEditingBehavior = function(editingBehavior) {
-    this.config.editingBehaviors.push(editingBehavior);
-  };
+  addEditingBehavior(editingBehavior) {
+    this.config.editingBehaviors.push(editingBehavior)
+  }
 
-  this.addMacro = function(macro) {
-    this.config.macros.push(macro);
-  };
+  addMacro(macro) {
+    this.config.macros.push(macro)
+  }
 
-  this.addDragAndDrop = function(DragAndDropHandlerClass) {
+  addDragAndDrop(DragAndDropHandlerClass) {
     if (!DragAndDropHandlerClass.prototype._isDragAndDropHandler) {
-      throw new Error('Only isntances of DragAndDropHandler are allowed.');
+      throw new Error('Only instances of DragAndDropHandler are allowed.')
     }
-    this.config.dndHandlers.push(DragAndDropHandlerClass);
-  };
+    this.config.dndHandlers.push(DragAndDropHandlerClass)
+  }
 
-  this.import = function(pkg, options) {
-    pkg.configure(this, options || {});
-    return this;
-  };
+  import(pkg, options) {
+    pkg.configure(this, options || {})
+    return this
+  }
 
   // Config Interpreter APIs
   // ------------------------
 
-  this.getConfig = function() {
+  getConfig() {
     return this.config;
-  };
+  }
 
-  this.getStyles = function() {
-    return this.config.styles;
-  };
+  getStyles() {
+    return this.config.styles
+  }
 
-  this.getSchema = function() {
+  getSchema() {
     var schemaConfig = this.config.schema;
     // TODO: We may want to remove passing a schema version as
     // the version is defined by the repository / npm package version
-    var schema = new DocumentSchema(schemaConfig.name, '1.0.0');
+    var schema = new DocumentSchema(schemaConfig.name, '1.0.0')
     schema.getDefaultTextType = function() {
-      return schemaConfig.defaultTextType;
-    };
-
-    schema.addNodes(this.config.nodes);
-    return schema;
-  };
-
-  this.createArticle = function(seed) {
-    var schemaConfig = this.config.schema;
-
-    var schema = this.getSchema();
-    var doc = new schemaConfig.ArticleClass(schema);
-    if (seed) {
-      seed(doc);
+      return schemaConfig.defaultTextType
     }
-    return doc;
-  };
+    schema.addNodes(this.config.nodes)
+    return schema
+  }
 
-  this.createImporter = function(type) {
-    var ImporterClass = this.config.importers[type];
+  createArticle(seed) {
+    var schemaConfig = this.config.schema;
+    var schema = this.getSchema()
+    var doc = new schemaConfig.ArticleClass(schema)
+    if (seed) {
+      seed(doc)
+    }
+    return doc
+  }
+
+  createImporter(type) {
+    var ImporterClass = this.config.importers[type]
     var config = {
       schema: this.getSchema(),
       converters: this.getConverterRegistry().get(type),
       DocumentClass: this.config.schema.ArticleClass
-    };
+    }
+    return new ImporterClass(config)
+  }
 
-    return new ImporterClass(config);
-  };
-
-  this.createExporter = function(type) {
-    var ExporterClass = this.config.exporters[type];
+  createExporter(type) {
+    var ExporterClass = this.config.exporters[type]
     var config = {
       schema: this.getSchema(),
       converters: this.getConverterRegistry().get(type)
-    };
-    return new ExporterClass(config);
-  };
+    }
+    return new ExporterClass(config)
+  }
 
-  this.getToolRegistry = function() {
-    var toolRegistry = new Registry();
-    forEach(this.config.tools, function(item, name) {
-      toolRegistry.add(name, item);
-    });
-    return toolRegistry;
-  };
+  getTools() {
+    return this.config.tools;
+  }
 
-  this.getComponentRegistry = function() {
-    var componentRegistry = new ComponentRegistry();
+  getComponentRegistry() {
+    var componentRegistry = new ComponentRegistry()
     forEach(this.config.components, function(ComponentClass, name) {
-      componentRegistry.add(name, ComponentClass);
-    });
-    return componentRegistry;
-  };
+      componentRegistry.add(name, ComponentClass)
+    })
+    return componentRegistry
+  }
 
-  this.getCommands = function() {
+  getCommands() {
     return map(this.config.commands, function(item, name) {
-      return new item.CommandClass(extend({name: name}, item.options));
-    });
-  };
+      return new item.CommandClass(Object.assign({name: name}, item.options))
+    })
+  }
 
-  this.getSurfaceCommandNames = function() {
-    var commands = this.getCommands();
+  getSurfaceCommandNames() {
+    var commands = this.getCommands()
     var commandNames = commands.map(function(C) {
-      return C.type;
-    });
-    return commandNames;
-  };
+      return C.type
+    })
+    return commandNames
+  }
 
   /*
     A converter registry is a registry by file type and then by node type
@@ -295,55 +292,52 @@ AbstractConfigurator.Prototype = function() {
     `configurator.getConverterRegistry().get('html').get('paragraph')` provides
     a HTML converter for Paragraphs.
   */
-  this.getConverterRegistry = function() {
+  getConverterRegistry() {
     if (!this.converterRegistry) {
-      var converterRegistry = new Registry();
+      var converterRegistry = new Registry()
       forEach(this.config.converters, function(converters, name) {
-        converterRegistry.add(name, new Registry(converters));
-      });
-      this.converterRegistry = converterRegistry;
+        converterRegistry.add(name, new Registry(converters))
+      })
+      this.converterRegistry = converterRegistry
     }
-    return this.converterRegistry;
-  };
+    return this.converterRegistry
+  }
 
-  this.getIconProvider = function() {
-    throw new Error('This method is abstract');
-  };
+  getIconProvider() {
+    throw new Error('This method is abstract')
+  }
 
-  this.getSeed = function() {
-    return this.config.seed;
-  };
+  getSeed() {
+    return this.config.seed
+  }
 
-  this.getTextTypes = function() {
+  getTextTypes() {
     return this.config.textTypes.map(function(t) {
-      return t.spec;
-    });
-  };
+      return t.spec
+    })
+  }
 
-  this.getLabelProvider = function() {
-    throw new Error('This method is abstract.');
-  };
+  getLabelProvider() {
+    throw new Error('This method is abstract.')
+  }
 
-  this.getEditingBehavior = function() {
-    var editingBehavior = new EditingBehavior();
+  getEditingBehavior() {
+    var editingBehavior = new EditingBehavior()
     this.config.editingBehaviors.forEach(function(behavior) {
-      behavior.register(editingBehavior);
-    });
-    return editingBehavior;
-  };
+      behavior.register(editingBehavior)
+    })
+    return editingBehavior
+  }
 
-  this.getMacros = function() {
-    return this.config.macros;
-  };
+  getMacros() {
+    return this.config.macros
+  }
 
-  this.createDragHandlers = function() {
+  createDragHandlers() {
     return this.config.dndHandlers.map(function(DragAndDropHandlerClass) {
-      return new DragAndDropHandlerClass();
-    });
-  };
+      return new DragAndDropHandlerClass()
+    })
+  }
+}
 
-};
-
-oo.initClass(AbstractConfigurator);
-
-export default AbstractConfigurator;
+export default AbstractConfigurator
