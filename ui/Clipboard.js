@@ -220,7 +220,7 @@ Clipboard.Prototype = function() {
   function removeControlCodes(text) {
     var regex = new RegExp("[\x00-\x08\x0b\x0c\x0e-\x1f]", "g");
     if (text !== undefined) {
-      return text.replace(regex, "");
+      return text.replace(regex, " ");
     }
 
     return text;
