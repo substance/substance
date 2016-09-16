@@ -316,7 +316,7 @@ Clipboard.Prototype = function() {
     }
     if (content) {
       surface.transaction(function(tx, args) {
-        args.text = text;
+        args.text = removeControlCodes(text);
         args.doc = content;
         return surface.paste(tx, args);
       });
