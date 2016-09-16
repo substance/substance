@@ -211,6 +211,21 @@ Clipboard.Prototype = function() {
     this._pastePlainText(plainText);
   };
 
+  /**
+   * Removes for XML illegal control codes from text (range from 0x00 - 0x1F with the exception of
+   * TAB, CR and LF). See http://www.w3.org/TR/xml/#charsets
+   * @param {string} text to process
+   * @return {string} Text without control codes
+   */
+  function removeControlCodes(text) {
+    var regex = new RegExp("[\x00-\x08\x0b\x0c\x0e-\x1f]", "g");
+    if (text !== undefined) {
+      return text.replace(regex, "");
+    }
+
+    return text;
+  }
+
   /*
     Pastes a given plain text into the surface.
 
@@ -219,7 +234,7 @@ Clipboard.Prototype = function() {
   this._pastePlainText = function(plainText) {
     var surface = this.getSurface();
     surface.transaction(function(tx, args) {
-      args.text = plainText;
+      args.text = removeControlCodes(plainText);
       return surface.paste(tx, args);
     });
   };

@@ -158,9 +158,9 @@ QUnit.uiTest("Pasting text into ContainerEditor using 'text/plain'.", function(a
   var editor = _containerEditorSample();
   var doc = editor.getDocument();
   var event = new ClipboardEvent();
-  event.clipboardData.setData('text/plain', 'XXX');
+  event.clipboardData.setData('text/plain', '\t\u0001\u001bX\rX\nX');
   editor.clipboard.onPaste(event);
-  assert.equal(doc.get(['p1', 'content']), '0XXX123456789', "Plain text should be correct.");
+  assert.equal(doc.get(['p1', 'content']), '0\tX\rX\nX123456789', "Plain text should be correct.");
 });
 
 QUnit.uiTest("Pasting without any data given.", function(assert) {
