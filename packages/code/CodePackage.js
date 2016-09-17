@@ -15,7 +15,7 @@ export default {
     config.addConverter('xml', CodeXMLConverter);
     config.addComponent('code', AnnotationComponent);
     config.addCommand('code', AnnotationCommand, { nodeType: Code.type });
-    config.addTool('code', AnnotationTool);
+    config.addTool('code', AnnotationTool, {target: 'annotations'});
     config.addIcon('code', { 'fontawesome': 'fa-code' });
     config.addLabel('code', {
       en: 'Code',

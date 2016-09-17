@@ -1,6 +1,6 @@
 'use strict';
 
-import Tool from '../../ui/Tool'
+import Tool from '../tools/Tool'
 
 function InsertImageTool() {
   InsertImageTool.super.apply(this, arguments);

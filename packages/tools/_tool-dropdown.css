@@ -1,0 +1,28 @@
+.sc-tool-dropdown { display: inline-block; position: relative; }
+
+.sc-tool-dropdown > .sc-button {
+  margin: 5px 2px;
+}
+
+.sc-tool-dropdown > .se-options {
+  position: absolute;
+  z-index: 10000;
+  top: 40px;
+  left: -80px;
+  width: 200px;
+}
+
+.sc-tool-dropdown > .se-options > .se-arrow {
+  margin: 0 auto;
+  width: 0;
+  height: 0;
+  border-style: solid;
+  border-width: 0 4px 8px 4px;
+  border-color: transparent transparent #2E2E2C transparent;
+}
+
+.sc-tool-dropdown > .se-options > .se-content {
+  background: var(--dark-bg-color);
+  border-radius: 5px;
+}
+

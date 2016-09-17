@@ -1,7 +1,7 @@
 'use strict';
 
 import each from 'lodash/each'
-import Tool from '../../ui/Tool'
+import Tool from '../tools/Tool'
 import keys from '../../util/keys'
 
 /**

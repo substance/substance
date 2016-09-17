@@ -15,7 +15,7 @@ export default {
     config.addConverter('xml', StrongXMLConverter);
     config.addComponent('strong', AnnotationComponent);
     config.addCommand('strong', AnnotationCommand, { nodeType: 'strong' });
-    config.addTool('strong', AnnotationTool);
+    config.addTool('strong', AnnotationTool, {target: 'annotations'});
     config.addIcon('strong', { 'fontawesome': 'fa-bold' });
     config.addLabel('strong', {
       en: 'Strong emphasis',

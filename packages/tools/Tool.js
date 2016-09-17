@@ -1,8 +1,7 @@
-'use strict';
-
 import capitalize from 'lodash/capitalize'
 import extend from 'lodash/extend'
-import Component from './Component'
+import Button from '../button/Button'
+import Component from '../../ui/Component'
 
 /**
   Default Tool implementation
@@ -38,43 +37,28 @@ Tool.Prototype = function() {
       el.attr('title', title);
       el.attr('aria-label', title);
     }
-    //.sm-disabled
-    if (this.props.disabled) {
-      el.addClass('sm-disabled');
-    }
-    // .sm-active
-    if (this.props.active) {
-      el.addClass('sm-active');
-    }
 
-    // button
-    el.append(this.renderButton($$));
+    // Add button
+    el.append(
+      this.renderButton($$)
+    );
     return el;
+  };
+
+  this.renderButton = function($$) {
+    var btn = $$(Button, {
+      icon: this.props.icon,
+      label: this.props.label,
+      hint: this.props.hint,
+      active: this.props.active,
+      disabled: this.props.disabled,
+      style: this.props.style
+    }).on('click', this.onClick)
+    return btn;
   };
 
   this.getClassNames = function() {
     return '';
-  };
-
-  this.renderButton = function($$) {
-    var button = $$('button')
-      .on('click', this.onClick)
-      .append(this.renderIcon($$));
-
-    if (this.props.disabled) {
-      // make button inaccessible
-      button.attr('tabindex', -1).attr('disabled', true);
-    } else {
-      // make button accessible for tab-navigation
-      button.attr('tabindex', 1);
-    }
-    return button;
-  };
-
-  this.renderIcon = function($$) {
-    var commandName = this.getCommandName();
-    var iconEl = this.context.iconProvider.renderIcon($$, commandName);
-    return iconEl;
   };
 
   this.getTitle = function() {

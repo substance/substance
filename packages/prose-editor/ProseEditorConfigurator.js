@@ -1,7 +1,7 @@
 import Configurator from '../../util/Configurator'
 import FileClientStub from './FileClientStub'
 import SaveHandlerStub from './SaveHandlerStub'
-import DefaultToolbar from '../../ui/Toolbar'
+import DefaultToolbar from '../tools/Toolbar'
 
 /*
   This works well for single-column apps (such as ProseEditor).

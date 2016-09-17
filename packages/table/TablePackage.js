@@ -3,7 +3,7 @@
 import TableNode from './TableNode'
 import TableComponent from './TableComponent'
 import InsertTableCommand from './InsertTableCommand'
-import Tool from '../../ui/Tool'
+import Tool from '../tools/Tool'
 
 export default {
   name: 'table',

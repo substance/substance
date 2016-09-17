@@ -15,7 +15,7 @@ export default {
     config.addConverter('xml', SubscriptXMLConverter);
     config.addComponent('subscript', AnnotationComponent);
     config.addCommand('subscript', AnnotationCommand, { nodeType: 'subscript' });
-    config.addTool('subscript', AnnotationTool);
+    config.addTool('subscript', AnnotationTool, {target: 'annotations'});
     config.addIcon('subscript', { 'fontawesome': 'fa-subscript' });
     config.addLabel('subscript', {
       en: 'Subscript',
