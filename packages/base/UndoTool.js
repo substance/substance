@@ -1,2 +1,2 @@
 // just for legacy
-export { default } from '../../ui/Tool'
+export { default } from '../tools/Tool'

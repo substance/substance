@@ -13,6 +13,7 @@
   --border-radius: 5px;
 
   /* Colors */
+  --dark-bg-color: #2E2E2E;
   --border-color: #E0E4E4;
   --dark-border-color: #777;
 
@@ -50,7 +51,8 @@
 
   /* Prose font sizes */
   --default-font-size: 16px;
-  --small-font-size: 14px;
+  --small-font-size: 13px;
+
   --large-font-size: 20px;
   --xlarge-font-size: 25px;
   /* Title font sizes */

@@ -1,5 +1,3 @@
-'use strict';
-
 import AbstractConfigurator from './AbstractConfigurator'
 import FontAwesomeIconProvider from '../ui/FontAwesomeIconProvider'
 
@@ -12,22 +10,15 @@ import LabelProvider from '../ui/DefaultLabelProvider'
   If you need app-specific API's just extend
   and configure your custom configurator.
 */
-function Configurator() {
-  AbstractConfigurator.call(this);
+class Configurator extends AbstractConfigurator {
+
+  getIconProvider() {
+    return new FontAwesomeIconProvider(this.config.icons)
+  }
+
+  getLabelProvider() {
+    return new LabelProvider(this.config.labels)
+  }
 }
 
-Configurator.Prototype = function() {
-
-  this.getIconProvider = function() {
-    return new FontAwesomeIconProvider(this.config.icons);
-  };
-
-  this.getLabelProvider = function() {
-    return new LabelProvider(this.config.labels);
-  };
-
-};
-
-AbstractConfigurator.extend(Configurator);
-
-export default Configurator;
+export default Configurator

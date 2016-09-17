@@ -15,7 +15,7 @@ export default {
     config.addConverter('xml', SuperscriptXMLConverter);
     config.addComponent('superscript', AnnotationComponent);
     config.addCommand('superscript', AnnotationCommand, { nodeType: 'superscript' });
-    config.addTool('superscript', AnnotationTool);
+    config.addTool('superscript', AnnotationTool, {target: 'annotations'});
     config.addIcon('superscript', { 'fontawesome': 'fa-superscript' });
     config.addLabel('superscript', {
       en: 'Superscript',

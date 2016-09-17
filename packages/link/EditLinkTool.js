@@ -1,6 +1,6 @@
 'use strict';
 
-import Tool from '../../ui/Tool'
+import Tool from '../tools/Tool'
 import clone from 'lodash/clone'
 import Prompt from '../../ui/Prompt'
 

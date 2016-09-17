@@ -16,7 +16,7 @@ export default {
     config.addConverter('xml', EmphasisXMLConverter);
     config.addComponent('emphasis', AnnotationComponent);
     config.addCommand('emphasis', AnnotationCommand, { nodeType: Emphasis.type });
-    config.addTool('emphasis', AnnotationTool);
+    config.addTool('emphasis', AnnotationTool, {target: 'annotations'});
     config.addIcon('emphasis', { 'fontawesome': 'fa-italic' });
     config.addLabel('emphasis', {
       en: 'Emphasis',

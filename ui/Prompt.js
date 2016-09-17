@@ -1,6 +1,6 @@
-'use strict';
 
 import Component from './Component'
+
 
 function Prompt() {
   Prompt.super.apply(this, arguments);
@@ -89,7 +89,6 @@ Label.Prototype = function() {
 };
 
 Component.extend(Label);
-
 
 /*
   Takes a path to a string property and makes it editable

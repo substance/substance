@@ -1,6 +1,6 @@
 'use strict';
 
-import Tool from './Tool'
+import Tool from '../packages/tools/Tool'
 
 /*
  * Abstract class for annotation tools like StrongTool, EmphasisTool, LinkTool.
@@ -38,7 +38,6 @@ AnnotationTool.Prototype = function() {
     if (iconEl) {
       el.append(iconEl);
     }
-
     return el;
   };
 };

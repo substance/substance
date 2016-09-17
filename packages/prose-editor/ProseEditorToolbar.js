@@ -1,6 +1,6 @@
 'use strict';
 
-import Toolbar from '../../ui/Toolbar'
+import Toolbar from '../tools/Toolbar'
 
 function ProseEditorToolbar() {
   ProseEditorToolbar.super.apply(this, arguments);

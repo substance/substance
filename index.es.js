@@ -74,11 +74,20 @@ export { default as SubscriptPackage } from './packages/subscript/SubscriptPacka
 export { default as SuperscriptPackage } from './packages/superscript/SuperscriptPackage'
 export { default as TablePackage } from './packages/table/TablePackage'
 
+// Button package
+export { default as Button } from './packages/button/Button'
+
+// Tools package
+export { default as ToolDropdown } from './packages/tools/ToolDropdown'
+export { default as Tool } from './packages/tools/Tool'
+export { default as Toolbar } from './packages/tools/Toolbar'
+export { default as ToolGroup } from './packages/tools/ToolGroup'
+
 // ui
 export { default as AnnotationCommand } from './ui/AnnotationCommand'
 export { default as AnnotationComponent } from './ui/AnnotationComponent'
 export { default as AnnotationTool } from './ui/AnnotationTool'
-export { default as Button } from './ui/Button'
+
 export { default as Command } from './ui/Command'
 export { default as Component } from './ui/Component'
 export { default as ContainerEditor } from './ui/ContainerEditor'
@@ -100,8 +109,6 @@ export { default as TextPropertyComponent } from './ui/TextPropertyComponent'
 export { default as TextPropertyEditor } from './ui/TextPropertyEditor'
 export { default as TOC } from './ui/TOC'
 export { default as TOCProvider } from './ui/TOCProvider'
-export { default as Tool } from './ui/Tool'
-export { default as Toolbar } from './ui/Toolbar'
 
 // util
 export { default as ArrayIterator } from './util/ArrayIterator'

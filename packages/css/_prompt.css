@@ -1,5 +1,5 @@
 .sc-prompt {}
-.sc-prompt .se-arrow {
+.sc-prompt > .se-arrow {
   margin: 0 auto;
   width: 0;
   height: 0;
@@ -7,33 +7,34 @@
   border-width: 0 4px 8px 4px;
   border-color: transparent transparent #2E2E2C transparent;
 }
-.sc-prompt .se-content {
+.sc-prompt > .se-content {
   border-radius: 2px;
   background: #2E2E2C;
   overflow: auto;
   color: rgba(255,255,255, 0.7);
 }
-.sc-prompt .se-content .se-label {
+.sc-prompt > .se-content > .se-label {
   float: left;
   padding: 5px;
   padding-left: 10px;
   line-height: 30px;
   font-size: var(--small-font-size);
 }
-.sc-prompt .se-content .se-action {
+.sc-prompt > .se-content > .se-action {
   display: block; outline: none; float: left;
   height: 40px; line-height: 30px; text-align: center;
   padding: 5px; min-width: 40px; color: rgba(255,255,255, 0.7);
 }
-.sc-prompt .se-content .se-action:hover { color: #fff; }
-.sc-prompt .se-content .se-input {
+.sc-prompt > .se-content > .se-action:hover { color: #fff; }
+.sc-prompt > .se-content > .se-input {
   display: block; float: left;
   background: #2E2E2C; font-size: var(--small-font-size); color: #fff;
   border: none; outline: none;
   height: 40px; padding: 5px 10px; width: 200px;
 }
-.sc-prompt .se-content .se-separator {
+.sc-prompt > .se-content > .se-separator {
   float: left; width: 1px; height: 30px;
   margin: 5px 5px;
   background: rgba(255,255,255, 0.3);
 }
+
