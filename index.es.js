@@ -114,7 +114,7 @@ export { default as PromptPackage } from './packages/prompt/PromptPackage'
 export { default as Prompt } from './packages/prompt/Prompt'
 
 // responsive application
-export { default as ResponsiveApplication } './packages/responsive-application/ResponsiveApplication'
+export { default as ResponsiveApplication } from './packages/responsive-application/ResponsiveApplication'
 
 // tools
 export { default as ToolDropdown } from './packages/tools/ToolDropdown'
