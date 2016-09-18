@@ -85,6 +85,10 @@ export { default as ScrollPane } from './packages/scroll-pane/ScrollPane'
 export { default as SplitPanePackage } from './packages/split-pane/SplitPanePackage'
 export { default as SplitPane } from './packages/split-pane/SplitPane'
 
+// scrollbar
+export { default as ScrollbarPackage } from './packages/scrollbar/ScrollbarPackage'
+export { default as Scrollbar } from './packages/scrollbar/Scrollbar'
+
 // tools
 export { default as ToolDropdown } from './packages/tools/ToolDropdown'
 export { default as Tool } from './packages/tools/Tool'

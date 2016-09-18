@@ -15,9 +15,9 @@
 @import './strong/_index.css';
 @import './subscript/_index.css';
 @import './tools/_index.css';
-
 /* scroll-pane */
 @import './scroll-pane/_scroll-pane.css';
-
 /* split-pane */
 @import './split-pane/_split-pane.css';
+/* scrollbar */
+@import './scrollbar/_scrollbar.css';

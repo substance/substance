@@ -1,6 +1,6 @@
 import platform from '../../util/platform'
 import Component from '../../ui/Component'
-import Scrollbar from '../../ui/Scrollbar'
+import Scrollbar from '../scrollbar/Scrollbar'
 import OverlayContainer from '../../ui/OverlayContainer'
 import getRelativeBoundingRect from '../../util/getRelativeBoundingRect'
 
