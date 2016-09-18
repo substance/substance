@@ -1,7 +1,7 @@
 import ScrollPane from './ScrollPane'
 
 export default {
-  name: 'subscript',
+  name: 'scroll-pane',
   configure: function(config) {
     config.addComponent('scroll-pane', ScrollPane)
   }

@@ -5,8 +5,6 @@ var DocumentationTOCProvider = require('./DocumentationTOCProvider');
 var Component = require('../ui/Component');
 var Cover = require('./components/CoverComponent');
 var TOC = require('../ui/TOC');
-var SplitPane = require('../ui/SplitPane');
-var ScrollPane = require('../ui/ScrollPane');
 var DocumentationRouter = require('./DocumentationRouter');
 
 function DocumentationReader() {
@@ -102,6 +100,8 @@ DocumentationReader.Prototype = function() {
   };
 
   this.render = function($$) {
+    var SplitPane = this.getComponent('split-pane');
+
     return $$('div').addClass('sc-documentation-reader sc-controller').append(
       $$(SplitPane, {splitType: 'vertical', sizeA: '270px'}).append(
         this._renderContextSection($$),
@@ -122,6 +122,8 @@ DocumentationReader.Prototype = function() {
   };
 
   this._renderMainSection = function($$) {
+    var ScrollPane = this.getComponent('scroll-pane');
+
     var config = this.config;
     var doc = this.props.doc;
     var meta = doc.get('meta');

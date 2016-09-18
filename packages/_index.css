@@ -18,3 +18,6 @@
 
 /* scroll-pane */
 @import './scroll-pane/_scroll-pane.css';
+
+/* split-pane */
+@import './split-pane/_split-pane.css';

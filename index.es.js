@@ -74,14 +74,18 @@ export { default as SubscriptPackage } from './packages/subscript/SubscriptPacka
 export { default as SuperscriptPackage } from './packages/superscript/SuperscriptPackage'
 export { default as TablePackage } from './packages/table/TablePackage'
 
-// Button
+// button
 export { default as Button } from './packages/button/Button'
 
-// ScrollPane
+// scroll-pane
 export { default as ScrollPanePackage } from './packages/scroll-pane/ScrollPanePackage'
 export { default as ScrollPane } from './packages/scroll-pane/ScrollPane'
 
-// Tools
+// split-pane
+export { default as SplitPanePackage } from './packages/split-pane/SplitPanePackage'
+export { default as SplitPane } from './packages/split-pane/SplitPane'
+
+// tools
 export { default as ToolDropdown } from './packages/tools/ToolDropdown'
 export { default as Tool } from './packages/tools/Tool'
 export { default as Toolbar } from './packages/tools/Toolbar'
@@ -106,7 +110,6 @@ export { default as Prompt } from './ui/Prompt'
 export { default as RenderingEngine } from './ui/RenderingEngine'
 export { default as ResponsiveApplication} from './ui/ResponsiveApplication'
 export { default as Router } from './ui/Router'
-export { default as SplitPane } from './ui/SplitPane'
 export { default as TextBlockComponent } from './ui/TextBlockComponent'
 export { default as TextPropertyComponent } from './ui/TextPropertyComponent'
 export { default as TextPropertyEditor } from './ui/TextPropertyEditor'

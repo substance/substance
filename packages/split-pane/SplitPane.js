@@ -1,6 +1,6 @@
 'use strict';
 
-import Component from './Component'
+import Component from '../../ui/Component'
 
 /**
   A split view layout component. Takes properties for configuration and 2 children via append.
