@@ -113,6 +113,9 @@ export { default as Input } from './packages/input/Input'
 export { default as PromptPackage } from './packages/prompt/PromptPackage'
 export { default as Prompt } from './packages/prompt/Prompt'
 
+// responsive application
+export { default as ResponsiveApplication } './packages/responsive-application/ResponsiveApplication'
+
 // tools
 export { default as ToolDropdown } from './packages/tools/ToolDropdown'
 export { default as Tool } from './packages/tools/Tool'
