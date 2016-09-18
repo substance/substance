@@ -5,9 +5,28 @@ import RedoCommand from './RedoCommand'
 import Tool from '../tools/Tool'
 import ToolGroup from '../tools/ToolGroup'
 
+import ScrollPanePackage from '../scroll-pane/ScrollPanePackage'
+import SplitPanePackage from '../split-pane/SplitPanePackage'
+import TabbedPanePackage from '../tabbed-pane/TabbedPanePackage'
+import ScrollbarPackage from '../scrollbar/ScrollbarPackage'
+import GridPackage from '../grid/GridPackage'
+import ModalPackage from '../modal/ModalPackage'
+import InputPackage from '../input/InputPackage'
+import PromptPackage from '../prompt/PromptPackage'
+import ButtonPackage from '../button/ButtonPackage'
+
 export default {
   name: 'base',
   configure: function(config) {
+    config.import(ScrollPanePackage)
+    config.import(SplitPanePackage)
+    config.import(TabbedPanePackage)
+    config.import(ScrollbarPackage)
+    config.import(GridPackage)
+    config.import(ModalPackage)
+    config.import(InputPackage)
+    config.import(PromptPackage)
+    config.import(ButtonPackage)
 
     // Register class to handle the text tool target
     config.addComponent('tool-target-text', ToolGroup)

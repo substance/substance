@@ -15,3 +15,21 @@
 @import './strong/_index.css';
 @import './subscript/_index.css';
 @import './tools/_index.css';
+/* scroll-pane */
+@import './scroll-pane/_scroll-pane.css';
+/* split-pane */
+@import './split-pane/_split-pane.css';
+/* scrollbar */
+@import './scrollbar/_scrollbar.css';
+/* layout */
+@import './layout/_layout.css';
+/* tabbed-pane */
+@import './tabbed-pane/_tabbed-pane.css';
+/* grid */
+@import './grid/_grid.css';
+/* modal */
+@import './modal/_modal.css';
+/* prompt */
+@import './prompt/_prompt.css';
+/* input */
+@import './input/_input.css';

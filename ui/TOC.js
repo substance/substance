@@ -1,7 +1,4 @@
-"use strict";
-
 import Component from './Component'
-import ScrollPane from './ScrollPane'
 import Icon from './FontAwesomeIcon'
 
 function TOC() {
@@ -23,6 +20,7 @@ TOC.Prototype = function() {
   this.render = function($$) {
     var tocProvider = this.context.tocProvider;
     var activeEntry = tocProvider.activeEntry;
+    var ScrollPane = this.getComponent('scroll-pane');
 
     var tocEntries = $$("div")
       .addClass("se-toc-entries")

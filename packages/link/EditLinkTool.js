@@ -2,7 +2,6 @@
 
 import Tool from '../tools/Tool'
 import clone from 'lodash/clone'
-import Prompt from '../../ui/Prompt'
 
 /**
   Tool to edit an existing link.
@@ -22,6 +21,7 @@ EditLinkTool.Prototype = function() {
   };
 
   this.render = function($$) {
+    var Prompt = this.getComponent('prompt');
     var node = this.props.node;
     var doc = node.getDocument();
     var el = $$('div').addClass('sc-edit-link-tool');

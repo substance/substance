@@ -1,10 +1,8 @@
-'use strict';
-
-import platform from '../util/platform'
-import Component from './Component'
-import Scrollbar from './Scrollbar'
-import OverlayContainer from './OverlayContainer'
-import getRelativeBoundingRect from '../util/getRelativeBoundingRect'
+import platform from '../../util/platform'
+import Component from '../../ui/Component'
+import Scrollbar from '../scrollbar/Scrollbar'
+import OverlayContainer from '../../ui/OverlayContainer'
+import getRelativeBoundingRect from '../../util/getRelativeBoundingRect'
 
 /**
   Wraps content in a scroll pane.

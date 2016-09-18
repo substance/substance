@@ -11,6 +11,7 @@
     offset in the toolbar. Needs checking.
   */
   font-size: 12px;
+  font-weight: 600;
 }
 .sc-switch-text-type .se-toggle {
   background: white;
@@ -22,6 +23,7 @@
 .sc-switch-text-type:not(.sm-disabled) .se-toggle:after {
   content: " \f0d7";
   padding-left: 10px;
+  margin-top: 2px;
   float: right;
   font-family: FontAwesome;
 }

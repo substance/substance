@@ -74,10 +74,46 @@ export { default as SubscriptPackage } from './packages/subscript/SubscriptPacka
 export { default as SuperscriptPackage } from './packages/superscript/SuperscriptPackage'
 export { default as TablePackage } from './packages/table/TablePackage'
 
-// Button package
+// button
 export { default as Button } from './packages/button/Button'
 
-// Tools package
+// scroll-pane
+export { default as ScrollPanePackage } from './packages/scroll-pane/ScrollPanePackage'
+export { default as ScrollPane } from './packages/scroll-pane/ScrollPane'
+
+// split-pane
+export { default as SplitPanePackage } from './packages/split-pane/SplitPanePackage'
+export { default as SplitPane } from './packages/split-pane/SplitPane'
+
+// scrollbar
+export { default as ScrollbarPackage } from './packages/scrollbar/ScrollbarPackage'
+export { default as Scrollbar } from './packages/scrollbar/Scrollbar'
+
+// layout
+export { default as LayoutPackage } from './packages/layout/LayoutPackage'
+export { default as Layout } from './packages/layout/Layout'
+
+// grid
+export { default as GridPackage } from './packages/grid/GridPackage'
+export { default as Grid } from './packages/grid/Grid'
+
+// tabbed-pane
+export { default as TabbedPanePackage } from './packages/tabbed-pane/TabbedPanePackage'
+export { default as TabbedPane } from './packages/tabbed-pane/TabbedPane'
+
+// modal
+export { default as ModalPackage } from './packages/modal/ModalPackage'
+export { default as Modal } from './packages/modal/Modal'
+
+// input
+export { default as InputPackage } from './packages/input/InputPackage'
+export { default as Input } from './packages/input/Input'
+
+// grid
+export { default as PromptPackage } from './packages/prompt/PromptPackage'
+export { default as Prompt } from './packages/prompt/Prompt'
+
+// tools
 export { default as ToolDropdown } from './packages/tools/ToolDropdown'
 export { default as Tool } from './packages/tools/Tool'
 export { default as Toolbar } from './packages/tools/Toolbar'
@@ -94,16 +130,10 @@ export { default as ContainerEditor } from './ui/ContainerEditor'
 export { default as DefaultDOMElement } from './ui/DefaultDOMElement'
 export { default as FontAwesomeIcon } from './ui/FontAwesomeIcon'
 export { default as InlineNodeCommand } from './ui/InlineNodeCommand'
-export { default as Input } from './ui/Input'
-export { default as Layout } from './ui/Layout'
-export { default as Modal } from './ui/Modal'
 export { default as Overlay } from './ui/DefaultOverlay'
-export { default as Prompt } from './ui/Prompt'
+
 export { default as RenderingEngine } from './ui/RenderingEngine'
-export { default as ResponsiveApplication} from './ui/ResponsiveApplication'
 export { default as Router } from './ui/Router'
-export { default as ScrollPane } from './ui/ScrollPane'
-export { default as SplitPane } from './ui/SplitPane'
 export { default as TextBlockComponent } from './ui/TextBlockComponent'
 export { default as TextPropertyComponent } from './ui/TextPropertyComponent'
 export { default as TextPropertyEditor } from './ui/TextPropertyEditor'

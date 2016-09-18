@@ -1,6 +1,6 @@
 'use strict';
 
-import Component from './Component'
+import Component from '../../ui/Component'
 
 function Input() {
   Component.apply(this, arguments);

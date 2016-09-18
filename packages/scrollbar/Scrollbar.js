@@ -1,8 +1,8 @@
 'use strict';
 
-import Component from './Component'
+import Component from '../../ui/Component'
 import each from 'lodash/each'
-import DefaultDOMElement from './DefaultDOMElement'
+import DefaultDOMElement from '../../ui/DefaultDOMElement'
 
 /**
   A rich scrollbar implementation that supports highlights.   Usually
