@@ -1,6 +1,6 @@
 'use strict';
 
-import Component from './Component'
+import Component from '../../ui/Component'
 
 /**
   Layout component for simple layout tasks, without having to write CSS
