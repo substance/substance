@@ -15,3 +15,6 @@
 @import './strong/_index.css';
 @import './subscript/_index.css';
 @import './tools/_index.css';
+
+/* scroll-pane */
+@import './scroll-pane/_scroll-pane.css';

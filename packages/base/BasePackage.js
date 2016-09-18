@@ -5,9 +5,13 @@ import RedoCommand from './RedoCommand'
 import Tool from '../tools/Tool'
 import ToolGroup from '../tools/ToolGroup'
 
+import ScrollPanePackage from '../scroll-pane/ScrollPanePackage'
+
 export default {
   name: 'base',
   configure: function(config) {
+
+    config.import(ScrollPanePackage)
 
     // Register class to handle the text tool target
     config.addComponent('tool-target-text', ToolGroup)

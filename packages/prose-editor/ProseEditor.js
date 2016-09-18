@@ -3,7 +3,6 @@
 import AbstractEditor from '../../ui/AbstractEditor'
 import ContainerEditor from '../../ui/ContainerEditor'
 import SplitPane from '../../ui/SplitPane'
-import ScrollPane from '../../ui/ScrollPane'
 import ProseEditorOverlay from './ProseEditorOverlay'
 
 function ProseEditor() {
@@ -21,6 +20,7 @@ ProseEditor.Prototype = function() {
 
     var toolbar = this._renderToolbar($$);
     var editor = this._renderEditor($$);
+    var ScrollPane = this.getComponent('scroll-pane');
 
     var contentPanel = $$(ScrollPane, {
       scrollbarType: 'substance',

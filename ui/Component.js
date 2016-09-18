@@ -1,5 +1,3 @@
-'use strict';
-
 import isString from 'lodash/isString'
 import isFunction from 'lodash/isFunction'
 import extend from 'lodash/extend'
@@ -143,6 +141,13 @@ Component.Prototype = function() {
     if (!labelProvider) throw new Error('Missing labelProvider.');
     return labelProvider.getLabel(name);
   };
+
+  this.getComponent = function(name) {
+    var componentRegistry = this.context.componentRegistry;
+    if (!componentRegistry) throw new Error('Missing componentRegistry.');
+    return componentRegistry.get(name);
+  };
+
 
   /**
     Render the component.
