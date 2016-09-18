@@ -1,6 +1,4 @@
-
-import Component from './Component'
-
+import Component from '../../ui/Component'
 
 function Prompt() {
   Prompt.super.apply(this, arguments);

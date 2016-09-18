@@ -1,8 +1,8 @@
 'use strict';
 
-import inBrowser from '../util/inBrowser'
-import DefaultDOMElement from '../ui/DefaultDOMElement'
-import Component from '../ui/Component'
+import inBrowser from '../../util/inBrowser'
+import DefaultDOMElement from '../../ui/DefaultDOMElement'
+import Component from '../../ui/Component'
 import cloneDeep from 'lodash/cloneDeep'
 
 function ResponsiveApplication() {
