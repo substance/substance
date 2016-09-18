@@ -133,7 +133,6 @@ export { default as InlineNodeCommand } from './ui/InlineNodeCommand'
 export { default as Overlay } from './ui/DefaultOverlay'
 
 export { default as RenderingEngine } from './ui/RenderingEngine'
-export { default as ResponsiveApplication} from './ui/ResponsiveApplication'
 export { default as Router } from './ui/Router'
 export { default as TextBlockComponent } from './ui/TextBlockComponent'
 export { default as TextPropertyComponent } from './ui/TextPropertyComponent'
