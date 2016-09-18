@@ -1,37 +1,33 @@
 import Component from './Component'
 import Icon from './FontAwesomeIcon'
 
-function TOC() {
-  Component.apply(this, arguments);
-}
+class TOC extends Component {
 
-TOC.Prototype = function() {
+  didMount() {
+    let tocProvider = this.context.tocProvider
+    tocProvider.on('toc:updated', this.onTOCUpdated, this)
+  }
 
-  this.didMount = function() {
-    var tocProvider = this.context.tocProvider;
-    tocProvider.on('toc:updated', this.onTOCUpdated, this);
-  };
+  dispose() {
+    let tocProvider = this.context.tocProvider
+    tocProvider.off(this)
+  }
 
-  this.dispose = function() {
-    var tocProvider = this.context.tocProvider;
-    tocProvider.off(this);
-  };
+  render($$) {
+    let tocProvider = this.context.tocProvider
+    let activeEntry = tocProvider.activeEntry
+    let ScrollPane = this.getComponent('scroll-pane')
 
-  this.render = function($$) {
-    var tocProvider = this.context.tocProvider;
-    var activeEntry = tocProvider.activeEntry;
-    var ScrollPane = this.getComponent('scroll-pane');
-
-    var tocEntries = $$("div")
+    let tocEntries = $$("div")
       .addClass("se-toc-entries")
       .ref('tocEntries');
 
-    var entries = tocProvider.getEntries();
-    for (var i = 0; i < entries.length; i++) {
-      var entry = entries[i];
-      var level = entry.level;
+    let entries = tocProvider.getEntries()
+    for (let i = 0; i < entries.length; i++) {
+      let entry = entries[i]
+      let level = entry.level
 
-      var tocEntryEl = $$('a')
+      let tocEntryEl = $$('a')
         .addClass('se-toc-entry')
         .addClass('sm-level-'+level)
         .attr({
@@ -45,34 +41,33 @@ TOC.Prototype = function() {
           entry.name
         );
       if (activeEntry === entry.id) {
-        tocEntryEl.addClass("sm-active");
+        tocEntryEl.addClass("sm-active")
       }
-      tocEntries.append(tocEntryEl);
+      tocEntries.append(tocEntryEl)
     }
 
-    var el = $$('div').addClass('sc-toc-panel').append(
+    let el = $$('div').addClass('sc-toc-panel').append(
       $$(ScrollPane).ref('panelEl').append(
         tocEntries
       )
     );
     return el;
-  };
+  }
 
-  this.getDocument = function() {
-    return this.context.doc;
-  };
+  getDocument() {
+    return this.context.doc
+  }
 
-  this.onTOCUpdated = function() {
-    this.rerender();
-  };
+  onTOCUpdated() {
+    this.rerender()
+  }
 
-  this.handleClick = function(e) {
-    var nodeId = e.currentTarget.dataset.id;
-    e.preventDefault();
-    this.send('tocEntrySelected', nodeId);
-  };
-};
+  handleClick(e) {
+    let nodeId = e.currentTarget.dataset.id
+    e.preventDefault()
+    this.send('tocEntrySelected', nodeId)
+  }
 
-Component.extend(TOC);
+}
 
-export default TOC;
+export default TOC
