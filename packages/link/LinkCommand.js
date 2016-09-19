@@ -1,34 +1,26 @@
-'use strict';
-
 import AnnotationCommand from '../../ui/AnnotationCommand'
 
-function LinkCommand() {
-  LinkCommand.super.apply(this, arguments);
-}
+class LinkCommand extends AnnotationCommand {
 
-LinkCommand.Prototype = function() {
-
-  this.getAnnotationData = function() {
+  getAnnotationData() {
     return {
       url: ""
-    };
-  };
+    }
+  }
 
-  this.canFuse = function() {
-    return false;
-  };
+  canFuse() {
+    return false
+  }
 
   // When there's some overlap with only a single annotation we do an expand
-  this.canEdit = function(annos, sel) { // eslint-disable-line
-    return annos.length === 1;
-  };
+  canEdit(annos, sel) { // eslint-disable-line
+    return annos.length === 1
+  }
 
-  this.canDelete = function(annos, sel) { // eslint-disable-line
-    return false;
-  };
+  canDelete(annos, sel) { // eslint-disable-line
+    return false
+  }
 
-};
+}
 
-AnnotationCommand.extend(LinkCommand);
-
-export default LinkCommand;
+export default LinkCommand
