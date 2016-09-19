@@ -1,39 +1,34 @@
-'use strict';
-
 import InsertNodeCommand from '../../ui/InsertNodeCommand'
 import uuid from '../../util/uuid'
 
-function InsertTableCommand() {
-  InsertTableCommand.super.call(this, { name: 'insert-table' });
-}
+class InsertTableCommand extends InsertNodeCommand {
+  constructor() {
+    super({ name: 'insert-table' })
+  }
 
-InsertTableCommand.Prototype = function() {
-
-  this.createNodeData = function(tx, args) { // eslint-disable-line
+  createNodeData(tx, args) { // eslint-disable-line
     // TODO: make this configurable, e.g. via args
-    var nrows = 5;
-    var ncols = 6;
-    var cells = [];
+    let nrows = 5
+    let ncols = 6
+    let cells = []
 
-    for (var i = 0; i < nrows; i++) {
-      var cols = [];
-      for (var j = 0; j < ncols; j++) {
-        var node = tx.create({id: uuid(), type: 'paragraph', content: ''});
-        cols.push({content: node.id});
+    for (let i = 0; i < nrows; i++) {
+      let cols = []
+      for (let j = 0; j < ncols; j++) {
+        let node = tx.create({id: uuid(), type: 'paragraph', content: ''})
+        cols.push({content: node.id})
       }
 
 
-      cells.push(cols);
+      cells.push(cols)
     }
 
     return {
       type: 'table',
       cells: cells
-    };
-  };
+    }
+  }
 
-};
+}
 
-InsertNodeCommand.extend(InsertTableCommand);
-
-export default InsertTableCommand;
+export default InsertTableCommand

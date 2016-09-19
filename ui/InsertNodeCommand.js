@@ -1,48 +1,40 @@
-'use strict';
-
 import Command from './Command'
 import insertNode from '../model/transform/insertNode'
 
-function InsertNodeCommand() {
-  InsertNodeCommand.super.apply(this, arguments);
-}
+class InsertNodeCommand extends Command {
 
-InsertNodeCommand.Prototype = function() {
-
-  this.getCommandState = function(props, context) {
-    var sel = context.documentSession.getSelection();
-    var newState = {
+  getCommandState(props, context) {
+    let sel = context.documentSession.getSelection();
+    let newState = {
       disabled: true,
       active: false
-    };
-    if (sel && !sel.isNull() && sel.isPropertySelection()) {
-      newState.disabled = false;
     }
-    return newState;
-  };
+    if (sel && !sel.isNull() && sel.isPropertySelection()) {
+      newState.disabled = false
+    }
+    return newState
+  }
 
-  this.execute = function(props, context) {
-    var state = this.getCommandState(props, context);
-    if (state.disabled) return;
-    var surface = context.surface ||context.surfaceManager.getFocusedSurface();
+  execute(props, context) {
+    var state = this.getCommandState(props, context)
+    if (state.disabled) return
+    var surface = context.surface ||context.surfaceManager.getFocusedSurface()
     if (surface) {
       surface.transaction(function(tx, args) {
-        return this.insertNode(tx, args);
-      }.bind(this));
+        return this.insertNode(tx, args)
+      }.bind(this))
     }
-    return true;
-  };
+    return true
+  }
 
-  this.insertNode = function(tx, args) {
-    args.node = this.createNodeData(tx, args);
-    return insertNode(tx, args);
-  };
+  insertNode(tx, args) {
+    args.node = this.createNodeData(tx, args)
+    return insertNode(tx, args)
+  }
 
-  this.createNodeData = function(tx, args) { // eslint-disable-line
-    throw new Error('InsertNodeCommand.createNodeData() is abstract.');
-  };
-};
+  createNodeData(tx, args) { // eslint-disable-line
+    throw new Error('InsertNodeCommand.createNodeData() is abstract.')
+  }
+}
 
-Command.extend(InsertNodeCommand);
-
-export default InsertNodeCommand;
+export default InsertNodeCommand
