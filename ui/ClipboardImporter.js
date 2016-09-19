@@ -14,12 +14,14 @@ import platform from '../util/platform'
 
 class ClipboardImporter extends HTMLImporter {
   
-  contructor(config) {
+  constructor(config) {
     ClipboardImporter._addConverters(config)
 
     if (!config.schema) {
       throw new Error('Missing argument: config.schema is required.')
     }
+
+    super(config)
     // disabling warnings about default importers
     this.IGNORE_DEFAULT_WARNINGS = true
 
@@ -27,8 +29,6 @@ class ClipboardImporter extends HTMLImporter {
       trimWhitespaces: true,
       REMOVE_INNER_WS: true
     })
-    
-    super.call(this, config)
 
     // ATTENTION: this is only here so we can enfore windows conversion
     // mode from within tests
