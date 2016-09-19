@@ -15,12 +15,12 @@ ProseEditor.Prototype = function() {
   };
 
   this.render = function($$) {
-    var SplitPane = this.getComponent('split-pane');
+    var SplitPane = this.componentRegistry.get('split-pane');
     var el = $$('div').addClass('sc-prose-editor');
 
     var toolbar = this._renderToolbar($$);
     var editor = this._renderEditor($$);
-    var ScrollPane = this.getComponent('scroll-pane');
+    var ScrollPane = this.componentRegistry.get('scroll-pane');
 
     var contentPanel = $$(ScrollPane, {
       scrollbarType: 'substance',

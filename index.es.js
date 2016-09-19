@@ -68,11 +68,15 @@ export { default as LinkPackage } from './packages/link/LinkPackage'
 export { default as ListPackage } from './packages/list/ListPackage'
 export { default as ParagraphPackage } from './packages/paragraph/ParagraphPackage'
 export { default as PersistencePackage } from './packages/persistence/PersistencePackage'
-export { default as ProseEditorPackage } from './packages/prose-editor/ProseEditorPackage'
 export { default as StrongPackage } from './packages/strong/StrongPackage'
 export { default as SubscriptPackage } from './packages/subscript/SubscriptPackage'
 export { default as SuperscriptPackage } from './packages/superscript/SuperscriptPackage'
 export { default as TablePackage } from './packages/table/TablePackage'
+
+// prose-editor
+export { default as ProseEditorPackage } from './packages/prose-editor/ProseEditorPackage'
+export { default as ProseEditor } from './packages/prose-editor/ProseEditor'
+export { default as ProseEditorConfigurator } from './packages/prose-editor/ProseEditorConfigurator'
 
 // button
 export { default as Button } from './packages/button/Button'
