@@ -4,67 +4,60 @@ import AbstractEditor from '../../ui/AbstractEditor'
 import ContainerEditor from '../../ui/ContainerEditor'
 import ProseEditorOverlay from './ProseEditorOverlay'
 
-function ProseEditor() {
-  ProseEditor.super.apply(this, arguments);
-}
+class ProseEditor extends AbstractEditor {
 
-ProseEditor.Prototype = function() {
+  willUpdateState(newState) {
+    this.handleStateUpdate(newState)
+  }
 
-  this.willUpdateState = function(newState) {
-    this.handleStateUpdate(newState);
-  };
-
-  this.render = function($$) {
+  render($$) {
     var SplitPane = this.componentRegistry.get('split-pane');
     var el = $$('div').addClass('sc-prose-editor');
-
     var toolbar = this._renderToolbar($$);
     var editor = this._renderEditor($$);
     var ScrollPane = this.componentRegistry.get('scroll-pane');
 
-    var contentPanel = $$(ScrollPane, {
+    let contentPanel = $$(ScrollPane, {
       scrollbarType: 'substance',
       scrollbarPosition: 'right',
       overlay: ProseEditorOverlay,
     }).append(
       editor
-    ).ref('contentPanel');
+    ).ref('contentPanel')
 
     el.append(
       $$(SplitPane, {splitType: 'horizontal'}).append(
         toolbar,
         contentPanel
       )
-    );
-    return el;
-  };
+    )
+    return el
+  }
 
-  this._renderToolbar = function($$) {
-    var configurator = this.props.configurator;
-    var ToolbarClass = configurator.getToolbarClass();
-    var commandStates = this.commandManager.getCommandStates();
+  _renderToolbar($$) {
+    let configurator = this.props.configurator
+    let ToolbarClass = configurator.getToolbarClass()
+    let commandStates = this.commandManager.getCommandStates()
     return $$(ToolbarClass, {
       commandStates: commandStates
-    }).ref('toolbar');
-  };
+    }).ref('toolbar')
+  }
 
-  this._renderEditor = function($$) {
-    var configurator = this.props.configurator;
+  _renderEditor($$) {
+    let configurator = this.props.configurator
     return $$(ContainerEditor, {
       disabled: this.props.disabled,
       documentSession: this.documentSession,
       node: this.doc.get('body'),
       commands: configurator.getSurfaceCommandNames(),
       textTypes: configurator.getTextTypes()
-    }).ref('body');
-  };
+    }).ref('body')
+  }
 
-  this.getToolbar = function() {
-    return this.refs.toolbar;
-  };
+  getToolbar() {
+    return this.refs.toolbar
+  }
 
-};
+}
 
-AbstractEditor.extend(ProseEditor);
-
-export default ProseEditor;
+export default ProseEditor
