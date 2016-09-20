@@ -73,6 +73,10 @@ export { default as SubscriptPackage } from './packages/subscript/SubscriptPacka
 export { default as SuperscriptPackage } from './packages/superscript/SuperscriptPackage'
 export { default as TablePackage } from './packages/table/TablePackage'
 
+// base
+export { default as SwitchTextTypeTool } from './packages/base/SwitchTextTypeTool'
+export { default as SwitchTextTypeCommand } from './packages/base/SwitchTextTypeCommand'
+
 // prose-editor
 export { default as ProseEditorPackage } from './packages/prose-editor/ProseEditorPackage'
 export { default as ProseEditor } from './packages/prose-editor/ProseEditor'
