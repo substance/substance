@@ -1,31 +1,24 @@
-'use strict';
-
 import Command from '../../ui/Command'
 
-function Undo(params) {
-  Command.call(this, params);
-}
+class Undo extends Command {
 
-Undo.Prototype = function() {
-
-  this.getCommandState = function(props, context) {
-    var docSession = context.documentSession;
+  getCommandState(props, context) {
+    let docSession = context.documentSession
     return {
       disabled: !docSession.canUndo(),
       active: false
-    };
-  };
-
-  this.execute = function(props, context) {
-    var docSession = context.documentSession;
-    if (docSession.canUndo()) {
-      docSession.undo();
-      return true;
     }
-    return false;
-  };
-};
+  }
 
-Command.extend(Undo);
+  execute(props, context) {
+    var docSession = context.documentSession
+    if (docSession.canUndo()) {
+      docSession.undo()
+      return true
+    }
+    return false
+  }
 
-export default Undo;
+}
+
+export default Undo
