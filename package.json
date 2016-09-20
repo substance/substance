@@ -65,5 +65,10 @@
   "browser": {
     "cheerio": false,
     "dom-serializer": false
+  },
+  "browserify": {
+    "transform": [
+      "babelify"
+    ]
   }
 }
