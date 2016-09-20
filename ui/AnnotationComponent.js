@@ -23,7 +23,7 @@ import Component from './Component'
 class AnnotationComponent extends Component {
 
   // TODO: we should avoid to have a didMount hook on an abstract base class
-  didMoun() {
+  didMount() {
     let node = this.props.node
     node.on('highlighted', this.onHighlightedChanged, this)
   }
