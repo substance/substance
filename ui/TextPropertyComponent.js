@@ -26,10 +26,8 @@ import SelectionFragmentComponent from './SelectionFragmentComponent'
 
 class TextPropertyComponent extends AnnotatedTextComponent {
 
-  constructor(...args) {
-    super(...args)
-    
-    this._isTextPropertyComponent = true;
+  get _isTextPropertyComponent() {
+    return true 
   }
 
   didMount() {
@@ -169,7 +167,7 @@ class TextPropertyComponent extends AnnotatedTextComponent {
         offset: 0
       }
     }
-    for (let child = el.getFirstChild(); child; child=child.getNextSibling(), idx++) {
+    for (let child = el.getFirstChild(); child; child = child.getNextSibling(), idx++) {
       if (child.isTextNode()) {
         l = child.textContent.length
         if (l >= charPos) {
@@ -184,7 +182,7 @@ class TextPropertyComponent extends AnnotatedTextComponent {
         let length = child.getAttribute('data-length')
         if (length) {
           l = parseInt(length, 10)
-          if (l>= charPos) {
+          if (l >= charPos) {
             // special handling for InlineNodes
             if (child.attr('data-inline')) {
               let nextSibling = child.getNextSibling()
