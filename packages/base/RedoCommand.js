@@ -1,9 +1,6 @@
 import Command from '../../ui/Command'
 
 class Redo extends Command {
-  constructor(...args) {
-    super(...args);
-  }
 
   getCommandState(props, context) {
     let docSession = context.documentSession
