@@ -1,12 +1,11 @@
 import inBrowser from '../util/inBrowser'
-import BrowserDOMElement from './BrowserDOMElement.js'
-import CheerioDOMElement from './CheerioDOMElement.js'
 
 let DOMElementImpl
-
 if (inBrowser) {
+  var BrowserDOMElement = require('./BrowserDOMElement').default
   DOMElementImpl = BrowserDOMElement
 } else {
+  var CheerioDOMElement = require('./CheerioDOMElement').default
   DOMElementImpl = CheerioDOMElement
 }
 
