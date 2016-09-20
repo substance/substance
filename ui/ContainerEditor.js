@@ -1,5 +1,3 @@
-'use strict';
-
 import isString from 'lodash/isString'
 import last from 'lodash/last'
 import uuid from '../util/uuid'
@@ -46,387 +44,385 @@ import IsolatedNodeComponent from './IsolatedNodeComponent'
   ```
  */
 
-function ContainerEditor(parent, props) {
-  // default props derived from the given props
-  props.containerId = props.containerId || props.node.id;
-  props.name = props.name || props.containerId || props.node.id;
+class ContainerEditor extends Surface {
+  constructor(parent, props) {
+    // default props derived from the given props
+    props.containerId = props.containerId || props.node.id
+    props.name = props.name || props.containerId || props.node.id
 
-  ContainerEditor.super.apply(this, arguments);
+    super(parent, props)
 
-  this.containerId = this.props.containerId;
-  if (!isString(this.containerId)) {
-    throw new Error("Property 'containerId' is mandatory.");
+    this.containerId = this.props.containerId
+    if (!isString(this.containerId)) {
+      throw new Error("Property 'containerId' is mandatory.")
+    }
+    let doc = this.getDocument()
+    this.container = doc.get(this.containerId)
+    if (!this.container) {
+      throw new Error('Container with id ' + this.containerId + ' does not exist.')
+    }
+
+    this.editingBehavior = this.context.editingBehavior || new EditingBehavior()
+
+    // derive internal state variables
+    super._deriveInternalState.call(this, this.props)
   }
-  var doc = this.getDocument();
-  this.container = doc.get(this.containerId);
-  if (!this.container) {
-    throw new Error('Container with id ' + this.containerId + ' does not exist.');
+
+  get _isContainerEditor() {
+    return true 
   }
-
-  this.editingBehavior = this.context.editingBehavior || new EditingBehavior();
-
-  // derive internal state variables
-  ContainerEditor.prototype._deriveInternalState.call(this, this.props);
-}
-
-ContainerEditor.Prototype = function() {
-
-  var _super = Object.getPrototypeOf(this);
-
-  this._isContainerEditor = true;
 
   // Note: this component is self managed
-  this.shouldRerender = function(newProps) {
-    if (newProps.disabled !== this.props.disabled) return true;
+  shouldRerender(newProps) {
+    if (newProps.disabled !== this.props.disabled) return true
     // TODO: we should still detect when the document has changed,
     // see https://github.com/substance/substance/issues/543
-    return false;
-  };
+    return false
+  }
 
-  this.willReceiveProps = function(newProps) {
-    _super.willReceiveProps.apply(this, arguments);
-    ContainerEditor.prototype._deriveInternalState.call(this, newProps);
-  };
+  willReceiveProps(newProps) {
+    super.willReceiveProps.apply(this, arguments)
+    ContainerEditor.prototype._deriveInternalState.call(this, newProps)
+  }
 
-  this.didMount = function() {
-    _super.didMount.apply(this, arguments);
+  didMount() {
+    super.didMount.apply(this, arguments)
     // var doc = this.getDocument();
     // to do incremental updates
-    this.container.on('nodes:changed', this.onContainerChange, this);
-  };
+    this.container.on('nodes:changed', this.onContainerChange, this)
+  }
 
-  this.dispose = function() {
-    _super.dispose.apply(this, arguments);
+  dispose() {
+    super.dispose.apply(this, arguments)
     // var doc = this.getDocument();
     // doc.off(this);
-    this.container.off(this);
-  };
+    this.container.off(this)
+  }
 
-  this.render = function($$) {
-    var el = _super.render.call(this, $$);
+  render($$) {
+    let el = super.render.call(this, $$)
 
-    var doc = this.getDocument();
-    var containerId = this.getContainerId();
-    var containerNode = doc.get(containerId);
+    let doc = this.getDocument()
+    let containerId = this.getContainerId()
+    let containerNode = doc.get(containerId)
     if (!containerNode) {
-      console.warn('No container node found for ', containerId);
+      console.warn('No container node found for ', containerId)
     }
     el.addClass('sc-container-editor container-node ' + containerId)
       .attr({
         spellCheck: false,
         "data-id": containerId
-      });
+      })
 
     if (this.isEmpty()) {
       el.append(
         $$('a').attr('href', '#').append('Start writing').on('click', this.onCreateText)
-      );
+      )
     } else {
       containerNode.getNodes().forEach(function(node) {
-        el.append(this._renderNode($$, node).ref(node.id));
-      }.bind(this));
+        el.append(this._renderNode($$, node).ref(node.id))
+      }.bind(this))
     }
 
     if (!this.props.disabled) {
-      el.addClass('sm-enabled');
-      el.setAttribute('contenteditable', true);
+      el.addClass('sm-enabled')
+      el.setAttribute('contenteditable', true)
     }
 
-    return el;
-  };
+    return el
+  }
 
-  this._renderNode = function($$, node) {
-    if (!node) throw new Error('Illegal argument');
+  _renderNode($$, node) {
+    if (!node) throw new Error('Illegal argument')
     if (node.isText()) {
-      return _super.renderNode.call(this, $$, node);
+      return super.renderNode.call(this, $$, node)
     } else {
-      var componentRegistry = this.context.componentRegistry;
-      var ComponentClass = componentRegistry.get(node.type);
+      let componentRegistry = this.context.componentRegistry
+      let ComponentClass = componentRegistry.get(node.type)
       if (ComponentClass.prototype._isIsolatedNodeComponent) {
-        return $$(ComponentClass, { node: node }).ref(node.id);
+        return $$(ComponentClass, { node: node }).ref(node.id)
       } else {
-        return $$(IsolatedNodeComponent, { node: node }).ref(node.id);
+        return $$(IsolatedNodeComponent, { node: node }).ref(node.id)
       }
     }
-  };
+  }
 
-  this._deriveInternalState = function(props) {
-    var _state = this._state;
+  _deriveInternalState(props) {
+    let _state = this._state
     if (!props.hasOwnProperty('enabled') || props.enabled) {
-      _state.enabled = true;
+      _state.enabled = true
     } else {
-      _state.enabled = false;
+      _state.enabled = false
     }
-  };
+  }
 
-  this._handleUpOrDownArrowKey = function (event) {
-    event.stopPropagation();
-    var direction = (event.keyCode === keys.UP) ? 'left' : 'right';
-    var selState = this.getDocumentSession().getSelectionState();
-    var sel = selState.getSelection();
+  _handleUpOrDownArrowKey(event) {
+    event.stopPropagation()
+    let direction = (event.keyCode === keys.UP) ? 'left' : 'right'
+    let selState = this.getDocumentSession().getSelectionState()
+    let sel = selState.getSelection()
 
     // Note: this collapses the selection, just to let ContentEditable continue doing a cursor move
     if (sel.isNodeSelection() && sel.isFull() && !event.shiftKey) {
-      this.domSelection.collapse(direction);
+      this.domSelection.collapse(direction)
     }
     // HACK: ATM we have a cursor behavior in Chrome and FF when collapsing a selection
     // e.g. have a selection from up-to-down and the press up, seems to move the focus
     else if (!platform.isIE && !sel.isCollapsed() && !event.shiftKey) {
-      var doc = this.getDocument();
+      let doc = this.getDocument()
       if (direction === 'left') {
-        this.setSelection(doc.createSelection(sel.start.path, sel.start.offset));
+        this.setSelection(doc.createSelection(sel.start.path, sel.start.offset))
       } else {
-        this.setSelection(doc.createSelection(sel.end.path, sel.end.offset));
+        this.setSelection(doc.createSelection(sel.end.path, sel.end.offset))
       }
     }
     // Note: we need this timeout so that CE updates the DOM selection first
     // before we try to map it to the model
     window.setTimeout(function() {
-      if (!this.isMounted()) return;
-      this._updateModelSelection({ direction: direction });
-    }.bind(this));
-  };
+      if (!this.isMounted()) return
+      this._updateModelSelection({ direction: direction })
+    }.bind(this))
+  }
 
-  this._handleLeftOrRightArrowKey = function (event) {
-    event.stopPropagation();
-    var direction = (event.keyCode === keys.LEFT) ? 'left' : 'right';
-    var selState = this.getDocumentSession().getSelectionState();
-    var sel = selState.getSelection();
+  _handleLeftOrRightArrowKey(event) {
+    event.stopPropagation()
+    let direction = (event.keyCode === keys.LEFT) ? 'left' : 'right'
+    let selState = this.getDocumentSession().getSelectionState()
+    let sel = selState.getSelection()
     // Note: collapsing the selection and let ContentEditable still continue doing a cursor move
     if (sel.isNodeSelection() && sel.isFull() && !event.shiftKey) {
-      event.preventDefault();
-      this.setSelection(sel.collapse(direction));
-      return;
+      event.preventDefault()
+      this.setSelection(sel.collapse(direction))
+      return
     } else {
-      _super._handleLeftOrRightArrowKey.call(this, event);
+      super._handleLeftOrRightArrowKey.call(this, event)
     }
-  };
+  }
 
-  this._handleEnterKey = function(event) {
-    var sel = this.getDocumentSession().getSelection();
+  _handleEnterKey(event) {
+    let sel = this.getDocumentSession().getSelection()
     if (sel.isNodeSelection() && sel.isFull()) {
-      event.preventDefault();
-      event.stopPropagation();
+      event.preventDefault()
+      event.stopPropagation()
     } else {
-      _super._handleEnterKey.apply(this, arguments);
+      super._handleEnterKey.apply(this, arguments)
     }
-  };
+  }
 
   // Used by Clipboard
-  this.isContainerEditor = function() {
-    return true;
-  };
+  isContainerEditor() {
+    return true
+  }
 
   /**
     Returns the containerId the editor is bound to
   */
-  this.getContainerId = function() {
-    return this.containerId;
-  };
+  getContainerId() {
+    return this.containerId
+  }
 
   // TODO: do we really need this in addition to getContainerId?
-  this.getContainer = function() {
-    return this.getDocument().get(this.getContainerId());
-  };
+  getContainer() {
+    return this.getDocument().get(this.getContainerId())
+  }
 
-  this.isEmpty = function() {
-    var containerNode = this.getContainer();
-    return (containerNode && containerNode.nodes.length === 0);
-  };
+  isEmpty() {
+    let containerNode = this.getContainer()
+    return (containerNode && containerNode.nodes.length === 0)
+  }
 
-  this.isEditable = function() {
-    return _super.isEditable.call(this) && !this.isEmpty();
-  };
+  isEditable() {
+    return super.isEditable.call(this) && !this.isEmpty()
+  }
 
   /*
     TODO: Select first content to be found
   */
-  this.selectFirst = function() {
-    console.warn('TODO: Implement selection of first content to be found.');
-  };
+  selectFirst() {
+    console.warn('TODO: Implement selection of first content to be found.')
+  }
 
   /*
     Register custom editor behavior using this method
   */
-  this.extendBehavior = function(extension) {
-    extension.register(this.editingBehavior);
-  };
+  extendBehavior(extension) {
+    extension.register(this.editingBehavior)
+  }
 
-  this.getTextTypes = function() {
-    return this.textTypes || [];
-  };
+  getTextTypes() {
+    return this.textTypes || []
+  }
 
   // Used by SwitchTextTypeTool
   // TODO: Filter by enabled commands for this Surface
-  this.getTextCommands = function() {
-    var textCommands = {};
+  getTextCommands() {
+    var textCommands = {}
     this.commandRegistry.each(function(cmd) {
       if (cmd.constructor.textTypeName) {
-        textCommands[cmd.getName()] = cmd;
+        textCommands[cmd.getName()] = cmd
       }
     });
-    return textCommands;
-  };
+    return textCommands
+  }
 
   /* Editing behavior */
 
   /**
     Performs a {@link model/transform/breakNode} transformation
   */
-  this.break = function(tx, args) {
-    return breakNode(tx, args);
-  };
+  break(tx, args) {
+    return breakNode(tx, args)
+  }
 
   /**
     Performs an {@link model/transform/insertNode} transformation
   */
-  this.insertNode = function(tx, args) {
+  insertNode(tx, args) {
     if (args.selection.isPropertySelection() || args.selection.isContainerSelection()) {
-      return insertNode(tx, args);
+      return insertNode(tx, args)
     }
-  };
+  }
 
   /**
    * Performs a {@link model/transform/switchTextType} transformation
    */
-  this.switchType = function(tx, args) {
+  switchType(tx, args) {
     if (args.selection.isPropertySelection()) {
-      return switchTextType(tx, args);
+      return switchTextType(tx, args)
     }
-  };
+  }
 
   /**
     Selects all content in the container
   */
-  this.selectAll = function() {
-    var doc = this.getDocument();
-    var container = doc.get(this.getContainerId());
+  selectAll() {
+    let doc = this.getDocument()
+    let container = doc.get(this.getContainerId())
     if (container.nodes.length === 0) {
-      return;
+      return
     }
-    var firstNodeId = container.nodes[0];
-    var lastNodeId = last(container.nodes);
-    var sel = doc.createSelection({
+    let firstNodeId = container.nodes[0]
+    let lastNodeId = last(container.nodes)
+    let sel = doc.createSelection({
       type: 'container',
       containerId: container.id,
       startPath: [firstNodeId],
       startOffset: 0,
       endPath: [lastNodeId],
       endOffset: 1
-    });
-    this.setSelection(sel);
-  };
+    })
+    this.setSelection(sel)
+  }
 
-  this.selectFirst = function() {
-    var doc = this.getDocument();
-    var nodes = this.getContainer().nodes;
+  selectFirst() {
+    let doc = this.getDocument()
+    let nodes = this.getContainer().nodes
     if (nodes.length === 0) {
-      console.warn('ContainerEditor.selectFirst(): Container is empty.');
-      return;
+      console.warn('ContainerEditor.selectFirst(): Container is empty.')
+      return
     }
-    var node = doc.get(nodes[0]);
-    var sel;
+    let node = doc.get(nodes[0])
+    let sel
     if (node.isText()) {
-      sel = doc.createSelection(node.getTextPath(), 0);
+      sel = doc.createSelection(node.getTextPath(), 0)
     } else {
-      sel = doc.createSelection(this.getContainerId(), [node.id], 0, [node.id], 1);
+      sel = doc.createSelection(this.getContainerId(), [node.id], 0, [node.id], 1)
     }
-    this.setSelection(sel);
-  };
+    this.setSelection(sel)
+  }
 
   /**
     Performs a {@link model/transform/paste} transformation
   */
-  this.paste = function(tx, args) {
+  paste(tx, args) {
     if (args.selection.isPropertySelection() || args.selection.isContainerSelection()) {
-      return paste(tx, args);
+      return paste(tx, args)
     }
-  };
+  }
 
-  this.onContainerChange = function(change) {
-    var doc = this.getDocument();
+  onContainerChange(change) {
+    let doc = this.getDocument()
     // first update the container
-    var renderContext = RenderingEngine.createContext(this);
-    var $$ = renderContext.$$;
-    var container = this.getContainer();
-    var path = container.getContentPath();
-    for (var i = 0; i < change.ops.length; i++) {
-      var op = change.ops[i];
+    let renderContext = RenderingEngine.createContext(this)
+    let $$ = renderContext.$$
+    let container = this.getContainer()
+    let path = container.getContentPath()
+    for (let i = 0; i < change.ops.length; i++) {
+      let op = change.ops[i]
       if (op.type === "update" && op.path[0] === path[0]) {
-        var diff = op.diff;
+        let diff = op.diff
         if (diff.type === "insert") {
-          var nodeId = diff.getValue();
-          var node = doc.get(nodeId);
-          var nodeEl;
+          let nodeId = diff.getValue()
+          let node = doc.get(nodeId)
+          let nodeEl
           if (node) {
-            nodeEl = this._renderNode($$, node);
+            nodeEl = this._renderNode($$, node)
           } else {
             // node does not exist anymore
             // so we insert a stub element, so that the number of child
             // elements is consistent
-            nodeEl = $$('div');
+            nodeEl = $$('div')
           }
-          this.insertAt(diff.getOffset(), nodeEl);
+          this.insertAt(diff.getOffset(), nodeEl)
         } else if (diff.type === "delete") {
-          this.removeAt(diff.getOffset());
+          this.removeAt(diff.getOffset())
         }
       }
     }
-  };
+  }
 
   // Create a first text element
-  this.onCreateText = function(e) {
-    e.preventDefault();
+  onCreateText(e) {
+    e.preventDefault()
 
-    var newSel;
+    let newSel;
     this.transaction(function(tx) {
-      var container = tx.get(this.props.containerId);
-      var textType = tx.getSchema().getDefaultTextType();
-      var node = tx.create({
+      let container = tx.get(this.props.containerId)
+      let textType = tx.getSchema().getDefaultTextType()
+      let node = tx.create({
         id: uuid(textType),
         type: textType,
         content: ''
-      });
-      container.show(node.id);
+      })
+      container.show(node.id)
 
       newSel = tx.createSelection({
         type: 'property',
         path: [ node.id, 'content'],
         startOffset: 0,
         endOffset: 0
-      });
-    }.bind(this));
-    this.rerender();
-    this.setSelection(newSel);
-  };
+      })
+    }.bind(this))
+    this.rerender()
+    this.setSelection(newSel)
+  }
 
-  this.transaction = function(transformation, info) {
-    var documentSession = this.documentSession;
-    var surfaceId = this.getId();
-    var containerId = this.getContainerId();
+  transaction(transformation, info) {
+    let documentSession = this.documentSession
+    let surfaceId = this.getId()
+    let containerId = this.getContainerId()
     return documentSession.transaction(function(tx, args) {
-      var sel = tx.before.selection;
+      let sel = tx.before.selection
       if (sel && !sel.isNull()) {
-        sel.containerId = sel.containerId || containerId;
+        sel.containerId = sel.containerId || containerId
       }
-      tx.before.surfaceId = surfaceId;
-      args.containerId = this.getContainerId();
-      args.editingBehavior = this.editingBehavior;
-      var result = transformation(tx, args);
+      tx.before.surfaceId = surfaceId
+      args.containerId = this.getContainerId()
+      args.editingBehavior = this.editingBehavior
+      let result = transformation(tx, args)
       if (result) {
-        sel = result.selection;
+        sel = result.selection
         if (sel && !sel.isNull()) {
-          sel.containerId = containerId;
+          sel.containerId = containerId
         }
-        return result;
+        return result
       }
-    }.bind(this), info);
-  };
+    }.bind(this), info)
+  }
 
-};
+}
 
-Surface.extend(ContainerEditor);
 
-ContainerEditor.isContainerEditor = true;
+ContainerEditor.isContainerEditor = true
 
-export default ContainerEditor;
+export default ContainerEditor

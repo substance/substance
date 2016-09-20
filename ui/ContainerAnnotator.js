@@ -1,5 +1,3 @@
-'use strict';
-
 import each from 'lodash/each'
 import ContainerEditor from './ContainerEditor'
 
@@ -28,34 +26,28 @@ import ContainerEditor from './ContainerEditor'
   ```
  */
 
-function ContainerAnnotator() {
-  ContainerAnnotator.super.apply(this, arguments);
-}
+class ContainerAnnotator extends ContainerEditor {
 
-ContainerAnnotator.Prototype = function() {
+  render($$) {
+    let doc = this.getDocument()
+    let containerNode = doc.get(this.props.containerId)
 
-  this.render = function($$) {
-    var doc = this.getDocument();
-    var containerNode = doc.get(this.props.containerId);
-
-    var el = $$("div")
+    let el = $$("div")
       .addClass('surface container-node ' + containerNode.id)
       .attr({
         spellCheck: false,
         "data-id": containerNode.id,
         "contenteditable": false
-      });
+      })
 
     // node components
     each(containerNode.getNodes(), function(node) {
-      el.append(this.renderNode(node));
-    }.bind(this));
+      el.append(this.renderNode(node))
+    }.bind(this))
 
-    return el;
-  };
+    return el
+  }
 
-};
+}
 
-ContainerEditor.extend(ContainerAnnotator);
-
-export default ContainerAnnotator;
+export default ContainerAnnotator
