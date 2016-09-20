@@ -16,7 +16,7 @@ import ProseArticle from './ProseArticle'
 import ProseEditor from './ProseEditor'
 import ProseEditorConfigurator from './ProseEditorConfigurator'
 import ProseEditorOverlay from './ProseEditorOverlay'
-import ProseEditorToolbar from './ProseEditorToolbar'
+import Toolbar from '../tools/Toolbar'
 
 
 export default {
@@ -27,7 +27,7 @@ export default {
       ArticleClass: ProseArticle,
       defaultTextType: 'paragraph'
     });
-    config.setToolbarClass(ProseEditorToolbar);
+    config.setToolbarClass(Toolbar);
     // Now import base packages
     config.import(BasePackage, {
       noBaseStyles: options.noBaseStyles
@@ -48,6 +48,6 @@ export default {
   ProseArticle: ProseArticle,
   ProseEditor: ProseEditor,
   Configurator: ProseEditorConfigurator,
-  Toolbar: ProseEditorToolbar,
+  Toolbar: Toolbar,
   Overlay: ProseEditorOverlay,
 };
