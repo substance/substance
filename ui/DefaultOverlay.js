@@ -18,9 +18,13 @@ DefaultOverlay.Prototype = function() {
     var tools = this.context.tools;
     var overlayTools = tools.get('overlay');
 
-    overlayTools.forEach(function(tool) {
-      var toolProps = tool.Class.getProps(commandStates);
-      if (toolProps) {
+    overlayTools.forEach(function(tool, name) {
+      var toolProps = Object.assign({}, commandStates[name], {
+        name: name,
+        icon: name
+      })
+
+      if (toolProps && !toolProps.disabled) {
         el.append(
           $$(tool.Class, toolProps).ref(tool.name)
         );
