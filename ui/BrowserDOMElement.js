@@ -6,6 +6,7 @@ import DelegatedEvent from './DelegatedEvent'
 
 class BrowserDOMElement extends DOMElement {
   constructor(el) {
+    super()
     console.assert(el instanceof window.Node, "Expecting native DOM node.")
     this.el = el
     el._wrapper = this
@@ -664,6 +665,34 @@ BrowserDOMElement.parseMarkup = function(str, format, isFullDoc) {
   }
 }
 
+class TextNode extends DOMElement.TextNode {
+  constructor(nativeEl) {
+    super()
+    console.assert(nativeEl instanceof window.Node && nativeEl.nodeType === 3, "Expecting native TextNode.")
+    this.el = nativeEl
+    nativeEl._wrapper = this
+
+    let methods = [
+      'getParent', 'getNextSibling', 'getPreviousSibling',
+      'getTextContent', 'setTextContent',
+      'getInnerHTML', 'setInnerHTML', 'getOuterHTML',
+      'getNativeElement', 'clone'
+    ]
+
+    methods.forEach(function(name) {
+      this[name] = super[name]
+    }.bind(this))
+  }
+  
+  get _isBrowserDOMElement() {
+    return true 
+  }
+}
+
+DOMElement._defineProperties(TextNode, ['nodeType', 'textContent', 'innerHTML', 'outerHTML', 'parentNode'])
+
+BrowserDOMElement.TextNode = TextNode
+
 BrowserDOMElement.wrapNativeElement = function(el) {
   if (el) {
     if (el._wrapper) {
@@ -682,104 +711,80 @@ BrowserDOMElement.wrapNativeElement = function(el) {
   }
 }
 
-class TextNode extends DOMElement.TextNode {
-  constructor(nativeEl) {
-    console.assert(nativeEl instanceof window.Node && nativeEl.nodeType === 3, "Expecting native TextNode.")
-    this.el = nativeEl
-    nativeEl._wrapper = this
-  }
-  
-  get _isBrowserDOMElement() {
-    return true 
-  }
-
-  [
-    'getParent', 'getNextSibling', 'getPreviousSibling',
-    'getTextContent', 'setTextContent',
-    'getInnerHTML', 'setInnerHTML', 'getOuterHTML',
-    'getNativeElement', 'clone'
-  ].forEach(function(name) {
-    this[name] = BrowserDOMElement.prototype[name]
-  }.bind(this))
-}
-
-DOMElement.TextNode.extend(TextNode);
-DOMElement._defineProperties(TextNode, ['nodeType', 'textContent', 'innerHTML', 'outerHTML', 'parentNode']);
-
-BrowserDOMElement.TextNode = TextNode;
-
 /*
   Wrapper for the window element only exposing the eventlistener API.
 */
-function BrowserWindow() {
-  this.el = window;
-  window.__BrowserDOMElementWrapper__ = this;
-  this.eventListeners = [];
+class BrowserWindow {
+  constructor() {
+    this.el = window
+    window.__BrowserDOMElementWrapper__ = this
+    this.eventListeners = []
+    this.getEventListeners = BrowserDOMElement.prototype.getEventListeners
+  }
+
+  on() {
+    return super.on.apply(this, arguments)
+  }
+
+  off() {
+    return super.off.apply(this, arguments)
+  }
+
+  addEventListener() {
+    return super.addEventListener.apply(this, arguments)
+  }
+
+  removeEventListener() {
+    return super.removeEventListener.apply(this, arguments)
+  }
 }
 
-BrowserWindow.Prototype = function() {
-  var _super = BrowserDOMElement.prototype;
-  this.on = function() {
-    return _super.on.apply(this, arguments);
-  };
-  this.off = function() {
-    return _super.off.apply(this, arguments);
-  };
-  this.addEventListener = function() {
-    return _super.addEventListener.apply(this, arguments);
-  };
-  this.removeEventListener = function() {
-    return _super.removeEventListener.apply(this, arguments);
-  };
-  this.getEventListeners = BrowserDOMElement.prototype.getEventListeners;
-};
-
-oo.initClass(BrowserWindow);
+oo.initClass(BrowserWindow)
 
 BrowserDOMElement.getBrowserWindow = function() {
-  if (window.__BrowserDOMElementWrapper__) return window.__BrowserDOMElementWrapper__;
-  return new BrowserWindow(window);
-};
+  if (window.__BrowserDOMElementWrapper__) return window.__BrowserDOMElementWrapper__
+  return new BrowserWindow(window)
+}
 
-var _r1;
-var _r2;
+let _r1
+let _r2
 
 BrowserDOMElement.isReverse = function(anchorNode, anchorOffset, focusNode, focusOffset) {
   // the selection is reversed when the focus propertyEl is before
   // the anchor el or the computed charPos is in reverse order
   if (focusNode && anchorNode) {
     if (!_r1) {
-      _r1 = window.document.createRange();
-      _r2 = window.document.createRange();
+      _r1 = window.document.createRange()
+      _r2 = window.document.createRange()
     }
-    _r1.setStart(anchorNode.getNativeElement(), anchorOffset);
-    _r2.setStart(focusNode.getNativeElement(), focusOffset);
-    var cmp = _r1.compareBoundaryPoints(window.Range.START_TO_START, _r2);
+    _r1.setStart(anchorNode.getNativeElement(), anchorOffset)
+    _r2.setStart(focusNode.getNativeElement(), focusOffset)
+    let cmp = _r1.compareBoundaryPoints(window.Range.START_TO_START, _r2)
     if (cmp === 1) {
-      return true;
+      return true
     }
   }
-  return false;
-};
+  return false
+}
 
 BrowserDOMElement.getWindowSelection = function() {
-  var nativeSel = window.getSelection();
-  var result = {
+  let nativeSel = window.getSelection()
+  let result = {
     anchorNode: BrowserDOMElement.wrapNativeElement(nativeSel.anchorNode),
     anchorOffset: nativeSel.anchorOffset,
     focusNode: BrowserDOMElement.wrapNativeElement(nativeSel.focusNode),
     focusOffset: nativeSel.focusOffset
-  };
-  return result;
-};
-
-function matches(el, selector) {
-  var elProto = window.Element.prototype;
-  var _matches = (
-    elProto.matches || elProto.matchesSelector ||
-    elProto.msMatchesSelector || elProto.webkitMatchesSelector
-  );
-  return _matches.call(el, selector);
+  }
+  return result
 }
 
-export default BrowserDOMElement;
+function matches(el, selector) {
+  let elProto = window.Element.prototype
+  let _matches = (
+    elProto.matches || elProto.matchesSelector ||
+    elProto.msMatchesSelector || elProto.webkitMatchesSelector
+  )
+  return _matches.call(el, selector)
+}
+
+export default BrowserDOMElement
