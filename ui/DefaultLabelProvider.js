@@ -1,25 +1,22 @@
-'use strict';
-
 import oo from '../util/oo'
 
 /**
  Default label provider implementation
 */
 
-function LabelProvider(labels, lang) {
-  this.lang = lang || 'en';
-  this.labels = labels;
+class LabelProvider {
+  constructor(labels, lang) {
+    this.lang = lang || 'en'
+    this.labels = labels
+  }
+
+  getLabel(name) {
+    let labels = this.labels[this.lang]
+    if (!labels) return name
+    return labels[name] || name
+  }
 }
 
-LabelProvider.Prototype = function() {
+oo.initClass(LabelProvider)
 
-  this.getLabel = function(name) {
-    var labels = this.labels[this.lang];
-    if (!labels) return name;
-    return labels[name] || name;
-  };
-};
-
-oo.initClass(LabelProvider);
-
-export default LabelProvider;
+export default LabelProvider
