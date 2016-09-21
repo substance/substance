@@ -1,34 +1,26 @@
-'use strict';
-
 import Component from './Component'
 
-function CursorComponent() {
-  CursorComponent.super.apply(this, arguments);
-}
+class CursorComponent extends Component {
 
-CursorComponent.Prototype = function() {
-
-  this.render = function($$) {
+  render($$) {
     // TODO: we should rename se-cursor to sc-cursor
-    var el = $$('span').addClass('se-cursor');
+    let el = $$('span').addClass('se-cursor')
     // Add zero-width character. Since we have a non-empty element, the
     // outline style set on the cursor would not be visible in certain
     // scenarios (e.g. when cursor is at the very beginning of a text.
-    el.append("\uFEFF");
-    el.append($$('div').addClass('se-cursor-inner'));
+    el.append("\uFEFF")
+    el.append($$('div').addClass('se-cursor-inner'))
 
     if (this.props.collaborator) {
-      var collaboratorIndex = this.props.collaborator.colorIndex;
-      el.addClass('sm-collaborator-'+collaboratorIndex);
+      let collaboratorIndex = this.props.collaborator.colorIndex
+      el.addClass('sm-collaborator-'+collaboratorIndex)
     } else {
-      el.addClass('sm-local-user');
+      el.addClass('sm-local-user')
     }
 
-    return el;
-  };
+    return el
+  }
 
-};
+}
 
-Component.extend(CursorComponent);
-
-export default CursorComponent;
+export default CursorComponent
