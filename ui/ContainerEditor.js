@@ -65,7 +65,7 @@ class ContainerEditor extends Surface {
     this.editingBehavior = this.context.editingBehavior || new EditingBehavior()
 
     // derive internal state variables
-    super._deriveInternalState.call(this, this.props)
+    ContainerEditor.prototype._deriveInternalState.call(this, this.props)
   }
 
   get _isContainerEditor() {
