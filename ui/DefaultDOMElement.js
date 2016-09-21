@@ -2,27 +2,27 @@ import inBrowser from '../util/inBrowser'
 import BrowserDOMElement from './BrowserDOMElement.js'
 import CheerioDOMElement from './CheerioDOMElement.js'
 
-var DOMElementImpl;
+let DOMElementImpl
 
 if (inBrowser) {
-  DOMElementImpl = BrowserDOMElement;
+  DOMElementImpl = BrowserDOMElement
 } else {
-  DOMElementImpl = CheerioDOMElement;
+  DOMElementImpl = CheerioDOMElement
 }
 
-var DefaultDOMElement = {};
+let DefaultDOMElement = {}
 
 DefaultDOMElement.createTextNode = function(text) {
-  return DOMElementImpl.createTextNode(text);
-};
+  return DOMElementImpl.createTextNode(text)
+}
 
 DefaultDOMElement.createElement = function(tagName) {
-  return DOMElementImpl.createElement(tagName);
-};
+  return DOMElementImpl.createElement(tagName)
+}
 
 DefaultDOMElement._create = function(el) {
-  return new DOMElementImpl(el);
-};
+  return new DOMElementImpl(el)
+}
 
 /*
   A wrapper for Browser's `window` providing
@@ -30,47 +30,47 @@ DefaultDOMElement._create = function(el) {
 */
 DefaultDOMElement.getBrowserWindow = function() {
   if (inBrowser) {
-    return DOMElementImpl.getBrowserWindow();
+    return DOMElementImpl.getBrowserWindow()
   } else {
     // just a stub if not in browser
-    return DefaultDOMElement.createElement('div');
+    return DefaultDOMElement.createElement('div')
   }
-};
+}
 
 /*
   @param {String} html
   @returns {DOMElement|DOMElement[]}
 */
 DefaultDOMElement.parseHTML = function(html) {
-  return DOMElementImpl.parseMarkup(html, 'html');
-};
+  return DOMElementImpl.parseMarkup(html, 'html')
+}
 
 /*
   @param {String} xml
   @returns {DOMElement|DOMElement[]}
 */
 DefaultDOMElement.parseXML = function(xml, fullDoc) {
-  return DOMElementImpl.parseMarkup(xml, 'xml', fullDoc);
-};
+  return DOMElementImpl.parseMarkup(xml, 'xml', fullDoc)
+}
 
 DefaultDOMElement.wrapNativeElement = function(el) {
   if (el) {
     if (inBrowser && (el instanceof window.Node || el === window) ) {
-      return BrowserDOMElement.wrapNativeElement(el);
+      return BrowserDOMElement.wrapNativeElement(el)
     } else if (el.root && el.root.type === "root" ) {
-      return CheerioDOMElement.wrapNativeElement(el);
+      return CheerioDOMElement.wrapNativeElement(el)
     }
   } else {
-    return null;
+    return null
   }
-};
+}
 
 DefaultDOMElement.isReverse = function(anchorNode, anchorOffset, focusNode, focusOffset) {
   if (inBrowser ) {
-    return BrowserDOMElement.isReverse(anchorNode, anchorOffset, focusNode, focusOffset);
+    return BrowserDOMElement.isReverse(anchorNode, anchorOffset, focusNode, focusOffset)
   } else {
-    throw new Error('Not implemented.');
+    throw new Error('Not implemented.')
   }
-};
+}
 
-export default DefaultDOMElement;
+export default DefaultDOMElement
