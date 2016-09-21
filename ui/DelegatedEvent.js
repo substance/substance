@@ -1,5 +1,3 @@
-'use strict';
-
 /*
   A wrapper for native DOM events when using event delegation via
   `DOMElement.on(eventName, selector, handler)`.
@@ -14,4 +12,4 @@ function DelegatedEvent(owner, selectedTarget, originalEvent) {
   this.originalEvent = originalEvent;
 }
 
-export default DelegatedEvent;
+export default DelegatedEvent
