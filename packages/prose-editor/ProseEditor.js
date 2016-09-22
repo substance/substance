@@ -65,7 +65,6 @@ class ProseEditor extends AbstractEditor {
       })
     }
   }
-
 }
 
 export default ProseEditor
