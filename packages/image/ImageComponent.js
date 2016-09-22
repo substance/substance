@@ -1,67 +1,57 @@
-'use strict';
-
 import NodeComponent from '../../ui/NodeComponent'
 import percentage from '../../util/percentage'
 
-function ImageComponent() {
-  ImageComponent.super.apply(this, arguments);
-}
+class ImageComponent extends NodeComponent {
 
-ImageComponent.Prototype = function() {
-
-  var _super = ImageComponent.super.prototype;
-
-  this.didMount = function() {
-    _super.didMount.call(this);
-    var node = this.props.node;
-    node.on('src:changed', this.rerender, this);
+  didMount() {
+    super.didMount.call(this)
+    let node = this.props.node
+    node.on('src:changed', this.rerender, this)
     // TODO: we should try to factor this out for reuse
-    node.on('upload:started', this.onUploadStarted, this);
-    node.on('upload:progress', this.onUploadProgress, this);
-    node.on('upload:finished', this.onUploadFinished, this);
-  };
+    node.on('upload:started', this.onUploadStarted, this)
+    node.on('upload:progress', this.onUploadProgress, this)
+    node.on('upload:finished', this.onUploadFinished, this)
+  }
 
-  this.dispose = function() {
-    _super.dispose.call(this);
+  dispose() {
+    super.dispose.call(this)
 
-    this.props.node.off(this);
-  };
+    this.props.node.off(this)
+  }
 
-  this.render = function($$) {
-    var el = _super.render.call(this, $$);
-    el.addClass('sc-image');
+  render($$) {
+    let el = super.render.call(this, $$)
+    el.addClass('sc-image')
 
     el.append(
       $$('img').attr({
         src: this.props.node.src,
       }).ref('image')
-    );
+    )
 
     if (this.state.uploading) {
-      var progressBar = $$('div')
+      let progressBar = $$('div')
         .addClass('se-progress-bar')
         .ref('progressBar')
         .append('Uploading: ' + percentage(this.state.progress));
-      el.append(progressBar);
+      el.append(progressBar)
     }
 
-    return el;
-  };
+    return el
+  }
 
-  this.onUploadStarted = function() {
-    this.setState({ uploading: true, progress: 0 });
-  };
+  onUploadStarted() {
+    this.setState({ uploading: true, progress: 0 })
+  }
 
-  this.onUploadProgress = function(progress) {
-    this.setState({ uploading: true, progress: progress });
-  };
+  onUploadProgress(progress) {
+    this.setState({ uploading: true, progress: progress })
+  }
 
-  this.onUploadFinished = function() {
-    this.setState({});
-  };
+  onUploadFinished() {
+    this.setState({})
+  }
 
-};
+}
 
-NodeComponent.extend(ImageComponent);
-
-export default ImageComponent;
+export default ImageComponent
