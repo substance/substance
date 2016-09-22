@@ -1,10 +1,23 @@
 /*
-  Default style (on white background)
+  Generic styles
   =============================================================
-
-  Used in toolbar (also see _tool-group.css)
 */
-.sc-button.sm-style-outline {
+
+.sc-button.sm-style-outline[disabled=true],
+.sc-button.sm-style-outline-dark[disabled=true],
+.sc-button.sm-style-plain[disabled=true],
+.sc-button.sm-style-plain-dark[disabled=true] {
+  opacity: 0.4;
+  cursor: default;
+}
+
+/*
+  Outline style
+  =============================================================
+*/
+
+.sc-button.sm-style-outline,
+.sc-button.sm-style-outline-dark {
   position: relative;
   height: 30px;
   min-width: 30px;
@@ -22,19 +35,22 @@
   padding-right: 7px;
 }
 
-.sc-button.sm-style-outline > .se-label {
+.sc-button.sm-style-outline > .se-label,
+.sc-button.sm-style-outline-dark > .se-label {
   font-weight: 600;
   display: inline-block;
 }
 
-.sc-button.sm-style-outline > .se-hint {
+.sc-button.sm-style-outline > .se-hint,
+.sc-button.sm-style-outline-dark > .se-hint {
   display: inline-block;
   color: rgba(0,0,0,0.4);
   font-size: 9px;
 }
 
 /* Add spacing between icon and label */
-.sc-button.sm-style-outline > * + * {
+.sc-button.sm-style-outline > * + *,
+.sc-button.sm-style-outline-dark > * + * {
   padding-left: 5px;
 }
 
@@ -44,24 +60,65 @@
   color: rgba(255,255,255, 1);
 }
 
-.sc-button.sm-style-outline[disabled=true] {
-  opacity: 0.4;
-  cursor: default;
+/*
+  Dark style color overrides
+*/
+.sc-button.sm-style-outline-dark {
+  border: 1px solid rgba(255,255,255, 0.8);
+  color: rgba(255,255,255, 0.8);
 }
 
+.sc-button.sm-style-outline-dark.sm-active {
+  border-color: #fff;
+  background: #fff;
+  color: #222;
+}
+
+
 /*
-  Plain Dark style (on dark background)
+  Plain Style
   =============================================================
 
   Used inside of tool dropdowns
 */
 
+.sc-button.sm-style-plain,
 .sc-button.sm-style-plain-dark {
-  color: rgba(255,255,255, 0.6);
   overflow: hidden;
   width: 100%;
   padding: 3px 10px;
   line-height: 24px;
+}
+
+.sc-button.sm-style-plain > .se-label,
+.sc-button.sm-style-plain-dark > .se-label {
+  float: left;
+  font-weight: 600;
+}
+
+.sc-button.sm-style-plain > .se-hint,
+.sc-button.sm-style-plain-dark > .se-hint {
+  display: inline-block;
+  font-size: 11px;
+  float: right;
+}
+
+/*
+  White style color
+*/
+.sc-button.sm-style-plain:hover {
+  background: rgba(0,0,0,0.1);
+}
+
+.sc-button.sm-style-plain > .se-hint {
+  color: rgba(0,0,0,0.4);
+}
+
+/*
+  Dark style color
+*/
+.sc-button.sm-style-plain-dark {
+  color: rgba(255,255,255, 0.6);
 }
 
 .sc-button.sm-style-plain-dark:hover {
@@ -69,21 +126,8 @@
   color: rgba(255,255,255, 0.8);
 }
 
-.sc-button.sm-style-plain-dark[disabled=true] {
-  opacity: 0.4;
-  cursor: default;
-}
-
-.sc-button.sm-style-plain-dark > .se-label {
-  float: left;
-  font-weight: 600;
-}
-
 .sc-button.sm-style-plain-dark > .se-hint {
-  display: inline-block;
   color: rgba(255,255,255,0.4);
-  font-size: 11px;
-  float: right;
 }
 
 /*
