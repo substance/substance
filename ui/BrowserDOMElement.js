@@ -680,7 +680,7 @@ class TextNode extends DOMElement.TextNode {
     ]
 
     methods.forEach(function(name) {
-      this[name] = super[name]
+      this[name] = BrowserDOMElement.prototype[name]
     }.bind(this))
   }
   
@@ -723,19 +723,19 @@ class BrowserWindow {
   }
 
   on() {
-    return super.on.apply(this, arguments)
+    return BrowserDOMElement.prototype.on.apply(this, arguments)
   }
 
   off() {
-    return super.off.apply(this, arguments)
+    return BrowserDOMElement.prototype.off.apply(this, arguments)
   }
 
   addEventListener() {
-    return super.addEventListener.apply(this, arguments)
+    return BrowserDOMElement.prototype.addEventListener.apply(this, arguments)
   }
 
   removeEventListener() {
-    return super.removeEventListener.apply(this, arguments)
+    return BrowserDOMElement.prototype.removeEventListener.apply(this, arguments)
   }
 }
 
