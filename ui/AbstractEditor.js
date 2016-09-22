@@ -6,14 +6,14 @@ import GlobalEventHandler from './GlobalEventHandler'
 import DragManager from './DragManager'
 
 class AbstractEditor extends Component {
-  
+
   constructor(...args) {
     super(...args)
     this._initialize(this.props)
   }
 
   didMount() {
-    this.documentSession.on('didUpdate', this._documentSessionUpdated, this)
+    this.documentSession.on('didUpdate', this.documentSessionUpdated, this)
   }
 
   willReceiveProps(nextProps) {
@@ -103,18 +103,8 @@ class AbstractEditor extends Component {
     }
   }
 
-  getToolbar() {
-    throw new Error('This method is abstract.')
-  }
-
-  _documentSessionUpdated() {
-    let toolbar = this.getToolbar()
-    if (toolbar) {
-      let commandStates = this.commandManager.getCommandStates()
-      toolbar.setProps({
-        commandStates: commandStates
-      })
-    }
+  documentSessionUpdated() {
+    throw new Error('This method is abstract')
   }
 }
 
