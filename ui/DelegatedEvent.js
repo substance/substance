@@ -7,9 +7,9 @@
   @param [Event] originalEvent native DOM event
 */
 function DelegatedEvent(owner, selectedTarget, originalEvent) {
-  this.owner = owner;
-  this.target = selectedTarget;
-  this.originalEvent = originalEvent;
+  this.owner = owner
+  this.target = selectedTarget
+  this.originalEvent = originalEvent
 }
 
 export default DelegatedEvent
