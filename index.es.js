@@ -64,7 +64,6 @@ export { default as EmphasisPackage } from './packages/emphasis/EmphasisPackage'
 export { default as HeadingPackage } from './packages/heading/HeadingPackage'
 export { default as ImagePackage } from './packages/image/ImagePackage'
 export { default as InlineWrapperPackage } from './packages/inline-wrapper/InlineWrapperPackage'
-export { default as LinkPackage } from './packages/link/LinkPackage'
 export { default as ListPackage } from './packages/list/ListPackage'
 export { default as ParagraphPackage } from './packages/paragraph/ParagraphPackage'
 export { default as PersistencePackage } from './packages/persistence/PersistencePackage'
@@ -83,6 +82,14 @@ export { default as ProseEditor } from './packages/prose-editor/ProseEditor'
 export { default as ProseArticle } from './packages/prose-editor/ProseArticle'
 export { default as ProseEditorConfigurator } from './packages/prose-editor/ProseEditorConfigurator'
 export { default as ProseEditorOverlayTools } from './packages/prose-editor/ProseEditorOverlayTools'
+
+// link
+export { default as LinkPackage } from './packages/link/LinkPackage'
+export { default as EditLinkTool } from './packages/link/EditLinkTool'
+export { default as Link } from './packages/link/Link'
+export { default as LinkCommand } from './packages/link/LinkCommand'
+export { default as EditLinkCommand } from './packages/link/EditLinkCommand'
+export { default as LinkComponent } from './packages/link/LinkComponent'
 
 // button
 export { default as Button } from './packages/button/Button'
