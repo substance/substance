@@ -21,12 +21,6 @@ class InlineNodeCommand extends Command {
     return this.nodeType
   }
 
-  // legacy
-  getAnnotationType() {
-    console.warn('DEPRECATED: ust InlineNodeCommand.getNodeType() instead.')
-    return this.getNodeType()
-  }
-
   getCommandState(props, context) {
     let sel = context.documentSession.getSelection()
     let newState = {
@@ -35,12 +29,9 @@ class InlineNodeCommand extends Command {
       node: undefined
     }
 
-    if (sel && !sel.isNull() && sel.isPropertySelection()) {
-      newState.disabled = false
-    }
-
     let annos = this._getAnnotationsForSelection(props, context)
     if (annos.length === 1 && annos[0].getSelection().equals(sel)) {
+      newState.disabled = false;
       newState.active = true
       newState.node = annos[0]
     }
