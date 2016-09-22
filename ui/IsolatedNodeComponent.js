@@ -1,83 +1,84 @@
-'use strict';
-
 import startsWith from 'lodash/startsWith'
 import keys from '../util/keys'
 import createSurfaceId from '../util/createSurfaceId'
 import Coordinate from '../model/Coordinate'
 import Component from './Component'
 
-function IsolatedNodeComponent() {
-  IsolatedNodeComponent.super.apply(this, arguments);
+class IsolatedNodeComponent extends Component {
+  constructor(...args) {
+    super(...args)
 
-  this.name = this.props.node.id;
-  this._id = createSurfaceId(this);
-  this._state = {
-    selectionFragment: null
-  };
+    this.name = this.props.node.id
+    this._id = createSurfaceId(this)
+    this._state = {
+      selectionFragment: null
+    }
 
-  this.handleAction('escape', this._escape);
-  this.ContentClass = this._getContentClass(this.props.node) || Component;
-}
+    this.handleAction('escape', this._escape)
+    this.ContentClass = this._getContentClass(this.props.node) || Component
+  }
 
-IsolatedNodeComponent.Prototype = function() {
+  get _isIsolatedNodeComponent() {
+    return true 
+  }
 
-  var _super = IsolatedNodeComponent.super.prototype;
+  get __elementTag() {
+    return 'div' 
+  }
 
-  this._isIsolatedNodeComponent = true;
+  get __slugChar() {
+    return "|" 
+  }
 
-  // InlineNode uses 'span'
-  this.__elementTag = 'div';
-  this.__slugChar = "|";
-
-  this.getChildContext = function() {
+  getChildContext() {
     return {
       surfaceParent: this
-    };
-  };
+    }
+  }
 
-  this.getInitialState = function() {
-    var selState = this.context.documentSession.getSelectionState();
-    return this._deriveStateFromSelectionState(selState);
-  };
+  getInitialState() {
+    let selState = this.context.documentSession.getSelectionState()
+    return this._deriveStateFromSelectionState(selState)
+  }
 
-  this.didMount = function() {
-    _super.didMount.call(this);
+  didMount() {
+    super.didMount.call(this);
 
-    var docSession = this.context.documentSession;
-    docSession.on('update', this.onSessionUpdate, this);
-  };
+    let docSession = this.context.documentSession
+    docSession.on('update', this.onSessionUpdate, this)
+  }
 
-  this.dispose = function() {
-    _super.dispose.call(this);
+  dispose() {
+    super.dispose.call(this)
 
-    var docSession = this.context.documentSession;
-    docSession.off(this);
-  };
+    let docSession = this.context.documentSession
+    docSession.off(this)
+  }
 
-  this.getClassNames = function() {
-    return 'sc-isolated-node';
-  };
+  getClassNames() {
+    return 'sc-isolated-node'
+  }
 
-  this.render = function($$) {
-    var node = this.props.node;
-    var ContentClass = this.ContentClass;
+  render($$) {
+    let node = this.props.node
+    let ContentClass = this.ContentClass
     // console.log('##### IsolatedNodeComponent.render()', $$.capturing);
-    var el = _super.render.apply(this, arguments);
-    el.tagName = this.__elementTag;
+    let el = super.render.apply(this, arguments)
+    el.tagName = this.__elementTag
     el.addClass(this.getClassNames())
       .addClass('sm-'+this.props.node.type)
-      .attr("data-id", node.id);
+      .attr("data-id", node.id)
 
-    var disabled = this.isDisabled();
+    let disabled = this.isDisabled()
 
     if (this.state.mode) {
-      el.addClass('sm-'+this.state.mode);
+      el.addClass('sm-'+this.state.mode)
     } else {
-      el.addClass('sm-not-selected');
+      el.addClass('sm-not-selected')
     }
 
     if (!ContentClass.noStyle) {
-      el.addClass('sm-default-style');
+      el.addClass('sm-default-style')
     }
 
     // shadowing handlers of the parent surface
@@ -88,42 +89,42 @@ IsolatedNodeComponent.Prototype = function() {
       .on('keypress', this._stopPropagation)
       .on('keyup', this._stopPropagation)
       .on('compositionstart', this._stopPropagation)
-      .on('textInput', this._stopPropagation);
+      .on('textInput', this._stopPropagation)
 
     el.append(
       $$(this.__elementTag).addClass('se-slug').addClass('sm-before').ref('before')
         // NOTE: better use a regular character otherwise Edge has problems
         .append(this.__slugChar)
-    );
+    )
 
-    var level = this._getLevel();
+    let level = this._getLevel()
 
-    var container = $$(this.__elementTag).addClass('se-container')
+    let container = $$(this.__elementTag).addClass('se-container')
       .attr('contenteditable', false)
-      .css({ 'z-index': 2*level });
+      .css({ 'z-index': 2*level })
 
     if (ContentClass.fullWidth) {
-      container.addClass('sm-full-width');
+      container.addClass('sm-full-width')
     }
 
     if (this.state.mode === 'cursor' && this.state.position === 'before') {
       container.append(
         $$(this.__elementTag).addClass('se-cursor').addClass('sm-before').attr('contenteditable', false)
-      );
+      )
     }
-    container.append(this.renderContent($$, node));
+    container.append(this.renderContent($$, node))
 
     if (disabled) {
-      container.addClass('sm-disabled');
+      container.addClass('sm-disabled')
       if (this.shouldRenderBlocker()) {
         // NOTE: there are some content implementations which work better without a blocker
-        var blocker = $$(this.__elementTag).addClass('se-blocker')
-          .css({ 'z-index': 2*level+1 });
-        container.append(blocker);
+        let blocker = $$(this.__elementTag).addClass('se-blocker')
+          .css({ 'z-index': 2*level+1 })
+        container.append(blocker)
       }
       if (this.shouldSelectOnClick()) {
         // select the node on click
-        el.on('click', this.onClick);
+        el.on('click', this.onClick)
       }
     }
 
@@ -134,7 +135,7 @@ IsolatedNodeComponent.Prototype = function() {
       el.on('dragstart', this.onDragStart)
         .on('dragenter', this.onDragEnter)
         .on('dragover', this.onDragOver)
-        .on('drop', this.onDrop);
+        .on('drop', this.onDrop)
     }
 
     if (this.state.mode === 'cursor' && this.state.position === 'after') {
@@ -143,252 +144,250 @@ IsolatedNodeComponent.Prototype = function() {
       );
     }
 
-    el.append(container);
+    el.append(container)
 
     el.append(
       $$(this.__elementTag).addClass('se-slug').addClass('sm-after').ref('after')
         // NOTE: better use a regular character otherwise Edge has problems
         .append(this.__slugChar)
-    );
+    )
 
-    return el;
-  };
+    return el
+  }
 
-  this.renderContent = function($$, node) {
-    var ComponentClass = this.ContentClass;
+  renderContent($$, node) {
+    let ComponentClass = this.ContentClass
     if (!ComponentClass) {
-      console.error('Could not resolve a component for type: ' + node.type);
-      return $$(this.__elementTag);
+      console.error('Could not resolve a component for type: ' + node.type)
+      return $$(this.__elementTag)
     } else {
-      var props = {
+      let props = {
         node: node,
         disabled: this.isDisabled(),
         isolatedNodeState: this.state.mode
-      };
+      }
       if (this.state.mode === 'focused') {
         props.focused = true;
       }
-      return $$(ComponentClass, props).ref('content');
+      return $$(ComponentClass, props).ref('content')
     }
-  };
+  }
 
-  this.shouldRenderBlocker = function() {
-    return true;
-  };
+  shouldRenderBlocker() {
+    return true
+  }
 
-  this.shouldSelectOnClick = function() {
-    return this.state.mode !== 'focused' && this.state.mpde !== 'co-focused';
-  };
+  shouldSelectOnClick() {
+    return this.state.mode !== 'focused' && this.state.mpde !== 'co-focused'
+  }
 
-  this.getId = function() {
-    return this._id;
-  };
+  getId() {
+    return this._id
+  }
 
-  this.getMode = function() {
-    return this.state.mode;
-  };
+  getMode() {
+    return this.state.mode
+  }
 
-  this.isNotSelected = function() {
-    return !this.state.mode;
-  };
+  isNotSelected() {
+    return !this.state.mode
+  }
 
-  this.isSelected = function() {
-    return this.state.mode === 'selected';
-  };
+  isSelected() {
+    return this.state.mode === 'selected'
+  }
 
-  this.isCoSelected = function() {
-    return this.state.mode === 'co-selected';
-  };
+  isCoSelected() {
+    return this.state.mode === 'co-selected'
+  }
 
-  this.isFocused = function() {
-    return this.state.mode === 'focused';
-  };
+  isFocused() {
+    return this.state.mode === 'focused'
+  }
 
-  this.isCoFocused = function() {
-    return this.state.mode === 'co-focused';
-  };
+  isCoFocused() {
+    return this.state.mode === 'co-focused'
+  }
 
-  this._getContentClass = function(node) {
-    var componentRegistry = this.context.componentRegistry;
-    var ComponentClass = componentRegistry.get(node.type);
-    return ComponentClass;
-  };
+  _getContentClass(node) {
+    let componentRegistry = this.context.componentRegistry
+    let ComponentClass = componentRegistry.get(node.type)
+    return ComponentClass
+  }
 
-  this.isDisabled = function() {
+  isDisabled() {
     return !this.state.mode || ['co-selected', 'cursor'].indexOf(this.state.mode) > -1;
-  };
+  }
 
-  this._isDisabled = this.isDisabled;
+  _getSurfaceParent() {
+    return this.context.surface
+  }
 
-  this._getSurfaceParent = function() {
-    return this.context.surface;
-  };
-
-  this._getLevel = function() {
-    var level = 1;
-    var parent = this._getSurfaceParent();
+  _getLevel() {
+    let level = 1;
+    let parent = this._getSurfaceParent()
     while (parent) {
-      level++;
-      parent = parent._getSurfaceParent();
+      level++
+      parent = parent._getSurfaceParent()
     }
-    return level;
-  };
+    return level
+  }
 
-  this.onSessionUpdate = function(update) {
+  onSessionUpdate(update) {
     if (update.selection) {
-      var documentSession = this.context.documentSession;
-      var newState = this._deriveStateFromSelectionState(documentSession.getSelectionState());
+      let documentSession = this.context.documentSession
+      let newState = this._deriveStateFromSelectionState(documentSession.getSelectionState())
       if (!newState && this.state.mode) {
-        this.extendState({ mode: null });
+        this.extendState({ mode: null })
       } else if (newState && newState.mode !== this.state.mode) {
-        this.extendState(newState);
+        this.extendState(newState)
       }
     }
-  };
+  }
 
-  this._deriveStateFromSelectionState = function(selState) {
-    var sel = selState.getSelection();
-    var surfaceId = sel.surfaceId;
-    if (!surfaceId) return;
-    var id = this.getId();
-    var nodeId = this.props.node.id;
-    var parentId = this._getSurfaceParent().getId();
-    var inParentSurface = (surfaceId === parentId);
+  _deriveStateFromSelectionState(selState) {
+    let sel = selState.getSelection()
+    let surfaceId = sel.surfaceId
+    if (!surfaceId) return
+    let id = this.getId()
+    let nodeId = this.props.node.id
+    let parentId = this._getSurfaceParent().getId()
+    let inParentSurface = (surfaceId === parentId)
     // detect cases where this node is selected or co-selected by inspecting the selection
     if (inParentSurface) {
       if (sel.isNodeSelection() && sel.getNodeId() === nodeId) {
         if (sel.isFull()) {
-          return { mode: 'selected' };
+          return { mode: 'selected' }
         } else if (sel.isBefore()) {
-          return { mode: 'cursor', position: 'before' };
+          return { mode: 'cursor', position: 'before' }
         } else if (sel.isAfter()) {
-          return { mode: 'cursor', position: 'after' };
+          return { mode: 'cursor', position: 'after' }
         }
       }
       if (sel.isContainerSelection() && sel.containsNodeFragment(nodeId)) {
-        return { mode: 'co-selected' };
+        return { mode: 'co-selected' }
       }
-      return;
+      return
     }
     if (sel.isCustomSelection() && id === surfaceId) {
-      return { mode: 'focused' };
+      return { mode: 'focused' }
     }
     // HACK: a looks a bit hacky. Fine for now.
     // TODO: we should think about switching to surfacePath, instead of surfaceId
     else if (startsWith(surfaceId, id)) {
-      var path1 = id.split('/');
-      var path2 = surfaceId.split('/');
-      var len1 = path1.length;
-      var len2 = path2.length;
+      let path1 = id.split('/')
+      let path2 = surfaceId.split('/')
+      let len1 = path1.length
+      let len2 = path2.length
       if (len2 > len1 && path1[len1-1] === path2[len1-1]) {
         if (len2 === len1 + 1) {
-          return { mode: 'focused' };
+          return { mode: 'focused' }
         } else {
-          return { mode: 'co-focused' };
+          return { mode: 'co-focused' }
         }
       } else {
-        return null;
+        return null
       }
     }
-  };
+  }
 
-  this.onMousedown = function(event) {
+  onMousedown(event) {
     // console.log('IsolatedNodeComponent.onMousedown', this.getId());
-    event.stopPropagation();
-  };
+    event.stopPropagation()
+  }
 
-  this.onClick = function(event) {
-    event.preventDefault();
-    this._selectNode();
-  };
+  onClick(event) {
+    event.preventDefault()
+    this._selectNode()
+  }
 
-  this.onKeydown = function(event) {
-    event.stopPropagation();
+  onKeydown(event) {
+    event.stopPropagation()
     // console.log('####', event.keyCode, event.metaKey, event.ctrlKey, event.shiftKey);
     // TODO: while this works when we have an isolated node with input or CE,
     // there is no built-in way of receiving key events in other cases
     // We need a global event listener for keyboard events which dispatches to the current isolated node
     if (event.keyCode === keys.ESCAPE && this.state.mode === 'focused') {
-      event.preventDefault();
-      this._escape();
+      event.preventDefault()
+      this._escape()
     }
-  };
+  }
 
-  this.onDragStart = function(event) {
+  onDragStart(event) {
     // console.log('Received drop on IsolatedNode', this.getId());
-    this.context.dragManager.onDragStart(event, this);
-  };
+    this.context.dragManager.onDragStart(event, this)
+  }
 
-  this.onDragEnter = function(event) {
-    event.preventDefault();
-  };
+  onDragEnter(event) {
+    event.preventDefault()
+  }
 
-  this.onDragOver = function(event) {
-    event.preventDefault();
-  };
+  onDragOver(event) {
+    event.preventDefault()
+  }
 
-  this.onDrop = function(event) {
+  onDrop(event) {
     // console.log('Received drop on IsolatedNode', this.getId());
-    this.context.dragManager.onDrop(event, this);
-  };
+    this.context.dragManager.onDrop(event, this)
+  }
 
-  this._escape = function() {
-    this._selectNode();
-  };
+  _escape() {
+    this._selectNode()
+  }
 
-  this._stopPropagation = function(event) {
-    event.stopPropagation();
-  };
+  _stopPropagation(event) {
+    event.stopPropagation()
+  }
 
-  this._selectNode = function() {
+  _selectNode() {
     // console.log('IsolatedNodeComponent: selecting node.');
-    var surface = this.context.surface;
-    var doc = surface.getDocument();
-    var nodeId = this.props.node.id;
+    let surface = this.context.surface
+    let doc = surface.getDocument()
+    let nodeId = this.props.node.id
     surface.setSelection(doc.createSelection({
       type: 'node',
       containerId: surface.getContainerId(),
       nodeId: nodeId,
       mode: 'full'
-    }));
-  };
+    }))
+  }
 
-};
+}
 
-Component.extend(IsolatedNodeComponent);
+IsolatedNodeComponent.prototype._isDisabled = IsolatedNodeComponent.prototype.isDisabled
 
 IsolatedNodeComponent.getCoordinate = function(surfaceEl, node) {
   // special treatment for block-level isolated-nodes
-  var parent = node.getParent();
+  let parent = node.getParent()
   if (node.isTextNode() && parent.is('.se-slug')) {
-    var boundary = parent;
-    var isolatedNodeEl = boundary.getParent();
-    var nodeId = isolatedNodeEl.getAttribute('data-id');
+    let boundary = parent
+    let isolatedNodeEl = boundary.getParent()
+    let nodeId = isolatedNodeEl.getAttribute('data-id')
     if (nodeId) {
-      var charPos = boundary.is('sm-after') ? 1 : 0;
-      return new Coordinate([nodeId], charPos);
+      var charPos = boundary.is('sm-after') ? 1 : 0
+      return new Coordinate([nodeId], charPos)
     } else {
-      console.error('FIXME: expecting a data-id attribute on IsolatedNodeComponent');
+      console.error('FIXME: expecting a data-id attribute on IsolatedNodeComponent')
     }
   }
-  return null;
-};
+  return null
+}
 
 IsolatedNodeComponent.getDOMCoordinate = function(comp, coor) {
-  var domCoor;
+  let domCoor
   if (coor.offset === 0) {
     domCoor = {
       container: comp.refs.before.getNativeElement(),
       offset: 0
-    };
+    }
   } else {
     domCoor = {
       container: comp.refs.after.getNativeElement(),
       offset: 1
-    };
+    }
   }
-  return domCoor;
-};
+  return domCoor
+}
 
 IsolatedNodeComponent.getDOMCoordinates = function(comp) {
   return {
@@ -400,7 +399,7 @@ IsolatedNodeComponent.getDOMCoordinates = function(comp) {
       container: comp.refs.after.getNativeElement(),
       offset: 1
     }
-  };
-};
+  }
+}
 
-export default IsolatedNodeComponent;
+export default IsolatedNodeComponent

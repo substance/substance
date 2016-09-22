@@ -1,19 +1,14 @@
-'use strict';
-
 import Component from './Component'
 
-function FontAwesomeIcon() {
-  FontAwesomeIcon.super.apply(this, arguments);
+class FontAwesomeIcon extends Component {
+  constructor(...args) {
+    super(...args)
+  }
+
+  render($$) {
+    return $$('i').addClass('fa ' + this.props.icon)
+  }
+
 }
 
-FontAwesomeIcon.Prototype = function() {
-
-  this.render = function($$) {
-    return $$('i').addClass('fa ' + this.props.icon);
-  };
-
-};
-
-Component.extend(FontAwesomeIcon);
-
-export default FontAwesomeIcon;
+export default FontAwesomeIcon

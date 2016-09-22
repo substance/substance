@@ -1,7 +1,5 @@
-'use strict';
-
 import EventEmitter from '../util/EventEmitter'
-import each from 'lodash/each'
+import forEach from 'lodash/forEach'
 import without from 'lodash/without'
 
 /**
@@ -18,23 +16,22 @@ import without from 'lodash/without'
   ```
 */
 
-function Highlights(doc) {
-  EventEmitter.apply(this, arguments);
+class Highlights extends EventEmitter {
+  constructor(doc) {
+    super()
 
-  this.doc = doc;
-  this._highlights = {};
-}
-
-Highlights.Prototype = function() {
+    this.doc = doc
+    this._highlights = {}
+  }
 
   /**
     Get currently active highlights.
 
     @return {Object} Returns current highlights as a scoped object.
   */
-  this.get = function() {
-    return this._highlights;
-  };
+  get() {
+    return this._highlights
+  }
 
   /**
     Set highlights.
@@ -50,45 +47,43 @@ Highlights.Prototype = function() {
       });
     ```
   */
-  this.set = function(highlights) {
-    var oldHighlights = this._highlights;
-    var doc = this.doc;
+  set(highlights) {
+    let oldHighlights = this._highlights
+    let doc = this.doc
     // Iterate over scopes of provided highlights
-    each(highlights, function(newScopedHighlights, scope) {
-      var oldScopedHighlights = oldHighlights[scope] || [];
+    forEach(highlights, function(newScopedHighlights, scope) {
+      let oldScopedHighlights = oldHighlights[scope] || []
 
       // old [1,2,3]  -> new [2,4,5]
       // toBeDeleted: [1,3]
       // toBeAdded:   [4,5]
-      var toBeDeleted = without(oldScopedHighlights, newScopedHighlights);
-      var toBeAdded = without(newScopedHighlights, oldScopedHighlights);
+      let toBeDeleted = without(oldScopedHighlights, newScopedHighlights)
+      let toBeAdded = without(newScopedHighlights, oldScopedHighlights)
 
       // if (scopedHighlights) {
-      each(toBeDeleted, function(nodeId) {
-        var node = doc.get(nodeId);
+      forEach(toBeDeleted, function(nodeId) {
+        let node = doc.get(nodeId)
         // Node could have been deleted in the meanwhile
         if (node) {
-          node.setHighlighted(false, scope);
+          node.setHighlighted(false, scope)
         }
       });
 
-      each(toBeAdded, function(nodeId) {
-        var node = doc.get(nodeId);
-        node.setHighlighted(true, scope);
-      });
-    });
+      forEach(toBeAdded, function(nodeId) {
+        let node = doc.get(nodeId)
+        node.setHighlighted(true, scope)
+      })
+    })
 
-    this._highlights = highlights;
-    this.emit('highlights:updated', highlights);
-  };
-};
+    this._highlights = highlights
 
-/**
-  Emitted when highlights have been updated
+    /**
+      Emitted when highlights have been updated
 
-  @event ui/Highlights@highlights:updated
-*/
+      @event ui/Highlights@highlights:updated
+    */
+    this.emit('highlights:updated', highlights)
+  }
+}
 
-EventEmitter.extend(Highlights);
-
-export default Highlights;
+export default Highlights

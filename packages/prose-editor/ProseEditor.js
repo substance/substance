@@ -1,5 +1,3 @@
-'use strict';
-
 import AbstractEditor from '../../ui/AbstractEditor'
 import ContainerEditor from '../../ui/ContainerEditor'
 import ProseEditorOverlay from './ProseEditorOverlay'
@@ -57,7 +55,6 @@ class ProseEditor extends AbstractEditor {
   getToolbar() {
     return this.refs.toolbar
   }
-
 }
 
 export default ProseEditor

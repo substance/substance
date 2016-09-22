@@ -1,5 +1,3 @@
-'use strict';
-
 import Component from './Component'
 
 /**
@@ -10,70 +8,67 @@ import Component from './Component'
   @class
   @component
 */
-function OverlayContainer() {
-  Component.apply(this, arguments);
+class OverlayContainer extends Component { 
+  constructor(...args) {
+    super(...args)
 
-  this.commandStates = this._getCommandStates();
-}
+    this.commandStates = this._getCommandStates()
+  }
 
-OverlayContainer.Prototype = function() {
-
-  this.render = function($$) {
-    var el = $$('div').addClass('sc-overlay sm-hidden');
-    var commandStates = this.context.commandManager.getCommandStates();
-    var ComponentClass = this.props.overlay;
+  render($$) {
+    let el = $$('div').addClass('sc-overlay sm-hidden')
+    let commandStates = this.context.commandManager.getCommandStates()
+    let ComponentClass = this.props.overlay
     el.append($$(ComponentClass, {
       commandStates: commandStates
-    }).ref('overlayContent'));
-    return el;
-  };
+    }).ref('overlayContent'))
+    return el
+  }
 
-  this.didMount = function() {
+  didMount() {
     // rerender the overlay content after anything else has been updated
-    this.context.documentSession.on('didUpdate', this._onSessionDidUpdate, this);
-  };
+    this.context.documentSession.on('didUpdate', this._onSessionDidUpdate, this)
+  }
 
-  this.dispose = function() {
-    this.context.documentSession.off(this);
-  };
+  dispose() {
+    this.context.documentSession.off(this)
+  }
 
-  this.position = function(hints) {
-    var content = this.refs.overlayContent;
+  position(hints) {
+    let content = this.refs.overlayContent
     if (content.childNodes.length > 0) {
       // Position based on rendering hints
       this._position(hints);
-      this.el.removeClass('sm-hidden');
+      this.el.removeClass('sm-hidden')
     }
-  };
+  }
 
-  this._onSessionDidUpdate = function() {
+  _onSessionDidUpdate() {
     if (this.shouldRerender()) {
-      this.rerender();
+      this.rerender()
     }
-  };
+  }
 
-  this._getCommandStates = function() {
-    return this.context.commandManager.getCommandStates();
-  };
+  _getCommandStates() {
+    return this.context.commandManager.getCommandStates()
+  }
 
-  this._position = function(hints) {
+  _position(hints) {
     if (hints) {
-      var contentWidth = this.el.htmlProp('offsetWidth');
-      var selectionMaxWidth = hints.rectangle.width;
+      let contentWidth = this.el.htmlProp('offsetWidth')
+      let selectionMaxWidth = hints.rectangle.width
 
       // By default, Overlays are aligned center/bottom to the selection
-      this.el.css('top', hints.rectangle.top + hints.rectangle.height);
-      var leftPos = hints.rectangle.left + selectionMaxWidth/2 - contentWidth/2;
+      this.el.css('top', hints.rectangle.top + hints.rectangle.height)
+      let leftPos = hints.rectangle.left + selectionMaxWidth/2 - contentWidth/2
       // Must not exceed left bound
-      leftPos = Math.max(leftPos, 0);
+      leftPos = Math.max(leftPos, 0)
       // Must not exceed right bound
-      var maxLeftPos = hints.rectangle.left + selectionMaxWidth + hints.rectangle.right - contentWidth;
-      leftPos = Math.min(leftPos, maxLeftPos);
-      this.el.css('left', leftPos);
+      let maxLeftPos = hints.rectangle.left + selectionMaxWidth + hints.rectangle.right - contentWidth
+      leftPos = Math.min(leftPos, maxLeftPos)
+      this.el.css('left', leftPos)
     }
-  };
-};
+  }
+}
 
-Component.extend(OverlayContainer);
-
-export default OverlayContainer;
+export default OverlayContainer

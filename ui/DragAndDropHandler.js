@@ -1,27 +1,25 @@
-'use strict';
-
 import oo from '../util/oo'
 
-function DragAndDropHandler() {}
+class DragAndDropHandler {
 
-DragAndDropHandler.Prototype = function() {
+  get _isDragAndDropHandler() {
+    return true 
+  }
 
-  this._isDragAndDropHandler = true;
-
-  this.dragStart = function(params, context) { // eslint-disable-line
+  dragStart(params, context) { // eslint-disable-line
     // nothing
-  };
+  }
 
-  this.drop = function(params, context) { // eslint-disable-line
+  drop(params, context) { // eslint-disable-line
     // nothing
-  };
+  }
 
-  this.dragEnd = function(params, context) { // eslint-disable-line
+  dragEnd(params, context) { // eslint-disable-line
     // nothing
-  };
+  }
 
-};
+}
 
-oo.initClass(DragAndDropHandler);
+oo.initClass(DragAndDropHandler)
 
-export default DragAndDropHandler;
+export default DragAndDropHandler

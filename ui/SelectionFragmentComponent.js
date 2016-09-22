@@ -1,28 +1,20 @@
-'use strict';
-
 import Component from './Component'
 
-function SelectionFragmentComponent() {
-  SelectionFragmentComponent.super.apply(this, arguments);
+class SelectionFragmentComponent extends Component {
+
+  render($$) {
+    // TODO: we should rename se-cursor to sc-cursor
+    let el = $$('span').addClass('se-selection-fragment')
+    if (this.props.collaborator) {
+      let collaboratorIndex = this.props.collaborator.colorIndex
+      el.addClass('sm-collaborator-'+collaboratorIndex)
+    } else {
+      el.addClass('sm-local-user')
+    }
+    el.append(this.props.children)
+    return el
+  }
+
 }
 
-SelectionFragmentComponent.Prototype = function() {
-
-  this.render = function($$) {
-    // TODO: we should rename se-cursor to sc-cursor
-    var el = $$('span').addClass('se-selection-fragment');
-    if (this.props.collaborator) {
-      var collaboratorIndex = this.props.collaborator.colorIndex;
-      el.addClass('sm-collaborator-'+collaboratorIndex);
-    } else {
-      el.addClass('sm-local-user');
-    }
-    el.append(this.props.children);
-    return el;
-  };
-
-};
-
-Component.extend(SelectionFragmentComponent);
-
-export default SelectionFragmentComponent;
+export default SelectionFragmentComponent

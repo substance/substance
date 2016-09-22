@@ -1,5 +1,3 @@
-"use strict";
-
 import each from 'lodash/each'
 import includes from 'lodash/includes'
 import EventEmitter from '../util/EventEmitter'
@@ -16,34 +14,33 @@ import EventEmitter from '../util/EventEmitter'
   @prop {Controller}
  */
 
-function TOCProvider(document, config) {
-  EventEmitter.apply(this, arguments);
-  this.document = document;
-  this.config = config;
+class TOCProvider extends EventEmitter {
+  constructor(document, config) {
+    super(document, config)
+    this.document = document
+    this.config = config
 
-  this.entries = this.computeEntries();
-  if (this.entries.length > 0) {
-    this.activeEntry = this.entries[0].id;
-  } else {
-    this.activeEntry = null;
+    this.entries = this.computeEntries()
+    if (this.entries.length > 0) {
+      this.activeEntry = this.entries[0].id
+    } else {
+      this.activeEntry = null
+    }
+
+    this.document.on('document:changed', this.handleDocumentChange, this)
   }
 
-  this.document.on('document:changed', this.handleDocumentChange, this);
-}
-
-TOCProvider.Prototype = function() {
-
-  this.dispose = function() {
-    var doc = this.getDocument();
-    doc.disconnect(this);
-  };
+  dispose() {
+    let doc = this.getDocument()
+    doc.disconnect(this)
+  }
 
   // Inspects a document change and recomputes the
   // entries if necessary
-  this.handleDocumentChange = function(change) {
-    var doc = this.getDocument();
-    var needsUpdate = false;
-    var tocTypes = this.constructor.tocTypes;
+  handleDocumentChange(change) {
+    let doc = this.getDocument()
+    let needsUpdate = false
+    let tocTypes = this.constructor.tocTypes
 
     // HACK: this is not totally correct but works.
     // Actually, the TOC should be updated if tocType nodes
@@ -51,97 +48,95 @@ TOCProvider.Prototype = function() {
     // This implementation just checks for changes of the node type
     // not the container, but as we usually create and show in
     // a single transaction this works.
-    for (var i = 0; i < change.ops.length; i++) {
-      var op = change.ops[i];
-      var nodeType;
+    for (let i = 0; i < change.ops.length; i++) {
+      let op = change.ops[i]
+      let nodeType
       if (op.isCreate() || op.isDelete()) {
-        var nodeData = op.getValue();
-        nodeType = nodeData.type;
+        let nodeData = op.getValue()
+        nodeType = nodeData.type
         if (includes(tocTypes, nodeType)) {
-          needsUpdate = true;
-          break;
+          needsUpdate = true
+          break
         }
       } else {
-        var id = op.path[0];
-        var node = doc.get(id);
+        let id = op.path[0]
+        let node = doc.get(id)
         if (node && includes(tocTypes, node.type)) {
-          needsUpdate = true;
-          break;
+          needsUpdate = true
+          break
         }
       }
     }
     if (needsUpdate) {
-      this.entries = this.computeEntries();
-      this.emit('toc:updated');
+      this.entries = this.computeEntries()
+      this.emit('toc:updated')
     }
-  };
+  }
 
-  this.computeEntries = function() {
-    var doc = this.getDocument();
-    var config = this.config;
-    var entries = [];
-    var contentNodes = doc.get(config.containerId).nodes;
+  computeEntries() {
+    let doc = this.getDocument()
+    let config = this.config
+    let entries = []
+    let contentNodes = doc.get(config.containerId).nodes
     each(contentNodes, function(nodeId) {
-      var node = doc.get(nodeId);
+      let node = doc.get(nodeId)
       if (node.type === 'heading') {
         entries.push({
           id: node.id,
           name: node.content,
           level: node.level,
           node: node
-        });
+        })
       }
-    });
-    return entries;
-  };
+    })
+    return entries
+  }
 
-  this.getEntries = function() {
-    return this.entries;
-  };
+  getEntries() {
+    return this.entries
+  }
 
-  this.getDocument = function() {
-    return this.document;
-  };
+  getDocument() {
+    return this.document
+  }
 
-  this.markActiveEntry = function(scrollPane) {
-    var panelContent = scrollPane.getContentElement();
-    var contentHeight = scrollPane.getContentHeight();
-    var scrollPaneHeight = scrollPane.getHeight();
-    var scrollPos = scrollPane.getScrollPosition();
+  markActiveEntry(scrollPane) {
+    let panelContent = scrollPane.getContentElement()
+    let contentHeight = scrollPane.getContentHeight()
+    let scrollPaneHeight = scrollPane.getHeight()
+    let scrollPos = scrollPane.getScrollPosition()
 
-    var scrollBottom = scrollPos + scrollPaneHeight;
-    var regularScanline = scrollPos;
-    var smartScanline = 2 * scrollBottom - contentHeight;
-    var scanline = Math.max(regularScanline, smartScanline);
+    let scrollBottom = scrollPos + scrollPaneHeight
+    let regularScanline = scrollPos
+    let smartScanline = 2 * scrollBottom - contentHeight
+    let scanline = Math.max(regularScanline, smartScanline)
 
-    var tocNodes = this.computeEntries();
-    if (tocNodes.length === 0) return;
+    let tocNodes = this.computeEntries()
+    if (tocNodes.length === 0) return
 
     // Use first toc node as default
-    var activeEntry = tocNodes[0].id;
-    for (var i = tocNodes.length - 1; i >= 0; i--) {
-      var tocNode = tocNodes[i];
-      var nodeEl = panelContent.find('[data-id="'+tocNode.id+'"]');
+    let activeEntry = tocNodes[0].id
+    for (let i = tocNodes.length - 1; i >= 0; i--) {
+      let tocNode = tocNodes[i]
+      let nodeEl = panelContent.find('[data-id="'+tocNode.id+'"]')
       if (!nodeEl) {
-        console.warn('Not found in Content panel', tocNode.id);
-        return;
+        console.warn('Not found in Content panel', tocNode.id)
+        return
       }
-      var panelOffset = scrollPane.getPanelOffsetForElement(nodeEl);
+      let panelOffset = scrollPane.getPanelOffsetForElement(nodeEl)
       if (scanline >= panelOffset) {
-        activeEntry = tocNode.id;
-        break;
+        activeEntry = tocNode.id
+        break
       }
     }
 
     if (this.activeEntry !== activeEntry) {
-      this.activeEntry = activeEntry;
-      this.emit('toc:updated');
+      this.activeEntry = activeEntry
+      this.emit('toc:updated')
     }
-  };
-};
+  }
+}
 
-EventEmitter.extend(TOCProvider);
+TOCProvider.tocTypes = ['heading']
 
-TOCProvider.tocTypes = ['heading'];
-
-export default TOCProvider;
+export default TOCProvider

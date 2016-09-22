@@ -1,5 +1,3 @@
-'use strict';
-
 import Surface from './Surface'
 import TextPropertyManager from '../model/TextPropertyManager'
 import TextProperty from './TextPropertyComponent'
@@ -27,32 +25,29 @@ import TextProperty from './TextPropertyComponent'
   ```
 */
 
-function TextPropertyAnnotator() {
-  Surface.apply(this, arguments);
-  var doc = this.getDocument();
-  this.textPropertyManager = new TextPropertyManager(doc);
-}
+class TextPropertyAnnotator extends Surface {
+  constructor(...args) {
+    super(...args)
+    let doc = this.getDocument()
+    this.textPropertyManager = new TextPropertyManager(doc)
+  }
 
-TextPropertyAnnotator.Prototype = function() {
-
-  this.render = function($$) {
-    var el = $$(this.props.tagName || 'div')
+  render($$) {
+    let el = $$(this.props.tagName || 'div')
       .addClass("sc-text-property-annotator")
       .append(
         $$(TextProperty, {
           tagName: "div",
           path: this.props.path
         })
-      );
-    return el;
-  };
+      )
+    return el
+  }
 
-  this.isContainerEditor = function() {
-    return false;
-  };
+  isContainerEditor() {
+    return false
+  }
 
-};
+}
 
-Surface.extend(TextPropertyAnnotator);
-
-export default TextPropertyAnnotator;
+export default TextPropertyAnnotator
