@@ -1,14 +1,8 @@
-'use strict';
-
 import Component from './Component'
 
-function UnsupportedNodeComponent() {
-  Component.apply(this, arguments);
-}
+class UnsupportedNodeComponent extends Component {
 
-UnsupportedNodeComponent.Prototype = function() {
-
-  this.render = function($$) {
+  render($$) {
     return $$('pre')
       .addClass('content-node unsupported')
       .attr({
@@ -17,10 +11,8 @@ UnsupportedNodeComponent.Prototype = function() {
       })
       .append(
         JSON.stringify(this.props.node.properties, null, 2)
-      );
-  };
-};
+      )
+  }
+}
 
-Component.extend(UnsupportedNodeComponent);
-
-export default UnsupportedNodeComponent;
+export default UnsupportedNodeComponent
