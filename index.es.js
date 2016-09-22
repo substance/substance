@@ -80,6 +80,7 @@ export { default as SwitchTextTypeCommand } from './packages/base/SwitchTextType
 // prose-editor
 export { default as ProseEditorPackage } from './packages/prose-editor/ProseEditorPackage'
 export { default as ProseEditor } from './packages/prose-editor/ProseEditor'
+export { default as ProseArticle } from './packages/prose-editor/ProseArticle'
 export { default as ProseEditorConfigurator } from './packages/prose-editor/ProseEditorConfigurator'
 export { default as ProseEditorOverlayTools } from './packages/prose-editor/ProseEditorOverlayTools'
 

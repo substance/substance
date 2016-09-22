@@ -15,7 +15,6 @@ import SuperscriptPackage from '../superscript/SuperscriptPackage'
 import ProseArticle from './ProseArticle'
 import ProseEditor from './ProseEditor'
 import ProseEditorConfigurator from './ProseEditorConfigurator'
-import ProseEditorOverlay from './ProseEditorOverlay'
 import Toolbar from '../tools/Toolbar'
 
 
@@ -27,7 +26,6 @@ export default {
       ArticleClass: ProseArticle,
       defaultTextType: 'paragraph'
     });
-    config.setToolbarClass(Toolbar);
     // Now import base packages
     config.import(BasePackage, {
       noBaseStyles: options.noBaseStyles
@@ -45,9 +43,7 @@ export default {
     config.import(CodePackage);
     config.import(LinkPackage);
   },
-  ProseArticle: ProseArticle,
   ProseEditor: ProseEditor,
   Configurator: ProseEditorConfigurator,
-  Toolbar: Toolbar,
-  Overlay: ProseEditorOverlay,
+  Toolbar: Toolbar
 };

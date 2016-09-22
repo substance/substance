@@ -1,10 +1,4 @@
-.sc-link {
-  color: #2079DC;
-}
-
 .sc-edit-link-tool > * {
   display: inline-block;
   margin-right: 5px;
 }
-
-@import './_edit-link-tool.css';

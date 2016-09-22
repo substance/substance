@@ -1,6 +1,6 @@
 import AbstractEditor from '../../ui/AbstractEditor'
 import ContainerEditor from '../../ui/ContainerEditor'
-import ProseEditorOverlay from './ProseEditorOverlay'
+import ProseEditorOverlayTools from './ProseEditorOverlayTools'
 
 class ProseEditor extends AbstractEditor {
 
@@ -18,7 +18,7 @@ class ProseEditor extends AbstractEditor {
     let contentPanel = $$(ScrollPane, {
       scrollbarType: 'substance',
       scrollbarPosition: 'right',
-      overlay: ProseEditorOverlay,
+      overlay: ProseEditorOverlayTools,
     }).append(
       editor
     ).ref('contentPanel')

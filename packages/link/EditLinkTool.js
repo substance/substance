@@ -20,29 +20,38 @@ EditLinkTool.Prototype = function() {
     return [this.props.node.id].concat(propPath);
   };
 
+  this._openLink = function() {
+    console.log('open link...');
+    var doc = this.context.documentSession.getDocument();
+    window.open(doc.get(this.getUrlPath()), '_blank');
+  };
+
   this.render = function($$) {
     var Prompt = this.getComponent('prompt');
+    var Input = this.getComponent('input');
+    var Button = this.getComponent('button');
     var node = this.props.node;
     var doc = node.getDocument();
     var el = $$('div').addClass('sc-edit-link-tool');
     var urlPath = this.getUrlPath();
 
     el.append(
-      $$(Prompt).append(
-        $$(Prompt.Input, {
-          type: 'url',
-          path: urlPath,
-          placeholder: 'Paste or type a link url'
-        }),
-        $$(Prompt.Separator),
-        $$(Prompt.Link, {
-          name: 'open-link',
-          href: doc.get(urlPath),
-          title: this.getLabel('open-link')
-        }),
-        $$(Prompt.Action, {name: 'delete', title: this.getLabel('delete')})
-          .on('click', this.onDelete)
-      )
+      $$(Input, {
+        type: 'url',
+        path: urlPath,
+        placeholder: 'Paste or type a link url'
+      }),
+      $$(Button, {
+        icon: 'open-link',
+        style: this.props.style
+      }).on('click', this._openLink),
+
+      $$(Button, {
+        icon: 'delete',
+        style: this.props.style
+      })
+        .attr('title', this.getLabel('delete'))
+        .on('click', this.onDelete)
     );
     return el;
   };
@@ -63,12 +72,5 @@ Tool.extend(EditLinkTool);
 
 EditLinkTool.urlPropertyPath = ['url'];
 
-EditLinkTool.getProps = function(commandStates) {
-  if (commandStates.link.mode === 'edit') {
-    return clone(commandStates.link);
-  } else {
-    return undefined;
-  }
-};
 
 export default EditLinkTool;
