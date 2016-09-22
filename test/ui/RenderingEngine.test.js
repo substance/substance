@@ -1,17 +1,15 @@
-'use strict'
 /* eslint-disable no-invalid-this, indent */
-
+import { module } from 'substance-test'
 import substanceGlobals from '../../util/substanceGlobals'
 import RenderingEngine from '../../ui/RenderingEngine'
 import TestComponent from './TestComponent'
-var Simple = TestComponent.Simple
 
+var Simple = TestComponent.Simple
 var internal = RenderingEngine._internal
 
 function RenderingEngineTests(debug) {
 
-import test from '../test'
-  .module('ui/RenderingEngine' + (debug ? '(debug)' : ''))
+const test = module('ui/RenderingEngine' + (debug ? '(debug)' : ''))
   .withOptions({
     before: function() {
       substanceGlobals.DEBUG_RENDERING = Boolean(debug)

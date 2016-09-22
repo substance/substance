@@ -9,11 +9,11 @@ import containerAnnoSample from '../fixtures/containerAnnoSample'
 
 const test = module('ui/AnnotationCommand')
 
-function ToggleStrongCommand() {
-  ToggleStrongCommand.super.call(this, { name: 'strong', nodeType: 'strong' })
+class ToggleStrongCommand extends AnnotationCommand {
+  constructor() {
+    super({ name: 'strong', nodeType: 'strong' })
+  }
 }
-
-AnnotationCommand.extend(ToggleStrongCommand)
 
 function fixture() {
   var doc = createTestArticle(containerAnnoSample)

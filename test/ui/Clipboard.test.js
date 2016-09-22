@@ -11,25 +11,38 @@ import TestContainerEditor from './TestContainerEditor'
 import fixture from '../fixtures/createTestArticle'
 import simple from '../fixtures/simple'
 
+import ParagraphComponent from '../../packages/paragraph/ParagraphComponent'
+import HeadingComponent from '../../packages/heading/HeadingComponent'
+import AnnotationComponent from '../../ui/AnnotationComponent'
+import LinkComponent from '../../packages/link/LinkComponent'
+import CodeblockComponent from '../../packages/codeblock/CodeblockComponent'
+import ParagraphHTMLConverter from '../../packages/paragraph/ParagraphHTMLConverter'
+import HeadingHTMLConverter from '../../packages/heading/HeadingHTMLConverter'
+import StrongHTMLConverter from '../../packages/strong/StrongHTMLConverter'
+import EmphasisHTMLConverter from '../../packages/emphasis/EmphasisHTMLConverter'
+import LinkHTMLConverter from '../../packages/link/LinkHTMLConverter'
+import CodeblockHTMLConverter from '../../packages/codeblock/CodeblockHTMLConverter'
+
+
 const test = module('ui/Clipboard')
 
 var componentRegistry = new ComponentRegistry({
-  "paragraph": require('../../packages/paragraph/ParagraphComponent'),
-  "heading": require('../../packages/heading/HeadingComponent'),
-  "strong": require('../../ui/AnnotationComponent'),
-  "emphasis": require('../../ui/AnnotationComponent'),
-  "link": require('../../packages/link/LinkComponent'),
-  "codeblock": require('../../packages/codeblock/CodeblockComponent'),
+  "paragraph": ParagraphComponent,
+  "heading": HeadingComponent,
+  "strong": AnnotationComponent,
+  "emphasis": AnnotationComponent,
+  "link": LinkComponent,
+  "codeblock": CodeblockComponent,
 })
 
 var converterRegistry = new Registry({
   "html": new Registry({
-    "paragraph": require('../../packages/paragraph/ParagraphHTMLConverter'),
-    "heading": require('../../packages/heading/HeadingHTMLConverter'),
-    "strong": require('../../packages/strong/StrongHTMLConverter'),
-    "emphasis": require('../../packages/emphasis/EmphasisHTMLConverter'),
-    "link": require('../../packages/link/LinkHTMLConverter'),
-    "codeblock": require('../../packages/codeblock/CodeblockHTMLConverter'),
+    "paragraph": ParagraphHTMLConverter,
+    "heading": HeadingHTMLConverter,
+    "strong": StrongHTMLConverter,
+    "emphasis": EmphasisHTMLConverter,
+    "link": LinkHTMLConverter,
+    "codeblock": CodeblockHTMLConverter,
   })
 })
 

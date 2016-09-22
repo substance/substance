@@ -1,4 +1,4 @@
-import { spy } from 'substane-test'
+import { spy } from 'substance-test'
 import Component from '../../ui/Component'
 
 class TestComponent extends Component {

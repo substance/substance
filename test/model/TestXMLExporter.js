@@ -1,11 +1,11 @@
 import XMLExporter from '../../model/XMLExporter'
-import converters from './TestXMLImporter'.converters
+import TestXMLImporter from './TestXMLImporter'
 import DefaultDOMElement from '../../ui/DefaultDOMElement'
 
 class TestXMLExporter extends XMLExporter {
 
   constructor() {
-    super({ converters: converters })
+    super({ converters: TestXMLImporter.converters })
   }
 
   convertDocument(doc) {

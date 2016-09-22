@@ -1,5 +1,3 @@
-'use strict';
-
 import isEqual from 'lodash/isEqual'
 import isObject from 'lodash/isObject'
 import isArray from 'lodash/isArray'
@@ -11,7 +9,6 @@ import oo from '../util/oo'
 import uuid from '../util/uuid'
 import OperationSerializer from './data/OperationSerializer'
 import ObjectOperation from './data/ObjectOperation'
-import Selection from './Selection'
 import { fromJSON as selectionFromJSON } from './selectionHelpers'
 
 /*

@@ -1,3 +1,4 @@
+import Selection from './Selection'
 import PropertySelection from './PropertySelection'
 import ContainerSelection from './ContainerSelection'
 import NodeSelection from './NodeSelection'

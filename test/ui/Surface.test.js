@@ -11,14 +11,19 @@ import fixture from '../fixtures/createTestArticle'
 import simple from '../fixtures/simple'
 import BrowserDOMElement from '../../ui/BrowserDOMElement'
 
+import ParagraphComponent from '../../packages/paragraph/ParagraphComponent'
+import HeadingComponent from '../../packages/heading/HeadingComponent'
+import AnnotationComponent from '../../ui/AnnotationComponent'
+import LinkComponent from '../../packages/link/LinkComponent'
+
 const test = module('ui/Surface')
 
 var componentRegistry = new Registry({
-  "paragraph": require('../../packages/paragraph/ParagraphComponent'),
-  "heading": require('../../packages/heading/HeadingComponent'),
-  "strong": require('../../ui/AnnotationComponent'),
-  "emphasis": require('../../ui/AnnotationComponent'),
-  "link": require('../../packages/link/LinkComponent'),
+  "paragraph": ParagraphComponent,
+  "heading": HeadingComponent,
+  "strong": AnnotationComponent,
+  "emphasis": AnnotationComponent,
+  "link": LinkComponent,
 })
 
 function _createApp(fixtureSeed, el) {

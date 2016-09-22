@@ -11,7 +11,7 @@ import Paragraph from '../../packages/paragraph/Paragraph'
 import ContainerSelection from '../../model/ContainerSelection'
 import PropertySelection from '../../model/PropertySelection'
 import oo from '../../util/oo'
-import setDOMSelection from '../setDOMSelection'
+import setDOMSelection from '../../util/setDOMSelection'
 
 const test = module('ui/DOMSelection')
 

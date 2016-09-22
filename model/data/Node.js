@@ -140,8 +140,9 @@ Node.isInstanceOf = function(NodeClass, typeName) {
   var type = NodeClass.type;
   while (type !== "node") {
     if (type === typeName) return true;
-    if (NodeClass.super) {
-      NodeClass = NodeClass.super;
+    var _super = Object.getPrototypeOf(NodeClass.prototype).constructor
+    if (_super && _super.type) {
+      NodeClass = _super;
       type = NodeClass.type;
     } else {
       break;

@@ -9,43 +9,42 @@ b.task('css', function() {
   b.copy('packages/**/*.css', 'dist/');
 });
 
-b.task('browser:umd', function() {
+b.task('browser', function() {
   b.js('./index.es.js', {
+    buble: true,
     ignore: ['substance-cheerio'],
     commonjs: { include: ['node_modules/lodash/**'] },
-    dest: './dist/substance.js',
-    format: 'umd',
-    moduleName: 'substance',
-    sourceMapRoot: __dirname,
-    sourceMapPrefix: 'substance'
+    targets: [{
+      dest: './dist/substance.js',
+      format: 'umd', moduleName: 'substance', sourceMapRoot: __dirname, sourceMapPrefix: 'substance'
+    }]
   });
 })
 
-// bundle for the browser
-b.task('browser:es6', function() {
+b.task('server', function() {
   b.js('./index.es.js', {
-    ignore: ['substance-cheerio'],
+    buble: true,
+    commonjs: { include: ['node_modules/**', require.resolve('substance-cheerio')] },
+    targets: [{
+      dest: './dist/substance.cjs.js',
+      format: 'cjs', sourceMapRoot: __dirname, sourceMapPrefix: 'substance'
+    }, {
+      dest: './dist/substance.es6.js',
+      format: 'es', sourceMapRoot: __dirname, sourceMapPrefix: 'substance'
+    }]
+  });
+});
+
+b.task('test', function() {
+  b.js('./test/model/ContainerAddress.test.js', {
+    resolve: { jsnext: ['substance-test'] },
     commonjs: { include: ['node_modules/lodash/**'] },
-    dest: './dist/substance.es6.js',
-    format: 'es',
-    sourceMapRoot: __dirname,
-    sourceMapPrefix: 'substance'
+    targets: [{
+      dest: './tmp/test.cjs.js', format: 'cjs'
+    }, {
+      dest: './dist/test.js', format: 'umd', moduleName: 'test'
+    }]
   });
-});
-
-b.task('server:cjs', function() {
-  b.js('./index.es.js', {
-    external: ['substance-cheerio'],
-    commonjs: { include: ['node_modules/**'] },
-    dest: './dist/substance.cjs.js',
-    format: 'cjs',
-    sourceMapRoot: __dirname,
-    sourceMapPrefix: 'substance'
-  });
-});
-
-b.task('browser', ['browser:umd', 'browser:es6'])
-
-b.task('server', ['server:cjs'])
+})
 
 b.task('default', ['clean', 'css', 'browser', 'server'])
