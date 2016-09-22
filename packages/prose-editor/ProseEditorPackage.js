@@ -44,8 +44,6 @@ export default {
     config.import(SuperscriptPackage);
     config.import(CodePackage);
     config.import(LinkPackage);
-
-    config.addStyle(style);
   },
   ProseArticle: ProseArticle,
   ProseEditor: ProseEditor,

@@ -1,5 +1,3 @@
-'use strict';
-
 import AbstractEditor from '../../ui/AbstractEditor'
 import ContainerEditor from '../../ui/ContainerEditor'
 import ProseEditorOverlay from './ProseEditorOverlay'
@@ -11,12 +9,11 @@ class ProseEditor extends AbstractEditor {
   }
 
   render($$) {
-    let SplitPane = this.getComponent('split-pane')
-    let el = $$('div').addClass('sc-prose-editor')
-
-    let toolbar = this._renderToolbar($$)
-    let editor = this._renderEditor($$)
-    let ScrollPane = this.getComponent('scroll-pane')
+    var SplitPane = this.componentRegistry.get('split-pane');
+    var el = $$('div').addClass('sc-prose-editor');
+    var toolbar = this._renderToolbar($$);
+    var editor = this._renderEditor($$);
+    var ScrollPane = this.componentRegistry.get('scroll-pane');
 
     let contentPanel = $$(ScrollPane, {
       scrollbarType: 'substance',
@@ -58,7 +55,6 @@ class ProseEditor extends AbstractEditor {
   getToolbar() {
     return this.refs.toolbar
   }
-
 }
 
 export default ProseEditor
