@@ -1,5 +1,3 @@
-'use strict';
-
 import oo from '../util/oo'
 import extend from 'lodash/extend'
 import forEach from 'lodash/forEach'
@@ -11,98 +9,97 @@ import Registry from '../util/Registry'
 
   @class
 */
-function CommandManager(context, commands) {
-  if (!context.documentSession) {
-    throw new Error('DocumentSession required.');
-  }
-  this.documentSession = context.documentSession;
-  this.context = extend({}, context, {
-    // for convenienve we provide access to the doc directly
-    doc: this.documentSession.getDocument()
-  });
-
-  // Set up command registry
-  this.commandRegistry = new Registry();
-  forEach(commands, function(command) {
-    if(!command._isCommand) {
-      throw new Error("Expecting instances of ui/Command.");
+class CommandManager {
+  constructor(context, commands) {
+    if (!context.documentSession) {
+      throw new Error('DocumentSession required.')
     }
-    this.commandRegistry.add(command.name, command);
-  }.bind(this));
+    this.documentSession = context.documentSession
+    this.context = extend({}, context, {
+      // for convenienve we provide access to the doc directly
+      doc: this.documentSession.getDocument()
+    })
 
-  this.documentSession.on('update', this.updateCommandStates, this);
+    // Set up command registry
+    this.commandRegistry = new Registry()
+    forEach(commands, function(command) {
+      if(!command._isCommand) {
+        throw new Error("Expecting instances of ui/Command.")
+      }
+      this.commandRegistry.add(command.name, command)
+    }.bind(this))
 
-  this.updateCommandStates();
-}
+    this.documentSession.on('update', this.updateCommandStates, this)
 
-CommandManager.Prototype = function() {
+    this.updateCommandStates()
+  }
 
-  this.dispose = function() {
-    this.documentSession.off(this);
-  };
+  dispose() {
+    this.documentSession.off(this)
+  }
 
-  this.getCommandContext = function() {
-    return this.context;
-  };
+  getCommandContext() {
+    return this.context
+  }
 
   /*
     Compute new command states object
   */
-  this.updateCommandStates = function() {
-    var commandStates = {};
-    var commandContext = this.getCommandContext();
-    var props = this._getCommandProps();
+  updateCommandStates() {
+    let commandStates = {}
+    let commandContext = this.getCommandContext()
+    let props = this._getCommandProps()
     this.commandRegistry.forEach(function(cmd) {
-      commandStates[cmd.getName()] = cmd.getCommandState(props, commandContext);
-    });
+      commandStates[cmd.getName()] = cmd.getCommandState(props, commandContext)
+    })
     // poor-man's immutable style
     if (!isEqual(this.commandStates, commandStates)) {
-      this.commandStates = commandStates;
+      this.commandStates = commandStates
     }
-  };
+  }
 
   /*
     Exposes the current commandStates object
   */
-  this.getCommandStates = function() {
-    return this.commandStates;
-  };
+  getCommandStates() {
+    return this.commandStates
+  }
 
   /*
     Execute a command, given a context and arguments
   */
-  this.executeCommand = function(commandName, props) {
-    var cmd = this.commandRegistry.get(commandName);
+  executeCommand(commandName, props) {
+    let cmd = this.commandRegistry.get(commandName)
     if (!cmd) {
-      console.warn('command', commandName, 'not registered');
-      return;
+      console.warn('command', commandName, 'not registered')
+      return
     }
-    var commandState = this.commandStates[commandName];
-    props = extend(this._getCommandProps(), commandState, props);
-    var info = cmd.execute(props, this.getCommandContext());
+    let commandState = this.commandStates[commandName]
+    props = extend(this._getCommandProps(), commandState, props)
+    let info = cmd.execute(props, this.getCommandContext())
     // TODO: why do we required commands to return a result?
     if (info === undefined) {
-      console.warn('command ', commandName, 'must return either an info object or true when handled or false when not handled');
+      console.warn('command ', commandName, 'must return either an info object or true when handled or false when not handled')
     }
-    return info;
-  };
+    return info
+  }
 
   // TODO: while we need it here this should go into the flow thingie later
-  this._getCommandProps = function() {
-    var documentSession = this.context.documentSession;
-    var selectionState = documentSession.getSelectionState();
-    var sel = selectionState.getSelection();
-    var surface = this.context.surfaceManager.getFocusedSurface();
+  _getCommandProps() {
+    let documentSession = this.context.documentSession
+    let selectionState = documentSession.getSelectionState()
+    let sel = selectionState.getSelection()
+    let surface = this.context.surfaceManager.getFocusedSurface()
     return {
       documentSession: documentSession,
       selectionState: selectionState,
       surface: surface,
       selection: sel
-    };
-  };
+    }
+  }
 
-};
+}
 
-oo.initClass(CommandManager);
+oo.initClass(CommandManager)
 
-export default CommandManager;
+export default CommandManager

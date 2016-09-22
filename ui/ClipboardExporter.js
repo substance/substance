@@ -1,5 +1,3 @@
-"use strict";
-
 import Document from '../model/Document'
 import HtmlExporter from '../model/HTMLExporter'
 import JSONConverter from '../model/JSONConverter'
@@ -7,11 +5,7 @@ import JSONConverter from '../model/JSONConverter'
 /**
   Export HTML from clipboard. Used for inter-application copy'n'paste.
 */
-function ClipboardExporter(config) {
-  ClipboardExporter.super.call(this, config);
-}
-
-ClipboardExporter.Prototype = function() {
+class ClipboardExporter extends HtmlExporter {
 
   /**
     Exports document in html format.
@@ -20,27 +14,27 @@ ClipboardExporter.Prototype = function() {
 
     @return {String} html representation of given document
   */
-  this.exportDocument = function(doc) {
-    this.state.doc = doc;
-    var html;
-    var elements = this.convertDocument(doc);
+  exportDocument(doc) {
+    this.state.doc = doc
+    let html
+    let elements = this.convertDocument(doc);
     // special treatment for a text snippet
     if (elements.length === 1 && elements[0].attr('data-id') === Document.TEXT_SNIPPET_ID) {
-      html = elements[0].innerHTML;
+      html = elements[0].innerHTML
     } else {
       html = elements.map(function(el) {
-        return el.outerHTML;
-      }).join('');
+        return el.outerHTML
+      }).join('')
     }
-    var jsonConverter = new JSONConverter();
-    var jsonStr = JSON.stringify(jsonConverter.exportDocument(doc));
-    var meta = [
+    let jsonConverter = new JSONConverter()
+    let jsonStr = JSON.stringify(jsonConverter.exportDocument(doc))
+    let meta = [
       "<meta name='substance' content='",
       btoa(jsonStr),
       "'>"
-    ].join('');
-    return '<html><head>' +meta+ '</head><body>' + html + '</body></html>';
-  };
+    ].join('')
+    return '<html><head>' +meta+ '</head><body>' + html + '</body></html>'
+  }
 
   /**
     Coverts document to set of DOM elements.
@@ -49,16 +43,14 @@ ClipboardExporter.Prototype = function() {
 
     @return {Array} array of DOM elements each represented single node
   */
-  this.convertDocument = function(doc) {
-    var content = doc.get(Document.SNIPPET_ID);
+  convertDocument(doc) {
+    let content = doc.get(Document.SNIPPET_ID)
     if (!content) {
-      throw new Error('Illegal clipboard document: could not find container "' + Document.SNIPPET_ID + '"');
+      throw new Error('Illegal clipboard document: could not find container "' + Document.SNIPPET_ID + '"')
     }
-    return this.convertContainer(content);
-  };
+    return this.convertContainer(content)
+  }
 
-};
+}
 
-HtmlExporter.extend(ClipboardExporter);
-
-export default ClipboardExporter;
+export default ClipboardExporter

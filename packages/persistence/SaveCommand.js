@@ -1,29 +1,25 @@
-'use strict';
-
 import Command from '../../ui/Command'
 
-function SaveCommand() {
-  SaveCommand.super.call(this, { name: 'save' });
-}
+class SaveCommand extends Command {
+  constructor() {
+    super({ name: 'save' })
+  }
 
-SaveCommand.Prototype = function() {
-  this.getCommandState = function(props, context) {
-    var dirty = context.documentSession.isDirty();
+  getCommandState(props, context) {
+    let dirty = context.documentSession.isDirty()
     return {
       disabled: !dirty,
       active: false
-    };
-  };
+    }
+  }
 
-  this.execute = function(props, context) {
-    var documentSession = context.documentSession;
-    documentSession.save();
+  execute(props, context) {
+    let documentSession = context.documentSession
+    documentSession.save()
     return {
       status: 'saving-process-started'
-    };
-  };
-};
-
-Command.extend(SaveCommand);
+    }
+  }
+}
 
 export default SaveCommand;

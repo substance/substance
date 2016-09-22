@@ -1,32 +1,25 @@
-'use strict';
-
 import Command from '../../ui/Command'
 
-function Redo(params) {
-  Command.call(this, params);
-}
+class Redo extends Command {
 
-Redo.Prototype = function() {
-
-  this.getCommandState = function(props, context) {
-    var docSession = context.documentSession;
+  getCommandState(props, context) {
+    let docSession = context.documentSession
     return {
       disabled: !docSession.canRedo(),
       active: false
-    };
-  };
-
-  this.execute = function(props, context) {
-    var docSession = context.documentSession;
-    if (docSession.canRedo()) {
-      docSession.redo();
-      return true;
-    } else {
-      return false;
     }
-  };
-};
+  }
 
-Command.extend(Redo);
+  execute(props, context) {
+    let docSession = context.documentSession
+    if (docSession.canRedo()) {
+      docSession.redo()
+      return true
+    } else {
+      return false
+    }
+  }
 
-export default Redo;
+}
+
+export default Redo

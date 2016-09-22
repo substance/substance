@@ -1,5 +1,3 @@
-'use strict';
-
 import isArray from 'lodash/isArray'
 import extend from 'lodash/extend'
 import forEach from 'lodash/forEach'
@@ -14,42 +12,43 @@ import platform from '../util/platform'
   Import HTML from clipboard. Used for inter-application copy'n'paste.
 */
 
-function ClipboardImporter(config) {
-  ClipboardImporter._addConverters(config);
+class ClipboardImporter extends HTMLImporter {
+  
+  constructor(config) {
+    ClipboardImporter._addConverters(config)
 
-  if (!config.schema) {
-    throw new Error('Missing argument: config.schema is required.');
+    if (!config.schema) {
+      throw new Error('Missing argument: config.schema is required.')
+    }
+
+    super(config)
+    // disabling warnings about default importers
+    this.IGNORE_DEFAULT_WARNINGS = true
+
+    extend(config, {
+      trimWhitespaces: true,
+      REMOVE_INNER_WS: true
+    })
+
+    // ATTENTION: this is only here so we can enfore windows conversion
+    // mode from within tests
+    this._isWindows = platform.isWindows
+
+    this._emptyDoc = this._createDocument(this.schema)
   }
-  // disabling warnings about default importers
-  this.IGNORE_DEFAULT_WARNINGS = true;
-
-  extend(config, {
-    trimWhitespaces: true,
-    REMOVE_INNER_WS: true
-  });
-  ClipboardImporter.super.call(this, config);
-
-  // ATTENTION: this is only here so we can enfore windows conversion
-  // mode from within tests
-  this._isWindows = platform.isWindows;
-
-  this._emptyDoc = this._createDocument(this.schema);
-}
-
-ClipboardImporter.Prototype = function() {
 
   /**
     Parses HTML and applies some sanitization/normalization.
   */
-  this.importDocument = function(html) {
-    var body, el;
+  importDocument(html) {
+    let body, el
 
     if (this._isWindows) {
       // Under windows we can exploit <!--StartFragment--> and <!--EndFragment-->
       // to have an easier life
-      var match = /<!--StartFragment\-->(.*)<!--EndFragment-->/.exec(html);
+      let match = /<!--StartFragment\-->(.*)<!--EndFragment-->/.exec(html)
       if (match) {
-        html = match[1];
+        html = match[1]
       }
     }
 
@@ -58,137 +57,135 @@ ClipboardImporter.Prototype = function() {
     // If the import fails e.g. because the schema is incompatible
     // we fall back to plain HTML import
     if (html.search(/meta name=.substance./)>=0) {
-      el = DefaultDOMElement.parseHTML(html);
-      var substanceData = el.find('meta[name="substance"]');
+      el = DefaultDOMElement.parseHTML(html)
+      let substanceData = el.find('meta[name="substance"]')
       if (substanceData) {
-        var jsonStr = atob(substanceData.attr('content'));
-        jsonStr = decodeURIComponent(jsonStr);
+        let jsonStr = atob(substanceData.attr('content'))
+        jsonStr = decodeURIComponent(jsonStr)
         try {
-          return this.importFromJSON(jsonStr);
+          return this.importFromJSON(jsonStr)
         } catch(err) {
-          console.error(err);
+          console.error(err)
         }
       }
     }
 
-    el = DefaultDOMElement.parseHTML(html);
+    el = DefaultDOMElement.parseHTML(html)
     if (isArray(el)) {
-      body = this._createElement('body');
-      body.append(el);
+      body = this._createElement('body')
+      body.append(el)
     } else {
-      body = el.find('body');
+      body = el.find('body')
     }
     if (!body) {
-      body = this._createElement('body');
-      body.append(el);
+      body = this._createElement('body')
+      body.append(el)
     }
-    body = _fixupGoogleDocsBody(body);
+    body = this._fixupGoogleDocsBody(body)
     if (!body) {
-      console.warn('Invalid HTML.');
-      return null;
+      console.warn('Invalid HTML.')
+      return null
     }
 
-    this.reset();
-    this.convertBody(body);
-    var doc = this.generateDocument();
-    return doc;
-  };
+    this.reset()
+    this.convertBody(body)
+    let doc = this.generateDocument()
+    return doc
+  }
 
-  function _fixupGoogleDocsBody(body) {
-    if (!body) return;
+  _fixupGoogleDocsBody(body) {
+    if (!body) return
     // Google Docs has a strange convention to use a bold tag as
     // container for the copied elements
     // HACK: we exploit the fact that this element has an id with a
     // specific format, e.g., id="docs-internal-guid-5bea85da-43dc-fb06-e327-00c1c6576cf7"
-    var bold = body.find('b');
+    let bold = body.find('b')
     if (bold && /^docs-internal/.exec(bold.id)) {
-      return bold;
+      return bold
     }
-    return body;
+    return body
   }
 
-  this.importFromJSON = function(jsonStr) {
-    var doc = this.createDocument();
-    var jsonData = JSON.parse(jsonStr);
-    var converter = new JSONConverter();
-    converter.importDocument(doc, jsonData);
-    return doc;
-  };
+  importFromJSON(jsonStr) {
+    let doc = this.createDocument()
+    let jsonData = JSON.parse(jsonStr)
+    let converter = new JSONConverter()
+    converter.importDocument(doc, jsonData)
+    return doc
+  }
 
   /**
     Converts all children of a given body element.
 
     @param {String} body body element of given HTML document
   */
-  this.convertBody = function(body) {
-    this.convertContainer(body.childNodes, Document.SNIPPET_ID);
-  };
+  convertBody(body) {
+    this.convertContainer(body.childNodes, Document.SNIPPET_ID)
+  }
 
-  this._wrapInlineElementsIntoBlockElement = function(childIterator) {
-    var wrapper = this._createElement('p');
+  _wrapInlineElementsIntoBlockElement(childIterator) {
+    let wrapper = this._createElement('p')
     while(childIterator.hasNext()) {
-      var el = childIterator.next();
+      let el = childIterator.next()
       // if there is a block node we finish this wrapper
-      var blockTypeConverter = this._getConverterForElement(el, 'block');
+      let blockTypeConverter = this._getConverterForElement(el, 'block')
       if (blockTypeConverter) {
-        childIterator.back();
-        break;
+        childIterator.back()
+        break
       }
-      wrapper.append(el.clone());
+      wrapper.append(el.clone())
     }
     // HACK: usually when we run into this case, then there is inline data only
     // Instead of detecting this case up-front we just set the proper id
     // and hope that all goes well.
     // Note: when this is called a second time, the id will be overridden.
-    wrapper.attr('data-id', Document.TEXT_SNIPPET_ID);
-    var node = this.defaultConverter(wrapper, this);
+    wrapper.attr('data-id', Document.TEXT_SNIPPET_ID)
+    let node = this.defaultConverter(wrapper, this)
     if (node) {
       if (!node.type) {
-        throw new Error('Contract: Html.defaultConverter() must return a node with type.');
+        throw new Error('Contract: Html.defaultConverter() must return a node with type.')
       }
-      this._createAndShow(node);
+      this._createAndShow(node)
     }
-    return node;
-  };
+    return node
+  }
 
   /**
     Creates substance document to paste.
 
     @return {Document} the document instance
   */
-  this.createDocument = function() {
-    return this._emptyDoc.createSnippet();
-  };
+  createDocument() {
+    return this._emptyDoc.createSnippet()
+  }
 
-  this._getUnsupportedNodeConverter = function() {
+  _getUnsupportedNodeConverter() {
     // nothing
-  };
+  }
 
-};
+}
 
-HTMLImporter.extend(ClipboardImporter);
-
-var _converters = {
+let _converters = {
   'catch-all-block': {
     type: 'paragraph',
-    matchElement: function(el) { return el.is('div'); },
+    matchElement: function(el) { return el.is('div') },
     import: function(el, node, converter) {
-      node.content = converter.annotatedText(el, [node.id, 'content']);
+      node.content = converter.annotatedText(el, [node.id, 'content'])
     }
   }
-};
+}
 
 ClipboardImporter._addConverters = function(config) {
   if (config.converters) {
-    var registry = new Registry();
+    let registry = new Registry()
     config.converters.forEach(function(conv, name) {
-      registry.add(name, conv);
+      registry.add(name, conv)
     });
     forEach(_converters, function(converter, name) {
-      registry.add(name, converter);
+      registry.add(name, converter)
     });
-    config.converters = registry;
+    config.converters = registry
   }
-};
+}
 
-export default ClipboardImporter;
+export default ClipboardImporter
