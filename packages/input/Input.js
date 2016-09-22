@@ -25,7 +25,6 @@ Input.Prototype = function() {
       var documentSession = this.context.documentSession;
       var doc = documentSession.getDocument();
       val = doc.get(this.props.path)
-      console.log('val', val)
     } else {
       val = this.props.value
     }
