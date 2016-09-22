@@ -81,6 +81,7 @@ export { default as SwitchTextTypeCommand } from './packages/base/SwitchTextType
 export { default as ProseEditorPackage } from './packages/prose-editor/ProseEditorPackage'
 export { default as ProseEditor } from './packages/prose-editor/ProseEditor'
 export { default as ProseEditorConfigurator } from './packages/prose-editor/ProseEditorConfigurator'
+export { default as ProseEditorOverlayTools } from './packages/prose-editor/ProseEditorOverlayTools'
 
 // button
 export { default as Button } from './packages/button/Button'
@@ -131,6 +132,7 @@ export { default as Toolbar } from './packages/tools/Toolbar'
 export { default as ToolGroup } from './packages/tools/ToolGroup'
 
 // ui
+export { default as AbstractEditor } from './ui/AbstractEditor'
 export { default as AnnotationCommand } from './ui/AnnotationCommand'
 export { default as AnnotationComponent } from './ui/AnnotationComponent'
 export { default as AnnotationTool } from './ui/AnnotationTool'
@@ -141,7 +143,6 @@ export { default as ContainerEditor } from './ui/ContainerEditor'
 export { default as DefaultDOMElement } from './ui/DefaultDOMElement'
 export { default as FontAwesomeIcon } from './ui/FontAwesomeIcon'
 export { default as InlineNodeCommand } from './ui/InlineNodeCommand'
-export { default as Overlay } from './ui/DefaultOverlay'
 
 export { default as RenderingEngine } from './ui/RenderingEngine'
 export { default as Router } from './ui/Router'
