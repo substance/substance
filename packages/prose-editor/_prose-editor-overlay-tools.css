@@ -1,0 +1,24 @@
+.sc-prose-editor-overlay-tools {}
+
+.sc-prose-editor-overlay-tools::before {
+  content: '';
+  display: block;
+  margin: 0 auto;
+  width: 0;
+  height: 0;
+  border-style: solid;
+  border-width: 0 4px 8px 4px;
+  border-color: transparent transparent #2E2E2C transparent;
+}
+
+.sc-prose-editor-overlay-tools > .se-active-tools {
+  border-radius: 5px;
+  background: #2E2E2C;
+  padding: 5px;
+}
+
+.sc-prose-editor-overlay-tools > .se-active-tools > * {
+  display: inline-block;
+  margin-left: 2px;
+  margin-right: 2px;
+}
