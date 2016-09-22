@@ -1,114 +1,111 @@
-'use strict';
-
 import isEqual from 'lodash/isEqual'
 import startsWith from 'lodash/startsWith'
 import Coordinate from '../model/Coordinate'
 import IsolatedNodeComponent from './IsolatedNodeComponent'
 
-function InlineNodeComponent() {
-  InlineNodeComponent.super.apply(this, arguments);
-}
+class InlineNodeComponent extends IsolatedNodeComponent {
 
-InlineNodeComponent.Prototype = function() {
-
-  var _super = InlineNodeComponent.super.prototype;
-
-  this._isInlineNodeComponent = true;
+  get _isInlineNodeComponent() {
+    return true 
+  }
 
   // use spans everywhere
-  this.__elementTag = 'span';
-  this.__slugChar = "\uFEFF";
+  get __elementTag() {
+    return 'span' 
+  }
 
-  this.getClassNames = function() {
-    return 'sc-inline-node';
-  };
+  get __slugChar() {
+    return "\uFEFF" 
+  }
 
-  this.render = function($$) { // eslint-disable-line
-    var el = _super.render.apply(this, arguments);
-    el.attr('data-inline', '1');
-    return el;
-  };
+  getClassNames() {
+    return 'sc-inline-node'
+  }
+
+  render($$) { // eslint-disable-line
+    let el = super.render.apply(this, arguments)
+    el.attr('data-inline', '1')
+    return el
+  }
 
   // TODO: this is almost the same as the super method. Try to consolidate.
-  this._deriveStateFromSelectionState = function(selState) {
-    var sel = selState.getSelection();
-    var surfaceId = sel.surfaceId;
-    if (!surfaceId) return;
-    var id = this.getId();
-    var node = this.props.node;
-    var parentId = this._getSurfaceParent().getId();
-    var inParentSurface = (surfaceId === parentId);
+  _deriveStateFromSelectionState(selState) {
+    let sel = selState.getSelection()
+    let surfaceId = sel.surfaceId
+    if (!surfaceId) return
+    let id = this.getId()
+    let node = this.props.node
+    let parentId = this._getSurfaceParent().getId()
+    let inParentSurface = (surfaceId === parentId)
     // detect cases where this node is selected or co-selected by inspecting the selection
     if (inParentSurface) {
       if (sel.isPropertySelection() && !sel.isCollapsed() && isEqual(sel.path, node.path)) {
-        var nodeSel = node.getSelection();
+        let nodeSel = node.getSelection()
         if(nodeSel.equals(sel)) {
-          return { mode: 'selected' };
+          return { mode: 'selected' }
         }
         if (sel.contains(nodeSel)) {
-          return { mode: 'co-selected' };
+          return { mode: 'co-selected' }
         }
       }
-      return;
+      return
     }
     // for all other cases (focused / co-focused) the surface id prefix must match
-    if (!startsWith(surfaceId, id)) return;
+    if (!startsWith(surfaceId, id)) return
     // Note: trying to distinguisd focused
     // surfaceIds are a sequence of names joined with '/'
     // a surface inside this node will have a path with length+1.
     // a custom selection might just use the id of this IsolatedNode
-    var p1 = id.split('/');
-    var p2 = surfaceId.split('/');
+    let p1 = id.split('/')
+    let p2 = surfaceId.split('/')
     if (p2.length >= p1.length && p2.length <= p1.length+1) {
-      return { mode: 'focused' };
+      return { mode: 'focused' }
     } else {
-      return { mode: 'co-focused' };
+      return { mode: 'co-focused' }
     }
-  };
+  }
 
-  this._selectNode = function() {
+  _selectNode() {
     // console.log('IsolatedNodeComponent: selecting node.');
-    var surface = this.context.surface;
-    var doc = surface.getDocument();
-    var node = this.props.node;
+    let surface = this.context.surface
+    let doc = surface.getDocument()
+    let node = this.props.node
     surface.setSelection(doc.createSelection({
       type: 'property',
       path: node.path,
       startOffset: node.startOffset,
       endOffset: node.endOffset
-    }));
-  };
+    }))
+  }
 
-};
-
-IsolatedNodeComponent.extend(InlineNodeComponent);
+}
 
 InlineNodeComponent.getCoordinate = function(el) {
   // special treatment for block-level isolated-nodes
-  var parent = el.getParent();
+  let parent = el.getParent()
   if (el.isTextNode() && parent.is('.se-slug')) {
-    var slug = parent;
-    var nodeEl = slug.getParent();
+    let slug = parent
+    let nodeEl = slug.getParent()
     if (nodeEl.is('.sc-inline-node')) {
-      var startOffset = Number(nodeEl.getAttribute('data-offset'));
-      var len = Number(nodeEl.getAttribute('data-length'));
-      var charPos = startOffset;
-      if (slug.is('sm-after')) charPos += len;
-      var path;
+      let startOffset = Number(nodeEl.getAttribute('data-offset'))
+      let len = Number(nodeEl.getAttribute('data-length'))
+      let charPos = startOffset
+      if (slug.is('sm-after')) charPos += len
+      let path
       while ( (nodeEl = nodeEl.getParent()) ) {
-        var pathStr = nodeEl.getAttribute('data-path');
+        let pathStr = nodeEl.getAttribute('data-path')
         if (pathStr) {
-          path = pathStr.split('.');
-          var coor = new Coordinate(path, charPos);
-          coor.__inInlineNode__ = true;
-          coor.__startOffset__ = startOffset;
-          coor.__endOffset__ = startOffset+len;
-          return coor;
+          path = pathStr.split('.')
+          let coor = new Coordinate(path, charPos)
+          coor.__inInlineNode__ = true
+          coor.__startOffset__ = startOffset
+          coor.__endOffset__ = startOffset+len
+          return coor
         }
       }
     }
   }
-  return null;
-};
+  return null
+}
 
-export default InlineNodeComponent;
+export default InlineNodeComponent
