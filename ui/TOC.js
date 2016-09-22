@@ -51,7 +51,7 @@ class TOC extends Component {
         tocEntries
       )
     );
-    return el;
+    return el
   }
 
   getDocument() {
