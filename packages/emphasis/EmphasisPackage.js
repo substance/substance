@@ -10,13 +10,15 @@ import AnnotationTool from '../../ui/AnnotationTool'
 
 export default {
   name: 'emphasis',
-  configure: function(config) {
+  configure: function(config, options) {
     config.addNode(Emphasis);
     config.addConverter('html', EmphasisHTMLConverter);
     config.addConverter('xml', EmphasisXMLConverter);
     config.addComponent('emphasis', AnnotationComponent);
     config.addCommand('emphasis', AnnotationCommand, { nodeType: Emphasis.type });
-    config.addTool('emphasis', AnnotationTool, {target: 'annotations'});
+    config.addTool('emphasis', AnnotationTool, {
+      target: options.toolTarget || 'annotations'
+    });
     config.addIcon('emphasis', { 'fontawesome': 'fa-italic' });
     config.addLabel('emphasis', {
       en: 'Emphasis',

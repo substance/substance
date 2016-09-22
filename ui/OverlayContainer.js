@@ -8,7 +8,7 @@ import Component from './Component'
   @class
   @component
 */
-class OverlayContainer extends Component { 
+class OverlayContainer extends Component {
   constructor(...args) {
     super(...args)
 
@@ -16,7 +16,7 @@ class OverlayContainer extends Component {
   }
 
   render($$) {
-    let el = $$('div').addClass('sc-overlay sm-hidden')
+    let el = $$('div').addClass('sc-overlay-container sm-hidden')
     let commandStates = this.context.commandManager.getCommandStates()
     let ComponentClass = this.props.overlay
     el.append($$(ComponentClass, {
@@ -36,8 +36,7 @@ class OverlayContainer extends Component {
 
   position(hints) {
     let content = this.refs.overlayContent
-    if (content.childNodes.length > 0) {
-      // Position based on rendering hints
+    if (content.isVisible()) {
       this._position(hints);
       this.el.removeClass('sm-hidden')
     }

@@ -64,7 +64,6 @@ export { default as EmphasisPackage } from './packages/emphasis/EmphasisPackage'
 export { default as HeadingPackage } from './packages/heading/HeadingPackage'
 export { default as ImagePackage } from './packages/image/ImagePackage'
 export { default as InlineWrapperPackage } from './packages/inline-wrapper/InlineWrapperPackage'
-export { default as LinkPackage } from './packages/link/LinkPackage'
 export { default as ListPackage } from './packages/list/ListPackage'
 export { default as ParagraphPackage } from './packages/paragraph/ParagraphPackage'
 export { default as PersistencePackage } from './packages/persistence/PersistencePackage'
@@ -73,10 +72,24 @@ export { default as SubscriptPackage } from './packages/subscript/SubscriptPacka
 export { default as SuperscriptPackage } from './packages/superscript/SuperscriptPackage'
 export { default as TablePackage } from './packages/table/TablePackage'
 
+// base
+export { default as SwitchTextTypeTool } from './packages/base/SwitchTextTypeTool'
+export { default as SwitchTextTypeCommand } from './packages/base/SwitchTextTypeCommand'
+
 // prose-editor
 export { default as ProseEditorPackage } from './packages/prose-editor/ProseEditorPackage'
 export { default as ProseEditor } from './packages/prose-editor/ProseEditor'
+export { default as ProseArticle } from './packages/prose-editor/ProseArticle'
 export { default as ProseEditorConfigurator } from './packages/prose-editor/ProseEditorConfigurator'
+export { default as ProseEditorOverlayTools } from './packages/prose-editor/ProseEditorOverlayTools'
+
+// link
+export { default as LinkPackage } from './packages/link/LinkPackage'
+export { default as EditLinkTool } from './packages/link/EditLinkTool'
+export { default as Link } from './packages/link/Link'
+export { default as LinkCommand } from './packages/link/LinkCommand'
+export { default as EditLinkCommand } from './packages/link/EditLinkCommand'
+export { default as LinkComponent } from './packages/link/LinkComponent'
 
 // button
 export { default as Button } from './packages/button/Button'
@@ -127,6 +140,7 @@ export { default as Toolbar } from './packages/tools/Toolbar'
 export { default as ToolGroup } from './packages/tools/ToolGroup'
 
 // ui
+export { default as AbstractEditor } from './ui/AbstractEditor'
 export { default as AnnotationCommand } from './ui/AnnotationCommand'
 export { default as AnnotationComponent } from './ui/AnnotationComponent'
 export { default as AnnotationTool } from './ui/AnnotationTool'
@@ -137,7 +151,6 @@ export { default as ContainerEditor } from './ui/ContainerEditor'
 export { default as DefaultDOMElement } from './ui/DefaultDOMElement'
 export { default as FontAwesomeIcon } from './ui/FontAwesomeIcon'
 export { default as InlineNodeCommand } from './ui/InlineNodeCommand'
-export { default as Overlay } from './ui/DefaultOverlay'
 
 export { default as RenderingEngine } from './ui/RenderingEngine'
 export { default as Router } from './ui/Router'
