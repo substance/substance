@@ -1,5 +1,3 @@
-"use strict";
-
 import last from 'lodash/last'
 import oo from '../util/oo'
 import Coordinate from '../model/Coordinate'
@@ -22,12 +20,11 @@ import IsolatedNodeComponent from './IsolatedNodeComponent'
  * @constructor
  * @param {Element} rootElement
  */
-function DOMSelection(surface) {
-  this.surface = surface;
-  this._wrange = window.document.createRange();
-}
-
-DOMSelection.Prototype = function() {
+class DOMSelection {
+  constructor(surface) {
+    this.surface = surface
+    this._wrange = window.document.createRange()
+  }
 
   /**
     Create a model selection by mapping the current DOM selection
@@ -37,17 +34,17 @@ DOMSelection.Prototype = function() {
       - `direction`: `left` or `right`; a hint for disambiguations, used by Surface during cursor navigation.
     @returns {model/Selection}
   */
-  this.getSelection = function(options) {
-    var range = this.mapDOMSelection(options);
-    var doc = this.surface.getDocument();
-    return doc.createSelection(range);
-  };
+  getSelection(options) {
+    let range = this.mapDOMSelection(options)
+    let doc = this.surface.getDocument()
+    return doc.createSelection(range)
+  }
 
-  this.getSelectionForDOMRange = function(wrange) {
-    var range = this.mapDOMRange(wrange);
-    var doc = this.surface.getDocument();
-    return doc.createSelection(range);
-  };
+  getSelectionForDOMRange(wrange) {
+    let range = this.mapDOMRange(wrange)
+    let doc = this.surface.getDocument()
+    return doc.createSelection(range)
+  }
 
   // function _printStacktrace() {
   //   try {
@@ -62,125 +59,125 @@ DOMSelection.Prototype = function() {
 
     @param {model/Selection} sel
   */
-  this.setSelection = function(sel) {
+  setSelection(sel) {
     // console.log('### DOMSelection: setting selection', sel.toString());
-    var wSel = window.getSelection();
+    let wSel = window.getSelection()
     if (sel.isNull() || sel.isCustomSelection()) {
-      this.clear();
-      return;
+      this.clear()
+      return
     }
-    var start, end;
+    let start, end
     if (sel.isPropertySelection() || sel.isContainerSelection()) {
-      start = this._getDOMCoordinate(sel.start);
+      start = this._getDOMCoordinate(sel.start)
       if (!start) {
-        console.warn('FIXME: selection seems to be invalid.');
-        this.clear();
-        return;
+        console.warn('FIXME: selection seems to be invalid.')
+        this.clear()
+        return
       }
       if (sel.isCollapsed()) {
-        end = start;
+        end = start
       } else {
-        end = this._getDOMCoordinate(sel.end);
+        end = this._getDOMCoordinate(sel.end)
         if (!end) {
-          console.warn('FIXME: selection seems to be invalid.');
-          this.clear();
-          return;
+          console.warn('FIXME: selection seems to be invalid.')
+          this.clear()
+          return
         }
       }
     } else if (sel.isNodeSelection()) {
-      var comp = this.surface.find('*[data-id="'+sel.getNodeId()+'"]');
+      let comp = this.surface.find('*[data-id="'+sel.getNodeId()+'"]')
       if (!comp) {
-        console.error('Could not find component with id', sel.getNodeId());
-        this.clear();
-        return;
+        console.error('Could not find component with id', sel.getNodeId())
+        this.clear()
+        return
       }
       if (comp._isIsolatedNodeComponent) {
-        var coors = IsolatedNodeComponent.getDOMCoordinates(comp);
+        let coors = IsolatedNodeComponent.getDOMCoordinates(comp)
         if (sel.isFull()) {
-          start = coors.start;
-          end = coors.end;
+          start = coors.start
+          end = coors.end
         } else if (sel.isBefore()) {
-          start = end = coors.start;
+          start = end = coors.start
         } else {
-          start = end = coors.end;
+          start = end = coors.end
         }
       } else {
-        var _nodeEl = comp.el;
+        let _nodeEl = comp.el
         start = {
           container: _nodeEl.getNativeElement(),
           offset: 0
-        };
+        }
         end = {
           container: _nodeEl.getNativeElement(),
           offset: _nodeEl.getChildCount()
-        };
+        }
         if (sel.isBefore()) {
-          end = start;
+          end = start
         } else if (sel.isAfter()) {
-          start = end;
+          start = end
         }
       }
     }
     // console.log('Model->DOMSelection: mapped to DOM coordinates', start.container, start.offset, end.container, end.offset, 'isReverse?', sel.isReverse());
 
     // if there is a range then set replace the window selection accordingly
-    var wRange;
+    let wRange
     if (wSel.rangeCount > 0) {
-      wRange = wSel.getRangeAt(0);
+      wRange = wSel.getRangeAt(0)
     } else {
-      wRange = this._wrange;
+      wRange = this._wrange
     }
-    wSel.removeAllRanges();
+    wSel.removeAllRanges()
     if (sel.isCollapsed()) {
-      wRange.setStart(start.container, start.offset);
-      wRange.setEnd(start.container, start.offset);
-      wSel.addRange(wRange);
+      wRange.setStart(start.container, start.offset)
+      wRange.setEnd(start.container, start.offset)
+      wSel.addRange(wRange)
     } else {
       if (sel.isReverse()) {
         // console.log('DOMSelection: rendering a reverse selection.');
-        var tmp = start;
-        start = end;
-        end = tmp;
+        let tmp = start
+        start = end
+        end = tmp
         // HACK: using wRange setEnd does not work reliably
         // so we set just the start anchor
         // and then use window.Selection.extend()
         // unfortunately we are not able to test this behavior as it needs
         // triggering native keyboard events
-        wRange.setStart(start.container, start.offset);
-        wRange.setEnd(start.container, start.offset);
-        wSel.addRange(wRange);
-        wSel.extend(end.container, end.offset);
+        wRange.setStart(start.container, start.offset)
+        wRange.setEnd(start.container, start.offset)
+        wSel.addRange(wRange)
+        wSel.extend(end.container, end.offset)
       } else {
-        wRange.setStart(start.container, start.offset);
-        wRange.setEnd(end.container, end.offset);
-        wSel.addRange(wRange);
+        wRange.setStart(start.container, start.offset)
+        wRange.setEnd(end.container, end.offset)
+        wSel.addRange(wRange)
       }
     }
     // console.log('Model->DOMSelection: mapped selection to DOM', 'anchorNode:', wSel.anchorNode, 'anchorOffset:', wSel.anchorOffset, 'focusNode:', wSel.focusNode, 'focusOffset:', wSel.focusOffset, 'collapsed:', wSel.collapsed);
-  };
+  }
 
-  this._getDOMCoordinate = function(coor) {
-    var comp, domCoor = null;
+  _getDOMCoordinate(coor) {
+    let comp, domCoor = null
     if (coor.isNodeCoordinate()) {
-      comp = this.surface.find('*[data-id="'+coor.getNodeId()+'"]');
+      comp = this.surface.find('*[data-id="'+coor.getNodeId()+'"]')
       if (comp) {
         if (comp._isIsolatedNodeComponent) {
-          domCoor = IsolatedNodeComponent.getDOMCoordinate(comp, coor);
+          domCoor = IsolatedNodeComponent.getDOMCoordinate(comp, coor)
         } else {
           domCoor = {
             container: comp.getNativeElement(),
             offset: coor.offset
-          };
+          }
         }
       }
     } else {
-      comp = this.surface._getTextPropertyComponent(coor.path);
+      comp = this.surface._getTextPropertyComponent(coor.path)
       if (comp) {
-        domCoor = comp.getDOMCoordinate(coor.offset);
+        domCoor = comp.getDOMCoordinate(coor.offset)
       }
     }
-    return domCoor;
-  };
+    return domCoor
+  }
 
   /*
     Map a DOM range to a model range.
@@ -188,13 +185,13 @@ DOMSelection.Prototype = function() {
     @param {Range} range
     @returns {model/Range}
   */
-  this.mapDOMRange = function(wRange) {
+  mapDOMRange(wRange) {
     return this._getRange(
       DefaultDOMElement.wrapNativeElement(wRange.startContainer),
       wRange.startOffset,
       DefaultDOMElement.wrapNativeElement(wRange.endContainer),
-      wRange.endOffset);
-  };
+      wRange.endOffset)
+  }
 
   /*
     Maps the current DOM selection to a model range.
@@ -203,73 +200,73 @@ DOMSelection.Prototype = function() {
       - `direction`: `left` or `right`; a hint for disambiguations, used by Surface during cursor navigation.
     @returns {model/Range}
   */
-  this.mapDOMSelection = function(options) {
-    var range;
-    var wSel = window.getSelection();
+  mapDOMSelection(options) {
+    let range
+    let wSel = window.getSelection()
     // Use this log whenever the mapping goes wrong to analyze what
     // is actually being provided by the browser
     // console.log('DOMSelection->Model: anchorNode:', wSel.anchorNode, 'anchorOffset:', wSel.anchorOffset, 'focusNode:', wSel.focusNode, 'focusOffset:', wSel.focusOffset, 'collapsed:', wSel.collapsed);
     if (wSel.rangeCount === 0) {
       return null;
     }
-    var anchorNode = DefaultDOMElement.wrapNativeElement(wSel.anchorNode);
+    let anchorNode = DefaultDOMElement.wrapNativeElement(wSel.anchorNode)
     if (wSel.isCollapsed) {
-      var coor = this._getCoordinate(anchorNode, wSel.anchorOffset, options);
-      if (!coor) return null;
+      let coor = this._getCoordinate(anchorNode, wSel.anchorOffset, options)
+      if (!coor) return null
       // EXPERIMENTAL: when the cursor is in an IsolatedNode
       // we return a selection for the whole node
       if (coor.__inIsolatedBlockNode__) {
-        range = _createRangeForIsolatedBlockNode(coor.path[0], this.getContainerId());
+        range = _createRangeForIsolatedBlockNode(coor.path[0], this.getContainerId())
       } else if (coor.__inInlineNode__) {
         // HACK: relying on hints left by InlineNodeComponent.getCoordinate()
         range = _createRange(
           new Coordinate(coor.path, coor.__startOffset__),
           new Coordinate(coor.path, coor.__endOffset__),
           false, this.getContainerId()
-        );
+        )
       } else {
-        range = _createRange(coor, coor, false, this.getContainerId());
+        range = _createRange(coor, coor, false, this.getContainerId())
       }
     }
     // HACK: special treatment for edge cases as addressed by #354.
     // Sometimes anchorNode and focusNodes are the surface
     else {
       if (anchorNode.isElementNode() && anchorNode.is('.sc-surface')) {
-        range = this._getEnclosingRange(wSel.getRangeAt(0));
+        range = this._getEnclosingRange(wSel.getRangeAt(0))
       } else {
-        var focusNode = DefaultDOMElement.wrapNativeElement(wSel.focusNode);
-        range = this._getRange(anchorNode, wSel.anchorOffset, focusNode, wSel.focusOffset);
+        let focusNode = DefaultDOMElement.wrapNativeElement(wSel.focusNode)
+        range = this._getRange(anchorNode, wSel.anchorOffset, focusNode, wSel.focusOffset)
       }
     }
     // console.log('DOMSelection->Model: extracted range', range.toString());
-    return range;
-  };
+    return range
+  }
 
   /*
     Clear the DOM selection.
   */
-  this.clear = function() {
-    window.getSelection().removeAllRanges();
-  };
+  clear() {
+    window.getSelection().removeAllRanges()
+  }
 
-  this.collapse = function(dir) {
-    var wSel = window.getSelection();
-    var wRange;
+  collapse(dir) {
+    let wSel = window.getSelection()
+    let wRange
     if (wSel.rangeCount > 0) {
-      wRange = wSel.getRangeAt(0);
-      wRange.collapse(dir === 'left');
-      wSel.removeAllRanges();
-      wSel.addRange(wRange);
+      wRange = wSel.getRangeAt(0)
+      wRange.collapse(dir === 'left')
+      wSel.removeAllRanges()
+      wSel.addRange(wRange)
     }
-  };
+  }
 
-  this.getContainerId = function() {
+  getContainerId() {
     if (this.surface.isContainerEditor()) {
       return this.surface.getContainerId();
     } else {
       return null;
     }
-  };
+  }
 
   /*
     Extract a model range from given DOM elements.
@@ -280,21 +277,21 @@ DOMSelection.Prototype = function() {
     @param {number} focusOffset
     @returns {model/Range}
   */
-  this._getRange = function(anchorNode, anchorOffset, focusNode, focusOffset) {
-    var start = this._getCoordinate(anchorNode, anchorOffset);
-    var end;
+  _getRange(anchorNode, anchorOffset, focusNode, focusOffset) {
+    let start = this._getCoordinate(anchorNode, anchorOffset)
+    let end
     if (anchorNode === focusNode && anchorOffset === focusOffset) {
-      end = start;
+      end = start
     } else {
-      end = this._getCoordinate(focusNode, focusOffset);
+      end = this._getCoordinate(focusNode, focusOffset)
     }
-    var isReverse = DefaultDOMElement.isReverse(anchorNode, anchorOffset, focusNode, focusOffset);
+    let isReverse = DefaultDOMElement.isReverse(anchorNode, anchorOffset, focusNode, focusOffset)
     if (start && end) {
-      return _createRange(start, end, isReverse, this.getContainerId());
+      return _createRange(start, end, isReverse, this.getContainerId())
     } else {
-      return null;
+      return null
     }
-  };
+  }
 
   /*
     Map a DOM coordinate to a model coordinate.
@@ -329,35 +326,35 @@ DOMSelection.Prototype = function() {
     Moving `left` would provide the previous address, `right` would provide the next address.
     The default direction is `right`.
   */
-  this._getCoordinate = function(nodeEl, offset, options) {
+  _getCoordinate(nodeEl, offset, options) {
     // Trying to apply the most common situation first
     // and after that covering known edge cases
-    var surfaceEl = this.surface.el;
-    var coor = null;
+    let surfaceEl = this.surface.el
+    let coor = null
     if (!coor) {
-      coor = InlineNodeComponent.getCoordinate(nodeEl, offset);
+      coor = InlineNodeComponent.getCoordinate(nodeEl, offset)
       if (coor) {
-        coor.__inInlineNode__ = true;
+        coor.__inInlineNode__ = true
       }
     }
     // as this is the most often case, try to map the coordinate within
     // a TextPropertyComponent
     if (!coor) {
-      coor = TextPropertyComponent.getCoordinate(surfaceEl, nodeEl, offset);
+      coor = TextPropertyComponent.getCoordinate(surfaceEl, nodeEl, offset)
     }
     // special treatment for isolated nodes
     if (!coor) {
-      coor = IsolatedNodeComponent.getCoordinate(surfaceEl, nodeEl, offset);
+      coor = IsolatedNodeComponent.getCoordinate(surfaceEl, nodeEl, offset)
       if (coor) {
-        coor.__inIsolatedBlockNode__ = true;
+        coor.__inIsolatedBlockNode__ = true
       }
     }
     // finally fall back to a brute-force search
     if (!coor) {
-      coor = this._searchForCoordinate(nodeEl, offset, options);
+      coor = this._searchForCoordinate(nodeEl, offset, options)
     }
-    return coor;
-  };
+    return coor
+  }
 
   /*
     Map a DOM coordinate to a model coordinate via a brute-force search
@@ -371,63 +368,63 @@ DOMSelection.Prototype = function() {
     @param {'left'|'right'} options.direction
     @returns {model/Coordinate} the coordinate
   */
-  this._searchForCoordinate = function(node, offset, options) {
+  _searchForCoordinate(node, offset, options) {
     // NOTE: assuming that most situations are covered by
     // TextPropertyComponent.getCoordinate already, we are trying just to
     // solve the remaining scenarios, in an opportunistic way
-    options = options || {};
-    options.direction = options.direction || 'right';
-    var dir = options.direction;
+    options = options || {}
+    options.direction = options.direction || 'right'
+    let dir = options.direction
     if (node.isElementNode()) {
-      var childCount = node.getChildCount();
-      offset = Math.max(0, Math.min(childCount, offset));
-      var el = node.getChildAt(offset);
+      let childCount = node.getChildCount()
+      offset = Math.max(0, Math.min(childCount, offset))
+      let el = node.getChildAt(offset)
       while (el) {
-        var textPropertyEl;
+        let textPropertyEl
         if (dir === 'right') {
           if (el.isElementNode()) {
             if (el.getAttribute('data-path')) {
-              textPropertyEl = el;
+              textPropertyEl = el
             } else {
-              textPropertyEl = el.find('*[data-path]');
+              textPropertyEl = el.find('*[data-path]')
             }
             if (textPropertyEl) {
-              return new Coordinate(_getPath(textPropertyEl), 0);
+              return new Coordinate(_getPath(textPropertyEl), 0)
             }
           }
-          el = el.getNextSibling();
+          el = el.getNextSibling()
         } else {
           if (el.isElementNode()) {
             if (el.getAttribute('data-path')) {
-              textPropertyEl = el;
+              textPropertyEl = el
             } else {
-              var textPropertyEls = el.findAll('*[data-path]');
-              textPropertyEl = last(textPropertyEls);
+              let textPropertyEls = el.findAll('*[data-path]')
+              textPropertyEl = last(textPropertyEls)
             }
             if (textPropertyEl) {
-              var path = _getPath(textPropertyEl);
-              var doc = this.surface.getDocument();
-              var text = doc.get(path);
-              return new Coordinate(path, text.length);
+              let path = _getPath(textPropertyEl)
+              let doc = this.surface.getDocument()
+              let text = doc.get(path)
+              return new Coordinate(path, text.length)
             }
           }
-          el = el.getPreviousSibling();
+          el = el.getPreviousSibling()
         }
       }
     }
     // if we land here then we could not find an addressable element on this level.
     // try to find it one level higher
     if (node !== this.surface.el) {
-      var parent = node.getParent();
-      var nodeIdx = parent.getChildIndex(node);
+      let parent = node.getParent()
+      let nodeIdx = parent.getChildIndex(node)
       if (dir === 'right') {
-        nodeIdx++;
+        nodeIdx++
       }
-      return this._searchForCoordinate(parent, nodeIdx, options);
+      return this._searchForCoordinate(parent, nodeIdx, options)
     }
 
-    return null;
-  };
+    return null
+  }
 
   /*
     Computes a model range that encloses all properties
@@ -439,72 +436,71 @@ DOMSelection.Prototype = function() {
     @param {Range} range
     @returns {model/Range}
   */
-  this._getEnclosingRange = function(wRange) {
-    var frag = wRange.cloneContents();
-    var props = frag.querySelectorAll('*[data-path]');
+  _getEnclosingRange(wRange) {
+    let frag = wRange.cloneContents()
+    let props = frag.querySelectorAll('*[data-path]')
     if (props.length === 0) {
-      return null;
+      return null
     } else {
-      var doc = this.surface.getDocument();
-      var first = props[0];
-      var last = props[props.length-1];
-      var startPath = _getPath(first);
-      var text;
+      let doc = this.surface.getDocument()
+      let first = props[0]
+      let last = props[props.length-1]
+      let startPath = _getPath(first)
+      let text
       if (first === last) {
-        text = doc.get(startPath);
+        text = doc.get(startPath)
         return new Range(
           new Coordinate(startPath, 0),
           new Coordinate(startPath, text.length),
           false
-        );
+        )
       } else {
-        var endPath = _getPath(last);
-        text = doc.get(endPath);
+        let endPath = _getPath(last)
+        text = doc.get(endPath)
         return new Range(
           new Coordinate(startPath, 0),
           new Coordinate(endPath, text.length),
           false
-        );
+        )
       }
     }
-  };
-
-  function _getPath(el) {
-    if (!el._isDOMElement) {
-      el = DefaultDOMElement.wrapNativeElement(el);
-    }
-    if (el.isElementNode()) {
-      var pathStr = el.getAttribute('data-path');
-      return pathStr.split('.');
-    }
-    throw new Error("Can't get path from element:" + el.outerHTML);
   }
+}
 
-  /*
-   Helper for creating a model range correctly
-   as for model/Range start should be before end.
-
-   In contrast to that, DOM selections are described with anchor and focus coordinates,
-   i.e. bearing the information of direction implicitly.
-   To simplify the implementation we treat anchor and focus equally
-   and only at the end exploit the fact deriving an isReverse flag
-   and bringing start and end in the correct order.
-  */
-  function _createRange(start, end, isReverse, containerId) {
-    if (isReverse) {
-      var tmp = start;
-      start = end;
-      end = tmp;
-    }
-    return new Range(start, end, isReverse, containerId);
+function _getPath(el) {
+  if (!el._isDOMElement) {
+    el = DefaultDOMElement.wrapNativeElement(el)
   }
-
-  function _createRangeForIsolatedBlockNode(nodeId, containerId) {
-    return new Range(new Coordinate([nodeId], 0), new Coordinate([nodeId], 1), false, containerId);
+  if (el.isElementNode()) {
+    let pathStr = el.getAttribute('data-path')
+    return pathStr.split('.')
   }
+  throw new Error("Can't get path from element:" + el.outerHTML)
+}
 
-};
+/*
+ Helper for creating a model range correctly
+ as for model/Range start should be before end.
 
-oo.initClass(DOMSelection);
+ In contrast to that, DOM selections are described with anchor and focus coordinates,
+ i.e. bearing the information of direction implicitly.
+ To simplify the implementation we treat anchor and focus equally
+ and only at the end exploit the fact deriving an isReverse flag
+ and bringing start and end in the correct order.
+*/
+function _createRange(start, end, isReverse, containerId) {
+  if (isReverse) {
+    let tmp = start
+    start = end
+    end = tmp
+  }
+  return new Range(start, end, isReverse, containerId)
+}
 
-export default DOMSelection;
+function _createRangeForIsolatedBlockNode(nodeId, containerId) {
+  return new Range(new Coordinate([nodeId], 0), new Coordinate([nodeId], 1), false, containerId)
+}
+
+oo.initClass(DOMSelection)
+
+export default DOMSelection
