@@ -1,5 +1,3 @@
-'use strict';
-
 import deleteSelection from './deleteSelection'
 import breakNode from './breakNode'
 import uuid from '../../util/uuid'
@@ -27,39 +25,39 @@ import uuid from '../../util/uuid'
 */
 
 function insertNode(tx, args) {
-  var selection = args.selection;
-  var node = args.node;
+  let selection = args.selection
+  let node = args.node
   if (!args.containerId) {
-    throw new Error("containerId is mandatory");
+    throw new Error("containerId is mandatory")
   }
   if (!args.selection) {
-    throw new Error("selection is mandatory");
+    throw new Error("selection is mandatory")
   }
   if (!args.node) {
-    throw new Error("node is mandatory");
+    throw new Error("node is mandatory")
   }
-  var containerId = args.containerId;
-  var container = tx.get(containerId);
-  var tmp;
+  let containerId = args.containerId
+  let container = tx.get(containerId)
+  let tmp
   if (!selection.isCollapsed()) {
-    tmp = deleteSelection(tx, args);
-    selection = tmp.selection;
+    tmp = deleteSelection(tx, args)
+    selection = tmp.selection
   }
-  tmp = breakNode(tx, args);
-  selection = tmp.selection;
+  tmp = breakNode(tx, args)
+  selection = tmp.selection
   // create the node if it does not exist yet
   // notice, that it is also allowed to insert an existing node
   if (!node.id) {
-    node.id = uuid(node.type);
+    node.id = uuid(node.type)
   }
   if (!tx.get(node.id)) {
-    node = tx.create(node);
+    node = tx.create(node)
   }
   // make sure we have the real node, not just its data
-  node = tx.get(node.id);
+  node = tx.get(node.id)
   // insert the new node after the node where the cursor was
-  var nodePos = container.getPosition(selection.start.getNodeId());
-  container.show(node.id, nodePos);
+  let nodePos = container.getPosition(selection.start.getNodeId())
+  container.show(node.id, nodePos)
 
   // if the new node is a text node we can set the cursor to the
   // first character position
@@ -68,7 +66,7 @@ function insertNode(tx, args) {
       type: 'property',
       path: [node.id, 'content'],
       startOffset: 0
-    });
+    })
   }
   // otherwise we select the whole new node
   else {
@@ -79,10 +77,10 @@ function insertNode(tx, args) {
       startOffset: 0,
       endPath: [node.id],
       endOffset: 1
-    });
+    })
   }
 
-  return args;
+  return args
 }
 
-export default insertNode;
+export default insertNode

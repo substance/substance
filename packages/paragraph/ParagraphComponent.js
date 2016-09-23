@@ -1,22 +1,10 @@
-'use strict';
-
 import TextBlockComponent from '../../ui/TextBlockComponent'
 
-function ParagraphComponent() {
-  ParagraphComponent.super.apply(this, arguments);
+class ParagraphComponent extends TextBlockComponent {
+  render($$) {
+    let el = super.render.call(this, $$)
+    return el.addClass('sc-paragraph')
+  }
 }
 
-ParagraphComponent.Prototype = function() {
-
-  var _super = ParagraphComponent.super.prototype;
-
-  this.render = function($$) {
-    var el = _super.render.call(this, $$);
-    return el.addClass('sc-paragraph');
-  };
-
-};
-
-TextBlockComponent.extend(ParagraphComponent);
-
-export default ParagraphComponent;
+export default ParagraphComponent

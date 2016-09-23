@@ -1,5 +1,3 @@
-'use strict';
-
 import extend from 'lodash/extend'
 import deleteSelection from './deleteSelection'
 import updateAnnotations from './updateAnnotations'
@@ -11,23 +9,23 @@ import updateAnnotations from './updateAnnotations'
  * to the range of the new text.
  */
 function replaceText(tx, args) {
-  return _defaultReplace(tx, args);
+  return _defaultReplace(tx, args)
 }
 
 function _defaultReplace(tx, args) {
-  var out = deleteSelection(tx, extend({}, args, {
+  let out = deleteSelection(tx, extend({}, args, {
     direction: 'right'
-  }));
-  var sel = out.selection;
+  }))
+  let sel = out.selection
   if (!sel.isPropertySelection()) {
     // Should not happen if deleteSelection works correctly
-    throw new Error('Invalid state.');
+    throw new Error('Invalid state.')
   }
-  var text = args.text;
-  var op = tx.update(sel.path, { insert: { offset: sel.startOffset, value: text } } );
-  updateAnnotations(tx, { op: op });
-  args.selection = tx.createSelection(sel.path, sel.startOffset + text.length);
-  return args;
+  let text = args.text
+  let op = tx.update(sel.path, { insert: { offset: sel.startOffset, value: text } } )
+  updateAnnotations(tx, { op: op })
+  args.selection = tx.createSelection(sel.path, sel.startOffset + text.length)
+  return args
 }
 
-export default replaceText;
+export default replaceText
