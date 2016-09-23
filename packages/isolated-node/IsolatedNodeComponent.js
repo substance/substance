@@ -1,8 +1,8 @@
 import startsWith from 'lodash/startsWith'
-import keys from '../util/keys'
-import createSurfaceId from '../util/createSurfaceId'
-import Coordinate from '../model/Coordinate'
-import Component from './Component'
+import keys from '../../util/keys'
+import createSurfaceId from '../../util/createSurfaceId'
+import Coordinate from '../../model/Coordinate'
+import Component from '../../ui/Component'
 
 class IsolatedNodeComponent extends Component {
   constructor(...args) {
@@ -19,15 +19,15 @@ class IsolatedNodeComponent extends Component {
   }
 
   get _isIsolatedNodeComponent() {
-    return true 
+    return true
   }
 
   get __elementTag() {
-    return 'div' 
+    return 'div'
   }
 
   get __slugChar() {
-    return "|" 
+    return "|"
   }
 
   getChildContext() {

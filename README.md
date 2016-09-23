@@ -21,8 +21,8 @@ Multi-language support                                                      | �
 Realtime collaboration                                                      | ✓
 Persistence API for documents                                               | ✓
 Text Macros                                                                 | ✓
-Key bindings                                                                | Beta 5
-Full Unicode support                                                        | Beta 5
+Key bindings                                                                | Beta 6
+Full Unicode support                                                        | Beta 6
 Packages (aka Plugins)                                                      | ✓
                                                                             |
 **UI Components**                                                           |
@@ -55,8 +55,7 @@ Mozilla Firefox (>=42)                                                      | �
 Apple Safari (>=9)                                                          | ✓
 Google Chrome (>=47)                                                        | ✓
 Microsoft Edge                                                              | ✓
-Mobile Safari (iOS)                                                         | Beta 5
-Mobile Chrome (Android)                                                     | Beta 5
+
 
 ## Development
 
@@ -99,7 +98,6 @@ $ npm run doc
 ### Beta 6
 
 - Key bindings
-- Mobile support
 - Improved Unicode support
 - Advanced list support
 - Advanced table support

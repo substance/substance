@@ -10,7 +10,7 @@ import switchTextType from '../model/transform/switchTextType'
 import paste from '../model/transform/paste'
 import Surface from './Surface'
 import RenderingEngine from './RenderingEngine'
-import IsolatedNodeComponent from './IsolatedNodeComponent'
+import IsolatedNodeComponent from '../packages/isolated-node/IsolatedNodeComponent'
 
 /**
   Represents a flow editor that manages a sequence of nodes in a container. Needs to be
@@ -69,7 +69,7 @@ class ContainerEditor extends Surface {
   }
 
   get _isContainerEditor() {
-    return true 
+    return true
   }
 
   // Note: this component is self managed

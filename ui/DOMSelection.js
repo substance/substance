@@ -5,7 +5,7 @@ import Range from '../model/Range'
 import DefaultDOMElement from './DefaultDOMElement'
 import TextPropertyComponent from './TextPropertyComponent'
 import InlineNodeComponent from '../packages/inline-node/InlineNodeComponent'
-import IsolatedNodeComponent from './IsolatedNodeComponent'
+import IsolatedNodeComponent from '../packages/isolated-node/IsolatedNodeComponent'
 
 /*
  * A class that maps DOM selections to model selections.

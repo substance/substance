@@ -1,7 +1,7 @@
 import isEqual from 'lodash/isEqual'
 import startsWith from 'lodash/startsWith'
 import Coordinate from '../../model/Coordinate'
-import IsolatedNodeComponent from '../../ui/IsolatedNodeComponent'
+import IsolatedNodeComponent from '../isolated-node/IsolatedNodeComponent'
 
 class InlineNodeComponent extends IsolatedNodeComponent {
 

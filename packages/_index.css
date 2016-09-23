@@ -31,3 +31,7 @@
 @import './modal/_modal.css';
 /* input */
 @import './input/_input.css';
+/* isolated-node */
+@import './isolated-node/_isolated-node.css';
+/* inline-node */
+@import './inline-node/_inline-node.css';

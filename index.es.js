@@ -130,10 +130,6 @@ export { default as Modal } from './packages/modal/Modal'
 export { default as InputPackage } from './packages/input/InputPackage'
 export { default as Input } from './packages/input/Input'
 
-// grid
-export { default as PromptPackage } from './packages/prompt/PromptPackage'
-export { default as Prompt } from './packages/prompt/Prompt'
-
 // responsive application
 export { default as ResponsiveApplication } from './packages/responsive-application/ResponsiveApplication'
 
