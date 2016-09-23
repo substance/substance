@@ -1,5 +1,3 @@
-'use strict';
-
 import isEqual from 'lodash/isEqual'
 import last from 'lodash/last'
 import each from 'lodash/each'
@@ -30,40 +28,41 @@ import documentHelpers from './documentHelpers'
   ```
  */
 
-function ContainerAnnotation() {
-  ContainerAnnotation.super.apply(this, arguments);
-}
+class ContainerAnnotation extends DocumentNode {
 
-ContainerAnnotation.Prototype = function() {
+  get _isAnnotation() {
+    return true
+  }
 
-  this._isAnnotation = true;
-  this._isContainerAnnotation = true;
+  get _isContainerAnnotation() {
+    return true
+  }
 
   /**
     Get the plain text spanned by this annotation.
 
     @return {String}
   */
-  this.getText = function() {
-    var doc = this.getDocument();
+  getText() {
+    let doc = this.getDocument()
     if (!doc) {
-      console.warn('Trying to use a ContainerAnnotation which is not attached to the document.');
-      return "";
+      console.warn('Trying to use a ContainerAnnotation which is not attached to the document.')
+      return ""
     }
-    return documentHelpers.getTextForSelection(doc, this.getSelection());
-  };
+    return documentHelpers.getTextForSelection(doc, this.getSelection())
+  }
 
   /**
     Provides a selection which has the same range as this annotation.
 
     @return {model/ContainerSelection}
   */
-  this.getSelection = function() {
-    var doc = this.getDocument();
+  getSelection() {
+    let doc = this.getDocument()
     // Guard: when this is called while this node has been detached already.
     if (!doc) {
-      console.warn('Trying to use a ContainerAnnotation which is not attached to the document.');
-      return Selection.nullSelection();
+      console.warn('Trying to use a ContainerAnnotation which is not attached to the document.')
+      return Selection.nullSelection()
     }
     return doc.createSelection({
       type: "container",
@@ -72,72 +71,70 @@ ContainerAnnotation.Prototype = function() {
       startOffset: this.startOffset,
       endPath: this.endPath,
       endOffset: this.endOffset
-    });
-  };
+    })
+  }
 
-  this.setHighlighted = function(highlighted, scope) {
+  setHighlighted(highlighted, scope) {
     if (this.highlighted !== highlighted) {
-      this.highlighted = highlighted;
-      this.highlightedScope = scope;
-      this.emit('highlighted', highlighted, scope);
+      this.highlighted = highlighted
+      this.highlightedScope = scope
+      this.emit('highlighted', highlighted, scope)
 
       each(this.fragments, function(frag) {
-        frag.emit('highlighted', highlighted, scope);
-      });
+        frag.emit('highlighted', highlighted, scope)
+      })
     }
-  };
+  }
 
-  this.updateRange = function(tx, sel) {
+  updateRange(tx, sel) {
     if (!sel.isContainerSelection()) {
-      throw new Error('Cannot change to ContainerAnnotation.');
+      throw new Error('Cannot change to ContainerAnnotation.')
     }
     if (!isEqual(this.startPath, sel.start.path)) {
-      tx.set([this.id, 'startPath'], sel.start.path);
+      tx.set([this.id, 'startPath'], sel.start.path)
     }
     if (this.startOffset !== sel.start.offset) {
-      tx.set([this.id, 'startOffset'], sel.start.offset);
+      tx.set([this.id, 'startOffset'], sel.start.offset)
     }
     if (!isEqual(this.endPath, sel.end.path)) {
-      tx.set([this.id, 'endPath'], sel.end.path);
+      tx.set([this.id, 'endPath'], sel.end.path)
     }
     if (this.endOffset !== sel.end.offset) {
-      tx.set([this.id, 'endOffset'], sel.end.offset);
+      tx.set([this.id, 'endOffset'], sel.end.offset)
     }
-  };
+  }
 
-  this.getFragments = function() {
-    var fragments = [];
-    var doc = this.getDocument();
-    var container = doc.get(this.containerId);
-    var paths = container.getPathRange(this.startPath, this.endPath);
+  getFragments() {
+    let fragments = []
+    let doc = this.getDocument()
+    let container = doc.get(this.containerId)
+    let paths = container.getPathRange(this.startPath, this.endPath)
     if (paths.length === 1) {
-      fragments.push(new ContainerAnnotation.Fragment(this, paths[0], "property"));
+      fragments.push(new ContainerAnnotation.Fragment(this, paths[0], "property"))
     } else if (paths.length > 1) {
-      fragments.push(new ContainerAnnotation.Fragment(this, paths[0], "start"));
-      fragments.push(new ContainerAnnotation.Fragment(this, last(paths), "end"));
-      for (var i = 1; i < paths.length-1; i++) {
-        fragments.push(new ContainerAnnotation.Fragment(this, paths[i], "inner"));
+      fragments.push(new ContainerAnnotation.Fragment(this, paths[0], "start"))
+      fragments.push(new ContainerAnnotation.Fragment(this, last(paths), "end"))
+      for (let i = 1; i < paths.length-1; i++) {
+        fragments.push(new ContainerAnnotation.Fragment(this, paths[i], "inner"))
       }
     }
-    return fragments;
-  };
+    return fragments
+  }
 
-  this.getStartAnchor = function() {
+  getStartAnchor() {
     if (!this._startAnchor) {
-      this._startAnchor = new ContainerAnnotation.Anchor(this, 'isStart');
+      this._startAnchor = new ContainerAnnotation.Anchor(this, 'isStart')
     }
-    return this._startAnchor;
-  };
+    return this._startAnchor
+  }
 
-  this.getEndAnchor = function() {
+  getEndAnchor() {
     if (!this._endAnchor) {
-      this._endAnchor = new ContainerAnnotation.Anchor(this);
+      this._endAnchor = new ContainerAnnotation.Anchor(this)
     }
-    return this._endAnchor;
-  };
-};
-
-DocumentNode.extend(ContainerAnnotation);
+    return this._endAnchor
+  }
+}
 
 ContainerAnnotation.define({
   type: "container-annotation",
@@ -146,9 +143,9 @@ ContainerAnnotation.define({
   startOffset: "number",
   endPath: ["string"],
   endOffset: "number"
-});
+})
 
-ContainerAnnotation.isContainerAnnotation = true;
+ContainerAnnotation.isContainerAnnotation = true
 
 /**
   @class
@@ -160,17 +157,17 @@ ContainerAnnotation.Anchor = function(anno, isStart) {
   // Anchor.call(this, path, offset)
 
   // initializing mixin
-  EventEmitter.call(this);
+  EventEmitter.call(this)
 
-  this.type = "container-annotation-anchor";
-  this.anno = anno;
+  this.type = "container-annotation-anchor"
+  this.anno = anno
   // TODO: remove this.node in favor of this.anno
-  this.node = anno;
-  this.id = anno.id;
-  this.containerId = anno.containerId;
-  this.isStart = Boolean(isStart);
-  Object.freeze(this);
-};
+  this.node = anno
+  this.id = anno.id
+  this.containerId = anno.containerId
+  this.isStart = Boolean(isStart)
+  Object.freeze(this)
+}
 
 ContainerAnnotation.Anchor.Prototype = function() {
 
