@@ -1,5 +1,3 @@
-'use strict';
-
 import insertText from './insertText'
 import createAnnotation from './createAnnotation'
 
@@ -24,23 +22,23 @@ import createAnnotation from './createAnnotation'
 
 function insertInlineNode(tx, args) {
   // 1. Insert fake character the inline node will stick
-  var tmp = insertText(tx, {
+  let tmp = insertText(tx, {
     selection: args.selection,
     text: "\uFEFF"
-  });
+  })
 
-  var inlineNodeSel = tx.createSelection({
+  let inlineNodeSel = tx.createSelection({
     type: 'property',
     path: tmp.selection.path,
     startOffset: tmp.selection.startOffset-1,
     endOffset: tmp.selection.endOffset
-  });
+  })
 
   // 2. Create citation annotation
-  args.node = args.node;
-  args.selection = inlineNodeSel;
-  args = createAnnotation(tx, args);
-  return args;
+  args.node = args.node
+  args.selection = inlineNodeSel
+  args = createAnnotation(tx, args)
+  return args
 }
 
-export default insertInlineNode;
+export default insertInlineNode
