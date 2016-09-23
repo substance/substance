@@ -12,7 +12,6 @@ import ScrollbarPackage from '../scrollbar/ScrollbarPackage'
 import GridPackage from '../grid/GridPackage'
 import ModalPackage from '../modal/ModalPackage'
 import InputPackage from '../input/InputPackage'
-import PromptPackage from '../prompt/PromptPackage'
 import ButtonPackage from '../button/ButtonPackage'
 
 export default {
@@ -25,7 +24,6 @@ export default {
     config.import(GridPackage)
     config.import(ModalPackage)
     config.import(InputPackage)
-    config.import(PromptPackage)
     config.import(ButtonPackage)
 
     // Register class to handle the text tool target

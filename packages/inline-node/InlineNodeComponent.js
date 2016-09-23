@@ -1,21 +1,21 @@
 import isEqual from 'lodash/isEqual'
 import startsWith from 'lodash/startsWith'
-import Coordinate from '../model/Coordinate'
-import IsolatedNodeComponent from './IsolatedNodeComponent'
+import Coordinate from '../../model/Coordinate'
+import IsolatedNodeComponent from '../../ui/IsolatedNodeComponent'
 
 class InlineNodeComponent extends IsolatedNodeComponent {
 
   get _isInlineNodeComponent() {
-    return true 
+    return true
   }
 
   // use spans everywhere
   get __elementTag() {
-    return 'span' 
+    return 'span'
   }
 
   get __slugChar() {
-    return "\uFEFF" 
+    return "\uFEFF"
   }
 
   getClassNames() {

@@ -4,7 +4,7 @@ import Coordinate from '../model/Coordinate'
 import Range from '../model/Range'
 import DefaultDOMElement from './DefaultDOMElement'
 import TextPropertyComponent from './TextPropertyComponent'
-import InlineNodeComponent from './InlineNodeComponent'
+import InlineNodeComponent from '../packages/inline-node/InlineNodeComponent'
 import IsolatedNodeComponent from './IsolatedNodeComponent'
 
 /*

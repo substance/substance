@@ -91,6 +91,10 @@ export { default as LinkCommand } from './packages/link/LinkCommand'
 export { default as EditLinkCommand } from './packages/link/EditLinkCommand'
 export { default as LinkComponent } from './packages/link/LinkComponent'
 
+// inline-node
+export { default as InsertInlineNodeCommand } from './packages/inline-node/InsertInlineNodeCommand'
+export { default as EditInlineNodeCommand } from './packages/inline-node/EditInlineNodeCommand'
+
 // button
 export { default as Button } from './packages/button/Button'
 
@@ -150,7 +154,6 @@ export { default as Component } from './ui/Component'
 export { default as ContainerEditor } from './ui/ContainerEditor'
 export { default as DefaultDOMElement } from './ui/DefaultDOMElement'
 export { default as FontAwesomeIcon } from './ui/FontAwesomeIcon'
-export { default as InlineNodeCommand } from './ui/InlineNodeCommand'
 
 export { default as RenderingEngine } from './ui/RenderingEngine'
 export { default as Router } from './ui/Router'

@@ -1,6 +1,6 @@
 'use strict';
 
-import InlineNodeComponent from '../../ui/InlineNodeComponent'
+import InlineNodeComponent from '../../packages/inline-node/InlineNodeComponent'
 
 function InlineWrapperComponent() {
   InlineWrapperComponent.super.apply(this, arguments);

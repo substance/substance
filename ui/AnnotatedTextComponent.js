@@ -1,7 +1,7 @@
 import Fragmenter from '../model/Fragmenter'
 import Component from './Component'
 import AnnotationComponent from './AnnotationComponent'
-import InlineNodeComponent from './InlineNodeComponent'
+import InlineNodeComponent from '../packages/inline-node/InlineNodeComponent'
 
 /**
   Renders an anotated text. Used internally by {@link ui/TextPropertyComponent}.

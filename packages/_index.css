@@ -29,7 +29,5 @@
 @import './grid/_grid.css';
 /* modal */
 @import './modal/_modal.css';
-/* prompt */
-@import './prompt/_prompt.css';
 /* input */
 @import './input/_input.css';
