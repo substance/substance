@@ -2,21 +2,11 @@
 
 import TextBlockComponent from '../../ui/TextBlockComponent'
 
-function CodeblockComponent() {
-  CodeblockComponent.super.apply(this, arguments);
+class CodeblockComponent extends TextBlockComponent {
+  render($$) {
+    let el = super.render.call(this, $$)
+    return el.addClass('sc-codeblock')
+  }
 }
 
-CodeblockComponent.Prototype = function() {
-
-  var _super = CodeblockComponent.super.prototype;
-
-  this.render = function($$) {
-    var el = _super.render.call(this, $$);
-    return el.addClass('sc-codeblock');
-  };
-
-};
-
-TextBlockComponent.extend(CodeblockComponent);
-
-export default CodeblockComponent;
+export default CodeblockComponent
