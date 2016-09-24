@@ -86,9 +86,9 @@ class SwitchTextTypeCommand extends Command {
     @param {String} textTypeName identifier (e.g. heading1)
   */
   execute(props, context) {
-    var textType = this.getTextType(context, props.textType)
-    var nodeData = textType.data
-    var surface = context.surfaceManager.getFocusedSurface()
+    let textType = this.getTextType(context, props.textType)
+    let nodeData = textType.data
+    let surface = context.surfaceManager.getFocusedSurface()
     if (!surface) {
       console.warn('No focused surface. Stopping command execution.')
       return
