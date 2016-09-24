@@ -13,7 +13,7 @@ import Component from '../../ui/Component'
 */
 class Button extends Component {
   render($$) {
-    var el = $$('button')
+    let el = $$('button')
       .addClass('sc-button')
 
     if (this.props.icon) {
@@ -50,7 +50,7 @@ class Button extends Component {
   }
 
   renderIcon($$) {
-    var iconEl = this.context.iconProvider.renderIcon($$, this.props.icon)
+    let iconEl = this.context.iconProvider.renderIcon($$, this.props.icon)
     return iconEl
   }
 
@@ -67,9 +67,9 @@ class Button extends Component {
   }
 
   getLabel(name) {
-    var labelProvider = this.context.labelProvider
+    let labelProvider = this.context.labelProvider
     return labelProvider.getLabel(name)
   }
 }
 
-export default Button;
+export default Button
