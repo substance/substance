@@ -19,7 +19,7 @@ export default {
       $$('code').append(
         converter.annotatedText([node.id, 'content'])
       )
-    );
+    )
   }
 
-};
+}
