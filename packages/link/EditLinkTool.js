@@ -44,13 +44,13 @@ EditLinkTool.Prototype = function() {
       $$(Button, {
         icon: 'open-link',
         style: this.props.style
-      }).on('click', this._openLink),
+      }).attr('title', this.getLabel('open-link'))
+        .on('click', this._openLink),
 
       $$(Button, {
         icon: 'delete',
         style: this.props.style
-      })
-        .attr('title', this.getLabel('delete'))
+      }).attr('title', this.getLabel('delete-link'))
         .on('click', this.onDelete)
     );
     return el;

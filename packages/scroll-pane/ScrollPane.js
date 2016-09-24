@@ -43,7 +43,7 @@ ScrollPane.Prototype = function() {
   };
 
   this.didMount = function() {
-    if (this.props.highlights) {
+    if (this.refs.scrollbar && this.props.highlights) {
       this.props.highlights.on('highlights:updated', this.onHighlightsUpdated, this);
     }
     // HACK: Scrollbar should use DOMMutationObserver instead

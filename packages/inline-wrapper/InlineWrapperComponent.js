@@ -2,20 +2,18 @@
 
 import InlineNodeComponent from '../../packages/inline-node/InlineNodeComponent'
 
-function InlineWrapperComponent() {
-  InlineWrapperComponent.super.apply(this, arguments);
-}
 
-InlineWrapperComponent.Prototype = function() {
+class InlineWrapperComponent extends InlineNodeComponent {
 
-  this.getClassNames = function() {
+  getClassNames() {
     // ATTENTION: ATM it is necessary to add .sc-inline-node
     return 'sc-inline-wrapper sc-inline-node';
-  };
+  }
 
-  this.renderContent = function($$) {
+  renderContent($$) {
     var node = this.props.node;
     var doc = node.getDocument();
+
     var wrappedNode = doc.get(node.wrappedNode);
     var el;
     if (wrappedNode) {
@@ -34,9 +32,6 @@ InlineWrapperComponent.Prototype = function() {
     }
     return el;
   };
-
-};
-
-InlineNodeComponent.extend(InlineWrapperComponent);
+}
 
 export default InlineWrapperComponent;

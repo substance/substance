@@ -158,6 +158,7 @@ export { default as TextPropertyComponent } from './ui/TextPropertyComponent'
 export { default as TextPropertyEditor } from './ui/TextPropertyEditor'
 export { default as TOC } from './ui/TOC'
 export { default as TOCProvider } from './ui/TOCProvider'
+export { default as Highlights } from './ui/Highlights'
 
 // util
 export { default as ArrayIterator } from './util/ArrayIterator'
