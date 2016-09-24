@@ -1,46 +1,43 @@
-'use strict';
-
 import inBrowser from '../../util/inBrowser'
 import DefaultDOMElement from '../../ui/DefaultDOMElement'
 import Component from '../../ui/Component'
 import cloneDeep from 'lodash/cloneDeep'
 
-function ResponsiveApplication() {
-  Component.apply(this, arguments);
+class ResponsiveApplication extends Component {
+  constructor(...args) {
+    super(...args)
 
-  this.pages = {};
+    this.pages = {}
 
-  this.handleActions({
-    'navigate': this.navigate,
-  });
-}
+    this.handleActions({
+      'navigate': this.navigate
+    })
+  }
 
-ResponsiveApplication.Prototype = function() {
-
-  this.getInitialState = function() {
+  getInitialState() {
     return {
       route: undefined,
       mobile: this._isMobile()
-    };
-  };
-
-  this.didMount = function() {
-    if (inBrowser) {
-      var _window = DefaultDOMElement.getBrowserWindow();
-      _window.on('resize', this._onResize, this);
     }
-    this.router = this.getRouter();
-    this.router.on('route:changed', this._onRouteChanged, this);
-    var route = this.router.readRoute();
+  }
+
+  didMount() {
+    if (inBrowser) {
+      let _window = DefaultDOMElement.getBrowserWindow()
+      _window.on('resize', this._onResize, this)
+    }
+    this.router = this.getRouter()
+    this.router.on('route:changed', this._onRouteChanged, this)
+    let route = this.router.readRoute()
     // Replaces the current entry without creating new history entry
     // or triggering hashchange
-    this.navigate(route, {replace: true});
-  };
+    this.navigate(route, {replace: true})
+  }
 
-  this.dispose = function() {
-    this.router.off(this);
-    this.router.dispose();
-  };
+  dispose() {
+    this.router.off(this)
+    this.router.dispose()
+  }
 
   /*
     Used to navigate the app based on given route.
@@ -49,84 +46,82 @@ ResponsiveApplication.Prototype = function() {
     On app level, never use setState/extendState directly as this may
     lead to invalid states.
   */
-  this.navigate = function(route, opts) {
+  navigate(route, opts) {
     this.extendState({
       route: route
-    });
-    this.router.writeRoute(route, opts);
-  };
+    })
+    this.router.writeRoute(route, opts)
+  }
 
-  this._onRouteChanged = function(route) {
+  _onRouteChanged(route) {
     // console.log('NotesApp._onRouteChanged', route);
-    this.navigate(route, {replace: true});
-  };
+    this.navigate(route, {replace: true})
+  }
 
-  this._isMobile = function() {
+  _isMobile() {
     if (inBrowser) {
-      return window.innerWidth < 700;
+      return window.innerWidth < 700
     }
-  };
+  }
 
-  this._onResize = function() {
+  _onResize() {
     if (this._isMobile()) {
       // switch to mobile
       if (!this.state.mobile) {
         this.extendState({
           mobile: true
-        });
+        })
       }
     } else {
       if (this.state.mobile) {
         this.extendState({
           mobile: false
-        });
+        })
       }
     }
-  };
+  }
 
-  this._getPage = function() {
-    return this.state.route.page || this.getDefaultPage();
-  };
+  _getPage() {
+    return this.state.route.page || this.getDefaultPage()
+  }
 
-  this._getPageClass = function() {
-    var page = this._getPage();
-    return this.pages[page];
-  };
+  _getPageClass() {
+    let page = this._getPage()
+    return this.pages[page]
+  }
 
-  this._getPageProps = function() {
-    var props = cloneDeep(this.state.route);
-    delete props.page;
-    props.mobile = this.state.mobile;
-    return props;
-  };
+  _getPageProps() {
+    let props = cloneDeep(this.state.route)
+    delete props.page
+    props.mobile = this.state.mobile
+    return props
+  }
 
-  this.addPage = function(pageName, PageClass) {
-    this.pages[pageName] = PageClass;
-  };
+  addPage(pageName, PageClass) {
+    this.pages[pageName] = PageClass
+  }
 
-  this.renderPage = function($$) {
-    var PageClass = this._getPageClass();
-    var pageName = this._getPage();
-    return $$(PageClass, this._getPageProps()).ref(pageName);
-  };
+  renderPage($$) {
+    let PageClass = this._getPageClass()
+    let pageName = this._getPage()
+    return $$(PageClass, this._getPageProps()).ref(pageName)
+  }
 
-  this.render = function($$) {
-    var el = $$('div').addClass('sc-responsive-application');
+  render($$) {
+    let el = $$('div').addClass('sc-responsive-application')
 
     if (this.state.route === undefined) {
       // Not yet initialized by router
-      return el;
+      return el
     }
 
     el.append(
       this.renderPage($$)
-    );
+    )
 
-    return el;
-  };
+    return el
+  }
 
-};
+}
 
-Component.extend(ResponsiveApplication);
-
-export default ResponsiveApplication;
+export default ResponsiveApplication
