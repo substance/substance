@@ -236,13 +236,6 @@ class ContainerEditor extends Surface {
   }
 
   /*
-    TODO: Select first content to be found
-  */
-  selectFirst() {
-    console.warn('TODO: Implement selection of first content to be found.')
-  }
-
-  /*
     Register custom editor behavior using this method
   */
   extendBehavior(extension) {
