@@ -1,17 +1,11 @@
-'use strict';
-
 import PropertyAnnotation from '../../model/PropertyAnnotation'
 import Fragmenter from '../../model/Fragmenter'
 
-function Subscript() {
-  Subscript.super.apply(this, arguments);
-}
+class Subscript extends PropertyAnnotation {}
 
-PropertyAnnotation.extend(Subscript);
-
-Subscript.type = 'subscript';
+Subscript.type = 'subscript'
 
 // hint for rendering in presence of overlapping annotations
-Subscript.fragmentation = Fragmenter.ANY;
+Subscript.fragmentation = Fragmenter.ANY
 
-export default Subscript;
+export default Subscript

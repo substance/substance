@@ -1,5 +1,3 @@
-'use strict';
-
 import Subscript from './Subscript'
 import SubscriptHTMLConverter from './SubscriptHTMLConverter'
 import SubscriptXMLConverter from './SubscriptXMLConverter'
@@ -10,18 +8,18 @@ import AnnotationTool from '../../ui/AnnotationTool'
 export default {
   name: 'subscript',
   configure: function(config) {
-    config.addNode(Subscript);
-    config.addConverter('html', SubscriptHTMLConverter);
-    config.addConverter('xml', SubscriptXMLConverter);
-    config.addComponent('subscript', AnnotationComponent);
-    config.addCommand('subscript', AnnotationCommand, { nodeType: 'subscript' });
-    config.addTool('subscript', AnnotationTool, {target: 'annotations'});
-    config.addIcon('subscript', { 'fontawesome': 'fa-subscript' });
+    config.addNode(Subscript)
+    config.addConverter('html', SubscriptHTMLConverter)
+    config.addConverter('xml', SubscriptXMLConverter)
+    config.addComponent('subscript', AnnotationComponent)
+    config.addCommand('subscript', AnnotationCommand, { nodeType: 'subscript' })
+    config.addTool('subscript', AnnotationTool, {target: 'annotations'})
+    config.addIcon('subscript', { 'fontawesome': 'fa-subscript' })
     config.addLabel('subscript', {
       en: 'Subscript',
       de: 'Tiefgestellt'
-    });
+    })
   },
   Subscript: Subscript,
-  SubscriptHTMLConverter: SubscriptHTMLConverter,
-};
+  SubscriptHTMLConverter: SubscriptHTMLConverter
+}
