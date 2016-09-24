@@ -1,34 +1,26 @@
-'use strict';
-
 import Component from '../../ui/Component'
 import TextPropertyEditor from '../../ui/TextPropertyEditor'
 
-function TextCellContent() {
-  TextCellContent.super.apply(this, arguments);
-}
+class TextCellContent extends Component {
 
-TextCellContent.Prototype = function() {
+  render($$) {
+    let el = $$('div').addClass('sc-text-cell')
 
-  this.render = function($$) {
-    var el = $$('div').addClass('sc-text-cell');
-
-    var path;
+    let path
     if (this.props.node) {
-      path = this.props.node.getTextPath();
+      path = this.props.node.getTextPath()
     } else {
-      path = this.props.path;
+      path = this.props.path
     }
 
     el.append($$(TextPropertyEditor, {
       path: path,
       disabled: this.props.disabled
-    }).ref('editor'));
+    }).ref('editor'))
 
-    return el;
-  };
+    return el
+  }
 
-};
+}
 
-Component.extend(TextCellContent);
-
-export default TextCellContent;
+export default TextCellContent
