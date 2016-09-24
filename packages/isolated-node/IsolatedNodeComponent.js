@@ -145,13 +145,11 @@ class IsolatedNodeComponent extends Component {
     }
 
     el.append(container)
-
     el.append(
       $$(this.__elementTag).addClass('se-slug').addClass('sm-after').ref('after')
         // NOTE: better use a regular character otherwise Edge has problems
         .append(this.__slugChar)
     )
-
     return el
   }
 

@@ -27,6 +27,14 @@ export default {
       en: 'Link',
       de: 'Link'
     });
+    config.addLabel('open-link', {
+      en: 'Open Link',
+      de: 'Link öffnen'
+    });
+    config.addLabel('delete-link', {
+      en: 'Remove Link',
+      de: 'Link löschen'
+    });
   },
   Link: Link,
   LinkComponent: LinkComponent,
