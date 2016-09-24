@@ -25,25 +25,25 @@ export default {
       name: 'prose-article',
       ArticleClass: ProseArticle,
       defaultTextType: 'paragraph'
-    });
+    })
     // Now import base packages
     config.import(BasePackage, {
       noBaseStyles: options.noBaseStyles
-    });
+    })
 
-    config.import(ParagraphPackage);
-    config.import(HeadingPackage);
-    config.import(CodeblockPackage);
-    config.import(BlockquotePackage);
-    config.import(ListPackage);
-    config.import(EmphasisPackage);
-    config.import(StrongPackage);
-    config.import(SubscriptPackage);
-    config.import(SuperscriptPackage);
-    config.import(CodePackage);
-    config.import(LinkPackage);
+    config.import(ParagraphPackage)
+    config.import(HeadingPackage)
+    config.import(CodeblockPackage)
+    config.import(BlockquotePackage)
+    config.import(ListPackage)
+    config.import(EmphasisPackage)
+    config.import(StrongPackage)
+    config.import(SubscriptPackage)
+    config.import(SuperscriptPackage)
+    config.import(CodePackage)
+    config.import(LinkPackage)
   },
   ProseEditor: ProseEditor,
   Configurator: ProseEditorConfigurator,
   Toolbar: Toolbar
-};
+}
