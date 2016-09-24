@@ -1,5 +1,3 @@
-'use strict';
-
 import Tool from '../tools/Tool'
 import clone from 'lodash/clone'
 
@@ -9,31 +7,27 @@ import clone from 'lodash/clone'
   Designed so that it can be used either in a toolbar, or within
   an overlay on the Surface.
 */
-function EditLinkTool() {
-  EditLinkTool.super.apply(this, arguments);
-}
+class EditLinkTool extends Tool {
 
-EditLinkTool.Prototype = function() {
+  getUrlPath() {
+    let propPath = this.constructor.urlPropertyPath
+    return [this.props.node.id].concat(propPath)
+  }
 
-  this.getUrlPath = function() {
-    var propPath = this.constructor.urlPropertyPath;
-    return [this.props.node.id].concat(propPath);
-  };
+  _openLink() {
+    console.log('open link...')
+    let doc = this.context.documentSession.getDocument()
+    window.open(doc.get(this.getUrlPath()), '_blank')
+  }
 
-  this._openLink = function() {
-    console.log('open link...');
-    var doc = this.context.documentSession.getDocument();
-    window.open(doc.get(this.getUrlPath()), '_blank');
-  };
-
-  this.render = function($$) {
-    var Prompt = this.getComponent('prompt');
-    var Input = this.getComponent('input');
-    var Button = this.getComponent('button');
-    var node = this.props.node;
-    var doc = node.getDocument();
-    var el = $$('div').addClass('sc-edit-link-tool');
-    var urlPath = this.getUrlPath();
+  render($$) {
+    let Prompt = this.getComponent('prompt')
+    let Input = this.getComponent('input')
+    let Button = this.getComponent('button')
+    let node = this.props.node
+    let doc = node.getDocument()
+    let el = $$('div').addClass('sc-edit-link-tool')
+    let urlPath = this.getUrlPath()
 
     el.append(
       $$(Input, {
@@ -52,25 +46,22 @@ EditLinkTool.Prototype = function() {
         style: this.props.style
       }).attr('title', this.getLabel('delete-link'))
         .on('click', this.onDelete)
-    );
-    return el;
-  };
+    )
+    return el
+  }
 
-  this.onDelete = function(e) {
+  onDelete(e) {
     e.preventDefault();
-    var node = this.props.node;
-    var sm = this.context.surfaceManager;
-    var surface = sm.getFocusedSurface();
+    let node = this.props.node
+    let sm = this.context.surfaceManager
+    let surface = sm.getFocusedSurface()
     surface.transaction(function(tx, args) {
-      tx.delete(node.id);
-      return args;
-    });
-  };
-};
+      tx.delete(node.id)
+      return args
+    })
+  }
+}
 
-Tool.extend(EditLinkTool);
+EditLinkTool.urlPropertyPath = ['url']
 
-EditLinkTool.urlPropertyPath = ['url'];
-
-
-export default EditLinkTool;
+export default EditLinkTool
