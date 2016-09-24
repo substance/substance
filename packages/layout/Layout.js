@@ -1,5 +1,3 @@
-'use strict';
-
 import Component from '../../ui/Component'
 
 /**
@@ -21,27 +19,22 @@ import Component from '../../ui/Component'
   });
   ```
 */
-function Layout() {
-  Component.apply(this, arguments);
-}
+class Layout extends Component {
 
-Layout.Prototype = function() {
-
-  this.render = function($$) {
-    var el = $$('div').addClass('sc-layout');
-    el.addClass('sm-width-'+this.props.width);
+  render($$) {
+    let el = $$('div').addClass('sc-layout')
+    el.addClass('sm-width-'+this.props.width)
     if (this.props.textAlign) {
-      el.addClass('sm-text-align-'+this.props.textAlign);
+      el.addClass('sm-text-align-'+this.props.textAlign)
     }
 
     if (this.props.noPadding) {
-      el.addClass('sm-no-padding');
+      el.addClass('sm-no-padding')
     }
 
-    el.append(this.props.children);
-    return el;
-  };
-};
+    el.append(this.props.children)
+    return el
+  }
+}
 
-Component.extend(Layout);
-export default Layout;
+export default Layout
