@@ -12,7 +12,7 @@ import Component from '../../ui/Component'
   @class
   @component
 */
-class Tool extends Component() {
+class Tool extends Component {
 
   get _isTool() {
     return true
