@@ -1,5 +1,3 @@
-'use strict';
-
 /*
  * HTML converter for Blockquote.
  */
@@ -9,7 +7,7 @@ export default {
   tagName: 'em',
 
   matchElement: function(el) {
-    return el.is('em, i');
+    return el.is('em, i')
   }
 
-};
+}
