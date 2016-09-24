@@ -1,5 +1,3 @@
-'use strict';
-
 /*
  * HTML converter for Strong.
  */
@@ -9,7 +7,7 @@ export default {
   tagName: "strong",
 
   matchElement: function(el) {
-    return el.is("strong, b");
+    return el.is("strong, b")
   }
 
-};
+}
