@@ -1,5 +1,3 @@
-'use strict';
-
 import Component from '../../ui/Component'
 import each from 'lodash/each'
 
@@ -27,49 +25,43 @@ import each from 'lodash/each'
   ```
 */
 
-function TabbedPane() {
-  Component.apply(this, arguments);
-}
+class TabbedPane extends Component {
 
-TabbedPane.Prototype = function() {
-
-  this.render = function($$) {
-    var el = $$('div').addClass('sc-tabbed-pane');
-    var tabsEl = $$('div').addClass('se-tabs');
+  render($$) {
+    let el = $$('div').addClass('sc-tabbed-pane')
+    let tabsEl = $$('div').addClass('se-tabs')
     each(this.props.tabs, function(tab) {
-      var tabEl = $$('a')
+      let tabEl = $$('a')
         .addClass("se-tab")
         .attr({
           href: "#",
           "data-id": tab.id,
         })
-        .on('click', this.onTabClicked);
+        .on('click', this.onTabClicked)
       if (tab.id === this.props.activeTab) {
-        tabEl.addClass("sm-active");
+        tabEl.addClass("sm-active")
       }
       tabEl.append(
         $$('span').addClass('label').append(tab.name)
-      );
-      tabsEl.append(tabEl);
-    }.bind(this));
+      )
+      tabsEl.append(tabEl)
+    }.bind(this))
 
-    el.append(tabsEl);
+    el.append(tabsEl)
     // Active content
     el.append(
       $$('div').addClass('se-tab-content').ref('tabContent').append(
         this.props.children
       )
-    );
-    return el;
-  };
+    )
+    return el
+  }
 
-  this.onTabClicked = function(e) {
-    e.preventDefault();
-    var tabId = e.currentTarget.dataset.id;
-    this.send('switchTab', tabId);
-  };
-};
+  onTabClicked(e) {
+    e.preventDefault()
+    let tabId = e.currentTarget.dataset.id
+    this.send('switchTab', tabId)
+  }
+}
 
-Component.extend(TabbedPane);
-
-export default TabbedPane;
+export default TabbedPane
