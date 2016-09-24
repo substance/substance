@@ -2,7 +2,6 @@ import InlineWrapper from './InlineWrapper'
 import InlineWrapperComponent from './InlineWrapperComponent'
 import InlineWrapperConverter from './InlineWrapperConverter'
 
-
 /*
   This package adds a node to the model which can be used
   to use a block-level node within an inline context.
@@ -15,15 +14,15 @@ import InlineWrapperConverter from './InlineWrapperConverter'
 export default {
   name: 'inline-wrapper',
   configure: function(config, options) {
-    config.addNode(InlineWrapper);
-    config.addComponent(InlineWrapper.type, InlineWrapperComponent);
+    config.addNode(InlineWrapper)
+    config.addComponent(InlineWrapper.type, InlineWrapperComponent)
     if (options.converters) {
       options.converters.forEach(function(name) {
-        config.addConverter(name, InlineWrapperConverter);
-      });
+        config.addConverter(name, InlineWrapperConverter)
+      })
     }
   },
   InlineWrapper: InlineWrapper,
   InlineWrapperComponent: InlineWrapperComponent,
   InlineWrapperConverter: InlineWrapperConverter
-};
+}
