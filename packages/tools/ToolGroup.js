@@ -2,13 +2,13 @@ import Component from '../../ui/Component'
 
 class ToolGroup extends Component {
   render($$) {
-    var tools = this.props.tools
-    var commandStates = this.props.commandStates
-    var el = $$('div').addClass('sc-tool-group')
+    let tools = this.props.tools
+    let commandStates = this.props.commandStates
+    let el = $$('div').addClass('sc-tool-group')
     el.addClass('sm-target-'+this.props.name)
 
     tools.forEach(function(tool, name) {
-      var toolProps = Object.assign({}, commandStates[name])
+      let toolProps = Object.assign({}, commandStates[name])
       toolProps.name = name
       toolProps.icon = name
       toolProps.style = 'outline' // outline button style will be used
@@ -21,4 +21,3 @@ class ToolGroup extends Component {
 }
 
 export default ToolGroup
-

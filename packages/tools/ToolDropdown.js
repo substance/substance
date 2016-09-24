@@ -3,17 +3,17 @@ import Button from '../button/Button'
 
 class ToolDropdown extends Component {
   render($$) {
-    var tools = this.props.tools
-    var commandStates = this.props.commandStates
-    var el = $$('div').addClass('sc-tool-dropdown')
+    let tools = this.props.tools
+    let commandStates = this.props.commandStates
+    let el = $$('div').addClass('sc-tool-dropdown')
     el.addClass('sm-target-'+this.props.name)
     el.append(
       this.renderButton($$)
     )
     if (this.state.open) {
-      var optionEls = [];
+      let optionEls = []
       tools.forEach(function(tool, name) {
-        var toolProps = Object.assign({}, commandStates[name])
+        let toolProps = Object.assign({}, commandStates[name])
         toolProps.name = name
         toolProps.label = name
         toolProps.hint = 'CTRL+4'
@@ -33,7 +33,7 @@ class ToolDropdown extends Component {
   }
 
   renderButton($$) {
-    var btn = $$(Button, {
+    let btn = $$(Button, {
       label: this.props.name,
       active: this.state.open,
       disabled: this.props.disabled,
@@ -43,7 +43,7 @@ class ToolDropdown extends Component {
   }
 
   onClick() {
-    var open = !this.state.open
+    let open = !this.state.open
     this.setState({
       open: open
     })
