@@ -23,7 +23,7 @@ class InlineNodeComponent extends IsolatedNodeComponent {
   }
 
   render($$) { // eslint-disable-line
-    let el = super.render.apply(this, arguments)
+    let el = super.render($$)
     el.attr('data-inline', '1')
     return el
   }
