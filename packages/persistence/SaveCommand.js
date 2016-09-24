@@ -22,4 +22,4 @@ class SaveCommand extends Command {
   }
 }
 
-export default SaveCommand;
+export default SaveCommand
