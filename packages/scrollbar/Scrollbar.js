@@ -50,12 +50,12 @@ class Scrollbar extends Component {
   }
 
   render($$) {
-    var el = $$('div')
+    let el = $$('div')
       .addClass('sc-scrollbar')
       .on('mousedown', this.onMouseDown)
 
     if (this.props.highlights) {
-      var highlightEls = []
+      let highlightEls = []
 
       each(this.props.highlights, function(highlights, scope) {
         each(highlights, function(h) {
@@ -76,12 +76,12 @@ class Scrollbar extends Component {
   }
 
   updatePositions() {
-    var scrollPane = this.props.scrollPane
-    var scrollableEl = scrollPane.getScrollableElement()
-    var contentHeight = scrollPane.getContentHeight()
-    var scrollPaneHeight = scrollPane.getHeight()
-    var scrollTop = scrollPane.getScrollPosition()
-    var contentEl = scrollPane.getContentElement()
+    let scrollPane = this.props.scrollPane
+    let scrollableEl = scrollPane.getScrollableElement()
+    let contentHeight = scrollPane.getContentHeight()
+    let scrollPaneHeight = scrollPane.getHeight()
+    let scrollTop = scrollPane.getScrollPosition()
+    let contentEl = scrollPane.getContentElement()
 
     // Needed for scrollbar interaction
     this.factor = (contentHeight / scrollPaneHeight)
@@ -97,21 +97,21 @@ class Scrollbar extends Component {
       // Compute highlights
       each(this.props.highlights,function(highlights) {
         each(highlights, function(nodeId) {
-          var nodeEl = scrollableEl.find('*[data-id="'+nodeId+'"]')
+          let nodeEl = scrollableEl.find('*[data-id="'+nodeId+'"]')
 
           if (!nodeEl) return
 
           // Compute bounding rect relative to scroll pane content element
-          var rect = getRelativeBoundingRect(nodeEl.getNativeElement(), contentEl.getNativeElement())
-          var top = rect.top / this.factor
-          var height = rect.height / this.factor
+          let rect = getRelativeBoundingRect(nodeEl.getNativeElement(), contentEl.getNativeElement())
+          let top = rect.top / this.factor
+          let height = rect.height / this.factor
 
           // Use specified minHeight for highlights
           if (height < Scrollbar.overlayMinHeight) {
             height = Scrollbar.overlayMinHeight
           }
 
-          var highlightEl = this.refs[nodeId]
+          let highlightEl = this.refs[nodeId]
           if (highlightEl) {
             this.refs[nodeId].css({
               top: top,
@@ -144,13 +144,13 @@ class Scrollbar extends Component {
 
     // temporarily, we bind to events on window level
     // because could leave the this element's area while dragging
-    var _window = DefaultDOMElement.getBrowserWindow()
+    let _window = DefaultDOMElement.getBrowserWindow()
     _window.on('mousemove', this.onMouseMove, this)
     _window.on('mouseup', this.onMouseUp, this)
 
-    var scrollBarOffset = this.el.getOffset().top
-    var y = e.pageY - scrollBarOffset
-    var thumbEl = this.refs.thumb.el
+    let scrollBarOffset = this.el.getOffset().top
+    let y = e.pageY - scrollBarOffset
+    let thumbEl = this.refs.thumb.el
     if (e.target !== thumbEl.getNativeElement()) {
       // Jump to mousedown position
       this.offset = thumbEl.height / 2
@@ -163,20 +163,20 @@ class Scrollbar extends Component {
   // Handle Mouse Up
   onMouseUp() {
     this._mouseDown = false
-    var _window = DefaultDOMElement.getBrowserWindow()
+    let _window = DefaultDOMElement.getBrowserWindow()
     _window.off('mousemove', this.onMouseMove, this)
     _window.off('mouseup', this.onMouseUp, this)
   }
 
   onMouseMove(e) {
     if (this._mouseDown) {
-      var scrollPane = this.props.scrollPane
-      var scrollableEl = scrollPane.getScrollableElement()
-      var scrollBarOffset = this.el.getOffset().top
-      var y = e.pageY - scrollBarOffset
+      let scrollPane = this.props.scrollPane
+      let scrollableEl = scrollPane.getScrollableElement()
+      let scrollBarOffset = this.el.getOffset().top
+      let y = e.pageY - scrollBarOffset
 
       // find offset to visible-area.top
-      var scroll = (y-this.offset)*this.factor
+      let scroll = (y-this.offset)*this.factor
       scrollableEl.setProperty('scrollTop', scroll)
     }
   }
