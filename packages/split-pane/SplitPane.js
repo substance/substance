@@ -1,5 +1,3 @@
-'use strict';
-
 import Component from '../../ui/Component'
 
 /**
@@ -25,57 +23,51 @@ import Component from '../../ui/Component'
   ```
 */
 
-function SplitPane() {
-  Component.apply(this, arguments);
-}
+class SplitPane extends Component {
 
-SplitPane.Prototype = function() {
-
-  this.render = function($$) {
+  render($$) {
     if (this.props.children.length !== 2) {
-      throw new Error('SplitPane only works with exactly two child elements');
+      throw new Error('SplitPane only works with exactly two child elements')
     }
 
-    var el = $$('div').addClass('sc-split-pane');
+    let el = $$('div').addClass('sc-split-pane')
     if (this.props.splitType === 'horizontal') {
-      el.addClass('sm-horizontal');
+      el.addClass('sm-horizontal')
     } else {
-      el.addClass('sm-vertical');
+      el.addClass('sm-vertical')
     }
 
-    var paneA = this.props.children[0];
-    var paneB = this.props.children[1];
+    let paneA = this.props.children[0]
+    let paneB = this.props.children[1]
 
     // Apply configured size either to pane A or B.
     if (this.props.sizeB) {
-      paneB.addClass('se-pane sm-sized');
-      paneB.css(this.getSizedStyle(this.props.sizeB));
-      paneA.addClass('se-pane sm-auto-fill');
+      paneB.addClass('se-pane sm-sized')
+      paneB.css(this.getSizedStyle(this.props.sizeB))
+      paneA.addClass('se-pane sm-auto-fill')
     } else {
-      paneA.addClass('se-pane sm-sized');
-      paneA.css(this.getSizedStyle(this.props.sizeA));
-      paneB.addClass('se-pane sm-auto-fill');
+      paneA.addClass('se-pane sm-sized')
+      paneA.css(this.getSizedStyle(this.props.sizeA))
+      paneB.addClass('se-pane sm-auto-fill')
     }
 
     el.append(
       paneA,
       paneB
-    );
-    return el;
-  };
+    )
+    return el
+  }
 
   // Accepts % and px units for size property
-  this.getSizedStyle = function(size) {
-    if (!size || size === 'inherit') return {};
+  getSizedStyle(size) {
+    if (!size || size === 'inherit') return {}
     if (this.props.splitType === 'horizontal') {
-      return {'height': size};
+      return {'height': size}
     } else {
-      return {'width': size};
+      return {'width': size}
     }
-  };
+  }
 
-};
+}
 
-Component.extend(SplitPane);
-
-export default SplitPane;
+export default SplitPane
