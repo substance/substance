@@ -1,18 +1,12 @@
-'use strict';
-
 import TextBlock from '../../model/TextBlock'
 
-function ListItem() {
-  ListItem.super.apply(this, arguments);
-}
+class ListItem extends TextBlock {}
 
-TextBlock.extend(ListItem);
-
-ListItem.type = 'list-item';
+ListItem.type = 'list-item'
 
 ListItem.define({
   listType: { type: 'string', default: 'unordered' },
   level: { type: 'number', default: 1 }
-});
+})
 
-export default ListItem;
+export default ListItem

@@ -1,29 +1,21 @@
-'use strict';
-
 import Component from '../../ui/Component'
 import TextProperty from '../../ui/TextPropertyComponent'
 
-function ListItemComponent() {
-  ListItemComponent.super.apply(this, arguments);
-}
+class ListItemComponent extends Component {
 
-ListItemComponent.Prototype = function() {
-
-  this.render = function($$) {
-    var node = this.props.node;
-    var el = $$('div')
+  render($$) {
+    let node = this.props.node
+    let el = $$('div')
       .addClass('sc-list-item')
       .addClass('sm-' + node.listType)
       .attr('data-id', this.props.node.id)
       .append($$(TextProperty, {
         path: [ this.props.node.id, 'content']
       })
-    );
-    return el;
-  };
+    )
+    return el
+  }
 
-};
+}
 
-Component.extend(ListItemComponent);
-
-export default ListItemComponent;
+export default ListItemComponent
