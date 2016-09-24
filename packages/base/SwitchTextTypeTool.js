@@ -1,5 +1,3 @@
-'use strict';
-
 import each from 'lodash/each'
 import Tool from '../tools/Tool'
 import keys from '../../util/keys'
@@ -10,163 +8,157 @@ import keys from '../../util/keys'
   @class
   @component
 */
-function SwitchTextTypeTool() {
-  SwitchTextTypeTool.super.apply(this, arguments);
+class SwitchTextTypeTool extends Tool {
+  constructor(...args) {
+    super(...args)
 
-  // cursor for keyboard navigation
-  this._navIdx = -1;
-}
-
-SwitchTextTypeTool.Prototype = function() {
-
-  var _super = SwitchTextTypeTool.super.prototype;
+    // cursor for keyboard navigation
+    this._navIdx = -1
+  }
 
   // UI Specific parts
   // ----------------
 
-  this.didMount = function() {
-    _super.didMount.call(this);
+  didMount(...args) {
+    super.didMount(...args)
 
-    this._focusToggle();
-  };
+    this._focusToggle()
+  }
 
-
-  this.render = function($$) {
-    var labelProvider = this.context.labelProvider;
-    var textTypeName = 'No selection';
+  render($$) {
+    let labelProvider = this.context.labelProvider
+    let textTypeName = 'No selection'
 
     if (this.props.currentTextType) {
-      textTypeName = this.props.currentTextType.name;
+      textTypeName = this.props.currentTextType.name
     }
-    var el = $$('div').addClass('sc-switch-text-type');
+    let el = $$('div').addClass('sc-switch-text-type')
 
-    var toggleButton = $$('button').ref('toggle')
+    let toggleButton = $$('button').ref('toggle')
       .addClass('se-toggle')
       .attr('title', labelProvider.getLabel('switch_text'))
       .append(labelProvider.getLabel(textTypeName))
-      .on('click', this.toggleAvailableTextTypes);
+      .on('click', this.toggleAvailableTextTypes)
 
     if (this.props.disabled || !this.props.currentTextType) {
       el.addClass('sm-disabled');
-      toggleButton.attr('tabindex', -1);
+      toggleButton.attr('tabindex', -1)
     } else {
-      toggleButton.attr('tabindex', 1);
+      toggleButton.attr('tabindex', 1)
     }
 
-    el.append(toggleButton);
+    el.append(toggleButton)
 
     if (this.state.open) {
-      el.addClass('sm-open');
+      el.addClass('sm-open')
 
       // dropdown options
-      var options = $$('div').addClass("se-options").ref('options');
+      let options = $$('div').addClass("se-options").ref('options')
       each(this.props.textTypes, function(textType) {
-        var button = $$('button')
+        let button = $$('button')
             .addClass('se-option sm-'+textType.name)
             .attr('data-type', textType.name)
             .append(labelProvider.getLabel(textType.name))
-            .on('click', this.handleClick);
-        options.append(button);
-      }.bind(this));
-      el.append(options);
-      el.on('keydown', this.onKeydown);
+            .on('click', this.handleClick)
+        options.append(button)
+      }.bind(this))
+      el.append(options)
+      el.on('keydown', this.onKeydown)
     }
 
-    return el;
-  };
+    return el
+  }
 
-  this.didUpdate = function() {
-    this._focusToggle();
-  };
+  didUpdate() {
+    this._focusToggle()
+  }
 
-  this._focusToggle = function() {
+  _focusToggle() {
     if (this.state.open) {
-      this.refs.toggle.focus();
+      this.refs.toggle.focus()
     }
-  };
+  }
 
-  this.executeCommand = function(textType) {
+  executeCommand(textType) {
     this.context.commandManager.executeCommand(this.getCommandName(), {
       textType: textType
-    });
-  };
+    })
+  }
 
-  this.getTextCommands = function() {
-    var surface = this.getSurface();
+  getTextCommands() {
+    let surface = this.getSurface()
     if (!this.textCommands && surface) {
-      this.textCommands = surface.getTextCommands();
+      this.textCommands = surface.getTextCommands()
     }
-    return this.textCommands || {};
-  };
+    return this.textCommands || {}
+  }
 
-  this.handleClick = function(e) {
-    e.preventDefault();
+  handleClick(e) {
+    e.preventDefault()
     // Modifies the tool's state so that state.open is undefined, which is nice
     // because it means the dropdown will be closed automatically
-    this.executeCommand(e.currentTarget.dataset.type);
-  };
+    this.executeCommand(e.currentTarget.dataset.type)
+  }
 
-  this.onKeydown = function(event) {
-    var handled = false;
+  onKeydown(event) {
+    let handled = false
     switch (event.keyCode) {
       case keys.UP:
-        this._nav(-1);
-        handled = true;
-        break;
+        this._nav(-1)
+        handled = true
+        break
       case keys.DOWN:
-        this._nav(1);
-        handled = true;
-        break;
+        this._nav(1)
+        handled = true
+        break
       case keys.ESCAPE:
-        this.toggleDropdown();
-        handled = true;
-        break;
+        this.toggleDropdown()
+        handled = true
+        break
       default:
         // nothing
     }
     if (handled) {
-      event.preventDefault();
-      event.stopPropagation();
+      event.preventDefault()
+      event.stopPropagation()
     }
-  };
+  }
 
-  this.toggleAvailableTextTypes = function(e) {
-    e.preventDefault();
-    e.stopPropagation();
-    if (this.props.disabled) return;
+  toggleAvailableTextTypes(e) {
+    e.preventDefault()
+    e.stopPropagation()
+    if (this.props.disabled) return
 
     // HACK: This only updates the view state state.open is not set on the tool itself
     // That way the dropdown automatically closes when the selection changes
-    this.toggleDropdown();
-  };
+    this.toggleDropdown()
+  }
 
-  this.toggleDropdown = function() {
+  toggleDropdown() {
     // reset index for keyboard navigation
-    this._navIdx = -1;
+    this._navIdx = -1
     this.extendState({
       open: !this.state.open
-    });
-  };
+    })
+  }
 
-  this._nav = function(step) {
-    this._navIdx += step;
-    this._navIdx = Math.max(0, this._navIdx);
-    this._navIdx = Math.min(this._getOptionsCount()-1, this._navIdx);
+  _nav(step) {
+    this._navIdx += step
+    this._navIdx = Math.max(0, this._navIdx)
+    this._navIdx = Math.min(this._getOptionsCount()-1, this._navIdx)
 
     if (this._navIdx >= 0) {
-      var option = this.refs.options.children[this._navIdx];
-      option.focus();
+      let option = this.refs.options.children[this._navIdx]
+      option.focus()
     }
-  };
+  }
 
-  this._getOptionsCount = function() {
-    return this.refs.options.children.length;
-  };
+  _getOptionsCount() {
+    return this.refs.options.children.length
+  }
 
-};
+}
 
-Tool.extend(SwitchTextTypeTool);
+SwitchTextTypeTool.command = 'switch-text-type'
 
-SwitchTextTypeTool.command = 'switch-text-type';
-
-export default SwitchTextTypeTool;
+export default SwitchTextTypeTool
