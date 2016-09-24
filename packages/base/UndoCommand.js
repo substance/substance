@@ -11,7 +11,7 @@ class Undo extends Command {
   }
 
   execute(props, context) {
-    var docSession = context.documentSession
+    let docSession = context.documentSession
     if (docSession.canUndo()) {
       docSession.undo()
       return true
