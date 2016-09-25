@@ -35,16 +35,51 @@ b.task('server', function() {
   });
 });
 
-b.task('test', function() {
-  b.js('./test/model/ContainerAddress.test.js', {
-    resolve: { jsnext: ['substance-test'] },
-    commonjs: { include: ['node_modules/lodash/**'] },
-    targets: [{
-      dest: './tmp/test.cjs.js', format: 'cjs'
-    }, {
-      dest: './dist/test.js', format: 'umd', moduleName: 'test'
-    }]
+// NEXT TODO: make test suite run in browser again, i.e. bundle the files for the browser test suite
+// in substance-test and deploy these to tmp folder
+
+b.task('test:clean', function() {
+  b.rm('tmp')
+})
+
+b.task('test:assets', function() {
+  b.copy('./node_modules/substance-test/dist/*', './tmp', { root: './node_modules/substance-test/dist' })
+})
+
+b.task('test:browser', function() {
+  b.js('./test/index.js', {
+    buble: true,
+    ignore: ['substance-cheerio'],
+    external: ['substance-test'],
+    commonjs: {
+      include: [
+        'node_modules/lodash/**',
+        // 'node_modules/substance-cheerio/**'
+      ]
+    },
+    targets: [
+      { dest: './tmp/tests.js', format: 'umd', moduleName: 'tests' }
+    ]
   });
 })
+
+b.task('test:server', function() {
+  b.copy('./node_modules/substance-test/dist/*', './tmp', { root: './node_modules/substance-test/dist' })
+  b.js('./test/index.js', {
+    buble: true,
+    external: ['substance-test'],
+    commonjs: {
+      include: [
+        'node_modules/lodash/**',
+        'node_modules/substance-cheerio/**'
+      ]
+    },
+    targets: [
+      { dest: './tmp/run-tests.js', format: 'cjs' },
+    ]
+  });
+})
+
+b.task('test', ['test:clean', 'test:assets', 'test:browser', 'test:server'])
 
 b.task('default', ['clean', 'css', 'browser', 'server'])
