@@ -1,3 +1,9 @@
+## Beta 5
+
+- ES6
+- Gutter support for ScrollPane
+- Streamlined Tool API
+
 ## Beta 4
 
 - Added support for realtime collaboration

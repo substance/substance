@@ -1,4 +1,4 @@
-import Component from './Component'
+import Component from '../../ui/Component'
 
 /**
   OverlayContainer component

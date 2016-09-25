@@ -1,7 +1,8 @@
 import platform from '../../util/platform'
 import Component from '../../ui/Component'
 import Scrollbar from '../scrollbar/Scrollbar'
-import OverlayContainer from '../../ui/OverlayContainer'
+import OverlayContainer from '../overlay/OverlayContainer'
+import GutterContainer from '../gutter/GutterContainer'
 import getRelativeBoundingRect from '../../util/getRelativeBoundingRect'
 
 /**
@@ -63,6 +64,7 @@ class ScrollPane extends Component {
     let el = $$('div')
       .addClass('sc-scroll-pane')
     let overlay
+    let gutter
 
     if (platform.isFF) {
       el.addClass('sm-firefox')
@@ -100,10 +102,17 @@ class ScrollPane extends Component {
       }).ref('overlay')
     }
 
+    if (this.props.gutter) {
+      gutter = $$(GutterContainer, {
+        gutter: this.props.gutter
+      }).ref('gutter')
+    }
+
     el.append(
       $$('div').ref('scrollable').addClass('se-scrollable').append(
         $$('div').ref('content').addClass('se-content')
           .append(overlay)
+          .append(gutter)
           .append(
             this.props.children
           )
@@ -115,8 +124,12 @@ class ScrollPane extends Component {
   _updateOverlayHints(overlayHints) {
     // Remember overlay hints for next update
     let overlay = this.refs.overlay
+    let gutter = this.refs.gutter
     if (overlay) {
       overlay.position(overlayHints)
+    }
+    if (gutter) {
+      gutter.position(overlayHints)
     }
   }
 
