@@ -1,13 +1,7 @@
-'use strict';
-
 import TextBlock from '../../model/TextBlock'
 
-function Blockquote() {
-  Blockquote.super.apply(this, arguments);
-}
+class Blockquote extends TextBlock {}
 
-TextBlock.extend(Blockquote);
+Blockquote.type = "blockquote"
 
-Blockquote.type = "blockquote";
-
-export default Blockquote;
+export default Blockquote

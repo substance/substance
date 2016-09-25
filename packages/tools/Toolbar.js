@@ -3,20 +3,20 @@ import ToolGroup from './ToolGroup'
 
 class Toolbar extends Component {
   render($$) {
-    var el = $$("div").addClass(this.getClassNames())
-    var commandStates = this.props.commandStates
-    var componentRegistry = this.context.componentRegistry
-    var toolTargets = this.context.tools
-    var toolEls = []
+    let el = $$("div").addClass(this.getClassNames())
+    let commandStates = this.props.commandStates
+    let componentRegistry = this.context.componentRegistry
+    let toolTargets = this.context.tools
+    let toolEls = []
 
     toolTargets.forEach(function(tools, target) {
       if (target === 'overlay') return; // skip overlay target
 
-      var ToolTargetClass = componentRegistry.get('tool-target-'+target)
+      let ToolTargetClass = componentRegistry.get('tool-target-'+target)
       if (!ToolTargetClass) {
         ToolTargetClass = ToolGroup
       }
-      var toolTargetEl = $$(ToolTargetClass, {
+      let toolTargetEl = $$(ToolTargetClass, {
         name: target,
         tools: tools,
         commandStates: commandStates
@@ -31,4 +31,4 @@ class Toolbar extends Component {
   }
 }
 
-export default Toolbar;
+export default Toolbar

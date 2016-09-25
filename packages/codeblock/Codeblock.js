@@ -1,13 +1,7 @@
-'use strict';
-
 import TextBlock from '../../model/TextBlock'
 
-function Codeblock() {
-  Codeblock.super.apply(this, arguments);
-}
+class Codeblock extends TextBlock {}
 
-TextBlock.extend(Codeblock);
+Codeblock.type = "codeblock"
 
-Codeblock.type = "codeblock";
-
-export default Codeblock;
+export default Codeblock

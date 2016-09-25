@@ -1,13 +1,7 @@
-'use strict';
-
 import TextBlock from '../../model/TextBlock'
 
-function Paragraph() {
-  Paragraph.super.apply(this, arguments);
-}
+class Paragraph extends TextBlock {}
 
-TextBlock.extend(Paragraph);
+Paragraph.type = "paragraph"
 
-Paragraph.type = "paragraph";
-
-export default Paragraph;
+export default Paragraph

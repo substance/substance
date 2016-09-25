@@ -1,17 +1,11 @@
-'use strict';
-
 import DocumentNode from '../../model/DocumentNode'
 
-function Image() {
-  Image.super.apply(this, arguments);
-}
-
-DocumentNode.extend(Image);
+class Image extends DocumentNode {}
 
 Image.define({
   type: "image",
   src: { type: "string", default: "http://" },
   previewSrc: { type: "string", optional: true }
-});
+})
 
-export default Image;
+export default Image

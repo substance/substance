@@ -1,5 +1,3 @@
-'use strict';
-
 import TextBlockComponent from '../../ui/TextBlockComponent'
 
 class CodeblockComponent extends TextBlockComponent {

@@ -1,17 +1,13 @@
-'use strict';
-
 import oo from '../../util/oo'
 
-var SaveHandlerStub = function() {
-};
+class SaveHandlerStub {
 
-SaveHandlerStub.Prototype = function() {
-  this.saveDocument = function(doc, changes, cb) {
-    console.warn('No SaveHandler provided. Using Stub.');
-    cb(null);
-  };
-};
+  saveDocument(doc, changes, cb) {
+    console.warn('No SaveHandler provided. Using Stub.')
+    cb(null)
+  }
+}
 
-oo.initClass(SaveHandlerStub);
+oo.initClass(SaveHandlerStub)
 
-export default SaveHandlerStub;
+export default SaveHandlerStub

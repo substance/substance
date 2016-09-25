@@ -1,31 +1,29 @@
 import HTMLImporter from '../../model/HTMLImporter'
 import ProseArticle from './ProseArticle'
-var schema = ProseArticle.schema;
+const schema = ProseArticle.schema
 
-var converters = [];
+let converters = [];
 
 // TODO: FIX this. Should be used together with configurator
-function ProseArticleImporter() {
-  ProseArticleImporter.super.call(this, {
-    schema: schema,
-    converters: converters,
-    DocumentClass: ProseArticle
-  });
-}
+class ProseArticleImporter extends HTMLImporter {
+  constructor() {
+    super({
+      schema: schema,
+      converters: converters,
+      DocumentClass: ProseArticle
+    })
+  }
 
-ProseArticleImporter.Prototype = function() {
   /*
     Takes an HTML string.
   */
-  this.convertDocument = function(bodyEls) {
+  convertDocument(bodyEls) {
     // Just to make sure we always get an array of elements
-    if (!bodyEls.length) bodyEls = [bodyEls];
-    this.convertContainer(bodyEls, 'body');
-  };
-};
+    if (!bodyEls.length) bodyEls = [bodyEls]
+    this.convertContainer(bodyEls, 'body')
+  }
+}
 
-HTMLImporter.extend(ProseArticleImporter);
+ProseArticleImporter.converters = converters
 
-ProseArticleImporter.converters = converters;
-
-export default ProseArticleImporter;
+export default ProseArticleImporter

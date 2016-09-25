@@ -1,16 +1,10 @@
-'use strict';
-
 import TextBlock from '../../model/TextBlock'
 
-function Heading() {
-  Heading.super.apply(this, arguments);
-}
-
-TextBlock.extend(Heading);
+class Heading extends TextBlock {}
 
 Heading.define({
   type: "heading",
   level: { type: "number", default: 1 }
-});
+})
 
-export default Heading;
+export default Heading

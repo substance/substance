@@ -1,66 +1,43 @@
-'use strict';
-
 import Component from '../../ui/Component'
 
 /*
   Simple component for realizing grid layouts
 */
-function Grid() {
-  Component.apply(this, arguments);
-}
-
-Grid.Prototype = function() {
-
-  this.render = function($$) {
-    var el = $$('div').addClass('sc-grid');
+class Grid extends Component {
+  render($$) {
+    let el = $$('div').addClass('sc-grid')
     if (this.props.mobile) {
-      el.addClass('sm-mobile');
+      el.addClass('sm-mobile')
     }
-    el.append(this.props.children);
-    return el;
-  };
-};
-
-Component.extend(Grid);
+    el.append(this.props.children)
+    return el
+  }
+}
 
 /*
   A grid row
 */
-function Row() {
-  Component.apply(this, arguments);
+class Row extends Component {
+  render($$) {
+    let el = $$('div').addClass('se-row')
+    el.append(this.props.children)
+    return el
+  }
 }
-
-Row.Prototype = function() {
-
-  this.render = function($$) {
-    var el = $$('div').addClass('se-row');
-    el.append(this.props.children);
-    return el;
-  };
-};
-
-Component.extend(Row);
 
 /*
   A grid cell
 */
-function Cell() {
-  Component.apply(this, arguments);
+class Cell extends Component {
+  render($$) {
+    let el = $$('div').addClass('se-cell')
+    el.addClass('sm-column-'+this.props.columns)
+    el.append(this.props.children)
+    return el
+  }
 }
 
-Cell.Prototype = function() {
+Grid.Row = Row
+Grid.Cell = Cell
 
-  this.render = function($$) {
-    var el = $$('div').addClass('se-cell');
-    el.addClass('sm-column-'+this.props.columns);
-    el.append(this.props.children);
-    return el;
-  };
-};
-
-Component.extend(Cell);
-
-Grid.Row = Row;
-Grid.Cell = Cell;
-
-export default Grid;
+export default Grid

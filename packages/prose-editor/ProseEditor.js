@@ -9,11 +9,11 @@ class ProseEditor extends AbstractEditor {
   }
 
   render($$) {
-    var SplitPane = this.componentRegistry.get('split-pane');
-    var el = $$('div').addClass('sc-prose-editor');
-    var toolbar = this._renderToolbar($$);
-    var editor = this._renderEditor($$);
-    var ScrollPane = this.componentRegistry.get('scroll-pane');
+    let SplitPane = this.componentRegistry.get('split-pane')
+    let el = $$('div').addClass('sc-prose-editor')
+    let toolbar = this._renderToolbar($$)
+    let editor = this._renderEditor($$)
+    let ScrollPane = this.componentRegistry.get('scroll-pane')
 
     let contentPanel = $$(ScrollPane, {
       scrollbarType: 'substance',

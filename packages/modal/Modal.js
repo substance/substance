@@ -1,5 +1,3 @@
-'use strict';
-
 import Component from '../../ui/Component'
 
 /**
@@ -19,39 +17,34 @@ import Component from '../../ui/Component'
   });
   ```
 */
-function Modal() {
-  Component.apply(this, arguments);
-}
+class Modal extends Component {
 
-Modal.Prototype = function() {
-
-  this.render = function($$) {
-    var el = $$('div').addClass('sc-modal');
+  render($$) {
+    let el = $$('div').addClass('sc-modal')
 
     // TODO: don't think that this is good enough. Right the modal is closed by any unhandled click.
     // Need to be discussed.
-    el.on('click', this._closeModal);
+    el.on('click', this._closeModal)
 
     if (this.props.width) {
-      el.addClass('sm-width-'+this.props.width);
+      el.addClass('sm-width-'+this.props.width)
     }
 
     el.append(
       $$('div').addClass('se-body').append(
         this.props.children
       )
-    );
-    return el;
-  };
+    )
+    return el
+  }
 
-  this._closeModal = function(e) {
-    var closeSurfaceClick = e.target.classList.contains('sc-modal');
+  _closeModal(e) {
+    let closeSurfaceClick = e.target.classList.contains('sc-modal')
     if (closeSurfaceClick) {
-      this.send('closeModal');
+      this.send('closeModal')
     }
-  };
+  }
 
-};
+}
 
-Component.extend(Modal);
-export default Modal;
+export default Modal

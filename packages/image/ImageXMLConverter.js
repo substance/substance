@@ -1,5 +1,3 @@
-'use strict';
-
 /*
  * XML converter for Images.
  */
@@ -9,12 +7,12 @@ export default {
   tagName: 'image',
 
   import: function(el, node) {
-    node.src = el.attr('src');
-    node.previewSrc = el.attr('preview-src');
+    node.src = el.attr('src')
+    node.previewSrc = el.attr('preview-src')
   },
 
   export: function(node, el) {
     el.attr('src', node.src)
-      .attr('preview-src', node.previewSrc);
+      .attr('preview-src', node.previewSrc)
   }
-};
+}

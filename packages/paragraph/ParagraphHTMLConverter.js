@@ -1,5 +1,3 @@
-'use strict';
-
 /*
  * HTML converter for Paragraph.
  */
@@ -16,4 +14,4 @@ export default {
     el.append(converter.annotatedText([node.id, 'content']));
   }
 
-};
+}

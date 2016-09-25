@@ -1,5 +1,3 @@
-'use strict';
-
 /*
  * HTML converter for Paragraphs.
  */
@@ -17,4 +15,4 @@ export default {
     el.attr('src', node.src)
       .attr('data-preview-src', node.previewSrc);
   }
-};
+}

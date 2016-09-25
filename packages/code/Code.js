@@ -1,12 +1,7 @@
-'use strict';
-
 import PropertyAnnotation from '../../model/PropertyAnnotation'
 
-function Code() {
-  Code.super.apply(this, arguments);
-}
-PropertyAnnotation.extend(Code);
+class Code extends PropertyAnnotation {}
 
-Code.type = 'code';
+Code.type = 'code'
 
-export default Code;
+export default Code
