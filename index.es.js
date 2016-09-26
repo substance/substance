@@ -140,6 +140,7 @@ export { default as Toolbar } from './packages/tools/Toolbar'
 export { default as ToolGroup } from './packages/tools/ToolGroup'
 
 // ui
+export { default as InsertNodeCommand } from './ui/InsertNodeCommand'
 export { default as Surface } from './ui/Surface'
 export { default as AbstractEditor } from './ui/AbstractEditor'
 export { default as AnnotationCommand } from './ui/AnnotationCommand'
