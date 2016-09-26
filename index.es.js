@@ -140,6 +140,7 @@ export { default as Toolbar } from './packages/tools/Toolbar'
 export { default as ToolGroup } from './packages/tools/ToolGroup'
 
 // ui
+export { default as Surface } from './ui/Surface'
 export { default as AbstractEditor } from './ui/AbstractEditor'
 export { default as AnnotationCommand } from './ui/AnnotationCommand'
 export { default as AnnotationComponent } from './ui/AnnotationComponent'
@@ -160,6 +161,7 @@ export { default as TOC } from './ui/TOC'
 export { default as TOCProvider } from './ui/TOCProvider'
 export { default as Highlights } from './ui/Highlights'
 
+
 // util
 export { default as ArrayIterator } from './util/ArrayIterator'
 export { default as Configurator } from './util/AbstractConfigurator'
@@ -179,11 +181,14 @@ export { default as uuid } from './util/uuid'
 
 // test-utlity related (to reduce bundle size we should think of
 // providing a separate bundle for that in the future)
-
 export { default as twoParagraphs } from './test/fixtures/twoParagraphs'
 export { default as MessageQueue } from './test/collab/MessageQueue'
 export { default as TestWebSocketServer } from './test/collab/TestWebSocketServer'
 export { default as TestWebSocketConnection } from './test/collab/TestWebSocketConnection'
 export { default as TestCollabServer } from './test/collab/TestCollabServer'
+export { default as TestCollabSession } from './test/collab/TestCollabSession'
 export { default as changeStoreSeed } from './test/fixtures/changeStoreSeed'
+export { default as documentStoreSeed } from './test/fixtures/documentStoreSeed'
 export { default as createTestDocumentFactory } from './test/fixtures/createTestDocumentFactory'
+
+
