@@ -10,6 +10,6 @@
 .sc-prose-editor .sc-container-editor .sc-list-item + .sc-list-item {
   padding-top: 0.5 *  var(--default-padding);
 }
-.sc-prose-editor .sc-prose-editor-toolbar {
+.sc-prose-editor .sc-toolbar {
   border-bottom: 1px solid  var(--border-color);
 }
