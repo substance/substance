@@ -175,3 +175,15 @@ export { default as request } from './util/request'
 export { default as SubstanceError } from './util/SubstanceError'
 export { default as substanceGlobals } from './util/substanceGlobals'
 export { default as uuid } from './util/uuid'
+
+
+// test-utlity related (to reduce bundle size we should think of
+// providing a separate bundle for that in the future)
+
+export { default as twoParagraphs } from './test/fixtures/twoParagraphs'
+export { default as MessageQueue } from './test/collab/MessageQueue'
+export { default as TestWebSocketServer } from './test/collab/TestWebSocketServer'
+export { default as TestWebSocketConnection } from './test/collab/TestWebSocketConnection'
+export { default as TestCollabServer } from './test/collab/TestCollabServer'
+export { default as changeStoreSeed } from './test/fixtures/changeStoreSeed'
+export { default as createTestDocumentFactory } from './test/fixtures/createTestDocumentFactory'
