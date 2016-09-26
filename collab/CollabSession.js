@@ -5,7 +5,7 @@ import cloneDeep from 'lodash/cloneDeep'
 import Err from '../util/SubstanceError'
 import DocumentSession from '../model/DocumentSession'
 import DocumentChange from '../model/DocumentChange'
-import Selection from '../model/Selection'
+import { fromJSON as selFromJSON } from '../model/selectionHelpers'
 
 /*
   Session that is connected to a Substance Hub allowing
@@ -511,7 +511,8 @@ class CollabSession extends DocumentSession {
         if (old) {
           oldSelection = old.selection
         }
-        let newSelection = Selection.fromJSON(collaborator.selection)
+        let newSelection = selFromJSON(collaborator.selection)
+
         newSelection.attach(this.doc)
 
         // Assign colorIndex (try to restore from old record)
