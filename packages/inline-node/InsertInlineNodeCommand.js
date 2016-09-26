@@ -38,7 +38,7 @@ class InsertInlineNodeCommand extends Command {
 
   createNodeData(tx, args) { // eslint-disable-line
     return {
-      type: this.constructor.type
+      type: this.params.nodeType
     }
   }
 
