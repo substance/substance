@@ -1,5 +1,4 @@
 import Tool from '../tools/Tool'
-import clone from 'lodash/clone'
 
 /**
   Tool to edit an existing link.
@@ -15,17 +14,13 @@ class EditLinkTool extends Tool {
   }
 
   _openLink() {
-    console.log('open link...')
     let doc = this.context.documentSession.getDocument()
     window.open(doc.get(this.getUrlPath()), '_blank')
   }
 
   render($$) {
-    let Prompt = this.getComponent('prompt')
     let Input = this.getComponent('input')
     let Button = this.getComponent('button')
-    let node = this.props.node
-    let doc = node.getDocument()
     let el = $$('div').addClass('sc-edit-link-tool')
     let urlPath = this.getUrlPath()
 
