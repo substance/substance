@@ -11,8 +11,3 @@
   width: 400px;
   height: 300px;
 }
-.sc-image .sc-insert-image-tool > input {
-  position: fixed;
-  top: -1000px;
-  left: -1000px;
-}
