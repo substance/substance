@@ -16,7 +16,6 @@ class ProseEditor extends AbstractEditor {
     let ScrollPane = this.componentRegistry.get('scroll-pane')
 
     let contentPanel = $$(ScrollPane, {
-      scrollbarType: 'substance',
       scrollbarPosition: 'right',
       overlay: ProseEditorOverlayTools,
     }).append(
