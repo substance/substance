@@ -38,23 +38,23 @@ export { default as XMLExporter } from './model/XMLExporter'
 export { default as XMLImporter } from './model/XMLImporter'
 
 // transformations
-export {default as breakNode} from './model/transform/breakNode'
-export {default as copySelection} from './model/transform/copySelection'
-export {default as createAnnotation} from './model/transform/createAnnotation'
-export {default as deleteCharacter} from './model/transform/deleteCharacter'
-export {default as deleteNode} from './model/transform/deleteNode'
-export {default as deleteSelection} from './model/transform/deleteSelection'
-export {default as expandAnnotation} from './model/transform/expandAnnotation'
-export {default as fuseAnnotation} from './model/transform/fuseAnnotation'
-export {default as insertInlineNode} from './model/transform/insertInlineNode'
-export {default as insertNode} from './model/transform/insertNode'
-export {default as insertText} from './model/transform/insertText'
-export {default as mergeNodes } from './model/transform/merge'
-export {default as pasteContent } from './model/transform/paste'
-export {default as replaceText } from './model/transform/replaceText'
-export {default as switchTextType } from './model/transform/switchTextType'
-export {default as truncateAnnotation } from './model/transform/truncateAnnotation'
-export {default as updateAnnotations } from './model/transform/updateAnnotations'
+export { default as breakNode } from './model/transform/breakNode'
+export { default as copySelection } from './model/transform/copySelection'
+export { default as createAnnotation } from './model/transform/createAnnotation'
+export { default as deleteCharacter } from './model/transform/deleteCharacter'
+export { default as deleteNode } from './model/transform/deleteNode'
+export { default as deleteSelection } from './model/transform/deleteSelection'
+export { default as expandAnnotation } from './model/transform/expandAnnotation'
+export { default as fuseAnnotation } from './model/transform/fuseAnnotation'
+export { default as insertInlineNode } from './model/transform/insertInlineNode'
+export { default as insertNode } from './model/transform/insertNode'
+export { default as insertText } from './model/transform/insertText'
+export { default as mergeNodes } from './model/transform/merge'
+export { default as pasteContent } from './model/transform/paste'
+export { default as replaceText } from './model/transform/replaceText'
+export { default as switchTextType } from './model/transform/switchTextType'
+export { default as truncateAnnotation } from './model/transform/truncateAnnotation'
+export { default as updateAnnotations } from './model/transform/updateAnnotations'
 
 // packages
 export { default as BasePackage } from './packages/base/BasePackage'
@@ -80,7 +80,6 @@ export { default as SwitchTextTypeCommand } from './packages/base/SwitchTextType
 export { default as ProseEditorPackage } from './packages/prose-editor/ProseEditorPackage'
 export { default as ProseEditor } from './packages/prose-editor/ProseEditor'
 export { default as ProseArticle } from './packages/prose-editor/ProseArticle'
-export { default as ProseEditorConfigurator } from './packages/prose-editor/ProseEditorConfigurator'
 export { default as ProseEditorOverlayTools } from './packages/prose-editor/ProseEditorOverlayTools'
 
 // link
@@ -162,10 +161,9 @@ export { default as TOC } from './ui/TOC'
 export { default as TOCProvider } from './ui/TOCProvider'
 export { default as Highlights } from './ui/Highlights'
 
-
 // util
 export { default as ArrayIterator } from './util/ArrayIterator'
-export { default as Configurator } from './util/AbstractConfigurator'
+export { default as Configurator } from './util/Configurator'
 export { default as EventEmitter } from './util/EventEmitter'
 export { default as Factory } from './util/Factory'
 export { default as inBrowser } from './util/inBrowser'
@@ -179,7 +177,6 @@ export { default as SubstanceError } from './util/SubstanceError'
 export { default as substanceGlobals } from './util/substanceGlobals'
 export { default as uuid } from './util/uuid'
 
-
 // test-utlity related (to reduce bundle size we should think of
 // providing a separate bundle for that in the future)
 export { default as twoParagraphs } from './test/fixtures/twoParagraphs'
@@ -192,4 +189,5 @@ export { default as changeStoreSeed } from './test/fixtures/changeStoreSeed'
 export { default as documentStoreSeed } from './test/fixtures/documentStoreSeed'
 export { default as createTestDocumentFactory } from './test/fixtures/createTestDocumentFactory'
 
-
+// aliases (mainly for backward compatibility)
+export { default as ProseEditorConfigurator } from './util/Configurator'
