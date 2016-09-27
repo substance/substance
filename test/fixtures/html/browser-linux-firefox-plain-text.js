@@ -1,2 +1,1 @@
-'use strict'
-module.exports="XXX";
+export default "XXX";

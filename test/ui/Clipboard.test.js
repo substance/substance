@@ -4,7 +4,7 @@ import DocumentSession from '../../model/DocumentSession'
 import Registry from '../../util/Registry'
 import ComponentRegistry from '../../ui/ComponentRegistry'
 import Clipboard from '../../ui/Clipboard'
-import DOMElement from '../../ui/DOMElement'
+import DefaultDOMElement from '../../ui/DefaultDOMElement'
 import StubSurface from './StubSurface'
 import TestContainerEditor from './TestContainerEditor'
 
@@ -23,6 +23,37 @@ import EmphasisHTMLConverter from '../../packages/emphasis/EmphasisHTMLConverter
 import LinkHTMLConverter from '../../packages/link/LinkHTMLConverter'
 import CodeblockHTMLConverter from '../../packages/codeblock/CodeblockHTMLConverter'
 
+import BrowserLinuxPLainTextFixture from '../fixtures/html/browser-linux-plain-text'
+import BrowserLinuxAnnotatedTextFixture from '../fixtures/html/browser-linux-annotated-text'
+import BrowserLinuxTwoParagraphsFixture from '../fixtures/html/browser-linux-two-paragraphs'
+import BrowserWindowsPlainTextFixture from '../fixtures/html/browser-windows-plain-text'
+import BrowserWindowsAnnotatedTextFixture from '../fixtures/html/browser-windows-annotated-text'
+import BrowserWindowsTwoParagraphsFixture from '../fixtures/html/browser-windows-two-paragraphs'
+import BrowserLinuxFirefoxPlainTextFixture from '../fixtures/html/browser-linux-firefox-plain-text'
+import BrowserLinuxFirefoxAnnotatedTextFixture from '../fixtures/html/browser-linux-firefox-annotated-text'
+import BrowserLinuxFirefoxTwoParagraphsFixture from '../fixtures/html/browser-linux-firefox-two-paragraphs'
+import BrowserLinuxFirefoxWholePageFixture from '../fixtures/html/browser-linux-firefox-whole-page'
+import BrowserOSXFirefoxPlainTextFixture from '../fixtures/html/browser-osx-firefox-plain-text'
+import BrowserOSXFirefoxAnnotatedTextFixture from '../fixtures/html/browser-osx-firefox-annotated-text'
+import BrowserOSXFirefoxTwoParagraphsFixture from '../fixtures/html/browser-osx-firefox-two-paragraphs'
+import BrowserWindowsFirefoxPlainTextFixture from '../fixtures/html/browser-windows-firefox-plain-text'
+import BrowserWindowsFirefoxAnnotatedTextFixture from '../fixtures/html/browser-windows-firefox-annotated-text'
+import BrowserWindowsFirefoxTwoParagraphsFixture from '../fixtures/html/browser-windows-firefox-two-paragraphs'
+import BrowserWindowsEdgePlainTextFixture from '../fixtures/html/browser-windows-edge-plain-text'
+import BrowserWindowsEdgeAnnotatedTextFixture from '../fixtures/html/browser-windows-edge-annotated-text'
+import BrowserWindowsEdgeTwoParagraphsFixture from '../fixtures/html/browser-windows-edge-two-paragraphs'
+import GDocsOSXLinuxChromePlainTextFixture from '../fixtures/html/google-docs-osx-linux-chrome-plain-text'
+import GDocsOSXLinuxChromeAnnotatedTextFixture from '../fixtures/html/google-docs-osx-linux-chrome-annotated-text'
+import GDocsOSXLinuxChromeTwoParagraphsFixture from '../fixtures/html/google-docs-osx-linux-chrome-two-paragraphs'
+import GDocsLinuxFirefoxPlainTextFixture from '../fixtures/html/google-docs-linux-firefox-plain-text'
+import GDocsLinuxFirefoxAnnotatedTextFixture from '../fixtures/html/google-docs-linux-firefox-annotated-text'
+import GDocsOSXFirefoxPlainTextFixture from '../fixtures/html/google-docs-osx-firefox-plain-text'
+import LibreOfficeOSXPlainTextFixture from '../fixtures/html/libre-office-osx-linux-plain-text'
+import LibreOfficeOSXAnnotatedTextFixture from '../fixtures/html/libre-office-osx-linux-annotated-text'
+import LibreOfficeOSXTwoParagraphsFixture from '../fixtures/html/libre-office-osx-linux-two-paragraphs'
+import MSW11OSXPlainTextFixture from '../fixtures/html/word-11-osx-plain-text'
+import MSW11OSXAnnotatedTextFixture from '../fixtures/html/word-11-osx-annotated-text'
+import MSW11OSXTwoParagraphsFixture from '../fixtures/html/word-11-osx-two-paragraphs'
 
 const test = module('ui/Clipboard')
 
@@ -87,7 +118,7 @@ test.UI("Copying HTML, and plain text", function(t) {
   t.notNil(clipboardData.data['text/plain'], "Clipboard should contain plain text data.")
   t.notNil(clipboardData.data['text/html'], "Clipboard should contain HTML data.")
 
-  var htmlDoc = DOMElement.parseHTML(clipboardData.data['text/html'])
+  var htmlDoc = DefaultDOMElement.parseHTML(clipboardData.data['text/html'])
   var body = htmlDoc.find('body')
   t.notNil(body, 'The copied HTML should always be a full HTML document string, containing a body element.')
   t.end()
@@ -107,7 +138,7 @@ test.UI("Copying a property selection", function(t) {
   var clipboardData = event.clipboardData
   t.equal(clipboardData.data['text/plain'], TEXT, "Plain text should be correct.")
 
-  var htmlDoc = DOMElement.parseHTML(clipboardData.data['text/html'])
+  var htmlDoc = DefaultDOMElement.parseHTML(clipboardData.data['text/html'])
   var body = htmlDoc.find('body')
   var childNodes = body.getChildNodes()
   t.equal(childNodes.length, 1, "There should be only one element")
@@ -142,7 +173,7 @@ test.UI("Copying a container selection", function(t) {
   var clipboardData = event.clipboardData
   t.equal(clipboardData.data['text/plain'], TEXT.join('\n'), "Plain text should be correct.")
 
-  var htmlDoc = DOMElement.parseHTML(clipboardData.data['text/html'])
+  var htmlDoc = DefaultDOMElement.parseHTML(clipboardData.data['text/html'])
   var elements = htmlDoc.find('body').getChildren()
   t.equal(elements.length, 3, "HTML should consist of three elements.")
   var p1 = elements[0]
@@ -305,43 +336,43 @@ function _twoParagraphsTest(t, fixture, forceWindows) {
 }
 
 test.UI("Browser - Chrome (OSX/Linux) - Plain Text", function(t) {
-  _plainTextTest(t, require('../fixtures/html/browser-linux-plain-text'))
+  _plainTextTest(t, BrowserLinuxPLainTextFixture)
 })
 
 test.UI("Browser - Chrome (OSX/Linux) - Annotated Text", function(t) {
-  _annotatedTextTest(t, require('../fixtures/html/browser-linux-annotated-text'))
+  _annotatedTextTest(t, BrowserLinuxAnnotatedTextFixture)
 })
 
 test.UI("Browser - Chrome (OSX/Linux) - Two Paragraphs", function(t) {
-  _twoParagraphsTest(t, require('../fixtures/html/browser-linux-two-paragraphs'))
+  _twoParagraphsTest(t, BrowserLinuxTwoParagraphsFixture)
 })
 
 test.UI("Browser - Chrome (Windows) - Plain Text", function(t) {
-  _plainTextTest(t, require('../fixtures/html/browser-windows-plain-text'), 'forceWindows')
+  _plainTextTest(t, BrowserWindowsPlainTextFixture, 'forceWindows')
 })
 
 test.UI("Browser - Chrome (Windows) - Annotated Text", function(t) {
-  _annotatedTextTest(t, require('../fixtures/html/browser-windows-annotated-text'), 'forceWindows')
+  _annotatedTextTest(t, BrowserWindowsAnnotatedTextFixture, 'forceWindows')
 })
 
 test.UI("Browser - Chrome (Windows) - Two Paragraphs", function(t) {
-  _twoParagraphsTest(t, require('../fixtures/html/browser-windows-two-paragraphs'), 'forceWindows')
+  _twoParagraphsTest(t, BrowserWindowsTwoParagraphsFixture, 'forceWindows')
 })
 
 test.UI("Browser - Firefox (Linux) - Plain Text", function(t) {
-  _plainTextTest(t, require('../fixtures/html/browser-linux-firefox-plain-text'))
+  _plainTextTest(t, BrowserLinuxFirefoxPlainTextFixture)
 })
 
 test.UI("Browser - Firefox (Linux) - Annotated Text", function(t) {
-  _annotatedTextTest(t, require('../fixtures/html/browser-linux-firefox-annotated-text'))
+  _annotatedTextTest(t, BrowserLinuxFirefoxAnnotatedTextFixture)
 })
 
 test.UI("Browser - Firefox (Linux) - Two Paragraphs", function(t) {
-  _twoParagraphsTest(t, require('../fixtures/html/browser-linux-firefox-two-paragraphs'))
+  _twoParagraphsTest(t, BrowserLinuxFirefoxTwoParagraphsFixture)
 })
 
 test.UI("Browser - Firefox (Linux) - Whole Page", function(t) {
-  _fixtureTest(t, require('../fixtures/html/browser-linux-firefox-whole-page'), function(editor, html) {
+  _fixtureTest(t, BrowserLinuxFirefoxWholePageFixture, function(editor, html) {
     var doc = editor.getDocument()
     var event = new ClipboardEvent()
     event.clipboardData.setData('text/plain', 'XXX')
@@ -355,85 +386,85 @@ test.UI("Browser - Firefox (Linux) - Whole Page", function(t) {
 })
 
 test.UI("Browser - Firefox (OSX) - Plain Text", function(t) {
-  _plainTextTest(t, require('../fixtures/html/browser-osx-firefox-plain-text'))
+  _plainTextTest(t, BrowserOSXFirefoxPlainTextFixture)
 })
 
 test.UI("Browser - Firefox (OSX) - Annotated Text", function(t) {
-  _annotatedTextTest(t, require('../fixtures/html/browser-osx-firefox-annotated-text'))
+  _annotatedTextTest(t, BrowserOSXFirefoxAnnotatedTextFixture)
 })
 
 test.UI("Browser - Firefox (OSX) - Two Paragraphs", function(t) {
-  _twoParagraphsTest(t, require('../fixtures/html/browser-osx-firefox-two-paragraphs'))
+  _twoParagraphsTest(t, BrowserOSXFirefoxTwoParagraphsFixture)
 })
 
 test.UI("Browser - Firefox (Windows) - Plain Text", function(t) {
-  _plainTextTest(t, require('../fixtures/html/browser-windows-firefox-plain-text'), 'forceWindows')
+  _plainTextTest(t, BrowserWindowsFirefoxPlainTextFixture, 'forceWindows')
 })
 
 test.UI("Browser - Firefox (Windows) - Annotated Text", function(t) {
-  _annotatedTextTest(t, require('../fixtures/html/browser-windows-firefox-annotated-text'), 'forceWindows')
+  _annotatedTextTest(t, BrowserWindowsFirefoxAnnotatedTextFixture, 'forceWindows')
 })
 
 test.UI("Browser - Firefox (Windows) - Two Paragraphs", function(t) {
-  _twoParagraphsTest(t, require('../fixtures/html/browser-windows-firefox-two-paragraphs'), 'forceWindows')
+  _twoParagraphsTest(t, BrowserWindowsFirefoxTwoParagraphsFixture, 'forceWindows')
 })
 
 test.UI("Browser - Edge (Windows) - Plain Text", function(t) {
-  _plainTextTest(t, require('../fixtures/html/browser-windows-edge-plain-text'), 'forceWindows')
+  _plainTextTest(t, BrowserWindowsEdgePlainTextFixture, 'forceWindows')
 })
 
 test.UI("Browser - Edge (Windows) - Annotated Text", function(t) {
-  _annotatedTextTest(t, require('../fixtures/html/browser-windows-edge-annotated-text'), 'forceWindows')
+  _annotatedTextTest(t, BrowserWindowsEdgeAnnotatedTextFixture, 'forceWindows')
 })
 
 test.UI("Browser - Edge (Windows) - Two Paragraphs", function(t) {
-  _twoParagraphsTest(t, require('../fixtures/html/browser-windows-edge-two-paragraphs'), 'forceWindows')
+  _twoParagraphsTest(t, BrowserWindowsEdgeTwoParagraphsFixture, 'forceWindows')
 })
 
 test.UI("GoogleDocs - Chrome (OSX/Linux) - Plain Text", function(t) {
-  _plainTextTest(t, require('../fixtures/html/google-docs-osx-linux-chrome-plain-text'))
+  _plainTextTest(t, GDocsOSXLinuxChromePlainTextFixture)
 })
 
 test.UI("GoogleDocs - Chrome (OSX/Linux) - Annotated Text", function(t) {
-  _annotatedTextTest(t, require('../fixtures/html/google-docs-osx-linux-chrome-annotated-text'))
+  _annotatedTextTest(t, GDocsOSXLinuxChromeAnnotatedTextFixture)
 })
 
 test.UI("GoogleDocs - Chrome (OSX/Linux) - Two Paragraphs", function(t) {
-  _twoParagraphsTest(t, require('../fixtures/html/google-docs-osx-linux-chrome-two-paragraphs'))
+  _twoParagraphsTest(t, GDocsOSXLinuxChromeTwoParagraphsFixture)
 })
 
 test.UI("GoogleDocs - Firefox (Linux) - Plain Text", function(t) {
-  _plainTextTest(t, require('../fixtures/html/google-docs-linux-firefox-plain-text'))
+  _plainTextTest(t, GDocsLinuxFirefoxPlainTextFixture)
 })
 
 test.UI("GoogleDocs - Firefox (Linux) - Annotated Text", function(t) {
-  _annotatedTextTest(t, require('../fixtures/html/google-docs-linux-firefox-annotated-text'))
+  _annotatedTextTest(t, GDocsLinuxFirefoxAnnotatedTextFixture)
 })
 
 test.UI("GoogleDocs - Firefox (OSX) - Plain Text", function(t) {
-  _plainTextTest(t, require('../fixtures/html/google-docs-osx-firefox-plain-text'))
+  _plainTextTest(t, GDocsOSXFirefoxPlainTextFixture)
 })
 
 test.UI("LibreOffice (OSX/Linux) - Plain Text", function(t) {
-  _plainTextTest(t, require('../fixtures/html/libre-office-osx-linux-plain-text'))
+  _plainTextTest(t, LibreOfficeOSXPlainTextFixture)
 })
 
 test.UI("LibreOffice (OSX/Linux) - Annotated Text", function(t) {
-  _annotatedTextTest(t, require('../fixtures/html/libre-office-osx-linux-annotated-text'))
+  _annotatedTextTest(t, LibreOfficeOSXAnnotatedTextFixture)
 })
 
 test.UI("LibreOffice (OSX/Linux) - Two Paragraphs", function(t) {
-  _twoParagraphsTest(t, require('../fixtures/html/libre-office-osx-linux-two-paragraphs'))
+  _twoParagraphsTest(t, LibreOfficeOSXTwoParagraphsFixture)
 })
 
 test.UI("Microsoft Word 11 (OSX) - Plain Text", function(t) {
-  _plainTextTest(t, require('../fixtures/html/word-11-osx-plain-text'))
+  _plainTextTest(t, MSW11OSXPlainTextFixture)
 })
 
 test.UI("Microsoft Word 11 (OSX) - Annotated Text", function(t) {
-  _annotatedTextTest(t, require('../fixtures/html/word-11-osx-annotated-text'))
+  _annotatedTextTest(t, MSW11OSXAnnotatedTextFixture)
 })
 
 test.UI("Microsoft Word 11 (OSX) - Two Paragraphs", function(t) {
-  _twoParagraphsTest(t, require('../fixtures/html/word-11-osx-two-paragraphs'))
+  _twoParagraphsTest(t, MSW11OSXTwoParagraphsFixture)
 })

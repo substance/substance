@@ -54,7 +54,6 @@ b.task('test:browser', function() {
     commonjs: {
       include: [
         'node_modules/lodash/**',
-        // 'node_modules/substance-cheerio/**'
       ]
     },
     targets: [
