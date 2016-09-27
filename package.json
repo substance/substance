@@ -54,7 +54,7 @@
     "map-stream": "0.0.6",
     "promise": "7.1.1",
     "substance-bundler": "^0.4.16",
-    "substance-test": "^0.1.1",
+    "substance-test": "^0.2.2",
     "tap-spec": "4.1.1",
     "tape": "4.5.1",
     "through2": "2.0.1",
