@@ -16,7 +16,11 @@ b.task('browser', function() {
           configFile: __dirname + '/karma.conf.js',
           browsers: [browser],
           singleRun: true
-        }, resolve).start();
+        }, function(exitCode) {
+          if (exitCode !== 0) {
+            process.exit(exitCode)
+          }
+        }).start();
       });
     }
   })
@@ -34,6 +38,11 @@ b.task('server', function() {
         })
         child.on('error', function(error) {
           reject(new Error(error))
+        })
+        child.on('close', function(exitCode) {
+          if (exitCode !== 0) {
+            process.exit(exitCode)
+          }
         })
       });
     }
