@@ -7,11 +7,11 @@
 @import './emphasis/_index.css';
 @import './heading/_index.css';
 @import './inline-wrapper/_index.css';
-@import './link/_index.css';
-@import './list/_index.css';
 @import './paragraph/_index.css';
 @import './prose-editor/_index.css';
 @import './strong/_index.css';
+/* link */
+@import './link/_link.css';
 /* image */
 @import './image/_image.css';
 @import './image/_insert-image-tool.css';
