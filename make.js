@@ -22,6 +22,8 @@ b.task('browser', function() {
 
 b.task('server', function() {
   b.js('./index.es.js', {
+    // necessary for nodejs 4
+    buble: true,
     commonjs: { include: ['node_modules/**', require.resolve('substance-cheerio')] },
     targets: [{
       dest: './dist/substance.cjs.js',
