@@ -52,6 +52,8 @@
     "vinyl-source-stream": "1.1.0",
     "vinyl-transform": "1.0.0",
     "yargs": "4.7.1"
+    "substance-docgen": "^0.1.0",
+    "substance-test": "^0.2.2"
   },
   "browser": {
     "cheerio": false,
