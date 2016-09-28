@@ -63,13 +63,11 @@ export { default as CodePackage } from './packages/code/CodePackage'
 export { default as EmphasisPackage } from './packages/emphasis/EmphasisPackage'
 export { default as ImagePackage } from './packages/image/ImagePackage'
 export { default as InlineWrapperPackage } from './packages/inline-wrapper/InlineWrapperPackage'
-export { default as ListPackage } from './packages/list/ListPackage'
 export { default as ParagraphPackage } from './packages/paragraph/ParagraphPackage'
 export { default as PersistencePackage } from './packages/persistence/PersistencePackage'
 export { default as StrongPackage } from './packages/strong/StrongPackage'
 export { default as SubscriptPackage } from './packages/subscript/SubscriptPackage'
 export { default as SuperscriptPackage } from './packages/superscript/SuperscriptPackage'
-export { default as TablePackage } from './packages/table/TablePackage'
 
 // heading
 export { default as HeadingPackage } from './packages/heading/HeadingPackage'
@@ -96,6 +94,7 @@ export { default as LinkComponent } from './packages/link/LinkComponent'
 // inline-node
 export { default as InsertInlineNodeCommand } from './packages/inline-node/InsertInlineNodeCommand'
 export { default as EditInlineNodeCommand } from './packages/inline-node/EditInlineNodeCommand'
+export { default as InlineNodeComponent } from './packages/inline-node/InlineNodeComponent'
 
 // button
 export { default as Button } from './packages/button/Button'
@@ -142,6 +141,7 @@ export { default as Toolbar } from './packages/tools/Toolbar'
 export { default as ToolGroup } from './packages/tools/ToolGroup'
 
 // ui
+export { default as BlockNodeComponent } from './ui/BlockNodeComponent'
 export { default as InsertNodeCommand } from './ui/InsertNodeCommand'
 export { default as Surface } from './ui/Surface'
 export { default as AbstractEditor } from './ui/AbstractEditor'
