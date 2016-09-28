@@ -40,6 +40,8 @@ b.task('test:assets', function() {
 
 b.task('test:browser', function() {
   b.js('./test/index.js', {
+    // buble necessary here, as travis has old browser versions
+    buble: true,
     ignore: ['substance-cheerio'],
     external: ['substance-test'],
     commonjs: { include: ['node_modules/lodash/**'] },
