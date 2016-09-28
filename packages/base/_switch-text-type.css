@@ -42,7 +42,7 @@
 .sc-switch-text-type .se-options .se-option {
   display: block;
   padding: 5px 10px;
-  width: 100%; // needed to make buttons render like block elements
+  width: 100%; /* needed to make buttons render like block elements */
 }
 .sc-switch-text-type .se-options .se-option:hover,
 .sc-switch-text-type .se-options .se-option:focus {
