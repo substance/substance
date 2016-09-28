@@ -5,10 +5,6 @@ import Toolbar from '../tools/Toolbar'
 
 class ProseEditor extends AbstractEditor {
 
-  willUpdateState(newState) {
-    this.handleStateUpdate(newState)
-  }
-
   render($$) {
     let SplitPane = this.componentRegistry.get('split-pane')
     let el = $$('div').addClass('sc-prose-editor')
