@@ -66,12 +66,9 @@ class AbstractEditor extends Component {
     }
     this.documentSession = props.documentSession
     this.doc = this.documentSession.getDocument()
-    this.saveHandler = configurator.getSaveHandler()
-    this.documentSession.setSaveHandler(this.saveHandler)
     this.componentRegistry = configurator.getComponentRegistry()
     this.tools = configurator.getTools()
     this.surfaceManager = new SurfaceManager(this.documentSession)
-    this.fileClient = configurator.getFileClient()
     this.commandManager = new CommandManager(this.getCommandContext(), commands)
     this.dragManager = new DragManager(configurator.createDragHandlers(), {
       documentSession: this.documentSession,
@@ -90,8 +87,6 @@ class AbstractEditor extends Component {
     return {
       documentSession: this.documentSession,
       surfaceManager: this.surfaceManager,
-      fileClient: this.fileClient,
-      saveHandler: this.saveHandler,
       converterRegistry: this.converterRegistry
     }
   }
