@@ -4,6 +4,7 @@ import map from 'lodash/map'
 import extend from 'lodash/extend'
 import DocumentChange from '../model/DocumentChange'
 import Selection from '../model/Selection'
+import { fromJSON as selFromJSON } from '../model/selectionHelpers'
 import Err from '../util/SubstanceError'
 
 /*
@@ -159,7 +160,7 @@ class CollabEngine extends EventEmitter {
 
     forEach(collaborators, function(collaborator) {
       if (collaborator.selection) {
-        let sel = Selection.fromJSON(collaborator.selection)
+        let sel = selFromJSON(collaborator.selection)
         change = this.deserializeChange(change)
         sel = DocumentChange.transformSelection(sel, change)
         // Write back the transformed selection to the server state

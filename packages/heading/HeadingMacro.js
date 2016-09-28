@@ -1,7 +1,7 @@
 import switchTextType from '../../model/transform/switchTextType'
 import deleteSelection from '../../model/transform/deleteSelection'
 
-let ListMacro = {
+let HeadingMacro = {
 
   appliesTo: ['paragraph'],
 
@@ -9,7 +9,7 @@ let ListMacro = {
     if (this.appliesTo.indexOf(props.node.type) === -1) {
       return false;
     }
-    let match = /^\*\s/.exec(props.text)
+    let match = /^#\s/.exec(props.text)
 
     if (match) {
       let surface = context.surfaceManager.getSurface(props.selection.surfaceId)
@@ -22,7 +22,8 @@ let ListMacro = {
           selection: props.selection,
           containerId: args.containerId,
           data: {
-            type: 'list-item'
+            type: 'heading',
+            level: 1
           }
         })
         if (props.action === 'type') {
@@ -34,7 +35,6 @@ let ListMacro = {
       return true
     }
   }
-
 }
 
-export default ListMacro
+export default HeadingMacro

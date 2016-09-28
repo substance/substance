@@ -1,7 +1,7 @@
 .sc-layout {
   padding: var(--default-padding);
-  padding-top: 2 * var(--default-padding);
-  padding-bottom: 2* var(--default-padding);
+  padding-top: var(--default-padding);
+  padding-bottom: var(--default-padding);
   width: 100%; /* by default takes the full width */
 }
 .sc-layout.sm-no-padding { padding: 0; }

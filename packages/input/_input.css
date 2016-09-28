@@ -1,12 +1,11 @@
 /*
-  TODO: Provide different styles (analog to _button.css);
+  TODO: Provide different styles (analoge to _button.css);
 */
 
 .sc-input {
   max-width: 500px;
-
+  font-size: 12px;
   height: 30px;
-  line-height: 30px;
   border-radius: 15px;
   background: #fff;
   border: none;

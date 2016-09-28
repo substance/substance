@@ -13,6 +13,7 @@ import GridPackage from '../grid/GridPackage'
 import ModalPackage from '../modal/ModalPackage'
 import InputPackage from '../input/InputPackage'
 import ButtonPackage from '../button/ButtonPackage'
+import LayoutPackage from '../layout/LayoutPackage'
 
 export default {
   name: 'base',
@@ -25,6 +26,7 @@ export default {
     config.import(ModalPackage)
     config.import(InputPackage)
     config.import(ButtonPackage)
+    config.import(LayoutPackage)
 
     // Register class to handle the text tool target
     config.addComponent('tool-target-text', ToolGroup)

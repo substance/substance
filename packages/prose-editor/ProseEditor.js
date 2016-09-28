@@ -1,12 +1,9 @@
 import AbstractEditor from '../../ui/AbstractEditor'
 import ContainerEditor from '../../ui/ContainerEditor'
 import ProseEditorOverlayTools from './ProseEditorOverlayTools'
+import Toolbar from '../tools/Toolbar'
 
 class ProseEditor extends AbstractEditor {
-
-  willUpdateState(newState) {
-    this.handleStateUpdate(newState)
-  }
 
   render($$) {
     let SplitPane = this.componentRegistry.get('split-pane')
@@ -16,7 +13,6 @@ class ProseEditor extends AbstractEditor {
     let ScrollPane = this.componentRegistry.get('scroll-pane')
 
     let contentPanel = $$(ScrollPane, {
-      scrollbarType: 'substance',
       scrollbarPosition: 'right',
       overlay: ProseEditorOverlayTools,
     }).append(
@@ -33,10 +29,8 @@ class ProseEditor extends AbstractEditor {
   }
 
   _renderToolbar($$) {
-    let configurator = this.props.configurator
-    let ToolbarClass = configurator.getToolbarClass()
     let commandStates = this.commandManager.getCommandStates()
-    return $$(ToolbarClass, {
+    return $$(Toolbar, {
       commandStates: commandStates
     }).ref('toolbar')
   }
@@ -52,12 +46,8 @@ class ProseEditor extends AbstractEditor {
     }).ref('body')
   }
 
-  getToolbar() {
-    return this.refs.toolbar
-  }
-
   documentSessionUpdated() {
-    let toolbar = this.getToolbar()
+    let toolbar = this.refs.toolbar
     if (toolbar) {
       let commandStates = this.commandManager.getCommandStates()
       toolbar.setProps({
