@@ -71,7 +71,9 @@ class Highlights extends EventEmitter {
 
       forEach(toBeAdded, function(nodeId) {
         let node = doc.get(nodeId)
-        node.setHighlighted(true, scope)
+        if (node) {
+          node.setHighlighted(true, scope)
+        }
       })
     })
 
