@@ -1,3 +1,4 @@
+
 import each from 'lodash/each'
 import oo from '../util/oo'
 import uuid from '../util/uuid'
@@ -201,6 +202,12 @@ RenderingEngine.Prototype = function() {
       var oldChildren = [];
       comp.el.getChildNodes().forEach(function(node) {
         var childComp = node._comp;
+
+        // TODO: to allow mounting a prerendered DOM element
+        // we would need to allow to 'take ownership' instead of removing
+        // the element. This being a special situation, we should only
+        // do that when mounting
+
         // remove orphaned nodes and relocated components
         if (!childComp || state.isRelocated(childComp)) {
           comp.el.removeChild(node);

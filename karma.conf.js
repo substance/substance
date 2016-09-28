@@ -1,14 +1,11 @@
 module.exports = function(config) {
   config.set({
     basePath: '.',
-    frameworks: ['browserify', 'tap'],
+    frameworks: ['tap'],
     files: [
-      'test/**/*.test.js',
-      { pattern: 'test/fixtures/**/*.html', included: false, served: true },
+      'dist/test/test.browser.js',
+      'dist/test/tests.js',
     ],
-    preprocessors: {
-      'test/**/*.js': ['browserify']
-    },
     browsers: ['Chrome'],
     customLaunchers: {
       ChromeTravis: {
@@ -17,25 +14,6 @@ module.exports = function(config) {
       }
     },
     singleRun: true,
-    browserify: {
-      debug: true, // include inline source maps
-      transform: ['browserify-istanbul']
-    },
-    reporters: ['tape', 'coverage'],
-    coverageReporter: {
-      reporters : [{
-        type: 'json',
-        dir: 'coverage/json',
-        subdir: function(browser) {
-          return browser.toLowerCase().split(/[ /-]/)[0];
-        }
-      }, {
-        type: 'html',
-        dir: 'coverage/html',
-        subdir: function(browser) {
-          return browser.toLowerCase().split(/[ /-]/)[0];
-        }
-      }]
-    },
+    reporters: ['tape'],
   });
 };

@@ -1,36 +1,36 @@
-'use strict';
+import HTMLImporter from '../../model/HTMLImporter'
+import schema from './TestSchema'
+import TestArticle from './TestArticle'
 
-var HTMLImporter = require('../../model/HTMLImporter');
-var schema = require('./TestSchema');
-var TestArticle = require('./TestArticle');
+import ParagraphHTMLConverter from '../../packages/paragraph/ParagraphHTMLConverter'
+import HeadingHTMLConverter from '../../packages/heading/HeadingHTMLConverter'
+import EmphasisHTMLConverter from '../../packages/emphasis/EmphasisHTMLConverter'
+import StrongHTMLConverter from '../../packages/strong/StrongHTMLConverter'
+import LinkHTMLConverter from '../../packages/link/LinkHTMLConverter'
 
 var converters = [
-  require('../../packages/paragraph/ParagraphHTMLConverter'),
-  require('../../packages/heading/HeadingHTMLConverter'),
-  require('../../packages/emphasis/EmphasisHTMLConverter'),
-  require('../../packages/strong/StrongHTMLConverter'),
-  require('../../packages/link/LinkHTMLConverter'),
-];
+  ParagraphHTMLConverter, HeadingHTMLConverter, EmphasisHTMLConverter,
+  StrongHTMLConverter, LinkHTMLConverter
+]
 
-function TestHTMLImporter() {
-  TestHTMLImporter.super.call(this, {
-    schema: schema,
-    converters: converters,
-    DocumentClass: TestArticle
-  });
+class TestHTMLImporter extends HTMLImporter {
+
+  constructor() {
+    super({
+      schema: schema,
+      converters: converters,
+      DocumentClass: TestArticle
+    })
+  }
+
+  convertDocument(documentEl) {
+    var bodyEl = documentEl.find('body')
+    this.convertContainer(bodyEl.children, 'body')
+  }
+
 }
 
-TestHTMLImporter.Prototype = function() {
 
-  this.convertDocument = function(documentEl) {
-    var bodyEl = documentEl.find('body');
-    this.convertContainer(bodyEl.children, 'body');
-  };
+TestHTMLImporter.converters = converters
 
-};
-
-HTMLImporter.extend(TestHTMLImporter);
-
-TestHTMLImporter.converters = converters;
-
-module.exports = TestHTMLImporter;
+export default TestHTMLImporter

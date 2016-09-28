@@ -1,2 +1,1 @@
-'use strict';
-module.exports="<html><body>\r\n<!--StartFragment-->XXX<!--EndFragment-->\r\n</body>\r\n</html>";
+export default "<html><body>\r\n<!--StartFragment-->XXX<!--EndFragment-->\r\n</body>\r\n</html>";

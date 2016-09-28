@@ -1,31 +1,29 @@
-'use strict';
+import isArray from 'lodash/isArray'
+import isNumber from 'lodash/isNumber'
+import isString from 'lodash/isString'
+import _insertText from '../../model/transform/insertText'
 
-var isArray = require('lodash/isArray');
-var isNumber = require('lodash/isNumber');
-var isString = require('lodash/isString');
-var _insertText = require('../../model/transform/insertText');
-
-module.exports = function insertText(tx, args) {
-  var path = args.path;
+export default function insertText(tx, args) {
+  var path = args.path
   if (!isArray(path)) {
-    throw new Error('args.path is mandatory');
+    throw new Error('args.path is mandatory')
   }
-  var pos = args.pos;
+  var pos = args.pos
   if (!isNumber(pos)) {
-    throw new Error('args.pos is mandatory');
+    throw new Error('args.pos is mandatory')
   }
-  var text = args.text;
+  var text = args.text
   if (!isString(text)) {
-    throw new Error('args.text is mandatory');
+    throw new Error('args.text is mandatory')
   }
   var sel = tx.createSelection({
     type: 'property',
     path: path,
     startOffset: pos,
     endOffset: pos
-  });
+  })
   _insertText(tx, {
     selection: sel,
     text: text || '$$$'
-  });
-};
+  })
+}

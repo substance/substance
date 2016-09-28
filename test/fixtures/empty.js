@@ -1,10 +1,8 @@
-'use strict';
-
-var TestArticle = require('../model/TestArticle');
+import TestArticle from '../model/TestArticle'
 
 /*
   Creates an empty test document with the following content
 */
-module.exports = function empty() {
-  return new TestArticle();
-};
+export default function empty() {
+  return new TestArticle()
+}

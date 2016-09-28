@@ -1,11 +1,9 @@
-'use strict';
+import TestArticle from '../model/TestArticle'
 
-var TestArticle = require('../model/TestArticle');
-
-module.exports = function createTestArticle(seedFn) {
-  var doc = new TestArticle();
+export default function createTestArticle(seedFn) {
+  var doc = new TestArticle()
   if (seedFn) {
-    seedFn(doc);
+    seedFn(doc)
   }
-  return doc;
-};
+  return doc
+}

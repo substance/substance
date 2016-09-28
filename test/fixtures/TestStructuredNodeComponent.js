@@ -1,40 +1,33 @@
-'use strict';
+import Component from '../../ui/Component'
+import TextPropertyEditor from '../../ui/TextPropertyEditor'
 
-var Component = require('../../ui/Component');
-var TextPropertyEditor = require('../../ui/TextPropertyEditor');
+class TestStructuredNodeComponent extends Component {
 
-function TestStructuredNodeComponent() {
-  TestStructuredNodeComponent.super.apply(this, arguments);
-}
-
-TestStructuredNodeComponent.Prototype = function() {
-  this.render = function($$) {
-    var node = this.props.node;
-    var el = $$('div').addClass('sc-structured-node');
+  render($$) {
+    var node = this.props.node
+    var el = $$('div').addClass('sc-structured-node')
     el.append(
       $$(TextPropertyEditor, {
         disabled: this.props.disabled,
         path: [node.id, 'title']
       }).ref('titleEditor')
-    );
+    )
     el.append(
       $$(TextPropertyEditor, {
         disabled: this.props.disabled,
         path: [node.id, 'body']
       }).ref('bodyEditor')
-    );
+    )
     el.append(
       $$(TextPropertyEditor, {
         disabled: this.props.disabled,
         path: [node.id, 'caption']
       }).ref('captionEditor')
-    );
-    return el;
-  };
-};
+    )
+    return el
+  }
+}
 
-Component.extend(TestStructuredNodeComponent);
+TestStructuredNodeComponent.fullWidth = true
 
-TestStructuredNodeComponent.fullWidth = true;
-
-module.exports = TestStructuredNodeComponent;
+export default TestStructuredNodeComponent

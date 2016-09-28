@@ -1,20 +1,14 @@
-'use strict';
+import DocumentNode from '../../model/DocumentNode'
 
-var DocumentNode = require('../../model/DocumentNode');
-
-function StructuredNode() {
-  StructuredNode.super.apply(this, arguments);
-}
-
-DocumentNode.extend(StructuredNode);
+class StructuredNode extends DocumentNode {}
 
 StructuredNode.define({
   type: "structured-node",
   title: "text",
   body: "text",
   caption: "text"
-});
+})
 
-StructuredNode.isBlock = true;
+StructuredNode.isBlock = true
 
-module.exports = StructuredNode;
+export default StructuredNode
