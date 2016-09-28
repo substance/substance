@@ -61,7 +61,6 @@ export { default as BasePackage } from './packages/base/BasePackage'
 export { default as BlockquotePackage } from './packages/blockquote/BlockquotePackage'
 export { default as CodePackage } from './packages/code/CodePackage'
 export { default as EmphasisPackage } from './packages/emphasis/EmphasisPackage'
-export { default as HeadingPackage } from './packages/heading/HeadingPackage'
 export { default as ImagePackage } from './packages/image/ImagePackage'
 export { default as InlineWrapperPackage } from './packages/inline-wrapper/InlineWrapperPackage'
 export { default as ListPackage } from './packages/list/ListPackage'
@@ -71,6 +70,10 @@ export { default as StrongPackage } from './packages/strong/StrongPackage'
 export { default as SubscriptPackage } from './packages/subscript/SubscriptPackage'
 export { default as SuperscriptPackage } from './packages/superscript/SuperscriptPackage'
 export { default as TablePackage } from './packages/table/TablePackage'
+
+// heading
+export { default as HeadingPackage } from './packages/heading/HeadingPackage'
+export { default as HeadingMacro } from './packages/heading/HeadingMacro'
 
 // base
 export { default as SwitchTextTypeTool } from './packages/base/SwitchTextTypeTool'
