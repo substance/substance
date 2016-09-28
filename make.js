@@ -24,7 +24,10 @@ b.task('server', function() {
   b.js('./index.es.js', {
     // necessary for nodejs 4
     buble: true,
-    commonjs: { include: ['node_modules/**', require.resolve('substance-cheerio')] },
+    commonjs: { include: [
+      '/**/lodash/**',
+      '/**/substance-cheerio/**'
+    ] },
     targets: [{
       dest: './dist/substance.cjs.js',
       format: 'cjs', sourceMapRoot: __dirname, sourceMapPrefix: 'substance'
@@ -60,8 +63,8 @@ b.task('test:server', function() {
     external: ['substance-test'],
     commonjs: {
       include: [
-        'node_modules/lodash/**',
-        'node_modules/substance-cheerio/**'
+        '/**/lodash/**',
+        '/**/substance-cheerio/**'
       ]
     },
     targets: [
