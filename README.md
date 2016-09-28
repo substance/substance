@@ -13,6 +13,7 @@ Custom converters (XML, HTML, etc.)                                         | �
 Custom HTML Rendering                                                       | ✓
 Annotations that can span over multiple nodes                               | ✓
 Annotations can hold information (e.g. a comment)                           | ✓
+Isolated Nodes (any content with any custom UI)                             | ✓
 Incremental document updates (undoable operations)                          | ✓
 Transformations for document manipulation                                   | ✓
 Custom editing toolbars                                                     | ✓
@@ -39,8 +40,8 @@ Heading                                                                     | �
 Blockquote                                                                  | ✓
 Codeblock                                                                   | ✓
 Image                                                                       | ✓
-List                                                                        | ✓
-Table                                                                       | ✓
+List                                                                        | Beta 6
+Table                                                                       | Beta 6
                                                                             |
 **Predefined annotation types**                                             |
 Strong                                                                      | ✓
@@ -99,9 +100,8 @@ $ npm run doc
 
 - Key bindings
 - Improved Unicode support
-- Advanced list support
-- Advanced table support
-
+- List package
+- Table package
 
 ### 1.0 Final
 
