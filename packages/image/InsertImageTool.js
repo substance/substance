@@ -19,7 +19,7 @@ class InsertImageTool extends Tool {
 
   onFileSelect(e) {
     let files = e.currentTarget.files
-    this.performAction({
+    this.executeCommand({
       files: Array.prototype.slice.call(files)
     })
   }
