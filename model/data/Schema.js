@@ -1,7 +1,4 @@
-'use strict';
-
 import each from 'lodash/each'
-import oo from '../../util/oo'
 import NodeRegistry from './NodeRegistry'
 import Node from './Node'
 
@@ -17,54 +14,54 @@ import Node from './Node'
   @param {String} name
   @param {String} version
 */
-function Schema(name, version) {
-  /**
-    @type {String}
-  */
-  this.name = name;
-  /**
-    @type {String}
-  */
-  this.version = version;
-  /**
-    @type {NodeRegistry}
-    @private
-  */
-  this.nodeRegistry = new NodeRegistry();
-  /**
-    @type {Array} all Node classes which have `Node.tocType = true`
-    @private
-  */
-  this.tocTypes = [];
+class Schema {
 
-  // add built-in node classes
-  this.addNodes(this.getBuiltIns());
-}
+  constructor(name, version) {
+    /**
+      @type {String}
+    */
+    this.name = name
+    /**
+      @type {String}
+    */
+    this.version = version
+    /**
+      @type {NodeRegistry}
+      @private
+    */
+    this.nodeRegistry = new NodeRegistry()
+    /**
+      @type {Array} all Node classes which have `Node.tocType = true`
+      @private
+    */
+    this.tocTypes = []
 
-Schema.Prototype = function() {
+    // add built-in node classes
+    this.addNodes(this.getBuiltIns())
+  }
 
   /**
     Add nodes to the schema.
 
     @param {Array} nodes Array of Node classes
   */
-  this.addNodes = function(nodes) {
-    if (!nodes) return;
+  addNodes(nodes) {
+    if (!nodes) return
     each(nodes, function(NodeClass) {
       if (!NodeClass.prototype._isNode) {
-        console.error('Illegal node class: ', NodeClass);
+        console.error('Illegal node class: ', NodeClass)
       } else {
-        this.addNode(NodeClass);
+        this.addNode(NodeClass)
       }
-    }.bind(this));
-  };
+    }.bind(this))
+  }
 
-  this.addNode = function(NodeClass) {
-    this.nodeRegistry.register(NodeClass);
+  addNode(NodeClass) {
+    this.nodeRegistry.register(NodeClass)
     if (NodeClass.tocType) {
-      this.tocTypes.push(NodeClass.type);
+      this.tocTypes.push(NodeClass.type)
     }
-  };
+  }
 
   /**
     Get the node class for a type name.
@@ -72,9 +69,9 @@ Schema.Prototype = function() {
     @param {String} name
     @returns {Class}
   */
-  this.getNodeClass = function(name) {
-    return this.nodeRegistry.get(name);
-  };
+  getNodeClass(name) {
+    return this.nodeRegistry.get(name)
+  }
 
   /**
     Provide all built-in node classes.
@@ -82,9 +79,9 @@ Schema.Prototype = function() {
     @private
     @returns {Node[]} An array of Node classes.
   */
-  this.getBuiltIns = function() {
-    return [];
-  };
+  getBuiltIns() {
+    return []
+  }
 
   /**
     Checks if a given type is of given parent type.
@@ -93,13 +90,13 @@ Schema.Prototype = function() {
     @param {String} parentType
     @returns {Boolean} true if type is and instance of parentType.
   */
-  this.isInstanceOf = function(type, parentType) {
-    var NodeClass = this.getNodeClass(type);
+  isInstanceOf(type, parentType) {
+    var NodeClass = this.getNodeClass(type)
     if (NodeClass) {
-      return Node.isInstanceOf(NodeClass, parentType);
+      return Node.isInstanceOf(NodeClass, parentType)
     }
-    return false;
-  };
+    return false
+  }
 
   /**
     Iterate over all registered node classes.
@@ -109,34 +106,32 @@ Schema.Prototype = function() {
     @param {Function} callback
     @param {Object} context
   */
-  this.each = function() {
-    this.nodeRegistry.each.apply(this.nodeRegistry, arguments);
-  };
+  each() {
+    this.nodeRegistry.each.apply(this.nodeRegistry, arguments)
+  }
 
   /**
     @returns {Node[]} list of types that should appear in a TOC
   */
-  this.getTocTypes = function() {
-    return this.tocTypes;
-  };
+  getTocTypes() {
+    return this.tocTypes
+  }
 
   /**
     @returns {String} the name of the default textish node (e.g. 'paragraph')
   */
-  this.getDefaultTextType = function() {
-    throw new Error('Schmema.prototype.getDefaultTextType() must be overridden.');
-  };
+  getDefaultTextType() {
+    throw new Error('Schmema.prototype.getDefaultTextType() must be overridden.')
+  }
 
-  this.getNodeSchema = function(type) {
-    var NodeClass = this.getNodeClass(type);
+  getNodeSchema(type) {
+    var NodeClass = this.getNodeClass(type)
     if (!NodeClass) {
-      console.error('Unknown node type ', type);
-      return null;
+      console.error('Unknown node type ', type)
+      return null
     }
-    return NodeClass.schema;
-  };
-};
+    return NodeClass.schema
+  }
+}
 
-oo.initClass(Schema);
-
-export default Schema;
+export default Schema

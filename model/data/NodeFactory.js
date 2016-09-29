@@ -1,23 +1,16 @@
-'use strict';
+class NodeFactory {
 
-import oo from '../../util/oo'
+  constructor(nodeRegistry) {
+    this.nodeRegistry = nodeRegistry
+  }
 
-function NodeFactory(nodeRegistry) {
-  this.nodeRegistry = nodeRegistry;
+  create(nodeType, nodeData) {
+    var NodeClass = this.nodeRegistry.get(nodeType)
+    if (!NodeClass) {
+      throw new Error('No Node registered by that name: ' + nodeType)
+    }
+    return new NodeClass(nodeData)
+  }
 }
 
-NodeFactory.Prototype = function() {
-
-  this.create = function(nodeType, nodeData) {
-    var NodeClass = this.nodeRegistry.get(nodeType);
-    if (!NodeClass) {
-      throw new Error('No Node registered by that name: ' + nodeType);
-    }
-    return new NodeClass(nodeData);
-  };
-
-};
-
-oo.initClass(NodeFactory);
-
-export default NodeFactory;
+export default NodeFactory
