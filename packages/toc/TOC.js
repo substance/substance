@@ -1,5 +1,5 @@
-import Component from './Component'
-import Icon from './FontAwesomeIcon'
+import Component from '../../ui/Component'
+import Icon from '../../ui/FontAwesomeIcon'
 
 class TOC extends Component {
 
@@ -46,7 +46,7 @@ class TOC extends Component {
       tocEntries.append(tocEntryEl)
     }
 
-    let el = $$('div').addClass('sc-toc-panel').append(
+    let el = $$('div').addClass('sc-toc').append(
       $$(ScrollPane).ref('panelEl').append(
         tocEntries
       )

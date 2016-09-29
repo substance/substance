@@ -74,8 +74,8 @@ export { default as HeadingPackage } from './packages/heading/HeadingPackage'
 export { default as HeadingMacro } from './packages/heading/HeadingMacro'
 
 // base
-export { default as SwitchTextTypeTool } from './packages/base/SwitchTextTypeTool'
-export { default as SwitchTextTypeCommand } from './packages/base/SwitchTextTypeCommand'
+export { default as SwitchTextTypeTool } from './packages/switch-text-type/SwitchTextTypeTool'
+export { default as SwitchTextTypeCommand } from './packages/switch-text-type/SwitchTextTypeCommand'
 
 // prose-editor
 export { default as ProseEditorPackage } from './packages/prose-editor/ProseEditorPackage'
@@ -134,16 +134,22 @@ export { default as Input } from './packages/input/Input'
 // responsive application
 export { default as ResponsiveApplication } from './packages/responsive-application/ResponsiveApplication'
 
+// toc
+export { default as TOC } from './packages/toc/TOC'
+export { default as TOCProvider } from './packages/toc/TOCProvider'
+
 // tools
 export { default as ToolDropdown } from './packages/tools/ToolDropdown'
 export { default as Tool } from './packages/tools/Tool'
 export { default as Toolbar } from './packages/tools/Toolbar'
 export { default as ToolGroup } from './packages/tools/ToolGroup'
 
+// surface
+export { default as Surface } from './packages/surface/Surface'
+
 // ui
 export { default as BlockNodeComponent } from './ui/BlockNodeComponent'
 export { default as InsertNodeCommand } from './ui/InsertNodeCommand'
-export { default as Surface } from './ui/Surface'
 export { default as AbstractEditor } from './ui/AbstractEditor'
 export { default as AnnotationCommand } from './ui/AnnotationCommand'
 export { default as AnnotationComponent } from './ui/AnnotationComponent'
@@ -160,8 +166,6 @@ export { default as Router } from './ui/Router'
 export { default as TextBlockComponent } from './ui/TextBlockComponent'
 export { default as TextPropertyComponent } from './ui/TextPropertyComponent'
 export { default as TextPropertyEditor } from './ui/TextPropertyEditor'
-export { default as TOC } from './ui/TOC'
-export { default as TOCProvider } from './ui/TOCProvider'
 export { default as Highlights } from './ui/Highlights'
 
 // util

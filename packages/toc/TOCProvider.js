@@ -1,6 +1,6 @@
 import each from 'lodash/each'
 import includes from 'lodash/includes'
-import EventEmitter from '../util/EventEmitter'
+import EventEmitter from '../../util/EventEmitter'
 
 /**
   Manages a table of content for a container. Default implementation considers

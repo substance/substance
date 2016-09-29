@@ -83,13 +83,13 @@ class Tool extends Component {
   onClick(e) {
     e.preventDefault()
     e.stopPropagation()
-    if (!this.props.disabled) this.performAction()
+    if (!this.props.disabled) this.executeCommand()
   }
 
   /**
     Executes the associated command
   */
-  performAction(props) {
+  executeCommand(props) {
     this.context.commandManager.executeCommand(this.getCommandName(), extend({
       mode: this.props.mode
     }, props))

@@ -1,8 +1,8 @@
 import Component from './Component'
 import CommandManager from './CommandManager'
-import SurfaceManager from './SurfaceManager'
 import MacroManager from './MacroManager'
 import GlobalEventHandler from './GlobalEventHandler'
+import SurfaceManager from '../packages/surface/SurfaceManager'
 import DragManager from './DragManager'
 
 class AbstractEditor extends Component {

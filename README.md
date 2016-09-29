@@ -11,8 +11,8 @@ Features                                                                    | St
 Custom document schemas                                                     | ✓
 Custom converters (XML, HTML, etc.)                                         | ✓
 Custom HTML Rendering                                                       | ✓
-Annotations that can span over multiple nodes                               | ✓
 Annotations can hold information (e.g. a comment)                           | ✓
+Annotations that can span over multiple nodes                               | Beta 6
 Isolated Nodes (any content with any custom UI)                             | ✓
 Incremental document updates (undoable operations)                          | ✓
 Transformations for document manipulation                                   | ✓
@@ -52,9 +52,9 @@ Superscript                                                                 | �
 Code                                                                        | ✓
                                                                             |
 **Platform support**                                                        |
-Mozilla Firefox (>=42)                                                      | ✓
-Apple Safari (>=9)                                                          | ✓
-Google Chrome (>=47)                                                        | ✓
+Mozilla Firefox (>=49)                                                      | ✓
+Apple Safari (>=10)                                                          | ✓
+Google Chrome (>=53)                                                        | ✓
 Microsoft Edge                                                              | ✓
 
 
@@ -88,15 +88,9 @@ $ npm run doc
 
 ## Roadmap
 
-### Beta 5
-
-*ETA: September 2016*
-
-- Stabilized Beta 4 features
-- ES6 support
-- Pure CSS for easier integration
-
 ### Beta 6
+
+*ETA: November 2016*
 
 - Key bindings
 - Improved Unicode support

@@ -11,9 +11,8 @@ import platform from '../util/platform'
 /**
   Import HTML from clipboard. Used for inter-application copy'n'paste.
 */
-
 class ClipboardImporter extends HTMLImporter {
-  
+
   constructor(config) {
     ClipboardImporter._addConverters(config)
 
