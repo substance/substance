@@ -1,4 +1,4 @@
-import Surface from '../../ui/Surface'
+import Surface from '../../packages/surface/Surface'
 import DocumentSession from '../../model/DocumentSession'
 
 function StubSurface(doc, containerId) {

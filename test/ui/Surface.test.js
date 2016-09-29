@@ -4,7 +4,7 @@ import { module } from 'substance-test'
 import Registry from '../../util/Registry'
 import createAnnotation from '../../model/transform/createAnnotation'
 import DocumentSession from '../../model/DocumentSession'
-import SurfaceManager from '../../ui/SurfaceManager'
+import SurfaceManager from '../../packages/surface/SurfaceManager'
 
 import TestContainerEditor from './TestContainerEditor'
 import fixture from '../fixtures/createTestArticle'
