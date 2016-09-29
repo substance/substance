@@ -1,5 +1,3 @@
-'use strict';
-
 /**
   Performs an asynchronous HTTP request.
 
@@ -17,7 +15,6 @@
   });
   ```
 */
-
 function request(method, url, data, cb) {
   var request = new XMLHttpRequest();
   request.open(method, url, true);

@@ -10,10 +10,48 @@ import ComponentRegistry from '../ui/ComponentRegistry'
 import FontAwesomeIconProvider from '../ui/FontAwesomeIconProvider'
 import LabelProvider from '../ui/DefaultLabelProvider'
 
-/**
- * Default Configurator for Substance editors.
- *
- */
+/*
+  Default Configurator for Substance editors. It provides an API for
+  adding nodes to the schema, components, commands and tools etc.
+
+  @class
+
+  @example
+
+  ```js
+  let configurator = new Configurator()
+
+  configurator.addNode(Heading)
+  configurator.addComponent('heading', HeadingComponent)
+  ```
+
+  To modularize configuration, package definitions can be imported.
+
+  ```js
+  configurator.import(ParagraphPackage)
+  ```
+
+  You can create your own extensions that way.
+
+  ```js
+
+  const AlienPackage = {
+    name: 'alien'
+    configure: function(config) {
+      config.addNode(AlienNode)
+      config.addComponent('alien', AlienComponent)
+      config.addCommand('add-alien', AddAlienCommand)
+      config.addTool('add-alien', AddAlienTool)
+    }
+  }
+
+  ```
+
+  From within a package, another package can be imported. This provides
+  a simple mechanism to model dependencies between packages. Just make
+  sure you don't run into cyclic dependencies as there is no checking for
+  that at the moment.
+*/
 class Configurator {
   constructor() {
     this.config = {

@@ -8,15 +8,13 @@ import isBoolean from 'lodash/isBoolean'
 import isNumber from 'lodash/isNumber'
 import isString from 'lodash/isString'
 
-/**
-  @class
-  @abstract
-
+/*
   Base class for custom HTML exporters. If you want to use XML as your
   exchange format see {@link model/XMLExporter}.
 
+  @class
+  @abstract
 */
-
 function HTMLExporter(config) {
   config = extend({ idAttribute: 'data-id' }, config);
   DOMExporter.call(this, config);

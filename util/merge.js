@@ -1,5 +1,3 @@
-'use strict';
-
 import merge from 'lodash/merge'
 import mergeWith from 'lodash/mergeWith'
 import isArray from 'lodash/isArray'

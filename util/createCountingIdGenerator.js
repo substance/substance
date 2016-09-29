@@ -1,5 +1,3 @@
-'use strict';
-
 export default function createCountingIdGenerator() {
   var counters = {};
   return function uuid(prefix) {

@@ -2,7 +2,7 @@
 
 import Registry from '../../util/Registry'
 
-/**
+/*
   Registry for Nodes.
 
   @class NodeRegistry

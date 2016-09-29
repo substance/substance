@@ -1,3 +1,6 @@
+/*
+  DOM selection helper
+*/
 export default function setDOMSelection(startNode, startOffset, endNode, endOffset) {
   var sel = window.getSelection()
   var range = window.document.createRange()

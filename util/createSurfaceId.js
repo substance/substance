@@ -1,5 +1,3 @@
-'use strict';
-
 export default function createSurfaceId(surface) {
   var surfaceParent = surface._getSurfaceParent();
   if (surfaceParent) {

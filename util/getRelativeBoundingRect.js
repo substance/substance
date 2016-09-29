@@ -1,5 +1,3 @@
-'use strict';
-
 import forEach from 'lodash/forEach'
 import map from 'lodash/map'
 

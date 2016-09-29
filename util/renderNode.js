@@ -1,5 +1,3 @@
-'use strict';
-
 import error from './error'
 
 export default function renderNode($$, component, node) {

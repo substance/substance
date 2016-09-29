@@ -1,13 +1,10 @@
-'use strict';
-
 import isString from 'lodash/isString'
 import isArray from 'lodash/isArray'
 import get from 'lodash/get'
 import setWith from 'lodash/setWith'
-import oo from './oo'
 import deleteFromArray from './deleteFromArray'
 
-function TreeNode() {}
+class TreeNode {}
 
 /*
  * A tree-structure for indexes.
@@ -20,10 +17,7 @@ function TreeNode() {}
  * var index = new TreeIndex({a: "aVal", b: {b1: 'b1Val', b2: 'b2Val'}});
  */
 
-function TreeIndex() {}
-
-TreeIndex.Prototype = function() {
-
+class TreeIndex {
   /**
    * Get value at path.
    *
@@ -34,7 +28,7 @@ TreeIndex.Prototype = function() {
    * obj.get(['b', 'b1']);
    * => b1Val
    */
-  this.get = function(path) {
+  get(path) {
     if (arguments.length > 1) {
       path = Array.prototype.slice(arguments, 0);
     }
@@ -42,9 +36,9 @@ TreeIndex.Prototype = function() {
       path = [path];
     }
     return get(this, path);
-  };
+  }
 
-  this.getAll = function(path) {
+  getAll(path) {
     if (arguments.length > 1) {
       path = Array.prototype.slice(arguments, 0);
     }
@@ -56,18 +50,18 @@ TreeIndex.Prototype = function() {
     }
     var node = get(this, path);
     return this._collectValues(node);
-  };
+  }
 
-  this.set = function(path, value) {
+  set(path, value) {
     if (isString(path)) {
       path = [path];
     }
     setWith(this, path, value, function(val) {
       if (!val) return new TreeNode();
     });
-  };
+  }
 
-  this.delete = function(path) {
+  delete(path) {
     if (isString(path)) {
       delete this[path];
     } else if(path.length === 1) {
@@ -80,24 +74,26 @@ TreeIndex.Prototype = function() {
         delete parent[key];
       }
     }
-  };
+  }
 
-  this.clear = function() {
+  clear() {
     var root = this;
     for (var key in root) {
       if (root.hasOwnProperty(key)) {
         delete root[key];
       }
     }
-  };
+  }
 
-  this.traverse = function(fn) {
+  traverse(fn) {
     this._traverse(this, [], fn);
-  };
+  }
 
-  this.forEach = this.traverse;
+  forEach(...args) {
+    this.traverse(...args)
+  }
 
-  this._traverse = function(root, path, fn) {
+  _traverse(root, path, fn) {
     var id;
     for (id in root) {
       if (!root.hasOwnProperty(id)) continue;
@@ -109,9 +105,9 @@ TreeIndex.Prototype = function() {
         fn(child, childPath);
       }
     }
-  };
+  }
 
-  this._collectValues = function(root) {
+  _collectValues(root) {
     // TODO: don't know if this is the best solution
     // We use this only for indexes, e.g., to get all annotation on one node
     var vals = {};
@@ -120,30 +116,24 @@ TreeIndex.Prototype = function() {
       vals[key] = val;
     });
     return vals;
-  };
-};
+  }
+}
 
-oo.initClass(TreeIndex);
+class TreeIndexArrays extends TreeIndex {
 
-TreeIndex.Arrays = function() {};
-
-TreeIndex.Arrays.Prototype = function() {
-
-  var _super = Object.getPrototypeOf(this);
-
-  this.get = function(path) {
-    var val = _super.get.call(this, path);
+  get(path) {
+    let val = super.get(path)
     if (val instanceof TreeNode) {
       val = val.__values__ || [];
     }
     return val;
-  };
+  }
 
-  this.set = function() {
+  set() {
     throw new Error('TreeIndex.set() is not supported for array type.');
-  };
+  }
 
-  this.add = function(path, value) {
+  add(path, value) {
     if (isString(path)) {
       path = [path];
     }
@@ -166,29 +156,28 @@ TreeIndex.Arrays.Prototype = function() {
         val = new TreeNode();
       }
       return val;
-    });
-    delete arr.__dummy__;
-    arr.push(value);
-  };
+    })
+    delete arr.__dummy__
+    arr.push(value)
+  }
 
-  this.remove = function(path, value) {
+  remove(path, value) {
     var arr = get(this, path);
     if (arr instanceof TreeNode) {
       deleteFromArray(arr.__values__, value);
     }
-  };
+  }
 
-  this._collectValues = function(root) {
-    var vals = [];
+  _collectValues(root) {
+    var vals = []
     this._traverse(root, [], function(val) {
       vals.push(val);
-    });
-    vals = Array.prototype.concat.apply([], vals);
-    return vals;
-  };
+    })
+    vals = Array.prototype.concat.apply([], vals)
+    return vals
+  }
+}
 
-};
-
-TreeIndex.extend(TreeIndex.Arrays);
+TreeIndex.Arrays = TreeIndexArrays
 
 export default TreeIndex;
