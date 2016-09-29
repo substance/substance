@@ -1,72 +1,69 @@
-'use strict';
-
 import filter from 'lodash/filter'
 import TreeIndex from '../util/TreeIndex'
 import DocumentIndex from './DocumentIndex'
 
-function AnchorIndex(doc) {
-  this.doc = doc;
-  this.byPath = new TreeIndex.Arrays();
-  this.byId = {};
-}
+class AnchorIndex extends DocumentIndex {
 
-AnchorIndex.Prototype = function() {
+  constructor(doc) {
+    super()
 
-  this.select = function(node) {
-    return (node._isContainerAnnotation);
-  };
+    this.doc = doc
+    this.byPath = new TreeIndex.Arrays()
+    this.byId = {}
+  }
 
-  this.reset = function(data) {
-    this.byPath.clear();
-    this.byId = {};
-    this._initialize(data);
-  };
+  select(node) {
+    return (node._isContainerAnnotation)
+  }
 
-  this.get = function(path, containerName) {
-    var anchors = this.byPath.getAll(path);
+  reset(data) {
+    this.byPath.clear()
+    this.byId = {}
+    this._initialize(data)
+  }
+
+  get(path, containerName) {
+    var anchors = this.byPath.getAll(path)
     if (containerName) {
       return filter(anchors, function(anchor) {
-        return (anchor.containerId === containerName);
-      });
+        return (anchor.containerId === containerName)
+      })
     } else {
       // return a copy of the array
-      return anchors.slice(0);
+      return anchors.slice(0)
     }
-  };
+  }
 
-  this.create = function(containerAnno) {
-    var startAnchor = containerAnno.getStartAnchor();
-    var endAnchor = containerAnno.getEndAnchor();
-    this.byPath.add(startAnchor.path, startAnchor);
-    this.byPath.add(endAnchor.path, endAnchor);
-    this.byId[containerAnno.id] = containerAnno;
-  };
+  create(containerAnno) {
+    var startAnchor = containerAnno.getStartAnchor()
+    var endAnchor = containerAnno.getEndAnchor()
+    this.byPath.add(startAnchor.path, startAnchor)
+    this.byPath.add(endAnchor.path, endAnchor)
+    this.byId[containerAnno.id] = containerAnno
+  }
 
-  this.delete = function(containerAnno) {
-    var startAnchor = containerAnno.getStartAnchor();
-    var endAnchor = containerAnno.getEndAnchor();
-    this.byPath.remove(startAnchor.path, startAnchor);
-    this.byPath.remove(endAnchor.path, endAnchor);
-    delete this.byId[containerAnno.id];
-  };
+  delete(containerAnno) {
+    var startAnchor = containerAnno.getStartAnchor()
+    var endAnchor = containerAnno.getEndAnchor()
+    this.byPath.remove(startAnchor.path, startAnchor)
+    this.byPath.remove(endAnchor.path, endAnchor)
+    delete this.byId[containerAnno.id]
+  }
 
-  this.update = function(node, path, newValue, oldValue) {
+  update(node, path, newValue, oldValue) {
     if (this.select(node)) {
-      var anchor = null;
+      var anchor = null
       if (path[1] === 'startPath') {
-        anchor = node.getStartAnchor();
+        anchor = node.getStartAnchor()
       } else if (path[1] === 'endPath') {
-        anchor = node.getEndAnchor();
+        anchor = node.getEndAnchor()
       } else {
-        return;
+        return
       }
-      this.byPath.remove(oldValue, anchor);
-      this.byPath.add(anchor.path, anchor);
+      this.byPath.remove(oldValue, anchor)
+      this.byPath.add(anchor.path, anchor)
     }
-  };
+  }
+}
 
-};
-
-DocumentIndex.extend(AnchorIndex);
-
-export default AnchorIndex;
+export default AnchorIndex

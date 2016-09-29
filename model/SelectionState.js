@@ -1,77 +1,74 @@
-'use strict';
-
-import oo from '../util/oo'
 import TreeIndex from '../util/TreeIndex'
 import Selection from './Selection'
 import documentHelpers from './documentHelpers'
 
-function SelectionState(doc) {
-  this.document = doc;
+class SelectionState {
 
-  this.selection = Selection.nullSelection;
-  this._state = {};
-  this._resetState();
-}
+  constructor(doc) {
+    this.document = doc
 
-SelectionState.Prototype = function() {
+    this.selection = Selection.nullSelection
+    this._state = {}
+    this._resetState()
+  }
 
-  this.setSelection = function(sel) {
+  setSelection(sel) {
     if (!sel) {
-      sel = Selection.nullSelection;
+      sel = Selection.nullSelection
     } else {
-      sel.attach(this.document);
+      sel.attach(this.document)
     }
     // TODO: selection state is selection plus derived state,
     // thus we need to return false only if both did not change
-    this._deriveState(sel);
-    this.selection = sel;
-    return true;
-  };
+    this._deriveState(sel)
+    this.selection = sel
+    return true
+  }
 
-  this.getSelection = function() {
-    return this.selection;
-  };
+  getSelection() {
+    return this.selection
+  }
 
-  this.getAnnotationsForType = function(type) {
-    var state = this._state;
+  getAnnotationsForType(type) {
+    var state = this._state
     if (state.annosByType) {
-      return state.annosByType.get(type) || [];
+      return state.annosByType.get(type) || []
     }
-    return [];
-  };
+    return []
+  }
 
-  this.isInlineNodeSelection = function() {
-    return this._state.isInlineNodeSelection;
-  };
+  isInlineNodeSelection() {
+    return this._state.isInlineNodeSelection
+  }
 
-  this._deriveState = function(sel) {
-    var doc = this.document;
+  _deriveState(sel) {
+    var doc = this.document
 
-    this._resetState();
-    var state = this._state;
+    this._resetState()
+    var state = this._state
 
     // create a mapping by type for the currently selected annotations
-    var annosByType = new TreeIndex.Arrays();
-    var propAnnos = documentHelpers.getPropertyAnnotationsForSelection(doc, sel);
+    var annosByType = new TreeIndex.Arrays()
+    var propAnnos = documentHelpers.getPropertyAnnotationsForSelection(doc, sel)
     propAnnos.forEach(function(anno) {
-      annosByType.add(anno.type, anno);
-    });
+      annosByType.add(anno.type, anno)
+    })
 
     if (propAnnos.length === 1 && propAnnos[0].isInline()) {
-      state.isInlineNodeSelection = propAnnos[0].getSelection().equals(sel);
+      state.isInlineNodeSelection = propAnnos[0].getSelection().equals(sel)
     }
 
-    var containerId = sel.containerId;
+    var containerId = sel.containerId
     if (containerId) {
-      var containerAnnos = documentHelpers.getContainerAnnotationsForSelection(doc, sel, containerId);
+      var containerAnnos = documentHelpers.getContainerAnnotationsForSelection(doc, sel, containerId)
       containerAnnos.forEach(function(anno) {
-        annosByType.add(anno.type, anno);
-      });
+        annosByType.add(anno.type, anno)
+      })
     }
-    state.annosByType = annosByType;
-  };
+    state.annosByType = annosByType
+  }
 
-  this._resetState = function() {
+  _resetState() {
     this._state = {
       // all annotations under the current selection
       annosByType: null,
@@ -81,12 +78,10 @@ SelectionState.Prototype = function() {
       nodeSelectionMode: '', // full, before, after
       // flags for inline nodes
       isInlineNodeSelection: false
-    };
-    return this._state;
-  };
+    }
+    return this._state
+  }
 
-};
+}
 
-oo.initClass(SelectionState);
-
-export default SelectionState;
+export default SelectionState

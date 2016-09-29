@@ -1,6 +1,5 @@
 import isArray from 'lodash/isArray'
 import each from 'lodash/each'
-import extend from 'lodash/extend'
 import TreeIndex from '../../util/TreeIndex'
 
 /*
@@ -22,6 +21,8 @@ class NodeIndex {
      * @private
      */
     this.index = new TreeIndex()
+
+    this._property = "id"
   }
 
   /**
@@ -50,6 +51,8 @@ class NodeIndex {
    * @type {String}
    */
   get property() { return "id" }
+
+  set property(p) { this._property = p }
 
   /**
    * Check if a node should be indexed.
@@ -173,7 +176,7 @@ class NodeIndex {
  * @returns {model/data/NodeIndex} A customized NodeIndex.
  */
 NodeIndex.create = function(prototype) {
-  var index = extend(new NodeIndex(), prototype)
+  var index = Object.assign(new NodeIndex(), prototype)
   index.clone = function() {
     return NodeIndex.create(prototype)
   }

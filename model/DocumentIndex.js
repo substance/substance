@@ -1,11 +1,5 @@
-'use strict';
-
 import NodeIndex from './data/NodeIndex'
 
-function DocumentIndex() {}
+class DocumentIndex extends NodeIndex {}
 
-NodeIndex.extend(DocumentIndex);
-
-DocumentIndex.filterByType = NodeIndex.filterByType;
-
-export default NodeIndex;
+export default DocumentIndex

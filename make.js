@@ -87,7 +87,7 @@ b.task('test:server', function() {
       ]
     },
     targets: [
-      { dest: TEST+'run-tests.js', format: 'cjs' },
+      { dest: TEST+'tests.cjs.js', format: 'cjs' },
     ]
   });
 })

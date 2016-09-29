@@ -1,8 +1,5 @@
-'use strict';
-
 import DOMImporter from './DOMImporter'
 import DefaultDOMElement from '../ui/DefaultDOMElement'
-import extend from 'lodash/extend'
 
 /*
   Base class for custom HTML importers. If you want to use XML as your
@@ -11,24 +8,23 @@ import extend from 'lodash/extend'
   @class
   @abstract
 */
-function HTMLImporter(config) {
-  config = extend({ idAttribute: 'data-id' }, config);
-  DOMImporter.call(this, config);
+class HTMLImporter extends DOMImporter {
 
-  // only used internally for creating wrapper elements
-  this._el = DefaultDOMElement.parseHTML('<html></html>');
-}
+  constructor(config) {
+    super(Object.assign({ idAttribute: 'data-id' }, config))
 
-HTMLImporter.Prototype = function() {
+    // only used internally for creating wrapper elements
+    this._el = DefaultDOMElement.parseHTML('<html></html>')
+  }
 
-  this.importDocument = function(html) {
-    this.reset();
-    var parsed = DefaultDOMElement.parseHTML(html);
+  importDocument(html) {
+    this.reset()
+    var parsed = DefaultDOMElement.parseHTML(html)
     // creating all nodes
-    this.convertDocument(parsed);
-    this.generateDocument();
-    return this.state.doc;
-  };
+    this.convertDocument(parsed)
+    this.generateDocument()
+    return this.state.doc
+  }
 
   /**
     Orchestrates conversion of a whole document.
@@ -46,27 +42,25 @@ HTMLImporter.Prototype = function() {
     looks like this.
 
     ```js
-      this.convertDocument = function(els) {
-        this.convertContainer(els, 'body');
-      };
+      convertDocument(els) {
+        this.convertContainer(els, 'body')
+      }
     ```
 
     If a full document `<html><body><p>A</p><p>B</p></body></html>` is imported
     you get the `<html>` element instead of a node array.
 
     ```js
-      this.convertDocument = function(htmlEl) {
-        var bodyEl = htmlEl.find('body');
-        this.convertContainer(bodyEl.children, 'body');
-      };
+      convertDocument(htmlEl) {
+        var bodyEl = htmlEl.find('body')
+        this.convertContainer(bodyEl.children, 'body')
+      }
     ```
   */
-  this.convertDocument = function(documentEl) { // eslint-disable-line
-    throw new Error('This method is abstract');
-  };
+  convertDocument(documentEl) { // eslint-disable-line
+    throw new Error('This method is abstract')
+  }
 
-};
+}
 
-DOMImporter.extend(HTMLImporter);
-
-export default HTMLImporter;
+export default HTMLImporter

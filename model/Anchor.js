@@ -1,5 +1,3 @@
-'use strict';
-
 import Coordinate from './Coordinate'
 
 /*
@@ -16,18 +14,12 @@ import Coordinate from './Coordinate'
   @class
   @abstract
 */
-function Anchor() {
-  Anchor.super.apply(this, arguments);
+class Anchor extends Coordinate {
+
+  isAnchor() {
+    return true
+  }
+
 }
 
-Anchor.Prototype = function() {
-
-  this.isAnchor = function() {
-    return true;
-  };
-
-};
-
-Coordinate.extend(Anchor);
-
-export default Anchor;
+export default Anchor

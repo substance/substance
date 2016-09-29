@@ -1,10 +1,9 @@
-'use strict';
-
 import cloneDeep from 'lodash/cloneDeep'
 import isEqual from 'lodash/isEqual'
 import Selection from './Selection'
 
 class CustomSelection extends Selection {
+
   constructor(customType, data, surfaceId) {
     super()
 

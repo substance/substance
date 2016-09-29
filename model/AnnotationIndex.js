@@ -1,5 +1,3 @@
-'use strict';
-
 import isString from 'lodash/isString'
 import isNumber from 'lodash/isNumber'
 import map from 'lodash/map'
@@ -14,82 +12,82 @@ import DocumentIndex from './DocumentIndex'
 //
 // To get all annotations for the content of a text node
 //
-//    var aIndex = doc.annotationIndex;
-//    aIndex.get(["text_1", "content"]);
+//    var aIndex = doc.annotationIndex
+//    aIndex.get(["text_1", "content"])
 //
 // You can also scope for a specific range
 //
-//    aIndex.get(["text_1", "content"], 23, 45);
+//    aIndex.get(["text_1", "content"], 23, 45)
 
-function AnnotationIndex() {
-  this.byPath = new TreeIndex();
-  this.byType = new TreeIndex();
-}
+class AnnotationIndex extends DocumentIndex {
 
-AnnotationIndex.Prototype = function() {
+  constructor() {
+    super()
 
-  this.property = "path";
+    this.byPath = new TreeIndex()
+    this.byType = new TreeIndex()
+  }
 
-  this.select = function(node) {
-    return Boolean(node._isPropertyAnnotation);
-  };
+  get property() { return "path"; }
 
-  this.reset = function(data) {
-    this.byPath.clear();
-    this.byType.clear();
-    this._initialize(data);
-  };
+  select(node) {
+    return Boolean(node._isPropertyAnnotation)
+  }
+
+  reset(data) {
+    this.byPath.clear()
+    this.byType.clear()
+    this._initialize(data)
+  }
 
   // TODO: use object interface? so we can combine filters (path and type)
-  this.get = function(path, start, end, type) {
-    var annotations;
+  get(path, start, end, type) {
+    var annotations
     if (isString(path) || path.length === 1) {
-      annotations = this.byPath.getAll(path) || {};
+      annotations = this.byPath.getAll(path) || {}
     } else {
-      annotations = this.byPath.get(path);
+      annotations = this.byPath.get(path)
     }
-    annotations = map(annotations);
+    annotations = map(annotations)
     if (isNumber(start)) {
-      annotations = filter(annotations, AnnotationIndex.filterByRange(start, end));
+      annotations = filter(annotations, AnnotationIndex.filterByRange(start, end))
     }
     if (type) {
-      annotations = filter(annotations, DocumentIndex.filterByType(type));
+      annotations = filter(annotations, DocumentIndex.filterByType(type))
     }
-    return annotations;
-  };
+    return annotations
+  }
 
-  this.create = function(anno) {
-    this.byType.set([anno.type, anno.id], anno);
-    this.byPath.set(anno.path.concat([anno.id]), anno);
-  };
+  create(anno) {
+    this.byType.set([anno.type, anno.id], anno)
+    this.byPath.set(anno.path.concat([anno.id]), anno)
+  }
 
-  this.delete = function(anno) {
-    this.byType.delete([anno.type, anno.id]);
-    this.byPath.delete(anno.path.concat([anno.id]));
-  };
+  delete(anno) {
+    this.byType.delete([anno.type, anno.id])
+    this.byPath.delete(anno.path.concat([anno.id]))
+  }
 
-  this.update = function(node, path, newValue, oldValue) {
+  update(node, path, newValue, oldValue) {
     if (this.select(node) && path[1] === this.property) {
-      this.delete({ id: node.id, type: node.type, path: oldValue });
-      this.create(node);
+      this.delete({ id: node.id, type: node.type, path: oldValue })
+      this.create(node)
     }
-  };
+  }
 
-};
-
-DocumentIndex.extend(AnnotationIndex);
+}
 
 AnnotationIndex.filterByRange = function(start, end) {
   return function(anno) {
-    var aStart = anno.startOffset;
-    var aEnd = anno.endOffset;
-    var overlap = (aEnd >= start);
+    var aStart = anno.startOffset
+    var aEnd = anno.endOffset
+    var overlap = (aEnd >= start)
     // Note: it is allowed to omit the end part
     if (isNumber(end)) {
-      overlap = overlap && (aStart <= end);
+      overlap = overlap && (aStart <= end)
     }
-    return overlap;
-  };
-};
+    return overlap
+  }
+}
 
-export default AnnotationIndex;
+export default AnnotationIndex

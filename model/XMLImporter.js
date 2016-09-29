@@ -1,8 +1,5 @@
-'use strict';
-
 import DOMImporter from './DOMImporter'
 import DefaultDOMElement from '../ui/DefaultDOMElement'
-import extend from 'lodash/extend'
 
 /*
   @class
@@ -14,28 +11,24 @@ import extend from 'lodash/extend'
   TODO: provide example and activate reenable API docs
 */
 
-function XMLImporter(config) {
-  config = extend({ idAttribute: 'id' }, config);
-  DOMImporter.call(this, config);
+class XMLImporter extends DOMImporter {
 
-  // only used internally for creating wrapper elements
-  this._el = DefaultDOMElement.parseXML('<dummy></dummy>');
+  constructor(config) {
+    super(Object.assign({ idAttribute: 'id' }, config))
+    // only used internally for creating wrapper elements
+    this._el = DefaultDOMElement.parseXML('<dummy></dummy>')
+  }
+
+  importDocument(xml) {
+    // initialization
+    this.reset()
+    // converting to JSON first
+    var articleElement = DefaultDOMElement.parseXML(xml)
+    this.convertDocument(articleElement)
+    var doc = this.generateDocument()
+    return doc
+  }
+
 }
 
-XMLImporter.Prototype = function() {
-
-  this.importDocument = function(xml) {
-    // initialization
-    this.reset();
-    // converting to JSON first
-    var articleElement = DefaultDOMElement.parseXML(xml);
-    this.convertDocument(articleElement);
-    var doc = this.generateDocument();
-    return doc;
-  };
-
-};
-
-DOMImporter.extend(XMLImporter);
-
-export default XMLImporter;
+export default XMLImporter

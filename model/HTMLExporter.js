@@ -1,79 +1,74 @@
-'use strict';
-
 import DOMExporter from './DOMExporter'
 import DefaultDOMElement from '../ui/DefaultDOMElement'
-import extend from 'lodash/extend'
 import each from 'lodash/each'
 import isBoolean from 'lodash/isBoolean'
 import isNumber from 'lodash/isNumber'
 import isString from 'lodash/isString'
 
-/*
-  Base class for custom HTML exporters. If you want to use XML as your
-  exchange format see {@link model/XMLExporter}.
-
-  @class
-  @abstract
-*/
-function HTMLExporter(config) {
-  config = extend({ idAttribute: 'data-id' }, config);
-  DOMExporter.call(this, config);
-
-  // used internally for creating elements
-  this._el = DefaultDOMElement.parseHTML('<html></html>');
+var defaultAnnotationConverter = {
+  tagName: 'span',
+  export: function(node, el) {
+    el.tagName = 'span'
+    el.attr('data-type', node.type)
+    var properties = node.toJSON()
+    each(properties, function(value, name) {
+      if (name === 'id' || name === 'type') return
+      if (isString(value) || isNumber(value) || isBoolean(value)) {
+        el.attr('data-'+name, value)
+      }
+    })
+  }
 }
 
-HTMLExporter.Prototype = function() {
+var defaultBlockConverter = {
+  export: function(node, el, converter) {
+    el.attr('data-type', node.type)
+    var properties = node.toJSON()
+    each(properties, function(value, name) {
+      if (name === 'id' || name === 'type') {
+        return
+      }
+      var prop = converter.$$('div').attr('property', name)
+      if (node.getPropertyType(name) === 'string' && value) {
+        prop.append(converter.annotatedText([node.id, name]))
+      } else {
+        prop.text(value)
+      }
+      el.append(prop)
+    })
+  }
+}
 
-  this.exportDocument = function(doc) {
-    var htmlEl = DefaultDOMElement.parseHTML('<html><head></head><body></body></html>');
-    return this.convertDocument(doc, htmlEl);
-  };
+/*
+  @class
+  @abstract
 
-  var defaultAnnotationConverter = {
-    tagName: 'span',
-    export: function(node, el) {
-      el.tagName = 'span';
-      el.attr('data-type', node.type);
-      var properties = node.toJSON();
-      each(properties, function(value, name) {
-        if (name === 'id' || name === 'type') return;
-        if (isString(value) || isNumber(value) || isBoolean(value)) {
-          el.attr('data-'+name, value);
-        }
-      });
-    }
-  };
+  Base class for custom HTML exporters. If you want to use XML as your
+  exchange format see {@link model/XMLExporter}.
+*/
 
-  var defaultBlockConverter = {
-    export: function(node, el, converter) {
-      el.attr('data-type', node.type);
-      var properties = node.toJSON();
-      each(properties, function(value, name) {
-        if (name === 'id' || name === 'type') {
-          return;
-        }
-        var prop = converter.$$('div').attr('property', name);
-        if (node.getPropertyType(name) === 'string' && value) {
-          prop.append(converter.annotatedText([node.id, name]));
-        } else {
-          prop.text(value);
-        }
-        el.append(prop);
-      });
-    }
-  };
+class HTMLExporter extends DOMExporter {
 
-  this.getDefaultBlockConverter = function() {
-    return defaultBlockConverter;
-  };
+  constructor(config) {
+    super(Object.assign({ idAttribute: 'data-id' }, config))
 
-  this.getDefaultPropertyAnnotationConverter = function() {
-    return defaultAnnotationConverter;
-  };
+    // used internally for creating elements
+    this._el = DefaultDOMElement.parseHTML('<html></html>')
+  }
 
-};
+  exportDocument(doc) {
+    var htmlEl = DefaultDOMElement.parseHTML('<html><head></head><body></body></html>')
+    return this.convertDocument(doc, htmlEl)
+  }
 
-DOMExporter.extend(HTMLExporter);
+  getDefaultBlockConverter() {
+    return defaultBlockConverter
+  }
 
-export default HTMLExporter;
+  getDefaultPropertyAnnotationConverter() {
+    return defaultAnnotationConverter
+  }
+
+}
+
+export default HTMLExporter

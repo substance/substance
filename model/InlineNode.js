@@ -1,12 +1,6 @@
-'use strict';
-
 import PropertyAnnotation from './PropertyAnnotation'
 
-function InlineNode() {
-  InlineNode.super.apply(this, arguments);
-}
-
-PropertyAnnotation.extend(InlineNode);
+class InlineNode extends PropertyAnnotation {}
 
 InlineNode.isInline = true;
 

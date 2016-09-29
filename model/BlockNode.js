@@ -1,12 +1,6 @@
-'use strict';
-
 import DocumentNode from './DocumentNode'
 
-function BlockNode() {
-  BlockNode.super.apply(this, arguments);
-}
-
-DocumentNode.extend(BlockNode);
+class BlockNode extends DocumentNode {}
 
 BlockNode.isBlock = true;
 

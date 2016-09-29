@@ -1,5 +1,3 @@
-'use strict';
-
 import DocumentNode from './DocumentNode'
 
 /**
@@ -10,33 +8,27 @@ import DocumentNode from './DocumentNode'
   @abstract
 */
 
-function TextNode() {
-  TextNode.super.apply(this, arguments);
+class TextNode extends DocumentNode {
+
+  getTextPath() {
+    return [this.id, 'content']
+  }
+
+  getText() {
+    return this.content
+  }
+
+  isEmpty() {
+    return !this.content
+  }
+
 }
 
-TextNode.Prototype = function() {
-
-  this.getTextPath = function() {
-    return [this.id, 'content'];
-  };
-
-  this.getText = function() {
-    return this.content;
-  };
-
-  this.isEmpty = function() {
-    return !this.content;
-  };
-
-};
-
-DocumentNode.extend(TextNode);
-
-TextNode.isText = true;
+TextNode.isText = true
 
 TextNode.define({
   type: "text",
   content: 'text'
-});
+})
 
-export default TextNode;
+export default TextNode

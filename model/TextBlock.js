@@ -1,12 +1,6 @@
-'use strict';
-
 import TextNode from './TextNode'
 
-function TextBlock() {
-  TextNode.apply(this, arguments);
-}
-
-TextNode.extend(TextBlock);
+class TextBlock extends TextNode {}
 
 TextBlock.isBlock = true;
 

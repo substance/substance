@@ -1,5 +1,3 @@
-'use strict';
-
 import isEqual from 'lodash/isEqual'
 import DocumentNode from './DocumentNode'
 
@@ -29,34 +27,31 @@ import DocumentNode from './DocumentNode'
       path: ['p1', 'content'],
       "startOffset": 10,
       "endOffset": 19
-    });
-  });
+    })
+  })
   ```
 **/
 
-function PropertyAnnotation() {
-  PropertyAnnotation.super.apply(this, arguments);
-}
+class PropertyAnnotation extends DocumentNode {
 
-PropertyAnnotation.Prototype = function() {
+  get _isAnnotation() { return true }
 
-  this._isAnnotation = true;
-  this._isPropertyAnnotation = true;
+  get _isPropertyAnnotation() { return true }
 
   /**
     Get the plain text spanned by this annotation.
 
     @returns {String}
   */
-  this.getText = function() {
-    var doc = this.getDocument();
+  getText() {
+    var doc = this.getDocument()
     if (!doc) {
-      console.warn('Trying to use an PropertyAnnotation which is not attached to the document.');
-      return "";
+      console.warn('Trying to use an PropertyAnnotation which is not attached to the document.')
+      return ""
     }
-    var text = doc.get(this.path);
-    return text.substring(this.startOffset, this.endOffset);
-  };
+    var text = doc.get(this.path)
+    return text.substring(this.startOffset, this.endOffset)
+  }
 
   /**
     Determines if an annotation can be split e.g., when breaking a node.
@@ -66,9 +61,9 @@ PropertyAnnotation.Prototype = function() {
     For certain annotation types,you may want to the annotation truncated
     rather than split, where you need to override this method returning `false`.
   */
-  this.canSplit = function() {
-    return true;
-  };
+  canSplit() {
+    return true
+  }
 
   /**
     If this annotation is a an Anchor.
@@ -79,38 +74,36 @@ PropertyAnnotation.Prototype = function() {
 
     @returns {Boolean}
   */
-  this.isAnchor = function() {
-    return false;
-  };
+  isAnchor() {
+    return false
+  }
 
   // TODO: maybe this should go into documentHelpers
-  this.getSelection = function() {
+  getSelection() {
     return this.getDocument().createSelection({
       type: 'property',
       path: this.path,
       startOffset: this.startOffset,
       endOffset: this.endOffset
-    });
-  };
+    })
+  }
 
-  this.updateRange = function(tx, sel) {
+  updateRange(tx, sel) {
     if (!sel.isPropertySelection()) {
-      throw new Error('Cannot change to ContainerAnnotation.');
+      throw new Error('Cannot change to ContainerAnnotation.')
     }
     if (!isEqual(this.startPath, sel.start.path)) {
-      tx.set([this.id, 'path'], sel.start.path);
+      tx.set([this.id, 'path'], sel.start.path)
     }
     if (this.startOffset !== sel.start.offset) {
-      tx.set([this.id, 'startOffset'], sel.start.offset);
+      tx.set([this.id, 'startOffset'], sel.start.offset)
     }
     if (this.endOffset !== sel.end.offset) {
-      tx.set([this.id, 'endOffset'], sel.end.offset);
+      tx.set([this.id, 'endOffset'], sel.end.offset)
     }
-  };
+  }
 
-};
-
-DocumentNode.extend(PropertyAnnotation);
+}
 
 PropertyAnnotation.define({
   type: "annotation",
@@ -120,22 +113,22 @@ PropertyAnnotation.define({
   // this is only used when an annotation is used 'stand-alone'
   // i.e. not attached to a property
   _content: { type: "string", optional: true}
-});
+})
 
-PropertyAnnotation.isPropertyAnnotation = true;
+PropertyAnnotation.isPropertyAnnotation = true
 
 // these properties making PropertyAnnotation compatible with ContainerAnnotations
 Object.defineProperties(PropertyAnnotation.prototype, {
   startPath: {
     get: function() {
-      return this.path;
+      return this.path
     }
   },
   endPath: {
     get: function() {
-      return this.path;
+      return this.path
     }
   }
-});
+})
 
-export default PropertyAnnotation;
+export default PropertyAnnotation

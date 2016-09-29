@@ -7,6 +7,7 @@ var __id__ = 0
 */
 
 class TestServerWebSocket extends EventEmitter {
+
   constructor(messageQueue, serverId, clientId) {
     super()
 
