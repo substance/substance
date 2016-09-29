@@ -6,7 +6,7 @@ import each from 'lodash/each'
 import extend from 'lodash/extend'
 import TreeIndex from '../../util/TreeIndex'
 
-/**
+/*
   Index for Nodes.
 
   Node indexes are first-class citizens in {@link model/data/Data}.

@@ -7,16 +7,15 @@ import DocumentNode from './DocumentNode'
 import ParentNodeMixin from './ParentNodeMixin'
 import ContainerAddress from './ContainerAddress'
 
-/**
+/*
   A Container represents a list of nodes.
 
   While most editing occurs on a property level (such as editing text),
   other things happen on a node level, e.g., breaking or mergin nodes,
   or spanning annotations or so called ContainerAnnotations.
 
+  @class
   @prop {String[]} nodes
-
-  @example
 */
 function Container() {
   Container.super.apply(this, arguments);

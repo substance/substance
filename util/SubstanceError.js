@@ -2,7 +2,7 @@
 
 import oo from './oo'
 
-/**
+/*
   Custom error object for all Substance related errors
 
   @example

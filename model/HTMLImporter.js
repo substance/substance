@@ -4,14 +4,13 @@ import DOMImporter from './DOMImporter'
 import DefaultDOMElement from '../ui/DefaultDOMElement'
 import extend from 'lodash/extend'
 
-/**
-  @class
-  @abstract
-
+/*
   Base class for custom HTML importers. If you want to use XML as your
   exchange format see {@link model/XMLImporter}.
-*/
 
+  @class
+  @abstract
+*/
 function HTMLImporter(config) {
   config = extend({ idAttribute: 'data-id' }, config);
   DOMImporter.call(this, config);

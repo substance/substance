@@ -9,7 +9,7 @@ import Selection from './Selection'
 import Anchor from './Anchor'
 import documentHelpers from './documentHelpers'
 
-/**
+/*
   Describes an annotation sticking on a container that can span over multiple
   nodes.
 
