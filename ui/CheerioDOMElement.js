@@ -253,7 +253,7 @@ class CheerioDOMElement extends DOMElement {
 
   isElementNode() {
     // cheerio specific
-    return this.el.type === "tag"
+    return this.el.type === "tag" || this.el.type === "script"
   }
 
   isCommentNode() {
@@ -471,7 +471,11 @@ CheerioDOMElement.parseMarkup = function(str, format) {
     }
     return new CheerioDOMElement(doc)
   } else {
-    nativeEls = $.parseXML(str)
+    if (format === 'xml') {
+      nativeEls = $.parseXML(str)
+    } else {
+      nativeEls = $.parseHTML(str)
+    }
   }
   let elements = nativeEls.map(function(el) {
     return new CheerioDOMElement(el)

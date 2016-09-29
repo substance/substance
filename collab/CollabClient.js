@@ -41,9 +41,9 @@ class CollabClient extends EventEmitter {
   */
   _onMessage(msg) {
     if (msg.scope === this.scope) {
-      this.emit('message', msg)
-    } else {
-      console.info('Message ignored. Not sent in hub scope', msg)
+      this.emit('message', msg);
+    } else if (msg.scope !== '_internal') {
+      console.info('Message ignored. Not sent in hub scope', msg);
     }
   }
 

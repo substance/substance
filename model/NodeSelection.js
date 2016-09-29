@@ -112,6 +112,10 @@ class NodeSelection extends Selection {
     }
   }
 
+  _clone() {
+    return new NodeSelection(this.containerId, this.nodeId, this.mode, this.reverse, this.surfaceId);
+  }
+
 }
 
 NodeSelection.fromJSON = function(json) {
