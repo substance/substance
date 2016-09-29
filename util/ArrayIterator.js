@@ -1,51 +1,47 @@
-'use strict';
-
-import oo from './oo'
-
 /*
   An iterator for arrays.
+
   @class
   @param {Array} arr
  */
-function ArrayIterator(arr) {
-  this.arr = arr;
-  this.pos = -1;
-}
+class ArrayIterator {
 
-ArrayIterator.Prototype = function() {
+  constructor(arr) {
+    this.arr = arr
+    this.pos = -1
+  }
 
-  this._isArrayIterator = true;
+  get _isArrayIterator() {
+    return true
+  }
 
   /**
     @returns {Boolean} true if there is another child node left.
    */
-  this.hasNext = function() {
-    return this.pos < this.arr.length - 1;
-  };
+  hasNext() {
+    return this.pos < this.arr.length - 1
+  }
 
   /**
     Increments the iterator providing the next child node.
 
     @returns {HTMLElement} The next child node.
    */
-  this.next = function() {
-    this.pos += 1;
-    var next = this.arr[this.pos];
-    return next;
-  };
+  next() {
+    this.pos += 1
+    var next = this.arr[this.pos]
+    return next
+  }
 
   /**
     Decrements the iterator.
    */
-  this.back = function() {
+  back() {
     if (this.pos >= 0) {
-      this.pos -= 1;
+      this.pos -= 1
     }
-    return this;
-  };
-
-};
-
-oo.initClass(ArrayIterator);
+    return this
+  }
+}
 
 export default ArrayIterator;
