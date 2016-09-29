@@ -17,27 +17,34 @@ var __id__ = 0;
   rendering and a minimalistic life-cycle. It also provides *up-tree*
   communication and *dependency injection*.
   Concepts:
+
   - `props` are provided by a parent component.  An initial set of properties is provided
   via constructor. After that, the parent component can call `setProps` or `extendProps`
   to update these properties which triggers rerendering if the properties change.
+
   - `state` is a set of flags and values which are used to control how the component
   gets rendered given the current props. Using `setState` the component can change
   its internal state, which leads to a rerendering if the state changes.
+
   - A child component with a `ref` id will be reused on rerender. All others will be
   wiped and rerender from scratch. If you want to preserve a grand-child (or lower), then
   make sure that all anchestors have a ref id. After rendering the child will be
   accessible via `this.refs[ref]`.
+
   - A component can send actions via `send` which are bubbled up through all parent
   components until one handles it.
+
   @class
   @abstract
   @extends ui/DOMElement
   @implements util/EventEmitter
   @example
+
   Define a component:
+
   ```
   class HelloMessage extends Component {
-    render: function() {
+    render() {
       return $$('div').append(
         'Hello ',
         this.props.name
@@ -45,7 +52,9 @@ var __id__ = 0;
     }
   }
   ```
+
   And mount it to a DOM Element:
+
   ```
   HelloMessage.mount({name: 'John'}, document.body)
   ```
