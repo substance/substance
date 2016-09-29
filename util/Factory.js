@@ -1,31 +1,21 @@
-'use strict';
-
 import Registry from './Registry'
 
 /*
- * Simple factory implementation.
- *
- * @class Factory
- * @extends Registry
- * @memberof module:util
- */
-function Factory() {
-  Factory.super.call(this);
-}
+  Simple factory implementation.
 
-Factory.Prototype = function() {
-
+  @class Factory
+  @extends Registry
+*/
+class Factory extends Registry {
   /**
-   * Create an instance of the clazz with a given name.
-   *
-   * @param {String} name
-   * @return A new instance.
-   * @method create
-   * @memberof module:Basics.Factory.prototype
-   */
-  this.create = function ( name ) {
+    Create an instance of the clazz with a given name.
+
+    @param {String} name
+    @return A new instance.
+  */
+  create(name) {
     var clazz = this.get(name);
-    if ( !clazz ) {
+    if (!clazz) {
       throw new Error( 'No class registered by that name: ' + name );
     }
     // call the clazz providing the remaining arguments
@@ -33,10 +23,7 @@ Factory.Prototype = function() {
     var obj = Object.create( clazz.prototype );
     clazz.apply( obj, args );
     return obj;
-  };
-
-};
-
-Registry.extend(Factory);
+  }
+}
 
 export default Factory;
