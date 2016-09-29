@@ -1,5 +1,3 @@
-'use strict';
-
 import map from 'lodash/map'
 
 export default function(collection, prop) {

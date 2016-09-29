@@ -1,5 +1,3 @@
-'use strict';
-
 /* globals Promise */
 
 export default function sendRequest(params, cb) {
