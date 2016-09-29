@@ -1,5 +1,3 @@
-import SwitchTextTypeCommand from './SwitchTextTypeCommand'
-import SwitchTextTypeTool from './SwitchTextTypeTool'
 import UndoCommand from './UndoCommand'
 import RedoCommand from './RedoCommand'
 import Tool from '../tools/Tool'
@@ -13,11 +11,13 @@ import GridPackage from '../grid/GridPackage'
 import ModalPackage from '../modal/ModalPackage'
 import InputPackage from '../input/InputPackage'
 import ButtonPackage from '../button/ButtonPackage'
+import SwitchTextTypePackage from '../switch-text-type/SwitchTextTypePackage'
 import LayoutPackage from '../layout/LayoutPackage'
 
 export default {
   name: 'base',
   configure: function(config) {
+    config.import(SwitchTextTypePackage)
     config.import(ScrollPanePackage)
     config.import(SplitPanePackage)
     config.import(TabbedPanePackage)
@@ -28,18 +28,17 @@ export default {
     config.import(ButtonPackage)
     config.import(LayoutPackage)
 
-    // Register class to handle the text tool target
+    // Register predefined tool-targets (text, document)
     config.addComponent('tool-target-text', ToolGroup)
     config.addComponent('tool-target-document', ToolGroup)
 
     // Commands
     config.addCommand('undo', UndoCommand)
     config.addCommand('redo', RedoCommand)
-    config.addCommand('switch-text-type', SwitchTextTypeCommand)
+
     // Tools
     config.addTool('undo', Tool, {target: 'document'})
     config.addTool('redo', Tool, {target: 'document'})
-    config.addTool('switch-text-type', SwitchTextTypeTool, {target: 'text'})
 
     // Icons
     config.addIcon('undo', { 'fontawesome': 'fa-undo' })

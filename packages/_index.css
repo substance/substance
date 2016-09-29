@@ -1,15 +1,28 @@
-@import './base/_index.css';
-@import './blockquote/_index.css';
-@import './button/_index.css';
-@import './code/_index.css';
-@import './codeblock/_index.css';
-@import './css/_index.css';
-@import './emphasis/_index.css';
-@import './heading/_index.css';
-@import './inline-wrapper/_index.css';
-@import './paragraph/_index.css';
-@import './prose-editor/_index.css';
-@import './strong/_index.css';
+/* TODO: @import './css/_index.css';*/
+
+/* switch-text-type */
+@import './switch-text-type/_switch-text-type.css';
+/* blockquote */
+@import './blockquote/_blockquote.css';
+/* button */
+@import './button/_button.css';
+/* code */
+@import './code/_code.css';
+/* codeblock */
+@import './codeblock/_codeblock.css';
+/* emphasis */
+@import './emphasis/_emphasis.css';
+/* heading */
+@import './heading/_heading.css';
+/* inline-wrapper */
+@import './inline-wrapper/_inline-wrapper.css';
+/* paragraph */
+@import './paragraph/_paragraph.css';
+/* prose-editor */
+@import './prose-editor/_prose-editor.css';
+@import './prose-editor/_prose-editor-overlay-tools.css';
+/* strong */
+@import './strong/_strong.css';
 /* link */
 @import './link/_link.css';
 /* image */
@@ -44,3 +57,9 @@
 @import './overlay/_overlay-container.css';
 /* gutter */
 @import './gutter/_gutter-container.css';
+/* toc */
+@import './toc/_toc.css';
+/* surface */
+@import './surface/_surface.css';
+/* text-property */
+@import './text-property/_text-property.css';
