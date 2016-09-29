@@ -28,9 +28,9 @@ b.task('server', function() {
     // necessary for nodejs 4
     buble: true,
     commonjs: { include: [
-      '/**/lodash/**',
-      '/**/substance-cheerio/**'
+      '/**/lodash/**'
     ] },
+    external: [ 'substance-cheerio' ],
     targets: [{
       dest: './dist/substance.cjs.js',
       format: 'cjs', sourceMapRoot: __dirname, sourceMapPrefix: 'substance'

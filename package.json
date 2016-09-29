@@ -34,7 +34,6 @@
     "substance-test": "^0.2.2"
   },
   "browser": {
-    "cheerio": false,
-    "dom-serializer": false
+    "substance-cheerio": false
   }
 }
