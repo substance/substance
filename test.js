@@ -1,4 +1,4 @@
-var Karma = require('karma').Server;
+var karma = require('karma');
 var path = require('path')
 var cp = require('child_process')
 var b = require('substance-bundler')
@@ -12,15 +12,26 @@ b.task('browser', function() {
     execute: function() {
       var browser = process.env.TRAVIS ? 'ChromeTravis': 'Chrome'
       return new Promise(function(resolve) {
-        new Karma({
+        var fails = 0
+        var server = new karma.Server({
           configFile: __dirname + '/karma.conf.js',
           browsers: [browser],
-          singleRun: true
-        }, function(exitCode) {
-          if (exitCode !== 0) {
-            process.exit(exitCode)
+          singleRun: true,
+          failOnEmptyTestSuite: false
+        }, function() {
+          // why is exitCode always == 1?
+          if (fails > 0) {
+            process.exit(1)
+          } else {
+            resolve()
           }
-        }).start();
+        })
+        server.on('run_complete', function(browsers, results) {
+          if (results && results.failed > 0) {
+            fails += results.failed
+          }
+        })
+        server.start()
       });
     }
   })
@@ -42,6 +53,8 @@ b.task('server', function() {
         child.on('close', function(exitCode) {
           if (exitCode !== 0) {
             process.exit(exitCode)
+          } else {
+            resolve()
           }
         })
       });
@@ -49,4 +62,4 @@ b.task('server', function() {
   })
 })
 
-b.task('default', ['build', 'browser', 'server'])
+b.task('default', ['build', 'server', 'browser'])
