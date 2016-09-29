@@ -3,8 +3,8 @@ module.exports = function(config) {
     basePath: '.',
     frameworks: ['tap'],
     files: [
-      'dist/test/test.browser.js',
-      'dist/test/tests.js',
+      '.test/test.browser.js',
+      '.test/tests.js',
     ],
     browsers: ['Chrome'],
     customLaunchers: {

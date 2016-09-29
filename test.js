@@ -43,7 +43,7 @@ b.task('server', function() {
   b.custom('Running nodejs tests...', {
     execute: function() {
       return new Promise(function(resolve, reject) {
-        const child = cp.fork(path.join(__dirname, 'dist/test/run-tests.js'))
+        const child = cp.fork(path.join(__dirname, '.test/run-tests.js'))
         child.on('message', function(msg) {
           if (msg === 'done') { resolve() }
         })
