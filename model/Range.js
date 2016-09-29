@@ -1,47 +1,44 @@
-'use strict';
+class Range {
 
-import oo from '../util/oo'
+  constructor(start, end, reverse, containerId) {
+    // HACK: to allow this class be inherited but without calling this ctor
+    if (arguments[0] === 'SKIP') return
 
-function Range(start, end, reverse, containerId) {
-  this.start = start;
-  this.end = end;
-  this.reverse = Boolean(reverse);
-  this.containerId = containerId;
-}
+    this.start = start
+    this.end = end
+    this.reverse = Boolean(reverse)
+    this.containerId = containerId
+  }
 
-Range.Prototype = function() {
+  get _isRange() { return true }
 
-  this._isRange = true;
+  isCollapsed() {
+    return this.start.equals(this.end)
+  }
 
-  this.isCollapsed = function() {
-    return this.start.equals(this.end);
-  };
-
-  this.equals = function(other) {
-    if (this === other) return true;
+  equals(other) {
+    if (this === other) return true
     else {
       return (
         this.containerId === other.containerId &&
         this.start.equals(other.start) &&
         this.end.equals(other.end)
-      );
+      )
     }
-  };
+  }
 
-  this.isReverse = function() {
-    return this.reverse;
-  };
+  isReverse() {
+    return this.reverse
+  }
 
-  this.toString = function() {
-    var str = [this.start.toString(), '->', this.end.toString()];
+  toString() {
+    var str = [this.start.toString(), '->', this.end.toString()]
     if (this.isReverse()) {
-      str.push('(reverse)');
+      str.push('(reverse)')
     }
-    return str.join('');
-  };
+    return str.join('')
+  }
 
-};
+}
 
-oo.initClass(Range);
-
-export default Range;
+export default Range

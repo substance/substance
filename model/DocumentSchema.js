@@ -1,5 +1,3 @@
-'use strict';
-
 import Schema from './data/Schema'
 import DocumentNode from './DocumentNode'
 import Container from './Container'
@@ -26,21 +24,17 @@ import ContainerAnnotation from './ContainerAnnotation'
     properties: {
       content: 'string'
     }
-  });
+  })
 
-  var schema = new Document.Schema('my-article', '1.0.0');
+  var schema = new Document.Schema('my-article', '1.0.0')
   schema.getDefaultTextType = function() {
-    return 'paragraph';
-  };
-  schema.addNodes([Paragraph, Emphasis, Strong, Comment]);
+    return 'paragraph'
+  }
+  schema.addNodes([Paragraph, Emphasis, Strong, Comment])
   ```
 */
 
-function DocumentSchema(name, version) {
-  DocumentSchema.super.call(this, name, version);
-}
-
-DocumentSchema.Prototype = function() {
+class DocumentSchema extends Schema {
 
   /**
     Returns default text type. E.g. used when hitting ENTER in a text node, which
@@ -50,21 +44,19 @@ DocumentSchema.Prototype = function() {
     @returns {String} default text type (e.g. 'paragraph')
   */
 
-  this.getDefaultTextType = function() {
-    throw new Error('DocumentSchema.getDefaultTextType() is abstract and must be overridden.');
-  };
+  getDefaultTextType() {
+    throw new Error('DocumentSchema.getDefaultTextType() is abstract and must be overridden.')
+  }
 
-  this.isAnnotationType = function(type) {
-    var nodeClass = this.getNodeClass(type);
-    return (nodeClass && nodeClass.prototype._isPropertyAnnotation);
-  };
+  isAnnotationType(type) {
+    var nodeClass = this.getNodeClass(type)
+    return (nodeClass && nodeClass.prototype._isPropertyAnnotation)
+  }
 
-  this.getBuiltIns = function() {
-    return [DocumentNode, PropertyAnnotation, Container, ContainerAnnotation];
-  };
+  getBuiltIns() {
+    return [DocumentNode, PropertyAnnotation, Container, ContainerAnnotation]
+  }
 
-};
+}
 
-Schema.extend(DocumentSchema);
-
-export default DocumentSchema;
+export default DocumentSchema

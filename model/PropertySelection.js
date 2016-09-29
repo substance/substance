@@ -458,14 +458,18 @@ PropertySelection.fromJSON = function(json) {
   E.g. Coordinate transforms can be applied to update selections
   using OT.
 */
-function CoordinateAdapter(propertySelection, pathProperty, offsetProperty) {
-  this._sel = propertySelection;
-  this._pathProp = pathProperty;
-  this._offsetProp = offsetProperty;
-  Object.freeze(this);
-}
+class CoordinateAdapter extends Coordinate {
 
-Coordinate.extend(CoordinateAdapter);
+  constructor(propertySelection, pathProperty, offsetProperty) {
+    super('SKIP')
+
+    this._sel = propertySelection;
+    this._pathProp = pathProperty;
+    this._offsetProp = offsetProperty;
+    Object.freeze(this);
+  }
+
+}
 
 Object.defineProperties(CoordinateAdapter.prototype, {
   path: {
@@ -488,14 +492,17 @@ Object.defineProperties(CoordinateAdapter.prototype, {
 
 PropertySelection.CoordinateAdapter = CoordinateAdapter;
 
-function RangeAdapter(sel) {
-  this._sel = sel;
-  this.start = sel.start;
-  this.end = sel.end;
-  Object.freeze(this);
-}
+class RangeAdapter extends Range {
 
-Range.extend(RangeAdapter);
+  constructor(sel) {
+    super('SKIP')
+    this._sel = sel;
+    this.start = sel.start;
+    this.end = sel.end;
+    Object.freeze(this);
+  }
+
+}
 
 Object.defineProperties(RangeAdapter.prototype, {
   reverse: {

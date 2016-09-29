@@ -1,16 +1,8 @@
-'use strict';
-
-import oo from '../../util/oo'
-
 /*
   @class
 */
-function Operation() {}
+class Operation {
+  get _isOperation() { return true }
+}
 
-Operation.Prototype = function() {
-  this.isOperation = true;
-};
-
-oo.initClass(Operation);
-
-export default Operation;
+export default Operation

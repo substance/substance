@@ -1,11 +1,8 @@
-'use strict';
-
 import isString from 'lodash/isString'
 import isArray from 'lodash/isArray'
 import get from 'lodash/get'
 import setWith from 'lodash/setWith'
 import unset from 'lodash/unset'
-import oo from '../../util/oo'
 
 /*
   An object that can be access via path API.
@@ -14,26 +11,26 @@ import oo from '../../util/oo'
   @param {object} [obj] An object to operate on
   @example
 
-  var obj = new DataObject({a: "aVal", b: {b1: 'b1Val', b2: 'b2Val'}});
+  var obj = new DataObject({a: "aVal", b: {b1: 'b1Val', b2: 'b2Val'}})
 */
 
-function DataObject(root) {
-  if (root) {
-    this.__root__ = root;
-  }
-}
+class DataObject {
 
-DataObject.Prototype = function() {
-
-  this._isDataObject = true;
-
-  this.getRoot = function() {
-    if (this.__root__) {
-      return this.__root__;
-    } else {
-      return this;
+  constructor(root) {
+    if (root) {
+      this.__root__ = root
     }
-  };
+  }
+
+  get _isDataObject() { return true }
+
+  getRoot() {
+    if (this.__root__) {
+      return this.__root__
+    } else {
+      return this
+    }
+  }
 
   /**
     Get value at path
@@ -42,60 +39,58 @@ DataObject.Prototype = function() {
 
     @example
 
-    obj.get(['b', 'b1']);
+    obj.get(['b', 'b1'])
     => b1Val
   */
-  this.get = function(path) {
+  get(path) {
     if (!path) {
-      return undefined;
+      return undefined
     }
     if (isString(path)) {
-      return this.getRoot()[path];
+      return this.getRoot()[path]
     }
     if (arguments.length > 1) {
-      path = Array.prototype.slice(arguments, 0);
+      path = Array.prototype.slice(arguments, 0)
     }
     if (!isArray(path)) {
-      throw new Error('Illegal argument for DataObject.get()');
+      throw new Error('Illegal argument for DataObject.get()')
     }
-    return get(this.getRoot(), path);
-  };
+    return get(this.getRoot(), path)
+  }
 
-  this.set = function(path, value) {
+  set(path, value) {
     if (!path) {
-      throw new Error('Illegal argument: DataObject.set(>path<, value) - path is mandatory.');
+      throw new Error('Illegal argument: DataObject.set(>path<, value) - path is mandatory.')
     }
     if (isString(path)) {
-      this.getRoot()[path] = value;
+      this.getRoot()[path] = value
     } else {
-      setWith(this.getRoot(), path, value);
+      setWith(this.getRoot(), path, value)
     }
-  };
+  }
 
-  this.delete = function(path) {
+  delete(path) {
     if (isString(path)) {
-      delete this.getRoot()[path];
+      delete this.getRoot()[path]
     } else if (path.length === 1) {
-      delete this.getRoot()[path[0]];
+      delete this.getRoot()[path[0]]
     } else {
-      var success = unset(this.getRoot(), path);
+      var success = unset(this.getRoot(), path)
       if (!success) {
-        throw new Error('Could not delete property at path' + path);
+        throw new Error('Could not delete property at path' + path)
       }
     }
-  };
+  }
 
-  this.clear = function() {
-    var root = this.getRoot();
+  clear() {
+    var root = this.getRoot()
     for (var key in root) {
       if (root.hasOwnProperty(key)) {
-        delete root[key];
+        delete root[key]
       }
     }
-  };
+  }
 
-};
+}
 
-oo.initClass(DataObject);
-
-export default DataObject;
+export default DataObject

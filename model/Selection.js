@@ -14,39 +14,39 @@ class Selection {
 
   constructor() {
     // Internal stuff
-    var _internal = {};
+    var _internal = {}
     Object.defineProperty(this, "_internal", {
       enumerable: false,
       value: _internal
-    });
+    })
       // set when attached to document
-    _internal.doc = null;
+    _internal.doc = null
   }
 
   // for duck-typed instanceof
   get _isSelection() { return true; }
 
   clone() {
-    var newSel = this._clone();
+    var newSel = this._clone()
     if (this._internal.doc) {
-      newSel.attach(this._internal.doc);
+      newSel.attach(this._internal.doc)
     }
-    return newSel;
+    return newSel
   }
 
   /**
     @returns {Document} The attached document instance
   */
   getDocument() {
-    var doc = this._internal.doc;
+    var doc = this._internal.doc
     if (!doc) {
-      throw new Error('Selection is not attached to a document.');
+      throw new Error('Selection is not attached to a document.')
     }
-    return doc;
+    return doc
   }
 
   isAttached() {
-    return Boolean(this._internal.doc);
+    return Boolean(this._internal.doc)
   }
 
   /**
@@ -57,8 +57,8 @@ class Selection {
     @returns {this}
   */
   attach(doc) {
-    this._internal.doc = doc;
-    return this;
+    this._internal.doc = doc
+    return this
   }
 
   /**
@@ -94,7 +94,7 @@ class Selection {
   isReverse() { return false; }
 
   getType() {
-    throw new Error('Selection.getType() is abstract.');
+    throw new Error('Selection.getType() is abstract.')
   }
 
   /**
@@ -102,17 +102,17 @@ class Selection {
   */
   equals(other) {
     if (this === other) {
-      return true ;
+      return true
     } else if (!other) {
-      return false;
+      return false
     } else if (this.isNull() !== other.isNull()) {
-      return false;
+      return false
     } else if (this.getType() !== other.getType()) {
-      return false;
+      return false
     } else {
       // Note: returning true here, so that sub-classes
       // can call this as a predicate in their expression
-      return true;
+      return true
     }
   }
 
@@ -120,7 +120,7 @@ class Selection {
     @returns {String} This selection as human readable string.
   */
   toString() {
-    return "null";
+    return "null"
   }
 
   /**
@@ -130,7 +130,7 @@ class Selection {
     @returns {Object}
   */
   toJSON() {
-    throw new Error('This method is abstract.');
+    throw new Error('This method is abstract.')
   }
 
   /**
@@ -140,7 +140,7 @@ class Selection {
     @returns {Selection.Fragment[]}
   */
   getFragments() {
-    return [];
+    return []
   }
 }
 
@@ -154,19 +154,19 @@ class Selection {
 class NullSelection extends Selection {
 
   isNull() {
-    return true;
+    return true
   }
 
   getType() {
-    return 'null';
+    return 'null'
   }
 
   toJSON() {
-    return null;
+    return null
   }
 
   clone() {
-    return this;
+    return this
   }
 }
 
@@ -176,7 +176,7 @@ class NullSelection extends Selection {
   @type {model/Selection}
 */
 
-Selection.nullSelection = Object.freeze(new NullSelection());
+Selection.nullSelection = Object.freeze(new NullSelection())
 
 /**
   A selection fragment. Used when we split a {@link model/ContainerSelection}
@@ -186,92 +186,91 @@ Selection.nullSelection = Object.freeze(new NullSelection());
   @class
 */
 
-Selection.Fragment = function(path, startOffset, endOffset, full) {
-  EventEmitter.call(this);
+class SelectionFragment extends EventEmitter {
 
-  this.type = "selection-fragment";
-  this.path = path;
-  this.startOffset = startOffset;
-  this.endOffset = endOffset || startOffset;
-  this.full = Boolean(full);
-};
+  constructor(path, startOffset, endOffset, full) {
+    super()
 
-Selection.Fragment.Prototype = function() {
+    this.type = "selection-fragment"
+    this.path = path
+    this.startOffset = startOffset
+    this.endOffset = endOffset || startOffset
+    this.full = Boolean(full)
+  }
 
-  this.isAnchor = function() {
-    return false;
-  };
+  isAnchor() {
+    return false
+  }
 
-  this.isInline = function() {
-    return false;
-  };
+  isInline() {
+    return false
+  }
 
-  this.isPropertyFragment = function() {
-    return true;
-  };
+  isPropertyFragment() {
+    return true
+  }
 
-  this.isNodeFragment = function() {
-    return false;
-  };
+  isNodeFragment() {
+    return false
+  }
 
-  this.isFull = function() {
-    return this.full;
-  };
+  isFull() {
+    return this.full
+  }
 
-  this.isPartial = function() {
-    return !this.full;
-  };
+  isPartial() {
+    return !this.full
+  }
 
-  this.getNodeId = function() {
-    return this.path[0];
-  };
+  getNodeId() {
+    return this.path[0]
+  }
 
-};
+}
 
-EventEmitter.extend(Selection.Fragment);
+Selection.Fragment = SelectionFragment
 
 
-Selection.NodeFragment = function(nodeId) {
-  EventEmitter.call(this);
+class NodeFragment extends EventEmitter {
 
-  this.type = "node-fragment";
-  this.nodeId = nodeId;
-  this.path = [nodeId];
-};
+  constructor(nodeId) {
+    super()
 
-Selection.NodeFragment.Prototype = function() {
+    this.type = "node-fragment"
+    this.nodeId = nodeId
+    this.path = [nodeId]
+  }
 
-  this.isAnchor = function() {
-    return false;
-  };
+  isAnchor() {
+    return false
+  }
 
-  this.isInline = function() {
-    return false;
-  };
+  isInline() {
+    return false
+  }
 
-  this.isPropertyFragment = function() {
-    return false;
-  };
+  isPropertyFragment() {
+    return false
+  }
 
-  this.isNodeFragment = function() {
-    return true;
-  };
+  isNodeFragment() {
+    return true
+  }
 
-  this.isFull = function() {
-    return true;
-  };
+  isFull() {
+    return true
+  }
 
-  this.isPartial = function() {
-    return false;
-  };
+  isPartial() {
+    return false
+  }
 
-  this.getNodeId = function() {
-    return this.nodeId;
-  };
-};
+  getNodeId() {
+    return this.nodeId
+  }
+}
 
-EventEmitter.extend(Selection.NodeFragment);
-
+Selection.NodeFragment = NodeFragment
 
 /**
   Describe the cursor when creating selection fragments.
@@ -281,23 +280,24 @@ EventEmitter.extend(Selection.NodeFragment);
   @class
   @extends Anchor
 */
-Selection.Cursor = function(path, offset) {
-  Anchor.call(this, path, offset);
-  this.type = "cursor";
-};
+class Cursor extends Anchor {
 
-Selection.Cursor.Prototype = function() {
+  constructor(path, offset) {
+    super(path, offset)
 
-  this.isPropertyFragment = function() {
-    return false;
-  };
+    this.type = "cursor"
+  }
 
-  this.isNodeFragment = function() {
-    return false;
-  };
+  isPropertyFragment() {
+    return false
+  }
 
-};
+  isNodeFragment() {
+    return false
+  }
 
-Anchor.extend(Selection.Cursor);
+}
+
+Selection.Cursor = Cursor
 
 export default Selection

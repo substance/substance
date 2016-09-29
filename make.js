@@ -87,7 +87,7 @@ b.task('test:server', function() {
       ]
     },
     targets: [
-      { dest: TEST+'run-tests.js', format: 'cjs' },
+      { dest: TEST+'tests.cjs.js', format: 'cjs' },
     ]
   });
 })
@@ -154,5 +154,6 @@ b.task('default', ['build'])
 // starts a server when CLI argument '-s' is set
 b.setServerPort(5550)
 b.serve({
-  static: true, route: '/', folder: 'dist'
+  static: true, route: '/', folder: 'dist',
+  static: true, route: '/test/', folder: '.test'
 })

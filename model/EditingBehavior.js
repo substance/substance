@@ -1,58 +1,52 @@
-"use strict";
+class EditingBehavior {
 
-import oo from '../util/oo'
+  constructor() {
+    this._merge = {}
+    this._mergeComponents = {}
+    this._break = {}
+  }
 
-function EditingBehavior() {
-  this._merge = {};
-  this._mergeComponents = {};
-  this._break = {};
+  defineMerge(firstType, secondType, impl) {
+    if (!this._merge[firstType]) {
+      this._merge[firstType] = {}
+    }
+    this._merge[firstType][secondType] = impl
+    return this
+  }
+
+  canMerge(firstType, secondType) {
+    return (this._merge[firstType] && this._merge[firstType][secondType])
+  }
+
+  getMerger(firstType, secondType) {
+    return this._merge[firstType][secondType]
+  }
+
+  defineComponentMerge(nodeType, impl) {
+    this._mergeComponents[nodeType] = impl
+  }
+
+  canMergeComponents(nodeType) {
+    return this._mergeComponents[nodeType]
+  }
+
+  getComponentMerger(nodeType) {
+    return this._mergeComponents[nodeType]
+  }
+
+  defineBreak(nodeType, impl) {
+    this._break[nodeType] = impl
+    return this
+  }
+
+  canBreak(nodeType) {
+    return this._break[nodeType]
+  }
+
+  getBreaker(nodeType) {
+    return this._break[nodeType]
+  }
+
 }
 
-EditingBehavior.Prototype = function() {
-
-  this.defineMerge = function(firstType, secondType, impl) {
-    if (!this._merge[firstType]) {
-      this._merge[firstType] = {};
-    }
-    this._merge[firstType][secondType] = impl;
-    return this;
-  };
-
-  this.canMerge = function(firstType, secondType) {
-    return (this._merge[firstType] && this._merge[firstType][secondType]);
-  };
-
-  this.getMerger = function(firstType, secondType) {
-    return this._merge[firstType][secondType];
-  };
-
-  this.defineComponentMerge = function(nodeType, impl) {
-    this._mergeComponents[nodeType] = impl;
-  };
-
-  this.canMergeComponents = function(nodeType) {
-    return this._mergeComponents[nodeType];
-  };
-
-  this.getComponentMerger = function(nodeType) {
-    return this._mergeComponents[nodeType];
-  };
-
-  this.defineBreak = function(nodeType, impl) {
-    this._break[nodeType] = impl;
-    return this;
-  };
-
-  this.canBreak = function(nodeType) {
-    return this._break[nodeType];
-  };
-
-  this.getBreaker = function(nodeType) {
-    return this._break[nodeType];
-  };
-
-};
-
-oo.initClass(EditingBehavior);
-
-export default EditingBehavior;
+export default EditingBehavior

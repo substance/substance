@@ -1,35 +1,32 @@
-'use strict';
-
 import Container from './Container'
 
-function ContainerAdapter(doc, path) {
-  this.document = doc;
-  this.path = path;
-  this.id = String(path);
+class ContainerAdapter extends Container {
 
-  // HACK: putting this into a place so that doc.get(this.id) works
-  // Hopefully this won't hurt :/
-  doc.data.nodes[this.id] = this;
+  constructor(doc, path) {
+    super(doc, { id: String(path) })
+    this.document = doc
+    this.path = path
+
+    // HACK: putting this into a place so that doc.get(this.id) works
+    // Hopefully this won't hurt :/
+    doc.data.nodes[this.id] = this
+  }
+
+  get _isDocumentNode() { return false }
+
+  get _isContainer() { return false }
+
+  getContentPath() {
+    return this.path
+  }
 }
-
-ContainerAdapter.Prototype = function() {
-
-  this._isDocumentNode = false;
-  this._isContainer = false;
-
-  this.getContentPath = function() {
-    return this.path;
-  };
-};
-
-Container.extend(ContainerAdapter);
 
 Object.defineProperties(ContainerAdapter.prototype, {
   nodes: {
     get: function() {
-      return this.document.get(this.path);
+      return this.document.get(this.path)
     },
   }
-});
+})
 
-export default ContainerAdapter;
+export default ContainerAdapter

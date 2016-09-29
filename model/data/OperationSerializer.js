@@ -1,9 +1,6 @@
-"use strict";
-
 import isArray from 'lodash/isArray'
 import isNumber from 'lodash/isNumber'
 import isObject from 'lodash/isObject'
-import oo from '../../util/oo'
 import ObjectOperation from './ObjectOperation'
 import TextOperation from './TextOperation'
 import ArrayOperation from './ArrayOperation'
@@ -56,206 +53,200 @@ Primitive type operations:
     ```
 */
 
-function OperationSerializer() {
-  this.SEPARATOR = '\t';
-}
+class OperationSerializer{
+  constructor() {
+    this.SEPARATOR = '\t'
+  }
 
-OperationSerializer.Prototype = function() {
-
-  this.serialize = function(op) {
-    var out = [];
+  serialize(op) {
+    var out = []
     switch (op.type) {
       case 'create':
-        out.push('c');
-        out.push(op.val.id);
-        out.push(op.val);
-        break;
+        out.push('c')
+        out.push(op.val.id)
+        out.push(op.val)
+        break
       case 'delete':
-        out.push('d');
-        out.push(op.val.id);
-        out.push(op.val);
-        break;
+        out.push('d')
+        out.push(op.val.id)
+        out.push(op.val)
+        break
       case 'set':
-        out.push('s');
-        out.push(op.path.join('.'));
-        out.push(op.val);
-        out.push(op.original);
-        break;
+        out.push('s')
+        out.push(op.path.join('.'))
+        out.push(op.val)
+        out.push(op.original)
+        break
       case 'update':
-        out.push('u');
-        out.push(op.path.join('.'));
-        Array.prototype.push.apply(out, this.serializePrimitiveOp(op.diff));
-        break;
+        out.push('u')
+        out.push(op.path.join('.'))
+        Array.prototype.push.apply(out, this.serializePrimitiveOp(op.diff))
+        break
       default:
-        throw new Error('Unsupported operation type.');
+        throw new Error('Unsupported operation type.')
     }
-    return out;
-  };
+    return out
+  }
 
-  this.serializePrimitiveOp = function(op) {
-    var out = [];
+  serializePrimitiveOp(op) {
+    var out = []
     if (op._isTextOperation) {
       if (op.isInsert()) {
-        out.push('t+');
+        out.push('t+')
       } else if (op.isDelete()) {
-        out.push('t-');
+        out.push('t-')
       }
-      out.push(op.pos);
-      out.push(op.str);
+      out.push(op.pos)
+      out.push(op.str)
     } else if (op._isArrayOperation) {
       if (op.isInsert()) {
-        out.push('a+');
+        out.push('a+')
       } else if (op.isDelete()) {
-        out.push('a-');
+        out.push('a-')
       }
-      out.push(op.pos);
-      out.push(op.val);
+      out.push(op.pos)
+      out.push(op.val)
     } else {
-      throw new Error('Unsupported operation type.');
+      throw new Error('Unsupported operation type.')
     }
-    return out;
-  };
+    return out
+  }
 
-  this.deserialize = function(str, tokenizer) {
+  deserialize(str, tokenizer) {
     if (!tokenizer) {
-      tokenizer = new Tokenizer(str, this.SEPARATOR);
+      tokenizer = new Tokenizer(str, this.SEPARATOR)
     }
-    var type = tokenizer.getString();
-    var op, path, val, oldVal, diff;
+    var type = tokenizer.getString()
+    var op, path, val, oldVal, diff
     switch (type) {
       case 'c':
-        path = tokenizer.getPath();
-        val = tokenizer.getObject();
-        op = ObjectOperation.Create(path, val);
-        break;
+        path = tokenizer.getPath()
+        val = tokenizer.getObject()
+        op = ObjectOperation.Create(path, val)
+        break
       case 'd':
-        path = tokenizer.getPath();
-        val = tokenizer.getObject();
-        op = ObjectOperation.Delete(path, val);
-        break;
+        path = tokenizer.getPath()
+        val = tokenizer.getObject()
+        op = ObjectOperation.Delete(path, val)
+        break
       case 's':
-        path = tokenizer.getPath();
-        val = tokenizer.getAny();
-        oldVal = tokenizer.getAny();
-        op = ObjectOperation.Set(path, oldVal, val);
-        break;
+        path = tokenizer.getPath()
+        val = tokenizer.getAny()
+        oldVal = tokenizer.getAny()
+        op = ObjectOperation.Set(path, oldVal, val)
+        break
       case 'u':
-        path = tokenizer.getPath();
-        diff = this.deserializePrimitiveOp(str, tokenizer);
-        op = ObjectOperation.Update(path, diff);
-        break;
+        path = tokenizer.getPath()
+        diff = this.deserializePrimitiveOp(str, tokenizer)
+        op = ObjectOperation.Update(path, diff)
+        break
       default:
-        throw new Error('Illegal type for ObjectOperation: '+ type);
+        throw new Error('Illegal type for ObjectOperation: '+ type)
     }
-    return op;
-  };
+    return op
+  }
 
-  this.deserializePrimitiveOp = function(str, tokenizer) {
+  deserializePrimitiveOp(str, tokenizer) {
     if (!tokenizer) {
-      tokenizer = new Tokenizer(str, this.SEPARATOR);
+      tokenizer = new Tokenizer(str, this.SEPARATOR)
     }
-    var type = tokenizer.getString();
-    var op, pos, val;
+    var type = tokenizer.getString()
+    var op, pos, val
     switch (type) {
       case 't+':
-        pos = tokenizer.getNumber();
-        val = tokenizer.getString();
-        op = TextOperation.Insert(pos, val);
-        break;
+        pos = tokenizer.getNumber()
+        val = tokenizer.getString()
+        op = TextOperation.Insert(pos, val)
+        break
       case 't-':
-        pos = tokenizer.getNumber();
-        val = tokenizer.getString();
-        op = TextOperation.Delete(pos, val);
-        break;
+        pos = tokenizer.getNumber()
+        val = tokenizer.getString()
+        op = TextOperation.Delete(pos, val)
+        break
       case 'a+':
-        pos = tokenizer.getNumber();
-        val = tokenizer.getAny();
-        op = ArrayOperation.Insert(pos, val);
-        break;
+        pos = tokenizer.getNumber()
+        val = tokenizer.getAny()
+        op = ArrayOperation.Insert(pos, val)
+        break
       case 'a-':
-        pos = tokenizer.getNumber();
-        val = tokenizer.getAny();
-        op = ArrayOperation.Delete(pos, val);
-        break;
+        pos = tokenizer.getNumber()
+        val = tokenizer.getAny()
+        op = ArrayOperation.Delete(pos, val)
+        break
       default:
-        throw new Error('Unsupported operation type: ' + type);
+        throw new Error('Unsupported operation type: ' + type)
     }
-    return op;
-  };
-};
-
-oo.initClass(OperationSerializer);
-
-function Tokenizer(str, sep) {
-  if (isArray(arguments[0])) {
-    this.tokens = arguments[0];
-  } else {
-    this.tokens = str.split(sep);
+    return op
   }
-  this.pos = -1;
 }
 
-Tokenizer.Prototype = function() {
-
-  this.error = function(msg) {
-    throw new Error('Parsing error: ' + msg + '\n' + this.tokens[this.pos]);
-  };
-
-  this.getString = function() {
-    this.pos++;
-    var str = this.tokens[this.pos];
-    if (str[0] === '"') {
-      str = str.slice(1, -1);
+class Tokenizer {
+  constructor(str, sep) {
+    if (isArray(arguments[0])) {
+      this.tokens = arguments[0]
+    } else {
+      this.tokens = str.split(sep)
     }
-    return str;
-  };
+    this.pos = -1
+  }
 
-  this.getNumber = function() {
-    this.pos++;
-    var number;
-    var token = this.tokens[this.pos];
+  error(msg) {
+    throw new Error('Parsing error: ' + msg + '\n' + this.tokens[this.pos])
+  }
+
+  getString() {
+    this.pos++
+    var str = this.tokens[this.pos]
+    if (str[0] === '"') {
+      str = str.slice(1, -1)
+    }
+    return str
+  }
+
+  getNumber() {
+    this.pos++
+    var number
+    var token = this.tokens[this.pos]
     try {
       if (isNumber(token)) {
-        number = token;
+        number = token
       } else {
-        number = parseInt(this.tokens[this.pos], 10);
+        number = parseInt(this.tokens[this.pos], 10)
       }
-      return number;
+      return number
     } catch (err) {
-      this.error('expected number');
+      this.error('expected number')
     }
-  };
+  }
 
-  this.getObject = function() {
-    this.pos++;
-    var obj;
-    var token = this.tokens[this.pos];
+  getObject() {
+    this.pos++
+    var obj
+    var token = this.tokens[this.pos]
     try {
       if (isObject(token)) {
-        obj = token;
+        obj = token
       } else {
-        obj = JSON.parse(this.tokens[this.pos]);
+        obj = JSON.parse(this.tokens[this.pos])
       }
-      return obj;
+      return obj
     } catch (err) {
-      this.error('expected object');
+      this.error('expected object')
     }
-  };
+  }
 
-  this.getAny = function() {
-    this.pos++;
-    var token = this.tokens[this.pos];
-    return token;
-  };
+  getAny() {
+    this.pos++
+    var token = this.tokens[this.pos]
+    return token
+  }
 
-  this.getPath = function() {
-    var str = this.getString();
-    return str.split('.');
-  };
-};
+  getPath() {
+    var str = this.getString()
+    return str.split('.')
+  }
+}
 
-oo.initClass(Tokenizer);
+OperationSerializer.Tokenizer = Tokenizer
 
-OperationSerializer.Tokenizer = Tokenizer;
-
-export default OperationSerializer;
+export default OperationSerializer

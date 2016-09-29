@@ -31,7 +31,7 @@
     "karma-tape-reporter": "1.0.3",
     "substance-bundler": "^0.4.20",
     "substance-docgen": "^0.1.0",
-    "substance-test": "^0.2.2"
+    "substance-test": "^0.2.3"
   },
   "browser": {
     "substance-cheerio": false
