@@ -1,7 +1,6 @@
 import forEach from 'lodash/forEach'
 import clone from 'lodash/clone'
-import oo from '../util/oo'
-import inBrowser from '../util/inBrowser'
+import inBrowser from '../../util/inBrowser'
 
 class SurfaceManager {
   constructor(documentSession) {
@@ -207,9 +206,6 @@ class SurfaceManager {
       focusedSurface._sendOverlayHints()
     }
   }
-
 }
-
-oo.initClass(SurfaceManager)
 
 export default SurfaceManager

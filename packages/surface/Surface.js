@@ -1,20 +1,20 @@
 import forEach from 'lodash/forEach'
 import isUndefined from 'lodash/isUndefined'
 import startsWith from 'lodash/startsWith'
-import createSurfaceId from '../util/createSurfaceId'
-import getRelativeBoundingRect from '../util/getRelativeBoundingRect'
-import keys from '../util/keys'
-import platform from '../util/platform'
-import inBrowser from '../util/inBrowser'
-import copySelection from '../model/transform/copySelection'
-import deleteSelection from '../model/transform/deleteSelection'
-import deleteCharacter from '../model/transform/deleteCharacter'
-import insertText from '../model/transform/insertText'
-import Clipboard from './Clipboard'
-import Component from './Component'
-import DefaultDOMElement from './DefaultDOMElement'
-import DOMSelection from './DOMSelection'
-import UnsupportedNode from './UnsupportedNodeComponent'
+import createSurfaceId from '../../util/createSurfaceId'
+import getRelativeBoundingRect from '../../util/getRelativeBoundingRect'
+import keys from '../../util/keys'
+import platform from '../../util/platform'
+import inBrowser from '../../util/inBrowser'
+import copySelection from '../../model/transform/copySelection'
+import deleteSelection from '../../model/transform/deleteSelection'
+import deleteCharacter from '../../model/transform/deleteCharacter'
+import insertText from '../../model/transform/insertText'
+import Clipboard from '../../ui/Clipboard'
+import Component from '../../ui/Component'
+import DefaultDOMElement from '../../ui/DefaultDOMElement'
+import DOMSelection from '../../ui/DOMSelection'
+import UnsupportedNode from '../../ui/UnsupportedNodeComponent'
 
 /**
    Abstract interface for editing components.
@@ -84,7 +84,7 @@ class Surface extends Component {
   }
 
   get _isSurface() {
-    return true 
+    return true
   }
 
   getChildContext() {
@@ -655,7 +655,7 @@ class Surface extends Component {
     // console.log('Native focus on surface', this.getId());
     let _state = this._state
     _state.hasNativeFocus = true
-  };
+  }
 
   // Internal implementations
 

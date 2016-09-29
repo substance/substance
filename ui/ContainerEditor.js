@@ -8,7 +8,7 @@ import breakNode from '../model/transform/breakNode'
 import insertNode from '../model/transform/insertNode'
 import switchTextType from '../model/transform/switchTextType'
 import paste from '../model/transform/paste'
-import Surface from './Surface'
+import Surface from '../packages/surface/Surface'
 import RenderingEngine from './RenderingEngine'
 import IsolatedNodeComponent from '../packages/isolated-node/IsolatedNodeComponent'
 

@@ -16,7 +16,7 @@ class Command {
   }
 
   get _isCommand() {
-    return true 
+    return true
   }
 
   getName() {
@@ -55,9 +55,5 @@ class Command {
 
 }
 
-// TODO: move it somewhere else
-//Command.prototype._isCommand = true
-
-oo.initClass(Command)
 
 export default Command

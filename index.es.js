@@ -144,10 +144,12 @@ export { default as Tool } from './packages/tools/Tool'
 export { default as Toolbar } from './packages/tools/Toolbar'
 export { default as ToolGroup } from './packages/tools/ToolGroup'
 
+// surface
+export { default as Surface } from './packages/surface/Surface'
+
 // ui
 export { default as BlockNodeComponent } from './ui/BlockNodeComponent'
 export { default as InsertNodeCommand } from './ui/InsertNodeCommand'
-export { default as Surface } from './ui/Surface'
 export { default as AbstractEditor } from './ui/AbstractEditor'
 export { default as AnnotationCommand } from './ui/AnnotationCommand'
 export { default as AnnotationComponent } from './ui/AnnotationComponent'
