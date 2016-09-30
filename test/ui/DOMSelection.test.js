@@ -48,13 +48,12 @@ class StubDoc {
     return result
   }
 
-  createSelection(...args) {
-    Document.prototype.createSelection(...args)
-  }
-
   on() {}
   off() {}
 }
+
+StubDoc.prototype.createSelection = Document.prototype.createSelection
+
 
 class StubSurface {
   constructor(el, containerId) {
