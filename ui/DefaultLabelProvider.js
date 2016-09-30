@@ -1,7 +1,6 @@
 /**
  Default label provider implementation
 */
-
 class LabelProvider {
   constructor(labels, lang) {
     this.lang = lang || 'en'

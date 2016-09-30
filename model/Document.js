@@ -33,6 +33,7 @@ var __id__ = 0
   @class Document
   @abstract
   @extends model/AbstractDocument
+
   @example
 
   ```js

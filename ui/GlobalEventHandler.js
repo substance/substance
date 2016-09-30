@@ -21,6 +21,7 @@ import DOMElement from './DOMElement'
 const events = [ 'keydown', 'keyup', 'keypress', 'mousedown', 'mouseup' , 'copy']
 
 class GlobalEventHandler {
+
   constructor(documentSession, surfaceManager) {
     this.documentSession = documentSession
     this.surfaceManager = surfaceManager

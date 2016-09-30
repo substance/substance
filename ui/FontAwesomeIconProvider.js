@@ -2,6 +2,7 @@ import forEach from 'lodash/forEach'
 import Icon from './FontAwesomeIcon'
 
 class FontAwesomeIconProvider {
+
   constructor(icons) {
     this.map = {}
     forEach(icons, function(config, name) {

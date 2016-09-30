@@ -16,8 +16,7 @@ import EventEmitter from '../util/EventEmitter'
 
 
   ```js
-  class Todo extends DocumentNode {}
-
+  class Todo extends TextBlock {}
   Todo.define({
     type: 'todo',
     content: 'text',

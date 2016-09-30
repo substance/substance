@@ -180,7 +180,7 @@ class Clipboard {
       args.text = plainText
       return surface.paste(tx, args)
     })
-  };
+  }
 
   onBeforePasteShim() {
     let surface = this.getSurface()
