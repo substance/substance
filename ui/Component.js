@@ -9,7 +9,7 @@ import DOMElement from './DOMElement'
 import DefaultDOMElement from './DefaultDOMElement'
 import inBrowser from '../util/inBrowser'
 
-var __id__ = 0;
+var __id__ = 0
 
 /**
   A light-weight component implementation inspired by React and Ember. In contrast to the
@@ -59,35 +59,35 @@ var __id__ = 0;
   HelloMessage.mount({name: 'John'}, document.body)
   ```
 */
-function Component(parent, props) {
-  EventEmitter.call(this);
-  this.__id__ = __id__++;
+class Component extends DOMElement.Delegator {
 
-  this.parent = parent;
-  this.el = null;
-  this.refs = {};
+  constructor(parent, props) {
+    super()
 
-  // HACK: a temporary solution to handle refs owned by an ancestor
-  // is to store them here as well, so that we can map virtual components
-  // efficiently
-  this.__foreignRefs__ = {};
-  this._actionHandlers = {};
+    // HACK: allowing skipping execution of this ctor
+    if (arguments[0] === 'SKIP') return
 
-  // context from parent (dependency injection)
-  this.context = this._getContext() || {};
-  Object.freeze(this.context);
-  // setting props without triggering willReceiveProps
-  this.props = props || {};
-  Object.freeze(this.props);
-  this.state = this.getInitialState() || {};
-  Object.freeze(this.state);
-}
+    this.__id__ = __id__++
 
-Component.Prototype = function() {
+    this.parent = parent
+    this.el = null
+    this.refs = {}
 
-  extend(this, EventEmitter.prototype);
+    // HACK: a temporary solution to handle refs owned by an ancestor
+    // is to store them here as well, so that we can map virtual components
+    // efficiently
+    this.__foreignRefs__ = {}
+    this._actionHandlers = {}
 
-  this._isComponent = true;
+    // context from parent (dependency injection)
+    this.context = this._getContext() || {}
+    Object.freeze(this.context)
+    // setting props without triggering willReceiveProps
+    this.props = props || {}
+    Object.freeze(this.props)
+    this.state = this.getInitialState() || {}
+    Object.freeze(this.state)
+  }
 
   /**
     Provides the context which is delivered to every child component. Override if you want to
@@ -95,56 +95,56 @@ Component.Prototype = function() {
 
     @return object the child context
   */
-  this.getChildContext = function() {
-    return this.childContext || {};
-  };
+  getChildContext() {
+    return this.childContext || {}
+  }
 
   /**
     Provide the initial component state.
 
     @return object the initial state
   */
-  this.getInitialState = function() {
-    return {};
-  };
+  getInitialState() {
+    return {}
+  }
 
   /**
     Provides the parent of this component.
 
     @return object the parent component or null if this component does not have a parent.
   */
-  this.getParent = function() {
-    return this.parent;
-  };
+  getParent() {
+    return this.parent
+  }
 
-  this.getRoot = function() {
-    var comp = this;
-    var parent = comp;
+  getRoot() {
+    var comp = this
+    var parent = comp
     while (parent) {
-      comp = parent;
-      parent = comp.getParent();
+      comp = parent
+      parent = comp.getParent()
     }
-    return comp;
-  };
+    return comp
+  }
 
-  this.getNativeElement = function() {
-    return this.el.getNativeElement();
-  };
+  getNativeElement() {
+    return this.el.getNativeElement()
+  }
 
   /*
     Short hand for using labelProvider API
   */
-  this.getLabel = function(name) {
-    var labelProvider = this.context.labelProvider;
-    if (!labelProvider) throw new Error('Missing labelProvider.');
-    return labelProvider.getLabel(name);
-  };
+  getLabel(name) {
+    var labelProvider = this.context.labelProvider
+    if (!labelProvider) throw new Error('Missing labelProvider.')
+    return labelProvider.getLabel(name)
+  }
 
-  this.getComponent = function(name) {
-    var componentRegistry = this.context.componentRegistry;
-    if (!componentRegistry) throw new Error('Missing componentRegistry.');
-    return componentRegistry.get(name);
-  };
+  getComponent(name) {
+    var componentRegistry = this.context.componentRegistry
+    if (!componentRegistry) throw new Error('Missing componentRegistry.')
+    return componentRegistry.get(name)
+  }
 
 
   /**
@@ -158,27 +158,27 @@ Component.Prototype = function() {
     @param {Function} $$ method to create components
     @return {VirtualNode} VirtualNode created using $$
    */
-  this.render = function($$) {
+  render($$) {
     /* istanbul ignore next */
-    return $$('div');
-  };
+    return $$('div')
+  }
 
-  this.mount = function(el) {
+  mount(el) {
     if (!el) {
-      throw new Error('Element is required.');
+      throw new Error('Element is required.')
     }
     if (!this.el) {
-      this._render();
+      this._render()
     }
     if (!el._isDOMElement) {
-      el = DefaultDOMElement.wrapNativeElement(el);
+      el = DefaultDOMElement.wrapNativeElement(el)
     }
-    el.appendChild(this.el);
+    el.appendChild(this.el)
     if (el.isInDocument()) {
-      this.triggerDidMount(true);
+      this.triggerDidMount(true)
     }
-    return this;
-  };
+    return this
+  }
 
   /**
    * Determines if Component.rerender() should be run after
@@ -188,39 +188,39 @@ Component.Prototype = function() {
    *
    * @return a boolean indicating whether rerender() should be run.
    */
-  this.shouldRerender = function(newProps) { // eslint-disable-line
-    return true;
-  };
+  shouldRerender(newProps) { // eslint-disable-line
+    return true
+  }
 
   /**
    * Rerenders the component.
    *
    * Call this to manually trigger a rerender.
    */
-  this.rerender = function() {
-    this._rerender(this.props, this.state);
-  };
+  rerender() {
+    this._rerender(this.props, this.state)
+  }
 
-  this._rerender = function(oldProps, oldState) {
-    this._render(oldProps, oldState);
+  _rerender(oldProps, oldState) {
+    this._render(oldProps, oldState)
     // when this component is not mounted still trigger didUpdate()
     if (!this.isMounted()) {
-      this.didUpdate(oldProps, oldState);
+      this.didUpdate(oldProps, oldState)
     }
-  };
+  }
 
-  this._render = function(oldProps, oldState) {
+  _render(oldProps, oldState) {
     if (this.__isRendering__) {
-      throw new Error('Component is rendering already.');
+      throw new Error('Component is rendering already.')
     }
-    this.__isRendering__ = true;
+    this.__isRendering__ = true
     try {
-      var engine = new RenderingEngine();
-      engine._render(this, oldProps, oldState);
+      var engine = new RenderingEngine()
+      engine._render(this, oldProps, oldState)
     } finally {
-      delete this.__isRendering__;
+      delete this.__isRendering__
     }
-  };
+  }
 
   /**
    * Triggers didMount handlers recursively.
@@ -236,27 +236,27 @@ Component.Prototype = function() {
    * @example
    *
    * ```
-   * var frag = document.createDocumentFragment();
-   * var comp = MyComponent.mount(frag);
+   * var frag = document.createDocumentFragment()
+   * var comp = MyComponent.mount(frag)
    * ...
-   * $('body').append(frag);
-   * comp.triggerDidMount();
+   * $('body').append(frag)
+   * comp.triggerDidMount()
    * ```
    */
-  this.triggerDidMount = function() {
+  triggerDidMount() {
     // Trigger didMount for the children first
     this.getChildren().forEach(function(child) {
       // We pass isMounted=true to save costly calls to Component.isMounted
       // for each child / grandchild
-      child.triggerDidMount(true);
-    });
+      child.triggerDidMount(true)
+    })
     // To prevent from multiple calls to didMount, which can happen under
     // specific circumstances we use a guard.
     if (!this.__isMounted__) {
-      this.__isMounted__ = true;
-      this.didMount();
+      this.__isMounted__ = true
+      this.didMount()
     }
-  };
+  }
 
   /**
    * Called when the element is inserted into the DOM.
@@ -267,52 +267,52 @@ Component.Prototype = function() {
    * @example
    *
    * ```
-   * var component = new MyComponent();
+   * var component = new MyComponent()
    * component.mount($('body')[0])
    * ```
    */
-  this.didMount = function() {};
+  didMount() {}
 
 
   /**
     Hook which is called after each rerender.
   */
-  this.didUpdate = function() {};
+  didUpdate() {}
 
   /**
     @return a boolean indicating if this component has been mounted
    */
-  this.isMounted = function() {
-    return this.__isMounted__;
-  };
+  isMounted() {
+    return this.__isMounted__
+  }
 
   /**
    * Triggers dispose handlers recursively.
    *
    * @private
    */
-  this.triggerDispose = function() {
+  triggerDispose() {
     this.getChildren().forEach(function(child) {
-      child.triggerDispose();
-    });
-    this.dispose();
-    this.__isMounted__ = false;
-  };
+      child.triggerDispose()
+    })
+    this.dispose()
+    this.__isMounted__ = false
+  }
 
   /**
     A hook which is called when the component is unmounted, i.e. removed from DOM, hence disposed
    */
-  this.dispose = function() {};
+  dispose() {}
 
   /*
     Attention: this is used when a preserved component is relocated.
     E.g., rendered with a new parent.
   */
-  this._setParent = function(newParent) {
-    this.parent = newParent;
-    this.context = this._getContext() || {};
-    Object.freeze(this.context);
-  };
+  _setParent(newParent) {
+    this.parent = newParent
+    this.context = this._getContext() || {}
+    Object.freeze(this.context)
+  }
 
   /**
     Send an action request to the parent component, bubbling up the component
@@ -323,18 +323,18 @@ Component.Prototype = function() {
     @returns {Boolean} true if the action was handled, false otherwise
     @example
   */
-  this.send = function(action) {
-    var comp = this;
+  send(action) {
+    var comp = this
     while(comp) {
       if (comp._actionHandlers && comp._actionHandlers[action]) {
-        comp._actionHandlers[action].apply(comp, Array.prototype.slice.call(arguments, 1));
-        return true;
+        comp._actionHandlers[action].apply(comp, Array.prototype.slice.call(arguments, 1))
+        return true
       }
-      comp = comp.getParent();
+      comp = comp.getParent()
     }
-    console.warn('Action', action, 'was not handled.');
-    return false;
-  };
+    console.warn('Action', action, 'was not handled.')
+    return false
+  }
 
   /**
     Define action handlers. Call this during construction/initialization of a component.
@@ -353,12 +353,12 @@ Component.Prototype = function() {
     }
     ```
   */
-  this.handleActions = function(actionHandlers) {
+  handleActions(actionHandlers) {
     each(actionHandlers, function(method, actionName) {
-      this.handleAction(actionName, method);
-    }.bind(this));
-    return this;
-  };
+      this.handleAction(actionName, method)
+    }.bind(this))
+    return this
+  }
 
   /**
     Define an action handler. Call this during construction/initialization of a component.
@@ -366,109 +366,109 @@ Component.Prototype = function() {
     @param {String} action name
     @param {Functon} a function of this component.
   */
-  this.handleAction = function(name, handler) {
+  handleAction(name, handler) {
     if (!name || !handler || !isFunction(handler)) {
-      throw new Error('Illegal arguments.');
+      throw new Error('Illegal arguments.')
     }
-    handler = handler.bind(this);
-    this._actionHandlers[name] = handler;
-  };
+    handler = handler.bind(this)
+    this._actionHandlers[name] = handler
+  }
 
   /**
     Get the current component state
 
     @return {Object} the current state
   */
-  this.getState = function() {
-    return this.state;
-  };
+  getState() {
+    return this.state
+  }
 
   /**
     Sets the state of this component, potentially leading to a rerender.
 
     Usually this is used by the component itself.
   */
-  this.setState = function(newState) {
-    var oldProps = this.props;
-    var oldState = this.state;
+  setState(newState) {
+    var oldProps = this.props
+    var oldState = this.state
     // Note: while setting props it is allowed to call this.setState()
     // which will not lead to an extra rerender
     var needRerender = !this.__isSettingProps__ &&
-      this.shouldRerender(this.getProps(), newState);
+      this.shouldRerender(this.getProps(), newState)
     // triggering this to provide a possibility to look at old before it is changed
-    this.willUpdateState(newState);
-    this.state = newState || {};
-    Object.freeze(this.state);
+    this.willUpdateState(newState)
+    this.state = newState || {}
+    Object.freeze(this.state)
     if (needRerender) {
-      this._rerender(oldProps, oldState);
+      this._rerender(oldProps, oldState)
     } else if (!this.__isSettingProps__) {
-      this.didUpdate(oldProps, oldState);
+      this.didUpdate(oldProps, oldState)
     }
-  };
+  }
 
   /**
     This is similar to `setState()` but extends the existing state instead of replacing it.
     @param {object} newState an object with a partial update.
   */
-  this.extendState = function(newState) {
-    newState = extend({}, this.state, newState);
-    this.setState(newState);
-  };
+  extendState(newState) {
+    newState = extend({}, this.state, newState)
+    this.setState(newState)
+  }
 
   /**
     Called before state is changed.
   */
-  this.willUpdateState = function(newState) { // eslint-disable-line
-  };
+  willUpdateState(newState) { // eslint-disable-line
+  }
 
   /**
     Get the current properties
 
     @return {Object} the current state
   */
-  this.getProps = function() {
-    return this.props;
-  };
+  getProps() {
+    return this.props
+  }
 
   /**
     Sets the properties of this component, potentially leading to a rerender.
 
     @param {object} an object with properties
   */
-  this.setProps = function(newProps) {
-    var oldProps = this.props;
-    var oldState = this.state;
-    var needRerender = this.shouldRerender(newProps, this.state);
-    this._setProps(newProps);
+  setProps(newProps) {
+    var oldProps = this.props
+    var oldState = this.state
+    var needRerender = this.shouldRerender(newProps, this.state)
+    this._setProps(newProps)
     if (needRerender) {
-      this._rerender(oldProps, oldState);
+      this._rerender(oldProps, oldState)
     } else {
-      this.didUpdate(oldProps, oldState);
+      this.didUpdate(oldProps, oldState)
     }
-  };
+  }
 
-  this._setProps = function(newProps) {
-    newProps = newProps || {};
+  _setProps(newProps) {
+    newProps = newProps || {}
     // set a flag so that this.setState() can omit triggering render
-    this.__isSettingProps__ = true;
+    this.__isSettingProps__ = true
     try {
-      this.willReceiveProps(newProps);
-      this.props = newProps || {};
-      Object.freeze(newProps);
+      this.willReceiveProps(newProps)
+      this.props = newProps || {}
+      Object.freeze(newProps)
     } finally {
-      delete this.__isSettingProps__;
+      delete this.__isSettingProps__
     }
-  };
+  }
 
   /**
     Extends the properties of the component, without reppotentially leading to a rerender.
 
     @param {object} an object with properties
   */
-  this.extendProps = function(updatedProps) {
-    var newProps = extend({}, this.props, updatedProps);
-    this.setProps(newProps);
-  };
+  extendProps(updatedProps) {
+    var newProps = extend({}, this.props, updatedProps)
+    this.setProps(newProps)
+  }
 
   /**
     Hook which is called before properties are updated. Use this to dispose objects which will be replaced when properties change.
@@ -476,245 +476,162 @@ Component.Prototype = function() {
     For example you can use this to derive state from props.
     @param {object} newProps
   */
-  this.willReceiveProps = function(newProps) { // eslint-disable-line
-  };
+  willReceiveProps(newProps) { // eslint-disable-line
+  }
 
-  this.getChildNodes = function() {
-    if (!this.el) return [];
-    var childNodes = this.el.getChildNodes();
-    childNodes = childNodes.map(_unwrapComp).filter(notNull);
-    return childNodes;
-  };
+  getChildNodes() {
+    if (!this.el) return []
+    var childNodes = this.el.getChildNodes()
+    childNodes = childNodes.map(_unwrapComp).filter(notNull)
+    return childNodes
+  }
 
-  this.getChildren = function() {
-    if (!this.el) return [];
-    var children = this.el.getChildren();
-    children = children.map(_unwrapComp).filter(notNull);
-    return children;
-  };
+  getChildren() {
+    if (!this.el) return []
+    var children = this.el.getChildren()
+    children = children.map(_unwrapComp).filter(notNull)
+    return children
+  }
 
-  this.getChildAt = function(pos) {
-    var node = this.el.getChildAt(pos);
-    return _unwrapCompStrict(node);
-  };
+  getChildAt(pos) {
+    var node = this.el.getChildAt(pos)
+    return _unwrapCompStrict(node)
+  }
 
-  this.find = function(cssSelector) {
-    var el = this.el.find(cssSelector);
-    return _unwrapComp(el);
-  };
+  find(cssSelector) {
+    var el = this.el.find(cssSelector)
+    return _unwrapComp(el)
+  }
 
-  this.findAll = function(cssSelector) {
-    var els = this.el.findAll(cssSelector);
-    return els.map(_unwrapComp).filter(notNull);
-  };
+  findAll(cssSelector) {
+    var els = this.el.findAll(cssSelector)
+    return els.map(_unwrapComp).filter(notNull)
+  }
 
-  this.appendChild = function(child) {
-    this.insertAt(this.getChildCount(), child);
-  };
+  appendChild(child) {
+    this.insertAt(this.getChildCount(), child)
+  }
 
-  this.insertAt = function(pos, childEl) {
+  insertAt(pos, childEl) {
     if (isString(childEl)) {
-      childEl = new VirtualElement.TextNode(childEl);
+      childEl = new VirtualElement.TextNode(childEl)
     }
     if (!childEl._isVirtualElement) {
-      throw new Error('Invalid argument: "child" must be a VirtualElement.');
+      throw new Error('Invalid argument: "child" must be a VirtualElement.')
     }
-    var child = new RenderingEngine()._renderChild(this, childEl);
-    this.el.insertAt(pos, child.el);
-    _mountChild(this, child);
-  };
+    var child = new RenderingEngine()._renderChild(this, childEl)
+    this.el.insertAt(pos, child.el)
+    _mountChild(this, child)
+  }
 
-  this.removeAt = function(pos) {
-    var childEl = this.el.getChildAt(pos);
+  removeAt(pos) {
+    var childEl = this.el.getChildAt(pos)
     if (childEl) {
-      var child = _unwrapCompStrict(childEl);
-      _disposeChild(child);
-      this.el.removeAt(pos);
+      var child = _unwrapCompStrict(childEl)
+      _disposeChild(child)
+      this.el.removeAt(pos)
     }
-  };
+  }
 
-  this.removeChild = function(child) {
+  removeChild(child) {
     if (!child || !child._isComponent) {
-      throw new Error('removeChild(): Illegal arguments. Expecting a Component instance.');
+      throw new Error('removeChild(): Illegal arguments. Expecting a Component instance.')
     }
     // TODO: remove ref from owner
-    _disposeChild(child);
-    this.el.removeChild(child.el);
-  };
+    _disposeChild(child)
+    this.el.removeChild(child.el)
+  }
 
-  this.replaceChild = function(oldChild, newChild) {
+  replaceChild(oldChild, newChild) {
     if (!newChild || !oldChild ||
         !newChild._isComponent || !oldChild._isComponent) {
-      throw new Error('replaceChild(): Illegal arguments. Expecting BrowserDOMElement instances.');
+      throw new Error('replaceChild(): Illegal arguments. Expecting BrowserDOMElement instances.')
     }
     // Attention: Node.replaceChild has weird semantics
-    _disposeChild(oldChild);
-    this.el.replaceChild(newChild.el, oldChild.el);
+    _disposeChild(oldChild)
+    this.el.replaceChild(newChild.el, oldChild.el)
     if (this.isMounted()) {
-      newChild.triggerDidMount(true);
-    }
-  };
-
-  function _disposeChild(child) {
-    child.triggerDispose();
-    if (child._owner && child._ref) {
-      console.assert(child._owner.refs[child._ref] === child, "Owner's ref should point to this child instance.");
-      delete child._owner.refs[child._ref];
+      newChild.triggerDidMount(true)
     }
   }
 
-  function _mountChild(parent, child) {
-    if (parent.isMounted()) {
-      child.triggerDidMount(true);
-    }
-    if (child._owner && child._ref) {
-      child._owner.refs[child._ref] = child;
-    }
-  }
-
-  this.empty = function() {
+  empty() {
     if (this.el) {
       this.getChildNodes().forEach(function(child) {
-        _disposeChild(child);
-      });
-      this.el.empty();
+        _disposeChild(child)
+      })
+      this.el.empty()
     }
-    return this;
-  };
+    return this
+  }
 
-  this.remove = function() {
-    _disposeChild(this);
-    this.el.remove();
-  };
+  remove() {
+    _disposeChild(this)
+    this.el.remove()
+  }
 
-  this._getContext = function() {
-    var context = {};
-    var parent = this.getParent();
+  _getContext() {
+    var context = {}
+    var parent = this.getParent()
     if (parent) {
-      context = extend(context, parent.context);
+      context = extend(context, parent.context)
       if (parent.getChildContext) {
-        return extend(context, parent.getChildContext());
+        return extend(context, parent.getChildContext())
       }
     }
-    return context;
-  };
+    return context
+  }
 
-  this.addEventListener = function() {
-    throw new Error("Not supported.");
-  };
+  addEventListener() {
+    throw new Error("Not supported.")
+  }
 
-  this.removeEventListener = function() {
-    throw new Error("Not supported.");
-  };
+  removeEventListener() {
+    throw new Error("Not supported.")
+  }
 
-  this.insertBefore = function() {
-    throw new Error("Not supported.");
-  };
+  insertBefore() {
+    throw new Error("Not supported.")
+  }
 
-};
-
-DOMElement.Delegator.extend(Component);
-
-DOMElement._defineProperties(Component, DOMElement._propertyNames);
-
-function _unwrapComp(el) {
-  if (el) return el._comp;
 }
 
-function _unwrapCompStrict(el) {
-  console.assert(el._comp, "Expecting a back-link to the component instance.");
-  return _unwrapComp(el);
-}
+Component.prototype._isComponent = true
+EventEmitter.mixin(Component)
+DOMElement._defineProperties(Component, DOMElement._propertyNames)
 
-function notNull(n) { return n; }
-
-Component.unwrap = _unwrapComp;
+Component.unwrap = _unwrapComp
 
 Component.render = function(props) {
-  props = props || {};
-  var ComponentClass = this;
-  var comp = new ComponentClass(null, props);
-  comp._render();
-  return comp;
-};
+  props = props || {}
+  var ComponentClass = this
+  var comp = new ComponentClass(null, props)
+  comp._render()
+  return comp
+}
 
 Component.mount = function(props, el) {
   if (arguments.length === 1) {
-    props = {};
-    el = arguments[0];
+    props = {}
+    el = arguments[0]
   }
-  if (!el) throw new Error("'el' is required.");
+  if (!el) throw new Error("'el' is required.")
   if (isString(el)) {
-    var selector = el;
+    var selector = el
     if (inBrowser) {
-      el = window.document.querySelector(selector);
+      el = window.document.querySelector(selector)
     } else {
-      throw new Error("This selector is not supported on server side.");
+      throw new Error("This selector is not supported on server side.")
     }
   }
   if (!el._isDOMElement) {
-    el = new DefaultDOMElement.wrapNativeElement(el);
+    el = new DefaultDOMElement.wrapNativeElement(el)
   }
-  var ComponentClass = this;
-  var comp = new ComponentClass(null, props);
-  comp.mount(el);
-  return comp;
-};
-
-function ElementComponent(parent, virtualComp) {
-  if (!parent._isComponent) {
-    throw new Error("Illegal argument: 'parent' must be a Component.");
-  }
-  if (!virtualComp._isVirtualHTMLElement) {
-    throw new Error("Illegal argument: 'virtualComp' must be a VirtualHTMLElement.");
-  }
-  this.parent = parent;
-  this.context = this._getContext() || {};
-  Object.freeze(this.context);
+  var ComponentClass = this
+  var comp = new ComponentClass(null, props)
+  comp.mount(el)
+  return comp
 }
-
-ElementComponent.Prototype = function() {
-  this._isElementComponent = true;
-};
-
-Component.extend(ElementComponent);
-Component.Element = ElementComponent;
-
-function TextNodeComponent(parent, virtualComp) {
-  if (!parent._isComponent) {
-    throw new Error("Illegal argument: 'parent' must be a Component.");
-  }
-  if (!virtualComp._isVirtualTextNode) {
-    throw new Error("Illegal argument: 'virtualComp' must be a VirtualTextNode.");
-  }
-  this.parent = parent;
-}
-
-TextNodeComponent.Prototype = function() {
-  this._isTextNodeComponent = true;
-
-  this.setTextContent = function(text) {
-    if (!this.el) {
-      throw new Error('Component must be rendered first.');
-    }
-    if (this.el.textContent !== text) {
-      var newEl = this.el.createTextNode(text);
-      this.el._replaceNativeEl(newEl.getNativeElement());
-    }
-  };
-
-  this.getChildNodes = function() {
-    return [];
-  };
-
-  this.getChildren = function() {
-    return [];
-  };
-
-};
-
-Component.extend(TextNodeComponent);
-Component.TextNode = TextNodeComponent;
 
 Object.defineProperty(Component, '$$', {
   get: function() {
@@ -722,19 +639,108 @@ Object.defineProperty(Component, '$$', {
       "With Substance Beta 4 we introduced a breaking change.",
       "We needed to turn the former static Component.$$ into a contextualized implementation, which is now served via Component.render($$).",
       "FIX: change your signature of 'this.render()' in all your Components to 'this.render($$)"
-    ].join("\n"));
+    ].join("\n"))
   }
-});
+})
 
 Component.unwrapDOMElement = function(el) {
-  return _unwrapComp(el);
-};
+  return _unwrapComp(el)
+}
 
 Component.getComponentFromNativeElement = function(nativeEl) {
   // while it sounds strange to wrap a native element
   // first, it makes sense after all, as DefaultDOMElement.wrapNativeElement()
   // provides the DOMElement instance of a previously wrapped native element.
-  return _unwrapComp(DefaultDOMElement.wrapNativeElement(nativeEl));
-};
+  return _unwrapComp(DefaultDOMElement.wrapNativeElement(nativeEl))
+}
 
-export default Component;
+function _disposeChild(child) {
+  child.triggerDispose()
+  if (child._owner && child._ref) {
+    console.assert(child._owner.refs[child._ref] === child, "Owner's ref should point to this child instance.")
+    delete child._owner.refs[child._ref]
+  }
+}
+
+function _mountChild(parent, child) {
+  if (parent.isMounted()) {
+    child.triggerDidMount(true)
+  }
+  if (child._owner && child._ref) {
+    child._owner.refs[child._ref] = child
+  }
+}
+
+
+function _unwrapComp(el) {
+  if (el) return el._comp
+}
+
+function _unwrapCompStrict(el) {
+  console.assert(el._comp, "Expecting a back-link to the component instance.")
+  return _unwrapComp(el)
+}
+
+function notNull(n) { return n; }
+
+
+class ElementComponent extends Component {
+
+  constructor(parent, virtualComp) {
+    super('SKIP')
+
+    if (!parent._isComponent) {
+      throw new Error("Illegal argument: 'parent' must be a Component.")
+    }
+    if (!virtualComp._isVirtualHTMLElement) {
+      throw new Error("Illegal argument: 'virtualComp' must be a VirtualHTMLElement.")
+    }
+    this.parent = parent
+    this.context = this._getContext() || {}
+    Object.freeze(this.context)
+  }
+
+}
+
+ElementComponent.prototype._isElementComponent = true
+
+class TextNodeComponent extends Component {
+
+  constructor(parent, virtualComp) {
+    super('SKIP')
+
+    if (!parent._isComponent) {
+      throw new Error("Illegal argument: 'parent' must be a Component.")
+    }
+    if (!virtualComp._isVirtualTextNode) {
+      throw new Error("Illegal argument: 'virtualComp' must be a VirtualTextNode.")
+    }
+    this.parent = parent
+  }
+
+  setTextContent(text) {
+    if (!this.el) {
+      throw new Error('Component must be rendered first.')
+    }
+    if (this.el.textContent !== text) {
+      var newEl = this.el.createTextNode(text)
+      this.el._replaceNativeEl(newEl.getNativeElement())
+    }
+  }
+
+  getChildNodes() {
+    return []
+  }
+
+  getChildren() {
+    return []
+  }
+
+}
+
+TextNodeComponent.prototype._isTextNodeComponent = true
+
+Component.Element = ElementComponent
+Component.TextNode = TextNodeComponent
+
+export default Component
