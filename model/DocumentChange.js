@@ -5,7 +5,6 @@ import map from 'lodash/map'
 import forEach from 'lodash/forEach'
 import clone from 'lodash/clone'
 import cloneDeep from 'lodash/cloneDeep'
-import oo from '../util/oo'
 import uuid from '../util/uuid'
 import OperationSerializer from './data/OperationSerializer'
 import ObjectOperation from './data/ObjectOperation'
@@ -244,8 +243,6 @@ class DocumentChange {
     return data
   }
 }
-
-oo.initClass(DocumentChange)
 
 DocumentChange.deserialize = function(str) {
   var opSerializer = new OperationSerializer()

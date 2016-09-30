@@ -1,4 +1,3 @@
-import oo from '../util/oo'
 import DefaultDOMElement from './DefaultDOMElement'
 import Component from './Component'
 
@@ -6,7 +5,6 @@ class DragManager {
   constructor(dndHandlers, context) {
     this.context = context
     this.dndHandlers = dndHandlers
-
     this._source = null
   }
 
@@ -75,7 +73,6 @@ class DragManager {
       }
     }
   }
-
 }
 
 function _getData(event) {
@@ -122,7 +119,5 @@ function _getComponent(comp) {
   }
   return comp;
 }
-
-oo.initClass(DragManager)
 
 export default DragManager

@@ -1,4 +1,3 @@
-import oo from '../util/oo'
 
 /*
   DocumentServer module. Can be bound to an express instance
@@ -58,7 +57,5 @@ class DocumentServer {
     })
   }
 }
-
-oo.initClass(DocumentServer)
 
 export default DocumentServer

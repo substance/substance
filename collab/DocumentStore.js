@@ -1,4 +1,3 @@
-import oo from '../util/oo'
 import extend from 'lodash/extend'
 import Err from '../util/SubstanceError'
 import uuid from '../util/uuid'
@@ -116,6 +115,5 @@ class DocumentStore {
   }
 }
 
-oo.initClass(DocumentStore)
 
 export default DocumentStore

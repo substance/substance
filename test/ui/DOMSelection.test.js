@@ -10,19 +10,17 @@ import Container from '../../model/Container'
 import Paragraph from '../../packages/paragraph/Paragraph'
 import ContainerSelection from '../../model/ContainerSelection'
 import PropertySelection from '../../model/PropertySelection'
-import oo from '../../util/oo'
 import setDOMSelection from '../../util/setDOMSelection'
 
 const test = module('ui/DOMSelection')
 
-function StubDoc(el) {
-  this.el = el
-  this.nodes = null
-}
+class StubDoc {
+  constructor(el) {
+    this.el = el
+    this.nodes = null
+  }
 
-StubDoc.Prototype = function() {
-
-  this.get = function(path) {
+  get(path) {
     if (this.nodes === null) {
       this.nodes = {}
       this.nodes['body'] = new Container(this, {
@@ -50,38 +48,38 @@ StubDoc.Prototype = function() {
     return result
   }
 
-  this.createSelection = Document.prototype.createSelection
+  createSelection(...args) {
+    Document.prototype.createSelection(...args)
+  }
 
-  this.on = function() {}
-
-  this.off = function() {}
+  on() {}
+  off() {}
 }
 
-oo.initClass(StubDoc)
+class StubSurface {
+  constructor(el, containerId) {
+    this.el = el
+    this.doc = new StubDoc(el)
+    this.containerId = containerId
+  }
 
-
-function StubSurface(el, containerId) {
-  this.el = el
-  this.doc = new StubDoc(el)
-  this.containerId = containerId
-
-  this.getDocument = function() {
+  getDocument() {
     return this.doc
   }
 
-  this.isContainerEditor = function() {
+  isContainerEditor() {
     return Boolean(this.containerId)
   }
 
-  this.getContainerId = function() {
+  getContainerId() {
     return this.containerId
   }
 
-  this.getNativeElement = function() {
+  getNativeElement() {
     return this.el.getNativeElement()
   }
 
-  this._getTextPropertyComponent = function(path) {
+  _getTextPropertyComponent(path) {
     var pathStr = path
     if (isArray(path)) {
       pathStr = path.join('.')
@@ -93,6 +91,7 @@ function StubSurface(el, containerId) {
     return new StubTextPropertyComponent(el)
   }
 }
+
 
 function StubTextPropertyComponent(el) {
   this.el = el

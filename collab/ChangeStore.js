@@ -1,4 +1,3 @@
-import oo from '../util/oo'
 import Err from '../util/SubstanceError'
 
 /*
@@ -133,6 +132,5 @@ ChangeStore.Prototype = function() {
   };
 };
 
-oo.initClass(ChangeStore);
 
 export default ChangeStore;

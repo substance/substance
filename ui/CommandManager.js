@@ -1,4 +1,3 @@
-import oo from '../util/oo'
 import extend from 'lodash/extend'
 import forEach from 'lodash/forEach'
 import isEqual from 'lodash/isEqual'
@@ -100,6 +99,5 @@ class CommandManager {
 
 }
 
-oo.initClass(CommandManager)
 
 export default CommandManager

@@ -1,9 +1,7 @@
-import oo from '../util/oo'
-
 class DragAndDropHandler {
 
   get _isDragAndDropHandler() {
-    return true 
+    return true
   }
 
   dragStart(params, context) { // eslint-disable-line
@@ -19,7 +17,5 @@ class DragAndDropHandler {
   }
 
 }
-
-oo.initClass(DragAndDropHandler)
 
 export default DragAndDropHandler

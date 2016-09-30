@@ -1,6 +1,5 @@
 import isString from 'lodash/isString'
 import isNumber from 'lodash/isNumber'
-import oo from '../util/oo'
 import DOMElement from './DOMElement'
 import DelegatedEvent from './DelegatedEvent'
 
@@ -15,7 +14,7 @@ class BrowserDOMElement extends DOMElement {
   }
 
   get _isBrowserDOMElement() {
-    return true 
+    return true
   }
 
   getNativeElement() {
@@ -683,9 +682,9 @@ class TextNode extends DOMElement.TextNode {
       this[name] = BrowserDOMElement.prototype[name]
     }.bind(this))
   }
-  
+
   get _isBrowserDOMElement() {
-    return true 
+    return true
   }
 }
 
@@ -739,7 +738,6 @@ class BrowserWindow {
   }
 }
 
-oo.initClass(BrowserWindow)
 
 BrowserDOMElement.getBrowserWindow = function() {
   if (window.__BrowserDOMElementWrapper__) return window.__BrowserDOMElementWrapper__

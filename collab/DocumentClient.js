@@ -1,4 +1,3 @@
-import oo from '../util/oo'
 import request from '../util/request'
 
 /*
@@ -57,6 +56,5 @@ class DocumentClient {
 
 }
 
-oo.initClass(DocumentClient)
 
 export default DocumentClient

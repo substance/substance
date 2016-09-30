@@ -1,4 +1,3 @@
-import oo from '../util/oo'
 import JSONConverter from '../model/JSONConverter'
 import each from 'lodash/each'
 import Err from '../util/SubstanceError'
@@ -205,9 +204,6 @@ class SnapshotEngine {
       })
     })
   }
-
 }
-
-oo.initClass(SnapshotEngine)
 
 export default SnapshotEngine

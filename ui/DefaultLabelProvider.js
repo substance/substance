@@ -1,5 +1,3 @@
-import oo from '../util/oo'
-
 /**
  Default label provider implementation
 */
@@ -16,7 +14,5 @@ class LabelProvider {
     return labels[name] || name
   }
 }
-
-oo.initClass(LabelProvider)
 
 export default LabelProvider
