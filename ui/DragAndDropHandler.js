@@ -18,6 +18,4 @@ class DragAndDropHandler {
 
 }
 
-DragAndDropHandler.prototype._isDragAndDropHandler = true
-
 export default DragAndDropHandler
