@@ -2,7 +2,7 @@ import forEach from 'lodash/forEach'
 
 // just as a reference to detect name collisions
 // with native Object properties
-var _obj = {}
+let _obj = {}
 
 /*
  * Simple registry implementation.
@@ -66,7 +66,7 @@ class Registry {
    * @memberof module:Basics.Registry.prototype
    */
   remove(name) {
-    var pos = this.names.indexOf(name)
+    let pos = this.names.indexOf(name)
     if (pos >= 0) {
       this.names.splice(pos, 1)
     }
@@ -106,9 +106,9 @@ class Registry {
   }
 
   forEach(callback) {
-    for (var i = 0; i < this.names.length; i++) {
-      var name = this.names[i]
-      var _continue = callback(this.entries[name], name)
+    for (let i = 0; i < this.names.length; i++) {
+      let name = this.names[i]
+      let _continue = callback(this.entries[name], name)
       if (_continue === false) {
         break
       }
@@ -116,7 +116,7 @@ class Registry {
   }
 
   map(callback) {
-    var result = []
+    let result = []
     this.forEach(function(entry, name) {
       result.push(callback(entry, name))
     })
@@ -124,7 +124,7 @@ class Registry {
   }
 
   filter(callback) {
-    var result = []
+    let result = []
     this.forEach(function(entry, name) {
       if (callback(entry, name)) {
         result.push(entry)

@@ -48,14 +48,18 @@ class StubDoc {
     return result
   }
 
+  createSelection() {
+    return Document.prototype.createSelection.apply(this, arguments)
+  }
+
   on() {}
+
   off() {}
 }
 
-StubDoc.prototype.createSelection = Document.prototype.createSelection
-
 
 class StubSurface {
+
   constructor(el, containerId) {
     this.el = el
     this.doc = new StubDoc(el)
@@ -91,13 +95,19 @@ class StubSurface {
   }
 }
 
+class StubTextPropertyComponent {
 
-function StubTextPropertyComponent(el) {
-  this.el = el
+  constructor(el) {
+    this.el = el
+  }
 
-  this.getDOMCoordinate = TextPropertyComponent.prototype.getDOMCoordinate
+  getDOMCoordinate() {
+    return TextPropertyComponent.prototype.getDOMCoordinate.apply(this, arguments)
+  }
 
-  this._getDOMCoordinate = TextPropertyComponent.prototype._getDOMCoordinate
+  _getDOMCoordinate() {
+    return TextPropertyComponent.prototype._getDOMCoordinate.apply(this, arguments)
+  }
 }
 
 // Fixtures
