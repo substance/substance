@@ -100,8 +100,4 @@ class CommandManager {
 
 }
 
-<<<<<<< HEAD
-
-=======
->>>>>>> Removed obsolete usages of oo
 export default CommandManager
