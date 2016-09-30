@@ -1,8 +1,8 @@
-import oo from '../util/oo'
 import JSONConverter from '../model/JSONConverter'
-let converter = new JSONConverter()
 import each from 'lodash/each'
 import Err from '../util/SubstanceError'
+
+let converter = new JSONConverter()
 
 /**
   API for creating and retrieving snapshots of documents
@@ -204,9 +204,6 @@ class SnapshotEngine {
       })
     })
   }
-
 }
-
-oo.initClass(SnapshotEngine)
 
 export default SnapshotEngine

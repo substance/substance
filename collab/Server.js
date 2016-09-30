@@ -1,6 +1,5 @@
 /* global WeakMap */
 
-import oo from '../util/oo'
 import uuid from '../util/uuid'
 import EventEmitter from '../util/EventEmitter'
 
@@ -341,7 +340,6 @@ class ServerRequest {
   }
 }
 
-oo.initClass(ServerRequest)
 
 /*
   ServerResponse
@@ -392,7 +390,5 @@ class ServerResponse {
     this.isSent = true
   }
 }
-
-oo.initClass(ServerResponse)
 
 export default Server

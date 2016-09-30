@@ -1,4 +1,3 @@
-import oo from '../util/oo'
 import Err from '../util/SubstanceError'
 
 /*
@@ -129,7 +128,5 @@ class SnapshotStore {
   }
 
 }
-
-oo.initClass(SnapshotStore)
 
 export default SnapshotStore

@@ -1,17 +1,13 @@
-'use strict';
-
-import oo from '../util/oo'
 import Err from '../util/SubstanceError'
 
 /*
   Implements Substance ChangeStore API. This is just a dumb store.
   No integrity checks are made, as this is the task of DocumentEngine
 */
-function ChangeStore(config) {
-  this.config = config;
-}
-
-ChangeStore.Prototype = function() {
+class ChangeStore {
+  constructor(config) {
+    this.config = config;
+  }
 
   /*
     Gets changes for a given document
@@ -19,7 +15,7 @@ ChangeStore.Prototype = function() {
     @param {String} args.documentId document id
     @param {Number} args.sinceVersion since which change
   */
-  this.getChanges = function(args, cb) {
+  getChanges(args, cb) {
     var changes = this._getChanges(args.documentId);
 
     // sinceVersion is optional
@@ -62,12 +58,12 @@ ChangeStore.Prototype = function() {
       };
       cb(null, res);
     }
-  };
+  }
 
   /*
     Add a change object to the database
   */
-  this.addChange = function(args, cb) {
+  addChange(args, cb) {
     if (!args.documentId) {
       return cb(new Err('ChangeStore.CreateError', {
         message: 'No documentId provided'
@@ -83,58 +79,56 @@ ChangeStore.Prototype = function() {
     this._addChange(args.documentId, args.change);
     var newVersion = this._getVersion(args.documentId);
     cb(null, newVersion);
-  };
+  }
 
   /*
     Delete changes for a given documentId
   */
-  this.deleteChanges = function(documentId, cb) {
+  deleteChanges(documentId, cb) {
     var deletedChanges = this._deleteChanges(documentId);
     cb(null, deletedChanges.length);
-  };
+  }
 
   /*
     Gets the version number for a document
   */
-  this.getVersion = function(id, cb) {
+  getVersion(id, cb) {
     cb(null, this._getVersion(id));
-  };
+  }
 
   /*
     Seeds the database with given changes
   */
-  this.seed = function(changes, cb) {
+  seed(changes, cb) {
     this._changes = changes;
     if (cb) { cb(null); }
     return this;
-  };
+  }
 
   // Handy synchronous helpers
   // -------------------------
 
-  this._deleteChanges = function(documentId) {
+  _deleteChanges(documentId) {
     var changes = this._getChanges(documentId);
     delete this._changes[documentId];
     return changes;
-  };
+  }
 
-  this._getVersion = function(documentId) {
+  _getVersion(documentId) {
     var changes = this._changes[documentId];
     return changes ? changes.length : 0;
-  };
+  }
 
-  this._getChanges = function(documentId) {
+  _getChanges(documentId) {
     return this._changes[documentId] || [];
-  };
+  }
 
-  this._addChange = function(documentId, change) {
+  _addChange(documentId, change) {
     if (!this._changes[documentId]) {
       this._changes[documentId] = [];
     }
     this._changes[documentId].push(change);
-  };
-};
-
-oo.initClass(ChangeStore);
+  }
+}
 
 export default ChangeStore;

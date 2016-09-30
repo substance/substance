@@ -8,20 +8,23 @@ export default function setupContainerEditor(fixture, el) {
   var doc = createTestArticle(fixture)
   var docSession = new DocumentSession(doc)
   var componentRegistry = createTestComponentRegistry()
-  var App = Component.extend({
-    getChildContext: function() {
+
+  class App extends Component {
+    getChildContext() {
       return {
         documentSession: docSession,
         document: doc,
         componentRegistry: componentRegistry
       }
-    },
-    render: function($$) {
+    }
+
+    render($$) {
       return $$('div').append($$(ContainerEditor, {
         node: doc.get('body')
       }).ref('editor'))
-    },
-  })
+    }
+  }
+
   var app
   if (el) {
     app = App.mount(el)

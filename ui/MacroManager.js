@@ -1,5 +1,3 @@
-import oo from '../util/oo'
-
 class MacroManager {
   constructor(context, macros) {
     this.context = context
@@ -49,7 +47,5 @@ class MacroManager {
     }
   }
 }
-
-oo.initClass(MacroManager)
 
 export default MacroManager

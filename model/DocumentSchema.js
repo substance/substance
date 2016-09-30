@@ -14,19 +14,16 @@ import ContainerAnnotation from './ContainerAnnotation'
   @example
 
   ```js
-  import Paragraph from 'substance/packages/paragraph/Paragraph'
-  import Emphasis from 'substance/packages/emphasis/Emphasis'
-  import Strong from 'substance/packages/emphasis/Strong'
-  import PropertyAnnotation from 'substance/ui/PropertyAnnotation'
+  import { PropertyAnnotation, Strong, Emphasis, Paragraph } from 'substance'
 
-  var Comment = PropertyAnnotation.extend({
-    name: 'comment',
-    properties: {
-      content: 'string'
-    }
+  class Comment extends PropertyAnnotation {}
+
+  Comment.define({
+    type: 'comment',
+    content: 'string'
   })
 
-  var schema = new Document.Schema('my-article', '1.0.0')
+  let schema = new Document.Schema('my-article')
   schema.getDefaultTextType = function() {
     return 'paragraph'
   }

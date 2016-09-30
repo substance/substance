@@ -36,21 +36,13 @@ var __id__ = 0
   @example
 
   ```js
-  import Document from 'substance/model/Document'
-  import articleSchema from './myArticleSchema'
-  var Article = function() {
-    Article.super.call(articleSchema)
+  import { Document } from 'substance'
 
-    // We set up a container that holds references to
-    // block nodes (e.g. paragraphs and figures)
-    this.create({
-      type: "container",
-      id: "body",
-      nodes: []
-    })
+  class MyArticle extends Document
+    foo() {
+
+    }
   }
-
-  Document.extend(Article)
   ```
 */
 

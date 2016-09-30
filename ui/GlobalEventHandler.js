@@ -7,7 +7,6 @@
   This implementation is just a prototype and might change with the next releases.
 */
 
-import oo from '../util/oo'
 import inBrowser from '../util/inBrowser'
 import DefaultDOMElement from './DefaultDOMElement'
 import DOMElement from './DOMElement'
@@ -88,7 +87,5 @@ class GlobalEventHandler {
 
 GlobalEventHandler.prototype.on = DOMElement.prototype.on
 GlobalEventHandler.prototype.off = DOMElement.prototype.off
-
-oo.initClass(GlobalEventHandler)
 
 export default GlobalEventHandler

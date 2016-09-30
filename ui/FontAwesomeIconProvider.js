@@ -1,5 +1,4 @@
 import forEach from 'lodash/forEach'
-import oo from '../util/oo'
 import Icon from './FontAwesomeIcon'
 
 class FontAwesomeIconProvider {
@@ -24,7 +23,5 @@ class FontAwesomeIconProvider {
     this.map[name] = faClass
   }
 }
-
-oo.initClass(FontAwesomeIconProvider)
 
 export default FontAwesomeIconProvider
