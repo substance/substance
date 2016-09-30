@@ -1,5 +1,3 @@
-'use strict';
-
 import oo from '../util/oo'
 import Err from '../util/SubstanceError'
 
