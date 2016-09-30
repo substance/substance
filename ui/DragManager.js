@@ -2,6 +2,7 @@ import DefaultDOMElement from './DefaultDOMElement'
 import Component from './Component'
 
 class DragManager {
+
   constructor(dndHandlers, context) {
     this.context = context
     this.dndHandlers = dndHandlers

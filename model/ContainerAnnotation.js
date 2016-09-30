@@ -181,7 +181,7 @@ class ContainerAnnotationAnchor extends Anchor {
 
 }
 
-Object.assign(ContainerAnnotationAnchor.prototype, EventEmitter.prototype)
+EventEmitter.mixin(ContainerAnnotationAnchor)
 
 Object.defineProperties(ContainerAnnotationAnchor.prototype, {
   path: {

@@ -20,6 +20,7 @@ import IsolatedNodeComponent from '../packages/isolated-node/IsolatedNodeCompone
  * @param {Element} rootElement
  */
 class DOMSelection {
+
   constructor(surface) {
     this.surface = surface
     this._wrange = window.document.createRange()

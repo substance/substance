@@ -8,6 +8,7 @@ import EventEmitter from '../util/EventEmitter'
 import DOMElement from './DOMElement'
 
 class CheerioDOMElement extends DOMElement {
+
   constructor(el) {
     super()
     EventEmitter.call(this)
@@ -19,7 +20,7 @@ class CheerioDOMElement extends DOMElement {
   }
 
   get _isCheerioDOMElement() {
-    return true 
+    return true
   }
 
   getNativeElement() {
@@ -442,7 +443,7 @@ class CheerioDOMElement extends DOMElement {
 
 }
 
-extend(CheerioDOMElement.prototype, EventEmitter.prototype)
+EventEmitter.mixin(CheerioDOMElement)
 
 DOMElement._defineProperties(CheerioDOMElement, DOMElement._propertyNames);
 

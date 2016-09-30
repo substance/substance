@@ -9,6 +9,7 @@ import Registry from '../util/Registry'
   @class
 */
 class CommandManager {
+
   constructor(context, commands) {
     if (!context.documentSession) {
       throw new Error('DocumentSession required.')
@@ -98,6 +99,5 @@ class CommandManager {
   }
 
 }
-
 
 export default CommandManager

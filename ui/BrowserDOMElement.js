@@ -4,6 +4,7 @@ import DOMElement from './DOMElement'
 import DelegatedEvent from './DelegatedEvent'
 
 class BrowserDOMElement extends DOMElement {
+
   constructor(el) {
     super()
     console.assert(el instanceof window.Node, "Expecting native DOM node.")

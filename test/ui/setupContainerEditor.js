@@ -5,9 +5,10 @@ import createTestArticle from '../fixtures/createTestArticle'
 import createTestComponentRegistry from '../fixtures/createTestComponentRegistry'
 
 export default function setupContainerEditor(fixture, el) {
-  var doc = createTestArticle(fixture)
-  var docSession = new DocumentSession(doc)
-  var componentRegistry = createTestComponentRegistry()
+
+  const doc = createTestArticle(fixture)
+  const docSession = new DocumentSession(doc)
+  const componentRegistry = createTestComponentRegistry()
 
   class App extends Component {
     getChildContext() {
@@ -25,7 +26,7 @@ export default function setupContainerEditor(fixture, el) {
     }
   }
 
-  var app
+  let app
   if (el) {
     app = App.mount(el)
   } else {

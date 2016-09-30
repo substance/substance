@@ -1,4 +1,5 @@
 class MacroManager {
+
   constructor(context, macros) {
     this.context = context
     this.macros = macros

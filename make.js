@@ -1,6 +1,5 @@
 var b = require('substance-bundler');
 var fs = require('fs')
-var docgen = require('substance-docgen');
 var docgenConfig = require('./.docgenrc')
 
 b.task('clean', function() {
@@ -114,6 +113,7 @@ b.task('npm:copy:css', function() {
 });
 
 b.task('npm:docs', function() {
+  var docgen = require('substance-docgen');
   b.copy('node_modules/substance-docgen/dist', NPM+'doc')
   b.custom('Generating API docs...', {
     dest: NPM+'doc/docs.js',
@@ -153,7 +153,5 @@ b.task('default', ['build'])
 
 // starts a server when CLI argument '-s' is set
 b.setServerPort(5550)
-b.serve({
-  static: true, route: '/', folder: 'dist',
-  static: true, route: '/test/', folder: '.test'
-})
+b.serve({ static: true, route: '/', folder: 'dist' })
+b.serve({ static: true, route: '/test/', folder: '.test' })
