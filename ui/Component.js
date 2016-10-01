@@ -12,19 +12,39 @@ import inBrowser from '../util/inBrowser'
 var __id__ = 0
 
 /**
-  A light-weight component implementation inspired by React and Ember. In contrast to the
-  large frameworks it does much less things automagically in favour of synchronous
-  rendering and a minimalistic life-cycle. It also provides *up-tree*
-  communication and *dependency injection*.
-  Concepts:
+  A light-weight component implementation inspired by React and Ember. In
+  contrast to the large frameworks it does much less things automagically in
+  favour of synchronous rendering and a minimalistic life-cycle. It also
+  provides *up-tree* communication and *dependency injection*.
+
+  ## Why synchronous rendering?
+
+  Synchronous rendering, while it may *seem* less performant, is necessary
+  because substance must render the model, after it has changed before the next
+  change is triggered by the user.
+
+  Asynchronous rendering as it exists in react means that the UI will
+  *eventually* catch up to changes in the model. This is not acceptable in
+  substance because substance plays with contenteditable and thus, cursor
+  positions, etc are maintained in the browser's DOM. If we went the async way,
+  the cursor in the DOM would be briefly inconsistent with the cursor in the
+  model. In this brief window, changes triggered by the user would be impossible
+  to apply.
+
+  ## Concepts:
 
   - `props` are provided by a parent component.  An initial set of properties is provided
   via constructor. After that, the parent component can call `setProps` or `extendProps`
   to update these properties which triggers rerendering if the properties change.
-
+ 
   - `state` is a set of flags and values which are used to control how the component
   gets rendered given the current props. Using `setState` the component can change
-  its internal state, which leads to a rerendering if the state changes.
+  its internal state, which leads to a rerendering if the state changes. 
+  Prefer using `extendState` rather than `setState`.
+
+    Normally, a component maintains its own state. It isn't recommended that a 
+  parent pass in or update state. If you find the need for this, you should be
+  looking at `props`.
 
   - A child component with a `ref` id will be reused on rerender. All others will be
   wiped and rerender from scratch. If you want to preserve a grand-child (or lower), then
@@ -32,12 +52,28 @@ var __id__ = 0
   accessible via `this.refs[ref]`.
 
   - A component can send actions via `send` which are bubbled up through all parent
-  components until one handles it.
+  components until one handles it. A component declares that it can handle an
+  action by calling the `handleActions` method on itself in the constructor or 
+  the `didUpdate` lifecycle hook.
 
-  @class
+  ## Lifecycle hooks
+
+  The {@link ui/RenderingEngine} triggers a set of hooks for you to define behavior
+  in various stages of the rendering cycle. The names are pretty self
+  explanatory. If in doubt, please check out the method documentation below.
+
+  1. {@link ui/Component#didMount}
+  1. {@link ui/Component#didUpdate}
+  1. {@link ui/Component#dispose}
+  1. {@link ui/Component#willReceiveProps}
+  1. {@link ui/Component#willUpdateState}
+
+
+  @class Component
   @abstract
   @extends ui/DOMElement
   @implements util/EventEmitter
+  
   @example
 
   Define a component:
@@ -58,9 +94,21 @@ var __id__ = 0
   ```
   HelloMessage.mount({name: 'John'}, document.body)
   ```
-*/
+   *
+   */
+  
+/**
+ * For some reason, without this, things refuse to render in `make npm:docs`.
+ * !ATTN: @michael
+ */
 class Component extends DOMElement.Delegator {
 
+  /**
+   * @constructor
+   * @param {Component} parent The parent component
+   * @param {Object} props     Properties against which this class must
+   *                           be rendered the first time.
+   */
   constructor(parent, props) {
     super()
 
@@ -90,10 +138,35 @@ class Component extends DOMElement.Delegator {
   }
 
   /**
-    Provides the context which is delivered to every child component. Override if you want to
-    provide your own child context.
+    Provides the context which is delivered to every child component. Override
+    if you want to provide your own child context. Child context is available to
+    all components rendered from within this component's render method as
+    `this.context`.
 
-    @return object the child context
+    @example 
+
+    ```
+    class A extends Component {
+    ...
+      getChildContext() {
+        // Optional, but useful to merge super's context
+        return Object.assign({}, super.getChildContext(), {foo: 'bar'});
+      }
+
+      render($$) {
+        return $$(B)
+      }
+    }
+
+    class B extends Component {
+      render($$) {
+        // this.context.foo is available here
+      }
+    }
+    ```
+    Component
+
+    @return {Object} the child context
   */
   getChildContext() {
     return this.childContext || {}
@@ -111,12 +184,17 @@ class Component extends DOMElement.Delegator {
   /**
     Provides the parent of this component.
 
-    @return object the parent component or null if this component does not have a parent.
+    @return {Component} the parent component or null if this component does not have a parent.
   */
   getParent() {
     return this.parent
   }
 
+  /**
+   * Get the top-most Component. This the component mounted using 
+   * {@link ui/Component.mount}
+   * @return {Component} The root component
+   */
   getRoot() {
     var comp = this
     var parent = comp
@@ -338,6 +416,8 @@ class Component extends DOMElement.Delegator {
 
   /**
     Define action handlers. Call this during construction/initialization of a component.
+    @param {Object} actionHandler  An object where the keys define the handled
+        actions and the values define the handler to be invoked. 
 
     @example
 
@@ -461,7 +541,8 @@ class Component extends DOMElement.Delegator {
   }
 
   /**
-    Extends the properties of the component, without reppotentially leading to a rerender.
+    Extends the properties of the component, without necessarily leading to a
+    rerender.
 
     @param {object} an object with properties
   */
