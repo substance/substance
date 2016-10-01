@@ -13,8 +13,7 @@
   "jsnext:main": "dist/substance.es6.js",
   "scripts": {
     "test": "node test",
-    "coveralls": "gulp coverage && cat ./coverage/report/lcov.info | ./node_modules/.bin/coveralls -v",
-    "doc": "gulp doc"
+    "doc": "node make npm:docs"
   },
   "author": "",
   "license": "MIT",
