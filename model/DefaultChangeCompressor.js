@@ -1,7 +1,6 @@
 /* eslint-disable no-unused-vars */
 
 import isEqual from 'lodash/isEqual'
-import oo from '../util/oo'
 import ObjectOperation from './data/ObjectOperation'
 
 var MAXIMUM_CHANGE_DURATION = 1500

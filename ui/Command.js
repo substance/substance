@@ -1,4 +1,3 @@
-import oo from '../util/oo'
 
 /**
  Abstract interface for commands.
