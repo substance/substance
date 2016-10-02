@@ -20,12 +20,11 @@ import truncateAnnotation from '../model/transform/truncateAnnotation'
   SmallCapsCommand.nodeType = 'smallcaps'
   ```
 */
-
 class AnnotationCommand extends Command {
-  
+
   constructor(...args) {
     super(...args)
-    
+
     this.nodeType = this.params.nodeType
 
     if (!this.nodeType) {
@@ -178,21 +177,21 @@ class AnnotationCommand extends Command {
       mode: null
     }
     if (this.canCreate(annos, sel)) {
-      newState.mode = "create"
+      newState.mode = 'create'
     } else if (this.canFuse(annos, sel)) {
-      newState.mode = "fusion"
+      newState.mode = 'fuse'
     } else if (this.canTruncate(annos, sel)) {
       newState.active = true
-      newState.mode = "truncate"
+      newState.mode = 'truncate'
     } else if (this.canExpand(annos, sel)) {
-      newState.mode = "expand"
+      newState.mode = 'expand'
     } else if (this.canEdit(annos, sel)) {
-      newState.mode = "edit"
+      newState.mode = 'edit'
       newState.node = annos[0]
       newState.active = true
     } else if (this.canDelete(annos, sel)) {
       newState.active = true
-      newState.mode = "delete"
+      newState.mode = 'delete'
     } else {
       newState.disabled = true
     }
