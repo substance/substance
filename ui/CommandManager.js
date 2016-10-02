@@ -29,7 +29,14 @@ class CommandManager {
       this.commandRegistry.add(command.name, command)
     }.bind(this))
 
-    this.documentSession.on('update', this.updateCommandStates, this)
+    // Priority is needed as upateCommandStates depends on information
+    // collected by SurfaceManager (determine focusedSurface) which is
+    // also done on session update
+    // TODO: Resolve #812, so we don't need a priority here and instead
+    // can rely on registration order.
+    this.documentSession.on('update', this.updateCommandStates, this, {
+      priority: -10
+    })
 
     this.updateCommandStates()
   }
