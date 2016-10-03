@@ -2,12 +2,6 @@ import AnnotationCommand from '../../ui/AnnotationCommand'
 
 class EditLinkCommand extends AnnotationCommand {
 
-  getAnnotationData() {
-    return {
-      url: ""
-    }
-  }
-
   canCreate() {
     return false
   }
