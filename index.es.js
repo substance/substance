@@ -89,7 +89,6 @@ export { default as LinkPackage } from './packages/link/LinkPackage'
 export { default as EditLinkTool } from './packages/link/EditLinkTool'
 export { default as Link } from './packages/link/Link'
 export { default as LinkCommand } from './packages/link/LinkCommand'
-export { default as EditLinkCommand } from './packages/link/EditLinkCommand'
 export { default as LinkComponent } from './packages/link/LinkComponent'
 
 // inline-node
@@ -153,6 +152,7 @@ export { default as BlockNodeComponent } from './ui/BlockNodeComponent'
 export { default as InsertNodeCommand } from './ui/InsertNodeCommand'
 export { default as AbstractEditor } from './ui/AbstractEditor'
 export { default as AnnotationCommand } from './ui/AnnotationCommand'
+export { default as EditAnnotationCommand } from './ui/EditAnnotationCommand'
 export { default as AnnotationComponent } from './ui/AnnotationComponent'
 export { default as AnnotationTool } from './ui/AnnotationTool'
 
