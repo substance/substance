@@ -46,6 +46,11 @@ var __id__ = 0
   parent pass in or update state. If you find the need for this, you should be
   looking at `props`.
 
+    State would be useful in situations where the component itself controls some
+  aspect of rendering. Eg. whether a dropdown is open or not could be a state
+  within the dropdown component itself since no other component needs to know
+  it.
+
   - A child component with a `ref` id will be reused on rerender. All others will be
   wiped and rerender from scratch. If you want to preserve a grand-child (or lower), then
   make sure that all anchestors have a ref id. After rendering the child will be
@@ -173,9 +178,12 @@ class Component extends DOMElement.Delegator {
   }
 
   /**
-    Provide the initial component state.
+    Override this within your component to provide the initial state for the
+    component. This method is internally called by the 
+    {@link ui/RenderingEngine} and the state defined here is made available to
+    the {@link ui/Component#render} method as this.state.
 
-    @return object the initial state
+    @return {Object} the initial state
   */
   getInitialState() {
     return {}
@@ -218,10 +226,34 @@ class Component extends DOMElement.Delegator {
     return labelProvider.getLabel(name)
   }
 
-  getComponent(name) {
+  /**
+   * Get a component class for the node type provided. Use this within the
+   * render method to render children nodes.
+   * 
+   *
+   *
+   * @example
+   *
+   * ```javascript
+   * render ($$) {
+   *   var el = $$('div')
+   *     .addClass(this.getClassNames());
+   *
+   *   var caption = this.props.node.getCaption(); // some method that returns a node
+   *   var CaptionClass = this.getComponent(caption.type);
+   *   
+   *   el.append($$(CaptionClass, {node: caption}));
+   *   return el;
+   * }
+   * ```
+   *
+   * @param  {String} nodeType A node type
+   * @return {Class}           The ComponentClass
+   */
+  getComponent(nodeType) {
     var componentRegistry = this.context.componentRegistry
     if (!componentRegistry) throw new Error('Missing componentRegistry.')
-    return componentRegistry.get(name)
+    return componentRegistry.get(nodeType)
   }
 
 
@@ -234,7 +266,7 @@ class Component extends DOMElement.Delegator {
     Every Component should override this method.
 
     @param {Function} $$ method to create components
-    @return {VirtualNode} VirtualNode created using $$
+    @return {VirtualNode} VirtualNode created using {@param $$}
    */
   render($$) {
     /* istanbul ignore next */
@@ -259,11 +291,13 @@ class Component extends DOMElement.Delegator {
   }
 
   /**
-   * Determines if Component.rerender() should be run after
-   * changing props or state.
+   * Determines if Component should be rendered again using {@link ui/Component#rerender} 
+   * after changing props. For comparisons, you can use `this.props` and
+   * `newProps`.
    *
-   * The default implementation performs a deep equal check.
+   * The default implementation simply returns true.
    *
+   * @param {Object} newProps The props are being applied to this component.
    * @return a boolean indicating whether rerender() should be run.
    */
   shouldRerender(newProps) { // eslint-disable-line
@@ -337,14 +371,33 @@ class Component extends DOMElement.Delegator {
   }
 
   /**
-   * Called when the element is inserted into the DOM.
+   * Called when the element is inserted into the DOM. Typically, you can use
+   * this to set up subscriptions to changes in the document or in a node of
+   * your interest.
    *
+   * Remember to unsubscribe from all changes in the {@link ui/Component#dispose}
+   * method otherwise listeners you have attached may be called without a context.
+   *
+   * @example
+   * 
+   * ```javascript
+   * class Foo extends Component {
+   *   didMount() {
+   *     this.props.node.on('label:changed', this.rerender, this);
+   *   }
+   *
+   *   dispose() {
+   *     // unless this is done, rerender could be called for a dead, disposed
+   *     // component instance.
+   *     this.props.node.off(this);
+   *   }  
+   * }
+   * ```
+   * 
    * Node: make sure that you call `component.mount(el)` using an element
    * which is already in the DOM.
    *
-   * @example
-   *
-   * ```
+   * ```javascript
    * var component = new MyComponent()
    * component.mount($('body')[0])
    * ```
@@ -358,7 +411,7 @@ class Component extends DOMElement.Delegator {
   didUpdate() {}
 
   /**
-    @return a boolean indicating if this component has been mounted
+    @return {boolean} indicating if this component has been mounted
    */
   isMounted() {
     return this.__isMounted__
@@ -378,7 +431,10 @@ class Component extends DOMElement.Delegator {
   }
 
   /**
-    A hook which is called when the component is unmounted, i.e. removed from DOM, hence disposed
+    A hook which is called when the component is unmounted, i.e. removed from DOM,
+     hence disposed. See {@link ui/Component#didMount} for example usage.
+
+     Remember to unsubscribe all change listeners here.
    */
   dispose() {}
 
@@ -418,6 +474,10 @@ class Component extends DOMElement.Delegator {
     Define action handlers. Call this during construction/initialization of a component.
     @param {Object} actionHandler  An object where the keys define the handled
         actions and the values define the handler to be invoked. 
+
+    These handlers are automatically removed once the Component is disposed, so
+    there is no need to unsubscribe these handlers in the {@link ui/Component#dispose}
+    hook.
 
     @example
 
@@ -464,9 +524,18 @@ class Component extends DOMElement.Delegator {
   }
 
   /**
-    Sets the state of this component, potentially leading to a rerender.
+    Sets the state of this component, potentially leading to a rerender. It is 
+    better practice to use {@link ui/Component#extendState}. That way, the code
+    which updates state only updates part relevant to it.
 
-    Usually this is used by the component itself.
+    Eg. If you have a Component that has a dropdown open state flag and another
+    enabled/disabled state flag for a node in the dropdown, you want to isolate
+    the pieces of your code making the two changes. The part of your code
+    opening and closing the dropdown should not also automatically change or 
+    remove the enabled flag.
+
+    Note: Usually this is used by the component itself.
+    @param {object} newState an object with a partial update.
   */
   setState(newState) {
     var oldProps = this.props
@@ -487,7 +556,9 @@ class Component extends DOMElement.Delegator {
   }
 
   /**
-    This is similar to `setState()` but extends the existing state instead of replacing it.
+    This is similar to `setState()` but extends the existing state instead of
+    replacing it.
+
     @param {object} newState an object with a partial update.
   */
   extendState(newState) {
