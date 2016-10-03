@@ -12,37 +12,38 @@ import inBrowser from '../util/inBrowser'
 var __id__ = 0
 
 /**
-  A light-weight component implementation inspired by React and Ember. In
-  contrast to the large frameworks it does much less things automagically in
+  A light-weight component implementation inspired by
+  [React](https://facebook.github.io/react/) and [Ember](http://emberjs.com/).
+  In contrast to the large frameworks it does much less things automagically in
   favour of synchronous rendering and a minimalistic life-cycle. It also
   provides *up-tree* communication and *dependency injection*.
 
-  ## Why synchronous rendering?
+  ### Why synchronous rendering?
 
   Synchronous rendering, while it may *seem* less performant, is necessary
   because substance must render the model, after it has changed before the next
   change is triggered by the user.
 
-  Asynchronous rendering as it exists in react means that the UI will
-  *eventually* catch up to changes in the model. This is not acceptable in
+  Asynchronous rendering as it exists in React means that the UI will
+  eventually *catch* up to changes in the model. This is not acceptable in
   substance because substance plays with contenteditable and thus, cursor
   positions, etc are maintained in the browser's DOM. If we went the async way,
   the cursor in the DOM would be briefly inconsistent with the cursor in the
   model. In this brief window, changes triggered by the user would be impossible
   to apply.
 
-  ## Concepts:
+  ### Concepts:
 
   - `props` are provided by a parent component.  An initial set of properties is provided
   via constructor. After that, the parent component can call `setProps` or `extendProps`
   to update these properties which triggers rerendering if the properties change.
- 
+
   - `state` is a set of flags and values which are used to control how the component
   gets rendered given the current props. Using `setState` the component can change
-  its internal state, which leads to a rerendering if the state changes. 
+  its internal state, which leads to a rerendering if the state changes.
   Prefer using `extendState` rather than `setState`.
 
-    Normally, a component maintains its own state. It isn't recommended that a 
+    Normally, a component maintains its own state. It isn't recommended that a
   parent pass in or update state. If you find the need for this, you should be
   looking at `props`.
 
@@ -58,10 +59,10 @@ var __id__ = 0
 
   - A component can send actions via `send` which are bubbled up through all parent
   components until one handles it. A component declares that it can handle an
-  action by calling the `handleActions` method on itself in the constructor or 
+  action by calling the `handleActions` method on itself in the constructor or
   the `didUpdate` lifecycle hook.
 
-  ## Lifecycle hooks
+  ### Lifecycle hooks
 
   The {@link ui/RenderingEngine} triggers a set of hooks for you to define behavior
   in various stages of the rendering cycle. The names are pretty self
@@ -75,10 +76,11 @@ var __id__ = 0
 
 
   @class Component
+  @component
   @abstract
   @extends ui/DOMElement
   @implements util/EventEmitter
-  
+
   @example
 
   Define a component:
@@ -99,21 +101,18 @@ var __id__ = 0
   ```
   HelloMessage.mount({name: 'John'}, document.body)
   ```
-   *
-   */
-  
-/**
- * For some reason, without this, things refuse to render in `make npm:docs`.
- * !ATTN: @michael
- */
-class Component extends DOMElement.Delegator {
+*/
 
+/** INCLUDE_IN_API_DOCS */
+class Component extends DOMElement.Delegator {
   /**
-   * @constructor
-   * @param {Component} parent The parent component
-   * @param {Object} props     Properties against which this class must
-   *                           be rendered the first time.
-   */
+    Construcutor is only used internally.
+
+    @constructor
+    @param {Component} parent The parent component
+    @param {Object} props     Properties against which this class must
+                              be rendered the first time.
+  */
   constructor(parent, props) {
     super()
 
@@ -148,14 +147,14 @@ class Component extends DOMElement.Delegator {
     all components rendered from within this component's render method as
     `this.context`.
 
-    @example 
+    @example
 
     ```
     class A extends Component {
     ...
       getChildContext() {
         // Optional, but useful to merge super's context
-        return Object.assign({}, super.getChildContext(), {foo: 'bar'});
+        return Object.assign({}, super.getChildContext(), {foo: 'bar'})
       }
 
       render($$) {
@@ -179,7 +178,7 @@ class Component extends DOMElement.Delegator {
 
   /**
     Override this within your component to provide the initial state for the
-    component. This method is internally called by the 
+    component. This method is internally called by the
     {@link ui/RenderingEngine} and the state defined here is made available to
     the {@link ui/Component#render} method as this.state.
 
@@ -199,10 +198,10 @@ class Component extends DOMElement.Delegator {
   }
 
   /**
-   * Get the top-most Component. This the component mounted using 
-   * {@link ui/Component.mount}
-   * @return {Component} The root component
-   */
+    Get the top-most Component. This the component mounted using
+    {@link ui/Component.mount}
+    @return {Component} The root component
+  */
   getRoot() {
     var comp = this
     var parent = comp
@@ -217,45 +216,49 @@ class Component extends DOMElement.Delegator {
     return this.el.getNativeElement()
   }
 
-  /*
+  /**
     Short hand for using labelProvider API
+
+    @example
+
+    ```
+    render($$) {
+      let el = $$('div').addClass('sc-my-component')
+      el.append(this.getLabel('first-name'))
+      return el
+    }
+    ```
   */
   getLabel(name) {
-    var labelProvider = this.context.labelProvider
+    let labelProvider = this.context.labelProvider
     if (!labelProvider) throw new Error('Missing labelProvider.')
     return labelProvider.getLabel(name)
   }
 
   /**
-   * Get a component class for the node type provided. Use this within the
-   * render method to render children nodes.
-   * 
-   *
-   *
-   * @example
-   *
-   * ```javascript
-   * render ($$) {
-   *   var el = $$('div')
-   *     .addClass(this.getClassNames());
-   *
-   *   var caption = this.props.node.getCaption(); // some method that returns a node
-   *   var CaptionClass = this.getComponent(caption.type);
-   *   
-   *   el.append($$(CaptionClass, {node: caption}));
-   *   return el;
-   * }
-   * ```
-   *
-   * @param  {String} nodeType A node type
-   * @return {Class}           The ComponentClass
-   */
+    Get a component class for the component name provided. Use this within the
+    render method to render children nodes.
+
+    @example
+
+    ```
+    render($$) {
+      let el = $$('div').addClass('sc-my-component')
+      let caption = this.props.node.getCaption() // some method that returns a node
+      let CaptionClass = this.getComponent(caption.type)
+      el.append($$(CaptionClass, {node: caption}))
+      return el
+    }
+    ```
+
+    @param  {String} componentName The component's registration name
+    @return {Class}                The ComponentClass
+  */
   getComponent(nodeType) {
-    var componentRegistry = this.context.componentRegistry
+    let componentRegistry = this.context.componentRegistry
     if (!componentRegistry) throw new Error('Missing componentRegistry.')
     return componentRegistry.get(nodeType)
   }
-
 
   /**
     Render the component.
@@ -267,12 +270,24 @@ class Component extends DOMElement.Delegator {
 
     @param {Function} $$ method to create components
     @return {VirtualNode} VirtualNode created using {@param $$}
-   */
+  */
   render($$) {
     /* istanbul ignore next */
     return $$('div')
   }
 
+  /**
+    Mount a component to the DOM.
+
+    @example
+
+    ```
+    var app = Texture.mount({
+      configurator: configurator,
+      documentId: 'elife-15278'
+    }, document.body)
+    ```
+  */
   mount(el) {
     if (!el) {
       throw new Error('Element is required.')
@@ -291,24 +306,24 @@ class Component extends DOMElement.Delegator {
   }
 
   /**
-   * Determines if Component should be rendered again using {@link ui/Component#rerender} 
-   * after changing props. For comparisons, you can use `this.props` and
-   * `newProps`.
-   *
-   * The default implementation simply returns true.
-   *
-   * @param {Object} newProps The props are being applied to this component.
-   * @return a boolean indicating whether rerender() should be run.
-   */
+    Determines if Component should be rendered again using {@link ui/Component#rerender}
+    after changing props. For comparisons, you can use `this.props` and
+    `newProps`.
+
+    The default implementation simply returns true.
+
+    @param {Object} newProps The props are being applied to this component.
+    @return a boolean indicating whether rerender() should be run.
+  */
   shouldRerender(newProps) { // eslint-disable-line
     return true
   }
 
   /**
-   * Rerenders the component.
-   *
-   * Call this to manually trigger a rerender.
-   */
+    Rerenders the component.
+
+    Call this to manually trigger a rerender.
+  */
   rerender() {
     this._rerender(this.props, this.state)
   }
@@ -335,26 +350,26 @@ class Component extends DOMElement.Delegator {
   }
 
   /**
-   * Triggers didMount handlers recursively.
-   *
-   * Gets called when using `component.mount(el)` on an element being
-   * in the DOM already. Typically this is done for a root component.
-   *
-   * If this is not possible because you want to do things differently, make sure
-   * you call 'component.triggerDidMount()' on root components.
-   *
-   * @param isMounted an optional param for optimization, it's used mainly internally
-   * @private
-   * @example
-   *
-   * ```
-   * var frag = document.createDocumentFragment()
-   * var comp = MyComponent.mount(frag)
-   * ...
-   * $('body').append(frag)
-   * comp.triggerDidMount()
-   * ```
-   */
+    Triggers didMount handlers recursively.
+
+    Gets called when using `component.mount(el)` on an element being
+    in the DOM already. Typically this is done for a root component.
+
+    If this is not possible because you want to do things differently, make sure
+    you call 'component.triggerDidMount()' on root components.
+
+    @param isMounted an optional param for optimization, it's used mainly internally
+    @private
+    @example
+
+    ```
+    var frag = document.createDocumentFragment()
+    var comp = MyComponent.mount(frag)
+    ...
+    $('body').append(frag)
+    comp.triggerDidMount()
+    ```
+  */
   triggerDidMount() {
     // Trigger didMount for the children first
     this.getChildren().forEach(function(child) {
@@ -371,42 +386,42 @@ class Component extends DOMElement.Delegator {
   }
 
   /**
-   * Called when the element is inserted into the DOM. Typically, you can use
-   * this to set up subscriptions to changes in the document or in a node of
-   * your interest.
-   *
-   * Remember to unsubscribe from all changes in the {@link ui/Component#dispose}
-   * method otherwise listeners you have attached may be called without a context.
-   *
-   * @example
-   * 
-   * ```javascript
-   * class Foo extends Component {
-   *   didMount() {
-   *     this.props.node.on('label:changed', this.rerender, this);
-   *   }
-   *
-   *   dispose() {
-   *     // unless this is done, rerender could be called for a dead, disposed
-   *     // component instance.
-   *     this.props.node.off(this);
-   *   }  
-   * }
-   * ```
-   * 
-   * Node: make sure that you call `component.mount(el)` using an element
-   * which is already in the DOM.
-   *
-   * ```javascript
-   * var component = new MyComponent()
-   * component.mount($('body')[0])
-   * ```
-   */
+    Called when the element is inserted into the DOM. Typically, you can use
+    this to set up subscriptions to changes in the document or in a node of
+    your interest.
+
+    Remember to unsubscribe from all changes in the {@link ui/Component#dispose}
+    method otherwise listeners you have attached may be called without a context.
+
+    @example
+
+    ```javascript
+    class Foo extends Component {
+      didMount() {
+        this.props.node.on('label:changed', this.rerender, this)
+      }
+
+      dispose() {
+        // unless this is done, rerender could be called for a dead, disposed
+        // component instance.
+        this.props.node.off(this)
+      }
+    }
+    ```
+
+    Make sure that you call `component.mount(el)` using an element
+    which is already in the DOM.
+
+    ```javascript
+    var component = new MyComponent()
+    component.mount($('body')[0])
+    ```
+  */
   didMount() {}
 
-
   /**
-    Hook which is called after each rerender.
+    Hook which is called after state or props have been updated and the implied
+    rerender is completed.
   */
   didUpdate() {}
 
@@ -418,10 +433,10 @@ class Component extends DOMElement.Delegator {
   }
 
   /**
-   * Triggers dispose handlers recursively.
-   *
-   * @private
-   */
+   Triggers dispose handlers recursively.
+
+   @private
+  */
   triggerDispose() {
     this.getChildren().forEach(function(child) {
       child.triggerDispose()
@@ -432,10 +447,10 @@ class Component extends DOMElement.Delegator {
 
   /**
     A hook which is called when the component is unmounted, i.e. removed from DOM,
-     hence disposed. See {@link ui/Component#didMount} for example usage.
+    hence disposed. See {@link ui/Component#didMount} for example usage.
 
-     Remember to unsubscribe all change listeners here.
-   */
+    Remember to unsubscribe all change listeners here.
+  */
   dispose() {}
 
   /*
@@ -473,7 +488,7 @@ class Component extends DOMElement.Delegator {
   /**
     Define action handlers. Call this during construction/initialization of a component.
     @param {Object} actionHandler  An object where the keys define the handled
-        actions and the values define the handler to be invoked. 
+        actions and the values define the handler to be invoked.
 
     These handlers are automatically removed once the Component is disposed, so
     there is no need to unsubscribe these handlers in the {@link ui/Component#dispose}
@@ -524,14 +539,14 @@ class Component extends DOMElement.Delegator {
   }
 
   /**
-    Sets the state of this component, potentially leading to a rerender. It is 
+    Sets the state of this component, potentially leading to a rerender. It is
     better practice to use {@link ui/Component#extendState}. That way, the code
     which updates state only updates part relevant to it.
 
     Eg. If you have a Component that has a dropdown open state flag and another
     enabled/disabled state flag for a node in the dropdown, you want to isolate
     the pieces of your code making the two changes. The part of your code
-    opening and closing the dropdown should not also automatically change or 
+    opening and closing the dropdown should not also automatically change or
     remove the enabled flag.
 
     Note: Usually this is used by the component itself.
@@ -833,7 +848,7 @@ function _unwrapCompStrict(el) {
   return _unwrapComp(el)
 }
 
-function notNull(n) { return n; }
+function notNull(n) { return n }
 
 
 class ElementComponent extends Component {
