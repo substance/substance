@@ -13,9 +13,10 @@ import ClipboardExporter from './ClipboardExporter'
 
   For inter-application copy'n'paste, the ClipboardImporter and ClipboardExporter is used.
 
-  @class Clipboard
+  @internal
 */
 class Clipboard {
+
   constructor(surface, config) {
     this.surface = surface
     let doc = surface.getDocument()

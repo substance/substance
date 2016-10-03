@@ -4,6 +4,8 @@ import JSONConverter from '../model/JSONConverter'
 
 /**
   Export HTML from clipboard. Used for inter-application copy'n'paste.
+
+  @internal
 */
 class ClipboardExporter extends HtmlExporter {
 

@@ -9,22 +9,14 @@ import TextOperation from './TextOperation'
 /**
   Incremental data storage implemention.
 
-  @class IncrementalData
-  @extends model/data/Data
-  @private
+  @internal
  */
-
-/**
-  @constructor
-  @param {Schema} schema
-  @param {Object} [options]
-*/
 class IncrementalData extends Data {
 
   /**
     Create a new node.
 
-    @param {Object} nodeData
+    @param {object} nodeData
     @returns {ObjectOperation} The applied operation.
    */
   create(nodeData) {
@@ -61,8 +53,8 @@ class IncrementalData extends Data {
         - `{ insert: { offset: Number, value: Object } }`
         - `{ delete: { offset: Number } }`
 
-    @param {Array} path
-    @param {Object} diff
+    @param {array} path
+    @param {object} diff
     @returns {ObjectOperation} The applied operation.
   */
   update(path, diff) {
@@ -130,7 +122,6 @@ class IncrementalData extends Data {
     @param {Array} path
     @param {Object} diff
     @returns {ObjectOperation} operation.
-
     @private
   */
   _getDiffOp(path, diff) {

@@ -1,5 +1,5 @@
 import isArray from 'lodash/isArray'
-import each from 'lodash/each'
+import forEach from 'lodash/forEach'
 
 class JSONConverter {
 
@@ -20,7 +20,7 @@ class JSONConverter {
     // as the data contains cyclic references which
     // cause problems.
     doc.import(function(tx) {
-      each(nodes, function(node) {
+      forEach(nodes, function(node) {
         // overwrite existing nodes
         if (tx.get(node.id)) {
           tx.delete(node.id)
@@ -40,7 +40,7 @@ class JSONConverter {
       },
       nodes: []
     }
-    each(doc.getNodes(), function(node) {
+    forEach(doc.getNodes(), function(node) {
       if (node._isDocumentNode) {
         json.nodes.push(node.toJSON())
       }

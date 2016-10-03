@@ -10,6 +10,8 @@ import platform from '../util/platform'
 
 /**
   Import HTML from clipboard. Used for inter-application copy'n'paste.
+
+  @internal
 */
 class ClipboardImporter extends HTMLImporter {
 

@@ -91,7 +91,6 @@ class ScrollPane extends Component {
     }
 
     if (this.props.overlay) {
-      let componentRegistry = this.context.componentRegistry
       // TODO: rework this. ATM we have a component `ui/Overlay`
       // which does the positioning and gets a prop `overlay` being
       // the actual, custom component to render the content.
@@ -216,16 +215,25 @@ class ScrollPane extends Component {
 
     @param {String} componentId component id, must be present in data-id attribute
   */
-  scrollTo(componentId) {
+  scrollTo(componentId, onlyIfNotVisible) {
     let scrollableEl = this.getScrollableElement()
     let targetNode = scrollableEl.find('*[data-id="'+componentId+'"]')
     if (targetNode) {
-      let offset = this.getPanelOffsetForElement(targetNode)
-      scrollableEl.setProperty('scrollTop', offset)
+      const offset = this.getPanelOffsetForElement(targetNode)
+      let shouldScroll = true
+      if (onlyIfNotVisible) {
+        const height = scrollableEl.height
+        const oldOffset = scrollableEl.getProperty('scrollTop')
+        shouldScroll = (offset < oldOffset || oldOffset+height<offset)
+      }
+      if (shouldScroll) {
+        scrollableEl.setProperty('scrollTop', offset)
+      }
     } else {
       console.warn(componentId, 'not found in scrollable container')
     }
   }
+
 }
 
 export default ScrollPane

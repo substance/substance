@@ -7,23 +7,17 @@ import DataObject from './DataObject'
 import NodeFactory from './NodeFactory'
 
 /**
-  A data storage implemention that supports data defined via a {@link model/data/Schema},
+  A data storage implemention that supports data defined via a {@link Schema},
   and incremental updates which are backed by a OT library.
 
-  It forms the underlying implementation for {@link model/Document}.
-
-  @private
-  @class Data
-  @extends util/EventEmitter
+  It forms the underlying implementation for {@link Document}.
  */
-
-/**
-  @constructor
-  @param {Schema} schema
-  @param {Object} [options]
-*/
 class Data extends EventEmitter {
 
+  /**
+    @param {Schema} schema
+    @param {Object} [options]
+  */
   constructor(schema, options) {
     super()
 
@@ -44,7 +38,7 @@ class Data extends EventEmitter {
   /**
     Check if this storage contains a node with given id.
 
-    @returns {Boolean} `true` if a node with id exists, `false` otherwise.
+    @returns {bool} `true` if a node with id exists, `false` otherwise.
    */
   contains(id) {
     return Boolean(this.nodes[id])
@@ -169,14 +163,9 @@ class Data extends EventEmitter {
   /**
     Update a property incrementally.
 
-    DEPRECATED: this will be replaced in Beta 3 with a more intuitive API.
-
     @param {Array} property path
     @param {Object} diff
     @returns {any} The value before applying the update.
-
-    @deprecated
-
   */
   update(path, diff) {
     // TODO: do we really want this incremental implementation here?
@@ -238,14 +227,11 @@ class Data extends EventEmitter {
     return oldValue
   }
 
-  /**
-    Convert to JSON.
-
+  /*
     DEPRECATED: We moved away from having JSON as first-class exchange format.
     We will remove this soon.
 
-    @private
-    @returns {Object} Plain content.
+    @internal
     @deprecated
    */
   toJSON() {
@@ -258,7 +244,7 @@ class Data extends EventEmitter {
   /**
     Clear nodes.
 
-    @private
+    @internal
    */
   reset() {
     this.nodes.clear()
@@ -308,6 +294,8 @@ class Data extends EventEmitter {
 
   /**
     Stops indexing process, all changes will be collected in indexing queue.
+
+    @private
   */
   _stopIndexing() {
     this.__QUEUE_INDEXING__ = true
@@ -315,6 +303,8 @@ class Data extends EventEmitter {
 
   /**
     Update all index changes from indexing queue.
+
+    @private
   */
   _startIndexing() {
     this.__QUEUE_INDEXING__ = false

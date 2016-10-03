@@ -1,25 +1,25 @@
-'use strict';
-
 import isString from 'lodash/isString'
 import filter from 'lodash/filter'
 import DocumentIndex from './DocumentIndex'
 import Selection from './Selection'
 
 /**
+  Some helpers for working with Documents.
+
   @module
   @example
 
   ```js
-  import documentHelpers from 'substance/model/documentHelpers'
+  import { documentHelpers } from 'substance'
   documentHelpers.isContainerAnnotation(doc, 'comment')
   ```
 */
-var documentHelpers = {};
+const documentHelpers = {};
 
 /**
-  @param {model/Document} doc
+  @param {Document} doc
   @param {String} type
-  @return {Boolean} `true` if given type is a {@link model/ContainerAnnotation}
+  @return {Boolean} `true` if given type is a {@link ContainerAnnotation}
 */
 documentHelpers.isContainerAnnotation = function(doc, type) {
   var schema = doc.getSchema();
@@ -29,9 +29,9 @@ documentHelpers.isContainerAnnotation = function(doc, type) {
 /**
   For a given selection get all property annotations
 
-  @param {model/Document} doc
-  @param {model/Selection} sel
-  @return {model/PropertyAnnotation[]} An array of property annotations.
+  @param {Document} doc
+  @param {Selection} sel
+  @return {PropertyAnnotation[]} An array of property annotations.
           Returns an empty array when selection is a container selection.
 */
 documentHelpers.getPropertyAnnotationsForSelection = function(doc, sel, options) {
@@ -49,8 +49,8 @@ documentHelpers.getPropertyAnnotationsForSelection = function(doc, sel, options)
 /**
   For a given selection get all container annotations
 
-  @param {model/Document} doc
-  @param {model/Selection} sel
+  @param {Document} doc
+  @param {Selection} sel
   @param {String} containerId
   @param {String} options.type provides only annotations of that type
   @return {Array} An array of container annotations
@@ -76,10 +76,10 @@ documentHelpers.getContainerAnnotationsForSelection = function(doc, sel, contain
   For a given selection, get annotations of a certain type
 
   @param {Document} doc
-  @param {Document.Selection} sel
-  @param {String} annotationType
-  @param {String} containerId (only needed when type is a container annotation)
-  @return {Array} all matching annotations
+  @param {Selection} sel
+  @param {string} annotationType
+  @param {string} containerId (only needed when type is a container annotation)
+  @return {array} all matching annotations
 */
 documentHelpers.getAnnotationsForSelection = function(doc, sel, annotationType, containerId) {
   var annos;
@@ -100,10 +100,9 @@ documentHelpers.getAnnotationsForSelection = function(doc, sel, annotationType, 
   For a given selection, get the corresponding text string
 
   @param {Document} doc
-  @param {model/Selection} sel
-  @return {String} text enclosed by the annotation
+  @param {Selection} sel
+  @return {string} text enclosed by the annotation
 */
-
 documentHelpers.getTextForSelection = function(doc, sel) {
   var text;
   if (!sel || sel.isNull()) {

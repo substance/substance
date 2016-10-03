@@ -7,18 +7,15 @@ import TreeIndex from '../../util/TreeIndex'
 
   Node indexes are first-class citizens in {@link model/data/Data}.
   I.e., they are updated after each operation, and before any other listener is notified.
-
-  @class
-  @abstract
  */
 class NodeIndex {
 
   constructor() {
     /**
-     * Internal storage.
-     *
-     * @property {TreeIndex} index
-     * @private
+      Internal storage.
+
+      @property {TreeIndex} index
+      @private
      */
     this.index = new TreeIndex()
 
@@ -26,42 +23,42 @@ class NodeIndex {
   }
 
   /**
-   * Get all indexed nodes for a given path.
-   *
-   * @param {Array<String>} path
-   * @returns A node or an object with ids and nodes as values.
+    Get all indexed nodes for a given path.
+
+    @param {Array<String>} path
+    @returns A node or an object with ids and nodes as values.
    */
   get(path) {
     return this.index.get(path) || {}
   }
 
   /**
-   * Collects nodes recursively.
-   *
-   * @returns An object with ids as keys and nodes as values.
+    Collects nodes recursively.
+
+    @returns An object with ids as keys and nodes as values.
    */
   getAll(path) {
     return this.index.getAll(path)
   }
 
   /**
-   * The property used for indexing.
-   *
-   * @private
-   * @type {String}
+    The property used for indexing.
+
+    @private
+    @type {String}
    */
   get property() { return this._property }
 
   set property(p) { this._property = p }
 
   /**
-   * Check if a node should be indexed.
-   *
-   * Used internally only. Override this in subclasses to achieve a custom behavior.
-   *
-   * @private
-   * @param {model/data/Node}
-   * @returns {Boolean} true if the given node should be added to the index.
+    Check if a node should be indexed.
+
+    Used internally only. Override this in subclasses to achieve a custom behavior.
+
+    @private
+    @param {Node}
+    @returns {Boolean} true if the given node should be added to the index.
    */
   select(node) {
     if(!this.type) {
@@ -72,12 +69,12 @@ class NodeIndex {
   }
 
   /**
-   * Called when a node has been created.
-   *
-   * Override this in subclasses for customization.
-   *
-   * @private
-   * @param {model/data/Node} node
+    Called when a node has been created.
+
+    Override this in subclasses for customization.
+
+    @private
+    @param {Node} node
    */
   create(node) {
     var values = node[this.property]
@@ -108,12 +105,12 @@ class NodeIndex {
   }
 
   /**
-   * Called when a property has been updated.
-   *
-   * Override this in subclasses for customization.
-   *
-   * @private
-   * @param {model/data/Node} node
+    Called when a property has been updated.
+
+    Override this in subclasses for customization.
+
+    @private
+    @param {Node} node
    */
   update(node, path, newValue, oldValue) {
     if (!this.select(node) || path[1] !== this.property) return
@@ -138,9 +135,9 @@ class NodeIndex {
   }
 
   /**
-   * Reset the index using a Data instance.
-   *
-   * @private
+    Reset the index using a Data instance.
+
+    @private
    */
   reset(data) {
     this.index.clear()
@@ -148,9 +145,9 @@ class NodeIndex {
   }
 
   /**
-   * Clone this index.
-   *
-   * @return A cloned NodeIndex.
+    Clone this index.
+
+    @return A cloned NodeIndex.
    */
   clone() {
     var NodeIndexClass = this.constructor
@@ -169,11 +166,10 @@ class NodeIndex {
 }
 
 /**
- * Create a new NodeIndex using the given prototype as mixin.
- *
- * @param {Object} prototype
- * @static
- * @returns {model/data/NodeIndex} A customized NodeIndex.
+  Create a new NodeIndex using the given prototype as mixin.
+
+  @param {Object} prototype
+  @returns {NodeIndex} A customized NodeIndex.
  */
 NodeIndex.create = function(prototype) {
   var index = Object.assign(new NodeIndex(), prototype)
@@ -183,6 +179,12 @@ NodeIndex.create = function(prototype) {
   return index
 }
 
+/**
+  Create a filter to filter nodes by type.
+
+  @param {String} type
+  @returns {function}
+ */
 NodeIndex.filterByType = function(type) {
   return function(node) {
     return node.isInstanceOf(type)

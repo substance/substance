@@ -144,8 +144,7 @@ ContainerAnnotation.define({
 ContainerAnnotation.isContainerAnnotation = true
 
 /**
-  @class
-  @private
+  @internal
 */
 class ContainerAnnotationAnchor extends Anchor {
 
@@ -191,8 +190,7 @@ Object.defineProperties(ContainerAnnotationAnchor.prototype, {
 })
 
 /**
-  @class
-  @private
+  @internal
 */
 class ContainerAnnotationFragment extends EventEmitter {
 
