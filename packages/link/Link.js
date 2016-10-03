@@ -6,7 +6,7 @@ class Link extends PropertyAnnotation {}
 Link.define({
   type: "link",
   title: { type: 'string', optional: true },
-  url: { type: 'string', 'default': 'http://'}
+  url: { type: 'string', 'default': ''}
 })
 
 // in presence of overlapping annotations will try to render this as one element

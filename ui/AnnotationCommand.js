@@ -25,9 +25,7 @@ class AnnotationCommand extends Command {
   constructor(...args) {
     super(...args)
 
-    this.nodeType = this.params.nodeType
-
-    if (!this.nodeType) {
+    if (!this.params.nodeType) {
       throw new Error("'nodeType' is required")
     }
   }
@@ -38,7 +36,7 @@ class AnnotationCommand extends Command {
     @returns {String} The annotation's type.
    */
   getAnnotationType() {
-    return this.nodeType
+    return this.params.nodeType
   }
 
   /**
@@ -65,11 +63,6 @@ class AnnotationCommand extends Command {
         sel.isNodeSelection() || sel.isContainerSelection()) {
       return true
     }
-    return false
-  }
-
-  // Not implemented by default
-  canEdit(annos, sel) { // eslint-disable-line
     return false
   }
 
@@ -185,10 +178,6 @@ class AnnotationCommand extends Command {
       newState.mode = 'truncate'
     } else if (this.canExpand(annos, sel)) {
       newState.mode = 'expand'
-    } else if (this.canEdit(annos, sel)) {
-      newState.mode = 'edit'
-      newState.node = annos[0]
-      newState.active = true
     } else if (this.canDelete(annos, sel)) {
       newState.active = true
       newState.mode = 'delete'
@@ -218,8 +207,6 @@ class AnnotationCommand extends Command {
         return this.executeTruncate(props, context)
       case 'expand':
         return this.executeExpand(props, context)
-      case 'edit':
-        return this.executeEdit(props, context)
       case 'delete':
         return this.executeDelete(props, context)
       default:
@@ -288,17 +275,6 @@ class AnnotationCommand extends Command {
     return {
       mode: 'expand',
       anno: anno
-    }
-  }
-
-  // TODO: do we still need this?
-  executeEdit(props, context) { // eslint-disable-line
-    let annos = this._getAnnotationsForSelection(props, context)
-    this._checkPrecondition(props, context, annos, this.canEdit)
-    return {
-      mode: "edit",
-      anno: annos[0],
-      readyOnly: true
     }
   }
 
