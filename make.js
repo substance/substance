@@ -46,7 +46,9 @@ function _server(DIST, transpileToES5) {
 }
 
 b.task('server', function() {
-  _server('./dist/', false)
+  // for the time being we transpile the cjs bundle
+  // so it works in node 4 too
+  _server('./dist/', true)
 });
 
 var TEST ='.test/'
