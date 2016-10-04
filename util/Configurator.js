@@ -117,7 +117,10 @@ class Configurator {
     if (this.config.components[name]) {
       throw new Error(name+' already registered')
     }
-    if (!ComponentClass || !ComponentClass.prototype._isComponent) {
+    if (!ComponentClass) {
+      throw new Error('Provided nil for component '+name)
+    }
+    if (!ComponentClass.prototype._isComponent) {
       throw new Error('ComponentClass must be a subclass of ui/Component.')
     }
     this.config.components[name] = ComponentClass
@@ -126,6 +129,9 @@ class Configurator {
   addCommand(name, CommandClass, options) {
     if (!isString(name)) {
       throw new Error("Expecting 'name' to be a String")
+    }
+    if (!CommandClass) {
+      throw new Error('Provided nil for command '+name)
     }
     if (!CommandClass.prototype._isCommand) {
       throw new Error("Expecting 'CommandClass' to be of type ui/Command.")
@@ -142,8 +148,11 @@ class Configurator {
     if (!isString(name)) {
       throw new Error("Expecting 'name' to be a String")
     }
-    if (!ToolClass.prototype._isTool) {
-      throw new Error("Expecting 'ToolClass' to be of type ui/Tool.")
+    if (!ToolClass) {
+      throw new Error('Provided nil for tool '+name)
+    }
+    if (!ToolClass || !ToolClass.prototype._isTool) {
+      throw new Error("Expecting 'ToolClass' to be of type ui/Tool. name:")
     }
     var toolTarget = options.target
     if (!toolTarget && options.overlay) {
