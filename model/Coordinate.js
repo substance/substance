@@ -15,6 +15,7 @@ import EventEmitter from '../util/EventEmitter'
 class Coordinate extends EventEmitter {
 
   constructor(path, offset, after) {
+    super()
     // HACK: to allow this class be inherited but without calling this ctor
     if (arguments[0] === 'SKIP') return
 
