@@ -1,19 +1,19 @@
-var b = require('substance-bundler');
+var b = require('substance-bundler')
 var fs = require('fs')
 var docgenConfig = require('./.docgenrc')
 
 b.task('clean', function() {
-  b.rm('./dist');
-});
+  b.rm('./dist')
+})
 
 function _css(DIST) {
-  b.copy('*.css', DIST);
-  b.copy('packages/**/*.css', DIST);
+  b.copy('*.css', DIST)
+  b.copy('packages/**/*.css', DIST)
 }
 
 b.task('css', function() {
   _css('dist/')
-});
+})
 
 function _browser(DIST, transpileToES5) {
   b.js('./index.es.js', {
@@ -24,7 +24,7 @@ function _browser(DIST, transpileToES5) {
       dest: DIST+'substance.js',
       format: 'umd', moduleName: 'substance', sourceMapRoot: __dirname, sourceMapPrefix: 'substance'
     }]
-  });
+  })
 }
 
 b.task('browser', function() {
@@ -43,14 +43,14 @@ function _server(DIST, transpileToES5) {
       dest: DIST+'substance.cjs.js',
       format: 'cjs', sourceMapRoot: __dirname, sourceMapPrefix: 'substance'
     }]
-  });
+  })
 }
 
 b.task('server', function() {
   // for the time being we transpile the cjs bundle
   // so it works in node 4 too
   _server('./dist/', true)
-});
+})
 
 var TEST ='.test/'
 
@@ -75,7 +75,7 @@ function _testBrowser(transpileToES5) {
     targets: [
       { dest: TEST+'tests.js', format: 'umd', moduleName: 'tests' }
     ]
-  });
+  })
 }
 
 b.task('test:browser', function() {
@@ -102,7 +102,7 @@ b.task('test:server', function() {
     targets: [
       { dest: TEST+'tests.cjs.js', format: 'cjs' },
     ]
-  });
+  })
 })
 
 var NPM = '.npm/'
@@ -113,27 +113,27 @@ b.task('npm:clean', function() {
 })
 
 b.task('npm:copy:js', function() {
-  b.copy('index.es.js', NPM);
-  b.copy('collab/*.js', NPM);
-  b.copy('model/**/*.js', NPM);
-  b.copy('packages/**/*.js', NPM);
-  b.copy('ui/*.js', NPM);
-  b.copy('util/*.js', NPM);
-});
+  b.copy('index.es.js', NPM)
+  b.copy('collab/*.js', NPM)
+  b.copy('model/**/*.js', NPM)
+  b.copy('packages/**/*.js', NPM)
+  b.copy('ui/*.js', NPM)
+  b.copy('util/*.js', NPM)
+})
 
 b.task('npm:copy:css', function() {
   _css(NPM)
   _css(NPMDIST)
-});
+})
 
 b.task('npm:docs', function() {
-  var docgen = require('substance-docgen');
+  var docgen = require('substance-docgen')
   b.copy('node_modules/substance-docgen/dist', NPM+'doc')
   b.custom('Generating API docs...', {
     dest: NPM+'doc/docs.js',
     execute: function() {
       var nodes = docgen.generate(docgenConfig)
-      fs.writeFileSync(NPM+'doc/docs.js', "window.DOCGEN_DATA = "+JSON.stringify(nodes, null, '  '));
+      fs.writeFileSync(NPM+'doc/docs.js', "window.DOCGEN_DATA = "+JSON.stringify(nodes, null, '  '))
     }
   })
 })
