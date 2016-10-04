@@ -16,7 +16,6 @@ class ToolDropdown extends Component {
         let toolProps = Object.assign({}, commandStates[name])
         toolProps.name = name
         toolProps.label = name
-        toolProps.hint = 'CTRL+4'
         toolProps.style = 'plain-dark' // plain button style on dark bg will be used
         optionEls.push($$(tool.Class, toolProps))
       })
