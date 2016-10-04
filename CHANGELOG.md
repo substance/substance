@@ -6,7 +6,8 @@
 - Extracted develoment environment into substance-bundler tool.
 - Extracted test environment into substance-test
 - Extracted API docs generator into substance-docgen
-- Improved Tool API: Simplified command and tool APIs .
+- Improved Tool API: Simplified command and tool APIs.
+- Commands are now stateless and can be parametrized in the configurator
 - Added tool targets: Determines where a tool gets rendered (e.g. in the toolbar or in an overlay)
 - Gutter support for ScrollPane: Render tools in a gutter, vertically aligned with the current selection
 - Removed experimental list and table packages: They will come back to core as soon as they are completed
