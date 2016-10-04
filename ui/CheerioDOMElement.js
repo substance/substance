@@ -11,7 +11,6 @@ class CheerioDOMElement extends DOMElement {
 
   constructor(el) {
     super()
-    EventEmitter.call(this)
 
     this.el = el
     this.$el = $(el)
