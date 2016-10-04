@@ -154,7 +154,6 @@ class ContainerAnnotationAnchor extends Anchor {
     // Note: we are not calling Anchor() as it is not useful for us
     // as we need to delegate to the annos value dynamically
     // Anchor.call(this, path, offset)
-    EventEmitter.call(this)
 
     this.type = "container-annotation-anchor"
     this.anno = anno
@@ -181,7 +180,6 @@ class ContainerAnnotationAnchor extends Anchor {
 
 }
 
-EventEmitter.mixin(ContainerAnnotationAnchor)
 
 Object.defineProperties(ContainerAnnotationAnchor.prototype, {
   path: {

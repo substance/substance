@@ -1,6 +1,7 @@
 import isArray from 'lodash/isArray'
 import isNumber from 'lodash/isNumber'
 import isEqual from 'lodash/isEqual'
+import EventEmitter from '../util/EventEmitter'
 
 // path: the address of a property, such as ['text_1', 'content']
 // offset: the position in the property
@@ -11,7 +12,7 @@ import isEqual from 'lodash/isEqual'
 //       foo <strong>bar|</strong> ...
 //     With after=true we can describe this position:
 //       foo <strong>bar</strong>| ...
-class Coordinate {
+class Coordinate extends EventEmitter {
 
   constructor(path, offset, after) {
     // HACK: to allow this class be inherited but without calling this ctor
