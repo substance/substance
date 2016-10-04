@@ -41,7 +41,7 @@ class Tool extends Component {
       this.renderButton($$)
     )
     return el
-  };
+  }
 
   renderButton($$) {
     let btn = $$(Button, {
