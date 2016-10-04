@@ -31,6 +31,7 @@ b.task('browser', function() {
   _browser('./dist/', false)
 })
 
+
 function _server(DIST, transpileToES5) {
   b.js('./index.es.js', {
     buble: transpileToES5,
@@ -63,10 +64,11 @@ b.task('test:assets', function() {
   b.copy('./node_modules/substance-test/dist/*', TEST, { root: './node_modules/substance-test/dist' })
 })
 
-b.task('test:browser', function() {
+
+function _testBrowser(transpileToES5) {
   b.js('./test/index.js', {
-    // buble necessary here, as travis has old browser versions
-    buble: true,
+
+    buble: transpileToES5,
     ignore: ['substance-cheerio'],
     external: ['substance-test'],
     commonjs: { include: ['node_modules/lodash/**'] },
@@ -74,6 +76,16 @@ b.task('test:browser', function() {
       { dest: TEST+'tests.js', format: 'umd', moduleName: 'tests' }
     ]
   });
+}
+
+b.task('test:browser', function() {
+  // buble necessary here, as travis has old browser versions
+  _testBrowser(true)
+})
+
+b.task('test:browser:pure', function() {
+  // Pure ES6, and no buble here, for better dev experience
+  _testBrowser(false)
 })
 
 b.task('test:server', function() {
@@ -150,6 +162,9 @@ b.task('test', ['test:clean', 'test:assets', 'test:browser', 'test:server'])
 b.task('npm', ['npm:clean', 'npm:copy:js', 'npm:copy:css', 'npm:docs', 'npm:js', 'npm:stuff'])
 
 b.task('default', ['build'])
+
+// Default dev mode, only browser bundles are made and no ES5 transpilation happens
+b.task('dev', ['clean', 'css', 'browser', 'test:clean', 'test:assets', 'test:browser:pure'])
 
 // SERVER
 
