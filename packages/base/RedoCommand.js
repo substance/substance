@@ -2,16 +2,16 @@ import Command from '../../ui/Command'
 
 class Redo extends Command {
 
-  getCommandState(props, context) {
-    let docSession = context.documentSession
+  getCommandState(params) {
+    let docSession = params.documentSession
     return {
       disabled: !docSession.canRedo(),
       active: false
     }
   }
 
-  execute(props, context) {
-    let docSession = context.documentSession
+  execute(params) {
+    let docSession = params.documentSession
     if (docSession.canRedo()) {
       docSession.redo()
       return true

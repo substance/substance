@@ -8,7 +8,7 @@ import truncateAnnotation from '../model/transform/truncateAnnotation'
   A class for commands intended to be executed on the annotations.
   See the example below to learn how to define a custom `AnnotationCommand`.
 
-  @class
+  @class AnnotationCommand
   @extends ui/Command
 
   @example
@@ -16,16 +16,17 @@ import truncateAnnotation from '../model/transform/truncateAnnotation'
   ```js
   import AnnotationCommand from 'substance/ui/AnnotationCommand'
 
-  class SmallCapsCommand extends AnnotationCommand {}
-  SmallCapsCommand.nodeType = 'smallcaps'
+  config.addCommand('strong', AnnotationCommand, {nodeType: 'strong'})
   ```
 */
+
+/** INCLUDE_IN_API_DOCS */
 class AnnotationCommand extends Command {
 
   constructor(...args) {
     super(...args)
 
-    if (!this.params.nodeType) {
+    if (!this.config.nodeType) {
       throw new Error("'nodeType' is required")
     }
   }
@@ -36,7 +37,7 @@ class AnnotationCommand extends Command {
     @returns {String} The annotation's type.
    */
   getAnnotationType() {
-    return this.params.nodeType
+    return this.config.nodeType
   }
 
   /**
@@ -152,9 +153,9 @@ class AnnotationCommand extends Command {
     @param {Object} state.selection the current selection
     @returns {Object} info object with command details.
   */
-  getCommandState(props, context) { // eslint-disable-line
-    context = context || {}
-    let sel = this._getSelection(props)
+  getCommandState(params) { // eslint-disable-line
+
+    let sel = this._getSelection(params)
     // We can skip all checking if a disabled condition is met
     // E.g. we don't allow toggling of property annotations when current
     // selection is a container selection
@@ -163,7 +164,7 @@ class AnnotationCommand extends Command {
         disabled: true
       }
     }
-    let annos = this._getAnnotationsForSelection(props, context)
+    let annos = this._getAnnotationsForSelection(params)
     let newState = {
       disabled: false,
       active: false,
@@ -193,35 +194,40 @@ class AnnotationCommand extends Command {
     @returns {Object} info object with execution details.
   */
   // Execute command and trigger transformations
-  execute(props, context) {
-    props = props || {}
-    props.selection = this._getSelection(props)
-    if (props.disabled) return false
-    let mode = props.mode
-    switch(mode) {
+  execute(params) {
+    // Disabled the next line as I believe it is
+    // always passed via params already
+    // params.selection = this._getSelection(params)
+    let commandState = params.commandState
+
+    if (commandState.disabled) return false
+    switch(commandState.mode) {
       case 'create':
-        return this.executeCreate(props, context)
+        return this.executeCreate(params)
       case 'fuse':
-        return this.executeFuse(props, context)
+        return this.executeFuse(params)
       case 'truncate':
-        return this.executeTruncate(props, context)
+        return this.executeTruncate(params)
       case 'expand':
-        return this.executeExpand(props, context)
+        return this.executeExpand(params)
       case 'delete':
-        return this.executeDelete(props, context)
+        return this.executeDelete(params)
       default:
-        console.warn('Command.execute(): unknown mode', mode)
+        console.warn('Command.execute(): unknown mode', commandState.mode)
         return false
     }
   }
 
-  executeCreate(props, context) {
-    let annos = this._getAnnotationsForSelection(props, context)
-    this._checkPrecondition(props, context, annos, this.canCreate)
-    let newAnno = this._applyTransform(props, context, function(tx) {
-      props.node = this.getAnnotationData()
-      props.node.type = this.getAnnotationType()
-      return createAnnotation(tx, props)
+  executeCreate(params) {
+    let annos = this._getAnnotationsForSelection(params)
+    this._checkPrecondition(params, annos, this.canCreate)
+    let newAnno = this._applyTransform(params, function(tx) {
+      let node = this.getAnnotationData()
+      node.type = this.getAnnotationType()
+      return createAnnotation(tx, {
+        node: node,
+        selection: params.selection
+      })
     }.bind(this))
     return {
       mode: 'create',
@@ -229,10 +235,10 @@ class AnnotationCommand extends Command {
     }
   }
 
-  executeFuse(props, context) {
-    let annos = this._getAnnotationsForSelection(props, context);
-    this._checkPrecondition(props, context, annos, this.canFuse);
-    let fusedAnno = this._applyTransform(props, context, function(tx) {
+  executeFuse(params) {
+    let annos = this._getAnnotationsForSelection(params);
+    this._checkPrecondition(params, annos, this.canFuse);
+    let fusedAnno = this._applyTransform(params, function(tx) {
       let result = fuseAnnotation(tx, {
         annos: annos
       })
@@ -246,13 +252,13 @@ class AnnotationCommand extends Command {
     }
   }
 
-  executeTruncate(props, context) {
-    let annos = this._getAnnotationsForSelection(props, context)
+  executeTruncate(params) {
+    let annos = this._getAnnotationsForSelection(params)
     let anno = annos[0]
-    this._checkPrecondition(props, context, annos, this.canTruncate)
-    this._applyTransform(props, context, function(tx) {
+    this._checkPrecondition(params, annos, this.canTruncate)
+    this._applyTransform(params, function(tx) {
       return truncateAnnotation(tx, {
-        selection: props.selection,
+        selection: params.selection,
         anno: anno
       })
     })
@@ -262,13 +268,13 @@ class AnnotationCommand extends Command {
     }
   }
 
-  executeExpand(props, context) {
-    let annos = this._getAnnotationsForSelection(props, context)
+  executeExpand(params) {
+    let annos = this._getAnnotationsForSelection(params)
     let anno = annos[0]
-    this._checkPrecondition(props, context, annos, this.canExpand)
-    this._applyTransform(props, context, function(tx) {
+    this._checkPrecondition(params, annos, this.canExpand)
+    this._applyTransform(params, function(tx) {
       expandAnnotation(tx, {
-        selection: props.selection,
+        selection: params.selection,
         anno: anno
       })
     })
@@ -278,11 +284,11 @@ class AnnotationCommand extends Command {
     }
   }
 
-  executeDelete(props, context) {
-    let annos = this._getAnnotationsForSelection(props, context)
+  executeDelete(params) {
+    let annos = this._getAnnotationsForSelection(params)
     let anno = annos[0]
-    this._checkPrecondition(props, context, annos, this.canDelete)
-    this._applyTransform(props, context, function(tx) {
+    this._checkPrecondition(params, annos, this.canDelete)
+    this._applyTransform(params, function(tx) {
       return tx.delete(anno.id)
     })
     return {
@@ -291,15 +297,15 @@ class AnnotationCommand extends Command {
     }
   }
 
-  _checkPrecondition(props, context, annos, checker) {
-    let sel = this._getSelection(props)
+  _checkPrecondition(params, annos, checker) {
+    let sel = this._getSelection(params)
     if (!checker.call(this, annos, sel)) {
       throw new Error("AnnotationCommand: can't execute command for selection " + sel.toString())
     }
   }
 
-  _getAnnotationsForSelection(props) {
-    return props.selectionState.getAnnotationsForType(this.getAnnotationType())
+  _getAnnotationsForSelection(params) {
+    return params.selectionState.getAnnotationsForType(this.getAnnotationType())
   }
 
   /**
@@ -308,12 +314,12 @@ class AnnotationCommand extends Command {
     @returns {Object} transformed annotations.
    */
   // Helper to trigger an annotation transformation
-  _applyTransform(props, context, transformFn) {
+  _applyTransform(params, transformFn) {
     // HACK: this looks a bit too flexible. Maybe we want to go for
-    let sel = this._getSelection(props)
-    let documentSession = this._getDocumentSession(props, context)
-    let surface = props.surface
-    props.selection = sel
+    let sel = this._getSelection(params)
+    let documentSession = this._getDocumentSession(params)
+    let surface = params.surface
+    params.selection = sel
 
     let result; // to store transform result
     if (sel.isNull()) return
@@ -322,7 +328,7 @@ class AnnotationCommand extends Command {
       if (surface) {
         tx.before.surfaceId = surface.getId()
       }
-      let out = transformFn(tx, props)
+      let out = transformFn(tx, params)
       if (out) {
         result = out.result
       }

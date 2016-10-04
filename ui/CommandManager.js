@@ -4,9 +4,10 @@ import isEqual from 'lodash/isEqual'
 import Registry from '../util/Registry'
 
 /*
-  Listens to changes on the document and selection and updates registered tools accordingly.
+  Listens to changes on the document and selection and updates the commandStates
+  accordingly.
 
-  @class
+  @class CommandManager
 */
 class CommandManager {
 
@@ -37,16 +38,11 @@ class CommandManager {
     this.documentSession.on('update', this.updateCommandStates, this, {
       priority: -10
     })
-
     this.updateCommandStates()
   }
 
   dispose() {
     this.documentSession.off(this)
-  }
-
-  getCommandContext() {
-    return this.context
   }
 
   /*
@@ -55,14 +51,35 @@ class CommandManager {
   updateCommandStates() {
     let commandStates = {}
     let commandContext = this.getCommandContext()
-    let props = this._getCommandProps()
+    let params = this._getCommandParams()
     this.commandRegistry.forEach(function(cmd) {
-      commandStates[cmd.getName()] = cmd.getCommandState(props, commandContext)
+      commandStates[cmd.getName()] = cmd.getCommandState(params, commandContext)
     })
     // poor-man's immutable style
     if (!isEqual(this.commandStates, commandStates)) {
       this.commandStates = commandStates
     }
+  }
+
+  /*
+    Execute a command, given a context and arguments
+  */
+  executeCommand(commandName, userParams) {
+    let cmd = this.commandRegistry.get(commandName)
+    if (!cmd) {
+      console.warn('command', commandName, 'not registered')
+      return
+    }
+    let commandState = this.commandStates[commandName]
+    let params = extend(this._getCommandParams(), userParams, {
+      commandState: commandState
+    })
+    let info = cmd.execute(params, this.getCommandContext())
+    // TODO: why do we require commands to return a result?
+    if (info === undefined) {
+      console.warn('command ', commandName, 'must return either an info object or true when handled or false when not handled')
+    }
+    return info
   }
 
   /*
@@ -72,27 +89,12 @@ class CommandManager {
     return this.commandStates
   }
 
-  /*
-    Execute a command, given a context and arguments
-  */
-  executeCommand(commandName, props) {
-    let cmd = this.commandRegistry.get(commandName)
-    if (!cmd) {
-      console.warn('command', commandName, 'not registered')
-      return
-    }
-    let commandState = this.commandStates[commandName]
-    props = extend(this._getCommandProps(), commandState, props)
-    let info = cmd.execute(props, this.getCommandContext())
-    // TODO: why do we required commands to return a result?
-    if (info === undefined) {
-      console.warn('command ', commandName, 'must return either an info object or true when handled or false when not handled')
-    }
-    return info
+  getCommandContext() {
+    return this.context
   }
 
   // TODO: while we need it here this should go into the flow thingie later
-  _getCommandProps() {
+  _getCommandParams() {
     let documentSession = this.context.documentSession
     let selectionState = documentSession.getSelectionState()
     let sel = selectionState.getSelection()
@@ -104,7 +106,6 @@ class CommandManager {
       selection: sel
     }
   }
-
 }
 
 export default CommandManager

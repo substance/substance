@@ -6,8 +6,8 @@ import _clone from 'lodash/clone'
 class SwitchTextTypeCommand extends Command {
 
   // Available text types on the surface
-  getTextTypes(context) {
-    let surface = context.surfaceManager.getFocusedSurface()
+  getTextTypes(params) {
+    let surface = params.surface
     if (surface && surface.isContainerEditor()) {
       return surface.getTextTypes()
     } else {
@@ -15,8 +15,8 @@ class SwitchTextTypeCommand extends Command {
     }
   }
 
-  getTextType(context, textTypeName) {
-    let textTypes = this.getTextTypes(context)
+  getTextType(params, textTypeName) {
+    let textTypes = this.getTextTypes()
     return _find(textTypes, function(t) {
       return t.name === textTypeName
     })
@@ -24,8 +24,8 @@ class SwitchTextTypeCommand extends Command {
 
   // Search which textType matches the current node
   // E.g. {type: 'heading', level: 1} => heading1
-  getCurrentTextType(context, node) {
-    let textTypes = this.getTextTypes(context)
+  getCurrentTextType(params, node) {
+    let textTypes = this.getTextTypes(params)
     let currentTextType
     textTypes.forEach(function(textType) {
       let nodeProps = _clone(textType.data)
@@ -37,14 +37,14 @@ class SwitchTextTypeCommand extends Command {
     return currentTextType
   }
 
-  getCommandState(props, context) {
-    let doc = context.documentSession.getDocument()
-    let sel = context.documentSession.getSelection()
-    let surface = context.surfaceManager.getFocusedSurface()
+  getCommandState(params) {
+    let doc = params.documentSession.getDocument()
+    let sel = params.selection
+    let surface = params.surface
     let node
     let newState = {
       disabled: false,
-      textTypes: this.getTextTypes(context)
+      textTypes: this.getTextTypes(params)
     }
     // Set disabled when not a property selection
     if (!surface || !surface.isEnabled() || sel.isNull()) {
@@ -59,7 +59,7 @@ class SwitchTextTypeCommand extends Command {
       // so we need to guard node
       if (node) {
         if (node.isText() && node.isBlock()) {
-          newState.currentTextType = this.getCurrentTextType(context, node)
+          newState.currentTextType = this.getCurrentTextType(params, node)
         }
         if (!newState.currentTextType) {
           // We 'abuse' the currentTextType field by providing a property
@@ -82,13 +82,11 @@ class SwitchTextTypeCommand extends Command {
 
   /**
     Trigger a switchTextType transaction
-
-    @param {String} textTypeName identifier (e.g. heading1)
   */
-  execute(props, context) {
-    let textType = this.getTextType(context, props.textType)
+  execute(params) {
+    let textType = this.getTextType(params.textType)
     let nodeData = textType.data
-    let surface = context.surfaceManager.getFocusedSurface()
+    let surface = params.surface
     if (!surface) {
       console.warn('No focused surface. Stopping command execution.')
       return

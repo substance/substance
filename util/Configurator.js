@@ -5,12 +5,10 @@ import DocumentSchema from '../model/DocumentSchema'
 import EditingBehavior from '../model/EditingBehavior'
 import Registry from '../util/Registry'
 import ComponentRegistry from '../ui/ComponentRegistry'
-
-// Default icon and label provider
 import FontAwesomeIconProvider from '../ui/FontAwesomeIconProvider'
 import LabelProvider from '../ui/DefaultLabelProvider'
 
-/*
+/**
   Default Configurator for Substance editors. It provides an API for
   adding nodes to the schema, components, commands and tools etc.
 
@@ -52,6 +50,8 @@ import LabelProvider from '../ui/DefaultLabelProvider'
   sure you don't run into cyclic dependencies as there is no checking for
   that at the moment.
 */
+
+/** INCLUDE_IN_API_DOCS */
 class Configurator {
   constructor() {
     this.config = {
