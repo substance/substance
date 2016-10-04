@@ -50,7 +50,7 @@ class NodeIndex {
    * @private
    * @type {String}
    */
-  get property() { return "id" }
+  get property() { return this._property }
 
   set property(p) { this._property = p }
 

@@ -4,7 +4,7 @@ var cp = require('child_process')
 var b = require('substance-bundler')
 
 b.task('build', function() {
-  b.make(require.resolve('./make.js'), 'test')
+  b.make(require.resolve('./make.js'), 'build', 'test')
 })
 
 b.task('browser', function() {
