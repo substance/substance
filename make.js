@@ -5,7 +5,7 @@ var docgenConfig = require('./.docgenrc')
 b.task('clean', function() {
   b.rm('./dist');
   b.rm('./.test');
-  b.rm('./.doc');
+  b.rm('./.docs');
   b.rm('./.npm');
 });
 
@@ -113,7 +113,7 @@ var NPMDIST = NPM+'dist/'
 
 b.task('npm:clean', function() {
   b.rm(NPM)
-  b.rm('.doc')
+  b.rm('.docs')
 })
 
 b.task('npm:copy:js', function() {
@@ -132,7 +132,7 @@ b.task('npm:copy:css', function() {
 
 // a fully debuggable version of the docgenerator
 b.task('docs', function() {
-  b.copy('node_modules/substance-docgen/dist/reader/**/*', '.doc/', {root: 'node_modules/substance-docgen/dist/reader'})
+  b.copy('node_modules/substance-docgen/dist/reader/**/*', '.docs/', {root: 'node_modules/substance-docgen/dist/reader'})
   b.custom('Bundling sourcefiles for docgen...', {
     src: [
       './*.md',
@@ -143,19 +143,19 @@ b.task('docs', function() {
       './ui/*.js',
       './util/*.js',
     ],
-    dest: '.doc/data.js',
+    dest: '.docs/data.js',
     execute: function(files) {
       var bundleSources = require('substance-docgen/bundleSources')
       files = files.map(function(file) {
         return path.relative(__dirname, file)
       })
-      bundleSources(files, '.doc/data.js', docgenConfig)
+      bundleSources(files, '.docs/data.js', docgenConfig)
     }
   })
 })
 
 b.task('npm:docs', ['docs'], function() {
-  b.copy('.doc', NPM+'doc')
+  b.copy('.docs', NPM+'doc')
 })
 
 b.task('npm:js', function() {
@@ -184,7 +184,7 @@ b.task('npm', ['npm:clean', 'npm:copy:js', 'npm:copy:css', 'npm:docs', 'npm:js',
 b.task('default', ['build'])
 
 // Default dev mode, only browser bundles are made and no ES5 transpilation happens
-b.task('dev', ['clean', 'css', 'browser', 'test:clean', 'test:assets', 'test:browser:pure'])
+b.task('dev', ['clean', 'css', 'browser', 'test:assets', 'test:browser:pure' , 'docs'])
 
 // SERVER
 
@@ -192,4 +192,4 @@ b.task('dev', ['clean', 'css', 'browser', 'test:clean', 'test:assets', 'test:bro
 b.setServerPort(5550)
 b.serve({ static: true, route: '/', folder: 'dist' })
 b.serve({ static: true, route: '/test/', folder: '.test' })
-b.serve({ static: true, route: '/doc/', folder: '.doc' })
+b.serve({ static: true, route: '/docs/', folder: '.docs' })
