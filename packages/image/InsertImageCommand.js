@@ -6,10 +6,9 @@ class ImageCommand extends Command {
     super({ name: 'insert-image' })
   }
 
-  getCommandState(params, context) {
-    let documentSession = context.documentSession
-    let sel = params.selection || documentSession.getSelection()
-    let surface = params.surface || context.surfaceManager.getFocusedSurface()
+  getCommandState(params) {
+    let sel = params.selection
+    let surface = params.surface
     let newState = {
       disabled: true,
       active: false
@@ -26,13 +25,13 @@ class ImageCommand extends Command {
     After upload has completed, the image URLs get updated.
   */
   execute(params, context) {
-    let state = this.getCommandState(params, context)
+    let state = this.getCommandState(params)
     // Return if command is disabled
     if (state.disabled) return
 
-    let documentSession = context.documentSession
-    let sel = params.selection || documentSession.getSelection()
-    let surface = params.surface || context.surfaceManager.getFocusedSurface()
+    let documentSession = params.documentSession
+    let sel = params.selection
+    let surface = params.surface
     let fileClient = context.fileClient
     let files = params.files
 
