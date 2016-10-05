@@ -41,7 +41,6 @@ Blockquote                                                                  | �
 Codeblock                                                                   | ✓
 Image                                                                       | ✓
 List                                                                        | Beta 6
-Table                                                                       | Beta 6
                                                                             |
 **Predefined annotation types**                                             |
 Strong                                                                      | ✓
@@ -53,7 +52,7 @@ Code                                                                        | �
                                                                             |
 **Platform support**                                                        |
 Mozilla Firefox (>=49)                                                      | ✓
-Apple Safari (>=10)                                                          | ✓
+Apple Safari (>=10)                                                         | ✓
 Google Chrome (>=53)                                                        | ✓
 Microsoft Edge                                                              | ✓
 
@@ -72,18 +71,18 @@ Run the dev server.
 npm start
 ```
 
-Navigate to `http://localhost:4201/docs` for the docs and `http://localhost:4201/test` for the test suite.
+Navigate to `http://localhost:5550/docs` for the docs and `http://localhost:5550/test` for the test suite. Test suite and docs are rebuilt as you make changes to the source files.
 
-To run the test-suite headless
+If you only work on the documentation, this recompiles faster.
+
+```
+npm run docs
+```
+
+To run the test-suite headless.
 
 ```
 $ npm test
-```
-
-To bundle the docs into a distribution:
-
-```
-$ npm run doc
 ```
 
 ## Roadmap
@@ -95,7 +94,6 @@ $ npm run doc
 - Key bindings
 - Improved Unicode support
 - List package
-- Table package
 
 ### 1.0 Final
 

@@ -10,15 +10,14 @@ class EditAnnotationCommand extends Command {
   constructor(...args) {
     super(...args)
 
-    if (!this.params.nodeType) {
+    if (!this.config.nodeType) {
       throw new Error("'nodeType' is required")
     }
   }
 
-  getCommandState(props, context) { // eslint-disable-line
-    context = context || {}
-    let sel = this._getSelection(props)
-    let annos = this._getAnnotationsForSelection(props, context)
+  getCommandState(params) {
+    let sel = this._getSelection(params)
+    let annos = this._getAnnotationsForSelection(params)
     let newState = {
       disabled: true,
     }
@@ -30,10 +29,10 @@ class EditAnnotationCommand extends Command {
     return newState
   }
 
-  execute(props, context) { } // eslint-disable-line
+  execute(params) { } // eslint-disable-line
 
-  _getAnnotationsForSelection(props) {
-    return props.selectionState.getAnnotationsForType(this.params.nodeType)
+  _getAnnotationsForSelection(params) {
+    return params.selectionState.getAnnotationsForType(this.config.nodeType)
   }
 }
 

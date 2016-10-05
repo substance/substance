@@ -22,18 +22,10 @@ import helpers from '../documentHelpers'
   });
   ```
 */
-
 function createAnnotation(tx, args) {
   let sel = args.selection
   if (!sel) throw new Error('selection is required.')
-  let annoType = args.annotationType
-  let annoData = args.annotationData
   let anno = args.node
-  if (!anno && annoType) {
-    console.warn('DEPRECATED: Use node: {type: "strong"} instead of annotationType: "strong"')
-    anno = { type: annoType }
-    extend(anno, annoData)
-  }
   if (!anno) throw new Error('node is required')
 
   if (!sel.isPropertySelection() && !sel.isContainerSelection() || sel.isCollapsed()) {

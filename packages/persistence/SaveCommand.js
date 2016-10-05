@@ -5,16 +5,16 @@ class SaveCommand extends Command {
     super({ name: 'save' })
   }
 
-  getCommandState(props, context) {
-    let dirty = context.documentSession.isDirty()
+  getCommandState(params) {
+    let dirty = params.documentSession.isDirty()
     return {
       disabled: !dirty,
       active: false
     }
   }
 
-  execute(props, context) {
-    let documentSession = context.documentSession
+  execute(params) {
+    let documentSession = params.documentSession
     documentSession.save()
     return {
       status: 'saving-process-started'

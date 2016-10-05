@@ -16,20 +16,20 @@ class DocumentStore {
 
     @return {Object} document record
   */
-  createDocument(props, cb) {
+  createDocument(params, cb) {
 
-    if (!props.documentId) {
+    if (!params.documentId) {
       // We generate a documentId ourselves
-      props.documentId = uuid()
+      params.documentId = uuid()
     }
 
-    let exists = this._documentExists(props.documentId);
+    let exists = this._documentExists(params.documentId);
     if (exists) {
       return cb(new Err('DocumentStore.CreateError', {
         message: 'Could not create because document already exists.'
       }))
     }
-    this._createDocument(props)
+    this._createDocument(params)
   }
 
   /*
@@ -48,14 +48,14 @@ class DocumentStore {
   /*
     Update document record
   */
-  updateDocument(documentId, newProps, cb) {
+  updateDocument(documentId, newparams, cb) {
     let exists = this._documentExists(documentId)
     if (!exists) {
       return cb(new Err('DocumentStore.UpdateError', {
         message: 'Document does not exist.'
       }))
     }
-    this._updateDocument(documentId, newProps)
+    this._updateDocument(documentId, newparams)
     cb(null, this._getDocument(documentId))
   }
 
@@ -92,8 +92,8 @@ class DocumentStore {
   // Handy synchronous helpers
   // -------------------------
 
-  _createDocument(props) {
-    this._documents[props.documentId] = props
+  _createDocument(params) {
+    this._documents[params.documentId] = params
   }
 
   _deleteDocument(documentId) {
@@ -105,9 +105,9 @@ class DocumentStore {
     return this._documents[documentId]
   }
 
-  _updateDocument(documentId, props) {
+  _updateDocument(documentId, params) {
     let doc = this._documents[documentId]
-    extend(doc, props)
+    extend(doc, params)
   }
 
   _documentExists(documentId) {

@@ -3,8 +3,8 @@ import insertNode from '../model/transform/insertNode'
 
 class InsertNodeCommand extends Command {
 
-  getCommandState(props, context) {
-    let sel = context.documentSession.getSelection();
+  getCommandState(params) {
+    let sel = params.selection
     let newState = {
       disabled: true,
       active: false
@@ -15,10 +15,10 @@ class InsertNodeCommand extends Command {
     return newState
   }
 
-  execute(props, context) {
-    var state = this.getCommandState(props, context)
+  execute(params) {
+    var state = params.commandState
     if (state.disabled) return
-    var surface = context.surface ||context.surfaceManager.getFocusedSurface()
+    var surface = params.surface
     if (surface) {
       surface.transaction(function(tx, args) {
         return this.insertNode(tx, args)

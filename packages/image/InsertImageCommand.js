@@ -6,10 +6,9 @@ class ImageCommand extends Command {
     super({ name: 'insert-image' })
   }
 
-  getCommandState(props, context) {
-    let documentSession = context.documentSession
-    let sel = props.selection || documentSession.getSelection()
-    let surface = props.surface || context.surfaceManager.getFocusedSurface()
+  getCommandState(params) {
+    let sel = params.selection
+    let surface = params.surface
     let newState = {
       disabled: true,
       active: false
@@ -25,16 +24,16 @@ class ImageCommand extends Command {
     Inserts (stub) images and triggers a fileupload.
     After upload has completed, the image URLs get updated.
   */
-  execute(props, context) {
-    let state = this.getCommandState(props, context)
+  execute(params, context) {
+    let state = this.getCommandState(params)
     // Return if command is disabled
     if (state.disabled) return
 
-    let documentSession = context.documentSession
-    let sel = props.selection || documentSession.getSelection()
-    let surface = props.surface || context.surfaceManager.getFocusedSurface()
+    let documentSession = params.documentSession
+    let sel = params.selection
+    let surface = params.surface
     let fileClient = context.fileClient
-    let files = props.files
+    let files = params.files
 
     // can drop images only into container editors
     if (!surface.isContainerEditor()) return

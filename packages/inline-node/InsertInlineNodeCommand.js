@@ -1,17 +1,53 @@
 import Command from '../../ui/Command'
 import insertInlineNode from '../../model/transform/insertInlineNode'
 
+/**
+  Reusable command implementation for inserting inline nodes.
+
+  @class InsertInlineNodeCommand
+
+  @example
+
+  Define a custom command.
+
+  ```
+  class AddXRefCommand extends InsertInlineNodeCommand {
+    createNodeData() {
+      return {
+        attributes: {'ref-type': 'bibr'},
+        targets: [],
+        label: '???',
+        type: 'xref'
+      }
+    }
+  }
+  ```
+
+  Register it in your app using the configurator.
+
+  ```
+  config.addCommand('add-xref', AddXRefCommand, {nodeType: 'xref'})
+  ```
+*/
+
 class InsertInlineNodeCommand extends Command {
+  /**
+    @param config Takes a config object, provided on registration in configurator
+  */
   constructor(...args) {
     super(...args)
 
-    if (!this.params.nodeType) {
-      throw new Error('Every AnnotationCommand must have a nodeType')
+    if (!this.config.nodeType) {
+      throw new Error('Every InlineInlineNodeCommand must have a nodeType')
     }
   }
 
-  getCommandState(props, context) {
-    let sel = context.documentSession.getSelection()
+  /**
+    Determine command state for inline node insertion. Command is enabled
+    if selection is a property selection.
+  */
+  getCommandState(params) {
+    let sel = params.selection
     let newState = {
       disabled: !sel.isPropertySelection(),
       active: false
@@ -19,10 +55,13 @@ class InsertInlineNodeCommand extends Command {
     return newState
   }
 
-  execute(props, context) {
-    let state = this.getCommandState(props, context)
+  /**
+    Insert new inline node at the current selection
+  */
+  execute(params) {
+    let state = this.getCommandState(params)
     if (state.disabled) return
-    let surface = context.surface || context.surfaceManager.getFocusedSurface()
+    let surface = params.surface
     if (surface) {
       surface.transaction(function(tx, args) {
         return this.insertInlineNode(tx, args)
@@ -38,12 +77,8 @@ class InsertInlineNodeCommand extends Command {
 
   createNodeData(tx, args) { // eslint-disable-line
     return {
-      type: this.params.nodeType
+      type: this.config.nodeType
     }
-  }
-
-  _getAnnotationsForSelection(props) {
-    return props.selectionState.getAnnotationsForType(this.params.nodeType)
   }
 
 }

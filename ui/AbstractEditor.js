@@ -86,8 +86,7 @@ class AbstractEditor extends Component {
   getCommandContext() {
     return {
       documentSession: this.documentSession,
-      surfaceManager: this.surfaceManager,
-      converterRegistry: this.converterRegistry
+      surfaceManager: this.surfaceManager
     }
   }
 

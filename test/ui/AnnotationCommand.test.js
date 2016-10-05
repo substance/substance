@@ -48,7 +48,9 @@ test("execute 'create' property annotation", function(t) {
   var sel = doc.createSelection(['p6', 'content'], 1, 6)
   docSession.setSelection(sel)
   var res = cmd.execute({
-    mode: 'create',
+    commandState: {
+      mode: 'create'
+    },
     documentSession: docSession,
     selectionState: docSession.getSelectionState()
   })
@@ -95,7 +97,9 @@ test("can 'expand' property annotation", function(t) {
   var sel = doc.createSelection(['p1', 'content'], 5, 7)
   docSession.setSelection(sel)
   cmd.execute({
-    mode: 'delete',
+    commandState: {
+      mode: 'delete'
+    },
     documentSession: docSession,
     selectionState: docSession.getSelectionState()
   })
