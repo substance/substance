@@ -7,7 +7,7 @@ import cloneDeep from 'lodash/cloneDeep'
 import each from 'lodash/each'
 import EventEmitter from '../../util/EventEmitter'
 
-/**
+/*
   Base node implementation.
 
   @prop {String} id an id that is unique within this data
