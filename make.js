@@ -1,11 +1,13 @@
 var b = require('substance-bundler')
-var fs = require('fs')
 var path = require('path')
 var docgenConfig = require('./.docgenrc')
 
 b.task('clean', function() {
-  b.rm('./dist')
-})
+  b.rm('./dist');
+  b.rm('./.test');
+  b.rm('./.doc');
+  b.rm('./.npm');
+});
 
 function _css(DIST) {
   b.copy('*.css', DIST)
@@ -111,6 +113,7 @@ var NPMDIST = NPM+'dist/'
 
 b.task('npm:clean', function() {
   b.rm(NPM)
+  b.rm('.doc')
 })
 
 b.task('npm:copy:js', function() {
