@@ -127,23 +127,9 @@ b.task('npm:copy:css', function() {
   _css(NPMDIST)
 })
 
-b.task('npm:docs', function() {
-  b.copy('node_modules/substance-docgen/dist/reader', NPM+'doc')
-  var docgen = require('substance-docgen');
-  b.custom('Generating API docs...', {
-    dest: NPM+'doc/docs.js',
-    execute: function() {
-      var json = docgen.generate(docgenConfig)
-      fs.writeFileSync(NPM+'doc/docs.js', "window.DOCGEN_DATA = "+JSON.stringify(json, null, 2));
-    }
-  })
-})
-
 // a fully debuggable version of the docgenerator
 b.task('docs', function() {
-  b.copy('node_modules/substance-docgen/.dev', '.doc')
-  b.copy('node_modules/substance-docgen/.dev/reader.js', '.doc/')
-  b.copy('node_modules/substance-docgen/.dev/reader.css', '.doc/')
+  b.copy('node_modules/substance-docgen/dist/reader/*', '.doc/', {root: 'node_modules/substance-docgen/dist/reader'})
   b.custom('Bundling sourcefiles for docgen...', {
     src: [
       './*.md',
@@ -163,6 +149,10 @@ b.task('docs', function() {
       bundleSources(files, '.doc/data.js', docgenConfig)
     }
   })
+})
+
+b.task('npm:docs', ['docs'], function() {
+  b.copy('.doc', NPM+'doc')
 })
 
 b.task('npm:js', function() {
