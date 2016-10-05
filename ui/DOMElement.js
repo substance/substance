@@ -14,18 +14,16 @@ const NOT_IMPLEMENTED = 'This method is not implemented.'
 
   There are three different implementations of this interface:
   - {@link ui/DefaultDOMElement}
-  - {@link ui/VirtualDOMElement}
+  - {@link ui/VirtualElement}
   - {@link ui/Component}
 
   Methods which rely on a CSS selector implementation are only available for {@link ui/DefaultDOMElement} instance, which is used during DOM import.
   I.e., don't use the following methods in Component renderers:
-  - {@link ui/DOMElement#is}
-  - {@link ui/DOMElement#find}
-  - {@link ui/DOMElement#findAll}
+  - {@link ui/DOMElement#is()}
+  - {@link ui/DOMElement#find()}
+  - {@link ui/DOMElement#findAll()}
 
-  @class
   @abstract
-  @interface
 */
 class DOMElement {
 
