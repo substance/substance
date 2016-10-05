@@ -12,10 +12,10 @@ import without from 'lodash/without'
 import DOMElement from './DOMElement'
 
 /**
-  A virtual {@link ui/DOMElement} which is used by the {@link ui/Component} API.
+  A virtual {@link DOMElement} which is used by the {@link Component} API.
 
   A VirtualElement is just a description of a DOM structure. It represents a virtual
-  DOM mixed with Components. This virtual structure needs to be compiled to a {@link ui/Component}
+  DOM mixed with Components. This virtual structure needs to be compiled to a {@link Component}
   to actually create a real DOM element.
 
   @class
