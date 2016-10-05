@@ -129,7 +129,7 @@ b.task('npm:copy:css', function() {
 
 // a fully debuggable version of the docgenerator
 b.task('docs', function() {
-  b.copy('node_modules/substance-docgen/dist/reader/*', '.doc/', {root: 'node_modules/substance-docgen/dist/reader'})
+  b.copy('node_modules/substance-docgen/dist/reader/**/*', '.doc/', {root: 'node_modules/substance-docgen/dist/reader'})
   b.custom('Bundling sourcefiles for docgen...', {
     src: [
       './*.md',
