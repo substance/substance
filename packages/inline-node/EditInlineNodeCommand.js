@@ -8,13 +8,13 @@ class EditInlineNodeCommand extends Command {
     }
   }
 
-  getCommandState(params, context) {
-    let sel = context.documentSession.getSelection()
+  getCommandState(params) {
+    let sel = params.selection
     let newState = {
       disabled: true,
       active: false
     }
-    let annos = this._getAnnotationsForSelection(params, context)
+    let annos = this._getAnnotationsForSelection(params)
     if (annos.length === 1 && annos[0].getSelection().equals(sel)) {
       newState.disabled = false
       newState.node = annos[0]
@@ -22,7 +22,7 @@ class EditInlineNodeCommand extends Command {
     return newState
   }
 
-  execute(params, context) { // eslint-disable-line
+  execute(params) { // eslint-disable-line
 
   }
 
