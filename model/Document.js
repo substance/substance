@@ -115,7 +115,7 @@ class Document extends EventEmitter {
     @returns {Boolean} `true` if a node with id exists, `false` otherwise.
   */
   contains(id) {
-    this.data.contains(id)
+    return this.data.contains(id)
   }
 
   /**
