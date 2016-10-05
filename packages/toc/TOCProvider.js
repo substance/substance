@@ -2,7 +2,7 @@ import each from 'lodash/each'
 import includes from 'lodash/includes'
 import EventEmitter from '../../util/EventEmitter'
 
-/**
+/*
   Manages a table of content for a container. Default implementation considers
   all headings as TOC entries. You can extend this implementation and override
   `computeEntries`. Instantiate this class on controller level and pass it to relevant components

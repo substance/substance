@@ -1,6 +1,6 @@
 import Component from '../../ui/Component'
 
-/**
+/*
   OverlayContainer component
 
   Used internally by surface to place overlay relative to selection/cursor

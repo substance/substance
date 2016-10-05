@@ -7,10 +7,33 @@ import Component from '../../ui/Component'
   Default Tool implementation
 
   A tool must be associated with a Command, which holds all the logic, while the tool
-  is just the visual representation of the command state.
+  is just the visual representation of the command state. You can use this component
+  for simple button-like tools, or extend it to create your own UI.
 
   @class
   @component
+
+  @example
+
+  Usually instantiated in a Toolbar or an Overlay. Usage:
+
+  ```
+  $$(Tool, {
+    icon: 'strong',
+    label: 'strong',
+    style: 'outline',
+    active: false,
+    disabled: false
+  })
+  ```
+
+
+  ```
+  config.addCommand('strong', AnnotationCommand, { nodeType: 'strong' })
+  config.addTool('strong', AnnotationTool, {
+    target: 'annotations'
+  })
+  ```
 */
 class Tool extends Component {
 
@@ -36,7 +59,6 @@ class Tool extends Component {
       el.attr('aria-label', title)
     }
 
-    // Add button
     el.append(
       this.renderButton($$)
     )

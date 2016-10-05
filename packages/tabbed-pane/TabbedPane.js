@@ -1,7 +1,7 @@
 import Component from '../../ui/Component'
 import each from 'lodash/each'
 
-/**
+/*
   A tabbed pane layout component. The actual content is specified via append.
 
   @class TabbedPane
