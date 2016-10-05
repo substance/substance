@@ -5,17 +5,14 @@ import Node from './Node'
 /**
   Schema for Data Objects.
 
-  @class Schema
-  @private
+  @internal
  */
-
-/**
-  @constructor Schema
-  @param {String} name
-  @param {String} version
-*/
 class Schema {
 
+  /**
+    @param {String} name
+    @param {String} version
+  */
   constructor(name, version) {
     /**
       @type {String}

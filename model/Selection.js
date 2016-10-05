@@ -3,13 +3,7 @@ import Anchor from './Anchor'
 
 /**
   A document selection. Refers to a Substance document model, not to the DOM.
-
-  Implemented by {@link model/PropertySelection} and {@link model/ContainerSelection}
-
-  @class
-  @abstract
 */
-
 class Selection {
 
   constructor() {
@@ -52,7 +46,7 @@ class Selection {
   /**
     Attach document to the selection.
 
-    @private
+    @internal
     @param {Document} doc document to attach
     @returns {this}
   */
@@ -144,13 +138,11 @@ class Selection {
   }
 }
 
-/**
+/*
   Class to represent null selections.
 
-  @private
-  @class
+  @internal
 */
-
 class NullSelection extends Selection {
 
   isNull() {
@@ -179,13 +171,11 @@ class NullSelection extends Selection {
 Selection.nullSelection = Object.freeze(new NullSelection())
 
 /**
-  A selection fragment. Used when we split a {@link model/ContainerSelection}
+  A selection fragment. Used when we split a {@link ContainerSelection}
   into their fragments, each corresponding to a property selection.
 
-  @private
-  @class
+  @internal
 */
-
 class SelectionFragment extends EventEmitter {
 
   constructor(path, startOffset, endOffset, full) {
@@ -276,9 +266,7 @@ Selection.NodeFragment = NodeFragment
   Describe the cursor when creating selection fragments.
   This is used for rendering selections.
 
-  @private
-  @class
-  @extends Anchor
+  @internal
 */
 class Cursor extends Anchor {
 

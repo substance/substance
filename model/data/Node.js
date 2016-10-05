@@ -10,16 +10,13 @@ import EventEmitter from '../../util/EventEmitter'
 /**
   Base node implementation.
 
-  @private
-  @class Node
-  @node
-  @extends EventEmitter
-  @param {Object} properties
-
   @prop {String} id an id that is unique within this data
  */
 class Node extends EventEmitter {
 
+  /**
+    @param {Object} properties
+  */
   constructor(props) {
     super()
 

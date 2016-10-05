@@ -1,10 +1,13 @@
 var b = require('substance-bundler')
-var fs = require('fs')
+var path = require('path')
 var docgenConfig = require('./.docgenrc')
 
 b.task('clean', function() {
-  b.rm('./dist')
-})
+  b.rm('./dist');
+  b.rm('./.test');
+  b.rm('./.doc');
+  b.rm('./.npm');
+});
 
 function _css(DIST) {
   b.copy('*.css', DIST)
@@ -110,6 +113,7 @@ var NPMDIST = NPM+'dist/'
 
 b.task('npm:clean', function() {
   b.rm(NPM)
+  b.rm('.doc')
 })
 
 b.task('npm:copy:js', function() {
@@ -126,16 +130,32 @@ b.task('npm:copy:css', function() {
   _css(NPMDIST)
 })
 
-b.task('npm:docs', function() {
-  var docgen = require('substance-docgen')
-  b.copy('node_modules/substance-docgen/dist', NPM+'doc')
-  b.custom('Generating API docs...', {
-    dest: NPM+'doc/docs.js',
-    execute: function() {
-      var nodes = docgen.generate(docgenConfig)
-      fs.writeFileSync(NPM+'doc/docs.js', "window.DOCGEN_DATA = "+JSON.stringify(nodes, null, '  '))
+// a fully debuggable version of the docgenerator
+b.task('docs', function() {
+  b.copy('node_modules/substance-docgen/dist/reader/**/*', '.doc/', {root: 'node_modules/substance-docgen/dist/reader'})
+  b.custom('Bundling sourcefiles for docgen...', {
+    src: [
+      './*.md',
+      './doc/*.md',
+      './collab/*.js',
+      './model/**/*.js',
+      './packages/**/*.js',
+      './ui/*.js',
+      './util/*.js',
+    ],
+    dest: '.doc/data.js',
+    execute: function(files) {
+      var bundleSources = require('substance-docgen/bundleSources')
+      files = files.map(function(file) {
+        return path.relative(__dirname, file)
+      })
+      bundleSources(files, '.doc/data.js', docgenConfig)
     }
   })
+})
+
+b.task('npm:docs', ['docs'], function() {
+  b.copy('.doc', NPM+'doc')
 })
 
 b.task('npm:js', function() {
@@ -172,3 +192,4 @@ b.task('dev', ['clean', 'css', 'browser', 'test:clean', 'test:assets', 'test:bro
 b.setServerPort(5550)
 b.serve({ static: true, route: '/', folder: 'dist' })
 b.serve({ static: true, route: '/test/', folder: '.test' })
+b.serve({ static: true, route: '/doc/', folder: '.doc' })

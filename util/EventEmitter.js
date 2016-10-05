@@ -3,18 +3,15 @@ import isObject from 'lodash/isObject'
 
 /**
   Event support.
-
-  @class
-  @private
 */
 class EventEmitter {
 
   /**
-   * Emit an event.
-   *
-   * @param {String} event
-   * @param ...arguments
-   * @return true if a listener was notified, false otherwise.
+    Emit an event.
+
+    @param {String} event
+    @param ...arguments
+    @return true if a listener was notified, false otherwise.
    */
   emit(event) {
     if (event in this.__events__) {
@@ -33,43 +30,18 @@ class EventEmitter {
   }
 
   /**
-   * Connect a listener to a set of events.
-   *
-   * Optionally, a `priority` can be provided to control the order
-   * of all bindings. The default priority is 0. All listeners with the
-   * same priority remain in order of registration.
-   * A lower priority will make the listener be called later, a higher
-   * priority earlier.
-   *
-   * @param {Object} listener
-   * @param {Object} hash with event as keys, and handler functions as values.
-   * @param {Number} hash with `priority` as ordering hint (default is 0).
-   * @chainable
-   */
-  connect (obj, methods, options) { // eslint-disable-line no-unused-vars
-    console.warn('DEPRECATED: Use EventEmitter.on(event, method, context) instead.')
-    return _connect.apply(this, arguments)
-  }
+    Subscribe a listener to an event.
 
-  /**
-   * Disconnect a listener (all bindings).
-   *
-   * @method disconnect
-   * @param {Object} listener
-   * @chainable
-   */
-  disconnect(listener) {
-    console.warn('DEPRECATED: Use EventEmitter.off(listener) instead.')
-    return _disconnect.call(this, listener)
-  }
+    Optionally, a `priority` can be provided to control the order
+    of all bindings. The default priority is 0. All listeners with the
+    same priority remain in order of registration.
+    A lower priority will make the listener be called later, a higher
+    priority earlier.
 
-  /**
-   * Subscribe a listener to an event.
-   *
-   * @param {String} event
-   * @param {Function} method
-   * @param {Object} context
-   * @param {Object} options
+    @param {String} event
+    @param {Function} method
+    @param {Object} context
+    @param {Object} options
    */
   on(event, method, context, options) {
     var priority = 0
@@ -81,12 +53,12 @@ class EventEmitter {
   }
 
   /**
-   * Unsubscrive a listener from an event.
-   *
-   * @param {String} event
-   * @param {Function} method
-   * @param {Object} context
-   * @param {Object} options
+    Unsubscrive a listener from an event.
+
+    @param {String} event
+    @param {Function} method
+    @param {Object} context
+    @param {Object} options
    */
   off(event, method, context) { // eslint-disable-line no-unused-vars
     if (arguments.length === 1 && isObject(arguments[0])) {

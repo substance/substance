@@ -6,9 +6,6 @@ import DocumentNode from './DocumentNode'
   PropertyAnnotations only work on text properties. If you want to annotate multiple
   nodes you have to use a {@link model/ContainerAnnotation}.
 
-  @class
-  @abstract
-
   @prop {String[]} path Identifies a text property in the document (e.g. `['text_1', 'content']`)
   @prop {Number} startOffset the character where the annoation starts
   @prop {Number} endOffset: the character where the annoation starts
@@ -30,13 +27,8 @@ import DocumentNode from './DocumentNode'
     })
   })
   ```
-**/
-
+*/
 class PropertyAnnotation extends DocumentNode {
-
-  get _isAnnotation() { return true }
-
-  get _isPropertyAnnotation() { return true }
 
   /**
     Get the plain text spanned by this annotation.
@@ -116,6 +108,9 @@ PropertyAnnotation.define({
 })
 
 PropertyAnnotation.isPropertyAnnotation = true
+
+PropertyAnnotation.prototype._isAnnotation = true
+PropertyAnnotation.prototype._isPropertyAnnotation = true
 
 // these properties making PropertyAnnotation compatible with ContainerAnnotations
 Object.defineProperties(PropertyAnnotation.prototype, {

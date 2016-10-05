@@ -74,11 +74,6 @@ var __id__ = 0
   1. {@link ui/Component#willReceiveProps}
   1. {@link ui/Component#willUpdateState}
 
-
-  @class Component
-  @component
-  @abstract
-  @extends ui/DOMElement
   @implements util/EventEmitter
 
   @example
@@ -102,8 +97,6 @@ var __id__ = 0
   HelloMessage.mount({name: 'John'}, document.body)
   ```
 */
-
-/** INCLUDE_IN_API_DOCS */
 class Component extends DOMElement.Delegator {
   /**
     Construcutor is only used internally.
@@ -252,12 +245,21 @@ class Component extends DOMElement.Delegator {
     ```
 
     @param  {String} componentName The component's registration name
+    @param  {Boolean} maybe if `true` then does not throw when no Component is found
     @return {Class}                The ComponentClass
   */
-  getComponent(nodeType) {
-    let componentRegistry = this.context.componentRegistry
+  getComponent(nodeType, maybe) {
+    let componentRegistry = this.getComponentRegistry()
     if (!componentRegistry) throw new Error('Missing componentRegistry.')
-    return componentRegistry.get(nodeType)
+    const ComponentClass = componentRegistry.get(nodeType)
+    if (!maybe && !ComponentClass) {
+      throw new Error('No Component registered with name ' + nodeType)
+    }
+    return ComponentClass
+  }
+
+  getComponentRegistry() {
+    return this.context.componentRegistry
   }
 
   /**

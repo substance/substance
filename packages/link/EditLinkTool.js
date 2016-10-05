@@ -5,6 +5,8 @@ import Tool from '../tools/Tool'
 
   Designed so that it can be used either in a toolbar, or within
   an overlay on the Surface.
+
+  @component
 */
 class EditLinkTool extends Tool {
 

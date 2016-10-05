@@ -5,15 +5,9 @@ import EventEmitter from '../util/EventEmitter'
 /**
   Base node type for document nodes.
 
-  @class
-  @abstract
-
-  @param {model/Document} doc A document instance
-  @param {object} node properties
   @example
 
   The following example shows how a new node type is defined.
-
 
   ```js
   class Todo extends TextBlock {}
@@ -24,18 +18,20 @@ import EventEmitter from '../util/EventEmitter'
   })
   ```
 
-  The following
-    data types are supported:
+  The following data types are supported:
 
-      - `string` bare metal string data type
-      - `text` a string that carries annotations
-      - `number` numeric values
-      - `bool` boolean values
-      - 'id' a node id referencing another node in the document
+  - `string` bare metal string data type
+  - `text` a string that carries annotations
+  - `number` numeric values
+  - `bool` boolean values
+  - 'id' a node id referencing another node in the document
 */
-
 class DocumentNode extends DataNode {
 
+  /**
+    @param {Document} doc A document instance
+    @param {object} node properties
+  */
   constructor(doc, props) {
     super(props)
     // being less strict here allows us to create a detached node

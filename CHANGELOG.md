@@ -1,7 +1,7 @@
 ## Beta 5
 
 - Substance is now written in ES6
-- More usage options: Use Substance via <script> tag or use a module bundler of your choice (Rollup, Browserify, Webpack, ...)
+- More usage options: Use Substance via `<script>` tag or use a module bundler of your choice (Rollup, Browserify, Webpack, ...)
 - Pure CSS instead of SASS for easier integration
 - Extracted develoment environment into substance-bundler tool.
 - Extracted test environment into substance-test

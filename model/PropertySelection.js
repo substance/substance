@@ -7,9 +7,6 @@ import Range from './Range'
 /**
   A selection which is bound to a property. Implements {@link model/Selection}.
 
-  @class
-  @extends model/Selection
-
   @example
 
   ```js
@@ -22,6 +19,14 @@ import Range from './Range'
 */
 class PropertySelection extends Selection {
 
+  /**
+    @param {array} path
+    @param {int} startOffset
+    @param {int} endOffset
+    @param {bool} reverse
+    @param {string} [containerId]
+    @param {string} [surfaceId]
+  */
   constructor(path, startOffset, endOffset, reverse, containerId, surfaceId) {
     super()
 
@@ -457,6 +462,8 @@ PropertySelection.fromJSON = function(json) {
   Adapter for Coordinate oriented implementations.
   E.g. Coordinate transforms can be applied to update selections
   using OT.
+
+  @internal
 */
 class CoordinateAdapter extends Coordinate {
 
