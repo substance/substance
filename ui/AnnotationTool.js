@@ -1,10 +1,22 @@
 import Tool from '../packages/tools/Tool'
 
-/*
- * Abstract class for annotation tools like StrongTool, EmphasisTool, LinkTool.
- *
- * @component
- */
+/**
+
+  Reuseable AnnotationTool component. Can be used without modification
+  for pure marker annotations that don't carry data. E.g. strong, emphasis,
+  superscript, etc.
+
+  @class
+  @component
+
+  @example
+
+  ```
+  config.addTool('strong', AnnotationTool, {
+    target: 'annotations'
+  })
+  ```
+*/
 
 class AnnotationTool extends Tool {
 

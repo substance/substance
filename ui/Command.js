@@ -25,8 +25,6 @@
   }
   ```
 */
-
-/** INCLUDE_IN_API_DOCS */
 class Command {
 
   /**

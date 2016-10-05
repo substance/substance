@@ -6,7 +6,7 @@ import EventEmitter from '../../util/EventEmitter'
 import DataObject from './DataObject'
 import NodeFactory from './NodeFactory'
 
-/**
+/*
   A data storage implemention that supports data defined via a {@link Schema},
   and incremental updates which are backed by a OT library.
 

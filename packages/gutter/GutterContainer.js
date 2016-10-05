@@ -1,6 +1,6 @@
 import Component from '../../ui/Component'
 
-/**
+/*
   GutterContainer component
 
   Used internally by surface to place the gutter relative to selection/cursor

@@ -6,7 +6,9 @@ import truncateAnnotation from '../model/transform/truncateAnnotation'
 
 /**
   A class for commands intended to be executed on the annotations.
-  See the example below to learn how to define a custom `AnnotationCommand`.
+
+  See the example below to learn how to register an `AnnotationCommand`
+  for a strong annotation.
 
   @class AnnotationCommand
   @extends ui/Command
@@ -14,13 +16,12 @@ import truncateAnnotation from '../model/transform/truncateAnnotation'
   @example
 
   ```js
-  import AnnotationCommand from 'substance/ui/AnnotationCommand'
+  import { AnnotationCommand } from 'substance'
 
   config.addCommand('strong', AnnotationCommand, {nodeType: 'strong'})
   ```
 */
 
-/** INCLUDE_IN_API_DOCS */
 class AnnotationCommand extends Command {
 
   constructor(...args) {

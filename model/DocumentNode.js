@@ -24,7 +24,7 @@ import EventEmitter from '../util/EventEmitter'
   - `text` a string that carries annotations
   - `number` numeric values
   - `bool` boolean values
-  - 'id' a node id referencing another node in the document
+  - `id` a node id referencing another node in the document
 */
 class DocumentNode extends DataNode {
 
