@@ -8,6 +8,8 @@ import insertInlineNode from '../../model/transform/insertInlineNode'
 
   @example
 
+  Define a custom command.
+
   ```
   class AddXRefCommand extends InsertInlineNodeCommand {
     createNodeData() {
@@ -21,14 +23,17 @@ import insertInlineNode from '../../model/transform/insertInlineNode'
   }
   ```
 
-  In configurator
+  Register it in your app using the configurator.
+
   ```
   config.addCommand('add-xref', AddXRefCommand, {nodeType: 'xref'})
   ```
 */
 
-/** INCLUDE_IN_API_DOCS */
 class InsertInlineNodeCommand extends Command {
+  /**
+    @param config Takes a config object, provided on registration in configurator
+  */
   constructor(...args) {
     super(...args)
 
@@ -41,8 +46,8 @@ class InsertInlineNodeCommand extends Command {
     Determine command state for inline node insertion. Command is enabled
     if selection is a property selection.
   */
-  getCommandState(params, context) {
-    let sel = context.documentSession.getSelection()
+  getCommandState(params) {
+    let sel = params.selection
     let newState = {
       disabled: !sel.isPropertySelection(),
       active: false
@@ -53,10 +58,10 @@ class InsertInlineNodeCommand extends Command {
   /**
     Insert new inline node at the current selection
   */
-  execute(params, context) {
-    let state = this.getCommandState(params, context)
+  execute(params) {
+    let state = this.getCommandState(params)
     if (state.disabled) return
-    let surface = context.surface || context.surfaceManager.getFocusedSurface()
+    let surface = params.surface
     if (surface) {
       surface.transaction(function(tx, args) {
         return this.insertInlineNode(tx, args)
@@ -74,10 +79,6 @@ class InsertInlineNodeCommand extends Command {
     return {
       type: this.config.nodeType
     }
-  }
-
-  _getAnnotationsForSelection(params) {
-    return params.selectionState.getAnnotationsForType(this.config.nodeType)
   }
 
 }
