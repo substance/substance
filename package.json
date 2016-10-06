@@ -10,7 +10,7 @@
     "node": ">=0.11"
   },
   "main": "dist/substance.cjs.js",
-  "jsnext:main": "dist/substance.es6.js",
+  "jsnext:main": "index.es.js",
   "scripts": {
     "test": "node test",
     "docs": "node make docs -w -s",
