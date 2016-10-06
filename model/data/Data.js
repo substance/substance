@@ -41,7 +41,7 @@ class Data extends EventEmitter {
     @returns {bool} `true` if a node with id exists, `false` otherwise.
    */
   contains(id) {
-    return Boolean(this.nodes[id])
+    return this.nodes.contains(id)
   }
 
   /**

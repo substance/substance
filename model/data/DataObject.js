@@ -22,7 +22,9 @@ class DataObject {
     }
   }
 
-  get _isDataObject() { return true }
+  contains(id) {
+    return Boolean(this.getRoot()[id])
+  }
 
   getRoot() {
     if (this.__root__) {
@@ -92,5 +94,7 @@ class DataObject {
   }
 
 }
+
+DataObject.prototype._isDataObject = true
 
 export default DataObject
