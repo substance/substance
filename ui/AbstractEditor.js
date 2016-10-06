@@ -34,7 +34,7 @@ class AbstractEditor extends Component {
     Define the editors render method here.
   */
   render(...args) {
-    super(...args)
+    super.render(...args)
   }
 
   didMount() {
