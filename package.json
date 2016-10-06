@@ -30,7 +30,7 @@
     "karma-tap": "1.0.4",
     "karma-tape-reporter": "1.0.3",
     "substance-bundler": "0.4.26",
-    "substance-docgen": "0.4.3",
+    "substance-docgen": "0.4.4",
     "substance-test": "^0.2.3"
   },
   "browser": {

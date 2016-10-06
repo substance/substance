@@ -1,5 +1,4 @@
 var b = require('substance-bundler')
-var docgen = require('substance-docgen')
 
 b.task('clean', function() {
   b.rm('./dist');
@@ -130,6 +129,7 @@ b.task('npm:copy:css', function() {
 })
 
 function _docs(mode, dest) {
+  var docgen = require('substance-docgen')
   docgen.bundle(b, {
     src: [
       './*.md',
