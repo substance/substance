@@ -2,7 +2,7 @@
 
 Substance is a JavaScript library for web-based content editing. It provides building blocks for realizing custom text editors and web-based publishing systems.
 
-Read the [introduction post](https://medium.com/@_mql/build-your-own-editor-with-substance-7790eb600109), check the [project website](http://substance.io), the [examples](https://github.com/substance/examples) and the [API documentation](http://substance.io/docs).
+Check the [project website](http://substance.io) and the [documentation](http://substance.io/docs).
 
 ## Features
 
@@ -85,18 +85,3 @@ To run the test-suite headless.
 $ npm test
 ```
 
-## Roadmap
-
-### Beta 6
-
-*ETA: November 2016*
-
-- Key bindings
-- Improved Unicode support
-- List package
-
-### 1.0 Final
-
-- Complete documentation
-- Full test coverage (Current Coverage Status: [![Current Coverage Status](https://coveralls.io/repos/github/substance/substance/badge.svg?branch=develop)](https://coveralls.io/github/substance/substance?branch=develop))
-- Final versions of API's

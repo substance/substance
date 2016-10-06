@@ -1,1 +1,0 @@
-TODO: getting started guide
