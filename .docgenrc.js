@@ -9,6 +9,7 @@ module.exports = {
     { type: "page", id: "about", title: "About", src: "doc/about.md" },
     { type: "section", id: "quickstart", title: "Quickstart", src: "doc/quickstart.md" },
     { type: "section", id: "changelog", title: "Changelog", src: "CHANGELOG.md" },
+    { type: "section", id: "roadmap", title: "Roadmap", src: "doc/roadmap.md" },
     { type: "section", id: "license", title: "License", src: "LICENSE.md" },
     { type: "page", id: "guides", title: "Guides", src: "doc/guides.md" },
     { type: "section", id: "your-first-editor", title: "Your first Substance editor", src: "doc/your-first-editor.md" },

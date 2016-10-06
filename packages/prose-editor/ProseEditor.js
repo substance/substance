@@ -3,6 +3,26 @@ import ContainerEditor from '../../ui/ContainerEditor'
 import ProseEditorOverlayTools from './ProseEditorOverlayTools'
 import Toolbar from '../tools/Toolbar'
 
+/**
+  Configurable ProseEditor component
+
+  @example
+
+  ```js
+  const cfg = new Configurator()
+  cfg.import(ProseEditorPackage)
+  cfg.import(SuperscriptPackage)
+
+  window.onload = function() {
+    let doc = configurator.createArticle(fixture)
+    let documentSession = new DocumentSession(doc)
+    ProseEditor.mount({
+      documentSession: documentSession,
+      configurator: configurator
+    }, document.body)
+  }
+  ```
+*/
 class ProseEditor extends AbstractEditor {
 
   render($$) {
