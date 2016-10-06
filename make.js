@@ -1,6 +1,4 @@
 var b = require('substance-bundler')
-var path = require('path')
-var docgenConfig = require('./.docgenrc')
 
 b.task('clean', function() {
   b.rm('./dist');
@@ -39,7 +37,7 @@ function _server(DIST, transpileToES5) {
   b.js('./index.es.js', {
     buble: transpileToES5,
     commonjs: { include: [
-      '/**/lodash/**'
+      'node_modules/lodash/**'
     ] },
     external: [ 'substance-cheerio' ],
     targets: [{
@@ -113,7 +111,7 @@ var NPMDIST = NPM+'dist/'
 
 b.task('npm:clean', function() {
   b.rm(NPM)
-  b.rm('.docs')
+  b.rm(NPM+'docs')
 })
 
 b.task('npm:copy:js', function() {
@@ -130,10 +128,9 @@ b.task('npm:copy:css', function() {
   _css(NPMDIST)
 })
 
-// a fully debuggable version of the docgenerator
-b.task('docs', function() {
-  b.copy('node_modules/substance-docgen/dist/reader/**/*', '.docs/', {root: 'node_modules/substance-docgen/dist/reader'})
-  b.custom('Bundling sourcefiles for docgen...', {
+function _docs(mode, dest) {
+  var docgen = require('substance-docgen')
+  docgen.bundle(b, {
     src: [
       './*.md',
       './doc/*.md',
@@ -143,19 +140,20 @@ b.task('docs', function() {
       './ui/*.js',
       './util/*.js',
     ],
-    dest: '.docs/data.js',
-    execute: function(files) {
-      var bundleSources = require('substance-docgen/bundleSources')
-      files = files.map(function(file) {
-        return path.relative(__dirname, file)
-      })
-      bundleSources(files, '.docs/data.js', docgenConfig)
-    }
+    dest: dest,
+    config: './.docgenrc.js',
+    mode: mode // one of: 'source', 'json', 'site' (default: 'json')
   })
+}
+
+b.task('docs', function() {
+  // creates a data.js file with prebuilt documentation
+  // this gives the best trade-off between build and load time
+  _docs('json', '.docs/')
 })
 
-b.task('npm:docs', ['docs'], function() {
-  b.copy('.docs', NPM+'doc')
+b.task('npm:docs', function() {
+  _docs('site', NPM+'docs/')
 })
 
 b.task('npm:js', function() {
