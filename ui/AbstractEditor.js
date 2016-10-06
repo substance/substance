@@ -5,6 +5,24 @@ import GlobalEventHandler from './GlobalEventHandler'
 import SurfaceManager from '../packages/surface/SurfaceManager'
 import DragManager from './DragManager'
 
+/**
+  Reusable abstract editor implementation.
+
+  @example
+
+  ```js
+  class SimpleWriter extends AbstractEditor {
+
+    render($$) {
+      // render editor
+    }
+
+    documentSessionUpdated() {
+      // actions in response to doc session updates. E.g. updating a toolbar
+    }
+  }
+  ```
+*/
 class AbstractEditor extends Component {
 
   constructor(...args) {

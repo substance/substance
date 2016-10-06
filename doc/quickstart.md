@@ -5,7 +5,7 @@ The fastest way to try out Substance is including it as a script into your websi
 <link rel="stylesheet" type="text/css" href="http://cdn.substance.io/substance-1.0.0-beta.5.1.css"/>
 ```
 
-Now you can start using Substance API's. The code below works in all modern browsers that support ES6.
+Now you can start using Substance API's. The code below works in all modern browsers that support ES2015.
 
 ```js
 const { ProseEditor, ProseEditorPackage, SuperscriptPackage, Configurator } = substance
@@ -33,8 +33,6 @@ window.onload = function() {
   }, document.body)
 }
 ```
-
-You can download the [complete example](substance-quickstart.html) as an HTML file.
 
 ## Install as package
 
