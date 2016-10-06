@@ -15,10 +15,10 @@ class SwitchTextTypeCommand extends Command {
     }
   }
 
-  getTextType(params, textTypeName) {
-    let textTypes = this.getTextTypes()
+  getTextType(params) {
+    let textTypes = this.getTextTypes(params)
     return _find(textTypes, function(t) {
-      return t.name === textTypeName
+      return t.name === params.textType
     })
   }
 
@@ -81,10 +81,10 @@ class SwitchTextTypeCommand extends Command {
   }
 
   /**
-    Trigger a switchTextType transaction
-  */
+   Trigger a switchTextType transaction
+   */
   execute(params) {
-    let textType = this.getTextType(params.textType)
+    let textType = this.getTextType(params)
     let nodeData = textType.data
     let surface = params.surface
     if (!surface) {
