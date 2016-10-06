@@ -27,58 +27,59 @@ const NOT_IMPLEMENTED = 'This method is not implemented.'
 */
 class DOMElement {
 
-  /**
+  /*
     The element's id.
     @property {String} ui/DOMElement#id
   */
 
-  /**
+  /*
     The element's tag name in lower case.
     @property {String} ui/DOMElement#tagName
   */
 
-  /**
+  /*
     @property {String} ui/DOMElement#textContent
    */
 
-  /**
+  /*
     The inner HTML string.
 
     @property {String} ui/DOMElement#innerHTML
    */
 
-  /**
+  /*
     The outer HTML string.
 
     @property {String} ui/DOMElement#outerHTML
    */
 
-  /**
+  /*
     An array of child nodes, including nodes such as TextNodes.
 
     @property {Array<ui/DOMElement>} ui/DOMElement#childNodes
    */
 
-  /**
+  /*
     An array of child elements.
 
     @property {Array<ui/DOMElement>} ui/DOMElement#children children
    */
 
-  /**
+  /*
     The computed height.
 
     @property {Array<ui/DOMElement>} ui/DOMElement#height
    */
 
-  /**
+  /*
     The computed width.
 
     @property {Array<ui/DOMElement>} ui/DOMElement#width
    */
 
-  get _isDOMElement() { return true }
-
+  /**
+    @returns the native element
+  */
   getNativeElement() {
     throw new Error(NOT_IMPLEMENTED)
   }
