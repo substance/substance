@@ -19,17 +19,23 @@ b.task('css', function() {
 function _browser(DIST, transpileToES5) {
   b.js('./index.es.js', {
     buble: transpileToES5,
+
     ignore: ['substance-cheerio'],
     commonjs: { include: ['node_modules/lodash/**'] },
     targets: [{
+      useStrict: !transpileToES5,
       dest: DIST+'substance.js',
       format: 'umd', moduleName: 'substance', sourceMapRoot: __dirname, sourceMapPrefix: 'substance'
     }]
   })
 }
 
-b.task('browser', function() {
+b.task('browser:pure', function() {
   _browser('./dist/', false)
+})
+
+b.task('browser', function() {
+  _browser('./dist/', true)
 })
 
 
@@ -182,7 +188,7 @@ b.task('npm', ['npm:clean', 'npm:copy:js', 'npm:copy:css', 'npm:docs', 'npm:js',
 b.task('default', ['build'])
 
 // Default dev mode, only browser bundles are made and no ES5 transpilation happens
-b.task('dev', ['clean', 'css', 'browser', 'test:assets', 'test:browser:pure' , 'docs'])
+b.task('dev', ['clean', 'css', 'browser:pure', 'test:assets', 'test:browser:pure' , 'docs'])
 
 // SERVER
 
