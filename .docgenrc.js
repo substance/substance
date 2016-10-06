@@ -7,10 +7,12 @@ module.exports = {
   sha: "develop",
   content: [
     { type: "page", id: "about", title: "About", src: "doc/about.md" },
-    { type: "section", id: "readme", title: "Readme", src: "README.md" },
+    { type: "section", id: "quickstart", title: "Quickstart", src: "doc/quickstart.md" },
     { type: "section", id: "changelog", title: "Changelog", src: "CHANGELOG.md" },
+    { type: "section", id: "license", title: "License", src: "LICENSE.md" },
     { type: "page", id: "guides", title: "Guides", src: "doc/guides.md" },
-    { type: "section", id: "getting_started", title: "Getting Started", src: "doc/getting-started.md" },
+    { type: "section", id: "your-first-editor", title: "Your first Substance editor", src: "doc/your-first-editor.md" },
+    { type: "section", id: "integrating-substance", title: "Integrating Substance", src: "doc/integrating-substance.md" },
     { type: "api", id: "api", title: "API" ,
       files: [
         // "model/documentHelpers.js",
