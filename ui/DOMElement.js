@@ -966,6 +966,8 @@ var _propertyDefinitions = {
   },
 }
 
+DOMElement.prototype._isDOMElement = true
+
 DOMElement._propertyNames = Object.keys(_propertyDefinitions)
 
 DOMElement._defineProperties = function(DOMElementClass, propertyNames) {
