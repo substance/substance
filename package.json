@@ -29,8 +29,8 @@
     "karma-source-map-support": "1.1.0",
     "karma-tap": "1.0.4",
     "karma-tape-reporter": "1.0.3",
-    "substance-bundler": "0.4.25",
-    "substance-docgen": "0.3.5",
+    "substance-bundler": "0.4.26",
+    "substance-docgen": "0.4.3",
     "substance-test": "^0.2.3"
   },
   "browser": {
