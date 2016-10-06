@@ -30,6 +30,13 @@ class AbstractEditor extends Component {
     this._initialize(this.props)
   }
 
+  /**
+    Define the editors render method here.
+  */
+  render(...args) {
+    super(...args)
+  }
+
   didMount() {
     this.documentSession.on('didUpdate', this.documentSessionUpdated, this)
   }
@@ -115,6 +122,11 @@ class AbstractEditor extends Component {
     }
   }
 
+  /**
+    Called when documentsession was updated (e.g. when the selection changes).
+
+    E.g. update toolbars.
+  */
   documentSessionUpdated() {
     throw new Error('This method is abstract')
   }
