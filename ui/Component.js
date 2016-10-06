@@ -101,7 +101,6 @@ class Component extends DOMElement.Delegator {
   /**
     Construcutor is only used internally.
 
-    @constructor
     @param {Component} parent The parent component
     @param {Object} props     Properties against which this class must
                               be rendered the first time.

@@ -15,11 +15,11 @@
 
   ```
   class MyCommand extends Command {
-    getCommandState(props, context) {
-      // determine commandState based on props and context
+    getCommandState(params, context) {
+      // determine commandState based on params and context
     }
 
-    execute(props, context) {
+    execute(params, context) {
       // perform operations on the document
     }
   }
@@ -57,7 +57,24 @@ class Command {
     Determines command state, based on passed params and context. The command
     state is usually used as props for tool components.
 
-    For an example implementation see {@link ui/EditAnnotation#getCommandState}
+    @example
+
+    This shows the implementation of {@link EditAnnotationCommand#getCommandState}
+
+    ```
+    getCommandState(params) {
+      const sel = this._getSelection(params)
+      const annos = params.selectionState.getAnnotationsForType(this.config.nodeType)
+      const newState = {
+        disabled: true,
+      }
+
+      if (annos.length === 1 && sel.isPropertySelection()) {
+        newState.disabled = false
+        newState.node = annos[0]
+      }
+    }
+    ```
 
     @param {Object} params      Provides documentSession, selectionState, surface, selection
     @param {Object} context     Provides app-specific context.
