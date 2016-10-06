@@ -64,17 +64,17 @@ var __id__ = 0
 
   ### Lifecycle hooks
 
-  The {@link ui/RenderingEngine} triggers a set of hooks for you to define behavior
+  The {@link RenderingEngine} triggers a set of hooks for you to define behavior
   in various stages of the rendering cycle. The names are pretty self
   explanatory. If in doubt, please check out the method documentation below.
 
-  1. {@link ui/Component#didMount}
-  1. {@link ui/Component#didUpdate}
-  1. {@link ui/Component#dispose}
-  1. {@link ui/Component#willReceiveProps}
-  1. {@link ui/Component#willUpdateState}
+  1. {@link Component#didMount}
+  1. {@link Component#didUpdate}
+  1. {@link Component#dispose}
+  1. {@link Component#willReceiveProps}
+  1. {@link Component#willUpdateState}
 
-  @implements util/EventEmitter
+  @implements EventEmitter
 
   @example
 
@@ -101,7 +101,6 @@ class Component extends DOMElement.Delegator {
   /**
     Construcutor is only used internally.
 
-    @constructor
     @param {Component} parent The parent component
     @param {Object} props     Properties against which this class must
                               be rendered the first time.
@@ -172,8 +171,8 @@ class Component extends DOMElement.Delegator {
   /**
     Override this within your component to provide the initial state for the
     component. This method is internally called by the
-    {@link ui/RenderingEngine} and the state defined here is made available to
-    the {@link ui/Component#render} method as this.state.
+    {@link RenderingEngine} and the state defined here is made available to
+    the {@link Component#render} method as this.state.
 
     @return {Object} the initial state
   */

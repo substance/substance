@@ -15,6 +15,11 @@ class EditAnnotationCommand extends Command {
     }
   }
 
+  /**
+    Get command state
+
+    @return {Object} object with `disabled` and `node` properties
+  */
   getCommandState(params) {
     let sel = this._getSelection(params)
     let annos = this._getAnnotationsForSelection(params)
