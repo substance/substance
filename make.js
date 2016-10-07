@@ -8,8 +8,7 @@ b.task('clean', function() {
 });
 
 function _css(DIST) {
-  b.copy('*.css', DIST)
-  b.copy('packages/**/*.css', DIST)
+  b.css('substance.css', DIST+'substance.css')
 }
 
 b.task('css', function() {
