@@ -126,6 +126,7 @@ b.task('npm:copy:js', function() {
   b.copy('packages/**/*.js', NPM)
   b.copy('ui/*.js', NPM)
   b.copy('util/*.js', NPM)
+  b.copy('test/*.js', NPM)
 })
 
 b.task('npm:copy:css', function() {
