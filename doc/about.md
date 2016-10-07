@@ -71,7 +71,7 @@ As a web-developer, jump right over to the {@link guides} section and learn how 
 Also check out [SimpleWriter](https://github.com/substance/simple-writer) our editor reference implementation, and the [examples](https://github.com/substance/examples) for learning about individual features.
 
 
-Tell us about your experiences and let us know what you liked and what’s missing to solve your use-case. We're glad for feedback and contributions in any form.
+Tell us about your experiences and let us know what you liked and what's missing to solve your use-case. We're glad for feedback and contributions in any form.
 
 Happy editor building!
 

@@ -36,4 +36,4 @@ window.onload = function() {
 
 ## Install as package
 
-Of course Substance can be used via npm and integrated into development toolchains, such as Rollup, Browserify, Webpack. To learn more please read the [integration guide]{@link integrating-substance}.
+Of course Substance can be used via npm and integrated into development toolchains, such as Rollup, Browserify, Webpack. To learn more please read the {@link integrating-substance} guide.
