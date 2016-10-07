@@ -169,7 +169,7 @@ b.task('npm:js', function() {
 
 var stuff = [
   'package.json',
-  'LICENSE',
+  'LICENSE.md',
   'README.md',
   'CHANGELOG.md'
 ]
