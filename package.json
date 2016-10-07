@@ -7,7 +7,7 @@
     "url": "https://github.com/substance/substance.git"
   },
   "engines": {
-    "node": ">=0.11"
+    "node": ">=6"
   },
   "main": "dist/substance.cjs.js",
   "jsnext:main": "index.es.js",
