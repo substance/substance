@@ -171,7 +171,8 @@ var stuff = [
   'package.json',
   'LICENSE.md',
   'README.md',
-  'CHANGELOG.md'
+  'CHANGELOG.md',
+  'make.js'
 ]
 b.task('npm:stuff', function() {
   stuff.forEach(function(f) {
