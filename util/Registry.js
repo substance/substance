@@ -1,12 +1,8 @@
-'use strict';
-
-var forEach = require('lodash/forEach');
-var oo = require('./oo');
-var warn = require('./warn');
+import forEach from 'lodash/forEach'
 
 // just as a reference to detect name collisions
 // with native Object properties
-var _obj = {};
+let _obj = {}
 
 /*
  * Simple registry implementation.
@@ -14,20 +10,20 @@ var _obj = {};
  * @class Registry
  * @private
  */
-function Registry(entries) {
-  this.entries = {};
-  this.names = [];
+class Registry {
+  constructor(entries, validator) {
+    this.entries = {}
+    this.names = []
+    this.validator = validator
 
-  if (entries) {
-    forEach(entries, function(entry, name) {
-      this.add(name, entry);
-    }.bind(this));
+    if (entries) {
+      forEach(entries, function(entry, name) {
+        this.add(name, entry)
+      }.bind(this))
+    }
   }
-}
 
-Registry.Prototype = function() {
-
-  this._isRegistry = true;
+  get _isRegistry() { return true }
 
   /**
    * Check if an entry is registered for a given name.
@@ -36,9 +32,9 @@ Registry.Prototype = function() {
    * @method contains
    * @memberof module:Basics.Registry.prototype
    */
-  this.contains = function(name) {
-    return this.entries.hasOwnProperty(name);
-  };
+  contains(name) {
+    return this.entries.hasOwnProperty(name)
+  }
 
   /**
    * Add an entry to the registry.
@@ -48,16 +44,19 @@ Registry.Prototype = function() {
    * @method add
    * @memberof module:Basics.Registry.prototype
    */
-  this.add = function(name, entry) {
+  add(name, entry) {
+    if (this.validator) {
+      this.validator(entry)
+    }
     if (_obj[name]) {
-      throw new Error('Illegal key: "'+name+'" is a property of Object which is thus not allowed as a key.');
+      throw new Error('Illegal key: "'+name+'" is a property of Object which is thus not allowed as a key.')
     }
     if (this.contains(name)) {
-      this.remove(name);
+      this.remove(name)
     }
-    this.entries[name] = entry;
-    this.names.push(name);
-  };
+    this.entries[name] = entry
+    this.names.push(name)
+  }
 
   /**
    * Remove an entry from the registry.
@@ -66,22 +65,22 @@ Registry.Prototype = function() {
    * @method remove
    * @memberof module:Basics.Registry.prototype
    */
-  this.remove = function(name) {
-    var pos = this.names.indexOf(name);
+  remove(name) {
+    let pos = this.names.indexOf(name)
     if (pos >= 0) {
-      this.names.splice(pos, 1);
+      this.names.splice(pos, 1)
     }
-    delete this.entries[name];
-  };
+    delete this.entries[name]
+  }
 
   /**
    * @method clear
    * @memberof module:Basics.Registry.prototype
    */
-  this.clear = function() {
-    this.names = [];
-    this.entries = {};
-  };
+  clear() {
+    this.names = []
+    this.entries = {}
+  }
 
   /**
    * Get the entry registered for a given name.
@@ -91,9 +90,9 @@ Registry.Prototype = function() {
    * @method get
    * @memberof module:Basics.Registry.prototype
    */
-  this.get = function(name) {
-    return this.entries[name];
-  };
+  get(name) {
+    return this.entries[name]
+  }
 
   /*
    * Iterate all registered entries in the order they were registered.
@@ -101,23 +100,38 @@ Registry.Prototype = function() {
    * @param {Function} callback with signature function(entry, name)
    * @param {Object} execution context
    */
-  this.each = function(callback, ctx) {
-    warn('DEPRECATED: use Registry.forEach(cb) instead');
-    return this.forEach(callback.bind(ctx));
-  };
+  each(callback, ctx) {
+    console.warn('DEPRECATED: use Registry.forEach(cb) instead')
+    return this.forEach(callback.bind(ctx))
+  }
 
-  this.forEach = function(callback) {
-    for (var i = 0; i < this.names.length; i++) {
-      var name = this.names[i];
-      var _continue = callback(this.entries[name], name);
+  forEach(callback) {
+    for (let i = 0; i < this.names.length; i++) {
+      let name = this.names[i]
+      let _continue = callback(this.entries[name], name)
       if (_continue === false) {
-        break;
+        break
       }
     }
-  };
+  }
 
-};
+  map(callback) {
+    let result = []
+    this.forEach(function(entry, name) {
+      result.push(callback(entry, name))
+    })
+    return result
+  }
 
-oo.initClass(Registry);
+  filter(callback) {
+    let result = []
+    this.forEach(function(entry, name) {
+      if (callback(entry, name)) {
+        result.push(entry)
+      }
+    })
+    return result
+  }
+}
 
-module.exports = Registry;
+export default Registry

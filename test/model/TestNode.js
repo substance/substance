@@ -1,22 +1,15 @@
-'use strict';
+import DocumentNode from '../../model/DocumentNode'
 
-var DocumentNode = require('../../model/DocumentNode');
+class TestNode extends DocumentNode {}
 
-function TestNode() {
-  TestNode.super.apply(this, arguments);
-}
-
-DocumentNode.extend(TestNode);
-
-TestNode.static.name = "test-node";
-
-TestNode.static.defineSchema({
+TestNode.define({
+  type: "test-node",
   boolVal: { type: "boolean", default: false },
   stringVal: { type: "string", default: "" },
   arrayVal: { type: ["array","string"], default: [] },
   objectVal: { type: "object", default: {} },
-});
+})
 
-TestNode.static.isBlock = true;
+TestNode.isBlock = true
 
-module.exports = TestNode;
+export default TestNode

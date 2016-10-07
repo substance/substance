@@ -1,26 +1,29 @@
-'use strict';
+import Paragraph from './Paragraph'
+import ParagraphComponent from './ParagraphComponent'
+import ParagraphHTMLConverter from './ParagraphHTMLConverter'
+import ParagraphXMLConverter from './ParagraphXMLConverter'
 
-var Paragraph = require('./Paragraph');
-var ParagraphComponent = require('./ParagraphComponent');
-var ParagraphHTMLConverter = require('./ParagraphHTMLConverter');
-
-module.exports = {
+export default {
   name: 'paragraph',
   configure: function(config) {
-    config.addNode(Paragraph);
-    config.addComponent(Paragraph.static.name, ParagraphComponent);
-    config.addConverter('html', ParagraphHTMLConverter);
+    config.addNode(Paragraph)
+    config.addComponent(Paragraph.type, ParagraphComponent)
+    config.addConverter('html', ParagraphHTMLConverter)
+    config.addConverter('xml', ParagraphXMLConverter)
     config.addTextType({
       name: 'paragraph',
       data: {type: 'paragraph'}
-    });
+    })
     config.addLabel('paragraph', {
       en: 'Paragraph',
       de: 'Paragraph'
-    });
+    })
     config.addLabel('paragraph.content', {
       en: 'Paragraph',
       de: 'Paragraph'
-    });
-  }
-};
+    })
+  },
+  Paragraph: Paragraph,
+  ParagraphComponent: ParagraphComponent,
+  ParagraphHTMLConverter: ParagraphHTMLConverter
+}

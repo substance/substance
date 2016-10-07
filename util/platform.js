@@ -1,6 +1,4 @@
-'use strict';
-
-var inBrowser = require('./inBrowser');
+import inBrowser from './inBrowser'
 
 /**
   @module
@@ -10,10 +8,13 @@ var inBrowser = require('./inBrowser');
   @example
 
   ```js
-  var platform = require('substance/util/platform');
+  import platform from 'substance/util/platform'
   ```
 */
 var platform = {
+
+  inBrowser: inBrowser,
+
   /**
     True if user agent is Internet Explorer or Microsoft Edge.
   */
@@ -63,8 +64,8 @@ if (typeof window !== 'undefined') {
   } else if (edge > 0) {
     // IE 12 => return version number
     platform.isIE = true;
-    platform.version = 12;
     platform.isEdge = true;
+    platform.version = 12;
     // TODO: if we need someday, this would be the exact version number
     parseInt(ua.substring(edge + 5, ua.indexOf('.', edge)), 10);
   }
@@ -76,4 +77,4 @@ if (typeof window !== 'undefined') {
   platform.isWebkit = !platform.isFF && !platform.isIE;
 }
 
-module.exports = platform;
+export default platform;

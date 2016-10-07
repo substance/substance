@@ -1,23 +1,21 @@
-'use strict';
-
-module.exports = function(tx) {
-  var body = tx.get('body');
+export default function(tx) {
+  var body = tx.get('body')
 
   tx.create({
     id: 'h1',
     type: 'heading',
     level: 1,
     content: 'A Dream Within a Dream'
-  });
-  body.show('h1');
+  })
+  body.show('h1')
 
   tx.create({
     id: 'h2',
     type: 'heading',
     level: 2,
     content: 'by Edgar Allan Poe'
-  });
-  body.show('h2');
+  })
+  body.show('h2')
 
   tx.create({
     id: 'p1',
@@ -27,7 +25,7 @@ module.exports = function(tx) {
       "And, in parting from you now,",
       "Thus much let me avow--",
       "You are not wrong, who deem",
-      "That my days have been a dream;",
+      "That my days have been a dream",
       "Yet if hope has flown away",
       "In a night, or in a day,",
       "In a vision, or in none,",
@@ -35,8 +33,8 @@ module.exports = function(tx) {
       "All that we see or seem",
       "Is but a dream within a dream."
     ].join("\n")
-  });
-  body.show('p1');
+  })
+  body.show('p1')
 
   tx.create({
     id: 'p2',
@@ -56,6 +54,6 @@ module.exports = function(tx) {
       "Is all that we see or seem",
       "But a dream within a dream?"
     ].join("\n")
-  });
-  body.show('p2');
+  })
+  body.show('p2')
 };

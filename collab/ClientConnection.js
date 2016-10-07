@@ -1,105 +1,102 @@
-"use strict";
+import EventEmitter from '../util/EventEmitter'
+import Err from '../util/SubstanceError'
 
-var EventEmitter = require('../util/EventEmitter');
-var Err = require('../util/SubstanceError');
-var __id__ = 0;
+let __id__ = 0
 
 /**
   ClientConnection abstraction. Uses websockets internally
 */
-function ClientConnection(config) {
-  ClientConnection.super.apply(this);
+class ClientConnection extends EventEmitter { 
+  constructor(config) {
+    super()
 
-  this.__id__ = __id__++;
-  this.config = config;
-  this._onMessage = this._onMessage.bind(this);
-  this._onConnectionOpen = this._onConnectionOpen.bind(this);
-  this._onConnectionClose = this._onConnectionClose.bind(this);
+    this.__id__ = __id__++
+    this.config = config
+    this._onMessage = this._onMessage.bind(this)
+    this._onConnectionOpen = this._onConnectionOpen.bind(this)
+    this._onConnectionClose = this._onConnectionClose.bind(this)
 
-  // Establish websocket connection
-  this._connect();
-}
+    // Establish websocket connection
+    this._connect()
+  }
 
-ClientConnection.Prototype = function() {
-
-  this._createWebSocket = function() {
-    throw Err('AbstractMethodError');
-  };
+  _createWebSocket() {
+    throw Err('AbstractMethodError')
+  }
 
   /*
     Initializes a new websocket connection
   */
-  this._connect = function() {
-    this.ws = this._createWebSocket();
-    this.ws.addEventListener('open', this._onConnectionOpen);
-    this.ws.addEventListener('close', this._onConnectionClose);
-    this.ws.addEventListener('message', this._onMessage);
-  };
+  _connect() {
+    this.ws = this._createWebSocket()
+    this.ws.addEventListener('open', this._onConnectionOpen)
+    this.ws.addEventListener('close', this._onConnectionClose)
+    this.ws.addEventListener('message', this._onMessage)
+  }
 
   /*
     Disposes the current websocket connection
   */
-  this._disconnect = function() {
-    this.ws.removeEventListener('message', this._onMessage);
-    this.ws.removeEventListener('open', this._onConnectionOpen);
-    this.ws.removeEventListener('close', this._onConnectionClose);
-    this.ws = null;
-  };
+  _disconnect() {
+    this.ws.removeEventListener('message', this._onMessage)
+    this.ws.removeEventListener('open', this._onConnectionOpen)
+    this.ws.removeEventListener('close', this._onConnectionClose)
+    this.ws = null
+  }
 
   /*
     Emits open event when connection has been established
   */
-  this._onConnectionOpen = function() {
-    this.emit('open');
-  };
+  _onConnectionOpen() {
+    this.emit('open')
+  }
 
   /*
     Trigger reconnect on connection close
   */
-  this._onConnectionClose = function() {
-    this._disconnect();
-    this.emit('close');
-    console.info('websocket connection closed. Attempting to reconnect in 5s.');
+  _onConnectionClose() {
+    this._disconnect()
+    this.emit('close')
+    console.info('websocket connection closed. Attempting to reconnect in 5s.')
     setTimeout(function() {
-      this._connect();
-    }.bind(this), 5000);
-  };
+      this._connect()
+    }.bind(this), 5000)
+  }
 
   /*
     Delegate incoming websocket messages
   */
-  this._onMessage = function(msg) {
-    msg = this.deserializeMessage(msg.data);
-    this.emit('message', msg);
-  };
+  _onMessage(msg) {
+    msg = this.deserializeMessage(msg.data)
+    this.emit('message', msg)
+  }
 
   /*
     Send message via websocket channel
   */
-  this.send = function(msg) {
+  send(msg) {
     if (!this.isOpen()) {
-      console.warn('Message could not be sent. Connection is not open.', msg);
-      return;
+      console.warn('Message could not be sent. Connection is not open.', msg)
+      return
     }
-    this.ws.send(this.serializeMessage(msg));
-  };
+    this.ws.send(this.serializeMessage(msg))
+  }
 
   /*
     Returns true if websocket connection is open
   */
-  this.isOpen = function() {
-    return this.ws && this.ws.readyState === 1;
-  };
+  isOpen() {
+    return this.ws && this.ws.readyState === 1
+  }
 
-  this.serializeMessage = function(msg) {
-    return JSON.stringify(msg);
-  };
+  serializeMessage(msg) {
+    return JSON.stringify(msg)
+  }
 
-  this.deserializeMessage = function(msg) {
-    return JSON.parse(msg);
-  };
+  deserializeMessage(msg) {
+    return JSON.parse(msg)
+  }
 
-};
+}
 
-EventEmitter.extend(ClientConnection);
-module.exports = ClientConnection;
+export default ClientConnection

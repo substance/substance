@@ -1,12 +1,7 @@
-'use strict';
+import PropertyAnnotation from '../../model/PropertyAnnotation'
 
-var PropertyAnnotation = require('../../model/PropertyAnnotation');
+class Code extends PropertyAnnotation {}
 
-function Code() {
-  Code.super.apply(this, arguments);
-}
-PropertyAnnotation.extend(Code);
+Code.type = 'code'
 
-Code.static.name = 'code';
-
-module.exports = Code;
+export default Code

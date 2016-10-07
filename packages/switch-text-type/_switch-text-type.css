@@ -1,0 +1,51 @@
+/* Switch Text Type Component
+---------------------------- */
+
+.sc-switch-text-type {
+  overflow: visible;
+  position: relative;
+  width: 120px;
+  /*font-size: var(--small-font-size);*/
+  /*
+    When using --small-font-size = 13px we get a wrong
+    offset in the toolbar. Needs checking.
+  */
+  font-size: 12px;
+  font-weight: 600;
+}
+.sc-switch-text-type .se-toggle {
+  background: white;
+  height: 30px;
+  padding: 0px 10px;
+  display: block;
+  overflow: hidden;
+}
+.sc-switch-text-type:not(.sm-disabled) .se-toggle:after {
+  content: " \f0d7";
+  padding-left: 10px;
+  margin-top: 2px;
+  float: right;
+  font-family: FontAwesome;
+}
+.sc-switch-text-type.sm-disabled { opacity: 0.4; cursor: default; }
+.sc-switch-text-type.sm-disabled:hover { background: none; }
+.sc-switch-text-type .se-options {
+  display: none;
+  position: absolute;
+  background: white;
+  top: 40px;
+  z-index: 5000;
+  min-width: 150px;
+  box-shadow: 0 0 25px 0 rgba(0, 0, 0, 0.15);
+  border: 1px solid var(--border-color);
+}
+.sc-switch-text-type .se-options .se-option {
+  display: block;
+  padding: 5px 10px;
+  width: 100%; /* needed to make buttons render like block elements */
+}
+.sc-switch-text-type .se-options .se-option:hover,
+.sc-switch-text-type .se-options .se-option:focus {
+  background: rgba(0,0,0,0.05);
+}
+.sc-switch-text-type.sm-open .se-options { display: block; }

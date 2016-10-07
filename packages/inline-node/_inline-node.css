@@ -1,0 +1,12 @@
+.sc-inline-node {
+  cursor: default;
+  /* webkit disables selection for draggable elements */
+  -webkit-user-select: text;
+}
+
+.sc-inline-node > .se-container { position: relative; }
+.sc-inline-node > .se-container > .se-blocker {
+  position: absolute; top:0; bottom: 0; left: 0; right: 0;
+}
+
+.sc-inline-node > .se-slug { opacity: 0; }

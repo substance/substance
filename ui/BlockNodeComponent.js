@@ -1,15 +1,7 @@
-'use strict';
+import NodeComponent from './NodeComponent'
 
-var NodeComponent = require('./NodeComponent');
-
-function BlockNodeComponent() {
-  BlockNodeComponent.super.apply(this, arguments);
+class BlockNodeComponent extends NodeComponent {
+  // maybe someday we need some BlockNode specific rendering
 }
 
-BlockNodeComponent.Prototype = function() {
-  // maybe someday we need some BlockNode specific rendering
-};
-
-NodeComponent.extend(BlockNodeComponent);
-
-module.exports = BlockNodeComponent;
+export default BlockNodeComponent

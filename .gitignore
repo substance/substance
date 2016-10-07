@@ -30,6 +30,10 @@ node_modules
 dist
 dist/doc
 tmp
+.npm
+.test
+.doc
+.docs
 
 # IDE / Editor genereated files
 .idea

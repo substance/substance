@@ -1,0 +1,24 @@
+.sc-layout {
+  padding: var(--default-padding);
+  padding-top: var(--default-padding);
+  padding-bottom: var(--default-padding);
+  width: 100%; /* by default takes the full width */
+}
+.sc-layout.sm-no-padding { padding: 0; }
+.sc-layout.sm-text-align-center { text-align: center; }
+.sc-layout.sm-text-align-right { text-align: right;}
+.sc-layout.sm-width-small { max-width: var(--small-layout-width); margin: 0px auto; }
+.sc-layout.sm-width-medium { max-width: var(--medium-layout-width); margin: 0px auto; }
+.sc-layout.sm-width-large { max-width: var(--large-layout-width); margin: 0px auto; }
+/*
+  When used inside layouts paragraphs and headings get some
+  padding by default.
+
+  TODO: maybe this should be activated explicitly through a
+  Prose component that turns on the text paddings.
+*/
+.sc-layout > p { padding-bottom: var(--default-padding); }
+.sc-layout > h1,
+.sc-layout > h2,
+.sc-layout > h3,
+.sc-layout > h4 { padding-bottom: var(--default-padding); }

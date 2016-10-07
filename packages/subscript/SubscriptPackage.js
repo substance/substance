@@ -1,19 +1,25 @@
-'use strict';
+import Subscript from './Subscript'
+import SubscriptHTMLConverter from './SubscriptHTMLConverter'
+import SubscriptXMLConverter from './SubscriptXMLConverter'
+import AnnotationCommand from '../../ui/AnnotationCommand'
+import AnnotationComponent from '../../ui/AnnotationComponent'
+import AnnotationTool from '../../ui/AnnotationTool'
 
-var Subscript = require('./Subscript');
-var SubscriptTool = require('./SubscriptTool');
-var SubscriptCommand = require('./SubscriptCommand');
-
-module.exports = {
+export default {
   name: 'subscript',
   configure: function(config) {
-    config.addNode(Subscript);
-    config.addCommand(SubscriptCommand);
-    config.addTool(SubscriptTool);
-    config.addIcon(SubscriptCommand.static.name, { 'fontawesome': 'fa-subscript' });
+    config.addNode(Subscript)
+    config.addConverter('html', SubscriptHTMLConverter)
+    config.addConverter('xml', SubscriptXMLConverter)
+    config.addComponent('subscript', AnnotationComponent)
+    config.addCommand('subscript', AnnotationCommand, { nodeType: 'subscript' })
+    config.addTool('subscript', AnnotationTool, {target: 'annotations'})
+    config.addIcon('subscript', { 'fontawesome': 'fa-subscript' })
     config.addLabel('subscript', {
       en: 'Subscript',
       de: 'Tiefgestellt'
-    });
-  }
-};
+    })
+  },
+  Subscript: Subscript,
+  SubscriptHTMLConverter: SubscriptHTMLConverter
+}

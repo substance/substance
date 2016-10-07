@@ -1,27 +1,23 @@
-'use strict';
+import Component from './Component'
 
-var Component = require('./Component');
+class NodeComponent extends Component {
 
-function NodeComponent() {
-  NodeComponent.super.apply(this, arguments);
+  render($$) {
+    let tagName = this.getTagName()
+    let el = $$(tagName)
+      .attr('data-id', this.props.node.id)
+      .addClass(this.getClassNames())
+    return el
+  }
+
+  getTagName() {
+    return 'div'
+  }
+
+  getClassNames() {
+    return ''
+  }
+
 }
 
-NodeComponent.Prototype = function() {
-
-  this.render = function($$) {
-    var tagName = this.getTagName();
-    var el = $$(tagName)
-      .attr("data-id", this.props.node.id)
-      .addClass('sc-node');
-    return el;
-  };
-
-  this.getTagName = function() {
-    return 'div';
-  };
-
-};
-
-Component.extend(NodeComponent);
-
-module.exports = NodeComponent;
+export default NodeComponent

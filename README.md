@@ -2,7 +2,7 @@
 
 Substance is a JavaScript library for web-based content editing. It provides building blocks for realizing custom text editors and web-based publishing systems.
 
-Read the [introduction post](https://medium.com/@_mql/build-your-own-editor-with-substance-7790eb600109), check the [project website](http://substance.io), the [examples](https://github.com/substance/examples) and the [API documentation](http://substance.io/docs).
+Check the [project website](http://substance.io) and the [documentation](http://substance.io/docs).
 
 ## Features
 
@@ -11,8 +11,9 @@ Features                                                                    | St
 Custom document schemas                                                     | ✓
 Custom converters (XML, HTML, etc.)                                         | ✓
 Custom HTML Rendering                                                       | ✓
-Annotations that can span over multiple nodes                               | ✓
 Annotations can hold information (e.g. a comment)                           | ✓
+Annotations that can span over multiple nodes                               | Beta 6
+Isolated Nodes (any content with any custom UI)                             | ✓
 Incremental document updates (undoable operations)                          | ✓
 Transformations for document manipulation                                   | ✓
 Custom editing toolbars                                                     | ✓
@@ -21,8 +22,8 @@ Multi-language support                                                      | �
 Realtime collaboration                                                      | ✓
 Persistence API for documents                                               | ✓
 Text Macros                                                                 | ✓
-Key bindings                                                                | Beta 5
-Full Unicode support                                                        | Beta 5
+Key bindings                                                                | Beta 6
+Full Unicode support                                                        | Beta 6
 Packages (aka Plugins)                                                      | ✓
                                                                             |
 **UI Components**                                                           |
@@ -39,8 +40,7 @@ Heading                                                                     | �
 Blockquote                                                                  | ✓
 Codeblock                                                                   | ✓
 Image                                                                       | ✓
-List                                                                        | ✓
-Table                                                                       | ✓
+List                                                                        | Beta 6
                                                                             |
 **Predefined annotation types**                                             |
 Strong                                                                      | ✓
@@ -51,12 +51,11 @@ Superscript                                                                 | �
 Code                                                                        | ✓
                                                                             |
 **Platform support**                                                        |
-Mozilla Firefox (>=42)                                                      | ✓
-Apple Safari (>=9)                                                          | ✓
-Google Chrome (>=47)                                                        | ✓
+Mozilla Firefox (>=49)                                                      | ✓
+Apple Safari (>=10)                                                         | ✓
+Google Chrome (>=53)                                                        | ✓
 Microsoft Edge                                                              | ✓
-Mobile Safari (iOS)                                                         | Beta 5
-Mobile Chrome (Android)                                                     | Beta 5
+
 
 ## Development
 
@@ -72,36 +71,17 @@ Run the dev server.
 npm start
 ```
 
-Navigate to `http://localhost:4201/docs` for the docs and `http://localhost:4201/test` for the test suite.
+Navigate to `http://localhost:5550/docs` for the docs and `http://localhost:5550/test` for the test suite. Test suite and docs are rebuilt as you make changes to the source files.
 
-To run the test-suite headless
+If you only work on the documentation, this recompiles faster.
+
+```
+npm run docs
+```
+
+To run the test-suite headless.
 
 ```
 $ npm test
 ```
 
-To bundle the docs into a distribution:
-
-```
-$ npm run doc
-```
-
-## Roadmap
-
-### Beta 5
-
-*ETA: July 2016*
-
-- Key bindings
-- Mobile support
-- Improved Unicode support
-- Advanced list support
-- Advanced table support
-
-*ETA: Fall 2016*
-
-### 1.0 Final
-
-- Complete documentation
-- Full test coverage
-- Final versions of API's

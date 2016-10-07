@@ -1,5 +1,3 @@
-"use strict";
-
 /**
   Mix-in for parent nodes.
 
@@ -11,41 +9,41 @@
 var ParentNodeMixin = {
 
   hasChildren: function() {
-    return true;
+    return true
   },
 
   getChildrenProperty: function() {
-    throw new Error('ParentNodeMixin.getChildrenProperty is abstract and must be implemented in ' + this.constructor.name + '.');
+    throw new Error('ParentNodeMixin.getChildrenProperty is abstract and must be implemented in ' + this.type + '.')
   },
 
   getChildIndex: function(child) {
-    return this[this.getChildrenProperty()].indexOf(child.id);
+    return this[this.getChildrenProperty()].indexOf(child.id)
   },
 
   getChildren: function() {
-    var doc = this.getDocument();
-    var childrenIds = this[this.getChildrenProperty()];
+    var doc = this.getDocument()
+    var childrenIds = this[this.getChildrenProperty()]
     return childrenIds.map(function(id) {
-      return doc.get(id);
-    });
+      return doc.get(id)
+    })
   },
 
   getChildAt: function(idx) {
-    var children = this[this.getChildrenProperty()];
+    var children = this[this.getChildrenProperty()]
     if (idx < 0 || idx >= children.length) {
-      throw new Error('Array index out of bounds: ' + idx + ", " + children.length);
+      throw new Error('Array index out of bounds: ' + idx + ", " + children.length)
     }
-    return this.getDocument().get(children[idx]);
+    return this.getDocument().get(children[idx])
   },
 
   getChildCount: function() {
-    return this[this.getChildrenProperty()].length;
+    return this[this.getChildrenProperty()].length
   },
 
   getAddressablePropertyNames: function() {
-    return [this.getChildrenProperty()];
+    return [this.getChildrenProperty()]
   },
 
-};
+}
 
-module.exports = ParentNodeMixin;
+export default ParentNodeMixin

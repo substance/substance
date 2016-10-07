@@ -1,45 +1,35 @@
-'use strict';
+import AnnotationComponent from '../../ui/AnnotationComponent'
 
-var AnnotationComponent = require('../../ui/AnnotationComponent');
+class LinkComponent extends AnnotationComponent {
 
-function LinkComponent() {
-  LinkComponent.super.apply(this, arguments);
-}
+  didMount(...args) {
+    super.didMount(...args)
 
-LinkComponent.Prototype = function() {
+    let node = this.props.node
+    node.on('properties:changed', this.rerender, this)
+  }
 
-  var _super = LinkComponent.super.prototype;
+  dispose(...args) {
+    super.dispose(...args)
 
-  this.didMount = function() {
-    _super.didMount.apply(this, arguments);
+    let node = this.props.node
+    node.off(this)
+  }
 
-    var node = this.props.node;
-    node.on('properties:changed', this.rerender, this);
-  };
+  render($$) { // eslint-disable-line
+    let el = super.render($$)
 
-  this.dispose = function() {
-    _super.dispose.apply(this, arguments);
+    el.tagName = 'a'
+    el.attr('href', this.props.node.url)
 
-    var node = this.props.node;
-    node.off(this);
-  };
-
-  this.render = function($$) { // eslint-disable-line
-    var el = _super.render.apply(this, arguments);
-
-    el.tagName = 'a';
-    el.attr('href', this.props.node.url);
-
-    var titleComps = [this.props.node.url];
+    let titleComps = [this.props.node.url]
     if (this.props.node.title) {
-      titleComps.push(this.props.node.title);
+      titleComps.push(this.props.node.title)
     }
 
-    return el.attr("title", titleComps.join(' | '));
-  };
+    return el.attr("title", titleComps.join(' | '))
+  }
 
-};
+}
 
-AnnotationComponent.extend(LinkComponent);
-
-module.exports = LinkComponent;
+export default LinkComponent

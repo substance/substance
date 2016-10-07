@@ -1,33 +1,24 @@
-'use strict';
+import Command from '../../ui/Command'
 
-var Command = require('../../ui/Command');
+class Undo extends Command {
 
-function Undo() {
-  Undo.super.apply(this, arguments);
-}
-
-Undo.Prototype = function() {
-
-  this.getCommandState = function(props, context) {
-    var docSession = context.documentSession;
+  getCommandState(params) {
+    let docSession = params.documentSession
     return {
       disabled: !docSession.canUndo(),
       active: false
-    };
-  };
-
-  this.execute = function(props, context) {
-    var docSession = context.documentSession;
-    if (docSession.canUndo()) {
-      docSession.undo();
-      return true;
     }
-    return false;
-  };
-};
+  }
 
-Command.extend(Undo);
+  execute(params) {
+    let docSession = params.documentSession
+    if (docSession.canUndo()) {
+      docSession.undo()
+      return true
+    }
+    return false
+  }
 
-Undo.static.name = 'undo';
+}
 
-module.exports = Undo;
+export default Undo

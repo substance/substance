@@ -4,14 +4,22 @@ module.exports = {
     "commonjs": true,
     "node": true
   },
+  "parserOptions": {
+    "sourceType": "module",
+    "ecmaVersion": 6,
+    "ecmaFeatures": {
+      "jsxnec": true,
+    },
+  },
   "extends": "eslint:recommended",
   "globals": {
-    "QUnit": true
+    "Promise": true,
+    "Map": true
   },
   "rules": {
     // 0 - off, 1 - warning, 2 - error
     "indent": ["error", 2, { "SwitchCase": 1 }],
-    "semi": [2, "always"],
+    "semi": [0, "always"],
     "comma-dangle": [2, "only-multiline"],
     "no-cond-assign": 2,
     "no-console": [2, { allow: ["warn", "info", "error", "assert"] }],
@@ -122,6 +130,6 @@ module.exports = {
     "no-undef-init": 2,
     "no-undefined": 0,
     "no-unused-vars": 2,
-    "no-use-before-define": [2, { "functions": false }]
+    "no-use-before-define": [2, { "functions": false, "classes": false }]
   }
 };

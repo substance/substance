@@ -1,13 +1,7 @@
-'use strict';
+import TextBlock from '../../model/TextBlock'
 
-var TextBlock = require('../../model/TextBlock');
+class Paragraph extends TextBlock {}
 
-function Paragraph() {
-  Paragraph.super.apply(this, arguments);
-}
+Paragraph.type = "paragraph"
 
-TextBlock.extend(Paragraph);
-
-Paragraph.static.name = "paragraph";
-
-module.exports = Paragraph;
+export default Paragraph

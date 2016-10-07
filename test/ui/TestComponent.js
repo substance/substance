@@ -1,58 +1,50 @@
-'use strict';
+import { spy } from 'substance-test'
+import Component from '../../ui/Component'
 
-var Component = require('../../ui/Component');
-var spy = require('../spy');
+class TestComponent extends Component {
 
-function TestComponent() {
-  TestComponent.super.apply(this, arguments);
-  this._enableSpies();
+  constructor(...args) {
+    super(...args)
+    this._enableSpies()
+  }
+
+  _enableSpies() {
+    ['didMount','didUpdate','dispose','shouldRerender','render'].forEach((name) => {
+      spy(this, name)
+    })
+  }
+
+  _disableSpies() {
+    ['didMount','didUpdate','dispose','shouldRerender','render'].forEach((name) => {
+      this[name].restore()
+    })
+  }
 }
-
-TestComponent.Prototype = function() {
-
-  this._enableSpies = function() {
-    ['didMount','didUpdate','dispose','shouldRerender','render'].forEach(function(name) {
-      spy(this, name);
-    }.bind(this));
-  };
-
-  this._disableSpies = function() {
-    ['didMount','didUpdate','dispose','shouldRerender','render'].forEach(function(name) {
-      this[name].restore();
-    }.bind(this));
-  };
-};
-
-Component.extend(TestComponent);
 
 TestComponent.create = function(renderFunc, props) {
-  var comp = new TestComponent();
+  var comp = new TestComponent()
   if (renderFunc) {
-    comp.render = renderFunc;
+    comp.render = renderFunc
   }
   if (props) {
-    comp.setProps(props);
+    comp.setProps(props)
   } else {
-    comp.rerender();
+    comp.rerender()
   }
-  return comp;
-};
-
-function SimpleComponent() {
-  SimpleComponent.super.apply(this, arguments);
+  return comp
 }
 
-SimpleComponent.Prototype = function() {
-  this.render = function($$) {
-    var el = $$('div').addClass('simple-component');
+class SimpleComponent extends TestComponent {
+
+  render($$) {
+    var el = $$('div').addClass('simple-component')
     if (this.props.children) {
-      el.append(this.props.children);
+      el.append(this.props.children)
     }
-    return el;
-  };
-};
+    return el
+  }
+}
 
-TestComponent.extend(SimpleComponent);
-TestComponent.Simple = SimpleComponent;
+TestComponent.Simple = SimpleComponent
 
-module.exports = TestComponent;
+export default TestComponent

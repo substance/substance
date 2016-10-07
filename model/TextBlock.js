@@ -1,13 +1,7 @@
-'use strict';
+import TextNode from './TextNode'
 
-var TextNode = require('./TextNode');
+class TextBlock extends TextNode {}
 
-function TextBlock() {
-  TextNode.apply(this, arguments);
-}
+TextBlock.isBlock = true;
 
-TextNode.extend(TextBlock);
-
-TextBlock.static.isBlock = true;
-
-module.exports = TextBlock;
+export default TextBlock;

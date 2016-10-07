@@ -1,0 +1,17 @@
+/*
+  TODO: Provide different styles (analoge to _button.css);
+*/
+
+.sc-input {
+  max-width: 500px;
+  font-size: 12px;
+  height: 30px;
+  border-radius: 15px;
+  background: #fff;
+  border: none;
+  padding: 0 10px;
+}
+
+.sc-input.sm-centered {
+  text-align: center;
+}

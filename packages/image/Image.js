@@ -1,18 +1,11 @@
-'use strict';
+import DocumentNode from '../../model/DocumentNode'
 
-var DocumentNode = require('../../model/DocumentNode');
+class Image extends DocumentNode {}
 
-function Image() {
-  Image.super.apply(this, arguments);
-}
+Image.define({
+  type: "image",
+  src: { type: "string", default: "http://" },
+  previewSrc: { type: "string", optional: true }
+})
 
-DocumentNode.extend(Image);
-
-Image.static.name = "image";
-
-Image.static.defineSchema({
-  "src": { type: "string", default: "http://" },
-  "previewSrc": { type: "string", optional: true }
-});
-
-module.exports = Image;
+export default Image

@@ -1,0 +1,150 @@
+/*
+  Generic styles
+  =============================================================
+*/
+
+.sc-button.sm-style-outline[disabled=true],
+.sc-button.sm-style-outline-dark[disabled=true],
+.sc-button.sm-style-plain[disabled=true],
+.sc-button.sm-style-plain-dark[disabled=true] {
+  opacity: 0.4;
+  cursor: default;
+}
+
+/*
+  Outline style
+  =============================================================
+*/
+
+.sc-button.sm-style-outline,
+.sc-button.sm-style-outline-dark {
+  position: relative;
+  height: 30px;
+  min-width: 30px;
+  text-align: center;
+  /*font-size: var(--small-font-size);*/
+  /*
+    TODO: if we put --small-font-size here = 13px
+    we get different alignments for buttons with
+    vs buttons without labels.
+  */
+  font-weight: 600;
+  font-size: 12px;
+  border-radius: 15px;
+  border: 1px solid var(--border-color);
+  padding-left: 7px;
+  padding-right: 7px;
+}
+
+.sc-button.sm-style-outline > .se-label,
+.sc-button.sm-style-outline-dark > .se-label {
+  font-weight: 600;
+  display: inline-block;
+  padding: 0px 5px;
+}
+
+.sc-button.sm-style-outline > .se-hint,
+.sc-button.sm-style-outline-dark > .se-hint {
+  display: inline-block;
+  color: rgba(0,0,0,0.4);
+  font-size: 9px;
+}
+
+/* Add spacing between icon and label */
+.sc-button.sm-style-outline > * + *,
+.sc-button.sm-style-outline-dark > * + * {
+  padding-left: 5px;
+}
+
+.sc-button.sm-style-outline.sm-active {
+  border-color: var(--dark-bg-color);
+  background: var(--dark-bg-color);
+  color: rgba(255,255,255, 1);
+}
+
+.sc-button.sm-style-outline:focus {
+  background: var(--border-color);
+}
+
+.sc-button.sm-style-outline.sm-active:focus {
+  border-color: #444;
+  background: #444;
+}
+
+/*
+  Dark style color overrides
+*/
+.sc-button.sm-style-outline-dark {
+  border: 1px solid rgba(255,255,255, 0.8);
+  color: rgba(255,255,255, 0.8);
+}
+
+.sc-button.sm-style-outline-dark.sm-active {
+  border-color: #fff;
+  background: #fff;
+  color: #222;
+}
+
+
+/*
+  Plain Style
+  =============================================================
+
+  Used inside of tool dropdowns
+*/
+
+.sc-button.sm-style-plain,
+.sc-button.sm-style-plain-dark {
+  overflow: hidden;
+  width: 100%;
+  padding: 3px 10px;
+  line-height: 24px;
+}
+
+.sc-button.sm-style-plain > .se-label,
+.sc-button.sm-style-plain-dark > .se-label {
+  float: left;
+  font-weight: 600;
+}
+
+.sc-button.sm-style-plain > .se-hint,
+.sc-button.sm-style-plain-dark > .se-hint {
+  display: inline-block;
+  font-size: 11px;
+  float: right;
+}
+
+/*
+  White style color
+*/
+.sc-button.sm-style-plain:hover {
+  background: rgba(0,0,0,0.1);
+}
+
+.sc-button.sm-style-plain > .se-hint {
+  color: rgba(0,0,0,0.4);
+}
+
+/*
+  Dark style color
+*/
+.sc-button.sm-style-plain-dark {
+  color: rgba(255,255,255, 0.6);
+}
+
+.sc-button.sm-style-plain-dark:hover {
+  background: rgba(255,255,255,0.2);
+  color: rgba(255,255,255, 0.8);
+}
+
+.sc-button.sm-style-plain-dark > .se-hint {
+  color: rgba(255,255,255,0.4);
+}
+
+/*
+  Some tools add a mode icon, which we position here
+*/
+.sc-button > .se-mode {
+  display: none;
+  /* position: absolute; top: 3px; right: 3px; font-size: 7px;*/
+}

@@ -1,22 +1,22 @@
-'use strict';
+import Schema from '../../model/DocumentSchema'
+import MetaNode from './TestMetaNode'
+import TestNode from './TestNode'
+import TestContainerAnnotation from './TestContainerAnnotation'
+import TestStructuredNode from './TestStructuredNode'
+import Paragraph from '../../packages/paragraph/Paragraph'
+import Heading from '../../packages/heading/Heading'
+import Emphasis from '../../packages/emphasis/Emphasis'
+import Strong from '../../packages/strong/Strong'
+import Link from '../../packages/link/Link'
+import Image from '../../packages/image/Image'
+import Codeblock from '../../packages/codeblock/Codeblock'
+import InlineWrapper from '../../packages/inline-wrapper/InlineWrapper'
 
-var Schema = require('../../model/DocumentSchema');
-var MetaNode = require('./TestMetaNode');
-var TestNode = require('./TestNode');
-var TestContainerAnnotation = require('./TestContainerAnnotation');
-var TestStructuredNode = require('./TestStructuredNode');
-var Paragraph = require('../../packages/paragraph/Paragraph');
-var Heading = require('../../packages/heading/Heading');
-var Emphasis = require('../../packages/emphasis/Emphasis');
-var Strong = require('../../packages/strong/Strong');
-var Link = require('../../packages/link/Link');
-var Image = require('../../packages/image/Image');
-
-var schema = new Schema("test-article", "1.0.0");
+var schema = new Schema("test-article", "1.0.0")
 
 schema.getDefaultTextType = function() {
-  return 'paragraph';
-};
+  return 'paragraph'
+}
 
 schema.addNodes([
   MetaNode,
@@ -26,9 +26,11 @@ schema.addNodes([
   Strong,
   Link,
   Image,
+  Codeblock,
   TestNode,
   TestContainerAnnotation,
-  TestStructuredNode
-]);
+  TestStructuredNode,
+  InlineWrapper
+])
 
-module.exports = schema;
+export default schema

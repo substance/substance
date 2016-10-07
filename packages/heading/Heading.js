@@ -1,17 +1,10 @@
-'use strict';
+import TextBlock from '../../model/TextBlock'
 
-var TextBlock = require('../../model/TextBlock');
+class Heading extends TextBlock {}
 
-function Heading() {
-  Heading.super.apply(this, arguments);
-}
+Heading.define({
+  type: "heading",
+  level: { type: "number", default: 1 }
+})
 
-TextBlock.extend(Heading);
-
-Heading.static.name = "heading";
-
-Heading.static.defineSchema({
-  "level": { type: "number", default: 1 }
-});
-
-module.exports = Heading;
+export default Heading

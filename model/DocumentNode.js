@@ -1,65 +1,55 @@
-'use strict';
-
-var each = require('lodash/each');
-var DataNode = require('./data/Node');
+import each from 'lodash/each'
+import DataNode from './data/Node'
+import EventEmitter from '../util/EventEmitter'
 
 /**
   Base node type for document nodes.
 
-  @class
-  @abstract
-
-  @param {model/Document} doc A document instance
-  @param {object} node properties
   @example
 
   The following example shows how a new node type is defined.
 
-
   ```js
-  function Todo() {
-    Todo.super.apply(this, arguments);
-  }
-  TextBlock.extend(Todo);
-  Todo.static.name = 'todo';
-  Todo.static.defineSchema({
+  class Todo extends TextBlock {}
+  Todo.define({
+    type: 'todo',
     content: 'text',
     done: { type: 'bool', default: false }
-  });
+  })
   ```
 
-  The following
-    data types are supported:
+  The following data types are supported:
 
-      - `string` bare metal string data type
-      - `text` a string that carries annotations
-      - `number` numeric values
-      - `bool` boolean values
-      - 'id' a node id referencing another node in the document
+  - `string` bare metal string data type
+  - `text` a string that carries annotations
+  - `number` numeric values
+  - `bool` boolean values
+  - `id` a node id referencing another node in the document
 */
+class DocumentNode extends DataNode {
 
-function DocumentNode(doc, props) {
-  DataNode.call(this, props);
-  if (!doc) {
-    throw new Error('Document instance is mandatory.');
+  /**
+    @param {Document} doc A document instance
+    @param {object} node properties
+  */
+  constructor(doc, props) {
+    super(props)
+    // being less strict here allows us to create a detached node
+    // which can be useful for testing
+    // if (!doc) throw new Error('Document instance is mandatory.')
+    this.document = doc
   }
-  this.document = doc;
-}
 
-DocumentNode.Prototype = function() {
-
-  this._isDocumentNode = true;
-
-  var _super = DocumentNode.super.prototype;
+  get _isDocumentNode() { return true }
 
   /**
     Get the Document instance.
 
     @returns {Document}
   */
-  this.getDocument = function() {
-    return this.document;
-  };
+  getDocument() {
+    return this.document
+  }
 
   /**
     Whether this node has a parent.
@@ -68,52 +58,52 @@ DocumentNode.Prototype = function() {
 
     @returns {Boolean}
   */
-  this.hasParent = function() {
-    return Boolean(this.parent);
-  };
+  hasParent() {
+    return Boolean(this.parent)
+  }
 
   /**
     @returns {DocumentNode} the parent node
   */
-  this.getParent = function() {
-    return this.document.get(this.parent);
-  };
+  getParent() {
+    return this.document.get(this.parent)
+  }
 
   /**
     Checks whether this node has children.
 
     @returns {Boolean} default: false
   */
-  this.hasChildren = function() {
-    return false;
-  };
+  hasChildren() {
+    return false
+  }
 
   /**
     Get the index of a given child.
 
     @returns {Number} default: -1
   */
-  this.getChildIndex = function(child) { // eslint-disable-line
-    return -1;
-  };
+  getChildIndex(child) { // eslint-disable-line
+    return -1
+  }
 
   /**
     Get a child node at a given position.
 
     @returns {DocumentNode} default: null
   */
-  this.getChildAt = function(idx) { // eslint-disable-line
-    return null;
-  };
+  getChildAt(idx) { // eslint-disable-line
+    return null
+  }
 
   /**
     Get the number of children nodes.
 
     @returns {Number} default: 0
   */
-  this.getChildCount = function() {
-    return 0;
-  };
+  getChildCount() {
+    return 0
+  }
 
   /**
     Get the root node.
@@ -123,121 +113,73 @@ DocumentNode.Prototype = function() {
 
     @returns {DocumentNode}
   */
-  this.getRoot = function() {
-    var node = this;
+  getRoot() {
+    var node = this
     while (node.hasParent()) {
-      node = node.getParent();
+      node = node.getParent()
     }
-    return node;
-  };
-
-  /**
-    This is used to be able to traverse all properties in a container.
-    This is particularly necessary for strucuted nodes, with more than one editable
-    text property.
-
-    @example
-
-    For a figure node with `title`, `img`, and `caption` this could look
-    be done this way:
-
-    ```
-    Figure.static.addressablePropertyNames = ['title', 'caption']
-    ```
-
-    The img itself does not need to be addressable, as it can't be edited in the text editor.
-
-    Alternatvely you can use the `text` data type in the schema, which implicitly makes
-    these properties addressable.
-
-    ```
-    Figure.static.defineSchema({
-      title: "text",
-      img: "string",
-      caption: "text"
-    });
-    ```
-
-    @private
-    @returns {String[]} an array of property names
-  */
-  this.getAddressablePropertyNames = function() {
-    var addressablePropertyNames = this.constructor.static.addressablePropertyNames;
-    return addressablePropertyNames || [];
-  };
-
-  this.hasAddressableProperties = function() {
-    return this.getAddressablePropertyNames().length > 0;
-  };
-
-  this.getPropertyNameAt = function(idx) {
-    var propertyNames = this.constructor.static.addressablePropertyNames || [];
-    return propertyNames[idx];
-  };
+    return node
+  }
 
   // TODO: should this really be here?
   // volatile property necessary to render highlighted node differently
   // TODO: We should get this out here
-  this.setHighlighted = function(highlighted, scope) {
+  setHighlighted(highlighted, scope) {
     if (this.highlighted !== highlighted) {
-      this.highlightedScope = scope;
-      this.highlighted = highlighted;
-      this.emit('highlighted', highlighted);
+      this.highlightedScope = scope
+      this.highlighted = highlighted
+      this.emit('highlighted', highlighted)
     }
-  };
-
-  function _matchPropertyEvent(eventName) {
-    return /([a-zA-Z_0-9]+):changed/.exec(eventName);
   }
 
-  this.on = function(eventName, handler, ctx) {
-    var match = _matchPropertyEvent(eventName);
+  on(eventName, handler, ctx) {
+    var match = _matchPropertyEvent(eventName)
     if (match) {
-      var propertyName = match[1];
-      if (this.constructor.static.schema[propertyName]) {
-        var doc = this.getDocument();
+      var propertyName = match[1]
+      if (this.constructor.schema[propertyName]) {
+        var doc = this.getDocument()
         doc.getEventProxy('path')
-          .on([this.id, propertyName], handler, ctx);
+          .on([this.id, propertyName], handler, ctx)
       }
     }
-    _super.on.apply(this, arguments);
-  };
+    EventEmitter.prototype.on.apply(this, arguments)
+  }
 
-  this.off = function(ctx, eventName, handler) {
-    var doc = this.getDocument();
-    var match = false;
+  off(ctx, eventName, handler) {
+    var doc = this.getDocument()
+    var match = false
     if (!eventName) {
-      doc.getEventProxy('path').off(ctx);
+      doc.getEventProxy('path').off(ctx)
     } else {
-      match = _matchPropertyEvent(eventName);
+      match = _matchPropertyEvent(eventName)
     }
     if (match) {
-      var propertyName = match[1];
+      var propertyName = match[1]
       doc.getEventProxy('path')
-        .off(ctx, [this.id, propertyName], handler);
+        .off(ctx, [this.id, propertyName], handler)
     }
-    _super.off.apply(this, arguments);
-  };
+    EventEmitter.prototype.off.apply(this, arguments)
+  }
 
   // Experimental: we are working on a simpler API replacing the
   // rather inconvenient EventProxy API.
-  this.connect = function(ctx, handlers) {
-    console.warn('DEPRECATED: use Node.on() instead');
+  connect(ctx, handlers) {
+    console.warn('DEPRECATED: use Node.on() instead')
     each(handlers, function(func, name) {
-      this.on(name, func, ctx);
-    }.bind(this));
-  };
+      this.on(name, func, ctx)
+    }.bind(this))
+  }
 
-  this.disconnect = function(ctx) {
-    console.warn('DEPRECATED: use Node.off() instead');
-    this.off(ctx);
-  };
+  disconnect(ctx) {
+    console.warn('DEPRECATED: use Node.off() instead')
+    this.off(ctx)
+  }
 
-  this._onPropertyChange = function(propertyName) {
+  _onPropertyChange(propertyName) {
     var args = [propertyName + ':changed']
-      .concat(Array.prototype.slice.call(arguments, 1));
-    this.emit.apply(this, args);
-  };
+      .concat(Array.prototype.slice.call(arguments, 1))
+    this.emit.apply(this, args)
+  }
 
   // Node categories
   // --------------------
@@ -245,48 +187,39 @@ DocumentNode.Prototype = function() {
   /**
     @returns {Boolean} true if node is a block node (e.g. Paragraph, Figure, List, Table)
   */
-  this.isBlock = function() {
-    return this.constructor.static.isBlock;
-  };
+  isBlock() {
+    return this.constructor.isBlock
+  }
 
   /**
     @returns {Boolean} true if node is a text node (e.g. Paragraph, Codebock)
   */
-  this.isText = function() {
-    return this.constructor.static.isText;
-  };
+  isText() {
+    return this.constructor.isText
+  }
 
   /**
     @returns {Boolean} true if node is an annotation node (e.g. Strong)
   */
-  this.isPropertyAnnotation = function() {
-    return this.constructor.static.isPropertyAnnotation;
-  };
+  isPropertyAnnotation() {
+    return this.constructor.isPropertyAnnotation
+  }
 
   /**
     @returns {Boolean} true if node is an inline node (e.g. Citation)
   */
-  this.isInline = function() {
-    return this.constructor.static.isInline;
-  };
+  isInline() {
+    return this.constructor.isInline
+  }
 
   /**
     @returns {Boolean} true if node is a container annotation (e.g. multiparagraph comment)
   */
-  this.isContainerAnnotation = function() {
-    return this.constructor.static.isContainerAnnotation;
-  };
+  isContainerAnnotation() {
+    return this.constructor.isContainerAnnotation
+  }
 
-};
-
-DataNode.extend(DocumentNode);
-
-/**
-  The node's name is used to register it in the DocumentSchema.
-
-  @type {String} default: 'node'
-*/
-DocumentNode.static.name = 'node';
+}
 
 /**
   Declares a node to be treated as block-type node.
@@ -294,34 +227,38 @@ DocumentNode.static.name = 'node';
   BlockNodes are considers the direct descendant of `Container` nodes.
   @type {Boolean} default: false
 */
-DocumentNode.static.isBlock = false;
+DocumentNode.isBlock = false
 
 /**
   Declares a node to be treated as text-ish node.
 
   @type {Boolean} default: false
 */
-DocumentNode.static.isText = false;
+DocumentNode.isText = false
 
 /**
   Declares a node to be treated as {@link model/PropertyAnnotation}.
 
   @type {Boolean} default: false
 */
-DocumentNode.static.isPropertyAnnotation = false;
+DocumentNode.isPropertyAnnotation = false
 
 /**
   Declares a node to be treated as {@link model/ContainerAnnotation}.
 
   @type {Boolean} default: false
 */
-DocumentNode.static.isContainerAnnotation = false;
+DocumentNode.isContainerAnnotation = false
 
 /**
   Declares a node to be treated as {@link model/InlineNode}.
 
   @type {Boolean} default: false
 */
-DocumentNode.static.isInline = false;
+DocumentNode.isInline = false
 
-module.exports = DocumentNode;
+function _matchPropertyEvent(eventName) {
+  return /([a-zA-Z_0-9]+):changed/.exec(eventName)
+}
+
+export default DocumentNode

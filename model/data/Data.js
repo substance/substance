@@ -1,57 +1,48 @@
-'use strict';
+import isArray from 'lodash/isArray'
+import isString from 'lodash/isString'
+import each from 'lodash/each'
+import cloneDeep from 'lodash/cloneDeep'
+import EventEmitter from '../../util/EventEmitter'
+import DataObject from './DataObject'
+import NodeFactory from './NodeFactory'
 
-var isArray = require('lodash/isArray');
-var isString = require('lodash/isString');
-var each = require('lodash/each');
-var cloneDeep = require('lodash/cloneDeep');
-var EventEmitter = require('../../util/EventEmitter');
-var DataObject = require('./DataObject');
-var NodeFactory = require('./NodeFactory');
-
-/**
-  A data storage implemention that supports data defined via a {@link model/data/Schema},
+/*
+  A data storage implemention that supports data defined via a {@link Schema},
   and incremental updates which are backed by a OT library.
 
-  It forms the underlying implementation for {@link model/Document}.
-
-  @private
-  @class Data
-  @extends util/EventEmitter
+  It forms the underlying implementation for {@link Document}.
  */
+class Data extends EventEmitter {
 
-/**
-  @constructor
-  @param {Schema} schema
-  @param {Object} [options]
-*/
-function Data(schema, options) {
-  EventEmitter.call(this);
+  /**
+    @param {Schema} schema
+    @param {Object} [options]
+  */
+  constructor(schema, options) {
+    super()
 
-  options = options || {};
+    options = options || {}
+    this.schema = schema
+    this.nodes = new DataObject()
+    this.indexes = {}
+    this.options = options || {}
 
-  this.schema = schema;
-  this.nodes = new DataObject();
-  this.indexes = {};
-  this.options = options || {};
+    this.nodeFactory = options.nodeFactory || new NodeFactory(schema.nodeRegistry)
 
-  this.nodeFactory = options.nodeFactory || new NodeFactory(schema.nodeRegistry);
-
-  // Sometimes necessary to resolve issues with updating indexes in presence
-  // of cyclic dependencies
-  this.__QUEUE_INDEXING__ = false;
-  this.queue = [];
-}
-
-Data.Prototype = function() {
+    // Sometimes necessary to resolve issues with updating indexes in presence
+    // of cyclic dependencies
+    this.__QUEUE_INDEXING__ = false
+    this.queue = []
+  }
 
   /**
     Check if this storage contains a node with given id.
 
-    @returns {Boolean} `true` if a node with id exists, `false` otherwise.
+    @returns {bool} `true` if a node with id exists, `false` otherwise.
    */
-  this.contains = function(id) {
-    return Boolean(this.nodes[id]);
-  };
+  contains(id) {
+    return this.nodes.contains(id)
+  }
 
   /**
     Get a node or value via path.
@@ -59,61 +50,61 @@ Data.Prototype = function() {
     @param {String|String[]} path node id or path to property.
     @returns {Node|Object|Primitive|undefined} a Node instance, a value or undefined if not found.
    */
-  this.get = function(path, strict) {
+  get(path, strict) {
     if (!path) {
-      throw new Error('Path or id required');
+      throw new Error('Path or id required')
     }
-    var result = this.nodes.get(path);
+    var result = this.nodes.get(path)
     if (strict && result === undefined) {
       if (isString(path)) {
-        throw new Error("Could not find node with id '"+path+"'.");
+        throw new Error("Could not find node with id '"+path+"'.")
       } else {
-        throw new Error("Property for path '"+path+"' us undefined.");
+        throw new Error("Property for path '"+path+"' us undefined.")
       }
     }
-    return result;
-  };
+    return result
+  }
 
   /**
     Get the internal storage for nodes.
 
     @return The internal node storage.
    */
-  this.getNodes = function() {
-    return this.nodes;
-  };
+  getNodes() {
+    return this.nodes
+  }
 
   /**
     Create a node from the given data.
 
     @return {Node} The created node.
    */
-  this.create = function(nodeData) {
-    var node = this.nodeFactory.create(nodeData.type, nodeData);
+  create(nodeData) {
+    var node = this.nodeFactory.create(nodeData.type, nodeData)
     if (!node) {
-      throw new Error('Illegal argument: could not create node for data:', nodeData);
+      throw new Error('Illegal argument: could not create node for data:', nodeData)
     }
     if (this.contains(node.id)) {
-      throw new Error("Node already exists: " + node.id);
+      throw new Error("Node already exists: " + node.id)
     }
     if (!node.id || !node.type) {
-      throw new Error("Node id and type are mandatory.");
+      throw new Error("Node id and type are mandatory.")
     }
-    this.nodes[node.id] = node;
+    this.nodes[node.id] = node
 
     var change = {
       type: 'create',
       node: node
-    };
-
-    if (this.__QUEUE_INDEXING__) {
-      this.queue.push(change);
-    } else {
-      this._updateIndexes(change);
     }
 
-    return node;
-  };
+    if (this.__QUEUE_INDEXING__) {
+      this.queue.push(change)
+    } else {
+      this._updateIndexes(change)
+    }
+
+    return node
+  }
 
   /**
     Delete the node with given id.
@@ -121,24 +112,24 @@ Data.Prototype = function() {
     @param {String} nodeId
     @returns {Node} The deleted node.
    */
-  this.delete = function(nodeId) {
-    var node = this.nodes[nodeId];
-    node.dispose();
-    delete this.nodes[nodeId];
+  delete(nodeId) {
+    var node = this.nodes[nodeId]
+    node.dispose()
+    delete this.nodes[nodeId]
 
     var change = {
       type: 'delete',
       node: node,
-    };
-
-    if (this.__QUEUE_INDEXING__) {
-      this.queue.push(change);
-    } else {
-      this._updateIndexes(change);
     }
 
-    return node;
-  };
+    if (this.__QUEUE_INDEXING__) {
+      this.queue.push(change)
+    } else {
+      this._updateIndexes(change)
+    }
+
+    return node
+  }
 
   /**
     Set a property to a new value.
@@ -147,10 +138,10 @@ Data.Prototype = function() {
     @param {Object} newValue
     @returns {Node} The deleted node.
    */
-  this.set = function(path, newValue) {
-    var node = this.get(path[0]);
-    var oldValue = this.nodes.get(path);
-    this.nodes.set(path, newValue);
+  set(path, newValue) {
+    var node = this.get(path[0])
+    var oldValue = this.nodes.get(path)
+    this.nodes.set(path, newValue)
 
     var change = {
       type: 'set',
@@ -158,71 +149,66 @@ Data.Prototype = function() {
       path: path,
       newValue: newValue,
       oldValue: oldValue
-    };
-
-    if (this.__QUEUE_INDEXING__) {
-      this.queue.push(change);
-    } else {
-      this._updateIndexes(change);
     }
 
-    return oldValue;
-  };
+    if (this.__QUEUE_INDEXING__) {
+      this.queue.push(change)
+    } else {
+      this._updateIndexes(change)
+    }
+
+    return oldValue
+  }
 
   /**
     Update a property incrementally.
 
-    DEPRECATED: this will be replaced in Beta 3 with a more intuitive API.
-
     @param {Array} property path
     @param {Object} diff
     @returns {any} The value before applying the update.
-
-    @deprecated
-
   */
-  this.update = function(path, diff) {
+  update(path, diff) {
     // TODO: do we really want this incremental implementation here?
-    var oldValue = this.nodes.get(path);
-    var newValue;
+    var oldValue = this.nodes.get(path)
+    var newValue
     if (diff.isOperation) {
-      newValue = diff.apply(oldValue);
+      newValue = diff.apply(oldValue)
     } else {
-      var start, end, pos, val;
+      var start, end, pos, val
       if (isString(oldValue)) {
         if (diff['delete']) {
           // { delete: [2, 5] }
-          start = diff['delete'].start;
-          end = diff['delete'].end;
-          newValue = oldValue.split('').splice(start, end-start).join('');
+          start = diff['delete'].start
+          end = diff['delete'].end
+          newValue = oldValue.split('').splice(start, end-start).join('')
         } else if (diff['insert']) {
           // { insert: [2, "foo"] }
-          pos = diff['insert'].offset;
-          val = diff['insert'].value;
-          newValue = [oldValue.substring(0, pos), val, oldValue.substring(pos)].join('');
+          pos = diff['insert'].offset
+          val = diff['insert'].value
+          newValue = [oldValue.substring(0, pos), val, oldValue.substring(pos)].join('')
         } else {
-          throw new Error('Diff is not supported:', JSON.stringify(diff));
+          throw new Error('Diff is not supported:', JSON.stringify(diff))
         }
       } else if (isArray(oldValue)) {
-        newValue = oldValue.slice(0);
+        newValue = oldValue.slice(0)
         if (diff['delete']) {
           // { delete: 2 }
-          pos = diff['delete'].offset;
-          newValue.splice(pos, 1);
+          pos = diff['delete'].offset
+          newValue.splice(pos, 1)
         } else if (diff['insert']) {
           // { insert: [2, "foo"] }
-          pos = diff['insert'].offset;
-          val = diff['insert'].value;
-          newValue.splice(pos, 0, val);
+          pos = diff['insert'].offset
+          val = diff['insert'].value
+          newValue.splice(pos, 0, val)
         } else {
-          throw new Error('Diff is not supported:', JSON.stringify(diff));
+          throw new Error('Diff is not supported:', JSON.stringify(diff))
         }
       } else {
-        throw new Error('Diff is not supported:', JSON.stringify(diff));
+        throw new Error('Diff is not supported:', JSON.stringify(diff))
       }
     }
-    this.nodes.set(path, newValue);
-    var node = this.get(path[0]);
+    this.nodes.set(path, newValue)
+    var node = this.get(path[0])
 
     var change = {
       type: 'update',
@@ -230,42 +216,39 @@ Data.Prototype = function() {
       path: path,
       newValue: newValue,
       oldValue: oldValue
-    };
-
-    if (this.__QUEUE_INDEXING__) {
-      this.queue.push(change);
-    } else {
-      this._updateIndexes(change);
     }
 
-    return oldValue;
-  };
+    if (this.__QUEUE_INDEXING__) {
+      this.queue.push(change)
+    } else {
+      this._updateIndexes(change)
+    }
 
-  /**
-    Convert to JSON.
+    return oldValue
+  }
 
+  /*
     DEPRECATED: We moved away from having JSON as first-class exchange format.
     We will remove this soon.
 
-    @private
-    @returns {Object} Plain content.
+    @internal
     @deprecated
    */
-  this.toJSON = function() {
+  toJSON() {
     return {
       schema: [this.schema.id, this.schema.version],
       nodes: cloneDeep(this.nodes)
-    };
-  };
+    }
+  }
 
   /**
     Clear nodes.
 
-    @private
+    @internal
    */
-  this.reset = function() {
-    this.nodes.clear();
-  };
+  reset() {
+    this.nodes.clear()
+  }
 
   /**
     Add a node index.
@@ -273,14 +256,14 @@ Data.Prototype = function() {
     @param {String} name
     @param {NodeIndex} index
    */
-  this.addIndex = function(name, index) {
+  addIndex(name, index) {
     if (this.indexes[name]) {
-      console.error('Index with name %s already exists.', name);
+      console.error('Index with name %s already exists.', name)
     }
-    index.reset(this);
-    this.indexes[name] = index;
-    return index;
-  };
+    index.reset(this)
+    this.indexes[name] = index
+    return index
+  }
 
   /**
     Get the node index with given name.
@@ -288,47 +271,49 @@ Data.Prototype = function() {
     @param {String} name
     @returns {NodeIndex} The node index.
    */
-  this.getIndex = function(name) {
-    return this.indexes[name];
-  };
+  getIndex(name) {
+    return this.indexes[name]
+  }
 
   /**
     Update a node index by providing of change object.
 
     @param {Object} change
    */
-  this._updateIndexes = function(change) {
-    if (!change || this.__QUEUE_INDEXING__) return;
+  _updateIndexes(change) {
+    if (!change || this.__QUEUE_INDEXING__) return
     each(this.indexes, function(index) {
       if (index.select(change.node)) {
         if (!index[change.type]) {
-          console.error('Contract: every NodeIndex must implement ' + change.type);
+          console.error('Contract: every NodeIndex must implement ' + change.type)
         }
-        index[change.type](change.node, change.path, change.newValue, change.oldValue);
+        index[change.type](change.node, change.path, change.newValue, change.oldValue)
       }
-    });
-  };
+    })
+  }
 
   /**
     Stops indexing process, all changes will be collected in indexing queue.
+
+    @private
   */
-  this._stopIndexing = function() {
-    this.__QUEUE_INDEXING__ = true;
-  };
+  _stopIndexing() {
+    this.__QUEUE_INDEXING__ = true
+  }
 
   /**
     Update all index changes from indexing queue.
+
+    @private
   */
-  this._startIndexing = function() {
-    this.__QUEUE_INDEXING__ = false;
+  _startIndexing() {
+    this.__QUEUE_INDEXING__ = false
     while(this.queue.length >0) {
-      var change = this.queue.shift();
-      this._updateIndexes(change);
+      var change = this.queue.shift()
+      this._updateIndexes(change)
     }
-  };
+  }
 
-};
+}
 
-EventEmitter.extend(Data);
-
-module.exports = Data;
+export default Data

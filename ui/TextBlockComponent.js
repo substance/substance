@@ -1,26 +1,16 @@
-'use strict';
+import NodeComponent from './NodeComponent'
+import TextProperty from './TextPropertyComponent'
 
-var BlockNodeComponent = require('./BlockNodeComponent');
-var TextProperty = require('./TextPropertyComponent');
+class TextBlockComponent extends NodeComponent {
 
-function TextBlockComponent() {
-  TextBlockComponent.super.apply(this, arguments);
-}
-
-TextBlockComponent.Prototype = function() {
-
-  var _super = TextBlockComponent.super.prototype;
-
-  this.render = function($$) {
-    var el = _super.render.call(this, $$);
+  render($$) {
+    let el = super.render.call(this, $$);
     el.append($$(TextProperty, {
       path: [ this.props.node.id, "content"]
-    }));
-    return el;
-  };
+    }))
+    return el
+  }
 
-};
+}
 
-BlockNodeComponent.extend(TextBlockComponent);
-
-module.exports = TextBlockComponent;
+export default TextBlockComponent

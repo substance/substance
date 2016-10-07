@@ -1,143 +1,140 @@
-"use strict";
 /* global WeakMap */
 
-var oo = require('../util/oo');
-var uuid = require('../util/uuid');
-var EventEmitter = require('../util/EventEmitter');
+import uuid from '../util/uuid'
+import EventEmitter from '../util/EventEmitter'
 
 /**
   Server
 
   Implements a generic layered architecture
 */
-function Server(config) {
-  Server.super.apply(this);
+class Server extends EventEmitter {
+  constructor(config) {
+    super()
 
-  this.config = config;
-  this._onConnection = this._onConnection.bind(this);
-}
+    this.config = config
+    this._onConnection = this._onConnection.bind(this)
+  }
 
-Server.Prototype = function() {
-
-  this.bind = function(wss) {
+  bind(wss) {
     if (this.wss) {
-      throw new Error('Server is already bound to a websocket');
+      throw new Error('Server is already bound to a websocket')
     }
-    this.wss = wss;
-    this._connections = new WeakMap();
-    this._collaborators = {};
-    this.wss.on('connection', this._onConnection);
+    this.wss = wss
+    this._connections = new WeakMap()
+    this._collaborators = {}
+    this.wss.on('connection', this._onConnection)
 
-    var interval = this.config.heartbeat;
+    let interval = this.config.heartbeat
     if (interval) {
-      this._heartbeat = setInterval(this._sendHeartbeat.bind(this), interval);
+      this._heartbeat = setInterval(this._sendHeartbeat.bind(this), interval)
     }
-    this._bound = true;
-  };
+    this._bound = true
+  }
 
   /*
     NOTE: This method is yet untested
   */
-  this.unbind = function() {
+  unbind() {
     if (this._bound) {
-      this.wss.off('connection', this._onConnection);
+      this.wss.off('connection', this._onConnection)
     } else {
-      throw new Error('Server is not yet bound to a websocket.');
+      throw new Error('Server is not yet bound to a websocket.')
     }
-  };
+  }
 
   /*
     Hook called when a collaborator connects
   */
-  this.onConnection = function(/*collaboratorId*/) {
+  onConnection(/*collaboratorId*/) {
     // noop
-  };
+  }
 
   /*
     Hook called when a collaborator disconnects
   */
-  this.onDisconnect = function(/*collaboratorId*/) {
+  onDisconnect(/*collaboratorId*/) {
     // noop
-  };
+  }
 
   /*
     Stub implementation for authenticate middleware.
 
     Implement your own as a hook
   */
-  this.authenticate = function(req, res) {
-    req.setAuthenticated();
-    this.next(req, res);
-  };
+  authenticate(req, res) {
+    req.setAuthenticated()
+    this.next(req, res)
+  }
 
   /*
     Stub implementation for authorize middleware
 
     Implement your own as a hook
   */
-  this.authorize = function(req, res) {
-    req.setAuthorized();
-    this.next(req, res);
-  };
+  authorize(req, res) {
+    req.setAuthorized()
+    this.next(req, res)
+  }
 
 
   /*
     Ability to enrich the request data
   */
-  this.enhanceRequest = function(req, res) {
-    req.setEnhanced();
-    this.next(req, res);
-  };
+  enhanceRequest(req, res) {
+    req.setEnhanced()
+    this.next(req, res)
+  }
 
   /*
     Executes the API according to the message type
 
     Implement your own as a hook
   */
-  this.execute = function(/*req, res*/) {
-    throw new Error('This method needs to be specified');
-  };
+  execute(/*req, res*/) {
+    throw new Error('This method needs to be specified')
+  }
 
   /*
     Ability to enrich the response data
   */
-  this.enhanceResponse = function(req, res) {
-    res.setEnhanced();
-    this.next(req, res);
-  };
+  enhanceResponse(req, res) {
+    res.setEnhanced()
+    this.next(req, res)
+  }
 
   /*
     When a new collaborator connects we generate a unique id for them
   */
-  this._onConnection = function(ws) {
-    var collaboratorId = uuid();
-    var connection = {
+  _onConnection(ws) {
+    let collaboratorId = uuid()
+    let connection = {
       collaboratorId: collaboratorId
-    };
-    this._connections.set(ws, connection);
+    }
+    this._connections.set(ws, connection)
 
     // Mapping to find connection for collaboratorId
     this._collaborators[collaboratorId] = {
       connection: ws
-    };
+    }
 
-    ws.on('message', this._onMessage.bind(this, ws));
-    ws.on('close', this._onClose.bind(this, ws));
-  };
+    ws.on('message', this._onMessage.bind(this, ws))
+    ws.on('close', this._onClose.bind(this, ws))
+  }
 
   /*
     When websocket connection closes
   */
-  this._onClose = function(ws) {
-    var conn = this._connections.get(ws);
-    var collaboratorId = conn.collaboratorId;
+  _onClose(ws) {
+    let conn = this._connections.get(ws)
+    let collaboratorId = conn.collaboratorId
 
-    this.onDisconnect(collaboratorId);
+    this.onDisconnect(collaboratorId)
 
     // Remove the connection records
-    delete this._collaborators[collaboratorId];
-    this._connections.delete(ws);
-  };
+    delete this._collaborators[collaboratorId]
+    this._connections.delete(ws)
+  }
 
   /*
     Implements state machine for handling the request response cycle
@@ -151,126 +148,126 @@ Server.Prototype = function() {
     __error           -> sendError          -> __done
     __done // end state
   */
-  this.__initial = function(req, res) {
-    return !req.isAuthenticated && !req.isAuthorized && !res.isReady;
-  };
+  __initial(req, res) {
+    return !req.isAuthenticated && !req.isAuthorized && !res.isReady
+  }
 
-  this.__authenticated = function(req, res) {
-    return req.isAuthenticated && !req.isAuthorized && !res.isReady;
-  };
+  __authenticated(req, res) {
+    return req.isAuthenticated && !req.isAuthorized && !res.isReady
+  }
 
-  this.__authorized = function(req, res) {
-    return req.isAuthenticated && req.isAuthorized && !req.isEnhanced && !res.isReady;
-  };
+  __authorized(req, res) {
+    return req.isAuthenticated && req.isAuthorized && !req.isEnhanced && !res.isReady
+  }
 
-  this.__requestEnhanced = function(req, res) {
-    return req.isAuthenticated && req.isAuthorized && req.isEnhanced && !res.isReady;
-  };
+  __requestEnhanced(req, res) {
+    return req.isAuthenticated && req.isAuthorized && req.isEnhanced && !res.isReady
+  }
 
-  this.__executed = function(req, res) {
+  __executed(req, res) {
     // excecute must call res.send() so res.data is set
-    return req.isAuthenticated && req.isAuthorized && res.isReady && res.data && !res.isEnhanced;
-  };
+    return req.isAuthenticated && req.isAuthorized && res.isReady && res.data && !res.isEnhanced
+  }
 
-  this.__enhanced = function(req, res) {
-    return res.isReady && res.isEnhanced && !res.isSent;
-  };
+  __enhanced(req, res) {
+    return res.isReady && res.isEnhanced && !res.isSent
+  }
 
-  this.__error = function(req, res) {
-    return res.err && !res.isSent;
-  };
+  __error(req, res) {
+    return res.err && !res.isSent
+  }
 
-  this.__done = function(req, res) {
-    return res.isSent;
-  };
+  __done(req, res) {
+    return res.isSent
+  }
 
-  this.next = function(req, res) {
+  next(req, res) {
     if (this.__initial(req, res)) {
-      this.authenticate(req, res);
+      this.authenticate(req, res)
     } else if (this.__authenticated(req, res)) {
-      this.authorize(req, res);
+      this.authorize(req, res)
     } else if (this.__authorized(req, res)) {
-      this.enhanceRequest(req, res);
+      this.enhanceRequest(req, res)
     } else if (this.__requestEnhanced(req, res)) {
-      this.execute(req, res);
+      this.execute(req, res)
     } else if (this.__executed(req, res)) {
-      this.enhanceResponse(req, res);
+      this.enhanceResponse(req, res)
     } else if (this.__enhanced(req, res)) {
-      this.sendResponse(req, res);
+      this.sendResponse(req, res)
     } else if (this.__error(req, res)) {
-      this.sendError(req, res);
+      this.sendError(req, res)
     } else if (this.__done(req,res)) {
       // console.log('We are done with processing the request.');
     }
-  };
+  }
 
   /*
     Send error response
   */
-  this.sendError = function(req, res) {
-    var collaboratorId = req.message.collaboratorId;
-    var msg = res.err;
-    this.send(collaboratorId, msg);
-    res.setSent();
-    this.next(req, res);
-  };
+  sendError(req, res) {
+    let collaboratorId = req.message.collaboratorId
+    let msg = res.err
+    this.send(collaboratorId, msg)
+    res.setSent()
+    this.next(req, res)
+  }
 
   /*
     Sends a heartbeat message to all connected collaborators
   */
-  this._sendHeartbeat = function() {
+  _sendHeartbeat() {
     Object.keys(this._collaborators).forEach(function(collaboratorId) {
       this.send(collaboratorId, {
         type: 'highfive',
         scope: '_internal'
       });
-    }.bind(this));
-  };
+    }.bind(this))
+  }
 
   /*
     Send response
   */
-  this.sendResponse = function(req, res) {
-    var collaboratorId = req.message.collaboratorId;
-    this.send(collaboratorId, res.data);
-    res.setSent();
-    this.next(req, res);
-  };
+  sendResponse(req, res) {
+    let collaboratorId = req.message.collaboratorId
+    this.send(collaboratorId, res.data)
+    res.setSent()
+    this.next(req, res)
+  }
 
-  this._isWebsocketOpen = function(ws) {
-    return ws && ws.readyState === 1;
-  };
+  _isWebsocketOpen(ws) {
+    return ws && ws.readyState === 1
+  }
 
   /*
     Send message to collaborator
   */
-  this.send = function(collaboratorId, message) {
+  send(collaboratorId, message) {
     if (!message.scope && this.config.scope) {
-      message.scope = this.config.scope;
+      message.scope = this.config.scope
     }
 
-    var ws = this._collaborators[collaboratorId].connection;
+    let ws = this._collaborators[collaboratorId].connection
     if (this._isWebsocketOpen(ws)) {
-      ws.send(this.serializeMessage(message));
+      ws.send(this.serializeMessage(message))
     } else {
-      console.error('Server#send: Websocket for collaborator', collaboratorId, 'is no longer open', message);
+      console.error('Server#send: Websocket for collaborator', collaboratorId, 'is no longer open', message)
     }
-  };
+  }
 
   /*
     Send message to collaborator
   */
-  this.broadCast = function(collaborators, message) {
+  broadCast(collaborators, message) {
     collaborators.forEach(function(collaboratorId) {
-      this.send(collaboratorId, message);
-    }.bind(this));
-  };
+      this.send(collaboratorId, message)
+    }.bind(this))
+  }
 
   // Takes a request object
-  this._processRequest = function(req) {
-    var res = new ServerResponse();
-    this.next(req, res);
-  };
+  _processRequest(req) {
+    let res = new ServerResponse()
+    this.next(req, res)
+  }
 
   /*
     Handling of client messages.
@@ -284,81 +281,77 @@ Server.Prototype = function() {
     The first argument is always the websocket so we can respond to messages
     after some operations have been performed.
   */
-  this._onMessage = function(ws, msg) {
+  _onMessage(ws, msg) {
     // Retrieve the connection data
-    var conn = this._connections.get(ws);
-    msg = this.deserializeMessage(msg);
+    let conn = this._connections.get(ws)
+    msg = this.deserializeMessage(msg)
 
     if (msg.scope === this.scope) {
       // We attach a unique collaborator id to each message
-      msg.collaboratorId = conn.collaboratorId;
-      var req = new ServerRequest(msg, ws);
-      this._processRequest(req);
+      msg.collaboratorId = conn.collaboratorId
+      let req = new ServerRequest(msg, ws)
+      this._processRequest(req)
     }
-  };
+  }
 
-  this.serializeMessage = function(msg) {
-    return JSON.stringify(msg);
-  };
+  serializeMessage(msg) {
+    return JSON.stringify(msg)
+  }
 
-  this.deserializeMessage = function(msg) {
-    return JSON.parse(msg);
-  };
+  deserializeMessage(msg) {
+    return JSON.parse(msg)
+  }
 
-};
-
-EventEmitter.extend(Server);
+}
 
 /*
   ServerRequest
 */
 
-function ServerRequest(message, ws) {
-  this.message = message;
-  this.ws = ws;
-  this.isAuthenticated = false;
-  this.isAuhorized = false;
-}
+class ServerRequest {
+  constructor(message, ws) {
+    this.message = message
+    this.ws = ws
+    this.isAuthenticated = false
+    this.isAuhorized = false
+  }
 
-ServerRequest.Prototype = function() {
   /*
     Marks a request as authenticated
   */
-  this.setAuthenticated = function(session) {
-    this.isAuthenticated = true;
-    this.session = session;
-  };
+  setAuthenticated(session) {
+    this.isAuthenticated = true
+    this.session = session
+  }
 
   /*
     Marks a request as authorized (authorizationData is optional)
   */
-  this.setAuthorized = function(authorizationData) {
-    this.isAuthorized = true;
-    this.authorizationData = authorizationData;
-  };
+  setAuthorized(authorizationData) {
+    this.isAuthorized = true
+    this.authorizationData = authorizationData
+  }
 
   /*
     Sets the isEnhanced flag
   */
-  this.setEnhanced = function() {
-    this.isEnhanced = true;
-  };
-};
+  setEnhanced() {
+    this.isEnhanced = true
+  }
+}
 
-oo.initClass(ServerRequest);
 
 /*
   ServerResponse
 */
-function ServerResponse() {
-  this.isReady = false; // once the response has been set using send
-  this.isEnhanced = false; // after response has been enhanced by enhancer
-  this.isSent = false; // after response has been sent
-  this.err = null;
-  this.data = null;
-}
-
-ServerResponse.Prototype = function() {
+class ServerResponse {
+  constructor() {
+    this.isReady = false // once the response has been set using send
+    this.isEnhanced = false // after response has been enhanced by enhancer
+    this.isSent = false // after response has been sent
+    this.err = null
+    this.data = null
+  }
 
   /*
     Sends an error response
@@ -373,31 +366,29 @@ ServerResponse.Prototype = function() {
     });
     ```
   */
-  this.error = function(err) {
-    this.err = err;
-    this.isReady = true;
-  };
+  error(err) {
+    this.err = err
+    this.isReady = true
+  }
 
   /*
     Send response data
   */
-  this.send = function(data) {
-    this.data = data;
-    this.isReady = true;
-  };
+  send(data) {
+    this.data = data
+    this.isReady = true
+  }
 
   /*
     Sets the isEnhanced flag
   */
-  this.setEnhanced = function() {
-    this.isEnhanced = true;
-  };
+  setEnhanced() {
+    this.isEnhanced = true
+  }
 
-  this.setSent = function() {
-    this.isSent = true;
-  };
-};
+  setSent() {
+    this.isSent = true
+  }
+}
 
-oo.initClass(ServerResponse);
-
-module.exports = Server;
+export default Server

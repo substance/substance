@@ -1,63 +1,64 @@
-'use strict';
+import cloneDeep from 'lodash/cloneDeep'
+import isEqual from 'lodash/isEqual'
+import Selection from './Selection'
 
-var cloneDeep = require('lodash/cloneDeep');
-var isEqual = require('lodash/isEqual');
+class CustomSelection extends Selection {
 
-var Selection = require('./Selection');
+  constructor(customType, data, surfaceId) {
+    super()
 
-/*
-  @
-*/
-function CustomSelection(customType, data, surfaceId) {
-  Selection.call(this);
+    this.customType = customType;
+    this.data = data;
 
-  this.customType = customType;
-  this.data = data;
+    this.surfaceId = surfaceId;
+  }
 
-  this.surfaceId = surfaceId;
-}
-
-CustomSelection.Prototype = function() {
-
-  this.toString = function() {
-    return "custom(" + this.customType + ', ' + JSON.stringify(this.data) + ")";
-  };
-
-  this.isCustomSelection = function() {
+  isCustomSelection() {
     return true;
-  };
+  }
 
-  this.getType = function() {
+  getType() {
     return 'custom';
-  };
+  }
 
-  this.getCustomType = function() {
+  getCustomType() {
     return this.customType;
-  };
+  }
 
-  this.toJSON = function() {
+  toJSON() {
     return {
       type: 'custom',
       customType: this.customType,
       data: cloneDeep(this.data),
       surfaceId: this.surfaceId
     };
-  };
+  }
 
-  this.equals = function(other) {
+  toString() {
+    /* istanbul ignore next */
+    return [
+      'CustomSelection(',
+      this.customType,', ',
+      JSON.stringify(this.data),
+      ")"
+    ].join('');
+  }
+
+  equals(other) {
     return (
       Selection.prototype.equals.call(this, other) &&
       other.isCustomSelection() &&
       isEqual(this.data, other.data)
     );
-  };
+  }
 
-};
-
-Selection.extend(CustomSelection);
+  _clone() {
+    return new CustomSelection(this.customType, this.data, this.surfaceId)
+  }
+}
 
 CustomSelection.fromJSON = function(json) {
   return new CustomSelection(json.customType, json.data || {}, json.surfaceId);
-};
+}
 
-module.exports = CustomSelection;
+export default CustomSelection

@@ -1,0 +1,22 @@
+.sc-scrollbar {
+  position: absolute;
+  left: 0px;
+  width: 20px;
+  top: 0px;
+  bottom: 0px;
+  background: #FAFAFA;
+  box-shadow: inset -4px 0 4px 0 rgba(25,25,25,0.04);
+}
+.sc-scrollbar .se-thumb {
+  position: absolute;
+  top: 40px;
+  left: 0px;
+  right: 0px;
+  height: 0px;
+  background-color: rgba(0,0,0, 0.2);
+}
+.sc-scrollbar .se-highlight {
+  position: absolute;
+  width: 100%;
+  background-color: #A5AFBD;
+}

@@ -1,13 +1,7 @@
-'use strict';
+import TextBlock from '../../model/TextBlock'
 
-var TextBlock = require('../../model/TextBlock');
+class Blockquote extends TextBlock {}
 
-function Blockquote() {
-  Blockquote.super.apply(this, arguments);
-}
+Blockquote.type = "blockquote"
 
-TextBlock.extend(Blockquote);
-
-Blockquote.static.name = "blockquote";
-
-module.exports = Blockquote;
+export default Blockquote

@@ -1,75 +1,30 @@
-'use strict';
+import DOMImporter from './DOMImporter'
+import DefaultDOMElement from '../ui/DefaultDOMElement'
 
-var DOMImporter = require('./DOMImporter');
-var DefaultDOMElement = require('../ui/DefaultDOMElement');
-var extend = require('lodash/extend');
-
-/**
-  @class
-  @abstract
-
+/*
   Base class for custom HTML importers. If you want to use XML as your
   exchange format see {@link model/XMLImporter}.
 
-  @example
+  @class
+  @abstract
+*/
+class HTMLImporter extends DOMImporter {
 
-  Below is a full example taken from the [Notepad](https://github.com/substance/examples/blob/master/converter/NoteImporter.js) example.
+  constructor(config) {
+    super(Object.assign({ idAttribute: 'data-id' }, config))
 
-  ```js
-  var HTMLImporter = require('substance/model/HTMLImporter');
-  var noteSchema = require('../note/noteSchema');
-  var Note = require('../note/Note');
-
-  var converters = [
-    require('substance/packages/paragraph/ParagraphHTMLConverter'),
-    require('substance/packages/blockquote/BlockquoteHTMLConverter'),
-    require('substance/packages/codeblock/CodeblockHTMLConverter'),
-    require('substance/packages/heading/HeadingHTMLConverter'),
-    require('substance/packages/strong/StrongHTMLConverter'),
-    require('substance/packages/emphasis/EmphasisHTMLConverter'),
-    require('substance/packages/link/LinkHTMLConverter'),
-    require('./MarkHTMLConverter'),
-    require('./TodoHTMLConverter')
-  ];
-
-  function NoteImporter() {
-    NoteImporter.super.call(this, {
-      schema: noteSchema,
-      converters: converters,
-      DocumentClass: Note
-    });
+    // only used internally for creating wrapper elements
+    this._el = DefaultDOMElement.parseHTML('<html></html>')
   }
 
-  NoteImporter.Prototype = function() {
-    this.convertDocument = function(bodyEls) {
-      this.convertContainer(bodyEls, 'body');
-    };
-  };
-
-  // Expose converters so we can reuse them in NoteHtmlExporter
-  NoteImporter.converters = converters;
-
-  HTMLImporter.extend(NoteImporter);
-  ```
-*/
-
-function HTMLImporter(config) {
-  config = extend({ idAttribute: 'data-id' }, config);
-  DOMImporter.call(this, config);
-
-  // only used internally for creating wrapper elements
-  this._el = DefaultDOMElement.parseHTML('<html></html>');
-}
-
-HTMLImporter.Prototype = function() {
-
-  this.importDocument = function(html) {
-    this.reset();
-    var parsed = DefaultDOMElement.parseHTML(html);
-    this.convertDocument(parsed);
-    var doc = this.generateDocument();
-    return doc;
-  };
+  importDocument(html) {
+    this.reset()
+    var parsed = DefaultDOMElement.parseHTML(html)
+    // creating all nodes
+    this.convertDocument(parsed)
+    this.generateDocument()
+    return this.state.doc
+  }
 
   /**
     Orchestrates conversion of a whole document.
@@ -87,27 +42,25 @@ HTMLImporter.Prototype = function() {
     looks like this.
 
     ```js
-      this.convertDocument = function(els) {
-        this.convertContainer(els, 'body');
-      };
+      convertDocument(els) {
+        this.convertContainer(els, 'body')
+      }
     ```
 
     If a full document `<html><body><p>A</p><p>B</p></body></html>` is imported
     you get the `<html>` element instead of a node array.
 
     ```js
-      this.convertDocument = function(htmlEl) {
-        var bodyEl = htmlEl.find('body');
-        this.convertContainer(bodyEl.children, 'body');
-      };
+      convertDocument(htmlEl) {
+        var bodyEl = htmlEl.find('body')
+        this.convertContainer(bodyEl.children, 'body')
+      }
     ```
   */
-  this.convertDocument = function(documentEl) { // eslint-disable-line
-    throw new Error('This method is abstract');
-  };
+  convertDocument(documentEl) { // eslint-disable-line
+    throw new Error('This method is abstract')
+  }
 
-};
+}
 
-DOMImporter.extend(HTMLImporter);
-
-module.exports = HTMLImporter;
+export default HTMLImporter

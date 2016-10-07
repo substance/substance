@@ -1,58 +1,52 @@
-'use strict';
+class MacroManager {
 
-var oo = require('../util/oo');
+  constructor(context, macros) {
+    this.context = context
+    this.macros = macros
+    this.context.documentSession.on('update', this.onUpdate, this)
+  }
 
-function MacroManager(context, macros) {
-  this.context = context;
-  this.macros = macros;
-  this.context.documentSession.on('update', this.onUpdate, this);
-}
-
-MacroManager.Prototype = function() {
-
-  this.onUpdate = function(update, info) {
+  onUpdate(update, info) {
     if (update.change) {
-      this.executeMacros(update, info);
+      this.executeMacros(update, info)
     }
-  };
+  }
 
-  this.executeMacros = function(update, info) {
-    var change = update.change;
+  executeMacros(update, info) {
+    let change = update.change
     if (!change) {
-      return;
+      return
     }
-    var doc = this.context.documentSession.getDocument();
-    var nodeId, node, text;
-    var path;
+    let doc = this.context.documentSession.getDocument()
+    let nodeId, node, text
+    let path
     if (info.action === 'type') {
       // HACK: we know that there is only one op when we type something
-      var op = change.ops[0];
-      path = op.path;
-      nodeId = path[0];
-      node = doc.get(nodeId);
-      text = doc.get(path);
+      let op = change.ops[0]
+      path = op.path
+      nodeId = path[0]
+      node = doc.get(nodeId)
+      text = doc.get(path)
     } else {
-      return;
+      return
     }
 
-    var props = {
+    let props = {
       action: info.action,
       node: node,
       path: path,
       text: text,
       selection: this.context.documentSession.getSelection()
-    };
-    for (var i = 0; i < this.macros.length; i++) {
-      var macro = this.macros[i];
-      var executed = macro.execute(props, this.context);
+    }
+    for (let i = 0; i < this.macros.length; i++) {
+      let macro = this.macros[i]
+      let executed = macro.execute(props, this.context)
 
       if (executed) {
-        break;
+        break
       }
     }
-  };
-};
+  }
+}
 
-oo.initClass(MacroManager);
-
-module.exports = MacroManager;
+export default MacroManager

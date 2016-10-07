@@ -1,143 +1,121 @@
-'use strict';
-
-var oo = require('../util/oo');
-var EventEmitter = require('../util/EventEmitter');
-var Anchor = require('./Anchor');
+import EventEmitter from '../util/EventEmitter'
+import Anchor from './Anchor'
 
 /**
   A document selection. Refers to a Substance document model, not to the DOM.
-
-  Implemented by {@link model/PropertySelection} and {@link model/ContainerSelection}
-
-  @class
-  @abstract
 */
+class Selection {
 
-function Selection() {
-  // Internal stuff
-  var _internal = {};
-  Object.defineProperty(this, "_internal", {
-    enumerable: false,
-    value: _internal
-  });
-    // set when attached to document
-  _internal.doc = null;
-}
+  constructor() {
+    // Internal stuff
+    var _internal = {}
+    Object.defineProperty(this, "_internal", {
+      enumerable: false,
+      value: _internal
+    })
+      // set when attached to document
+    _internal.doc = null
+  }
 
-Selection.Prototype = function() {
+  // for duck-typed instanceof
+  get _isSelection() { return true; }
 
-  this._isSelection = true;
-
-  this.clone = function() {
-    var newSel = this._clone();
+  clone() {
+    var newSel = this._clone()
     if (this._internal.doc) {
-      newSel.attach(this._internal.doc);
+      newSel.attach(this._internal.doc)
     }
-    return newSel;
-  };
+    return newSel
+  }
 
   /**
     @returns {Document} The attached document instance
   */
-  this.getDocument = function() {
-    var doc = this._internal.doc;
+  getDocument() {
+    var doc = this._internal.doc
     if (!doc) {
-      throw new Error('Selection is not attached to a document.');
+      throw new Error('Selection is not attached to a document.')
     }
-    return doc;
-  };
+    return doc
+  }
 
-  this.isAttached = function() {
-    return Boolean(this._internal.doc);
-  };
+  isAttached() {
+    return Boolean(this._internal.doc)
+  }
 
   /**
     Attach document to the selection.
 
-    @private
+    @internal
     @param {Document} doc document to attach
     @returns {this}
   */
-  this.attach = function(doc) {
-    this._internal.doc = doc;
-    return this;
-  };
+  attach(doc) {
+    this._internal.doc = doc
+    return this
+  }
 
   /**
     @returns {Boolean} true when selection is null.
   */
-  this.isNull = function() {
-    return false;
-  };
+  isNull() { return false; }
 
   /**
     @returns {Boolean} true for property selections
   */
-  this.isPropertySelection = function() {
-    return false;
-  };
+  isPropertySelection() { return false; }
 
   /**
     @returns {Boolean} true if selection is a {@link model/ContainerSelection}
   */
-  this.isContainerSelection = function() {
-    return false;
-  };
+  isContainerSelection() { return false; }
 
   /**
     @returns {Boolean} true if selection is a {@link model/NodeSelection}
   */
-  this.isNodeSelection = function() {
-    return false;
-  };
+  isNodeSelection() { return false; }
 
-  this.isCustomSelection = function() {
-    return false;
-  };
+  isCustomSelection() { return false; }
 
   /**
     @returns {Boolean} true when selection is collapsed
   */
-  this.isCollapsed = function() {
-    return true;
-  };
+  isCollapsed() { return true; }
 
   /**
     @returns {Boolean} true if startOffset < endOffset
   */
-  this.isReverse = function() {
-    return false;
-  };
+  isReverse() { return false; }
 
-  this.getType = function() {
-    throw new Error('Selection.getType() is abstract.');
-  };
+  getType() {
+    throw new Error('Selection.getType() is abstract.')
+  }
 
   /**
     @returns {Boolean} true if selection equals `other` selection
   */
-  this.equals = function(other) {
+  equals(other) {
     if (this === other) {
-      return true ;
+      return true
     } else if (!other) {
-      return false;
+      return false
     } else if (this.isNull() !== other.isNull()) {
-      return false;
+      return false
     } else if (this.getType() !== other.getType()) {
-      return false;
+      return false
     } else {
       // Note: returning true here, so that sub-classes
       // can call this as a predicate in their expression
-      return true;
+      return true
     }
-  };
+  }
 
   /**
     @returns {String} This selection as human readable string.
   */
-  this.toString = function() {
-    return "null";
-  };
+  toString() {
+    return "null"
+  }
 
   /**
     Convert container selection to JSON.
@@ -145,9 +123,9 @@ Selection.Prototype = function() {
     @abstract
     @returns {Object}
   */
-  this.toJSON = function() {
-    throw new Error('This method is abstract.');
-  };
+  toJSON() {
+    throw new Error('This method is abstract.')
+  }
 
   /**
     Get selection fragments for this selection.
@@ -155,44 +133,34 @@ Selection.Prototype = function() {
     A selection fragment is bound to a single property.
     @returns {Selection.Fragment[]}
   */
-  this.getFragments = function() {
-    return [];
-  };
+  getFragments() {
+    return []
+  }
+}
 
-};
-
-oo.initClass(Selection);
-
-/**
+/*
   Class to represent null selections.
 
-  @private
-  @class
+  @internal
 */
+class NullSelection extends Selection {
 
-Selection.NullSelection = function() {
-  Selection.call(this);
-};
+  isNull() {
+    return true
+  }
 
-Selection.NullSelection.Prototype = function() {
-  this.isNull = function() {
-    return true;
-  };
+  getType() {
+    return 'null'
+  }
 
-  this.getType = function() {
-    return 'null';
-  };
+  toJSON() {
+    return null
+  }
 
-  this.toJSON = function() {
-    return null;
-  };
-
-  this.clone = function() {
-    return this;
-  };
-};
-
-Selection.extend(Selection.NullSelection);
+  clone() {
+    return this
+  }
+}
 
 /**
   We use a singleton to represent NullSelections.
@@ -200,156 +168,124 @@ Selection.extend(Selection.NullSelection);
   @type {model/Selection}
 */
 
-Selection.nullSelection = Object.freeze(new Selection.NullSelection());
-
-Selection.fromJSON = function(json) {
-  if (!json) {
-    return Selection.nullSelection;
-  }
-  var type = json.type;
-  switch(type) {
-    case 'property':
-      var PropertySelection = require('./PropertySelection');
-      return PropertySelection.fromJSON(json);
-    case 'container':
-      var ContainerSelection = require('./ContainerSelection');
-      return ContainerSelection.fromJSON(json);
-    case 'node':
-      var NodeSelection = require('./NodeSelection');
-      return NodeSelection.fromJSON(json);
-    case 'custom':
-      var CustomSelection = require('./CustomSelection');
-      return CustomSelection.fromJSON(json);
-    default:
-      // console.error('Selection.fromJSON(): unsupported selection data', json);
-      return Selection.nullSelection;
-  }
-};
-
-Selection.create = function() {
-  throw new Error('Selection.create() has been removed as it is not possible to create selections consistently without looking into the document.');
-};
+Selection.nullSelection = Object.freeze(new NullSelection())
 
 /**
-  A selection fragment. Used when we split a {@link model/ContainerSelection}
+  A selection fragment. Used when we split a {@link ContainerSelection}
   into their fragments, each corresponding to a property selection.
 
-  @private
-  @class
+  @internal
 */
+class SelectionFragment extends EventEmitter {
 
-Selection.Fragment = function(path, startOffset, endOffset, full) {
-  EventEmitter.call(this);
+  constructor(path, startOffset, endOffset, full) {
+    super()
 
-  this.type = "selection-fragment";
-  this.path = path;
-  this.startOffset = startOffset;
-  this.endOffset = endOffset || startOffset;
-  this.full = Boolean(full);
-};
+    this.type = "selection-fragment"
+    this.path = path
+    this.startOffset = startOffset
+    this.endOffset = endOffset || startOffset
+    this.full = Boolean(full)
+  }
 
-Selection.Fragment.Prototype = function() {
+  isAnchor() {
+    return false
+  }
 
-  this.isAnchor = function() {
-    return false;
-  };
+  isInline() {
+    return false
+  }
 
-  this.isInline = function() {
-    return false;
-  };
+  isPropertyFragment() {
+    return true
+  }
 
-  this.isPropertyFragment = function() {
-    return true;
-  };
+  isNodeFragment() {
+    return false
+  }
 
-  this.isNodeFragment = function() {
-    return false;
-  };
+  isFull() {
+    return this.full
+  }
 
-  this.isFull = function() {
-    return this.full;
-  };
+  isPartial() {
+    return !this.full
+  }
 
-  this.isPartial = function() {
-    return !this.full;
-  };
+  getNodeId() {
+    return this.path[0]
+  }
 
-  this.getNodeId = function() {
-    return this.path[0];
-  };
+}
 
-};
-
-EventEmitter.extend(Selection.Fragment);
+Selection.Fragment = SelectionFragment
 
 
-Selection.NodeFragment = function(nodeId) {
-  EventEmitter.call(this);
+class NodeFragment extends EventEmitter {
 
-  this.type = "node-fragment";
-  this.nodeId = nodeId;
-  this.path = [nodeId];
-};
+  constructor(nodeId) {
+    super()
 
-Selection.NodeFragment.Prototype = function() {
+    this.type = "node-fragment"
+    this.nodeId = nodeId
+    this.path = [nodeId]
+  }
 
-  this.isAnchor = function() {
-    return false;
-  };
+  isAnchor() {
+    return false
+  }
 
-  this.isInline = function() {
-    return false;
-  };
+  isInline() {
+    return false
+  }
 
-  this.isPropertyFragment = function() {
-    return false;
-  };
+  isPropertyFragment() {
+    return false
+  }
 
-  this.isNodeFragment = function() {
-    return true;
-  };
+  isNodeFragment() {
+    return true
+  }
 
-  this.isFull = function() {
-    return true;
-  };
+  isFull() {
+    return true
+  }
 
-  this.isPartial = function() {
-    return false;
-  };
+  isPartial() {
+    return false
+  }
 
-  this.getNodeId = function() {
-    return this.nodeId;
-  };
-};
+  getNodeId() {
+    return this.nodeId
+  }
+}
 
-EventEmitter.extend(Selection.NodeFragment);
-
+Selection.NodeFragment = NodeFragment
 
 /**
   Describe the cursor when creating selection fragments.
   This is used for rendering selections.
 
-  @private
-  @class
-  @extends Anchor
+  @internal
 */
-Selection.Cursor = function(path, offset) {
-  Anchor.call(this, path, offset);
-  this.type = "cursor";
-};
+class Cursor extends Anchor {
 
-Selection.Cursor.Prototype = function() {
+  constructor(path, offset) {
+    super(path, offset)
 
-  this.isPropertyFragment = function() {
-    return false;
-  };
+    this.type = "cursor"
+  }
 
-  this.isNodeFragment = function() {
-    return false;
-  };
+  isPropertyFragment() {
+    return false
+  }
 
-};
+  isNodeFragment() {
+    return false
+  }
 
-Anchor.extend(Selection.Cursor);
+}
 
-module.exports = Selection;
+Selection.Cursor = Cursor
+
+export default Selection

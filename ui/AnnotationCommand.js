@@ -1,62 +1,54 @@
-'use strict';
-
-var Command = require('./Command');
-var createAnnotation = require('../model/transform/createAnnotation');
-var fuseAnnotation = require('../model/transform/fuseAnnotation');
-var expandAnnotation = require('../model/transform/expandAnnotation');
-var truncateAnnotation = require('../model/transform/truncateAnnotation');
+import Command from './Command'
+import createAnnotation from '../model/transform/createAnnotation'
+import fuseAnnotation from '../model/transform/fuseAnnotation'
+import expandAnnotation from '../model/transform/expandAnnotation'
+import truncateAnnotation from '../model/transform/truncateAnnotation'
 
 /**
   A class for commands intended to be executed on the annotations.
-  See the example below to learn how to define a custom `AnnotationCommand`.
 
-  @class
+  See the example below to learn how to register an `AnnotationCommand`
+  for a strong annotation.
+
+  @class AnnotationCommand
   @extends ui/Command
 
   @example
 
   ```js
-  var AnnotationCommand = require('substance/ui/AnnotationCommand');
+  import { AnnotationCommand } from 'substance'
 
-  function SmallCapsCommand() {
-    SmallCaps.super.apply(this, arguments);
-  }
-
-  var SmallCapsCommand = AnnotationCommand.extend();
-
-  SmallCapsCommand.static.name = 'smallcaps';
+  config.addCommand('strong', AnnotationCommand, {nodeType: 'strong'})
   ```
 */
-function AnnotationCommand() {
-  Command.call(this);
-}
 
-AnnotationCommand.Prototype = function() {
+class AnnotationCommand extends Command {
+
+  constructor(...args) {
+    super(...args)
+
+    if (!this.config.nodeType) {
+      throw new Error("'nodeType' is required")
+    }
+  }
 
   /**
     Get the type of an annotation.
 
     @returns {String} The annotation's type.
    */
-  this.getAnnotationType = function() {
-    // Note: AnnotationCommand.static.annotationType is only necessary if
-    // it is different to Annotation.static.name
-    var annotationType = this.constructor.static.annotationType || this.constructor.static.name;
-    if (annotationType) {
-      return annotationType;
-    } else {
-      throw new Error('Contract: AnnotationCommand.static.annotationType should be associated to a document annotation type.');
-    }
-  };
+  getAnnotationType() {
+    return this.config.nodeType
+  }
 
   /**
     Get the annotation's data.
 
     @returns {Object} The annotation's data.
    */
-  this.getAnnotationData = function() {
-    return {};
-  };
+  getAnnotationData() {
+    return {}
+  }
 
   /**
     Checks if command couldn't be executed with current selection.
@@ -66,20 +58,15 @@ AnnotationCommand.Prototype = function() {
 
     @returns {Boolean} Whether or not command could be executed.
    */
-  this.isDisabled = function(sel) {
+  isDisabled(sel) {
     // TODO: Container selections should be valid if the annotation type
     // is a container annotation. Currently we only allow property selections.
     if (!sel || sel.isNull() || !sel.isAttached() || sel.isCustomSelection()||
         sel.isNodeSelection() || sel.isContainerSelection()) {
-      return true;
+      return true
     }
-    return false;
-  };
-
-  // Not implemented by default
-  this.canEdit = function(annos, sel) { // eslint-disable-line
-    return false;
-  };
+    return false
+  }
 
   /**
     Checks if new annotations could be created.
@@ -91,9 +78,9 @@ AnnotationCommand.Prototype = function() {
     @returns {Boolean} Whether or not annotation could be created.
    */
   // When there's no existing annotation overlapping, we create a new one.
-  this.canCreate = function(annos, sel) {
-    return (annos.length === 0 && !sel.isCollapsed());
-  };
+  canCreate(annos, sel) {
+    return (annos.length === 0 && !sel.isCollapsed())
+  }
 
   /**
     Checks if annotations could be fused.
@@ -105,9 +92,9 @@ AnnotationCommand.Prototype = function() {
     @returns {Boolean} Whether or not annotations could be fused.
    */
   // When more than one annotation overlaps with the current selection
-  this.canFuse = function(annos, sel) {
-    return (annos.length >= 2 && !sel.isCollapsed());
-  };
+  canFuse(annos, sel) {
+    return (annos.length >= 2 && !sel.isCollapsed())
+  }
 
   /**
     Checks if annotation could be deleted.
@@ -119,11 +106,11 @@ AnnotationCommand.Prototype = function() {
     @returns {Boolean} Whether or not annotation could be deleted.
    */
   // When the cursor or selection is inside an existing annotation
-  this.canDelete = function(annos, sel) {
-    if (annos.length !== 1) return false;
-    var annoSel = annos[0].getSelection();
-    return sel.isInsideOf(annoSel);
-  };
+  canDelete(annos, sel) {
+    if (annos.length !== 1) return false
+    let annoSel = annos[0].getSelection()
+    return sel.isInsideOf(annoSel)
+  }
 
   /**
     Checks if annotation could be expanded.
@@ -136,11 +123,11 @@ AnnotationCommand.Prototype = function() {
     @returns {Boolean} Whether or not annotation could be expanded.
    */
   // When there's some overlap with only a single annotation we do an expand
-  this.canExpand = function(annos, sel) {
-    if (annos.length !== 1) return false;
-    var annoSel = annos[0].getSelection();
-    return sel.overlaps(annoSel) && !sel.isInsideOf(annoSel);
-  };
+  canExpand(annos, sel) {
+    if (annos.length !== 1) return false
+    let annoSel = annos[0].getSelection()
+    return sel.overlaps(annoSel) && !sel.isInsideOf(annoSel)
+  }
 
   /**
     Checks if annotation could be truncated.
@@ -152,14 +139,14 @@ AnnotationCommand.Prototype = function() {
 
     @returns {Boolean} Whether or not annotation could be truncated.
    */
-  this.canTruncate = function(annos, sel) {
-    if (annos.length !== 1) return false;
-    var annoSel = annos[0].getSelection();
+  canTruncate(annos, sel) {
+    if (annos.length !== 1) return false
+    let annoSel = annos[0].getSelection()
 
     return (sel.isLeftAlignedWith(annoSel) || sel.isRightAlignedWith(annoSel)) &&
            !sel.contains(annoSel) &&
-           !sel.isCollapsed();
-  };
+           !sel.isCollapsed()
+  }
 
   /**
     Gets command state object.
@@ -167,44 +154,40 @@ AnnotationCommand.Prototype = function() {
     @param {Object} state.selection the current selection
     @returns {Object} info object with command details.
   */
-  this.getCommandState = function(props, context) { // eslint-disable-line
-    context = context || {};
-    var sel = this._getSelection(props);
+  getCommandState(params) { // eslint-disable-line
+
+    let sel = this._getSelection(params)
     // We can skip all checking if a disabled condition is met
     // E.g. we don't allow toggling of property annotations when current
     // selection is a container selection
     if (this.isDisabled(sel)) {
       return {
         disabled: true
-      };
+      }
     }
-    var annos = this._getAnnotationsForSelection(props, context);
-    var newState = {
+    let annos = this._getAnnotationsForSelection(params)
+    let newState = {
       disabled: false,
       active: false,
       mode: null
-    };
-    if (this.canCreate(annos, sel)) {
-      newState.mode = "create";
-    } else if (this.canFuse(annos, sel)) {
-      newState.mode = "fusion";
-    } else if (this.canTruncate(annos, sel)) {
-      newState.active = true;
-      newState.mode = "truncate";
-    } else if (this.canExpand(annos, sel)) {
-      newState.mode = "expand";
-    } else if (this.canEdit(annos, sel)) {
-      newState.mode = "edit";
-      newState.node = annos[0];
-      newState.active = true;
-    } else if (this.canDelete(annos, sel)) {
-      newState.active = true;
-      newState.mode = "delete";
-    } else {
-      newState.disabled = true;
     }
-    return newState;
-  };
+    if (this.canCreate(annos, sel)) {
+      newState.mode = 'create'
+    } else if (this.canFuse(annos, sel)) {
+      newState.mode = 'fuse'
+    } else if (this.canTruncate(annos, sel)) {
+      newState.active = true
+      newState.mode = 'truncate'
+    } else if (this.canExpand(annos, sel)) {
+      newState.mode = 'expand'
+    } else if (this.canDelete(annos, sel)) {
+      newState.active = true
+      newState.mode = 'delete'
+    } else {
+      newState.disabled = true
+    }
+    return newState
+  }
 
   /**
     Execute command and trigger transformation.
@@ -212,127 +195,119 @@ AnnotationCommand.Prototype = function() {
     @returns {Object} info object with execution details.
   */
   // Execute command and trigger transformations
-  this.execute = function(props, context) {
-    props = props || {};
-    props.selection = this._getSelection(props);
-    if (props.disabled) return false;
-    var mode = props.mode;
-    switch(mode) {
-      case 'create':
-        return this.executeCreate(props, context);
-      case 'fuse':
-        return this.executeFuse(props, context);
-      case 'truncate':
-        return this.executeTruncate(props, context);
-      case 'expand':
-        return this.executeExpand(props, context);
-      case 'edit':
-        return this.executeEdit(props, context);
-      case 'delete':
-        return this.executeDelete(props, context);
-      default:
-        console.warn('Command.execute(): unknown mode', mode);
-        return false;
-    }
-  };
+  execute(params) {
+    // Disabled the next line as I believe it is
+    // always passed via params already
+    // params.selection = this._getSelection(params)
+    let commandState = params.commandState
 
-  this.executeCreate = function(props, context) {
-    var annos = this._getAnnotationsForSelection(props, context);
-    this._checkPrecondition(props, context, annos, this.canCreate);
-    var newAnno = this._applyTransform(props, context, function(tx) {
-      props.node = this.getAnnotationData();
-      props.node.type = this.getAnnotationType();
-      return createAnnotation(tx, props);
-    }.bind(this));
+    if (commandState.disabled) return false
+    switch(commandState.mode) {
+      case 'create':
+        return this.executeCreate(params)
+      case 'fuse':
+        return this.executeFuse(params)
+      case 'truncate':
+        return this.executeTruncate(params)
+      case 'expand':
+        return this.executeExpand(params)
+      case 'delete':
+        return this.executeDelete(params)
+      default:
+        console.warn('Command.execute(): unknown mode', commandState.mode)
+        return false
+    }
+  }
+
+  executeCreate(params) {
+    let annos = this._getAnnotationsForSelection(params)
+    this._checkPrecondition(params, annos, this.canCreate)
+    let newAnno = this._applyTransform(params, function(tx) {
+      let node = this.getAnnotationData()
+      node.type = this.getAnnotationType()
+      return createAnnotation(tx, {
+        node: node,
+        selection: params.selection
+      })
+    }.bind(this))
     return {
       mode: 'create',
       anno: newAnno
-    };
-  };
+    }
+  }
 
-  this.executeFuse = function(props, context) {
-    var annos = this._getAnnotationsForSelection(props, context);
-    this._checkPrecondition(props, context, annos, this.canFuse);
-    var fusedAnno = this._applyTransform(props, context, function(tx) {
-      var result = fuseAnnotation(tx, {
+  executeFuse(params) {
+    let annos = this._getAnnotationsForSelection(params);
+    this._checkPrecondition(params, annos, this.canFuse);
+    let fusedAnno = this._applyTransform(params, function(tx) {
+      let result = fuseAnnotation(tx, {
         annos: annos
-      });
+      })
       return {
         result: result.node
-      };
-    });
+      }
+    })
     return {
       mode: 'fuse',
       anno: fusedAnno
-    };
-  };
+    }
+  }
 
-  this.executeTruncate = function(props, context) {
-    var annos = this._getAnnotationsForSelection(props, context);
-    var anno = annos[0];
-    this._checkPrecondition(props, context, annos, this.canTruncate);
-    this._applyTransform(props, context, function(tx) {
+  executeTruncate(params) {
+    let annos = this._getAnnotationsForSelection(params)
+    let anno = annos[0]
+    this._checkPrecondition(params, annos, this.canTruncate)
+    this._applyTransform(params, function(tx) {
       return truncateAnnotation(tx, {
-        selection: props.selection,
+        selection: params.selection,
         anno: anno
-      });
-    });
+      })
+    })
     return {
       mode: 'truncate',
       anno: anno
-    };
-  };
+    }
+  }
 
-  this.executeExpand = function(props, context) {
-    var annos = this._getAnnotationsForSelection(props, context);
-    var anno = annos[0];
-    this._checkPrecondition(props, context, annos, this.canExpand);
-    this._applyTransform(props, context, function(tx) {
+  executeExpand(params) {
+    let annos = this._getAnnotationsForSelection(params)
+    let anno = annos[0]
+    this._checkPrecondition(params, annos, this.canExpand)
+    this._applyTransform(params, function(tx) {
       expandAnnotation(tx, {
-        selection: props.selection,
+        selection: params.selection,
         anno: anno
-      });
-    });
+      })
+    })
     return {
       mode: 'expand',
       anno: anno
-    };
-  };
+    }
+  }
 
-  // TODO: do we still need this?
-  this.executeEdit = function(props, context) { // eslint-disable-line
-    var annos = this._getAnnotationsForSelection(props, context);
-    this._checkPrecondition(props, context, annos, this.canEdit);
-    return {
-      mode: "edit",
-      anno: annos[0],
-      readyOnly: true
-    };
-  };
-
-  this.executeDelete = function(props, context) {
-    var annos = this._getAnnotationsForSelection(props, context);
-    var anno = annos[0];
-    this._checkPrecondition(props, context, annos, this.canDelete);
-    this._applyTransform(props, context, function(tx) {
-      return tx.delete(anno.id);
-    });
+  executeDelete(params) {
+    let annos = this._getAnnotationsForSelection(params)
+    let anno = annos[0]
+    this._checkPrecondition(params, annos, this.canDelete)
+    this._applyTransform(params, function(tx) {
+      return tx.delete(anno.id)
+    })
     return {
       mode: 'delete',
       annoId: anno.id
-    };
-  };
-
-  this._checkPrecondition = function(props, context, annos, checker) {
-    var sel = this._getSelection(props);
-    if (!checker.call(this, annos, sel)) {
-      throw new Error("AnnotationCommand: can't execute command for selection " + sel.toString());
     }
-  };
+  }
 
-  this._getAnnotationsForSelection = function(props) {
-    return props.selectionState.getAnnotationsForType(this.getAnnotationType());
-  };
+  _checkPrecondition(params, annos, checker) {
+    let sel = this._getSelection(params)
+    if (!checker.call(this, annos, sel)) {
+      throw new Error("AnnotationCommand: can't execute command for selection " + sel.toString())
+    }
+  }
+
+  _getAnnotationsForSelection(params) {
+    return params.selectionState.getAnnotationsForType(this.getAnnotationType())
+  }
 
   /**
     Apply an annotation transformation.
@@ -340,31 +315,29 @@ AnnotationCommand.Prototype = function() {
     @returns {Object} transformed annotations.
    */
   // Helper to trigger an annotation transformation
-  this._applyTransform = function(props, context, transformFn) {
+  _applyTransform(params, transformFn) {
     // HACK: this looks a bit too flexible. Maybe we want to go for
-    var sel = this._getSelection(props);
-    var documentSession = this._getDocumentSession(props, context);
-    var surface = props.surface;
-    props.selection = sel;
+    let sel = this._getSelection(params)
+    let documentSession = this._getDocumentSession(params)
+    let surface = params.surface
+    params.selection = sel
 
-    var result; // to store transform result
-    if (sel.isNull()) return;
+    let result; // to store transform result
+    if (sel.isNull()) return
     documentSession.transaction(function(tx) {
-      tx.before.selection = sel;
+      tx.before.selection = sel
       if (surface) {
-        tx.before.surfaceId = surface.getId();
+        tx.before.surfaceId = surface.getId()
       }
-      var out = transformFn(tx, props);
+      let out = transformFn(tx, params)
       if (out) {
-        result = out.result;
+        result = out.result
       }
-      return out;
-    });
-    return result;
-  };
+      return out
+    })
+    return result
+  }
 
-};
+}
 
-Command.extend(AnnotationCommand);
-
-module.exports = AnnotationCommand;
+export default AnnotationCommand

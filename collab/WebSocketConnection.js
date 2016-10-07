@@ -1,21 +1,12 @@
-"use strict";
-
-var ClientConnection = require('./ClientConnection');
+import ClientConnection from './ClientConnection'
 
 /**
   Browser WebSocket abstraction. Handles reconnects etc.
 */
-function WebSocketConnection() {
-  WebSocketConnection.super.apply(this, arguments);
+class WebSocketConnection extends ClientConnection {
+  _createWebSocket() {
+    return new window.WebSocket(this.config.wsUrl);
+  }
 }
 
-WebSocketConnection.Prototype = function() {
-
-  this._createWebSocket = function() {
-    return new window.WebSocket(this.config.wsUrl);
-  };
-
-};
-
-ClientConnection.extend(WebSocketConnection);
-module.exports = WebSocketConnection;
+export default WebSocketConnection

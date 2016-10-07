@@ -1,10 +1,9 @@
-'use strict';
-
-function Conflict(a, b) {
-  Error.call(this, "Conflict: " + JSON.stringify(a) +" vs " + JSON.stringify(b));
-  this.a = a;
-  this.b = b;
+class Conflict extends Error {
+  constructor(a, b) {
+    super("Conflict: " + JSON.stringify(a) +" vs " + JSON.stringify(b))
+    this.a = a;
+    this.b = b;
+  }
 }
-Conflict.prototype = Error.prototype;
 
-module.exports = Conflict;
+export default Conflict;

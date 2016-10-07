@@ -1,7 +1,5 @@
-'use strict';
-
-var forEach = require('lodash/forEach');
-var map = require('lodash/map');
+import forEach from 'lodash/forEach'
+import map from 'lodash/map'
 
 /*
   Calculate a bounding rectangle for a set of rectangles.
@@ -91,4 +89,4 @@ function getRelativeBoundingRect(els, containerEl) {
   };
 }
 
-module.exports = getRelativeBoundingRect;
+export default getRelativeBoundingRect;

@@ -1,30 +1,28 @@
-'use strict';
+import inBrowser from '../util/inBrowser'
+import BrowserDOMElement from './BrowserDOMElement.js'
+import CheerioDOMElement from './CheerioDOMElement.js'
 
-var inBrowser = require('../util/inBrowser');
-
-var DOMElementImpl;
+let DOMElementImpl
 
 if (inBrowser) {
-  DOMElementImpl = require('./BrowserDOMElement.js');
+  DOMElementImpl = BrowserDOMElement
 } else {
-  DOMElementImpl = require('./CheerioDOMElement.js');
+  DOMElementImpl = CheerioDOMElement
 }
 
-var DefaultDOMElement = {};
+let DefaultDOMElement = {}
 
 DefaultDOMElement.createTextNode = function(text) {
-  var el = DOMElementImpl.createTextNode(text);
-  return new DOMElementImpl(el);
-};
+  return DOMElementImpl.createTextNode(text)
+}
 
 DefaultDOMElement.createElement = function(tagName) {
-  var el = DOMElementImpl.createElement(tagName);
-  return new DOMElementImpl(el);
-};
+  return DOMElementImpl.createElement(tagName)
+}
 
 DefaultDOMElement._create = function(el) {
-  return new DOMElementImpl(el);
-};
+  return new DOMElementImpl(el)
+}
 
 /*
   A wrapper for Browser's `window` providing
@@ -32,50 +30,47 @@ DefaultDOMElement._create = function(el) {
 */
 DefaultDOMElement.getBrowserWindow = function() {
   if (inBrowser) {
-    return DOMElementImpl.getBrowserWindow();
+    return DOMElementImpl.getBrowserWindow()
   } else {
     // just a stub if not in browser
-    return DefaultDOMElement.createElement('div');
+    return DefaultDOMElement.createElement('div')
   }
-};
+}
 
 /*
   @param {String} html
   @returns {DOMElement|DOMElement[]}
 */
 DefaultDOMElement.parseHTML = function(html) {
-  return DOMElementImpl.parseMarkup(html, 'html');
-};
+  return DOMElementImpl.parseMarkup(html, 'html')
+}
 
 /*
   @param {String} xml
   @returns {DOMElement|DOMElement[]}
 */
 DefaultDOMElement.parseXML = function(xml, fullDoc) {
-  return DOMElementImpl.parseMarkup(xml, 'xml', fullDoc);
-};
+  return DOMElementImpl.parseMarkup(xml, 'xml', fullDoc)
+}
 
 DefaultDOMElement.wrapNativeElement = function(el) {
   if (el) {
     if (inBrowser && (el instanceof window.Node || el === window) ) {
-      var BrowserDOMElement = require('./BrowserDOMElement');
-      return BrowserDOMElement.wrapNativeElement(el);
+      return BrowserDOMElement.wrapNativeElement(el)
     } else if (el.root && el.root.type === "root" ) {
-      var CheerioDOMElement = require('./CheerioDOMElement');
-      return CheerioDOMElement.wrapNativeElement(el);
+      return CheerioDOMElement.wrapNativeElement(el)
     }
   } else {
-    return null;
+    return null
   }
-};
+}
 
 DefaultDOMElement.isReverse = function(anchorNode, anchorOffset, focusNode, focusOffset) {
   if (inBrowser ) {
-    var BrowserDOMElement = require('./BrowserDOMElement');
-    return BrowserDOMElement.isReverse(anchorNode, anchorOffset, focusNode, focusOffset);
+    return BrowserDOMElement.isReverse(anchorNode, anchorOffset, focusNode, focusOffset)
   } else {
-    throw new Error('Not implemented.');
+    throw new Error('Not implemented.')
   }
-};
+}
 
-module.exports = DefaultDOMElement;
+export default DefaultDOMElement

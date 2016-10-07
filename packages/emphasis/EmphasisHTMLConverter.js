@@ -1,15 +1,13 @@
-'use strict';
-
 /*
  * HTML converter for Blockquote.
  */
-module.exports = {
+export default {
 
   type: 'emphasis',
   tagName: 'em',
 
   matchElement: function(el) {
-    return el.is('em, i');
+    return el.is('em, i')
   }
 
-};
+}

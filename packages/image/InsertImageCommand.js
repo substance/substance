@@ -1,73 +1,98 @@
-'use strict';
+import Command from '../../ui/Command'
+import paste from '../../model/transform/paste'
 
-var uuid = require('../../util/uuid');
-var Command = require('../../ui/Command');
+class ImageCommand extends Command {
+  constructor() {
+    super({ name: 'insert-image' })
+  }
 
-function ImageCommand() {
-  ImageCommand.super.apply(this, arguments);
-}
-
-ImageCommand.Prototype = function() {
-
-  this.getCommandState = function(props, context) {
-    var documentSession = context.documentSession;
-    var sel = documentSession.getSelection();
-
-    var newState = {
+  getCommandState(params) {
+    let sel = params.selection
+    let surface = params.surface
+    let newState = {
       disabled: true,
       active: false
-    };
-    if (sel && !sel.isNull() && sel.isPropertySelection()) {
-      newState.disabled = false;
     }
-    return newState;
-  };
+    if (sel && !sel.isNull() && !sel.isCustomSelection() &&
+        surface && surface.isContainerEditor()) {
+      newState.disabled = false
+    }
+    return newState
+  }
 
   /**
-    Initiates a fileupload and performs image insertion after the fileupload
-    has been completed.
-
-    TODO: Think about ways to make ImagCommand CLI-compatible.
+    Inserts (stub) images and triggers a fileupload.
+    After upload has completed, the image URLs get updated.
   */
-  this.execute = function(props, context) {
-    var state = this.getCommandState(props, context);
+  execute(params, context) {
+    let state = this.getCommandState(params)
     // Return if command is disabled
-    if (state.disabled) return;
+    if (state.disabled) return
 
-    var surface = context.surfaceManager.getFocusedSurface();
-    var fileClient = context.fileClient;
-    var file = props.file;
-    if (!file) {
-      throw new Error("'file' is mandatory.");
-    }
-    fileClient.uploadFile(file, function(err, figureUrl) {
-      // NOTE: we are providing a custom beforeState, to make sure
-      // thate the correct initial selection is used.
-      surface.transaction(function(tx, args) {
-        var newImage = {
-          id: uuid('image'),
-          type: 'image',
-          src: figureUrl,
-          previewSrc: figureUrl
-        };
-        // Note: returning the result which will contain an updated selection
-        return surface.insertNode(tx, {
-          selection: args.selection,
-          node: newImage,
-          containerId: surface.getContainerId()
-        });
-      });
-    });
+    let documentSession = params.documentSession
+    let sel = params.selection
+    let surface = params.surface
+    let fileClient = context.fileClient
+    let files = params.files
+
+    // can drop images only into container editors
+    if (!surface.isContainerEditor()) return
+
+    // creating a small doc where we add the images
+    // and then we use the paste transformation to get this snippet
+    // into the real doc
+    let doc = surface.getDocument()
+    let snippet = doc.createSnippet()
+
+    // as file upload takes longer we will insert stub images
+    let items = files.map(function(file) {
+      let node = snippet.create({ type: 'image' })
+      snippet.show(node)
+      return {
+        file: file,
+        nodeId: node.id
+      }
+    })
+
+    surface.transaction(function(tx) {
+      tx.before.selection = sel
+      return paste(tx, {
+        selection: sel,
+        containerId: surface.getContainerId(),
+        doc: snippet
+      })
+    })
+
+    // start uploading
+    items.forEach(function(item) {
+      let nodeId = item.nodeId
+      let file = item.file
+      let node = doc.get(nodeId)
+      node.emit('upload:started')
+      let channel = fileClient.uploadFile(file, function(err, url) {
+        if (err) {
+          url = "error"
+        }
+        // get the node again to make sure it still exists
+        let node = doc.get(nodeId)
+        if (node) {
+          node.emit('upload:finished');
+          documentSession.transaction(function(tx) {
+            tx.set([nodeId, 'src'], url)
+          })
+        }
+      })
+      channel.on('progress', function(progress) {
+        // console.log('Progress', progress);
+        node.emit('upload:progress', progress)
+      })
+    })
 
     return {
       status: 'file-upload-process-started'
-    };
-  };
+    }
+  }
 
-};
+}
 
-Command.extend(ImageCommand);
-
-ImageCommand.static.name = 'insert-image';
-
-module.exports = ImageCommand;
+export default ImageCommand

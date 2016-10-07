@@ -1,17 +1,11 @@
-'use strict';
+import PropertyAnnotation from '../../model/PropertyAnnotation'
+import Fragmenter from '../../model/Fragmenter'
 
-var PropertyAnnotation = require('../../model/PropertyAnnotation');
-var Fragmenter = require('../../model/Fragmenter');
+class Subscript extends PropertyAnnotation {}
 
-function Subscript() {
-  Subscript.super.apply(this, arguments);
-}
-
-PropertyAnnotation.extend(Subscript);
-
-Subscript.static.name = 'subscript';
+Subscript.type = 'subscript'
 
 // hint for rendering in presence of overlapping annotations
-Subscript.static.fragmentation = Fragmenter.ANY;
+Subscript.fragmentation = Fragmenter.ANY
 
-module.exports = Subscript;
+export default Subscript

@@ -1,18 +1,12 @@
-'use strict';
+import PropertyAnnotation from '../../model/PropertyAnnotation'
+import Fragmenter from '../../model/Fragmenter'
 
-var PropertyAnnotation = require('../../model/PropertyAnnotation');
-var Fragmenter = require('../../model/Fragmenter');
+class Strong extends PropertyAnnotation {}
 
-function Strong() {
-  Strong.super.apply(this, arguments);
-}
-
-PropertyAnnotation.extend(Strong);
-
-Strong.static.name = "strong";
+Strong.type = "strong"
 
 // a hint that makes in case of overlapping annotations that this
 // annotation gets fragmented more often
-Strong.static.fragmentation = Fragmenter.ANY;
+Strong.fragmentation = Fragmenter.ANY
 
-module.exports = Strong;
+export default Strong

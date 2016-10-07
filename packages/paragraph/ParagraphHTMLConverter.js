@@ -1,9 +1,7 @@
-'use strict';
-
 /*
  * HTML converter for Paragraph.
  */
-module.exports = {
+export default {
 
   type: 'paragraph',
   tagName: 'p',
@@ -16,4 +14,4 @@ module.exports = {
     el.append(converter.annotatedText([node.id, 'content']));
   }
 
-};
+}

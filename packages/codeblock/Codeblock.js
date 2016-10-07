@@ -1,13 +1,7 @@
-'use strict';
+import TextBlock from '../../model/TextBlock'
 
-var TextBlock = require('../../model/TextBlock');
+class Codeblock extends TextBlock {}
 
-function Codeblock() {
-  Codeblock.super.apply(this, arguments);
-}
+Codeblock.type = "codeblock"
 
-TextBlock.extend(Codeblock);
-
-Codeblock.static.name = "codeblock";
-
-module.exports = Codeblock;
+export default Codeblock

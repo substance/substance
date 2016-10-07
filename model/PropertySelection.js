@@ -1,16 +1,11 @@
-'use strict';
-
-var isEqual = require('lodash/isEqual');
-var isNumber = require('lodash/isNumber');
-var Selection = require('./Selection');
-var Coordinate = require('./Coordinate');
-var Range = require('./Range');
+import isEqual from 'lodash/isEqual'
+import isNumber from 'lodash/isNumber'
+import Selection from './Selection'
+import Coordinate from './Coordinate'
+import Range from './Range'
 
 /**
   A selection which is bound to a property. Implements {@link model/Selection}.
-
-  @class
-  @extends model/Selection
 
   @example
 
@@ -22,59 +17,67 @@ var Range = require('./Range');
     endOffset: 6
   });
 */
-function PropertySelection(path, startOffset, endOffset, reverse, containerId, surfaceId) {
-  Selection.call(this);
+class PropertySelection extends Selection {
 
   /**
-    The path to the selected property.
-    @type {String[]}
+    @param {array} path
+    @param {int} startOffset
+    @param {int} endOffset
+    @param {bool} reverse
+    @param {string} [containerId]
+    @param {string} [surfaceId]
   */
-  this.path = path;
+  constructor(path, startOffset, endOffset, reverse, containerId, surfaceId) {
+    super()
 
-  /**
-    Start character position.
-    @type {Number}
-  */
-  this.startOffset = startOffset;
+    /**
+      The path to the selected property.
+      @type {String[]}
+    */
+    this.path = path;
 
-  /**
-    End character position.
-    @type {Number}
-  */
-  this.endOffset = endOffset;
+    /**
+      Start character position.
+      @type {Number}
+    */
+    this.startOffset = startOffset;
 
-  /**
-    Selection direction.
-    @type {Boolean}
-  */
-  this.reverse = Boolean(reverse);
+    /**
+      End character position.
+      @type {Number}
+    */
+    this.endOffset = endOffset;
 
-  this.containerId = containerId;
+    /**
+      Selection direction.
+      @type {Boolean}
+    */
+    this.reverse = Boolean(reverse);
 
-  /**
-    Identifier of the surface this selection should be active in.
-    @type {String}
-  */
-  this.surfaceId = surfaceId;
+    this.containerId = containerId;
 
-  if (!path || !isNumber(startOffset)) {
-    throw new Error('Invalid arguments: `path` and `startOffset` are mandatory');
+    /**
+      Identifier of the surface this selection should be active in.
+      @type {String}
+    */
+    this.surfaceId = surfaceId;
+
+    if (!path || !isNumber(startOffset)) {
+      throw new Error('Invalid arguments: `path` and `startOffset` are mandatory');
+    }
+
+    // dynamic adapters for Coordinate oriented implementations
+    this._internal.start = new CoordinateAdapter(this, 'path', 'startOffset');
+    this._internal.end = new CoordinateAdapter(this, 'path', 'endOffset');
+    this._internal.range = new RangeAdapter(this);
   }
-
-  // dynamic adapters for Coordinate oriented implementations
-  this._internal.start = new CoordinateAdapter(this, 'path', 'startOffset');
-  this._internal.end = new CoordinateAdapter(this, 'path', 'endOffset');
-  this._internal.range = new RangeAdapter(this);
-}
-
-PropertySelection.Prototype = function() {
 
   /**
     Convert container selection to JSON.
 
     @returns {Object}
   */
-  this.toJSON = function() {
+  toJSON() {
     return {
       type: 'property',
       path: this.path,
@@ -84,43 +87,45 @@ PropertySelection.Prototype = function() {
       containerId: this.containerId,
       surfaceId: this.surfaceId
     };
-  };
+  }
 
-  this.isPropertySelection = function() {
+  isPropertySelection() {
     return true;
-  };
+  }
 
-  this.getType = function() {
+  getType() {
     return 'property';
-  };
+  }
 
-  this.isNull = function() {
+  isNull() {
     return false;
-  };
+  }
 
-  this.isCollapsed = function() {
+  isCollapsed() {
     return this.startOffset === this.endOffset;
-  };
+  }
 
-  this.isReverse = function() {
+  isReverse() {
     return this.reverse;
-  };
+  }
 
-  this.equals = function(other) {
+  equals(other) {
     return (
       Selection.prototype.equals.call(this, other) &&
       (this.start.equals(other.start) && this.end.equals(other.end))
     );
-  };
+  }
 
-  this.toString = function() {
+  toString() {
+    /* istanbul ignore next */
     return [
       "PropertySelection(", JSON.stringify(this.path), ", ",
       this.startOffset, " -> ", this.endOffset,
       (this.reverse?", reverse":""),
+      (this.surfaceId?(", "+this.surfaceId):""),
       ")"
     ].join('');
-  };
+  }
 
   /**
     Collapse a selection to chosen direction.
@@ -128,7 +133,7 @@ PropertySelection.Prototype = function() {
     @param {String} direction either left of right
     @returns {PropertySelection}
   */
-  this.collapse = function(direction) {
+  collapse(direction) {
     var offset;
     if (direction === 'left') {
       offset = this.startOffset;
@@ -136,45 +141,45 @@ PropertySelection.Prototype = function() {
       offset = this.endOffset;
     }
     return this.createWithNewRange(offset, offset);
-  };
+  }
 
   // Helper Methods
   // ----------------------
 
-  this.getRange = function() {
+  getRange() {
     return this.range;
-  };
+  }
 
   /**
     Get path of a selection, e.g. target property where selected data is stored.
 
     @returns {String[]} path
   */
-  this.getPath = function() {
+  getPath() {
     return this.path;
-  };
+  }
 
-  this.getNodeId = function() {
+  getNodeId() {
     return this.path[0];
-  };
+  }
 
   /**
     Get start character position.
 
     @returns {Number} offset
   */
-  this.getStartOffset = function() {
+  getStartOffset() {
     return this.startOffset;
-  };
+  }
 
   /**
     Get end character position.
 
     @returns {Number} offset
   */
-  this.getEndOffset = function() {
+  getEndOffset() {
     return this.endOffset;
-  };
+  }
 
   /**
     Checks if this selection is inside another one.
@@ -183,7 +188,7 @@ PropertySelection.Prototype = function() {
     @param {Boolean} [strict] true if should check that it is strictly inside the other
     @returns {Boolean}
   */
-  this.isInsideOf = function(other, strict) {
+  isInsideOf(other, strict) {
     if (other.isNull()) return false;
     if (other.isContainerSelection()) {
       return other.contains(this, strict);
@@ -197,7 +202,7 @@ PropertySelection.Prototype = function() {
         this.startOffset >= other.startOffset &&
         this.endOffset <= other.endOffset);
     }
-  };
+  }
 
   /**
     Checks if this selection contains another one.
@@ -206,10 +211,10 @@ PropertySelection.Prototype = function() {
     @param {Boolean} [strict] true if should check that it is strictly contains the other
     @returns {Boolean}
   */
-  this.contains = function(other, strict) {
+  contains(other, strict) {
     if (other.isNull()) return false;
     return other.isInsideOf(this, strict);
-  };
+  }
 
   /**
     Checks if this selection overlaps another one.
@@ -218,7 +223,7 @@ PropertySelection.Prototype = function() {
     @param {Boolean} [strict] true if should check that it is strictly overlaps the other
     @returns {Boolean}
   */
-  this.overlaps = function(other, strict) {
+  overlaps(other, strict) {
     if (other.isNull()) return false;
     if (other.isContainerSelection()) {
       // console.log('PropertySelection.overlaps: delegating to ContainerSelection.overlaps...');
@@ -230,7 +235,7 @@ PropertySelection.Prototype = function() {
     } else {
       return (! (this.startOffset>other.endOffset||this.endOffset<other.startOffset) );
     }
-  };
+  }
 
   /**
     Checks if this selection has the right boundary in common with another one.
@@ -238,7 +243,7 @@ PropertySelection.Prototype = function() {
     @param {Selection} other
     @returns {Boolean}
   */
-  this.isRightAlignedWith = function(other) {
+  isRightAlignedWith(other) {
     if (other.isNull()) return false;
     if (other.isContainerSelection()) {
       // console.log('PropertySelection.isRightAlignedWith: delegating to ContainerSelection.isRightAlignedWith...');
@@ -246,7 +251,7 @@ PropertySelection.Prototype = function() {
     }
     return (isEqual(this.path, other.path) &&
       this.endOffset === other.endOffset);
-  };
+  }
 
   /**
     Checks if this selection has the left boundary in common with another one.
@@ -254,7 +259,7 @@ PropertySelection.Prototype = function() {
     @param {Selection} other
     @returns {Boolean}
   */
-  this.isLeftAlignedWith = function(other) {
+  isLeftAlignedWith(other) {
     if (other.isNull()) return false;
     if (other.isContainerSelection()) {
       // console.log('PropertySelection.isLeftAlignedWith: delegating to ContainerSelection.isLeftAlignedWith...');
@@ -262,7 +267,7 @@ PropertySelection.Prototype = function() {
     }
     return (isEqual(this.path, other.path) &&
       this.startOffset === other.startOffset);
-  };
+  }
 
   /**
     Expands selection to include another selection.
@@ -270,7 +275,7 @@ PropertySelection.Prototype = function() {
     @param {Selection} other
     @returns {Selection} a new selection
   */
-  this.expand = function(other) {
+  expand(other) {
     if (other.isNull()) return this;
 
     // if the other is a ContainerSelection
@@ -285,8 +290,7 @@ PropertySelection.Prototype = function() {
     var newStartOffset = Math.min(this.startOffset, other.startOffset);
     var newEndOffset = Math.max(this.endOffset, other.endOffset);
     return this.createWithNewRange(newStartOffset, newEndOffset);
-  };
-
+  }
 
   /**
     Creates a new selection by truncating this one by another selection.
@@ -294,7 +298,7 @@ PropertySelection.Prototype = function() {
     @param {Selection} other
     @returns {Selection} a new selection
   */
-  this.truncateWith = function(other) {
+  truncateWith(other) {
     if (other.isNull()) return this;
     if (other.isInsideOf(this, 'strict')) {
       // the other selection should overlap only on one side
@@ -352,7 +356,7 @@ PropertySelection.Prototype = function() {
       throw new Error('Illegal state.');
     }
     return this.createWithNewRange(newStartOffset, newEndOffset);
-  };
+  }
 
   /**
     Creates a new selection with given range and same path.
@@ -361,21 +365,21 @@ PropertySelection.Prototype = function() {
     @param {Number} endOffset
     @returns {Selection} a new selection
   */
-  this.createWithNewRange = function(startOffset, endOffset) {
+  createWithNewRange(startOffset, endOffset) {
     var sel = new PropertySelection(this.path, startOffset, endOffset, false, this.containerId, this.surfaceId);
     var doc = this._internal.doc;
     if (doc) {
       sel.attach(doc);
     }
     return sel;
-  };
+  }
 
   /**
     Return fragments for a given selection.
 
     @returns {Selection.Fragment[]}
   */
-  this.getFragments = function() {
+  getFragments() {
     if(this._internal.fragments) {
       return this._internal.fragments;
     }
@@ -390,15 +394,13 @@ PropertySelection.Prototype = function() {
 
     this._internal.fragments = fragments;
     return fragments;
-  };
+  }
 
-  this._clone = function() {
+  _clone() {
     return new PropertySelection(this.path, this.startOffset, this.endOffset, this.reverse, this.containerId, this.surfaceId);
-  };
+  }
 
-};
-
-Selection.extend(PropertySelection);
+}
 
 Object.defineProperties(PropertySelection.prototype, {
   /**
@@ -454,21 +456,27 @@ PropertySelection.fromJSON = function(json) {
   var containerId = json.containerId;
   var surfaceId = json.surfaceId;
   return new PropertySelection(path, startOffset, endOffset, reverse, containerId, surfaceId);
-};
+}
 
 /*
   Adapter for Coordinate oriented implementations.
   E.g. Coordinate transforms can be applied to update selections
   using OT.
-*/
-function CoordinateAdapter(propertySelection, pathProperty, offsetProperty) {
-  this._sel = propertySelection;
-  this._pathProp = pathProperty;
-  this._offsetProp = offsetProperty;
-  Object.freeze(this);
-}
 
-Coordinate.extend(CoordinateAdapter);
+  @internal
+*/
+class CoordinateAdapter extends Coordinate {
+
+  constructor(propertySelection, pathProperty, offsetProperty) {
+    super('SKIP')
+
+    this._sel = propertySelection;
+    this._pathProp = pathProperty;
+    this._offsetProp = offsetProperty;
+    Object.freeze(this);
+  }
+
+}
 
 Object.defineProperties(CoordinateAdapter.prototype, {
   path: {
@@ -491,14 +499,17 @@ Object.defineProperties(CoordinateAdapter.prototype, {
 
 PropertySelection.CoordinateAdapter = CoordinateAdapter;
 
-function RangeAdapter(sel) {
-  this._sel = sel;
-  this.start = sel.start;
-  this.end = sel.end;
-  Object.freeze(this);
-}
+class RangeAdapter extends Range {
 
-Range.extend(RangeAdapter);
+  constructor(sel) {
+    super('SKIP')
+    this._sel = sel;
+    this.start = sel.start;
+    this.end = sel.end;
+    Object.freeze(this);
+  }
+
+}
 
 Object.defineProperties(RangeAdapter.prototype, {
   reverse: {
@@ -529,4 +540,4 @@ Object.defineProperties(RangeAdapter.prototype, {
 
 PropertySelection.RangeAdapter = RangeAdapter;
 
-module.exports = PropertySelection;
+export default PropertySelection

@@ -1,3 +1,1 @@
-'use strict';
-
-module.exports = require('./BlockquoteHTMLConverter');
+export { default } from './BlockquoteHTMLConverter'

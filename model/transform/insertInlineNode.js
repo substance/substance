@@ -1,7 +1,5 @@
-'use strict';
-
-var insertText = require('./insertText');
-var createAnnotation = require('./createAnnotation');
+import insertText from './insertText'
+import createAnnotation from './createAnnotation'
 
 /**
   Inserts a new inline node at the given selection/cursor.
@@ -15,7 +13,6 @@ var createAnnotation = require('./createAnnotation');
   ```js
   insertInlineNode(tx, {
     selection: bodyEditor.getSelection(),
-    containerId: bodyEditor.getContainerId(),
     node: {
       type: 'citation'
     }
@@ -25,23 +22,23 @@ var createAnnotation = require('./createAnnotation');
 
 function insertInlineNode(tx, args) {
   // 1. Insert fake character the inline node will stick
-  var tmp = insertText(tx, {
+  let tmp = insertText(tx, {
     selection: args.selection,
     text: "\uFEFF"
-  });
+  })
 
-  var inlineNodeSel = tx.createSelection({
+  let inlineNodeSel = tx.createSelection({
     type: 'property',
     path: tmp.selection.path,
     startOffset: tmp.selection.startOffset-1,
     endOffset: tmp.selection.endOffset
-  });
+  })
 
   // 2. Create citation annotation
-  args.node = args.node;
-  args.selection = inlineNodeSel;
-  args = createAnnotation(tx, args);
-  return args;
+  args.node = args.node
+  args.selection = inlineNodeSel
+  args = createAnnotation(tx, args)
+  return args
 }
 
-module.exports = insertInlineNode;
+export default insertInlineNode

@@ -1,5 +1,3 @@
-'use strict';
-
 function deleteFromArray(array, value) {
   for (var i = 0; i < array.length; i++) {
     if (array[i] === value) {
@@ -9,4 +7,4 @@ function deleteFromArray(array, value) {
   }
 }
 
-module.exports = deleteFromArray;
+export default deleteFromArray;

@@ -1,16 +1,12 @@
-"use strict";
-
-var oo = require('../util/oo');
-var request = require('../util/request');
+import request from '../util/request'
 
 /*
   HTTP client for talking with DocumentServer
 */
-function DocumentClient(config) {
-  this.config = config;
-}
-
-DocumentClient.Prototype = function() {
+class DocumentClient {
+  constructor(config) {
+    this.config = config
+  }
 
   /*
     Create a new document on the server
@@ -26,9 +22,9 @@ DocumentClient.Prototype = function() {
       }
     });
   */
-  this.createDocument = function(newDocument, cb) {
-    request('POST', this.config.httpUrl, newDocument, cb);
-  };
+  createDocument(newDocument, cb) {
+    request('POST', this.config.httpUrl, newDocument, cb)
+  }
 
   /*
     Get a document from the server
@@ -40,9 +36,9 @@ DocumentClient.Prototype = function() {
     ```
   */
 
-  this.getDocument = function(documentId, cb) {
-    request('GET', this.config.httpUrl+documentId, null, cb);
-  };
+  getDocument(documentId, cb) {
+    request('GET', this.config.httpUrl+documentId, null, cb)
+  }
 
   /*
     Remove a document from the server
@@ -54,12 +50,11 @@ DocumentClient.Prototype = function() {
     ```
   */
 
-  this.deleteDocument = function(documentId, cb) {
-    request('DELETE', this.config.httpUrl+documentId, null, cb);
-  };
+  deleteDocument(documentId, cb) {
+    request('DELETE', this.config.httpUrl+documentId, null, cb)
+  }
 
-};
+}
 
-oo.initClass(DocumentClient);
 
-module.exports = DocumentClient;
+export default DocumentClient

@@ -1,13 +1,7 @@
-'use strict';
+import PropertyAnnotation from './PropertyAnnotation'
 
-var PropertyAnnotation = require('./PropertyAnnotation');
+class InlineNode extends PropertyAnnotation {}
 
-function InlineNode() {
-  InlineNode.super.apply(this, arguments);
-}
+InlineNode.isInline = true;
 
-PropertyAnnotation.extend(InlineNode);
-
-InlineNode.static.isInline = true;
-
-module.exports = InlineNode;
+export default InlineNode;

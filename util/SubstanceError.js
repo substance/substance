@@ -1,14 +1,10 @@
-'use strict';
-
-var oo = require('./oo');
-
-/**
+/*
   Custom error object for all Substance related errors
 
   @example
 
   ```js
-  var Err = require('substance/util/SubstanceError');
+  import Err from 'substance/util/SubstanceError'
   throw new Err('Document.SelectionUpdateError', {message: 'Could not update selection.'});
   ```
 
@@ -21,59 +17,58 @@ var oo = require('./oo');
     https://gist.github.com/justmoon/15511f92e5216fa2624b
     https://github.com/davepacheco/node-verror/blob/master/lib/verror.js
 */
-function SubstanceError(name, options) {
-  this.name = name;
-  this.message = options.message;
-  this.info = options.info;
-  this.errorCode = options.errorCode;
-  this.cause = options.cause;
 
-  if (Error.captureStackTrace) {
-    Error.captureStackTrace(this, (SubstanceError));
+class SubstanceError extends Error {
+  constructor(name, options) {
+    super(name, options)
+    this.name = name
+    this.message = options.message
+    this.info = options.info
+    this.errorCode = options.errorCode
+    this.cause = options.cause
+
+    if (Error.captureStackTrace) {
+      Error.captureStackTrace(this, (SubstanceError))
+    }
   }
-}
 
-SubstanceError.Prototype = function() {
-  this.inspect = function() {
-    var parts = [];
+  inspect() {
+    var parts = []
 
     // This gives us a full node.js error including error name + message + stack trace
-    parts.push(this.stack);
+    parts.push(this.stack)
 
     // We just print additional info here
     if (this.info) {
-      parts.push(this.info + '. ');
+      parts.push(this.info + '. ')
     }
 
     // We also print the cause in the same way
     if (this.cause) {
-      parts.push('\nCaused by: ');
+      parts.push('\nCaused by: ')
 
       if (this.cause.inspect) {
         // If cause is again a Substance error
-        parts.push(this.cause.inspect());
+        parts.push(this.cause.inspect())
       } else {
         // If not we just use Error.toString
-        parts.push(this.cause.toString());
+        parts.push(this.cause.toString())
       }
     }
-    return parts.join('');
-  };
-};
+    return parts.join('')
+  }
+}
 
-oo.initClass(Error);
-
-Error.extend(SubstanceError);
 
 SubstanceError.fromJSON = function(err) {
-  if (!err) return null;
+  if (!err) return null
   var error = new SubstanceError(err.name, {
     message: err.message,
     info: err.info,
     errorCode: err.errorCode,
     cause: SubstanceError.fromJSON(err.cause)
-  });
-  return error;
-};
+  })
+  return error
+}
 
-module.exports = SubstanceError;
+export default SubstanceError

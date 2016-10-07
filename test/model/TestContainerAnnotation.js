@@ -1,13 +1,7 @@
-'use strict';
+import ContainerAnnotation from '../../model/ContainerAnnotation'
 
-var ContainerAnnotation = require('../../model/ContainerAnnotation');
+class TestContainerAnnotation extends ContainerAnnotation {}
 
-function TestContainerAnnotation() {
-  TestContainerAnnotation.super.apply(this, arguments);
-}
+TestContainerAnnotation.type = 'test-container-anno'
 
-ContainerAnnotation.extend(TestContainerAnnotation);
-
-TestContainerAnnotation.static.name = 'test-container-anno';
-
-module.exports = TestContainerAnnotation;
+export default TestContainerAnnotation

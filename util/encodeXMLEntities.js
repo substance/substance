@@ -1,5 +1,3 @@
-'use strict';
-
 /*
   Escape XML Entities
 
@@ -13,4 +11,4 @@ function encodeXMLEntities(str) {
     .replace(/"/g, '&quot;');
 }
 
-module.exports = encodeXMLEntities;
+export default encodeXMLEntities;

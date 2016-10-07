@@ -1,13 +1,7 @@
-'use strict';
+import DocumentNode from './DocumentNode'
 
-var DocumentNode = require('./DocumentNode');
+class BlockNode extends DocumentNode {}
 
-function BlockNode() {
-  BlockNode.super.apply(this, arguments);
-}
+BlockNode.isBlock = true;
 
-DocumentNode.extend(BlockNode);
-
-BlockNode.static.isBlock = true;
-
-module.exports = BlockNode;
+export default BlockNode;

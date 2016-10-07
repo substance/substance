@@ -1,3 +1,18 @@
+## Beta 5
+
+- Substance is now written in ES6
+- More usage options: Use Substance via `<script>` tag or use a module bundler of your choice (Rollup, Browserify, Webpack, ...)
+- Pure CSS instead of SASS for easier integration
+- Extracted develoment environment into substance-bundler tool.
+- Extracted test environment into substance-test
+- Extracted API docs generator into substance-docgen
+- Improved Tool API: Simplified command and tool APIs.
+- Commands are now stateless and can be parametrized in the configurator
+- Added tool targets: Determines where a tool gets rendered (e.g. in the toolbar or in an overlay)
+- Gutter support for ScrollPane: Render tools in a gutter, vertically aligned with the current selection
+- Removed experimental list and table packages: They will come back to core as soon as they are completed
+- Stabilized Beta 4 features
+
 ## Beta 4
 
 - Added support for realtime collaboration

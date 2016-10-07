@@ -1,11 +1,5 @@
-'use strict';
+import NodeIndex from './data/NodeIndex'
 
-var NodeIndex = require('./data/NodeIndex');
+class DocumentIndex extends NodeIndex {}
 
-function DocumentIndex() {}
-
-NodeIndex.extend(DocumentIndex);
-
-DocumentIndex.filterByType = NodeIndex.filterByType;
-
-module.exports = NodeIndex;
+export default DocumentIndex

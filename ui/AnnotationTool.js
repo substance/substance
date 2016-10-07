@@ -1,47 +1,50 @@
-'use strict';
+import Tool from '../packages/tools/Tool'
 
-var Tool = require('./Tool');
+/**
 
-/*
- * Abstract class for annotation tools like StrongTool, EmphasisTool, LinkTool.
- *
- * @component
- */
+  Reuseable AnnotationTool component. Can be used without modification
+  for pure marker annotations that don't carry data. E.g. strong, emphasis,
+  superscript, etc.
 
-function AnnotationTool() {
-  Tool.apply(this, arguments);
-}
+  @class
+  @component
 
-AnnotationTool.Prototype = function() {
-  var _super = AnnotationTool.super.prototype;
+  @example
 
-  this.render = function($$) {
-    var el = _super.render.call(this, $$);
-    el.addClass('sm-annotation-tool');
-    return el;
-  };
+  ```
+  config.addTool('strong', AnnotationTool, {
+    target: 'annotations'
+  })
+  ```
+*/
 
-  this.renderButton = function($$) {
-    var el = _super.renderButton.call(this, $$);
-    el.append(this.renderMode($$));  
-    return el;
-  };
+class AnnotationTool extends Tool {
+
+  render($$) {
+    let el = super.render.call(this, $$)
+    el.addClass('sm-annotation-tool')
+    return el
+  }
+
+  renderButton($$) {
+    let el = super.renderButton.call(this, $$)
+    el.append(this.renderMode($$))
+    return el
+  }
 
   /*
     Renders a small hint for the mode (expand, truncate, edit, etc)
   */
-  this.renderMode = function($$) {
-    var mode = this.props.mode;
-    var el = $$('div').addClass('se-mode');
+  renderMode($$) {
+    let mode = this.props.mode
+    let el = $$('div').addClass('se-mode')
 
-    var iconEl = this.context.iconProvider.renderIcon($$, mode);
+    let iconEl = this.context.iconProvider.renderIcon($$, mode)
     if (iconEl) {
-      el.append(iconEl);
+      el.append(iconEl)
     }
-    
-    return el;
-  };
-};
+    return el
+  }
+}
 
-Tool.extend(AnnotationTool);
-module.exports = AnnotationTool;
+export default AnnotationTool

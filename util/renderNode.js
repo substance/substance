@@ -1,8 +1,6 @@
-'use strict';
+import error from './error'
 
-var error = require('./error');
-
-module.exports = function renderNode($$, component, node) {
+export default function renderNode($$, component, node) {
   var componentRegistry = component.context.componentRegistry || component.props.componentRegistry;
   var ComponentClass = componentRegistry.get(node.type);
   if (!ComponentClass) {

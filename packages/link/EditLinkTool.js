@@ -1,65 +1,64 @@
-'use strict';
-
-var Component = require('../../ui/Component');
-var clone = require('lodash/clone');
-var Prompt = require('../../ui/Prompt');
+import Tool from '../tools/Tool'
 
 /**
-  Component to edit an existing link.
+  Tool to edit an existing link.
 
   Designed so that it can be used either in a toolbar, or within
   an overlay on the Surface.
+
+  @component
 */
-function EditLinkTool() {
-  EditLinkTool.super.apply(this, arguments);
-}
+class EditLinkTool extends Tool {
 
-EditLinkTool.Prototype = function() {
+  getUrlPath() {
+    let propPath = this.constructor.urlPropertyPath
+    return [this.props.node.id].concat(propPath)
+  }
 
-  this.render = function($$) {
-    var node = this.props.node;
-    var el = $$('div').addClass('sc-edit-link-tool');
+  _openLink() {
+    let doc = this.context.documentSession.getDocument()
+    window.open(doc.get(this.getUrlPath()), '_blank')
+  }
+
+  render($$) {
+    let Input = this.getComponent('input')
+    let Button = this.getComponent('button')
+    let el = $$('div').addClass('sc-edit-link-tool')
+    let urlPath = this.getUrlPath()
 
     el.append(
-      $$(Prompt).append(
-        $$(Prompt.Input, {
-          type: 'url',
-          path: [node.id, 'url'],
-          placeholder: 'Paste or type a link url'
-        }),
-        $$(Prompt.Separator),
-        $$(Prompt.Link, {
-          name: 'open-link',
-          href: node.url,
-          title: this.getLabel('open-link')
-        }),
-        $$(Prompt.Action, {name: 'delete', title: this.getLabel('delete')})
-          .on('click', this.onDelete)
-      )
-    );
-    return el;
-  };
+      $$(Input, {
+        type: 'url',
+        path: urlPath,
+        placeholder: 'Paste or type a link url'
+      }),
+      $$(Button, {
+        icon: 'open-link',
+        style: this.props.style
+      }).attr('title', this.getLabel('open-link'))
+        .on('click', this._openLink),
 
-  this.onDelete = function(e) {
-    e.preventDefault();
-    var node = this.props.node;
-    var documentSession = this.context.documentSession;
-    documentSession.transaction(function(tx) {
-      tx.delete(node.id);
-    });
-  };
-};
-
-Component.extend(EditLinkTool);
-
-EditLinkTool.static.getProps = function(commandStates) {
-  if (commandStates.link.mode === 'edit') {
-    return clone(commandStates.link);
-  } else {
-    return undefined;
+      $$(Button, {
+        icon: 'delete',
+        style: this.props.style
+      }).attr('title', this.getLabel('delete-link'))
+        .on('click', this.onDelete)
+    )
+    return el
   }
-};
 
-EditLinkTool.static.name = 'edit-link';
+  onDelete(e) {
+    e.preventDefault();
+    let node = this.props.node
+    let sm = this.context.surfaceManager
+    let surface = sm.getFocusedSurface()
+    surface.transaction(function(tx, args) {
+      tx.delete(node.id)
+      return args
+    })
+  }
+}
 
-module.exports = EditLinkTool;
+EditLinkTool.urlPropertyPath = ['url']
+
+export default EditLinkTool

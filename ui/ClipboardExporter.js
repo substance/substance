@@ -1,19 +1,13 @@
-"use strict";
-
-var HtmlExporter = require('../model/HTMLExporter');
-var ClipboardImporter = require('./ClipboardImporter');
-var CLIPBOARD_CONTAINER_ID = ClipboardImporter.CLIPBOARD_CONTAINER_ID;
-var CLIPBOARD_PROPERTY_ID = ClipboardImporter.CLIPBOARD_PROPERTY_ID;
-var JSONConverter = require('../model/JSONConverter');
+import Document from '../model/Document'
+import HtmlExporter from '../model/HTMLExporter'
+import JSONConverter from '../model/JSONConverter'
 
 /**
   Export HTML from clipboard. Used for inter-application copy'n'paste.
-*/
-function ClipboardExporter(config) {
-  ClipboardExporter.super.call(this, config);
-}
 
-ClipboardExporter.Prototype = function() {
+  @internal
+*/
+class ClipboardExporter extends HtmlExporter {
 
   /**
     Exports document in html format.
@@ -22,25 +16,27 @@ ClipboardExporter.Prototype = function() {
 
     @return {String} html representation of given document
   */
-  this.exportDocument = function(doc) {
-    this.state.doc = doc;
-    var html;
-    var elements = this.convertDocument(doc);
-    if (elements.length === 1 && elements[0].attr('data-id') === CLIPBOARD_PROPERTY_ID) {
-      html = elements[0].innerHTML;
+  exportDocument(doc) {
+    this.state.doc = doc
+    let html
+    let elements = this.convertDocument(doc);
+    // special treatment for a text snippet
+    if (elements.length === 1 && elements[0].attr('data-id') === Document.TEXT_SNIPPET_ID) {
+      html = elements[0].innerHTML
     } else {
       html = elements.map(function(el) {
-        return el.outerHTML;
-      }).join('');
+        return el.outerHTML
+      }).join('')
     }
-    var jsonConverter = new JSONConverter();
-    var json = [
+    let jsonConverter = new JSONConverter()
+    let jsonStr = JSON.stringify(jsonConverter.exportDocument(doc))
+    let meta = [
       "<meta name='substance' content='",
-      JSON.stringify(jsonConverter.exportDocument(doc)),
+      btoa(jsonStr),
       "'>"
-    ].join('');
-    return '<html><head>' +json+ '</head><body>' + html + '</body></html>';
-  };
+    ].join('')
+    return '<html><head>' +meta+ '</head><body>' + html + '</body></html>'
+  }
 
   /**
     Coverts document to set of DOM elements.
@@ -49,18 +45,14 @@ ClipboardExporter.Prototype = function() {
 
     @return {Array} array of DOM elements each represented single node
   */
-  this.convertDocument = function(doc) {
-    var content = doc.get(CLIPBOARD_CONTAINER_ID);
+  convertDocument(doc) {
+    let content = doc.get(Document.SNIPPET_ID)
     if (!content) {
-      throw new Error('Illegal clipboard document: could not find container "' + CLIPBOARD_CONTAINER_ID + '"');
+      throw new Error('Illegal clipboard document: could not find container "' + Document.SNIPPET_ID + '"')
     }
-    return this.convertContainer(content);
-  };
+    return this.convertContainer(content)
+  }
 
-};
+}
 
-HtmlExporter.extend(ClipboardExporter);
-
-ClipboardExporter.CLIPBOARD_CONTAINER_ID = CLIPBOARD_CONTAINER_ID;
-
-module.exports = ClipboardExporter;
+export default ClipboardExporter

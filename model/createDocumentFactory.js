@@ -1,6 +1,4 @@
-'use strict';
-
-var DocumentSession = require('./DocumentSession');
+import DocumentSession from './DocumentSession'
 
 /*
   Creates a factory for documents and the correspondent initial changeset
@@ -46,4 +44,4 @@ function createDocumentFactory(ArticleClass, create) {
   };
 }
 
-module.exports = createDocumentFactory;
+export default createDocumentFactory;

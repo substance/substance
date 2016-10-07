@@ -1,16 +1,14 @@
-'use strict';
+import createTestArticle from './createTestArticle'
+import createChangeset from './createChangeset'
 
-var createTestArticle = require('./createTestArticle');
-var createChangeset = require('./createChangeset');
-
-module.exports = function createTestDocumentFactory() {
+export default function createTestDocumentFactory() {
   return {
     createDocument: function() {
-      return createTestArticle();
+      return createTestArticle()
     },
     createChangeset: function() {
-      var doc = createTestArticle();
-      return createChangeset(doc);
+      var doc = createTestArticle()
+      return createChangeset(doc)
     }
-  };
-};
+  }
+}

@@ -1,24 +1,19 @@
-'use strict';
+import Document from '../../model/Document'
 
-var Document = require('../../model/Document');
+class ProseArticle extends Document {
+  constructor(schema) {
+    super(schema)
+    this._initialize()
+  }
 
-function ProseArticle(schema) {
-  Document.call(this, schema);
-  this._initialize();
-}
-
-ProseArticle.Prototype = function() {
-
-  this._initialize = function() {
+  _initialize() {
     this.create({
       type: 'container',
       id: 'body',
       nodes: []
-    });
-  };
+    })
+  }
 
-};
+}
 
-Document.extend(ProseArticle);
-
-module.exports = ProseArticle;
+export default ProseArticle

@@ -1,5 +1,3 @@
-'use strict';
-
 /*
   Experimental
 
@@ -9,10 +7,9 @@
   This implementation is just a prototype and might change with the next releases.
 */
 
-var oo = require('../util/oo');
-var inBrowser = require('../util/inBrowser');
-var DefaultDOMElement = require('./DefaultDOMElement');
-var DOMElement = require('./DOMElement');
+import inBrowser from '../util/inBrowser'
+import DefaultDOMElement from './DefaultDOMElement'
+import DOMElement from './DOMElement'
 
 /*
   TODO: to be 100% safe we would need to introduce a hidden contenteditable
@@ -21,78 +18,75 @@ var DOMElement = require('./DOMElement');
   to window.document.
 */
 
-function GlobalEventHandler(documentSession, surfaceManager) {
-  this.documentSession = documentSession;
-  this.surfaceManager = surfaceManager;
-  this.listeners = [];
-  this.initialize();
-}
+const events = [ 'keydown', 'keyup', 'keypress', 'mousedown', 'mouseup' , 'copy']
 
-GlobalEventHandler.Prototype = function() {
+class GlobalEventHandler {
 
-  var events = [ 'keydown', 'keyup', 'keypress', 'mousedown', 'mouseup' , 'copy'];
+  constructor(documentSession, surfaceManager) {
+    this.documentSession = documentSession
+    this.surfaceManager = surfaceManager
+    this.listeners = []
+    this.initialize()
+  }
 
-  this.initialize = function() {
+  initialize() {
     if (inBrowser) {
-      var document = DefaultDOMElement.wrapNativeElement(window.document);
+      let document = DefaultDOMElement.wrapNativeElement(window.document)
       events.forEach(function(name) {
-        document.on(name, this._dispatch.bind(this, name), this);
-      }.bind(this));
+        document.on(name, this._dispatch.bind(this, name), this)
+      }.bind(this))
     }
-  };
+  }
 
-  this.dispose = function() {
+  dispose() {
     if (inBrowser) {
-      var document = DefaultDOMElement.wrapNativeElement(window.document);
-      document.off(this);
+      let document = DefaultDOMElement.wrapNativeElement(window.document)
+      document.off(this)
     }
-  };
+  }
 
-  this.on = DOMElement.prototype.on;
-
-  this.off = DOMElement.prototype.off;
-
-  this.addEventListener = function(eventName, handler, options) {
+  addEventListener(eventName, handler, options) {
     if (!options.id) {
-      throw new Error("GlobalEventHandler can only be used with option 'id'");
+      throw new Error("GlobalEventHandler can only be used with option 'id'")
     }
-    var listener = new DOMElement.EventListener(eventName, handler, options);
-    this.listeners.push(listener);
-  };
+    let listener = new DOMElement.EventListener(eventName, handler, options)
+    this.listeners.push(listener)
+  }
 
-  this.removeEventListener = function(listener) {
-    var idx = this.listeners.indexOf(listener);
+  removeEventListener(listener) {
+    let idx = this.listeners.indexOf(listener);
     if (idx > -1) {
-      this.listeners.splice(idx, 1);
+      this.listeners.splice(idx, 1)
     }
-  };
+  }
 
-  this.getEventListeners = function() {
-    return this.listeners;
-  };
+  getEventListeners() {
+    return this.listeners
+  }
 
-  this._getActiveListener = function(eventName) {
-    var documentSession = this.documentSession;
-    var sel = documentSession.getSelection();
+  _getActiveListener(eventName) {
+    let documentSession = this.documentSession
+    let sel = documentSession.getSelection()
     if (sel) {
-      var surfaceId = sel.surfaceId;
-      for (var i = 0; i < this.listeners.length; i++) {
-        var listener = this.listeners[i];
+      let surfaceId = sel.surfaceId
+      for (let i = 0; i < this.listeners.length; i++) {
+        let listener = this.listeners[i]
         if (listener.eventName === eventName && listener.options.id === surfaceId) {
-          return listener;
+          return listener
         }
       }
     }
-  };
+  }
 
-  this._dispatch = function(eventName, e) {
-    var listener = this._getActiveListener(eventName);
+  _dispatch(eventName, e) {
+    let listener = this._getActiveListener(eventName)
     if (listener) {
-      listener.handler(e);
+      listener.handler(e)
     }
-  };
-};
+  }
+}
 
-oo.initClass(GlobalEventHandler);
+GlobalEventHandler.prototype.on = DOMElement.prototype.on
+GlobalEventHandler.prototype.off = DOMElement.prototype.off
 
-module.exports = GlobalEventHandler;
+export default GlobalEventHandler

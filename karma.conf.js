@@ -1,14 +1,11 @@
 module.exports = function(config) {
   config.set({
     basePath: '.',
-    frameworks: ['browserify', 'tap'],
+    frameworks: ['tap'],
     files: [
-      'test/**/*.test.js',
-      { pattern: 'test/fixtures/**/*.html', included: false, served: true },
+      '.test/test.browser.js',
+      '.test/tests.js',
     ],
-    preprocessors: {
-      'test/**/*.js': ['browserify']
-    },
     browsers: ['Chrome'],
     customLaunchers: {
       ChromeTravis: {
@@ -16,10 +13,7 @@ module.exports = function(config) {
         flags: ['--no-sandbox']
       }
     },
-    reporters: ['tape'],
     singleRun: true,
-    browserify: {
-      debug: true // include inline source maps
-    }
+    reporters: ['tape'],
   });
 };

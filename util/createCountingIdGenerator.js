@@ -1,6 +1,4 @@
-'use strict';
-
-module.exports = function createCountingIdGenerator() {
+export default function createCountingIdGenerator() {
   var counters = {};
   return function uuid(prefix) {
     if (!counters.hasOwnProperty(prefix)) {

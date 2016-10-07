@@ -1,49 +1,52 @@
-'use strict';
-/* eslint-disable consistent-return */
+import { module } from 'substance-test'
 
-var test = require('../test').module('model/DocumentEngine');
+import DocumentStore from '../../collab/DocumentStore'
+import ChangeStore from '../../collab/ChangeStore'
+import DocumentEngine from '../../collab/DocumentEngine'
+import testDocumentEngine from '../collab/testDocumentEngine'
 
-var DocumentStore = require('../../collab/DocumentStore');
-var ChangeStore = require('../../collab/ChangeStore');
-var DocumentEngine = require('../../collab/DocumentEngine');
-var testDocumentEngine = require('../collab/testDocumentEngine');
+import Configurator from '../../util/Configurator'
+import TestArticle from './TestArticle'
+import TestMetaNode from './TestMetaNode'
 
-var createTestDocumentFactory = require('../fixtures/createTestDocumentFactory');
-var twoParagraphs = require('../fixtures/twoParagraphs');
-var documentStoreSeed = require('../fixtures/documentStoreSeed');
-var changeStoreSeed = require('../fixtures/changeStoreSeed');
+import documentStoreSeed from '../fixtures/documentStoreSeed'
+import changeStoreSeed from '../fixtures/changeStoreSeed'
 
-var documentStore = new DocumentStore();
-var changeStore = new ChangeStore();
+const test = module('model/DocumentEngine')
+
+var configurator = new Configurator()
+configurator.defineSchema({
+  name: 'prose-article',
+  ArticleClass: TestArticle,
+  defaultTextType: 'paragraph'
+})
+configurator.addNode(TestMetaNode)
+
+var documentStore = new DocumentStore()
+var changeStore = new ChangeStore()
 
 var documentEngine = new DocumentEngine({
+  configurator: configurator,
   documentStore: documentStore,
-  changeStore: changeStore,
-  schemas: {
-    'prose-article': {
-      name: 'prose-article',
-      version: '1.0.0',
-      documentFactory: createTestDocumentFactory(twoParagraphs)
-    }
-  }
-});
+  changeStore: changeStore
+})
 
 function setup(cb, t) {
-  var newDocumentStoreSeed = JSON.parse(JSON.stringify(documentStoreSeed));
-  var newChangeStoreSeed = JSON.parse(JSON.stringify(changeStoreSeed));
+  var newDocumentStoreSeed = JSON.parse(JSON.stringify(documentStoreSeed))
+  var newChangeStoreSeed = JSON.parse(JSON.stringify(changeStoreSeed))
   documentStore.seed(newDocumentStoreSeed, function(err) {
-    if (err) return console.error(err);
+    if (err) return console.error(err)
     changeStore.seed(newChangeStoreSeed, function(err) {
-      if (err) return console.error(err);
-      cb(t);
-    });
-  });
+      if (err) return console.error(err)
+      cb(t)
+    })
+  })
 }
 
 function setupTest(description, fn) {
   test(description, function (t) {
-    setup(fn, t);
-  });
+    setup(fn, t)
+  })
 }
 
 // Runs the offical backend test suite

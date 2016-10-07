@@ -1,0 +1,25 @@
+/* TOC
+-----------------------------------------------------*/
+
+.sc-toc {}
+.sc-toc .se-toc-entries { padding: 20px 0px; }
+.sc-toc .se-toc-entries .se-toc-entry {
+  color: #777;
+  font-weight: 600;
+  letter-spacing: var(--heading-letterspacing);
+  display: block;
+  padding: 2px 0px;
+  position: relative;
+}
+.sc-toc .se-toc-entries .se-toc-entry i.fa {
+  font-size: 12px;
+  visibility: hidden;
+  display: inline-block;
+  padding-right: 5px;
+}
+.sc-toc .se-toc-entries .se-toc-entry.sm-active { color: #222; }
+.sc-toc .se-toc-entries .se-toc-entry.sm-active i.fa { visibility: visible; }
+.sc-toc .se-toc-entries .se-toc-entry:hover { color: #222; }
+.sc-toc .se-toc-entries .se-toc-entry.sm-level-1 { font-size: 16px; margin-left: 20px; }
+.sc-toc .se-toc-entries .se-toc-entry.sm-level-2 { font-size: 14px; margin-left: 40px; }
+.sc-toc .se-toc-entries .se-toc-entry.sm-level-3 { font-size: 12px; margin-left: 60px; }

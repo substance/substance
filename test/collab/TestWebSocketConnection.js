@@ -1,68 +1,59 @@
-"use strict";
-
-var ClientConnection = require('../../collab/ClientConnection');
-var TestWebSocket = require('./TestWebSocket');
+import ClientConnection from '../../collab/ClientConnection'
+import TestWebSocket from './TestWebSocket'
 
 /*
   Browser WebSocket abstraction. Handles reconnects etc.
 */
-function TestWebSocketConnection() {
-  TestWebSocketConnection.super.apply(this, arguments);
-}
+class TestWebSocketConnection extends ClientConnection {
 
-TestWebSocketConnection.Prototype = function() {
-
-  var _super = TestWebSocketConnection.super.prototype;
-
-  this._createWebSocket = function() {
+  _createWebSocket() {
     // this.config has messageQueue, clientId, serverId
-    var ws = new TestWebSocket(this.config);
-    return ws;
-  };
+    var ws = new TestWebSocket(this.config)
+    return ws
+  }
 
   /*
     Manual connect
   */
-  this.connect = function() {
-    this._connect();
-  };
+  connect() {
+    this._connect()
+  }
 
   /*
     Manual disconnect
   */
-  this.disconnect = function() {
-    this._disconnect();
-  };
+  disconnect() {
+    this._disconnect()
+  }
 
-  this._connect = function() {
+  _connect(...args) {
     // Create websocket and bind events open/close/message
-    _super._connect.apply(this, arguments);
+    super._connect(...args)
     // connects websocket to the messageQueue and triggers 'open' event
-    this.ws.connect();
-  };
+    this.ws.connect()
+  }
 
-  this._disconnect = function() {
-    this.ws.disconnect();
-    _super._disconnect.apply(this, arguments);
-  };
+  _disconnect(...args) {
+    this.ws.disconnect()
+    super._disconnect(...args)
+  }
 
-  this._onConnectionClose = function() {
-    this.emit('close');
-  };
+  _onConnectionClose() {
+    this.emit('close')
+  }
 
   /*
     Our message queue holds JS objects already so we just
     pass through the msg
   */
-  this.serializeMessage = function(msg) {
-    return msg;
-  };
+  serializeMessage(msg) {
+    return msg
+  }
 
-  this.deserializeMessage = function(msg) {
-    return msg;
-  };
+  deserializeMessage(msg) {
+    return msg
+  }
 
-};
+}
 
-ClientConnection.extend(TestWebSocketConnection);
-module.exports = TestWebSocketConnection;
+export default TestWebSocketConnection

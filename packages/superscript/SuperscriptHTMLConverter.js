@@ -1,9 +1,7 @@
-'use strict';
-
 /*
- * HTML converter for Blockquote.
+ * HTML converter for Superscript.
  */
-module.exports = {
+export default {
   type: 'superscript',
-  tagName: 'sup',
-};
+  tagName: 'sup'
+}

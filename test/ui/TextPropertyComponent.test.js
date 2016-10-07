@@ -1,29 +1,27 @@
-"use strict";
+import { module } from 'substance-test'
+import TextPropertyComponent from '../../ui/TextPropertyComponent'
 
-var test = require('../test').module('ui/TextPropertyComponent');
+import fixture from '../fixtures/createTestArticle'
+import simple from '../fixtures/simple'
 
-var Component = require('../../ui/Component');
-var TextPropertyComponent = require('../../ui/TextPropertyComponent');
-
-var fixture = require('../fixtures/createTestArticle');
-var simple = require('../fixtures/simple');
+const test = module('ui/TextPropertyComponent')
 
 test.UI("Get coordinate of empty property", function(t) {
-  var doc = fixture(simple);
+  var doc = fixture(simple)
   doc.create({
     type: 'paragraph',
     id: 'empty',
     content: ''
-  });
-  var comp = Component.mount(TextPropertyComponent, {
+  })
+  var comp = TextPropertyComponent.mount({
     doc: doc,
     path: ['empty', 'content']
-  }, t.sandbox);
+  }, t.sandbox)
 
-  var coor = comp.getDOMCoordinate(0);
+  var coor = comp.getDOMCoordinate(0)
 
-  t.notNil(coor, 'Coordinate should be not null.');
-  t.equal(coor.container, comp.el.getNativeElement(), 'element should be property element');
-  t.equal(coor.offset, 0, 'offset should be 0');
-  t.end();
-});
+  t.notNil(coor, 'Coordinate should be not null.')
+  t.equal(coor.container, comp.el.getNativeElement(), 'element should be property element')
+  t.equal(coor.offset, 0, 'offset should be 0')
+  t.end()
+})

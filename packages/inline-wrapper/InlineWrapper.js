@@ -1,17 +1,14 @@
-'use strict';
+import InlineNode from '../../model/InlineNode'
 
-var InlineNode = require('../../model/InlineNode');
-
-function InlineWrapper() {
-  InlineWrapper.super.apply(this, arguments);
+class InlineWrapper extends InlineNode {
+  getWrappedNode() {
+    return this.getDocument().get(this.wrappedNode)
+  }
 }
 
-InlineNode.extend(InlineWrapper);
-
-InlineWrapper.static.name = 'inline-wrapper';
-
-InlineWrapper.static.defineSchema({
+InlineWrapper.define({
+  type: 'inline-wrapper',
   wrappedNode: 'id'
-});
+})
 
-module.exports = InlineWrapper;
+export default InlineWrapper

@@ -1,45 +1,39 @@
-'use strict';
+class ContainerAddress {
 
-var oo = require('../util/oo');
+  constructor(pos, offset) {
+    this.pos = pos
+    this.offset = offset
+  }
 
-function ContainerAddress(pos, offset) {
-  this.pos = pos;
-  this.offset = offset;
-}
-
-ContainerAddress.Prototype = function() {
-
-  this.isBefore = function(other, strict) {
-    strict = Boolean(strict);
+  isBefore(other, strict) {
+    strict = Boolean(strict)
     if (this.pos < other.pos) {
-      return true;
+      return true
     } else if (this.pos > other.pos) {
-      return false;
+      return false
     } else if (this.offset < other.offset) {
-      return true;
+      return true
     } else if (this.offset > other.offset) {
-      return false;
+      return false
     }
     if (strict) {
-      return false;
+      return false
     } else {
-      return true;
+      return true
     }
-  };
+  }
 
-  this.isAfter = function(other, strict) {
-    return other.isBefore(this, strict);
-  };
+  isAfter(other, strict) {
+    return other.isBefore(this, strict)
+  }
 
-  this.isEqual = function(other) {
-    return (this.pos === other.pos && this.offset === other.offset);
-  };
+  isEqual(other) {
+    return (this.pos === other.pos && this.offset === other.offset)
+  }
 
-  this.toString = function() {
-    return [this.pos,'.',this.offset].join('');
-  };
-};
+  toString() {
+    return [this.pos,'.',this.offset].join('')
+  }
+}
 
-oo.initClass(ContainerAddress);
-
-module.exports = ContainerAddress;
+export default ContainerAddress

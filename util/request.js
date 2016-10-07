@@ -1,5 +1,3 @@
-'use strict';
-
 /**
   Performs an asynchronous HTTP request.
 
@@ -12,12 +10,11 @@
 
   ```js
   request('GET', './data.json', null, function(err, data) {
-    if (err) return cb(err); 
+    if (err) return cb(err);
     cb(null, data);
   });
   ```
 */
-
 function request(method, url, data, cb) {
   var request = new XMLHttpRequest();
   request.open(method, url, true);
@@ -25,7 +22,7 @@ function request(method, url, data, cb) {
   request.onload = function() {
     if (request.status >= 200 && request.status < 400) {
       var res = request.responseText;
-      if(isJson(res)) res = JSON.parse(res); 
+      if(isJson(res)) res = JSON.parse(res);
       cb(null, res);
     } else {
       return cb(new Error('Request failed. Returned status: ' + request.status));
@@ -48,4 +45,4 @@ function isJson(str) {
   return true;
 }
 
-module.exports = request;
+export default request;

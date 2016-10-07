@@ -1,40 +1,29 @@
-'use strict';
+import HTMLImporter from '../../model/HTMLImporter'
+import ProseArticle from './ProseArticle'
+const schema = ProseArticle.schema
 
-var HTMLImporter = require('../../model/HTMLImporter');
-var ProseArticle = require('./ProseArticle');
-var schema = ProseArticle.schema;
+let converters = [];
 
-var converters = [
-  require('../paragraph/ParagraphHTMLConverter'),
-  require('../heading/HeadingHTMLConverter'),
-  require('../codeblock/CodeBlockHTMLConverter'),
-  require('../image/ImageHTMLConverter'),
-  require('../strong/StrongHTMLConverter'),
-  require('../emphasis/EmphasisHTMLConverter'),
-  require('../link/LinkHTMLConverter'),
-];
+// TODO: FIX this. Should be used together with configurator
+class ProseArticleImporter extends HTMLImporter {
+  constructor() {
+    super({
+      schema: schema,
+      converters: converters,
+      DocumentClass: ProseArticle
+    })
+  }
 
-function ProseArticleImporter() {
-  ProseArticleImporter.super.call(this, {
-    schema: schema,
-    converters: converters,
-    DocumentClass: ProseArticle
-  });
-}
-
-ProseArticleImporter.Prototype = function() {
   /*
     Takes an HTML string.
   */
-  this.convertDocument = function(bodyEls) {
+  convertDocument(bodyEls) {
     // Just to make sure we always get an array of elements
-    if (!bodyEls.length) bodyEls = [bodyEls];
-    this.convertContainer(bodyEls, 'body');
-  };
-};
+    if (!bodyEls.length) bodyEls = [bodyEls]
+    this.convertContainer(bodyEls, 'body')
+  }
+}
 
-HTMLImporter.extend(ProseArticleImporter);
+ProseArticleImporter.converters = converters
 
-ProseArticleImporter.converters = converters;
-
-module.exports = ProseArticleImporter;
+export default ProseArticleImporter

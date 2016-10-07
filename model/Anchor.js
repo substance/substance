@@ -1,6 +1,4 @@
-'use strict';
-
-var Coordinate = require('./Coordinate');
+import Coordinate from './Coordinate'
 
 /*
   Anchors are special annotations which have a zero width.
@@ -16,18 +14,12 @@ var Coordinate = require('./Coordinate');
   @class
   @abstract
 */
-function Anchor() {
-  Anchor.super.apply(this, arguments);
+class Anchor extends Coordinate {
+
+  isAnchor() {
+    return true
+  }
+
 }
 
-Anchor.Prototype = function() {
-
-  this.isAnchor = function() {
-    return true;
-  };
-
-};
-
-Coordinate.extend(Anchor);
-
-module.exports = Anchor;
+export default Anchor

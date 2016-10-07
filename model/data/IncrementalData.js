@@ -1,45 +1,29 @@
-'use strict';
-
-var isString = require('lodash/isString');
-var isArray = require('lodash/isArray');
-var cloneDeep = require('lodash/cloneDeep');
-var Data = require('./Data');
-var ObjectOperation = require('./ObjectOperation');
-var ArrayOperation = require('./ArrayOperation');
-var TextOperation = require('./TextOperation');
+import isString from 'lodash/isString'
+import isArray from 'lodash/isArray'
+import cloneDeep from 'lodash/cloneDeep'
+import Data from './Data'
+import ObjectOperation from './ObjectOperation'
+import ArrayOperation from './ArrayOperation'
+import TextOperation from './TextOperation'
 
 /**
   Incremental data storage implemention.
 
-  @class IncrementalData
-  @extends model/data/Data
-  @private
+  @internal
  */
-
-/**
-  @constructor
-  @param {Schema} schema
-  @param {Object} [options]
-*/
-function IncrementalData(schema, options) {
-  IncrementalData.super.call(this, schema, options);
-}
-
-IncrementalData.Prototype = function() {
-
-  var _super = IncrementalData.super.prototype;
+class IncrementalData extends Data {
 
   /**
     Create a new node.
 
-    @param {Object} nodeData
+    @param {object} nodeData
     @returns {ObjectOperation} The applied operation.
    */
-  this.create = function(nodeData) {
-    var op = ObjectOperation.Create([nodeData.id], nodeData);
-    this.apply(op);
-    return op;
-  };
+  create(nodeData) {
+    var op = ObjectOperation.Create([nodeData.id], nodeData)
+    this.apply(op)
+    return op
+  }
 
   /**
     Delete a node.
@@ -47,16 +31,16 @@ IncrementalData.Prototype = function() {
     @param {String} nodeId
     @returns {ObjectOperation} The applied operation.
    */
-  this.delete = function(nodeId) {
-    var op = null;
-    var node = this.get(nodeId);
+  delete(nodeId) {
+    var op = null
+    var node = this.get(nodeId)
     if (node) {
-      var nodeData = node.toJSON();
-      op = ObjectOperation.Delete([nodeId], nodeData);
-      this.apply(op);
+      var nodeData = node.toJSON()
+      op = ObjectOperation.Delete([nodeId], nodeData)
+      this.apply(op)
     }
-    return op;
-  };
+    return op
+  }
 
   /**
     Update a property incrementally.
@@ -69,16 +53,16 @@ IncrementalData.Prototype = function() {
         - `{ insert: { offset: Number, value: Object } }`
         - `{ delete: { offset: Number } }`
 
-    @param {Array} path
-    @param {Object} diff
+    @param {array} path
+    @param {object} diff
     @returns {ObjectOperation} The applied operation.
   */
-  this.update = function(path, diff) {
-    var diffOp = this._getDiffOp(path, diff);
-    var op = ObjectOperation.Update(path, diffOp);
-    this.apply(op);
-    return op;
-  };
+  update(path, diff) {
+    var diffOp = this._getDiffOp(path, diff)
+    var op = ObjectOperation.Update(path, diffOp)
+    this.apply(op)
+    return op
+  }
 
   /**
     Set a property to a new value
@@ -87,50 +71,50 @@ IncrementalData.Prototype = function() {
     @param {Object} newValue
     @returns {ObjectOperation} The applied operation.
    */
-  this.set = function(path, newValue) {
-    var oldValue = this.get(path);
-    var op = ObjectOperation.Set(path, oldValue, newValue);
-    this.apply(op);
-    return op;
-  };
+  set(path, newValue) {
+    var oldValue = this.get(path)
+    var op = ObjectOperation.Set(path, oldValue, newValue)
+    this.apply(op)
+    return op
+  }
 
   /**
     Apply a given operation.
 
     @param {ObjectOperation} op
    */
-  this.apply = function(op) {
-    if (op.type === ObjectOperation.NOP) return;
+  apply(op) {
+    if (op.type === ObjectOperation.NOP) return
     else if (op.type === ObjectOperation.CREATE) {
       // clone here as the operations value must not be changed
-      _super.create.call(this, cloneDeep(op.val));
+      super.create(cloneDeep(op.val))
     } else if (op.type === ObjectOperation.DELETE) {
-      _super.delete.call(this, op.val.id);
+      super.delete(op.val.id)
     } else if (op.type === ObjectOperation.UPDATE) {
-      var oldVal = this.get(op.path);
-      var diff = op.diff;
+      var oldVal = this.get(op.path)
+      var diff = op.diff
       if (op.propertyType === 'array') {
         if (! (diff._isArrayOperation) ) {
-          diff = ArrayOperation.fromJSON(diff);
+          diff = ArrayOperation.fromJSON(diff)
         }
         // array ops work inplace
-        diff.apply(oldVal);
+        diff.apply(oldVal)
       } else if (op.propertyType === 'string') {
         if (! (diff._isTextOperation) ) {
-          diff = TextOperation.fromJSON(diff);
+          diff = TextOperation.fromJSON(diff)
         }
-        var newVal = diff.apply(oldVal);
-        _super.set.call(this, op.path, newVal);
+        var newVal = diff.apply(oldVal)
+        super.set(op.path, newVal)
       } else {
-        throw new Error("Unsupported type for operational update.");
+        throw new Error("Unsupported type for operational update.")
       }
     } else if (op.type === ObjectOperation.SET) {
-      _super.set.call(this, op.path, op.val);
+      super.set(op.path, op.val)
     } else {
-      throw new Error("Illegal state.");
+      throw new Error("Illegal state.")
     }
-    this.emit('operation:applied', op, this);
-  };
+    this.emit('operation:applied', op, this)
+  }
 
   /**
     Creates proper operation based on provided node path and diff.
@@ -138,51 +122,48 @@ IncrementalData.Prototype = function() {
     @param {Array} path
     @param {Object} diff
     @returns {ObjectOperation} operation.
-
     @private
   */
-  this._getDiffOp = function(path, diff) {
-    var diffOp = null;
+  _getDiffOp(path, diff) {
+    var diffOp = null
     if (diff.isOperation) {
-      diffOp = diff;
+      diffOp = diff
     } else {
-      var value = this.get(path);
-      var start, end, pos, val;
+      var value = this.get(path)
+      var start, end, pos, val
       if (value === null || value === undefined) {
-        throw new Error('Property has not been initialized: ' + JSON.stringify(path));
+        throw new Error('Property has not been initialized: ' + JSON.stringify(path))
       } else if (isString(value)) {
         if (diff['delete']) {
           // { delete: [2, 5] }
-          start = diff['delete'].start;
-          end = diff['delete'].end;
-          diffOp = TextOperation.Delete(start, value.substring(start, end));
+          start = diff['delete'].start
+          end = diff['delete'].end
+          diffOp = TextOperation.Delete(start, value.substring(start, end))
         } else if (diff['insert']) {
           // { insert: [2, "foo"] }
-          pos = diff['insert'].offset;
-          val = diff['insert'].value;
-          diffOp = TextOperation.Insert(pos, val);
+          pos = diff['insert'].offset
+          val = diff['insert'].value
+          diffOp = TextOperation.Insert(pos, val)
         }
       } else if (isArray(value)) {
         if (diff['delete']) {
           // { delete: 2 }
-          pos = diff['delete'].offset;
-          diffOp = ArrayOperation.Delete(pos, value[pos]);
+          pos = diff['delete'].offset
+          diffOp = ArrayOperation.Delete(pos, value[pos])
         } else if (diff['insert']) {
           // { insert: [2, "foo"] }
-          pos = diff['insert'].offset;
-          val = diff['insert'].value;
-          diffOp = ArrayOperation.Insert(pos, val);
+          pos = diff['insert'].offset
+          val = diff['insert'].value
+          diffOp = ArrayOperation.Insert(pos, val)
         }
       }
     }
     if (!diffOp) {
-      throw new Error('Unsupported diff: ' + JSON.stringify(diff));
+      throw new Error('Unsupported diff: ' + JSON.stringify(diff))
     }
-    return diffOp;
-  };
+    return diffOp
+  }
 
-};
+}
 
-Data.extend(IncrementalData);
-
-module.exports = IncrementalData;
+export default IncrementalData

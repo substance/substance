@@ -1,72 +1,70 @@
-'use strict';
+import isString from 'lodash/isString'
+import Selection from './Selection'
+import Coordinate from './Coordinate'
 
-var isString = require('lodash/isString');
-var Selection = require('./Selection');
-var Coordinate = require('./Coordinate');
+class NodeSelection extends Selection {
 
-function NodeSelection(containerId, nodeId, mode, reverse, surfaceId) {
-  Selection.call(this);
+  constructor(containerId, nodeId, mode, reverse, surfaceId) {
+    super()
 
-  if (!isString(containerId)) {
-    throw new Error("'containerId' is mandatory.");
+    if (!isString(containerId)) {
+      throw new Error("'containerId' is mandatory.");
+    }
+    if (!isString(nodeId)) {
+      throw new Error("'nodeId' is mandatory.");
+    }
+    if (['full', 'before', 'after'].indexOf(mode) < 0) {
+      throw new Error("'mode' is mandatory.");
+    }
+
+    this.containerId = containerId;
+    this.nodeId = nodeId;
+    this.mode = mode;
+    this.reverse = Boolean(reverse);
+    this.surfaceId = surfaceId;
   }
-  if (!isString(nodeId)) {
-    throw new Error("'nodeId' is mandatory.");
-  }
-  if (['full', 'before', 'after'].indexOf(mode) < 0) {
-    throw new Error("'mode' is mandatory.");
-  }
 
-  this.containerId = containerId;
-  this.nodeId = nodeId;
-  this.mode = mode;
-  this.reverse = Boolean(reverse);
-  this.surfaceId = surfaceId;
-}
+  // for duck-typed instanceof
+  get _isNodeSelection() { return true }
 
-NodeSelection.Prototype = function() {
 
-  this._isNodeSelection = true;
-
-  var _super = NodeSelection.super.prototype;
-
-  this.equals = function(other) {
+  equals(other) {
     return (
-      _super.call(this, other) &&
+      super.equals(other) &&
       this.nodeId === other.nodeId &&
       this.mode === other.mode
-    );
-  };
+    )
+  }
 
-  this.isNodeSelection = function() {
+  isNodeSelection() {
     return true;
-  };
+  }
 
-  this.getType = function() {
+  getType() {
     return 'node';
-  };
+  }
 
-  this.getNodeId = function() {
+  getNodeId() {
     return this.nodeId;
-  };
+  }
 
-  this.isFull = function() {
+  isFull() {
     return this.mode === 'full';
-  };
+  }
 
-  this.isBefore = function() {
+  isBefore() {
     return this.mode === 'before';
-  };
+  }
 
-  this.isAfter = function() {
+  isAfter() {
     return this.mode === 'after';
-  };
+  }
 
-  this.isCollapsed = function() {
+  isCollapsed() {
     return this.mode !== 'full';
-  };
+  }
 
-  this.toJSON = function() {
+  toJSON() {
     return {
       containerId: this.containerId,
       nodeId: this.nodeId,
@@ -74,9 +72,21 @@ NodeSelection.Prototype = function() {
       reverse: this.reverse,
       surfaceId: this.surfaceId
     };
-  };
+  }
 
-  this.collapse = function(direction) {
+  toString() {
+    /* istanbul ignore next */
+    return [
+      "NodeSelection(",
+      this.containerId, ".", this.nodeId, ", ",
+      this.mode, ", ",
+      (this.reverse?", reverse":""),
+      (this.surfaceId?(", "+this.surfaceId):""),
+      ")"
+    ].join('');
+  }
+
+  collapse(direction) {
     if (direction === 'left') {
       if (this.isBefore()) {
         return this;
@@ -92,23 +102,25 @@ NodeSelection.Prototype = function() {
     } else {
       throw new Error("'direction' must be either 'left' or 'right'");
     }
-  };
+  }
 
-  this._getCoordinate = function() {
+  _getCoordinate() {
     if (this.mode === 'before') {
       return new Coordinate([this.nodeId], 0);
     } else if (this.mode === 'after') {
       return new Coordinate([this.nodeId], 1);
     }
-  };
+  }
 
-};
+  _clone() {
+    return new NodeSelection(this.containerId, this.nodeId, this.mode, this.reverse, this.surfaceId);
+  }
 
-Selection.extend(NodeSelection);
+}
 
 NodeSelection.fromJSON = function(json) {
   return new NodeSelection(json.containerId, json.nodeId, json.mode, json.reverse);
-};
+}
 
 NodeSelection._createFromRange = function(range) {
   var containerId = range.containerId;
@@ -132,4 +144,4 @@ NodeSelection._createFromCoordinate = function(coor) {
   return new NodeSelection(containerId, nodeId, mode, false);
 };
 
-module.exports = NodeSelection;
+export default NodeSelection

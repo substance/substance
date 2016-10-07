@@ -1,0 +1,89 @@
+/* Global variables
+-------------------------------------------------- */
+
+:root {
+  /* Layout */
+  --small-layout-width: 300px;
+  --medium-layout-width: 620px;
+  --large-layout-width: 960px;
+
+  /* Normalized heights (used by buttons and inputs) */
+  --base-height: 40px;
+  --short-height: 20px;
+  --border-radius: 5px;
+
+  /* Colors */
+  --dark-bg-color: #2E2E2E;
+  --border-color: #E0E4E4;
+  --dark-border-color: #777;
+
+  /* Used by Button component */
+  --button-color: rgba(0,0,0,0.75);
+
+  --fill-white-color: #fff;
+  --fill-light-color: #f7f9f9; /* #f8f8f8; */
+  --fill-dark-color: #404040;
+
+  /* Depending on a base-color */
+  --darken-color-1: rgba(0,0,0,0.05);
+  --darken-color-2: rgba(0,0,0,0.10);
+  --darken-color-3: rgba(0,0,0,0.25);
+  --darken-color-4: rgba(0,0,0,0.50);
+  --darken-color-5: rgba(0,0,0,0.75);
+
+  --lighten-color-1: rgba(0,0,0,0.05);
+  --lighten-color-2: rgba(0,0,0,0.10);
+  --lighten-color-3: rgba(0,0,0,0.25);
+  --lighten-color-4: rgba(0,0,0,0.50);
+  --lighten-color-5: rgba(0,0,0,0.75);
+
+  --link-color: #1795CD;
+
+  /* We disable this for now, as accessibility needs more discussion */
+  --focus-outline-color: transparent; /* #1795CD;/* #5BE3FF;
+
+  /* Font colors */
+  --default-text-color: rgba(0,0,0,0.75);
+  --light-text-color: rgba(0,0,0,.40);
+
+  /* Default padding */
+  --default-padding: 20px;
+
+  /* Prose font sizes */
+  --default-font-size: 16px;
+  --small-font-size: 13px;
+
+  --large-font-size: 20px;
+  --xlarge-font-size: 25px;
+  /* Title font sizes */
+  --title-font-size: 38px;
+  /* Heading font sizes */
+  --h1-font-size: 26px;
+  --h2-font-size: 22px;
+  --h3-font-size: 18px;
+  --h4-font-size: 16px;
+
+  --strong-font-weight: 600;
+  --highlight-color-1: #0b9dd9;
+  --highlight-color-2: #91bb04;
+  --heading-letterspacing: -0.5px;
+
+  /* code-font */
+  --font-family-code: Consolas, 'Liberation Mono', Menlo, Courier, monospace;
+  --font-size-code: 14px;
+
+  /* RGB #A3CDFD = HSB 209,29,80 */
+  --local-selection-color: #A3CDFD;
+
+  /* Collaborator colors */
+  --collaborator-color-1: #A4E57A;
+  --collaborator-color-2: #BC90FF;
+  --collaborator-color-3: #D6BB4C;
+  --collaborator-color-4: #BAA6A0;
+  --collaborator-color-5: #7BB5B3;
+  --collaborator-color-6: #FF7B7B;
+  --collaborator-color-7: #A0CC00;
+  --collaborator-color-8: #89CAFF;
+  --collaborator-color-9: #FF9FBF;
+  --collaborator-color-10: #FFB533;
+}

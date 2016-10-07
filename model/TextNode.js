@@ -1,6 +1,4 @@
-'use strict';
-
-var DocumentNode = require('./DocumentNode');
+import DocumentNode from './DocumentNode'
 
 /**
   A base class for all text-ish nodes, such as Paragraphs, Headings,
@@ -10,33 +8,27 @@ var DocumentNode = require('./DocumentNode');
   @abstract
 */
 
-function TextNode() {
-  TextNode.super.apply(this, arguments);
+class TextNode extends DocumentNode {
+
+  getTextPath() {
+    return [this.id, 'content']
+  }
+
+  getText() {
+    return this.content
+  }
+
+  isEmpty() {
+    return !this.content
+  }
+
 }
 
-TextNode.Prototype = function() {
+TextNode.isText = true
 
-  this.getTextPath = function() {
-    return [this.id, 'content'];
-  };
-
-  this.getText = function() {
-    return this.content;
-  };
-
-  this.isEmpty = function() {
-    return !this.content;
-  };
-
-};
-
-DocumentNode.extend(TextNode);
-
-TextNode.static.name = "text";
-TextNode.static.isText = true;
-
-TextNode.static.defineSchema({
+TextNode.define({
+  type: "text",
   content: 'text'
-});
+})
 
-module.exports = TextNode;
+export default TextNode

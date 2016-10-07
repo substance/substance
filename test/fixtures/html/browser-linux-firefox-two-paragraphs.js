@@ -1,2 +1,1 @@
-'use strict';
-module.exports="<p>AAA</p><p>BBB</p>";
+export default "<p>AAA</p><p>BBB</p>";

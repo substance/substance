@@ -1,38 +1,37 @@
-'use strict';
+import XMLImporter from '../../model/XMLImporter'
+import schema from './TestSchema'
+import TestArticle from './TestArticle'
 
-var XMLImporter = require('../../model/XMLImporter');
-var schema = require('./TestSchema');
-var TestArticle = require('./TestArticle');
+import ParagraphXMLConverter from '../../packages/paragraph/ParagraphXMLConverter'
+import ImageXMLConverter from '../../packages/image/ImageXMLConverter'
+import HeadingXMLConverter from '../../packages/heading/HeadingXMLConverter'
+import EmphasisXMLConverter from '../../packages/emphasis/EmphasisXMLConverter'
+import StrongXMLConverter from '../../packages/strong/StrongXMLConverter'
+import LinkXMLConverter from '../../packages/link/LinkXMLConverter'
+import TestMetaNodeXMLConverter from './TestMetaNodeXMLConverter'
 
 var converters = [
-  require('../../packages/paragraph/ParagraphXMLConverter'),
-  require('../../packages/image/ImageXMLConverter'),
-  require('../../packages/heading/HeadingXMLConverter'),
-  require('../../packages/emphasis/EmphasisXMLConverter'),
-  require('../../packages/strong/StrongXMLConverter'),
-  require('../../packages/link/LinkXMLConverter'),
-  require('./TestMetaNodeXMLConverter')
-];
+  ParagraphXMLConverter, ImageXMLConverter, HeadingXMLConverter,
+  EmphasisXMLConverter, StrongXMLConverter, LinkXMLConverter, TestMetaNodeXMLConverter
+]
 
-function TestXMLImporter() {
-  TestXMLImporter.super.call(this, {
-    schema: schema,
-    converters: converters,
-    DocumentClass: TestArticle
-  });
+class TestXMLImporter extends XMLImporter {
+
+  constructor() {
+    super({
+      schema: schema,
+      converters: converters,
+      DocumentClass: TestArticle
+    })
+  }
+
+  convertDocument(documentEl) {
+    var bodyEl = documentEl.find('body')
+    this.convertContainer(bodyEl.children, 'body')
+  }
+
 }
 
-TestXMLImporter.Prototype = function() {
+TestXMLImporter.converters = converters
 
-  this.convertDocument = function(documentEl) {
-    var bodyEl = documentEl.find('body');
-    this.convertContainer(bodyEl.children, 'body');
-  };
-
-};
-
-XMLImporter.extend(TestXMLImporter);
-
-TestXMLImporter.converters = converters;
-
-module.exports = TestXMLImporter;
+export default TestXMLImporter

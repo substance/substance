@@ -1,29 +1,26 @@
-'use strict';
+import Document from '../../model/Document'
+import schema from './TestSchema'
 
-var Document = require('../../model/Document');
-var schema = require('./TestSchema');
+class TestArticle extends Document {
 
-function TestArticle() {
-  TestArticle.super.call(this, schema);
+  constructor() {
+    super(schema)
 
-  this.create({
-    type: "meta",
-    id: "meta",
-    title: 'Untitled'
-  });
-  this.create({
-    type: "container",
-    id: "body",
-    nodes: []
-  });
+    this.create({
+      type: "meta",
+      id: "meta",
+      title: 'Untitled'
+    })
+    this.create({
+      type: "container",
+      id: "body",
+      nodes: []
+    })
+  }
+
+  getDocumentMeta() {
+    return this.get('meta')
+  }
 }
 
-TestArticle.Prototype = function() {
-  this.getDocumentMeta = function() {
-    return this.get('meta');
-  };
-};
-
-Document.extend(TestArticle);
-
-module.exports = TestArticle;
+export default TestArticle

@@ -1,7 +1,5 @@
-'use strict';
-
-var Surface = require('./Surface');
-var TextProperty = require('./TextPropertyComponent');
+import Surface from '../packages/surface/Surface'
+import TextProperty from './TextPropertyComponent'
 
 /**
   Editor for a text property (annotated string). Needs to be
@@ -28,56 +26,53 @@ var TextProperty = require('./TextPropertyComponent');
   ```
 */
 
-function TextPropertyEditor(parent, props) {
-  // making props.name optional
-  props.name = props.name || props.path.join('.');
-  Surface.apply(this, arguments);
+class TextPropertyEditor extends Surface {
+  constructor(parent, props) {
+    // making props.name optional
+    props.name = props.name || props.path.join('.')
+    super(parent, props)
 
-  if (!props.path) {
-    throw new Error("Property 'path' is mandatory.");
+    if (!props.path) {
+      throw new Error("Property 'path' is mandatory.")
+    }
   }
-}
 
-TextPropertyEditor.Prototype = function() {
-
-  var _super = TextPropertyEditor.super.prototype;
-
-  this.render = function($$) {
-    var el = _super.render.apply(this, arguments);
-    el.addClass("sc-text-property-editor");
+  render($$) {
+    let el = super.render.apply(this, arguments)
+    el.addClass("sc-text-property-editor")
 
     if (!this.props.disabled) {
-      el.addClass('sm-enabled');
-      el.setAttribute('contenteditable', true);
+      el.addClass('sm-enabled')
+      el.setAttribute('contenteditable', true)
     }
 
     el.append(
       $$(TextProperty, {
-        tagName: "div",
-        path: this.props.path
+        tagName: this.props.tagName || "div",
+        path: this.props.path,
+        withoutBreak: this.props.withoutBreak
       })
-    );
-    return el;
-  };
+    )
+
+    return el
+  }
 
   /**
     Selects all text
   */
-  this.selectAll = function() {
-    var doc = this.getDocument();
-    var path = this.props.path;
-    var text = doc.get(path);
-    var sel = doc.createSelection({
+  selectAll() {
+    let doc = this.getDocument()
+    let path = this.props.path
+    let text = doc.get(path)
+    let sel = doc.createSelection({
       type: 'property',
       path: path,
       startOffset: 0,
       endOffset: text.length
-    });
-    this.setSelection(sel);
-  };
+    })
+    this.setSelection(sel)
+  }
 
-};
+}
 
-Surface.extend(TextPropertyEditor);
-
-module.exports = TextPropertyEditor;
+export default TextPropertyEditor
