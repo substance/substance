@@ -117,7 +117,6 @@ var NPMDIST = NPM+'dist/'
 
 b.task('npm:clean', function() {
   b.rm(NPM)
-  b.rm(NPM+'docs')
 })
 
 b.task('npm:copy:js', function() {
