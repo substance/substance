@@ -7,13 +7,6 @@ b.task('clean', function() {
   b.rm('./.npm');
 });
 
-function _css(DIST, transpile) {
-  b.css('substance.css', DIST+'substance.css', { variables: transpile })
-}
-
-b.task('css', function() {
-  _css('dist/', false)
-})
 
 function _browser(DIST, transpileToES5) {
   b.js('./index.es.js', {
@@ -27,7 +20,15 @@ function _browser(DIST, transpileToES5) {
       format: 'umd', moduleName: 'substance', sourceMapRoot: __dirname, sourceMapPrefix: 'substance'
     }]
   })
+
+  b.css('substance.css', DIST+'substance.css', { variables: true })
+  b.css('substance.css', DIST+'substance.next.css')
+  b.css('substance-pagestyle.css', DIST+'substance-pagestyle.css', {variables: true})
+  b.css('substance-pagestyle.css', DIST+'substance-pagestyle.next.css')
+  b.css('substance-reset.css', DIST+'substance-reset.css', {variables: true})
+  b.css('substance-reset.css', DIST+'substance-reset.next.css')
 }
+
 
 b.task('browser:pure', function() {
   _browser('./dist/', false)
@@ -118,7 +119,14 @@ b.task('npm:clean', function() {
   b.rm(NPM)
 })
 
-b.task('npm:copy:js', function() {
+var stuff = [
+  'package.json',
+  'LICENSE.md',
+  'README.md',
+  'CHANGELOG.md',
+  'make.js'
+]
+b.task('npm:copy:sources', function() {
   b.copy('index.es.js', NPM)
   b.copy('collab/*.js', NPM)
   b.copy('model/**/*.js', NPM)
@@ -126,11 +134,11 @@ b.task('npm:copy:js', function() {
   b.copy('ui/*.js', NPM)
   b.copy('util/*.js', NPM)
   b.copy('test/**/*.js', NPM)
-})
-
-b.task('npm:copy:css', function() {
-  _css(NPM, true)
-  _css(NPMDIST, true)
+  b.copy('*.css', NPM)
+  b.copy('packages/**/*.css', NPM)
+  stuff.forEach(function(f) {
+    b.copy(f, NPM)
+  })
 })
 
 function _docs(mode, dest) {
@@ -161,34 +169,24 @@ b.task('npm:docs', function() {
   _docs('site', NPM+'docs/')
 })
 
-b.task('npm:js', function() {
+b.task('npm:browser', function() {
   _browser(NPMDIST, true)
+})
+
+b.task('npm:server', function() {
   _server(NPMDIST, true)
 })
 
-var stuff = [
-  'package.json',
-  'LICENSE.md',
-  'README.md',
-  'CHANGELOG.md',
-  'make.js'
-]
-b.task('npm:stuff', function() {
-  stuff.forEach(function(f) {
-    b.copy(f, NPM)
-  })
-})
-
-b.task('build', ['clean', 'css', 'browser', 'server'])
+b.task('build', ['clean', 'browser', 'server'])
 
 b.task('test', ['test:clean', 'test:assets', 'test:browser', 'test:server'])
 
-b.task('npm', ['npm:clean', 'npm:copy:js', 'npm:copy:css', 'npm:docs', 'npm:js', 'npm:stuff'])
+b.task('npm', ['npm:clean', 'npm:copy:sources', 'npm:docs', 'npm:browser', 'npm:server'])
 
 b.task('default', ['build'])
 
 // Default dev mode, only browser bundles are made and no ES5 transpilation happens
-b.task('dev', ['clean', 'css', 'browser:pure', 'test:assets', 'test:browser:pure' , 'docs'])
+b.task('dev', ['clean', 'browser:pure', 'test:assets', 'test:browser:pure' , 'docs'])
 
 // SERVER
 
