@@ -7,12 +7,12 @@ b.task('clean', function() {
   b.rm('./.npm');
 });
 
-function _css(DIST) {
-  b.css('substance.css', DIST+'substance.css')
+function _css(DIST, transpile) {
+  b.css('substance.css', DIST+'substance.css', { variables: transpile })
 }
 
 b.task('css', function() {
-  _css('dist/')
+  _css('dist/', false)
 })
 
 function _browser(DIST, transpileToES5) {
@@ -129,8 +129,8 @@ b.task('npm:copy:js', function() {
 })
 
 b.task('npm:copy:css', function() {
-  _css(NPM)
-  _css(NPMDIST)
+  _css(NPM, true)
+  _css(NPMDIST, true)
 })
 
 function _docs(mode, dest) {
