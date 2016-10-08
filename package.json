@@ -1,6 +1,6 @@
 {
   "name": "substance",
-  "version": "1.0.0-beta.5.7",
+  "version": "1.0.0-beta.5.8",
   "description": "",
   "repository": {
     "type": "git",
@@ -46,6 +46,7 @@
     "ui",
     "util",
     "*.css",
+    "*.js",
     "*.md",
     "packages.json"
   ]
