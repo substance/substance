@@ -1,4 +1,6 @@
 import Component from './Component'
+import Flow from './Flow'
+import { DocumentSessionFlowAdapter } from './flowHelpers'
 import CommandManager from './CommandManager'
 import MacroManager from './MacroManager'
 import GlobalEventHandler from './GlobalEventHandler'
@@ -59,6 +61,7 @@ class AbstractEditor extends Component {
     this.commandManager.dispose()
     this.globalEventHandler.dispose()
     this.dragManager.dispose()
+    this.flow.dispose()
     this.documentSession.off(this)
     // Note: we need to clear everything, as the childContext
     // changes which is immutable
@@ -68,18 +71,19 @@ class AbstractEditor extends Component {
   getChildContext() {
     return {
       controller: this,
-      iconProvider: this.iconProvider,
       documentSession: this.documentSession,
       doc: this.doc, // TODO: remove in favor of documentSession
+      flow: this.flow,
       componentRegistry: this.componentRegistry,
       surfaceManager: this.surfaceManager,
       commandManager: this.commandManager,
-      tools: this.tools,
-      labelProvider: this.labelProvider,
       converterRegistry: this.converterRegistry,
-      globalEventHandler: this.globalEventHandler,
-      editingBehavior: this.editingBehavior,
       dragManager: this.dragManager,
+      editingBehavior: this.editingBehavior,
+      globalEventHandler: this.globalEventHandler,
+      iconProvider: this.iconProvider,
+      labelProvider: this.labelProvider,
+      tools: this.tools,
     }
   }
 
@@ -92,6 +96,7 @@ class AbstractEditor extends Component {
     this.documentSession = props.documentSession
     this.doc = this.documentSession.getDocument()
     this.componentRegistry = configurator.getComponentRegistry()
+    this.flow = this._setupFlow()
     this.tools = configurator.getTools()
     this.surfaceManager = new SurfaceManager(this.documentSession)
     this.commandManager = new CommandManager(this.getCommandContext(), commands)
@@ -106,6 +111,13 @@ class AbstractEditor extends Component {
     this.globalEventHandler = new GlobalEventHandler(this.documentSession, this.surfaceManager)
     this.editingBehavior = configurator.getEditingBehavior()
     this.labelProvider = configurator.getLabelProvider()
+  }
+
+  _setupFlow() {
+    // TODO: make stages configurable
+    const flow = new Flow(['model', 'pre-render', 'render', 'post-render', 'final'])
+    DocumentSessionFlowAdapter.connect(this.documentSession, flow)
+    return flow
   }
 
   getCommandContext() {
@@ -123,7 +135,7 @@ class AbstractEditor extends Component {
   }
 
   /**
-    Called when documentsession was updated (e.g. when the selection changes).
+    Called when documentSession was updated (e.g. when the selection changes).
 
     E.g. update toolbars.
   */

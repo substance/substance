@@ -28,6 +28,17 @@ class TextPropertyComponent extends AnnotatedTextComponent {
 
   didMount() {
     super.didMount()
+
+    this.context.flow.subscribe({
+      stage: 'render',
+      resources: [{
+        source: this.getDocument(),
+        path: this.props.path
+      }],
+      handler: this._onUpdate,
+      owner: this
+    })
+
     // TODO: instead of letting Surface manage TextProperties
     // we should instead use the Flow in future
     let surface = this.getSurface()
@@ -37,7 +48,10 @@ class TextPropertyComponent extends AnnotatedTextComponent {
   }
 
   dispose() {
-    super.dispose();
+    super.dispose()
+
+    this.context.flow.unsubscribe(this)
+
     let surface = this.getSurface()
     if (surface) {
       surface._unregisterTextProperty(this)
@@ -67,6 +81,11 @@ class TextPropertyComponent extends AnnotatedTextComponent {
       el.append($$('br'))
     }
     return el
+  }
+
+  _onUpdate(text) {
+    console.log('TextProperty updated by flow:', text)
+    this.rerender()
   }
 
   _renderFragment($$, fragment) {

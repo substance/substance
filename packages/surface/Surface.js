@@ -718,18 +718,18 @@ class Surface extends Component {
   // called by SurfaceManager to know which text properties need to be
   // updated because of model changes
   _checkForUpdates(change) {
-    let _state = this._state
-    Object.keys(change.updated).forEach(function(key) {
-      if (this._getComponentForKey(key)) {
-        this._markAsDirty(_state, key)
-      }
-    }.bind(this))
-    return _state.isDirty
+    // let _state = this._state
+    // Object.keys(change.updated).forEach(function(key) {
+    //   if (this._getComponentForKey(key)) {
+    //     this._markAsDirty(_state, key)
+    //   }
+    // }.bind(this))
+    // return _state.isDirty
   }
 
   _update(oldProps, oldState) {
     this._updateContentEditableState(oldState)
-    this._updateProperties()
+    // this._updateProperties()
   }
 
   _updateContentEditableState(oldState) {
@@ -758,13 +758,13 @@ class Surface extends Component {
   }
 
   _updateProperties() {
-    let _state = this._state
-    let dirtyProperties = Object.keys(_state.dirtyProperties)
-    for (let i = 0; i < dirtyProperties.length; i++) {
-      this._updateProperty(dirtyProperties[i])
-    }
-    _state.isDirty = false
-    _state.dirtyProperties = {}
+    // let _state = this._state
+    // let dirtyProperties = Object.keys(_state.dirtyProperties)
+    // for (let i = 0; i < dirtyProperties.length; i++) {
+    //   this._updateProperty(dirtyProperties[i])
+    // }
+    // _state.isDirty = false
+    // _state.dirtyProperties = {}
   }
 
   _markAsDirty(_state, key) {
@@ -773,19 +773,19 @@ class Surface extends Component {
   }
 
   _updateProperty(key) {
-    let _state = this._state
-    // hide the cursor fragment when focused
-    let cursorFragment = this._hasNativeFocus() ? null : _state.cursorFragment
-    let frags = _state.fragments[key] || []
-    if (cursorFragment && cursorFragment.key === key) {
-      frags = frags.concat([cursorFragment])
-    }
-    let comp = this._getComponentForKey(key)
-    if (comp) {
-      comp.extendProps({
-        fragments: frags
-      })
-    }
+    // let _state = this._state
+    // // hide the cursor fragment when focused
+    // let cursorFragment = this._hasNativeFocus() ? null : _state.cursorFragment
+    // let frags = _state.fragments[key] || []
+    // if (cursorFragment && cursorFragment.key === key) {
+    //   frags = frags.concat([cursorFragment])
+    // }
+    // let comp = this._getComponentForKey(key)
+    // if (comp) {
+    //   comp.extendProps({
+    //     fragments: frags
+    //   })
+    // }
   }
 
   _onSessionUpdate(update) {
