@@ -4,7 +4,7 @@ module.exports = {
   index: 'README.md',
   // This will be used to create links to source files within the API docs
   repository: "https://github.com/substance/substance",
-  sha: "v1.0.0-beta.5.5",
+  sha: "v1.0.0-beta.5",
   content: [
     { type: "page", id: "about", title: "About", src: "doc/about.md" },
     { type: "section", id: "quickstart", title: "Quickstart", src: "doc/quickstart.md" },
