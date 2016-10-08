@@ -1,6 +1,6 @@
 {
   "name": "substance",
-  "version": "1.0.0-beta.5.5",
+  "version": "1.0.0-beta.5.6",
   "description": "",
   "repository": {
     "type": "git",
@@ -30,7 +30,7 @@
     "karma-tap": "1.0.4",
     "karma-tape-reporter": "1.0.3",
     "substance-bundler": "0.5.1",
-    "substance-docgen": "0.4.6",
+    "substance-docgen": "0.4.7",
     "substance-test": "^0.2.3"
   },
   "browser": {
