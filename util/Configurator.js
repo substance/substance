@@ -88,7 +88,7 @@ class Configurator {
       throw new Error('A NodeClass must have a type.')
     }
     if (this.config.nodes[type]) {
-      throw new Error('NodeClass with this type name is already registered: ' + name)
+      throw new Error('NodeClass with this type name is already registered: ' + type)
     }
     this.config.nodes[type] = NodeClass
   }
