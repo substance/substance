@@ -40,8 +40,6 @@ class DocumentNode extends DataNode {
     this.document = doc
   }
 
-  get _isDocumentNode() { return true }
-
   /**
     Get the Document instance.
 
@@ -220,6 +218,8 @@ class DocumentNode extends DataNode {
   }
 
 }
+
+DocumentNode.prototype._isDocumentNode = true
 
 /**
   Declares a node to be treated as block-type node.

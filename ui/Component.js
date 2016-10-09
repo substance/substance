@@ -258,7 +258,7 @@ class Component extends DOMElement.Delegator {
   }
 
   getComponentRegistry() {
-    return this.context.componentRegistry
+    return this.props.componentRegistry || this.context.componentRegistry
   }
 
   /**

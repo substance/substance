@@ -26,12 +26,8 @@ import SelectionFragmentComponent from './SelectionFragmentComponent'
 
 class TextPropertyComponent extends AnnotatedTextComponent {
 
-  get _isTextPropertyComponent() {
-    return true 
-  }
-
   didMount() {
-    super.didMount.call(this)
+    super.didMount()
     // TODO: instead of letting Surface manage TextProperties
     // we should instead use the Flow in future
     let surface = this.getSurface()
@@ -41,7 +37,7 @@ class TextPropertyComponent extends AnnotatedTextComponent {
   }
 
   dispose() {
-    super.dispose.call(this);
+    super.dispose();
     let surface = this.getSurface()
     if (surface) {
       surface._unregisterTextProperty(this)
@@ -210,6 +206,9 @@ class TextPropertyComponent extends AnnotatedTextComponent {
     }
   }
 }
+
+TextPropertyComponent.prototype._isTextPropertyComponent = true
+
 
 // Helpers for DOM selection mapping
 

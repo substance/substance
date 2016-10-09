@@ -27,10 +27,7 @@ class AnnotatedTextComponent extends Component {
   render($$) {
     let el = this._renderContent($$)
       .addClass('sc-annotated-text')
-      .css({
-        whiteSpace: "pre-wrap"
-      })
-
+      .css({ whiteSpace: "pre-wrap" })
     return el
   }
 
@@ -102,10 +99,6 @@ class AnnotatedTextComponent extends Component {
    */
   getDocument() {
     return this.props.doc || this.context.doc
-  }
-
-  getComponentRegistry() {
-    return this.props.componentRegistry || this.context.componentRegistry
   }
 
 }
