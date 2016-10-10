@@ -212,6 +212,14 @@ class Configurator {
     })
   }
 
+  /**
+    Adds an icon to the configuration which can be later retrieved via the 
+    iconProvider.
+
+    @param {string} iconName name or key for retrieving the icon
+    @param {Object} options  your custom method of representing the icon as a
+        JSON object. Enables plugging in your own IconProvider.
+   */
   addIcon(iconName, options) {
     var iconConfig = this.config.icons[iconName]
     if (!iconConfig) {
