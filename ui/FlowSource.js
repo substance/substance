@@ -33,6 +33,10 @@ class FlowSource {
     this.flow._extendInfo(info)
   }
 
+  startFlow() {
+    this.flow._startFlow()
+  }
+
 }
 
 export default FlowSource

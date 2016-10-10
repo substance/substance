@@ -27,15 +27,18 @@ class DocumentSessionFlowAdapter extends FlowSource {
     const change = update.change
     const selection = update.selection
     const collaborators = update.collaborators
+    const doc = this.documentSession.getDocument()
+    this.extendInfo(info)
     if (change) {
+      this.set('change', change)
       Object.keys(change.created).forEach((id) => {
-        this.set(id, info)
+        this.set(id, change.created[id])
       })
       Object.keys(change.updated).forEach((id) => {
-        this.set(id, info)
+        this.set(id, doc.get(id.split(',')))
       })
       Object.keys(change.deleted).forEach((id) => {
-        this.set(id, info)
+        this.set(id, change.deleted[id])
       })
     }
     if (selection) {
@@ -44,6 +47,7 @@ class DocumentSessionFlowAdapter extends FlowSource {
     if (collaborators) {
       this.set('collaborators', collaborators, info)
     }
+    this.startFlow()
   }
 }
 

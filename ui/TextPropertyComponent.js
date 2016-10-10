@@ -84,7 +84,6 @@ class TextPropertyComponent extends AnnotatedTextComponent {
   }
 
   _onUpdate(text) {
-    console.log('TextProperty updated by flow:', text)
     this.rerender()
   }
 

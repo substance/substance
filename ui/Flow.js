@@ -2,12 +2,16 @@ import isPlainObject from 'lodash/isPlainObject'
 import deleteFromArray from '../util/deleteFromArray'
 import map from '../util/map'
 import uuid from '../util/uuid'
+import EventEmitter from '../util/EventEmitter'
 
-class Flow {
+class Flow extends EventEmitter {
 
   constructor(stages) {
+    super()
+
     this.id = uuid()
     this.stages = stages.slice(0)
+    this.data = {}
 
     this.sources = {}
     // for batch unsubscription
@@ -15,11 +19,7 @@ class Flow {
     // for dependency propagation
     this._subscriptionsByResource = {}
 
-    // temporary state
-    this._isFlowing = false
-    this._schedule = {}
-    this._scheduled = {}
-    this._data = {}
+    this._reset()
   }
 
   dispose() {
@@ -100,6 +100,7 @@ class Flow {
       return [source.id].concat(r.path)
     })
     return {
+      id: uuid(),
       stage: subscription.stage,
       resourceIds: resourceIds,
       handler: subscription.handler.bind(subscription.owner),
@@ -119,50 +120,64 @@ class Flow {
 
   _set(resourceId, data) {
     if (!this._subscriptionsByResource[resourceId]) return
+    // console.log('setting data', resourceId, data)
     // you should use a simple flat object for resource data
-    this._data[resourceId] = data
+    this.data[resourceId] = data
     this._propagate(resourceId)
   }
 
   _extend(resourceId, data) {
     if (!this._subscriptionsByResource[resourceId]) return
     if (!isPlainObject(data)) throw new Error('Flow.extend() should only be used with plain objects')
-    let _data = this._data[resourceId]
+    // console.log('extending data', resourceId, data)
+    let _data = this.data[resourceId]
     if (!_data) {
-      this._data[resourceId] = _data = {}
+      this.data[resourceId] = _data = {}
     }
     Object.assign(_data, data)
     this._propagate(resourceId)
   }
 
   _extendInfo(info) {
+    // console.log('extending info', info)
     Object.assign(this._info, info)
   }
 
   _propagate(resourceId) {
     const subscriptions = this._subscriptionsByResource[resourceId]
-    if (!this._isFlowing) this._reset()
     subscriptions.forEach((s) => {
       if (this._scheduled[s.id]) return
+      console.log('scheduling for', resourceId)
       this._scheduled[s.id] = true
       this._schedule[s.stage].push(s)
     })
-    if (!this._isFlowing) {
-      this._isFlowing = true
-      try {
-        this._runSchedule()
-      } finally {
-        this._isFlowing = false
-      }
+  }
+
+  _startFlow() {
+    if (this._isFlowing) return
+    // console.log('starting flow', this._schedule)
+    this._isFlowing = true
+    try {
+      this._runSchedule()
+    } finally {
+      this._reset()
     }
   }
 
   _reset() {
+    this._isFlowing = false
+    // NOTE: i think we do not want to clear the data
+    // as the sources are responsible for updating them
+    // and data shall not be lost by partial updates
+    this._info = {}
+    this._initSchedule()
+  }
+
+  _initSchedule() {
     const schedule = {}
     this.stages.forEach(function(name) {
       schedule[name] = []
     })
-    this._info = {}
     this._schedule = schedule
     this._scheduled = {}
   }
@@ -174,10 +189,11 @@ class Flow {
       while (stage.length > 0) {
         const next = stage.shift()
         const data = next.resourceIds.map((id) => {
-          return this._data[id]
+          return this.data[id]
         })
-        next.handler(data, ...data, this._info)
+        next.handler(...data, this._info)
       }
+      this.emit(name, this._info, this.data)
     })
   }
 }
