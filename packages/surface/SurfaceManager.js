@@ -3,9 +3,9 @@ import clone from 'lodash/clone'
 import inBrowser from '../../util/inBrowser'
 
 class SurfaceManager {
-  constructor(documentSession) {
-    this.documentSession = documentSession
 
+  constructor(flow, documentSession) {
+    this.flow = flow
     this.surfaces = {}
 
     this._state = {
@@ -15,18 +15,21 @@ class SurfaceManager {
       selection: null,
       collaborators: {}
     }
-
-    this.documentSession.on('update', this.onSessionUpdate, this)
-    // HACK: trying to make rerendering the DOM selection the very last
-    // TODO: we want to introduce a FlowManager, which will hopefully
-    // make this prio hack obsolete
-    this.documentSession.on('didUpdate', this.onSessionDidUpdate, this, {
-      priority: -1000000
+    flow.subscribe({
+      stage: 'model',
+      resources: [{
+        source: documentSession,
+        path: 'selection'
+      }],
+      handler: this._onSelectionUpdate,
+      owner: this
     })
+    flow.on('final', this._recoverDOMSelection, this)
   }
 
   dispose() {
-    this.documentSession.off(this)
+    this.flow.unsubscribe(this)
+    this.flow.off(this)
   }
 
   /**
@@ -77,6 +80,12 @@ class SurfaceManager {
         this._state.focusedSurfaceId = null
       }
     }
+  }
+
+  _onSelectionUpdate(selection) {
+    const state = this._state
+    state.selection = selection
+    state.focusedSurfaceId = selection.surfaceId
   }
 
   // keeps track of selection fragments and collaborator fragments
@@ -191,7 +200,7 @@ class SurfaceManager {
     }.bind(this))
   }
 
-  onSessionDidUpdate(update, info) {
+  _recoverDOMSelection(info) {
     if (info.skipSelection) {
       // console.log('Skipping selection update.');
       return

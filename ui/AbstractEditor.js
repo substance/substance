@@ -98,7 +98,7 @@ class AbstractEditor extends Component {
     this.componentRegistry = configurator.getComponentRegistry()
     this.flow = this._setupFlow()
     this.tools = configurator.getTools()
-    this.surfaceManager = new SurfaceManager(this.documentSession)
+    this.surfaceManager = new SurfaceManager(this.flow, this.documentSession)
     this.commandManager = new CommandManager(this.getCommandContext(), commands)
     this.dragManager = new DragManager(configurator.createDragHandlers(), {
       documentSession: this.documentSession,
