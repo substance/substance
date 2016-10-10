@@ -87,7 +87,7 @@ class Configurator {
 
   /**
     Adds a node to this configuration. Later, when you use 
-    {@link util/Configurator#getSchema()}, this node will be added to that schema.
+    {@link Configurator#getSchema()}, this node will be added to that schema.
     Usually, used within a package to add its own nodes to the schema.
 
     @param {Node} NodeClass
@@ -142,7 +142,7 @@ class Configurator {
   }
 
   /**
-    Add a component for a node type. Components ({@link ui/Component}) are the
+    Add a component for a node type. Components ({@link Component}) are the
     ui representation of a node for rendering and manipulation. This is usually
     used within a package to add representations for nodes added by that
     package.
@@ -152,7 +152,7 @@ class Configurator {
     
     @param {String} nodeType       the type attribute of the node for which this
                                    component is to be used.
-    @param {Class} ComponentClass  A subclass of {@link ui/Component} for nodes 
+    @param {Class} ComponentClass  A subclass of {@link Component} for nodes 
                                    of nodeType.
    */
   addComponent(nodeType, ComponentClass) {
@@ -279,8 +279,8 @@ class Configurator {
     be used only once per configuration. You shouldn't call this within package
     config methods.
 
-    You can use {@link util/Configurator#getSeed} method to get this seed and
-    apply it on your document {@link model/Document} class.
+    You can use {@link Configurator#getSeed} method to get this seed and
+    apply it on your document {@link Document} class.
 
     @param {function} seed   A transaction function that creates the seed
         document from an empty document.
@@ -314,7 +314,7 @@ class Configurator {
   }
 
   /**
-    Adds an editing behavior to this configuration. {@link model/EditingBehavior}
+    Adds an editing behavior to this configuration. {@link EditingBehavior}
     for more.
 
     @param {EditingBehavior} editingBehavior.
