@@ -1,6 +1,6 @@
 import EventEmitter from '../util/EventEmitter'
 import forEach from 'lodash/forEach'
-import map from 'lodash/map'
+import map from '../util/map'
 import extend from 'lodash/extend'
 import DocumentChange from '../model/DocumentChange'
 import Selection from '../model/Selection'

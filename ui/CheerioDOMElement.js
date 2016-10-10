@@ -2,9 +2,9 @@ import isString from 'lodash/isString'
 import last from 'lodash/last'
 import extend from 'lodash/extend'
 import clone from 'lodash/clone'
-import map from 'lodash/map'
 import $ from 'substance-cheerio'
 import EventEmitter from '../util/EventEmitter'
+import map from '../util/map'
 import DOMElement from './DOMElement'
 
 class CheerioDOMElement extends DOMElement {

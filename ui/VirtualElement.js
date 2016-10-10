@@ -6,9 +6,9 @@ import isFunction from 'lodash/isFunction'
 import isNil from 'lodash/isNil'
 import isPlainObject from 'lodash/isPlainObject'
 import isString from 'lodash/isString'
-import map from 'lodash/map'
 import omit from 'lodash/omit'
 import without from 'lodash/without'
+import map from '../util/map'
 import DOMElement from './DOMElement'
 
 /**
