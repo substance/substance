@@ -2,7 +2,7 @@ import isEqual from 'lodash/isEqual'
 import isObject from 'lodash/isObject'
 import isArray from 'lodash/isArray'
 import isString from 'lodash/isString'
-import each from 'lodash/each'
+import forEach from '../util/forEach'
 import uuid from '../util/uuid'
 import EventEmitter from '../util/EventEmitter'
 import DocumentIndex from './DocumentIndex'
@@ -399,7 +399,7 @@ class Document extends EventEmitter {
   }
 
   _apply(documentChange) {
-    each(documentChange.ops, function(op) {
+    forEach(documentChange.ops, function(op) {
       this.data.apply(op)
       this.emit('operation:applied', op)
     }.bind(this))
@@ -413,7 +413,7 @@ class Document extends EventEmitter {
   }
 
   _updateEventProxies(change, info) {
-    each(this.eventProxies, function(proxy) {
+    forEach(this.eventProxies, function(proxy) {
       proxy.onDocumentChanged(change, info, this)
     }.bind(this))
   }
@@ -425,11 +425,11 @@ class Document extends EventEmitter {
    */
   loadSeed(seed) {
     // clear all existing nodes (as they should be there in the seed)
-    each(this.data.nodes, function(node) {
+    forEach(this.data.nodes, function(node) {
       this.delete(node.id)
     }.bind(this))
     // create nodes
-    each(seed.nodes, function(nodeData) {
+    forEach(seed.nodes, function(nodeData) {
       this.create(nodeData)
     }.bind(this))
   }

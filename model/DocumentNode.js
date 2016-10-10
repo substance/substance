@@ -1,4 +1,4 @@
-import each from 'lodash/each'
+import forEach from '../util/forEach'
 import DataNode from './data/Node'
 import EventEmitter from '../util/EventEmitter'
 
@@ -163,7 +163,7 @@ class DocumentNode extends DataNode {
   // rather inconvenient EventProxy API.
   connect(ctx, handlers) {
     console.warn('DEPRECATED: use Node.on() instead')
-    each(handlers, function(func, name) {
+    forEach(handlers, function(func, name) {
       this.on(name, func, ctx)
     }.bind(this))
   }

@@ -1,6 +1,6 @@
 import isFunction from 'lodash/isFunction'
 import extend from 'lodash/extend'
-import each from 'lodash/each'
+import forEach from '../util/forEach'
 import uuid from '../util/uuid'
 import Document from './Document'
 import DocumentChange from './DocumentChange'
@@ -52,7 +52,7 @@ class TransactionDocument extends Document {
     // when calling undo
     this.before = {}
     // HACK: copying all indexes
-    each(document.data.indexes, function(index, name) {
+    forEach(document.data.indexes, function(index, name) {
       this.data.addIndex(name, index.clone())
     }.bind(this))
 

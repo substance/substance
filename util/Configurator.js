@@ -1,4 +1,4 @@
-import forEach from 'lodash/forEach'
+import forEach from './forEach'
 import map from 'lodash/map'
 import isString from 'lodash/isString'
 import DocumentSchema from '../model/DocumentSchema'

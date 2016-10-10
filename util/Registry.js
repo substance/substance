@@ -1,4 +1,4 @@
-import forEach from 'lodash/forEach'
+import forEach from './forEach'
 
 // just as a reference to detect name collisions
 // with native Object properties

@@ -1,8 +1,8 @@
 import isArray from 'lodash/isArray'
 import isString from 'lodash/isString'
-import each from 'lodash/each'
 import cloneDeep from 'lodash/cloneDeep'
 import EventEmitter from '../../util/EventEmitter'
+import forEach from '../../util/forEach'
 import DataObject from './DataObject'
 import NodeFactory from './NodeFactory'
 
@@ -282,7 +282,7 @@ class Data extends EventEmitter {
    */
   _updateIndexes(change) {
     if (!change || this.__QUEUE_INDEXING__) return
-    each(this.indexes, function(index) {
+    forEach(this.indexes, function(index) {
       if (index.select(change.node)) {
         if (!index[change.type]) {
           console.error('Contract: every NodeIndex must implement ' + change.type)

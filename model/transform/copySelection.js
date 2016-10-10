@@ -1,5 +1,5 @@
 import cloneDeep from 'lodash/cloneDeep'
-import each from 'lodash/each'
+import forEach from '../../util/forEach'
 import last from 'lodash/last'
 import Document from '../Document'
 import annotationHelpers from '../annotationHelpers'
@@ -51,7 +51,7 @@ function _copyPropertySelection(doc, selection) {
   })
   containerNode.show(Document.TEXT_SNIPPET_ID)
   let annotations = doc.getIndex('annotations').get(path, offset, endOffset)
-  each(annotations, function(anno) {
+  forEach(annotations, function(anno) {
     let data = cloneDeep(anno.toJSON())
     data.path = [Document.TEXT_SNIPPET_ID, 'content']
     data.startOffset = Math.max(offset, anno.startOffset)-offset
@@ -139,7 +139,7 @@ function _copyNode(doc, node, container, created) {
 
   let annotationIndex = doc.getIndex('annotations')
   let annotations = annotationIndex.get([node.id])
-  each(annotations, function(anno) {
+  forEach(annotations, function(anno) {
     doc.create(cloneDeep(anno.toJSON()))
   })
 }

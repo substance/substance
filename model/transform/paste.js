@@ -1,5 +1,5 @@
 import last from 'lodash/last'
-import each from 'lodash/each'
+import forEach from '../../util/forEach'
 import uuid from '../../util/uuid'
 import Document from '../Document'
 import annotationHelpers from '../annotationHelpers'
@@ -114,7 +114,7 @@ function _pasteAnnotatedText(tx, args) {
     startOffset: sel.start.offset+text.length
   })
   // copy annotations
-  each(annotations, function(anno) {
+  forEach(annotations, function(anno) {
     let data = anno.toJSON()
     data.path = path.slice(0)
     data.startOffset += offset

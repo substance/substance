@@ -1,5 +1,5 @@
 import isArray from 'lodash/isArray'
-import forEach from 'lodash/forEach'
+import forEach from '../util/forEach'
 
 class JSONConverter {
 

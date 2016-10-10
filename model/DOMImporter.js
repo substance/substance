@@ -1,5 +1,5 @@
 import last from 'lodash/last'
-import forEach from 'lodash/forEach'
+import forEach from '../util/forEach'
 import clone from 'lodash/clone'
 import extend from 'lodash/extend'
 // import uuid from '../util/uuid'

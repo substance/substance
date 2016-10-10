@@ -1,4 +1,4 @@
-import forEach from 'lodash/forEach'
+import forEach from './forEach'
 import isObject from 'lodash/isObject'
 
 /**

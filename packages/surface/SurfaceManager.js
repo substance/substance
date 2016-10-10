@@ -1,5 +1,5 @@
-import forEach from 'lodash/forEach'
 import clone from 'lodash/clone'
+import forEach from '../../util/forEach'
 import inBrowser from '../../util/inBrowser'
 
 class SurfaceManager {

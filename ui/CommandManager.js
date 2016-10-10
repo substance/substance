@@ -1,5 +1,5 @@
 import extend from 'lodash/extend'
-import forEach from 'lodash/forEach'
+import forEach from '../util/forEach'
 import isEqual from 'lodash/isEqual'
 import Registry from '../util/Registry'
 
