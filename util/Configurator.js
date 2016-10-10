@@ -75,12 +75,22 @@ class Configurator {
   // Record phase API
   // ------------------------
 
+  /**
+    Defines the document schema for this configuration.
+    
+    @param  {DocumentSchema} schema A schema to be used for articles created
+        from this configuration.
+   */
   defineSchema(schema) {
     this.config.schema = schema
   }
 
   /**
-   * @param {String} NodeClass node class name.
+    Adds a node to this configuration. Later, when you use 
+    {@link util/Configurator#getSchema()}, this node will be added to that schema.
+    Usually, used within a package to add its own nodes to the schema.
+
+    @param {Node} NodeClass
    */
   addNode(NodeClass) {
     var type = NodeClass.type
@@ -93,6 +103,12 @@ class Configurator {
     this.config.nodes[type] = NodeClass
   }
 
+  /**
+    Adds a converter for a conversion format.
+
+    @param {string} type      a conversion format type, eg. 'html', 'xml', 'json'
+    @param {Object} converter a converter for that format.
+   */
   addConverter(type, converter) {
     var converters = this.config.converters[type]
     if (!converters) {
@@ -105,25 +121,51 @@ class Configurator {
     converters[converter.type] = converter
   }
 
+  /**
+    Add importer for a conversion format.
+    
+    @param {string} type          a conversion format type. eg. 'html', 'xml'
+    @param {Object} ImporterClass an importer for the conversion format.
+   */
   addImporter(type, ImporterClass) {
     this.config.importers[type] = ImporterClass
   }
 
+  /**
+    Add exporter for a conversion format.
+    
+    @param {string} type          a conversion format type. eg. 'html', 'xml'
+    @param {Object} ExporterClass an exporter for the conversion format.
+   */
   addExporter(type, ExporterClass) {
     this.config.exporters[type] = ExporterClass
   }
 
-  addComponent(name, ComponentClass) {
-    if (this.config.components[name]) {
-      throw new Error(name+' already registered')
+  /**
+    Add a component for a node type. Components ({@link ui/Component}) are the
+    ui representation of a node for rendering and manipulation. This is usually
+    used within a package to add representations for nodes added by that
+    package.
+
+    A component can be added once per nodeType. If you provide two components 
+    for the same node type, Substance can't figure out which one to use.
+    
+    @param {String} nodeType       the type attribute of the node for which this
+                                   component is to be used.
+    @param {Class} ComponentClass  A subclass of {@link ui/Component} for nodes 
+                                   of nodeType.
+   */
+  addComponent(nodeType, ComponentClass) {
+    if (this.config.components[nodeType]) {
+      throw new Error(nodeType+' already registered')
     }
     if (!ComponentClass) {
-      throw new Error('Provided nil for component '+name)
+      throw new Error('Provided nil for component '+nodeType)
     }
     if (!ComponentClass.prototype._isComponent) {
       throw new Error('ComponentClass must be a subclass of ui/Component.')
     }
-    this.config.components[name] = ComponentClass
+    this.config.components[nodeType] = ComponentClass
   }
 
   addCommand(name, CommandClass, options) {
@@ -180,12 +222,31 @@ class Configurator {
   }
 
   /**
-    @param {String} labelName name of label.
-    @param {String} label label.
-
     Define a new label
     Label is either a string or a hash with translations.
     If string is provided 'en' is used as the language.
+
+    @param {String} labelName name of label.
+    @param {String} label label.
+
+    @example
+
+    ```
+    // Using english only.
+    config.addLabel('paragraph.content', 'Paragraph')
+
+    // Using multiple languages
+    config.addLabel('superscript', {
+      en: 'Superscript',
+      de: 'Hochgestellt'
+    })
+
+    .
+    .
+    // Usage within other code
+    let labels = this.context.labelProvider
+    $$('span').append(labels.getLabel('superscript'));
+    ```
   */
   addLabel(labelName, label) {
     if (isString(label)) {
@@ -204,10 +265,17 @@ class Configurator {
   }
 
   /**
-    @param seed Seed function.
+    Replaces the seed function for this configuration.
 
-    Define a seed function
-    Seed function is a transaction function.
+    Use a seed function to create the empty state for your document. This should
+    be used only once per configuration. You shouldn't call this within package
+    config methods.
+
+    You can use {@link util/Configurator#getSeed} method to get this seed and
+    apply it on your document {@link model/Document} class.
+
+    @param {function} seed   A transaction function that creates the seed
+        document from an empty document.
 
     @example
 
@@ -226,7 +294,6 @@ class Configurator {
     config.addSeed(seedFn);
     ```
   */
-
   addSeed(seed) {
     this.config.seed = seed
   }
@@ -238,6 +305,12 @@ class Configurator {
     })
   }
 
+  /**
+    Adds an editing behavior to this configuration. {@link model/EditingBehavior}
+    for more.
+
+    @param {EditingBehavior} editingBehavior.
+   */
   addEditingBehavior(editingBehavior) {
     this.config.editingBehaviors.push(editingBehavior)
   }
@@ -253,6 +326,16 @@ class Configurator {
     this.config.dndHandlers.push(DragAndDropHandlerClass)
   }
 
+  /**
+    Configure this instance of configuration for provided package.
+    @param  {Object} pkg     Object should contain a `configure` method that
+                             takes a Configurator instance as the first method.
+    @param  {Object} options Additional options to pass to the
+                             package.`configure` method
+
+    @return {configurator}   returns the configurator instance to make it easy
+                             to chain calls to import.
+   */
   import(pkg, options) {
     pkg.configure(this, options || {})
     return this
