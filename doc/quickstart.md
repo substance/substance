@@ -1,8 +1,12 @@
 The fastest way to try out Substance is including it as a script into your website.
 
+Download the latest distribution from our [releases page on Github](https://github.com/substance/substance/releases). There's a zip file attached to each release.
+
 ```html
-<script type="text/javascript" src="http://cdn.substance.io/substance-1.0.0-beta.5.1.js"/></script>
-<link rel="stylesheet" type="text/css" href="http://cdn.substance.io/substance-1.0.0-beta.5.1.css"/>
+<script type="text/javascript" src="./substance/substance.js"/></script>
+<link rel="stylesheet" type="text/css" href="substance/substance.css"/>
+<link rel="stylesheet" type="text/css" href="substance/substance-reset.css"/>
+<link rel="stylesheet" type="text/css" href="substance/substance-pagestyle.css"/>
 ```
 
 Now you can start using Substance API's. The code below works in all modern browsers that support ES2015.
