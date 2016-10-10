@@ -45,6 +45,7 @@ import IsolatedNodeComponent from '../packages/isolated-node/IsolatedNodeCompone
  */
 
 class ContainerEditor extends Surface {
+
   constructor(parent, props) {
     // default props derived from the given props
     props.containerId = props.containerId || props.node.id
@@ -87,20 +88,25 @@ class ContainerEditor extends Surface {
 
   didMount() {
     super.didMount.apply(this, arguments)
-    // var doc = this.getDocument();
-    // to do incremental updates
-    this.container.on('nodes:changed', this.onContainerChange, this)
+    this.context.flow.subscribe({
+      stage: 'render',
+      resources: [{
+        source: this.getDocumentSession(),
+        path: 'change'
+      }],
+      handler: this.onContainerChange,
+      owner: this,
+    })
   }
 
   dispose() {
     super.dispose.apply(this, arguments)
-    // var doc = this.getDocument();
-    // doc.off(this);
-    this.container.off(this)
+
+    this.context.flow.unsubscribe(this)
   }
 
   render($$) {
-    let el = super.render.call(this, $$)
+    let el = super.render($$)
 
     let doc = this.getDocument()
     let containerId = this.getContainerId()
@@ -334,6 +340,7 @@ class ContainerEditor extends Surface {
   }
 
   onContainerChange(change) {
+    if (!change.updated[this.container.getContentPath()]) return
     let doc = this.getDocument()
     // first update the container
     let renderContext = RenderingEngine.createContext(this)
