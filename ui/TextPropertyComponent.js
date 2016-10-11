@@ -1,4 +1,5 @@
 import isNumber from 'lodash/isNumber'
+import map from '../util/map'
 import Coordinate from '../model/Coordinate'
 import AnnotatedTextComponent from './AnnotatedTextComponent'
 import CursorComponent from './CursorComponent'
@@ -28,20 +29,24 @@ class TextPropertyComponent extends AnnotatedTextComponent {
 
   didMount() {
     super.didMount()
-
-    this.context.flow.subscribe({
+    const doc = this.getDocument()
+    const flow = this.getFlow()
+    const surface = this.getSurface()
+    const resources = {
+      text: [doc.id, this.props.path],
+    }
+    if (surface) {
+      resources.selectionFragments = [surface.id, 'selectionFragments', this.props.path]
+    }
+    flow.subscribe({
       stage: 'render',
-      resources: [{
-        source: this.getDocument(),
-        path: this.props.path
-      }],
+      resources: resources,
       handler: this._onUpdate,
       owner: this
     })
 
     // TODO: instead of letting Surface manage TextProperties
     // we should instead use the Flow in future
-    let surface = this.getSurface()
     if (surface) {
       surface._registerTextProperty(this)
     }
@@ -83,8 +88,12 @@ class TextPropertyComponent extends AnnotatedTextComponent {
     return el
   }
 
-  _onUpdate(text) {
-    this.rerender()
+  _onUpdate(data) {
+    const fragments = map(data.selectionFragments).filter(Boolean)
+    this.extendProps({
+      text: data.text,
+      fragments: fragments
+    })
   }
 
   _renderFragment($$, fragment) {

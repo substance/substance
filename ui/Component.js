@@ -8,8 +8,7 @@ import VirtualElement from './VirtualElement'
 import DOMElement from './DOMElement'
 import DefaultDOMElement from './DefaultDOMElement'
 import inBrowser from '../util/inBrowser'
-
-var __id__ = 0
+import uuid from '../util/uuid'
 
 /**
   A light-weight component implementation inspired by
@@ -111,7 +110,7 @@ class Component extends DOMElement.Delegator {
     // HACK: allowing skipping execution of this ctor
     if (arguments[0] === 'SKIP') return
 
-    this.__id__ = __id__++
+    this.__id__ = uuid()
 
     this.parent = parent
     this.el = null
@@ -131,6 +130,14 @@ class Component extends DOMElement.Delegator {
     Object.freeze(this.props)
     this.state = this.getInitialState() || {}
     Object.freeze(this.state)
+  }
+
+  getId() {
+    return this.__id__
+  }
+
+  setId() {
+    throw new Error("'id' is readonly")
   }
 
   /**
@@ -259,6 +266,10 @@ class Component extends DOMElement.Delegator {
 
   getComponentRegistry() {
     return this.props.componentRegistry || this.context.componentRegistry
+  }
+
+  getFlow() {
+    return this.context.flow
   }
 
   /**
@@ -765,7 +776,9 @@ class Component extends DOMElement.Delegator {
 }
 
 Component.prototype._isComponent = true
+
 EventEmitter.mixin(Component)
+
 DOMElement._defineProperties(Component, DOMElement._propertyNames)
 
 Component.unwrap = _unwrapComp

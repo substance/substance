@@ -24,8 +24,6 @@ import docHelpers from './documentHelpers'
 import JSONConverter from './JSONConverter'
 var converter = new JSONConverter()
 
-var __id__ = 0
-
 /**
   Abstract class used for deriving a custom article implementation.
   Requires a {@link model/DocumentSchema} to be provided on construction.
@@ -56,10 +54,12 @@ class Document extends EventEmitter {
 
   constructor(schema) {
     super()
+
     // HACK: to be able to inherit but not execute this ctor
     if (arguments[0] === 'SKIP') return
 
-    this.__id__ = __id__++
+    this.__id__ = uuid()
+
     if (!schema) {
       throw new Error('A document needs a schema for reflection.')
     }
@@ -100,7 +100,9 @@ class Document extends EventEmitter {
     this.on('document:changed', this._updateEventProxies, this)
   }
 
-  get _isDocument() { return true }
+  get id() {
+    return this.__id__
+  }
 
   /**
     @returns {model/DocumentSchema} the document's schema.
@@ -484,10 +486,13 @@ class Document extends EventEmitter {
 
 }
 
+Document.prototype._isDocument = true
+
 // used by transforms copy, paste
 // and by ClipboardImporter/Exporter
 Document.SNIPPET_ID = "snippet"
 Document.TEXT_SNIPPET_ID = "text-snippet"
+
 
 export default Document
 

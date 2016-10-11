@@ -2,7 +2,6 @@ import isUndefined from 'lodash/isUndefined'
 import startsWith from 'lodash/startsWith'
 import createSurfaceId from '../../util/createSurfaceId'
 import getRelativeBoundingRect from '../../util/getRelativeBoundingRect'
-import forEach from '../../util/forEach'
 import keys from '../../util/keys'
 import platform from '../../util/platform'
 import inBrowser from '../../util/inBrowser'
@@ -69,18 +68,8 @@ class Surface extends Component {
     this._state = {
       // true if the document session's selection is addressing this surface
       skipNextFocusEvent: false,
-      skipNextObservation: false,
-      // used to avoid multiple rerenderings (e.g. simultanous update of text and fragments)
-      isDirty: false,
-      dirtyProperties: {},
-      // while fragments are provided as a hash of (type -> [Fragment])
-      // we derive a hash of (prop-key -> [Fragment]); in other words, Fragments grouped by property
-      fragments: {},
-      // we want to show the cursor fragment only when blurred, so we keep it separated from the other fragments
-      cursorFragment: null
+      skipNextObservation: false
     }
-
-    Surface.prototype._deriveInternalState.call(this, this.props)
   }
 
   get _isSurface() {
@@ -104,12 +93,22 @@ class Surface extends Component {
       // this.domObserver = new window.MutationObserver(this.onDomMutations.bind(this));
       // this.domObserver.observe(this.el.getNativeElement(), { subtree: true, characterData: true, characterDataOldValue: true });
     }
-    this.documentSession.on('update', this._onSessionUpdate, this)
+    const doc = this.getDocument()
+    const flow = this.getFlow()
+    flow.subscribe({
+      stage: 'pre-render',
+      resources: {
+        selection: [doc.id, 'selection']
+      },
+      handler: this._onSelectionUpdate,
+      owner: this
+    })
   }
 
 
   dispose() {
-    this.documentSession.off(this)
+    const flow = this.getFlow()
+    flow.unsubscribe(this)
     this.domSelection = null
     if (this.domObserver) {
       this.domObserver.disconnect()
@@ -117,10 +116,6 @@ class Surface extends Component {
     if (this.context.surfaceManager) {
       this.context.surfaceManager.unregisterSurface(this)
     }
-  }
-
-  willReceiveProps(nextProps) {
-    Surface.prototype._deriveInternalState.call(this, nextProps)
   }
 
   didUpdate(oldProps, oldState) {
@@ -659,77 +654,8 @@ class Surface extends Component {
 
   // Internal implementations
 
-  // called whenever we receive props
-  // used to compute fragments that get dispatched to TextProperties
-  _deriveInternalState(nextProps) {
-    let _state = this._state
-    let oldFragments = _state.fragments
-    if (oldFragments) {
-      forEach(oldFragments, function(frag, key) {
-        if (this._getComponentForKey(key)) {
-          this._markAsDirty(_state, key)
-        }
-      }.bind(this));
-    }
-    let nextFragments = nextProps.fragments
-    if (nextFragments) {
-      this._deriveFragments(nextFragments)
-    }
-  }
-
-  // fragments are all dynamic informations that we are displaying
-  // like annotations (such as selections)
-  _deriveFragments(newFragments) {
-    // console.log('deriving fragments', newFragments, this.getId());
-    let _state = this._state
-    _state.cursorFragment = null
-    // group fragments by property
-    let fragments = {}
-    this._forEachFragment(newFragments, function(frag, owner) {
-      let key = frag.path.toString()
-      frag.key = key
-      // skip frags which are not rendered here
-      if (!this._getComponentForKey(key)) return
-      // extract the cursor fragment for special treatment (not shown when focused)
-      if (frag.type === 'cursor' && owner === 'local-user') {
-        _state.cursorFragment = frag
-        return
-      }
-      let propertyFrags = fragments[key]
-      if (!propertyFrags) {
-        propertyFrags = []
-        fragments[key] = propertyFrags
-      }
-      propertyFrags.push(frag)
-      this._markAsDirty(_state, key)
-    }.bind(this))
-    _state.fragments = fragments
-    // console.log('derived fragments', fragments, window.clientId);
-  }
-
-  _forEachFragment(fragments, fn) {
-    forEach(fragments, function(frags, owner) {
-      frags.forEach(function(frag) {
-        fn(frag, owner)
-      })
-    })
-  }
-
-  // called by SurfaceManager to know which text properties need to be
-  // updated because of model changes
-  _checkForUpdates(change) {
-    // let _state = this._state
-    // Object.keys(change.updated).forEach(function(key) {
-    //   if (this._getComponentForKey(key)) {
-    //     this._markAsDirty(_state, key)
-    //   }
-    // }.bind(this))
-    // return _state.isDirty
-  }
-
   _update(oldProps, oldState) {
     this._updateContentEditableState(oldState)
-    // this._updateProperties()
   }
 
   _updateContentEditableState(oldState) {
@@ -757,38 +683,7 @@ class Surface extends Component {
     this.el.setAttribute('contenteditable', true)
   }
 
-  _updateProperties() {
-    // let _state = this._state
-    // let dirtyProperties = Object.keys(_state.dirtyProperties)
-    // for (let i = 0; i < dirtyProperties.length; i++) {
-    //   this._updateProperty(dirtyProperties[i])
-    // }
-    // _state.isDirty = false
-    // _state.dirtyProperties = {}
-  }
-
-  _markAsDirty(_state, key) {
-    _state.isDirty = true
-    _state.dirtyProperties[key] = true
-  }
-
-  _updateProperty(key) {
-    // let _state = this._state
-    // // hide the cursor fragment when focused
-    // let cursorFragment = this._hasNativeFocus() ? null : _state.cursorFragment
-    // let frags = _state.fragments[key] || []
-    // if (cursorFragment && cursorFragment.key === key) {
-    //   frags = frags.concat([cursorFragment])
-    // }
-    // let comp = this._getComponentForKey(key)
-    // if (comp) {
-    //   comp.extendProps({
-    //     fragments: frags
-    //   })
-    // }
-  }
-
-  _onSessionUpdate(update) {
+  _onSelectionUpdate(update) {
     if (update.selection) {
       let newMode = this._deriveModeFromSelection(update.selection)
       if (this.state.mode !== newMode) {
@@ -1115,6 +1010,13 @@ class Surface extends Component {
   }
 
 }
+
+Object.defineProperty(Surface.prototype, 'id', {
+  configurable: false,
+  get: function() {
+    return this._surfaceId
+  }
+})
 
 Surface.getDOMRangeFromEvent = function(evt) {
   let range, x = evt.clientX, y = evt.clientY

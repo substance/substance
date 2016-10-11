@@ -1,10 +1,11 @@
 import Component from './Component'
 import Flow from './Flow'
-import { DocumentSessionFlowAdapter } from './flowHelpers'
+import DocumentSessionFlowAdapter from './DocumentSessionFlowAdapter'
 import CommandManager from './CommandManager'
 import MacroManager from './MacroManager'
 import GlobalEventHandler from './GlobalEventHandler'
 import SurfaceManager from '../packages/surface/SurfaceManager'
+import SurfaceFlowAdapter from '../packages/surface/SurfaceFlowAdapter'
 import DragManager from './DragManager'
 
 /**
@@ -116,7 +117,10 @@ class AbstractEditor extends Component {
   _setupFlow() {
     // TODO: make stages configurable
     const flow = new Flow(['model', 'pre-render', 'render', 'post-render', 'final'])
-    DocumentSessionFlowAdapter.connect(this.documentSession, flow)
+    // will feed resources scoped to doc.id
+    DocumentSessionFlowAdapter.connect(flow, this.documentSession)
+    // will feed resources scoped to surface.id
+    SurfaceFlowAdapter.connect(flow, this.documentSession)
     return flow
   }
 

@@ -65,8 +65,7 @@ class ContainerEditor extends Surface {
 
     this.editingBehavior = this.context.editingBehavior || new EditingBehavior()
 
-    // derive internal state variables
-    ContainerEditor.prototype._deriveInternalState.call(this, this.props)
+    this._deriveInternalState(this.props)
   }
 
   get _isContainerEditor() {
@@ -83,17 +82,17 @@ class ContainerEditor extends Surface {
 
   willReceiveProps(newProps) {
     super.willReceiveProps.apply(this, arguments)
-    ContainerEditor.prototype._deriveInternalState.call(this, newProps)
+    this._deriveInternalState(newProps)
   }
 
   didMount() {
     super.didMount.apply(this, arguments)
+    const doc = this.getDocument()
     this.context.flow.subscribe({
       stage: 'render',
-      resources: [{
-        source: this.getDocumentSession(),
-        path: 'change'
-      }],
+      resources: {
+        change: [doc.id, 'change']
+      },
       handler: this.onContainerChange,
       owner: this,
     })
@@ -339,7 +338,9 @@ class ContainerEditor extends Surface {
     }
   }
 
-  onContainerChange(change) {
+  // called by flow when subscribed resources have been updated
+  onContainerChange(data) {
+    const change = data.change
     if (!change.updated[this.container.getContentPath()]) return
     let doc = this.getDocument()
     // first update the container

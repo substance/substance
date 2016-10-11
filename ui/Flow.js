@@ -1,5 +1,6 @@
 import isPlainObject from 'lodash/isPlainObject'
 import deleteFromArray from '../util/deleteFromArray'
+import forEach from '../util/forEach'
 import map from '../util/map'
 import uuid from '../util/uuid'
 import EventEmitter from '../util/EventEmitter'
@@ -9,11 +10,12 @@ class Flow extends EventEmitter {
   constructor(stages) {
     super()
 
-    this.id = uuid()
     this.stages = stages.slice(0)
     this.data = {}
 
-    this.sources = {}
+    // these adapters feed data into the flow
+    // by listening to events
+    this._adapters = []
     // for batch unsubscription
     this._subscriptionsByOwner = {}
     // for dependency propagation
@@ -23,11 +25,16 @@ class Flow extends EventEmitter {
   }
 
   dispose() {
-    const sources = this.sources
-    map(sources, function(source) { source.dispose() })
-    this.sources = {}
+    this._adapters.forEach(function(a) {
+      a.dispose()
+    })
+    this._adapters = []
     this._subscriptionsByOwner = {}
     this._subscriptionsByResource = {}
+  }
+
+  registerAdapter(adapter) {
+    this._adapters.push(adapter)
   }
 
   /*
@@ -54,8 +61,8 @@ class Flow extends EventEmitter {
     const byResource = this._subscriptionsByResource
     const byOwner = this._subscriptionsByOwner
     const owner = subscription.owner
-    if (!owner[this.id]) owner[this.id] = uuid()
-    const ownerId = owner[this.id]
+    if (!owner.id) owner.id = uuid()
+    const ownerId = owner.id
     subscription.resourceIds.forEach(function(resourceId) {
       if(!byResource[resourceId]) byResource[resourceId] = []
       byResource[resourceId].push(subscription)
@@ -65,15 +72,13 @@ class Flow extends EventEmitter {
   }
 
   unsubscribe(owner) {
-    const ownerId = owner[this.id]
+    const ownerId = owner.id
     const byOwner = this._subscriptionsByOwner
     const subscriptions = byOwner[ownerId]
     if (subscriptions) {
       subscriptions.forEach((s) => { this._unsubscribe(s) })
     }
     delete byOwner[ownerId]
-    // also remove the stamp
-    delete owner[this.id]
   }
 
   _unsubscribe(subscription) {
@@ -88,46 +93,32 @@ class Flow extends EventEmitter {
   }
 
   _compileSubscription(subscription) {
-    const _id = this.id
-    const sources = this.sources
-    ;['stage', 'resources', 'handler', 'owner'].forEach(function(prop) {
+    ['stage', 'resources', 'handler', 'owner'].forEach(function(prop) {
       if (!subscription[prop]) throw new Error("'"+prop+"' is required")
     })
-    const resourceIds = subscription.resources.map(function(r) {
-      if (!r.source) throw new Error("'source' is required")
-      const source = sources[r.source[_id]]
-      if (!source) throw new Error("source is not registered in this flow")
-      return [source.id].concat(r.path)
-    })
     return {
+      // each subscription has a unique id, so that we can prevent to schedule a handler twice
       id: uuid(),
       stage: subscription.stage,
-      resourceIds: resourceIds,
+      resources: subscription.resources,
+      resourceIds: map(subscription.resources, function(resId) { return String(resId) }),
       handler: subscription.handler.bind(subscription.owner),
       owner: subscription.owner,
     }
   }
 
-  addSource(flowSource) {
-    this.sources.push(flowSource)
-  }
-
-  _getId(obj) {
-    const _id = this.id
-    if (!obj[_id]) obj[_id] = uuid()
-    return obj[_id]
-  }
-
-  _set(resourceId, data) {
-    if (!this._subscriptionsByResource[resourceId]) return
+  set(resourceId, data) {
     // console.log('setting data', resourceId, data)
     // you should use a simple flat object for resource data
     this.data[resourceId] = data
-    this._propagate(resourceId)
+    // no need to schedule things when nobody is registered for
+    // this resource
+    if (this._subscriptionsByResource[resourceId]) {
+      this._propagate(resourceId)
+    }
   }
 
-  _extend(resourceId, data) {
-    if (!this._subscriptionsByResource[resourceId]) return
+  extend(resourceId, data) {
     if (!isPlainObject(data)) throw new Error('Flow.extend() should only be used with plain objects')
     // console.log('extending data', resourceId, data)
     let _data = this.data[resourceId]
@@ -135,25 +126,31 @@ class Flow extends EventEmitter {
       this.data[resourceId] = _data = {}
     }
     Object.assign(_data, data)
-    this._propagate(resourceId)
+    // no need to schedule things when nobody is registered for
+    // this resource
+    if (this._subscriptionsByResource[resourceId]) {
+      this._propagate(resourceId)
+    }
   }
 
-  _extendInfo(info) {
+  setValue(resourceId, property, value) {
+    // console.log('setting value', resourceId, property, value)
+    let _data = this.data[resourceId]
+    if (!_data) {
+      this.data[resourceId] = _data = {}
+    }
+    _data[property] = value
+    if (this._subscriptionsByResource[resourceId]) {
+      this._propagate(resourceId)
+    }
+  }
+
+  extendInfo(info) {
     // console.log('extending info', info)
     Object.assign(this._info, info)
   }
 
-  _propagate(resourceId) {
-    const subscriptions = this._subscriptionsByResource[resourceId]
-    subscriptions.forEach((s) => {
-      if (this._scheduled[s.id]) return
-      console.log('scheduling for', resourceId)
-      this._scheduled[s.id] = true
-      this._schedule[s.stage].push(s)
-    })
-  }
-
-  _startFlow() {
+  start() {
     if (this._isFlowing) return
     // console.log('starting flow', this._schedule)
     this._isFlowing = true
@@ -164,7 +161,18 @@ class Flow extends EventEmitter {
     }
   }
 
+  _propagate(resourceId) {
+    const subscriptions = this._subscriptionsByResource[resourceId]
+    subscriptions.forEach((s) => {
+      if (this._scheduled[s.id]) return
+      // console.log('scheduling %s for %s', s.id, String(resourceId))
+      this._scheduled[s.id] = true
+      this._schedule[s.stage].push(s)
+    })
+  }
+
   _reset() {
+    // console.log('############ FLOW RESET ##################')
     this._isFlowing = false
     // NOTE: i think we do not want to clear the data
     // as the sources are responsible for updating them
@@ -188,10 +196,11 @@ class Flow extends EventEmitter {
       if (!stage) throw new Error('Internal error')
       while (stage.length > 0) {
         const next = stage.shift()
-        const data = next.resourceIds.map((id) => {
-          return this.data[id]
+        const data = {}
+        forEach(next.resources, (resourceId, name) => {
+          data[name] = this.data[resourceId]
         })
-        next.handler(...data, this._info)
+        next.handler(data, this._info)
       }
       this.emit(name, this._info, this.data)
     })
