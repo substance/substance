@@ -34,6 +34,7 @@ class ProseEditor extends AbstractEditor {
 
     let contentPanel = $$(ScrollPane, {
       scrollbarPosition: 'right',
+      scrollbarType: this.props.scrollbarType,
       overlay: ProseEditorOverlayTools,
     }).append(
       editor
