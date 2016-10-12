@@ -4,6 +4,7 @@ import Scrollbar from '../scrollbar/Scrollbar'
 import OverlayContainer from '../overlay/OverlayContainer'
 import GutterContainer from '../gutter/GutterContainer'
 import getRelativeBoundingRect from '../../util/getRelativeBoundingRect'
+import getRelativeMouseBounds from '../../util/getRelativeMouseBounds'
 
 /**
   Wraps content in a scroll pane.
@@ -51,6 +52,7 @@ class ScrollPane extends Component {
     this.handleActions({
       'updateOverlayHints': this._updateOverlayHints
     })
+
   }
 
   dispose() {
@@ -61,6 +63,7 @@ class ScrollPane extends Component {
   }
 
   render($$) {
+    let ContextMenu = this.getComponent('context-menu')
     let el = $$('div')
       .addClass('sc-scroll-pane')
     let overlay
@@ -107,14 +110,23 @@ class ScrollPane extends Component {
       }).ref('gutter')
     }
 
+    let contextMenu = $$(ContextMenu).ref('contextMenu')
+
+    let contentEl = $$('div').ref('content').addClass('se-content')
+      .append(overlay)
+      .append(gutter)
+      .append(contextMenu)
+      .on('contextmenu', this.onContextMenu)
+
+    if (contextMenu) {
+      contentEl.append(contextMenu)
+    }
+
+    contentEl.append(this.props.children)
+
     el.append(
       $$('div').ref('scrollable').addClass('se-scrollable').append(
-        $$('div').ref('content').addClass('se-content')
-          .append(overlay)
-          .append(gutter)
-          .append(
-            this.props.children
-          )
+        contentEl
       ).on('scroll', this.onScroll)
     )
     return el
@@ -154,6 +166,15 @@ class ScrollPane extends Component {
       this.props.tocProvider.markActiveEntry(this)
     }
     this.emit('scroll', scrollPos, scrollable)
+  }
+
+  onContextMenu(e) {
+    e.preventDefault();
+    let contentContainerEl = this.refs.content.el.el
+    let mouseBounds = getRelativeMouseBounds(e, contentContainerEl)
+    let contextMenu = this.refs.contextMenu
+
+    contextMenu.show(mouseBounds)
   }
 
   /**

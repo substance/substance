@@ -13,6 +13,7 @@ import InputPackage from '../input/InputPackage'
 import ButtonPackage from '../button/ButtonPackage'
 import SwitchTextTypePackage from '../switch-text-type/SwitchTextTypePackage'
 import LayoutPackage from '../layout/LayoutPackage'
+import ContextMenuPackage from '../context-menu/ContextMenuPackage'
 
 export default {
   name: 'base',
@@ -27,6 +28,7 @@ export default {
     config.import(InputPackage)
     config.import(ButtonPackage)
     config.import(LayoutPackage)
+    config.import(ContextMenuPackage)
 
     // Register predefined tool-targets (text, document)
     config.addComponent('tool-target-text', ToolGroup)
