@@ -18,7 +18,7 @@ class SurfaceFlowAdapter {
     flow.subscribe({
       stage: 'model',
       resources: {
-        selection: [doc.id, 'selection'],
+        selection: [doc.id, 'selection']
       },
       handler: this._onSelectionChange,
       owner: this
@@ -44,7 +44,6 @@ class SurfaceFlowAdapter {
   }
 
   dispose() {
-    super.dispose()
     this.flow.unsubscribe(this)
   }
 
@@ -52,9 +51,9 @@ class SurfaceFlowAdapter {
     const state = this._state
     const oldSel = state.selection
     const newSel = data.selection
-    this._updateSelectionFragments(oldSel, newSel)
+    // this._updateSelectionFragments(oldSel, newSel)
     state.selection = newSel
-    this.flow.start()
+    // this.flow.start()
   }
 
   _onCollaboratorsChange(data) {
@@ -72,6 +71,13 @@ class SurfaceFlowAdapter {
     this.flow.start()
   }
 
+  /*
+    This feeds SelectionFragments into the flow.
+
+    Fragments are inserted for every property
+    Each fragment is inserted via id which of the following
+    form: `<surface-id>,'selectionFragments', <property-path>`
+  */
   _updateSelectionFragments(oldSel, newSel, collaborator) {
     const state = this._state
     const flow = this.flow
@@ -82,7 +88,6 @@ class SurfaceFlowAdapter {
     if (collaborator) {
       owner = collaborator.collaboratorId
     }
-    // console.log('00000', oldSel, newSel)
     // clear old fragments
     if (oldSurfaceId) {
       const oldFragments = state.fragments[owner]

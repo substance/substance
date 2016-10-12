@@ -31,6 +31,14 @@ import getRelativeMouseBounds from '../../util/getRelativeMouseBounds'
  */
 class ScrollPane extends Component {
 
+  constructor(...args) {
+    super(...args)
+
+    this.handleActions({
+      'domSelectionRendered': this._onDomSelectionRendered
+    })
+  }
+
   /*
     Expose scrollPane as a child context
   */
@@ -44,22 +52,23 @@ class ScrollPane extends Component {
     if (this.refs.scrollbar && this.props.highlights) {
       this.props.highlights.on('highlights:updated', this.onHighlightsUpdated, this)
     }
-    // HACK: Scrollbar should use DOMMutationObserver instead
     if (this.refs.scrollbar) {
-      this.context.doc.on('document:changed', this.onDocumentChange, this, { priority: -1 })
+      this.domObserver = new window.MutationObserver(this._onContentChanged.bind(this));
+      this.domObserver.observe(this.el.getNativeElement(), {
+        subtree: true,
+        attributes: true,
+        characterData: true,
+        childList: true,
+      });
+      this.context.flow.on('post-render', this._onPostRender, this)
     }
-
-    this.handleActions({
-      'updateOverlayHints': this._updateOverlayHints
-    })
-
   }
 
   dispose() {
     if (this.props.highlights) {
       this.props.highlights.off(this)
     }
-    this.context.doc.off(this)
+    this.context.flow.off(this)
   }
 
   render($$) {
@@ -132,7 +141,26 @@ class ScrollPane extends Component {
     return el
   }
 
-  _updateOverlayHints(overlayHints) {
+  _onContentChanged() {
+    this._contentChanged = true
+  }
+
+  _onPostRender() {
+    if (this.refs.scrollbar && this._contentChanged) {
+      this._contentChanged = false
+      this.refs.scrollbar.updatePositions()
+    }
+  }
+
+  _onDomSelectionRendered() {
+    const wsel = window.getSelection()
+    if (wsel.rangeCount === 0) return
+    const wrange = wsel.getRangeAt(0)
+    const parentRect = this.getNativeElement().getBoundingClientRect()
+    const selRect = wrange.getBoundingClientRect()
+    const overlayHints = {
+      rectangle: _getRelativeRect(parentRect, selRect)
+    }
     // Remember overlay hints for next update
     let overlay = this.refs.overlay
     let gutter = this.refs.gutter
@@ -142,11 +170,6 @@ class ScrollPane extends Component {
     if (gutter) {
       gutter.position(overlayHints)
     }
-  }
-
-  // HACK: Scrollbar should use DOMMutationObserver instead
-  onDocumentChange() {
-    this.refs.scrollbar.updatePositions()
   }
 
   onHighlightsUpdated(highlights) {
@@ -254,7 +277,20 @@ class ScrollPane extends Component {
       console.warn(componentId, 'not found in scrollable container')
     }
   }
+}
 
+
+function _getRelativeRect(parentRect, childRect) {
+  var left = childRect.left - parentRect.left;
+  var top = childRect.top - parentRect.top;
+  return {
+    left: left,
+    top: top,
+    right: parentRect.width - left - childRect.width,
+    bottom: parentRect.height - top - childRect.height,
+    width: childRect.width,
+    height: childRect.height
+  }
 }
 
 export default ScrollPane

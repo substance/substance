@@ -24,7 +24,7 @@ class SurfaceManager {
       handler: this._onSelectionUpdate,
       owner: this
     })
-    flow.on('final', this._recoverDOMSelection, this)
+    flow.on('post-render', this._recoverDOMSelection, this)
   }
 
   dispose() {
@@ -109,7 +109,6 @@ class SurfaceManager {
       // console.log('Rendering selection on surface', focusedSurface.getId(), this.documentSession.getSelection().toString());
       focusedSurface.focus()
       focusedSurface.rerenderDOMSelection()
-      focusedSurface._sendOverlayHints()
     }
   }
 }

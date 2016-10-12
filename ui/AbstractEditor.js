@@ -127,7 +127,8 @@ class AbstractEditor extends Component {
   getCommandContext() {
     return {
       documentSession: this.documentSession,
-      surfaceManager: this.surfaceManager
+      surfaceManager: this.surfaceManager,
+      flow: this.flow
     }
   }
 

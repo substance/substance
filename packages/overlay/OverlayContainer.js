@@ -26,12 +26,19 @@ class OverlayContainer extends Component {
   }
 
   didMount() {
-    // rerender the overlay content after anything else has been updated
-    this.context.documentSession.on('didUpdate', this._onSessionDidUpdate, this)
+    const doc = this.context.documentSession.getDocument()
+    this.context.flow.subscribe({
+      stage: 'render',
+      resources: {
+        commandStates: [doc.id, 'commandStates']
+      },
+      handler: this._onCommandStatesUpdate,
+      owner: this
+    })
   }
 
   dispose() {
-    this.context.documentSession.off(this)
+    this.context.flow.unsubscribe(this)
   }
 
   position(hints) {
@@ -42,10 +49,9 @@ class OverlayContainer extends Component {
     }
   }
 
-  _onSessionDidUpdate() {
-    if (this.shouldRerender()) {
-      this.rerender()
-    }
+  _onCommandStatesUpdate() {
+    console.log('OverlayContainer: command states updated')
+    this.rerender()
   }
 
   _getCommandStates() {

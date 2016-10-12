@@ -16,11 +16,12 @@ class CommandManager {
       throw new Error('DocumentSession required.')
     }
     this.documentSession = context.documentSession
+    this.flow = context.flow
+    this.doc = this.documentSession.getDocument()
     this.context = extend({}, context, {
       // for convenienve we provide access to the doc directly
-      doc: this.documentSession.getDocument()
+      doc: this.doc
     })
-
     // Set up command registry
     this.commandRegistry = new Registry()
     forEach(commands, function(command) {
@@ -30,19 +31,22 @@ class CommandManager {
       this.commandRegistry.add(command.name, command)
     }.bind(this))
 
-    // Priority is needed as upateCommandStates depends on information
-    // collected by SurfaceManager (determine focusedSurface) which is
-    // also done on session update
-    // TODO: Resolve #812, so we don't need a priority here and instead
-    // can rely on registration order.
-    this.documentSession.on('update', this.updateCommandStates, this, {
-      priority: -10
+    const flow = context.flow
+
+    flow.subscribe({
+      stage: 'model',
+      resources: {
+        change: [this.doc.id, 'change'],
+        selection: [this.doc.id, 'selection']
+      },
+      handler: this.updateCommandStates,
+      owner: this
     })
     this.updateCommandStates()
   }
 
   dispose() {
-    this.documentSession.off(this)
+    this.flow.unsubscribe(this)
   }
 
   /*
@@ -58,6 +62,8 @@ class CommandManager {
     // poor-man's immutable style
     if (!isEqual(this.commandStates, commandStates)) {
       this.commandStates = commandStates
+      this.flow.set([this.doc.id, 'commandStates'], commandStates)
+      this.flow.start()
     }
   }
 

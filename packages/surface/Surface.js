@@ -1,7 +1,6 @@
 import isUndefined from 'lodash/isUndefined'
 import startsWith from 'lodash/startsWith'
 import createSurfaceId from '../../util/createSurfaceId'
-import getRelativeBoundingRect from '../../util/getRelativeBoundingRect'
 import keys from '../../util/keys'
 import platform from '../../util/platform'
 import inBrowser from '../../util/inBrowser'
@@ -326,6 +325,9 @@ class Surface extends Component {
       let sel = this.getSelection()
       if (sel.surfaceId === this.getId()) {
         this.domSelection.setSelection(sel)
+        // this will let our parents know that the DOM selection
+        // is ready
+        this.send('domSelectionRendered')
       }
     }
   }
@@ -926,87 +928,6 @@ class Surface extends Component {
     } else {
       console.error('Could not create a selection from event.');
     }
-  }
-
-  // EXPERIMENTAL: get bounding box for current selection
-  getBoundingRectangleForSelection() {
-    let sel = this.getSelection()
-    if (this.isDisabled() ||
-        !sel || sel.isNull() ||
-        sel.isNodeSelection() || sel.isCustomSelection()) return {}
-
-    // TODO: selection rectangle should be calculated
-    // relative to scrolling container, which either is
-    // the parent scrollPane, or the body element
-    let containerEl
-    if (this.context.scrollPane) {
-      containerEl = this.context.scrollPane.refs.content.el.el
-    } else {
-      containerEl = document.body
-    }
-
-    let wsel = window.getSelection()
-    let wrange
-    if (wsel.rangeCount > 0) {
-      wrange = wsel.getRangeAt(0)
-    }
-
-    // having a DOM selection?
-    if (wrange && wrange.collapsed) {
-      // unfortunately, collapsed selections do not have a boundary rectangle
-      // thus we need to insert a span temporarily and take its rectangle
-      // if (wrange.collapsed) {
-      let span = document.createElement('span')
-      // Ensure span has dimensions and position by
-      // adding a zero-width space character
-      this._state.skipNextObservation = true
-      span.appendChild(window.document.createTextNode("\u200b"))
-      wrange.insertNode(span)
-      let rect = getRelativeBoundingRect(span, containerEl)
-      let spanParent = span.parentNode
-      this._state.skipNextObservation = true
-      spanParent.removeChild(span)
-      // Glue any broken text nodes back together
-      spanParent.normalize()
-      // HACK: in FF the DOM selection gets corrupted
-      // by the span-insertion above
-      if (platform.isFF) {
-        this.rerenderDOMSelection()
-      }
-      return rect;
-    } else {
-      let nativeEl = this.el.el
-      if (sel.isCollapsed()) {
-        let cursorEl = nativeEl.querySelector('.se-cursor')
-        if (cursorEl) {
-          return getRelativeBoundingRect(cursorEl, containerEl)
-        } else {
-          // TODO: in the most cases we actually do not have a
-          // cursor element.
-          // console.warn('FIXME: there should be a rendered cursor element.');
-          return {}
-        }
-      } else {
-        let selFragments = nativeEl.querySelectorAll('.se-selection-fragment')
-        if (selFragments.length > 0) {
-          return getRelativeBoundingRect(selFragments, containerEl)
-        } else {
-          console.warn('FIXME: there should be a rendered selection fragments element.')
-          return {}
-        }
-      }
-    }
-  }
-
-  _sendOverlayHints() {
-    // TODO: we need to rethink this.
-    // The overlay is owned by the ScrollPane.
-    // So the current solution is to send up hints
-    // which are dispatched to the overlay instance.
-    let selectionRect = this.getBoundingRectangleForSelection()
-    this.send('updateOverlayHints', {
-      rectangle: selectionRect
-    })
   }
 
 }
