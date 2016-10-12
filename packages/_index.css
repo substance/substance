@@ -1,5 +1,3 @@
-/* TODO: @import './css/_index.css';*/
-
 /* switch-text-type */
 @import './switch-text-type/_switch-text-type.css';
 /* blockquote */
@@ -10,6 +8,8 @@
 @import './code/_code.css';
 /* codeblock */
 @import './codeblock/_codeblock.css';
+/* context-menu */
+@import './context-menu/_context-menu.css';
 /* emphasis */
 @import './emphasis/_emphasis.css';
 /* heading */

@@ -1,0 +1,10 @@
+.sc-context-menu {
+  position: absolute;
+  background: #2E2E2C;
+  border-radius: 5px;
+}
+
+.sc-context-menu.sm-hidden {
+  /* we don't use display none because we want to determine the content's width */
+  visibility: hidden;
+}
