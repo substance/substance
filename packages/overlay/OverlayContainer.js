@@ -50,7 +50,6 @@ class OverlayContainer extends Component {
   }
 
   _onCommandStatesUpdate() {
-    console.log('OverlayContainer: command states updated')
     this.rerender()
   }
 
