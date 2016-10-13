@@ -10,7 +10,7 @@ class Toolbar extends Component {
     let toolEls = []
 
     toolTargets.forEach(function(tools, target) {
-      if (target === 'overlay') return; // skip overlay target
+      if (target === 'overlay' || target === 'context-menu') return; // skip overlay and context-menu
 
       let ToolTargetClass = componentRegistry.get('tool-target-'+target)
       if (!ToolTargetClass) {
