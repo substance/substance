@@ -10,10 +10,10 @@ class ContextMenu extends Component {
   getActiveTools() {
     let commandStates = this._getCommandStates()
     let tools = this.context.tools
-    let annotationTools = tools.get('annotations')
+    let contextMenuTools = tools.get('context-menu')
     let activeTools = []
 
-    annotationTools.forEach((tool, toolName) => {
+    contextMenuTools.forEach((tool, toolName) => {
       let toolProps = Object.assign({}, commandStates[toolName], {
         name: toolName,
         // rendering hints only interprerted by generic Tool class
@@ -31,7 +31,7 @@ class ContextMenu extends Component {
   }
 
   getToolStyle() {
-    return 'outline-dark'
+    return 'plain-dark'
   }
 
   render($$) {
