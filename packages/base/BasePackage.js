@@ -1,5 +1,8 @@
 import UndoCommand from './UndoCommand'
 import RedoCommand from './RedoCommand'
+import CopyCommand from './CopyCommand'
+import PasteCommand from './PasteCommand'
+
 import Tool from '../tools/Tool'
 import ToolGroup from '../tools/ToolGroup'
 
@@ -37,10 +40,15 @@ export default {
     // Commands
     config.addCommand('undo', UndoCommand)
     config.addCommand('redo', RedoCommand)
+    config.addCommand('copy', CopyCommand)
+    config.addCommand('paste', PasteCommand)
 
     // Tools
     config.addTool('undo', Tool, {target: 'document'})
     config.addTool('redo', Tool, {target: 'document'})
+    config.addTool('copy', Tool, {target: 'context-menu'})
+    config.addTool('paste', Tool, {target: 'context-menu'})
+
 
     // Icons
     config.addIcon('undo', { 'fontawesome': 'fa-undo' })
@@ -49,7 +57,16 @@ export default {
     config.addIcon('delete', { 'fontawesome': 'fa-times' })
     config.addIcon('expand', { 'fontawesome': 'fa-arrows-h' })
     config.addIcon('truncate', { 'fontawesome': 'fa-arrows-h' })
+
     // Labels
+    config.addLabel('copy', {
+      en: 'Copy',
+      de: 'Kopieren'
+    })
+    config.addLabel('paste', {
+      en: 'Paste',
+      de: 'Einfügen'
+    })
     config.addLabel('undo', {
       en: 'Undo',
       de: 'Rückgängig'
