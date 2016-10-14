@@ -324,10 +324,11 @@ class Component extends DOMElement.Delegator {
 
     The default implementation simply returns true.
 
-    @param {Object} newProps The props are being applied to this component.
+    @param {Object} newProps The new props being applied to this component.
+    @param {Object} newState The new state being applied
     @return a boolean indicating whether rerender() should be run.
   */
-  shouldRerender(newProps) { // eslint-disable-line
+  shouldRerender(newProps, newState) { // eslint-disable-line
     return true
   }
 
