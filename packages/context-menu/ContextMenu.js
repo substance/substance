@@ -18,7 +18,6 @@ class ContextMenu extends Component {
         name: toolName,
         // rendering hints only interprerted by generic Tool class
         // (= outlined button)
-        icon: toolName,
         style: this.getToolStyle(toolName)
       })
 
@@ -48,7 +47,6 @@ class ContextMenu extends Component {
       })
       el.append(toolsEl)
     }
-
     return el
   }
 

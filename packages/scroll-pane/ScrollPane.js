@@ -156,8 +156,9 @@ class ScrollPane extends Component {
     const wsel = window.getSelection()
     if (wsel.rangeCount === 0) return
     const wrange = wsel.getRangeAt(0)
-    const parentRect = this.getNativeElement().getBoundingClientRect()
+    const parentRect = this.refs.content.getNativeElement().getBoundingClientRect()
     const selRect = wrange.getBoundingClientRect()
+
     const overlayHints = {
       rectangle: _getRelativeRect(parentRect, selRect)
     }
