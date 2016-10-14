@@ -19,8 +19,8 @@ export default {
     })
     config.addIcon('strong', { 'fontawesome': 'fa-bold' })
     config.addLabel('strong', {
-      en: 'Strong emphasis',
-      de: 'Starke Betonung'
+      en: 'Strong',
+      de: 'Fett'
     })
   },
   Strong: Strong,
