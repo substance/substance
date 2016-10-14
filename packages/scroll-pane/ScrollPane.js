@@ -197,7 +197,6 @@ class ScrollPane extends Component {
     let contentContainerEl = this.refs.content.el.el
     let mouseBounds = getRelativeMouseBounds(e, contentContainerEl)
     let contextMenu = this.refs.contextMenu
-
     contextMenu.show(mouseBounds)
   }
 

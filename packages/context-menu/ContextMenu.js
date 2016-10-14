@@ -1,12 +1,15 @@
 import Component from '../../ui/Component'
-
+import isEqual from 'lodash/isEqual'
 
 class ContextMenu extends Component {
   constructor(...args) {
     super(...args)
+    this.activeTools = this.getActiveTools()
   }
 
-  // TODO: remove hard-coded bits and introduce tool group 'contextual'
+  /*
+    Override with your own implementation
+  */
   getActiveTools() {
     let commandStates = this._getCommandStates()
     let tools = this.context.tools
@@ -16,27 +19,29 @@ class ContextMenu extends Component {
     contextMenuTools.forEach((tool, toolName) => {
       let toolProps = Object.assign({}, commandStates[toolName], {
         name: toolName,
+        label: toolName,
         // rendering hints only interprerted by generic Tool class
         // (= outlined button)
         style: this.getToolStyle(toolName)
       })
 
-      activeTools.push({
-        Class: tool.Class,
-        toolProps: toolProps
-      })
+      if (!toolProps.disabled) {
+        activeTools.push({
+          Class: tool.Class,
+          toolProps: toolProps
+        })
+      }
     })
     return activeTools
   }
 
-  getToolStyle() {
-    return 'plain-dark'
-  }
-
+  /*
+    Override with custom rendering
+  */
   render($$) {
     let el = $$('div').addClass('sc-context-menu sm-hidden')
 
-    let activeTools = this.getActiveTools()
+    let activeTools = this.state.activeTools
 
     if (activeTools.length > 0) {
       let toolsEl = $$('div').addClass('se-active-tools')
@@ -48,6 +53,30 @@ class ContextMenu extends Component {
       el.append(toolsEl)
     }
     return el
+  }
+
+  /*
+    Override if you just want to use a different style
+  */
+  getToolStyle() {
+    return 'plain-dark'
+  }
+
+  getInitialState() {
+    return {
+      activeTools: this.getActiveTools()
+    }
+  }
+
+  shouldRerender(newProps, newState) {
+    // poor-man's immutable style
+    let hasChanged = !isEqual(this.props, newProps) || !isEqual(this.state.activeTools, newState.activeTools)
+
+    if (!hasChanged) {
+      this.hide()
+      return false
+    }
+    return true
   }
 
   didMount() {
@@ -69,9 +98,9 @@ class ContextMenu extends Component {
   }
 
   _onSessionDidUpdate() {
-    if (this.shouldRerender()) {
-      this.rerender() // also hides it!
-    }
+    this.setState({
+      activeTools: this.getActiveTools()
+    })
   }
 
   _getCommandStates() {
@@ -93,6 +122,7 @@ class ContextMenu extends Component {
       this.el.css('left', leftPos)
     }
   }
+
 }
 
 export default ContextMenu
