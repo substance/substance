@@ -149,6 +149,7 @@ class Surface extends Component {
       if (!this.isReadonly()) {
         // Mouse Events
         el.on('mousedown', this.onMouseDown)
+        el.on('contextmenu', this.onContextMenu)
         // disable drag'n'drop
         // we will react on this to render a custom selection
         el.on('focus', this.onNativeFocus)
@@ -606,6 +607,16 @@ class Surface extends Component {
     if (this.documentEl) {
       // TODO: we should handle mouse up only if we started a drag (and the selection has really changed)
       this.documentEl.on('mouseup', this.onMouseUp, this, { once: true })
+    }
+  }
+
+  // When a user right clicks the DOM selection is updated (in Chrome the nearest
+  // word gets selected). Like we do with the left mouse clicks we need to sync up
+  // our model selection.
+  onContextMenu(e) {
+    if (this.domSelection) {
+      let sel = this.domSelection.getSelection()
+      this.setSelection(sel)
     }
   }
 
