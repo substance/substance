@@ -25,12 +25,10 @@ class ContextMenu extends Component {
         style: this.getToolStyle(toolName)
       })
 
-      if (!toolProps.disabled) {
-        activeTools.push({
-          Class: tool.Class,
-          toolProps: toolProps
-        })
-      }
+      activeTools.push({
+        Class: tool.Class,
+        toolProps: toolProps
+      })
     })
     return activeTools
   }

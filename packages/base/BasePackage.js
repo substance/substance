@@ -44,8 +44,8 @@ export default {
     config.addCommand('paste', PasteCommand)
 
     // Tools
-    config.addTool('undo', Tool, {target: 'document'})
-    config.addTool('redo', Tool, {target: 'document'})
+    config.addTool('undo', Tool, {target: 'context-menu'})
+    config.addTool('redo', Tool, {target: 'context-menu'})
     config.addTool('copy', Tool, {target: 'context-menu'})
     config.addTool('paste', Tool, {target: 'context-menu'})
 
