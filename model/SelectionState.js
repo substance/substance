@@ -37,14 +37,24 @@ class SelectionState {
     return []
   }
 
+  getMarkers() {
+    // returns markers under the current selection
+    return this._state.markers || []
+  }
+
   isInlineNodeSelection() {
     return this._state.isInlineNodeSelection
   }
 
   _deriveState(sel) {
-    var doc = this.document
-
     this._resetState()
+
+    this._deriveAnnoState(sel)
+    this._deriveMarkerState(sel)
+  }
+
+  _deriveAnnoState(sel) {
+    var doc = this.document
     var state = this._state
 
     // create a mapping by type for the currently selected annotations
@@ -68,10 +78,18 @@ class SelectionState {
     state.annosByType = annosByType
   }
 
+  _deriveMarkerState(sel) {
+    const doc = this.document
+    let state = this._state
+    state.markers = doc._markers.getMarkersForSelection(sel) || []
+  }
+
   _resetState() {
     this._state = {
       // all annotations under the current selection
       annosByType: null,
+      // markers under the current selection
+      markers: null,
       // flags to make node selection (IsolatedNodes) stuff more convenient
       isNodeSelection: false,
       nodeId: null,
@@ -81,7 +99,6 @@ class SelectionState {
     }
     return this._state
   }
-
 }
 
 export default SelectionState

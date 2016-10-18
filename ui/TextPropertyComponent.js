@@ -143,8 +143,11 @@ class TextPropertyComponent extends AnnotatedTextComponent {
   }
 
   getAnnotations() {
+    const doc = this.getDocument()
     let path = this.getPath()
-    let annotations = this.getDocument().getIndex('annotations').get(path)
+    let annotations = doc.getAnnotations(path)
+    let markers = doc.getMarkers(path)
+    annotations = annotations.concat(markers)
     let fragments = this.props.fragments
     if (fragments) {
       annotations = annotations.concat(fragments)

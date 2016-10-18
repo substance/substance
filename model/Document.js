@@ -22,6 +22,7 @@ import Coordinate from './Coordinate'
 import Range from './Range'
 import docHelpers from './documentHelpers'
 import JSONConverter from './JSONConverter'
+import MarkersManager from './MarkersManager'
 var converter = new JSONConverter()
 
 /**
@@ -77,6 +78,9 @@ class Document extends EventEmitter {
 
     // special index for (property-scoped) annotations
     this.addIndex('annotations', new AnnotationIndex())
+    // data structure for 'dynamic annotations' called Markers
+    // similar to indexes these get co-transformed when the document is changed
+    this._markers = new MarkersManager(this)
 
     // TODO: these are only necessary if there is a container annotation
     // in the schema
@@ -411,6 +415,7 @@ class Document extends EventEmitter {
 
   _notifyChangeListeners(change, info) {
     info = info || {}
+    this._markers._onDocumentChange(change)
     this.emit('document:changed', change, info, this)
   }
 
@@ -462,6 +467,18 @@ class Document extends EventEmitter {
     for (idx = 0; idx < annotations.length; idx++) {
       this.create(annotations[idx])
     }
+  }
+
+  getAnnotations(path) {
+    return this.getIndex('annotations').get(path)
+  }
+
+  addMarker(key, marker) {
+    this._markers.add(marker.path, key, marker)
+  }
+
+  getMarkers(path) {
+    return this._markers.get(path)
   }
 
   _create(nodeData) {

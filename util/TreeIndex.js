@@ -129,8 +129,9 @@ class TreeIndexArrays extends TreeIndex {
     return val;
   }
 
-  set() {
-    throw new Error('TreeIndex.set() is not supported for array type.');
+  set(path, arr) {
+    let val = super.get(path)
+    val.__values__ = arr
   }
 
   add(path, value) {
@@ -164,7 +165,11 @@ class TreeIndexArrays extends TreeIndex {
   remove(path, value) {
     var arr = get(this, path);
     if (arr instanceof TreeNode) {
-      deleteFromArray(arr.__values__, value);
+      if (arguments.length === 1) {
+        delete arr.__values__
+      } else {
+        deleteFromArray(arr.__values__, value);
+      }
     }
   }
 

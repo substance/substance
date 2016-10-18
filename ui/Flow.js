@@ -145,6 +145,10 @@ class Flow extends EventEmitter {
     }
   }
 
+  get(resourceId) {
+    return this.data[resourceId]
+  }
+
   extendInfo(info) {
     // console.log('extending info', info)
     Object.assign(this._info, info)

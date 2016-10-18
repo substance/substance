@@ -563,6 +563,11 @@ class Surface extends Component {
     // console.log('mousedown on', this.getId());
     // event.stopPropagation();
 
+    // TODO: what is this exactly?
+    if ( event.button !== 0 ) {
+      return
+    }
+
     // special treatment for triple clicks
     if (!(platform.isIE && platform.version<12) && event.detail >= 3) {
       let sel = this.getSelection()
@@ -577,10 +582,6 @@ class Surface extends Component {
         event.stopPropagation()
         return
       }
-    }
-    // TODO: what is this exactly?
-    if ( event.which !== 1 ) {
-      return
     }
     // 'mouseDown' is triggered before 'focus' so we tell
     // our focus handler that we are already dealing with it
