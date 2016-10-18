@@ -1,23 +1,21 @@
 import Command from '../../ui/Command'
+import inBrowser from '../../util/inBrowser'
 
 class CopyCommand extends Command {
 
   getCommandState(params) {
-    let docSession = params.documentSession
-    let surface = params.surface
+    let disabled = !params.selection || params.selection.isNull()
     return {
-      disabled: false
+      disabled: disabled
     }
   }
 
-  execute(params) {
-    let docSession = params.documentSession
-    let surface = params.surface
-
-    // Only works internally
-    console.log('TODO: this does not land in browser clipboard atm. Resides in Clipboard.clipboarData')
-    surface.clipboard.copy()
-    return true
+  execute() {
+    if (inBrowser) {
+      window.document.execCommand('copy')
+      return true
+    }
+    return false
   }
 }
 
