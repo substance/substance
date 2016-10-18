@@ -127,7 +127,7 @@ class Clipboard {
     for (let i = 0; i < clipboardData.types.length; i++) {
       types[clipboardData.types[i]] = true
     }
-    // console.log('onPaste(): received content types', types);
+    console.log('onPaste(): received content types', types);
 
     event.preventDefault()
     event.stopPropagation()
@@ -292,7 +292,7 @@ class Clipboard {
     // TODO: the clipboard importer should make sure
     // that the container exists
     let content = this.htmlImporter.importDocument(html)
-    this.copy(content, text)
+    this.paste(content, text)
   }
 
   /*
