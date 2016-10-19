@@ -120,11 +120,15 @@ class DocumentSession extends EventEmitter {
 
   startFlow() {
     if (this._flowing) return
-    this.stages.forEach((stage) => {
-      this.emit(stage, this)
-    })
-    this._isDirty = {}
-    this._flowing = false
+    this._flowing = true
+    try {
+      this.stages.forEach((stage) => {
+        this.emit(stage, this)
+      })
+    } finally {
+      this._isDirty = {}
+      this._flowing = false
+    }
   }
 
   createSelection() {

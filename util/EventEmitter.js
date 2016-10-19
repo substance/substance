@@ -21,7 +21,7 @@ class EventEmitter {
       var args = Array.prototype.slice.call(arguments, 1)
       for (var i = 0, len = bindings.length; i < len; i++) {
         var binding = bindings[i]
-        // console.log("- triggering %s", binding.context.constructor.type)
+        // console.log("- triggering %s on %s", event, binding.context.constructor.name)
         binding.method.apply(binding.context, args)
       }
       return true
