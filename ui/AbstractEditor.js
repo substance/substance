@@ -25,6 +25,32 @@ class AbstractEditor extends Component {
     this._initialize(this.props)
   }
 
+  _initialize(props) {
+    let configurator = props.configurator
+    if (!props.documentSession && !props.editSession) {
+      throw new Error('DocumentSession instance required');
+    }
+    this.editSession = props.editSession || props.documentSession
+    this.doc = this.editSession.getDocument()
+    this.componentRegistry = configurator.getComponentRegistry()
+    this.tools = configurator.getTools()
+
+    this.labelProvider = configurator.getLabelProvider()
+    this.iconProvider = configurator.getIconProvider()
+
+    // legacy
+    this.documentSession = this.editSession
+    this.surfaceManager = this.editSession.surfaceManager
+    this.commandManager = this.editSession.commandManager
+    this.dragManager = this.editSession.dragManager
+    this.macroManager = this.editSession.macroManager
+    this.converterRegistry = this.editSession.converterRegistry
+    this.globalEventHandler = this.editSession.globalEventHandler
+    this.editingBehavior = this.editSession.editingBehavior
+    this.markersManager = this.editSession.markersManager
+
+  }
+
   /**
     Define the editors render method here.
   */
@@ -32,12 +58,9 @@ class AbstractEditor extends Component {
     super.render(...args)
   }
 
-  didMount() {
-  }
-
   willReceiveProps(nextProps) {
-    let newSession = nextProps.documentSession
-    let shouldDispose = newSession && newSession !== this.documentSession
+    let newSession = nextProps.editSession || nextProps.documentSession
+    let shouldDispose = newSession && newSession !== this.editSession
     if (shouldDispose) {
       this._dispose()
       this._initialize(nextProps)
@@ -49,11 +72,7 @@ class AbstractEditor extends Component {
   }
 
   _dispose() {
-    this.surfaceManager.dispose()
-    this.commandManager.dispose()
-    this.globalEventHandler.dispose()
-    this.dragManager.dispose()
-    this.documentSession.off(this)
+    this.editSession.off(this)
     // Note: we need to clear everything, as the childContext
     // changes which is immutable
     this.empty()
@@ -63,9 +82,9 @@ class AbstractEditor extends Component {
     return {
       editor: this,
       controller: this,
-      editSession: this.documentSession,
-      documentSession: this.documentSession,
-      doc: this.doc, // TODO: remove in favor of documentSession
+      editSession: this.editSession,
+      documentSession: this.editSession,
+      doc: this.doc, // TODO: remove in favor of editSession
       componentRegistry: this.componentRegistry,
       surfaceManager: this.surfaceManager,
       commandManager: this.commandManager,
@@ -80,30 +99,6 @@ class AbstractEditor extends Component {
       // i.e. a declarative way to map tools to tool groups
       tools: this.tools,
     }
-  }
-
-  _initialize(props) {
-    let configurator = props.configurator
-    if (!props.documentSession) {
-      throw new Error('DocumentSession instance required');
-    }
-    this.documentSession = props.documentSession
-    this.doc = this.documentSession.getDocument()
-    this.componentRegistry = configurator.getComponentRegistry()
-    this.tools = configurator.getTools()
-
-    // legacy
-    this.surfaceManager = this.documentSession.surfaceManager
-    this.commandManager = this.documentSession.commandManager
-    this.dragManager = this.documentSession.dragManager
-    this.macroManager = this.documentSession.macroManager
-    this.converterRegistry = this.documentSession.converterRegistry
-    this.globalEventHandler = this.documentSession.globalEventHandler
-    this.editingBehavior = this.documentSession.editingBehavior
-    this.markersManager = this.documentSession.markersManager
-
-    this.labelProvider = configurator.getLabelProvider()
-    this.iconProvider = configurator.getIconProvider()
   }
 }
 

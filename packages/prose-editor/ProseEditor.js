@@ -25,6 +25,18 @@ import Toolbar from '../tools/Toolbar'
 */
 class ProseEditor extends AbstractEditor {
 
+  didMount() {
+    super.didMount()
+
+    this.editSession.on('render', this._onCommandStatesChanged, this)
+  }
+
+  dispose() {
+    super.dispose()
+
+    this.editSession.off(this)
+  }
+
   render($$) {
     let SplitPane = this.componentRegistry.get('split-pane')
     let el = $$('div').addClass('sc-prose-editor')
@@ -67,13 +79,15 @@ class ProseEditor extends AbstractEditor {
     }).ref('body')
   }
 
-  documentSessionUpdated() {
-    let toolbar = this.refs.toolbar
-    if (toolbar) {
-      let commandStates = this.commandManager.getCommandStates()
-      toolbar.setProps({
-        commandStates: commandStates
-      })
+  _onCommandStatesChanged(editSession) {
+    if (editSession.hasChanged('commandStates')) {
+      let toolbar = this.refs.toolbar
+      if (toolbar) {
+        let commandStates = this.commandManager.getCommandStates()
+        toolbar.setProps({
+          commandStates: commandStates
+        })
+      }
     }
   }
 }
