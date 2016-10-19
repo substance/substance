@@ -99,11 +99,14 @@ class MarkersManager {
     return result
   }
 
-  _fetchDocumentMarkers(path) {
-    let annos = map(this.editSession.getDocument().getAnnotations(path))
-    let markers = this.markers[path]
-    let documentMarkers = annos.concat(markers)
-    this._documentMarkers[path] = documentMarkers
+  _fetchDocumentMarkers(pathStr) {
+    let path = pathStr.split(',')
+    let documentMarkers = map(this.editSession.getDocument().getAnnotations(path)) || []
+    let markers = this.markers[pathStr]
+    if (markers) {
+      documentMarkers = documentMarkers.concat(markers)
+    }
+    this._documentMarkers[pathStr] = documentMarkers
     return documentMarkers
   }
 
@@ -149,8 +152,11 @@ class MarkersManager {
   _updateProperties() {
     Object.keys(this._dirtyProps).forEach((id) => {
       let os = this._observers[id]
+      let markers = this._documentMarkers[id]
       if (os) {
-        os.forEach((o) => o.observer.updateMarkers([]))
+        os.forEach(function (o) {
+          o.observer.updateMarkers(markers)
+        })
       }
     })
   }
