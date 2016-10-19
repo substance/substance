@@ -60,7 +60,7 @@ class ScrollPane extends Component {
         characterData: true,
         childList: true,
       });
-      this.context.flow.on('post-render', this._onPostRender, this)
+      this.context.editSession.on('post-render', this._onPostRender, this)
     }
   }
 

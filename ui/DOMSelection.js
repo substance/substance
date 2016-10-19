@@ -171,7 +171,11 @@ class DOMSelection {
         }
       }
     } else {
-      comp = this.surface._getTextPropertyComponent(coor.path)
+      // This is broken since we pulled the text-property register out of surface
+      // comp = this.surface._getTextPropertyComponent(coor.path)
+      // HACK: ... this hack replaces the original registry
+      // with a probably not so efficient lookup
+      comp = this.surface.find('.sc-text-property[data-path="'+coor.path.join('.')+'"]')
       if (comp) {
         domCoor = comp.getDOMCoordinate(coor.offset)
       }

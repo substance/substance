@@ -81,7 +81,6 @@ class SelectionState {
   _deriveMarkerState(sel) {
     const doc = this.document
     let state = this._state
-    state.markers = doc._markers.getMarkersForSelection(sel) || []
   }
 
   _resetState() {

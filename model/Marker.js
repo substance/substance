@@ -7,8 +7,7 @@ class Marker extends PropertyAnnotation {
   }
 
   remove() {
-    let doc = this.getDocument()
-    doc._markers._removeMarker(this)
+    console.warn('TODO: remove Marker')
   }
 
 }

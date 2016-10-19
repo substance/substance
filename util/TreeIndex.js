@@ -121,6 +121,11 @@ class TreeIndex {
 
 class TreeIndexArrays extends TreeIndex {
 
+  contains(path) {
+    let val = super.get(path)
+    return Boolean(val)
+  }
+
   get(path) {
     let val = super.get(path)
     if (val instanceof TreeNode) {

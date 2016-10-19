@@ -15,10 +15,6 @@ import InlineNodeComponent from '../packages/inline-node/InlineNodeComponent'
 
 class AnnotatedTextComponent extends Component {
 
-  // TODO: this component should listen on changes to the property
-  // Otherwise will not be updated.
-  // Note that in contrast, TextPropertyComponents get updated by Surface.
-
   /**
     Node render implementation. Use model/Fragmenter for rendering of annotations.
 
@@ -37,6 +33,12 @@ class AnnotatedTextComponent extends Component {
 
   getAnnotations() {
     return this.getDocument().getIndex('annotations').get(this.props.path)
+  }
+
+  _onDocumentChange(update) {
+    if (update.change && update.change.updated[this.getPath()]) {
+      this.rerender()
+    }
   }
 
   _renderContent($$) {

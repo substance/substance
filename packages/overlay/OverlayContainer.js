@@ -17,7 +17,7 @@ class OverlayContainer extends Component {
 
   render($$) {
     let el = $$('div').addClass('sc-overlay-container sm-hidden')
-    let commandStates = this.context.commandManager.getCommandStates()
+    let commandStates = this._getCommandStates()
     let ComponentClass = this.props.overlay
     el.append($$(ComponentClass, {
       commandStates: commandStates
@@ -26,19 +26,12 @@ class OverlayContainer extends Component {
   }
 
   didMount() {
-    const doc = this.context.documentSession.getDocument()
-    this.context.flow.subscribe({
-      stage: 'render',
-      resources: {
-        commandStates: [doc.id, 'commandStates']
-      },
-      handler: this._onCommandStatesUpdate,
-      owner: this
-    })
+    // ... and this is called on every cycle leading to a rerender when dirty
+    this.context.editSession.on('render', this._onRender, this)
   }
 
   dispose() {
-    this.context.flow.unsubscribe(this)
+    this.context.commandManager.off(this)
   }
 
   position(hints) {
@@ -49,8 +42,10 @@ class OverlayContainer extends Component {
     }
   }
 
-  _onCommandStatesUpdate() {
-    this.rerender()
+  _onRender(editSession) {
+    if (editSession.hasChanged('commandStates')) {
+      this.rerender()
+    }
   }
 
   _getCommandStates() {

@@ -2,34 +2,19 @@ import inBrowser from '../../util/inBrowser'
 
 class SurfaceManager {
 
-  constructor(flow, documentSession) {
-    this.flow = flow
-    this.documentSession = documentSession
+  constructor(editSession) {
+    this.editSession = editSession
     this.surfaces = {}
-
-    const doc = documentSession.getDocument()
-
     this._state = {
       focusedSurfaceId: null,
-      // grouped by surfaceId and the by fragment type ('selection' | collaboratorId)
-      fragments: {},
       selection: null,
-      collaborators: {}
     }
-    flow.subscribe({
-      stage: 'model',
-      resources: {
-        selection: [doc.id, 'selection']
-      },
-      handler: this._onSelectionUpdate,
-      owner: this
-    })
-    flow.on('post-render', this._recoverDOMSelection, this)
+    editSession.on('model', this._onSelectionChanged, this)
+    editSession.on('post-render', this._recoverDOMSelection, this)
   }
 
   dispose() {
-    this.flow.unsubscribe(this)
-    this.flow.off(this)
+    this.editSession.off(this)
   }
 
   /**
@@ -82,12 +67,13 @@ class SurfaceManager {
     }
   }
 
-  _onSelectionUpdate(update) {
-    const selection = update.selection
+  _onSelectionChanged(session) {
+    // TODO: would be nice if we had a more convenient events
+    if (!session.hasChanged('selection')) return
+    const selection = session.getSelection()
     const state = this._state
     state.selection = selection
     state.focusedSurfaceId = selection.surfaceId
-
     // HACK: removing DOM selection *and* blurring when having a CustomSelection
     // otherwise we will receive events on the wrong surface
     // instead of bubbling up to GlobalEventManager
@@ -97,16 +83,12 @@ class SurfaceManager {
     }
   }
 
-  _recoverDOMSelection(info) {
-    if (info.skipSelection) {
-      // console.log('Skipping selection update.');
-      return
-    }
+  _recoverDOMSelection() {
     // at the end of the update flow, make sure the surface is focused
     // and displays the right DOM selection.
     let focusedSurface = this.getFocusedSurface()
     if (focusedSurface && !focusedSurface.isDisabled()) {
-      // console.log('Rendering selection on surface', focusedSurface.getId(), this.documentSession.getSelection().toString());
+      // console.log('Rendering selection on surface', focusedSurface.getId(), this.editSession.getSelection().toString());
       focusedSurface.focus()
       focusedSurface.rerenderDOMSelection()
     }

@@ -1,23 +1,53 @@
 import extend from 'lodash/extend'
 import isPlainObject from 'lodash/isPlainObject'
+import isArray from 'lodash/isArray'
 import EventEmitter from '../util/EventEmitter'
 import TransactionDocument from './TransactionDocument'
 import DefaultChangeCompressor from './DefaultChangeCompressor'
 import Selection from './Selection'
 import SelectionState from './SelectionState'
 import DocumentChange from './DocumentChange'
+import CommandManager from '../ui/CommandManager'
+import MacroManager from '../ui/MacroManager'
+import GlobalEventHandler from '../ui/GlobalEventHandler'
+import SurfaceManager from '../packages/surface/SurfaceManager'
+import DragManager from '../ui/DragManager'
+import MarkersManager from '../model/MarkersManager'
 
 var __id__ = 0
 
 class DocumentSession extends EventEmitter {
 
-  constructor(doc, options) {
+  constructor(doc, configurator, options) {
     super()
 
     this.__id__ = __id__++
 
     options = options || {}
+
+    // whenever the session is updated these events aka stages get called
+    // in this very order
+    this.stages = options.stages || ['model', 'pre-render', 'render', 'post-render', 'final']
+    if (!this.stages || !isArray(this.stages)) {
+      throw new Error("stages is required.")
+    }
+
     this.doc = doc
+
+
+    this.surfaceManager = new SurfaceManager(this)
+
+    this._context = {
+      editSession: this,
+      documentSession: this,
+      surfaceManager: this.surfaceManager,
+    }
+    if (options.context) {
+      Object.assign(this._context, options.context)
+    }
+
+    this._data = {}
+    this._isDirty = {}
     this.selectionState = new SelectionState(doc)
 
     // the stage is a essentially a clone of this document
@@ -33,10 +63,15 @@ class DocumentSession extends EventEmitter {
     this.compressor = options.compressor || new DefaultChangeCompressor()
     this.saveHandler = options.saveHandler
 
-    // Note: registering twice:
-    // to do internal transformations in case changes are coming
-    // in from another session -- this must be done as early as possible
-    this.doc.on('document:changed', this.onDocumentChange, this, {priority: 1000})
+    this.commandManager = new CommandManager(this._context, configurator.getCommands())
+    this.dragManager = new DragManager(configurator.createDragHandlers(), Object.assign({}, this._context, {
+      commandManager: this.commandManager
+    }));
+    this.macroManager = new MacroManager(this._context, configurator.getMacros())
+    this.converterRegistry = configurator.getConverterRegistry()
+    this.globalEventHandler = new GlobalEventHandler(this, this.surfaceManager)
+    this.editingBehavior = configurator.getEditingBehavior()
+    this.markersManager = new MarkersManager(this)
   }
 
   getDocument() {
@@ -47,16 +82,49 @@ class DocumentSession extends EventEmitter {
     return this.selectionState.getSelection()
   }
 
+  // @flows
   setSelection(sel) {
+    if (!sel.surfaceId) {
+      let fs = this.getFocusedSurface()
+      if (fs) {
+        sel.surfaceId = fs.id
+      }
+    }
     if (sel && isPlainObject(sel)) {
       sel = this.doc.createSelection(sel)
     }
     var selectionHasChanged = this._setSelection(sel)
     if(selectionHasChanged) {
-      this._triggerUpdateEvent({
-        selection: sel
-      })
+      this._isDirty['selection'] = true
+      this.set('selection', sel)
+      this.startFlow()
     }
+  }
+
+  getFocusedSurface() {
+    return this.surfaceManager.getFocusedSurface()
+  }
+
+  hasChanged(key) {
+    return Boolean(this._isDirty[key])
+  }
+
+  get(key) {
+    return this._data[key]
+  }
+
+  set(key, value) {
+    this._data[key] = value
+    this._isDirty[key] = true
+  }
+
+  startFlow() {
+    if (this._flowing) return
+    this.stages.forEach((stage) => {
+      this.emit(stage, this)
+    })
+    this._isDirty = {}
+    this._flowing = false
   }
 
   createSelection() {
@@ -116,11 +184,11 @@ class DocumentSession extends EventEmitter {
       }
       var selectionHasChanged = this._setSelection(sel)
       to.push(change.invert())
-      var update = {
-        change: change
+      this.set('change', change)
+      if (selectionHasChanged) {
+        this.set('selection', sel)
       }
-      if (selectionHasChanged) update.selection = sel
-      this._triggerUpdateEvent(update, { replay: true })
+      this.startFlow()
     } else {
       console.warn('No change can be %s.', (which === 'undo'? 'undone':'redone'))
     }
@@ -142,6 +210,8 @@ class DocumentSession extends EventEmitter {
       }
     })
     ```
+
+    @flows
   */
   transaction(transformation, info) {
     if (this.isTransacting) {
@@ -172,22 +242,6 @@ class DocumentSession extends EventEmitter {
     }
   }
 
-  onDocumentChange(change, info) {
-    // ATTENTION: this is used if you have two independent DocumentSessions
-    // in one client.
-    if (info && info.session !== this) {
-      this.stage._apply(change)
-      this._transformLocalChangeHistory(change, info)
-      var update = {
-        change: change
-      }
-      var newSelection = this._transformSelection(change, info)
-      var selectionHasChanged = this._setSelection(newSelection)
-      if (selectionHasChanged) update.selection = newSelection
-      // this._triggerUpdateEvent(update, info)
-    }
-  }
-
   _setSelection(sel) {
     return this.selectionState.setSelection(sel)
   }
@@ -213,11 +267,13 @@ class DocumentSession extends EventEmitter {
 
   _commit(change, info) {
     var selectionHasChanged = this._commitChange(change)
-    var update = {
-      change: change
+
+    this.set('change', change)
+    this.set('info', info)
+    if (selectionHasChanged) {
+      this.set('selection', this.getSelection())
     }
-    if (selectionHasChanged) update.selection = this.getSelection()
-    this._triggerUpdateEvent(update, info)
+    this.startFlow()
   }
 
   _commitChange(change) {
@@ -289,26 +345,27 @@ class DocumentSession extends EventEmitter {
     }
   }
 
-  _triggerUpdateEvent(update, info) {
-    info = info || {}
-    info.session = this
-    if (update.change && update.change.ops.length > 0) {
-      // TODO: I would like to wrap this with a try catch.
-      // however, debugging gets inconvenient as caught exceptions don't trigger a breakpoint
-      // by default, and other libraries such as jquery throw noisily.
-      this.doc._notifyChangeListeners(update.change, info)
-      this._dirty = true
-    } else {
-      // HACK: removing this from the update when it is NOP
-      // this way, we only need to do this check here
-      delete update.change
-    }
-    if (Object.keys(update).length > 0 || info.force) {
-      // slots to have more control about when things get
-      // updated, and things have been rendered/updated
-      this.emit('update', update, info)
-      this.emit('didUpdate', update, info)
-    }
+  _triggerUpdateEvent(update, info) { //eslint-disable-line
+    // info = info || {}
+    // info.session = this
+    // if (update.change && update.change.ops.length > 0) {
+    //   // TODO: I would like to wrap this with a try catch.
+    //   // however, debugging gets inconvenient as caught exceptions don't trigger a breakpoint
+    //   // by default, and other libraries such as jquery throw noisily.
+    //   this.doc._notifyChangeListeners(update.change, info)
+    //   this._dirty = true
+    // } else {
+    //   // HACK: removing this from the update when it is NOP
+    //   // this way, we only need to do this check here
+    //   delete update.change
+    // }
+    // // TODO: these will be removed soon
+    // if (Object.keys(update).length > 0 || info.force) {
+    //   // slots to have more control about when things get
+    //   // updated, and things have been rendered/updated
+    //   // this.emit('update', update, info)
+    //   // this.emit('didUpdate', update, info)
+    // }
   }
 }
 

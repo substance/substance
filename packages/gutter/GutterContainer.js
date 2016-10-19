@@ -25,11 +25,11 @@ class GutterContainer extends Component {
 
   didMount() {
     // rerender the overlay content after anything else has been updated
-    this.context.documentSession.on('didUpdate', this._onSessionDidUpdate, this)
+    this.context.editSession.on('render', this._onCommandStatesUpdated, this)
   }
 
   dispose() {
-    this.context.documentSession.off(this)
+    this.context.editSession.off(this)
   }
 
   position(hints) {
@@ -42,8 +42,8 @@ class GutterContainer extends Component {
     }
   }
 
-  _onSessionDidUpdate() {
-    if (this.shouldRerender()) {
+  _onCommandStatesUpdated(editSession) {
+    if (editSession.hasChanged('commandStates')) {
       this.rerender()
     }
   }

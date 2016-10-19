@@ -28,8 +28,8 @@ class Surface extends Component {
 
     // DocumentSession instance must be provided either as a prop
     // or via dependency-injection
-    this.documentSession = this.props.documentSession || this.context.documentSession
-    if (!this.documentSession) {
+    this.editSession = this.props.editSession || this.context.editSession
+    if (!this.editSession) {
       throw new Error('No DocumentSession provided')
     }
     this.name = this.props.name
@@ -92,22 +92,12 @@ class Surface extends Component {
       // this.domObserver = new window.MutationObserver(this.onDomMutations.bind(this));
       // this.domObserver.observe(this.el.getNativeElement(), { subtree: true, characterData: true, characterDataOldValue: true });
     }
-    const doc = this.getDocument()
-    const flow = this.getFlow()
-    flow.subscribe({
-      stage: 'pre-render',
-      resources: {
-        selection: [doc.id, 'selection']
-      },
-      handler: this._onSelectionUpdate,
-      owner: this
-    })
+    this.editSession.on('render', this._onSelectionChanged, this)
   }
 
 
   dispose() {
-    const flow = this.getFlow()
-    flow.unsubscribe(this)
+    this.editSession.off(this)
     this.domSelection = null
     if (this.domObserver) {
       this.domObserver.disconnect()
@@ -217,12 +207,18 @@ class Surface extends Component {
   }
 
   getDocument() {
-    return this.documentSession.getDocument()
+    return this.editSession.getDocument()
   }
 
   getDocumentSession() {
-    return this.documentSession
+    console.warn('DEPRECATED: use Surface.getEditSession()')
+    return this.editSession
   }
+
+  getEditSession() {
+    return this.editSession
+  }
+
 
   isEnabled() {
     return !this.state.disabled
@@ -268,23 +264,23 @@ class Surface extends Component {
    */
   transaction(transformation, info) {
     // TODO: we would like to get rid of this method, and only have
-    // documentSession.transaction()
+    // editSession.transaction()
     // The problem is, that we need to get surfaceId into the change,
     // to be able to set the selection into the right surface.
     // ATM we put this into the selection, which is hacky, and makes it
     // unnecessarily inconvient to create selections.
-    // Maybe documentSession should provide a means to augment the before/after
+    // Maybe editSession should provide a means to augment the before/after
     // state of a change.
-    let documentSession = this.documentSession
+    let editSession = this.editSession
     let surfaceId = this.getId()
-    return documentSession.transaction(function(tx, args) {
+    return editSession.transaction(function(tx, args) {
       tx.before.surfaceId = surfaceId
       return transformation(tx, args)
     }, info)
   }
 
   getSelection() {
-    return this.documentSession.getSelection()
+    return this.editSession.getSelection()
   }
 
   /**
@@ -614,7 +610,7 @@ class Surface extends Component {
   // When a user right clicks the DOM selection is updated (in Chrome the nearest
   // word gets selected). Like we do with the left mouse clicks we need to sync up
   // our model selection.
-  onContextMenu(e) {
+  onContextMenu() {
     if (this.domSelection) {
       let sel = this.domSelection.getSelection()
       this.setSelection(sel)
@@ -697,9 +693,10 @@ class Surface extends Component {
     this.el.setAttribute('contenteditable', true)
   }
 
-  _onSelectionUpdate(update) {
-    if (update.selection) {
-      let newMode = this._deriveModeFromSelection(update.selection)
+  _onSelectionChanged(editSession) {
+    if (editSession.hasChanged('selection')) {
+      let selection = editSession.get('selection')
+      let newMode = this._deriveModeFromSelection(selection)
       if (this.state.mode !== newMode) {
         this.extendState({
           mode: newMode
@@ -728,10 +725,6 @@ class Surface extends Component {
     return this.context.surfaceParent
   }
 
-  _getComponentForKey(key) {
-    return this._textProperties[key]
-  }
-
   _focus() {
     this._state.hasNativeFocus = true
     // HACK: we must not focus explicitly in Chrome/Safari
@@ -751,7 +744,7 @@ class Surface extends Component {
     event.stopPropagation()
 
     let direction = (event.keyCode === keys.LEFT) ? 'left' : 'right'
-    let selState = this.getDocumentSession().getSelectionState()
+    let selState = this.getEditSession().getSelectionState()
     let sel = selState.getSelection()
     // Note: collapsing the selection and let ContentEditable still continue doing a cursor move
     if (selState.isInlineNodeSelection() && !event.shiftKey) {
@@ -857,12 +850,10 @@ class Surface extends Component {
     // when a new DOM selection is set.
     // ATTENTION: in FF 44 this was causing troubles, making the CE unselectable
     // until the next native blur.
-    // Should not be necessary anymore as this should be covered by this._focus()
-    // which will eventually be called at the end of the update flow
     if (!sel.isNull() && sel.surfaceId === this.getId() && platform.isFF) {
       this._focus()
     }
-    this.documentSession.setSelection(sel)
+    this.editSession.setSelection(sel)
   }
 
   _updateModelSelection(options) {

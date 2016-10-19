@@ -87,21 +87,15 @@ class ContainerEditor extends Surface {
 
   didMount() {
     super.didMount.apply(this, arguments)
-    const doc = this.getDocument()
-    this.context.flow.subscribe({
-      stage: 'render',
-      resources: {
-        change: [doc.id, 'change']
-      },
-      handler: this.onContainerChange,
-      owner: this,
-    })
+    let editSession = this.getEditSession()
+    editSession.on('render', this._onContainerChanged, this)
   }
 
   dispose() {
     super.dispose.apply(this, arguments)
 
-    this.context.flow.unsubscribe(this)
+    let editSession = this.getEditSession()
+    editSession.off(this)
   }
 
   render($$) {
@@ -164,7 +158,7 @@ class ContainerEditor extends Surface {
   _handleUpOrDownArrowKey(event) {
     event.stopPropagation()
     let direction = (event.keyCode === keys.UP) ? 'left' : 'right'
-    let selState = this.getDocumentSession().getSelectionState()
+    let selState = this.getEditSession().getSelectionState()
     let sel = selState.getSelection()
 
     // Note: this collapses the selection, just to let ContentEditable continue doing a cursor move
@@ -192,7 +186,7 @@ class ContainerEditor extends Surface {
   _handleLeftOrRightArrowKey(event) {
     event.stopPropagation()
     let direction = (event.keyCode === keys.LEFT) ? 'left' : 'right'
-    let selState = this.getDocumentSession().getSelectionState()
+    let selState = this.getEditSession().getSelectionState()
     let sel = selState.getSelection()
     // Note: collapsing the selection and let ContentEditable still continue doing a cursor move
     if (sel.isNodeSelection() && sel.isFull() && !event.shiftKey) {
@@ -205,7 +199,7 @@ class ContainerEditor extends Surface {
   }
 
   _handleEnterKey(event) {
-    let sel = this.getDocumentSession().getSelection()
+    let sel = this.getEditSession().getSelection()
     if (sel.isNodeSelection() && sel.isFull()) {
       event.preventDefault()
       event.stopPropagation()
@@ -339,9 +333,11 @@ class ContainerEditor extends Surface {
   }
 
   // called by flow when subscribed resources have been updated
-  onContainerChange(data) {
-    const change = data.change
+  _onContainerChanged(editSession) {
+    if (!editSession.hasChanged('change')) return
+    let change = editSession.get('change')
     if (!change.updated[this.container.getContentPath()]) return
+
     let doc = this.getDocument()
     // first update the container
     let renderContext = RenderingEngine.createContext(this)
@@ -399,10 +395,10 @@ class ContainerEditor extends Surface {
   }
 
   transaction(transformation, info) {
-    let documentSession = this.documentSession
+    let editSession = this.editSession
     let surfaceId = this.getId()
     let containerId = this.getContainerId()
-    return documentSession.transaction(function(tx, args) {
+    return editSession.transaction(function(tx, args) {
       let sel = tx.before.selection
       if (sel && !sel.isNull()) {
         sel.containerId = sel.containerId || containerId

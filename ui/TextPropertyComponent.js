@@ -1,5 +1,4 @@
 import isNumber from 'lodash/isNumber'
-import map from '../util/map'
 import Coordinate from '../model/Coordinate'
 import AnnotatedTextComponent from './AnnotatedTextComponent'
 import CursorComponent from './CursorComponent'
@@ -27,39 +26,33 @@ import SelectionFragmentComponent from './SelectionFragmentComponent'
 
 class TextPropertyComponent extends AnnotatedTextComponent {
 
-  didMount() {
-    super.didMount()
-    const doc = this.getDocument()
-    const flow = this.getFlow()
-    const surface = this.getSurface()
-    const resources = {
-      text: [doc.id, this.props.path],
+  getInitialState() {
+    const markersManager = this.context.markersManager
+    let path = this.props.path
+    let markers
+    if (markersManager) {
+      let surface = this.context.surface
+      let opts = {}
+      if (surface) {
+        opts.surfaceId = surface.id
+        opts.containerId = surface.getContainerId()
+      }
+      // provides the initial set of markers and registers for updates
+      // markers = markersManager.getMarkers(path, opts)
+      markers = []
+      markersManager.register(this, path, opts)
+    } else {
+      const doc = this.getDocument()
+      markers = doc.getAnnotations(path)
     }
-    if (surface) {
-      resources.selectionFragments = [surface.id, 'selectionFragments', this.props.path]
-    }
-    flow.subscribe({
-      stage: 'render',
-      resources: resources,
-      handler: this._onUpdate,
-      owner: this
-    })
-
-    // TODO: instead of letting Surface manage TextProperties
-    // we should instead use the Flow in future
-    if (surface) {
-      surface._registerTextProperty(this)
+    return {
+      markers: markers
     }
   }
 
   dispose() {
-    super.dispose()
-
-    this.context.flow.unsubscribe(this)
-
-    let surface = this.getSurface()
-    if (surface) {
-      surface._unregisterTextProperty(this)
+    if (this.context.markersManager) {
+      this.context.markersManager.deregister(this, this.props.path)
     }
   }
 
@@ -88,12 +81,14 @@ class TextPropertyComponent extends AnnotatedTextComponent {
     return el
   }
 
-  _onUpdate(data) {
-    const fragments = map(data.selectionFragments).filter(Boolean)
-    this.extendProps({
-      text: data.text,
-      fragments: fragments
+  updateMarkers(markers) {
+    this.setState({
+      markers: markers
     })
+  }
+
+  getAnnotations() {
+    return this.state.markers
   }
 
   _renderFragment($$, fragment) {
@@ -140,19 +135,6 @@ class TextPropertyComponent extends AnnotatedTextComponent {
 
   getText() {
     return this.getDocument().get(this.getPath())
-  }
-
-  getAnnotations() {
-    const doc = this.getDocument()
-    let path = this.getPath()
-    let annotations = doc.getAnnotations(path)
-    let markers = doc.getMarkers(path)
-    annotations = annotations.concat(markers)
-    let fragments = this.props.fragments
-    if (fragments) {
-      annotations = annotations.concat(fragments)
-    }
-    return annotations
   }
 
   getDocument() {

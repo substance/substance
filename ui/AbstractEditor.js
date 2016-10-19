@@ -1,12 +1,4 @@
 import Component from './Component'
-import Flow from './Flow'
-import DocumentSessionFlowAdapter from './DocumentSessionFlowAdapter'
-import CommandManager from './CommandManager'
-import MacroManager from './MacroManager'
-import GlobalEventHandler from './GlobalEventHandler'
-import SurfaceManager from '../packages/surface/SurfaceManager'
-import SurfaceFlowAdapter from '../packages/surface/SurfaceFlowAdapter'
-import DragManager from './DragManager'
 
 /**
   Reusable abstract editor implementation.
@@ -41,7 +33,6 @@ class AbstractEditor extends Component {
   }
 
   didMount() {
-    this.documentSession.on('didUpdate', this.documentSessionUpdated, this)
   }
 
   willReceiveProps(nextProps) {
@@ -62,7 +53,6 @@ class AbstractEditor extends Component {
     this.commandManager.dispose()
     this.globalEventHandler.dispose()
     this.dragManager.dispose()
-    this.flow.dispose()
     this.documentSession.off(this)
     // Note: we need to clear everything, as the childContext
     // changes which is immutable
@@ -71,81 +61,49 @@ class AbstractEditor extends Component {
 
   getChildContext() {
     return {
+      editor: this,
       controller: this,
+      editSession: this.documentSession,
       documentSession: this.documentSession,
       doc: this.doc, // TODO: remove in favor of documentSession
-      flow: this.flow,
       componentRegistry: this.componentRegistry,
       surfaceManager: this.surfaceManager,
       commandManager: this.commandManager,
+      markersManager: this.markersManager,
       converterRegistry: this.converterRegistry,
       dragManager: this.dragManager,
       editingBehavior: this.editingBehavior,
       globalEventHandler: this.globalEventHandler,
       iconProvider: this.iconProvider,
       labelProvider: this.labelProvider,
+      // ATTENTION: this is a map of tool target names to maps of tool names to tools
+      // i.e. a declarative way to map tools to tool groups
       tools: this.tools,
     }
   }
 
   _initialize(props) {
     let configurator = props.configurator
-    let commands = configurator.getCommands()
     if (!props.documentSession) {
       throw new Error('DocumentSession instance required');
     }
     this.documentSession = props.documentSession
     this.doc = this.documentSession.getDocument()
     this.componentRegistry = configurator.getComponentRegistry()
-    this.flow = this._setupFlow()
     this.tools = configurator.getTools()
-    this.surfaceManager = new SurfaceManager(this.flow, this.documentSession)
-    this.commandManager = new CommandManager(this.getCommandContext(), commands)
-    this.dragManager = new DragManager(configurator.createDragHandlers(), {
-      documentSession: this.documentSession,
-      surfaceManager: this.surfaceManager,
-      commandManager: this.commandManager,
-    });
-    this.macroManager = new MacroManager(this.getMacroContext(), configurator.getMacros())
-    this.iconProvider = configurator.getIconProvider()
-    this.converterRegistry = configurator.getConverterRegistry()
-    this.globalEventHandler = new GlobalEventHandler(this.documentSession, this.surfaceManager)
-    this.editingBehavior = configurator.getEditingBehavior()
+
+    // legacy
+    this.surfaceManager = this.documentSession.surfaceManager
+    this.commandManager = this.documentSession.commandManager
+    this.dragManager = this.documentSession.dragManager
+    this.macroManager = this.documentSession.macroManager
+    this.converterRegistry = this.documentSession.converterRegistry
+    this.globalEventHandler = this.documentSession.globalEventHandler
+    this.editingBehavior = this.documentSession.editingBehavior
+    this.markersManager = this.documentSession.markersManager
+
     this.labelProvider = configurator.getLabelProvider()
-  }
-
-  _setupFlow() {
-    // TODO: make stages configurable
-    const flow = new Flow(['model', 'pre-render', 'render', 'post-render', 'final'])
-    // will feed resources scoped to doc.id
-    DocumentSessionFlowAdapter.connect(flow, this.documentSession)
-    // will feed resources scoped to surface.id
-    SurfaceFlowAdapter.connect(flow, this.documentSession)
-    return flow
-  }
-
-  getCommandContext() {
-    return {
-      documentSession: this.documentSession,
-      surfaceManager: this.surfaceManager,
-      flow: this.flow
-    }
-  }
-
-  getMacroContext() {
-    return {
-      documentSession: this.documentSession,
-      surfaceManager: this.surfaceManager
-    }
-  }
-
-  /**
-    Called when documentSession was updated (e.g. when the selection changes).
-
-    E.g. update toolbars.
-  */
-  documentSessionUpdated() {
-    throw new Error('This method is abstract')
+    this.iconProvider = configurator.getIconProvider()
   }
 }
 
