@@ -1,4 +1,5 @@
 /* globals Promise */
+import forEach from './forEach'
 
 export default function sendRequest(params, cb) {
   return new Promise(function(resolve, reject) {
@@ -17,7 +18,16 @@ export default function sendRequest(params, cb) {
       if (xmlhttp.readyState === 4) return _done();
     };
     xmlhttp.open(method, url, true);
-    xmlhttp.send();
+    if (params.header) {
+      forEach(params.header, function(val, key) {
+        xmlhttp.setRequestHeader(key, val)
+      })
+    }
+    if (params.data) {
+      xmlhttp.send(JSON.stringify(params.data));
+    } else {
+      xmlhttp.send();
+    }
 
     function _done() {
       if (xmlhttp.status === 200) {
@@ -30,6 +40,6 @@ export default function sendRequest(params, cb) {
         reject(xmlhttp.statusText, xmlhttp.status);
       }
     }
-  });
-};
+  })
+}
 
