@@ -131,19 +131,6 @@ class MarkersManager {
     return containerMarkers
   }
 
-  // helpers for computing selection markers
-  _getMarkersForSelection(sel) {
-    // only PropertySelections are supported right now
-    if (!sel || !sel.isPropertySelection()) return []
-    const path = sel.getPath()
-    // markers are stored as one hash for each path, grouped by marker key
-    let markers = this._markers.getAll(path)
-    const filtered = markers.filter(function(m) {
-      return m.isInsideOf(sel)
-    })
-    return filtered
-  }
-
   _onDocumentChange(editSession) {
     if (editSession.hasChanged('change')) {
       let change = editSession.get('change')
@@ -247,7 +234,7 @@ class MarkersManager {
         }
         // TODO: we should do something special when the change occurred inside the marker
         if (start !== end && newStart === newEnd) {
-          this._removeMarker(marker)
+          marker.remove()
           return
         }
         if (start !== newStart) {
