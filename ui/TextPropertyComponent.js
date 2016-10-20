@@ -31,14 +31,12 @@ class TextPropertyComponent extends AnnotatedTextComponent {
     let path = this.props.path
     let markers
     if (markersManager) {
-      let surface = this.context.surface
-      let opts = {}
-      if (surface) {
-        opts.surfaceId = surface.id
-        opts.containerId = surface.getContainerId()
-      }
-      // provides the initial set of markers and registers for updates
-      markers = markersManager.register(this, path, opts)
+      // register and get initial set of markers
+      markersManager.register(this)
+      markers = markersManager.getMarkers(path, {
+        surfaceId: this.getSurfaceId(),
+        containerId: this.getContainerId()
+      })
     } else {
       const doc = this.getDocument()
       markers = doc.getAnnotations(path)
@@ -50,7 +48,7 @@ class TextPropertyComponent extends AnnotatedTextComponent {
 
   dispose() {
     if (this.context.markersManager) {
-      this.context.markersManager.deregister(this, this.props.path)
+      this.context.markersManager.deregister(this)
     }
   }
 
@@ -77,12 +75,6 @@ class TextPropertyComponent extends AnnotatedTextComponent {
       el.append($$('br'))
     }
     return el
-  }
-
-  updateMarkers(markers) {
-    this.setState({
-      markers: markers
-    })
   }
 
   getAnnotations() {
@@ -139,12 +131,19 @@ class TextPropertyComponent extends AnnotatedTextComponent {
     return this.props.doc ||this.context.doc
   }
 
-  getController() {
-    return this.props.controller || this.context.controller
+  getSurface() {
+    return this.props.surface || this.context.surface
   }
 
-  getSurface() {
-    return this.props.surface ||this.context.surface
+  // used by MarkersManager to abstract away how this is implemented
+  getSurfaceId() {
+    let surface = this.getSurface()
+    return surface ? surface.id : null
+  }
+
+  getContainerId() {
+    let surface = this.getSurface()
+    return surface ? surface.getContainerId() : null
   }
 
   isEditable() {
@@ -158,6 +157,7 @@ class TextPropertyComponent extends AnnotatedTextComponent {
   getDOMCoordinate(charPos) {
     return this._getDOMCoordinate(this.el, charPos)
   }
+
 
   _finishFragment(fragment, context, parentContext) {
     context.attr('data-length', fragment.length)
@@ -215,6 +215,7 @@ class TextPropertyComponent extends AnnotatedTextComponent {
       }
     }
   }
+
 }
 
 TextPropertyComponent.prototype._isTextPropertyComponent = true

@@ -1,6 +1,7 @@
 import uniq from 'lodash/uniq'
 import map from '../util/map'
 import forEach from '../util/forEach'
+import deleteFromArray from '../util/deleteFromArray'
 
 /*
 
@@ -16,8 +17,10 @@ class MarkersManager {
 
     // registry
     this._configs = {}
-    this._observers = {}
+    this._textProperties = {}
     this._dirtyProps = {}
+
+
     // cached data
     this._documentMarkers = {}
     this._surfaceMarkers = {}
@@ -31,58 +34,68 @@ class MarkersManager {
     this.editSession.off(this)
   }
 
-  register(observer, path, opts) {
-    path = String(path)
-    opts = opts || {}
-    const surfaceId = opts.surfaceId
-    const containerId = opts.containerId
-    let o = this._observers[path]
-    if (!o) {
-      o = this._observers[path] = []
+  register(textProperyComponent) {
+    let path = String(textProperyComponent.getPath())
+    // register the component via path
+    let textProperties = this._textProperties[path]
+    if (!textProperties) {
+      textProperties = this._textProperties[path] = []
     }
-    o.push({
-      observer: observer,
-      surfaceId: surfaceId,
-      containerId: containerId
-    })
+    textProperties.push(textProperyComponent)
     this._updateRegistration(path)
-    return this._initialFetch(path, surfaceId, containerId)
+    this._initialFetch(path, textProperyComponent.getSurfaceId(), textProperyComponent.getContainerId())
   }
 
-  deregister(observer, path) {
-    path = String(path)
-    let o = this._observers[path]
-    for (var i = 0; i < o.length; i++) {
-      if (o[i].observer === observer) {
-        o.splice(i, 1)
-      }
-    }
+  deregister(textProperyComponent) {
+    let path = String(textProperyComponent.getPath())
+    deleteFromArray(this._textProperties[path], textProperyComponent)
     this._updateRegistration(path)
+  }
+
+  getMarkers(path, opts) {
+    opts = opts || {}
+    return this._getMarkers(path, opts.surfaceId, opts.containerId)
   }
 
   _updateRegistration(path) {
-    let o = this._observers[path]
+    let textProperties = this._textProperties[path]
     let config = { containerIds: [], surfaceIds: []}
-    if (o.length === 0) {
+    if (textProperties.length === 0) {
       // TODO: stop watching
       delete this._documentMarkers[path]
       delete this._surfaceMarkers[path]
       delete this._containerMarkers[path]
-      delete this._observers[path]
+      delete this._textProperties[path]
       delete this._configs[path]
     } else {
-      for (var i = 0; i < o.length; i++) {
-        if (o[i].surfaceId) {
-          config.surfaceIds.push(o[i].surfaceId)
+      for (var i = 0; i < textProperties.length; i++) {
+        let textProperty = textProperties[i]
+        let surfaceId = textProperty.getSurfaceId()
+        let containerId = textProperty.getContainerId()
+        if (surfaceId) {
+          config.surfaceIds.push(surfaceId)
         }
-        if (o[i].containerId) {
-          config.containerIds.push(o[i].containerIds)
+        if (containerId) {
+          config.containerIds.push(containerId)
         }
       }
       config.containerIds = uniq(config.containerIds)
       config.surfaceIds = uniq(config.surfaceIds)
       this._configs[path] = config
     }
+  }
+
+  _getMarkers(path, surfaceId, containerId) {
+    let markers = this._documentMarkers[path] || []
+    if (surfaceId) {
+      let surfaceMarkers = this._surfaceMarkers[String([surfaceId].concat(path))]
+      if (surfaceMarkers) markers = markers.concat(surfaceMarkers)
+    }
+    if (containerId) {
+      let containerMarkers = this._containerMarkers[String([containerId].concat(path))]
+      if (containerMarkers) markers = markers.concat(containerMarkers)
+    }
+    return markers
   }
 
   _initialFetch(path, surfaceId, containerId) {
@@ -121,12 +134,12 @@ class MarkersManager {
   _fetchSurfaceMarkers(path, surfaceId) {
     // TODO: implement this to bring back
     let surfaceMarkers = []
-    this._surfaceMarkers[path] = surfaceMarkers
+    this._surfaceMarkers[String([surfaceId].concat(path))] = surfaceMarkers
     return surfaceMarkers
   }
 
   _fetchContainerMarkers(path, containerId) {
-    let containerMarkers = []
+    let containerMarkers = [String([containerId].concat(path))]
     this._containerMarkers[path] = containerMarkers
     return containerMarkers
   }
@@ -145,14 +158,19 @@ class MarkersManager {
   }
 
   _updateProperties() {
-    Object.keys(this._dirtyProps).forEach((id) => {
-      let os = this._observers[id]
-      let markers = this._documentMarkers[id]
-      if (os) {
-        os.forEach(function (o) {
-          o.observer.updateMarkers(markers)
-        })
+    Object.keys(this._dirtyProps).forEach((path) => {
+      let textProperties = this._textProperties[path]
+      if (textProperties) {
+        textProperties.forEach(this._updateTextProperty.bind(this))
       }
+    })
+  }
+
+  _updateTextProperty(textPropertyComponent) {
+    let path = textPropertyComponent.getPath()
+    let markers = this.getMarkers(path, textPropertyComponent.getSurfaceId(), textPropertyComponent.getContainerId())
+    textPropertyComponent.setState({
+      markers: markers
     })
   }
 
