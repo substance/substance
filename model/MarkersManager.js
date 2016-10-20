@@ -58,19 +58,22 @@ class MarkersManager {
   }
 
   setMarkers(path, type, markers) {
-    path = String(path)
+    let pathStr = String(path)
     let doc = this.editSession.getDocument()
     // remove the old ones first
     var oldMarkers = map(doc.getIndex('markers').get(path)) || []
     oldMarkers.forEach(function(m) {
-      if (m.type === type) m.remove()
+      if (m.type === type) {
+        // console.log('### removing marker')
+        m.remove()
+      }
     })
     // then create new ones
     markers.forEach(function(m) {
       doc.create(m)
     })
-    this._fetchDocumentMarkers(path)
-    this._dirtyProps[path] = true
+    this._fetchDocumentMarkers(pathStr)
+    this._dirtyProps[pathStr] = true
     this.editSession.startFlow()
   }
 
@@ -186,7 +189,8 @@ class MarkersManager {
 
   _updateTextProperty(textPropertyComponent) {
     let path = textPropertyComponent.getPath()
-    let markers = this.getMarkers(path, textPropertyComponent.getSurfaceId(), textPropertyComponent.getContainerId())
+    let markers = this._getMarkers(path, textPropertyComponent.getSurfaceId(), textPropertyComponent.getContainerId())
+    // console.log('## providing %s markers for %s', markers.length, path)
     textPropertyComponent.setState({
       markers: markers
     })
