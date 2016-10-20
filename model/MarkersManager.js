@@ -113,7 +113,7 @@ class MarkersManager {
     if (markers) {
       documentMarkers = documentMarkers.concat(markers)
     }
-    console.log('## fetched documentMarkers for %s', pathStr, documentMarkers)
+    // console.log('## fetched documentMarkers for %s', pathStr, documentMarkers)
     this._documentMarkers[pathStr] = documentMarkers
     return documentMarkers
   }
