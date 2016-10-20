@@ -1,33 +1,37 @@
-import Component from '../../ui/Component'
-import ToolGroup from './ToolGroup'
+import Toolbox from './Toolbox'
 
-class Toolbar extends Component {
+class Toolbar extends Toolbox {
   render($$) {
-    let el = $$("div").addClass(this.getClassNames())
-    let commandStates = this.props.commandStates
-    let componentRegistry = this.context.componentRegistry
-    let toolTargets = this.context.tools
-    let toolEls = []
+    let el = $$('div').addClass(this.getClassNames())
+    let activeToolGroups = this.state.activeToolGroups
 
-    toolTargets.forEach(function(tools, target) {
-      if (target === 'overlay' || target === 'context-menu') return; // skip overlay and context-menu
-
-      let ToolTargetClass = componentRegistry.get('tool-target-'+target)
-      if (!ToolTargetClass) {
-        ToolTargetClass = ToolGroup
-      }
-      let toolTargetEl = $$(ToolTargetClass, {
-        name: target,
-        tools: tools,
-        commandStates: commandStates
+    activeToolGroups.forEach((toolGroup) => {
+      let toolGroupProps = Object.assign({}, toolGroup, {
+        toolStyle: this.getToolStyle(),
+        layout: 'horizontal',
+        showIcons: true
       })
-      el.append(toolTargetEl)
+      el.append(
+        $$(toolGroup.Class, toolGroupProps)
+      )
     })
     return el
   }
 
+  getActiveToolGroupNames() {
+    return ['text', 'document', 'annotations', 'default']
+  }
+
   getClassNames() {
     return 'sc-toolbar';
+  }
+
+  getToolStyle() {
+    return 'outline'
+  }
+
+  showDisabled() {
+    return true
   }
 }
 

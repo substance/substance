@@ -254,12 +254,12 @@ class Component extends DOMElement.Delegator {
     @param  {Boolean} maybe if `true` then does not throw when no Component is found
     @return {Class}                The ComponentClass
   */
-  getComponent(nodeType, maybe) {
+  getComponent(componentName, maybe) {
     let componentRegistry = this.getComponentRegistry()
     if (!componentRegistry) throw new Error('Missing componentRegistry.')
-    const ComponentClass = componentRegistry.get(nodeType)
+    const ComponentClass = componentRegistry.get(componentName)
     if (!maybe && !ComponentClass) {
-      throw new Error('No Component registered with name ' + nodeType)
+      throw new Error('No Component registered with name ' + componentName)
     }
     return ComponentClass
   }

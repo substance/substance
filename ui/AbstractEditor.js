@@ -33,7 +33,7 @@ class AbstractEditor extends Component {
     this.editSession = props.editSession || props.documentSession
     this.doc = this.editSession.getDocument()
     this.componentRegistry = configurator.getComponentRegistry()
-    this.tools = configurator.getTools()
+    this.toolGroups = configurator.getToolGroups()
 
     this.labelProvider = configurator.getLabelProvider()
     this.iconProvider = configurator.getIconProvider()
@@ -48,7 +48,6 @@ class AbstractEditor extends Component {
     this.globalEventHandler = this.editSession.globalEventHandler
     this.editingBehavior = this.editSession.editingBehavior
     this.markersManager = this.editSession.markersManager
-
   }
 
   /**
@@ -97,7 +96,7 @@ class AbstractEditor extends Component {
       labelProvider: this.labelProvider,
       // ATTENTION: this is a map of tool target names to maps of tool names to tools
       // i.e. a declarative way to map tools to tool groups
-      tools: this.tools,
+      toolGroups: this.toolGroups,
     }
   }
 }

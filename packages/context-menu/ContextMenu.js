@@ -1,99 +1,33 @@
-import Component from '../../ui/Component'
-import isEqual from 'lodash/isEqual'
+import Toolbox from '../tools/Toolbox'
 
-class ContextMenu extends Component {
-
-  constructor(...args) {
-    super(...args)
-  }
+class ContextMenu extends Toolbox {
 
   /*
     Override with custom rendering
   */
   render($$) {
     let el = $$('div').addClass('sc-context-menu sm-hidden')
+    let activeToolGroups = this.state.activeToolGroups
 
-    let activeTools = this.state.activeTools
-
-    if (activeTools.length > 0) {
-      let toolsEl = $$('div').addClass('se-active-tools')
-      activeTools.forEach(tool => {
-        toolsEl.append(
-          $$(tool.Class, tool.toolProps).ref(tool.toolProps.name)
-        )
+    activeToolGroups.forEach((toolGroup) => {
+      let toolGroupProps = Object.assign({}, toolGroup, {
+        toolStyle: this.getToolStyle(),
+        showLabels: true,
+        // showHints: true
       })
-      el.append(toolsEl)
-    }
+
+      let toolGroupEl = $$(toolGroup.Class, toolGroupProps)
+      el.append(toolGroupEl)
+    })
     return el
   }
 
-  getInitialState() {
-    return {
-      activeTools: this.getActiveTools()
-    }
+  getActiveToolGroupNames() {
+    return ['context-menu-spell-check', 'context-menu-document']
   }
 
-  shouldRerender(newProps, newState) {
-    // poor-man's immutable style
-    let hasChanged = !isEqual(this.props, newProps) || !isEqual(this.state.activeTools, newState.activeTools)
-
-    if (!hasChanged) {
-      this.hide()
-      return false
-    }
+  showDisabled() {
     return true
-  }
-
-  didMount() {
-    // rerender the context menu after anything else has been updated
-    this.context.editSession.on('render', this._onCommandStatesChanged, this)
-  }
-
-  dispose() {
-    this.context.editSession.off(this)
-  }
-
-  show(hints) {
-    this.el.removeClass('sm-hidden')
-    this._position(hints)
-  }
-
-  hide() {
-    this.el.addClass('sm-hidden')
-  }
-
-  _onCommandStatesChanged(editSession) {
-    if (editSession.hasChanged('commandStates')) {
-      this.setState({
-        activeTools: this.getActiveTools()
-      })
-    }
-  }
-
-  /*
-    Override with your own implementation
-  */
-  getActiveTools() {
-    let commandStates = this._getCommandStates()
-    let tools = this.context.tools
-    let contextMenuTools = tools.get('context-menu')
-    let activeTools = []
-
-    contextMenuTools.forEach((tool, toolName) => {
-      let toolProps = Object.assign({}, commandStates[toolName], {
-        name: toolName,
-        label: toolName,
-        // rendering hints only interprerted by generic Tool class
-        // (= outlined button)
-        style: this.getToolStyle(toolName)
-      })
-
-      activeTools.push({
-        Class: tool.Class,
-        toolProps: toolProps
-      })
-    })
-    return activeTools
   }
 
   /*
@@ -103,8 +37,13 @@ class ContextMenu extends Component {
     return 'plain-dark'
   }
 
-  _getCommandStates() {
-    return this.context.commandManager.getCommandStates()
+  show(hints) {
+    this.el.removeClass('sm-hidden')
+    this._position(hints)
+  }
+
+  hide() {
+    this.el.addClass('sm-hidden')
   }
 
   _position(hints) {
@@ -122,7 +61,6 @@ class ContextMenu extends Component {
       this.el.css('left', leftPos)
     }
   }
-
 }
 
 export default ContextMenu

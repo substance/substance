@@ -1,7 +1,5 @@
 import UndoCommand from './UndoCommand'
 import RedoCommand from './RedoCommand'
-import CopyCommand from './CopyCommand'
-import PasteCommand from './PasteCommand'
 
 import Tool from '../tools/Tool'
 import ToolGroup from '../tools/ToolGroup'
@@ -17,6 +15,8 @@ import ButtonPackage from '../button/ButtonPackage'
 import SwitchTextTypePackage from '../switch-text-type/SwitchTextTypePackage'
 import LayoutPackage from '../layout/LayoutPackage'
 import ContextMenuPackage from '../context-menu/ContextMenuPackage'
+import OverlayPackage from '../overlay/OverlayPackage'
+import GutterPackage from '../gutter/GutterPackage'
 
 export default {
   name: 'base',
@@ -32,23 +32,23 @@ export default {
     config.import(ButtonPackage)
     config.import(LayoutPackage)
     config.import(ContextMenuPackage)
+    config.import(OverlayPackage)
+    config.import(GutterPackage)
 
-    // Register predefined tool-targets (text, document)
-    config.addComponent('tool-target-text', ToolGroup)
-    config.addComponent('tool-target-document', ToolGroup)
+    // Setup base toolgroups
+    config.addToolGroup('document')
+    config.addToolGroup('annotations')
+    config.addToolGroup('default')
+    config.addToolGroup('context-menu-document')
 
     // Commands
     config.addCommand('undo', UndoCommand)
     config.addCommand('redo', RedoCommand)
-    config.addCommand('copy', CopyCommand)
-    config.addCommand('paste', PasteCommand)
+
 
     // Tools
-    config.addTool('undo', Tool, {target: 'document'})
-    config.addTool('redo', Tool, {target: 'document'})
-    // config.addTool('copy', Tool, {target: 'context-menu'})
-    // config.addTool('paste', Tool, {target: 'context-menu'})
-
+    config.addTool('undo', Tool, {toolGroup: ['document', 'context-menu-document']})
+    config.addTool('redo', Tool, {toolGroup: ['document', 'context-menu-document']})
 
     // Icons
     config.addIcon('undo', { 'fontawesome': 'fa-undo' })
@@ -59,14 +59,6 @@ export default {
     config.addIcon('truncate', { 'fontawesome': 'fa-arrows-h' })
 
     // Labels
-    config.addLabel('copy', {
-      en: 'Copy',
-      de: 'Kopieren'
-    })
-    config.addLabel('paste', {
-      en: 'Paste',
-      de: 'Einfügen'
-    })
     config.addLabel('undo', {
       en: 'Undo',
       de: 'Rückgängig'

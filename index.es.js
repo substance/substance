@@ -85,7 +85,6 @@ export { default as SwitchTextTypeCommand } from './packages/switch-text-type/Sw
 export { default as ProseEditorPackage } from './packages/prose-editor/ProseEditorPackage'
 export { default as ProseEditor } from './packages/prose-editor/ProseEditor'
 export { default as ProseArticle } from './packages/prose-editor/ProseArticle'
-export { default as ProseEditorOverlayTools } from './packages/prose-editor/ProseEditorOverlayTools'
 
 // link
 export { default as LinkPackage } from './packages/link/LinkPackage'
@@ -145,7 +144,6 @@ export { default as TOCProvider } from './packages/toc/TOCProvider'
 export { default as ToolDropdown } from './packages/tools/ToolDropdown'
 export { default as Tool } from './packages/tools/Tool'
 export { default as Toolbar } from './packages/tools/Toolbar'
-export { default as ToolGroup } from './packages/tools/ToolGroup'
 
 // surface
 export { default as Surface } from './packages/surface/Surface'
@@ -164,7 +162,6 @@ export { default as DefaultDOMElement } from './ui/DefaultDOMElement'
 export { default as FontAwesomeIcon } from './ui/FontAwesomeIcon'
 export { default as InsertNodeCommand } from './ui/InsertNodeCommand'
 export { default as Highlights } from './ui/Highlights'
-export { default as OverlayTools } from './ui/OverlayTools'
 export { default as RenderingEngine } from './ui/RenderingEngine'
 export { default as Router } from './ui/Router'
 export { default as TextBlockComponent } from './ui/TextBlockComponent'

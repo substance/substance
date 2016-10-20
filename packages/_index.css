@@ -20,7 +20,6 @@
 @import './paragraph/_paragraph.css';
 /* prose-editor */
 @import './prose-editor/_prose-editor.css';
-@import './prose-editor/_prose-editor-overlay-tools.css';
 /* strong */
 @import './strong/_strong.css';
 /* link */
@@ -54,9 +53,9 @@
 /* inline-node */
 @import './inline-node/_inline-node.css';
 /* overlay */
-@import './overlay/_overlay-container.css';
+@import './overlay/_overlay.css';
 /* gutter */
-@import './gutter/_gutter-container.css';
+@import './gutter/_gutter.css';
 /* toc */
 @import './toc/_toc.css';
 /* surface */

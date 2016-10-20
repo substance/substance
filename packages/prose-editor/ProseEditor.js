@@ -1,6 +1,5 @@
 import AbstractEditor from '../../ui/AbstractEditor'
 import ContainerEditor from '../../ui/ContainerEditor'
-import ProseEditorOverlayTools from './ProseEditorOverlayTools'
 import Toolbar from '../tools/Toolbar'
 
 /**
@@ -25,18 +24,6 @@ import Toolbar from '../tools/Toolbar'
 */
 class ProseEditor extends AbstractEditor {
 
-  didMount() {
-    super.didMount()
-
-    this.editSession.on('render', this._onCommandStatesChanged, this)
-  }
-
-  dispose() {
-    super.dispose()
-
-    this.editSession.off(this)
-  }
-
   render($$) {
     let SplitPane = this.componentRegistry.get('split-pane')
     let el = $$('div').addClass('sc-prose-editor')
@@ -46,8 +33,7 @@ class ProseEditor extends AbstractEditor {
 
     let contentPanel = $$(ScrollPane, {
       scrollbarPosition: 'right',
-      scrollbarType: this.props.scrollbarType,
-      overlay: ProseEditorOverlayTools,
+      scrollbarType: this.props.scrollbarType
     }).append(
       editor
     ).ref('contentPanel')
@@ -77,18 +63,6 @@ class ProseEditor extends AbstractEditor {
       commands: configurator.getSurfaceCommandNames(),
       textTypes: configurator.getTextTypes()
     }).ref('body')
-  }
-
-  _onCommandStatesChanged(editSession) {
-    if (editSession.hasChanged('commandStates')) {
-      let toolbar = this.refs.toolbar
-      if (toolbar) {
-        let commandStates = this.commandManager.getCommandStates()
-        toolbar.setProps({
-          commandStates: commandStates
-        })
-      }
-    }
   }
 }
 

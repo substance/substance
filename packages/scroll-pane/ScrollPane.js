@@ -1,8 +1,6 @@
 import platform from '../../util/platform'
 import Component from '../../ui/Component'
 import Scrollbar from '../scrollbar/Scrollbar'
-import OverlayContainer from '../overlay/OverlayContainer'
-import GutterContainer from '../gutter/GutterContainer'
 import getRelativeBoundingRect from '../../util/getRelativeBoundingRect'
 import getRelativeMouseBounds from '../../util/getRelativeMouseBounds'
 
@@ -73,10 +71,10 @@ class ScrollPane extends Component {
 
   render($$) {
     let ContextMenu = this.getComponent('context-menu')
+    let Overlay = this.getComponent('overlay')
+    let Gutter = this.getComponent('gutter')
     let el = $$('div')
       .addClass('sc-scroll-pane')
-    let overlay
-    let gutter
 
     if (platform.isFF) {
       el.addClass('sm-firefox')
@@ -102,25 +100,10 @@ class ScrollPane extends Component {
       )
     }
 
-    if (this.props.overlay) {
-      // TODO: rework this. ATM we have a component `ui/Overlay`
-      // which does the positioning and gets a prop `overlay` being
-      // the actual, custom component to render the content.
-      // Hard-wiring the internal class for now, as all current implementations
-      // use the same impl.
-      overlay = $$(OverlayContainer, {
-        overlay: this.props.overlay
-      }).ref('overlay')
-    }
-
-    if (this.props.gutter) {
-      gutter = $$(GutterContainer, {
-        gutter: this.props.gutter
-      }).ref('gutter')
-    }
+    let overlay = $$(Overlay).ref('overlay')
+    let gutter = $$(Gutter).ref('gutter')
 
     let contextMenu = $$(ContextMenu).ref('contextMenu')
-
     let contentEl = $$('div').ref('content').addClass('se-content')
       .append(overlay)
       .append(gutter)
@@ -166,10 +149,18 @@ class ScrollPane extends Component {
     let overlay = this.refs.overlay
     let gutter = this.refs.gutter
     if (overlay) {
-      overlay.position(overlayHints)
+      if (overlay.hasActiveTools()) {
+        overlay.show(overlayHints)
+      } else {
+        overlay.hide()
+      }
     }
     if (gutter) {
-      gutter.position(overlayHints)
+      if (gutter.hasActiveTools()) {
+        gutter.show(overlayHints)
+      } else {
+        gutter.hide()
+      }
     }
   }
 

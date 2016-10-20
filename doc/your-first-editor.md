@@ -257,8 +257,7 @@ class SimpleWriter extends AbstractEditor {
     let Body = this.componentRegistry.get('body')
 
     let contentPanel = $$(ScrollPane, {
-      scrollbarPosition: 'right',
-      overlay: SimpleWriterOverlayTools,
+      scrollbarPosition: 'right'
     }).append(
       $$(Body, {
         disabled: this.props.disabled,
