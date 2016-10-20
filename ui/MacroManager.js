@@ -6,6 +6,10 @@ class MacroManager {
     this.context.editSession.on('final', this.onUpdate, this)
   }
 
+  dispose() {
+    this.context.editSession.off(this)
+  }
+
   onUpdate(editSession) {
     if (editSession.hasChanged('change')) {
       let change = editSession.get('change')

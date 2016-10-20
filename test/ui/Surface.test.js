@@ -32,6 +32,7 @@ function _createApp(fixtureSeed, el) {
   var surfaceManager = new SurfaceManager(documentSession)
   var app = TestContainerEditor.mount({
     context: {
+      editSession: documentSession,
       documentSession: documentSession,
       surfaceManager: surfaceManager,
       componentRegistry: componentRegistry
@@ -40,6 +41,7 @@ function _createApp(fixtureSeed, el) {
   }, el)
   var surface = app.refs.editor
   return {
+    editSession: documentSession,
     documentSession: documentSession,
     doc: doc,
     surface: surface,

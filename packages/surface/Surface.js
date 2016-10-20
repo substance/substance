@@ -707,6 +707,7 @@ class Surface extends Component {
 
   // helper to manage surface mode which is derived from the current selection
   _deriveModeFromSelection(sel) {
+    if (!sel) return null
     let surfaceId = sel.surfaceId
     let id = this.getId()
     let mode

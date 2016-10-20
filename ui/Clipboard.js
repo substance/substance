@@ -68,6 +68,7 @@ class Clipboard {
   onCopy(event) {
     // console.log("Clipboard.onCopy", arguments);
     let clipboardData = this.copy()
+    substanceGlobals._clipboardData = event.clipboardData
 
     if (event.clipboardData && clipboardData.doc) {
       event.preventDefault()
@@ -89,10 +90,8 @@ class Clipboard {
     // we keep the copied data for internal use.
     // Then we have copy'n'paste at least within one app
     Clipboard.clipboardData = clipboardData
-
     // FOR DEBUGGING
     substanceGlobals.clipboardData = clipboardData
-    substanceGlobals._clipboardData = event.clipboardData
     return clipboardData
   }
 

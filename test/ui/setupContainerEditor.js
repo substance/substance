@@ -13,6 +13,7 @@ export default function setupContainerEditor(fixture, el) {
   class App extends Component {
     getChildContext() {
       return {
+        editSession: docSession,
         documentSession: docSession,
         document: doc,
         componentRegistry: componentRegistry

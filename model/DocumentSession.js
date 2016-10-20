@@ -1,27 +1,25 @@
 import extend from 'lodash/extend'
 import isPlainObject from 'lodash/isPlainObject'
 import isArray from 'lodash/isArray'
-import EventEmitter from '../util/EventEmitter'
-import TransactionDocument from './TransactionDocument'
-import DefaultChangeCompressor from './DefaultChangeCompressor'
-import Selection from './Selection'
-import SelectionState from './SelectionState'
-import DocumentChange from './DocumentChange'
-import CommandManager from '../ui/CommandManager'
-import MacroManager from '../ui/MacroManager'
-import GlobalEventHandler from '../ui/GlobalEventHandler'
-import SurfaceManager from '../packages/surface/SurfaceManager'
-import DragManager from '../ui/DragManager'
+import DefaultChangeCompressor from '../model/DefaultChangeCompressor'
+import DocumentChange from '../model/DocumentChange'
+import EditingBehavior from '../model/EditingBehavior'
 import MarkersManager from '../model/MarkersManager'
-
-var __id__ = 0
+import Selection from '../model/Selection'
+import SelectionState from '../model/SelectionState'
+import SurfaceManager from '../packages/surface/SurfaceManager'
+import TransactionDocument from '../model/TransactionDocument'
+import CommandManager from '../ui/CommandManager'
+import DragManager from '../ui/DragManager'
+import GlobalEventHandler from '../ui/GlobalEventHandler'
+import MacroManager from '../ui/MacroManager'
+import EventEmitter from '../util/EventEmitter'
+import Registry from '../util/Registry'
 
 class DocumentSession extends EventEmitter {
 
-  constructor(doc, configurator, options) {
+  constructor(doc, options) {
     super()
-
-    this.__id__ = __id__++
 
     options = options || {}
 
@@ -33,24 +31,7 @@ class DocumentSession extends EventEmitter {
     }
 
     this.doc = doc
-
-
-    this.surfaceManager = new SurfaceManager(this)
-
-    this._context = {
-      editSession: this,
-      documentSession: this,
-      surfaceManager: this.surfaceManager,
-    }
-    if (options.context) {
-      Object.assign(this._context, options.context)
-    }
-
-    this._data = {}
-    this._isDirty = {}
-    this.selectionState = new SelectionState(doc)
-
-    // the stage is a essentially a clone of this document
+    // the stage is essentially a clone of the document
     // used to apply a sequence of document operations
     // without touching this document
     this.stage = new TransactionDocument(this.doc, this)
@@ -59,19 +40,69 @@ class DocumentSession extends EventEmitter {
     this.doneChanges = []
     this.undoneChanges = []
     this._lastChange = null
-
+    // TODO: compressor needs to be worked over
     this.compressor = options.compressor || new DefaultChangeCompressor()
+    // TODO: do we really want this?
     this.saveHandler = options.saveHandler
 
-    this.commandManager = new CommandManager(this._context, configurator.getCommands())
-    this.dragManager = new DragManager(configurator.createDragHandlers(), Object.assign({}, this._context, {
+    // this is used as a key-value store during the flow to accumulate the session state
+    this._data = {}
+    // this contains which of the state properties have been updated since the last flow
+    this._isDirty = {}
+    // TODO: should be consolidated as we now have a session state
+    this.selectionState = new SelectionState(doc)
+    // surface manager takes care of surfaces, keeps track of the currently focused surface
+    // and makes sure the DOM selection is rendered properly at the end of a flow
+    this.surfaceManager = new SurfaceManager(this)
+    // this context is provided to commands, tools, etc.
+    this._context = {
+      editSession: this,
+      //legacy
+      surfaceManager: this.surfaceManager,
+      documentSession: this,
+    }
+    // to expose custom context just provide optios.context
+    if (options.context) {
+      Object.assign(this._context, options.context)
+    }
+    // configuration:
+    let commands = []
+    let dragHandlers = []
+    let macros = []
+    let converterRegistry = new Registry()
+    let editingBehavior = new EditingBehavior()
+    if (options.configurator) {
+      let configurator = options.configurator
+      commands = configurator.getCommands()
+      dragHandlers = configurator.createDragHandlers()
+      macros = configurator.getMacros()
+      converterRegistry = configurator.getConverterRegistry()
+      editingBehavior = configurator.getEditingBehavior()
+    }
+
+    // The command manager keeps the commandStates up-to-date
+    this.commandManager = new CommandManager(this._context, commands)
+    // The drag manager dispatches drag requests to registered drag handlers
+    // TODO: after consolidating the API of this class, we probably need a less diverse context
+    this.dragManager = new DragManager(dragHandlers, Object.assign({}, this._context, {
       commandManager: this.commandManager
-    }));
-    this.macroManager = new MacroManager(this._context, configurator.getMacros())
-    this.converterRegistry = configurator.getConverterRegistry()
+    }))
+    // The macro manager dispatches to macro detectors at the end of the flow
+    this.macroManager = new MacroManager(this._context, macros)
     this.globalEventHandler = new GlobalEventHandler(this, this.surfaceManager)
-    this.editingBehavior = configurator.getEditingBehavior()
     this.markersManager = new MarkersManager(this)
+    // TODO: see how we want to expose these
+    this.converterRegistry = converterRegistry
+    this.editingBehavior = editingBehavior
+  }
+
+  dispose() {
+    this.surfaceManager.dispose()
+    this.commandManager.dispose()
+    this.dragManager.dispose()
+    this.macroManager.dispose()
+    this.globalEventHandler.dispose()
+    this.markersManager.dispose()
   }
 
   getDocument() {
@@ -84,7 +115,7 @@ class DocumentSession extends EventEmitter {
 
   // @flows
   setSelection(sel) {
-    if (!sel.surfaceId) {
+    if (sel && !sel.surfaceId) {
       let fs = this.getFocusedSurface()
       if (fs) {
         sel.surfaceId = fs.id

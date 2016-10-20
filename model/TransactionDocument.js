@@ -57,6 +57,13 @@ class TransactionDocument extends Document {
     }.bind(this))
 
     this.loadSeed(document.toJSON())
+
+    // make sure that we mirror all changes that are done outside of transactions
+    document.on('document:changed', this._onDocumentChanged, this)
+  }
+
+  dispose() {
+    this.document.off(this)
   }
 
   get isTransactionDocument() { return true }
@@ -111,6 +118,10 @@ class TransactionDocument extends Document {
 
   getOperations() {
     return this.ops
+  }
+
+  _onDocumentChanged(change) {
+    this._apply(change)
   }
 
   _apply(documentChange) {
