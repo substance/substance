@@ -16,7 +16,7 @@
 .sc-scroll-pane.sm-substance-scrollbar.sm-scrollbar-position-right .sc-scrollbar {
   right: 0px; left: auto;
 }
-.sc-scroll-pane.sm-substance-scrollbar.sm-scrollbar-position-right .sc-scrollable {
+.sc-scroll-pane.sm-substance-scrollbar.sm-scrollbar-position-right .se-scrollable {
   right: 20px;
 }
 
