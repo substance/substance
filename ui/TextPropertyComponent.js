@@ -38,9 +38,7 @@ class TextPropertyComponent extends AnnotatedTextComponent {
         opts.containerId = surface.getContainerId()
       }
       // provides the initial set of markers and registers for updates
-      // markers = markersManager.getMarkers(path, opts)
-      markers = []
-      markersManager.register(this, path, opts)
+      markers = markersManager.register(this, path, opts)
     } else {
       const doc = this.getDocument()
       markers = doc.getAnnotations(path)

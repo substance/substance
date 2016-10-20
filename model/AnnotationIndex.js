@@ -28,7 +28,7 @@ class AnnotationIndex extends DocumentIndex {
     this.byType = new TreeIndex()
   }
 
-  get property() { return "path"; }
+  get property() { return "path" }
 
   select(node) {
     return Boolean(node._isPropertyAnnotation)

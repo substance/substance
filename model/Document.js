@@ -9,6 +9,7 @@ import DocumentIndex from './DocumentIndex'
 import AnnotationIndex from './AnnotationIndex'
 import ContainerAnnotationIndex from './ContainerAnnotationIndex'
 import AnchorIndex from './AnchorIndex'
+import MarkerIndex from './MarkerIndex'
 import DocumentChange from './DocumentChange'
 import PathEventProxy from './PathEventProxy'
 import IncrementalData from './data/IncrementalData'
@@ -25,33 +26,28 @@ import JSONConverter from './JSONConverter'
 var converter = new JSONConverter()
 
 /**
-  Abstract class used for deriving a custom article implementation.
-  Requires a {@link model/DocumentSchema} to be provided on construction.
-
-  @class Document
-  @abstract
-  @extends model/AbstractDocument
+  Basic implementation of a Document.
 
   @example
 
   ```js
   import { Document } from 'substance'
 
-  class MyArticle extends Document
-    foo() {
+  class MyArticle extends Document {
+    constructor(...args) {
+      super(...args)
 
+      this.addIndex('foo', FooIndex)
     }
   }
   ```
 */
 
-/**
-  @constructor Document
-  @param {DocumentSchema} schema The document schema.
-*/
-
 class Document extends EventEmitter {
 
+  /**
+    @param {DocumentSchema} schema The document schema.
+  */
   constructor(schema) {
     super()
 
@@ -71,9 +67,7 @@ class Document extends EventEmitter {
     })
 
     // all by type
-    this.addIndex('type', DocumentIndex.create({
-      property: "type"
-    }))
+    this.addIndex('type', DocumentIndex.create({ property: "type" }))
 
     // special index for (property-scoped) annotations
     this.addIndex('annotations', new AnnotationIndex())
@@ -83,6 +77,9 @@ class Document extends EventEmitter {
     // special index for (container-scoped) annotations
     this.addIndex('container-annotations', new ContainerAnnotationIndex())
     this.addIndex('container-annotation-anchors', new AnchorIndex())
+
+    // index for markers
+    this.addIndex('markers', new MarkerIndex())
 
     // change event proxies are triggered after a document change has been applied
     // before the regular document:changed event is fired.

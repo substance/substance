@@ -9,8 +9,11 @@ class MarkersManager {
 
   constructor(editSession) {
     this.editSession = editSession
-    // document markers
-    this.markers = {}
+
+    let doc = editSession.getDocument()
+    this._annos = doc.getIndex('annotations')
+    this._markers = doc.getIndex('markers')
+
     // registry
     this._configs = {}
     this._observers = {}
@@ -101,11 +104,16 @@ class MarkersManager {
 
   _fetchDocumentMarkers(pathStr) {
     let path = pathStr.split(',')
-    let documentMarkers = map(this.editSession.getDocument().getAnnotations(path)) || []
-    let markers = this.markers[pathStr]
+    let documentMarkers = []
+    let annos = map(this._annos.get(path)) || []
+    if (annos) {
+      documentMarkers = documentMarkers.concat(annos)
+    }
+    let markers = map(this._markers.get(path)) || []
     if (markers) {
       documentMarkers = documentMarkers.concat(markers)
     }
+    console.log('## fetched documentMarkers for %s', pathStr, documentMarkers)
     this._documentMarkers[pathStr] = documentMarkers
     return documentMarkers
   }
@@ -140,7 +148,7 @@ class MarkersManager {
     if (editSession.hasChanged('change')) {
       let change = editSession.get('change')
       // update document markers
-      // this._transformMarkers(change)
+      this._transformMarkers(change)
       // fetch all document markers
       forEach(change.updated, (val, id) => {
         this._fetchDocumentMarkers(id)
@@ -168,7 +176,7 @@ class MarkersManager {
     // TODO: we need to update markers, properly. They are not part of the model and need to be moved, expanded, deleted here according
     // to incoming changes
     change.ops.forEach((op) => {
-      let markers = this.markers[op.path]
+      let markers = map(this._markers.get(op.path)) || []
       if (op.type === 'update' && op.diff._isTextOperation) {
         let diff = op.diff
         switch (diff.type) {
