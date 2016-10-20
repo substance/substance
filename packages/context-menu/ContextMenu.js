@@ -5,7 +5,6 @@ class ContextMenu extends Component {
 
   constructor(...args) {
     super(...args)
-    this.activeTools = this.getActiveTools()
   }
 
   /*
