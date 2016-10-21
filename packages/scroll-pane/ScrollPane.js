@@ -190,6 +190,7 @@ class ScrollPane extends Component {
     let mouseBounds = getRelativeMouseBounds(e, contentContainerEl)
     let contextMenu = this.refs.contextMenu
     contextMenu.show(mouseBounds)
+    this.refs.scrollbar.updatePositions()
   }
 
   /**
