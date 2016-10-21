@@ -151,22 +151,6 @@ function _off(event, method, context) {
   /* eslint-enable no-invalid-this */
 }
 
-/*
-  Internal implementation of connect.
- */
-function _connect(obj, methods, options) {
-  /* eslint-disable no-invalid-this */
-  var priority = 0
-  if (arguments.length === 3) {
-    priority = options.priority || priority
-  }
-  forEach(methods, function(method, event) {
-    _on.call(this, event, method, obj, priority)
-    this.__events__[event].sort(byPriorityDescending)
-  }.bind(this))
-  return this
-  /* eslint-enable no-invalid-this */
-}
 
 /**
   Internal implementation of disconnect.

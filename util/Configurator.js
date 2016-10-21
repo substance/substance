@@ -279,7 +279,7 @@ class Configurator {
     .
     // Usage within other code
     let labels = this.context.labelProvider
-    $$('span').append(labels.getLabel('superscript'));
+    $$('span').append(labels.getLabel('superscript'))
     ```
   */
   addLabel(labelName, label) {
@@ -315,17 +315,17 @@ class Configurator {
 
     ```js
     var seedFn = function(tx) {
-      var body = tx.get('body');
+      var body = tx.get('body')
 
       tx.create({
         id: 'p1',
         type: 'paragraph',
         content: 'This is your new paragraph!'
-      });
-      body.show('p1');
-    };
+      })
+      body.show('p1')
+    }
 
-    config.addSeed(seedFn);
+    config.addSeed(seedFn)
     ```
   */
   addSeed(seed) {
@@ -379,7 +379,7 @@ class Configurator {
   // ------------------------
 
   getConfig() {
-    return this.config;
+    return this.config
   }
 
   getStyles() {
@@ -387,7 +387,7 @@ class Configurator {
   }
 
   getSchema() {
-    var schemaConfig = this.config.schema;
+    var schemaConfig = this.config.schema
     // TODO: We may want to remove passing a schema version as
     // the version is defined by the repository / npm package version
     var schema = new DocumentSchema(schemaConfig.name, '1.0.0')
@@ -399,7 +399,7 @@ class Configurator {
   }
 
   createArticle(seed) {
-    var schemaConfig = this.config.schema;
+    var schemaConfig = this.config.schema
     var schema = this.getSchema()
     var doc = new schemaConfig.ArticleClass(schema)
     if (seed) {

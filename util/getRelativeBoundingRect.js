@@ -15,25 +15,25 @@ function _getBoundingRect(rects) {
     bottom: Number.NEGATIVE_INFINITY,
     width: Number.NaN,
     height: Number.NaN
-  };
+  }
 
   forEach(rects, function(rect) {
     if (rect.left < bounds.left) {
-      bounds.left = rect.left;
+      bounds.left = rect.left
     }
     if (rect.top < bounds.top) {
-      bounds.top = rect.top;
+      bounds.top = rect.top
     }
     if (rect.left + rect.width > bounds.right) {
-      bounds.right = rect.left + rect.width;
+      bounds.right = rect.left + rect.width
     }
     if (rect.top + rect.height > bounds.bottom) {
-      bounds.bottom = rect.top + rect.height;
+      bounds.bottom = rect.top + rect.height
     }
-  });
-  bounds.width = bounds.right - bounds.left;
-  bounds.height = bounds.bottom - bounds.top;
-  return bounds;
+  })
+  bounds.width = bounds.right - bounds.left
+  bounds.height = bounds.bottom - bounds.top
+  return bounds
 }
 
 /*
@@ -44,11 +44,11 @@ function _getBoundingRect(rects) {
   element that consists of a single client rect per line of text in variable widths.
 */
 function _getBoundingOffsetsRect(el, relativeParentEl) {
-  var relativeParentElRect = relativeParentEl.getBoundingClientRect();
-  var elRect = _getBoundingRect(el.getClientRects());
+  var relativeParentElRect = relativeParentEl.getBoundingClientRect()
+  var elRect = _getBoundingRect(el.getClientRects())
 
-  var left = elRect.left - relativeParentElRect.left;
-  var top = elRect.top - relativeParentElRect.top;
+  var left = elRect.left - relativeParentElRect.left
+  var top = elRect.top - relativeParentElRect.top
   return {
     left: left,
     top: top,
@@ -56,7 +56,7 @@ function _getBoundingOffsetsRect(el, relativeParentEl) {
     bottom: relativeParentElRect.height - top - elRect.height,
     width: elRect.width,
     height: elRect.height
-  };
+  }
 }
 
 /**
@@ -71,14 +71,14 @@ function _getBoundingOffsetsRect(el, relativeParentEl) {
 */
 function getRelativeBoundingRect(els, containerEl) {
   if (els.length === undefined) {
-    els = [els];
+    els = [els]
   }
   var elRects = map(els, function(el) {
-    return _getBoundingOffsetsRect(el, containerEl);
-  });
+    return _getBoundingOffsetsRect(el, containerEl)
+  })
 
-  var elsRect = _getBoundingRect(elRects);
-  var containerElRect = containerEl.getBoundingClientRect();
+  var elsRect = _getBoundingRect(elRects)
+  var containerElRect = containerEl.getBoundingClientRect()
   return {
     left: elsRect.left,
     top: elsRect.top,
@@ -86,7 +86,7 @@ function getRelativeBoundingRect(els, containerEl) {
     bottom: containerElRect.height - elsRect.top - elsRect.height,
     width: elsRect.width,
     height: elsRect.height
-  };
+  }
 }
 
-export default getRelativeBoundingRect;
+export default getRelativeBoundingRect
