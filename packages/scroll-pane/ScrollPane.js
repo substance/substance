@@ -131,6 +131,12 @@ class ScrollPane extends Component {
   _onPostRender() {
     if (this.refs.scrollbar && this._contentChanged) {
       this._contentChanged = false
+      this._updateScrollbar()
+    }
+  }
+
+  _updateScrollbar() {
+    if (this.refs.scrollbar) {
       this.refs.scrollbar.updatePositions()
     }
   }
@@ -162,7 +168,7 @@ class ScrollPane extends Component {
         gutter.hide()
       }
     }
-    this.refs.scrollbar.updatePositions()
+    this._updateScrollbar()
   }
 
   onHighlightsUpdated(highlights) {
@@ -190,7 +196,7 @@ class ScrollPane extends Component {
     let mouseBounds = getRelativeMouseBounds(e, contentContainerEl)
     let contextMenu = this.refs.contextMenu
     contextMenu.show(mouseBounds)
-    this.refs.scrollbar.updatePositions()
+    this._updateScrollbar()
   }
 
   /**

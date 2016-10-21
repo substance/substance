@@ -25,7 +25,7 @@ class ContextMenu extends Toolbox {
   }
 
   getActiveToolGroupNames() {
-    return ['context-menu-spell-check', 'context-menu-document']
+    return ['context-menu-primary', 'context-menu-document']
   }
 
   showDisabled() {

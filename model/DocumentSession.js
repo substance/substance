@@ -3,7 +3,6 @@ import isPlainObject from 'lodash/isPlainObject'
 import isArray from 'lodash/isArray'
 import DefaultChangeCompressor from '../model/DefaultChangeCompressor'
 import DocumentChange from '../model/DocumentChange'
-import EditingBehavior from '../model/EditingBehavior'
 import MarkersManager from '../model/MarkersManager'
 import Selection from '../model/Selection'
 import SelectionState from '../model/SelectionState'
@@ -14,7 +13,6 @@ import DragManager from '../ui/DragManager'
 import GlobalEventHandler from '../ui/GlobalEventHandler'
 import MacroManager from '../ui/MacroManager'
 import EventEmitter from '../util/EventEmitter'
-import Registry from '../util/Registry'
 
 class DocumentSession extends EventEmitter {
 
@@ -65,20 +63,16 @@ class DocumentSession extends EventEmitter {
     if (options.context) {
       Object.assign(this._context, options.context)
     }
-    // configuration:
-    let commands = []
-    let dragHandlers = []
-    let macros = []
-    let converterRegistry = new Registry()
-    let editingBehavior = new EditingBehavior()
-    if (options.configurator) {
-      let configurator = options.configurator
-      commands = configurator.getCommands()
-      dragHandlers = configurator.createDragHandlers()
-      macros = configurator.getMacros()
-      converterRegistry = configurator.getConverterRegistry()
-      editingBehavior = configurator.getEditingBehavior()
+
+    if (!options.configurator) {
+      throw new Error('No configurator provided.')
     }
+    let configurator = options.configurator
+    let commands = configurator.getCommands()
+    let dragHandlers = configurator.createDragHandlers()
+    let macros = configurator.getMacros()
+    let converterRegistry = configurator.getConverterRegistry()
+    let editingBehavior = configurator.getEditingBehavior()
 
     // The command manager keeps the commandStates up-to-date
     this.commandManager = new CommandManager(this._context, commands)
@@ -198,7 +192,6 @@ class DocumentSession extends EventEmitter {
   redo() {
     this._undoRedo('redo')
   }
-
 
   _undoRedo(which) {
     var from, to

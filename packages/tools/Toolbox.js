@@ -69,6 +69,10 @@ class Toolbox extends Component {
     let hasActiveTools = false
 
     tools.forEach((tool, toolName) => {
+      if (!commandStates[toolName]) {
+        throw new Error(`Could not find commandState for ${toolName}`)
+      }
+
       let toolProps = Object.assign({}, commandStates[toolName], {
         name: toolName,
         label: toolName,
@@ -84,11 +88,9 @@ class Toolbox extends Component {
         })
         hasActiveTools = true
       }
-
     })
 
     this._hasActiveTools = hasActiveTools
-
     return activeTools
   }
 

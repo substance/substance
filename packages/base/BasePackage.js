@@ -39,7 +39,9 @@ export default {
     config.addToolGroup('document')
     config.addToolGroup('annotations')
     config.addToolGroup('default')
+    config.addToolGroup('context-menu-primary')
     config.addToolGroup('context-menu-document')
+    config.addToolGroup('insert')
 
     // Commands
     config.addCommand('undo', UndoCommand)

@@ -15,6 +15,7 @@ class CommandManager {
     if (!context.editSession) {
       throw new Error('DocumentSession required.')
     }
+
     this.editSession = context.editSession
     this.doc = this.editSession.getDocument()
     this.context = extend({}, context, {
