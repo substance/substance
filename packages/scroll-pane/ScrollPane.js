@@ -162,6 +162,7 @@ class ScrollPane extends Component {
         gutter.hide()
       }
     }
+    this.refs.scrollbar.updatePositions()
   }
 
   onHighlightsUpdated(highlights) {
@@ -203,12 +204,11 @@ class ScrollPane extends Component {
     Returns the cumulated height of a panel's content
   */
   getContentHeight() {
-    let contentHeight = 0
-    let contentEl = this.refs.content.el
-    contentEl.childNodes.forEach(function(el) {
-      contentHeight += el.getOuterHeight()
-    })
-    return contentHeight
+    let contentEl = this.refs.content.el.getNativeElement()
+    // Important to use scrollHeight here (e.g. to consider overflowing
+    // content, that stretches the content area, such as an overlay or
+    // a context menu)
+    return contentEl.scrollHeight
   }
 
   /**
@@ -230,7 +230,7 @@ class ScrollPane extends Component {
   */
   getScrollPosition() {
     let scrollableEl = this.getScrollableElement()
-    return Math.floor(scrollableEl.getProperty('scrollTop') + 1)
+    return scrollableEl.getProperty('scrollTop')
   }
 
   /**
