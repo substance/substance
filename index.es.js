@@ -105,6 +105,10 @@ export { default as Button } from './packages/button/Button'
 export { default as ScrollPanePackage } from './packages/scroll-pane/ScrollPanePackage'
 export { default as ScrollPane } from './packages/scroll-pane/ScrollPane'
 
+// spell-check
+export { default as SpellCheckPackage } from './packages/spell-check/SpellCheckPackage'
+export { default as SpellCheckManager } from './packages/spell-check/SpellCheckManager'
+
 // split-pane
 export { default as SplitPanePackage } from './packages/split-pane/SplitPanePackage'
 export { default as SplitPane } from './packages/split-pane/SplitPane'

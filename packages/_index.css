@@ -60,5 +60,7 @@
 @import './toc/_toc.css';
 /* surface */
 @import './surface/_surface.css';
+/* spell-check */
+@import './spell-check/_spell-error.css';
 /* text-property */
 @import './text-property/_text-property.css';

@@ -16,8 +16,10 @@ class ContextMenu extends Toolbox {
         // showHints: true
       })
 
-      let toolGroupEl = $$(toolGroup.Class, toolGroupProps)
-      el.append(toolGroupEl)
+      if (toolGroupProps.tools.size > 0) {
+        let toolGroupEl = $$(toolGroup.Class, toolGroupProps)
+        el.append(toolGroupEl)
+      }
     })
     return el
   }

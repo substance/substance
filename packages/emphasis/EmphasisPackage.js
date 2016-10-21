@@ -15,7 +15,7 @@ export default {
     config.addComponent('emphasis', AnnotationComponent)
     config.addCommand('emphasis', AnnotationCommand, { nodeType: Emphasis.type })
     config.addTool('emphasis', AnnotationTool, {
-      target: options.toolTarget || 'annotations'
+      toolGroup: options.toolGroup || 'annotations'
     })
     config.addIcon('emphasis', { 'fontawesome': 'fa-italic' });
     config.addLabel('emphasis', {

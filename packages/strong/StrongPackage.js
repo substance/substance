@@ -15,7 +15,7 @@ export default {
     config.addComponent('strong', AnnotationComponent)
     config.addCommand('strong', AnnotationCommand, { nodeType: 'strong' })
     config.addTool('strong', AnnotationTool, {
-      target: options.toolTarget || 'annotations'
+      toolGroup: options.toolGroup || 'annotations'
     })
     config.addIcon('strong', { 'fontawesome': 'fa-bold' })
     config.addLabel('strong', {
