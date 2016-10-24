@@ -1,6 +1,7 @@
 import extend from 'lodash/extend'
 import isPlainObject from 'lodash/isPlainObject'
 import isFunction from 'lodash/isFunction'
+import isString from 'lodash/isString'
 import DocumentChange from '../model/DocumentChange'
 import MarkersManager from '../model/MarkersManager'
 import Selection from '../model/Selection'
@@ -294,8 +295,8 @@ class EditorSession {
     @param {Object} [options] options for the resource handler
 
   */
-  onUpdate(resource, handler, context, options) {
-    return this._registerObserver('update', resource, handler, context, options)
+  onUpdate(...args) {
+    return this._registerObserver('update', args)
   }
 
   /**
@@ -328,8 +329,8 @@ class EditorSession {
     }
     ```
   */
-  onRender(resource, handler, context, options) {
-    return this._registerObserver('render', resource, handler, context, options)
+  onRender(...args) {
+    return this._registerObserver('render', args)
   }
 
   /**
@@ -345,8 +346,8 @@ class EditorSession {
     @param {Object} context owner of the handler
     @param {Object} [options] options for the resource handler
   */
-  onPostRender(resource, handler, context, options) {
-    return this._registerObserver('post-render', resource, handler, context, options)
+  onPostRender(...args) {
+    return this._registerObserver('post-render', args)
   }
 
   /**
@@ -362,12 +363,12 @@ class EditorSession {
     @param {Object} [options] options for the resource handler
 
   */
-  onPosition(resource, handler, context, options) {
-    return this._registerObserver('position', resource, handler, context, options)
+  onPosition(...args) {
+    return this._registerObserver('position', args)
   }
 
-  onFinalize(resource, handler, context, options) {
-    return this._registerObserver('finalize', resource, handler, context, options)
+  onFinalize(...args) {
+    return this._registerObserver('finalize', args)
   }
 
   /*
@@ -406,12 +407,8 @@ class EditorSession {
     })
     ```
   */
-  on(stage, handler, observer, options) {
-    let resource = null
-    if (options && options.resource) {
-      resource = options.resource
-    }
-    return this._registerObserver(stage, resource, handler, observer, options)
+  on(stage, ...args) {
+    return this._registerObserver(stage, args)
   }
 
   off(observer) {
@@ -590,23 +587,43 @@ class EditorSession {
     this._postponed.push(fn)
   }
 
-  _registerObserver(stage, resource, handler, context, options) {
-    if (isFunction(resource)) {
-      options = context
-      context = handler
-      handler = resource
-      resource = null
+  _parseObserverArgs(args) {
+    let params = { resource: null, handler: null, context: null, options: {} }
+    // first can be a string
+    let idx = 0
+    let arg = args[idx]
+    if (isString(arg)) {
+      params.resource = arg
+      idx++
+      arg = args[idx]
     }
+    if (!arg) {
+      throw new Error('Provided handler function was nil.')
+    }
+    if (!isFunction(arg)) {
+      throw new Error('Expecting a handler Function.')
+    }
+    params.handler = arg
+    idx++
+    arg = args[idx]
+    if (arg) {
+      params.context = arg
+      idx++
+      arg = args[idx]
+    }
+    if (arg) {
+      params.options = arg
+    }
+    return params
+  }
+
+  _registerObserver(stage, args) {
+    let observer = this._parseObserverArgs(args)
     let observers = this._observers[stage]
     if (!observers) {
       observers = this._observers[stage] = []
     }
-    observers.push({
-      resource: resource,
-      handler: handler,
-      context: context,
-      options: options || {}
-    })
+    observers.push(observer)
   }
 
   _deregisterObserver(observer) {

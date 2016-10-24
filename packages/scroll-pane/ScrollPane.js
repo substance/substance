@@ -57,7 +57,7 @@ class ScrollPane extends Component {
         attributes: true,
         characterData: true,
         childList: true,
-      });
+      })
       this.context.editorSession.onPosition(this._onPosition, this)
     }
   }
@@ -128,7 +128,7 @@ class ScrollPane extends Component {
     this._contentChanged = true
   }
 
-  _onPostRender() {
+  _onPosition() {
     if (this.refs.scrollbar && this._contentChanged) {
       this._contentChanged = false
       this._updateScrollbar()

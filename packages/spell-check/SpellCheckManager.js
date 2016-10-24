@@ -18,7 +18,7 @@ class SpellCheckManager {
     this._schedule = {}
     this._scheduleCheck = debounce(this._runSpellCheck.bind(this), wait)
 
-    session.on('final', this._onDocumentChange, this)
+    session.onFinalize('document', this._onDocumentChange, this)
   }
 
   dispose() {
@@ -36,17 +36,14 @@ class SpellCheckManager {
     })
   }
 
-  _onDocumentChange(editorSession) {
-    if (editorSession.hasChanged('change')) {
-      // Note: instead of analyzing the model, we consider
-      // all existing TextPropertyComponents instead
-      // as this reflects what is presented to the user
-      const textProperties = this.textPropertyManager._textProperties
-      let change = editorSession.get('change')
-      Object.keys(change.updated).forEach((pathStr) => {
-        if (textProperties[pathStr]) this._scheduleCheck(pathStr)
-      })
-    }
+  _onDocumentChange(change) {
+    // Note: instead of analyzing the model, we consider
+    // all existing TextPropertyComponents instead
+    // as this reflects what is presented to the user
+    const textProperties = this.textPropertyManager._textProperties
+    Object.keys(change.updated).forEach((pathStr) => {
+      if (textProperties[pathStr]) this._scheduleCheck(pathStr)
+    })
   }
 
   _runSpellCheck(pathStr) {
