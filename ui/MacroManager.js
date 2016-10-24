@@ -3,19 +3,15 @@ class MacroManager {
   constructor(context, macros) {
     this.context = context
     this.macros = macros
-    this.context.editorSession.onFinalize(this.onUpdate, this)
+    this.context.editorSession.onFinalize('document', this.onDocumentChanged, this)
   }
 
   dispose() {
     this.context.editorSession.off(this)
   }
 
-  onUpdate(editorSession) {
-    if (editorSession.hasChanged('change')) {
-      let change = editorSession.get('change')
-      let info = editorSession.get('info')
-      this.executeMacros(change, info)
-    }
+  onDocumentChanged(change, info) {
+    this.executeMacros(change, info)
   }
 
   executeMacros(change, info) {
@@ -38,12 +34,12 @@ class MacroManager {
       node: node,
       path: path,
       text: text,
+      editorSession: this.context.editorSession,
       selection: this.context.editorSession.getSelection()
     }
     for (let i = 0; i < this.macros.length; i++) {
       let macro = this.macros[i]
       let executed = macro.execute(props, this.context)
-
       if (executed) {
         break
       }

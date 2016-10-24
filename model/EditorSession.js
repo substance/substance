@@ -52,6 +52,8 @@ class EditorSession {
     this._info = null
 
     this._flowStages = ['update', 'render', 'post-render', 'position', 'finalize']
+    // to get something executed directly after a flow
+    this._postponed = []
 
     this._observers = {}
 
@@ -171,6 +173,10 @@ class EditorSession {
 
   getFocusedSurface() {
     return this.surfaceManager.getFocusedSurface()
+  }
+
+  getSurface(surfaceId) {
+    return this.surfaceManager.getSurface(surfaceId)
   }
 
   canUndo() {
@@ -558,6 +564,13 @@ class EditorSession {
       this._resetFlow()
       this._flowing = false
     }
+    try {
+      this._postponed.forEach((fn) => {
+        fn(this)
+      })
+    } finally {
+      this._postponed = []
+    }
   }
 
   /*
@@ -569,6 +582,10 @@ class EditorSession {
     this._flowStages.forEach((stage) => {
       this._notifyObservers(stage)
     })
+  }
+
+  postpone(fn) {
+    this._postponed.push(fn)
   }
 
   _registerObserver(stage, resource, handler, context, options) {
