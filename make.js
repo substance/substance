@@ -84,12 +84,12 @@ function _testBrowser(transpileToES5) {
   })
 }
 
-b.task('test:browser', function() {
+b.task('test:browser', ['test:clean', 'test:assets'], function() {
   // buble necessary here, as travis has old browser versions
   _testBrowser(true)
 })
 
-b.task('test:browser:pure', function() {
+b.task('test:browser:pure', ['test:clean', 'test:assets'], function() {
   // Pure ES6, and no buble here, for better dev experience
   _testBrowser(false)
 })
