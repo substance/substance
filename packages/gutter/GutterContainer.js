@@ -25,7 +25,7 @@ class GutterContainer extends Component {
 
   didMount() {
     // rerender the overlay content after anything else has been updated
-    this.context.editSession.on('render', this._onCommandStatesUpdated, this)
+    this.context.editSession.onRender('commandStates', this.rerender, this)
   }
 
   dispose() {
@@ -39,12 +39,6 @@ class GutterContainer extends Component {
     if (gutterEl.isVisible()) {
       this._position(hints);
       this.el.removeClass('sm-hidden')
-    }
-  }
-
-  _onCommandStatesUpdated(editSession) {
-    if (editSession.hasChanged('commandStates')) {
-      this.rerender()
     }
   }
 

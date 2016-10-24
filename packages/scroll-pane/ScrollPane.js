@@ -58,7 +58,7 @@ class ScrollPane extends Component {
         characterData: true,
         childList: true,
       });
-      this.context.editSession.on('post-render', this._onPostRender, this)
+      this.context.editSession.onPosition(this._onPosition, this)
     }
   }
 
@@ -66,7 +66,7 @@ class ScrollPane extends Component {
     if (this.props.highlights) {
       this.props.highlights.off(this)
     }
-    this.context.flow.off(this)
+    this.context.editSession.off(this)
   }
 
   render($$) {

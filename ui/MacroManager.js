@@ -3,7 +3,7 @@ class MacroManager {
   constructor(context, macros) {
     this.context = context
     this.macros = macros
-    this.context.editSession.on('final', this.onUpdate, this)
+    this.context.editSession.onFinalize(this.onUpdate, this)
   }
 
   dispose() {

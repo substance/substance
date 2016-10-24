@@ -31,7 +31,7 @@ class CommandManager {
       this.commandRegistry.add(command.name, command)
     }.bind(this))
 
-    this.editSession.on('model', this.onSessionUpdate, this)
+    this.editSession.onUpdate(this.onSessionUpdate, this)
     this.updateCommandStates(this.editSession)
   }
 
@@ -58,7 +58,7 @@ class CommandManager {
     // poor-man's immutable style
     if (!isEqual(this.commandStates, commandStates)) {
       this.commandStates = commandStates
-      editSession.set('commandStates', commandStates)
+      editSession.setCommandStates(commandStates)
     }
   }
 

@@ -92,7 +92,7 @@ class Surface extends Component {
       // this.domObserver = new window.MutationObserver(this.onDomMutations.bind(this));
       // this.domObserver.observe(this.el.getNativeElement(), { subtree: true, characterData: true, characterDataOldValue: true });
     }
-    this.editSession.on('render', this._onSelectionChanged, this)
+    this.editSession.onRender('selection', this._onSelectionChanged, this)
   }
 
 
@@ -693,15 +693,12 @@ class Surface extends Component {
     this.el.setAttribute('contenteditable', true)
   }
 
-  _onSelectionChanged(editSession) {
-    if (editSession.hasChanged('selection')) {
-      let selection = editSession.get('selection')
-      let newMode = this._deriveModeFromSelection(selection)
-      if (this.state.mode !== newMode) {
-        this.extendState({
-          mode: newMode
-        })
-      }
+  _onSelectionChanged(selection) {
+    let newMode = this._deriveModeFromSelection(selection)
+    if (this.state.mode !== newMode) {
+      this.extendState({
+        mode: newMode
+      })
     }
   }
 

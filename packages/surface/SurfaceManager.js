@@ -9,8 +9,8 @@ class SurfaceManager {
       focusedSurfaceId: null,
       selection: null,
     }
-    editSession.on('model', this._onSelectionChanged, this)
-    editSession.on('post-render', this._recoverDOMSelection, this)
+    editSession.onUpdate('selection', this._onSelectionChanged, this)
+    editSession.onPostRender(this._recoverDOMSelection, this)
   }
 
   dispose() {
@@ -67,10 +67,7 @@ class SurfaceManager {
     }
   }
 
-  _onSelectionChanged(session) {
-    // TODO: would be nice if we had a more convenient events
-    if (!session.hasChanged('selection')) return
-    const selection = session.getSelection()
+  _onSelectionChanged(selection) {
     const state = this._state
     state.selection = selection
     state.focusedSurfaceId = selection.surfaceId

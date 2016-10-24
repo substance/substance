@@ -128,8 +128,9 @@ class DocumentChange {
         deleted[op.val.id] = op.val
       }
       if (op.type === "set" || op.type === "update") {
-        // The old as well the new one is affected
         updated[op.path] = true
+        // also mark the node itself as dirty
+        updated[op.path[0]] = true
       }
       _checkAnnotation(op)
     }
@@ -192,6 +193,7 @@ class DocumentChange {
   }
 
   isUpdated(path) {
+    // TODO: decide which API we prefer
     return this.isAffected(path)
   }
 

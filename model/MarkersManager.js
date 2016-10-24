@@ -26,8 +26,8 @@ class MarkersManager {
     this._surfaceMarkers = {}
     this._containerMarkers = {}
 
-    editSession.on('model', this._onDocumentChange, this)
-    editSession.on('render', this._updateProperties, this)
+    editSession.onUpdate('document', this._onDocumentChange, this)
+    editSession.onRender(this._updateProperties, this)
   }
 
   dispose() {
@@ -164,17 +164,14 @@ class MarkersManager {
     return containerMarkers
   }
 
-  _onDocumentChange(editSession) {
-    if (editSession.hasChanged('change')) {
-      let change = editSession.get('change')
-      // update document markers
-      this._transformMarkers(change)
-      // fetch all document markers
-      forEach(change.updated, (val, id) => {
-        this._fetchDocumentMarkers(id)
-        this._dirtyProps[id] = true
-      })
-    }
+  _onDocumentChange(change) {
+    // update document markers
+    this._transformMarkers(change)
+    // fetch all document markers
+    forEach(change.updated, (val, id) => {
+      this._fetchDocumentMarkers(id)
+      this._dirtyProps[id] = true
+    })
   }
 
   _updateProperties() {

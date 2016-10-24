@@ -88,7 +88,9 @@ class ContainerEditor extends Surface {
   didMount() {
     super.didMount.apply(this, arguments)
     let editSession = this.getEditSession()
-    editSession.on('render', this._onContainerChanged, this)
+    editSession.onRender('document', this._onContainerChanged, this, {
+      path: [this.props.node.id, 'nodes']
+    })
   }
 
   dispose() {
@@ -333,11 +335,7 @@ class ContainerEditor extends Surface {
   }
 
   // called by flow when subscribed resources have been updated
-  _onContainerChanged(editSession) {
-    if (!editSession.hasChanged('change')) return
-    let change = editSession.get('change')
-    if (!change.updated[this.container.getContentPath()]) return
-
+  _onContainerChanged(change) {
     let doc = this.getDocument()
     // first update the container
     let renderContext = RenderingEngine.createContext(this)
