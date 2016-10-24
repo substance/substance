@@ -53,7 +53,7 @@ class EditorSession {
 
     this._flowStages = ['update', 'render', 'post-render', 'position', 'finalize']
 
-    this._eventProxies = {}
+    this._observers = {}
 
     // TODO: do we really want this?
     this._hasUnsavedChanges = false
@@ -139,6 +139,10 @@ class EditorSession {
       default:
         throw new Error('Unknown resource: ' + resourceName)
     }
+  }
+
+  getConfigurator() {
+    return this.configurator
   }
 
   getDocument() {
@@ -567,17 +571,6 @@ class EditorSession {
     })
   }
 
-  _notifyObservers(stage) {
-    // TODO: this could be optimized by storing the proxies
-    // hierarchically, i.e. first by stage, then by resource
-    let proxy = this._eventProxies['@'+stage]
-    if (proxy) proxy.notifyObservers()
-    this._resources.forEach((resource) => {
-      let proxy = this._eventProxies[resource+'@'+stage]
-      if (proxy) proxy.notifyObservers()
-    })
-  }
-
   _registerObserver(stage, resource, handler, context, options) {
     if (isFunction(resource)) {
       options = context
@@ -585,29 +578,60 @@ class EditorSession {
       handler = resource
       resource = null
     }
-    let proxyId = (resource ? resource : '') + '@' + stage
-    let proxy = this._eventProxies[proxyId]
-    // lazy creation of proxies
-    if (!proxy) {
-      if (!resource) {
-        proxy = new StageEventProxy(this, stage)
-      } else {
-        if (resource === 'document') {
-          proxy = new DocumentEventProxy(this, stage)
-        } else {
-          proxy = new ResourceEventProxy(this, stage, resource)
-        }
-      }
-      this._eventProxies[proxy.id] = proxy
+    let observers = this._observers[stage]
+    if (!observers) {
+      observers = this._observers[stage] = []
     }
-    proxy.registerObserver(handler, context, options)
+    observers.push({
+      resource: resource,
+      handler: handler,
+      context: context,
+      options: options || {}
+    })
   }
 
   _deregisterObserver(observer) {
     // TODO: we should optimize this, as ATM this needs to traverse
     // a lot of registered listeners
-    forEach(this._eventProxies, function(proxy) {
-      proxy.deregisterObserver(observer)
+    forEach(this.observers, function(observers) {
+      for (var i = 0; i < observers.length; i++) {
+        var entry = observers[i]
+        if (entry.context === observer) {
+          // console.log('## removing observer')
+          observers.splice(i, 1)
+          i--
+        }
+      }
+    })
+  }
+
+  _notifyObservers(stage) {
+    // TODO: this is not hierarchical anymore
+    // i.e. probably we have to expect degradation of performance
+    // with huuuge documents, as the number of listeners is
+    // We could optimize this by 'compiling' a list of observers for
+    // each configuration, maybe lazily
+    // for now we accept this circumstance
+    const observers = this._observers[stage]
+    if (!observers) return
+    observers.forEach((o) => {
+      if (!o.resource) {
+        o.handler.call(o.context, this)
+      } else if (o.resource === 'document') {
+        if (!this.hasDocumentChanged()) return
+        const change = this.getChange()
+        const info = this.getChangeInfo()
+        const path = o.options.path
+        if (!path) {
+          o.handler.call(o.context, change, info, this)
+        } else if (change.isAffected(path)) {
+          o.handler.call(o.context, change, info, this)
+        }
+      } else {
+        if (!this.hasChanged(o.resource)) return
+        const resource = this.get(o.resource)
+        o.handler.call(o.context, resource, this)
+      }
     })
   }
 
@@ -626,89 +650,3 @@ class EditorSession {
 }
 
 export default EditorSession
-
-// Event Proxies
-
-class EventProxy {
-  constructor(editorSession, stage) {
-    this.stage = stage
-    this.editorSession = editorSession
-    this.observers = []
-  }
-
-  dispose() {
-    this.observers = []
-  }
-
-  registerObserver(handler, observer, options) {
-    if (!isFunction(handler)) throw new Error('Invalid argument: handler must be a Function')
-    this.observers.push({
-      observer: observer,
-      handler: handler,
-      options: options || {}
-    })
-  }
-
-  deregisterObserver(observer) {
-    for (var i = 0; i < this.observers.length; i++) {
-      var entry = this.observers[i]
-      if (entry.observer === observer) {
-        // console.log('## removing observer from', this)
-        this.observers.splice(i, 1)
-        i--
-      }
-    }
-  }
-}
-
-class StageEventProxy extends EventProxy {
-  constructor(editorSession, stage) {
-    super(editorSession, stage)
-    this.id = '@'+stage
-  }
-  notifyObservers() {
-    this.observers.forEach((o) => {
-      o.handler.call(o.observer, this.editorSession)
-    })
-  }
-}
-
-class ResourceEventProxy extends EventProxy {
-  constructor(editorSession, stage, resourceName) {
-    super(editorSession, stage)
-    this.id = resourceName+'@'+stage
-    this.resourceName = resourceName
-  }
-  notifyObservers() {
-    const resource = this.editorSession.get(this.resourceName)
-    this.observers.forEach((o) => {
-      o.handler.call(o.observer, resource, this.editorSession)
-    })
-  }
-}
-
-class DocumentEventProxy extends EventProxy {
-  constructor(editorSession, stage) {
-    super(editorSession, stage)
-    this.id = 'document@'+stage
-  }
-
-  notifyObservers() {
-    const editorSession = this.editorSession
-    const change = editorSession.getChange()
-    const info = editorSession.getChangeInfo()
-    if (!change) return
-    this.observers.forEach(function(o) {
-      let path = o.options.path
-      // listeners for all document changes have no path
-      if (!path) {
-        o.handler.call(o.observer, change, info, editorSession)
-      }
-      // TODO: it might be valueable to provide the old value
-      // in case of property listeners
-      else if (change.isAffected(path)) {
-        o.handler.call(o.observer, change, info, editorSession)
-      }
-    })
-  }
-}
