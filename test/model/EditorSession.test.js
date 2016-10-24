@@ -2,7 +2,7 @@ import { module, spy } from 'substance-test'
 
 import extend from 'lodash/extend'
 import EditorSession from '../../model/EditorSession'
-import Configurator from '../../model/Configurator'
+import Configurator from '../../util/Configurator'
 import fixture from '../fixtures/createTestArticle'
 import simple from '../fixtures/simple'
 
@@ -36,11 +36,11 @@ test("Transaction: before and after state.", function(t) {
 test("Keeping TransactionDocument up-to-date.", function(t) {
   var doc = fixture(simple)
   var session = _createEditorSession(doc)
-  session.stage._apply = spy(session.stage, '_apply')
+  session._transactionDocument._apply = spy(session._transactionDocument, '_apply')
 
   doc.create({ type: 'paragraph', id: 'foo', content: 'foo'})
-  var p = session.stage.get('foo')
-  t.equal(session.stage._apply.callCount, 1, "Stage should have been updated.")
+  var p = session._transactionDocument.get('foo')
+  t.equal(session._transactionDocument._apply.callCount, 1, "Stage should have been updated.")
   t.notNil(p, "Stage should contain new paragraph node.")
   t.equal(p.content, "foo")
   t.end()

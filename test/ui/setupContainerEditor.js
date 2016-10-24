@@ -1,7 +1,7 @@
 import EditorSession from '../../model/EditorSession'
 import Component from '../../ui/Component'
 import ContainerEditor from '../../ui/ContainerEditor'
-import Configurator from '../../ui/Configurator'
+import Configurator from '../../util/Configurator'
 import createTestArticle from '../fixtures/createTestArticle'
 import createTestComponentRegistry from '../fixtures/createTestComponentRegistry'
 
