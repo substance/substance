@@ -241,8 +241,6 @@ class EditorSession {
       }
     })
     ```
-
-    @flows
   */
   transaction(transformation, info) {
     if (this.isTransacting) {
@@ -564,13 +562,17 @@ class EditorSession {
       this._resetFlow()
       this._flowing = false
     }
-    try {
-      this._postponed.forEach((fn) => {
-        fn(this)
+    // Note: postponing is ATM used only by Macros
+    // HACK: to avoid having multiple flows at the same time
+    // we are running this deferred
+    const postponed = this._postponed
+    const self = this
+    this._postponed = []
+    setTimeout(function() {
+      postponed.forEach(function(fn) {
+        fn(self)
       })
-    } finally {
-      this._postponed = []
-    }
+    }, 0)
   }
 
   /*
