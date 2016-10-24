@@ -4,7 +4,6 @@ import extend from 'lodash/extend'
 import clone from 'lodash/clone'
 import $ from 'substance-cheerio'
 import EventEmitter from '../util/EventEmitter'
-import map from '../util/map'
 import DOMElement from './DOMElement'
 
 class CheerioDOMElement extends DOMElement {
@@ -315,14 +314,14 @@ class CheerioDOMElement extends DOMElement {
   }
 
   findAll(cssSelector) {
-    let result = this.$el.find(cssSelector)
-    if (result.length > 0) {
-      return map(result, function(el) {
-        return this._wrapNativeElement(el)
+    let found = this.$el.find(cssSelector)
+    let result = []
+    if (found.length > 0) {
+      found.each(function(_, el) {
+        result.push(this._wrapNativeElement(el))
       }.bind(this))
-    } else {
-      return []
     }
+    return result
   }
 
   _normalizeChild(child) {
