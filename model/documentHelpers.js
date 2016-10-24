@@ -127,4 +127,16 @@ documentHelpers.getTextForSelection = function(doc, sel) {
   }
 };
 
+documentHelpers.getMarkersForSelection = function(doc, sel) {
+  // only PropertySelections are supported right now
+  if (!sel || !sel.isPropertySelection()) return []
+  const path = sel.getPath()
+  // markers are stored as one hash for each path, grouped by marker key
+  let markers = doc.getIndex('markers').get(path)
+  const filtered = filter(markers, function(m) {
+    return m.isInsideOf(sel)
+  })
+  return filtered
+}
+
 export default documentHelpers;

@@ -1,7 +1,7 @@
 import isEqual from 'lodash/isEqual'
 import last from 'lodash/last'
-import each from 'lodash/each'
 import EventEmitter from '../util/EventEmitter'
+import forEach from '../util/forEach'
 import DocumentNode from './DocumentNode'
 import Selection from './Selection'
 import Anchor from './Anchor'
@@ -75,8 +75,7 @@ class ContainerAnnotation extends DocumentNode {
       this.highlighted = highlighted
       this.highlightedScope = scope
       this.emit('highlighted', highlighted, scope)
-
-      each(this.fragments, function(frag) {
+      forEach(this.fragments, function(frag) {
         frag.emit('highlighted', highlighted, scope)
       })
     }

@@ -2,12 +2,12 @@ import extend from 'lodash/extend'
 import cheerio from 'cheerio'
 import serialize from 'dom-serializer'
 
-var $ = null;
+var $ = null
 
 function _createElement(data) {
-  var options = {};
+  var options = {}
   if (data.root && data.root.options) {
-    options = data.root.options;
+    options = data.root.options
   }
   return extend({
     attribs: {},
@@ -17,24 +17,24 @@ function _createElement(data) {
     options: options,
     next: null,
     prev: null
-  }, data);
+  }, data)
 }
 
 if (!$) {
   if (cheerio.prototype) {
-    cheerio.prototype.prop = cheerio.prototype.attr;
-    cheerio.prototype.removeProp = cheerio.prototype.removeAttr;
-    cheerio.prototype.on = function() {};
-    cheerio.prototype.off = function() {};
-    $ = cheerio.load('', {decodeEntities: false});
+    cheerio.prototype.prop = cheerio.prototype.attr
+    cheerio.prototype.removeProp = cheerio.prototype.removeAttr
+    cheerio.prototype.on = function() {}
+    cheerio.prototype.off = function() {}
+    $ = cheerio.load('', {decodeEntities: false})
 
     $._createElement = function(tagName, root) {
       return _createElement({
         type: "tag",
         name: tagName,
         root: root
-      });
-    };
+      })
+    }
 
     /*
        we need to be able to create native text nodes efficiently
@@ -46,31 +46,31 @@ if (!$) {
         type: 'text',
         data: text,
         root: root
-      });
-    };
+      })
+    }
 
     var parseMarkup = function(str, options) {
-      var parsed = $.load(str, options);
-      var root = parsed.root()[0];
+      var parsed = $.load(str, options)
+      var root = parsed.root()[0]
       if (!root.options) {
-        root.options = options;
+        root.options = options
       }
-      return root.children.slice();
-    };
+      return root.children.slice()
+    }
 
     $.parseHTML = function(str) {
-      return parseMarkup(str, { xmlMode: false });
-    };
+      return parseMarkup(str, { xmlMode: false })
+    }
 
     $.parseXML = function(str) {
-      return parseMarkup(str, { xmlMode: true });
-    };
+      return parseMarkup(str, { xmlMode: true })
+    }
 
     $._serialize = function(el) {
-      var opts = el.options || (el.root && el.root.options);
-      return serialize(el, opts);
-    };
+      var opts = el.options || (el.root && el.root.options)
+      return serialize(el, opts)
+    }
   }
 }
 
-export default $;
+export default $

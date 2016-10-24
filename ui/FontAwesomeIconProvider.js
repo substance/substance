@@ -1,4 +1,4 @@
-import forEach from 'lodash/forEach'
+import forEach from '../util/forEach'
 import Icon from './FontAwesomeIcon'
 
 class FontAwesomeIconProvider {

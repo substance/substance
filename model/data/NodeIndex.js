@@ -1,5 +1,5 @@
 import isArray from 'lodash/isArray'
-import each from 'lodash/each'
+import forEach from '../../util/forEach'
 import TreeIndex from '../../util/TreeIndex'
 
 /*
@@ -81,7 +81,7 @@ class NodeIndex {
     if (!isArray(values)) {
       values = [values]
     }
-    each(values, function(value) {
+    forEach(values, function(value) {
       this.index.set([value, node.id], node)
     }.bind(this))
   }
@@ -99,7 +99,7 @@ class NodeIndex {
     if (!isArray(values)) {
       values = [values]
     }
-    each(values, function(value) {
+    forEach(values, function(value) {
       this.index.delete([value, node.id])
     }.bind(this))
   }
@@ -118,14 +118,14 @@ class NodeIndex {
     if (!isArray(values)) {
       values = [values]
     }
-    each(values, function(value) {
+    forEach(values, function(value) {
       this.index.delete([value, node.id])
     }.bind(this))
     values = newValue
     if (!isArray(values)) {
       values = [values]
     }
-    each(values, function(value) {
+    forEach(values, function(value) {
       this.index.set([value, node.id], node)
     }.bind(this))
   }
@@ -156,7 +156,7 @@ class NodeIndex {
   }
 
   _initialize(data) {
-    each(data.getNodes(), function(node) {
+    forEach(data.getNodes(), function(node) {
       if (this.select(node)) {
         this.create(node)
       }

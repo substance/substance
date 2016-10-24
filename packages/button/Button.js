@@ -62,7 +62,7 @@ class Button extends Component {
 
   renderHint($$) {
     return $$('div').addClass('se-hint').append(
-      this.getLabel(this.props.hint)
+      this.getLabel(this.props.hint+'-hint')
     )
   }
 

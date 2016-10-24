@@ -8,8 +8,7 @@ import VirtualElement from './VirtualElement'
 import DOMElement from './DOMElement'
 import DefaultDOMElement from './DefaultDOMElement'
 import inBrowser from '../util/inBrowser'
-
-var __id__ = 0
+import uuid from '../util/uuid'
 
 /**
   A light-weight component implementation inspired by
@@ -111,7 +110,7 @@ class Component extends DOMElement.Delegator {
     // HACK: allowing skipping execution of this ctor
     if (arguments[0] === 'SKIP') return
 
-    this.__id__ = __id__++
+    this.__id__ = uuid()
 
     this.parent = parent
     this.el = null
@@ -131,6 +130,14 @@ class Component extends DOMElement.Delegator {
     Object.freeze(this.props)
     this.state = this.getInitialState() || {}
     Object.freeze(this.state)
+  }
+
+  getId() {
+    return this.__id__
+  }
+
+  setId() {
+    throw new Error("'id' is readonly")
   }
 
   /**
@@ -247,18 +254,22 @@ class Component extends DOMElement.Delegator {
     @param  {Boolean} maybe if `true` then does not throw when no Component is found
     @return {Class}                The ComponentClass
   */
-  getComponent(nodeType, maybe) {
+  getComponent(componentName, maybe) {
     let componentRegistry = this.getComponentRegistry()
     if (!componentRegistry) throw new Error('Missing componentRegistry.')
-    const ComponentClass = componentRegistry.get(nodeType)
+    const ComponentClass = componentRegistry.get(componentName)
     if (!maybe && !ComponentClass) {
-      throw new Error('No Component registered with name ' + nodeType)
+      throw new Error('No Component registered with name ' + componentName)
     }
     return ComponentClass
   }
 
   getComponentRegistry() {
-    return this.context.componentRegistry
+    return this.props.componentRegistry || this.context.componentRegistry
+  }
+
+  getFlow() {
+    return this.context.flow
   }
 
   /**
@@ -313,10 +324,11 @@ class Component extends DOMElement.Delegator {
 
     The default implementation simply returns true.
 
-    @param {Object} newProps The props are being applied to this component.
+    @param {Object} newProps The new props being applied to this component.
+    @param {Object} newState The new state being applied
     @return a boolean indicating whether rerender() should be run.
   */
-  shouldRerender(newProps) { // eslint-disable-line
+  shouldRerender(newProps, newState) { // eslint-disable-line
     return true
   }
 
@@ -399,13 +411,13 @@ class Component extends DOMElement.Delegator {
     ```javascript
     class Foo extends Component {
       didMount() {
-        this.props.node.on('label:changed', this.rerender, this)
+        this.context.editSession.onRender('document', this.rerender, this, {
+          path: [this.props.node.id, 'label']
+        })
       }
 
       dispose() {
-        // unless this is done, rerender could be called for a dead, disposed
-        // component instance.
-        this.props.node.off(this)
+        this.context.editSession.off(this)
       }
     }
     ```
@@ -765,7 +777,9 @@ class Component extends DOMElement.Delegator {
 }
 
 Component.prototype._isComponent = true
+
 EventEmitter.mixin(Component)
+
 DOMElement._defineProperties(Component, DOMElement._propertyNames)
 
 Component.unwrap = _unwrapComp

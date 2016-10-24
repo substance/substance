@@ -45,6 +45,7 @@ import IsolatedNodeComponent from '../packages/isolated-node/IsolatedNodeCompone
  */
 
 class ContainerEditor extends Surface {
+
   constructor(parent, props) {
     // default props derived from the given props
     props.containerId = props.containerId || props.node.id
@@ -64,8 +65,7 @@ class ContainerEditor extends Surface {
 
     this.editingBehavior = this.context.editingBehavior || new EditingBehavior()
 
-    // derive internal state variables
-    ContainerEditor.prototype._deriveInternalState.call(this, this.props)
+    this._deriveInternalState(this.props)
   }
 
   get _isContainerEditor() {
@@ -82,25 +82,26 @@ class ContainerEditor extends Surface {
 
   willReceiveProps(newProps) {
     super.willReceiveProps.apply(this, arguments)
-    ContainerEditor.prototype._deriveInternalState.call(this, newProps)
+    this._deriveInternalState(newProps)
   }
 
   didMount() {
     super.didMount.apply(this, arguments)
-    // var doc = this.getDocument();
-    // to do incremental updates
-    this.container.on('nodes:changed', this.onContainerChange, this)
+    let editSession = this.getEditSession()
+    editSession.onRender('document', this._onContainerChanged, this, {
+      path: [this.props.node.id, 'nodes']
+    })
   }
 
   dispose() {
     super.dispose.apply(this, arguments)
-    // var doc = this.getDocument();
-    // doc.off(this);
-    this.container.off(this)
+
+    let editSession = this.getEditSession()
+    editSession.off(this)
   }
 
   render($$) {
-    let el = super.render.call(this, $$)
+    let el = super.render($$)
 
     let doc = this.getDocument()
     let containerId = this.getContainerId()
@@ -159,7 +160,7 @@ class ContainerEditor extends Surface {
   _handleUpOrDownArrowKey(event) {
     event.stopPropagation()
     let direction = (event.keyCode === keys.UP) ? 'left' : 'right'
-    let selState = this.getDocumentSession().getSelectionState()
+    let selState = this.getEditSession().getSelectionState()
     let sel = selState.getSelection()
 
     // Note: this collapses the selection, just to let ContentEditable continue doing a cursor move
@@ -187,7 +188,7 @@ class ContainerEditor extends Surface {
   _handleLeftOrRightArrowKey(event) {
     event.stopPropagation()
     let direction = (event.keyCode === keys.LEFT) ? 'left' : 'right'
-    let selState = this.getDocumentSession().getSelectionState()
+    let selState = this.getEditSession().getSelectionState()
     let sel = selState.getSelection()
     // Note: collapsing the selection and let ContentEditable still continue doing a cursor move
     if (sel.isNodeSelection() && sel.isFull() && !event.shiftKey) {
@@ -200,7 +201,7 @@ class ContainerEditor extends Surface {
   }
 
   _handleEnterKey(event) {
-    let sel = this.getDocumentSession().getSelection()
+    let sel = this.getEditSession().getSelection()
     if (sel.isNodeSelection() && sel.isFull()) {
       event.preventDefault()
       event.stopPropagation()
@@ -333,7 +334,8 @@ class ContainerEditor extends Surface {
     }
   }
 
-  onContainerChange(change) {
+  // called by flow when subscribed resources have been updated
+  _onContainerChanged(change) {
     let doc = this.getDocument()
     // first update the container
     let renderContext = RenderingEngine.createContext(this)
@@ -391,10 +393,10 @@ class ContainerEditor extends Surface {
   }
 
   transaction(transformation, info) {
-    let documentSession = this.documentSession
+    let editSession = this.editSession
     let surfaceId = this.getId()
     let containerId = this.getContainerId()
-    return documentSession.transaction(function(tx, args) {
+    return editSession.transaction(function(tx, args) {
       let sel = tx.before.selection
       if (sel && !sel.isNull()) {
         sel.containerId = sel.containerId || containerId

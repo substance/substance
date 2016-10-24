@@ -1,6 +1,5 @@
 import AbstractEditor from '../../ui/AbstractEditor'
 import ContainerEditor from '../../ui/ContainerEditor'
-import ProseEditorOverlayTools from './ProseEditorOverlayTools'
 import Toolbar from '../tools/Toolbar'
 
 /**
@@ -34,7 +33,7 @@ class ProseEditor extends AbstractEditor {
 
     let contentPanel = $$(ScrollPane, {
       scrollbarPosition: 'right',
-      overlay: ProseEditorOverlayTools,
+      scrollbarType: this.props.scrollbarType
     }).append(
       editor
     ).ref('contentPanel')
@@ -64,16 +63,6 @@ class ProseEditor extends AbstractEditor {
       commands: configurator.getSurfaceCommandNames(),
       textTypes: configurator.getTextTypes()
     }).ref('body')
-  }
-
-  documentSessionUpdated() {
-    let toolbar = this.refs.toolbar
-    if (toolbar) {
-      let commandStates = this.commandManager.getCommandStates()
-      toolbar.setProps({
-        commandStates: commandStates
-      })
-    }
   }
 }
 

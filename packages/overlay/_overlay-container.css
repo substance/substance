@@ -1,5 +1,0 @@
-/*
-  This just serves as a container for positioning overlay content
-*/
-.sc-overlay-container { z-index: 200; position: absolute; }
-.sc-overlay-container.sm-hidden { visibility: hidden; position: fixed; }

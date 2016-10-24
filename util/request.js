@@ -16,33 +16,33 @@
   ```
 */
 function request(method, url, data, cb) {
-  var request = new XMLHttpRequest();
-  request.open(method, url, true);
-  request.setRequestHeader('Content-Type', 'application/json; charset=UTF-8');
+  var request = new XMLHttpRequest()
+  request.open(method, url, true)
+  request.setRequestHeader('Content-Type', 'application/json charset=UTF-8')
   request.onload = function() {
     if (request.status >= 200 && request.status < 400) {
-      var res = request.responseText;
-      if(isJson(res)) res = JSON.parse(res);
-      cb(null, res);
+      var res = request.responseText
+      if(isJson(res)) res = JSON.parse(res)
+      cb(null, res)
     } else {
-      return cb(new Error('Request failed. Returned status: ' + request.status));
+      return cb(new Error('Request failed. Returned status: ' + request.status))
     }
-  };
+  }
 
   if (data) {
-    request.send(JSON.stringify(data));
+    request.send(JSON.stringify(data))
   } else {
-    request.send();
+    request.send()
   }
 }
 
 function isJson(str) {
   try {
-    JSON.parse(str);
+    JSON.parse(str)
   } catch (e) {
-    return false;
+    return false
   }
-  return true;
+  return true
 }
 
-export default request;
+export default request

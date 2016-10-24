@@ -1,4 +1,4 @@
-import each from 'lodash/each'
+import forEach from '../../util/forEach'
 import isArray from 'lodash/isArray'
 import createAnnotation from './createAnnotation'
 
@@ -23,7 +23,7 @@ function fuseAnnotation(tx, args) {
       sel = sel.expand(anno.getSelection())
     }
   })
-  each(annos, function(anno) {
+  forEach(annos, function(anno) {
     tx.delete(anno.id)
   })
   // The expanded selection

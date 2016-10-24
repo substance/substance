@@ -2,13 +2,14 @@ import isEqual from 'lodash/isEqual'
 import isObject from 'lodash/isObject'
 import isArray from 'lodash/isArray'
 import isString from 'lodash/isString'
-import each from 'lodash/each'
+import forEach from '../util/forEach'
 import uuid from '../util/uuid'
 import EventEmitter from '../util/EventEmitter'
 import DocumentIndex from './DocumentIndex'
 import AnnotationIndex from './AnnotationIndex'
 import ContainerAnnotationIndex from './ContainerAnnotationIndex'
 import AnchorIndex from './AnchorIndex'
+import MarkerIndex from './MarkerIndex'
 import DocumentChange from './DocumentChange'
 import PathEventProxy from './PathEventProxy'
 import IncrementalData from './data/IncrementalData'
@@ -24,42 +25,37 @@ import docHelpers from './documentHelpers'
 import JSONConverter from './JSONConverter'
 var converter = new JSONConverter()
 
-var __id__ = 0
-
 /**
-  Abstract class used for deriving a custom article implementation.
-  Requires a {@link model/DocumentSchema} to be provided on construction.
-
-  @class Document
-  @abstract
-  @extends model/AbstractDocument
+  Basic implementation of a Document.
 
   @example
 
   ```js
   import { Document } from 'substance'
 
-  class MyArticle extends Document
-    foo() {
+  class MyArticle extends Document {
+    constructor(...args) {
+      super(...args)
 
+      this.addIndex('foo', FooIndex)
     }
   }
   ```
 */
 
-/**
-  @constructor Document
-  @param {DocumentSchema} schema The document schema.
-*/
-
 class Document extends EventEmitter {
 
+  /**
+    @param {DocumentSchema} schema The document schema.
+  */
   constructor(schema) {
     super()
+
     // HACK: to be able to inherit but not execute this ctor
     if (arguments[0] === 'SKIP') return
 
-    this.__id__ = __id__++
+    this.__id__ = uuid()
+
     if (!schema) {
       throw new Error('A document needs a schema for reflection.')
     }
@@ -71,9 +67,7 @@ class Document extends EventEmitter {
     })
 
     // all by type
-    this.addIndex('type', DocumentIndex.create({
-      property: "type"
-    }))
+    this.addIndex('type', DocumentIndex.create({ property: "type" }))
 
     // special index for (property-scoped) annotations
     this.addIndex('annotations', new AnnotationIndex())
@@ -83,6 +77,9 @@ class Document extends EventEmitter {
     // special index for (container-scoped) annotations
     this.addIndex('container-annotations', new ContainerAnnotationIndex())
     this.addIndex('container-annotation-anchors', new AnchorIndex())
+
+    // index for markers
+    this.addIndex('markers', new MarkerIndex())
 
     // change event proxies are triggered after a document change has been applied
     // before the regular document:changed event is fired.
@@ -100,7 +97,9 @@ class Document extends EventEmitter {
     this.on('document:changed', this._updateEventProxies, this)
   }
 
-  get _isDocument() { return true }
+  get id() {
+    return this.__id__
+  }
 
   /**
     @returns {model/DocumentSchema} the document's schema.
@@ -399,7 +398,7 @@ class Document extends EventEmitter {
   }
 
   _apply(documentChange) {
-    each(documentChange.ops, function(op) {
+    forEach(documentChange.ops, function(op) {
       this.data.apply(op)
       this.emit('operation:applied', op)
     }.bind(this))
@@ -413,7 +412,7 @@ class Document extends EventEmitter {
   }
 
   _updateEventProxies(change, info) {
-    each(this.eventProxies, function(proxy) {
+    forEach(this.eventProxies, function(proxy) {
       proxy.onDocumentChanged(change, info, this)
     }.bind(this))
   }
@@ -425,11 +424,11 @@ class Document extends EventEmitter {
    */
   loadSeed(seed) {
     // clear all existing nodes (as they should be there in the seed)
-    each(this.data.nodes, function(node) {
+    forEach(this.data.nodes, function(node) {
       this.delete(node.id)
     }.bind(this))
     // create nodes
-    each(seed.nodes, function(nodeData) {
+    forEach(seed.nodes, function(nodeData) {
       this.create(nodeData)
     }.bind(this))
   }
@@ -462,6 +461,10 @@ class Document extends EventEmitter {
     }
   }
 
+  getAnnotations(path) {
+    return this.getIndex('annotations').get(path)
+  }
+
   _create(nodeData) {
     var op = this.data.create(nodeData)
     return op
@@ -484,10 +487,13 @@ class Document extends EventEmitter {
 
 }
 
+Document.prototype._isDocument = true
+
 // used by transforms copy, paste
 // and by ClipboardImporter/Exporter
 Document.SNIPPET_ID = "snippet"
 Document.TEXT_SNIPPET_ID = "text-snippet"
+
 
 export default Document
 

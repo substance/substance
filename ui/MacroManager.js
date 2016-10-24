@@ -3,21 +3,23 @@ class MacroManager {
   constructor(context, macros) {
     this.context = context
     this.macros = macros
-    this.context.documentSession.on('update', this.onUpdate, this)
+    this.context.editSession.onFinalize(this.onUpdate, this)
   }
 
-  onUpdate(update, info) {
-    if (update.change) {
-      this.executeMacros(update, info)
+  dispose() {
+    this.context.editSession.off(this)
+  }
+
+  onUpdate(editSession) {
+    if (editSession.hasChanged('change')) {
+      let change = editSession.get('change')
+      let info = editSession.get('info')
+      this.executeMacros(change, info)
     }
   }
 
-  executeMacros(update, info) {
-    let change = update.change
-    if (!change) {
-      return
-    }
-    let doc = this.context.documentSession.getDocument()
+  executeMacros(change, info) {
+    let doc = this.context.editSession.getDocument()
     let nodeId, node, text
     let path
     if (info.action === 'type') {
@@ -36,7 +38,7 @@ class MacroManager {
       node: node,
       path: path,
       text: text,
-      selection: this.context.documentSession.getSelection()
+      selection: this.context.editSession.getSelection()
     }
     for (let i = 0; i < this.macros.length; i++) {
       let macro = this.macros[i]

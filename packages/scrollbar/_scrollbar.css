@@ -7,6 +7,7 @@
   background: #FAFAFA;
   box-shadow: inset -4px 0 4px 0 rgba(25,25,25,0.04);
 }
+
 .sc-scrollbar .se-thumb {
   position: absolute;
   top: 40px;
@@ -15,6 +16,11 @@
   height: 0px;
   background-color: rgba(0,0,0, 0.2);
 }
+
+.sc-scrollbar.sm-hide-thumb .se-thumb {
+  visibility: hidden;
+}
+
 .sc-scrollbar .se-highlight {
   position: absolute;
   width: 100%;

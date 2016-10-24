@@ -95,6 +95,19 @@ class PropertyAnnotation extends DocumentNode {
     }
   }
 
+  // WIP
+  isInsideOf(sel, _strict) {
+    if (sel.isNull()) return false;
+    if (_strict) {
+      return (isEqual(this.path, sel.path) &&
+        this.startOffset > sel.startOffset &&
+        this.endOffset < sel.endOffset)
+    } else {
+      return (isEqual(this.path, sel.path) &&
+        this.startOffset >= sel.startOffset &&
+        this.endOffset <= sel.endOffset)
+    }
+  }
 }
 
 PropertyAnnotation.define({

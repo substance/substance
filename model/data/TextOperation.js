@@ -35,8 +35,6 @@ class TextOperation extends Operation {
     }
   }
 
-  get _isTextOperation() { return true }
-
   apply(str) {
     if (this.isEmpty()) return str
     if (this.type === INSERT) {
@@ -110,6 +108,8 @@ class TextOperation extends Operation {
     return ["(", (this.isInsert() ? INSERT : DELETE), ",", this.pos, ",'", this.str, "')"].join('')
   }
 }
+
+TextOperation.prototype._isTextOperation = true
 
 function hasConflict(a, b) {
   // Insert vs Insert:

@@ -190,9 +190,11 @@ test.UI("Copying a container selection", function(t) {
 
 function _containerEditorSample(t) {
   var doc = fixture(simple)
+  var documentSession = new DocumentSession(doc)
   var app = TestContainerEditor.mount({
     context: {
-      documentSession: new DocumentSession(doc),
+      editSession: documentSession,
+      documentSession: documentSession,
       componentRegistry: componentRegistry,
       converterRegistry: converterRegistry
     },

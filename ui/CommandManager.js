@@ -1,5 +1,5 @@
 import extend from 'lodash/extend'
-import forEach from 'lodash/forEach'
+import forEach from '../util/forEach'
 import isEqual from 'lodash/isEqual'
 import Registry from '../util/Registry'
 
@@ -12,15 +12,16 @@ import Registry from '../util/Registry'
 class CommandManager {
 
   constructor(context, commands) {
-    if (!context.documentSession) {
+    if (!context.editSession) {
       throw new Error('DocumentSession required.')
     }
-    this.documentSession = context.documentSession
+
+    this.editSession = context.editSession
+    this.doc = this.editSession.getDocument()
     this.context = extend({}, context, {
       // for convenienve we provide access to the doc directly
-      doc: this.documentSession.getDocument()
+      doc: this.doc
     })
-
     // Set up command registry
     this.commandRegistry = new Registry()
     forEach(commands, function(command) {
@@ -30,25 +31,24 @@ class CommandManager {
       this.commandRegistry.add(command.name, command)
     }.bind(this))
 
-    // Priority is needed as upateCommandStates depends on information
-    // collected by SurfaceManager (determine focusedSurface) which is
-    // also done on session update
-    // TODO: Resolve #812, so we don't need a priority here and instead
-    // can rely on registration order.
-    this.documentSession.on('update', this.updateCommandStates, this, {
-      priority: -10
-    })
-    this.updateCommandStates()
+    this.editSession.onUpdate(this.onSessionUpdate, this)
+    this.updateCommandStates(this.editSession)
   }
 
   dispose() {
-    this.documentSession.off(this)
+    this.editSession.off(this)
+  }
+
+  onSessionUpdate(editSession) {
+    if (editSession.hasChanged('change') || editSession.hasChanged('selection')) {
+      this.updateCommandStates(editSession)
+    }
   }
 
   /*
     Compute new command states object
   */
-  updateCommandStates() {
+  updateCommandStates(editSession) {
     let commandStates = {}
     let commandContext = this.getCommandContext()
     let params = this._getCommandParams()
@@ -58,6 +58,7 @@ class CommandManager {
     // poor-man's immutable style
     if (!isEqual(this.commandStates, commandStates)) {
       this.commandStates = commandStates
+      editSession.setCommandStates(commandStates)
     }
   }
 
@@ -95,15 +96,17 @@ class CommandManager {
 
   // TODO: while we need it here this should go into the flow thingie later
   _getCommandParams() {
-    let documentSession = this.context.documentSession
-    let selectionState = documentSession.getSelectionState()
+    let editSession = this.context.editSession
+    let selectionState = editSession.getSelectionState()
     let sel = selectionState.getSelection()
     let surface = this.context.surfaceManager.getFocusedSurface()
     return {
-      documentSession: documentSession,
+      editSession: editSession,
       selectionState: selectionState,
       surface: surface,
-      selection: sel
+      selection: sel,
+      //legacy
+      documentSession: editSession,
     }
   }
 }

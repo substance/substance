@@ -82,17 +82,12 @@ class StubSurface {
     return this.el.getNativeElement()
   }
 
-  _getTextPropertyComponent(path) {
-    var pathStr = path
-    if (isArray(path)) {
-      pathStr = path.join('.')
-    }
-    var el = this.el.find('*[data-path="'+pathStr+'"]')
-    if (!el) {
-      return null
-    }
+  find(selector) {
+    var el =  this.el.find(selector)
+    if (!el) return null
     return new StubTextPropertyComponent(el)
   }
+
 }
 
 class StubTextPropertyComponent {

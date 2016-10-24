@@ -26,25 +26,29 @@ import SelectionFragmentComponent from './SelectionFragmentComponent'
 
 class TextPropertyComponent extends AnnotatedTextComponent {
 
-  get _isTextPropertyComponent() {
-    return true 
-  }
-
-  didMount() {
-    super.didMount.call(this)
-    // TODO: instead of letting Surface manage TextProperties
-    // we should instead use the Flow in future
-    let surface = this.getSurface()
-    if (surface) {
-      surface._registerTextProperty(this)
+  getInitialState() {
+    const markersManager = this.context.markersManager
+    let path = this.props.path
+    let markers
+    if (markersManager) {
+      // register and get initial set of markers
+      markersManager.register(this)
+      markers = markersManager.getMarkers(path, {
+        surfaceId: this.getSurfaceId(),
+        containerId: this.getContainerId()
+      })
+    } else {
+      const doc = this.getDocument()
+      markers = doc.getAnnotations(path)
+    }
+    return {
+      markers: markers
     }
   }
 
   dispose() {
-    super.dispose.call(this);
-    let surface = this.getSurface()
-    if (surface) {
-      surface._unregisterTextProperty(this)
+    if (this.context.markersManager) {
+      this.context.markersManager.deregister(this)
     }
   }
 
@@ -71,6 +75,10 @@ class TextPropertyComponent extends AnnotatedTextComponent {
       el.append($$('br'))
     }
     return el
+  }
+
+  getAnnotations() {
+    return this.state.markers
   }
 
   _renderFragment($$, fragment) {
@@ -119,26 +127,23 @@ class TextPropertyComponent extends AnnotatedTextComponent {
     return this.getDocument().get(this.getPath())
   }
 
-  getAnnotations() {
-    let path = this.getPath()
-    let annotations = this.getDocument().getIndex('annotations').get(path)
-    let fragments = this.props.fragments
-    if (fragments) {
-      annotations = annotations.concat(fragments)
-    }
-    return annotations
-  }
-
   getDocument() {
     return this.props.doc ||this.context.doc
   }
 
-  getController() {
-    return this.props.controller || this.context.controller
+  getSurface() {
+    return this.props.surface || this.context.surface
   }
 
-  getSurface() {
-    return this.props.surface ||this.context.surface
+  // used by MarkersManager to abstract away how this is implemented
+  getSurfaceId() {
+    let surface = this.getSurface()
+    return surface ? surface.id : null
+  }
+
+  getContainerId() {
+    let surface = this.getSurface()
+    return surface ? surface.getContainerId() : null
   }
 
   isEditable() {
@@ -152,6 +157,7 @@ class TextPropertyComponent extends AnnotatedTextComponent {
   getDOMCoordinate(charPos) {
     return this._getDOMCoordinate(this.el, charPos)
   }
+
 
   _finishFragment(fragment, context, parentContext) {
     context.attr('data-length', fragment.length)
@@ -209,7 +215,11 @@ class TextPropertyComponent extends AnnotatedTextComponent {
       }
     }
   }
+
 }
+
+TextPropertyComponent.prototype._isTextPropertyComponent = true
+
 
 // Helpers for DOM selection mapping
 

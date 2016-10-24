@@ -1,6 +1,6 @@
 import isFunction from 'lodash/isFunction'
 import extend from 'lodash/extend'
-import each from 'lodash/each'
+import forEach from '../util/forEach'
 import uuid from '../util/uuid'
 import Document from './Document'
 import DocumentChange from './DocumentChange'
@@ -52,11 +52,18 @@ class TransactionDocument extends Document {
     // when calling undo
     this.before = {}
     // HACK: copying all indexes
-    each(document.data.indexes, function(index, name) {
+    forEach(document.data.indexes, function(index, name) {
       this.data.addIndex(name, index.clone())
     }.bind(this))
 
     this.loadSeed(document.toJSON())
+
+    // make sure that we mirror all changes that are done outside of transactions
+    document.on('document:changed', this._onDocumentChanged, this)
+  }
+
+  dispose() {
+    this.document.off(this)
   }
 
   get isTransactionDocument() { return true }
@@ -111,6 +118,10 @@ class TransactionDocument extends Document {
 
   getOperations() {
     return this.ops
+  }
+
+  _onDocumentChanged(change) {
+    this._apply(change)
   }
 
   _apply(documentChange) {

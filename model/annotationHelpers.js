@@ -1,4 +1,4 @@
-import forEach from 'lodash/forEach'
+import forEach from '../util/forEach'
 import uniq from 'lodash/uniq'
 import uuid from '../util/uuid'
 

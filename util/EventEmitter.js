@@ -1,4 +1,4 @@
-import forEach from 'lodash/forEach'
+import forEach from './forEach'
 import isObject from 'lodash/isObject'
 
 /**
@@ -21,7 +21,7 @@ class EventEmitter {
       var args = Array.prototype.slice.call(arguments, 1)
       for (var i = 0, len = bindings.length; i < len; i++) {
         var binding = bindings[i]
-        // console.log("- triggering %s", binding.context.constructor.type)
+        // console.log("- triggering %s on %s", event, binding.context.constructor.name)
         binding.method.apply(binding.context, args)
       }
       return true
@@ -151,22 +151,6 @@ function _off(event, method, context) {
   /* eslint-enable no-invalid-this */
 }
 
-/*
-  Internal implementation of connect.
- */
-function _connect(obj, methods, options) {
-  /* eslint-disable no-invalid-this */
-  var priority = 0
-  if (arguments.length === 3) {
-    priority = options.priority || priority
-  }
-  forEach(methods, function(method, event) {
-    _on.call(this, event, method, obj, priority)
-    this.__events__[event].sort(byPriorityDescending)
-  }.bind(this))
-  return this
-  /* eslint-enable no-invalid-this */
-}
 
 /**
   Internal implementation of disconnect.

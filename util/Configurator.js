@@ -1,4 +1,4 @@
-import forEach from 'lodash/forEach'
+import forEach from './forEach'
 import map from 'lodash/map'
 import isString from 'lodash/isString'
 import DocumentSchema from '../model/DocumentSchema'
@@ -7,6 +7,7 @@ import Registry from '../util/Registry'
 import ComponentRegistry from '../ui/ComponentRegistry'
 import FontAwesomeIconProvider from '../ui/FontAwesomeIconProvider'
 import LabelProvider from '../ui/DefaultLabelProvider'
+import ToolGroup from '../packages/tools/ToolGroup'
 
 /**
   Default Configurator for Substance editors. It provides an API for
@@ -63,6 +64,7 @@ class Configurator {
       exporters: {},
       commands: {},
       tools: new Map(),
+      toolGroups: new Map(),
       textTypes: [],
       editingBehaviors: [],
       macros: [],
@@ -77,7 +79,7 @@ class Configurator {
 
   /**
     Defines the document schema for this configuration.
-    
+
     @param  {DocumentSchema} schema A schema to be used for articles created
         from this configuration.
    */
@@ -86,7 +88,7 @@ class Configurator {
   }
 
   /**
-    Adds a node to this configuration. Later, when you use 
+    Adds a node to this configuration. Later, when you use
     {@link Configurator#getSchema()}, this node will be added to that schema.
     Usually, used within a package to add its own nodes to the schema.
 
@@ -123,7 +125,7 @@ class Configurator {
 
   /**
     Add importer for a conversion format.
-    
+
     @param {string} type          a conversion format type. eg. 'html', 'xml'
     @param {Object} ImporterClass an importer for the conversion format.
    */
@@ -133,7 +135,7 @@ class Configurator {
 
   /**
     Add exporter for a conversion format.
-    
+
     @param {string} type          a conversion format type. eg. 'html', 'xml'
     @param {Object} ExporterClass an exporter for the conversion format.
    */
@@ -147,12 +149,12 @@ class Configurator {
     used within a package to add representations for nodes added by that
     package.
 
-    A component can be added once per nodeType. If you provide two components 
+    A component can be added once per nodeType. If you provide two components
     for the same node type, Substance can't figure out which one to use.
-    
+
     @param {String} nodeType       the type attribute of the node for which this
                                    component is to be used.
-    @param {Class} ComponentClass  A subclass of {@link Component} for nodes 
+    @param {Class} ComponentClass  A subclass of {@link Component} for nodes
                                    of nodeType.
    */
   addComponent(nodeType, ComponentClass) {
@@ -185,8 +187,35 @@ class Configurator {
     }
   }
 
+  addToolGroup(name, ToolGroupClass, options) {
+    options = options || {}
+    ToolGroupClass = ToolGroupClass || ToolGroup
+
+    this.config.toolGroups.set(name, {
+      name: name,
+      tools: new Map(),
+      Class: ToolGroupClass,
+      options: options
+    })
+  }
+
   addTool(name, ToolClass, options) {
-    options = options || {};
+    options = options || {}
+
+    if (options.target) {
+      console.warn('DEPRECATED: please use `toolGroup` instead of `target`', name)
+    }
+    let toolGroupNames = options.toolGroup || options.target
+    if (isString(toolGroupNames)) {
+      toolGroupNames = [ toolGroupNames ]
+    }
+
+    if (!toolGroupNames && options.overlay) {
+      toolGroupNames = [ 'overlay' ]
+    } else if (!toolGroupNames) {
+      toolGroupNames = [ 'default' ]
+    }
+
     if (!isString(name)) {
       throw new Error("Expecting 'name' to be a String")
     }
@@ -196,24 +225,21 @@ class Configurator {
     if (!ToolClass || !ToolClass.prototype._isTool) {
       throw new Error("Expecting 'ToolClass' to be of type ui/Tool. name:")
     }
-    var toolTarget = options.target
-    if (!toolTarget && options.overlay) {
-      toolTarget = 'overlay'
-    } else if (!toolTarget) {
-      toolTarget = 'default'
-    }
-    if (!this.config.tools.has(toolTarget)) {
-      this.config.tools.set(toolTarget, new Map());
-    }
-    this.config.tools.get(toolTarget).set(name, {
-      name: name,
-      Class: ToolClass,
-      options: options || {}
+
+    toolGroupNames.forEach((toolGroupName) => {
+      let toolGroup = this.config.toolGroups.get(toolGroupName)
+      if (!toolGroup) throw new Error(`No toolGroup registered with name: ${toolGroupName}`)
+
+      toolGroup.tools.set(name, {
+        name: name,
+        Class: ToolClass,
+        options: options || {}
+      })
     })
   }
 
   /**
-    Adds an icon to the configuration which can be later retrieved via the 
+    Adds an icon to the configuration which can be later retrieved via the
     iconProvider.
 
     @param {string} iconName name or key for retrieving the icon
@@ -253,7 +279,7 @@ class Configurator {
     .
     // Usage within other code
     let labels = this.context.labelProvider
-    $$('span').append(labels.getLabel('superscript'));
+    $$('span').append(labels.getLabel('superscript'))
     ```
   */
   addLabel(labelName, label) {
@@ -289,17 +315,17 @@ class Configurator {
 
     ```js
     var seedFn = function(tx) {
-      var body = tx.get('body');
+      var body = tx.get('body')
 
       tx.create({
         id: 'p1',
         type: 'paragraph',
         content: 'This is your new paragraph!'
-      });
-      body.show('p1');
-    };
+      })
+      body.show('p1')
+    }
 
-    config.addSeed(seedFn);
+    config.addSeed(seedFn)
     ```
   */
   addSeed(seed) {
@@ -353,7 +379,7 @@ class Configurator {
   // ------------------------
 
   getConfig() {
-    return this.config;
+    return this.config
   }
 
   getStyles() {
@@ -361,7 +387,7 @@ class Configurator {
   }
 
   getSchema() {
-    var schemaConfig = this.config.schema;
+    var schemaConfig = this.config.schema
     // TODO: We may want to remove passing a schema version as
     // the version is defined by the repository / npm package version
     var schema = new DocumentSchema(schemaConfig.name, '1.0.0')
@@ -373,7 +399,7 @@ class Configurator {
   }
 
   createArticle(seed) {
-    var schemaConfig = this.config.schema;
+    var schemaConfig = this.config.schema
     var schema = this.getSchema()
     var doc = new schemaConfig.ArticleClass(schema)
     if (seed) {
@@ -401,8 +427,12 @@ class Configurator {
     return new ExporterClass(config)
   }
 
-  getTools() {
-    return this.config.tools;
+  getToolGroups() {
+    return this.config.toolGroups
+  }
+
+  getTools(toolGroupName) {
+    return this.config.toolGroups.get(toolGroupName).tools
   }
 
   getComponentRegistry() {
