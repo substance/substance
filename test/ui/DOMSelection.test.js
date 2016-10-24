@@ -455,7 +455,7 @@ test.UI("DOM Coordinate on surface element", function(t) {
 
 var textWithInlines = [
   '<div id="test1">',
-    '<span id="test1-content" data-path="test1.content">',
+    '<span id="test1-content" class="sc-text-property" data-path="test1.content">',
       '123',
       '<span data-inline="1" data-length="1" contenteditable="false">$</span>',
       '45',
