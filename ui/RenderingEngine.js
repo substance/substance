@@ -93,7 +93,7 @@ function _capture(state, vel, forceCapture) {
       needRerender = true;
     } else {
       // NOTE: don't ask shouldRerender if no element is there yet
-      needRerender = !comp.el || comp.shouldRerender(vel.props);
+      needRerender = !comp.el || comp.shouldRerender(vel.props, comp.state);
       comp.__htmlConfig__ = vel._copyHTMLConfig();
       state.setOldProps(vel, comp.props);
       state.setOldState(vel, comp.state);

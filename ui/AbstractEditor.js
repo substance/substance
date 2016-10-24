@@ -95,6 +95,10 @@ class AbstractEditor extends Component {
   getConfigurator() {
     return this.editorSession.getConfigurator()
   }
+
+  getEditorSession() {
+    return this.editorSession
+  }
 }
 
 export default AbstractEditor
