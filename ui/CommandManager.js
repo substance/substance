@@ -12,12 +12,12 @@ import Registry from '../util/Registry'
 class CommandManager {
 
   constructor(context, commands) {
-    if (!context.editSession) {
-      throw new Error('DocumentSession required.')
+    if (!context.editorSession) {
+      throw new Error('EditorSession required.')
     }
 
-    this.editSession = context.editSession
-    this.doc = this.editSession.getDocument()
+    this.editorSession = context.editorSession
+    this.doc = this.editorSession.getDocument()
     this.context = extend({}, context, {
       // for convenienve we provide access to the doc directly
       doc: this.doc
@@ -31,24 +31,24 @@ class CommandManager {
       this.commandRegistry.add(command.name, command)
     }.bind(this))
 
-    this.editSession.onUpdate(this.onSessionUpdate, this)
-    this.updateCommandStates(this.editSession)
+    this.editorSession.onUpdate(this.onSessionUpdate, this)
+    this.updateCommandStates(this.editorSession)
   }
 
   dispose() {
-    this.editSession.off(this)
+    this.editorSession.off(this)
   }
 
-  onSessionUpdate(editSession) {
-    if (editSession.hasChanged('change') || editSession.hasChanged('selection')) {
-      this.updateCommandStates(editSession)
+  onSessionUpdate(editorSession) {
+    if (editorSession.hasChanged('change') || editorSession.hasChanged('selection')) {
+      this.updateCommandStates(editorSession)
     }
   }
 
   /*
     Compute new command states object
   */
-  updateCommandStates(editSession) {
+  updateCommandStates(editorSession) {
     let commandStates = {}
     let commandContext = this.getCommandContext()
     let params = this._getCommandParams()
@@ -58,7 +58,7 @@ class CommandManager {
     // poor-man's immutable style
     if (!isEqual(this.commandStates, commandStates)) {
       this.commandStates = commandStates
-      editSession.setCommandStates(commandStates)
+      editorSession.setCommandStates(commandStates)
     }
   }
 
@@ -96,17 +96,15 @@ class CommandManager {
 
   // TODO: while we need it here this should go into the flow thingie later
   _getCommandParams() {
-    let editSession = this.context.editSession
-    let selectionState = editSession.getSelectionState()
+    let editorSession = this.context.editorSession
+    let selectionState = editorSession.getSelectionState()
     let sel = selectionState.getSelection()
     let surface = this.context.surfaceManager.getFocusedSurface()
     return {
-      editSession: editSession,
+      editorSession: editorSession,
       selectionState: selectionState,
       surface: surface,
       selection: sel,
-      //legacy
-      documentSession: editSession,
     }
   }
 }

@@ -318,13 +318,13 @@ class AnnotationCommand extends Command {
   _applyTransform(params, transformFn) {
     // HACK: this looks a bit too flexible. Maybe we want to go for
     let sel = this._getSelection(params)
-    let documentSession = this._getDocumentSession(params)
+    let editorSession = this._getEditorSession(params)
     let surface = params.surface
     params.selection = sel
 
     let result; // to store transform result
     if (sel.isNull()) return
-    documentSession.transaction(function(tx) {
+    editorSession.transaction(function(tx) {
       tx.before.selection = sel
       if (surface) {
         tx.before.surfaceId = surface.getId()

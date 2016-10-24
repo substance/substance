@@ -3,17 +3,17 @@ import Command from '../../ui/Command'
 class Redo extends Command {
 
   getCommandState(params) {
-    let docSession = params.documentSession
+    let editorSession = params.editorSession
     return {
-      disabled: !docSession.canRedo(),
+      disabled: !editorSession.canRedo(),
       active: false
     }
   }
 
   execute(params) {
-    let docSession = params.documentSession
-    if (docSession.canRedo()) {
-      docSession.redo()
+    let editorSession = params.editorSession
+    if (editorSession.canRedo()) {
+      editorSession.redo()
       return true
     } else {
       return false

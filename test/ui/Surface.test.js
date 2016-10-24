@@ -1,9 +1,10 @@
 import { module } from 'substance-test'
 
 /* eslint-disable no-invalid-this */
-import Registry from '../../util/Registry'
 import createAnnotation from '../../model/transform/createAnnotation'
-import DocumentSession from '../../model/DocumentSession'
+import EditorSession from '../../model/EditorSession'
+import Registry from '../../util/Registry'
+import Configurator from '../../util/Configurator'
 import SurfaceManager from '../../packages/surface/SurfaceManager'
 
 import TestContainerEditor from './TestContainerEditor'
@@ -28,12 +29,11 @@ var componentRegistry = new Registry({
 
 function _createApp(fixtureSeed, el) {
   var doc = fixture(fixtureSeed)
-  var documentSession = new DocumentSession(doc)
-  var surfaceManager = new SurfaceManager(documentSession)
+  var editorSession = new EditorSession(doc, { configurator: new Configurator() })
+  var surfaceManager = new SurfaceManager(editorSession)
   var app = TestContainerEditor.mount({
     context: {
-      editSession: documentSession,
-      documentSession: documentSession,
+      editorSession: editorSession,
       surfaceManager: surfaceManager,
       componentRegistry: componentRegistry
     },
@@ -41,8 +41,7 @@ function _createApp(fixtureSeed, el) {
   }, el)
   var surface = app.refs.editor
   return {
-    editSession: documentSession,
-    documentSession: documentSession,
+    editorSession: editorSession,
     doc: doc,
     surface: surface,
   }

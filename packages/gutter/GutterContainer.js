@@ -25,11 +25,11 @@ class GutterContainer extends Component {
 
   didMount() {
     // rerender the overlay content after anything else has been updated
-    this.context.editSession.onRender('commandStates', this.rerender, this)
+    this.context.editorSession.onRender('commandStates', this.rerender, this)
   }
 
   dispose() {
-    this.context.editSession.off(this)
+    this.context.editorSession.off(this)
   }
 
   position(hints) {

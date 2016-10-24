@@ -2,19 +2,19 @@ import inBrowser from '../../util/inBrowser'
 
 class SurfaceManager {
 
-  constructor(editSession) {
-    this.editSession = editSession
+  constructor(editorSession) {
+    this.editorSession = editorSession
     this.surfaces = {}
     this._state = {
       focusedSurfaceId: null,
       selection: null,
     }
-    editSession.onUpdate('selection', this._onSelectionChanged, this)
-    editSession.onPostRender(this._recoverDOMSelection, this)
+    editorSession.onUpdate('selection', this._onSelectionChanged, this)
+    editorSession.onPostRender(this._recoverDOMSelection, this)
   }
 
   dispose() {
-    this.editSession.off(this)
+    this.editorSession.off(this)
   }
 
   /**
@@ -85,7 +85,7 @@ class SurfaceManager {
     // and displays the right DOM selection.
     let focusedSurface = this.getFocusedSurface()
     if (focusedSurface && !focusedSurface.isDisabled()) {
-      // console.log('Rendering selection on surface', focusedSurface.getId(), this.editSession.getSelection().toString());
+      // console.log('Rendering selection on surface', focusedSurface.getId(), this.editorSession.getSelection().toString());
       focusedSurface.focus()
       focusedSurface.rerenderDOMSelection()
     }

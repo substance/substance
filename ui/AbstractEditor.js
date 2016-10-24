@@ -7,13 +7,8 @@ import Component from './Component'
 
   ```js
   class SimpleWriter extends AbstractEditor {
-
     render($$) {
       // render editor
-    }
-
-    documentSessionUpdated() {
-      // actions in response to doc session updates. E.g. updating a toolbar
     }
   }
   ```
@@ -26,28 +21,27 @@ class AbstractEditor extends Component {
   }
 
   _initialize(props) {
-    let configurator = props.configurator
-    if (!props.documentSession && !props.editSession) {
-      throw new Error('DocumentSession instance required');
+    if (!props.editorSession) {
+      throw new Error('EditorSession instance required');
     }
-    this.editSession = props.editSession || props.documentSession
-    this.doc = this.editSession.getDocument()
+    this.editorSession = props.editorSession
+    this.doc = this.editorSession.getDocument()
+
+    let configurator = this.editorSession.getConfigurator()
     this.componentRegistry = configurator.getComponentRegistry()
     this.toolGroups = configurator.getToolGroups()
-
     this.labelProvider = configurator.getLabelProvider()
     this.iconProvider = configurator.getIconProvider()
 
     // legacy
-    this.documentSession = this.editSession
-    this.surfaceManager = this.editSession.surfaceManager
-    this.commandManager = this.editSession.commandManager
-    this.dragManager = this.editSession.dragManager
-    this.macroManager = this.editSession.macroManager
-    this.converterRegistry = this.editSession.converterRegistry
-    this.globalEventHandler = this.editSession.globalEventHandler
-    this.editingBehavior = this.editSession.editingBehavior
-    this.markersManager = this.editSession.markersManager
+    this.surfaceManager = this.editorSession.surfaceManager
+    this.commandManager = this.editorSession.commandManager
+    this.dragManager = this.editorSession.dragManager
+    this.macroManager = this.editorSession.macroManager
+    this.converterRegistry = this.editorSession.converterRegistry
+    this.globalEventHandler = this.editorSession.globalEventHandler
+    this.editingBehavior = this.editorSession.editingBehavior
+    this.markersManager = this.editorSession.markersManager
   }
 
   /**
@@ -58,8 +52,8 @@ class AbstractEditor extends Component {
   }
 
   willReceiveProps(nextProps) {
-    let newSession = nextProps.editSession || nextProps.documentSession
-    let shouldDispose = newSession && newSession !== this.editSession
+    let newSession = nextProps.editorSession
+    let shouldDispose = newSession && newSession !== this.editorSession
     if (shouldDispose) {
       this._dispose()
       this._initialize(nextProps)
@@ -71,7 +65,7 @@ class AbstractEditor extends Component {
   }
 
   _dispose() {
-    this.editSession.off(this)
+    this.editorSession.off(this)
     // Note: we need to clear everything, as the childContext
     // changes which is immutable
     this.empty()
@@ -80,10 +74,8 @@ class AbstractEditor extends Component {
   getChildContext() {
     return {
       editor: this,
-      controller: this,
-      editSession: this.editSession,
-      documentSession: this.editSession,
-      doc: this.doc, // TODO: remove in favor of editSession
+      editorSession: this.editorSession,
+      doc: this.doc, // TODO: remove in favor of editorSession
       componentRegistry: this.componentRegistry,
       surfaceManager: this.surfaceManager,
       commandManager: this.commandManager,
@@ -98,6 +90,10 @@ class AbstractEditor extends Component {
       // i.e. a declarative way to map tools to tool groups
       toolGroups: this.toolGroups,
     }
+  }
+
+  getConfigurator() {
+    return this.editorSession.getConfigurator()
   }
 }
 

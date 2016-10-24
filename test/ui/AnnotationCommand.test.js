@@ -1,8 +1,9 @@
 import { module } from 'substance-test'
 
-import DocumentSession from '../../model/DocumentSession'
+import EditorSession from '../../model/EditorSession'
 import SelectionState from '../../model/SelectionState'
 import AnnotationCommand from '../../ui/AnnotationCommand'
+import Configurator from '../../util/Configurator'
 
 import createTestArticle from '../fixtures/createTestArticle'
 import containerAnnoSample from '../fixtures/containerAnnoSample'
@@ -43,16 +44,18 @@ test("can 'create' property annotation", function(t) {
 
 test("execute 'create' property annotation", function(t) {
   var doc = fixture()
-  var docSession = new DocumentSession(doc)
+  var editorSession = new EditorSession(doc, {
+    configurator: new Configurator()
+  })
   var cmd = new ToggleStrongCommand()
   var sel = doc.createSelection(['p6', 'content'], 1, 6)
-  docSession.setSelection(sel)
+  editorSession.setSelection(sel)
   var res = cmd.execute({
     commandState: {
       mode: 'create'
     },
-    documentSession: docSession,
-    selectionState: docSession.getSelectionState()
+    editorSession: editorSession,
+    selectionState: editorSession.getSelectionState()
   })
   var newAnno = res.anno
   t.notNil(newAnno, 'A new anno should have been created')
@@ -92,16 +95,18 @@ test("execute 'delete' property annotation", function(t) {
 
 test("can 'expand' property annotation", function(t) {
   var doc = fixture()
-  var docSession = new DocumentSession(doc)
+  var editorSession = new EditorSession(doc, {
+    configurator: new Configurator()
+  })
   var cmd = new ToggleStrongCommand()
   var sel = doc.createSelection(['p1', 'content'], 5, 7)
-  docSession.setSelection(sel)
+  editorSession.setSelection(sel)
   cmd.execute({
     commandState: {
       mode: 'delete'
     },
-    documentSession: docSession,
-    selectionState: docSession.getSelectionState()
+    editorSession: editorSession,
+    selectionState: editorSession.getSelectionState()
   })
   t.isNil(doc.get('a3'), 'a3 should be gone.')
   t.end()

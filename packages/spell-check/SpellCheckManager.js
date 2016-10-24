@@ -36,13 +36,13 @@ class SpellCheckManager {
     })
   }
 
-  _onDocumentChange(editSession) {
-    if (editSession.hasChanged('change')) {
+  _onDocumentChange(editorSession) {
+    if (editorSession.hasChanged('change')) {
       // Note: instead of analyzing the model, we consider
       // all existing TextPropertyComponents instead
       // as this reflects what is presented to the user
       const textProperties = this.textPropertyManager._textProperties
-      let change = editSession.get('change')
+      let change = editorSession.get('change')
       Object.keys(change.updated).forEach((pathStr) => {
         if (textProperties[pathStr]) this._scheduleCheck(pathStr)
       })

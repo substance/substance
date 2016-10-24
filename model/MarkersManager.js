@@ -8,10 +8,10 @@ import deleteFromArray from '../util/deleteFromArray'
 */
 class MarkersManager {
 
-  constructor(editSession) {
-    this.editSession = editSession
+  constructor(editorSession) {
+    this.editorSession = editorSession
 
-    let doc = editSession.getDocument()
+    let doc = editorSession.getDocument()
     this._annos = doc.getIndex('annotations')
     this._markers = doc.getIndex('markers')
 
@@ -26,12 +26,12 @@ class MarkersManager {
     this._surfaceMarkers = {}
     this._containerMarkers = {}
 
-    editSession.onUpdate('document', this._onDocumentChange, this)
-    editSession.onRender(this._updateProperties, this)
+    editorSession.onUpdate('document', this._onDocumentChange, this)
+    editorSession.onRender(this._updateProperties, this)
   }
 
   dispose() {
-    this.editSession.off(this)
+    this.editorSession.off(this)
   }
 
   register(textProperyComponent) {
@@ -59,7 +59,7 @@ class MarkersManager {
 
   setMarkers(path, type, markers) {
     let pathStr = String(path)
-    let doc = this.editSession.getDocument()
+    let doc = this.editorSession.getDocument()
     // remove the old ones first
     var oldMarkers = map(doc.getIndex('markers').get(path)) || []
     oldMarkers.forEach(function(m) {
@@ -74,7 +74,7 @@ class MarkersManager {
     })
     this._fetchDocumentMarkers(pathStr)
     this._dirtyProps[pathStr] = true
-    this.editSession.startFlow()
+    this.editorSession.startFlow()
   }
 
   _updateRegistration(path) {

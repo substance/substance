@@ -16,7 +16,7 @@ class EditLinkTool extends Tool {
   }
 
   _openLink() {
-    let doc = this.context.documentSession.getDocument()
+    let doc = this.context.editorSession.getDocument()
     window.open(doc.get(this.getUrlPath()), '_blank')
   }
 

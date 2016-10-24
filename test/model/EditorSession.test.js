@@ -1,17 +1,16 @@
 import { module, spy } from 'substance-test'
 
 import extend from 'lodash/extend'
-import isUndefined from 'lodash/isUndefined'
-import isNull from 'lodash/isNull'
-import DocumentSession from '../../model/DocumentSession'
+import EditorSession from '../../model/EditorSession'
+import Configurator from '../../model/Configurator'
 import fixture from '../fixtures/createTestArticle'
 import simple from '../fixtures/simple'
 
-const test = module('model/DocumentSession')
+const test = module('model/EditorSession')
 
 test("Transaction: before and after state.", function(t) {
   var doc = fixture(simple)
-  var docSession = new DocumentSession(doc)
+  var session = _createEditorSession(doc)
   var beforeState = {
     selection: doc.createSelection(['p1', 'content'], 1),
     some: "other"
@@ -19,7 +18,7 @@ test("Transaction: before and after state.", function(t) {
   var afterState = {
     selection: doc.createSelection(['p1', 'content'], 2)
   }
-  var change = docSession.transaction(function(tx, args) {
+  var change = session.transaction(function(tx, args) {
     extend(tx.before, beforeState)
     tx.create({ type: 'paragraph', id: 'bla', content: ""})
     args.selection = doc.createSelection(['p1', 'content'], 2)
@@ -36,12 +35,12 @@ test("Transaction: before and after state.", function(t) {
 
 test("Keeping TransactionDocument up-to-date.", function(t) {
   var doc = fixture(simple)
-  var docSession = new DocumentSession(doc)
-  docSession.stage._apply = spy(docSession.stage, '_apply')
+  var session = _createEditorSession(doc)
+  session.stage._apply = spy(session.stage, '_apply')
 
   doc.create({ type: 'paragraph', id: 'foo', content: 'foo'})
-  var p = docSession.stage.get('foo')
-  t.equal(docSession.stage._apply.callCount, 1, "Stage should have been updated.")
+  var p = session.stage.get('foo')
+  t.equal(session.stage._apply.callCount, 1, "Stage should have been updated.")
   t.notNil(p, "Stage should contain new paragraph node.")
   t.equal(p.content, "foo")
   t.end()
@@ -49,37 +48,44 @@ test("Keeping TransactionDocument up-to-date.", function(t) {
 
 test("Undoing and redoing a change.", function(t) {
   var doc = fixture(simple)
-  var docSession = new DocumentSession(doc)
-  docSession.transaction(function(tx) {
+  var session = _createEditorSession(doc)
+  session.transaction(function(tx) {
     tx.update(['p1', 'content'], { insert: {offset: 3, value: "XXX"} })
   })
 
   t.equal(doc.get(['p1', 'content']), '012XXX3456789', 'Text should have been inserted.')
-  t.equal(docSession.canUndo(), true, 'Undo should be possible')
-  docSession.undo()
+  t.equal(session.canUndo(), true, 'Undo should be possible')
+  session.undo()
   t.equal(doc.get(['p1', 'content']), '0123456789', 'Original text should have been recovered.')
-  t.equal(docSession.canUndo(), false, 'Undo should be disabled')
-  t.equal(docSession.canRedo(), true, 'Redo should be possible')
-  docSession.redo()
+  t.equal(session.canUndo(), false, 'Undo should be disabled')
+  t.equal(session.canRedo(), true, 'Redo should be possible')
+  session.redo()
   t.equal(doc.get(['p1', 'content']), '012XXX3456789', 'Text should have been changed again.')
   t.end()
 })
 
 test("Selections after undo/redo.", function(t) {
   var doc = fixture(simple)
-  var docSession = new DocumentSession(doc)
+  var session = _createEditorSession(doc)
   var path = ['p1', 'content']
-  docSession.setSelection(doc.createSelection(path, 3))
-  docSession.transaction(function(tx, args) {
+  session.setSelection(doc.createSelection(path, 3))
+  session.transaction(function(tx, args) {
     tx.update(path, { insert: {offset: 3, value: "XXX"} })
     args.selection = tx.createSelection(path, 6)
     return args
   })
-  docSession.undo()
-  var sel = docSession.getSelection()
+  session.undo()
+  var sel = session.getSelection()
   t.ok(sel.equals(doc.createSelection(path, 3)), 'Selection should be set correctly after undo.')
-  docSession.redo()
-  sel = docSession.getSelection()
+  session.redo()
+  sel = session.getSelection()
   t.ok(sel.equals(doc.createSelection(path, 6)), 'Selection should be set correctly after redo.')
   t.end()
 })
+
+
+function _createEditorSession(doc) {
+  return new EditorSession(doc, {
+    configurator: new Configurator()
+  })
+}

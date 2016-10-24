@@ -13,14 +13,18 @@ import DragManager from '../ui/DragManager'
 import GlobalEventHandler from '../ui/GlobalEventHandler'
 import MacroManager from '../ui/MacroManager'
 import forEach from '../util/forEach'
-import Registry from '../util/Registry'
 
-class DocumentSession {
+class EditorSession {
 
   constructor(doc, options) {
     options = options || {}
 
     this.document = doc
+    if (!options.configurator) {
+      throw new Error('No configurator provided.')
+    }
+    this.configurator = options.configurator
+
     // the stage is essentially a clone of the document used to apply a sequence of document operations
     // without touching this document
     this._transactionDocument = new TransactionDocument(doc, this)
@@ -49,10 +53,13 @@ class DocumentSession {
 
     this._flowStages = ['update', 'render', 'post-render', 'position', 'finalize']
 
+    this._eventProxies = {}
+
     // TODO: do we really want this?
+    this._hasUnsavedChanges = false
+    this._isSaving = false
     this._saveHandler = options.saveHandler
 
-    this._eventProxies = {}
 
     // Managers
     // --------
@@ -62,9 +69,8 @@ class DocumentSession {
     this.surfaceManager = new SurfaceManager(this)
     // this context is provided to commands, tools, etc.
     this._context = {
-      editSession: this,
+      editorSession: this,
       //legacy
-      documentSession: this,
       surfaceManager: this.surfaceManager,
     }
     // to expose custom context just provide optios.context
@@ -72,10 +78,7 @@ class DocumentSession {
       Object.assign(this._context, options.context)
     }
 
-    if (!options.configurator) {
-      throw new Error('No configurator provided.')
-    }
-    let configurator = options.configurator
+    let configurator = this.configurator
     let commands = configurator.getCommands()
     let dragHandlers = configurator.createDragHandlers()
     let macros = configurator.getMacros()
@@ -199,6 +202,10 @@ class DocumentSession {
     return doc.createSelection.apply(doc, arguments)
   }
 
+  getCollaborators() {
+    return null
+  }
+
   /*
     Set saveHandler via API
 
@@ -206,10 +213,6 @@ class DocumentSession {
   */
   setSaveHandler(saveHandler) {
     this._saveHandler = saveHandler
-  }
-
-  getCollaborators() {
-    return null
   }
 
   /**
@@ -274,7 +277,7 @@ class DocumentSession {
 
     During `update` data should be derived necessary for rendering.
 
-    This is mainly used by extensions of the EditSession to
+    This is mainly used by extensions of the EditorSession to
     derive extra state information.
 
     @param {string} [resource] the name of the resource
@@ -304,12 +307,12 @@ class DocumentSession {
     ```js
     class ImageComponent extends Component {
       didMount() {
-        this.context.editSession.onRender('document', this.rerender, this, {
+        this.context.editorSession.onRender('document', this.rerender, this, {
           path: [this.props.node.id, 'src']
         })
       }
       dispose() {
-        this.context.editSession.off(this)
+        this.context.editorSession.off(this)
       }
       render($$) {
         ...
@@ -372,24 +375,24 @@ class DocumentSession {
     Called when a flow stage is executed:
 
     ```js
-    editSession.on('update', this._onSessionUpdate, this)
+    editorSession.on('update', this._onSessionUpdate, this)
     ```
 
     Called at a specific flow stage but only if a resource has changed:
 
     ```js
-    editSession.on('update', this._onSelectionUpdate, this, {
+    editorSession.on('update', this._onSelectionUpdate, this, {
       resource: 'selection'
     })
     ```
     which is equivalent to
     ```js
-    editSession.onUpdate('selection', this._onSelectionUpdate, this)
+    editorSession.onUpdate('selection', this._onSelectionUpdate, this)
     ```
 
     Called at a specific flow stage but only if a property has changed:
     ```js
-    editSession.on('update', this._onPropertyChanged, this, {
+    editorSession.on('update', this._onPropertyChanged, this, {
       resource: 'document',
       path: [node.id, 'content']
     })
@@ -497,8 +500,8 @@ class DocumentSession {
   /*
     Are there unsaved changes?
   */
-  isDirty() {
-    return this._dirty
+  hasUnsavedChanges() {
+    return this._hasUnsavedChanges
   }
 
   /*
@@ -508,7 +511,7 @@ class DocumentSession {
     var doc = this.getDocument()
     var saveHandler = this.saveHandler
 
-    if (this._dirty && !this._isSaving) {
+    if (this._hasUnsavedChanges && !this._isSaving) {
       this._isSaving = true
       // Pass saving logic to the user defined callback if available
       if (saveHandler) {
@@ -520,14 +523,14 @@ class DocumentSession {
           if (err) {
             console.error('Error during save')
           } else {
-            this._dirty = false
+            this._hasUnsavedChanges = false
             // af
             this._triggerUpdateEvent({}, {force: true})
           }
         }.bind(this))
 
       } else {
-        console.error('Document saving is not handled at the moment. Make sure saveHandler instance provided to documentSession')
+        console.error('Document saving is not handled at the moment. Make sure saveHandler instance provided to editorSession')
       }
     }
   }
@@ -622,14 +625,14 @@ class DocumentSession {
 
 }
 
-export default DocumentSession
+export default EditorSession
 
 // Event Proxies
 
 class EventProxy {
-  constructor(editSession, stage) {
+  constructor(editorSession, stage) {
     this.stage = stage
-    this.editSession = editSession
+    this.editorSession = editorSession
     this.observers = []
   }
 
@@ -650,7 +653,7 @@ class EventProxy {
     for (var i = 0; i < this.observers.length; i++) {
       var entry = this.observers[i]
       if (entry.observer === observer) {
-        console.log('## removing observer from', this)
+        // console.log('## removing observer from', this)
         this.observers.splice(i, 1)
         i--
       }
@@ -659,52 +662,52 @@ class EventProxy {
 }
 
 class StageEventProxy extends EventProxy {
-  constructor(editSession, stage) {
-    super(editSession, stage)
+  constructor(editorSession, stage) {
+    super(editorSession, stage)
     this.id = '@'+stage
   }
   notifyObservers() {
     this.observers.forEach((o) => {
-      o.handler.call(o.observer, this.editSession)
+      o.handler.call(o.observer, this.editorSession)
     })
   }
 }
 
 class ResourceEventProxy extends EventProxy {
-  constructor(editSession, stage, resourceName) {
-    super(editSession, stage)
+  constructor(editorSession, stage, resourceName) {
+    super(editorSession, stage)
     this.id = resourceName+'@'+stage
     this.resourceName = resourceName
   }
   notifyObservers() {
-    const resource = this.editSession.get(this.resourceName)
+    const resource = this.editorSession.get(this.resourceName)
     this.observers.forEach((o) => {
-      o.handler.call(o.observer, resource, this.editSession)
+      o.handler.call(o.observer, resource, this.editorSession)
     })
   }
 }
 
 class DocumentEventProxy extends EventProxy {
-  constructor(editSession, stage) {
-    super(editSession, stage)
+  constructor(editorSession, stage) {
+    super(editorSession, stage)
     this.id = 'document@'+stage
   }
 
   notifyObservers() {
-    const editSession = this.editSession
-    const change = editSession.getChange()
-    const info = editSession.getChangeInfo()
+    const editorSession = this.editorSession
+    const change = editorSession.getChange()
+    const info = editorSession.getChangeInfo()
     if (!change) return
     this.observers.forEach(function(o) {
       let path = o.options.path
       // listeners for all document changes have no path
       if (!path) {
-        o.handler.call(o.observer, change, info, editSession)
+        o.handler.call(o.observer, change, info, editorSession)
       }
       // TODO: it might be valueable to provide the old value
       // in case of property listeners
       else if (change.isAffected(path)) {
-        o.handler.call(o.observer, change, info, editSession)
+        o.handler.call(o.observer, change, info, editorSession)
       }
     })
   }

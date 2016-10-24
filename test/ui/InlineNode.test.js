@@ -42,9 +42,9 @@ function paragraphsWithInlineNodes(doc) {
 
 test("InlineNodes should be not selected when selection is null", function(t) {
   var env = setup(paragraphsWithInlineNodes)
-  var documentSession = env.documentSession
+  var editorSession = env.editorSession
   var nodes = env.app.findAll('.sc-inline-node')
-  documentSession.setSelection(null)
+  editorSession.setSelection(null)
   nodes.forEach(function(node){
     t.ok(node.isNotSelected(), "node '"+node.getId()+"' should not be selected.")
   })
@@ -53,9 +53,9 @@ test("InlineNodes should be not selected when selection is null", function(t) {
 
 test("InlineNodes should be not selected when selection is somewhere else", function(t) {
   var env = setup(paragraphsWithInlineNodes)
-  var documentSession = env.documentSession
+  var editorSession = env.editorSession
   var nodes = env.app.findAll('.sc-inline-node')
-  documentSession.setSelection({
+  editorSession.setSelection({
     type: 'property',
     path: ['p1', 'content'],
     startOffset: 5,
@@ -69,9 +69,9 @@ test("InlineNodes should be not selected when selection is somewhere else", func
 
 test("InlineNode should be 'selected' with when the inline node is selected", function(t) {
   var env = setup(paragraphsWithInlineNodes)
-  var documentSession = env.documentSession
+  var editorSession = env.editorSession
   var nodes = env.app.findAll('.sc-inline-node')
-  documentSession.setSelection({
+  editorSession.setSelection({
     type: 'property',
     path: ['p1', 'content'],
     startOffset: 2,
@@ -91,9 +91,9 @@ test("InlineNode should be 'selected' with when the inline node is selected", fu
 
 test("InlineNode should be 'co-selected' when selection is spanning an inline node", function(t) {
   var env = setup(paragraphsWithInlineNodes)
-  var documentSession = env.documentSession
+  var editorSession = env.editorSession
   var nodes = env.app.findAll('.sc-inline-node')
-  documentSession.setSelection({
+  editorSession.setSelection({
     type: 'property',
     path: ['p1', 'content'],
     startOffset: 1,
@@ -113,9 +113,9 @@ test("InlineNode should be 'co-selected' when selection is spanning an inline no
 
 test("InlineNode should be 'focused' when having the selection", function(t) {
   var env = setup(paragraphsWithInlineNodes, t.sandbox)
-  var documentSession = env.documentSession
+  var editorSession = env.editorSession
   var nodes = env.app.findAll('.sc-inline-node')
-  documentSession.setSelection({
+  editorSession.setSelection({
     type: 'property',
     path: ['p1', 'content'],
     startOffset: 1,
@@ -132,7 +132,7 @@ test("InlineNode should be 'focused' when having the selection", function(t) {
   })
   // used this to play with the sandbox after the test was run, e.g. to find out
   // the real surface ids
-  // documentSession.on('didUpdate', function(change) {
+  // editorSession.on('didUpdate', function(change) {
   //   if (change.selection) {
   //     console.log(change.selection)
   //   }
@@ -143,9 +143,9 @@ test("InlineNode should be 'focused' when having the selection", function(t) {
 // Similar to the previous but with another inline node being focused
 test("InlineNode should be 'focused' when having the selection (II)", function(t) {
   var env = setup(paragraphsWithInlineNodes, t.sandbox)
-  var documentSession = env.documentSession
+  var editorSession = env.editorSession
   var nodes = env.app.findAll('.sc-inline-node')
-  documentSession.setSelection({
+  editorSession.setSelection({
     type: 'property',
     path: ['c_p', 'content'],
     startOffset: 1,
@@ -197,9 +197,9 @@ function nestedInlineNode(doc) {
 
 test("InlineNode should be 'co-focused' when a nested inline node has the selection", function(t) {
   var env = setup(nestedInlineNode, t.sandbox)
-  var documentSession = env.documentSession
+  var editorSession = env.editorSession
   var nodes = env.app.findAll('.sc-inline-node')
-  documentSession.setSelection({
+  editorSession.setSelection({
     type: 'property',
     path: ['sn2', 'title'],
     startOffset: 2,

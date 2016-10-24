@@ -26,11 +26,11 @@ class Surface extends Component {
   constructor(...args) {
     super(...args)
 
-    // DocumentSession instance must be provided either as a prop
+    // EditorSession instance must be provided either as a prop
     // or via dependency-injection
-    this.editSession = this.props.editSession || this.context.editSession
-    if (!this.editSession) {
-      throw new Error('No DocumentSession provided')
+    this.editorSession = this.props.editorSession || this.context.editorSession
+    if (!this.editorSession) {
+      throw new Error('No EditorSession provided')
     }
     this.name = this.props.name
     if (!this.name) {
@@ -92,12 +92,12 @@ class Surface extends Component {
       // this.domObserver = new window.MutationObserver(this.onDomMutations.bind(this));
       // this.domObserver.observe(this.el.getNativeElement(), { subtree: true, characterData: true, characterDataOldValue: true });
     }
-    this.editSession.onRender('selection', this._onSelectionChanged, this)
+    this.editorSession.onRender('selection', this._onSelectionChanged, this)
   }
 
 
   dispose() {
-    this.editSession.off(this)
+    this.editorSession.off(this)
     this.domSelection = null
     if (this.domObserver) {
       this.domObserver.disconnect()
@@ -207,18 +207,12 @@ class Surface extends Component {
   }
 
   getDocument() {
-    return this.editSession.getDocument()
+    return this.editorSession.getDocument()
   }
 
-  getDocumentSession() {
-    console.warn('DEPRECATED: use Surface.getEditSession()')
-    return this.editSession
+  getEditorSession() {
+    return this.editorSession
   }
-
-  getEditSession() {
-    return this.editSession
-  }
-
 
   isEnabled() {
     return !this.state.disabled
@@ -264,23 +258,23 @@ class Surface extends Component {
    */
   transaction(transformation, info) {
     // TODO: we would like to get rid of this method, and only have
-    // editSession.transaction()
+    // editorSession.transaction()
     // The problem is, that we need to get surfaceId into the change,
     // to be able to set the selection into the right surface.
     // ATM we put this into the selection, which is hacky, and makes it
     // unnecessarily inconvient to create selections.
-    // Maybe editSession should provide a means to augment the before/after
+    // Maybe editorSession should provide a means to augment the before/after
     // state of a change.
-    let editSession = this.editSession
+    let editorSession = this.editorSession
     let surfaceId = this.getId()
-    return editSession.transaction(function(tx, args) {
+    return editorSession.transaction(function(tx, args) {
       tx.before.surfaceId = surfaceId
       return transformation(tx, args)
     }, info)
   }
 
   getSelection() {
-    return this.editSession.getSelection()
+    return this.editorSession.getSelection()
   }
 
   /**
@@ -742,7 +736,7 @@ class Surface extends Component {
     event.stopPropagation()
 
     let direction = (event.keyCode === keys.LEFT) ? 'left' : 'right'
-    let selState = this.getEditSession().getSelectionState()
+    let selState = this.getEditorSession().getSelectionState()
     let sel = selState.getSelection()
     // Note: collapsing the selection and let ContentEditable still continue doing a cursor move
     if (selState.isInlineNodeSelection() && !event.shiftKey) {
@@ -851,7 +845,7 @@ class Surface extends Component {
     if (!sel.isNull() && sel.surfaceId === this.getId() && platform.isFF) {
       this._focus()
     }
-    this.editSession.setSelection(sel)
+    this.editorSession.setSelection(sel)
   }
 
   _updateModelSelection(options) {

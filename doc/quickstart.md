@@ -30,10 +30,11 @@ cfg.import(SuperscriptPackage)
 
 window.onload = function() {
   let doc = configurator.createArticle(fixture)
-  let documentSession = new DocumentSession(doc)
-  ProseEditor.mount({
-    documentSession: documentSession,
+  let editorSession = new EditorSession(doc, {
     configurator: configurator
+  })
+  ProseEditor.mount({
+    editorSession: editorSession,
   }, document.body)
 }
 ```

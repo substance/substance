@@ -14,10 +14,11 @@ import Toolbar from '../tools/Toolbar'
 
   window.onload = function() {
     let doc = configurator.createArticle(fixture)
-    let documentSession = new DocumentSession(doc)
-    ProseEditor.mount({
-      documentSession: documentSession,
+    let editorSession = new EditorSession(doc, {
       configurator: configurator
+    })
+    ProseEditor.mount({
+      editorSession: editorSession
     }, document.body)
   }
   ```
@@ -55,10 +56,10 @@ class ProseEditor extends AbstractEditor {
   }
 
   _renderEditor($$) {
-    let configurator = this.props.configurator
+    let configurator = this.getConfigurator()
     return $$(ContainerEditor, {
       disabled: this.props.disabled,
-      documentSession: this.documentSession,
+      editorSession: this.editorSession,
       node: this.doc.get('body'),
       commands: configurator.getSurfaceCommandNames(),
       textTypes: configurator.getTextTypes()

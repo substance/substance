@@ -38,7 +38,7 @@ class SwitchTextTypeCommand extends Command {
   }
 
   getCommandState(params) {
-    let doc = params.documentSession.getDocument()
+    let doc = params.editorSession.getDocument()
     let sel = params.selection
     let surface = params.surface
     let node

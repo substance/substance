@@ -411,13 +411,13 @@ class Component extends DOMElement.Delegator {
     ```javascript
     class Foo extends Component {
       didMount() {
-        this.context.editSession.onRender('document', this.rerender, this, {
+        this.context.editorSession.onRender('document', this.rerender, this, {
           path: [this.props.node.id, 'label']
         })
       }
 
       dispose() {
-        this.context.editSession.off(this)
+        this.context.editorSession.off(this)
       }
     }
     ```

@@ -37,22 +37,22 @@ class IsolatedNodeComponent extends Component {
   }
 
   getInitialState() {
-    let selState = this.context.documentSession.getSelectionState()
+    let selState = this.context.editorSession.getSelectionState()
     return this._deriveStateFromSelectionState(selState)
   }
 
   didMount() {
     super.didMount.call(this);
 
-    let editSession = this.context.editSession
-    editSession.onRender('selection', this._onSelectionChanged, this)
+    let editorSession = this.context.editorSession
+    editorSession.onRender('selection', this._onSelectionChanged, this)
   }
 
   dispose() {
     super.dispose.call(this)
 
-    let editSession = this.context.editSession
-    editSession.off(this)
+    let editorSession = this.context.editorSession
+    editorSession.off(this)
   }
 
   getClassNames() {
@@ -232,8 +232,8 @@ class IsolatedNodeComponent extends Component {
   }
 
   _onSelectionChanged(selection) {
-    let documentSession = this.context.documentSession
-    let newState = this._deriveStateFromSelectionState(documentSession.getSelectionState())
+    let editorSession = this.context.editorSession
+    let newState = this._deriveStateFromSelectionState(editorSession.getSelectionState())
     if (!newState && this.state.mode) {
       this.extendState({ mode: null })
     } else if (newState && newState.mode !== this.state.mode) {

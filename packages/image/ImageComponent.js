@@ -6,7 +6,7 @@ class ImageComponent extends NodeComponent {
   didMount() {
     super.didMount.call(this)
     let node = this.props.node
-    this.context.editSession.onRender('document', this.rerender, this, {
+    this.context.editorSession.onRender('document', this.rerender, this, {
       path: [node.id, 'src']
     })
     // TODO: we should try to factor this out for reuse
@@ -18,7 +18,7 @@ class ImageComponent extends NodeComponent {
   dispose() {
     super.dispose.call(this)
 
-    this.context.editSession.off(this)
+    this.context.editorSession.off(this)
     this.props.node.off(this)
   }
 

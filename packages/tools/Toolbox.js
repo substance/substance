@@ -22,15 +22,15 @@ class Toolbox extends Component {
 
   didMount() {
     // rerender the context menu after anything else has been updated
-    this.context.editSession.on('render', this._onCommandStatesChanged, this)
+    this.context.editorSession.on('render', this._onCommandStatesChanged, this)
   }
 
   dispose() {
-    this.context.editSession.off(this)
+    this.context.editorSession.off(this)
   }
 
-  _onCommandStatesChanged(editSession) {
-    if (editSession.hasChanged('commandStates')) {
+  _onCommandStatesChanged(editorSession) {
+    if (editorSession.hasChanged('commandStates')) {
       this.setState({
         activeToolGroups: this.getActiveToolGroups()
       })

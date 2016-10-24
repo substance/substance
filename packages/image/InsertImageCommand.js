@@ -29,7 +29,7 @@ class ImageCommand extends Command {
     // Return if command is disabled
     if (state.disabled) return
 
-    let documentSession = params.documentSession
+    let editorSession = params.editorSession
     let sel = params.selection
     let surface = params.surface
     let fileClient = context.fileClient
@@ -77,7 +77,7 @@ class ImageCommand extends Command {
         let node = doc.get(nodeId)
         if (node) {
           node.emit('upload:finished');
-          documentSession.transaction(function(tx) {
+          editorSession.transaction(function(tx) {
             tx.set([nodeId, 'src'], url)
           })
         }
