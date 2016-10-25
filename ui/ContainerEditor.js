@@ -121,7 +121,7 @@ class ContainerEditor extends Surface {
       )
     } else {
       containerNode.getNodes().forEach(function(node) {
-        el.append(this._renderNode($$, node).ref(node.id))
+        el.append(this._renderNode($$, node))
       }.bind(this))
     }
 

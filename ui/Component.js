@@ -675,7 +675,7 @@ class Component extends DOMElement.Delegator {
 
   getChildAt(pos) {
     var node = this.el.getChildAt(pos)
-    return _unwrapCompStrict(node)
+    return _unwrapComp(node, true)
   }
 
   find(cssSelector) {
@@ -707,7 +707,7 @@ class Component extends DOMElement.Delegator {
   removeAt(pos) {
     var childEl = this.el.getChildAt(pos)
     if (childEl) {
-      var child = _unwrapCompStrict(childEl)
+      var child = _unwrapComp(childEl, true)
       _disposeChild(child)
       this.el.removeAt(pos)
     }
@@ -836,6 +836,7 @@ Component.getComponentFromNativeElement = function(nativeEl) {
   return _unwrapComp(DefaultDOMElement.wrapNativeElement(nativeEl))
 }
 
+// NOTE: this is used for incremental updates only
 function _disposeChild(child) {
   child.triggerDispose()
   if (child._owner && child._ref) {
@@ -844,6 +845,7 @@ function _disposeChild(child) {
   }
 }
 
+// NOTE: this is used for incremental updates only
 function _mountChild(parent, child) {
   if (parent.isMounted()) {
     child.triggerDidMount(true)
@@ -853,14 +855,10 @@ function _mountChild(parent, child) {
   }
 }
 
-
-function _unwrapComp(el) {
+// NOTE: we keep a reference to the component in all DOMElement instances
+function _unwrapComp(el, strict) {
+  if (strict && !el._comp) throw new Error("Expecting a back-link to the component instance.")
   if (el) return el._comp
-}
-
-function _unwrapCompStrict(el) {
-  console.assert(el._comp, "Expecting a back-link to the component instance.")
-  return _unwrapComp(el)
 }
 
 function notNull(n) { return n }
