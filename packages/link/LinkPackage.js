@@ -16,8 +16,8 @@ export default {
     config.addConverter('xml', LinkXMLConverter)
     config.addCommand('link', LinkCommand, {nodeType: 'link'})
     config.addCommand('edit-link', EditAnnotationCommand, {nodeType: 'link'})
-    config.addTool('link', AnnotationTool, {toolGroup: options.toolTarget || 'annotations'})
-    config.addTool('edit-link', EditLinkTool, { toolGroup: options.editLinkToolTarget || 'overlay' })
+    config.addTool('link', AnnotationTool, {toolGroup: options.toolGroup || 'annotations'})
+    config.addTool('edit-link', EditLinkTool, { toolGroup: options.editLinkToolGroup || 'overlay' })
     config.addIcon('link', { 'fontawesome': 'fa-link'})
     config.addIcon('open-link', { 'fontawesome': 'fa-external-link' })
     config.addLabel('link', {
