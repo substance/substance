@@ -21,13 +21,14 @@ class DragManager {
     event.dataTransfer.setData('text/html', event.target.outerHTML)
     event.stopPropagation()
 
-    this._source = {
-      component: component
+    this._source = component
+    let data = {
+      source: component,
+      event: event
     }
-
     for (let i = 0; i < this.dndHandlers.length; i++) {
       let handler = this.dndHandlers[i]
-      handler.dragStart(this._source, this.context)
+      handler.dragStart(data, this.context)
     }
   }
 
@@ -48,6 +49,7 @@ class DragManager {
     event.stopPropagation()
     // console.log('DragManager.onDragEnter', event);
     let params = {
+      event: event,
       source: this._source,
       target: _getTargetInfo(event, component),
       data: _getData(event)
