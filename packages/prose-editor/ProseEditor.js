@@ -30,13 +30,18 @@ class ProseEditor extends AbstractEditor {
     let el = $$('div').addClass('sc-prose-editor')
     let toolbar = this._renderToolbar($$)
     let editor = this._renderEditor($$)
+
     let ScrollPane = this.componentRegistry.get('scroll-pane')
+    let Overlay = this.componentRegistry.get('overlay')
+    let ContextMenu = this.componentRegistry.get('context-menu')
 
     let contentPanel = $$(ScrollPane, {
       scrollbarPosition: 'right',
-      scrollbarType: this.props.scrollbarType
+      scrollbarType: this.props.scrollbarType,
     }).append(
-      editor
+      editor,
+      $$(Overlay),
+      $$(ContextMenu)
     ).ref('contentPanel')
 
     el.append(

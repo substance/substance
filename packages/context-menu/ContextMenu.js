@@ -2,6 +2,19 @@ import Toolbox from '../tools/Toolbox'
 
 class ContextMenu extends Toolbox {
 
+  didMount() {
+    super.didMount()
+    if (!this.context.scrollPane) {
+      throw new Error('Requires a scrollPane context')
+    }
+    this.context.scrollPane.on('context-menu:position', this._position, this)
+  }
+
+  dispose() {
+    super.dispose()
+    this.context.scrollPane.off(this)
+  }
+
   /*
     Override with custom rendering
   */
@@ -39,29 +52,24 @@ class ContextMenu extends Toolbox {
     return 'plain-dark'
   }
 
-  show(hints) {
-    this.el.removeClass('sm-hidden')
-    this._position(hints)
-  }
-
   hide() {
     this.el.addClass('sm-hidden')
   }
 
   _position(hints) {
-    if (hints) {
-      let contentWidth = this.el.htmlProp('offsetWidth')
+    let mouseBounds = hints.mouseBounds
+    this.el.removeClass('sm-hidden')
+    let contentWidth = this.el.htmlProp('offsetWidth')
 
-      // By default, context menu are aligned left bottom to the mouse coordinate clicked
-      this.el.css('top', hints.top)
-      let leftPos = hints.left
-      // Must not exceed left bound
-      leftPos = Math.max(leftPos, 0)
-      // Must not exceed right bound
-      let maxLeftPos = hints.left + hints.right - contentWidth
-      leftPos = Math.min(leftPos, maxLeftPos)
-      this.el.css('left', leftPos)
-    }
+    // By default, context menu are aligned left bottom to the mouse coordinate clicked
+    this.el.css('top', mouseBounds.top)
+    let leftPos = mouseBounds.left
+    // Must not exceed left bound
+    leftPos = Math.max(leftPos, 0)
+    // Must not exceed right bound
+    let maxLeftPos = mouseBounds.left + mouseBounds.right - contentWidth
+    leftPos = Math.min(leftPos, maxLeftPos)
+    this.el.css('left', leftPos)
   }
 }
 

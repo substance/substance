@@ -47,7 +47,6 @@ export default {
     config.addCommand('undo', UndoCommand)
     config.addCommand('redo', RedoCommand)
 
-
     // Tools
     config.addTool('undo', Tool, {toolGroup: ['document', 'context-menu-document']})
     config.addTool('redo', Tool, {toolGroup: ['document', 'context-menu-document']})

@@ -7,8 +7,8 @@
 */
 function getRelativeMouseBounds(mouseEvent, containerEl) {
   let containerElRect = containerEl.getBoundingClientRect()
-  let left = mouseEvent.pageX - containerElRect.left
-  let top = mouseEvent.pageY - containerElRect.top
+  let left = mouseEvent.clientX - containerElRect.left
+  let top = mouseEvent.clientY - containerElRect.top
   let res = {
     left: left,
     right: containerElRect.width - left,

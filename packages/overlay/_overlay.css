@@ -2,7 +2,7 @@
   This just serves as a container for positioning overlay content
 */
 .sc-overlay { z-index: 200; position: absolute; }
-.sc-overlay.sm-hidden { visibility: hidden; position: fixed; }
+.sc-overlay.sm-hidden { visibility: hidden; }
 
 
 .sc-overlay.sm-theme-dark {}
@@ -24,8 +24,10 @@
   padding: 5px;
 }
 
-.sc-overlay.sm-theme-dark > .se-active-tools > * {
+.sc-overlay.sm-theme-dark > .se-active-tools > .sc-tool-group {
   display: inline-block;
-  margin-left: 2px;
-  margin-right: 2px;
+}
+
+.sc-overlay.sm-theme-dark > .se-active-tools > .sc-tool-group > .se-tool {
+  display: inline-block;
 }

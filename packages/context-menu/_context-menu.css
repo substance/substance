@@ -2,7 +2,6 @@
   position: absolute;
   background: #2E2E2C;
   border-radius: 5px;
-
   font-size: var(--small-font-size);
   z-index: 1000;
 }

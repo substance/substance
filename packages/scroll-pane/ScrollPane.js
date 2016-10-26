@@ -26,16 +26,8 @@ import getRelativeMouseBounds from '../../util/getRelativeMouseBounds'
     tocProvider: this.tocProvider
   })
   ```
- */
+*/
 class ScrollPane extends Component {
-
-  constructor(...args) {
-    super(...args)
-
-    this.handleActions({
-      'domSelectionRendered': this._onDomSelectionRendered
-    })
-  }
 
   /*
     Expose scrollPane as a child context
@@ -51,7 +43,7 @@ class ScrollPane extends Component {
       this.props.highlights.on('highlights:updated', this.onHighlightsUpdated, this)
     }
     if (this.refs.scrollbar) {
-      this.domObserver = new window.MutationObserver(this._onContentChanged.bind(this));
+      this.domObserver = new window.MutationObserver(this._onContentChanged.bind(this))
       this.domObserver.observe(this.el.getNativeElement(), {
         subtree: true,
         attributes: true,
@@ -60,6 +52,10 @@ class ScrollPane extends Component {
       })
       this.context.editorSession.onPosition(this._onPosition, this)
     }
+
+    this.handleActions({
+      'domSelectionRendered': this._onDomSelectionRendered
+    })
   }
 
   dispose() {
@@ -70,9 +66,6 @@ class ScrollPane extends Component {
   }
 
   render($$) {
-    let ContextMenu = this.getComponent('context-menu')
-    let Overlay = this.getComponent('overlay')
-    let Gutter = this.getComponent('gutter')
     let el = $$('div')
       .addClass('sc-scroll-pane')
 
@@ -80,10 +73,16 @@ class ScrollPane extends Component {
       el.addClass('sm-firefox')
     }
 
+    // When noStyle is provided we just use ScrollPane as a container, but without
+    // any absolute positioned containers, leaving the body scrollable.
+    if (!this.props.noStyle) {
+      el.addClass('sm-default-style')
+    }
+
     // Initialize Substance scrollbar (if enabled)
     if (this.props.scrollbarType === 'substance') {
       el.addClass('sm-substance-scrollbar')
-      el.addClass('sm-scrollbar-position-'+this.props.scrollbarPosition)
+      el.addClass('sm-scrollbar-position-' + this.props.scrollbarPosition)
 
       el.append(
         // TODO: is there a way to pass scrollbar highlights already
@@ -100,28 +99,19 @@ class ScrollPane extends Component {
       )
     }
 
-    let overlay = $$(Overlay).ref('overlay')
-    let gutter = $$(Gutter).ref('gutter')
-
-    let contextMenu = $$(ContextMenu).ref('contextMenu')
-    let contentEl = $$('div').ref('content').addClass('se-content')
-      .append(overlay)
-      .append(gutter)
-      .append(contextMenu)
-      .on('contextmenu', this.onContextMenu)
-
-    if (contextMenu) {
-      contentEl.append(contextMenu)
-    }
-
-    contentEl.append(this.props.children)
-
     el.append(
       $$('div').ref('scrollable').addClass('se-scrollable').append(
-        contentEl
+        this.renderContent($$)
       ).on('scroll', this.onScroll)
     )
     return el
+  }
+
+  renderContent($$) {
+    let contentEl = $$('div').ref('content').addClass('se-content')
+    contentEl.append(this.props.children)
+    contentEl.on('contextmenu', this._onContextMenu)
+    return contentEl
   }
 
   _onContentChanged() {
@@ -141,36 +131,6 @@ class ScrollPane extends Component {
     }
   }
 
-  _onDomSelectionRendered() {
-    const wsel = window.getSelection()
-    if (wsel.rangeCount === 0) return
-    const wrange = wsel.getRangeAt(0)
-    const parentRect = this.refs.content.getNativeElement().getBoundingClientRect()
-    const selRect = wrange.getBoundingClientRect()
-
-    const overlayHints = {
-      rectangle: _getRelativeRect(parentRect, selRect)
-    }
-    // Remember overlay hints for next update
-    let overlay = this.refs.overlay
-    let gutter = this.refs.gutter
-    if (overlay) {
-      if (overlay.hasActiveTools()) {
-        overlay.show(overlayHints)
-      } else {
-        overlay.hide()
-      }
-    }
-    if (gutter) {
-      if (gutter.hasActiveTools()) {
-        gutter.show(overlayHints)
-      } else {
-        gutter.hide()
-      }
-    }
-    this._updateScrollbar()
-  }
-
   onHighlightsUpdated(highlights) {
     this.refs.scrollbar.extendProps({
       highlights: highlights
@@ -188,15 +148,6 @@ class ScrollPane extends Component {
       this.props.tocProvider.markActiveEntry(this)
     }
     this.emit('scroll', scrollPos, scrollable)
-  }
-
-  onContextMenu(e) {
-    e.preventDefault();
-    let contentContainerEl = this.refs.content.el.el
-    let mouseBounds = getRelativeMouseBounds(e, contentContainerEl)
-    let contextMenu = this.refs.contextMenu
-    contextMenu.show(mouseBounds)
-    this._updateScrollbar()
   }
 
   /**
@@ -275,12 +226,42 @@ class ScrollPane extends Component {
       console.warn(componentId, 'not found in scrollable container')
     }
   }
+
+  _onDomSelectionRendered() {
+    const wsel = window.getSelection()
+    if (wsel.rangeCount === 0) return
+    const wrange = wsel.getRangeAt(0)
+    const contentRect = this.refs.content.getNativeElement().getBoundingClientRect()
+    const innerContentRect = this.refs.content.getChildAt(0).getNativeElement().getBoundingClientRect()
+    const selectionRect = wrange.getBoundingClientRect()
+    const positionHints = {
+      contentWidth: contentRect.width,
+      contentHeight: contentRect.height,
+      selectionRect: _getRelativeRect(contentRect, selectionRect),
+      innerContentRect: _getRelativeRect(contentRect, innerContentRect)
+    }
+
+    this.emit('overlay:position', positionHints)
+    this._updateScrollbar()
+  }
+
+  _onContextMenu(e) {
+    e.preventDefault()
+    let contentContainerEl = this.refs.content.el.el
+    let mouseBounds = getRelativeMouseBounds(e, contentContainerEl)
+    let positionHints = {
+      mouseBounds: mouseBounds
+    }
+
+    this.emit('context-menu:position', positionHints)
+    this._updateScrollbar()
+  }
 }
 
 
 function _getRelativeRect(parentRect, childRect) {
-  var left = childRect.left - parentRect.left;
-  var top = childRect.top - parentRect.top;
+  var left = childRect.left - parentRect.left
+  var top = childRect.top - parentRect.top
   return {
     left: left,
     top: top,

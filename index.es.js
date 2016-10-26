@@ -149,6 +149,7 @@ export { default as TOCProvider } from './packages/toc/TOCProvider'
 export { default as ToolDropdown } from './packages/tools/ToolDropdown'
 export { default as Tool } from './packages/tools/Tool'
 export { default as Toolbar } from './packages/tools/Toolbar'
+export { default as Toolbox } from './packages/tools/Toolbox'
 
 // surface
 export { default as Surface } from './packages/surface/Surface'

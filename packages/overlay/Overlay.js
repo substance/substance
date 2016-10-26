@@ -5,6 +5,20 @@ import Toolbox from '../tools/Toolbox'
 */
 class Overlay extends Toolbox {
 
+  didMount() {
+    super.didMount()
+    if (!this.context.scrollPane) {
+      throw new Error('Requires scrollPane context')
+    }
+
+    this.context.scrollPane.on('overlay:position', this._position, this)
+  }
+
+  dispose() {
+    super.dispose()
+    this.context.scrollPane.off(this)
+  }
+
   render($$) {
     let el = $$('div').addClass(this.getClassNames())
     el.addClass('sm-hidden')
@@ -43,19 +57,28 @@ class Overlay extends Toolbox {
   }
 
   _position(hints) {
-    if (hints) {
+
+
+    if (this.hasActiveTools()) {
+
+      this.el.removeClass('sm-hidden')
+
       let contentWidth = this.el.htmlProp('offsetWidth')
-      let selectionMaxWidth = hints.rectangle.width
+      let selRect = hints.selectionRect
+      let selectionMaxWidth = selRect.width
 
       // By default, Overlays are aligned center/bottom to the selection
-      this.el.css('top', hints.rectangle.top + hints.rectangle.height)
-      let leftPos = hints.rectangle.left + selectionMaxWidth/2 - contentWidth/2
+      this.el.css('top', selRect.top + selRect.height)
+      let leftPos = selRect.left + selectionMaxWidth/2 - contentWidth/2
       // Must not exceed left bound
       leftPos = Math.max(leftPos, 0)
       // Must not exceed right bound
-      let maxLeftPos = hints.rectangle.left + selectionMaxWidth + hints.rectangle.right - contentWidth
+      let maxLeftPos = selRect.left + selectionMaxWidth + selRect.right - contentWidth
       leftPos = Math.min(leftPos, maxLeftPos)
       this.el.css('left', leftPos)
+    } else {
+      this.el.addClass('sm-hidden')
+      console.log('hasActiveTools', this.hasActiveTools())
     }
   }
 
@@ -68,7 +91,7 @@ class Overlay extends Toolbox {
   }
 
   getActiveToolGroupNames() {
-    return ['overlay']
+    return ['overlay', 'annotations']
   }
 
 }

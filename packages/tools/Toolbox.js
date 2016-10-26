@@ -42,6 +42,8 @@ class Toolbox extends Component {
     containing Class and toolProps for rendering
   */
   getActiveToolGroups() {
+    this._hasActiveTools = false
+
     let toolGroups = this.context.toolGroups
     let activeToolGroupNames = this.getActiveToolGroupNames()
     let activeToolGroups = new Map()
@@ -66,7 +68,6 @@ class Toolbox extends Component {
   getActiveTools(tools, toolGroupName) { // eslint-disable-line
     let activeTools = new Map()
     let commandStates = this._getCommandStates()
-    let hasActiveTools = false
 
     tools.forEach((tool, toolName) => {
       if (!commandStates[toolName]) {
@@ -86,11 +87,10 @@ class Toolbox extends Component {
           Class: tool.Class,
           toolProps: toolProps
         })
-        hasActiveTools = true
+        this._hasActiveTools = true
       }
     })
 
-    this._hasActiveTools = hasActiveTools
     return activeTools
   }
 
