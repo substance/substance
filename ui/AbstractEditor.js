@@ -99,6 +99,10 @@ class AbstractEditor extends Component {
   getEditorSession() {
     return this.editorSession
   }
+
+  getComponentRegistry() {
+    return this.componentRegistry
+  }
 }
 
 export default AbstractEditor

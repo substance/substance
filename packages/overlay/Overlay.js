@@ -44,7 +44,7 @@ class Overlay extends Toolbox {
     Override if you just want to use a different style
   */
   getToolStyle() {
-    return 'outline-dark'
+    return 'plain-dark'
   }
 
   show(hints) {
