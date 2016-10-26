@@ -70,7 +70,8 @@ class Configurator {
       macros: [],
       dndHandlers: [],
       icons: {},
-      labels: {}
+      labels: {},
+      lang: 'en_US'
     }
   }
 
@@ -508,6 +509,14 @@ class Configurator {
     return this.config.dndHandlers.map(function(DragAndDropHandlerClass) {
       return new DragAndDropHandlerClass()
     })
+  }
+
+  setDefaultLanguage(lang) {
+    this.config.lang = lang
+  }
+
+  getDefaultLanguage() {
+    return this.config.lang || 'en_US'
   }
 }
 

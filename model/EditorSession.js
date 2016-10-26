@@ -63,6 +63,8 @@ class EditorSession {
     this._isSaving = false
     this._saveHandler = options.saveHandler
 
+    this._lang = options.lang || this.configurator.getDefaultLanguage()
+    this._dir = options.dir || 'ltr'
 
     // Managers
     // --------
@@ -129,6 +131,14 @@ class EditorSession {
     return this.hasChanged('commandStates')
   }
 
+  hasLanguageChanged() {
+    return this.hasChanged('lang')
+  }
+
+  hasTextDirectionChanged() {
+    return this.hasChanged('dir')
+  }
+
   get(resourceName) {
     switch(resourceName) {
       case 'document':
@@ -180,6 +190,14 @@ class EditorSession {
     return this.surfaceManager.getSurface(surfaceId)
   }
 
+  getLang() {
+    return this._lang
+  }
+
+  getTextDirection() {
+    return this._dir
+  }
+
   canUndo() {
     return this._history.canUndo()
   }
@@ -206,6 +224,22 @@ class EditorSession {
   setCommandStates(commandStates) {
     this._commandStates = commandStates
     this._setDirty('commandStates')
+  }
+
+  setLang(lang) {
+    if (this._lang !== lang) {
+      this._lang = lang
+      this._setDirty('lang')
+      this.startFlow()
+    }
+  }
+
+  setTextDirection(dir) {
+    if (this._dir !== dir) {
+      this._dir = dir
+      this._setDirty('dir')
+      this.startFlow()
+    }
   }
 
   createSelection() {

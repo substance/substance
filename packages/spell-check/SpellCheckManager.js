@@ -2,7 +2,7 @@ import debounce from 'lodash/debounce'
 import isString from 'lodash/isString'
 import sendRequest from '../../util/sendRequest'
 
-const API_URL = 'http://localhost:4777/api/'
+const DEFAULT_API_URL = 'http://localhost:4777/api/check'
 
 class SpellCheckManager {
 
@@ -11,6 +11,8 @@ class SpellCheckManager {
     let wait = options.wait || 750
 
     this.session = session
+    this.apiURL = options.apiURL || DEFAULT_API_URL
+
     // TODO: MarkersManager is basically a TextPropertyManager
     this.textPropertyManager = session.markersManager
     this.markersManager = session.markersManager
@@ -52,7 +54,7 @@ class SpellCheckManager {
     if (!text || !isString(text)) return
     sendRequest({
       method: 'POST',
-      url: API_URL + 'check',
+      url: this.apiURL,
       header: {
         'Content-Type': 'application/json; charset=UTF-8',
       },
