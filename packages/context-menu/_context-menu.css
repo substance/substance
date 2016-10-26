@@ -4,6 +4,7 @@
   border-radius: 5px;
 
   font-size: var(--small-font-size);
+  z-index: 1000;
 }
 
 .sc-context-menu.sm-hidden {
