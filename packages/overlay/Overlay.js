@@ -78,7 +78,6 @@ class Overlay extends Toolbox {
       this.el.css('left', leftPos)
     } else {
       this.el.addClass('sm-hidden')
-      console.log('hasActiveTools', this.hasActiveTools())
     }
   }
 
