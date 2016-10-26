@@ -51,6 +51,7 @@ class SpellCheckManager {
   _runSpellCheck(pathStr) {
     let path = pathStr.split(',')
     let text = this.session.getDocument().get(path)
+    let lang = this.session.getLanguage()
     if (!text || !isString(text)) return
     sendRequest({
       method: 'POST',
@@ -60,6 +61,7 @@ class SpellCheckManager {
       },
       data: {
         text: text,
+        lang: lang
       }
     }).then((data) => {
       data = JSON.parse(data)

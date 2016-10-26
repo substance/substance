@@ -190,7 +190,7 @@ class EditorSession {
     return this.surfaceManager.getSurface(surfaceId)
   }
 
-  getLang() {
+  getLanguage() {
     return this._lang
   }
 
@@ -226,7 +226,7 @@ class EditorSession {
     this._setDirty('commandStates')
   }
 
-  setLang(lang) {
+  setLanguage(lang) {
     if (this._lang !== lang) {
       this._lang = lang
       this._setDirty('lang')
