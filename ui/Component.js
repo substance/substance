@@ -662,20 +662,20 @@ class Component extends DOMElement.Delegator {
   getChildNodes() {
     if (!this.el) return []
     var childNodes = this.el.getChildNodes()
-    childNodes = childNodes.map(_unwrapComp).filter(notNull)
+    childNodes = childNodes.map(_unwrapComp).filter(Boolean)
     return childNodes
   }
 
   getChildren() {
     if (!this.el) return []
     var children = this.el.getChildren()
-    children = children.map(_unwrapComp).filter(notNull)
+    children = children.map(_unwrapComp).filter(Boolean)
     return children
   }
 
   getChildAt(pos) {
     var node = this.el.getChildAt(pos)
-    return _unwrapComp(node, true)
+    return _unwrapCompStrict(node)
   }
 
   find(cssSelector) {
@@ -685,7 +685,7 @@ class Component extends DOMElement.Delegator {
 
   findAll(cssSelector) {
     var els = this.el.findAll(cssSelector)
-    return els.map(_unwrapComp).filter(notNull)
+    return els.map(_unwrapComp).filter(Boolean)
   }
 
   appendChild(child) {
@@ -707,7 +707,7 @@ class Component extends DOMElement.Delegator {
   removeAt(pos) {
     var childEl = this.el.getChildAt(pos)
     if (childEl) {
-      var child = _unwrapComp(childEl, true)
+      var child = _unwrapCompStrict(childEl)
       _disposeChild(child)
       this.el.removeAt(pos)
     }
@@ -856,12 +856,15 @@ function _mountChild(parent, child) {
 }
 
 // NOTE: we keep a reference to the component in all DOMElement instances
-function _unwrapComp(el, strict) {
-  if (strict && !el._comp) throw new Error("Expecting a back-link to the component instance.")
+function _unwrapComp(el) {
   if (el) return el._comp
 }
 
-function notNull(n) { return n }
+function _unwrapCompStrict(el) {
+  let comp = _unwrapComp(el)
+  if (!comp) throw new Error("Expecting a back-link to the component instance.")
+  return comp
+}
 
 
 class ElementComponent extends Component {
