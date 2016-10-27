@@ -206,6 +206,10 @@ class EditorSession {
     return this._history.canRedo()
   }
 
+  executeCommand(...args) {
+    this.commandManager.executeCommand(...args)
+  }
+
   setSelection(sel) {
     if (sel && !sel.surfaceId) {
       let fs = this.getFocusedSurface()
