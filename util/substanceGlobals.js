@@ -12,4 +12,6 @@ if (_global.hasOwnProperty('Substance')) {
   _global.Substance = substanceGlobals
 }
 
+substanceGlobals.DEBUG_RENDERING = true
+
 export default substanceGlobals
