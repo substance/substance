@@ -93,7 +93,7 @@ class BrowserDOMElement extends DOMElement {
   }
 
   setTagName(tagName) {
-    let newEl = BrowserDOMElement.createElement(tagName)
+    let newEl = this.el.createElement(tagName)
     let attributes = this.el.attributes
     let l = attributes.length
     let i
