@@ -58,6 +58,8 @@ function _create(state, vel) {
   if (vel._isVirtualComponent) {
     console.assert(parent, "A Component should have a parent.");
     comp = new vel.ComponentClass(parent, vel.props);
+    // HACK: making sure that we have the right props
+    vel.props = comp.props
     comp.__htmlConfig__ = vel._copyHTMLConfig();
   } else if (vel._isVirtualHTMLElement) {
     comp = new Component.Element(parent, vel);
