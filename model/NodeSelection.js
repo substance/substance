@@ -119,7 +119,7 @@ class NodeSelection extends Selection {
 }
 
 NodeSelection.fromJSON = function(json) {
-  return new NodeSelection(json.containerId, json.nodeId, json.mode, json.reverse);
+  return new NodeSelection(json.containerId, json.nodeId, json.mode, json.reverse, json.surfaceId);
 }
 
 NodeSelection._createFromRange = function(range) {
