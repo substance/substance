@@ -45,10 +45,6 @@ class Command {
     return false
   }
 
-  get _isCommand() {
-    return true
-  }
-
   /**
     Get the command name specified at command registration. See
     {@link util/Configurator#addCommand}
@@ -116,5 +112,7 @@ class Command {
   }
 
 }
+
+Command.prototype._isCommand = true
 
 export default Command

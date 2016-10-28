@@ -2,25 +2,26 @@ import UndoCommand from './UndoCommand'
 import RedoCommand from './RedoCommand'
 
 import Tool from '../tools/Tool'
-import ToolGroup from '../tools/ToolGroup'
 
+import BlockerPackage from '../blocker/BlockerPackage'
+import ButtonPackage from '../button/ButtonPackage'
+import ContextMenuPackage from '../context-menu/ContextMenuPackage'
+import GridPackage from '../grid/GridPackage'
+import GutterPackage from '../gutter/GutterPackage'
+import InputPackage from '../input/InputPackage'
+import LayoutPackage from '../layout/LayoutPackage'
+import ModalPackage from '../modal/ModalPackage'
+import OverlayPackage from '../overlay/OverlayPackage'
+import ScrollbarPackage from '../scrollbar/ScrollbarPackage'
 import ScrollPanePackage from '../scroll-pane/ScrollPanePackage'
 import SplitPanePackage from '../split-pane/SplitPanePackage'
-import TabbedPanePackage from '../tabbed-pane/TabbedPanePackage'
-import ScrollbarPackage from '../scrollbar/ScrollbarPackage'
-import GridPackage from '../grid/GridPackage'
-import ModalPackage from '../modal/ModalPackage'
-import InputPackage from '../input/InputPackage'
-import ButtonPackage from '../button/ButtonPackage'
 import SwitchTextTypePackage from '../switch-text-type/SwitchTextTypePackage'
-import LayoutPackage from '../layout/LayoutPackage'
-import ContextMenuPackage from '../context-menu/ContextMenuPackage'
-import OverlayPackage from '../overlay/OverlayPackage'
-import GutterPackage from '../gutter/GutterPackage'
+import TabbedPanePackage from '../tabbed-pane/TabbedPanePackage'
 
 export default {
   name: 'base',
   configure: function(config) {
+    config.import(BlockerPackage)
     config.import(SwitchTextTypePackage)
     config.import(ScrollPanePackage)
     config.import(SplitPanePackage)

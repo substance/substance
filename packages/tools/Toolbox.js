@@ -22,7 +22,7 @@ class Toolbox extends Component {
 
   didMount() {
     // rerender the context menu after anything else has been updated
-    this.context.editorSession.on('render', this._onCommandStatesChanged, this)
+    this.context.editorSession.onRender(this._onCommandStatesChanged, this)
   }
 
   dispose() {

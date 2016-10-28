@@ -1,4 +1,6 @@
 import Component from './Component'
+import RenderingEngine from './RenderingEngine'
+import Blocker from '../packages/blocker/Blocker'
 
 /**
   Reusable abstract editor implementation.
@@ -60,6 +62,11 @@ class AbstractEditor extends Component {
     }
   }
 
+  didMount() {
+    this.editorSession.on('locked', this.onSessionLocked, this)
+    this.editorSession.on('unlocked', this.onSessionUnlocked, this)
+  }
+
   dispose() {
     this._dispose()
   }
@@ -102,6 +109,21 @@ class AbstractEditor extends Component {
 
   getComponentRegistry() {
     return this.componentRegistry
+  }
+
+  onSessionLocked() {
+    let renderContext = RenderingEngine.createContext(this)
+    let $$ = renderContext.$$
+    let Blocker = this.getComponent('blocker')
+    let blocker = $$(Blocker).ref('blocker')
+    blocker.append('Loading data...')
+    this.append(blocker)
+  }
+
+  onSessionUnlocked() {
+    if (this.refs.blocker) {
+      this.refs.blocker.remove()
+    }
   }
 }
 

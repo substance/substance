@@ -80,6 +80,7 @@ class CommandManager {
 
     if (cmd.isAsync) {
       // TODO: Request UI lock here
+      this.editorSession.lock()
       cmd.execute(params, this.getCommandContext(), (err, info) => {
         if (err) {
           if (cb) {
@@ -90,7 +91,7 @@ class CommandManager {
         } else {
           if (cb) cb(null, info)
         }
-        // TODO: Release UI lock here
+        this.editorSession.unlock()
       })
     } else {
       let info = cmd.execute(params, this.getCommandContext())

@@ -2,6 +2,8 @@
 @import './switch-text-type/_switch-text-type.css';
 /* blockquote */
 @import './blockquote/_blockquote.css';
+/* blocker */
+@import './blocker/_blocker.css';
 /* button */
 @import './button/_button.css';
 /* code */

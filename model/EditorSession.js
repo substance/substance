@@ -14,10 +14,13 @@ import DragManager from '../ui/DragManager'
 import GlobalEventHandler from '../ui/GlobalEventHandler'
 import MacroManager from '../ui/MacroManager'
 import forEach from '../util/forEach'
+import EventEmitter from '../util/EventEmitter'
 
-class EditorSession {
+class EditorSession extends EventEmitter {
 
   constructor(doc, options) {
+    super()
+
     options = options || {}
 
     this.document = doc
@@ -330,6 +333,15 @@ class EditorSession {
     this._undoRedo('redo')
   }
 
+  // used for asynchronous changes
+  lock() {
+    this.emit('locked')
+  }
+
+  unlock() {
+    this.emit('unlocked')
+  }
+
   /**
     Registers a hook for the `update` phase.
 
@@ -456,11 +468,12 @@ class EditorSession {
     })
     ```
   */
-  on(stage, ...args) {
-    return this._registerObserver(stage, args)
-  }
+  // on(stage, ...args) {
+  //   return this._registerObserver(stage, args)
+  // }
 
   off(observer) {
+    super.off(observer)
     // in every observer we store an array of subscriptions for this session
     let _subscriptions = observer._subscriptions
     if (!_subscriptions) return
