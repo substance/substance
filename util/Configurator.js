@@ -158,8 +158,8 @@ class Configurator {
     @param {Class} ComponentClass  A subclass of {@link Component} for nodes
                                    of nodeType.
    */
-  addComponent(nodeType, ComponentClass) {
-    if (this.config.components[nodeType]) {
+  addComponent(nodeType, ComponentClass, force) {
+    if (!force && this.config.components[nodeType]) {
       throw new Error(nodeType+' already registered')
     }
     if (!ComponentClass) {
