@@ -225,6 +225,17 @@ class EditorSession {
     }
   }
 
+  selectNode(nodeId) {
+    let surface = this.getFocusedSurface()
+    this.setSelection({
+      type: 'node',
+      nodeId: nodeId,
+      mode: 'full',
+      containerId: surface.getContainerId(),
+      surfaceId: surface.id
+    })
+  }
+
   setCommandStates(commandStates) {
     this._commandStates = commandStates
     this._setDirty('commandStates')
