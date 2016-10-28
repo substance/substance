@@ -35,6 +35,10 @@ class AnnotatedTextComponent extends Component {
     return this.getDocument().getIndex('annotations').get(this.props.path)
   }
 
+  _getTagName() {
+    return this.props.tagName
+  }
+
   _onDocumentChange(update) {
     if (update.change && update.change.updated[this.getPath()]) {
       this.rerender()
@@ -44,7 +48,7 @@ class AnnotatedTextComponent extends Component {
   _renderContent($$) {
     let text = this.getText();
     let annotations = this.getAnnotations()
-    let el = $$(this.props.tagName || 'span')
+    let el = $$(this._getTagName() || 'span')
     if (annotations && annotations.length > 0) {
       let fragmenter = new Fragmenter({
         onText: this._renderTextNode.bind(this),
