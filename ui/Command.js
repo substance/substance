@@ -41,6 +41,10 @@ class Command {
     }
   }
 
+  get isAsync() {
+    return false
+  }
+
   get _isCommand() {
     return true
   }

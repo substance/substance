@@ -63,9 +63,11 @@ class CommandManager {
   }
 
   /*
-    Execute a command, given a context and arguments
+    Execute a command, given a context and arguments.
+
+    Commands are run async if cmd.isAsync() returns true.
   */
-  executeCommand(commandName, userParams) {
+  executeCommand(commandName, userParams, cb) {
     let cmd = this.commandRegistry.get(commandName)
     if (!cmd) {
       console.warn('command', commandName, 'not registered')
@@ -75,12 +77,25 @@ class CommandManager {
     let params = extend(this._getCommandParams(), userParams, {
       commandState: commandState
     })
-    let info = cmd.execute(params, this.getCommandContext())
-    // TODO: why do we require commands to return a result?
-    if (info === undefined) {
-      console.warn('command ', commandName, 'must return either an info object or true when handled or false when not handled')
+
+    if (cmd.isAsync) {
+      // TODO: Request UI lock here
+      cmd.execute(params, this.getCommandContext(), (err, info) => {
+        if (err) {
+          if (cb) {
+            cb(err)
+          } else {
+            console.error(err)
+          }
+        } else {
+          if (cb) cb(null, info)
+        }
+        // TODO: Release UI lock here
+      })
+    } else {
+      let info = cmd.execute(params, this.getCommandContext())
+      return info
     }
-    return info
   }
 
   /*
