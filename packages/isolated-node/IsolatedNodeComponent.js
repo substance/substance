@@ -118,11 +118,12 @@ class IsolatedNodeComponent extends Component {
       container.addClass('sm-disabled')
       if (this.shouldRenderBlocker()) {
         // NOTE: there are some content implementations which work better without a blocker
-        let blocker = $$(this.__elementTag).addClass('se-blocker')
+        let blocker = $$(this.__elementTag).addClass('se-blocker').ref('blocker')
           .css({ 'z-index': 2*level+1 })
+        // select the node on click
+        blocker.on('click', this.onClickBlocker)
         container.append(blocker)
-      }
-      if (this.shouldSelectOnClick()) {
+      } else {
         // select the node on click
         el.on('click', this.onClick)
       }
@@ -176,7 +177,7 @@ class IsolatedNodeComponent extends Component {
   }
 
   shouldSelectOnClick() {
-    return this.state.mode !== 'focused' && this.state.mpde !== 'co-focused'
+    return this.state.mode !== 'focused' && this.state.mode !== 'co-focused'
   }
 
   getId() {
@@ -294,7 +295,18 @@ class IsolatedNodeComponent extends Component {
 
   onClick(event) {
     event.preventDefault()
-    this._selectNode()
+    event.stopPropagation()
+    if (this.shouldSelectOnClick()) {
+      this._selectNode()
+    }
+  }
+
+  onClickBlocker(event) {
+    event.preventDefault()
+    event.stopPropagation()
+    if (this.shouldSelectOnClick() && event.target === this.refs.blocker.getNativeElement()) {
+      this._selectNode()
+    }
   }
 
   onKeydown(event) {
