@@ -16,12 +16,14 @@ class MacroManager {
 
   executeMacros(change, info) {
     let doc = this.context.editorSession.getDocument()
-    let nodeId, node, text
+    let nodeId, node, text, start, end
     let path
     if (info.action === 'type') {
       // HACK: we know that there is only one op when we type something
       let op = change.ops[0]
       path = op.path
+      start = op.diff.pos
+      end = start+op.diff.getLength()
       nodeId = path[0]
       node = doc.get(nodeId)
       text = doc.get(path)
@@ -34,6 +36,8 @@ class MacroManager {
       node: node,
       path: path,
       text: text,
+      start: start,
+      end: end,
       editorSession: this.context.editorSession,
       selection: this.context.editorSession.getSelection()
     }
