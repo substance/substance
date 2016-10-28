@@ -14,6 +14,7 @@ import ModalPackage from '../modal/ModalPackage'
 import OverlayPackage from '../overlay/OverlayPackage'
 import ScrollbarPackage from '../scrollbar/ScrollbarPackage'
 import ScrollPanePackage from '../scroll-pane/ScrollPanePackage'
+import BodyScrollPanePackage from '../body-scroll-pane/BodyScrollPanePackage'
 import SplitPanePackage from '../split-pane/SplitPanePackage'
 import SwitchTextTypePackage from '../switch-text-type/SwitchTextTypePackage'
 import TabbedPanePackage from '../tabbed-pane/TabbedPanePackage'
@@ -24,6 +25,7 @@ export default {
     config.import(BlockerPackage)
     config.import(SwitchTextTypePackage)
     config.import(ScrollPanePackage)
+    config.import(BodyScrollPanePackage)
     config.import(SplitPanePackage)
     config.import(TabbedPanePackage)
     config.import(ScrollbarPackage)

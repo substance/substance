@@ -10,7 +10,6 @@ class Overlay extends Toolbox {
     if (!this.context.scrollPane) {
       throw new Error('Requires scrollPane context')
     }
-
     this.context.scrollPane.on('overlay:position', this._position, this)
   }
 
@@ -44,7 +43,7 @@ class Overlay extends Toolbox {
     Override if you just want to use a different style
   */
   getToolStyle() {
-    return 'plain-dark'
+    return 'outline-dark'
   }
 
   show(hints) {
