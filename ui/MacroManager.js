@@ -18,17 +18,37 @@ class MacroManager {
     let doc = this.context.editorSession.getDocument()
     let nodeId, node, text, start, end
     let path
-    if (info.action === 'type') {
-      // HACK: we know that there is only one op when we type something
-      let op = change.ops[0]
-      path = op.path
-      start = op.diff.pos
-      end = start+op.diff.getLength()
-      nodeId = path[0]
-      node = doc.get(nodeId)
-      text = doc.get(path)
-    } else {
-      return
+    // HACK: we exploit the information of the internal structure
+    // of this document changes
+    switch(info.action) {
+      case 'type': {
+        let op = change.ops[0]
+        path = op.path
+        nodeId = path[0]
+        node = doc.get(nodeId)
+        text = doc.get(path)
+        start = op.diff.pos
+        end = start+op.diff.getLength()
+        break
+      }
+      case 'break': {
+        // We interpret a 'break' as kind of confirmation
+        // of the current node
+        // so we take the original selection
+        // to determine the original node
+        let sel = change.before.selection
+        if (!sel.isPropertySelection()) return
+        path = sel.path
+        nodeId = path[0]
+        node = doc.get(nodeId)
+        if (!node.isText()) return
+        text = node.getText()
+        start = sel.getStartOffset()
+        end = start
+        break
+      }
+      default:
+        return
     }
 
     let props = {
