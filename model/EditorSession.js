@@ -529,7 +529,9 @@ class EditorSession {
     var newSelection = change.after.selection || Selection.nullSelection
     // HACK injecting the surfaceId here...
     // TODO: we should find out where the best place is to do this
-    if (!newSelection.isNull()) newSelection.surfaceId = change.after.surfaceId
+    if (!newSelection.isNull() && !newSelection.surfaceId) {
+      newSelection.surfaceId = change.after.surfaceId
+    }
     this._setSelection(newSelection)
   }
 

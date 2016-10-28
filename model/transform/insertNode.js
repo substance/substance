@@ -45,18 +45,30 @@ function insertNode(tx, args) {
   }
   tmp = breakNode(tx, args)
   selection = tmp.selection
+
+  let secondId = selection.start.getNodeId()
+  let second = tx.get(secondId)
+  let nodePos = container.getPosition(secondId)
+
+  // remove empty text node created by breakNode
+  if (second.isText() && second.getText().length === 0) {
+    container.hide(secondId)
+    tx.delete(secondId)
+  }
+
   // create the node if it does not exist yet
   // notice, that it is also allowed to insert an existing node
   if (!node.id) {
     node.id = uuid(node.type)
   }
+  // this transform can be called to insert an existing node
+  // in this case the document contains the id already
   if (!tx.get(node.id)) {
     node = tx.create(node)
   }
-  // make sure we have the real node, not just its data
   node = tx.get(node.id)
+
   // insert the new node after the node where the cursor was
-  let nodePos = container.getPosition(selection.start.getNodeId())
   container.show(node.id, nodePos)
 
   // if the new node is a text node we can set the cursor to the

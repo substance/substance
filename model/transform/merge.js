@@ -24,7 +24,7 @@ let merge = function(tx, args) {
         containerId: containerId
       })
       if (nextNode.isText()) {
-        args.selection = tx.createSelection(nextNodeId, 0)
+        args.selection = tx.createSelection(nextNode.getTextPath(), 0)
       } else {
         args.selection = tx.createSelection({
           type: 'node',
