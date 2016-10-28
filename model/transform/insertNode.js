@@ -38,22 +38,26 @@ function insertNode(tx, args) {
   }
   let containerId = args.containerId
   let container = tx.get(containerId)
-  let tmp
-  if (!selection.isCollapsed()) {
-    tmp = deleteSelection(tx, args)
-    selection = tmp.selection
-  }
-  tmp = breakNode(tx, args)
-  selection = tmp.selection
-
-  let secondId = selection.start.getNodeId()
-  let second = tx.get(secondId)
-  let nodePos = container.getPosition(secondId)
-
-  // remove empty text node created by breakNode
-  if (second.isText() && second.getText().length === 0) {
-    container.hide(secondId)
-    tx.delete(secondId)
+  let nodePos, nodeId
+  if (selection.isNodeSelection() && selection.isFull()) {
+    nodeId = selection.getNodeId()
+    nodePos = container.getPosition(nodeId)
+    container.hide(nodeId)
+    tx.delete(nodeId)
+  } else {
+    let tmp = args
+    if (!selection.isCollapsed()) {
+      tmp = deleteSelection(tx, args)
+    }
+    tmp = breakNode(tx, tmp)
+    let nodeId = tmp.selection.start.getNodeId()
+    let second = tx.get(nodeId)
+    nodePos = container.getPosition(nodeId)
+    // remove empty text node created by breakNode
+    if (second.isText() && second.getText().length === 0) {
+      container.hide(nodeId)
+      tx.delete(nodeId)
+    }
   }
 
   // create the node if it does not exist yet
@@ -83,12 +87,10 @@ function insertNode(tx, args) {
   // otherwise we select the whole new node
   else {
     args.selection = tx.createSelection({
-      type: 'container',
+      type: 'node',
       containerId: containerId,
-      startPath: [node.id],
-      startOffset: 0,
-      endPath: [node.id],
-      endOffset: 1
+      nodeId: node.id,
+      mode: 'full'
     })
   }
 
