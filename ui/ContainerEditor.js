@@ -46,12 +46,12 @@ import IsolatedNodeComponent from '../packages/isolated-node/IsolatedNodeCompone
 
 class ContainerEditor extends Surface {
 
-  constructor(parent, props) {
+  constructor(parent, props, el) {
     // default props derived from the given props
     props.containerId = props.containerId || props.node.id
     props.name = props.name || props.containerId || props.node.id
 
-    super(parent, props)
+    super(parent, props, el)
 
     this.containerId = this.props.containerId
     if (!isString(this.containerId)) {
@@ -136,7 +136,7 @@ class ContainerEditor extends Surface {
   _renderNode($$, node) {
     if (!node) throw new Error('Illegal argument')
     if (node.isText()) {
-      return super.renderNode.call(this, $$, node)
+      return super.renderNode($$, node)
     } else {
       let componentRegistry = this.context.componentRegistry
       let ComponentClass = componentRegistry.get(node.type)
