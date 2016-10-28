@@ -104,7 +104,7 @@ class Component extends DOMElement.Delegator {
     @param {Object} props     Properties against which this class must
                               be rendered the first time.
   */
-  constructor(parent, props) {
+  constructor(parent, props, el) {
     super()
 
     // HACK: allowing skipping execution of this ctor
@@ -113,7 +113,7 @@ class Component extends DOMElement.Delegator {
     this.__id__ = uuid()
 
     this.parent = parent
-    this.el = null
+    this.el = el
     this.refs = {}
 
     // HACK: a temporary solution to handle refs owned by an ancestor
