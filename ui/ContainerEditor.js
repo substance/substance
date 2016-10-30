@@ -63,6 +63,8 @@ class ContainerEditor extends Surface {
       throw new Error('Container with id ' + this.containerId + ' does not exist.')
     }
 
+    this.textTypes = this.props.textTypes || []
+
     this.editingBehavior = this.context.editingBehavior || new EditingBehavior()
 
     this._deriveInternalState(this.props)

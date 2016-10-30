@@ -59,7 +59,6 @@ class Surface extends Component {
 
     // set when editing is enabled
     this.undoEnabled = true
-    this.textTypes = this.props.textTypes
 
     // a registry for TextProperties which allows us to dispatch changes
     this._textProperties = {}
