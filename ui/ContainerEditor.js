@@ -42,7 +42,7 @@ import IsolatedNodeComponent from '../packages/isolated-node/IsolatedNodeCompone
     commands: [StrongCommand, EmphasisCommand, SwitchTextTypeCommand],
   })
   ```
- */
+*/
 
 class ContainerEditor extends Surface {
 
@@ -68,10 +68,6 @@ class ContainerEditor extends Surface {
     this.editingBehavior = this.context.editingBehavior || new EditingBehavior()
 
     this._deriveInternalState(this.props)
-  }
-
-  get _isContainerEditor() {
-    return true
   }
 
   // Note: this component is self managed
@@ -288,28 +284,6 @@ class ContainerEditor extends Surface {
     }
   }
 
-  /**
-    Selects all content in the container
-  */
-  selectAll() {
-    let doc = this.getDocument()
-    let container = doc.get(this.getContainerId())
-    if (container.nodes.length === 0) {
-      return
-    }
-    let firstNodeId = container.nodes[0]
-    let lastNodeId = last(container.nodes)
-    let sel = doc.createSelection({
-      type: 'container',
-      containerId: container.id,
-      startPath: [firstNodeId],
-      startOffset: 0,
-      endPath: [lastNodeId],
-      endOffset: 1
-    })
-    this.setSelection(sel)
-  }
-
   selectFirst() {
     let doc = this.getDocument()
     let nodes = this.getContainer().nodes
@@ -419,7 +393,8 @@ class ContainerEditor extends Surface {
 
 }
 
-
+ContainerEditor.prototype._isContainerEditor = true
+// TODO: where do we use this?
 ContainerEditor.isContainerEditor = true
 
 export default ContainerEditor

@@ -133,6 +133,13 @@ class Selection {
   getFragments() {
     return []
   }
+
+  createWith(update) {
+    let SelectionClass = this.constructor
+    let data = this.toJSON()
+    Object.assign(data, update)
+    return SelectionClass.fromJSON(data)
+  }
 }
 
 // for duck-typed instanceof

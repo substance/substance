@@ -1,8 +1,3 @@
-import UndoCommand from './UndoCommand'
-import RedoCommand from './RedoCommand'
-
-import Tool from '../tools/Tool'
-
 import BlockerPackage from '../blocker/BlockerPackage'
 import ButtonPackage from '../button/ButtonPackage'
 import ContextMenuPackage from '../context-menu/ContextMenuPackage'
@@ -18,6 +13,12 @@ import BodyScrollPanePackage from '../body-scroll-pane/BodyScrollPanePackage'
 import SplitPanePackage from '../split-pane/SplitPanePackage'
 import SwitchTextTypePackage from '../switch-text-type/SwitchTextTypePackage'
 import TabbedPanePackage from '../tabbed-pane/TabbedPanePackage'
+import Tool from '../tools/Tool'
+import platform from '../../util/platform'
+
+import UndoCommand from './UndoCommand'
+import RedoCommand from './RedoCommand'
+import SelectAllCommand from './SelectAllCommand'
 
 export default {
   name: 'base',
@@ -49,10 +50,12 @@ export default {
     // Commands
     config.addCommand('undo', UndoCommand)
     config.addCommand('redo', RedoCommand)
+    config.addCommand('select-all', SelectAllCommand)
 
     // Tools
     config.addTool('undo', Tool, {toolGroup: ['document', 'context-menu-document']})
     config.addTool('redo', Tool, {toolGroup: ['document', 'context-menu-document']})
+    config.addTool('select-all', Tool, {toolGroup: ['document', 'context-menu-document']})
 
     // Icons
     config.addIcon('undo', { 'fontawesome': 'fa-undo' })
@@ -71,6 +74,10 @@ export default {
       en: 'Redo',
       de: 'Wiederherstellen'
     })
+    config.addLabel('select-all', {
+      en: 'Select All',
+      de: 'Alles Auswählen'
+    })
     config.addLabel('container-selection', {
       en: 'Container',
       de: 'Container'
@@ -83,5 +90,15 @@ export default {
       en: 'Insert Container',
       de: 'Container einfügen'
     })
+
+    if (platform.isMac) {
+      config.addKeyboardShortcut('cmd+z', { command: 'undo' })
+      config.addKeyboardShortcut('cmd+shift+z', { command: 'redo' })
+      config.addKeyboardShortcut('cmd+a', { command: 'select-all' })
+    } else {
+      config.addKeyboardShortcut('ctrl+z', { command: 'undo' })
+      config.addKeyboardShortcut('ctrl+shift+z', { command: 'redo' })
+      config.addKeyboardShortcut('ctrl+a', { command: 'select-all' })
+    }
   }
 }

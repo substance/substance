@@ -1,7 +1,3 @@
-import extend from 'lodash/extend'
-import isPlainObject from 'lodash/isPlainObject'
-import isFunction from 'lodash/isFunction'
-import isString from 'lodash/isString'
 import DocumentChange from '../model/DocumentChange'
 import MarkersManager from '../model/MarkersManager'
 import Selection from '../model/Selection'
@@ -13,7 +9,11 @@ import CommandManager from '../ui/CommandManager'
 import DragManager from '../ui/DragManager'
 import GlobalEventHandler from '../ui/GlobalEventHandler'
 import MacroManager from '../ui/MacroManager'
+import KeyboardManager from '../ui/KeyboardManager'
 import forEach from '../util/forEach'
+import isPlainObject from '../util/isPlainObject'
+import isFunction from '../util/isFunction'
+import isString from '../util/isString'
 import EventEmitter from '../util/EventEmitter'
 
 class EditorSession extends EventEmitter {
@@ -104,6 +104,10 @@ class EditorSession extends EventEmitter {
     this.macroManager = new MacroManager(this._context, macros)
     this.globalEventHandler = new GlobalEventHandler(this, this.surfaceManager)
     this.markersManager = new MarkersManager(this)
+    this.keyboardManager = new KeyboardManager(this, configurator.getKeyboardShortcuts(), {
+      context: this._context
+    })
+
     // TODO: see how we want to expose these
     this.converterRegistry = converterRegistry
     this.editingBehavior = editingBehavior
@@ -314,7 +318,7 @@ class EditorSession extends EventEmitter {
         sel.surfaceId = surfaceId
       }
       tx.after.selection = sel
-      extend(info, tx.info)
+      Object.assign(info, tx.info)
     })
     if (change) {
       this.isTransacting = false

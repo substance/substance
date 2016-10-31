@@ -57,6 +57,10 @@ class TextPropertyEditor extends Surface {
     return el
   }
 
+  getPath() {
+    return this.props.path
+  }
+
   /**
     Selects all text
   */
@@ -74,5 +78,7 @@ class TextPropertyEditor extends Surface {
   }
 
 }
+
+TextPropertyEditor.prototype._isTextPropertyEditor = true
 
 export default TextPropertyEditor

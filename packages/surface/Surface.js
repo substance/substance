@@ -23,6 +23,7 @@ import UnsupportedNode from '../../ui/UnsupportedNodeComponent'
    @abstract
 */
 class Surface extends Component {
+
   constructor(...args) {
     super(...args)
 
@@ -68,10 +69,6 @@ class Surface extends Component {
       skipNextFocusEvent: false,
       skipNextObservation: false
     }
-  }
-
-  get _isSurface() {
-    return true
   }
 
   getChildContext() {
@@ -201,10 +198,6 @@ class Surface extends Component {
     return this.el
   }
 
-  getController() {
-    return this.context.controller
-  }
-
   getDocument() {
     return this.editorSession.getDocument()
   }
@@ -331,23 +324,10 @@ class Surface extends Component {
   /* Note: In a regular Surface all text properties are treated independently
      like in a form */
 
-  /**
-    Selects all text
-  */
   selectAll() {
-    let doc = this.getDocument()
-    let sel = this.getSelection()
-    if (sel.isPropertySelection()) {
-      let path = sel.path
-      let text = doc.get(path)
-      sel = doc.createSelection({
-        type: 'property',
-        path: path,
-        startOffset: 0,
-        endOffset: text.length
-      })
-      this.setSelection(sel)
-    }
+    this.editorSession.executeCommand('select-all', {
+      surface: this
+    })
   }
 
   /**
@@ -415,11 +395,10 @@ class Surface extends Component {
   onKeyDown(event) {
     // console.log('Surface.onKeyDown()', this.getId());
 
-    let commandManager = this.context.commandManager
-    if ( event.which === 229 ) {
-      // ignore fake IME events (emitted in IE and Chromium)
-      return
-    }
+    // ignore fake IME events (emitted in IE and Chromium)
+    if ( event.which === 229 ) return
+
+    // core handlers for cursor movements and editor interactions
     switch ( event.keyCode ) {
       case keys.LEFT:
       case keys.RIGHT:
@@ -444,45 +423,7 @@ class Surface extends Component {
         break
     }
 
-    // Note: when adding a new handler you might want to enable this log to see keyCodes etc.
-    // console.log('####', event.keyCode, event.metaKey, event.ctrlKey, event.shiftKey);
-
-    // Built-in key combos
-    // Ctrl+A: select all
-    let handled = false
-    if ( (event.ctrlKey||event.metaKey) && event.keyCode === 65) {
-      this.selectAll()
-      handled = true
-    }
-    // Undo/Redo: cmd+z, cmd+shift+z
-    else if (this.undoEnabled && event.keyCode === 90 && (event.metaKey||event.ctrlKey)) {
-      if (event.shiftKey) {
-        commandManager.executeCommand('redo')
-      } else {
-        commandManager.executeCommand('undo')
-      }
-      handled = true
-    }
-    // Toggle strong: cmd+b ctrl+b
-    else if (event.keyCode === 66 && (event.metaKey||event.ctrlKey)) {
-      commandManager.executeCommand('strong')
-      handled = true
-    }
-    // Toggle emphasis: cmd+i ctrl+i
-    else if (event.keyCode === 73 && (event.metaKey||event.ctrlKey)) {
-      commandManager.executeCommand('emphasis')
-      handled = true
-    }
-    // Toggle link: cmd+k ctrl+k
-    else if (event.keyCode === 75 && (event.metaKey||event.ctrlKey)) {
-      commandManager.executeCommand('link')
-      handled = true
-    }
-
-    if (handled) {
-      event.preventDefault()
-      event.stopPropagation()
-    }
+    this.editorSession.keyboardManager.onKeydown(event)
   }
 
   onTextInput(event) {
@@ -950,7 +891,6 @@ Surface.getDOMRangeFromEvent = function(evt) {
       range.setStart(evt.rangeParent, evt.rangeOffset)
       range.collapse(true)
     }
-
     // Try the standards-based way next
     else if (document.caretPositionFromPoint) {
       let pos = document.caretPositionFromPoint(x, y)
@@ -958,7 +898,6 @@ Surface.getDOMRangeFromEvent = function(evt) {
       range.setStart(pos.offsetNode, pos.offset)
       range.collapse(true)
     }
-
     // Next, the WebKit way
     else if (document.caretRangeFromPoint) {
       range = document.caretRangeFromPoint(x, y)
@@ -967,5 +906,7 @@ Surface.getDOMRangeFromEvent = function(evt) {
 
   return range
 }
+
+Surface.prototype._isSurface = true
 
 export default Surface

@@ -38,6 +38,8 @@ var platform = {
 
   isWindows: (inBrowser && window.navigator !== undefined && window.navigator.appVersion && window.navigator.appVersion.indexOf("Win") !== -1),
 
+  isMac: (inBrowser && window.navigator !== undefined && window.navigator.platform.indexOf('Mac') >= 0)
+
 }
 
 if (typeof window !== 'undefined') {

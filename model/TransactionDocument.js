@@ -66,8 +66,6 @@ class TransactionDocument extends Document {
     this.document.off(this)
   }
 
-  get isTransactionDocument() { return true }
-
   reset() {
     this.ops = []
     this.before = {}
@@ -86,6 +84,13 @@ class TransactionDocument extends Document {
     // TODO: incremental graph returns op not the node,
     // so probably here we should too?
     return this.data.get(nodeData.id)
+  }
+
+  createDefaultTextNode(content) {
+    return this.create({
+      type: this.getSchema().getDefaultTextType(),
+      content: content || ''
+    })
   }
 
   delete(nodeId) {
@@ -198,5 +203,7 @@ class TransactionDocument extends Document {
   }
 
 }
+
+TransactionDocument.prototype.isTransactionDocument = true
 
 export default TransactionDocument

@@ -4,6 +4,7 @@ import StrongXMLConverter from './StrongXMLConverter'
 import AnnotationCommand from '../../ui/AnnotationCommand'
 import AnnotationComponent from '../../ui/AnnotationComponent'
 import AnnotationTool from '../../ui/AnnotationTool'
+import platform from '../../util/platform'
 
 export default {
   name: 'strong',
@@ -22,6 +23,11 @@ export default {
       en: 'Strong',
       de: 'Fett'
     })
+    if (platform.isMac) {
+      config.addKeyboardShortcut('cmd+b', { command: 'strong' })
+    } else {
+      config.addKeyboardShortcut('ctrl+b', { command: 'strong' })
+    }
   },
   Strong: Strong,
   StrongHTMLConverter: StrongHTMLConverter

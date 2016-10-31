@@ -8,6 +8,7 @@ import ComponentRegistry from '../ui/ComponentRegistry'
 import FontAwesomeIconProvider from '../ui/FontAwesomeIconProvider'
 import LabelProvider from '../ui/DefaultLabelProvider'
 import ToolGroup from '../packages/tools/ToolGroup'
+import KeyboardManager from '../ui/KeyboardManager'
 
 /**
   Default Configurator for Substance editors. It provides an API for
@@ -69,9 +70,10 @@ class Configurator {
       editingBehaviors: [],
       macros: [],
       dndHandlers: [],
+      keyboardShortcuts: {},
       icons: {},
       labels: {},
-      lang: 'en_US'
+      lang: 'en_US',
     }
   }
 
@@ -361,6 +363,11 @@ class Configurator {
     this.config.dndHandlers.push(DragAndDropHandlerClass)
   }
 
+  addKeyboardShortcut(combo, spec) {
+    let key = KeyboardManager.parseCombo(combo)
+    this.config.keyboardShortcuts[key] = spec
+  }
+
   /**
     Configure this instance of configuration for provided package.
     @param  {Object} pkg     Object should contain a `configure` method that
@@ -509,6 +516,10 @@ class Configurator {
     return this.config.dndHandlers.map(function(DragAndDropHandlerClass) {
       return new DragAndDropHandlerClass()
     })
+  }
+
+  getKeyboardShortcuts() {
+    return this.config.keyboardShortcuts
   }
 
   setDefaultLanguage(lang) {

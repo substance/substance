@@ -4,7 +4,7 @@ import EmphasisXMLConverter from './EmphasisXMLConverter'
 import AnnotationCommand from '../../ui/AnnotationCommand'
 import AnnotationComponent from '../../ui/AnnotationComponent'
 import AnnotationTool from '../../ui/AnnotationTool'
-
+import platform from '../../util/platform'
 
 export default {
   name: 'emphasis',
@@ -22,6 +22,11 @@ export default {
       en: 'Emphasis',
       de: 'Betonung'
     })
+    if (platform.isMac) {
+      config.addKeyboardShortcut('cmd+i', { command: 'emphasis' })
+    } else {
+      config.addKeyboardShortcut('ctrl+i', { command: 'emphasis' })
+    }
   },
   Emphasis: Emphasis,
   EmphasisHTMLConverter: EmphasisHTMLConverter

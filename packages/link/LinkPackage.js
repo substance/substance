@@ -6,6 +6,7 @@ import LinkXMLConverter from './LinkXMLConverter'
 import AnnotationTool from '../../ui/AnnotationTool'
 import EditLinkTool from './EditLinkTool'
 import EditAnnotationCommand from '../../ui/EditAnnotationCommand'
+import platform from '../../util/platform'
 
 export default {
   name: 'link',
@@ -32,6 +33,11 @@ export default {
       en: 'Remove Link',
       de: 'Link löschen'
     })
+    if (platform.isMac) {
+      config.addKeyboardShortcut('cmd+k', { command: 'link' })
+    } else {
+      config.addKeyboardShortcut('ctrl+k', { command: 'link' })
+    }
   },
   Link: Link,
   LinkComponent: LinkComponent,
