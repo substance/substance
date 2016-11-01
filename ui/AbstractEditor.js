@@ -1,6 +1,5 @@
 import Component from './Component'
 import RenderingEngine from './RenderingEngine'
-import Blocker from '../packages/blocker/Blocker'
 
 /**
   Reusable abstract editor implementation.
