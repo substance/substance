@@ -127,7 +127,7 @@ class ContainerSelection extends Selection {
       this.containerId, ", ",
       JSON.stringify(this.startPath), ", ", this.startOffset,
       " -> ",
-      JSON.stringify(this.startPath), ", ", this.endOffset,
+      JSON.stringify(this.endPath), ", ", this.endOffset,
       (this.reverse?", reverse":""),
       (this.surfaceId?(", "+this.surfaceId):""),
       ")"
