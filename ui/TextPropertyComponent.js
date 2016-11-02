@@ -91,16 +91,19 @@ class TextPropertyComponent extends AnnotatedTextComponent {
       el = $$(SelectionFragmentComponent, { collaborator: node.collaborator })
     } else {
       el = super._renderFragment.apply(this, arguments)
-      if (node.constructor.isInline) {
-        el.ref(id)
-      }
+      el.ref(id + '@' + fragment.counter)
+      // NOTE: before we only preserved inline nodes, or if configured explicitly
+      // now the performance seems good enough to do this all the time.
+      // if (node.constructor.isInline) {
+      //   el.ref(id)
+      // }
       // Adding refs here, enables preservative rerendering
       // TODO: while this solves problems with rerendering inline nodes
       // with external content, it decreases the overall performance too much.
       // We should optimize the component first before we can enable this.
-      else if (this.context.config && this.context.config.preservativeTextPropertyRendering) {
-        el.ref(id + '@' + fragment.counter)
-      }
+      // else if (this.context.config && this.context.config.preservativeTextPropertyRendering) {
+      //   el.ref(id + '@' + fragment.counter)
+      // }
     }
     el.attr('data-offset', fragment.pos)
     return el
