@@ -553,7 +553,9 @@ class EditorSession extends EventEmitter {
   _commitChange(change, info) {
     change.timestamp = Date.now()
     this._applyChange(change, info)
-    this._history.push(change.invert())
+    if (info['history'] !== false) {
+      this._history.push(change.invert())
+    }
     var newSelection = change.after.selection || Selection.nullSelection
     // HACK injecting the surfaceId here...
     // TODO: we should find out where the best place is to do this
