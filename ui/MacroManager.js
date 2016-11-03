@@ -61,13 +61,17 @@ class MacroManager {
       editorSession: this.context.editorSession,
       selection: this.context.editorSession.getSelection()
     }
-    for (let i = 0; i < this.macros.length; i++) {
-      let macro = this.macros[i]
-      let executed = macro.execute(props, this.context)
-      if (executed) {
-        break
+
+    setTimeout(() => {
+      for (let i = 0; i < this.macros.length; i++) {
+        let macro = this.macros[i]
+        let executed = macro.execute(props, this.context)
+        if (executed) {
+          break
+        }
       }
-    }
+    })
+
   }
 }
 
