@@ -1,52 +1,59 @@
-import inBrowser from '../util/inBrowser'
-import DocumentIndex from '../model/DocumentIndex'
+import forEach from 'lodash/forEach'
+
+/*
+  Each time a resource node is created an automatic fetch is triggered. This
+  happens only once. We may want to adapt other fetching strategies as well.
+
+  TODO: Resources would be problematic in a realtime scenario atm, as all
+  collaborators would trigger a fetch of the resource, when it should only
+  be done by the user who created the resource explicitly
+*/
 
 class ResourceManager {
   constructor(editorSession, context) {
     this.editorSession = editorSession
     this.context = context
-
-    this.editorSession.getDocument().addIndex('resources', new ResourceIndex(this))
+    this.editorSession.onRender('document', this._onDocumentChange, this)
   }
 
-  triggerFetch(resource) {
-    resource.fetchPayload(this.context, function(err, result) {
-      console.log('do stuff')
+  _onDocumentChange(change) {
+    let doc = this.editorSession.getDocument()
+    forEach(change.created, (node) => {
+      node = doc.get(node.id)
+      if (node.constructor.isResource) {
+        setTimeout(() => {
+          this.triggerFetch(node)
+        })
+      }
     })
   }
-}
 
-
-class ResourceIndex extends DocumentIndex {
-
-  constructor(resourceManager) {
-    super()
-
-    this.resourceManager = resourceManager
+  /*
+    Trigger fetch of a given resource
+  */
+  triggerFetch(resource) {
+    resource.fetchPayload(this.context, (err, props) => {
+      if (err) {
+        this._updateNode(resource.id, {
+          errorMessage: err.toString()
+        })
+      } else {
+        this._updateNode(resource.id, props)
+      }
+    })
   }
 
-  select(node) {
-    return Boolean(node.constructor.isResource)
+  /*
+      Fill in node payload
+  */
+  _updateNode(nodeId, props) {
+    let editorSession = this.editorSession
+    editorSession.transaction((tx) => {
+      forEach(props, (val, key) => {
+        tx.set([nodeId, key], val)
+      })
+    })
   }
-
-  reset(data) {
-    this.resources = {}
-    this._initialize(data)
-  }
-
-  get() {
-    return this.resources
-  }
-
-  create(resource) {
-    this.resources[resource.id] = resource
-    this.resourceManager.triggerFetch(resource)
-  }
-
-  delete(resource) {
-    delete this.resources[resource.id]
-  }
-
 }
 
 
