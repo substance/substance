@@ -1,5 +1,6 @@
 import Component from './Component'
 import RenderingEngine from './RenderingEngine'
+import ResourceManager from './ResourceManager'
 
 /**
   Reusable abstract editor implementation.
@@ -43,6 +44,8 @@ class AbstractEditor extends Component {
     this.globalEventHandler = this.editorSession.globalEventHandler
     this.editingBehavior = this.editorSession.editingBehavior
     this.markersManager = this.editorSession.markersManager
+
+    this.ResourceManageranager = new ResourceManager(this.editorSession, this.getChildContext())
   }
 
   /**
