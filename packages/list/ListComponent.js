@@ -1,42 +1,40 @@
 import Component from '../../ui/Component'
-// import IsolatedNodeComponent from '../isolated-node/IsolatedNodeComponent'
-import TextPropertyComponent from '../../ui/TextPropertyComponent'
+import ListItemComponent from './ListItemComponent'
 
 class ListComponent extends Component {
 
   constructor(...args) {
     super(...args)
-
-    this.handleActions({
-      break: this.break
-    })
   }
 
   render($$) {
     let node = this.props.node
-    let el = $$('div').addClass('sc-list').attr('contenteditable', 'true')
-    node.items.forEach(function(id) {
-      el.append($$(TextPropertyComponent, { path: [id, 'content'] }))
+    let el = $$(this._getTagName()).addClass('sc-list').attr('data-id', node.id)
+    node.getItems().forEach(function(item, idx) {
+      el.append(
+        $$(ListItemComponent, {
+          path: [node.id, 'items', idx, 'content'],
+          node: item,
+          tagName: 'li'
+        }).ref(node.id)
+      )
     })
-    el.on('keydown', this.onKeyDown)
     return el
   }
 
-  onKeyDown(event) {
-    console.log('ListComponent.onKeyDown()');
-    switch ( event.keyCode ) {
-      case keys.ENTER:
-        return this._break(event)
-      default:
-        break
-    }
+  didMount() {
+    this.context.editorSession.onRender('document', this.rerender, this, {
+      path: [this.props.node.id, 'items']
+    })
   }
 
-  break() {
-    console.log('TODO: break da list')
+  _getTagName() {
+    return this.props.node.ordered ? 'ol' : 'ul'
   }
+
 }
 
-ListComponent.prototype._isIsolatedNodeComponent = true
+// we need this ATM to prevent this being wrapped into an isolated node (see ContainerEditor._renderNode())
+ListComponent.prototype._isCustomNodeComponent = true
 
 export default ListComponent

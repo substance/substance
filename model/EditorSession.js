@@ -7,6 +7,7 @@ import SurfaceManager from '../packages/surface/SurfaceManager'
 import TransactionDocument from '../model/TransactionDocument'
 import CommandManager from '../ui/CommandManager'
 import DragManager from '../ui/DragManager'
+import Editing from '../ui/Editing'
 import GlobalEventHandler from '../ui/GlobalEventHandler'
 import MacroManager from '../ui/MacroManager'
 import KeyboardManager from '../ui/KeyboardManager'
@@ -93,6 +94,8 @@ class EditorSession extends EventEmitter {
     let macros = configurator.getMacros()
     let converterRegistry = configurator.getConverterRegistry()
     let editingBehavior = configurator.getEditingBehavior()
+
+    this.editing = new Editing(this, editingBehavior)
 
     this.fileManager = options.fileManager || new FileManager(this, configurator.getFileAdapters(), this._context)
 

@@ -138,7 +138,7 @@ class ContainerEditor extends Surface {
     } else {
       let componentRegistry = this.context.componentRegistry
       let ComponentClass = componentRegistry.get(node.type)
-      if (ComponentClass.prototype._isIsolatedNodeComponent) {
+      if (ComponentClass.prototype._isCustomNodeComponent || ComponentClass.prototype._isIsolatedNodeComponent) {
         return $$(ComponentClass, { node: node }).ref(node.id)
       } else {
         return $$(IsolatedNodeComponent, { node: node }).ref(node.id)

@@ -218,7 +218,6 @@ class Clipboard {
         position: 'fixed',
         opacity: '0.0',
         bottom: '-1000px',
-        // width: '0px'
       })
       .append(" ")
       .on('beforepaste', function(event) {
