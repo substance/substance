@@ -214,6 +214,10 @@ class Surface extends Component {
     return false
   }
 
+  hasNativeSpellcheck() {
+    return this.props.spellcheck === 'native'
+  }
+
   getContainerId() {
     return null
   }

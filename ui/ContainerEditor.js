@@ -108,10 +108,10 @@ class ContainerEditor extends Surface {
       console.warn('No container node found for ', containerId)
     }
     el.addClass('sc-container-editor container-node ' + containerId)
-      .attr({
-        spellcheck: false,
-        "data-id": containerId
-      })
+      .attr("data-id", containerId)
+
+    // native spellcheck
+    el.attr('spellcheck', this.props.spellcheck === 'native')
 
     if (this.isEmpty()) {
       el.append(

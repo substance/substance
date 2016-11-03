@@ -43,7 +43,9 @@ class TextPropertyEditor extends Surface {
 
     if (!this.props.disabled) {
       el.addClass('sm-enabled')
-      el.setAttribute('contenteditable', true)
+      el.attr('contenteditable', true)
+      // native spellcheck
+      el.attr('spellcheck', this.props.spellcheck === 'native')
     }
 
     el.append(
