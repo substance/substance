@@ -85,6 +85,7 @@ class Surface extends Component {
     }
     if (!this.isReadonly() && inBrowser) {
       this.domSelection = new DOMSelection(this)
+      // TODO: it seems that domObserver has become obsolete here, as some of this is done on TextPropertyComponent now
       // this.domObserver = new window.MutationObserver(this.onDomMutations.bind(this));
       // this.domObserver.observe(this.el.getNativeElement(), { subtree: true, characterData: true, characterDataOldValue: true });
     }
@@ -111,7 +112,6 @@ class Surface extends Component {
     let tagName = this.props.tagName || 'div'
     let el = $$(tagName)
       .addClass('sc-surface')
-      .attr('spellCheck', false)
       .attr('tabindex', 2)
 
     if (!this.isDisabled()) {
