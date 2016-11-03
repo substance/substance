@@ -109,7 +109,7 @@ class ContainerEditor extends Surface {
     }
     el.addClass('sc-container-editor container-node ' + containerId)
       .attr({
-        spellCheck: false,
+        spellcheck: false,
         "data-id": containerId
       })
 
