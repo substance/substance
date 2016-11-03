@@ -1,19 +1,13 @@
-import isString from 'lodash/isString'
-import isNumber from 'lodash/isNumber'
-import Operation from './Operation'
+import isString from '../../util/isString'
+import isNumber from '../../util/isNumber'
 import Conflict from './Conflict'
 
 var INSERT = "insert"
 var DELETE = "delete"
 
-/*
-  @class
-  @extends Operation
-*/
-class TextOperation extends Operation {
+class TextOperation {
 
   constructor(data) {
-    super()
     if (!data || data.type === undefined || data.pos === undefined || data.str === undefined) {
       throw new Error("Illegal argument: insufficient data.")
     }
@@ -109,6 +103,7 @@ class TextOperation extends Operation {
   }
 }
 
+TextOperation.prototype._isOperation = true
 TextOperation.prototype._isTextOperation = true
 
 function hasConflict(a, b) {

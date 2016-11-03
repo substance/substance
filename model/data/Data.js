@@ -1,9 +1,9 @@
-import isArray from 'lodash/isArray'
-import isString from 'lodash/isString'
 import cloneDeep from 'lodash/cloneDeep'
+import isArray from '../../util/isArray'
+import isPlainObject from '../../util/isPlainObject'
+import isString from '../../util/isString'
 import EventEmitter from '../../util/EventEmitter'
 import forEach from '../../util/forEach'
-import DataObject from './DataObject'
 import NodeFactory from './NodeFactory'
 
 /*
@@ -23,7 +23,7 @@ class Data extends EventEmitter {
 
     options = options || {}
     this.schema = schema
-    this.nodes = new DataObject()
+    this.nodes = {}
     this.indexes = {}
     this.options = options || {}
 
@@ -41,7 +41,7 @@ class Data extends EventEmitter {
     @returns {bool} `true` if a node with id exists, `false` otherwise.
    */
   contains(id) {
-    return this.nodes.contains(id)
+    return Boolean(this.nodes[id])
   }
 
   /**
@@ -51,10 +51,18 @@ class Data extends EventEmitter {
     @returns {Node|Object|Primitive|undefined} a Node instance, a value or undefined if not found.
    */
   get(path, strict) {
-    if (!path) {
-      throw new Error('Path or id required')
+    let result
+    let realPath = this.getRealPath(path)
+    if (!realPath) {
+      return undefined
     }
-    var result = this.nodes.get(path)
+    if (isString(realPath)) {
+      result = this.nodes[realPath]
+    } else if (realPath.length === 1) {
+      result = this.nodes[realPath[0]]
+    } else {
+      result = this.nodes[realPath[0]][realPath[1]]
+    }
     if (strict && result === undefined) {
       if (isString(path)) {
         throw new Error("Could not find node with id '"+path+"'.")
@@ -63,6 +71,33 @@ class Data extends EventEmitter {
       }
     }
     return result
+  }
+
+  getRealPath(path) {
+    if (!path) return false
+    if (isString(path)) return path
+    if (path.length < 3) return path
+    let realPath = []
+    let context = this.nodes[path[0]]
+    let prop, name
+    let L = path.length
+    let i = 1
+    for (; i<L-1; i++) {
+      if (!context) return false
+      name = path[i]
+      prop = context[name]
+      if (isArray(prop) || isPlainObject(prop)) {
+        realPath.push(name)
+        context = prop
+      } else if (isString(prop)) {
+        context = this.nodes[prop]
+        realPath = [prop]
+      } else {
+        return false
+      }
+    }
+    realPath.push(path[i])
+    return realPath
   }
 
   /**
@@ -139,14 +174,19 @@ class Data extends EventEmitter {
     @returns {Node} The deleted node.
    */
   set(path, newValue) {
-    var node = this.get(path[0])
-    var oldValue = this.nodes.get(path)
-    this.nodes.set(path, newValue)
+    var realPath = this.getRealPath(path)
+    if (!realPath) {
+      console.error('Could not resolve path', path)
+      return
+    }
+    var node = this.get(realPath[0])
+    var oldValue = node[realPath[1]]
+    node[realPath[1]] = newValue
 
     var change = {
       type: 'set',
       node: node,
-      path: path,
+      path: realPath,
       newValue: newValue,
       oldValue: oldValue
     }
@@ -169,7 +209,13 @@ class Data extends EventEmitter {
   */
   update(path, diff) {
     // TODO: do we really want this incremental implementation here?
-    var oldValue = this.nodes.get(path)
+    var realPath = this.getRealPath(path)
+    if (!realPath) {
+      console.error('Could not resolve path', path)
+      return
+    }
+    var node = this.get(realPath[0])
+    var oldValue = this.get(realPath)
     var newValue
     if (diff.isOperation) {
       newValue = diff.apply(oldValue)
@@ -187,7 +233,7 @@ class Data extends EventEmitter {
           val = diff['insert'].value
           newValue = [oldValue.substring(0, pos), val, oldValue.substring(pos)].join('')
         } else {
-          throw new Error('Diff is not supported:', JSON.stringify(diff))
+          throw new Error('Diff is not supported:' + JSON.stringify(diff))
         }
       } else if (isArray(oldValue)) {
         newValue = oldValue.slice(0)
@@ -201,19 +247,24 @@ class Data extends EventEmitter {
           val = diff['insert'].value
           newValue.splice(pos, 0, val)
         } else {
-          throw new Error('Diff is not supported:', JSON.stringify(diff))
+          throw new Error('Diff is not supported:' + JSON.stringify(diff))
+        }
+      } else if (oldValue._isCoordinate) {
+        if (diff['shift']) {
+          val = diff['shift']
+        } else {
+          throw new Error('Diff is not supported:' + JSON.stringify(diff))
         }
       } else {
         throw new Error('Diff is not supported:', JSON.stringify(diff))
       }
     }
-    this.nodes.set(path, newValue)
-    var node = this.get(path[0])
+    this.nodes.set(realPath, newValue)
 
     var change = {
       type: 'update',
       node: node,
-      path: path,
+      path: realPath,
       newValue: newValue,
       oldValue: oldValue
     }

@@ -1,10 +1,10 @@
-import isString from 'lodash/isString'
+import isString from '../../util/isString'
 import isEqual from 'lodash/isEqual'
 import cloneDeep from 'lodash/cloneDeep'
 import DataObject from './DataObject'
-import Operation from './Operation'
 import TextOperation from './TextOperation'
 import ArrayOperation from './ArrayOperation'
+import CoordinateOperation from './CoordinateOperation'
 import Conflict from './Conflict'
 
 var NOP = "NOP"
@@ -13,14 +13,9 @@ var DELETE = 'delete'
 var UPDATE = 'update'
 var SET = 'set'
 
-/*
-  @class
-  @extends Operation
-*/
-class ObjectOperation extends Operation {
+class ObjectOperation {
 
   constructor(data) {
-    super()
     if (!data) {
       throw new Error('Data of ObjectOperation is missing.')
     }
@@ -48,6 +43,8 @@ class ObjectOperation extends Operation {
           this.propertyType = 'string'
         } else if (data.diff._isArrayOperation) {
           this.propertyType = 'array'
+        } else if (data.diff._isCoordinateOperation) {
+          this.propertyType = 'coordinate'
         } else {
           throw new Error('Invalid data: diff must be a TextOperation or an ArrayOperation.')
         }
@@ -62,8 +59,6 @@ class ObjectOperation extends Operation {
       throw new Error('Invalid type: '+ data.type)
     }
   }
-
-  get _isObjectOperation() { return true }
 
   apply(obj) {
     if (this.type === NOP) return obj
@@ -83,13 +78,12 @@ class ObjectOperation extends Operation {
     else if (this.type === UPDATE) {
       var diff = this.diff
       var oldVal = adapter.get(this.path)
-      var newVal
-      if (diff._isArrayOperation) {
-        newVal = diff.apply(oldVal)
-      } else {
-        newVal = diff.apply(oldVal)
+      var newVal = diff.apply(oldVal)
+      // some ops work inplace, others create a new value
+      // for the latter, we must set the new value
+      if (oldVal !== newVal) {
+        adapter.set(this.path, newVal)
       }
-      adapter.set(this.path, newVal)
     }
     else /* if (this.type === SET) */ {
       // clone here as the operations value must not be changed
@@ -152,8 +146,12 @@ class ObjectOperation extends Operation {
       var invertedDiff
       if (this.diff._isTextOperation) {
         invertedDiff = TextOperation.fromJSON(this.diff.toJSON()).invert()
-      } else {
+      } else if (this.diff._isArrayOperation) {
         invertedDiff = ArrayOperation.fromJSON(this.diff.toJSON()).invert()
+      } else if (this.diff._isCoordinateOperation) {
+        invertedDiff = CoordinateOperation.fromJSON(this.diff.toJSON()).invert()
+      } else {
+        throw new Error('Illegal type')
       }
       result.diff = invertedDiff
     }
@@ -232,6 +230,9 @@ class ObjectOperation extends Operation {
   }
 }
 
+ObjectOperation.prototype._isOperation = true
+ObjectOperation.prototype._isObjectOperation = true
+
 /* Low level implementation */
 
 var hasConflict = function(a, b) {
@@ -259,10 +260,18 @@ var transform_delete_update = function(a, b, flipped) {
     return transform_delete_update(b, a, true)
   }
   var op
-  if (b.propertyType === 'string') {
-    op = TextOperation.fromJSON(b.diff)
-  } else /* if (b.propertyType === 'array') */ {
-    op = ArrayOperation.fromJSON(b.diff)
+  switch (b.propertyType) {
+    case 'string':
+      op = TextOperation.fromJSON(b.diff)
+      break
+    case 'array':
+      op = ArrayOperation.fromJSON(b.diff)
+      break
+    case 'coordinate':
+      op = CoordinateOperation.fromJSON(b.diff)
+      break
+    default:
+      throw new Error('Illegal type')
   }
   // (DELETE, UPDATE) is transformed into (DELETE, CREATE)
   if (!flipped) {
@@ -285,14 +294,24 @@ var transform_create_update = function() {
 var transform_update_update = function(a, b) {
   // Note: this is a conflict the user should know about
   var op_a, op_b, t
-  if (b.propertyType === 'string') {
-    op_a = TextOperation.fromJSON(a.diff)
-    op_b = TextOperation.fromJSON(b.diff)
-    t = TextOperation.transform(op_a, op_b, {inplace: true})
-  } else /* if (b.propertyType === 'array') */ {
-    op_a = ArrayOperation.fromJSON(a.diff)
-    op_b = ArrayOperation.fromJSON(b.diff)
-    t = ArrayOperation.transform(op_a, op_b, {inplace: true})
+  switch(b.propertyType) {
+    case 'string':
+      op_a = TextOperation.fromJSON(a.diff)
+      op_b = TextOperation.fromJSON(b.diff)
+      t = TextOperation.transform(op_a, op_b, {inplace: true})
+      break
+    case 'array':
+      op_a = ArrayOperation.fromJSON(a.diff)
+      op_b = ArrayOperation.fromJSON(b.diff)
+      t = ArrayOperation.transform(op_a, op_b, {inplace: true})
+      break
+    case 'coordinate':
+      op_a = CoordinateOperation.fromJSON(a.diff)
+      op_b = CoordinateOperation.fromJSON(b.diff)
+      t = CoordinateOperation.transform(op_a, op_b, {inplace: true})
+      break
+    default:
+      throw new Error('Illegal type')
   }
   a.diff = t[0]
   b.diff = t[1]
@@ -421,6 +440,9 @@ ObjectOperation.fromJSON = function(data) {
         break
       case "array":
         data.diff = ArrayOperation.fromJSON(data.diff)
+        break
+      case "coordinate":
+        data.diff = CoordinateOperation.fromJSON(data.diff)
         break
       default:
         throw new Error("Unsupported update diff:" + JSON.stringify(data.diff))

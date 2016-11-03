@@ -1,7 +1,6 @@
-import isNumber from 'lodash/isNumber'
 import isEqual from 'lodash/isEqual'
 import cloneDeep from 'lodash/cloneDeep'
-import Operation from './Operation'
+import isNumber from '../../util/isNumber'
 import Conflict from './Conflict'
 
 var NOP = "NOP"
@@ -12,10 +11,8 @@ var INSERT = "insert"
   @class
   @extends Operation
 */
-class ArrayOperation extends Operation {
+class ArrayOperation {
   constructor(data) {
-    super()
-
     if (!data || !data.type) {
       throw new Error("Illegal argument: insufficient data.")
     }
@@ -33,8 +30,6 @@ class ArrayOperation extends Operation {
       throw new Error("Illegal argument: expecting positive number as pos.")
     }
   }
-
-  get _isArrayOperation() { return true }
 
   apply(array) {
     if (this.type === NOP) {
@@ -115,6 +110,9 @@ class ArrayOperation extends Operation {
     return ["(", (this.isInsert() ? INSERT : DELETE), ",", this.getOffset(), ",'", this.getValue(), "')"].join('')
   }
 }
+
+ArrayOperation.prototype._isOperation = true
+ArrayOperation.prototype._isArrayOperation = true
 
 var hasConflict = function(a, b) {
   if (a.type === NOP || b.type === NOP) return false

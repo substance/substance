@@ -2,8 +2,8 @@ import isNumber from 'lodash/isNumber'
 import Coordinate from './Coordinate'
 import Selection from './Selection'
 import PropertySelection from './PropertySelection'
+import CoordinateAdapter from './CoordinateAdapter'
 
-const CoordinateAdapter = PropertySelection.CoordinateAdapter
 const RangeAdapter = PropertySelection.RangeAdapter
 
 /**

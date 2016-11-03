@@ -5,6 +5,7 @@ import Data from './Data'
 import ObjectOperation from './ObjectOperation'
 import ArrayOperation from './ArrayOperation'
 import TextOperation from './TextOperation'
+import CoordinateOperation from './CoordinateOperation'
 
 /**
   Incremental data storage implemention.
@@ -100,11 +101,16 @@ class IncrementalData extends Data {
         // array ops work inplace
         diff.apply(oldVal)
       } else if (op.propertyType === 'string') {
-        if (! (diff._isTextOperation) ) {
+        if (!(diff._isTextOperation) ) {
           diff = TextOperation.fromJSON(diff)
         }
         var newVal = diff.apply(oldVal)
         super.set(op.path, newVal)
+      } else if (op.propertyType === 'coordinate') {
+        if (!(diff._isCoordinateOperation) ) {
+          diff = CoordinateOperation.fromJSON(diff)
+        }
+        diff.apply(oldVal)
       } else {
         throw new Error("Unsupported type for operational update.")
       }
@@ -155,6 +161,13 @@ class IncrementalData extends Data {
           pos = diff['insert'].offset
           val = diff['insert'].value
           diffOp = ArrayOperation.Insert(pos, val)
+        }
+      } else if (value._isCoordinate) {
+        if (diff['shift']) {
+          val = diff['shift']
+          diffOp = CoordinateOperation.Shift(val)
+        } else {
+          throw new Error('Illegal diff.')
         }
       }
     }

@@ -1,7 +1,7 @@
 import isEqual from 'lodash/isEqual'
 import isNumber from 'lodash/isNumber'
 import Selection from './Selection'
-import Coordinate from './Coordinate'
+import CoordinateAdapter from './CoordinateAdapter'
 import Range from './Range'
 
 /**
@@ -457,47 +457,6 @@ PropertySelection.fromJSON = function(json) {
   var surfaceId = json.surfaceId;
   return new PropertySelection(path, startOffset, endOffset, reverse, containerId, surfaceId);
 }
-
-/*
-  Adapter for Coordinate oriented implementations.
-  E.g. Coordinate transforms can be applied to update selections
-  using OT.
-
-  @internal
-*/
-class CoordinateAdapter extends Coordinate {
-
-  constructor(propertySelection, pathProperty, offsetProperty) {
-    super('SKIP')
-
-    this._sel = propertySelection;
-    this._pathProp = pathProperty;
-    this._offsetProp = offsetProperty;
-    Object.freeze(this);
-  }
-
-}
-
-Object.defineProperties(CoordinateAdapter.prototype, {
-  path: {
-    get: function() {
-      return this._sel[this._pathProp];
-    },
-    set: function(path) {
-      this._sel[this._pathProp] = path;
-    }
-  },
-  offset: {
-    get: function() {
-      return this._sel[this._offsetProp];
-    },
-    set: function(offset) {
-      this._sel[this._offsetProp] = offset;
-    }
-  }
-});
-
-PropertySelection.CoordinateAdapter = CoordinateAdapter;
 
 class RangeAdapter extends Range {
 
