@@ -220,40 +220,45 @@ class Data extends EventEmitter {
     if (diff.isOperation) {
       newValue = diff.apply(oldValue)
     } else {
-      var start, end, pos, val
+      diff = this._normalizeDiff(oldValue, diff)
       if (isString(oldValue)) {
-        if (diff['delete']) {
-          // { delete: [2, 5] }
-          start = diff['delete'].start
-          end = diff['delete'].end
-          newValue = oldValue.split('').splice(start, end-start).join('')
-        } else if (diff['insert']) {
-          // { insert: [2, "foo"] }
-          pos = diff['insert'].offset
-          val = diff['insert'].value
-          newValue = [oldValue.substring(0, pos), val, oldValue.substring(pos)].join('')
-        } else {
-          throw new Error('Diff is not supported:' + JSON.stringify(diff))
+        switch (diff.type) {
+          case 'delete': {
+            newValue = oldValue.split('').splice(diff.start, diff.end-diff.start).join('')
+            break
+          }
+          case 'insert': {
+            newValue = [oldValue.substring(0, diff.start), diff.text, oldValue.substring(diff.start)].join('')
+            break
+          }
+          default:
+            throw new Error('Unknown diff type')
         }
       } else if (isArray(oldValue)) {
         newValue = oldValue.slice(0)
-        if (diff['delete']) {
-          // { delete: 2 }
-          pos = diff['delete'].offset
-          newValue.splice(pos, 1)
-        } else if (diff['insert']) {
-          // { insert: [2, "foo"] }
-          pos = diff['insert'].offset
-          val = diff['insert'].value
-          newValue.splice(pos, 0, val)
-        } else {
-          throw new Error('Diff is not supported:' + JSON.stringify(diff))
+        switch (diff.type) {
+          case 'delete': {
+            newValue.splice(diff.pos, 1)
+            break
+          }
+          case 'insert': {
+            newValue.splice(diff.pos, 0, diff.value)
+            break
+          }
+          default:
+            throw new Error('Unknown diff type')
         }
       } else if (oldValue._isCoordinate) {
-        if (diff.hasOwnProperty('shift')) {
-          val = diff['shift']
-        } else {
-          throw new Error('Diff is not supported:' + JSON.stringify(diff))
+        switch (diff.type) {
+          case 'shift': {
+            // ATTENTION: in this case we do not want to create a new value
+            oldValue = { path: oldValue.path, offset: oldValue.offset }
+            newValue = oldValue
+            newValue.offset += diff.value
+            break
+          }
+          default:
+            throw new Error('Unknown diff type')
         }
       } else {
         throw new Error('Diff is not supported:', JSON.stringify(diff))
@@ -276,6 +281,53 @@ class Data extends EventEmitter {
     }
 
     return oldValue
+  }
+
+  // normalize to support legacy formats
+  _normalizeDiff(value, diff) {
+    if (isString(value)) {
+      // legacy
+      if (diff['delete']) {
+        console.warn('DEPRECATED: use doc.update(path, {type:"delete", start:s, end: e}) instead')
+        diff = {
+          type: 'delete',
+          start: diff['delete'].start,
+          end: diff['delete'].end
+        }
+      } else if (diff['insert']) {
+        console.warn('DEPRECATED: use doc.update(path, {type:"insert", start:s, text: t}) instead')
+        diff = {
+          type: 'insert',
+          start: diff['insert'].offset,
+          text: diff['insert'].value
+        }
+      }
+    } else if (isArray(value)) {
+      // legacy
+      if (diff['delete']) {
+        console.warn('DEPRECATED: use doc.update(path, {type:"delete", pos:1}) instead')
+        diff = {
+          type: 'delete',
+          pos: diff['delete'].offset
+        }
+      } else if (diff['insert']) {
+        console.warn('DEPRECATED: use doc.update(path, {type:"insert", pos:1, value: "foo"}) instead')
+        diff = {
+          type: 'insert',
+          pos: diff['insert'].offset,
+          value: diff['insert'].value
+        }
+      }
+    } else if (value._isCoordinate) {
+      if (diff.hasOwnProperty('shift')) {
+        console.warn('DEPRECATED: use doc.update(path, {type:"shift", value:2}) instead')
+        diff = {
+          type: 'shift',
+          value: diff['shift']
+        }
+      }
+    }
+    return diff
   }
 
   /*
