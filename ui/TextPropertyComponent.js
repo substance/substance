@@ -3,6 +3,7 @@ import Coordinate from '../model/Coordinate'
 import AnnotatedTextComponent from './AnnotatedTextComponent'
 import CursorComponent from './CursorComponent'
 import SelectionFragmentComponent from './SelectionFragmentComponent'
+import diff from '../util/diff'
 
 /**
   Renders a text property. Used internally by different components to render
@@ -46,6 +47,11 @@ class TextPropertyComponent extends AnnotatedTextComponent {
     }
   }
 
+  didMount() {
+    this.domObserver = new window.MutationObserver(this._onDomMutations.bind(this));
+    this.domObserver.observe(this.el.getNativeElement(), { subtree: true, characterData: true, characterDataOldValue: true });
+  }
+
   dispose() {
     if (this.context.markersManager) {
       this.context.markersManager.deregister(this)
@@ -58,8 +64,7 @@ class TextPropertyComponent extends AnnotatedTextComponent {
     let el = this._renderContent($$)
       .addClass('sc-text-property')
       .attr({
-        'data-path': path.join('.'),
-        spellCheck: false,
+        'data-path': path.join('.')
       })
       .css({
         'white-space': 'pre-wrap'
@@ -120,6 +125,40 @@ class TextPropertyComponent extends AnnotatedTextComponent {
   onDrop(event) {
     // console.log('Received drop on TextProperty', this.getPath());
     this.context.dragManager.onDrop(event, this)
+  }
+
+  _onDomMutations(mutations) {
+    // HACK: only detecting mutations that are coming from the native spell-correction
+    if (mutations.length === 2 && mutations[0].target === mutations[1].target) {
+      let textEl = mutations[0].target._wrapper
+      if (textEl) {
+        this._applyTextMutation(textEl, mutations[0].oldValue)
+        return
+      }
+    }
+    // in all other cases, revert the change by rerendering
+    this.rerender()
+  }
+
+  _applyTextMutation(textEl, oldText) {
+    // find the offset
+    let offset = _getCharPos(textEl, 0)
+    let newText = textEl.textContent
+    let changes = diff(oldText, newText, offset)
+
+    let editorSession = this.context.editorSession
+    let path = this.getPath()
+    editorSession.transaction(function(tx) {
+      changes.forEach(function(change) {
+        // NOTE: atomic text replace is not supported currently
+        if (change.type === 'replace') {
+          tx.update(path, { type: 'delete', start: change.start, end: change.end })
+          tx.update(path, { type: 'insert', start: change.start, text: change.text })
+        } else {
+          tx.update(path, change)
+        }
+      })
+    })
   }
 
   getPath() {
