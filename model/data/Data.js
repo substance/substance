@@ -250,7 +250,7 @@ class Data extends EventEmitter {
           throw new Error('Diff is not supported:' + JSON.stringify(diff))
         }
       } else if (oldValue._isCoordinate) {
-        if (diff['shift']) {
+        if (diff.hasOwnProperty('shift')) {
           val = diff['shift']
         } else {
           throw new Error('Diff is not supported:' + JSON.stringify(diff))

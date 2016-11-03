@@ -163,7 +163,7 @@ class IncrementalData extends Data {
           diffOp = ArrayOperation.Insert(pos, val)
         }
       } else if (value._isCoordinate) {
-        if (diff['shift']) {
+        if (diff.hasOwnProperty('shift')) {
           val = diff['shift']
           diffOp = CoordinateOperation.Shift(val)
         } else {

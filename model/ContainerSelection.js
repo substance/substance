@@ -1,4 +1,5 @@
-import isNumber from 'lodash/isNumber'
+import isNil from '../util/isNil'
+import isNumber from '../util/isNumber'
 import Coordinate from './Coordinate'
 import Selection from './Selection'
 import PropertySelection from './PropertySelection'
@@ -30,6 +31,17 @@ class ContainerSelection extends Selection {
   constructor(containerId, startPath, startOffset, endPath, endOffset, reverse, surfaceId) {
     super()
 
+    if (arguments.length === 1) {
+      let data = arguments[0]
+      containerId = data.containerId
+      startPath = data.startPath
+      startOffset = data.startOffset
+      endPath = data.endPath
+      endOffset = data.endOffset
+      reverse = data.reverse
+      surfaceId = data.surfaceId
+    }
+
     /**
       @type {String}
     */
@@ -51,14 +63,13 @@ class ContainerSelection extends Selection {
       The path of the property where this annotations ends.
       @type {String[]}
     */
-    this.endPath = endPath;
+    this.endPath = isNil(endPath) ? startPath : endPath;
 
     /**
       The character position where this annotations ends.
       @type {Number}
     */
-    this.endOffset = endOffset;
-
+    this.endOffset = isNil(endOffset) ? startOffset : endOffset;
 
     this.reverse = Boolean(reverse);
 
@@ -74,9 +85,6 @@ class ContainerSelection extends Selection {
     this._internal.end = new CoordinateAdapter(this, 'endPath', 'endOffset');
     this._internal.range = new RangeAdapter(this);
   }
-
-  // for duck-typed instanceof
-  get _isContainerSelection() { return true }
 
   toJSON() {
     return {
@@ -446,7 +454,7 @@ class ContainerSelection extends Selection {
   }
 
   _clone() {
-    return new ContainerSelection(this.containerId, this.startPath, this.startOffset, this.endPath, this.endOffset, this.reverse, this.surfaceId);
+    return new ContainerSelection(this);
   }
 
   _range(sel) {
@@ -476,16 +484,7 @@ class ContainerSelection extends Selection {
   }
 }
 
-function _createNewSelection(containerSel, start, end) {
-  var newSel = new ContainerSelection(containerSel.containerId,
-    start.path, start.offset, end.path, end.offset, false, containerSel.surfaceId);
-  // we need to attach the new selection
-  var doc = containerSel._internal.doc;
-  if (doc) {
-    newSel.attach(doc);
-  }
-  return newSel;
-}
+ContainerSelection.prototype._isContainerSelection = true
 
 Object.defineProperties(ContainerSelection.prototype, {
   path: {
@@ -525,18 +524,20 @@ Object.defineProperties(ContainerSelection.prototype, {
 });
 
 ContainerSelection.fromJSON = function(properties) {
-  // Note: not calling the super ctor as it freezes the instance
-  var containerId = properties.containerId;
-  var startPath = properties.startPath;
-  var endPath = properties.endPath || properties.startPath;
-  var startOffset = properties.startOffset;
-  var endOffset = properties.endOffset;
-  var reverse = Boolean(properties.reverse);
-  // Note: to be able to associate selections with surfaces we decided
-  // to introduce this optional property
-  var surfaceId = properties.surfaceId;
-  var sel = new ContainerSelection(containerId, startPath, startOffset, endPath, endOffset, reverse, surfaceId);
+  var sel = new ContainerSelection(properties);
   return sel;
 }
 
+function _createNewSelection(containerSel, start, end) {
+  var newSel = new ContainerSelection(containerSel.containerId,
+    start.path, start.offset, end.path, end.offset, false, containerSel.surfaceId);
+  // we need to attach the new selection
+  var doc = containerSel._internal.doc;
+  if (doc) {
+    newSel.attach(doc);
+  }
+  return newSel;
+}
+
 export default ContainerSelection
+
