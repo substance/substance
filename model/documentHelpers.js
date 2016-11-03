@@ -39,7 +39,8 @@ documentHelpers.getPropertyAnnotationsForSelection = function(doc, sel, options)
   if (!sel.isPropertySelection()) {
     return [];
   }
-  var annotations = doc.getIndex('annotations').get(sel.path, sel.startOffset, sel.endOffset);
+  var path = doc.getRealPath(sel.path)
+  var annotations = doc.getIndex('annotations').get(path, sel.startOffset, sel.endOffset);
   if (options.type) {
     annotations = filter(annotations, DocumentIndex.filterByType(options.type));
   }
@@ -130,7 +131,7 @@ documentHelpers.getTextForSelection = function(doc, sel) {
 documentHelpers.getMarkersForSelection = function(doc, sel) {
   // only PropertySelections are supported right now
   if (!sel || !sel.isPropertySelection()) return []
-  const path = sel.getPath()
+  const path = doc.getRealPath(sel.getPath())
   // markers are stored as one hash for each path, grouped by marker key
   let markers = doc.getIndex('markers').get(path)
   const filtered = filter(markers, function(m) {

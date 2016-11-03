@@ -119,6 +119,22 @@ class Document extends EventEmitter {
   }
 
   /**
+    Provides the so called real for a property.
+
+    With our flat model, properties usually have 2-component path,
+    e.g. 'text1.content'
+    With ids, which are comparable to symlinks on the file-system
+    it sometimes makes sense to describe a property in its parent context.
+    For example a list item could be addressed via its parent: `['list1', 'items', 1, 'content']`
+    Here `this.getRealPath()` would provide something like `['list-item-xyz', 'content']`
+    The real path makes Operational Transforms more robust, as such changes are independent
+    of its parent.
+  */
+  getRealPath(path) {
+    return this.data.getRealPath(path)
+  }
+
+  /**
     Get a node or value via path.
 
     @param {String|String[]} path node id or path to property.

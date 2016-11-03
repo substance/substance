@@ -102,14 +102,18 @@ class TransactionDocument extends Document {
   }
 
   set(path, value) {
-    var op = this.data.set(path, value)
+    var realPath = this.getRealPath(path)
+    if (!realPath) throw new Error('Invalid path')
+    var op = this.data.set(realPath, value)
     if (!op) return
     this.ops.push(op)
     return op
   }
 
   update(path, diffOp) {
-    var op = this.data.update(path, diffOp)
+    var realPath = this.getRealPath(path)
+    if (!realPath) throw new Error('Invalid path')
+    var op = this.data.update(realPath, diffOp)
     if (!op) return
     this.ops.push(op)
     return op

@@ -1,4 +1,4 @@
-import isString from 'lodash/isString'
+import isString from '../util/isString'
 import Selection from './Selection'
 import Coordinate from './Coordinate'
 
@@ -6,6 +6,15 @@ class NodeSelection extends Selection {
 
   constructor(containerId, nodeId, mode, reverse, surfaceId) {
     super()
+
+    if (arguments.length === 1) {
+      let data = arguments[0]
+      containerId = data.containerId
+      nodeId = data.nodeId
+      mode = data.mode
+      reverse = data.reverse
+      surfaceId = data.surfaceId
+    }
 
     if (!isString(containerId)) {
       throw new Error("'containerId' is mandatory.");
@@ -113,13 +122,12 @@ class NodeSelection extends Selection {
   }
 
   _clone() {
-    return new NodeSelection(this.containerId, this.nodeId, this.mode, this.reverse, this.surfaceId);
+    return new NodeSelection(this);
   }
-
 }
 
 NodeSelection.fromJSON = function(json) {
-  return new NodeSelection(json.containerId, json.nodeId, json.mode, json.reverse, json.surfaceId);
+  return new NodeSelection(json);
 }
 
 NodeSelection._createFromRange = function(range) {

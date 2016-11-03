@@ -148,6 +148,10 @@ class TextPropertyComponent extends AnnotatedTextComponent {
     return this.props.path
   }
 
+  getRealPath() {
+    return this.getDocument().getRealPath(this.props.path)
+  }
+
   getText() {
     return this.getDocument().get(this.getPath())
   }
