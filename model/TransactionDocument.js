@@ -6,6 +6,7 @@ import Document from './Document'
 import DocumentChange from './DocumentChange'
 import IncrementalData from './data/IncrementalData'
 import DocumentNodeFactory from './DocumentNodeFactory'
+import FileNode from './FileNode'
 
 var __id__ = 0
 
@@ -78,6 +79,16 @@ class TransactionDocument extends Document {
     if (!nodeData.type) {
       throw new Error('No node type provided')
     }
+    // EXPERIMENTAL:
+    // files are stored already during the tx because
+    // we don't want the binary data be in the recorded
+    // node data
+    if (nodeData.type === 'file') {
+      let fileStore = this._getFileStore()
+      fileStore.storeFile(nodeData)
+      nodeData = FileNode.strip(nodeData)
+    }
+
     var op = this.data.create(nodeData)
     if (!op) return
     this.ops.push(op)
@@ -196,6 +207,10 @@ class TransactionDocument extends Document {
     // update state
     this._isCancelled = true
     this.reset()
+  }
+
+  _getFileStore() {
+    return this.document._getFileStore()
   }
 
   newInstance() {

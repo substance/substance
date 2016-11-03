@@ -3,6 +3,7 @@ import DocumentNode from './DocumentNode'
 import Container from './Container'
 import PropertyAnnotation from './PropertyAnnotation'
 import ContainerAnnotation from './ContainerAnnotation'
+import FileNode from './FileNode'
 
 /*
   Used to define custom article formats. Predefined node types can be combined with custom ones.
@@ -54,7 +55,7 @@ class DocumentSchema extends Schema {
   }
 
   getBuiltIns() {
-    return [DocumentNode, PropertyAnnotation, Container, ContainerAnnotation]
+    return [DocumentNode, PropertyAnnotation, Container, ContainerAnnotation, FileNode]
   }
 
 }

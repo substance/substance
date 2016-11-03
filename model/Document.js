@@ -23,6 +23,9 @@ import Coordinate from './Coordinate'
 import Range from './Range'
 import docHelpers from './documentHelpers'
 import JSONConverter from './JSONConverter'
+import FileStore from './FileStore'
+import FileNode from './FileNode'
+
 var converter = new JSONConverter()
 
 /**
@@ -65,6 +68,8 @@ class Document extends EventEmitter {
     this.data = new IncrementalData(schema, {
       nodeFactory: this.nodeFactory
     })
+
+    this.fileStore = new FileStore.Stub()
 
     // all by type
     this.addIndex('type', DocumentIndex.create({ property: "type" }))
@@ -202,6 +207,16 @@ class Document extends EventEmitter {
     if (!nodeData.id) {
       nodeData.id = uuid(nodeData.type)
     }
+    // EXPERIMENTAL:
+    // files are stored already during the tx because
+    // we don't want the binary data be in the recorded
+    // node data
+    if (nodeData.type === 'file') {
+      let fileStore = this._getFileStore()
+      fileStore.storeFile(nodeData)
+      nodeData = FileNode.strip(nodeData)
+    }
+
     var op = this._create(nodeData)
     var change = new DocumentChange([op], {}, {})
     change._extractInformation(this)
@@ -415,6 +430,10 @@ class Document extends EventEmitter {
     forEach(this.eventProxies, function(proxy) {
       proxy.onDocumentChanged(change, info, this)
     }.bind(this))
+  }
+
+  _getFileStore() {
+    return this.fileStore
   }
 
   /**
