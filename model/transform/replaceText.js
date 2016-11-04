@@ -22,7 +22,7 @@ function _defaultReplace(tx, args) {
     throw new Error('Invalid state.')
   }
   let text = args.text
-  let op = tx.update(sel.path, { insert: { offset: sel.startOffset, value: text } } )
+  let op = tx.update(sel.path, { type: 'insert', start: sel.startOffset, text: text })
   updateAnnotations(tx, { op: op })
   args.selection = tx.createSelection(sel.path, sel.startOffset + text.length)
   return args

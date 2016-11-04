@@ -7,7 +7,7 @@ class LinkComponent extends AnnotationComponent {
 
     let node = this.props.node
     this.context.editorSession.onRender('document', this.rerender, this, {
-      path: [node.id]
+      path: [node.id, 'url']
     })
   }
 

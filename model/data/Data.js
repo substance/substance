@@ -1,9 +1,9 @@
-import isArray from 'lodash/isArray'
-import isString from 'lodash/isString'
 import cloneDeep from 'lodash/cloneDeep'
+import isArray from '../../util/isArray'
+import isPlainObject from '../../util/isPlainObject'
+import isString from '../../util/isString'
 import EventEmitter from '../../util/EventEmitter'
 import forEach from '../../util/forEach'
-import DataObject from './DataObject'
 import NodeFactory from './NodeFactory'
 
 /*
@@ -23,7 +23,7 @@ class Data extends EventEmitter {
 
     options = options || {}
     this.schema = schema
-    this.nodes = new DataObject()
+    this.nodes = {}
     this.indexes = {}
     this.options = options || {}
 
@@ -41,7 +41,7 @@ class Data extends EventEmitter {
     @returns {bool} `true` if a node with id exists, `false` otherwise.
    */
   contains(id) {
-    return this.nodes.contains(id)
+    return Boolean(this.nodes[id])
   }
 
   /**
@@ -51,10 +51,18 @@ class Data extends EventEmitter {
     @returns {Node|Object|Primitive|undefined} a Node instance, a value or undefined if not found.
    */
   get(path, strict) {
-    if (!path) {
-      throw new Error('Path or id required')
+    let result
+    let realPath = this.getRealPath(path)
+    if (!realPath) {
+      return undefined
     }
-    var result = this.nodes.get(path)
+    if (isString(realPath)) {
+      result = this.nodes[realPath]
+    } else if (realPath.length === 1) {
+      result = this.nodes[realPath[0]]
+    } else {
+      result = this.nodes[realPath[0]][realPath[1]]
+    }
     if (strict && result === undefined) {
       if (isString(path)) {
         throw new Error("Could not find node with id '"+path+"'.")
@@ -63,6 +71,33 @@ class Data extends EventEmitter {
       }
     }
     return result
+  }
+
+  getRealPath(path) {
+    if (!path) return false
+    if (isString(path)) return path
+    if (path.length < 3) return path
+    let realPath = []
+    let context = this.nodes[path[0]]
+    let prop, name
+    let L = path.length
+    let i = 1
+    for (; i<L-1; i++) {
+      if (!context) return false
+      name = path[i]
+      prop = context[name]
+      if (isArray(prop) || isPlainObject(prop)) {
+        realPath.push(name)
+        context = prop
+      } else if (isString(prop)) {
+        context = this.nodes[prop]
+        realPath = [prop]
+      } else {
+        return false
+      }
+    }
+    realPath.push(path[i])
+    return realPath
   }
 
   /**
@@ -139,14 +174,19 @@ class Data extends EventEmitter {
     @returns {Node} The deleted node.
    */
   set(path, newValue) {
-    var node = this.get(path[0])
-    var oldValue = this.nodes.get(path)
-    this.nodes.set(path, newValue)
+    var realPath = this.getRealPath(path)
+    if (!realPath) {
+      console.error('Could not resolve path', path)
+      return
+    }
+    var node = this.get(realPath[0])
+    var oldValue = node[realPath[1]]
+    node[realPath[1]] = newValue
 
     var change = {
       type: 'set',
       node: node,
-      path: path,
+      path: realPath,
       newValue: newValue,
       oldValue: oldValue
     }
@@ -169,51 +209,67 @@ class Data extends EventEmitter {
   */
   update(path, diff) {
     // TODO: do we really want this incremental implementation here?
-    var oldValue = this.nodes.get(path)
+    var realPath = this.getRealPath(path)
+    if (!realPath) {
+      console.error('Could not resolve path', path)
+      return
+    }
+    var node = this.get(realPath[0])
+    var oldValue = this.get(realPath)
     var newValue
     if (diff.isOperation) {
       newValue = diff.apply(oldValue)
     } else {
-      var start, end, pos, val
+      diff = this._normalizeDiff(oldValue, diff)
       if (isString(oldValue)) {
-        if (diff['delete']) {
-          // { delete: [2, 5] }
-          start = diff['delete'].start
-          end = diff['delete'].end
-          newValue = oldValue.split('').splice(start, end-start).join('')
-        } else if (diff['insert']) {
-          // { insert: [2, "foo"] }
-          pos = diff['insert'].offset
-          val = diff['insert'].value
-          newValue = [oldValue.substring(0, pos), val, oldValue.substring(pos)].join('')
-        } else {
-          throw new Error('Diff is not supported:', JSON.stringify(diff))
+        switch (diff.type) {
+          case 'delete': {
+            newValue = oldValue.split('').splice(diff.start, diff.end-diff.start).join('')
+            break
+          }
+          case 'insert': {
+            newValue = [oldValue.substring(0, diff.start), diff.text, oldValue.substring(diff.start)].join('')
+            break
+          }
+          default:
+            throw new Error('Unknown diff type')
         }
       } else if (isArray(oldValue)) {
         newValue = oldValue.slice(0)
-        if (diff['delete']) {
-          // { delete: 2 }
-          pos = diff['delete'].offset
-          newValue.splice(pos, 1)
-        } else if (diff['insert']) {
-          // { insert: [2, "foo"] }
-          pos = diff['insert'].offset
-          val = diff['insert'].value
-          newValue.splice(pos, 0, val)
-        } else {
-          throw new Error('Diff is not supported:', JSON.stringify(diff))
+        switch (diff.type) {
+          case 'delete': {
+            newValue.splice(diff.pos, 1)
+            break
+          }
+          case 'insert': {
+            newValue.splice(diff.pos, 0, diff.value)
+            break
+          }
+          default:
+            throw new Error('Unknown diff type')
+        }
+      } else if (oldValue._isCoordinate) {
+        switch (diff.type) {
+          case 'shift': {
+            // ATTENTION: in this case we do not want to create a new value
+            oldValue = { path: oldValue.path, offset: oldValue.offset }
+            newValue = oldValue
+            newValue.offset += diff.value
+            break
+          }
+          default:
+            throw new Error('Unknown diff type')
         }
       } else {
         throw new Error('Diff is not supported:', JSON.stringify(diff))
       }
     }
-    this.nodes.set(path, newValue)
-    var node = this.get(path[0])
+    this.nodes.set(realPath, newValue)
 
     var change = {
       type: 'update',
       node: node,
-      path: path,
+      path: realPath,
       newValue: newValue,
       oldValue: oldValue
     }
@@ -225,6 +281,53 @@ class Data extends EventEmitter {
     }
 
     return oldValue
+  }
+
+  // normalize to support legacy formats
+  _normalizeDiff(value, diff) {
+    if (isString(value)) {
+      // legacy
+      if (diff['delete']) {
+        console.warn('DEPRECATED: use doc.update(path, {type:"delete", start:s, end: e}) instead')
+        diff = {
+          type: 'delete',
+          start: diff['delete'].start,
+          end: diff['delete'].end
+        }
+      } else if (diff['insert']) {
+        console.warn('DEPRECATED: use doc.update(path, {type:"insert", start:s, text: t}) instead')
+        diff = {
+          type: 'insert',
+          start: diff['insert'].offset,
+          text: diff['insert'].value
+        }
+      }
+    } else if (isArray(value)) {
+      // legacy
+      if (diff['delete']) {
+        console.warn('DEPRECATED: use doc.update(path, {type:"delete", pos:1}) instead')
+        diff = {
+          type: 'delete',
+          pos: diff['delete'].offset
+        }
+      } else if (diff['insert']) {
+        console.warn('DEPRECATED: use doc.update(path, {type:"insert", pos:1, value: "foo"}) instead')
+        diff = {
+          type: 'insert',
+          pos: diff['insert'].offset,
+          value: diff['insert'].value
+        }
+      }
+    } else if (value._isCoordinate) {
+      if (diff.hasOwnProperty('shift')) {
+        console.warn('DEPRECATED: use doc.update(path, {type:"shift", value:2}) instead')
+        diff = {
+          type: 'shift',
+          value: diff['shift']
+        }
+      }
+    }
+    return diff
   }
 
   /*

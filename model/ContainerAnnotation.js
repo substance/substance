@@ -30,10 +30,6 @@ import documentHelpers from './documentHelpers'
 
 class ContainerAnnotation extends DocumentNode {
 
-  get _isAnnotation() { return true }
-
-  get _isContainerAnnotation() { return true }
-
   /**
     Get the plain text spanned by this annotation.
 
@@ -141,6 +137,8 @@ ContainerAnnotation.define({
 })
 
 ContainerAnnotation.isContainerAnnotation = true
+ContainerAnnotation.prototype._isAnnotation = true
+ContainerAnnotation.prototype._isContainerAnnotation = true
 
 /**
   @internal

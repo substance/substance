@@ -164,9 +164,13 @@ class DOMSelection {
         if (comp._isIsolatedNodeComponent) {
           domCoor = IsolatedNodeComponent.getDOMCoordinate(comp, coor)
         } else {
+          let domOffset = 0
+          if (coor.offset > 0) {
+            domOffset = comp.getChildCount()
+          }
           domCoor = {
             container: comp.getNativeElement(),
-            offset: coor.offset
+            offset: domOffset
           }
         }
       }

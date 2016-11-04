@@ -165,7 +165,7 @@ function _mergeTextNodes(tx, args) {
     })
   } else {
     // append the second text
-    tx.update(firstPath, { insert: { offset: firstLength, value: secondText } })
+    tx.update(firstPath, { type: 'insert', start: firstLength, text: secondText })
     // transfer annotations
     annotationHelpers.transferAnnotations(tx, secondPath, 0, firstPath, firstLength)
     // hide the second node

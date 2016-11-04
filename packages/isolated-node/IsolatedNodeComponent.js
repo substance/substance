@@ -18,10 +18,6 @@ class IsolatedNodeComponent extends Component {
     this.ContentClass = this._getContentClass(this.props.node) || Component
   }
 
-  get _isIsolatedNodeComponent() {
-    return true
-  }
-
   get __elementTag() {
     return 'div'
   }
@@ -361,6 +357,8 @@ class IsolatedNodeComponent extends Component {
   }
 
 }
+
+IsolatedNodeComponent.prototype._isIsolatedNodeComponent = true
 
 IsolatedNodeComponent.prototype._isDisabled = IsolatedNodeComponent.prototype.isDisabled
 

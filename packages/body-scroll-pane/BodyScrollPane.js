@@ -46,7 +46,9 @@ class BodyScrollPane extends Component {
 
   render($$) {
     let el = $$('div')
-    el.on('contextmenu', this._onContextMenu)
+    if (this.props.contextMenu === 'custom') {
+      contentEl.on('contextmenu', this._onContextMenu)
+    }
     el.append(this.props.children)
     return el
   }

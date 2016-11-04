@@ -1,12 +1,11 @@
-import isArray from 'lodash/isArray'
-import isNumber from 'lodash/isNumber'
-import isEqual from 'lodash/isEqual'
-import EventEmitter from '../util/EventEmitter'
+import isArray from '../util/isArray'
+import isNumber from '../util/isNumber'
+import isArrayEqual from '../util/isArrayEqual'
 
 /**
   @internal
 */
-class Coordinate extends EventEmitter {
+class Coordinate {
 
   /**
    @param {Array} path the address of a property, such as ['text_1', 'content']
@@ -21,7 +20,6 @@ class Coordinate extends EventEmitter {
        foo <strong>bar</strong>| ...
   */
   constructor(path, offset, after) {
-    super()
     // HACK: to allow this class be inherited but without calling this ctor
     if (arguments[0] === 'SKIP') return
 
@@ -40,11 +38,9 @@ class Coordinate extends EventEmitter {
     }
   }
 
-  get _isCoordinate() { return true }
-
   equals(other) {
     return (other === this ||
-      (isEqual(other.path, this.path) && other.offset === this.offset) )
+      (isArrayEqual(other.path, this.path) && other.offset === this.offset) )
   }
 
   withCharPos(offset) {
@@ -84,5 +80,7 @@ class Coordinate extends EventEmitter {
   }
 
 }
+
+Coordinate.prototype._isCoordinate = true
 
 export default Coordinate

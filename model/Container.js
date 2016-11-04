@@ -76,14 +76,14 @@ class Container extends DocumentNode {
     if (!isNumber(pos)) {
       pos = this.nodes.length
     }
-    doc.update(this.getContentPath(), { insert: { offset: pos, value: nodeId } })
+    doc.update(this.getContentPath(), { type: 'insert', pos: pos, value: nodeId })
   }
 
   hide(nodeId) {
     var doc = this.getDocument()
     var pos = this.nodes.indexOf(nodeId)
     if (pos >= 0) {
-      doc.update(this.getContentPath(), { delete: { offset: pos } })
+      doc.update(this.getContentPath(), { type: 'delete', pos: pos })
     }
   }
 

@@ -4,6 +4,7 @@ import isObject from 'lodash/isObject'
 import ObjectOperation from './ObjectOperation'
 import TextOperation from './TextOperation'
 import ArrayOperation from './ArrayOperation'
+import CoordinateOperation from './CoordinateOperation'
 
 /*
   Specification:
@@ -106,6 +107,14 @@ class OperationSerializer{
       }
       out.push(op.pos)
       out.push(op.val)
+    } else if (op._isCoordinateOperation) {
+      if (op.isShift()) {
+        out.push('c>>')
+      } else {
+        throw new Error('Unsupported CoordinateOperation type.')
+      }
+      out.push(op.pos)
+      out.push(op.val)
     } else {
       throw new Error('Unsupported operation type.')
     }
@@ -172,6 +181,10 @@ class OperationSerializer{
         pos = tokenizer.getNumber()
         val = tokenizer.getAny()
         op = ArrayOperation.Delete(pos, val)
+        break
+      case 'c>>':
+        val = tokenizer.getNumber()
+        op = CoordinateOperation.Shift(val)
         break
       default:
         throw new Error('Unsupported operation type: ' + type)

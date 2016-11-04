@@ -478,17 +478,7 @@ class EditorSession extends EventEmitter {
 
   off(observer) {
     super.off(observer)
-    // in every observer we store an array of subscriptions for this session
-    let _subscriptions = observer._subscriptions
-    if (!_subscriptions) return
-    let subscriptions = _subscriptions[this.id]
-    if (!subscriptions) return
-    // we dispatch the deregistration to the according proxy
-    subscriptions.forEach((s) => {
-      let proxy = this._eventProxies[s.proxy]
-      proxy.off(s)
-    })
-    delete observer._subscriptions[this.id]
+    this._deregisterObserver(observer)
   }
 
   _setSelection(sel) {
@@ -699,7 +689,7 @@ class EditorSession extends EventEmitter {
   _deregisterObserver(observer) {
     // TODO: we should optimize this, as ATM this needs to traverse
     // a lot of registered listeners
-    forEach(this.observers, function(observers) {
+    forEach(this._observers, function(observers) {
       for (var i = 0; i < observers.length; i++) {
         var entry = observers[i]
         if (entry.context === observer) {

@@ -94,9 +94,7 @@ function _copyContainerSelection(doc, selection) {
     path = firstFragment.path
     offset = firstFragment.startOffset
     text = doc.get(path)
-    snippet.update(path, {
-      delete: { start: 0, end: offset }
-    })
+    snippet.update(path, { type: 'delete', start: 0, end: offset })
     annotationHelpers.deletedText(snippet, path, 0, offset)
   }
 
@@ -105,9 +103,7 @@ function _copyContainerSelection(doc, selection) {
     path = lastFragment.path
     offset = lastFragment.endOffset
     text = doc.get(path)
-    snippet.update(path, {
-      delete: { start: offset, end: text.length }
-    })
+    snippet.update(path, { type: 'delete', start: offset, end: text.length })
     annotationHelpers.deletedText(snippet, path, offset, text.length)
   }
 

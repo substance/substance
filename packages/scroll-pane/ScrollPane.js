@@ -110,7 +110,9 @@ class ScrollPane extends Component {
   renderContent($$) {
     let contentEl = $$('div').ref('content').addClass('se-content')
     contentEl.append(this.props.children)
-    contentEl.on('contextmenu', this._onContextMenu)
+    if (this.props.contextMenu === 'custom') {
+      contentEl.on('contextmenu', this._onContextMenu)
+    }
     return contentEl
   }
 
@@ -252,7 +254,6 @@ class ScrollPane extends Component {
     let positionHints = {
       mouseBounds: mouseBounds
     }
-
     this.emit('context-menu:position', positionHints)
     this._updateScrollbar()
   }
