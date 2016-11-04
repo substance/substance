@@ -63,6 +63,7 @@ class Configurator {
       converters: {},
       importers: {},
       exporters: {},
+      fileProxies: [],
       commands: {},
       tools: new Map(),
       toolGroups: new Map(),
@@ -366,6 +367,14 @@ class Configurator {
   addKeyboardShortcut(combo, spec) {
     let key = KeyboardManager.parseCombo(combo)
     this.config.keyboardShortcuts[key] = spec
+  }
+
+  addFileProxy(FileProxyClass) {
+    this.config.fileProxies.push(FileProxyClass)
+  }
+
+  getFileAdapters() {
+    return this.config.fileProxies.slice(0)
   }
 
   /**

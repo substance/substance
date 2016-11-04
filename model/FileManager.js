@@ -1,4 +1,4 @@
-import BlobAdapter from './BlobAdapter'
+import forEach from '../util/forEach'
 
 /*
   Storage for files such as images and other assets.
@@ -8,48 +8,61 @@ import BlobAdapter from './BlobAdapter'
 */
 class FileManager {
 
-  constructor() {
-    this.adapters = {}
+  constructor(editorSession, extensions, context) {
+    this.editorSession = editorSession
+    this.extensions = extensions
+    this.proxies = {}
+    this.context = context
+
+    // adapt all existing files
+    forEach(editorSession.getDocument().getNodes(), (node) => {
+      if (node._isFileNode) this.storeFile(node)
+    })
+
+    this.editorSession.onUpdate('document', this._onDocumentChange, this)
+  }
+
+  dispose() {
+    this.editorSession.off(this)
   }
 
   storeFile(fileNode) {
-    let adapter = this.adapters[fileNode.id]
+    let proxy = this.proxies[fileNode.id]
     // don't adapt the file if we already have it
-    if (!adapter) {
-      adapter = this.createFileAdapter(fileNode)
-      this.adapters[fileNode.id] = adapter
+    if (!proxy) {
+      proxy = this.createFileProxy(fileNode)
+      if (proxy) {
+        this.proxies[fileNode.id] = proxy
+      }
     }
-    return adapter
+    return proxy
   }
 
-  createFileAdapter(fileNode) { // eslint-disable-line
-    throw new Error('This method is abstract.')
-  }
-
-  getAdapter(fileNode) {
-    return this.adapters[fileNode.id]
-  }
-}
-
-FileManager.Stub = class Stub extends FileManager {
-  constructor() {
-    super()
-  }
-
-  storeFile(fileNode) {
-    let adapter = this.adapters[fileNode.id]
-    // don't adapt the file if we already have it
-    if (!adapter) {
-      adapter = this.createFileAdapter(fileNode)
-      this.adapters[fileNode.id] = adapter
+  createFileProxy(fileNode) { // eslint-disable-line
+    let context = this.context
+    for (var i = 0; i < this.extensions.length; i++) {
+      let ExtClass = this.extensions[i]
+      if (ExtClass.match(fileNode, context)) {
+        return new ExtClass(fileNode, context)
+      }
     }
-    return adapter
+    console.error('No file adapter found for ', fileNode)
   }
 
-  createFileAdapter(fileNode) {
-    return new BlobAdapter(fileNode)
+  getProxy(fileNode) {
+    return this.proxies[fileNode.id]
   }
 
+  _onDocumentChange(change) {
+    let doc = this.editorSession.getDocument()
+    forEach(change.created, (nodeData) => {
+      // we would need the real node to support inheritance
+      let node = doc.get(nodeData.id)
+      if (node._isFileNode) {
+        this.createFileProxy(node)
+      }
+    })
+  }
 }
 
 export default FileManager

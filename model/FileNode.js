@@ -3,29 +3,35 @@ import DocumentNode from './DocumentNode'
 class FileNode extends DocumentNode {
 
   getUrl() {
-    if (this.adapter) {
-      return this.adapter.getUrl()
+    if (this.proxy) {
+      return this.proxy.getUrl()
     } else {
+      // this happens if no FileProxy is attached
       return ""
     }
   }
 
-  setAdapter(adapter) {
-    this.adapter = adapter
+  setProxy(proxy) {
+    this.proxy = proxy
   }
 }
 
 FileNode.type = 'file'
 FileNode.define({
-  mimeType: { type: 'string', optional:true },
+  fileType: { type: 'string', optional:true },
+  mimeType: { type: 'string', optional:true }
 })
 
 FileNode.strip = function(nodeData) {
   return {
     type: nodeData.type,
     id: nodeData.id,
+    fileType: nodeData.fileType,
     mimeType: nodeData.mimeType
   }
 }
+
+FileNode.prototype._isFileNode = true
+FileNode._isFileNode = true
 
 export default FileNode

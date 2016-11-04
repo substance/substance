@@ -94,7 +94,7 @@ class EditorSession extends EventEmitter {
     let converterRegistry = configurator.getConverterRegistry()
     let editingBehavior = configurator.getEditingBehavior()
 
-    this.fileManager = options.fileManager || new FileManager(this)
+    this.fileManager = options.fileManager || new FileManager(this, configurator.getFileAdapters(), this._context)
 
     // The command manager keeps the commandStates up-to-date
     this.commandManager = new CommandManager(this._context, commands)
@@ -118,6 +118,7 @@ class EditorSession extends EventEmitter {
 
   dispose() {
     this.surfaceManager.dispose()
+    this.fileManager.dispose()
     this.commandManager.dispose()
     this.dragManager.dispose()
     this.macroManager.dispose()

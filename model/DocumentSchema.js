@@ -55,7 +55,7 @@ class DocumentSchema extends Schema {
   }
 
   getBuiltIns() {
-    return [DocumentNode, PropertyAnnotation, Container, ContainerAnnotation, FileNode]
+    return [DocumentNode, PropertyAnnotation, Container, ContainerAnnotation]
   }
 
 }
