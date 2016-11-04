@@ -15,6 +15,7 @@ import isPlainObject from '../util/isPlainObject'
 import isFunction from '../util/isFunction'
 import isString from '../util/isString'
 import EventEmitter from '../util/EventEmitter'
+import FileManager from './FileManager'
 
 class EditorSession extends EventEmitter {
 
@@ -92,6 +93,8 @@ class EditorSession extends EventEmitter {
     let macros = configurator.getMacros()
     let converterRegistry = configurator.getConverterRegistry()
     let editingBehavior = configurator.getEditingBehavior()
+
+    this.fileManager = options.fileManager || new FileManager(this)
 
     // The command manager keeps the commandStates up-to-date
     this.commandManager = new CommandManager(this._context, commands)

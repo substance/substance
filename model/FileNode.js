@@ -2,17 +2,16 @@ import DocumentNode from './DocumentNode'
 
 class FileNode extends DocumentNode {
 
-  constructor(...args) {
-    super(...args)
-
-    this.fileAdapter = this.getDocument()._getFileStore().getAdapter(this)
-    if (!this.fileAdapter) {
-      throw new Error('Could not find file.')
+  getUrl() {
+    if (this.adapter) {
+      return this.adapter.getUrl()
+    } else {
+      return ""
     }
   }
 
-  getUrl() {
-    return this.fileAdapter.getUrl()
+  setAdapter(adapter) {
+    this.adapter = adapter
   }
 }
 

@@ -6,7 +6,7 @@ import BlobAdapter from './BlobAdapter'
   This accumulates files created or loaded during a session
   so that it is possible to pick up a file after undo+redo.
 */
-class FileStore {
+class FileManager {
 
   constructor() {
     this.adapters = {}
@@ -31,7 +31,7 @@ class FileStore {
   }
 }
 
-FileStore.Stub = class Stub extends FileStore {
+FileManager.Stub = class Stub extends FileManager {
   constructor() {
     super()
   }
@@ -52,4 +52,4 @@ FileStore.Stub = class Stub extends FileStore {
 
 }
 
-export default FileStore
+export default FileManager

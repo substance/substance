@@ -79,16 +79,6 @@ class TransactionDocument extends Document {
     if (!nodeData.type) {
       throw new Error('No node type provided')
     }
-    // EXPERIMENTAL:
-    // files are stored already during the tx because
-    // we don't want the binary data be in the recorded
-    // node data
-    if (nodeData.type === 'file') {
-      let fileStore = this._getFileStore()
-      fileStore.storeFile(nodeData)
-      nodeData = FileNode.strip(nodeData)
-    }
-
     var op = this.data.create(nodeData)
     if (!op) return
     this.ops.push(op)
