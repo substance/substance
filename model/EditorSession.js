@@ -350,6 +350,10 @@ class EditorSession extends EventEmitter {
     this.emit('unlocked')
   }
 
+  startWorkflow(name, props) {
+    this.emit('workflow:started', name, props)
+  }
+
   /**
     Registers a hook for the `update` phase.
 

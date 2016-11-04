@@ -67,6 +67,7 @@ class AbstractEditor extends Component {
   didMount() {
     this.editorSession.on('locked', this.onSessionLocked, this)
     this.editorSession.on('unlocked', this.onSessionUnlocked, this)
+    this.editorSession.on('workflow:started', this.onWorkflowStarted, this)
   }
 
   dispose() {
@@ -113,6 +114,15 @@ class AbstractEditor extends Component {
     return this.componentRegistry
   }
 
+  onWorkflowStarted(workflowName, props) {
+    let renderContext = RenderingEngine.createContext(this)
+    let $$ = renderContext.$$
+    let WorkflowComponent = this.getComponent(workflowName)
+    let workflowEl = $$(WorkflowComponent, props).ref('workflow')
+    this.append(workflowEl)
+  }
+
+  /* Probably no longer needed */
   onSessionLocked() {
     let renderContext = RenderingEngine.createContext(this)
     let $$ = renderContext.$$
