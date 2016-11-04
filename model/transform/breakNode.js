@@ -90,9 +90,7 @@ function breakTextNode(tx, args) {
       // transfer annotations which are after offset to the new node
       annotationHelpers.transferAnnotations(tx, path, offset, [id, 'content'], 0)
       // truncate the original property
-      tx.update(path, {
-        delete: { start: offset, end: text.length }
-      })
+      tx.update(path, { type: 'delete', start: offset, end: text.length })
     }
     // show the new node
     container.show(id, nodePos+1)

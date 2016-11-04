@@ -39,7 +39,7 @@ function _deletePropertySelection(tx, args) {
   let path = sel.path
   let startOffset = sel.startOffset
   let endOffset = sel.endOffset
-  let op = tx.update(path, { delete: { start: startOffset, end: endOffset } })
+  let op = tx.update(path, { type: 'delete', start: startOffset, end: endOffset })
   updateAnnotations(tx, {op: op})
   args.selection = tx.createSelection(path, startOffset)
   return args

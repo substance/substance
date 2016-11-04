@@ -106,7 +106,7 @@ function _pasteAnnotatedText(tx, args) {
   // insert plain text
   let path = sel.start.path
   let offset = sel.start.offset
-  tx.update(path, { insert: { offset: offset, value: text } } )
+  tx.update(path, { type: 'insert', start: offset, text: text })
   annotationHelpers.insertedText(tx, sel.start, text.length)
   sel = tx.createSelection({
     type: 'property',
