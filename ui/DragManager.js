@@ -16,7 +16,7 @@ class DragManager {
 
   onDragStart(event, component) { // eslint-disable-line
     // dito: trigger listeners to expose drop targets
-    // console.log('DragManager.onDragStart');
+    // console.log('DragManager.onDragStart', event, component);
     event.dataTransfer.effectAllowed = 'all'
     event.dataTransfer.setData('text/html', event.target.outerHTML)
     event.stopPropagation()
@@ -34,26 +34,30 @@ class DragManager {
 
   onDragEnter(event, component) { // eslint-disable-line
     // we could emit an event, so that listeners could expose drop targets
-    // console.log('DragManager.onDragEnter', event);
+    // console.log('DragManager.onDragEnter', event, component);
     event.stopPropagation()
   }
 
   onDragOver(event, component) { // eslint-disable-line
     // prevent default to allow drop
+    // console.log('DragManager.onDragOver', event, component);
     event.preventDefault()
     event.stopPropagation()
   }
 
   onDrop(event, component) {
+    // console.log('DragManager.onDrop', event, component);
     event.preventDefault()
     event.stopPropagation()
-    // console.log('DragManager.onDragEnter', event);
+    let source = this._source
+    this._source = null
     let params = {
       event: event,
-      source: this._source,
+      source: source,
       target: _getTargetInfo(event, component),
       data: _getData(event)
     }
+
     let i, handler;
     for (i = 0; i < this.dndHandlers.length; i++) {
       handler = this.dndHandlers[i]
