@@ -341,19 +341,6 @@ class EditorSession extends EventEmitter {
     this._undoRedo('redo')
   }
 
-  // used for asynchronous changes
-  lock() {
-    this.emit('locked')
-  }
-
-  unlock() {
-    this.emit('unlocked')
-  }
-
-  startWorkflow(name, props) {
-    this.emit('workflow:started', name, props)
-  }
-
   /**
     Registers a hook for the `update` phase.
 

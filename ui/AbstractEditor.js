@@ -64,18 +64,11 @@ class AbstractEditor extends Component {
     }
   }
 
-  didMount() {
-    this.editorSession.on('locked', this.onSessionLocked, this)
-    this.editorSession.on('unlocked', this.onSessionUnlocked, this)
-    this.editorSession.on('workflow:started', this.onWorkflowStarted, this)
-  }
-
   dispose() {
     this._dispose()
   }
 
   _dispose() {
-    this.editorSession.off(this)
     // Note: we need to clear everything, as the childContext
     // changes which is immutable
     this.empty()
@@ -112,24 +105,6 @@ class AbstractEditor extends Component {
 
   getComponentRegistry() {
     return this.componentRegistry
-  }
-
-  onWorkflowStarted(workflowName, props) {
-    let renderContext = RenderingEngine.createContext(this)
-    let $$ = renderContext.$$
-    let WorkflowComponent = this.getComponent(workflowName)
-    let workflowEl = $$(WorkflowComponent, props).ref('workflow')
-    this.append(workflowEl)
-  }
-
-  /* Probably no longer needed */
-  onSessionLocked() {
-    let renderContext = RenderingEngine.createContext(this)
-    let $$ = renderContext.$$
-    let Blocker = this.getComponent('blocker')
-    let blocker = $$(Blocker).ref('blocker')
-    blocker.append('Loading data...')
-    this.append(blocker)
   }
 
   onSessionUnlocked() {
