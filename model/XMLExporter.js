@@ -49,8 +49,8 @@ var defaultBlockConverter = {
 */
 class XMLExporter extends DOMExporter {
 
-  constructor(config) {
-    super(Object.assign({ idAttribute: 'id' }, config))
+  constructor(config, context) {
+    super(Object.assign({ idAttribute: 'id' }, config), context)
 
     // used internally for creating elements
     this._el = DefaultDOMElement.parseXML('<dummy></dummy>')

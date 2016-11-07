@@ -6,7 +6,8 @@ import encodeXMLEntities from '../util/encodeXMLEntities'
 
 class DOMExporter {
 
-  constructor(config) {
+  constructor(config, context) {
+    this.context = context || {}
     if (!config.converters) {
       throw new Error('config.converters is mandatory')
     }
