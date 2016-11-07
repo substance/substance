@@ -70,7 +70,7 @@ class FileManager {
       // we would need the real node to support inheritance
       let node = doc.get(nodeData.id)
       if (node._isFileNode) {
-        this.createFileProxy(node)
+        this.storeFile(node)
       }
     })
   }
