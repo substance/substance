@@ -26,7 +26,6 @@ class EditAnnotationCommand extends Command {
     let newState = {
       disabled: true,
     }
-
     if (annos.length === 1 && sel.isPropertySelection()) {
       newState.disabled = false
       newState.node = annos[0]

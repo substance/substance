@@ -91,8 +91,8 @@ class AnnotationCommand extends Command {
 
     @returns {Boolean} Whether or not annotations could be fused.
    */
-  // When more than one annotation overlaps with the current selection
   canFuse(annos, sel) {
+    // When more than one annotation overlaps with the current selection
     return (annos.length >= 2 && !sel.isCollapsed())
   }
 
@@ -105,8 +105,8 @@ class AnnotationCommand extends Command {
 
     @returns {Boolean} Whether or not annotation could be deleted.
    */
-  // When the cursor or selection is inside an existing annotation
   canDelete(annos, sel) {
+    // When the cursor or selection is inside an existing annotation
     if (annos.length !== 1) return false
     let annoSel = annos[0].getSelection()
     return sel.isInsideOf(annoSel)
@@ -122,8 +122,8 @@ class AnnotationCommand extends Command {
 
     @returns {Boolean} Whether or not annotation could be expanded.
    */
-  // When there's some overlap with only a single annotation we do an expand
   canExpand(annos, sel) {
+    // When there's some overlap with only a single annotation we do an expand
     if (annos.length !== 1) return false
     let annoSel = annos[0].getSelection()
     return sel.overlaps(annoSel) && !sel.isInsideOf(annoSel)
