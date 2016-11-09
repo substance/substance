@@ -73,9 +73,7 @@ class TextPropertyComponent extends AnnotatedTextComponent {
       })
 
     if (this.context.dragManager) {
-      el.on('dragenter', this.onDragEnter)
-        .on('dragover', this.onDragOver)
-        .on('drop', this.onDrop)
+      el.on('drop', this.onDrop)
     }
 
     if (!this.props.withoutBreak) {
@@ -116,13 +114,6 @@ class TextPropertyComponent extends AnnotatedTextComponent {
     return el
   }
 
-  onDragEnter(event) {
-    event.preventDefault()
-  }
-
-  onDragOver(event) {
-    event.preventDefault()
-  }
 
   onDrop(event) {
     // console.log('Received drop on TextProperty', this.getPath());
