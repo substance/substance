@@ -152,6 +152,11 @@ class Surface extends Component {
     return el
   }
 
+  onDrop(event) {
+    // console.log('Received drop on Surface', this.getId(), event);
+    this.context.dragManager.onDrop(event, this)
+  }
+
   renderNode($$, node) {
     let doc = this.getDocument()
     let componentRegistry = this.getComponentRegistry()
@@ -581,11 +586,6 @@ class Surface extends Component {
     //  - dragging selected text
     //  - spell correction
     console.info("We want to enable a DOM MutationObserver which catches all changes made by native interfaces (such as spell corrections, etc). Lookout for this message and try to set Surface.skipNextObservation=true when you know that you will mutate the DOM.", e)
-  }
-
-  onDrop(event) {
-    // console.log('Received drop on Surface', this.getId(), event);
-    this.context.dragManager.onDrop(event, this)
   }
 
   onNativeBlur() {

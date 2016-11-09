@@ -8,6 +8,18 @@ class DragAndDropHandler {
     // nothing
   }
 
+  dragEnter(params, context) { // eslint-disable-line
+    // nothing
+  }
+
+  dragOver(params, context) { // eslint-disable-line
+    // nothing
+  }
+
+  dragLeave(params, context) { // eslint-disable-line
+    // nothing
+  }
+
   drop(params, context) { // eslint-disable-line
     // nothing
   }

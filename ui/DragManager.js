@@ -19,7 +19,11 @@ class DragManager {
     // console.log('DragManager.onDragStart', event, component);
     event.dataTransfer.effectAllowed = 'all'
     event.dataTransfer.setData('text/html', event.target.outerHTML)
-    event.stopPropagation()
+
+    var dragIcon = document.createElement('img')
+    dragIcon.width = 30
+    event.dataTransfer.setDragImage(dragIcon, -10, -10)
+    // event.stopPropagation()
 
     this._source = component
     let data = {
@@ -32,17 +36,35 @@ class DragManager {
     }
   }
 
+  _callHandlerMethod(event, component, methodName) {
+    let data = {
+      source: this._source,
+      event: event,
+      component: component // TODO: better prop name?
+    }
+
+    for (let i = 0; i < this.dndHandlers.length; i++) {
+      let handler = this.dndHandlers[i]
+      handler[methodName](data, this.context)
+    }
+  }
+
   onDragEnter(event, component) { // eslint-disable-line
-    // we could emit an event, so that listeners could expose drop targets
-    // console.log('DragManager.onDragEnter', event, component);
-    event.stopPropagation()
+    // event.stopPropagation()
+
+    this._callHandlerMethod(event, component, 'dragEnter')
+  }
+
+  onDragLeave(event, component) { // eslint-disable-line
+    // event.stopPropagation()
+
+    this._callHandlerMethod(event, component, 'dragLeave')
   }
 
   onDragOver(event, component) { // eslint-disable-line
-    // prevent default to allow drop
-    // console.log('DragManager.onDragOver', event, component);
-    event.preventDefault()
-    event.stopPropagation()
+    // event.stopPropagation()
+
+    this._callHandlerMethod(event, component, 'dragOver')
   }
 
   onDrop(event, component) {

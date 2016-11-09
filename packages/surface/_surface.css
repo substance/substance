@@ -12,3 +12,10 @@
 .sm-selected-node.sm-collaborator-3 { outline-color: var(--collaborator-color-3); }
 .sm-selected-node.sm-collaborator-4 { outline-color: var(--collaborator-color-4); }
 .sm-selected-node.sm-collaborator-5 { outline-color: var(--collaborator-color-5); }
+
+/* ContainerEditor
+----------------------------------------------------*/
+
+.sc-container-editor > *[data-drop=after] {
+  border-bottom: 4px solid #A3CDFD;
+}

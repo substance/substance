@@ -130,8 +130,6 @@ class IsolatedNodeComponent extends Component {
         this.state.mode !== 'co-focused') {
       el.attr("draggable", true);
       el.on('dragstart', this.onDragStart)
-        .on('dragenter', this.onDragEnter)
-        .on('dragover', this.onDragOver)
         .on('drop', this.onDrop)
     }
 
@@ -318,20 +316,12 @@ class IsolatedNodeComponent extends Component {
   }
 
   onDragStart(event) {
-    // console.log('Received drop on IsolatedNode', this.getId());
+    console.log('Received dragStart on IsolatedNode', this.getId());
     this.context.dragManager.onDragStart(event, this)
   }
 
-  onDragEnter(event) {
-    event.preventDefault()
-  }
-
-  onDragOver(event) {
-    event.preventDefault()
-  }
-
   onDrop(event) {
-    // console.log('Received drop on IsolatedNode', this.getId());
+    console.log('Received drop on IsolatedNode', this.getId());
     this.context.dragManager.onDrop(event, this)
   }
 
