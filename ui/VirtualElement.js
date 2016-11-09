@@ -664,11 +664,7 @@ VirtualElement.createElement = function() {
         ref = val
         break
       default:
-        if (key.slice(0,2) === 'on') {
-          eventHandlers.push({ name: key.slice(2), handler: val })
-        } else {
-          props[key] = val
-        }
+        props[key] = val
     }
   }
   if (type === 'element') {
