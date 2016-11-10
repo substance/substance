@@ -12,6 +12,8 @@
 @import './codeblock/_codeblock.css';
 /* context-menu */
 @import './context-menu/_context-menu.css';
+/* drop-teaser */
+@import './drop-teaser/_drop-teaser.css';
 /* emphasis */
 @import './emphasis/_emphasis.css';
 /* heading */

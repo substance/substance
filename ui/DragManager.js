@@ -1,95 +1,178 @@
 import DefaultDOMElement from './DefaultDOMElement'
 import Component from './Component'
+import EventEmitter from '../util/EventEmitter'
 
-class DragManager {
+class DragManager extends EventEmitter {
 
   constructor(dndHandlers, context) {
+    super()
     this.context = context
     this.dndHandlers = dndHandlers
     this._source = null
+    this.el = DefaultDOMElement.wrapNativeElement(document)
+
+    this.el.on('dragstart', this._onDragStart, this)
+    this.el.on('dragend', this._onDragEnd, this)
+    this.el.on('dragenter', this._onDragEnter, this)
+    this.el.on('dragexit', this._onDragExit, this)
+    this.el.on('dragover', this._onDragOver, this)
   }
 
   dispose() {
-    let documentEl = DefaultDOMElement.wrapNativeElement(window.document)
-    documentEl.off(this)
+    this.el.off(this)
   }
 
-  onDragStart(event, component) { // eslint-disable-line
+  _onDragStart(e) { // eslint-disable-line
     // dito: trigger listeners to expose drop targets
     // console.log('DragManager.onDragStart', event, component);
-    event.dataTransfer.effectAllowed = 'all'
-    event.dataTransfer.setData('text/html', event.target.outerHTML)
+    console.log(e)
+    this._externalDrag = false
+    this._initDrag(e)
+  }
+
+  _isMouseInsideDOMSelection(e) {
+    let domSelection = window.getSelection()
+    if (domSelection.rangeCount === 0) {
+      return false
+    }
+
+    let domRange = domSelection.getRangeAt(0)
+    let selectionRect = domRange.getBoundingClientRect()
+
+    return e.clientX >= selectionRect.left &&
+           e.clientX <= selectionRect.right &&
+           e.clientY >= selectionRect.top &&
+           e.clientY <= selectionRect.bottom;
+  }
+
+  _initDrag(e) {
+
+    let dragState = { event: e }
+    let isSelectionDrag = this._isMouseInsideDOMSelection(e)
+    if (isSelectionDrag) {
+      let sourceSelection = this.context.editorSession.getSelection()
+      dragState.sourceSelection = sourceSelection
+      if (sourceSelection.isPropertySelection()) {
+        dragState.mode = 'inline'
+      } else {
+        dragState.mode = 'block'
+      }
+    } else {
+      e.preventDefault()
+      e.stopPropagation()
+    }
+
+    this.dragState = new DragState(dragState)
+
+    e.dataTransfer.effectAllowed = 'all'
+    e.dataTransfer.setData('text/html', e.target.outerHTML)
 
     var dragIcon = document.createElement('img')
     dragIcon.width = 30
-    event.dataTransfer.setDragImage(dragIcon, -10, -10)
+    e.dataTransfer.setDragImage(dragIcon, -10, -10)
     // event.stopPropagation()
 
-    this._source = component
-    let data = {
-      source: component,
-      event: event
-    }
-    for (let i = 0; i < this.dndHandlers.length; i++) {
-      let handler = this.dndHandlers[i]
-      handler.dragStart(data, this.context)
+    this.emit('dragstart', this.dragState)
+  }
+
+  _onDragOver(e) {
+    this._updateDrag(e)
+  }
+
+  _onDragEnter(e) {
+    if (!this.dragState) {
+      this._initDrag(e)
+      this._externalDrag = true
     }
   }
 
-  _callHandlerMethod(event, component, methodName) {
-    let data = {
-      source: this._source,
-      event: event,
-      component: component // TODO: better prop name?
+  _updateDrag(e) {
+    let targetEl = DefaultDOMElement.wrapNativeElement(e.target)
+    // HACK: ignore drop teaser
+    if (targetEl.is('.sc-drop-teaser')) return
+
+    let components = this._getComponents(targetEl)
+    let surface, nodeComponent
+
+    // console.log('comps', components)
+
+    if (components) {
+      surface = components[0]
+      if (surface && surface.isContainerEditor()) {
+        nodeComponent = components[1]
+      }
     }
 
-    for (let i = 0; i < this.dndHandlers.length; i++) {
-      let handler = this.dndHandlers[i]
-      handler[methodName](data, this.context)
+    this.dragState.event = e
+    this.dragState.surface = surface
+    this.dragState.targetEl = nodeComponent ? nodeComponent.el : targetEl
+
+    // position the drop-teaser in case of a ContainerDrop
+    if (this.dragState.mode === 'block') {
+      let elRect = this.dragState.targetEl.getNativeElement().getBoundingClientRect()
+      let mouseY = this.dragState.event.clientY
+      let threshold = elRect.top + elRect.height / 2
+      this.dragState.insertMode = mouseY > threshold ? 'after' : 'before'
+      this.dragState.isContainerDrop = Boolean(nodeComponent)
+      this.emit('drop-teaser:position-requested', this.dragState)
     }
   }
 
-  onDragEnter(event, component) { // eslint-disable-line
-    // event.stopPropagation()
-
-    this._callHandlerMethod(event, component, 'dragEnter')
+  _getComponents(targetEl) {
+    let res = []
+    let curr = targetEl
+    while (curr) {
+      let comp = Component.getComponentForDOMElement(curr)
+      if (comp) {
+        res.unshift(comp)
+        if(comp._isSurface) {
+          return res
+        }
+      }
+      curr = curr.parentNode
+    }
+    return null
   }
 
-  onDragLeave(event, component) { // eslint-disable-line
-    // event.stopPropagation()
-
-    this._callHandlerMethod(event, component, 'dragLeave')
+  _onDragEnd() {
+    if (this.dragState) {
+      let dragState = this.dragState
+      this.dragState = null;
+      dragState.isContainerDrop = false
+      this.emit('drop-teaser:position-requested', dragState)
+    }
   }
 
-  onDragOver(event, component) { // eslint-disable-line
-    // event.stopPropagation()
-
-    this._callHandlerMethod(event, component, 'dragOver')
+  _onDragExit() {
+    this._onDragEnd()
   }
 
-  onDrop(event, component) {
-    // console.log('DragManager.onDrop', event, component);
-    event.preventDefault()
-    event.stopPropagation()
-    let source = this._source
-    this._source = null
-    let params = {
-      event: event,
-      source: source,
-      target: _getTargetInfo(event, component),
-      data: _getData(event)
-    }
+  onDrop(e) {
+    console.log('DragManager.onDrop', e, this.dragState);
+    let dragState = this.dragState
+    e.preventDefault()
+    e.stopPropagation()
+    this._onDragEnd()
 
-    let i, handler;
-    for (i = 0; i < this.dndHandlers.length; i++) {
-      handler = this.dndHandlers[i]
-      let _break = handler.drop(params, this.context)
-      if (_break) break
-    }
-    for (i = 0; i < this.dndHandlers.length; i++) {
-      handler = this.dndHandlers[i]
-      handler.dragEnd(params, this.context)
-    }
+    // let source = this._source
+    // this._source = null
+    // let params = {
+    //   event: event,
+    //   source: source,
+    //   target: _getTargetInfo(event, component),
+    //   data: _getData(event)
+    // }
+
+    // let i, handler;
+    // for (i = 0; i < this.dndHandlers.length; i++) {
+    //   handler = this.dndHandlers[i]
+    //   let _break = handler.drop(params, this.context)
+    //   if (_break) break
+    // }
+    // for (i = 0; i < this.dndHandlers.length; i++) {
+    //   handler = this.dndHandlers[i]
+    //   handler.dragEnd(params, this.context)
+    // }
   }
 
   _getData(event) {
@@ -103,6 +186,20 @@ class DragManager {
     }
   }
 }
+
+
+class DragState {
+
+  constructor(data) {
+    this.mode = data.mode
+    this.targetEl = data.targetEl
+    this.surfaceId = data.surfaceId
+    this.sourceSelection = data.sourceSelection
+    this.event = data.event
+  }
+
+}
+
 
 function _getData(event) {
   let dataTransfer = event.dataTransfer

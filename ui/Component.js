@@ -825,8 +825,13 @@ Object.defineProperty(Component, '$$', {
   }
 })
 
-Component.unwrapDOMElement = function(el) {
+Component.getComponentForDOMElement = function(el) {
   return _unwrapComp(el)
+}
+
+Component.unwrapDOMElement = function(el) {
+  console.warn('DEPRECATED: Use Component.getComponentForDOMElement')
+  return Component.getComponentForDOMElement(el)
 }
 
 Component.getComponentFromNativeElement = function(nativeEl) {

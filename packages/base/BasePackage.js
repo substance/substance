@@ -7,6 +7,7 @@ import InputPackage from '../input/InputPackage'
 import LayoutPackage from '../layout/LayoutPackage'
 import ModalPackage from '../modal/ModalPackage'
 import OverlayPackage from '../overlay/OverlayPackage'
+import DropTeaserPackage from '../drop-teaser/DropTeaserPackage'
 import ScrollbarPackage from '../scrollbar/ScrollbarPackage'
 import ScrollPanePackage from '../scroll-pane/ScrollPanePackage'
 import BodyScrollPanePackage from '../body-scroll-pane/BodyScrollPanePackage'
@@ -37,6 +38,7 @@ export default {
     config.import(LayoutPackage)
     config.import(ContextMenuPackage)
     config.import(OverlayPackage)
+    config.import(DropTeaserPackage)
     config.import(GutterPackage)
 
     // Setup base toolgroups

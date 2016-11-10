@@ -72,10 +72,6 @@ class TextPropertyComponent extends AnnotatedTextComponent {
         'white-space': 'pre-wrap'
       })
 
-    if (this.context.dragManager) {
-      el.on('drop', this.onDrop)
-    }
-
     if (!this.props.withoutBreak) {
       el.append($$('br'))
     }
@@ -112,12 +108,6 @@ class TextPropertyComponent extends AnnotatedTextComponent {
     }
     el.attr('data-offset', fragment.pos)
     return el
-  }
-
-
-  onDrop(event) {
-    // console.log('Received drop on TextProperty', this.getPath());
-    this.context.dragManager.onDrop(event, this)
   }
 
   _onDomMutations(mutations) {

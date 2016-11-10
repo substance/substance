@@ -1,5 +1,4 @@
 import isString from 'lodash/isString'
-import last from 'lodash/last'
 import uuid from '../util/uuid'
 import keys from '../util/keys'
 import platform from '../util/platform'
@@ -11,8 +10,6 @@ import paste from '../model/transform/paste'
 import Surface from '../packages/surface/Surface'
 import RenderingEngine from './RenderingEngine'
 import IsolatedNodeComponent from '../packages/isolated-node/IsolatedNodeComponent'
-import DefaultDOMElement from './DefaultDOMElement'
-
 
 /**
   Represents a flow editor that manages a sequence of nodes in a container. Needs to be
@@ -91,11 +88,11 @@ class ContainerEditor extends Surface {
     editorSession.onRender('document', this._onContainerChanged, this, {
       path: [this.getContainerId(), 'nodes']
     })
+
   }
 
   dispose() {
     super.dispose.apply(this, arguments)
-
     let editorSession = this.getEditorSession()
     editorSession.off(this)
   }
@@ -130,81 +127,9 @@ class ContainerEditor extends Surface {
       el.setAttribute('contenteditable', true)
     }
 
-    // Setup drag behaviours
-    if (this.context.dragManager) {
-      el.on('dragstart', this.onDragStart)
-      el.on('drag', this._onDrag)
-      el.on('dragenter', this.onDragEnter)
-      el.on('dragend', this.onDragEnd)
-    }
-
     return el
   }
 
-  onDragStart(e) {
-    console.log('ContainerEditor.onDragStart', e)
-    this.startDragging()
-  }
-
-  onDragEnter(e) {
-    if (!this._isDragging) {
-      this.startDragging()
-    }
-  }
-
-  onDragEnd(e) {
-    this._isDragging = false
-    // NOTE: this can be used so you don't see a cursor rendered in
-    // text properties when dragging over them
-    // if (!this.props.disabled) {
-    //   this.el.setAttribute('contenteditable', true)
-    // }
-    if (this._prevDragTarget) {
-      this._prevDragTarget.removeAttr('data-drop')
-    }
-  }
-
-  _findTopLevelNode(el) {
-    let self = this.el.getNativeElement()
-    let child = el
-    let parent = el.parentNode
-    while (true) {
-      if (self === parent) return child
-      if (!parent) return null
-      child = parent
-      parent = child.parentNode
-    }
-  }
-
-  _onDrag(e) {
-    let el = document.elementFromPoint(e.clientX, e.clientY)
-    let topLevelEl = DefaultDOMElement.wrapNativeElement(this._findTopLevelNode(el))
-
-    if (this._prevDragTarget !== topLevelEl) {
-      // 1. clear
-      if (this._prevDragTarget) {
-        this._prevDragTarget.removeAttr('data-drop')
-      }
-      this._prevDragTarget = topLevelEl
-      // highlight new drop target
-      if (topLevelEl) {
-        topLevelEl.attr({'data-drop': 'after'})
-      }
-    }
-  }
-
-  startDragging() {
-    // NOTE: this can be used so you don't see a cursor rendered in
-    // text properties when dragging over them
-    // this.el.setAttribute('contenteditable', false)
-    this._prevDragTarget = null
-    this._isDragging = true
-  }
-
-  onDrop(event) {
-    // aggregate data, such as insert pos...
-    this.context.dragManager.onDrop(event, this)
-  }
 
   _renderNode($$, node) {
     if (!node) throw new Error('Illegal argument')
@@ -220,7 +145,6 @@ class ContainerEditor extends Surface {
       }
     }
   }
-
 
   _deriveInternalState(props) {
     let _state = this._state

@@ -125,14 +125,6 @@ class IsolatedNodeComponent extends Component {
       }
     }
 
-    if (this.context.dragManager &&
-        this.state.mode !== 'focused' &&
-        this.state.mode !== 'co-focused') {
-      el.attr("draggable", true);
-      el.on('dragstart', this.onDragStart)
-        .on('drop', this.onDrop)
-    }
-
     if (this.state.mode === 'cursor' && this.state.position === 'after') {
       container.append(
         $$(this.__elementTag).addClass('se-cursor').addClass('sm-after').attr('contenteditable', false)
@@ -145,6 +137,8 @@ class IsolatedNodeComponent extends Component {
         // NOTE: better use a regular character otherwise Edge has problems
         .append(this.__slugChar)
     )
+
+    el.attr('draggable', true)
     return el
   }
 
@@ -313,16 +307,6 @@ class IsolatedNodeComponent extends Component {
       event.preventDefault()
       this._escape()
     }
-  }
-
-  onDragStart(event) {
-    console.log('Received dragStart on IsolatedNode', this.getId());
-    this.context.dragManager.onDragStart(event, this)
-  }
-
-  onDrop(event) {
-    console.log('Received drop on IsolatedNode', this.getId());
-    this.context.dragManager.onDrop(event, this)
   }
 
   _escape() {

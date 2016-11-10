@@ -34,6 +34,7 @@ class ProseEditor extends AbstractEditor {
     let ScrollPane = this.componentRegistry.get('scroll-pane')
     let Overlay = this.componentRegistry.get('overlay')
     let ContextMenu = this.componentRegistry.get('context-menu')
+    let DropTeaser = this.componentRegistry.get('drop-teaser')
 
     let contentPanel = $$(ScrollPane, {
       scrollbarPosition: 'right',
@@ -41,7 +42,8 @@ class ProseEditor extends AbstractEditor {
     }).append(
       editor,
       $$(Overlay),
-      $$(ContextMenu)
+      $$(ContextMenu),
+      $$(DropTeaser)
     ).ref('contentPanel')
 
     el.append(

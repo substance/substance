@@ -56,6 +56,7 @@ class ScrollPane extends Component {
     this.handleActions({
       'domSelectionRendered': this._onDomSelectionRendered
     })
+    this.context.dragManager.on('drop-teaser:position-requested', this._onDropTeaserPositionRequested, this)
   }
 
   dispose() {
@@ -63,6 +64,7 @@ class ScrollPane extends Component {
       this.props.highlights.off(this)
     }
     this.context.editorSession.off(this)
+    this.context.dragManager.off(this)
   }
 
   render($$) {
@@ -199,8 +201,8 @@ class ScrollPane extends Component {
     @param {DOMNode} el DOM node that lives inside the
   */
   getPanelOffsetForElement(el) {
-    let nativeEl = el.el
-    let contentContainerEl = this.refs.content.el.el
+    let nativeEl = el.getNativeElement()
+    let contentContainerEl = this.refs.content.getNativeElement()
     let rect = getRelativeBoundingRect(nativeEl, contentContainerEl)
     return rect.top
   }
@@ -227,6 +229,18 @@ class ScrollPane extends Component {
     } else {
       console.warn(componentId, 'not found in scrollable container')
     }
+  }
+
+  _onDropTeaserPositionRequested(dragState) {
+    let contentContainerEl = this.refs.content.getNativeElement()
+    let rect = getRelativeBoundingRect(dragState.targetEl.getNativeElement(), contentContainerEl)
+
+    if (dragState.insertMode === 'before') {
+      rect.bottom = rect.bottom + rect.height
+    } else {
+      rect.top = rect.top + rect.height
+    }
+    this.emit('drop-teaser:position', { rect: rect, visible: dragState.isContainerDrop })
   }
 
   _onDomSelectionRendered() {
