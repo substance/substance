@@ -16,6 +16,7 @@ class DragManager extends EventEmitter {
     this.el.on('dragenter', this._onDragEnter, this)
     this.el.on('dragexit', this._onDragExit, this)
     this.el.on('dragover', this._onDragOver, this)
+    this.el.on('drop', this._onDrop, this)
   }
 
   dispose() {
@@ -102,10 +103,10 @@ class DragManager extends EventEmitter {
         nodeComponent = components[1]
       }
     }
-
     this.dragState.event = e
     this.dragState.surface = surface
     this.dragState.targetEl = nodeComponent ? nodeComponent.el : targetEl
+    this.dragState.targetNodeId = nodeComponent ? nodeComponent.props.node.id : null
 
     // position the drop-teaser in case of a ContainerDrop
     if (this.dragState.mode === 'block') {
@@ -136,10 +137,11 @@ class DragManager extends EventEmitter {
 
   _onDragEnd() {
     if (this.dragState) {
-      let dragState = this.dragState
-      this.dragState = null;
-      dragState.isContainerDrop = false
-      this.emit('drop-teaser:position-requested', dragState)
+      try {
+        this.emit('drop-teaser:position-requested', Object.assign({}, this.dragState, { isContainerDrop: false }))
+      } finally {
+        this.dragState = null;
+      }
     }
   }
 
@@ -147,32 +149,25 @@ class DragManager extends EventEmitter {
     this._onDragEnd()
   }
 
-  onDrop(e) {
+  _onDrop(e) {
     console.log('DragManager.onDrop', e, this.dragState);
     let dragState = this.dragState
     e.preventDefault()
     e.stopPropagation()
+
     this._onDragEnd()
 
-    // let source = this._source
-    // this._source = null
-    // let params = {
-    //   event: event,
-    //   source: source,
-    //   target: _getTargetInfo(event, component),
-    //   data: _getData(event)
-    // }
+    let i, handler;
+    for (i = 0; i < this.dndHandlers.length; i++) {
+      handler = this.dndHandlers[i]
 
-    // let i, handler;
-    // for (i = 0; i < this.dndHandlers.length; i++) {
-    //   handler = this.dndHandlers[i]
-    //   let _break = handler.drop(params, this.context)
-    //   if (_break) break
-    // }
-    // for (i = 0; i < this.dndHandlers.length; i++) {
-    //   handler = this.dndHandlers[i]
-    //   handler.dragEnd(params, this.context)
-    // }
+      let match = handler.match(dragState, this.context)
+      if (match) {
+        handler.drop(dragState, this.context)
+        break
+      }
+    }
+
   }
 
   _getData(event) {

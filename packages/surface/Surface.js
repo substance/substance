@@ -144,17 +144,8 @@ class Surface extends Component {
         this.clipboard.attach(el)
       }
 
-      if (this.context.dragManager) {
-        el.on('drop', this.onDrop)
-      }
-
     }
     return el
-  }
-
-  onDrop(event) {
-    // console.log('Received drop on Surface', this.getId(), event);
-    this.context.dragManager.onDrop(event, this)
   }
 
   renderNode($$, node) {

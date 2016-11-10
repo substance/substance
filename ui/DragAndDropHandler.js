@@ -1,31 +1,15 @@
 class DragAndDropHandler {
 
+  match(dragState, context) { // eslint-disable-line
+    return false
+  }
+
+  drop(dragState, context) { // eslint-disable-line
+    // nothing
+  }
+
   get _isDragAndDropHandler() {
     return true
-  }
-
-  dragStart(params, context) { // eslint-disable-line
-    // nothing
-  }
-
-  dragEnter(params, context) { // eslint-disable-line
-    // nothing
-  }
-
-  dragOver(params, context) { // eslint-disable-line
-    // nothing
-  }
-
-  dragLeave(params, context) { // eslint-disable-line
-    // nothing
-  }
-
-  drop(params, context) { // eslint-disable-line
-    // nothing
-  }
-
-  dragEnd(params, context) { // eslint-disable-line
-    // nothing
   }
 
 }

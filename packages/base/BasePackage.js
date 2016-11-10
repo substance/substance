@@ -14,6 +14,7 @@ import BodyScrollPanePackage from '../body-scroll-pane/BodyScrollPanePackage'
 import SplitPanePackage from '../split-pane/SplitPanePackage'
 import SwitchTextTypePackage from '../switch-text-type/SwitchTextTypePackage'
 import TabbedPanePackage from '../tabbed-pane/TabbedPanePackage'
+import InternalDragAndDrop from './InternalDragAndDrop'
 import Tool from '../tools/Tool'
 import platform from '../../util/platform'
 
@@ -58,6 +59,9 @@ export default {
     config.addTool('undo', Tool, {toolGroup: ['document', 'context-menu-document']})
     config.addTool('redo', Tool, {toolGroup: ['document', 'context-menu-document']})
     config.addTool('select-all', Tool, {toolGroup: ['document', 'context-menu-document']})
+
+    // Internal drag+drop handler
+    config.addDragAndDrop(InternalDragAndDrop)
 
     // Icons
     config.addIcon('undo', { 'fontawesome': 'fa-undo' })

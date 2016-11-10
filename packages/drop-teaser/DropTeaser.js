@@ -11,7 +11,6 @@ export default class DropTeaser extends Component {
   }
 
   _update(hints) {
-    console.log('hints', hints)
     if (hints.visible) {
       this.el.removeClass('sm-hidden')
       this.el.css('top', hints.rect.top)
