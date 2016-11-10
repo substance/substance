@@ -1,4 +1,5 @@
 .sc-drop-teaser {
+  z-index: 5000;
   position: absolute;
   background: #A3CDFD;
   height: 5px;
