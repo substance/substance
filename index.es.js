@@ -129,6 +129,9 @@ export { default as Layout } from './packages/layout/Layout'
 export { default as GridPackage } from './packages/grid/GridPackage'
 export { default as Grid } from './packages/grid/Grid'
 
+// drop-teaser
+export { default as DropTeaser } from './packages/drop-teaser/DropTeaser'
+
 // tabbed-pane
 export { default as TabbedPanePackage } from './packages/tabbed-pane/TabbedPanePackage'
 export { default as TabbedPane } from './packages/tabbed-pane/TabbedPane'
