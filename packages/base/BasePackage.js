@@ -15,6 +15,7 @@ import SplitPanePackage from '../split-pane/SplitPanePackage'
 import SwitchTextTypePackage from '../switch-text-type/SwitchTextTypePackage'
 import TabbedPanePackage from '../tabbed-pane/TabbedPanePackage'
 import InternalDragAndDrop from './InternalDragAndDrop'
+import FilePackage from '../file/FilePackage'
 import Tool from '../tools/Tool'
 import platform from '../../util/platform'
 
@@ -25,6 +26,7 @@ import SelectAllCommand from './SelectAllCommand'
 export default {
   name: 'base',
   configure: function(config) {
+    config.import(FilePackage)
     config.import(BlockerPackage)
     config.import(SwitchTextTypePackage)
     config.import(ScrollPanePackage)

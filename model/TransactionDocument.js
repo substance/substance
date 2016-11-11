@@ -6,7 +6,7 @@ import Document from './Document'
 import DocumentChange from './DocumentChange'
 import IncrementalData from './data/IncrementalData'
 import DocumentNodeFactory from './DocumentNodeFactory'
-import FileNode from './FileNode'
+import FileNode from '../packages/file/FileNode'
 
 var __id__ = 0
 

@@ -5,6 +5,7 @@ import ImageXMLConverter from './ImageXMLConverter'
 import InsertImageCommand from './InsertImageCommand'
 import InsertImageTool from './InsertImageTool'
 import DropImage from './DropImage'
+import ImageFileProxy from './ImageFileProxy'
 
 export default {
   name: 'image',
@@ -24,7 +25,11 @@ export default {
       en: 'Insert image',
       de: 'Bild einfügen'
     })
-    config.addDragAndDrop(DropImage)
+
+    // TODO: Add as DropHandler handler
+    // config.addDragAndDrop(DropImage)
+
+    config.addFileProxy(ImageFileProxy)
   },
   ImageNode: ImageNode,
   ImageComponent: ImageComponent,

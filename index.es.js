@@ -29,7 +29,6 @@ export { default as EditorSession } from './model/EditorSession'
 export { default as DOMExporter } from './model/DOMExporter'
 export { default as DOMImporter } from './model/DOMImporter'
 export { default as FileManager } from './model/FileManager'
-export { default as FileNode } from './model/FileNode'
 export { default as FileProxy } from './model/FileProxy'
 export { default as Fragmenter } from './model/Fragmenter'
 export { default as HTMLExporter } from './model/HTMLExporter'
@@ -76,6 +75,10 @@ export { default as PersistencePackage } from './packages/persistence/Persistenc
 export { default as StrongPackage } from './packages/strong/StrongPackage'
 export { default as SubscriptPackage } from './packages/subscript/SubscriptPackage'
 export { default as SuperscriptPackage } from './packages/superscript/SuperscriptPackage'
+
+// file
+export { default as FilePackage } from './packages/file/FilePackage'
+export { default as FileNode } from './packages/file/FileNode'
 
 // heading
 export { default as HeadingPackage } from './packages/heading/HeadingPackage'

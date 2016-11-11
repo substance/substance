@@ -48,15 +48,14 @@ class DragManager extends EventEmitter {
 
   _initDrag(e) {
 
-    let dragState = { event: e }
+    let dragState = { event: e, mode: 'block' }
+
     let isSelectionDrag = this._isMouseInsideDOMSelection(e)
     if (isSelectionDrag) {
       let sourceSelection = this.context.editorSession.getSelection()
       dragState.sourceSelection = sourceSelection
       if (sourceSelection.isPropertySelection()) {
         dragState.mode = 'inline'
-      } else {
-        dragState.mode = 'block'
       }
     } else {
       e.preventDefault()
@@ -71,12 +70,12 @@ class DragManager extends EventEmitter {
     var dragIcon = document.createElement('img')
     dragIcon.width = 30
     e.dataTransfer.setDragImage(dragIcon, -10, -10)
-    // event.stopPropagation()
 
     this.emit('dragstart', this.dragState)
   }
 
   _onDragOver(e) {
+    // console.log('_onDragOver', e)
     this._updateDrag(e)
   }
 
@@ -150,7 +149,11 @@ class DragManager extends EventEmitter {
   }
 
   _onDrop(e) {
-    console.log('DragManager.onDrop', e, this.dragState);
+    this.dragState.event = e
+
+    // Extracts information from e.dataTransfer (types, files, items)
+    this.dragState.data = this._getData(e)
+
     let dragState = this.dragState
     e.preventDefault()
     e.stopPropagation()
@@ -170,8 +173,8 @@ class DragManager extends EventEmitter {
 
   }
 
-  _getData(event) {
-    let dataTransfer = event.dataTransfer
+  _getData(e) {
+    let dataTransfer = e.dataTransfer
     if (dataTransfer) {
       return {
         types: dataTransfer.types,
@@ -196,16 +199,16 @@ class DragState {
 }
 
 
-function _getData(event) {
-  let dataTransfer = event.dataTransfer
-  if (dataTransfer) {
-    return {
-      types: dataTransfer.types,
-      items: Array.prototype.slice.call(dataTransfer.items),
-      files: Array.prototype.slice.call(dataTransfer.files)
-    }
-  }
-}
+// function _getData(event) {
+//   let dataTransfer = event.dataTransfer
+//   if (dataTransfer) {
+//     return {
+//       types: dataTransfer.types,
+//       items: Array.prototype.slice.call(dataTransfer.items),
+//       files: Array.prototype.slice.call(dataTransfer.files)
+//     }
+//   }
+// }
 
 function _getTargetInfo(event) {
   let target = {
