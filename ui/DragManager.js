@@ -2,6 +2,11 @@ import DefaultDOMElement from './DefaultDOMElement'
 import Component from './Component'
 import EventEmitter from '../util/EventEmitter'
 
+import copySelection from '../model/transform/copySelection'
+import deleteSelection from '../model/transform/deleteSelection'
+import paste from '../model/transform/paste'
+
+
 class DragManager extends EventEmitter {
 
   constructor(dndHandlers, context) {
@@ -26,7 +31,6 @@ class DragManager extends EventEmitter {
   _onDragStart(e) { // eslint-disable-line
     // dito: trigger listeners to expose drop targets
     // console.log('DragManager.onDragStart', event, component);
-    console.log(e)
     this._externalDrag = false
     this._initDrag(e)
   }
@@ -102,6 +106,7 @@ class DragManager extends EventEmitter {
         nodeComponent = components[1]
       }
     }
+
     this.dragState.event = e
     this.dragState.surface = surface
     this.dragState.targetEl = nodeComponent ? nodeComponent.el : targetEl
@@ -150,35 +155,124 @@ class DragManager extends EventEmitter {
 
   _onDrop(e) {
     this.dragState.event = e
-
-    // Extracts information from e.dataTransfer (types, files, items)
     this.dragState.data = this._getData(e)
 
-    let dragState = this.dragState
     e.preventDefault()
     e.stopPropagation()
 
+    if (this.dragState.data) {
+      this._handleExternalDrop()
+    } else if (this.dragState.sourceSelection) {
+      this._handleInternalDrop()
+    }
     this._onDragEnd()
+  }
 
+  _callHandlers(tx, params) {
     let i, handler;
     for (i = 0; i < this.dndHandlers.length; i++) {
       handler = this.dndHandlers[i]
 
-      let match = handler.match(dragState, this.context)
+      let match = handler.match(params, this.context)
       if (match) {
-        handler.drop(dragState, this.context)
+        handler.drop(params, this.context)
         break
       }
     }
-
   }
 
+  _handleExternalDrop() {
+    let dragState = this.dragState
+    let files = dragState.data.files
+    let uris = dragState.data.uris
+    let html = dragState.data.html
+    let text = dragState.data.text
+
+    this.context.editorSession.transaction((tx) => {
+      if (files.length > 0) {
+        files.forEach((file) => {
+          this._callHandlers(tx, {
+            file: file,
+            type: 'file'
+          })
+        })
+      } else if (uris.length > 0) {
+        uris.forEach((uri) => {
+          this._callHandlers(tx, {
+            uri: uri,
+            type: 'uri'
+          })
+        })
+      } else {
+        console.info('TODO: implement html/text drop here')
+      }
+
+    })
+  }
+
+  _handleInternalDrop() {
+    let context = this.context
+    let dragState = this.dragState
+    let containerId, nodeId, insertMode, surfaceId
+    if (dragState.isContainerDrop) {
+      containerId = dragState.surface.getContainerId()
+      nodeId = dragState.targetNodeId
+      insertMode = dragState.insertMode
+      surfaceId = dragState.surface.id
+    } else {
+      console.error('Not yet supported')
+      return
+    }
+
+    context.editorSession.transaction((tx) => {
+      let copyResult = copySelection(tx, {selection: dragState.sourceSelection})
+      deleteSelection(tx, {selection: dragState.sourceSelection})
+      let insertSel
+      if(dragState.isContainerDrop) {
+        insertSel = tx.createSelection({
+          type: 'node',
+          containerId: containerId,
+          nodeId: nodeId,
+          mode: insertMode,
+          surfaceId: surfaceId
+        })
+      }
+      return paste(tx, {
+        selection: insertSel,
+        doc: copyResult.doc,
+        containerId: containerId
+      })
+    })
+  }
+
+  /*
+    Following best practice from Mozilla for URI extraction
+
+    See: https://developer.mozilla.org/en-US/docs/Web/Guide/HTML/Recommended_Drag_Types#link
+  */
+  _extractUris(dataTransfer) {
+    let uris = []
+    let rawUriList = dataTransfer.getData('text/uri-list')
+    if (rawUriList) {
+      uris = rawUriList.split('\n').filter(function(item) {
+        return !item.startsWith('#')
+      })
+    }
+    return uris
+  }
+
+  /*
+    Extracts information from e.dataTransfer (types, files, items)
+
+    TODO: consider HTML
+  */
   _getData(e) {
     let dataTransfer = e.dataTransfer
     if (dataTransfer) {
       return {
-        types: dataTransfer.types,
-        items: Array.prototype.slice.call(dataTransfer.items),
+        uris: this._extractUris(dataTransfer),
+        text: dataTransfer.getData('text/plain'),
+        html: dataTransfer.getData('text/html'),
         files: Array.prototype.slice.call(dataTransfer.files)
       }
     }
@@ -187,7 +281,6 @@ class DragManager extends EventEmitter {
 
 
 class DragState {
-
   constructor(data) {
     this.mode = data.mode
     this.targetEl = data.targetEl
@@ -195,53 +288,6 @@ class DragState {
     this.sourceSelection = data.sourceSelection
     this.event = data.event
   }
-
-}
-
-
-// function _getData(event) {
-//   let dataTransfer = event.dataTransfer
-//   if (dataTransfer) {
-//     return {
-//       types: dataTransfer.types,
-//       items: Array.prototype.slice.call(dataTransfer.items),
-//       files: Array.prototype.slice.call(dataTransfer.files)
-//     }
-//   }
-// }
-
-function _getTargetInfo(event) {
-  let target = {
-    element: DefaultDOMElement.wrapNativeElement(event.target)
-  }
-  // try to get information about the component
-  let comp = Component.getComponentFromNativeElement(event.target)
-  comp = _getComponent(comp)
-  if (comp) {
-    target.comp = comp
-    if (target._isSurface) {
-      target.surface = comp
-    } else if (comp.context.surface) {
-      target.surface = comp.context.surface
-    }
-    if (target.surface) {
-      let sel = target.surface.getSelectionFromEvent(event)
-      if (sel) target.selection = sel
-    }
-    let node = comp.props.node
-    if (node) target.node = node
-    if (comp._isTextPropertyComponent) {
-      target.path = comp.props.path
-    }
-  }
-  return target
-}
-
-function _getComponent(comp) {
-  if (comp._isTextNodeComponent || comp._isElementComponent) {
-    return _getComponent(comp.getParent())
-  }
-  return comp;
 }
 
 export default DragManager
