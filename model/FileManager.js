@@ -55,10 +55,9 @@ class FileManager {
   }
 
   sync() {
-    let promises = []
     // Note: potentially this could be a bi-directional sync
     // ATM, we only consider upload
-    map(this.proxies, (proxy) => {
+    let promises = map(this.proxies, (proxy) => {
       return proxy.sync()
     })
     return Promise.all(promises)
