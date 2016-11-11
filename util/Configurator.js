@@ -425,23 +425,23 @@ class Configurator {
     return doc
   }
 
-  createImporter(type) {
+  createImporter(type, context) {
     var ImporterClass = this.config.importers[type]
     var config = {
       schema: this.getSchema(),
       converters: this.getConverterRegistry().get(type),
       DocumentClass: this.config.schema.ArticleClass
     }
-    return new ImporterClass(config)
+    return new ImporterClass(config, context)
   }
 
-  createExporter(type) {
+  createExporter(type, context) {
     var ExporterClass = this.config.exporters[type]
     var config = {
       schema: this.getSchema(),
       converters: this.getConverterRegistry().get(type)
     }
-    return new ExporterClass(config)
+    return new ExporterClass(config, context)
   }
 
   getToolGroups() {

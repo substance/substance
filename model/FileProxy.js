@@ -21,6 +21,9 @@ class FileProxy {
   getUrl() {
     return ""
   }
+  sync() {
+    return Promise.resolve()
+  }
 }
 
 FileProxy.match = function(fileNode, context) { // eslint-disable-line

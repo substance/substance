@@ -1,4 +1,5 @@
 import forEach from '../util/forEach'
+import map from '../util/map'
 
 /*
   Storage for files such as images and other assets.
@@ -53,13 +54,23 @@ class FileManager {
     return this.proxies[fileNode.id]
   }
 
+  sync() {
+    let promises = []
+    // Note: potentially this could be a bi-directional sync
+    // ATM, we only consider upload
+    map(this.proxies, (proxy) => {
+      return proxy.sync()
+    })
+    return Promise.all(promises)
+  }
+
   _onDocumentChange(change) {
     let doc = this.editorSession.getDocument()
     forEach(change.created, (nodeData) => {
       // we would need the real node to support inheritance
       let node = doc.get(nodeData.id)
       if (node._isFileNode) {
-        this.createFileProxy(node)
+        this.storeFile(node)
       }
     })
   }

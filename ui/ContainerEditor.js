@@ -85,7 +85,7 @@ class ContainerEditor extends Surface {
   didMount() {
     super.didMount.apply(this, arguments)
     let editorSession = this.getEditorSession()
-    editorSession.onRender('document', this._onContainerChanged, this, {
+    editorSession.onUpdate('document', this._onContainerChanged, this, {
       path: [this.getContainerId(), 'nodes']
     })
 

@@ -2,6 +2,10 @@ import DocumentNode from './DocumentNode'
 
 class FileNode extends DocumentNode {
 
+  constructor(...args) {
+    super(...args)
+  }
+
   getUrl() {
     if (this.proxy) {
       return this.proxy.getUrl()
@@ -19,7 +23,8 @@ class FileNode extends DocumentNode {
 FileNode.type = 'file'
 FileNode.define({
   fileType: { type: 'string', optional:true },
-  mimeType: { type: 'string', optional:true }
+  mimeType: { type: 'string', optional:true },
+  data: { type: 'object', optional:true }
 })
 
 FileNode.strip = function(nodeData) {

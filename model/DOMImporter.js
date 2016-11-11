@@ -24,7 +24,9 @@ const TABS_OR_NL = /[\t\n\r]+/g
  */
 class DOMImporter {
 
-  constructor(config) {
+  constructor(config, context) {
+    this.context = context || {}
+
     if (!config.converters) {
       throw new Error('config.converters is mandatory')
     }
