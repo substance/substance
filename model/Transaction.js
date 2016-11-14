@@ -44,6 +44,10 @@ class Transaction {
     return this.stageDoc.get(...args)
   }
 
+  getDocument() {
+    return this.stageDoc
+  }
+
   getIndex(...args) {
     return this.stageDoc.getIndex(...args)
   }

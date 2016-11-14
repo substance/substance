@@ -66,9 +66,9 @@ let paste = function(tx, args) {
   Splits plain text by lines and puts them into paragraphs.
 */
 function _convertPlainTextToDocument(tx, args) {
-  let defaultTextType = tx.getSchema().getDefaultTextType()
   let lines = args.text.split(/\s*\n\s*\n/)
-  let pasteDoc = tx.newInstance()
+  let pasteDoc = tx.getDocument().newInstance()
+  let defaultTextType = pasteDoc.getSchema().getDefaultTextType()
   let container = pasteDoc.create({
     type: 'container',
     id: Document.SNIPPET_ID,

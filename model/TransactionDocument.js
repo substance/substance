@@ -103,9 +103,10 @@ class TransactionDocument extends Document {
   update(path, diffOp) {
     var realPath = this.getRealPath(path)
     if (!realPath) throw new Error('Invalid path')
-    this.lastOp = this.data.update(realPath, diffOp)
-    if (this.lastOp) {
-      this.ops.push(this.lastOp)
+    let op = this.lastOp = this.data.update(realPath, diffOp)
+    if (op) {
+      this.ops.push(op)
+      return op
     }
   }
 
@@ -127,7 +128,7 @@ class TransactionDocument extends Document {
 
   _rollback() {
     for (var i = this.ops.length - 1; i >= 0; i--) {
-      this.stageDoc.data.apply(this.ops[i].invert())
+      this.data.apply(this.ops[i].invert())
     }
     this.ops = []
     this.lastOp = null
