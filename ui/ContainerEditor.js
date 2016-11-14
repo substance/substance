@@ -369,26 +369,11 @@ class ContainerEditor extends Surface {
   }
 
   transaction(transformation, info) {
-    let editorSession = this.editorSession
-    let surfaceId = this.getId()
-    let containerId = this.getContainerId()
-    return editorSession.transaction(function(tx, args) {
-      let sel = tx.before.selection
-      if (sel && !sel.isNull()) {
-        sel.containerId = sel.containerId || containerId
-      }
-      tx.before.surfaceId = surfaceId
+    return this.editorSession.transaction((tx, args) => {
       args.containerId = this.getContainerId()
       args.editingBehavior = this.editingBehavior
-      let result = transformation(tx, args)
-      if (result) {
-        sel = result.selection
-        if (sel && !sel.isNull()) {
-          sel.containerId = containerId
-        }
-        return result
-      }
-    }.bind(this), info)
+      return transformation(tx, args)
+    }, info)
   }
 
 }

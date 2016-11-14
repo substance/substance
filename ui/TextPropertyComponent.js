@@ -48,7 +48,7 @@ class TextPropertyComponent extends AnnotatedTextComponent {
   }
 
   didMount() {
-    if (this.context.surface.hasNativeSpellcheck()) {
+    if (this.context.surface && this.context.surface.hasNativeSpellcheck()) {
       this.domObserver = new window.MutationObserver(this._onDomMutations.bind(this));
       this.domObserver.observe(this.el.getNativeElement(), { subtree: true, characterData: true, characterDataOldValue: true });
     }
