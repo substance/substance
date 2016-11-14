@@ -77,13 +77,11 @@ class Editing {
         tx.update(contentPath, {delete: {offset: nodePos}})
         tx.delete(nodeId)
         let newNode = tx.createDefaultTextNode()
-        tx.update(contentPath, {insert: {offset: nodePos, value: newNode.id}})
-        tx.selection = PropertySelection.fromJSON({
-          path: [],
+        tx.update(contentPath, { type: 'insert', pos: nodePos, value: newNode.id })
+        tx.selection = tx.createSelection({
+          path: newNode.getTextPath(),
           startOffset: 0,
-          endOffset: 0,
           containerId: container.id,
-          surfaceId: tx.surfaceId
         })
       } else {
         // just put the selection in the next or previous node
@@ -128,8 +126,7 @@ class Editing {
         tx.selection = new PropertySelection({
           path: path,
           startOffset: start,
-          containerId: sel.containerId,
-          surfaceId: sel.surfaceId
+          containerId: sel.containerId
         })
       }
       return
@@ -147,8 +144,7 @@ class Editing {
       tx.selection = new PropertySelection({
         path: sel.path,
         startOffset: sel.startOffset,
-        containerId: sel.containerId,
-        surfaceId: sel.surfaceId
+        containerId: sel.containerId
       })
     }
     else if (sel.isContainerSelection()) {
@@ -165,13 +161,16 @@ class Editing {
       let nodePos = container.getPosition(nodeId)
       let textNode = tx.createDefaultTextNode()
       if (sel.isBefore()) {
-        container.show(textNode, nodePos)
+        tx.update(container.getContentPath(), { type: 'insert', pos: nodePos, value: textNode.id })
+        // leave selection as is
       } else if (sel.isAfter()) {
-        container.show(textNode, nodePos+1)
+        tx.update(container.getContentPath(), { type: 'insert', pos: nodePos+1, value: textNode.id })
+        _selectBefore(tx, textNode, containerId)
       } else {
-        container.hide(nodeId)
+        tx.update(container.getContentPath(), { type: 'delete', pos: nodePos })
         tx.delete(nodeId)
-        container.show(textNode, nodePos)
+        tx.update(container.getContentPath(), { type: 'insert', pos: nodePos, value: textNode.id })
+        _selectBefore(tx, textNode, containerId)
       }
     } else if (sel.isCustomSelection()) {
       // TODO: what to do with custom selections?
@@ -181,12 +180,12 @@ class Editing {
       if (!sel.isCollapsed()) {
         // delete the selection
         this._deletePropertySelection(tx, sel)
-        sel.collapse('left')
+        tx.selection = sel.collapse('left')
       }
       // then break the node
       if (containerId) {
         let container = tx.get(containerId)
-        let nodeId = sel.startPath[0]
+        let nodeId = sel.start.path[0]
         let node = tx.get(nodeId)
         let nodeEditing = this._getNodeEditing(node)
         if (nodeEditing) {
@@ -198,10 +197,23 @@ class Editing {
         // TODO: do we still want a soft-break thingie here? i.e. insert a <br>
       }
     } else if (sel.isContainerSelection()) {
-      // delete the selection
-      this._deleteContainerSelection(tx, sel)
-      // but don't merge, simply set the selection at the beginning of the second node
-      console.log('TODO: set the selection at the beginning of next node')
+      if (sel.start.hasSamePath(sel.end)) {
+        this._deleteContainerSelection(tx, sel)
+        this._break(tx)
+      } else {
+        let start = sel.start
+        let containerId = sel.containerId
+        let container = tx.get(containerId)
+        let startNodeId = start.path[0]
+        let nodePos = container.getPosition(startNodeId)
+        this._deleteContainerSelection(tx, sel)
+        if (nodePos < container.length-1) {
+          tx.selection = _selectBefore(tx, container.getNodeAt(nodePos+1), containerId)
+        } else {
+          tx.selection = sel.collapse('left')
+          this._break(tx)
+        }
+      }
     }
   }
 
@@ -256,11 +268,128 @@ class Editing {
     }
   }
 
+  insertInlineNode(tx, nodeData) {
+    let sel = tx.selection
+    if (!sel.isPropertySelection()) throw new Error('insertInlineNode requires a PropertySelection')
+    let text = "\uFEFF"
+    this.insertText(tx, text)
+    sel = tx.selection
+    let endOffset = tx.selection.endOffset
+    let startOffset = endOffset - text.length
+    nodeData = Object.assign({}, nodeData, {
+      path: sel.path,
+      startOffset: startOffset,
+      endOffset: endOffset
+    })
+    return tx.create(nodeData)
+  }
+
+  insertBlockNode(tx, nodeData) {
+    let sel = tx.selection
+    if (!sel || sel.isNull()) throw new Error('Selection is null.')
+    // don't create the node if it already exists
+    let blockNode
+    if (!nodeData._isNode || !tx.get(nodeData.id)) {
+      blockNode = tx.create(nodeData)
+    } else {
+      blockNode = tx.get(nodeData.id)
+    }
+    if (sel.isNodeSelection()) {
+      let containerId = sel.containerId
+      let container = tx.get(containerId)
+      let nodePos = container.getPosition(sel.getNodeId())
+      // insert before
+      if (sel.isBefore()) {
+        tx.update(container.getContentPath(), { type: 'insert', pos: nodePos, value: blockNode.id })
+      }
+      // insert after
+      else if (sel.isAfter()) {
+        tx.update(container.getContentPath(), { type: 'insert', pos: nodePos+1, value: blockNode.id })
+        tx.selection = tx.createSelection({
+          type: 'node',
+          containerId: containerId,
+          nodeId: blockNode.id,
+          mode: 'after'
+        })
+      } else {
+        tx.update(container.getContentPath(), { type: 'delete', pos: nodePos })
+        tx.delete(sel.getNodeId())
+        tx.update([container.id, 'nodes'], { type: 'insert', pos: nodePos, value: blockNode.id })
+        tx.selection = tx.createSelection({
+          type: 'node',
+          containerId: containerId,
+          nodeId: blockNode.id,
+          mode: 'after'
+        })
+      }
+    } else if (sel.isPropertySelection()) {
+      if (!sel.containerId) throw new Error('insertBlockNode can only be used within a container.')
+      let container = tx.get(sel.containerId)
+      if (!sel.isCollapsed()) {
+        this._deletePropertySelection(tx)
+        tx.selection = sel.collapse('left')
+      }
+      let node = tx.get(sel.path[0])
+      if (!node) throw new Error('Invalid selection.')
+      let nodePos = container.getPosition(node.id)
+      if (node.isText()) {
+        let text = node.getText()
+        // replace node
+        if (text.length === 0) {
+          tx.update(container.getContentPath(), { type: 'delete', pos: nodePos })
+          tx.delete(node.id)
+          tx.update([container.id, 'nodes'], { type: 'insert', pos: nodePos, value: blockNode.id })
+          _selectAfter(tx, blockNode, container.id)
+        }
+        // insert before
+        else if (sel.startOffset === 0) {
+          tx.update(container.getContentPath(), { type: 'insert', pos: nodePos, value: blockNode.id })
+        }
+        // insert after
+        else if (sel.startOffset === text.length) {
+          tx.update(container.getContentPath(), { type: 'insert', pos: nodePos+1, value: blockNode.id })
+          _selectBefore(tx, blockNode, container.id)
+        }
+        // break
+        else {
+          this._break(tx)
+          tx.update(container.getContentPath(), { type: 'insert', pos: nodePos+1, value: blockNode.id })
+          _selectAfter(tx, blockNode, container.id)
+        }
+      } else {
+        // TODO: this will be necessary for lists
+        console.error('Not yet implemented: insertBlockNode() on a custom node')
+      }
+    } else if (sel.isContainerSelection()) {
+      if (sel.isCollapsed()) {
+        let start = sel.start
+        if (start.isPropertyCoordinate()) {
+          tx.selection = tx.createSelection({
+            type: 'property',
+            path: start.path,
+            startOffset: start.offset,
+            containerId: sel.containerId,
+          })
+        } else if (start.isNodeCoordinate()) {
+          tx.selection = tx.createSelection({
+            type: 'node',
+            containerId: sel.containerId,
+            nodeId: start.path[0],
+            mode: start.offset === 0 ? 'before' : 'after',
+          })
+        } else {
+          throw new Error('Unsupported selection for insertBlockNode')
+        }
+        return this.insertBlockNode(tx, blockNode)
+      }
+    }
+  }
+
   _deletePropertySelection(tx, sel) {
     let realPath = tx.getRealPath(sel.path)
     let start = sel.startOffset
     let end = sel.endOffset
-    tx.update(realPath, { delete: { start: start, end: end } })
+    tx.update(realPath, { type: 'delete', start: start, end: end })
     annotationHelpers.deletedText(tx, realPath, start, end)
   }
 
@@ -278,7 +407,7 @@ class Editing {
     // delete or truncate last node
     if (startPos < endPos) {
       if (sel.end.isNodeCoordinate() && sel.end.offset > 0) {
-        tx.update([container.id, 'nodes'], {delete: {offset: endPos}})
+        tx.update([container.id, 'nodes'], { type: 'delete', pos: endPos })
         tx.delete(endId)
       } else {
         let endNode = tx.get(endId)
@@ -295,17 +424,17 @@ class Editing {
     for (var i = endPos-1; i > startPos; i--) {
       let nodeId = container.nodes[i]
       // remove from container
-      tx.update([container.id, 'nodes'], {delete: {offset: i}})
+      tx.update([container.id, 'nodes'], { type: 'delete', pos: i })
       // delete node
       tx.delete(nodeId)
     }
 
     // if the first node coordinate is node before -> delete the node and insert a default text node
     if (sel.start.isNodeCoordinate() && sel.start.offset === 0) {
-      tx.update([container.id, 'nodes'], {delete: {offset: startPos}})
+      tx.update([container.id, 'nodes'], { type: 'delete', pos: startPos })
       tx.delete(startId)
       let startNode = tx.createDefaultTextNode()
-      tx.update([container.id, 'nodes'], {insert: {offset: startPos, value: startNode.id}})
+      tx.update([container.id, 'nodes'], { type: 'insert', pos: startPos, value: startNode.id })
       tx.selection = new PropertySelection({
         path: startNode.getTextPath(),
         startOffset: 0,
@@ -331,6 +460,44 @@ class Editing {
     }
     return nodeEditing
   }
+
 }
 
 export default Editing
+
+function _selectBefore(tx, node, containerId) {
+  if (node.isText()) {
+    tx.selection = tx.createSelection({
+      type: 'property',
+      path: node.getTextPath(),
+      startOffset: 0,
+      containerId: containerId
+    })
+  } else {
+    tx.selection = tx.createSelection({
+      type: 'node',
+      containerId: containerId,
+      nodeId: node.id,
+      mode: 'before'
+    })
+  }
+}
+
+function _selectAfter(tx, node, containerId) {
+  if (node.isText()) {
+    let text = node.getText()
+    tx.selection = tx.createSelection({
+      type: 'property',
+      path: node.getTextPath(),
+      startOffset: text.length,
+      containerId: containerId
+    })
+  } else {
+    tx.selection = tx.createSelection({
+      type: 'node',
+      containerId: containerId,
+      nodeId: node.id,
+      mode: 'after'
+    })
+  }
+}

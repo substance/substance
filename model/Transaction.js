@@ -117,6 +117,27 @@ class Transaction {
     this.editorSession.editing.insertText(this, text)
   }
 
+  insertInlineNode(inlineNode) {
+    this.editorSession.editing.insertInlineNode(this, inlineNode)
+  }
+
+  insertBlockNode(blockNode) {
+    this.editorSession.editing.insertBlockNode(this, blockNode)
+  }
+
+  deleteSelection() {
+    this.editorSession.editing._delete(this, 'right')
+  }
+
+  deleteCharacter(direction) {
+    if (!this.selection.isCollapsed()) throw new Error('tx.deleteCharacter() can only be applied to a collapsed selection.')
+    this.editorSession.editing._delete(this, 'right')
+  }
+
+  break() {
+    this.editorSession.editing._break(this)
+  }
+
   // Legacy API
   // --------------
   // used by transforms and such
