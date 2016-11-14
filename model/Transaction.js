@@ -41,29 +41,16 @@ class Transaction {
     this.stageDoc.dispose()
   }
 
-  get(...args) {
-    return this.stageDoc.get(...args)
-  }
-
   getDocument() {
     return this.stageDoc
   }
 
-  getIndex(...args) {
-    return this.stageDoc.getIndex(...args)
+  get(...args) {
+    return this.stageDoc.get(...args)
   }
 
-  getRealPath(...args) {
-    return this.stageDoc.getRealPath(...args)
-  }
-
-  getAnnotations(...args) {
-    return this.stageDoc.getAnnotations(...args)
-  }
-
-  getSchema() {
-    return this.document.getSchema()
-  }
+  // Low-level API
+  // -------------
 
   create(nodeData) {
     this._ensureStarted()
@@ -90,17 +77,6 @@ class Transaction {
     return this.stageDoc.update(path, diffOp)
   }
 
-  get selection() {
-    return this._selection
-  }
-
-  set selection(sel) {
-    this.setSelection(sel)
-  }
-
-  /*
-    TODO: want to simplify setting selections.
-  */
   createSelection(...args) {
     return this.stageDoc.createSelection(...args)
   }
@@ -134,12 +110,46 @@ class Transaction {
     this._surface = surface
   }
 
+  // High-level API
+  // --------------
+
+  insertText(text) {
+    this.editorSession.editing.insertText(this, text)
+  }
+
+  // Legacy API
+  // --------------
+  // used by transforms and such
+
+  getIndex(...args) {
+    return this.stageDoc.getIndex(...args)
+  }
+
+  getRealPath(...args) {
+    return this.stageDoc.getRealPath(...args)
+  }
+
+  getAnnotations(...args) {
+    return this.stageDoc.getAnnotations(...args)
+  }
+
+  getSchema() {
+    return this.document.getSchema()
+  }
+
+
+  // internal API
+
   get surfaceId() {
     return this._surface ? this._surface.id : null
   }
 
-  rollback() {
-    this.stageDoc._rollback()
+  get selection() {
+    return this._selection
+  }
+
+  set selection(sel) {
+    this.setSelection(sel)
   }
 
   // NOTE: ops are actually owned by TransactionDocument
@@ -149,6 +159,10 @@ class Transaction {
   }
   set ops(ops) {
     this.stageDoc.ops = ops
+  }
+
+  rollback() {
+    this.stageDoc._rollback()
   }
 
   _apply(...args) {

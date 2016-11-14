@@ -52,7 +52,7 @@ class Editing {
     let selection = this._getSelection()
     if (selection.isNull()) return
     this.editorSession.transaction((tx) => {
-      this._type(tx, text)
+      this.insertText(tx, text)
     }, { action: 'type' })
   }
 
@@ -205,7 +205,7 @@ class Editing {
     }
   }
 
-  _type(tx, text) {
+  insertText(tx, text) {
     let sel = tx.selection
     // type over a selected node or insert a paragraph before
     // or after
@@ -252,7 +252,7 @@ class Editing {
       }
     } else if (sel.isContainerSelection()) {
       this._deleteContainerSelection(tx, sel)
-      this._type(tx, text)
+      this.insertText(tx, text)
     }
   }
 
