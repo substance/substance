@@ -57,7 +57,7 @@ In addition to the higher level operations, still the low-level API can be used 
 - [IT6]: Range within TextProperty overlapping an annotion aligned at the left side
 
   ```
-  abc>*de*f< ---> abc*xxx*|
+  abc>*de<f* ---> abc*xxxf*|
   ```
 
   > Note: this is treated like replacing the annotated text, thus the inserted text *is* annotated
@@ -65,7 +65,7 @@ In addition to the higher level operations, still the low-level API can be used 
 - [IT7]: Range within TextProperty inside an annotion
 
   ```
-  abc*>de<*f ---> abc*xxx|f*
+  abc*>de<*f ---> abc*xxx|*f
   ```
 
   > Note: this is treated like replacing parts of annotated text, thus the inserted text *is* annotated
