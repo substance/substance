@@ -133,10 +133,11 @@ class TextNodeEditing {
         console.warn('TODO: handle annotation update case.')
       }
     })
-    tx.selection = new PropertySelection({
-      path: sel.path,
-      startOffset: sel.startOffset,
-      containerId: sel.containerId
+    tx.selection = tx.createSelection({
+      type: 'property',
+      path: start.path,
+      startOffset: startOffset,
+      containerId: range.containerId
     })
   }
 
