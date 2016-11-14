@@ -15,7 +15,7 @@ import breakNode from './breakNode'
   @return {Object} with updated `selection`
 */
 
-let paste = function(tx, args) {
+function paste(tx, args) {
   args.text = args.text || ''
   let sel = args.selection
   if (!sel || sel.isNull()) {
@@ -134,19 +134,31 @@ function _pasteDocument(tx, args) {
   let sel = args.selection
   let container = tx.get(containerId)
 
-  let startPath = sel.start.path
-  let startPos = container.getPosition(sel.start.getNodeId())
-  let text = tx.get(startPath)
   let insertPos
-  // Break, unless we are at the last character of a node,
-  // then we can simply insert after the node
-  if ( text.length === sel.start.offset ) {
-    insertPos = startPos + 1
-  } else {
-    let result = breakNode(tx, args)
-    sel = result.selection
-    insertPos = startPos + 1
+  if (sel.isPropertySelection()) {
+    let startPath = sel.start.path
+    let startPos = container.getPosition(sel.start.getNodeId())
+    let text = tx.get(startPath)
+    // Break, unless we are at the last character of a node,
+    // then we can simply insert after the node
+    if ( text.length === sel.start.offset ) {
+      insertPos = startPos + 1
+    } else {
+      let result = breakNode(tx, args)
+      sel = result.selection
+      insertPos = startPos + 1
+    }
+  } else if (sel.isNodeSelection()) {
+    let nodePos = container.getPosition(sel.getNodeId())
+    if (sel.isBefore()) {
+      insertPos = nodePos
+    } else if (sel.isAfter()) {
+      insertPos = nodePos+1
+    } else {
+      throw new Error('Illegal state: the selection should be collapsed.')
+    }
   }
+
   // TODO how should this check be useful?
   if (insertPos < 0) {
     console.error('Could not find insertion position in ContainerNode.')
