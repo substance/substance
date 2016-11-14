@@ -260,7 +260,14 @@ class Editing {
         })
         // console.log('### setting selection after typing: ', tx.selection.toString())
       } else {
-        console.log('TODO: implement typing on node ', node.type)
+        // fall back to simple TextProperty editing
+        this.nodeEditing.text.type(tx, sel, text)
+        tx.selection = new PropertySelection({
+          path: path,
+          startOffset: sel.startOffset + text.length,
+          containerId: sel.containerId,
+          surfaceId: sel.surfaceId
+        })
       }
     } else if (sel.isContainerSelection()) {
       this._deleteContainerSelection(tx, sel)
