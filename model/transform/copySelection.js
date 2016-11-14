@@ -12,7 +12,10 @@ import annotationHelpers from '../annotationHelpers'
 */
 
 function copySelection(tx, args) {
-  let doc = tx.getDocument()
+  let doc
+  // legacy
+  if (tx._isDocument) doc = tx
+  else doc = tx.getDocument()
   let selection = args.selection
   if (!selection || !selection._isSelection) {
     throw new Error("'selection' is mandatory.")

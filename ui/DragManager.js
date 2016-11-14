@@ -236,8 +236,7 @@ class DragManager extends EventEmitter {
           type: 'node',
           containerId: containerId,
           nodeId: nodeId,
-          mode: insertMode,
-          surfaceId: surfaceId
+          mode: insertMode
         })
       }
       return paste(tx, {
