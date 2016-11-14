@@ -11,7 +11,11 @@ import annotationHelpers from '../annotationHelpers'
   @return {Object} with a `doc` property that has a fresh doc with the copied content
 */
 
-function copySelection(doc, args) {
+function copySelection(tx, args) {
+  let doc
+  // legacy
+  if (tx._isDocument) doc = tx
+  else doc = tx.getDocument()
   let selection = args.selection
   if (!selection || !selection._isSelection) {
     throw new Error("'selection' is mandatory.")

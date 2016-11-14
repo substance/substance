@@ -133,6 +133,11 @@ class TextNodeEditing {
         console.warn('TODO: handle annotation update case.')
       }
     })
+    tx.selection = new PropertySelection({
+      path: sel.path,
+      startOffset: sel.startOffset,
+      containerId: sel.containerId
+    })
   }
 
   break(tx, node, coor, container) {
@@ -185,8 +190,23 @@ class TextNodeEditing {
       first = node
       second = next
     }
-    if (!first || !second || !first.isText() || !second.isText()) {
-      console.error('Can only merge text nodes.')
+    if (!first.isText() && direction === 'left') {
+      tx.selection = tx.createSelection({
+        type: 'node',
+        containerId: container.id,
+        nodeId: first.id,
+        mode: 'full'
+      })
+      return
+    } else if (!second.isText() && direction === 'right') {
+      tx.selection = tx.createSelection({
+        type: 'node',
+        containerId: container.id,
+        nodeId: second.id,
+        mode: 'full'
+      })
+      return
+    } else if (!first || !second || !first.isText() || !second.isText()) {
       return
     }
     let firstPath = first.getTextPath()
