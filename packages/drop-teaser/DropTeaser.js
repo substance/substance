@@ -7,6 +7,8 @@ export default class DropTeaser extends Component {
 
   render($$) {
     let el = $$('div').addClass('sc-drop-teaser sm-hidden')
+    el.on('dragenter', this._onDrag)
+    el.on('dragover', this._onDrag)
     return el
   }
 
@@ -20,4 +22,7 @@ export default class DropTeaser extends Component {
       this.el.addClass('sm-hidden')
     }
   }
+
+  // just so that the teaser does not prevent dropping
+  _onDrag(e) { e.preventDefault() }
 }
