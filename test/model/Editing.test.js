@@ -75,6 +75,123 @@ test.UI("[IT3]: Cursor within TextProperty at the start of an annotation", funct
   t.end()
 })
 
+test.UI("[IT4]: Cursor within TextProperty at the end of an annotation", function(t) {
+  let editor = TestEditor.mount({ editorSession: fixture(_p1, _s1) }, t.sandbox)
+  let editorSession = editor.editorSession
+  let doc = editorSession.getDocument()
+  editorSession.transaction((tx) => {
+    tx.setSelection({
+      type: 'property',
+      path: ['p1', 'content'],
+      startOffset: 5
+    })
+    tx.insertText('xxx')
+  })
+  let sel = editorSession.getSelection()
+  let p1 = doc.get('p1')
+  let s1 = doc.get('s1')
+  t.equal(p1.getText(), 'abcdexxxf', 'Text should have been inserted correctly.')
+  t.equal(s1.startOffset, 3, 'Annotation should have been moved.')
+  t.equal(s1.endOffset, 8, 'Annotation should have been moved.')
+  t.equal(sel.startOffset, 8, 'Cursor should be after inserted text')
+  t.end()
+})
+
+test.UI("[IT5]: Range within TextProperty", function(t) {
+  let editor = TestEditor.mount({ editorSession: fixture(_p1) }, t.sandbox)
+  let editorSession = editor.editorSession
+  let doc = editorSession.getDocument()
+  editorSession.transaction((tx) => {
+    tx.setSelection({
+      type: 'property',
+      path: ['p1', 'content'],
+      startOffset: 2,
+      endOffset: 5
+    })
+    tx.insertText('xxx')
+  })
+  let sel = editorSession.getSelection()
+  let p1 = doc.get('p1')
+  t.equal(p1.getText(), 'abxxxf', 'Text should have been inserted correctly.')
+  t.equal(sel.startOffset, 5, 'Cursor should be after inserted text')
+  t.ok(sel.isCollapsed(), '... collapsed')
+  t.end()
+})
+
+test.UI("[IT6]: Range within TextProperty overlapping an annotion aligned at the left side", function(t) {
+  let editor = TestEditor.mount({ editorSession: fixture(_p1, _s1) }, t.sandbox)
+  let editorSession = editor.editorSession
+  let doc = editorSession.getDocument()
+  doc.set(['s1', 'endOffset'], 6)
+  editorSession.transaction((tx) => {
+    tx.setSelection({
+      type: 'property',
+      path: ['p1', 'content'],
+      startOffset: 3,
+      endOffset: 5
+    })
+    tx.insertText('xxx')
+  })
+  let sel = editorSession.getSelection()
+  let p1 = doc.get('p1')
+  let s1 = doc.get('s1')
+  t.equal(p1.getText(), 'abcxxxf', 'Text should have been inserted correctly.')
+  t.equal(s1.startOffset, 3, 'Annotation should have been moved.')
+  t.equal(s1.endOffset, 7, 'Annotation should have been moved.')
+  t.equal(sel.startOffset, 6, 'Cursor should be after inserted text')
+  t.ok(sel.isCollapsed(), '... collapsed')
+  t.end()
+})
+
+test.UI("[IT7]: Range within TextProperty inside an annotion", function(t) {
+  let editor = TestEditor.mount({ editorSession: fixture(_p1, _s1) }, t.sandbox)
+  let editorSession = editor.editorSession
+  let doc = editorSession.getDocument()
+  editorSession.transaction((tx) => {
+    tx.setSelection({
+      type: 'property',
+      path: ['p1', 'content'],
+      startOffset: 3,
+      endOffset: 5
+    })
+    tx.insertText('xxx')
+  })
+  let sel = editorSession.getSelection()
+  let p1 = doc.get('p1')
+  let s1 = doc.get('s1')
+  t.equal(p1.getText(), 'abcxxxf', 'Text should have been inserted correctly.')
+  t.equal(s1.startOffset, 3, 'Annotation should have been moved.')
+  t.equal(s1.endOffset, 6, 'Annotation should have been moved.')
+  t.equal(sel.startOffset, 6, 'Cursor should be after inserted text')
+  t.ok(sel.isCollapsed(), '... collapsed')
+  t.end()
+})
+
+test.UI("[IT8]: Range within TextProperty starting inside an annotion", function(t) {
+  let editor = TestEditor.mount({ editorSession: fixture(_p1, _s1) }, t.sandbox)
+  let editorSession = editor.editorSession
+  let doc = editorSession.getDocument()
+  doc.set(['s1', 'endOffset'], 6)
+  editorSession.transaction((tx) => {
+    tx.setSelection({
+      type: 'property',
+      path: ['p1', 'content'],
+      startOffset:4,
+      endOffset: 6
+    })
+    tx.insertText('xxx')
+  })
+  let sel = editorSession.getSelection()
+  let p1 = doc.get('p1')
+  let s1 = doc.get('s1')
+  t.equal(p1.getText(), 'abcdxxx', 'Text should have been inserted correctly.')
+  t.equal(s1.startOffset, 3, 'Annotation should have been moved.')
+  t.equal(s1.endOffset, 7, 'Annotation should have been moved.')
+  t.equal(sel.startOffset, 7, 'Cursor should be after inserted text')
+  t.ok(sel.isCollapsed(), '... collapsed')
+  t.end()
+})
+
 test.UI("[II1]: Insert inline node into TextProperty", function(t) {
   let editor = TestEditor.mount({ editorSession: fixture(_p1) }, t.sandbox)
   let editorSession = editor.editorSession
