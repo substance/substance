@@ -79,6 +79,7 @@ class Editing {
         let newNode = tx.createDefaultTextNode()
         tx.update(contentPath, { type: 'insert', pos: nodePos, value: newNode.id })
         tx.selection = tx.createSelection({
+          type: 'property',
           path: newNode.getTextPath(),
           startOffset: 0,
           containerId: container.id,
@@ -141,11 +142,6 @@ class Editing {
         return
       }
       nodeEditing.delete(tx, sel)
-      tx.selection = new PropertySelection({
-        path: sel.path,
-        startOffset: sel.startOffset,
-        containerId: sel.containerId
-      })
     }
     else if (sel.isContainerSelection()) {
       this._deleteContainerSelection(tx, sel)
@@ -238,7 +234,7 @@ class Editing {
       }
       tx.selection = new PropertySelection({
         path: textNode.getTextPath(),
-        startOffset: 0,
+        startOffset: text.length,
         containerId: sel.containerId,
         surfaceId: sel.surfaceId
       })

@@ -304,7 +304,13 @@ class EditorSession extends EventEmitter {
   transaction(transformation, info) {
     info = info || {}
     let change = this._transaction._recordChange(transformation, this.getSelection(), this.getFocusedSurface())
-    if (change) this._commit(change, info)
+    if (change) {
+      this._commit(change, info)
+    } else {
+      // if no changes, at least update the selection
+      this._setSelection(this._transaction.getSelection())
+      this.startFlow()
+    }
     return change
   }
 
