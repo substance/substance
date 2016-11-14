@@ -19,20 +19,20 @@ In addition to the higher level operations, still the low-level API can be used 
 
 ## Inserting Text
 
-- *[IT1]*: Cursor within a TextProperty
+- [IT1]: Cursor within a TextProperty
 
   ```
   abc|def ---> abcxxx|def
 
   ```
 
-- *[IT2]*: Cursor within TextProperty inside annotation
+- [IT2]: Cursor within TextProperty inside annotation
 
   ```
   abc*d|e*f ---> abc*dxxx|e*f
   ```
 
-- *[IT3]*: Cursor within TextProperty at the start of an annotation
+- [IT3]: Cursor within TextProperty at the start of an annotation
 
   ```
   abc|*de*f ---> abcxxx|*de*f
@@ -40,7 +40,7 @@ In addition to the higher level operations, still the low-level API can be used 
 
   > Note: the text is inserted before the annotation, thus it is *not* annotated
 
-- *[IT4]*: Cursor within TextProperty at the end of an annotation
+- [IT4]: Cursor within TextProperty at the end of an annotation
 
   ```
   abc*de|*f ---> abc*dexxx|*f
@@ -48,13 +48,13 @@ In addition to the higher level operations, still the low-level API can be used 
 
   > Note: the text is appended to the annotated text, thus it *is* annotated
 
-- *[IT5]*: Range within TextProperty
+- [IT5]: Range within TextProperty
 
   ```
   ab>cde<f ---> abxxx|f
   ```
 
-- *[IT6]*: Range within TextProperty overlapping an annotion aligned at the left side
+- [IT6]: Range within TextProperty overlapping an annotion aligned at the left side
 
   ```
   abc>*de*f< ---> abc*xxx*|
@@ -62,7 +62,7 @@ In addition to the higher level operations, still the low-level API can be used 
 
   > Note: this is treated like replacing the annotated text, thus the inserted text *is* annotated
 
-- *[IT7]*: Range within TextProperty inside an annotion
+- [IT7]: Range within TextProperty inside an annotion
 
   ```
   abc*>de<*f ---> abc*xxx|f*
@@ -70,7 +70,7 @@ In addition to the higher level operations, still the low-level API can be used 
 
   > Note: this is treated like replacing parts of annotated text, thus the inserted text *is* annotated
 
-- *[IT8]*: Range within TextProperty starting inside an annotion
+- [IT8]: Range within TextProperty starting inside an annotion
 
   ```
   abc*d>e*f< ---> abc*dxxx|*
@@ -78,7 +78,7 @@ In addition to the higher level operations, still the low-level API can be used 
 
   > Note: this is treated like replacing parts of annotated text, thus the inserted text *is* annotated
 
-- *[IT9]*: Range within TextProperty starting before an annotion reaching inside the annotation
+- [IT9]: Range within TextProperty starting before an annotion reaching inside the annotation
 
   ```
   ab>c*d<ef* ---> abxxx|*ef*
@@ -86,19 +86,19 @@ In addition to the higher level operations, still the low-level API can be used 
 
   > Note: this is treated like replacing parts of the text before the annotation, thus the inserted text is *not* annotated
 
-- *[IT20]*: NodeSelection
+- [IT20]: NodeSelection
 
   `break` and `insert`
 
-- *[IT30]*: Collapsed ContainerSelection
+- [IT30]: Collapsed ContainerSelection
 
   Treat like PropertySelection or NodeSelection depending on the coordinate
 
-- *[IT31]*: Range within one custom node
+- [IT31]: Range within one custom node
 
   Defined by node specific editing behavior
 
-- *[IT40]*: Range (all other cases)
+- [IT40]: Range (all other cases)
 
   `delete` and `insert`
 
@@ -115,41 +115,41 @@ In all cases, if inserting is allowed, the cursor is set
 - otherwise the cursor is set after the inserted node (NodeSelection)
 
 
-- *[IB1]*: Cursor in TextProperty not part of a ContainerEditor
+- [IB1]: Cursor in TextProperty not part of a ContainerEditor
 
   Nothing.
 
   > Maybe this should insert a `<br>` or `\n`?
 
-- *[IB2]*: Cursor at start of a TextNode within a Container
+- [IB2]: Cursor at start of a TextNode within a Container
 
   Insert node before text node.
 
-- *[IB3]*: Cursor at end of a TextNode within a Container
+- [IB3]: Cursor at end of a TextNode within a Container
 
   Insert node after text node.
 
-- *[IB4]*: Cursor inside an empty TextNode within a Container
+- [IB4]: Cursor inside an empty TextNode within a Container
 
   Replace text node.
 
-- *[IB5]*: Cursor in the middle of a non-empty TextNode within a Container
+- [IB5]: Cursor in the middle of a non-empty TextNode within a Container
 
   `break` and insert after (first) text node.
 
-- *[IB10]*: NodeSelection before
+- [IB10]: NodeSelection before
 
   Insert node before selected node.
 
-- *[IB11]*: NodeSelection after
+- [IB11]: NodeSelection after
 
   Insert node after selected node.
 
-- *[IB11]*: NodeSelection full
+- [IB11]: NodeSelection full
 
   Replace node.
 
-- *[IB20]*: Range (all other cases)
+- [IB20]: Range (all other cases)
 
   `break` and `insert`
 
@@ -160,167 +160,167 @@ In all cases, if inserting is allowed, the cursor is set
 
 With direction `right`:
 
-- *[DR1]*: Cursor at the end of a TextProperty not part of a Container
+- [DR1]: Cursor at the end of a TextProperty not part of a Container
 
   Nothing.
 
-- *[DR2]*: Cursor at the end of a TextNode at the end of a Container
+- [DR2]: Cursor at the end of a TextNode at the end of a Container
 
   Nothing.
 
-- *[DR3]*: Cursor in the middle of a TextProperty
+- [DR3]: Cursor in the middle of a TextProperty
 
   Delete one character.
 
-- *[DR4]*: Cursor inside an empty TextNode with successors
+- [DR4]: Cursor inside an empty TextNode with successors
 
   Delete text node and put cursor before next node.
 
-- *[DR5]*: Cursor at the end of a non-empty TextNode with successors within a Container
+- [DR5]: Cursor at the end of a non-empty TextNode with successors within a Container
 
   Merge with next.
 
-- *[DR10]*: NodeSelection before TextNode
+- [DR10]: NodeSelection before TextNode
 
   Set cursor at first character, then `delete`
 
-- *[DR11]*: NodeSelection before isolated node
+- [DR11]: NodeSelection before isolated node
 
   Select the node.
 
-- *[DR14]*: NodeSelection after at the end of document
+- [DR14]: NodeSelection after at the end of document
 
   Nothing.
 
-- *[DR15]*: NodeSelection after a TextNode with successors
+- [DR15]: NodeSelection after a TextNode with successors
 
   Put the cursor at end of text then `delete`.
 
-- *[DR16]*: NodeSelection after other node with TextNode as successor
+- [DR16]: NodeSelection after other node with TextNode as successor
 
   Put the cursor at start of text then `delete left`.
 
-- *[DR17]*: NodeSelection after other node with other node as successor
+- [DR17]: NodeSelection after other node with other node as successor
 
   Try to merge the next node into the selected node (node specific), otherwise select the successor.
 
 
 With direction `left`:
 
-- *[DL1]*: Cursor at the start of a TextProperty not part of a Container
+- [DL1]: Cursor at the start of a TextProperty not part of a Container
 
   Nothing.
 
-- *[DL2]*: Cursor at the start of a TextNode at the top of a Container
+- [DL2]: Cursor at the start of a TextNode at the top of a Container
 
   Nothing.
 
-- *[DL3]*: Cursor in the middle of a TextProperty
+- [DL3]: Cursor in the middle of a TextProperty
 
   Delete previous character. Move cursor one character left.
 
-- *[DL4]*: Cursor inside an empty TextNode with a TextNode as predecessor
+- [DL4]: Cursor inside an empty TextNode with a TextNode as predecessor
 
   Delete text node and put cursor at the end of the previous text node.
 
-- *[DL5]*: Cursor inside an empty TextNode with another node as predecessor
+- [DL5]: Cursor inside an empty TextNode with another node as predecessor
 
   Delete text node and put cursor after the previous node.
 
-- *[DL6]*: Cursor at the start of a non-empty TextNode with a predecessor
+- [DL6]: Cursor at the start of a non-empty TextNode with a predecessor
 
   Merge with previous node.
 
-- *[DL13]*: NodeSelection after isolated/custom node
+- [DL13]: NodeSelection after isolated/custom node
 
   Select the node.
 
-- *[DL14]*: NodeSelection before node at the top of Container
+- [DL14]: NodeSelection before node at the top of Container
 
   Nothing.
 
-- *[DL16]*: NodeSelection before other node with TextNode as predecessor
+- [DL16]: NodeSelection before other node with TextNode as predecessor
 
   Put the cursor at end of text then `delete right`.
 
-- *[DL17]*: NodeSelection before other node with other node as predecessor
+- [DL17]: NodeSelection before other node with other node as predecessor
 
   Try to merge the nodes (node specific), otherwise select the predecessor.
 
 
 Both directions:
 
-- *[D1]*: Collapsed ContainerSelection
+- [D1]: Collapsed ContainerSelection
 
   Reduce selection to PropertySelection or NodeSelection, then `delete`.
 
-- *[D10]*: NodeSelection full with successors
+- [D10]: NodeSelection full with successors
 
   Delete the node. Cursor before next.
 
-- *[D11]*: NodeSelection full at the end of document
+- [D11]: NodeSelection full at the end of document
 
   Replace the node with a paragraph. Cursor in new paragraph.
 
-- *[D12]*: NodeSelection before TextNode
+- [D12]: NodeSelection before TextNode
 
   Set cursor at first character, then `delete`
 
-- *[D13]*: NodeSelection after TextNode
+- [D13]: NodeSelection after TextNode
 
   Set cursor at last character, then `delete`
 
-- *[D20]*: Range that starts before node and ends after node
+- [D20]: Range that starts before node and ends after node
 
   Delete all selected nodes and insert a new paragraph. Cursor in new paragraph.
 
-- *[D21]*: Range that starts after a node and ends before a node
+- [D21]: Range that starts after a node and ends before a node
 
   Delete all inner nodes and collapse the selection to start.
 
-- *[D22]*: Range that starts after a node and ends after a node
+- [D22]: Range that starts after a node and ends after a node
 
   Delete all inner nodes and the end node and collapse the selection to start.
 
-- *[D23]*: Range that starts before a node and ends before a node
+- [D23]: Range that starts before a node and ends before a node
 
   Delete all inner nodes and the start node and collapse the selection to end.
 
 
 ## Break
 
-- *[B1]*: Cursor in TextProperty not part of a Container
+- [B1]: Cursor in TextProperty not part of a Container
 
   Nothing.
 
-- *[B2]*: Cursor at start of a TextNode
+- [B2]: Cursor at start of a TextNode
 
   Insert a node of the same type before the text node. Leave the cursor in the original node.
 
-- *[B3]*: Cursor at end of a TextNode
+- [B3]: Cursor at end of a TextNode
 
   Insert a paragraph after the text node. Put the cursor into the new paragraph.
 
-- *[B4]*: Cursor inside of a non-empty TextNode
+- [B4]: Cursor inside of a non-empty TextNode
 
   Move the text into a new paragraph. Transfer annotations (possible split). Put cursor at the start of new paragraph.
 
-- *[B10]*: Cursor before a TextNode
+- [B10]: Cursor before a TextNode
 
   Put cursor at start of TextNode, then `break`
 
-- *[B11]*: Cursor after a TextNode
+- [B11]: Cursor after a TextNode
 
   Put cursor at end of TextNode, then `break`
 
-- *[B12]*: Cursor before isolated node
+- [B12]: Cursor before isolated node
 
   Insert paragraph before node. Leave cursor before isolated node
 
-- *[B13]*: Cursor after isolated node
+- [B13]: Cursor after isolated node
 
   Insert paragraph after node. Put cursor at start of new paragraph
 
-- *[B20]*: Range
+- [B20]: Range
 
   `delete` then `break`
