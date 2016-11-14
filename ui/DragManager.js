@@ -161,11 +161,9 @@ class DragManager extends EventEmitter {
   _onDrop(e) {
     this.dragState.event = e
     this.dragState.data = this._getData(e)
-
     e.preventDefault()
     e.stopPropagation()
-
-    if (this.dragState.data) {
+    if (this._externalDrag && this.dragState.data) {
       this._handleExternalDrop()
     } else if (this.dragState.sourceSelection) {
       this._handleInternalDrop()
