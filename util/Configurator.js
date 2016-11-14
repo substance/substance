@@ -232,8 +232,10 @@ class Configurator {
 
     toolGroupNames.forEach((toolGroupName) => {
       let toolGroup = this.config.toolGroups.get(toolGroupName)
-      if (!toolGroup) throw new Error(`No toolGroup registered with name: ${toolGroupName}`)
-
+      if (!toolGroup) {
+        console.error(`No toolGroup registered with name: ${toolGroupName}`)
+        return
+      }
       toolGroup.tools.set(name, {
         name: name,
         Class: ToolClass,
