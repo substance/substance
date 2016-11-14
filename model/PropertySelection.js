@@ -1,5 +1,5 @@
-import isEqual from 'lodash/isEqual'
-import isNumber from 'lodash/isNumber'
+import isArrayEqual from '../util/isArrayEqual'
+import isNumber from '../util/isNumber'
 import Selection from './Selection'
 import CoordinateAdapter from './CoordinateAdapter'
 import Range from './Range'
@@ -30,6 +30,16 @@ class PropertySelection extends Selection {
   constructor(path, startOffset, endOffset, reverse, containerId, surfaceId) {
     super()
 
+    if (arguments.length === 1) {
+      let data = arguments[0]
+      path = data.path
+      startOffset = data.startOffset
+      endOffset = data.endOffset
+      reverse = data.reverse
+      containerId = data.containerId
+      surfaceId = data.surfaceId
+    }
+
     /**
       The path to the selected property.
       @type {String[]}
@@ -46,7 +56,7 @@ class PropertySelection extends Selection {
       End character position.
       @type {Number}
     */
-    this.endOffset = endOffset;
+    this.endOffset = isNumber(endOffset) ? endOffset : startOffset;
 
     /**
       Selection direction.
@@ -194,11 +204,11 @@ class PropertySelection extends Selection {
       return other.contains(this, strict);
     }
     if (strict) {
-      return (isEqual(this.path, other.path) &&
+      return (isArrayEqual(this.path, other.path) &&
         this.startOffset > other.startOffset &&
         this.endOffset < other.endOffset);
     } else {
-      return (isEqual(this.path, other.path) &&
+      return (isArrayEqual(this.path, other.path) &&
         this.startOffset >= other.startOffset &&
         this.endOffset <= other.endOffset);
     }
@@ -229,7 +239,7 @@ class PropertySelection extends Selection {
       // console.log('PropertySelection.overlaps: delegating to ContainerSelection.overlaps...');
       return other.overlaps(this);
     }
-    if (!isEqual(this.path, other.path)) return false;
+    if (!isArrayEqual(this.path, other.path)) return false;
     if (strict) {
       return (! (this.startOffset>=other.endOffset||this.endOffset<=other.startOffset) );
     } else {
@@ -249,7 +259,7 @@ class PropertySelection extends Selection {
       // console.log('PropertySelection.isRightAlignedWith: delegating to ContainerSelection.isRightAlignedWith...');
       return other.isRightAlignedWith(this);
     }
-    return (isEqual(this.path, other.path) &&
+    return (isArrayEqual(this.path, other.path) &&
       this.endOffset === other.endOffset);
   }
 
@@ -265,7 +275,7 @@ class PropertySelection extends Selection {
       // console.log('PropertySelection.isLeftAlignedWith: delegating to ContainerSelection.isLeftAlignedWith...');
       return other.isLeftAlignedWith(this);
     }
-    return (isEqual(this.path, other.path) &&
+    return (isArrayEqual(this.path, other.path) &&
       this.startOffset === other.startOffset);
   }
 
@@ -284,7 +294,7 @@ class PropertySelection extends Selection {
     if (other.isContainerSelection()) {
       return other.expand(this);
     }
-    if (!isEqual(this.path, other.path)) {
+    if (!isArrayEqual(this.path, other.path)) {
       throw new Error('Can not expand PropertySelection to a different property.');
     }
     var newStartOffset = Math.min(this.startOffset, other.startOffset);
@@ -313,12 +323,12 @@ class PropertySelection extends Selection {
       otherEndOffset = other.endOffset;
     } else if (other.isContainerSelection()) {
       // either the startPath or the endPath must be the same
-      if (isEqual(other.startPath, this.path)) {
+      if (isArrayEqual(other.startPath, this.path)) {
         otherStartOffset = other.startOffset;
       } else {
         otherStartOffset = this.startOffset;
       }
-      if (isEqual(other.endPath, this.path)) {
+      if (isArrayEqual(other.endPath, this.path)) {
         otherEndOffset = other.endOffset;
       } else {
         otherEndOffset = this.endOffset;
@@ -449,13 +459,7 @@ Object.defineProperties(PropertySelection.prototype, {
 });
 
 PropertySelection.fromJSON = function(json) {
-  var path = json.path;
-  var startOffset = json.startOffset;
-  var endOffset = json.hasOwnProperty('endOffset') ? json.endOffset : json.startOffset;
-  var reverse = json.reverse;
-  var containerId = json.containerId;
-  var surfaceId = json.surfaceId;
-  return new PropertySelection(path, startOffset, endOffset, reverse, containerId, surfaceId);
+  return new PropertySelection(json);
 }
 
 class RangeAdapter extends Range {

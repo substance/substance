@@ -4,9 +4,10 @@ import Selection from '../model/Selection'
 import SelectionState from '../model/SelectionState'
 import ChangeHistory from '../model/ChangeHistory'
 import SurfaceManager from '../packages/surface/SurfaceManager'
-import TransactionDocument from '../model/TransactionDocument'
+import Transaction from '../model/Transaction'
 import CommandManager from '../ui/CommandManager'
 import DragManager from '../ui/DragManager'
+import Editing from '../ui/Editing'
 import GlobalEventHandler from '../ui/GlobalEventHandler'
 import MacroManager from '../ui/MacroManager'
 import KeyboardManager from '../ui/KeyboardManager'
@@ -30,11 +31,7 @@ class EditorSession extends EventEmitter {
     }
     this.configurator = options.configurator
 
-    // the stage is essentially a clone of the document used to apply a sequence of document operations
-    // without touching this document
-    this._transactionDocument = new TransactionDocument(doc, this)
-    // while in session.transaction() this will is true
-    this._isTransacting = false
+    this._transaction = new Transaction(doc, this)
 
     this._history = new ChangeHistory()
     // used for change accumulation (in a collab environment)
@@ -93,6 +90,8 @@ class EditorSession extends EventEmitter {
     let macros = configurator.getMacros()
     let converterRegistry = configurator.getConverterRegistry()
     let editingBehavior = configurator.getEditingBehavior()
+
+    this.editing = new Editing(this, editingBehavior)
 
     this.fileManager = options.fileManager || new FileManager(this, configurator.getFileAdapters(), this._context)
 
@@ -234,6 +233,7 @@ class EditorSession extends EventEmitter {
     if (this._setSelection(sel)) {
       this.startFlow()
     }
+    return sel
   }
 
   selectNode(nodeId) {
@@ -297,40 +297,15 @@ class EditorSession extends EventEmitter {
     doc.transaction(function(tx, args) {
       tx.update(...)
       ...
-      return {
-        selection: newSelection
-      }
+      tx.setSelection(newSelection)
     })
     ```
   */
   transaction(transformation, info) {
-    if (this.isTransacting) {
-      throw new Error('Nested transactions are not supported.')
-    }
-    const tx = this._transactionDocument
-    this.isTransacting = true
-    tx.reset()
-    var sel = this.getSelection()
     info = info || {}
-    var surfaceId = sel.surfaceId
-    var change = tx._transaction(function(tx) {
-      tx.before.selection = sel
-      var args = { selection: sel }
-      var result = transformation(tx, args) || {}
-      sel = result.selection || sel
-      if (sel._isSelection && !sel.isNull() && !sel.surfaceId) {
-        sel.surfaceId = surfaceId
-      }
-      tx.after.selection = sel
-      Object.assign(info, tx.info)
-    })
-    if (change) {
-      this.isTransacting = false
-      this._commit(change, info)
-      return change
-    } else {
-      this.isTransacting = false
-    }
+    let change = this._transaction._recordChange(transformation, this.getSelection(), this.getFocusedSurface())
+    if (change) this._commit(change, info)
+    return change
   }
 
   undo() {
@@ -484,7 +459,6 @@ class EditorSession extends EventEmitter {
 
   _undoRedo(which) {
     const doc = this.getDocument()
-    const tx = this._transactionDocument
     var from, to
     if (which === 'redo') {
       from = this._history.undoneChanges
@@ -497,7 +471,7 @@ class EditorSession extends EventEmitter {
     if (change) {
       this._applyChange(change, {})
       // keep tx in sync
-      tx._apply(change)
+      this._transaction._apply(change)
       // move change to the opposite change list (undo <-> redo)
       to.push(change.invert())
       // use selection from change
@@ -737,7 +711,6 @@ class EditorSession extends EventEmitter {
     this._change = null
     this._info = null
   }
-
 }
 
 export default EditorSession

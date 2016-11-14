@@ -128,6 +128,8 @@ export { default as Scrollbar } from './packages/scrollbar/Scrollbar'
 export { default as LayoutPackage } from './packages/layout/LayoutPackage'
 export { default as Layout } from './packages/layout/Layout'
 
+export { default as ListPackage } from './packages/list/ListPackage'
+
 // grid
 export { default as GridPackage } from './packages/grid/GridPackage'
 export { default as Grid } from './packages/grid/Grid'

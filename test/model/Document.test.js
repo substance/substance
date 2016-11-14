@@ -32,3 +32,8 @@ test("Create expanded property selection.", function(t) {
   t.deepEqual(sel.endOffset, 4, 'sel.endOffset should be correct.')
   t.end()
 })
+
+test("Using deep path", function(t) {
+
+  t.end()
+})

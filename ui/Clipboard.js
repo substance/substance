@@ -126,7 +126,7 @@ class Clipboard {
     for (let i = 0; i < clipboardData.types.length; i++) {
       types[clipboardData.types[i]] = true
     }
-    console.log('onPaste(): received content types', types);
+    // console.log('onPaste(): received content types', types);
 
     event.preventDefault()
     event.stopPropagation()
@@ -218,7 +218,6 @@ class Clipboard {
         position: 'fixed',
         opacity: '0.0',
         bottom: '-1000px',
-        // width: '0px'
       })
       .append(" ")
       .on('beforepaste', function(event) {

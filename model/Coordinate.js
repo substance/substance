@@ -79,6 +79,10 @@ class Coordinate {
     return this.path.length === 1
   }
 
+  hasSamePath(other) {
+    return isArrayEqual(this.path, other.path)
+  }
+
 }
 
 Coordinate.prototype._isCoordinate = true

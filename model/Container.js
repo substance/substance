@@ -26,17 +26,23 @@ class Container extends DocumentNode {
     }
   }
 
-  get _isContainer() { return true; }
-
   dispose() {
     this.document.off(this)
+  }
+
+  getContentPath() {
+    return [this.id, 'nodes']
+  }
+
+  getContent() {
+    return this.nodes
   }
 
   getPosition(nodeId) {
     // HACK: ATM we are caching only in the real Document
     // i.e., which is connected to the UI etc.
     if (this.document && this.document.isTransactionDocument) {
-      return this.nodes.indexOf(nodeId)
+      return this.getContent().indexOf(nodeId)
     } else {
       var positions = this._getCachedPositions()
       var pos = positions[nodeId]
@@ -47,22 +53,19 @@ class Container extends DocumentNode {
     }
   }
 
-  getNodes() {
-    var doc = this.getDocument()
-    var nodes = []
-    this.nodes.forEach(function(nodeId){
-      var node = doc.get(nodeId)
-      if (!node) {
-        console.error('Node does not exist: ', nodeId)
-      } else {
-        nodes.push(node)
-      }
-    })
-    return nodes
+  getNodeAt(idx) {
+    let content = this.getContent()
+    if (idx < 0 || idx >= content.length) {
+      throw new Error('Array index out of bounds: ' + idx + ", " + content.length)
+    }
+    return this.getDocument().get(content[idx])
   }
 
-  getNodeAt(pos) {
-    return this.getDocument().get(this.nodes[pos])
+  getNodes() {
+    let doc = this.getDocument()
+    return this.getContent().map(function(id) {
+      return doc.get(id)
+    }).filter(Boolean)
   }
 
   show(nodeId, pos) {
@@ -74,14 +77,14 @@ class Container extends DocumentNode {
       }
     }
     if (!isNumber(pos)) {
-      pos = this.nodes.length
+      pos = this.getLength()
     }
     doc.update(this.getContentPath(), { type: 'insert', pos: pos, value: nodeId })
   }
 
   hide(nodeId) {
     var doc = this.getDocument()
-    var pos = this.nodes.indexOf(nodeId)
+    var pos = this.getPosition(nodeId)
     if (pos >= 0) {
       doc.update(this.getContentPath(), { type: 'delete', pos: pos })
     }
@@ -108,7 +111,11 @@ class Container extends DocumentNode {
   }
 
   getLength() {
-    return this.nodes.length
+    return this.getContent().length
+  }
+
+  get length() {
+    return this.getLength()
   }
 
   _onChange(change) {
@@ -128,11 +135,9 @@ class Container extends DocumentNode {
     return this.positions
   }
 
-  getContentPath() {
-    return [this.id, 'nodes']
-  }
-
 }
+
+Container.prototype._isContainer = true
 
 // HACK: using a mixin here
 // TODO: Get rid of this ParentNodeMixin
@@ -145,13 +150,6 @@ Container.prototype.getChildrenProperty = function() {
 Container.define({
   type: "container",
   nodes: { type: ['id'], default: [] }
-})
-
-Object.defineProperty(Container.prototype, 'length', {
-  get: function() {
-    console.warn('DEPRECATED: want to get rid of unnecessary properties. Use this.getLength() instead.')
-    return this.nodes.length
-  }
 })
 
 export default Container

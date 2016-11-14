@@ -8,39 +8,13 @@ import simple from '../fixtures/simple'
 
 const test = module('model/EditorSession')
 
-test("Transaction: before and after state.", function(t) {
-  var doc = fixture(simple)
-  var session = _createEditorSession(doc)
-  var beforeState = {
-    selection: doc.createSelection(['p1', 'content'], 1),
-    some: "other"
-  }
-  var afterState = {
-    selection: doc.createSelection(['p1', 'content'], 2)
-  }
-  var change = session.transaction(function(tx, args) {
-    extend(tx.before, beforeState)
-    tx.create({ type: 'paragraph', id: 'bla', content: ""})
-    args.selection = doc.createSelection(['p1', 'content'], 2)
-    return args
-  })
-  t.ok(change !== null, "Change should be applied.")
-  t.ok(change.before !== null, "Change should have before state.")
-  t.ok(change.after !== null, "Change should have after state.")
-  t.deepEqual(change.before, beforeState, "Change.before should be the same.")
-  t.ok(change.after.selection.equals(afterState.selection), "Change.after.selection should be set correctly.")
-  t.equal(change.after.some, beforeState.some, "Not updated state variables should be forwarded.")
-  t.end()
-})
-
 test("Keeping TransactionDocument up-to-date.", function(t) {
   var doc = fixture(simple)
   var session = _createEditorSession(doc)
-  session._transactionDocument._apply = spy(session._transactionDocument, '_apply')
-
+  session._transaction.stageDoc._apply = spy(session._transaction.stageDoc, '_apply')
   doc.create({ type: 'paragraph', id: 'foo', content: 'foo'})
-  var p = session._transactionDocument.get('foo')
-  t.equal(session._transactionDocument._apply.callCount, 1, "Stage should have been updated.")
+  var p = session._transaction.get('foo')
+  t.equal(session._transaction.stageDoc._apply.callCount, 1, "Stage should have been updated.")
   t.notNil(p, "Stage should contain new paragraph node.")
   t.equal(p.content, "foo")
   t.end()

@@ -1,12 +1,8 @@
-import isFunction from 'lodash/isFunction'
-import extend from 'lodash/extend'
 import forEach from '../util/forEach'
 import uuid from '../util/uuid'
 import Document from './Document'
-import DocumentChange from './DocumentChange'
 import IncrementalData from './data/IncrementalData'
 import DocumentNodeFactory from './DocumentNodeFactory'
-import FileNode from '../packages/file/FileNode'
 
 var __id__ = 0
 
@@ -17,6 +13,8 @@ var __id__ = 0
   Whenever a transaction is started on the document, a TransactionDocument is used to
   record changes, which are applied en-bloc when the transaction is saved.
 
+  The transaction document is the common way to manipulate the document.
+  It provides a 'turtle-graphics' style API, i.e., it has a state
 
   @example
 
@@ -33,7 +31,7 @@ class TransactionDocument extends Document {
   /**
     @param {model/Document} document a document instance
   */
-  constructor(document, session) {
+  constructor(document) {
     super('SKIP')
 
     this.__id__ = "TX_"+__id__++
@@ -45,14 +43,12 @@ class TransactionDocument extends Document {
     })
 
     this.document = document
-    this.session = session
 
     // ops recorded since transaction start
     this.ops = []
-    // app information state information used to recover the state before the transaction
-    // when calling undo
-    this.before = {}
-    // HACK: copying all indexes
+    this.lastOp = null
+
+    // copy all indexes
     forEach(document.data.indexes, function(index, name) {
       this.data.addIndex(name, index.clone())
     }.bind(this))
@@ -67,11 +63,6 @@ class TransactionDocument extends Document {
     this.document.off(this)
   }
 
-  reset() {
-    this.ops = []
-    this.before = {}
-  }
-
   create(nodeData) {
     if (!nodeData.id) {
       nodeData.id = uuid(nodeData.type)
@@ -79,12 +70,11 @@ class TransactionDocument extends Document {
     if (!nodeData.type) {
       throw new Error('No node type provided')
     }
-    var op = this.data.create(nodeData)
-    if (!op) return
-    this.ops.push(op)
-    // TODO: incremental graph returns op not the node,
-    // so probably here we should too?
-    return this.data.get(nodeData.id)
+    this.lastOp = this.data.create(nodeData)
+    if (this.lastOp) {
+      this.ops.push(this.lastOp)
+      return this.data.get(nodeData.id)
+    }
   }
 
   createDefaultTextNode(content) {
@@ -95,38 +85,33 @@ class TransactionDocument extends Document {
   }
 
   delete(nodeId) {
-    var op = this.data.delete(nodeId)
-    if (!op) return
-    this.ops.push(op)
-    return op
+    this.lastOp = this.data.delete(nodeId)
+    if (this.lastOp) {
+      this.ops.push(this.lastOp)
+    }
   }
 
   set(path, value) {
-    var op = this.data.set(path, value)
-    if (!op) return
-    this.ops.push(op)
-    return op
+    var realPath = this.getRealPath(path)
+    if (!realPath) throw new Error('Invalid path')
+    this.lastOp = this.data.set(realPath, value)
+    if (this.lastOp) {
+      this.ops.push(this.lastOp)
+    }
   }
 
   update(path, diffOp) {
-    var op = this.data.update(path, diffOp)
-    if (!op) return
-    this.ops.push(op)
-    return op
-  }
-
-  /**
-    Cancels the current transaction, discarding all changes recorded so far.
-  */
-  cancel() {
-    this._cancelTransaction()
-  }
-
-  getOperations() {
-    return this.ops
+    var realPath = this.getRealPath(path)
+    if (!realPath) throw new Error('Invalid path')
+    let op = this.lastOp = this.data.update(realPath, diffOp)
+    if (op) {
+      this.ops.push(op)
+      return op
+    }
   }
 
   _onDocumentChanged(change) {
+    console.info('TODO: find out when this is actually used')
     this._apply(change)
   }
 
@@ -136,77 +121,22 @@ class TransactionDocument extends Document {
     }.bind(this))
   }
 
-  _transaction(transformation) {
-    if (!isFunction(transformation)) {
-      throw new Error('Document.transaction() requires a transformation function.')
-    }
-    // var time = Date.now()
-    // HACK: ATM we can't deep clone as we do not have a deserialization
-    // for selections.
-    this._startTransaction()
-    // console.log('Starting the transaction took', Date.now() - time)
-    try {
-      // time = Date.now()
-      transformation(this, {})
-      // console.log('Executing the transformation took', Date.now() - time)
-      // save automatically if not canceled
-      if (!this._isCancelled) {
-        return this._saveTransaction()
-      }
-    } finally {
-      if (!this._isSaved) {
-        this.cancel()
-      }
-      // HACK: making sure that the state is reset when an exception has occurred
-      this.session.isTransacting = false
-    }
+  _reset() {
+    this.ops = []
+    this.lastOp = null
   }
 
-  _startTransaction() {
-    this.before = {}
-    this.after = {}
-    this.info = {}
-    this._isCancelled = false
-    this._isSaved = false
-    // TODO: we should use a callback and not an event
-    // Note: this is used to initialize
-    this.document.emit('transaction:started', this)
-  }
-
-  _saveTransaction() {
-    if (this._isCancelled) {
-      return
-    }
-    var beforeState = this.before
-    var afterState = extend({}, beforeState, this.after)
-    var ops = this.ops
-    var change
-    if (ops.length > 0) {
-      change = new DocumentChange(ops, beforeState, afterState)
-    }
-    this._isSaved = true
-    this.reset()
-    return change
-  }
-
-  _cancelTransaction() {
-    // revert all recorded changes
+  _rollback() {
     for (var i = this.ops.length - 1; i >= 0; i--) {
       this.data.apply(this.ops[i].invert())
     }
-    // update state
-    this._isCancelled = true
-    this.reset()
-  }
-
-  _getFileStore() {
-    return this.document._getFileStore()
+    this.ops = []
+    this.lastOp = null
   }
 
   newInstance() {
     return this.document.newInstance()
   }
-
 }
 
 TransactionDocument.prototype.isTransactionDocument = true
