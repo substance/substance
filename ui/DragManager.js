@@ -178,7 +178,7 @@ class DragManager extends EventEmitter {
 
       let match = handler.match(params, this.context)
       if (match) {
-        handler.drop(params, this.context)
+        handler.drop(tx, params, this.context)
         break
       }
     }
@@ -188,10 +188,25 @@ class DragManager extends EventEmitter {
     let dragState = this.dragState
     let files = dragState.data.files
     let uris = dragState.data.uris
-    let html = dragState.data.html
-    let text = dragState.data.text
+    let editorSession = this.context.editorSession
 
-    this.context.editorSession.transaction((tx) => {
+    editorSession.transaction((tx) => {
+      if (dragState.isContainerDrop) {
+        let containerId = dragState.surface.getContainerId()
+        let nodeId = dragState.targetNodeId
+        let insertMode = dragState.insertMode
+        let surfaceId = dragState.surface.id
+        tx.switchSurface(surfaceId)
+        tx.selection = tx.createSelection({
+          type: 'node',
+          containerId: containerId,
+          nodeId: nodeId,
+          mode: insertMode
+        })
+      } else {
+        console.error('Not yet supported')
+        return
+      }
       if (files.length > 0) {
         files.forEach((file) => {
           this._callHandlers(tx, {
@@ -209,41 +224,31 @@ class DragManager extends EventEmitter {
       } else {
         console.info('TODO: implement html/text drop here')
       }
-
     })
   }
 
   _handleInternalDrop() {
     let context = this.context
     let dragState = this.dragState
-    let containerId, nodeId, insertMode, surfaceId
-    if (dragState.isContainerDrop) {
-      containerId = dragState.surface.getContainerId()
-      nodeId = dragState.targetNodeId
-      insertMode = dragState.insertMode
-      surfaceId = dragState.surface.id
-    } else {
-      console.error('Not yet supported')
-      return
-    }
 
     context.editorSession.transaction((tx) => {
       let copyResult = copySelection(tx, {selection: dragState.sourceSelection})
       deleteSelection(tx, {selection: dragState.sourceSelection, clear: true })
-      let insertSel
       if(dragState.isContainerDrop) {
-        insertSel = tx.createSelection({
+        tx.switchSurface(dragState.surface.id)
+        let containerId = dragState.surface.getContainerId()
+        tx.selection = tx.createSelection({
           type: 'node',
           containerId: containerId,
-          nodeId: nodeId,
-          mode: insertMode
+          nodeId: dragState.targetNodeId,
+          mode: dragState.insertMode
+        })
+        return paste(tx, {
+          selection: tx.selection,
+          doc: copyResult.doc,
+          containerId: containerId
         })
       }
-      return paste(tx, {
-        selection: insertSel,
-        doc: copyResult.doc,
-        containerId: containerId
-      })
     })
   }
 

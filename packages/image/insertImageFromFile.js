@@ -1,16 +1,13 @@
-export default function(tx, params) {
-  let file = params.file
-
+export default function(tx, file) {
   // Create file node for the image
   let imageFile = tx.create({
-    type: 'npfile',
+    type: 'file',
     fileType: 'image',
     mimeType: file.type,
     data: file
   })
-
   // Inserts image at current cursor pos
-  tx.insertNode({
+  tx.insertBlockNode({
     type: 'image',
     imageFile: imageFile.id
   })
