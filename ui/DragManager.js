@@ -1,5 +1,6 @@
 import DefaultDOMElement from './DefaultDOMElement'
 import Component from './Component'
+import inBrowser from '../util/inBrowser'
 import EventEmitter from '../util/EventEmitter'
 
 import copySelection from '../model/transform/copySelection'
@@ -14,18 +15,22 @@ class DragManager extends EventEmitter {
     this.context = context
     this.dndHandlers = dndHandlers
     this._source = null
-    this.el = DefaultDOMElement.wrapNativeElement(document)
 
-    this.el.on('dragstart', this._onDragStart, this)
-    this.el.on('dragend', this._onDragEnd, this)
-    this.el.on('dragenter', this._onDragEnter, this)
-    this.el.on('dragexit', this._onDragExit, this)
-    this.el.on('dragover', this._onDragOver, this)
-    this.el.on('drop', this._onDrop, this)
+    if (inBrowser) {
+      this.el = DefaultDOMElement.wrapNativeElement(document)
+      this.el.on('dragstart', this._onDragStart, this)
+      this.el.on('dragend', this._onDragEnd, this)
+      this.el.on('dragenter', this._onDragEnter, this)
+      this.el.on('dragexit', this._onDragExit, this)
+      this.el.on('dragover', this._onDragOver, this)
+      this.el.on('drop', this._onDrop, this)
+    }
   }
 
   dispose() {
-    this.el.off(this)
+    if (this.el) {
+      this.el.off(this)
+    }
   }
 
   _onDragStart(e) { // eslint-disable-line

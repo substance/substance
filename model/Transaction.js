@@ -1,4 +1,5 @@
 import isFunction from '../util/isFunction'
+import isPlainObject from '../util/isPlainObject'
 import DocumentChange from '../model/DocumentChange'
 import TransactionDocument from '../model/TransactionDocument'
 
@@ -106,6 +107,9 @@ class Transaction {
 
   setSelection(sel) {
     if (!sel) sel = Selection.nullSelection
+    else if (isPlainObject(sel)) {
+      sel = this.createSelection(sel)
+    }
     if (!sel.isNull()) {
       if (sel.surfaceId && this.surfaceId !== sel.surfaceId) {
         console.warn('You should call tx.switchSurface() first.')

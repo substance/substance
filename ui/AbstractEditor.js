@@ -52,7 +52,7 @@ class AbstractEditor extends Component {
     Define the editors render method here.
   */
   render(...args) {
-    super.render(...args)
+    return super.render(...args)
   }
 
   willReceiveProps(nextProps) {
