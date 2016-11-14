@@ -158,13 +158,17 @@ function _deleteNodeSelection(tx, args) {
     nodeId: nodeId,
     containerId: containerId
   })
-  let newNode = tx.create({
-    type: tx.getSchema().getDefaultTextType(),
-    content: ""
-  })
-  container.show(newNode.id, pos)
-  return {
-    selection: tx.createSelection([newNode.id, 'content'], 0)
+  if (args.clear) {
+    return { selection: null }
+  } else {
+    let newNode = tx.create({
+      type: tx.getSchema().getDefaultTextType(),
+      content: ""
+    })
+    container.show(newNode.id, pos)
+    return {
+      selection: tx.createSelection([newNode.id, 'content'], 0)
+    }
   }
 }
 

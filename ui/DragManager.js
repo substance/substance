@@ -229,7 +229,7 @@ class DragManager extends EventEmitter {
 
     context.editorSession.transaction((tx) => {
       let copyResult = copySelection(tx, {selection: dragState.sourceSelection})
-      deleteSelection(tx, {selection: dragState.sourceSelection})
+      deleteSelection(tx, {selection: dragState.sourceSelection, clear: true })
       let insertSel
       if(dragState.isContainerDrop) {
         insertSel = tx.createSelection({
