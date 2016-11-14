@@ -233,6 +233,7 @@ class EditorSession extends EventEmitter {
     if (this._setSelection(sel)) {
       this.startFlow()
     }
+    return sel
   }
 
   selectNode(nodeId) {
