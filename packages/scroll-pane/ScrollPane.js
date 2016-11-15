@@ -232,8 +232,11 @@ class ScrollPane extends Component {
   }
 
   _onDropTeaserPositionRequested(dragState) {
+    let targetEl = dragState.targetEl
+    if (!targetEl) return
+
     let contentContainerEl = this.refs.content.getNativeElement()
-    let rect = getRelativeBoundingRect(dragState.targetEl.getNativeElement(), contentContainerEl)
+    let rect = getRelativeBoundingRect(targetEl.getNativeElement(), contentContainerEl)
 
     if (dragState.insertMode === 'before') {
       rect.bottom = rect.bottom + rect.height
@@ -249,7 +252,10 @@ class ScrollPane extends Component {
     const wrange = wsel.getRangeAt(0)
     const contentRect = this.refs.content.getNativeElement().getBoundingClientRect()
     const innerContentRect = this.refs.content.getChildAt(0).getNativeElement().getBoundingClientRect()
-    const selectionRect = wrange.getBoundingClientRect()
+    let selectionRect = wrange.getBoundingClientRect()
+    if (selectionRect.top === 0 && selectionRect.bottom === 0) {
+      selectionRect = this._fixForCursorRectBug()
+    }
     const positionHints = {
       contentWidth: contentRect.width,
       contentHeight: contentRect.height,
@@ -259,6 +265,12 @@ class ScrollPane extends Component {
 
     this.emit('overlay:position', positionHints)
     this._updateScrollbar()
+  }
+
+  _fixForCursorRectBug() {
+    let wsel = window.getSelection()
+    let rects = wsel.anchorNode.parentElement.getClientRects()
+    return rects[0]
   }
 
   _onContextMenu(e) {

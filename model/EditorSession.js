@@ -221,7 +221,7 @@ class EditorSession extends EventEmitter {
   }
 
   setSelection(sel) {
-    if (sel && !sel.surfaceId) {
+    if (sel && !sel.isNull() && !sel.surfaceId) {
       let fs = this.getFocusedSurface()
       if (fs) {
         sel.surfaceId = fs.id
