@@ -100,11 +100,8 @@ class Editing {
     if (sel.isCollapsed()) {
       let path = sel.start.path
       let node = tx.get(path[0])
+
       let nodeEditing = this._getNodeEditing(node)
-      if (!nodeEditing) {
-        console.warn('No editing behavior defined for node type', node.type)
-        return
-      }
       // TODO: are we sure that this is the default implementation? or is it specific to text nodes?
       let offset = sel.start.offset
       let text = tx.get(path)
@@ -137,10 +134,6 @@ class Editing {
       let path = sel.start.path
       let node = tx.get(path[0])
       let nodeEditing = this._getNodeEditing(node)
-      if (!nodeEditing) {
-        console.warn('No editing behavior defined for node type', node.type)
-        return
-      }
       nodeEditing.delete(tx, sel)
     }
     else if (sel.isContainerSelection()) {
@@ -184,11 +177,7 @@ class Editing {
         let nodeId = sel.start.path[0]
         let node = tx.get(nodeId)
         let nodeEditing = this._getNodeEditing(node)
-        if (nodeEditing) {
-          nodeEditing.break(tx, node, sel.start, container)
-        } else {
-          console.warn('No editing behavior defined for node type', node.type)
-        }
+        nodeEditing.break(tx, node, sel.start, container)
       } else {
         // TODO: do we still want a soft-break thingie here? i.e. insert a <br>
       }
@@ -245,26 +234,16 @@ class Editing {
       let nodeId = path[0]
       let node = tx.get(nodeId)
       let nodeEditing = this._getNodeEditing(node)
-      if (nodeEditing) {
-        // console.log('#### before', sel.toString())
-        nodeEditing.type(tx, sel, text)
-        tx.selection = new PropertySelection({
-          path: path,
-          startOffset: sel.startOffset + text.length,
-          containerId: sel.containerId,
-          surfaceId: sel.surfaceId
-        })
-        // console.log('### setting selection after typing: ', tx.selection.toString())
-      } else {
-        // fall back to simple TextProperty editing
-        this.nodeEditing.text.type(tx, sel, text)
-        tx.selection = new PropertySelection({
-          path: path,
-          startOffset: sel.startOffset + text.length,
-          containerId: sel.containerId,
-          surfaceId: sel.surfaceId
-        })
-      }
+
+      // console.log('#### before', sel.toString())
+      nodeEditing.type(tx, sel, text)
+      tx.selection = new PropertySelection({
+        path: path,
+        startOffset: sel.startOffset + text.length,
+        containerId: sel.containerId,
+        surfaceId: sel.surfaceId
+      })
+      // console.log('### setting selection after typing: ', tx.selection.toString())
     } else if (sel.isContainerSelection()) {
       this._deleteContainerSelection(tx, sel)
       this.insertText(tx, text)
@@ -415,11 +394,7 @@ class Editing {
       } else {
         let endNode = tx.get(endId)
         let endEditing = this._getNodeEditing(endNode)
-        if (endEditing) {
-          endEditing.delete(tx, { start: 'before', end: sel.end })
-        } else {
-          console.error('No editing behavior defined for node type' + endNode.type)
-        }
+        endEditing.delete(tx, { start: 'before', end: sel.end })
       }
     }
 
@@ -447,18 +422,18 @@ class Editing {
     } else {
       let startNode = tx.get(startId)
       let startEditing = this._getNodeEditing(startNode)
-      if (startEditing) {
         startEditing.delete(tx, { start: sel.start, end: 'after' })
-      } else {
-        console.error('No editing behavior defined for node type' + startNode.type)
-      }
       tx.selection = sel.collapse('left')
     }
   }
 
   _getNodeEditing(node) {
     let nodeEditing = this.nodeEditing[node.type]
-    if (!nodeEditing && node.isText()) {
+    if (!nodeEditing) {
+      // iconsole.warn('No editing behavior defined for node type', node.type)
+      if (!node.isText()) {
+        console.warn('No editing behavior defined for node type', node.type, 'Falling back to text editing behavior')
+      }
       nodeEditing = this.nodeEditing.text
     }
     return nodeEditing
