@@ -252,7 +252,10 @@ class ScrollPane extends Component {
     const wrange = wsel.getRangeAt(0)
     const contentRect = this.refs.content.getNativeElement().getBoundingClientRect()
     const innerContentRect = this.refs.content.getChildAt(0).getNativeElement().getBoundingClientRect()
-    const selectionRect = wrange.getBoundingClientRect()
+    let selectionRect = wrange.getBoundingClientRect()
+    if (selectionRect.top === 0 && selectionRect.bottom === 0) {
+      selectionRect = this._fixForCursorRectBug()
+    }
     const positionHints = {
       contentWidth: contentRect.width,
       contentHeight: contentRect.height,
@@ -262,6 +265,12 @@ class ScrollPane extends Component {
 
     this.emit('overlay:position', positionHints)
     this._updateScrollbar()
+  }
+
+  _fixForCursorRectBug() {
+    let wsel = window.getSelection()
+    let rects = wsel.anchorNode.parentElement.getClientRects()
+    return rects[0]
   }
 
   _onContextMenu(e) {
