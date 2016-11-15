@@ -59,7 +59,7 @@ export default {
     // Tools
     config.addTool('undo', Tool, {toolGroup: ['document', 'context-menu-document']})
     config.addTool('redo', Tool, {toolGroup: ['document', 'context-menu-document']})
-    config.addTool('select-all', Tool, {toolGroup: ['document', 'context-menu-document']})
+    config.addTool('select-all', Tool, {toolGroup: ['context-menu-document']})
 
     // Icons
     config.addIcon('undo', { 'fontawesome': 'fa-undo' })

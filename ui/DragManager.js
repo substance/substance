@@ -6,7 +6,7 @@ import EventEmitter from '../util/EventEmitter'
 import copySelection from '../model/transform/copySelection'
 import deleteSelection from '../model/transform/deleteSelection'
 import paste from '../model/transform/paste'
-
+import NodeSelection from '../model/NodeSelection'
 
 class DragManager extends EventEmitter {
 
@@ -34,7 +34,6 @@ class DragManager extends EventEmitter {
   }
 
   _onDragStart(e) { // eslint-disable-line
-    // dito: trigger listeners to expose drop targets
     // console.log('DragManager.onDragStart', event, component);
     this._externalDrag = false
     this._initDrag(e)
@@ -67,8 +66,23 @@ class DragManager extends EventEmitter {
         dragState.mode = 'inline'
       }
     } else {
-      e.preventDefault()
-      e.stopPropagation()
+      // This is definitely hacky. Just until we have time to think about it
+      // more thoroughly
+      let comp = this._getIsolatedNodeOrContainerChild(DefaultDOMElement.wrapNativeElement(e.target))
+      if (comp && comp.props.node) {
+        let surface = comp.context.surface
+        let nodeSelection = new NodeSelection({
+          containerId: surface.getContainerId(),
+          nodeId: comp.props.node.id,
+          mode: 'full',
+          surfaceId: surface.id
+        })
+        this.context.editorSession.setSelection(nodeSelection)
+        dragState.sourceSelection = nodeSelection
+      } else {
+        e.preventDefault()
+        e.stopPropagation()
+      }
     }
 
     this.dragState = new DragState(dragState)
@@ -99,12 +113,9 @@ class DragManager extends EventEmitter {
     let targetEl = DefaultDOMElement.wrapNativeElement(e.target)
     // HACK: ignore drop teaser
     if (targetEl.is('.sc-drop-teaser')) return
-
     let components = this._getComponents(targetEl)
     let surface, nodeComponent
-
     // console.log('comps', components)
-
     if (components) {
       surface = components[0]
       if (surface && surface.isContainerEditor()) {
@@ -142,6 +153,21 @@ class DragManager extends EventEmitter {
       curr = curr.parentNode
     }
     return null
+  }
+
+  _getIsolatedNodeOrContainerChild(targetEl) {
+    let parent, current
+    current = targetEl
+    parent = current.parentNode
+    while(parent) {
+      if (parent._comp && parent._comp._isContainerEditor) {
+        return current._comp
+      } else if (current._comp && current._comp._isIsolatedNode) {
+        return current._comp
+      }
+      current = parent
+      parent = current.parentNode
+    }
   }
 
   _onDragEnd() {
