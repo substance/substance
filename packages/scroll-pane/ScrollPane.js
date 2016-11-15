@@ -232,8 +232,11 @@ class ScrollPane extends Component {
   }
 
   _onDropTeaserPositionRequested(dragState) {
+    let targetEl = dragState.targetEl
+    if (!targetEl) return
+
     let contentContainerEl = this.refs.content.getNativeElement()
-    let rect = getRelativeBoundingRect(dragState.targetEl.getNativeElement(), contentContainerEl)
+    let rect = getRelativeBoundingRect(targetEl.getNativeElement(), contentContainerEl)
 
     if (dragState.insertMode === 'before') {
       rect.bottom = rect.bottom + rect.height
