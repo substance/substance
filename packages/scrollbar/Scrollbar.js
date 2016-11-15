@@ -86,7 +86,12 @@ class Scrollbar extends Component {
     // Needed for scrollbar interaction
     this.factor = (contentHeight / scrollPaneHeight)
 
-    // Update thumb
+    if (this.factor <= 1) {
+      this.el.addClass('sm-hide-thumb')
+    } else {
+      this.el.removeClass('sm-hide-thumb')
+    }
+
     this.refs.thumb.css({
       top: scrollTop / this.factor,
       height: scrollPaneHeight / this.factor

@@ -40,7 +40,7 @@ let insertText = function(tx, args) {
   if (tx.get(sel.startPath) === undefined) {
     tx.set(sel.startPath, "")
   }
-  let op = tx.update(sel.startPath, { insert: { offset: sel.startOffset, value: text } } )
+  let op = tx.update(sel.startPath, { type: 'insert', start: sel.startOffset, text: text })
   updateAnnotations(tx, {op: op})
   args.selection = tx.createSelection(sel.startPath, sel.startOffset + text.length)
   return args

@@ -7,13 +7,13 @@ import AnnotationTool from '../../ui/AnnotationTool'
 
 export default {
   name: 'superscript',
-  configure: function(config) {
+  configure: function(config, options) {
     config.addNode(Superscript)
     config.addConverter('html', SuperscriptHTMLConverter)
     config.addConverter('xml', SuperscriptXMLConverter)
     config.addComponent('superscript', AnnotationComponent)
     config.addCommand('superscript', AnnotationCommand, { nodeType: 'superscript' })
-    config.addTool('superscript', AnnotationTool, {target: 'annotations'})
+    config.addTool('superscript', AnnotationTool, {toolGroup: options.toolGroup || 'annotations'})
     config.addIcon('superscript', { 'fontawesome': 'fa-superscript' })
     config.addLabel('superscript', {
       en: 'Superscript',

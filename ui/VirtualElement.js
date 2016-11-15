@@ -6,9 +6,9 @@ import isFunction from 'lodash/isFunction'
 import isNil from 'lodash/isNil'
 import isPlainObject from 'lodash/isPlainObject'
 import isString from 'lodash/isString'
-import map from 'lodash/map'
 import omit from 'lodash/omit'
 import without from 'lodash/without'
+import map from '../util/map'
 import DOMElement from './DOMElement'
 
 /**
@@ -42,18 +42,44 @@ class VirtualElement extends DOMElement {
     return this.parent
   }
 
+  /*
+    Provides the component after this VirtualElement has been rendered.
+  */
+  getComponent() {
+    return this._comp
+  }
+
   /**
     Associates a reference identifier with this element.
 
     When rendered the corresponding component is stored in the owner using the given key.
     In addition to that, components with a reference are preserved when its parent is rerendered.
 
+    > Attention: only the owner should use this method, as it only
+      affects the owner's references
+
     @param {String} ref id for the compiled Component
   */
   ref(ref) {
-    if (!ref) {
-      throw new Error('Illegal argument')
-    }
+    if (!ref) throw new Error('Illegal argument')
+    /*
+      Attention: only the owner can create a ref()
+      If you run into this situation, e.g. when you pass down a virtual element
+      to a component which wants to have a ref itself,
+      then you have other options:
+
+      1. via props:
+      ```js
+        this.props.content.getComponent()
+      ```
+
+      2. via Component.getChildAt or Component.find()
+      ```
+        this.getChildAt(0)
+        this.find('.child')
+      ```
+    */
+    if (this._ref) throw new Error('A VirtualElement can only be referenced once.')
     this._ref = ref
     if (this._context) {
       this._context.refs[ref] = this
@@ -638,11 +664,7 @@ VirtualElement.createElement = function() {
         ref = val
         break
       default:
-        if (key.slice(0,2) === 'on') {
-          eventHandlers.push({ name: key.slice(2), handler: val })
-        } else {
-          props[key] = val
-        }
+        props[key] = val
     }
   }
   if (type === 'element') {

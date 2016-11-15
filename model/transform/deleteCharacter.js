@@ -52,7 +52,7 @@ function _deleteCharacterInProperty(tx, args) {
     // simple delete one character
     startChar = (direction === 'left') ? sel.startOffset-1 : sel.startOffset
     endChar = startChar+1
-    let op = tx.update(sel.path, { delete: { start: startChar, end: endChar } })
+    let op = tx.update(sel.path, { type: 'delete', start: startChar, end: endChar })
     updateAnnotations(tx, { op: op })
     args.selection = tx.createSelection(sel.path, startChar)
   }

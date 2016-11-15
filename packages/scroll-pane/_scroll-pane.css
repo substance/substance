@@ -1,6 +1,6 @@
 /* ScrollPane
 -----------------------------------------------------*/
-.sc-scroll-pane {
+.sc-scroll-pane.sm-default-style {
   position: absolute;
   top: 0px;
   bottom: 0px;
@@ -9,35 +9,35 @@
 }
 /* Substance scrollbar active */
 /* Make space for Substance Scrollbar on the left side */
-.sc-scroll-pane.sm-substance-scrollbar.sm-scrollbar-position-left .se-scrollable {
+.sc-scroll-pane.sm-default-style.sm-substance-scrollbar.sm-scrollbar-position-left .se-scrollable {
   left: 20px;
 }
 /* Patches the scrollbar to stick on the right side */
-.sc-scroll-pane.sm-substance-scrollbar.sm-scrollbar-position-right .sc-scrollbar {
+.sc-scroll-pane.sm-default-style.sm-substance-scrollbar.sm-scrollbar-position-right .sc-scrollbar {
   right: 0px; left: auto;
 }
-.sc-scroll-pane.sm-substance-scrollbar.sm-scrollbar-position-right .sc-scrollbar {
+.sc-scroll-pane.sm-default-style.sm-substance-scrollbar.sm-scrollbar-position-right .se-scrollable {
   right: 20px;
 }
 /* Hide native scroll bar in content panel */
-.sc-scroll-pane.sm-substance-scrollbar .se-scrollable::-webkit-scrollbar {
+.sc-scroll-pane.sm-default-style.sm-substance-scrollbar .se-scrollable::-webkit-scrollbar {
   width: 0px; height: 0px;
 }
-.sc-scroll-pane.sm-substance-scrollbar .se-scrollable::-webkit-scrollbar-thumb {
+.sc-scroll-pane.sm-default-style.sm-substance-scrollbar .se-scrollable::-webkit-scrollbar-thumb {
   background-color: rgba(0, 0, 0, 0);
 }
 /* Hide native scrollbar in Internet Explorer/Edge */
-.sc-scroll-pane.sm-substance-scrollbar .se-scrollable {
+.sc-scroll-pane.sm-default-style.sm-substance-scrollbar .se-scrollable {
   -ms-overflow-style: none;
 }
 /* Firefox-specific hack for hiding the scrollbar */
-.sc-scroll-pane.sm-substance-scrollbar.sm-firefox .se-scrollable {
+.sc-scroll-pane.sm-default-style.sm-substance-scrollbar.sm-firefox .se-scrollable {
   margin-right: -15px;
   overflow-y: scroll;
   overflow-x: hidden;
 }
 /* Patches the scrollbar to stick on the right side */
-.sc-scroll-pane .se-scrollable {
+.sc-scroll-pane.sm-default-style > .se-scrollable {
   position: absolute;
   top: 0px;
   bottom: 0px;
@@ -45,7 +45,7 @@
   right: 0px;
   overflow: auto;
 }
-.sc-scroll-pane .se-content { position: relative; }
+.sc-scroll-pane.sm-default-style > .se-scrollable > .se-content { position: relative; }
 /* For debugging purposes
 .sc-scroll-pane .se-scanline {
   position: absolute;

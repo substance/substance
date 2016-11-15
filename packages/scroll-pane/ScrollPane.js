@@ -1,9 +1,8 @@
 import platform from '../../util/platform'
 import Component from '../../ui/Component'
 import Scrollbar from '../scrollbar/Scrollbar'
-import OverlayContainer from '../overlay/OverlayContainer'
-import GutterContainer from '../gutter/GutterContainer'
 import getRelativeBoundingRect from '../../util/getRelativeBoundingRect'
+import getRelativeMouseBounds from '../../util/getRelativeMouseBounds'
 
 /**
   Wraps content in a scroll pane.
@@ -27,7 +26,7 @@ import getRelativeBoundingRect from '../../util/getRelativeBoundingRect'
     tocProvider: this.tocProvider
   })
   ```
- */
+*/
 class ScrollPane extends Component {
 
   /*
@@ -43,37 +42,49 @@ class ScrollPane extends Component {
     if (this.refs.scrollbar && this.props.highlights) {
       this.props.highlights.on('highlights:updated', this.onHighlightsUpdated, this)
     }
-    // HACK: Scrollbar should use DOMMutationObserver instead
     if (this.refs.scrollbar) {
-      this.context.doc.on('document:changed', this.onDocumentChange, this, { priority: -1 })
+      this.domObserver = new window.MutationObserver(this._onContentChanged.bind(this))
+      this.domObserver.observe(this.el.getNativeElement(), {
+        subtree: true,
+        attributes: true,
+        characterData: true,
+        childList: true,
+      })
+      this.context.editorSession.onPosition(this._onPosition, this)
     }
 
     this.handleActions({
-      'updateOverlayHints': this._updateOverlayHints
+      'domSelectionRendered': this._onDomSelectionRendered
     })
+    this.context.dragManager.on('drop-teaser:position-requested', this._onDropTeaserPositionRequested, this)
   }
 
   dispose() {
     if (this.props.highlights) {
       this.props.highlights.off(this)
     }
-    this.context.doc.off(this)
+    this.context.editorSession.off(this)
+    this.context.dragManager.off(this)
   }
 
   render($$) {
     let el = $$('div')
       .addClass('sc-scroll-pane')
-    let overlay
-    let gutter
 
     if (platform.isFF) {
       el.addClass('sm-firefox')
     }
 
+    // When noStyle is provided we just use ScrollPane as a container, but without
+    // any absolute positioned containers, leaving the body scrollable.
+    if (!this.props.noStyle) {
+      el.addClass('sm-default-style')
+    }
+
     // Initialize Substance scrollbar (if enabled)
     if (this.props.scrollbarType === 'substance') {
       el.addClass('sm-substance-scrollbar')
-      el.addClass('sm-scrollbar-position-'+this.props.scrollbarPosition)
+      el.addClass('sm-scrollbar-position-' + this.props.scrollbarPosition)
 
       el.append(
         // TODO: is there a way to pass scrollbar highlights already
@@ -90,51 +101,38 @@ class ScrollPane extends Component {
       )
     }
 
-    if (this.props.overlay) {
-      // TODO: rework this. ATM we have a component `ui/Overlay`
-      // which does the positioning and gets a prop `overlay` being
-      // the actual, custom component to render the content.
-      // Hard-wiring the internal class for now, as all current implementations
-      // use the same impl.
-      overlay = $$(OverlayContainer, {
-        overlay: this.props.overlay
-      }).ref('overlay')
-    }
-
-    if (this.props.gutter) {
-      gutter = $$(GutterContainer, {
-        gutter: this.props.gutter
-      }).ref('gutter')
-    }
-
     el.append(
       $$('div').ref('scrollable').addClass('se-scrollable').append(
-        $$('div').ref('content').addClass('se-content')
-          .append(overlay)
-          .append(gutter)
-          .append(
-            this.props.children
-          )
+        this.renderContent($$)
       ).on('scroll', this.onScroll)
     )
     return el
   }
 
-  _updateOverlayHints(overlayHints) {
-    // Remember overlay hints for next update
-    let overlay = this.refs.overlay
-    let gutter = this.refs.gutter
-    if (overlay) {
-      overlay.position(overlayHints)
+  renderContent($$) {
+    let contentEl = $$('div').ref('content').addClass('se-content')
+    contentEl.append(this.props.children)
+    if (this.props.contextMenu === 'custom') {
+      contentEl.on('contextmenu', this._onContextMenu)
     }
-    if (gutter) {
-      gutter.position(overlayHints)
+    return contentEl
+  }
+
+  _onContentChanged() {
+    this._contentChanged = true
+  }
+
+  _onPosition() {
+    if (this.refs.scrollbar && this._contentChanged) {
+      this._contentChanged = false
+      this._updateScrollbar()
     }
   }
 
-  // HACK: Scrollbar should use DOMMutationObserver instead
-  onDocumentChange() {
-    this.refs.scrollbar.updatePositions()
+  _updateScrollbar() {
+    if (this.refs.scrollbar) {
+      this.refs.scrollbar.updatePositions()
+    }
   }
 
   onHighlightsUpdated(highlights) {
@@ -168,12 +166,11 @@ class ScrollPane extends Component {
     Returns the cumulated height of a panel's content
   */
   getContentHeight() {
-    let contentHeight = 0
-    let contentEl = this.refs.content.el
-    contentEl.childNodes.forEach(function(el) {
-      contentHeight += el.getOuterHeight()
-    })
-    return contentHeight
+    let contentEl = this.refs.content.el.getNativeElement()
+    // Important to use scrollHeight here (e.g. to consider overflowing
+    // content, that stretches the content area, such as an overlay or
+    // a context menu)
+    return contentEl.scrollHeight
   }
 
   /**
@@ -195,7 +192,7 @@ class ScrollPane extends Component {
   */
   getScrollPosition() {
     let scrollableEl = this.getScrollableElement()
-    return Math.floor(scrollableEl.getProperty('scrollTop') + 1)
+    return scrollableEl.getProperty('scrollTop')
   }
 
   /**
@@ -204,8 +201,8 @@ class ScrollPane extends Component {
     @param {DOMNode} el DOM node that lives inside the
   */
   getPanelOffsetForElement(el) {
-    let nativeEl = el.el
-    let contentContainerEl = this.refs.content.el.el
+    let nativeEl = el.getNativeElement()
+    let contentContainerEl = this.refs.content.getNativeElement()
     let rect = getRelativeBoundingRect(nativeEl, contentContainerEl)
     return rect.top
   }
@@ -234,6 +231,72 @@ class ScrollPane extends Component {
     }
   }
 
+  _onDropTeaserPositionRequested(dragState) {
+    let targetEl = dragState.targetEl
+    if (!targetEl) return
+
+    let contentContainerEl = this.refs.content.getNativeElement()
+    let rect = getRelativeBoundingRect(targetEl.getNativeElement(), contentContainerEl)
+
+    if (dragState.insertMode === 'before') {
+      rect.bottom = rect.bottom + rect.height
+    } else {
+      rect.top = rect.top + rect.height
+    }
+    this.emit('drop-teaser:position', { rect: rect, visible: dragState.isContainerDrop })
+  }
+
+  _onDomSelectionRendered() {
+    const wsel = window.getSelection()
+    if (wsel.rangeCount === 0) return
+    const wrange = wsel.getRangeAt(0)
+    const contentRect = this.refs.content.getNativeElement().getBoundingClientRect()
+    const innerContentRect = this.refs.content.getChildAt(0).getNativeElement().getBoundingClientRect()
+    let selectionRect = wrange.getBoundingClientRect()
+    if (selectionRect.top === 0 && selectionRect.bottom === 0) {
+      selectionRect = this._fixForCursorRectBug()
+    }
+    const positionHints = {
+      contentWidth: contentRect.width,
+      contentHeight: contentRect.height,
+      selectionRect: _getRelativeRect(contentRect, selectionRect),
+      innerContentRect: _getRelativeRect(contentRect, innerContentRect)
+    }
+
+    this.emit('overlay:position', positionHints)
+    this._updateScrollbar()
+  }
+
+  _fixForCursorRectBug() {
+    let wsel = window.getSelection()
+    let rects = wsel.anchorNode.parentElement.getClientRects()
+    return rects[0]
+  }
+
+  _onContextMenu(e) {
+    e.preventDefault()
+    let contentContainerEl = this.refs.content.el.el
+    let mouseBounds = getRelativeMouseBounds(e, contentContainerEl)
+    let positionHints = {
+      mouseBounds: mouseBounds
+    }
+    this.emit('context-menu:position', positionHints)
+    this._updateScrollbar()
+  }
+}
+
+
+function _getRelativeRect(parentRect, childRect) {
+  var left = childRect.left - parentRect.left
+  var top = childRect.top - parentRect.top
+  return {
+    left: left,
+    top: top,
+    right: parentRect.width - left - childRect.width,
+    bottom: parentRect.height - top - childRect.height,
+    width: childRect.width,
+    height: childRect.height
+  }
 }
 
 export default ScrollPane

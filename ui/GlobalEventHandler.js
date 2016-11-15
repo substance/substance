@@ -22,8 +22,8 @@ const events = [ 'keydown', 'keyup', 'keypress', 'mousedown', 'mouseup' , 'copy'
 
 class GlobalEventHandler {
 
-  constructor(documentSession, surfaceManager) {
-    this.documentSession = documentSession
+  constructor(editorSession, surfaceManager) {
+    this.editorSession = editorSession
     this.surfaceManager = surfaceManager
     this.listeners = []
     this.initialize()
@@ -65,8 +65,8 @@ class GlobalEventHandler {
   }
 
   _getActiveListener(eventName) {
-    let documentSession = this.documentSession
-    let sel = documentSession.getSelection()
+    let editorSession = this.editorSession
+    let sel = editorSession.getSelection()
     if (sel) {
       let surfaceId = sel.surfaceId
       for (let i = 0; i < this.listeners.length; i++) {

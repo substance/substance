@@ -1,6 +1,7 @@
 import { module } from 'substance-test'
-import DocumentSession from '../../model/DocumentSession'
+import EditorSession from '../../model/EditorSession'
 import deleteNode from '../../model/transform/deleteNode'
+import Configurator from '../../util/Configurator'
 import fixture from '../fixtures/createTestArticle'
 import containerAnnoSample from '../fixtures/containerAnnoSample'
 
@@ -8,8 +9,8 @@ const test = module('transform/deleteNode')
 
 test("Delete a plain node", function(t) {
   var doc = fixture(containerAnnoSample)
-  var docSession = new DocumentSession(doc)
-  docSession.transaction(function(tx, args) {
+  var editorSession = _createSession(doc)
+  editorSession.transaction(function(tx, args) {
     args.nodeId = "p4"
     deleteNode(tx, args)
   })
@@ -19,8 +20,8 @@ test("Delete a plain node", function(t) {
 
 test("Delete annotations when deleting a node", function(t) {
   var doc = fixture(containerAnnoSample)
-  var docSession = new DocumentSession(doc)
-  docSession.transaction(function(tx) {
+  var editorSession = _createSession(doc)
+  editorSession.transaction(function(tx) {
     tx.create({
       id: "test-anno",
       type: "annotation",
@@ -30,7 +31,7 @@ test("Delete annotations when deleting a node", function(t) {
   })
   t.notNil(doc.get("test-anno"))
 
-  docSession.transaction(function(tx, args) {
+  editorSession.transaction(function(tx, args) {
     args.nodeId = "p4"
     deleteNode(tx, args)
   })
@@ -40,8 +41,8 @@ test("Delete annotations when deleting a node", function(t) {
 
 test("Move startAnchor of container annotation to next node.", function(t) {
   var doc = fixture(containerAnnoSample)
-  var docSession = new DocumentSession(doc)
-  docSession.transaction(function(tx, args) {
+  var editorSession = _createSession(doc)
+  editorSession.transaction(function(tx, args) {
     args.nodeId = "p1"
     deleteNode(tx, args)
   })
@@ -53,8 +54,8 @@ test("Move startAnchor of container annotation to next node.", function(t) {
 
 test("Move endAnchor of container annotation to previous node.", function(t) {
   var doc = fixture(containerAnnoSample)
-  var docSession = new DocumentSession(doc)
-  docSession.transaction(function(tx, args) {
+  var editorSession = _createSession(doc)
+  editorSession.transaction(function(tx, args) {
     args.nodeId = "p3"
     deleteNode(tx, args)
   })
@@ -64,3 +65,7 @@ test("Move endAnchor of container annotation to previous node.", function(t) {
   t.equal(anno.endOffset, p2.content.length)
   t.end()
 })
+
+function _createSession(doc) {
+  return new EditorSession(doc, { configurator: new Configurator() })
+}

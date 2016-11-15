@@ -1,5 +1,3 @@
-// import each from 'lodash/each'
-
 /*
  * Delete a node and all annotations attached to it,
  * and removes the node from all containers.
@@ -13,7 +11,8 @@ function deleteNode(tx, args) {
   }
   let node = tx.get(nodeId)
   if (!node) {
-    throw new Error("Invalid 'nodeId'. Node does not exist.")
+    console.warn('Node does not exist')
+    return args
   }
   // optional: containerId - will hide the node before removing it
   let containerId = args.containerId
@@ -67,12 +66,36 @@ function deleteNode(tx, args) {
       }
     }
   }
+  let newSel = null
   if (containerId) {
     // hide the node from the one container if provided
     container = tx.get(containerId)
+    let nodePos = container.getPosition(nodeId)
+    if (nodePos >= 0) {
+      if (nodePos < container.getLength()-1) {
+        let nextNode = container.getNodeAt(nodePos+1)
+        if (nextNode.isText()) {
+          newSel = tx.createSelection({
+            type: 'property',
+            containerId: containerId,
+            path: nextNode.getTextPath(),
+            startOffset: 0,
+            endOffset: 0
+          })
+        } else {
+          newSel = tx.createSelection({
+            type: 'node',
+            containerId: containerId,
+            nodeId: nextNode.id,
+            mode: 'before',
+            reverse: false
+          })
+        }
+      }
+    }
     container.hide(nodeId)
   }
-  // hiding automatically is causing troubles with nested containers
+  // NOTE: hiding automatically is causing troubles with nested containers
   //  else {
   //   // or hide it from all containers
   //   each(tx.getIndex('type').get('container'), function(container) {
@@ -88,7 +111,10 @@ function deleteNode(tx, args) {
   }
   // finally delete the node itself
   tx.delete(nodeId)
-  return args
+
+  return {
+    selection: newSel
+  }
 }
 
 export default deleteNode

@@ -241,7 +241,7 @@ export default {
 
 ## Define a SimpleWriter component.
 
-The SimpleWriter component forms our editor's heart. Some basic Substance infrastructure is set up by AbstractEditor, which we inherit from. We need to implement {@link AbstractEditor#render} and {@link AbstractEditor#documentSessionUpdated}. Substance uses a {@link Component} API similar to [React](https://facebook.github.io/react/), which be relatively easy to understand.
+The SimpleWriter component forms our editor's heart. Some basic Substance infrastructure is set up by AbstractEditor, which we inherit from. We need to implement {@link AbstractEditor#render}. Substance uses a {@link Component} API similar to [React](https://facebook.github.io/react/), which be relatively easy to understand.
 
 The following code shows the setup of an editor, rendering a toolbar on top and document's body. We delegate setting up the editor to the Body component, which is defined in a package and sets up the actual editor.
 
@@ -257,8 +257,7 @@ class SimpleWriter extends AbstractEditor {
     let Body = this.componentRegistry.get('body')
 
     let contentPanel = $$(ScrollPane, {
-      scrollbarPosition: 'right',
-      overlay: SimpleWriterOverlayTools,
+      scrollbarPosition: 'right'
     }).append(
       $$(Body, {
         disabled: this.props.disabled,
@@ -279,15 +278,6 @@ class SimpleWriter extends AbstractEditor {
     return el
   }
 
-  documentSessionUpdated() {
-    let toolbar = this.refs.toolbar
-    if (toolbar) {
-      let commandStates = this.commandManager.getCommandStates()
-      toolbar.setProps({
-        commandStates: commandStates
-      })
-    }
-  }
 }
 ```
 
@@ -302,11 +292,12 @@ window.onload = function() {
   let importer = cfg.createImporter('html')
   let doc = importer.importDocument(fixture)
   // This is the data structure manipulated by the editor
-  let documentSession = new DocumentSession(doc)
+  let editorSession = new EditorSession(doc, {
+    configurator
+  })
   // Mount SimpleWriter to the DOM and run it.
   SimpleWriter.mount({
-    documentSession: documentSession,
-    configurator: cfg
+    editorSession: editorSession
   }, document.body)
 }
 ```

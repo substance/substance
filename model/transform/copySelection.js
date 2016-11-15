@@ -1,5 +1,5 @@
 import cloneDeep from 'lodash/cloneDeep'
-import each from 'lodash/each'
+import forEach from '../../util/forEach'
 import last from 'lodash/last'
 import Document from '../Document'
 import annotationHelpers from '../annotationHelpers'
@@ -11,7 +11,11 @@ import annotationHelpers from '../annotationHelpers'
   @return {Object} with a `doc` property that has a fresh doc with the copied content
 */
 
-function copySelection(doc, args) {
+function copySelection(tx, args) {
+  let doc
+  // legacy
+  if (tx._isDocument) doc = tx
+  else doc = tx.getDocument()
   let selection = args.selection
   if (!selection || !selection._isSelection) {
     throw new Error("'selection' is mandatory.")
@@ -51,7 +55,7 @@ function _copyPropertySelection(doc, selection) {
   })
   containerNode.show(Document.TEXT_SNIPPET_ID)
   let annotations = doc.getIndex('annotations').get(path, offset, endOffset)
-  each(annotations, function(anno) {
+  forEach(annotations, function(anno) {
     let data = cloneDeep(anno.toJSON())
     data.path = [Document.TEXT_SNIPPET_ID, 'content']
     data.startOffset = Math.max(offset, anno.startOffset)-offset
@@ -94,9 +98,7 @@ function _copyContainerSelection(doc, selection) {
     path = firstFragment.path
     offset = firstFragment.startOffset
     text = doc.get(path)
-    snippet.update(path, {
-      delete: { start: 0, end: offset }
-    })
+    snippet.update(path, { type: 'delete', start: 0, end: offset })
     annotationHelpers.deletedText(snippet, path, 0, offset)
   }
 
@@ -105,9 +107,7 @@ function _copyContainerSelection(doc, selection) {
     path = lastFragment.path
     offset = lastFragment.endOffset
     text = doc.get(path)
-    snippet.update(path, {
-      delete: { start: offset, end: text.length }
-    })
+    snippet.update(path, { type: 'delete', start: offset, end: text.length })
     annotationHelpers.deletedText(snippet, path, offset, text.length)
   }
 
@@ -139,7 +139,7 @@ function _copyNode(doc, node, container, created) {
 
   let annotationIndex = doc.getIndex('annotations')
   let annotations = annotationIndex.get([node.id])
-  each(annotations, function(anno) {
+  forEach(annotations, function(anno) {
     doc.create(cloneDeep(anno.toJSON()))
   })
 }

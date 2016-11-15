@@ -1,4 +1,4 @@
-import each from 'lodash/each'
+import forEach from '../util/forEach'
 import DataNode from './data/Node'
 import EventEmitter from '../util/EventEmitter'
 
@@ -39,8 +39,6 @@ class DocumentNode extends DataNode {
     // if (!doc) throw new Error('Document instance is mandatory.')
     this.document = doc
   }
-
-  get _isDocumentNode() { return true }
 
   /**
     Get the Document instance.
@@ -165,7 +163,7 @@ class DocumentNode extends DataNode {
   // rather inconvenient EventProxy API.
   connect(ctx, handlers) {
     console.warn('DEPRECATED: use Node.on() instead')
-    each(handlers, function(func, name) {
+    forEach(handlers, function(func, name) {
       this.on(name, func, ctx)
     }.bind(this))
   }
@@ -220,6 +218,8 @@ class DocumentNode extends DataNode {
   }
 
 }
+
+DocumentNode.prototype._isDocumentNode = true
 
 /**
   Declares a node to be treated as block-type node.

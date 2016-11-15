@@ -1,5 +1,6 @@
-import isEqual from 'lodash/isEqual'
+import isArrayEqual from '../util/isArrayEqual'
 import DocumentNode from './DocumentNode'
+import CoordinateAdapter from './CoordinateAdapter'
 
 /**
   A property annotation can be used to overlay text and give it a special meaning.
@@ -30,6 +31,14 @@ import DocumentNode from './DocumentNode'
 */
 class PropertyAnnotation extends DocumentNode {
 
+  constructor(...args) {
+    super(...args)
+
+    // for Coordinate oriented methods (such as CoordinateOperations)
+    this._start = new CoordinateAdapter(this, 'path', 'startOffset')
+    this._end = new CoordinateAdapter(this, 'path', 'endOffset')
+  }
+
   /**
     Get the plain text spanned by this annotation.
 
@@ -57,8 +66,16 @@ class PropertyAnnotation extends DocumentNode {
     return true
   }
 
+  get start() {
+    return this._start
+  }
+
+  get end() {
+    return this._end
+  }
+
   /**
-    If this annotation is a an Anchor.
+    If this annotation is an Anchor.
 
     Anchors are annotations with a zero width.
     For instance, ContainerAnnotation have a start and an end anchor,
@@ -84,7 +101,7 @@ class PropertyAnnotation extends DocumentNode {
     if (!sel.isPropertySelection()) {
       throw new Error('Cannot change to ContainerAnnotation.')
     }
-    if (!isEqual(this.startPath, sel.start.path)) {
+    if (!isArrayEqual(this.startPath, sel.start.path)) {
       tx.set([this.id, 'path'], sel.start.path)
     }
     if (this.startOffset !== sel.start.offset) {
@@ -95,11 +112,24 @@ class PropertyAnnotation extends DocumentNode {
     }
   }
 
+  // WIP
+  isInsideOf(sel, _strict) {
+    if (sel.isNull()) return false;
+    if (_strict) {
+      return (isArrayEqual(this.path, sel.path) &&
+        this.startOffset > sel.startOffset &&
+        this.endOffset < sel.endOffset)
+    } else {
+      return (isArrayEqual(this.path, sel.path) &&
+        this.startOffset >= sel.startOffset &&
+        this.endOffset <= sel.endOffset)
+    }
+  }
 }
 
 PropertyAnnotation.define({
   type: "annotation",
-  path: ["string"],
+  path: { type: ["array", "string"] },
   startOffset: "number",
   endOffset: "number",
   // this is only used when an annotation is used 'stand-alone'
@@ -108,11 +138,11 @@ PropertyAnnotation.define({
 })
 
 PropertyAnnotation.isPropertyAnnotation = true
-
 PropertyAnnotation.prototype._isAnnotation = true
 PropertyAnnotation.prototype._isPropertyAnnotation = true
 
 // these properties making PropertyAnnotation compatible with ContainerAnnotations
+// TODO: for such things we should use the coordinates
 Object.defineProperties(PropertyAnnotation.prototype, {
   startPath: {
     get: function() {

@@ -38,25 +38,41 @@ function insertNode(tx, args) {
   }
   let containerId = args.containerId
   let container = tx.get(containerId)
-  let tmp
-  if (!selection.isCollapsed()) {
-    tmp = deleteSelection(tx, args)
-    selection = tmp.selection
+  let nodePos, nodeId
+  if (selection.isNodeSelection() && selection.isFull()) {
+    nodeId = selection.getNodeId()
+    nodePos = container.getPosition(nodeId)
+    container.hide(nodeId)
+    tx.delete(nodeId)
+  } else {
+    let tmp = args
+    if (!selection.isCollapsed()) {
+      tmp = deleteSelection(tx, args)
+    }
+    tmp = breakNode(tx, tmp)
+    let nodeId = tmp.selection.start.getNodeId()
+    let second = tx.get(nodeId)
+    nodePos = container.getPosition(nodeId)
+    // remove empty text node created by breakNode
+    if (second.isText() && second.getText().length === 0) {
+      container.hide(nodeId)
+      tx.delete(nodeId)
+    }
   }
-  tmp = breakNode(tx, args)
-  selection = tmp.selection
+
   // create the node if it does not exist yet
   // notice, that it is also allowed to insert an existing node
   if (!node.id) {
     node.id = uuid(node.type)
   }
+  // this transform can be called to insert an existing node
+  // in this case the document contains the id already
   if (!tx.get(node.id)) {
     node = tx.create(node)
   }
-  // make sure we have the real node, not just its data
   node = tx.get(node.id)
+
   // insert the new node after the node where the cursor was
-  let nodePos = container.getPosition(selection.start.getNodeId())
   container.show(node.id, nodePos)
 
   // if the new node is a text node we can set the cursor to the
@@ -71,12 +87,10 @@ function insertNode(tx, args) {
   // otherwise we select the whole new node
   else {
     args.selection = tx.createSelection({
-      type: 'container',
+      type: 'node',
       containerId: containerId,
-      startPath: [node.id],
-      startOffset: 0,
-      endPath: [node.id],
-      endOffset: 1
+      nodeId: node.id,
+      mode: 'full'
     })
   }
 

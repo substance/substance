@@ -1,19 +1,20 @@
-import DocumentSession from '../../model/DocumentSession'
+import EditorSession from '../../model/EditorSession'
 import Component from '../../ui/Component'
 import ContainerEditor from '../../ui/ContainerEditor'
+import Configurator from '../../util/Configurator'
 import createTestArticle from '../fixtures/createTestArticle'
 import createTestComponentRegistry from '../fixtures/createTestComponentRegistry'
 
 export default function setupContainerEditor(fixture, el) {
 
   const doc = createTestArticle(fixture)
-  const docSession = new DocumentSession(doc)
+  const editorSession = new EditorSession(doc, { configurator: new Configurator() })
   const componentRegistry = createTestComponentRegistry()
 
   class App extends Component {
     getChildContext() {
       return {
-        documentSession: docSession,
+        editorSession: editorSession,
         document: doc,
         componentRegistry: componentRegistry
       }
@@ -35,7 +36,7 @@ export default function setupContainerEditor(fixture, el) {
     app.triggerDidMount()
   }
   return {
-    documentSession: docSession,
+    editorSession: editorSession,
     doc: doc,
     app: app
   }

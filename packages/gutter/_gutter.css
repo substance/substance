@@ -1,0 +1,18 @@
+.sc-gutter { z-index: 200; position: absolute; }
+.sc-gutter.sm-hidden { visibility: hidden; position: fixed; }
+
+.sc-gutter.sm-theme-dark::before {
+  content: '';
+  display: block;
+  margin: 0 auto;
+  width: 0;
+  height: 0;
+  border-style: solid;
+  border-width: 0 4px 8px 4px;
+  border-color: transparent transparent #2E2E2C transparent;
+}
+
+.sc-gutter.sm-theme-dark > .se-active-tools {
+  background: #2E2E2C;
+  padding: 5px;
+}

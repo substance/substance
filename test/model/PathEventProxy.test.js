@@ -1,6 +1,7 @@
 import { module } from 'substance-test'
 
-import DocumentSession from '../../model/DocumentSession'
+import EditorSession from '../../model/EditorSession'
+import Configurator from '../../util/Configurator'
 import fixture from '../fixtures/createTestArticle'
 import headersAndParagraphs from '../fixtures/headersAndParagraphs'
 
@@ -39,12 +40,12 @@ test("Setting a property", function(t) {
 
 test("Setting a property and deleting the node afterwards", function(t) {
   var doc = fixture(docWithTestNodes)
-  var docSession = new DocumentSession(doc)
+  var editorSession = new EditorSession(doc, { configurator: new Configurator() })
   var callCount = 0
   doc.getEventProxy('path').on(['test', 'arrayVal'], function() {
     callCount++
   })
-  docSession.transaction(function(tx) {
+  editorSession.transaction(function(tx) {
     tx.set(['test', 'arrayVal'], [1,1,1])
     tx.delete('test')
   })

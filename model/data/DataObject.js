@@ -7,8 +7,6 @@ import unset from 'lodash/unset'
 /*
   An object that can be access via path API.
 
-  @class
-  @param {object} [obj] An object to operate on
   @example
 
   var obj = new DataObject({a: "aVal", b: {b1: 'b1Val', b2: 'b2Val'}})
@@ -16,6 +14,9 @@ import unset from 'lodash/unset'
 
 class DataObject {
 
+  /*
+    @param {object} [root] An object to operate on
+  */
   constructor(root) {
     if (root) {
       this.__root__ = root

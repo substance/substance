@@ -3,8 +3,9 @@
   padding:  var(--default-padding);
 }
 /* Add padding to each child except last one */
-.sc-prose-editor .sc-container-editor > * + * {
-  padding-top:  var(--default-padding);
+.sc-prose-editor .sc-container-editor > * {
+  padding-top: 10px;
+  padding-bottom: 10px;
 }
 .sc-prose-editor .sc-toolbar {
   border-bottom: 1px solid  var(--border-color);

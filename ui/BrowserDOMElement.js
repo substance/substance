@@ -1,5 +1,5 @@
-import isString from 'lodash/isString'
-import isNumber from 'lodash/isNumber'
+import isString from '../util/isString'
+import isNumber from '../util/isNumber'
 import DOMElement from './DOMElement'
 import DelegatedEvent from './DelegatedEvent'
 
@@ -93,7 +93,7 @@ class BrowserDOMElement extends DOMElement {
   }
 
   setTagName(tagName) {
-    let newEl = BrowserDOMElement.createElement(tagName)
+    let newEl = this.createElement(tagName)
     let attributes = this.el.attributes
     let l = attributes.length
     let i
@@ -422,7 +422,7 @@ class BrowserDOMElement extends DOMElement {
         return child
       }
     }
-    if (isString(child)) {
+    if (isString(child) || isNumber(child)) {
       child = this.createTextNode(child)
     }
     if (!child || !child._isBrowserDOMElement) {

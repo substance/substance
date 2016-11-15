@@ -1,6 +1,6 @@
 import DOMExporter from './DOMExporter'
 import DefaultDOMElement from '../ui/DefaultDOMElement'
-import forEach from 'lodash/forEach'
+import forEach from '../util/forEach'
 import isBoolean from 'lodash/isBoolean'
 import isNumber from 'lodash/isNumber'
 import isString from 'lodash/isString'
@@ -49,8 +49,8 @@ var defaultBlockConverter = {
 */
 class XMLExporter extends DOMExporter {
 
-  constructor(config) {
-    super(Object.assign({ idAttribute: 'id' }, config))
+  constructor(config, context) {
+    super(Object.assign({ idAttribute: 'id' }, config), context)
 
     // used internally for creating elements
     this._el = DefaultDOMElement.parseXML('<dummy></dummy>')

@@ -1,0 +1,29 @@
+.sc-blocker {
+  z-index: 500000;
+  position: fixed;
+  top: 0px;
+  left: 0px;
+  right: 0px;
+  bottom: 0px;
+
+  background: #FFF;
+
+  opacity: 0;
+  transition: opacity .25s ease-in-out;
+  -moz-transition: opacity .25s ease-in-out;
+  -webkit-transition: opacity .25s ease-in-out;
+}
+
+.sc-blocker > .se-display {
+  transition: opacity .25s ease-in-out;
+  -moz-transition: opacity .25s ease-in-out;
+  -webkit-transition: opacity .25s ease-in-out;
+}
+
+.sc-blocker.sm-visible {
+  opacity: 0.7;
+}
+
+.sc-blocker.sm-visible > .se-display {
+  opacity: 1.0;
+}

@@ -1,4 +1,4 @@
-import each from 'lodash/each'
+import forEach from '../../util/forEach'
 import NodeRegistry from './NodeRegistry'
 import Node from './Node'
 
@@ -44,7 +44,7 @@ class Schema {
   */
   addNodes(nodes) {
     if (!nodes) return
-    each(nodes, function(NodeClass) {
+    forEach(nodes, function(NodeClass) {
       if (!NodeClass.prototype._isNode) {
         console.error('Illegal node class: ', NodeClass)
       } else {

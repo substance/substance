@@ -4,6 +4,7 @@ import StrongXMLConverter from './StrongXMLConverter'
 import AnnotationCommand from '../../ui/AnnotationCommand'
 import AnnotationComponent from '../../ui/AnnotationComponent'
 import AnnotationTool from '../../ui/AnnotationTool'
+import platform from '../../util/platform'
 
 export default {
   name: 'strong',
@@ -15,13 +16,18 @@ export default {
     config.addComponent('strong', AnnotationComponent)
     config.addCommand('strong', AnnotationCommand, { nodeType: 'strong' })
     config.addTool('strong', AnnotationTool, {
-      target: options.toolTarget || 'annotations'
+      toolGroup: options.toolGroup || 'annotations'
     })
     config.addIcon('strong', { 'fontawesome': 'fa-bold' })
     config.addLabel('strong', {
-      en: 'Strong emphasis',
-      de: 'Starke Betonung'
+      en: 'Strong',
+      de: 'Fett'
     })
+    if (platform.isMac) {
+      config.addKeyboardShortcut('cmd+b', { command: 'strong' })
+    } else {
+      config.addKeyboardShortcut('ctrl+b', { command: 'strong' })
+    }
   },
   Strong: Strong,
   StrongHTMLConverter: StrongHTMLConverter

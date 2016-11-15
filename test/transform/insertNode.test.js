@@ -1,6 +1,7 @@
 import { module } from 'substance-test'
 import insertNode from '../../model/transform/insertNode'
-import DocumentSession from '../../model/DocumentSession'
+import EditorSession from '../../model/EditorSession'
+import Configurator from '../../util/Configurator'
 import fixture from '../fixtures/createTestArticle'
 import simple from '../fixtures/simple'
 
@@ -38,8 +39,8 @@ test("InsertNode usage", function(t) {
 
 test("Insert node should break node.", function(t) {
   var doc = fixture(simple)
-  var docSession = new DocumentSession(doc)
-  docSession.transaction(function(tx, args) {
+  var editorSession = _createSession(doc)
+  editorSession.transaction(function(tx, args) {
     args.containerId = 'body'
     args.selection = doc.createSelection(selectionInFirstParagraph)
     args.node = testNode
@@ -59,8 +60,8 @@ test("Insert node should break node.", function(t) {
 
 test("Inserting an existing node should be possible", function(t) {
   var doc = fixture(simple)
-  var docSession = new DocumentSession(doc)
-  docSession.transaction(function(tx, args) {
+  var editorSession = _createSession(doc)
+  editorSession.transaction(function(tx, args) {
     tx.create(testNode)
     args.containerId = 'body'
     args.selection = doc.createSelection(selectionInFirstParagraph)
@@ -74,8 +75,8 @@ test("Inserting an existing node should be possible", function(t) {
 test("Selection after insert.", function(t) {
   var doc = fixture(simple)
   var sel
-  var docSession = new DocumentSession(doc)
-  docSession.transaction(function(tx, args) {
+  var editorSession = _createSession(doc)
+  editorSession.transaction(function(tx, args) {
     args.containerId = 'body'
     args.selection = doc.createSelection(selectionInFirstParagraph)
     args.node = testNode
@@ -87,3 +88,7 @@ test("Selection after insert.", function(t) {
   t.equal(sel.startOffset, 0, "Cursor should be at the beginning.")
   t.end()
 })
+
+function _createSession(doc) {
+  return new EditorSession(doc, { configurator: new Configurator() })
+}

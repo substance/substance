@@ -1,5 +1,5 @@
 import last from 'lodash/last'
-import forEach from 'lodash/forEach'
+import forEach from '../util/forEach'
 import clone from 'lodash/clone'
 import extend from 'lodash/extend'
 // import uuid from '../util/uuid'
@@ -24,7 +24,9 @@ const TABS_OR_NL = /[\t\n\r]+/g
  */
 class DOMImporter {
 
-  constructor(config) {
+  constructor(config, context) {
+    this.context = context || {}
+
     if (!config.converters) {
       throw new Error('config.converters is mandatory')
     }

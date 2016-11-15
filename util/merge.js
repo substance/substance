@@ -4,17 +4,17 @@ import isArray from 'lodash/isArray'
 
 function _concatArrays(objValue, srcValue) {
   if (isArray(objValue)) {
-    return objValue.concat(srcValue);
+    return objValue.concat(srcValue)
   } else {
-    return null;
+    return null
   }
 }
 
 function _replaceArrays(objValue, srcValue) {
   if (isArray(objValue)) {
-    return srcValue;
+    return srcValue
   } else {
-    return null;
+    return null
   }
 }
 
@@ -26,16 +26,16 @@ function _replaceArrays(objValue, srcValue) {
    get concatenated rather than overwritten.
 */
 export default function(a, b, options) {
-  options = options || {};
-  var _with = null;
+  options = options || {}
+  var _with = null
   if (options.array === 'replace') {
-    _with = _replaceArrays;
+    _with = _replaceArrays
   } else if (options.array === 'concat') {
-    _with = _concatArrays;
+    _with = _concatArrays
   }
   if (_with) {
-    return mergeWith(a, b, _with);
+    return mergeWith(a, b, _with)
   } else {
-    return merge(a, b);
+    return merge(a, b)
   }
-};
+}

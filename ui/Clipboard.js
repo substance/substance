@@ -67,14 +67,9 @@ class Clipboard {
   */
   onCopy(event) {
     // console.log("Clipboard.onCopy", arguments);
-    let clipboardData = this._copy();
-    // in the case that browser doesn't provide event.clipboardData
-    // we keep the copied data for internal use.
-    // Then we have copy'n'paste at least within one app
-    Clipboard.clipboardData = clipboardData
-    // FOR DEBUGGING
-    substanceGlobals.clipboardData = clipboardData
+    let clipboardData = this.copy()
     substanceGlobals._clipboardData = event.clipboardData
+
     if (event.clipboardData && clipboardData.doc) {
       event.preventDefault()
       // store as plain text and html
@@ -84,6 +79,20 @@ class Clipboard {
         event.clipboardData.setData('text/html', clipboardData.html)
       }
     }
+  }
+
+  /*
+    Can be called from outside
+  */
+  copy() {
+    let clipboardData = this._copy();
+    // in the case that browser doesn't provide event.clipboardData
+    // we keep the copied data for internal use.
+    // Then we have copy'n'paste at least within one app
+    Clipboard.clipboardData = clipboardData
+    // FOR DEBUGGING
+    substanceGlobals.clipboardData = clipboardData
+    return clipboardData
   }
 
   /*
@@ -209,7 +218,6 @@ class Clipboard {
         position: 'fixed',
         opacity: '0.0',
         bottom: '-1000px',
-        // width: '0px'
       })
       .append(" ")
       .on('beforepaste', function(event) {
@@ -282,12 +290,32 @@ class Clipboard {
     // TODO: the clipboard importer should make sure
     // that the container exists
     let content = this.htmlImporter.importDocument(html)
-    if (content) {
+    this.paste(content, text)
+  }
+
+  /*
+    Takes a clipboard document and pastes it at the current
+    cursor position.
+
+    Used by PasteCommand
+  */
+  paste(contentDoc, text) {
+    // Use internal clipboard doc
+    if (!contentDoc) {
+      contentDoc = Clipboard.clipboardData.doc
+    }
+
+    let surface = this.getSurface()
+    if (!surface) return
+    // TODO: the clipboard importer should make sure
+    // that the container exists
+
+    if (contentDoc) {
       surface.transaction(function(tx, args) {
         args.text = text
-        args.doc = content
+        args.doc = contentDoc
         return surface.paste(tx, args)
-      });
+      })
       return true
     }
   }
