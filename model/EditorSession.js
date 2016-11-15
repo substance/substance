@@ -221,14 +221,14 @@ class EditorSession extends EventEmitter {
   }
 
   setSelection(sel) {
+    if (sel && isPlainObject(sel)) {
+      sel = this.getDocument().createSelection(sel)
+    }
     if (sel && !sel.isNull() && !sel.surfaceId) {
       let fs = this.getFocusedSurface()
       if (fs) {
         sel.surfaceId = fs.id
       }
-    }
-    if (sel && isPlainObject(sel)) {
-      sel = this.getDocument().createSelection(sel)
     }
     if (this._setSelection(sel)) {
       this.startFlow()
