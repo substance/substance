@@ -69,7 +69,7 @@ class DragManager extends EventEmitter {
       // This is definitely hacky. Just until we have time to think about it
       // more thoroughly
       let comp = this._getIsolatedNodeOrContainerChild(DefaultDOMElement.wrapNativeElement(e.target))
-      if (comp.props.node) {
+      if (comp && comp.props.node) {
         let surface = comp.context.surface
         let nodeSelection = new NodeSelection({
           containerId: surface.getContainerId(),
@@ -160,9 +160,9 @@ class DragManager extends EventEmitter {
     current = targetEl
     parent = current.parentNode
     while(parent) {
-      if (parent._comp._isContainerEditor) {
+      if (parent._comp && parent._comp._isContainerEditor) {
         return current._comp
-      } else if (current._comp._isIsolatedNode) {
+      } else if (current._comp && current._comp._isIsolatedNode) {
         return current._comp
       }
       current = parent
