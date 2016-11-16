@@ -24,9 +24,9 @@ class FileNode extends DocumentNode {
 FileNode.type = 'file'
 FileNode.define({
   url: { type: 'string', optional: true },
-  fileType: { type: 'string', optional:true },
-  mimeType: { type: 'string', optional:true },
-  data: { type: 'object', optional:true }
+  fileType: { type: 'string', optional: true },
+  mimeType: { type: 'string', optional: true },
+  data: { type: 'object', optional: true }
 })
 
 FileNode.strip = function(nodeData) {

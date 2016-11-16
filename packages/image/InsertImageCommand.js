@@ -1,6 +1,5 @@
 import Command from '../../ui/Command'
-import paste from '../../model/transform/paste'
-import insertImageFromFile from './insertImageFromFile'
+import insertImage from './insertImage'
 
 class ImageCommand extends Command {
 
@@ -21,13 +20,12 @@ class ImageCommand extends Command {
   /*
     Inserts file and image nodes
   */
-  execute(params, context) {
-    let state = this.getCommandState(params)
+  execute(params) {
     let editorSession = params.editorSession
 
     editorSession.transaction((tx) => {
       params.files.forEach((file) => {
-        insertImageFromFile(tx, file)
+        insertImage(tx, file)
       })
     })
   }
