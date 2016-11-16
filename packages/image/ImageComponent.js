@@ -23,13 +23,11 @@ class ImageComponent extends NodeComponent {
   render($$) {
     let el = super.render($$)
     el.addClass('sc-image')
-
     el.append(
       $$('img').attr({
         src: this.props.node.getUrl(),
       }).ref('image')
     )
-
     return el
   }
 

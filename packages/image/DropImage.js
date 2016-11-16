@@ -1,17 +1,16 @@
 import startsWith from 'lodash/startsWith'
-import insertImageFromFile from './insertImageFromFile'
+import insertImage from './insertImage'
 import DragAndDropHandler from '../../ui/DragAndDropHandler'
 
-// Implements a file drop handler
 class DropImage extends DragAndDropHandler {
   match(params) {
-    console.log('match', params)
-    return params.type === 'file' && startsWith(params.file.type, 'image')
+    // Mime-type starts with 'image/'
+    let isImage = params.file.type.indexOf('image/') === 0
+    return params.type === 'file' && isImage
   }
 
   drop(tx, params) {
-    console.info('handling image file')
-    insertImageFromFile(tx, params.file)
+    insertImage(tx, params.file)
   }
 }
 
