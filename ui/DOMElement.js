@@ -4,7 +4,7 @@ import isObject from 'lodash/isObject'
 import isString from 'lodash/isString'
 import isArray from 'lodash/isArray'
 import findIndex from 'lodash/findIndex'
-import forEach from 'lodash/forEach'
+import forEach from '../util/forEach'
 import ArrayIterator from '../util/ArrayIterator'
 
 const NOT_IMPLEMENTED = 'This method is not implemented.'

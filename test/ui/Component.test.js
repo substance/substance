@@ -661,7 +661,7 @@ function ComponentTests(debug) {
     t.end()
   })
 
-  test("Edge case: ingesting a child without picking up", function(t) {
+  test("Edge case: unused children", function(t) {
     class Parent extends Component {
       render($$) {
         return $$('div').append(
@@ -677,6 +677,35 @@ function ComponentTests(debug) {
     var comp = Parent.render()
     t.equal(comp.el.getChildCount(), 1, "Should have 1 child")
     t.equal(comp.el.textContent, '', "textContent should be empty")
+    t.end()
+  })
+
+  test("Providing a ref'd child via props", function(t) {
+    class Parent extends Component {
+      render($$) {
+        let grandchild = $$(Grandchild).ref('grandchild')
+        return $$('div').append(
+          $$(Child, { child: grandchild })
+        )
+      }
+    }
+    class Child extends Component {
+      render($$) {
+        return $$('div').append(this.props.child)
+      }
+    }
+    class Grandchild extends Component {
+      render($$) {
+        return $$('div')
+      }
+    }
+    var parent = Parent.render()
+    t.equal(parent.el.getChildCount(), 1, "Should have 1 child")
+    var child = parent.getChildAt(0)
+    t.equal(child.el.getChildCount(), 1, "Should have 1 grandchild")
+    var grandchild = child.getChildAt(0)
+    t.ok(parent.refs.grandchild === grandchild, "Grandchild should be the same as the referenced component.")
+    t.ok(child.props.child.getComponent() === grandchild, "Grandchild should be accessible via props of child.")
     t.end()
   })
 
@@ -1075,7 +1104,7 @@ function ComponentTests(debug) {
       render($$) {
         var el = $$('div').addClass('composite-component')
         this.props.items.forEach(function(item) {
-          el.append($$(ItemComponent, item).ref(item.ref))
+          el.append($$(ItemComponent, {name: item.name}).ref(item.ref))
         })
         return el
       }

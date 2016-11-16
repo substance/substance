@@ -3,17 +3,17 @@ import Command from '../../ui/Command'
 class Undo extends Command {
 
   getCommandState(params) {
-    let docSession = params.documentSession
+    let editorSession = params.editorSession
     return {
-      disabled: !docSession.canUndo(),
+      disabled: !editorSession.canUndo(),
       active: false
     }
   }
 
   execute(params) {
-    let docSession = params.documentSession
-    if (docSession.canUndo()) {
-      docSession.undo()
+    let editorSession = params.editorSession
+    if (editorSession.canUndo()) {
+      editorSession.undo()
       return true
     }
     return false

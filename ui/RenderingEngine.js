@@ -58,6 +58,8 @@ function _create(state, vel) {
   if (vel._isVirtualComponent) {
     console.assert(parent, "A Component should have a parent.");
     comp = new vel.ComponentClass(parent, vel.props);
+    // HACK: making sure that we have the right props
+    vel.props = comp.props
     comp.__htmlConfig__ = vel._copyHTMLConfig();
   } else if (vel._isVirtualHTMLElement) {
     comp = new Component.Element(parent, vel);
@@ -93,7 +95,7 @@ function _capture(state, vel, forceCapture) {
       needRerender = true;
     } else {
       // NOTE: don't ask shouldRerender if no element is there yet
-      needRerender = !comp.el || comp.shouldRerender(vel.props);
+      needRerender = !comp.el || comp.shouldRerender(vel.props, comp.state);
       comp.__htmlConfig__ = vel._copyHTMLConfig();
       state.setOldProps(vel, comp.props);
       state.setOldState(vel, comp.state);
@@ -130,9 +132,9 @@ function _capture(state, vel, forceCapture) {
         var stack = content.children.slice(0);
         while (stack.length) {
           var child = stack.shift();
-          if (state.isCaptured(child) || child._isVirtualComponent) {
-            continue;
-          }
+          if (state.isCaptured(child)) continue
+          // virtual components are addressed via recursion, not captured here
+          if (child._isVirtualComponent) continue
           if (!child._comp) {
             _create(state, child);
           }
@@ -170,7 +172,11 @@ function _render(state, vel) {
   if (state.isSkipped(vel)) return;
 
   // before changes can be applied, a VirtualElement must have been captured
-  console.assert(state.isCaptured(vel), 'VirtualElement must be captured before rendering');
+  // FIXME: with DEBUG_RENDERING we are having troubles with this assumption.
+  // It happens when the rerendered component is having children injected from its parent.
+  // Then the parent is no rerendered this, these injected components are not recaptured, and this assertion does not hold.
+  // However, it seems not to be critical, as these components don't need to be rerendered
+  // Still we should find a consistent way
 
   var comp = vel._comp;
   console.assert(comp && comp._isComponent, "A captured VirtualElement must have a component instance attached.");

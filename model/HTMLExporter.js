@@ -1,6 +1,6 @@
 import DOMExporter from './DOMExporter'
 import DefaultDOMElement from '../ui/DefaultDOMElement'
-import each from 'lodash/each'
+import forEach from '../util/forEach'
 import isBoolean from 'lodash/isBoolean'
 import isNumber from 'lodash/isNumber'
 import isString from 'lodash/isString'
@@ -11,7 +11,7 @@ var defaultAnnotationConverter = {
     el.tagName = 'span'
     el.attr('data-type', node.type)
     var properties = node.toJSON()
-    each(properties, function(value, name) {
+    forEach(properties, function(value, name) {
       if (name === 'id' || name === 'type') return
       if (isString(value) || isNumber(value) || isBoolean(value)) {
         el.attr('data-'+name, value)
@@ -24,7 +24,7 @@ var defaultBlockConverter = {
   export: function(node, el, converter) {
     el.attr('data-type', node.type)
     var properties = node.toJSON()
-    each(properties, function(value, name) {
+    forEach(properties, function(value, name) {
       if (name === 'id' || name === 'type') {
         return
       }

@@ -1,11 +1,12 @@
 import Surface from '../../packages/surface/Surface'
-import DocumentSession from '../../model/DocumentSession'
+import EditorSession from '../../model/EditorSession'
+import Configurator from '../../util/Configurator'
 
 function StubSurface(doc, containerId) {
 
   this.name = 'test_surface'
   this.containerId = containerId
-  this.documentSession = new DocumentSession(doc)
+  this.editorSession = new EditorSession(doc, { configurator: new Configurator() })
 
   this.getName = function() {
     return this.name
@@ -19,12 +20,12 @@ function StubSurface(doc, containerId) {
     return doc
   }
 
-  this.getDocumentSession = function() {
-    return this.documentSession
+  this.getEditorSession = function() {
+    return this.editorSession
   }
 
   this.getSelection = function() {
-    return this.documentSession.getSelection()
+    return this.editorSession.getSelection()
   }
 
   this.setSelection = function(sel) {
@@ -32,7 +33,7 @@ function StubSurface(doc, containerId) {
   }
 
   this._setSelection = function(sel) {
-    this.documentSession.setSelection(sel)
+    this.editorSession.setSelection(sel)
   }
 
   this.getContainerId = function() {

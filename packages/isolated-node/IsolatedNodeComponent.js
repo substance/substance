@@ -18,10 +18,6 @@ class IsolatedNodeComponent extends Component {
     this.ContentClass = this._getContentClass(this.props.node) || Component
   }
 
-  get _isIsolatedNodeComponent() {
-    return true
-  }
-
   get __elementTag() {
     return 'div'
   }
@@ -37,22 +33,22 @@ class IsolatedNodeComponent extends Component {
   }
 
   getInitialState() {
-    let selState = this.context.documentSession.getSelectionState()
+    let selState = this.context.editorSession.getSelectionState()
     return this._deriveStateFromSelectionState(selState)
   }
 
   didMount() {
     super.didMount.call(this);
 
-    let docSession = this.context.documentSession
-    docSession.on('update', this.onSessionUpdate, this)
+    let editorSession = this.context.editorSession
+    editorSession.onRender('selection', this._onSelectionChanged, this)
   }
 
   dispose() {
     super.dispose.call(this)
 
-    let docSession = this.context.documentSession
-    docSession.off(this)
+    let editorSession = this.context.editorSession
+    editorSession.off(this)
   }
 
   getClassNames() {
@@ -118,24 +114,15 @@ class IsolatedNodeComponent extends Component {
       container.addClass('sm-disabled')
       if (this.shouldRenderBlocker()) {
         // NOTE: there are some content implementations which work better without a blocker
-        let blocker = $$(this.__elementTag).addClass('se-blocker')
+        let blocker = $$(this.__elementTag).addClass('se-blocker').ref('blocker')
           .css({ 'z-index': 2*level+1 })
+        // select the node on click
+        blocker.on('click', this.onClickBlocker)
         container.append(blocker)
-      }
-      if (this.shouldSelectOnClick()) {
+      } else {
         // select the node on click
         el.on('click', this.onClick)
       }
-    }
-
-    if (this.context.dragManager &&
-        this.state.mode !== 'focused' &&
-        this.state.mode !== 'co-focused') {
-      el.attr("draggable", true);
-      el.on('dragstart', this.onDragStart)
-        .on('dragenter', this.onDragEnter)
-        .on('dragover', this.onDragOver)
-        .on('drop', this.onDrop)
     }
 
     if (this.state.mode === 'cursor' && this.state.position === 'after') {
@@ -150,6 +137,8 @@ class IsolatedNodeComponent extends Component {
         // NOTE: better use a regular character otherwise Edge has problems
         .append(this.__slugChar)
     )
+
+    el.attr('draggable', true)
     return el
   }
 
@@ -176,7 +165,7 @@ class IsolatedNodeComponent extends Component {
   }
 
   shouldSelectOnClick() {
-    return this.state.mode !== 'focused' && this.state.mpde !== 'co-focused'
+    return this.state.mode !== 'focused' && this.state.mode !== 'co-focused'
   }
 
   getId() {
@@ -231,15 +220,13 @@ class IsolatedNodeComponent extends Component {
     return level
   }
 
-  onSessionUpdate(update) {
-    if (update.selection) {
-      let documentSession = this.context.documentSession
-      let newState = this._deriveStateFromSelectionState(documentSession.getSelectionState())
-      if (!newState && this.state.mode) {
-        this.extendState({ mode: null })
-      } else if (newState && newState.mode !== this.state.mode) {
-        this.extendState(newState)
-      }
+  _onSelectionChanged(selection) {
+    let editorSession = this.context.editorSession
+    let newState = this._deriveStateFromSelectionState(editorSession.getSelectionState())
+    if (!newState && this.state.mode) {
+      this.extendState({ mode: null })
+    } else if (newState && newState.mode !== this.state.mode) {
+      this.extendState(newState)
     }
   }
 
@@ -296,7 +283,18 @@ class IsolatedNodeComponent extends Component {
 
   onClick(event) {
     event.preventDefault()
-    this._selectNode()
+    event.stopPropagation()
+    if (this.shouldSelectOnClick()) {
+      this._selectNode()
+    }
+  }
+
+  onClickBlocker(event) {
+    event.preventDefault()
+    event.stopPropagation()
+    if (this.shouldSelectOnClick() && event.target === this.refs.blocker.getNativeElement()) {
+      this._selectNode()
+    }
   }
 
   onKeydown(event) {
@@ -309,24 +307,6 @@ class IsolatedNodeComponent extends Component {
       event.preventDefault()
       this._escape()
     }
-  }
-
-  onDragStart(event) {
-    // console.log('Received drop on IsolatedNode', this.getId());
-    this.context.dragManager.onDragStart(event, this)
-  }
-
-  onDragEnter(event) {
-    event.preventDefault()
-  }
-
-  onDragOver(event) {
-    event.preventDefault()
-  }
-
-  onDrop(event) {
-    // console.log('Received drop on IsolatedNode', this.getId());
-    this.context.dragManager.onDrop(event, this)
   }
 
   _escape() {
@@ -351,6 +331,8 @@ class IsolatedNodeComponent extends Component {
   }
 
 }
+
+IsolatedNodeComponent.prototype._isIsolatedNodeComponent = true
 
 IsolatedNodeComponent.prototype._isDisabled = IsolatedNodeComponent.prototype.isDisabled
 

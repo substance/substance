@@ -7,13 +7,13 @@ import AnnotationTool from '../../ui/AnnotationTool'
 
 export default {
   name: 'code',
-  configure: function(config) {
+  configure: function(config, options) {
     config.addNode(Code);
     config.addConverter('html', CodeHTMLConverter)
     config.addConverter('xml', CodeXMLConverter)
     config.addComponent('code', AnnotationComponent)
     config.addCommand('code', AnnotationCommand, { nodeType: Code.type })
-    config.addTool('code', AnnotationTool, {target: 'annotations'})
+    config.addTool('code', AnnotationTool, {toolGroup: options.toolGroup || 'annotations'})
     config.addIcon('code', { 'fontawesome': 'fa-code' })
     config.addLabel('code', {
       en: 'Code',

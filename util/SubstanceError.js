@@ -5,7 +5,7 @@
 
   ```js
   import Err from 'substance/util/SubstanceError'
-  throw new Err('Document.SelectionUpdateError', {message: 'Could not update selection.'});
+  throw new Err('Document.SelectionUpdateError', {message: 'Could not update selection.'})
   ```
 
   For better inspection allows you to pass a cause (the error that caused the error).

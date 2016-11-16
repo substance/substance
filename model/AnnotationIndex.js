@@ -1,7 +1,7 @@
 import isString from 'lodash/isString'
 import isNumber from 'lodash/isNumber'
-import map from 'lodash/map'
 import filter from 'lodash/filter'
+import map from '../util/map'
 import TreeIndex from '../util/TreeIndex'
 import DocumentIndex from './DocumentIndex'
 
@@ -28,7 +28,7 @@ class AnnotationIndex extends DocumentIndex {
     this.byType = new TreeIndex()
   }
 
-  get property() { return "path"; }
+  get property() { return "path" }
 
   select(node) {
     return Boolean(node._isPropertyAnnotation)

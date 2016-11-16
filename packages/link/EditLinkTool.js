@@ -16,7 +16,7 @@ class EditLinkTool extends Tool {
   }
 
   _openLink() {
-    let doc = this.context.documentSession.getDocument()
+    let doc = this.context.editorSession.getDocument()
     window.open(doc.get(this.getUrlPath()), '_blank')
   }
 
@@ -24,6 +24,13 @@ class EditLinkTool extends Tool {
     let Input = this.getComponent('input')
     let Button = this.getComponent('button')
     let el = $$('div').addClass('sc-edit-link-tool')
+
+    // GUARD: Return if tool is disabled
+    if (this.props.disabled) {
+      console.warn('Tried to render EditLinkTool while disabled.')
+      return el
+    }
+
     let urlPath = this.getUrlPath()
 
     el.append(

@@ -1,7 +1,7 @@
 .sc-layout {
-  padding: var(--default-padding);
-  padding-top: var(--default-padding);
-  padding-bottom: var(--default-padding);
+  margin: var(--default-padding);
+  margin-top: var(--default-padding);
+  margin-bottom: var(--default-padding);
   width: 100%; /* by default takes the full width */
 }
 .sc-layout.sm-no-padding { padding: 0; }
@@ -17,8 +17,8 @@
   TODO: maybe this should be activated explicitly through a
   Prose component that turns on the text paddings.
 */
-.sc-layout > p { padding-bottom: var(--default-padding); }
+.sc-layout > p { margin-bottom: var(--default-padding); }
 .sc-layout > h1,
 .sc-layout > h2,
 .sc-layout > h3,
-.sc-layout > h4 { padding-bottom: var(--default-padding); }
+.sc-layout > h4 { margin-bottom: var(--default-padding); }

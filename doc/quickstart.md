@@ -12,7 +12,7 @@ Download the latest distribution from our [releases page on Github](https://gith
 Now you can start using Substance API's. The code below works in all modern browsers that support ES2015.
 
 ```js
-const { ProseEditor, ProseEditorPackage, SuperscriptPackage, Configurator } = substance
+import { ProseEditor, ProseEditorPackage, SuperscriptPackage, Configurator } from 'substance'
 
 const fixture = function(tx) {
   let body = tx.get('body')
@@ -30,10 +30,11 @@ cfg.import(SuperscriptPackage)
 
 window.onload = function() {
   let doc = configurator.createArticle(fixture)
-  let documentSession = new DocumentSession(doc)
-  ProseEditor.mount({
-    documentSession: documentSession,
+  let editorSession = new EditorSession(doc, {
     configurator: configurator
+  })
+  ProseEditor.mount({
+    editorSession: editorSession,
   }, document.body)
 }
 ```

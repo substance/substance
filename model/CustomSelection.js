@@ -7,9 +7,15 @@ class CustomSelection extends Selection {
   constructor(customType, data, surfaceId) {
     super()
 
-    this.customType = customType;
-    this.data = data;
+    if (arguments.length === 1) {
+      let _data = arguments[0]
+      customType = _data.customType
+      data = _data.data
+      surfaceId = _data.surfaceId
+    }
 
+    this.customType = customType;
+    this.data = data || {};
     this.surfaceId = surfaceId;
   }
 
@@ -53,12 +59,14 @@ class CustomSelection extends Selection {
   }
 
   _clone() {
-    return new CustomSelection(this.customType, this.data, this.surfaceId)
+    return new CustomSelection(this)
   }
 }
 
+CustomSelection.prototype._isCustomSelection = true
+
 CustomSelection.fromJSON = function(json) {
-  return new CustomSelection(json.customType, json.data || {}, json.surfaceId);
+  return new CustomSelection(json);
 }
 
 export default CustomSelection

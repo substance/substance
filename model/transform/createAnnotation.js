@@ -42,7 +42,7 @@ function createAnnotation(tx, args) {
     anno.endPath = sel.endPath
     anno.containerId = sel.containerId
   } else if (sel.isPropertySelection()) {
-    anno.path = sel.path
+    anno.path = tx.getRealPath(sel.path)
   } else {
     throw new Error('Illegal state: can not apply ContainerSelection')
   }
@@ -67,7 +67,7 @@ function _createPropertyAnnotations(tx, args) {
       id: uuid(node.type)
     }
     extend(anno, node)
-    anno.path = sels[i].getPath()
+    anno.path = tx.getRealPath(sels[i].getPath())
     anno.startOffset = sels[i].startOffset
     anno.endOffset = sels[i].endOffset
     tx.create(anno)

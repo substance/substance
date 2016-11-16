@@ -3,7 +3,7 @@ import forEach from 'lodash/forEach'
 import clone from 'lodash/clone'
 import cloneDeep from 'lodash/cloneDeep'
 import Err from '../util/SubstanceError'
-import DocumentSession from '../model/DocumentSession'
+import EditorSession from '../model/EditorSession'
 import DocumentChange from '../model/DocumentChange'
 import { fromJSON as selFromJSON } from '../model/selectionHelpers'
 
@@ -13,7 +13,7 @@ import { fromJSON as selFromJSON } from '../model/selectionHelpers'
 
   Requires a connected and authenticated collabClient.
 */
-class CollabSession extends DocumentSession {
+class CollabSession extends EditorSession {
   constructor(doc, config) {
     super(doc, config)
 

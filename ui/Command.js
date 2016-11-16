@@ -41,8 +41,8 @@ class Command {
     }
   }
 
-  get _isCommand() {
-    return true
+  get isAsync() {
+    return false
   }
 
   /**
@@ -76,7 +76,7 @@ class Command {
     }
     ```
 
-    @param {Object} params      Provides documentSession, selectionState, surface, selection
+    @param {Object} params      Provides editorSession, selectionState, surface, selection
     @param {Object} context     Provides app-specific context.
   */
   getCommandState(params, context) { // eslint-disable-line
@@ -86,7 +86,7 @@ class Command {
   /**
     Execute command and perform operations on the document
 
-    @param {Object} params      Provides commandState, documentSession, selectionState, surface, selection
+    @param {Object} params      Provides commandState, editorSession, selectionState, surface, selection
     @param {Object} context     Provides app-specific context.
 
     @return {Object} info object with execution details
@@ -95,12 +95,12 @@ class Command {
     throw new Error('Command.execute() is abstract.')
   }
 
-  _getDocumentSession(params, context) {
-    let docSession = params.documentSession || context.documentSession
-    if (!docSession) {
-      throw new Error("'documentSession' is required.")
+  _getEditorSession(params, context) {
+    let editorSession = params.editorSession || context.editorSession
+    if (!editorSession) {
+      throw new Error("'editorSession' is required.")
     }
-    return docSession
+    return editorSession
   }
 
   _getSelection(params) {
@@ -112,5 +112,7 @@ class Command {
   }
 
 }
+
+Command.prototype._isCommand = true
 
 export default Command

@@ -35,7 +35,7 @@ class AnnotationComponent extends Component {
   }
 
   render($$) {
-    let el = $$('span')
+    let el = $$(this._getTagName())
       .attr("data-id", this.props.node.id)
       .addClass(this.getClassNames())
     if (this.props.node.highlighted) {
@@ -55,6 +55,10 @@ class AnnotationComponent extends Component {
     } else {
       this.el.removeClass('sm-highlighted')
     }
+  }
+
+  _getTagName() {
+    return 'span'
   }
 
 }

@@ -91,8 +91,8 @@ class AnnotationCommand extends Command {
 
     @returns {Boolean} Whether or not annotations could be fused.
    */
-  // When more than one annotation overlaps with the current selection
   canFuse(annos, sel) {
+    // When more than one annotation overlaps with the current selection
     return (annos.length >= 2 && !sel.isCollapsed())
   }
 
@@ -105,8 +105,8 @@ class AnnotationCommand extends Command {
 
     @returns {Boolean} Whether or not annotation could be deleted.
    */
-  // When the cursor or selection is inside an existing annotation
   canDelete(annos, sel) {
+    // When the cursor or selection is inside an existing annotation
     if (annos.length !== 1) return false
     let annoSel = annos[0].getSelection()
     return sel.isInsideOf(annoSel)
@@ -122,8 +122,8 @@ class AnnotationCommand extends Command {
 
     @returns {Boolean} Whether or not annotation could be expanded.
    */
-  // When there's some overlap with only a single annotation we do an expand
   canExpand(annos, sel) {
+    // When there's some overlap with only a single annotation we do an expand
     if (annos.length !== 1) return false
     let annoSel = annos[0].getSelection()
     return sel.overlaps(annoSel) && !sel.isInsideOf(annoSel)
@@ -314,21 +314,17 @@ class AnnotationCommand extends Command {
 
     @returns {Object} transformed annotations.
    */
-  // Helper to trigger an annotation transformation
   _applyTransform(params, transformFn) {
-    // HACK: this looks a bit too flexible. Maybe we want to go for
     let sel = this._getSelection(params)
-    let documentSession = this._getDocumentSession(params)
+    if (sel.isNull()) return
+
+    let editorSession = this._getEditorSession(params)
     let surface = params.surface
     params.selection = sel
 
     let result; // to store transform result
-    if (sel.isNull()) return
-    documentSession.transaction(function(tx) {
-      tx.before.selection = sel
-      if (surface) {
-        tx.before.surfaceId = surface.getId()
-      }
+    editorSession.setSelection(sel)
+    editorSession.transaction(function(tx) {
       let out = transformFn(tx, params)
       if (out) {
         result = out.result

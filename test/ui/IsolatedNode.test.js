@@ -6,9 +6,9 @@ const test = module('ui/IsolatedNode')
 
 test("IsolatedNodes should be 'not-selected' when selection is null", function(t) {
   var env = setup(nestedContainers)
-  var documentSession = env.documentSession
+  var editorSession = env.editorSession
   var isolatedNodes = env.app.findAll('.sc-isolated-node')
-  documentSession.setSelection(null)
+  editorSession.setSelection(null)
   isolatedNodes.forEach(function(isolated){
     t.ok(isolated.isNotSelected(), "isolated node '"+isolated.getId()+"' should not be selected.")
   })
@@ -17,10 +17,10 @@ test("IsolatedNodes should be 'not-selected' when selection is null", function(t
 
 test("IsolatedNodes should be 'not-selected' when selection is somewhere else", function(t) {
   var env = setup(nestedContainers)
-  var documentSession = env.documentSession
-  var doc = documentSession.getDocument()
+  var editorSession = env.editorSession
+  var doc = editorSession.getDocument()
   var isolatedNodes = env.app.findAll('.sc-isolated-node')
-  documentSession.setSelection(doc.createSelection(['p1', 'content'], 0))
+  editorSession.setSelection(doc.createSelection(['p1', 'content'], 0))
   isolatedNodes.forEach(function(isolated){
     t.ok(isolated.isNotSelected(), "isolated node '"+isolated.getId()+"' should not be selected.")
   })
@@ -72,9 +72,9 @@ test("IsolatedNode should be 'co-selected' with spanning container selection", f
 test("IsolatedNode should be 'focused' when having the selection", function(t) {
   var env = setup(nestedContainers)
   var doc = env.doc
-  var documentSession = env.documentSession
+  var editorSession = env.editorSession
   var isolatedNodes = env.app.findAll('.sc-isolated-node')
-  documentSession.setSelection(doc.createSelection({
+  editorSession.setSelection(doc.createSelection({
     type: 'property',
     path: ['c1_p1', 'content'],
     startOffset: 0,
@@ -94,9 +94,9 @@ test("IsolatedNode should be 'focused' when having the selection", function(t) {
 test("IsolatedNode should be 'co-focused' when child is having the selection", function(t) {
   var env = setup(nestedContainers)
   var doc = env.doc
-  var documentSession = env.documentSession
+  var editorSession = env.editorSession
   var isolatedNodes = env.app.findAll('.sc-isolated-node')
-  documentSession.setSelection(doc.createSelection({
+  editorSession.setSelection(doc.createSelection({
     type: 'property',
     path: ['c2_p1', 'content'],
     startOffset: 0,
@@ -135,9 +135,9 @@ test("IsolatedNode should be robust 'co-focused' w.r.t. prefix of surface id", f
   // exist. I.e. one surfaceId was a prefix of another one.
   var env = setup(_twoStructuredNodes)
   var doc = env.doc
-  var documentSession = env.documentSession
+  var editorSession = env.editorSession
   var isolatedNodes = env.app.findAll('.sc-isolated-node')
-  documentSession.setSelection(doc.createSelection({
+  editorSession.setSelection(doc.createSelection({
     type: 'property',
     path: ['c2_p1', 'content'],
     startOffset: 0,

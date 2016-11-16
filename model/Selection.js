@@ -17,9 +17,6 @@ class Selection {
     _internal.doc = null
   }
 
-  // for duck-typed instanceof
-  get _isSelection() { return true; }
-
   clone() {
     var newSel = this._clone()
     if (this._internal.doc) {
@@ -136,7 +133,17 @@ class Selection {
   getFragments() {
     return []
   }
+
+  createWith(update) {
+    let SelectionClass = this.constructor
+    let data = this.toJSON()
+    Object.assign(data, update)
+    return SelectionClass.fromJSON(data)
+  }
 }
+
+// for duck-typed instanceof
+Selection.prototype._isSelection = true
 
 /*
   Class to represent null selections.

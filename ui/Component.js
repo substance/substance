@@ -8,8 +8,7 @@ import VirtualElement from './VirtualElement'
 import DOMElement from './DOMElement'
 import DefaultDOMElement from './DefaultDOMElement'
 import inBrowser from '../util/inBrowser'
-
-var __id__ = 0
+import uuid from '../util/uuid'
 
 /**
   A light-weight component implementation inspired by
@@ -105,16 +104,16 @@ class Component extends DOMElement.Delegator {
     @param {Object} props     Properties against which this class must
                               be rendered the first time.
   */
-  constructor(parent, props) {
+  constructor(parent, props, el) {
     super()
 
     // HACK: allowing skipping execution of this ctor
     if (arguments[0] === 'SKIP') return
 
-    this.__id__ = __id__++
+    this.__id__ = uuid()
 
     this.parent = parent
-    this.el = null
+    this.el = el
     this.refs = {}
 
     // HACK: a temporary solution to handle refs owned by an ancestor
@@ -131,6 +130,14 @@ class Component extends DOMElement.Delegator {
     Object.freeze(this.props)
     this.state = this.getInitialState() || {}
     Object.freeze(this.state)
+  }
+
+  getId() {
+    return this.__id__
+  }
+
+  setId() {
+    throw new Error("'id' is readonly")
   }
 
   /**
@@ -247,18 +254,22 @@ class Component extends DOMElement.Delegator {
     @param  {Boolean} maybe if `true` then does not throw when no Component is found
     @return {Class}                The ComponentClass
   */
-  getComponent(nodeType, maybe) {
+  getComponent(componentName, maybe) {
     let componentRegistry = this.getComponentRegistry()
     if (!componentRegistry) throw new Error('Missing componentRegistry.')
-    const ComponentClass = componentRegistry.get(nodeType)
+    const ComponentClass = componentRegistry.get(componentName)
     if (!maybe && !ComponentClass) {
-      throw new Error('No Component registered with name ' + nodeType)
+      throw new Error('No Component registered with name ' + componentName)
     }
     return ComponentClass
   }
 
   getComponentRegistry() {
-    return this.context.componentRegistry
+    return this.props.componentRegistry || this.context.componentRegistry
+  }
+
+  getFlow() {
+    return this.context.flow
   }
 
   /**
@@ -313,10 +324,11 @@ class Component extends DOMElement.Delegator {
 
     The default implementation simply returns true.
 
-    @param {Object} newProps The props are being applied to this component.
+    @param {Object} newProps The new props being applied to this component.
+    @param {Object} newState The new state being applied
     @return a boolean indicating whether rerender() should be run.
   */
-  shouldRerender(newProps) { // eslint-disable-line
+  shouldRerender(newProps, newState) { // eslint-disable-line
     return true
   }
 
@@ -399,13 +411,13 @@ class Component extends DOMElement.Delegator {
     ```javascript
     class Foo extends Component {
       didMount() {
-        this.props.node.on('label:changed', this.rerender, this)
+        this.context.editorSession.onRender('document', this.rerender, this, {
+          path: [this.props.node.id, 'label']
+        })
       }
 
       dispose() {
-        // unless this is done, rerender could be called for a dead, disposed
-        // component instance.
-        this.props.node.off(this)
+        this.context.editorSession.off(this)
       }
     }
     ```
@@ -650,14 +662,14 @@ class Component extends DOMElement.Delegator {
   getChildNodes() {
     if (!this.el) return []
     var childNodes = this.el.getChildNodes()
-    childNodes = childNodes.map(_unwrapComp).filter(notNull)
+    childNodes = childNodes.map(_unwrapComp).filter(Boolean)
     return childNodes
   }
 
   getChildren() {
     if (!this.el) return []
     var children = this.el.getChildren()
-    children = children.map(_unwrapComp).filter(notNull)
+    children = children.map(_unwrapComp).filter(Boolean)
     return children
   }
 
@@ -673,7 +685,7 @@ class Component extends DOMElement.Delegator {
 
   findAll(cssSelector) {
     var els = this.el.findAll(cssSelector)
-    return els.map(_unwrapComp).filter(notNull)
+    return els.map(_unwrapComp).filter(Boolean)
   }
 
   appendChild(child) {
@@ -765,7 +777,9 @@ class Component extends DOMElement.Delegator {
 }
 
 Component.prototype._isComponent = true
+
 EventEmitter.mixin(Component)
+
 DOMElement._defineProperties(Component, DOMElement._propertyNames)
 
 Component.unwrap = _unwrapComp
@@ -811,8 +825,13 @@ Object.defineProperty(Component, '$$', {
   }
 })
 
-Component.unwrapDOMElement = function(el) {
+Component.getComponentForDOMElement = function(el) {
   return _unwrapComp(el)
+}
+
+Component.unwrapDOMElement = function(el) {
+  console.warn('DEPRECATED: Use Component.getComponentForDOMElement')
+  return Component.getComponentForDOMElement(el)
 }
 
 Component.getComponentFromNativeElement = function(nativeEl) {
@@ -822,6 +841,7 @@ Component.getComponentFromNativeElement = function(nativeEl) {
   return _unwrapComp(DefaultDOMElement.wrapNativeElement(nativeEl))
 }
 
+// NOTE: this is used for incremental updates only
 function _disposeChild(child) {
   child.triggerDispose()
   if (child._owner && child._ref) {
@@ -830,6 +850,7 @@ function _disposeChild(child) {
   }
 }
 
+// NOTE: this is used for incremental updates only
 function _mountChild(parent, child) {
   if (parent.isMounted()) {
     child.triggerDidMount(true)
@@ -839,17 +860,16 @@ function _mountChild(parent, child) {
   }
 }
 
-
+// NOTE: we keep a reference to the component in all DOMElement instances
 function _unwrapComp(el) {
   if (el) return el._comp
 }
 
 function _unwrapCompStrict(el) {
-  console.assert(el._comp, "Expecting a back-link to the component instance.")
-  return _unwrapComp(el)
+  let comp = _unwrapComp(el)
+  if (!comp) throw new Error("Expecting a back-link to the component instance.")
+  return comp
 }
-
-function notNull(n) { return n }
 
 
 class ElementComponent extends Component {

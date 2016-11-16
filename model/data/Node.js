@@ -4,8 +4,8 @@ import isString from 'lodash/isString'
 import isArray from 'lodash/isArray'
 import isObject from 'lodash/isObject'
 import cloneDeep from 'lodash/cloneDeep'
-import each from 'lodash/each'
 import EventEmitter from '../../util/EventEmitter'
+import forEach from '../../util/forEach'
 
 /*
   Base node implementation.
@@ -93,7 +93,7 @@ class Node extends EventEmitter {
     var data = {
       type: this.type
     }
-    each(this.constructor.schema, function(prop, name) {
+    forEach(this.constructor.schema, function(prop, name) {
       data[prop.name] = this[name]
     }.bind(this))
     return data
@@ -159,7 +159,7 @@ function _defineSchema(NodeClass, schema) {
 
 function _compileSchema(schema) {
   var compiledSchema = {}
-  each(schema, function(definition, name) {
+  forEach(schema, function(definition, name) {
     // skip 'type'
     if (name === 'type') {
       return
@@ -207,7 +207,7 @@ function _unfoldedSchema(NodeClass, compiledSchema) {
 function _extractDefaultProps(NodeClass) {
   var unfoldedSchema = NodeClass.unfoldedSchema
   var defaultProps = {}
-  each(unfoldedSchema, function(prop, name) {
+  forEach(unfoldedSchema, function(prop, name) {
     if (prop.hasOwnProperty('default')) {
       defaultProps[name] = prop['default']
     }

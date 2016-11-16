@@ -1,10 +1,11 @@
 import { module } from 'substance-test'
 
-import DocumentSession from '../../model/DocumentSession'
-import Registry from '../../util/Registry'
+import EditorSession from '../../model/EditorSession'
 import ComponentRegistry from '../../ui/ComponentRegistry'
 import Clipboard from '../../ui/Clipboard'
 import DefaultDOMElement from '../../ui/DefaultDOMElement'
+import Configurator from '../../util/Configurator'
+import Registry from '../../util/Registry'
 import StubSurface from './StubSurface'
 import TestContainerEditor from './TestContainerEditor'
 
@@ -190,9 +191,10 @@ test.UI("Copying a container selection", function(t) {
 
 function _containerEditorSample(t) {
   var doc = fixture(simple)
+  var editorSession = new EditorSession(doc, { configurator: new Configurator() })
   var app = TestContainerEditor.mount({
     context: {
-      documentSession: new DocumentSession(doc),
+      editorSession: editorSession,
       componentRegistry: componentRegistry,
       converterRegistry: converterRegistry
     },

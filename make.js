@@ -7,13 +7,12 @@ b.task('clean', function() {
   b.rm('./.npm');
 });
 
-
 function _browser(DIST, transpileToES5) {
   b.js('./index.es.js', {
     buble: transpileToES5,
 
     ignore: ['substance-cheerio'],
-    commonjs: { include: ['node_modules/lodash/**'] },
+    commonjs: { include: ['/**/node_modules/lodash/**'] },
     targets: [{
       useStrict: !transpileToES5,
       dest: DIST+'substance.js',
@@ -43,7 +42,7 @@ function _server(DIST, transpileToES5) {
   b.js('./index.es.js', {
     buble: transpileToES5,
     commonjs: { include: [
-      'node_modules/lodash/**'
+      '/**/node_modules/lodash/**'
     ] },
     external: [ 'substance-cheerio' ],
     targets: [{
@@ -85,12 +84,12 @@ function _testBrowser(transpileToES5) {
   })
 }
 
-b.task('test:browser', function() {
+b.task('test:browser', ['test:clean', 'test:assets'], function() {
   // buble necessary here, as travis has old browser versions
   _testBrowser(true)
 })
 
-b.task('test:browser:pure', function() {
+b.task('test:browser:pure', ['test:clean', 'test:assets'], function() {
   // Pure ES6, and no buble here, for better dev experience
   _testBrowser(false)
 })

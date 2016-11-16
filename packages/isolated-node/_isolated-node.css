@@ -34,7 +34,7 @@
 }
 .sc-isolated-node.sm-default-style.sm-selected > .se-container,
 .sc-isolated-node.sm-default-style.sm-co-selected > .se-container {
-  background: rgba(163,205,253, 0.6);
+  /*background: rgba(163,205,253, 0.6);*/
   outline: 2px solid;
   outline-color: var(--local-selection-color);
 }

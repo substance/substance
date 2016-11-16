@@ -1,7 +1,7 @@
 import isEqual from 'lodash/isEqual'
 import last from 'lodash/last'
-import each from 'lodash/each'
 import EventEmitter from '../util/EventEmitter'
+import forEach from '../util/forEach'
 import DocumentNode from './DocumentNode'
 import Selection from './Selection'
 import Anchor from './Anchor'
@@ -29,10 +29,6 @@ import documentHelpers from './documentHelpers'
  */
 
 class ContainerAnnotation extends DocumentNode {
-
-  get _isAnnotation() { return true }
-
-  get _isContainerAnnotation() { return true }
 
   /**
     Get the plain text spanned by this annotation.
@@ -75,8 +71,7 @@ class ContainerAnnotation extends DocumentNode {
       this.highlighted = highlighted
       this.highlightedScope = scope
       this.emit('highlighted', highlighted, scope)
-
-      each(this.fragments, function(frag) {
+      forEach(this.fragments, function(frag) {
         frag.emit('highlighted', highlighted, scope)
       })
     }
@@ -142,6 +137,8 @@ ContainerAnnotation.define({
 })
 
 ContainerAnnotation.isContainerAnnotation = true
+ContainerAnnotation.prototype._isAnnotation = true
+ContainerAnnotation.prototype._isContainerAnnotation = true
 
 /**
   @internal

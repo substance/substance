@@ -130,11 +130,17 @@
 */
 .sc-button.sm-style-plain-dark {
   color: rgba(255,255,255, 0.6);
+  min-width: 30px;
 }
 
 .sc-button.sm-style-plain-dark:hover {
   background: rgba(255,255,255,0.2);
   color: rgba(255,255,255, 0.8);
+}
+
+.sc-button.sm-style-plain-dark.sm-active {
+  background: rgba(255,255,255,0.5);
+  color: rgba(255,255,255, 1);
 }
 
 .sc-button.sm-style-plain-dark > .se-hint {

@@ -28,9 +28,7 @@ class Button extends Component {
     if (this.props.active) {
       el.addClass('sm-active')
     }
-    if (!this.props.style) {
-      el.addClass('sm-style-outline')
-    } else {
+    if (this.props.style) {
       el.addClass('sm-style-'+this.props.style)
     }
 
@@ -62,7 +60,7 @@ class Button extends Component {
 
   renderHint($$) {
     return $$('div').addClass('se-hint').append(
-      this.getLabel(this.props.hint)
+      this.getLabel(this.props.hint+'-hint')
     )
   }
 

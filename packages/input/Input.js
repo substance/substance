@@ -3,11 +3,11 @@ import Component from '../../ui/Component'
 class Input extends Component {
 
   _onChange() {
-    let documentSession = this.context.documentSession
+    let editorSession = this.context.editorSession
     let path = this.props.path
     let newVal = this.el.val()
 
-    documentSession.transaction(function(tx) {
+    editorSession.transaction(function(tx) {
       tx.set(path, newVal)
     })
   }
@@ -16,8 +16,8 @@ class Input extends Component {
     let val
 
     if (this.props.path) {
-      let documentSession = this.context.documentSession
-      let doc = documentSession.getDocument()
+      let editorSession = this.context.editorSession
+      let doc = editorSession.getDocument()
       val = doc.get(this.props.path)
     } else {
       val = this.props.value
