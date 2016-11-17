@@ -37,6 +37,7 @@ class ProseEditor extends AbstractEditor {
     let DropTeaser = this.componentRegistry.get('drop-teaser')
 
     let contentPanel = $$(ScrollPane, {
+      contextMenu: 'custom',
       scrollbarPosition: 'right',
       scrollbarType: this.props.scrollbarType,
     }).append(
