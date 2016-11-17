@@ -89,7 +89,7 @@ class Overlay extends Toolbox {
   }
 
   getActiveToolGroupNames() {
-    return ['overlay', 'annotations']
+    return ['overlay']
   }
 
 }

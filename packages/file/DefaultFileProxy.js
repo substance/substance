@@ -27,11 +27,15 @@ class DefaultFileProxy extends FileProxy {
       return this._fileUrl
     }
     // no URL available
-    return ""
+    return ''
   }
 
-  sync(cb) {
-    this.context.fileService.uploadFile(this.file, cb)
+  sync() {
+    if (!this.url) {
+      console.info('Simulating file upload. Creating blob url instead.', this._fileUrl)
+      this.url = this._fileUrl
+    }
+    return Promise.resolve()
   }
 }
 

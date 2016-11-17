@@ -28,12 +28,8 @@ class FileProxy {
     return ''
   }
 
-  /*
-    We support both promise and callback API's here
-  */
-  sync(cb) {
-    if (cb) return cb(null)
-    return Promise.resolve()
+  sync() {
+    return Promise.reject(new Error('sync method not implemented'))
   }
 }
 

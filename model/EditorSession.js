@@ -59,11 +59,6 @@ class EditorSession extends EventEmitter {
 
     this._observers = {}
 
-    // TODO: do we really want this?
-    this._hasUnsavedChanges = false
-    this._isSaving = false
-    this._saveHandler = options.saveHandler
-
     this._lang = options.lang || this.configurator.getDefaultLanguage()
     this._dir = options.dir || 'ltr'
 
@@ -92,8 +87,17 @@ class EditorSession extends EventEmitter {
     let editingBehavior = configurator.getEditingBehavior()
 
     this.editing = new Editing(this, editingBehavior)
-
     this.fileManager = options.fileManager || new FileManager(this, configurator.getFileAdapters(), this._context)
+
+    // Handling of saving
+    this._hasUnsavedChanges = false
+    this._isSaving = false
+
+    if (options.saveHandler) {
+      this.saveHandler = options.saveHandler
+    } else {
+      this.saveHandler = configurator.getSaveHandler()
+    }
 
     // The command manager keeps the commandStates up-to-date
     this.commandManager = new CommandManager(this._context, commands)
@@ -283,7 +287,7 @@ class EditorSession extends EventEmitter {
     E.g. if saveHandler not available at construction
   */
   setSaveHandler(saveHandler) {
-    this._saveHandler = saveHandler
+    this.saveHandler = saveHandler
   }
 
   /**
@@ -512,6 +516,8 @@ class EditorSession extends EventEmitter {
 
   _commit(change, info) {
     this._commitChange(change, info)
+    // TODO: Not sure this is the best place to mark the session dirty
+    this._hasUnsavedChanges = true
     this.startFlow()
   }
 
@@ -548,29 +554,33 @@ class EditorSession extends EventEmitter {
     Save session / document
   */
   save() {
-    var doc = this.getDocument()
     var saveHandler = this.saveHandler
 
     if (this._hasUnsavedChanges && !this._isSaving) {
       this._isSaving = true
       // Pass saving logic to the user defined callback if available
       if (saveHandler) {
-        // TODO: calculate changes since last save
-        var changes = []
-        saveHandler.saveDocument(doc, changes, function(err) {
-
+        let saveParams = {
+          editorSession: this,
+          fileManager: this.fileManager
+        }
+        return saveHandler.saveDocument(saveParams)
+        .then(() => {
+          this._hasUnsavedChanges = false
+          // We update the selection, just so a selection update flow is
+          // triggered (which will update the save tool)
+          // TODO: model this kind of update more explicitly. It could be an 'update' to the
+          // document resource (hasChanges was modified)
+          this.setSelection(this.getSelection())
+        })
+        .catch((err) => {
+          console.error('Error during save', err)
+        }).then(() => { // finally
           this._isSaving = false
-          if (err) {
-            console.error('Error during save')
-          } else {
-            this._hasUnsavedChanges = false
-            // af
-            this._triggerUpdateEvent({}, {force: true})
-          }
-        }.bind(this))
-
+        })
       } else {
         console.error('Document saving is not handled at the moment. Make sure saveHandler instance provided to editorSession')
+        return Promise.reject()
       }
     }
   }
