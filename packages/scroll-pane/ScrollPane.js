@@ -234,24 +234,42 @@ class ScrollPane extends Component {
     Determines the selection bounding rectangle relative to the scrollpane's content.
   */
   _onDomSelectionRendered() {
+    let selectionRect = this._getSelectionRect()
+    if (!selectionRect) return
+    // Allows overlays to do positioning relative to the current
+    // selection bounding rectangle.
+    this.emit('dom-selection:rendered', {
+      selectionRect: selectionRect
+    })
+    this._scrollSelectionIntoView(selectionRect)
+    this._updateScrollbar()
+  }
+
+  _scrollSelectionIntoView(selectionRect) {
+    let upperBound = this.getScrollPosition()
+    let lowerBound = upperBound + this.getHeight()
+    let selTop = selectionRect.top
+    let selBottom = selectionRect.top + selectionRect.height
+    if ((selTop < upperBound && selBottom < upperBound) ||
+        (selTop > lowerBound && selBottom > lowerBound)) {
+      let scrollableEl = this.getScrollableElement()
+      scrollableEl.setProperty('scrollTop', selTop)
+    }
+  }
+
+  /*
+    Get selection rectangle relative to panel content element
+  */
+  _getSelectionRect() {
     const wsel = window.getSelection()
     if (wsel.rangeCount === 0) return
     const wrange = wsel.getRangeAt(0)
-    const contentRect = this.refs.content.getNativeElement().getBoundingClientRect()
+    let contentRect = this.getContentElement().getNativeElement().getBoundingClientRect()
     let selectionRect = wrange.getBoundingClientRect()
     if (selectionRect.top === 0 && selectionRect.bottom === 0) {
       selectionRect = this._fixForCursorRectBug()
     }
-    const positionHints = {
-      contentWidth: contentRect.width,
-      contentHeight: contentRect.height,
-      selectionRect: _getRelativeRect(contentRect, selectionRect),
-    }
-
-    // Allows overlays to do positioning relative to the current
-    // selection bounding rectangle.
-    this.emit('dom-selection:rendered', positionHints)
-    this._updateScrollbar()
+    return _getRelativeRect(contentRect, selectionRect)
   }
 
   _fixForCursorRectBug() {
@@ -271,7 +289,6 @@ class ScrollPane extends Component {
     this._updateScrollbar()
   }
 }
-
 
 function _getRelativeRect(parentRect, childRect) {
   var left = childRect.left - parentRect.left
