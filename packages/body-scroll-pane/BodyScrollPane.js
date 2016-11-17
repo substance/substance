@@ -1,5 +1,4 @@
-import Component from '../../ui/Component'
-// import getRelativeBoundingRect from '../../util/getRelativeBoundingRect'
+import AbstractScrollPane from '../scroll-pane/AbstractScrollPane'
 import getRelativeMouseBounds from '../../util/getRelativeMouseBounds'
 
 /**
@@ -23,7 +22,7 @@ import getRelativeMouseBounds from '../../util/getRelativeMouseBounds'
   )
   ```
 */
-class BodyScrollPane extends Component {
+class BodyScrollPane extends AbstractScrollPane {
 
   /*
     Expose scrollPane as a child context
@@ -47,7 +46,7 @@ class BodyScrollPane extends Component {
   render($$) {
     let el = $$('div')
     if (this.props.contextMenu === 'custom') {
-      contentEl.on('contextmenu', this._onContextMenu)
+      el.on('contextmenu', this._onContextMenu)
     }
     el.append(this.props.children)
     return el
@@ -57,7 +56,7 @@ class BodyScrollPane extends Component {
     Returns the height of scrollPane (inner content overflows)
   */
   getHeight() {
-    return document.body.clientHeight
+    return window.innerHeight
   }
 
   /**
@@ -86,6 +85,10 @@ class BodyScrollPane extends Component {
     return document.body.scrollTop
   }
 
+  setScrollPosition(scrollPos) {
+    document.body.scrollTop = scrollPos
+  }
+
   /**
     Get offset relative to `.se-content`.
 
@@ -104,34 +107,30 @@ class BodyScrollPane extends Component {
     console.warn('TODO: implement')
   }
 
-  _onDomSelectionRendered() {
+  /*
+    Get selection rectangle relative to panel content element
+  */
+  _getSelectionRect() {
     const wsel = window.getSelection()
     if (wsel.rangeCount === 0) return
     const wrange = wsel.getRangeAt(0)
     const contentRect = document.body.getBoundingClientRect()
     const selectionRect = wrange.getBoundingClientRect()
 
-    // TODO: needs work!
-    const positionHints = {
-      contentWidth: document.body.clientWidth,
-      contentHeight: document.body.clientHeight,
-      selectionRect: _getRelativeRect(contentRect, selectionRect),
-      innerContentRect: contentRect
-    }
-
-    this.emit('overlay:position', positionHints)
+    return _getRelativeRect(contentRect, selectionRect)
   }
 
-  _onContextMenu(e) {
-    e.preventDefault()
-    let mouseBounds = getRelativeMouseBounds(e, document.body)
-    let positionHints = {
-      mouseBounds: mouseBounds
-    }
-    this.emit('context-menu:position', positionHints)
+  _fixForCursorRectBug() {
+    let wsel = window.getSelection()
+    let rects = wsel.anchorNode.parentElement.getClientRects()
+    return rects[0]
   }
+
+  _getMouseBounds(e) {
+    return getRelativeMouseBounds(e, document.body)
+  }
+
 }
-
 
 function _getRelativeRect(parentRect, childRect) {
   var left = childRect.left - parentRect.left
