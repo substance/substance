@@ -114,8 +114,8 @@ class Editing {
         nodeEditing.merge(tx, node, sel.start, container, direction, previous, next)
       } else {
         let start = offset
-        if (direction === 'left') start = start-1
-        let end = start+1
+        if (direction === 'left') start = calculateStartFromCodepoint(start, text)
+        let end = calculateEndFromCodepoint(start, text)
         nodeEditing.delete(tx, {
           start: { path: path, offset: start},
           end: { path: path, offset: end }
@@ -442,6 +442,26 @@ class Editing {
 }
 
 export default Editing
+
+function is32bit(pos, text) {
+  return text.codePointAt(pos) > 0xFFFF;
+}
+
+function calculateStartFromCodepoint(pos, text) {
+  if (pos > 1 && is32bit(pos - 2, text) > 0xFFFF) {
+    return pos - 2
+  }
+  return pos - 1
+}
+
+
+function calculateEndFromCodepoint(pos, text) {
+  if (is32bit(pos, text)) {
+    return pos + 2;
+  }
+  return pos + 1;
+}
+
 
 function _selectBefore(tx, node, containerId) {
   if (node.isText()) {
