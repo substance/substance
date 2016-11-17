@@ -1,8 +1,9 @@
 import Component from '../../ui/Component'
+import getRelativeBoundingRect from '../../util/getRelativeBoundingRect'
 
 export default class DropTeaser extends Component {
   didMount() {
-    this.context.scrollPane.on('drop-teaser:position', this._update, this)
+    this.context.dragManager.on('drag:updated', this._onDragUpdated, this)
   }
 
   render($$) {
@@ -12,7 +13,24 @@ export default class DropTeaser extends Component {
     return el
   }
 
-  _update(hints) {
+  _onDragUpdated(dragState) {
+    let scrollPane = this.context.scrollPane
+    let targetEl = dragState.targetEl
+    if (!targetEl) return
+
+    let contentElement = scrollPane.getContentElement().getNativeElement()
+    let rect = getRelativeBoundingRect(targetEl.getNativeElement(), contentElement)
+
+    if (dragState.insertMode === 'before') {
+      rect.bottom = rect.bottom + rect.height
+    } else {
+      rect.top = rect.top + rect.height
+    }
+
+    this._renderDropTeaser({rect: rect, visible: dragState.isContainerDrop})
+  }
+
+  _renderDropTeaser(hints) {
     if (hints.visible) {
       this.el.removeClass('sm-hidden')
       this.el.css('top', hints.rect.top)

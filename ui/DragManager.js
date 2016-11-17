@@ -33,8 +33,7 @@ class DragManager extends EventEmitter {
     }
   }
 
-  _onDragStart(e) { // eslint-disable-line
-    // console.log('DragManager.onDragStart', event, component);
+  _onDragStart(e) {
     this._externalDrag = false
     this._initDrag(e)
   }
@@ -135,7 +134,7 @@ class DragManager extends EventEmitter {
       let threshold = elRect.top + elRect.height / 2
       this.dragState.insertMode = mouseY > threshold ? 'after' : 'before'
       this.dragState.isContainerDrop = Boolean(nodeComponent)
-      this.emit('drop-teaser:position-requested', this.dragState)
+      this.emit('drag:updated', this.dragState)
     }
   }
 
@@ -173,7 +172,7 @@ class DragManager extends EventEmitter {
   _onDragEnd() {
     if (this.dragState) {
       try {
-        this.emit('drop-teaser:position-requested', Object.assign({}, this.dragState, { isContainerDrop: false }))
+        this.emit('drag:updated', Object.assign({}, this.dragState, { isContainerDrop: false }))
       } finally {
         this.dragState = null;
       }
@@ -295,23 +294,20 @@ class DragManager extends EventEmitter {
   }
 
   /*
-    Extracts information from e.dataTransfer (types, files, items)
-
-    TODO: consider HTML
+    Extracts information from e.dataTransfer (files, uris, text, html)
   */
   _getData(e) {
     let dataTransfer = e.dataTransfer
     if (dataTransfer) {
       return {
+        files: Array.prototype.slice.call(dataTransfer.files),
         uris: this._extractUris(dataTransfer),
         text: dataTransfer.getData('text/plain'),
-        html: dataTransfer.getData('text/html'),
-        files: Array.prototype.slice.call(dataTransfer.files)
+        html: dataTransfer.getData('text/html')
       }
     }
   }
 }
-
 
 class DragState {
   constructor(data) {
