@@ -560,27 +560,27 @@ class EditorSession extends EventEmitter {
       this._isSaving = true
       // Pass saving logic to the user defined callback if available
       if (saveHandler) {
-        // TODO: calculate changes since last save
-        // var changes = []
         let saveParams = {
           editorSession: this,
           fileManager: this.fileManager
         }
-        saveHandler.saveDocument(saveParams, function(err) {
+        return saveHandler.saveDocument(saveParams)
+        .then(() => {
+          this._hasUnsavedChanges = false
+          // We update the selection, just so a selection update flow is
+          // triggered (which will update the save tool)
+          // TODO: model this kind of update more explicitly. It could be an 'update' to the
+          // document resource (hasChanges was modified)
+          this.setSelection(this.getSelection())
+        })
+        .catch((err) => {
+          console.error('Error during save', err)
+        }).then(() => { // finally
           this._isSaving = false
-          if (err) {
-            console.error('Error during save')
-          } else {
-            this._hasUnsavedChanges = false
-            // We update the selection, just so a selection update flow is
-            // triggered (which will update the save tool)
-            // TODO: model this kind of update more explicitly. It could be an 'update' to the
-            // document resource (hasChanges was modified)
-            this.setSelection(this.getSelection())
-          }
-        }.bind(this))
+        })
       } else {
         console.error('Document saving is not handled at the moment. Make sure saveHandler instance provided to editorSession')
+        return Promise.reject()
       }
     }
   }
