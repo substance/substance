@@ -9,6 +9,7 @@ import FontAwesomeIconProvider from '../ui/FontAwesomeIconProvider'
 import LabelProvider from '../ui/DefaultLabelProvider'
 import ToolGroup from '../packages/tools/ToolGroup'
 import KeyboardManager from '../ui/KeyboardManager'
+import SaveHandlerStub from '../packages/persistence/SaveHandlerStub'
 
 /**
   Default Configurator for Substance editors. It provides an API for
@@ -52,8 +53,6 @@ import KeyboardManager from '../ui/KeyboardManager'
   sure you don't run into cyclic dependencies as there is no checking for
   that at the moment.
 */
-
-/** INCLUDE_IN_API_DOCS */
 class Configurator {
   constructor() {
     this.config = {
@@ -75,6 +74,7 @@ class Configurator {
       icons: {},
       labels: {},
       lang: 'en_US',
+      SaveHandlerClass: null
     }
   }
 
@@ -539,6 +539,15 @@ class Configurator {
 
   getDefaultLanguage() {
     return this.config.lang || 'en_US'
+  }
+
+  setSaveHandlerClass(SaveHandlerClass) {
+    this.config.SaveHandlerClass = SaveHandlerClass
+  }
+
+  getSaveHandler() {
+    let SaveHandler = this.config.SaveHandlerClass || SaveHandlerStub
+    return new SaveHandler()
   }
 }
 
