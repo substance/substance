@@ -11,6 +11,7 @@ Features                                                                    | St
 Custom document schemas                                                     | ✓
 Custom converters (XML, HTML, etc.)                                         | ✓
 Custom HTML Rendering                                                       | ✓
+Drag & Drop Support                                                         | Beta 6
 Annotations can hold information (e.g. a comment)                           | ✓
 Annotations that can span over multiple nodes                               | Beta 6
 Isolated Nodes (any content with any custom UI)                             | ✓
