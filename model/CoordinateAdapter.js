@@ -1,4 +1,5 @@
 import isArrayEqual from '../util/isArrayEqual'
+import Coordinate from './Coordinate'
 
 /*
   Adapter for Coordinate oriented implementations.
@@ -7,9 +8,11 @@ import isArrayEqual from '../util/isArrayEqual'
 
   @internal
 */
-class CoordinateAdapter {
+class CoordinateAdapter extends Coordinate {
 
   constructor(owner, pathProperty, offsetProperty) {
+    super('SKIP')
+
     this._owner = owner;
     this._pathProp = pathProperty;
     this._offsetProp = offsetProperty;
@@ -21,16 +24,20 @@ class CoordinateAdapter {
       (isArrayEqual(other.path, this.path) && other.offset === this.offset) )
   }
 
-  getNodeId() {
-    return this.path[0]
+  get path() {
+    return this._owner[this._pathProp];
   }
 
-  getPath() {
-    return this.path
+  set path(path) {
+    this._owner[this._pathProp] = path;
   }
 
-  getOffset() {
-    return this.offset
+  get offset() {
+    return this._owner[this._offsetProp];
+  }
+
+  set offset(offset) {
+    this._owner[this._offsetProp] = offset;
   }
 
   toJSON() {
@@ -43,35 +50,6 @@ class CoordinateAdapter {
   toString() {
     return "(" + this.path.join('.') + ", " + this.offset + ")"
   }
-
-  isPropertyCoordinate() {
-    return this.path.length > 1
-  }
-
-  isNodeCoordinate() {
-    return this.path.length === 1
-  }
 }
-
-CoordinateAdapter.prototype._isCoordinate = true
-
-Object.defineProperties(CoordinateAdapter.prototype, {
-  path: {
-    get: function() {
-      return this._owner[this._pathProp];
-    },
-    set: function(path) {
-      this._owner[this._pathProp] = path;
-    }
-  },
-  offset: {
-    get: function() {
-      return this._owner[this._offsetProp];
-    },
-    set: function(offset) {
-      this._owner[this._offsetProp] = offset;
-    }
-  }
-})
 
 export default CoordinateAdapter
