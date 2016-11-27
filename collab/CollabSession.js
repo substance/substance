@@ -250,7 +250,7 @@ class CollabSession extends EditorSession {
     the collaborators (=selections etc.)
   */
   syncDone(args) {
-    console.log('syncDone', args)
+    // console.log('syncDone', args)
     let serverChange = args.serverChange
     let collaborators = args.collaborators
     let serverVersion = args.version
@@ -325,7 +325,6 @@ class CollabSession extends EditorSession {
      ============== */
 
   afterDocumentChange(change, info) {
-    console.log('##### CollabSession.afterDocumentChange')
     // Record local changes into nextCommit
     if (!info.remote) {
       this._recordChange(change)
