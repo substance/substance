@@ -483,35 +483,8 @@ class CollabSession extends EditorSession {
   }
 
   _updateCollaborators(collaborators) {
-    let collaboratorsChange = {}
-
-    forEach(collaborators, function(collaborator, collaboratorId) {
-      if (collaborator) {
-        let oldSelection
-        let old = this.collaborators[collaboratorId]
-        if (old) {
-          oldSelection = old.selection
-        }
-        let newSelection = selFromJSON(collaborator.selection)
-
-        newSelection.attach(this.document)
-
-        // Assign colorIndex (try to restore from old record)
-        collaborator.colorIndex = old ? old.colorIndex : this._getNextColorIndex()
-        collaborator.selection = newSelection
-        this.collaborators[collaboratorId] = collaborator
-        if (!newSelection.equals(oldSelection)) {
-          collaboratorsChange[collaboratorId] = collaborator
-        }
-      } else {
-        collaboratorsChange[collaboratorId] = null
-        delete this.collaborators[collaboratorId]
-      }
-    }.bind(this))
-
-    if (Object.keys(collaboratorsChange).length>0) {
-      return collaboratorsChange
-    }
+    // Disabled Collaborator selection stuff for now
+    // will be replaced with a Marker based approach.
   }
 
   /*
