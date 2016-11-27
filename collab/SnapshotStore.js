@@ -27,10 +27,10 @@ class SnapshotStore {
     let documentId = args.documentId
     let version = args.version
     let docEntry = this._snapshots[documentId]
+    let snapshotData
     let result
 
     if (!docEntry) return cb(null, undefined)
-
     let availableVersions = Object.keys(docEntry)
 
     // Exit if no versions are available
@@ -39,22 +39,34 @@ class SnapshotStore {
     // If no version is given we return the latest version available
     if (!version) {
       let latestVersion = Math.max.apply(null, availableVersions)
-      result = docEntry[latestVersion]
+      snapshotData = docEntry[latestVersion]
+      result = {
+        data: snapshotData,
+        version: latestVersion
+      }
     } else {
       // Attemt to get the version
-      result = docEntry[version]
-      if (!result && args.findClosest) {
+      snapshotData = docEntry[version]
+
+      if (!snapshotData && args.findClosest) {
         // We don't have a snaphot for that requested version
         let smallerVersions = availableVersions.filter(function(v) {
           return parseInt(v, 10) < version
         })
-
         // Take the closest version if there is any
         let clostestVersion = Math.max.apply(null, smallerVersions)
-        result = docEntry[clostestVersion]
+        snapshotData = docEntry[clostestVersion]
+        result = {
+          data: snapshotData,
+          version: clostestVersion
+        }
+      } else if (snapshotData) {
+        result = {
+          data: snapshotData,
+          version: version
+        }
       }
     }
-
     cb(null, result)
   }
 
@@ -71,11 +83,7 @@ class SnapshotStore {
     if (!docEntry) {
       docEntry = this._snapshots[documentId] = {}
     }
-    docEntry[version] = {
-      documentId: documentId,
-      version: version,
-      data: data
-    }
+    docEntry[version] = data
     cb(null, docEntry[version])
   }
 
