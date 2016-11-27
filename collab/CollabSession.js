@@ -14,6 +14,7 @@ import { fromJSON as selFromJSON } from '../model/selectionHelpers'
   Requires a connected and authenticated collabClient.
 */
 class CollabSession extends EditorSession {
+
   constructor(doc, config) {
     super(doc, config)
 
@@ -53,7 +54,7 @@ class CollabSession extends EditorSession {
     this._error = null
 
     // Note: registering a second document:changed handler where we trigger sync requests
-    this.doc.on('document:changed', this.afterDocumentChange, this, {priority: -10})
+    this.onUpdate('document', this.afterDocumentChange, this)
 
     // Bind handlers
     this._broadCastSelectionUpdateDebounced = debounce(this._broadCastSelectionUpdate, 250)
@@ -106,7 +107,6 @@ class CollabSession extends EditorSession {
     Synchronize with collab server
   */
   sync() {
-
     // If there is something to sync and there is no running sync
     if (this.__canSync()) {
       let nextChange = this._getNextChange()
@@ -224,29 +224,20 @@ class CollabSession extends EditorSession {
     let serverVersion = args.version
 
     if (!this._nextChange && !this._pendingChange) {
-      let oldSelection = this.selection
       if (serverChange) {
         serverChange = this.deserializeChange(serverChange)
         this._applyRemoteChange(serverChange)
       }
-      let newSelection = this.selection
       if (serverVersion) {
         this.version = serverVersion
-      }
-      let update = {
-        change: serverChange
-      }
-      if (newSelection !== oldSelection) {
-        update.selection = newSelection
       }
       // collaboratorsChange only contains information about
       // changed collaborators
       let collaboratorsChange = this._updateCollaborators(collaborators)
       if (collaboratorsChange) {
-        update.collaborators = collaboratorsChange
         this.emit('collaborators:changed')
       }
-      this._triggerUpdateEvent(update, { remote: true })
+      this.startFlow()
     } else {
       // console.log('skipped remote update. Pending sync or local changes.');
     }
@@ -259,6 +250,7 @@ class CollabSession extends EditorSession {
     the collaborators (=selections etc.)
   */
   syncDone(args) {
+    // console.log('syncDone', args)
     let serverChange = args.serverChange
     let collaborators = args.collaborators
     let serverVersion = args.version
@@ -274,7 +266,7 @@ class CollabSession extends EditorSession {
     // here as we know the next sync will be triggered soon. And if
     // followed by an idle phase (_nextChange = null) will give us
     // the latest collaborator records
-    let collaboratorsChange = this._updateCollaborators(collaborators)
+    this._updateCollaborators(collaborators)
     if (this._nextChange) {
       this._transformCollaboratorSelections(this._nextChange)
     }
@@ -287,13 +279,7 @@ class CollabSession extends EditorSession {
     // Each time the sync worked we consider the system connected
     this._connected = true
 
-    let update = {
-      change: serverChange
-    }
-    if (collaboratorsChange) {
-      update.collaborators = collaboratorsChange
-    }
-    this._triggerUpdateEvent(update, { remote: true })
+    this.startFlow()
 
     this.emit('connected')
     // Attempt to sync again (maybe we have new local changes)
@@ -304,7 +290,7 @@ class CollabSession extends EditorSession {
     Handle sync error
   */
   syncError(error) {
-    error('Sync error:', error)
+    console.error('Sync error:', error)
     this._abortSync()
   }
 
@@ -372,7 +358,7 @@ class CollabSession extends EditorSession {
      ================ */
 
   _commit(change, info) {
-    let selectionHasChanged = this._commitChange(change)
+    this._commitChange(change, info)
 
     let collaboratorsChange = null
     forEach(this.getCollaborators(), function(collaborator) {
@@ -388,16 +374,7 @@ class CollabSession extends EditorSession {
       }
     })
 
-    let update = {
-      change: change
-    }
-    if (selectionHasChanged) {
-      update.selection = this.getSelection()
-    }
-    if (collaboratorsChange) {
-      update.collaborators = collaboratorsChange
-    }
-    this._triggerUpdateEvent(update, info)
+    this.startFlow()
   }
 
   /*
@@ -406,11 +383,15 @@ class CollabSession extends EditorSession {
   _applyRemoteChange(change) {
     // console.log('CollabSession: applying remote change');
     if (change.ops.length > 0) {
-      this.stage._apply(change)
-      this.doc._apply(change)
+      this._transaction.stageDoc._apply(change)
+      this.getDocument()._apply(change)
+      this._setDirty('document')
       // Only undo+redo history is updated according to the new change
       this._transformLocalChangeHistory(change)
-      this.selection = this._transformSelection(change)
+      this._setSelection(this._transformSelection(change))
+      this._change = change
+      this._info = { remote: true }
+      this.startFlow()
     }
   }
 
@@ -502,35 +483,8 @@ class CollabSession extends EditorSession {
   }
 
   _updateCollaborators(collaborators) {
-    let collaboratorsChange = {}
-
-    forEach(collaborators, function(collaborator, collaboratorId) {
-      if (collaborator) {
-        let oldSelection
-        let old = this.collaborators[collaboratorId]
-        if (old) {
-          oldSelection = old.selection
-        }
-        let newSelection = selFromJSON(collaborator.selection)
-
-        newSelection.attach(this.doc)
-
-        // Assign colorIndex (try to restore from old record)
-        collaborator.colorIndex = old ? old.colorIndex : this._getNextColorIndex()
-        collaborator.selection = newSelection
-        this.collaborators[collaboratorId] = collaborator
-        if (!newSelection.equals(oldSelection)) {
-          collaboratorsChange[collaboratorId] = collaborator
-        }
-      } else {
-        collaboratorsChange[collaboratorId] = null
-        delete this.collaborators[collaboratorId]
-      }
-    }.bind(this))
-
-    if (Object.keys(collaboratorsChange).length>0) {
-      return collaboratorsChange
-    }
+    // Disabled Collaborator selection stuff for now
+    // will be replaced with a Marker based approach.
   }
 
   /*

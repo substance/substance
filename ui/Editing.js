@@ -193,7 +193,7 @@ class Editing {
         let nodePos = container.getPosition(startNodeId)
         this._deleteContainerSelection(tx, sel)
         if (nodePos < container.length-1) {
-          tx.selection = _selectBefore(tx, container.getNodeAt(nodePos+1), containerId)
+          _selectBefore(tx, container.getNodeAt(nodePos+1), containerId)
         } else {
           tx.selection = sel.collapse('left')
           this._break(tx)

@@ -503,8 +503,8 @@ class EditorSession extends EventEmitter {
     var clone = {
       ops: externalChange.ops.map(function(op) { return op.clone(); })
     }
-    DocumentChange.transformInplace(clone, this.doneChanges)
-    DocumentChange.transformInplace(clone, this.undoneChanges)
+    DocumentChange.transformInplace(clone, this._history.doneChanges)
+    DocumentChange.transformInplace(clone, this._history.undoneChanges)
   }
 
   _transformSelection(change) {
