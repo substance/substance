@@ -1,8 +1,10 @@
 import platform from '../util/platform'
 import substanceGlobals from '../util/substanceGlobals'
+import copySelection from '../model/copySelection'
+import paste from '../model/transform/paste'
 import documentHelpers from '../model/documentHelpers'
-import ClipboardImporter from './ClipboardImporter'
-import ClipboardExporter from './ClipboardExporter'
+import ClipboardImporter from '../ui/ClipboardImporter'
+import ClipboardExporter from '../ui/ClipboardExporter'
 
 /**
   The Clipboard is a Component which should be rendered as a sibling component
@@ -38,6 +40,11 @@ class Clipboard {
 
   getSurface() {
     return this.surface
+  }
+
+  getEditorSession() {
+    // HACK: this needs to be revisited someday
+    return this.surface.context.editorSession
   }
 
   /*
@@ -106,10 +113,9 @@ class Clipboard {
     event.preventDefault()
     // console.log("Clipboard.onCut", arguments);
     this.onCopy(event)
-    let surface = this.getSurface()
-    if (!surface) return
-    surface.transaction(function(tx, args) {
-      return surface.delete(tx, args)
+    let editorSession = this.getEditorSession()
+    editorSession.transaction((tx)=>{
+      tx.deleteSelection()
     })
   }
 
@@ -185,10 +191,11 @@ class Clipboard {
     @param {String} plainText plain text
   */
   _pastePlainText(plainText) {
-    let surface = this.getSurface()
-    surface.transaction(function(tx, args) {
-      args.text = plainText
-      return surface.paste(tx, args)
+    let editorSession = this.getEditorSession()
+    editorSession.transaction(function(tx) {
+      return paste(tx, {
+        text: plainText
+      })
     })
   }
 
@@ -260,15 +267,15 @@ class Clipboard {
     Copies data from surface to clipboard.
   */
   _copy() {
-    let surface = this.getSurface()
-    let sel = surface.getSelection()
-    let doc = surface.getDocument()
+    let editorSession = this.getEditorSession()
+    let sel = editorSession.getSelection()
+    let doc = editorSession.getDocument()
     let clipboardDoc = null
     let clipboardText = ""
     let clipboardHtml = ""
     if (!sel.isCollapsed()) {
       clipboardText = documentHelpers.getTextForSelection(doc, sel) || ""
-      clipboardDoc = surface.copy(doc, sel)
+      clipboardDoc = copySelection(doc, sel)
       clipboardHtml = this.htmlExporter.exportDocument(clipboardDoc)
     }
     return {
@@ -304,17 +311,13 @@ class Clipboard {
     if (!contentDoc) {
       contentDoc = Clipboard.clipboardData.doc
     }
-
-    let surface = this.getSurface()
-    if (!surface) return
-    // TODO: the clipboard importer should make sure
-    // that the container exists
-
+    let editorSession = this.getEditorSession()
     if (contentDoc) {
-      surface.transaction(function(tx, args) {
-        args.text = text
-        args.doc = contentDoc
-        return surface.paste(tx, args)
+      editorSession.transaction((tx)=>{
+        return paste(tx, {
+          text: text,
+          doc: contentDoc
+        })
       })
       return true
     }
