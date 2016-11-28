@@ -31,7 +31,8 @@ TextNode.static.name = "text";
 TextNode.static.isText = true;
 
 TextNode.static.defineSchema({
-  content: 'text'
+  content: 'text',
+  direction: { type: 'string', optional: true }
 });
 
 module.exports = TextNode;
