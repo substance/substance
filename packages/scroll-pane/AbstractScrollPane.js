@@ -38,7 +38,7 @@ class AbstractScrollPane extends Component {
   */
   _onContextMenu(e) {
     e.preventDefault()
-    let mouseBounds = this._getMouseBounds()
+    let mouseBounds = this._getMouseBounds(e)
 
     this.emit('context-menu:opened', {
       mouseBounds: mouseBounds
