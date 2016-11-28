@@ -77,10 +77,11 @@ class TransactionDocument extends Document {
     }
   }
 
-  createDefaultTextNode(content) {
+  createDefaultTextNode(text, dir) {
     return this.create({
       type: this.getSchema().getDefaultTextType(),
-      content: content || ''
+      content: text || '',
+      direction: dir
     })
   }
 
