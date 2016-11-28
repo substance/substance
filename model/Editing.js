@@ -90,12 +90,12 @@ class Editing {
         // leave selection as is
       } else if (sel.isAfter()) {
         tx.update(container.getContentPath(), { type: 'insert', pos: nodePos+1, value: textNode.id })
-        this.selectBefore(tx, textNode, containerId)
+        this._setCursor(tx, textNode, containerId, 'before')
       } else {
         tx.update(container.getContentPath(), { type: 'delete', pos: nodePos })
         tx.delete(nodeId)
         tx.update(container.getContentPath(), { type: 'insert', pos: nodePos, value: textNode.id })
-        this.selectBefore(tx, textNode, containerId)
+        this._setCursor(tx, textNode, containerId, 'before')
       }
     } else if (sel.isCustomSelection()) {
       // TODO: what to do with custom selections?
@@ -129,7 +129,7 @@ class Editing {
         let nodePos = container.getPosition(startNodeId)
         this.deleteContainerSelection(tx, sel)
         if (nodePos < container.length-1) {
-          this.selectBefore(tx, container.getNodeAt(nodePos+1), containerId)
+          this._setCursor(tx, container.getNodeAt(nodePos+1), containerId, 'before')
         } else {
           tx.selection = sel.collapse('left')
           this.break(tx)
@@ -451,7 +451,7 @@ class Editing {
           tx.update(container.getContentPath(), { type: 'delete', pos: nodePos })
           tx.delete(node.id)
           tx.update([container.id, 'nodes'], { type: 'insert', pos: nodePos, value: blockNode.id })
-          this.selectAfter(tx, blockNode, container.id)
+          this._setCursor(tx, blockNode, container.id, 'after')
         }
         // insert before
         else if (sel.startOffset === 0) {
@@ -460,13 +460,13 @@ class Editing {
         // insert after
         else if (sel.startOffset === text.length) {
           tx.update(container.getContentPath(), { type: 'insert', pos: nodePos+1, value: blockNode.id })
-          this.selectBefore(tx, blockNode, container.id)
+          this._setCursor(tx, blockNode, container.id, 'before')
         }
         // break
         else {
           this.break(tx)
           tx.update(container.getContentPath(), { type: 'insert', pos: nodePos+1, value: blockNode.id })
-          this.selectAfter(tx, blockNode, container.id)
+          this._setCursor(tx, blockNode, container.id, 'after')
         }
       } else {
         // TODO: this will be necessary for lists
@@ -516,12 +516,7 @@ class Editing {
         tx.delete(nodeId)
         container.show(textNode, nodePos)
       }
-      tx.selection = new PropertySelection({
-        path: textNode.getTextPath(),
-        startOffset: text.length,
-        containerId: sel.containerId,
-        surfaceId: sel.surfaceId
-      })
+      this._setCursor(tx, textNode, sel.containerId, 'after')
     } else if (sel.isCustomSelection()) {
       // TODO: what to do with custom selections?
     } else if (sel.isCollapsed() || sel.isPropertySelection()) {
@@ -529,15 +524,17 @@ class Editing {
       let nodeId = path[0]
       let node = tx.get(nodeId)
       let nodeEditing = this._getNodeEditing(node)
-
       // console.log('#### before', sel.toString())
       nodeEditing.type(tx, sel, text)
-      tx.selection = new PropertySelection({
-        path: path,
-        startOffset: sel.startOffset + text.length,
-        containerId: sel.containerId,
-        surfaceId: sel.surfaceId
-      })
+      if (node.isText()) {
+        let offset = sel.startOffset + text.length
+        tx.selection = new PropertySelection({
+          path: path,
+          startOffset: offset,
+          containerId: sel.containerId,
+          surfaceId: sel.surfaceId
+        })
+      }
       // console.log('### setting selection after typing: ', tx.selection.toString())
     } else if (sel.isContainerSelection()) {
       this.deleteContainerSelection(tx, sel)
@@ -545,12 +542,17 @@ class Editing {
     }
   }
 
-  selectBefore(tx, node, containerId) {
+  _setCursor(tx, node, containerId, mode) {
     if (node.isText()) {
+      let offset = 0
+      if (mode === 'after') {
+        let text = node.getText()
+        offset = text.length
+      }
       tx.selection = tx.createSelection({
         type: 'property',
         path: node.getTextPath(),
-        startOffset: 0,
+        startOffset: offset,
         containerId: containerId
       })
     } else {
@@ -558,26 +560,7 @@ class Editing {
         type: 'node',
         containerId: containerId,
         nodeId: node.id,
-        mode: 'before'
-      })
-    }
-  }
-
-  selectAfter(tx, node, containerId) {
-    if (node.isText()) {
-      let text = node.getText()
-      tx.selection = tx.createSelection({
-        type: 'property',
-        path: node.getTextPath(),
-        startOffset: text.length,
-        containerId: containerId
-      })
-    } else {
-      tx.selection = tx.createSelection({
-        type: 'node',
-        containerId: containerId,
-        nodeId: node.id,
-        mode: 'after'
+        mode: mode
       })
     }
   }
@@ -620,7 +603,8 @@ class Editing {
     let newNode = Object.assign({
       id: uuid(data.type),
       type: data.type,
-      content: node.content
+      content: node.content,
+      direction: node.direction
     }, data)
     let newPath = [newNode.id, 'content']
     newNode = tx.create(newNode)

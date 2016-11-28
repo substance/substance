@@ -19,6 +19,7 @@ class EditingInterface {
     this._selection = null
     // TODO: allow for custom editing implementation
     this._impl = new Editing()
+    this._direction = null
   }
 
   getDocument() {
@@ -36,7 +37,7 @@ class EditingInterface {
   }
 
   createDefaultTextNode(content) {
-    return this._document.createDefaultTextNode(content)
+    return this._document.createDefaultTextNode(content, this._direction)
   }
 
   delete(nodeId) {
@@ -81,6 +82,18 @@ class EditingInterface {
 
   set selection(sel) {
     this.setSelection(sel)
+  }
+
+  /*
+    ATTENTION/TODO: text direction could be different on different paragraphs
+    I.e. it should probably be a TextNode property
+  */
+  get textDirection() {
+    return this._direction
+  }
+
+  set textDirection(dir) {
+    this._direction = dir
   }
 
   /* High-level editing */
