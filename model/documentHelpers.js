@@ -2,6 +2,9 @@ import isString from 'lodash/isString'
 import filter from 'lodash/filter'
 import DocumentIndex from './DocumentIndex'
 import Selection from './Selection'
+import ObjectOperation from './data/ObjectOperation'
+import DocumentChange from './DocumentChange'
+import forEach from 'lodash/forEach'
 
 /**
   Some helpers for working with Documents.
@@ -138,6 +141,29 @@ documentHelpers.getMarkersForSelection = function(doc, sel) {
     return m.isInsideOf(sel)
   })
   return filtered
+}
+
+documentHelpers.getChangeFromDocument = function(doc) {
+  let nodes = doc.getNodes()
+  let annotations = []
+  let contentNodes = []
+  let containers = []
+
+  forEach(nodes, (node) => {
+    if (node._isAnnotation) {
+      annotations.push(node)
+    } else if (node._isContainer) {
+      containers.push(node)
+    } else {
+      contentNodes.push(node)
+    }
+  })
+
+  let ops = contentNodes.concat(containers).concat(annotations).map((node) => {
+    return ObjectOperation.Create([node.id], node.toJSON())
+  })
+
+  return new DocumentChange({ops: ops})
 }
 
 export default documentHelpers;

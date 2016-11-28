@@ -41,19 +41,19 @@ class DocumentChange {
       // when the change has been applied
       this.timestamp = data.timestamp
       // application state before the change was applied
-      this.before = data.before
+      this.before = data.before || {}
       // array of operations
       this.ops = data.ops
       this.info = data.info; // custom change info
       // application state after the change was applied
-      this.after = data.after
+      this.after = data.after || {}
     } else if (arguments.length === 3) {
       this.sha = uuid()
       this.info = {}
       this.timestamp = Date.now()
       this.ops = ops.slice(0)
-      this.before = before
-      this.after = after
+      this.before = before || {}
+      this.after = after || {}
     } else {
       throw new Error('Illegal arguments.')
     }
