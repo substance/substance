@@ -185,9 +185,11 @@ class TextNodeEditing {
   merge(tx, node, coor, container, direction, previous, next) {
     let first, second
     if (direction === 'left') {
+      if (!previous) return
       first = previous
       second = node
     } else if (direction === 'right') {
+      if (!next) return
       first = node
       second = next
     }
