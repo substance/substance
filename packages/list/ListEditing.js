@@ -1,4 +1,4 @@
-import TextNodeEditing from '../../ui/TextNodeEditing'
+import TextNodeEditing from '../../model/TextNodeEditing'
 import annotationHelpers from '../../model/annotationHelpers'
 
 class ListEditing extends TextNodeEditing {
@@ -55,12 +55,18 @@ class ListEditing extends TextNodeEditing {
           container.show(newTextNode.id, nodePos+1)
           container.show(newList.id, nodePos+2)
         }
-        tx.selection = tx.createSelection(newTextNode.getTextPath(), 0)
+        tx.select({
+          startPath: newTextNode.getTextPath(),
+          startOffset: 0
+        })
       } else {
         newItem.content = ""
         newItem = tx.create(newItem)
         list.show(newItem.id, itemPos)
-        tx.selection = tx.createSelection([list.id, 'items', itemPos+1, 'content'], 0)
+        tx.select({
+          startPath: [list.id, 'items', itemPos+1, 'content'],
+          startOffset: 0
+        })
       }
     }
     // otherwise split the text property and create a new paragraph node with trailing text and annotations transferred
@@ -75,7 +81,10 @@ class ListEditing extends TextNodeEditing {
         tx.update(realPath, { type: 'delete', start: offset, end: text.length })
       }
       list.show(newItem.id, itemPos+1)
-      tx.selection = tx.createSelection([list.id, 'items', itemPos+1, 'content'], 0)
+      tx.select({
+        startPath: [list.id, 'items', itemPos+1, 'content'],
+        startOffset: 0
+      })
     }
   }
 

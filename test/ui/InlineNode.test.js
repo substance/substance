@@ -1,7 +1,6 @@
 import { module } from 'substance-test'
 import setup from './setupContainerEditor'
 import twoParagraphs from '../fixtures/twoParagraphs'
-import insertInlineNode from '../../model/transform/insertInlineNode'
 
 const test = module('ui/InlineNode')
 

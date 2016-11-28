@@ -50,7 +50,9 @@ class SelectionState {
     this._resetState()
 
     this._deriveAnnoState(sel)
-    this._deriveMarkerState(sel)
+    if (this.document.getIndex('markers')) {
+      this._deriveMarkerState(sel)
+    }
   }
 
   _deriveAnnoState(sel) {

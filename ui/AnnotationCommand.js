@@ -222,18 +222,12 @@ class AnnotationCommand extends Command {
   executeCreate(params) {
     let annos = this._getAnnotationsForSelection(params)
     this._checkPrecondition(params, annos, this.canCreate)
-    let newAnno = this._applyTransform(params, function(tx) {
-      let node = this.getAnnotationData()
-      node.type = this.getAnnotationType()
-      return createAnnotation(tx, {
-        node: node,
-        selection: params.selection
-      })
-    }.bind(this))
-    return {
-      mode: 'create',
-      anno: newAnno
-    }
+    let editorSession = this._getEditorSession(params)
+    let annoData = this.getAnnotationData()
+    annoData.type = this.getAnnotationType()
+    editorSession.transaction((tx)=>{
+      tx.annotate(annoData)
+    })
   }
 
   executeFuse(params) {

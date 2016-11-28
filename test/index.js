@@ -1,6 +1,7 @@
 // model
 import "./model/ContainerAddress.test.js"
 import "./model/ContainerSelection.test.js"
+import "./model/copySelection.test.js"
 import "./model/Document.test.js"
 import "./model/documentHelpers.test.js"
 import "./model/Editing.test.js"
@@ -15,14 +16,10 @@ import "./model/XMLImporter.test.js"
 
 // transforms
 import "./transform/breakNode.test.js"
-import "./transform/copySelection.test.js"
 import "./transform/createAnnotation.test.js"
 import "./transform/deleteCharacter.test.js"
-import "./transform/deleteNode.test.js"
-import "./transform/deleteSelection.test.js"
 import "./transform/expandAnnotation.test.js"
 import "./transform/fuseAnnotation.test.js"
-import "./transform/insertNode.test.js"
 import "./transform/insertText.test.js"
 import "./transform/merge.test.js"
 import "./transform/paste.test.js"

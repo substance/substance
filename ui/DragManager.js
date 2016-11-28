@@ -3,8 +3,6 @@ import Component from './Component'
 import inBrowser from '../util/inBrowser'
 import EventEmitter from '../util/EventEmitter'
 
-import copySelection from '../model/transform/copySelection'
-import deleteSelection from '../model/transform/deleteSelection'
 import paste from '../model/transform/paste'
 import NodeSelection from '../model/NodeSelection'
 
@@ -221,12 +219,12 @@ class DragManager extends EventEmitter {
         let nodeId = dragState.targetNodeId
         let insertMode = dragState.insertMode
         let surfaceId = dragState.surface.id
-        tx.switchSurface(surfaceId)
-        tx.selection = tx.createSelection({
+        tx.select({
           type: 'node',
-          containerId: containerId,
           nodeId: nodeId,
-          mode: insertMode
+          mode: insertMode,
+          containerId: containerId,
+          surfaceId: surfaceId
         })
       } else {
         console.error('Not yet supported')
@@ -257,16 +255,19 @@ class DragManager extends EventEmitter {
     let dragState = this.dragState
 
     context.editorSession.transaction((tx) => {
-      let copyResult = copySelection(tx, {selection: dragState.sourceSelection})
-      deleteSelection(tx, {selection: dragState.sourceSelection, clear: true })
+      tx.selection = dragState.sourceSelection
+      let copyResult = tx.copySelection()
+      // just clear, but don't merge or don't insert a new node
+      tx.deleteSelection({ clear: true })
       if(dragState.isContainerDrop) {
-        tx.switchSurface(dragState.surface.id)
         let containerId = dragState.surface.getContainerId()
+        let surfaceId = dragState.surface.id
         tx.selection = tx.createSelection({
           type: 'node',
-          containerId: containerId,
           nodeId: dragState.targetNodeId,
-          mode: dragState.insertMode
+          mode: dragState.insertMode,
+          containerId: containerId,
+          surfaceId: surfaceId
         })
         return paste(tx, {
           selection: tx.selection,

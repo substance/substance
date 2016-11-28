@@ -1,11 +1,11 @@
 import { module } from 'substance-test'
-import copySelection from '../../model/transform/copySelection'
+import copySelection from '../../model/copySelection'
 import Document from '../../model/Document'
 import fixture from '../fixtures/createTestArticle'
 import simple from '../fixtures/simple'
 import headersAndParagraphs from '../fixtures/headersAndParagraphs'
 
-const test = module('transform/copySelection')
+const test = module('model/copySelection')
 
 test("Copying a property selection", function(t) {
   var doc = fixture(headersAndParagraphs)

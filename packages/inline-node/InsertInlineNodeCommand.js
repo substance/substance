@@ -1,5 +1,4 @@
 import Command from '../../ui/Command'
-import insertInlineNode from '../../model/transform/insertInlineNode'
 
 /**
   Reusable command implementation for inserting inline nodes.
@@ -70,9 +69,9 @@ class InsertInlineNodeCommand extends Command {
     return true
   }
 
-  insertInlineNode(tx, args) {
-    args.node = this.createNodeData(tx, args)
-    return insertInlineNode(tx, args)
+  insertInlineNode(tx, nodeData) {
+    nodeData = this.createNodeData(tx, nodeData)
+    return tx.insertInlineNode(nodeData)
   }
 
   createNodeData(tx, args) { // eslint-disable-line

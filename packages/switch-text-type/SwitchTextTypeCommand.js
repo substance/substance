@@ -81,7 +81,7 @@ class SwitchTextTypeCommand extends Command {
   }
 
   /**
-   Trigger a switchTextType transaction
+    Trigger a switchTextType transaction
    */
   execute(params) {
     let textType = this.getTextType(params)

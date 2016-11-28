@@ -42,21 +42,32 @@ test("Selections after undo/redo.", function(t) {
   var doc = fixture(simple)
   var session = _createEditorSession(doc)
   var path = ['p1', 'content']
-  session.setSelection(doc.createSelection(path, 3))
+  session.setSelection({
+    startPath: path,
+    startOffset: 3
+  })
   session.transaction(function(tx, args) {
     tx.update(path, { insert: {offset: 3, value: "XXX"} })
-    args.selection = tx.createSelection(path, 6)
+    tx.select({
+      startPath: path,
+      startOffset: 6
+    })
     return args
   })
   session.undo()
   var sel = session.getSelection()
-  t.ok(sel.equals(doc.createSelection(path, 3)), 'Selection should be set correctly after undo.')
+  t.ok(sel.equals(doc.createSelection({
+    startPath: path,
+    startOffset: 3
+  })), 'Selection should be set correctly after undo.')
   session.redo()
   sel = session.getSelection()
-  t.ok(sel.equals(doc.createSelection(path, 6)), 'Selection should be set correctly after redo.')
+  t.ok(sel.equals(doc.createSelection({
+    startPath: path,
+    startOffset: 6
+  })), 'Selection should be set correctly after redo.')
   t.end()
 })
-
 
 function _createEditorSession(doc) {
   return new EditorSession(doc, {

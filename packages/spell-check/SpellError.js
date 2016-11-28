@@ -11,4 +11,6 @@ SpellError.define({
   suggestions: { type: ['object'], default: [] }
 })
 
+SpellError.scope = 'document'
+
 export default SpellError
