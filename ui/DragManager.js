@@ -219,7 +219,7 @@ class DragManager extends EventEmitter {
         let nodeId = dragState.targetNodeId
         let insertMode = dragState.insertMode
         let surfaceId = dragState.surface.id
-        tx.select({
+        tx.setSelection({
           type: 'node',
           nodeId: nodeId,
           mode: insertMode,

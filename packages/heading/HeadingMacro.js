@@ -14,8 +14,9 @@ let HeadingMacro = {
       let editorSession = props.editorSession
       editorSession.postpone(() => {
         editorSession.transaction(function(tx) {
-          tx.select({
-            startPath: props.path,
+          tx.setSelection({
+            type: 'property',
+            path: props.path,
             startOffset: 0,
             endOffset: match[0].length
           })

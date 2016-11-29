@@ -1,8 +1,5 @@
 import Command from './Command'
-import createAnnotation from '../model/transform/createAnnotation'
-import fuseAnnotation from '../model/transform/fuseAnnotation'
-import expandAnnotation from '../model/transform/expandAnnotation'
-import truncateAnnotation from '../model/transform/truncateAnnotation'
+import annotationHelpers from '../model/annotationHelpers'
 
 /**
   A class for commands intended to be executed on the annotations.
@@ -233,18 +230,9 @@ class AnnotationCommand extends Command {
   executeFuse(params) {
     let annos = this._getAnnotationsForSelection(params);
     this._checkPrecondition(params, annos, this.canFuse);
-    let fusedAnno = this._applyTransform(params, function(tx) {
-      let result = fuseAnnotation(tx, {
-        annos: annos
-      })
-      return {
-        result: result.node
-      }
+    this._applyTransform(params, function(tx) {
+      annotationHelpers.fuseAnnotation(tx, annos)
     })
-    return {
-      mode: 'fuse',
-      anno: fusedAnno
-    }
   }
 
   executeTruncate(params) {
@@ -252,15 +240,8 @@ class AnnotationCommand extends Command {
     let anno = annos[0]
     this._checkPrecondition(params, annos, this.canTruncate)
     this._applyTransform(params, function(tx) {
-      return truncateAnnotation(tx, {
-        selection: params.selection,
-        anno: anno
-      })
+      annotationHelpers.truncateAnnotation(tx, anno, params.selection)
     })
-    return {
-      mode: 'truncate',
-      anno: anno
-    }
   }
 
   executeExpand(params) {
@@ -268,10 +249,7 @@ class AnnotationCommand extends Command {
     let anno = annos[0]
     this._checkPrecondition(params, annos, this.canExpand)
     this._applyTransform(params, function(tx) {
-      expandAnnotation(tx, {
-        selection: params.selection,
-        anno: anno
-      })
+      annotationHelpers.expandAnnotation(tx, anno, params.selection)
     })
     return {
       mode: 'expand',
@@ -313,17 +291,11 @@ class AnnotationCommand extends Command {
     if (sel.isNull()) return
 
     let editorSession = this._getEditorSession(params)
-    let surface = params.surface
-    params.selection = sel
-
-    let result; // to store transform result
+    let result // to store transform result
     editorSession.setSelection(sel)
     editorSession.transaction(function(tx) {
       let out = transformFn(tx, params)
-      if (out) {
-        result = out.result
-      }
-      return out
+      if (out) result = out.result
     })
     return result
   }

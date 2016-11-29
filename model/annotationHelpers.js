@@ -1,5 +1,6 @@
-import forEach from '../util/forEach'
 import uniq from 'lodash/uniq'
+import forEach from '../util/forEach'
+import isArray from '../util/isArray'
 import uuid from '../util/uuid'
 
 // TODO: this should be implemented as transformations
@@ -203,8 +204,68 @@ function transferAnnotations(doc, path, offset, newPath, newOffset) {
   });
 }
 
+/*
+ @param {model/Document} tx
+ @param {model/Annotation} args.anno annotation which should be expanded
+ @param {model/Selection}  args.selection selection to which to expand
+*/
+function truncateAnnotation(tx, anno, sel) {
+  if (!sel || !sel._isSelection) throw new Error('Argument "selection" is required.')
+  if (!anno || !anno._isAnnotation) throw new Error('Argument "anno" is required.')
+  let annoSel = anno.getSelection()
+  let newAnnoSel = annoSel.truncateWith(sel)
+  anno.updateRange(tx, newAnnoSel)
+  return anno
+}
+
+/*
+ @param {model/Document} tx
+ @param {model/Annotation} args.anno annotation which should be expanded
+ @param {model/Selection}  args.selection selection to which to expand
+*/
+function expandAnnotation(tx, anno, sel) {
+  if (!sel || !sel._isSelection) throw new Error('Argument "selection" is required.')
+  if (!anno || !anno._isAnnotation) throw new Error('Argument "anno" is required.')
+  let annoSel = anno.getSelection()
+  let newAnnoSel = annoSel.expand(sel)
+  anno.updateRange(tx, newAnnoSel)
+  return anno
+}
+
+/*
+ @param {model/Document} tx
+ @param {model/Annotation[]} args.annos annotations which should be fused
+*/
+function fuseAnnotation(tx, annos) {
+  if (!isArray(annos) || annos.length < 2) {
+    throw new Error('fuseAnnotation(): at least two annotations are necessary.')
+  }
+  let sel, annoType
+  annos.forEach(function(anno, idx) {
+    if (idx === 0) {
+      sel = anno.getSelection()
+      annoType = anno.type
+    } else {
+      if (anno.type !== annoType) {
+        throw new Error('fuseAnnotation(): all annotations must be of the same type.')
+      }
+      sel = sel.expand(anno.getSelection())
+    }
+  })
+  // expand the first and delete the others
+  for (var i = 1; i < annos.length; i++) {
+    tx.delete(annos[i].id)
+  }
+  expandAnnotation(tx, annos[0], sel)
+  tx.selection = sel
+}
+
+
 export default {
   insertedText: insertedText,
   deletedText: deletedText,
-  transferAnnotations: transferAnnotations
+  transferAnnotations: transferAnnotations,
+  expandAnnotation: expandAnnotation,
+  fuseAnnotation: fuseAnnotation,
+  truncateAnnotation: truncateAnnotation
 }

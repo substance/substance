@@ -169,11 +169,13 @@ function _pasteDocument(tx, pasteDoc) {
     // select the whole pasted block
     let firstNode = insertedNodes[0]
     let lastNode = last(insertedNodes)
-    tx.select({
+    tx.setSelection({
+      type: 'container',
       startPath: [firstNode.id],
       startOffset: 0,
       endPath: [lastNode.id],
       endOffset: 1,
+      containerId: containerId
     })
   }
 }

@@ -3,6 +3,7 @@ import "./model/ContainerAddress.test.js"
 import "./model/ContainerSelection.test.js"
 import "./model/copySelection.test.js"
 import "./model/Document.test.js"
+import "./model/annotationHelpers.test.js"
 import "./model/documentHelpers.test.js"
 import "./model/Editing.test.js"
 import "./model/EditorSession.test.js"
@@ -15,15 +16,7 @@ import "./model/XMLExporter.test.js"
 import "./model/XMLImporter.test.js"
 
 // transforms
-import "./transform/breakNode.test.js"
-import "./transform/createAnnotation.test.js"
-import "./transform/deleteCharacter.test.js"
-import "./transform/expandAnnotation.test.js"
-import "./transform/fuseAnnotation.test.js"
-import "./transform/insertText.test.js"
-import "./transform/merge.test.js"
 import "./transform/paste.test.js"
-import "./transform/truncateAnnotation.test.js"
 
 // ui
 import "./ui/AnnotationCommand.test.js"

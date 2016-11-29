@@ -44,9 +44,6 @@ export { default as XMLExporter } from './model/XMLExporter'
 export { default as XMLImporter } from './model/XMLImporter'
 
 // transformations
-export { default as expandAnnotation } from './model/transform/expandAnnotation'
-export { default as fuseAnnotation } from './model/transform/fuseAnnotation'
-export { default as truncateAnnotation } from './model/transform/truncateAnnotation'
 export { default as updateAnnotations } from './model/transform/updateAnnotations'
 
 // packages

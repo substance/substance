@@ -300,7 +300,8 @@ class ContainerEditor extends Surface {
         content: ''
       })
       container.show(node.id)
-      tx.select({
+      tx.setSelection({
+        type: 'container',
         startPath: [ node.id, 'content'],
         startOffset: 0,
         containerId: containerId,

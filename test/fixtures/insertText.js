@@ -6,8 +6,9 @@ export default function insertText(tx, path, pos, text) {
   if (!isArray(path)) throw new Error('args.path is mandatory')
   if (!isNumber(pos)) throw new Error('args.pos is mandatory')
   if (!isString(text)) throw new Error('args.text is mandatory')
-  tx.select({
-    startPath: path,
+  tx.setSelection({
+    type: 'property',
+    path: path,
     startOffset: pos
   })
   tx.insertText(tx, text)

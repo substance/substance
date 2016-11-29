@@ -55,16 +55,18 @@ class ListEditing extends TextNodeEditing {
           container.show(newTextNode.id, nodePos+1)
           container.show(newList.id, nodePos+2)
         }
-        tx.select({
-          startPath: newTextNode.getTextPath(),
+        tx.setSelection({
+          type: 'property',
+          path: newTextNode.getTextPath(),
           startOffset: 0
         })
       } else {
         newItem.content = ""
         newItem = tx.create(newItem)
         list.show(newItem.id, itemPos)
-        tx.select({
-          startPath: [list.id, 'items', itemPos+1, 'content'],
+        tx.setSelection({
+          type: 'property',
+          path: [list.id, 'items', itemPos+1, 'content'],
           startOffset: 0
         })
       }
@@ -81,7 +83,8 @@ class ListEditing extends TextNodeEditing {
         tx.update(realPath, { type: 'delete', start: offset, end: text.length })
       }
       list.show(newItem.id, itemPos+1)
-      tx.select({
+      tx.setSelection({
+        type: 'property',
         startPath: [list.id, 'items', itemPos+1, 'content'],
         startOffset: 0
       })
