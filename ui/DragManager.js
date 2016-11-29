@@ -1,10 +1,8 @@
-import DefaultDOMElement from './DefaultDOMElement'
-import Component from './Component'
-import inBrowser from '../util/inBrowser'
-import EventEmitter from '../util/EventEmitter'
-
-import paste from '../model/transform/paste'
 import NodeSelection from '../model/NodeSelection'
+import Component from '../ui/Component'
+import DefaultDOMElement from '../ui/DefaultDOMElement'
+import EventEmitter from '../util/EventEmitter'
+import inBrowser from '../util/inBrowser'
 
 class DragManager extends EventEmitter {
 
@@ -255,25 +253,21 @@ class DragManager extends EventEmitter {
     let dragState = this.dragState
 
     context.editorSession.transaction((tx) => {
-      tx.selection = dragState.sourceSelection
+      tx.setSelection(dragState.sourceSelection)
       let copy = tx.copySelection()
       // just clear, but don't merge or don't insert a new node
       tx.deleteSelection({ clear: true })
       if(dragState.isContainerDrop) {
         let containerId = dragState.surface.getContainerId()
         let surfaceId = dragState.surface.id
-        tx.selection = tx.createSelection({
+        tx.setSelection({
           type: 'node',
           nodeId: dragState.targetNodeId,
           mode: dragState.insertMode,
           containerId: containerId,
           surfaceId: surfaceId
         })
-        return paste(tx, {
-          selection: tx.selection,
-          doc: copy,
-          containerId: containerId
-        })
+        tx.paste(copy)
       }
     })
   }

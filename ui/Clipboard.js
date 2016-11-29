@@ -1,7 +1,6 @@
 import platform from '../util/platform'
 import substanceGlobals from '../util/substanceGlobals'
 import copySelection from '../model/copySelection'
-import paste from '../model/transform/paste'
 import documentHelpers from '../model/documentHelpers'
 import ClipboardImporter from '../ui/ClipboardImporter'
 import ClipboardExporter from '../ui/ClipboardExporter'
@@ -193,9 +192,7 @@ class Clipboard {
   _pastePlainText(plainText) {
     let editorSession = this.getEditorSession()
     editorSession.transaction(function(tx) {
-      return paste(tx, {
-        text: plainText
-      })
+      tx.paste(plainText)
     })
   }
 
@@ -306,20 +303,13 @@ class Clipboard {
 
     Used by PasteCommand
   */
-  paste(contentDoc, text) {
-    // Use internal clipboard doc
-    if (!contentDoc) {
-      contentDoc = Clipboard.clipboardData.doc
-    }
+  paste(doc, text) {
+    let content = doc || text
     let editorSession = this.getEditorSession()
-    if (contentDoc) {
-      editorSession.transaction((tx)=>{
-        return paste(tx, {
-          text: text,
-          doc: contentDoc
-        })
+    if (content) {
+      editorSession.transaction((tx) => {
+        tx.paste(content)
       })
-      return true
     }
   }
 

@@ -43,9 +43,6 @@ export { default as Selection } from './model/Selection'
 export { default as XMLExporter } from './model/XMLExporter'
 export { default as XMLImporter } from './model/XMLImporter'
 
-// transformations
-export { default as updateAnnotations } from './model/transform/updateAnnotations'
-
 // packages
 export { default as BasePackage } from './packages/base/BasePackage'
 export { default as BlockquotePackage } from './packages/blockquote/BlockquotePackage'

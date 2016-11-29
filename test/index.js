@@ -11,12 +11,10 @@ import "./model/Fragmenter.test.js"
 import "./model/HTMLExporter.test.js"
 import "./model/HTMLImporter.test.js"
 import "./model/OperationSerializer.test.js"
+import "./model/paste.test.js"
 import "./model/PathEventProxy.test.js"
 import "./model/XMLExporter.test.js"
 import "./model/XMLImporter.test.js"
-
-// transforms
-import "./transform/paste.test.js"
 
 // ui
 import "./ui/AnnotationCommand.test.js"

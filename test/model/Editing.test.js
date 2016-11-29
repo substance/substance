@@ -243,28 +243,7 @@ test.UI("[IB2]: Cursor at start of a TextNode within a Container", function(t) {
   t.end()
 })
 
-class TestEditor extends AbstractEditor {
-  render($$) {
-    let doc = this.editorSession.getDocument()
-    let el = $$('div')
-    let body = $$(ContainerEditor, {
-      node: doc.get('body')
-    })
-    el.append(body)
-    return el
-  }
-}
-
-
 // TODO: add specification and test cases for tx.annotate()
-
-// import { module } from 'substance-test'
-// import createAnnotation from '../../model/transform/createAnnotation'
-// import docHelpers from '../../model/documentHelpers'
-// import fixture from '../fixtures/createTestArticle'
-// import headersAndParagraphs from '../fixtures/headersAndParagraphs'
-
-// const test = module('transform/createAnnotation')
 
 // test("Create property annotation for a given property selection", function(t) {
 //   var doc = fixture(headersAndParagraphs)
@@ -317,6 +296,18 @@ class TestEditor extends AbstractEditor {
 //   t.equal(annoText, selText, 'New annotation should have the same text as the original selection')
 //   t.end()
 // })
+
+class TestEditor extends AbstractEditor {
+  render($$) {
+    let doc = this.editorSession.getDocument()
+    let el = $$('div')
+    let body = $$(ContainerEditor, {
+      node: doc.get('body')
+    })
+    el.append(body)
+    return el
+  }
+}
 
 function getConfig() {
   let config = new Configurator()

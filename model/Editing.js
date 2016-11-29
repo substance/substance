@@ -1,8 +1,11 @@
+import isString from '../util/isString'
 import annotationHelpers from '../model/annotationHelpers'
+import deleteNode from '../model/deleteNode'
+import paste from '../model/paste'
+import uuid from '../util/uuid'
 import PropertySelection from '../model/PropertySelection'
 import TextNodeEditing from '../model/TextNodeEditing'
 import ListEditing from '../packages/list/ListEditing'
-import uuid from '../util/uuid'
 
 /**
   Core editing implementation, that controls meta behavior
@@ -105,7 +108,7 @@ class Editing {
       if (!sel.isCollapsed()) {
         // delete the selection
         this.deletePropertySelection(tx, sel)
-        tx.selection = sel.collapse('left')
+        tx.setSelection(sel.collapse('left'))
       }
       // then break the node
       if (containerId) {
@@ -131,7 +134,7 @@ class Editing {
         if (nodePos < container.length-1) {
           this._setCursor(tx, container.getNodeAt(nodePos+1), containerId, 'before')
         } else {
-          tx.selection = sel.collapse('left')
+          tx.setSelection(sel.collapse('left'))
           this.break(tx)
         }
       }
@@ -152,11 +155,11 @@ class Editing {
         let container = tx.get(sel.containerId)
         let nodePos = container.getPosition(nodeId)
         let contentPath = container.getContentPath()
-        tx.update(contentPath, {delete: {offset: nodePos}})
+        tx.update(contentPath, { type: 'delete', pos: nodePos })
         tx.delete(nodeId)
         let newNode = tx.createDefaultTextNode()
         tx.update(contentPath, { type: 'insert', pos: nodePos, value: newNode.id })
-        tx.selection = tx.createSelection({
+        tx.setSelection({
           type: 'property',
           path: newNode.getTextPath(),
           startOffset: 0,
@@ -199,7 +202,8 @@ class Editing {
           end: { path: path, offset: end }
         })
         // TODO: this should go into the nodeEditing impl
-        tx.selection = new PropertySelection({
+        tx.setSelection({
+          type: 'property',
           path: path,
           startOffset: start,
           containerId: sel.containerId
@@ -265,7 +269,8 @@ class Editing {
       tx.delete(startId)
       let startNode = tx.createDefaultTextNode()
       tx.update([container.id, 'nodes'], { type: 'insert', pos: startPos, value: startNode.id })
-      tx.selection = new PropertySelection({
+      tx.setSelection({
+        type: 'property',
         path: startNode.getTextPath(),
         startOffset: 0,
         containerId: sel.containerId,
@@ -275,7 +280,7 @@ class Editing {
       let startNode = tx.get(startId)
       let startEditing = this._getNodeEditing(startNode)
       startEditing.delete(tx, { start: sel.start, end: 'after' })
-      tx.selection = sel.collapse('left')
+      tx.setSelection(sel.collapse('left'))
     }
   }
 
@@ -369,15 +374,14 @@ class Editing {
       container.hide(nodeId)
     }
     // delete nested nodes
-    // TODO: revisit this
     if (node.hasChildren()) {
       node.getChildren().forEach(function(child) {
-        deleteNode(tx, { nodeId: child.id })
+        deleteNode(tx, { nodeId: child.id, containerId: containerId })
       })
     }
     // finally delete the node itself
     tx.delete(nodeId)
-    tx.selection = newSel
+    tx.setSelection(newSel)
   }
 
   insertInlineNode(tx, nodeData) {
@@ -417,7 +421,7 @@ class Editing {
       // insert after
       else if (sel.isAfter()) {
         tx.update(container.getContentPath(), { type: 'insert', pos: nodePos+1, value: blockNode.id })
-        tx.selection = tx.createSelection({
+        tx.setSelection({
           type: 'node',
           containerId: containerId,
           nodeId: blockNode.id,
@@ -427,7 +431,7 @@ class Editing {
         tx.update(container.getContentPath(), { type: 'delete', pos: nodePos })
         tx.delete(sel.getNodeId())
         tx.update([container.id, 'nodes'], { type: 'insert', pos: nodePos, value: blockNode.id })
-        tx.selection = tx.createSelection({
+        tx.setSelection({
           type: 'node',
           containerId: containerId,
           nodeId: blockNode.id,
@@ -439,7 +443,7 @@ class Editing {
       let container = tx.get(sel.containerId)
       if (!sel.isCollapsed()) {
         this.deletePropertySelection(tx)
-        tx.selection = sel.collapse('left')
+        tx.setSelection(sel.collapse('left'))
       }
       let node = tx.get(sel.path[0])
       if (!node) throw new Error('Invalid selection.')
@@ -476,14 +480,14 @@ class Editing {
       if (sel.isCollapsed()) {
         let start = sel.start
         if (start.isPropertyCoordinate()) {
-          tx.selection = tx.createSelection({
+          tx.setSelection({
             type: 'property',
             path: start.path,
             startOffset: start.offset,
             containerId: sel.containerId,
           })
         } else if (start.isNodeCoordinate()) {
-          tx.selection = tx.createSelection({
+          tx.setSelection({
             type: 'node',
             containerId: sel.containerId,
             nodeId: start.path[0],
@@ -528,7 +532,8 @@ class Editing {
       nodeEditing.type(tx, sel, text)
       if (node.isText()) {
         let offset = sel.startOffset + text.length
-        tx.selection = new PropertySelection({
+        tx.setSelection({
+          type: 'property',
           path: path,
           startOffset: offset,
           containerId: sel.containerId,
@@ -542,26 +547,13 @@ class Editing {
     }
   }
 
-  _setCursor(tx, node, containerId, mode) {
-    if (node.isText()) {
-      let offset = 0
-      if (mode === 'after') {
-        let text = node.getText()
-        offset = text.length
-      }
-      tx.selection = tx.createSelection({
-        type: 'property',
-        path: node.getTextPath(),
-        startOffset: offset,
-        containerId: containerId
-      })
+  paste(tx, content) {
+    if (isString(content)) {
+      paste(tx, {text: content})
+    } else if (content._isDocument) {
+      paste(tx, {doc: content})
     } else {
-      tx.selection = tx.createSelection({
-        type: 'node',
-        containerId: containerId,
-        nodeId: node.id,
-        mode: mode
-      })
+      throw new Error('Illegal content for paste.')
     }
   }
 
@@ -619,11 +611,16 @@ class Editing {
     }
     // remove the old one from the document
     this.deleteNode(tx, node.id, containerId)
-    tx.selection = tx.createSelection(newPath, sel.startOffset, sel.endOffset)
+    tx.setSelection({
+      type: 'property',
+      path: newPath,
+      startOffset: sel.startOffset,
+      endOffset: sel.endOffset,
+      containerId: containerId
+    })
 
     return newNode
   }
-
 
   _getNodeEditing(node) {
     let nodeEditing = this.nodeEditing[node.type]
@@ -636,6 +633,30 @@ class Editing {
     }
     return nodeEditing
   }
+
+  _setCursor(tx, node, containerId, mode) {
+    if (node.isText()) {
+      let offset = 0
+      if (mode === 'after') {
+        let text = node.getText()
+        offset = text.length
+      }
+      tx.setSelection({
+        type: 'property',
+        path: node.getTextPath(),
+        startOffset: offset,
+        containerId: containerId
+      })
+    } else {
+      tx.setSelection({
+        type: 'node',
+        containerId: containerId,
+        nodeId: node.id,
+        mode: mode
+      })
+    }
+  }
+
 }
 
 export default Editing

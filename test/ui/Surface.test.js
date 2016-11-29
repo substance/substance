@@ -1,7 +1,6 @@
 import { module } from 'substance-test'
 
 /* eslint-disable no-invalid-this */
-import createAnnotation from '../../model/transform/createAnnotation'
 import EditorSession from '../../model/EditorSession'
 import Registry from '../../util/Registry'
 import Configurator from '../../util/Configurator'
@@ -31,10 +30,8 @@ test.UI("Set the selection after creating annotation.", function(t) {
     surfaceId: 'body',
     containerId: 'body'
   })
-  editorSession.transaction(function(tx, args) {
-    args.selection = tx.getSelection()
-    args.node = {type: "strong"}
-    return createAnnotation(tx, args)
+  editorSession.transaction(function(tx) {
+    tx.annotate({ type: "strong" })
   })
   var wsel = window.getSelection()
   var newSel = surface.domSelection.getSelection()
@@ -49,12 +46,12 @@ test.UI("Render a reverse selection.", function(t) {
   var {editorSession} = _createApp(simple, el)
   editorSession.setSelection({
     type: 'container',
-    containerId: 'body',
     startPath:['p1', 'content'],
     startOffset: 3,
     endPath: ['p2', 'content'],
     endOffset: 2,
     reverse: true,
+    containerId: 'body',
     surfaceId: 'body'
   })
   var wsel = BrowserDOMElement.getWindowSelection()

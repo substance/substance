@@ -60,21 +60,14 @@ class InsertInlineNodeCommand extends Command {
   execute(params) {
     let state = this.getCommandState(params)
     if (state.disabled) return
-    let surface = params.surface
-    if (surface) {
-      surface.transaction(function(tx, args) {
-        return this.insertInlineNode(tx, args)
-      }.bind(this))
-    }
-    return true
+    let editorSession = this._getEditorSession(params)
+    editorSession.transaction((tx)=>{
+      let nodeData = this.createNodeData(tx, params)
+      tx.insertInlineNode(nodeData)
+    })
   }
 
-  insertInlineNode(tx, nodeData) {
-    nodeData = this.createNodeData(tx, nodeData)
-    return tx.insertInlineNode(nodeData)
-  }
-
-  createNodeData(tx, args) { // eslint-disable-line
+  createNodeData(tx) { // eslint-disable-line
     return {
       type: this.config.nodeType
     }

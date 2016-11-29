@@ -32,8 +32,7 @@ class CorrectionTool extends Tool {
 
   _applyCorrection(suggestion) {
     let editorSession = this.context.editorSession
-    editorSession.transaction(function(tx, args) {
-      tx.selection = args.selection
+    editorSession.transaction(function(tx) {
       tx.insertText(tx, suggestion)
     })
   }

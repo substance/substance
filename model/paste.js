@@ -1,7 +1,7 @@
 import last from 'lodash/last'
-import forEach from '../../util/forEach'
-import uuid from '../../util/uuid'
-import Document from '../Document'
+import forEach from '../util/forEach'
+import uuid from '../util/uuid'
+import Document from '../model/Document'
 
 /**
   Pastes clipboard content at the current selection

@@ -55,7 +55,6 @@ function insertedText(doc, coordinate, length) {
   });
 }
 
-// TODO: clean up replaceText support hackz
 function deletedText(doc, path, startOffset, endOffset) {
   if (startOffset === endOffset) return;
   var index = doc.getIndex('annotations');
@@ -257,7 +256,7 @@ function fuseAnnotation(tx, annos) {
     tx.delete(annos[i].id)
   }
   expandAnnotation(tx, annos[0], sel)
-  tx.selection = sel
+  tx.setSelection(sel)
 }
 
 

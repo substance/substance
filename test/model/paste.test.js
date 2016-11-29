@@ -1,10 +1,10 @@
 import { module } from 'substance-test'
 import Document from '../../model/Document'
-import paste from '../../model/transform/paste'
+import paste from '../../model/paste'
 import fixture from '../fixtures/createTestArticle'
 import simple from '../fixtures/simple'
 
-const test = module('transform/paste')
+const test = module('model/paste')
 
 test("Pasting plain text", function(t) {
   var doc = fixture(simple)

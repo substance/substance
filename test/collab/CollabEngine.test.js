@@ -10,8 +10,6 @@ import CollabEngine from '../../collab/CollabEngine'
 import documentStoreSeed from '../fixtures/documentStoreSeed'
 import changeStoreSeed from '../fixtures/changeStoreSeed'
 // import twoParagraphs from '../fixtures/twoParagraphs'
-// import insertParagraph from '../fixtures/insertParagraph'
-// import insertText from '../fixtures/insertText'
 
 const test = module('collab/CollabEngine')
 

@@ -98,6 +98,10 @@ class EditingInterface {
 
   /* High-level editing */
 
+  annotate(annotationData) {
+    return this._impl.annotate(this, annotationData)
+  }
+
   break() {
     this._impl.break(this)
   }
@@ -131,16 +135,14 @@ class EditingInterface {
     this._impl.insertBlockNode(this, blockNode)
   }
 
+  paste(content) {
+    this._impl.paste(this, content)
+  }
+
   switchTextType(nodeData) {
     this._impl.switchTextType(this, nodeData)
   }
 
-  /* Annotation specific */
-
-  // create an annotation for the current selection using the given data
-  annotate(annotationData) {
-    return this._impl.annotate(this, annotationData)
-  }
 
   /* Legacy low-level API */
 
