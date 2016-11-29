@@ -256,7 +256,7 @@ class DragManager extends EventEmitter {
 
     context.editorSession.transaction((tx) => {
       tx.selection = dragState.sourceSelection
-      let copyResult = tx.copySelection()
+      let copy = tx.copySelection()
       // just clear, but don't merge or don't insert a new node
       tx.deleteSelection({ clear: true })
       if(dragState.isContainerDrop) {
@@ -271,7 +271,7 @@ class DragManager extends EventEmitter {
         })
         return paste(tx, {
           selection: tx.selection,
-          doc: copyResult.doc,
+          doc: copy,
           containerId: containerId
         })
       }
