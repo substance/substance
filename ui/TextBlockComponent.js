@@ -19,7 +19,7 @@ TextBlockComponent.Prototype = function() {
         path: [ this.props.node.id, "content"]
       }));
     if (node.direction) {
-      el.attr('dir', node.direction)
+      el.attr('dir', node.direction);
     }
     return el;
   };

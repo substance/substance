@@ -9,8 +9,8 @@ function HeadingComponent() {
 HeadingComponent.Prototype = function() {
 
   this.getClassNames = function() {
-    return "sc-heading sm-level-"+this.props.node.level
-  }
+    return "sc-heading sm-level-"+this.props.node.level;
+  };
 
 };
 
