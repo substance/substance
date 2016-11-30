@@ -222,9 +222,14 @@ class AnnotationCommand extends Command {
     let editorSession = this._getEditorSession(params)
     let annoData = this.getAnnotationData()
     annoData.type = this.getAnnotationType()
+    let anno
     editorSession.transaction((tx)=>{
-      tx.annotate(annoData)
+      anno = tx.annotate(annoData)
     })
+    return {
+      mode: 'create',
+      anno: anno
+    }
   }
 
   executeFuse(params) {
@@ -233,6 +238,10 @@ class AnnotationCommand extends Command {
     this._applyTransform(params, function(tx) {
       annotationHelpers.fuseAnnotation(tx, annos)
     })
+    return {
+      mode: 'fuse',
+      anno: annos[0]
+    }
   }
 
   executeTruncate(params) {
@@ -242,6 +251,10 @@ class AnnotationCommand extends Command {
     this._applyTransform(params, function(tx) {
       annotationHelpers.truncateAnnotation(tx, anno, params.selection)
     })
+    return {
+      mode: 'truncate',
+      anno: anno
+    }
   }
 
   executeExpand(params) {

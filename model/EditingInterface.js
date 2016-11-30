@@ -162,6 +162,10 @@ class EditingInterface {
     return this._document.getSchema()
   }
 
+  createSnippet() {
+    return this._document.createSnippet()
+  }
+
 }
 
 export default EditingInterface

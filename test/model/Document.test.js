@@ -33,7 +33,13 @@ test("Create expanded property selection.", function(t) {
   t.end()
 })
 
-test("Using deep path", function(t) {
-
+test("Node.toJSON() should not export undefined, optional properties", function(t) {
+  var doc = fixture(simple)
+  let p = doc.create({
+    type: 'paragraph',
+    id: 'p',
+    content: ''
+  })
+  t.deepEqual(p.toJSON(), { type: 'paragraph', id: 'p', content: '' }, 'JSON should be correct.')
   t.end()
 })

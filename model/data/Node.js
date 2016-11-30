@@ -117,6 +117,7 @@ class Node extends EventEmitter {
     }
     forEach(this.constructor.schema, function(prop, name) {
       let val = this[name]
+      if (prop.optional && val === undefined) return
       if (isArray(val) || isPlainObject(val)) {
         val = cloneDeep(val)
       }

@@ -25,7 +25,7 @@ TextNode.isText = true
 TextNode.define({
   type: "text",
   content: "text",
-  direction: { type: "string", default: "ltr" }
+  direction: { type: "string", optional: true }
 })
 
 export default TextNode
