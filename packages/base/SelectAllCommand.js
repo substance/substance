@@ -26,11 +26,11 @@ class SelectAll extends Command {
         let lastNodeId = last(container.nodes)
         sel = editorSession.createSelection({
           type: 'container',
-          containerId: container.id,
           startPath: [firstNodeId],
           startOffset: 0,
           endPath: [lastNodeId],
           endOffset: 1,
+          containerId: container.id,
           surfaceId: surface.id
         })
       } else if (surface._isTextPropertyEditor) {

@@ -22,7 +22,7 @@ test("Updating a property", function(t) {
   doc.getEventProxy('path').on(['test', 'arrayVal'], function() {
     callCount++
   })
-  doc.update(['test', 'arrayVal'], { insert: { offset: 1, value: '1000' } } )
+  doc.update(['test', 'arrayVal'], { type: 'insert', pos: 1, value: '1000' } )
   t.equal(callCount, 1, "Event proxy listener should have been called.")
   t.end()
 })

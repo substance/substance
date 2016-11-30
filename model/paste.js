@@ -1,11 +1,7 @@
 import last from 'lodash/last'
-import forEach from '../../util/forEach'
-import uuid from '../../util/uuid'
-import Document from '../Document'
-import annotationHelpers from '../annotationHelpers'
-import deleteSelection from './deleteSelection'
-import insertText from './insertText'
-import breakNode from './breakNode'
+import forEach from '../util/forEach'
+import uuid from '../util/uuid'
+import Document from '../model/Document'
 
 /**
   Pastes clipboard content at the current selection
@@ -16,47 +12,43 @@ import breakNode from './breakNode'
 */
 
 function paste(tx, args) {
-  args.text = args.text || ''
-  let sel = args.selection
+  let sel = tx.selection
   if (!sel || sel.isNull()) {
-    // TODO: we should throw
-    console.error("Can not paste, without selection.")
-    return args
+    throw new Error("Can not paste, without selection.")
   }
+  args = args || {}
+  args.text = args.text || ''
+  let pasteDoc = args.doc
   // TODO: is there a better way to detect that this paste is happening within a
   // container?
-  let inContainer = Boolean(args.containerId)
-  let pasteDoc = args.doc
+  let inContainer = Boolean(sel.containerId)
 
   // when we are in a container, we interpret line-breaks
   // and create a document with multiple paragraphs
   // in a PropertyEditor we paste the text as is
+  if (!pasteDoc && !inContainer) {
+    tx.insertText(args.text)
+    return
+  }
   if (!pasteDoc) {
-    if (inContainer) {
-      args.doc = pasteDoc = _convertPlainTextToDocument(tx, args)
-    } else {
-      return insertText(tx, args)
-    }
+    pasteDoc = _convertPlainTextToDocument(tx, args)
   }
   if (!sel.isCollapsed()) {
-    let tmp = deleteSelection(tx, args)
-    args.selection = tmp.selection
+    tx.deleteSelection()
   }
   let nodes = pasteDoc.get(Document.SNIPPET_ID).nodes
   let schema = tx.getSchema()
-
   if (nodes.length > 0) {
     let first = pasteDoc.get(nodes[0])
-
     if (schema.isInstanceOf(first.type, 'text')) {
-      args = _pasteAnnotatedText(tx, args)
+      _pasteAnnotatedText(tx, pasteDoc)
       // HACK: this changes the container's nodes array.
       // We do this, to be able to call _pasteDocument inserting the remaining nodes
       nodes.shift()
     }
     // if still nodes left > 0
     if (nodes.length > 0) {
-      args = _pasteDocument(tx, args)
+      _pasteDocument(tx, pasteDoc)
     }
   }
   return args
@@ -95,10 +87,8 @@ function _convertPlainTextToDocument(tx, args) {
   return pasteDoc
 }
 
-function _pasteAnnotatedText(tx, args) {
-  let copy = args.doc
-  let sel = args.selection
-
+function _pasteAnnotatedText(tx, copy) {
+  let sel = tx.selection
   let nodes = copy.get(Document.SNIPPET_ID).nodes
   let textPath = [nodes[0], 'content']
   let text = copy.get(textPath)
@@ -106,34 +96,23 @@ function _pasteAnnotatedText(tx, args) {
   // insert plain text
   let path = sel.start.path
   let offset = sel.start.offset
-  tx.update(path, { type: 'insert', start: offset, text: text })
-  annotationHelpers.insertedText(tx, sel.start, text.length)
-  sel = tx.createSelection({
-    type: 'property',
-    path: sel.start.path,
-    startOffset: sel.start.offset+text.length
-  })
+  tx.insertText(text)
   // copy annotations
   forEach(annotations, function(anno) {
     let data = anno.toJSON()
     data.path = path.slice(0)
     data.startOffset += offset
     data.endOffset += offset
-    if (tx.get(data.id)) {
-      data.id = uuid(data.type)
-    }
+    // create a new uuid if a node with the same id exists already
+    if (tx.get(data.id)) data.id = uuid(data.type)
     tx.create(data)
   })
-  args.selection = sel
-  return args
 }
 
-function _pasteDocument(tx, args) {
-  let pasteDoc = args.doc
-  let containerId = args.containerId
-  let sel = args.selection
+function _pasteDocument(tx, pasteDoc) {
+  let sel = tx.selection
+  let containerId = sel.containerId
   let container = tx.get(containerId)
-
   let insertPos
   if (sel.isPropertySelection()) {
     let startPath = sel.start.path
@@ -144,8 +123,7 @@ function _pasteDocument(tx, args) {
     if ( text.length === sel.start.offset ) {
       insertPos = startPos + 1
     } else {
-      let result = breakNode(tx, args)
-      sel = result.selection
+      tx.break()
       insertPos = startPos + 1
     }
   } else if (sel.isNodeSelection()) {
@@ -172,7 +150,6 @@ function _pasteDocument(tx, args) {
     let node = _copyNode(tx, pasteDoc.get(nodeId))
     container.show(node.id, insertPos++)
     insertedNodes.push(node)
-
     // transfer annotations
     // what if we have changed the id of nodes that are referenced by annotations?
     let annos = annoIndex.get(nodeId)
@@ -188,20 +165,19 @@ function _pasteDocument(tx, args) {
     }
   }
 
-  if (insertedNodes.length === 0) return args
-
-  // select the whole pasted block
-  let firstNode = insertedNodes[0]
-  let lastNode = last(insertedNodes)
-  args.selection = tx.createSelection({
-    type: 'container',
-    containerId: containerId,
-    startPath: [firstNode.id],
-    startOffset: 0,
-    endPath: [lastNode.id],
-    endOffset: 1,
-  })
-  return args
+  if (insertedNodes.length > 0) {
+    // select the whole pasted block
+    let firstNode = insertedNodes[0]
+    let lastNode = last(insertedNodes)
+    tx.setSelection({
+      type: 'container',
+      startPath: [firstNode.id],
+      startOffset: 0,
+      endPath: [lastNode.id],
+      endOffset: 1,
+      containerId: containerId
+    })
+  }
 }
 
 function _copyNode(tx, pasteNode) {

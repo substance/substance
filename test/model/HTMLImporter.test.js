@@ -5,27 +5,10 @@ import DOMElement from '../../ui/DefaultDOMElement'
 
 const test = module('model/HTMLImporter')
 
-let importer
-
-function setup() {
-  importer = new TestHTMLImporter()
-}
-
-function teardown() {
-  importer = null
-}
-
-function setupTest(description, fn) {
-  test(description, function (t) {
-    setup()
-    fn(t)
-    teardown()
-  })
-}
-
 var CONTENT = '0123456789'
 
-setupTest("Importing paragraph", function(t) {
+test("Importing paragraph", function(t) {
+  let importer = new TestHTMLImporter()
   var html = '<p data-id="p1">' + CONTENT + '</p>'
   var el = DOMElement.parseHTML(html)
   var node = importer.convertElement(el)
@@ -33,11 +16,12 @@ setupTest("Importing paragraph", function(t) {
     id: "p1",
     type: "paragraph",
     content: CONTENT
-  })
+  }, 'paragraph should have been imported correctly')
   t.end()
 })
 
-setupTest("Importing paragraph with strong", function(t) {
+test("Importing paragraph with strong", function(t) {
+  let importer = new TestHTMLImporter()
   var html = '<p data-id="p1">0123<strong data-id="s1">456</strong>789</p>'
   var el = DOMElement.parseHTML(html)
   importer.convertElement(el)
@@ -49,7 +33,8 @@ setupTest("Importing paragraph with strong", function(t) {
   t.end()
 })
 
-setupTest("Importing h1", function(t) {
+test("Importing h1", function(t) {
+  let importer = new TestHTMLImporter()
   var html = '<h1 data-id="h1">' + CONTENT + '</h1>'
   var el = DOMElement.parseHTML(html)
   var node = importer.convertElement(el)
@@ -58,11 +43,12 @@ setupTest("Importing h1", function(t) {
     type: "heading",
     level: 1,
     content: CONTENT
-  })
+  }, 'heading should have been imported correctly')
   t.end()
 })
 
-setupTest("Importing h2", function(t) {
+test("Importing h2", function(t) {
+  let importer = new TestHTMLImporter()
   var html = '<h2 data-id="h2">' + CONTENT + '</h2>'
   var el = DOMElement.parseHTML(html)
   var node = importer.convertElement(el)
@@ -71,6 +57,6 @@ setupTest("Importing h2", function(t) {
     type: "heading",
     level: 2,
     content: CONTENT
-  })
+  }, 'heading should have been imported correctly')
   t.end()
 })

@@ -8,7 +8,7 @@ import Heading from '../../packages/heading/Heading'
 import Emphasis from '../../packages/emphasis/Emphasis'
 import Strong from '../../packages/strong/Strong'
 import Link from '../../packages/link/Link'
-import Image from '../../packages/image/Image'
+import ImageNode from '../../packages/image/ImageNode'
 import Codeblock from '../../packages/codeblock/Codeblock'
 import InlineWrapper from '../../packages/inline-wrapper/InlineWrapper'
 
@@ -25,7 +25,7 @@ schema.addNodes([
   Emphasis,
   Strong,
   Link,
-  Image,
+  ImageNode,
   Codeblock,
   TestNode,
   TestContainerAnnotation,

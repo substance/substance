@@ -61,8 +61,7 @@ class ClipboardImporter extends HTMLImporter {
       el = DefaultDOMElement.parseHTML(html)
       let substanceData = el.find('meta[name="substance"]')
       if (substanceData) {
-        let jsonStr = atob(substanceData.attr('content'))
-        jsonStr = decodeURIComponent(jsonStr)
+        let jsonStr = decodeURIComponent(escape(window.atob(substanceData.attr('content'))))
         try {
           return this.importFromJSON(jsonStr)
         } catch(err) {

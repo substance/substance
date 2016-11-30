@@ -1,5 +1,4 @@
 import Tool from '../tools/Tool'
-import insertText from '../../model/transform/insertText'
 
 class CorrectionTool extends Tool {
 
@@ -33,11 +32,8 @@ class CorrectionTool extends Tool {
 
   _applyCorrection(suggestion) {
     let editorSession = this.context.editorSession
-    editorSession.transaction(function(tx, args) {
-      return insertText(tx, {
-        selection: args.selection,
-        text: suggestion
-      })
+    editorSession.transaction(function(tx) {
+      tx.insertText(tx, suggestion)
     })
   }
 }

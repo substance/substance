@@ -1,22 +1,20 @@
 import { module } from 'substance-test'
 
 import EditorSession from '../../model/EditorSession'
-import ComponentRegistry from '../../ui/ComponentRegistry'
+import Configurator from '../../util/Configurator'
+// import ComponentRegistry from '../../ui/ComponentRegistry'
 import Clipboard from '../../ui/Clipboard'
 import DefaultDOMElement from '../../ui/DefaultDOMElement'
-import Configurator from '../../util/Configurator'
 import Registry from '../../util/Registry'
-import StubSurface from './StubSurface'
-import TestContainerEditor from './TestContainerEditor'
 
 import fixture from '../fixtures/createTestArticle'
 import simple from '../fixtures/simple'
 
-import ParagraphComponent from '../../packages/paragraph/ParagraphComponent'
-import HeadingComponent from '../../packages/heading/HeadingComponent'
-import AnnotationComponent from '../../ui/AnnotationComponent'
-import LinkComponent from '../../packages/link/LinkComponent'
-import CodeblockComponent from '../../packages/codeblock/CodeblockComponent'
+// import ParagraphComponent from '../../packages/paragraph/ParagraphComponent'
+// import HeadingComponent from '../../packages/heading/HeadingComponent'
+// import AnnotationComponent from '../../ui/AnnotationComponent'
+// import LinkComponent from '../../packages/link/LinkComponent'
+// import CodeblockComponent from '../../packages/codeblock/CodeblockComponent'
 import ParagraphHTMLConverter from '../../packages/paragraph/ParagraphHTMLConverter'
 import HeadingHTMLConverter from '../../packages/heading/HeadingHTMLConverter'
 import StrongHTMLConverter from '../../packages/strong/StrongHTMLConverter'
@@ -58,16 +56,16 @@ import MSW11OSXTwoParagraphsFixture from '../fixtures/html/word-11-osx-two-parag
 
 const test = module('ui/Clipboard')
 
-var componentRegistry = new ComponentRegistry({
-  "paragraph": ParagraphComponent,
-  "heading": HeadingComponent,
-  "strong": AnnotationComponent,
-  "emphasis": AnnotationComponent,
-  "link": LinkComponent,
-  "codeblock": CodeblockComponent,
-})
+// let componentRegistry = new ComponentRegistry({
+//   "paragraph": ParagraphComponent,
+//   "heading": HeadingComponent,
+//   "strong": AnnotationComponent,
+//   "emphasis": AnnotationComponent,
+//   "link": LinkComponent,
+//   "codeblock": CodeblockComponent,
+// })
 
-var converterRegistry = new Registry({
+let converterRegistry = new Registry({
   "html": new Registry({
     "paragraph": ParagraphHTMLConverter,
     "heading": HeadingHTMLConverter,
@@ -78,82 +76,47 @@ var converterRegistry = new Registry({
   })
 })
 
-var clipboardConfig = {
+let clipboardConfig = {
   converterRegistry: converterRegistry
 }
 
-function ClipboardEventData() {
-  this.data = {}
-
-  this.getData = function(format) {
-    return this.data[format]
-  }
-
-  this.setData = function(format, data) {
-    this.data[format] = data
-  }
-}
-
-Object.defineProperty(ClipboardEventData.prototype, 'types', {
-  get: function() {
-    return Object.keys(this.data)
-  }
-})
-
-function ClipboardEvent() {
-  this.clipboardData = new ClipboardEventData()
-  this.preventDefault = function() {}
-  this.stopPropagation = function() {}
-}
-
 test.UI("Copying HTML, and plain text", function(t) {
-  var doc = fixture(simple)
-  var surface = new StubSurface(doc, null, 'body')
-  var clipboard = new Clipboard(surface, clipboardConfig)
-  var sel = doc.createSelection({ type: 'property', path: ['p1', 'content'], startOffset: 0, endOffset: 5 })
-  surface.setSelection(sel)
-  var event = new ClipboardEvent()
+  let { editorSession, clipboard } = _fixture(simple)
+  editorSession.setSelection({ type: 'property', path: ['p1', 'content'], startOffset: 0, endOffset: 5 })
+  let event = new ClipboardEvent()
   clipboard.onCopy(event)
-
-  var clipboardData = event.clipboardData
+  let clipboardData = event.clipboardData
   t.notNil(clipboardData.data['text/plain'], "Clipboard should contain plain text data.")
   t.notNil(clipboardData.data['text/html'], "Clipboard should contain HTML data.")
-
-  var htmlDoc = DefaultDOMElement.parseHTML(clipboardData.data['text/html'])
-  var body = htmlDoc.find('body')
+  let htmlDoc = DefaultDOMElement.parseHTML(clipboardData.data['text/html'])
+  let body = htmlDoc.find('body')
   t.notNil(body, 'The copied HTML should always be a full HTML document string, containing a body element.')
   t.end()
 })
 
 test.UI("Copying a property selection", function(t) {
-  var doc = fixture(simple)
-  var surface = new StubSurface(doc, null, 'body')
-  var clipboard = new Clipboard(surface, clipboardConfig)
-  var sel = doc.createSelection({ type: 'property', path: ['p1', 'content'], startOffset: 0, endOffset: 5 })
-  surface.setSelection(sel)
-  var TEXT = '01234'
-
-  var event = new ClipboardEvent()
+  let { editorSession, clipboard } = _fixture(simple)
+  editorSession.setSelection({ type: 'property', path: ['p1', 'content'], startOffset: 0, endOffset: 5 })
+  let TEXT = '01234'
+  let event = new ClipboardEvent()
   clipboard.onCopy(event)
 
-  var clipboardData = event.clipboardData
+  let clipboardData = event.clipboardData
   t.equal(clipboardData.data['text/plain'], TEXT, "Plain text should be correct.")
 
-  var htmlDoc = DefaultDOMElement.parseHTML(clipboardData.data['text/html'])
-  var body = htmlDoc.find('body')
-  var childNodes = body.getChildNodes()
+  let htmlDoc = DefaultDOMElement.parseHTML(clipboardData.data['text/html'])
+  let body = htmlDoc.find('body')
+  let childNodes = body.getChildNodes()
   t.equal(childNodes.length, 1, "There should be only one element")
-  var el = childNodes[0]
+  let el = childNodes[0]
   t.equal(el.nodeType, 'text', "HTML element should be a text node.")
   t.equal(el.text(), TEXT, "HTML text should be correct.")
   t.end()
 })
 
 test.UI("Copying a container selection", function(t) {
-  var doc = fixture(simple)
-  var surface = new StubSurface(doc, null, 'body')
-  var clipboard = new Clipboard(surface, clipboardConfig)
-  var sel = doc.createSelection({
+  let { editorSession, clipboard } = _fixture(simple)
+  editorSession.setSelection({
     type: 'container',
     containerId: 'body',
     startPath: ['p1', 'content'],
@@ -161,87 +124,75 @@ test.UI("Copying a container selection", function(t) {
     endPath: ['p3', 'content'],
     endOffset: 5
   })
-  surface.setSelection(sel)
-  var TEXT = [
+  let TEXT = [
     '123456789',
     '0123456789',
     '01234'
   ]
 
-  var event = new ClipboardEvent()
+  let event = new ClipboardEvent()
   clipboard.onCopy(event)
 
-  var clipboardData = event.clipboardData
+  let clipboardData = event.clipboardData
   t.equal(clipboardData.data['text/plain'], TEXT.join('\n'), "Plain text should be correct.")
 
-  var htmlDoc = DefaultDOMElement.parseHTML(clipboardData.data['text/html'])
-  var elements = htmlDoc.find('body').getChildren()
+  let htmlDoc = DefaultDOMElement.parseHTML(clipboardData.data['text/html'])
+  let elements = htmlDoc.find('body').getChildren()
   t.equal(elements.length, 3, "HTML should consist of three elements.")
-  var p1 = elements[0]
+  let p1 = elements[0]
   t.equal(p1.attr('data-id'), 'p1', "First element should have correct data-id.")
   t.equal(p1.text(), TEXT[0], "First element should have correct text content.")
-  var p2 = elements[1]
+  let p2 = elements[1]
   t.equal(p2.attr('data-id'), 'p2', "Second element should have correct data-id.")
   t.equal(p2.text(), TEXT[1], "Second element should have correct text content.")
-  var p3 = elements[2]
+  let p3 = elements[2]
   t.equal(p3.attr('data-id'), 'p3', "Third element should have correct data-id.")
   t.equal(p3.text(), TEXT[2], "Third element should have correct text content.")
   t.end()
 })
 
-function _containerEditorSample(t) {
-  var doc = fixture(simple)
-  var editorSession = new EditorSession(doc, { configurator: new Configurator() })
-  var app = TestContainerEditor.mount({
-    context: {
-      editorSession: editorSession,
-      componentRegistry: componentRegistry,
-      converterRegistry: converterRegistry
-    },
-    node: doc.get('body')
-  }, t.sandbox)
-  var editor = app.refs.editor
-  var sel = doc.createSelection({
+test.UI("Pasting text into ContainerEditor using 'text/plain'.", function(t) {
+  let { editorSession, clipboard, doc } = _fixture(simple)
+  editorSession.setSelection({
     type: 'property',
     path: ['p1', 'content'],
-    startOffset: 1
+    startOffset: 1,
+    containerId: 'body'
   })
-  // editor.setFocused(true)
-  // HACK faking that the element is focused natively
-  editor.isNativeFocused = true
-  editor.setSelection(sel)
-
-  return editor
-}
-
-test.UI("Pasting text into ContainerEditor using 'text/plain'.", function(t) {
-  var editor = _containerEditorSample(t)
-  var doc = editor.getDocument()
-  var event = new ClipboardEvent()
+  let event = new ClipboardEvent()
   event.clipboardData.setData('text/plain', 'XXX')
-  editor.clipboard.onPaste(event)
+  clipboard.onPaste(event)
   t.equal(doc.get(['p1', 'content']), '0XXX123456789', "Plain text should be correct.")
   t.end()
 })
 
 test.UI("Pasting without any data given.", function(t) {
-  var editor = _containerEditorSample(t)
-  var doc = editor.getDocument()
-  var event = new ClipboardEvent()
-  editor.clipboard.onPaste(event)
+  let { editorSession, clipboard, doc } = _fixture(simple)
+  editorSession.setSelection({
+    type: 'property',
+    path: ['p1', 'content'],
+    startOffset: 1,
+    containerId: 'body'
+  })
+  let event = new ClipboardEvent()
+  clipboard.onPaste(event)
   t.equal(doc.get(['p1', 'content']), '0123456789', "Text should be still the same.")
   t.end()
 })
 
-
 test.UI("Pasting text into ContainerEditor using 'text/html'.", function(t) {
-  var editor = _containerEditorSample(t)
-  var doc = editor.getDocument()
-  var TEXT = 'XXX'
-  var event = new ClipboardEvent()
+  let { editorSession, clipboard, doc } = _fixture(simple)
+  editorSession.setSelection({
+    type: 'property',
+    path: ['p1', 'content'],
+    startOffset: 1,
+    containerId: 'body'
+  })
+  let TEXT = 'XXX'
+  let event = new ClipboardEvent()
   event.clipboardData.setData('text/plain', TEXT)
   event.clipboardData.setData('text/html', TEXT)
-  editor.clipboard.onPaste(event)
+  clipboard.onPaste(event)
   t.equal(doc.get(['p1', 'content']), '0XXX123456789', "Plain text should be correct.")
   t.end()
 })
@@ -249,10 +200,9 @@ test.UI("Pasting text into ContainerEditor using 'text/html'.", function(t) {
 // this test revealed #700: the problem was that in source code there where
 // `"` and `'` characters which did not survive the way through HTML correctly
 test.UI("Copy and Pasting source code.", function(t) {
-  var editor = _containerEditorSample(t)
-  var doc = editor.getDocument()
-  var body = doc.get('body')
-  var cb = doc.create({
+  let { editorSession, clipboard, doc } = _fixture(simple)
+  let body = doc.get('body')
+  let cb = doc.create({
     type: 'codeblock',
     id: 'cb1',
     content: [
@@ -262,80 +212,24 @@ test.UI("Copy and Pasting source code.", function(t) {
     ].join("\n")
   })
   body.show(cb, body.getPosition('p1')+1)
-  editor.setSelection(doc.createSelection({
+  editorSession.setSelection(doc.createSelection({
     type: 'container',
-    containerId: 'body',
     startPath: ['p1', 'content'],
     startOffset: 1,
     endPath: ['p2', 'content'],
-    endOffset: 1
+    endOffset: 1,
+    containerId: 'body',
   }))
-  var event = new ClipboardEvent()
-  editor.clipboard.onCut(event)
-  var cb2 = doc.get('cb1')
-  t.isNil(cb2, "Codeblock should have been cutted.")
-  editor.clipboard.onPaste(event)
-  cb2 = doc.get('cb1')
-  t.notNil(cb2, "Codeblock should have been pasted.")
-  t.deepEqual(cb2.toJSON(), cb.toJSON(), "Codeblock should have been pasted correctly.")
+  let event = new ClipboardEvent()
+  clipboard.onCut(event)
+  let cb1 = doc.get('cb1')
+  t.isNil(cb1, "Codeblock should have been cutted.")
+  clipboard.onPaste(event)
+  cb1 = doc.get('cb1')
+  t.notNil(cb1, "Codeblock should have been pasted.")
+  t.deepEqual(cb1.toJSON(), cb.toJSON(), "Codeblock should have been pasted correctly.")
   t.end()
 })
-
-function _fixtureTest(t, fixture, impl, forceWindows) {
-  var editor = _containerEditorSample(t)
-  if (forceWindows) {
-    // NOTE: faking 'Windows' mode in importer so that
-    // the correct implementation will be used
-    editor.clipboard.htmlImporter._isWindows = true
-  }
-  impl(editor, fixture)
-}
-
-function _plainTextTest(t, fixture, forceWindows) {
-  _fixtureTest(t, fixture, function(editor, html) {
-    var doc = editor.getDocument()
-    var event = new ClipboardEvent()
-    event.clipboardData.setData('text/plain', '')
-    event.clipboardData.setData('text/html', html)
-    editor.clipboard.onPaste(event)
-    t.equal(doc.get(['p1', 'content']), '0XXX123456789', "Content should have been pasted correctly.")
-    t.end()
-  }, forceWindows)
-}
-
-function _annotatedTextTest(t, fixture, forceWindows) {
-  _fixtureTest(t, fixture, function(editor, html) {
-    var doc = editor.getDocument()
-    var event = new ClipboardEvent()
-    event.clipboardData.setData('text/plain', '')
-    event.clipboardData.setData('text/html', html)
-    editor.clipboard.onPaste(event)
-    t.equal(doc.get(['p1', 'content']), '0XXX123456789', "Content should have been pasted correctly.")
-    var annotations = doc.getIndex('annotations').get(['p1', 'content'])
-    t.equal(annotations.length, 1, "There should be one annotation on the property now.")
-    var anno = annotations[0]
-    t.equal(anno.type, 'link', "The annotation should be a link.")
-    t.end()
-  }, forceWindows)
-}
-
-function _twoParagraphsTest(t, fixture, forceWindows) {
-  _fixtureTest(t, fixture, function(editor, html) {
-    var doc = editor.getDocument()
-    var event = new ClipboardEvent()
-    event.clipboardData.setData('text/plain', '')
-    event.clipboardData.setData('text/html', html)
-    editor.clipboard.onPaste(event)
-    var body = doc.get('body')
-    var p1 = body.getChildAt(0)
-    t.equal(p1.content, '0AAA', "First paragraph should be truncated.")
-    var p2 = body.getChildAt(1)
-    t.equal(p2.content, 'BBB', "Second paragraph should contain 'BBB'.")
-    var p3 = body.getChildAt(2)
-    t.equal(p3.content, '123456789', "Remainder of original p1 should go into forth paragraph.")
-    t.end()
-  }, forceWindows)
-}
 
 test.UI("Browser - Chrome (OSX/Linux) - Plain Text", function(t) {
   _plainTextTest(t, BrowserLinuxPLainTextFixture)
@@ -374,12 +268,12 @@ test.UI("Browser - Firefox (Linux) - Two Paragraphs", function(t) {
 })
 
 test.UI("Browser - Firefox (Linux) - Whole Page", function(t) {
-  _fixtureTest(t, BrowserLinuxFirefoxWholePageFixture, function(editor, html) {
-    var doc = editor.getDocument()
-    var event = new ClipboardEvent()
+  let html = BrowserLinuxFirefoxWholePageFixture
+  _fixtureTest(t, html, function(doc, clipboard) {
+    let event = new ClipboardEvent()
     event.clipboardData.setData('text/plain', 'XXX')
     event.clipboardData.setData('text/html', html)
-    editor.clipboard.onPaste(event)
+    clipboard.onPaste(event)
     // make sure HTML paste succeeded, by checking against the result of plain text insertion
     t.notOk(doc.get('p1').getText() === '0XXX123456789', "HTML conversion and paste should have been successful (not fall back to plain-text).")
     t.ok(doc.get('body').getLength() > 30, 'There should be a lot of paragraphs')
@@ -470,3 +364,95 @@ test.UI("Microsoft Word 11 (OSX) - Annotated Text", function(t) {
 test.UI("Microsoft Word 11 (OSX) - Two Paragraphs", function(t) {
   _twoParagraphsTest(t, MSW11OSXTwoParagraphsFixture)
 })
+
+class ClipboardEventData {
+  constructor() {
+    this.data = {}
+  }
+
+  getData(format) {
+    return this.data[format]
+  }
+
+  setData(format, data) {
+    this.data[format] = data
+  }
+
+  get types() {
+    return Object.keys(this.data)
+  }
+}
+
+class ClipboardEvent {
+  constructor() {
+    this.clipboardData = new ClipboardEventData()
+  }
+  preventDefault() {}
+  stopPropagation() {}
+}
+
+function _fixture(seed) {
+  let doc = fixture(seed)
+  let editorSession = new EditorSession(doc, { configurator: new Configurator() })
+  let clipboard = new Clipboard(editorSession, clipboardConfig)
+  return { editorSession: editorSession, clipboard: clipboard, doc: doc }
+}
+
+function _fixtureTest(t, html, impl, forceWindows) {
+  let { editorSession, clipboard, doc } = _fixture(simple)
+  if (forceWindows) {
+    // NOTE: faking 'Windows' mode in importer so that
+    // the correct implementation will be used
+    clipboard.htmlImporter._isWindows = true
+  }
+  editorSession.setSelection({
+    type: 'property',
+    path: ['p1', 'content'],
+    startOffset: 1,
+    containerId: 'body'
+  })
+  impl(doc, clipboard)
+}
+
+function _plainTextTest(t, html, forceWindows) {
+  _fixtureTest(t, html, function(doc, clipboard) {
+    let event = new ClipboardEvent()
+    event.clipboardData.setData('text/plain', '')
+    event.clipboardData.setData('text/html', html)
+    clipboard.onPaste(event)
+    t.equal(doc.get(['p1', 'content']), '0XXX123456789', "Content should have been pasted correctly.")
+    t.end()
+  }, forceWindows)
+}
+
+function _annotatedTextTest(t, html, forceWindows) {
+  _fixtureTest(t, html, function(doc, clipboard) {
+    let event = new ClipboardEvent()
+    event.clipboardData.setData('text/plain', '')
+    event.clipboardData.setData('text/html', html)
+    clipboard.onPaste(event)
+    t.equal(doc.get(['p1', 'content']), '0XXX123456789', "Content should have been pasted correctly.")
+    let annotations = doc.getIndex('annotations').get(['p1', 'content'])
+    t.equal(annotations.length, 1, "There should be one annotation on the property now.")
+    let anno = annotations[0]
+    t.equal(anno.type, 'link', "The annotation should be a link.")
+    t.end()
+  }, forceWindows)
+}
+
+function _twoParagraphsTest(t, html, forceWindows) {
+  _fixtureTest(t, html, function(doc, clipboard) {
+    let event = new ClipboardEvent()
+    event.clipboardData.setData('text/plain', '')
+    event.clipboardData.setData('text/html', html)
+    clipboard.onPaste(event)
+    let body = doc.get('body')
+    let p1 = body.getChildAt(0)
+    t.equal(p1.content, '0AAA', "First paragraph should be truncated.")
+    let p2 = body.getChildAt(1)
+    t.equal(p2.content, 'BBB', "Second paragraph should contain 'BBB'.")
+    let p3 = body.getChildAt(2)
+    t.equal(p3.content, '123456789', "Remainder of original p1 should go into forth paragraph.")
+    t.end()
+  }, forceWindows)
+}

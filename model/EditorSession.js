@@ -7,7 +7,6 @@ import SurfaceManager from '../packages/surface/SurfaceManager'
 import Transaction from '../model/Transaction'
 import CommandManager from '../ui/CommandManager'
 import DragManager from '../ui/DragManager'
-import Editing from '../ui/Editing'
 import GlobalEventHandler from '../ui/GlobalEventHandler'
 import MacroManager from '../ui/MacroManager'
 import KeyboardManager from '../ui/KeyboardManager'
@@ -53,7 +52,7 @@ class EditorSession extends EventEmitter {
     this._change = null
     this._info = null
 
-    this._flowStages = ['update', 'render', 'post-render', 'position', 'finalize']
+    this._flowStages = ['update', 'pre-render', 'render', 'post-render', 'position', 'finalize']
     // to get something executed directly after a flow
     this._postponed = []
 
@@ -86,7 +85,6 @@ class EditorSession extends EventEmitter {
     let converterRegistry = configurator.getConverterRegistry()
     let editingBehavior = configurator.getEditingBehavior()
 
-    this.editing = new Editing(this, editingBehavior)
     this.fileManager = options.fileManager || new FileManager(this, configurator.getFileAdapters(), this._context)
 
     // Handling of saving
@@ -344,6 +342,10 @@ class EditorSession extends EventEmitter {
     return this._registerObserver('update', args)
   }
 
+  onPreRender(...args) {
+    return this._registerObserver('pre-render', args)
+  }
+
   /**
     Registers a hook for the 'render' phase.
 
@@ -416,46 +418,6 @@ class EditorSession extends EventEmitter {
     return this._registerObserver('finalize', args)
   }
 
-  /*
-    Low-level implementation for hook registration
-
-    @param {string} stage name of stage
-    @param {Function} handler handler function
-    @param {Object} observer context of the handler function
-    @param {Object} [options]
-
-    @example
-
-    Called when a flow stage is executed:
-
-    ```js
-    editorSession.on('update', this._onSessionUpdate, this)
-    ```
-
-    Called at a specific flow stage but only if a resource has changed:
-
-    ```js
-    editorSession.on('update', this._onSelectionUpdate, this, {
-      resource: 'selection'
-    })
-    ```
-    which is equivalent to
-    ```js
-    editorSession.onUpdate('selection', this._onSelectionUpdate, this)
-    ```
-
-    Called at a specific flow stage but only if a property has changed:
-    ```js
-    editorSession.on('update', this._onPropertyChanged, this, {
-      resource: 'document',
-      path: [node.id, 'content']
-    })
-    ```
-  */
-  // on(stage, ...args) {
-  //   return this._registerObserver(stage, args)
-  // }
-
   off(observer) {
     super.off(observer)
     this._deregisterObserver(observer)
@@ -524,7 +486,7 @@ class EditorSession extends EventEmitter {
   _commitChange(change, info) {
     change.timestamp = Date.now()
     this._applyChange(change, info)
-    if (info['history'] !== false) {
+    if (info['history'] !== false && !info['hidden']) {
       this._history.push(change.invert())
     }
     var newSelection = change.after.selection || Selection.nullSelection

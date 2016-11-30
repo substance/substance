@@ -4,10 +4,6 @@ import createSurfaceId from '../../util/createSurfaceId'
 import keys from '../../util/keys'
 import platform from '../../util/platform'
 import inBrowser from '../../util/inBrowser'
-import copySelection from '../../model/transform/copySelection'
-import deleteSelection from '../../model/transform/deleteSelection'
-import deleteCharacter from '../../model/transform/deleteCharacter'
-import insertText from '../../model/transform/insertText'
 import Clipboard from '../../ui/Clipboard'
 import Component from '../../ui/Component'
 import DefaultDOMElement from '../../ui/DefaultDOMElement'
@@ -41,7 +37,7 @@ class Surface extends Component {
     // considering nesting in IsolatedNodes
     this._surfaceId = createSurfaceId(this)
 
-    this.clipboard = new Clipboard(this, {
+    this.clipboard = new Clipboard(this.editorSession, {
       converterRegistry: this.context.converterRegistry
     })
 
@@ -214,71 +210,6 @@ class Surface extends Component {
     return null
   }
 
-  /**
-    Run a transformation as a transaction properly configured for this surface.
-
-    @param transformation a transformation function(tx, args) which receives
-                          the selection the transaction was started with, and should return
-                          output arguments containing a selection, as well.
-
-    @example
-
-    Returning a new selection:
-    ```js
-    surface.transaction(function(tx, args) {
-      var selection = args.selection;
-      ...
-      selection = tx.createSelection(...);
-      return {
-        selection: selection
-      };
-    });
-    ```
-
-    Adding event information to the transaction:
-
-    ```js
-    surface.transaction(function(tx, args) {
-      tx.info.foo = 'bar';
-      ...
-    });
-    ```
-   */
-  transaction(transformation, info) {
-    // TODO: we would like to get rid of this method, and only have
-    // editorSession.transaction()
-    // The problem is, that we need to get surfaceId into the change,
-    // to be able to set the selection into the right surface.
-    // ATM we put this into the selection, which is hacky, and makes it
-    // unnecessarily inconvient to create selections.
-    // Maybe editorSession should provide a means to augment the before/after
-    // state of a change.
-    let editorSession = this.editorSession
-    let surfaceId = this.getId()
-    return editorSession.transaction(function(tx, args) {
-      tx.before.surfaceId = surfaceId
-      return transformation(tx, args)
-    }, info)
-  }
-
-  getSelection() {
-    return this.editorSession.getSelection()
-  }
-
-  /**
-   * Set the model selection and update the DOM selection accordingly
-   */
-  setSelection(sel) {
-    // console.log('Surface.setSelection()', this.name, sel);
-    // storing the surface id so that we can associate
-    // the selection with this surface later
-    if (sel && !sel.isNull()) {
-      sel.surfaceId = this.getId()
-      sel.containerId = sel.containerId || this.getContainerId()
-    }
-    this._setSelection(sel)
-  }
-
   blur() {
     if (this.el) {
       this.el.blur()
@@ -301,11 +232,10 @@ class Surface extends Component {
     if (this.isDisabled()) return
     if (inBrowser) {
       // console.log('Surface.rerenderDOMSelection', this.__id__);
-      let sel = this.getSelection()
+      let sel = this.editorSession.getSelection()
       if (sel.surfaceId === this.getId()) {
         this.domSelection.setSelection(sel)
-        // this will let our parents know that the DOM selection
-        // is ready
+        // this will let our parents know that the DOM selection is ready
         this.send('domSelectionRendered')
       }
     }
@@ -313,58 +243,6 @@ class Surface extends Component {
 
   getDomNodeForId(nodeId) {
     return this.el.getNativeElement().querySelector('*[data-id="'+nodeId+'"]')
-  }
-
-  /* Editing behavior */
-
-  /* Note: In a regular Surface all text properties are treated independently
-     like in a form */
-
-  selectAll() {
-    this.editorSession.executeCommand('select-all', {
-      surface: this
-    })
-  }
-
-  insertText(tx, args) {
-    console.warn('DEPRECATED: use editorSession')
-    let sel = args.selection
-    if (sel.isPropertySelection() || sel.isContainerSelection()) {
-      return insertText(tx, args)
-    }
-  }
-
-  delete(tx, args) {
-    let sel = args.selection
-    if (!sel.isCollapsed()) {
-      return deleteSelection(tx, args)
-    }
-    else if (sel.isPropertySelection() || sel.isNodeSelection()) {
-      return deleteCharacter(tx, args)
-    }
-  }
-
-  break(tx, args) {
-    return this.softBreak(tx, args)
-  }
-
-  softBreak(tx, args) {
-    args.text = "\n"
-    return this.insertText(tx, args)
-  }
-
-  copy(doc, selection) {
-    let result = copySelection(doc, { selection: selection })
-    return result.doc
-  }
-
-  paste(tx, args) {
-    // TODO: for now only plain text is inserted
-    // We could do some stitching however, preserving the annotations
-    // received in the document
-    if (args.text) {
-      return this.insertText(tx, args)
-    }
   }
 
   /* Event handlers */
@@ -417,7 +295,9 @@ class Surface extends Component {
     // necessary for handling dead keys properly
     this._state.skipNextObservation=true
     let text = event.data
-    this.editorSession.editing.type(text)
+    this.editorSession.transaction((tx) => {
+      tx.insertText(text)
+    }, { action: 'type' })
   }
 
   // Handling Dead-keys under OSX
@@ -447,7 +327,9 @@ class Surface extends Component {
     event.preventDefault()
     event.stopPropagation()
     if (character.length>0) {
-      this.editorSession.editing.type(character)
+      this.editorSession.transaction((tx) => {
+        tx.insertText(character)
+      }, { action: 'type' })
     }
   }
 
@@ -496,7 +378,7 @@ class Surface extends Component {
     //   setTimeout(function() {
     //     if (this.domSelection) {
     //       var sel = this.domSelection.getSelection();
-    //       this.setSelection(sel);
+    //       this._setSelection(sel);
     //     }
     //   }.bind(this));
     // }
@@ -514,7 +396,7 @@ class Surface extends Component {
   onContextMenu() {
     if (this.domSelection) {
       let sel = this.domSelection.getSelection()
-      this.setSelection(sel)
+      this._setSelection(sel)
     }
   }
 
@@ -527,7 +409,7 @@ class Surface extends Component {
     setTimeout(function() {
       if (this.domSelection) {
         let sel = this.domSelection.getSelection()
-        this.setSelection(sel)
+        this._setSelection(sel)
       }
     }.bind(this))
   }
@@ -643,7 +525,7 @@ class Surface extends Component {
     // Note: collapsing the selection and let ContentEditable still continue doing a cursor move
     if (selState.isInlineNodeSelection() && !event.shiftKey) {
       event.preventDefault()
-      this.setSelection(sel.collapse(direction))
+      this._setSelection(sel.collapse(direction))
       return
     }
 
@@ -700,20 +582,26 @@ class Surface extends Component {
   _handleSpaceKey(event) {
     event.preventDefault()
     event.stopPropagation()
-    this.editorSession.editing.type(' ')
+    this.editorSession.transaction((tx) => {
+      tx.insertText(' ')
+    }, { action: 'type' })
   }
 
   _handleEnterKey(event) {
     event.preventDefault()
     event.stopPropagation()
-    this.editorSession.editing.break()
+    this.editorSession.transaction((tx) => {
+      tx.break()
+    }, { action: 'break' })
   }
 
   _handleDeleteKey(event) {
     event.preventDefault()
     event.stopPropagation()
     let direction = (event.keyCode === keys.BACKSPACE) ? 'left' : 'right'
-    this.editorSession.editing.delete(direction)
+    this.editorSession.transaction((tx) => {
+      tx.deleteCharacter(direction)
+    }, { action: 'delete' })
   }
 
   _hasNativeFocus() {
@@ -721,6 +609,10 @@ class Surface extends Component {
   }
 
   _setSelection(sel) {
+    // NOTE: setting the surfaceId is important so that it can be mapped to the DOM correctly
+    if (sel) {
+      sel.surfaceId = this.id
+    }
     // Since we allow the surface be blurred natively when clicking
     // on tools we now need to make sure that the element is focused natively
     // when we set the selection
@@ -728,7 +620,8 @@ class Surface extends Component {
     // when a new DOM selection is set.
     // ATTENTION: in FF 44 this was causing troubles, making the CE unselectable
     // until the next native blur.
-    if (!sel.isNull() && sel.surfaceId === this.getId() && platform.isFF) {
+    // TODO: check if this is still necessary
+    if (!sel.isNull() && sel.surfaceId === this.id && platform.isFF) {
       this._focus()
     }
     this.editorSession.setSelection(sel)
@@ -739,13 +632,13 @@ class Surface extends Component {
     // console.log('Surface: updating model selection', sel.toString());
     // NOTE: this will also lead to a rerendering of the selection
     // via session.on('update')
-    this.setSelection(sel)
+    this._setSelection(sel)
   }
 
   _selectProperty(path) {
     let doc = this.getDocument()
     let text = doc.get(path)
-    this.setSelection(doc.createSelection(path, 0, text.length))
+    this._setSelection(doc.createSelection(path, 0, text.length))
   }
 
   // internal API for TextProperties to enable dispatching
@@ -783,14 +676,6 @@ class Surface extends Component {
     })
   }
 
-  /*
-    Called when starting a transaction to populate the transaction
-    arguments.
-    ATM used only by ContainerEditor.
-  */
-  _prepareArgs(args) { // eslint-disable-line
-  }
-
   // Experimental: used by DragManager
   getSelectionFromEvent(event) {
     if (this.domSelection) {
@@ -805,7 +690,7 @@ class Surface extends Component {
     let sel = this.getSelectionFromEvent(event)
     if (sel) {
       this._state.skipNextFocusEvent = true
-      this.setSelection(sel)
+      this._setSelection(sel)
     } else {
       console.error('Could not create a selection from event.');
     }

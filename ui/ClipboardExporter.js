@@ -32,7 +32,7 @@ class ClipboardExporter extends HtmlExporter {
     let jsonStr = JSON.stringify(jsonConverter.exportDocument(doc))
     let meta = [
       "<meta name='substance' content='",
-      btoa(jsonStr),
+      btoa(unescape(encodeURIComponent(jsonStr))),
       "'>"
     ].join('')
     return '<html><head>' +meta+ '</head><body>' + html + '</body></html>'

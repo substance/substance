@@ -23,12 +23,14 @@ class MacroManager {
     switch(info.action) {
       case 'type': {
         let op = change.ops[0]
-        path = op.path
-        nodeId = path[0]
-        node = doc.get(nodeId)
-        text = doc.get(path)
-        start = op.diff.pos
-        end = start+op.diff.getLength()
+        if (op.type === 'update' && op.diff.propertyType === 'string') {
+          path = op.path
+          nodeId = path[0]
+          node = doc.get(nodeId)
+          text = doc.get(path)
+          start = op.diff.pos
+          end = start+op.diff.getLength()
+        }
         break
       }
       case 'break': {

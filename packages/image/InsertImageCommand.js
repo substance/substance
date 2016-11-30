@@ -1,21 +1,7 @@
-import Command from '../../ui/Command'
+import InsertNodeCommand from '../../ui/InsertNodeCommand'
 import insertImage from './insertImage'
 
-class ImageCommand extends Command {
-
-  getCommandState(params) {
-    let sel = params.selection
-    let surface = params.surface
-    let newState = {
-      disabled: true,
-      active: false
-    }
-    if (sel && !sel.isNull() && !sel.isCustomSelection() &&
-        surface && surface.isContainerEditor()) {
-      newState.disabled = false
-    }
-    return newState
-  }
+class ImageCommand extends InsertNodeCommand {
 
   /*
     Inserts file and image nodes

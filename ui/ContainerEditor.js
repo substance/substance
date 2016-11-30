@@ -3,10 +3,6 @@ import uuid from '../util/uuid'
 import keys from '../util/keys'
 import platform from '../util/platform'
 import EditingBehavior from '../model/EditingBehavior'
-import breakNode from '../model/transform/breakNode'
-import insertNode from '../model/transform/insertNode'
-import switchTextType from '../model/transform/switchTextType'
-import paste from '../model/transform/paste'
 import Surface from '../packages/surface/Surface'
 import RenderingEngine from './RenderingEngine'
 import IsolatedNodeComponent from '../packages/isolated-node/IsolatedNodeComponent'
@@ -170,9 +166,15 @@ class ContainerEditor extends Surface {
     else if (!platform.isIE && !sel.isCollapsed() && !event.shiftKey) {
       let doc = this.getDocument()
       if (direction === 'left') {
-        this.setSelection(doc.createSelection(sel.start.path, sel.start.offset))
+        this._setSelection({
+          startPath: sel.start.path,
+          startOffset: sel.start.offset
+        })
       } else {
-        this.setSelection(doc.createSelection(sel.end.path, sel.end.offset))
+        this._setSelection({
+          startPath: sel.end.path,
+          startOffset: end.offset
+        })
       }
     }
     // Note: we need this timeout so that CE updates the DOM selection first
@@ -191,7 +193,7 @@ class ContainerEditor extends Surface {
     // Note: collapsing the selection and let ContentEditable still continue doing a cursor move
     if (sel.isNodeSelection() && sel.isFull() && !event.shiftKey) {
       event.preventDefault()
-      this.setSelection(sel.collapse(direction))
+      this._setSelection(sel.collapse(direction))
       return
     } else {
       super._handleLeftOrRightArrowKey.call(this, event)
@@ -234,19 +236,13 @@ class ContainerEditor extends Surface {
     return super.isEditable.call(this) && !this.isEmpty()
   }
 
-  /*
-    Register custom editor behavior using this method
-  */
-  extendBehavior(extension) {
-    extension.register(this.editingBehavior)
-  }
-
   getTextTypes() {
     return this.textTypes || []
   }
 
   // Used by SwitchTextTypeTool
   // TODO: Filter by enabled commands for this Surface
+  // TODO: rethink
   getTextCommands() {
     var textCommands = {}
     this.commandRegistry.each(function(cmd) {
@@ -255,59 +251,6 @@ class ContainerEditor extends Surface {
       }
     });
     return textCommands
-  }
-
-  /* Editing behavior */
-
-  /**
-    Performs a {@link model/transform/breakNode} transformation
-  */
-  break(tx, args) {
-    return breakNode(tx, args)
-  }
-
-  /**
-    Performs an {@link model/transform/insertNode} transformation
-  */
-  insertNode(tx, args) {
-    if (args.selection.isPropertySelection() || args.selection.isContainerSelection()) {
-      return insertNode(tx, args)
-    }
-  }
-
-  /**
-   * Performs a {@link model/transform/switchTextType} transformation
-   */
-  switchType(tx, args) {
-    if (args.selection.isPropertySelection()) {
-      return switchTextType(tx, args)
-    }
-  }
-
-  selectFirst() {
-    let doc = this.getDocument()
-    let nodes = this.getContainer().nodes
-    if (nodes.length === 0) {
-      console.warn('ContainerEditor.selectFirst(): Container is empty.')
-      return
-    }
-    let node = doc.get(nodes[0])
-    let sel
-    if (node.isText()) {
-      sel = doc.createSelection(node.getTextPath(), 0)
-    } else {
-      sel = doc.createSelection(this.getContainerId(), [node.id], 0, [node.id], 1)
-    }
-    this.setSelection(sel)
-  }
-
-  /**
-    Performs a {@link model/transform/paste} transformation
-  */
-  paste(tx, args) {
-    if (args.selection.isPropertySelection() || args.selection.isContainerSelection()) {
-      return paste(tx, args)
-    }
   }
 
   // called by flow when subscribed resources have been updated
@@ -343,12 +286,13 @@ class ContainerEditor extends Surface {
   }
 
   // Create a first text element
+  // TODO: rethink
   onCreateText(e) {
     e.preventDefault()
-
-    let newSel;
-    this.transaction(function(tx) {
-      let container = tx.get(this.props.containerId)
+    let newSel
+    let containerId = this.props.containerId
+    this.context.editorSession.transaction((tx)=>{
+      let container = tx.get(containerId)
       let textType = tx.getSchema().getDefaultTextType()
       let node = tx.create({
         id: uuid(textType),
@@ -356,26 +300,15 @@ class ContainerEditor extends Surface {
         content: ''
       })
       container.show(node.id)
-
-      newSel = tx.createSelection({
-        type: 'property',
-        path: [ node.id, 'content'],
+      tx.setSelection({
+        type: 'container',
+        startPath: [ node.id, 'content'],
         startOffset: 0,
-        endOffset: 0
+        containerId: containerId,
+        surfaceId: this.id
       })
-    }.bind(this))
-    this.rerender()
-    this.setSelection(newSel)
+    })
   }
-
-  transaction(transformation, info) {
-    return this.editorSession.transaction((tx, args) => {
-      args.containerId = this.getContainerId()
-      args.editingBehavior = this.editingBehavior
-      return transformation(tx, args)
-    }, info)
-  }
-
 }
 
 ContainerEditor.prototype._isContainerEditor = true

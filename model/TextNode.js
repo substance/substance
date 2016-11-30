@@ -3,11 +3,7 @@ import DocumentNode from './DocumentNode'
 /**
   A base class for all text-ish nodes, such as Paragraphs, Headings,
   Prerendered, etc.
-
-  @class
-  @abstract
 */
-
 class TextNode extends DocumentNode {
 
   getTextPath() {
@@ -28,7 +24,8 @@ TextNode.isText = true
 
 TextNode.define({
   type: "text",
-  content: 'text'
+  content: "text",
+  direction: { type: "string", optional: true }
 })
 
 export default TextNode

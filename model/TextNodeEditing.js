@@ -133,7 +133,7 @@ class TextNodeEditing {
         console.warn('TODO: handle annotation update case.')
       }
     })
-    tx.selection = tx.createSelection({
+    tx.setSelection({
       type: 'property',
       path: start.path,
       startOffset: startOffset,
@@ -156,7 +156,12 @@ class TextNodeEditing {
       })
       // show the new node
       container.show(newNode.id, nodePos)
-      tx.selection = tx.createSelection(path, 0)
+      tx.setSelection({
+        type: 'property',
+        path: path,
+        startOffset: 0,
+        containerId: container.id
+      })
     }
     // otherwise split the text property and create a new paragraph node with trailing text and annotations transferred
     else {
@@ -178,33 +183,40 @@ class TextNodeEditing {
       // show the new node
       container.show(newNode.id, nodePos+1)
       // update the selection
-      tx.selection = tx.createSelection(newNode.getTextPath(), 0)
+      tx.setSelection({
+        type: 'property',
+        path: newNode.getTextPath(),
+        startOffset: 0,
+        containerId: container.id
+      })
     }
   }
 
   merge(tx, node, coor, container, direction, previous, next) {
     let first, second
     if (direction === 'left') {
+      if (!previous) return
       first = previous
       second = node
     } else if (direction === 'right') {
+      if (!next) return
       first = node
       second = next
     }
     if (!first.isText() && direction === 'left') {
-      tx.selection = tx.createSelection({
+      tx.setSelection({
         type: 'node',
-        containerId: container.id,
         nodeId: first.id,
-        mode: 'full'
+        mode: 'full',
+        containerId: container.id
       })
       return
     } else if (!second.isText() && direction === 'right') {
-      tx.selection = tx.createSelection({
+      tx.setSelection({
         type: 'node',
-        containerId: container.id,
         nodeId: second.id,
-        mode: 'full'
+        mode: 'full',
+        containerId: container.id
       })
       return
     } else if (!first || !second || !first.isText() || !second.isText()) {
@@ -221,10 +233,11 @@ class TextNodeEditing {
       // delete the second node
       tx.delete(firstPath[0])
       // set the selection to the end of the first component
-      tx.selection = tx.createSelection({
+      tx.setSelection({
         type: 'property',
         path: secondPath,
-        startOffset: 0
+        startOffset: 0,
+        containerId: container.id
       })
     } else {
       // append the second text
@@ -236,10 +249,11 @@ class TextNodeEditing {
       // delete the second node
       tx.delete(secondPath[0])
       // set the selection to the end of the first component
-      tx.selection = tx.createSelection({
+      tx.setSelection({
         type: 'property',
         path: firstPath,
-        startOffset: firstLength
+        startOffset: firstLength,
+        containerId: container.id
       })
     }
   }

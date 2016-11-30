@@ -1,44 +1,9 @@
 import { module } from 'substance-test'
+import EditingInterface from '../../model/EditingInterface'
 import setup from './setupContainerEditor'
 import twoParagraphs from '../fixtures/twoParagraphs'
-import insertInlineNode from '../../model/transform/insertInlineNode'
 
 const test = module('ui/InlineNode')
-
-function paragraphsWithInlineNodes(doc) {
-  twoParagraphs(doc)
-  var sn1 = doc.create({
-    type: "structured-node",
-    id: "sn",
-    title: "ABCDEFG"
-  })
-  insertInlineNode(doc, {
-    selection: doc.createSelection(['p1', 'content'], 2),
-    node: {
-      type: 'inline-wrapper',
-      id: 'in1',
-      wrappedNode: sn1.id
-    }
-  })
-  var c = doc.create({
-    type: "container",
-    id: "c"
-  })
-  var c_p = doc.create({
-    type: 'paragraph',
-    id: "c_p",
-    content: "ABCDEFG"
-  })
-  c.show(c_p)
-  insertInlineNode(doc, {
-    selection: doc.createSelection(['p2', 'content'], 2),
-    node: {
-      type: 'inline-wrapper',
-      id: 'in2',
-      wrappedNode: c.id
-    }
-  })
-}
 
 test("InlineNodes should be not selected when selection is null", function(t) {
   var env = setup(paragraphsWithInlineNodes)
@@ -163,38 +128,6 @@ test("InlineNode should be 'focused' when having the selection (II)", function(t
   t.end()
 })
 
-// co-focusing an inline node is only possible, if the inline node itself contains
-// content with an inline node (or isolated node)
-function nestedInlineNode(doc) {
-  twoParagraphs(doc)
-  var sn1 = doc.create({
-    type: "structured-node",
-    id: "sn1",
-    title: "ABCDEFG"
-  })
-  insertInlineNode(doc, {
-    selection: doc.createSelection(['p1', 'content'], 2),
-    node: {
-      type: 'inline-wrapper',
-      id: 'in1',
-      wrappedNode: sn1.id
-    }
-  })
-  var sn2 = doc.create({
-    type: "structured-node",
-    id: "sn2",
-    title: "ABCDEFG"
-  })
-  insertInlineNode(doc, {
-    selection: doc.createSelection(['sn1', 'title'], 4),
-    node: {
-      type: 'inline-wrapper',
-      id: 'in2',
-      wrappedNode: sn2.id
-    }
-  })
-}
-
 // FIXME: broken since introduction of EditorSession/Flow
 // test("InlineNode should be 'co-focused' when a nested inline node has the selection", function(t) {
 //   var env = setup(nestedInlineNode, t.sandbox)
@@ -216,3 +149,82 @@ function nestedInlineNode(doc) {
 //   })
 //   t.end()
 // })
+
+// fixtures
+
+function paragraphsWithInlineNodes(doc) {
+  var tx = new EditingInterface(doc)
+  twoParagraphs(tx)
+  var sn1 = tx.create({
+    type: "structured-node",
+    id: "sn",
+    title: "ABCDEFG"
+  })
+  tx.setSelection({
+    type: 'property',
+    path: ['p1', 'content'],
+    startOffset: 2
+  })
+  tx.insertInlineNode({
+    type: 'inline-wrapper',
+    id: 'in1',
+    wrappedNode: sn1.id
+  })
+  var c = tx.create({
+    type: "container",
+    id: "c"
+  })
+  var c_p = tx.create({
+    type: 'paragraph',
+    id: "c_p",
+    content: "ABCDEFG"
+  })
+  c.show(c_p)
+  tx.setSelection({
+    type: 'property',
+    path: ['p2', 'content'],
+    startOffset: 2
+  })
+  tx.insertInlineNode({
+    type: 'inline-wrapper',
+    id: 'in2',
+    wrappedNode: c.id
+  })
+}
+
+// co-focusing an inline node is only possible, if the inline node itself contains
+// content with an inline node (or isolated node)
+function nestedInlineNode(doc) {
+  let tx = new EditingInterface(doc)
+  twoParagraphs(tx)
+  let sn1 = tx.create({
+    type: "structured-node",
+    id: "sn1",
+    title: "ABCDEFG"
+  })
+  tx.setSelection({
+    type: 'property',
+    path: ['p1', 'content'],
+    startOffset: 2
+  })
+  tx.insertInlineNode({
+    type: 'inline-wrapper',
+    id: 'in1',
+    wrappedNode: sn1.id
+  })
+  let sn2 = doc.create({
+    type: "structured-node",
+    id: "sn2",
+    title: "ABCDEFG"
+  })
+  tx.setSelection({
+    type: 'paragraph',
+    path: ['sn1', 'content'],
+    startOffset: 4
+  })
+  tx.insertInlineNode({
+    type: 'inline-wrapper',
+    id: 'in2',
+    wrappedNode: sn2.id
+  })
+}

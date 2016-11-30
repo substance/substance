@@ -9,7 +9,6 @@ import DocumentIndex from './DocumentIndex'
 import AnnotationIndex from './AnnotationIndex'
 import ContainerAnnotationIndex from './ContainerAnnotationIndex'
 import AnchorIndex from './AnchorIndex'
-import MarkerIndex from './MarkerIndex'
 import DocumentChange from './DocumentChange'
 import PathEventProxy from './PathEventProxy'
 import IncrementalData from './data/IncrementalData'
@@ -78,9 +77,6 @@ class Document extends EventEmitter {
     // special index for (container-scoped) annotations
     this.addIndex('container-annotations', new ContainerAnnotationIndex())
     this.addIndex('container-annotation-anchors', new AnchorIndex())
-
-    // index for markers
-    this.addIndex('markers', new MarkerIndex())
 
     // change event proxies are triggered after a document change has been applied
     // before the regular document:changed event is fired.
@@ -222,7 +218,7 @@ class Document extends EventEmitter {
     var op = this._create(nodeData)
     var change = new DocumentChange([op], {}, {})
     change._extractInformation(this)
-    this._notifyChangeListeners(change)
+    this._notifyChangeListeners(change, { hidden: true })
     return this.data.get(nodeData.id)
   }
 
@@ -245,7 +241,7 @@ class Document extends EventEmitter {
     var op = this._delete(nodeId)
     var change = new DocumentChange([op], {}, {})
     change._extractInformation(this)
-    this._notifyChangeListeners(change)
+    this._notifyChangeListeners(change, { hidden: true })
     return node
   }
 
@@ -269,7 +265,7 @@ class Document extends EventEmitter {
     var op = this._set(path, value)
     var change = new DocumentChange([op], {}, {})
     change._extractInformation(this)
-    this._notifyChangeListeners(change)
+    this._notifyChangeListeners(change, { hidden: true })
     return oldValue
   }
 
@@ -311,7 +307,7 @@ class Document extends EventEmitter {
     var op = this._update(path, diff)
     var change = new DocumentChange([op], {}, {})
     change._extractInformation(this)
-    this._notifyChangeListeners(change)
+    this._notifyChangeListeners(change, { hidden: true })
     return op
   }
 
@@ -593,6 +589,7 @@ function _createSelectionFromData(doc, selData) {
     return new PropertySelection(selData.path, selData.startOffset, selData.endOffset, selData.reverse, selData.containerId, selData.surfaceId)
   } else if (selData.type === 'container') {
     var container = doc.get(selData.containerId, 'strict')
+    if (!container) throw new Error('Can not create ContainerSelection: container "'+selData.containerId+'" does not exist.')
     var start = new Coordinate(selData.startPath, selData.startOffset)
     var end = new Coordinate(selData.endPath, selData.endOffset)
     var startAddress = container.getAddress(start)

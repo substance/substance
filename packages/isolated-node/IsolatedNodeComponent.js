@@ -319,17 +319,17 @@ class IsolatedNodeComponent extends Component {
 
   _selectNode() {
     // console.log('IsolatedNodeComponent: selecting node.');
+    let editorSession = this.context.editorSession
     let surface = this.context.surface
-    let doc = surface.getDocument()
     let nodeId = this.props.node.id
-    surface.setSelection(doc.createSelection({
+    editorSession.setSelection({
       type: 'node',
-      containerId: surface.getContainerId(),
       nodeId: nodeId,
-      mode: 'full'
-    }))
+      mode: 'full',
+      containerId: surface.getContainerId(),
+      surfaceId: surface.id
+    })
   }
-
 }
 
 IsolatedNodeComponent.prototype._isIsolatedNodeComponent = true

@@ -15,7 +15,6 @@ export { default as WebSocketConnection } from './collab/WebSocketConnection'
 
 // model
 export { default as annotationHelpers } from './model/annotationHelpers'
-export { default as Annotation } from './model/Annotation'
 export { default as BlockNode } from './model/BlockNode'
 export { default as Container } from './model/Container'
 export { default as ContainerAnnotation } from './model/ContainerAnnotation'
@@ -42,25 +41,6 @@ export { default as TextNode } from './model/TextNode'
 export { default as Selection } from './model/Selection'
 export { default as XMLExporter } from './model/XMLExporter'
 export { default as XMLImporter } from './model/XMLImporter'
-
-// transformations
-export { default as breakNode } from './model/transform/breakNode'
-export { default as copySelection } from './model/transform/copySelection'
-export { default as createAnnotation } from './model/transform/createAnnotation'
-export { default as deleteCharacter } from './model/transform/deleteCharacter'
-export { default as deleteNode } from './model/transform/deleteNode'
-export { default as deleteSelection } from './model/transform/deleteSelection'
-export { default as expandAnnotation } from './model/transform/expandAnnotation'
-export { default as fuseAnnotation } from './model/transform/fuseAnnotation'
-export { default as insertInlineNode } from './model/transform/insertInlineNode'
-export { default as insertNode } from './model/transform/insertNode'
-export { default as insertText } from './model/transform/insertText'
-export { default as mergeNodes } from './model/transform/merge'
-export { default as pasteContent } from './model/transform/paste'
-export { default as replaceText } from './model/transform/replaceText'
-export { default as switchTextType } from './model/transform/switchTextType'
-export { default as truncateAnnotation } from './model/transform/truncateAnnotation'
-export { default as updateAnnotations } from './model/transform/updateAnnotations'
 
 // packages
 export { default as BasePackage } from './packages/base/BasePackage'

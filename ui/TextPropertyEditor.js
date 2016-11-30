@@ -27,6 +27,7 @@ import TextProperty from './TextPropertyComponent'
 */
 
 class TextPropertyEditor extends Surface {
+
   constructor(parent, props) {
     // making props.name optional
     props.name = props.name || props.path.join('.')
@@ -62,23 +63,6 @@ class TextPropertyEditor extends Surface {
   getPath() {
     return this.props.path
   }
-
-  /**
-    Selects all text
-  */
-  selectAll() {
-    let doc = this.getDocument()
-    let path = this.props.path
-    let text = doc.get(path)
-    let sel = doc.createSelection({
-      type: 'property',
-      path: path,
-      startOffset: 0,
-      endOffset: text.length
-    })
-    this.setSelection(sel)
-  }
-
 }
 
 TextPropertyEditor.prototype._isTextPropertyEditor = true

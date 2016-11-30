@@ -77,10 +77,11 @@ class TransactionDocument extends Document {
     }
   }
 
-  createDefaultTextNode(content) {
+  createDefaultTextNode(text, dir) {
     return this.create({
       type: this.getSchema().getDefaultTextType(),
-      content: content || ''
+      content: text || '',
+      direction: dir
     })
   }
 
@@ -111,7 +112,8 @@ class TransactionDocument extends Document {
   }
 
   _onDocumentChanged(change) {
-    console.info('TODO: find out when this is actually used')
+    // NOTE: this is hooked to document:changed (low-level), to make sure that we
+    // update the transaction document too when the document is manipulated directly, e.g. using `document.create(...)`
     this._apply(change)
   }
 

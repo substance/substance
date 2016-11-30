@@ -1,8 +1,8 @@
 // Fixture for documentStore
 import JSONConverter from '../../model/JSONConverter'
+import EditingInterface from '../../model/EditingInterface'
 import createTestArticle from './createTestArticle'
 import twoParagraphs from './twoParagraphs'
-import insertText from './insertText'
 var converter = new JSONConverter()
 
 // Serializes to JSON
@@ -15,19 +15,15 @@ function build(doc, documentId, version) {
 }
 
 var doc = createTestArticle(twoParagraphs)
+var tx = new EditingInterface(doc)
 
 var doc1V1 = build(doc, 'test-doc', 1)
 var doc2V1 = build(doc, 'test-doc-2', 1)
-insertText(doc, {
-  path: ['p1', 'content'],
-  pos: 1,
-  text: '!'
-})
-insertText(doc, {
-  path: ['p1', 'content'],
-  pos: 3,
-  text: '???'
-})
+
+tx.setSelection({ type: 'property', path: ['p1', 'content'], startOffset: 1 })
+tx.insertText('!')
+tx.setSelection({ type: 'property', path: ['p1', 'content'], startOffset: 3 })
+tx.insertText('???')
 var doc2V3 = build(doc, 'test-doc-2', 3)
 
 export default {

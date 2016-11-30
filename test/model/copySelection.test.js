@@ -1,11 +1,11 @@
 import { module } from 'substance-test'
-import copySelection from '../../model/transform/copySelection'
+import copySelection from '../../model/copySelection'
 import Document from '../../model/Document'
 import fixture from '../fixtures/createTestArticle'
 import simple from '../fixtures/simple'
 import headersAndParagraphs from '../fixtures/headersAndParagraphs'
 
-const test = module('transform/copySelection')
+const test = module('model/copySelection')
 
 test("Copying a property selection", function(t) {
   var doc = fixture(headersAndParagraphs)
@@ -15,9 +15,7 @@ test("Copying a property selection", function(t) {
     startOffset: 4,
     endOffset: 9
   })
-  var args = {selection: sel}
-  var out = copySelection(doc, args)
-  var copy = out.doc
+  var copy = copySelection(doc, sel)
   var textNode = copy.get(Document.TEXT_SNIPPET_ID)
   t.notNil(textNode, 'There should be a text node for the property fragment.')
   t.equal(textNode.content, 'graph', 'Selected text should be copied.')
@@ -32,9 +30,7 @@ test("Copying a property selection with annotated text", function(t) {
     startOffset: 10,
     endOffset: 19
   })
-  var args = {selection: sel}
-  var out = copySelection(doc, args)
-  var copy = out.doc
+  var copy = copySelection(doc, sel)
   t.equal(copy.get([Document.TEXT_SNIPPET_ID, 'content']), 'with anno', 'Selected text should be copied.')
   var annos = copy.getIndex('annotations').get([Document.TEXT_SNIPPET_ID, 'content'])
   t.equal(annos.length, 1, 'There should be one annotation on copied text.')
@@ -54,9 +50,7 @@ test("Copying a container selection", function(t) {
     endPath: ['p2', 'content'],
     endOffset: 9
   })
-  var args = {selection: sel}
-  var out = copySelection(doc, args)
-  var copy = out.doc
+  var copy = copySelection(doc, sel)
   var content = copy.get(Document.SNIPPET_ID)
   t.notNil(content, 'There should be a container node with id "content".')
   // 4 nodes? 'body', 'snippets', 'p1', 'p2'
@@ -87,9 +81,7 @@ test("Copying a container selection", function(t) {
 //     endPath: ['p2', 'content'],
 //     endOffset: 9
 //   })
-//   var args = {selection: sel}
-//   var out = copySelection(doc, args)
-//   var copy = out.doc
+//   var copy = copySelection(doc, sel)
 //   var img = copy.get('i1')
 //   t.notNil(img, 'The image should be copied.')
 //   t.end()
@@ -105,9 +97,7 @@ test("Copying a paragraph", function(t) {
     endPath: ['p2'],
     endOffset: 1
   })
-  var args = {selection: sel}
-  var out = copySelection(doc, args)
-  var copy = out.doc
+  var copy = copySelection(doc, sel)
   var p2 = copy.get('p2')
   t.equal(p2.content, doc.get('p2').content, 'The whole paragraph should be copied.')
   t.end()
@@ -130,8 +120,7 @@ test("Copying a paragraph", function(t) {
 //     endPath: ['i1'],
 //     endOffset: 1
 //   })
-//   var args = { selection: sel }
-//   var out = copySelection(doc, args)
+//   var out = copySelection(doc, sel)
 //   var copy = out.doc
 //   var img = copy.get('i1')
 //   t.notNil(img, 'The image should be copied.')

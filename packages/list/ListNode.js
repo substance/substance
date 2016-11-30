@@ -1,6 +1,6 @@
 import Container from '../../model/Container'
 
-class List extends Container {
+class ListNode extends Container {
   getContentPath() {
     return [this.id, 'items']
   }
@@ -12,14 +12,15 @@ class List extends Container {
   }
 }
 
-List.type = 'list'
+ListNode.type = 'list'
 
-List.define({
+ListNode.define({
   ordered: { type: 'boolean', default: false },
-  items: { type: [ 'array', 'id' ], default: [] }
+  // list-items are owned by the list
+  items: { type: [ 'array', 'id' ], default: [], strong: true }
 })
 
 // HACK: we don't want the inherited property 'nodes'
-delete List.schema.nodes
+delete ListNode.schema.nodes
 
-export default List
+export default ListNode

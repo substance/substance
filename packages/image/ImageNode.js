@@ -1,6 +1,6 @@
 import DocumentNode from '../../model/DocumentNode'
 
-class Image extends DocumentNode {
+class ImageNode extends DocumentNode {
 
   getImageFile() {
     if (this.imageFile) {
@@ -16,9 +16,9 @@ class Image extends DocumentNode {
   }
 }
 
-Image.define({
+ImageNode.define({
   type: 'image',
   imageFile: { type: 'file' }
 })
 
-export default Image
+export default ImageNode

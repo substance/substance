@@ -383,7 +383,7 @@ class CollabSession extends EditorSession {
   _applyRemoteChange(change) {
     // console.log('CollabSession: applying remote change');
     if (change.ops.length > 0) {
-      this._transaction.stageDoc._apply(change)
+      this._transaction._apply(change)
       this.getDocument()._apply(change)
       this._setDirty('document')
       // Only undo+redo history is updated according to the new change

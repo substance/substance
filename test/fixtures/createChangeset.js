@@ -1,14 +1,15 @@
 import isFunction from 'lodash/isFunction'
-import EditorSession from '../../model/EditorSession'
-import Configurator from '../../util/Configurator'
+import DocumentChange from '../../model/DocumentChange'
+import EditingInterface from '../../model/EditingInterface'
+import TransactionDocument from '../../model/TransactionDocument'
 
 export default function createChangeset(doc, fn) {
   if (!doc._isDocument || !isFunction(fn)) {
     throw new Error('Illegal arguments')
   }
-  var session = new EditorSession(doc, {
-    configurator: new Configurator()
-  })
-  var change = session.transaction(fn)
-  return [change.toJSON()]
+  let txDoc = new TransactionDocument(doc)
+  let tx = new EditingInterface(txDoc)
+  fn(tx)
+  txDoc.dispose()
+  return [new DocumentChange(txDoc.ops, {}, {}).toJSON()]
 }

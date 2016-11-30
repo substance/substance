@@ -148,8 +148,8 @@ Container.prototype.getChildrenProperty = function() {
 }
 
 Container.define({
-  type: "container",
-  nodes: { type: ['id'], default: [] }
+  type: 'container',
+  nodes: { type: ['array', 'id'], default: [] }
 })
 
 export default Container

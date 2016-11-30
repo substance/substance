@@ -1,178 +1,67 @@
-import uniq from 'lodash/uniq'
-import map from '../util/map'
 import forEach from '../util/forEach'
 import deleteFromArray from '../util/deleteFromArray'
+import ArrayTree from '../util/ArrayTree'
 
 /*
-
 */
 class MarkersManager {
 
   constructor(editorSession) {
     this.editorSession = editorSession
 
-    let doc = editorSession.getDocument()
-    this._annos = doc.getIndex('annotations')
-    this._markers = doc.getIndex('markers')
-
     // registry
-    this._configs = {}
     this._textProperties = {}
     this._dirtyProps = {}
 
+    this._markers = new MarkersIndex(editorSession)
 
-    // cached data
-    this._documentMarkers = {}
-    this._surfaceMarkers = {}
-    this._containerMarkers = {}
-
-    editorSession.onUpdate('document', this._onDocumentChange, this)
+    editorSession.onUpdate(this._onChange, this)
     editorSession.onRender(this._updateProperties, this)
   }
 
   dispose() {
     this.editorSession.off(this)
+    this._markers.dispose()
   }
 
   register(textProperyComponent) {
     let path = String(textProperyComponent.getRealPath())
     // console.log('registering property', path)
-    // register the component via path
     let textProperties = this._textProperties[path]
     if (!textProperties) {
       textProperties = this._textProperties[path] = []
     }
     textProperties.push(textProperyComponent)
-    this._updateRegistration(path)
-    this._initialFetch(path, textProperyComponent.getSurfaceId(), textProperyComponent.getContainerId())
   }
 
   deregister(textProperyComponent) {
     let path = String(textProperyComponent.getRealPath())
+    let textProperties = this._textProperties[path]
     deleteFromArray(this._textProperties[path], textProperyComponent)
-    this._updateRegistration(path)
+    if (textProperties.length === 0) {
+      delete this._textProperties[path]
+    }
   }
 
   getMarkers(path, opts) {
     opts = opts || {}
-    return this._getMarkers(path, opts.surfaceId, opts.containerId)
-  }
-
-  setMarkers(path, type, markers) {
-    let pathStr = String(path)
     let doc = this.editorSession.getDocument()
-    // remove the old ones first
-    var oldMarkers = map(doc.getIndex('markers').get(path)) || []
-    oldMarkers.forEach(function(m) {
-      if (m.type === type) {
-        // console.log('### removing marker')
-        m.remove()
+    let annos = doc.getAnnotations(path) || []
+    let markers = this._markers.get(path, opts.surfaceId, opts.containerId)
+    return annos.concat(markers)
+  }
+
+  _onChange(editorSession) {
+    if (editorSession.hasDocumentChanged()) {
+      // mark all updated props per se as dirty
+      if (editorSession.hasDocumentChanged()) {
+        let change = editorSession.getChange()
+        forEach(change.updated, (val, id) => {
+          this._dirtyProps[id] = true
+        })
       }
-    })
-    // then create new ones
-    markers.forEach(function(m) {
-      doc.create(m)
-    })
-    this._fetchDocumentMarkers(pathStr)
-    this._dirtyProps[pathStr] = true
-    this.editorSession.startFlow()
-  }
-
-  _updateRegistration(path) {
-    let textProperties = this._textProperties[path]
-    let config = { containerIds: [], surfaceIds: []}
-    if (textProperties.length === 0) {
-      // TODO: stop watching
-      delete this._documentMarkers[path]
-      delete this._surfaceMarkers[path]
-      delete this._containerMarkers[path]
-      delete this._textProperties[path]
-      delete this._configs[path]
-    } else {
-      for (var i = 0; i < textProperties.length; i++) {
-        let textProperty = textProperties[i]
-        let surfaceId = textProperty.getSurfaceId()
-        let containerId = textProperty.getContainerId()
-        if (surfaceId) {
-          config.surfaceIds.push(surfaceId)
-        }
-        if (containerId) {
-          config.containerIds.push(containerId)
-        }
-      }
-      config.containerIds = uniq(config.containerIds)
-      config.surfaceIds = uniq(config.surfaceIds)
-      this._configs[path] = config
+      Object.assign(this._dirtyProps, this._markers._collectDirtyProps())
     }
-  }
-
-  _getMarkers(path, surfaceId, containerId) {
-    let markers = this._documentMarkers[path] || []
-    if (surfaceId) {
-      let surfaceMarkers = this._surfaceMarkers[String([surfaceId].concat(path))]
-      if (surfaceMarkers) markers = markers.concat(surfaceMarkers)
-    }
-    if (containerId) {
-      let containerMarkers = this._containerMarkers[String([containerId].concat(path))]
-      if (containerMarkers) markers = markers.concat(containerMarkers)
-    }
-    return markers
-  }
-
-  _initialFetch(path, surfaceId, containerId) {
-    // initial fetch
-    let result = []
-    // document markers are property annos, spell-errors
-    if (!this._documentMarkers[path]) {
-      result = result.concat(this._fetchDocumentMarkers(path))
-    }
-    // TODO: maybe not store all in one to avoid clashes with containerIds
-    if (surfaceId && !this._surfaceMarkers[String([surfaceId].concat(path))]) {
-      result = result.concat(this._fetchSurfaceMarkers(path, surfaceId))
-    }
-    if (containerId && !this._containerMarkers[String([containerId].concat(path))]) {
-      result = result.concat(this._fetchContainerMarkers(path, containerId))
-    }
-    return result
-  }
-
-  _fetchDocumentMarkers(pathStr) {
-    let path = pathStr.split(',')
-    let documentMarkers = []
-    let annos = map(this._annos.get(path)) || []
-    if (annos) {
-      documentMarkers = documentMarkers.concat(annos)
-    }
-    let markers = map(this._markers.get(path)) || []
-    if (markers) {
-      documentMarkers = documentMarkers.concat(markers)
-    }
-    // console.log('## fetched documentMarkers for %s', pathStr, documentMarkers)
-    this._documentMarkers[pathStr] = documentMarkers
-    return documentMarkers
-  }
-
-  _fetchSurfaceMarkers(path, surfaceId) {
-    // TODO: implement this to bring back
-    let surfaceMarkers = []
-    this._surfaceMarkers[String([surfaceId].concat(path))] = surfaceMarkers
-    return surfaceMarkers
-  }
-
-  _fetchContainerMarkers(path, containerId) {
-    let containerMarkers = [String([containerId].concat(path))]
-    this._containerMarkers[path] = containerMarkers
-    return containerMarkers
-  }
-
-  _onDocumentChange(change) {
-    // update document markers
-    this._transformMarkers(change)
-    // fetch all document markers
-    forEach(change.updated, (val, id) => {
-      this._fetchDocumentMarkers(id)
-      this._dirtyProps[id] = true
-    })
   }
 
   _updateProperties() {
@@ -187,21 +76,138 @@ class MarkersManager {
 
   _updateTextProperty(textPropertyComponent) {
     let path = textPropertyComponent.getRealPath()
-    let markers = this._getMarkers(path, textPropertyComponent.getSurfaceId(), textPropertyComponent.getContainerId())
+    let markers = this.getMarkers(path, {
+      surfaceId: textPropertyComponent.getSurfaceId(),
+      containerId: textPropertyComponent.getContainerId()
+    })
     // console.log('## providing %s markers for %s', markers.length, path)
     textPropertyComponent.setState({
       markers: markers
     })
   }
 
-  // for every observed path we need to transform markers
-  // at least certain markers
-  _transformMarkers(change) {
+}
+
+/*
+  A DocumentIndex implementation for keeping track of markers
+*/
+class MarkersIndex {
+
+  constructor(editorSession) {
+    this.editorSession = editorSession
+    this.document = editorSession.getDocument()
+    this._documentMarkers = new ArrayTree()
+    this._surfaceMarkers = {}
+    this._containerMarkers = {}
+
+    this._dirtyProps = {}
+
+    this.document.addIndex('markers', this)
+    editorSession.onUpdate('document', this._onDocumentChange, this)
+  }
+
+  dispose() {
+    this.document.indexes.delete('markers')
+    this.editorSession.off(this)
+  }
+
+  reset() {
+    this._documentMarkers = new ArrayTree()
+    this._surfaceMarkers = {}
+    this._containerMarkers = {}
+    let doc = this.document
+    forEach(doc.getNodes(), (node) => {
+      if (this.select(node)) {
+        this.create(node)
+      }
+    })
+  }
+
+  select(node) {
+    return node._isMarker
+  }
+
+  create(marker) {
+    // console.log('Indexing marker', marker)
+    switch (marker.constructor.scope) {
+      case 'document': {
+        this._dirtyProps[marker.path] = true
+        this._documentMarkers.add(marker.path, marker)
+        break
+      }
+      case 'surface': {
+        if (!this._surfaceMarkers[marker.surfaceId]) {
+          this._surfaceMarkers[marker.surfaceId] = new ArrayTree()
+        }
+        this._dirtyProps[marker.path] = true
+        this._surfaceMarkers[marker.surfaceId].add(marker.path, marker)
+        break
+      }
+      case 'container': {
+        console.warn('Container scoped markers are not supported yet')
+        break
+      }
+      default:
+        console.error('Invalid marker scope.')
+    }
+  }
+
+  delete(marker) {
+    switch (marker.constructor.scope) {
+      case 'document': {
+        this._dirtyProps[marker.path] = true
+        this._documentMarkers.remove(marker.path, marker)
+        break
+      }
+      case 'surface': {
+        if (!this._surfaceMarkers[marker.surfaceId]) {
+          this._surfaceMarkers[marker.surfaceId] = new ArrayTree()
+        }
+        this._dirtyProps[marker.path] = true
+        this._surfaceMarkers[marker.surfaceId].remove(marker.path, marker)
+        break
+      }
+      case 'container': {
+        console.warn('Container scoped markers are not supported yet')
+        break
+      }
+      default:
+        console.error('Invalid marker scope.')
+    }
+  }
+
+  get(path, surfaceId) {
+    let markers = this._documentMarkers[path] || []
+    if (surfaceId && this._surfaceMarkers[surfaceId]) {
+      let surfaceMarkers = this._surfaceMarkers[surfaceId][path]
+      if (surfaceMarkers) markers = markers.concat(surfaceMarkers)
+    }
+    // TODO support container scoped markers
+    return markers
+  }
+
+  _collectDirtyProps() {
+    let dirtyProps = this._dirtyProps
+    this._dirtyProps = {}
+    return dirtyProps
+  }
+
+  // used for applying transformations
+  _getAllCustomMarkers(path) {
+    let markers = this._documentMarkers[path] || []
+    for(let surfaceId in this._surfaceMarkers) {
+      if (!this._surfaceMarkers.hasOwnProperty(surfaceId)) continue
+      let surfaceMarkers = this._surfaceMarkers[surfaceId][path]
+      if (surfaceMarkers) markers = markers.concat(surfaceMarkers)
+    }
+    // TODO: support container markers
+    return markers
+  }
+
+  _onDocumentChange(change) {
     let doc = this.doc
-    // TODO: we need to update markers, properly. They are not part of the model and need to be moved, expanded, deleted here according
-    // to incoming changes
     change.ops.forEach((op) => {
-      let markers = map(this._markers.get(op.path)) || []
+      let markers = this._getAllCustomMarkers(op.path)
       if (op.type === 'update' && op.diff._isTextOperation) {
         let diff = op.diff
         switch (diff.type) {
@@ -223,6 +229,7 @@ class MarkersManager {
     const length = op.str.length
     if (length === 0) return
     markers.forEach(function(marker) {
+      console.log('Transforming marker after insert')
       var start = marker.startOffset;
       var end = marker.endOffset;
       var newStart = start;
@@ -238,7 +245,7 @@ class MarkersManager {
       if (pos < end) {
         newEnd += length;
         marker.endOffset = newEnd
-        marker.invalidate()
+        if (marker.invalidate) marker.invalidate()
       }
     })
   }
@@ -281,10 +288,11 @@ class MarkersManager {
         if (end !== newEnd) {
           marker.endOffset = newEnd
         }
-        marker.invalidate()
+        if (marker.invalidate) marker.invalidate()
       }
     })
   }
+
 }
 
 export default MarkersManager

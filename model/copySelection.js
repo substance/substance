@@ -1,8 +1,8 @@
 import cloneDeep from 'lodash/cloneDeep'
-import forEach from '../../util/forEach'
 import last from 'lodash/last'
-import Document from '../Document'
-import annotationHelpers from '../annotationHelpers'
+import forEach from '../util/forEach'
+import Document from './Document'
+import annotationHelpers from './annotationHelpers'
 
 /**
   Creates a new document instance containing only the selected content
@@ -11,34 +11,25 @@ import annotationHelpers from '../annotationHelpers'
   @return {Object} with a `doc` property that has a fresh doc with the copied content
 */
 
-function copySelection(tx, args) {
-  let doc
-  // legacy
-  if (tx._isDocument) doc = tx
-  else doc = tx.getDocument()
-  let selection = args.selection
-  if (!selection || !selection._isSelection) {
-    throw new Error("'selection' is mandatory.")
+function copySelection(doc, selection) {
+  if (!selection) throw new Error("'selection' is mandatory.")
+  let copy = null
+  if (!selection.isNull() && !selection.isCollapsed()) {
+    // return a simplified version if only a piece of text is selected
+    if (selection.isPropertySelection()) {
+      copy = _copyPropertySelection(doc, selection)
+    }
+    else if (selection.isContainerSelection()) {
+      copy = _copyContainerSelection(doc, selection)
+    }
+    else if (selection.isNodeSelection()) {
+      copy = _copyNodeSelection(doc, selection)
+    }
+    else {
+      console.error('Copy is not yet supported for selection type.')
+    }
   }
-  if (selection.isNull() || selection.isCollapsed()) {
-    args.doc = null
-  }
-
-  // return a simplified version if only a piece of text is selected
-  else if (selection.isPropertySelection()) {
-    args.doc = _copyPropertySelection(doc, selection)
-  }
-  else if (selection.isContainerSelection()) {
-    args.doc = _copyContainerSelection(doc, selection)
-  }
-  else if (selection.isNodeSelection()) {
-    args.doc = _copyNodeSelection(doc, selection)
-  }
-  else {
-    console.error('Copy is not yet supported for selection type.')
-    args.doc = null
-  }
-  return args
+  return copy
 }
 
 function _copyPropertySelection(doc, selection) {
@@ -70,9 +61,8 @@ function _copyPropertySelection(doc, selection) {
 // Basically this needs to be implemented for each nested node.
 // The default implementation ignores partially selected nested nodes.
 function _copyContainerSelection(doc, selection) {
-  let container = doc.get(selection.containerId)
   let snippet = doc.createSnippet()
-  let containerNode = snippet.getContainer()
+  let container = snippet.getContainer()
 
   let fragments = selection.getFragments()
   if (fragments.length === 0) return snippet
@@ -80,12 +70,15 @@ function _copyContainerSelection(doc, selection) {
   // copy nodes and annotations.
   for (let i = 0; i < fragments.length; i++) {
     let fragment = fragments[i]
-    let nodeId = fragment.getNodeId()
+    let nodeId = fragment.path[0]
     let node = doc.get(nodeId)
     // skip created nodes
     if (!created[nodeId]) {
-      _copyNode(snippet, node, container, created)
-      containerNode.show(nodeId)
+      _copyNode(node).forEach((nodeData) => {
+        let copy = snippet.create(nodeData)
+        created[copy.id] = true
+      })
+      container.show(nodeId)
     }
   }
 
@@ -94,7 +87,7 @@ function _copyContainerSelection(doc, selection) {
   let path, offset, text
 
   // if first is a text node, remove part before the selection
-  if (firstFragment.isPropertyFragment()) {
+  if (firstFragment.type === 'selection-fragment') {
     path = firstFragment.path
     offset = firstFragment.startOffset
     text = doc.get(path)
@@ -103,7 +96,7 @@ function _copyContainerSelection(doc, selection) {
   }
 
   // if last is a is a text node, remove part before the selection
-  if (lastFragment.isPropertyFragment()) {
+  if (lastFragment.type === 'selection-fragment') {
     path = lastFragment.path
     offset = lastFragment.endOffset
     text = doc.get(path)
@@ -115,33 +108,48 @@ function _copyContainerSelection(doc, selection) {
 }
 
 function _copyNodeSelection(doc, selection) {
-  let container = doc.get(selection.containerId)
   let snippet = doc.createSnippet()
   let containerNode = snippet.getContainer()
   let nodeId = selection.getNodeId()
   let node = doc.get(nodeId)
-  _copyNode(snippet, node, container, {})
+  _copyNode(node).forEach((nodeData) => {
+    snippet.create(nodeData)
+  })
   containerNode.show(node.id)
   return snippet
 }
 
-function _copyNode(doc, node, container, created) {
-  // nested nodes should provide a custom implementation
-  if (node.hasChildren()) {
-    // TODO: call a customized implementation for nested nodes
-    // and continue, to skip the default implementation
-    let children = node.getChildren()
-    children.forEach(function(child) {
-      _copyNode(doc, child, container, created)
-    })
-  }
-  created[node.id] = doc.create(node.toJSON())
+/*
+  Creates a 'deep' JSON copy of a node returning an array of JSON objects
+  that can be used to create the object tree owned by the given root node.
 
-  let annotationIndex = doc.getIndex('annotations')
+  @param {DocumentNode} node
+*/
+function _copyNode(node) {
+  let nodes = []
+  // EXPERIMENTAL: using schema reflection to determine whether to do a 'deep' copy or just shallow
+  let nodeSchema = node.getSchema()
+  let doc = node.getDocument()
+  forEach(nodeSchema, (prop) => {
+    // ATM we do a cascaded copy if the property has type 'id', ['array', 'id'], or 'file'
+    if ((prop.isReference() && prop.owner) || (prop.type === 'file')) {
+      let val = node[prop.name]
+      if (prop.isArray()) {
+        val.forEach((id) => {
+          nodes = nodes.concat(_copyNode(doc.get(id)))
+        })
+      } else {
+        nodes = nodes.concat(_copyNode(doc.get(val)))
+      }
+    }
+  })
+  nodes.push(node.toJSON())
+  let annotationIndex = node.getDocument().getIndex('annotations')
   let annotations = annotationIndex.get([node.id])
   forEach(annotations, function(anno) {
-    doc.create(cloneDeep(anno.toJSON()))
+    nodes.push(anno.toJSON())
   })
+  return nodes
 }
 
 export default copySelection
