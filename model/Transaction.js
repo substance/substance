@@ -114,18 +114,13 @@ class Transaction extends EditingInterface {
     try {
       this.setSelection(selection)
       let selBefore = this.getSelection()
-      let result = transformation(this, {
+      transformation(this, {
         selection: selBefore
       }) || {}
       let ops = this.ops
       if (ops.length > 0) {
         change = new DocumentChange(ops, this._before, this._after)
         change.before = { selection: selBefore }
-        // TODO: we need to rethink if we really want it the old way, i.e. returning a selection
-        // I'd prefer tx.setSelection(...)
-        if (result.hasOwnProperty('selection')) {
-          this.setSelection(result.selection)
-        }
         change.after = { selection: this.getSelection() }
       }
       this._state = 'finished'

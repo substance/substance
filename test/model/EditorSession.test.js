@@ -1,6 +1,5 @@
 import { module, spy } from 'substance-test'
 
-import extend from 'lodash/extend'
 import EditorSession from '../../model/EditorSession'
 import Configurator from '../../util/Configurator'
 import fixture from '../fixtures/createTestArticle'
@@ -9,62 +8,58 @@ import simple from '../fixtures/simple'
 const test = module('model/EditorSession')
 
 test("Keeping TransactionDocument up-to-date.", function(t) {
-  var doc = fixture(simple)
-  var session = _createEditorSession(doc)
-  session._transaction._stageDoc._apply = spy(session._transaction._stageDoc, '_apply')
+  let { editorSession, doc } = _fixture(simple)
+  let stageDoc = editorSession._transaction._stageDoc
+  stageDoc._apply = spy(stageDoc, '_apply')
   doc.create({ type: 'paragraph', id: 'foo', content: 'foo'})
-  var p = session._transaction.get('foo')
-  t.equal(session._transaction._stageDoc._apply.callCount, 1, "Stage should have been updated.")
+  var p = stageDoc.get('foo')
+  t.equal(stageDoc._apply.callCount, 1, "Stage should have been updated.")
   t.notNil(p, "Stage should contain new paragraph node.")
   t.equal(p.content, "foo")
   t.end()
 })
 
 test("Undoing and redoing a change.", function(t) {
-  var doc = fixture(simple)
-  var session = _createEditorSession(doc)
-  session.transaction(function(tx) {
+  let { editorSession, doc } = _fixture(simple)
+  editorSession.transaction(function(tx) {
     tx.update(['p1', 'content'], { type: 'insert', start: 3, text: "XXX" })
   })
-
   t.equal(doc.get(['p1', 'content']), '012XXX3456789', 'Text should have been inserted.')
-  t.equal(session.canUndo(), true, 'Undo should be possible')
-  session.undo()
+  t.equal(editorSession.canUndo(), true, 'Undo should be possible')
+  editorSession.undo()
   t.equal(doc.get(['p1', 'content']), '0123456789', 'Original text should have been recovered.')
-  t.equal(session.canUndo(), false, 'Undo should be disabled')
-  t.equal(session.canRedo(), true, 'Redo should be possible')
-  session.redo()
+  t.equal(editorSession.canUndo(), false, 'Undo should be disabled')
+  t.equal(editorSession.canRedo(), true, 'Redo should be possible')
+  editorSession.redo()
   t.equal(doc.get(['p1', 'content']), '012XXX3456789', 'Text should have been changed again.')
   t.end()
 })
 
 test("Selections after undo/redo.", function(t) {
-  var doc = fixture(simple)
-  var session = _createEditorSession(doc)
+  let { editorSession, doc } = _fixture(simple)
   var path = ['p1', 'content']
-  session.setSelection({
+  editorSession.setSelection({
     type: 'property',
     path: path,
     startOffset: 3
   })
-  session.transaction(function(tx, args) {
+  editorSession.transaction(function(tx) {
     tx.update(path, { type: 'insert', start: 3, text: "XXX" })
     tx.setSelection({
       type: 'property',
       path: path,
       startOffset: 6
     })
-    return args
   })
-  session.undo()
-  var sel = session.getSelection()
+  editorSession.undo()
+  var sel = editorSession.getSelection()
   t.ok(sel.equals(doc.createSelection({
     type: 'property',
     path: path,
     startOffset: 3
   })), 'Selection should be set correctly after undo.')
-  session.redo()
-  sel = session.getSelection()
+  editorSession.redo()
+  sel = editorSession.getSelection()
   t.ok(sel.equals(doc.createSelection({
     type: 'property',
     path: path,
@@ -73,8 +68,13 @@ test("Selections after undo/redo.", function(t) {
   t.end()
 })
 
-function _createEditorSession(doc) {
-  return new EditorSession(doc, {
+function _fixture(seed) {
+  let doc = fixture(seed)
+  let editorSession = new EditorSession(doc, {
     configurator: new Configurator()
   })
+  return {
+    editorSession: editorSession,
+    doc: doc
+  }
 }

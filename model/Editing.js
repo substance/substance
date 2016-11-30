@@ -558,6 +558,7 @@ class Editing {
   }
 
   paste(tx, content) {
+    if (!content) return
     if (isString(content)) {
       paste(tx, {text: content})
     } else if (content._isDocument) {

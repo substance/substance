@@ -37,7 +37,7 @@ class Surface extends Component {
     // considering nesting in IsolatedNodes
     this._surfaceId = createSurfaceId(this)
 
-    this.clipboard = new Clipboard(this, {
+    this.clipboard = new Clipboard(this.editorSession, {
       converterRegistry: this.context.converterRegistry
     })
 
