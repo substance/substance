@@ -1,9 +1,7 @@
 import isString from '../util/isString'
 import annotationHelpers from '../model/annotationHelpers'
-import deleteNode from '../model/deleteNode'
 import paste from '../model/paste'
 import uuid from '../util/uuid'
-import PropertySelection from '../model/PropertySelection'
 import TextNodeEditing from '../model/TextNodeEditing'
 import ListEditing from '../packages/list/ListEditing'
 
@@ -373,12 +371,24 @@ class Editing {
       }
       container.hide(nodeId)
     }
-    // delete nested nodes
-    if (node.hasChildren()) {
-      node.getChildren().forEach(function(child) {
-        deleteNode(tx, { nodeId: child.id, containerId: containerId })
-      })
-    }
+
+    // delete recursively
+    // EXPERIMENTAL: using schema reflection to determine whether to do a 'deep' delete or just shallow
+    let nodeSchema = node.getSchema()
+    forEach(nodeSchema, (prop) => {
+      // ATM we do a cascaded delete if the property has type 'id', ['array', 'id'], or 'file'
+      if ((prop.isReference() && prop.owner) || (prop.type === 'file')) {
+        if (prop.isArray()) {
+          let ids = node[prop.name]
+          ids.forEach((id) => {
+            this.deleteNode(tx, id)
+          })
+        } else {
+          this.deleteNode(tx, node[prop.name])
+        }
+      }
+    })
+
     // finally delete the node itself
     tx.delete(nodeId)
     tx.setSelection(newSel)

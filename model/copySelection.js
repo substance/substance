@@ -12,9 +12,7 @@ import annotationHelpers from './annotationHelpers'
 */
 
 function copySelection(doc, selection) {
-  if (!selection) {
-    throw new Error("'selection' is mandatory.")
-  }
+  if (!selection) throw new Error("'selection' is mandatory.")
   let copy = null
   if (!selection.isNull() && !selection.isCollapsed()) {
     // return a simplified version if only a piece of text is selected
@@ -63,9 +61,8 @@ function _copyPropertySelection(doc, selection) {
 // Basically this needs to be implemented for each nested node.
 // The default implementation ignores partially selected nested nodes.
 function _copyContainerSelection(doc, selection) {
-  let container = doc.get(selection.containerId)
   let snippet = doc.createSnippet()
-  let containerNode = snippet.getContainer()
+  let container = snippet.getContainer()
 
   let fragments = selection.getFragments()
   if (fragments.length === 0) return snippet
@@ -77,8 +74,11 @@ function _copyContainerSelection(doc, selection) {
     let node = doc.get(nodeId)
     // skip created nodes
     if (!created[nodeId]) {
-      _copyNode(snippet, node, container, created)
-      containerNode.show(nodeId)
+      _copyNode(node).forEach((nodeData) => {
+        let copy = snippet.create(nodeData)
+        created[copy.id] = true
+      })
+      container.show(nodeId)
     }
   }
 
@@ -108,33 +108,48 @@ function _copyContainerSelection(doc, selection) {
 }
 
 function _copyNodeSelection(doc, selection) {
-  let container = doc.get(selection.containerId)
   let snippet = doc.createSnippet()
   let containerNode = snippet.getContainer()
   let nodeId = selection.getNodeId()
   let node = doc.get(nodeId)
-  _copyNode(snippet, node, container, {})
+  _copyNode(node).forEach((nodeData) => {
+    snippet.create(nodeData)
+  })
   containerNode.show(node.id)
   return snippet
 }
 
-function _copyNode(doc, node, container, created) {
-  // nested nodes should provide a custom implementation
-  if (node.hasChildren()) {
-    // TODO: call a customized implementation for nested nodes
-    // and continue, to skip the default implementation
-    let children = node.getChildren()
-    children.forEach(function(child) {
-      _copyNode(doc, child, container, created)
-    })
-  }
-  created[node.id] = doc.create(node.toJSON())
+/*
+  Creates a 'deep' JSON copy of a node returning an array of JSON objects
+  that can be used to create the object tree owned by the given root node.
 
-  let annotationIndex = doc.getIndex('annotations')
+  @param {DocumentNode} node
+*/
+function _copyNode(node) {
+  let nodes = []
+  // EXPERIMENTAL: using schema reflection to determine whether to do a 'deep' copy or just shallow
+  let nodeSchema = node.getSchema()
+  let doc = node.getDocument()
+  forEach(nodeSchema, (prop) => {
+    // ATM we do a cascaded copy if the property has type 'id', ['array', 'id'], or 'file'
+    if ((prop.isReference() && prop.owner) || (prop.type === 'file')) {
+      let val = node[prop.name]
+      if (prop.isArray()) {
+        val.forEach((id) => {
+          nodes = nodes.concat(_copyNode(doc.get(id)))
+        })
+      } else {
+        nodes = nodes.concat(_copyNode(doc.get(val)))
+      }
+    }
+  })
+  nodes.push(node.toJSON())
+  let annotationIndex = node.getDocument().getIndex('annotations')
   let annotations = annotationIndex.get([node.id])
   forEach(annotations, function(anno) {
-    doc.create(cloneDeep(anno.toJSON()))
+    nodes.push(anno.toJSON())
   })
+  return nodes
 }
 
 export default copySelection

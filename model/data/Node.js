@@ -1,11 +1,31 @@
 import isBoolean from 'lodash/isBoolean'
-import isNumber from 'lodash/isNumber'
-import isString from 'lodash/isString'
-import isArray from 'lodash/isArray'
 import isObject from 'lodash/isObject'
 import cloneDeep from 'lodash/cloneDeep'
+import isNumber from '../../util/isNumber'
+import isString from '../../util/isString'
+import isArray from '../../util/isArray'
+import isPlainObject from '../../util/isPlainObject'
 import EventEmitter from '../../util/EventEmitter'
 import forEach from '../../util/forEach'
+import last from '../../util/last'
+
+class Property {
+  constructor(spec) {
+    Object.assign(this, spec)
+  }
+
+  isArray() {
+    return isArray(this.type)
+  }
+
+  isReference() {
+    if (this.isArray()) {
+      return last(this.type) === 'id'
+    } else {
+      return this.type === 'id'
+    }
+  }
+}
 
 /*
   Base node implementation.
@@ -44,8 +64,6 @@ class Node extends EventEmitter {
     }
   }
 
-  get _isNode() { return true; }
-
   dispose() {}
 
   /**
@@ -56,6 +74,10 @@ class Node extends EventEmitter {
   */
   isInstanceOf(typeName) {
     return Node.isInstanceOf(this.constructor, typeName)
+  }
+
+  getSchema() {
+    return this.constructor.schema
   }
 
   /**
@@ -94,7 +116,11 @@ class Node extends EventEmitter {
       type: this.type
     }
     forEach(this.constructor.schema, function(prop, name) {
-      data[prop.name] = this[name]
+      let val = this[name]
+      if (isArray(val) || isPlainObject(val)) {
+        val = cloneDeep(val)
+      }
+      data[prop.name] = val
     }.bind(this))
     return data
   }
@@ -119,6 +145,8 @@ Object.defineProperty(Node.prototype, 'type', {
     throw new Error('read-only')
   }
 })
+
+Node.prototype._isNode = true
 
 /**
   Internal implementation of Node.prototype.isInstanceOf.
@@ -169,7 +197,7 @@ function _compileSchema(schema) {
     }
     definition = _compileDefintion(definition)
     definition.name = name
-    compiledSchema[name] = definition
+    compiledSchema[name] = new Property(definition)
   })
   return compiledSchema
 }
