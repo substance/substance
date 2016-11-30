@@ -1,5 +1,5 @@
-import List from './List'
-import ListItem from './ListItem'
+import ListNode from './ListNode'
+import ListItemNode from './ListItemNode'
 import ListComponent from './ListComponent'
 import ListHTMLConverter from './ListHTMLConverter'
 import ListItemHTMLConverter from './ListItemHTMLConverter'
@@ -7,8 +7,8 @@ import ListItemHTMLConverter from './ListItemHTMLConverter'
 export default {
   name: 'list',
   configure: function(config) {
-    config.addNode(List);
-    config.addNode(ListItem);
+    config.addNode(ListNode);
+    config.addNode(ListItemNode);
     config.addComponent('list', ListComponent)
     config.addConverter('html', ListHTMLConverter)
     config.addConverter('html', ListItemHTMLConverter)

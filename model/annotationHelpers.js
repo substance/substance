@@ -205,7 +205,7 @@ function transferAnnotations(doc, path, offset, newPath, newOffset) {
 
 /*
  @param {model/Document} tx
- @param {model/Annotation} args.anno annotation which should be expanded
+ @param {model/PropertyAnnotation} args.anno annotation which should be expanded
  @param {model/Selection}  args.selection selection to which to expand
 */
 function truncateAnnotation(tx, anno, sel) {
@@ -219,7 +219,7 @@ function truncateAnnotation(tx, anno, sel) {
 
 /*
  @param {model/Document} tx
- @param {model/Annotation} args.anno annotation which should be expanded
+ @param {model/PropertyAnnotation} args.anno annotation which should be expanded
  @param {model/Selection}  args.selection selection to which to expand
 */
 function expandAnnotation(tx, anno, sel) {
@@ -233,7 +233,7 @@ function expandAnnotation(tx, anno, sel) {
 
 /*
  @param {model/Document} tx
- @param {model/Annotation[]} args.annos annotations which should be fused
+ @param {model/PropertyAnnotation[]} args.annos annotations which should be fused
 */
 function fuseAnnotation(tx, annos) {
   if (!isArray(annos) || annos.length < 2) {

@@ -11,7 +11,7 @@ class FileNode extends DocumentNode {
       return this.proxy.getUrl()
     } else {
       // this happens if no FileProxy is attached
-      console.warn('No file proxy attached to ', this.node.id)
+      console.warn('No file proxy attached to ', this.id)
       return ''
     }
   }

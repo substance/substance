@@ -15,7 +15,6 @@ export { default as WebSocketConnection } from './collab/WebSocketConnection'
 
 // model
 export { default as annotationHelpers } from './model/annotationHelpers'
-export { default as Annotation } from './model/Annotation'
 export { default as BlockNode } from './model/BlockNode'
 export { default as Container } from './model/Container'
 export { default as ContainerAnnotation } from './model/ContainerAnnotation'
