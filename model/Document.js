@@ -589,6 +589,7 @@ function _createSelectionFromData(doc, selData) {
     return new PropertySelection(selData.path, selData.startOffset, selData.endOffset, selData.reverse, selData.containerId, selData.surfaceId)
   } else if (selData.type === 'container') {
     var container = doc.get(selData.containerId, 'strict')
+    if (!container) throw new Error('Can not create ContainerSelection: container "'+selData.containerId+'" does not exist.')
     var start = new Coordinate(selData.startPath, selData.startOffset)
     var end = new Coordinate(selData.endPath, selData.endOffset)
     var startAddress = container.getAddress(start)

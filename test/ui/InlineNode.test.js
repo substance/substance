@@ -161,7 +161,7 @@ function paragraphsWithInlineNodes(doc) {
     title: "ABCDEFG"
   })
   tx.setSelection({
-    type: 'paragraph',
+    type: 'property',
     path: ['p1', 'content'],
     startOffset: 2
   })
@@ -203,7 +203,7 @@ function nestedInlineNode(doc) {
     title: "ABCDEFG"
   })
   tx.setSelection({
-    type: 'paragraph',
+    type: 'property',
     path: ['p1', 'content'],
     startOffset: 2
   })
