@@ -11,7 +11,8 @@ class CollabServer extends Server {
     super(config)
 
     this.scope = 'substance/collab'
-    this.documentEngine = config.documentEngine
+    this.configurator = config.configurator
+    this.documentEngine = this.configurator.getDocumentEngine()
     this.collabEngine = new CollabEngine(this.documentEngine)
   }
 

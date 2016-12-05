@@ -6,6 +6,9 @@ let converter = new JSONConverter()
 
 /**
   API for creating and retrieving snapshots of documents
+
+  TODO: Can we create snapshots without having to know the document schema?
+        Then we could remove the dependency to config.configurator
 */
 class SnapshotEngine {
   constructor(config) {
