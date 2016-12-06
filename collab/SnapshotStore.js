@@ -35,7 +35,6 @@ class SnapshotStore {
 
     // Exit if no versions are available
     if (availableVersions.length === 0) return cb(null, undefined)
-
     // If no version is given we return the latest version available
     if (!version) {
       let latestVersion = Math.max.apply(null, availableVersions)
@@ -67,13 +66,18 @@ class SnapshotStore {
         }
       }
     }
+
+    if (result) {
+      result.documentId = args.documentId
+    }
+
     cb(null, result)
   }
 
   /*
     Stores a snapshot for a given documentId and version.
 
-    Please not that an existing snapshot will be overwritten.
+    Please note that an existing snapshot will be overwritten.
   */
   saveSnapshot(args, cb) {
     let documentId = args.documentId

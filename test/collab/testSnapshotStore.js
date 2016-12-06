@@ -60,7 +60,7 @@ function testSnapshotStore(store, test) {
   })
 
   test('Retrieve snapshot for test-doc-2 with version=2', function(t) {
-    // in the fixture there does not exist a snapshot for version 2
+    // in the fixture a snapshot for version 2 does not exist
     store.getSnapshot({
       documentId: 'test-doc-2',
       version: 2

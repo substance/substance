@@ -7,11 +7,7 @@ var converter = new JSONConverter()
 
 // Serializes to JSON
 function build(doc, documentId, version) {
-  return {
-    documentId: documentId,
-    data: converter.exportDocument(doc),
-    version: version,
-  }
+  return converter.exportDocument(doc)
 }
 
 var doc = createTestArticle(twoParagraphs)

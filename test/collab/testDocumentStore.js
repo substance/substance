@@ -13,6 +13,7 @@ function testDocumentStore(store, test) {
         custom: 'some custom data'
       }
     }
+
     store.createDocument(newDoc, function(err, doc) {
       t.ok(doc, 'valid doc entry expected')
       t.equal(doc.schemaName, 'prose-article', 'schemaName should be "prose-article"')
@@ -123,6 +124,7 @@ function testDocumentStore(store, test) {
   /*
     Exists
   */
+
   test('documentExists should return true for existing document', function(t) {
     store.documentExists('test-doc', function(err, exists) {
       t.notOk(err, 'There should be no error')
