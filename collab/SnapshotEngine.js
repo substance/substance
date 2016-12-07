@@ -1,8 +1,6 @@
 import Err from '../util/SubstanceError'
 import computeSnapshot from './computeSnapshot'
 
-// let converter = new JSONConverter()
-
 /**
   API for creating and retrieving document snapshots
 */
@@ -131,8 +129,7 @@ class SnapshotEngine {
         toVersion: version
       }, (err, result) => {
         if (err) return cb(err)
-        let ops = _extractOps(result.changes)
-        jsonDoc = computeSnapshot(jsonDoc, ops)
+        jsonDoc = computeSnapshot(jsonDoc, result.changes)
         let snapshot = {
           documentId: documentId,
           version: version,
@@ -157,8 +154,7 @@ class SnapshotEngine {
       sinceVersion: 0
     }, (err, result) => {
       if (err) return cb(err)
-      let ops = _extractOps(result.changes)
-      jsonDoc = computeSnapshot(jsonDoc, ops)
+      jsonDoc = computeSnapshot(jsonDoc, result.changes)
       let snapshot = {
         documentId: documentId,
         version: version,
@@ -169,13 +165,6 @@ class SnapshotEngine {
   }
 }
 
-function _extractOps(changes) {
-  let ops = []
-  changes.forEach((change) => {
-    ops.concat(change.ops)
-  })
-  return ops
-}
 
 
 export default SnapshotEngine

@@ -4,7 +4,7 @@ import forEach from '../util/forEach'
 class JSONConverter {
 
   importDocument(doc, json) {
-    if (json.nodes) {
+    if (!json.nodes) {
       throw new Error('Invalid JSON format.')
     }
     var schema = doc.getSchema()
