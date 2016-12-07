@@ -16,20 +16,20 @@ class DocumentStore {
 
     @return {Object} document record
   */
-  createDocument(params, cb) {
-
-    if (!params.documentId) {
+  createDocument(doc, cb) {
+    if (!doc.documentId) {
       // We generate a documentId ourselves
-      params.documentId = uuid()
+      doc.documentId = uuid()
     }
 
-    let exists = this._documentExists(params.documentId);
+    let exists = this._documentExists(doc.documentId);
     if (exists) {
       return cb(new Err('DocumentStore.CreateError', {
         message: 'Could not create because document already exists.'
       }))
     }
-    this._createDocument(params)
+    this._createDocument(doc)
+    cb(null, doc)
   }
 
   /*
@@ -92,8 +92,8 @@ class DocumentStore {
   // Handy synchronous helpers
   // -------------------------
 
-  _createDocument(params) {
-    this._documents[params.documentId] = params
+  _createDocument(doc) {
+    this._documents[doc.documentId] = doc
   }
 
   _deleteDocument(documentId) {

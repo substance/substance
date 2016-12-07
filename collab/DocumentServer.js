@@ -3,9 +3,12 @@
   DocumentServer module. Can be bound to an express instance
 */
 class DocumentServer {
-  constructor(config) {
-    this.engine = config.documentEngine
-    this.path = config.path
+
+  constructor(params) {
+    this.configurator = params.configurator
+    this.engine = this.configurator.getDocumentEngine()
+    // TODO: make path configurable through configurator
+    this.path = '/api/documents'
   }
 
   /*

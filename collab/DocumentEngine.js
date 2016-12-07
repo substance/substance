@@ -5,6 +5,8 @@ import SnapshotEngine from './SnapshotEngine'
 
 /*
   DocumentEngine
+
+  TODO: should we only pass the configurator, instead of the config object?
 */
 class DocumentEngine extends EventEmitter {
   constructor(config) {
@@ -14,13 +16,14 @@ class DocumentEngine extends EventEmitter {
     // Where changes are stored
     this.documentStore = config.documentStore
     this.changeStore = config.changeStore
+    this.snapshotStore = config.snapshotStore
 
     // SnapshotEngine instance is required
     this.snapshotEngine = config.snapshotEngine || new SnapshotEngine({
       configurator: this.configurator,
       documentStore: this.documentStore,
       changeStore: this.changeStore,
-      snapshotStore: config.snapshotStore
+      snapshotStore: this.snapshotStore
     })
   }
 
@@ -30,6 +33,10 @@ class DocumentEngine extends EventEmitter {
     Writes the initial change into the database.
     Returns the JSON serialized version, as a starting point
   */
+
+  // TODO: Document creation should happen in the client. Then we can get
+  //       rid of schema-awareness in the document engine.
+
   createDocument(args, cb) {
     let schema = this.configurator.getSchema()
     if (!schema) {
@@ -163,15 +170,13 @@ class DocumentEngine extends EventEmitter {
         }, function(err) {
           if (err) return cb(err)
           this.snapshotEngine.requestSnapshot(args.documentId, newVersion, function() {
-            // no matter if errored or not we will complete the addChange
-            // successfully
+            // no matter if errored or not we will confirm the new change
             cb(null, newVersion)
           })
         }.bind(this))
       }.bind(this))
     }.bind(this))
   }
-
 }
 
 export default DocumentEngine

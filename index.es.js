@@ -12,6 +12,8 @@ export { default as DocumentStore } from './collab/DocumentStore'
 export { default as SnapshotEngine } from './collab/SnapshotEngine'
 export { default as SnapshotStore } from './collab/SnapshotStore'
 export { default as WebSocketConnection } from './collab/WebSocketConnection'
+export { default as CollabServerConfigurator } from './collab/CollabServerConfigurator'
+export { default as CollabServerPackage } from './collab/CollabServerPackage'
 
 // model
 export { default as annotationHelpers } from './model/annotationHelpers'

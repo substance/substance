@@ -33,10 +33,10 @@ import "./ui/TextPropertyComponent.test.js"
 import "./util/TreeIndex.test.js"
 
 // collab
-// import "./collab/ChangeStore.test.js"
+import "./collab/ChangeStore.test.js"
 // import "./collab/CollabEngine.test.js"
 // TODO: these two are broken... some tests do not finish
 // import "./model/DocumentEngine.test.js"
-// import "./collab/DocumentStore.test.js"
-// import "./collab/SnapshotEngine.test.js"
-// import "./collab/SnapshotStore.test.js"
+import "./collab/DocumentStore.test.js"
+import "./collab/SnapshotEngine.test.js"
+import "./collab/SnapshotStore.test.js"

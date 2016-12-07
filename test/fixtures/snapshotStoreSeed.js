@@ -1,37 +1,39 @@
-// Fixture for documentStore
-import JSONConverter from '../../model/JSONConverter'
-import EditingInterface from '../../model/EditingInterface'
-import createTestArticle from './createTestArticle'
-import twoParagraphs from './twoParagraphs'
-var converter = new JSONConverter()
+import ObjectOperation from '../../model/data/ObjectOperation'
+import map from '../../util/map'
+import changeStoreSeed from './changeStoreSeed'
 
 // Serializes to JSON
-function build(doc, documentId, version) {
-  return {
-    documentId: documentId,
-    data: converter.exportDocument(doc),
-    version: version,
+function buildSnapshot(changeset, schemaName) {
+  let nodes = {}
+  changeset.forEach((change) => {
+    change.ops.forEach((op) => {
+      op = ObjectOperation.fromJSON(op)
+      op.apply(nodes)
+    })
+  })
+  let doc = {
+    nodes: nodes,
+    schema: {
+      name: schemaName
+    }
   }
+  return doc
 }
 
-var doc = createTestArticle(twoParagraphs)
-var tx = new EditingInterface(doc)
-
-var doc1V1 = build(doc, 'test-doc', 1)
-var doc2V1 = build(doc, 'test-doc-2', 1)
-
-tx.setSelection({ type: 'property', path: ['p1', 'content'], startOffset: 1 })
-tx.insertText('!')
-tx.setSelection({ type: 'property', path: ['p1', 'content'], startOffset: 3 })
-tx.insertText('???')
-var doc2V3 = build(doc, 'test-doc-2', 3)
+var doc1V1 = buildSnapshot(changeStoreSeed['test-doc'], 'test-article')
+var doc2V1 = buildSnapshot(changeStoreSeed['test-doc-2'], 'test-article')
+var doc3V1 = buildSnapshot(changeStoreSeed['test-doc-3'].slice(0,1), 'test-article')
 
 export default {
   'test-doc': {
     1: doc1V1
   },
   'test-doc-2': {
-    1: doc2V1,
-    3: doc2V3
+    1: doc2V1
+  },
+  'test-doc-3': {
+    1: doc2V1
   }
 }
+
+
