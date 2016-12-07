@@ -114,7 +114,6 @@ class CollabEngine extends EventEmitter {
     which is similar to the commit case
   */
   sync(args, cb) {
-    console.log('client does a sync', args)
     // We now always get a change since the selection should be considered
     this._sync(args, function(err, result) {
       if (err) return cb(err)
