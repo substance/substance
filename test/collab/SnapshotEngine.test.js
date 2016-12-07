@@ -4,9 +4,8 @@ import DocumentStore from '../../collab/DocumentStore'
 import SnapshotStore from '../../collab/SnapshotStore'
 import ChangeStore from '../../collab/ChangeStore'
 import SnapshotEngine from '../../collab/SnapshotEngine'
-import Configurator from '../../util/Configurator'
-import TestArticle from '../model/TestArticle'
-import TestMetaNode from '../model/TestMetaNode'
+import CollabServerConfigurator from '../../collab/CollabServerConfigurator'
+import CollabServerPackage from '../../collab/CollabServerPackage'
 import testSnapshotEngine from './testSnapshotEngine'
 import testSnapshotEngineWithStore from './testSnapshotEngineWithStore'
 import documentStoreSeed from '../fixtures/documentStoreSeed'
@@ -17,24 +16,19 @@ const test = module('collab/SnapshotEngine')
 
 // Setup store instances
 
-var configurator = new Configurator()
-configurator.defineSchema({
-  name: 'prose-article',
-  ArticleClass: TestArticle,
-  defaultTextType: 'paragraph'
-})
-configurator.addNode(TestMetaNode)
+var cfg = new CollabServerConfigurator()
+cfg.import(CollabServerPackage)
 
 var documentStore = new DocumentStore()
 var changeStore = new ChangeStore()
-var snapshotEngine = new SnapshotEngine({
-  configurator: configurator,
-  documentStore: documentStore,
-  changeStore: changeStore,
-})
+// var snapshotEngine = new SnapshotEngine({
+//   configurator: cfg,
+//   documentStore: documentStore,
+//   changeStore: changeStore,
+// })
 var snapshotStore = new SnapshotStore()
 var snapshotEngineWithStore = new SnapshotEngine({
-  configurator: configurator,
+  configurator: cfg,
   documentStore: documentStore,
   changeStore: changeStore,
   snapshotStore: snapshotStore
@@ -66,9 +60,8 @@ function setupTest(description, fn) {
 }
 
 // Run the generic testsuite with an engine that does not have a store attached
-testSnapshotEngine(snapshotEngine, setupTest)
+// testSnapshotEngine(snapshotEngine, setupTest)
 // Run the same testsuite but this time with a store
-testSnapshotEngine(snapshotEngineWithStore, setupTest)
-
+// testSnapshotEngine(snapshotEngineWithStore, setupTest)
 // Run tests that are only relevant when a snapshot store is provided to the engine
 testSnapshotEngineWithStore(snapshotEngineWithStore, setupTest)

@@ -170,15 +170,13 @@ class DocumentEngine extends EventEmitter {
         }, function(err) {
           if (err) return cb(err)
           this.snapshotEngine.requestSnapshot(args.documentId, newVersion, function() {
-            // no matter if errored or not we will complete the addChange
-            // successfully
+            // no matter if errored or not we will confirm the new change
             cb(null, newVersion)
           })
         }.bind(this))
       }.bind(this))
     }.bind(this))
   }
-
 }
 
 export default DocumentEngine

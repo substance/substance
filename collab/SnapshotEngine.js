@@ -1,26 +1,20 @@
-import JSONConverter from '../model/JSONConverter'
-import each from 'lodash/each'
 import Err from '../util/SubstanceError'
+import computeSnapshot from './computeSnapshot'
 
-let converter = new JSONConverter()
+// let converter = new JSONConverter()
 
 /**
-  API for creating and retrieving snapshots of documents
-
-  TODO: Can we create snapshots without having to know the document schema?
-        Then we could remove the dependency to config.configurator
+  API for creating and retrieving document snapshots
 */
 class SnapshotEngine {
   constructor(config) {
-    this.configurator = config.configurator
     this.changeStore = config.changeStore
     this.documentStore = config.documentStore
 
     // Optional
     this.snapshotStore = config.snapshotStore
-    // Snapshot creation frequency,
-    // e.g. if it's equals 15 then every
-    // 15th version will be saved as snapshot
+    // Snapshot creation frequency (e.g. if it equals 15 then every
+    // 15th version will be saved as snapshot)
     this.frequency = config.frequency || 1
   }
 
@@ -76,7 +70,7 @@ class SnapshotEngine {
     If no version is provided a snaphot for the latest version is created.
   */
   _computeSnapshot(args, cb) {
-    this.documentStore.getDocument(args.documentId, function(err, docRecord) {
+    this.documentStore.getDocument(args.documentId, (err, docRecord) => {
       if (err) return cb(err)
 
       if (args.version === undefined) {
@@ -91,11 +85,11 @@ class SnapshotEngine {
       } else {
         this._computeSnapshotDumb(args, cb)
       }
-    }.bind(this))
+    })
   }
 
   /*
-    Used when a snapshot store is present. This way gives a huge performance
+    Used when a snapshot store is present. This gives gives a huge performance
     benefit.
 
     Example: Let's assume we want to request a snapshot for a new version 20.
@@ -105,15 +99,14 @@ class SnapshotEngine {
   _computeSnapshotSmart(args, cb) {
     let documentId = args.documentId
     let version = args.version
-    let docRecord = args.docRecord
-    let doc
+    let jsonDoc = { nodes: {}}
 
     // snaphot = null if no snapshot has been found
     this.snapshotStore.getSnapshot({
       documentId: documentId,
       version: version,
       findClosest: true
-    }, function(err, snapshot) {
+    }, (err, snapshot) => {
       if (err) return cb(err)
 
       if (snapshot && version === snapshot.version) {
@@ -127,30 +120,27 @@ class SnapshotEngine {
       } else {
         knownVersion = 0 // we need to fetch all changes
       }
-
-      doc = this._createDocumentInstance(docRecord.schemaName)
       if (snapshot) {
-        doc = converter.importDocument(doc, snapshot.data)
+        jsonDoc = snapshot.data
       }
 
       // Now we get the remaining changes after the known version
       this.changeStore.getChanges({
         documentId: documentId,
-        sinceVersion: knownVersion, // 1
-        toVersion: version // 2
-      }, function(err, result) {
-        if (err) cb(err)
-        // Apply remaining changes to the doc
-        this._applyChanges(doc, result.changes)
-        // doc here should be already restored
+        sinceVersion: knownVersion,
+        toVersion: version
+      }, (err, result) => {
+        if (err) return cb(err)
+        let ops = _extractOps(result.changes)
+        jsonDoc = computeSnapshot(jsonDoc, ops)
         let snapshot = {
           documentId: documentId,
           version: version,
-          data: converter.exportDocument(doc)
+          data: jsonDoc
         }
         cb(null, snapshot)
-      }.bind(this))
-    }.bind(this))
+      })
+    })
   }
 
   /*
@@ -159,54 +149,33 @@ class SnapshotEngine {
   _computeSnapshotDumb(args, cb) {
     let documentId = args.documentId
     let version = args.version
-    let docRecord = args.docRecord
-    let doc
+    let jsonDoc = { nodes: {}}
 
     // Get all changes for a document
     this.changeStore.getChanges({
       documentId: documentId,
       sinceVersion: 0
-    }, function(err, result) {
-      if (err) cb(err);
-      doc = this._createDocumentInstance(docRecord.schemaName)
-      // Apply remaining changes to the doc
-      this._applyChanges(doc, result.changes)
-      // doc here should be already restored
+    }, (err, result) => {
+      if (err) return cb(err)
+      let ops = _extractOps(result.changes)
+      jsonDoc = computeSnapshot(jsonDoc, ops)
       let snapshot = {
         documentId: documentId,
         version: version,
-        data: converter.exportDocument(doc)
+        data: jsonDoc
       }
       cb(null, snapshot)
-    }.bind(this))
-  }
-
-  /*
-    Based on a given schema create a document instance based
-    on given schema configuration
-  */
-  _createDocumentInstance(schemaName) {
-    let schema = this.configurator.getSchema()
-
-    if (schema.name !== schemaName) {
-      throw new Err('SnapshotEngine.SchemaNotFoundError', {
-        message:'Schema ' + schemaName + ' not found'
-      })
-    }
-    let doc = this.configurator.createArticle()
-    return doc
-  }
-
-  /*
-    Takes a document and applies the given changes
-  */
-  _applyChanges(doc, changes) {
-    each(changes, function(change) {
-      each(change.ops, function(op) {
-        doc.data.apply(op)
-      })
     })
   }
 }
+
+function _extractOps(changes) {
+  let ops = []
+  changes.forEach((change) => {
+    ops.concat(change.ops)
+  })
+  return ops
+}
+
 
 export default SnapshotEngine

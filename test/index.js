@@ -38,5 +38,5 @@ import "./collab/ChangeStore.test.js"
 // TODO: these two are broken... some tests do not finish
 // import "./model/DocumentEngine.test.js"
 import "./collab/DocumentStore.test.js"
-// import "./collab/SnapshotEngine.test.js"
+import "./collab/SnapshotEngine.test.js"
 import "./collab/SnapshotStore.test.js"
