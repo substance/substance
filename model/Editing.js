@@ -2,6 +2,7 @@ import isString from '../util/isString'
 import annotationHelpers from '../model/annotationHelpers'
 import paste from '../model/paste'
 import uuid from '../util/uuid'
+import forEach from 'lodash/forEach'
 import TextNodeEditing from '../model/TextNodeEditing'
 import ListEditing from '../packages/list/ListEditing'
 

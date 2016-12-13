@@ -41,6 +41,8 @@ class SwitchTextTypeCommand extends Command {
     let doc = params.editorSession.getDocument()
     let sel = params.selection
     let surface = params.surface
+
+
     let node
     let newState = {
       disabled: false,
@@ -87,13 +89,13 @@ class SwitchTextTypeCommand extends Command {
     let textType = this.getTextType(params)
     let nodeData = textType.data
     let surface = params.surface
+    let editorSession = params.editorSession
     if (!surface) {
       console.warn('No focused surface. Stopping command execution.')
       return
     }
-    surface.transaction(function(tx, args) {
-      args.data = nodeData
-      return surface.switchType(tx, args)
+    editorSession.transaction(function(tx) {
+      return tx.switchTextType(nodeData)
     })
     return nodeData
   }
