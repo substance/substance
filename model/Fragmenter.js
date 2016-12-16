@@ -222,8 +222,8 @@ function _extractEntries(annotations) {
       } else if (a.hasOwnProperty('fragmentationHint')) {
         l = a.fragmentationHint
       }
-      var startOffset = Math.min(a.startOffset, a.endOffset)
-      var endOffset = Math.max(a.startOffset, a.endOffset)
+      var startOffset = Math.min(a.start.offset, a.end.offset)
+      var endOffset = Math.max(a.start.offset, a.end.offset)
       var opener = {
         pos: startOffset,
         mode: ENTER,

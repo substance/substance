@@ -1,8 +1,7 @@
 import isArrayEqual from '../util/isArrayEqual'
 import isNumber from '../util/isNumber'
 import Selection from './Selection'
-import CoordinateAdapter from './CoordinateAdapter'
-import Range from './Range'
+import Coordinate from './Coordinate'
 
 /**
   A selection which is bound to a property. Implements {@link model/Selection}.
@@ -40,23 +39,12 @@ class PropertySelection extends Selection {
       surfaceId = data.surfaceId
     }
 
-    /**
-      The path to the selected property.
-      @type {String[]}
-    */
-    this.path = path
+    if (!path || !isNumber(startOffset)) {
+      throw new Error('Invalid arguments: `path` and `startOffset` are mandatory');
+    }
 
-    /**
-      Start character position.
-      @type {Number}
-    */
-    this.startOffset = startOffset
-
-    /**
-      End character position.
-      @type {Number}
-    */
-    this.endOffset = isNumber(endOffset) ? endOffset : startOffset
+    this.start = new Coordinate(path, startOffset)
+    this.end = new Coordinate(path, isNumber(endOffset) ? endOffset : startOffset)
 
     /**
       Selection direction.
@@ -70,16 +58,21 @@ class PropertySelection extends Selection {
       Identifier of the surface this selection should be active in.
       @type {String}
     */
-    this.surfaceId = surfaceId
+    this.surfaceId = surfaceId;
+  }
 
-    if (!path || !isNumber(startOffset)) {
-      throw new Error('Invalid arguments: `path` and `startOffset` are mandatory')
-    }
+  get path() {
+    return this.start.path
+  }
 
-    // dynamic adapters for Coordinate oriented implementations
-    this._internal.start = new CoordinateAdapter(this, 'path', 'startOffset')
-    this._internal.end = new CoordinateAdapter(this, 'path', 'endOffset')
-    this._internal.range = new RangeAdapter(this)
+  get startOffset() {
+    console.warn('DEPRECATED: Use sel.start.offset instead')
+    return this.start.offset
+  }
+
+  get endOffset() {
+    console.warn('DEPRECATED: Use sel.end.offset instead')
+    return this.end.offset
   }
 
   /**
@@ -90,9 +83,9 @@ class PropertySelection extends Selection {
   toJSON() {
     return {
       type: 'property',
-      path: this.path,
-      startOffset: this.startOffset,
-      endOffset: this.endOffset,
+      path: this.start.path,
+      startOffset: this.start.offset,
+      endOffset: this.end.offset,
       reverse: this.reverse,
       containerId: this.containerId,
       surfaceId: this.surfaceId
@@ -112,7 +105,7 @@ class PropertySelection extends Selection {
   }
 
   isCollapsed() {
-    return this.startOffset === this.endOffset
+    return this.start.offset === this.end.offset;
   }
 
   isReverse() {
@@ -130,7 +123,7 @@ class PropertySelection extends Selection {
     /* istanbul ignore next */
     return [
       "PropertySelection(", JSON.stringify(this.path), ", ",
-      this.startOffset, " -> ", this.endOffset,
+      this.start.offset, " -> ", this.end.offset,
       (this.reverse?", reverse":""),
       (this.surfaceId?(", "+this.surfaceId):""),
       ")"
@@ -146,9 +139,9 @@ class PropertySelection extends Selection {
   collapse(direction) {
     var offset
     if (direction === 'left') {
-      offset = this.startOffset
+      offset = this.start.offset;
     } else {
-      offset = this.endOffset
+      offset = this.end.offset;
     }
     return this.createWithNewRange(offset, offset)
   }
@@ -156,39 +149,17 @@ class PropertySelection extends Selection {
   // Helper Methods
   // ----------------------
 
-  getRange() {
-    return this.range
-  }
-
   /**
     Get path of a selection, e.g. target property where selected data is stored.
 
     @returns {String[]} path
   */
   getPath() {
-    return this.path
+    return this.start.path;
   }
 
   getNodeId() {
-    return this.path[0]
-  }
-
-  /**
-    Get start character position.
-
-    @returns {Number} offset
-  */
-  getStartOffset() {
-    return this.startOffset
-  }
-
-  /**
-    Get end character position.
-
-    @returns {Number} offset
-  */
-  getEndOffset() {
-    return this.endOffset
+    return this.start.path[0];
   }
 
   /**
@@ -205,12 +176,12 @@ class PropertySelection extends Selection {
     }
     if (strict) {
       return (isArrayEqual(this.path, other.path) &&
-        this.startOffset > other.startOffset &&
-        this.endOffset < other.endOffset)
+        this.start.offset > other.start.offset &&
+        this.end.offset < other.end.offset);
     } else {
       return (isArrayEqual(this.path, other.path) &&
-        this.startOffset >= other.startOffset &&
-        this.endOffset <= other.endOffset)
+        this.start.offset >= other.start.offset &&
+        this.end.offset <= other.end.offset);
     }
   }
 
@@ -241,9 +212,9 @@ class PropertySelection extends Selection {
     }
     if (!isArrayEqual(this.path, other.path)) return false
     if (strict) {
-      return (! (this.startOffset>=other.endOffset||this.endOffset<=other.startOffset) )
+      return (! (this.start.offset>=other.end.offset||this.end.offset<=other.start.offset) );
     } else {
-      return (! (this.startOffset>other.endOffset||this.endOffset<other.startOffset) )
+      return (! (this.start.offset>other.end.offset||this.end.offset<other.start.offset) );
     }
   }
 
@@ -260,7 +231,7 @@ class PropertySelection extends Selection {
       return other.isRightAlignedWith(this)
     }
     return (isArrayEqual(this.path, other.path) &&
-      this.endOffset === other.endOffset)
+      this.end.offset === other.end.offset);
   }
 
   /**
@@ -276,7 +247,7 @@ class PropertySelection extends Selection {
       return other.isLeftAlignedWith(this)
     }
     return (isArrayEqual(this.path, other.path) &&
-      this.startOffset === other.startOffset)
+      this.start.offset === other.start.offset);
   }
 
   /**
@@ -297,9 +268,9 @@ class PropertySelection extends Selection {
     if (!isArrayEqual(this.path, other.path)) {
       throw new Error('Can not expand PropertySelection to a different property.')
     }
-    var newStartOffset = Math.min(this.startOffset, other.startOffset)
-    var newEndOffset = Math.max(this.endOffset, other.endOffset)
-    return this.createWithNewRange(newStartOffset, newEndOffset)
+    var newStartOffset = Math.min(this.start.offset, other.start.offset);
+    var newEndOffset = Math.max(this.end.offset, other.end.offset);
+    return this.createWithNewRange(newStartOffset, newEndOffset);
   }
 
   /**
@@ -319,45 +290,45 @@ class PropertySelection extends Selection {
     }
     var otherStartOffset, otherEndOffset
     if (other.isPropertySelection()) {
-      otherStartOffset = other.startOffset
-      otherEndOffset = other.endOffset
+      otherStartOffset = other.start.offset;
+      otherEndOffset = other.end.offset;
     } else if (other.isContainerSelection()) {
       // either the startPath or the endPath must be the same
-      if (isArrayEqual(other.startPath, this.path)) {
-        otherStartOffset = other.startOffset
+      if (isArrayEqual(other.start.path, this.start.path)) {
+        otherStartOffset = other.start.offset;
       } else {
-        otherStartOffset = this.startOffset
+        otherStartOffset = this.start.offset;
       }
-      if (isArrayEqual(other.endPath, this.path)) {
-        otherEndOffset = other.endOffset
+      if (isArrayEqual(other.end.path, this.start.path)) {
+        otherEndOffset = other.end.offset;
       } else {
-        otherEndOffset = this.endOffset
+        otherEndOffset = this.end.offset;
       }
     } else {
       return this
     }
 
-    var newStartOffset
-    var newEndOffset
-    if (this.startOffset > otherStartOffset && this.endOffset > otherEndOffset) {
-      newStartOffset = otherEndOffset
-      newEndOffset = this.endOffset
-    } else if (this.startOffset < otherStartOffset && this.endOffset < otherEndOffset) {
-      newStartOffset = this.startOffset
-      newEndOffset = otherStartOffset
-    } else if (this.startOffset === otherStartOffset) {
-      if (this.endOffset <= otherEndOffset) {
-        return Selection.nullSelection
+    var newStartOffset;
+    var newEndOffset;
+    if (this.start.offset > otherStartOffset && this.end.offset > otherEndOffset) {
+      newStartOffset = otherEndOffset;
+      newEndOffset = this.end.offset;
+    } else if (this.start.offset < otherStartOffset && this.end.offset < otherEndOffset) {
+      newStartOffset = this.start.offset;
+      newEndOffset = otherStartOffset;
+    } else if (this.start.offset === otherStartOffset) {
+      if (this.end.offset <= otherEndOffset) {
+        return Selection.nullSelection;
       } else {
-        newStartOffset = otherEndOffset
-        newEndOffset = this.endOffset
+        newStartOffset = otherEndOffset;
+        newEndOffset = this.end.offset;
       }
-    } else if (this.endOffset === otherEndOffset) {
-      if (this.startOffset >= otherStartOffset) {
-        return Selection.nullSelection
+    } else if (this.end.offset === otherEndOffset) {
+      if (this.start.offset >= otherStartOffset) {
+        return Selection.nullSelection;
       } else {
-        newStartOffset = this.startOffset
-        newEndOffset = otherStartOffset
+        newStartOffset = this.start.offset;
+        newEndOffset = otherStartOffset;
       }
     } else if (other.contains(this)) {
       return Selection.nullSelection
@@ -397,9 +368,9 @@ class PropertySelection extends Selection {
     var fragments
 
     if (this.isCollapsed()) {
-      fragments = [new Selection.Cursor(this.path, this.startOffset)]
+      fragments = [new Selection.Cursor(this.path, this.start.offset)];
     } else {
-      fragments = [new Selection.Fragment(this.path, this.startOffset, this.endOffset)]
+      fragments = [new Selection.Fragment(this.path, this.start.offset, this.end.offset)];
     }
 
     this._internal.fragments = fragments
@@ -407,7 +378,7 @@ class PropertySelection extends Selection {
   }
 
   _clone() {
-    return new PropertySelection(this.path, this.startOffset, this.endOffset, this.reverse, this.containerId, this.surfaceId)
+    return new PropertySelection(this.start.path, this.start.offset, this.end.offset, this.reverse, this.containerId, this.surfaceId);
   }
 
   /**
@@ -417,68 +388,10 @@ class PropertySelection extends Selection {
     return this._internal.start
   }
 
-  /**
-    @property {Coordinate}
-  */
-  get end() {
-    return this._internal.end
-  }
-
-  /**
-    @property {Range}
-  */
-  get range() {
-    return this._internal.range
-  }
-
-  get startPath() {
-    return this.path
-  }
-
-  get endPath() {
-    return this.path
-  }
 }
 
 PropertySelection.fromJSON = function(json) {
   return new PropertySelection(json)
 }
-
-class RangeAdapter extends Range {
-
-  constructor(sel) {
-    super('SKIP')
-    this._sel = sel
-    this.start = sel.start
-    this.end = sel.end
-    Object.freeze(this)
-  }
-
-  get reverse() {
-    return this._sel.reverse
-  }
-
-  set reverse(reverse) {
-    this._sel.reverse = reverse
-  }
-
-  get containerId() {
-    return this._sel.containerId
-  }
-
-  set containerId(containerId) {
-    this._sel.containerId = containerId
-  }
-
-  get surfaceId() {
-    return this._sel.surfaceId
-  }
-
-  set surfaceId(surfaceId) {
-    this._sel.surfaceId = surfaceId
-  }
-}
-
-PropertySelection.RangeAdapter = RangeAdapter
 
 export default PropertySelection

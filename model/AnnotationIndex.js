@@ -80,8 +80,8 @@ class AnnotationIndex extends DocumentIndex {
 
 AnnotationIndex.filterByRange = function(start, end) {
   return function(anno) {
-    var aStart = anno.startOffset
-    var aEnd = anno.endOffset
+    var aStart = anno.start.offset
+    var aEnd = anno.end.offset
     var overlap = (aEnd >= start)
     // Note: it is allowed to omit the end part
     if (isNumber(end)) {

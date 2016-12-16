@@ -13,8 +13,7 @@ class TextNodeEditing {
     V: <-|->-|       :   move end by diff to start+L
     VI: <-|--|->     :   move end by total span+L
   */
-  type(tx, sel, text) {
-    // console.log('### typing over range', range.toString())
+  insertText(tx, sel, text) {
     let start = sel.start
     let end = sel.end
     if (!isArrayEqual(start.path, end.path)) {

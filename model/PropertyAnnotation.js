@@ -1,6 +1,5 @@
 import isArrayEqual from '../util/isArrayEqual'
-import DocumentNode from './DocumentNode'
-import CoordinateAdapter from './CoordinateAdapter'
+import Annotation from './Annotation'
 
 /**
   A property annotation can be used to overlay text and give it a special meaning.
@@ -22,6 +21,13 @@ import CoordinateAdapter from './CoordinateAdapter'
     tx.create({
       id: 's1',
       type: 'strong',
+      start: {
+        path: ['p1', 'content'],
+        offset: 10
+      },
+      end: {
+        offset
+      }
       path: ['p1', 'content'],
       "startOffset": 10,
       "endOffset": 19
@@ -29,100 +35,54 @@ import CoordinateAdapter from './CoordinateAdapter'
   })
   ```
 */
-class PropertyAnnotation extends DocumentNode {
+class PropertyAnnotation extends Annotation {
 
-  constructor(...args) {
-    super(...args)
-
-    // for Coordinate oriented methods (such as CoordinateOperations)
-    this._start = new CoordinateAdapter(this, 'path', 'startOffset')
-    this._end = new CoordinateAdapter(this, 'path', 'endOffset')
+  get path() {
+    return this.start.path
   }
 
-  /**
-    Get the plain text spanned by this annotation.
-
-    @returns {String}
-  */
-  getText() {
-    var doc = this.getDocument()
-    if (!doc) {
-      console.warn('Trying to use an PropertyAnnotation which is not attached to the document.')
-      return ""
-    }
-    var text = doc.get(this.path)
-    return text.substring(this.startOffset, this.endOffset)
-  }
-
-  /**
-    Determines if an annotation can be split e.g., when breaking a node.
-
-    In these cases, a new annotation will be created attached to the created node.
-
-    For certain annotation types,you may want to the annotation truncated
-    rather than split, where you need to override this method returning `false`.
-  */
-  canSplit() {
-    return true
-  }
-
-  get start() {
-    return this._start
-  }
-
-  get end() {
-    return this._end
-  }
-
-  /**
-    If this annotation is an Anchor.
-
-    Anchors are annotations with a zero width.
-    For instance, ContainerAnnotation have a start and an end anchor,
-    or rendered cursors are modeled as anchors.
-
-    @returns {Boolean}
-  */
-  isAnchor() {
-    return false
-  }
-
-  // TODO: maybe this should go into documentHelpers
   getSelection() {
     return this.getDocument().createSelection({
       type: 'property',
       path: this.path,
-      startOffset: this.startOffset,
-      endOffset: this.endOffset
+      startOffset: this.start.offset,
+      endOffset: this.end.offset
     })
   }
 
-  updateRange(tx, sel) {
+  // used by annotationHelpers
+  _updateRange(tx, sel) {
     if (!sel.isPropertySelection()) {
-      throw new Error('Cannot change to ContainerAnnotation.')
+      throw new Error('Invalid argument: PropertyAnnotation._updateRange() requires a PropertySelection.')
     }
-    if (!isArrayEqual(this.startPath, sel.start.path)) {
+    if (!isArrayEqual(this.start.path, sel.start.path)) {
       tx.set([this.id, 'path'], sel.start.path)
     }
-    if (this.startOffset !== sel.start.offset) {
-      tx.set([this.id, 'startOffset'], sel.start.offset)
+    // TODO: these should be Coordinate ops
+    if (this.start.offset !== sel.start.offset) {
+      tx.set([this.id, 'start', 'offset'], sel.start.offset)
     }
-    if (this.endOffset !== sel.end.offset) {
-      tx.set([this.id, 'endOffset'], sel.end.offset)
+    if (this.end.offset !== sel.end.offset) {
+      tx.set([this.id, 'end', 'offset'], sel.end.offset)
     }
   }
 
   // WIP
+  // FIXME: this is not correct if sel is a container selection
   isInsideOf(sel, _strict) {
     if (sel.isNull()) return false;
-    if (_strict) {
-      return (isArrayEqual(this.path, sel.path) &&
-        this.startOffset > sel.startOffset &&
-        this.endOffset < sel.endOffset)
+    if (sel.isPropertySelection()) {
+      if (_strict) {
+        return (isArrayEqual(this.start.path, sel.start.path) &&
+          this.start.offset > sel.start.offset &&
+          this.end.offset < sel.end.offset)
+      } else {
+        return (isArrayEqual(this.start.path, sel.start.path) &&
+          this.start.offset >= sel.start.offset &&
+          this.end.offset <= sel.end.offset)
+      }
     } else {
-      return (isArrayEqual(this.path, sel.path) &&
-        this.startOffset >= sel.startOffset &&
-        this.endOffset <= sel.endOffset)
+      console.warn('PropertyAnnotation.isInsideOf() does not support other selection types.')
     }
   }
 
@@ -141,9 +101,8 @@ PropertyAnnotation.prototype._isPropertyAnnotation = true
 
 PropertyAnnotation.schema = {
   type: "annotation",
-  path: { type: ["array", "string"] },
-  startOffset: "number",
-  endOffset: "number",
+  start: "coordinate",
+  end: "coordinate",
   // this is only used when an annotation is used 'stand-alone'
   // i.e. not attached to a property
   _content: { type: "string", optional: true}

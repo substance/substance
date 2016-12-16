@@ -1,5 +1,6 @@
 import { module } from 'substance-test'
 import Fragmenter from '../../model/Fragmenter'
+import Annotation from '../../model/Annotation'
 
 const test = module('model/Fragmenter')
 
@@ -129,21 +130,24 @@ test("Anchors should not fragment other annotations.", function(t) {
   t.end()
 })
 
-class Anno {
+class Anno extends Annotation {
+
   constructor(tagName, id, startOffset, endOffset, opts) {
+    super(null, {
+      id: id,
+      start: { path: [id, 'content'], offset: startOffset},
+      end: { path: [id, 'content'], offset: endOffset }
+    })
+
     opts = opts || {}
     this.tagName = tagName
-    this.id = id
-    this.offset = startOffset
-    this.startOffset = startOffset
-    this.endOffset = endOffset
 
     this._isAnchor = false
     this._isInline = false
 
     if (opts.anchor) {
       this.zeroWidth = true
-      this.offset = this.startOffset
+      this.offset = startOffset
     }
 
     if (opts.hasOwnProperty('fragmentation')) {

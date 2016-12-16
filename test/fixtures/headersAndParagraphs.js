@@ -30,9 +30,13 @@ export default function headersAndParagraphs(tx) {
   tx.create({
     type: 'emphasis',
     id: 'em1',
-    path: ['p2', 'content'],
-    startOffset: 15,
-    endOffset: 25
+    start: {
+      path: ['p2', 'content'],
+      offset: 15,
+    },
+    end: {
+      offset: 25
+    }
   })
   tx.create({
     type: 'heading',

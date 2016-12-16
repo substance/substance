@@ -43,31 +43,21 @@ class Editing {
     }
     let nodeData
     if (sel.isPropertySelection()) {
-      if (AnnotationClass.prototype._isContainerAnnotation) {
+      if (AnnotationClass.prototype._isAnnotation) {
         nodeData = {
+          start: sel.start,
+          end: sel.end,
           containerId: sel.containerId,
-          startPath: sel.path,
-          startOffset: sel.startOffset,
-          endPath: sel.path,
-          endOffset: sel.endOffset
-        }
-      } else if (AnnotationClass.prototype._isPropertyAnnotation) {
-        nodeData = {
-          path: sel.path,
-          startOffset: sel.startOffset,
-          endOffset: sel.endOffset
         }
       } else {
-        throw new Error('Annotation can not be created for a property selection.')
+        throw new Error('Annotation can not be created for a selection.')
       }
     } else if (sel.isContainerSelection()) {
       if (AnnotationClass.prototype._isContainerAnnotation) {
         nodeData = {
           containerId: sel.containerId,
-          startPath: sel.path,
-          startOffset: sel.startOffset,
-          endPath: sel.path,
-          endOffset: sel.endOffset
+          start: sel.start,
+          end: sel.end
         }
       } else if (AnnotationClass.prototype._isPropertyAnnotation) {
         console.warn('NOT SUPPORTED YET: creating property annotations for a non collapsed container selection.')
@@ -226,8 +216,8 @@ class Editing {
 
   deletePropertySelection(tx, sel) {
     let realPath = tx.getRealPath(sel.path)
-    let start = sel.startOffset
-    let end = sel.endOffset
+    let start = sel.start.offset
+    let end = sel.end.offset
     tx.update(realPath, { type: 'delete', start: start, end: end })
     annotationHelpers.deletedText(tx, realPath, start, end)
   }
@@ -236,10 +226,8 @@ class Editing {
   deleteContainerSelection(tx, sel) {
     let containerId = sel.containerId
     let container = tx.get(containerId)
-    let startPath = sel.startPath
-    let endPath = sel.endPath
-    let startId = startPath[0]
-    let endId = endPath[0]
+    let startId = sel.start.path[0]
+    let endId = sel.end.path[0]
     let startPos = container.getPosition(startId)
     let endPos = container.getPosition(endId)
 
@@ -303,48 +291,51 @@ class Editing {
     for (let i = 0; i < annos.length; i++) {
       tx.delete(annos[i].id);
     }
+
+    // TODO: fix support for container annotations
     // transfer anchors of ContainerAnnotations to previous or next node:
     //  - start anchors go to the next node
     //  - end anchors go to the previous node
-    let anchors = tx.getIndex('container-annotation-anchors').get(nodeId)
-    for (let i = 0; i < anchors.length; i++) {
-      let anchor = anchors[i]
-      container = tx.get(anchor.containerId)
-      // Note: during the course of this loop we might have deleted the node already
-      // so, don't do it again
-      if (!tx.get(anchor.id)) continue
-      let pos = container.getPosition(anchor.path[0])
-      let path, offset
-      if (anchor.isStart) {
-        if (pos < container.getLength()-1) {
-          let nextNode = container.getChildAt(pos+1)
-          if (nextNode.isText()) {
-            path = [nextNode.id, 'content']
-          } else {
-            path = [nextNode.id]
-          }
-          tx.set([anchor.id, 'startPath'], path)
-          tx.set([anchor.id, 'startOffset'], 0)
-        } else {
-          tx.delete(anchor.id)
-        }
-      } else {
-        if (pos > 0) {
-          let previousNode = container.getChildAt(pos-1)
-          if (previousNode.isText()) {
-            path = [previousNode.id, 'content']
-            offset = tx.get(path).length
-          } else {
-            path = [previousNode.id]
-            offset = 1
-          }
-          tx.set([anchor.id, 'endPath'], path)
-          tx.set([anchor.id, 'endOffset'], offset)
-        } else {
-          tx.delete(anchor.id)
-        }
-      }
-    }
+    // let anchors = tx.getIndex('container-annotation-anchors').get(nodeId)
+    // for (let i = 0; i < anchors.length; i++) {
+    //   let anchor = anchors[i]
+    //   container = tx.get(anchor.containerId)
+    //   // Note: during the course of this loop we might have deleted the node already
+    //   // so, don't do it again
+    //   if (!tx.get(anchor.id)) continue
+    //   let pos = container.getPosition(anchor.path[0])
+    //   let path, offset
+    //   if (anchor.isStart) {
+    //     if (pos < container.getLength()-1) {
+    //       let nextNode = container.getChildAt(pos+1)
+    //       if (nextNode.isText()) {
+    //         path = [nextNode.id, 'content']
+    //       } else {
+    //         path = [nextNode.id]
+    //       }
+    //       tx.set([anchor.id, 'start', 'path'], path)
+    //       tx.set([anchor.id, 'start', 'offset'], 0)
+    //     } else {
+    //       tx.delete(anchor.id)
+    //     }
+    //   } else {
+    //     if (pos > 0) {
+    //       let previousNode = container.getChildAt(pos-1)
+    //       if (previousNode.isText()) {
+    //         path = [previousNode.id, 'content']
+    //         offset = tx.get(path).length
+    //       } else {
+    //         path = [previousNode.id]
+    //         offset = 1
+    //       }
+    //       tx.set([anchor.id, 'endPath'], path)
+    //       tx.set([anchor.id, 'endOffset'], offset)
+    //     } else {
+    //       tx.delete(anchor.id)
+    //     }
+    //   }
+    // }
+
     let newSel = null
     if (containerId) {
       // hide the node from the one container if provided
@@ -403,12 +394,17 @@ class Editing {
     let text = "\uFEFF"
     this.insertText(tx, text)
     sel = tx.selection
-    let endOffset = tx.selection.endOffset
+    let endOffset = tx.selection.end.offset
     let startOffset = endOffset - text.length
     nodeData = Object.assign({}, nodeData, {
-      path: sel.path,
-      startOffset: startOffset,
-      endOffset: endOffset
+      start: {
+        path: sel.path,
+        offset: startOffset
+      },
+      end: {
+        path: sel.path,
+        offset: endOffset
+      }
     })
     return tx.create(nodeData)
   }
@@ -471,11 +467,11 @@ class Editing {
           this._setCursor(tx, blockNode, container.id, 'after')
         }
         // insert before
-        else if (sel.startOffset === 0) {
+        else if (sel.start.offset === 0) {
           tx.update(container.getContentPath(), { type: 'insert', pos: nodePos, value: blockNode.id })
         }
         // insert after
-        else if (sel.startOffset === text.length) {
+        else if (sel.start.offset === text.length) {
           tx.update(container.getContentPath(), { type: 'insert', pos: nodePos+1, value: blockNode.id })
           this._setCursor(tx, blockNode, container.id, 'before')
         }
@@ -542,7 +538,7 @@ class Editing {
       let node = tx.get(nodeId)
       let nodeEditing = this._getNodeEditing(node)
       // console.log('#### before', sel.toString())
-      nodeEditing.type(tx, sel, text)
+      nodeEditing.insertText(tx, sel, text)
       // console.log('### setting selection after typing: ', tx.selection.toString())
     } else if (sel.isContainerSelection()) {
       this.deleteContainerSelection(tx, sel)
@@ -618,8 +614,8 @@ class Editing {
     tx.setSelection({
       type: 'property',
       path: newPath,
-      startOffset: sel.startOffset,
-      endOffset: sel.endOffset,
+      startOffset: sel.start.offset,
+      endOffset: sel.end.offset,
       containerId: containerId
     })
 

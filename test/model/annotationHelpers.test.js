@@ -23,8 +23,8 @@ test("Truncate property annotation with a given property selection", function(t)
   })
   let a2 = doc.get('a2')
   truncateAnnotation(doc, a2, sel)
-  t.equal(a2.startOffset, 0, 'startOffset should be 0')
-  t.equal(a2.endOffset, 1, 'endOffset should have changed from 2 to 1')
+  t.equal(a2.start.offset, 0, 'startOffset should be 0')
+  t.equal(a2.end.offset, 1, 'endOffset should have changed from 2 to 1')
   t.end()
 })
 
@@ -38,7 +38,7 @@ test("Truncate container annotation with a given property selection", function(t
   })
   let a1 = doc.get('a1')
   truncateAnnotation(doc, a1, sel)
-  t.equal(a1.endOffset, 1, 'endOffset should be 1')
+  t.equal(a1.end.offset, 1, 'endOffset should be 1')
   t.end()
 })
 
@@ -54,8 +54,8 @@ test("Truncate container annotation with a given container selection", function(
   })
   let a1 = doc.get('a1')
   truncateAnnotation(doc, a1, sel)
-  t.deepEqual(a1.endPath, ['p2', 'content'], 'endPath should be p2.content')
-  t.equal(a1.endOffset, 1, 'endOffset should be 1')
+  t.deepEqual(a1.end.path, ['p2', 'content'], 'endPath should be p2.content')
+  t.equal(a1.end.offset, 1, 'endOffset should be 1')
   t.end()
 })
 
@@ -70,8 +70,8 @@ test("Expand-right of property annotation for a given property selection", funct
   let annos = documentHelpers.getPropertyAnnotationsForSelection(doc, sel, { type: 'strong' })
   let anno = annos[0]
   expandAnnotation(doc, anno, sel)
-  t.equal(anno.startOffset, 0, 'startOffset should be 0')
-  t.equal(anno.endOffset, 6, 'endOffset should have changed from 2 to 1')
+  t.equal(anno.start.offset, 0, 'startOffset should be 0')
+  t.equal(anno.end.offset, 6, 'endOffset should have changed from 2 to 1')
   t.end()
 })
 
@@ -85,7 +85,7 @@ test("Expand container annotation for a given property selection (right expansio
   })
   let anno = doc.get('a1')
   expandAnnotation(doc, anno, sel)
-  t.equal(anno.endOffset, 6, 'endOffset should be 6')
+  t.equal(anno.end.offset, 6, 'endOffset should be 6')
   t.end()
 })
 
@@ -101,8 +101,8 @@ test("Expand container annotation for a given container selection (expand right)
   })
   let anno = doc.get('a1')
   expandAnnotation(doc, anno, sel)
-  t.deepEqual(anno.endPath, ['p3', 'content'], 'endPath should be p2.content')
-  t.equal(anno.endOffset, 6, 'endOffset should be 6')
+  t.deepEqual(anno.end.path, ['p3', 'content'], 'endPath should be p2.content')
+  t.equal(anno.end.offset, 6, 'endOffset should be 6')
   t.end()
 })
 
@@ -119,8 +119,8 @@ test("Fuse two property annotations for a given property selection", function(t)
   let a3 = tx.get('a3')
   fuseAnnotation(tx, [a2, a3])
   t.isNil(tx.get('a3'), 'a3 should be gone.')
-  t.equal(a2.startOffset, 0, 'startOffset should be 0')
-  t.equal(a2.endOffset, 6, 'endOffset should be 6')
+  t.equal(a2.start.offset, 0, 'startOffset should be 0')
+  t.equal(a2.end.offset, 6, 'endOffset should be 6')
   t.end()
 })
 
@@ -136,10 +136,10 @@ test("Fuse two conatiner annotations for a given property selection", function(t
   let a4 = tx.get('a4')
   fuseAnnotation(tx, [a1, a4])
   t.isNil(tx.get('a4'), 'a4 should be gone.')
-  t.deepEqual(a1.startPath, ['p1', 'content'], 'startPath should be p1.content')
-  t.equal(a1.startOffset, 5, 'startOffset should be 5')
-  t.deepEqual(a1.endPath, ['p4', 'content'], 'endPath should be p1.content')
-  t.equal(a1.endOffset, 9, 'a1.endOffset should be 9')
+  t.deepEqual(a1.start.path, ['p1', 'content'], 'startPath should be p1.content')
+  t.equal(a1.start.offset, 5, 'startOffset should be 5')
+  t.deepEqual(a1.end.path, ['p4', 'content'], 'endPath should be p1.content')
+  t.equal(a1.end.offset, 9, 'a1.end.offset should be 9')
   t.end()
 })
 
@@ -149,20 +149,27 @@ function fixturePlus() {
   doc.create({
     id: 'a3',
     type: 'strong',
-    path: ['p1', 'content'],
-    startOffset: 4,
-    endOffset: 6
+    start: {
+      path: ['p1', 'content'],
+      offset: 4
+    },
+    end: {
+      offset: 6
+    }
   })
-
   // Create a second container annotation to be fused
   doc.create({
     type: 'test-container-anno',
     id: 'a4',
     containerId: 'body',
-    startPath: ['p3', 'content'],
-    startOffset: 7,
-    endPath: ['p4', 'content'],
-    endOffset: 9,
+    start: {
+      path: ['p3', 'content'],
+      offset: 7,
+    },
+    end: {
+      path: ['p4', 'content'],
+      offset: 9,
+    }
   })
   return doc
 }

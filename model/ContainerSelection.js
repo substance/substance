@@ -46,54 +46,44 @@ class ContainerSelection extends Selection {
       @type {String}
     */
     this.containerId = containerId;
+    if (!this.containerId)  throw new Error('Invalid arguments: `containerId` is mandatory');
 
-    /**
-      The path of the property where this annotations starts.
-      @type {String[]}
-    */
-    this.startPath = startPath;
-
-    /**
-      The character position where this annotations starts.
-      @type {Number}
-    */
-    this.startOffset = startOffset;
-
-    /**
-      The path of the property where this annotations ends.
-      @type {String[]}
-    */
-    this.endPath = isNil(endPath) ? startPath : endPath;
-
-    /**
-      The character position where this annotations ends.
-      @type {Number}
-    */
-    this.endOffset = isNil(endOffset) ? startOffset : endOffset;
+    this.start = new Coordinate(startPath, startOffset)
+    this.end = new Coordinate(isNil(endPath) ? startPath : endPath, isNil(endOffset) ? startOffset : endOffset)
 
     this.reverse = Boolean(reverse);
 
     this.surfaceId = surfaceId;
+  }
 
-    if (!this.containerId || !this.startPath || !isNumber(this.startOffset) ||
-     !this.endPath || !isNumber(this.endOffset) ) {
-      throw new Error('Invalid arguments: `containerId`, `startPath`, `startOffset`, `endPath`, and `endOffset` are mandatory');
-    }
+  get startPath() {
+    console.warn('DEPRECATED: use sel.start.path instead.')
+    return this.start.path
+  }
 
-    // dynamic adapters for Coordinate oriented implementations
-    this._internal.start = new CoordinateAdapter(this, 'startPath', 'startOffset');
-    this._internal.end = new CoordinateAdapter(this, 'endPath', 'endOffset');
-    this._internal.range = new RangeAdapter(this);
+  get startOffset() {
+    console.warn('DEPRECATED: use sel.start.offset instead.')
+    return this.start.offset
+  }
+
+  get endPath() {
+    console.warn('DEPRECATED: use sel.end.path instead.')
+    return this.end.path
+  }
+
+  get endOffset() {
+    console.warn('DEPRECATED: use sel.end.offset instead.')
+    return this.end.offset
   }
 
   toJSON() {
     return {
       type: 'container',
       containerId: this.containerId,
-      startPath: this.startPath,
-      startOffset: this.startOffset,
-      endPath: this.endPath,
-      endOffset: this.endOffset,
+      startPath: this.start.path,
+      startOffset: this.start.offset,
+      endPath: this.end.path,
+      endOffset: this.end.offset,
       reverse: this.reverse,
       surfaceId: this.surfaceId
     };
@@ -133,9 +123,9 @@ class ContainerSelection extends Selection {
     return [
       "ContainerSelection(",
       this.containerId, ", ",
-      JSON.stringify(this.startPath), ", ", this.startOffset,
+      JSON.stringify(this.start.path), ", ", this.start.offset,
       " -> ",
-      JSON.stringify(this.endPath), ", ", this.endOffset,
+      JSON.stringify(this.end.path), ", ", this.end.offset,
       (this.reverse?", reverse":""),
       (this.surfaceId?(", "+this.surfaceId):""),
       ")"
@@ -210,12 +200,12 @@ class ContainerSelection extends Selection {
 
   containsNode(nodeId) {
     var container = this.getContainer();
-    var startPos = container.getPosition(this.startPath[0]);
-    var endPos = container.getPosition(this.endPath[0]);
+    var startPos = container.getPosition(this.start.path[0]);
+    var endPos = container.getPosition(this.end.path[0]);
     var pos = container.getPosition(nodeId);
     if ((startPos>pos || endPos<pos) ||
-        (startPos === pos && this.startPath.length === 1 && this.startOffset > 0) ||
-        (endPos === pos && this.endPath.length === 1 && this.endOffset < 1)) {
+        (startPos === pos && this.start.path.length === 1 && this.start.offset > 0) ||
+        (endPos === pos && this.end.path.length === 1 && this.end.offset < 1)) {
       return false;
     }
     return true;
@@ -331,8 +321,8 @@ class ContainerSelection extends Selection {
 
     var doc = this.getDocument();
     var container = this.getContainer();
-    var startPos = container.getPosition(this.startPath[0]);
-    var endPos = container.getPosition(this.endPath[0]);
+    var startPos = container.getPosition(this.start.path[0]);
+    var endPos = container.getPosition(this.end.path[0]);
 
     var coor, node, nodeId, fragment, path, offset, text;
     if (startPos !== endPos) {
@@ -407,24 +397,24 @@ class ContainerSelection extends Selection {
         fragments.push(
           new Selection.NodeFragment(nodeId)
         );
-      } else if (startIsNodeCoordinate && endIsNodeCoordinate && this.startOffset < this.endOffset) {
+      } else if (startIsNodeCoordinate && endIsNodeCoordinate && this.start.offset < this.end.offset) {
         fragments.push(
           new Selection.NodeFragment(nodeId)
         );
-      } else if (!startIsNodeCoordinate && endIsNodeCoordinate && this.endOffset > 0) {
-        text = doc.get(this.startPath);
+      } else if (!startIsNodeCoordinate && endIsNodeCoordinate && this.end.offset > 0) {
+        text = doc.get(this.start.path);
         fragments.push(
-          new Selection.Fragment(path, this.startOffset, text.length, (this.startOffset === 0))
+          new Selection.Fragment(path, this.start.offset, text.length, (this.start.offset === 0))
         );
-      } else if (startIsNodeCoordinate && !endIsNodeCoordinate && this.startOffset === 0) {
-        text = doc.get(this.endPath);
+      } else if (startIsNodeCoordinate && !endIsNodeCoordinate && this.start.offset === 0) {
+        text = doc.get(this.end.path);
         fragments.push(
-          new Selection.Fragment(path, 0, this.endOffset, (this.endOffset === text.length))
+          new Selection.Fragment(path, 0, this.end.offset, (this.end.offset === text.length))
         );
       } else if (!startIsNodeCoordinate && !endIsNodeCoordinate) {
-        text = doc.get(this.startPath);
+        text = doc.get(this.start.path);
         fragments.push(
-          new Selection.Fragment(path, this.startOffset, this.endOffset, (this.startOffset === 0 && this.endOffset === text.length))
+          new Selection.Fragment(path, this.start.offset, this.end.offset, (this.start.offset === 0 && this.end.offset === text.length))
         );
       }
     }

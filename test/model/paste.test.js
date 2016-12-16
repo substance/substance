@@ -60,16 +60,20 @@ test("Pasting annotated text", function(t) {
   snippet.create({
     type: 'strong',
     id: 's1',
-    path: [p.id, 'content'],
-    startOffset: 2,
-    endOffset: 4
+    start: {
+      path: [p.id, 'content'],
+      offset: 2,
+    },
+    end: {
+      offset: 4
+    }
   })
   tx.paste(snippet)
   let p1 = tx.get('p1')
   t.equal(p1.content, '012AABBCC3456789', 'Plain text should be inserted.')
   let s1 = tx.get('s1')
   t.deepEqual(s1.path, [p1.id, 'content'], 'Annotation is bound to the correct path.')
-  t.deepEqual([s1.startOffset, s1.endOffset], [5, 7], 'Annotation has correct range.')
+  t.deepEqual([s1.start.offset, s1.end.offset], [5, 7], 'Annotation has correct range.')
   t.end()
 })
 

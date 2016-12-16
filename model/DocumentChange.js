@@ -78,40 +78,31 @@ class DocumentChange {
 
     // TODO: we will introduce a special operation type for coordinates
     function _checkAnnotation(op) {
-      var node = op.val
-      var path, propName
       switch (op.type) {
         case "create":
-        case "delete":
-          // HACK: detecting annotation changes in an opportunistic way
-          if (node.hasOwnProperty('startOffset')) {
-            path = node.path || node.startPath
-            updated[path] = true
+        case "delete": {
+          let node = op.val
+          if (node.hasOwnProperty('start')) {
+            updated[node.start.path] = true
           }
-          if (node.hasOwnProperty('endPath')) {
-            path = node.endPath
-            updated[path] = true
+          if (node.hasOwnProperty('end')) {
+            updated[node.end.path] = true
           }
           break
+        }
         case "update":
-        case "set":
+        case "set": {
           // HACK: detecting annotation changes in an opportunistic way
-          node = doc.get(op.path[0])
+          let node = doc.get(op.path[0])
           if (node) {
-            propName = op.path[1]
-            if (node.isPropertyAnnotation()) {
-              if ((propName === 'path' || propName === 'startOffset' ||
-                   propName === 'endOffset') && !deleted[node.path[0]]) {
-                updated[node.path] = true
-              }
-            } else if (node.isContainerAnnotation()) {
-              if (propName === 'startPath' || propName === 'startOffset' ||
-                  propName === 'endPath' || propName === 'endOffset') {
-                affectedContainerAnnos.push(node)
-              }
+            if (node._isPropertyAnnotation) {
+              updated[node.start.path] = true
+            } else if (node._isContainerAnnotation) {
+              affectedContainerAnnos.push(node)
             }
           }
           break
+        }
         default:
           throw new Error('Illegal state')
       }
@@ -137,8 +128,8 @@ class DocumentChange {
 
     affectedContainerAnnos.forEach(function(anno) {
       var container = doc.get(anno.containerId, 'strict')
-      var startPos = container.getPosition(anno.startPath[0])
-      var endPos = container.getPosition(anno.endPath[0])
+      var startPos = container.getPosition(anno.start.path[0])
+      var endPos = container.getPosition(anno.end.path[0])
       for (var pos = startPos; pos <= endPos; pos++) {
         var node = container.getChildAt(pos)
         var path
@@ -339,9 +330,9 @@ function _transformSelectionInplace(sel, a) {
       hasChanged |= _transformCoordinateInplace(sel.end, op)
     } else {
       if (sel.isContainerSelection()) {
-        sel.endPath = sel.startPath
+        sel.end.path = sel.start.path
       }
-      sel.endOffset = sel.startOffset
+      sel.end.offset = sel.start.offset
     }
   }
   return hasChanged

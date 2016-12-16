@@ -45,7 +45,7 @@ class MacroManager {
         node = doc.get(nodeId)
         if (!node.isText()) return
         text = node.getText()
-        start = sel.getStartOffset()
+        start = sel.start.offset
         end = start
         break
       }

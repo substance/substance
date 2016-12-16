@@ -197,24 +197,10 @@ class DocumentNode extends DataNode {
   }
 
   /**
-    @returns {Boolean} true if node is an annotation node (e.g. Strong)
-  */
-  isPropertyAnnotation() {
-    return this.constructor.isPropertyAnnotation
-  }
-
-  /**
     @returns {Boolean} true if node is an inline node (e.g. Citation)
   */
   isInline() {
     return this.constructor.isInline
-  }
-
-  /**
-    @returns {Boolean} true if node is a container annotation (e.g. multiparagraph comment)
-  */
-  isContainerAnnotation() {
-    return this.constructor.isContainerAnnotation
   }
 
 }

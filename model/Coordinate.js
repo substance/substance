@@ -10,31 +10,23 @@ class Coordinate {
   /**
    @param {Array} path the address of a property, such as ['text_1', 'content']
    @param {int} offset the position in the property
-   @param {boolean} after an internal flag indicating if the address should be associated to the left or right side
-
-   Note: at boundaries of annotations there are two possible positions with the same address
-       foo <strong>bar</strong> ...
-     With offset=7 normally we associate this position:
-       foo <strong>bar|</strong> ...
-     With after=true we can describe this position:
-       foo <strong>bar</strong>| ...
   */
-  constructor(path, offset, after) {
+  constructor(path, offset) {
     // HACK: to allow this class be inherited but without calling this ctor
     if (arguments[0] === 'SKIP') return
-
-    this.path = path
-    this.offset = offset
-    this.after = after
-    if (!isArray(path)) {
+    if (arguments.length === 1) {
+      let data = arguments[0]
+      this.path = data.path
+      this.offset = data.offset
+    } else {
+      this.path = path
+      this.offset = offset
+    }
+    if (!isArray(this.path)) {
       throw new Error('Invalid arguments: path should be an array.')
     }
-    if (!isNumber(offset) || offset < 0) {
+    if (!isNumber(this.offset) || this.offset < 0) {
       throw new Error('Invalid arguments: offset must be a positive number.')
-    }
-    // make sure that path can't be changed afterwards
-    if (!Object.isFrozen(path)) {
-      Object.freeze(path)
     }
   }
 
@@ -62,8 +54,7 @@ class Coordinate {
   toJSON() {
     return {
       path: this.path,
-      offset: this.offset,
-      after: this.after
+      offset: this.offset
     }
   }
 

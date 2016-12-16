@@ -22,9 +22,8 @@ function fixture() {
   doc.create({
     id: 'a3',
     type: 'strong',
-    path: ['p1', 'content'],
-    startOffset: 4,
-    endOffset: 8
+    start: { path: ['p1', 'content'], offset: 4 },
+    end: { offset: 8 }
   })
   return doc
 }
@@ -61,9 +60,9 @@ test("execute 'create' property annotation", function(t) {
   t.notNil(newAnno, 'A new anno should have been created')
   newAnno = doc.get(newAnno.id)
   t.equal(newAnno.type, 'strong', '.. of correct type')
-  t.deepEqual(newAnno.startPath, ['p6', 'content'], ".. with correct path")
-  t.equal(newAnno.startOffset, 1, '.. with correct startOffset')
-  t.equal(newAnno.endOffset, 6, '.. with correct endOffset')
+  t.deepEqual(newAnno.start.path, ['p6', 'content'], ".. with correct path")
+  t.equal(newAnno.start.offset, 1, '.. with correct startOffset')
+  t.equal(newAnno.end.offset, 6, '.. with correct endOffset')
   t.end()
 })
 

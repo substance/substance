@@ -67,26 +67,28 @@ class AnnotatedTextComponent extends Component {
     let doc = this.getDocument()
     let componentRegistry = this.getComponentRegistry()
     let node = fragment.node
+    // TODO: fix support for container annotations
     if (node.type === "container-annotation-fragment") {
-      return $$(AnnotationComponent, { doc: doc, node: node })
-        .addClass("se-annotation-fragment")
-        .addClass(node.anno.getTypeNames().join(' ').replace(/_/g, "-"));
+      // return $$(AnnotationComponent, { doc: doc, node: node })
+      //   .addClass("se-annotation-fragment")
+      //   .addClass(node.anno.getTypeNames().join(' ').replace(/_/g, "-"));
     } else if (node.type === "container-annotation-anchor") {
-      return $$(AnnotationComponent, { doc: doc, node: node })
-        .addClass("se-anchor")
-        .addClass(node.anno.getTypeNames().join(' ').replace(/_/g, "-"))
-        .addClass(node.isStart?"start-anchor":"end-anchor")
+      // return $$(AnnotationComponent, { doc: doc, node: node })
+      //   .addClass("se-anchor")
+      //   .addClass(node.anno.getTypeNames().join(' ').replace(/_/g, "-"))
+      //   .addClass(node.isStart?"start-anchor":"end-anchor")
+    } else {
+      let ComponentClass = componentRegistry.get(node.type) || AnnotationComponent
+      if (node.constructor.isInline &&
+          // opt-out for custom implementations
+          !ComponentClass.isCustom &&
+          // also no extra wrapping if the node is already an inline node
+          !ComponentClass.prototype._isInlineNodeComponent) {
+        ComponentClass = InlineNodeComponent
+      }
+      let el = $$(ComponentClass, { doc: doc, node: node })
+      return el
     }
-    let ComponentClass = componentRegistry.get(node.type) || AnnotationComponent
-    if (node.constructor.isInline &&
-        // opt-out for custom implementations
-        !ComponentClass.isCustom &&
-        // also no extra wrapping if the node is already an inline node
-        !ComponentClass.prototype._isInlineNodeComponent) {
-      ComponentClass = InlineNodeComponent
-    }
-    let el = $$(ComponentClass, { doc: doc, node: node })
-    return el
   }
 
   _finishFragment(fragment, context, parentContext) {

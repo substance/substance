@@ -36,7 +36,7 @@ test("Copying a property selection with annotated text", function(t) {
   t.equal(annos.length, 1, 'There should be one annotation on copied text.')
   var anno = annos[0]
   t.equal(anno.type, "emphasis", "The annotation should be 'emphasis'.")
-  t.deepEqual([anno.startOffset, anno.endOffset], [5, 9], 'The annotation should be over the text "anno".')
+  t.deepEqual([anno.start.offset, anno.end.offset], [5, 9], 'The annotation should be over the text "anno".')
   t.end()
 })
 

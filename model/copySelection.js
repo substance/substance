@@ -48,9 +48,15 @@ function _copyPropertySelection(doc, selection) {
   let annotations = doc.getIndex('annotations').get(path, offset, endOffset)
   forEach(annotations, function(anno) {
     let data = cloneDeep(anno.toJSON())
-    data.path = [Document.TEXT_SNIPPET_ID, 'content']
-    data.startOffset = Math.max(offset, anno.startOffset)-offset
-    data.endOffset = Math.min(endOffset, anno.endOffset)-offset
+    let path = [Document.TEXT_SNIPPET_ID, 'content']
+    data.start = {
+      path: path,
+      offset: Math.max(offset, anno.start.offset)-offset
+    }
+    data.end = {
+      path: path,
+      offset: Math.min(endOffset, anno.end.offset)-offset
+    }
     snippet.create(data)
   })
   return snippet

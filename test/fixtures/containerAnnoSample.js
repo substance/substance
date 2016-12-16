@@ -23,18 +23,26 @@ export default function(article) {
   article.create({
     type: 'test-container-anno',
     id: 'a1',
-    containerId: 'body',
-    startPath: ['p1', 'content'],
-    startOffset: 5,
-    endPath: ['p3', 'content'],
-    endOffset: 4,
+    start: {
+      path: ['p1', 'content'],
+      offset: 5,
+    },
+    end: {
+      path: ['p3', 'content'],
+      offset: 4
+    },
+    containerId: 'body'
   })
   article.create({
     type: 'strong',
     id: 'a2',
-    path: ['p1', 'content'],
-    startOffset: 0,
-    endOffset: 2,
+    start: {
+      path: ['p1', 'content'],
+      offset: 0,
+    },
+    end: {
+      offset: 2
+    }
   })
   var body = article.get('body')
   body.show('p1')
