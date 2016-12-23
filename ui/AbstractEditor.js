@@ -45,7 +45,7 @@ class AbstractEditor extends Component {
     this.editingBehavior = this.editorSession.editingBehavior
     this.markersManager = this.editorSession.markersManager
 
-    this.ResourceManageranager = new ResourceManager(this.editorSession, this.getChildContext())
+    this.resourceManager = new ResourceManager(this.editorSession, this.getChildContext())
   }
 
   /**
@@ -89,6 +89,7 @@ class AbstractEditor extends Component {
       globalEventHandler: this.globalEventHandler,
       iconProvider: this.iconProvider,
       labelProvider: this.labelProvider,
+      resourceManager: this.resourceManager,
       // ATTENTION: this is a map of tool target names to maps of tool names to tools
       // i.e. a declarative way to map tools to tool groups
       toolGroups: this.toolGroups,
