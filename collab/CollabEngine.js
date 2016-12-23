@@ -102,11 +102,11 @@ class CollabEngine extends EventEmitter {
     Note: a client can reconnect having a pending change
     which is similar to the commit case
   */
-  sync(args, cb) {
-    this._sync(args, function(err, result) {
+  sync({documentId, version, change, collaboratorId}, cb) {
+    this._sync({documentId, version, change}, function(err, result) {
       if (err) return cb(err)
       // Registers the collaborator If not already registered for that document
-      this._register(args.collaboratorId, args.documentId, args.collaboratorInfo)
+      this._register(collaboratorId, documentId)
       cb(null, result)
     }.bind(this))
   }
@@ -114,39 +114,35 @@ class CollabEngine extends EventEmitter {
   /*
     Internal implementation of sync
 
-    @param {String} args.collaboratorId collaboratorId
+
     @param {String} args.documentId document id
     @param {Number} args.version client version
     @param {Number} args.change new change (optional)
 
     OUT: version, change (rebased client change), serverChange (ustream ops)
   */
-  _sync(args, cb) {
-    this.documentEngine.getVersion(args.documentId, (err, serverVersion) => {
-      if (args.version > serverVersion) {
+  _sync({documentId, version, change}, cb) {
+    this.documentEngine.getVersion(documentId, (err, serverVersion) => {
+      if (version > serverVersion) {
         cb(new Err('InvalidVersionError', {
           message: 'Client version greater than server version'
         }))
-      } else if (args.change && serverVersion === args.version) {
-        this._syncFF(args, cb)
-      } else if (args.change && serverVersion > args.version) {
-        this._syncRB(args, cb)
-      } else if (!args.change) {
+      } else if (change && serverVersion === version) {
+        this._syncFF({documentId, version, change}, cb)
+      } else if (change && serverVersion > version) {
+        this._syncRB({documentId, version, change}, cb)
+      } else if (!change) {
         // E.g. when a client joins a session
-        this._syncPullOnly(args, cb)
+        this._syncPullOnly({documentId, version, change}, cb)
       } else {
         console.warn('Unhandled case')
       }
     })
   }
 
-  _syncPullOnly(args, cb) {
+  _syncPullOnly({documentId, version, change}, cb) {
     console.warn('This code is not yet tested')
-    this.documentEngine.getChanges({
-      documentId: args.documentId,
-      sinceVersion: args.version
-    }, (err, result) => {
-      let changes = result.changes
+    this.documentEngine.getChanges(documentId, version, (err, changes) => {
       let serverChange
 
       // Collect ops from all changes to turn them into a single change
@@ -160,8 +156,8 @@ class CollabEngine extends EventEmitter {
       }
       cb(null, {
         serverChange: serverChange,
-        change: args.change,
-        version: result.version
+        change: change,
+        version: version
       })
     })
   }
@@ -169,15 +165,11 @@ class CollabEngine extends EventEmitter {
   /*
     Fast forward sync (client version = server version)
   */
-  _syncFF(args, cb) {
-    this.documentEngine.addChange({
-      documentId: args.documentId,
-      change: args.change,
-      documentInfo: args.documentInfo
-    }, (err, serverVersion) => {
+  _syncFF({documentId, change}, cb) {
+    this.documentEngine.addChange(documentId, change, (err, serverVersion) => {
       if (err) return cb(err)
       cb(null, {
-        change: args.change, // collaborators must be notified
+        change: change, // collaborators must be notified
         serverChange: null,
         version: serverVersion
       })
@@ -187,28 +179,24 @@ class CollabEngine extends EventEmitter {
   /*
     Rebased sync (client version < server version)
   */
-  _syncRB(args, cb) {
-    this._rebaseChange({
-      documentId: args.documentId,
-      change: args.change,
-      version: args.version
-    }, function(err, rebased) {
+  _syncRB({documentId, change, version}, cb) {
+    this._rebaseChange({documentId, change, version}, function(err, rebased) {
       // result has change, changes, version (serverversion)
       if (err) return cb(err)
-
       // Store the rebased commit
-      this.documentEngine.addChange({
-        documentId: args.documentId,
-        change: rebased.change, // rebased change
-        documentInfo: args.documentInfo
-      }, function(err, serverVersion) {
-        if (err) return cb(err)
-        cb(null, {
-          change: rebased.change,
-          serverChange: rebased.serverChange, // collaborators must be notified
-          version: serverVersion
-        })
-      })
+      this.documentEngine.addChange(
+        documentId,
+        change,
+        function(err, serverVersion) {
+          if (err) return cb(err)
+          cb(null, {
+            change: rebased.change,
+            // collaborators must be notified
+            serverChange: rebased.serverChange,
+            version: serverVersion
+          })
+        }
+      )
     }.bind(this))
   }
 
@@ -218,13 +206,10 @@ class CollabEngine extends EventEmitter {
     IN: documentId, change, version (client version)
     OUT: change, serverChange, version (server version)
   */
-  _rebaseChange(args, cb) {
-    this.documentEngine.getChanges({
-      documentId: args.documentId,
-      sinceVersion: args.version
-    }, function(err, result) {
+  _rebaseChange({documentId, change, version}, cb) {
+    this.documentEngine.getChanges(documentId, version, function(err, result) {
       let B = result.changes.map(this.deserializeChange)
-      let a = this.deserializeChange(args.change)
+      let a = this.deserializeChange(change)
       // transform changes
       DocumentChange.transformInplace(a, B)
       let ops = B.reduce(function(ops, change) {
