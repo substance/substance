@@ -1,67 +1,50 @@
 /* eslint-disable consistent-return */
 import { module } from 'substance-test'
-import DocumentStore from '../../collab/DocumentStore'
-import SnapshotStore from '../../collab/SnapshotStore'
-import ChangeStore from '../../collab/ChangeStore'
 import SnapshotEngine from '../../collab/SnapshotEngine'
-import CollabServerConfigurator from '../../collab/CollabServerConfigurator'
-import CollabServerPackage from '../../collab/CollabServerPackage'
-import testSnapshotEngine from './testSnapshotEngine'
-import testSnapshotEngineWithStore from './testSnapshotEngineWithStore'
-import documentStoreSeed from '../fixtures/documentStoreSeed'
-import changeStoreSeed from '../fixtures/changeStoreSeed'
-import snapshotStoreSeed from '../fixtures/snapshotStoreSeed'
+import makeStoresFixture from './makeStoresFixture'
 
 const test = module('collab/SnapshotEngine')
 
-// Setup store instances
+function _fixture(numChanges, snapshots) {
+  let stores = makeStoresFixture(numChanges, snapshots)
+  return new SnapshotEngine(stores)
+}
 
-var cfg = new CollabServerConfigurator()
-cfg.import(CollabServerPackage)
-
-var documentStore = new DocumentStore()
-var changeStore = new ChangeStore()
-// var snapshotEngine = new SnapshotEngine({
-//   configurator: cfg,
-//   documentStore: documentStore,
-//   changeStore: changeStore,
-// })
-var snapshotStore = new SnapshotStore()
-var snapshotEngineWithStore = new SnapshotEngine({
-  configurator: cfg,
-  documentStore: documentStore,
-  changeStore: changeStore,
-  snapshotStore: snapshotStore
+test('Should error when getting snapshot that does not exist', function(t) {
+  let snapshotEngine = _fixture(0) // 0 changes, no snapshots
+  snapshotEngine.getSnapshot('test-doc', 1, function(err, snapshot) {
+    t.ok(err, 'There should be an error')
+    t.notOk(snapshot)
+    t.end()
+  })
 })
 
-function setup(cb, t) {
-  // Make sure we create a new seed instance, as data ops
-  // are performed directly on the seed object
-  var newDocumentStoreSeed = JSON.parse(JSON.stringify(documentStoreSeed))
-  var newChangeStoreSeed = JSON.parse(JSON.stringify(changeStoreSeed))
-  var newSnapshotStoreSeed = JSON.parse(JSON.stringify(snapshotStoreSeed))
-
-  documentStore.seed(newDocumentStoreSeed, function(err) {
-    if (err) return console.error(err)
-    changeStore.seed(newChangeStoreSeed, function(err) {
-      if (err) return console.error(err)
-      snapshotStore.seed(newSnapshotStoreSeed, function(err) {
-        if (err) return console.error(err)
-        cb(t)
-      })
-    })
+test('Get existing snapshot (straight)', function(t) {
+  let snapshotEngine = _fixture(1, [1]) // 1 change, snapshot for v1
+  snapshotEngine.getSnapshot('test-doc', 1, function(err, snapshot) {
+    t.notOk(err, 'There should be no error')
+    t.ok(snapshot)
+    t.end()
   })
-}
+})
 
-function setupTest(description, fn) {
-  test(description, function (t) {
-    setup(fn, t)
+test('Get existing snapshot (computed from scratch)', function(t) {
+  // SnapshotEngine must compute snapshot on demand
+  let snapshotEngine = _fixture(2, [1]) // 1 change, snapshot for v1
+  snapshotEngine.getSnapshot('test-doc', 2, function(err, snapshot) {
+    t.notOk(err, 'There should be no error')
+    t.ok(snapshot)
+    t.end()
   })
-}
+})
 
-// Run the generic testsuite with an engine that does not have a store attached
-// testSnapshotEngine(snapshotEngine, setupTest)
-// Run the same testsuite but this time with a store
-// testSnapshotEngine(snapshotEngineWithStore, setupTest)
-// Run tests that are only relevant when a snapshot store is provided to the engine
-testSnapshotEngineWithStore(snapshotEngineWithStore, setupTest)
+test('Get existing snapshot (computed)', function(t) {
+  // SnapshotEngine takes existing snapshot v1 and fetches remaining
+  // changes to compute v2.
+  let snapshotEngine = _fixture(2, [1]) // 1 change, snapshot for v1
+  snapshotEngine.getSnapshot('test-doc', 2, function(err, snapshot) {
+    t.notOk(err, 'There should be no error')
+    t.ok(snapshot)
+    t.end()
+  })
+})
