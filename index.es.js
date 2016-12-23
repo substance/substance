@@ -8,7 +8,6 @@ export { default as CollabSession } from './collab/CollabSession'
 export { default as DocumentClient } from './collab/DocumentClient'
 export { default as DocumentEngine } from './collab/DocumentEngine'
 export { default as DocumentServer } from './collab/DocumentServer'
-export { default as DocumentStore } from './collab/DocumentStore'
 export { default as SnapshotEngine } from './collab/SnapshotEngine'
 export { default as SnapshotStore } from './collab/SnapshotStore'
 export { default as WebSocketConnection } from './collab/WebSocketConnection'
@@ -187,6 +186,7 @@ export { default as SubstanceError } from './util/SubstanceError'
 export { default as substanceGlobals } from './util/substanceGlobals'
 export { default as TreeIndex } from './util/TreeIndex'
 export { default as uuid } from './util/uuid'
+export { series } from './util/async'
 
 // test-utlity related (to reduce bundle size we should think of
 // providing a separate bundle for that in the future)
@@ -196,8 +196,6 @@ export { default as TestWebSocketServer } from './test/collab/TestWebSocketServe
 export { default as TestWebSocketConnection } from './test/collab/TestWebSocketConnection'
 export { default as TestCollabServer } from './test/collab/TestCollabServer'
 export { default as TestCollabSession } from './test/collab/TestCollabSession'
-export { default as changeStoreSeed } from './test/fixtures/changeStoreSeed'
-export { default as documentStoreSeed } from './test/fixtures/documentStoreSeed'
 export { default as createTestDocumentFactory } from './test/fixtures/createTestDocumentFactory'
 
 // aliases (mainly for backward compatibility)
