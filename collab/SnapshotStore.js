@@ -1,88 +1,48 @@
-import Err from '../util/SubstanceError'
-
 /*
   Implements Substance SnapshotStore API. This is just a dumb store.
   No integrity checks are made, as this is the task of SnapshotEngine
 */
 class SnapshotStore {
-  constructor(config) {
-    this.config = config
-
-    // Snapshots will stored here
-    this._snapshots = {}
+  constructor(seed) {
+    this._snapshots = seed || {}
   }
 
   /*
-    Get Snapshot by documentId and version. If no version is provided
-    the highest version available is returned
-
-    @return {Object} snapshot record
+    Get all available versions for a document
   */
-  getSnapshot(args, cb) {
-    if (!args || !args.documentId) {
-      return cb(new Err('InvalidArgumentsError', {
-        message: 'args require a documentId'
-      }))
-    }
-    let documentId = args.documentId
-    let version = args.version
-    let docEntry = this._snapshots[documentId]
-    let snapshotData
-    let result
-
-    if (!docEntry) return cb(null, undefined)
-    let availableVersions = Object.keys(docEntry)
-
-    // Exit if no versions are available
-    if (availableVersions.length === 0) return cb(null, undefined)
-    // If no version is given we return the latest version available
-    if (!version) {
-      let latestVersion = Math.max.apply(null, availableVersions)
-      snapshotData = docEntry[latestVersion]
-      result = {
-        data: snapshotData,
-        version: latestVersion
-      }
-    } else {
-      // Attemt to get the version
-      snapshotData = docEntry[version]
-
-      if (!snapshotData && args.findClosest) {
-        // We don't have a snaphot for that requested version
-        let smallerVersions = availableVersions.filter(function(v) {
-          return parseInt(v, 10) < version
-        })
-        // Take the closest version if there is any
-        let clostestVersion = Math.max.apply(null, smallerVersions)
-        snapshotData = docEntry[clostestVersion]
-        result = {
-          data: snapshotData,
-          version: clostestVersion
-        }
-      } else if (snapshotData) {
-        result = {
-          data: snapshotData,
-          version: version
-        }
-      }
-    }
-
-    if (result) {
-      result.documentId = args.documentId
-    }
-
-    cb(null, result)
+  getVersions(documentId, cb) {
+    let versions = this._getVersions(documentId)
+    cb(null, versions)
   }
 
   /*
-    Stores a snapshot for a given documentId and version.
+    Get Snapshot by documentId and version.
+
+    Returns snapshot data and snaphot version
+  */
+  getSnapshot(documentId, version, cb) {
+    if (!arguments.length === 3) {
+      throw new Error('Invalid Arguments')
+    }
+    let docEntry = this._snapshots[documentId]
+    if (!docEntry) return cb(null, undefined)
+    let snapshot = docEntry[version]
+    if (snapshot) {
+      cb(null, snapshot, version)
+    } else {
+      cb(null, undefined)
+    }
+  }
+
+  /*
+    Saves a snapshot for a given documentId and version.
 
     Please note that an existing snapshot will be overwritten.
   */
-  saveSnapshot(args, cb) {
-    let documentId = args.documentId
-    let version = args.version
-    let data = args.data
+  saveSnapshot(documentId, version, data, cb) {
+    if (!documentId || !version || !data) {
+      throw new Error('Invalid arguments')
+    }
     let docEntry = this._snapshots[documentId]
     if (!docEntry) {
       docEntry = this._snapshots[documentId] = {}
@@ -94,12 +54,10 @@ class SnapshotStore {
   /*
     Removes a snapshot for a given documentId + version
   */
-  deleteSnaphot(documentId, version, cb) {
+  deleteSnapshot(documentId, version, cb) {
     let docEntry = this._snapshots[documentId]
     if (!docEntry || !docEntry[version]) {
-      return cb(new Err('DeleteError', {
-        message: 'Snapshot could not be found'
-      }))
+      return cb(new Error('Snapshot does not exist and can not be deleted'))
     }
     let snapshot = this._snapshots[documentId][version]
     delete this._snapshots[documentId][version]
@@ -107,36 +65,12 @@ class SnapshotStore {
   }
 
   /*
-    Deletes all snapshots for a given documentId
+    Get versions for a given document
   */
-  deleteSnapshotsForDocument(documentId, cb) {
+  _getVersions(documentId) {
     let docEntry = this._snapshots[documentId]
-    let deleteCount = 0
-    if (docEntry) deleteCount = Object.keys(docEntry).length
-    delete this._snapshots[documentId]
-    cb(null, deleteCount)
-  }
-
-  /*
-    Returns true if a snapshot exists for a certain version
-  */
-  snapshotExists(documentId, version, cb) {
-    let exists = false
-    let docRecord = this._snapshots[documentId]
-
-    if (docRecord) {
-      exists = docRecord[version]
-    }
-    cb(null, exists)
-  }
-
-  /*
-    Seeds the database
-  */
-  seed(snapshots, cb) {
-    this._snapshots = snapshots
-    if (cb) { cb(null) }
-    return this
+    if (!docEntry) return [] // no versions available
+    return Object.keys(docEntry)
   }
 
 }

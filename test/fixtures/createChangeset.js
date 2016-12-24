@@ -5,7 +5,7 @@ import TransactionDocument from '../../model/TransactionDocument'
 /*
   Create a changeset
 
-  Allows one or functions to be passed, which will each represent a change
+  Allows one or more functions to be passed, which will each represent a change
   in the result.
 */
 export default function createChangeset(doc, fns) {
@@ -24,7 +24,6 @@ export default function createChangeset(doc, fns) {
   fns.forEach((fn) => {
     fn(tx)
     let opsForChange = txDoc.ops.slice(opCount)
-
     changes.push(new DocumentChange(opsForChange, {}, {}).toJSON())
     opCount = txDoc.ops.length
   })

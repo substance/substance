@@ -13,7 +13,7 @@
   "jsnext:main": "index.es.js",
   "scripts": {
     "test": "node test",
-    "test:browser": "node make test:browser -w -s",
+    "test:browser": "node make test:browser:pure -w -s",
     "docs": "node make docs -w -s",
     "start": "node make dev -w -s"
   },

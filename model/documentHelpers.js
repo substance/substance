@@ -166,4 +166,4 @@ documentHelpers.getChangeFromDocument = function(doc) {
   return new DocumentChange({ops: ops})
 }
 
-export default documentHelpers;
+export default documentHelpers

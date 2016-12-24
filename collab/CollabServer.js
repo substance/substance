@@ -20,7 +20,7 @@ class CollabServer extends Server {
     Send an error
   */
   _error(req, res, err) {
-    console.log(err)
+    console.error(err)
     res.error({
       scope: this.scope,
       type: 'error',

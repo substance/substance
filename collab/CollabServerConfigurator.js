@@ -36,11 +36,11 @@ class CollabServerConfigurator {
   // Config Interpreter API
   // ------------------------
 
-  getHost(host) {
+  getHost() {
     return this.config.host
   }
 
-  getPort(port) {
+  getPort() {
     return this.config.port
   }
 
@@ -56,8 +56,10 @@ class CollabServerConfigurator {
     return this.config.snapshotStore
   }
 
-  // TODO: We should discuss if it is a good idea that the configurator 'owns'
-  // instances. Don't see a better solution for now though.
+  /*
+    TODO: We should discuss if it is a good idea that the configurator 'owns'
+    instances. Don't see a better solution for now though.
+  */
   getDocumentEngine() {
     if (!this.documentEngine) {
       this.documentEngine = new DocumentEngine({

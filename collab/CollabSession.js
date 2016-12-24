@@ -39,6 +39,7 @@ class CollabSession extends EditorSession {
     this._connected = false // gets flipped to true in syncDone
     this._nextChange = null // next change to be sent over the wire
     this._pendingChange = null // change that is currently being synced
+    this._pendingSync = false
     this._error = null
     // Note: registering a second document:changed handler where we trigger sync requests
     this.onUpdate('document', this.afterDocumentChange, this)
@@ -47,15 +48,15 @@ class CollabSession extends EditorSession {
     this.collabClient.on('disconnected', this.onCollabClientDisconnected, this)
     this.collabClient.on('message', this._onMessage.bind(this))
     // Attempt to open a document immediately, but only if the collabClient is
-    // already connected. If not the _onConnected handler will take care of it
-    // once websocket connection is ready.
+    // already connected. If not the onCollabClientConnected handler will take
+    // care of it once websocket connection is ready.
     if (this.collabClient.isConnected() && this.autoSync) {
       this.sync()
     }
   }
 
   /*
-    Unregister event handlers. Call this before throw away
+    Unregister event handlers. Call this before throwing away
     a CollabSession reference. Otherwise you will leak memory
   */
   dispose() {
@@ -91,14 +92,16 @@ class CollabSession extends EditorSession {
         change: nextChange ? this.serializeChange(nextChange) : undefined
       }
       this._send(msg)
+      this._pendingSync = true
       this._pendingChange = nextChange
+
       // Can be used to reset errors that arised from previous syncs.
       // When a new sync is started, users can use this event to unset the error
       this.emit('sync')
       this._nextChange = null
       this._error = null
     } else {
-      console.error('Can not sync. Either collabClient is not connected or we are already syncing')
+      console.error('Can not sync. Either collabClient is not connected or already syncing')
     }
   }
 
@@ -184,7 +187,7 @@ class CollabSession extends EditorSession {
     let serverChange = args.change
     let serverVersion = args.version
 
-    if (!this._nextChange && !this._pendingChange) {
+    if (!this._nextChange && !this._pendingSync) {
       if (serverChange) {
         serverChange = this.deserializeChange(serverChange)
         this._applyRemoteChange(serverChange)
@@ -194,7 +197,7 @@ class CollabSession extends EditorSession {
       }
       this.startFlow()
     } else {
-      console.log('skipped remote update. Pending sync or local changes.');
+      console.info('skipped remote update. Pending sync or local changes.');
     }
   }
 
@@ -217,6 +220,7 @@ class CollabSession extends EditorSession {
     // Important: after sync is done we need to reset _pendingChange and _error
     // In this state we can safely listen to
     this._pendingChange = null
+    this._pendingSync = false
     this._error = null
     // Each time the sync worked we consider the system connected
     this._connected = true
@@ -334,7 +338,7 @@ class CollabSession extends EditorSession {
   }
 
   __canSync() {
-    return this.collabClient.isConnected() && !this._pendingChange
+    return this.collabClient.isConnected() && !this._pendingSync
   }
 
   /*
@@ -364,6 +368,7 @@ class CollabSession extends EditorSession {
       }
       this._pendingChange = null
     }
+    this._pendingSync = false
     this._error = null
     this._nextChange = newNextChange
   }
