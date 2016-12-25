@@ -1,11 +1,8 @@
-import last from 'lodash/last'
+import { clone, extend } from 'lodash-es'
+import last from '../util/last'
 import forEach from '../util/forEach'
-import clone from 'lodash/clone'
-import extend from 'lodash/extend'
-// import uuid from '../util/uuid'
 import createCountingIdGenerator from '../util/createCountingIdGenerator'
 import ArrayIterator from '../util/ArrayIterator'
-
 
 const WS_LEFT = /^\s+/g
 const WS_LEFT_ALL = /^\s*/g

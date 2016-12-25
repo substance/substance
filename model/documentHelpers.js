@@ -1,10 +1,10 @@
-import isString from 'lodash/isString'
-import filter from 'lodash/filter'
+import { filter } from 'lodash-es'
+import isString from '../util/isString'
+import forEach from '../util/forEach'
 import DocumentIndex from './DocumentIndex'
 import Selection from './Selection'
 import ObjectOperation from './data/ObjectOperation'
 import DocumentChange from './DocumentChange'
-import forEach from 'lodash/forEach'
 
 /**
   Some helpers for working with Documents.

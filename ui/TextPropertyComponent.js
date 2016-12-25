@@ -1,4 +1,4 @@
-import isNumber from 'lodash/isNumber'
+import isNumber from '../util/isNumber'
 import Coordinate from '../model/Coordinate'
 import AnnotatedTextComponent from './AnnotatedTextComponent'
 import CursorComponent from './CursorComponent'

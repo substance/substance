@@ -1,5 +1,5 @@
 import Component from '../../ui/Component'
-import each from 'lodash/each'
+import forEach from '../../util/forEach'
 
 /*
   A tabbed pane layout component. The actual content is specified via append.
@@ -30,7 +30,7 @@ class TabbedPane extends Component {
   render($$) {
     let el = $$('div').addClass('sc-tabbed-pane')
     let tabsEl = $$('div').addClass('se-tabs')
-    each(this.props.tabs, function(tab) {
+    forEach(this.props.tabs, function(tab) {
       let tabEl = $$('a')
         .addClass("se-tab")
         .attr({

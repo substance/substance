@@ -1,7 +1,7 @@
 import EventEmitter from '../util/EventEmitter'
-import forEach from 'lodash/forEach'
+import { forEach, extend } from 'lodash-es'
 import map from '../util/map'
-import extend from 'lodash/extend'
+
 import DocumentChange from '../model/DocumentChange'
 import Err from '../util/SubstanceError'
 

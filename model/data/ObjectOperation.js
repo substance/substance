@@ -1,6 +1,5 @@
 import isString from '../../util/isString'
-import isEqual from 'lodash/isEqual'
-import cloneDeep from 'lodash/cloneDeep'
+import { isEqual, cloneDeep } from 'lodash-es'
 import DataObject from './DataObject'
 import TextOperation from './TextOperation'
 import ArrayOperation from './ArrayOperation'

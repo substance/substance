@@ -1,4 +1,4 @@
-import cloneDeep from 'lodash/cloneDeep'
+import { cloneDeep } from 'lodash-es'
 import Err from '../util/SubstanceError'
 import EditorSession from '../model/EditorSession'
 import DocumentChange from '../model/DocumentChange'

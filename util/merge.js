@@ -1,6 +1,4 @@
-import merge from 'lodash/merge'
-import mergeWith from 'lodash/mergeWith'
-import isArray from 'lodash/isArray'
+import { merge, mergeWith, isArray } from 'lodash-es'
 
 function _concatArrays(objValue, srcValue) {
   if (isArray(objValue)) {

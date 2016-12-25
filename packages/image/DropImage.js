@@ -1,4 +1,3 @@
-import startsWith from 'lodash/startsWith'
 import insertImage from './insertImage'
 import DragAndDropHandler from '../../ui/DragAndDropHandler'
 

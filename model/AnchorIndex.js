@@ -1,4 +1,4 @@
-import filter from 'lodash/filter'
+import { filter } from 'lodash-es'
 import TreeIndex from '../util/TreeIndex'
 import DocumentIndex from './DocumentIndex'
 

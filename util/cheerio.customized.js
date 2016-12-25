@@ -1,4 +1,4 @@
-import extend from 'lodash/extend'
+import { extend } from 'lodash-es'
 import cheerio from 'cheerio'
 import serialize from 'dom-serializer'
 

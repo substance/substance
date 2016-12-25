@@ -1,4 +1,4 @@
-import each from 'lodash/each'
+import forEach from '../../util/forEach'
 import Tool from '../tools/Tool'
 import keys from '../../util/keys'
 
@@ -54,7 +54,7 @@ class SwitchTextTypeTool extends Tool {
 
       // dropdown options
       let options = $$('div').addClass("se-options").ref('options')
-      each(this.props.textTypes, function(textType) {
+      forEach(this.props.textTypes, function(textType) {
         let button = $$('button')
             .addClass('se-option sm-'+textType.name)
             .attr('data-type', textType.name)

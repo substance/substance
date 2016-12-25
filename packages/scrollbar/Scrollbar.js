@@ -1,5 +1,5 @@
 import Component from '../../ui/Component'
-import each from 'lodash/each'
+import forEach from '../../util/forEach'
 import DefaultDOMElement from '../../ui/DefaultDOMElement'
 import getRelativeBoundingRect from '../../util/getRelativeBoundingRect'
 
@@ -57,8 +57,8 @@ class Scrollbar extends Component {
     if (this.props.highlights) {
       let highlightEls = []
 
-      each(this.props.highlights, function(highlights, scope) {
-        each(highlights, function(h) {
+      forEach(this.props.highlights, function(highlights, scope) {
+        forEach(highlights, function(h) {
           highlightEls.push(
             $$('div').ref(h).addClass('se-highlight sm-'+scope)
           )
@@ -100,8 +100,8 @@ class Scrollbar extends Component {
     // If we have highlights, update them as well
     if (this.props.highlights) {
       // Compute highlights
-      each(this.props.highlights,function(highlights) {
-        each(highlights, function(nodeId) {
+      forEach(this.props.highlights,function(highlights) {
+        forEach(highlights, function(nodeId) {
           let nodeEl = scrollableEl.find('*[data-id="'+nodeId+'"]')
 
           if (!nodeEl) return
@@ -185,7 +185,6 @@ class Scrollbar extends Component {
       scrollableEl.setProperty('scrollTop', scroll)
     }
   }
-
 }
 
 Scrollbar.overlayMinHeight = 2

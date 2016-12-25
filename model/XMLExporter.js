@@ -1,10 +1,9 @@
+import { isBoolean } from 'lodash-es'
+import forEach from '../util/forEach'
+import isNumber from '../util/isNumber'
+import isString from '../util/isString'
 import DOMExporter from './DOMExporter'
 import DefaultDOMElement from '../ui/DefaultDOMElement'
-import forEach from '../util/forEach'
-import isBoolean from 'lodash/isBoolean'
-import isNumber from 'lodash/isNumber'
-import isString from 'lodash/isString'
-
 
 var defaultAnnotationConverter = {
   tagName: 'annotation',

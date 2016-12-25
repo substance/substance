@@ -1,18 +1,16 @@
 var b = require('substance-bundler')
 
 b.task('clean', function() {
-  b.rm('./dist');
-  b.rm('./.test');
-  b.rm('./.docs');
-  b.rm('./.npm');
-});
+  b.rm('./dist')
+  b.rm('./.test')
+  b.rm('./.docs')
+  b.rm('./.npm')
+})
 
 function _browser(DIST, transpileToES5) {
   b.js('./index.es.js', {
     buble: transpileToES5,
-
     ignore: ['substance-cheerio'],
-    commonjs: { include: ['/**/node_modules/lodash/**'] },
     targets: [{
       useStrict: !transpileToES5,
       dest: DIST+'substance.js',
@@ -42,7 +40,8 @@ function _server(DIST, transpileToES5) {
   b.js('./index.es.js', {
     buble: transpileToES5,
     commonjs: { include: [
-      '/**/node_modules/lodash/**'
+      // TODO: Can we switch the substance-cheerio bundle to expose ES6
+      '/**/substance-cheerio/**'
     ] },
     external: [ 'substance-cheerio' ],
     targets: [{
@@ -73,11 +72,9 @@ b.task('test:assets', function() {
 
 function _testBrowser(transpileToES5) {
   b.js('./test/index.js', {
-
     buble: transpileToES5,
     ignore: ['substance-cheerio'],
     external: ['substance-test'],
-    commonjs: { include: ['node_modules/lodash/**'] },
     targets: [
       { dest: TEST+'tests.js', format: 'umd', moduleName: 'tests' }
     ]
@@ -101,7 +98,6 @@ b.task('test:server', function() {
     external: ['substance-test'],
     commonjs: {
       include: [
-        '/**/lodash/**',
         '/**/substance-cheerio/**'
       ]
     },

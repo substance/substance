@@ -1,8 +1,6 @@
-import isString from 'lodash/isString'
-import isArray from 'lodash/isArray'
-import get from 'lodash/get'
-import setWith from 'lodash/setWith'
-import unset from 'lodash/unset'
+import isString from '../../util/isString'
+import isArray from '../../util/isArray'
+import { get, setWith, unset } from 'lodash-es'
 
 /*
   An object that can be access via path API.

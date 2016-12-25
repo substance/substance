@@ -1,6 +1,6 @@
+import { isEqual } from 'lodash-es'
 import forEach from '../util/forEach'
-import isEqual from 'lodash/isEqual'
-import isArray from 'lodash/isArray'
+import isArray from '../util/isArray'
 import TreeIndex from '../util/TreeIndex'
 
 class PathEventProxy {
@@ -71,7 +71,6 @@ class PathEventProxy {
       }
     }
   }
-
 }
 
 export default PathEventProxy

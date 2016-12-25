@@ -1,5 +1,4 @@
-import isEqual from 'lodash/isEqual'
-import last from 'lodash/last'
+import { isEqual, last } from 'lodash-es'
 import EventEmitter from '../util/EventEmitter'
 import forEach from '../util/forEach'
 import DocumentNode from './DocumentNode'

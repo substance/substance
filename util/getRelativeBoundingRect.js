@@ -1,5 +1,5 @@
 import forEach from './forEach'
-import map from 'lodash/map'
+import map from './map'
 
 /*
   Calculate a bounding rectangle for a set of rectangles.

@@ -1,4 +1,4 @@
-import last from 'lodash/last'
+import last from '../util/last'
 import Coordinate from '../model/Coordinate'
 import Range from '../model/Range'
 import DefaultDOMElement from './DefaultDOMElement'

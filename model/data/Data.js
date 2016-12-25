@@ -1,4 +1,4 @@
-import cloneDeep from 'lodash/cloneDeep'
+import { cloneDeep } from 'lodash-es'
 import isArray from '../../util/isArray'
 import isPlainObject from '../../util/isPlainObject'
 import isString from '../../util/isString'

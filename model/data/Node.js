@@ -1,6 +1,4 @@
-import isBoolean from 'lodash/isBoolean'
-import isObject from 'lodash/isObject'
-import cloneDeep from 'lodash/cloneDeep'
+import { isBoolean, isObject, cloneDeep } from 'lodash-es'
 import isNumber from '../../util/isNumber'
 import isString from '../../util/isString'
 import isArray from '../../util/isArray'

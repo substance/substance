@@ -21,7 +21,6 @@ function diff(a, b, offset) {
     } else {
       let m = levenshtein(a, b)
       changes = _diff(a, b, m, offset)
-
     }
   }
   return changes

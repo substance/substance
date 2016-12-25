@@ -1,5 +1,5 @@
 import Component from '../../ui/Component'
-import isEqual from 'lodash/isEqual'
+import { isEqual } from 'lodash-es'
 
 class Toolbox extends Component {
 
