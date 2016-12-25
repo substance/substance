@@ -1,7 +1,5 @@
 import Command from '../../ui/Command'
-import _isMatch from 'lodash/isMatch'
-import _find from 'lodash/find'
-import _clone from 'lodash/clone'
+import { isMatch, find, clone } from 'lodash-es'
 
 class SwitchTextTypeCommand extends Command {
 
@@ -17,7 +15,7 @@ class SwitchTextTypeCommand extends Command {
 
   getTextType(params) {
     let textTypes = this.getTextTypes(params)
-    return _find(textTypes, function(t) {
+    return find(textTypes, function(t) {
       return t.name === params.textType
     })
   }
@@ -28,9 +26,9 @@ class SwitchTextTypeCommand extends Command {
     let textTypes = this.getTextTypes(params)
     let currentTextType
     textTypes.forEach(function(textType) {
-      let nodeProps = _clone(textType.data)
+      let nodeProps = clone(textType.data)
       delete nodeProps.type
-      if (_isMatch(node, nodeProps) && node.type === textType.data.type) {
+      if (isMatch(node, nodeProps) && node.type === textType.data.type) {
         currentTextType = textType
       }
     })

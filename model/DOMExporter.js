@@ -1,5 +1,5 @@
-import extend from 'lodash/extend'
-import isString from 'lodash/isString'
+import { extend } from 'lodash-es'
+import isString from '../util/isString'
 import Registry from '../util/Registry'
 import Fragmenter from './Fragmenter'
 import encodeXMLEntities from '../util/encodeXMLEntities'

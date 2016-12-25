@@ -1,5 +1,4 @@
-import isEqual from 'lodash/isEqual'
-import startsWith from 'lodash/startsWith'
+import { isEqual, startsWith } from 'lodash-es'
 import Coordinate from '../../model/Coordinate'
 import IsolatedNodeComponent from '../isolated-node/IsolatedNodeComponent'
 

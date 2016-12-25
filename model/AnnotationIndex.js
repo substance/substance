@@ -1,6 +1,4 @@
-import isString from 'lodash/isString'
-import isNumber from 'lodash/isNumber'
-import filter from 'lodash/filter'
+import { isString, isNumber, filter } from 'lodash-es'
 import map from '../util/map'
 import TreeIndex from '../util/TreeIndex'
 import DocumentIndex from './DocumentIndex'

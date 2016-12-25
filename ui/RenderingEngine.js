@@ -1,4 +1,4 @@
-import each from 'lodash/each'
+import { forEach } from 'lodash-es'
 import uuid from '../util/uuid'
 import substanceGlobals from '../util/substanceGlobals'
 import VirtualElement from './VirtualElement'
@@ -293,10 +293,10 @@ function _render(state, vel) {
   var refs = {};
   var foreignRefs = {};
   if (vel._context) {
-    each(vel._context.refs, function(vel, ref) {
+    forEach(vel._context.refs, function(vel, ref) {
       refs[ref] = vel._comp;
     });
-    each(vel._context.foreignRefs, function(vel, ref) {
+    forEach(vel._context.foreignRefs, function(vel, ref) {
       foreignRefs[ref] = vel._comp;
     });
   }
@@ -372,11 +372,11 @@ function _prepareVirtualComponent(state, comp, vc) {
   var oldRefs = comp.refs;
   var oldForeignRefs = comp.__foreignRefs__;
   // map virtual components to existing ones
-  each(newRefs, function(vc, ref) {
+  forEach(newRefs, function(vc, ref) {
     var comp = oldRefs[ref];
     if (comp) _mapComponents(state, comp, vc);
   });
-  each(foreignRefs, function(vc, ref) {
+  forEach(foreignRefs, function(vc, ref) {
     var comp = oldForeignRefs[ref];
     if (comp) _mapComponents(state, comp, vc);
   });

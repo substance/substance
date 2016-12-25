@@ -1,5 +1,5 @@
-import debounce from 'lodash/debounce'
-import isString from 'lodash/isString'
+import { debounce } from 'lodash-es'
+import isString from '../../util/isString'
 import sendRequest from '../../util/sendRequest'
 
 const DEFAULT_API_URL = 'http://localhost:4777/api/check'

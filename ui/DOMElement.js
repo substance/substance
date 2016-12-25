@@ -1,9 +1,8 @@
 /* eslint-disable no-unused-vars */
-import isFunction from 'lodash/isFunction'
-import isObject from 'lodash/isObject'
-import isString from 'lodash/isString'
-import isArray from 'lodash/isArray'
-import findIndex from 'lodash/findIndex'
+import { isObject, findIndex } from 'lodash-es'
+import isFunction from '../util/isFunction'
+import isString from '../util/isString'
+import isArray from '../util/isArray'
 import forEach from '../util/forEach'
 import ArrayIterator from '../util/ArrayIterator'
 

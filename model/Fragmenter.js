@@ -1,5 +1,5 @@
 import forEach from '../util/forEach'
-import isString from 'lodash/isString'
+import isString from '../util/isString'
 
 var ENTER = 1
 var EXIT = -1

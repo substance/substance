@@ -1,7 +1,7 @@
-import isEqual from 'lodash/isEqual'
-import isObject from 'lodash/isObject'
-import isArray from 'lodash/isArray'
-import isString from 'lodash/isString'
+import { isEqual, isObject} from 'lodash-es'
+
+import isArray from '../util/isArray'
+import isString from '../util/isString'
 import forEach from '../util/forEach'
 import uuid from '../util/uuid'
 import EventEmitter from '../util/EventEmitter'

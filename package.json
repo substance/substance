@@ -21,7 +21,7 @@
   "license": "MIT",
   "dependencies": {
     "substance-cheerio": "^0.1.0",
-    "lodash": "4.13.1"
+    "lodash-es": "4.13.1"
   },
   "devDependencies": {
     "karma": "0.13.22",

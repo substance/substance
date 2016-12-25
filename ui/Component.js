@@ -1,7 +1,4 @@
-import isString from 'lodash/isString'
-import isFunction from 'lodash/isFunction'
-import extend from 'lodash/extend'
-import each from 'lodash/each'
+import { extend, forEach, isString, isFunction } from 'lodash-es'
 import EventEmitter from '../util/EventEmitter'
 import RenderingEngine from './RenderingEngine'
 import VirtualElement from './VirtualElement'
@@ -522,7 +519,7 @@ class Component extends DOMElement.Delegator {
     ```
   */
   handleActions(actionHandlers) {
-    each(actionHandlers, function(method, actionName) {
+    forEach(actionHandlers, function(method, actionName) {
       this.handleAction(actionName, method)
     }.bind(this))
     return this

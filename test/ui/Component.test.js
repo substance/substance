@@ -1,7 +1,7 @@
 /* eslint-disable no-invalid-this, indent */
 
 import { module, spy } from 'substance-test'
-import isEqual from 'lodash/isEqual'
+import { isEqual } from 'lodash-es'
 import Component from '../../ui/Component'
 import TestComponent from './TestComponent'
 import substanceGlobals from '../../util/substanceGlobals'

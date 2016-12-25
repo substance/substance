@@ -1,5 +1,4 @@
-import isUndefined from 'lodash/isUndefined'
-import startsWith from 'lodash/startsWith'
+import { isUndefined, startsWith } from 'lodash-es'
 import createSurfaceId from '../../util/createSurfaceId'
 import keys from '../../util/keys'
 import platform from '../../util/platform'
