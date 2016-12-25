@@ -59,7 +59,12 @@ class EditLinkTool extends Tool {
     let node = this.props.node
     let sm = this.context.surfaceManager
     let surface = sm.getFocusedSurface()
-    surface.transaction(function(tx, args) {
+    if (!surface) {
+      console.warn('No focused surface. Stopping command execution.')
+      return
+    }
+    let editorSession = this.context.editorSession
+    editorSession.transaction(function(tx, args) {
       tx.delete(node.id)
       return args
     })
