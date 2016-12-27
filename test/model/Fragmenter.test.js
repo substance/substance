@@ -145,17 +145,14 @@ class Anno extends Annotation {
     this._isAnchor = false
     this._isInline = false
 
-    if (opts.anchor) {
-      this.zeroWidth = true
-      this.offset = startOffset
-    }
-
     if (opts.hasOwnProperty('fragmentation')) {
       this.fragmentationHint = opts.fragmentation
     }
 
     if (opts.hasOwnProperty('isAnchor')) {
       this._isAnchor = opts.isAnchor
+      this.zeroWidth = true
+      this.offset = startOffset
     }
 
     if (opts.hasOwnProperty('isInline')) {
