@@ -499,6 +499,10 @@ class EditorSession extends EventEmitter {
   }
 
   _applyChange(change, info) {
+    if (!change) {
+      console.error('FIXME: change is null.')
+      return
+    }
     this.getDocument()._apply(change)
     this._setDirty('document')
     this._change = change

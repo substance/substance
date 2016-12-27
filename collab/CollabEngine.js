@@ -210,7 +210,9 @@ class CollabEngine extends EventEmitter {
   */
   _rebaseChange({documentId, change, version}, cb) {
     this.documentEngine.getChanges(documentId, version, function(err, result) {
-      let B = result.changes.map(this.deserializeChange)
+      // HACK: it happened that result.changes was empty
+      let changes = result.changes || []
+      let B = changes.map(this.deserializeChange)
       let a = this.deserializeChange(change)
       // transform changes
       DocumentChange.transformInplace(a, B)

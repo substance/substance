@@ -29,6 +29,16 @@ class CoordinateOperation {
     return this.type === SHIFT
   }
 
+  isNOP() {
+    switch (this.type) {
+      case SHIFT: {
+        return this.val === 0
+      }
+      default:
+        return false
+    }
+  }
+
   clone() {
     return new CoordinateOperation(this)
   }
