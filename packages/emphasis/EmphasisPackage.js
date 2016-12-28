@@ -2,20 +2,23 @@ import Emphasis from './Emphasis'
 import EmphasisHTMLConverter from './EmphasisHTMLConverter'
 import EmphasisXMLConverter from './EmphasisXMLConverter'
 import AnnotationCommand from '../../ui/AnnotationCommand'
-import AnnotationComponent from '../../ui/AnnotationComponent'
+import EmphasisComponent from './EmphasisComponent'
 import AnnotationTool from '../../ui/AnnotationTool'
 import platform from '../../util/platform'
 
 export default {
   name: 'emphasis',
-  configure: function(config, options) {
+  configure: function(config, {toolGroup, disableCollapsedCursor}) {
     config.addNode(Emphasis)
     config.addConverter('html', EmphasisHTMLConverter)
     config.addConverter('xml', EmphasisXMLConverter)
-    config.addComponent('emphasis', AnnotationComponent)
-    config.addCommand('emphasis', AnnotationCommand, { nodeType: Emphasis.type })
+    config.addComponent('emphasis', EmphasisComponent)
+    config.addCommand('emphasis', AnnotationCommand, {
+      nodeType: Emphasis.type,
+      disableCollapsedCursor
+    })
     config.addTool('emphasis', AnnotationTool, {
-      toolGroup: options.toolGroup || 'annotations'
+      toolGroup: toolGroup || 'annotations'
     })
     config.addIcon('emphasis', { 'fontawesome': 'fa-italic' });
     config.addLabel('emphasis', {

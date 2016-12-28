@@ -24,10 +24,10 @@ import SelectAllCommand from './SelectAllCommand'
 
 export default {
   name: 'base',
-  configure: function(config) {
+  configure: function(config, {disableCollapsedCursor}) {
     config.import(FilePackage)
     config.import(BlockerPackage)
-    config.import(SwitchTextTypePackage)
+    config.import(SwitchTextTypePackage, {disableCollapsedCursor})
     config.import(ScrollPanePackage)
     config.import(BodyScrollPanePackage)
     config.import(SplitPanePackage)

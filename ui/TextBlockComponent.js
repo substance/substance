@@ -4,7 +4,7 @@ import TextProperty from './TextPropertyComponent'
 class TextBlockComponent extends NodeComponent {
 
   render($$) {
-    let el = super.render.call(this, $$)
+    let el = super.render($$)
     el.addClass('sc-text-block')
 
     let node = this.props.node

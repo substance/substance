@@ -1,10 +1,5 @@
-/*
-  This just serves as a container for positioning overlay content
-*/
 .sc-overlay { z-index: 200; position: absolute; }
 .sc-overlay.sm-hidden { visibility: hidden; }
-
-
 .sc-overlay.sm-theme-dark {}
 
 .sc-overlay.sm-theme-dark::before {
