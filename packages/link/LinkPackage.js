@@ -10,15 +10,21 @@ import platform from '../../util/platform'
 
 export default {
   name: 'link',
-  configure: function(config, {toolGroup, editLinkToolGroup, disableCollapsedCursor}) {
+  configure: function(config, {
+    toolGroup,
+    editLinkToolGroup,
+    disableCollapsedCursor
+  }) {
     config.addNode(Link)
     config.addComponent('link', LinkComponent)
     config.addConverter('html', LinkHTMLConverter)
     config.addConverter('xml', LinkXMLConverter)
-    config.addCommand('link', LinkCommand, {nodeType: 'link'})
-    config.addCommand('edit-link', EditAnnotationCommand, {
+    config.addCommand('link', LinkCommand, {
       nodeType: 'link',
       disableCollapsedCursor
+    })
+    config.addCommand('edit-link', EditAnnotationCommand, {
+      nodeType: 'link'
     })
     config.addTool('link', AnnotationTool, {
       toolGroup: toolGroup || 'annotations'

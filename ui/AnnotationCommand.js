@@ -233,7 +233,7 @@ class AnnotationCommand extends Command {
     let annoData = this.getAnnotationData()
     annoData.type = this.getAnnotationType()
     let anno
-    editorSession.transaction((tx)=>{
+    editorSession.transaction((tx) => {
       anno = tx.annotate(annoData)
     })
     return {
