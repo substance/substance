@@ -16,6 +16,11 @@ import annotationHelpers from '../model/annotationHelpers'
   import { AnnotationCommand } from 'substance'
 
   config.addCommand('strong', AnnotationCommand, {nodeType: 'strong'})
+  // Disable, when cursor is collapsed
+  config.addCommand('strong', AnnotationCommand, {
+    nodeType: 'strong',
+    disableCollapsedCursor: true
+  })
   ```
 */
 
@@ -62,6 +67,11 @@ class AnnotationCommand extends Command {
         sel.isNodeSelection() || sel.isContainerSelection()) {
       return true
     }
+
+    if (this.config.disableCollapsedCursor && sel.isCollapsed()) {
+      return true
+    }
+
     return false
   }
 

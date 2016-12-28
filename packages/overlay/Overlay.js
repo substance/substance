@@ -87,7 +87,7 @@ class Overlay extends Toolbox {
   }
 
   getActiveToolGroupNames() {
-    return ['overlay']
+    return this.props.toolGroups || ['overlay']
   }
 
 }

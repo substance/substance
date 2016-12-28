@@ -35,11 +35,20 @@ class SwitchTextTypeCommand extends Command {
     return currentTextType
   }
 
+  isDisabled({selection, surface}) {
+    if (!surface || !surface.isEnabled() || selection.isNull()) {
+      return true
+    }
+    // When command is configured to be disabled for collapsed cursor
+    if (selection && !this.config.disableCollapsedCursor && selection.isCollapsed()) {
+      return true
+    }
+    return false
+  }
+
   getCommandState(params) {
     let doc = params.editorSession.getDocument()
     let sel = params.selection
-    let surface = params.surface
-
 
     let node
     let newState = {
@@ -47,7 +56,7 @@ class SwitchTextTypeCommand extends Command {
       textTypes: this.getTextTypes(params)
     }
     // Set disabled when not a property selection
-    if (!surface || !surface.isEnabled() || sel.isNull()) {
+    if (this.isDisabled(params)) {
       newState.disabled = true
     } else if (sel.isContainerSelection()) {
       newState.disabled = true

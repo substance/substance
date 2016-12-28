@@ -93,6 +93,10 @@ export { default as Button } from './packages/button/Button'
 export { default as ScrollPanePackage } from './packages/scroll-pane/ScrollPanePackage'
 export { default as ScrollPane } from './packages/scroll-pane/ScrollPane'
 
+// body-scroll-pane
+export { default as BodyScrollPanePackage } from './packages/body-scroll-pane/BodyScrollPanePackage'
+export { default as BodyScrollPane } from './packages/body-scroll-pane/BodyScrollPane'
+
 // spell-check
 export { default as SpellCheckPackage } from './packages/spell-check/SpellCheckPackage'
 export { default as SpellCheckManager } from './packages/spell-check/SpellCheckManager'

@@ -10,15 +10,22 @@ import platform from '../../util/platform'
 
 export default {
   name: 'link',
-  configure: function(config, options) {
+  configure: function(config, {toolGroup, editLinkToolGroup, disableCollapsedCursor}) {
     config.addNode(Link)
     config.addComponent('link', LinkComponent)
     config.addConverter('html', LinkHTMLConverter)
     config.addConverter('xml', LinkXMLConverter)
     config.addCommand('link', LinkCommand, {nodeType: 'link'})
-    config.addCommand('edit-link', EditAnnotationCommand, {nodeType: 'link'})
-    config.addTool('link', AnnotationTool, {toolGroup: options.toolGroup || 'annotations'})
-    config.addTool('edit-link', EditLinkTool, { toolGroup: options.editLinkToolGroup || 'overlay' })
+    config.addCommand('edit-link', EditAnnotationCommand, {
+      nodeType: 'link',
+      disableCollapsedCursor
+    })
+    config.addTool('link', AnnotationTool, {
+      toolGroup: toolGroup || 'annotations'
+    })
+    config.addTool('edit-link', EditLinkTool, {
+      toolGroup: editLinkToolGroup || 'overlay'
+    })
     config.addIcon('link', { 'fontawesome': 'fa-link'})
     config.addIcon('open-link', { 'fontawesome': 'fa-external-link' })
     config.addLabel('link', {
