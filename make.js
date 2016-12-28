@@ -57,6 +57,12 @@ b.task('server', function() {
   _server('./dist/', true)
 })
 
+b.task('server:pure', function() {
+  // for the time being we transpile the cjs bundle
+  // so it works in node 4 too
+  _server('./dist/', false)
+})
+
 var TEST ='.test/'
 
 b.task('test:clean', function() {
@@ -173,6 +179,8 @@ b.task('npm:server', function() {
 })
 
 b.task('build', ['clean', 'browser', 'server'])
+
+b.task('build:pure', ['clean', 'browser:pure', 'server:pure'])
 
 b.task('test', ['test:clean', 'test:assets', 'test:browser', 'test:server'])
 
