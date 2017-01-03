@@ -5,7 +5,7 @@ import isString from '../util/isString'
 import forEach from '../util/forEach'
 import uuid from '../util/uuid'
 import EventEmitter from '../util/EventEmitter'
-import DocumentIndex from './DocumentIndex'
+import PropertyIndex from './data/PropertyIndex'
 import AnnotationIndex from './AnnotationIndex'
 import ContainerAnnotationIndex from './ContainerAnnotationIndex'
 // import AnchorIndex from './AnchorIndex'
@@ -67,7 +67,7 @@ class Document extends EventEmitter {
     })
 
     // all by type
-    this.addIndex('type', DocumentIndex.create({ property: "type" }))
+    this.addIndex('type', new PropertyIndex('type'))
 
     // special index for (property-scoped) annotations
     this.addIndex('annotations', new AnnotationIndex())

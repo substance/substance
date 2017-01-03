@@ -1,10 +1,9 @@
 import { module } from 'substance-test'
 
 import annotationHelpers from '../../model/annotationHelpers'
-import documentHelpers from '../../model/documentHelpers'
 import EditingInterface from '../../model/EditingInterface'
-import fixture from '../fixtures/createTestArticle'
-import containerAnnoSample from '../fixtures/containerAnnoSample'
+import createTestArticle from '../fixtures/createTestArticle'
+import simple from '../fixtures/simple'
 
 const test = module('model/annotationHelpers')
 
@@ -12,8 +11,14 @@ let truncateAnnotation = annotationHelpers.truncateAnnotation
 let expandAnnotation = annotationHelpers.expandAnnotation
 let fuseAnnotation = annotationHelpers.fuseAnnotation
 
+// test("Updating annotation index when transferring annotations", function(t) {
+//   let tx = new EditingInterface(fixture())
+
+//   t.end()
+// })
+
 test("Truncate property annotation with a given property selection", function(t) {
-  let doc = fixture(containerAnnoSample)
+  let doc = fixture(A1)
   // Put cursor inside an the existing annotation
   let sel = doc.createSelection({
     type: 'property',
@@ -21,29 +26,29 @@ test("Truncate property annotation with a given property selection", function(t)
     startOffset: 1,
     endOffset: 2
   })
-  let a2 = doc.get('a2')
-  truncateAnnotation(doc, a2, sel)
-  t.equal(a2.start.offset, 0, 'startOffset should be 0')
-  t.equal(a2.end.offset, 1, 'endOffset should have changed from 2 to 1')
+  let anno = doc.get('a1')
+  truncateAnnotation(doc, anno, sel)
+  t.equal(anno.start.offset, 0, 'startOffset should be 0')
+  t.equal(anno.end.offset, 1, 'endOffset should have changed from 2 to 1')
   t.end()
 })
 
 test("Truncate container annotation with a given property selection", function(t) {
-  let doc = fixture(containerAnnoSample)
+  let doc = fixture(CA1)
   let sel = doc.createSelection({
     type: 'property',
     path: ['p3', 'content'],
     startOffset: 1,
     endOffset: 4
   })
-  let a1 = doc.get('a1')
-  truncateAnnotation(doc, a1, sel)
-  t.equal(a1.end.offset, 1, 'endOffset should be 1')
+  let anno = doc.get('ca1')
+  truncateAnnotation(doc, anno, sel)
+  t.equal(anno.end.offset, 1, 'endOffset should be 1')
   t.end()
 })
 
 test("Truncate container annotation with a given container selection", function(t) {
-  let doc = fixture(containerAnnoSample)
+  let doc = fixture(CA1)
   let sel = doc.createSelection({
     type: 'container',
     containerId: 'body',
@@ -52,23 +57,22 @@ test("Truncate container annotation with a given container selection", function(
     endPath: ['p3', 'content'],
     endOffset: 4,
   })
-  let a1 = doc.get('a1')
-  truncateAnnotation(doc, a1, sel)
-  t.deepEqual(a1.end.path, ['p2', 'content'], 'endPath should be p2.content')
-  t.equal(a1.end.offset, 1, 'endOffset should be 1')
+  let anno = doc.get('ca1')
+  truncateAnnotation(doc, anno, sel)
+  t.deepEqual(anno.end.path, ['p2', 'content'], 'endPath should be p2.content')
+  t.equal(anno.end.offset, 1, 'endOffset should be 1')
   t.end()
 })
 
 test("Expand-right of property annotation for a given property selection", function(t) {
-  let doc = fixture(containerAnnoSample)
+  let doc = fixture(A1)
   let sel = doc.createSelection({
     type: 'property',
     path: ['p1', 'content'],
     startOffset: 1,
     endOffset: 6
   })
-  let annos = documentHelpers.getPropertyAnnotationsForSelection(doc, sel, { type: 'strong' })
-  let anno = annos[0]
+  let anno = doc.get('a1')
   expandAnnotation(doc, anno, sel)
   t.equal(anno.start.offset, 0, 'startOffset should be 0')
   t.equal(anno.end.offset, 6, 'endOffset should have changed from 2 to 1')
@@ -76,21 +80,21 @@ test("Expand-right of property annotation for a given property selection", funct
 })
 
 test("Expand container annotation for a given property selection (right expansion)", function(t) {
-  let doc = fixture(containerAnnoSample)
+  let doc = fixture(CA1)
   let sel = doc.createSelection({
     type: 'property',
     path: ['p3', 'content'],
     startOffset: 1,
     endOffset: 6
   })
-  let anno = doc.get('a1')
+  let anno = doc.get('ca1')
   expandAnnotation(doc, anno, sel)
   t.equal(anno.end.offset, 6, 'endOffset should be 6')
   t.end()
 })
 
 test("Expand container annotation for a given container selection (expand right)", function(t) {
-  let doc = fixture(containerAnnoSample)
+  let doc = fixture(CA1)
   let sel = doc.createSelection({
     type: 'container',
     containerId: 'body',
@@ -99,7 +103,7 @@ test("Expand container annotation for a given container selection (expand right)
     endPath: ['p3', 'content'],
     endOffset: 6,
   })
-  let anno = doc.get('a1')
+  let anno = doc.get('ca1')
   expandAnnotation(doc, anno, sel)
   t.deepEqual(anno.end.path, ['p3', 'content'], 'endPath should be p2.content')
   t.equal(anno.end.offset, 6, 'endOffset should be 6')
@@ -107,7 +111,7 @@ test("Expand container annotation for a given container selection (expand right)
 })
 
 test("Fuse two property annotations for a given property selection", function(t) {
-  let tx = new EditingInterface(fixturePlus())
+  let tx = new EditingInterface(fixture(A1, A2))
   // Put selection so that it touches both strong annotations
   tx.setSelection({
     type: 'property',
@@ -115,39 +119,59 @@ test("Fuse two property annotations for a given property selection", function(t)
     startOffset: 1,
     endOffset: 6
   })
+  let a1 = tx.get('a1')
   let a2 = tx.get('a2')
-  let a3 = tx.get('a3')
-  fuseAnnotation(tx, [a2, a3])
-  t.isNil(tx.get('a3'), 'a3 should be gone.')
-  t.equal(a2.start.offset, 0, 'startOffset should be 0')
-  t.equal(a2.end.offset, 6, 'endOffset should be 6')
+  fuseAnnotation(tx, [a1, a2])
+  t.isNil(tx.get('a2'), 'a2 should be gone.')
+  t.equal(a1.start.offset, 0, 'startOffset should be 0')
+  t.equal(a1.end.offset, 6, 'endOffset should be 6')
   t.end()
 })
 
 test("Fuse two conatiner annotations for a given property selection", function(t) {
-  let tx = new EditingInterface(fixturePlus())
+  let tx = new EditingInterface(fixture(CA1, CA2))
   tx.setSelection({
     type: 'property',
     path: ['p3', 'content'],
     startOffset: 3,
     endOffset: 8
   })
-  let a1 = tx.get('a1')
-  let a4 = tx.get('a4')
-  fuseAnnotation(tx, [a1, a4])
-  t.isNil(tx.get('a4'), 'a4 should be gone.')
-  t.deepEqual(a1.start.path, ['p1', 'content'], 'startPath should be p1.content')
-  t.equal(a1.start.offset, 5, 'startOffset should be 5')
-  t.deepEqual(a1.end.path, ['p4', 'content'], 'endPath should be p1.content')
-  t.equal(a1.end.offset, 9, 'a1.end.offset should be 9')
+  let ca1 = tx.get('ca1')
+  let ca2 = tx.get('ca2')
+  fuseAnnotation(tx, [ca1, ca2])
+  t.isNil(tx.get('ca2'), 'ca2 should be gone.')
+  t.deepEqual(ca1.start.path, ['p1', 'content'], 'start pPath should be p1.content')
+  t.equal(ca1.start.offset, 5, 'start offset should be 5')
+  t.deepEqual(ca1.end.path, ['p4', 'content'], 'end path should be p1.content')
+  t.equal(ca1.end.offset, 9, 'end offset should be 9')
   t.end()
 })
 
-function fixturePlus() {
-  let doc = fixture(containerAnnoSample)
-  // Create a second strong annotation to be fused
+function fixture(...fns) {
+  let doc = createTestArticle(simple)
+  fns.forEach((fn)=>{
+    fn(doc)
+  })
+  return doc
+}
+
+function A1(doc) {
   doc.create({
-    id: 'a3',
+    type: 'strong',
+    id: 'a1',
+    start: {
+      path: ['p1', 'content'],
+      offset: 0,
+    },
+    end: {
+      offset: 2
+    }
+  })
+}
+
+function A2(doc) {
+  doc.create({
+    id: 'a2',
     type: 'strong',
     start: {
       path: ['p1', 'content'],
@@ -157,10 +181,28 @@ function fixturePlus() {
       offset: 6
     }
   })
-  // Create a second container annotation to be fused
+}
+
+function CA1(doc) {
   doc.create({
     type: 'test-container-anno',
-    id: 'a4',
+    id: 'ca1',
+    start: {
+      path: ['p1', 'content'],
+      offset: 5,
+    },
+    end: {
+      path: ['p3', 'content'],
+      offset: 4
+    },
+    containerId: 'body'
+  })
+}
+
+function CA2(doc) {
+  doc.create({
+    type: 'test-container-anno',
+    id: 'ca2',
     containerId: 'body',
     start: {
       path: ['p3', 'content'],
@@ -171,5 +213,4 @@ function fixturePlus() {
       offset: 9,
     }
   })
-  return doc
 }
