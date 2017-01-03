@@ -7,7 +7,6 @@ import Component from '../../ui/Component'
   $$(Button, {
     name: 'add-ref' // used to resolve icon and label
     label: 'Add reference' // optional if you want to set the label string explicity
-    hint: 'CTRL+5' // optional if you want to set the hint string explicitly
   })
   ```
 */
@@ -22,16 +21,12 @@ class Button extends Component {
     if (this.props.label) {
       el.append(this.renderLabel($$))
     }
-    if (this.props.hint) {
-      el.append(this.renderHint($$))
-    }
     if (this.props.active) {
       el.addClass('sm-active')
     }
     if (this.props.style) {
       el.addClass('sm-style-'+this.props.style)
     }
-
     if (this.props.disabled) {
       // make button inaccessible
       el.attr('tabindex', -1)
@@ -41,8 +36,7 @@ class Button extends Component {
       el.attr('tabindex', 1)
     }
 
-    // Ability to inject additional elements
-    // Should be avoided
+    // Ability to inject additional elements (should be avoided!)
     el.append(this.props.children)
     return el
   }
