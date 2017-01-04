@@ -1,4 +1,5 @@
-import { cloneDeep, last } from 'lodash-es'
+import cloneDeep from '../util/cloneDeep'
+import last from '../util/last'
 import forEach from '../util/forEach'
 import Document from './Document'
 import annotationHelpers from './annotationHelpers'

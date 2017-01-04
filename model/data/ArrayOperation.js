@@ -1,4 +1,5 @@
-import { isEqual, cloneDeep } from 'lodash-es'
+import cloneDeep from '../../util/cloneDeep'
+import isEqual from '../../util/isEqual'
 import isNumber from '../../util/isNumber'
 import Conflict from './Conflict'
 

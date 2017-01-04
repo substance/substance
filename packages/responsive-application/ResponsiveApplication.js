@@ -1,4 +1,4 @@
-import { cloneDeep } from 'lodash-es'
+import cloneDeep from '../../util/cloneDeep'
 import inBrowser from '../../util/inBrowser'
 import DefaultDOMElement from '../../ui/DefaultDOMElement'
 import Component from '../../ui/Component'

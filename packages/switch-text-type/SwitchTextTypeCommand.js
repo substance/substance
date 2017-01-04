@@ -1,5 +1,7 @@
+import isMatch from 'lodash-es/isMatch'
+import find from 'lodash-es/find'
+import clone from '../../util/clone'
 import Command from '../../ui/Command'
-import { isMatch, find, clone } from 'lodash-es'
 
 class SwitchTextTypeCommand extends Command {
   // Available text types on the surface

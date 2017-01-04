@@ -1,4 +1,4 @@
-import { forEach } from 'lodash-es'
+import forEach from '../util/forEach'
 import uuid from '../util/uuid'
 import substanceGlobals from '../util/substanceGlobals'
 import VirtualElement from './VirtualElement'

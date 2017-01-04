@@ -1,10 +1,10 @@
 /* eslint-disable no-invalid-this, indent */
 
 import { module, spy } from 'substance-test'
-import { isEqual } from 'lodash-es'
 import Component from '../../ui/Component'
 import TestComponent from './TestComponent'
 import substanceGlobals from '../../util/substanceGlobals'
+import isEqual from '../../util/isEqual'
 
 var Simple = TestComponent.Simple
 

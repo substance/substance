@@ -1,6 +1,6 @@
 import EventEmitter from '../util/EventEmitter'
 import forEach from '../util/forEach'
-import { without } from 'lodash-es'
+import without from '../util/without'
 
 /*
   Manages highlights. Used by {@link ui/ScrollPane}.

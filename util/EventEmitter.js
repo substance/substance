@@ -1,5 +1,5 @@
 import forEach from './forEach'
-import { isObject } from 'lodash-es'
+import isObject from './isObject'
 
 /**
   Event support.

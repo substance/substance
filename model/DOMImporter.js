@@ -1,4 +1,5 @@
-import { clone, extend } from 'lodash-es'
+import extend from '../util/extend'
+import clone from '../util/clone'
 import last from '../util/last'
 import forEach from '../util/forEach'
 import createCountingIdGenerator from '../util/createCountingIdGenerator'

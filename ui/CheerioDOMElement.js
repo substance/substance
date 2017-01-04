@@ -1,6 +1,7 @@
+import clone from '../util/clone'
+import extend from '../util/extend'
 import isString from '../util/isString'
 import last from '../util/last'
-import { extend, clone } from 'lodash-es'
 import $ from 'substance-cheerio'
 import EventEmitter from '../util/EventEmitter'
 import DOMElement from './DOMElement'

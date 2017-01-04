@@ -1,4 +1,4 @@
-import { uniq } from 'lodash-es'
+import uniq from '../util/uniq'
 import forEach from '../util/forEach'
 import isArray from '../util/isArray'
 import uuid from '../util/uuid'

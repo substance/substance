@@ -1,4 +1,4 @@
-import { extend } from 'lodash-es'
+import extend from '../util/extend'
 import isString from '../util/isString'
 import Registry from '../util/Registry'
 import Fragmenter from './Fragmenter'

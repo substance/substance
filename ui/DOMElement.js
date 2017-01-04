@@ -1,5 +1,6 @@
 /* eslint-disable no-unused-vars */
-import { isObject, findIndex } from 'lodash-es'
+import findIndex from 'lodash-es/findIndex'
+import isObject from '../util/isObject'
 import isFunction from '../util/isFunction'
 import isString from '../util/isString'
 import isArray from '../util/isArray'

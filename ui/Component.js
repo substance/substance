@@ -1,4 +1,7 @@
-import { extend, forEach, isString, isFunction } from 'lodash-es'
+import extend from '../util/extend'
+import forEach from '../util/forEach'
+import isString from '../util/isString'
+import isFunction from '../util/isFunction'
 import EventEmitter from '../util/EventEmitter'
 import RenderingEngine from './RenderingEngine'
 import VirtualElement from './VirtualElement'

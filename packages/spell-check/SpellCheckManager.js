@@ -1,4 +1,4 @@
-import { debounce } from 'lodash-es'
+import debounce from 'lodash-es/debounce'
 import isString from '../../util/isString'
 import sendRequest from '../../util/sendRequest'
 

@@ -1,4 +1,4 @@
-import { filter } from 'lodash-es'
+import filter from '../util/filter'
 import isString from '../util/isString'
 import forEach from '../util/forEach'
 import DocumentIndex from './DocumentIndex'

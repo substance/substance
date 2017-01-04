@@ -1,5 +1,5 @@
-import { isEqual, isObject} from 'lodash-es'
-
+import isEqual from '../util/isEqual'
+import isObject from '../util/isObject'
 import isArray from '../util/isArray'
 import isString from '../util/isString'
 import forEach from '../util/forEach'

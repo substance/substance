@@ -1,7 +1,7 @@
 import DOMExporter from './DOMExporter'
 import DefaultDOMElement from '../ui/DefaultDOMElement'
-import { isBoolean } from 'lodash-es'
 import forEach from '../util/forEach'
+import isBoolean from '../util/isBoolean'
 import isNumber from '../util/isNumber'
 import isString from '../util/isString'
 

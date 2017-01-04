@@ -1,8 +1,13 @@
-import {
-  clone, extend, flattenDeep, isArray, isFunction, isNil,
-  isPlainObject, isString, omit, without
-} from 'lodash-es'
-import map from '../util/map'
+import flattenDeep from 'lodash-es/flattenDeep'
+import omit from 'lodash-es/omit'
+import clone from '../util/clone'
+import extend from '../util/extend'
+import isArray from '../util/isArray'
+import isFunction from '../util/isFunction'
+import isNil from '../util/isNil'
+import isPlainObject from '../util/isPlainObject'
+import isString from '../util/isString'
+import without from '../util/without'
 import DOMElement from './DOMElement'
 
 /**

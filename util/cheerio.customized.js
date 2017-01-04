@@ -1,6 +1,6 @@
-import { extend } from 'lodash-es'
 import cheerio from 'cheerio'
 import serialize from 'dom-serializer'
+import extend from './extend'
 
 var $ = null
 

@@ -1,4 +1,7 @@
-import { isEqual, isObject, clone, cloneDeep } from 'lodash-es'
+import isEqual from '../util/isEqual'
+import isObject from '../util/isObject'
+import clone from '../util/clone'
+import cloneDeep from '../util/cloneDeep'
 import isArray from '../util/isArray'
 import forEach from '../util/forEach'
 import map from '../util/map'

@@ -1,4 +1,6 @@
-import { extend, isNumber, isString } from 'lodash-es'
+import extend from '../util/extend'
+import isNumber from '../util/isNumber'
+import isString from '../util/isString'
 import DocumentNode from './DocumentNode'
 import ParentNodeMixin from './ParentNodeMixin'
 import ContainerAddress from './ContainerAddress'
