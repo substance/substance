@@ -2,7 +2,6 @@ import Command from '../../ui/Command'
 import { isMatch, find, clone } from 'lodash-es'
 
 class SwitchTextTypeCommand extends Command {
-
   // Available text types on the surface
   getTextTypes(params) {
     let surface = params.surface
@@ -40,7 +39,7 @@ class SwitchTextTypeCommand extends Command {
       return true
     }
     // When command is configured to be disabled for collapsed cursor
-    if (selection && !this.config.disableCollapsedCursor && selection.isCollapsed()) {
+    if (selection && this.config.disableCollapsedCursor && selection.isCollapsed()) {
       return true
     }
     return false

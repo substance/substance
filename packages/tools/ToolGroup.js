@@ -14,7 +14,6 @@ class ToolGroup extends Component {
       let toolProps = Object.assign({}, tool.toolProps, {
         showIcon: this.props.showIcons,
         showLabel: this.props.showLabels,
-        showHint: this.props.showHints,
         style: this.props.toolStyle
       })
       el.append(

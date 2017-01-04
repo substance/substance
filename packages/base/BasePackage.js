@@ -1,4 +1,3 @@
-import BlockerPackage from '../blocker/BlockerPackage'
 import ButtonPackage from '../button/ButtonPackage'
 import ContextMenuPackage from '../context-menu/ContextMenuPackage'
 import GridPackage from '../grid/GridPackage'
@@ -12,7 +11,6 @@ import ScrollbarPackage from '../scrollbar/ScrollbarPackage'
 import ScrollPanePackage from '../scroll-pane/ScrollPanePackage'
 import BodyScrollPanePackage from '../body-scroll-pane/BodyScrollPanePackage'
 import SplitPanePackage from '../split-pane/SplitPanePackage'
-import SwitchTextTypePackage from '../switch-text-type/SwitchTextTypePackage'
 import TabbedPanePackage from '../tabbed-pane/TabbedPanePackage'
 import FilePackage from '../file/FilePackage'
 import Tool from '../tools/Tool'
@@ -24,10 +22,8 @@ import SelectAllCommand from './SelectAllCommand'
 
 export default {
   name: 'base',
-  configure: function(config, {disableCollapsedCursor}) {
+  configure: function(config) {
     config.import(FilePackage)
-    config.import(BlockerPackage)
-    config.import(SwitchTextTypePackage, {disableCollapsedCursor})
     config.import(ScrollPanePackage)
     config.import(BodyScrollPanePackage)
     config.import(SplitPanePackage)

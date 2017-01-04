@@ -10,7 +10,7 @@ textarea {
   font-size: var(--default-font-size);
   min-height: 30px;
   line-height: 1.5;
-  -webkit-font-smoothing:antialiased;
+  /*-webkit-font-smoothing:antialiased;*/
 }
 
 h1, h2, h3, h4, h5, h6 {
