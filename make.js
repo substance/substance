@@ -1,23 +1,36 @@
-var b = require('substance-bundler')
+let b = require('substance-bundler')
 
-b.task('clean', function() {
-  b.rm('./dist')
-  b.rm('./.test')
-  b.rm('./.docs')
-  b.rm('./.npm')
-})
+// Constants
+// ---------
 
+const TEST ='.test/'
+const NPM = '.npm/'
+const NPMDIST = NPM+'dist/'
+const STUFF = [
+  'package.json',
+  'LICENSE.md',
+  'README.md',
+  'CHANGELOG.md',
+  'make.js'
+]
+
+
+// Helpers
+// -------
+// Doing the actual work
+
+// creates a browser bundle
 function _browser(DIST, transpileToES5) {
   b.js('./index.es.js', {
-    buble: transpileToES5,
-    ignore: ['substance-cheerio'],
-    targets: [{
-      useStrict: !transpileToES5,
+    target: {
       dest: DIST+'substance.js',
-      format: 'umd', moduleName: 'substance', sourceMapRoot: __dirname, sourceMapPrefix: 'substance'
-    }]
+      format: 'umd', moduleName: 'substance',
+      sourceMapRoot: __dirname, sourceMapPrefix: 'substance',
+      useStrict: !transpileToES5,
+    },
+    ignore: ['substance-cheerio'],
+    buble: transpileToES5
   })
-
   b.css('substance.css', DIST+'substance.css', { variables: true })
   b.css('substance.css', DIST+'substance.next.css')
   b.css('substance-pagestyle.css', DIST+'substance-pagestyle.css', {variables: true})
@@ -26,122 +39,47 @@ function _browser(DIST, transpileToES5) {
   b.css('substance-reset.css', DIST+'substance-reset.next.css')
 }
 
-
-b.task('browser:pure', function() {
-  _browser('./dist/', false)
-})
-
-b.task('browser', function() {
-  _browser('./dist/', true)
-})
-
-
+// creates a server bundle
 function _server(DIST, transpileToES5) {
   b.js('./index.es.js', {
-    buble: transpileToES5,
-    commonjs: { include: [
-      // TODO: Can we switch the substance-cheerio bundle to expose ES6
-      '/**/substance-cheerio/**'
-    ] },
-    external: [ 'substance-cheerio' ],
-    targets: [{
+    target: {
       dest: DIST+'substance.cjs.js',
-      format: 'cjs', sourceMapRoot: __dirname, sourceMapPrefix: 'substance'
-    }]
+      format: 'cjs',
+      sourceMapRoot: __dirname, sourceMapPrefix: 'substance'
+    },
+    buble: transpileToES5,
+    external: [ 'substance-cheerio' ]
   })
 }
 
-b.task('server', function() {
-  // for the time being we transpile the cjs bundle
-  // so it works in node 4 too
-  _server('./dist/', true)
-})
-
-b.task('server:pure', function() {
-  // for the time being we transpile the cjs bundle
-  // so it works in node 4 too
-  _server('./dist/', false)
-})
-
-var TEST ='.test/'
-
-b.task('test:clean', function() {
-  b.rm(TEST)
-})
-
-b.task('test:assets', function() {
-  // TODO: it would be nice to treat such glob patterns
-  // differently, so that we do not need to specify glob root
-  b.copy('./node_modules/substance-test/dist/*', TEST, { root: './node_modules/substance-test/dist' })
-})
-
-
+// bundles the test suite to be run in a browser
 function _testBrowser(transpileToES5) {
   b.js('./test/index.js', {
+    target: {
+      dest: TEST+'tests.js',
+      format: 'umd', moduleName: 'tests'
+    },
     buble: transpileToES5,
-    ignore: ['substance-cheerio'],
-    external: ['substance-test'],
-    targets: [
-      { dest: TEST+'tests.js', format: 'umd', moduleName: 'tests' }
-    ]
+    ignore: [ 'substance-cheerio' ],
+    external: [ 'substance-test' ]
   })
 }
 
-b.task('test:browser', ['test:clean', 'test:assets'], function() {
-  // buble necessary here, as travis has old browser versions
-  _testBrowser(true)
-})
-
-b.task('test:browser:pure', ['test:clean', 'test:assets'], function() {
-  // Pure ES6, and no buble here, for better dev experience
-  _testBrowser(false)
-})
-
-b.task('test:server', function() {
+// bundles the test suite to be run in node
+function _testServer() {
   b.js('./test/index.js', {
+    target: {
+      dest: TEST+'tests.cjs.js',
+      format: 'cjs'
+    },
     // buble necessary here, for nodejs
     buble: true,
-    external: ['substance-test'],
-    commonjs: {
-      include: [
-        '/**/substance-cheerio/**'
-      ]
-    },
-    targets: [
-      { dest: TEST+'tests.cjs.js', format: 'cjs' },
-    ]
+    external: [ 'substance-test' ],
+    commonjs: [ 'substance-cheerio' ]
   })
-})
+}
 
-var NPM = '.npm/'
-var NPMDIST = NPM+'dist/'
-
-b.task('npm:clean', function() {
-  b.rm(NPM)
-})
-
-var stuff = [
-  'package.json',
-  'LICENSE.md',
-  'README.md',
-  'CHANGELOG.md',
-  'make.js'
-]
-b.task('npm:copy:sources', function() {
-  b.copy('index.es.js', NPM)
-  b.copy('collab/*.js', NPM)
-  b.copy('model/**/*.js', NPM)
-  b.copy('packages/**/*.js', NPM)
-  b.copy('ui/*.js', NPM)
-  b.copy('util/*.js', NPM)
-  b.copy('test/**/*.js', NPM)
-  b.copy('*.css', NPM)
-  b.copy('packages/**/*.css', NPM)
-  stuff.forEach(function(f) {
-    b.copy(f, NPM)
-  })
-})
-
+// generates API documentation
 function _docs(mode, dest) {
   var docgen = require('substance-docgen')
   docgen.bundle(b, {
@@ -159,6 +97,79 @@ function _docs(mode, dest) {
     mode: mode // one of: 'source', 'json', 'site' (default: 'json')
   })
 }
+
+// Tasks
+// -----
+
+b.task('clean', function() {
+  b.rm('./dist')
+  b.rm('./.test')
+  b.rm('./.docs')
+  b.rm('./.npm')
+})
+
+b.task('browser:pure', function() {
+  _browser('./dist/', false)
+})
+
+b.task('browser', function() {
+  _browser('./dist/', true)
+})
+
+b.task('server', function() {
+  // for the time being we transpile the cjs bundle
+  // so it works in node 4 too
+  _server('./dist/', true)
+})
+
+b.task('server:pure', function() {
+  // for the time being we transpile the cjs bundle
+  // so it works in node 4 too
+  _server('./dist/', false)
+})
+
+b.task('test:clean', function() {
+  b.rm(TEST)
+})
+
+b.task('test:assets', function() {
+  // TODO: it would be nice to treat such glob patterns
+  // differently, so that we do not need to specify glob root
+  b.copy('./node_modules/substance-test/dist/*', TEST, { root: './node_modules/substance-test/dist' })
+})
+
+b.task('test:browser', ['test:clean', 'test:assets'], function() {
+  // buble necessary here, as travis has old browser versions
+  _testBrowser(true)
+})
+
+b.task('test:browser:pure', ['test:clean', 'test:assets'], function() {
+  // Pure ES6, and no buble here, for better dev experience
+  _testBrowser(false)
+})
+
+b.task('test:server', function() {
+  _testServer()
+})
+
+b.task('npm:clean', function() {
+  b.rm(NPM)
+})
+
+b.task('npm:copy:sources', function() {
+  b.copy('index.es.js', NPM)
+  b.copy('collab/*.js', NPM)
+  b.copy('model/**/*.js', NPM)
+  b.copy('packages/**/*.js', NPM)
+  b.copy('ui/*.js', NPM)
+  b.copy('util/*.js', NPM)
+  b.copy('test/**/*.js', NPM)
+  b.copy('*.css', NPM)
+  b.copy('packages/**/*.css', NPM)
+  STUFF.forEach(function(f) {
+    b.copy(f, NPM)
+  })
+})
 
 b.task('docs', function() {
   // creates a data.js file with prebuilt documentation
@@ -191,7 +202,9 @@ b.task('default', ['build'])
 // Default dev mode, only browser bundles are made and no ES5 transpilation happens
 b.task('dev', ['clean', 'browser:pure', 'test:assets', 'test:browser:pure' , 'docs'])
 
-// SERVER
+
+// HTTP server
+// -----------
 
 // starts a server when CLI argument '-s' is set
 b.setServerPort(5550)
