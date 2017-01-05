@@ -14,6 +14,6 @@ export default {
   },
 
   export: function(node, el, converter) {
-    el.append(converter.annotatedText(item.getTextPath()))
+    el.append(converter.annotatedText(node.getTextPath()))
   }
 }

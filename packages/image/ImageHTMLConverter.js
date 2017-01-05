@@ -8,9 +8,9 @@ export default {
 
   import: function(el, node, converter) {
     let imageFile = {
-        type: 'file',
-        fileType: 'image',
-        url: el.attr('src')
+      type: 'file',
+      fileType: 'image',
+      url: el.attr('src')
     }
     converter.createNode(imageFile)
     node.imageFile = imageFile.id

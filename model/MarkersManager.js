@@ -229,7 +229,7 @@ class MarkersIndex {
     const length = op.str.length
     if (length === 0) return
     markers.forEach(function(marker) {
-      console.log('Transforming marker after insert')
+      // console.log('Transforming marker after insert')
       var start = marker.startOffset;
       var end = marker.endOffset;
       var newStart = start;

@@ -47,7 +47,7 @@ class ClipboardImporter extends HTMLImporter {
     if (this._isWindows) {
       // Under windows we can exploit <!--StartFragment--> and <!--EndFragment-->
       // to have an easier life
-      let match = /<!--StartFragment\-->(.*)<!--EndFragment-->/.exec(html)
+      let match = /<!--StartFragment-->(.*)<!--EndFragment-->/.exec(html)
       if (match) {
         html = match[1]
       }

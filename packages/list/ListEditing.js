@@ -92,7 +92,7 @@ class ListEditing extends TextNodeEditing {
   }
 
   merge() {
-    console.log('TODO: merge list node')
+    console.warn('TODO: merge list node')
   }
 }
 

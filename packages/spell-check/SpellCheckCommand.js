@@ -11,8 +11,10 @@ class SpellCheckCommand extends Command {
 
     let state = params.selectionState
     let markers = state.getMarkers()
-    if (markers.length === 0) return {
-      disabled: true
+    if (markers.length === 0) {
+      return {
+        disabled: true
+      }
     }
     markers = markers.filter(function(m) {
       return m.type === 'spell-error'

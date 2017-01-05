@@ -167,7 +167,7 @@ class Editing {
       } else {
         // just put the selection in the next or previous node
         // TODO: need to be implemented
-        console.log('TODO: put the selection into previous/next node.')
+        console.warn('TODO: put the selection into previous/next node.')
       }
       return
     }

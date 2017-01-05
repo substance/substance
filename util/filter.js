@@ -1,4 +1,3 @@
-import isArray from './isArray'
 import isFunction from './isFunction'
 import forEach from './forEach'
 
