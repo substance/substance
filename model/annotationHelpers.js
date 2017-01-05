@@ -1,4 +1,3 @@
-import uniq from '../util/uniq'
 import forEach from '../util/forEach'
 import isArray from '../util/isArray'
 import uuid from '../util/uuid'
@@ -120,13 +119,16 @@ function deletedText(doc, path, startOffset, endOffset) {
     }
   });
   // check all anchors after that if they have collapsed and remove the annotation in that case
-  forEach(uniq(containerAnnoIds), function(id) {
+  let checked = {}
+  forEach(containerAnnoIds, function(id) {
+    if (checked[id]) return
     var anno = doc.get(id);
     var annoSel = anno.getSelection();
     if(annoSel.isCollapsed()) {
       // console.log("...deleting container annotation because it has collapsed" + id);
       doc.delete(id);
     }
+    checked[id] = true
   });
 }
 
@@ -193,13 +195,16 @@ function transferAnnotations(doc, path, offset, newPath, newOffset) {
     }
   });
   // check all anchors after that if they have collapsed and remove the annotation in that case
-  forEach(uniq(containerAnnoIds), function(id) {
+  let checked = {}
+  forEach(containerAnnoIds, function(id) {
+    if (checked[id]) return
     var anno = doc.get(id);
     var annoSel = anno.getSelection();
     if(annoSel.isCollapsed()) {
       // console.log("...deleting container annotation because it has collapsed" + id);
       doc.delete(id);
     }
+    checked[id] = true
   });
 }
 

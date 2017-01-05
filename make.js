@@ -14,7 +14,6 @@ const STUFF = [
   'make.js'
 ]
 
-
 // Helpers
 // -------
 // Doing the actual work

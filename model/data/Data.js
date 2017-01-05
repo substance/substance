@@ -1,4 +1,3 @@
-import cloneDeep from '../../util/cloneDeep'
 import isArray from '../../util/isArray'
 import isPlainObject from '../../util/isPlainObject'
 import isString from '../../util/isString'
@@ -338,9 +337,13 @@ class Data extends EventEmitter {
     @deprecated
    */
   toJSON() {
+    let nodes = {}
+    forEach(this.nodes, (node)=>{
+      nodes[node.id] = node.toJSON()
+    })
     return {
       schema: [this.schema.id, this.schema.version],
-      nodes: cloneDeep(this.nodes)
+      nodes: nodes
     }
   }
 

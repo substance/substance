@@ -1,5 +1,5 @@
-import forEach from '../util/forEach'
 import DataNode from './data/Node'
+import forEach from '../util/forEach'
 import EventEmitter from '../util/EventEmitter'
 
 /**

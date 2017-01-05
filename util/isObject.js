@@ -1,1 +1,6 @@
-export { default } from 'lodash-es/isObject'
+function isObject(val) {
+  const type = typeof val
+  return Boolean(val) && (type == 'object' || type == 'function')
+}
+
+export default isObject

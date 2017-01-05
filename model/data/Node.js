@@ -1,13 +1,13 @@
 import cloneDeep from '../../util/cloneDeep'
+import forEach from '../../util/forEach'
 import isArray from '../../util/isArray'
 import isBoolean from '../../util/isBoolean'
 import isNumber from '../../util/isNumber'
 import isObject from '../../util/isObject'
 import isString from '../../util/isString'
 import isPlainObject from '../../util/isPlainObject'
-import EventEmitter from '../../util/EventEmitter'
-import forEach from '../../util/forEach'
 import last from '../../util/last'
+import EventEmitter from '../../util/EventEmitter'
 
 class Property {
   constructor(spec) {
