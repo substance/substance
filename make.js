@@ -1,4 +1,5 @@
 let b = require('substance-bundler')
+let eslint = require('eslint')
 
 // Constants
 // ---------
@@ -28,7 +29,8 @@ function _browser(DIST, transpileToES5) {
       useStrict: !transpileToES5,
     },
     ignore: ['substance-cheerio'],
-    buble: transpileToES5
+    buble: transpileToES5,
+    eslint: eslint
   })
   b.css('substance.css', DIST+'substance.css', { variables: true })
   b.css('substance.css', DIST+'substance.next.css')
@@ -47,7 +49,8 @@ function _server(DIST, transpileToES5) {
       sourceMapRoot: __dirname, sourceMapPrefix: 'substance'
     },
     buble: transpileToES5,
-    external: [ 'substance-cheerio' ]
+    external: [ 'substance-cheerio' ],
+    eslint: eslint
   })
 }
 
@@ -73,8 +76,7 @@ function _testServer() {
     },
     // buble necessary here, for nodejs
     buble: true,
-    external: [ 'substance-test' ],
-    commonjs: [ 'substance-cheerio' ]
+    external: [ 'substance-test', 'util', 'events', 'stream', 'buffer' ],
   })
 }
 

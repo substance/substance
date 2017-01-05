@@ -24,6 +24,7 @@
     "lodash-es": "4.13.1"
   },
   "devDependencies": {
+    "eslint": "^3.12.2",
     "karma": "0.13.22",
     "karma-chrome-launcher": "1.0.1",
     "karma-firefox-launcher": "1.0.0",
