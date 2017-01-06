@@ -309,7 +309,7 @@ class VirtualHTMLElement extends VirtualElement {
 
   removeChild(child) {
     if (!child || !child._isVirtualElement) {
-      throw new Error('removeChild(): Illegal arguments. Expecting a CheerioDOMElement instance.')
+      throw new Error('removeChild(): Illegal arguments. Expecting a VirtualElement instance.')
     }
     var idx = this.children.indexOf(child)
     if (idx < 0) {
@@ -322,7 +322,7 @@ class VirtualHTMLElement extends VirtualElement {
   replaceChild(oldChild, newChild) {
     if (!newChild || !oldChild ||
         !newChild._isVirtualElement || !oldChild._isVirtualElement) {
-      throw new Error('replaceChild(): Illegal arguments. Expecting BrowserDOMElement instances.')
+      throw new Error('replaceChild(): Illegal arguments. Expecting VirtualElement instances.')
     }
     var idx = this.children.indexOf(oldChild)
     if (idx < 0) {
