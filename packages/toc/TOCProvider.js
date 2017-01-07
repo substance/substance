@@ -1,4 +1,4 @@
-import includes from 'lodash-es/includes'
+import includes from '../../util/includes'
 import forEach from '../../util/forEach'
 import EventEmitter from '../../util/EventEmitter'
 

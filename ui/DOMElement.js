@@ -1,5 +1,3 @@
-/* eslint-disable no-unused-vars */
-import findIndex from 'lodash-es/findIndex'
 import isObject from '../util/isObject'
 import isFunction from '../util/isFunction'
 import isString from '../util/isString'
@@ -91,7 +89,7 @@ class DOMElement {
     @param {String} className
     @returns {Boolean} true if the CSS class is set
   */
-  hasClass(className) {
+  hasClass(className) { // eslint-disable-line no-unused-vars
     throw new Error(NOT_IMPLEMENTED)
   }
 
@@ -102,7 +100,7 @@ class DOMElement {
     @param {String} classString A space-separated string with CSS classes
     @returns {this}
   */
-  addClass(classString) {
+  addClass(classString) { // eslint-disable-line no-unused-vars
     throw new Error(NOT_IMPLEMENTED)
   }
 
@@ -113,7 +111,7 @@ class DOMElement {
     @param {String} classString A space-separated string with CSS classes
     @returns {this}
   */
-  removeClass(classString) {
+  removeClass(classString) { // eslint-disable-line no-unused-vars
     throw new Error(NOT_IMPLEMENTED)
   }
 
@@ -165,7 +163,7 @@ class DOMElement {
     @abstract
     @returns {String} the attribute's value.
   */
-  getAttribute(name) {
+  getAttribute(name) { // eslint-disable-line no-unused-vars
     throw new Error(NOT_IMPLEMENTED)
   }
 
@@ -176,11 +174,11 @@ class DOMElement {
     @param {String} the attribute's value.
     @returns {this}
   */
-  setAttribute(name, value) {
+  setAttribute(name, value) { // eslint-disable-line no-unused-vars
     throw new Error(NOT_IMPLEMENTED)
   }
 
-  removeAttribute(name) {
+  removeAttribute(name) { // eslint-disable-line no-unused-vars
     throw new Error(NOT_IMPLEMENTED)
   }
 
@@ -211,15 +209,15 @@ class DOMElement {
     return this
   }
 
-  getProperty(name) {
+  getProperty(name) { // eslint-disable-line no-unused-vars
     throw new Error(NOT_IMPLEMENTED)
   }
 
-  setProperty(name, value) {
+  setProperty(name, value) { // eslint-disable-line no-unused-vars
     throw new Error(NOT_IMPLEMENTED)
   }
 
-  removeProperty(name) {
+  removeProperty(name) { // eslint-disable-line no-unused-vars
     throw new Error(NOT_IMPLEMENTED)
   }
 
@@ -244,7 +242,7 @@ class DOMElement {
     @param {String} tagName the new tag name
     @returns {this}
   */
-  setTagName(tagName) {
+  setTagName(tagName) { // eslint-disable-line no-unused-vars
     throw new Error(NOT_IMPLEMENTED)
   }
 
@@ -269,7 +267,7 @@ class DOMElement {
     @param {String} id the new id
     @returns {this}
   */
-  setId(id) {
+  setId(id) { // eslint-disable-line no-unused-vars
     throw new Error(NOT_IMPLEMENTED)
   }
 
@@ -293,7 +291,7 @@ class DOMElement {
     throw new Error(NOT_IMPLEMENTED)
   }
 
-  setValue(value) {
+  setValue(value) { // eslint-disable-line no-unused-vars
     throw new Error(NOT_IMPLEMENTED)
   }
 
@@ -323,11 +321,11 @@ class DOMElement {
     return this
   }
 
-  getStyle(name) {
+  getStyle(name) { // eslint-disable-line no-unused-vars
     throw new Error(NOT_IMPLEMENTED)
   }
 
-  setStyle(name, value) {
+  setStyle(name, value) { // eslint-disable-line no-unused-vars
     throw new Error(NOT_IMPLEMENTED)
   }
 
@@ -368,7 +366,7 @@ class DOMElement {
     @param {String} text the new text content
     @returns {this}
   */
-  setTextContent(text) {
+  setTextContent(text) { // eslint-disable-line no-unused-vars
     throw new Error(NOT_IMPLEMENTED)
   }
 
@@ -409,7 +407,7 @@ class DOMElement {
     @param {String} text the new text content
     @returns {this}
   */
-  setInnerHTML(html) {
+  setInnerHTML(html) { // eslint-disable-line no-unused-vars
     throw new Error(NOT_IMPLEMENTED)
   }
 
@@ -463,8 +461,8 @@ class DOMElement {
   off(eventName, handler) {
     // el.off(this): disconnect all listeners bound to the given context
     if (arguments.length === 1 && !isString(eventName)) {
-      var context = arguments[0]
-      var listeners = this.getEventListeners().filter(function(l) {
+      let context = arguments[0]
+      this.getEventListeners().filter(function(l) {
         return l.context === context
       }).forEach(function(l) {
         this.removeEventListener(l)
@@ -475,11 +473,11 @@ class DOMElement {
     return this
   }
 
-  addEventListener(eventName, handler, options) {
+  addEventListener(eventName, handler, options) { // eslint-disable-line no-unused-vars
     throw new Error(NOT_IMPLEMENTED)
   }
 
-  removeEventListener(eventName, handler) {
+  removeEventListener(eventName, handler) { // eslint-disable-line no-unused-vars
     throw new Error(NOT_IMPLEMENTED)
   }
 
@@ -540,11 +538,11 @@ class DOMElement {
     throw new Error(NOT_IMPLEMENTED)
   }
 
-  getChildAt(pos) {
+  getChildAt(pos) { // eslint-disable-line no-unused-vars
     throw new Error(NOT_IMPLEMENTED)
   }
 
-  getChildIndex(child) {
+  getChildIndex(child) { // eslint-disable-line no-unused-vars
     throw new Error(NOT_IMPLEMENTED)
   }
 
@@ -624,11 +622,11 @@ class DOMElement {
     @param {String} str a tag name or an HTML element as string.
     @returns {ui/DOMElement}
   */
-  createElement(str) {
+  createElement(str) { // eslint-disable-line no-unused-vars
     throw new Error(NOT_IMPLEMENTED)
   }
 
-  createTextNode(text) {
+  createTextNode(text) { // eslint-disable-line no-unused-vars
     throw new Error(NOT_IMPLEMENTED)
   }
 
@@ -643,7 +641,7 @@ class DOMElement {
     @param {String} cssSelector
     @returns {Boolean}
    */
-  is(cssSelector) {
+  is(cssSelector) { // eslint-disable-line no-unused-vars
     throw new Error(NOT_IMPLEMENTED)
   }
 
@@ -681,7 +679,7 @@ class DOMElement {
     @param {String} cssSelector
     @returns {ui/DOMElement} found element
    */
-  find(cssSelector) {
+  find(cssSelector) { // eslint-disable-line no-unused-vars
     throw new Error(NOT_IMPLEMENTED)
   }
 
@@ -696,7 +694,7 @@ class DOMElement {
     @param {String} cssSelector
     @returns {Array<ui/DOMElement>} found elements
    */
-  findAll(cssSelector) {
+  findAll(cssSelector) { // eslint-disable-line no-unused-vars
     throw new Error(NOT_IMPLEMENTED)
   }
 
@@ -725,7 +723,7 @@ class DOMElement {
     return this
   }
 
-  appendChild(child) {
+  appendChild(child) { // eslint-disable-line no-unused-vars
     throw new Error(NOT_IMPLEMENTED)
   }
 
@@ -737,11 +735,11 @@ class DOMElement {
     @param {ui/DOMElement|String} child The child element or text to insert.
     @returns {this}
   */
-  insertAt(pos, child) {
+  insertAt(pos, child) { // eslint-disable-line no-unused-vars
     throw new Error(NOT_IMPLEMENTED)
   }
 
-  insertBefore(newChild, before) {
+  insertBefore(newChild, before) { // eslint-disable-line no-unused-vars
     throw new Error(NOT_IMPLEMENTED)
   }
 
@@ -752,15 +750,15 @@ class DOMElement {
     @param {Number} pos
     @returns {this}
   */
-  removeAt(pos) {
+  removeAt(pos) { // eslint-disable-line no-unused-vars
     throw new Error(NOT_IMPLEMENTED)
   }
 
-  removeChild(child) {
+  removeChild(child) { // eslint-disable-line no-unused-vars
     throw new Error(NOT_IMPLEMENTED)
   }
 
-  replaceChild(oldChild, newChild) {
+  replaceChild(oldChild, newChild) { // eslint-disable-line no-unused-vars
     throw new Error(NOT_IMPLEMENTED)
   }
 
@@ -832,7 +830,7 @@ class DOMElement {
   /**
     Outer height as provided by $.outerHeight(withMargin)
   */
-  getOuterHeight(withMargin) {
+  getOuterHeight(withMargin) { // eslint-disable-line no-unused-vars
     return 0
   }
 
