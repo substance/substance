@@ -1,13 +1,13 @@
 import inBrowser from '../util/inBrowser'
 import BrowserDOMElement from './BrowserDOMElement.js'
-import CheerioDOMElement from './CheerioDOMElement.js'
+import MemoryDOMElement from './MemoryDOMElement.js'
 
 let DOMElementImpl
 
 if (inBrowser) {
   DOMElementImpl = BrowserDOMElement
 } else {
-  DOMElementImpl = CheerioDOMElement
+  DOMElementImpl = MemoryDOMElement
 }
 
 let DefaultDOMElement = {}
@@ -58,7 +58,7 @@ DefaultDOMElement.wrapNativeElement = function(el) {
     if (inBrowser && (el instanceof window.Node || el === window) ) {
       return BrowserDOMElement.wrapNativeElement(el)
     } else if (el.root && el.root.type === "root" ) {
-      return CheerioDOMElement.wrapNativeElement(el)
+      return MemoryDOMElement.wrapNativeElement(el)
     }
   } else {
     return null

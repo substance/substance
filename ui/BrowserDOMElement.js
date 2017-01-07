@@ -1,6 +1,7 @@
 import isString from '../util/isString'
 import isNumber from '../util/isNumber'
 import DOMElement from './DOMElement'
+import DOMEventListener from './DOMEventListener'
 import DelegatedEvent from './DelegatedEvent'
 
 class BrowserDOMElement extends DOMElement {
@@ -202,7 +203,7 @@ class BrowserDOMElement extends DOMElement {
     if (arguments.length === 1 && arguments[0]) {
       listener = arguments[0]
     } else {
-      listener = new DOMElement.EventListener(eventName, handler, options)
+      listener = new DOMEventListener(eventName, handler, options)
     }
     if (listener.options.selector && !listener.__hasEventDelegation__) {
       listener.handler = this._delegatedHandler(listener)
@@ -237,7 +238,7 @@ class BrowserDOMElement extends DOMElement {
   removeEventListener(eventName, handler) {
     // console.log('removing event listener', eventName, handler);
     let listener = null, idx = -1
-    idx = DOMElement._findEventListenerIndex(this.eventListeners, eventName, handler)
+    idx = DOMEventListener.findIndex(this.eventListeners, eventName, handler)
     listener = this.eventListeners[idx]
     if (idx > -1) {
       this.eventListeners.splice(idx, 1)
@@ -665,33 +666,17 @@ BrowserDOMElement.parseMarkup = function(str, format, isFullDoc) {
   }
 }
 
-class TextNode extends DOMElement.TextNode {
+class BrowserTextNode extends BrowserDOMElement {
+
   constructor(nativeEl) {
-    super()
-    console.assert(nativeEl instanceof window.Node && nativeEl.nodeType === 3, "Expecting native TextNode.")
-    this.el = nativeEl
-    nativeEl._wrapper = this
-
-    let methods = [
-      'getParent', 'getNextSibling', 'getPreviousSibling',
-      'getTextContent', 'setTextContent',
-      'getInnerHTML', 'setInnerHTML', 'getOuterHTML',
-      'getNativeElement', 'clone'
-    ]
-
-    methods.forEach(function(name) {
-      this[name] = BrowserDOMElement.prototype[name]
-    }.bind(this))
+    super(nativeEl)
+    if (!(nativeEl instanceof window.Node) || nativeEl.nodeType !== 3) {
+      throw new Error("Expecting native TextNode.")
+    }
   }
+  getNodeType() { return 'text' }
 
-  get _isBrowserDOMElement() {
-    return true
-  }
 }
-
-DOMElement._defineProperties(TextNode, ['nodeType', 'textContent', 'innerHTML', 'outerHTML', 'parentNode'])
-
-BrowserDOMElement.TextNode = TextNode
 
 BrowserDOMElement.wrapNativeElement = function(el) {
   if (el) {
@@ -699,7 +684,7 @@ BrowserDOMElement.wrapNativeElement = function(el) {
       return el._wrapper
     } else if (el instanceof window.Node) {
       if (el.nodeType === 3) {
-        return new TextNode(el)
+        return new BrowserTextNode(el)
       } else {
         return new BrowserDOMElement(el)
       }
@@ -715,6 +700,7 @@ BrowserDOMElement.wrapNativeElement = function(el) {
   Wrapper for the window element only exposing the eventlistener API.
 */
 class BrowserWindow {
+
   constructor() {
     this.el = window
     window.__BrowserDOMElementWrapper__ = this
@@ -737,6 +723,7 @@ class BrowserWindow {
   removeEventListener() {
     return BrowserDOMElement.prototype.removeEventListener.apply(this, arguments)
   }
+
 }
 
 
@@ -745,8 +732,8 @@ BrowserDOMElement.getBrowserWindow = function() {
   return new BrowserWindow(window)
 }
 
-let _r1
-let _r2
+let _r1 = null
+let _r2 = null
 
 BrowserDOMElement.isReverse = function(anchorNode, anchorOffset, focusNode, focusOffset) {
   // the selection is reversed when the focus propertyEl is before

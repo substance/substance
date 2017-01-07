@@ -575,7 +575,7 @@ class DOMElement {
     @returns {Boolean} true if the element is of type `Node.TEXT_NODE`
    */
   isTextNode() {
-    throw new Error(NOT_IMPLEMENTED)
+    return false
   }
 
   /**
@@ -585,7 +585,7 @@ class DOMElement {
     @returns {Boolean} true if the element is of type `Node.ELEMENT_NODE`
    */
   isElementNode() {
-    throw new Error(NOT_IMPLEMENTED)
+    return false
   }
 
   /**
@@ -595,7 +595,7 @@ class DOMElement {
     @returns {Boolean} true if the element is of type `Node.COMMENT_NODE`
    */
   isCommentNode() {
-    throw new Error(NOT_IMPLEMENTED)
+    return false
   }
 
   /**
@@ -605,7 +605,7 @@ class DOMElement {
     @returns {Boolean} true if the element is of type `Node.DOCUMENT_NODE`
    */
   isDocumentNode() {
-    throw new Error(NOT_IMPLEMENTED)
+    return false
   }
 
   /**
@@ -862,288 +862,73 @@ class DOMElement {
     return this.createElement.bind(this)
   }
 
-}
+  // properties
 
-var _propertyDefinitions = {
-  'id': {
-    configurable: true,
-    get: function() {
-      return this.getId()
-    },
-    set: function(id) {
-      this.setId(id)
-    }
-  },
-  'tagName': {
-    configurable: true,
-    get: function() {
-      return this.getTagName()
-    },
-    set: function(tagName) {
-      this.setTagName(tagName)
-    }
-  },
-  'nodeName': {
-    configurable: true,
-    get: function() {
-      return this.getTagName()
-    }
-  },
-  'nodeType': {
-    configurable: true,
-    get: function() {
-      return this.getNodeType()
-    },
-    set: function() {
-      throw new Error('ui/DOMElement#nodeType is readonly.')
-    }
-  },
-  'textContent': {
-    configurable: true,
-    get: function() {
-      return this.getTextContent()
-    },
-    set: function(text) {
-      this.setTextContent(text)
-    }
-  },
-  'innerHTML': {
-    configurable: true,
-    get: function() {
-      return this.getInnerHTML()
-    },
-    set: function(html) {
-      this.setInnerHTML(html)
-    }
-  },
-  'outerHTML': {
-    configurable: true,
-    get: function() {
-      return this.getOuterHTML()
-    },
-    set: function() {
-      throw new Error('ui/DOMElement#outerHTML is readonly.')
-    }
-  },
-  'childNodes': {
-    configurable: true,
-    get: function() {
-      return this.getChildNodes()
-    },
-    set: function() {
-      throw new Error('ui/DOMElement#childNodes is readonly.')
-    }
-  },
-  'children': {
-    configurable: true,
-    get: function() {
-      return this.getChildren()
-    },
-    set: function() {
-      throw new Error('ui/DOMElement#children is readonly.')
-    }
-  },
-  'parentNode': {
-    configurable: true,
-    get: function() {
-      return this.getParent()
-    },
-    set: function() {
-      throw new Error('ui/DOMElement#parentNode is readonly.')
-    }
-  },
-  'height': {
-    configurable: true,
-    get: function() {
-      return this.getHeight()
-    },
-  },
-  'width': {
-    configurable: true,
-    get: function() {
-      return this.getWidth()
-    },
-  },
+  get id() {
+    return this.getId()
+  }
+
+  set id(id) {
+    this.setId(id)
+  }
+
+  get tagName() {
+    return this.getTagName()
+  }
+
+  set tagName(tagName) {
+    this.setTagName(tagName)
+  }
+
+  get nodeName() {
+    return this.getTagName()
+  }
+
+  get nodeType() {
+    return this.getNodeType()
+  }
+
+  get textContent() {
+    return this.getTextContent()
+  }
+
+  set textContent(text) {
+    this.setTextContent(text)
+  }
+
+  get innerHTML() {
+    return this.getInnerHTML()
+  }
+
+  set innerHTML(html) {
+    this.setInnerHTML(html)
+  }
+
+  get outerHTML() {
+    return this.getOuterHTML()
+  }
+
+  get childNodes() {
+    return this.getChildNodes()
+  }
+
+  get parentNode() {
+    return this.getParent()
+  }
+
+  get height() {
+    return this.getHeight()
+  }
+
+  get width() {
+    return this.getWidth()
+  }
 }
 
 DOMElement.prototype._isDOMElement = true
 
-DOMElement._propertyNames = Object.keys(_propertyDefinitions)
-
-DOMElement._defineProperties = function(DOMElementClass, propertyNames) {
-  propertyNames = propertyNames || DOMElement._propertyNames
-  propertyNames.forEach(function(name) {
-    var def = _propertyDefinitions[name]
-    if (def) {
-      Object.defineProperty(DOMElementClass.prototype, name, def)
-    }
-  })
-}
-
-class DOMElementDelegator extends DOMElement {
-  constructor() {
-    super()
-
-    this.el = null
-  }
-}
-
-var _delegators = {
-  'getNativeElement': null,
-  'hasClass': false,
-  'getAttribute': null,
-  'getAttributes': {},
-  'getProperty': null,
-  'getTagName': 'throw',
-  'getId': 'throw',
-  'getValue': null,
-  'getStyle': null,
-  'getTextContent': '',
-  'getInnerHTML': '',
-  'getOuterHTML': '',
-  'getChildCount': 0,
-  'getChildNodes': [],
-  'getChildren': [],
-  'getChildAt': null,
-  'getParent': null,
-  'getRoot': null,
-  'getEventListeners': [],
-  'find': null,
-  'findAll': [],
-  'is': false,
-  'isTextNode': false,
-  'isElementNode': false,
-  'isCommentNode': false,
-  'isDocumentNode': false,
-  'isInDocument': false,
-  'position': null
-}
-
-forEach(_delegators, function(defaultValue, method) {
-  DOMElementDelegator.prototype[method] = function() {
-    if (!this.el) {
-      if (defaultValue === 'throw') {
-        throw new Error('This component has not been rendered yet.')
-      } else {
-        return defaultValue
-      }
-    }
-    return this.el[method].apply(this.el, arguments)
-  }
-})
-
-// Delegators implementing the DOMElement interface
-// these are chainable
-;[
-  'addClass', 'removeClass',
-  'setAttribute', 'removeAttribute',
-  'setProperty', 'removeProperty',
-  'setTagName', 'setId', 'setValue', 'setStyle',
-  'setTextContent', 'setInnerHTML',
-  'addEventListener', 'removeEventListener',
-  'appendChild', 'insertAt', 'insertBefore',
-  'remove', 'removeAt', 'removeChild', 'replaceChild', 'empty',
-  'focus', 'blur', 'click'
-].forEach(function(method) {
-  DOMElementDelegator.prototype[method] = function() {
-    if (!this.el) {
-      throw new Error('This component has not been rendered yet.')
-    }
-    this.el[method].apply(this.el, arguments)
-    return this
-  }
-})
-
-DOMElement.Delegator = DOMElementDelegator
-
-class DOMEventListener {
-  constructor(eventName, handler, options) {
-    if (!isString(eventName) || !isFunction(handler)) {
-      throw new Error("Illegal arguments: 'eventName' must be a String, and 'handler' must be a Function.")
-    }
-    options = options || {}
-    var origHandler = handler
-    var context = options.context
-    var capture = Boolean(options.capture)
-
-    if (context) {
-      handler = handler.bind(context)
-    }
-    if (options.once === true) {
-      handler = _once(this, handler)
-    }
-
-    this.eventName = eventName
-    this.originalHandler = origHandler
-    this.handler = handler
-    this.capture = capture
-    this.context = context
-    this.options = options
-    // set when this gets attached to a DOM element
-    this._el = null
-  }
-
-  get _isDOMEventListener() { return true }
-
-}
-
-DOMEventListener.matches = function(l1, l2) {
-  return l1.eventName === l2.eventName && l1.originalHandler === l2.originalHandler
-}
-
-function _once(listener, handler) {
-  return function(event) {
-    handler(event)
-    listener._el.removeEventListener(listener)
-  }
-}
-
-DOMElement.EventListener = DOMEventListener
-
-DOMElement._findEventListenerIndex = function(eventListeners, eventName, handler) {
-  var idx = -1
-  if (arguments[1]._isDOMEventListener) {
-    idx = eventListeners.indexOf(arguments[1])
-  } else {
-    idx = findIndex(eventListeners,
-      DOMEventListener.matches.bind(null, {
-        eventName: eventName,
-        originalHandler: handler
-      })
-    )
-  }
-  return idx
-}
-
-class TextNode {
-
-  get _isDOMElement() { return true }
-
-  isTextNode() {
-    return true
-  }
-
-  getNodeType() {
-    return 'text'
-  }
-
-  isElementNode() { return false }
-
-  isDocumentNode() { return false }
-
-  isCommentNode() { return false }
-
-}
-
-[
-  'getParent', 'getNextSibling', 'getPreviousSibling',
-  'text', 'getTextContent', 'setTextContent',
-  'clone'
-].forEach(function(name) {
-  TextNode.prototype[name] = DOMElement.prototype[name]
-})
-
-
-DOMElement.TextNode = TextNode
+// This field is used to register the implementing class
+// i.e., either BrowserDOMElement or MemoryDOMElement
+DOMElement.Impl = null
 
 export default DOMElement

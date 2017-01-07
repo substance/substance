@@ -1,24 +1,19 @@
+import {
+  parseXML, parseHTML, createElement, createTextNode
+} from 'substance-xdom'
 import clone from '../util/clone'
-import extend from '../util/extend'
 import isString from '../util/isString'
 import last from '../util/last'
-import $ from 'substance-cheerio'
 import EventEmitter from '../util/EventEmitter'
 import DOMElement from './DOMElement'
 
-class CheerioDOMElement extends DOMElement {
+class MemoryDOMElement extends DOMElement {
 
   constructor(el) {
     super()
 
     this.el = el
-    this.$el = $(el)
     el._wrapper = this
-    this.htmlProps = {}
-  }
-
-  get _isCheerioDOMElement() {
-    return true
   }
 
   getNativeElement() {
@@ -26,47 +21,43 @@ class CheerioDOMElement extends DOMElement {
   }
 
   _wrapNativeElement(el) {
-    if (el._wrapper) {
-      return el._wrapper
-    } else {
-      return new CheerioDOMElement(el)
-    }
+    _wrapNativeElement(el)
   }
 
   hasClass(className) {
-    return this.$el.hasClass(className)
+    return this.el.hasClass(className)
   }
 
   addClass(className) {
-    this.$el.addClass(className)
+    this.el.addClass(className)
     return this
   }
 
   removeClass(className) {
-    this.$el.removeClass(className)
+    this.el.removeClass(className)
     return this
   }
 
   getClasses() {
-    return this.$el.attr('class')
+    return this.el.getAttribute('class')
   }
 
   setClasses(classString) {
-    this.$el.attr('class', classString)
+    this.el.setAttribute('class', classString)
     return this
   }
 
   getAttribute(name) {
-    return this.$el.attr(name)
+    return this.el.getAttribute(name)
   }
 
   setAttribute(name, value) {
-    this.$el.attr(name, value)
+    this.el.setAttribute(name, value)
     return this
   }
 
   removeAttribute(name) {
-    this.$el.removeAttr(name)
+    this.el.removeAttribute(name)
     return this
   }
 
@@ -76,19 +67,16 @@ class CheerioDOMElement extends DOMElement {
   }
 
   getProperty(name) {
-    return this.$el.prop(name)
+    return this.el.getProperty(name)
   }
 
   setProperty(name, value) {
-    this.htmlProps[name] = value
-    this.$el.prop(name, value)
+    this.el.setProperty(name, value)
     return this
   }
 
-  // TODO: verify that this.el[name] is correct
   removeProperty(name) {
-    delete this.htmlProps[name]
-    delete this.el[name]
+    this.el.removeProperty(name)
     return this
   }
 
@@ -101,77 +89,76 @@ class CheerioDOMElement extends DOMElement {
   }
 
   setTagName(tagName) {
-    let newEl = $._createElement(tagName, this.el.root)
-    let $newEl = $(newEl)
-    $newEl.html(this.$el.html())
-    newEl.attribs = extend({}, this.el.attribs)
-    this._replaceNativeEl(newEl)
+    this.el.name = tagName
     return this
   }
 
   getId() {
-    return this.$el.attr('id')
+    return this.el.getAttribute('id')
   }
 
   setId(id) {
-    this.$el.attr('id', id)
+    this.el.setAttribute('id', id)
     return this
   }
 
   getTextContent() {
-    return this.$el.text()
+    return this.el.getTextContent()
   }
 
   setTextContent(text) {
-    this.$el.text(text)
+    this.el.setTextContent(text)
     return this
   }
 
   getInnerHTML() {
-    return this.$el.html()
+    return this.el.getInnerHTML()
   }
 
   setInnerHTML(html) {
-    this.$el.html(html)
+    this.el.setInnerHTML(html)
     return this
   }
 
   getOuterHTML() {
-    // TODO: this is not really jquery
-    return $._serialize(this.el)
+    return this.el.getOuterHTML()
   }
 
   getValue() {
-    return this.$el.val()
+    return this.el.getValue()
   }
 
   setValue(value) {
-    this.$el.val(value)
+    this.el.setValue(value)
     return this
   }
 
   getStyle(name) {
-    return this.$el.css(name)
+    return this.el.getStyle(name)
   }
 
   setStyle(name, value) {
-    this.$el.css(name, value)
+    this.el.setStyle(name, value)
     return this
   }
 
   addEventListener() {
+    // stub
     return this
   }
 
   removeEventListener() {
+    // stub
     return this
   }
 
   removeAllEventListeners() {
+    // stub
     return this
   }
 
   getEventListeners() {
+    // stub
     return []
   }
 
@@ -181,9 +168,7 @@ class CheerioDOMElement extends DOMElement {
 
   getChildNodes() {
     let childNodes = this.el.children
-    childNodes = childNodes.map(function(node) {
-      return this._wrapNativeElement(node)
-    }.bind(this))
+    childNodes = childNodes.map(_wrapNativeElement)
     return childNodes
   }
 
@@ -192,19 +177,17 @@ class CheerioDOMElement extends DOMElement {
     children = children.filter(function(node) {
       return node.type === "tag"
     })
-    children = children.map(function(node) {
-      return this._wrapNativeElement(node)
-    }.bind(this))
+    children = children.map(_wrapNativeElement)
     return children
   }
 
   getChildAt(pos) {
-    return this._wrapNativeElement(this.el.children[pos])
+    return _wrapNativeElement(this.el.children[pos])
   }
 
   getChildIndex(child) {
-    if (!child._isCheerioDOMElement) {
-      throw new Error('Expecting a CheerioDOMElement instance.')
+    if (!child._isMemoryDOMElement) {
+      throw new Error('Expecting a MemoryDOMElement instance.')
     }
     return this.el.children.indexOf(child.el)
   }
@@ -212,7 +195,7 @@ class CheerioDOMElement extends DOMElement {
   getFirstChild() {
     let firstChild = this.el.children[0]
     if (firstChild) {
-      return CheerioDOMElement.wrapNativeElement(firstChild)
+      return MemoryDOMElement.wrapNativeElement(firstChild)
     } else {
       return null
     }
@@ -221,7 +204,7 @@ class CheerioDOMElement extends DOMElement {
   getLastChild() {
     let lastChild = last(this.el.children)
     if (lastChild) {
-      return CheerioDOMElement.wrapNativeElement(lastChild)
+      return MemoryDOMElement.wrapNativeElement(lastChild)
     } else {
       return null
     }
@@ -230,7 +213,7 @@ class CheerioDOMElement extends DOMElement {
   getNextSibling() {
     var next = this.el.next;
     if (next) {
-      return CheerioDOMElement.wrapNativeElement(next)
+      return MemoryDOMElement.wrapNativeElement(next)
     } else {
       return null
     }
@@ -239,56 +222,49 @@ class CheerioDOMElement extends DOMElement {
   getPreviousSibling() {
     let previous = this.el.previous
     if (previous) {
-      return CheerioDOMElement.wrapNativeElement(previous)
+      return MemoryDOMElement.wrapNativeElement(previous)
     } else {
       return null
     }
   }
 
   isTextNode() {
-    // cheerio specific
     return this.el.type === "text"
   }
 
   isElementNode() {
-    // cheerio specific
     return this.el.type === "tag" || this.el.type === "script"
   }
 
   isCommentNode() {
-    // cheerio specific
     return this.el.type === "comment"
   }
 
   isDocumentNode() {
+    // TODO: this is wrong. Only makes sense for HTML and only if this.el is really the document element
     return this.el === this.el.root
   }
 
-  clone() {
-    let clone = this.$el.clone()[0]
-    return this._wrapNativeElement(clone)
+  clone(deep) {
+    return _wrapNativeElement(this.el.clone(deep))
   }
 
   createElement(tagName) {
-    let el = $._createElement(tagName, this.el.root)
-    return this._wrapNativeElement(el)
+    return _wrapNativeElement(createElement(tagName, { ownerDocument: this.el.ownerDocument }))
   }
 
   createTextNode(text) {
-    let el = $._createTextNode(text)
-    return this._wrapNativeElement(el)
+    return _wrapNativeElement(createTextNode(text, { ownerDocument: this.el.ownerDocument }))
   }
 
   is(cssSelector) {
-    // Note: unfortunately there is no cross-browser supported selectr matcher
-    // Element.matches is not supported by all (mobile) browsers
-    return this.$el.is(cssSelector)
+    return this.el.is(cssSelector)
   }
 
   getParent() {
     let parent = this.el.parent
     if (parent) {
-      return this._wrapNativeElement(parent)
+      return _wrapNativeElement(parent)
     } else {
       return null
     }
@@ -296,31 +272,21 @@ class CheerioDOMElement extends DOMElement {
 
   getRoot() {
     let el = this.el
-    let parent = el
-    while (parent) {
-      el = parent
-      parent = el.parent
-    }
-    return this._wrapNativeElement(el)
+    while (el.parent) el = el.parent
+    return _wrapNativeElement(el)
   }
 
   find(cssSelector) {
-    let result = this.$el.find(cssSelector)
-    if (result.length > 0) {
-      return this._wrapNativeElement(result[0])
+    let result = this.el.find(cssSelector)
+    if (result) {
+      return _wrapNativeElement(result)
     } else {
       return null
     }
   }
 
   findAll(cssSelector) {
-    let found = this.$el.find(cssSelector)
-    let result = []
-    if (found.length > 0) {
-      found.each(function(_, el) {
-        result.push(this._wrapNativeElement(el))
-      }.bind(this))
-    }
+    let result = this.el.findAll(cssSelector).map(_wrapNativeElement)
     return result
   }
 
@@ -331,31 +297,22 @@ class CheerioDOMElement extends DOMElement {
     if (child._wrapper) {
       child = child._wrapper
     }
-    if (!child || !child._isCheerioDOMElement) {
-      throw new Error('Illegal argument: only String and CheerioDOMElement instances are valid.')
+    if (!child || !child._isMemoryDOMElement) {
+      throw new Error('Illegal argument: only String and MemoryDOMElement instances are valid.')
     }
-    console.assert(child.el._wrapper === child, "Expecting a backlink between native element and CheerioDOMElement")
+    console.assert(child.el._wrapper === child, "Expecting a backlink between native element and MemoryDOMElement")
     return child.getNativeElement()
   }
 
   appendChild(child) {
     child = this._normalizeChild(child)
-    this.el.children.push(child)
-    child.parent = this.el
+    this.el.appendChild(child)
     return this
   }
 
   insertAt(pos, child) {
     child = this._normalizeChild(child)
-    let children = this.el.children
-    // NOTE: manipulating cheerio's internal children array
-    // as otherwise cheerio clones the element loosing our custom data
-    if (pos >= children.length) {
-      children.push(child)
-    } else {
-      children.splice(pos, 0, child)
-    }
-    child.parent = this.el
+    this.el.insertAt(pos, child)
     return this
   }
 
@@ -372,17 +329,16 @@ class CheerioDOMElement extends DOMElement {
     if (pos < 0 || pos >= this.el.children.length) {
       throw new Error('removeAt(): Index out of bounds.')
     }
-    // NOTE: again manipulating cheerio's internal children array --
-    // it works.
-    let child = this.el.children[pos]
-    child.parent = null
-    this.el.children.splice(pos, 1)
+    this.el.removeAt(pos)
+    // let child = this.el.children[pos]
+    // child.parent = null
+    // this.el.children.splice(pos, 1)
     return this
   }
 
   removeChild(child) {
-    if (!child || !child._isCheerioDOMElement) {
-      throw new Error('removeChild(): Illegal arguments. Expecting a CheerioDOMElement instance.')
+    if (!child || !child._isMemoryDOMElement) {
+      throw new Error('removeChild(): Illegal arguments. Expecting a MemoryDOMElement instance.')
     }
     let idx = this.el.children.indexOf(child.el)
     if (idx < 0) {
@@ -394,7 +350,7 @@ class CheerioDOMElement extends DOMElement {
 
   replaceChild(oldChild, newChild) {
     if (!newChild || !oldChild ||
-        !newChild._isCheerioDOMElement || !oldChild._isCheerioDOMElement) {
+        !newChild._isMemoryDOMElement || !oldChild._isMemoryDOMElement) {
       throw new Error('replaceChild(): Illegal arguments. Expecting BrowserDOMElement instances.')
     }
     let idx = this.el.children.indexOf(oldChild.el)
@@ -406,21 +362,18 @@ class CheerioDOMElement extends DOMElement {
   }
 
   empty() {
-    this.$el.empty()
+    this.el.removeAllChildren()
     return this
   }
 
   remove() {
-    this.$el.remove()
+    this.el.remove()
     return this
   }
 
   _replaceNativeEl(newEl) {
-    let $newEl = $(newEl)
-    this.$el.replaceWith($newEl)
-    this.el = newEl
-    this.$el = $newEl
-    // HACK: we need the correct backlink
+    this.el.replaceWith(newEl)
+    // NOTE: we need to retain the backlink
     this.el._wrapper = this
   }
 
@@ -441,43 +394,44 @@ class CheerioDOMElement extends DOMElement {
 
 }
 
-EventEmitter.mixin(CheerioDOMElement)
+// TODO: instead we should allow to add and remove listeners
+EventEmitter.mixin(MemoryDOMElement)
 
-DOMElement._defineProperties(CheerioDOMElement, DOMElement._propertyNames);
+MemoryDOMElement.prototype._isMemoryDOMElement = true
 
-CheerioDOMElement.createTextNode = function(text) {
-  return CheerioDOMElement.wrapNativeElement(
-    $._createTextNode(text)
+MemoryDOMElement.createTextNode = function(text) {
+  return MemoryDOMElement.wrapNativeElement(
+    createTextNode(null, text)
   )
 }
 
-CheerioDOMElement.createElement = function(tagName) {
-  return CheerioDOMElement.wrapNativeElement(
-    $('<' + tagName + '>')[0]
+MemoryDOMElement.createElement = function(tagName) {
+  return MemoryDOMElement.wrapNativeElement(
+    createElement(null, tagName)
   )
 }
 
-CheerioDOMElement.parseMarkup = function(str, format) {
+MemoryDOMElement.parseMarkup = function(str, format) {
   let nativeEls = []
-  let doc;
+  let doc
 
   if (!str) {
     // Create an empty XML document
     if (format === 'xml') {
-      doc = $.parseXML('')
+      doc = parseXML('')
     } else {
-      doc = $.parseHTML('')
+      doc = parseHTML('')
     }
-    return new CheerioDOMElement(doc)
+    return new MemoryDOMElement(doc)
   } else {
     if (format === 'xml') {
-      nativeEls = $.parseXML(str)
+      nativeEls = parseXML(str)
     } else {
-      nativeEls = $.parseHTML(str)
+      nativeEls = parseHTML(str)
     }
   }
   let elements = nativeEls.map(function(el) {
-    return new CheerioDOMElement(el)
+    return new MemoryDOMElement(el)
   });
   if (elements.length === 1) {
     return elements[0]
@@ -486,12 +440,15 @@ CheerioDOMElement.parseMarkup = function(str, format) {
   }
 }
 
-CheerioDOMElement.wrapNativeElement = function(el) {
+MemoryDOMElement.wrapNativeElement = _wrapNativeElement
+
+function _wrapNativeElement(el) {
   if (el._wrapper) {
     return el._wrapper
   } else {
-    return new CheerioDOMElement(el)
+    return new MemoryDOMElement(el)
   }
 }
 
-export default CheerioDOMElement
+
+export default MemoryDOMElement

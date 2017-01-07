@@ -10,6 +10,7 @@ import isPlainObject from '../util/isPlainObject'
 import isString from '../util/isString'
 import without from '../util/without'
 import DOMElement from './DOMElement'
+import DOMEventListener from './DOMEventListener'
 
 /**
   A virtual {@link DOMElement} which is used by the {@link Component} API.
@@ -17,8 +18,6 @@ import DOMElement from './DOMElement'
   A VirtualElement is just a description of a DOM structure. It represents a virtual
   DOM mixed with Components. This virtual structure needs to be compiled to a {@link Component}
   to actually create a real DOM element.
-
-  @class
 */
 class VirtualElement extends DOMElement {
 
@@ -32,11 +31,6 @@ class VirtualElement extends DOMElement {
     // set when ref'd
     this._ref = null
   }
-
-  /*
-    For instance of like checks.
-  */
-  get _isVirtualElement() { return true }
 
   getParent() {
     return this.parent
@@ -89,40 +83,18 @@ class VirtualElement extends DOMElement {
 
 }
 
-DOMElement._defineProperties(VirtualElement, without(DOMElement._propertyNames, 'children'))
+VirtualElement.prototype._isVirtualElement = true
 
-/*
-  A virtual HTML element.
+class VirtualBaseElement extends VirtualElement {
 
-  @private
-  @class VirtualElement.VirtualHTMLElement
-  @extends ui/VirtualElement
-*/
-class VirtualHTMLElement extends VirtualElement {
-
-  constructor(tagName) {
+  constructor() {
     super()
 
-    this._tagName = tagName
     this.classNames = null
     this.attributes = null
     this.htmlProps = null
     this.style = null
     this.eventListeners = null
-
-    this.children = []
-
-  }
-
-  get _isVirtualHTMLElement() { return true; }
-
-  getTagName() {
-    return this._tagName
-  }
-
-  setTagName(tagName) {
-    this._tagName = tagName
-    return this
   }
 
   hasClass(className) {
@@ -200,6 +172,206 @@ class VirtualHTMLElement extends VirtualElement {
     return this
   }
 
+  getValue() {
+    return this.htmlProp('value')
+  }
+
+  setValue(value) {
+    this.htmlProp('value', value)
+    return this
+  }
+
+  getProperty(name) {
+    if (this.htmlProps) {
+      return this.htmlProps[name]
+    }
+  }
+
+  setProperty(name, value) {
+    if (!this.htmlProps) {
+      this.htmlProps = {}
+    }
+    this.htmlProps[name] = value
+    return this
+  }
+
+  removeProperty(name) {
+    if (this.htmlProps) {
+      delete this.htmlProps[name]
+    }
+    return this
+  }
+
+  getStyle(name) {
+    if (this.style) {
+      return this.style[name]
+    }
+  }
+
+  setStyle(name, value) {
+    if (!this.style) {
+      this.style = {}
+    }
+    this.style[name] = value
+    return this
+  }
+
+  addEventListener(eventName, handler, options) {
+    var listener
+    if (arguments.length === 1 && arguments[0]._isDOMEventListener) {
+      listener = arguments[0]
+    } else {
+      options = options || {}
+      options.context = options.context || this._owner._comp
+      listener = new DOMEventListener(eventName, handler, options)
+    }
+    if (!this.eventListeners) {
+      this.eventListeners = []
+    }
+    this.eventListeners.push(listener)
+    return this
+  }
+
+  removeEventListener(eventName, handler) {
+    if (this.eventListeners) {
+      DOMEventListener.findIndex(this.eventListeners, eventName, handler)
+    }
+    return this
+  }
+
+  getEventListeners() {
+    return this.eventListeners
+  }
+
+  _normalizeChild(child) {
+    if (isString(child)) {
+      child = new VirtualTextNode(child)
+    }
+    return child
+  }
+
+  _append(outlet, args) {
+    if (args.length === 1 && !isArray(args[0])) {
+      this._appendChild(outlet, args[0])
+      return
+    }
+    let children
+    if (isArray(args[0])) {
+      children = args[0]
+    } else if (arguments.length > 1) {
+      children = Array.prototype.slice.call(args,0)
+    } else {
+      return
+    }
+    children.forEach(this._appendChild.bind(this, outlet))
+  }
+
+  _appendChild(outlet, child) {
+    child = this._normalizeChild(child)
+    // TODO: discuss. Having a bad feeling about this,
+    // because it could obscure an implementation error
+    if (!child) return
+    outlet.push(child)
+    this._attach(child)
+    return child
+  }
+
+  _insertAt(outlet, pos, child) {
+    if (!child) return
+    outlet.splice(pos, 0, child)
+    this._attach(child)
+  }
+
+  _removeAt(outlet, pos) {
+    var child = outlet[pos]
+    outlet.splice(pos, 1)
+    this._detach(child)
+  }
+
+  _attach(child) {
+    child.parent = this
+    if (this._context && child._owner !== this._owner && child._ref) {
+      this._context.foreignRefs[child._ref] = child
+    }
+  }
+
+  _detach(child) {
+    child.parent = null
+    if (this._context && child._owner !== this._owner && child._ref) {
+      delete this.context.foreignRefs[child._ref]
+    }
+  }
+
+  _mergeHTMLConfig(other) {
+    if (other.classNames) {
+      if (!this.classNames) {
+        this.classNames = []
+      }
+      this.classNames = this.classNames.concat(other.classNames)
+    }
+    if (other.attributes) {
+      if (!this.attributes) {
+        this.attributes = {}
+      }
+      extend(this.attributes, other.attributes)
+    }
+    if (other.htmlProps) {
+      if (!this.htmlProps) {
+        this.htmlProps = {}
+      }
+      extend(this.htmlProps, other.htmlProps)
+    }
+    if (other.style) {
+      if (!this.style) {
+        this.style = {}
+      }
+      extend(this.style, other.style)
+    }
+    if (other.eventListeners) {
+      if (!this.eventListeners) {
+        this.eventListeners = []
+      }
+      this.eventListeners = this.eventListeners.concat(other.eventListeners)
+    }
+  }
+
+  _copyHTMLConfig() {
+    return {
+      classNames: clone(this.classNames),
+      attributes: clone(this.attributes),
+      htmlProps: clone(this.htmlProps),
+      style: clone(this.style),
+      eventListeners: clone(this.eventListeners)
+    }
+  }
+
+}
+
+/*
+  A virtual HTML element.
+
+  @private
+  @class VirtualElement.VirtualHTMLElement
+  @extends ui/VirtualElement
+*/
+class VirtualHTMLElement extends VirtualBaseElement {
+
+  constructor(tagName) {
+    super()
+
+    this._tagName = tagName
+    this.children = []
+  }
+
+  getTagName() {
+    return this._tagName
+  }
+
+  setTagName(tagName) {
+    this._tagName = tagName
+    return this
+  }
+
   setTextContent(text) {
     if (!isString(text)) throw new Error('Illegal argument: expecting a string.')
     text = text || ''
@@ -223,15 +395,6 @@ class VirtualHTMLElement extends VirtualElement {
     }
   }
 
-  getValue() {
-    return this.htmlProp('value')
-  }
-
-  setValue(value) {
-    this.htmlProp('value', value)
-    return this
-  }
-
   getChildNodes() {
     return this.children
   }
@@ -242,20 +405,8 @@ class VirtualHTMLElement extends VirtualElement {
     })
   }
 
-  isTextNode() {
-    return false
-  }
-
   isElementNode() {
     return true
-  }
-
-  isCommentNode() {
-    return false
-  }
-
-  isDocumentNode() {
-    return false
   }
 
   append() {
@@ -343,68 +494,6 @@ class VirtualHTMLElement extends VirtualElement {
     return this
   }
 
-  getProperty(name) {
-    if (this.htmlProps) {
-      return this.htmlProps[name]
-    }
-  }
-
-  setProperty(name, value) {
-    if (!this.htmlProps) {
-      this.htmlProps = {}
-    }
-    this.htmlProps[name] = value
-    return this
-  }
-
-  removeProperty(name) {
-    if (this.htmlProps) {
-      delete this.htmlProps[name]
-    }
-    return this
-  }
-
-  getStyle(name) {
-    if (this.style) {
-      return this.style[name]
-    }
-  }
-
-  setStyle(name, value) {
-    if (!this.style) {
-      this.style = {}
-    }
-    this.style[name] = value
-    return this
-  }
-
-  addEventListener(eventName, handler, options) {
-    var listener
-    if (arguments.length === 1 && arguments[0]._isDOMEventListener) {
-      listener = arguments[0]
-    } else {
-      options = options || {}
-      options.context = options.context || this._owner._comp
-      listener = new DOMElement.EventListener(eventName, handler, options)
-    }
-    if (!this.eventListeners) {
-      this.eventListeners = []
-    }
-    this.eventListeners.push(listener)
-    return this
-  }
-
-  removeEventListener(eventName, handler) {
-    if (this.eventListeners) {
-      DOMElement._findEventListenerIndex(this.eventListeners, eventName, handler)
-    }
-    return this
-  }
-
-  getEventListeners() {
-    return this.eventListeners
-  }
-
   getNodeType() {
     return "element"
   }
@@ -413,131 +502,27 @@ class VirtualHTMLElement extends VirtualElement {
     return Boolean(this._innerHTMLString)
   }
 
-  _normalizeChild(child) {
-    if (isString(child)) {
-      child = new VirtualTextNode(child)
-    }
-    return child
-  }
-
-  _append(outlet, args) {
-    if (args.length === 1 && !isArray(args[0])) {
-      this._appendChild(outlet, args[0])
-      return
-    }
-    var children
-    if (isArray(args[0])) {
-      children = args[0]
-    } else if (arguments.length > 1) {
-      children = Array.prototype.slice.call(args,0)
-    } else {
-      return
-    }
-    children.forEach(this._appendChild.bind(this, outlet))
-  }
-
-  _appendChild(outlet, child) {
-    child = this._normalizeChild(child)
-    // TODO: discuss. Having a bad feeling about this,
-    // because it could obscure an implementation error
-    if (!child) return
-    outlet.push(child)
-    this._attach(child)
-    return child
-  }
-
-  _insertAt(outlet, pos, child) {
-    if (!child) return
-    outlet.splice(pos, 0, child)
-    this._attach(child)
-  }
-
-  _removeAt(outlet, pos) {
-    var child = outlet[pos]
-    outlet.splice(pos, 1)
-    this._detach(child)
-  }
-
-  _attach(child) {
-    child.parent = this
-    if (this._context && child._owner !== this._owner && child._ref) {
-      this._context.foreignRefs[child._ref] = child
-    }
-  }
-
-  _detach(child) {
-    child.parent = null
-    if (this._context && child._owner !== this._owner && child._ref) {
-      delete this.context.foreignRefs[child._ref]
-    }
-  }
-
-  _mergeHTMLConfig(other) {
-    if (other.classNames) {
-      if (!this.classNames) {
-        this.classNames = []
-      }
-      this.classNames = this.classNames.concat(other.classNames)
-    }
-    if (other.attributes) {
-      if (!this.attributes) {
-        this.attributes = {}
-      }
-      extend(this.attributes, other.attributes)
-    }
-    if (other.htmlProps) {
-      if (!this.htmlProps) {
-        this.htmlProps = {}
-      }
-      extend(this.htmlProps, other.htmlProps)
-    }
-    if (other.style) {
-      if (!this.style) {
-        this.style = {}
-      }
-      extend(this.style, other.style)
-    }
-    if (other.eventListeners) {
-      if (!this.eventListeners) {
-        this.eventListeners = []
-      }
-      this.eventListeners = this.eventListeners.concat(other.eventListeners)
-    }
-  }
 }
+
+VirtualHTMLElement.prototype._isVirtualHTMLElement = true
+
 
 /*
   A virtual element which gets rendered by a custom component.
 
   @private
-  @class VirtualElement.VirtualComponent
-  @extends ui/VirtualElement
 */
-class VirtualComponent extends VirtualHTMLElement {
+class VirtualComponent extends VirtualBaseElement {
 
   constructor(ComponentClass, props) {
     super()
 
-    props = props || {}
-
     this.ComponentClass = ComponentClass
-    this.props = props
-    if (!props.children) {
-      props.children = []
-    }
-    this.children = props.children
+    this.props = props || {}
   }
-
-  get _isVirtualComponent() { return true; }
 
   getComponent() {
     return this._comp
-  }
-
-  // Note: for VirtualComponentElement we put children into props
-  // so that the render method of ComponentClass can place it.
-  getChildren() {
-    return this.props.children
   }
 
   getNodeType() {
@@ -554,16 +539,6 @@ class VirtualComponent extends VirtualHTMLElement {
 
   _detach(child) {
     child._preliminaryParent = null
-  }
-
-  _copyHTMLConfig() {
-    return {
-      classNames: clone(this.classNames),
-      attributes: clone(this.attributes),
-      htmlProps: clone(this.htmlProps),
-      style: clone(this.style),
-      eventListeners: clone(this.eventListeners)
-    }
   }
 }
 
