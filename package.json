@@ -20,7 +20,7 @@
   "author": "",
   "license": "MIT",
   "dependencies": {
-    "substance-cheerio": "^0.1.2",
+    "substance-xdom": "^0.1.1",
     "lodash-es": "4.13.1"
   },
   "devDependencies": {
