@@ -3,7 +3,7 @@ import isBoolean from '../util/isBoolean'
 import isNumber from '../util/isNumber'
 import isString from '../util/isString'
 import DOMExporter from './DOMExporter'
-import DefaultDOMElement from '../ui/DefaultDOMElement'
+import DefaultDOMElement from '../dom/DefaultDOMElement'
 
 var defaultAnnotationConverter = {
   tagName: 'annotation',

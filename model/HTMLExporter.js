@@ -1,5 +1,5 @@
 import DOMExporter from './DOMExporter'
-import DefaultDOMElement from '../ui/DefaultDOMElement'
+import DefaultDOMElement from '../dom/DefaultDOMElement'
 import forEach from '../util/forEach'
 import isBoolean from '../util/isBoolean'
 import isNumber from '../util/isNumber'
@@ -57,7 +57,7 @@ class HTMLExporter extends DOMExporter {
   }
 
   exportDocument(doc) {
-    var htmlEl = DefaultDOMElement.parseHTML('<html><head></head><body></body></html>')
+    let htmlEl = DefaultDOMElement.parseHTML('<html><head></head><body></body></html>')
     return this.convertDocument(doc, htmlEl)
   }
 

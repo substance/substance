@@ -37,15 +37,6 @@ class BrowserDOMElement extends DOMElement {
     return this
   }
 
-  getClasses() {
-    return this.el.className
-  }
-
-  setClasses(classString) {
-    this.el.className = classString
-    return this
-  }
-
   getAttribute(name) {
     return this.el.getAttribute(name)
   }
@@ -353,13 +344,25 @@ class BrowserDOMElement extends DOMElement {
     return BrowserDOMElement.wrapNativeElement(clone)
   }
 
+  _getOwnerDocument() {
+    let doc
+    if (this.isDocumentNode()) {
+      doc = this.el
+    } else {
+      doc = this.el.ownerDocument
+    }
+    return doc
+  }
+
   createElement(tagName) {
-    let el = this.el.ownerDocument.createElement(tagName)
+    let doc = this._getOwnerDocument()
+    let el = doc.createElement(tagName)
     return BrowserDOMElement.wrapNativeElement(el)
   }
 
   createTextNode(text) {
-    var el = this.el.ownerDocument.createTextNode(text)
+    let doc = this._getOwnerDocument()
+    var el = doc.createTextNode(text)
     return BrowserDOMElement.wrapNativeElement(el)
   }
 

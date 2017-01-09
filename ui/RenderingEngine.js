@@ -2,7 +2,7 @@ import forEach from '../util/forEach'
 import uuid from '../util/uuid'
 import substanceGlobals from '../util/substanceGlobals'
 import VirtualNode from './VirtualNode'
-import DefaultDOMElement from './DefaultDOMElement'
+import DefaultDOMElement from '../dom/DefaultDOMElement'
 import Component from './Component'
 
 class RenderingEngine {
@@ -60,8 +60,8 @@ function _create(state, vel) {
     comp = new vel.ComponentClass(parent, vel.props);
     // HACK: making sure that we have the right props
     vel.props = comp.props
-    comp.__htmlConfig__ = vel._copyHTMLConfig();
-  } else if (vel._isVirtualHTMLElement) {
+    comp.__htmlConfig__ = vel.data()
+  } else if (vel._isVirtualElement) {
     comp = new Component.Element(parent, vel);
   } else if (vel._isVirtualTextNode) {
     comp = new Component.TextNode(parent, vel);
@@ -96,7 +96,7 @@ function _capture(state, vel, forceCapture) {
     } else {
       // NOTE: don't ask shouldRerender if no element is there yet
       needRerender = !comp.el || comp.shouldRerender(vel.props, comp.state);
-      comp.__htmlConfig__ = vel._copyHTMLConfig();
+      comp.__htmlConfig__ = vel.data()
       state.setOldProps(vel, comp.props);
       state.setOldState(vel, comp.state);
       // updates prop triggering willReceiveProps
@@ -108,12 +108,12 @@ function _capture(state, vel, forceCapture) {
     if (needRerender) {
       var context = new CaptureContext(vel);
       var content = comp.render(context.$$);
-      if (!content || !content._isVirtualHTMLElement) {
+      if (!content || !content._isVirtualElement) {
         throw new Error("Component.render must return VirtualHTMLElement");
       }
 
       if (comp.__htmlConfig__) {
-        content._mergeHTMLConfig(comp.__htmlConfig__);
+        content.assign(comp.__htmlConfig__)
       }
       content._comp = comp;
       vel._content = content;
@@ -138,7 +138,7 @@ function _capture(state, vel, forceCapture) {
           if (!child._comp) {
             _create(state, child);
           }
-          if (child._isVirtualHTMLElement && child.children.length > 0) {
+          if (child._isVirtualElement && child.children.length > 0) {
             stack = stack.concat(child.children);
           }
           state.setCaptured(child);
@@ -159,7 +159,7 @@ function _capture(state, vel, forceCapture) {
     } else {
       state.setSkipped(vel);
     }
-  } else if (vel._isVirtualHTMLElement) {
+  } else if (vel._isVirtualElement) {
     for (var i = 0; i < vel.children.length; i++) {
       _capture(state, vel.children[i]);
     }
@@ -194,7 +194,7 @@ function _render(state, vel) {
   _updateElement(comp, vel);
 
   // structural updates are necessary only for HTML elements (without innerHTML set)
-  if (vel._isVirtualHTMLElement && !vel.hasInnerHTML()) {
+  if (vel._isVirtualElement && !vel.hasInnerHTML()) {
     var newChildren = vel.children;
     var oldComp, virtualComp, newComp;
     var pos1 = 0; var pos2 = 0;
@@ -314,7 +314,7 @@ function _triggerUpdate(state, vel) {
     if (state.isUpdated(vel)) {
       vel._comp.didUpdate(state.getOldProps(vel), state.getOldState(vel));
     }
-  } else if (vel._isVirtualHTMLElement) {
+  } else if (vel._isVirtualElement) {
     vel.children.forEach(_triggerUpdate.bind(null, state));
   }
 }
@@ -442,7 +442,7 @@ function _mapComponents(state, comp, vc) {
 
 function _isOfSameType(comp, vc) {
   return (
-    (comp._isElementComponent && vc._isVirtualHTMLElement) ||
+    (comp._isElementComponent && vc._isVirtualElement) ||
     (comp._isComponent && vc._isVirtualComponent && comp.constructor === vc.ComponentClass) ||
     (comp._isTextNodeComponent && vc._isVirtualTextNode)
   );
@@ -652,14 +652,13 @@ class CaptureContext {
   }
 }
 
-
 function _createWrappingVirtualComponent(comp) {
   var vel = new VirtualNode.Component(comp.constructor);
   vel._comp = comp;
   if (comp.__htmlConfig__) {
-    vel._mergeHTMLConfig(comp.__htmlConfig__);
+    vel.assign(comp.__htmlConfig__)
   }
-  return vel;
+  return vel
 }
 
 RenderingEngine.createContext = function(comp) {

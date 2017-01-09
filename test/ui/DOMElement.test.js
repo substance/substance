@@ -1,7 +1,7 @@
 import { module, spy } from 'substance-test'
-import DOMElement from '../../ui/DefaultDOMElement'
+import DOMElement from '../../dom/DefaultDOMElement'
 
-const test = module('ui/DOMElement')
+const test = module('dom/DOMElement')
 
 test("Parsing a full HTML document", function(t) {
   var html = '<html><head><title>TEST</title></head><body>TEST</body></html>'

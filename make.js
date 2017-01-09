@@ -29,7 +29,7 @@ function _browser(DIST, transpileToES5) {
       useStrict: !transpileToES5,
     },
     buble: transpileToES5,
-    eslint: { exclude: [ 'xdom/vendor.js' ] }
+    eslint: { exclude: [ 'dom/vendor.js' ] }
   })
   b.css('substance.css', DIST+'substance.css', { variables: true })
   b.css('substance.css', DIST+'substance.next.css')
@@ -48,7 +48,7 @@ function _server(DIST, transpileToES5) {
       sourceMapRoot: __dirname, sourceMapPrefix: 'substance'
     },
     buble: transpileToES5,
-    eslint: { exclude: [ 'xdom/vendor.js' ] }
+    eslint: { exclude: [ 'dom/vendor.js' ] }
   })
 }
 
@@ -98,20 +98,20 @@ function _docs(mode, dest) {
 }
 
 function _vendor_xdom() {
-  b.js('./xdom/.vendor.js', {
+  b.js('./dom/.vendor.js', {
     target: {
-      dest: './xdom/vendor.js',
+      dest: './dom/vendor.js',
       format: 'es'
     },
     resolve: {
       alias: {
         // TODO: would be nice to have a 'stub' generator provided by bundler
-        'inherits': path.join(__dirname, 'xdom', '.stub.js'),
-        'events': path.join(__dirname, 'xdom', '.stub.js'),
-        'dom-serializer': path.join(__dirname, 'xdom/.domSerializer.js'),
-        'entities': path.join(__dirname, 'xdom/.stub.js'),
-        'entities/maps/entities.json': path.join(__dirname, 'xdom/.stub.js'),
-        'entities/maps/legacy.json': path.join(__dirname, 'xdom/.stub.js')
+        'inherits': path.join(__dirname, 'dom', '.stub.js'),
+        'events': path.join(__dirname, 'dom', '.stub.js'),
+        'dom-serializer': path.join(__dirname, 'dom/.domSerializer.js'),
+        'entities': path.join(__dirname, 'dom/.stub.js'),
+        'entities/maps/entities.json': path.join(__dirname, 'dom/.stub.js'),
+        'entities/maps/legacy.json': path.join(__dirname, 'dom/.stub.js')
       }
     },
     commonjs: true,

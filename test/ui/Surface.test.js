@@ -8,7 +8,7 @@ import Configurator from '../../util/Configurator'
 import TestContainerEditor from './TestContainerEditor'
 import fixture from '../fixtures/createTestArticle'
 import simple from '../fixtures/simple'
-import BrowserDOMElement from '../../ui/BrowserDOMElement'
+import BrowserDOMElement from '../../dom/BrowserDOMElement'
 
 import ParagraphComponent from '../../packages/paragraph/ParagraphComponent'
 import HeadingComponent from '../../packages/heading/HeadingComponent'

@@ -1,15 +1,10 @@
 import flattenDeep from 'lodash-es/flattenDeep'
-import omit from 'lodash-es/omit'
-import XNode from '../xdom/XNode'
-import clone from '../util/clone'
-import extend from '../util/extend'
-import map from '../util/map'
-import isArray from '../util/isArray'
+import XNode from '../dom/XNode'
 import isFunction from '../util/isFunction'
 import isNil from '../util/isNil'
 import isPlainObject from '../util/isPlainObject'
 import isString from '../util/isString'
-import without from '../util/without'
+import isArray from '../util/isArray'
 
 /**
   A virtual {@link DOMElement} which is used by the {@link Component} API.
@@ -25,18 +20,12 @@ class VirtualNode extends XNode {
 
     // a reference to the Component instance
     this._comp = null
-    // set when this gets inserted into another virtual element
-    this._parent = null
     // a reference to the owner Component instance
     this._owner = null
     // a reference to the RenderingContext
     this._context = null
     // set when ref'd
     this._ref = null
-  }
-
-  getParent() {
-    return this._parent
   }
 
   /*
@@ -84,162 +73,138 @@ class VirtualNode extends XNode {
     return this
   }
 
+  _normalizeChild(child) {
+    if (isNil(child)) return null
+    if (child._isXNode) {
+      if (!child._isVirtualNode) {
+        if (child.type === 'tag') {
+          child = new VirtualElement(child.name, child)
+        } else if (child.type === 'text') {
+          child = new VirtualTextNode(child.data)
+        } else {
+          return null
+        }
+      }
+    } else {
+      child = new VirtualTextNode(String(child))
+    }
+    if (!child._isVirtualNode) throw new Error('Illegal argument: child must be an instance of VirtualNode.')
+    return child
+  }
+
+  _onAttach(child) {
+    if (this._context && child._owner !== this._owner && child._ref) {
+      this._context.foreignRefs[child._ref] = child
+    }
+  }
+
+  _onDetach(child) {
+    if (this._context && child._owner !== this._owner && child._ref) {
+      delete this.context.foreignRefs[child._ref]
+    }
+  }
+
+  createTextNode(text) {
+    return new VirtualTextNode(text, { ownerDocument: this.ownerDocument })
+  }
+
+  createElement(tagName) {
+    return new VirtualElement(tagName, { ownerDocument: this.ownerDocument })
+  }
+
 }
 
 VirtualNode.prototype._isVirtualNode = true
 
-
+/*
+  A virtual HTML element.
+*/
 class VirtualElement extends VirtualNode {
 
-  constructor() {
-    super()
-
-    this.classes = new Set()
-    this.attributes = new Map()
-    this.htmlProps = new Map()
-    this.style = new Map()
-    this.eventListeners = []
+  constructor(tagName, opts = {}) {
+    super('tag', Object.assign({ name: tagName }, opts))
   }
 
-  hasClass(className) {
-    return this.classes.indexOf(className) > -1
+  isElementNode() {
+    return true
   }
 
-  addClass(className) {
-    if (!this.classNames) {
-      this.classNames = []
-    }
-    this.classNames.push(className)
+  getNodeType() {
+    return "element"
+  }
+
+  // FIXME: support setInnerHTML
+  hasInnerHTML() { return false }
+
+}
+
+VirtualElement.prototype._isVirtualElement = true
+
+/*
+  A virtual element which gets rendered by a custom component.
+
+  @private
+*/
+class VirtualComponent extends VirtualNode {
+
+  constructor(ComponentClass, props) {
+    super('component')
+
+    this.ComponentClass = ComponentClass
+    this.props = props || {}
+  }
+
+  getNodeType() {
+    return 'component'
+  }
+
+  outlet(name) {
+    return new Outlet(this, name)
+  }
+
+  // Note: overriding structural DOMElement API
+  // as it has a special semantics (considering outlets)
+  // in the context of VirtualComponents
+  // VirtualComponents are actually leafs in the sense of VirtualNodes
+  // instead they have outlets, i.e. props containing children
+
+  append(...args) {
+    this._append(this._defaultOutlet(), ...args)
     return this
   }
 
-  removeClass(className) {
-    if (this.classNames) {
-      this.classNames = without(this.classNames, className)
-    }
+  appendChild(...args) {
+    this._appendChild(this._defaultOutlet(), ...args)
     return this
   }
 
-  removeAttr(attr) {
-    if (this.attributes) {
-      if (isString(attr)) {
-        delete this.attributes[attr]
-      } else {
-        this.attributes = omit(this.attributes, attr)
-      }
-    }
-    return this
+  insertAt() {
+    throw new Error('insertAt() is not supported on VirtualComponents.')
   }
 
-  getAttribute(name) {
-    if (this.attributes) {
-      return this.attributes[name]
-    }
+  insertBefore() {
+    throw new Error('insertBefore() is not supported on VirtualComponents.')
   }
 
-  setAttribute(name, value) {
-    if (!this.attributes) {
-      this.attributes = {}
-    }
-    this.attributes[name] = value
-    return this
+  removeAt() {
+    throw new Error('removeAt() is not supported on VirtualComponents.')
   }
 
-  getAttributes() {
-    // we are having separated storages for differet
-    // kind of attributes which we now pull together
-    // in the same way as a native DOM element has it
-    var attributes = {}
-    if (this.attributes) {
-      extend(attributes, this.attributes)
-    }
-    if (this.classNames) {
-      attributes.class = this.classNames.join(' ')
-    }
-    if (this.style) {
-      attributes.style = map(this.style, function(val, key) {
-        return key + ":" + val
-      }).join(';')
-    }
-    return attributes
+  removeChild() {
+    throw new Error('removeAt() is not supported on VirtualComponents.')
   }
 
-  getValue() {
-    return this.htmlProp('value')
+  replaceChild() {
+    throw new Error('replaceChild() is not supported on VirtualComponents.')
   }
 
-  setValue(value) {
-    this.htmlProp('value', value)
-    return this
+  empty() {
+    throw new Error('empty() is not supported on VirtualComponents.')
   }
 
-  getProperty(name) {
-    if (this.htmlProps) {
-      return this.htmlProps[name]
-    }
-  }
-
-  setProperty(name, value) {
-    if (!this.htmlProps) {
-      this.htmlProps = {}
-    }
-    this.htmlProps[name] = value
-    return this
-  }
-
-  removeProperty(name) {
-    if (this.htmlProps) {
-      delete this.htmlProps[name]
-    }
-    return this
-  }
-
-  getStyle(name) {
-    if (this.style) {
-      return this.style[name]
-    }
-  }
-
-  setStyle(name, value) {
-    if (!this.style) {
-      this.style = {}
-    }
-    this.style[name] = value
-    return this
-  }
-
-  addEventListener(eventName, handler, options) {
-    var listener
-    if (arguments.length === 1 && arguments[0]._isDOMEventListener) {
-      listener = arguments[0]
-    } else {
-      options = options || {}
-      options.context = options.context || this._owner._comp
-      listener = new DOMEventListener(eventName, handler, options)
-    }
-    if (!this.eventListeners) {
-      this.eventListeners = []
-    }
-    this.eventListeners.push(listener)
-    return this
-  }
-
-  removeEventListener(eventName, handler) {
-    if (this.eventListeners) {
-      DOMEventListener.findIndex(this.eventListeners, eventName, handler)
-    }
-    return this
-  }
-
-  getEventListeners() {
-    return this.eventListeners
-  }
-
-  _normalizeChild(child) {
-    if (isString(child)) {
-      child = new VirtualTextNode(child)
-    }
-    return child
+  _defaultOutlet() {
+    if (!this.props.children) this.props.children = []
+    return this.props.children
   }
 
   _append(outlet, args) {
@@ -260,142 +225,25 @@ class VirtualElement extends VirtualNode {
 
   _appendChild(outlet, child) {
     child = this._normalizeChild(child)
-    // TODO: discuss. Having a bad feeling about this,
-    // because it could obscure an implementation error
-    if (!child) return
+    if (!child) return this
     outlet.push(child)
-    this._attach(child)
-    return child
+    this._onAttach(child)
   }
 
-  _insertAt(outlet, pos, child) {
-    if (!child) return
-    outlet.splice(pos, 0, child)
-    this._attach(child)
-  }
-
-  _removeAt(outlet, pos) {
-    var child = outlet[pos]
-    outlet.splice(pos, 1)
-    this._detach(child)
-  }
-
-  _attach(child) {
-    child.parent = this
-    if (this._context && child._owner !== this._owner && child._ref) {
-      this._context.foreignRefs[child._ref] = child
-    }
-  }
-
-  _detach(child) {
-    child.parent = null
-    if (this._context && child._owner !== this._owner && child._ref) {
-      delete this.context.foreignRefs[child._ref]
-    }
-  }
-
-  _mergeHTMLConfig(other) {
-    if (other.classNames) {
-      if (!this.classNames) {
-        this.classNames = []
-      }
-      this.classNames = this.classNames.concat(other.classNames)
-    }
-    if (other.attributes) {
-      if (!this.attributes) {
-        this.attributes = {}
-      }
-      extend(this.attributes, other.attributes)
-    }
-    if (other.htmlProps) {
-      if (!this.htmlProps) {
-        this.htmlProps = {}
-      }
-      extend(this.htmlProps, other.htmlProps)
-    }
-    if (other.style) {
-      if (!this.style) {
-        this.style = {}
-      }
-      extend(this.style, other.style)
-    }
-    if (other.eventListeners) {
-      if (!this.eventListeners) {
-        this.eventListeners = []
-      }
-      this.eventListeners = this.eventListeners.concat(other.eventListeners)
-    }
-  }
-
-  _copyHTMLConfig() {
-    return {
-      classNames: clone(this.classNames),
-      attributes: clone(this.attributes),
-      htmlProps: clone(this.htmlProps),
-      style: clone(this.style),
-      eventListeners: clone(this.eventListeners)
-    }
-  }
-
-}
-
-/*
-  A virtual HTML element.
-*/
-class VirtualElement extends VirtualNode {
-
-  constructor(tagName) {
-    super('tag', { name: tagName})
-  }
-
-  isElementNode() {
-    return true
-  }
-
-  getNodeType() {
-    return "element"
-  }
-
-}
-
-VirtualElement.prototype._isVirtualElement = true
-
-
-/*
-  A virtual element which gets rendered by a custom component.
-
-  @private
-*/
-class VirtualComponent extends VirtualNode {
-
-  constructor(ComponentClass, props) {
-    super()
-
-    this.ComponentClass = ComponentClass
-    this.props = props || {}
-  }
-
-  getNodeType() {
-    return 'component'
-  }
-
-  outlet(name) {
-    return new Outlet(this, name)
-  }
-
-  _attach(child) {
+  // TODO: rethink the _preliminaryParent stuff
+  // it seems inconsistent to me, as children provided via props
+  // would not have this property set
+  _onAttach(child) {
     child._preliminaryParent = this
   }
-
-  _detach(child) {
-    child._preliminaryParent = null
-  }
 }
+
+VirtualComponent.prototype._isVirtualComponent = true
 
 class VirtualTextNode extends VirtualNode {
 
-  constructor(text) {
-    super('text', { data: text })
+  constructor(text, opts = {}) {
+    super('text', Object.assign({ data: text }, opts))
   }
 
   isTextNode() { return true }
@@ -404,8 +252,8 @@ class VirtualTextNode extends VirtualNode {
 
 VirtualTextNode.prototype._isVirtualTextNode = true
 
-VirtualElement.Component = VirtualComponent
-VirtualElement.TextNode = VirtualTextNode
+VirtualNode.Component = VirtualComponent
+VirtualNode.TextNode = VirtualTextNode
 
 /**
   Create a virtual DOM representation which is used by Component
@@ -413,7 +261,7 @@ VirtualElement.TextNode = VirtualTextNode
 
   @param elementType HTML tag name or Component class
   @param [props] a properties object for Component classes
-  @return {VirtualElement} a virtual DOM node
+  @return {VirtualNode} a virtual DOM node
 
   @example
 
@@ -429,7 +277,7 @@ VirtualElement.TextNode = VirtualTextNode
   $$(HelloMessage, {name: 'John'})
   ```
 */
-VirtualElement.createElement = function() {
+VirtualNode.createElement = function() {
   var content
   var _first = arguments[0]
   var _second = arguments[1]
@@ -528,4 +376,4 @@ class Outlet {
   }
 }
 
-export default VirtualElement
+export default VirtualNode

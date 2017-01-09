@@ -1,8 +1,8 @@
 import inBrowser from '../util/inBrowser'
-import BrowserDOMElement from '../ui/BrowserDOMElement.js'
-import MemoryDOMElement from '../ui/MemoryDOMElement.js'
+import BrowserDOMElement from './BrowserDOMElement'
+import XNode from './XNode'
 
-const DefaultDOMElementClass = inBrowser ? BrowserDOMElement : MemoryDOMElement
+const DefaultDOMElementClass = inBrowser ? BrowserDOMElement : XNode
 
 /**
   A Bridge to the default DOMElement implementation, either BrowserDOMElement, or MemoryDOMElement.
@@ -38,7 +38,7 @@ DefaultDOMElement.parseHTML = function(html) {
   @returns {DOMElement|DOMElement[]}
 */
 DefaultDOMElement.parseXML = function(xml, fullDoc) {
-  return DefaultDOMElementClass.parseXML(xml, { fullDoc: fullDoc })
+  return DefaultDOMElementClass.parseXML(xml, fullDoc)
 }
 
 DefaultDOMElement.wrapNativeElement = function(el) {

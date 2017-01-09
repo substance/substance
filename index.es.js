@@ -160,7 +160,6 @@ export { default as BlockNodeComponent } from './ui/BlockNodeComponent'
 export { default as Command } from './ui/Command'
 export { default as Component } from './ui/Component'
 export { default as ContainerEditor } from './ui/ContainerEditor'
-export { default as DefaultDOMElement } from './ui/DefaultDOMElement'
 export { default as DragAndDropHandler } from './ui/DragAndDropHandler'
 export { default as FontAwesomeIcon } from './ui/FontAwesomeIcon'
 export { default as InsertNodeCommand } from './ui/InsertNodeCommand'
@@ -191,6 +190,9 @@ export { default as substanceGlobals } from './util/substanceGlobals'
 export { default as TreeIndex } from './util/TreeIndex'
 export { default as uuid } from './util/uuid'
 export { series } from './util/async'
+
+// dom
+export { default as DefaultDOMElement } from './dom/DefaultDOMElement'
 
 // test-utlity related (to reduce bundle size we should think of
 // providing a separate bundle for that in the future)

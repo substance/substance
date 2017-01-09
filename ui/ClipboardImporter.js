@@ -4,7 +4,7 @@ import forEach from '../util/forEach'
 import Registry from '../util/Registry'
 import Document from '../model/Document'
 import HTMLImporter from '../model/HTMLImporter'
-import DefaultDOMElement from './DefaultDOMElement'
+import DefaultDOMElement from '../dom/DefaultDOMElement'
 import JSONConverter from '../model/JSONConverter'
 import platform from '../util/platform'
 

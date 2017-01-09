@@ -1,6 +1,6 @@
 import NodeSelection from '../model/NodeSelection'
 import Component from '../ui/Component'
-import DefaultDOMElement from '../ui/DefaultDOMElement'
+import DefaultDOMElement from '../dom/DefaultDOMElement'
 import EventEmitter from '../util/EventEmitter'
 import inBrowser from '../util/inBrowser'
 

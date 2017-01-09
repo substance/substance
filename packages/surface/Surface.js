@@ -6,7 +6,7 @@ import inBrowser from '../../util/inBrowser'
 import isNil from '../../util/isNil'
 import Clipboard from '../../ui/Clipboard'
 import Component from '../../ui/Component'
-import DefaultDOMElement from '../../ui/DefaultDOMElement'
+import DefaultDOMElement from '../../dom/DefaultDOMElement'
 import DOMSelection from '../../ui/DOMSelection'
 import UnsupportedNode from '../../ui/UnsupportedNodeComponent'
 

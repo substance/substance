@@ -8,9 +8,9 @@
 */
 
 import inBrowser from '../util/inBrowser'
-import DOMElement from './DOMElement'
-import DOMEventListener from './DOMEventListener'
-import DefaultDOMElement from './DefaultDOMElement'
+import DOMElement from '../dom/DOMElement'
+import DOMEventListener from '../dom/DOMEventListener'
+import DefaultDOMElement from '../dom/DefaultDOMElement'
 
 /*
   TODO: to be 100% safe we would need to introduce a hidden contenteditable

@@ -42,11 +42,11 @@ function ComponentTests(debug) {
     var comp = TestComponent.create(function($$) {
       return $$('div')
     })
-    t.equal(comp.tagName, 'div', 'Element should be a "div".')
+    t.equal(comp.el.tagName, 'div', 'Element should be a "div".')
     comp = TestComponent.create(function($$) {
       return $$('span')
     })
-    t.equal(comp.tagName, 'span', 'Element should be a "span".')
+    t.equal(comp.el.tagName, 'span', 'Element should be a "span".')
     t.end()
   })
 
@@ -112,7 +112,7 @@ function ComponentTests(debug) {
     })
     t.equal(comp.attr('data-id'), 'foo', 'Element should have data-id="foo".')
     t.ok(comp.hasClass('foo'), 'Element should have class "foo".')
-    t.equal(comp.htmlProp('type'), 'foo', 'Element should have type "foo".')
+    t.equal(comp.el.getProperty('type'), 'foo', 'Element should have type "foo".')
     t.end()
   })
 
@@ -126,7 +126,7 @@ function ComponentTests(debug) {
 
   test("Render a component", function(t) {
     var comp = Simple.render()
-    t.equal(comp.tagName.toLowerCase(), 'div', 'Element should be a "div".')
+    t.equal(comp.el.tagName.toLowerCase(), 'div', 'Element should be a "div".')
     t.ok(comp.hasClass('simple-component'), 'Element should have class "simple-component".')
     t.end()
   })
@@ -1075,16 +1075,6 @@ function ComponentTests(debug) {
     t.notOk(parentIsUpdated, 'Initially child.didUpdate() should not have been called.')
     comp.rerender()
     t.ok(parentIsUpdated, 'After rerender child.didUpdate() should have access to parent.el')
-    t.end()
-  })
-
-
-  /* ##################### Incremental Component API ##########################*/
-
-  test("Component.append() should support appending text.", function(t) {
-    var comp = Simple.render()
-    comp.append('XXX')
-    t.equal(comp.text(), 'XXX')
     t.end()
   })
 

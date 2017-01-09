@@ -1,5 +1,5 @@
 import DOMImporter from './DOMImporter'
-import DefaultDOMElement from '../ui/DefaultDOMElement'
+import DefaultDOMElement from '../dom/DefaultDOMElement'
 
 /*
   Base class for custom HTML importers. If you want to use XML as your

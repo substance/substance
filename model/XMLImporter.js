@@ -1,5 +1,5 @@
 import DOMImporter from './DOMImporter'
-import DefaultDOMElement from '../ui/DefaultDOMElement'
+import DefaultDOMElement from '../dom/DefaultDOMElement'
 
 /*
   @class

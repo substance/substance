@@ -5,7 +5,8 @@ import isFunction from '../util/isFunction'
 import EventEmitter from '../util/EventEmitter'
 import RenderingEngine from './RenderingEngine'
 import VirtualNode from './VirtualNode'
-import DOMElement from './DOMElement'
+import DOMElement from '../dom/DOMElement'
+import DefaultDOMElement from '../dom/DefaultDOMElement'
 import inBrowser from '../util/inBrowser'
 import uuid from '../util/uuid'
 
@@ -307,7 +308,7 @@ class Component extends EventEmitter {
       this._render()
     }
     if (!el._isDOMElement) {
-      el = DOMElement.wrapNativeElement(el)
+      el = DefaultDOMElement.wrapNativeElement(el)
     }
     el.appendChild(this.el)
     if (el.isInDocument()) {
@@ -599,6 +600,65 @@ class Component extends EventEmitter {
   willUpdateState(newState) { // eslint-disable-line
   }
 
+  getAttribute(name) {
+    if (this.el) {
+      return this.el.getAttribute(name)
+    }
+  }
+
+  setAttribute(name, val) {
+    if (this.el) {
+      this.el.setAttribute(name, val)
+    }
+    return this
+  }
+
+  hasClass(name) {
+    if (this.el) {
+      return this.el.hasClass(name)
+    }
+  }
+
+  addClass(name) {
+    if (this.el) {
+      this.el.addClass(name)
+    }
+    return this
+  }
+
+  removeClass(name) {
+    if (this.el) {
+      this.el.removeClass(name)
+    }
+    return this
+  }
+
+  getStyle(name) {
+    if (this.el) {
+      return this.el.getStyle(name)
+    }
+  }
+
+  setStyle(name, val) {
+    if (this.el) {
+      return this.el.setStyle(name, val)
+    }
+    return this
+  }
+
+  getValue() {
+    if (this.el) {
+      return this.el.getValue()
+    }
+  }
+
+  setValue(val) {
+    if (this.el) {
+      this.el.setValue(val)
+    }
+    return this
+  }
+
   /**
     Get the current properties
 
@@ -658,6 +718,11 @@ class Component extends EventEmitter {
   willReceiveProps(newProps) { // eslint-disable-line
   }
 
+  getChildCount() {
+    if (!this.el) return 0
+    return this.el.getChildCount()
+  }
+
   // TODO: it is confusing to have Component extends DOMElement
   // The APIs are similar but slightly different!
 
@@ -669,8 +734,10 @@ class Component extends EventEmitter {
   }
 
   getChildAt(pos) {
-    var node = this.el.getChildAt(pos)
-    return _unwrapCompStrict(node)
+    if (this.el) {
+      let child = this.el.getChildAt(pos)
+      return _unwrapCompStrict(child)
+    }
   }
 
   find(cssSelector) {
@@ -735,8 +802,8 @@ class Component extends EventEmitter {
 
   empty() {
     if (this.el) {
-      this.getChildNodes().forEach(function(child) {
-        _disposeChild(child)
+      this.el.getChildNodes().forEach(function(child) {
+        _disposeChild(_unwrapCompStrict(child))
       })
       this.el.empty()
     }
@@ -759,9 +826,23 @@ class Component extends EventEmitter {
     }
     return context
   }
+
+  click() {
+    if (this.el) {
+      this.el.click()
+    }
+    return this
+  }
+
 }
 
 Component.prototype._isComponent = true
+
+Component.prototype.attr = DOMElement.prototype.attr
+
+Component.prototype.val = DOMElement.prototype.val
+
+Component.prototype.css = DOMElement.prototype.css
 
 Component.unwrap = _unwrapComp
 
@@ -788,7 +869,7 @@ Component.mount = function(props, el) {
     }
   }
   if (!el._isDOMElement) {
-    el = new DOMElement.wrapNativeElement(el)
+    el = new DefaultDOMElement.wrapNativeElement(el)
   }
   var ComponentClass = this
   var comp = new ComponentClass(null, props)
@@ -819,7 +900,7 @@ Component.getComponentFromNativeElement = function(nativeEl) {
   // while it sounds strange to wrap a native element
   // first, it makes sense after all, as DOMElement.wrapNativeElement()
   // provides the DOMElement instance of a previously wrapped native element.
-  return _unwrapComp(DOMElement.wrapNativeElement(nativeEl))
+  return _unwrapComp(DefaultDOMElement.wrapNativeElement(nativeEl))
 }
 
 // NOTE: this is used for incremental updates only
@@ -861,8 +942,8 @@ class ElementComponent extends Component {
     if (!parent._isComponent) {
       throw new Error("Illegal argument: 'parent' must be a Component.")
     }
-    if (!virtualComp._isVirtualHTMLElement) {
-      throw new Error("Illegal argument: 'virtualComp' must be a VirtualHTMLElement.")
+    if (!virtualComp._isVirtualElement) {
+      throw new Error("Illegal argument: 'virtualComp' must be a VirtualElement.")
     }
     this.parent = parent
     this.context = this._getContext() || {}

@@ -1,6 +1,6 @@
 import XMLExporter from '../../model/XMLExporter'
 import TestXMLImporter from './TestXMLImporter'
-import DefaultDOMElement from '../../ui/DefaultDOMElement'
+import DefaultDOMElement from '../../dom/DefaultDOMElement'
 
 class TestXMLExporter extends XMLExporter {
 

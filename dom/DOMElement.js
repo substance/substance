@@ -10,17 +10,6 @@ const NOT_IMPLEMENTED = 'This method is not implemented.'
 /**
   A unified interface for DOM elements used by Substance.
 
-  There are three different implementations of this interface:
-  - {@link ui/DefaultDOMElement}
-  - {@link ui/VirtualElement}
-  - {@link ui/Component}
-
-  Methods which rely on a CSS selector implementation are only available for {@link ui/DefaultDOMElement} instance, which is used during DOM import.
-  I.e., don't use the following methods in Component renderers:
-  - {@link ui/DOMElement#is()}
-  - {@link ui/DOMElement#find()}
-  - {@link ui/DOMElement#findAll()}
-
   @abstract
 */
 class DOMElement {
@@ -701,8 +690,7 @@ class DOMElement {
   /**
     Append a child element.
 
-    @abstract
-    @param {ui/DOMElement|String} child An element or text to append
+    @param {DOMElement|String} child An element or text to append
     @returns {this}
    */
   append(child) {
@@ -884,6 +872,14 @@ class DOMElement {
 
   get nodeType() {
     return this.getNodeType()
+  }
+
+  get className() {
+    return this.getAttribute('class')
+  }
+
+  set className(className) {
+    this.setAttribute('class', className)
   }
 
   get textContent() {
