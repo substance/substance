@@ -4,9 +4,8 @@ import isString from '../util/isString'
 import isFunction from '../util/isFunction'
 import EventEmitter from '../util/EventEmitter'
 import RenderingEngine from './RenderingEngine'
-import VirtualElement from './VirtualElement'
+import VirtualNode from './VirtualNode'
 import DOMElement from './DOMElement'
-import DefaultDOMElement from './DefaultDOMElement'
 import inBrowser from '../util/inBrowser'
 import uuid from '../util/uuid'
 
@@ -96,7 +95,7 @@ import uuid from '../util/uuid'
   HelloMessage.mount({name: 'John'}, document.body)
   ```
 */
-class Component extends DOMElement.Delegator {
+class Component extends EventEmitter {
   /**
     Construcutor is only used internally.
 
@@ -308,7 +307,7 @@ class Component extends DOMElement.Delegator {
       this._render()
     }
     if (!el._isDOMElement) {
-      el = DefaultDOMElement.wrapNativeElement(el)
+      el = DOMElement.wrapNativeElement(el)
     }
     el.appendChild(this.el)
     if (el.isInDocument()) {
@@ -659,12 +658,8 @@ class Component extends DOMElement.Delegator {
   willReceiveProps(newProps) { // eslint-disable-line
   }
 
-  getChildNodes() {
-    if (!this.el) return []
-    var childNodes = this.el.getChildNodes()
-    childNodes = childNodes.map(_unwrapComp).filter(Boolean)
-    return childNodes
-  }
+  // TODO: it is confusing to have Component extends DOMElement
+  // The APIs are similar but slightly different!
 
   getChildren() {
     if (!this.el) return []
@@ -688,16 +683,19 @@ class Component extends DOMElement.Delegator {
     return els.map(_unwrapComp).filter(Boolean)
   }
 
+  // Incremental updates
+  // -------------------
+
   appendChild(child) {
     this.insertAt(this.getChildCount(), child)
   }
 
   insertAt(pos, childEl) {
     if (isString(childEl)) {
-      childEl = new VirtualElement.TextNode(childEl)
+      childEl = new VirtualNode.TextNode(childEl)
     }
-    if (!childEl._isVirtualElement) {
-      throw new Error('Invalid argument: "child" must be a VirtualElement.')
+    if (!childEl._isVirtualNode) {
+      throw new Error('Invalid argument: "child" must be a VirtualNode.')
     }
     var child = new RenderingEngine()._renderChild(this, childEl)
     this.el.insertAt(pos, child.el)
@@ -761,26 +759,9 @@ class Component extends DOMElement.Delegator {
     }
     return context
   }
-
-  addEventListener() {
-    throw new Error("Not supported.")
-  }
-
-  removeEventListener() {
-    throw new Error("Not supported.")
-  }
-
-  insertBefore() {
-    throw new Error("Not supported.")
-  }
-
 }
 
 Component.prototype._isComponent = true
-
-EventEmitter.mixin(Component)
-
-DOMElement._defineProperties(Component, DOMElement._propertyNames)
 
 Component.unwrap = _unwrapComp
 
@@ -807,7 +788,7 @@ Component.mount = function(props, el) {
     }
   }
   if (!el._isDOMElement) {
-    el = new DefaultDOMElement.wrapNativeElement(el)
+    el = new DOMElement.wrapNativeElement(el)
   }
   var ComponentClass = this
   var comp = new ComponentClass(null, props)
@@ -836,9 +817,9 @@ Component.unwrapDOMElement = function(el) {
 
 Component.getComponentFromNativeElement = function(nativeEl) {
   // while it sounds strange to wrap a native element
-  // first, it makes sense after all, as DefaultDOMElement.wrapNativeElement()
+  // first, it makes sense after all, as DOMElement.wrapNativeElement()
   // provides the DOMElement instance of a previously wrapped native element.
-  return _unwrapComp(DefaultDOMElement.wrapNativeElement(nativeEl))
+  return _unwrapComp(DOMElement.wrapNativeElement(nativeEl))
 }
 
 // NOTE: this is used for incremental updates only

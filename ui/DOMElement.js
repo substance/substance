@@ -255,7 +255,7 @@ class DOMElement {
     @returns {String} the id.
    */
   getId() {
-    throw new Error(NOT_IMPLEMENTED)
+    return this.getAttribute('id')
   }
 
   /**
@@ -267,8 +267,8 @@ class DOMElement {
     @param {String} id the new id
     @returns {this}
   */
-  setId(id) { // eslint-disable-line no-unused-vars
-    throw new Error(NOT_IMPLEMENTED)
+  setId(id) {
+    this.setAttribute('id', id)
   }
 
   /**
@@ -924,9 +924,5 @@ class DOMElement {
 }
 
 DOMElement.prototype._isDOMElement = true
-
-// This field is used to register the implementing class
-// i.e., either BrowserDOMElement or MemoryDOMElement
-DOMElement.Impl = null
 
 export default DOMElement

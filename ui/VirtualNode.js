@@ -1,5 +1,6 @@
 import flattenDeep from 'lodash-es/flattenDeep'
 import omit from 'lodash-es/omit'
+import XNode from '../xdom/XNode'
 import clone from '../util/clone'
 import extend from '../util/extend'
 import map from '../util/map'
@@ -9,8 +10,6 @@ import isNil from '../util/isNil'
 import isPlainObject from '../util/isPlainObject'
 import isString from '../util/isString'
 import without from '../util/without'
-import DOMElement from './DOMElement'
-import DOMEventListener from './DOMEventListener'
 
 /**
   A virtual {@link DOMElement} which is used by the {@link Component} API.
@@ -19,21 +18,25 @@ import DOMEventListener from './DOMEventListener'
   DOM mixed with Components. This virtual structure needs to be compiled to a {@link Component}
   to actually create a real DOM element.
 */
-class VirtualElement extends DOMElement {
+class VirtualNode extends XNode {
 
-  constructor(owner) {
-    super()
+  constructor(type, args) {
+    super(type, args)
 
+    // a reference to the Component instance
+    this._comp = null
     // set when this gets inserted into another virtual element
-    this.parent = null
-    // set when created by RenderingContext
-    this._owner = owner
+    this._parent = null
+    // a reference to the owner Component instance
+    this._owner = null
+    // a reference to the RenderingContext
+    this._context = null
     // set when ref'd
     this._ref = null
   }
 
   getParent() {
-    return this.parent
+    return this._parent
   }
 
   /*
@@ -83,25 +86,23 @@ class VirtualElement extends DOMElement {
 
 }
 
-VirtualElement.prototype._isVirtualElement = true
+VirtualNode.prototype._isVirtualNode = true
 
-class VirtualBaseElement extends VirtualElement {
+
+class VirtualElement extends VirtualNode {
 
   constructor() {
     super()
 
-    this.classNames = null
-    this.attributes = null
-    this.htmlProps = null
-    this.style = null
-    this.eventListeners = null
+    this.classes = new Set()
+    this.attributes = new Map()
+    this.htmlProps = new Map()
+    this.style = new Map()
+    this.eventListeners = []
   }
 
   hasClass(className) {
-    if (this.classNames) {
-      return this.classNames.indexOf(className) > -1
-    }
-    return false
+    return this.classes.indexOf(className) > -1
   }
 
   addClass(className) {
@@ -161,15 +162,6 @@ class VirtualBaseElement extends VirtualElement {
       }).join(';')
     }
     return attributes
-  }
-
-  getId() {
-    return this.getAttribute('id')
-  }
-
-  setId(id) {
-    this.setAttribute('id', id)
-    return this
   }
 
   getValue() {
@@ -349,162 +341,24 @@ class VirtualBaseElement extends VirtualElement {
 
 /*
   A virtual HTML element.
-
-  @private
-  @class VirtualElement.VirtualHTMLElement
-  @extends ui/VirtualElement
 */
-class VirtualHTMLElement extends VirtualBaseElement {
+class VirtualElement extends VirtualNode {
 
   constructor(tagName) {
-    super()
-
-    this._tagName = tagName
-    this.children = []
-  }
-
-  getTagName() {
-    return this._tagName
-  }
-
-  setTagName(tagName) {
-    this._tagName = tagName
-    return this
-  }
-
-  setTextContent(text) {
-    if (!isString(text)) throw new Error('Illegal argument: expecting a string.')
-    text = text || ''
-    this.empty()
-    this.appendChild(text)
-    return this
-  }
-
-  setInnerHTML(html) {
-    html = html || ''
-    this.empty()
-    this._innerHTMLString = html
-    return this
-  }
-
-  getInnerHTML() {
-    if (!this.hasOwnProperty('_innerHTMLString')) {
-      throw new Error('Not supported.')
-    } else {
-      return this._innerHTMLString
-    }
-  }
-
-  getChildNodes() {
-    return this.children
-  }
-
-  getChildren() {
-    return this.children.filter(function(child) {
-      return child.getNodeType() !== "text"
-    })
+    super('tag', { name: tagName})
   }
 
   isElementNode() {
     return true
   }
 
-  append() {
-    if (this._innerHTMLString) {
-      throw Error('It is not possible to mix $$.html() with $$.append(). You can call $$.empty() to reset this virtual element.')
-    }
-    this._append(this.children, arguments)
-    return this
-  }
-
-  appendChild(child) {
-    if (this._innerHTMLString) {
-      throw Error('It is not possible to mix $$.html() with $$.append(). You can call $$.empty() to reset this virtual element.')
-    }
-    this._appendChild(this.children, child)
-    return this
-  }
-
-  insertAt(pos, child) {
-    child = this._normalizeChild(child)
-    if (!child) {
-      throw new Error('Illegal child: ' + child)
-    }
-    if (!child._isVirtualElement) {
-      throw new Error('Illegal argument for $$.insertAt():' + child)
-    }
-    if (pos < 0 || pos > this.children.length) {
-      throw new Error('insertAt(): index out of bounds.')
-    }
-    this._insertAt(this.children, pos, child)
-    return this
-  }
-
-  insertBefore(child, before) {
-    var pos = this.children.indexOf(before)
-    if (pos > -1) {
-      this.insertAt(pos, child)
-    } else {
-      throw new Error('insertBefore(): reference node is not a child of this element.')
-    }
-    return this
-  }
-
-  removeAt(pos) {
-    if (pos < 0 || pos >= this.children.length) {
-      throw new Error('removeAt(): Index out of bounds.')
-    }
-    this._removeAt(pos)
-    return this
-  }
-
-  removeChild(child) {
-    if (!child || !child._isVirtualElement) {
-      throw new Error('removeChild(): Illegal arguments. Expecting a VirtualElement instance.')
-    }
-    var idx = this.children.indexOf(child)
-    if (idx < 0) {
-      throw new Error('removeChild(): element is not a child.')
-    }
-    this.removeAt(idx)
-    return this
-  }
-
-  replaceChild(oldChild, newChild) {
-    if (!newChild || !oldChild ||
-        !newChild._isVirtualElement || !oldChild._isVirtualElement) {
-      throw new Error('replaceChild(): Illegal arguments. Expecting VirtualElement instances.')
-    }
-    var idx = this.children.indexOf(oldChild)
-    if (idx < 0) {
-      throw new Error('replaceChild(): element is not a child.')
-    }
-    this.removeAt(idx)
-    this.insertAt(idx, newChild)
-    return this
-  }
-
-  empty() {
-    var children = this.children
-    while (children.length) {
-      var child = children.pop()
-      child.parent = null
-    }
-    delete this._innerHTMLString
-    return this
-  }
-
   getNodeType() {
     return "element"
   }
 
-  hasInnerHTML() {
-    return Boolean(this._innerHTMLString)
-  }
-
 }
 
-VirtualHTMLElement.prototype._isVirtualHTMLElement = true
+VirtualElement.prototype._isVirtualElement = true
 
 
 /*
@@ -512,17 +366,13 @@ VirtualHTMLElement.prototype._isVirtualHTMLElement = true
 
   @private
 */
-class VirtualComponent extends VirtualBaseElement {
+class VirtualComponent extends VirtualNode {
 
   constructor(ComponentClass, props) {
     super()
 
     this.ComponentClass = ComponentClass
     this.props = props || {}
-  }
-
-  getComponent() {
-    return this._comp
   }
 
   getNodeType() {
@@ -542,48 +392,17 @@ class VirtualComponent extends VirtualBaseElement {
   }
 }
 
-class Outlet {
-  constructor(virtualEl, name) {
-    this.virtualEl = virtualEl
-    this.name = name
-    Object.freeze(this)
-  }
-
-  _getOutlet() {
-    var outlet = this.virtualEl.props[this.name]
-    if (!outlet) {
-      outlet = []
-      this.virtualEl.props[this.name] = outlet
-    }
-    return outlet
-  }
-
-  append() {
-    var outlet = this._getOutlet()
-    this.virtualEl._append(outlet, arguments)
-    return this
-  }
-
-  empty() {
-    var arr = this.virtualEl.props[this.name]
-    arr.forEach(function(el) {
-      this._detach(el)
-    }.bind(this))
-    arr.splice(0, arr.length)
-    return this
-  }
-}
-
-
-class VirtualTextNode extends VirtualElement {
+class VirtualTextNode extends VirtualNode {
 
   constructor(text) {
-    super()
-    this.text = text
+    super('text', { data: text })
   }
 
-  get _isVirtualTextNode() { return true; }
+  isTextNode() { return true }
+
 }
+
+VirtualTextNode.prototype._isVirtualTextNode = true
 
 VirtualElement.Component = VirtualComponent
 VirtualElement.TextNode = VirtualTextNode
@@ -643,7 +462,7 @@ VirtualElement.createElement = function() {
     }
   }
   if (type === 'element') {
-    content = new VirtualHTMLElement(_first)
+    content = new VirtualElement(_first)
     // remaining props are attributes
     // TODO: should we make sure that these are only string values?
     content.attr(props)
@@ -675,6 +494,38 @@ VirtualElement.createElement = function() {
     content.append(flattenDeep(Array.prototype.slice.call(arguments, 2)))
   }
   return content
+}
+
+class Outlet {
+  constructor(virtualEl, name) {
+    this.virtualEl = virtualEl
+    this.name = name
+    Object.freeze(this)
+  }
+
+  _getOutlet() {
+    var outlet = this.virtualEl.props[this.name]
+    if (!outlet) {
+      outlet = []
+      this.virtualEl.props[this.name] = outlet
+    }
+    return outlet
+  }
+
+  append() {
+    var outlet = this._getOutlet()
+    this.virtualEl._append(outlet, arguments)
+    return this
+  }
+
+  empty() {
+    var arr = this.virtualEl.props[this.name]
+    arr.forEach(function(el) {
+      this._detach(el)
+    }.bind(this))
+    arr.splice(0, arr.length)
+    return this
+  }
 }
 
 export default VirtualElement

@@ -1,7 +1,7 @@
 import forEach from '../util/forEach'
 import uuid from '../util/uuid'
 import substanceGlobals from '../util/substanceGlobals'
-import VirtualElement from './VirtualElement'
+import VirtualNode from './VirtualNode'
 import DefaultDOMElement from './DefaultDOMElement'
 import Component from './Component'
 
@@ -584,7 +584,7 @@ class DescendingContext {
     // as expected.
     // TODO: instead of creating a new VirtualElement each time, we could return
     // an immutable wrapper for the already recorded element.
-    vel = VirtualElement.createElement.apply(this, arguments);
+    vel = VirtualNode.createElement.apply(this, arguments);
     // these variables need to be set make the 'ref()' API work
     vel._context = this;
     vel._owner = this.owner;
@@ -640,7 +640,7 @@ class CaptureContext {
   }
 
   _createComponent() {
-    var vel = VirtualElement.createElement.apply(this, arguments);
+    var vel = VirtualNode.createElement.apply(this, arguments);
     vel._context = this;
     vel._owner = this.owner;
     if (vel._isVirtualComponent) {
@@ -654,7 +654,7 @@ class CaptureContext {
 
 
 function _createWrappingVirtualComponent(comp) {
-  var vel = new VirtualElement.Component(comp.constructor);
+  var vel = new VirtualNode.Component(comp.constructor);
   vel._comp = comp;
   if (comp.__htmlConfig__) {
     vel._mergeHTMLConfig(comp.__htmlConfig__);

@@ -1,27 +1,20 @@
 import inBrowser from '../util/inBrowser'
-import BrowserDOMElement from './BrowserDOMElement.js'
-import MemoryDOMElement from './MemoryDOMElement.js'
+import BrowserDOMElement from '../ui/BrowserDOMElement.js'
+import MemoryDOMElement from '../ui/MemoryDOMElement.js'
 
-let DOMElementImpl
+const DefaultDOMElementClass = inBrowser ? BrowserDOMElement : MemoryDOMElement
 
-if (inBrowser) {
-  DOMElementImpl = BrowserDOMElement
-} else {
-  DOMElementImpl = MemoryDOMElement
-}
-
+/**
+  A Bridge to the default DOMElement implementation, either BrowserDOMElement, or MemoryDOMElement.
+*/
 let DefaultDOMElement = {}
 
 DefaultDOMElement.createTextNode = function(text) {
-  return DOMElementImpl.createTextNode(text)
+  return DefaultDOMElementClass.createTextNode(text)
 }
 
 DefaultDOMElement.createElement = function(tagName) {
-  return DOMElementImpl.createElement(tagName)
-}
-
-DefaultDOMElement._create = function(el) {
-  return new DOMElementImpl(el)
+  return DefaultDOMElementClass.createElement(tagName)
 }
 
 /*
@@ -29,12 +22,7 @@ DefaultDOMElement._create = function(el) {
   the DOMElement's eventlistener API.
 */
 DefaultDOMElement.getBrowserWindow = function() {
-  if (inBrowser) {
-    return DOMElementImpl.getBrowserWindow()
-  } else {
-    // just a stub if not in browser
-    return DefaultDOMElement.createElement('div')
-  }
+  return DefaultDOMElementClass.getBrowserWindow()
 }
 
 /*
@@ -42,7 +30,7 @@ DefaultDOMElement.getBrowserWindow = function() {
   @returns {DOMElement|DOMElement[]}
 */
 DefaultDOMElement.parseHTML = function(html) {
-  return DOMElementImpl.parseMarkup(html, 'html')
+  return DefaultDOMElementClass.parseHTML(html)
 }
 
 /*
@@ -50,27 +38,15 @@ DefaultDOMElement.parseHTML = function(html) {
   @returns {DOMElement|DOMElement[]}
 */
 DefaultDOMElement.parseXML = function(xml, fullDoc) {
-  return DOMElementImpl.parseMarkup(xml, 'xml', fullDoc)
+  return DefaultDOMElementClass.parseXML(xml, { fullDoc: fullDoc })
 }
 
 DefaultDOMElement.wrapNativeElement = function(el) {
-  if (el) {
-    if (inBrowser && (el instanceof window.Node || el === window) ) {
-      return BrowserDOMElement.wrapNativeElement(el)
-    } else if (el.root && el.root.type === "root" ) {
-      return MemoryDOMElement.wrapNativeElement(el)
-    }
-  } else {
-    return null
-  }
+  return DefaultDOMElementClass.wrapNativeElement(el)
 }
 
 DefaultDOMElement.isReverse = function(anchorNode, anchorOffset, focusNode, focusOffset) {
-  if (inBrowser ) {
-    return BrowserDOMElement.isReverse(anchorNode, anchorOffset, focusNode, focusOffset)
-  } else {
-    throw new Error('Not implemented.')
-  }
+  return DefaultDOMElementClass.isReverse(anchorNode, anchorOffset, focusNode, focusOffset)
 }
 
 export default DefaultDOMElement

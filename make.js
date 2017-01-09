@@ -1,5 +1,6 @@
 let b = require('substance-bundler')
 let eslint = require('eslint')
+let path = require('path')
 
 // Constants
 // ---------
@@ -28,7 +29,6 @@ function _browser(DIST, transpileToES5) {
       sourceMapRoot: __dirname, sourceMapPrefix: 'substance',
       useStrict: !transpileToES5,
     },
-    ignore: ['substance-cheerio'],
     buble: transpileToES5,
     eslint: eslint
   })
@@ -49,7 +49,6 @@ function _server(DIST, transpileToES5) {
       sourceMapRoot: __dirname, sourceMapPrefix: 'substance'
     },
     buble: transpileToES5,
-    external: [ 'substance-cheerio' ],
     eslint: eslint
   })
 }
@@ -61,9 +60,9 @@ function _testBrowser(transpileToES5) {
       dest: TEST+'tests.js',
       format: 'umd', moduleName: 'tests'
     },
-    buble: transpileToES5,
-    ignore: [ 'substance-cheerio' ],
-    external: [ 'substance-test' ]
+    // buble: transpileToES5,
+    buble: true,
+    external: { 'substance-test': 'substanceTest' }
   })
 }
 
@@ -76,7 +75,7 @@ function _testServer() {
     },
     // buble necessary here, for nodejs
     buble: true,
-    external: [ 'substance-test', 'util', 'events', 'stream', 'buffer' ],
+    external: [ 'substance-test' ],
   })
 }
 
@@ -96,6 +95,28 @@ function _docs(mode, dest) {
     dest: dest,
     config: './.docgenrc.js',
     mode: mode // one of: 'source', 'json', 'site' (default: 'json')
+  })
+}
+
+function _vendor_xdom() {
+  b.js('./xdom/.vendor.js', {
+    target: {
+      dest: './xdom/vendor.js',
+      format: 'es'
+    },
+    resolve: {
+      alias: {
+        // TODO: would be nice to have a 'stub' generator provided by bundler
+        'inherits': path.join(__dirname, 'xdom', '.stub.js'),
+        'events': path.join(__dirname, 'xdom', '.stub.js'),
+        'dom-serializer': path.join(__dirname, 'xdom/.domSerializer.js'),
+        'entities': path.join(__dirname, 'xdom/.stub.js'),
+        'entities/maps/entities.json': path.join(__dirname, 'xdom/.stub.js'),
+        'entities/maps/legacy.json': path.join(__dirname, 'xdom/.stub.js')
+      }
+    },
+    commonjs: true,
+    json: true
   })
 }
 
@@ -197,6 +218,8 @@ b.task('build:pure', ['clean', 'browser:pure', 'server:pure'])
 b.task('test', ['test:clean', 'test:assets', 'test:browser', 'test:server'])
 
 b.task('npm', ['npm:clean', 'npm:copy:sources', 'npm:docs', 'npm:browser', 'npm:server'])
+
+b.task('vendor:xdom', _vendor_xdom)
 
 b.task('default', ['build'])
 

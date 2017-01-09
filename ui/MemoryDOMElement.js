@@ -1,6 +1,6 @@
 import {
   parseXML, parseHTML, createElement, createTextNode
-} from 'substance-xdom'
+} from '../xdom/xdom'
 import clone from '../util/clone'
 import isString from '../util/isString'
 import last from '../util/last'
@@ -438,6 +438,14 @@ MemoryDOMElement.parseMarkup = function(str, format) {
   } else {
     return elements
   }
+}
+
+MemoryDOMElement.parseHTML = function(html, isFullDoc) {
+  return MemoryDOMElement.parseMarkup(html, 'html', isFullDoc)
+}
+
+MemoryDOMElement.parseXML = function(html, isFullDoc) {
+  return MemoryDOMElement.parseMarkup(html, 'xml', isFullDoc)
 }
 
 MemoryDOMElement.wrapNativeElement = _wrapNativeElement

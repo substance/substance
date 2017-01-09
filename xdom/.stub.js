@@ -1,0 +1,1 @@
+export default function() { /* stub inserted by bundler */ }

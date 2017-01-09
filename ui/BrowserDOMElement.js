@@ -597,8 +597,6 @@ class BrowserDOMElement extends DOMElement {
 
 }
 
-DOMElement._defineProperties(BrowserDOMElement, DOMElement._propertyNames)
-
 BrowserDOMElement.createTextNode = function(text) {
   return BrowserDOMElement.wrapNativeElement(
     window.document.createTextNode(text)
@@ -664,6 +662,14 @@ BrowserDOMElement.parseMarkup = function(str, format, isFullDoc) {
   } else {
     return elements
   }
+}
+
+BrowserDOMElement.parseHTML = function(html, isFullDoc) {
+  return BrowserDOMElement.parseMarkup(html, 'html', isFullDoc)
+}
+
+BrowserDOMElement.parseXML = function(html, isFullDoc) {
+  return BrowserDOMElement.parseMarkup(html, 'xml', isFullDoc)
 }
 
 class BrowserTextNode extends BrowserDOMElement {
