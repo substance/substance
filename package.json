@@ -26,7 +26,6 @@
     "css-select": "^1.2.0",
     "domelementtype": "^1.3.0",
     "domutils": "^1.5.1",
-    "eslint": "^3.12.2",
     "htmlparser2": "^3.9.2",
     "karma": "0.13.22",
     "karma-chrome-launcher": "1.0.1",
@@ -34,7 +33,7 @@
     "karma-source-map-support": "1.1.0",
     "karma-tap": "1.0.4",
     "karma-tape-reporter": "1.0.3",
-    "substance-bundler": "^0.6.6",
+    "substance-bundler": "^0.6.7",
     "substance-docgen": "0.4.7",
     "substance-test": "0.2.6"
   },

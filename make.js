@@ -1,5 +1,4 @@
 let b = require('substance-bundler')
-let eslint = require('eslint')
 let path = require('path')
 
 // Constants
@@ -30,7 +29,7 @@ function _browser(DIST, transpileToES5) {
       useStrict: !transpileToES5,
     },
     buble: transpileToES5,
-    eslint: eslint
+    eslint: { exclude: [ 'xdom/vendor.js' ] }
   })
   b.css('substance.css', DIST+'substance.css', { variables: true })
   b.css('substance.css', DIST+'substance.next.css')
@@ -49,7 +48,7 @@ function _server(DIST, transpileToES5) {
       sourceMapRoot: __dirname, sourceMapPrefix: 'substance'
     },
     buble: transpileToES5,
-    eslint: eslint
+    eslint: { exclude: [ 'xdom/vendor.js' ] }
   })
 }
 
