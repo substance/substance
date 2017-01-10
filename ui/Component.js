@@ -600,6 +600,36 @@ class Component extends EventEmitter {
   willUpdateState(newState) { // eslint-disable-line
   }
 
+  getTextContent() {
+    if (this.el) {
+      return this.el.textContent
+    }
+  }
+
+  get textContent() {
+    return this.getTextContent()
+  }
+
+  getInnerHTML() {
+    if (this.el) {
+      return this.el.getInnerHTML()
+    }
+  }
+
+  get innerHTML() {
+    return this.getInnerHTML()
+  }
+
+  getOuterHTML() {
+    if (this.el) {
+      return this.el.getOuterHTML()
+    }
+  }
+
+  get outerHTML() {
+    return this.getOuterHTML()
+  }
+
   getAttribute(name) {
     if (this.el) {
       return this.el.getAttribute(name)

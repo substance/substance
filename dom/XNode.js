@@ -186,15 +186,6 @@ class XNode extends DOMElement {
     return this
   }
 
-  getValue() {
-    return this.data
-  }
-
-  setValue(value) {
-    this.data = value
-    return this
-  }
-
   getStyle(name) {
     if (this.styles) {
       return this.styles[name]
@@ -447,7 +438,7 @@ class XNode extends DOMElement {
     }
   }
 
-  data() {
+  _getData() {
     let copy = {
       attribs: Object.assign({}, this.attribs),
     }

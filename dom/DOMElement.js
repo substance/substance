@@ -277,11 +277,12 @@ class DOMElement {
   }
 
   getValue() {
-    throw new Error(NOT_IMPLEMENTED)
+    return this.getProperty('value')
   }
 
-  setValue(value) { // eslint-disable-line no-unused-vars
-    throw new Error(NOT_IMPLEMENTED)
+  setValue(value) {
+    this.setProperty('value', value)
+    return this
   }
 
   /**

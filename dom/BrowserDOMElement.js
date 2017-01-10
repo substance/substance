@@ -117,15 +117,6 @@ class BrowserDOMElement extends DOMElement {
     return this
   }
 
-  getValue() {
-    return this.el.value
-  }
-
-  setValue(value) {
-    this.el.value = value
-    return this
-  }
-
   getStyle(name) {
     // NOTE: important to provide computed style, otherwise we don't get inherited styles
     let style = this.getComputedStyle()

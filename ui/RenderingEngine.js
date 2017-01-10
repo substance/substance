@@ -60,7 +60,7 @@ function _create(state, vel) {
     comp = new vel.ComponentClass(parent, vel.props);
     // HACK: making sure that we have the right props
     vel.props = comp.props
-    comp.__htmlConfig__ = vel.data()
+    comp.__htmlConfig__ = vel._getData()
   } else if (vel._isVirtualElement) {
     comp = new Component.Element(parent, vel);
   } else if (vel._isVirtualTextNode) {
@@ -96,7 +96,7 @@ function _capture(state, vel, forceCapture) {
     } else {
       // NOTE: don't ask shouldRerender if no element is there yet
       needRerender = !comp.el || comp.shouldRerender(vel.props, comp.state);
-      comp.__htmlConfig__ = vel.data()
+      comp.__htmlConfig__ = vel._getData()
       state.setOldProps(vel, comp.props);
       state.setOldState(vel, comp.state);
       // updates prop triggering willReceiveProps
@@ -241,7 +241,7 @@ function _render(state, vel) {
       // Try to reuse TextNodes to avoid unnecesary DOM manipulations
       if (oldComp && oldComp.el.isTextNode() &&
           virtualComp && virtualComp._isVirtualTextNode &&
-          oldComp.el.textContent === virtualComp.text ) {
+          oldComp.el.textContent === virtualComp.getTextContent() ) {
         continue;
       }
 
@@ -453,7 +453,7 @@ function _createElement(vel) {
   // TODO: we need a element factory here
   // this is fine as long we have only one DOMElement implementation per platform
   if (vel._isVirtualTextNode) {
-    el = DefaultDOMElement.createTextNode(vel.text);
+    el = DefaultDOMElement.createTextNode(vel.getTextContent());
   } else {
     el = DefaultDOMElement.createElement(vel.tagName);
   }
@@ -462,7 +462,7 @@ function _createElement(vel) {
 
 function _updateElement(comp, vel) {
   if (comp._isTextNodeComponent) {
-    comp.setTextContent(vel.text);
+    comp.setTextContent(vel.getTextContent());
     return;
   }
   var el = comp.el;
