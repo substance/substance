@@ -77,7 +77,7 @@ class AnnotatedTextComponent extends Component {
         .addClass("se-annotation-fragment")
         .addClass(node.anno.getTypeNames().join(' ').replace(/_/g, "-"));
     } else if (node.type === "container-annotation-anchor") {
-      return $$(AnnotationComponent, { doc: doc, node: node })
+      return $$(AnnotationComponent, { doc: doc, node: node.anno })
         .addClass("se-anchor")
         .addClass(node.anno.getTypeNames().join(' ').replace(/_/g, "-"))
         .addClass(node.isStart?"start-anchor":"end-anchor")

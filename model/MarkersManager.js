@@ -47,8 +47,9 @@ class MarkersManager {
     opts = opts || {}
     let doc = this.editorSession.getDocument()
     let annos = doc.getAnnotations(path) || []
+    let containerAnnos = doc.getIndex('container-annotation-anchors').get(path)
     let markers = this._markers.get(path, opts.surfaceId, opts.containerId)
-    return annos.concat(markers)
+    return annos.concat(markers, containerAnnos)
   }
 
   _onChange(editorSession) {

@@ -46,9 +46,9 @@ class Editing {
       if (AnnotationClass.prototype._isContainerAnnotation) {
         nodeData = {
           containerId: sel.containerId,
-          startPath: sel.path,
+          startPath: sel.startPath,
           startOffset: sel.startOffset,
-          endPath: sel.path,
+          endPath: sel.endPath,
           endOffset: sel.endOffset
         }
       } else if (AnnotationClass.prototype._isPropertyAnnotation) {
@@ -64,9 +64,9 @@ class Editing {
       if (AnnotationClass.prototype._isContainerAnnotation) {
         nodeData = {
           containerId: sel.containerId,
-          startPath: sel.path,
+          startPath: sel.startPath,
           startOffset: sel.startOffset,
-          endPath: sel.path,
+          endPath: sel.endPath,
           endOffset: sel.endOffset
         }
       } else if (AnnotationClass.prototype._isPropertyAnnotation) {
