@@ -108,17 +108,12 @@ class ContainerEditor extends Surface {
     // native spellcheck
     el.attr('spellcheck', this.props.spellcheck === 'native')
 
-    if (this.isEmpty()) {
-      el.append(
-        $$('a').attr('href', '#').append('Start writing').on('click', this.onCreateText)
-      )
-    } else {
-      containerNode.getNodes().forEach(function(node) {
-        el.append(this._renderNode($$, node))
-      }.bind(this))
-    }
+    containerNode.getNodes().forEach(function(node) {
+      el.append(this._renderNode($$, node))
+    }.bind(this))
 
-    if (!this.props.disabled) {
+    // No editing if disabled by user or container is empty
+    if (!this.props.disabled && !this.isEmpty()) {
       el.addClass('sm-enabled')
       el.setAttribute('contenteditable', true)
     }
@@ -164,7 +159,6 @@ class ContainerEditor extends Surface {
     // HACK: ATM we have a cursor behavior in Chrome and FF when collapsing a selection
     // e.g. have a selection from up-to-down and the press up, seems to move the focus
     else if (!platform.isIE && !sel.isCollapsed() && !event.shiftKey) {
-      let doc = this.getDocument()
       if (direction === 'left') {
         this._setSelection({
           startPath: sel.start.path,
@@ -173,7 +167,7 @@ class ContainerEditor extends Surface {
       } else {
         this._setSelection({
           startPath: sel.end.path,
-          startOffset: end.offset
+          startOffset: sel.end.offset
         })
       }
     }
@@ -284,35 +278,8 @@ class ContainerEditor extends Surface {
       }
     }
   }
-
-  // Create a first text element
-  // TODO: rethink
-  onCreateText(e) {
-    e.preventDefault()
-    let newSel
-    let containerId = this.props.containerId
-    this.context.editorSession.transaction((tx)=>{
-      let container = tx.get(containerId)
-      let textType = tx.getSchema().getDefaultTextType()
-      let node = tx.create({
-        id: uuid(textType),
-        type: textType,
-        content: ''
-      })
-      container.show(node.id)
-      tx.setSelection({
-        type: 'container',
-        startPath: [ node.id, 'content'],
-        startOffset: 0,
-        containerId: containerId,
-        surfaceId: this.id
-      })
-    })
-  }
 }
 
 ContainerEditor.prototype._isContainerEditor = true
-// TODO: where do we use this?
-ContainerEditor.isContainerEditor = true
 
 export default ContainerEditor
