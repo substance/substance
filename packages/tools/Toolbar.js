@@ -19,7 +19,7 @@ class Toolbar extends Toolbox {
   }
 
   getActiveToolGroupNames() {
-    return ['text', 'document', 'annotations', 'default']
+    return this.props.toolGroups || ['text', 'document', 'annotations', 'default']
   }
 
   getClassNames() {

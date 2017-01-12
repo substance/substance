@@ -6,10 +6,10 @@ class SaveHandlerStub {
     - syncing files (e.g. images) with a backend
     - storing a snapshot of the document's content (e.g. a XML serialization)
   */
-  saveDocument(params) {
-    console.info('Simulating save ...', params)
+  saveDocument({fileManager}) {
+    console.info('Simulating save ...')
 
-    return params.fileManager.sync()
+    return fileManager.sync()
     .then(() => {
       // Here you would run a converter (HTML/XML) usually
       // and send the result to a REST endpoint.
