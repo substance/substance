@@ -1,10 +1,6 @@
-import extend from '../util/extend'
-import forEach from '../util/forEach'
-import isString from '../util/isString'
-import isFunction from '../util/isFunction'
-import EventEmitter from '../util/EventEmitter'
+import { extend, forEach, isString, isFunction } from 'lodash-es'
 import RenderingEngine from './RenderingEngine'
-import VirtualNode from './VirtualNode'
+import VirtualElement from './VirtualElement'
 import DOMElement from '../dom/DOMElement'
 import DefaultDOMElement from '../dom/DefaultDOMElement'
 import inBrowser from '../util/inBrowser'
@@ -96,7 +92,7 @@ import uuid from '../util/uuid'
   HelloMessage.mount({name: 'John'}, document.body)
   ```
 */
-class Component extends EventEmitter {
+class Component {
   /**
     Construcutor is only used internally.
 
@@ -105,8 +101,6 @@ class Component extends EventEmitter {
                               be rendered the first time.
   */
   constructor(parent, props, el) {
-    super()
-
     // HACK: allowing skipping execution of this ctor
     if (arguments[0] === 'SKIP') return
 
@@ -281,7 +275,7 @@ class Component extends EventEmitter {
     Every Component should override this method.
 
     @param {Function} $$ method to create components
-    @return {VirtualNode} VirtualNode created using {@param $$}
+    @return {VirtualElement} VirtualElement created using {@param $$}
   */
   render($$) {
     /* istanbul ignore next */
@@ -600,6 +594,65 @@ class Component extends EventEmitter {
   willUpdateState(newState) { // eslint-disable-line
   }
 
+  /**
+    Get the current properties
+
+    @return {Object} the current state
+  */
+  getProps() {
+    return this.props
+  }
+
+  /**
+    Sets the properties of this component, potentially leading to a rerender.
+
+    @param {object} an object with properties
+  */
+  setProps(newProps) {
+    var oldProps = this.props
+    var oldState = this.state
+    var needRerender = this.shouldRerender(newProps, this.state)
+    this._setProps(newProps)
+    if (needRerender) {
+      this._rerender(oldProps, oldState)
+    } else {
+      this.didUpdate(oldProps, oldState)
+    }
+  }
+
+  _setProps(newProps) {
+    newProps = newProps || {}
+    // set a flag so that this.setState() can omit triggering render
+    this.__isSettingProps__ = true
+    try {
+      this.willReceiveProps(newProps)
+      this.props = newProps || {}
+      Object.freeze(newProps)
+    } finally {
+      delete this.__isSettingProps__
+    }
+  }
+
+  /**
+    Extends the properties of the component, without necessarily leading to a
+    rerender.
+
+    @param {object} an object with properties
+  */
+  extendProps(updatedProps) {
+    var newProps = extend({}, this.props, updatedProps)
+    this.setProps(newProps)
+  }
+
+  /**
+    Hook which is called before properties are updated. Use this to dispose objects which will be replaced when properties change.
+
+    For example you can use this to derive state from props.
+    @param {object} newProps
+  */
+  willReceiveProps(newProps) { // eslint-disable-line
+  }
+
   getTextContent() {
     if (this.el) {
       return this.el.textContent
@@ -689,72 +742,21 @@ class Component extends EventEmitter {
     return this
   }
 
-  /**
-    Get the current properties
-
-    @return {Object} the current state
-  */
-  getProps() {
-    return this.props
-  }
-
-  /**
-    Sets the properties of this component, potentially leading to a rerender.
-
-    @param {object} an object with properties
-  */
-  setProps(newProps) {
-    var oldProps = this.props
-    var oldState = this.state
-    var needRerender = this.shouldRerender(newProps, this.state)
-    this._setProps(newProps)
-    if (needRerender) {
-      this._rerender(oldProps, oldState)
-    } else {
-      this.didUpdate(oldProps, oldState)
-    }
-  }
-
-  _setProps(newProps) {
-    newProps = newProps || {}
-    // set a flag so that this.setState() can omit triggering render
-    this.__isSettingProps__ = true
-    try {
-      this.willReceiveProps(newProps)
-      this.props = newProps || {}
-      Object.freeze(newProps)
-    } finally {
-      delete this.__isSettingProps__
-    }
-  }
-
-  /**
-    Extends the properties of the component, without necessarily leading to a
-    rerender.
-
-    @param {object} an object with properties
-  */
-  extendProps(updatedProps) {
-    var newProps = extend({}, this.props, updatedProps)
-    this.setProps(newProps)
-  }
-
-  /**
-    Hook which is called before properties are updated. Use this to dispose objects which will be replaced when properties change.
-
-    For example you can use this to derive state from props.
-    @param {object} newProps
-  */
-  willReceiveProps(newProps) { // eslint-disable-line
-  }
-
   getChildCount() {
     if (!this.el) return 0
     return this.el.getChildCount()
   }
 
-  // TODO: it is confusing to have Component extends DOMElement
-  // The APIs are similar but slightly different!
+  get childNodes() {
+    return this.getChildNodes()
+  }
+
+  getChildNodes() {
+    if (!this.el) return []
+    var childNodes = this.el.getChildNodes()
+    childNodes = childNodes.map(_unwrapComp).filter(Boolean)
+    return childNodes
+  }
 
   getChildren() {
     if (!this.el) return []
@@ -764,10 +766,8 @@ class Component extends EventEmitter {
   }
 
   getChildAt(pos) {
-    if (this.el) {
-      let child = this.el.getChildAt(pos)
-      return _unwrapCompStrict(child)
-    }
+    var node = this.el.getChildAt(pos)
+    return _unwrapCompStrict(node)
   }
 
   find(cssSelector) {
@@ -780,19 +780,16 @@ class Component extends EventEmitter {
     return els.map(_unwrapComp).filter(Boolean)
   }
 
-  // Incremental updates
-  // -------------------
-
   appendChild(child) {
     this.insertAt(this.getChildCount(), child)
   }
 
   insertAt(pos, childEl) {
     if (isString(childEl)) {
-      childEl = new VirtualNode.TextNode(childEl)
+      childEl = new VirtualElement.TextNode(childEl)
     }
-    if (!childEl._isVirtualNode) {
-      throw new Error('Invalid argument: "child" must be a VirtualNode.')
+    if (!childEl._isVirtualElement) {
+      throw new Error('Invalid argument: "child" must be a VirtualElement.')
     }
     var child = new RenderingEngine()._renderChild(this, childEl)
     this.el.insertAt(pos, child.el)
@@ -832,8 +829,8 @@ class Component extends EventEmitter {
 
   empty() {
     if (this.el) {
-      this.el.getChildNodes().forEach(function(child) {
-        _disposeChild(_unwrapCompStrict(child))
+      this.getChildNodes().forEach(function(child) {
+        _disposeChild(child)
       })
       this.el.empty()
     }
@@ -857,11 +854,22 @@ class Component extends EventEmitter {
     return context
   }
 
+  addEventListener() {
+    throw new Error("Not supported.")
+  }
+
+  removeEventListener() {
+    throw new Error("Not supported.")
+  }
+
+  insertBefore() {
+    throw new Error("Not supported.")
+  }
+
   click() {
     if (this.el) {
       this.el.click()
     }
-    return this
   }
 
 }
@@ -873,6 +881,8 @@ Component.prototype.attr = DOMElement.prototype.attr
 Component.prototype.val = DOMElement.prototype.val
 
 Component.prototype.css = DOMElement.prototype.css
+
+Component.prototype.text = DOMElement.prototype.text
 
 Component.unwrap = _unwrapComp
 
@@ -928,7 +938,7 @@ Component.unwrapDOMElement = function(el) {
 
 Component.getComponentFromNativeElement = function(nativeEl) {
   // while it sounds strange to wrap a native element
-  // first, it makes sense after all, as DOMElement.wrapNativeElement()
+  // first, it makes sense after all, as DefaultDOMElement.wrapNativeElement()
   // provides the DOMElement instance of a previously wrapped native element.
   return _unwrapComp(DefaultDOMElement.wrapNativeElement(nativeEl))
 }
@@ -972,8 +982,8 @@ class ElementComponent extends Component {
     if (!parent._isComponent) {
       throw new Error("Illegal argument: 'parent' must be a Component.")
     }
-    if (!virtualComp._isVirtualElement) {
-      throw new Error("Illegal argument: 'virtualComp' must be a VirtualElement.")
+    if (!virtualComp._isVirtualHTMLElement) {
+      throw new Error("Illegal argument: 'virtualComp' must be a VirtualHTMLElement.")
     }
     this.parent = parent
     this.context = this._getContext() || {}

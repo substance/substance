@@ -54,7 +54,7 @@ function ComponentTests(debug) {
     var comp = TestComponent.create(function($$) {
       return $$('div').attr('data-id', 'foo')
     })
-    t.equal(comp.attr('data-id'), 'foo', 'Element should be have data-id="foo".')
+    t.equal(comp.el.attr('data-id'), 'foo', 'Element should be have data-id="foo".')
     t.end()
   })
 
@@ -62,7 +62,7 @@ function ComponentTests(debug) {
     var comp = TestComponent.create(function($$) {
       return $$('div').css('width', '100px')
     })
-    t.equal(comp.css('width'), '100px', 'Element should have a css width of 100px.')
+    t.equal(comp.el.css('width'), '100px', 'Element should have a css width of 100px.')
     t.end()
   })
 
@@ -70,7 +70,7 @@ function ComponentTests(debug) {
     var comp = TestComponent.create(function($$) {
       return $$('div').addClass('test')
     })
-    t.ok(comp.hasClass('test'), 'Element should have class "test".')
+    t.ok(comp.el.hasClass('test'), 'Element should have class "test".')
     t.end()
   })
 
@@ -78,7 +78,7 @@ function ComponentTests(debug) {
     var comp = TestComponent.create(function($$) {
       return $$('input').attr('type', 'text').val('foo')
     })
-    t.equal(comp.val(), 'foo', 'Value should be set.')
+    t.equal(comp.el.val(), 'foo', 'Value should be set.')
     t.end()
   })
 
@@ -86,7 +86,7 @@ function ComponentTests(debug) {
     var comp = TestComponent.create(function($$) {
       return $$('div').text('foo')
     })
-    t.equal(comp.textContent, 'foo','textContent should be set.')
+    t.equal(comp.el.textContent, 'foo','textContent should be set.')
     t.end()
   })
 
@@ -110,8 +110,8 @@ function ComponentTests(debug) {
         .attr('data-id', 'foo')
         .htmlProp('type', 'foo')
     })
-    t.equal(comp.attr('data-id'), 'foo', 'Element should have data-id="foo".')
-    t.ok(comp.hasClass('foo'), 'Element should have class "foo".')
+    t.equal(comp.el.attr('data-id'), 'foo', 'Element should have data-id="foo".')
+    t.ok(comp.el.hasClass('foo'), 'Element should have class "foo".')
     t.equal(comp.el.getProperty('type'), 'foo', 'Element should have type "foo".')
     t.end()
   })
@@ -120,14 +120,14 @@ function ComponentTests(debug) {
     var comp = TestComponent.create(function($$) {
       return $$('input').attr('type', 'text').val('foo')
     })
-    t.equal(comp.val(), 'foo', 'Input field should have value "foo".')
+    t.equal(comp.el.val(), 'foo', 'Input field should have value "foo".')
     t.end()
   })
 
   test("Render a component", function(t) {
     var comp = Simple.render()
     t.equal(comp.el.tagName.toLowerCase(), 'div', 'Element should be a "div".')
-    t.ok(comp.hasClass('simple-component'), 'Element should have class "simple-component".')
+    t.ok(comp.el.hasClass('simple-component'), 'Element should have class "simple-component".')
     t.end()
   })
 
@@ -212,21 +212,23 @@ function ComponentTests(debug) {
         el.append($$('div').append(
           $$(Child).ref('b')
         ))
-        // ingested grandchild
-        var grandchild = $$(Child).ref('c')
         el.append(
-          $$(Wrapper, {name:'bar'}).append(grandchild)
+          $$(Wrapper, {
+            name:'bar',
+            // ingested grandchild
+            children: [
+              $$(Child).ref('c')
+            ]
+          })
         )
         return el
       }
     }
-
     class Child extends Component {
       render($$) {
         return $$('div')
       }
     }
-
     class Wrapper extends Component {
       render($$) {
         return $$('div').append(this.props.children)
@@ -371,27 +373,31 @@ function ComponentTests(debug) {
         .append($$('div').addClass('child1'))
         .append($$('div').addClass('child2'))
     })
-    t.equal(comp.getChildCount(), 2, 'Component should have two children.')
-    t.ok(comp.hasClass('parent'), 'Element should have class "parent".')
-    t.ok(comp.getChildAt(0).hasClass('child1'), 'First child should have class "child1".')
-    t.ok(comp.getChildAt(1).hasClass('child2'), 'Second child should have class "child2".')
+    t.equal(comp.el.getChildCount(), 2, 'Component should have two children.')
+    t.ok(comp.el.hasClass('parent'), 'Element should have class "parent".')
+    t.ok(comp.el.getChildAt(0).hasClass('child1'), 'First child should have class "child1".')
+    t.ok(comp.el.getChildAt(1).hasClass('child2'), 'Second child should have class "child2".')
     t.end()
   })
 
   test("Render children components", function(t) {
     var comp = TestComponent.create(function($$) {
       return $$('div').append(
-        $$(Simple).addClass('a'),
-        $$(Simple).addClass('b')
+        $$(Simple, {
+          children: ['a']
+        }),
+        $$(Simple, {
+          children: ['b']
+        })
       )
     })
     t.equal(comp.getChildCount(), 2, "Component should have two children")
-    var first = comp.getChildAt(0)
-    var second = comp.getChildAt(1)
+    let first = comp.getChildAt(0)
+    let second = comp.getChildAt(1)
     t.ok(first instanceof Simple, 'First child should be a Simple')
-    t.ok(first.hasClass('a'), '.. and should have class "a".')
+    t.equal(first.el.textContent, 'a', '.. and should have text "a".')
     t.ok(second instanceof Simple, 'Second child should be a Simple')
-    t.ok(second.hasClass('b'), '.. and should have class "b".')
+    t.equal(second.el.textContent, 'b', '.. and should have text "b".')
     t.end()
   })
 
@@ -409,8 +415,8 @@ function ComponentTests(debug) {
     t.equal(child.getChildCount(), 2, ".. and two grandchildren")
     var first = child.getChildAt(0)
     var second = child.getChildAt(1)
-    t.ok(first.hasClass('a'), 'First should have class "a".')
-    t.ok(second.hasClass('b'), 'Second should have class "b".')
+    t.ok(first.el.hasClass('a'), 'First should have class "a".')
+    t.ok(second.el.hasClass('b'), 'Second should have class "b".')
     t.end()
   })
 
@@ -431,14 +437,13 @@ function ComponentTests(debug) {
     t.equal(child.getChildCount(), 2, ".. and two grandchildren")
     var first = child.getChildAt(0)
     var second = child.getChildAt(1)
-    t.ok(first.hasClass('a'), 'First grandchild should have class "a".')
-    t.ok(second.hasClass('b'), 'Second grandchild should have class "b".')
+    t.ok(first.el.hasClass('a'), 'First grandchild should have class "a".')
+    t.ok(second.el.hasClass('b'), 'Second grandchild should have class "b".')
     t.end()
   })
 
   // didMount is only called in browser
   test.UI("Call didMount once when mounted", function(t) {
-
     class Child extends TestComponent {
       render($$) {
         if (this.props.loading) {
@@ -450,13 +455,11 @@ function ComponentTests(debug) {
         }
       }
     }
-
     class Parent extends TestComponent {
       render($$) {
         return $$('div')
           .append($$(Child,{loading: true}).ref('child'))
       }
-
       didMount() {
         this.refs.child.setProps({ loading: false })
       }
@@ -495,50 +498,16 @@ function ComponentTests(debug) {
       items: [ {name: 'A'}, {name: 'B'} ]
     })
     t.equal(comp.getChildCount(), 2, 'Component should have two children.')
-    t.equal(comp.getChildAt(0).textContent, 'A', 'First child should have text A')
-    t.equal(comp.getChildAt(1).textContent, 'B', 'First child should have text B')
+    t.equal(comp.getChildAt(0).el.textContent, 'A', 'First child should have text A')
+    t.equal(comp.getChildAt(1).el.textContent, 'B', 'First child should have text B')
 
     // Now we are gonna set new props
     comp.setProps({
       items: [ {name: 'X'}, {name: 'Y'} ]
     })
     t.equal(comp.getChildCount(), 2, 'Component should have two children.')
-    t.equal(comp.getChildAt(0).textContent, 'X', 'First child should have text X')
-    t.equal(comp.getChildAt(1).textContent, 'Y', 'First child should have text Y')
-    t.end()
-  })
-
-  test("Updating HTML attributes in nested components", function(t) {
-    class Child extends TestComponent {
-      render($$) {
-        return $$('input').attr('type', 'text')
-      }
-    }
-
-    class Parent extends TestComponent {
-      render($$) {
-        var el = $$('div')
-        var child = $$(Child).ref('child')
-        if (this.props.childAttr) {
-          child.attr(this.props.childAttr)
-        }
-        if (this.props.childClass) {
-          child.addClass(this.props.childClass)
-        }
-        if (this.props.childCss) {
-          child.css(this.props.childCss)
-        }
-        return el.append(child)
-      }
-    }
-
-    var comp = Parent.render()
-    comp.setProps({ childAttr: { "data-id": "child" } })
-    t.equal(comp.refs.child.attr('data-id'), 'child', "Child component should have updated attribute.")
-    comp.setProps({ childClass: "child" })
-    t.ok(comp.refs.child.hasClass('child'), "Child component should have updated class.")
-    comp.setProps({ childCss: { "width": "50px" } })
-    t.equal(comp.refs.child.css('width'), "50px", "Child component should have updated css style.")
+    t.equal(comp.getChildAt(0).el.textContent, 'X', 'First child should have text X')
+    t.equal(comp.getChildAt(1).el.textContent, 'Y', 'First child should have text Y')
     t.end()
   })
 
@@ -558,18 +527,18 @@ function ComponentTests(debug) {
         )
         el.append(
           // grandchildren wrapper ingested into Child component
-          $$(Child).append(grandchildren)
+          $$(Child, {
+            children: grandchildren
+          })
         )
         return el
       }
     }
-
     class Child extends TestComponent {
       render($$) {
         return $$('div').append(this.props.children)
       }
     }
-
     class GrandChild extends TestComponent {
       render($$) {
         return $$('div').append(this.props.name)
@@ -580,9 +549,9 @@ function ComponentTests(debug) {
     var foo = comp.refs.foo
     var bar = comp.refs.bar
     t.notNil(foo, "Component should have a ref 'foo'.")
-    t.equal(foo.textContent, 'foo', "foo should have textContent 'foo'")
+    t.equal(foo.el.textContent, 'foo', "foo should have textContent 'foo'")
     t.notNil(bar, "Component should have a ref 'bar'.")
-    t.equal(bar.textContent, 'bar', "bar should have textContent 'bar'")
+    t.equal(bar.el.textContent, 'bar', "bar should have textContent 'bar'")
     t.end()
   })
 
@@ -590,11 +559,13 @@ function ComponentTests(debug) {
     class Parent extends Component {
       render($$) {
         return $$('div').addClass('parent').append(
-          $$(Child).append(
-            $$('div').addClass('grandchild-container').append(
-              $$(Grandchild).ref('grandchild')
-            )
-          ).ref('child')
+          $$(Child, {
+            children: [
+              $$('div').addClass('grandchild-container').append(
+                $$(Grandchild).ref('grandchild')
+              )
+            ]
+          }).ref('child')
         )
       }
     }
@@ -623,19 +594,29 @@ function ComponentTests(debug) {
     t.end()
   })
 
+  // FIXME: this test reveals that our rendering algorithm is not able
+  // to preserve elements when ref'd components are passed down via props.
+  // In such cases, the parent already
   test("Implicit retaining in 3-level nesting situation", function(t) {
     class Parent extends Component {
       render($$) {
+        // Ideally, the 'wrapper' element and Child component would be preserved automatically
+        // because of the ref'd component 'grandchild' passed via props.
+        // However, ATM the rendering algorithm does not 'know' about the existence
+        // of the ref'd component when rendering the top-level component.
+        // This would be revealed during descent when the Child component
+        // is rendered. A chicken egg problem: to decide to preserve the wrapper we need
+        // to have it rendered already. We need to rethink the rendering algorithm.
+        // For now, we need to ref the component which we pass the ref'd component into.
         return $$('div').addClass('parent').append(
-          // this element should be retained implicitly because Grandchild has a ref
-          // The challenge is to find out that wrapper and Child need to be retained,
-          // because of the ref on Grandchild
-          // At the time of descent, nothing can be told about the content of Child
-          // as it depends on Child.render() how grandchild is treated actually
           $$('div').addClass('wrapper').append(
-            $$(Child).append(
-              $$(Grandchild).ref('grandchild')
-            )
+            $$(Child, {
+              children: [
+                $$(Grandchild).ref('grandchild')
+              ]
+            })
+            // disable the next line to reveal the problem
+            .ref('child')
           )
         )
       }
@@ -665,7 +646,10 @@ function ComponentTests(debug) {
     class Parent extends Component {
       render($$) {
         return $$('div').append(
-          $$(Child).append('Foo')
+          $$(Child, {
+            // TODO: should this element be created at all?
+            children: [$$('div').ref('unused')]
+          })
         )
       }
     }
@@ -680,18 +664,19 @@ function ComponentTests(debug) {
     t.end()
   })
 
-  test("Providing a ref'd child via props", function(t) {
+  test("Providing a ref'd child", function(t) {
     class Parent extends Component {
       render($$) {
-        let grandchild = $$(Grandchild).ref('grandchild')
         return $$('div').append(
-          $$(Child, { child: grandchild })
+          $$(Child, {
+            children: [$$(Grandchild).ref('grandchild')]
+          })
         )
       }
     }
     class Child extends Component {
       render($$) {
-        return $$('div').append(this.props.child)
+        return $$('div').append(this.props.children)
       }
     }
     class Grandchild extends Component {
@@ -700,12 +685,12 @@ function ComponentTests(debug) {
       }
     }
     var parent = Parent.render()
-    t.equal(parent.el.getChildCount(), 1, "Should have 1 child")
+    t.equal(parent.getChildCount(), 1, "Should have 1 child")
     var child = parent.getChildAt(0)
-    t.equal(child.el.getChildCount(), 1, "Should have 1 grandchild")
+    t.equal(child.getChildCount(), 1, "Should have 1 grandchild")
     var grandchild = child.getChildAt(0)
     t.ok(parent.refs.grandchild === grandchild, "Grandchild should be the same as the referenced component.")
-    t.ok(child.props.child.getComponent() === grandchild, "Grandchild should be accessible via props of child.")
+    t.ok(child.props.children[0].getComponent() === grandchild, "Grandchild should be accessible via props of child.")
     t.end()
   })
 
