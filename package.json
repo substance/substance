@@ -41,6 +41,7 @@
     "collab",
     "dist",
     "docs",
+    "dom",
     "model",
     "packages",
     "test",

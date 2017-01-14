@@ -86,6 +86,7 @@ function _docs(mode, dest) {
       './*.md',
       './doc/*.md',
       './collab/*.js',
+      './dom/*.js',
       './model/**/*.js',
       './packages/**/*.js',
       './ui/*.js',
@@ -180,6 +181,7 @@ b.task('npm:clean', function() {
 b.task('npm:copy:sources', function() {
   b.copy('index.es.js', NPM)
   b.copy('collab/*.js', NPM)
+  b.copy('dom/**/*.js', NPM)
   b.copy('model/**/*.js', NPM)
   b.copy('packages/**/*.js', NPM)
   b.copy('ui/*.js', NPM)
