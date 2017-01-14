@@ -5,6 +5,8 @@ import DOMElement from './DOMElement'
 import last from '../util/last'
 import isString from '../util/isString'
 import isNil from '../util/isNil'
+import isNumber from '../util/isNumber'
+import forEach from '../util/forEach'
 
 class XNode extends DOMElement {
 
@@ -16,17 +18,21 @@ class XNode extends DOMElement {
 
     if (args.ownerDocument) this.ownerDocument = args.ownerDocument
 
+    // NOTE: there are some properties which are named so that this
+    // can be used together with htmlparser2 and css-select
+    // but which could have a better naming, e.g., name -> tagName
+
     switch(type) {
       case ElementType.Tag: {
         this.name = args.name
         if (!this.name) throw new Error("'name' is mandatory.")
-        this.attribs = _attribs(this)
+        this.properties = new Map()
+        this.attributes = new Map()
         this.classes = new Set()
         this.styles = new Map()
-        this.htmlProps = new Map()
         this.eventListeners = []
-        this.children = []
-        this.assign(args)
+        this.children = args.children || []
+        this._assign(args)
         break
       }
       case ElementType.Text:
@@ -47,17 +53,14 @@ class XNode extends DOMElement {
         this.format = args.format
         break
       }
-      case 'component': {
-        this.attribs = _attribs(this)
+      default:
+        this.name = null
+        this.properties = new Map()
+        this.attributes = new Map()
         this.classes = new Set()
         this.styles = new Map()
-        this.htmlProps = new Map()
         this.eventListeners = []
-        this.assign(args)
-        break
-      }
-      default:
-        //
+        this.children = args.children || []
     }
   }
 
@@ -71,6 +74,14 @@ class XNode extends DOMElement {
     return clone
   }
 
+  get tagName() {
+    return this.getTagName()
+  }
+
+  set tagName(tagName) {
+    this.setTagName(tagName)
+  }
+
   getTagName() {
     if (this.name) {
       return this.name.toLowerCase()
@@ -78,50 +89,76 @@ class XNode extends DOMElement {
   }
 
   setTagName(tagName) {
-    this.name = tagName
+    this.name = String(tagName).toLowerCase()
     return this
   }
 
   getAttribute(name) {
-    if (this.attribs) {
-      return this.attribs[name]
+    switch(name) {
+      case 'class':
+        return stringifyClasses(this.classes)
+      case 'style':
+        return stringifyStyles(this.styles)
+      default:
+        return this.attributes.get(name)
     }
   }
 
   setAttribute(name, value) {
-    if (this.attribs) {
-      this.attribs[name] = value
+    switch(name) {
+      case 'class':
+        parseClasses(this.classes, value)
+        break
+      case 'style':
+        parseStyles(this.styles, value)
+        break
+      default:
+        this.attributes.set(name, value)
     }
     return this
   }
 
   removeAttribute(name) {
-    if (this.attribs) {
-      delete this.attribs[name]
+    switch(name) {
+      case 'class':
+        this.classes = new Set()
+        break
+      case 'style':
+        this.styles = new Map()
+        break
+      default:
+        this.attributes.delete(name)
     }
     return this
   }
 
+  // ATTENTION: this comes without 'class' and 'style'
   getAttributes() {
-    return this.attribs
+    return this.attributes
+  }
+
+  getProperties() {
+    if (this.properties) {
+      return this.properties
+    }
   }
 
   getProperty(name) {
-    if (this.htmlProps) {
-      return this.htmlProps[name]
+    if (this.properties) {
+      return this.properties.get(name)
     }
   }
 
   setProperty(name, value) {
-    if (this.htmlProps) {
-      this.htmlProps[name] = value
+    if (this.properties) {
+      this.properties.set(name, value)
     }
     return this
   }
 
   removeProperty(name) {
-    if (this.htmlProps && this.htmlProps.hasOwnProperty(name)) {
-      delete this.htmlProps[name]
+    if (this.properties && this.properties.hasOwnProperty(name)) {
+      delete this.properties[name]
     }
     return this
   }
@@ -188,13 +225,14 @@ class XNode extends DOMElement {
 
   getStyle(name) {
     if (this.styles) {
-      return this.styles[name]
+      return this.styles.get(name)
     }
   }
 
   setStyle(name, value) {
     if (this.styles) {
-      this.styles[name] = value
+      if (DOMElement.pxStyles[name] && isNumber(value)) value = value + "px"
+      this.styles.set(name, value)
     }
     return this
   }
@@ -288,6 +326,10 @@ class XNode extends DOMElement {
 
   isDocumentNode() {
     return this.type === "document"
+  }
+
+  isComponentNode() {
+    return this.type === "component"
   }
 
   createElement(tagName) {
@@ -418,45 +460,48 @@ class XNode extends DOMElement {
     return this
   }
 
-  assign(other) {
+  get attribs() {
+    return this.attributes
+  }
+
+  _assign(other) {
+    if (other.name) this.name = other.name
     if (this.classes && other.classes) {
       other.classes.forEach((val) => {
         this.classes.add(val)
       })
     }
-    if (this.attribs && other.attribs) {
-      Object.assign(this.attribs, other.attribs)
-    }
-    if (this.htmlProps && other.htmlProps) {
-      Object.assign(this.htmlProps, other.htmlProps)
-    }
     if (this.styles && other.styles) {
-      Object.assign(this.styles, other.styles)
+      forEach(other.styles, (val, name) => {
+        this.styles.set(name, val)
+      })
+    }
+    // TODO: while it is 'smart' to deal with 'style' and 'class'
+    // implicitly, it introduces some confusion here
+    if (this.attributes && other.attributes) {
+      forEach(other.attributes, (val, name) => {
+        switch (name) {
+          case 'class': {
+            parseClasses(this.classes, val)
+            break
+          }
+          case 'style': {
+            parseStyles(this.styles, val)
+            break
+          }
+          default:
+            this.attributes.set(name, val)
+        }
+      })
+    }
+    if (this.properties && other.properties) {
+      forEach(other.properties, (val, name) => {
+        this.properties.set(name, val)
+      })
     }
     if (this.eventListeners && other.eventListeners) {
       this.eventListeners = this.eventListeners.concat(other.eventListeners)
     }
-  }
-
-  _getData() {
-    let copy = {
-      attribs: Object.assign({}, this.attribs),
-    }
-    if (this.classes && this.classes.length > 0) {
-      copy.classes = new Set(this.classes)
-    }
-    if (this.styles) {
-      copy.styles = new Map(this.styles)
-    }
-    if (this.htmlProps) {
-      copy.htmlProps = new Map(this.htmlProps)
-    }
-    if (this.eventListeners) {
-      copy.eventListeners = this.eventListeners.map((l) => {
-        return l.clone()
-      })
-    }
-    return copy
   }
 
   _onAttach(child) {} // eslint-disable-line no-unused-vars
@@ -502,9 +547,7 @@ XNode.createElement = function(tagName, ownerDocument) {
 XNode.parseMarkup = function(str, format) {
   let elements = []
   if (!str) {
-    return new XNode('document', {
-      format: format
-    })
+    return new XNode('document', { format: format })
   } else {
     elements = parseMarkup(str, { format: format })
   }
@@ -528,26 +571,27 @@ XNode.wrapNativeElement = function(el) {
   return el
 }
 
-function parseClasses(classNames) {
-  return new Set(classNames.split(/\s+/))
+function parseClasses(classes, classStr) {
+  classStr.split(/\s+/).forEach((name) => {
+    classes.add(name)
+  })
 }
 
 function stringifyClasses(classes) {
   return Array.from(classes).join(' ')
 }
 
-function parseStyles(styles) {
-  styles = (styles || '').trim()
-  if (!styles) return {}
-  return styles
-    .split(';')
-    .reduce(function(obj, str){
-      var n = str.indexOf(':')
-      // skip if there is no :, or if it is the first/last character
-      if (n < 1 || n === str.length-1) return obj
-      obj[str.slice(0,n).trim()] = str.slice(n+1).trim()
-      return obj
-    }, new Map())
+function parseStyles(styles, styleStr) {
+  styleStr = (styleStr || '').trim()
+  if (!styleStr) return
+  styleStr.split(';').forEach((style) => {
+    let n = style.indexOf(':')
+    // skip if there is no :, or if it is the first/last character
+    if (n < 1 || n === style.length-1) return
+    let name = style.slice(0,n).trim()
+    let val = style.slice(n+1).trim()
+    styles.set(name, val)
+  })
 }
 
 function stringifyStyles(styles) {
@@ -557,23 +601,6 @@ function stringifyStyles(styles) {
   }).join(';')
   if (str.length > 0) str += ';'
   return str
-}
-
-function _attribs(self) {
-  return {
-    get class() {
-      return stringifyClasses(self.classes)
-    },
-    set class(classNames) {
-      self.classes = parseClasses(classNames)
-    },
-    get style() {
-      return stringifyStyles(self.styles)
-    },
-    set style(style) {
-      self.styles = parseStyles(style)
-    }
-  }
 }
 
 export default XNode

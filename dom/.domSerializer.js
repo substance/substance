@@ -70,19 +70,18 @@ const singleTag = {
 }
 
 function formatAttribs(el, opts) {
-  const attribs = el.attribs
-  if (!attribs) return
+  const attributes = el.attributes
+  if (!attributes) return
 
   let output = []
-
   // Loop through the attributes
-  for (var key in attribs) {
+  for (var key in attributes) {
     // as 'class' and 'style' are computed dynamically we need to check if there are any values set
     // otherwise this will generate empty attributes
     if (key === 'class' && el.classes.size === 0) continue
     if (key === 'style' && el.styles.size === 0) continue
 
-    let value = attribs[key]
+    let value = attributes[key]
     if (!value && booleanAttributes[key]) {
       output.push(key)
     } else {

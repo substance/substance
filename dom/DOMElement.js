@@ -922,4 +922,13 @@ class DOMElement {
 
 DOMElement.prototype._isDOMElement = true
 
+DOMElement.pxStyles = {
+  top: true,
+  bottom: true,
+  left: true,
+  right: true,
+  height: true,
+  width: true
+}
+
 export default DOMElement
