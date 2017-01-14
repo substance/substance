@@ -35,7 +35,7 @@
     "karma-tape-reporter": "1.0.3",
     "substance-bundler": "^0.6.7",
     "substance-docgen": "0.4.7",
-    "substance-test": "^0.3.2"
+    "substance-test": "^0.3.3"
   },
   "files": [
     "collab",
