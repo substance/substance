@@ -11,9 +11,7 @@ import DOMEventListener from '../dom/DOMEventListener'
 
   A VirtualElement is just a description of a DOM structure. It represents a virtual
   DOM mixed with Components. This virtual structure needs to be compiled to a {@link Component}
-  to actually create a real DOM element.
-
-  @class
+  to actually create a real DOM element, which is done by {@link RenderingEngine}
 */
 class VirtualElement extends DOMElement {
 

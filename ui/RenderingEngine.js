@@ -5,6 +5,86 @@ import VirtualElement from './VirtualElement'
 import DefaultDOMElement from '../dom/DefaultDOMElement'
 import Component from './Component'
 
+/*
+
+  ## Rendering Algorithm
+
+  TODO: document the algorithm
+
+  ## Findings
+
+  What makes our rendering algorithm so difficult?
+
+  - Dependency Injection requires a (direct) parent to be allow constructor injection, i.e. that injected dependencies
+    are available in the constructor already. As a consequence a component tree must to be constructed from top to down.
+
+  - The earliest time to evaluate `$$(MyComponent)`, is when it has been attached to an existing component.
+    I.e., to run `MyComponent.render()` an instance of `MyComponent` is needed, which can only be created with an existing
+    parent component.
+
+  - In general, it is *not* possible to have a naturally descending rendering algorithm, i.e. a simple recursion calling
+    `render()` and creating or updating Components on the way, preserving a simple stack-trace.
+    Instead, it requires calling `render()` on one level, then doing comparisons with the existing tree
+    to be able to reuse components, and then descend into the sub-tree.
+
+  - If components are passed down via props, things get even more difficult.
+    For example, consider a situation where components are passed via props:
+    ```
+      render($$) {
+        return $$('div').append(
+          $$(Wrapper, {
+            foo: $$(MyComponent)
+          })
+        )
+      }
+    ```
+    At the time when this component gets rendered, `MyComponent` can not be instantiated, as it is not known what `Wrapper`
+    actually does with it.
+    While the general approach is working from top-to-down, in this case it has a bottom-to-up nature, i.e., the child needs
+    to be rendered to know what to do with the passed component.
+
+    Particularly, this is problematic when the passed component has a reference:
+    ```
+      render($$) {
+        return $$('div').append(
+          $$(Wrapper, {
+            foo: $$(MyComponent).ref('foo')
+          })
+        )
+      }
+    ```
+    As nothing is known at the time of descending about the content of `Wrapper` the rendering algorithm
+    can not tell that it ought to be preserved. For now, the correct way to deal with this situation is
+    to use a reference for the wrapper as well:
+    ```
+      render($$) {
+        return $$('div').append(
+          $$(Wrapper, {
+            foo: $$(MyComponent).ref('foo')
+          }).ref('wrapper')
+        )
+      }
+    ```
+
+  ## TODO
+
+  There is a lot of hacks in the current implementation, which should be cleaned up when we have time.
+  - remove means to change props of VirtualComponent dynamically: currently, it is possible to do something like
+    ```
+      $$(MyComponent).attr({ "data-id": "foo" }).append('foo')
+    ```
+    ATM, `attr()` and `append()` represent a means to change the `props` of the component.
+    This is pretty inconsistent and creates confusion about the responsibility for rendering the element.
+    Only the Component's `render()` should be responsible for that. If necessary, children or anything like that must
+    be passed down via props.
+  - remove outlets: outlets are just another way to change props.
+  - try to fuse `virtualComponent._content` into virtualComponent: ATM, `VirtualComponent` uses a `VirtualHTMLElement`
+    instance to store the result of `render()`. This makes understanding the virtual tree after rendering difficult,
+    as there is another layer via `virtualComponent._content`.
+  - Rethink strategy for 'reusing' components: ATM we consider refs as the key indicator whether to preserve a component
+    or not. This makes sense essentially, but could be extended to an opportunistic strategy where components are reused
+    implicitly when they are at the right place.
+*/
 class RenderingEngine {
   _render(comp, oldProps, oldState) {
     // var t0 = Date.now();

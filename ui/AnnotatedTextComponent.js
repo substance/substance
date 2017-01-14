@@ -15,11 +15,6 @@ import InlineNodeComponent from '../packages/inline-node/InlineNodeComponent'
 
 class AnnotatedTextComponent extends Component {
 
-  /**
-    Node render implementation. Use model/Fragmenter for rendering of annotations.
-
-    @return {VirtualNode} VirtualNode created using ui/Component
-   */
   render($$) {
     let el = this._renderContent($$)
       .addClass('sc-annotated-text')
