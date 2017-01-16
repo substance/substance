@@ -884,6 +884,8 @@ Component.prototype.css = DOMElement.prototype.css
 
 Component.prototype.text = DOMElement.prototype.text
 
+Component.prototype.append = DOMElement.prototype.append
+
 Component.unwrap = _unwrapComp
 
 Component.render = function(props) {
