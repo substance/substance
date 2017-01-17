@@ -14,6 +14,6 @@ module.exports = function(config) {
       }
     },
     singleRun: true,
-    reporters: ['tape'],
+    reporters: ['tape', 'coverage'],
   });
 };

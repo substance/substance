@@ -1,5 +1,6 @@
 let b = require('substance-bundler')
 let path = require('path')
+let karma = require('karma')
 
 // Constants
 // ---------
@@ -53,28 +54,56 @@ function _server(DIST, transpileToES5) {
 }
 
 // bundles the test suite to be run in a browser
-function _testBrowser(transpileToES5) {
+function _testBrowser(transpileToES5, coverage) {
+
   b.js('./test/index.js', {
     target: {
       dest: TEST+'tests.js',
       format: 'umd', moduleName: 'tests'
     },
-    // buble: transpileToES5,
-    buble: true,
-    external: { 'substance-test': 'substanceTest' }
+    buble: transpileToES5,
+    external: { 'substance-test': 'substanceTest' },
+    istanbul: coverage ? {
+      include: [
+        'collab/*.js',
+        'dom/*.js',
+        'model/**/*.js',
+        // 'packages/**/*.js',
+        'ui/*.js',
+        // 'util/*.js'
+      ],
+      exclude: [ 'dom/vendor.js' ]
+    } : false
   })
 }
 
-// bundles the test suite to be run in node
-function _testServer() {
-  b.js('./test/index.js', {
-    target: {
-      dest: TEST+'tests.cjs.js',
-      format: 'cjs'
-    },
-    // buble necessary here, for nodejs
-    buble: true,
-    external: [ 'substance-test' ],
+function _runTestBrowser() {
+  b.custom('Running browser tests...', {
+    execute: function() {
+      const browser = process.env.TRAVIS ? 'ChromeTravis': 'Chrome'
+      return new Promise(function(resolve) {
+        let fails = 0
+        const server = new karma.Server({
+          configFile: __dirname + '/karma.conf.js',
+          browsers: [browser],
+          singleRun: true,
+          failOnEmptyTestSuite: false
+        }, function() {
+          // why is exitCode always == 1?
+          if (fails > 0) {
+            process.exit(1)
+          } else {
+            resolve()
+          }
+        })
+        server.on('run_complete', function(browsers, results) {
+          if (results && results.failed > 0) {
+            fails += results.failed
+          }
+        })
+        server.start()
+      })
+    }
   })
 }
 
@@ -104,16 +133,12 @@ function _vendor_xdom() {
       dest: './dom/vendor.js',
       format: 'es'
     },
-    resolve: {
-      alias: {
-        // TODO: would be nice to have a 'stub' generator provided by bundler
-        'inherits': path.join(__dirname, 'dom', '.stub.js'),
-        'events': path.join(__dirname, 'dom', '.stub.js'),
-        'dom-serializer': path.join(__dirname, 'dom/.domSerializer.js'),
-        'entities': path.join(__dirname, 'dom/.stub.js'),
-        'entities/maps/entities.json': path.join(__dirname, 'dom/.stub.js'),
-        'entities/maps/legacy.json': path.join(__dirname, 'dom/.stub.js')
-      }
+    ignore: [
+      'inherits', 'events', 'dom-serializer',
+      'entities', 'entities/maps/entities.json', 'entities/maps/legacy.json'
+    ],
+    alias: {
+      'dom-serializer': path.join(__dirname, 'dom/.domSerializer.js'),
     },
     commonjs: true,
     json: true
@@ -170,9 +195,13 @@ b.task('test:browser:pure', ['test:clean', 'test:assets'], function() {
   _testBrowser(false)
 })
 
-b.task('test:server', function() {
-  _testServer()
+b.task('test:browser:coverage', ['test:clean', 'test:assets'], function() {
+  _testBrowser(true, true)
 })
+
+b.task('run:test:browser', ['test:browser'], _runTestBrowser)
+
+b.task('run:test:coverage', ['test:browser:coverage'], _runTestBrowser)
 
 b.task('npm:clean', function() {
   b.rm(NPM)

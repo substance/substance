@@ -12,7 +12,7 @@
   "main": "dist/substance.cjs.js",
   "jsnext:main": "index.es.js",
   "scripts": {
-    "test": "node test",
+    "test": "node make run:test:browser",
     "test:browser": "node make test:browser:pure -w -s",
     "docs": "node make docs -w -s",
     "start": "node make dev -w -s"
@@ -29,13 +29,14 @@
     "htmlparser2": "3.9.2",
     "karma": "0.13.22",
     "karma-chrome-launcher": "1.0.1",
+    "karma-coverage": "^1.1.1",
     "karma-firefox-launcher": "1.0.0",
     "karma-source-map-support": "1.1.0",
     "karma-tap": "1.0.4",
     "karma-tape-reporter": "1.0.3",
-    "substance-bundler": "^0.6.7",
+    "substance-bundler": "0.6.10",
     "substance-docgen": "0.4.7",
-    "substance-test": "0.4.2"
+    "substance-test": "0.4.3"
   },
   "files": [
     "collab",
