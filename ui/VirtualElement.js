@@ -1,7 +1,12 @@
-import {
-  clone, extend, flattenDeep, isArray, isFunction, isNil,
-  isPlainObject, isString, omit, without
-} from 'lodash-es'
+import clone from '../util/clone'
+import extend from '../util/extend'
+import flattenOften from '../util/flattenOften'
+import isArray from '../util/isArray'
+import isFunction from '../util/isFunction'
+import isNil from '../util/isNil'
+import isPlainObject from '../util/isPlainObject'
+import isString from '../util/isString'
+import without from '../util/without'
 import map from '../util/map'
 import DOMElement from '../dom/DOMElement'
 import DOMEventListener from '../dom/DOMEventListener'
@@ -133,13 +138,9 @@ class VirtualHTMLElement extends VirtualElement {
     return this
   }
 
-  removeAttr(attr) {
+  removeAttribute(name) {
     if (this.attributes) {
-      if (isString(attr)) {
-        delete this.attributes[attr]
-      } else {
-        this.attributes = omit(this.attributes, attr)
-      }
+      delete this.attributes[name]
     }
     return this
   }
@@ -686,7 +687,7 @@ VirtualElement.createElement = function() {
   // allow a notation similar to React.createElement
   // $$(MyComponent, {}, ...children)
   if (arguments.length > 2) {
-    content.append(flattenDeep(Array.prototype.slice.call(arguments, 2)))
+    content.append(flattenOften(Array.prototype.slice.call(arguments, 2), 3))
   }
   return content
 }

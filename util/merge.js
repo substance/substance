@@ -1,3 +1,4 @@
+// TODO: rename this module to avoid confusion with lodash-es/merge
 import merge from 'lodash-es/merge'
 import mergeWith from 'lodash-es/mergeWith'
 import isArray from './isArray'
