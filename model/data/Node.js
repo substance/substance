@@ -6,26 +6,8 @@ import isNumber from '../../util/isNumber'
 import isObject from '../../util/isObject'
 import isString from '../../util/isString'
 import isPlainObject from '../../util/isPlainObject'
-import last from '../../util/last'
 import EventEmitter from '../../util/EventEmitter'
-
-class Property {
-  constructor(spec) {
-    Object.assign(this, spec)
-  }
-
-  isArray() {
-    return isArray(this.type)
-  }
-
-  isReference() {
-    if (this.isArray()) {
-      return last(this.type) === 'id'
-    } else {
-      return this.type === 'id'
-    }
-  }
-}
+import Property from './Property'
 
 /*
   Base node implementation.
@@ -128,14 +110,7 @@ class Node extends EventEmitter {
 
 }
 
-Node.define = Node.defineSchema = function(schema) {
-  _defineSchema(this, schema)
-}
-
-Node.define({
-  type: "node",
-  id: 'string'
-})
+Node.prototype._isNode = true
 
 Object.defineProperty(Node.prototype, 'type', {
   configurable: false,
@@ -147,7 +122,30 @@ Object.defineProperty(Node.prototype, 'type', {
   }
 })
 
-Node.prototype._isNode = true
+Object.defineProperty(Node, 'schema', {
+  get() { return this._schema },
+  set(schema) {
+    let NodeClass = this
+    // TODO: discuss if we want this. Is a bit more convenient
+    // ATM we transfer 'type' to the static property
+    if (schema.type) {
+      NodeClass.type = schema.type
+    }
+    // collects a full schema considering the schemas of parent class
+    // we will use the unfolded schema, check integrity of the given props (mandatory, readonly)
+    // or fill in default values for undefined properties.
+    NodeClass._schema = compileSchema(NodeClass, schema)
+  }
+})
+
+Node.define = Node.defineSchema = function define(schema) {
+  this.schema = schema
+}
+
+Node.schema = {
+  type: "node",
+  id: 'string'
+}
 
 /**
   Internal implementation of Node.prototype.isInstanceOf.
@@ -173,21 +171,26 @@ Node.isInstanceOf = function(NodeClass, typeName) {
 
 // ### Internal implementation
 
-function _defineSchema(NodeClass, schema) {
-  if (schema.type) {
-    NodeClass.type = schema.type
+function compileSchema(NodeClass, schema) {
+  let compiledSchema = _compileSchema(schema)
+  let schemas = [compiledSchema]
+  let clazz = NodeClass
+  while(clazz) {
+    var parentProto = Object.getPrototypeOf(clazz.prototype)
+    if (!parentProto) {
+      break
+    }
+    clazz = parentProto.constructor
+    if (clazz && clazz._schema) {
+      schemas.unshift(clazz._schema)
+    }
   }
-  var compiledSchema = _compileSchema(schema)
-  // collects a full schema considering the schemas of parent class
-  // we will use the unfolded schema, check integrity of the given props (mandatory, readonly)
-  // or fill in default values for undefined properties.
-  NodeClass.schema = _unfoldedSchema(NodeClass, compiledSchema)
-  // computes the set of default properties only once
-  NodeClass.defaultProps = _extractDefaultProps(NodeClass)
+  schemas.unshift({})
+  return Object.assign.apply(null, schemas)
 }
 
 function _compileSchema(schema) {
-  var compiledSchema = {}
+  let compiledSchema = {}
   forEach(schema, function(definition, name) {
     // skip 'type'
     if (name === 'type') {
@@ -204,7 +207,7 @@ function _compileSchema(schema) {
 }
 
 function _compileDefintion(definition) {
-  var result = definition
+  let result = definition
   if (isArray(definition.type) && definition[0] !== "array") {
     definition.type = [ "array", definition.type[0] ]
   } else if (definition.type === 'text') {
@@ -216,36 +219,8 @@ function _compileDefintion(definition) {
   return result
 }
 
-function _unfoldedSchema(NodeClass, compiledSchema) {
-  var schemas = [compiledSchema]
-  var clazz = NodeClass
-  while(clazz) {
-    var parentProto = Object.getPrototypeOf(clazz.prototype)
-    if (!parentProto) {
-      break
-    }
-    clazz = parentProto.constructor
-    if (clazz && clazz.schema) {
-      schemas.unshift(clazz.schema)
-    }
-  }
-  schemas.unshift({})
-  return Object.assign.apply(null, schemas)
-}
-
-function _extractDefaultProps(NodeClass) {
-  var unfoldedSchema = NodeClass.unfoldedSchema
-  var defaultProps = {}
-  forEach(unfoldedSchema, function(prop, name) {
-    if (prop.hasOwnProperty('default')) {
-      defaultProps[name] = prop['default']
-    }
-  })
-  return defaultProps
-}
-
 function _checked(prop, value) {
-  var type
+  let type
   if (isArray(prop.type)) {
     type = "array"
   } else {
@@ -271,5 +246,6 @@ function _checked(prop, value) {
   }
   return value
 }
+
 
 export default Node
