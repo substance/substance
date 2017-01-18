@@ -108,19 +108,13 @@ class Node extends EventEmitter {
     return data
   }
 
+  get type() {
+    return this.constructor.type
+  }
+
 }
 
 Node.prototype._isNode = true
-
-Object.defineProperty(Node.prototype, 'type', {
-  configurable: false,
-  get: function() {
-    return this.constructor.type
-  },
-  set: function() {
-    throw new Error('read-only')
-  }
-})
 
 Object.defineProperty(Node, 'schema', {
   get() { return this._schema },

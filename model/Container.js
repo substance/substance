@@ -1,8 +1,6 @@
-import extend from '../util/extend'
 import isNumber from '../util/isNumber'
 import isString from '../util/isString'
 import DocumentNode from './DocumentNode'
-import ParentNodeMixin from './ParentNodeMixin'
 import ContainerAddress from './ContainerAddress'
 
 /*
@@ -135,15 +133,39 @@ class Container extends DocumentNode {
     return this.positions
   }
 
+  // NOTE: this has been in ParentNodeMixin before
+
+  hasChildren() {
+    return this.nodes.length > 0
+  }
+
+  getChildIndex(child) {
+    return this.nodes.indexOf(child.id)
+  }
+
+  getChildren() {
+    var doc = this.getDocument()
+    var childrenIds = this.nodes
+    return childrenIds.map(function(id) {
+      return doc.get(id)
+    })
+  }
+
+  getChildAt(idx) {
+    var childrenIds = this.nodes
+    if (idx < 0 || idx >= childrenIds.length) {
+      throw new Error('Array index out of bounds: ' + idx + ", " + childrenIds.length)
+    }
+    return this.getDocument().get(childrenIds[idx])
+  }
+
+  getChildCount() {
+    return this.nodes.length
+  }
+
 }
 
 Container.prototype._isContainer = true
-
-Object.assign(Container.prototype, ParentNodeMixin)
-
-Container.prototype.getChildrenProperty = function() {
-  return 'nodes'
-}
 
 Container.schema ={
   type: 'container',

@@ -125,6 +125,14 @@ class PropertyAnnotation extends DocumentNode {
         this.endOffset <= sel.endOffset)
     }
   }
+
+  get startPath() {
+    return this.path
+  }
+
+  get endPath() {
+    return this.path
+  }
 }
 
 PropertyAnnotation.schema = {
@@ -140,20 +148,5 @@ PropertyAnnotation.schema = {
 PropertyAnnotation.isPropertyAnnotation = true
 PropertyAnnotation.prototype._isAnnotation = true
 PropertyAnnotation.prototype._isPropertyAnnotation = true
-
-// these properties making PropertyAnnotation compatible with ContainerAnnotations
-// TODO: for such things we should use the coordinates
-Object.defineProperties(PropertyAnnotation.prototype, {
-  startPath: {
-    get: function() {
-      return this.path
-    }
-  },
-  endPath: {
-    get: function() {
-      return this.path
-    }
-  }
-})
 
 export default PropertyAnnotation

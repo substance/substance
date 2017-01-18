@@ -937,16 +937,6 @@ Component.mount = function(props, el) {
   return comp
 }
 
-Object.defineProperty(Component, '$$', {
-  get: function() {
-    throw new Error([
-      "With Substance Beta 4 we introduced a breaking change.",
-      "We needed to turn the former static Component.$$ into a contextualized implementation, which is now served via Component.render($$).",
-      "FIX: change your signature of 'this.render()' in all your Components to 'this.render($$)"
-    ].join("\n"))
-  }
-})
-
 Component.getComponentForDOMElement = function(el) {
   return _unwrapComp(el)
 }

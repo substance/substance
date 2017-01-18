@@ -482,46 +482,26 @@ class ContainerSelection extends Selection {
     }
     return addressRange;
   }
+
+  get path() {
+    throw new Error('ContainerSelection has no path property. Use startPath and endPath instead');
+  }
+
+  get start() {
+    return this._internal.start;
+  }
+
+  get end() {
+    return this._internal.end;
+  }
+
+  get range() {
+    return this._internal.range;
+  }
+
 }
 
 ContainerSelection.prototype._isContainerSelection = true
-
-Object.defineProperties(ContainerSelection.prototype, {
-  path: {
-    get: function() {
-      throw new Error('ContainerSelection has no path property. Use startPath and endPath instead');
-    },
-    set: function() {
-      throw new Error('ContainerSelection has no path property. Use startPath and endPath instead.');
-    }
-  },
-  /**
-    @property {Coordinate} ContainerSelection.start
-  */
-  start: {
-    get: function() {
-      return this._internal.start;
-    },
-    set: function() { throw new Error('ContainerSelection.prototype.start is read-only.'); }
-  },
-  /**
-    @property {Coordinate} ContainerSelection.end
-  */
-  end: {
-    get: function() {
-      return this._internal.end;
-    },
-    set: function() { throw new Error('ContainerSelection.prototype.end is read-only.'); }
-  },
-
-  range: {
-    get: function() {
-      return this._internal.range;
-    },
-    set: function() { throw new Error('ContainerSelection.prototype.range is read-only.'); }
-  },
-
-});
 
 ContainerSelection.fromJSON = function(properties) {
   var sel = new ContainerSelection(properties);

@@ -174,17 +174,14 @@ class ContainerAnnotationAnchor extends Anchor {
     return (this.isStart ? this.node.startOffset : this.node.endOffset)
   }
 
-}
-
-
-Object.defineProperties(ContainerAnnotationAnchor.prototype, {
-  path: {
-    get: function() { return this.getPath(); }
-  },
-  offset: {
-    get: function() { return this.getOffset(); }
+  get path() {
+    return this.getPath()
   }
-})
+
+  get offset() {
+    return this.getOffset()
+  }
+}
 
 /**
   @internal
@@ -216,26 +213,21 @@ class ContainerAnnotationFragment extends EventEmitter {
     var length = textProp.length
     return ( (this.mode === "end" || this.mode === "property") ? this.anno.endOffset : length)
   }
+
+  get startOffset() {
+    return this.getStartOffset()
+  }
+
+  get endOffset() {
+    return this.getEndOffset()
+  }
+
+  get highlighted() {
+    return this.anno.highlighted
+  }
 }
 
 ContainerAnnotationFragment.fragmentation = Number.MAX_VALUE
-
-Object.defineProperties(ContainerAnnotationFragment.prototype, {
-  startOffset: {
-    get: function() { return this.getStartOffset(); },
-    set: function() { throw new Error('ContainerAnnotationFragment.startOffset is read-only.'); }
-  },
-  endOffset: {
-    get: function() { return this.getEndOffset(); },
-    set: function() { throw new Error('ContainerAnnotationFragment.endOffset is read-only.'); }
-  },
-  highlighted: {
-    get: function() {
-      return this.anno.highlighted
-    },
-    set: function() { throw new Error('ContainerAnnotationFragment.highlighted is read-only.'); }
-  }
-})
 
 ContainerAnnotation.Anchor = ContainerAnnotationAnchor
 ContainerAnnotation.Fragment = ContainerAnnotationFragment

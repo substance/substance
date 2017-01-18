@@ -410,53 +410,35 @@ class PropertySelection extends Selection {
     return new PropertySelection(this.path, this.startOffset, this.endOffset, this.reverse, this.containerId, this.surfaceId);
   }
 
+  /**
+    @property {Coordinate}
+  */
+  get start() {
+    return this._internal.start;
+  }
+
+  /**
+    @property {Coordinate}
+  */
+  get end() {
+    return this._internal.end;
+  }
+
+  /**
+    @property {Range}
+  */
+  get range() {
+    return this._internal.range;
+  }
+
+  get startPath() {
+    return this.path;
+  }
+
+  get endPath() {
+    return this.path;
+  }
 }
-
-Object.defineProperties(PropertySelection.prototype, {
-  /**
-    @property {Coordinate} PropertySelection.start
-  */
-  start: {
-    get: function() {
-      return this._internal.start;
-    },
-    set: function() { throw new Error('PropertySelection.prototype.start is read-only.'); },
-    enumerable: false
-  },
-  /**
-    @property {Coordinate} PropertySelection.end
-  */
-  end: {
-    get: function() {
-      return this._internal.end;
-    },
-    set: function() { throw new Error('PropertySelection.prototype.end is read-only.'); },
-    enumerable: false
-  },
-  range: {
-    get: function() {
-      return this._internal.range;
-    },
-    set: function() { throw new Error('PropertySelection.prototype.range is read-only.'); },
-    enumerable: false
-  },
-
-  // making this similar to ContainerSelection
-  startPath: {
-    get: function() {
-      return this.path;
-    },
-    set: function() { throw new Error('immutable.'); },
-    enumerable: false
-  },
-  endPath: {
-    get: function() {
-      return this.path;
-    },
-    set: function() { throw new Error('immutable.'); },
-    enumerable: false
-  },
-});
 
 PropertySelection.fromJSON = function(json) {
   return new PropertySelection(json);
@@ -472,34 +454,30 @@ class RangeAdapter extends Range {
     Object.freeze(this);
   }
 
-}
+  get reverse() {
+    return this._sel.reverse;
+  }
 
-Object.defineProperties(RangeAdapter.prototype, {
-  reverse: {
-    get: function() {
-      return this._sel.reverse;
-    },
-    set: function(reverse) {
-      this._sel.reverse = reverse;
-    }
-  },
-  containerId: {
-    get: function() {
-      return this._sel.containerId;
-    },
-    set: function(containerId) {
-      this._sel.containerId = containerId;
-    }
-  },
-  surfaceId: {
-    get: function() {
-      return this._sel.surfaceId;
-    },
-    set: function(surfaceId) {
-      this._sel.surfaceId = surfaceId;
-    }
-  },
-});
+  set reverse(reverse) {
+    this._sel.reverse = reverse;
+  }
+
+  get containerId() {
+    return this._sel.containerId;
+  }
+
+  set containerId(containerId) {
+    this._sel.containerId = containerId;
+  }
+
+  get surfaceId() {
+    return this._sel.surfaceId;
+  }
+
+  set surfaceId(surfaceId) {
+    this._sel.surfaceId = surfaceId;
+  }
+}
 
 PropertySelection.RangeAdapter = RangeAdapter;
 

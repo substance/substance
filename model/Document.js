@@ -505,11 +505,11 @@ Document.prototype._isDocument = true
 // used by transforms copy, paste
 // and by ClipboardImporter/Exporter
 Document.SNIPPET_ID = "snippet"
+
 Document.TEXT_SNIPPET_ID = "text-snippet"
 
 
-export default Document
-
+/* Internals */
 
 function _createSelection() {
   var doc = this; // eslint-disable-line
@@ -638,3 +638,5 @@ function _allignCoordinate(doc, coor, isStart) {
     }
   }
 }
+
+export default Document
