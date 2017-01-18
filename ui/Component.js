@@ -699,6 +699,19 @@ class Component {
     return this
   }
 
+  getProperty(name) {
+    if (this.el) {
+      return this.el.getProperty(name)
+    }
+  }
+
+  setProperty(name, val) {
+    if (this.el) {
+      this.el.setProperty(name, val)
+    }
+    return this
+  }
+
   hasClass(name) {
     if (this.el) {
       return this.el.hasClass(name)
@@ -880,6 +893,8 @@ class Component {
 Component.prototype._isComponent = true
 
 Component.prototype.attr = DOMElement.prototype.attr
+
+Component.prototype.htmlProp = DOMElement.prototype.htmlProp
 
 Component.prototype.val = DOMElement.prototype.val
 
