@@ -194,15 +194,6 @@ export { series } from './util/async'
 // dom
 export { default as DefaultDOMElement } from './dom/DefaultDOMElement'
 
-// test-utlity related (to reduce bundle size we should think of
-// providing a separate bundle for that in the future)
-export { default as twoParagraphs } from './test/fixtures/twoParagraphs'
-export { default as MessageQueue } from './test/collab/MessageQueue'
-export { default as TestWebSocketServer } from './test/collab/TestWebSocketServer'
-export { default as TestWebSocketConnection } from './test/collab/TestWebSocketConnection'
-export { default as TestCollabServer } from './test/collab/TestCollabServer'
-export { default as TestCollabSession } from './test/collab/TestCollabSession'
-export { default as createTestDocumentFactory } from './test/fixtures/createTestDocumentFactory'
 
 // aliases (mainly for backward compatibility)
 export { default as ProseEditorConfigurator } from './util/Configurator'
