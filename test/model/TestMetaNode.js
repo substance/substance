@@ -2,9 +2,9 @@ import DocumentNode from '../../model/DocumentNode'
 
 class TestMetaNode extends DocumentNode {}
 
-TestMetaNode.define({
+TestMetaNode.schema = {
   type: 'meta',
   title: 'text'
-})
+}
 
 export default TestMetaNode

@@ -127,14 +127,14 @@ class ContainerAnnotation extends DocumentNode {
   }
 }
 
-ContainerAnnotation.define({
+ContainerAnnotation.schema = {
   type: "container-annotation",
   containerId: "string",
   startPath: ["string"],
   startOffset: "number",
   endPath: ["string"],
   endOffset: "number"
-})
+}
 
 ContainerAnnotation.isContainerAnnotation = true
 ContainerAnnotation.prototype._isAnnotation = true

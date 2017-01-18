@@ -139,17 +139,15 @@ class Container extends DocumentNode {
 
 Container.prototype._isContainer = true
 
-// HACK: using a mixin here
-// TODO: Get rid of this ParentNodeMixin
-extend(Container.prototype, ParentNodeMixin)
+Object.assign(Container.prototype, ParentNodeMixin)
 
 Container.prototype.getChildrenProperty = function() {
   return 'nodes'
 }
 
-Container.define({
+Container.schema ={
   type: 'container',
   nodes: { type: ['array', 'id'], default: [] }
-})
+}
 
 export default Container

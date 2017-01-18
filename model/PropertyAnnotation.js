@@ -127,7 +127,7 @@ class PropertyAnnotation extends DocumentNode {
   }
 }
 
-PropertyAnnotation.define({
+PropertyAnnotation.schema = {
   type: "annotation",
   path: { type: ["array", "string"] },
   startOffset: "number",
@@ -135,7 +135,7 @@ PropertyAnnotation.define({
   // this is only used when an annotation is used 'stand-alone'
   // i.e. not attached to a property
   _content: { type: "string", optional: true}
-})
+}
 
 PropertyAnnotation.isPropertyAnnotation = true
 PropertyAnnotation.prototype._isAnnotation = true

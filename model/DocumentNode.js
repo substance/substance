@@ -11,11 +11,11 @@ import EventEmitter from '../util/EventEmitter'
 
   ```js
   class Todo extends TextBlock {}
-  Todo.define({
+  Todo.schema = {
     type: 'todo',
     content: 'text',
     done: { type: 'bool', default: false }
-  })
+  }
   ```
 
   The following data types are supported:
