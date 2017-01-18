@@ -1,7 +1,7 @@
-/* global WeakMap */
-
 import uuid from '../util/uuid'
 import EventEmitter from '../util/EventEmitter'
+import ServerRequest from './ServerRequest'
+import ServerResponse from './ServerResponse'
 
 /**
   Server
@@ -302,93 +302,6 @@ class Server extends EventEmitter {
     return JSON.parse(msg)
   }
 
-}
-
-/*
-  ServerRequest
-*/
-
-class ServerRequest {
-  constructor(message, ws) {
-    this.message = message
-    this.ws = ws
-    this.isAuthenticated = false
-    this.isAuhorized = false
-  }
-
-  /*
-    Marks a request as authenticated
-  */
-  setAuthenticated(session) {
-    this.isAuthenticated = true
-    this.session = session
-  }
-
-  /*
-    Marks a request as authorized (authorizationData is optional)
-  */
-  setAuthorized(authorizationData) {
-    this.isAuthorized = true
-    this.authorizationData = authorizationData
-  }
-
-  /*
-    Sets the isEnhanced flag
-  */
-  setEnhanced() {
-    this.isEnhanced = true
-  }
-}
-
-
-/*
-  ServerResponse
-*/
-class ServerResponse {
-  constructor() {
-    this.isReady = false // once the response has been set using send
-    this.isEnhanced = false // after response has been enhanced by enhancer
-    this.isSent = false // after response has been sent
-    this.err = null
-    this.data = null
-  }
-
-  /*
-    Sends an error response
-
-    @example
-
-    ```js
-    res.error({
-      type: 'syncError',
-      errorName: 'AuthenticationError',
-      documentId: 'doc-1'
-    });
-    ```
-  */
-  error(err) {
-    this.err = err
-    this.isReady = true
-  }
-
-  /*
-    Send response data
-  */
-  send(data) {
-    this.data = data
-    this.isReady = true
-  }
-
-  /*
-    Sets the isEnhanced flag
-  */
-  setEnhanced() {
-    this.isEnhanced = true
-  }
-
-  setSent() {
-    this.isSent = true
-  }
 }
 
 export default Server

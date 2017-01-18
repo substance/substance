@@ -1,6 +1,4 @@
-function isObject(val) {
+export default function isObject(val) {
   const type = typeof val
   return Boolean(val) && (type === 'object' || type === 'function')
 }
-
-export default isObject

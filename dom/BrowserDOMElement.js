@@ -722,17 +722,16 @@ BrowserDOMElement.getBrowserWindow = function() {
   return new BrowserWindow(window)
 }
 
-let _r1 = null
-let _r2 = null
-
 BrowserDOMElement.isReverse = function(anchorNode, anchorOffset, focusNode, focusOffset) {
   // the selection is reversed when the focus propertyEl is before
   // the anchor el or the computed charPos is in reverse order
   if (focusNode && anchorNode) {
-    if (!_r1) {
-      _r1 = window.document.createRange()
-      _r2 = window.document.createRange()
+    if (!BrowserDOMElement.isReverse._r1) {
+      BrowserDOMElement.isReverse._r1 = window.document.createRange()
+      BrowserDOMElement.isReverse._r2 = window.document.createRange()
     }
+    const _r1 = BrowserDOMElement.isReverse._r1
+    const _r2 = BrowserDOMElement.isReverse._r2
     _r1.setStart(anchorNode.getNativeElement(), anchorOffset)
     _r2.setStart(focusNode.getNativeElement(), focusOffset)
     let cmp = _r1.compareBoundaryPoints(window.Range.START_TO_START, _r2)

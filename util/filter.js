@@ -1,7 +1,7 @@
 import isFunction from './isFunction'
 import forEach from './forEach'
 
-function filter(iteratee, fn) {
+export default function filter(iteratee, fn) {
   if (iteratee.constructor.prototype.filter && isFunction(iteratee.constructor.prototype.filter)) {
     return iteratee.filter(fn)
   }
@@ -11,5 +11,3 @@ function filter(iteratee, fn) {
   })
   return result
 }
-
-export default filter

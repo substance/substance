@@ -23,7 +23,7 @@ import Range from './Range'
 import docHelpers from './documentHelpers'
 import JSONConverter from './JSONConverter'
 
-var converter = new JSONConverter()
+const converter = new JSONConverter()
 
 /**
   Basic implementation of a Document.

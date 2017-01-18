@@ -67,7 +67,7 @@ function generateKey(event) {
   return frags.join('+')
 }
 
-KeyboardManager.parseCombo = function parseCombo(combo) {
+function parseCombo(combo) {
   let frags = combo.split('+')
   let data = {
     keyCode: -1
@@ -108,5 +108,7 @@ KeyboardManager.parseCombo = function parseCombo(combo) {
   }
   return generateKey(data)
 }
+
+KeyboardManager.parseCombo = parseCombo
 
 export default KeyboardManager

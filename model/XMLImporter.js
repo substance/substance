@@ -2,9 +2,6 @@ import DOMImporter from './DOMImporter'
 import DefaultDOMElement from '../dom/DefaultDOMElement'
 
 /*
-  @class
-  @abstract
-
   Base class for custom XML importers. If you want to use HTML as your
   exchange format see {@link model/HTMLImporter}.
 

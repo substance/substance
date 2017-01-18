@@ -2,8 +2,6 @@ import forEach from '../util/forEach'
 import deleteFromArray from '../util/deleteFromArray'
 import ArrayTree from '../util/ArrayTree'
 
-/*
-*/
 class MarkersManager {
 
   constructor(editorSession) {

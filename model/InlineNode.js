@@ -2,6 +2,6 @@ import PropertyAnnotation from './PropertyAnnotation'
 
 class InlineNode extends PropertyAnnotation {}
 
-InlineNode.isInline = true;
+InlineNode.isInline = true
 
-export default InlineNode;
+export default InlineNode

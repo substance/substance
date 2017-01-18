@@ -5,7 +5,7 @@
   @param {DOMElement} containerEl used as a reference point to calculate position
   @return {object} bound description with left, top, right, bottom
 */
-function getRelativeMouseBounds(mouseEvent, containerEl) {
+export default function getRelativeMouseBounds(mouseEvent, containerEl) {
   let containerElRect = containerEl.getBoundingClientRect()
   let left = mouseEvent.clientX - containerElRect.left
   let top = mouseEvent.clientY - containerElRect.top
@@ -17,5 +17,3 @@ function getRelativeMouseBounds(mouseEvent, containerEl) {
   }
   return res;
 }
-
-export default getRelativeMouseBounds

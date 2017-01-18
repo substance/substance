@@ -241,5 +241,4 @@ function _checked(prop, value) {
   return value
 }
 
-
 export default Node

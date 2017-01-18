@@ -9,9 +9,6 @@ import ContainerAddress from './ContainerAddress'
   While most editing occurs on a property level (such as editing text),
   other things happen on a node level, e.g., breaking or mergin nodes,
   or spanning annotations or so called ContainerAnnotations.
-
-  @class
-  @prop {String[]} nodes
 */
 class Container extends DocumentNode {
 
@@ -167,7 +164,7 @@ class Container extends DocumentNode {
 
 Container.prototype._isContainer = true
 
-Container.schema ={
+Container.schema = {
   type: 'container',
   nodes: { type: ['array', 'id'], default: [] }
 }

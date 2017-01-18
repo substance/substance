@@ -1,4 +1,3 @@
-/* globals Promise */
 import forEach from './forEach'
 
 export default function sendRequest(params, cb) {

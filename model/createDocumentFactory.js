@@ -28,23 +28,23 @@ function createDocumentFactory(ArticleClass, create) {
   return {
     ArticleClass: ArticleClass,
     createEmptyArticle: function() {
-      var doc = new ArticleClass();
-      return doc;
+      var doc = new ArticleClass()
+      return doc
     },
     createArticle: function() {
-      var doc = new ArticleClass();
-      create(doc);
-      return doc;
+      var doc = new ArticleClass()
+      create(doc)
+      return doc
     },
     createChangeset: function() {
-      var doc = new ArticleClass();
+      var doc = new ArticleClass()
       var session = new EditorSession(doc, {
         configurator: new Configurator()
-      });
-      var change = session.transaction(create);
-      return [change.toJSON()];
+      })
+      var change = session.transaction(create)
+      return [change.toJSON()]
     }
-  };
+  }
 }
 
-export default createDocumentFactory;
+export default createDocumentFactory

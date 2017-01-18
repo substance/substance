@@ -4,8 +4,6 @@ import Document from './Document'
 import IncrementalData from './data/IncrementalData'
 import DocumentNodeFactory from './DocumentNodeFactory'
 
-var __id__ = 0
-
 /**
   A {@link Document} instance that is used during transaction.
 
@@ -33,8 +31,6 @@ class TransactionDocument extends Document {
   */
   constructor(document) {
     super('SKIP')
-
-    this.__id__ = "TX_"+__id__++
 
     this.schema = document.schema
     this.nodeFactory = new DocumentNodeFactory(this)

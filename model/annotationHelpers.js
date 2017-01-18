@@ -2,12 +2,20 @@ import forEach from '../util/forEach'
 import isArray from '../util/isArray'
 import uuid from '../util/uuid'
 
-// TODO: this should be implemented as transformations
 
 // A collection of methods to update annotations
 // --------
 //
 // As we treat annotations as overlay of plain text we need to keep them up-to-date during editing.
+
+export default {
+  insertedText,
+  deletedText,
+  transferAnnotations,
+  expandAnnotation,
+  fuseAnnotation,
+  truncateAnnotation
+}
 
 function insertedText(doc, coordinate, length) {
   if (!length) return;
@@ -262,14 +270,4 @@ function fuseAnnotation(tx, annos) {
   }
   expandAnnotation(tx, annos[0], sel)
   tx.setSelection(sel)
-}
-
-
-export default {
-  insertedText: insertedText,
-  deletedText: deletedText,
-  transferAnnotations: transferAnnotations,
-  expandAnnotation: expandAnnotation,
-  fuseAnnotation: fuseAnnotation,
-  truncateAnnotation: truncateAnnotation
 }

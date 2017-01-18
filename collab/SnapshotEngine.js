@@ -1,6 +1,6 @@
 import computeSnapshot from './computeSnapshot'
 
-const EMPTY_DOC = { nodes: {}}
+const EMPTY_DOC = { nodes: {} }
 
 /*
   API for creating and retrieving document snapshots

@@ -1,9 +1,9 @@
 import forEach from '../util/forEach'
 import isString from '../util/isString'
 
-var ENTER = 1
-var EXIT = -1
-var ANCHOR = -2
+const ENTER = 1
+const EXIT = -1
+const ANCHOR = -2
 
 // Fragmenter
 // --------

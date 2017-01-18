@@ -6,10 +6,12 @@
   @param [Element] selectedTarget native DOM element
   @param [Event] originalEvent native DOM event
 */
-function DelegatedEvent(owner, selectedTarget, originalEvent) {
-  this.owner = owner
-  this.target = selectedTarget
-  this.originalEvent = originalEvent
+class DelegatedEvent {
+  constructor(owner, selectedTarget, originalEvent) {
+    this.owner = owner
+    this.target = selectedTarget
+    this.originalEvent = originalEvent
+  }
 }
 
 export default DelegatedEvent

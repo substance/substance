@@ -5,20 +5,21 @@ import map from '../util/map'
 import TreeIndex from '../util/TreeIndex'
 import DocumentIndex from './DocumentIndex'
 
-// PropertyAnnotation Index
-// ----------------
-//
-// Lets us look up existing annotations by path and type
-//
-// To get all annotations for the content of a text node
-//
-//    var aIndex = doc.annotationIndex
-//    aIndex.get(["text_1", "content"])
-//
-// You can also scope for a specific range
-//
-//    aIndex.get(["text_1", "content"], 23, 45)
+/*
+  Index for Annotations.
 
+  @example
+  Lets us look up existing annotations by path and type
+
+  To get all annotations for the content of a text node
+
+    var aIndex = doc.annotationIndex
+    aIndex.get(["text_1", "content"])
+
+  You can also scope for a specific range
+
+    aIndex.get(["text_1", "content"], 23, 45)
+*/
 class AnnotationIndex extends DocumentIndex {
 
   constructor() {

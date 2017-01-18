@@ -699,14 +699,10 @@ class DescendingContext {
 
 }
 
-
-
 RenderingEngine._internal = {
   _capture: _capture,
   _wrap: _createWrappingVirtualComponent,
-};
-
-
+}
 
 class CaptureContext {
   constructor(owner) {

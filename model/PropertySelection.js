@@ -15,7 +15,7 @@ import Range from './Range'
     path: ['p1', 'content'],
     startOffset: 3,
     endOffset: 6
-  });
+  })
 */
 class PropertySelection extends Selection {
 
@@ -44,42 +44,42 @@ class PropertySelection extends Selection {
       The path to the selected property.
       @type {String[]}
     */
-    this.path = path;
+    this.path = path
 
     /**
       Start character position.
       @type {Number}
     */
-    this.startOffset = startOffset;
+    this.startOffset = startOffset
 
     /**
       End character position.
       @type {Number}
     */
-    this.endOffset = isNumber(endOffset) ? endOffset : startOffset;
+    this.endOffset = isNumber(endOffset) ? endOffset : startOffset
 
     /**
       Selection direction.
       @type {Boolean}
     */
-    this.reverse = Boolean(reverse);
+    this.reverse = Boolean(reverse)
 
-    this.containerId = containerId;
+    this.containerId = containerId
 
     /**
       Identifier of the surface this selection should be active in.
       @type {String}
     */
-    this.surfaceId = surfaceId;
+    this.surfaceId = surfaceId
 
     if (!path || !isNumber(startOffset)) {
-      throw new Error('Invalid arguments: `path` and `startOffset` are mandatory');
+      throw new Error('Invalid arguments: `path` and `startOffset` are mandatory')
     }
 
     // dynamic adapters for Coordinate oriented implementations
-    this._internal.start = new CoordinateAdapter(this, 'path', 'startOffset');
-    this._internal.end = new CoordinateAdapter(this, 'path', 'endOffset');
-    this._internal.range = new RangeAdapter(this);
+    this._internal.start = new CoordinateAdapter(this, 'path', 'startOffset')
+    this._internal.end = new CoordinateAdapter(this, 'path', 'endOffset')
+    this._internal.range = new RangeAdapter(this)
   }
 
   /**
@@ -96,34 +96,34 @@ class PropertySelection extends Selection {
       reverse: this.reverse,
       containerId: this.containerId,
       surfaceId: this.surfaceId
-    };
+    }
   }
 
   isPropertySelection() {
-    return true;
+    return true
   }
 
   getType() {
-    return 'property';
+    return 'property'
   }
 
   isNull() {
-    return false;
+    return false
   }
 
   isCollapsed() {
-    return this.startOffset === this.endOffset;
+    return this.startOffset === this.endOffset
   }
 
   isReverse() {
-    return this.reverse;
+    return this.reverse
   }
 
   equals(other) {
     return (
       Selection.prototype.equals.call(this, other) &&
       (this.start.equals(other.start) && this.end.equals(other.end))
-    );
+    )
   }
 
   toString() {
@@ -134,7 +134,7 @@ class PropertySelection extends Selection {
       (this.reverse?", reverse":""),
       (this.surfaceId?(", "+this.surfaceId):""),
       ")"
-    ].join('');
+    ].join('')
   }
 
   /**
@@ -144,20 +144,20 @@ class PropertySelection extends Selection {
     @returns {PropertySelection}
   */
   collapse(direction) {
-    var offset;
+    var offset
     if (direction === 'left') {
-      offset = this.startOffset;
+      offset = this.startOffset
     } else {
-      offset = this.endOffset;
+      offset = this.endOffset
     }
-    return this.createWithNewRange(offset, offset);
+    return this.createWithNewRange(offset, offset)
   }
 
   // Helper Methods
   // ----------------------
 
   getRange() {
-    return this.range;
+    return this.range
   }
 
   /**
@@ -166,11 +166,11 @@ class PropertySelection extends Selection {
     @returns {String[]} path
   */
   getPath() {
-    return this.path;
+    return this.path
   }
 
   getNodeId() {
-    return this.path[0];
+    return this.path[0]
   }
 
   /**
@@ -179,7 +179,7 @@ class PropertySelection extends Selection {
     @returns {Number} offset
   */
   getStartOffset() {
-    return this.startOffset;
+    return this.startOffset
   }
 
   /**
@@ -188,7 +188,7 @@ class PropertySelection extends Selection {
     @returns {Number} offset
   */
   getEndOffset() {
-    return this.endOffset;
+    return this.endOffset
   }
 
   /**
@@ -199,18 +199,18 @@ class PropertySelection extends Selection {
     @returns {Boolean}
   */
   isInsideOf(other, strict) {
-    if (other.isNull()) return false;
+    if (other.isNull()) return false
     if (other.isContainerSelection()) {
-      return other.contains(this, strict);
+      return other.contains(this, strict)
     }
     if (strict) {
       return (isArrayEqual(this.path, other.path) &&
         this.startOffset > other.startOffset &&
-        this.endOffset < other.endOffset);
+        this.endOffset < other.endOffset)
     } else {
       return (isArrayEqual(this.path, other.path) &&
         this.startOffset >= other.startOffset &&
-        this.endOffset <= other.endOffset);
+        this.endOffset <= other.endOffset)
     }
   }
 
@@ -222,8 +222,8 @@ class PropertySelection extends Selection {
     @returns {Boolean}
   */
   contains(other, strict) {
-    if (other.isNull()) return false;
-    return other.isInsideOf(this, strict);
+    if (other.isNull()) return false
+    return other.isInsideOf(this, strict)
   }
 
   /**
@@ -234,16 +234,16 @@ class PropertySelection extends Selection {
     @returns {Boolean}
   */
   overlaps(other, strict) {
-    if (other.isNull()) return false;
+    if (other.isNull()) return false
     if (other.isContainerSelection()) {
-      // console.log('PropertySelection.overlaps: delegating to ContainerSelection.overlaps...');
-      return other.overlaps(this);
+      // console.log('PropertySelection.overlaps: delegating to ContainerSelection.overlaps...')
+      return other.overlaps(this)
     }
-    if (!isArrayEqual(this.path, other.path)) return false;
+    if (!isArrayEqual(this.path, other.path)) return false
     if (strict) {
-      return (! (this.startOffset>=other.endOffset||this.endOffset<=other.startOffset) );
+      return (! (this.startOffset>=other.endOffset||this.endOffset<=other.startOffset) )
     } else {
-      return (! (this.startOffset>other.endOffset||this.endOffset<other.startOffset) );
+      return (! (this.startOffset>other.endOffset||this.endOffset<other.startOffset) )
     }
   }
 
@@ -254,13 +254,13 @@ class PropertySelection extends Selection {
     @returns {Boolean}
   */
   isRightAlignedWith(other) {
-    if (other.isNull()) return false;
+    if (other.isNull()) return false
     if (other.isContainerSelection()) {
-      // console.log('PropertySelection.isRightAlignedWith: delegating to ContainerSelection.isRightAlignedWith...');
-      return other.isRightAlignedWith(this);
+      // console.log('PropertySelection.isRightAlignedWith: delegating to ContainerSelection.isRightAlignedWith...')
+      return other.isRightAlignedWith(this)
     }
     return (isArrayEqual(this.path, other.path) &&
-      this.endOffset === other.endOffset);
+      this.endOffset === other.endOffset)
   }
 
   /**
@@ -270,13 +270,13 @@ class PropertySelection extends Selection {
     @returns {Boolean}
   */
   isLeftAlignedWith(other) {
-    if (other.isNull()) return false;
+    if (other.isNull()) return false
     if (other.isContainerSelection()) {
-      // console.log('PropertySelection.isLeftAlignedWith: delegating to ContainerSelection.isLeftAlignedWith...');
-      return other.isLeftAlignedWith(this);
+      // console.log('PropertySelection.isLeftAlignedWith: delegating to ContainerSelection.isLeftAlignedWith...')
+      return other.isLeftAlignedWith(this)
     }
     return (isArrayEqual(this.path, other.path) &&
-      this.startOffset === other.startOffset);
+      this.startOffset === other.startOffset)
   }
 
   /**
@@ -286,20 +286,20 @@ class PropertySelection extends Selection {
     @returns {Selection} a new selection
   */
   expand(other) {
-    if (other.isNull()) return this;
+    if (other.isNull()) return this
 
     // if the other is a ContainerSelection
     // we delegate to that implementation as it is more complex
     // and can deal with PropertySelections, too
     if (other.isContainerSelection()) {
-      return other.expand(this);
+      return other.expand(this)
     }
     if (!isArrayEqual(this.path, other.path)) {
-      throw new Error('Can not expand PropertySelection to a different property.');
+      throw new Error('Can not expand PropertySelection to a different property.')
     }
-    var newStartOffset = Math.min(this.startOffset, other.startOffset);
-    var newEndOffset = Math.max(this.endOffset, other.endOffset);
-    return this.createWithNewRange(newStartOffset, newEndOffset);
+    var newStartOffset = Math.min(this.startOffset, other.startOffset)
+    var newEndOffset = Math.max(this.endOffset, other.endOffset)
+    return this.createWithNewRange(newStartOffset, newEndOffset)
   }
 
   /**
@@ -309,63 +309,63 @@ class PropertySelection extends Selection {
     @returns {Selection} a new selection
   */
   truncateWith(other) {
-    if (other.isNull()) return this;
+    if (other.isNull()) return this
     if (other.isInsideOf(this, 'strict')) {
       // the other selection should overlap only on one side
-      throw new Error('Can not truncate with a contained selections');
+      throw new Error('Can not truncate with a contained selections')
     }
     if (!this.overlaps(other)) {
-      return this;
+      return this
     }
-    var otherStartOffset, otherEndOffset;
+    var otherStartOffset, otherEndOffset
     if (other.isPropertySelection()) {
-      otherStartOffset = other.startOffset;
-      otherEndOffset = other.endOffset;
+      otherStartOffset = other.startOffset
+      otherEndOffset = other.endOffset
     } else if (other.isContainerSelection()) {
       // either the startPath or the endPath must be the same
       if (isArrayEqual(other.startPath, this.path)) {
-        otherStartOffset = other.startOffset;
+        otherStartOffset = other.startOffset
       } else {
-        otherStartOffset = this.startOffset;
+        otherStartOffset = this.startOffset
       }
       if (isArrayEqual(other.endPath, this.path)) {
-        otherEndOffset = other.endOffset;
+        otherEndOffset = other.endOffset
       } else {
-        otherEndOffset = this.endOffset;
+        otherEndOffset = this.endOffset
       }
     } else {
-      return this;
+      return this
     }
 
-    var newStartOffset;
-    var newEndOffset;
+    var newStartOffset
+    var newEndOffset
     if (this.startOffset > otherStartOffset && this.endOffset > otherEndOffset) {
-      newStartOffset = otherEndOffset;
-      newEndOffset = this.endOffset;
+      newStartOffset = otherEndOffset
+      newEndOffset = this.endOffset
     } else if (this.startOffset < otherStartOffset && this.endOffset < otherEndOffset) {
-      newStartOffset = this.startOffset;
-      newEndOffset = otherStartOffset;
+      newStartOffset = this.startOffset
+      newEndOffset = otherStartOffset
     } else if (this.startOffset === otherStartOffset) {
       if (this.endOffset <= otherEndOffset) {
-        return Selection.nullSelection;
+        return Selection.nullSelection
       } else {
-        newStartOffset = otherEndOffset;
-        newEndOffset = this.endOffset;
+        newStartOffset = otherEndOffset
+        newEndOffset = this.endOffset
       }
     } else if (this.endOffset === otherEndOffset) {
       if (this.startOffset >= otherStartOffset) {
-        return Selection.nullSelection;
+        return Selection.nullSelection
       } else {
-        newStartOffset = this.startOffset;
-        newEndOffset = otherStartOffset;
+        newStartOffset = this.startOffset
+        newEndOffset = otherStartOffset
       }
     } else if (other.contains(this)) {
-      return Selection.nullSelection;
+      return Selection.nullSelection
     } else {
       // FIXME: if this happens, we have a bug somewhere above
-      throw new Error('Illegal state.');
+      throw new Error('Illegal state.')
     }
-    return this.createWithNewRange(newStartOffset, newEndOffset);
+    return this.createWithNewRange(newStartOffset, newEndOffset)
   }
 
   /**
@@ -376,12 +376,12 @@ class PropertySelection extends Selection {
     @returns {Selection} a new selection
   */
   createWithNewRange(startOffset, endOffset) {
-    var sel = new PropertySelection(this.path, startOffset, endOffset, false, this.containerId, this.surfaceId);
-    var doc = this._internal.doc;
+    var sel = new PropertySelection(this.path, startOffset, endOffset, false, this.containerId, this.surfaceId)
+    var doc = this._internal.doc
     if (doc) {
-      sel.attach(doc);
+      sel.attach(doc)
     }
-    return sel;
+    return sel
   }
 
   /**
@@ -391,94 +391,94 @@ class PropertySelection extends Selection {
   */
   getFragments() {
     if(this._internal.fragments) {
-      return this._internal.fragments;
+      return this._internal.fragments
     }
 
-    var fragments;
+    var fragments
 
     if (this.isCollapsed()) {
-      fragments = [new Selection.Cursor(this.path, this.startOffset)];
+      fragments = [new Selection.Cursor(this.path, this.startOffset)]
     } else {
-      fragments = [new Selection.Fragment(this.path, this.startOffset, this.endOffset)];
+      fragments = [new Selection.Fragment(this.path, this.startOffset, this.endOffset)]
     }
 
-    this._internal.fragments = fragments;
-    return fragments;
+    this._internal.fragments = fragments
+    return fragments
   }
 
   _clone() {
-    return new PropertySelection(this.path, this.startOffset, this.endOffset, this.reverse, this.containerId, this.surfaceId);
+    return new PropertySelection(this.path, this.startOffset, this.endOffset, this.reverse, this.containerId, this.surfaceId)
   }
 
   /**
     @property {Coordinate}
   */
   get start() {
-    return this._internal.start;
+    return this._internal.start
   }
 
   /**
     @property {Coordinate}
   */
   get end() {
-    return this._internal.end;
+    return this._internal.end
   }
 
   /**
     @property {Range}
   */
   get range() {
-    return this._internal.range;
+    return this._internal.range
   }
 
   get startPath() {
-    return this.path;
+    return this.path
   }
 
   get endPath() {
-    return this.path;
+    return this.path
   }
 }
 
 PropertySelection.fromJSON = function(json) {
-  return new PropertySelection(json);
+  return new PropertySelection(json)
 }
 
 class RangeAdapter extends Range {
 
   constructor(sel) {
     super('SKIP')
-    this._sel = sel;
-    this.start = sel.start;
-    this.end = sel.end;
-    Object.freeze(this);
+    this._sel = sel
+    this.start = sel.start
+    this.end = sel.end
+    Object.freeze(this)
   }
 
   get reverse() {
-    return this._sel.reverse;
+    return this._sel.reverse
   }
 
   set reverse(reverse) {
-    this._sel.reverse = reverse;
+    this._sel.reverse = reverse
   }
 
   get containerId() {
-    return this._sel.containerId;
+    return this._sel.containerId
   }
 
   set containerId(containerId) {
-    this._sel.containerId = containerId;
+    this._sel.containerId = containerId
   }
 
   get surfaceId() {
-    return this._sel.surfaceId;
+    return this._sel.surfaceId
   }
 
   set surfaceId(surfaceId) {
-    this._sel.surfaceId = surfaceId;
+    this._sel.surfaceId = surfaceId
   }
 }
 
-PropertySelection.RangeAdapter = RangeAdapter;
+PropertySelection.RangeAdapter = RangeAdapter
 
 export default PropertySelection

@@ -165,7 +165,7 @@ class ClipboardImporter extends HTMLImporter {
 
 }
 
-let _converters = {
+const CONVERTERS = {
   'catch-all-block': {
     type: 'paragraph',
     matchElement: function(el) { return el.is('div') },
@@ -181,7 +181,7 @@ ClipboardImporter._addConverters = function(config) {
     config.converters.forEach(function(conv, name) {
       registry.add(name, conv)
     });
-    forEach(_converters, function(converter, name) {
+    forEach(CONVERTERS, function(converter, name) {
       registry.add(name, converter)
     });
     config.converters = registry

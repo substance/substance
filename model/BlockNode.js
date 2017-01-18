@@ -2,6 +2,6 @@ import DocumentNode from './DocumentNode'
 
 class BlockNode extends DocumentNode {}
 
-BlockNode.isBlock = true;
+BlockNode.isBlock = true
 
-export default BlockNode;
+export default BlockNode

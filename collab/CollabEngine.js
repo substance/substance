@@ -11,6 +11,7 @@ import Err from '../util/SubstanceError'
   real time editing as a reusable library.
 */
 class CollabEngine extends EventEmitter {
+
   constructor(documentEngine) {
     super()
     this.documentEngine = documentEngine

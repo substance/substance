@@ -5,7 +5,7 @@ import isBoolean from '../util/isBoolean'
 import isNumber from '../util/isNumber'
 import isString from '../util/isString'
 
-var defaultAnnotationConverter = {
+const defaultAnnotationConverter = {
   tagName: 'span',
   export: function(node, el) {
     el.tagName = 'span'
@@ -20,7 +20,7 @@ var defaultAnnotationConverter = {
   }
 }
 
-var defaultBlockConverter = {
+const defaultBlockConverter = {
   export: function(node, el, converter) {
     el.attr('data-type', node.type)
     var properties = node.toJSON()
