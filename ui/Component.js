@@ -1,9 +1,12 @@
-import { extend, forEach, isString, isFunction } from 'lodash-es'
 import RenderingEngine from './RenderingEngine'
 import VirtualElement from './VirtualElement'
 import DOMElement from '../dom/DOMElement'
 import DefaultDOMElement from '../dom/DefaultDOMElement'
 import inBrowser from '../util/inBrowser'
+import extend from '../util/extend'
+import forEach from '../util/forEach'
+import isString from '../util/isString'
+import isFunction from '../util/isFunction'
 import uuid from '../util/uuid'
 
 /**
