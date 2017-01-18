@@ -1,5 +1,5 @@
-import isString from '../../util/isString'
-import isArray from '../../util/isArray'
+import isString from './isString'
+import isArray from './isArray'
 import get from 'lodash-es/get'
 import setWith from 'lodash-es/setWith'
 import unset from 'lodash-es/unset'
@@ -9,10 +9,10 @@ import unset from 'lodash-es/unset'
 
   @example
 
-  var obj = new DataObject({a: "aVal", b: {b1: 'b1Val', b2: 'b2Val'}})
+  var obj = new PathObject({a: "aVal", b: {b1: 'b1Val', b2: 'b2Val'}})
 */
 
-class DataObject {
+class PathObject {
 
   /*
     @param {object} [root] An object to operate on
@@ -56,14 +56,14 @@ class DataObject {
       path = Array.prototype.slice(arguments, 0)
     }
     if (!isArray(path)) {
-      throw new Error('Illegal argument for DataObject.get()')
+      throw new Error('Illegal argument for PathObject.get()')
     }
     return get(this.getRoot(), path)
   }
 
   set(path, value) {
     if (!path) {
-      throw new Error('Illegal argument: DataObject.set(>path<, value) - path is mandatory.')
+      throw new Error('Illegal argument: PathObject.set(>path<, value) - path is mandatory.')
     }
     if (isString(path)) {
       this.getRoot()[path] = value
@@ -96,6 +96,6 @@ class DataObject {
 
 }
 
-DataObject.prototype._isDataObject = true
+PathObject.prototype._isPathObject = true
 
-export default DataObject
+export default PathObject

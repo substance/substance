@@ -1,4 +1,4 @@
-import startsWith from 'lodash-es/startsWith'
+import startsWith from '../../util/startsWith'
 import keys from '../../util/keys'
 import createSurfaceId from '../../util/createSurfaceId'
 import Coordinate from '../../model/Coordinate'

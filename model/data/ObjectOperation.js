@@ -1,7 +1,7 @@
 import isEqual from '../../util/isEqual'
 import isString from '../../util/isString'
 import cloneDeep from '../../util/cloneDeep'
-import DataObject from './DataObject'
+import PathObject from '../../util/PathObject'
 import TextOperation from './TextOperation'
 import ArrayOperation from './ArrayOperation'
 import CoordinateOperation from './CoordinateOperation'
@@ -63,10 +63,10 @@ class ObjectOperation {
   apply(obj) {
     if (this.type === NOP) return obj
     var adapter
-    if (obj._isDataObject) {
+    if (obj._isPathObject) {
       adapter = obj
     } else {
-      adapter = new DataObject(obj)
+      adapter = new PathObject(obj)
     }
     if (this.type === CREATE) {
       adapter.set(this.path, cloneDeep(this.val))
