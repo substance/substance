@@ -1,6 +1,7 @@
 let b = require('substance-bundler')
 let path = require('path')
 let karma = require('karma')
+let cp = require('child_process')
 
 // Constants
 // ---------
@@ -77,6 +78,18 @@ function _testBrowser(transpileToES5, coverage) {
   })
 }
 
+function _testNode() {
+  b.js('./test/index.js', {
+    target: {
+      dest: TEST+'tests.cjs.js',
+      format: 'cjs'
+    },
+    external: ['substance-test'],
+    buble: true,
+    commonjs: true
+  })
+}
+
 function _runTestBrowser() {
   b.custom('Running browser tests...', {
     execute: function() {
@@ -103,6 +116,29 @@ function _runTestBrowser() {
         })
         server.start()
       })
+    }
+  })
+}
+
+function _runTestNode() {
+  b.custom('Running nodejs tests...', {
+    execute: function() {
+      return new Promise(function(resolve, reject) {
+        const child = cp.fork(path.join(__dirname, '.test/run-tests.js'))
+        child.on('message', function(msg) {
+          if (msg === 'done') { resolve() }
+        })
+        child.on('error', function(error) {
+          reject(new Error(error))
+        })
+        child.on('close', function(exitCode) {
+          if (exitCode !== 0) {
+            process.exit(exitCode)
+          } else {
+            resolve()
+          }
+        })
+      });
     }
   })
 }
@@ -199,9 +235,14 @@ b.task('test:browser:coverage', ['test:clean', 'test:assets'], function() {
   _testBrowser(true, true)
 })
 
+b.task('test:node', _testNode)
+
 b.task('run:test:browser', ['test:browser'], _runTestBrowser)
 
+b.task('run:test:node', ['test:node'], _runTestNode)
+
 b.task('run:test:coverage', ['test:browser:coverage'], _runTestBrowser)
+
 
 b.task('npm:clean', function() {
   b.rm(NPM)
@@ -245,7 +286,7 @@ b.task('build', ['clean', 'browser', 'server'])
 
 b.task('build:pure', ['clean', 'browser:pure', 'server:pure'])
 
-b.task('test', ['test:clean', 'test:assets', 'test:browser', 'test:server'])
+b.task('test', ['test:clean', 'test:assets', 'run:test:browser', 'run:test:node'])
 
 b.task('npm', ['npm:clean', 'npm:copy:sources', 'npm:docs', 'npm:browser', 'npm:server'])
 

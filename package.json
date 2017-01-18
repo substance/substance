@@ -12,7 +12,7 @@
   "main": "dist/substance.cjs.js",
   "jsnext:main": "index.es.js",
   "scripts": {
-    "test": "node make run:test:browser",
+    "test": "node make test",
     "test:browser": "node make test:browser:pure -w -s",
     "docs": "node make docs -w -s",
     "start": "node make dev -w -s"
