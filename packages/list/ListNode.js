@@ -20,7 +20,4 @@ ListNode.schema = {
   items: { type: [ 'array', 'id' ], default: [], strong: true }
 }
 
-// HACK: we don't want the inherited property 'nodes'
-delete ListNode.schema.nodes
-
 export default ListNode
