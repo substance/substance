@@ -31,6 +31,7 @@ import "./ui/TextPropertyComponent.test.js"
 
 // util
 import "./util/TreeIndex.test.js"
+import "./util/utils.test.js"
 
 // collab
 import "./collab/ChangeStore.test.js"
