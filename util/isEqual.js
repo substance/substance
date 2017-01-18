@@ -1,4 +1,3 @@
-import isNil from './isNil'
 import isPlainObject from './isPlainObject'
 import isArray from './isArray'
 

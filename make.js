@@ -20,7 +20,7 @@ const STUFF = [
 // Doing the actual work
 
 // creates a browser bundle
-function _browser(DIST, transpileToES5) {
+function _browser(DIST, transpileToES5, production) {
   b.js('./index.es.js', {
     target: {
       dest: DIST+'substance.js',
@@ -29,7 +29,8 @@ function _browser(DIST, transpileToES5) {
       useStrict: !transpileToES5,
     },
     buble: transpileToES5,
-    eslint: { exclude: [ 'dom/vendor.js' ] }
+    eslint: { exclude: [ 'dom/vendor.js' ] },
+    cleanup: Boolean(production)
   })
   b.css('substance.css', DIST+'substance.css', { variables: true })
   b.css('substance.css', DIST+'substance.next.css')
@@ -40,7 +41,7 @@ function _browser(DIST, transpileToES5) {
 }
 
 // creates a server bundle
-function _server(DIST, transpileToES5) {
+function _server(DIST, transpileToES5, production) {
   b.js('./index.es.js', {
     target: {
       dest: DIST+'substance.cjs.js',
@@ -48,7 +49,8 @@ function _server(DIST, transpileToES5) {
       sourceMapRoot: __dirname, sourceMapPrefix: 'substance'
     },
     buble: transpileToES5,
-    eslint: { exclude: [ 'dom/vendor.js' ] }
+    eslint: { exclude: [ 'dom/vendor.js' ] },
+    cleanup: Boolean(production)
   })
 }
 
@@ -275,11 +277,11 @@ b.task('npm:docs', function() {
 })
 
 b.task('npm:browser', function() {
-  _browser(NPMDIST, true)
+  _browser(NPMDIST, true, true)
 })
 
 b.task('npm:server', function() {
-  _server(NPMDIST, true)
+  _server(NPMDIST, true, true)
 })
 
 b.task('build', ['clean', 'browser', 'server'])
@@ -296,7 +298,6 @@ b.task('default', ['build'])
 
 // Default dev mode, only browser bundles are made and no ES5 transpilation happens
 b.task('dev', ['clean', 'browser:pure', 'test:assets', 'test:browser:pure' , 'docs'])
-
 
 // HTTP server
 // -----------
