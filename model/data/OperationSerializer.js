@@ -55,6 +55,7 @@ Primitive type operations:
 */
 
 class OperationSerializer{
+
   constructor() {
     this.SEPARATOR = '\t'
   }

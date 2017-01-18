@@ -2,8 +2,8 @@ import isString from '../../util/isString'
 import isNumber from '../../util/isNumber'
 import Conflict from './Conflict'
 
-var INSERT = "insert"
-var DELETE = "delete"
+const INSERT = "insert"
+const DELETE = "delete"
 
 class TextOperation {
 
@@ -197,7 +197,7 @@ function transform_insert_delete(a, b) {
   }
 }
 
-var transform = function(a, b, options) {
+function transform(a, b, options) {
   options = options || {}
   if (options["no-conflict"] && hasConflict(a, b)) {
     throw new Conflict(a, b)

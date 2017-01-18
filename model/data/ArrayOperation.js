@@ -3,15 +3,12 @@ import isEqual from '../../util/isEqual'
 import isNumber from '../../util/isNumber'
 import Conflict from './Conflict'
 
-var NOP = "NOP"
-var DELETE = "delete"
-var INSERT = "insert"
+const NOP = "NOP"
+const DELETE = "delete"
+const INSERT = "insert"
 
-/*
-  @class
-  @extends Operation
-*/
 class ArrayOperation {
+
   constructor(data) {
     if (!data || !data.type) {
       throw new Error("Illegal argument: insufficient data.")
@@ -114,7 +111,7 @@ class ArrayOperation {
 ArrayOperation.prototype._isOperation = true
 ArrayOperation.prototype._isArrayOperation = true
 
-var hasConflict = function(a, b) {
+function hasConflict(a, b) {
   if (a.type === NOP || b.type === NOP) return false
   if (a.type === INSERT && b.type === INSERT) {
     return a.pos === b.pos
