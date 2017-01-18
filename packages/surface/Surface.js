@@ -1,9 +1,9 @@
-import startsWith from 'lodash-es/startsWith'
 import createSurfaceId from '../../util/createSurfaceId'
-import keys from '../../util/keys'
-import platform from '../../util/platform'
 import inBrowser from '../../util/inBrowser'
 import isNil from '../../util/isNil'
+import keys from '../../util/keys'
+import platform from '../../util/platform'
+import startsWith from '../../util/startsWith'
 import Clipboard from '../../ui/Clipboard'
 import Component from '../../ui/Component'
 import DefaultDOMElement from '../../dom/DefaultDOMElement'
@@ -696,14 +696,13 @@ class Surface extends Component {
     }
   }
 
-}
-
-Object.defineProperty(Surface.prototype, 'id', {
-  configurable: false,
-  get: function() {
+  get id() {
     return this._surfaceId
   }
-})
+
+}
+
+Surface.prototype._isSurface = true
 
 Surface.getDOMRangeFromEvent = function(evt) {
   let range, x = evt.clientX, y = evt.clientY
@@ -737,7 +736,5 @@ Surface.getDOMRangeFromEvent = function(evt) {
 
   return range
 }
-
-Surface.prototype._isSurface = true
 
 export default Surface
