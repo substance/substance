@@ -15,7 +15,8 @@ export default function isEqual(a, b) {
     let akeys = Object.keys(a).sort()
     let bkeys = Object.keys(b).sort()
     if (!isEqual(akeys, bkeys)) return false
-    for (let key of akeys) {
+    for (let i = 0; i < akeys.length; i++) {
+      let key = akeys[i]
       if (!isEqual(a[key], b[key])) return false
     }
     return true
