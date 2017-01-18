@@ -1,7 +1,5 @@
 let b = require('substance-bundler')
 let path = require('path')
-let karma = require('karma')
-let cp = require('child_process')
 
 // Constants
 // ---------
@@ -93,6 +91,7 @@ function _testNode() {
 function _runTestBrowser() {
   b.custom('Running browser tests...', {
     execute: function() {
+      let karma = require('karma')
       const browser = process.env.TRAVIS ? 'ChromeTravis': 'Chrome'
       return new Promise(function(resolve) {
         let fails = 0
@@ -123,6 +122,7 @@ function _runTestBrowser() {
 function _runTestNode() {
   b.custom('Running nodejs tests...', {
     execute: function() {
+      let cp = require('child_process')
       return new Promise(function(resolve, reject) {
         const child = cp.fork(path.join(__dirname, '.test/run-tests.js'))
         child.on('message', function(msg) {
