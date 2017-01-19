@@ -116,6 +116,7 @@ class Node extends EventEmitter {
 
 Node.prototype._isNode = true
 
+// NOTE: this code and its deps will always be included in the bundle as rollup considers this as global side-effect
 Object.defineProperty(Node, 'schema', {
   get() { return this._schema },
   set(schema) {
