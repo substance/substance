@@ -41,7 +41,7 @@ class XNode extends DOMElement {
         break
       }
       case ElementType.CDATA: {
-        this.children = args.children || []
+        this.data = args.data || ''
         break
       }
       case ElementType.Directive: {
@@ -333,11 +333,23 @@ class XNode extends DOMElement {
   }
 
   createElement(tagName) {
-    return new XNode('tag', { name: tagName, ownerDocument: this.ownerDocument })
+    return new XNode(ElementType.Tag, { name: tagName, ownerDocument: this.ownerDocument })
   }
 
   createTextNode(text) {
-    return new XNode('text', { data: text, ownerDocument: this.ownerDocument })
+    return new XNode(ElementType.Text, { data: text, ownerDocument: this.ownerDocument })
+  }
+
+  createComment(data) {
+    return new XNode(ElementType.Comment, { data: data, ownerDocument: this.ownerDocument })
+  }
+
+  createProcessingInstruction(name, data) {
+    return new XNode(ElementType.Directive, { name: name, data: data, ownerDocument: this.ownerDocument })
+  }
+
+  createCDATASection(data) {
+    return new XNode(ElementType.CDATA, { data: data, ownerDocument: this.ownerDocument })
   }
 
   appendChild(child) {
@@ -478,7 +490,8 @@ class XNode extends DOMElement {
     }
     // TODO: while it is 'smart' to deal with 'style' and 'class'
     // implicitly, it introduces some confusion here
-    if (this.attributes && other.attributes) {
+    let otherAttributes = other.attributes || other.attribs
+    if (this.attributes && otherAttributes) {
       forEach(other.attributes, (val, name) => {
         switch (name) {
           case 'class': {

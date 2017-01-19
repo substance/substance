@@ -66,9 +66,10 @@ class XDomHandler {
   }
 
   onopentag(name, attributes) {
-    let element = this.elementFactory.createElement(name, {
-      attributes: attributes
-    })
+    let element = this.elementFactory.createElement(name)
+    for (let key in attributes) {
+      element.setAttribute(key, attributes[key])
+    }
     this._addDomElement(element)
     this._tagStack.push(element)
   }
@@ -107,9 +108,8 @@ class XDomHandler {
     this._tagStack.pop()
   }
 
-  oncdatastart() {
-    let element = this.elementFactory.createCDATASection()
-    element.appendChid(this.elementFactory.createTextNode(""))
+  oncdatastart(data) {
+    let element = this.elementFactory.createCDATASection(data)
     this._addDomElement(element)
     this._tagStack.push(element)
   }

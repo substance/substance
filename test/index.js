@@ -16,12 +16,14 @@ import "./model/PathEventProxy.test.js"
 import "./model/XMLExporter.test.js"
 import "./model/XMLImporter.test.js"
 
+// dom
+import "./dom/DOMElement.test.js"
+
 // ui
 import "./ui/AnnotationCommand.test.js"
 import "./ui/Clipboard.test.js"
 import "./ui/Component.integration.test.js"
 import "./ui/Component.test.js"
-import "./ui/DOMElement.test.js"
 import "./ui/DOMSelection.test.js"
 import "./ui/InlineNode.test.js"
 import "./ui/IsolatedNode.test.js"

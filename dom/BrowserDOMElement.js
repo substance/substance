@@ -348,7 +348,25 @@ class BrowserDOMElement extends DOMElement {
 
   createTextNode(text) {
     let doc = this._getOwnerDocument()
-    var el = doc.createTextNode(text)
+    let el = doc.createTextNode(text)
+    return BrowserDOMElement.wrapNativeElement(el)
+  }
+
+  createComment(data) {
+    let doc = this._getOwnerDocument()
+    let el = doc.createComment(data)
+    return BrowserDOMElement.wrapNativeElement(el)
+  }
+
+  createProcessingInstruction(name, data) {
+    let doc = this._getOwnerDocument()
+    let el = doc.createProcessingInstruction(name, data)
+    return BrowserDOMElement.wrapNativeElement(el)
+  }
+
+  createCDATASection(data) {
+    let doc = this._getOwnerDocument()
+    let el = doc.createCDATASection(data)
     return BrowserDOMElement.wrapNativeElement(el)
   }
 
