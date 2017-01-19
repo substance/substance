@@ -1,12 +1,13 @@
 import { cssSelect, domSerializer, DomUtils, ElementType } from './vendor'
-import parseMarkup from './parseMarkup'
-import DOMEventListener from './DOMEventListener'
-import DOMElement from './DOMElement'
-import last from '../util/last'
+import forEach from '../util/forEach'
 import isString from '../util/isString'
 import isNil from '../util/isNil'
 import isNumber from '../util/isNumber'
-import forEach from '../util/forEach'
+import last from '../util/last'
+import parseMarkup from './parseMarkup'
+import DOMEventListener from './DOMEventListener'
+import DOMElement from './DOMElement'
+import DelegatedEvent from './DelegatedEvent'
 
 class XNode extends DOMElement {
 
@@ -445,17 +446,20 @@ class XNode extends DOMElement {
   }
 
   addEventListener(eventName, handler, options) {
-    var listener
-    if (arguments.length === 1 && arguments[0]._isDOMEventListener) {
+    let listener
+    if (arguments.length === 1 && arguments[0]) {
       listener = arguments[0]
     } else {
-      options = options || {}
-      options.context = options.context || this._owner._comp
       listener = new DOMEventListener(eventName, handler, options)
+    }
+    if (listener.options.selector && !listener.__hasEventDelegation__) {
+      listener.handler = DelegatedEvent.delegatedHandler(listener, this)
+      listener.__hasEventDelegation__ = true
     }
     if (!this.eventListeners) {
       this.eventListeners = []
     }
+    listener._el = this
     this.eventListeners.push(listener)
     return this
   }
@@ -465,6 +469,26 @@ class XNode extends DOMElement {
       DOMEventListener.findIndex(this.eventListeners, eventName, handler)
     }
     return this
+  }
+
+  click() {
+    this._emitEvent('click', { target: this })
+    return this
+  }
+
+  // TODO: flesh this out
+  _emitEvent(eventName, data) {
+    this._propagateEvent(new XNodeEvent(eventName, data))
+  }
+
+  _propagateEvent(event) {
+    let listener = this.eventListeners.find((l) => {
+      return l.eventName === event._name
+    })
+    if (listener) listener.handler(event)
+    if (event.stopped) return
+    let p = this.parentNode
+    if (p) p._propagateEvent(event)
   }
 
   removeAllEventListeners() {
@@ -614,6 +638,23 @@ function stringifyStyles(styles) {
   }).join(';')
   if (str.length > 0) str += ';'
   return str
+}
+
+// TODO: could be a bit closer to the real DOM impl
+class XNodeEvent {
+
+  constructor(name, data) {
+    this._name = name
+
+    Object.assign(this, data)
+  }
+
+  stopPropagation() {
+    this.stopped = true
+  }
+
+  // just a stub
+  preventDefault() {}
 }
 
 export default XNode

@@ -183,33 +183,13 @@ class BrowserDOMElement extends DOMElement {
       listener = new DOMEventListener(eventName, handler, options)
     }
     if (listener.options.selector && !listener.__hasEventDelegation__) {
-      listener.handler = this._delegatedHandler(listener)
+      listener.handler = DelegatedEvent.delegatedHandler(listener, this.getNativeElement())
       listener.__hasEventDelegation__ = true
     }
     this.el.addEventListener(listener.eventName, listener.handler, listener.capture)
-    listener._el = this
     this.eventListeners.push(listener)
+    listener._el = this
     return this
-  }
-
-  _delegatedHandler(listener) {
-    let handler = listener.handler
-    let context = listener.context
-    let selector = listener.options.selector
-    let nativeTop = this.getNativeElement()
-    return function(event) {
-      let nativeEl = event.target
-      while(nativeEl) {
-        if (matches(nativeEl, selector)) {
-          handler(new DelegatedEvent(context, event.target, event))
-          break
-        }
-        if (nativeEl === nativeTop) {
-          break
-        }
-        nativeEl = nativeEl.parentNode;
-      }
-    }
   }
 
   removeEventListener(eventName, handler) {

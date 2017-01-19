@@ -14,4 +14,23 @@ class DelegatedEvent {
   }
 }
 
+DelegatedEvent.delegatedHandler = function(listener, top) {
+  let handler = listener.handler
+  let context = listener.context
+  let selector = listener.options.selector
+  return function(event) {
+    let el = event.target
+    while(el) {
+      if (matches(el, selector)) {
+        handler(new DelegatedEvent(context, event.target, event))
+        break
+      }
+      if (el === top) {
+        break
+      }
+      el = el.parentNode;
+    }
+  }
+}
+
 export default DelegatedEvent
