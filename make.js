@@ -166,17 +166,15 @@ function _docs(mode, dest) {
 }
 
 function _vendor_xdom() {
-  b.js('./dom/.vendor.js', {
+  b.js('./dom/_vendor.js', {
     target: {
       dest: './dom/vendor.js',
       format: 'es'
     },
-    ignore: [
-      'inherits', 'events', 'dom-serializer',
-      'entities', 'entities/maps/entities.json', 'entities/maps/legacy.json'
-    ],
+    ignore: [ 'events', 'entities' ],
     alias: {
-      'dom-serializer': path.join(__dirname, 'dom/.domSerializer.js'),
+      'dom-serializer': path.join(__dirname, 'dom/_domSerializer.js'),
+      'inherits': path.join(__dirname, 'dom/_stub.js')
     },
     commonjs: true,
     json: true

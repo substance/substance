@@ -34,7 +34,7 @@
     "karma-source-map-support": "1.1.0",
     "karma-tap": "1.0.4",
     "karma-tape-reporter": "1.0.3",
-    "substance-bundler": "0.6.11",
+    "substance-bundler": "0.7.0",
     "substance-docgen": "0.4.7",
     "substance-test": "0.4.5"
   },
