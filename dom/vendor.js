@@ -225,28 +225,28 @@ function getText$1(elem){
 
 var traversal = createCommonjsModule(function (module, exports) {
 var getChildren = exports.getChildren = function(elem){
-	return elem.children;
+  return elem.children;
 };
 
 var getParent = exports.getParent = function(elem){
-	return elem.parent;
+  return elem.parent;
 };
 
 exports.getSiblings = function(elem){
-	var parent = getParent(elem);
-	return parent ? getChildren(parent) : [elem];
+  var parent = getParent(elem);
+  return parent ? getChildren(parent) : [elem];
 };
 
 exports.getAttributeValue = function(elem, name){
-	return elem.attribs && elem.attribs[name];
+  return elem.getAttribute(name);
 };
 
 exports.hasAttrib = function(elem, name){
-	return !!elem.attribs && hasOwnProperty.call(elem.attribs, name);
+  return elem.hasAttribute(name);
 };
 
 exports.getName = function(elem){
-	return elem.name;
+  return elem.name;
 };
 });
 
@@ -434,88 +434,88 @@ var ElementType = index;
 var isTag = exports.isTag = ElementType.isTag;
 
 exports.testElement = function(options, element){
-	for(var key in options){
-		if(!options.hasOwnProperty(key));
-		else if(key === "tag_name"){
-			if(!isTag(element) || !options.tag_name(element.name)){
-				return false;
-			}
-		} else if(key === "tag_type"){
-			if(!options.tag_type(element.type)) return false;
-		} else if(key === "tag_contains"){
-			if(isTag(element) || !options.tag_contains(element.data)){
-				return false;
-			}
-		} else if(!element.attribs || !options[key](element.attribs[key])){
-			return false;
-		}
-	}
-	return true;
+  for(var key in options){
+    if(!options.hasOwnProperty(key));
+    else if(key === "tag_name"){
+      if(!isTag(element) || !options.tag_name(element.name)){
+        return false;
+      }
+    } else if(key === "tag_type"){
+      if(!options.tag_type(element.type)) return false;
+    } else if(key === "tag_contains"){
+      if(isTag(element) || !options.tag_contains(element.data)){
+        return false;
+      }
+    } else if(!element.attributes || !options[key](element.getAttribute(key))) {
+      return false;
+    }
+  }
+  return true;
 };
 
 var Checks = {
-	tag_name: function(name){
-		if(typeof name === "function"){
-			return function(elem){ return isTag(elem) && name(elem.name); };
-		} else if(name === "*"){
-			return isTag;
-		} else {
-			return function(elem){ return isTag(elem) && elem.name === name; };
-		}
-	},
-	tag_type: function(type){
-		if(typeof type === "function"){
-			return function(elem){ return type(elem.type); };
-		} else {
-			return function(elem){ return elem.type === type; };
-		}
-	},
-	tag_contains: function(data){
-		if(typeof data === "function"){
-			return function(elem){ return !isTag(elem) && data(elem.data); };
-		} else {
-			return function(elem){ return !isTag(elem) && elem.data === data; };
-		}
-	}
+  tag_name: function(name){
+    if(typeof name === "function"){
+      return function(elem){ return isTag(elem) && name(elem.name); };
+    } else if(name === "*"){
+      return isTag;
+    } else {
+      return function(elem){ return isTag(elem) && elem.name === name; };
+    }
+  },
+  tag_type: function(type){
+    if(typeof type === "function"){
+      return function(elem){ return type(elem.type); };
+    } else {
+      return function(elem){ return elem.type === type; };
+    }
+  },
+  tag_contains: function(data){
+    if(typeof data === "function"){
+      return function(elem){ return !isTag(elem) && data(elem.data); };
+    } else {
+      return function(elem){ return !isTag(elem) && elem.data === data; };
+    }
+  }
 };
 
 function getAttribCheck(attrib, value){
-	if(typeof value === "function"){
-		return function(elem){ return elem.attribs && value(elem.attribs[attrib]); };
-	} else {
-		return function(elem){ return elem.attribs && elem.attribs[attrib] === value; };
-	}
+  if(typeof value === "function"){
+    return function(elem){ return value(elem.getAttribute(attrib)); };
+  } else {
+    return function(elem){ return elem.getAttribute(attrib) === value; };
+  }
 }
 
 function combineFuncs(a, b){
-	return function(elem){
-		return a(elem) || b(elem);
-	};
+  return function(elem){
+    return a(elem) || b(elem);
+  };
 }
 
 exports.getElements = function(options, element, recurse, limit){
-	var funcs = Object.keys(options).map(function(key){
-		var value = options[key];
-		return key in Checks ? Checks[key](value) : getAttribCheck(key, value);
-	});
+  var funcs = Object.keys(options).map(function(key){
+    var value = options[key];
+    return key in Checks ? Checks[key](value) : getAttribCheck(key, value);
+  });
 
-	return funcs.length === 0 ? [] : this.filter(
-		funcs.reduce(combineFuncs),
-		element, recurse, limit
-	);
+  return funcs.length === 0 ? [] : this.filter(
+    funcs.reduce(combineFuncs),
+    element, recurse, limit
+  );
 };
 
 exports.getElementById = function(id, element, recurse){
-	if(!Array.isArray(element)) element = [element];
-	return this.findOne(getAttribCheck("id", id), element, recurse !== false);
+  if(!Array.isArray(element)) element = [element];
+  return this.findOne(getAttribCheck("id", id), element, recurse !== false);
 };
 
 exports.getElementsByTagName = function(name, element, recurse, limit){
-	return this.filter(Checks.tag_name(name), element, recurse, limit);
+  return this.filter(Checks.tag_name(name), element, recurse, limit);
 };
 
 exports.getElementsByTagType = function(type, element, recurse, limit){
-	return this.filter(Checks.tag_type(type), element, recurse, limit);
+  return this.filter(Checks.tag_type(type), element, recurse, limit);
 };
 });
 
@@ -667,16 +667,16 @@ var index$3 = createCommonjsModule(function (module) {
 var DomUtils = module.exports;
 
 [
-	stringify,
-	traversal,
-	manipulation,
-	querying,
-	legacy,
-	helpers
+  stringify,
+  traversal,
+  manipulation,
+  querying,
+  legacy,
+  helpers
 ].forEach(function(ext){
-	Object.keys(ext).forEach(function(key){
-		DomUtils[key] = ext[key].bind(DomUtils);
-	});
+  Object.keys(ext).forEach(function(key){
+    DomUtils[key] = ext[key].bind(DomUtils);
+  });
 });
 });
 

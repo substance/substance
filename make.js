@@ -179,6 +179,7 @@ function _vendor_xdom() {
     },
     ignore: [ 'events', 'entities' ],
     alias: {
+      'domutils': path.join(__dirname, 'dom/domUtils/index.js'),
       'dom-serializer': path.join(__dirname, 'dom/_domSerializer.js'),
       'inherits': path.join(__dirname, 'dom/_stub.js')
     },

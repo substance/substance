@@ -114,6 +114,17 @@ class XNode extends DOMElement {
     return this
   }
 
+  hasAttribute(name) {
+    switch(name) {
+      case 'class':
+        return Boolean(this.classes)
+      case 'style':
+        return Boolean(this.styles)
+      default:
+        return this.attributes.has(name)
+    }
+  }
+
   getAttribute(name) {
     switch(name) {
       case 'class':
