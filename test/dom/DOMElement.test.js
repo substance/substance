@@ -128,4 +128,35 @@ function testDOMElement(impl) {
     t.equal(el.outerHTML, '<foo><link>foo</link></foo>')
     t.end()
   })
+
+  test("find via tagname", function(t) {
+    let el = DOMElement.parseXML('<dummy><foo></foo></dummy>')
+    let foo = el.find('foo')
+    t.notNil(foo, 'Should find a <foo> element')
+    t.end()
+  })
+
+  test("find multiple elements", function(t) {
+    let el = DOMElement.parseXML('<dummy><foo>Bla</foo><foo>Blupp</foo></dummy>')
+    let foos = el.findAll('foo')
+    t.equal(foos.length, 2, 'Should find two <foo> elements')
+    t.equal(foos[0].textContent, 'Bla', '... with correct textContent')
+    t.equal(foos[1].textContent, 'Blupp', '... with correct textContent')
+    t.end()
+  })
+
+  test("find via #id", function(t) {
+    let el = DOMElement.parseXML('<dummy><bla id="foo"></bla></dummy>')
+    let foo = el.find('#foo')
+    t.notNil(foo, 'Should find a #foo element')
+    t.end()
+  })
+
+  test("find via attr", function(t) {
+    let el = DOMElement.parseXML('<dummy><bla data-id="foo"></bla></dummy>')
+    let foo = el.find('[data-id=foo]')
+    t.notNil(foo, 'Should find a element with data-id=foo')
+    t.end()
+  })
+
 }
