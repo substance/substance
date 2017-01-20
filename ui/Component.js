@@ -8,6 +8,7 @@ import forEach from '../util/forEach'
 import isString from '../util/isString'
 import isFunction from '../util/isFunction'
 import uuid from '../util/uuid'
+import EventEmitter from '../util/EventEmitter'
 
 /**
   A light-weight component implementation inspired by
@@ -95,7 +96,7 @@ import uuid from '../util/uuid'
   HelloMessage.mount({name: 'John'}, document.body)
   ```
 */
-class Component {
+class Component extends EventEmitter {
   /**
     Construcutor is only used internally.
 
@@ -104,6 +105,8 @@ class Component {
                               be rendered the first time.
   */
   constructor(parent, props = {}, options = {}) {
+    super()
+
     // TODO: it turned out that the signature is sub-optimal
     // w.r.t. `parent`. Creating a root component allowing for manual dependency injection
     // we could change to `new Component(props, options)`
