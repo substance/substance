@@ -98,19 +98,17 @@ function formatAttribs(el, opts) {
 
   let output = [];
   // Loop through the attributes
-  for (var key in attributes) {
+  attributes.forEach((value, key) => {
     // as 'class' and 'style' are computed dynamically we need to check if there are any values set
     // otherwise this will generate empty attributes
-    if (key === 'class' && el.classes.size === 0) continue
-    if (key === 'style' && el.styles.size === 0) continue
-
-    let value = attributes[key];
+    if (key === 'class' && el.classes.size === 0) return
+    if (key === 'style' && el.styles.size === 0) return
     if (!value && booleanAttributes[key]) {
       output.push(key);
     } else {
       output.push(key + '="' + (opts.decodeEntities ? entities.encodeXML(value) : value) + '"');
     }
-  }
+  });
 
   return output.join(' ')
 }

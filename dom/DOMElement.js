@@ -785,7 +785,7 @@ class DOMElement {
   }
 
   serialize() {
-    return this.outerHTML
+    return this.getOuterHTML()
   }
 
   isInDocument() {
@@ -794,7 +794,7 @@ class DOMElement {
       if (el.isDocumentNode()) {
         return true
       }
-      el = el.parentNode
+      el = el.getParent()
     }
   }
 

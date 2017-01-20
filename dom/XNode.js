@@ -201,9 +201,9 @@ class XNode extends DOMElement {
   // clear old children and append new children
   setInnerHTML(html) {
     if (this.children) {
-      let opts = {}
-      if (this.ownerDocument) opts.ownerDocument = this.ownerDocument
-      else opts.format = 'html'
+      let opts = {
+        ownerDocument: this.getOwnerDocument()
+      }
       let children = parseMarkup(html, opts)
       this.empty()
       children.forEach((child) => {
@@ -214,7 +214,7 @@ class XNode extends DOMElement {
   }
 
   getOuterHTML() {
-    return domSerializer(this)
+    return domSerializer(this, { xmlMode: this.ownerDocument.format === 'xml' })
   }
 
   getTextContent() {
