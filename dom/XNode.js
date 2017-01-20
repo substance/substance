@@ -267,8 +267,7 @@ class XNode extends DOMElement {
   }
 
   getChildNodes() {
-    let childNodes = this.children
-    return childNodes
+    return this.children.slice(0)
   }
 
   getChildren() {
@@ -408,7 +407,7 @@ class XNode extends DOMElement {
       var pos = this.children.indexOf(before)
       if (pos > -1) {
         DomUtils.prepend(before, newChild)
-        child.ownerDocument = this.getOwnerDocument()
+        newChild.ownerDocument = this.getOwnerDocument()
       } else {
         throw new Error('insertBefore(): reference node is not a child of this element.')
       }
@@ -491,8 +490,13 @@ class XNode extends DOMElement {
   }
 
   removeEventListener(eventName, handler) {
-    if (this.eventListeners) {
-      DOMEventListener.findIndex(this.eventListeners, eventName, handler)
+    // console.log('removing event listener', eventName, handler);
+    let listener = null, idx = -1
+    idx = DOMEventListener.findIndex(this.eventListeners, eventName, handler)
+    listener = this.eventListeners[idx]
+    if (idx > -1) {
+      this.eventListeners.splice(idx, 1)
+      listener._el = null
     }
     return this
   }
