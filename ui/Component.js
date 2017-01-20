@@ -103,28 +103,50 @@ class Component {
     @param {Object} props     Properties against which this class must
                               be rendered the first time.
   */
-  constructor(parent, props, el) {
-    // HACK: allowing skipping execution of this ctor
-    if (arguments[0] === 'SKIP') return
+  constructor(parent, props = {}, options = {}) {
+    // TODO: it turned out that the signature is sub-optimal
+    // w.r.t. `parent`. Creating a root component allowing for manual dependency injection
+    // we could change to `new Component(props, options)`
+    // with options `parent` and `context`
+    // Also, the parent-child relation could be inconsistent with the actual elements, which should be checked.
+
+    this.parent = (parent && parent._isComponent) ? parent : null
+
+    // EXPERIMENTAL: used for attaching to existing/pre-rendered element
+    this.el = options.el
+
+    // context from parent (dependency injection) or if given via options
+    // the latter is a rather EXPERIMENTAL feature only used
+    let context = options.context ? options.context : this._getContext() || {}
+    this.context = context
+    Object.freeze(this.context)
+
+    // used for rerendering and can be used by components for incremental rendering
+    // Note: usually it is inherited from the parent. In case of root components
+    // it can be provided via context or options
+    this.renderingEngine = (parent && parent.renderingEngine) || context.renderingEngine || options.renderingEngine || new RenderingEngine()
+
+    // HACK: to allow that ElementComponent and TextComponent can derive from Component
+    // we need to skip the initialization of the rest
+    if (this._SKIP_COMPONENT_INIT) return
 
     this.__id__ = uuid()
 
-    this.parent = parent
-    this.el = el
+    // store for ref'd child components
     this.refs = {}
-
     // HACK: a temporary solution to handle refs owned by an ancestor
     // is to store them here as well, so that we can map virtual components
     // efficiently
     this.__foreignRefs__ = {}
+
+    // action handlers added via `handleAction()` are stored here
     this._actionHandlers = {}
 
-    // context from parent (dependency injection)
-    this.context = this._getContext() || {}
-    Object.freeze(this.context)
     // setting props without triggering willReceiveProps
-    this.props = props || {}
+    this.props = props
     Object.freeze(this.props)
+
+    // initializing state
     this.state = this.getInitialState() || {}
     Object.freeze(this.state)
   }
@@ -301,12 +323,14 @@ class Component {
     if (!el) {
       throw new Error('Element is required.')
     }
-    if (!this.el) {
-      this._render()
-    }
     if (!el._isDOMElement) {
       el = DefaultDOMElement.wrapNativeElement(el)
     }
+    // this makes this component a root component
+    this.parent = null
+    this.el = null
+    this.renderingEngine = new RenderingEngine({ elementFactory: el.getOwnerDocument() })
+    this._render()
     el.appendChild(this.el)
     if (el.isInDocument()) {
       this.triggerDidMount(true)
@@ -352,8 +376,7 @@ class Component {
     }
     this.__isRendering__ = true
     try {
-      var engine = new RenderingEngine()
-      engine._render(this, oldProps, oldState)
+      this.renderingEngine._render(this, oldProps, oldState)
     } finally {
       delete this.__isRendering__
     }
@@ -807,7 +830,7 @@ class Component {
     if (!childEl._isVirtualElement) {
       throw new Error('Invalid argument: "child" must be a VirtualElement.')
     }
-    var child = new RenderingEngine()._renderChild(this, childEl)
+    var child = this.renderingEngine._renderChild(this, childEl)
     this.el.insertAt(pos, child.el)
     _mountChild(this, child)
   }
@@ -932,7 +955,7 @@ Component.mount = function(props, el) {
     el = new DefaultDOMElement.wrapNativeElement(el)
   }
   var ComponentClass = this
-  var comp = new ComponentClass(null, props)
+  let comp = new ComponentClass(null, props)
   comp.mount(el)
   return comp
 }
@@ -986,36 +1009,19 @@ function _unwrapCompStrict(el) {
 
 class ElementComponent extends Component {
 
-  constructor(parent, virtualComp) {
-    super('SKIP')
-
-    if (!parent._isComponent) {
-      throw new Error("Illegal argument: 'parent' must be a Component.")
-    }
-    if (!virtualComp._isVirtualHTMLElement) {
-      throw new Error("Illegal argument: 'virtualComp' must be a VirtualHTMLElement.")
-    }
-    this.parent = parent
-    this.context = this._getContext() || {}
-    Object.freeze(this.context)
+  constructor(parent) {
+    super(parent)
   }
 
 }
 
 ElementComponent.prototype._isElementComponent = true
+ElementComponent.prototype._SKIP_COMPONENT_INIT = true
 
 class TextNodeComponent extends Component {
 
-  constructor(parent, virtualComp) {
-    super('SKIP')
-
-    if (!parent._isComponent) {
-      throw new Error("Illegal argument: 'parent' must be a Component.")
-    }
-    if (!virtualComp._isVirtualTextNode) {
-      throw new Error("Illegal argument: 'virtualComp' must be a VirtualTextNode.")
-    }
-    this.parent = parent
+  constructor(parent) {
+    super(parent)
   }
 
   setTextContent(text) {
@@ -1023,8 +1029,7 @@ class TextNodeComponent extends Component {
       throw new Error('Component must be rendered first.')
     }
     if (this.el.textContent !== text) {
-      var newEl = this.el.createTextNode(text)
-      this.el._replaceNativeEl(newEl.getNativeElement())
+      this.el.textContent = text
     }
   }
 
@@ -1039,6 +1044,8 @@ class TextNodeComponent extends Component {
 }
 
 TextNodeComponent.prototype._isTextNodeComponent = true
+TextNodeComponent.prototype._SKIP_COMPONENT_INIT = true
+
 
 Component.Element = ElementComponent
 Component.TextNode = TextNodeComponent

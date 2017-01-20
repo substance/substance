@@ -80,6 +80,10 @@ class VirtualElement extends DOMElement {
     return this
   }
 
+  isInDocument() {
+    return false
+  }
+
 }
 
 VirtualElement.prototype._isVirtualElement = true

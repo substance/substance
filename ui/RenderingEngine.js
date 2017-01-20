@@ -86,10 +86,15 @@ import Component from './Component'
     implicitly when they are at the right place.
 */
 class RenderingEngine {
+
+  constructor(options = {}) {
+    this.elementFactory = options.elementFactory || DefaultDOMElement.createDocument('html')
+  }
+
   _render(comp, oldProps, oldState) {
     // var t0 = Date.now();
     var vel = _createWrappingVirtualComponent(comp);
-    var state = new RenderingEngine.State();
+    var state = new RenderingEngine.State(this.elementFactory);
     if (oldProps) {
       state.setOldProps(vel, oldProps);
     }
@@ -114,7 +119,7 @@ class RenderingEngine {
   _renderChild(comp, vel) {
     // HACK: to make this work with the rest of the implementation
     // we ingest a fake parent
-    var state = new RenderingEngine.State();
+    var state = new RenderingEngine.State(this.elementFactory);
     vel.parent = { _comp: comp };
     try {
       _capture(state, vel);
@@ -268,7 +273,7 @@ function _render(state, vel) {
   }
   // render the element
   if (!comp.el) {
-    comp.el = _createElement(vel);
+    comp.el = _createElement(state, vel);
     comp.el._comp = comp;
   }
   _updateElement(comp, vel);
@@ -528,14 +533,12 @@ function _isOfSameType(comp, vc) {
   );
 }
 
-function _createElement(vel) {
+function _createElement(state, vel) {
   var el;
-  // TODO: we need a element factory here
-  // this is fine as long we have only one DOMElement implementation per platform
   if (vel._isVirtualTextNode) {
-    el = DefaultDOMElement.createTextNode(vel.text);
+    el = state.elementFactory.createTextNode(vel.text);
   } else {
-    el = DefaultDOMElement.createElement(vel.tagName);
+    el = state.elementFactory.createElement(vel.tagName);
   }
   return el;
 }
@@ -745,7 +748,9 @@ RenderingEngine.createContext = function(comp) {
 
 
 class RenderingState {
-  constructor() {
+
+  constructor(elementFactory) {
+    this.elementFactory = elementFactory
     this.poluted = [];
     this.id = "__"+uuid();
   }
