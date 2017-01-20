@@ -1,3 +1,5 @@
+import DefaultDOMElement from './DOMElement'
+
 /*
   A wrapper for native DOM events when using event delegation via
   `DOMElement.on(eventName, selector, handler)`.
@@ -19,9 +21,9 @@ DelegatedEvent.delegatedHandler = function(listener, top) {
   let context = listener.context
   let selector = listener.options.selector
   return function(event) {
-    let el = event.target
+    let el = DefaultDOMElement.wrap(event.target)
     while(el) {
-      if (matches(el, selector)) {
+      if (el.is(selector)) {
         handler(new DelegatedEvent(context, event.target, event))
         break
       }
