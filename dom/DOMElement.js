@@ -658,6 +658,16 @@ class DOMElement {
   }
 
   /**
+    Get the ownerDocument of this element.
+
+    @abstract
+    @returns {ui/DOMElement} the document element
+  */
+  getOwnerDocument() {
+    throw new Error(NOT_IMPLEMENTED)
+  }
+
+  /**
     Find the first descendant element matching the given CSS selector.
     Note this differs from jQuery.find() that it returns only one element.
 
@@ -779,7 +789,13 @@ class DOMElement {
   }
 
   isInDocument() {
-    return false
+    let el = this
+    while(el) {
+      if (el.isDocumentNode()) {
+        return true
+      }
+      el = el.parentNode
+    }
   }
 
   /**
@@ -907,6 +923,22 @@ class DOMElement {
     return this.getChildNodes()
   }
 
+  get firstChild() {
+    return this.getFirstChild()
+  }
+
+  get lastChild() {
+    return this.getLastChild()
+  }
+
+  get nextSibling() {
+    return this.getNextSibling()
+  }
+
+  get previousSibling() {
+    return this.getPreviousSibling()
+  }
+
   get parentNode() {
     return this.getParent()
   }
@@ -930,5 +962,7 @@ DOMElement.pxStyles = {
   height: true,
   width: true
 }
+
+DOMElement.EMPTY_HTML = '<html><head></head><body></body></html>'
 
 export default DOMElement

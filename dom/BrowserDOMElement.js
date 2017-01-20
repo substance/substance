@@ -310,42 +310,36 @@ class BrowserDOMElement extends DOMElement {
     return BrowserDOMElement.wrapNativeElement(clone)
   }
 
-  _getOwnerDocument() {
-    let doc
-    if (this.isDocumentNode()) {
-      doc = this.el
-    } else {
-      doc = this.el.ownerDocument
-    }
-    return doc
+  createDocument(format) {
+    return BrowserDOMElement.createDocument(format)
   }
 
   createElement(tagName) {
-    let doc = this._getOwnerDocument()
+    let doc = this._getNativeOwnerDocument()
     let el = doc.createElement(tagName)
     return BrowserDOMElement.wrapNativeElement(el)
   }
 
   createTextNode(text) {
-    let doc = this._getOwnerDocument()
+    let doc = this._getNativeOwnerDocument()
     let el = doc.createTextNode(text)
     return BrowserDOMElement.wrapNativeElement(el)
   }
 
   createComment(data) {
-    let doc = this._getOwnerDocument()
+    let doc = this._getNativeOwnerDocument()
     let el = doc.createComment(data)
     return BrowserDOMElement.wrapNativeElement(el)
   }
 
   createProcessingInstruction(name, data) {
-    let doc = this._getOwnerDocument()
+    let doc = this._getNativeOwnerDocument()
     let el = doc.createProcessingInstruction(name, data)
     return BrowserDOMElement.wrapNativeElement(el)
   }
 
   createCDATASection(data) {
-    let doc = this._getOwnerDocument()
+    let doc = this._getNativeOwnerDocument()
     let el = doc.createCDATASection(data)
     return BrowserDOMElement.wrapNativeElement(el)
   }
@@ -378,6 +372,14 @@ class BrowserDOMElement extends DOMElement {
       parent = el.parentNode
     }
     return BrowserDOMElement.wrapNativeElement(el)
+  }
+
+  getOwnerDocument() {
+    return BrowserDOMElement.wrapNativeElement(this._getNativeOwnerDocument())
+  }
+
+  _getNativeOwnerDocument() {
+    return (this.isDocumentNode() ? this.el : this.el.ownerDocument)
   }
 
   find(cssSelector) {
@@ -582,14 +584,30 @@ class BrowserDOMElement extends DOMElement {
     return outerHeight
   }
 
+  get children() {
+    return this.getChildren()
+  }
+
+  get ownerDocument() {
+    return this.getOwnerDocument()
+  }
+
 }
 
 BrowserDOMElement.prototype._isBrowserDOMElement = true
 
-BrowserDOMElement.createTextNode = function(text) {
-  return BrowserDOMElement.wrapNativeElement(
-    window.document.createTextNode(text)
-  )
+// TODO: flesh out how options should look like (e.g. XML namespaceURI etc.)
+BrowserDOMElement.createDocument = function(format) {
+  let doc
+  if (format === 'xml') {
+    // HACK: didn't find a way to create an empty XML doc without a root element
+    doc = window.document.implementation.createDocument(null, 'dummy')
+    // remove the
+    doc.removeChild(doc.firstChild)
+  } else {
+    doc = (new window.DOMParser()).parseFromString(DOMElement.EMPTY_HTML, 'text/html')
+  }
+  return BrowserDOMElement.wrapNativeElement(doc)
 }
 
 BrowserDOMElement.createElement = function(tagName) {
@@ -598,17 +616,17 @@ BrowserDOMElement.createElement = function(tagName) {
   )
 }
 
+BrowserDOMElement.createTextNode = function(text) {
+  return BrowserDOMElement.wrapNativeElement(
+    window.document.createTextNode(text)
+  )
+}
+
 BrowserDOMElement.parseMarkup = function(str, format, isFullDoc) {
   let nativeEls = []
   let doc
   if (!str) {
-    // Create an empty XML document
-    if (format === 'xml') {
-      doc = (new window.DOMParser()).parseFromString('<dummy/>', 'text/xml')
-    } else {
-      doc = (new window.DOMParser()).parseFromString('<html></html>', 'text/html')
-    }
-    return new BrowserDOMElement(doc)
+    return BrowserDOMElement.createDocument(format)
   } else {
     let parser = new window.DOMParser()
     if (format === 'html') {

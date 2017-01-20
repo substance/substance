@@ -17,7 +17,10 @@ class XNode extends DOMElement {
     this.type = type
     if (!type) throw new Error("'type' is mandatory")
 
-    if (args.ownerDocument) this.ownerDocument = args.ownerDocument
+    this.ownerDocument = args.ownerDocument
+    if (type !== 'document' && !this.ownerDocument) {
+      throw new Error("'ownerDocument' is mandatory")
+    }
 
     // NOTE: there are some properties which are named so that this
     // can be used together with htmlparser2 and css-select
@@ -52,6 +55,7 @@ class XNode extends DOMElement {
       }
       case 'document': {
         this.format = args.format
+        this.children = args.children || []
         break
       }
       default:
@@ -63,6 +67,10 @@ class XNode extends DOMElement {
         this.eventListeners = []
         this.children = args.children || []
     }
+  }
+
+  getNativeElement() {
+    return this
   }
 
   clone(deep) {
@@ -313,6 +321,10 @@ class XNode extends DOMElement {
     return el
   }
 
+  getOwnerDocument() {
+    return (this.type === 'document') ? this : this.ownerDocument
+  }
+
   isTextNode() {
     return this.type === "text"
   }
@@ -333,24 +345,28 @@ class XNode extends DOMElement {
     return this.type === "component"
   }
 
+  createDocument(format) {
+    return XNode.createDocument(format)
+  }
+
   createElement(tagName) {
-    return new XNode(ElementType.Tag, { name: tagName, ownerDocument: this.ownerDocument })
+    return new XNode(ElementType.Tag, { name: tagName, ownerDocument: this.getOwnerDocument() })
   }
 
   createTextNode(text) {
-    return new XNode(ElementType.Text, { data: text, ownerDocument: this.ownerDocument })
+    return new XNode(ElementType.Text, { data: text, ownerDocument: this.getOwnerDocument() })
   }
 
   createComment(data) {
-    return new XNode(ElementType.Comment, { data: data, ownerDocument: this.ownerDocument })
+    return new XNode(ElementType.Comment, { data: data, ownerDocument: this.getOwnerDocument() })
   }
 
   createProcessingInstruction(name, data) {
-    return new XNode(ElementType.Directive, { name: name, data: data, ownerDocument: this.ownerDocument })
+    return new XNode(ElementType.Directive, { name: name, data: data, ownerDocument: this.getOwnerDocument() })
   }
 
   createCDATASection(data) {
-    return new XNode(ElementType.CDATA, { data: data, ownerDocument: this.ownerDocument })
+    return new XNode(ElementType.CDATA, { data: data, ownerDocument: this.getOwnerDocument() })
   }
 
   appendChild(child) {
@@ -361,6 +377,12 @@ class XNode extends DOMElement {
       this._onAttach(child)
     }
     return this
+  }
+
+  removeChild(child) {
+    if (child.parentNode === this) {
+      child.remove()
+    }
   }
 
   insertAt(pos, child) {
@@ -482,13 +504,16 @@ class XNode extends DOMElement {
   }
 
   _propagateEvent(event) {
-    let listener = this.eventListeners.find((l) => {
-      return l.eventName === event._name
-    })
-    if (listener) listener.handler(event)
-    if (event.stopped) return
-    let p = this.parentNode
-    if (p) p._propagateEvent(event)
+    let listeners = this.eventListeners
+    if (listeners) {
+      let listener = listeners.find((l) => {
+        return l.eventName === event._name
+      })
+      if (listener) listener.handler(event)
+      if (event.stopped) return
+      let p = this.parentNode
+      if (p) p._propagateEvent(event)
+    }
   }
 
   removeAllEventListeners() {
@@ -567,11 +592,12 @@ class XNode extends DOMElement {
 
 XNode.prototype._isXNode = true
 
-XNode.createTextNode = function(text, ownerDocument) {
-  return new XNode(ElementType.Text, {
-    data: text,
-    ownerDocument: ownerDocument
-  })
+XNode.createDocument = function(format) {
+  if (format === 'xml') {
+    return new XNode('document', { format: format })
+  } else {
+    return XNode.parseMarkup(DOMElement.EMPTY_HTML, 'html')
+  }
 }
 
 XNode.createElement = function(tagName, ownerDocument) {
@@ -581,17 +607,55 @@ XNode.createElement = function(tagName, ownerDocument) {
   })
 }
 
-XNode.parseMarkup = function(str, format) {
-  let elements = []
+XNode.createTextNode = function(text, ownerDocument) {
+  return new XNode(ElementType.Text, {
+    data: text,
+    ownerDocument: ownerDocument
+  })
+}
+
+XNode.parseMarkup = function(str, format, isFullDoc) {
   if (!str) {
-    return new XNode('document', { format: format })
-  } else {
-    elements = parseMarkup(str, { format: format })
+    return XNode.createDocument(format)
   }
-  if (elements.length === 1) {
-    return elements[0]
+  let doc
+  if (format === 'html') {
+    isFullDoc = (str.search(/<\s*html/i)>=0)
+    doc = parseMarkup(str, { format: format })
+  } else if (format === 'xml') {
+    doc = parseMarkup(str, { format: format })
+  }
+  if (doc) {
+    if (format === 'html') {
+      if (isFullDoc) {
+        return doc.find('html')
+      } else {
+        // NOTE: for partials we create a consistent HTML structure and
+        // append the parsed elements to body
+        // TODO: this is maybe not 100% correct for all inputs (e.g. '<head></head>')
+        let childNodes = doc.childNodes.slice(0)
+        doc.empty()
+        doc.appendChild(doc.createElement('head'))
+        doc.appendChild(doc.createElement('body').append(childNodes))
+        return _manyOrOne(childNodes)
+      }
+    } else if (format === 'xml') {
+      if (isFullDoc) {
+        return doc
+      } else {
+        return _manyOrOne(doc.childNodes)
+      }
+    }
   } else {
-    return elements
+    throw new Error('Could not parse DOM string.')
+  }
+
+  function _manyOrOne(elements) {
+    if (elements.length === 1) {
+      return elements[0]
+    } else {
+      return elements
+    }
   }
 }
 

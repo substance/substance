@@ -9,12 +9,16 @@ const DefaultDOMElementClass = inBrowser ? BrowserDOMElement : XNode
 */
 let DefaultDOMElement = {}
 
-DefaultDOMElement.createTextNode = function(text) {
-  return DefaultDOMElementClass.createTextNode(text)
+DefaultDOMElement.createDocument = function(format) {
+  return DefaultDOMElementClass.createDocument(format)
 }
 
 DefaultDOMElement.createElement = function(tagName) {
   return DefaultDOMElementClass.createElement(tagName)
+}
+
+DefaultDOMElement.createTextNode = function(text) {
+  return DefaultDOMElementClass.createTextNode(text)
 }
 
 /*
@@ -41,8 +45,12 @@ DefaultDOMElement.parseXML = function(xml, fullDoc) {
   return DefaultDOMElementClass.parseXML(xml, fullDoc)
 }
 
+DefaultDOMElement.wrap =
 DefaultDOMElement.wrapNativeElement = function(el) {
-  return DefaultDOMElementClass.wrapNativeElement(el)
+  if (!el) throw new Error('Illegal argument')
+  // in Browser we can use both implementations
+  if (el._isXNode) return el
+  else return DefaultDOMElementClass.wrapNativeElement(el)
 }
 
 DefaultDOMElement.isReverse = function(anchorNode, anchorOffset, focusNode, focusOffset) {
