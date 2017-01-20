@@ -31,7 +31,7 @@ function ComponentTests(debug, memory) {
         substanceGlobals.DEBUG_RENDERING = Boolean(debug)
         t._document = memory ? XNode.createDocument('html') : DefaultDOMElement.createDocument('html')
         t._renderingEngine = new RenderingEngine({ elementFactory: t._document })
-        TestComponent.renderingEngine = t._renderingEngine
+        TestComponent.defaultRenderingEngine = t._renderingEngine
       }
     })
 
