@@ -16,7 +16,7 @@ export default function parseMarkup(markup, options) {
   let parserOptions = {
     xmlMode : (format === 'xml')
   }
-  let handler = new XDomHandler(format)
+  let handler = new XDomHandler({ format })
   let parser = new Parser(handler, parserOptions)
   parser.end(markup)
   return handler.document

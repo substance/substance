@@ -55,6 +55,7 @@ class XNode extends DOMElement {
       }
       case 'document': {
         this.format = args.format
+        if (!this.format) throw new Error("'format' is mandatory.")
         this.children = args.children || []
         break
       }
@@ -201,12 +202,11 @@ class XNode extends DOMElement {
   // clear old children and append new children
   setInnerHTML(html) {
     if (this.children) {
-      let opts = {
+      let _doc = parseMarkup(html, {
         ownerDocument: this.getOwnerDocument()
-      }
-      let children = parseMarkup(html, opts)
+      })
       this.empty()
-      children.forEach((child) => {
+      _doc.children.forEach((child) => {
         this.appendChild(child)
       })
     }
@@ -374,6 +374,7 @@ class XNode extends DOMElement {
       child = this._normalizeChild(child)
       if (!child) return this
       DomUtils.appendChild(this, child)
+      child.ownerDocument = this.getOwnerDocument()
       this._onAttach(child)
     }
     return this
@@ -395,6 +396,7 @@ class XNode extends DOMElement {
         this.appendChild(child)
       } else {
         DomUtils.prepend(children[pos], child)
+        child.ownerDocument = this.getOwnerDocument()
       }
       this._onAttach(child)
     }
@@ -406,6 +408,7 @@ class XNode extends DOMElement {
       var pos = this.children.indexOf(before)
       if (pos > -1) {
         DomUtils.prepend(before, newChild)
+        child.ownerDocument = this.getOwnerDocument()
       } else {
         throw new Error('insertBefore(): reference node is not a child of this element.')
       }
@@ -456,6 +459,7 @@ class XNode extends DOMElement {
     let parent = this.parent
     newEl = this._normalizeChild(newEl)
     DomUtils.replaceElement(this, newEl)
+    newEl.ownerDocument = this.getOwnerDocument()
     if (parent) {
       parent._onDetach(newEl)
       parent._onAttach(newEl)
