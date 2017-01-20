@@ -125,6 +125,8 @@ function _runTestBrowser() {
   })
 }
 
+// TODO: this should go into a helper provided by substance-test
+// otherwise we need to write this again and again
 function _runTestNode() {
   b.custom('Running nodejs tests...', {
     execute: function() {
