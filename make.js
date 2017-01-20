@@ -235,7 +235,7 @@ b.task('test:browser:coverage', ['test:clean', 'test:assets'], function() {
   _testBrowser(true, true)
 })
 
-b.task('test:node', _testNode)
+b.task('test:node', ['test:clean', 'test:assets'], _testNode)
 
 b.task('run:test:browser', ['test:browser'], _runTestBrowser)
 
