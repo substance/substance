@@ -10,15 +10,15 @@ const DefaultDOMElementClass = inBrowser ? BrowserDOMElement : XNode
 let DefaultDOMElement = {}
 
 DefaultDOMElement.createDocument = function(format) {
-  return DefaultDOMElementClass.createDocument(format)
+  return DefaultDOMElement._impl.createDocument(format)
 }
 
 DefaultDOMElement.createElement = function(tagName) {
-  return DefaultDOMElementClass.createElement(tagName)
+  return DefaultDOMElement._impl.createElement(tagName)
 }
 
 DefaultDOMElement.createTextNode = function(text) {
-  return DefaultDOMElementClass.createTextNode(text)
+  return DefaultDOMElement._impl.createTextNode(text)
 }
 
 /*
@@ -26,7 +26,7 @@ DefaultDOMElement.createTextNode = function(text) {
   the DOMElement's eventlistener API.
 */
 DefaultDOMElement.getBrowserWindow = function() {
-  return DefaultDOMElementClass.getBrowserWindow()
+  return DefaultDOMElement._impl.getBrowserWindow()
 }
 
 /*
@@ -34,7 +34,7 @@ DefaultDOMElement.getBrowserWindow = function() {
   @returns {DOMElement|DOMElement[]}
 */
 DefaultDOMElement.parseHTML = function(html) {
-  return DefaultDOMElementClass.parseHTML(html)
+  return DefaultDOMElement._impl.parseHTML(html)
 }
 
 /*
@@ -42,7 +42,7 @@ DefaultDOMElement.parseHTML = function(html) {
   @returns {DOMElement|DOMElement[]}
 */
 DefaultDOMElement.parseXML = function(xml, fullDoc) {
-  return DefaultDOMElementClass.parseXML(xml, fullDoc)
+  return DefaultDOMElement._impl.parseXML(xml, fullDoc)
 }
 
 DefaultDOMElement.wrap =
@@ -50,11 +50,21 @@ DefaultDOMElement.wrapNativeElement = function(el) {
   if (!el) throw new Error('Illegal argument')
   // in Browser we can use both implementations
   if (el._isXNode) return el
-  else return DefaultDOMElementClass.wrapNativeElement(el)
+  else return DefaultDOMElement._impl.wrapNativeElement(el)
 }
 
 DefaultDOMElement.isReverse = function(anchorNode, anchorOffset, focusNode, focusOffset) {
-  return DefaultDOMElementClass.isReverse(anchorNode, anchorOffset, focusNode, focusOffset)
+  return DefaultDOMElement._impl.isReverse(anchorNode, anchorOffset, focusNode, focusOffset)
+}
+
+DefaultDOMElement._impl = DefaultDOMElementClass
+
+DefaultDOMElement._reset = function() {
+  DefaultDOMElement._impl = DefaultDOMElementClass
+}
+
+DefaultDOMElement._useXNode = function() {
+  DefaultDOMElement._impl = XNode
 }
 
 export default DefaultDOMElement

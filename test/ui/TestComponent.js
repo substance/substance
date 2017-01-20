@@ -23,8 +23,7 @@ class TestComponent extends Component {
 }
 
 TestComponent.create = function(renderFunc, props) {
-  const renderingEngine = TestComponent.defaultRenderingEngine
-  const comp = new TestComponent(null, props, { renderingEngine })
+  const comp = new TestComponent(null, props)
   if (renderFunc) {
     comp.render = renderFunc
   }
@@ -48,7 +47,5 @@ class SimpleComponent extends TestComponent {
 }
 
 TestComponent.Simple = SimpleComponent
-
-TestComponent.defaultRenderingEngine = new RenderingEngine()
 
 export default TestComponent

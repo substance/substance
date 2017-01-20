@@ -29,9 +29,11 @@ function ComponentTests(debug, memory) {
     .withOptions({
       before: function(t) {
         substanceGlobals.DEBUG_RENDERING = Boolean(debug)
-        t._document = memory ? XNode.createDocument('html') : DefaultDOMElement.createDocument('html')
-        t._renderingEngine = new RenderingEngine({ elementFactory: t._document })
-        TestComponent.defaultRenderingEngine = t._renderingEngine
+        if (memory) DefaultDOMElement._useXNode()
+        t._document = DefaultDOMElement.createDocument('html')
+      },
+      after: function(t) {
+        DefaultDOMElement._reset()
       }
     })
 
@@ -1084,7 +1086,7 @@ function ComponentTests(debug, memory) {
 
   /* ##################### Integration tests / Issues ##########################*/
 
-  test('Preserve components when ref matches, and rerender when props changed', function(t) {
+  test('Preserve components when ref matches and rerender when props changed', function(t) {
 
     class ItemComponent extends TestComponent {
       shouldRerender(nextProps) {
@@ -1261,7 +1263,7 @@ function ComponentTests(debug, memory) {
     t.equal(comp.el.textContent, 'XYZ', "... and content should be correct.")
     comp.setProps({ nested: true })
     t.equal(comp.refs.foo.getParent().getParent(), comp, "Then 'foo' should be grand-child.")
-    t.equal(comp.el.textContent, 'XYZ', "... and content should be complete.")
+    t.equal(comp.el.textContent, 'XYZ', "... and content should be correct.")
     comp.setProps({})
     t.equal(comp.refs.foo.getParent(), comp, "At last 'foo' should be direct child again.")
     t.equal(comp.el.textContent, 'XYZ', "... and content should be correct.")
