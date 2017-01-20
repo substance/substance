@@ -117,15 +117,15 @@ function testDOMElement(impl) {
     t.end()
   })
 
-  // test.UI("setTagName on XML should create XML elements", function(t) {
-  //   var el = DOMElement.parseXML('<dummy></dummy>')
-  //   // this call is brutal as a new element needs to be created
-  //   // and all the content and attributes be copied over
-  //   el.setTagName('foo')
-  //   t.equal(el.getNativeElement().ownerDocument.contentType, 'application/xml', 'Element should still be an XML element')
-  //   el.setInnerHTML('<link>foo</link>')
-  //   // when using an HTML element <link> will get exported as self-closing
-  //   t.equal(el.outerHTML, '<foo><link>foo</link></foo>')
-  //   t.end()
-  // })
+  test("setTagName on XML should create XML elements", function(t) {
+    var el = DOMElement.parseXML('<dummy></dummy>')
+    // this call is brutal as a new element needs to be created
+    // and all the content and attributes be copied over
+    el.setTagName('foo')
+    t.equal(el.getNativeElement().ownerDocument.contentType, 'application/xml', 'Element should still be an XML element')
+    el.setInnerHTML('<link>foo</link>')
+    // when using an HTML element <link> will get exported as self-closing
+    t.equal(el.outerHTML, '<foo><link>foo</link></foo>')
+    t.end()
+  })
 }

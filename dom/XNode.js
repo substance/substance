@@ -54,9 +54,20 @@ class XNode extends DOMElement {
         break
       }
       case 'document': {
-        this.format = args.format
-        if (!this.format) throw new Error("'format' is mandatory.")
+        let format = args.format
+        this.format = format
+        if (!format) throw new Error("'format' is mandatory.")
         this.children = args.children || []
+        switch(format) {
+          case 'xml':
+            this.contentType = 'application/xml'
+            break
+          case 'html':
+            this.contentType = 'text/html'
+            break
+          default:
+            throw new Error('Unsupported format ' + format)
+        }
         break
       }
       default:
