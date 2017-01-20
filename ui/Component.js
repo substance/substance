@@ -1,11 +1,14 @@
-import { extend, forEach, isString, isFunction } from 'lodash-es'
-import EventEmitter from '../util/EventEmitter'
 import RenderingEngine from './RenderingEngine'
 import VirtualElement from './VirtualElement'
-import DOMElement from './DOMElement'
-import DefaultDOMElement from './DefaultDOMElement'
+import DOMElement from '../dom/DOMElement'
+import DefaultDOMElement from '../dom/DefaultDOMElement'
 import inBrowser from '../util/inBrowser'
+import extend from '../util/extend'
+import forEach from '../util/forEach'
+import isString from '../util/isString'
+import isFunction from '../util/isFunction'
 import uuid from '../util/uuid'
+import EventEmitter from '../util/EventEmitter'
 
 /**
   A light-weight component implementation inspired by
@@ -93,7 +96,7 @@ import uuid from '../util/uuid'
   HelloMessage.mount({name: 'John'}, document.body)
   ```
 */
-class Component extends DOMElement.Delegator {
+class Component extends EventEmitter {
   /**
     Construcutor is only used internally.
 
@@ -101,30 +104,52 @@ class Component extends DOMElement.Delegator {
     @param {Object} props     Properties against which this class must
                               be rendered the first time.
   */
-  constructor(parent, props, el) {
+  constructor(parent, props = {}, options = {}) {
     super()
 
-    // HACK: allowing skipping execution of this ctor
-    if (arguments[0] === 'SKIP') return
+    // TODO: it turned out that the signature is sub-optimal
+    // w.r.t. `parent`. Creating a root component allowing for manual dependency injection
+    // we could change to `new Component(props, options)`
+    // with options `parent` and `context`
+    // Also, the parent-child relation could be inconsistent with the actual elements, which should be checked.
+
+    this.parent = (parent && parent._isComponent) ? parent : null
+
+    // EXPERIMENTAL: used for attaching to existing/pre-rendered element
+    this.el = options.el
+
+    // context from parent (dependency injection) or if given via options
+    // the latter is a rather EXPERIMENTAL feature only used
+    let context = options.context ? options.context : this._getContext() || {}
+    this.context = context
+    Object.freeze(this.context)
+
+    // used for rerendering and can be used by components for incremental rendering
+    // Note: usually it is inherited from the parent. In case of root components
+    // it can be provided via context or options
+    this.renderingEngine = (parent && parent.renderingEngine) || context.renderingEngine || options.renderingEngine || new RenderingEngine()
+
+    // HACK: to allow that ElementComponent and TextComponent can derive from Component
+    // we need to skip the initialization of the rest
+    if (this._SKIP_COMPONENT_INIT) return
 
     this.__id__ = uuid()
 
-    this.parent = parent
-    this.el = el
+    // store for ref'd child components
     this.refs = {}
-
     // HACK: a temporary solution to handle refs owned by an ancestor
     // is to store them here as well, so that we can map virtual components
     // efficiently
     this.__foreignRefs__ = {}
+
+    // action handlers added via `handleAction()` are stored here
     this._actionHandlers = {}
 
-    // context from parent (dependency injection)
-    this.context = this._getContext() || {}
-    Object.freeze(this.context)
     // setting props without triggering willReceiveProps
-    this.props = props || {}
+    this.props = props
     Object.freeze(this.props)
+
+    // initializing state
     this.state = this.getInitialState() || {}
     Object.freeze(this.state)
   }
@@ -278,7 +303,7 @@ class Component extends DOMElement.Delegator {
     Every Component should override this method.
 
     @param {Function} $$ method to create components
-    @return {VirtualNode} VirtualNode created using {@param $$}
+    @return {VirtualElement} VirtualElement created using {@param $$}
   */
   render($$) {
     /* istanbul ignore next */
@@ -301,12 +326,14 @@ class Component extends DOMElement.Delegator {
     if (!el) {
       throw new Error('Element is required.')
     }
-    if (!this.el) {
-      this._render()
-    }
     if (!el._isDOMElement) {
       el = DefaultDOMElement.wrapNativeElement(el)
     }
+    // this makes this component a root component
+    this.parent = null
+    this.el = null
+    this.renderingEngine = new RenderingEngine({ elementFactory: el.getOwnerDocument() })
+    this._render()
     el.appendChild(this.el)
     if (el.isInDocument()) {
       this.triggerDidMount(true)
@@ -352,8 +379,7 @@ class Component extends DOMElement.Delegator {
     }
     this.__isRendering__ = true
     try {
-      var engine = new RenderingEngine()
-      engine._render(this, oldProps, oldState)
+      this.renderingEngine._render(this, oldProps, oldState)
     } finally {
       delete this.__isRendering__
     }
@@ -656,6 +682,117 @@ class Component extends DOMElement.Delegator {
   willReceiveProps(newProps) { // eslint-disable-line
   }
 
+  getTextContent() {
+    if (this.el) {
+      return this.el.textContent
+    }
+  }
+
+  get textContent() {
+    return this.getTextContent()
+  }
+
+  getInnerHTML() {
+    if (this.el) {
+      return this.el.getInnerHTML()
+    }
+  }
+
+  get innerHTML() {
+    return this.getInnerHTML()
+  }
+
+  getOuterHTML() {
+    if (this.el) {
+      return this.el.getOuterHTML()
+    }
+  }
+
+  get outerHTML() {
+    return this.getOuterHTML()
+  }
+
+  getAttribute(name) {
+    if (this.el) {
+      return this.el.getAttribute(name)
+    }
+  }
+
+  setAttribute(name, val) {
+    if (this.el) {
+      this.el.setAttribute(name, val)
+    }
+    return this
+  }
+
+  getProperty(name) {
+    if (this.el) {
+      return this.el.getProperty(name)
+    }
+  }
+
+  setProperty(name, val) {
+    if (this.el) {
+      this.el.setProperty(name, val)
+    }
+    return this
+  }
+
+  hasClass(name) {
+    if (this.el) {
+      return this.el.hasClass(name)
+    }
+  }
+
+  addClass(name) {
+    if (this.el) {
+      this.el.addClass(name)
+    }
+    return this
+  }
+
+  removeClass(name) {
+    if (this.el) {
+      this.el.removeClass(name)
+    }
+    return this
+  }
+
+  getStyle(name) {
+    if (this.el) {
+      return this.el.getStyle(name)
+    }
+  }
+
+  setStyle(name, val) {
+    if (this.el) {
+      return this.el.setStyle(name, val)
+    }
+    return this
+  }
+
+  getValue() {
+    if (this.el) {
+      return this.el.getValue()
+    }
+  }
+
+  setValue(val) {
+    if (this.el) {
+      this.el.setValue(val)
+    }
+    return this
+  }
+
+  getChildCount() {
+    if (!this.el) return 0
+    return this.el.getChildCount()
+  }
+
+  get childNodes() {
+    return this.getChildNodes()
+  }
+
   getChildNodes() {
     if (!this.el) return []
     var childNodes = this.el.getChildNodes()
@@ -696,7 +833,7 @@ class Component extends DOMElement.Delegator {
     if (!childEl._isVirtualElement) {
       throw new Error('Invalid argument: "child" must be a VirtualElement.')
     }
-    var child = new RenderingEngine()._renderChild(this, childEl)
+    var child = this.renderingEngine._renderChild(this, childEl)
     this.el.insertAt(pos, child.el)
     _mountChild(this, child)
   }
@@ -771,13 +908,27 @@ class Component extends DOMElement.Delegator {
     throw new Error("Not supported.")
   }
 
+  click() {
+    if (this.el) {
+      this.el.click()
+    }
+  }
+
 }
 
 Component.prototype._isComponent = true
 
-EventEmitter.mixin(Component)
+Component.prototype.attr = DOMElement.prototype.attr
 
-DOMElement._defineProperties(Component, DOMElement._propertyNames)
+Component.prototype.htmlProp = DOMElement.prototype.htmlProp
+
+Component.prototype.val = DOMElement.prototype.val
+
+Component.prototype.css = DOMElement.prototype.css
+
+Component.prototype.text = DOMElement.prototype.text
+
+Component.prototype.append = DOMElement.prototype.append
 
 Component.unwrap = _unwrapComp
 
@@ -807,20 +958,10 @@ Component.mount = function(props, el) {
     el = new DefaultDOMElement.wrapNativeElement(el)
   }
   var ComponentClass = this
-  var comp = new ComponentClass(null, props)
+  let comp = new ComponentClass(null, props)
   comp.mount(el)
   return comp
 }
-
-Object.defineProperty(Component, '$$', {
-  get: function() {
-    throw new Error([
-      "With Substance Beta 4 we introduced a breaking change.",
-      "We needed to turn the former static Component.$$ into a contextualized implementation, which is now served via Component.render($$).",
-      "FIX: change your signature of 'this.render()' in all your Components to 'this.render($$)"
-    ].join("\n"))
-  }
-})
 
 Component.getComponentForDOMElement = function(el) {
   return _unwrapComp(el)
@@ -871,36 +1012,19 @@ function _unwrapCompStrict(el) {
 
 class ElementComponent extends Component {
 
-  constructor(parent, virtualComp) {
-    super('SKIP')
-
-    if (!parent._isComponent) {
-      throw new Error("Illegal argument: 'parent' must be a Component.")
-    }
-    if (!virtualComp._isVirtualHTMLElement) {
-      throw new Error("Illegal argument: 'virtualComp' must be a VirtualHTMLElement.")
-    }
-    this.parent = parent
-    this.context = this._getContext() || {}
-    Object.freeze(this.context)
+  constructor(parent) {
+    super(parent)
   }
 
 }
 
 ElementComponent.prototype._isElementComponent = true
+ElementComponent.prototype._SKIP_COMPONENT_INIT = true
 
 class TextNodeComponent extends Component {
 
-  constructor(parent, virtualComp) {
-    super('SKIP')
-
-    if (!parent._isComponent) {
-      throw new Error("Illegal argument: 'parent' must be a Component.")
-    }
-    if (!virtualComp._isVirtualTextNode) {
-      throw new Error("Illegal argument: 'virtualComp' must be a VirtualTextNode.")
-    }
-    this.parent = parent
+  constructor(parent) {
+    super(parent)
   }
 
   setTextContent(text) {
@@ -908,8 +1032,7 @@ class TextNodeComponent extends Component {
       throw new Error('Component must be rendered first.')
     }
     if (this.el.textContent !== text) {
-      var newEl = this.el.createTextNode(text)
-      this.el._replaceNativeEl(newEl.getNativeElement())
+      this.el.textContent = text
     }
   }
 
@@ -924,6 +1047,8 @@ class TextNodeComponent extends Component {
 }
 
 TextNodeComponent.prototype._isTextNodeComponent = true
+TextNodeComponent.prototype._SKIP_COMPONENT_INIT = true
+
 
 Component.Element = ElementComponent
 Component.TextNode = TextNodeComponent

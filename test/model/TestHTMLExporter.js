@@ -4,19 +4,18 @@ const converters = TestHTMLImporter.converters
 
 class TestHTMLExporter extends HTMLExporter {
 
-  constructor() {
-    super({
+  constructor(config) {
+    super(Object.assign({
       converters: converters
-    })
+    }, config))
   }
 
-  convertDocument(doc, htmlEl) {
-    var bodyEl = htmlEl.find('body')
-    var body = doc.get('body')
-    bodyEl.append(
-      this.convertContainer(body)
+  convertDocument(doc) {
+    let el = this.createElement('div')
+    el.append(
+      this.convertContainer(doc.get('body'))
     )
-    return htmlEl
+    return el
   }
 
 }

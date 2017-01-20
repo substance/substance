@@ -4,7 +4,7 @@ import EditorSession from '../../model/EditorSession'
 import Configurator from '../../util/Configurator'
 // import ComponentRegistry from '../../ui/ComponentRegistry'
 import Clipboard from '../../ui/Clipboard'
-import DefaultDOMElement from '../../ui/DefaultDOMElement'
+import DefaultDOMElement from '../../dom/DefaultDOMElement'
 import Registry from '../../util/Registry'
 
 import fixture from '../fixtures/createTestArticle'

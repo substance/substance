@@ -1,16 +1,17 @@
+import isEqual from '../../util/isEqual'
 import isString from '../../util/isString'
-import { isEqual, cloneDeep } from 'lodash-es'
-import DataObject from './DataObject'
+import cloneDeep from '../../util/cloneDeep'
+import PathObject from '../../util/PathObject'
 import TextOperation from './TextOperation'
 import ArrayOperation from './ArrayOperation'
 import CoordinateOperation from './CoordinateOperation'
 import Conflict from './Conflict'
 
-var NOP = "NOP"
-var CREATE = "create"
-var DELETE = 'delete'
-var UPDATE = 'update'
-var SET = 'set'
+const NOP = "NOP"
+const CREATE = "create"
+const DELETE = 'delete'
+const UPDATE = 'update'
+const SET = 'set'
 
 class ObjectOperation {
 
@@ -62,10 +63,10 @@ class ObjectOperation {
   apply(obj) {
     if (this.type === NOP) return obj
     var adapter
-    if (obj._isDataObject) {
+    if (obj._isPathObject) {
       adapter = obj
     } else {
-      adapter = new DataObject(obj)
+      adapter = new PathObject(obj)
     }
     if (this.type === CREATE) {
       adapter.set(this.path, cloneDeep(this.val))
@@ -234,27 +235,27 @@ ObjectOperation.prototype._isObjectOperation = true
 
 /* Low level implementation */
 
-var hasConflict = function(a, b) {
+function hasConflict(a, b) {
   if (a.type === NOP || b.type === NOP) return false
   return isEqual(a.path, b.path)
 }
 
-var transform_delete_delete = function(a, b) {
+function transform_delete_delete(a, b) {
   // both operations have the same effect.
   // the transformed operations are turned into NOPs
   a.type = NOP
   b.type = NOP
 }
 
-var transform_create_create = function() {
+function transform_create_create() {
   throw new Error("Can not transform two concurring creates of the same property")
 }
 
-var transform_delete_create = function() {
+function transform_delete_create() {
   throw new Error('Illegal state: can not create and delete a value at the same time.')
 }
 
-var transform_delete_update = function(a, b, flipped) {
+function transform_delete_update(a, b, flipped) {
   if (a.type !== DELETE) {
     return transform_delete_update(b, a, true)
   }
@@ -285,12 +286,12 @@ var transform_delete_update = function(a, b, flipped) {
   }
 }
 
-var transform_create_update = function() {
+function transform_create_update() {
   // it is not possible to reasonably transform this.
   throw new Error("Can not transform a concurring create and update of the same property")
 }
 
-var transform_update_update = function(a, b) {
+function transform_update_update(a, b) {
   // Note: this is a conflict the user should know about
   var op_a, op_b, t
   switch(b.propertyType) {
@@ -316,11 +317,11 @@ var transform_update_update = function(a, b) {
   b.diff = t[1]
 }
 
-var transform_create_set = function() {
+function transform_create_set() {
   throw new Error('Illegal state: can not create and set a value at the same time.')
 }
 
-var transform_delete_set = function(a, b, flipped) {
+function transform_delete_set(a, b, flipped) {
   if (a.type !== DELETE) return transform_delete_set(b, a, true)
   if (!flipped) {
     a.type = NOP
@@ -332,43 +333,49 @@ var transform_delete_set = function(a, b, flipped) {
   }
 }
 
-var transform_update_set = function() {
+function transform_update_set() {
   throw new Error("Unresolvable conflict: update + set.")
 }
 
-var transform_set_set = function(a, b) {
+function transform_set_set(a, b) {
   a.type = NOP
   b.original = a.val
 }
 
-var _NOP = 0
-var _CREATE = 1
-var _DELETE = 2
-var _UPDATE = 4
-var _SET = 8
+const _NOP = 0
+const _CREATE = 1
+const _DELETE = 2
+const _UPDATE = 4
+const _SET = 8
 
-var CODE = {}
-CODE[NOP] =_NOP
-CODE[CREATE] = _CREATE
-CODE[DELETE] = _DELETE
-CODE[UPDATE] = _UPDATE
-CODE[SET] = _SET
+const CODE = (() => {
+  const c = {}
+  c[NOP] =_NOP
+  c[CREATE] = _CREATE
+  c[DELETE] = _DELETE
+  c[UPDATE] = _UPDATE
+  c[SET] = _SET
+  return c
+})()
 
-/* eslint-disable no-multi-spaces */
-var __transform__ = []
-__transform__[_DELETE | _DELETE] = transform_delete_delete
-__transform__[_DELETE | _CREATE] = transform_delete_create
-__transform__[_DELETE | _UPDATE] = transform_delete_update
-__transform__[_CREATE | _CREATE] = transform_create_create
-__transform__[_CREATE | _UPDATE] = transform_create_update
-__transform__[_UPDATE | _UPDATE] = transform_update_update
-__transform__[_CREATE | _SET   ] = transform_create_set
-__transform__[_DELETE | _SET   ] = transform_delete_set
-__transform__[_UPDATE | _SET   ] = transform_update_set
-__transform__[_SET    | _SET   ] = transform_set_set
-/* eslint-enable no-multi-spaces */
+const __transform__ = (() => {
+  /* eslint-disable no-multi-spaces */
+  const t = {}
+  t[_DELETE | _DELETE] = transform_delete_delete
+  t[_DELETE | _CREATE] = transform_delete_create
+  t[_DELETE | _UPDATE] = transform_delete_update
+  t[_CREATE | _CREATE] = transform_create_create
+  t[_CREATE | _UPDATE] = transform_create_update
+  t[_UPDATE | _UPDATE] = transform_update_update
+  t[_CREATE | _SET   ] = transform_create_set
+  t[_DELETE | _SET   ] = transform_delete_set
+  t[_UPDATE | _SET   ] = transform_update_set
+  t[_SET    | _SET   ] = transform_set_set
+  /* eslint-enable no-multi-spaces */
+  return t
+})()
 
-var transform = function(a, b, options) {
+function transform(a, b, options) {
   options = options || {}
   if (options['no-conflict'] && hasConflict(a, b)) {
     throw new Conflict(a, b)

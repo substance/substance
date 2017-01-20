@@ -2,14 +2,12 @@ import HTMLImporter from '../../model/HTMLImporter'
 import ProseArticle from './ProseArticle'
 const schema = ProseArticle.schema
 
-let converters = [];
-
 // TODO: FIX this. Should be used together with configurator
 class ProseArticleImporter extends HTMLImporter {
   constructor() {
     super({
       schema: schema,
-      converters: converters,
+      converters: ProseArticleImporter.converters,
       DocumentClass: ProseArticle
     })
   }
@@ -24,6 +22,6 @@ class ProseArticleImporter extends HTMLImporter {
   }
 }
 
-ProseArticleImporter.converters = converters
+ProseArticleImporter.converters = []
 
 export default ProseArticleImporter

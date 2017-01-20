@@ -21,10 +21,10 @@ import ContainerAnnotation from './ContainerAnnotation'
 
   class Comment extends PropertyAnnotation {}
 
-  Comment.define({
+  Comment.schema = {
     type: 'comment',
     content: 'string'
-  })
+  }
 
   let schema = new Document.Schema('my-article')
   schema.getDefaultTextType = function() {

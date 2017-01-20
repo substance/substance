@@ -1,6 +1,36 @@
 import forEach from './forEach'
 import map from './map'
 
+/**
+  Get bounding rectangle relative to a given parent element. Allows multiple
+  elements being passed (we need this for selections that consist of multiple
+  selection fragments). Takes a relative parent element that is used as a
+  reference point, instead of the browser's viewport.
+
+  @param {Array} els elements to compute the bounding rectangle for
+  @param {DOMElement} containerEl relative parent used as a reference point
+  @return {object} rectangle description with left, top, right, bottom, width and height
+*/
+export default function getRelativeBoundingRect(els, containerEl) {
+  if (els.length === undefined) {
+    els = [els]
+  }
+  var elRects = map(els, function(el) {
+    return _getBoundingOffsetsRect(el, containerEl)
+  })
+
+  var elsRect = _getBoundingRect(elRects)
+  var containerElRect = containerEl.getBoundingClientRect()
+  return {
+    left: elsRect.left,
+    top: elsRect.top,
+    right: containerElRect.width - elsRect.left - elsRect.width,
+    bottom: containerElRect.height - elsRect.top - elsRect.height,
+    width: elsRect.width,
+    height: elsRect.height
+  }
+}
+
 /*
   Calculate a bounding rectangle for a set of rectangles.
 
@@ -58,35 +88,3 @@ function _getBoundingOffsetsRect(el, relativeParentEl) {
     height: elRect.height
   }
 }
-
-/**
-  Get bounding rectangle relative to a given parent element. Allows multiple
-  elements being passed (we need this for selections that consist of multiple
-  selection fragments). Takes a relative parent element that is used as a
-  reference point, instead of the browser's viewport.
-
-  @param {Array} els elements to compute the bounding rectangle for
-  @param {DOMElement} containerEl relative parent used as a reference point
-  @return {object} rectangle description with left, top, right, bottom, width and height
-*/
-function getRelativeBoundingRect(els, containerEl) {
-  if (els.length === undefined) {
-    els = [els]
-  }
-  var elRects = map(els, function(el) {
-    return _getBoundingOffsetsRect(el, containerEl)
-  })
-
-  var elsRect = _getBoundingRect(elRects)
-  var containerElRect = containerEl.getBoundingClientRect()
-  return {
-    left: elsRect.left,
-    top: elsRect.top,
-    right: containerElRect.width - elsRect.left - elsRect.width,
-    bottom: containerElRect.height - elsRect.top - elsRect.height,
-    width: elsRect.width,
-    height: elsRect.height
-  }
-}
-
-export default getRelativeBoundingRect

@@ -1,5 +1,6 @@
 import EventEmitter from '../util/EventEmitter'
-import { forEach, extend } from 'lodash-es'
+import extend from '../util/extend'
+import forEach from '../util/forEach'
 import map from '../util/map'
 
 import DocumentChange from '../model/DocumentChange'
@@ -10,6 +11,7 @@ import Err from '../util/SubstanceError'
   real time editing as a reusable library.
 */
 class CollabEngine extends EventEmitter {
+
   constructor(documentEngine) {
     super()
     this.documentEngine = documentEngine

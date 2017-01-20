@@ -1,4 +1,4 @@
-let HeadingMacro = {
+export default {
 
   appliesTo: ['paragraph'],
 
@@ -31,5 +31,3 @@ let HeadingMacro = {
     }
   }
 }
-
-export default HeadingMacro

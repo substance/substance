@@ -1,6 +1,6 @@
-import { extend, isNumber, isString } from 'lodash-es'
+import isNumber from '../util/isNumber'
+import isString from '../util/isString'
 import DocumentNode from './DocumentNode'
-import ParentNodeMixin from './ParentNodeMixin'
 import ContainerAddress from './ContainerAddress'
 
 /*
@@ -9,9 +9,6 @@ import ContainerAddress from './ContainerAddress'
   While most editing occurs on a property level (such as editing text),
   other things happen on a node level, e.g., breaking or mergin nodes,
   or spanning annotations or so called ContainerAnnotations.
-
-  @class
-  @prop {String[]} nodes
 */
 class Container extends DocumentNode {
 
@@ -133,21 +130,43 @@ class Container extends DocumentNode {
     return this.positions
   }
 
+  // NOTE: this has been in ParentNodeMixin before
+
+  hasChildren() {
+    return this.nodes.length > 0
+  }
+
+  getChildIndex(child) {
+    return this.nodes.indexOf(child.id)
+  }
+
+  getChildren() {
+    var doc = this.getDocument()
+    var childrenIds = this.nodes
+    return childrenIds.map(function(id) {
+      return doc.get(id)
+    })
+  }
+
+  getChildAt(idx) {
+    var childrenIds = this.nodes
+    if (idx < 0 || idx >= childrenIds.length) {
+      throw new Error('Array index out of bounds: ' + idx + ", " + childrenIds.length)
+    }
+    return this.getDocument().get(childrenIds[idx])
+  }
+
+  getChildCount() {
+    return this.nodes.length
+  }
+
 }
 
 Container.prototype._isContainer = true
 
-// HACK: using a mixin here
-// TODO: Get rid of this ParentNodeMixin
-extend(Container.prototype, ParentNodeMixin)
-
-Container.prototype.getChildrenProperty = function() {
-  return 'nodes'
-}
-
-Container.define({
+Container.schema = {
   type: 'container',
   nodes: { type: ['array', 'id'], default: [] }
-})
+}
 
 export default Container

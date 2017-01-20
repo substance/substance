@@ -1,4 +1,4 @@
-import { filter } from 'lodash-es'
+import filter from '../util/filter'
 import isString from '../util/isString'
 import forEach from '../util/forEach'
 import DocumentIndex from './DocumentIndex'
@@ -17,17 +17,25 @@ import DocumentChange from './DocumentChange'
   documentHelpers.isContainerAnnotation(doc, 'comment')
   ```
 */
-const documentHelpers = {};
+export default {
+  isContainerAnnotation,
+  getPropertyAnnotationsForSelection,
+  getContainerAnnotationsForSelection,
+  getAnnotationsForSelection,
+  getTextForSelection,
+  getMarkersForSelection,
+  getChangeFromDocument,
+}
 
 /**
   @param {Document} doc
   @param {String} type
   @return {Boolean} `true` if given type is a {@link ContainerAnnotation}
 */
-documentHelpers.isContainerAnnotation = function(doc, type) {
+function isContainerAnnotation(doc, type) {
   var schema = doc.getSchema();
   return schema.isInstanceOf(type, 'container-annotation');
-};
+}
 
 /**
   For a given selection get all property annotations
@@ -37,7 +45,7 @@ documentHelpers.isContainerAnnotation = function(doc, type) {
   @return {PropertyAnnotation[]} An array of property annotations.
           Returns an empty array when selection is a container selection.
 */
-documentHelpers.getPropertyAnnotationsForSelection = function(doc, sel, options) {
+function getPropertyAnnotationsForSelection(doc, sel, options) {
   options = options || {};
   if (!sel.isPropertySelection()) {
     return [];
@@ -48,7 +56,7 @@ documentHelpers.getPropertyAnnotationsForSelection = function(doc, sel, options)
     annotations = filter(annotations, DocumentIndex.filterByType(options.type));
   }
   return annotations;
-};
+}
 
 /**
   For a given selection get all container annotations
@@ -59,7 +67,7 @@ documentHelpers.getPropertyAnnotationsForSelection = function(doc, sel, options)
   @param {String} options.type provides only annotations of that type
   @return {Array} An array of container annotations
 */
-documentHelpers.getContainerAnnotationsForSelection = function(doc, sel, containerId, options) {
+function getContainerAnnotationsForSelection(doc, sel, containerId, options) {
   // ATTENTION: looking for container annotations is not as efficient as property
   // selections, as we do not have an index that has notion of the spatial extend
   // of an annotation. Opposed to that, common annotations are bound
@@ -74,7 +82,7 @@ documentHelpers.getContainerAnnotationsForSelection = function(doc, sel, contain
     return sel.overlaps(anno.getSelection());
   });
   return annotations;
-};
+}
 
 /**
   For a given selection, get annotations of a certain type
@@ -85,20 +93,20 @@ documentHelpers.getContainerAnnotationsForSelection = function(doc, sel, contain
   @param {string} containerId (only needed when type is a container annotation)
   @return {array} all matching annotations
 */
-documentHelpers.getAnnotationsForSelection = function(doc, sel, annotationType, containerId) {
+function getAnnotationsForSelection(doc, sel, annotationType, containerId) {
   var annos;
-  var isContainerAnno = documentHelpers.isContainerAnnotation(doc, annotationType);
+  var isContainerAnno = isContainerAnnotation(doc, annotationType);
 
   if (isContainerAnno) {
     var container = doc.get(containerId, 'strict');
-    annos = documentHelpers.getContainerAnnotationsForSelection(doc, sel, container, {
+    annos = getContainerAnnotationsForSelection(doc, sel, container, {
       type: annotationType
     });
   } else {
-    annos = documentHelpers.getPropertyAnnotationsForSelection(doc, sel, { type: annotationType });
+    annos = getPropertyAnnotationsForSelection(doc, sel, { type: annotationType });
   }
   return annos;
-};
+}
 
 /**
   For a given selection, get the corresponding text string
@@ -107,7 +115,7 @@ documentHelpers.getAnnotationsForSelection = function(doc, sel, annotationType, 
   @param {Selection} sel
   @return {string} text enclosed by the annotation
 */
-documentHelpers.getTextForSelection = function(doc, sel) {
+function getTextForSelection(doc, sel) {
   var text;
   if (!sel || sel.isNull()) {
     return "";
@@ -129,9 +137,9 @@ documentHelpers.getTextForSelection = function(doc, sel) {
     });
     return result.join('\n');
   }
-};
+}
 
-documentHelpers.getMarkersForSelection = function(doc, sel) {
+function getMarkersForSelection(doc, sel) {
   // only PropertySelections are supported right now
   if (!sel || !sel.isPropertySelection()) return []
   const path = doc.getRealPath(sel.getPath())
@@ -143,7 +151,7 @@ documentHelpers.getMarkersForSelection = function(doc, sel) {
   return filtered
 }
 
-documentHelpers.getChangeFromDocument = function(doc) {
+function getChangeFromDocument(doc) {
   let nodes = doc.getNodes()
   let annotations = []
   let contentNodes = []
@@ -165,5 +173,3 @@ documentHelpers.getChangeFromDocument = function(doc) {
 
   return new DocumentChange({ops: ops})
 }
-
-export default documentHelpers

@@ -8,7 +8,7 @@ export default function levenshtein(a, b){
       m[0][j] = j
       if(j === 0) continue;
       let jb = j-1
-      m[i][j] = b.charAt(ib) == a.charAt(jb) ? m[ib][jb] : Math.min(
+      m[i][j] = b.charAt(ib) === a.charAt(jb) ? m[ib][jb] : Math.min(
         m[ib][jb]+1,
         m[i][jb]+1,
         m[ib][j]+1

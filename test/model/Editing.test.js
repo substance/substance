@@ -363,9 +363,9 @@ function _s1(doc) {
 
 class TestInlineNode extends InlineNode {}
 TestInlineNode.type = 'test-inline'
-TestInlineNode.define({
+TestInlineNode.schema = {
   foo: { type: 'string' }
-})
+}
 
 class TestBlockNode extends BlockNode {}
 TestBlockNode.type = 'test-block'

@@ -1,4 +1,4 @@
-import { startsWith } from 'lodash-es'
+import startsWith from '../../util/startsWith'
 import keys from '../../util/keys'
 import createSurfaceId from '../../util/createSurfaceId'
 import Coordinate from '../../model/Coordinate'
@@ -220,7 +220,7 @@ class IsolatedNodeComponent extends Component {
     return level
   }
 
-  _onSelectionChanged(selection) {
+  _onSelectionChanged() {
     let editorSession = this.context.editorSession
     let newState = this._deriveStateFromSelectionState(editorSession.getSelectionState())
     if (!newState && this.state.mode) {

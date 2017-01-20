@@ -12,35 +12,38 @@
   "main": "dist/substance.cjs.js",
   "jsnext:main": "index.es.js",
   "scripts": {
-    "test": "node test",
+    "test": "node make test",
     "test:browser": "node make test:browser:pure -w -s",
+    "coverage": "node make run:test:coverage",
     "docs": "node make docs -w -s",
     "start": "node make dev -w -s"
   },
   "author": "",
   "license": "MIT",
   "dependencies": {
-    "substance-cheerio": "^0.1.0",
     "lodash-es": "4.13.1"
   },
   "devDependencies": {
+    "css-select": "1.2.0",
+    "domelementtype": "1.3.0",
+    "domutils": "1.5.1",
+    "htmlparser2": "3.9.2",
     "karma": "0.13.22",
     "karma-chrome-launcher": "1.0.1",
+    "karma-coverage": "^1.1.1",
     "karma-firefox-launcher": "1.0.0",
     "karma-source-map-support": "1.1.0",
     "karma-tap": "1.0.4",
     "karma-tape-reporter": "1.0.3",
-    "substance-bundler": "0.5.1",
+    "substance-bundler": "0.7.0",
     "substance-docgen": "0.4.7",
-    "substance-test": "0.2.6"
-  },
-  "browser": {
-    "substance-cheerio": false
+    "substance-test": "0.5.1"
   },
   "files": [
     "collab",
     "dist",
     "docs",
+    "dom",
     "model",
     "packages",
     "test",

@@ -22,10 +22,10 @@ class TextNode extends DocumentNode {
 
 TextNode.isText = true
 
-TextNode.define({
+TextNode.schema = {
   type: "text",
   content: "text",
   direction: { type: "string", optional: true }
-})
+}
 
 export default TextNode

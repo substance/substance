@@ -1,7 +1,7 @@
 import Server from './Server'
 import CollabEngine from './CollabEngine'
 import Err from '../util/SubstanceError'
-import { forEach } from 'lodash-es'
+import forEach from '../util/forEach'
 
 /*
   Implements Substance CollabServer API.

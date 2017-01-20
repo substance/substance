@@ -1,4 +1,5 @@
-import { capitalize, extend } from 'lodash-es'
+import capitalize from '../../util/capitalize'
+import extend from '../../util/extend'
 import Component from '../../ui/Component'
 
 /**

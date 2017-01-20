@@ -1,5 +1,6 @@
-import { extend, isEqual } from 'lodash-es'
+import extend from '../util/extend'
 import forEach from '../util/forEach'
+import isEqual from '../util/isEqual'
 import Registry from '../util/Registry'
 
 /*

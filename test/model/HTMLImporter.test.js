@@ -1,7 +1,7 @@
 import { module } from 'substance-test'
 
 import TestHTMLImporter from '../model/TestHTMLImporter'
-import DOMElement from '../../ui/DefaultDOMElement'
+import DOMElement from '../../dom/DefaultDOMElement'
 
 const test = module('model/HTMLImporter')
 

@@ -4,7 +4,6 @@ class InsertNodeCommand extends Command {
 
   getCommandState(params) {
     let sel = params.selection
-    let surface = params.surface
     let newState = {
       disabled: true,
       active: false

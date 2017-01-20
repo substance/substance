@@ -1,5 +1,5 @@
 import forEach from './forEach'
-import { isObject } from 'lodash-es'
+import isObject from './isObject'
 
 /**
   Event support.
@@ -76,6 +76,14 @@ class EventEmitter {
     })
     /* eslint-enable no-console */
   }
+
+  get __events__() {
+    if (!this.___events___) {
+      this.___events___ = {}
+    }
+    return this.___events___
+  }
+
 }
 
 // sort descending as a listener with higher priority should be
@@ -191,28 +199,6 @@ function validateMethod(method, context) {
   } else if (typeof method !== 'function') {
     throw new Error( 'Invalid callback. Function or method name expected.' )
   }
-}
-
-const __events__ = {
-  get: function () {
-    if (!this.___events___) {
-      this.___events___ = {}
-    }
-    return this.___events___
-  },
-  configurable: true,
-  enumerable: false
-}
-
-Object.defineProperty(EventEmitter.prototype, '__events__', __events__)
-
-EventEmitter.mixin = function(clazz) {
-  var properties = Object.getOwnPropertyNames(EventEmitter.prototype)
-  properties.forEach(function(name) {
-    if (name === 'constructor' || name === '__events__') return
-    clazz.prototype[name] = EventEmitter.prototype[name]
-  })
-  Object.defineProperty(clazz.prototype, '__events__', __events__)
 }
 
 export default EventEmitter

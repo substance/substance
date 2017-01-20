@@ -116,7 +116,7 @@ class Transaction extends EditingInterface {
       let selBefore = this.getSelection()
       transformation(this, {
         selection: selBefore
-      }) || {}
+      })
       let ops = this.ops
       if (ops.length > 0) {
         change = new DocumentChange(ops, this._before, this._after)

@@ -8,8 +8,9 @@
 */
 
 import inBrowser from '../util/inBrowser'
-import DefaultDOMElement from './DefaultDOMElement'
-import DOMElement from './DOMElement'
+import DOMElement from '../dom/DOMElement'
+import DOMEventListener from '../dom/DOMEventListener'
+import DefaultDOMElement from '../dom/DefaultDOMElement'
 
 /*
   TODO: to be 100% safe we would need to introduce a hidden contenteditable
@@ -49,7 +50,7 @@ class GlobalEventHandler {
     if (!options.id) {
       throw new Error("GlobalEventHandler can only be used with option 'id'")
     }
-    let listener = new DOMElement.EventListener(eventName, handler, options)
+    let listener = new DOMEventListener(eventName, handler, options)
     this.listeners.push(listener)
   }
 

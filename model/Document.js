@@ -1,5 +1,5 @@
-import { isEqual, isObject} from 'lodash-es'
-
+import isEqual from '../util/isEqual'
+import isObject from '../util/isObject'
 import isArray from '../util/isArray'
 import isString from '../util/isString'
 import forEach from '../util/forEach'
@@ -23,7 +23,7 @@ import Range from './Range'
 import docHelpers from './documentHelpers'
 import JSONConverter from './JSONConverter'
 
-var converter = new JSONConverter()
+const converter = new JSONConverter()
 
 /**
   Basic implementation of a Document.
@@ -505,11 +505,11 @@ Document.prototype._isDocument = true
 // used by transforms copy, paste
 // and by ClipboardImporter/Exporter
 Document.SNIPPET_ID = "snippet"
+
 Document.TEXT_SNIPPET_ID = "text-snippet"
 
 
-export default Document
-
+/* Internals */
 
 function _createSelection() {
   var doc = this; // eslint-disable-line
@@ -638,3 +638,5 @@ function _allignCoordinate(doc, coor, isStart) {
     }
   }
 }
+
+export default Document

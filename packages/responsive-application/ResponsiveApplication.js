@@ -1,6 +1,6 @@
-import { cloneDeep } from 'lodash-es'
+import cloneDeep from '../../util/cloneDeep'
 import inBrowser from '../../util/inBrowser'
-import DefaultDOMElement from '../../ui/DefaultDOMElement'
+import DefaultDOMElement from '../../dom/DefaultDOMElement'
 import Component from '../../ui/Component'
 
 class ResponsiveApplication extends Component {

@@ -1,14 +1,21 @@
-import { uniq } from 'lodash-es'
 import forEach from '../util/forEach'
 import isArray from '../util/isArray'
 import uuid from '../util/uuid'
 
-// TODO: this should be implemented as transformations
 
 // A collection of methods to update annotations
 // --------
 //
 // As we treat annotations as overlay of plain text we need to keep them up-to-date during editing.
+
+export default {
+  insertedText,
+  deletedText,
+  transferAnnotations,
+  expandAnnotation,
+  fuseAnnotation,
+  truncateAnnotation
+}
 
 function insertedText(doc, coordinate, length) {
   if (!length) return;
@@ -120,13 +127,16 @@ function deletedText(doc, path, startOffset, endOffset) {
     }
   });
   // check all anchors after that if they have collapsed and remove the annotation in that case
-  forEach(uniq(containerAnnoIds), function(id) {
+  let checked = {}
+  forEach(containerAnnoIds, function(id) {
+    if (checked[id]) return
     var anno = doc.get(id);
     var annoSel = anno.getSelection();
     if(annoSel.isCollapsed()) {
       // console.log("...deleting container annotation because it has collapsed" + id);
       doc.delete(id);
     }
+    checked[id] = true
   });
 }
 
@@ -193,13 +203,16 @@ function transferAnnotations(doc, path, offset, newPath, newOffset) {
     }
   });
   // check all anchors after that if they have collapsed and remove the annotation in that case
-  forEach(uniq(containerAnnoIds), function(id) {
+  let checked = {}
+  forEach(containerAnnoIds, function(id) {
+    if (checked[id]) return
     var anno = doc.get(id);
     var annoSel = anno.getSelection();
     if(annoSel.isCollapsed()) {
       // console.log("...deleting container annotation because it has collapsed" + id);
       doc.delete(id);
     }
+    checked[id] = true
   });
 }
 
@@ -257,14 +270,4 @@ function fuseAnnotation(tx, annos) {
   }
   expandAnnotation(tx, annos[0], sel)
   tx.setSelection(sel)
-}
-
-
-export default {
-  insertedText: insertedText,
-  deletedText: deletedText,
-  transferAnnotations: transferAnnotations,
-  expandAnnotation: expandAnnotation,
-  fuseAnnotation: fuseAnnotation,
-  truncateAnnotation: truncateAnnotation
 }

@@ -1,6 +1,6 @@
 import Component from '../../ui/Component'
 import forEach from '../../util/forEach'
-import DefaultDOMElement from '../../ui/DefaultDOMElement'
+import DefaultDOMElement from '../../dom/DefaultDOMElement'
 import getRelativeBoundingRect from '../../util/getRelativeBoundingRect'
 
 /**

@@ -1,6 +1,6 @@
-import { cloneDeep } from 'lodash-es'
 import isString from '../../util/isString'
 import isArray from '../../util/isArray'
+import cloneDeep from '../../util/cloneDeep'
 import Data from './Data'
 import ObjectOperation from './ObjectOperation'
 import ArrayOperation from './ArrayOperation'

@@ -1,4 +1,4 @@
-import { isEqual } from 'lodash-es'
+import isEqual from '../util/isEqual'
 import forEach from '../util/forEach'
 import isArray from '../util/isArray'
 import TreeIndex from '../util/TreeIndex'

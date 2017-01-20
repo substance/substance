@@ -160,7 +160,6 @@ export { default as BlockNodeComponent } from './ui/BlockNodeComponent'
 export { default as Command } from './ui/Command'
 export { default as Component } from './ui/Component'
 export { default as ContainerEditor } from './ui/ContainerEditor'
-export { default as DefaultDOMElement } from './ui/DefaultDOMElement'
 export { default as DragAndDropHandler } from './ui/DragAndDropHandler'
 export { default as FontAwesomeIcon } from './ui/FontAwesomeIcon'
 export { default as InsertNodeCommand } from './ui/InsertNodeCommand'
@@ -192,15 +191,9 @@ export { default as TreeIndex } from './util/TreeIndex'
 export { default as uuid } from './util/uuid'
 export { series } from './util/async'
 
-// test-utlity related (to reduce bundle size we should think of
-// providing a separate bundle for that in the future)
-export { default as twoParagraphs } from './test/fixtures/twoParagraphs'
-export { default as MessageQueue } from './test/collab/MessageQueue'
-export { default as TestWebSocketServer } from './test/collab/TestWebSocketServer'
-export { default as TestWebSocketConnection } from './test/collab/TestWebSocketConnection'
-export { default as TestCollabServer } from './test/collab/TestCollabServer'
-export { default as TestCollabSession } from './test/collab/TestCollabSession'
-export { default as createTestDocumentFactory } from './test/fixtures/createTestDocumentFactory'
+// dom
+export { default as DefaultDOMElement } from './dom/DefaultDOMElement'
+
 
 // aliases (mainly for backward compatibility)
 export { default as ProseEditorConfigurator } from './util/Configurator'

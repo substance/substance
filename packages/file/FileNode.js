@@ -22,12 +22,13 @@ class FileNode extends DocumentNode {
 }
 
 FileNode.type = 'file'
-FileNode.define({
+
+FileNode.schema = {
   url: { type: 'string', optional: true },
   fileType: { type: 'string', optional: true },
   mimeType: { type: 'string', optional: true },
   data: { type: 'object', optional: true }
-})
+}
 
 FileNode.strip = function(nodeData) {
   return {

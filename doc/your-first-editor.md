@@ -20,9 +20,9 @@ The body node inherits from {@link Container}.
 ```js
 class Body extends Container {}
 
-Body.define({
+Body.schema = {
   type: 'body'
-})
+}
 ```
 
 The Comment node is a {@link PropertyAnnotation} and defines a content property to hold the comment text.
@@ -30,10 +30,10 @@ The Comment node is a {@link PropertyAnnotation} and defines a content property 
 ```
 class Comment extends PropertyAnnotation {}
 
-Comment.define({
+Comment.schema = {
   type: 'comment',
   content: { type: 'string', default: '' }
-})
+}
 ```
 
 ## Node Converters

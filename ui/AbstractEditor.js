@@ -1,5 +1,4 @@
 import Component from './Component'
-import RenderingEngine from './RenderingEngine'
 import ResourceManager from './ResourceManager'
 
 /**

@@ -1,11 +1,12 @@
-import { isUndefined, startsWith } from 'lodash-es'
 import createSurfaceId from '../../util/createSurfaceId'
+import inBrowser from '../../util/inBrowser'
+import isNil from '../../util/isNil'
 import keys from '../../util/keys'
 import platform from '../../util/platform'
-import inBrowser from '../../util/inBrowser'
+import startsWith from '../../util/startsWith'
 import Clipboard from '../../ui/Clipboard'
 import Component from '../../ui/Component'
-import DefaultDOMElement from '../../ui/DefaultDOMElement'
+import DefaultDOMElement from '../../dom/DefaultDOMElement'
 import DOMSelection from '../../ui/DOMSelection'
 import UnsupportedNode from '../../ui/UnsupportedNodeComponent'
 
@@ -695,14 +696,13 @@ class Surface extends Component {
     }
   }
 
-}
-
-Object.defineProperty(Surface.prototype, 'id', {
-  configurable: false,
-  get: function() {
+  get id() {
     return this._surfaceId
   }
-})
+
+}
+
+Surface.prototype._isSurface = true
 
 Surface.getDOMRangeFromEvent = function(evt) {
   let range, x = evt.clientX, y = evt.clientY
@@ -713,10 +713,10 @@ Surface.getDOMRangeFromEvent = function(evt) {
     range.moveToPoint(x, y)
   }
 
-  else if (!isUndefined(document.createRange)) {
+  else if (!isNil(document.createRange)) {
     // Try Mozilla's rangeOffset and rangeParent properties,
     // which are exactly what we want
-    if (!isUndefined(evt.rangeParent)) {
+    if (!isNil(evt.rangeParent)) {
       range = document.createRange()
       range.setStart(evt.rangeParent, evt.rangeOffset)
       range.collapse(true)
@@ -736,7 +736,5 @@ Surface.getDOMRangeFromEvent = function(evt) {
 
   return range
 }
-
-Surface.prototype._isSurface = true
 
 export default Surface

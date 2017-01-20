@@ -6,9 +6,9 @@ class InlineWrapper extends InlineNode {
   }
 }
 
-InlineWrapper.define({
+InlineWrapper.schema = {
   type: 'inline-wrapper',
   wrappedNode: 'id'
-})
+}
 
 export default InlineWrapper

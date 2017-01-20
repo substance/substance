@@ -1,5 +1,4 @@
-/* eslint-disable no-unused-vars */
-import { isObject, findIndex } from 'lodash-es'
+import isObject from '../util/isObject'
 import isFunction from '../util/isFunction'
 import isString from '../util/isString'
 import isArray from '../util/isArray'
@@ -10,17 +9,6 @@ const NOT_IMPLEMENTED = 'This method is not implemented.'
 
 /**
   A unified interface for DOM elements used by Substance.
-
-  There are three different implementations of this interface:
-  - {@link ui/DefaultDOMElement}
-  - {@link ui/VirtualElement}
-  - {@link ui/Component}
-
-  Methods which rely on a CSS selector implementation are only available for {@link ui/DefaultDOMElement} instance, which is used during DOM import.
-  I.e., don't use the following methods in Component renderers:
-  - {@link ui/DOMElement#is()}
-  - {@link ui/DOMElement#find()}
-  - {@link ui/DOMElement#findAll()}
 
   @abstract
 */
@@ -77,9 +65,11 @@ class DOMElement {
    */
 
   /**
+    @abstract
     @returns the native element
   */
   getNativeElement() {
+    /* istanbul ignore next */
     throw new Error(NOT_IMPLEMENTED)
   }
 
@@ -90,7 +80,8 @@ class DOMElement {
     @param {String} className
     @returns {Boolean} true if the CSS class is set
   */
-  hasClass(className) {
+  hasClass(className) { // eslint-disable-line no-unused-vars
+    /* istanbul ignore next */
     throw new Error(NOT_IMPLEMENTED)
   }
 
@@ -101,7 +92,8 @@ class DOMElement {
     @param {String} classString A space-separated string with CSS classes
     @returns {this}
   */
-  addClass(classString) {
+  addClass(classString) { // eslint-disable-line no-unused-vars
+    /* istanbul ignore next */
     throw new Error(NOT_IMPLEMENTED)
   }
 
@@ -112,7 +104,8 @@ class DOMElement {
     @param {String} classString A space-separated string with CSS classes
     @returns {this}
   */
-  removeClass(classString) {
+  removeClass(classString) { // eslint-disable-line no-unused-vars
+    /* istanbul ignore next */
     throw new Error(NOT_IMPLEMENTED)
   }
 
@@ -164,7 +157,8 @@ class DOMElement {
     @abstract
     @returns {String} the attribute's value.
   */
-  getAttribute(name) {
+  getAttribute(name) { // eslint-disable-line no-unused-vars
+    /* istanbul ignore next */
     throw new Error(NOT_IMPLEMENTED)
   }
 
@@ -175,15 +169,18 @@ class DOMElement {
     @param {String} the attribute's value.
     @returns {this}
   */
-  setAttribute(name, value) {
+  setAttribute(name, value) { // eslint-disable-line no-unused-vars
+    /* istanbul ignore next */
     throw new Error(NOT_IMPLEMENTED)
   }
 
-  removeAttribute(name) {
+  removeAttribute(name) { // eslint-disable-line no-unused-vars
+    /* istanbul ignore next */
     throw new Error(NOT_IMPLEMENTED)
   }
 
   getAttributes() {
+    /* istanbul ignore next */
     throw new Error(NOT_IMPLEMENTED)
   }
 
@@ -210,15 +207,18 @@ class DOMElement {
     return this
   }
 
-  getProperty(name) {
+  getProperty(name) { // eslint-disable-line no-unused-vars
+    /* istanbul ignore next */
     throw new Error(NOT_IMPLEMENTED)
   }
 
-  setProperty(name, value) {
+  setProperty(name, value) { // eslint-disable-line no-unused-vars
+    /* istanbul ignore next */
     throw new Error(NOT_IMPLEMENTED)
   }
 
-  removeProperty(name) {
+  removeProperty(name) { // eslint-disable-line no-unused-vars
+    /* istanbul ignore next */
     throw new Error(NOT_IMPLEMENTED)
   }
 
@@ -231,6 +231,7 @@ class DOMElement {
     @returns {String} the tag name in lower-case.
    */
   getTagName() {
+    /* istanbul ignore next */
     throw new Error(NOT_IMPLEMENTED)
   }
 
@@ -243,7 +244,8 @@ class DOMElement {
     @param {String} tagName the new tag name
     @returns {this}
   */
-  setTagName(tagName) {
+  setTagName(tagName) { // eslint-disable-line no-unused-vars
+    /* istanbul ignore next */
     throw new Error(NOT_IMPLEMENTED)
   }
 
@@ -256,7 +258,7 @@ class DOMElement {
     @returns {String} the id.
    */
   getId() {
-    throw new Error(NOT_IMPLEMENTED)
+    return this.getAttribute('id')
   }
 
   /**
@@ -269,7 +271,7 @@ class DOMElement {
     @returns {this}
   */
   setId(id) {
-    throw new Error(NOT_IMPLEMENTED)
+    this.setAttribute('id', id)
   }
 
   /**
@@ -289,11 +291,12 @@ class DOMElement {
   }
 
   getValue() {
-    throw new Error(NOT_IMPLEMENTED)
+    return this.getProperty('value')
   }
 
   setValue(value) {
-    throw new Error(NOT_IMPLEMENTED)
+    this.setProperty('value', value)
+    return this
   }
 
   /**
@@ -322,11 +325,13 @@ class DOMElement {
     return this
   }
 
-  getStyle(name) {
+  getStyle(name) { // eslint-disable-line no-unused-vars
+    /* istanbul ignore next */
     throw new Error(NOT_IMPLEMENTED)
   }
 
-  setStyle(name, value) {
+  setStyle(name, value) { // eslint-disable-line no-unused-vars
+    /* istanbul ignore next */
     throw new Error(NOT_IMPLEMENTED)
   }
 
@@ -355,6 +360,7 @@ class DOMElement {
     @returns {String}
   */
   getTextContent() {
+    /* istanbul ignore next */
     throw new Error(NOT_IMPLEMENTED)
   }
 
@@ -367,7 +373,8 @@ class DOMElement {
     @param {String} text the new text content
     @returns {this}
   */
-  setTextContent(text) {
+  setTextContent(text) { // eslint-disable-line no-unused-vars
+    /* istanbul ignore next */
     throw new Error(NOT_IMPLEMENTED)
   }
 
@@ -396,6 +403,7 @@ class DOMElement {
     @returns {String}
   */
   getInnerHTML() {
+    /* istanbul ignore next */
     throw new Error(NOT_IMPLEMENTED)
   }
 
@@ -408,7 +416,8 @@ class DOMElement {
     @param {String} text the new text content
     @returns {this}
   */
-  setInnerHTML(html) {
+  setInnerHTML(html) { // eslint-disable-line no-unused-vars
+    /* istanbul ignore next */
     throw new Error(NOT_IMPLEMENTED)
   }
 
@@ -421,6 +430,7 @@ class DOMElement {
     @returns {String}
   */
   getOuterHTML() {
+    /* istanbul ignore next */
     throw new Error(NOT_IMPLEMENTED)
   }
 
@@ -462,8 +472,8 @@ class DOMElement {
   off(eventName, handler) {
     // el.off(this): disconnect all listeners bound to the given context
     if (arguments.length === 1 && !isString(eventName)) {
-      var context = arguments[0]
-      var listeners = this.getEventListeners().filter(function(l) {
+      let context = arguments[0]
+      this.getEventListeners().filter(function(l) {
         return l.context === context
       }).forEach(function(l) {
         this.removeEventListener(l)
@@ -474,15 +484,18 @@ class DOMElement {
     return this
   }
 
-  addEventListener(eventName, handler, options) {
+  addEventListener(eventName, handler, options) { // eslint-disable-line no-unused-vars
+    /* istanbul ignore next */
     throw new Error(NOT_IMPLEMENTED)
   }
 
-  removeEventListener(eventName, handler) {
+  removeEventListener(eventName, handler) { // eslint-disable-line no-unused-vars
+    /* istanbul ignore next */
     throw new Error(NOT_IMPLEMENTED)
   }
 
   getEventListeners() {
+    /* istanbul ignore next */
     throw new Error(NOT_IMPLEMENTED)
   }
 
@@ -508,6 +521,7 @@ class DOMElement {
   }
 
   getChildCount() {
+    /* istanbul ignore next */
     throw new Error(NOT_IMPLEMENTED)
   }
 
@@ -522,6 +536,7 @@ class DOMElement {
     @returns {Array<ui/DOMElement>}
    */
   getChildNodes() {
+    /* istanbul ignore next */
     throw new Error(NOT_IMPLEMENTED)
   }
 
@@ -536,14 +551,17 @@ class DOMElement {
     @returns {Array<ui/DOMElement>}
    */
   getChildren() {
+    /* istanbul ignore next */
     throw new Error(NOT_IMPLEMENTED)
   }
 
-  getChildAt(pos) {
+  getChildAt(pos) { // eslint-disable-line no-unused-vars
+    /* istanbul ignore next */
     throw new Error(NOT_IMPLEMENTED)
   }
 
-  getChildIndex(child) {
+  getChildIndex(child) { // eslint-disable-line no-unused-vars
+    /* istanbul ignore next */
     throw new Error(NOT_IMPLEMENTED)
   }
 
@@ -552,18 +570,22 @@ class DOMElement {
   }
 
   getLastChild() {
+    /* istanbul ignore next */
     throw new Error(NOT_IMPLEMENTED)
   }
 
   getFirstChild() {
+    /* istanbul ignore next */
     throw new Error(NOT_IMPLEMENTED)
   }
 
   getNextSibling() {
+    /* istanbul ignore next */
     throw new Error(NOT_IMPLEMENTED)
   }
 
   getPreviousSibling() {
+    /* istanbul ignore next */
     throw new Error(NOT_IMPLEMENTED)
   }
 
@@ -574,7 +596,7 @@ class DOMElement {
     @returns {Boolean} true if the element is of type `Node.TEXT_NODE`
    */
   isTextNode() {
-    throw new Error(NOT_IMPLEMENTED)
+    return false
   }
 
   /**
@@ -584,7 +606,7 @@ class DOMElement {
     @returns {Boolean} true if the element is of type `Node.ELEMENT_NODE`
    */
   isElementNode() {
-    throw new Error(NOT_IMPLEMENTED)
+    return false
   }
 
   /**
@@ -594,7 +616,7 @@ class DOMElement {
     @returns {Boolean} true if the element is of type `Node.COMMENT_NODE`
    */
   isCommentNode() {
-    throw new Error(NOT_IMPLEMENTED)
+    return false
   }
 
   /**
@@ -604,7 +626,7 @@ class DOMElement {
     @returns {Boolean} true if the element is of type `Node.DOCUMENT_NODE`
    */
   isDocumentNode() {
-    throw new Error(NOT_IMPLEMENTED)
+    return false
   }
 
   /**
@@ -614,6 +636,7 @@ class DOMElement {
     @returns {ui/DOMElement} A clone of this element.
   */
   clone() {
+    /* istanbul ignore next */
     throw new Error(NOT_IMPLEMENTED)
   }
 
@@ -623,11 +646,13 @@ class DOMElement {
     @param {String} str a tag name or an HTML element as string.
     @returns {ui/DOMElement}
   */
-  createElement(str) {
+  createElement(str) { // eslint-disable-line no-unused-vars
+    /* istanbul ignore next */
     throw new Error(NOT_IMPLEMENTED)
   }
 
-  createTextNode(text) {
+  createTextNode(text) { // eslint-disable-line no-unused-vars
+    /* istanbul ignore next */
     throw new Error(NOT_IMPLEMENTED)
   }
 
@@ -642,7 +667,8 @@ class DOMElement {
     @param {String} cssSelector
     @returns {Boolean}
    */
-  is(cssSelector) {
+  is(cssSelector) { // eslint-disable-line no-unused-vars
+    /* istanbul ignore next */
     throw new Error(NOT_IMPLEMENTED)
   }
 
@@ -653,6 +679,7 @@ class DOMElement {
     @returns {ui/DOMElement} the parent element
    */
   getParent() {
+    /* istanbul ignore next */
     throw new Error(NOT_IMPLEMENTED)
   }
 
@@ -665,6 +692,18 @@ class DOMElement {
     @returns {ui/DOMElement} the root element
    */
   getRoot() {
+    /* istanbul ignore next */
+    throw new Error(NOT_IMPLEMENTED)
+  }
+
+  /**
+    Get the ownerDocument of this element.
+
+    @abstract
+    @returns {ui/DOMElement} the document element
+  */
+  getOwnerDocument() {
+    /* istanbul ignore next */
     throw new Error(NOT_IMPLEMENTED)
   }
 
@@ -680,7 +719,8 @@ class DOMElement {
     @param {String} cssSelector
     @returns {ui/DOMElement} found element
    */
-  find(cssSelector) {
+  find(cssSelector) { // eslint-disable-line no-unused-vars
+    /* istanbul ignore next */
     throw new Error(NOT_IMPLEMENTED)
   }
 
@@ -695,15 +735,15 @@ class DOMElement {
     @param {String} cssSelector
     @returns {Array<ui/DOMElement>} found elements
    */
-  findAll(cssSelector) {
+  findAll(cssSelector) { // eslint-disable-line no-unused-vars
+    /* istanbul ignore next */
     throw new Error(NOT_IMPLEMENTED)
   }
 
   /**
     Append a child element.
 
-    @abstract
-    @param {ui/DOMElement|String} child An element or text to append
+    @param {DOMElement|String} child An element or text to append
     @returns {this}
    */
   append(child) {
@@ -724,7 +764,8 @@ class DOMElement {
     return this
   }
 
-  appendChild(child) {
+  appendChild(child) { // eslint-disable-line no-unused-vars
+    /* istanbul ignore next */
     throw new Error(NOT_IMPLEMENTED)
   }
 
@@ -736,11 +777,13 @@ class DOMElement {
     @param {ui/DOMElement|String} child The child element or text to insert.
     @returns {this}
   */
-  insertAt(pos, child) {
+  insertAt(pos, child) { // eslint-disable-line no-unused-vars
+    /* istanbul ignore next */
     throw new Error(NOT_IMPLEMENTED)
   }
 
-  insertBefore(newChild, before) {
+  insertBefore(newChild, before) { // eslint-disable-line no-unused-vars
+    /* istanbul ignore next */
     throw new Error(NOT_IMPLEMENTED)
   }
 
@@ -751,22 +794,23 @@ class DOMElement {
     @param {Number} pos
     @returns {this}
   */
-  removeAt(pos) {
+  removeAt(pos) { // eslint-disable-line no-unused-vars
+    /* istanbul ignore next */
     throw new Error(NOT_IMPLEMENTED)
   }
 
-  removeChild(child) {
+  removeChild(child) { // eslint-disable-line no-unused-vars
+    /* istanbul ignore next */
     throw new Error(NOT_IMPLEMENTED)
   }
 
-  replaceChild(oldChild, newChild) {
+  replaceChild(oldChild, newChild) { // eslint-disable-line no-unused-vars
+    /* istanbul ignore next */
     throw new Error(NOT_IMPLEMENTED)
   }
 
   /**
     Removes this element from its parent.
-
-    @abstract
     @returns {this}
   */
   remove() {
@@ -783,15 +827,22 @@ class DOMElement {
     @returns {this}
   */
   empty() {
+    /* istanbul ignore next */
     throw new Error(NOT_IMPLEMENTED)
   }
 
   serialize() {
-    return this.outerHTML
+    return this.getOuterHTML()
   }
 
   isInDocument() {
-    return false
+    let el = this
+    while(el) {
+      if (el.isDocumentNode()) {
+        return true
+      }
+      el = el.getParent()
+    }
   }
 
   /**
@@ -831,7 +882,7 @@ class DOMElement {
   /**
     Outer height as provided by $.outerHeight(withMargin)
   */
-  getOuterHeight(withMargin) {
+  getOuterHeight(withMargin) { // eslint-disable-line no-unused-vars
     return 0
   }
 
@@ -861,288 +912,104 @@ class DOMElement {
     return this.createElement.bind(this)
   }
 
-}
+  // properties
 
-var _propertyDefinitions = {
-  'id': {
-    configurable: true,
-    get: function() {
-      return this.getId()
-    },
-    set: function(id) {
-      this.setId(id)
-    }
-  },
-  'tagName': {
-    configurable: true,
-    get: function() {
-      return this.getTagName()
-    },
-    set: function(tagName) {
-      this.setTagName(tagName)
-    }
-  },
-  'nodeName': {
-    configurable: true,
-    get: function() {
-      return this.getTagName()
-    }
-  },
-  'nodeType': {
-    configurable: true,
-    get: function() {
-      return this.getNodeType()
-    },
-    set: function() {
-      throw new Error('ui/DOMElement#nodeType is readonly.')
-    }
-  },
-  'textContent': {
-    configurable: true,
-    get: function() {
-      return this.getTextContent()
-    },
-    set: function(text) {
-      this.setTextContent(text)
-    }
-  },
-  'innerHTML': {
-    configurable: true,
-    get: function() {
-      return this.getInnerHTML()
-    },
-    set: function(html) {
-      this.setInnerHTML(html)
-    }
-  },
-  'outerHTML': {
-    configurable: true,
-    get: function() {
-      return this.getOuterHTML()
-    },
-    set: function() {
-      throw new Error('ui/DOMElement#outerHTML is readonly.')
-    }
-  },
-  'childNodes': {
-    configurable: true,
-    get: function() {
-      return this.getChildNodes()
-    },
-    set: function() {
-      throw new Error('ui/DOMElement#childNodes is readonly.')
-    }
-  },
-  'children': {
-    configurable: true,
-    get: function() {
-      return this.getChildren()
-    },
-    set: function() {
-      throw new Error('ui/DOMElement#children is readonly.')
-    }
-  },
-  'parentNode': {
-    configurable: true,
-    get: function() {
-      return this.getParent()
-    },
-    set: function() {
-      throw new Error('ui/DOMElement#parentNode is readonly.')
-    }
-  },
-  'height': {
-    configurable: true,
-    get: function() {
-      return this.getHeight()
-    },
-  },
-  'width': {
-    configurable: true,
-    get: function() {
-      return this.getWidth()
-    },
-  },
+  get id() {
+    return this.getId()
+  }
+
+  set id(id) {
+    this.setId(id)
+  }
+
+  get tagName() {
+    return this.getTagName()
+  }
+
+  set tagName(tagName) {
+    this.setTagName(tagName)
+  }
+
+  get nodeName() {
+    return this.getTagName()
+  }
+
+  get nodeType() {
+    return this.getNodeType()
+  }
+
+  get className() {
+    return this.getAttribute('class')
+  }
+
+  set className(className) {
+    this.setAttribute('class', className)
+  }
+
+  get textContent() {
+    return this.getTextContent()
+  }
+
+  set textContent(text) {
+    this.setTextContent(text)
+  }
+
+  get innerHTML() {
+    return this.getInnerHTML()
+  }
+
+  set innerHTML(html) {
+    this.setInnerHTML(html)
+  }
+
+  get outerHTML() {
+    return this.getOuterHTML()
+  }
+
+  get childNodes() {
+    return this.getChildNodes()
+  }
+
+  get firstChild() {
+    return this.getFirstChild()
+  }
+
+  get lastChild() {
+    return this.getLastChild()
+  }
+
+  get nextSibling() {
+    return this.getNextSibling()
+  }
+
+  get previousSibling() {
+    return this.getPreviousSibling()
+  }
+
+  get parentNode() {
+    return this.getParent()
+  }
+
+  get height() {
+    return this.getHeight()
+  }
+
+  get width() {
+    return this.getWidth()
+  }
 }
 
 DOMElement.prototype._isDOMElement = true
 
-DOMElement._propertyNames = Object.keys(_propertyDefinitions)
-
-DOMElement._defineProperties = function(DOMElementClass, propertyNames) {
-  propertyNames = propertyNames || DOMElement._propertyNames
-  propertyNames.forEach(function(name) {
-    var def = _propertyDefinitions[name]
-    if (def) {
-      Object.defineProperty(DOMElementClass.prototype, name, def)
-    }
-  })
+DOMElement.pxStyles = {
+  top: true,
+  bottom: true,
+  left: true,
+  right: true,
+  height: true,
+  width: true
 }
 
-class DOMElementDelegator extends DOMElement {
-  constructor() {
-    super()
-
-    this.el = null
-  }
-}
-
-var _delegators = {
-  'getNativeElement': null,
-  'hasClass': false,
-  'getAttribute': null,
-  'getAttributes': {},
-  'getProperty': null,
-  'getTagName': 'throw',
-  'getId': 'throw',
-  'getValue': null,
-  'getStyle': null,
-  'getTextContent': '',
-  'getInnerHTML': '',
-  'getOuterHTML': '',
-  'getChildCount': 0,
-  'getChildNodes': [],
-  'getChildren': [],
-  'getChildAt': null,
-  'getParent': null,
-  'getRoot': null,
-  'getEventListeners': [],
-  'find': null,
-  'findAll': [],
-  'is': false,
-  'isTextNode': false,
-  'isElementNode': false,
-  'isCommentNode': false,
-  'isDocumentNode': false,
-  'isInDocument': false,
-  'position': null
-}
-
-forEach(_delegators, function(defaultValue, method) {
-  DOMElementDelegator.prototype[method] = function() {
-    if (!this.el) {
-      if (defaultValue === 'throw') {
-        throw new Error('This component has not been rendered yet.')
-      } else {
-        return defaultValue
-      }
-    }
-    return this.el[method].apply(this.el, arguments)
-  }
-})
-
-// Delegators implementing the DOMElement interface
-// these are chainable
-;[
-  'addClass', 'removeClass',
-  'setAttribute', 'removeAttribute',
-  'setProperty', 'removeProperty',
-  'setTagName', 'setId', 'setValue', 'setStyle',
-  'setTextContent', 'setInnerHTML',
-  'addEventListener', 'removeEventListener',
-  'appendChild', 'insertAt', 'insertBefore',
-  'remove', 'removeAt', 'removeChild', 'replaceChild', 'empty',
-  'focus', 'blur', 'click'
-].forEach(function(method) {
-  DOMElementDelegator.prototype[method] = function() {
-    if (!this.el) {
-      throw new Error('This component has not been rendered yet.')
-    }
-    this.el[method].apply(this.el, arguments)
-    return this
-  }
-})
-
-DOMElement.Delegator = DOMElementDelegator
-
-class DOMEventListener {
-  constructor(eventName, handler, options) {
-    if (!isString(eventName) || !isFunction(handler)) {
-      throw new Error("Illegal arguments: 'eventName' must be a String, and 'handler' must be a Function.")
-    }
-    options = options || {}
-    var origHandler = handler
-    var context = options.context
-    var capture = Boolean(options.capture)
-
-    if (context) {
-      handler = handler.bind(context)
-    }
-    if (options.once === true) {
-      handler = _once(this, handler)
-    }
-
-    this.eventName = eventName
-    this.originalHandler = origHandler
-    this.handler = handler
-    this.capture = capture
-    this.context = context
-    this.options = options
-    // set when this gets attached to a DOM element
-    this._el = null
-  }
-
-  get _isDOMEventListener() { return true }
-
-}
-
-DOMEventListener.matches = function(l1, l2) {
-  return l1.eventName === l2.eventName && l1.originalHandler === l2.originalHandler
-}
-
-function _once(listener, handler) {
-  return function(event) {
-    handler(event)
-    listener._el.removeEventListener(listener)
-  }
-}
-
-DOMElement.EventListener = DOMEventListener
-
-DOMElement._findEventListenerIndex = function(eventListeners, eventName, handler) {
-  var idx = -1
-  if (arguments[1]._isDOMEventListener) {
-    idx = eventListeners.indexOf(arguments[1])
-  } else {
-    idx = findIndex(eventListeners,
-      DOMEventListener.matches.bind(null, {
-        eventName: eventName,
-        originalHandler: handler
-      })
-    )
-  }
-  return idx
-}
-
-class TextNode {
-
-  get _isDOMElement() { return true }
-
-  isTextNode() {
-    return true
-  }
-
-  getNodeType() {
-    return 'text'
-  }
-
-  isElementNode() { return false }
-
-  isDocumentNode() { return false }
-
-  isCommentNode() { return false }
-
-}
-
-[
-  'getParent', 'getNextSibling', 'getPreviousSibling',
-  'text', 'getTextContent', 'setTextContent',
-  'clone'
-].forEach(function(name) {
-  TextNode.prototype[name] = DOMElement.prototype[name]
-})
-
-
-DOMElement.TextNode = TextNode
+DOMElement.EMPTY_HTML = '<html><head></head><body></body></html>'
 
 export default DOMElement

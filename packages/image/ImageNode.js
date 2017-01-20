@@ -16,9 +16,9 @@ class ImageNode extends DocumentNode {
   }
 }
 
-ImageNode.define({
+ImageNode.schema = {
   type: 'image',
   imageFile: { type: 'file' }
-})
+}
 
 export default ImageNode

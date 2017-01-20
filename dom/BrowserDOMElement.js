@@ -1,21 +1,22 @@
 import isString from '../util/isString'
 import isNumber from '../util/isNumber'
 import DOMElement from './DOMElement'
+import DOMEventListener from './DOMEventListener'
 import DelegatedEvent from './DelegatedEvent'
 
 class BrowserDOMElement extends DOMElement {
 
   constructor(el) {
     super()
+    // wrapping the native element
     console.assert(el instanceof window.Node, "Expecting native DOM node.")
     this.el = el
     el._wrapper = this
+    // a store for event listeners: necessary so that we can 'reuse' the listener and do reasoning for incremental rendering
     this.eventListeners = []
-    this.htmlProps = {}
-  }
-
-  get _isBrowserDOMElement() {
-    return true
+    // store for changed properties: unfortunately this is necessary for incremental
+    // rerendering, as there seems no way to get a set of changed properties in a general way
+    this._changedProperties = new Set()
   }
 
   getNativeElement() {
@@ -33,15 +34,6 @@ class BrowserDOMElement extends DOMElement {
 
   removeClass(className) {
     this.el.classList.remove(className)
-    return this
-  }
-
-  getClasses() {
-    return this.el.className
-  }
-
-  setClasses(classString) {
-    this.el.className = classString
     return this
   }
 
@@ -70,18 +62,26 @@ class BrowserDOMElement extends DOMElement {
     return result
   }
 
+  getProperties() {
+    let properties = {}
+    this._changedProperties.forEach((name) => {
+      properties[name] = this.el[name]
+    })
+    return properties
+  }
+
   getProperty(name) {
     return this.el[name]
   }
 
   setProperty(name, value) {
-    this.htmlProps[name] = value
+    this._changedProperties.add(name)
     this.el[name] = value
     return this
   }
 
   removeProperty(name) {
-    delete this.htmlProps[name]
+    this._changedProperties.delete(name)
     delete this.el[name]
     return this
   }
@@ -101,11 +101,9 @@ class BrowserDOMElement extends DOMElement {
       let attr = attributes.item(i)
       newEl.setAttribute(attr.name, attr.value)
     }
-    for (let key in this.htmlProps) {
-      if (this.htmlProps.hasOwnProperty(key)) {
-        newEl[key] = this.htmlProps[key]
-      }
-    }
+    this._changedProperties.forEach((name)=>{
+      newEl[name] = this.el[name]
+    })
     this.eventListeners.forEach(function(listener) {
       newEl.addEventListener(listener.eventName, listener.handler, listener.capture)
     })
@@ -125,15 +123,6 @@ class BrowserDOMElement extends DOMElement {
     return this
   }
 
-  getValue() {
-    return this.el.value
-  }
-
-  setValue(value) {
-    this.el.value = value
-    return this
-  }
-
   getStyle(name) {
     // NOTE: important to provide computed style, otherwise we don't get inherited styles
     let style = this.getComputedStyle()
@@ -145,18 +134,7 @@ class BrowserDOMElement extends DOMElement {
   }
 
   setStyle(name, value) {
-    let _pxStyles = {
-      top: true,
-      bottom: true,
-      left: true,
-      right: true,
-      height: true,
-      width: true
-    }
-
-    if (_pxStyles[name] && isNumber(value)) {
-      value = value + "px"
-    }
+    if (DOMElement.pxStyles[name] && isNumber(value)) value = value + "px"
     this.el.style[name] = value
     return this
   }
@@ -202,42 +180,22 @@ class BrowserDOMElement extends DOMElement {
     if (arguments.length === 1 && arguments[0]) {
       listener = arguments[0]
     } else {
-      listener = new DOMElement.EventListener(eventName, handler, options)
+      listener = new DOMEventListener(eventName, handler, options)
     }
     if (listener.options.selector && !listener.__hasEventDelegation__) {
-      listener.handler = this._delegatedHandler(listener)
+      listener.handler = DelegatedEvent.delegatedHandler(listener, this.getNativeElement())
       listener.__hasEventDelegation__ = true
     }
     this.el.addEventListener(listener.eventName, listener.handler, listener.capture)
-    listener._el = this
     this.eventListeners.push(listener)
+    listener._el = this
     return this
-  }
-
-  _delegatedHandler(listener) {
-    let handler = listener.handler
-    let context = listener.context
-    let selector = listener.options.selector
-    let nativeTop = this.getNativeElement()
-    return function(event) {
-      let nativeEl = event.target
-      while(nativeEl) {
-        if (matches(nativeEl, selector)) {
-          handler(new DelegatedEvent(context, event.target, event))
-          break
-        }
-        if (nativeEl === nativeTop) {
-          break
-        }
-        nativeEl = nativeEl.parentNode;
-      }
-    }
   }
 
   removeEventListener(eventName, handler) {
     // console.log('removing event listener', eventName, handler);
     let listener = null, idx = -1
-    idx = DOMElement._findEventListenerIndex(this.eventListeners, eventName, handler)
+    idx = DOMEventListener.findIndex(this.eventListeners, eventName, handler)
     listener = this.eventListeners[idx]
     if (idx > -1) {
       this.eventListeners.splice(idx, 1)
@@ -352,13 +310,37 @@ class BrowserDOMElement extends DOMElement {
     return BrowserDOMElement.wrapNativeElement(clone)
   }
 
+  createDocument(format) {
+    return BrowserDOMElement.createDocument(format)
+  }
+
   createElement(tagName) {
-    let el = this.el.ownerDocument.createElement(tagName)
+    let doc = this._getNativeOwnerDocument()
+    let el = doc.createElement(tagName)
     return BrowserDOMElement.wrapNativeElement(el)
   }
 
   createTextNode(text) {
-    var el = this.el.ownerDocument.createTextNode(text)
+    let doc = this._getNativeOwnerDocument()
+    let el = doc.createTextNode(text)
+    return BrowserDOMElement.wrapNativeElement(el)
+  }
+
+  createComment(data) {
+    let doc = this._getNativeOwnerDocument()
+    let el = doc.createComment(data)
+    return BrowserDOMElement.wrapNativeElement(el)
+  }
+
+  createProcessingInstruction(name, data) {
+    let doc = this._getNativeOwnerDocument()
+    let el = doc.createProcessingInstruction(name, data)
+    return BrowserDOMElement.wrapNativeElement(el)
+  }
+
+  createCDATASection(data) {
+    let doc = this._getNativeOwnerDocument()
+    let el = doc.createCDATASection(data)
     return BrowserDOMElement.wrapNativeElement(el)
   }
 
@@ -390,6 +372,14 @@ class BrowserDOMElement extends DOMElement {
       parent = el.parentNode
     }
     return BrowserDOMElement.wrapNativeElement(el)
+  }
+
+  getOwnerDocument() {
+    return BrowserDOMElement.wrapNativeElement(this._getNativeOwnerDocument())
+  }
+
+  _getNativeOwnerDocument() {
+    return (this.isDocumentNode() ? this.el : this.el.ownerDocument)
   }
 
   find(cssSelector) {
@@ -594,14 +584,30 @@ class BrowserDOMElement extends DOMElement {
     return outerHeight
   }
 
+  get children() {
+    return this.getChildren()
+  }
+
+  get ownerDocument() {
+    return this.getOwnerDocument()
+  }
+
 }
 
-DOMElement._defineProperties(BrowserDOMElement, DOMElement._propertyNames)
+BrowserDOMElement.prototype._isBrowserDOMElement = true
 
-BrowserDOMElement.createTextNode = function(text) {
-  return BrowserDOMElement.wrapNativeElement(
-    window.document.createTextNode(text)
-  )
+// TODO: flesh out how options should look like (e.g. XML namespaceURI etc.)
+BrowserDOMElement.createDocument = function(format) {
+  let doc
+  if (format === 'xml') {
+    // HACK: didn't find a way to create an empty XML doc without a root element
+    doc = window.document.implementation.createDocument(null, 'dummy')
+    // remove the
+    doc.removeChild(doc.firstChild)
+  } else {
+    doc = (new window.DOMParser()).parseFromString(DOMElement.EMPTY_HTML, 'text/html')
+  }
+  return BrowserDOMElement.wrapNativeElement(doc)
 }
 
 BrowserDOMElement.createElement = function(tagName) {
@@ -610,17 +616,17 @@ BrowserDOMElement.createElement = function(tagName) {
   )
 }
 
+BrowserDOMElement.createTextNode = function(text) {
+  return BrowserDOMElement.wrapNativeElement(
+    window.document.createTextNode(text)
+  )
+}
+
 BrowserDOMElement.parseMarkup = function(str, format, isFullDoc) {
   let nativeEls = []
   let doc
   if (!str) {
-    // Create an empty XML document
-    if (format === 'xml') {
-      doc = (new window.DOMParser()).parseFromString('<dummy/>', 'text/xml')
-    } else {
-      doc = (new window.DOMParser()).parseFromString('<html></html>', 'text/html')
-    }
-    return new BrowserDOMElement(doc)
+    return BrowserDOMElement.createDocument(format)
   } else {
     let parser = new window.DOMParser()
     if (format === 'html') {
@@ -665,33 +671,25 @@ BrowserDOMElement.parseMarkup = function(str, format, isFullDoc) {
   }
 }
 
-class TextNode extends DOMElement.TextNode {
-  constructor(nativeEl) {
-    super()
-    console.assert(nativeEl instanceof window.Node && nativeEl.nodeType === 3, "Expecting native TextNode.")
-    this.el = nativeEl
-    nativeEl._wrapper = this
-
-    let methods = [
-      'getParent', 'getNextSibling', 'getPreviousSibling',
-      'getTextContent', 'setTextContent',
-      'getInnerHTML', 'setInnerHTML', 'getOuterHTML',
-      'getNativeElement', 'clone'
-    ]
-
-    methods.forEach(function(name) {
-      this[name] = BrowserDOMElement.prototype[name]
-    }.bind(this))
-  }
-
-  get _isBrowserDOMElement() {
-    return true
-  }
+BrowserDOMElement.parseHTML = function(html, isFullDoc) {
+  return BrowserDOMElement.parseMarkup(html, 'html', isFullDoc)
 }
 
-DOMElement._defineProperties(TextNode, ['nodeType', 'textContent', 'innerHTML', 'outerHTML', 'parentNode'])
+BrowserDOMElement.parseXML = function(html, isFullDoc) {
+  return BrowserDOMElement.parseMarkup(html, 'xml', isFullDoc)
+}
 
-BrowserDOMElement.TextNode = TextNode
+class BrowserTextNode extends BrowserDOMElement {
+
+  constructor(nativeEl) {
+    super(nativeEl)
+    if (!(nativeEl instanceof window.Node) || nativeEl.nodeType !== 3) {
+      throw new Error("Expecting native TextNode.")
+    }
+  }
+  getNodeType() { return 'text' }
+
+}
 
 BrowserDOMElement.wrapNativeElement = function(el) {
   if (el) {
@@ -699,7 +697,7 @@ BrowserDOMElement.wrapNativeElement = function(el) {
       return el._wrapper
     } else if (el instanceof window.Node) {
       if (el.nodeType === 3) {
-        return new TextNode(el)
+        return new BrowserTextNode(el)
       } else {
         return new BrowserDOMElement(el)
       }
@@ -712,50 +710,44 @@ BrowserDOMElement.wrapNativeElement = function(el) {
 }
 
 /*
-  Wrapper for the window element only exposing the eventlistener API.
+  Wrapper for the window element exposing DOMElement's EventListener API.
 */
 class BrowserWindow {
+
   constructor() {
+    // Note: not
     this.el = window
     window.__BrowserDOMElementWrapper__ = this
     this.eventListeners = []
-    this.getEventListeners = BrowserDOMElement.prototype.getEventListeners
   }
 
-  on() {
-    return BrowserDOMElement.prototype.on.apply(this, arguments)
-  }
-
-  off() {
-    return BrowserDOMElement.prototype.off.apply(this, arguments)
-  }
-
-  addEventListener() {
-    return BrowserDOMElement.prototype.addEventListener.apply(this, arguments)
-  }
-
-  removeEventListener() {
-    return BrowserDOMElement.prototype.removeEventListener.apply(this, arguments)
-  }
 }
 
+BrowserWindow.prototype.on = BrowserDOMElement.prototype.on
+
+BrowserWindow.prototype.off = BrowserDOMElement.prototype.off
+
+BrowserWindow.prototype.addEventListener = BrowserDOMElement.prototype.addEventListener
+
+BrowserWindow.prototype.removeEventListener = BrowserDOMElement.prototype.removeEventListener
+
+BrowserWindow.prototype.getEventListeners = BrowserDOMElement.prototype.getEventListeners
 
 BrowserDOMElement.getBrowserWindow = function() {
   if (window.__BrowserDOMElementWrapper__) return window.__BrowserDOMElementWrapper__
   return new BrowserWindow(window)
 }
 
-let _r1
-let _r2
-
 BrowserDOMElement.isReverse = function(anchorNode, anchorOffset, focusNode, focusOffset) {
   // the selection is reversed when the focus propertyEl is before
   // the anchor el or the computed charPos is in reverse order
   if (focusNode && anchorNode) {
-    if (!_r1) {
-      _r1 = window.document.createRange()
-      _r2 = window.document.createRange()
+    if (!BrowserDOMElement.isReverse._r1) {
+      BrowserDOMElement.isReverse._r1 = window.document.createRange()
+      BrowserDOMElement.isReverse._r2 = window.document.createRange()
     }
+    const _r1 = BrowserDOMElement.isReverse._r1
+    const _r2 = BrowserDOMElement.isReverse._r2
     _r1.setStart(anchorNode.getNativeElement(), anchorOffset)
     _r2.setStart(focusNode.getNativeElement(), focusOffset)
     let cmp = _r1.compareBoundaryPoints(window.Range.START_TO_START, _r2)

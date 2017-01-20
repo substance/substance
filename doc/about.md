@@ -9,11 +9,11 @@ Building an editor starts with the data. For instance, a scientific article is m
 ```js
 class Todo extends TextBlock {}
 
-Todo.define({
+Todo.schema = {
   type: 'todo',
   content: 'text',
   done: { type: 'bool', default: false}
-})
+}
 ```
 
 Probably you are already using a certain data format, XML files or HTML. With Substance you can create a custom converter very easily.

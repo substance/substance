@@ -1,4 +1,3 @@
 export default function isPlainObject(o) {
-  if (!o) return false
-  return o.constructor === Object
+  return Boolean(o) && o.constructor === Object
 }

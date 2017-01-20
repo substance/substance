@@ -1,7 +1,7 @@
 import { module } from 'substance-test'
 /* eslint-disable no-invalid-this, indent */
 
-import { get } from 'lodash-es'
+import get from 'lodash-es/get'
 import isArray from '../../util/isArray'
 import DOMSelection from '../../ui/DOMSelection'
 import TextPropertyComponent from '../../ui/TextPropertyComponent'

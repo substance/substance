@@ -1,6 +1,6 @@
 import isArray from '../../util/isArray'
 import isNumber from '../../util/isNumber'
-import { isObject } from 'lodash-es'
+import isObject from '../../util/isObject'
 import ObjectOperation from './ObjectOperation'
 import TextOperation from './TextOperation'
 import ArrayOperation from './ArrayOperation'
@@ -55,6 +55,7 @@ Primitive type operations:
 */
 
 class OperationSerializer{
+
   constructor() {
     this.SEPARATOR = '\t'
   }
