@@ -65,9 +65,11 @@ class DOMElement {
    */
 
   /**
+    @abstract
     @returns the native element
   */
   getNativeElement() {
+    /* istanbul ignore next */
     throw new Error(NOT_IMPLEMENTED)
   }
 
@@ -79,6 +81,7 @@ class DOMElement {
     @returns {Boolean} true if the CSS class is set
   */
   hasClass(className) { // eslint-disable-line no-unused-vars
+    /* istanbul ignore next */
     throw new Error(NOT_IMPLEMENTED)
   }
 
@@ -90,6 +93,7 @@ class DOMElement {
     @returns {this}
   */
   addClass(classString) { // eslint-disable-line no-unused-vars
+    /* istanbul ignore next */
     throw new Error(NOT_IMPLEMENTED)
   }
 
@@ -101,6 +105,7 @@ class DOMElement {
     @returns {this}
   */
   removeClass(classString) { // eslint-disable-line no-unused-vars
+    /* istanbul ignore next */
     throw new Error(NOT_IMPLEMENTED)
   }
 
@@ -153,6 +158,7 @@ class DOMElement {
     @returns {String} the attribute's value.
   */
   getAttribute(name) { // eslint-disable-line no-unused-vars
+    /* istanbul ignore next */
     throw new Error(NOT_IMPLEMENTED)
   }
 
@@ -164,14 +170,17 @@ class DOMElement {
     @returns {this}
   */
   setAttribute(name, value) { // eslint-disable-line no-unused-vars
+    /* istanbul ignore next */
     throw new Error(NOT_IMPLEMENTED)
   }
 
   removeAttribute(name) { // eslint-disable-line no-unused-vars
+    /* istanbul ignore next */
     throw new Error(NOT_IMPLEMENTED)
   }
 
   getAttributes() {
+    /* istanbul ignore next */
     throw new Error(NOT_IMPLEMENTED)
   }
 
@@ -199,14 +208,17 @@ class DOMElement {
   }
 
   getProperty(name) { // eslint-disable-line no-unused-vars
+    /* istanbul ignore next */
     throw new Error(NOT_IMPLEMENTED)
   }
 
   setProperty(name, value) { // eslint-disable-line no-unused-vars
+    /* istanbul ignore next */
     throw new Error(NOT_IMPLEMENTED)
   }
 
   removeProperty(name) { // eslint-disable-line no-unused-vars
+    /* istanbul ignore next */
     throw new Error(NOT_IMPLEMENTED)
   }
 
@@ -219,6 +231,7 @@ class DOMElement {
     @returns {String} the tag name in lower-case.
    */
   getTagName() {
+    /* istanbul ignore next */
     throw new Error(NOT_IMPLEMENTED)
   }
 
@@ -232,6 +245,7 @@ class DOMElement {
     @returns {this}
   */
   setTagName(tagName) { // eslint-disable-line no-unused-vars
+    /* istanbul ignore next */
     throw new Error(NOT_IMPLEMENTED)
   }
 
@@ -312,10 +326,12 @@ class DOMElement {
   }
 
   getStyle(name) { // eslint-disable-line no-unused-vars
+    /* istanbul ignore next */
     throw new Error(NOT_IMPLEMENTED)
   }
 
   setStyle(name, value) { // eslint-disable-line no-unused-vars
+    /* istanbul ignore next */
     throw new Error(NOT_IMPLEMENTED)
   }
 
@@ -344,6 +360,7 @@ class DOMElement {
     @returns {String}
   */
   getTextContent() {
+    /* istanbul ignore next */
     throw new Error(NOT_IMPLEMENTED)
   }
 
@@ -357,6 +374,7 @@ class DOMElement {
     @returns {this}
   */
   setTextContent(text) { // eslint-disable-line no-unused-vars
+    /* istanbul ignore next */
     throw new Error(NOT_IMPLEMENTED)
   }
 
@@ -385,6 +403,7 @@ class DOMElement {
     @returns {String}
   */
   getInnerHTML() {
+    /* istanbul ignore next */
     throw new Error(NOT_IMPLEMENTED)
   }
 
@@ -398,6 +417,7 @@ class DOMElement {
     @returns {this}
   */
   setInnerHTML(html) { // eslint-disable-line no-unused-vars
+    /* istanbul ignore next */
     throw new Error(NOT_IMPLEMENTED)
   }
 
@@ -410,6 +430,7 @@ class DOMElement {
     @returns {String}
   */
   getOuterHTML() {
+    /* istanbul ignore next */
     throw new Error(NOT_IMPLEMENTED)
   }
 
@@ -464,14 +485,17 @@ class DOMElement {
   }
 
   addEventListener(eventName, handler, options) { // eslint-disable-line no-unused-vars
+    /* istanbul ignore next */
     throw new Error(NOT_IMPLEMENTED)
   }
 
   removeEventListener(eventName, handler) { // eslint-disable-line no-unused-vars
+    /* istanbul ignore next */
     throw new Error(NOT_IMPLEMENTED)
   }
 
   getEventListeners() {
+    /* istanbul ignore next */
     throw new Error(NOT_IMPLEMENTED)
   }
 
@@ -497,6 +521,7 @@ class DOMElement {
   }
 
   getChildCount() {
+    /* istanbul ignore next */
     throw new Error(NOT_IMPLEMENTED)
   }
 
@@ -511,6 +536,7 @@ class DOMElement {
     @returns {Array<ui/DOMElement>}
    */
   getChildNodes() {
+    /* istanbul ignore next */
     throw new Error(NOT_IMPLEMENTED)
   }
 
@@ -525,14 +551,17 @@ class DOMElement {
     @returns {Array<ui/DOMElement>}
    */
   getChildren() {
+    /* istanbul ignore next */
     throw new Error(NOT_IMPLEMENTED)
   }
 
   getChildAt(pos) { // eslint-disable-line no-unused-vars
+    /* istanbul ignore next */
     throw new Error(NOT_IMPLEMENTED)
   }
 
   getChildIndex(child) { // eslint-disable-line no-unused-vars
+    /* istanbul ignore next */
     throw new Error(NOT_IMPLEMENTED)
   }
 
@@ -541,18 +570,22 @@ class DOMElement {
   }
 
   getLastChild() {
+    /* istanbul ignore next */
     throw new Error(NOT_IMPLEMENTED)
   }
 
   getFirstChild() {
+    /* istanbul ignore next */
     throw new Error(NOT_IMPLEMENTED)
   }
 
   getNextSibling() {
+    /* istanbul ignore next */
     throw new Error(NOT_IMPLEMENTED)
   }
 
   getPreviousSibling() {
+    /* istanbul ignore next */
     throw new Error(NOT_IMPLEMENTED)
   }
 
@@ -603,6 +636,7 @@ class DOMElement {
     @returns {ui/DOMElement} A clone of this element.
   */
   clone() {
+    /* istanbul ignore next */
     throw new Error(NOT_IMPLEMENTED)
   }
 
@@ -613,10 +647,12 @@ class DOMElement {
     @returns {ui/DOMElement}
   */
   createElement(str) { // eslint-disable-line no-unused-vars
+    /* istanbul ignore next */
     throw new Error(NOT_IMPLEMENTED)
   }
 
   createTextNode(text) { // eslint-disable-line no-unused-vars
+    /* istanbul ignore next */
     throw new Error(NOT_IMPLEMENTED)
   }
 
@@ -632,6 +668,7 @@ class DOMElement {
     @returns {Boolean}
    */
   is(cssSelector) { // eslint-disable-line no-unused-vars
+    /* istanbul ignore next */
     throw new Error(NOT_IMPLEMENTED)
   }
 
@@ -642,6 +679,7 @@ class DOMElement {
     @returns {ui/DOMElement} the parent element
    */
   getParent() {
+    /* istanbul ignore next */
     throw new Error(NOT_IMPLEMENTED)
   }
 
@@ -654,6 +692,7 @@ class DOMElement {
     @returns {ui/DOMElement} the root element
    */
   getRoot() {
+    /* istanbul ignore next */
     throw new Error(NOT_IMPLEMENTED)
   }
 
@@ -664,6 +703,7 @@ class DOMElement {
     @returns {ui/DOMElement} the document element
   */
   getOwnerDocument() {
+    /* istanbul ignore next */
     throw new Error(NOT_IMPLEMENTED)
   }
 
@@ -680,6 +720,7 @@ class DOMElement {
     @returns {ui/DOMElement} found element
    */
   find(cssSelector) { // eslint-disable-line no-unused-vars
+    /* istanbul ignore next */
     throw new Error(NOT_IMPLEMENTED)
   }
 
@@ -695,6 +736,7 @@ class DOMElement {
     @returns {Array<ui/DOMElement>} found elements
    */
   findAll(cssSelector) { // eslint-disable-line no-unused-vars
+    /* istanbul ignore next */
     throw new Error(NOT_IMPLEMENTED)
   }
 
@@ -723,6 +765,7 @@ class DOMElement {
   }
 
   appendChild(child) { // eslint-disable-line no-unused-vars
+    /* istanbul ignore next */
     throw new Error(NOT_IMPLEMENTED)
   }
 
@@ -735,10 +778,12 @@ class DOMElement {
     @returns {this}
   */
   insertAt(pos, child) { // eslint-disable-line no-unused-vars
+    /* istanbul ignore next */
     throw new Error(NOT_IMPLEMENTED)
   }
 
   insertBefore(newChild, before) { // eslint-disable-line no-unused-vars
+    /* istanbul ignore next */
     throw new Error(NOT_IMPLEMENTED)
   }
 
@@ -750,21 +795,22 @@ class DOMElement {
     @returns {this}
   */
   removeAt(pos) { // eslint-disable-line no-unused-vars
+    /* istanbul ignore next */
     throw new Error(NOT_IMPLEMENTED)
   }
 
   removeChild(child) { // eslint-disable-line no-unused-vars
+    /* istanbul ignore next */
     throw new Error(NOT_IMPLEMENTED)
   }
 
   replaceChild(oldChild, newChild) { // eslint-disable-line no-unused-vars
+    /* istanbul ignore next */
     throw new Error(NOT_IMPLEMENTED)
   }
 
   /**
     Removes this element from its parent.
-
-    @abstract
     @returns {this}
   */
   remove() {
@@ -781,6 +827,7 @@ class DOMElement {
     @returns {this}
   */
   empty() {
+    /* istanbul ignore next */
     throw new Error(NOT_IMPLEMENTED)
   }
 
