@@ -1,5 +1,5 @@
-import extend from '../util/extend'
 import isString from '../util/isString'
+import isFunction from '../util/isFunction'
 import Registry from '../util/Registry'
 import Fragmenter from './Fragmenter'
 import encodeXMLEntities from '../util/encodeXMLEntities'
@@ -14,12 +14,7 @@ class DOMExporter {
     if (!config.converters._isRegistry) {
       this.converters = new Registry()
       config.converters.forEach(function(Converter) {
-        var converter
-        if (typeof Converter === 'function') {
-          converter = new Converter()
-        } else {
-          converter = Converter
-        }
+        let converter = isFunction(Converter) ? new Converter() : Converter
         if (!converter.type) {
           console.error('Converter must provide the type of the associated node.', converter)
           return
@@ -33,11 +28,13 @@ class DOMExporter {
     this.state = {
       doc: null
     }
-    this.config = extend({idAttribute: 'id'}, config)
-
+    this.config = config
     // NOTE: Subclasses (HTMLExporter and XMLExporter) must initialize this
     // with a proper DOMElement instance which is used to create new elements.
-    this._el = null
+    this._elementFactory = config.elementFactory
+    if (!this._elementFactory) {
+      throw new Error("'elementFactory' is mandatory")
+    }
     this.$$ = this.createElement.bind(this)
   }
 
@@ -147,7 +144,7 @@ class DOMExporter {
   }
 
   createElement(str) {
-    return this._el.createElement(str)
+    return this._elementFactory.createElement(str)
   }
 
   _annotatedText(text, annotations) {

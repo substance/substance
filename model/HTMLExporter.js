@@ -5,6 +5,43 @@ import isBoolean from '../util/isBoolean'
 import isNumber from '../util/isNumber'
 import isString from '../util/isString'
 
+/*
+  Base class for custom HTML exporters. If you want to use XML as your
+  exchange format see {@link model/XMLExporter}.
+*/
+
+class HTMLExporter extends DOMExporter {
+
+  constructor(config, context) {
+    super(_defaultConfig(config), context)
+  }
+
+  exportDocument(doc) {
+    let htmlEl = DefaultDOMElement.parseHTML('<html><head></head><body></body></html>')
+    return this.convertDocument(doc, htmlEl)
+  }
+
+  getDefaultBlockConverter() {
+    return defaultBlockConverter // eslint-disable-line no-use-before-define
+  }
+
+  getDefaultPropertyAnnotationConverter() {
+    return defaultAnnotationConverter // eslint-disable-line no-use-before-define
+  }
+
+}
+
+function _defaultConfig(config) {
+  config = Object.assign({
+    idAttribute: 'data-id'
+  }, config)
+  if (!config.elementFactory) {
+    config.elementFactory = DefaultDOMElement.createDocument('html')
+  }
+  return config
+}
+
+
 const defaultAnnotationConverter = {
   tagName: 'span',
   export: function(node, el) {
@@ -37,38 +74,6 @@ const defaultBlockConverter = {
       el.append(prop)
     })
   }
-}
-
-/*
-  @class
-  @abstract
-
-  Base class for custom HTML exporters. If you want to use XML as your
-  exchange format see {@link model/XMLExporter}.
-*/
-
-class HTMLExporter extends DOMExporter {
-
-  constructor(config) {
-    super(Object.assign({ idAttribute: 'data-id' }, config))
-
-    // used internally for creating elements
-    this._el = DefaultDOMElement.parseHTML('<html></html>')
-  }
-
-  exportDocument(doc) {
-    let htmlEl = DefaultDOMElement.parseHTML('<html><head></head><body></body></html>')
-    return this.convertDocument(doc, htmlEl)
-  }
-
-  getDefaultBlockConverter() {
-    return defaultBlockConverter
-  }
-
-  getDefaultPropertyAnnotationConverter() {
-    return defaultAnnotationConverter
-  }
-
 }
 
 export default HTMLExporter
