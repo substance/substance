@@ -1,5 +1,6 @@
 import { spy } from 'substance-test'
 import Component from '../../ui/Component'
+import RenderingEngine from '../../ui/RenderingEngine'
 
 class TestComponent extends Component {
 
@@ -22,7 +23,8 @@ class TestComponent extends Component {
 }
 
 TestComponent.create = function(renderFunc, props) {
-  var comp = new TestComponent()
+  const renderingEngine = TestComponent.defaultRenderingEngine
+  const comp = new TestComponent(null, props, { renderingEngine })
   if (renderFunc) {
     comp.render = renderFunc
   }
@@ -46,5 +48,7 @@ class SimpleComponent extends TestComponent {
 }
 
 TestComponent.Simple = SimpleComponent
+
+TestComponent.defaultRenderingEngine = new RenderingEngine()
 
 export default TestComponent

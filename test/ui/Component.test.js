@@ -1,21 +1,43 @@
 /* eslint-disable no-invalid-this, indent */
 
 import { module, spy } from 'substance-test'
-import Component from '../../ui/Component'
-import TestComponent from './TestComponent'
 import substanceGlobals from '../../util/substanceGlobals'
 import isEqual from '../../util/isEqual'
+import inBrowser from '../../util/inBrowser'
+import DefaultDOMElement from '../../dom/DefaultDOMElement'
+import Component from '../../ui/Component'
+import RenderingEngine from '../../ui/RenderingEngine'
+import XNode from '../../dom/XNode'
+import TestComponent from './TestComponent'
 
-var Simple = TestComponent.Simple
+const Simple = TestComponent.Simple
 
-function ComponentTests(debug) {
+// regular rendering using default DOM elements
+ComponentTests()
 
-  const test = module('ui/Component' + (debug ? ' (debug)' : '' ))
+// RenderingEngine in debug mode
+ComponentTests('debug')
+
+// in the browser do an extra run on memory DOM elements
+if (inBrowser) {
+  ComponentTests(false, 'memory')
+}
+
+function ComponentTests(debug, memory) {
+
+  const test = module('ui/Component' + (debug ? '[debug]' : '') + (memory ? '[memory]' : ''))
     .withOptions({
       before: function() {
         substanceGlobals.DEBUG_RENDERING = Boolean(debug)
       }
     })
+
+  // Note: we are defining the RenderingEngine explicitly so
+  // that we can control which DOMElement implementation is used underneath
+  const _document = memory ? XNode.createDocument('html') : DefaultDOMElement.createDocument('html')
+  const renderingEngine = new RenderingEngine({ elementFactory: _document })
+  // HACK: make TestComponent to use this renderingEngine
+  TestComponent.renderingEngine = renderingEngine
 
   test("Throw error when render method is not returning an element", function(t) {
     class MyComponent extends TestComponent {
@@ -27,19 +49,20 @@ function ComponentTests(debug) {
     t.end()
   })
 
-  test.UI("Mounting a component", function(t) {
-    // Mount to a detached element
-    var el = window.document.createElement('div')
-    var comp = Simple.mount(el)
+  test("Mounting a component", function(t) {
+    // Mounting a detached element
+    let doc = _document.createDocument('html')
+    let el = doc.createElement('div')
+    let comp = Simple.mount(el)
     t.equal(comp.didMount.callCount, 0, "didMount must not be called when mounting to detached elements")
-    // Mount to an existing DOM element
-    comp = Simple.mount(t.sandbox)
+    // Mounting an attached element
+    comp = Simple.mount(doc.firstChild)
     t.equal(comp.didMount.callCount, 1, "didMount should have been called")
     t.end()
   })
 
   test("Render an HTML element", function(t) {
-    var comp = TestComponent.create(function($$) {
+    let comp = TestComponent.create(function($$) {
       return $$('div')
     })
     t.equal(comp.el.tagName, 'div', 'Element should be a "div".')
@@ -51,7 +74,7 @@ function ComponentTests(debug) {
   })
 
   test("Render an element with attributes", function(t) {
-    var comp = TestComponent.create(function($$) {
+    let comp = TestComponent.create(function($$) {
       return $$('div').attr('data-id', 'foo')
     })
     t.equal(comp.el.attr('data-id'), 'foo', 'Element should be have data-id="foo".')
@@ -59,7 +82,7 @@ function ComponentTests(debug) {
   })
 
   test("Render an element with css styles", function(t) {
-    var comp = TestComponent.create(function($$) {
+    let comp = TestComponent.create(function($$) {
       return $$('div').css('width', '100px')
     })
     t.equal(comp.el.css('width'), '100px', 'Element should have a css width of 100px.')
@@ -67,7 +90,7 @@ function ComponentTests(debug) {
   })
 
   test("Render an element with classes", function(t) {
-    var comp = TestComponent.create(function($$) {
+    let comp = TestComponent.create(function($$) {
       return $$('div').addClass('test')
     })
     t.ok(comp.el.hasClass('test'), 'Element should have class "test".')
@@ -75,7 +98,7 @@ function ComponentTests(debug) {
   })
 
   test("Render an element with value", function(t) {
-    var comp = TestComponent.create(function($$) {
+    let comp = TestComponent.create(function($$) {
       return $$('input').attr('type', 'text').val('foo')
     })
     t.equal(comp.el.val(), 'foo', 'Value should be set.')
@@ -83,7 +106,7 @@ function ComponentTests(debug) {
   })
 
   test("Render an element with plain text", function(t) {
-    var comp = TestComponent.create(function($$) {
+    let comp = TestComponent.create(function($$) {
       return $$('div').text('foo')
     })
     t.equal(comp.el.textContent, 'foo','textContent should be set.')
@@ -91,20 +114,20 @@ function ComponentTests(debug) {
   })
 
   test("Render an element with custom html", function(t) {
-    var comp = TestComponent.create(function($$) {
+    let comp = TestComponent.create(function($$) {
       return $$('div').html('Hello <b>World</b>')
     })
     // ATTENTION: it is important to call find() on the element API
     // not on the Component API, as Component#find will only provide
     // elements which are Component instance.
-    var b = comp.el.find('b')
+    let b = comp.el.find('b')
     t.notNil(b, 'Element should have rendered HTML as content.')
     t.equal(b.textContent, 'World','Rendered element should have right content.')
     t.end()
   })
 
   test("Rendering an element with HTML attributes etc.", function(t) {
-    var comp = TestComponent.create(function($$) {
+    let comp = TestComponent.create(function($$) {
       return $$('div')
         .addClass('foo')
         .attr('data-id', 'foo')
@@ -117,7 +140,7 @@ function ComponentTests(debug) {
   })
 
   test("Rendering an input element with value", function(t) {
-    var comp = TestComponent.create(function($$) {
+    let comp = TestComponent.create(function($$) {
       return $$('input').attr('type', 'text').val('foo')
     })
     t.equal(comp.el.val(), 'foo', 'Input field should have value "foo".')
@@ -125,14 +148,14 @@ function ComponentTests(debug) {
   })
 
   test("Render a component", function(t) {
-    var comp = Simple.render()
+    let comp = Simple.render()
     t.equal(comp.el.tagName.toLowerCase(), 'div', 'Element should be a "div".')
     t.ok(comp.el.hasClass('simple-component'), 'Element should have class "simple-component".')
     t.end()
   })
 
   test("Rerender on setProps()", function(t) {
-    var comp = Simple.render({ foo: 'bar '})
+    let comp = Simple.render({ foo: 'bar '})
     comp.shouldRerender.reset()
     comp.render.reset()
     comp.setProps({ foo: 'baz' })
@@ -142,7 +165,7 @@ function ComponentTests(debug) {
   })
 
   test("Rerendering triggers didUpdate()", function(t) {
-    var comp = Simple.render({ foo: 'bar '})
+    let comp = Simple.render({ foo: 'bar '})
     spy(comp, 'didUpdate')
     comp.rerender()
     t.ok(comp.didUpdate.callCount === 1, "didUpdate() should have been called once.")
@@ -150,7 +173,7 @@ function ComponentTests(debug) {
   })
 
   test("Setting props triggers willReceiveProps()", function(t) {
-    var comp = Simple.render({ foo: 'bar '})
+    let comp = Simple.render({ foo: 'bar '})
     spy(comp, 'willReceiveProps')
     comp.setProps({ foo: 'baz' })
     t.ok(comp.willReceiveProps.callCount === 1, "willReceiveProps() should have been called once.")
@@ -158,7 +181,7 @@ function ComponentTests(debug) {
   })
 
   test("Rerender on setState()", function(t) {
-    var comp = Simple.render()
+    let comp = Simple.render()
     comp.shouldRerender.reset()
     comp.render.reset()
     comp.setState({ foo: 'baz' })
@@ -168,7 +191,7 @@ function ComponentTests(debug) {
   })
 
   test("Setting state triggers willUpdateState()", function(t) {
-    var comp = Simple.render()
+    let comp = Simple.render()
     spy(comp, 'willUpdateState')
     comp.setState({ foo: 'baz' })
     t.ok(comp.willUpdateState.callCount === 1, "willUpdateState() should have been called once.")
@@ -184,7 +207,7 @@ function ComponentTests(debug) {
         return $$('div')
       }
     }
-    var comp = A.render()
+    let comp = A.render()
     spy(comp, 'didUpdate')
     // component will not rerender but still should trigger didUpdate()
     comp.setProps({foo: 'bar'})
@@ -198,14 +221,14 @@ function ComponentTests(debug) {
   test("Dependency-Injection", function(t) {
     class Parent extends Component {
       getChildContext() {
-        var childContext = {}
+        let childContext = {}
         if (this.props.name) {
           childContext[this.props.name] = this.props.name
         }
         return childContext
       }
       render($$) {
-        var el = $$('div')
+        let el = $$('div')
         // direct child
         el.append($$(Child).ref('a'))
         // indirect child
@@ -237,10 +260,10 @@ function ComponentTests(debug) {
 
     Wrapper.prototype.getChildContext = Parent.prototype.getChildContext
 
-    var comp = Parent.render({name: 'foo'})
-    var a = comp.refs.a
-    var b = comp.refs.b
-    var c = comp.refs.c
+    let comp = Parent.render({name: 'foo'})
+    let a = comp.refs.a
+    let b = comp.refs.b
+    let c = comp.refs.c
     t.notNil(a.context.foo, "'a' should have a property 'foo' in its context")
     t.isNil(a.context.bar, ".. but not 'bar'")
     t.notNil(b.context.foo, "'b' should have a property 'foo' in its context")
@@ -258,7 +281,7 @@ function ComponentTests(debug) {
         return { mode: 0 }
       }
       render($$) {
-        var el = $$('div')
+        let el = $$('div')
         if (this.state.mode === 0) {
           el.append(
             "Foo",
@@ -275,8 +298,8 @@ function ComponentTests(debug) {
         return el
       }
     }
-    var comp = TestComponent.render()
-    var childNodes = comp.el.getChildNodes()
+    let comp = TestComponent.render()
+    let childNodes = comp.el.getChildNodes()
     t.equal(childNodes.length, 2, '# Component should have two children in mode 0')
     t.ok(childNodes[0].isTextNode(), '__first should be a TextNode')
     t.equal(childNodes[0].textContent, 'Foo', '____with proper text content')
@@ -303,7 +326,7 @@ function ComponentTests(debug) {
         this.value = 0
       }
       render($$) {
-        var el = $$('a').append('Click me')
+        let el = $$('a').append('Click me')
         if (this.props.method === 'instance') {
           el.on('click', this.onClick)
         } else if (this.props.method === 'anonymous') {
@@ -319,7 +342,7 @@ function ComponentTests(debug) {
     }
 
     // first render without a click handler
-    var comp = ClickableComponent.render()
+    let comp = ClickableComponent.render()
 
     comp.click()
     t.equal(comp.value, 0, 'Handler should not have been triggered')
@@ -357,7 +380,7 @@ function ComponentTests(debug) {
       }
     }
 
-    var comp = ClickableComponent.render()
+    let comp = ClickableComponent.render()
     comp.click()
     t.equal(comp.clicks, 1, 'Handler should have been triggered')
     comp.click()
@@ -368,7 +391,7 @@ function ComponentTests(debug) {
   /* ##################### Nested Elements/Components ##########################*/
 
   test("Render children elements", function(t) {
-    var comp = TestComponent.create(function($$) {
+    let comp = TestComponent.create(function($$) {
       return $$('div').addClass('parent')
         .append($$('div').addClass('child1'))
         .append($$('div').addClass('child2'))
@@ -381,7 +404,7 @@ function ComponentTests(debug) {
   })
 
   test("Render children components", function(t) {
-    var comp = TestComponent.create(function($$) {
+    let comp = TestComponent.create(function($$) {
       return $$('div').append(
         $$(Simple, {
           children: ['a']
@@ -402,7 +425,7 @@ function ComponentTests(debug) {
   })
 
   test("Render grandchildren elements", function(t) {
-    var comp = TestComponent.create(function($$) {
+    let comp = TestComponent.create(function($$) {
       return $$('div').append(
         $$('div').addClass('child').append(
           $$('div').addClass('a'),
@@ -411,10 +434,10 @@ function ComponentTests(debug) {
       )
     })
     t.equal(comp.getChildCount(), 1, "Component should have 1 child")
-    var child = comp.getChildAt(0)
+    let child = comp.getChildAt(0)
     t.equal(child.getChildCount(), 2, ".. and two grandchildren")
-    var first = child.getChildAt(0)
-    var second = child.getChildAt(1)
+    let first = child.getChildAt(0)
+    let second = child.getChildAt(1)
     t.ok(first.el.hasClass('a'), 'First should have class "a".')
     t.ok(second.el.hasClass('b'), 'Second should have class "b".')
     t.end()
@@ -422,7 +445,7 @@ function ComponentTests(debug) {
 
 
   test("Render nested elements passed via props", function(t) {
-    var comp = TestComponent.create(function($$) {
+    let comp = TestComponent.create(function($$) {
       return $$('div').append(
         $$(Simple, {
           children: [
@@ -433,10 +456,10 @@ function ComponentTests(debug) {
       )
     })
     t.equal(comp.getChildCount(), 1, "Component should have 1 child")
-    var child = comp.getChildAt(0)
+    let child = comp.getChildAt(0)
     t.equal(child.getChildCount(), 2, ".. and two grandchildren")
-    var first = child.getChildAt(0)
-    var second = child.getChildAt(1)
+    let first = child.getChildAt(0)
+    let second = child.getChildAt(1)
     t.ok(first.el.hasClass('a'), 'First grandchild should have class "a".')
     t.ok(second.el.hasClass('b'), 'Second grandchild should have class "b".')
     t.end()
@@ -465,9 +488,9 @@ function ComponentTests(debug) {
       }
     }
 
-    var comp = Parent.mount(t.sandbox)
-    var childComp = comp.refs.child
-    var grandChildComp = childComp.refs.child
+    let comp = Parent.mount(t.sandbox)
+    let childComp = comp.refs.child
+    let grandChildComp = childComp.refs.child
     t.equal(childComp.didMount.callCount, 1, "Child's didMount should have been called only once.")
     t.equal(grandChildComp.didMount.callCount, 1, "Grandchild's didMount should have been called only once.")
 
@@ -485,16 +508,16 @@ function ComponentTests(debug) {
     }
     class CompositeComponent extends TestComponent {
       render($$) {
-        var el = $$('div').addClass('composite-component')
-        for (var i = 0; i < this.props.items.length; i++) {
-          var item = this.props.items[i]
+        let el = $$('div').addClass('composite-component')
+        for (let i = 0; i < this.props.items.length; i++) {
+          let item = this.props.items[i]
           el.append($$(ItemComponent, item))
         }
         return el
       }
     }
 
-    var comp = CompositeComponent.render({
+    let comp = CompositeComponent.render({
       items: [ {name: 'A'}, {name: 'B'} ]
     })
     t.equal(comp.getChildCount(), 2, 'Component should have two children.')
@@ -519,9 +542,9 @@ function ComponentTests(debug) {
     // only then the tocEntry components can be captured.
     class Parent extends TestComponent {
       render($$) {
-        var el = $$('div')
+        let el = $$('div')
         // grandchildren wrapped into a 'div' element
-        var grandchildren = $$('div').append(
+        let grandchildren = $$('div').append(
           $$(GrandChild, { name: 'foo' }).ref('foo'),
           $$(GrandChild, { name: 'bar' }).ref('bar')
         )
@@ -545,9 +568,9 @@ function ComponentTests(debug) {
       }
     }
 
-    var comp = Parent.render()
-    var foo = comp.refs.foo
-    var bar = comp.refs.bar
+    let comp = Parent.render()
+    let foo = comp.refs.foo
+    let bar = comp.refs.bar
     t.notNil(foo, "Component should have a ref 'foo'.")
     t.equal(foo.el.textContent, 'foo', "foo should have textContent 'foo'")
     t.notNil(bar, "Component should have a ref 'bar'.")
@@ -571,7 +594,7 @@ function ComponentTests(debug) {
     }
     class Child extends Component {
       render($$) {
-        var el = $$('div').addClass('child').append(
+        let el = $$('div').addClass('child').append(
           this.props.children
         )
         return el
@@ -583,9 +606,9 @@ function ComponentTests(debug) {
       }
     }
 
-    var comp = Parent.render()
-    var child = comp.refs.child
-    var grandchild = comp.refs.grandchild
+    let comp = Parent.render()
+    let child = comp.refs.child
+    let grandchild = comp.refs.grandchild
     t.notNil(child, "Child should be referenced.")
     t.notNil(grandchild, "Grandchild should be referenced.")
     comp.rerender()
@@ -623,7 +646,7 @@ function ComponentTests(debug) {
     }
     class Child extends Component {
       render($$) {
-        var el = $$('div').addClass('child').append(
+        let el = $$('div').addClass('child').append(
           this.props.children
         )
         return el
@@ -634,10 +657,10 @@ function ComponentTests(debug) {
         return $$('div').addClass('grandchild')
       }
     }
-    var comp = Parent.render()
-    var wrapper = comp.find('.wrapper')
+    let comp = Parent.render()
+    let wrapper = comp.find('.wrapper')
     comp.rerender()
-    var wrapper2 = comp.find('.wrapper')
+    let wrapper2 = comp.find('.wrapper')
     t.ok(wrapper.el === wrapper2.el, "wrapper element should have been retained.")
     t.end()
   })
@@ -658,7 +681,7 @@ function ComponentTests(debug) {
         return $$('div')
       }
     }
-    var comp = Parent.render()
+    let comp = Parent.render()
     t.equal(comp.el.getChildCount(), 1, "Should have 1 child")
     t.equal(comp.el.textContent, '', "textContent should be empty")
     t.end()
@@ -684,11 +707,11 @@ function ComponentTests(debug) {
         return $$('div')
       }
     }
-    var parent = Parent.render()
+    let parent = Parent.render()
     t.equal(parent.getChildCount(), 1, "Should have 1 child")
-    var child = parent.getChildAt(0)
+    let child = parent.getChildAt(0)
     t.equal(child.getChildCount(), 1, "Should have 1 grandchild")
-    var grandchild = child.getChildAt(0)
+    let grandchild = child.getChildAt(0)
     t.ok(parent.refs.grandchild === grandchild, "Grandchild should be the same as the referenced component.")
     t.ok(child.props.children[0].getComponent() === grandchild, "Grandchild should be accessible via props of child.")
     t.end()
@@ -707,20 +730,20 @@ function ComponentTests(debug) {
     class Child extends Component {
       render($$) {
         // 'foo' is ref'd, so it should be retained when rerendering on this level
-        var el = $$('div').addClass('child').append(
+        let el = $$('div').addClass('child').append(
           $$('div').addClass('foo').ref('foo')
         )
         return el
       }
     }
-    var comp = Parent.render()
-    var child = comp.find('.child')
+    let comp = Parent.render()
+    let child = comp.find('.child')
     t.notNil(child, "Child should exist.")
-    var foo = child.refs.foo
+    let foo = child.refs.foo
     child.rerender()
     t.ok(child.refs.foo === foo, "'foo' should have been retained.")
     comp.rerender()
-    var child2 = comp.find('.child')
+    let child2 = comp.find('.child')
     t.ok(child !== child2, "Child should have been renewed.")
     t.ok(foo !== child2.refs.foo, "'foo' should be different as well.")
     t.end()
@@ -745,8 +768,8 @@ function ComponentTests(debug) {
       }
     }
 
-    var comp = Parent.render()
-    var child = comp.refs.child
+    let comp = Parent.render()
+    let child = comp.refs.child
     child.click()
     t.equal(child.clicks, 1, 'Handler should have been triggered')
     comp.rerender()
@@ -760,14 +783,14 @@ function ComponentTests(debug) {
   /* ##################### Refs: Preserving Components ##########################*/
 
   test("Children without a ref are not retained", function(t) {
-    var comp = TestComponent.create(function($$) {
+    let comp = TestComponent.create(function($$) {
       return $$('div').append(
         $$(Simple)
       )
     })
-    var child = comp.getChildAt(0)
+    let child = comp.getChildAt(0)
     comp.rerender()
-    var newChild = comp.getChildAt(0)
+    let newChild = comp.getChildAt(0)
     // as we did not apply a ref, the component should get rerendered from scratch
     t.ok(newChild !== child, 'Child component should have been renewed.')
     t.ok(newChild.el !== child.el, 'Child element should have been renewed.')
@@ -775,15 +798,15 @@ function ComponentTests(debug) {
   })
 
   test("Render a child element with ref", function(t) {
-    var comp = TestComponent.create(function($$) {
+    let comp = TestComponent.create(function($$) {
       return $$('div').addClass('parent')
         .append($$('div').addClass('child').ref('foo'))
     })
     t.notNil(comp.refs.foo, 'Component should have a ref "foo".')
     t.ok(comp.refs.foo.hasClass('child'), 'Referenced component should have class "child".')
     // check that the instance is retained after rerender
-    var child = comp.refs.foo
-    var el = child.getNativeElement()
+    let child = comp.refs.foo
+    let el = child.getNativeElement()
     comp.rerender()
     t.ok(comp.refs.foo === child, 'Child element should have been preserved.')
     t.ok(comp.refs.foo.getNativeElement() === el, 'Native element should be the same.')
@@ -791,13 +814,13 @@ function ComponentTests(debug) {
   })
 
   test("Render a child component with ref", function(t) {
-    var comp = TestComponent.create(function($$) {
+    let comp = TestComponent.create(function($$) {
       return $$('div').append(
         $$(Simple).ref('foo')
       )
     })
-    var child = comp.refs.foo
-    var el = child.getNativeElement()
+    let child = comp.refs.foo
+    let el = child.getNativeElement()
     comp.rerender()
     t.ok(comp.refs.foo === child, 'Child component should have been preserved.')
     t.ok(comp.refs.foo.getNativeElement() === el, 'Native element should be the same.')
@@ -805,12 +828,12 @@ function ComponentTests(debug) {
   })
 
   test("Rerendering a child component with ref triggers didUpdate()", function(t) {
-    var comp = TestComponent.create(function($$) {
+    let comp = TestComponent.create(function($$) {
       return $$('div').append(
         $$(Simple).ref('foo')
       )
     })
-    var child = comp.refs.foo
+    let child = comp.refs.foo
     spy(child, 'didUpdate')
     comp.rerender()
     t.ok(child.didUpdate.callCount === 1, "child.didUpdate() should have been called once.")
@@ -823,13 +846,13 @@ function ComponentTests(debug) {
         return false
       }
     }
-    var comp = TestComponent.create(function($$) {
+    let comp = TestComponent.create(function($$) {
       return $$('div').append(
         // change prop randomly
         $$(Child, {foo: Date.now()}).ref('foo')
       )
     })
-    var child = comp.refs.foo
+    let child = comp.refs.foo
     spy(child, 'didUpdate')
     comp.rerender()
     t.ok(child.didUpdate.callCount === 1, "child.didUpdate() should have been called once.")
@@ -837,8 +860,8 @@ function ComponentTests(debug) {
   })
 
   test.UI("didUpdate() provides old props and old state", function(t) {
-    var oldProps = null
-    var oldState = null
+    let oldProps = null
+    let oldState = null
     class MyComponent extends Component {
       getInitialState() {
         return {
@@ -850,7 +873,7 @@ function ComponentTests(debug) {
         oldState = _oldState
       }
     }
-    var comp = MyComponent.mount({
+    let comp = MyComponent.mount({
       val: 'a'
     }, t.sandbox)
     comp.setState({ val: 2 })
@@ -869,7 +892,7 @@ function ComponentTests(debug) {
   })
 
   test("Refs on grandchild elements.", function(t) {
-    var comp = TestComponent.create(function($$) {
+    let comp = TestComponent.create(function($$) {
       return $$('div').append(
         $$('div').append(
           $$('div').ref(this.props.grandChildRef)
@@ -878,7 +901,7 @@ function ComponentTests(debug) {
     }, { grandChildRef: "foo"})
 
     t.notNil(comp.refs.foo, "Ref 'foo' should be set.")
-    var foo = comp.refs.foo
+    let foo = comp.refs.foo
     comp.rerender()
     t.ok(foo === comp.refs.foo, "Referenced grandchild should have been retained.")
     spy(foo, 'dispose')
@@ -897,8 +920,8 @@ function ComponentTests(debug) {
       }
     }
 
-    var comp = TestComponent.create(function($$) {
-      var el = $$('div')
+    let comp = TestComponent.create(function($$) {
+      let el = $$('div')
       el.append(
         $$('div').append(
           // generating a random property making sure the grandchild gets rerendered
@@ -908,7 +931,7 @@ function ComponentTests(debug) {
       return el
     })
     t.notNil(comp.refs.grandchild, "Ref 'grandchild' should be set.")
-    var grandchild = comp.refs.grandchild
+    let grandchild = comp.refs.grandchild
     comp.rerender()
     t.notNil(comp.refs.grandchild, "Ref 'grandchild' should be set.")
     t.ok(comp.refs.grandchild === grandchild, "'grandchild' should be the same")
@@ -926,8 +949,8 @@ function ComponentTests(debug) {
       }
     }
 
-    var comp = TestComponent.create(function($$) {
-      var el = $$('div')
+    let comp = TestComponent.create(function($$) {
+      let el = $$('div')
       el.append(
         $$('div').append(
           // generating a random property making sure the grandchild gets rerendered
@@ -939,7 +962,7 @@ function ComponentTests(debug) {
       return el
     })
     t.notNil(comp.refs.grandchild, "Ref 'grandchild' should be set.")
-    var grandchild = comp.refs.grandchild
+    let grandchild = comp.refs.grandchild
     comp.rerender()
     t.ok(comp.refs.grandchild === grandchild, "'grandchild' should be the same")
     t.end()
@@ -958,8 +981,8 @@ function ComponentTests(debug) {
     }
     class MainComponent extends TestComponent {
       render($$) {
-        var el = $$('div').addClass('context')
-        var ComponentClass
+        let el = $$('div').addClass('context')
+        let ComponentClass
         if (this.props.context ==='A') {
           ComponentClass = ComponentA
         } else {
@@ -970,7 +993,7 @@ function ComponentTests(debug) {
       }
     }
 
-    var comp = MainComponent.render({context: 'A'})
+    let comp = MainComponent.render({context: 'A'})
     t.ok(comp.refs.context instanceof ComponentA, 'Context should be of instance ComponentA')
     comp.setProps({context: 'B'})
     t.ok(comp.refs.context instanceof ComponentB, 'Context should be of instance ComponentB')
@@ -987,13 +1010,13 @@ function ComponentTests(debug) {
         )
       }
     }
-    var comp = MyComponent.render(MyComponent)
+    let comp = MyComponent.render(MyComponent)
     t.ok(comp.refs.helloComp, 'There should stil be a ref to the helloComp element/component')
     t.end()
   })
 
   test("Implicitly retain elements when grandchild elements have refs.", function(t) {
-    var comp = TestComponent.create(function($$) {
+    let comp = TestComponent.create(function($$) {
       return $$('div').append(
         $$('div').append(
           $$('div').ref(this.props.grandChildRef)
@@ -1001,7 +1024,7 @@ function ComponentTests(debug) {
       )
     }, { grandChildRef: "foo"})
 
-    var child = comp.getChildAt(0)
+    let child = comp.getChildAt(0)
     comp.rerender()
     t.ok(child === comp.getChildAt(0), "Child should be retained.")
     t.ok(child.el === comp.getChildAt(0).el, "Child element should be retained.")
@@ -1017,14 +1040,14 @@ function ComponentTests(debug) {
       }
     }
 
-    var comp = TestComponent.create(function($$) {
-      var grandchild = $$('div').ref('grandchild')
+    let comp = TestComponent.create(function($$) {
+      let grandchild = $$('div').ref('grandchild')
       return $$('div').append(
         $$(Child).append(grandchild)
       )
     })
 
-    var child = comp.getChildAt(0)
+    let child = comp.getChildAt(0)
     comp.rerender()
     t.ok(child === comp.getChildAt(0), "Child should be retained.")
     t.ok(child.el === comp.getChildAt(0).el, "Child element should be retained.")
@@ -1036,7 +1059,7 @@ function ComponentTests(debug) {
   // This is working fine when didUpdate() is called at the right time,
   // i.e., when ScrollPane has been rendered already
   test("Everthing should be rendered when didUpdate() is triggered.", function(t) {
-    var parentIsUpdated = false
+    let parentIsUpdated = false
     class Parent extends Component {
       render($$) {
         return $$('div').append(
@@ -1055,7 +1078,7 @@ function ComponentTests(debug) {
       }
     }
 
-    var comp = Parent.render()
+    let comp = Parent.render()
     // didUpdate() should not have been called (no rerender)
     t.notOk(parentIsUpdated, 'Initially child.didUpdate() should not have been called.')
     comp.rerender()
@@ -1077,7 +1100,7 @@ function ComponentTests(debug) {
     }
     class CompositeComponent extends TestComponent {
       render($$) {
-        var el = $$('div').addClass('composite-component')
+        let el = $$('div').addClass('composite-component')
         this.props.items.forEach(function(item) {
           el.append($$(ItemComponent, {name: item.name}).ref(item.ref))
         })
@@ -1086,7 +1109,7 @@ function ComponentTests(debug) {
     }
 
     // Initial mount
-    var comp = CompositeComponent.render({
+    let comp = CompositeComponent.render({
       items: [
         {ref: 'a', name: 'A'},
         {ref: 'b', name: 'B'},
@@ -1094,11 +1117,11 @@ function ComponentTests(debug) {
       ]
     })
 
-    var a = comp.refs.a
-    var b = comp.refs.b
-    var c = comp.refs.c
+    let a = comp.refs.a
+    let b = comp.refs.b
+    let c = comp.refs.c
 
-    var childNodes = comp.childNodes
+    let childNodes = comp.childNodes
     t.equal(childNodes.length, 3, 'Component should have 3 children.')
     t.equal(childNodes[0].textContent, 'A', '.. first child should have text A')
     t.equal(childNodes[1].textContent, 'B', '.. second child should have text B')
@@ -1145,9 +1168,9 @@ function ComponentTests(debug) {
         return {contextId: 'hello'}
       }
       render($$) {
-        var el = $$('div').addClass('lc-lens lc-writer sc-controller')
+        let el = $$('div').addClass('lc-lens lc-writer sc-controller')
 
-        var workspace = $$('div').ref('workspace').addClass('le-workspace')
+        let workspace = $$('div').ref('workspace').addClass('le-workspace')
 
         workspace.append(
           // Main (left column)
@@ -1183,7 +1206,7 @@ function ComponentTests(debug) {
       }
     }
 
-    var comp = ComponentWithRefs.render()
+    let comp = ComponentWithRefs.render()
     t.ok(comp.refs.contentPanel, 'There should be a ref to the contentPanel component')
     comp.setState({contextId: 'foo'})
     t.ok(comp.refs.contentPanel, 'There should stil be a ref to the contentPanel component')
@@ -1202,7 +1225,7 @@ function ComponentTests(debug) {
     }
     class Parent extends TestComponent {
       render($$) {
-        var el = $$('div')
+        let el = $$('div')
         el.append(
           $$(Child).append(
             $$('div').ref('foo').append('foo')
@@ -1211,7 +1234,7 @@ function ComponentTests(debug) {
         return el
       }
     }
-    var comp = Parent.render()
+    let comp = Parent.render()
     t.notNil(comp.refs.foo, 'Ref should be bound to owner.')
     t.equal(comp.refs.foo.text(), 'foo', 'Ref should point to the right component.')
     t.end()
@@ -1220,7 +1243,7 @@ function ComponentTests(debug) {
   test('#635: Relocating a preserved component', function(t) {
     class Parent extends TestComponent {
       render($$) {
-        var el = $$('div')
+        let el = $$('div')
         el.append('X')
         if (this.props.nested) {
           el.append(
@@ -1237,7 +1260,7 @@ function ComponentTests(debug) {
         return el
       }
     }
-    var comp = Parent.render()
+    let comp = Parent.render()
     t.equal(comp.refs.foo.getParent(), comp, "First 'foo' should be direct child.")
     t.equal(comp.el.textContent, 'XYZ', "... and content should be correct.")
     comp.setProps({ nested: true })
@@ -1252,14 +1275,14 @@ function ComponentTests(debug) {
   test.UI("Combine props and children via append", function(t) {
     class Toolbar extends TestComponent {
       render($$) {
-        var el = $$('div').append(
+        let el = $$('div').append(
           $$(Simple, this.props.strong).append('Strong')
         )
         return el
       }
     }
 
-    var toolState = {strong: {active: true}}
+    let toolState = {strong: {active: true}}
     Toolbar.render(toolState)
     // the original toolState object should not have been changed
     t.ok(isEqual(toolState, {strong: {active: true}}), "props object should not have been touched")
@@ -1269,15 +1292,15 @@ function ComponentTests(debug) {
   test("Pass-through props and add children via append", function(t) {
     class MyComponent extends TestComponent {
       render($$) {
-        var el = $$('div').append(
+        let el = $$('div').append(
           $$(Simple, this.props).append('Child 1')
         )
         return el
       }
     }
-    var props = {foo: 'bar'}
-    var comp = MyComponent.render(props)
-    var simple = comp.getChildAt(0)
+    let props = {foo: 'bar'}
+    let comp = MyComponent.render(props)
+    let simple = comp.getChildAt(0)
     t.notNil(simple, 'Should have a child component.')
     t.equal(simple.props.foo, props.foo, '.. with props past through')
     t.equal(simple.props.children.length, 1, '.. with props.children having one element')
@@ -1286,8 +1309,3 @@ function ComponentTests(debug) {
   })
 
 }
-
-// with RenderingEngine in debug mode
-ComponentTests('debug')
-// and without
-ComponentTests()
