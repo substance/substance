@@ -1,13 +1,17 @@
-let b = require('substance-bundler')
-let path = require('path')
+/*
+  IMPORTANT: Don't use ES6 here, as some people are still on Node 4.
+*/
+
+var b = require('substance-bundler')
+var path = require('path')
 
 // Constants
 // ---------
 
-const TEST ='.test/'
-const NPM = '.npm/'
-const NPMDIST = NPM+'dist/'
-const STUFF = [
+var TEST ='.test/'
+var NPM = '.npm/'
+var NPMDIST = NPM+'dist/'
+var STUFF = [
   'package.json',
   'LICENSE.md',
   'README.md',
