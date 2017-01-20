@@ -4,12 +4,12 @@ import DefaultDOMElement from '../../dom/DefaultDOMElement'
 
 class TestXMLExporter extends XMLExporter {
 
-  constructor() {
-    super({ converters: TestXMLImporter.converters })
+  constructor(config) {
+    super(Object.assign({ converters: TestXMLImporter.converters }, config))
   }
 
   convertDocument(doc) {
-    var articleEl = DefaultDOMElement.parseXML('<article></article>')
+    var articleEl = this.createElement('article')
     var body = doc.get('body')
     articleEl.append(
       this.convertContainer(body)

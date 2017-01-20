@@ -27,17 +27,13 @@ function ComponentTests(debug, memory) {
 
   const test = module('ui/Component' + (debug ? '[debug]' : '') + (memory ? '[memory]' : ''))
     .withOptions({
-      before: function() {
+      before: function(t) {
         substanceGlobals.DEBUG_RENDERING = Boolean(debug)
+        t._document = memory ? XNode.createDocument('html') : DefaultDOMElement.createDocument('html')
+        t._renderingEngine = new RenderingEngine({ elementFactory: t._document })
+        TestComponent.renderingEngine = t._renderingEngine
       }
     })
-
-  // Note: we are defining the RenderingEngine explicitly so
-  // that we can control which DOMElement implementation is used underneath
-  const _document = memory ? XNode.createDocument('html') : DefaultDOMElement.createDocument('html')
-  const renderingEngine = new RenderingEngine({ elementFactory: _document })
-  // HACK: make TestComponent to use this renderingEngine
-  TestComponent.renderingEngine = renderingEngine
 
   test("Throw error when render method is not returning an element", function(t) {
     class MyComponent extends TestComponent {
@@ -51,7 +47,7 @@ function ComponentTests(debug, memory) {
 
   test("Mounting a component", function(t) {
     // Mounting a detached element
-    let doc = _document.createDocument('html')
+    let doc = t._document.createDocument('html')
     let el = doc.createElement('div')
     let comp = Simple.mount(el)
     t.equal(comp.didMount.callCount, 0, "didMount must not be called when mounting to detached elements")
