@@ -8,6 +8,7 @@ var path = require('path')
 // Constants
 // ---------
 
+var DIST = 'dist/'
 var TEST ='.test/'
 var NPM = '.npm/'
 var NPMDIST = NPM+'dist/'
@@ -23,6 +24,15 @@ var STUFF = [
 // -------
 // Doing the actual work
 
+function _css(DIST) {
+  b.css('substance.css', DIST+'substance.css', { variables: true })
+  b.css('substance.css', DIST+'substance.next.css')
+  b.css('substance-pagestyle.css', DIST+'substance-pagestyle.css', {variables: true})
+  b.css('substance-pagestyle.css', DIST+'substance-pagestyle.next.css')
+  b.css('substance-reset.css', DIST+'substance-reset.css', {variables: true})
+  b.css('substance-reset.css', DIST+'substance-reset.next.css')
+}
+
 // creates a browser bundle
 function _browser(DIST, transpileToES5, production) {
   b.js('./index.es.js', {
@@ -36,12 +46,6 @@ function _browser(DIST, transpileToES5, production) {
     eslint: { exclude: [ 'dom/vendor.js' ] },
     cleanup: Boolean(production)
   })
-  b.css('substance.css', DIST+'substance.css', { variables: true })
-  b.css('substance.css', DIST+'substance.next.css')
-  b.css('substance-pagestyle.css', DIST+'substance-pagestyle.css', {variables: true})
-  b.css('substance-pagestyle.css', DIST+'substance-pagestyle.next.css')
-  b.css('substance-reset.css', DIST+'substance-reset.css', {variables: true})
-  b.css('substance-reset.css', DIST+'substance-reset.next.css')
 }
 
 // creates a server bundle
@@ -198,24 +202,28 @@ b.task('clean', function() {
   b.rm('./.npm')
 })
 
-b.task('browser:pure', function() {
-  _browser('./dist/', false)
+b.task('css', function() {
+  _css(DIST)
 })
 
-b.task('browser', function() {
-  _browser('./dist/', true)
+b.task('browser:pure', ['css'], function() {
+  _browser(DIST, false)
+})
+
+b.task('browser', ['css'], function() {
+  _browser(DIST, true)
 })
 
 b.task('server', function() {
   // for the time being we transpile the cjs bundle
   // so it works in node 4 too
-  _server('./dist/', true)
+  _server(DIST, true)
 })
 
 b.task('server:pure', function() {
   // for the time being we transpile the cjs bundle
   // so it works in node 4 too
-  _server('./dist/', false)
+  _server(DIST, false)
 })
 
 b.task('test:clean', function() {
