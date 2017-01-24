@@ -180,12 +180,16 @@ class Editing {
     if (sel.isCollapsed()) {
       let path = sel.start.path
       let node = tx.get(path[0])
-
       let nodeEditing = this._getNodeEditing(node)
       // TODO: are we sure that this is the default implementation? or is it specific to text nodes?
       let offset = sel.start.offset
       let text = tx.get(path)
-      if ( ((offset === 0 && direction === 'left') || (offset === text.length && direction === 'right')) && sel.containerId) {
+      // case: cursor is at the first or the last position
+      // and the deletion leads to a merge with the previous
+      // or next sibling node
+      if (sel.containerId &&
+          ((offset === 0 && direction === 'left') ||
+           (offset === text.length && direction === 'right'))) {
         // need to merge
         let container = tx.get(sel.containerId)
         let nodePos = container.getPosition(node.id)
@@ -196,27 +200,25 @@ class Editing {
         let start = offset
         if (direction === 'left') start = start-1
         let end = start+1
-        nodeEditing.delete(tx, {
-          start: { path: path, offset: start},
-          end: { path: path, offset: end }
-        })
-        // TODO: this should go into the nodeEditing impl
+        // set a selection that spans over one character
         tx.setSelection({
           type: 'property',
           path: path,
           startOffset: start,
+          endOffset: end,
           containerId: sel.containerId
         })
+        nodeEditing.delete(tx, sel)
       }
-      return
     }
-    // simple deletion of a range of characters
-    if (sel.isPropertySelection()) {
+    // deleting a range of characters with a text property
+    else if (sel.isPropertySelection()) {
       let path = sel.start.path
       let node = tx.get(path[0])
       let nodeEditing = this._getNodeEditing(node)
       nodeEditing.delete(tx, sel)
     }
+    // deleting a range within a container (across multiple nodes)
     else if (sel.isContainerSelection()) {
       this.deleteContainerSelection(tx, sel)
     }
@@ -541,16 +543,6 @@ class Editing {
       let nodeEditing = this._getNodeEditing(node)
       // console.log('#### before', sel.toString())
       nodeEditing.type(tx, sel, text)
-      if (node.isText()) {
-        let offset = sel.startOffset + text.length
-        tx.setSelection({
-          type: 'property',
-          path: path,
-          startOffset: offset,
-          containerId: sel.containerId,
-          surfaceId: sel.surfaceId
-        })
-      }
       // console.log('### setting selection after typing: ', tx.selection.toString())
     } else if (sel.isContainerSelection()) {
       this.deleteContainerSelection(tx, sel)

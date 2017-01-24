@@ -35,6 +35,10 @@ class MarkersManager {
   deregister(textProperyComponent) {
     let path = String(textProperyComponent.getRealPath())
     let textProperties = this._textProperties[path]
+    if (!textProperties) {
+      // FIXME: happens in test suite
+      return
+    }
     deleteFromArray(this._textProperties[path], textProperyComponent)
     if (textProperties.length === 0) {
       delete this._textProperties[path]

@@ -1,6 +1,4 @@
 import isArrayEqual from '../util/isArrayEqual'
-import Coordinate from '../model/Coordinate'
-import Range from '../model/Range'
 import annotationHelpers from '../model/annotationHelpers'
 
 class TextNodeEditing {
@@ -15,18 +13,17 @@ class TextNodeEditing {
     V: <-|->-|       :   move end by diff to start+L
     VI: <-|--|->     :   move end by total span+L
   */
-  type(tx, range, text) {
-    range = this._normalizeRange(tx, range)
+  type(tx, sel, text) {
     // console.log('### typing over range', range.toString())
-    let start = range.start
-    let end = range.end
+    let start = sel.start
+    let end = sel.end
     if (!isArrayEqual(start.path, end.path)) {
       throw new Error('Unsupported state: range should be on one property')
     }
     let realPath = tx.getRealPath(start.path)
     let startOffset = start.offset
     let endOffset = end.offset
-    let typeover = !range.isCollapsed()
+    let typeover = !sel.isCollapsed()
     let L = text.length
     // delete selected text
     if (typeover) {
@@ -73,6 +70,14 @@ class TextNodeEditing {
         console.warn('TODO: handle annotation update case.')
       }
     })
+    let offset = startOffset + text.length
+    tx.setSelection({
+      type: 'property',
+      path: start.path,
+      startOffset: offset,
+      containerId: sel.containerId,
+      surfaceId: sel.surfaceId
+    })
   }
 
   /*
@@ -85,12 +90,11 @@ class TextNodeEditing {
     V: <-|->-|       :   move end by diff to start
     VI: <-|--|->     :   move end by total span
   */
-  delete(tx, range) {
-    range = this._normalizeRange(tx, range)
-    let start = range.start
-    let end = range.end
+  delete(tx, sel) {
+    let start = sel.start
+    let end = sel.end
     if (!isArrayEqual(start.path, end.path)) {
-      throw new Error('Unsupported state: range should be on one property')
+      throw new Error('Unsupported state: selection should be on one property')
     }
     let realPath = tx.getRealPath(start.path)
     let startOffset = start.offset
@@ -137,7 +141,7 @@ class TextNodeEditing {
       type: 'property',
       path: start.path,
       startOffset: startOffset,
-      containerId: range.containerId
+      containerId: sel.containerId
     })
   }
 
@@ -258,24 +262,26 @@ class TextNodeEditing {
     }
   }
 
-  _normalizeRange(tx, range) {
-    // HACK: this is not really cool
-    let start = range.start
-    let end = range.end
-    if (range.start === 'before') {
-      start = { path: tx.get(end.path[0]).getTextPath(), offset: 0 }
-    } else if (range.start.path.length === 1) {
-      start = { path: tx.get(start.path[0]).getTextPath(), offset: range.start.offset }
-    }
-    if (range.end === 'after') {
-      end = { path:  tx.get(start.path[0]).getTextPath(), offset: tx.get(start.path[0]).getText().length }
-    } else if (range.end.path.length === 1) {
-      end = { path: tx.get(end.path[0]).getTextPath(), offset: tx.get(end.path[0]).getText().length }
-    }
-    if (!start._isCoordinate) start = new Coordinate(start.path, start.offset)
-    if (!end._isCoordinate) end = new Coordinate(end.path, end.offset)
-    return new Range(start, end)
-  }
+  // FIXME: a weird normalization was done here
+  // probably dealing with the special forms of node selections?
+  // _asRange(tx, sel) {
+  //   // HACK: this is not really cool
+  //   let start = sel.start
+  //   let end = sel.end
+  //   if (range.start === 'before') {
+  //     start = { path: tx.get(end.path[0]).getTextPath(), offset: 0 }
+  //   } else if (range.start.path.length === 1) {
+  //     start = { path: tx.get(start.path[0]).getTextPath(), offset: range.start.offset }
+  //   }
+  //   if (range.end === 'after') {
+  //     end = { path:  tx.get(start.path[0]).getTextPath(), offset: tx.get(start.path[0]).getText().length }
+  //   } else if (range.end.path.length === 1) {
+  //     end = { path: tx.get(end.path[0]).getTextPath(), offset: tx.get(end.path[0]).getText().length }
+  //   }
+  //   if (!start._isCoordinate) start = new Coordinate(start.path, start.offset)
+  //   if (!end._isCoordinate) end = new Coordinate(end.path, end.offset)
+  //   return new Range(start, end)
+  // }
 }
 
 export default TextNodeEditing

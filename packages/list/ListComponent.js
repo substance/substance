@@ -13,7 +13,7 @@ class ListComponent extends Component {
     node.getItems().forEach(function(item, idx) {
       el.append(
         $$(ListItemComponent, {
-          path: [node.id, 'items', idx, 'content'],
+          path: [node.id, 'items', item.id, 'content'],
           node: item,
           tagName: 'li'
         }).ref(node.id)

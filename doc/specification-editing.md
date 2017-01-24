@@ -324,3 +324,9 @@ Both directions:
 - [B20]: Range
 
   `delete` then `break`
+
+## List
+
+- [L1]: Insert Text - Cursor inside of list item
+
+  Same as [IT1] but with List Item.

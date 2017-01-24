@@ -10,7 +10,7 @@ class ListEditing extends TextNodeEditing {
     let listItem = tx.get(realPath[0])
 
     let L = list.length
-    let itemPos = list.getPosition(listItem.id)
+    let itemPos = list.getItemIndex(listItem.id)
     let text = listItem.getText()
     let newItem = listItem.toJSON()
     delete newItem.id
@@ -29,25 +29,25 @@ class ListEditing extends TextNodeEditing {
         }
         // if at the first list item, remove the item
         else if (itemPos === 0) {
-          list.hide(listItem.id)
+          list.remove(listItem.id)
           tx.delete(listItem.id)
           container.show(newTextNode.id, nodePos)
         }
         // if at the last list item, remove the item and append the paragraph
         else if (itemPos >= L-1) {
-          list.hide(listItem.id)
+          list.remove(listItem.id)
           tx.delete(listItem.id)
           container.show(newTextNode.id, nodePos+1)
         }
         // otherwise create a new list
         else {
           let tail = []
-          let items = list.items
+          const items = list.items.slice()
           for (var i = L-1; i > itemPos; i--) {
             tail.unshift(items[i])
-            list.hide(items[i])
+            list.remove(items[i])
           }
-          list.hide(items[itemPos])
+          list.remove(items[itemPos])
           let newList = tx.create({
             type: 'list',
             items: tail
@@ -57,17 +57,21 @@ class ListEditing extends TextNodeEditing {
         }
         tx.setSelection({
           type: 'property',
-          path: newTextNode.getTextPath(),
-          startOffset: 0
+          start: {
+            path: newTextNode.getTextPath(),
+            offset: 0
+          }
         })
       } else {
         newItem.content = ""
         newItem = tx.create(newItem)
-        list.show(newItem.id, itemPos)
+        list.insertAt(itemPos, newItem.id)
         tx.setSelection({
           type: 'property',
-          path: [list.id, 'items', itemPos+1, 'content'],
-          startOffset: 0
+          start: {
+            path: list.getItemPath(newItem.id),
+            offset: 0
+          }
         })
       }
     }
@@ -82,11 +86,13 @@ class ListEditing extends TextNodeEditing {
         // truncate the original property
         tx.update(realPath, { type: 'delete', start: offset, end: text.length })
       }
-      list.show(newItem.id, itemPos+1)
+      list.insertAt(itemPos+1, newItem.id)
       tx.setSelection({
         type: 'property',
-        startPath: [list.id, 'items', itemPos+1, 'content'],
-        startOffset: 0
+        start: {
+          path: list.getItemPath(newItem.id),
+          offset: 0
+        }
       })
     }
   }

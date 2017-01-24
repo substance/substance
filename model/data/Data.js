@@ -1,4 +1,5 @@
 import isArray from '../../util/isArray'
+import isNumber from '../../util/isNumber'
 import isPlainObject from '../../util/isPlainObject'
 import isString from '../../util/isString'
 import EventEmitter from '../../util/EventEmitter'
@@ -85,9 +86,20 @@ class Data extends EventEmitter {
       if (!context) return false
       name = path[i]
       prop = context[name]
-      if (isArray(prop) || isPlainObject(prop)) {
+      if (isPlainObject(prop)) {
         realPath.push(name)
         context = prop
+      } else if (isArray(prop)) {
+        let next = path[i+1]
+        if (isNumber(next)) {
+          realPath.push(name)
+          context = prop
+        }
+        // EXPERIMENTAL: allow to use
+        // a notation such as 'l1.items.li1.content'
+        else {
+          return this.getRealPath(path.slice(i+1))
+        }
       } else if (isString(prop)) {
         context = this.nodes[prop]
         realPath = [prop]
