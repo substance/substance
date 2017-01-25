@@ -198,7 +198,7 @@ class Editing {
           endOffset: end,
           containerId: sel.containerId
         })
-        nodeEditing.delete(tx, sel)
+        nodeEditing.deleteSelection(tx)
       }
     }
     // deleting a range of characters with a text property
@@ -206,7 +206,7 @@ class Editing {
       let path = sel.start.path
       let node = tx.get(path[0])
       let nodeEditing = this._getNodeEditing(node)
-      nodeEditing.delete(tx, sel)
+      nodeEditing.deleteSelection(tx)
     }
     // deleting a range within a container (across multiple nodes)
     else if (sel.isContainerSelection()) {

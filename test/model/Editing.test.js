@@ -1,6 +1,7 @@
 import { module } from 'substance-test'
 
 import Document from '../../model/Document'
+import DocumentSchema from '../../model/DocumentSchema'
 import EditorSession from '../../model/EditorSession'
 import BlockNode from '../../model/BlockNode'
 import InlineNode from '../../model/InlineNode'
@@ -13,6 +14,9 @@ import StrongPackage from '../../packages/strong/StrongPackage'
 import ListPackage from '../../packages/list/ListPackage'
 
 const test = module('model/Editing')
+
+// Inserting
+// ---------
 
 test.UI("[IT1]: Cursor within a TextProperty", function(t) {
   let editor = TestEditor.mount({ editorSession: fixture(_p1) }, t.sandbox)
@@ -244,6 +248,93 @@ test.UI("[IB2]: Cursor at start of a TextNode within a Container", function(t) {
   t.end()
 })
 
+
+// Deleting
+// --------
+
+test.UI("[DR2]: Cursor at the end of a TextNode at the end of a Container", function(t) {
+  let { editorSession, doc } = setupEditor(t, _p1, _p2)
+  editorSession.transaction((tx) => {
+    tx.setSelection({
+      type: 'property',
+      path: ['p2', 'content'],
+      startOffset: 6
+    })
+    tx.deleteSelection()
+  })
+  // nothing should have happened
+  let sel = editorSession.getSelection()
+  let body = doc.get('body')
+  t.equal(body.nodes.length, 2, 'There should still be 2 nodes in body')
+  let p2 = doc.get('p2')
+  t.equal(p2.getText(), 'abcdef', 'p2 should still have same content.')
+  t.equal(sel.startOffset, 6, 'Cursor should still be at the same position')
+  t.end()
+})
+
+test.UI("[DR3]: Cursor in the middle of a TextProperty", function(t) {
+  let { editorSession, doc } = setupEditor(t, _p1)
+  editorSession.transaction((tx) => {
+    tx.setSelection({
+      type: 'property',
+      path: ['p1', 'content'],
+      startOffset: 3
+    })
+    tx.deleteCharacter('right')
+  })
+  // nothing should have happened
+  let sel = editorSession.getSelection()
+  let p1 = doc.get('p1')
+  t.equal(p1.getText(), 'abcef', 'one character should have been deleted')
+  t.equal(sel.startOffset, 3, 'Cursor should be at the same position')
+  t.end()
+})
+
+test.UI("[DR4-1]: Cursor inside an empty TextNode with successor (TextNode)", function(t) {
+  let { editorSession, doc } = setupEditor(t, _p1, _empty, _p2)
+  editorSession.setSelection({
+    type: 'property',
+    path: ['empty', 'content'],
+    startOffset: 0,
+    containerId: 'body'
+  })
+  editorSession.transaction((tx) => {
+    tx.deleteCharacter('right')
+  })
+  // nothing should have happened
+  let sel = editorSession.getSelection()
+  let body = doc.get('body')
+  let p2 = doc.get('p2')
+  t.equal(body.nodes.length, 2, 'There should be only 2 nodes left.')
+  t.equal(p2.getText(), 'abcdef', 'p2 should not be affected')
+  t.deepEqual(sel.start.path, p2.getTextPath(), 'Cursor should be in p2')
+  t.equal(sel.start.offset, 0, '... at the first position')
+  t.end()
+})
+
+test.UI("[DR4-2]: Cursor inside an empty TextNode with successor (Isolated Node)", function(t) {
+  let { editorSession, doc } = setupEditor(t, _p1, _empty, _block1)
+  editorSession.setSelection({
+    type: 'property',
+    path: ['empty', 'content'],
+    startOffset: 0,
+    containerId: 'body'
+  })
+  editorSession.transaction((tx) => {
+    tx.deleteCharacter('right')
+  })
+  let sel = editorSession.getSelection()
+  let body = doc.get('body')
+  t.equal(body.nodes.length, 2, 'There should be only 2 nodes left.')
+  t.ok(sel.isNodeSelection(), 'Selection should be a NodeSelection')
+  t.ok(sel.isBefore(), '... before')
+  t.equal(sel.getNodeId(), 'block1', '... block1')
+  t.end()
+})
+
+// List Editing
+// ------------
+
 // TODO: add specification
 test.UI("[L1]: Insert text into list item", function(t) {
   let editor = TestEditor.mount({ editorSession: fixture(_l1) }, t.sandbox)
@@ -283,7 +374,7 @@ test.UI("[L2]: Break list item (in the middle of text)", function(t) {
   let li2 = doc.get(l.items[1])
   t.equal(li1.getText(), 'abc', 'First item should have been truncated.')
   t.equal(li2.getText(), 'def', 'remaining line should have been inserted into new list item.')
-  t.equal(sel.start.path, l.getItemPath(li2.id), 'Cursor should in second item')
+  t.deepEqual(sel.start.path, l.getItemPath(li2.id), 'Cursor should in second item')
   t.equal(sel.start.offset, 0, 'Cursor should be at begin of item.')
   t.end()
 })
@@ -354,10 +445,19 @@ class TestEditor extends AbstractEditor {
   }
 }
 
+function setupEditor(t, ...f) {
+  let editor = TestEditor.mount({ editorSession: fixture(...f) }, t.sandbox)
+  let editorSession = editor.editorSession
+  let doc = editorSession.getDocument()
+  return { editor, editorSession, doc }
+}
+
 function getConfig() {
   let config = new Configurator()
   config.addToolGroup('annotations')
-  config.defineSchema({ name: 'test-article' })
+  config.defineSchema(new DocumentSchema('test-article', 1.0, {
+    defaultTextType: 'paragraph'
+  }))
   config.import(ParagraphPackage)
   config.import(StrongPackage)
   config.import(ListPackage)
@@ -397,6 +497,24 @@ function _p1(doc, body) {
   body.show('p1')
 }
 
+function _p2(doc, body) {
+  doc.create({
+    type: 'paragraph',
+    id: 'p2',
+    content: 'abcdef'
+  })
+  body.show('p2')
+}
+
+function _empty(doc, body) {
+  doc.create({
+    type: 'paragraph',
+    id: 'empty',
+    content: ''
+  })
+  body.show('empty')
+}
+
 function _s1(doc) {
   doc.create({
     type: 'strong',
@@ -429,6 +547,14 @@ function _l1(doc, body) {
     items: ['l1-1', 'l1-2']
   })
   body.show('l1')
+}
+
+function _block1(doc, body) {
+  doc.create({
+    type: 'test-block',
+    id: 'block1'
+  })
+  body.show('block1')
 }
 
 class TestInlineNode extends InlineNode {}

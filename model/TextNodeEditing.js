@@ -89,7 +89,8 @@ class TextNodeEditing {
     V: <-|->-|       :   move end by diff to start
     VI: <-|--|->     :   move end by total span
   */
-  delete(tx, sel) {
+  deleteSelection(tx) {
+    let sel = tx.selection
     let start = sel.start
     let end = sel.end
     if (!isArrayEqual(start.path, end.path)) {

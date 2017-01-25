@@ -57,10 +57,8 @@ class ListEditing extends TextNodeEditing {
         }
         tx.setSelection({
           type: 'property',
-          start: {
-            path: newTextNode.getTextPath(),
-            offset: 0
-          }
+          path: newTextNode.getTextPath(),
+          startOffset: 0
         })
       } else {
         newItem.content = ""
@@ -68,10 +66,8 @@ class ListEditing extends TextNodeEditing {
         list.insertAt(itemPos, newItem.id)
         tx.setSelection({
           type: 'property',
-          start: {
-            path: list.getItemPath(newItem.id),
-            offset: 0
-          }
+          path: list.getItemPath(newItem.id),
+          startOffset: 0
         })
       }
     }
@@ -89,10 +85,8 @@ class ListEditing extends TextNodeEditing {
       list.insertAt(itemPos+1, newItem.id)
       tx.setSelection({
         type: 'property',
-        start: {
-          path: list.getItemPath(newItem.id),
-          offset: 0
-        }
+        path: list.getItemPath(newItem.id),
+        startOffset: 0
       })
     }
   }
