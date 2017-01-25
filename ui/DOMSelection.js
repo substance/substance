@@ -424,11 +424,13 @@ class DOMSelection {
     // try to find it one level higher
     if (node !== this.surface.el) {
       let parent = node.getParent()
-      let nodeIdx = parent.getChildIndex(node)
-      if (dir === 'right') {
-        nodeIdx++
+      if (parent) {
+        let nodeIdx = parent.getChildIndex(node)
+        if (dir === 'right') {
+          nodeIdx++
+        }
+        return this._searchForCoordinate(parent, nodeIdx, options)
       }
-      return this._searchForCoordinate(parent, nodeIdx, options)
     }
 
     return null
