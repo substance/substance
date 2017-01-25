@@ -477,18 +477,6 @@ class ContainerSelection extends Selection {
     throw new Error('ContainerSelection has no path property. Use startPath and endPath instead');
   }
 
-  get start() {
-    return this._internal.start;
-  }
-
-  get end() {
-    return this._internal.end;
-  }
-
-  get range() {
-    return this._internal.range;
-  }
-
 }
 
 ContainerSelection.prototype._isContainerSelection = true

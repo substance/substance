@@ -381,13 +381,6 @@ class PropertySelection extends Selection {
     return new PropertySelection(this.start.path, this.start.offset, this.end.offset, this.reverse, this.containerId, this.surfaceId);
   }
 
-  /**
-    @property {Coordinate}
-  */
-  get start() {
-    return this._internal.start
-  }
-
 }
 
 PropertySelection.fromJSON = function(json) {
