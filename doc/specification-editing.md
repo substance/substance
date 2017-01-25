@@ -168,33 +168,41 @@ With direction `right`:
 
   Nothing.
 
-- [DR3]: Cursor in the middle of a TextProperty
+- [DR3]: Cursor in the middle of a TextProperty/TextNode
 
   Delete one character.
 
 - [DR4]: Cursor inside an empty TextNode with successors
 
   Delete text node and put cursor before next node.
+  TODO: define exact behavior for different types of successors
 
 - [DR5]: Cursor at the end of a non-empty TextNode with successors within a Container
 
   Merge with next.
+  TODO: define exact behavior for different types of successors
 
 - [DR10]: NodeSelection before TextNode
 
   Set cursor at first character, then `delete`
 
+  TODO: these cases should be normalized, i.e. there should
+  be only one way to represent the cursor before a TextNode
+  (-> property selection)
+  Collapsed NodeSelections are only needed for IsolatedNodes.
+
 - [DR11]: NodeSelection before isolated node
 
   Select the node.
 
-- [DR14]: NodeSelection after at the end of document
+- [DR14]: NodeSelection after IsolatedNode at the end of document
 
   Nothing.
 
 - [DR15]: NodeSelection after a TextNode with successors
 
   Put the cursor at end of text then `delete`.
+  TODO: normalize
 
 - [DR16]: NodeSelection after other node with TextNode as successor
 
