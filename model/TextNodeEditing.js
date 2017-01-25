@@ -196,6 +196,8 @@ class TextNodeEditing {
     }
   }
 
+  // TODO: the concept for implementing merge could still be improved
+  // e.g. it is strange to implement merge text-list here
   merge(tx, node, coor, container, direction, previous, next) {
     let first, second
     if (direction === 'left') {
@@ -214,51 +216,61 @@ class TextNodeEditing {
         mode: 'full',
         containerId: container.id
       })
-      return
     } else if (!second.isText() && direction === 'right') {
-      tx.setSelection({
-        type: 'node',
-        nodeId: second.id,
-        mode: 'full',
-        containerId: container.id
-      })
-      return
-    } else if (!first || !second || !first.isText() || !second.isText()) {
-      return
-    }
-    let firstPath = first.getTextPath()
-    let firstText = first.getText()
-    let firstLength = firstText.length
-    let secondPath = second.getTextPath()
-    let secondText = second.getText()
-    if (firstLength === 0) {
-      // hide the second node
-      container.hide(firstPath[0])
-      // delete the second node
-      tx.delete(firstPath[0])
-      // set the selection to the end of the first component
-      tx.setSelection({
-        type: 'property',
-        path: secondPath,
-        startOffset: 0,
-        containerId: container.id
-      })
+      if (first.isEmpty()) {
+        container.hide(first.id)
+        tx.delete(first.id)
+        tx.setSelection({
+          type: 'node',
+          nodeId: second.id,
+          mode: 'before',
+          containerId: container.id
+        })
+      } else {
+        tx.setSelection({
+          type: 'node',
+          nodeId: second.id,
+          mode: 'full',
+          containerId: container.id
+        })
+      }
+    } else if (first && second && first.isText() && second.isText()) {
+      let firstPath = first.getTextPath()
+      let firstText = first.getText()
+      let firstLength = firstText.length
+      let secondPath = second.getTextPath()
+      let secondText = second.getText()
+      if (firstLength === 0) {
+        // hide the second node
+        container.hide(first.id)
+        // delete the second node
+        tx.delete(first.id)
+        // set the selection to the end of the first component
+        tx.setSelection({
+          type: 'property',
+          path: secondPath,
+          startOffset: 0,
+          containerId: container.id
+        })
+      } else {
+        // append the second text
+        tx.update(firstPath, { type: 'insert', start: firstLength, text: secondText })
+        // transfer annotations
+        annotationHelpers.transferAnnotations(tx, secondPath, 0, firstPath, firstLength)
+        // hide the second node
+        container.hide(secondPath[0])
+        // delete the second node
+        tx.delete(secondPath[0])
+        // set the selection to the end of the first component
+        tx.setSelection({
+          type: 'property',
+          path: firstPath,
+          startOffset: firstLength,
+          containerId: container.id
+        })
+      }
     } else {
-      // append the second text
-      tx.update(firstPath, { type: 'insert', start: firstLength, text: secondText })
-      // transfer annotations
-      annotationHelpers.transferAnnotations(tx, secondPath, 0, firstPath, firstLength)
-      // hide the second node
-      container.hide(secondPath[0])
-      // delete the second node
-      tx.delete(secondPath[0])
-      // set the selection to the end of the first component
-      tx.setSelection({
-        type: 'property',
-        path: firstPath,
-        startOffset: firstLength,
-        containerId: container.id
-      })
+      console.warn('Unsupported merge', first, second)
     }
   }
 
