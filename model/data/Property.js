@@ -20,4 +20,9 @@ export default class Property {
       return this.type === 'id'
     }
   }
+
+  isOwned() {
+    return Boolean(this.owned)
+  }
+
 }

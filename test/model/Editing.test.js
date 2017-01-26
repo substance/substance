@@ -268,7 +268,7 @@ test.UI("[DR2]: Cursor at the end of a TextNode at the end of a Container", func
   t.equal(body.nodes.length, 2, 'There should still be 2 nodes in body')
   let p2 = doc.get('p2')
   t.equal(p2.getText(), 'abcdef', 'p2 should still have same content.')
-  t.equal(sel.startOffset, 6, 'Cursor should still be at the same position')
+  t.equal(sel.start.offset, 6, 'Cursor should still be at the same position')
   t.end()
 })
 
@@ -282,11 +282,10 @@ test.UI("[DR3]: Cursor in the middle of a TextProperty", function(t) {
     })
     tx.deleteCharacter('right')
   })
-  // nothing should have happened
   let sel = editorSession.getSelection()
   let p1 = doc.get('p1')
   t.equal(p1.getText(), 'abcef', 'one character should have been deleted')
-  t.equal(sel.startOffset, 3, 'Cursor should be at the same position')
+  t.equal(sel.start.offset, 3, 'Cursor should be at the same position')
   t.end()
 })
 
@@ -301,7 +300,6 @@ test.UI("[DR4-1]: Cursor inside an empty TextNode with successor (TextNode)", fu
   editorSession.transaction((tx) => {
     tx.deleteCharacter('right')
   })
-  // nothing should have happened
   let sel = editorSession.getSelection()
   let body = doc.get('body')
   let p2 = doc.get('p2')
@@ -332,6 +330,308 @@ test.UI("[DR4-2]: Cursor inside an empty TextNode with successor (Isolated Node)
   t.end()
 })
 
+// TODO: test DR4 with list as succsessor
+
+test.UI("[DR5-1]: Cursor at the end of a non-empty TextNode with successor (TextNode)", function(t) {
+  let { editorSession, doc } = setupEditor(t, _p1, _p2)
+  editorSession.setSelection({
+    type: 'property',
+    path: ['p1', 'content'],
+    startOffset: 6,
+    containerId: 'body'
+  })
+  editorSession.transaction((tx) => {
+    tx.deleteCharacter('right')
+  })
+  let sel = editorSession.getSelection()
+  let body = doc.get('body')
+  let p1 = doc.get('p1')
+  t.equal(body.nodes.length, 1, 'There should be only one node left.')
+  t.ok(sel.isCollapsed(), 'Selection should be a collapsed')
+  t.deepEqual(sel.start.path, p1.getTextPath(), '... on p1')
+  t.equal(sel.start.offset, 6, '... at the same position as before')
+  t.end()
+})
+
+test.UI("[DR5-2]: Cursor at the end of a non-empty TextNode with successor (IsolatedNode)", function(t) {
+  let { editorSession, doc } = setupEditor(t, _p1, _block1)
+  editorSession.setSelection({
+    type: 'property',
+    path: ['p1', 'content'],
+    startOffset: 6,
+    containerId: 'body'
+  })
+  editorSession.transaction((tx) => {
+    tx.deleteCharacter('right')
+  })
+  // NOTE: if there is no merge possible, nothing should happen
+  // only the selection should be updated
+  let sel = editorSession.getSelection()
+  let body = doc.get('body')
+  t.equal(body.nodes.length, 2, 'There should still be 2 nodes left.')
+  t.ok(sel.isNodeSelection(), 'Selection should be a NodeSelection')
+  t.equal(sel.getNodeId(), 'block1', '... in block1')
+  t.ok(sel.isFull(), '... selecting the whole node')
+  t.end()
+})
+
+// TODO: test DR5 with list as successor
+
+test.UI("[DR11]: NodeSelection before isolated node", function(t) {
+  let { editorSession, doc } = setupEditor(t, _p1, _block1, _p2)
+  editorSession.setSelection({
+    type: 'node',
+    mode: 'before',
+    nodeId: 'block1',
+    containerId: 'body'
+  })
+  editorSession.transaction((tx) => {
+    tx.deleteCharacter('right')
+  })
+  let sel = editorSession.getSelection()
+  let body = doc.get('body')
+  t.equal(body.nodes.length, 3, 'There should be 3 nodes.')
+  let pnew = body.getChildAt(1)
+  t.ok(sel.isCollapsed(), 'Selection should be collapsed')
+  t.deepEqual(sel.start.path, pnew.getTextPath(), '... on new paragraph')
+  t.equal(sel.start.offset, 0, '... at first position')
+  t.end()
+})
+
+test.UI("[DR16]: NodeSelection after IsolatedNode with TextNode as successor", function(t) {
+  let { editorSession, doc } = setupEditor(t, _p1, _block1, _p2)
+  editorSession.setSelection({
+    type: 'node',
+    mode: 'after',
+    nodeId: 'block1',
+    containerId: 'body'
+  })
+  editorSession.transaction((tx) => {
+    tx.deleteCharacter('right')
+  })
+  let sel = editorSession.getSelection()
+  let body = doc.get('body')
+  let p2 = doc.get('p2')
+  t.equal(body.nodes.length, 3, 'There should still be 3 nodes.')
+  t.equal(p2.getText(), 'bcdef', 'First character of p2 should be deleted')
+  t.ok(sel.isCollapsed(), 'Selection should be collapsed')
+  t.deepEqual(sel.start.path, p2.getTextPath(), '... on p2')
+  t.equal(sel.start.offset, 0, '... at first position')
+  t.end()
+})
+
+
+test.UI("[DL3]: Cursor in the middle of a TextProperty", function(t) {
+  let { editorSession, doc } = setupEditor(t, _p1)
+  editorSession.setSelection({
+    type: 'property',
+    path: ['p1', 'content'],
+    startOffset: 4,
+    containerId: 'body'
+  })
+  editorSession.transaction((tx) => {
+    tx.deleteCharacter('left')
+  })
+  let sel = editorSession.getSelection()
+  let p1 = doc.get('p1')
+  t.equal(p1.getText(), 'abcef', 'one character should have been deleted')
+  t.equal(sel.start.offset, 3, 'Cursor should have shifted by one character')
+  t.end()
+})
+
+test.UI("[DL4-1]: Cursor inside an empty TextNode with a TextNode as predecessor", function(t) {
+  let { editorSession, doc } = setupEditor(t, _p1, _empty, _p2)
+  editorSession.setSelection({
+    type: 'property',
+    path: ['empty', 'content'],
+    startOffset: 0,
+    containerId: 'body'
+  })
+  editorSession.transaction((tx) => {
+    tx.deleteCharacter('left')
+  })
+  let sel = editorSession.getSelection()
+  let p1 = doc.get('p1')
+  t.isNil(doc.get('empty'), 'empty node should have been deleted')
+  t.equal(p1.getText(), 'abcdef', 'p1 should be untouched')
+  t.deepEqual(sel.start.path, p1.getTextPath(), 'Cursor should be in p1')
+  t.equal(sel.start.offset, 6, '... at last position')
+  t.end()
+})
+
+test.UI("[DL4-2]: Cursor inside an empty TextNode with an IsolatedNode as predecessor", function(t) {
+  let { editorSession, doc } = setupEditor(t, _block1, _empty, _p2)
+  editorSession.setSelection({
+    type: 'property',
+    path: ['empty', 'content'],
+    startOffset: 0,
+    containerId: 'body'
+  })
+  editorSession.transaction((tx) => {
+    tx.deleteCharacter('left')
+  })
+  let sel = editorSession.getSelection()
+  t.isNil(doc.get('empty'), 'empty node should have been deleted')
+  t.ok(sel.isNodeSelection(), 'Selection should be a node selection')
+  t.equal(sel.getNodeId(), 'block1', '... on block1')
+  t.ok(sel.isAfter(), '... cursor after the node')
+  t.end()
+})
+
+test.UI("[DL5-1]: Cursor at the start of a non-empty TextNode with a TextNode as predecessor", function(t) {
+  let { editorSession, doc } = setupEditor(t, _p1, _p2)
+  editorSession.setSelection({
+    type: 'property',
+    path: ['p2', 'content'],
+    startOffset: 0,
+    containerId: 'body'
+  })
+  editorSession.transaction((tx) => {
+    tx.deleteCharacter('left')
+  })
+  let sel = editorSession.getSelection()
+  let p1 = doc.get('p1')
+  t.isNil(doc.get('p2'), 'p2 should have been deleted')
+  t.equal(p1.getText(), 'abcdefabcdef', 'Text should have been merged')
+  t.ok(sel.isCollapsed(), 'Selection should be collapsed')
+  t.deepEqual(sel.start.path, p1.getTextPath(), '... on p1')
+  t.ok(sel.start.offset, 6, '... cursor should after the original text of p1')
+  t.end()
+})
+
+test.UI("[DL5-2]: Cursor at the start of a non-empty TextNode with an IsolatedNode as predecessor", function(t) {
+  let { editorSession, doc } = setupEditor(t, _block1, _p2)
+  editorSession.setSelection({
+    type: 'property',
+    path: ['p2', 'content'],
+    startOffset: 0,
+    containerId: 'body'
+  })
+  editorSession.transaction((tx) => {
+    tx.deleteCharacter('left')
+  })
+  let sel = editorSession.getSelection()
+  let body = doc.get('body')
+  t.equal(body.getLength(), 2, 'There should still be two nodes')
+  t.ok(sel.isNodeSelection(), 'Selection should be a NodeSelection')
+  t.equal(sel.getNodeId(), 'block1', '... on block1')
+  t.ok(sel.isFull(), '... selecting the full node')
+  t.end()
+})
+
+test.UI("[DL13]: NodeSelection after IsolatedNode", function(t) {
+  let { editorSession, doc } = setupEditor(t, _block1, _p2)
+  editorSession.setSelection({
+    type: 'node',
+    mode: 'after',
+    nodeId: 'block1',
+    containerId: 'body'
+  })
+  editorSession.transaction((tx) => {
+    tx.deleteCharacter('left')
+  })
+  let sel = editorSession.getSelection()
+  let body = doc.get('body')
+  t.isNil(doc.get('block1'), 'IsolatedNode should have been deleted')
+  t.equal(body.getLength(), 2, 'There should still be two nodes')
+  let pnew = body.getChildAt(0)
+  t.ok(sel.isCollapsed(), 'Selection should be collapsed')
+  t.deepEqual(sel.start.path, pnew.getTextPath(), '... on new paragraph')
+  t.equal(sel.start.offset, 0, '... at first position')
+  t.end()
+})
+
+test.UI("[DL16]: NodeSelection before IsolatedNode with TextNode as predecessor", function(t) {
+  let { editorSession, doc } = setupEditor(t, _p1, _block2)
+  editorSession.setSelection({
+    type: 'node',
+    mode: 'before',
+    nodeId: 'block2',
+    containerId: 'body'
+  })
+  editorSession.transaction((tx) => {
+    tx.deleteCharacter('left')
+  })
+  let sel = editorSession.getSelection()
+  let body = doc.get('body')
+  let p1 = doc.get('p1')
+  t.equal(body.getLength(), 2, 'There should still be two nodes')
+  t.equal(p1.getText(), 'abcde', 'Last character of p1 should have been deleted')
+  t.ok(sel.isCollapsed(), 'Selection should be collapsed')
+  t.deepEqual(sel.start.path, p1.getTextPath(), '... on p1')
+  t.equal(sel.start.offset, 5, '... at last position')
+  t.end()
+})
+
+test.UI("[DL17]: NodeSelection before IsolatedNode with IsolatedNode as predecessor", function(t) {
+  let { editorSession, doc } = setupEditor(t, _block1, _block2)
+  editorSession.setSelection({
+    type: 'node',
+    mode: 'before',
+    nodeId: 'block2',
+    containerId: 'body'
+  })
+  editorSession.transaction((tx) => {
+    tx.deleteCharacter('left')
+  })
+  let sel = editorSession.getSelection()
+  let body = doc.get('body')
+  t.equal(body.getLength(), 2, 'There should still be two nodes')
+  t.ok(sel.isNodeSelection(), 'Selection should be a NodeSelection')
+  t.equal(sel.getNodeId(), 'block1', '... on block1')
+  t.ok(sel.isFull(), '... selection the entire node')
+  t.end()
+})
+
+test.UI("[D10]: IsolatedNodes is selected entirely", function(t) {
+  let { editorSession, doc } = setupEditor(t, _p1, _block1, _p2)
+  editorSession.setSelection({
+    type: 'node',
+    mode: 'full',
+    nodeId: 'block1',
+    containerId: 'body'
+  })
+  editorSession.transaction((tx) => {
+    tx.deleteSelection()
+  })
+  let sel = editorSession.getSelection()
+  let body = doc.get('body')
+  t.isNil(doc.get('block1'), 'IsolatedNode should have been deleted')
+  let pnew = body.getChildAt(1)
+  t.equal(body.getLength(), 3, 'There should be 3 nodes')
+  t.ok(sel.isCollapsed(), 'Selection should be collapsed')
+  t.deepEqual(sel.start.path, pnew.getTextPath(), '... on new paragraph')
+  t.equal(sel.start.offset, 0, '... at first position')
+  t.end()
+})
+
+test.UI("[D20-1]: Range that starts at begin of a TextNode and ends at end of a TextNode", function(t) {
+  let { editorSession, doc } = setupEditor(t, _p1, _block1, _block2, _p2)
+  let p1 = doc.get('p1')
+  let p2 = doc.get('p2')
+  editorSession.setSelection({
+    type: 'container',
+    startPath: p1.getTextPath(),
+    startOffset: 0,
+    endPath: p2.getTextPath(),
+    endOffset: p2.getLength(),
+    containerId: 'body'
+  })
+  editorSession.transaction((tx) => {
+    tx.deleteSelection()
+  })
+  let sel = editorSession.getSelection()
+  let body = doc.get('body')
+  t.equal(body.nodes.length, 1, 'There should be only one node left')
+  let first = body.getChildAt(0)
+  t.ok(first.isText(), '... which is a TextNode')
+  t.ok(first.isEmpty(), '... which is empty')
+  t.ok(sel.isCollapsed(), 'Selection should be collapsed')
+  t.deepEqual(sel.start.path, first.getTextPath(), '... on that TextNode')
+  t.equal(sel.start.offset, 0, '... at first position')
+  t.end()
+})
+
 // List Editing
 // ------------
 
@@ -351,7 +651,7 @@ test.UI("[L1]: Insert text into list item", function(t) {
   let sel = editorSession.getSelection()
   let li = doc.get('l1-1')
   t.equal(li.getText(), 'abcxxxdef', 'Text should have been inserted correctly.')
-  t.equal(sel.startOffset, 6, 'Cursor should be after inserted text')
+  t.equal(sel.start.offset, 6, 'Cursor should be after inserted text')
   t.end()
 })
 
@@ -555,6 +855,14 @@ function _block1(doc, body) {
     id: 'block1'
   })
   body.show('block1')
+}
+
+function _block2(doc, body) {
+  doc.create({
+    type: 'test-block',
+    id: 'block2'
+  })
+  body.show('block2')
 }
 
 class TestInlineNode extends InlineNode {}

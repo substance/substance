@@ -1,13 +1,22 @@
+import isPlainObject from '../util/isPlainObject'
+
 class Range {
 
   constructor(start, end, reverse, containerId) {
     // HACK: to allow this class be inherited but without calling this ctor
     if (arguments[0] === 'SKIP') return
-
-    this.start = start
-    this.end = end
-    this.reverse = Boolean(reverse)
-    this.containerId = containerId
+    if (arguments.length === 1 && isPlainObject(arguments[0])) {
+      let data = arguments[0]
+      this.start = data.start
+      this.end = data.end
+      this.reverse = Boolean(data.reverse)
+      this.containerId = data.containerId
+    } else {
+      this.start = start
+      this.end = end
+      this.reverse = Boolean(reverse)
+      this.containerId = containerId
+    }
   }
 
   get _isRange() { return true }

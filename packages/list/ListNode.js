@@ -32,12 +32,14 @@ class ListNode extends DocumentNode {
 
 }
 
+ListNode.isList = true
+
 ListNode.type = 'list'
 
 ListNode.schema = {
   ordered: { type: 'boolean', default: false },
   // list-items are owned by the list
-  items: { type: [ 'array', 'id' ], default: [], children: true }
+  items: { type: [ 'array', 'id' ], default: [], owned: true }
 }
 
 export default ListNode

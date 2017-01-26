@@ -89,14 +89,23 @@ class TextNodeEditing {
     V: <-|->-|       :   move end by diff to start
     VI: <-|--|->     :   move end by total span
   */
-  deleteSelection(tx) {
-    let sel = tx.selection
-    let start = sel.start
-    let end = sel.end
-    if (!isArrayEqual(start.path, end.path)) {
-      throw new Error('Unsupported state: selection should be on one property')
+  deleteRange(tx, start, end, containerId) {
+    if (!start) {
+      start = {
+        path: end.path,
+        offset: 0
+      }
     }
     let realPath = tx.getRealPath(start.path)
+    let node = tx.get(realPath[0])
+    if (!node.isText()) throw new Error('Expecting a TextNode.')
+    if (!end) {
+      end = {
+        path: start.path,
+        offset: node.getLength()
+      }
+    }
+    if (!isArrayEqual(start.path, end.path)) throw new Error('Unsupported state: selection should be on one property')
     let startOffset = start.offset
     let endOffset = end.offset
     tx.update(realPath, { type: 'delete', start: startOffset, end: endOffset })
@@ -141,7 +150,7 @@ class TextNodeEditing {
       type: 'property',
       path: start.path,
       startOffset: startOffset,
-      containerId: sel.containerId
+      containerId: containerId
     })
   }
 
@@ -210,12 +219,23 @@ class TextNodeEditing {
       second = next
     }
     if (!first.isText() && direction === 'left') {
-      tx.setSelection({
-        type: 'node',
-        nodeId: first.id,
-        mode: 'full',
-        containerId: container.id
-      })
+      if (second.isEmpty()) {
+        container.hide(second.id)
+        tx.delete(second.id)
+        tx.setSelection({
+          type: 'node',
+          nodeId: first.id,
+          mode: 'after',
+          containerId: container.id
+        })
+      } else {
+        tx.setSelection({
+          type: 'node',
+          nodeId: first.id,
+          mode: 'full',
+          containerId: container.id
+        })
+      }
     } else if (!second.isText() && direction === 'right') {
       if (first.isEmpty()) {
         container.hide(first.id)

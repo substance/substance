@@ -3,6 +3,7 @@ import annotationHelpers from '../model/annotationHelpers'
 import paste from '../model/paste'
 import uuid from '../util/uuid'
 import forEach from '../util/forEach'
+import Coordinate from '../model/Coordinate'
 import TextNodeEditing from '../model/TextNodeEditing'
 import ListEditing from '../packages/list/ListEditing'
 
@@ -136,38 +137,13 @@ class Editing {
     // either delete the node (replacing with an empty text node)
     // or just move the cursor
     if (sel.isNodeSelection()) {
-      if (sel.isFull() ||
-          sel.isBefore() && direction === 'right' ||
-          sel.isAfter() && direction === 'left' ) {
-        // replace the node with default text node
-        let nodeId = sel.getNodeId()
-        let container = tx.get(sel.containerId)
-        let nodePos = container.getPosition(nodeId)
-        let contentPath = container.getContentPath()
-        tx.update(contentPath, { type: 'delete', pos: nodePos })
-        tx.delete(nodeId)
-        let newNode = tx.createDefaultTextNode()
-        tx.update(contentPath, { type: 'insert', pos: nodePos, value: newNode.id })
-        tx.setSelection({
-          type: 'property',
-          path: newNode.getTextPath(),
-          startOffset: 0,
-          containerId: container.id,
-        })
-      } else {
-        // just put the selection in the next or previous node
-        // TODO: need to be implemented
-        console.warn('TODO: put the selection into previous/next node.')
-      }
-      return
+      this.deleteNodeSelection(tx, sel, direction)
     }
-    if (sel.isCustomSelection()) {
-      // TODO: what to do with custom selections?
-      return
-    }
+    // TODO: what to do with custom selections?
+    else if (sel.isCustomSelection()) {}
     // if the selection is collapsed this is the classical one-character deletion
     // either backwards (backspace) or forward (delete)
-    if (sel.isCollapsed()) {
+    else if (sel.isCollapsed()) {
       let path = sel.start.path
       let node = tx.get(path[0])
       let nodeEditing = this._getNodeEditing(node)
@@ -187,18 +163,11 @@ class Editing {
         let next = nodePos < container.getLength()-1 ? container.getNodeAt(nodePos+1) : null
         nodeEditing.merge(tx, node, sel.start, container, direction, previous, next)
       } else {
-        let start = offset
-        if (direction === 'left') start = start-1
-        let end = start+1
-        // set a selection that spans over one character
-        tx.setSelection({
-          type: 'property',
-          path: path,
-          startOffset: start,
-          endOffset: end,
-          containerId: sel.containerId
-        })
-        nodeEditing.deleteSelection(tx)
+        let startOffset = (direction === 'left') ? offset-1 : offset
+        let endOffset = startOffset+1
+        let start = { path: path, offset: startOffset }
+        let end = { path: path, offset: endOffset }
+        nodeEditing.deleteRange(tx, start, end, sel.containerId)
       }
     }
     // deleting a range of characters with a text property
@@ -206,11 +175,82 @@ class Editing {
       let path = sel.start.path
       let node = tx.get(path[0])
       let nodeEditing = this._getNodeEditing(node)
-      nodeEditing.deleteSelection(tx)
+      nodeEditing.deleteRange(tx, sel.start, sel.end, sel.containerId)
     }
     // deleting a range within a container (across multiple nodes)
     else if (sel.isContainerSelection()) {
       this.deleteContainerSelection(tx, sel)
+    }
+    else {
+      console.warn('Unsupported case: tx.delete(%)', direction, sel)
+    }
+  }
+
+  deleteNodeSelection(tx, sel, direction) {
+    let nodeId = sel.getNodeId()
+    let container = tx.get(sel.containerId)
+    let nodePos = container.getPosition(nodeId)
+    if (sel.isFull() ||
+        sel.isBefore() && direction === 'right' ||
+        sel.isAfter() && direction === 'left' ) {
+      // replace the node with default text node
+      let contentPath = container.getContentPath()
+      tx.update(contentPath, { type: 'delete', pos: nodePos })
+      tx.delete(nodeId)
+      let newNode = tx.createDefaultTextNode()
+      tx.update(contentPath, { type: 'insert', pos: nodePos, value: newNode.id })
+      tx.setSelection({
+        type: 'property',
+        path: newNode.getTextPath(),
+        startOffset: 0,
+        containerId: container.id,
+      })
+    } else {
+      if (sel.isBefore() && direction === 'left') {
+        if (nodePos > 0) {
+          let previous = container.getNodeAt(nodePos-1)
+          if (previous.isText()) {
+            tx.setSelection({
+              type: 'property',
+              path: previous.getTextPath(),
+              startOffset: previous.getLength()
+            })
+            this.delete(tx, direction)
+          } else {
+            tx.setSelection({
+              type: 'node',
+              mode: 'full',
+              nodeId: previous.id,
+              containerId: container.id
+            })
+          }
+        } else {
+          // nothing to do
+        }
+      } else if (sel.isAfter() && direction === 'right') {
+        if (nodePos < container.getLength()-1) {
+          let next = container.getNodeAt(nodePos+1)
+          if (next.isText()) {
+            tx.setSelection({
+              type: 'property',
+              path: next.getTextPath(),
+              startOffset: 0
+            })
+            this.delete(tx, direction)
+          } else {
+            tx.setSelection({
+              type: 'node',
+              mode: 'full',
+              nodeId: next.id,
+              containerId: container.id
+            })
+          }
+        } else {
+          // nothing to do
+        }
+      } else {
+        console.warn('Unsupported case: delete(%s)', direction, sel)
+      }
     }
   }
 
@@ -226,56 +266,120 @@ class Editing {
   deleteContainerSelection(tx, sel) {
     let containerId = sel.containerId
     let container = tx.get(containerId)
-    let startId = sel.start.path[0]
-    let endId = sel.end.path[0]
+    let start = sel.start
+    let end = sel.end
+    let startId = start.getNodeId()
+    let endId = end.getNodeId()
     let startPos = container.getPosition(startId)
     let endPos = container.getPosition(endId)
 
+    // special case: selection within one node
+    if (startPos === endPos) {
+      let node = tx.get(startId)
+      let nodeEditing = this._getNodeEditing(node)
+      nodeEditing.deleteRange(tx, start, end, containerId)
+      return
+    }
+
+    // normalize the range if it is 'reverse'
+    if (startPos > endPos) {
+      [start, end] = [end, start]
+      ;[startPos, endPos] = [endPos, startPos]
+      ;[startId, endId] = [endId, startId]
+    }
+
+    // we need to detect if start and end nodes are selected entirely
+    // 1. If both are entirely selected
+    // 1.1. and the first is a TextNode, the first should be cleared, all others be removed
+    // 1.2. and the first is not a TextNode, then all should be removed and an empty paragraph should be inserted
+    // 2. If first is entirely selected and the last partially, then the last should be truncated and all others removed
+    // 3. If first is partially selected and the last entirely, then the first should be truncated and all others removed
+    // 4. If first and last are partially selected, all inner nodes should be removed and first and last be merged if possible
+
+    let firstNode = tx.get(start.getNodeId())
+    let lastNode = tx.get(end.getNodeId())
+    let firstEditing = this._getNodeEditing(firstNode)
+    let lastEditing = this._getNodeEditing(lastNode)
+    let firstEntirelySelected = this._isEntirelySelected(tx, firstNode, start, null)
+    let lastEntirelySelected = this._isEntirelySelected(tx, lastNode, null, end)
+
     // delete or truncate last node
-    if (startPos < endPos) {
-      if (sel.end.isNodeCoordinate() && sel.end.offset > 0) {
-        tx.update([container.id, 'nodes'], { type: 'delete', pos: endPos })
-        tx.delete(endId)
-      } else {
-        let endNode = tx.get(endId)
-        let endEditing = this._getNodeEditing(endNode)
-        endEditing.delete(tx, { start: 'before', end: sel.end })
-      }
+    if (lastEntirelySelected) {
+      tx.update([container.id, 'nodes'], { type: 'delete', pos: endPos })
+      this._deleteNode(tx, lastNode)
+    } else {
+      lastEditing.deleteRange(tx, null, end, containerId)
     }
 
     // delete inner nodes
-    for (var i = endPos-1; i > startPos; i--) {
+    for (let i = endPos-1; i > startPos; i--) {
       let nodeId = container.nodes[i]
       // remove from container
       tx.update([container.id, 'nodes'], { type: 'delete', pos: i })
       // delete node
-      tx.delete(nodeId)
+      this._deleteNode(tx, tx.get(nodeId))
     }
 
-    // if the first node coordinate is node before -> delete the node and insert a default text node
-    if (sel.start.isNodeCoordinate() && sel.start.offset === 0) {
+    if (firstNode.isText() || firstNode.isList()) {
+      firstEditing.deleteRange(tx, start, null, containerId)
+      // tx.setSelection({
+      //   type: 'property',
+      //   path: firstNode.getTextPath(),
+      //   startOffset: start.offset,
+      //   endOffset: firstNode.getLength(),
+      //   containerId: container.id
+      // })
+      // this.deleteSelection(tx)
+    } else if (firstEntirelySelected && lastEntirelySelected) {
+      // remove from container
       tx.update([container.id, 'nodes'], { type: 'delete', pos: startPos })
-      tx.delete(startId)
-      let startNode = tx.createDefaultTextNode()
-      tx.update([container.id, 'nodes'], { type: 'insert', pos: startPos, value: startNode.id })
-      tx.setSelection({
-        type: 'property',
-        path: startNode.getTextPath(),
-        startOffset: 0,
-        containerId: sel.containerId,
-        surfaceId: sel.surfaceId
-      })
-    } else {
-      let startNode = tx.get(startId)
-      let startEditing = this._getNodeEditing(startNode)
-      startEditing.delete(tx, { start: sel.start, end: 'after' })
+      this._deleteNode(tx, firstNode)
+      // insert a new paragraph
+      let textNode = tx.createDefaultTextNode()
+      tx.update([container.id, 'nodes'], { type: 'insert', pos: startPos, value: textNode.id })
+    }
+
+    // merge the last if possible
+    if (!firstEntirelySelected && !lastEntirelySelected) {
       tx.setSelection(sel.collapse('left'))
+      this._mergeNodes(tx, firstNode, lastNode, container)
     }
   }
 
   /*
+    Deletes a node and its children and attached annotations
+    and removes it from a given container
+  */
+  _deleteNode(tx, node) {
+    if (node.isText()) {
+      // remove all associated annotations
+      let annos = tx.getIndex('annotations').get(node.id)
+      for (let i = 0; i < annos.length; i++) {
+        tx.delete(annos[i].id);
+      }
+    }
+    // delete recursively
+    // ATM we do a cascaded delete if the property has type 'id' or ['array', 'id'] and property 'owned' set,
+    // or if it 'file'
+    let nodeSchema = node.getSchema()
+    forEach(nodeSchema, (prop) => {
+      if ((prop.isReference() && prop.isOwned()) || (prop.type === 'file')) {
+        if (prop.isArray()) {
+          let ids = node[prop.name]
+          ids.forEach((id) => {
+            this._deleteNode(tx, tx.get(id))
+          })
+        } else {
+          this._deleteNode(tx, tx.get(node[prop.name]))
+        }
+      }
+    })
+    tx.delete(node.id)
+  }
+
+  /*
     Delete a node and all annotations attached to it,
-    and removes the node from all containers.
+    and removes the node from the container.
 
     @param {String} nodeId
     @param {String} [containerId]
@@ -284,108 +388,54 @@ class Editing {
     if (!nodeId) throw new Error('Parameter `nodeId` is mandatory.')
     let node = tx.get(nodeId)
     if (!node) throw new Error('Node does not exist')
-
-    let container
-    // remove all associated annotations
-    let annos = tx.getIndex('annotations').get(nodeId)
-    for (let i = 0; i < annos.length; i++) {
-      tx.delete(annos[i].id);
-    }
-
-    // TODO: fix support for container annotations
-    // transfer anchors of ContainerAnnotations to previous or next node:
-    //  - start anchors go to the next node
-    //  - end anchors go to the previous node
-    // let anchors = tx.getIndex('container-annotation-anchors').get(nodeId)
-    // for (let i = 0; i < anchors.length; i++) {
-    //   let anchor = anchors[i]
-    //   container = tx.get(anchor.containerId)
-    //   // Note: during the course of this loop we might have deleted the node already
-    //   // so, don't do it again
-    //   if (!tx.get(anchor.id)) continue
-    //   let pos = container.getPosition(anchor.path[0])
-    //   let path, offset
-    //   if (anchor.isStart) {
-    //     if (pos < container.getLength()-1) {
-    //       let nextNode = container.getChildAt(pos+1)
-    //       if (nextNode.isText()) {
-    //         path = [nextNode.id, 'content']
-    //       } else {
-    //         path = [nextNode.id]
-    //       }
-    //       tx.set([anchor.id, 'start', 'path'], path)
-    //       tx.set([anchor.id, 'start', 'offset'], 0)
-    //     } else {
-    //       tx.delete(anchor.id)
-    //     }
-    //   } else {
-    //     if (pos > 0) {
-    //       let previousNode = container.getChildAt(pos-1)
-    //       if (previousNode.isText()) {
-    //         path = [previousNode.id, 'content']
-    //         offset = tx.get(path).length
-    //       } else {
-    //         path = [previousNode.id]
-    //         offset = 1
-    //       }
-    //       tx.set([anchor.id, 'endPath'], path)
-    //       tx.set([anchor.id, 'endOffset'], offset)
-    //     } else {
-    //       tx.delete(anchor.id)
-    //     }
-    //   }
-    // }
-
-    let newSel = null
     if (containerId) {
-      // hide the node from the one container if provided
-      container = tx.get(containerId)
-      let nodePos = container.getPosition(nodeId)
-      if (nodePos >= 0) {
-        if (nodePos < container.getLength()-1) {
-          let nextNode = container.getNodeAt(nodePos+1)
-          if (nextNode.isText()) {
-            newSel = tx.createSelection({
-              type: 'property',
-              containerId: containerId,
-              path: nextNode.getTextPath(),
-              startOffset: 0,
-              endOffset: 0
-            })
-          } else {
-            newSel = tx.createSelection({
-              type: 'node',
-              containerId: containerId,
-              nodeId: nextNode.id,
-              mode: 'before',
-              reverse: false
-            })
-          }
-        }
-      }
+      let container = tx.get(containerId)
       container.hide(nodeId)
+      // TODO: fix support for container annotations
+      // transfer anchors of ContainerAnnotations to previous or next node:
+      //  - start anchors go to the next node
+      //  - end anchors go to the previous node
+      // let anchors = tx.getIndex('container-annotation-anchors').get(nodeId)
+      // for (let i = 0; i < anchors.length; i++) {
+      //   let anchor = anchors[i]
+      //   container = tx.get(anchor.containerId)
+      //   // Note: during the course of this loop we might have deleted the node already
+      //   // so, don't do it again
+      //   if (!tx.get(anchor.id)) continue
+      //   let pos = container.getPosition(anchor.path[0])
+      //   let path, offset
+      //   if (anchor.isStart) {
+      //     if (pos < container.getLength()-1) {
+      //       let nextNode = container.getChildAt(pos+1)
+      //       if (nextNode.isText()) {
+      //         path = [nextNode.id, 'content']
+      //       } else {
+      //         path = [nextNode.id]
+      //       }
+      //       tx.set([anchor.id, 'start', 'path'], path)
+      //       tx.set([anchor.id, 'start', 'offset'], 0)
+      //     } else {
+      //       tx.delete(anchor.id)
+      //     }
+      //   } else {
+      //     if (pos > 0) {
+      //       let previousNode = container.getChildAt(pos-1)
+      //       if (previousNode.isText()) {
+      //         path = [previousNode.id, 'content']
+      //         offset = tx.get(path).length
+      //       } else {
+      //         path = [previousNode.id]
+      //         offset = 1
+      //       }
+      //       tx.set([anchor.id, 'endPath'], path)
+      //       tx.set([anchor.id, 'endOffset'], offset)
+      //     } else {
+      //       tx.delete(anchor.id)
+      //     }
+      //   }
+      // }
     }
-
-    // delete recursively
-    // EXPERIMENTAL: using schema reflection to determine whether to do a 'deep' delete or just shallow
-    let nodeSchema = node.getSchema()
-    forEach(nodeSchema, (prop) => {
-      // ATM we do a cascaded delete if the property has type 'id', ['array', 'id'], or 'file'
-      if ((prop.isReference() && prop.owner) || (prop.type === 'file')) {
-        if (prop.isArray()) {
-          let ids = node[prop.name]
-          ids.forEach((id) => {
-            this.deleteNode(tx, id)
-          })
-        } else {
-          this.deleteNode(tx, node[prop.name])
-        }
-      }
-    })
-
-    // finally delete the node itself
-    tx.delete(nodeId)
-    tx.setSelection(newSel)
+    this._deleteNode(tx, node)
   }
 
   insertInlineNode(tx, nodeData) {
@@ -634,6 +684,35 @@ class Editing {
     return nodeEditing
   }
 
+  _isEntirelySelected(tx, node, start, end) {
+    if (node.isText()) {
+      if (start && start.offset !== 0) return false
+      if (end && end.offset < node.getLength()) return false
+    } else if (node.isList()) {
+      if (start) {
+        let itemId = start.path[2]
+        let itemPos = node.getItemIndex(itemId)
+        if (itemPos > 0 || start.offset !== 0) return false
+      }
+      if (end) {
+        let itemId = end.path[2]
+        let itemPos = node.getItemIndex(itemId)
+        let item = tx.get(itemId)
+        if (itemPos < node.items.length-1 || end.offset < item.getLength()) return false
+      }
+    } else {
+      if (start) {
+        console.assert(start.isNodeCoordinate(), 'expected a NodeCoordinate')
+        if (start.offset > 0) return false
+      }
+      if (end) {
+        console.assert(end.isNodeCoordinate(), 'expected a NodeCoordinate')
+        if (end.offset === 0) return false
+      }
+    }
+    return true
+  }
+
   _setCursor(tx, node, containerId, mode) {
     if (node.isText()) {
       let offset = 0
@@ -657,6 +736,32 @@ class Editing {
     }
   }
 
+  _mergeNodes(tx, firstNode, secondNode, container) {
+    if (firstNode.isText()) {
+      if (secondNode.isText()) {
+        container.hide(secondNode.id)
+        // append the text
+        tx.update(firstNode.getTextPath(), {
+          type: 'insert',
+          start: firstNode.getLength(),
+          text: secondNode.getText()
+        })
+        // transfer annotations
+        annotationHelpers.transferAnnotations(tx,
+          secondNode.getTextPath(), 0,
+          firstNode.getTextPath(), firstNode.getLength())
+        // TODO: merge text nodes
+      } else if (secondNode.isList()) {
+        // TODO merge first list item into text
+      }
+    } else if (firstNode.isList()) {
+      if (secondNode.isText()) {
+        // TODO: merge text into last list item
+      } else if (secondNode.isList()) {
+        // TODO merge list items
+      }
+    }
+  }
 }
 
 export default Editing
