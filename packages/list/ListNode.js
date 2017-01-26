@@ -30,6 +30,13 @@ class ListNode extends DocumentNode {
     }
   }
 
+  getLength() {
+    return this.items.length
+  }
+
+  get length() {
+    return this.getLength()
+  }
 }
 
 ListNode.isList = true

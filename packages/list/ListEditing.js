@@ -43,14 +43,15 @@ class ListEditing extends TextNodeEditing {
         else {
           let tail = []
           const items = list.items.slice()
-          for (var i = L-1; i > itemPos; i--) {
+          for (let i = L-1; i > itemPos; i--) {
             tail.unshift(items[i])
             list.remove(items[i])
           }
           list.remove(items[itemPos])
           let newList = tx.create({
             type: 'list',
-            items: tail
+            items: tail,
+            ordered: list.ordered
           })
           container.show(newTextNode.id, nodePos+1)
           container.show(newList.id, nodePos+2)
@@ -60,13 +61,15 @@ class ListEditing extends TextNodeEditing {
           path: newTextNode.getTextPath(),
           startOffset: 0
         })
-      } else {
+      }
+      // insert a new paragraph above the current one
+      else {
         newItem.content = ""
         newItem = tx.create(newItem)
         list.insertAt(itemPos, newItem.id)
         tx.setSelection({
           type: 'property',
-          path: list.getItemPath(newItem.id),
+          path: list.getItemPath(listItem.id),
           startOffset: 0
         })
       }

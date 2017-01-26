@@ -655,7 +655,7 @@ test.UI("[L1]: Insert text into list item", function(t) {
   t.end()
 })
 
-test.UI("[L2]: Break list item (in the middle of text)", function(t) {
+test.UI("[L2]: Break list item in the middle of text", function(t) {
   let editor = TestEditor.mount({ editorSession: fixture(_l1) }, t.sandbox)
   let editorSession = editor.editorSession
   let doc = editorSession.getDocument()
@@ -676,6 +676,60 @@ test.UI("[L2]: Break list item (in the middle of text)", function(t) {
   t.equal(li2.getText(), 'def', 'remaining line should have been inserted into new list item.')
   t.deepEqual(sel.start.path, l.getItemPath(li2.id), 'Cursor should in second item')
   t.equal(sel.start.offset, 0, 'Cursor should be at begin of item.')
+  t.end()
+})
+
+test.UI("[L3]: Break list item at begin of text", function(t) {
+  let editor = TestEditor.mount({ editorSession: fixture(_l1) }, t.sandbox)
+  let editorSession = editor.editorSession
+  let doc = editorSession.getDocument()
+  editorSession.transaction((tx) => {
+    tx.setSelection({
+      type: 'property',
+      path: ['l1', 'items', 'l1-1', 'content'],
+      startOffset: 0
+    })
+    tx.break()
+  })
+  let sel = editorSession.getSelection()
+  let l = doc.get('l1')
+  t.equal(l.items.length, 3, 'List should have 3 items')
+  let li1 = doc.get(l.items[0])
+  let li2 = doc.get(l.items[1])
+  t.equal(li1.getText(), '', 'First item should be empty.')
+  t.equal(li2.getText(), 'abcdef', 'Text should have moved to next item.')
+  t.deepEqual(sel.start.path, l.getItemPath(li2.id), 'Cursor should be in second item')
+  t.equal(sel.start.offset, 0, '... at begin of item.')
+  t.end()
+})
+
+test.UI("[L4]: Split list by breaking an empty item", function(t) {
+  let editor = TestEditor.mount({ editorSession: fixture(_l1, _l1_empty) }, t.sandbox)
+  let editorSession = editor.editorSession
+  let doc = editorSession.getDocument()
+  editorSession.transaction((tx) => {
+    tx.setSelection({
+      type: 'property',
+      path: ['l1', 'items', 'l1-empty', 'content'],
+      startOffset: 0
+    })
+    tx.break()
+  })
+  let sel = editorSession.getSelection()
+  let body = doc.get('body')
+  t.equal(body.nodes.length, 3, 'There should be three nodes')
+  let l1 = body.getChildAt(0)
+  let p = body.getChildAt(1)
+  let l2 = body.getChildAt(2)
+  t.ok(l1.isList() && p.isText() && l2.isList(), '... list, paragraph, and list')
+  t.equal(l1.items.length, 1, 'The first list should now have only one item')
+  t.equal(l1.items[0], 'l1-1', '... with id "li-1"')
+  t.equal(p.getText(), '', 'The paragraph should be empty')
+  t.equal(l2.items.length, 1, 'The second list should now have only one item')
+  t.equal(l2.items[0], 'l1-2', '... with id "li-2"')
+  t.ok(sel.isCollapsed(), 'The selection should be collapsed')
+  t.deepEqual(sel.start.path, p.getTextPath(), '... on the new paragraph')
+  t.equal(sel.start.offset, 0, '... at first position')
   t.end()
 })
 
@@ -847,6 +901,16 @@ function _l1(doc, body) {
     items: ['l1-1', 'l1-2']
   })
   body.show('l1')
+}
+
+function _l1_empty(doc) {
+  doc.create({
+    type: 'list-item',
+    id: 'l1-empty',
+    content: ''
+  })
+  let l1 = doc.get('l1')
+  l1.insertAt(1, 'l1-empty')
 }
 
 function _block1(doc, body) {
