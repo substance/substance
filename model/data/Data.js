@@ -53,9 +53,7 @@ class Data extends EventEmitter {
   get(path, strict) {
     let result
     let realPath = this.getRealPath(path)
-    if (!realPath) {
-      return undefined
-    }
+    if (!realPath) return undefined
     result = this._get(realPath)
     if (strict && result === undefined) {
       if (isString(path)) {
@@ -73,12 +71,14 @@ class Data extends EventEmitter {
       result = this.nodes[realPath]
     } else if (realPath.length === 1) {
       result = this.nodes[realPath[0]]
-    } else if (realPath.length === 2) {
-      result = this.nodes[realPath[0]][realPath[1]]
-    } else if (realPath.length === 3) {
-      result = this.nodes[realPath[0]][realPath[1]][realPath[2]]
-    } else {
-      throw new Error('Path of length '+realPath.length+' not supported.')
+    } else if (realPath.length > 1) {
+      let context = this.nodes[realPath[0]]
+      for (let i = 1; i < realPath.length-1; i++) {
+        if (!context) return undefined
+        context = context[realPath[i]]
+      }
+      if (!context) return undefined
+      result = context[realPath[realPath.length-1]]
     }
     return result
   }
