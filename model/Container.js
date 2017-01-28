@@ -33,19 +33,23 @@ class Container extends DocumentNode {
     return this.nodes
   }
 
-  getPosition(nodeId) {
+  getPosition(nodeId, strict) {
+    let pos
+    // convenience
+    if (nodeId._isNode) nodeId = nodeId.id
     // HACK: ATM we are caching only in the real Document
     // i.e., which is connected to the UI etc.
     if (this.document && this.document.isTransactionDocument) {
-      return this.getContent().indexOf(nodeId)
+      pos = this.getContent().indexOf(nodeId)
     } else {
-      var positions = this._getCachedPositions()
-      var pos = positions[nodeId]
-      if (pos === undefined) {
-        pos = -1
-      }
-      return pos
+      const positions = this._getCachedPositions()
+      pos = positions[nodeId]
+      if (pos === undefined) pos = -1
     }
+    if (strict && pos < 0) {
+      throw new Error('Node is not within this container: ' + nodeId)
+    }
+    return pos
   }
 
   getNodeAt(idx) {

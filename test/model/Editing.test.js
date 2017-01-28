@@ -910,7 +910,7 @@ function _l1_empty(doc) {
     content: ''
   })
   let l1 = doc.get('l1')
-  l1.insertAt(1, 'l1-empty')
+  l1.insertItemAt(1, 'l1-empty')
 }
 
 function _block1(doc, body) {

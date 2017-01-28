@@ -2,8 +2,20 @@ import DocumentNode from '../../model/DocumentNode'
 
 class ListNode extends DocumentNode {
 
-  getItemPath(id) {
-    return [this.id, 'items', id, 'content']
+  getItemAt(idx) {
+    return this.getDocument().get(this.items[idx])
+  }
+
+  getFirstItem() {
+    return this.getItemAt(0)
+  }
+
+  getLastItem() {
+    return this.getItemAt(this.getLength()-1)
+  }
+
+  getItemPath(itemId) {
+    return [this.id, 'items', itemId, 'content']
   }
 
   getItems() {
@@ -13,18 +25,30 @@ class ListNode extends DocumentNode {
     })
   }
 
-  getItemIndex(id) {
-    return this.items.indexOf(id)
+  getItemPosition(itemId) {
+    if (itemId._isNode) itemId = itemId.id
+    let pos = this.items.indexOf(itemId)
+    if (pos < 0) throw new Error('Item is not within this list: ' + itemId)
+    return pos
   }
 
-  insertAt(pos, itemId) {
+  insertItemAt(pos, itemId) {
     const doc = this.getDocument()
     doc.update([this.id, 'items'], { type: 'insert', pos: pos, value: itemId })
   }
 
+  appendItem(itemId) {
+    this.insertItemAt(this.items.length, itemId)
+  }
+
+  removeItemAt(pos) {
+    const doc = this.getDocument()
+    doc.update([this.id, 'items'], { type: 'delete', pos: pos })
+  }
+
   remove(itemId) {
     const doc = this.getDocument()
-    const pos = this.getItemIndex(itemId)
+    const pos = this.getItemPosition(itemId)
     if (pos >= 0) {
       doc.update([this.id, 'items'], { type: 'delete', pos: pos })
     }
