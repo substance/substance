@@ -1040,6 +1040,15 @@ class Editing {
     let first = container.getChildAt(pos)
     let second = container.getChildAt(pos+1)
     if (first.isText()) {
+      // Simplification for empty nodes
+      if (first.isEmpty()) {
+        container.hide(first.id)
+        tx.delete(first.id)
+        // TODO: need to clear where to handle
+        // selections ... probably better not to do it here
+        this._setCursor(tx, second, container.id, 'before')
+        return
+      }
       let target = first
       let targetPath = target.getTextPath()
       let targetLength = target.getLength()
@@ -1117,7 +1126,13 @@ class Editing {
         _selectNode(tx, direction === 'left' ? first.id : second.id, container.id)
       }
     } else {
-      _selectNode(tx, direction === 'left' ? first.id : second.id, container.id)
+      if (second.isText() && second.isEmpty()) {
+        container.hide(second.id)
+        tx.delete(second.id)
+        this._setCursor(tx, first, container.id, 'after')
+      } else {
+        _selectNode(tx, direction === 'left' ? first.id : second.id, container.id)
+      }
     }
   }
 
