@@ -2,7 +2,7 @@ import { module } from 'substance-test'
 import setupContainerEditor from './setupContainerEditor'
 import nestedContainers from '../fixtures/nestedContainers'
 
-const test = module('ui/IsolatedNode')
+const test = module('IsolatedNode')
 
 test("IsolatedNodes should be 'not-selected' when selection is null", function(t) {
   let { editorSession, app } = setupContainerEditor(nestedContainers)

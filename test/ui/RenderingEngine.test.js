@@ -9,7 +9,7 @@ var internal = RenderingEngine._internal
 
 function RenderingEngineTests(debug) {
 
-const test = module('ui/RenderingEngine' + (debug ? '(debug)' : ''))
+const test = module('RenderingEngine' + (debug ? ' [debug-mode]' : ''))
   .withOptions({
     before: function() {
       substanceGlobals.DEBUG_RENDERING = Boolean(debug)

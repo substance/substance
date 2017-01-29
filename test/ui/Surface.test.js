@@ -1,21 +1,18 @@
-import { module } from 'substance-test'
-
 /* eslint-disable no-invalid-this */
+import { module } from 'substance-test'
 import EditorSession from '../../model/EditorSession'
 import Registry from '../../util/Registry'
 import Configurator from '../../util/Configurator'
-
 import TestContainerEditor from './TestContainerEditor'
 import fixture from '../fixtures/createTestArticle'
 import simple from '../fixtures/simple'
 import BrowserDOMElement from '../../dom/BrowserDOMElement'
-
 import ParagraphComponent from '../../packages/paragraph/ParagraphComponent'
 import HeadingComponent from '../../packages/heading/HeadingComponent'
 import AnnotationComponent from '../../ui/AnnotationComponent'
 import LinkComponent from '../../packages/link/LinkComponent'
 
-const test = module('ui/Surface')
+const test = module('Surface')
 
 // This test was added to cover issue #82
 test.UI("Set the selection after creating annotation.", function(t) {

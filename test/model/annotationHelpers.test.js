@@ -5,17 +5,11 @@ import EditingInterface from '../../model/EditingInterface'
 import createTestArticle from '../fixtures/createTestArticle'
 import simple from '../fixtures/simple'
 
-const test = module('model/annotationHelpers')
+const test = module('annotationHelpers')
 
 let truncateAnnotation = annotationHelpers.truncateAnnotation
 let expandAnnotation = annotationHelpers.expandAnnotation
 let fuseAnnotation = annotationHelpers.fuseAnnotation
-
-// test("Updating annotation index when transferring annotations", function(t) {
-//   let tx = new EditingInterface(fixture())
-
-//   t.end()
-// })
 
 test("Truncate property annotation with a given property selection", function(t) {
   let doc = fixture(A1)

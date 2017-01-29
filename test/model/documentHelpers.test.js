@@ -5,7 +5,7 @@ import fixture from '../fixtures/createTestArticle'
 import simple from '../fixtures/simple'
 import containerAnnoSample from '../fixtures/containerAnnoSample'
 
-const test = module('model/documentHelpers')
+const test = module('documentHelpers')
 
 test("Get text for null selection.", function(t) {
   var doc = fixture(simple)

@@ -54,7 +54,7 @@ import MSW11OSXPlainTextFixture from '../fixtures/html/word-11-osx-plain-text'
 import MSW11OSXAnnotatedTextFixture from '../fixtures/html/word-11-osx-annotated-text'
 import MSW11OSXTwoParagraphsFixture from '../fixtures/html/word-11-osx-two-paragraphs'
 
-const test = module('ui/Clipboard')
+const test = module('Clipboard')
 
 // let componentRegistry = new ComponentRegistry({
 //   "paragraph": ParagraphComponent,

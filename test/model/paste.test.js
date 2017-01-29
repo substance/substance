@@ -4,7 +4,7 @@ import EditingInterface from '../../model/EditingInterface'
 import fixture from '../fixtures/createTestArticle'
 import simple from '../fixtures/simple'
 
-const test = module('model/paste')
+const test = module('paste')
 
 test("Pasting plain text", function(t) {
   let { tx } = _fixture(simple)

@@ -5,7 +5,7 @@ import ObjectOperation from '../../model/data/ObjectOperation'
 import TextOperation from '../../model/data/TextOperation'
 import ArrayOperation from '../../model/data/ArrayOperation'
 
-const test = module('model/OperationSerializer')
+const test = module('OperationSerializer')
 
 test('Serializing create', function(t) {
   var p = { id: 'p1', type: 'paragraph', content: 'foo' }

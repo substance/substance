@@ -1,7 +1,7 @@
 import { module } from 'substance-test'
 import TreeIndex from '../../util/TreeIndex'
 
-const test = module('util/TreeIndex')
+const test = module('TreeIndex')
 
 test("Setting and getting values from a TreeIndex", function(t) {
   var adapter = new TreeIndex()

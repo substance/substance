@@ -8,7 +8,7 @@ import fixture from '../fixtures/createTestArticle'
 import simple from '../fixtures/simple'
 import containerAnnoSample from '../fixtures/containerAnnoSample'
 
-const test = module('model/ContainerSelection')
+const test = module('ContainerSelection')
 
 test("Creating a ContainerSelection", function(t) {
   var sel = new ContainerSelection('body',['p1', 'content'], 1, ['p2', 'content'], 2)

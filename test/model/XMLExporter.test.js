@@ -17,7 +17,7 @@ if (inBrowser) {
 
 function xmlExporterTests(memory) {
 
-  const test = module('model/XMLExporter' + ( memory ? ' [memory]' : ''))
+  const test = module('XMLExporter' + ( memory ? ' [memory]' : ''))
     .withOptions({
       before: function(t) {
         t.elementFactory = memory ? XNode.createDocument('xml') : DefaultDOMElement.createDocument('xml')

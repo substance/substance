@@ -2,7 +2,7 @@ import { module } from 'substance-test'
 import Fragmenter from '../../model/Fragmenter'
 import Annotation from '../../model/Annotation'
 
-const test = module('model/Fragmenter')
+const test = module('Fragmenter')
 
 var TEXT = 'ABCDEFGHI'
 

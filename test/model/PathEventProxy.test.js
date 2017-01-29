@@ -5,7 +5,7 @@ import Configurator from '../../util/Configurator'
 import fixture from '../fixtures/createTestArticle'
 import headersAndParagraphs from '../fixtures/headersAndParagraphs'
 
-const test = module('model/PathEventProxy')
+const test = module('PathEventProxy')
 
 function docWithTestNodes(tx) {
   headersAndParagraphs(tx)

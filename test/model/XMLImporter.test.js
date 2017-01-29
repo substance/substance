@@ -2,7 +2,7 @@ import { module } from 'substance-test'
 import TestXMLImporter from '../model/TestXMLImporter'
 import DOMElement from '../../dom/DefaultDOMElement'
 
-const test = module('model/XMLImporter')
+const test = module('XMLImporter')
 
 let importer
 

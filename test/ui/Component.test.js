@@ -1,5 +1,4 @@
 /* eslint-disable no-invalid-this, indent */
-
 import { module, spy } from 'substance-test'
 import substanceGlobals from '../../util/substanceGlobals'
 import isEqual from '../../util/isEqual'
@@ -25,7 +24,7 @@ if (inBrowser) {
 
 function ComponentTests(debug, memory) {
 
-  const test = module('ui/Component' + (debug ? '[debug]' : '') + (memory ? '[memory]' : ''))
+  const test = module('Component' + (debug ? ' [debug]' : '') + (memory ? ' [memory]' : ''))
     .withOptions({
       before: function(t) {
         substanceGlobals.DEBUG_RENDERING = Boolean(debug)

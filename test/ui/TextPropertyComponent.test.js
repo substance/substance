@@ -1,10 +1,9 @@
 import { module } from 'substance-test'
 import TextPropertyComponent from '../../ui/TextPropertyComponent'
-
 import fixture from '../fixtures/createTestArticle'
 import simple from '../fixtures/simple'
 
-const test = module('ui/TextPropertyComponent')
+const test = module('TextPropertyComponent')
 
 test.UI("Get coordinate of empty property", function(t) {
   var doc = fixture(simple)

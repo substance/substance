@@ -1,6 +1,5 @@
+/* eslint-disable no-invalid-this, indent, no-use-before-define */
 import { module } from 'substance-test'
-/* eslint-disable no-invalid-this, indent */
-
 import get from 'lodash-es/get'
 import isArray from '../../util/isArray'
 import DOMSelection from '../../ui/DOMSelection'
@@ -12,123 +11,7 @@ import ContainerSelection from '../../model/ContainerSelection'
 import PropertySelection from '../../model/PropertySelection'
 import setDOMSelection from '../../util/setDOMSelection'
 
-const test = module('ui/DOMSelection')
-
-class StubDoc {
-  constructor(el) {
-    this.el = el
-    this.nodes = null
-  }
-
-  get(path) {
-    if (this.nodes === null) {
-      this.nodes = {}
-      this.nodes['body'] = new Container(this, {
-        type: 'container',
-        id: 'body',
-        nodes: []
-      })
-      var propEls = this.el.findAll('*[data-path]')
-      for (var i = 0; i < propEls.length; i++) {
-        var propEl = propEls[i]
-        var nodeId = propEl.getAttribute('data-path').split('.')[0]
-        this.nodes[nodeId] = new Paragraph(this, {
-          type: 'paragraph',
-          id: nodeId,
-          content: propEl.textContent
-        })
-        this.nodes['body'].nodes.push(nodeId)
-      }
-    }
-
-    if (!isArray(path)) {
-      path = [path]
-    }
-    var result = get(this.nodes, path)
-    return result
-  }
-
-  createSelection() {
-    return Document.prototype.createSelection.apply(this, arguments)
-  }
-
-  on() {}
-
-  off() {}
-}
-
-
-class StubSurface {
-
-  constructor(el, containerId) {
-    this.el = el
-    this.doc = new StubDoc(el)
-    this.containerId = containerId
-  }
-
-  getDocument() {
-    return this.doc
-  }
-
-  isContainerEditor() {
-    return Boolean(this.containerId)
-  }
-
-  getContainerId() {
-    return this.containerId
-  }
-
-  getNativeElement() {
-    return this.el.getNativeElement()
-  }
-
-  find(selector) {
-    var el =  this.el.find(selector)
-    if (!el) return null
-    return new StubTextPropertyComponent(el)
-  }
-
-}
-
-class StubTextPropertyComponent {
-
-  constructor(el) {
-    this.el = el
-  }
-
-  getDOMCoordinate() {
-    return TextPropertyComponent.prototype.getDOMCoordinate.apply(this, arguments)
-  }
-
-  _getDOMCoordinate() {
-    return TextPropertyComponent.prototype._getDOMCoordinate.apply(this, arguments)
-  }
-}
-
-// Fixtures
-var singlePropertyFixture = [
-  '<div id="test1">',
-    '<span data-path="test1.content">Hello World!</span>',
-  '</div>'
-].join('')
-
-var mixedFixture = [
-  '<div id="before">Before</div>',
-  '<div id="test1">',
-    '<span data-path="test1.content">The first property.</span>',
-  '</div>',
-  '<div id="test2">',
-    '<span data-path="test2.content">The second property.</span>',
-  '</div>',
-  '<div id="between">Between</div>',
-  '<div id="test3">',
-    '<span data-path="test3.content">The third property.</span>',
-  '</div>',
-  '<div id="test4">',
-    '<span data-path="test4.content">The forth property.</span>',
-  '</div>',
-  '<div id="after">After</div>'
-].join('')
+const test = module('DOMSelection')
 
 test.UI("Get coordinate for collapsed selection", function(t) {
   var el = t.sandbox.html(singlePropertyFixture)
@@ -494,3 +377,118 @@ test.UI("Setting cursor after inline node at end of property", function(t) {
   t.equal(wSel.focusOffset, wSel.anchorOffset, 'focusOffset should be correct.')
   t.end()
 })
+
+// Fixtures
+const singlePropertyFixture = [
+  '<div id="test1">',
+    '<span data-path="test1.content">Hello World!</span>',
+  '</div>'
+].join('')
+
+const mixedFixture = [
+  '<div id="before">Before</div>',
+  '<div id="test1">',
+    '<span data-path="test1.content">The first property.</span>',
+  '</div>',
+  '<div id="test2">',
+    '<span data-path="test2.content">The second property.</span>',
+  '</div>',
+  '<div id="between">Between</div>',
+  '<div id="test3">',
+    '<span data-path="test3.content">The third property.</span>',
+  '</div>',
+  '<div id="test4">',
+    '<span data-path="test4.content">The forth property.</span>',
+  '</div>',
+  '<div id="after">After</div>'
+].join('')
+
+class StubDoc {
+  constructor(el) {
+    this.el = el
+    this.nodes = null
+  }
+
+  get(path) {
+    if (this.nodes === null) {
+      this.nodes = {}
+      this.nodes['body'] = new Container(this, {
+        type: 'container',
+        id: 'body',
+        nodes: []
+      })
+      var propEls = this.el.findAll('*[data-path]')
+      for (var i = 0; i < propEls.length; i++) {
+        var propEl = propEls[i]
+        var nodeId = propEl.getAttribute('data-path').split('.')[0]
+        this.nodes[nodeId] = new Paragraph(this, {
+          type: 'paragraph',
+          id: nodeId,
+          content: propEl.textContent
+        })
+        this.nodes['body'].nodes.push(nodeId)
+      }
+    }
+
+    if (!isArray(path)) {
+      path = [path]
+    }
+    var result = get(this.nodes, path)
+    return result
+  }
+
+  createSelection() {
+    return Document.prototype.createSelection.apply(this, arguments)
+  }
+
+  on() {}
+
+  off() {}
+}
+
+class StubSurface {
+
+  constructor(el, containerId) {
+    this.el = el
+    this.doc = new StubDoc(el)
+    this.containerId = containerId
+  }
+
+  getDocument() {
+    return this.doc
+  }
+
+  isContainerEditor() {
+    return Boolean(this.containerId)
+  }
+
+  getContainerId() {
+    return this.containerId
+  }
+
+  getNativeElement() {
+    return this.el.getNativeElement()
+  }
+
+  find(selector) {
+    var el = this.el.find(selector)
+    if (!el) return null
+    return new StubTextPropertyComponent(el)
+  }
+
+}
+
+class StubTextPropertyComponent {
+
+  constructor(el) {
+    this.el = el
+  }
+
+  getDOMCoordinate() {
+    return TextPropertyComponent.prototype.getDOMCoordinate.apply(this, arguments)
+  }
+
+  _getDOMCoordinate() {
+    return TextPropertyComponent.prototype._getDOMCoordinate.apply(this, arguments)
+  }
+}

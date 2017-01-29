@@ -3,7 +3,7 @@ import { module } from 'substance-test'
 import TestHTMLImporter from '../model/TestHTMLImporter'
 import DOMElement from '../../dom/DefaultDOMElement'
 
-const test = module('model/HTMLImporter')
+const test = module('HTMLImporter')
 
 var CONTENT = '0123456789'
 

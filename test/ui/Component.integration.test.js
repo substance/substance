@@ -1,14 +1,7 @@
 import { module } from 'substance-test'
 import Component from '../../ui/Component'
-const test = module('ui/Component (integration)')
 
-function component(renderFunc, props) {
-  var comp = new Component(null, props)
-  if (renderFunc) {
-    comp.render = renderFunc
-  }
-  return comp
-}
+const test = module('Component (integration)')
 
 test.UI("Three elements", function(t) {
   var sandbox = t.sandbox; // eslint-disable-line
@@ -45,3 +38,11 @@ test.UI("Three elements", function(t) {
   runChecks()
   t.end()
 })
+
+function component(renderFunc, props) {
+  var comp = new Component(null, props)
+  if (renderFunc) {
+    comp.render = renderFunc
+  }
+  return comp
+}

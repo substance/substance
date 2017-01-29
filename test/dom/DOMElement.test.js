@@ -13,7 +13,7 @@ function testDOMElement(impl) {
 
   const DOMElement = impl === 'BrowserDOMElement' ? BrowserDOMElement : XNode
 
-  const test = module('dom/DOMElement ('+impl+')')
+  const test = module('DOMElement ('+impl+')')
 
   test("Parsing a full HTML document", function(t) {
     var html = '<html><head><title>TEST</title></head><body>TEST</body></html>'

@@ -13,7 +13,7 @@ import ParagraphPackage from '../../packages/paragraph/ParagraphPackage'
 import StrongPackage from '../../packages/strong/StrongPackage'
 import ListPackage from '../../packages/list/ListPackage'
 
-const test = module('model/Editing')
+const test = module('Editing')
 
 // Inserting
 // ---------

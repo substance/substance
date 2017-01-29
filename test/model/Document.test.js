@@ -3,7 +3,7 @@ import { module } from 'substance-test'
 import fixture from '../fixtures/createTestArticle'
 import simple from '../fixtures/simple'
 
-const test = module('model/Document')
+const test = module('Document')
 
 test("Create null selection.", function(t) {
   var doc = fixture(simple)

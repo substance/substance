@@ -5,7 +5,7 @@ import Configurator from '../../util/Configurator'
 import fixture from '../fixtures/createTestArticle'
 import simple from '../fixtures/simple'
 
-const test = module('model/EditorSession')
+const test = module('EditorSession')
 
 test("Keeping TransactionDocument up-to-date.", function(t) {
   let { editorSession, doc } = _fixture(simple)

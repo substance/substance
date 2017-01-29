@@ -8,7 +8,7 @@ import Configurator from '../../util/Configurator'
 import createTestArticle from '../fixtures/createTestArticle'
 import containerAnnoSample from '../fixtures/containerAnnoSample'
 
-const test = module('ui/AnnotationCommand')
+const test = module('AnnotationCommand')
 
 class ToggleStrongCommand extends AnnotationCommand {
   constructor() {

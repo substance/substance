@@ -1,7 +1,7 @@
 import { module } from 'substance-test'
 import ContainerAddress from '../../model/ContainerAddress'
 
-const test = module('model/ContainerAddress')
+const test = module('ContainerAddress')
 
 test("[0,1] is before [1,0]", function(t) {
   var first = new ContainerAddress(0, 1)

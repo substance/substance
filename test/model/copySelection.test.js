@@ -5,7 +5,7 @@ import fixture from '../fixtures/createTestArticle'
 import simple from '../fixtures/simple'
 import headersAndParagraphs from '../fixtures/headersAndParagraphs'
 
-const test = module('model/copySelection')
+const test = module('copySelection')
 
 test("Copying a property selection", function(t) {
   var doc = fixture(headersAndParagraphs)
