@@ -14,6 +14,7 @@ import Component from '../../ui/Component'
 import AbstractEditor from '../../ui/AbstractEditor'
 import ContainerEditor from '../../ui/ContainerEditor'
 import Configurator from '../../util/Configurator'
+import TestContainerAnnotation from './TestContainerAnnotation'
 
 export default function setupEditor(t, ...f) {
   let editor = TestEditor.mount({ editorSession: fixture(...f) }, t.sandbox)
@@ -59,6 +60,7 @@ function getConfig() {
   config.import(CodeblockPackage)
   config.addNode(TestBlockNode)
   config.addNode(TestInlineNode)
+  config.addNode(TestContainerAnnotation)
   config.addComponent('test-block', Component)
   return config
 }

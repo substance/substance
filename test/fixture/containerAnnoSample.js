@@ -1,26 +1,26 @@
-export default function(article) {
-  article.set(['meta', 'title'], 'Sample1')
-  article.create({
+export default function(tx) {
+  let body = tx.get('body')
+  tx.create({
     type: 'paragraph',
     id: 'p1',
     content: '0123456789'
   })
-  article.create({
+  tx.create({
     type: 'paragraph',
     id: 'p2',
     content: '0123456789'
   })
-  article.create({
+  tx.create({
     type: 'paragraph',
     id: 'p3',
     content: '0123456789'
   })
-  article.create({
+  tx.create({
     type: 'paragraph',
     id: 'p4',
     content: '0123456789'
   })
-  article.create({
+  tx.create({
     type: 'test-container-anno',
     id: 'a1',
     start: {
@@ -33,7 +33,7 @@ export default function(article) {
     },
     containerId: 'body'
   })
-  article.create({
+  tx.create({
     type: 'strong',
     id: 'a2',
     start: {
@@ -44,11 +44,9 @@ export default function(article) {
       offset: 2
     }
   })
-  var body = article.get('body')
   body.show('p1')
   body.show('p2')
   body.show('p3')
   body.show('p4')
-  article.FORCE_TRANSACTIONS = false
-  return article
+  return tx
 }

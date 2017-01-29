@@ -1,60 +1,41 @@
 import { module } from 'substance-test'
-import EditorSession from '../model/EditorSession'
 import SelectionState from '../model/SelectionState'
 import AnnotationCommand from '../ui/AnnotationCommand'
-import Configurator from '../util/Configurator'
-import createTestArticle from './fixture/createTestArticle'
+import setupEditor from './fixture/setupEditor'
 import containerAnnoSample from './fixture/containerAnnoSample'
 
 const test = module('AnnotationCommand')
 
-class ToggleStrongCommand extends AnnotationCommand {
-  constructor() {
-    super({ name: 'strong', nodeType: 'strong' })
-  }
-}
-
-function fixture() {
-  var doc = createTestArticle(containerAnnoSample)
-  // Create a second strong annotation to be fused
-  doc.create({
-    id: 'a3',
-    type: 'strong',
-    start: { path: ['p1', 'content'], offset: 4 },
-    end: { offset: 8 }
-  })
-  return doc
-}
-
-test("can 'create' property annotation", function(t) {
-  var doc = fixture()
-  var selectionState = new SelectionState(doc)
-  var cmd = new ToggleStrongCommand()
-  var sel = doc.createSelection(['p6', 'content'], 1, 6)
+test.UI("can 'create' property annotation", function(t) {
+  let { doc } = fixture(t)
+  let selectionState = new SelectionState(doc)
+  let cmd = new ToggleStrongCommand()
+  let sel = doc.createSelection(['p6', 'content'], 1, 6)
   selectionState.setSelection(sel)
-  var cmdState = cmd.getCommandState({
+  let cmdState = cmd.getCommandState({
     selectionState: selectionState
   })
   t.equal(cmdState.mode, 'create', "Mode should be correct.")
   t.end()
 })
 
-test("execute 'create' property annotation", function(t) {
-  var doc = fixture()
-  var editorSession = new EditorSession(doc, {
-    configurator: new Configurator()
+test.UI("execute 'create' property annotation", function(t) {
+  let { editorSession, doc } = fixture(t)
+  let cmd = new ToggleStrongCommand()
+  editorSession.setSelection({
+    type: 'property',
+    path: ['p6', 'content'],
+    startOffset: 1,
+    endOffset: 6
   })
-  var cmd = new ToggleStrongCommand()
-  var sel = doc.createSelection(['p6', 'content'], 1, 6)
-  editorSession.setSelection(sel)
-  var res = cmd.execute({
+  let res = cmd.execute({
     commandState: {
       mode: 'create'
     },
     editorSession: editorSession,
     selectionState: editorSession.getSelectionState()
   })
-  var newAnno = res.anno
+  let newAnno = res.anno
   t.notNil(newAnno, 'A new anno should have been created')
   newAnno = doc.get(newAnno.id)
   t.equal(newAnno.type, 'strong', '.. of correct type')
@@ -64,40 +45,41 @@ test("execute 'create' property annotation", function(t) {
   t.end()
 })
 
-test("can 'delete' property annotation", function(t) {
-  var doc = fixture()
-  var selectionState = new SelectionState(doc)
-  var cmd = new ToggleStrongCommand()
-  var sel = doc.createSelection(['p1', 'content'], 5, 7)
+test.UI("can 'delete' property annotation", function(t) {
+  let { doc } = fixture(t)
+  let selectionState = new SelectionState(doc)
+  let cmd = new ToggleStrongCommand()
+  let sel = doc.createSelection(['p1', 'content'], 5, 7)
   selectionState.setSelection(sel)
-  var cmdState = cmd.getCommandState({
+  let cmdState = cmd.getCommandState({
     selectionState: selectionState
   })
   t.equal(cmdState.mode, 'delete', "Mode should be correct.")
   t.end()
 })
 
-test("execute 'delete' property annotation", function(t) {
-  var doc = fixture()
-  var selectionState = new SelectionState(doc)
-  var cmd = new ToggleStrongCommand()
-  var sel = doc.createSelection(['p1', 'content'], 5, 7)
+test.UI("execute 'delete' property annotation", function(t) {
+  let { doc } = fixture(t)
+  let selectionState = new SelectionState(doc)
+  let cmd = new ToggleStrongCommand()
+  let sel = doc.createSelection(['p1', 'content'], 5, 7)
   selectionState.setSelection(sel)
-  var cmdState = cmd.getCommandState({
+  let cmdState = cmd.getCommandState({
     selectionState: selectionState
   })
   t.equal(cmdState.mode, 'delete', "Mode should be correct.")
   t.end()
 })
 
-test("can 'expand' property annotation", function(t) {
-  var doc = fixture()
-  var editorSession = new EditorSession(doc, {
-    configurator: new Configurator()
+test.UI("can 'expand' property annotation", function(t) {
+  let { editorSession, doc } = fixture(t)
+  let cmd = new ToggleStrongCommand()
+  editorSession.setSelection({
+    type: 'property',
+    path: ['p1', 'content'],
+    startOffset: 5,
+    endOffset: 7
   })
-  var cmd = new ToggleStrongCommand()
-  var sel = doc.createSelection(['p1', 'content'], 5, 7)
-  editorSession.setSelection(sel)
   cmd.execute({
     commandState: {
       mode: 'delete'
@@ -108,3 +90,20 @@ test("can 'expand' property annotation", function(t) {
   t.isNil(doc.get('a3'), 'a3 should be gone.')
   t.end()
 })
+
+class ToggleStrongCommand extends AnnotationCommand {
+  constructor() {
+    super({ name: 'strong', nodeType: 'strong' })
+  }
+}
+
+function fixture(t) {
+  return setupEditor(t, containerAnnoSample, (tx) => {
+    tx.create({
+      id: 'a3',
+      type: 'strong',
+      start: { path: ['p1', 'content'], offset: 4 },
+      end: { offset: 8 }
+    })
+  })
+}

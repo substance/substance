@@ -1,14 +1,11 @@
 import { module, spy } from 'substance-test'
-
-import EditorSession from '../model/EditorSession'
-import Configurator from '../util/Configurator'
-import fixture from './fixture/createTestArticle'
+import setupEditor from './fixture/setupEditor'
 import simple from './fixture/simple'
 
 const test = module('EditorSession')
 
-test("Keeping TransactionDocument up-to-date.", function(t) {
-  let { editorSession, doc } = _fixture(simple)
+test.UI("Keeping TransactionDocument up-to-date.", function(t) {
+  let { editorSession, doc } = setupEditor(t, simple)
   let stageDoc = editorSession._transaction._stageDoc
   stageDoc._apply = spy(stageDoc, '_apply')
   doc.create({ type: 'paragraph', id: 'foo', content: 'foo'})
@@ -19,8 +16,8 @@ test("Keeping TransactionDocument up-to-date.", function(t) {
   t.end()
 })
 
-test("Undoing and redoing a change.", function(t) {
-  let { editorSession, doc } = _fixture(simple)
+test.UI("Undoing and redoing a change.", function(t) {
+  let { editorSession, doc } = setupEditor(t, simple)
   editorSession.transaction(function(tx) {
     tx.update(['p1', 'content'], { type: 'insert', start: 3, text: "XXX" })
   })
@@ -35,8 +32,8 @@ test("Undoing and redoing a change.", function(t) {
   t.end()
 })
 
-test("Selections after undo/redo.", function(t) {
-  let { editorSession, doc } = _fixture(simple)
+test.UI("Selections after undo/redo.", function(t) {
+  let { editorSession, doc } = setupEditor(t, simple)
   var path = ['p1', 'content']
   editorSession.setSelection({
     type: 'property',
@@ -68,13 +65,3 @@ test("Selections after undo/redo.", function(t) {
   t.end()
 })
 
-function _fixture(seed) {
-  let doc = fixture(seed)
-  let editorSession = new EditorSession(doc, {
-    configurator: new Configurator()
-  })
-  return {
-    editorSession: editorSession,
-    doc: doc
-  }
-}
