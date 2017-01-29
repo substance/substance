@@ -280,13 +280,7 @@ class Editing {
       [startId, endId] = [endId, startId]
     }
 
-    // we need to detect if start and end nodes are selected entirely
-    // 1. If both are entirely selected
-    // 1.1. and the first is a TextNode, the first should be cleared, all others be removed
-    // 1.2. and the first is not a TextNode, then all should be removed and an empty paragraph should be inserted
-    // 2. If first is entirely selected and the last partially, then the last should be truncated and all others removed
-    // 3. If first is partially selected and the last entirely, then the first should be truncated and all others removed
-    // 4. If first and last are partially selected, all inner nodes should be removed and first and last be merged if possible
+    // TODO: document the algorithm
 
     let firstNode = tx.get(start.getNodeId())
     let lastNode = tx.get(end.getNodeId())
@@ -298,7 +292,8 @@ class Editing {
       tx.update([container.id, 'nodes'], { type: 'delete', pos: endPos })
       this._deleteNode(tx, lastNode)
     } else {
-      if (lastNode.isText()) {
+      let node = lastNode
+      if (node.isText()) {
         this._deleteTextRange(tx, null, end, containerId)
       } else {
         throw new Error('Not supported yet')
@@ -308,32 +303,42 @@ class Editing {
     // delete inner nodes
     for (let i = endPos-1; i > startPos; i--) {
       let nodeId = container.nodes[i]
-      // remove from container
       tx.update([container.id, 'nodes'], { type: 'delete', pos: i })
-      // delete node
       this._deleteNode(tx, tx.get(nodeId))
     }
 
-    if (firstNode.isText()) {
-      this._deleteTextRange(tx, start, null, containerId)
-    } else if (firstNode.isList()) {
-      throw new Error('Not supported yet')
-    } else if (firstEntirelySelected && lastEntirelySelected) {
-      // remove from container
+    // delete or truncate the first node
+    if (firstEntirelySelected) {
       tx.update([container.id, 'nodes'], { type: 'delete', pos: startPos })
       this._deleteNode(tx, firstNode)
+    } else {
+      let node = firstNode
+      if (node.isText()) {
+        this._deleteTextRange(tx, start, null, containerId)
+      } else {
+        throw new Error('Not supported yet')
+      }
+    }
+
+    // insert a new TextNode if all has been deleted
+    if (firstEntirelySelected && lastEntirelySelected) {
       // insert a new paragraph
       let textNode = tx.createDefaultTextNode()
       tx.update([container.id, 'nodes'], { type: 'insert', pos: startPos, value: textNode.id })
-    } else {
-      throw new Error('Not supported yet')
-    }
-
-    // merge the last if possible
-    if (!firstEntirelySelected && !lastEntirelySelected) {
+      tx.setSelection({
+        type: 'property',
+        path: textNode.getTextPath(),
+        startOffset: 0,
+        containerId: containerId
+      })
+    } else if (!firstEntirelySelected && !lastEntirelySelected) {
       this._merge(tx, firstNode, sel.start, 'right', container)
+      tx.setSelection(sel.collapse('left'))
+    } else if (firstEntirelySelected) {
+      this._setCursor(tx, lastNode, container.id, 'before')
+    } else {
+      this._setCursor(tx, firstNode, container.id, 'after')
     }
-    tx.setSelection(sel.collapse('left'))
   }
 
   /*

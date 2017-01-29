@@ -16,6 +16,8 @@ import ListPackage from '../packages/list/ListPackage'
 
 const test = module('Editing')
 
+// TODO: consolidate specification and 'category labels' of tests
+
 // TODO: we should enable t.sandbox for all tests so that this implementation is
 // tested on all platforms
 
@@ -626,7 +628,7 @@ test.UI("[D10]: Deleting an entirely selected IsolatedNode", function(t) {
   t.end()
 })
 
-test.UI("[D20-1]: Deleting a Range that starts at begin of a TextNode and ends at end of a TextNode", function(t) {
+test.UI("[D20-1]: Deleting a range starting before a TextNode and ending after a TextNode", function(t) {
   let { editorSession, doc } = setupEditor(t, _p1, _block1, _block2, _p2)
   let p1 = doc.get('p1')
   let p2 = doc.get('p2')
@@ -647,6 +649,60 @@ test.UI("[D20-1]: Deleting a Range that starts at begin of a TextNode and ends a
   let first = body.getChildAt(0)
   t.ok(first.isText(), '... which is a TextNode')
   t.ok(first.isEmpty(), '... which is empty')
+  t.ok(sel.isCollapsed(), 'Selection should be collapsed')
+  t.deepEqual(sel.start.path, first.getTextPath(), '... on that TextNode')
+  t.equal(sel.start.offset, 0, '... at first position')
+  t.end()
+})
+
+test.UI("[D20-2]: Deleting a range starting in the middle of a TextNode and ending after a TextNode", function(t) {
+  let { editorSession, doc } = setupEditor(t, _p1, _block1, _block2, _p2)
+  let p1 = doc.get('p1')
+  let p2 = doc.get('p2')
+  editorSession.setSelection({
+    type: 'container',
+    startPath: p1.getTextPath(),
+    startOffset: 3,
+    endPath: p2.getTextPath(),
+    endOffset: p2.getLength(),
+    containerId: 'body'
+  })
+  editorSession.transaction((tx) => {
+    tx.deleteSelection()
+  })
+  let sel = editorSession.getSelection()
+  let body = doc.get('body')
+  t.equal(body.nodes.length, 1, 'There should be only one node left')
+  let first = body.getChildAt(0)
+  t.ok(first.isText(), '... which is a TextNode')
+  t.equal(first.getText(), P1_TEXT.slice(0, 3), '... with truncated content')
+  t.ok(sel.isCollapsed(), 'Selection should be collapsed')
+  t.deepEqual(sel.start.path, first.getTextPath(), '... on that TextNode')
+  t.equal(sel.start.offset, 3, '... at last position')
+  t.end()
+})
+
+test.UI("[D20-3]: Deleting a range starting before a TextNode and ending in the middle of a TextNode", function(t) {
+  let { editorSession, doc } = setupEditor(t, _p1, _block1, _block2, _p2)
+  let p1 = doc.get('p1')
+  let p2 = doc.get('p2')
+  editorSession.setSelection({
+    type: 'container',
+    startPath: p1.getTextPath(),
+    startOffset: 0,
+    endPath: p2.getTextPath(),
+    endOffset: 3,
+    containerId: 'body'
+  })
+  editorSession.transaction((tx) => {
+    tx.deleteSelection()
+  })
+  let sel = editorSession.getSelection()
+  let body = doc.get('body')
+  t.equal(body.nodes.length, 1, 'There should be only one node left')
+  let first = body.getChildAt(0)
+  t.ok(first.isText(), '... which is a TextNode')
+  t.equal(first.getText(), P2_TEXT.slice(3), '... with sliced content')
   t.ok(sel.isCollapsed(), 'Selection should be collapsed')
   t.deepEqual(sel.start.path, first.getTextPath(), '... on that TextNode')
   t.equal(sel.start.offset, 0, '... at first position')
@@ -676,7 +732,7 @@ test.UI("[L1]: Inserting text into a ListItem", function(t) {
   t.end()
 })
 
-test.UI("[L2]: Breaking a ListItem with Cursor in the middle of text", function(t) {
+test.UI("[L2]: Breaking a ListItem with cursor in the middle of text", function(t) {
   let editor = TestEditor.mount({ editorSession: fixture(_l1) }, t.sandbox)
   let editorSession = editor.editorSession
   let doc = editorSession.getDocument()
@@ -700,7 +756,7 @@ test.UI("[L2]: Breaking a ListItem with Cursor in the middle of text", function(
   t.end()
 })
 
-test.UI("[L3]: Breaking a ListItem with Cursor at begin of text", function(t) {
+test.UI("[L3]: Breaking a ListItem with cursor at begin of text", function(t) {
   let editor = TestEditor.mount({ editorSession: fixture(_l1) }, t.sandbox)
   let editorSession = editor.editorSession
   let doc = editorSession.getDocument()
