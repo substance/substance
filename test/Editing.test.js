@@ -22,9 +22,7 @@ const test = module('Editing')
 // tested on all platforms
 
 test.UI("[IT1]: Inserting text with cursor in the middle of a TextProperty", function(t) {
-  let editor = TestEditor.mount({ editorSession: fixture(_p1) }, t.sandbox)
-  let editorSession = editor.editorSession
-  let doc = editorSession.getDocument()
+  let { editorSession, doc } = setupEditor(t, _p1)
   editorSession.transaction((tx) => {
     tx.setSelection({
       type: 'property',
@@ -41,9 +39,7 @@ test.UI("[IT1]: Inserting text with cursor in the middle of a TextProperty", fun
 })
 
 test.UI("[IT2]: Inserting text with cursor within TextProperty inside annotation", function(t) {
-  let editor = TestEditor.mount({ editorSession: fixture(_p1, _s1) }, t.sandbox)
-  let editorSession = editor.editorSession
-  let doc = editorSession.getDocument()
+  let { editorSession, doc } = setupEditor(t, _p1, _s1)
   editorSession.transaction((tx) => {
     tx.setSelection({
       type: 'property',
@@ -62,9 +58,7 @@ test.UI("[IT2]: Inserting text with cursor within TextProperty inside annotation
 })
 
 test.UI("[IT3]: Inserting text with cursor within TextProperty at the start of an annotation", function(t) {
-  let editor = TestEditor.mount({ editorSession: fixture(_p1, _s1) }, t.sandbox)
-  let editorSession = editor.editorSession
-  let doc = editorSession.getDocument()
+  let { editorSession, doc } = setupEditor(t, _p1, _s1)
   editorSession.transaction((tx) => {
     tx.setSelection({
       type: 'property',
@@ -84,9 +78,7 @@ test.UI("[IT3]: Inserting text with cursor within TextProperty at the start of a
 })
 
 test.UI("[IT4]: Inserting text with cursor within TextProperty at the end of an annotation", function(t) {
-  let editor = TestEditor.mount({ editorSession: fixture(_p1, _s1) }, t.sandbox)
-  let editorSession = editor.editorSession
-  let doc = editorSession.getDocument()
+  let { editorSession, doc } = setupEditor(t, _p1, _s1)
   editorSession.transaction((tx) => {
     tx.setSelection({
       type: 'property',
@@ -106,9 +98,7 @@ test.UI("[IT4]: Inserting text with cursor within TextProperty at the end of an 
 })
 
 test.UI("[IT5]: Inserting text with range within TextProperty", function(t) {
-  let editor = TestEditor.mount({ editorSession: fixture(_p1) }, t.sandbox)
-  let editorSession = editor.editorSession
-  let doc = editorSession.getDocument()
+  let { editorSession, doc } = setupEditor(t, _p1)
   editorSession.transaction((tx) => {
     tx.setSelection({
       type: 'property',
@@ -127,9 +117,7 @@ test.UI("[IT5]: Inserting text with range within TextProperty", function(t) {
 })
 
 test.UI("[IT6]: Inserting text with range within TextProperty overlapping an annotion aligned at the left side", function(t) {
-  let editor = TestEditor.mount({ editorSession: fixture(_p1, _s1) }, t.sandbox)
-  let editorSession = editor.editorSession
-  let doc = editorSession.getDocument()
+  let { editorSession, doc } = setupEditor(t, _p1, _s1)
   doc.set(['s1', 'end', 'offset'], 6)
   editorSession.transaction((tx) => {
     tx.setSelection({
@@ -152,9 +140,7 @@ test.UI("[IT6]: Inserting text with range within TextProperty overlapping an ann
 })
 
 test.UI("[IT7]: Inserting text with range within TextProperty inside an annotion", function(t) {
-  let editor = TestEditor.mount({ editorSession: fixture(_p1, _s1) }, t.sandbox)
-  let editorSession = editor.editorSession
-  let doc = editorSession.getDocument()
+  let { editorSession, doc } = setupEditor(t, _p1, _s1)
   editorSession.transaction((tx) => {
     tx.setSelection({
       type: 'property',
@@ -176,9 +162,7 @@ test.UI("[IT7]: Inserting text with range within TextProperty inside an annotion
 })
 
 test.UI("[IT8]: Inserting text with range within TextProperty starting inside an annotion", function(t) {
-  let editor = TestEditor.mount({ editorSession: fixture(_p1, _s1) }, t.sandbox)
-  let editorSession = editor.editorSession
-  let doc = editorSession.getDocument()
+  let { editorSession, doc } = setupEditor(t, _p1, _s1)
   doc.set(['s1', 'end', 'offset'], 6)
   editorSession.transaction((tx) => {
     tx.setSelection({
@@ -201,9 +185,7 @@ test.UI("[IT8]: Inserting text with range within TextProperty starting inside an
 })
 
 test.UI("[II1]: Inserting InlineNode node into a TextProperty", function(t) {
-  let editor = TestEditor.mount({ editorSession: fixture(_p1) }, t.sandbox)
-  let editorSession = editor.editorSession
-  let doc = editorSession.getDocument()
+  let { editorSession, doc } = setupEditor(t, _p1)
   editorSession.transaction((tx) => {
     tx.setSelection({
       type: 'property',
@@ -227,9 +209,7 @@ test.UI("[II1]: Inserting InlineNode node into a TextProperty", function(t) {
 })
 
 test.UI("[IB2]: Inserting BlockNode using cursor at start of a TextNode", function(t) {
-  let editor = TestEditor.mount({ editorSession: fixture(_p1) }, t.sandbox)
-  let editorSession = editor.editorSession
-  let doc = editorSession.getDocument()
+  let { editorSession, doc } = setupEditor(t, _p1)
   editorSession.transaction((tx) => {
     tx.setSelection({
       type: 'property',
@@ -709,14 +689,65 @@ test.UI("[D20-3]: Deleting a range starting before a TextNode and ending in the 
   t.end()
 })
 
+test.UI("[D20-4]: Deleting a range starting in the middle of a TextNode and ending in the middle of a TextNode", function(t) {
+  let { editorSession, doc } = setupEditor(t, _p1, _block1, _block2, _p2)
+  let p1 = doc.get('p1')
+  let p2 = doc.get('p2')
+  editorSession.setSelection({
+    type: 'container',
+    startPath: p1.getTextPath(),
+    startOffset: 3,
+    endPath: p2.getTextPath(),
+    endOffset: 3,
+    containerId: 'body'
+  })
+  editorSession.transaction((tx) => {
+    tx.deleteSelection()
+  })
+  let sel = editorSession.getSelection()
+  let body = doc.get('body')
+  t.equal(body.nodes.length, 1, 'There should be only one node left')
+  let first = body.getChildAt(0)
+  t.ok(first.isText(), '... which is a TextNode')
+  t.equal(first.getText(), P1_TEXT.slice(0,3)+P2_TEXT.slice(3), '... with merged content')
+  t.ok(sel.isCollapsed(), 'Selection should be collapsed')
+  t.deepEqual(sel.start.path, first.getTextPath(), '... on that TextNode')
+  t.equal(sel.start.offset, 3, '... at correct position')
+  t.end()
+})
+
+test.UI("[D20-4]: Deleting a range starting in the middle of a TextNode and ending in the middle of a ListItem", function(t) {
+  let { editorSession, doc } = setupEditor(t, _p1, _block1, _block2, _l1)
+  let p1 = doc.get('p1')
+  let l1 = doc.get('l1')
+  editorSession.setSelection({
+    type: 'container',
+    startPath: p1.getTextPath(),
+    startOffset: 3,
+    endPath: l1.getItemPath('l1-1'),
+    endOffset: 3,
+    containerId: 'body'
+  })
+  editorSession.transaction((tx) => {
+    tx.deleteSelection()
+  })
+  let sel = editorSession.getSelection()
+  let body = doc.get('body')
+  t.equal(body.nodes.length, 2, 'There should be 2 nodes left')
+  t.equal(p1.getText(), P1_TEXT.slice(0,3)+LI1_TEXT.slice(3), '... with merged content')
+  t.equal(l1.items.length, 1, 'The list should have only 1 item left')
+  t.ok(sel.isCollapsed(), 'Selection should be collapsed')
+  t.deepEqual(sel.start.path, p1.getTextPath(), '... on p1')
+  t.equal(sel.start.offset, 3, '... at correct position')
+  t.end()
+})
+
 // List Editing
 // ------------
 
 // TODO: add specification
 test.UI("[L1]: Inserting text into a ListItem", function(t) {
-  let editor = TestEditor.mount({ editorSession: fixture(_l1) }, t.sandbox)
-  let editorSession = editor.editorSession
-  let doc = editorSession.getDocument()
+  let { editorSession, doc } = setupEditor(t, _l1)
   editorSession.transaction((tx) => {
     tx.setSelection({
       type: 'property',
@@ -733,9 +764,7 @@ test.UI("[L1]: Inserting text into a ListItem", function(t) {
 })
 
 test.UI("[L2]: Breaking a ListItem with cursor in the middle of text", function(t) {
-  let editor = TestEditor.mount({ editorSession: fixture(_l1) }, t.sandbox)
-  let editorSession = editor.editorSession
-  let doc = editorSession.getDocument()
+  let { editorSession, doc } = setupEditor(t, _l1)
   editorSession.transaction((tx) => {
     tx.setSelection({
       type: 'property',
@@ -757,9 +786,7 @@ test.UI("[L2]: Breaking a ListItem with cursor in the middle of text", function(
 })
 
 test.UI("[L3]: Breaking a ListItem with cursor at begin of text", function(t) {
-  let editor = TestEditor.mount({ editorSession: fixture(_l1) }, t.sandbox)
-  let editorSession = editor.editorSession
-  let doc = editorSession.getDocument()
+  let { editorSession, doc } = setupEditor(t, _l1)
   editorSession.transaction((tx) => {
     tx.setSelection({
       type: 'property',
@@ -781,9 +808,7 @@ test.UI("[L3]: Breaking a ListItem with cursor at begin of text", function(t) {
 })
 
 test.UI("[L4]: Splitting a List by breaking an empty ListItem", function(t) {
-  let editor = TestEditor.mount({ editorSession: fixture(_l1, _l1_empty) }, t.sandbox)
-  let editorSession = editor.editorSession
-  let doc = editorSession.getDocument()
+  let { editorSession, doc } = setupEditor(t, _l1, _l1_empty)
   editorSession.transaction((tx) => {
     tx.setSelection({
       type: 'property',
@@ -811,9 +836,7 @@ test.UI("[L4]: Splitting a List by breaking an empty ListItem", function(t) {
 })
 
 test.UI("[L5-1]: Merging two ListItems using BACKSPACE", function(t) {
-  let editor = TestEditor.mount({ editorSession: fixture(_l1) }, t.sandbox)
-  let editorSession = editor.editorSession
-  let doc = editorSession.getDocument()
+  let { editorSession, doc } = setupEditor(t, _l1)
   editorSession.setSelection({
     type: 'property',
     path: ['l1', 'items', 'l1-2', 'content'],
@@ -835,9 +858,7 @@ test.UI("[L5-1]: Merging two ListItems using BACKSPACE", function(t) {
 })
 
 test.UI("[L5-2]: Merging two ListItems using DELETE", function(t) {
-  let editor = TestEditor.mount({ editorSession: fixture(_l1) }, t.sandbox)
-  let editorSession = editor.editorSession
-  let doc = editorSession.getDocument()
+  let { editorSession, doc } = setupEditor(t, _l1)
   editorSession.setSelection({
     type: 'property',
     path: ['l1', 'items', 'l1-1', 'content'],
@@ -859,9 +880,7 @@ test.UI("[L5-2]: Merging two ListItems using DELETE", function(t) {
 })
 
 test.UI("[L6-1]: Merging a List into previous TextNode using BACKSPACE", function(t) {
-  let editor = TestEditor.mount({ editorSession: fixture(_p1, _l1) }, t.sandbox)
-  let editorSession = editor.editorSession
-  let doc = editorSession.getDocument()
+  let { editorSession, doc } = setupEditor(t, _p1, _l1)
   editorSession.setSelection({
     type: 'property',
     path: ['l1', 'items', 'l1-1', 'content'],
@@ -883,9 +902,7 @@ test.UI("[L6-1]: Merging a List into previous TextNode using BACKSPACE", functio
 })
 
 test.UI("[L6-2]: Merging a List into previous List using BACKSPACE", function(t) {
-  let editor = TestEditor.mount({ editorSession: fixture(_l1, _l2) }, t.sandbox)
-  let editorSession = editor.editorSession
-  let doc = editorSession.getDocument()
+  let { editorSession, doc } = setupEditor(t, _l1, _l2)
   editorSession.setSelection({
     type: 'property',
     path: ['l2', 'items', 'l2-1', 'content'],
@@ -905,9 +922,7 @@ test.UI("[L6-2]: Merging a List into previous List using BACKSPACE", function(t)
 })
 
 test.UI("[L6-3]: Merging a List into previous List using DELETE", function(t) {
-  let editor = TestEditor.mount({ editorSession: fixture(_l1, _l2) }, t.sandbox)
-  let editorSession = editor.editorSession
-  let doc = editorSession.getDocument()
+  let { editorSession, doc } = setupEditor(t, _l1, _l2)
   editorSession.setSelection({
     type: 'property',
     path: ['l1', 'items', 'l1-2', 'content'],
@@ -981,6 +996,14 @@ test.UI("[L6-3]: Merging a List into previous List using DELETE", function(t) {
 // })
 
 class TestEditor extends AbstractEditor {
+
+  constructor(...args) {
+    super(...args)
+    this.handleActions({
+      domSelectionRendered: function() {}
+    })
+  }
+
   render($$) {
     let doc = this.editorSession.getDocument()
     let el = $$('div')
