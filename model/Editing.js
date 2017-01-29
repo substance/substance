@@ -668,6 +668,21 @@ class Editing {
         startOffset: offset,
         containerId: containerId
       })
+    } else if (node.isList()) {
+      let item, offset
+      if (mode === 'after') {
+        item = node.getLastItem()
+        offset = item.getLength()
+      } else {
+        item = node.getFirstItem()
+        offset = 0
+      }
+      tx.setSelection({
+        type: 'property',
+        path: node.getItemPath(item.id),
+        startOffset: offset,
+        containerId: containerId
+      })
     } else {
       tx.setSelection({
         type: 'node',
