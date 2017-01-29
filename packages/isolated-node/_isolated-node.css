@@ -43,3 +43,13 @@
   outline: 2px solid;
   outline-color: var(--local-selection-color);
 }
+
+/* Hide selection fragments when in selected-state */
+.sm-selected > .se-container ::selection {
+  background: transparent;
+}
+
+.sc-isolated-node.sm-selected > .se-container {
+  background: rgba(163, 205, 253, 0.3);
+  outline: 2px solid #A3CDFD;
+}
