@@ -806,7 +806,7 @@ test.UI("[L5-2]: Merging two ListItems using DELETE", function(t) {
   t.end()
 })
 
-test.UI("[L6]: Merging a List into previous TextNode (BACKSPACE)", function(t) {
+test.UI("[L6-1]: Merging a List into previous TextNode using BACKSPACE", function(t) {
   let editor = TestEditor.mount({ editorSession: fixture(_p1, _l1) }, t.sandbox)
   let editorSession = editor.editorSession
   let doc = editorSession.getDocument()
@@ -827,6 +827,50 @@ test.UI("[L6]: Merging a List into previous TextNode (BACKSPACE)", function(t) {
   t.ok(sel.isCollapsed(), 'The selection should be collapsed')
   t.deepEqual(sel.start.path, p.getTextPath(), '... on the paragraph')
   t.equal(sel.start.offset, P1_TEXT.length, '... at the end of the original content')
+  t.end()
+})
+
+test.UI("[L6-2]: Merging a List into previous List using BACKSPACE", function(t) {
+  let editor = TestEditor.mount({ editorSession: fixture(_l1, _l2) }, t.sandbox)
+  let editorSession = editor.editorSession
+  let doc = editorSession.getDocument()
+  editorSession.setSelection({
+    type: 'property',
+    path: ['l2', 'items', 'l2-1', 'content'],
+    startOffset: 0,
+    containerId: 'body'
+  })
+  editorSession.transaction((tx) => {
+    tx.deleteCharacter('left')
+  })
+  let sel = editorSession.getSelection()
+  let l1 = doc.get('l1')
+  t.equal(l1.items.length, 4, 'First list should have 4 items')
+  t.ok(sel.isCollapsed(), 'The selection should be collapsed')
+  t.deepEqual(sel.start.path, ['l1', 'items', 'l2-1', 'content'], '... on the same item')
+  t.equal(sel.start.offset, 0, '... at the same position')
+  t.end()
+})
+
+test.UI("[L6-3]: Merging a List into previous List using DELETE", function(t) {
+  let editor = TestEditor.mount({ editorSession: fixture(_l1, _l2) }, t.sandbox)
+  let editorSession = editor.editorSession
+  let doc = editorSession.getDocument()
+  editorSession.setSelection({
+    type: 'property',
+    path: ['l1', 'items', 'l1-2', 'content'],
+    startOffset: LI2_TEXT.length,
+    containerId: 'body'
+  })
+  editorSession.transaction((tx) => {
+    tx.deleteCharacter('right')
+  })
+  let sel = editorSession.getSelection()
+  let l1 = doc.get('l1')
+  t.equal(l1.items.length, 4, 'First list should have 4 items')
+  t.ok(sel.isCollapsed(), 'The selection should be collapsed')
+  t.deepEqual(sel.start.path, ['l1', 'items', 'l1-2', 'content'], '... on the same item')
+  t.equal(sel.start.offset, LI2_TEXT.length, '... at the same position')
   t.end()
 })
 
@@ -984,8 +1028,8 @@ function _s1(doc) {
   })
 }
 
-const LI1_TEXT = 'abcdef'
-const LI2_TEXT = '0123456'
+const LI1_TEXT = 'l1-1:abcdef'
+const LI2_TEXT = 'l1-2:0123456'
 
 // list with two items
 function _l1(doc, body) {
@@ -1016,6 +1060,29 @@ function _l1_empty(doc) {
   let l1 = doc.get('l1')
   l1.insertItemAt(1, 'l1-empty')
 }
+
+const LI21_TEXT = 'l2-1:abcdef'
+const LI22_TEXT = 'l2-2:0123456'
+
+function _l2(doc, body) {
+  doc.create({
+    type: 'list-item',
+    id: 'l2-1',
+    content: LI21_TEXT
+  })
+  doc.create({
+    type: 'list-item',
+    id: 'l2-2',
+    content: LI22_TEXT
+  })
+  doc.create({
+    type: 'list',
+    id: 'l2',
+    items: ['l2-1', 'l2-2']
+  })
+  body.show('l2')
+}
+
 
 function _block1(doc, body) {
   doc.create({

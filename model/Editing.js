@@ -1,6 +1,7 @@
 import forEach from '../util/forEach'
 import isArrayEqual from '../util/isArrayEqual'
 import isString from '../util/isString'
+import last from '../util/last'
 import uuid from '../util/uuid'
 import annotationHelpers from '../model/annotationHelpers'
 import paste from '../model/paste'
@@ -1131,12 +1132,33 @@ class Editing {
         })
       } else if (second.isList()) {
         container.hide(second.id)
-        let items = second.items.slice()
-        for (let i=0; i<items.length;i++) {
+        let firstItems = first.items.slice()
+        let secondItems = second.items.slice()
+        for (let i=0; i<secondItems.length;i++) {
           second.removeItemAt(0)
-          first.appendItem(items[i])
+          first.appendItem(secondItems[i])
         }
         tx.delete(second.id)
+        if (direction === 'left') {
+          tx.setSelection({
+            type: 'property',
+            // ATTENTION: we need to use a list relative path here
+            // such as ['list1', 'items', 'list-item1', 'content']
+            path: first.getItemPath(secondItems[0]),
+            startOffset: 0,
+            containerId: container.id
+          })
+        } else {
+          let item = tx.get(last(firstItems))
+          tx.setSelection({
+            type: 'property',
+            // ATTENTION: we need to use a list relative path here
+            // such as ['list1', 'items', 'list-item1', 'content']
+            path: first.getItemPath(item.id),
+            startOffset: item.getLength(),
+            containerId: container.id
+          })
+        }
       } else {
         _selectNode(tx, direction === 'left' ? first.id : second.id, container.id)
       }
