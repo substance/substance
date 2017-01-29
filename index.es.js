@@ -81,6 +81,11 @@ export { default as Link } from './packages/link/Link'
 export { default as LinkCommand } from './packages/link/LinkCommand'
 export { default as LinkComponent } from './packages/link/LinkComponent'
 
+// table
+export { default as TablePackage } from './packages/table/TablePackage'
+export { default as Table } from './packages/table/Table'
+export { default as TableCell } from './packages/table/TableCell'
+
 // inline-node
 export { default as InsertInlineNodeCommand } from './packages/inline-node/InsertInlineNodeCommand'
 export { default as EditInlineNodeCommand } from './packages/inline-node/EditInlineNodeCommand'

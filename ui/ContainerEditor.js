@@ -1,5 +1,4 @@
 import isString from '../util/isString'
-import uuid from '../util/uuid'
 import keys from '../util/keys'
 import platform from '../util/platform'
 import EditingBehavior from '../model/EditingBehavior'

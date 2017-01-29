@@ -3,7 +3,7 @@ class ExecuteCommandHandler {
     this.editorSession = editorSession
     this.commandName = commandName
   }
-  execute(params, context) {
+  execute(params) {
     this.editorSession.executeCommand(this.commandName, params)
   }
 }

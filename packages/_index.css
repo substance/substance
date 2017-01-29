@@ -46,6 +46,8 @@
 @import './layout/_layout.css';
 /* tabbed-pane */
 @import './tabbed-pane/_tabbed-pane.css';
+/* table */
+@import './table/_table.css';
 /* grid */
 @import './grid/_grid.css';
 /* modal */
