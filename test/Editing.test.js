@@ -19,7 +19,7 @@ const test = module('Editing')
 // TODO: we should enable t.sandbox for all tests so that this implementation is
 // tested on all platforms
 
-test.UI("[IT1]: Inserting text with cursor within a TextProperty", function(t) {
+test.UI("[IT1]: Inserting text with cursor in the middle of a TextProperty", function(t) {
   let editor = TestEditor.mount({ editorSession: fixture(_p1) }, t.sandbox)
   let editorSession = editor.editorSession
   let doc = editorSession.getDocument()
@@ -38,7 +38,7 @@ test.UI("[IT1]: Inserting text with cursor within a TextProperty", function(t) {
   t.end()
 })
 
-test.UI("[IT2]: Cursor within TextProperty inside annotation", function(t) {
+test.UI("[IT2]: Inserting text with cursor within TextProperty inside annotation", function(t) {
   let editor = TestEditor.mount({ editorSession: fixture(_p1, _s1) }, t.sandbox)
   let editorSession = editor.editorSession
   let doc = editorSession.getDocument()
@@ -59,7 +59,7 @@ test.UI("[IT2]: Cursor within TextProperty inside annotation", function(t) {
   t.end()
 })
 
-test.UI("[IT3]: Cursor within TextProperty at the start of an annotation", function(t) {
+test.UI("[IT3]: Inserting text with cursor within TextProperty at the start of an annotation", function(t) {
   let editor = TestEditor.mount({ editorSession: fixture(_p1, _s1) }, t.sandbox)
   let editorSession = editor.editorSession
   let doc = editorSession.getDocument()
@@ -81,7 +81,7 @@ test.UI("[IT3]: Cursor within TextProperty at the start of an annotation", funct
   t.end()
 })
 
-test.UI("[IT4]: Cursor within TextProperty at the end of an annotation", function(t) {
+test.UI("[IT4]: Inserting text with cursor within TextProperty at the end of an annotation", function(t) {
   let editor = TestEditor.mount({ editorSession: fixture(_p1, _s1) }, t.sandbox)
   let editorSession = editor.editorSession
   let doc = editorSession.getDocument()
@@ -103,7 +103,7 @@ test.UI("[IT4]: Cursor within TextProperty at the end of an annotation", functio
   t.end()
 })
 
-test.UI("[IT5]: Range within TextProperty", function(t) {
+test.UI("[IT5]: Inserting text with range within TextProperty", function(t) {
   let editor = TestEditor.mount({ editorSession: fixture(_p1) }, t.sandbox)
   let editorSession = editor.editorSession
   let doc = editorSession.getDocument()
@@ -124,7 +124,7 @@ test.UI("[IT5]: Range within TextProperty", function(t) {
   t.end()
 })
 
-test.UI("[IT6]: Range within TextProperty overlapping an annotion aligned at the left side", function(t) {
+test.UI("[IT6]: Inserting text with range within TextProperty overlapping an annotion aligned at the left side", function(t) {
   let editor = TestEditor.mount({ editorSession: fixture(_p1, _s1) }, t.sandbox)
   let editorSession = editor.editorSession
   let doc = editorSession.getDocument()
@@ -149,7 +149,7 @@ test.UI("[IT6]: Range within TextProperty overlapping an annotion aligned at the
   t.end()
 })
 
-test.UI("[IT7]: Range within TextProperty inside an annotion", function(t) {
+test.UI("[IT7]: Inserting text with range within TextProperty inside an annotion", function(t) {
   let editor = TestEditor.mount({ editorSession: fixture(_p1, _s1) }, t.sandbox)
   let editorSession = editor.editorSession
   let doc = editorSession.getDocument()
@@ -173,7 +173,7 @@ test.UI("[IT7]: Range within TextProperty inside an annotion", function(t) {
   t.end()
 })
 
-test.UI("[IT8]: Range within TextProperty starting inside an annotion", function(t) {
+test.UI("[IT8]: Inserting text with range within TextProperty starting inside an annotion", function(t) {
   let editor = TestEditor.mount({ editorSession: fixture(_p1, _s1) }, t.sandbox)
   let editorSession = editor.editorSession
   let doc = editorSession.getDocument()
@@ -198,7 +198,7 @@ test.UI("[IT8]: Range within TextProperty starting inside an annotion", function
   t.end()
 })
 
-test.UI("[II1]: Insert inline node into TextProperty", function(t) {
+test.UI("[II1]: Inserting InlineNode node into a TextProperty", function(t) {
   let editor = TestEditor.mount({ editorSession: fixture(_p1) }, t.sandbox)
   let editorSession = editor.editorSession
   let doc = editorSession.getDocument()
@@ -224,7 +224,7 @@ test.UI("[II1]: Insert inline node into TextProperty", function(t) {
   t.end()
 })
 
-test.UI("[IB2]: Cursor at start of a TextNode within a Container", function(t) {
+test.UI("[IB2]: Inserting BlockNode using cursor at start of a TextNode", function(t) {
   let editor = TestEditor.mount({ editorSession: fixture(_p1) }, t.sandbox)
   let editorSession = editor.editorSession
   let doc = editorSession.getDocument()
@@ -250,11 +250,7 @@ test.UI("[IB2]: Cursor at start of a TextNode within a Container", function(t) {
   t.end()
 })
 
-
-// Deleting
-// --------
-
-test.UI("[DR2]: Cursor at the end of a TextNode at the end of a Container", function(t) {
+test.UI("[DR2]: Deleting using DELETE with cursor at the end of a TextNode at the end of a Container", function(t) {
   let { editorSession, doc } = setupEditor(t, _p1, _p2)
   editorSession.setSelection({
     type: 'property',
@@ -275,7 +271,7 @@ test.UI("[DR2]: Cursor at the end of a TextNode at the end of a Container", func
   t.end()
 })
 
-test.UI("[DR3]: Cursor in the middle of a TextProperty", function(t) {
+test.UI("[DR3]: Deleting using DELETE with cursor in the middle of a TextProperty", function(t) {
   let { editorSession, doc } = setupEditor(t, _p1)
   editorSession.transaction((tx) => {
     tx.setSelection({
@@ -292,7 +288,7 @@ test.UI("[DR3]: Cursor in the middle of a TextProperty", function(t) {
   t.end()
 })
 
-test.UI("[DR4-1]: Deleting one character using DELETE with cursor inside an empty TextNode with TextNode as successor", function(t) {
+test.UI("[DR4-1]: Deleting using DELETE with cursor inside an empty TextNode and TextNode as successor", function(t) {
   let { editorSession, doc } = setupEditor(t, _p1, _empty, _p2)
   editorSession.setSelection({
     type: 'property',
@@ -314,7 +310,7 @@ test.UI("[DR4-1]: Deleting one character using DELETE with cursor inside an empt
   t.end()
 })
 
-test.UI("[DR4-2]: Deleting one character using DELETE with cursor inside an empty TextNode with IsolatedNode as successor", function(t) {
+test.UI("[DR4-2]: Deleting using DELETE with cursor inside an empty TextNode and IsolatedNode as successor", function(t) {
   let { editorSession, doc } = setupEditor(t, _p1, _empty, _block1)
   editorSession.setSelection({
     type: 'property',
@@ -334,7 +330,7 @@ test.UI("[DR4-2]: Deleting one character using DELETE with cursor inside an empt
   t.end()
 })
 
-test.UI("[DR4-3]: Deleting one character using DELETE with cursor inside an empty TextNode with List as successor", function(t) {
+test.UI("[DR4-3]: Deleting using DELETE with cursor inside an empty TextNode and List as successor", function(t) {
   let { editorSession, doc } = setupEditor(t, _p1, _empty, _l1)
   editorSession.setSelection({
     type: 'property',
@@ -355,7 +351,7 @@ test.UI("[DR4-3]: Deleting one character using DELETE with cursor inside an empt
   t.end()
 })
 
-test.UI("[DR5-1]: Cursor at the end of a non-empty TextNode with TextNode as successor", function(t) {
+test.UI("[DR5-1]: Deleting using DELETE with cursor at the end of a non-empty TextNode and TextNode as successor", function(t) {
   let { editorSession, doc } = setupEditor(t, _p1, _p2)
   editorSession.setSelection({
     type: 'property',
@@ -376,7 +372,7 @@ test.UI("[DR5-1]: Cursor at the end of a non-empty TextNode with TextNode as suc
   t.end()
 })
 
-test.UI("[DR5-2]: Cursor at the end of a non-empty TextNode with IsolatedNode as successor", function(t) {
+test.UI("[DR5-2]: Deleting using DELETE with cursor at the end of a non-empty TextNode and IsolatedNode as successor", function(t) {
   let { editorSession, doc } = setupEditor(t, _p1, _block1)
   editorSession.setSelection({
     type: 'property',
@@ -400,7 +396,7 @@ test.UI("[DR5-2]: Cursor at the end of a non-empty TextNode with IsolatedNode as
 
 // TODO: test DR5 with list as successor
 
-test.UI("[DR11]: Cursor before IsolatedNode", function(t) {
+test.UI("[DR11]: Deleting using DELETE with cursor before IsolatedNode", function(t) {
   let { editorSession, doc } = setupEditor(t, _p1, _block1, _p2)
   editorSession.setSelection({
     type: 'node',
@@ -421,7 +417,7 @@ test.UI("[DR11]: Cursor before IsolatedNode", function(t) {
   t.end()
 })
 
-test.UI("[DR16]: Cursor after IsolatedNode with TextNode as successor", function(t) {
+test.UI("[DR16]: Deleting using DELETE with cursor after IsolatedNode and TextNode as successor", function(t) {
   let { editorSession, doc } = setupEditor(t, _p1, _block1, _p2)
   editorSession.setSelection({
     type: 'node',
@@ -462,7 +458,7 @@ test.UI("[DL3]: Deleting using BACKSPACE with cursor in the middle of a TextProp
   t.end()
 })
 
-test.UI("[DL4-1]: Cursor inside an empty TextNode with a TextNode as predecessor", function(t) {
+test.UI("[DL4-1]: Deleting using BACKSPACE with cursor inside an empty TextNode and TextNode as predecessor", function(t) {
   let { editorSession, doc } = setupEditor(t, _p1, _empty, _p2)
   editorSession.setSelection({
     type: 'property',
@@ -482,7 +478,7 @@ test.UI("[DL4-1]: Cursor inside an empty TextNode with a TextNode as predecessor
   t.end()
 })
 
-test.UI("[DL4-2]: Cursor inside an empty TextNode with an IsolatedNode as predecessor", function(t) {
+test.UI("[DL4-2]: Deleting using BACKSPACE with cursor inside an empty TextNode and IsolatedNode as predecessor", function(t) {
   let { editorSession, doc } = setupEditor(t, _block1, _empty, _p2)
   editorSession.setSelection({
     type: 'property',
@@ -503,7 +499,7 @@ test.UI("[DL4-2]: Cursor inside an empty TextNode with an IsolatedNode as predec
 
 // TODO: DL4 with List as predecessor
 
-test.UI("[DL5-1]: Cursor at the start of a non-empty TextNode with a TextNode as predecessor", function(t) {
+test.UI("[DL5-1]: Deleting using BACKSPACE with cursor at the start of a non-empty TextNode and TextNode as predecessor", function(t) {
   let { editorSession, doc } = setupEditor(t, _p1, _p2)
   editorSession.setSelection({
     type: 'property',
@@ -524,7 +520,7 @@ test.UI("[DL5-1]: Cursor at the start of a non-empty TextNode with a TextNode as
   t.end()
 })
 
-test.UI("[DL5-2]: Cursor at the start of a non-empty TextNode with an IsolatedNode as predecessor", function(t) {
+test.UI("[DL5-2]: Deleting using BACKSPACE with cursor at the start of a non-empty TextNode and IsolatedNode as predecessor", function(t) {
   let { editorSession, doc } = setupEditor(t, _block1, _p2)
   editorSession.setSelection({
     type: 'property',
@@ -544,7 +540,7 @@ test.UI("[DL5-2]: Cursor at the start of a non-empty TextNode with an IsolatedNo
   t.end()
 })
 
-test.UI("[DL13]: NodeSelection after IsolatedNode", function(t) {
+test.UI("[DL13]: Deleting using BACKSPACE with cursor after IsolatedNode", function(t) {
   let { editorSession, doc } = setupEditor(t, _block1, _p2)
   editorSession.setSelection({
     type: 'node',
@@ -566,7 +562,7 @@ test.UI("[DL13]: NodeSelection after IsolatedNode", function(t) {
   t.end()
 })
 
-test.UI("[DL16]: NodeSelection before IsolatedNode with TextNode as predecessor", function(t) {
+test.UI("[DL16]: Deleting using BACKSPACE with cursor before IsolatedNode with TextNode as predecessor", function(t) {
   let { editorSession, doc } = setupEditor(t, _p1, _block2)
   editorSession.setSelection({
     type: 'node',
@@ -588,7 +584,7 @@ test.UI("[DL16]: NodeSelection before IsolatedNode with TextNode as predecessor"
   t.end()
 })
 
-test.UI("[DL17]: Cursor before IsolatedNode with IsolatedNode as predecessor", function(t) {
+test.UI("[DL17]: Deleting using BACKSPACE with cursor before IsolatedNode and IsolatedNode as predecessor", function(t) {
   let { editorSession, doc } = setupEditor(t, _block1, _block2)
   editorSession.setSelection({
     type: 'node',
