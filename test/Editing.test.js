@@ -1,3 +1,4 @@
+/* eslint-disable no-use-before-define */
 import { module } from 'substance-test'
 
 import Document from '../model/Document'
@@ -15,10 +16,10 @@ import ListPackage from '../packages/list/ListPackage'
 
 const test = module('Editing')
 
-// Inserting
-// ---------
+// TODO: we should enable t.sandbox for all tests so that this implementation is
+// tested on all platforms
 
-test.UI("[IT1]: Cursor within a TextProperty", function(t) {
+test.UI("[IT1]: Inserting text with cursor within a TextProperty", function(t) {
   let editor = TestEditor.mount({ editorSession: fixture(_p1) }, t.sandbox)
   let editorSession = editor.editorSession
   let doc = editorSession.getDocument()
@@ -32,7 +33,7 @@ test.UI("[IT1]: Cursor within a TextProperty", function(t) {
   })
   let sel = editorSession.getSelection()
   let p1 = doc.get('p1')
-  t.equal(p1.getText(), 'abcxxxdef', 'Text should have been inserted correctly.')
+  t.equal(p1.getText(), P1_TEXT.slice(0,3)+'xxx'+P1_TEXT.slice(3), 'Text should have been inserted correctly.')
   t.equal(sel.start.offset, 6, 'Cursor should be after inserted text')
   t.end()
 })
@@ -52,7 +53,7 @@ test.UI("[IT2]: Cursor within TextProperty inside annotation", function(t) {
   let sel = editorSession.getSelection()
   let p1 = doc.get('p1')
   let s1 = doc.get('s1')
-  t.equal(p1.getText(), 'abcdxxxef', 'Text should have been inserted correctly.')
+  t.equal(p1.getText(), P1_TEXT.slice(0,4)+'xxx'+P1_TEXT.slice(4), 'Text should have been inserted correctly.')
   t.equal(s1.end.offset, 8, 'Annotation should have been expanded.')
   t.equal(sel.start.offset, 7, 'Cursor should be after inserted text')
   t.end()
@@ -73,7 +74,7 @@ test.UI("[IT3]: Cursor within TextProperty at the start of an annotation", funct
   let sel = editorSession.getSelection()
   let p1 = doc.get('p1')
   let s1 = doc.get('s1')
-  t.equal(p1.getText(), 'abcxxxdef', 'Text should have been inserted correctly.')
+  t.equal(p1.getText(), P1_TEXT.slice(0,3)+'xxx'+P1_TEXT.slice(3), 'Text should have been inserted correctly.')
   t.equal(s1.start.offset, 6, 'Annotation should have been moved.')
   t.equal(s1.end.offset, 8, 'Annotation should have been moved.')
   t.equal(sel.start.offset, 6, 'Cursor should be after inserted text')
@@ -95,7 +96,7 @@ test.UI("[IT4]: Cursor within TextProperty at the end of an annotation", functio
   let sel = editorSession.getSelection()
   let p1 = doc.get('p1')
   let s1 = doc.get('s1')
-  t.equal(p1.getText(), 'abcdexxxf', 'Text should have been inserted correctly.')
+  t.equal(p1.getText(), P1_TEXT.slice(0,5)+'xxx'+P1_TEXT.slice(5), 'Text should have been inserted correctly.')
   t.equal(s1.start.offset, 3, 'Annotation should have been moved.')
   t.equal(s1.end.offset, 8, 'Annotation should have been moved.')
   t.equal(sel.start.offset, 8, 'Cursor should be after inserted text')
@@ -117,7 +118,7 @@ test.UI("[IT5]: Range within TextProperty", function(t) {
   })
   let sel = editorSession.getSelection()
   let p1 = doc.get('p1')
-  t.equal(p1.getText(), 'abxxxf', 'Text should have been inserted correctly.')
+  t.equal(p1.getText(), P1_TEXT.slice(0, 2)+'xxx'+P1_TEXT.slice(5), 'Text should have been inserted correctly.')
   t.equal(sel.start.offset, 5, 'Cursor should be after inserted text')
   t.ok(sel.isCollapsed(), '... collapsed')
   t.end()
@@ -140,7 +141,7 @@ test.UI("[IT6]: Range within TextProperty overlapping an annotion aligned at the
   let sel = editorSession.getSelection()
   let p1 = doc.get('p1')
   let s1 = doc.get('s1')
-  t.equal(p1.getText(), 'abcxxxf', 'Text should have been inserted correctly.')
+  t.equal(p1.getText(), P1_TEXT.slice(0, 3)+'xxx'+P1_TEXT.slice(5), 'Text should have been inserted correctly.')
   t.equal(s1.start.offset, 3, 'Annotation should have been moved.')
   t.equal(s1.end.offset, 7, 'Annotation should have been moved.')
   t.equal(sel.start.offset, 6, 'Cursor should be after inserted text')
@@ -164,7 +165,7 @@ test.UI("[IT7]: Range within TextProperty inside an annotion", function(t) {
   let sel = editorSession.getSelection()
   let p1 = doc.get('p1')
   let s1 = doc.get('s1')
-  t.equal(p1.getText(), 'abcxxxf', 'Text should have been inserted correctly.')
+  t.equal(p1.getText(), P1_TEXT.slice(0, 3)+'xxx'+P1_TEXT.slice(5), 'Text should have been inserted correctly.')
   t.equal(s1.start.offset, 3, 'Annotation should have been moved.')
   t.equal(s1.end.offset, 6, 'Annotation should have been moved.')
   t.equal(sel.start.offset, 6, 'Cursor should be after inserted text')
@@ -189,7 +190,7 @@ test.UI("[IT8]: Range within TextProperty starting inside an annotion", function
   let sel = editorSession.getSelection()
   let p1 = doc.get('p1')
   let s1 = doc.get('s1')
-  t.equal(p1.getText(), 'abcdxxx', 'Text should have been inserted correctly.')
+  t.equal(p1.getText(), P1_TEXT.slice(0, 4)+'xxx'+P1_TEXT.slice(6), 'Text should have been inserted correctly.')
   t.equal(s1.start.offset, 3, 'Annotation should have been moved.')
   t.equal(s1.end.offset, 7, 'Annotation should have been moved.')
   t.equal(sel.start.offset, 7, 'Cursor should be after inserted text')
@@ -216,7 +217,7 @@ test.UI("[II1]: Insert inline node into TextProperty", function(t) {
   let sel = editorSession.getSelection()
   let p1 = doc.get('p1')
   let il1 = doc.get('il1')
-  t.equal(p1.getText(), 'abc\uFEFFdef', 'Text should have been inserted correctly.')
+  t.equal(p1.getText(), P1_TEXT.slice(0,3)+'\uFEFF'+P1_TEXT.slice(3), 'Text should have been inserted correctly.')
   t.equal(il1.start.offset, 3, 'Annotation should have been moved.')
   t.equal(il1.end.offset, 4, 'Annotation should have been moved.')
   t.equal(sel.start.offset, 4, 'Cursor should be after inserted inline node')
@@ -240,11 +241,12 @@ test.UI("[IB2]: Cursor at start of a TextNode within a Container", function(t) {
   })
   let sel = editorSession.getSelection()
   let body = doc.get('body')
+  let p1 = doc.get('p1')
   t.equal(body.nodes[0], 'ib1', 'First node should be inserted block node.')
   t.equal(body.nodes[1], 'p1', 'Second node should be inserted block node.')
-  t.deepEqual(sel.start.path, ['p1', 'content'], 'Cursor should be in paragraph')
-  t.ok(sel.isCollapsed(), '...collapsed')
-  t.equal(sel.start.offset, 0, '... offset 0')
+  t.ok(sel.isCollapsed(), 'Selection should be collapsed')
+  t.deepEqual(sel.start.path, p1.getTextPath(), '... on paragraph')
+  t.equal(sel.start.offset, 0, '... first position')
   t.end()
 })
 
@@ -254,21 +256,22 @@ test.UI("[IB2]: Cursor at start of a TextNode within a Container", function(t) {
 
 test.UI("[DR2]: Cursor at the end of a TextNode at the end of a Container", function(t) {
   let { editorSession, doc } = setupEditor(t, _p1, _p2)
+  editorSession.setSelection({
+    type: 'property',
+    path: ['p2', 'content'],
+    startOffset: P2_TEXT.length,
+    containerId: 'body'
+  })
   editorSession.transaction((tx) => {
-    tx.setSelection({
-      type: 'property',
-      path: ['p2', 'content'],
-      startOffset: 6
-    })
-    tx.deleteSelection()
+    tx.deleteCharacter('right')
   })
   // nothing should have happened
   let sel = editorSession.getSelection()
   let body = doc.get('body')
   t.equal(body.nodes.length, 2, 'There should still be 2 nodes in body')
   let p2 = doc.get('p2')
-  t.equal(p2.getText(), 'abcdef', 'p2 should still have same content.')
-  t.equal(sel.start.offset, 6, 'Cursor should still be at the same position')
+  t.equal(p2.getText(), P2_TEXT, 'p2 should still have same content.')
+  t.equal(sel.start.offset, P2_TEXT.length, 'Cursor should still be at the same position')
   t.end()
 })
 
@@ -284,12 +287,12 @@ test.UI("[DR3]: Cursor in the middle of a TextProperty", function(t) {
   })
   let sel = editorSession.getSelection()
   let p1 = doc.get('p1')
-  t.equal(p1.getText(), 'abcef', 'one character should have been deleted')
+  t.equal(p1.getText(), P1_TEXT.slice(0,3)+P1_TEXT.slice(4), 'One character should have been deleted')
   t.equal(sel.start.offset, 3, 'Cursor should be at the same position')
   t.end()
 })
 
-test.UI("[DR4-1]: Cursor inside an empty TextNode with successor (TextNode)", function(t) {
+test.UI("[DR4-1]: Deleting one character using DELETE with cursor inside an empty TextNode with TextNode as successor", function(t) {
   let { editorSession, doc } = setupEditor(t, _p1, _empty, _p2)
   editorSession.setSelection({
     type: 'property',
@@ -304,13 +307,14 @@ test.UI("[DR4-1]: Cursor inside an empty TextNode with successor (TextNode)", fu
   let body = doc.get('body')
   let p2 = doc.get('p2')
   t.equal(body.nodes.length, 2, 'There should be only 2 nodes left.')
-  t.equal(p2.getText(), 'abcdef', 'p2 should not be affected')
-  t.deepEqual(sel.start.path, p2.getTextPath(), 'Cursor should be in p2')
-  t.equal(sel.start.offset, 0, '... at the first position')
+  t.equal(p2.getText(), P2_TEXT, 'p2 should not be affected')
+  t.ok(sel.isCollapsed(), 'Selection should be collapsed')
+  t.deepEqual(sel.start.path, p2.getTextPath(), '... on p2')
+  t.equal(sel.start.offset, 0, '... at first position')
   t.end()
 })
 
-test.UI("[DR4-2]: Cursor inside an empty TextNode with successor (Isolated Node)", function(t) {
+test.UI("[DR4-2]: Deleting one character using DELETE with cursor inside an empty TextNode with IsolatedNode as successor", function(t) {
   let { editorSession, doc } = setupEditor(t, _p1, _empty, _block1)
   editorSession.setSelection({
     type: 'property',
@@ -330,14 +334,33 @@ test.UI("[DR4-2]: Cursor inside an empty TextNode with successor (Isolated Node)
   t.end()
 })
 
-// TODO: test DR4 with list as succsessor
+test.UI("[DR4-3]: Deleting one character using DELETE with cursor inside an empty TextNode with List as successor", function(t) {
+  let { editorSession, doc } = setupEditor(t, _p1, _empty, _l1)
+  editorSession.setSelection({
+    type: 'property',
+    path: ['empty', 'content'],
+    startOffset: 0,
+    containerId: 'body'
+  })
+  editorSession.transaction((tx) => {
+    tx.deleteCharacter('right')
+  })
+  let sel = editorSession.getSelection()
+  let body = doc.get('body')
+  let l = doc.get('l1')
+  t.equal(body.nodes.length, 2, 'There should be only 2 nodes left.')
+  t.ok(sel.isCollapsed(), 'Selection should be collapsed')
+  t.deepEqual(sel.start.path, l.getItemPath('l1-1'), '... on first list item')
+  t.equal(sel.start.offset, 0,'... at first position')
+  t.end()
+})
 
-test.UI("[DR5-1]: Cursor at the end of a non-empty TextNode with successor (TextNode)", function(t) {
+test.UI("[DR5-1]: Cursor at the end of a non-empty TextNode with TextNode as successor", function(t) {
   let { editorSession, doc } = setupEditor(t, _p1, _p2)
   editorSession.setSelection({
     type: 'property',
     path: ['p1', 'content'],
-    startOffset: 6,
+    startOffset: P1_TEXT.length,
     containerId: 'body'
   })
   editorSession.transaction((tx) => {
@@ -349,16 +372,16 @@ test.UI("[DR5-1]: Cursor at the end of a non-empty TextNode with successor (Text
   t.equal(body.nodes.length, 1, 'There should be only one node left.')
   t.ok(sel.isCollapsed(), 'Selection should be a collapsed')
   t.deepEqual(sel.start.path, p1.getTextPath(), '... on p1')
-  t.equal(sel.start.offset, 6, '... at the same position as before')
+  t.equal(sel.start.offset, P1_TEXT.length, '... at the same position as before')
   t.end()
 })
 
-test.UI("[DR5-2]: Cursor at the end of a non-empty TextNode with successor (IsolatedNode)", function(t) {
+test.UI("[DR5-2]: Cursor at the end of a non-empty TextNode with IsolatedNode as successor", function(t) {
   let { editorSession, doc } = setupEditor(t, _p1, _block1)
   editorSession.setSelection({
     type: 'property',
     path: ['p1', 'content'],
-    startOffset: 6,
+    startOffset: P1_TEXT.length,
     containerId: 'body'
   })
   editorSession.transaction((tx) => {
@@ -377,7 +400,7 @@ test.UI("[DR5-2]: Cursor at the end of a non-empty TextNode with successor (Isol
 
 // TODO: test DR5 with list as successor
 
-test.UI("[DR11]: NodeSelection before isolated node", function(t) {
+test.UI("[DR11]: Cursor before IsolatedNode", function(t) {
   let { editorSession, doc } = setupEditor(t, _p1, _block1, _p2)
   editorSession.setSelection({
     type: 'node',
@@ -398,7 +421,7 @@ test.UI("[DR11]: NodeSelection before isolated node", function(t) {
   t.end()
 })
 
-test.UI("[DR16]: NodeSelection after IsolatedNode with TextNode as successor", function(t) {
+test.UI("[DR16]: Cursor after IsolatedNode with TextNode as successor", function(t) {
   let { editorSession, doc } = setupEditor(t, _p1, _block1, _p2)
   editorSession.setSelection({
     type: 'node',
@@ -413,7 +436,7 @@ test.UI("[DR16]: NodeSelection after IsolatedNode with TextNode as successor", f
   let body = doc.get('body')
   let p2 = doc.get('p2')
   t.equal(body.nodes.length, 3, 'There should still be 3 nodes.')
-  t.equal(p2.getText(), 'bcdef', 'First character of p2 should be deleted')
+  t.equal(p2.getText(), P2_TEXT.slice(1), 'First character of p2 should be deleted')
   t.ok(sel.isCollapsed(), 'Selection should be collapsed')
   t.deepEqual(sel.start.path, p2.getTextPath(), '... on p2')
   t.equal(sel.start.offset, 0, '... at first position')
@@ -421,7 +444,7 @@ test.UI("[DR16]: NodeSelection after IsolatedNode with TextNode as successor", f
 })
 
 
-test.UI("[DL3]: Cursor in the middle of a TextProperty", function(t) {
+test.UI("[DL3]: Deleting using BACKSPACE with cursor in the middle of a TextProperty", function(t) {
   let { editorSession, doc } = setupEditor(t, _p1)
   editorSession.setSelection({
     type: 'property',
@@ -434,7 +457,7 @@ test.UI("[DL3]: Cursor in the middle of a TextProperty", function(t) {
   })
   let sel = editorSession.getSelection()
   let p1 = doc.get('p1')
-  t.equal(p1.getText(), 'abcef', 'one character should have been deleted')
+  t.equal(p1.getText(), P1_TEXT.slice(0,3)+P1_TEXT.slice(4), 'one character should have been deleted')
   t.equal(sel.start.offset, 3, 'Cursor should have shifted by one character')
   t.end()
 })
@@ -453,9 +476,9 @@ test.UI("[DL4-1]: Cursor inside an empty TextNode with a TextNode as predecessor
   let sel = editorSession.getSelection()
   let p1 = doc.get('p1')
   t.isNil(doc.get('empty'), 'empty node should have been deleted')
-  t.equal(p1.getText(), 'abcdef', 'p1 should be untouched')
+  t.equal(p1.getText(), P1_TEXT, 'p1 should be untouched')
   t.deepEqual(sel.start.path, p1.getTextPath(), 'Cursor should be in p1')
-  t.equal(sel.start.offset, 6, '... at last position')
+  t.equal(sel.start.offset, P1_TEXT.length, '... at last position')
   t.end()
 })
 
@@ -478,6 +501,8 @@ test.UI("[DL4-2]: Cursor inside an empty TextNode with an IsolatedNode as predec
   t.end()
 })
 
+// TODO: DL4 with List as predecessor
+
 test.UI("[DL5-1]: Cursor at the start of a non-empty TextNode with a TextNode as predecessor", function(t) {
   let { editorSession, doc } = setupEditor(t, _p1, _p2)
   editorSession.setSelection({
@@ -492,10 +517,10 @@ test.UI("[DL5-1]: Cursor at the start of a non-empty TextNode with a TextNode as
   let sel = editorSession.getSelection()
   let p1 = doc.get('p1')
   t.isNil(doc.get('p2'), 'p2 should have been deleted')
-  t.equal(p1.getText(), 'abcdefabcdef', 'Text should have been merged')
+  t.equal(p1.getText(), P1_TEXT+P2_TEXT, 'Text should have been merged')
   t.ok(sel.isCollapsed(), 'Selection should be collapsed')
   t.deepEqual(sel.start.path, p1.getTextPath(), '... on p1')
-  t.ok(sel.start.offset, 6, '... cursor should after the original text of p1')
+  t.ok(sel.start.offset, P1_TEXT.length, '... cursor should after the original text of p1')
   t.end()
 })
 
@@ -556,14 +581,14 @@ test.UI("[DL16]: NodeSelection before IsolatedNode with TextNode as predecessor"
   let body = doc.get('body')
   let p1 = doc.get('p1')
   t.equal(body.getLength(), 2, 'There should still be two nodes')
-  t.equal(p1.getText(), 'abcde', 'Last character of p1 should have been deleted')
+  t.equal(p1.getText(), P1_TEXT.slice(0, -1), 'Last character of p1 should have been deleted')
   t.ok(sel.isCollapsed(), 'Selection should be collapsed')
   t.deepEqual(sel.start.path, p1.getTextPath(), '... on p1')
-  t.equal(sel.start.offset, 5, '... at last position')
+  t.equal(sel.start.offset, P1_TEXT.length-1, '... at last position')
   t.end()
 })
 
-test.UI("[DL17]: NodeSelection before IsolatedNode with IsolatedNode as predecessor", function(t) {
+test.UI("[DL17]: Cursor before IsolatedNode with IsolatedNode as predecessor", function(t) {
   let { editorSession, doc } = setupEditor(t, _block1, _block2)
   editorSession.setSelection({
     type: 'node',
@@ -583,7 +608,7 @@ test.UI("[DL17]: NodeSelection before IsolatedNode with IsolatedNode as predeces
   t.end()
 })
 
-test.UI("[D10]: IsolatedNodes is selected entirely", function(t) {
+test.UI("[D10]: Deleting an entirely selected IsolatedNode", function(t) {
   let { editorSession, doc } = setupEditor(t, _p1, _block1, _p2)
   editorSession.setSelection({
     type: 'node',
@@ -605,7 +630,7 @@ test.UI("[D10]: IsolatedNodes is selected entirely", function(t) {
   t.end()
 })
 
-test.UI("[D20-1]: Range that starts at begin of a TextNode and ends at end of a TextNode", function(t) {
+test.UI("[D20-1]: Deleting a Range that starts at begin of a TextNode and ends at end of a TextNode", function(t) {
   let { editorSession, doc } = setupEditor(t, _p1, _block1, _block2, _p2)
   let p1 = doc.get('p1')
   let p2 = doc.get('p2')
@@ -636,7 +661,7 @@ test.UI("[D20-1]: Range that starts at begin of a TextNode and ends at end of a 
 // ------------
 
 // TODO: add specification
-test.UI("[L1]: Insert text into list item", function(t) {
+test.UI("[L1]: Inserting text into a ListItem", function(t) {
   let editor = TestEditor.mount({ editorSession: fixture(_l1) }, t.sandbox)
   let editorSession = editor.editorSession
   let doc = editorSession.getDocument()
@@ -650,12 +675,12 @@ test.UI("[L1]: Insert text into list item", function(t) {
   })
   let sel = editorSession.getSelection()
   let li = doc.get('l1-1')
-  t.equal(li.getText(), 'abcxxxdef', 'Text should have been inserted correctly.')
+  t.equal(li.getText(), LI1_TEXT.slice(0,3)+'xxx'+LI1_TEXT.slice(3), 'Text should have been inserted correctly.')
   t.equal(sel.start.offset, 6, 'Cursor should be after inserted text')
   t.end()
 })
 
-test.UI("[L2]: Break list item in the middle of text", function(t) {
+test.UI("[L2]: Breaking a ListItem with Cursor in the middle of text", function(t) {
   let editor = TestEditor.mount({ editorSession: fixture(_l1) }, t.sandbox)
   let editorSession = editor.editorSession
   let doc = editorSession.getDocument()
@@ -672,14 +697,14 @@ test.UI("[L2]: Break list item in the middle of text", function(t) {
   t.equal(l.items.length, 3, 'List should have 3 items')
   let li1 = doc.get(l.items[0])
   let li2 = doc.get(l.items[1])
-  t.equal(li1.getText(), 'abc', 'First item should have been truncated.')
-  t.equal(li2.getText(), 'def', 'remaining line should have been inserted into new list item.')
+  t.equal(li1.getText(), LI1_TEXT.slice(0,3), 'First item should have been truncated.')
+  t.equal(li2.getText(), LI1_TEXT.slice(3), 'remaining line should have been inserted into new list item.')
   t.deepEqual(sel.start.path, l.getItemPath(li2.id), 'Cursor should in second item')
   t.equal(sel.start.offset, 0, 'Cursor should be at begin of item.')
   t.end()
 })
 
-test.UI("[L3]: Break list item at begin of text", function(t) {
+test.UI("[L3]: Breaking a ListItem with Cursor at begin of text", function(t) {
   let editor = TestEditor.mount({ editorSession: fixture(_l1) }, t.sandbox)
   let editorSession = editor.editorSession
   let doc = editorSession.getDocument()
@@ -697,13 +722,13 @@ test.UI("[L3]: Break list item at begin of text", function(t) {
   let li1 = doc.get(l.items[0])
   let li2 = doc.get(l.items[1])
   t.equal(li1.getText(), '', 'First item should be empty.')
-  t.equal(li2.getText(), 'abcdef', 'Text should have moved to next item.')
+  t.equal(li2.getText(), LI1_TEXT, 'Text should have moved to next item.')
   t.deepEqual(sel.start.path, l.getItemPath(li2.id), 'Cursor should be in second item')
   t.equal(sel.start.offset, 0, '... at begin of item.')
   t.end()
 })
 
-test.UI("[L4]: Split list by breaking an empty item", function(t) {
+test.UI("[L4]: Splitting a List by breaking an empty ListItem", function(t) {
   let editor = TestEditor.mount({ editorSession: fixture(_l1, _l1_empty) }, t.sandbox)
   let editorSession = editor.editorSession
   let doc = editorSession.getDocument()
@@ -730,6 +755,78 @@ test.UI("[L4]: Split list by breaking an empty item", function(t) {
   t.ok(sel.isCollapsed(), 'The selection should be collapsed')
   t.deepEqual(sel.start.path, p.getTextPath(), '... on the new paragraph')
   t.equal(sel.start.offset, 0, '... at first position')
+  t.end()
+})
+
+test.UI("[L5-1]: Merging two ListItems using BACKSPACE", function(t) {
+  let editor = TestEditor.mount({ editorSession: fixture(_l1) }, t.sandbox)
+  let editorSession = editor.editorSession
+  let doc = editorSession.getDocument()
+  editorSession.setSelection({
+    type: 'property',
+    path: ['l1', 'items', 'l1-2', 'content'],
+    startOffset: 0,
+    containerId: 'body'
+  })
+  editorSession.transaction((tx) => {
+    tx.deleteCharacter('left')
+  })
+  let sel = editorSession.getSelection()
+  let l = doc.get('l1')
+  t.equal(l.items.length, 1, 'Only one list item should be left')
+  let li = l.getItemAt(0)
+  t.equal(li.getText(), LI1_TEXT+LI2_TEXT, 'The list item should have the merged text')
+  t.ok(sel.isCollapsed(), 'The selection should be collapsed')
+  t.deepEqual(sel.start.path, l.getItemPath(li.id), '... on the list item')
+  t.equal(sel.start.offset, LI1_TEXT.length, '... at the end of the original content')
+  t.end()
+})
+
+test.UI("[L5-2]: Merging two ListItems using DELETE", function(t) {
+  let editor = TestEditor.mount({ editorSession: fixture(_l1) }, t.sandbox)
+  let editorSession = editor.editorSession
+  let doc = editorSession.getDocument()
+  editorSession.setSelection({
+    type: 'property',
+    path: ['l1', 'items', 'l1-1', 'content'],
+    startOffset: LI1_TEXT.length,
+    containerId: 'body'
+  })
+  editorSession.transaction((tx) => {
+    tx.deleteCharacter('right')
+  })
+  let sel = editorSession.getSelection()
+  let l = doc.get('l1')
+  t.equal(l.items.length, 1, 'Only one list item should be left')
+  let li = l.getItemAt(0)
+  t.equal(li.getText(), LI1_TEXT+LI2_TEXT, 'The list item should have the merged text')
+  t.ok(sel.isCollapsed(), 'The selection should be collapsed')
+  t.deepEqual(sel.start.path, l.getItemPath(li.id), '... on the list item')
+  t.equal(sel.start.offset, LI1_TEXT.length, '... at the end of the original content')
+  t.end()
+})
+
+test.UI("[L6]: Merging a List into previous TextNode (BACKSPACE)", function(t) {
+  let editor = TestEditor.mount({ editorSession: fixture(_p1, _l1) }, t.sandbox)
+  let editorSession = editor.editorSession
+  let doc = editorSession.getDocument()
+  editorSession.setSelection({
+    type: 'property',
+    path: ['l1', 'items', 'l1-1', 'content'],
+    startOffset: 0,
+    containerId: 'body'
+  })
+  editorSession.transaction((tx) => {
+    tx.deleteCharacter('left')
+  })
+  let sel = editorSession.getSelection()
+  let p = doc.get('p1')
+  let l = doc.get('l1')
+  t.equal(l.items.length, 1, 'One list item should be left')
+  t.equal(p.getText(), P1_TEXT+LI1_TEXT, 'The text should be merged into the paragraph')
+  t.ok(sel.isCollapsed(), 'The selection should be collapsed')
+  t.deepEqual(sel.start.path, p.getTextPath(), '... on the paragraph')
+  t.equal(sel.start.offset, P1_TEXT.length, '... at the end of the original content')
   t.end()
 })
 
@@ -842,20 +939,24 @@ function fixture(...args) {
   return editorSession
 }
 
+const P1_TEXT = 'p1:abcdef'
+
 function _p1(doc, body) {
   doc.create({
     type: 'paragraph',
     id: 'p1',
-    content: 'abcdef'
+    content: P1_TEXT
   })
   body.show('p1')
 }
+
+const P2_TEXT = 'p2:ghijk'
 
 function _p2(doc, body) {
   doc.create({
     type: 'paragraph',
     id: 'p2',
-    content: 'abcdef'
+    content: P2_TEXT
   })
   body.show('p2')
 }
@@ -883,17 +984,20 @@ function _s1(doc) {
   })
 }
 
+const LI1_TEXT = 'abcdef'
+const LI2_TEXT = '0123456'
+
 // list with two items
 function _l1(doc, body) {
   doc.create({
     type: 'list-item',
     id: 'l1-1',
-    content: 'abcdef'
+    content: LI1_TEXT
   })
   doc.create({
     type: 'list-item',
     id: 'l1-2',
-    content: 'abcdef'
+    content: LI2_TEXT
   })
   doc.create({
     type: 'list',
