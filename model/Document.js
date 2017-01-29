@@ -378,7 +378,7 @@ class Document extends EventEmitter {
     } else {
       switch (data.type) {
         case 'property': {
-          if (data.endOffset === null || data.endOffset === undefined) {
+          if (isNil(data.endOffset)) {
             data.endOffset = data.startOffset
           }
           if (!data.hasOwnProperty('reverse')) {
@@ -388,6 +388,17 @@ class Document extends EventEmitter {
               data.endOffset = tmp
               data.reverse = true
             }
+          }
+          // integrity checks:
+          let text = this.get(data.path)
+          if (isNil(text)) {
+            throw new Error('Invalid property path: ' + data.path)
+          }
+          if (data.startOffset < 0 || data.startOffset > text.length) {
+            throw new Error('Invalid startOffset: target property has length '+text.length+', given startOffset is ' + data.startOffset)
+          }
+          if (data.endOffset < 0 || data.endOffset > text.length) {
+            throw new Error('Invalid startOffset: target property has length '+text.length+', given endOffset is ' + data.endOffset)
           }
           sel = new PropertySelection(data.path, data.startOffset, data.endOffset, data.reverse, data.containerId, data.surfaceId)
           break

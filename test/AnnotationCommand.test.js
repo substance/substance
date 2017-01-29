@@ -10,7 +10,7 @@ test.UI("can 'create' property annotation", function(t) {
   let { doc } = fixture(t)
   let selectionState = new SelectionState(doc)
   let cmd = new ToggleStrongCommand()
-  let sel = doc.createSelection(['p6', 'content'], 1, 6)
+  let sel = doc.createSelection(['p4', 'content'], 1, 6)
   selectionState.setSelection(sel)
   let cmdState = cmd.getCommandState({
     selectionState: selectionState
@@ -24,7 +24,7 @@ test.UI("execute 'create' property annotation", function(t) {
   let cmd = new ToggleStrongCommand()
   editorSession.setSelection({
     type: 'property',
-    path: ['p6', 'content'],
+    path: ['p4', 'content'],
     startOffset: 1,
     endOffset: 6
   })
@@ -39,7 +39,7 @@ test.UI("execute 'create' property annotation", function(t) {
   t.notNil(newAnno, 'A new anno should have been created')
   newAnno = doc.get(newAnno.id)
   t.equal(newAnno.type, 'strong', '.. of correct type')
-  t.deepEqual(newAnno.start.path, ['p6', 'content'], ".. with correct path")
+  t.deepEqual(newAnno.start.path, ['p4', 'content'], ".. with correct path")
   t.equal(newAnno.start.offset, 1, '.. with correct startOffset')
   t.equal(newAnno.end.offset, 6, '.. with correct endOffset')
   t.end()

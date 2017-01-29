@@ -76,13 +76,34 @@ function fixture(...args) {
     seed(doc, body)
   })
   let editorSession = new EditorSession(doc, { configurator: config })
-  editorSession.setSelection({
-    type: 'property',
-    path: ['p1', 'content'],
-    startOffset: 0,
-    containerId: 'body',
-    surfaceId: 'body'
-  })
+  let first = body.getNodeAt(0)
+  if (first) {
+    if (first.isText()) {
+      editorSession.setSelection({
+        type: 'property',
+        path: first.getTextPath(),
+        startOffset: 0,
+        containerId: 'body',
+        surfaceId: 'body'
+      })
+    } else if (first.isList()) {
+      editorSession.setSelection({
+        type: 'property',
+        path: first.getItemPath(first.items[0]),
+        startOffset: 0,
+        containerId: 'body',
+        surfaceId: 'body'
+      })
+    } else {
+      editorSession.setSelection({
+        type: 'node',
+        nodeId: first.id,
+        mode: 'before',
+        containerId: 'body',
+        surfaceId: 'body'
+      })
+    }
+  }
   return editorSession
 }
 
