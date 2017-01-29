@@ -10,8 +10,7 @@
   ```
 */
 export default function simple(tx) {
-  var body = tx.get('body')
-  tx.set(['meta', 'title'], 'Simple')
+  let body = tx.get('body')
   tx.create({
     type: 'paragraph',
     id: 'p1',

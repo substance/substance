@@ -4,8 +4,12 @@ import EditorSession from '../../model/EditorSession'
 import BlockNode from '../../model/BlockNode'
 import InlineNode from '../../model/InlineNode'
 import ParagraphPackage from '../../packages/paragraph/ParagraphPackage'
+import HeadingPackage from '../../packages/heading/HeadingPackage'
 import StrongPackage from '../../packages/strong/StrongPackage'
+import EmphasisPackage from '../../packages/emphasis/EmphasisPackage'
 import ListPackage from '../../packages/list/ListPackage'
+import LinkPackage from '../../packages/link/LinkPackage'
+import CodeblockPackage from '../../packages/codeblock/CodeblockPackage'
 import Component from '../../ui/Component'
 import AbstractEditor from '../../ui/AbstractEditor'
 import ContainerEditor from '../../ui/ContainerEditor'
@@ -42,12 +46,17 @@ class TestEditor extends AbstractEditor {
 function getConfig() {
   let config = new Configurator()
   config.addToolGroup('annotations')
+  config.addToolGroup('overlay')
   config.defineSchema(new DocumentSchema('test-article', 1.0, {
     defaultTextType: 'paragraph'
   }))
   config.import(ParagraphPackage)
+  config.import(HeadingPackage)
   config.import(StrongPackage)
+  config.import(EmphasisPackage)
   config.import(ListPackage)
+  config.import(LinkPackage)
+  config.import(CodeblockPackage)
   config.addNode(TestBlockNode)
   config.addNode(TestInlineNode)
   config.addComponent('test-block', Component)

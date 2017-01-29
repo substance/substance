@@ -1,7 +1,5 @@
 import { module } from 'substance-test'
 
-import EditorSession from '../model/EditorSession'
-import Configurator from '../util/Configurator'
 import Clipboard from '../ui/Clipboard'
 import DefaultDOMElement from '../dom/DefaultDOMElement'
 import Registry from '../util/Registry'
@@ -12,8 +10,8 @@ import EmphasisHTMLConverter from '../packages/emphasis/EmphasisHTMLConverter'
 import LinkHTMLConverter from '../packages/link/LinkHTMLConverter'
 import CodeblockHTMLConverter from '../packages/codeblock/CodeblockHTMLConverter'
 
-import fixture from './fixture/createTestArticle'
 import simple from './fixture/simple'
+import setupEditor from './fixture/setupEditor'
 import BrowserLinuxPLainTextFixture from './fixture/html/browser-linux-plain-text'
 import BrowserLinuxAnnotatedTextFixture from './fixture/html/browser-linux-annotated-text'
 import BrowserLinuxTwoParagraphsFixture from './fixture/html/browser-linux-two-paragraphs'
@@ -48,32 +46,8 @@ import MSW11OSXTwoParagraphsFixture from './fixture/html/word-11-osx-two-paragra
 
 const test = module('Clipboard')
 
-// let componentRegistry = new ComponentRegistry({
-//   "paragraph": ParagraphComponent,
-//   "heading": HeadingComponent,
-//   "strong": AnnotationComponent,
-//   "emphasis": AnnotationComponent,
-//   "link": LinkComponent,
-//   "codeblock": CodeblockComponent,
-// })
-
-let converterRegistry = new Registry({
-  "html": new Registry({
-    "paragraph": ParagraphHTMLConverter,
-    "heading": HeadingHTMLConverter,
-    "strong": StrongHTMLConverter,
-    "emphasis": EmphasisHTMLConverter,
-    "link": LinkHTMLConverter,
-    "codeblock": CodeblockHTMLConverter,
-  })
-})
-
-let clipboardConfig = {
-  converterRegistry: converterRegistry
-}
-
 test.UI("Copying HTML, and plain text", function(t) {
-  let { editorSession, clipboard } = _fixture(simple)
+  let { editorSession, clipboard } = _fixture(t, simple)
   editorSession.setSelection({ type: 'property', path: ['p1', 'content'], startOffset: 0, endOffset: 5 })
   let event = new ClipboardEvent()
   clipboard.onCopy(event)
@@ -87,7 +61,7 @@ test.UI("Copying HTML, and plain text", function(t) {
 })
 
 test.UI("Copying a property selection", function(t) {
-  let { editorSession, clipboard } = _fixture(simple)
+  let { editorSession, clipboard } = _fixture(t, simple)
   editorSession.setSelection({ type: 'property', path: ['p1', 'content'], startOffset: 0, endOffset: 5 })
   let TEXT = '01234'
   let event = new ClipboardEvent()
@@ -107,7 +81,7 @@ test.UI("Copying a property selection", function(t) {
 })
 
 test.UI("Copying a container selection", function(t) {
-  let { editorSession, clipboard } = _fixture(simple)
+  let { editorSession, clipboard } = _fixture(t, simple)
   editorSession.setSelection({
     type: 'container',
     containerId: 'body',
@@ -144,7 +118,7 @@ test.UI("Copying a container selection", function(t) {
 })
 
 test.UI("Pasting text into ContainerEditor using 'text/plain'.", function(t) {
-  let { editorSession, clipboard, doc } = _fixture(simple)
+  let { editorSession, clipboard, doc } = _fixture(t, simple)
   editorSession.setSelection({
     type: 'property',
     path: ['p1', 'content'],
@@ -159,7 +133,7 @@ test.UI("Pasting text into ContainerEditor using 'text/plain'.", function(t) {
 })
 
 test.UI("Pasting without any data given.", function(t) {
-  let { editorSession, clipboard, doc } = _fixture(simple)
+  let { editorSession, clipboard, doc } = _fixture(t, simple)
   editorSession.setSelection({
     type: 'property',
     path: ['p1', 'content'],
@@ -173,7 +147,7 @@ test.UI("Pasting without any data given.", function(t) {
 })
 
 test.UI("Pasting text into ContainerEditor using 'text/html'.", function(t) {
-  let { editorSession, clipboard, doc } = _fixture(simple)
+  let { editorSession, clipboard, doc } = _fixture(t, simple)
   editorSession.setSelection({
     type: 'property',
     path: ['p1', 'content'],
@@ -192,7 +166,7 @@ test.UI("Pasting text into ContainerEditor using 'text/html'.", function(t) {
 // this test revealed #700: the problem was that in source code there where
 // `"` and `'` characters which did not survive the way through HTML correctly
 test.UI("Copy and Pasting source code.", function(t) {
-  let { editorSession, clipboard, doc } = _fixture(simple)
+  let { editorSession, clipboard, doc } = _fixture(t, simple)
   let body = doc.get('body')
   let cb = doc.create({
     type: 'codeblock',
@@ -357,6 +331,21 @@ test.UI("Microsoft Word 11 (OSX) - Two Paragraphs", function(t) {
   _twoParagraphsTest(t, MSW11OSXTwoParagraphsFixture)
 })
 
+let converterRegistry = new Registry({
+  "html": new Registry({
+    "paragraph": ParagraphHTMLConverter,
+    "heading": HeadingHTMLConverter,
+    "strong": StrongHTMLConverter,
+    "emphasis": EmphasisHTMLConverter,
+    "link": LinkHTMLConverter,
+    "codeblock": CodeblockHTMLConverter,
+  })
+})
+
+let clipboardConfig = {
+  converterRegistry: converterRegistry
+}
+
 class ClipboardEventData {
   constructor() {
     this.data = {}
@@ -383,15 +372,14 @@ class ClipboardEvent {
   stopPropagation() {}
 }
 
-function _fixture(seed) {
-  let doc = fixture(seed)
-  let editorSession = new EditorSession(doc, { configurator: new Configurator() })
+function _fixture(t, seed) {
+  let { editorSession, doc } = setupEditor(t, seed)
   let clipboard = new Clipboard(editorSession, clipboardConfig)
-  return { editorSession: editorSession, clipboard: clipboard, doc: doc }
+  return { editorSession, doc, clipboard }
 }
 
 function _fixtureTest(t, html, impl, forceWindows) {
-  let { editorSession, clipboard, doc } = _fixture(simple)
+  let { editorSession, clipboard, doc } = _fixture(t, simple)
   if (forceWindows) {
     // NOTE: faking 'Windows' mode in importer so that
     // the correct implementation will be used
