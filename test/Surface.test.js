@@ -1,37 +1,27 @@
 /* eslint-disable no-invalid-this */
 import { module } from 'substance-test'
-import EditorSession from '../model/EditorSession'
-import Registry from '../util/Registry'
-import Configurator from '../util/Configurator'
 import BrowserDOMElement from '../dom/BrowserDOMElement'
-import ParagraphComponent from '../packages/paragraph/ParagraphComponent'
-import HeadingComponent from '../packages/heading/HeadingComponent'
-import AnnotationComponent from '../ui/AnnotationComponent'
-import LinkComponent from '../packages/link/LinkComponent'
-import fixture from './fixture/createTestArticle'
-import simple from './fixture/simple'
-import TestContainerEditor from './fixture/TestContainerEditor'
+import setupEditor from './fixture/setupEditor'
 
 const test = module('Surface')
 
 // This test was added to cover issue #82
 test.UI("Set the selection after creating annotation.", function(t) {
   window.getSelection().removeAllRanges()
-  var el = t.sandbox
-  var {editorSession, surface} = _createApp(simple, el)
+  let { editorSession, surface } = setupEditor(t, _p1)
   let sel = editorSession.setSelection({
     type: 'property',
     path: ['p1', 'content'],
     startOffset: 0,
     endOffset: 5,
-    surfaceId: 'body',
-    containerId: 'body'
+    containerId: 'body',
+    surfaceId: 'body'
   })
   editorSession.transaction(function(tx) {
     tx.annotate({ type: "strong" })
   })
-  var wsel = window.getSelection()
-  var newSel = surface.domSelection.getSelection()
+  let wsel = window.getSelection()
+  let newSel = surface.domSelection.getSelection()
   t.equal(wsel.rangeCount, 1, "There should be a DOM selection.")
   t.ok(newSel.equals(sel), "New selection should be equal to initial selection.")
   t.end()
@@ -39,8 +29,7 @@ test.UI("Set the selection after creating annotation.", function(t) {
 
 test.UI("Render a reverse selection.", function(t) {
   window.getSelection().removeAllRanges()
-  var el = t.sandbox
-  var {editorSession} = _createApp(simple, el)
+  let { editorSession } = setupEditor(t, _p1, _p2)
   editorSession.setSelection({
     type: 'container',
     startPath:['p1', 'content'],
@@ -56,29 +45,24 @@ test.UI("Render a reverse selection.", function(t) {
   t.end()
 })
 
-var componentRegistry = new Registry({
-  "paragraph": ParagraphComponent,
-  "heading": HeadingComponent,
-  "strong": AnnotationComponent,
-  "emphasis": AnnotationComponent,
-  "link": LinkComponent,
-})
+const P1_TEXT = 'abcdef'
 
-function _createApp(fixtureSeed, el) {
-  var doc = fixture(fixtureSeed)
-  var editorSession = new EditorSession(doc, { configurator: new Configurator() })
-  var app = TestContainerEditor.mount({
-    context: {
-      editorSession: editorSession,
-      surfaceManager: editorSession.surfaceManager,
-      componentRegistry: componentRegistry
-    },
-    node: doc.get('body')
-  }, el)
-  var surface = app.refs.editor
-  return {
-    editorSession: editorSession,
-    doc: doc,
-    surface: surface,
-  }
+function _p1(doc, body) {
+  doc.create({
+    type: 'paragraph',
+    id: 'p1',
+    content: P1_TEXT
+  })
+  body.show('p1')
+}
+
+const P2_TEXT = 'ghijk'
+
+function _p2(doc, body) {
+  doc.create({
+    type: 'paragraph',
+    id: 'p2',
+    content: P2_TEXT
+  })
+  body.show('p2')
 }
