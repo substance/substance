@@ -441,6 +441,10 @@ class StubDoc {
     return Document.prototype.createSelection.apply(this, arguments)
   }
 
+  _createSelectionFromRange() {
+    return Document.prototype._createSelectionFromRange.apply(this, arguments)
+  }
+
   on() {}
 
   off() {}

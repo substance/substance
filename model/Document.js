@@ -566,6 +566,37 @@ class Document extends EventEmitter {
     return op
   }
 
+  // NOTE: this is still here because DOMSelection is using it
+  _createSelectionFromRange(range) {
+    let inOneNode = isEqual(range.start.path, range.end.path)
+    if (inOneNode) {
+      if (range.start.isNodeCoordinate()) {
+        return NodeSelection._createFromRange(range)
+      } else {
+        return this.createSelection({
+          type: 'property',
+          path: range.start.path,
+          startOffset: range.start.offset,
+          endOffset: range.end.offset,
+          reverse: range.reverse,
+          containerId: range.containerId,
+          surfaceId: range.surfaceId
+        })
+      }
+    } else {
+      return this.createSelection({
+        type: 'container',
+        startPath: range.start.path,
+        startOffset: range.start.offset,
+        endPath: range.end.path,
+        endOffset: range.end.offset,
+        reverse: range.reverse,
+        containerId: range.containerId,
+        surfaceId: range.surfaceId
+      })
+    }
+  }
+
 }
 
 Document.prototype._isDocument = true
@@ -597,34 +628,7 @@ function _createSelectionLegacy(doc, args) {
   }
   // createSelection(range)
   else if (args[0] instanceof Range) {
-    let range = args[0]
-    let inOneNode = isEqual(range.start.path, range.end.path)
-    if (inOneNode) {
-      if (range.start.isNodeCoordinate()) {
-        return NodeSelection._createFromRange(range)
-      } else {
-        return doc.createSelection({
-          type: 'property',
-          path: range.start.path,
-          startOffset: range.start.offset,
-          endOffset: range.end.offset,
-          reverse: range.reverse,
-          containerId: range.containerId,
-          surfaceId: range.surfaceId
-        })
-      }
-    } else {
-      return doc.createSelection({
-        type: 'container',
-        startPath: range.start.path,
-        startOffset: range.start.offset,
-        endPath: range.end.path,
-        endOffset: range.end.offset,
-        reverse: range.reverse,
-        containerId: range.containerId,
-        surfaceId: range.surfaceId
-      })
-    }
+    return doc._createSelectionFromRange(args[0])
   }
   // createSelection(startPath, startOffset)
   else if (args.length === 2 && isArray(args[0])) {

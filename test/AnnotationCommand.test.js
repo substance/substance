@@ -10,7 +10,12 @@ test.UI("can 'create' property annotation", function(t) {
   let { doc } = fixture(t)
   let selectionState = new SelectionState(doc)
   let cmd = new ToggleStrongCommand()
-  let sel = doc.createSelection(['p4', 'content'], 1, 6)
+  let sel = doc.createSelection({
+    type: 'property',
+    path: ['p4', 'content'],
+    startOffset: 1,
+    endOffset: 6
+  })
   selectionState.setSelection(sel)
   let cmdState = cmd.getCommandState({
     selectionState: selectionState
@@ -49,7 +54,12 @@ test.UI("can 'delete' property annotation", function(t) {
   let { doc } = fixture(t)
   let selectionState = new SelectionState(doc)
   let cmd = new ToggleStrongCommand()
-  let sel = doc.createSelection(['p1', 'content'], 5, 7)
+  let sel = doc.createSelection({
+    type: 'property',
+    path: ['p1', 'content'],
+    startOffset: 5,
+    endOffset: 7
+  })
   selectionState.setSelection(sel)
   let cmdState = cmd.getCommandState({
     selectionState: selectionState
@@ -62,7 +72,12 @@ test.UI("execute 'delete' property annotation", function(t) {
   let { doc } = fixture(t)
   let selectionState = new SelectionState(doc)
   let cmd = new ToggleStrongCommand()
-  let sel = doc.createSelection(['p1', 'content'], 5, 7)
+  let sel = doc.createSelection({
+    type: 'property',
+    path: ['p1', 'content'],
+    startOffset: 5,
+    endOffset: 7
+  })
   selectionState.setSelection(sel)
   let cmdState = cmd.getCommandState({
     selectionState: selectionState

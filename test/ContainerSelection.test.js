@@ -20,19 +20,6 @@ test("Creating a ContainerSelection", function(t) {
   t.end()
 })
 
-test("Creating a ContainerSelection using a Range", function(t) {
-  var doc = fixture(simple)
-  var range = new Range(new Coordinate(['p1', 'content'], 1), new Coordinate(['p2', 'content'], 2), false, 'body')
-  var sel = doc.createSelection(range)
-  t.ok(sel.isContainerSelection(), 'Should be a container selection.')
-  t.deepEqual(sel.start.path, ['p1', 'content'], 'startPath should be correct.')
-  t.equal(sel.start.offset, 1, 'startOffset should be correct.')
-  t.deepEqual(sel.end.path, ['p2', 'content'], 'endPath should be correct.')
-  t.equal(sel.end.offset, 2, 'endOffset should be correct.')
-  t.ok(!sel.isReverse(), 'Selection should not be reverse')
-  t.end()
-})
-
 test("Collapsed ContainerSelection", function(t) {
   var sel = new ContainerSelection('body', ['p1', 'content'], 1, ['p1', 'content'], 1)
   t.ok(sel.isContainerSelection(), 'Should be a container selection.')

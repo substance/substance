@@ -37,13 +37,14 @@ class DOMSelection {
   getSelection(options) {
     let range = this.mapDOMSelection(options)
     let doc = this.surface.getDocument()
-    return doc.createSelection(range)
+    // TODO: consolidate
+    return doc._createSelectionFromRange(range)
   }
 
   getSelectionForDOMRange(wrange) {
     let range = this.mapDOMRange(wrange)
     let doc = this.surface.getDocument()
-    return doc.createSelection(range)
+    return doc._createSelectionFromRange(range)
   }
 
   // function _printStacktrace() {

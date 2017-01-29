@@ -37,7 +37,17 @@ function xmlExporterTests(memory) {
   test("Exporting paragraph with strong", function(t) {
     let { doc, exporter } = setup(t)
     var p1 = doc.create({ type: 'paragraph', id: 'p1', content: CONTENT })
-    doc.create({ type: 'strong', id: 's1', path: ['p1', 'content'], startOffset: 4, endOffset: 7})
+    doc.create({
+      type: 'strong',
+      id: 's1',
+      start: {
+        path: ['p1', 'content'],
+        offset: 4
+      },
+      end: {
+        offset: 7
+      }
+    })
     var el = exporter.convertNode(p1)
     var actual = el.serialize()
     var expected = '<p id="p1">0123<strong id="s1">456</strong>789</p>'

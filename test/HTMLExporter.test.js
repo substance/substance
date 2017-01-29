@@ -38,7 +38,17 @@ function htmlExporterTests(memory) {
   test("Exporting paragraph with strong", function(t) {
     let { doc, exporter } = setup(t)
     let p1 = doc.create({ type: 'paragraph', id: 'p1', content: CONTENT })
-    doc.create({ type: 'strong', id: 's1', path: ['p1', 'content'], startOffset: 4, endOffset: 7})
+    doc.create({
+      type: 'strong',
+      id: 's1',
+      start: {
+        path: ['p1', 'content'],
+        offset: 4
+      },
+      end: {
+        offset: 7
+      }
+    })
     let el = exporter.convertNode(p1)
     let actual = el.outerHTML
     let expected = '<p data-id="p1">0123<strong data-id="s1">456</strong>789</p>'
@@ -83,7 +93,19 @@ function htmlExporterTests(memory) {
   test("Exporting a link", function(t) {
     let { doc, exporter } = setup(t)
     let p1 = doc.create({ type: 'paragraph', id: 'p1', content: CONTENT })
-    doc.create({ type: 'link', id: 'l1', path: ['p1', 'content'], startOffset: 4, endOffset: 7, url: 'foo', title: 'bar' })
+    doc.create({
+      type: 'link',
+      id: 'l1',
+      start: {
+        path: ['p1', 'content'],
+        offset: 4,
+      },
+      end: {
+        offset: 7
+      },
+      url: 'foo',
+      title: 'bar'
+    })
     let el = exporter.convertNode(p1)
     let childNodes = el.getChildNodes()
     t.equal(childNodes.length, 3)
