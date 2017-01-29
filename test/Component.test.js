@@ -794,6 +794,20 @@ function ComponentTests(debug, memory) {
     t.end()
   })
 
+  test("A ref must be unique in owner scope (fail on inadvertent reuse)", function(t) {
+    class MyComponent extends TestComponent {
+      render($$) {
+        return $$('div')
+          .append($$('div').ref('foo'))
+          .append($$('div').ref('foo'))
+      }
+    }
+    t.throws(function() {
+      MyComponent.render()
+    }, "Should throw an exception when a reference id is used multiple times")
+    t.end()
+  })
+
   test("Render a child element with ref", function(t) {
     let comp = TestComponent.create(function($$) {
       return $$('div').addClass('parent')
