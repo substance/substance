@@ -1,6 +1,7 @@
-import isEqual from '../util/isEqual'
-import isObject from '../util/isObject'
 import isArray from '../util/isArray'
+import isEqual from '../util/isEqual'
+import isNil from '../util/isNil'
+import isPlainObject from '../util/isPlainObject'
 import isString from '../util/isString'
 import forEach from '../util/forEach'
 import uuid from '../util/uuid'
@@ -341,13 +342,26 @@ class Document extends EventEmitter {
     Creating a PropertySelection:
 
     ```js
-    doc.createSelection([ 'text1', 'content'], 10, 20)
+    doc.createSelection({
+      type: 'property',
+      path: [ 'text1', 'content'],
+      startOffset: 10,
+      endOffset: 20,
+      containerId: 'body'
+    })
     ```
 
     Creating a ContainerSelection:
 
     ```js
-    doc.createSelection('main', [ 'p1', 'content'], 10, [ 'p2', 'content'], 20)
+    doc.createSelection({
+      type: 'container',
+      containerId: 'body',
+      startPath: [ 'p1', 'content'],
+      startOffset: 10,
+      endPath: [ 'p2', 'content'],
+      endOffset: 20
+    })
     ```
 
     Creating a NullSelection:
@@ -355,20 +369,63 @@ class Document extends EventEmitter {
     ```js
     doc.createSelection(null)
     ```
-
-    You can also call this method with JSON data
-
-    ```js
-    doc.createSelection({
-      type: 'property',
-      path: [ 'p1', 'content'],
-      startOffset: 10,
-      endOffset: 20
-    })
-    ```
   */
-  createSelection() {
-    var sel = _createSelection.apply(this, arguments)
+  createSelection(data) {
+    let sel
+    if (isNil(data)) return Selection.nullSelection
+    if (arguments.length !== 1 || !isPlainObject(data)) {
+      sel = _createSelectionLegacy(this, arguments)
+    } else {
+      switch (data.type) {
+        case 'property': {
+          if (data.endOffset === null || data.endOffset === undefined) {
+            data.endOffset = data.startOffset
+          }
+          if (!data.hasOwnProperty('reverse')) {
+            if (data.startOffset>data.endOffset) {
+              let tmp = data.startOffset
+              data.startOffset = data.endOffset
+              data.endOffset = tmp
+              data.reverse = true
+            }
+          }
+          sel = new PropertySelection(data.path, data.startOffset, data.endOffset, data.reverse, data.containerId, data.surfaceId)
+          break
+        }
+        case 'container': {
+          let container = this.get(data.containerId, 'strict')
+          if (!container) throw new Error('Can not create ContainerSelection: container "'+data.containerId+'" does not exist.')
+          let start = new Coordinate(data.startPath, data.startOffset)
+          let end = new Coordinate(data.endPath, data.endOffset)
+          let startAddress = container.getAddress(start)
+          let endAddress = container.getAddress(end)
+          if (!startAddress) {
+            throw new Error('Invalid arguments for ContainerSelection: ', start.toString())
+          }
+          if (!endAddress) {
+            throw new Error('Invalid arguments for ContainerSelection: ', end.toString())
+          }
+          if (!data.hasOwnProperty('reverse')) {
+            if (endAddress.isBefore(startAddress, 'strict')) {
+              [start, end] = [end, start]
+              data.reverse = true
+            }
+          }
+          sel = new ContainerSelection(container.id, start.path, start.offset, end.path, end.offset, data.reverse, data.surfaceId)
+          break
+        }
+        case 'node': {
+          sel = NodeSelection.fromJSON(data)
+          break
+        }
+        case 'custom': {
+          sel = CustomSelection.fromJSON(data)
+          break
+        }
+        default:
+          throw new Error('Illegal selection type', data)
+      }
+    }
     if (!sel.isNull()) {
       sel.attach(this)
     }
@@ -511,131 +568,83 @@ Document.TEXT_SNIPPET_ID = "text-snippet"
 
 /* Internals */
 
-function _createSelection() {
-  var doc = this; // eslint-disable-line
-  var coor, range, path, startOffset, endOffset
-  if (arguments.length === 1 && arguments[0] === null) {
-    return Selection.nullSelection
-  }
-  if (arguments[0] instanceof Coordinate) {
-    coor = arguments[0]
+// DEPRECATED legacy support
+function _createSelectionLegacy(doc, args) {
+  console.warn('DEPRECATED: use document.createSelection({ type: ... }) instead')
+  // createSelection(coor)
+  if (args[0] instanceof Coordinate) {
+    let coor = args[0]
     if (coor.isNodeCoordinate()) {
       return NodeSelection._createFromCoordinate(coor)
     } else {
-      return new PropertySelection(coor.path, coor.offset, coor.offset)
+      return doc.createSelection({
+        type: 'property',
+        path: coor.path,
+        startOffset: coor.offset,
+      })
     }
   }
-  else if (arguments[0] instanceof Range) {
-    range = arguments[0]
-    var inOneNode = isEqual(range.start.path, range.end.path)
+  // createSelection(range)
+  else if (args[0] instanceof Range) {
+    let range = args[0]
+    let inOneNode = isEqual(range.start.path, range.end.path)
     if (inOneNode) {
       if (range.start.isNodeCoordinate()) {
         return NodeSelection._createFromRange(range)
       } else {
-        return new PropertySelection(range.start.path, range.start.offset, range.end.offset, range.reverse, range.containerId)
+        return doc.createSelection({
+          type: 'property',
+          path: range.start.path,
+          startOffset: range.start.offset,
+          endOffset: range.end.offset,
+          reverse: range.reverse,
+          containerId: range.containerId,
+          surfaceId: range.surfaceId
+        })
       }
     } else {
-      return new ContainerSelection(range.containerId, range.start.path, range.start.offset, range.end.path, range.end.offset, range.reverse)
+      return doc.createSelection({
+        type: 'container',
+        startPath: range.start.path,
+        startOffset: range.start.offset,
+        endPath: range.end.path,
+        endOffset: range.end.offset,
+        reverse: range.reverse,
+        containerId: range.containerId,
+        surfaceId: range.surfaceId
+      })
     }
-  }
-  else if (arguments.length === 1 && isObject(arguments[0])) {
-    return _createSelectionFromData(doc, arguments[0])
   }
   // createSelection(startPath, startOffset)
-  else if (arguments.length === 2 && isArray(arguments[0])) {
-    path = arguments[0]
-    startOffset = arguments[1]
-    return new PropertySelection(path, startOffset, startOffset)
+  else if (args.length === 2 && isArray(args[0])) {
+    return doc.createSelection({
+      type: 'property',
+      path: args[0],
+      startOffset: args[1]
+    })
   }
   // createSelection(startPath, startOffset, endOffset)
-  else if (arguments.length === 3 && isArray(arguments[0])) {
-    path = arguments[0]
-    startOffset = arguments[1]
-    endOffset = arguments[2]
-    return new PropertySelection(path, startOffset, endOffset, startOffset>endOffset)
+  else if (args.length === 3 && isArray(args[0])) {
+    return doc.createSelection({
+      type: 'property',
+      path: args[0],
+      startOffset: args[1],
+      endOffset: args[2]
+    })
   }
   // createSelection(containerId, startPath, startOffset, endPath, endOffset)
-  else if (arguments.length === 5 && isString(arguments[0])) {
-    return _createSelectionFromData(doc, {
+  else if (args.length === 5 && isString(args[0])) {
+    return doc.createSelection({
       type: 'container',
-      containerId: arguments[0],
-      startPath: arguments[1],
-      startOffset: arguments[2],
-      endPath: arguments[3],
-      endOffset: arguments[4]
+      containerId: args[0],
+      startPath: args[1],
+      startOffset: args[2],
+      endPath: args[3],
+      endOffset: args[4]
     })
   } else {
-    console.error('Illegal arguments for Selection.create().', arguments)
-    return Selection.nullSelection
-  }
-}
-
-function _createSelectionFromData(doc, selData) {
-  var tmp
-  if (selData.type === 'property') {
-    if (selData.endOffset === null || selData.endOffset === undefined) {
-      selData.endOffset = selData.startOffset
-    }
-    if (!selData.hasOwnProperty('reverse')) {
-      if (selData.startOffset>selData.endOffset) {
-        tmp = selData.startOffset
-        selData.startOffset = selData.endOffset
-        selData.endOffset = tmp
-        selData.reverse = true
-      } else {
-        selData.reverse = false
-      }
-    }
-    return new PropertySelection(selData.path, selData.startOffset, selData.endOffset, selData.reverse, selData.containerId, selData.surfaceId)
-  } else if (selData.type === 'container') {
-    var container = doc.get(selData.containerId, 'strict')
-    if (!container) throw new Error('Can not create ContainerSelection: container "'+selData.containerId+'" does not exist.')
-    var start = new Coordinate(selData.startPath, selData.startOffset)
-    var end = new Coordinate(selData.endPath, selData.endOffset)
-    var startAddress = container.getAddress(start)
-    var endAddress = container.getAddress(end)
-    var isReverse = selData.reverse
-    if (!startAddress) {
-      throw new Error('Invalid arguments for ContainerSelection: ', start.toString())
-    }
-    if (!endAddress) {
-      throw new Error('Invalid arguments for ContainerSelection: ', end.toString())
-    }
-    if (!selData.hasOwnProperty('reverse')) {
-      isReverse = endAddress.isBefore(startAddress, 'strict')
-      if (isReverse) {
-        tmp = start
-        start = end
-        end = tmp
-      }
-    }
-
-    // ATTENTION: since Beta4 we are not supporting partial
-    // selections of nodes other than text nodes
-    // Thus we are turning other property coordinates into node coordinates
-    _allignCoordinate(doc, start, true)
-    _allignCoordinate(doc, end, false)
-
-    return new ContainerSelection(container.id, start.path, start.offset, end.path, end.offset, isReverse, selData.surfaceId)
-  }
-  else if (selData.type === 'node') {
-    return NodeSelection.fromJSON(selData)
-  } else if (selData.type === 'custom') {
-    return CustomSelection.fromJSON(selData)
-  } else {
-    throw new Error('Illegal selection type', selData)
-  }
-}
-
-function _allignCoordinate(doc, coor, isStart) {
-  if (!coor.isNodeCoordinate()) {
-    var nodeId = coor.getNodeId()
-    var node = doc.get(nodeId)
-    if (!node.isText()) {
-      console.warn('Selecting a non-textish node partially is not supported. Select the full node.')
-      coor.path = [nodeId]
-      coor.offset = isStart ? 0 : 1
-    }
+    console.error('Illegal arguments for document.createSelection().', args)
+    return doc.createSelection(null)
   }
 }
 
