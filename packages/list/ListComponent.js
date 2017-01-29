@@ -16,7 +16,9 @@ class ListComponent extends Component {
           path: [node.id, 'items', item.id, 'content'],
           node: item,
           tagName: 'li'
-        }).ref(node.id)
+        })
+        // setting ref to preserve items when rerendering
+        .ref(item.id)
       )
     })
     return el

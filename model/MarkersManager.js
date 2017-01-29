@@ -34,6 +34,7 @@ class MarkersManager {
 
   deregister(textProperyComponent) {
     let path = String(textProperyComponent.getRealPath())
+    // console.log('deregistering property', path)
     let textProperties = this._textProperties[path]
     if (!textProperties) {
       // FIXME: happens in test suite
