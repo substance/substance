@@ -1,5 +1,6 @@
 .sc-table {
-  min-width: 300px;
+  display: table;
+  width: 100%;
 }
 .sc-table .sc-table-cell {
   border: 1px solid #ddd;

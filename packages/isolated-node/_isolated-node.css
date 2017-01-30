@@ -5,6 +5,16 @@
 .sc-isolated-node > .se-container {
   display: inline-block;
   position: relative;
+  /*
+    HACK: Always make container be 100%, so the content inside is able
+    to take up 100% space too.
+  */
+  width: 100%;
+  /*
+    Add horizontal scrollbars, if the space inside the isolated node exceeds
+    the container space.
+  */
+  overflow: auto;
 }
 .sc-isolated-node > .se-container > .se-blocker {
   position: absolute;
