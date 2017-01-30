@@ -155,16 +155,19 @@ class Editing {
         let endOffset = startOffset+1
         let start = { path: path, offset: startOffset }
         let end = { path: path, offset: endOffset }
-        this._deleteTextRange(tx, start, end, sel.containerId)
+        this._deleteTextRange(tx, start, end)
+        tx.setSelection({
+          type: 'property',
+          path: path,
+          startOffset: startOffset,
+          containerId: sel.containerId
+        })
       }
     }
-    // deleting a range of characters with a text property
+    // deleting a range of characters within a text property
     else if (sel.isPropertySelection()) {
-      let path = tx.getRealPath(sel.start.path)
-      let node = tx.get(path[0])
-      if (node.isText()) {
-        this._deleteTextRange(tx, sel.start, sel.end, sel.containerId)
-      }
+      this._deleteTextRange(tx, sel.start, sel.end)
+      tx.setSelection(sel.collapse('left'))
     }
     // deleting a range within a container (across multiple nodes)
     else if (sel.isContainerSelection()) {
@@ -266,10 +269,13 @@ class Editing {
     if (startPos === endPos) {
       let node = tx.get(startId)
       if (node.isText()) {
-        this._deleteTextRange(tx, start, end, containerId)
+        this._deleteTextRange(tx, start, end)
+      } else if (node.isList()) {
+        this._deleteListRange(tx, node, start, end)
       } else {
         throw new Error('Not supported yet.')
       }
+      tx.setSelection(sel.collapse('left'))
       return
     }
 
@@ -294,9 +300,11 @@ class Editing {
     } else {
       let node = lastNode
       if (node.isText()) {
-        this._deleteTextRange(tx, null, end, containerId)
+        this._deleteTextRange(tx, null, end)
+      } else if (node.isList()) {
+        this._deleteListRange(tx, node, null, end)
       } else {
-        throw new Error('Not supported yet')
+        // IsolatedNodes can not be selected partially
       }
     }
 
@@ -314,9 +322,11 @@ class Editing {
     } else {
       let node = firstNode
       if (node.isText()) {
-        this._deleteTextRange(tx, start, null, containerId)
+        this._deleteTextRange(tx, start, null)
+      } else if (node.isList()) {
+        this._deleteListRange(tx, node, start, null)
       } else {
-        throw new Error('Not supported yet')
+        // IsolatedNodes can not be selected partially
       }
     }
 
@@ -740,7 +750,7 @@ class Editing {
     V: <-|->-|       :   move end by diff to start
     VI: <-|--|->     :   move end by total span
   */
-  _deleteTextRange(tx, start, end, containerId) {
+  _deleteTextRange(tx, start, end) {
     if (!start) {
       start = {
         path: end.path,
@@ -797,12 +807,69 @@ class Editing {
         console.warn('TODO: handle annotation update case.')
       }
     })
-    tx.setSelection({
-      type: 'property',
-      path: start.path,
-      startOffset: startOffset,
-      containerId: containerId
-    })
+  }
+
+  _deleteListRange(tx, list, start, end) {
+    // TODO: make robust against empty lists
+    if (!start) {
+      start = {
+        path: list.getItemPath(list.items[0]),
+        offset: 0
+      }
+    }
+    if (!end) {
+      let item = list.getLastItem()
+      end = {
+        path: list.getItemPath(item.id),
+        offset: item.getLength()
+      }
+    }
+    let startId = start.path[2]
+    let startPos = list.getItemPosition(startId)
+    let endId = end.path[2]
+    let endPos = list.getItemPosition(endId)
+    // range within the same item
+    if (startPos === endPos) {
+      this._deleteTextRange(tx, start, end)
+      return
+    }
+    // normalize the range if it is 'reverse'
+    if (startPos > endPos) {
+      [start, end] = [end, start];
+      [startPos, endPos] = [endPos, startPos];
+      [startId, endId] = [endId, startId]
+    }
+    let firstItem = tx.get(startId)
+    let lastItem = tx.get(endId)
+    let firstEntirelySelected = this._isEntirelySelected(tx, firstItem, start, null)
+    let lastEntirelySelected = this._isEntirelySelected(tx, lastItem, null, end)
+
+    // delete or truncate last node
+    if (lastEntirelySelected) {
+      list.removeItemAt(endPos)
+      this._deleteNode(tx, lastItem)
+    } else {
+      this._deleteTextRange(tx, null, end)
+    }
+
+    // delete inner nodes
+    for (let i = endPos-1; i > startPos; i--) {
+      let itemId = list.items[i]
+      list.removeItemAt(i)
+      this._deleteNode(tx, tx.get(itemId))
+    }
+
+    // delete or truncate the first node
+    if (firstEntirelySelected) {
+      list.removeItemAt(startPos)
+      this._deleteNode(tx, firstItem)
+    } else {
+      this._deleteTextRange(tx, start, null)
+    }
+
+    if (!firstEntirelySelected && !lastEntirelySelected) {
+      this._mergeListItems(tx, list, startPos)
+    }
   }
 
   /*
@@ -1040,11 +1107,23 @@ class Editing {
       let list = node
       let itemId = coor.path[2]
       let itemPos = list.getItemPosition(itemId)
-      if (direction === 'left' && itemPos > 0) {
-        this._mergeListItems(tx, list, itemPos-1, container)
-        return
-      } else if (direction === 'right' && itemPos<list.items.length-1) {
-        this._mergeListItems(tx, list, itemPos, container)
+      let withinListNode = (
+        (direction === 'left' && itemPos > 0) ||
+        (direction === 'right' && itemPos<list.items.length-1)
+      )
+      if (withinListNode) {
+        itemPos = (direction === 'left') ? itemPos-1 : itemPos
+        let target = list.getItemAt(itemPos)
+        let targetLength = target.getLength()
+        this._mergeListItems(tx, list, itemPos)
+        tx.setSelection({
+          type: 'property',
+          // ATTENTION: we need to use a list relative path here
+          // such as ['list1', 'items', 'list-item1', 'content']
+          path: list.getItemPath(target.id),
+          startOffset: targetLength,
+          containerId: container.id
+        })
         return
       }
     }
@@ -1178,7 +1257,7 @@ class Editing {
     }
   }
 
-  _mergeListItems(tx, list, itemPos, container) {
+  _mergeListItems(tx, list, itemPos) {
     let target = list.getItemAt(itemPos)
     let targetPath = target.getTextPath()
     let targetLength = target.getLength()
@@ -1191,14 +1270,6 @@ class Editing {
     // transfer annotations
     annotationHelpers.transferAnnotations(tx, sourcePath, 0, targetPath, targetLength)
     tx.delete(source.id)
-    tx.setSelection({
-      type: 'property',
-      // ATTENTION: we need to use a list relative path here
-      // such as ['list1', 'items', 'list-item1', 'content']
-      path: list.getItemPath(target.id),
-      startOffset: targetLength,
-      containerId: container.id
-    })
   }
 }
 

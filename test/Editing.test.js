@@ -704,7 +704,7 @@ test.UI("[D20-4]: Deleting a range starting in the middle of a TextNode and endi
   t.end()
 })
 
-test.UI("[D20-4]: Deleting a range starting in the middle of a TextNode and ending in the middle of a ListItem", function(t) {
+test.UI("[D20-5]: Deleting a range starting in the middle of a TextNode and ending in the middle of a ListItem", function(t) {
   let { editorSession, doc } = setupEditor(t, _p1, _block1, _block2, _l1)
   let p1 = doc.get('p1')
   let l1 = doc.get('l1')
@@ -726,6 +726,81 @@ test.UI("[D20-4]: Deleting a range starting in the middle of a TextNode and endi
   t.equal(l1.items.length, 1, 'The list should have only 1 item left')
   t.ok(sel.isCollapsed(), 'Selection should be collapsed')
   t.deepEqual(sel.start.path, p1.getTextPath(), '... on p1')
+  t.equal(sel.start.offset, 3, '... at correct position')
+  t.end()
+})
+
+test.UI("[D20-6]: Deleting a range starting in the middle of a ListItem and ending in the middle of a TextNode", function(t) {
+  let { editorSession, doc } = setupEditor(t, _l1, _block1, _block2, _p1)
+  let p1 = doc.get('p1')
+  let l1 = doc.get('l1')
+  editorSession.setSelection({
+    type: 'container',
+    startPath: l1.getItemPath('l1-2'),
+    startOffset: 3,
+    endPath: p1.getTextPath(),
+    endOffset: 3,
+    containerId: 'body'
+  })
+  editorSession.transaction((tx) => {
+    tx.deleteSelection()
+  })
+  let sel = editorSession.getSelection()
+  let body = doc.get('body')
+  t.equal(body.nodes.length, 1, 'There should be 1 node left')
+  t.equal(l1.items.length, 2, 'The list should have 2 items')
+  let li2 = l1.getItemAt(1)
+  t.equal(li2.getText(), LI2_TEXT.slice(0,3)+P1_TEXT.slice(3), 'The second item should container merged content')
+  t.ok(sel.isCollapsed(), 'Selection should be collapsed')
+  t.deepEqual(sel.start.path, l1.getItemPath(li2.id), '... on second list item')
+  t.equal(sel.start.offset, 3, '... at correct position')
+  t.end()
+})
+
+test.UI("[D20-7]: Deleting a range within a ListItem", function(t) {
+  let { editorSession, doc } = setupEditor(t, _l1)
+  let l1 = doc.get('l1')
+  editorSession.setSelection({
+    type: 'container',
+    startPath: l1.getItemPath('l1-2'),
+    startOffset: 3,
+    endPath: l1.getItemPath('l1-2'),
+    endOffset: 6,
+    containerId: 'body'
+  })
+  editorSession.transaction((tx) => {
+    tx.deleteSelection()
+  })
+  let sel = editorSession.getSelection()
+  t.equal(l1.items.length, 2, 'The list should have 2 items')
+  let li2 = l1.getItemAt(1)
+  t.equal(li2.getText(), LI2_TEXT.slice(0,3)+LI2_TEXT.slice(6), 'The second item should be changed')
+  t.ok(sel.isCollapsed(), 'Selection should be collapsed')
+  t.deepEqual(sel.start.path, l1.getItemPath(li2.id), '... on second list item')
+  t.equal(sel.start.offset, 3, '... at correct position')
+  t.end()
+})
+
+test.UI("[D20-7]: Deleting a range across two ListItems within the same List", function(t) {
+  let { editorSession, doc } = setupEditor(t, _l1)
+  let l1 = doc.get('l1')
+  editorSession.setSelection({
+    type: 'container',
+    startPath: l1.getItemPath('l1-1'),
+    startOffset: 3,
+    endPath: l1.getItemPath('l1-2'),
+    endOffset: 3,
+    containerId: 'body'
+  })
+  editorSession.transaction((tx) => {
+    tx.deleteSelection()
+  })
+  let sel = editorSession.getSelection()
+  t.equal(l1.items.length, 1, 'The list should have 1 item')
+  let li1 = l1.getItemAt(0)
+  t.equal(li1.getText(), LI1_TEXT.slice(0,3)+LI2_TEXT.slice(3), 'The items should be merged')
+  t.ok(sel.isCollapsed(), 'Selection should be collapsed')
+  t.deepEqual(sel.start.path, l1.getItemPath(li1.id), '... on the list item')
   t.equal(sel.start.offset, 3, '... at correct position')
   t.end()
 })
