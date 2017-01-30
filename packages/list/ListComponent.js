@@ -25,6 +25,8 @@ class ListComponent extends Component {
           node: item,
           tagName: 'li'
         })
+        // setting ref to preserve items when rerendering
+        .ref(item.id)
       }
     })
     return el

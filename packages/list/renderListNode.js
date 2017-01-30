@@ -21,8 +21,6 @@ export default function renderListNode(node, rootEl, createElement) {
     console.assert(item.level === stack.length, 'item.level should now be the same as stack.length')
     last(stack).append(
       createElement(item)
-      // setting ref to preserve items when rerendering
-      .ref(item.id)
     )
   }
   for(let j=stack.length; j>1;j--) {
