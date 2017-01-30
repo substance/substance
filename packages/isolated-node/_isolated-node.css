@@ -1,4 +1,7 @@
-.sc-isolated-node {}
+.sc-isolated-node {
+  /* HACK: we add some default margin for all isolated nodes */
+  margin-bottom: 20px;
+}
 .sc-isolated-node > .se-container {
   display: inline-block;
   position: relative;
