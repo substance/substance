@@ -1051,6 +1051,97 @@ test.UI("[L7-2]: Copying a paragraph and a ListItem", function(t) {
   t.end()
 })
 
+test.UI("[L8-1]: Turning a paragraph into a List", function(t) {
+  let { doc, editorSession} = setupEditor(t, _p1)
+  editorSession.setSelection({
+    type: 'property',
+    path: ['p1', 'content'],
+    startOffset: 3,
+    containerId: 'body'
+  })
+  editorSession.transaction((tx)=>{
+    tx.toggleList({ ordered: false})
+  })
+  let body = doc.get('body')
+  t.equal(body.getLength(), 1, 'There should be 1 node')
+  let l = body.getNodeAt(0)
+  t.equal(l.type, 'list', '.. a list')
+  t.equal(l.ordered, false, '.. unordered')
+  t.equal(l.getLength(), 1, '.. with one item')
+  let li = l.getItemAt(0)
+  t.equal(li.getText(), P1_TEXT, '.. with text of p1')
+  t.end()
+})
+
+test.UI("[L8-2]: Turning first list-item into a paragraph", function(t) {
+  let { doc, editorSession} = setupEditor(t, _l1)
+  editorSession.setSelection({
+    type: 'property',
+    path: ['l1', 'items', 'l1-1', 'content'],
+    startOffset: 3,
+    containerId: 'body'
+  })
+  editorSession.transaction((tx)=>{
+    tx.toggleList()
+  })
+  let body = doc.get('body')
+  t.equal(body.getLength(), 2, 'There should be 2 nodes')
+  let p = body.getNodeAt(0)
+  let l = body.getNodeAt(1)
+  t.equal(p.type, 'paragraph', '.. first should be paragraph')
+  t.equal(p.getText(), LI1_TEXT, '.. with text of first list item')
+  t.equal(l.type, 'list', '.. second should be alist')
+  t.equal(l.getLength(), 1, '.. with one item')
+  t.end()
+})
+
+test.UI("[L8-2]: Turning last list-item into a paragraph", function(t) {
+  let { doc, editorSession} = setupEditor(t, _l1)
+  editorSession.setSelection({
+    type: 'property',
+    path: ['l1', 'items', 'l1-2', 'content'],
+    startOffset: 3,
+    containerId: 'body'
+  })
+  editorSession.transaction((tx)=>{
+    tx.toggleList()
+  })
+  let body = doc.get('body')
+  t.equal(body.getLength(), 2, 'There should be 2 nodes')
+  let l = body.getNodeAt(0)
+  let p = body.getNodeAt(1)
+  t.equal(l.type, 'list', '.. first should be alist')
+  t.equal(l.getLength(), 1, '.. with one item')
+  t.equal(p.type, 'paragraph', '.. second should be paragraph')
+  t.equal(p.getText(), LI2_TEXT, '.. with text of second list item')
+  t.end()
+})
+
+test.UI("[L8-2]: Turning a middle list-item into a paragraph splitting the list", function(t) {
+  let { doc, editorSession} = setupEditor(t, _l1, _li3)
+  editorSession.setSelection({
+    type: 'property',
+    path: ['l1', 'items', 'l1-3', 'content'],
+    startOffset: 3,
+    containerId: 'body'
+  })
+  editorSession.transaction((tx)=>{
+    tx.toggleList()
+  })
+  let body = doc.get('body')
+  t.equal(body.getLength(), 3, 'There should be 3 nodes')
+  let l = body.getNodeAt(0)
+  let p = body.getNodeAt(1)
+  let l2 = body.getNodeAt(2)
+  t.equal(l.type, 'list', '.. first should be alist')
+  t.equal(l.getLength(), 1, '.. with one item')
+  t.equal(p.type, 'paragraph', '.. second should be paragraph')
+  t.equal(p.getText(), LI3_TEXT, '.. with text of second list item')
+  t.equal(l2.type, 'list', '.. last should be a list again')
+  t.equal(l2.getLength(), 1, '.. with one item')
+  t.end()
+})
+
 test.UI("[L9-1]: Indenting a ListItem", function(t) {
   let { doc, editorSession } = setupEditor(t, _l1)
   editorSession.setSelection({
@@ -1184,6 +1275,7 @@ function _s1(doc) {
 
 const LI1_TEXT = 'l1-1:abcdef'
 const LI2_TEXT = 'l1-2:0123456'
+const LI3_TEXT = 'l1-3:ghij'
 
 // list with two items
 function _l1(doc, body) {
@@ -1203,6 +1295,16 @@ function _l1(doc, body) {
     items: ['l1-1', 'l1-2']
   })
   body.show('l1')
+}
+
+function _li3(doc) {
+  doc.create({
+    type: 'list-item',
+    id: 'l1-3',
+    content: LI3_TEXT
+  })
+  let l1 = doc.get('l1')
+  l1.insertItemAt(1, 'l1-3')
 }
 
 function _l1_empty(doc) {

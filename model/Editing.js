@@ -643,6 +643,68 @@ class Editing {
     return newNode
   }
 
+  toggleList(tx, params) {
+    let sel = tx.selection
+    let container = tx.get(sel.containerId)
+    // not possible without container
+    if (!container) return
+    if (sel.isPropertySelection()) {
+      let nodeId = sel.start.path[0]
+      let node = tx.get(nodeId)
+      let nodePos = container.getPosition(node.id, 'strict')
+      if (node.isText()) {
+        tx.update([container.id, 'nodes'], { type: 'delete', pos: nodePos })
+        // TODO: what if this should create a different list-item type?
+        let newItem = tx.create({
+          type: 'list-item',
+          content: node.getText(),
+        })
+        annotationHelpers.transferAnnotations(tx, node.getTextPath(), 0, newItem.getTextPath(), 0)
+        let newList = tx.create(Object.assign({
+          type: 'list',
+          items: [newItem.id]
+        }, params))
+        tx.delete(node.id)
+        tx.update([container.id, 'nodes'], { type: 'insert', pos: nodePos, value: newList.id })
+      } else if (node.isList()) {
+        let itemId = sel.start.path[2]
+        let itemPos = node.getItemPosition(itemId)
+        let item = node.getItemAt(itemPos)
+        let newTextNode = tx.createDefaultTextNode(item.getText())
+        annotationHelpers.transferAnnotations(tx, item.getTextPath(), 0, newTextNode.getTextPath(), 0)
+        // take the item out of the list
+        node.removeItemAt(itemPos)
+        if (node.getLength() === 0) {
+          tx.update([container.id, 'nodes'], { type: 'delete', pos: nodePos })
+          tx.delete(node.id)
+          tx.update([container.id, 'nodes'], { type: 'insert', pos: nodePos, value: newTextNode.id })
+        } else if (itemPos === 0) {
+          tx.update([container.id, 'nodes'], { type: 'insert', pos: nodePos, value: newTextNode.id })
+        } else if (node.getLength() <= itemPos){
+          tx.update([container.id, 'nodes'], { type: 'insert', pos: nodePos+1, value: newTextNode.id })
+        } else {
+          //split the
+          let tail = []
+          const items = node.items.slice()
+          const L = items.length
+          for (let i = L-1; i >= itemPos; i--) {
+            tail.unshift(items[i])
+            node.removeItemAt(i)
+          }
+          let newList = tx.create({
+            type: 'list',
+            items: tail,
+            ordered: node.ordered
+          })
+          tx.update([container.id, 'nodes'], { type: 'insert', pos: nodePos+1, value: newTextNode.id })
+          tx.update([container.id, 'nodes'], { type: 'insert', pos: nodePos+2, value: newList.id })
+        }
+      }
+    } else if (sel.isContainerSelection()) {
+      console.error('TODO: support toggleList with ContainerSelection')
+    }
+  }
+
   indent(tx) {
     let sel = tx.selection
     if (sel.isPropertySelection()) {
