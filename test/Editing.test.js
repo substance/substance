@@ -1,5 +1,6 @@
 /* eslint-disable no-use-before-define */
 import { module } from 'substance-test'
+import EditingInterface from '../model/EditingInterface'
 import setupEditor from './fixture/setupEditor'
 
 const test = module('Editing')
@@ -1001,6 +1002,52 @@ test.UI("[L6-3]: Merging a List into previous List using DELETE", function(t) {
   t.ok(sel.isCollapsed(), 'The selection should be collapsed')
   t.deepEqual(sel.start.path, ['l1', 'items', 'l1-2', 'content'], '... on the same item')
   t.equal(sel.start.offset, LI2_TEXT.length, '... at the same position')
+  t.end()
+})
+
+test.UI("[L7-1]: Copying two ListItems", function(t) {
+  let { doc } = setupEditor(t, _l1)
+  let editor = new EditingInterface(doc)
+  editor.setSelection({
+    type: 'container',
+    startPath: ['l1', 'items', 'l1-1', 'content'],
+    startOffset: 3,
+    endPath: ['l1', 'items', 'l1-2', 'content'],
+    endOffset: 3,
+    containerId: 'body'
+  })
+  let copy = editor.copySelection()
+  let content = copy.getContainer()
+  t.equal(content.getLength(), 1, 'There should be one node')
+  let l1 = copy.get('l1')
+  t.notNil(l1, 'l1 should exist')
+  t.equal(l1.getLength(), 2, '.. having 2 items')
+  let li1 = l1.getItemAt(0)
+  let li2 = l1.getItemAt(1)
+  t.equal(li1.getText(), LI1_TEXT.slice(3), 'The first item should have correct content')
+  t.equal(li2.getText(), LI2_TEXT.slice(0, 3), 'The second item should have correct content')
+  t.end()
+})
+
+test.UI("[L7-2]: Copying a paragraph and a ListItem", function(t) {
+  let { doc } = setupEditor(t, _p1, _l1)
+  let editor = new EditingInterface(doc)
+  editor.setSelection({
+    type: 'container',
+    startPath: ['p1', 'content'],
+    startOffset: 3,
+    endPath: ['l1', 'items', 'l1-1', 'content'],
+    endOffset: 3,
+    containerId: 'body'
+  })
+  let copy = editor.copySelection()
+  let content = copy.getContainer()
+  t.equal(content.getLength(), 2, 'There should be 2 nodes')
+  let l1 = copy.get('l1')
+  t.notNil(l1, 'l1 should exist')
+  t.equal(l1.getLength(), 1, '.. having 1 item')
+  let li1 = l1.getItemAt(0)
+  t.equal(li1.getText(), LI1_TEXT.slice(0, 3), 'The first item should have correct content')
   t.end()
 })
 
