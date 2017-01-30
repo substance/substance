@@ -284,6 +284,9 @@ function deleteTextRange(doc, start, end) {
 }
 
 function deleteListRange(doc, list, start, end) {
+  if (doc !== list.getDocument()) {
+    list = doc.get(list.id)
+  }
   if (!start) {
     start = {
       path: list.getItemPath(list.items[0]),
@@ -346,6 +349,9 @@ function deleteListRange(doc, list, start, end) {
 }
 
 function mergeListItems(doc, list, itemPos) {
+  if (doc !== list.getDocument()) {
+    list = doc.get(list.id)
+  }
   let target = list.getItemAt(itemPos)
   let targetPath = target.getTextPath()
   let targetLength = target.getLength()

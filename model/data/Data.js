@@ -242,7 +242,6 @@ class Data extends EventEmitter {
     @returns {any} The value before applying the update.
   */
   update(path, diff) {
-    // TODO: do we really want this incremental implementation here?
     var realPath = this.getRealPath(path)
     if (!realPath) {
       console.error('Could not resolve path', path)

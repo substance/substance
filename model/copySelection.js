@@ -72,8 +72,6 @@ function _copyContainerSelection(tx, sel) {
 
   let start = sel.start
   let end = sel.end
-  let startNode = tx.get(start.getNodeId())
-  let endNode = tx.get(end.getNodeId())
 
   let skippedFirst = false
   let skippedLast = false
@@ -100,6 +98,8 @@ function _copyContainerSelection(tx, sel) {
       container.show(id)
     }
   }
+  let startNode = snippet.get(start.getNodeId())
+  let endNode = snippet.get(end.getNodeId())
   if (!skippedFirst) {
     if (startNode.isText()) {
       documentHelpers.deleteTextRange(snippet, null, start)
