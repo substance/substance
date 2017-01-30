@@ -31,7 +31,7 @@ function htmlExporterTests(memory) {
     let el = exporter.convertNode(p1)
     let actual = el.outerHTML
     let expected = '<p data-id="p1">' + CONTENT + '</p>'
-    t.equal(actual, expected)
+    t.equal(actual, expected, 'Exported HTML should be correct')
     t.end()
   })
 
@@ -52,7 +52,7 @@ function htmlExporterTests(memory) {
     let el = exporter.convertNode(p1)
     let actual = el.outerHTML
     let expected = '<p data-id="p1">0123<strong data-id="s1">456</strong>789</p>'
-    t.equal(actual, expected)
+    t.equal(actual, expected, 'Exported HTML should be correct')
     t.end()
   })
 
@@ -62,7 +62,7 @@ function htmlExporterTests(memory) {
     let el = exporter.convertNode(h1)
     let actual = el.outerHTML
     let expected = '<h1 data-id="h1">' + CONTENT + '</h1>'
-    t.equal(actual, expected)
+    t.equal(actual, expected, 'Exported HTML should be correct')
     t.end()
   })
 
@@ -72,7 +72,7 @@ function htmlExporterTests(memory) {
     let el = exporter.convertNode(h2)
     let actual = el.outerHTML
     let expected = '<h2 data-id="h2">' + CONTENT + '</h2>'
-    t.equal(actual, expected)
+    t.equal(actual, expected, 'Exported HTML should be correct')
     t.end()
   })
 
@@ -86,7 +86,7 @@ function htmlExporterTests(memory) {
       '<p data-id="p3">' + CONTENT + '</p>',
       '<p data-id="p4">' + CONTENT + '</p>'
     ].join('')
-    t.equal(actual, expected)
+    t.equal(actual, expected, 'Exported HTML should be correct')
     t.end()
   })
 
@@ -108,14 +108,53 @@ function htmlExporterTests(memory) {
     })
     let el = exporter.convertNode(p1)
     let childNodes = el.getChildNodes()
-    t.equal(childNodes.length, 3)
-    t.equal(childNodes[0].textContent, "0123")
-    t.equal(childNodes[1].textContent, "456")
-    t.equal(childNodes[2].textContent, "789")
+    t.equal(childNodes.length, 3, 'Exported paragraph should have 3 child nodes')
+    t.equal(childNodes[0].textContent, "0123", '.. 1. should have correct text')
+    t.equal(childNodes[1].textContent, "456", '.. 2. should have correct text')
+    t.equal(childNodes[2].textContent, "789", '.. 3. should have correct text')
     let a = childNodes[1]
-    t.equal(a.attr('data-id'), 'l1')
-    t.equal(a.attr('href'), 'foo')
-    t.equal(a.attr('title'), 'bar')
+    t.equal(a.attr('data-id'), 'l1', '.. <a> should have data-id set')
+    t.equal(a.attr('href'), 'foo', '.. and correct href attribute')
+    t.equal(a.attr('title'), 'bar', '.. and correct title attribute')
+    t.end()
+  })
+
+  test("Exporting an unordered list", function(t) {
+    let { doc, exporter } = setup(t)
+    let l1 = _l1(doc)
+    let el = exporter.convertNode(l1)
+    let childNodes = el.getChildNodes()
+    t.equal(el.tagName, 'ul', 'Exported element should be a <ul>')
+    t.equal(el.attr('data-id'), 'l1', '.. with correct id')
+    t.equal(childNodes.length, 2, '.. and two child nodes')
+    t.equal(childNodes[0].tagName, "li", '.. a <li>')
+    t.equal(childNodes[0].textContent, 'Foo', ".. with content 'Foo'")
+    t.equal(childNodes[1].tagName, "li", '.. and a <li>')
+    t.equal(childNodes[1].textContent, 'Bar', ".. with content 'Bar'")
+    t.end()
+  })
+
+  test("Exporting an ordered list", function(t) {
+    let { doc, exporter } = setup(t)
+    let ol = doc.create({
+      type: 'list',
+      id: 'ol1',
+      ordered: true
+    })
+    let el = exporter.convertNode(ol)
+    t.equal(el.tagName, 'ol', 'Exported element should be a <ol>')
+    t.end()
+  })
+
+  test("Exporting a nested list", function(t) {
+    let { doc, exporter } = setup(t)
+    let l = _l2(doc)
+    let el = exporter.convertNode(l)
+    let items = el.findAll('li')
+    let nestedList = el.find('ul')
+    t.equal(items.length, 4, 'Exported should contain 4 list items')
+    t.notNil(nestedList, '.. and a nested list')
+    t.equal(nestedList.childNodes.length, 2, '.. which has 2 child nodes')
     t.end()
   })
 
@@ -130,4 +169,64 @@ function htmlExporterTests(memory) {
     return { exporter, doc }
   }
 
+}
+
+function _li1(doc) {
+  doc.create({
+    type: 'list-item',
+    id: 'li1',
+    content: 'Foo',
+    level: 1
+  })
+}
+
+function _li2(doc) {
+  doc.create({
+    type: 'list-item',
+    id: 'li2',
+    content: 'Bar',
+    level: 1
+  })
+}
+
+function _l1(doc) {
+  _li1(doc)
+  _li2(doc)
+  return doc.create({
+    type: 'list',
+    id: 'l1',
+    items: ['li1', 'li2'],
+    ordered: false
+  })
+}
+
+function _li3(doc) {
+  doc.create({
+    type: 'list-item',
+    id: 'li3',
+    content: 'Bla',
+    level: 2
+  })
+}
+
+function _li4(doc) {
+  doc.create({
+    type: 'list-item',
+    id: 'li4',
+    content: 'Blupp',
+    level: 2
+  })
+}
+
+function _l2(doc) {
+  _li1(doc)
+  _li2(doc)
+  _li3(doc)
+  _li4(doc)
+  return doc.create({
+    type: 'list',
+    id: 'l1',
+    items: ['li1', 'li3', 'li4', 'li2'],
+    ordered: false
+  })
 }
