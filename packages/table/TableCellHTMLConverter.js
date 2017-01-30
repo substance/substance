@@ -15,7 +15,14 @@ export default {
     }
   },
 
-  export: function(/*node, el, converter*/) {
-    console.error('TableCellHTMLConverter.export is not implemented')
+  export: function(node, el, converter) {
+    el.append(converter.annotatedText([node.id, 'content']))
+    if (node.rowspan > 0) {
+      el.attr('rowspan', node.rowspan)
+    }
+    if (node.colspan > 0) {
+      el.attr('colspan', node.colspan)
+    }
+    return el
   }
 }
