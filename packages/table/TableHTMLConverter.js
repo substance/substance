@@ -1,3 +1,5 @@
+import times from '../../util/times'
+
 export default {
 
   type: 'table',
@@ -14,29 +16,25 @@ export default {
     let colCount = 0
     let cells = []
     let rowspans = [] // we remember active rowspans here
-
     for (let i = 0; i < trs.length; i++) {
       let tds = trs[i].getChildren()
       let row = []
       colCount = Math.max(tds.length, colCount)
       for (let j = 0; j < tds.length; j++) {
         let td = tds[j]
-
         // if there is an open rowspan
         if (rowspans[j] > 1) {
           row.push(null)
           rowspans[j] -= 1 // count down until exhausted
         }
-
         let tableCell = converter.convertElement(td)
         row.push(tableCell.id)
         if (tableCell.rowspan > 1) {
           rowspans[j] = tableCell.rowspan
         }
-
-        // Add null values for colspans
         if (tableCell.colspan > 1) {
-          Array(tableCell.colspan - 1).forEach(() => {
+          // Add null values for colspans
+          times(tableCell.colspan - 1, () => {
             row.push(null)
           })
         }
@@ -46,7 +44,22 @@ export default {
     node.cells = cells
   },
 
-  export: function(/*node, el, converter*/) {
-    console.error('TableHTMLConverter.export is not implemented')
+  export: function(node, el, converter) {
+    let $$ = converter.$$
+    let rowCount = node.getRowCount()
+    let colCount = node.getColCount()
+    for (let i = 0; i < rowCount; i++) {
+      let rowEl = $$('tr')
+      for (let j = 0; j < colCount; j++) {
+        let cellId = node.cells[i][j]
+        // Merged cells (cellId is null) are skipped
+        if (cellId) {
+          let cellEl = converter.convertNode(cellId)
+          rowEl.append(cellEl)
+        }
+      }
+      el.append(rowEl)
+    }
+    return el
   }
 }
