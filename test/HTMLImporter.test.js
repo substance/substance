@@ -60,3 +60,52 @@ test("Importing h2", function(t) {
   }, 'heading should have been imported correctly')
   t.end()
 })
+
+test("Importing an unordered list", function(t) {
+  let importer = new TestHTMLImporter()
+  let html = '<ul data-id="l1"><li>Foo</li><li>Bar</li></ul>'
+  let el = DOMElement.parseHTML(html)
+  let node = importer.convertElement(el)
+  t.equal(node.type, 'list', 'Imported node should be a list')
+  t.equal(node.id, 'l1', 'id should be correct')
+  t.equal(node.ordered, false, 'node should unordered')
+  t.equal(node.items.length, 2, 'it should have 2 items')
+  let li1 = node.getItemAt(0)
+  let li2 = node.getItemAt(1)
+  t.equal(li1.getText(), 'Foo', 'First item should have correct text')
+  t.equal(li2.getText(), 'Bar', 'Second item should have correct text')
+  t.end()
+})
+
+test("Importing an ordered list", function(t) {
+  let importer = new TestHTMLImporter()
+  let html = '<ol data-id="l1"></ol>'
+  let el = DOMElement.parseHTML(html)
+  let node = importer.convertElement(el)
+  t.equal(node.type, 'list', 'Imported node should be a list')
+  t.equal(node.id, 'l1', 'id should be correct')
+  t.equal(node.ordered, true, 'node should ordered')
+  t.end()
+})
+
+test("Importing a nested list", function(t) {
+  let importer = new TestHTMLImporter()
+  let html = '<ul data-id="l1"><li>Foo</li><ul><li>Bla</li><li>Blupp</li></ul><li>Bar</li></ul>'
+  let el = DOMElement.parseHTML(html)
+  let node = importer.convertElement(el)
+  t.equal(node.items.length, 4, 'Imported node should have 4 items')
+  let levels = node.getItems().map(item=>item.level)
+  t.equal(String(levels), String([1,2,2,1]), 'Node levels should be correct')
+  t.end()
+})
+
+test("Importing a nested list (bad style)", function(t) {
+  let importer = new TestHTMLImporter()
+  let html = '<ul data-id="l1"><li>Foo<ul><li>Bla</li><li>Blupp</li></ul></li><li>Bar</li></ul>'
+  let el = DOMElement.parseHTML(html)
+  let node = importer.convertElement(el)
+  t.equal(node.items.length, 4, 'Imported node should have 4 items')
+  let levels = node.getItems().map(item=>item.level)
+  t.equal(String(levels), String([1,2,2,1]), 'Node levels should be correct')
+  t.end()
+})

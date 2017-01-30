@@ -4,12 +4,15 @@ import HeadingHTMLConverter from '../../packages/heading/HeadingHTMLConverter'
 import EmphasisHTMLConverter from '../../packages/emphasis/EmphasisHTMLConverter'
 import StrongHTMLConverter from '../../packages/strong/StrongHTMLConverter'
 import LinkHTMLConverter from '../../packages/link/LinkHTMLConverter'
+import ListHTMLConverter from '../../packages/list/ListHTMLConverter'
+import ListItemHTMLConverter from '../../packages/list/ListItemHTMLConverter'
 import schema from './TestSchema'
 import TestArticle from './TestArticle'
 
 const CONVERTERS = [
   ParagraphHTMLConverter, HeadingHTMLConverter, EmphasisHTMLConverter,
-  StrongHTMLConverter, LinkHTMLConverter
+  StrongHTMLConverter, LinkHTMLConverter,
+  ListHTMLConverter, ListItemHTMLConverter
 ]
 
 class TestHTMLImporter extends HTMLImporter {
@@ -20,6 +23,8 @@ class TestHTMLImporter extends HTMLImporter {
       converters: CONVERTERS,
       DocumentClass: TestArticle
     })
+
+    this.createDocument()
   }
 
   convertDocument(documentEl) {
@@ -28,7 +33,6 @@ class TestHTMLImporter extends HTMLImporter {
   }
 
 }
-
 
 TestHTMLImporter.converters = CONVERTERS
 

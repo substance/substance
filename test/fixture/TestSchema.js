@@ -6,6 +6,8 @@ import Strong from '../../packages/strong/Strong'
 import Link from '../../packages/link/Link'
 import ImageNode from '../../packages/image/ImageNode'
 import Codeblock from '../../packages/codeblock/Codeblock'
+import List from '../../packages/list/ListNode'
+import ListItem from '../../packages/list/ListItemNode'
 import InlineWrapper from '../../packages/inline-wrapper/InlineWrapper'
 import MetaNode from './TestMetaNode'
 import TestNode from './TestNode'
@@ -27,6 +29,7 @@ schema.addNodes([
   Link,
   ImageNode,
   Codeblock,
+  List, ListItem,
   TestNode,
   TestContainerAnnotation,
   TestStructuredNode,
