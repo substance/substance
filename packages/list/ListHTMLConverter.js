@@ -1,5 +1,9 @@
+import isString from '../../util/isString'
+import renderListNode from './renderListNode'
+import getListTagName from './getListTagName'
+
 /*
- * HTML converter for Lists.
+  HTML converter for Lists.
  */
 export default {
 
@@ -10,22 +14,39 @@ export default {
   },
 
   import: function(el, node, converter) {
+    let self = this
     if (el.is('ol')) {
       node.ordered = true
     }
     let itemEls = el.findAll('li')
     itemEls.forEach(function(li) {
       let listItem = converter.convertElement(li)
+      listItem.level = _getLevel(li)
       node.items.push(listItem.id)
     })
+    function _getLevel(li) {
+      let _el = li
+      let level = 1
+      while(_el) {
+        if (_el.parentNode === el) return level
+        _el = _el.parentNode
+        if (self.matchElement(_el)) level++
+      }
+    }
   },
 
   export: function(node, el, converter) {
     let $$ = converter.$$
-    el.tagName = node.ordered ? 'ol' : 'ul'
-    node.getItems().forEach(function(item) {
-      el.append($$('li').append(converter.annotatedText(item.getTextPath())))
+    el.tagName = getListTagName(node)
+    renderListNode(node, el, (arg)=>{
+      if (isString(arg)) {
+        return $$(arg)
+      } else {
+        let item = arg
+        return $$('li').append(converter.annotatedText(item.getTextPath()))
+      }
     })
     return el
   }
+
 }
