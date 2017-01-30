@@ -1,6 +1,8 @@
 import Table from './Table'
 import TableCell from './TableCell'
 import TableComponent from './TableComponent'
+import TableHTMLConverter from './TableHTMLConverter'
+import TableCellHTMLConverter from './TableCellHTMLConverter'
 
 export default {
   name: 'table',
@@ -8,5 +10,9 @@ export default {
     config.addNode(Table)
     config.addNode(TableCell)
     config.addComponent('table', TableComponent)
+    config.addConverter('html', TableHTMLConverter)
+    config.addConverter('html', TableCellHTMLConverter)
+    config.addConverter('xml', TableHTMLConverter)
+    config.addConverter('xml', TableCellHTMLConverter)
   }
 }
