@@ -661,6 +661,23 @@ class Editing {
     }
   }
 
+  dedent(tx) {
+    let sel = tx.selection
+    if (sel.isPropertySelection()) {
+      let nodeId = sel.start.getNodeId()
+      let node = tx.get(nodeId)
+      if (node.isList()) {
+        let itemId = sel.start.path[2]
+        let item = tx.get(itemId)
+        if (item && item.level>1) {
+          tx.set([node.id, 'items', itemId, 'level'], item.level-1)
+        }
+      }
+    } else if (sel.isContainerSelection()) {
+      // TODO support ContainerSelection
+    }
+  }
+
   /*
     <-->: anno
     |--|: area of change

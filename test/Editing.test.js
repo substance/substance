@@ -1067,6 +1067,22 @@ test.UI("[L9-1]: Indenting a ListItem", function(t) {
   t.end()
 })
 
+test.UI("[L9-1]: Dedenting a ListItem", function(t) {
+  let { doc, editorSession } = setupEditor(t, _l1, _li1plus)
+  editorSession.setSelection({
+    type: 'property',
+    path: ['l1', 'items', 'l1-1', 'content'],
+    startOffset: 3,
+    containerId: 'body'
+  })
+  editorSession.transaction((tx) => {
+    tx.dedent()
+  })
+  let li1 = doc.get('l1-1')
+  t.equal(li1.level, 1, 'Indentation level should have decreased')
+  t.end()
+})
+
 // TODO: add specification and test cases for tx.annotate()
 
 // test("Create property annotation for a given property selection", function(t) {
@@ -1197,6 +1213,10 @@ function _l1_empty(doc) {
   })
   let l1 = doc.get('l1')
   l1.insertItemAt(1, 'l1-empty')
+}
+
+function _li1plus(doc) {
+  doc.set(['l1-1', 'level'], 2)
 }
 
 const LI21_TEXT = 'l2-1:abcdef'

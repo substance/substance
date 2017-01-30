@@ -147,6 +147,9 @@ class EditingInterface {
     this._impl.indent(this)
   }
 
+  dedent() {
+    this._impl.dedent(this)
+  }
 
   /* Legacy low-level API */
 
