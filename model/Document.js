@@ -568,6 +568,7 @@ class Document extends EventEmitter {
 
   // NOTE: this is still here because DOMSelection is using it
   _createSelectionFromRange(range) {
+    if (!range) return Selection.nullSelection
     let inOneNode = isEqual(range.start.path, range.end.path)
     if (inOneNode) {
       if (range.start.isNodeCoordinate()) {
