@@ -64,31 +64,8 @@ test("Copying a container selection", function(t) {
   t.end()
 })
 
-// FIXME: broken since introduction of file nodes
-// test("Copying a node without editable properties", function(t) {
-//   var doc = fixture(simple)
-//   doc.create({
-//     type: 'image',
-//     id: 'i1',
-//     src: 'foo'
-//   })
-//   doc.get('body').show('i1', 1)
-//   var sel = doc.createSelection({
-//     type: 'container',
-//     containerId: 'body',
-//     startPath: ['p1', 'content'],
-//     startOffset: 4,
-//     endPath: ['p2', 'content'],
-//     endOffset: 9
-//   })
-//   var copy = copySelection(doc, sel)
-//   var img = copy.get('i1')
-//   t.notNil(img, 'The image should be copied.')
-//   t.end()
-// })
-
 test("Copying a paragraph", function(t) {
-  var doc = fixture(simple)
+  let doc = fixture(simple)
   var sel = doc.createSelection({
     type: 'container',
     containerId: 'body',

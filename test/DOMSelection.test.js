@@ -445,6 +445,10 @@ class StubDoc {
     return Document.prototype._createSelectionFromRange.apply(this, arguments)
   }
 
+  _normalizeCoor() {
+    return Document.prototype._normalizeCoor.apply(this, arguments)
+  }
+
   on() {}
 
   off() {}

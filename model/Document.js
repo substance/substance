@@ -4,6 +4,7 @@ import isNil from '../util/isNil'
 import isPlainObject from '../util/isPlainObject'
 import isString from '../util/isString'
 import forEach from '../util/forEach'
+import last from '../util/last'
 import uuid from '../util/uuid'
 import EventEmitter from '../util/EventEmitter'
 import PropertyIndex from './data/PropertyIndex'
@@ -406,8 +407,8 @@ class Document extends EventEmitter {
         case 'container': {
           let container = this.get(data.containerId, 'strict')
           if (!container) throw new Error('Can not create ContainerSelection: container "'+data.containerId+'" does not exist.')
-          let start = new Coordinate(data.startPath, data.startOffset)
-          let end = new Coordinate(data.endPath, data.endOffset)
+          let start = this._normalizeCoor({ path: data.startPath, offset: data.startOffset})
+          let end = this._normalizeCoor({ path: data.endPath, offset: data.endOffset})
           let startAddress = container.getAddress(start)
           let endAddress = container.getAddress(end)
           if (!startAddress) {
@@ -596,6 +597,26 @@ class Document extends EventEmitter {
         surfaceId: range.surfaceId
       })
     }
+  }
+
+  _normalizeCoor({ path, offset }) {
+    // NOTE: normalizing so that a node coordinate is used only for 'isolated nodes'
+    if (path.length === 1) {
+      let node = this.get(path[0])
+      if (node.isText()) {
+        // console.warn("DEPRECATED: don't use node coordinates for TextNodes. Use selectionHelpers instead to set cursor at first or last position conveniently.")
+        return new Coordinate(node.getTextPath(), offset === 0 ? 0 : node.getLength())
+      } else if (node.isList()) {
+        // console.warn("DEPRECATED: don't use node coordinates for ListNodes. Use selectionHelpers instead to set cursor at first or last position conveniently.")
+        if (offset === 0) {
+          return new Coordinate(node.getItemPath(node.items[0]), 0)
+        } else {
+          let item = this.get(last(node.items))
+          return new Coordinate(node.getItemPath(item.id), item.getLength())
+        }
+      }
+    }
+    return new Coordinate(path, offset)
   }
 
 }
