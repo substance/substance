@@ -1,3 +1,4 @@
+import { cloneDeep } from 'lodash-es'
 import ObjectOperation from '../model/data/ObjectOperation'
 
 /*
@@ -5,12 +6,16 @@ import ObjectOperation from '../model/data/ObjectOperation'
 */
 export default function computeSnapshot(jsonDoc, changeset) {
   // Clone the doc to make sure we don't manipulate in-place
-  jsonDoc = JSON.parse(JSON.stringify(jsonDoc))
+  jsonDoc = cloneDeep(jsonDoc)
   let nodes = jsonDoc.nodes
   changeset.forEach((change) => {
-    change.ops.forEach((op) => {
-      op = ObjectOperation.fromJSON(op)
-      op.apply(nodes)
+    change.ops.forEach((opData) => {
+      try {
+        let op = ObjectOperation.fromJSON(opData)
+        op.apply(nodes)
+      } catch (err) {
+        console.error(err, opData)
+      }
     })
   })
   return jsonDoc

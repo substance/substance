@@ -203,7 +203,7 @@ function _compileSchema(schema) {
 
 function _compileDefintion(definition) {
   let result = definition
-  if (isArray(definition.type) && definition[0] !== "array") {
+  if (isArray(definition.type) && definition.type[0] !== "array") {
     definition.type = [ "array", definition.type[0] ]
   } else if (definition.type === 'text') {
     result = {

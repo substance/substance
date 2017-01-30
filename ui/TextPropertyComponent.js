@@ -164,7 +164,6 @@ class TextPropertyComponent extends AnnotatedTextComponent {
     return this.props.surface || this.context.surface
   }
 
-  // used by MarkersManager to abstract away how this is implemented
   getSurfaceId() {
     let surface = this.getSurface()
     return surface ? surface.id : null

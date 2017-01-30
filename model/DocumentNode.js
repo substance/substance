@@ -186,35 +186,25 @@ class DocumentNode extends DataNode {
     @returns {Boolean} true if node is a block node (e.g. Paragraph, Figure, List, Table)
   */
   isBlock() {
-    return this.constructor.isBlock
+    return Boolean(this.constructor.isBlock)
   }
 
   /**
     @returns {Boolean} true if node is a text node (e.g. Paragraph, Codebock)
   */
   isText() {
-    return this.constructor.isText
-  }
-
-  /**
-    @returns {Boolean} true if node is an annotation node (e.g. Strong)
-  */
-  isPropertyAnnotation() {
-    return this.constructor.isPropertyAnnotation
+    return Boolean(this.constructor.isText)
   }
 
   /**
     @returns {Boolean} true if node is an inline node (e.g. Citation)
   */
   isInline() {
-    return this.constructor.isInline
+    return Boolean(this.constructor.isInline)
   }
 
-  /**
-    @returns {Boolean} true if node is a container annotation (e.g. multiparagraph comment)
-  */
-  isContainerAnnotation() {
-    return this.constructor.isContainerAnnotation
+  isList() {
+    return Boolean(this.constructor.isList)
   }
 
 }

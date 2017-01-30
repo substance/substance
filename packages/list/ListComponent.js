@@ -1,35 +1,49 @@
+import isString from '../../util/isString'
 import Component from '../../ui/Component'
 import ListItemComponent from './ListItemComponent'
+import renderListNode from './renderListNode'
+import getListTagName from './getListTagName'
 
 class ListComponent extends Component {
 
-  constructor(...args) {
-    super(...args)
+  didMount() {
+    this.context.editorSession.onRender('document', this._onChange, this)
   }
 
   render($$) {
     let node = this.props.node
-    let el = $$(this._getTagName()).addClass('sc-list').attr('data-id', node.id)
-    node.getItems().forEach(function(item, idx) {
-      el.append(
-        $$(ListItemComponent, {
-          path: [node.id, 'items', idx, 'content'],
+    let el = $$(getListTagName(this))
+      .addClass('sc-list')
+      .attr('data-id', node.id)
+    renderListNode(node, el, (arg) => {
+      if (isString(arg)) {
+        return $$(arg)
+      } else if(arg.type === 'list-item') {
+        let item = arg
+        return $$(ListItemComponent, {
+          path: [node.id, 'items', item.id, 'content'],
           node: item,
           tagName: 'li'
-        }).ref(node.id)
-      )
+        })
+        // setting ref to preserve items when rerendering
+        .ref(item.id)
+      }
     })
     return el
   }
 
-  didMount() {
-    this.context.editorSession.onRender('document', this.rerender, this, {
-      path: [this.props.node.id, 'items']
-    })
-  }
-
-  _getTagName() {
-    return this.props.node.ordered ? 'ol' : 'ul'
+  _onChange(change) {
+    const node = this.props.node
+    if (change.isAffected(node.id)) {
+      return this.rerender()
+    }
+    // check if any of the list items are affected
+    let itemIds = node.items
+    for (let i = 0; i < itemIds.length; i++) {
+      if (change.isAffected([itemIds[i], 'level'])) {
+        return this.rerender()
+      }
+    }
   }
 
 }

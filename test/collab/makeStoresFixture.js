@@ -1,9 +1,9 @@
 import computeSnapshot from '../../collab/computeSnapshot'
-import TestArticle from '../model/TestArticle'
-import createChangeset from '../fixtures/createChangeset'
-import twoParagraphs from '../fixtures/twoParagraphs'
 import SnapshotStore from '../../collab/SnapshotStore'
 import ChangeStore from '../../collab/ChangeStore'
+import TestArticle from '../fixture/TestArticle'
+import createChangeset from '../fixture/createChangeset'
+import twoParagraphs from '../fixture/twoParagraphs'
 
 const EMPTY_DOC = {nodes: {}}
 
@@ -19,7 +19,7 @@ function insertText(pos, text) {
 
 /*
   'test-doc' with numChanges changes and available snapshots
-  
+
   @param {Number} numChanges number of available changes
   @param {Number[]} snapshots an array of version numbers
 */

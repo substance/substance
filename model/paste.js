@@ -100,9 +100,9 @@ function _pasteAnnotatedText(tx, copy) {
   // copy annotations
   forEach(annotations, function(anno) {
     let data = anno.toJSON()
-    data.path = path.slice(0)
-    data.startOffset += offset
-    data.endOffset += offset
+    data.start.path = path.slice(0)
+    data.start.offset += offset
+    data.end.offset += offset
     // create a new uuid if a node with the same id exists already
     if (tx.get(data.id)) data.id = uuid(data.type)
     tx.create(data)

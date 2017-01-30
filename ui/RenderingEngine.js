@@ -685,6 +685,7 @@ class DescendingContext {
   reset() {
     this.pos = 0;
     this.updates = 0;
+    this.refs = {}
   }
 
   _ancestorsReady(vel) {

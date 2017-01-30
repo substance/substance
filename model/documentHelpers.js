@@ -1,10 +1,11 @@
 import filter from '../util/filter'
-import isString from '../util/isString'
 import forEach from '../util/forEach'
+import isArrayEqual from '../util/isArrayEqual'
 import DocumentIndex from './DocumentIndex'
-import Selection from './Selection'
 import ObjectOperation from './data/ObjectOperation'
 import DocumentChange from './DocumentChange'
+import annotationHelpers from './annotationHelpers'
+import { isEntirelySelected } from './selectionHelpers'
 
 /**
   Some helpers for working with Documents.
@@ -25,6 +26,10 @@ export default {
   getTextForSelection,
   getMarkersForSelection,
   getChangeFromDocument,
+  deleteNode,
+  deleteTextRange,
+  deleteListRange,
+  mergeListItems
 }
 
 /**
@@ -51,7 +56,7 @@ function getPropertyAnnotationsForSelection(doc, sel, options) {
     return [];
   }
   var path = doc.getRealPath(sel.path)
-  var annotations = doc.getIndex('annotations').get(path, sel.startOffset, sel.endOffset);
+  var annotations = doc.getIndex('annotations').get(path, sel.start.offset, sel.end.offset);
   if (options.type) {
     annotations = filter(annotations, DocumentIndex.filterByType(options.type));
   }
@@ -116,25 +121,29 @@ function getAnnotationsForSelection(doc, sel, annotationType, containerId) {
   @return {string} text enclosed by the annotation
 */
 function getTextForSelection(doc, sel) {
-  var text;
   if (!sel || sel.isNull()) {
     return "";
   } else if (sel.isPropertySelection()) {
-    text = doc.get(sel.start.path);
+    let text = doc.get(sel.start.path);
     return text.substring(sel.start.offset, sel.end.offset);
   } else if (sel.isContainerSelection()) {
-    var result = [];
-    var fragments = sel.getFragments();
-    fragments.forEach(function(fragment) {
-      if (fragment instanceof Selection.Fragment) {
-        var text = doc.get(fragment.path);
-        if (isString(text)) {
-          result.push(
-            text.substring(fragment.startOffset, fragment.endOffset)
-          );
+    let result = []
+    let nodeIds = sel.getNodeIds()
+    let L = nodeIds.length
+    for (let i = 0; i < L; i++) {
+      let id = nodeIds[i]
+      let node = doc.get(id)
+      if (node.isText()) {
+        let text = node.getText()
+        if (i === L-1) {
+          text = text.slice(0, sel.end.offset)
         }
+        if (i === 0) {
+          text = text.slice(sel.start.offset)
+        }
+        result.push(text)
       }
-    });
+    }
     return result.join('\n');
   }
 }
@@ -173,3 +182,187 @@ function getChangeFromDocument(doc) {
 
   return new DocumentChange({ops: ops})
 }
+
+/*
+  Deletes a node and its children and attached annotations
+  and removes it from a given container
+*/
+function deleteNode(doc, node) {
+  if (node.isText()) {
+    // remove all associated annotations
+    let annos = doc.getIndex('annotations').get(node.id)
+    for (let i = 0; i < annos.length; i++) {
+      doc.delete(annos[i].id);
+    }
+  }
+  // delete recursively
+  // ATM we do a cascaded delete if the property has type 'id' or ['array', 'id'] and property 'owned' set,
+  // or if it 'file'
+  let nodeSchema = node.getSchema()
+  forEach(nodeSchema, (prop) => {
+    if ((prop.isReference() && prop.isOwned()) || (prop.type === 'file')) {
+      if (prop.isArray()) {
+        let ids = node[prop.name]
+        ids.forEach((id) => {
+          deleteNode(doc, doc.get(id))
+        })
+      } else {
+        deleteNode(doc, doc.get(node[prop.name]))
+      }
+    }
+  })
+  doc.delete(node.id)
+}
+
+/*
+  <-->: anno
+  |--|: area of change
+  I: <--> |--|     :   nothing
+  II: |--| <-->    :   move both by total span
+  III: |-<-->-|    :   delete anno
+  IV: |-<-|->      :   move start by diff to start, and end by total span
+  V: <-|->-|       :   move end by diff to start
+  VI: <-|--|->     :   move end by total span
+*/
+function deleteTextRange(doc, start, end) {
+  if (!start) {
+    start = {
+      path: end.path,
+      offset: 0
+    }
+  }
+  let realPath = doc.getRealPath(start.path)
+  let node = doc.get(realPath[0])
+  if (!node.isText()) throw new Error('Expecting a TextNode.')
+  if (!end) {
+    end = {
+      path: start.path,
+      offset: node.getLength()
+    }
+  }
+  if (!isArrayEqual(start.path, end.path)) throw new Error('Unsupported state: selection should be on one property')
+  let startOffset = start.offset
+  let endOffset = end.offset
+  doc.update(realPath, { type: 'delete', start: startOffset, end: endOffset })
+  // update annotations
+  let annos = doc.getAnnotations(realPath)
+  annos.forEach(function(anno) {
+    let annoStart = anno.start.offset
+    let annoEnd = anno.end.offset
+    // I anno is before
+    if (annoEnd<=startOffset) {
+      return
+    }
+    // II anno is after
+    else if (annoStart>=endOffset) {
+      doc.update([anno.id, 'start'], { type: 'shift', value: startOffset-endOffset })
+      doc.update([anno.id, 'end'], { type: 'shift', value: startOffset-endOffset })
+    }
+    // III anno is deleted
+    else if (annoStart>=startOffset && annoEnd<=endOffset) {
+      doc.delete(anno.id)
+    }
+    // IV anno.start between and anno.end after
+    else if (annoStart>=startOffset && annoEnd>=endOffset) {
+      if (annoStart>startOffset) {
+        doc.update([anno.id, 'start'], { type: 'shift', value: startOffset-annoStart })
+      }
+      doc.update([anno.id, 'end'], { type: 'shift', value: startOffset-endOffset })
+    }
+    // V anno.start before and anno.end between
+    else if (annoStart<=startOffset && annoEnd<=endOffset) {
+      doc.update([anno.id, 'end'], { type: 'shift', value: startOffset-annoEnd })
+    }
+    // VI anno.start before and anno.end after
+    else if (annoStart<startOffset && annoEnd >= endOffset) {
+      doc.update([anno.id, 'end'], { type: 'shift', value: startOffset-endOffset })
+    }
+    else {
+      console.warn('TODO: handle annotation update case.')
+    }
+  })
+}
+
+function deleteListRange(doc, list, start, end) {
+  if (doc !== list.getDocument()) {
+    list = doc.get(list.id)
+  }
+  if (!start) {
+    start = {
+      path: list.getItemPath(list.items[0]),
+      offset: 0
+    }
+  }
+  if (!end) {
+    let item = list.getLastItem()
+    end = {
+      path: list.getItemPath(item.id),
+      offset: item.getLength()
+    }
+  }
+  let startId = start.path[2]
+  let startPos = list.getItemPosition(startId)
+  let endId = end.path[2]
+  let endPos = list.getItemPosition(endId)
+  // range within the same item
+  if (startPos === endPos) {
+    deleteTextRange(doc, start, end)
+    return
+  }
+  // normalize the range if it is 'reverse'
+  if (startPos > endPos) {
+    [start, end] = [end, start];
+    [startPos, endPos] = [endPos, startPos];
+    [startId, endId] = [endId, startId]
+  }
+  let firstItem = doc.get(startId)
+  let lastItem = doc.get(endId)
+  let firstEntirelySelected = isEntirelySelected(doc, firstItem, start, null)
+  let lastEntirelySelected = isEntirelySelected(doc, lastItem, null, end)
+
+  // delete or truncate last node
+  if (lastEntirelySelected) {
+    list.removeItemAt(endPos)
+    deleteNode(doc, lastItem)
+  } else {
+    deleteTextRange(doc, null, end)
+  }
+
+  // delete inner nodes
+  for (let i = endPos-1; i > startPos; i--) {
+    let itemId = list.items[i]
+    list.removeItemAt(i)
+    deleteNode(doc, doc.get(itemId))
+  }
+
+  // delete or truncate the first node
+  if (firstEntirelySelected) {
+    list.removeItemAt(startPos)
+    deleteNode(doc, firstItem)
+  } else {
+    deleteTextRange(doc, start, null)
+  }
+
+  if (!firstEntirelySelected && !lastEntirelySelected) {
+    mergeListItems(doc, list, startPos)
+  }
+}
+
+function mergeListItems(doc, list, itemPos) {
+  if (doc !== list.getDocument()) {
+    list = doc.get(list.id)
+  }
+  let target = list.getItemAt(itemPos)
+  let targetPath = target.getTextPath()
+  let targetLength = target.getLength()
+  let source = list.getItemAt(itemPos+1)
+  let sourcePath = source.getTextPath()
+  // hide source
+  list.removeItemAt(itemPos+1)
+  // append the text
+  doc.update(targetPath, { type: 'insert', start: targetLength, text: source.getText() })
+  // transfer annotations
+  annotationHelpers.transferAnnotations(doc, sourcePath, 0, targetPath, targetLength)
+  doc.delete(source.id)
+}
+

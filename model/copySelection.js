@@ -1,8 +1,8 @@
 import cloneDeep from '../util/cloneDeep'
-import last from '../util/last'
 import forEach from '../util/forEach'
 import Document from './Document'
-import annotationHelpers from './annotationHelpers'
+import documentHelpers from './documentHelpers'
+import { isFirst, isLast } from './selectionHelpers'
 
 /**
   Creates a new document instance containing only the selected content
@@ -48,62 +48,72 @@ function _copyPropertySelection(doc, selection) {
   let annotations = doc.getIndex('annotations').get(path, offset, endOffset)
   forEach(annotations, function(anno) {
     let data = cloneDeep(anno.toJSON())
-    data.path = [Document.TEXT_SNIPPET_ID, 'content']
-    data.startOffset = Math.max(offset, anno.startOffset)-offset
-    data.endOffset = Math.min(endOffset, anno.endOffset)-offset
+    let path = [Document.TEXT_SNIPPET_ID, 'content']
+    data.start = {
+      path: path,
+      offset: Math.max(offset, anno.start.offset)-offset
+    }
+    data.end = {
+      path: path,
+      offset: Math.min(endOffset, anno.end.offset)-offset
+    }
     snippet.create(data)
   })
   return snippet
 }
 
-// TODO: copying nested nodes is not straight-forward,
-// as it is not clear if the node is valid to be created just partially
-// Basically this needs to be implemented for each nested node.
-// The default implementation ignores partially selected nested nodes.
-function _copyContainerSelection(doc, selection) {
-  let snippet = doc.createSnippet()
+function _copyContainerSelection(tx, sel) {
+  let snippet = tx.createSnippet()
   let container = snippet.getContainer()
 
-  let fragments = selection.getFragments()
-  if (fragments.length === 0) return snippet
+  let nodeIds = sel.getNodeIds()
+  let L = nodeIds.length
+  if (L === 0) return snippet
+
+  let start = sel.start
+  let end = sel.end
+
+  let skippedFirst = false
+  let skippedLast = false
+
+  // First copy the whole covered nodes
   let created = {}
-  // copy nodes and annotations.
-  for (let i = 0; i < fragments.length; i++) {
-    let fragment = fragments[i]
-    let nodeId = fragment.path[0]
-    let node = doc.get(nodeId)
-    // skip created nodes
-    if (!created[nodeId]) {
+  for(let i = 0; i<L; i++) {
+    let id = nodeIds[i]
+    let node = tx.get(id)
+    // skip NIL selections, such as cursor at the end of first node or cursor at the start of last node.
+    if (i===0 && isLast(tx, start)) {
+      skippedFirst = true
+      continue
+    }
+    if (i===L-1 && isFirst(tx, end)) {
+      skippedLast = true
+      continue
+    }
+    if (!created[id]) {
       _copyNode(node).forEach((nodeData) => {
         let copy = snippet.create(nodeData)
         created[copy.id] = true
       })
-      container.show(nodeId)
+      container.show(id)
     }
   }
-
-  let firstFragment = fragments[0]
-  let lastFragment = last(fragments)
-  let path, offset, text
-
-  // if first is a text node, remove part before the selection
-  if (firstFragment.type === 'selection-fragment') {
-    path = firstFragment.path
-    offset = firstFragment.startOffset
-    text = doc.get(path)
-    snippet.update(path, { type: 'delete', start: 0, end: offset })
-    annotationHelpers.deletedText(snippet, path, 0, offset)
+  let startNode = snippet.get(start.getNodeId())
+  let endNode = snippet.get(end.getNodeId())
+  if (!skippedFirst) {
+    if (startNode.isText()) {
+      documentHelpers.deleteTextRange(snippet, null, start)
+    } else if (startNode.isList()) {
+      documentHelpers.deleteListRange(snippet, startNode, null, start)
+    }
   }
-
-  // if last is a is a text node, remove part before the selection
-  if (lastFragment.type === 'selection-fragment') {
-    path = lastFragment.path
-    offset = lastFragment.endOffset
-    text = doc.get(path)
-    snippet.update(path, { type: 'delete', start: offset, end: text.length })
-    annotationHelpers.deletedText(snippet, path, offset, text.length)
+  if (!skippedLast) {
+    if (endNode.isText()) {
+      documentHelpers.deleteTextRange(snippet, end, null)
+    } else if (endNode.isList()) {
+      documentHelpers.deleteListRange(snippet, endNode, end, null)
+    }
   }
-
   return snippet
 }
 
@@ -131,8 +141,9 @@ function _copyNode(node) {
   let nodeSchema = node.getSchema()
   let doc = node.getDocument()
   forEach(nodeSchema, (prop) => {
-    // ATM we do a cascaded copy if the property has type 'id', ['array', 'id'], or 'file'
-    if ((prop.isReference() && prop.owner) || (prop.type === 'file')) {
+    // ATM we do a cascaded copy if the property has type 'id', ['array', 'id'] and is owned by the node,
+    // or it is of type 'file'
+    if ((prop.isReference() && prop.isOwned()) || (prop.type === 'file')) {
       let val = node[prop.name]
       if (prop.isArray()) {
         val.forEach((id) => {

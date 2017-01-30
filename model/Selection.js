@@ -178,9 +178,6 @@ class NullSelection extends Selection {
 Selection.nullSelection = Object.freeze(new NullSelection())
 
 /**
-  A selection fragment. Used when we split a {@link ContainerSelection}
-  into their fragments, each corresponding to a property selection.
-
   @internal
 */
 class SelectionFragment extends EventEmitter {

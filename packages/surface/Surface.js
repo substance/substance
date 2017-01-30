@@ -610,7 +610,7 @@ class Surface extends Component {
 
   _setSelection(sel) {
     // NOTE: setting the surfaceId is important so that it can be mapped to the DOM correctly
-    if (sel) {
+    if (sel && !sel.isNull()) {
       sel.surfaceId = this.id
     }
     // Since we allow the surface be blurred natively when clicking

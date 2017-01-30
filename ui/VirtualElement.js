@@ -75,7 +75,11 @@ class VirtualElement extends DOMElement {
     if (this._ref) throw new Error('A VirtualElement can only be referenced once.')
     this._ref = ref
     if (this._context) {
-      this._context.refs[ref] = this
+      const refs = this._context.refs
+      if(refs[ref]) {
+        throw new Error('An item with reference "'+ref+'" already exists.')
+      }
+      refs[ref] = this
     }
     return this
   }

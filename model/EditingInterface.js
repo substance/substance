@@ -143,6 +143,17 @@ class EditingInterface {
     this._impl.switchTextType(this, nodeData)
   }
 
+  toggleList(params) {
+    this._impl.toggleList(this, params)
+  }
+
+  indent() {
+    this._impl.indent(this)
+  }
+
+  dedent() {
+    this._impl.dedent(this)
+  }
 
   /* Legacy low-level API */
 

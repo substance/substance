@@ -70,7 +70,7 @@ class DOMImporter {
 
       this._allConverters.push(converter)
       // Defaults to _blockConverters
-      if (NodeClass.isPropertyAnnotation) {
+      if (NodeClass.prototype._isPropertyAnnotation) {
         this._propertyAnnotationConverters.push(converter)
       } else {
         this._blockConverters.push(converter)
@@ -223,7 +223,7 @@ class DOMImporter {
       if (NodeClass.isInline) {
         this._convertInlineNode(el, node, converter)
       }
-      else if (NodeClass.isPropertyAnnotation) {
+      else if (NodeClass.prototype._isPropertyAnnotation) {
         this._convertPropertyAnnotation(el, node)
       } else {
         node = converter.import(el, node, this) || node
@@ -240,17 +240,25 @@ class DOMImporter {
     // if there is no context, this is called stand-alone
     // i.e., user tries to convert an annotation element
     // directly, not part of a block element, such as a paragraph
-    node.path = [node.id, '_content']
     node._content = this.annotatedText(el, node.path)
-    node.startOffset = 0
-    node.endOffset = node._content.length
+    node.start = {
+      path: [node.id, '_content'],
+      offset: 0
+    }
+    node.end = {
+      offset: node._content.length
+    }
   }
 
   _convertInlineNode(el, node, converter) {
-    node.path = [node.id, 'content']
     node._content = '$'
-    node.startOffset = 0
-    node.endOffset = 1
+    node.start = {
+      path: [node.id, '_content'],
+      offset: 0
+    }
+    node.end = {
+      offset: 1
+    }
     node = converter.import(el, node, this)
     return node
   }
@@ -289,24 +297,6 @@ class DOMImporter {
     })
     return nodeData
   }
-
-  // /**
-  //   Converts an html element into a text property of the document.
-
-  //   @private
-  //   @param {Array<String>} path Path of the property to be written
-  //   @param {String} html HTML to be converter
-  //  */
-  // convertProperty(path, html) {
-  //   // TODO: while this method may be useful if html is updated
-  //   // piecewise, from an API point of view it is not intuitive.
-  //   // We should see if we really need this.
-  //   // And we should give it a better naming.
-  //   var doc = this.getDocument()
-  //   var el = $$('div').setInnerHtml(html)
-  //   var text = this.annotatedText(el, path)
-  //   doc.setText(path, text, this.state.inlineNodes)
-  // }
 
   /**
     Convert annotated text. You should call this method only for elements
@@ -471,7 +461,11 @@ class DOMImporter {
         var inlineNode = this._nodeData(el, inlineType)
         if (inlineTypeConverter.import) {
           // push a new context so we can deal with reentrant calls
-          state.stack.push({ path: context.path, offset: startOffset, text: ""})
+          state.stack.push({
+            path: context.path,
+            offset: startOffset,
+            text: ""
+          })
           state.pushContext(el.tagName, inlineTypeConverter)
           inlineNode = inlineTypeConverter.import(el, inlineNode, this) || inlineNode
           state.popContext()
@@ -495,9 +489,13 @@ class DOMImporter {
         }
         // in the mean time the offset will probably have changed to reentrant calls
         var endOffset = context.offset
-        inlineNode.startOffset = startOffset
-        inlineNode.endOffset = endOffset
-        inlineNode.path = context.path.slice(0)
+        inlineNode.start = {
+          path: context.path.slice(0),
+          offset: startOffset
+        }
+        inlineNode.end = {
+          offset: endOffset
+        }
         state.inlineNodes.push(inlineNode)
       } else {
         console.warn('Unknown element type. Taking plain text.', el.outerHTML)

@@ -1,4 +1,5 @@
 import isEqual from '../../util/isEqual'
+import isNil from '../../util/isNil'
 import isString from '../../util/isString'
 import cloneDeep from '../../util/cloneDeep'
 import PathObject from '../../util/PathObject'
@@ -77,17 +78,35 @@ class ObjectOperation {
     }
     else if (this.type === UPDATE) {
       var diff = this.diff
-      var oldVal = adapter.get(this.path)
-      var newVal = diff.apply(oldVal)
-      // some ops work inplace, others create a new value
-      // for the latter, we must set the new value
-      if (oldVal !== newVal) {
-        adapter.set(this.path, newVal)
+      switch (this.propertyType) {
+        case 'array': {
+          let arr = adapter.get(this.path)
+          diff.apply(arr)
+          break
+        }
+        case 'string': {
+          let str = adapter.get(this.path)
+          if (isNil(str)) str = ''
+          str = diff.apply(str)
+          adapter.set(this.path, str)
+          break
+        }
+        case 'coordinate': {
+          let coor = adapter.get(this.path)
+          if (!coor) throw new Error('No coordinate with path '+this.path)
+          diff.apply(coor)
+          break
+        }
+        default:
+          throw new Error('Invalid state.')
       }
     }
-    else /* if (this.type === SET) */ {
+    else if (this.type === SET) {
       // clone here as the operations value must not be changed
       adapter.set(this.path, cloneDeep(this.val))
+    }
+    else {
+      throw new Error('Invalid type.')
     }
     return obj
   }
@@ -178,10 +197,14 @@ class ObjectOperation {
       data.val = this.val
     }
     else if (this.type === UPDATE) {
-      if (this.diff._isArrayOperation) {
-        data.propertyType = "array"
-      } else /* if (this.diff._isTextOperation) */ {
+      if (this.diff._isTextOperation) {
         data.propertyType = "string"
+      } else if (this.diff._isArrayOperation) {
+        data.propertyType = "array"
+      } else if (this.diff._isCoordinateOperation) {
+        data.propertyType = "coordinate"
+      } else {
+        throw new Error('Invalid property type.')
       }
       data.diff = this.diff.toJSON()
     }

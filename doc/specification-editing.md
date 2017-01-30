@@ -168,33 +168,41 @@ With direction `right`:
 
   Nothing.
 
-- [DR3]: Cursor in the middle of a TextProperty
+- [DR3]: Cursor in the middle of a TextProperty/TextNode
 
   Delete one character.
 
 - [DR4]: Cursor inside an empty TextNode with successors
 
   Delete text node and put cursor before next node.
+  TODO: define exact behavior for different types of successors
 
 - [DR5]: Cursor at the end of a non-empty TextNode with successors within a Container
 
   Merge with next.
+  TODO: define exact behavior for different types of successors
 
 - [DR10]: NodeSelection before TextNode
 
   Set cursor at first character, then `delete`
 
+  TODO: these cases should be normalized, i.e. there should
+  be only one way to represent the cursor before a TextNode
+  (-> property selection)
+  Collapsed NodeSelections are only needed for IsolatedNodes.
+
 - [DR11]: NodeSelection before isolated node
 
   Select the node.
 
-- [DR14]: NodeSelection after at the end of document
+- [DR14]: NodeSelection after IsolatedNode at the end of document
 
   Nothing.
 
 - [DR15]: NodeSelection after a TextNode with successors
 
   Put the cursor at end of text then `delete`.
+  TODO: normalize
 
 - [DR16]: NodeSelection after other node with TextNode as successor
 
@@ -219,33 +227,37 @@ With direction `left`:
 
   Delete previous character. Move cursor one character left.
 
-- [DL4]: Cursor inside an empty TextNode with a TextNode as predecessor
+- [DL4-1]: Cursor inside an empty TextNode with a TextNode as predecessor
 
   Delete text node and put cursor at the end of the previous text node.
 
-- [DL5]: Cursor inside an empty TextNode with another node as predecessor
+- [DL4-2]: Cursor inside an empty TextNode with an IsolatedNode as predecessor
 
   Delete text node and put cursor after the previous node.
 
-- [DL6]: Cursor at the start of a non-empty TextNode with a predecessor
+- [DL5-1]: Cursor at the start of a non-empty TextNode with a TextNode as predecessor
 
   Merge with previous node.
 
-- [DL13]: NodeSelection after isolated/custom node
+- [DL5-1]: Cursor at the start of a non-empty TextNode with an IsolatedNode as predecessor
 
-  Select the node.
+- [DL13]: NodeSelection after IsolatedNode
+
+  Delete the node.
 
 - [DL14]: NodeSelection before node at the top of Container
 
   Nothing.
 
-- [DL16]: NodeSelection before other node with TextNode as predecessor
+- [DL16]: NodeSelection before IsolatedNode with TextNode as predecessor
 
   Put the cursor at end of text then `delete right`.
 
-- [DL17]: NodeSelection before other node with other node as predecessor
+- [DL17]: NodeSelection before IsolatedNode with IsolatedNode as predecessor
 
   Try to merge the nodes (node specific), otherwise select the predecessor.
+
+TODO: add specification for cases with ListNode involved
 
 
 Both directions:
@@ -254,23 +266,30 @@ Both directions:
 
   Reduce selection to PropertySelection or NodeSelection, then `delete`.
 
-- [D10]: NodeSelection full with successors
+  TODO: normalize. I.e. when ContainerSelection is collapsed
+  turn it into a PropertySelection (upfront)
 
-  Delete the node. Cursor before next.
+- [D10]: IsolatedNodes is selected entirely
 
-- [D11]: NodeSelection full at the end of document
-
-  Replace the node with a paragraph. Cursor in new paragraph.
+  Replace node with empty paragraph. Cursor in new paragraph
 
 - [D12]: NodeSelection before TextNode
 
   Set cursor at first character, then `delete`
 
+  TODO: normalize
+
 - [D13]: NodeSelection after TextNode
 
   Set cursor at last character, then `delete`
 
-- [D20]: Range that starts before node and ends after node
+  TODO: normalize
+
+- [D20-1]: Range that starts at begin of a TextNode and ends at end of a TextNode
+
+  Delete all selected nodes and insert a new paragraph. Cursor in new paragraph.
+
+- [D20-2]: Range that starts before an IsolatedNode and ends after an IsolatedNode
 
   Delete all selected nodes and insert a new paragraph. Cursor in new paragraph.
 
@@ -324,3 +343,9 @@ Both directions:
 - [B20]: Range
 
   `delete` then `break`
+
+## List
+
+- [L1]: Insert Text - Cursor inside of list item
+
+  Same as [IT1] but with List Item.

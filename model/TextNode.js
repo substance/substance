@@ -18,6 +18,10 @@ class TextNode extends DocumentNode {
     return !this.content
   }
 
+  getLength() {
+    return this.content.length
+  }
+
 }
 
 TextNode.isText = true

@@ -72,9 +72,9 @@ class InlineNodeComponent extends IsolatedNodeComponent {
     let node = this.props.node
     editorSession.setSelection({
       type: 'property',
-      path: node.path,
-      startOffset: node.startOffset,
-      endOffset: node.endOffset,
+      path: node.start.path,
+      startOffset: node.start.offset,
+      endOffset: node.end.offset,
       containerId: surface.getContainerId(),
       surfaceId: surface.id
     })
