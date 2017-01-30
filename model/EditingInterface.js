@@ -143,6 +143,10 @@ class EditingInterface {
     this._impl.switchTextType(this, nodeData)
   }
 
+  indent() {
+    this._impl.indent(this)
+  }
+
 
   /* Legacy low-level API */
 

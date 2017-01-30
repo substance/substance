@@ -1051,6 +1051,22 @@ test.UI("[L7-2]: Copying a paragraph and a ListItem", function(t) {
   t.end()
 })
 
+test.UI("[L9-1]: Indenting a ListItem", function(t) {
+  let { doc, editorSession } = setupEditor(t, _l1)
+  editorSession.setSelection({
+    type: 'property',
+    path: ['l1', 'items', 'l1-1', 'content'],
+    startOffset: 3,
+    containerId: 'body'
+  })
+  editorSession.transaction((tx) => {
+    tx.indent()
+  })
+  let li1 = doc.get('l1-1')
+  t.equal(li1.level, 2, 'Indentation level should have increased')
+  t.end()
+})
+
 // TODO: add specification and test cases for tx.annotate()
 
 // test("Create property annotation for a given property selection", function(t) {

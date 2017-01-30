@@ -643,6 +643,24 @@ class Editing {
     return newNode
   }
 
+  indent(tx) {
+    let sel = tx.selection
+    if (sel.isPropertySelection()) {
+      let nodeId = sel.start.getNodeId()
+      let node = tx.get(nodeId)
+      if (node.isList()) {
+        let itemId = sel.start.path[2]
+        let item = tx.get(itemId)
+        // Note: allowing only 3 levels
+        if (item && item.level<3) {
+          tx.set([node.id, 'items', itemId, 'level'], item.level+1)
+        }
+      }
+    } else if (sel.isContainerSelection()) {
+      // TODO support ContainerSelection
+    }
+  }
+
   /*
     <-->: anno
     |--|: area of change
