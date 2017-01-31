@@ -149,8 +149,15 @@ class Editing {
         (offset === text.length && direction === 'right')
       ))
       if (needsMerge) {
-        let container = tx.get(sel.containerId)
-        this._merge(tx, node, sel.start, direction, container)
+        // ATTENTION: deviation from standard implementation
+        // for list items: Word and GDoc toggle a list item
+        // when doing a BACKSPACE at the first position
+        if (node.isList() && offset === 0 && direction === 'left') {
+          return this.toggleList(tx)
+        } else {
+          let container = tx.get(sel.containerId)
+          this._merge(tx, node, sel.start, direction, container)
+        }
       } else {
         let startOffset = (direction === 'left') ? offset-1 : offset
         let endOffset = startOffset+1
@@ -666,6 +673,12 @@ class Editing {
         }, params))
         tx.delete(node.id)
         tx.update([container.id, 'nodes'], { type: 'insert', pos: nodePos, value: newList.id })
+        tx.setSelection({
+          type: 'property',
+          path: newList.getItemPath(newItem.id),
+          startOffset: sel.start.offset,
+          containerId: sel.containerId
+        })
       } else if (node.isList()) {
         let itemId = sel.start.path[2]
         let itemPos = node.getItemPosition(itemId)
@@ -699,6 +712,12 @@ class Editing {
           tx.update([container.id, 'nodes'], { type: 'insert', pos: nodePos+1, value: newTextNode.id })
           tx.update([container.id, 'nodes'], { type: 'insert', pos: nodePos+2, value: newList.id })
         }
+        tx.setSelection({
+          type: 'property',
+          path: newTextNode.getTextPath(),
+          startOffset: sel.start.offset,
+          containerId: sel.containerId
+        })
       }
     } else if (sel.isContainerSelection()) {
       console.error('TODO: support toggleList with ContainerSelection')
