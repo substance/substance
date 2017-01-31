@@ -2,17 +2,18 @@ import { module } from 'substance-test'
 
 import DOMElement from '../dom/DefaultDOMElement'
 import TestHTMLImporter from './fixture/TestHTMLImporter'
+import checkValues from './fixture/checkValues'
 
 const test = module('HTMLImporter')
 
-var CONTENT = '0123456789'
+const CONTENT = '0123456789'
 
 test("Importing paragraph", function(t) {
-  let importer = new TestHTMLImporter()
-  var html = '<p data-id="p1">' + CONTENT + '</p>'
-  var el = DOMElement.parseHTML(html)
-  var node = importer.convertElement(el)
-  t.deepEqual(node.toJSON(), {
+  let importer = new TestHTMLImporter('stand-alone')
+  let html = '<p data-id="p1">' + CONTENT + '</p>'
+  let el = DOMElement.parseHTML(html)
+  let node = importer.convertElement(el)
+  checkValues(t, node, {
     id: "p1",
     type: "paragraph",
     content: CONTENT
@@ -21,24 +22,23 @@ test("Importing paragraph", function(t) {
 })
 
 test("Importing paragraph with strong", function(t) {
-  let importer = new TestHTMLImporter()
-  var html = '<p data-id="p1">0123<strong data-id="s1">456</strong>789</p>'
-  var el = DOMElement.parseHTML(html)
-  importer.convertElement(el)
-  var doc = importer.generateDocument()
-  var p1 = doc.get('p1')
-  var s1 = doc.get('s1')
-  t.equal(CONTENT, p1.content, 'paragraph should have correct content')
-  t.equal('456', s1.getText(), 'annotation should provide correct text')
+  let importer = new TestHTMLImporter('stand-alone')
+  let html = '<p data-id="p1">0123<strong data-id="s1">456</strong>789</p>'
+  let el = DOMElement.parseHTML(html)
+  let p1 = importer.convertElement(el)
+  let doc = p1.getDocument()
+  let s1 = doc.get('s1')
+  t.equal(p1.content, CONTENT, 'paragraph should have correct content')
+  t.equal(s1.getText(), '456', 'annotation should provide correct text')
   t.end()
 })
 
 test("Importing h1", function(t) {
-  let importer = new TestHTMLImporter()
-  var html = '<h1 data-id="h1">' + CONTENT + '</h1>'
-  var el = DOMElement.parseHTML(html)
-  var node = importer.convertElement(el)
-  t.deepEqual(node.toJSON(), {
+  let importer = new TestHTMLImporter('stand-alone')
+  let html = '<h1 data-id="h1">' + CONTENT + '</h1>'
+  let el = DOMElement.parseHTML(html)
+  let node = importer.convertElement(el)
+  checkValues(t, node, {
     id: "h1",
     type: "heading",
     level: 1,
@@ -48,11 +48,11 @@ test("Importing h1", function(t) {
 })
 
 test("Importing h2", function(t) {
-  let importer = new TestHTMLImporter()
-  var html = '<h2 data-id="h2">' + CONTENT + '</h2>'
-  var el = DOMElement.parseHTML(html)
-  var node = importer.convertElement(el)
-  t.deepEqual(node.toJSON(), {
+  let importer = new TestHTMLImporter('stand-alone')
+  let html = '<h2 data-id="h2">' + CONTENT + '</h2>'
+  let el = DOMElement.parseHTML(html)
+  let node = importer.convertElement(el)
+  checkValues(t, node, {
     id: "h2",
     type: "heading",
     level: 2,
@@ -62,7 +62,7 @@ test("Importing h2", function(t) {
 })
 
 test("Importing an unordered list", function(t) {
-  let importer = new TestHTMLImporter()
+  let importer = new TestHTMLImporter('stand-alone')
   let html = '<ul data-id="l1"><li>Foo</li><li>Bar</li></ul>'
   let el = DOMElement.parseHTML(html)
   let node = importer.convertElement(el)
@@ -78,7 +78,7 @@ test("Importing an unordered list", function(t) {
 })
 
 test("Importing an ordered list", function(t) {
-  let importer = new TestHTMLImporter()
+  let importer = new TestHTMLImporter('stand-alone')
   let html = '<ol data-id="l1"></ol>'
   let el = DOMElement.parseHTML(html)
   let node = importer.convertElement(el)
@@ -89,7 +89,7 @@ test("Importing an ordered list", function(t) {
 })
 
 test("Importing a nested list", function(t) {
-  let importer = new TestHTMLImporter()
+  let importer = new TestHTMLImporter('stand-alone')
   let html = '<ul data-id="l1"><li>Foo</li><ul><li>Bla</li><li>Blupp</li></ul><li>Bar</li></ul>'
   let el = DOMElement.parseHTML(html)
   let node = importer.convertElement(el)
@@ -100,7 +100,7 @@ test("Importing a nested list", function(t) {
 })
 
 test("Importing a nested list (bad style)", function(t) {
-  let importer = new TestHTMLImporter()
+  let importer = new TestHTMLImporter('stand-alone')
   let html = '<ul data-id="l1"><li>Foo<ul><li>Bla</li><li>Blupp</li></ul></li><li>Bar</li></ul>'
   let el = DOMElement.parseHTML(html)
   let node = importer.convertElement(el)
