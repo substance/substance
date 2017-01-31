@@ -899,7 +899,7 @@ test.UI("[L4]: Splitting a List by breaking an empty ListItem", function(t) {
   t.end()
 })
 
-test.UI("[L5-1]: Merging two ListItems using BACKSPACE", function(t) {
+test.UI("[L5-1]: Toggling a ListItem using BACKSPACE", function(t) {
   let { editorSession, doc } = setupEditor(t, _l1)
   editorSession.setSelection({
     type: 'property',
@@ -911,13 +911,16 @@ test.UI("[L5-1]: Merging two ListItems using BACKSPACE", function(t) {
     tx.deleteCharacter('left')
   })
   let sel = editorSession.getSelection()
+  let body = doc.get('body')
+  t.equal(body.getLength(), 2, 'There should be two nodes now')
   let l = doc.get('l1')
+  let p = body.getChildAt(1)
   t.equal(l.items.length, 1, 'Only one list item should be left')
-  let li = l.getItemAt(0)
-  t.equal(li.getText(), LI1_TEXT+LI2_TEXT, 'The list item should have the merged text')
+  t.equal(p.type, 'paragraph', 'The second one should be a paragraph')
+  t.equal(p.getText(), LI2_TEXT, '.. with the text of the second item')
   t.ok(sel.isCollapsed(), 'The selection should be collapsed')
-  t.deepEqual(sel.start.path, l.getItemPath(li.id), '... on the list item')
-  t.equal(sel.start.offset, LI1_TEXT.length, '... at the end of the original content')
+  t.deepEqual(sel.start.path, p.getTextPath(), '... on the new paragraph')
+  t.equal(sel.start.offset, 0, '... at first position')
   t.end()
 })
 
@@ -943,49 +946,7 @@ test.UI("[L5-2]: Merging two ListItems using DELETE", function(t) {
   t.end()
 })
 
-test.UI("[L6-1]: Merging a List into previous TextNode using BACKSPACE", function(t) {
-  let { editorSession, doc } = setupEditor(t, _p1, _l1)
-  editorSession.setSelection({
-    type: 'property',
-    path: ['l1', 'items', 'l1-1', 'content'],
-    startOffset: 0,
-    containerId: 'body'
-  })
-  editorSession.transaction((tx) => {
-    tx.deleteCharacter('left')
-  })
-  let sel = editorSession.getSelection()
-  let p = doc.get('p1')
-  let l = doc.get('l1')
-  t.equal(l.items.length, 1, 'One list item should be left')
-  t.equal(p.getText(), P1_TEXT+LI1_TEXT, 'The text should be merged into the paragraph')
-  t.ok(sel.isCollapsed(), 'The selection should be collapsed')
-  t.deepEqual(sel.start.path, p.getTextPath(), '... on the paragraph')
-  t.equal(sel.start.offset, P1_TEXT.length, '... at the end of the original content')
-  t.end()
-})
-
-test.UI("[L6-2]: Merging a List into previous List using BACKSPACE", function(t) {
-  let { editorSession, doc } = setupEditor(t, _l1, _l2)
-  editorSession.setSelection({
-    type: 'property',
-    path: ['l2', 'items', 'l2-1', 'content'],
-    startOffset: 0,
-    containerId: 'body'
-  })
-  editorSession.transaction((tx) => {
-    tx.deleteCharacter('left')
-  })
-  let sel = editorSession.getSelection()
-  let l1 = doc.get('l1')
-  t.equal(l1.items.length, 4, 'First list should have 4 items')
-  t.ok(sel.isCollapsed(), 'The selection should be collapsed')
-  t.deepEqual(sel.start.path, ['l1', 'items', 'l2-1', 'content'], '... on the same item')
-  t.equal(sel.start.offset, 0, '... at the same position')
-  t.end()
-})
-
-test.UI("[L6-3]: Merging a List into previous List using DELETE", function(t) {
+test.UI("[L6-1]: Merging a List into previous List using DELETE", function(t) {
   let { editorSession, doc } = setupEditor(t, _l1, _l2)
   editorSession.setSelection({
     type: 'property',
