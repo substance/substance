@@ -21,7 +21,10 @@ class IncrementalData extends Data {
     @returns {ObjectOperation} The applied operation.
    */
   create(nodeData) {
-    var op = ObjectOperation.Create([nodeData.id], nodeData)
+    if (nodeData._isNode) {
+      nodeData = nodeData.toJSON()
+    }
+    let op = ObjectOperation.Create([nodeData.id], nodeData)
     this.apply(op)
     return op
   }
