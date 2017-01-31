@@ -7,35 +7,51 @@ import Coordinate from '../Coordinate'
 */
 export default class Property {
 
-  constructor(spec) {
-    Object.assign(this, spec)
+  constructor(definition) {
+    this.definition = definition
   }
 
   isArray() {
-    return isArray(this.type)
+    return isArray(this.definition.type)
   }
 
   isReference() {
     if (this.isArray()) {
-      return last(this.type) === 'id'
+      return last(this.definition.type) === 'id'
     } else {
-      return this.type === 'id'
+      return this.definition.type === 'id'
     }
+  }
+
+  isText() {
+    return Boolean(this.definition._isText)
   }
 
   isOwned() {
-    return Boolean(this.owned)
+    return Boolean(this.definition.owned)
+  }
+
+  isOptional() {
+    return Boolean(this.definition.optional)
+  }
+
+  isNotNull() {
+    return Boolean(this.definition.notNull)
   }
 
   hasDefault() {
-    return this.hasOwnProperty('default')
+    return this.definition.hasOwnProperty('default')
+  }
+
+  getDefault() {
+    return this.definition.default
   }
 
   createDefaultValue() {
-    if (isArray(this.type)) {
+    if (isArray(this.definition.type)) {
       return []
     }
-    switch(this.type) {
+    switch(this.definition.type) {
       case 'object':
         return {}
       case 'number':
@@ -51,5 +67,13 @@ export default class Property {
       default:
         return null
     }
+  }
+
+  get type() {
+    return this.definition.type
+  }
+
+  get name() {
+    return this.definition.name
   }
 }

@@ -19,27 +19,27 @@ class Node extends EventEmitter {
   /**
     @param {Object} properties
   */
-  constructor(props) {
+  constructor(data) {
     super()
 
-    var NodeClass = this.constructor
+    const NodeClass = this.constructor
 
-    var schema = NodeClass.schema
+    let schema = NodeClass.schema
     for (var name in schema) {
       if (!schema.hasOwnProperty(name)) continue
-      var prop = schema[name]
-      // check integrity of provided props, such as type correctness,
+      let prop = schema[name]
+      // check integrity of provided data, such as type correctness,
       // and mandatory properties
-      var propIsGiven = (props[name] !== undefined)
-      var hasDefault = prop.hasOwnProperty('default')
-      var isOptional = prop.optional
+      const propIsGiven = (data[name] !== undefined)
+      const hasDefault = prop.hasDefault()
+      const isOptional = prop.isOptional()
       if ( (!isOptional && !hasDefault) && !propIsGiven) {
         throw new Error('Property ' + name + ' is mandatory for node type ' + this.type)
       }
       if (propIsGiven) {
-        this[name] = _checked(prop, props[name])
+        this[name] = _checked(prop, data[name])
       } else if (hasDefault) {
-        this[name] = cloneDeep(_checked(prop, prop.default))
+        this[name] = cloneDeep(_checked(prop, prop.getDefault()))
       } else {
         // property is optional
       }
@@ -208,7 +208,8 @@ function _compileDefintion(definition) {
   } else if (definition.type === 'text') {
     result = {
       type: "string",
-      default: ''
+      default: '',
+      _isText: true
     }
   }
   return result
@@ -216,20 +217,21 @@ function _compileDefintion(definition) {
 
 function _checked(prop, value) {
   let type
-  if (isArray(prop.type)) {
+  let name = prop.name
+  if (prop.isArray()) {
     type = "array"
   } else {
     type = prop.type
   }
   if (value === null) {
-    if (prop.notNull) {
-      throw new Error('Value for property ' + prop.name + ' is null.')
+    if (prop.isNotNull()) {
+      throw new Error('Value for property ' + name + ' is null.')
     } else {
       return value
     }
   }
   if (value === undefined) {
-    throw new Error('Value for property ' + prop.name + ' is undefined.')
+    throw new Error('Value for property ' + name + ' is undefined.')
   }
   if (type === "string" && !isString(value) ||
       type === "boolean" && !isBoolean(value) ||
@@ -237,7 +239,7 @@ function _checked(prop, value) {
       type === "array" && !isArray(value) ||
       type === "id" && !isString(value) ||
       type === "object" && !isObject(value)) {
-    throw new Error('Illegal value type for property ' + prop.name + ': expected ' + type + ', was ' + (typeof value))
+    throw new Error('Illegal value type for property ' + name + ': expected ' + type + ', was ' + (typeof value))
   }
   return value
 }

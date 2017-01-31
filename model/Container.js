@@ -61,10 +61,8 @@ class Container extends DocumentNode {
   }
 
   getNodes() {
-    let doc = this.getDocument()
-    return this.getContent().map(function(id) {
-      return doc.get(id)
-    }).filter(Boolean)
+    const doc = this.getDocument()
+    return this.getContent().map(id => doc.get(id)).filter(Boolean)
   }
 
   show(nodeId, pos) {
