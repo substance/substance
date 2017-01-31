@@ -91,7 +91,7 @@ function _copyContainerSelection(tx, sel) {
       continue
     }
     if (!created[id]) {
-      _copyNode(node).forEach((nodeData) => {
+      documentHelpers.copyNode(node).forEach((nodeData) => {
         let copy = snippet.create(nodeData)
         created[copy.id] = true
       })
@@ -122,45 +122,12 @@ function _copyNodeSelection(doc, selection) {
   let containerNode = snippet.getContainer()
   let nodeId = selection.getNodeId()
   let node = doc.get(nodeId)
-  _copyNode(node).forEach((nodeData) => {
+  documentHelpers.copyNode(node).forEach((nodeData) => {
     snippet.create(nodeData)
   })
   containerNode.show(node.id)
   return snippet
 }
 
-/*
-  Creates a 'deep' JSON copy of a node returning an array of JSON objects
-  that can be used to create the object tree owned by the given root node.
-
-  @param {DocumentNode} node
-*/
-function _copyNode(node) {
-  let nodes = []
-  // EXPERIMENTAL: using schema reflection to determine whether to do a 'deep' copy or just shallow
-  let nodeSchema = node.getSchema()
-  let doc = node.getDocument()
-  forEach(nodeSchema, (prop) => {
-    // ATM we do a cascaded copy if the property has type 'id', ['array', 'id'] and is owned by the node,
-    // or it is of type 'file'
-    if ((prop.isReference() && prop.isOwned()) || (prop.type === 'file')) {
-      let val = node[prop.name]
-      if (prop.isArray()) {
-        val.forEach((id) => {
-          nodes = nodes.concat(_copyNode(doc.get(id)))
-        })
-      } else {
-        nodes = nodes.concat(_copyNode(doc.get(val)))
-      }
-    }
-  })
-  nodes.push(node.toJSON())
-  let annotationIndex = node.getDocument().getIndex('annotations')
-  let annotations = annotationIndex.get([node.id])
-  forEach(annotations, function(anno) {
-    nodes.push(anno.toJSON())
-  })
-  return nodes
-}
 
 export default copySelection

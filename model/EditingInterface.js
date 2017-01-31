@@ -32,6 +32,10 @@ class EditingInterface {
     return this._document.get(...args)
   }
 
+  contains(id) {
+    return this._document.contains(id)
+  }
+
   create(nodeData) {
     return this._document.create(nodeData)
   }

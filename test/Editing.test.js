@@ -1012,7 +1012,7 @@ test.UI("[L7-2]: Copying a paragraph and a ListItem", function(t) {
   t.end()
 })
 
-test.UI("[L8-1]: Turning a paragraph into a List", function(t) {
+test.UI("[L8-1]: Toggling a paragraph into a List", function(t) {
   let { doc, editorSession} = setupEditor(t, _p1)
   editorSession.setSelection({
     type: 'property',
@@ -1034,7 +1034,7 @@ test.UI("[L8-1]: Turning a paragraph into a List", function(t) {
   t.end()
 })
 
-test.UI("[L8-2]: Turning first list-item into a paragraph", function(t) {
+test.UI("[L8-2]: Toggling first list-item into a paragraph", function(t) {
   let { doc, editorSession} = setupEditor(t, _l1)
   editorSession.setSelection({
     type: 'property',
@@ -1056,7 +1056,7 @@ test.UI("[L8-2]: Turning first list-item into a paragraph", function(t) {
   t.end()
 })
 
-test.UI("[L8-2]: Turning last list-item into a paragraph", function(t) {
+test.UI("[L8-2]: Toggling last list-item into a paragraph", function(t) {
   let { doc, editorSession} = setupEditor(t, _l1)
   editorSession.setSelection({
     type: 'property',
@@ -1078,7 +1078,7 @@ test.UI("[L8-2]: Turning last list-item into a paragraph", function(t) {
   t.end()
 })
 
-test.UI("[L8-2]: Turning a middle list-item into a paragraph splitting the list", function(t) {
+test.UI("[L8-2]: Toggling a middle list-item into a paragraph splitting the list", function(t) {
   let { doc, editorSession} = setupEditor(t, _l1, _li3)
   editorSession.setSelection({
     type: 'property',
@@ -1133,6 +1133,37 @@ test.UI("[L9-1]: Dedenting a ListItem", function(t) {
   let li1 = doc.get('l1-1')
   t.equal(li1.level, 1, 'Indentation level should have decreased')
   t.end()
+})
+
+test.UI("[L10]: Copy and Pasting a List", function(t) {
+  let { doc, editorSession } = setupEditor(t, _p1, _empty, _l1)
+  editorSession.transaction((tx) => {
+    tx.setSelection({
+      type: 'container',
+      startPath: ['l1', 'items', 'l1-1', 'content'],
+      startOffset: 0,
+      endPath: ['l1', 'items', 'l1-2', 'content'],
+      endOffset: LI2_TEXT.length,
+      containerId: 'body'
+    })
+    let copy = tx.copySelection()
+    tx.setSelection({
+      type: 'property',
+      path: ['empty', 'content'],
+      startOffset: 0,
+      containerId: 'body'
+    })
+    tx.paste(copy)
+  })
+  let body = doc.get('body')
+  let nodes = body.getNodes()
+  t.equal(body.length, 3, "There should be 3 nodes")
+  t.deepEqual(['paragraph', 'list', 'list'], nodes.map(n => n.type), '.. a paragraph and 2 lists')
+  let li1 = body.getChildAt(1)
+  let li2 = body.getChildAt(2)
+  t.notDeepEqual(li1.items, li2.items, 'List items should not be the same.')
+  t.equal(li1.getItemAt(0).getText(), li2.getItemAt(0).getText(), 'First list item should have same content')
+  t.equal(li1.getItemAt(1).getText(), li2.getItemAt(1).getText(), 'Second list item should have same content')
 })
 
 // TODO: add specification and test cases for tx.annotate()

@@ -2,6 +2,7 @@ import last from '../util/last'
 import forEach from '../util/forEach'
 import uuid from '../util/uuid'
 import Document from '../model/Document'
+import documentHelpers from '../model/documentHelpers'
 
 /**
   Pastes clipboard content at the current selection
@@ -116,11 +117,16 @@ function _pasteDocument(tx, pasteDoc) {
   let insertPos
   if (sel.isPropertySelection()) {
     let startPath = sel.start.path
-    let startPos = container.getPosition(sel.start.getNodeId())
+    let nodeId = sel.start.getNodeId()
+    let startPos = container.getPosition(nodeId)
     let text = tx.get(startPath)
     // Break, unless we are at the last character of a node,
     // then we can simply insert after the node
-    if ( text.length === sel.start.offset ) {
+    if (text.length === 0) {
+      insertPos = startPos
+      container.hide(nodeId)
+      documentHelpers.deleteNode(tx, tx.get(nodeId))
+    } else if ( text.length === sel.start.offset ) {
       insertPos = startPos + 1
     } else {
       tx.break()
@@ -143,26 +149,20 @@ function _pasteDocument(tx, pasteDoc) {
   }
   // transfer nodes from content document
   let nodeIds = pasteDoc.get(Document.SNIPPET_ID).nodes
-  let annoIndex = pasteDoc.getIndex('annotations')
   let insertedNodes = []
+  let idMap = {}
   for (let i = 0; i < nodeIds.length; i++) {
-    let nodeId = nodeIds[i]
-    let node = _copyNode(tx, pasteDoc.get(nodeId))
+    let node = pasteDoc.get(nodeIds[i])
+    debugger
+    // Note: this will on the one hand make sure
+    // node ids are changed to avoid collisions in
+    // the target doc
+    // Plus, it uses reflection to create owned nodes recursively,
+    // and to transfer attached annotations.
+    _createWithDisambiguatedIds(tx, node, idMap)
+    // ATTENTION: use node.id here, it might have changed by disambiguater
     container.show(node.id, insertPos++)
     insertedNodes.push(node)
-    // transfer annotations
-    // what if we have changed the id of nodes that are referenced by annotations?
-    let annos = annoIndex.get(nodeId)
-    for (let j = 0; j < annos.length; j++) {
-      let data = annos[j].toJSON()
-      if (node.id !== nodeId) {
-        data.path[0] = node.id
-      }
-      if (tx.get(data.id)) {
-        data.id = uuid(data.type)
-      }
-      tx.create(data)
-    }
   }
 
   if (insertedNodes.length > 0) {
@@ -180,22 +180,72 @@ function _pasteDocument(tx, pasteDoc) {
   }
 }
 
-function _copyNode(tx, pasteNode) {
-  let nodeId = pasteNode.id
-  let data = pasteNode.toJSON()
-  // create a new id if the node exists already
-  if (tx.get(nodeId)) {
-    data.id = uuid(pasteNode.type)
-  }
-  if (pasteNode.hasChildren()) {
-    let children = pasteNode.getChildren()
-    let childrenIds = data[pasteNode.getChildrenProperty()]
-    for (let i = 0; i < children.length; i++) {
-      let childNode = _copyNode(tx, children[i])
-      childrenIds[i] = childNode.id
+// We need to disambiguate ids if the target document
+// contains a node with the same id.
+// Unfortunately, this can be difficult in some cases,
+// e.g. other nodes that have a reference to the re-named node
+// We only fix annotations for now.
+function _createWithDisambiguatedIds(tx, node, idMap) {
+  // do not run twice on the same node
+  if (idMap[node.id]) return
+  idMap[node.id] = node.id
+  if (!node) return
+  if (tx.contains(node.id)) {
+    const sourceDoc = node.getDocument()
+    const annotationIndex = sourceDoc.getIndex('annotations')
+
+    let newId = uuid(node.type)
+    idMap[node.id] = newId
+    node.id = newId
+
+    let nodeSchema = node.getSchema()
+    let annos = []
+    for (let key in nodeSchema) {
+      if (key === 'id' || key === 'type' || !nodeSchema.hasOwnProperty(key)) continue
+      const prop = nodeSchema[key]
+      const name = prop.name
+      // ATM we do a cascaded copy if the property has type 'id', ['array', 'id'] and is owned by the node,
+      // or it is of type 'file'
+      if ((prop.isReference() && prop.isOwned()) || (prop.type === 'file')) {
+        // NOTE: we need to recurse directly here, so that we can
+        // update renamed references
+        let val = node[prop.name]
+        if (prop.isArray()) {
+          for (let i = 0; i < val.length; i++) {
+            let id = val[i]
+            if (!idMap[id]) {
+              let node = sourceDoc.get(id)
+              _createWithDisambiguatedIds(tx, node, idMap)
+              val[i] = node.id
+            }
+          }
+        } else {
+          let id = val
+          if (!idMap[id]) {
+            let node = sourceDoc.get(id)
+            _createWithDisambiguatedIds(tx, node, idMap)
+            node[name] = node.id
+          }
+        }
+      } else if (prop.isText()) {
+        let _annos = annotationIndex.get([node.id])
+        for (let i = 0; i < _annos.length; i++) {
+          let anno = _annos[i]
+          if (anno.start.path[0] === node.id) {
+            anno.start.path[0] = newId
+          }
+          if (anno.end.path[0] === node.id) {
+            anno.end.path[0] = newId
+          }
+          annos.push(anno)
+        }
+      }
+    }
+    tx.create(node)
+    for (let i = 0; i < annos.length; i++) {
+      _createWithDisambiguatedIds(tx, annos[i], idMap)
     }
   }
-  return tx.create(data)
 }
 
 export default paste
