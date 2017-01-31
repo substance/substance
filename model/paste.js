@@ -118,7 +118,7 @@ function _pasteDocument(tx, pasteDoc) {
   if (sel.isPropertySelection()) {
     let startPath = sel.start.path
     let nodeId = sel.start.getNodeId()
-    let startPos = container.getPosition(nodeId)
+    let startPos = container.getPosition(nodeId, 'strict')
     let text = tx.get(startPath)
     // Break, unless we are at the last character of a node,
     // then we can simply insert after the node
@@ -133,7 +133,7 @@ function _pasteDocument(tx, pasteDoc) {
       insertPos = startPos + 1
     }
   } else if (sel.isNodeSelection()) {
-    let nodePos = container.getPosition(sel.getNodeId())
+    let nodePos = container.getPosition(sel.getNodeId(), 'strict')
     if (sel.isBefore()) {
       insertPos = nodePos
     } else if (sel.isAfter()) {
@@ -142,24 +142,18 @@ function _pasteDocument(tx, pasteDoc) {
       throw new Error('Illegal state: the selection should be collapsed.')
     }
   }
-
-  // TODO how should this check be useful?
-  if (insertPos < 0) {
-    console.error('Could not find insertion position in ContainerNode.')
-  }
   // transfer nodes from content document
   let nodeIds = pasteDoc.get(Document.SNIPPET_ID).nodes
   let insertedNodes = []
-  let idMap = {}
+  let visited = {}
   for (let i = 0; i < nodeIds.length; i++) {
     let node = pasteDoc.get(nodeIds[i])
-    debugger
     // Note: this will on the one hand make sure
     // node ids are changed to avoid collisions in
     // the target doc
     // Plus, it uses reflection to create owned nodes recursively,
     // and to transfer attached annotations.
-    _createWithDisambiguatedIds(tx, node, idMap)
+    _transferWithDisambiguatedIds(tx, node, visited)
     // ATTENTION: use node.id here, it might have changed by disambiguater
     container.show(node.id, insertPos++)
     insertedNodes.push(node)
@@ -185,66 +179,71 @@ function _pasteDocument(tx, pasteDoc) {
 // Unfortunately, this can be difficult in some cases,
 // e.g. other nodes that have a reference to the re-named node
 // We only fix annotations for now.
-function _createWithDisambiguatedIds(tx, node, idMap) {
+function _transferWithDisambiguatedIds(targetDoc, node, visited) {
   // do not run twice on the same node
-  if (idMap[node.id]) return
-  idMap[node.id] = node.id
+  if (visited[node.id]) return
+  visited[node.id] = true
   if (!node) return
-  if (tx.contains(node.id)) {
-    const sourceDoc = node.getDocument()
-    const annotationIndex = sourceDoc.getIndex('annotations')
-
-    let newId = uuid(node.type)
-    idMap[node.id] = newId
+  let oldId = node.id
+  let newId
+  if (targetDoc.contains(node.id)) {
+    // change the node id
+    newId = uuid(node.type)
     node.id = newId
-
-    let nodeSchema = node.getSchema()
-    let annos = []
-    for (let key in nodeSchema) {
-      if (key === 'id' || key === 'type' || !nodeSchema.hasOwnProperty(key)) continue
-      const prop = nodeSchema[key]
-      const name = prop.name
-      // ATM we do a cascaded copy if the property has type 'id', ['array', 'id'] and is owned by the node,
-      // or it is of type 'file'
-      if ((prop.isReference() && prop.isOwned()) || (prop.type === 'file')) {
-        // NOTE: we need to recurse directly here, so that we can
-        // update renamed references
-        let val = node[prop.name]
-        if (prop.isArray()) {
-          for (let i = 0; i < val.length; i++) {
-            let id = val[i]
-            if (!idMap[id]) {
-              let node = sourceDoc.get(id)
-              _createWithDisambiguatedIds(tx, node, idMap)
-              val[i] = node.id
-            }
-          }
-        } else {
-          let id = val
-          if (!idMap[id]) {
-            let node = sourceDoc.get(id)
-            _createWithDisambiguatedIds(tx, node, idMap)
-            node[name] = node.id
+  }
+  const sourceDoc = node.getDocument()
+  const annotationIndex = sourceDoc.getIndex('annotations')
+  const nodeSchema = node.getSchema()
+  // collect annotations so that we can create them in the target doc afterwards
+  let annos = []
+  // now we iterate all properties of the node schema,
+  // to see if there are owned references, which need to be created recursively,
+  // and if there are text properties, where annotations could be attached to
+  for (let key in nodeSchema) {
+    if (key === 'id' || key === 'type' || !nodeSchema.hasOwnProperty(key)) continue
+    const prop = nodeSchema[key]
+    const name = prop.name
+    // Look for references to owned children and create recursively
+    if ((prop.isReference() && prop.isOwned()) || (prop.type === 'file')) {
+      // NOTE: we need to recurse directly here, so that we can
+      // update renamed references
+      let val = node[prop.name]
+      if (prop.isArray()) {
+        for (let i = 0; i < val.length; i++) {
+          let id = val[i]
+          if (!visited[id]) {
+            let child = sourceDoc.get(id)
+            _transferWithDisambiguatedIds(targetDoc, child, visited)
+            val[i] = child.id
           }
         }
-      } else if (prop.isText()) {
-        let _annos = annotationIndex.get([node.id])
-        for (let i = 0; i < _annos.length; i++) {
-          let anno = _annos[i]
-          if (anno.start.path[0] === node.id) {
-            anno.start.path[0] = newId
-          }
-          if (anno.end.path[0] === node.id) {
-            anno.end.path[0] = newId
-          }
-          annos.push(anno)
+      } else {
+        let id = val
+        if (!visited[id]) {
+          let child = sourceDoc.get(id)
+          _transferWithDisambiguatedIds(targetDoc, child, visited)
+          node[name] = child.id
         }
       }
     }
-    tx.create(node)
-    for (let i = 0; i < annos.length; i++) {
-      _createWithDisambiguatedIds(tx, annos[i], idMap)
+    // Look for text properties and create annotations in the target doc accordingly
+    else if (prop.isText()) {
+      let _annos = annotationIndex.get([node.id])
+      for (let i = 0; i < _annos.length; i++) {
+        let anno = _annos[i]
+        if (anno.start.path[0] === oldId) {
+          anno.start.path[0] = newId
+        }
+        if (anno.end.path[0] === oldId) {
+          anno.end.path[0] = newId
+        }
+        annos.push(anno)
+      }
     }
+  }
+  targetDoc.create(node)
+  for (let i = 0; i < annos.length; i++) {
+    _transferWithDisambiguatedIds(targetDoc, annos[i], visited)
   }
 }
 

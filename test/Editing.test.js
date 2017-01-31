@@ -1164,6 +1164,7 @@ test.UI("[L10]: Copy and Pasting a List", function(t) {
   t.notDeepEqual(li1.items, li2.items, 'List items should not be the same.')
   t.equal(li1.getItemAt(0).getText(), li2.getItemAt(0).getText(), 'First list item should have same content')
   t.equal(li1.getItemAt(1).getText(), li2.getItemAt(1).getText(), 'Second list item should have same content')
+  t.end()
 })
 
 // TODO: add specification and test cases for tx.annotate()

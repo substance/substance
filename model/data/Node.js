@@ -97,14 +97,15 @@ class Node extends EventEmitter {
     var data = {
       type: this.type
     }
-    forEach(this.constructor.schema, function(prop, name) {
+    const schema = this.getSchema()
+    forEach(schema, (prop, name) => {
       let val = this[name]
-      if (prop.optional && val === undefined) return
+      if (prop.isOptional() && val === undefined) return
       if (isArray(val) || isPlainObject(val)) {
         val = cloneDeep(val)
       }
       data[prop.name] = val
-    }.bind(this))
+    })
     return data
   }
 
