@@ -3,6 +3,7 @@ import uuid from '../util/uuid'
 import Document from './Document'
 import IncrementalData from './data/IncrementalData'
 import DocumentNodeFactory from './DocumentNodeFactory'
+import ParentNodeHook from './ParentNodeHook'
 
 /**
   A {@link Document} instance that is used during transaction.
@@ -49,6 +50,9 @@ class TransactionDocument extends Document {
       this.data.addIndex(name, index.clone())
     }.bind(this))
 
+    // ATTENTION: this must before loading the seed
+    ParentNodeHook.register(this)
+
     this.loadSeed(document.toJSON())
 
     // make sure that we mirror all changes that are done outside of transactions
@@ -89,18 +93,14 @@ class TransactionDocument extends Document {
   }
 
   set(path, value) {
-    var realPath = this.getRealPath(path)
-    if (!realPath) throw new Error('Invalid path')
-    this.lastOp = this.data.set(realPath, value)
+    this.lastOp = this.data.set(path, value)
     if (this.lastOp) {
       this.ops.push(this.lastOp)
     }
   }
 
   update(path, diffOp) {
-    var realPath = this.getRealPath(path)
-    if (!realPath) throw new Error('Invalid path')
-    let op = this.lastOp = this.data.update(realPath, diffOp)
+    let op = this.lastOp = this.data.update(path, diffOp)
     if (op) {
       this.ops.push(op)
       return op
@@ -137,6 +137,6 @@ class TransactionDocument extends Document {
   }
 }
 
-TransactionDocument.prototype.isTransactionDocument = true
+TransactionDocument.prototype._isTransactionDocument = true
 
 export default TransactionDocument

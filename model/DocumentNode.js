@@ -1,5 +1,4 @@
 import DataNode from './data/Node'
-import forEach from '../util/forEach'
 import EventEmitter from '../util/EventEmitter'
 
 /**
@@ -68,6 +67,22 @@ class DocumentNode extends DataNode {
   }
 
   /**
+    Get the root node.
+
+    The root node is the last ancestor returned
+    by a sequence of `getParent()` calls.
+
+    @returns {DocumentNode}
+  */
+  getRoot() {
+    let node = this
+    while(node.parent) {
+      node = node.parent
+    }
+    return node
+  }
+
+  /**
     Checks whether this node has children.
 
     @returns {Boolean} default: false
@@ -103,22 +118,6 @@ class DocumentNode extends DataNode {
     return 0
   }
 
-  /**
-    Get the root node.
-
-    The root node is the last ancestor returned
-    by a sequence of `getParent()` calls.
-
-    @returns {DocumentNode}
-  */
-  getRoot() {
-    var node = this
-    while (node.hasParent()) {
-      node = node.getParent()
-    }
-    return node
-  }
-
   // TODO: should this really be here?
   // volatile property necessary to render highlighted node differently
   // TODO: We should get this out here
@@ -130,6 +129,8 @@ class DocumentNode extends DataNode {
     }
   }
 
+  // Experimental: we are working on a simpler API replacing the
+  // rather inconvenient EventProxy API.
   on(eventName, handler, ctx) {
     var match = _matchPropertyEvent(eventName)
     if (match) {
@@ -157,20 +158,6 @@ class DocumentNode extends DataNode {
         .off(ctx, [this.id, propertyName], handler)
     }
     EventEmitter.prototype.off.apply(this, arguments)
-  }
-
-  // Experimental: we are working on a simpler API replacing the
-  // rather inconvenient EventProxy API.
-  connect(ctx, handlers) {
-    console.warn('DEPRECATED: use Node.on() instead')
-    forEach(handlers, function(func, name) {
-      this.on(name, func, ctx)
-    }.bind(this))
-  }
-
-  disconnect(ctx) {
-    console.warn('DEPRECATED: use Node.off() instead')
-    this.off(ctx)
   }
 
   _onPropertyChange(propertyName) {

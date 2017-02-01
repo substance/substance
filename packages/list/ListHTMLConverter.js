@@ -15,11 +15,13 @@ export default {
 
   import: function(el, node, converter) {
     let self = this
+    this._santizeNestedLists(el)
     if (el.is('ol')) {
       node.ordered = true
     }
     let itemEls = el.findAll('li')
     itemEls.forEach(function(li) {
+      // ATTENTION: pulling out nested list elements here on-the-fly
       let listItem = converter.convertElement(li)
       listItem.level = _getLevel(li)
       node.items.push(listItem.id)
@@ -47,6 +49,18 @@ export default {
       }
     })
     return el
-  }
+  },
 
+  _santizeNestedLists(root) {
+    let nestedLists = root.findAll('ol,ul')
+    nestedLists.forEach((el)=>{
+      while (!el.parentNode.is('ol,ul')) {
+        // pull it up
+        let parent = el.parentNode
+        let grandParent = parent.parentNode
+        let pos = grandParent.getChildIndex(parent)
+        grandParent.insertAt(pos+1, el)
+      }
+    })
+  }
 }

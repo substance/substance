@@ -1,6 +1,4 @@
 import isArray from '../../util/isArray'
-import isNumber from '../../util/isNumber'
-import isObject from '../../util/isObject'
 import isString from '../../util/isString'
 import EventEmitter from '../../util/EventEmitter'
 import forEach from '../../util/forEach'
@@ -51,13 +49,12 @@ class Data extends EventEmitter {
     @returns {Node|Object|Primitive|undefined} a Node instance, a value or undefined if not found.
    */
   get(path, strict) {
-    let result
-    let realPath = this.getRealPath(path)
-    if (!realPath) return undefined
-    result = this._get(realPath)
+    let result = this._get(path)
     if (strict && result === undefined) {
       if (isString(path)) {
         throw new Error("Could not find node with id '"+path+"'.")
+      } else if (!this.contains(path[0])) {
+        throw new Error("Could not find node with id '"+path[0]+"'.")
       } else {
         throw new Error("Property for path '"+path+"' us undefined.")
       }
@@ -65,63 +62,22 @@ class Data extends EventEmitter {
     return result
   }
 
-  _get(realPath) {
+  _get(path) {
     let result
-    if (isString(realPath)) {
-      result = this.nodes[realPath]
-    } else if (realPath.length === 1) {
-      result = this.nodes[realPath[0]]
-    } else if (realPath.length > 1) {
-      let context = this.nodes[realPath[0]]
-      for (let i = 1; i < realPath.length-1; i++) {
+    if (isString(path)) {
+      result = this.nodes[path]
+    } else if (path.length === 1) {
+      result = this.nodes[path[0]]
+    } else if (path.length > 1) {
+      let context = this.nodes[path[0]]
+      for (let i = 1; i < path.length-1; i++) {
         if (!context) return undefined
-        context = context[realPath[i]]
+        context = context[path[i]]
       }
       if (!context) return undefined
-      result = context[realPath[realPath.length-1]]
+      result = context[path[path.length-1]]
     }
     return result
-  }
-
-  getRealPath(path) {
-    if (!path) return false
-    if (isString(path)) return path
-    if (path.length < 3) return path
-    let nodeId = path[0]
-    let realPath = [nodeId]
-    let context = this.nodes[nodeId]
-    let prop, name
-    let L = path.length
-    let i = 1
-    for (; i<L-1; i++) {
-      if (!context) return false
-      name = path[i]
-      prop = context[name]
-      if (isArray(prop)) {
-        let next = path[i+1]
-        if (isNumber(next)) {
-          realPath.push(name)
-          context = prop
-        }
-        // EXPERIMENTAL: allow to use
-        // a notation such as 'l1.items.li1.content'
-        else {
-          return this.getRealPath(path.slice(i+1))
-        }
-      } else if (isString(prop)) {
-        context = this.nodes[prop]
-        realPath = [prop]
-      } else if (isObject(prop)) {
-        realPath.push(name)
-        context = prop
-      } else {
-        return false
-      }
-    }
-    // the last one is always a property
-    realPath.push(path[L-1])
-
-    return realPath
   }
 
   /**
@@ -198,17 +154,12 @@ class Data extends EventEmitter {
     @returns {Node} The deleted node.
    */
   set(path, newValue) {
-    var realPath = this.getRealPath(path)
-    if (!realPath) {
-      console.error('Could not resolve path', path)
-      return
-    }
-    let node = this.get(realPath[0])
-    let oldValue = this._set(realPath, newValue)
+    let node = this.get(path[0])
+    let oldValue = this._set(path, newValue)
     var change = {
       type: 'set',
       node: node,
-      path: realPath,
+      path: path,
       newValue: newValue,
       oldValue: oldValue
     }
@@ -220,16 +171,16 @@ class Data extends EventEmitter {
     return oldValue
   }
 
-  _set(realPath, newValue) {
+  _set(path, newValue) {
     let oldValue
-    if (realPath.length === 2) {
-      oldValue = this.nodes[realPath[0]][realPath[1]]
-      this.nodes[realPath[0]][realPath[1]] = newValue
-    } else if (realPath.length === 3) {
-      oldValue = this.nodes[realPath[0]][realPath[1]][realPath[2]]
-      this.nodes[realPath[0]][realPath[1]][realPath[2]] = newValue
+    if (path.length === 2) {
+      oldValue = this.nodes[path[0]][path[1]]
+      this.nodes[path[0]][path[1]] = newValue
+    } else if (path.length === 3) {
+      oldValue = this.nodes[path[0]][path[1]][path[2]]
+      this.nodes[path[0]][path[1]][path[2]] = newValue
     } else {
-      throw new Error('Path of length '+realPath.length+' not supported.')
+      throw new Error('Path of length '+path.length+' not supported.')
     }
     return oldValue
   }

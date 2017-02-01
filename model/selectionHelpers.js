@@ -103,7 +103,7 @@ export function setCursor(tx, node, containerId, mode) {
     }
     tx.setSelection({
       type: 'property',
-      path: node.getItemPath(item.id),
+      path: item.getTextPath(),
       startOffset: offset,
       containerId: containerId
     })

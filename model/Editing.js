@@ -34,25 +34,16 @@ class Editing {
     } else if (sel.isCustomSelection()) {
       throw new Error('Custom selections are not supported by tx.annotate()')
     }
-    let nodeData
+    let start = sel.start
+    let end = sel.end
+    let containerId = sel.containerId
+    let nodeData = { start, end, containerId }
     if (sel.isPropertySelection()) {
-      if (AnnotationClass.prototype._isAnnotation) {
-        nodeData = {
-          start: sel.start,
-          end: sel.end,
-          containerId: sel.containerId,
-        }
-      } else {
+      if (!AnnotationClass.prototype._isAnnotation) {
         throw new Error('Annotation can not be created for a selection.')
       }
     } else if (sel.isContainerSelection()) {
-      if (AnnotationClass.prototype._isContainerAnnotation) {
-        nodeData = {
-          containerId: sel.containerId,
-          start: sel.start,
-          end: sel.end
-        }
-      } else if (AnnotationClass.prototype._isPropertyAnnotation) {
+      if (AnnotationClass.prototype._isPropertyAnnotation) {
         console.warn('NOT SUPPORTED YET: creating property annotations for a non collapsed container selection.')
       }
     } else {
@@ -149,8 +140,16 @@ class Editing {
         (offset === text.length && direction === 'right')
       ))
       if (needsMerge) {
-        let container = tx.get(sel.containerId)
-        this._merge(tx, node, sel.start, direction, container)
+        // ATTENTION: deviation from standard implementation
+        // for list items: Word and GDoc toggle a list item
+        // when doing a BACKSPACE at the first position
+        let root = node.getRoot()
+        if (root.isList() && offset === 0 && direction === 'left') {
+          return this.toggleList(tx)
+        } else {
+          let container = tx.get(sel.containerId)
+          this._merge(tx, root, sel.start, direction, container)
+        }
       } else {
         let startOffset = (direction === 'left') ? offset-1 : offset
         let endOffset = startOffset+1
@@ -248,11 +247,11 @@ class Editing {
   }
 
   deletePropertySelection(tx, sel) {
-    let realPath = tx.getRealPath(sel.path)
+    let path = sel.start.path
     let start = sel.start.offset
     let end = sel.end.offset
-    tx.update(realPath, { type: 'delete', start: start, end: end })
-    annotationHelpers.deletedText(tx, realPath, start, end)
+    tx.update(path, { type: 'delete', start: start, end: end })
+    annotationHelpers.deletedText(tx, path, start, end)
   }
 
   // deletes all inner nodes and 'truncates' start and end node
@@ -268,7 +267,8 @@ class Editing {
 
     // special case: selection within one node
     if (startPos === endPos) {
-      let node = tx.get(startId)
+      // ATTENTION: we need the root node here e.g. the list, not the list-item
+      let node = tx.get(startId).getRoot()
       if (node.isText()) {
         documentHelpers.deleteTextRange(tx, start, end)
       } else if (node.isList()) {
@@ -299,7 +299,8 @@ class Editing {
       tx.update([container.id, 'nodes'], { type: 'delete', pos: endPos })
       documentHelpers.deleteNode(tx, lastNode)
     } else {
-      let node = lastNode
+      // ATTENTION: we need the root node here e.g. the list, not the list-item
+      let node = lastNode.getRoot()
       if (node.isText()) {
         documentHelpers.deleteTextRange(tx, null, end)
       } else if (node.isList()) {
@@ -321,7 +322,8 @@ class Editing {
       tx.update([container.id, 'nodes'], { type: 'delete', pos: startPos })
       documentHelpers.deleteNode(tx, firstNode)
     } else {
-      let node = firstNode
+      // ATTENTION: we need the root node here e.g. the list, not the list-item
+      let node = firstNode.getRoot()
       if (node.isText()) {
         documentHelpers.deleteTextRange(tx, start, null)
       } else if (node.isList()) {
@@ -650,7 +652,8 @@ class Editing {
     if (!container) return
     if (sel.isPropertySelection()) {
       let nodeId = sel.start.path[0]
-      let node = tx.get(nodeId)
+      // ATTENTION: we need the root node here e.g. the list, not the list-item
+      let node = tx.get(nodeId).getRoot()
       let nodePos = container.getPosition(node.id, 'strict')
       if (node.isText()) {
         tx.update([container.id, 'nodes'], { type: 'delete', pos: nodePos })
@@ -666,8 +669,14 @@ class Editing {
         }, params))
         tx.delete(node.id)
         tx.update([container.id, 'nodes'], { type: 'insert', pos: nodePos, value: newList.id })
+        tx.setSelection({
+          type: 'property',
+          path: newItem.getTextPath(),
+          startOffset: sel.start.offset,
+          containerId: sel.containerId
+        })
       } else if (node.isList()) {
-        let itemId = sel.start.path[2]
+        let itemId = sel.start.path[0]
         let itemPos = node.getItemPosition(itemId)
         let item = node.getItemAt(itemPos)
         let newTextNode = tx.createDefaultTextNode(item.getText())
@@ -699,6 +708,12 @@ class Editing {
           tx.update([container.id, 'nodes'], { type: 'insert', pos: nodePos+1, value: newTextNode.id })
           tx.update([container.id, 'nodes'], { type: 'insert', pos: nodePos+2, value: newList.id })
         }
+        tx.setSelection({
+          type: 'property',
+          path: newTextNode.getTextPath(),
+          startOffset: sel.start.offset,
+          containerId: sel.containerId
+        })
       }
     } else if (sel.isContainerSelection()) {
       console.error('TODO: support toggleList with ContainerSelection')
@@ -709,13 +724,14 @@ class Editing {
     let sel = tx.selection
     if (sel.isPropertySelection()) {
       let nodeId = sel.start.getNodeId()
-      let node = tx.get(nodeId)
+      // ATTENTION: we need the root node here, e.g. the list, not the list items
+      let node = tx.get(nodeId).getRoot()
       if (node.isList()) {
-        let itemId = sel.start.path[2]
+        let itemId = sel.start.path[0]
         let item = tx.get(itemId)
         // Note: allowing only 3 levels
         if (item && item.level<3) {
-          tx.set([node.id, 'items', itemId, 'level'], item.level+1)
+          tx.set([itemId, 'level'], item.level+1)
         }
       }
     } else if (sel.isContainerSelection()) {
@@ -727,12 +743,13 @@ class Editing {
     let sel = tx.selection
     if (sel.isPropertySelection()) {
       let nodeId = sel.start.getNodeId()
-      let node = tx.get(nodeId)
+      // ATTENTION: we need the root node here, e.g. the list, not the list items
+      let node = tx.get(nodeId).getRoot()
       if (node.isList()) {
-        let itemId = sel.start.path[2]
+        let itemId = sel.start.path[0]
         let item = tx.get(itemId)
         if (item && item.level>1) {
-          tx.set([node.id, 'items', itemId, 'level'], item.level-1)
+          tx.set([itemId, 'level'], item.level-1)
         }
       }
     } else if (sel.isContainerSelection()) {
@@ -756,19 +773,19 @@ class Editing {
     if (!isArrayEqual(start.path, end.path)) {
       throw new Error('Unsupported state: range should be on one property')
     }
-    let realPath = tx.getRealPath(start.path)
+    let path = start.path
     let startOffset = start.offset
     let endOffset = end.offset
     let typeover = !sel.isCollapsed()
     let L = text.length
     // delete selected text
     if (typeover) {
-      tx.update(realPath, { type: 'delete', start: startOffset, end: endOffset })
+      tx.update(path, { type: 'delete', start: startOffset, end: endOffset })
     }
     // insert new text
-    tx.update(realPath, { type: 'insert', start: startOffset, text: text })
+    tx.update(path, { type: 'insert', start: startOffset, text: text })
     // update annotations
-    let annos = tx.getAnnotations(realPath)
+    let annos = tx.getAnnotations(path)
     annos.forEach(function(anno) {
       let annoStart = anno.start.offset
       let annoEnd = anno.end.offset
@@ -817,6 +834,8 @@ class Editing {
   }
 
   _breakNode(tx, node, coor, container) {
+    // ATTENTION: we need the root here, e.g. a list, not the list-item
+    node = node.getRoot()
     if (node.isText()) {
       this._breakTextNode(tx, node, coor, container)
     } else if (node.isList()) {
@@ -880,8 +899,7 @@ class Editing {
   _breakListNode(tx, node, coor, container) {
     let path = coor.path
     let offset = coor.offset
-    let realPath = tx.getRealPath(path)
-    let listItem = tx.get(realPath[0])
+    let listItem = tx.get(path[0])
 
     let L = node.length
     let itemPos = node.getItemPosition(listItem.id)
@@ -943,7 +961,7 @@ class Editing {
         node.insertItemAt(itemPos, newItem.id)
         tx.setSelection({
           type: 'property',
-          path: node.getItemPath(listItem.id),
+          path: listItem.getTextPath(),
           startOffset: 0
         })
       }
@@ -955,14 +973,14 @@ class Editing {
       // Now we need to transfer annotations
       if (offset < text.length) {
         // transfer annotations which are after offset to the new node
-        annotationHelpers.transferAnnotations(tx, realPath, offset, [newItem.id,'content'], 0)
+        annotationHelpers.transferAnnotations(tx, path, offset, [newItem.id,'content'], 0)
         // truncate the original property
-        tx.update(realPath, { type: 'delete', start: offset, end: text.length })
+        tx.update(path, { type: 'delete', start: offset, end: text.length })
       }
       node.insertItemAt(itemPos+1, newItem.id)
       tx.setSelection({
         type: 'property',
-        path: node.getItemPath(newItem.id),
+        path: newItem.getTextPath(),
         startOffset: 0
       })
     }
@@ -973,7 +991,7 @@ class Editing {
     // within a single list node
     if (node.isList()) {
       let list = node
-      let itemId = coor.path[2]
+      let itemId = coor.path[0]
       let itemPos = list.getItemPosition(itemId)
       let withinListNode = (
         (direction === 'left' && itemPos > 0) ||
@@ -983,12 +1001,10 @@ class Editing {
         itemPos = (direction === 'left') ? itemPos-1 : itemPos
         let target = list.getItemAt(itemPos)
         let targetLength = target.getLength()
-        documentHelpers.mergeListItems(tx, list, itemPos)
+        documentHelpers.mergeListItems(tx, list.id, itemPos)
         tx.setSelection({
           type: 'property',
-          // ATTENTION: we need to use a list relative path here
-          // such as ['list1', 'items', 'list-item1', 'content']
-          path: list.getItemPath(target.id),
+          path: target.getTextPath(),
           startOffset: targetLength,
           containerId: container.id
         })
@@ -1076,9 +1092,7 @@ class Editing {
         tx.delete(source.id)
         tx.setSelection({
           type: 'property',
-          // ATTENTION: we need to use a list relative path here
-          // such as ['list1', 'items', 'list-item1', 'content']
-          path: first.getItemPath(target.id),
+          path: target.getTextPath(),
           startOffset: targetLength,
           containerId: container.id
         })
@@ -1094,9 +1108,7 @@ class Editing {
         if (direction === 'left') {
           tx.setSelection({
             type: 'property',
-            // ATTENTION: we need to use a list relative path here
-            // such as ['list1', 'items', 'list-item1', 'content']
-            path: first.getItemPath(secondItems[0]),
+            path: tx.get(secondItems[0]).getTextPath(),
             startOffset: 0,
             containerId: container.id
           })
@@ -1104,9 +1116,7 @@ class Editing {
           let item = tx.get(last(firstItems))
           tx.setSelection({
             type: 'property',
-            // ATTENTION: we need to use a list relative path here
-            // such as ['list1', 'items', 'list-item1', 'content']
-            path: first.getItemPath(item.id),
+            path: item.getTextPath(),
             startOffset: item.getLength(),
             containerId: container.id
           })

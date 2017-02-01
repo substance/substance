@@ -32,6 +32,10 @@ class EditingInterface {
     return this._document.get(...args)
   }
 
+  contains(id) {
+    return this._document.contains(id)
+  }
+
   create(nodeData) {
     return this._document.create(nodeData)
   }
@@ -159,10 +163,6 @@ class EditingInterface {
 
   getIndex(...args) {
     return this._document.getIndex(...args)
-  }
-
-  getRealPath(...args) {
-    return this._document.getRealPath(...args)
   }
 
   getAnnotations(...args) {

@@ -158,17 +158,7 @@ class ContainerEditor extends Surface {
     // HACK: ATM we have a cursor behavior in Chrome and FF when collapsing a selection
     // e.g. have a selection from up-to-down and the press up, seems to move the focus
     else if (!platform.isIE && !sel.isCollapsed() && !event.shiftKey) {
-      if (direction === 'left') {
-        this._setSelection({
-          startPath: sel.start.path,
-          startOffset: sel.start.offset
-        })
-      } else {
-        this._setSelection({
-          startPath: sel.end.path,
-          startOffset: sel.end.offset
-        })
-      }
+      this._setSelection(sel.collapse(direction))
     }
     // Note: we need this timeout so that CE updates the DOM selection first
     // before we try to map it to the model

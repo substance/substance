@@ -17,17 +17,17 @@ const CONVERTERS = [
 
 class TestHTMLImporter extends HTMLImporter {
 
-  constructor() {
+  constructor(standAlone) {
     super({
       schema: schema,
       converters: CONVERTERS,
-      DocumentClass: TestArticle
+      DocumentClass: TestArticle,
+      "stand-alone": Boolean(standAlone)
     })
-
-    this.createDocument()
   }
 
   convertDocument(documentEl) {
+    this.state.doc = this.createDocument()
     var bodyEl = documentEl.find('body')
     this.convertContainer(bodyEl.children, 'body')
   }

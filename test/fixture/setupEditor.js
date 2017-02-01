@@ -89,7 +89,7 @@ function fixture(...args) {
     } else if (first.isList()) {
       editorSession.setSelection({
         type: 'property',
-        path: first.getItemPath(first.items[0]),
+        path: first.getItemAt(0).getTextPath(),
         startOffset: 0,
         containerId: 'body',
         surfaceId: 'body'

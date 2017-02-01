@@ -14,10 +14,6 @@ class ListNode extends DocumentNode {
     return this.getItemAt(this.getLength()-1)
   }
 
-  getItemPath(itemId) {
-    return [this.id, 'items', itemId, 'content']
-  }
-
   getItems() {
     const doc = this.getDocument()
     return this.items.map((id) => {

@@ -2,6 +2,7 @@ import last from '../util/last'
 import forEach from '../util/forEach'
 import uuid from '../util/uuid'
 import Document from '../model/Document'
+import documentHelpers from '../model/documentHelpers'
 
 /**
   Pastes clipboard content at the current selection
@@ -116,18 +117,23 @@ function _pasteDocument(tx, pasteDoc) {
   let insertPos
   if (sel.isPropertySelection()) {
     let startPath = sel.start.path
-    let startPos = container.getPosition(sel.start.getNodeId())
+    let nodeId = sel.start.getNodeId()
+    let startPos = container.getPosition(nodeId, 'strict')
     let text = tx.get(startPath)
     // Break, unless we are at the last character of a node,
     // then we can simply insert after the node
-    if ( text.length === sel.start.offset ) {
+    if (text.length === 0) {
+      insertPos = startPos
+      container.hide(nodeId)
+      documentHelpers.deleteNode(tx, tx.get(nodeId))
+    } else if ( text.length === sel.start.offset ) {
       insertPos = startPos + 1
     } else {
       tx.break()
       insertPos = startPos + 1
     }
   } else if (sel.isNodeSelection()) {
-    let nodePos = container.getPosition(sel.getNodeId())
+    let nodePos = container.getPosition(sel.getNodeId(), 'strict')
     if (sel.isBefore()) {
       insertPos = nodePos
     } else if (sel.isAfter()) {
@@ -136,33 +142,21 @@ function _pasteDocument(tx, pasteDoc) {
       throw new Error('Illegal state: the selection should be collapsed.')
     }
   }
-
-  // TODO how should this check be useful?
-  if (insertPos < 0) {
-    console.error('Could not find insertion position in ContainerNode.')
-  }
   // transfer nodes from content document
   let nodeIds = pasteDoc.get(Document.SNIPPET_ID).nodes
-  let annoIndex = pasteDoc.getIndex('annotations')
   let insertedNodes = []
+  let visited = {}
   for (let i = 0; i < nodeIds.length; i++) {
-    let nodeId = nodeIds[i]
-    let node = _copyNode(tx, pasteDoc.get(nodeId))
+    let node = pasteDoc.get(nodeIds[i])
+    // Note: this will on the one hand make sure
+    // node ids are changed to avoid collisions in
+    // the target doc
+    // Plus, it uses reflection to create owned nodes recursively,
+    // and to transfer attached annotations.
+    _transferWithDisambiguatedIds(tx, node, visited)
+    // ATTENTION: use node.id here, it might have changed by disambiguater
     container.show(node.id, insertPos++)
     insertedNodes.push(node)
-    // transfer annotations
-    // what if we have changed the id of nodes that are referenced by annotations?
-    let annos = annoIndex.get(nodeId)
-    for (let j = 0; j < annos.length; j++) {
-      let data = annos[j].toJSON()
-      if (node.id !== nodeId) {
-        data.path[0] = node.id
-      }
-      if (tx.get(data.id)) {
-        data.id = uuid(data.type)
-      }
-      tx.create(data)
-    }
   }
 
   if (insertedNodes.length > 0) {
@@ -180,22 +174,77 @@ function _pasteDocument(tx, pasteDoc) {
   }
 }
 
-function _copyNode(tx, pasteNode) {
-  let nodeId = pasteNode.id
-  let data = pasteNode.toJSON()
-  // create a new id if the node exists already
-  if (tx.get(nodeId)) {
-    data.id = uuid(pasteNode.type)
+// We need to disambiguate ids if the target document
+// contains a node with the same id.
+// Unfortunately, this can be difficult in some cases,
+// e.g. other nodes that have a reference to the re-named node
+// We only fix annotations for now.
+function _transferWithDisambiguatedIds(targetDoc, node, visited) {
+  // do not run twice on the same node
+  if (visited[node.id]) return
+  visited[node.id] = true
+  if (!node) return
+  let oldId = node.id
+  let newId
+  if (targetDoc.contains(node.id)) {
+    // change the node id
+    newId = uuid(node.type)
+    node.id = newId
   }
-  if (pasteNode.hasChildren()) {
-    let children = pasteNode.getChildren()
-    let childrenIds = data[pasteNode.getChildrenProperty()]
-    for (let i = 0; i < children.length; i++) {
-      let childNode = _copyNode(tx, children[i])
-      childrenIds[i] = childNode.id
+  const sourceDoc = node.getDocument()
+  const annotationIndex = sourceDoc.getIndex('annotations')
+  const nodeSchema = node.getSchema()
+  // collect annotations so that we can create them in the target doc afterwards
+  let annos = []
+  // now we iterate all properties of the node schema,
+  // to see if there are owned references, which need to be created recursively,
+  // and if there are text properties, where annotations could be attached to
+  for (let key in nodeSchema) {
+    if (key === 'id' || key === 'type' || !nodeSchema.hasOwnProperty(key)) continue
+    const prop = nodeSchema[key]
+    const name = prop.name
+    // Look for references to owned children and create recursively
+    if ((prop.isReference() && prop.isOwned()) || (prop.type === 'file')) {
+      // NOTE: we need to recurse directly here, so that we can
+      // update renamed references
+      let val = node[prop.name]
+      if (prop.isArray()) {
+        for (let i = 0; i < val.length; i++) {
+          let id = val[i]
+          if (!visited[id]) {
+            let child = sourceDoc.get(id)
+            _transferWithDisambiguatedIds(targetDoc, child, visited)
+            val[i] = child.id
+          }
+        }
+      } else {
+        let id = val
+        if (!visited[id]) {
+          let child = sourceDoc.get(id)
+          _transferWithDisambiguatedIds(targetDoc, child, visited)
+          node[name] = child.id
+        }
+      }
+    }
+    // Look for text properties and create annotations in the target doc accordingly
+    else if (prop.isText()) {
+      let _annos = annotationIndex.get([node.id])
+      for (let i = 0; i < _annos.length; i++) {
+        let anno = _annos[i]
+        if (anno.start.path[0] === oldId) {
+          anno.start.path[0] = newId
+        }
+        if (anno.end.path[0] === oldId) {
+          anno.end.path[0] = newId
+        }
+        annos.push(anno)
+      }
     }
   }
-  return tx.create(data)
+  targetDoc.create(node)
+  for (let i = 0; i < annos.length; i++) {
+    _transferWithDisambiguatedIds(targetDoc, annos[i], visited)
+  }
 }
 
 export default paste

@@ -638,7 +638,12 @@ class Surface extends Component {
   _selectProperty(path) {
     let doc = this.getDocument()
     let text = doc.get(path)
-    this._setSelection(doc.createSelection(path, 0, text.length))
+    this._setSelection(doc.createSelection({
+      type: 'property',
+      path: path,
+      startoffset: 0,
+      endOffset: text.length
+    }))
   }
 
   // internal API for TextProperties to enable dispatching

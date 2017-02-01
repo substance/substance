@@ -42,7 +42,7 @@ test("Create expanded property selection.", function(t) {
   t.end()
 })
 
-test("Node.toJSON() should not export undefined, optional properties", function(t) {
+test("Node.toJSON() should not export undefined optional properties", function(t) {
   let doc = fixture(simple)
   let p = doc.create({
     type: 'paragraph',

@@ -1,7 +1,7 @@
-import extend from '../util/extend'
 import clone from '../util/clone'
-import last from '../util/last'
+import extend from '../util/extend'
 import forEach from '../util/forEach'
+import last from '../util/last'
 import createCountingIdGenerator from '../util/createCountingIdGenerator'
 import ArrayIterator from '../util/ArrayIterator'
 
@@ -107,35 +107,19 @@ class DOMImporter {
     if (!this.state.doc) {
       this.state.doc = this.createDocument()
     }
-    var doc = this.state.doc
     this._createNodes()
-    return doc
+    return this.state.doc
   }
 
   _createNodes() {
-    var state = this.state
-    var doc = state.doc
-    // creating all nodes
-    state.nodes.forEach(function(node) {
-      // delete if the node exists already
-      if (doc.get(node.id)) {
-        doc.delete(node.id)
-      }
-      doc.create(node)
-    })
+    const state = this.state
+    _createNodes(state.doc, state.nodes)
     this._createInlineNodes()
   }
 
   _createInlineNodes() {
-    var state = this.state
-    var doc = state.doc
-    // creating annotations afterwards so that the targeted nodes exist for sure
-    state.inlineNodes.forEach(function(node) {
-      if (doc.get(node.id)) {
-        doc.delete(node.id)
-      }
-      doc.create(node)
-    })
+    const state = this.state
+    _createNodes(state.doc, state.inlineNodes)
   }
 
   /**
@@ -155,7 +139,7 @@ class DOMImporter {
       var blockTypeConverter = this._getConverterForElement(el, 'block')
       var node
       if (blockTypeConverter) {
-        node = this._nodeData(el, blockTypeConverter.type)
+        node = this._createNode(el, blockTypeConverter.type)
         state.pushContext(el.tagName, blockTypeConverter)
         node = blockTypeConverter.import(el, node, this) || node
         state.popContext()
@@ -196,14 +180,18 @@ class DOMImporter {
     @returns {object} the created node as JSON
    */
   convertElement(el) {
-    var doc = this.state.doc
-    var nodeData = this._convertElement(el)
-    var node
-    if (doc) {
-      node = doc.create(nodeData)
-    } else {
-      var NodeClass = this.schema.getNodeClass(nodeData.type)
-      node = new NodeClass(doc, nodeData)
+    let isTopLevel = !this.state.isConverting
+    if (isTopLevel) {
+      this.state.isConverting = true
+    }
+    let node = this._convertElement(el)
+    // HACK: to allow using an importer stand-alone
+    // i.e. creating detached elements
+    if (this.config["stand-alone"] && isTopLevel) {
+      this.state.isConverting = false
+      this.generateDocument()
+      node = this.state.doc.get(node.id)
+      this.reset()
     }
     return node
   }
@@ -212,7 +200,7 @@ class DOMImporter {
     var node
     var converter = this._getConverterForElement(el, mode)
     if (converter) {
-      node = this._nodeData(el, converter.type)
+      node = this._createNode(el, converter.type)
       var NodeClass = this.schema.getNodeClass(node.type)
       this.state.pushContext(el.tagName, converter)
       // Note: special treatment for property annotations and inline nodes
@@ -276,26 +264,32 @@ class DOMImporter {
     this.state.container.push(node.id)
   }
 
+  _createNode(el, type) {
+    let NodeClass = this.schema.getNodeClass(type)
+    if (!NodeClass) throw new Error('No NodeClass registered for type '+type)
+    let nodeData = {}
+    forEach(NodeClass.schema, function(prop, name) {
+      if (prop.hasDefault()) {
+        nodeData[name] = clone(prop.default)
+      } else {
+        // otherwise we use a default value
+        // so that Node creation will still succeed
+        // TODO: this might be risky if the Node impl is relying
+        // on all data being valid
+        nodeData[name] = prop.createDefaultValue()
+      }
+    })
+    nodeData.type = type
+    nodeData.id = this.getIdForElement(el, type)
+    // NOTE: this instance is detached,
+    // still we want a real instance for sake of consistency
+    let node = new NodeClass(null, nodeData)
+    return node
+  }
+
   _createAndShow(node) {
     this.createNode(node)
     this.show(node)
-  }
-
-  _nodeData(el, type) {
-    var nodeData = {
-      type: type,
-      id: this.getIdForElement(el, type)
-    }
-    var NodeClass = this.schema.getNodeClass(type)
-    forEach(NodeClass.schema, function(prop, name) {
-      // check integrity of provided props, such as type correctness,
-      // and mandatory properties
-      var hasDefault = prop.hasOwnProperty('default')
-      if (hasDefault) {
-        nodeData[name] = clone(prop.default)
-      }
-    })
-    return nodeData
   }
 
   /**
@@ -355,7 +349,7 @@ class DOMImporter {
   }
 
   /**
-    Tells the converter to insert a virutal custom text.
+    Tells the converter to insert custom text.
 
     This is useful when during conversion a generated label needs to be inserted instead
     of real text.
@@ -407,7 +401,7 @@ class DOMImporter {
     if (!defaultConverter) {
       throw new Error('Could not find converter for default type ', defaultTextType)
     }
-    var node = this._nodeData(el, defaultTextType)
+    var node = this._createNode(el, defaultTextType)
     this.state.pushContext(el.tagName, converter)
     node = defaultConverter.import(el, node, converter) || node
     this.state.popContext()
@@ -458,7 +452,7 @@ class DOMImporter {
         // node instantly (self-managed)
         var startOffset = context.offset
         var inlineType = inlineTypeConverter.type
-        var inlineNode = this._nodeData(el, inlineType)
+        var inlineNode = this._createNode(el, inlineType)
         if (inlineTypeConverter.import) {
           // push a new context so we can deal with reentrant calls
           state.stack.push({
@@ -670,6 +664,7 @@ class DOMImporterState {
     this.lastChar = ""
     this.skipTypes = {}
     this.ignoreAnnotations = false
+    this.isConverting = false
 
     // experimental: trying to generate simpler ids during import
     // this.uuid = uuid
@@ -691,5 +686,21 @@ class DOMImporterState {
 }
 
 DOMImporter.State = DOMImporterState
+
+function _createNodes(doc, nodes) {
+  nodes.forEach((node) => {
+    // NOTE: if your Document implementation adds default nodes in the constructor
+    // and you have exported the node, we need to remove the default version first
+    // TODO: alternatively we could just update the existing one. For now we remove the old one.
+    let _node = doc.get(node.id)
+    if (_node && _node !== node) {
+      // console.warn('Node with same it already exists.', node)
+      doc.delete(node.id)
+    }
+    if (node.document !== doc) {
+      doc.create(node)
+    }
+  })
+}
 
 export default DOMImporter
