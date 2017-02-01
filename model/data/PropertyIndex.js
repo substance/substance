@@ -40,7 +40,7 @@ class PropertyIndex extends NodeIndex {
     @param {Node}
     @returns {Boolean} true if the given node should be added to the index.
    */
-  select(node) {
+  select(node) { // eslint-disable-line
     return true
   }
 
