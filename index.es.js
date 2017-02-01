@@ -194,6 +194,18 @@ export { default as SubstanceError } from './util/SubstanceError'
 export { default as substanceGlobals } from './util/substanceGlobals'
 export { default as TreeIndex } from './util/TreeIndex'
 export { default as uuid } from './util/uuid'
+        
+export { default as isArray } from './util/isArray'
+export { default as isArrayEqual } from './util/isArrayEqual'
+export { default as isBoolean } from './util/isBoolean'
+export { default as isEqual } from './util/isEqual'
+export { default as isFunction } from './util/isFunction'
+export { default as isNil } from './util/isNil'
+export { default as isNumber } from './util/isNumber'
+export { default as isObject } from './util/isObject'
+export { default as isPlainObject } from './util/isPlainObject'
+export { default as isString } from './util/isString'        
+        
 export { series } from './util/async'
 
 // dom
