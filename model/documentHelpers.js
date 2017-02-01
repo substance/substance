@@ -271,12 +271,11 @@ function deleteTextRange(doc, start, end) {
     }
   }
   let path = start.path
-  let node = doc.get(path[0])
-  if (!node.isText()) throw new Error('Expecting a TextNode.')
+  let text = doc.get(path)
   if (!end) {
     end = {
       path: start.path,
-      offset: node.getLength()
+      offset: text.length
     }
   }
   if (!isArrayEqual(start.path, end.path)) throw new Error('Unsupported state: selection should be on one property')

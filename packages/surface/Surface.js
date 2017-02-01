@@ -349,7 +349,7 @@ class Surface extends Component {
 
     // special treatment for triple clicks
     if (!(platform.isIE && platform.version<12) && event.detail >= 3) {
-      let sel = this.getSelection()
+      let sel = this.getEditorSession().getSelection()
       if (sel.isPropertySelection()) {
         this._selectProperty(sel.path)
         event.preventDefault()
@@ -641,7 +641,7 @@ class Surface extends Component {
     this._setSelection(doc.createSelection({
       type: 'property',
       path: path,
-      startoffset: 0,
+      startOffset: 0,
       endOffset: text.length
     }))
   }

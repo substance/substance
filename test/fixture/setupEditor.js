@@ -15,6 +15,8 @@ import AbstractEditor from '../../ui/AbstractEditor'
 import ContainerEditor from '../../ui/ContainerEditor'
 import Configurator from '../../util/Configurator'
 import TestContainerAnnotation from './TestContainerAnnotation'
+import TestStructuredNode from './TestStructuredNode'
+import TestStructuredNodeComponent from './TestStructuredNodeComponent'
 
 export default function setupEditor(t, ...f) {
   let editor = TestEditor.mount({ editorSession: fixture(...f) }, t.sandbox)
@@ -61,7 +63,9 @@ function getConfig() {
   config.addNode(TestBlockNode)
   config.addNode(TestInlineNode)
   config.addNode(TestContainerAnnotation)
+  config.addNode(TestStructuredNode)
   config.addComponent('test-block', Component)
+  config.addComponent('structured-node', TestStructuredNodeComponent)
   return config
 }
 
