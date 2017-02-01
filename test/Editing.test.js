@@ -314,10 +314,9 @@ test.UI("[DR4-3]: Deleting using DELETE with cursor inside an empty TextNode and
   })
   let sel = editorSession.getSelection()
   let body = doc.get('body')
-  let l = doc.get('l1')
   t.equal(body.nodes.length, 2, 'There should be only 2 nodes left.')
   t.ok(sel.isCollapsed(), 'Selection should be collapsed')
-  t.deepEqual(sel.start.path, l.getItemPath('l1-1'), '... on first list item')
+  t.deepEqual(sel.start.path, ['l1-1', 'content'], '... on first list item')
   t.equal(sel.start.offset, 0,'... at first position')
   t.end()
 })
@@ -713,7 +712,7 @@ test.UI("[D20-5]: Deleting a range starting in the middle of a TextNode and endi
     type: 'container',
     startPath: p1.getTextPath(),
     startOffset: 3,
-    endPath: l1.getItemPath('l1-1'),
+    endPath: ['l1-1', 'content'],
     endOffset: 3,
     containerId: 'body'
   })
@@ -737,7 +736,7 @@ test.UI("[D20-6]: Deleting a range starting in the middle of a ListItem and endi
   let l1 = doc.get('l1')
   editorSession.setSelection({
     type: 'container',
-    startPath: l1.getItemPath('l1-2'),
+    startPath: ['l1-2', 'content'],
     startOffset: 3,
     endPath: p1.getTextPath(),
     endOffset: 3,
@@ -753,7 +752,7 @@ test.UI("[D20-6]: Deleting a range starting in the middle of a ListItem and endi
   let li2 = l1.getItemAt(1)
   t.equal(li2.getText(), LI2_TEXT.slice(0,3)+P1_TEXT.slice(3), 'The second item should container merged content')
   t.ok(sel.isCollapsed(), 'Selection should be collapsed')
-  t.deepEqual(sel.start.path, l1.getItemPath(li2.id), '... on second list item')
+  t.deepEqual(sel.start.path, li2.getTextPath(), '... on second list item')
   t.equal(sel.start.offset, 3, '... at correct position')
   t.end()
 })
@@ -763,9 +762,9 @@ test.UI("[D20-7]: Deleting a range within a ListItem", function(t) {
   let l1 = doc.get('l1')
   editorSession.setSelection({
     type: 'container',
-    startPath: l1.getItemPath('l1-2'),
+    startPath: ['l1-2', 'content'],
     startOffset: 3,
-    endPath: l1.getItemPath('l1-2'),
+    endPath: ['l1-2', 'content'],
     endOffset: 6,
     containerId: 'body'
   })
@@ -777,19 +776,19 @@ test.UI("[D20-7]: Deleting a range within a ListItem", function(t) {
   let li2 = l1.getItemAt(1)
   t.equal(li2.getText(), LI2_TEXT.slice(0,3)+LI2_TEXT.slice(6), 'The second item should be changed')
   t.ok(sel.isCollapsed(), 'Selection should be collapsed')
-  t.deepEqual(sel.start.path, l1.getItemPath(li2.id), '... on second list item')
+  t.deepEqual(sel.start.path, li2.getTextPath(), '... on second list item')
   t.equal(sel.start.offset, 3, '... at correct position')
   t.end()
 })
 
-test.UI("[D20-7]: Deleting a range across two ListItems within the same List", function(t) {
+test.UI("[D20-8]: Deleting a range across two ListItems within the same List", function(t) {
   let { editorSession, doc } = setupEditor(t, _l1)
   let l1 = doc.get('l1')
   editorSession.setSelection({
     type: 'container',
-    startPath: l1.getItemPath('l1-1'),
+    startPath: ['l1-1', 'content'],
     startOffset: 3,
-    endPath: l1.getItemPath('l1-2'),
+    endPath: ['l1-2', 'content'],
     endOffset: 3,
     containerId: 'body'
   })
@@ -801,7 +800,7 @@ test.UI("[D20-7]: Deleting a range across two ListItems within the same List", f
   let li1 = l1.getItemAt(0)
   t.equal(li1.getText(), LI1_TEXT.slice(0,3)+LI2_TEXT.slice(3), 'The items should be merged')
   t.ok(sel.isCollapsed(), 'Selection should be collapsed')
-  t.deepEqual(sel.start.path, l1.getItemPath(li1.id), '... on the list item')
+  t.deepEqual(sel.start.path, li1.getTextPath(), '... on the list item')
   t.equal(sel.start.offset, 3, '... at correct position')
   t.end()
 })
@@ -812,12 +811,13 @@ test.UI("[D20-7]: Deleting a range across two ListItems within the same List", f
 // TODO: add specification
 test.UI("[L1]: Inserting text into a ListItem", function(t) {
   let { editorSession, doc } = setupEditor(t, _l1)
+  editorSession.setSelection({
+    type: 'property',
+    path: ['l1-1', 'content'],
+    startOffset: 3,
+    containerId: 'body'
+  })
   editorSession.transaction((tx) => {
-    tx.setSelection({
-      type: 'property',
-      path: ['l1', 'items', 'l1-1', 'content'],
-      startOffset: 3
-    })
     tx.insertText('xxx')
   })
   let sel = editorSession.getSelection()
@@ -829,12 +829,13 @@ test.UI("[L1]: Inserting text into a ListItem", function(t) {
 
 test.UI("[L2]: Breaking a ListItem with cursor in the middle of text", function(t) {
   let { editorSession, doc } = setupEditor(t, _l1)
+  editorSession.setSelection({
+    type: 'property',
+    path: ['l1-1', 'content'],
+    startOffset: 3,
+    containerId: 'body'
+  })
   editorSession.transaction((tx) => {
-    tx.setSelection({
-      type: 'property',
-      path: ['l1', 'items', 'l1-1', 'content'],
-      startOffset: 3
-    })
     tx.break()
   })
   let sel = editorSession.getSelection()
@@ -844,19 +845,20 @@ test.UI("[L2]: Breaking a ListItem with cursor in the middle of text", function(
   let li2 = doc.get(l.items[1])
   t.equal(li1.getText(), LI1_TEXT.slice(0,3), 'First item should have been truncated.')
   t.equal(li2.getText(), LI1_TEXT.slice(3), 'remaining line should have been inserted into new list item.')
-  t.deepEqual(sel.start.path, l.getItemPath(li2.id), 'Cursor should in second item')
+  t.deepEqual(sel.start.path, li2.getTextPath(), 'Cursor should in second item')
   t.equal(sel.start.offset, 0, 'Cursor should be at begin of item.')
   t.end()
 })
 
 test.UI("[L3]: Breaking a ListItem with cursor at begin of text", function(t) {
   let { editorSession, doc } = setupEditor(t, _l1)
+  editorSession.setSelection({
+    type: 'property',
+    path: ['l1-1', 'content'],
+    startOffset: 0,
+    containerId: 'body'
+  })
   editorSession.transaction((tx) => {
-    tx.setSelection({
-      type: 'property',
-      path: ['l1', 'items', 'l1-1', 'content'],
-      startOffset: 0
-    })
     tx.break()
   })
   let sel = editorSession.getSelection()
@@ -866,19 +868,20 @@ test.UI("[L3]: Breaking a ListItem with cursor at begin of text", function(t) {
   let li2 = doc.get(l.items[1])
   t.equal(li1.getText(), '', 'First item should be empty.')
   t.equal(li2.getText(), LI1_TEXT, 'Text should have moved to next item.')
-  t.deepEqual(sel.start.path, l.getItemPath(li2.id), 'Cursor should be in second item')
+  t.deepEqual(sel.start.path, li2.getTextPath(), 'Cursor should be in second item')
   t.equal(sel.start.offset, 0, '... at begin of item.')
   t.end()
 })
 
 test.UI("[L4]: Splitting a List by breaking an empty ListItem", function(t) {
   let { editorSession, doc } = setupEditor(t, _l1, _l1_empty)
+  editorSession.setSelection({
+    type: 'property',
+    path: ['l1-empty', 'content'],
+    startOffset: 0,
+    containerId: 'body'
+  })
   editorSession.transaction((tx) => {
-    tx.setSelection({
-      type: 'property',
-      path: ['l1', 'items', 'l1-empty', 'content'],
-      startOffset: 0
-    })
     tx.break()
   })
   let sel = editorSession.getSelection()
@@ -903,7 +906,7 @@ test.UI("[L5-1]: Toggling a ListItem using BACKSPACE", function(t) {
   let { editorSession, doc } = setupEditor(t, _l1)
   editorSession.setSelection({
     type: 'property',
-    path: ['l1', 'items', 'l1-2', 'content'],
+    path: ['l1-2', 'content'],
     startOffset: 0,
     containerId: 'body'
   })
@@ -928,7 +931,7 @@ test.UI("[L5-2]: Merging two ListItems using DELETE", function(t) {
   let { editorSession, doc } = setupEditor(t, _l1)
   editorSession.setSelection({
     type: 'property',
-    path: ['l1', 'items', 'l1-1', 'content'],
+    path: ['l1-1', 'content'],
     startOffset: LI1_TEXT.length,
     containerId: 'body'
   })
@@ -941,7 +944,7 @@ test.UI("[L5-2]: Merging two ListItems using DELETE", function(t) {
   let li = l.getItemAt(0)
   t.equal(li.getText(), LI1_TEXT+LI2_TEXT, 'The list item should have the merged text')
   t.ok(sel.isCollapsed(), 'The selection should be collapsed')
-  t.deepEqual(sel.start.path, l.getItemPath(li.id), '... on the list item')
+  t.deepEqual(sel.start.path, li.getTextPath(), '... on the list item')
   t.equal(sel.start.offset, LI1_TEXT.length, '... at the end of the original content')
   t.end()
 })
@@ -950,7 +953,7 @@ test.UI("[L6-1]: Merging a List into previous List using DELETE", function(t) {
   let { editorSession, doc } = setupEditor(t, _l1, _l2)
   editorSession.setSelection({
     type: 'property',
-    path: ['l1', 'items', 'l1-2', 'content'],
+    path: ['l1-2', 'content'],
     startOffset: LI2_TEXT.length,
     containerId: 'body'
   })
@@ -961,7 +964,7 @@ test.UI("[L6-1]: Merging a List into previous List using DELETE", function(t) {
   let l1 = doc.get('l1')
   t.equal(l1.items.length, 4, 'First list should have 4 items')
   t.ok(sel.isCollapsed(), 'The selection should be collapsed')
-  t.deepEqual(sel.start.path, ['l1', 'items', 'l1-2', 'content'], '... on the same item')
+  t.deepEqual(sel.start.path, ['l1-2', 'content'], '... on the same item')
   t.equal(sel.start.offset, LI2_TEXT.length, '... at the same position')
   t.end()
 })
@@ -971,9 +974,9 @@ test.UI("[L7-1]: Copying two ListItems", function(t) {
   let editor = new EditingInterface(doc)
   editor.setSelection({
     type: 'container',
-    startPath: ['l1', 'items', 'l1-1', 'content'],
+    startPath: ['l1-1', 'content'],
     startOffset: 3,
-    endPath: ['l1', 'items', 'l1-2', 'content'],
+    endPath: ['l1-2', 'content'],
     endOffset: 3,
     containerId: 'body'
   })
@@ -997,7 +1000,7 @@ test.UI("[L7-2]: Copying a paragraph and a ListItem", function(t) {
     type: 'container',
     startPath: ['p1', 'content'],
     startOffset: 3,
-    endPath: ['l1', 'items', 'l1-1', 'content'],
+    endPath: ['l1-1', 'content'],
     endOffset: 3,
     containerId: 'body'
   })
@@ -1038,7 +1041,7 @@ test.UI("[L8-2]: Toggling first list-item into a paragraph", function(t) {
   let { doc, editorSession} = setupEditor(t, _l1)
   editorSession.setSelection({
     type: 'property',
-    path: ['l1', 'items', 'l1-1', 'content'],
+    path: ['l1-1', 'content'],
     startOffset: 3,
     containerId: 'body'
   })
@@ -1060,7 +1063,7 @@ test.UI("[L8-2]: Toggling last list-item into a paragraph", function(t) {
   let { doc, editorSession} = setupEditor(t, _l1)
   editorSession.setSelection({
     type: 'property',
-    path: ['l1', 'items', 'l1-2', 'content'],
+    path: ['l1-2', 'content'],
     startOffset: 3,
     containerId: 'body'
   })
@@ -1082,7 +1085,7 @@ test.UI("[L8-2]: Toggling a middle list-item into a paragraph splitting the list
   let { doc, editorSession} = setupEditor(t, _l1, _li3)
   editorSession.setSelection({
     type: 'property',
-    path: ['l1', 'items', 'l1-3', 'content'],
+    path: ['l1-3', 'content'],
     startOffset: 3,
     containerId: 'body'
   })
@@ -1107,7 +1110,7 @@ test.UI("[L9-1]: Indenting a ListItem", function(t) {
   let { doc, editorSession } = setupEditor(t, _l1)
   editorSession.setSelection({
     type: 'property',
-    path: ['l1', 'items', 'l1-1', 'content'],
+    path: ['l1-1', 'content'],
     startOffset: 3,
     containerId: 'body'
   })
@@ -1123,7 +1126,7 @@ test.UI("[L9-1]: Dedenting a ListItem", function(t) {
   let { doc, editorSession } = setupEditor(t, _l1, _li1plus)
   editorSession.setSelection({
     type: 'property',
-    path: ['l1', 'items', 'l1-1', 'content'],
+    path: ['l1-1', 'content'],
     startOffset: 3,
     containerId: 'body'
   })
@@ -1135,14 +1138,14 @@ test.UI("[L9-1]: Dedenting a ListItem", function(t) {
   t.end()
 })
 
-test.UI("[L10]: Copy and Pasting a List", function(t) {
+test.UI("[L10-1]: Copy and Pasting a List", function(t) {
   let { doc, editorSession } = setupEditor(t, _p1, _empty, _l1)
   editorSession.transaction((tx) => {
     tx.setSelection({
       type: 'container',
-      startPath: ['l1', 'items', 'l1-1', 'content'],
+      startPath: ['l1-1', 'content'],
       startOffset: 0,
-      endPath: ['l1', 'items', 'l1-2', 'content'],
+      endPath: ['l1-2', 'content'],
       endOffset: LI2_TEXT.length,
       containerId: 'body'
     })
@@ -1166,6 +1169,39 @@ test.UI("[L10]: Copy and Pasting a List", function(t) {
   t.equal(li1.getItemAt(1).getText(), li2.getItemAt(1).getText(), 'Second list item should have same content')
   t.end()
 })
+
+test.UI("[L10-2]: Copy and Pasting a List partially", function(t) {
+  let { doc, editorSession } = setupEditor(t, _p1, _empty, _l1)
+  editorSession.transaction((tx) => {
+    tx.setSelection({
+      type: 'container',
+      startPath: ['l1-1', 'content'],
+      startOffset: 3,
+      endPath: ['l1-2', 'content'],
+      endOffset: 3,
+      containerId: 'body'
+    })
+    let copy = tx.copySelection()
+    tx.setSelection({
+      type: 'property',
+      path: ['empty', 'content'],
+      startOffset: 0,
+      containerId: 'body'
+    })
+    tx.paste(copy)
+  })
+  let body = doc.get('body')
+  let nodes = body.getNodes()
+  t.equal(body.length, 3, "There should be 3 nodes")
+  t.deepEqual(['paragraph', 'list', 'list'], nodes.map(n => n.type), '.. a paragraph and 2 lists')
+  let li1 = body.getChildAt(1)
+  let li2 = body.getChildAt(2)
+  t.notDeepEqual(li1.items, li2.items, 'List items should not be the same.')
+  t.equal(li1.getItemAt(0).getText(), LI1_TEXT.slice(3), 'First list item should be truncated')
+  t.equal(li1.getItemAt(1).getText(), LI2_TEXT.slice(0,3), 'Second list item should be truncated')
+  t.end()
+})
+
 
 // TODO: add specification and test cases for tx.annotate()
 

@@ -24,6 +24,7 @@ import Coordinate from './Coordinate'
 import Range from './Range'
 import docHelpers from './documentHelpers'
 import JSONConverter from './JSONConverter'
+import ParentNodeHook from './ParentNodeHook'
 
 const converter = new JSONConverter()
 
@@ -90,10 +91,10 @@ class Document extends EventEmitter {
     this.eventProxies = {
       'path': new PathEventProxy(this),
     }
-
-    // Note: using the general event queue (as opposed to calling _updateEventProxies from within _notifyChangeListeners)
-    // so that handler priorities are considered correctly
     this.on('document:changed', this._updateEventProxies, this)
+    // TODO: maybe we want to have a generalized concept for such low-level hooks
+    // e.g. indexes are similar
+    ParentNodeHook.register(this)
   }
 
   get id() {
@@ -114,22 +115,6 @@ class Document extends EventEmitter {
   */
   contains(id) {
     return this.data.contains(id)
-  }
-
-  /**
-    Provides the so called real for a property.
-
-    With our flat model, properties usually have 2-component path,
-    e.g. 'text1.content'
-    With ids, which are comparable to symlinks on the file-system
-    it sometimes makes sense to describe a property in its parent context.
-    For example a list item could be addressed via its parent: `['list1', 'items', 1, 'content']`
-    Here `this.getRealPath()` would provide something like `['list-item-xyz', 'content']`
-    The real path makes Operational Transforms more robust, as such changes are independent
-    of its parent.
-  */
-  getRealPath(path) {
-    return this.data.getRealPath(path)
   }
 
   /**
@@ -391,10 +376,7 @@ class Document extends EventEmitter {
             }
           }
           // integrity checks:
-          let text = this.get(data.path)
-          if (isNil(text)) {
-            throw new Error('Invalid property path: ' + data.path)
-          }
+          let text = this.get(data.path, 'strict')
           if (data.startOffset < 0 || data.startOffset > text.length) {
             throw new Error('Invalid startOffset: target property has length '+text.length+', given startOffset is ' + data.startOffset)
           }
@@ -609,10 +591,11 @@ class Document extends EventEmitter {
       } else if (node.isList()) {
         // console.warn("DEPRECATED: don't use node coordinates for ListNodes. Use selectionHelpers instead to set cursor at first or last position conveniently.")
         if (offset === 0) {
-          return new Coordinate(node.getItemPath(node.items[0]), 0)
+          let item = node.getItemAt(0)
+          return new Coordinate(item.getTextPath(), 0)
         } else {
           let item = this.get(last(node.items))
-          return new Coordinate(node.getItemPath(item.id), item.getLength())
+          return new Coordinate(item.getTextPath(), item.getLength())
         }
       }
     }

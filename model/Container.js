@@ -8,17 +8,17 @@ import ContainerAddress from './ContainerAddress'
 
   While most editing occurs on a property level (such as editing text),
   other things happen on a node level, e.g., breaking or mergin nodes,
-  or spanning annotations or so called ContainerAnnotations.
+  or spanning annotations so called ContainerAnnotations.
 */
 class Container extends DocumentNode {
 
   constructor(...args) {
     super(...args)
-    // HACK: we invalidate cached positions on every change
-    // NOTE, that in trans action docs we don't do caching
-    if (this.document && !this.document.isTransactionDocument) {
-      this.document.on('document:changed', this._onChange, this)
-    }
+
+    // NOTE: we are caching positions as they are queried very often,
+    // whereas the number of changes to a container are quite rare.
+    // The cache gets invalidated whenever the container is changed.
+    this._enableCaching()
   }
 
   dispose() {
@@ -33,21 +33,13 @@ class Container extends DocumentNode {
     return this.nodes
   }
 
-  getPosition(nodeId, strict) {
-    let pos
-    // convenience
-    if (nodeId._isNode) nodeId = nodeId.id
-    // HACK: ATM we are caching only in the real Document
-    // i.e., which is connected to the UI etc.
-    if (this.document && this.document.isTransactionDocument) {
-      pos = this.getContent().indexOf(nodeId)
-    } else {
-      const positions = this._getCachedPositions()
-      pos = positions[nodeId]
-      if (pos === undefined) pos = -1
+  getPosition(node, strict) {
+    if (isString(node)) {
+      node = this.document.get(node)
     }
+    let pos = this._getPosition(node)
     if (strict && pos < 0) {
-      throw new Error('Node is not within this container: ' + nodeId)
+      throw new Error('Node is not within this container: ' + node.id)
     }
     return pos
   }
@@ -115,24 +107,81 @@ class Container extends DocumentNode {
     return this.getLength()
   }
 
-  _onChange(change) {
-    if (change.isUpdated(this.getContentPath())) {
-      this.positions = null
+  _getPosition(node) {
+    if (this._isCaching) {
+      return this._getCachedPosition(node)
+    } else {
+      return this._lookupPosition(node)
     }
   }
 
-  _getCachedPositions() {
-    if (!this.positions) {
-      var positions = {}
-      this.nodes.forEach(function(id, pos) {
-        positions[id] = pos
-      })
-      this.positions = positions
+  _getCachedPosition(node) {
+    let cache = this._cachedPositions || this._fillCache()
+    let nodeId = node.id
+    let pos = -1
+    if (cache.hasOwnProperty(nodeId)) {
+      pos = cache[nodeId]
+    } else {
+      pos = this._lookupPosition(node)
+      cache[nodeId] = pos
     }
-    return this.positions
+    return pos
+  }
+
+  _fillCache() {
+    let positions = {}
+    this.nodes.forEach((id, pos) => {
+      positions[id] = pos
+    })
+    this._cachedPositions = positions
+    return positions
+  }
+
+  _invalidateCache() {
+    this._cachedPositions = null
+  }
+
+  _lookupPosition(node) {
+    if (node.hasParent()) {
+      node = node.getRoot()
+    }
+    return this.getContent().indexOf(node.id)
+  }
+
+  _enableCaching() {
+    // this hook is used to invalidate cached positions
+    // caching is done only in the 'real' document, not in a TransactionDocument
+    if (this.document) {
+      // TransactionDocument does must be up2date after each operation
+      // as this is used to record a DocumentChange
+      // whereas, a real document is manipulated only by applying a DocumentChange
+      if (this.document._isTransactionDocument) {
+        this.document.data.on('operation:applied', this._onOperationApplied, this)
+      }
+      // for real document is only check
+      else {
+        this.document.on('document:changed', this._onDocumentChange, this)
+      }
+      this._isCaching = true
+    }
+  }
+
+  _onOperationApplied(op) {
+    if (op.type === 'set' || op.type === 'update') {
+      if (op.path[0] === this.id) {
+        this._invalidateCache()
+      }
+    }
+  }
+
+  _onDocumentChange(change) {
+    if (change.isUpdated(this.getContentPath())) {
+      this._invalidateCache()
+    }
   }
 
   // NOTE: this has been in ParentNodeMixin before
+  // TODO: try to get rid of this
 
   hasChildren() {
     return this.nodes.length > 0

@@ -56,8 +56,8 @@ function getPropertyAnnotationsForSelection(doc, sel, options) {
   if (!sel.isPropertySelection()) {
     return [];
   }
-  var path = doc.getRealPath(sel.path)
-  var annotations = doc.getIndex('annotations').get(path, sel.start.offset, sel.end.offset);
+  let path = sel.getPath()
+  let annotations = doc.getIndex('annotations').get(path, sel.start.offset, sel.end.offset);
   if (options.type) {
     annotations = filter(annotations, DocumentIndex.filterByType(options.type));
   }
@@ -152,7 +152,7 @@ function getTextForSelection(doc, sel) {
 function getMarkersForSelection(doc, sel) {
   // only PropertySelections are supported right now
   if (!sel || !sel.isPropertySelection()) return []
-  const path = doc.getRealPath(sel.getPath())
+  const path = sel.getPath()
   // markers are stored as one hash for each path, grouped by marker key
   let markers = doc.getIndex('markers').get(path)
   const filtered = filter(markers, function(m) {
@@ -266,8 +266,8 @@ function deleteTextRange(doc, start, end) {
       offset: 0
     }
   }
-  let realPath = doc.getRealPath(start.path)
-  let node = doc.get(realPath[0])
+  let path = start.path
+  let node = doc.get(path[0])
   if (!node.isText()) throw new Error('Expecting a TextNode.')
   if (!end) {
     end = {
@@ -278,9 +278,9 @@ function deleteTextRange(doc, start, end) {
   if (!isArrayEqual(start.path, end.path)) throw new Error('Unsupported state: selection should be on one property')
   let startOffset = start.offset
   let endOffset = end.offset
-  doc.update(realPath, { type: 'delete', start: startOffset, end: endOffset })
+  doc.update(path, { type: 'delete', start: startOffset, end: endOffset })
   // update annotations
-  let annos = doc.getAnnotations(realPath)
+  let annos = doc.getAnnotations(path)
   annos.forEach(function(anno) {
     let annoStart = anno.start.offset
     let annoEnd = anno.end.offset
@@ -324,20 +324,20 @@ function deleteListRange(doc, list, start, end) {
   }
   if (!start) {
     start = {
-      path: list.getItemPath(list.items[0]),
+      path: list.getItemAt(0).getTextPath(),
       offset: 0
     }
   }
   if (!end) {
     let item = list.getLastItem()
     end = {
-      path: list.getItemPath(item.id),
+      path: item.getTextPath(),
       offset: item.getLength()
     }
   }
-  let startId = start.path[2]
+  let startId = start.path[0]
   let startPos = list.getItemPosition(startId)
-  let endId = end.path[2]
+  let endId = end.path[0]
   let endPos = list.getItemPosition(endId)
   // range within the same item
   if (startPos === endPos) {
@@ -379,14 +379,13 @@ function deleteListRange(doc, list, start, end) {
   }
 
   if (!firstEntirelySelected && !lastEntirelySelected) {
-    mergeListItems(doc, list, startPos)
+    mergeListItems(doc, list.id, startPos)
   }
 }
 
-function mergeListItems(doc, list, itemPos) {
-  if (doc !== list.getDocument()) {
-    list = doc.get(list.id)
-  }
+function mergeListItems(doc, listId, itemPos) {
+  // HACK: make sure that the list is really from the doc
+  let list = doc.get(listId)
   let target = list.getItemAt(itemPos)
   let targetPath = target.getTextPath()
   let targetLength = target.getLength()

@@ -23,7 +23,7 @@ class MarkersManager {
   }
 
   register(textProperyComponent) {
-    let path = String(textProperyComponent.getRealPath())
+    let path = String(textProperyComponent.getPath())
     // console.log('registering property', path)
     let textProperties = this._textProperties[path]
     if (!textProperties) {
@@ -33,7 +33,7 @@ class MarkersManager {
   }
 
   deregister(textProperyComponent) {
-    let path = String(textProperyComponent.getRealPath())
+    let path = String(textProperyComponent.getPath())
     // console.log('deregistering property', path)
     let textProperties = this._textProperties[path]
     if (!textProperties) {
@@ -78,7 +78,7 @@ class MarkersManager {
   }
 
   _updateTextProperty(textPropertyComponent) {
-    let path = textPropertyComponent.getRealPath()
+    let path = textPropertyComponent.getPath()
     let markers = this.getMarkers(path, {
       surfaceId: textPropertyComponent.getSurfaceId(),
       containerId: textPropertyComponent.getContainerId()

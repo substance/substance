@@ -17,7 +17,7 @@ class Table extends BlockNode {
 
 Table.schema = {
   type: 'table',
-  cells: { type: ['array', 'array', 'id'], default: [] }
+  cells: { type: ['array', 'array', 'id'], default: [], owned: true }
 }
 
 export default Table

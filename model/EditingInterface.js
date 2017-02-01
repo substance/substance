@@ -165,10 +165,6 @@ class EditingInterface {
     return this._document.getIndex(...args)
   }
 
-  getRealPath(...args) {
-    return this._document.getRealPath(...args)
-  }
-
   getAnnotations(...args) {
     return this._document.getAnnotations(...args)
   }
