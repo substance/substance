@@ -3,7 +3,10 @@ function removeElement(elem){
   if(elem.next) elem.next.prev = elem.prev;
   if(elem.parent){
     var childs = elem.parent.children;
-    childs.splice(childs.lastIndexOf(elem), 1);
+    let pos = childs.lastIndexOf(elem)
+    if (pos < 0) throw new Error('Invalid state')
+    childs.splice(pos, 1);
+    elem.parent = null
   }
 }
 
@@ -22,7 +25,9 @@ function replaceElement(elem, replacement){
   var parent = replacement.parent = elem.parent;
   if(parent){
     var childs = parent.children;
-    childs[childs.lastIndexOf(elem)] = replacement;
+    let pos = childs.lastIndexOf(elem)
+    if (pos < 0) throw new Error('Invalid state')
+    childs[pos] = replacement;
   }
 }
 
@@ -52,7 +57,9 @@ function append(elem, next){
     currNext.prev = next;
     if(parent){
       var childs = parent.children;
-      childs.splice(childs.lastIndexOf(currNext), 0, next);
+      let pos = childs.lastIndexOf(currNext)
+      if (pos < 0) throw new Error('Invalid state')
+      childs.splice(pos, 0, next);
     }
   } else if(parent){
     parent.children.push(next);
@@ -64,7 +71,9 @@ function prepend(elem, prev){
   var parent = elem.parent;
   if(parent){
     var childs = parent.children;
-    childs.splice(childs.lastIndexOf(elem), 0, prev);
+    let pos = childs.lastIndexOf(elem)
+    if (pos < 0) throw new Error('Invalid state')
+    childs.splice(pos, 0, prev);
   }
 
   if(elem.prev){

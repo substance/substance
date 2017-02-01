@@ -228,7 +228,9 @@ class XNode extends DOMElement {
         ownerDocument: this.getOwnerDocument()
       })
       this.empty()
-      _doc.children.forEach((child) => {
+      // ATTENTION: important to copy the children array first
+      // as appendChild removes from parent
+      _doc.children.slice(0).forEach((child) => {
         this.appendChild(child)
       })
     }
@@ -482,7 +484,7 @@ class XNode extends DOMElement {
     DomUtils.replaceElement(this, newEl)
     newEl.ownerDocument = this.getOwnerDocument()
     if (parent) {
-      parent._onDetach(newEl)
+      parent._onDetach(this)
       parent._onAttach(newEl)
     }
     return this
