@@ -189,6 +189,10 @@ function getChangeFromDocument(doc) {
   and removes it from a given container
 */
 function deleteNode(doc, node) {
+  if (!node) {
+    console.warn('Invalid arguments')
+    return
+  }
   if (node.isText()) {
     // remove all associated annotations
     let annos = doc.getIndex('annotations').get(node.id)
