@@ -95,7 +95,9 @@ test("Importing a nested list", function(t) {
   let node = importer.convertElement(el)
   t.equal(node.items.length, 4, 'Imported node should have 4 items')
   let levels = node.getItems().map(item=>item.level)
+  let content = node.getItems().map(item=>item.content)
   t.equal(String(levels), String([1,2,2,1]), 'Node levels should be correct')
+  t.equal(String(content), String(['Foo','Bla','Blupp','Bar']), 'Items should have correct content')
   t.end()
 })
 
@@ -106,6 +108,8 @@ test("Importing a nested list (bad style)", function(t) {
   let node = importer.convertElement(el)
   t.equal(node.items.length, 4, 'Imported node should have 4 items')
   let levels = node.getItems().map(item=>item.level)
+  let content = node.getItems().map(item=>item.content)
   t.equal(String(levels), String([1,2,2,1]), 'Node levels should be correct')
+  t.equal(String(content), String(['Foo','Bla','Blupp','Bar']), 'Items should have correct content')
   t.end()
 })

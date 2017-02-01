@@ -689,10 +689,12 @@ DOMImporter.State = DOMImporterState
 
 function _createNodes(doc, nodes) {
   nodes.forEach((node) => {
-    // TODO explain why this necessary
+    // NOTE: if your Document implementation adds default nodes in the constructor
+    // and you have exported the node, we need to remove the default version first
+    // TODO: alternatively we could just update the existing one. For now we remove the old one.
     let _node = doc.get(node.id)
     if (_node && _node !== node) {
-      console.warn('Node with same it already exists.', node)
+      // console.warn('Node with same it already exists.', node)
       doc.delete(node.id)
     }
     if (node.document !== doc) {
