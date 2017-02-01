@@ -414,11 +414,11 @@ class XNode extends DOMElement {
     if (children) {
       // NOTE: manipulating htmlparser's internal children array
       if (pos >= children.length) {
-        this.appendChild(child)
+        DomUtils.appendChild(this, child)
       } else {
         DomUtils.prepend(children[pos], child)
-        child.ownerDocument = this.getOwnerDocument()
       }
+      child.ownerDocument = this.getOwnerDocument()
       this._onAttach(child)
     }
     return this
