@@ -400,7 +400,8 @@ class Surface extends Component {
     }
   }
 
-  onMouseUp() {
+  onMouseUp(e) {
+    e.stopPropagation()
     // console.log('mouseup on', this.getId());
     // ATTENTION: this delay is necessary for cases the user clicks
     // into an existing selection. In this case the window selection still

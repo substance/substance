@@ -63,6 +63,7 @@ class Data extends EventEmitter {
   }
 
   _get(path) {
+    if (!path) return undefined
     let result
     if (isString(path)) {
       result = this.nodes[path]
