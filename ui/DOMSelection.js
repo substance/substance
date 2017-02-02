@@ -3,7 +3,6 @@ import Coordinate from '../model/Coordinate'
 import Range from '../model/Range'
 import DefaultDOMElement from '../dom/DefaultDOMElement'
 import TextPropertyComponent from './TextPropertyComponent'
-import InlineNodeComponent from '../packages/inline-node/InlineNodeComponent'
 import IsolatedNodeComponent from '../packages/isolated-node/IsolatedNodeComponent'
 import Component from '../ui/Component'
 
@@ -226,7 +225,7 @@ class DOMSelection {
     let wSel = window.getSelection()
     // Use this log whenever the mapping goes wrong to analyze what
     // is actually being provided by the browser
-    console.log('DOMSelection->Model: anchorNode:', wSel.anchorNode, 'anchorOffset:', wSel.anchorOffset, 'focusNode:', wSel.focusNode, 'focusOffset:', wSel.focusOffset, 'collapsed:', wSel.collapsed);
+    // console.log('DOMSelection->Model: anchorNode:', wSel.anchorNode, 'anchorOffset:', wSel.anchorOffset, 'focusNode:', wSel.focusNode, 'focusOffset:', wSel.focusOffset, 'collapsed:', wSel.collapsed);
     if (wSel.rangeCount === 0) {
       return null;
     }
@@ -243,7 +242,7 @@ class DOMSelection {
       let focusNode = DefaultDOMElement.wrapNativeElement(wSel.focusNode)
       range = this._getRange(anchorNode, wSel.anchorOffset, focusNode, wSel.focusOffset)
     }
-    console.log('DOMSelection->Model: extracted range ', range ? range.toString() : null);
+    // console.log('DOMSelection->Model: extracted range ', range ? range.toString() : null);
     return range
   }
 

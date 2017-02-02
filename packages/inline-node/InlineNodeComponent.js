@@ -1,4 +1,3 @@
-import inBrowser from '../../util/inBrowser'
 import startsWith from '../../util/startsWith'
 import isEqual from '../../util/isEqual'
 import AbstractIsolatedNodeComponent from '../../ui/AbstractIsolatedNodeComponent'
@@ -44,49 +43,17 @@ class InlineNodeComponent extends AbstractIsolatedNodeComponent {
     el.append(
       this.renderContent($$, node)
         .ref('content')
+        .addClass('se-content')
         .css({ 'z-index': 2*level })
     )
 
     if (disabled) {
       el.addClass('sm-disabled')
-      if (this.shouldRenderBlocker()) {
-        // NOTE: there are some content implementations which work better without a blocker
-        let blocker = $$('span').addClass('se-blocker')
-          .ref('blocker')
-          .css({ 'z-index': 2*level+1 })
-        // select the node on click
-        blocker.on('click', this.onClickBlocker)
-        el.append(blocker)
-      } else {
-        // select the node on click
-        el.on('click', this.onClick)
-      }
+      el.on('click', this.onClick)
     }
 
     el.attr('draggable', true)
     return el
-  }
-
-  didMount() {
-    super.didMount()
-
-    this._updateBlocker()
-  }
-
-  didUpdate() {
-    this._updateBlocker()
-  }
-
-  _updateBlocker() {
-    let blocker = this.refs.blocker
-    let contentEl = this.refs.content.el
-    if (inBrowser && blocker && contentEl) {
-      window.setTimeout(()=>{
-        console.log('UPDATING BLOCKER')
-        blocker.setStyle('width', contentEl.getWidth())
-        blocker.setStyle('height', contentEl.getHeight())
-      })
-    }
   }
 
   isDisabled() {
@@ -95,10 +62,6 @@ class InlineNodeComponent extends AbstractIsolatedNodeComponent {
 
   getClassNames() {
     return ''
-  }
-
-  shouldRenderBlocker() {
-    return true
   }
 
   // TODO: this is almost the same as the super method. Try to consolidate.
