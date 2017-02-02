@@ -7,7 +7,7 @@ import checkValues from './fixture/checkValues'
 
 const test = module('DOMSelection')
 
-test.UI("Mapping a collapsed DOM selection inside a TextProperty", function(t) {
+test.UI("Mapping a cursor inside a TextProperty from DOM to model", function(t) {
   let { editor, surface } = setupEditor(t, _p1)
   let domSelection = surface.context.domSelection
   let node = editor.el.find('[data-path="p1.content"]').getFirstChild()
@@ -24,7 +24,7 @@ test.UI("Mapping a collapsed DOM selection inside a TextProperty", function(t) {
   t.end()
 })
 
-test.UI("Mapping a collapsed DOM selection inside an empty paragraph", function(t) {
+test.UI("Mapping a cursor in an empty paragraph from DOM to model", function(t) {
   let { editor, surface } = setupEditor(t, _empty)
   let domSelection = surface.context.domSelection
   let node = editor.el.find('[data-path="empty.content"]').getFirstChild()
@@ -61,44 +61,45 @@ test.UI("Mapping a ContainerSelection from DOM to model", function(t) {
   t.end()
 })
 
-function _issue273(doc, body) {
-  let tx = new EditingInterface(doc)
-  tx.create({
-    type: 'paragraph',
-    id: 'p',
-    content: 'XXXXXX'
-  })
-  body.show('p')
-  tx.setSelection({type: 'property', path: ['p', 'content'], startOffset: 3})
-  tx.insertInlineNode({ type: 'test-inline-node', id: 'test', content: '[5]'})
-}
+// obsolete since we have removed 'brackets' for InlineNodes
+// function _issue273(doc, body) {
+//   let tx = new EditingInterface(doc)
+//   tx.create({
+//     type: 'paragraph',
+//     id: 'p',
+//     content: 'XXXXXX'
+//   })
+//   body.show('p')
+//   tx.setSelection({type: 'property', path: ['p', 'content'], startOffset: 3})
+//   tx.insertInlineNode({ type: 'test-inline-node', id: 'test', content: '[5]'})
+// }
 
-test.UI("Issue #273: 'Could not find char position' when clicking right above an inline node", function(t) {
-  let { editor, surface } = setupEditor(t, _issue273)
-  let domSelection = surface.context.domSelection
-  let node = editor.el.find('[data-id="test"]').getFirstChild()
-  setDOMSelection(node, 0)
-  let sel = domSelection.getSelection()
-  t.notOk(!sel || sel.isNull(), 'Selection should not be null')
-  checkValues(t, sel.toJSON(), {
-    type: 'property',
-    path: ['p', 'content'],
-    startOffset: 3,
-    containerId: 'body',
-    surfaceId: 'body'
-  })
-  setDOMSelection(node, 1)
-  sel = domSelection.getSelection()
-  t.notOk(!sel || sel.isNull(), 'Selection should not be null')
-  checkValues(t, sel.toJSON(), {
-    type: 'property',
-    path: ['p', 'content'],
-    startOffset: 4,
-    containerId: 'body',
-    surfaceId: 'body'
-  })
-  t.end()
-})
+// test.UI("Issue #273: 'Could not find char position' when clicking right above an inline node", function(t) {
+//   let { editor, surface } = setupEditor(t, _issue273)
+//   let domSelection = surface.context.domSelection
+//   let node = editor.el.find('[data-id="test"]').getFirstChild()
+//   setDOMSelection(node, 0)
+//   let sel = domSelection.getSelection()
+//   t.notOk(!sel || sel.isNull(), 'Selection should not be null')
+//   checkValues(t, sel.toJSON(), {
+//     type: 'property',
+//     path: ['p', 'content'],
+//     startOffset: 3,
+//     containerId: 'body',
+//     surfaceId: 'body'
+//   })
+//   setDOMSelection(node, 1)
+//   sel = domSelection.getSelection()
+//   t.notOk(!sel || sel.isNull(), 'Selection should not be null')
+//   checkValues(t, sel.toJSON(), {
+//     type: 'property',
+//     path: ['p', 'content'],
+//     startOffset: 4,
+//     containerId: 'body',
+//     surfaceId: 'body'
+//   })
+//   t.end()
+// })
 
 test.FF("Issue #354: Wrong selection in FF when double clicking between lines", function(t) {
   let { editor, surface } = setupEditor(t, surfaceWithParagraphs)

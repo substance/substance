@@ -226,7 +226,7 @@ class DOMSelection {
     let wSel = window.getSelection()
     // Use this log whenever the mapping goes wrong to analyze what
     // is actually being provided by the browser
-    // console.log('DOMSelection->Model: anchorNode:', wSel.anchorNode, 'anchorOffset:', wSel.anchorOffset, 'focusNode:', wSel.focusNode, 'focusOffset:', wSel.focusOffset, 'collapsed:', wSel.collapsed);
+    console.log('DOMSelection->Model: anchorNode:', wSel.anchorNode, 'anchorOffset:', wSel.anchorOffset, 'focusNode:', wSel.focusNode, 'focusOffset:', wSel.focusOffset, 'collapsed:', wSel.collapsed);
     if (wSel.rangeCount === 0) {
       return null;
     }
@@ -243,7 +243,7 @@ class DOMSelection {
       let focusNode = DefaultDOMElement.wrapNativeElement(wSel.focusNode)
       range = this._getRange(anchorNode, wSel.anchorOffset, focusNode, wSel.focusOffset)
     }
-    // console.log('DOMSelection->Model: extracted range %s', range);
+    console.log('DOMSelection->Model: extracted range ', range ? range.toString() : null);
     return range
   }
 
@@ -325,10 +325,6 @@ class DOMSelection {
   */
   _getCoordinate(nodeEl, offset) {
     let coor = null
-    // this deals with a cursor in the left/right 'slug' of an inline node
-    if (!coor) {
-      coor = InlineNodeComponent.getCoordinate(nodeEl)
-    }
     if (!coor) {
       coor = IsolatedNodeComponent.getCoordinate(nodeEl)
     }

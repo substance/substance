@@ -1,67 +1,21 @@
 import startsWith from '../../util/startsWith'
-import keys from '../../util/keys'
-import createSurfaceId from '../../util/createSurfaceId'
 import Coordinate from '../../model/Coordinate'
 import Component from '../../ui/Component'
+import AbstractIsolatedNodeComponent from '../../ui/AbstractIsolatedNodeComponent'
 
-class IsolatedNodeComponent extends Component {
+class IsolatedNodeComponent extends AbstractIsolatedNodeComponent {
+
   constructor(...args) {
     super(...args)
-
-    this.name = this.props.node.id
-    this._id = createSurfaceId(this)
-    this._state = {
-      selectionFragment: null
-    }
-
-    this.handleAction('escape', this._escape)
-    this.ContentClass = this._getContentClass(this.props.node) || Component
-  }
-
-  get __elementTag() {
-    return 'div'
-  }
-
-  get __slugChar() {
-    return "|"
-  }
-
-  getChildContext() {
-    return {
-      surfaceParent: this
-    }
-  }
-
-  getInitialState() {
-    let selState = this.context.editorSession.getSelectionState()
-    return this._deriveStateFromSelectionState(selState)
-  }
-
-  didMount() {
-    super.didMount.call(this);
-
-    let editorSession = this.context.editorSession
-    editorSession.onRender('selection', this._onSelectionChanged, this)
-  }
-
-  dispose() {
-    super.dispose.call(this)
-
-    let editorSession = this.context.editorSession
-    editorSession.off(this)
-  }
-
-  getClassNames() {
-    return 'sc-isolated-node'
   }
 
   render($$) {
     let node = this.props.node
     let ContentClass = this.ContentClass
     // console.log('##### IsolatedNodeComponent.render()', $$.capturing);
-    let el = super.render.apply(this, arguments)
-    el.tagName = this.__elementTag
+    let el = $$('div')
     el.addClass(this.getClassNames())
+      .addClass('sc-isolated-node')
       .addClass('sm-'+this.props.node.type)
       .attr("data-id", node.id)
 
@@ -88,14 +42,14 @@ class IsolatedNodeComponent extends Component {
       .on('textInput', this._stopPropagation)
 
     el.append(
-      $$(this.__elementTag).addClass('se-slug').addClass('sm-before').ref('before')
+      $$('div').addClass('se-slug').addClass('sm-before').ref('before')
         // NOTE: better use a regular character otherwise Edge has problems
-        .append(this.__slugChar)
+        .append('[')
     )
 
     let level = this._getLevel()
 
-    let container = $$(this.__elementTag).addClass('se-container')
+    let container = $$('div').addClass('se-container')
       .attr('contenteditable', false)
       .css({ 'z-index': 2*level })
 
@@ -105,16 +59,18 @@ class IsolatedNodeComponent extends Component {
 
     if (this.state.mode === 'cursor' && this.state.position === 'before') {
       container.append(
-        $$(this.__elementTag).addClass('se-cursor').addClass('sm-before').attr('contenteditable', false)
+        $$('div').addClass('se-cursor').addClass('sm-before').attr('contenteditable', false)
       )
     }
-    container.append(this.renderContent($$, node))
+    container.append(
+      this.renderContent($$, node).ref('content')
+    )
 
     if (disabled) {
       container.addClass('sm-disabled')
       if (this.shouldRenderBlocker()) {
         // NOTE: there are some content implementations which work better without a blocker
-        let blocker = $$(this.__elementTag).addClass('se-blocker').ref('blocker')
+        let blocker = $$('div').addClass('se-blocker').ref('blocker')
           .css({ 'z-index': 2*level+1 })
         // select the node on click
         blocker.on('click', this.onClickBlocker)
@@ -127,107 +83,23 @@ class IsolatedNodeComponent extends Component {
 
     if (this.state.mode === 'cursor' && this.state.position === 'after') {
       container.append(
-        $$(this.__elementTag).addClass('se-cursor').addClass('sm-after').attr('contenteditable', false)
+        $$('div').addClass('se-cursor').addClass('sm-after').attr('contenteditable', false)
       );
     }
 
     el.append(container)
     el.append(
-      $$(this.__elementTag).addClass('se-slug').addClass('sm-after').ref('after')
+      $$('div').addClass('se-slug').addClass('sm-after').ref('after')
         // NOTE: better use a regular character otherwise Edge has problems
-        .append(this.__slugChar)
+        .append(']')
     )
 
     el.attr('draggable', true)
     return el
   }
 
-  renderContent($$, node) {
-    let ComponentClass = this.ContentClass
-    if (!ComponentClass) {
-      console.error('Could not resolve a component for type: ' + node.type)
-      return $$(this.__elementTag)
-    } else {
-      let props = {
-        node: node,
-        disabled: this.isDisabled(),
-        isolatedNodeState: this.state.mode
-      }
-      if (this.state.mode === 'focused') {
-        props.focused = true;
-      }
-      return $$(ComponentClass, props).ref('content')
-    }
-  }
-
-  shouldRenderBlocker() {
-    return true
-  }
-
-  shouldSelectOnClick() {
-    return this.state.mode !== 'focused' && this.state.mode !== 'co-focused'
-  }
-
-  getId() {
-    return this._id
-  }
-
-  getMode() {
-    return this.state.mode
-  }
-
-  isNotSelected() {
-    return !this.state.mode
-  }
-
-  isSelected() {
-    return this.state.mode === 'selected'
-  }
-
-  isCoSelected() {
-    return this.state.mode === 'co-selected'
-  }
-
-  isFocused() {
-    return this.state.mode === 'focused'
-  }
-
-  isCoFocused() {
-    return this.state.mode === 'co-focused'
-  }
-
-  _getContentClass(node) {
-    let componentRegistry = this.context.componentRegistry
-    let ComponentClass = componentRegistry.get(node.type)
-    return ComponentClass
-  }
-
-  isDisabled() {
-    return !this.state.mode || ['co-selected', 'cursor'].indexOf(this.state.mode) > -1;
-  }
-
-  _getSurfaceParent() {
-    return this.context.surface
-  }
-
-  _getLevel() {
-    let level = 1;
-    let parent = this._getSurfaceParent()
-    while (parent) {
-      level++
-      parent = parent._getSurfaceParent()
-    }
-    return level
-  }
-
-  _onSelectionChanged() {
-    let editorSession = this.context.editorSession
-    let newState = this._deriveStateFromSelectionState(editorSession.getSelectionState())
-    if (!newState && this.state.mode) {
-      this.extendState({ mode: null })
-    } else if (newState && newState.mode !== this.state.mode) {
-      this.extendState(newState)
-    }
+  getClassNames() {
+    return ''
   }
 
   _deriveStateFromSelectionState(selState) {
@@ -274,47 +146,6 @@ class IsolatedNodeComponent extends Component {
         return null
       }
     }
-  }
-
-  onMousedown(event) {
-    // console.log('IsolatedNodeComponent.onMousedown', this.getId());
-    event.stopPropagation()
-  }
-
-  onClick(event) {
-    event.preventDefault()
-    event.stopPropagation()
-    if (this.shouldSelectOnClick()) {
-      this._selectNode()
-    }
-  }
-
-  onClickBlocker(event) {
-    event.preventDefault()
-    event.stopPropagation()
-    if (this.shouldSelectOnClick() && event.target === this.refs.blocker.getNativeElement()) {
-      this._selectNode()
-    }
-  }
-
-  onKeydown(event) {
-    event.stopPropagation()
-    // console.log('####', event.keyCode, event.metaKey, event.ctrlKey, event.shiftKey);
-    // TODO: while this works when we have an isolated node with input or CE,
-    // there is no built-in way of receiving key events in other cases
-    // We need a global event listener for keyboard events which dispatches to the current isolated node
-    if (event.keyCode === keys.ESCAPE && this.state.mode === 'focused') {
-      event.preventDefault()
-      this._escape()
-    }
-  }
-
-  _escape() {
-    this._selectNode()
-  }
-
-  _stopPropagation(event) {
-    event.stopPropagation()
   }
 
   _selectNode() {

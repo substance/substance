@@ -175,16 +175,17 @@ test.UI("[IT8]: Inserting text with range within TextProperty starting inside an
 
 test.UI("[II1]: Inserting InlineNode node into a TextProperty", function(t) {
   let { editorSession, doc } = setupEditor(t, _p1)
+  editorSession.setSelection({
+    type: 'property',
+    path: ['p1', 'content'],
+    startOffset: 3,
+    containerId: 'body'
+  })
   editorSession.transaction((tx) => {
-    tx.setSelection({
-      type: 'property',
-      path: ['p1', 'content'],
-      startOffset: 3
-    })
     tx.insertInlineNode({
       type: 'test-inline-node',
       id: 'il1',
-      foo: 'foo'
+      content: 'X'
     })
   })
   let sel = editorSession.getSelection()

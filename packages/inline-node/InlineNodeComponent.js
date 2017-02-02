@@ -1,32 +1,104 @@
+import inBrowser from '../../util/inBrowser'
 import startsWith from '../../util/startsWith'
 import isEqual from '../../util/isEqual'
-import Coordinate from '../../model/Coordinate'
-import IsolatedNodeComponent from '../isolated-node/IsolatedNodeComponent'
-import Component from '../../ui/Component'
+import AbstractIsolatedNodeComponent from '../../ui/AbstractIsolatedNodeComponent'
 
-class InlineNodeComponent extends IsolatedNodeComponent {
+class InlineNodeComponent extends AbstractIsolatedNodeComponent {
 
-  get _isInlineNodeComponent() {
-    return true
+  render($$) {
+    let node = this.props.node
+    let ContentClass = this.ContentClass
+
+    let el = $$('span')
+    el.addClass(this.getClassNames())
+      .addClass('sc-inline-node')
+      .addClass('sm-'+this.props.node.type)
+      .attr("data-id", node.id)
+      .attr('data-inline', '1')
+      .attr('contenteditable', false)
+
+    let disabled = this.isDisabled()
+
+    if (this.state.mode) {
+      el.addClass('sm-'+this.state.mode)
+    } else {
+      el.addClass('sm-not-selected')
+    }
+
+    if (!ContentClass.noStyle) {
+      el.addClass('sm-default-style')
+    }
+
+    // shadowing handlers of the parent surface
+    // TODO: extract this into a helper so that we can reuse it anywhere where we want
+    // to prevent propagation to the parent surface
+    el.on('keydown', this.onKeydown)
+      .on('mousedown', this._stopPropagation)
+      .on('keypress', this._stopPropagation)
+      .on('keyup', this._stopPropagation)
+      .on('compositionstart', this._stopPropagation)
+      .on('textInput', this._stopPropagation)
+
+    let level = this._getLevel()
+
+    el.append(
+      this.renderContent($$, node)
+        .ref('content')
+        .css({ 'z-index': 2*level })
+    )
+
+    if (disabled) {
+      el.addClass('sm-disabled')
+      if (this.shouldRenderBlocker()) {
+        // NOTE: there are some content implementations which work better without a blocker
+        let blocker = $$('span').addClass('se-blocker')
+          .ref('blocker')
+          .css({ 'z-index': 2*level+1 })
+        // select the node on click
+        blocker.on('click', this.onClickBlocker)
+        el.append(blocker)
+      } else {
+        // select the node on click
+        el.on('click', this.onClick)
+      }
+    }
+
+    el.attr('draggable', true)
+    return el
   }
 
-  // use spans everywhere
-  get __elementTag() {
-    return 'span'
+  didMount() {
+    super.didMount()
+
+    this._updateBlocker()
   }
 
-  get __slugChar() {
-    return "\uFEFF"
+  didUpdate() {
+    this._updateBlocker()
+  }
+
+  _updateBlocker() {
+    let blocker = this.refs.blocker
+    let contentEl = this.refs.content.el
+    if (inBrowser && blocker && contentEl) {
+      window.setTimeout(()=>{
+        console.log('UPDATING BLOCKER')
+        blocker.setStyle('width', contentEl.getWidth())
+        blocker.setStyle('height', contentEl.getHeight())
+      })
+    }
+  }
+
+  isDisabled() {
+    return !this.state.mode || ['co-selected', 'cursor'].indexOf(this.state.mode) > -1;
   }
 
   getClassNames() {
-    return 'sc-inline-node'
+    return ''
   }
 
-  render($$) { // eslint-disable-line
-    let el = super.render($$)
-    el.attr('data-inline', '1')
-    return el
+  shouldRenderBlocker() {
+    return true
   }
 
   // TODO: this is almost the same as the super method. Try to consolidate.
@@ -83,31 +155,6 @@ class InlineNodeComponent extends IsolatedNodeComponent {
 
 }
 
-/*
-  This is used to map a DOM coordinate that is within the left or right slug of this node.
-*/
-InlineNodeComponent.getCoordinate = function(el) {
-  // special treatment for block-level isolated-nodes
-  let parent = el.getParent()
-  if (el.isTextNode() && parent.is('.se-slug')) {
-    let slug = parent
-    let nodeEl = slug.getParent()
-    let comp = Component.unwrap(nodeEl)
-    if (comp && comp._isInlineNodeComponent) {
-      let node = comp.props.node
-      let path = node.start.path
-      let startOffset = node.start.offset
-      let endOffset = node.end.offset
-      let charPos = slug.is('sm-after') ? startOffset : endOffset
-      let coor = new Coordinate(path, charPos)
-      coor._comp = comp
-      coor.__inInlineNode__ = true
-      coor.__startOffset__ = startOffset
-      coor.__endOffset__ = endOffset
-      return coor
-    }
-  }
-  return null
-}
+InlineNodeComponent.prototype._isInlineNodeComponent = true
 
 export default InlineNodeComponent
