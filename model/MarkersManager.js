@@ -241,8 +241,8 @@ class MarkersIndex {
       if (pos <= start) {
         newStart += length
         newEnd += length
-        marker.startOffset = newStart
-        marker.endOffset = newEnd
+        marker.start.offset = newStart
+        marker.end.offset = newEnd
         return
       }
       if (pos < end) {

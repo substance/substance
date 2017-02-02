@@ -17,9 +17,19 @@ class Annotation extends DocumentNode {
     return this.start.path
   }
 
+  set startPath(path) {
+    console.warn('DEPRECATED: use Annotation.start.path instead.')
+    this.start.path = path
+  }
+
   get startOffset() {
     console.warn('DEPRECATED: use Annotation.start.offset instead.')
     return this.start.offset
+  }
+
+  set startOffset(offset) {
+    console.warn('DEPRECATED: use Annotation.start.offset instead.')
+    this.start.offset = offset
   }
 
   get endPath() {
@@ -27,9 +37,19 @@ class Annotation extends DocumentNode {
     return this.end.path
   }
 
+  set endPath(path) {
+    console.warn('DEPRECATED: use Annotation.end.path instead.')
+    this.end.path = path
+  }
+
   get endOffset() {
     console.warn('DEPRECATED: use Annotation.end.offset instead.')
     return this.end.offset
+  }
+
+  set endOffset(offset) {
+    console.warn('DEPRECATED: use Annotation.end.offset instead.')
+    this.end.offset = offset
   }
 
   /**

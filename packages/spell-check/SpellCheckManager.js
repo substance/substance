@@ -84,9 +84,13 @@ class SpellCheckManager {
     let newErrors = data.map(function(m) {
       return {
         type: 'spell-error',
-        path: path,
-        startOffset: m.start,
-        endOffset: m.end,
+        start: {
+          path: path,
+          offset: m.start
+        },
+        end: {
+          offset: m.end
+        },
         suggestions: m.suggestions
       }
     })
