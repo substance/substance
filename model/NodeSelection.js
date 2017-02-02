@@ -33,10 +33,6 @@ class NodeSelection extends Selection {
     this.surfaceId = surfaceId;
   }
 
-  // for duck-typed instanceof
-  get _isNodeSelection() { return true }
-
-
   equals(other) {
     return (
       super.equals(other) &&
@@ -75,10 +71,11 @@ class NodeSelection extends Selection {
 
   toJSON() {
     return {
-      containerId: this.containerId,
+      type: 'node',
       nodeId: this.nodeId,
       mode: this.mode,
       reverse: this.reverse,
+      containerId: this.containerId,
       surfaceId: this.surfaceId
     };
   }
@@ -126,25 +123,25 @@ class NodeSelection extends Selection {
   }
 }
 
+NodeSelection.prototype._isNodeSelection = true
+
 NodeSelection.fromJSON = function(json) {
   return new NodeSelection(json);
 }
 
 NodeSelection._createFromRange = function(range) {
-  var containerId = range.containerId;
-  var nodeId = range.start.getNodeId();
-  var startOffset = range.start.offset;
-  var endOffset = range.end.offset;
-  var reverse = range.reverse;
-  var mode;
+  let startOffset = range.start.offset
+  let endOffset = range.end.offset
+  let mode
   if (startOffset === endOffset) {
-    mode = startOffset === 0 ? 'before' : 'after';
+    mode = startOffset === 0 ? 'before' : 'after'
   } else {
-    mode = 'full';
+    mode = 'full'
   }
-  return new NodeSelection(containerId, nodeId, mode, reverse);
+  return new NodeSelection(range.containerId, range.start.getNodeId(), mode, range.reverse, range.surfaceId)
 };
 
+// TODO: is this used?
 NodeSelection._createFromCoordinate = function(coor) {
   var containerId = coor.containerId;
   var nodeId = coor.getNodeId();

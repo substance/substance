@@ -182,7 +182,7 @@ test.UI("[II1]: Inserting InlineNode node into a TextProperty", function(t) {
       startOffset: 3
     })
     tx.insertInlineNode({
-      type: 'test-inline',
+      type: 'test-inline-node',
       id: 'il1',
       foo: 'foo'
     })

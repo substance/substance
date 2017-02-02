@@ -2,6 +2,7 @@ import startsWith from '../../util/startsWith'
 import isEqual from '../../util/isEqual'
 import Coordinate from '../../model/Coordinate'
 import IsolatedNodeComponent from '../isolated-node/IsolatedNodeComponent'
+import Component from '../../ui/Component'
 
 class InlineNodeComponent extends IsolatedNodeComponent {
 
@@ -82,29 +83,28 @@ class InlineNodeComponent extends IsolatedNodeComponent {
 
 }
 
+/*
+  This is used to map a DOM coordinate that is within the left or right slug of this node.
+*/
 InlineNodeComponent.getCoordinate = function(el) {
   // special treatment for block-level isolated-nodes
   let parent = el.getParent()
   if (el.isTextNode() && parent.is('.se-slug')) {
     let slug = parent
     let nodeEl = slug.getParent()
-    if (nodeEl.is('.sc-inline-node')) {
-      let startOffset = Number(nodeEl.getAttribute('data-offset'))
-      let len = Number(nodeEl.getAttribute('data-length'))
-      let charPos = startOffset
-      if (slug.is('sm-after')) charPos += len
-      let path
-      while ( (nodeEl = nodeEl.getParent()) ) {
-        let pathStr = nodeEl.getAttribute('data-path')
-        if (pathStr) {
-          path = pathStr.split('.')
-          let coor = new Coordinate(path, charPos)
-          coor.__inInlineNode__ = true
-          coor.__startOffset__ = startOffset
-          coor.__endOffset__ = startOffset+len
-          return coor
-        }
-      }
+    let comp = Component.unwrap(nodeEl)
+    if (comp && comp._isInlineNodeComponent) {
+      let node = comp.props.node
+      let path = node.start.path
+      let startOffset = node.start.offset
+      let endOffset = node.end.offset
+      let charPos = slug.is('sm-after') ? startOffset : endOffset
+      let coor = new Coordinate(path, charPos)
+      coor._comp = comp
+      coor.__inInlineNode__ = true
+      coor.__startOffset__ = startOffset
+      coor.__endOffset__ = endOffset
+      return coor
     }
   }
   return null

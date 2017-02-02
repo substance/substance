@@ -7,7 +7,6 @@ import startsWith from '../../util/startsWith'
 import Clipboard from '../../ui/Clipboard'
 import Component from '../../ui/Component'
 import DefaultDOMElement from '../../dom/DefaultDOMElement'
-import DOMSelection from '../../ui/DOMSelection'
 import UnsupportedNode from '../../ui/UnsupportedNodeComponent'
 
 /**
@@ -41,7 +40,9 @@ class Surface extends Component {
       converterRegistry: this.context.converterRegistry
     })
 
-    this.domSelection = null
+    this.domSelection = this.context.domSelection
+    if (!this.domSelection) throw new Error('DOMSelection instance must be provided via context.')
+
     this.domObserver = null
 
     // HACK: we need to listen to mousup on document
@@ -75,19 +76,12 @@ class Surface extends Component {
     if (this.context.surfaceManager) {
       this.context.surfaceManager.registerSurface(this)
     }
-    if (!this.isReadonly() && inBrowser) {
-      this.domSelection = new DOMSelection(this)
-      // TODO: it seems that domObserver has become obsolete here, as some of this is done on TextPropertyComponent now
-      // this.domObserver = new window.MutationObserver(this.onDomMutations.bind(this));
-      // this.domObserver.observe(this.el.getNativeElement(), { subtree: true, characterData: true, characterDataOldValue: true });
-    }
     this.editorSession.onRender('selection', this._onSelectionChanged, this)
   }
 
 
   dispose() {
     this.editorSession.off(this)
-    this.domSelection = null
     if (this.domObserver) {
       this.domObserver.disconnect()
     }
@@ -228,6 +222,7 @@ class Surface extends Component {
     this._focus()
   }
 
+  // As the DOMSelection is owned by the Editor now, rerendering could now be done by someone else, e.g. the SurfaceManager?
   rerenderDOMSelection() {
     if (this.isDisabled()) return
     if (inBrowser) {
@@ -276,6 +271,8 @@ class Surface extends Component {
         return this._handleEnterKey(event)
       case keys.SPACE:
         return this._handleSpaceKey(event)
+      case keys.TAB:
+        return this._handleTabKey(event)
       case keys.BACKSPACE:
       case keys.DELETE:
         return this._handleDeleteKey(event)
@@ -586,6 +583,13 @@ class Surface extends Component {
     this.editorSession.transaction((tx) => {
       tx.insertText(' ')
     }, { action: 'type' })
+  }
+
+  _handleTabKey(event) {
+    event.stopPropagation()
+    window.setTimeout(()=>{
+      this._updateModelSelection()
+    })
   }
 
   _handleEnterKey(event) {

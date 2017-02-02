@@ -336,21 +336,24 @@ IsolatedNodeComponent.prototype._isIsolatedNodeComponent = true
 
 IsolatedNodeComponent.prototype._isDisabled = IsolatedNodeComponent.prototype.isDisabled
 
-IsolatedNodeComponent.getCoordinate = function(surfaceEl, node) {
-  // special treatment for block-level isolated-nodes
+/*
+  This provides a model coordinatae for
+*/
+IsolatedNodeComponent.getCoordinate = function(node) {
   let parent = node.getParent()
   if (node.isTextNode() && parent.is('.se-slug')) {
-    let boundary = parent
-    let isolatedNodeEl = boundary.getParent()
-    let nodeId = isolatedNodeEl.getAttribute('data-id')
-    if (nodeId) {
-      var charPos = boundary.is('sm-after') ? 1 : 0
-      return new Coordinate([nodeId], charPos)
-    } else {
-      console.error('FIXME: expecting a data-id attribute on IsolatedNodeComponent')
-    }
+    let slug = parent
+    let isolatedNodeEl = slug.getParent()
+    let comp = Component.unwrap(isolatedNodeEl)
+    let nodeId = comp.props.node.id
+    let charPos = slug.is('sm-after') ? 1 : 0
+    let coor = new Coordinate([nodeId], charPos)
+    coor._comp = comp
+    coor.__inIsolatedBlockNode__ = true
+    return coor
+  } else {
+    return null
   }
-  return null
 }
 
 IsolatedNodeComponent.getDOMCoordinate = function(comp, coor) {

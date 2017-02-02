@@ -88,6 +88,10 @@ class Selection {
     throw new Error('Selection.getType() is abstract.')
   }
 
+  get type() {
+    return this.getType()
+  }
+
   /**
     @returns {Boolean} true if selection equals `other` selection
   */
