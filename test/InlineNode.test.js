@@ -5,7 +5,7 @@ import twoParagraphs from './fixture/twoParagraphs'
 
 const test = module('InlineNode')
 
-test("InlineNodes should be not selected when selection is null", function(t) {
+test.UI("InlineNodes should be not selected when selection is null", function(t) {
   let { editorSession, editor } = setupEditor(t, paragraphsWithInlineNodes)
   let nodes = editor.findAll('.sc-inline-node')
   editorSession.setSelection(null)
@@ -15,7 +15,7 @@ test("InlineNodes should be not selected when selection is null", function(t) {
   t.end()
 })
 
-test("InlineNodes should be not selected when selection is somewhere else", function(t) {
+test.UI("InlineNodes should be not selected when selection is somewhere else", function(t) {
   let { editorSession, editor } = setupEditor(t, paragraphsWithInlineNodes)
   let nodes = editor.findAll('.sc-inline-node')
   editorSession.setSelection({
@@ -30,7 +30,7 @@ test("InlineNodes should be not selected when selection is somewhere else", func
   t.end()
 })
 
-test("InlineNode should be 'selected' with when the inline node is selected", function(t) {
+test.UI("InlineNode should be 'selected' with when the inline node is selected", function(t) {
   let { editorSession, editor } = setupEditor(t, paragraphsWithInlineNodes)
   let nodes = editor.findAll('.sc-inline-node')
   editorSession.setSelection({
@@ -51,7 +51,7 @@ test("InlineNode should be 'selected' with when the inline node is selected", fu
   t.end()
 })
 
-test("InlineNode should be 'co-selected' when selection is spanning an inline node", function(t) {
+test.UI("InlineNode should be 'co-selected' when selection is spanning an inline node", function(t) {
   let { editorSession, editor } = setupEditor(t, paragraphsWithInlineNodes)
   let nodes = editor.findAll('.sc-inline-node')
   editorSession.setSelection({
@@ -72,7 +72,7 @@ test("InlineNode should be 'co-selected' when selection is spanning an inline no
   t.end()
 })
 
-test("InlineNode should be 'focused' when having the selection", function(t) {
+test.UI("InlineNode should be 'focused' when having the selection", function(t) {
   let { editorSession, editor } = setupEditor(t, paragraphsWithInlineNodes)
   let nodes = editor.findAll('.sc-inline-node')
   editorSession.setSelection({
@@ -101,7 +101,7 @@ test("InlineNode should be 'focused' when having the selection", function(t) {
 })
 
 // Similar to the previous but with another inline node being focused
-test("InlineNode should be 'focused' when having the selection (II)", function(t) {
+test.UI("InlineNode should be 'focused' when having the selection (II)", function(t) {
   let { editorSession, editor } = setupEditor(t, paragraphsWithInlineNodes)
   let nodes = editor.findAll('.sc-inline-node')
   editorSession.setSelection({
@@ -123,7 +123,7 @@ test("InlineNode should be 'focused' when having the selection (II)", function(t
 })
 
 // FIXME: broken since introduction of EditorSession/Flow
-// test("InlineNode should be 'co-focused' when a nested inline node has the selection", function(t) {
+// test.UI("InlineNode should be 'co-focused' when a nested inline node has the selection", function(t) {
 //   let { editorSession, editor } = setupEditor(t, nestedInlineNode, t.sandbox)
 //   let nodes = editor.findAll('.sc-inline-node')
 //   editorSession.setSelection({

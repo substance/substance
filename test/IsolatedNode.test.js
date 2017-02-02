@@ -4,7 +4,7 @@ import setupEditor from './fixture/setupEditor'
 
 const test = module('IsolatedNode')
 
-test("IsolatedNodes should be 'not-selected' when selection is null", function(t) {
+test.UI("IsolatedNodes should be 'not-selected' when selection is null", function(t) {
   let { editorSession, editor } = setupEditor(t, nestedContainers)
   let isolatedNodes = editor.findAll('.sc-isolated-node')
   editorSession.setSelection(null)
@@ -14,7 +14,7 @@ test("IsolatedNodes should be 'not-selected' when selection is null", function(t
   t.end()
 })
 
-test("IsolatedNodes should be 'not-selected' when selection is somewhere else", function(t) {
+test.UI("IsolatedNodes should be 'not-selected' when selection is somewhere else", function(t) {
   let { editorSession, editor } = setupEditor(t, nestedContainers)
   let isolatedNodes = editor.findAll('.sc-isolated-node')
   editorSession.setSelection({
@@ -29,7 +29,7 @@ test("IsolatedNodes should be 'not-selected' when selection is somewhere else", 
   t.end()
 })
 
-test("IsolatedNode should be 'selected' with node selection", function(t) {
+test.UI("IsolatedNode should be 'selected' with node selection", function(t) {
   let { editorSession, editor } = setupEditor(t, nestedContainers)
   let isolatedNodes = editor.findAll('.sc-isolated-node')
   editorSession.setSelection({
@@ -50,7 +50,7 @@ test("IsolatedNode should be 'selected' with node selection", function(t) {
   t.end()
 })
 
-test("IsolatedNode should be 'co-selected' with spanning container selection", function(t) {
+test.UI("IsolatedNode should be 'co-selected' with spanning container selection", function(t) {
   let { editorSession, editor } = setupEditor(t, nestedContainers)
   let isolatedNodes = editor.findAll('.sc-isolated-node')
   editorSession.setSelection({
@@ -75,7 +75,7 @@ test("IsolatedNode should be 'co-selected' with spanning container selection", f
   t.end()
 })
 
-test("IsolatedNode should be 'focused' when having the selection", function(t) {
+test.UI("IsolatedNode should be 'focused' when having the selection", function(t) {
   let { editorSession, editor } = setupEditor(t, nestedContainers)
   let isolatedNodes = editor.findAll('.sc-isolated-node')
   editorSession.setSelection({
@@ -95,7 +95,7 @@ test("IsolatedNode should be 'focused' when having the selection", function(t) {
   t.end()
 })
 
-test("IsolatedNode should be 'co-focused' when child is having the selection", function(t) {
+test.UI("IsolatedNode should be 'co-focused' when child is having the selection", function(t) {
   let { editorSession, editor } = setupEditor(t, nestedContainers)
   let isolatedNodes = editor.findAll('.sc-isolated-node')
   editorSession.setSelection({
@@ -115,7 +115,7 @@ test("IsolatedNode should be 'co-focused' when child is having the selection", f
   t.end()
 })
 
-test("Issue #696: IsolatedNode should detect 'co-focused' robustly in presence of surface ids with same prefix", function(t) {
+test.UI("Issue #696: IsolatedNode should detect 'co-focused' robustly in presence of surface ids with same prefix", function(t) {
   // as experienced in #696 it happened that co-focused state was infered just
   // by using startsWith on the surface path. This was leading to wrong
   // co-focused states when e.g. two isolated nodes `body/entity` and `body/entity-1`
