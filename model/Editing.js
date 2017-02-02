@@ -91,7 +91,7 @@ class Editing {
         let node = tx.get(nodeId)
         this._breakNode(tx, node, sel.start, container)
       } else {
-        // TODO: do we still want a soft-break thingie here? i.e. insert a <br>
+        this.insertText(tx, '\n')
       }
     }
     else if (sel.isContainerSelection()) {
