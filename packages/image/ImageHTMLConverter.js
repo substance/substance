@@ -1,3 +1,5 @@
+import uuid from '../../util/uuid'
+
 /*
  * HTML converter for Paragraphs.
  */
@@ -7,12 +9,12 @@ export default {
   tagName: 'img',
 
   import: function(el, node, converter) {
-    let imageFile = {
+    let imageFile = converter.createNode({
+      id: 'file-'+node.id,
       type: 'file',
       fileType: 'image',
       url: el.attr('src')
-    }
-    converter.createNode(imageFile)
+    })
     node.imageFile = imageFile.id
   },
 

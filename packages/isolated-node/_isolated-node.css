@@ -2,6 +2,10 @@
   position: relative;
 }
 
+.sc-isolated-node > .se-container {
+  display: inline-block;
+}
+
 .sc-isolated-node .se-cursor {
   position: absolute;
   top: 0; bottom: 0;

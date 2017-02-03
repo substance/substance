@@ -1,0 +1,59 @@
+.sc-dropzones {
+  /*z-index: 5000;*/
+}
+
+.sc-dropzones .se-dropzone {
+  /*background: rgba(0,0,255, 0.1);*/
+  position: absolute;
+}
+
+.sc-dropzones .se-dropzone .se-drop-teaser {
+  position: absolute;
+  left: 0px;
+  right: 0px;
+  z-index: 100;
+  transition: background-color 0.5s ease;
+  height: 3px;
+}
+
+.sc-dropzones .se-dropzone.sm-over .se-drop-teaser {
+  background: blue;
+}
+
+.sc-dropzones .se-dropzone .se-drop-shield {
+  position: absolute;
+  top: 0; left: 0; right: 0; bottom: 0;
+  z-index:101;
+}
+
+.sc-dropzones.sm-hidden {
+  visibility: hidden;
+}
+
+/* Custom Dropzone styles */
+.sc-dropzones .se-custom-dropzone {
+  z-index: 102;
+}
+
+.sc-dropzones .se-custom-dropzone .se-drop-shield {
+  position: absolute;
+  top: 0; left: 0; right: 0; bottom: 0;
+  z-index:103;
+}
+
+.sc-dropzones .se-custom-dropzone.sm-over {
+  background: rgba(0,0,0,0.7);
+  color: #fff
+}
+
+.sc-dropzones .se-custom-dropzone .se-message {
+  text-align: center;
+  font-size: 15px;
+  font-weight: 600;
+  padding: 20px 0;
+  display: none;
+}
+
+.sc-dropzones .se-custom-dropzone.sm-over .se-message {
+  display: block;
+}

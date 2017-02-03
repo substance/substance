@@ -29,4 +29,6 @@ class TableComponent extends Component {
   }
 }
 
+TableComponent.hasDropzones = true
+
 export default TableComponent

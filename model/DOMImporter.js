@@ -252,6 +252,12 @@ class DOMImporter {
   }
 
   createNode(node) {
+    if (!node.type) {
+      throw new Error('node.type required.')
+    }
+    if (!node.id) {
+      node.id = this.nextId(node.type)
+    }
     if (this.state.ids[node.id]) {
       throw new Error('Node with id alread exists:' + node.id)
     }

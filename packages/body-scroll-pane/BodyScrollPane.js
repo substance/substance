@@ -1,5 +1,6 @@
 import AbstractScrollPane from '../scroll-pane/AbstractScrollPane'
 import getRelativeMouseBounds from '../../util/getRelativeMouseBounds'
+import DefaultDOMElement from '../../dom/DefaultDOMElement'
 
 /**
   Wraps content in a scroll pane.
@@ -68,7 +69,7 @@ class BodyScrollPane extends AbstractScrollPane {
 
   getContentElement() {
     // TODO: should be wrapped in DefaultDOMElement
-    return document.body
+    return DefaultDOMElement.wrapNativeElement(document.body)
   }
 
   // /**

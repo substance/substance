@@ -31,6 +31,33 @@ class ImageComponent extends NodeComponent {
     return el
   }
 
+  /* Custom dropzone protocol */
+  getDropzoneSpecs() {
+    return [
+      {
+        component: this.refs['image'],
+        message: 'Replace Image',
+        dropParams: {
+          action: 'replace-image',
+          nodeId: this.props.node.id,
+        }
+      }
+    ]
+  }
+
+  handleDrop(tx, dragState) {
+    // TODO: Not working yet!
+    let newImageFile = dragState.data.files[0]
+    let imageFile = tx.create({
+      type: 'file',
+      fileType: 'image',
+      mimeType: newImageFile.type,
+      data: newImageFile
+    })
+    imageFile.data = newImageFile
+    tx.set([this.props.node.id, 'imageFile'], imageFile.id)
+  }
+
 }
 
 export default ImageComponent
