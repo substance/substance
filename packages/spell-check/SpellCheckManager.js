@@ -38,7 +38,8 @@ class SpellCheckManager {
     })
   }
 
-  _onDocumentChange(change) {
+  _onDocumentChange(change, info) {
+    if (info.spellcheck) return
     // Note: instead of analyzing the model, we consider
     // all existing TextPropertyComponents instead
     // as this reflects what is presented to the user
@@ -49,6 +50,7 @@ class SpellCheckManager {
   }
 
   _runSpellCheck(pathStr) {
+    // console.log('Running spell-checker on', pathStr)
     let path = pathStr.split(',')
     let text = this.editorSession.getDocument().get(path)
     let lang = this.editorSession.getLanguage()
@@ -84,9 +86,13 @@ class SpellCheckManager {
     let newErrors = data.map(function(m) {
       return {
         type: 'spell-error',
-        path: path,
-        startOffset: m.start,
-        endOffset: m.end,
+        start: {
+          path: path,
+          offset: m.start
+        },
+        end: {
+          offset: m.end
+        },
         suggestions: m.suggestions
       }
     })
@@ -99,7 +105,7 @@ class SpellCheckManager {
       newErrors.forEach((spellError) => {
         tx.create(spellError)
       })
-    }, { history: false })
+    }, { history: false, spellcheck: true })
   }
 }
 

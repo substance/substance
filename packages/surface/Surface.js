@@ -7,7 +7,6 @@ import startsWith from '../../util/startsWith'
 import Clipboard from '../../ui/Clipboard'
 import Component from '../../ui/Component'
 import DefaultDOMElement from '../../dom/DefaultDOMElement'
-import DOMSelection from '../../ui/DOMSelection'
 import UnsupportedNode from '../../ui/UnsupportedNodeComponent'
 
 /**
@@ -41,7 +40,9 @@ class Surface extends Component {
       converterRegistry: this.context.converterRegistry
     })
 
-    this.domSelection = null
+    this.domSelection = this.context.domSelection
+    if (!this.domSelection) throw new Error('DOMSelection instance must be provided via context.')
+
     this.domObserver = null
 
     // HACK: we need to listen to mousup on document
@@ -75,19 +76,12 @@ class Surface extends Component {
     if (this.context.surfaceManager) {
       this.context.surfaceManager.registerSurface(this)
     }
-    if (!this.isReadonly() && inBrowser) {
-      this.domSelection = new DOMSelection(this)
-      // TODO: it seems that domObserver has become obsolete here, as some of this is done on TextPropertyComponent now
-      // this.domObserver = new window.MutationObserver(this.onDomMutations.bind(this));
-      // this.domObserver.observe(this.el.getNativeElement(), { subtree: true, characterData: true, characterDataOldValue: true });
-    }
     this.editorSession.onRender('selection', this._onSelectionChanged, this)
   }
 
 
   dispose() {
     this.editorSession.off(this)
-    this.domSelection = null
     if (this.domObserver) {
       this.domObserver.disconnect()
     }
@@ -228,6 +222,7 @@ class Surface extends Component {
     this._focus()
   }
 
+  // As the DOMSelection is owned by the Editor now, rerendering could now be done by someone else, e.g. the SurfaceManager?
   rerenderDOMSelection() {
     if (this.isDisabled()) return
     if (inBrowser) {
@@ -276,6 +271,8 @@ class Surface extends Component {
         return this._handleEnterKey(event)
       case keys.SPACE:
         return this._handleSpaceKey(event)
+      case keys.TAB:
+        return this._handleTabKey(event)
       case keys.BACKSPACE:
       case keys.DELETE:
         return this._handleDeleteKey(event)
@@ -339,8 +336,18 @@ class Surface extends Component {
   // particularly, double- and triple clicks.
   // also it turned out to be problematic to react on mouse down instantly
   onMouseDown(event) {
-    // console.log('mousedown on', this.getId());
-    // event.stopPropagation();
+    // ATTENTION: stopping a mousedown stops clicks/mouseup from working in FF
+    if (event.__reserved__) {
+      // console.log('%s: mousedown already reserved by %s', this.id, event.__reserved__.id)
+      return
+    } else {
+      // console.log('%s: taking mousedown ', this.id)
+      event.__reserved__ = this
+    }
+
+    if (this.state.mode === 'co-focused') {
+      this.el.setAttribute('contenteditable', true)
+    }
 
     // TODO: what is this exactly?
     if ( event.button !== 0 ) {
@@ -349,7 +356,7 @@ class Surface extends Component {
 
     // special treatment for triple clicks
     if (!(platform.isIE && platform.version<12) && event.detail >= 3) {
-      let sel = this.getSelection()
+      let sel = this.getEditorSession().getSelection()
       if (sel.isPropertySelection()) {
         this._selectProperty(sel.path)
         event.preventDefault()
@@ -400,7 +407,8 @@ class Surface extends Component {
     }
   }
 
-  onMouseUp() {
+  onMouseUp(e) {
+    e.stopPropagation()
     // console.log('mouseup on', this.getId());
     // ATTENTION: this delay is necessary for cases the user clicks
     // into an existing selection. In this case the window selection still
@@ -446,29 +454,16 @@ class Surface extends Component {
     this._updateContentEditableState(oldState)
   }
 
-  _updateContentEditableState(oldState) {
+  _updateContentEditableState() {
     // ContentEditable management
     // Note: to be able to isolate nodes, we need to control
     // how contenteditable is used in a hieriarchy of surfaces.
-    if (oldState.mode === 'co-focused') {
-      this.el.off('mousedown', this._enableContentEditable, this)
+    let mode = this.state.mode
+    if (!this.isEditable() || this.props.disabled || mode === 'co-focused') {
+      this.el.removeAttribute('contenteditable')
+    } else {
+      this.el.setAttribute('contenteditable', true)
     }
-    if (!this.isEditable()) {
-      this.el.setAttribute('contenteditable', false)
-    } else if (this.state.mode !== oldState.mode) {
-      switch(this.state.mode) {
-        case 'co-focused':
-          this.el.setAttribute('contenteditable', false)
-          this.el.on('mousedown', this._enableContentEditable, this)
-          break
-        default:
-          this.el.setAttribute('contenteditable', true)
-      }
-    }
-  }
-
-  _enableContentEditable() {
-    this.el.setAttribute('contenteditable', true)
   }
 
   _onSelectionChanged(selection) {
@@ -587,6 +582,13 @@ class Surface extends Component {
     }, { action: 'type' })
   }
 
+  _handleTabKey(event) {
+    event.stopPropagation()
+    window.setTimeout(()=>{
+      this._updateModelSelection()
+    })
+  }
+
   _handleEnterKey(event) {
     event.preventDefault()
     event.stopPropagation()
@@ -609,10 +611,6 @@ class Surface extends Component {
   }
 
   _setSelection(sel) {
-    // NOTE: setting the surfaceId is important so that it can be mapped to the DOM correctly
-    if (sel && !sel.isNull()) {
-      sel.surfaceId = this.id
-    }
     // Since we allow the surface be blurred natively when clicking
     // on tools we now need to make sure that the element is focused natively
     // when we set the selection
@@ -641,7 +639,7 @@ class Surface extends Component {
     this._setSelection(doc.createSelection({
       type: 'property',
       path: path,
-      startoffset: 0,
+      startOffset: 0,
       endOffset: text.length
     }))
   }

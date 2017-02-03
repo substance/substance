@@ -2,16 +2,20 @@
   DOM selection helper
 */
 export default function setDOMSelection(startNode, startOffset, endNode, endOffset) {
-  var sel = window.getSelection()
-  var range = window.document.createRange()
+  let wsel = window.getSelection()
+  let wrange = window.document.createRange()
   if (startNode._isDOMElement) {
     startNode = startNode.getNativeElement()
+  }
+  if (!endNode) {
+    endNode = startNode
+    endOffset = startOffset
   }
   if (endNode._isDOMElement) {
     endNode = endNode.getNativeElement()
   }
-  range.setStart(startNode, startOffset)
-  range.setEnd(endNode, endOffset)
-  sel.removeAllRanges()
-  sel.addRange(range)
+  wrange.setStart(startNode, startOffset)
+  wrange.setEnd(endNode, endOffset)
+  wsel.removeAllRanges()
+  wsel.addRange(wrange)
 }

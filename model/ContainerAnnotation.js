@@ -1,6 +1,4 @@
 import isEqual from '../util/isEqual'
-import last from '../util/last'
-import EventEmitter from '../util/EventEmitter'
 import forEach from '../util/forEach'
 import Annotation from './Annotation'
 import Selection from './Selection'

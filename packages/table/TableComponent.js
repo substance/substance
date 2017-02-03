@@ -17,7 +17,8 @@ class TableComponent extends Component {
         if (cellId) {
           let cellNode = doc.get(cellId)
           let cellEl = $$(TableCellComponent, {
-            node: cellNode
+            node: cellNode,
+            disabled: this.props.disabled
           })
           rowEl.append(cellEl)
         }

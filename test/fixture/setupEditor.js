@@ -2,7 +2,6 @@ import Document from '../../model/Document'
 import DocumentSchema from '../../model/DocumentSchema'
 import EditorSession from '../../model/EditorSession'
 import BlockNode from '../../model/BlockNode'
-import InlineNode from '../../model/InlineNode'
 import ParagraphPackage from '../../packages/paragraph/ParagraphPackage'
 import HeadingPackage from '../../packages/heading/HeadingPackage'
 import StrongPackage from '../../packages/strong/StrongPackage'
@@ -14,7 +13,14 @@ import Component from '../../ui/Component'
 import AbstractEditor from '../../ui/AbstractEditor'
 import ContainerEditor from '../../ui/ContainerEditor'
 import Configurator from '../../util/Configurator'
+import InlineWrapper from '../../packages/inline-wrapper/InlineWrapper'
+import InlineWrapperComponent from '../../packages/inline-wrapper/InlineWrapperComponent'
 import TestContainerAnnotation from './TestContainerAnnotation'
+import TestStructuredNode from './TestStructuredNode'
+import TestStructuredNodeComponent from './TestStructuredNodeComponent'
+import TestInlineNode from './TestInlineNode'
+import TestInlineNodeComponent from './TestInlineNodeComponent'
+import TestContainerComponent from './TestContainerComponent'
 
 export default function setupEditor(t, ...f) {
   let editor = TestEditor.mount({ editorSession: fixture(...f) }, t.sandbox)
@@ -61,7 +67,13 @@ function getConfig() {
   config.addNode(TestBlockNode)
   config.addNode(TestInlineNode)
   config.addNode(TestContainerAnnotation)
+  config.addNode(TestStructuredNode)
+  config.addNode(InlineWrapper)
   config.addComponent('test-block', Component)
+  config.addComponent('test-inline-node', TestInlineNodeComponent)
+  config.addComponent('structured-node', TestStructuredNodeComponent)
+  config.addComponent('container', TestContainerComponent)
+  config.addComponent(InlineWrapper.type, InlineWrapperComponent)
   return config
 }
 
@@ -105,12 +117,6 @@ function fixture(...args) {
     }
   }
   return editorSession
-}
-
-class TestInlineNode extends InlineNode {}
-TestInlineNode.type = 'test-inline'
-TestInlineNode.schema = {
-  foo: { type: 'string' }
 }
 
 class TestBlockNode extends BlockNode {}

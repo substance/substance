@@ -1,9 +1,10 @@
+import diff from '../util/diff'
 import isNumber from '../util/isNumber'
 import Coordinate from '../model/Coordinate'
-import AnnotatedTextComponent from './AnnotatedTextComponent'
-import CursorComponent from './CursorComponent'
-import SelectionFragmentComponent from './SelectionFragmentComponent'
-import diff from '../util/diff'
+import Component from '../ui/Component'
+import AnnotatedTextComponent from '../ui/AnnotatedTextComponent'
+import CursorComponent from '../ui/CursorComponent'
+import SelectionFragmentComponent from '../ui/SelectionFragmentComponent'
 
 /**
   Renders a text property. Used internally by different components to render
@@ -247,25 +248,34 @@ TextPropertyComponent.prototype._isTextPropertyComponent = true
 
 // Helpers for DOM selection mapping
 
-TextPropertyComponent.getCoordinate = function(root, node, offset) {
-  let context = _getPropertyContext(root, node, offset)
+/*
+  Used to map from DOM to model.
+  Given a root element and a DOM element - which is typically somewhere inside a surface
+  it tries to find the next TextProperty by walking up the DOM.
+  If found it computes the character position, counting chars and using the hints, data-length and data-offset,
+  rendered by the TextPropertyComponent
+*/
+TextPropertyComponent.getCoordinate = function(root, el, offset) {
+  let context = _getPropertyContext(root, el, offset)
   if (!context) {
     return null
   }
   // in some cases we need to normalize the DOM coordinate
   // before we can use it for retrieving charPos
   // E.g. observed with #273
-  node = context.node
-  offset = context.offset
-  var charPos = _getCharPos(context.node, context.offset)
+  let charPos = _getCharPos(context.node, context.offset)
   if (isNumber(charPos)) {
-    return new Coordinate(context.path, charPos)
+    let coor = new Coordinate(context.path, charPos)
+    coor._comp = context.comp
+    return coor
+  } else {
+    return null
   }
-  return null
 }
 
 function _getPropertyContext(root, node, offset) {
   let result = {
+    comp: null,
     el: null,
     path: null,
     node: node,
@@ -273,16 +283,17 @@ function _getPropertyContext(root, node, offset) {
   }
   while (node && node !== root) {
     if (node.isElementNode()) {
-      let path = node.getAttribute('data-path')
-      if (path) {
-        result.el = node;
-        result.path = path.split('.')
+      let comp = Component.unwrap(node)
+      if (comp && comp._isTextPropertyComponent) {
+        result.comp = comp
+        result.el = node
+        result.path = comp.getPath()
         return result;
       }
+      // we need to normalize situations where the DOM coordinate
+      // is inside an inline node, which we have observed
+      // can actually happen.
       if (node.getAttribute('data-inline')) {
-        // we need to normalize situations where the DOM coordinate
-        // is inside an inline node, which we have observed
-        // can actually happen.
         result.node = node
         if (offset > 0) {
           result.offset = 1

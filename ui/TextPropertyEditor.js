@@ -60,6 +60,14 @@ class TextPropertyEditor extends Surface {
     return el
   }
 
+  _handleEnterKey(event) {
+    event.preventDefault()
+    event.stopPropagation()
+    if (this.props.multiLine) {
+      super._handleEnterKey(event)
+    }
+  }
+
   getPath() {
     return this.props.path
   }

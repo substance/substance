@@ -1,14 +1,13 @@
 import { module } from 'substance-test'
 import EditingInterface from '../model/EditingInterface'
-import setupContainerEditor from './fixture/setupContainerEditor'
+import setupEditor from './fixture/setupEditor'
 import twoParagraphs from './fixture/twoParagraphs'
 
 const test = module('InlineNode')
 
-test("InlineNodes should be not selected when selection is null", function(t) {
-  var env = setupContainerEditor(paragraphsWithInlineNodes)
-  var editorSession = env.editorSession
-  var nodes = env.app.findAll('.sc-inline-node')
+test.UI("InlineNodes should be not selected when selection is null", function(t) {
+  let { editorSession, editor } = setupEditor(t, paragraphsWithInlineNodes)
+  let nodes = editor.findAll('.sc-inline-node')
   editorSession.setSelection(null)
   nodes.forEach(function(node){
     t.ok(node.isNotSelected(), "node '"+node.getId()+"' should not be selected.")
@@ -16,10 +15,9 @@ test("InlineNodes should be not selected when selection is null", function(t) {
   t.end()
 })
 
-test("InlineNodes should be not selected when selection is somewhere else", function(t) {
-  var env = setupContainerEditor(paragraphsWithInlineNodes)
-  var editorSession = env.editorSession
-  var nodes = env.app.findAll('.sc-inline-node')
+test.UI("InlineNodes should be not selected when selection is somewhere else", function(t) {
+  let { editorSession, editor } = setupEditor(t, paragraphsWithInlineNodes)
+  let nodes = editor.findAll('.sc-inline-node')
   editorSession.setSelection({
     type: 'property',
     path: ['p1', 'content'],
@@ -32,10 +30,9 @@ test("InlineNodes should be not selected when selection is somewhere else", func
   t.end()
 })
 
-test("InlineNode should be 'selected' with when the inline node is selected", function(t) {
-  var env = setupContainerEditor(paragraphsWithInlineNodes)
-  var editorSession = env.editorSession
-  var nodes = env.app.findAll('.sc-inline-node')
+test.UI("InlineNode should be 'selected' with when the inline node is selected", function(t) {
+  let { editorSession, editor } = setupEditor(t, paragraphsWithInlineNodes)
+  let nodes = editor.findAll('.sc-inline-node')
   editorSession.setSelection({
     type: 'property',
     path: ['p1', 'content'],
@@ -54,10 +51,9 @@ test("InlineNode should be 'selected' with when the inline node is selected", fu
   t.end()
 })
 
-test("InlineNode should be 'co-selected' when selection is spanning an inline node", function(t) {
-  var env = setupContainerEditor(paragraphsWithInlineNodes)
-  var editorSession = env.editorSession
-  var nodes = env.app.findAll('.sc-inline-node')
+test.UI("InlineNode should be 'co-selected' when selection is spanning an inline node", function(t) {
+  let { editorSession, editor } = setupEditor(t, paragraphsWithInlineNodes)
+  let nodes = editor.findAll('.sc-inline-node')
   editorSession.setSelection({
     type: 'property',
     path: ['p1', 'content'],
@@ -76,10 +72,9 @@ test("InlineNode should be 'co-selected' when selection is spanning an inline no
   t.end()
 })
 
-test("InlineNode should be 'focused' when having the selection", function(t) {
-  var env = setupContainerEditor(paragraphsWithInlineNodes, t.sandbox)
-  var editorSession = env.editorSession
-  var nodes = env.app.findAll('.sc-inline-node')
+test.UI("InlineNode should be 'focused' when having the selection", function(t) {
+  let { editorSession, editor } = setupEditor(t, paragraphsWithInlineNodes)
+  let nodes = editor.findAll('.sc-inline-node')
   editorSession.setSelection({
     type: 'property',
     path: ['p1', 'content'],
@@ -106,10 +101,9 @@ test("InlineNode should be 'focused' when having the selection", function(t) {
 })
 
 // Similar to the previous but with another inline node being focused
-test("InlineNode should be 'focused' when having the selection (II)", function(t) {
-  var env = setupContainerEditor(paragraphsWithInlineNodes, t.sandbox)
-  var editorSession = env.editorSession
-  var nodes = env.app.findAll('.sc-inline-node')
+test.UI("InlineNode should be 'focused' when having the selection (II)", function(t) {
+  let { editorSession, editor } = setupEditor(t, paragraphsWithInlineNodes)
+  let nodes = editor.findAll('.sc-inline-node')
   editorSession.setSelection({
     type: 'property',
     path: ['c_p', 'content'],
@@ -129,10 +123,9 @@ test("InlineNode should be 'focused' when having the selection (II)", function(t
 })
 
 // FIXME: broken since introduction of EditorSession/Flow
-// test("InlineNode should be 'co-focused' when a nested inline node has the selection", function(t) {
-//   var env = setupContainerEditor(nestedInlineNode, t.sandbox)
-//   var editorSession = env.editorSession
-//   var nodes = env.app.findAll('.sc-inline-node')
+// test.UI("InlineNode should be 'co-focused' when a nested inline node has the selection", function(t) {
+//   let { editorSession, editor } = setupEditor(t, nestedInlineNode, t.sandbox)
+//   let nodes = editor.findAll('.sc-inline-node')
 //   editorSession.setSelection({
 //     type: 'property',
 //     path: ['sn2', 'title'],
@@ -194,37 +187,37 @@ function paragraphsWithInlineNodes(doc) {
 
 // co-focusing an inline node is only possible, if the inline node itself contains
 // content with an inline node (or isolated node)
-function nestedInlineNode(doc) {
-  let tx = new EditingInterface(doc)
-  twoParagraphs(tx)
-  let sn1 = tx.create({
-    type: "structured-node",
-    id: "sn1",
-    title: "ABCDEFG"
-  })
-  tx.setSelection({
-    type: 'property',
-    path: ['p1', 'content'],
-    startOffset: 2
-  })
-  tx.insertInlineNode({
-    type: 'inline-wrapper',
-    id: 'in1',
-    wrappedNode: sn1.id
-  })
-  let sn2 = doc.create({
-    type: "structured-node",
-    id: "sn2",
-    title: "ABCDEFG"
-  })
-  tx.setSelection({
-    type: 'paragraph',
-    path: ['sn1', 'content'],
-    startOffset: 4
-  })
-  tx.insertInlineNode({
-    type: 'inline-wrapper',
-    id: 'in2',
-    wrappedNode: sn2.id
-  })
-}
+// function nestedInlineNode(doc) {
+//   let tx = new EditingInterface(doc)
+//   twoParagraphs(tx)
+//   let sn1 = tx.create({
+//     type: "structured-node",
+//     id: "sn1",
+//     title: "ABCDEFG"
+//   })
+//   tx.setSelection({
+//     type: 'property',
+//     path: ['p1', 'content'],
+//     startOffset: 2
+//   })
+//   tx.insertInlineNode({
+//     type: 'inline-wrapper',
+//     id: 'in1',
+//     wrappedNode: sn1.id
+//   })
+//   let sn2 = doc.create({
+//     type: "structured-node",
+//     id: "sn2",
+//     title: "ABCDEFG"
+//   })
+//   tx.setSelection({
+//     type: 'paragraph',
+//     path: ['sn1', 'content'],
+//     startOffset: 4
+//   })
+//   tx.insertInlineNode({
+//     type: 'inline-wrapper',
+//     id: 'in2',
+//     wrappedNode: sn2.id
+//   })
+// }

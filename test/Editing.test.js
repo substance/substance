@@ -175,16 +175,17 @@ test.UI("[IT8]: Inserting text with range within TextProperty starting inside an
 
 test.UI("[II1]: Inserting InlineNode node into a TextProperty", function(t) {
   let { editorSession, doc } = setupEditor(t, _p1)
+  editorSession.setSelection({
+    type: 'property',
+    path: ['p1', 'content'],
+    startOffset: 3,
+    containerId: 'body'
+  })
   editorSession.transaction((tx) => {
-    tx.setSelection({
-      type: 'property',
-      path: ['p1', 'content'],
-      startOffset: 3
-    })
     tx.insertInlineNode({
-      type: 'test-inline',
+      type: 'test-inline-node',
       id: 'il1',
-      foo: 'foo'
+      content: 'X'
     })
   })
   let sel = editorSession.getSelection()
@@ -1202,6 +1203,38 @@ test.UI("[L10-2]: Copy and Pasting a List partially", function(t) {
   t.end()
 })
 
+test.UI("[IN-1]: Inserting text in an IsolatedNode", function(t) {
+  let { doc, editorSession } = setupEditor(t, _p1, _in1, _p2)
+  editorSession.setSelection({
+    type: 'property',
+    path: ['in1', 'title'],
+    startOffset: 3
+  })
+
+  editorSession.transaction((tx) => {
+    tx.insertText('xxx')
+  })
+  let in1 = doc.get('in1')
+  t.equal(in1.title, IN1_TITLE.slice(0,3)+'xxx'+IN1_TITLE.slice(3), 'Text should be inserted into field')
+  t.end()
+})
+
+test.UI("[IN-2]: Deleting a character in an IsolatedNode", function(t) {
+  let { doc, editorSession } = setupEditor(t, _p1, _in1, _p2)
+  editorSession.setSelection({
+    type: 'property',
+    path: ['in1', 'title'],
+    startOffset: 3
+  })
+
+  editorSession.transaction((tx) => {
+    tx.deleteCharacter('right')
+  })
+  let in1 = doc.get('in1')
+  t.equal(in1.title, IN1_TITLE.slice(0,3)+IN1_TITLE.slice(4), 'Text should be inserted into field')
+  t.end()
+})
+
 
 // TODO: add specification and test cases for tx.annotate()
 
@@ -1387,4 +1420,18 @@ function _block2(doc, body) {
     id: 'block2'
   })
   body.show('block2')
+}
+
+const IN1_TITLE = 'TITLE'
+const IN1_BODY = 'BODY'
+const IN1_CAPTION = 'CAPTION'
+function _in1(doc, body) {
+  doc.create({
+    type: 'structured-node',
+    id: 'in1',
+    title: IN1_TITLE,
+    body: IN1_BODY,
+    caption: IN1_CAPTION
+  })
+  body.show('in1')
 }

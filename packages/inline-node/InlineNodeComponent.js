@@ -1,31 +1,67 @@
 import startsWith from '../../util/startsWith'
 import isEqual from '../../util/isEqual'
-import Coordinate from '../../model/Coordinate'
-import IsolatedNodeComponent from '../isolated-node/IsolatedNodeComponent'
+import AbstractIsolatedNodeComponent from '../../ui/AbstractIsolatedNodeComponent'
 
-class InlineNodeComponent extends IsolatedNodeComponent {
+class InlineNodeComponent extends AbstractIsolatedNodeComponent {
 
-  get _isInlineNodeComponent() {
-    return true
+  render($$) {
+    let node = this.props.node
+    let ContentClass = this.ContentClass
+
+    let el = $$('span')
+    el.addClass(this.getClassNames())
+      .addClass('sc-inline-node')
+      .addClass('sm-'+this.props.node.type)
+      .attr("data-id", node.id)
+      .attr('data-inline', '1')
+
+    let disabled = this.isDisabled()
+
+    if (this.state.mode) {
+      el.addClass('sm-'+this.state.mode)
+    } else {
+      el.addClass('sm-not-selected')
+    }
+
+    if (!ContentClass.noStyle) {
+      el.addClass('sm-default-style')
+    }
+
+    // shadowing handlers of the parent surface
+    // TODO: extract this into a helper so that we can reuse it anywhere where we want
+    // to prevent propagation to the parent surface
+    el.on('keydown', this.onKeydown)
+      .on('mousedown', this._stopPropagation)
+      .on('keypress', this._stopPropagation)
+      .on('keyup', this._stopPropagation)
+      .on('compositionstart', this._stopPropagation)
+      .on('textInput', this._stopPropagation)
+
+    let level = this._getLevel()
+
+    el.append(
+      this.renderContent($$, node)
+        .ref('content')
+        .addClass('se-content')
+        .css({ 'z-index': level })
+    )
+
+    if (disabled) {
+      el.addClass('sm-disabled')
+         .attr('contenteditable', false)
+         .on('click', this.onClick)
+    }
+
+    el.attr('draggable', true)
+    return el
   }
 
-  // use spans everywhere
-  get __elementTag() {
-    return 'span'
-  }
-
-  get __slugChar() {
-    return "\uFEFF"
+  isDisabled() {
+    return !this.state.mode || ['co-selected', 'cursor'].indexOf(this.state.mode) > -1;
   }
 
   getClassNames() {
-    return 'sc-inline-node'
-  }
-
-  render($$) { // eslint-disable-line
-    let el = super.render($$)
-    el.attr('data-inline', '1')
-    return el
+    return ''
   }
 
   // TODO: this is almost the same as the super method. Try to consolidate.
@@ -82,32 +118,6 @@ class InlineNodeComponent extends IsolatedNodeComponent {
 
 }
 
-InlineNodeComponent.getCoordinate = function(el) {
-  // special treatment for block-level isolated-nodes
-  let parent = el.getParent()
-  if (el.isTextNode() && parent.is('.se-slug')) {
-    let slug = parent
-    let nodeEl = slug.getParent()
-    if (nodeEl.is('.sc-inline-node')) {
-      let startOffset = Number(nodeEl.getAttribute('data-offset'))
-      let len = Number(nodeEl.getAttribute('data-length'))
-      let charPos = startOffset
-      if (slug.is('sm-after')) charPos += len
-      let path
-      while ( (nodeEl = nodeEl.getParent()) ) {
-        let pathStr = nodeEl.getAttribute('data-path')
-        if (pathStr) {
-          path = pathStr.split('.')
-          let coor = new Coordinate(path, charPos)
-          coor.__inInlineNode__ = true
-          coor.__startOffset__ = startOffset
-          coor.__endOffset__ = startOffset+len
-          return coor
-        }
-      }
-    }
-  }
-  return null
-}
+InlineNodeComponent.prototype._isInlineNodeComponent = true
 
 export default InlineNodeComponent
