@@ -152,16 +152,7 @@ class Container extends DocumentNode {
     // this hook is used to invalidate cached positions
     // caching is done only in the 'real' document, not in a TransactionDocument
     if (this.document) {
-      // TransactionDocument does must be up2date after each operation
-      // as this is used to record a DocumentChange
-      // whereas, a real document is manipulated only by applying a DocumentChange
-      if (this.document._isTransactionDocument) {
-        this.document.data.on('operation:applied', this._onOperationApplied, this)
-      }
-      // for real document is only check
-      else {
-        this.document.on('document:changed', this._onDocumentChange, this)
-      }
+      this.document.data.on('operation:applied', this._onOperationApplied, this)
       this._isCaching = true
     }
   }
