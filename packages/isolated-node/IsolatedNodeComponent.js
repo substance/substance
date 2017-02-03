@@ -35,66 +35,45 @@ class IsolatedNodeComponent extends AbstractIsolatedNodeComponent {
     // TODO: extract this into a helper so that we can reuse it anywhere where we want
     // to prevent propagation to the parent surface
     el.on('keydown', this.onKeydown)
-      .on('mousedown', this._stopPropagation)
       .on('keypress', this._stopPropagation)
       .on('keyup', this._stopPropagation)
       .on('compositionstart', this._stopPropagation)
       .on('textInput', this._stopPropagation)
 
-    el.append(
-      $$('div').addClass('se-slug').addClass('sm-before').ref('before')
-        // NOTE: better use a regular character otherwise Edge has problems
-        .append('[')
-    )
-
     let level = this._getLevel()
 
-    let container = $$('div').addClass('se-container')
-      .attr('contenteditable', false)
-      .css({ 'z-index': 2*level })
-
-    if (ContentClass.fullWidth) {
-      container.addClass('sm-full-width')
-    }
-
     if (this.state.mode === 'cursor' && this.state.position === 'before') {
-      container.append(
-        $$('div').addClass('se-cursor').addClass('sm-before').attr('contenteditable', false)
+      el.append(
+        $$('div').addClass('se-cursor').addClass('sm-before')
       )
     }
-    container.append(
+    el.append(
       this.renderContent($$, node).ref('content')
     )
 
     if (disabled) {
-      container.addClass('sm-disabled')
-      if (this.shouldRenderBlocker()) {
-        // NOTE: there are some content implementations which work better without a blocker
-        let blocker = $$('div').addClass('se-blocker').ref('blocker')
-          .css({ 'z-index': 2*level+1 })
-        // select the node on click
-        blocker.on('click', this.onClickBlocker)
-        container.append(blocker)
-      } else {
-        // select the node on click
-        el.on('click', this.onClick)
+      el.addClass('sm-disabled')
+        .attr('contenteditable', false)
+        // ATTENTION: draggable=true causes trouble in Safari not to work at all
+        // i.e. does not select anymore
+        .attr('draggable', true)
+        .on('mousedown', this._reserveMousedown, this)
+        .on('click', this.onClick)
+    } else {
+      // ATTENTION: see above
+      if (this.state.mode !== 'focused') {
+        el.attr('draggable', true)
       }
+      el.on('mousedown', this._reserveMousedown, this)
+        .on('click', this.onClick)
     }
 
     if (this.state.mode === 'cursor' && this.state.position === 'after') {
-      container.append(
-        $$('div').addClass('se-cursor').addClass('sm-after').attr('contenteditable', false)
-      );
+      el.append(
+        $$('div').addClass('se-cursor').addClass('sm-after')
+      )
     }
 
-    el.append(container)
-    el.append(
-      $$('div').addClass('se-slug').addClass('sm-after').ref('after')
-        // NOTE: better use a regular character otherwise Edge has problems
-        .append(']')
-    )
-
-    el.attr('draggable', true)
     return el
   }
 
@@ -161,42 +140,46 @@ class IsolatedNodeComponent extends AbstractIsolatedNodeComponent {
       surfaceId: surface.id
     })
   }
+
+  onClick(event) {
+    if (this._mousedown) {
+      this._mousedown = false
+      event.preventDefault()
+      event.stopPropagation()
+      this._selectNode()
+    }
+  }
+
+  // EXPERIMENTAL: Surface and IsolatedNodeComponent communicate via flag on the mousedown event
+  // and only reacting on click or mouseup when the mousedown has been reserved
+  _reserveMousedown(event) {
+    if (event.__reserved__) {
+      console.log('%s: mousedown already reserved by %s', this.id, event.__reserved__.id)
+      return
+    } else {
+      console.log('%s: taking mousedown ', this.id)
+      event.__reserved__ = this
+      this._mousedown = true
+    }
+  }
+
+  get id() { return this.getId() }
 }
 
 IsolatedNodeComponent.prototype._isIsolatedNodeComponent = true
 
 IsolatedNodeComponent.prototype._isDisabled = IsolatedNodeComponent.prototype.isDisabled
 
-/*
-  This provides a model coordinatae for
-*/
-IsolatedNodeComponent.getCoordinate = function(node) {
-  let parent = node.getParent()
-  if (node.isTextNode() && parent.is('.se-slug')) {
-    let slug = parent
-    let isolatedNodeEl = slug.getParent()
-    let comp = Component.unwrap(isolatedNodeEl)
-    let nodeId = comp.props.node.id
-    let charPos = slug.is('sm-after') ? 1 : 0
-    let coor = new Coordinate([nodeId], charPos)
-    coor._comp = comp
-    coor.__inIsolatedBlockNode__ = true
-    return coor
-  } else {
-    return null
-  }
-}
-
 IsolatedNodeComponent.getDOMCoordinate = function(comp, coor) {
   let domCoor
   if (coor.offset === 0) {
     domCoor = {
-      container: comp.refs.before.getNativeElement(),
+      container: comp.el.getNativeElement(),
       offset: 0
     }
   } else {
     domCoor = {
-      container: comp.refs.after.getNativeElement(),
+      container: comp.el.getNativeElement(),
       offset: 1
     }
   }
@@ -206,12 +189,12 @@ IsolatedNodeComponent.getDOMCoordinate = function(comp, coor) {
 IsolatedNodeComponent.getDOMCoordinates = function(comp) {
   return {
     start: {
-      container: comp.refs.before.getNativeElement(),
+      container: comp.el.getNativeElement(),
       offset: 0
     },
     end: {
-      container: comp.refs.after.getNativeElement(),
-      offset: 1
+      container: comp.el.getNativeElement(),
+      offset: comp.el.getChildCount()
     }
   }
 }

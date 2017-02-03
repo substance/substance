@@ -45,6 +45,39 @@ class DOMSelection {
     return doc._createSelectionFromRange(range)
   }
 
+  /*
+    Maps the current DOM selection to a model range.
+
+    @param {object} [options]
+      - `direction`: `left` or `right`; a hint for disambiguations, used by Surface during cursor navigation.
+    @returns {model/Range}
+  */
+  mapDOMSelection(options) {
+    let range
+    let wSel = window.getSelection()
+    // Use this log whenever the mapping goes wrong to analyze what
+    // is actually being provided by the browser
+    // console.log('DOMSelection->Model: anchorNode:', wSel.anchorNode, 'anchorOffset:', wSel.anchorOffset, 'focusNode:', wSel.focusNode, 'focusOffset:', wSel.focusOffset, 'collapsed:', wSel.collapsed);
+    if (wSel.rangeCount === 0) {
+      return null;
+    }
+    let anchorNode = DefaultDOMElement.wrapNativeElement(wSel.anchorNode)
+    if (wSel.isCollapsed) {
+      let coor = this._getCoordinate(anchorNode, wSel.anchorOffset, options)
+      if (!coor) return null
+      range = _createRange({
+        start: coor,
+        end: coor
+      })
+    }
+    else {
+      let focusNode = DefaultDOMElement.wrapNativeElement(wSel.focusNode)
+      range = this._getRange(anchorNode, wSel.anchorOffset, focusNode, wSel.focusOffset)
+    }
+    // console.log('DOMSelection->Model: extracted range ', range ? range.toString() : null);
+    return range
+  }
+
   // function _printStacktrace() {
   //   try {
   //     throw new Error();
@@ -60,7 +93,7 @@ class DOMSelection {
   */
   setSelection(sel) {
     // console.log('### DOMSelection: setting selection', sel.toString());
-    let [start, end] = this.mapModelToDOMCoordinates(sel)
+    let {start, end} = this.mapModelToDOMCoordinates(sel)
     if (!start) {
       this.clear()
       return
@@ -113,7 +146,7 @@ class DOMSelection {
       rootEl = surface.el
     }
     if (sel.isNull() || sel.isCustomSelection()) {
-      return null
+      return {}
     }
 
     let start, end
@@ -121,8 +154,7 @@ class DOMSelection {
       start = this._getDOMCoordinate(rootEl, sel.start)
       if (!start) {
         console.warn('FIXME: selection seems to be invalid.')
-        this.clear()
-        return
+        return {}
       }
       if (sel.isCollapsed()) {
         end = start
@@ -130,16 +162,14 @@ class DOMSelection {
         end = this._getDOMCoordinate(rootEl, sel.end)
         if (!end) {
           console.warn('FIXME: selection seems to be invalid.')
-          this.clear()
-          return
+          return {}
         }
       }
     } else if (sel.isNodeSelection()) {
       let comp = Component.unwrap(rootEl.find('*[data-id="'+sel.getNodeId()+'"]'))
       if (!comp) {
         console.error('Could not find component with id', sel.getNodeId())
-        this.clear()
-        return
+        return {}
       }
       if (comp._isIsolatedNodeComponent) {
         let coors = IsolatedNodeComponent.getDOMCoordinates(comp)
@@ -169,7 +199,7 @@ class DOMSelection {
       }
     }
     // console.log('Model->DOMSelection: mapped to DOM coordinates', start.container, start.offset, end.container, end.offset, 'isReverse?', sel.isReverse());
-    return [start,end]
+    return {start,end}
   }
 
   _getDOMCoordinate(rootEl, coor) {
@@ -211,39 +241,6 @@ class DOMSelection {
       wRange.startOffset,
       DefaultDOMElement.wrapNativeElement(wRange.endContainer),
       wRange.endOffset)
-  }
-
-  /*
-    Maps the current DOM selection to a model range.
-
-    @param {object} [options]
-      - `direction`: `left` or `right`; a hint for disambiguations, used by Surface during cursor navigation.
-    @returns {model/Range}
-  */
-  mapDOMSelection(options) {
-    let range
-    let wSel = window.getSelection()
-    // Use this log whenever the mapping goes wrong to analyze what
-    // is actually being provided by the browser
-    // console.log('DOMSelection->Model: anchorNode:', wSel.anchorNode, 'anchorOffset:', wSel.anchorOffset, 'focusNode:', wSel.focusNode, 'focusOffset:', wSel.focusOffset, 'collapsed:', wSel.collapsed);
-    if (wSel.rangeCount === 0) {
-      return null;
-    }
-    let anchorNode = DefaultDOMElement.wrapNativeElement(wSel.anchorNode)
-    if (wSel.isCollapsed) {
-      let coor = this._getCoordinate(anchorNode, wSel.anchorOffset, options)
-      if (!coor) return null
-      range = _createRange({
-        start: coor,
-        end: coor
-      })
-    }
-    else {
-      let focusNode = DefaultDOMElement.wrapNativeElement(wSel.focusNode)
-      range = this._getRange(anchorNode, wSel.anchorOffset, focusNode, wSel.focusOffset)
-    }
-    // console.log('DOMSelection->Model: extracted range ', range ? range.toString() : null);
-    return range
   }
 
   /*
@@ -324,9 +321,6 @@ class DOMSelection {
   */
   _getCoordinate(nodeEl, offset) {
     let coor = null
-    if (!coor) {
-      coor = IsolatedNodeComponent.getCoordinate(nodeEl)
-    }
     // this deals with a cursor in a TextProperty
     if (!coor) {
       coor = TextPropertyComponent.getCoordinate(this.editor.el, nodeEl, offset)

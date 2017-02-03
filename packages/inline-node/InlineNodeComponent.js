@@ -14,7 +14,6 @@ class InlineNodeComponent extends AbstractIsolatedNodeComponent {
       .addClass('sm-'+this.props.node.type)
       .attr("data-id", node.id)
       .attr('data-inline', '1')
-      .attr('contenteditable', false)
 
     let disabled = this.isDisabled()
 
@@ -44,12 +43,13 @@ class InlineNodeComponent extends AbstractIsolatedNodeComponent {
       this.renderContent($$, node)
         .ref('content')
         .addClass('se-content')
-        .css({ 'z-index': 2*level })
+        .css({ 'z-index': level })
     )
 
     if (disabled) {
       el.addClass('sm-disabled')
-      el.on('click', this.onClick)
+         .attr('contenteditable', false)
+         .on('click', this.onClick)
     }
 
     el.attr('draggable', true)

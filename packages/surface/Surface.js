@@ -336,8 +336,18 @@ class Surface extends Component {
   // particularly, double- and triple clicks.
   // also it turned out to be problematic to react on mouse down instantly
   onMouseDown(event) {
-    // console.log('mousedown on', this.getId());
-    // event.stopPropagation();
+    // ATTENTION: stopping a mousedown stops clicks/mouseup from working in FF
+    if (event.__reserved__) {
+      console.log('%s: mousedown already reserved by %s', this.id, event.__reserved__.id)
+      return
+    } else {
+      console.log('%s: taking mousedown ', this.id)
+      event.__reserved__ = this
+    }
+
+    if (this.state.mode === 'co-focused') {
+      this.el.setAttribute('contenteditable', true)
+    }
 
     // TODO: what is this exactly?
     if ( event.button !== 0 ) {
@@ -444,29 +454,16 @@ class Surface extends Component {
     this._updateContentEditableState(oldState)
   }
 
-  _updateContentEditableState(oldState) {
+  _updateContentEditableState() {
     // ContentEditable management
     // Note: to be able to isolate nodes, we need to control
     // how contenteditable is used in a hieriarchy of surfaces.
-    if (oldState.mode === 'co-focused') {
-      this.el.off('mousedown', this._enableContentEditable, this)
+    let mode = this.state.mode
+    if (!this.isEditable() || this.props.disabled || mode === 'co-focused') {
+      this.el.removeAttribute('contenteditable')
+    } else {
+      this.el.setAttribute('contenteditable', true)
     }
-    if (!this.isEditable()) {
-      this.el.setAttribute('contenteditable', false)
-    } else if (this.state.mode !== oldState.mode) {
-      switch(this.state.mode) {
-        case 'co-focused':
-          this.el.setAttribute('contenteditable', false)
-          this.el.on('mousedown', this._enableContentEditable, this)
-          break
-        default:
-          this.el.setAttribute('contenteditable', true)
-      }
-    }
-  }
-
-  _enableContentEditable() {
-    this.el.setAttribute('contenteditable', true)
   }
 
   _onSelectionChanged(selection) {
@@ -614,10 +611,6 @@ class Surface extends Component {
   }
 
   _setSelection(sel) {
-    // NOTE: setting the surfaceId is important so that it can be mapped to the DOM correctly
-    if (sel && !sel.isNull()) {
-      sel.surfaceId = this.id
-    }
     // Since we allow the surface be blurred natively when clicking
     // on tools we now need to make sure that the element is focused natively
     // when we set the selection
