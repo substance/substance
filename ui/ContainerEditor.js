@@ -165,6 +165,7 @@ class ContainerEditor extends Surface {
       if (event.keyCode === keys.UP && nodePos > 0) {
         let prev = container.getNodeAt(nodePos-1)
         if (!prev.isText() && !prev.isList()) {
+          event.preventDefault()
           this.getEditorSession().setSelection({
             type: 'node',
             nodeId: prev.id,
@@ -177,6 +178,7 @@ class ContainerEditor extends Surface {
       } else if (event.keyCode === keys.DOWN && nodePos < container.getLength()) {
         let next = container.getNodeAt(nodePos+1)
         if (!next.isText() && !next.isList()) {
+          event.preventDefault()
           this.getEditorSession().setSelection({
             type: 'node',
             nodeId: next.id,
@@ -208,15 +210,16 @@ class ContainerEditor extends Surface {
     }
   }
 
-  _handleEnterKey(event) {
-    let sel = this.getEditorSession().getSelection()
-    if (sel.isNodeSelection() && sel.isFull()) {
-      event.preventDefault()
-      event.stopPropagation()
-    } else {
-      super._handleEnterKey.apply(this, arguments)
-    }
-  }
+  // _handleEnterKey(event) {
+  //   let sel = this.getEditorSession().getSelection()
+  //   if (sel.isNodeSelection() && sel.isFull()) {
+  //     event.preventDefault()
+  //     event.stopPropagation()
+  //     // TODO: we could enter here
+  //   } else {
+  //     super._handleEnterKey.apply(this, arguments)
+  //   }
+  // }
 
   // Used by Clipboard
   isContainerEditor() {

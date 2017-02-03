@@ -1,6 +1,4 @@
 import startsWith from '../../util/startsWith'
-import Coordinate from '../../model/Coordinate'
-import Component from '../../ui/Component'
 import AbstractIsolatedNodeComponent from '../../ui/AbstractIsolatedNodeComponent'
 
 class IsolatedNodeComponent extends AbstractIsolatedNodeComponent {
@@ -39,8 +37,6 @@ class IsolatedNodeComponent extends AbstractIsolatedNodeComponent {
       .on('keyup', this._stopPropagation)
       .on('compositionstart', this._stopPropagation)
       .on('textInput', this._stopPropagation)
-
-    let level = this._getLevel()
 
     if (this.state.mode === 'cursor' && this.state.position === 'before') {
       el.append(
@@ -154,10 +150,10 @@ class IsolatedNodeComponent extends AbstractIsolatedNodeComponent {
   // and only reacting on click or mouseup when the mousedown has been reserved
   _reserveMousedown(event) {
     if (event.__reserved__) {
-      console.log('%s: mousedown already reserved by %s', this.id, event.__reserved__.id)
+      // console.log('%s: mousedown already reserved by %s', this.id, event.__reserved__.id)
       return
     } else {
-      console.log('%s: taking mousedown ', this.id)
+      // console.log('%s: taking mousedown ', this.id)
       event.__reserved__ = this
       this._mousedown = true
     }

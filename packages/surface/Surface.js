@@ -338,10 +338,10 @@ class Surface extends Component {
   onMouseDown(event) {
     // ATTENTION: stopping a mousedown stops clicks/mouseup from working in FF
     if (event.__reserved__) {
-      console.log('%s: mousedown already reserved by %s', this.id, event.__reserved__.id)
+      // console.log('%s: mousedown already reserved by %s', this.id, event.__reserved__.id)
       return
     } else {
-      console.log('%s: taking mousedown ', this.id)
+      // console.log('%s: taking mousedown ', this.id)
       event.__reserved__ = this
     }
 
