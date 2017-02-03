@@ -166,6 +166,7 @@ export { default as Command } from './ui/Command'
 export { default as Component } from './ui/Component'
 export { default as ContainerEditor } from './ui/ContainerEditor'
 export { default as DragAndDropHandler } from './ui/DragAndDropHandler'
+export { default as DOMSelection } from './ui/DOMSelection'
 export { default as FontAwesomeIcon } from './ui/FontAwesomeIcon'
 export { default as InsertNodeCommand } from './ui/InsertNodeCommand'
 export { default as Highlights } from './ui/Highlights'
@@ -194,7 +195,7 @@ export { default as SubstanceError } from './util/SubstanceError'
 export { default as substanceGlobals } from './util/substanceGlobals'
 export { default as TreeIndex } from './util/TreeIndex'
 export { default as uuid } from './util/uuid'
-        
+
 export { default as isArray } from './util/isArray'
 export { default as isArrayEqual } from './util/isArrayEqual'
 export { default as isBoolean } from './util/isBoolean'
@@ -204,8 +205,8 @@ export { default as isNil } from './util/isNil'
 export { default as isNumber } from './util/isNumber'
 export { default as isObject } from './util/isObject'
 export { default as isPlainObject } from './util/isPlainObject'
-export { default as isString } from './util/isString'        
-        
+export { default as isString } from './util/isString'
+
 export { series } from './util/async'
 
 // dom
