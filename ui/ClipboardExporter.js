@@ -31,15 +31,8 @@ class ClipboardExporter extends HtmlExporter {
     }
     let jsonConverter = new JSONConverter()
     let jsonStr = JSON.stringify(jsonConverter.exportDocument(doc))
-    let meta = ''
-    if (inBrowser) {
-      meta = [
-        "<meta name='substance' content='",
-        btoa(unescape(encodeURIComponent(jsonStr))),
-        "'>"
-      ].join('')
-    }
-    return '<html><head>' +meta+ '</head><body>' + html + '</body></html>'
+    let substanceContent = `<script id="substance-clipboard" type="application/json">${jsonStr}</script>`
+    return '<html><head>' +substanceContent+ '</head><body>' + html + '</body></html>'
   }
 
   /**

@@ -53,15 +53,14 @@ class ClipboardImporter extends HTMLImporter {
       }
     }
 
-    // when copying from a substance editor we store JSON in a meta tag
-    // Then we parse the
+    // when copying from a substance editor we store JSON in a script tag in the head
     // If the import fails e.g. because the schema is incompatible
     // we fall back to plain HTML import
-    if (html.search(/meta name=.substance./)>=0) {
+    if (html.search(/script id=.substance-clipboard./)>=0) {
       el = DefaultDOMElement.parseHTML(html)
-      let substanceData = el.find('meta[name="substance"]')
+      let substanceData = el.find('#substance-clipboard')
       if (substanceData) {
-        let jsonStr = decodeURIComponent(escape(window.atob(substanceData.attr('content'))))
+        let jsonStr = substanceData.textContent
         try {
           return this.importFromJSON(jsonStr)
         } catch(err) {
@@ -81,7 +80,7 @@ class ClipboardImporter extends HTMLImporter {
       body = this._createElement('body')
       body.append(el)
     }
-    body = this._fixupGoogleDocsBody(body)
+    body = this._sanitizeBody(body)
     if (!body) {
       console.warn('Invalid HTML.')
       return null
@@ -91,6 +90,13 @@ class ClipboardImporter extends HTMLImporter {
     this.convertBody(body)
     let doc = this.generateDocument()
     return doc
+  }
+
+  _sanitizeBody(body) {
+    body = this._fixupGoogleDocsBody(body)
+    // Remove <meta> element
+    body.findAll('meta').forEach(el => el.remove())
+    return body
   }
 
   _fixupGoogleDocsBody(body) {
