@@ -1,9 +1,7 @@
 .sc-dropzones {
-  /*z-index: 5000;*/
 }
 
 .sc-dropzones .se-dropzone {
-  /*background: rgba(0,0,255, 0.1);*/
   position: absolute;
 }
 
