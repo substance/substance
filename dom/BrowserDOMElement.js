@@ -134,7 +134,7 @@ class BrowserDOMElement extends DOMElement {
   }
 
   setStyle(name, value) {
-    if (DOMElement.pxStyles[name] && isNumber(value)) value = value + "px"
+    if (DOMElement.pxStyles[name] && isNumber(value)) value = value + 'px'
     this.el.style[name] = value
     return this
   }

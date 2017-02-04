@@ -3,6 +3,7 @@ import extend from '../util/extend'
 import flattenOften from '../util/flattenOften'
 import isArray from '../util/isArray'
 import isFunction from '../util/isFunction'
+import isNumber from '../util/isNumber'
 import isNil from '../util/isNil'
 import isPlainObject from '../util/isPlainObject'
 import isString from '../util/isString'
@@ -369,6 +370,7 @@ class VirtualHTMLElement extends VirtualElement {
     if (!this.style) {
       this.style = {}
     }
+    if (DOMElement.pxStyles[name] && isNumber(value)) value = value + 'px'
     this.style[name] = value
     return this
   }
