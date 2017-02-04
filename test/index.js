@@ -22,7 +22,6 @@ import "./DOMElement.test.js"
 // ui
 import "./AnnotationCommand.test.js"
 import "./Clipboard.test.js"
-import "./Component.integration.test.js"
 import "./Component.test.js"
 import "./DOMSelection.test.js"
 import "./InlineNode.test.js"

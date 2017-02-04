@@ -1,3 +1,4 @@
+import inBrowser from '../util/inBrowser'
 import Document from '../model/Document'
 import HtmlExporter from '../model/HTMLExporter'
 import JSONConverter from '../model/JSONConverter'
@@ -30,11 +31,14 @@ class ClipboardExporter extends HtmlExporter {
     }
     let jsonConverter = new JSONConverter()
     let jsonStr = JSON.stringify(jsonConverter.exportDocument(doc))
-    let meta = [
-      "<meta name='substance' content='",
-      btoa(unescape(encodeURIComponent(jsonStr))),
-      "'>"
-    ].join('')
+    let meta = ''
+    if (inBrowser) {
+      meta = [
+        "<meta name='substance' content='",
+        btoa(unescape(encodeURIComponent(jsonStr))),
+        "'>"
+      ].join('')
+    }
     return '<html><head>' +meta+ '</head><body>' + html + '</body></html>'
   }
 

@@ -129,32 +129,6 @@ function _runTestBrowser() {
   })
 }
 
-// TODO: this should go into a helper provided by substance-test
-// otherwise we need to write this again and again
-function _runTestNode() {
-  b.custom('Running nodejs tests...', {
-    execute: function() {
-      let cp = require('child_process')
-      return new Promise(function(resolve, reject) {
-        const child = cp.fork(path.join(__dirname, '.test/run-tests.js'))
-        child.on('message', function(msg) {
-          if (msg === 'done') { resolve() }
-        })
-        child.on('error', function(error) {
-          reject(new Error(error))
-        })
-        child.on('close', function(exitCode) {
-          if (exitCode !== 0) {
-            process.exit(exitCode)
-          } else {
-            resolve()
-          }
-        })
-      });
-    }
-  })
-}
-
 // generates API documentation
 function _docs(mode, dest) {
   var docgen = require('substance-docgen')
@@ -252,11 +226,13 @@ b.task('test:browser:coverage', ['test:clean', 'test:assets'], function() {
 
 b.task('test:node', ['test:clean', 'test:assets'], _testNode)
 
+b.task('build:test', ['test:clean', 'test:assets', 'test:browser', 'test:node'])
+
 b.task('run:test:browser', ['test:browser'], _runTestBrowser)
 
-b.task('run:test:node', ['test:node'], _runTestNode)
-
 b.task('run:test:coverage', ['test:browser:coverage'], _runTestBrowser)
+
+b.task('run:test', ['build:test'], _runTestBrowser)
 
 
 b.task('npm:clean', function() {
@@ -300,8 +276,6 @@ b.task('npm:server', function() {
 b.task('build', ['clean', 'browser', 'server'])
 
 b.task('build:pure', ['clean', 'browser:pure', 'server:pure'])
-
-b.task('test', ['test:clean', 'test:assets', 'run:test:browser', 'run:test:node'])
 
 b.task('npm', ['npm:clean', 'npm:copy:sources', 'npm:docs', 'npm:browser', 'npm:server'])
 

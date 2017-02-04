@@ -4,7 +4,7 @@ import simple from './fixture/simple'
 
 const test = module('EditorSession')
 
-test.UI("Keeping TransactionDocument up-to-date.", function(t) {
+test("Keeping TransactionDocument up-to-date.", function(t) {
   let { editorSession, doc } = setupEditor(t, simple)
   let stageDoc = editorSession._transaction._stageDoc
   stageDoc._apply = spy(stageDoc, '_apply')
@@ -16,7 +16,7 @@ test.UI("Keeping TransactionDocument up-to-date.", function(t) {
   t.end()
 })
 
-test.UI("Undoing and redoing a change.", function(t) {
+test("Undoing and redoing a change.", function(t) {
   let { editorSession, doc } = setupEditor(t, simple)
   editorSession.transaction(function(tx) {
     tx.update(['p1', 'content'], { type: 'insert', start: 3, text: "XXX" })
@@ -32,7 +32,7 @@ test.UI("Undoing and redoing a change.", function(t) {
   t.end()
 })
 
-test.UI("Selections after undo/redo.", function(t) {
+test("Selections after undo/redo.", function(t) {
   let { editorSession, doc } = setupEditor(t, simple)
   var path = ['p1', 'content']
   editorSession.setSelection({

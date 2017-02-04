@@ -17,12 +17,11 @@ if (inBrowser) {
 
 function xmlExporterTests(memory) {
 
-  const test = module('XMLExporter' + ( memory ? ' [memory]' : ''))
-    .withOptions({
-      before: function(t) {
-        t.elementFactory = memory ? XNode.createDocument('xml') : DefaultDOMElement.createDocument('xml')
-      }
-    })
+  const test = module('XMLExporter' + ( memory ? ' [memory]' : ''), {
+    before: function(t) {
+      t.elementFactory = memory ? XNode.createDocument('xml') : DefaultDOMElement.createDocument('xml')
+    }
+  })
 
   test("Exporting paragraph", function(t) {
     let { doc, exporter } = setup(t)

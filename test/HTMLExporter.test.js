@@ -18,12 +18,11 @@ if (inBrowser) {
 
 function htmlExporterTests(memory) {
 
-  const test = module('HTMLExporter' + ( memory ? ' [memory]' : ''))
-    .withOptions({
-      before: function(t) {
-        t.elementFactory = memory ? XNode.createDocument('html') : DefaultDOMElement.createDocument('html')
-      }
-    })
+  const test = module('HTMLExporter' + ( memory ? ' [memory]' : ''), {
+    before: function(t) {
+      t.elementFactory = memory ? XNode.createDocument('html') : DefaultDOMElement.createDocument('html')
+    }
+  })
 
   test("Exporting paragraph", function(t) {
     let { doc, exporter } = setup(t)

@@ -1,4 +1,5 @@
 import { cssSelect, domSerializer, DomUtils, ElementType } from './vendor'
+import inBrowser from '../util/inBrowser'
 import forEach from '../util/forEach'
 import isString from '../util/isString'
 import isNil from '../util/isNil'
@@ -700,6 +701,13 @@ XNode.parseXML = function(html, isFullDoc) {
 }
 
 XNode.wrapNativeElement = function(el) {
+  // HACK: at many places we have an `isBrowser` check
+  // to skip code that uses window or window.document
+  // To be able to test such code together with the memory DOM implementation
+  // we stub out window and document
+  if (inBrowser) {
+    if (el === window || el === window.document) { return new DOMElementStub() }
+  }
   if (!el._isXNode) throw new Error('Illegal argument: expected XNode instance')
   return el
 }
@@ -751,6 +759,11 @@ class XNodeEvent {
 
   // just a stub
   preventDefault() {}
+}
+
+class DOMElementStub {
+  on() {}
+  off(){}
 }
 
 export default XNode
