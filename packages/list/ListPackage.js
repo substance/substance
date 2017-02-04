@@ -18,7 +18,7 @@ export default {
     config.addTool('insert-unordered-list', InsertListTool, { toolGroup: options.toolGroup })
     config.addLabel('insert-unordered-list', {
       en: 'Unordered list',
-      de: 'Ungeordnete liste'
+      de: 'Aufzählung'
     })
     config.addIcon('insert-unordered-list', { 'fontawesome': 'fa-list-ul' })
 
@@ -26,7 +26,7 @@ export default {
     config.addTool('insert-ordered-list', InsertListTool, { toolGroup: options.toolGroup })
     config.addLabel('insert-ordered-list', {
       en: 'Ordered list',
-      de: 'Bestellliste'
+      de: 'Nummerierte Liste'
     })
     config.addIcon('insert-ordered-list', { 'fontawesome': 'fa-list-ol' })
 
