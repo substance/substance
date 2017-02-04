@@ -13,7 +13,7 @@
   "jsnext:main": "index.es.js",
   "scripts": {
     "test": "node make build:test && (node .test/run-tests.js | node ./node_modules/substance-test/dist/tap-spec.js) && node make run:test:browser",
-    "test:browser": "node make test:browser:pure -w -s",
+    "dev": "node make test:browser:pure -w -s",
     "coverage": "node make run:test:coverage",
     "docs": "node make docs -w -s",
     "start": "node make dev -w -s"
