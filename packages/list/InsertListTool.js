@@ -9,7 +9,7 @@ class InsertListTool extends Tool {
     return [ button ]
   }
   onClick () {
-    this.context.commandManager.executeCommand(this.name, {
+    this.executeCommand({
       context: this.context
     })
   }
