@@ -12,7 +12,7 @@
   "main": "dist/substance.cjs.js",
   "jsnext:main": "index.es.js",
   "scripts": {
-    "test": "node make test",
+    "test": "node make build:test && (node .test/run-tests.js | node ./node_modules/substance-test/dist/tap-spec.js) && node make run:test:browser",
     "test:browser": "node make test:browser:pure -w -s",
     "coverage": "node make run:test:coverage",
     "docs": "node make docs -w -s",
@@ -37,7 +37,7 @@
     "karma-tape-reporter": "1.0.3",
     "substance-bundler": "0.7.0",
     "substance-docgen": "0.4.7",
-    "substance-test": "0.5.2"
+    "substance-test": "0.6.0"
   },
   "files": [
     "collab",
