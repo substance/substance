@@ -1,15 +1,16 @@
 import Command from '../../ui/Command'
 
-class InsertUnorderedListCommand extends Command {
+class InsertListCommand extends Command {
   getCommandState (params) {
     return {}
   }
   execute (params) {
+    let ordered = this.config.ordered
     let editorSession = params.editorSession
     editorSession.transaction((tx) => {
-      tx.toggleList({ ordered: false })
+      tx.toggleList({ ordered: ordered })
     })
   }
 }
 
-export default InsertUnorderedListCommand
+export default InsertListCommand
