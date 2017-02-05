@@ -26,8 +26,7 @@ FileNode.type = 'file'
 FileNode.schema = {
   url: { type: 'string', optional: true },
   fileType: { type: 'string', optional: true },
-  mimeType: { type: 'string', optional: true },
-  data: { type: 'object', optional: true }
+  mimeType: { type: 'string', optional: true }
 }
 
 FileNode.strip = function(nodeData) {

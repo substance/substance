@@ -46,15 +46,15 @@ class ImageComponent extends NodeComponent {
   }
 
   handleDrop(tx, dragState) {
-    // TODO: Not working yet!
     let newImageFile = dragState.data.files[0]
     let imageFile = tx.create({
       type: 'file',
       fileType: 'image',
       mimeType: newImageFile.type,
-      data: newImageFile
+      url: URL.createObjectURL(newImageFile)
     })
-    imageFile.data = newImageFile
+    // Delete the old image file
+    tx.delete(this.props.node.imageFile)
     tx.set([this.props.node.id, 'imageFile'], imageFile.id)
   }
 
