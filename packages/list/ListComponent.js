@@ -12,7 +12,7 @@ class ListComponent extends Component {
 
   render($$) {
     let node = this.props.node
-    let el = $$(getListTagName(this))
+    let el = $$(getListTagName(node))
       .addClass('sc-list')
       .attr('data-id', node.id)
     renderListNode(node, el, (arg) => {
