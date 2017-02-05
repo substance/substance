@@ -7,8 +7,8 @@ import AbstractScrollPane from './AbstractScrollPane'
 /**
   Wraps content in a scroll pane.
 
-  @class ScrollPane
-  @component
+  NOTE: It is best practice to put all overlays as direct childs of the ScrollPane
+        to reduce the chance that positioning gets messed up (position: relative)
 
   @prop {String} scrollbarType 'native' or 'substance' for a more advanced visual scrollbar. Defaults to 'native'
   @prop {String} [scrollbarPosition] 'left' or 'right' only relevant when scrollBarType: 'substance'. Defaults to 'right'

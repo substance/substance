@@ -1,15 +1,23 @@
 import NodeSelection from '../model/NodeSelection'
 import Component from '../ui/Component'
+import DragAndDropHandler from '../ui/DragAndDropHandler'
 import DefaultDOMElement from '../dom/DefaultDOMElement'
 import EventEmitter from '../util/EventEmitter'
 import inBrowser from '../util/inBrowser'
 
 class DragManager extends EventEmitter {
 
-  constructor(dndHandlers, context) {
+  constructor(assetHandlers, context) {
     super()
     this.context = context
-    this.dndHandlers = dndHandlers
+    this.assetHandlers = assetHandlers
+
+    // TODO: This could live in the configurator at some point
+    this.dropHandlers = [
+      new MoveNode(),
+      new InsertNodes(this.assetHandlers, this.context),
+      new CustomHandler()
+    ]
     this._source = null
 
     if (inBrowser) {
@@ -19,7 +27,6 @@ class DragManager extends EventEmitter {
       this.el.on('dragenter', this._onDragEnter, this)
       this.el.on('dragexit', this._onDragExit, this)
       this.el.on('dragover', this._onDragOver, this)
-      this.el.on('drop', this._onDrop, this)
     }
   }
 
@@ -30,8 +37,8 @@ class DragManager extends EventEmitter {
   }
 
   _onDragStart(e) {
-    this._externalDrag = false
-    this._initDrag(e)
+    // console.log('#### DragManager._onDragStart')
+    this._initDrag(e, { external: false })
   }
 
   _isMouseInsideDOMSelection(e) {
@@ -49,10 +56,15 @@ class DragManager extends EventEmitter {
            e.clientY <= selectionRect.bottom;
   }
 
-  _initDrag(e) {
+  /*
+    Initializes dragState, which encapsulate state through the whole
+    drag + drop operation.
 
-    let dragState = { event: e, mode: 'block' }
-
+    ATTENTION: This can not be debugged properly in Chrome
+  */
+  _initDrag(e, options) {
+    console.log('_initDrag')
+    let dragState = Object.assign({}, { event: e, mode: 'block'}, options)
     let isSelectionDrag = this._isMouseInsideDOMSelection(e)
     if (isSelectionDrag) {
       let sourceSelection = this.context.editorSession.getSelection()
@@ -61,8 +73,43 @@ class DragManager extends EventEmitter {
         dragState.mode = 'inline'
       }
     } else {
-      // This is definitely hacky. Just until we have time to think about it
-      // more thoroughly
+      // We need to determine all ContainerEditors and their scrollPanes; those have the drop
+      // zones attached
+      let surfaces = Object.keys(this.context.surfaceManager.surfaces).map((surfaceId) => {
+        return this.context.surfaceManager.surfaces[surfaceId]
+      })
+
+      let scrollPanes = {}
+      surfaces.forEach((surface) => {
+        // Skip for everything but container editors
+        if (!surface.isContainerEditor()) return
+        let scrollPane = surface.context.scrollPane
+        let scrollPaneName = scrollPane.getName()
+        let surfaceName = surface.getName()
+
+        if (!scrollPanes[scrollPaneName]) {
+          let surfaces = {}
+          surfaces[surfaceName] = surface
+          scrollPanes[scrollPaneName] = {
+            scrollPane,
+            surfaces
+          }
+        } else {
+          scrollPanes[scrollPaneName].surfaces[surfaceName] = surface
+        }
+      })
+
+      // We store the scrollPanes in dragState so the Dropzones component
+      // can use it to compute dropzones per scrollpane for each contained
+      // surface
+      dragState.scrollPanes = scrollPanes
+
+
+      // let surface = surfaces.find((surface) => { return surface.isContainerEditor() })
+      // console.log('le surface', surface)
+
+      // TODO: Compute dropzones for multiple surfaces (container editors)
+      // In an internal drag, we receive the source (= node being dragged)
       let comp = this._getIsolatedNodeOrContainerChild(DefaultDOMElement.wrapNativeElement(e.target))
       if (comp && comp.props.node) {
         let surface = comp.context.surface
@@ -80,57 +127,27 @@ class DragManager extends EventEmitter {
       }
     }
 
-    this.dragState = new DragState(dragState)
-
+    this.dragState = dragState
     e.dataTransfer.effectAllowed = 'all'
     e.dataTransfer.setData('text/html', e.target.outerHTML)
 
+    // Ensure we have a small dragIcon, so dragged content does not eat up
+    // all screen space.
     var dragIcon = document.createElement('img')
     dragIcon.width = 30
     e.dataTransfer.setDragImage(dragIcon, -10, -10)
-
     this.emit('dragstart', this.dragState)
   }
 
-  _onDragOver(e) {
+  _onDragOver(/*e*/) {
     // console.log('_onDragOver', e)
-    this._updateDrag(e)
+    // this._updateDrag(e)
   }
 
   _onDragEnter(e) {
+    // console.log('_onDragEnter(e)', e)
     if (!this.dragState) {
-      this._initDrag(e)
-      this._externalDrag = true
-    }
-  }
-
-  _updateDrag(e) {
-    let targetEl = DefaultDOMElement.wrapNativeElement(e.target)
-    // HACK: ignore drop teaser
-    if (targetEl.is('.sc-drop-teaser')) return
-    let components = this._getComponents(targetEl)
-    let surface, nodeComponent
-    // console.log('comps', components)
-    if (components) {
-      surface = components[0]
-      if (surface && surface.isContainerEditor()) {
-        nodeComponent = components[1]
-      }
-    }
-
-    this.dragState.event = e
-    this.dragState.surface = surface
-    this.dragState.targetEl = nodeComponent ? nodeComponent.el : targetEl
-    this.dragState.targetNodeId = nodeComponent ? nodeComponent.props.node.id : null
-
-    // position the drop-teaser in case of a ContainerDrop
-    if (this.dragState.mode === 'block') {
-      let elRect = this.dragState.targetEl.getNativeElement().getBoundingClientRect()
-      let mouseY = this.dragState.event.clientY
-      let threshold = elRect.top + elRect.height / 2
-      this.dragState.insertMode = mouseY > threshold ? 'after' : 'before'
-      this.dragState.isContainerDrop = Boolean(nodeComponent)
-      this.emit('drag:updated', this.dragState)
+      this._initDrag(e, {external: true})
     }
   }
 
@@ -166,110 +183,45 @@ class DragManager extends EventEmitter {
   }
 
   _onDragEnd() {
-    if (this.dragState) {
-      try {
-        this.emit('drag:updated', Object.assign({}, this.dragState, { isContainerDrop: false }))
-      } finally {
-        this.dragState = null;
-      }
-    }
+    // console.log('_onDragEnd')
+    this.dragState = null
+    this.emit('dragend')
   }
 
   _onDragExit() {
+    // console.log('_onDragExit')
     this._onDragEnd()
   }
 
-  _onDrop(e) {
-    this.dragState.event = e
-    this.dragState.data = this._getData(e)
+  handleDrop(e, dragStateExtensions) {
+    let dragState = Object.assign(this.dragState, dragStateExtensions)
+    console.log('le dragstate', dragState)
+
+    let i, handler
+    let match = false
+
     e.preventDefault()
     e.stopPropagation()
-    if (this._externalDrag && this.dragState.data) {
-      this._handleExternalDrop()
-    } else if (this.dragState.sourceSelection) {
-      this._handleInternalDrop()
+
+    dragState.event = e
+    dragState.data = this._getData(e)
+
+    // Run through drop handlers and call the first that matches
+    for (i = 0; i < this.dropHandlers.length && !match; i++) {
+      handler = this.dropHandlers[i]
+      match = handler.match(dragState)
     }
+
+    if (match) {
+      let editorSession = this.context.editorSession
+      editorSession.transaction((tx) => {
+        handler.drop(tx, dragState)
+      })
+    } else {
+      console.error('No drop handler could be found.')
+    }
+
     this._onDragEnd()
-  }
-
-  _callHandlers(tx, params) {
-    let i, handler;
-    for (i = 0; i < this.dndHandlers.length; i++) {
-      handler = this.dndHandlers[i]
-
-      let match = handler.match(params, this.context)
-      if (match) {
-        handler.drop(tx, params, this.context)
-        break
-      }
-    }
-  }
-
-  _handleExternalDrop() {
-    let dragState = this.dragState
-    let files = dragState.data.files
-    let uris = dragState.data.uris
-    let editorSession = this.context.editorSession
-
-    editorSession.transaction((tx) => {
-      if (dragState.isContainerDrop) {
-        let containerId = dragState.surface.getContainerId()
-        let nodeId = dragState.targetNodeId
-        let insertMode = dragState.insertMode
-        let surfaceId = dragState.surface.id
-        tx.setSelection({
-          type: 'node',
-          nodeId: nodeId,
-          mode: insertMode,
-          containerId: containerId,
-          surfaceId: surfaceId
-        })
-      } else {
-        console.error('Not yet supported')
-        return
-      }
-      if (files.length > 0) {
-        files.forEach((file) => {
-          this._callHandlers(tx, {
-            file: file,
-            type: 'file'
-          })
-        })
-      } else if (uris.length > 0) {
-        uris.forEach((uri) => {
-          this._callHandlers(tx, {
-            uri: uri,
-            type: 'uri'
-          })
-        })
-      } else {
-        console.info('TODO: implement html/text drop here')
-      }
-    })
-  }
-
-  _handleInternalDrop() {
-    let context = this.context
-    let dragState = this.dragState
-
-    context.editorSession.transaction((tx) => {
-      tx.setSelection(dragState.sourceSelection)
-      let copy = tx.copySelection()
-      // just clear, but don't merge or don't insert a new node
-      tx.deleteSelection({ clear: true })
-      if(dragState.isContainerDrop) {
-        let containerId = dragState.surface.getContainerId()
-        let surfaceId = dragState.surface.id
-        tx.setSelection({
-          type: 'node',
-          nodeId: dragState.targetNodeId,
-          mode: dragState.insertMode,
-          containerId: containerId,
-          surfaceId: surfaceId
-        })
-        tx.paste(copy)
-      }
-    })
   }
 
   /*
@@ -304,13 +256,125 @@ class DragManager extends EventEmitter {
   }
 }
 
-class DragState {
-  constructor(data) {
-    this.mode = data.mode
-    this.targetEl = data.targetEl
-    this.surfaceId = data.surfaceId
-    this.sourceSelection = data.sourceSelection
-    this.event = data.event
+/*
+Implements drag+drop move operation.
+
+  - remember current selection (node that is dragged)
+  - delete current selection (removes node from original position)
+  - determine node selection based on given insertPos
+  - paste node at new insert position
+*/
+class MoveNode extends DragAndDropHandler {
+  match(dragState) {
+    let {insertPos} = dragState.dropParams
+    return dragState.dropType === 'place' && insertPos >= 0 && !dragState.external
+  }
+
+  drop(tx, dragState) {
+    let { insertPos } = dragState.dropParams
+    tx.setSelection(dragState.sourceSelection)
+    let copy = tx.copySelection()
+    // just clear, but don't merge or don't insert a new node
+    tx.deleteSelection({ clear: true })
+    let containerId = dragState.targetSurface.getContainerId()
+    let surfaceId = dragState.targetSurface.getName()
+    let container = tx.get(containerId)
+    let targetNode = container.nodes[insertPos]
+    let insertMode = 'before'
+    if (!targetNode) {
+      targetNode = container.nodes[insertPos-1]
+      insertMode = 'after'
+    }
+    tx.setSelection({
+      type: 'node',
+      nodeId: targetNode,
+      mode: insertMode,
+      containerId: containerId,
+      surfaceId: surfaceId
+    })
+    tx.paste(copy)
+  }
+}
+
+
+class InsertNodes extends DragAndDropHandler {
+  constructor(assetHandlers, context) {
+    super()
+    this.assetHandlers = assetHandlers
+    this.context = context
+  }
+
+  match(dragState) {
+    return dragState.dropType === 'place' && dragState.external
+  }
+
+  drop(tx, dragState) {
+    let { insertPos } = dragState.dropParams
+    let files = dragState.data.files
+    let uris = dragState.data.uris
+    let containerId = dragState.targetSurface.getContainerId()
+    let surfaceId = dragState.targetSurface.id
+    let container = tx.get(containerId)
+    let targetNode = container.nodes[insertPos]
+    let insertMode = 'before'
+    if (!targetNode) {
+      targetNode = container.nodes[insertPos-1]
+      insertMode = 'after'
+    }
+
+    tx.setSelection({
+      type: 'node',
+      nodeId: targetNode,
+      mode: insertMode,
+      containerId: containerId,
+      surfaceId: surfaceId
+    })
+    if (files.length > 0) {
+      files.forEach((file) => {
+        this._callHandlers(tx, {
+          file: file,
+          type: 'file'
+        })
+      })
+    } else if (uris.length > 0) {
+      uris.forEach((uri) => {
+        this._callHandlers(tx, {
+          uri: uri,
+          type: 'uri'
+        })
+      })
+    } else {
+      console.info('TODO: implement html/text drop here')
+    }
+  }
+
+  _callHandlers(tx, params) {
+    let i, handler;
+    for (i = 0; i < this.assetHandlers.length; i++) {
+      handler = this.assetHandlers[i]
+
+      let match = handler.match(params, this.context)
+      if (match) {
+        handler.drop(tx, params, this.context)
+        break
+      }
+    }
+  }
+}
+
+/*
+  Built-in handler that calls a custom handler, specified
+  on the component (e.g. see ImageComponent).
+*/
+class CustomHandler extends DragAndDropHandler {
+
+  match(dragState) {
+    return dragState.dropType === 'custom'
+  }
+
+  drop(tx, dragState) {
+    // Delegate handling to component which set up the custom dropzone
+    dragState.component.handleDrop(tx, dragState)
   }
 }
 

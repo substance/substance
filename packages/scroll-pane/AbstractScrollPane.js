@@ -17,6 +17,10 @@ class AbstractScrollPane extends Component {
     })
   }
 
+  getName() {
+    return this.props.name
+  }
+
   /*
     Determine selection rectangle relative to content element
     and emit a dom-selection:rendered event with positioning hints

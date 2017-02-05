@@ -77,6 +77,10 @@ class IsolatedNodeComponent extends AbstractIsolatedNodeComponent {
     return ''
   }
 
+  getContent() {
+    return this.refs.content
+  }
+
   _deriveStateFromSelectionState(selState) {
     let sel = selState.getSelection()
     let surfaceId = sel.surfaceId
