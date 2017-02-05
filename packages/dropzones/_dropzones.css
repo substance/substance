@@ -15,7 +15,7 @@
 }
 
 .sc-dropzones .se-dropzone.sm-over .se-drop-teaser {
-  background: blue;
+  background: var(--local-selection-color);
 }
 
 .sc-dropzones .se-dropzone .se-drop-shield {
