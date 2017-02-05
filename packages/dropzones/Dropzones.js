@@ -92,7 +92,6 @@ export default class Dropzones extends Component {
         if (i < numDropzones - 2) {
           let comp = components[i]
           // We get the isolated node wrapper and want to use the content element
-          // TODO: Let's add an API for that comp.getContentComponent()
           if (comp._isIsolatedNodeComponent) {
             comp = comp.getContent()
           }
@@ -136,7 +135,7 @@ export default class Dropzones extends Component {
             el.append(
               $$('div').addClass('se-dropzone').attr({
                 'data-dropzone-index': index,
-                'data-dropzone-surface': surfaceId,
+                'data-dropzone-surface': surfaceId
               }).css({
                 position: 'absolute',
                 top: dropzone.top,
@@ -157,6 +156,7 @@ export default class Dropzones extends Component {
             el.append(
               $$('div').addClass('se-custom-dropzone').attr({
                 'data-dropzone-index': index,
+                'data-dropzone-surface': surfaceId
               }).css({
                 position: 'absolute',
                 top: dropzone.top,

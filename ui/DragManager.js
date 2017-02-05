@@ -15,7 +15,7 @@ class DragManager extends EventEmitter {
     // TODO: This could live in the configurator at some point
     this.dropHandlers = [
       new MoveNode(),
-      new InsertNodes(this.assetHandlers),
+      new InsertNodes(this.assetHandlers, this.context),
       new CustomHandler()
     ]
     this._source = null
@@ -224,19 +224,6 @@ class DragManager extends EventEmitter {
     this._onDragEnd()
   }
 
-  _callHandlers(tx, params) {
-    let i, handler;
-    for (i = 0; i < this.dndHandlers.length; i++) {
-      handler = this.dndHandlers[i]
-
-      let match = handler.match(params, this.context)
-      if (match) {
-        handler.drop(tx, params, this.context)
-        break
-      }
-    }
-  }
-
   /*
     Following best practice from Mozilla for URI extraction
 
@@ -311,6 +298,12 @@ class MoveNode extends DragAndDropHandler {
 
 
 class InsertNodes extends DragAndDropHandler {
+  constructor(assetHandlers, context) {
+    super()
+    this.assetHandlers = assetHandlers
+    this.context = context
+  }
+
   match(dragState) {
     return dragState.dropType === 'place' && dragState.external
   }
@@ -320,7 +313,6 @@ class InsertNodes extends DragAndDropHandler {
     let files = dragState.data.files
     let uris = dragState.data.uris
     let containerId = dragState.targetSurface.getContainerId()
-    let nodeId = dragState.targetNodeId
     let surfaceId = dragState.targetSurface.id
     let container = tx.get(containerId)
     let targetNode = container.nodes[insertPos]
@@ -332,7 +324,7 @@ class InsertNodes extends DragAndDropHandler {
 
     tx.setSelection({
       type: 'node',
-      nodeId: nodeId,
+      nodeId: targetNode,
       mode: insertMode,
       containerId: containerId,
       surfaceId: surfaceId
@@ -355,6 +347,19 @@ class InsertNodes extends DragAndDropHandler {
       console.info('TODO: implement html/text drop here')
     }
   }
+
+  _callHandlers(tx, params) {
+    let i, handler;
+    for (i = 0; i < this.assetHandlers.length; i++) {
+      handler = this.assetHandlers[i]
+
+      let match = handler.match(params, this.context)
+      if (match) {
+        handler.drop(tx, params, this.context)
+        break
+      }
+    }
+  }
 }
 
 /*
@@ -362,10 +367,6 @@ class InsertNodes extends DragAndDropHandler {
   on the component (e.g. see ImageComponent).
 */
 class CustomHandler extends DragAndDropHandler {
-  constructor(assetDropHandlers) {
-    super()
-    this.assetDropHandlers = assetDropHandlers
-  }
 
   match(dragState) {
     return dragState.dropType === 'custom'
@@ -376,6 +377,5 @@ class CustomHandler extends DragAndDropHandler {
     dragState.component.handleDrop(tx, dragState)
   }
 }
-
 
 export default DragManager
