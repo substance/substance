@@ -119,7 +119,6 @@ class DragManager extends EventEmitter {
           mode: 'full',
           surfaceId: surface.id
         })
-        this.context.editorSession.setSelection(nodeSelection)
         dragState.sourceSelection = nodeSelection
       } else {
         e.preventDefault()
