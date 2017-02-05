@@ -37,6 +37,7 @@ class ProseEditor extends AbstractEditor {
     let Dropzones = this.componentRegistry.get('dropzones')
 
     let contentPanel = $$(ScrollPane, {
+      name: 'contentPanel',
       contextMenu: 'custom',
       scrollbarPosition: 'right',
       scrollbarType: this.props.scrollbarType,

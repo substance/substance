@@ -34,6 +34,10 @@ class BodyScrollPane extends AbstractScrollPane {
     }
   }
 
+  getName() {
+    return 'body'
+  }
+
   didMount() {
     this.handleActions({
       'domSelectionRendered': this._onDomSelectionRendered

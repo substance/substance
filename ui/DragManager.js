@@ -4,7 +4,6 @@ import DragAndDropHandler from '../ui/DragAndDropHandler'
 import DefaultDOMElement from '../dom/DefaultDOMElement'
 import EventEmitter from '../util/EventEmitter'
 import inBrowser from '../util/inBrowser'
-import getRelativeBoundingRect from '../util/getRelativeBoundingRect'
 
 class DragManager extends EventEmitter {
 
@@ -74,15 +73,42 @@ class DragManager extends EventEmitter {
         dragState.mode = 'inline'
       }
     } else {
-      // HACK: We find the first ContainerEditor
-      // TODO: We must support multiple container editors, which can live in multiple scroll panes
+      // We need to determine all ContainerEditors and their scrollPanes; those have the drop
+      // zones attached
       let surfaces = Object.keys(this.context.surfaceManager.surfaces).map((surfaceId) => {
         return this.context.surfaceManager.surfaces[surfaceId]
       })
-      let surface = surfaces.find((surface) => { return surface.isContainerEditor() })
+
+      let scrollPanes = {}
+      surfaces.forEach((surface) => {
+        // Skip for everything but container editors
+        if (!surface.isContainerEditor()) return
+        let scrollPane = surface.context.scrollPane
+        let scrollPaneName = scrollPane.getName()
+        let surfaceName = surface.getName()
+
+        if (!scrollPanes[scrollPaneName]) {
+          let surfaces = {}
+          surfaces[surfaceName] = surface
+          scrollPanes[scrollPaneName] = {
+            scrollPane,
+            surfaces
+          }
+        } else {
+          scrollPanes[scrollPaneName].surfaces[surfaceName] = surface
+        }
+      })
+
+      // We store the scrollPanes in dragState so the Dropzones component
+      // can use it to compute dropzones per scrollpane for each contained
+      // surface
+      dragState.scrollPanes = scrollPanes
+
+
+      // let surface = surfaces.find((surface) => { return surface.isContainerEditor() })
+      // console.log('le surface', surface)
 
       // TODO: Compute dropzones for multiple surfaces (container editors)
-      dragState.dropzones = this._computeDropzones(surface)
       // In an internal drag, we receive the source (= node being dragged)
       let comp = this._getIsolatedNodeOrContainerChild(DefaultDOMElement.wrapNativeElement(e.target))
       if (comp && comp.props.node) {
@@ -101,7 +127,7 @@ class DragManager extends EventEmitter {
       }
     }
 
-    this.dragState = new DragState(dragState)
+    this.dragState = dragState
     e.dataTransfer.effectAllowed = 'all'
     e.dataTransfer.setData('text/html', e.target.outerHTML)
 
@@ -110,108 +136,7 @@ class DragManager extends EventEmitter {
     var dragIcon = document.createElement('img')
     dragIcon.width = 30
     e.dataTransfer.setDragImage(dragIcon, -10, -10)
-
     this.emit('dragstart', this.dragState)
-  }
-
-  /*
-    Get bounding rect for a component (relative to scrollPane content element)
-  */
-  _getBoundingRect(comp) {
-    let scrollPane = comp.context.scrollPane
-    let contentElement = scrollPane.getContentElement().getNativeElement()
-    let rect = getRelativeBoundingRect(comp.getNativeElement(), contentElement)
-    return rect
-  }
-
-  _computeDropzones(surface) {
-    let components = surface.childNodes
-
-    // e.g. 3 components = 4 drop zones (1 before, 1 after, 2 in-between)
-    let numDropzones = components.length + 1
-    let dropzones = []
-
-    for (let i = 0; i < numDropzones; i++) {
-      if (i === 0) {
-        // First dropzone
-        let firstComp = this._getBoundingRect(components[0])
-        dropzones.push({
-          type: 'place',
-          left: firstComp.left,
-          top: firstComp.top,
-          width: firstComp.width,
-          height: firstComp.height / 2,
-          teaserPos: 0,
-          dropParams: {
-            insertPos: i
-          }
-        })
-      } else if (i === numDropzones - 1) {
-        // Last dropzone
-        let lastComp = this._getBoundingRect(components[i - 1])
-        dropzones.push({
-          type: 'place',
-          left: lastComp.left,
-          top: lastComp.top + lastComp.height / 2,
-          width: lastComp.width,
-          height: lastComp.height / 2,
-          teaserPos: lastComp.height / 2,
-          dropParams: {
-            insertPos: i
-          }
-        })
-      } else {
-        // Drop zone in between two components
-        let upperComp = this._getBoundingRect(components[i-1])
-        let lowerComp = this._getBoundingRect(components[i])
-        let topBound = upperComp.top + upperComp.height / 2
-        let bottomBound = lowerComp.top + lowerComp.height / 2
-
-        dropzones.push({
-          type: 'place',
-          left: upperComp.left,
-          top: topBound,
-          width: upperComp.width,
-          height: bottomBound - topBound,
-          teaserPos: (upperComp.top + upperComp.height + lowerComp.top) / 2 - topBound,
-          dropParams: {
-            insertPos: i
-          }
-        })
-      }
-
-      if (i < numDropzones - 2) {
-        let comp = components[i]
-        // We get the isolated node wrapper and want to use the content element
-        // TODO: Let's add an API for that comp.getContentComponent()
-        if (comp.refs.content) {
-          comp = comp.refs.content
-        }
-        // If component has dropzones declared
-        if (comp.getDropzoneSpecs) {
-          let dropzoneSpecs = comp.getDropzoneSpecs()
-          dropzoneSpecs.forEach((dropzoneSpec) => {
-            let dropzoneComp = dropzoneSpec.component
-            let rect = this._getBoundingRect(dropzoneComp)
-            // console.log('dropcomp', dropComp)
-            dropzones.push({
-              type: 'custom',
-              component: comp,
-              dropzoneComponent: dropzoneComp,
-              left: rect.left,
-              top: rect.top,
-              width: rect.width,
-              height: rect.height,
-              message: dropzoneSpec.message,
-              dropParams: dropzoneSpec.dropParams
-            })
-          })
-        }
-      }
-
-    }
-    console.log('le dropzones', dropzones)
-    return dropzones
   }
 
   _onDragOver(/*e*/) {
@@ -221,9 +146,6 @@ class DragManager extends EventEmitter {
 
   _onDragEnter(e) {
     // console.log('_onDragEnter(e)', e)
-    // debugger
-    // console.log('this.dragState', this.dragState)
-
     if (!this.dragState) {
       this._initDrag(e, {external: true})
     }
@@ -348,22 +270,12 @@ class DragManager extends EventEmitter {
 }
 
 /*
-  Models dragState object that's encoding the state during a drag and drop
-  operation.
-*/
-class DragState {
-  constructor(data) {
-    this.mode = data.mode
-    this.targetEl = data.targetEl
-    this.dropzones = data.dropzones
-    this.surfaceId = data.surfaceId
-    this.sourceSelection = data.sourceSelection
-    this.event = data.event
-  }
-}
+Implements drag+drop move operation.
 
-/*
-  Built-in handler for move operations
+  - remember current selection (node that is dragged)
+  - delete current selection (removes node from original position)
+  - determine node selection based on given insertPos
+  - paste node at new insert position
 */
 class MoveNode extends DragAndDropHandler {
   match(dragState) {
@@ -371,23 +283,14 @@ class MoveNode extends DragAndDropHandler {
     return dragState.dropType === 'place' && insertPos >= 0 && !dragState.external
   }
 
-  /*
-    Implements drag+drop move operation.
-
-    - remember current selection (node that is dragged)
-    - delete current selection (removes node from original position)
-    - determine node selection based on given insertPos
-    - paste node at new insert position
-  */
   drop(tx, dragState) {
     let { insertPos } = dragState.dropParams
     tx.setSelection(dragState.sourceSelection)
     let copy = tx.copySelection()
     // just clear, but don't merge or don't insert a new node
     tx.deleteSelection({ clear: true })
-
-    let containerId = dragState.sourceSelection.containerId
-    let surfaceId = dragState.sourceSelection.surfaceId
+    let containerId = dragState.targetSurface.getContainerId()
+    let surfaceId = dragState.targetSurface.getName()
     let container = tx.get(containerId)
     let targetNode = container.nodes[insertPos]
     let insertMode = 'before'
@@ -406,18 +309,26 @@ class MoveNode extends DragAndDropHandler {
   }
 }
 
+
 class InsertNodes extends DragAndDropHandler {
   match(dragState) {
     return dragState.dropType === 'place' && dragState.external
   }
 
   drop(tx, dragState) {
+    let { insertPos } = dragState.dropParams
     let files = dragState.data.files
     let uris = dragState.data.uris
-    let containerId = dragState.surface.getContainerId()
+    let containerId = dragState.targetSurface.getContainerId()
     let nodeId = dragState.targetNodeId
-    let insertMode = dragState.insertMode
-    let surfaceId = dragState.surface.id
+    let surfaceId = dragState.targetSurface.id
+    let container = tx.get(containerId)
+    let targetNode = container.nodes[insertPos]
+    let insertMode = 'before'
+    if (!targetNode) {
+      targetNode = container.nodes[insertPos-1]
+      insertMode = 'after'
+    }
 
     tx.setSelection({
       type: 'node',
