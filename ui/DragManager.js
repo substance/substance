@@ -63,7 +63,7 @@ class DragManager extends EventEmitter {
     ATTENTION: This can not be debugged properly in Chrome
   */
   _initDrag(e, options) {
-    console.log('_initDrag')
+    // console.log('_initDrag')
     let dragState = Object.assign({}, { event: e, mode: 'block'}, options)
     let isSelectionDrag = this._isMouseInsideDOMSelection(e)
     if (isSelectionDrag) {
@@ -119,7 +119,6 @@ class DragManager extends EventEmitter {
           mode: 'full',
           surfaceId: surface.id
         })
-        this.context.editorSession.setSelection(nodeSelection)
         dragState.sourceSelection = nodeSelection
       } else {
         e.preventDefault()
@@ -139,7 +138,7 @@ class DragManager extends EventEmitter {
     this.emit('dragstart', this.dragState)
   }
 
-  _onDragOver(/*e*/) {
+  _onDragOver(e) { // eslint-disable-line
     // console.log('_onDragOver', e)
     // this._updateDrag(e)
   }
@@ -195,7 +194,7 @@ class DragManager extends EventEmitter {
 
   handleDrop(e, dragStateExtensions) {
     let dragState = Object.assign(this.dragState, dragStateExtensions)
-    console.log('le dragstate', dragState)
+    // console.log('le dragstate', dragState)
 
     let i, handler
     let match = false
