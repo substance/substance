@@ -36,6 +36,10 @@ class DragManager extends EventEmitter {
     }
   }
 
+  _getSelection() {
+    return this.context.editorSession.getSelection()
+  }
+
   _onDragStart(e) {
     // console.log('#### DragManager._onDragStart')
     this._initDrag(e, { external: false })
@@ -62,22 +66,22 @@ class DragManager extends EventEmitter {
 
     ATTENTION: This can not be debugged properly in Chrome
   */
-  _initDrag(e, options) {
+  _initDrag(event, options) {
     // console.log('_initDrag')
-    let dragState = Object.assign({}, { event: e, mode: 'block'}, options)
-    let isSelectionDrag = this._isMouseInsideDOMSelection(e)
+    let dragState = Object.assign({}, { event, mode: 'block'}, options)
+
+    let sel = this._getSelection()
+
+    let isSelectionDrag = (sel.isPropertySelection() || sel.isContainerSelection()) && this._isMouseInsideDOMSelection(event)
     if (isSelectionDrag) {
-      let sourceSelection = this.context.editorSession.getSelection()
-      dragState.sourceSelection = sourceSelection
-      if (sourceSelection.isPropertySelection()) {
+      dragState.sourceSelection = sel
+      if (sel.isPropertySelection()) {
         dragState.mode = 'inline'
       }
     } else {
       // We need to determine all ContainerEditors and their scrollPanes; those have the drop
       // zones attached
-      let surfaces = Object.keys(this.context.surfaceManager.surfaces).map((surfaceId) => {
-        return this.context.surfaceManager.surfaces[surfaceId]
-      })
+      let surfaces = this.context.surfaceManager.getSurfaces()
 
       let scrollPanes = {}
       surfaces.forEach((surface) => {
@@ -110,7 +114,7 @@ class DragManager extends EventEmitter {
 
       // TODO: Compute dropzones for multiple surfaces (container editors)
       // In an internal drag, we receive the source (= node being dragged)
-      let comp = this._getIsolatedNodeOrContainerChild(DefaultDOMElement.wrapNativeElement(e.target))
+      let comp = this._getIsolatedNodeOrContainerChild(DefaultDOMElement.wrapNativeElement(event.target))
       if (comp && comp.props.node) {
         let surface = comp.context.surface
         let nodeSelection = new NodeSelection({
@@ -121,20 +125,20 @@ class DragManager extends EventEmitter {
         })
         dragState.sourceSelection = nodeSelection
       } else {
-        e.preventDefault()
-        e.stopPropagation()
+        event.preventDefault()
+        event.stopPropagation()
       }
     }
 
     this.dragState = dragState
-    e.dataTransfer.effectAllowed = 'all'
-    e.dataTransfer.setData('text/html', e.target.outerHTML)
+    event.dataTransfer.effectAllowed = 'all'
+    event.dataTransfer.setData('text/html', event.target.outerHTML)
 
     // Ensure we have a small dragIcon, so dragged content does not eat up
     // all screen space.
-    var dragIcon = document.createElement('img')
+    let dragIcon = window.document.createElement('img')
     dragIcon.width = 30
-    e.dataTransfer.setDragImage(dragIcon, -10, -10)
+    event.dataTransfer.setDragImage(dragIcon, -10, -10)
     this.emit('dragstart', this.dragState)
   }
 
