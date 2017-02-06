@@ -1,74 +1,75 @@
 import startsWith from '../../util/startsWith'
+import Component from '../../ui/Component'
 import AbstractIsolatedNodeComponent from '../../ui/AbstractIsolatedNodeComponent'
 
+/*
+  Isolation Strategies:
+    - default: IsolatedNode renders a blocker the content gets enabled by a double-click.
+    - open: No blocker. Content is enabled when parent surface is.
+
+    > Notes:
+
+      The blocker is used to shield the inner UI and not to interfer with general editing gestures.
+      In some cases however, e.g. a figure (with image and caption), it feels better if the content directly accessible.
+      In this case, the content component must provide a means to drag the node, e.g. set `<img draggable=true>`.
+      This works only in browsers that are able to deal with 'contenteditable' isles,
+      i.e. a structure where the isolated node is contenteditable=false, and inner elements have contenteditable=true
+      Does not work in Edge. Works in Chrome, Safari
+
+      The the default unblocking gesture requires the content to implement a grabFocus() method, which should set the selection
+      into one of the surfaces, or set a CustomSelection.
+*/
 class IsolatedNodeComponent extends AbstractIsolatedNodeComponent {
 
   constructor(...args) {
     super(...args)
+
+    this.blockingMode = this.ContentClass.noBlocker ? 'open' : 'closed'
   }
 
   render($$) {
     let node = this.props.node
     let ContentClass = this.ContentClass
+    let disabled = this.props.disabled
+
     // console.log('##### IsolatedNodeComponent.render()', $$.capturing);
     let el = $$('div')
     el.addClass(this.getClassNames())
       .addClass('sc-isolated-node')
       .addClass('sm-'+this.props.node.type)
       .attr("data-id", node.id)
-
-    let disabled = this.isDisabled()
-
+    if (disabled) {
+      el.addClass('sm-disabled')
+    }
     if (this.state.mode) {
       el.addClass('sm-'+this.state.mode)
-    } else {
-      el.addClass('sm-not-selected')
     }
-
     if (!ContentClass.noStyle) {
       el.addClass('sm-default-style')
     }
-
-    // shadowing handlers of the parent surface
-    // TODO: extract this into a helper so that we can reuse it anywhere where we want
-    // to prevent propagation to the parent surface
+    // always handle ESCAPE
     el.on('keydown', this.onKeydown)
-      .on('keypress', this._stopPropagation)
-      .on('keyup', this._stopPropagation)
-      .on('compositionstart', this._stopPropagation)
-      .on('textInput', this._stopPropagation)
 
-    if (this.state.mode === 'cursor' && this.state.position === 'before') {
-      el.append(
-        $$('div').addClass('se-cursor').addClass('sm-before')
-      )
-    }
-    el.append(
-      this.renderContent($$, node).ref('content')
-    )
-
-    if (disabled) {
-      el.addClass('sm-disabled')
-        .attr('contenteditable', false)
-        // ATTENTION: draggable=true causes trouble in Safari not to work at all
-        // i.e. does not select anymore
-        .attr('draggable', true)
-        .on('mousedown', this._reserveMousedown, this)
-        .on('click', this.onClick)
-    } else {
-      // ATTENTION: see above
-      if (this.state.mode !== 'focused') {
-        // el.attr('draggable', true)
+    let contentProps = {}
+    switch (this.blockingMode) {
+      case 'closed': {
+        // the blocker is rendered unless an inner surface has the focus
+        if (this.state.mode !== 'focused') {
+          el.attr('contenteditable', false)
+          el.append($$(Blocker).ref('blocker'))
+          contentProps.disabled = true
+        }
+        break
       }
-      el.on('mousedown', this._reserveMousedown, this)
-        .on('click', this.onClick)
+      case 'open': {
+        el.attr('contenteditable', false)
+        break
+      }
+      default:
+        //
     }
-
-    if (this.state.mode === 'cursor' && this.state.position === 'after') {
-      el.append(
-        $$('div').addClass('se-cursor').addClass('sm-after')
-      )
-    }
+    let content = this.renderContent($$, node, contentProps).ref('content')
+    el.append(content)
 
     return el
   }
@@ -127,7 +128,7 @@ class IsolatedNodeComponent extends AbstractIsolatedNodeComponent {
     }
   }
 
-  _selectNode() {
+  selectNode() {
     // console.log('IsolatedNodeComponent: selecting node.');
     let editorSession = this.context.editorSession
     let surface = this.context.surface
@@ -135,35 +136,18 @@ class IsolatedNodeComponent extends AbstractIsolatedNodeComponent {
     editorSession.setSelection({
       type: 'node',
       nodeId: nodeId,
-      mode: 'full',
       containerId: surface.getContainerId(),
       surfaceId: surface.id
     })
   }
 
-  onClick(event) {
-    if (this._mousedown) {
-      this._mousedown = false
-      event.preventDefault()
-      event.stopPropagation()
-      this._selectNode()
+  grabFocus() {
+    let content = this.refs.content
+    if (content.grabFocus) {
+      content.grabFocus()
     }
   }
 
-  // EXPERIMENTAL: Surface and IsolatedNodeComponent communicate via flag on the mousedown event
-  // and only reacting on click or mouseup when the mousedown has been reserved
-  _reserveMousedown(event) {
-    if (event.__reserved__) {
-      // console.log('%s: mousedown already reserved by %s', this.id, event.__reserved__.id)
-      return
-    } else {
-      // console.log('%s: taking mousedown ', this.id)
-      event.__reserved__ = this
-      this._mousedown = true
-    }
-  }
-
-  get id() { return this.getId() }
 }
 
 IsolatedNodeComponent.prototype._isIsolatedNodeComponent = true
@@ -200,6 +184,49 @@ IsolatedNodeComponent.getDOMCoordinates = function(comp) {
       offset: childIdx+1
     }
   }
+}
+
+class Blocker extends Component {
+
+  render($$) {
+    return $$('div').addClass('se-blocker')
+      .attr('draggable', true)
+      .attr('contenteditable', false)
+      .on('mousedown', this._reserveMousedown, this)
+      .on('click', this.onClick)
+      .on('dblclick', this.onDblClick)
+  }
+
+  onClick(event) {
+    if (event.target !== this.getNativeElement()) return
+    console.log('Clicked on Blocker of %s', this.getParent().id, event)
+    if (this.state.mode !== 'selected' && this.state.mode !== 'focused') {
+      event.preventDefault()
+      event.stopPropagation()
+      this.getParent().selectNode()
+    }
+  }
+
+  onDblClick(event) {
+    console.log('DblClicked on Blocker of %s', this.getParent().id, event)
+    // console.log('%s: onClick()', this.id, event)
+    event.preventDefault()
+    event.stopPropagation()
+    this.getParent().grabFocus()
+  }
+
+  // EXPERIMENTAL: Surface and IsolatedNodeComponent communicate via flag on the mousedown event
+  // and only reacting on click or mouseup when the mousedown has been reserved
+  _reserveMousedown(event) {
+    if (event.__reserved__) {
+      // console.log('%s: mousedown already reserved by %s', this.id, event.__reserved__.id)
+      return
+    } else {
+      // console.log('%s: taking mousedown ', this.id)
+      event.__reserved__ = this
+    }
+  }
+
 }
 
 export default IsolatedNodeComponent

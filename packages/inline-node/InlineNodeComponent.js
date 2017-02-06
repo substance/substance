@@ -31,11 +31,6 @@ class InlineNodeComponent extends AbstractIsolatedNodeComponent {
     // TODO: extract this into a helper so that we can reuse it anywhere where we want
     // to prevent propagation to the parent surface
     el.on('keydown', this.onKeydown)
-      .on('mousedown', this._stopPropagation)
-      .on('keypress', this._stopPropagation)
-      .on('keyup', this._stopPropagation)
-      .on('compositionstart', this._stopPropagation)
-      .on('textInput', this._stopPropagation)
 
     let level = this._getLevel()
 
@@ -101,7 +96,7 @@ class InlineNodeComponent extends AbstractIsolatedNodeComponent {
     }
   }
 
-  _selectNode() {
+  selectNode() {
     // console.log('IsolatedNodeComponent: selecting node.');
     let editorSession = this.context.editorSession
     let surface = this.context.surface
@@ -116,6 +111,11 @@ class InlineNodeComponent extends AbstractIsolatedNodeComponent {
     })
   }
 
+  onClick(event) {
+    event.preventDefault()
+    event.stopPropagation()
+    this.selectNode()
+  }
 }
 
 InlineNodeComponent.prototype._isInlineNodeComponent = true

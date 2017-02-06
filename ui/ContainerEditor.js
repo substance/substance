@@ -189,7 +189,7 @@ class ContainerEditor extends Surface {
     let direction = (event.keyCode === keys.UP) ? 'left' : 'right'
     let sel = this.getEditorSession().getSelection()
 
-    if (this._selectNextIsolatedNode(direction)) {
+    if (event.altKey && this._selectNextIsolatedNode(direction)) {
       event.preventDefault()
       return
     }
@@ -201,10 +201,26 @@ class ContainerEditor extends Surface {
     // Note: we need this timeout so that CE updates the DOM selection first
     // before we try to map it to the model
     window.setTimeout(function() {
+      // TODO: try to get rid of the isMounted() checks
       if (!this.isMounted()) return
       this._updateModelSelection({ direction: direction })
     }.bind(this))
   }
+
+  _handleTabKey(event) {
+    let sel = this.getEditorSession().getSelection()
+    if (sel.isNodeSelection() && sel.isFull()) {
+      let comp = this.refs[sel.getNodeId()]
+      if (comp && comp.grabFocus) {
+        event.preventDefault()
+        event.stopPropagation()
+        comp.grabFocus()
+        return
+      }
+    }
+    super._handleTabKey(event)
+  }
+
 
   // Used by Clipboard
   isContainerEditor() {

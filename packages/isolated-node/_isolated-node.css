@@ -25,17 +25,8 @@
   outline: 2px solid #A3CDFD;
 }
 
-.sc-isolated-node > .se-cursor {
+.sc-isolated-node > .se-blocker {
   position: absolute;
-  top: 0px; bottom: 0px;
-  width: 1px;
-}
-
-.sc-isolated-node > .se-cursor.sm-before {
-  left: 0px;
-  border-left: 2px solid var(--local-selection-color);
-}
-.sc-isolated-node > .se-cursor.sm-after {
-  right: 0px;
-  border-right: 2px solid var(--local-selection-color);
+  top: 0px; bottom: 0px; left: 0px; right: 0px;
+  cursor: default;
 }

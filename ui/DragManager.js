@@ -111,7 +111,6 @@ class DragManager extends EventEmitter {
         let nodeSelection = new NodeSelection({
           containerId: surface.getContainerId(),
           nodeId: comp.props.node.id,
-          mode: 'full',
           surfaceId: surface.id
         })
         dragState.sourceSelection = nodeSelection

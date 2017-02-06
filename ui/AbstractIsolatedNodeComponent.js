@@ -13,7 +13,7 @@ class AbstractIsolatedNodeComponent extends Component {
       selectionFragment: null
     }
 
-    this.handleAction('escape', this._escape)
+    this.handleAction('escape', this.escape)
     this.ContentClass = this._getContentClass(this.props.node) || Component
   }
 
@@ -32,7 +32,7 @@ class AbstractIsolatedNodeComponent extends Component {
     super.didMount.call(this);
 
     let editorSession = this.context.editorSession
-    editorSession.onRender('selection', this._onSelectionChanged, this)
+    editorSession.onRender('selection', this.onSelectionChanged, this)
   }
 
   dispose() {
@@ -42,35 +42,27 @@ class AbstractIsolatedNodeComponent extends Component {
     editorSession.off(this)
   }
 
-  renderContent($$, node) {
+  renderContent($$, node, options = {}) {
     let ComponentClass = this.ContentClass
     if (!ComponentClass) {
       console.error('Could not resolve a component for type: ' + node.type)
       return $$(this.__elementTag)
     } else {
-      let props = {
+      let props = Object.assign({
+        disabled: this.props.disabled,
         node: node,
-        disabled: this.isDisabled(),
-        isolatedNodeState: this.state.mode
-      }
-      if (this.state.mode === 'focused') {
-        props.focused = true;
-      }
+        isolatedNodeState: this.state.mode,
+        focused: (this.state.mode === 'focused')
+      }, options)
       return $$(ComponentClass, props)
     }
-  }
-
-  shouldRenderBlocker() {
-    return true
-  }
-
-  shouldSelectOnClick() {
-    return this.state.mode !== 'focused' && this.state.mode !== 'co-focused'
   }
 
   getId() {
     return this._id
   }
+
+  get id() { return this.getId() }
 
   getMode() {
     return this.state.mode
@@ -96,8 +88,35 @@ class AbstractIsolatedNodeComponent extends Component {
     return this.state.mode === 'co-focused'
   }
 
-  isDisabled() {
-    return !this.state.mode || ['co-selected'].indexOf(this.state.mode) > -1;
+  escape() {
+    this.selectNode()
+  }
+
+  onSelectionChanged() {
+    let editorSession = this.context.editorSession
+    let newState = this._deriveStateFromSelectionState(editorSession.getSelectionState())
+    if (!newState && this.state.mode) {
+      this.extendState({ mode: null })
+    } else if (newState && newState.mode !== this.state.mode) {
+      this.extendState(newState)
+    }
+  }
+
+  onMousedown(event) {
+    // console.log('AbstractIsolatedNodeComponent.onMousedown', this.getId());
+    event.stopPropagation()
+  }
+
+  onKeydown(event) {
+    // console.log('####', event.keyCode, event.metaKey, event.ctrlKey, event.shiftKey);
+    // TODO: while this works when we have an isolated node with input or CE,
+    // there is no built-in way of receiving key events in other cases
+    // We need a global event listener for keyboard events which dispatches to the current isolated node
+    if (event.keyCode === keys.ESCAPE && this.state.mode === 'focused') {
+      event.stopPropagation()
+      event.preventDefault()
+      this.escape()
+    }
   }
 
   _getContentClass(node) {
@@ -118,57 +137,6 @@ class AbstractIsolatedNodeComponent extends Component {
       parent = parent._getSurfaceParent()
     }
     return level
-  }
-
-  _onSelectionChanged() {
-    let editorSession = this.context.editorSession
-    let newState = this._deriveStateFromSelectionState(editorSession.getSelectionState())
-    if (!newState && this.state.mode) {
-      this.extendState({ mode: null })
-    } else if (newState && newState.mode !== this.state.mode) {
-      this.extendState(newState)
-    }
-  }
-
-  onMousedown(event) {
-    // console.log('AbstractIsolatedNodeComponent.onMousedown', this.getId());
-    event.stopPropagation()
-  }
-
-  onClick(event) {
-    event.preventDefault()
-    event.stopPropagation()
-    if (this.shouldSelectOnClick()) {
-      this._selectNode()
-    }
-  }
-
-  onClickBlocker(event) {
-    event.preventDefault()
-    event.stopPropagation()
-    if (this.shouldSelectOnClick() && event.target === this.refs.blocker.getNativeElement()) {
-      this._selectNode()
-    }
-  }
-
-  onKeydown(event) {
-    event.stopPropagation()
-    // console.log('####', event.keyCode, event.metaKey, event.ctrlKey, event.shiftKey);
-    // TODO: while this works when we have an isolated node with input or CE,
-    // there is no built-in way of receiving key events in other cases
-    // We need a global event listener for keyboard events which dispatches to the current isolated node
-    if (event.keyCode === keys.ESCAPE && this.state.mode === 'focused') {
-      event.preventDefault()
-      this._escape()
-    }
-  }
-
-  _escape() {
-    this._selectNode()
-  }
-
-  _stopPropagation(event) {
-    event.stopPropagation()
   }
 
 }

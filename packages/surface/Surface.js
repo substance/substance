@@ -247,6 +247,7 @@ class Surface extends Component {
    * Handle document key down events.
    */
   onKeyDown(event) {
+    if (!this._shouldConsumeEvent(event)) return
     // console.log('Surface.onKeyDown()', this.getId());
 
     // ignore fake IME events (emitted in IE and Chromium)
@@ -286,6 +287,7 @@ class Surface extends Component {
   }
 
   onTextInput(event) {
+    if (!this._shouldConsumeEvent(event)) return
     // console.log("TextInput:", event);
     event.preventDefault()
     event.stopPropagation()
@@ -299,13 +301,15 @@ class Surface extends Component {
   }
 
   // Handling Dead-keys under OSX
-  onCompositionStart() {
+  onCompositionStart(event) {
+    if (!this._shouldConsumeEvent(event)) return
     // just tell DOM observer that we have everything under control
     this._state.skipNextObservation = true
   }
 
   // TODO: do we need this anymore?
   onTextInputShim(event) {
+    if (!this._shouldConsumeEvent(event)) return
     // Filter out non-character keys
     if (
       // Catches most keys that don't produce output (charCode === 0, thus no character)
@@ -337,7 +341,13 @@ class Surface extends Component {
   // particularly, double- and triple clicks.
   // also it turned out to be problematic to react on mouse down instantly
   onMouseDown(event) {
-    // ATTENTION: stopping a mousedown stops clicks/mouseup from working in FF
+    if (!this._shouldConsumeEvent(event)) return
+
+    // EXPERIMENTAL: trying to 'reserve' a mousedown event
+    // so that parents know that they shouldn't react
+    // This is similar to event.stopPropagation() but without
+    // side-effects.
+    // Note: some browsers do not do clicks, selections etc. on children if propagation is stopped
     if (event.__reserved__) {
       // console.log('%s: mousedown already reserved by %s', this.id, event.__reserved__.id)
       return
@@ -384,10 +394,8 @@ class Surface extends Component {
     //   // HACK: clearing the DOM selection, otherwise we have troubles with the old selection being in the way for the next selection
     //   this.domSelection.clear();
     //   setTimeout(function() {
-    //     if (this.domSelection) {
     //       var sel = this.domSelection.getSelection();
     //       this._setSelection(sel);
-    //     }
     //   }.bind(this));
     // }
 
@@ -401,14 +409,14 @@ class Surface extends Component {
   // When a user right clicks the DOM selection is updated (in Chrome the nearest
   // word gets selected). Like we do with the left mouse clicks we need to sync up
   // our model selection.
-  onContextMenu() {
-    if (this.domSelection) {
-      let sel = this.domSelection.getSelection()
-      this._setSelection(sel)
-    }
+  onContextMenu(event) {
+    if (!this._shouldConsumeEvent(event)) return
+    let sel = this.domSelection.getSelection()
+    this._setSelection(sel)
   }
 
   onMouseUp(e) {
+    if (!this._shouldConsumeEvent(event)) return
     e.stopPropagation()
     // console.log('mouseup on', this.getId());
     // ATTENTION: this delay is necessary for cases the user clicks
@@ -416,10 +424,8 @@ class Surface extends Component {
     // holds the old value, and is set to the correct selection after this
     // being called.
     setTimeout(function() {
-      if (this.domSelection) {
-        let sel = this.domSelection.getSelection()
-        this._setSelection(sel)
-      }
+      let sel = this.domSelection.getSelection()
+      this._setSelection(sel)
     }.bind(this))
   }
 
@@ -677,14 +683,18 @@ class Surface extends Component {
     })
   }
 
+  // only take care of events which are emitted on targets which belong to this surface
+  _shouldConsumeEvent(event) {
+    let comp = Component.unwrap(event.target._wrapper)
+    return (comp && (comp === this || comp.context.surface === this))
+  }
+
   // Experimental: used by DragManager
   getSelectionFromEvent(event) {
-    if (this.domSelection) {
-      let domRange = Surface.getDOMRangeFromEvent(event)
-      let sel = this.domSelection.getSelectionForDOMRange(domRange)
-      sel.surfaceId = this.getId()
-      return sel;
-    }
+    let domRange = Surface.getDOMRangeFromEvent(event)
+    let sel = this.domSelection.getSelectionForDOMRange(domRange)
+    sel.surfaceId = this.getId()
+    return sel;
   }
 
   setSelectionFromEvent(event) {
