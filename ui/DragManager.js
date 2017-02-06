@@ -120,21 +120,22 @@ class DragManager extends EventEmitter {
       }
     }
 
-    console.log('setting dragState', dragState)
     this.dragState = dragState
-    event.dataTransfer.effectAllowed = 'all'
-    event.dataTransfer.setData('text/html', event.target.outerHTML)
 
     // Ensure we have a small dragIcon, so dragged content does not eat up
     // all screen space.
-    let dragIcon = window.document.createElement('img')
-    dragIcon.width = 30
-    event.dataTransfer.setDragImage(dragIcon, -10, -10)
+    var img = document.createElement("img")
+    img.src = "data:image/gif;base64,R0lGODlhAQABAAAAACH5BAEKAAEALAAAAAABAAEAAAICTAEAOw==";
+    event.dataTransfer.setDragImage(img, 0, 0)
+
     if (!isSelectionDrag) {
       this.emit('dragstart', this.dragState)
     }
   }
 
+  /*
+    When drag starts externally, e.g. draggin a file into the workspace
+  */
   _onDragEnter(e) {
     // console.log('_onDragEnter(e)', e)
     if (!this.dragState) {
