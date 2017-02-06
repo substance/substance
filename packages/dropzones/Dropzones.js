@@ -89,7 +89,7 @@ export default class Dropzones extends Component {
           })
         }
 
-        if (i < numDropzones - 2) {
+        if (i < numDropzones - 1) {
           let comp = components[i]
           // We get the isolated node wrapper and want to use the content element
           if (comp._isIsolatedNodeComponent) {

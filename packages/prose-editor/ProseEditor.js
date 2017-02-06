@@ -59,9 +59,11 @@ class ProseEditor extends AbstractEditor {
 
   _renderToolbar($$) {
     let commandStates = this.commandManager.getCommandStates()
-    return $$(Toolbar, {
-      commandStates: commandStates
-    }).ref('toolbar')
+    return $$('div').addClass('se-toolbar-wrapper').append(
+      $$(Toolbar, {
+        commandStates: commandStates
+      }).ref('toolbar')
+    )
   }
 
   _renderEditor($$) {
