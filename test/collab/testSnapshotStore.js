@@ -69,7 +69,7 @@ function testSnapshotStore(createEmptySnapshotStore, test) {
   /*
     Delete snapshot
   */
-  test('Retrieve snapshot for test-doc', (t) => {
+  test('Delete snapshot', (t) => {
     let snapshotStore = createEmptySnapshotStore()
 
     function _create(cb) {
