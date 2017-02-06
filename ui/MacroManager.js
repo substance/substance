@@ -23,7 +23,7 @@ class MacroManager {
     switch(info.action) {
       case 'type': {
         let op = change.ops[0]
-        if (op.type === 'update' && op.diff.propertyType === 'string') {
+        if (op.type === 'update' && op.diff._isTextOperation) {
           path = op.path
           nodeId = path[0]
           node = doc.get(nodeId)

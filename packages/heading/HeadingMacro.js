@@ -11,20 +11,27 @@ export default {
     }
     let match = /^#\s/.exec(props.text)
     if (match) {
+      // console.log('Applying HeadingMacro')
       let editorSession = props.editorSession
-      editorSession.postpone(() => {
-        editorSession.transaction(function(tx) {
-          tx.setSelection({
-            type: 'property',
-            path: props.path,
-            startOffset: 0,
-            endOffset: match[0].length
-          })
-          tx.deleteSelection()
-          tx.switchTextType({
-            type: 'heading',
-            level: 1
-          })
+      let sel = editorSession.getSelection()
+      let path = sel.start.path
+      let startOffset = sel.start.offset
+      editorSession.transaction(function(tx) {
+        tx.setSelection({
+          type: 'property',
+          path: path,
+          startOffset: 0,
+          endOffset: match[0].length
+        })
+        tx.deleteSelection()
+        let node = tx.switchTextType({
+          type: 'heading',
+          level: 1
+        })
+        tx.setSelection({
+          type: 'property',
+          path: node.getTextPath(),
+          startOffset: startOffset - match[0].length
         })
       })
       return true
