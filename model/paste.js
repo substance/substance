@@ -1,3 +1,4 @@
+import isArray from '../util/isArray'
 import last from '../util/last'
 import forEach from '../util/forEach'
 import uuid from '../util/uuid'
@@ -153,9 +154,9 @@ function _pasteDocument(tx, pasteDoc) {
     // the target doc
     // Plus, it uses reflection to create owned nodes recursively,
     // and to transfer attached annotations.
-    _transferWithDisambiguatedIds(tx, node, visited)
+    let newId = _transferWithDisambiguatedIds(node.getDocument(), tx, node.id, visited)
     // ATTENTION: use node.id here, it might have changed by disambiguater
-    container.show(node.id, insertPos++)
+    container.show(newId, insertPos++)
     insertedNodes.push(node)
   }
 
@@ -179,11 +180,9 @@ function _pasteDocument(tx, pasteDoc) {
 // Unfortunately, this can be difficult in some cases,
 // e.g. other nodes that have a reference to the re-named node
 // We only fix annotations for now.
-function _transferWithDisambiguatedIds(targetDoc, node, visited) {
-  // do not run twice on the same node
-  if (visited[node.id]) return
-  visited[node.id] = true
-  if (!node) return
+function _transferWithDisambiguatedIds(sourceDoc, targetDoc, id, visited) {
+  if (visited[id]) throw new Error('FIXME: dont call me twice')
+  const node = sourceDoc.get(id, 'strict')
   let oldId = node.id
   let newId
   if (targetDoc.contains(node.id)) {
@@ -191,7 +190,7 @@ function _transferWithDisambiguatedIds(targetDoc, node, visited) {
     newId = uuid(node.type)
     node.id = newId
   }
-  const sourceDoc = node.getDocument()
+  visited[id] = node.id
   const annotationIndex = sourceDoc.getIndex('annotations')
   const nodeSchema = node.getSchema()
   // collect annotations so that we can create them in the target doc afterwards
@@ -209,20 +208,11 @@ function _transferWithDisambiguatedIds(targetDoc, node, visited) {
       // update renamed references
       let val = node[prop.name]
       if (prop.isArray()) {
-        for (let i = 0; i < val.length; i++) {
-          let id = val[i]
-          if (!visited[id]) {
-            let child = sourceDoc.get(id)
-            _transferWithDisambiguatedIds(targetDoc, child, visited)
-            val[i] = child.id
-          }
-        }
+        _transferArrayOfReferences(sourceDoc, targetDoc, val, visited)
       } else {
         let id = val
         if (!visited[id]) {
-          let child = sourceDoc.get(id)
-          _transferWithDisambiguatedIds(targetDoc, child, visited)
-          node[name] = child.id
+          node[name] = _transferWithDisambiguatedIds(sourceDoc, targetDoc, id, visited)
         }
       }
     }
@@ -243,7 +233,23 @@ function _transferWithDisambiguatedIds(targetDoc, node, visited) {
   }
   targetDoc.create(node)
   for (let i = 0; i < annos.length; i++) {
-    _transferWithDisambiguatedIds(targetDoc, annos[i], visited)
+    _transferWithDisambiguatedIds(sourceDoc, targetDoc, annos[i].id, visited)
+  }
+  return node.id
+}
+
+function _transferArrayOfReferences(sourceDoc, targetDoc, arr, visited) {
+  for (let i = 0; i < arr.length; i++) {
+    let val = arr[i]
+    // multi-dimensional
+    if (isArray(val)) {
+      _transferArrayOfReferences(sourceDoc, targetDoc, val, visited)
+    } else {
+      let id = val
+      if (id && !visited[id]) {
+        arr[i] = _transferWithDisambiguatedIds(sourceDoc, targetDoc, id, visited)
+      }
+    }
   }
 }
 
