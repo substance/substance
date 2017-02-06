@@ -36,6 +36,7 @@ class DOMSelection {
     @returns {model/Selection}
   */
   getSelection(options) {
+    // HACK: ignore this if not Browser (e.g. when running the test suite in node)
     if (!inBrowser) return
     let range = this.mapDOMSelection(options)
     let doc = this.editor.getDocument()
@@ -96,6 +97,7 @@ class DOMSelection {
     @param {model/Selection} sel
   */
   setSelection(sel) {
+    // HACK: ignore this if not Browser (e.g. when running the test suite in node)
     if (!inBrowser) return
     // console.log('### DOMSelection: setting selection', sel.toString());
     let {start, end} = this.mapModelToDOMCoordinates(sel)

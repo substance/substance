@@ -64,13 +64,8 @@ class Editing {
       if (sel.isBefore()) {
         tx.update(container.getContentPath(), { type: 'insert', pos: nodePos, value: textNode.id })
         // leave selection as is
-      } else if (sel.isAfter()) {
-        tx.update(container.getContentPath(), { type: 'insert', pos: nodePos+1, value: textNode.id })
-        setCursor(tx, textNode, containerId, 'before')
       } else {
-        tx.update(container.getContentPath(), { type: 'delete', pos: nodePos })
-        tx.delete(nodeId)
-        tx.update(container.getContentPath(), { type: 'insert', pos: nodePos, value: textNode.id })
+        tx.update(container.getContentPath(), { type: 'insert', pos: nodePos+1, value: textNode.id })
         setCursor(tx, textNode, containerId, 'before')
       }
     }
@@ -211,7 +206,6 @@ class Editing {
           } else {
             tx.setSelection({
               type: 'node',
-              mode: 'full',
               nodeId: previous.id,
               containerId: container.id
             })
@@ -232,7 +226,6 @@ class Editing {
           } else {
             tx.setSelection({
               type: 'node',
-              mode: 'full',
               nodeId: next.id,
               containerId: container.id
             })

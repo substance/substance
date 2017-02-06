@@ -223,6 +223,7 @@ class EditorSession extends EventEmitter {
   }
 
   setSelection(sel) {
+    // console.log('EditorSession.setSelection()', sel)
     if (sel && isPlainObject(sel)) {
       sel = this.getDocument().createSelection(sel)
     }
@@ -243,7 +244,6 @@ class EditorSession extends EventEmitter {
     this.setSelection({
       type: 'node',
       nodeId: nodeId,
-      mode: 'full',
       containerId: surface.getContainerId(),
       surfaceId: surface.id
     })

@@ -22,9 +22,7 @@ class NodeSelection extends Selection {
     if (!isString(nodeId)) {
       throw new Error("'nodeId' is mandatory.");
     }
-    if (['full', 'before', 'after'].indexOf(mode) < 0) {
-      throw new Error("'mode' is mandatory.");
-    }
+    mode = mode || "full"
 
     this.containerId = containerId;
     this.nodeId = nodeId;
