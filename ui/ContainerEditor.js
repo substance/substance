@@ -1,6 +1,6 @@
 import isString from '../util/isString'
 import keys from '../util/keys'
-import platform from '../util/platform'
+// import platform from '../util/platform'
 import EditingBehavior from '../model/EditingBehavior'
 import Surface from '../packages/surface/Surface'
 import RenderingEngine from './RenderingEngine'
@@ -145,51 +145,59 @@ class ContainerEditor extends Surface {
     }
   }
 
+  _selectNextIsolatedNode(direction) {
+    let selState = this.getEditorSession().getSelectionState()
+    let node = (direction === 'left') ? selState.getPreviousNode() : selState.getNextNode()
+    if (!node || !node.isIsolatedNode()) return false
+    if (
+      (direction === 'left' && selState.isFirst()) ||
+      (direction === 'right' && selState.isLast())
+    ) {
+      this.getEditorSession().setSelection({
+        type: 'node',
+        nodeId: node.id,
+        containerId: selState.getContainer().id,
+        surfaceId: this.id
+      })
+      return true
+    }
+    return false
+  }
+
+  _handleLeftOrRightArrowKey(event) {
+    event.stopPropagation()
+    let direction = (event.keyCode === keys.LEFT) ? 'left' : 'right'
+    let sel = this.getEditorSession().getSelection()
+
+    if (this._selectNextIsolatedNode(direction)) {
+      event.preventDefault()
+      return
+    }
+
+    if (sel.isNodeSelection() && !event.shiftKey) {
+      this.domSelection.collapse(direction)
+    }
+
+    window.setTimeout(function() {
+      if (!this.isMounted()) return
+      this._updateModelSelection({ direction: direction })
+    }.bind(this))
+  }
+
   _handleUpOrDownArrowKey(event) {
     event.stopPropagation()
     let direction = (event.keyCode === keys.UP) ? 'left' : 'right'
-    let selState = this.getEditorSession().getSelectionState()
-    let sel = selState.getSelection()
+    let sel = this.getEditorSession().getSelection()
 
-    // Note: this collapses the selection, just to let ContentEditable continue doing a cursor move
-    if (sel.isNodeSelection() && sel.isFull() && !event.shiftKey) {
+    if (this._selectNextIsolatedNode(direction)) {
+      event.preventDefault()
+      return
+    }
+
+    if (sel.isNodeSelection() && !event.shiftKey) {
       this.domSelection.collapse(direction)
     }
-    // HACK: ATM we have a cursor behavior in Chrome and FF when collapsing a selection
-    // e.g. have a selection from up-to-down and the press up, seems to move the focus
-    else if (!platform.isIE && !sel.isCollapsed() && !event.shiftKey) {
-      this._setSelection(sel.collapse(direction))
-    } else if (sel.isCollapsed() && event.altKey) {
-      let container = this.getContainer()
-      let nodePos = container.getPosition(sel.getNodeId())
-      if (event.keyCode === keys.UP && nodePos > 0) {
-        let prev = container.getNodeAt(nodePos-1)
-        if (!prev.isText() && !prev.isList()) {
-          event.preventDefault()
-          this.getEditorSession().setSelection({
-            type: 'node',
-            nodeId: prev.id,
-            mode: 'full',
-            containerId: container.id,
-            surfaceId: this.id
-          })
-          return
-        }
-      } else if (event.keyCode === keys.DOWN && nodePos < container.getLength()) {
-        let next = container.getNodeAt(nodePos+1)
-        if (!next.isText() && !next.isList()) {
-          event.preventDefault()
-          this.getEditorSession().setSelection({
-            type: 'node',
-            nodeId: next.id,
-            mode: 'full',
-            containerId: container.id,
-            surfaceId: this.id
-          })
-          return
-        }
-      }
-    }
+
     // Note: we need this timeout so that CE updates the DOM selection first
     // before we try to map it to the model
     window.setTimeout(function() {
@@ -197,29 +205,6 @@ class ContainerEditor extends Surface {
       this._updateModelSelection({ direction: direction })
     }.bind(this))
   }
-
-  _handleLeftOrRightArrowKey(event) {
-    event.stopPropagation()
-    let direction = (event.keyCode === keys.LEFT) ? 'left' : 'right'
-    let selState = this.getEditorSession().getSelectionState()
-    let sel = selState.getSelection()
-    if (sel.isNodeSelection() && sel.isFull() && !event.shiftKey) {
-      this._setSelection(sel.collapse(direction))
-    } else {
-      super._handleLeftOrRightArrowKey.call(this, event)
-    }
-  }
-
-  // _handleEnterKey(event) {
-  //   let sel = this.getEditorSession().getSelection()
-  //   if (sel.isNodeSelection() && sel.isFull()) {
-  //     event.preventDefault()
-  //     event.stopPropagation()
-  //     // TODO: we could enter here
-  //   } else {
-  //     super._handleEnterKey.apply(this, arguments)
-  //   }
-  // }
 
   // Used by Clipboard
   isContainerEditor() {

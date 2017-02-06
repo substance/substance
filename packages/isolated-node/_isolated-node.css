@@ -2,23 +2,6 @@
   position: relative;
 }
 
-.sc-isolated-node > .se-container {
-  display: inline-block;
-}
-
-.sc-isolated-node .se-cursor {
-  position: absolute;
-  top: 0; bottom: 0;
-  width: 1px;
-}
-.sc-isolated-node > .se-cursor.sm-before {
-  left: -5px;
-  border-left: 2px solid var(--local-selection-color);
-}
-.sc-isolated-node > .se-cursor.sm-after {
-  right: -5px;
-  border-right: 2px solid var(--local-selection-color);
-}
 .sc-isolated-node.sm-default-style.sm-selected,
 .sc-isolated-node.sm-default-style.sm-co-selected {
   /*background: rgba(163,205,253, 0.6);*/
@@ -32,6 +15,7 @@
 }
 
 /* Hide selection fragments when in selected-state */
+.sc-isolated-node.sm-selected ::selection,
 .sc-isolated-node.sm-selected ::selection {
   background: transparent;
 }
@@ -39,4 +23,19 @@
 .sc-isolated-node.sm-selected {
   background: rgba(163, 205, 253, 0.3);
   outline: 2px solid #A3CDFD;
+}
+
+.sc-isolated-node > .se-cursor {
+  position: absolute;
+  top: 0px; bottom: 0px;
+  width: 1px;
+}
+
+.sc-isolated-node > .se-cursor.sm-before {
+  left: 0px;
+  border-left: 2px solid var(--local-selection-color);
+}
+.sc-isolated-node > .se-cursor.sm-after {
+  right: 0px;
+  border-right: 2px solid var(--local-selection-color);
 }

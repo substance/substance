@@ -29,6 +29,9 @@ class NodeSelection extends Selection {
     this.mode = mode;
     this.reverse = Boolean(reverse);
     this.surfaceId = surfaceId;
+
+    this.start = new Coordinate([nodeId], 0)
+    this.end = new Coordinate([nodeId], 1)
   }
 
   equals(other) {

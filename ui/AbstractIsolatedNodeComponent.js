@@ -97,7 +97,7 @@ class AbstractIsolatedNodeComponent extends Component {
   }
 
   isDisabled() {
-    return !this.state.mode || ['co-selected', 'cursor'].indexOf(this.state.mode) > -1;
+    return !this.state.mode || ['co-selected'].indexOf(this.state.mode) > -1;
   }
 
   _getContentClass(node) {

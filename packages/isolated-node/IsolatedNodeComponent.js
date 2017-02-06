@@ -58,7 +58,7 @@ class IsolatedNodeComponent extends AbstractIsolatedNodeComponent {
     } else {
       // ATTENTION: see above
       if (this.state.mode !== 'focused') {
-        el.attr('draggable', true)
+        // el.attr('draggable', true)
       }
       el.on('mousedown', this._reserveMousedown, this)
         .on('click', this.onClick)
@@ -187,14 +187,17 @@ IsolatedNodeComponent.getDOMCoordinate = function(comp, coor) {
 }
 
 IsolatedNodeComponent.getDOMCoordinates = function(comp) {
+  let el = comp.el
+  let parent = el.parentNode
+  let childIdx = parent.getChildIndex(el)
   return {
     start: {
-      container: comp.el.getNativeElement(),
-      offset: 0
+      container: parent.getNativeElement(),
+      offset: childIdx
     },
     end: {
-      container: comp.el.getNativeElement(),
-      offset: comp.el.getChildCount()
+      container: parent.getNativeElement(),
+      offset: childIdx+1
     }
   }
 }

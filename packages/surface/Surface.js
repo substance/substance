@@ -516,23 +516,20 @@ class Surface extends Component {
     event.stopPropagation()
 
     let direction = (event.keyCode === keys.LEFT) ? 'left' : 'right'
-    let selState = this.getEditorSession().getSelectionState()
-    let sel = selState.getSelection()
-    // Note: collapsing the selection and let ContentEditable still continue doing a cursor move
-    if (selState.isInlineNodeSelection() && !event.shiftKey) {
-      event.preventDefault()
-      this._setSelection(sel.collapse(direction))
-      return
-    }
+    // let selState = this.getEditorSession().getSelectionState()
+    // let sel = selState.getSelection()
+    // // Note: collapsing the selection and let ContentEditable still continue doing a cursor move
+    // if (selState.isInlineNodeSelection() && !event.shiftKey) {
+    //   event.preventDefault()
+    //   this._setSelection(sel.collapse(direction))
+    //   return
+    // }
 
     // Note: we need this timeout so that CE updates the DOM selection first
     // before we map it to the model
     window.setTimeout(function() {
       if (!this.isMounted()) return
-      let options = {
-        direction: (event.keyCode === keys.LEFT) ? 'left' : 'right'
-      }
-      this._updateModelSelection(options)
+      this._updateModelSelection({direction})
     }.bind(this))
   }
 

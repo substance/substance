@@ -7,6 +7,8 @@ import TextPropertyComponent from './TextPropertyComponent'
 import IsolatedNodeComponent from '../packages/isolated-node/IsolatedNodeComponent'
 import Component from '../ui/Component'
 
+const DEBUG = false
+
 /*
   A class that maps DOM selections to model selections.
 
@@ -62,7 +64,7 @@ class DOMSelection {
     let wSel = window.getSelection()
     // Use this log whenever the mapping goes wrong to analyze what
     // is actually being provided by the browser
-    // console.log('DOMSelection->Model: anchorNode:', wSel.anchorNode, 'anchorOffset:', wSel.anchorOffset, 'focusNode:', wSel.focusNode, 'focusOffset:', wSel.focusOffset, 'collapsed:', wSel.collapsed);
+    if (DEBUG) console.info('DOM->Model: ', wSel.anchorNode, wSel.anchorOffset, wSel.focusNode, wSel.focusOffset);
     if (wSel.rangeCount === 0) {
       return null;
     }
@@ -79,17 +81,9 @@ class DOMSelection {
       let focusNode = DefaultDOMElement.wrapNativeElement(wSel.focusNode)
       range = this._getRange(anchorNode, wSel.anchorOffset, focusNode, wSel.focusOffset)
     }
-    // console.log('DOMSelection->Model: extracted range ', range ? range.toString() : null);
+    if (DEBUG) console.info('DOM->Model: range ', range ? range.toString() : null);
     return range
   }
-
-  // function _printStacktrace() {
-  //   try {
-  //     throw new Error();
-  //   } catch (err) {
-  //     console.log(err.stack);
-  //   }
-  // }
 
   /**
     Transfer a given model selection into the DOM.
@@ -121,9 +115,7 @@ class DOMSelection {
     } else {
       if (sel.isReverse()) {
         // console.log('DOMSelection: rendering a reverse selection.');
-        let tmp = start
-        start = end
-        end = tmp
+        [start, end] = [end, start]
         // HACK: using wRange setEnd does not work reliably
         // so we set just the start anchor
         // and then use window.Selection.extend()
@@ -143,7 +135,7 @@ class DOMSelection {
   }
 
   mapModelToDOMCoordinates(sel) {
-    // console.log('### DOMSelection.mapModelToDOMCoordinates(): mapping selection to DOM', sel.toString());
+    if (DEBUG) console.info('Model->DOM: sel =', sel.toString());
     let rootEl
     let surface = this.editor.surfaceManager.getSurface(sel.surfaceId)
     if (!surface) {
@@ -179,15 +171,9 @@ class DOMSelection {
         return {}
       }
       if (comp._isIsolatedNodeComponent) {
-        let coors = IsolatedNodeComponent.getDOMCoordinates(comp)
-        if (sel.isFull()) {
-          start = coors.start
-          end = coors.end
-        } else if (sel.isBefore()) {
-          start = end = coors.start
-        } else {
-          start = end = coors.end
-        }
+        let coors = IsolatedNodeComponent.getDOMCoordinates(comp, sel)
+        start = coors.start
+        end = coors.end
       } else {
         let _nodeEl = comp.el
         start = {
@@ -198,14 +184,9 @@ class DOMSelection {
           container: _nodeEl.getNativeElement(),
           offset: _nodeEl.getChildCount()
         }
-        if (sel.isBefore()) {
-          end = start
-        } else if (sel.isAfter()) {
-          start = end
-        }
       }
     }
-    // console.log('Model->DOMSelection: mapped to DOM coordinates', start.container, start.offset, end.container, end.offset, 'isReverse?', sel.isReverse());
+    if (DEBUG) console.info('Model->DOM:', start.container, start.offset, end.container, end.offset, 'isReverse?', sel.isReverse());
     return {start,end}
   }
 
