@@ -1,7 +1,9 @@
 /* eslint-disable no-use-before-define */
 import { module } from 'substance-test'
+import Document from '../model/Document'
 import EditingInterface from '../model/EditingInterface'
 import setupEditor from './fixture/setupEditor'
+import headersAndParagraphs from './fixture/headersAndParagraphs'
 
 const test = module('Editing')
 
@@ -926,52 +928,6 @@ test("[L6-1]: Merging a List into previous List using DELETE", function(t) {
   t.end()
 })
 
-test("[L7-1]: Copying two ListItems", function(t) {
-  let { doc } = setupEditor(t, _l1)
-  let editor = new EditingInterface(doc)
-  editor.setSelection({
-    type: 'container',
-    startPath: ['l1-1', 'content'],
-    startOffset: 3,
-    endPath: ['l1-2', 'content'],
-    endOffset: 3,
-    containerId: 'body'
-  })
-  let copy = editor.copySelection()
-  let content = copy.getContainer()
-  t.equal(content.getLength(), 1, 'There should be one node')
-  let l1 = copy.get('l1')
-  t.notNil(l1, 'l1 should exist')
-  t.equal(l1.getLength(), 2, '.. having 2 items')
-  let li1 = l1.getItemAt(0)
-  let li2 = l1.getItemAt(1)
-  t.equal(li1.getText(), LI1_TEXT.slice(3), 'The first item should have correct content')
-  t.equal(li2.getText(), LI2_TEXT.slice(0, 3), 'The second item should have correct content')
-  t.end()
-})
-
-test("[L7-2]: Copying a paragraph and a ListItem", function(t) {
-  let { doc } = setupEditor(t, _p1, _l1)
-  let editor = new EditingInterface(doc)
-  editor.setSelection({
-    type: 'container',
-    startPath: ['p1', 'content'],
-    startOffset: 3,
-    endPath: ['l1-1', 'content'],
-    endOffset: 3,
-    containerId: 'body'
-  })
-  let copy = editor.copySelection()
-  let content = copy.getContainer()
-  t.equal(content.getLength(), 2, 'There should be 2 nodes')
-  let l1 = copy.get('l1')
-  t.notNil(l1, 'l1 should exist')
-  t.equal(l1.getLength(), 1, '.. having 1 item')
-  let li1 = l1.getItemAt(0)
-  t.equal(li1.getText(), LI1_TEXT.slice(0, 3), 'The first item should have correct content')
-  t.end()
-})
-
 test("[L8-1]: Toggling a paragraph into a List", function(t) {
   let { doc, editorSession} = setupEditor(t, _p1)
   editorSession.setSelection({
@@ -1245,6 +1201,157 @@ test("[IN-2]: Deleting a character in an IsolatedNode", function(t) {
 //   t.equal(annoText, selText, 'New annotation should have the same text as the original selection')
 //   t.end()
 // })
+
+test("[C-1] Copying a property selection", function(t) {
+  let { doc } = setupEditor(t, headersAndParagraphs)
+  let editor = new EditingInterface(doc)
+  editor.setSelection({
+    type: 'property',
+    path: ['p1', 'content'],
+    startOffset: 4,
+    endOffset: 9,
+    containerId: 'body'
+  })
+  let copy = editor.copySelection()
+  let textNode = copy.get(Document.TEXT_SNIPPET_ID)
+  t.notNil(textNode, 'There should be a text node for the property fragment.')
+  t.equal(textNode.content, 'graph', 'Selected text should be copied.')
+  t.end()
+})
+
+test("[C-2] Copying a property selection with annotated text", function(t) {
+  let { doc } = setupEditor(t, headersAndParagraphs)
+  let editor = new EditingInterface(doc)
+  editor.setSelection({
+    type: 'property',
+    path: ['p2', 'content'],
+    startOffset: 10,
+    endOffset: 19,
+    containerId: 'body'
+  })
+  let copy = editor.copySelection()
+  t.equal(copy.get([Document.TEXT_SNIPPET_ID, 'content']), 'with anno', 'Selected text should be copied.')
+  let annos = copy.getIndex('annotations').get([Document.TEXT_SNIPPET_ID, 'content'])
+  t.equal(annos.length, 1, 'There should be one annotation on copied text.')
+  let anno = annos[0]
+  t.equal(anno.type, "emphasis", "The annotation should be 'emphasis'.")
+  t.deepEqual([anno.start.offset, anno.end.offset], [5, 9], 'The annotation should be over the text "anno".')
+  t.end()
+})
+
+test("[C-3] Copying a container selection", function(t) {
+  let { doc } = setupEditor(t, headersAndParagraphs)
+  let editor = new EditingInterface(doc)
+  editor.setSelection({
+    type: 'container',
+    containerId: 'body',
+    startPath: ['h1', 'content'],
+    startOffset: 4,
+    endPath: ['p2', 'content'],
+    endOffset: 9,
+  })
+  let copy = editor.copySelection()
+  let content = copy.get(Document.SNIPPET_ID)
+  t.notNil(content, 'There should be a container node with id "content".')
+  // 4 nodes? 'body', 'snippets', 'p1', 'p2'
+  t.equal(content.nodes.length, 4, 'There should be 4 nodes in the copied document.')
+  let first = copy.get(content.nodes[0])
+  t.equal(first.type, 'heading', "The first node should be a heading.")
+  t.equal(first.content, 'ion 1', "Its content should be truncated to 'ion 1'.")
+  let last = copy.get(content.nodes[3])
+  t.equal(last.type, 'paragraph', "The last node should be a paragraph.")
+  t.equal(last.content, 'Paragraph', "Its content should be truncated to 'Paragraph'.")
+  t.end()
+})
+
+test("[C-4] Copying a paragraph", function(t) {
+  let { doc } = setupEditor(t, _p1, _p2)
+  let editor = new EditingInterface(doc)
+  editor.setSelection({
+    type: 'container',
+    containerId: 'body',
+    startPath: ['p2'],
+    startOffset: 0,
+    endPath: ['p2'],
+    endOffset: 1
+  })
+  let copy = editor.copySelection()
+  let p2 = copy.get('p2')
+  t.equal(p2.content, doc.get('p2').content, 'The whole paragraph should be copied.')
+  t.end()
+})
+
+test("[C-5]: Copying two ListItems", function(t) {
+  let { doc } = setupEditor(t, _l1)
+  let editor = new EditingInterface(doc)
+  editor.setSelection({
+    type: 'container',
+    startPath: ['l1-1', 'content'],
+    startOffset: 3,
+    endPath: ['l1-2', 'content'],
+    endOffset: 3,
+    containerId: 'body'
+  })
+  let copy = editor.copySelection()
+  let content = copy.getContainer()
+  t.equal(content.getLength(), 1, 'There should be one node')
+  let l1 = copy.get('l1')
+  t.notNil(l1, 'l1 should exist')
+  t.equal(l1.getLength(), 2, '.. having 2 items')
+  let li1 = l1.getItemAt(0)
+  let li2 = l1.getItemAt(1)
+  t.equal(li1.getText(), LI1_TEXT.slice(3), 'The first item should have correct content')
+  t.equal(li2.getText(), LI2_TEXT.slice(0, 3), 'The second item should have correct content')
+  t.end()
+})
+
+test("[C-6]: Copying a paragraph and a ListItem", function(t) {
+  let { doc } = setupEditor(t, _p1, _l1)
+  let editor = new EditingInterface(doc)
+  editor.setSelection({
+    type: 'container',
+    startPath: ['p1', 'content'],
+    startOffset: 3,
+    endPath: ['l1-1', 'content'],
+    endOffset: 3,
+    containerId: 'body'
+  })
+  let copy = editor.copySelection()
+  let content = copy.getContainer()
+  t.equal(content.getLength(), 2, 'There should be 2 nodes')
+  let l1 = copy.get('l1')
+  t.notNil(l1, 'l1 should exist')
+  t.equal(l1.getLength(), 1, '.. having 1 item')
+  let li1 = l1.getItemAt(0)
+  t.equal(li1.getText(), LI1_TEXT.slice(0, 3), 'The first item should have correct content')
+  t.end()
+})
+
+// FIXME: broken since introduction of file nodes
+// test("Copying a node without properties", function(t) {
+//   var doc = fixture(simple)
+//   doc.create({
+//     type: 'image',
+//     id: 'i1',
+//     src: 'foo'
+//   })
+//   doc.get('body').show('i1', 1)
+//   var sel = doc.createSelection({
+//     type: 'container',
+//     containerId: 'body',
+//     startPath: ['i1'],
+//     startOffset: 0,
+//     endPath: ['i1'],
+//     endOffset: 1
+//   })
+//   var out = copySelection(doc, sel)
+//   var copy = out.doc
+//   var img = copy.get('i1')
+//   t.notNil(img, 'The image should be copied.')
+//   t.equal(img.src, 'foo')
+//   t.end()
+// })
+
 
 const P1_TEXT = 'p1:abcdef'
 

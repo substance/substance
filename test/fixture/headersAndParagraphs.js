@@ -1,6 +1,5 @@
 export default function headersAndParagraphs(tx) {
   var body = tx.get('body')
-  tx.set(['meta', 'title'], 'Sample1')
   tx.create({
     type: 'heading',
     id: 'h1',

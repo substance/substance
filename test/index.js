@@ -1,7 +1,6 @@
 // model
 import "./ContainerAddress.test.js"
 import "./ContainerSelection.test.js"
-import "./copySelection.test.js"
 import "./Document.test.js"
 import "./annotationHelpers.test.js"
 import "./documentHelpers.test.js"
