@@ -12,6 +12,7 @@
   "main": "dist/substance.cjs.js",
   "jsnext:main": "index.es.js",
   "scripts": {
+    "lint": "eslint -c .eslintrc.js collab doc dom model packages test ui util index.es.js",
     "test": "node make build:test && (node .test/run-tests.js | node ./node_modules/substance-test/dist/tap-spec.js) && node make run:test:browser",
     "dev": "node make test:browser:pure -w -s",
     "coverage": "node make run:test:coverage",
