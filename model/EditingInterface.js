@@ -144,11 +144,11 @@ class EditingInterface {
   }
 
   switchTextType(nodeData) {
-    this._impl.switchTextType(this, nodeData)
+    return this._impl.switchTextType(this, nodeData)
   }
 
   toggleList(params) {
-    this._impl.toggleList(this, params)
+    return this._impl.toggleList(this, params)
   }
 
   indent() {

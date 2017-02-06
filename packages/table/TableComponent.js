@@ -2,6 +2,7 @@ import Component from '../../ui/Component'
 import TableCellComponent from './TableCellComponent'
 
 class TableComponent extends Component {
+
   render($$) {
     let el = $$('table').addClass('sc-table')
     let node = this.props.node
@@ -19,7 +20,7 @@ class TableComponent extends Component {
           let cellEl = $$(TableCellComponent, {
             node: cellNode,
             disabled: this.props.disabled
-          })
+          }).ref(cellNode.id)
           rowEl.append(cellEl)
         }
       }
@@ -27,6 +28,7 @@ class TableComponent extends Component {
     }
     return el
   }
+
 }
 
 TableComponent.hasDropzones = true

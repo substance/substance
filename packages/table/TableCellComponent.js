@@ -9,7 +9,7 @@ class TableCellComponent extends Component {
       $$(TextPropertyEditor, {
         path: node.getTextPath(),
         disabled: this.props.disabled
-      })
+      }).ref('editor')
     )
     if (node.rowspan > 0) {
       el.attr('rowspan', node.rowspan)
