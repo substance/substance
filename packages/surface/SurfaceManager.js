@@ -40,6 +40,10 @@ class SurfaceManager {
     }
   }
 
+  getSurfaces() {
+    return Object.values(this.surfaces)
+  }
+
   /**
    * Register a surface
    *
