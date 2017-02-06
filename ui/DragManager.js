@@ -68,16 +68,14 @@ class DragManager extends EventEmitter {
   */
   _initDrag(event, options) {
     // console.log('_initDrag')
-    let dragState = Object.assign({}, { event, mode: 'block'}, options)
-
     let sel = this._getSelection()
+    let dragState = Object.assign({}, { event, mode: 'block'}, options)
 
     let isSelectionDrag = (sel.isPropertySelection() || sel.isContainerSelection()) && this._isMouseInsideDOMSelection(event)
     if (isSelectionDrag) {
+      // console.log('DragManager: starting a selection drag', sel.toString())
+      dragState.selectionDrag = true
       dragState.sourceSelection = sel
-      if (sel.isPropertySelection()) {
-        dragState.mode = 'inline'
-      }
     } else {
       // We need to determine all ContainerEditors and their scrollPanes; those have the drop
       // zones attached
@@ -139,7 +137,9 @@ class DragManager extends EventEmitter {
     let dragIcon = window.document.createElement('img')
     dragIcon.width = 30
     event.dataTransfer.setDragImage(dragIcon, -10, -10)
-    this.emit('dragstart', this.dragState)
+    if (!isSelectionDrag) {
+      this.emit('dragstart', this.dragState)
+    }
   }
 
   _onDragOver(e) { // eslint-disable-line
@@ -185,10 +185,18 @@ class DragManager extends EventEmitter {
     }
   }
 
-  _onDragEnd() {
+  _onDragEnd(event) {
     // console.log('_onDragEnd')
-    this.dragState = null
-    this.emit('dragend')
+    try {
+      if (this.dragState.selectionDrag) {
+        // cut and paste to destination
+        console.log('TODO: drag selection', event)
+      } else {
+        this.emit('dragend')
+      }
+    } finally {
+      this.dragState = null
+    }
   }
 
   _onDragExit() {
