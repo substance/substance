@@ -8,6 +8,7 @@ import StrongPackage from '../../packages/strong/StrongPackage'
 import EmphasisPackage from '../../packages/emphasis/EmphasisPackage'
 import ListPackage from '../../packages/list/ListPackage'
 import LinkPackage from '../../packages/link/LinkPackage'
+import TablePackage from '../../packages/table/TablePackage'
 import CodeblockPackage from '../../packages/codeblock/CodeblockPackage'
 import Component from '../../ui/Component'
 import AbstractEditor from '../../ui/AbstractEditor'
@@ -52,6 +53,7 @@ class TestEditor extends AbstractEditor {
 
 function getConfig() {
   let config = new Configurator()
+  config.addToolGroup('default')
   config.addToolGroup('annotations')
   config.addToolGroup('overlay')
   config.defineSchema(new DocumentSchema('test-article', 1.0, {
@@ -61,8 +63,9 @@ function getConfig() {
   config.import(HeadingPackage)
   config.import(StrongPackage)
   config.import(EmphasisPackage)
-  config.import(ListPackage)
   config.import(LinkPackage)
+  config.import(ListPackage)
+  config.import(TablePackage)
   config.import(CodeblockPackage)
   config.addNode(TestBlockNode)
   config.addNode(TestInlineNode)

@@ -4,6 +4,15 @@ import Document from '../model/Document'
 import EditingInterface from '../model/EditingInterface'
 import setupEditor from './fixture/setupEditor'
 import headersAndParagraphs from './fixture/headersAndParagraphs'
+import {
+  _p1, P1_TEXT,
+  _p2, P2_TEXT,
+  _s1, _empty,
+  _block1, _block2,
+  _in1, IN1_TITLE,
+  _l1, _l1_empty, _l2, _li1plus, _li3, LI1_TEXT, LI2_TEXT, LI3_TEXT,
+  _t1, _t1_sparse, T_CONTENT
+} from './samples'
 
 const test = module('Editing')
 
@@ -1051,70 +1060,6 @@ test("[L9-1]: Dedenting a ListItem", function(t) {
   t.end()
 })
 
-test("[L10-1]: Copy and Pasting a List", function(t) {
-  let { doc, editorSession } = setupEditor(t, _p1, _empty, _l1)
-  editorSession.transaction((tx) => {
-    tx.setSelection({
-      type: 'container',
-      startPath: ['l1-1', 'content'],
-      startOffset: 0,
-      endPath: ['l1-2', 'content'],
-      endOffset: LI2_TEXT.length,
-      containerId: 'body'
-    })
-    let copy = tx.copySelection()
-    tx.setSelection({
-      type: 'property',
-      path: ['empty', 'content'],
-      startOffset: 0,
-      containerId: 'body'
-    })
-    tx.paste(copy)
-  })
-  let body = doc.get('body')
-  let nodes = body.getNodes()
-  t.equal(body.length, 3, "There should be 3 nodes")
-  t.deepEqual(['paragraph', 'list', 'list'], nodes.map(n => n.type), '.. a paragraph and 2 lists')
-  let li1 = body.getChildAt(1)
-  let li2 = body.getChildAt(2)
-  t.notDeepEqual(li1.items, li2.items, 'List items should not be the same.')
-  t.equal(li1.getItemAt(0).getText(), li2.getItemAt(0).getText(), 'First list item should have same content')
-  t.equal(li1.getItemAt(1).getText(), li2.getItemAt(1).getText(), 'Second list item should have same content')
-  t.end()
-})
-
-test("[L10-2]: Copy and Pasting a List partially", function(t) {
-  let { doc, editorSession } = setupEditor(t, _p1, _empty, _l1)
-  editorSession.transaction((tx) => {
-    tx.setSelection({
-      type: 'container',
-      startPath: ['l1-1', 'content'],
-      startOffset: 3,
-      endPath: ['l1-2', 'content'],
-      endOffset: 3,
-      containerId: 'body'
-    })
-    let copy = tx.copySelection()
-    tx.setSelection({
-      type: 'property',
-      path: ['empty', 'content'],
-      startOffset: 0,
-      containerId: 'body'
-    })
-    tx.paste(copy)
-  })
-  let body = doc.get('body')
-  let nodes = body.getNodes()
-  t.equal(body.length, 3, "There should be 3 nodes")
-  t.deepEqual(['paragraph', 'list', 'list'], nodes.map(n => n.type), '.. a paragraph and 2 lists')
-  let li1 = body.getChildAt(1)
-  let li2 = body.getChildAt(2)
-  t.notDeepEqual(li1.items, li2.items, 'List items should not be the same.')
-  t.equal(li1.getItemAt(0).getText(), LI1_TEXT.slice(3), 'First list item should be truncated')
-  t.equal(li1.getItemAt(1).getText(), LI2_TEXT.slice(0,3), 'Second list item should be truncated')
-  t.end()
-})
-
 test("[IN-1]: Inserting text in an IsolatedNode", function(t) {
   let { doc, editorSession } = setupEditor(t, _p1, _in1, _p2)
   editorSession.setSelection({
@@ -1148,7 +1093,6 @@ test("[IN-2]: Deleting a character in an IsolatedNode", function(t) {
 })
 
 
-// TODO: add specification and test cases for tx.annotate()
 
 // test("Create property annotation for a given property selection", function(t) {
 //   var doc = fixture(headersAndParagraphs)
@@ -1327,6 +1271,51 @@ test("[C-6]: Copying a paragraph and a ListItem", function(t) {
   t.end()
 })
 
+test("[C-7] Copying a table", function(t) {
+  let { doc } = setupEditor(t, _t1)
+  let editor = new EditingInterface(doc)
+  editor.setSelection({
+    type: 'node',
+    nodeId: 't1',
+    containerId: 'body',
+  })
+  let copy = editor.copySelection()
+  let t1 = copy.get('t1')
+  t.notNil(t1, 'Table node should exist')
+  t.equals(t1.getRowCount(), 2, '.. with two rows')
+  t.equals(t1.getColCount(), 2, '.. with two cols')
+  for (let row = 0; row < 2; row++) {
+    for (let col = 0; col < 2; col++) {
+      let cell = t1.getCellAt(row,col)
+      t.notNil(cell, `Cell (${row+1},${col+1}) should exist`)
+      t.equals(cell.content, T_CONTENT[row][col], '.. and have correct content')
+    }
+  }
+  t.end()
+})
+
+test("[C-8] Copying a sparse table", function(t) {
+  let { doc } = setupEditor(t, _t1_sparse)
+  let editor = new EditingInterface(doc)
+  editor.setSelection({
+    type: 'node',
+    nodeId: 't1',
+    containerId: 'body',
+  })
+  let copy = editor.copySelection()
+  let t1 = copy.get('t1')
+  t.notNil(t1, 'Table node should exist')
+  t.equals(t1.getRowCount(), 2, '.. with two rows')
+  t.equals(t1.getColCount(), 2, '.. with two cols')
+  for (let i = 0; i < 2; i++) {
+    let cell = t1.getCellAt(i,i)
+    t.notNil(cell, `Cell (${i+1},${i+1}) should exist`)
+    t.equals(cell.content, T_CONTENT[i][i], '.. and have correct content')
+    t.nil(t1.getCellAt(1-i, i), `Cell (${1-i+1},${i+1}) should not exist`)
+  }
+  t.end()
+})
+
 // FIXME: broken since introduction of file nodes
 // test("Copying a node without properties", function(t) {
 //   var doc = fixture(simple)
@@ -1352,149 +1341,127 @@ test("[C-6]: Copying a paragraph and a ListItem", function(t) {
 //   t.end()
 // })
 
+// NOTE: with Copy'n'Paste within the same document,
+// we must make sure to check that things are cloned correctly,
+// e.g., not that inadvertantly the copy references one of the original children
 
-const P1_TEXT = 'p1:abcdef'
-
-function _p1(doc, body) {
-  doc.create({
-    type: 'paragraph',
-    id: 'p1',
-    content: P1_TEXT
+test("[CP-5]: Copy and Pasting a List", function(t) {
+  let { doc, editorSession } = setupEditor(t, _p1, _empty, _l1)
+  editorSession.transaction((tx) => {
+    tx.setSelection({
+      type: 'container',
+      startPath: ['l1-1', 'content'],
+      startOffset: 0,
+      endPath: ['l1-2', 'content'],
+      endOffset: LI2_TEXT.length,
+      containerId: 'body'
+    })
+    let copy = tx.copySelection()
+    tx.setSelection({
+      type: 'property',
+      path: ['empty', 'content'],
+      startOffset: 0,
+      containerId: 'body'
+    })
+    tx.paste(copy)
   })
-  body.show('p1')
-}
+  let body = doc.get('body')
+  let nodes = body.getNodes()
+  t.equal(body.length, 3, "There should be 3 nodes")
+  t.deepEqual(['paragraph', 'list', 'list'], nodes.map(n => n.type), '.. a paragraph and 2 lists')
+  let li1 = body.getChildAt(1)
+  let li2 = body.getChildAt(2)
+  t.notDeepEqual(li1.items, li2.items, 'List items should not be the same.')
+  t.equal(li1.getItemAt(0).getText(), li2.getItemAt(0).getText(), 'First list item should have same content')
+  t.equal(li1.getItemAt(1).getText(), li2.getItemAt(1).getText(), 'Second list item should have same content')
+  t.end()
+})
 
-const P2_TEXT = 'p2:ghijk'
-
-function _p2(doc, body) {
-  doc.create({
-    type: 'paragraph',
-    id: 'p2',
-    content: P2_TEXT
+test("[CP-6]: Copy and Pasting a List partially", function(t) {
+  let { doc, editorSession } = setupEditor(t, _p1, _empty, _l1)
+  editorSession.transaction((tx) => {
+    tx.setSelection({
+      type: 'container',
+      startPath: ['l1-1', 'content'],
+      startOffset: 3,
+      endPath: ['l1-2', 'content'],
+      endOffset: 3,
+      containerId: 'body'
+    })
+    let copy = tx.copySelection()
+    tx.setSelection({
+      type: 'property',
+      path: ['empty', 'content'],
+      startOffset: 0,
+      containerId: 'body'
+    })
+    tx.paste(copy)
   })
-  body.show('p2')
-}
+  let body = doc.get('body')
+  let nodes = body.getNodes()
+  t.equal(body.length, 3, "There should be 3 nodes")
+  t.deepEqual(['paragraph', 'list', 'list'], nodes.map(n => n.type), '.. a paragraph and 2 lists')
+  let li1 = body.getChildAt(1)
+  let li2 = body.getChildAt(2)
+  t.notDeepEqual(li1.items, li2.items, 'List items should not be the same.')
+  t.equal(li1.getItemAt(0).getText(), LI1_TEXT.slice(3), 'First list item should be truncated')
+  t.equal(li1.getItemAt(1).getText(), LI2_TEXT.slice(0,3), 'Second list item should be truncated')
+  t.end()
+})
 
-function _empty(doc, body) {
-  doc.create({
-    type: 'paragraph',
-    id: 'empty',
-    content: ''
+test("[CP-7] Copy and Pasting a table", function(t) {
+  let { doc, editorSession } = setupEditor(t, _t1, _empty)
+  editorSession.setSelection({
+    type: 'node',
+    nodeId: 't1',
+    containerId: 'body',
   })
-  body.show('empty')
-}
-
-function _s1(doc) {
-  doc.create({
-    type: 'strong',
-    id: 's1',
-    start: {
-      path: ['p1', 'content'],
-      offset: 3,
-    },
-    end: {
-      offset: 5
+  editorSession.transaction((tx)=>{
+    let copy = tx.copySelection()
+    tx.setSelection({
+      type: 'property',
+      path: ['empty', 'content'],
+      startOffset: 0,
+      containerId: 'body'
+    })
+    tx.paste(copy)
+  })
+  let body = doc.get('body')
+  let t1 = doc.get('t1')
+  let t2 = body.getNodeAt(1)
+  t.equal(t2.type, 'table', 'Second node should be table.')
+  t.equals(t2.getRowCount(), 2, '.. with two rows')
+  t.equals(t2.getColCount(), 2, '.. with two cols')
+  for (let row = 0; row < 2; row++) {
+    for (let col = 0; col < 2; col++) {
+      let cell = t2.getCellAt(row,col)
+      let origCell = t1.getCellAt(row, col)
+      t.notNil(cell, `Cell (${row+1},${col+1}) should exist`)
+      t.notEqual(cell, origCell, `.. should be different to the original cell`)
+      t.equals(cell.content, T_CONTENT[row][col], '.. and have correct content')
     }
-  })
-}
+  }
+  t.end()
+})
 
-const LI1_TEXT = 'l1-1:abcdef'
-const LI2_TEXT = 'l1-2:0123456'
-const LI3_TEXT = 'l1-3:ghij'
-
-// list with two items
-function _l1(doc, body) {
-  doc.create({
-    type: 'list-item',
-    id: 'l1-1',
-    content: LI1_TEXT
-  })
-  doc.create({
-    type: 'list-item',
-    id: 'l1-2',
-    content: LI2_TEXT
-  })
-  doc.create({
-    type: 'list',
-    id: 'l1',
-    items: ['l1-1', 'l1-2']
-  })
-  body.show('l1')
-}
-
-function _li3(doc) {
-  doc.create({
-    type: 'list-item',
-    id: 'l1-3',
-    content: LI3_TEXT
-  })
-  let l1 = doc.get('l1')
-  l1.insertItemAt(1, 'l1-3')
-}
-
-function _l1_empty(doc) {
-  doc.create({
-    type: 'list-item',
-    id: 'l1-empty',
-    content: ''
-  })
-  let l1 = doc.get('l1')
-  l1.insertItemAt(1, 'l1-empty')
-}
-
-function _li1plus(doc) {
-  doc.set(['l1-1', 'level'], 2)
-}
-
-const LI21_TEXT = 'l2-1:abcdef'
-const LI22_TEXT = 'l2-2:0123456'
-
-function _l2(doc, body) {
-  doc.create({
-    type: 'list-item',
-    id: 'l2-1',
-    content: LI21_TEXT
-  })
-  doc.create({
-    type: 'list-item',
-    id: 'l2-2',
-    content: LI22_TEXT
-  })
-  doc.create({
-    type: 'list',
-    id: 'l2',
-    items: ['l2-1', 'l2-2']
-  })
-  body.show('l2')
-}
-
-
-function _block1(doc, body) {
-  doc.create({
-    type: 'test-block',
-    id: 'block1'
-  })
-  body.show('block1')
-}
-
-function _block2(doc, body) {
-  doc.create({
-    type: 'test-block',
-    id: 'block2'
-  })
-  body.show('block2')
-}
-
-const IN1_TITLE = 'TITLE'
-const IN1_BODY = 'BODY'
-const IN1_CAPTION = 'CAPTION'
-function _in1(doc, body) {
-  doc.create({
-    type: 'structured-node',
-    id: 'in1',
-    title: IN1_TITLE,
-    body: IN1_BODY,
-    caption: IN1_CAPTION
-  })
-  body.show('in1')
-}
+// test("[CP-8] Copy and Pasting a sparse table", function(t) {
+//   let { doc } = setupEditor(t, _t1_sparse)
+//   let editor = new EditingInterface(doc)
+//   editor.setSelection({
+//     type: 'node',
+//     nodeId: 't1',
+//     containerId: 'body',
+//   })
+//   let copy = editor.copySelection()
+//   let t1 = copy.get('t1')
+//   t.notNil(t1, 'Table node should exist')
+//   t.equals(t1.getRowCount(), 2, '.. with two rows')
+//   t.equals(t1.getColCount(), 2, '.. with two cols')
+//   for (let i = 0; i < 2; i++) {
+//     let cell = t1.getCellAt(i,i)
+//     t.notNil(cell, `Cell (${i+1},${i+1}) should exist`)
+//     t.equals(cell.content, T_CONTENT[i][i], '.. and have correct content')
+//     t.nil(t1.getCellAt(1-i, i), `Cell (${1-i+1},${i+1}) should not exist`)
+//   }
+//   t.end()
+// })
