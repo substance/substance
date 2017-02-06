@@ -18,15 +18,12 @@ class DragManager extends EventEmitter {
       new InsertNodes(this.assetHandlers, this.context),
       new CustomHandler()
     ]
-    this._source = null
-
     if (inBrowser) {
       this.el = DefaultDOMElement.wrapNativeElement(document)
       this.el.on('dragstart', this._onDragStart, this)
       this.el.on('dragend', this._onDragEnd, this)
       this.el.on('dragenter', this._onDragEnter, this)
       this.el.on('dragexit', this._onDragExit, this)
-      this.el.on('dragover', this._onDragOver, this)
     }
   }
 
@@ -50,10 +47,8 @@ class DragManager extends EventEmitter {
     if (domSelection.rangeCount === 0) {
       return false
     }
-
     let domRange = domSelection.getRangeAt(0)
     let selectionRect = domRange.getBoundingClientRect()
-
     return e.clientX >= selectionRect.left &&
            e.clientX <= selectionRect.right &&
            e.clientY >= selectionRect.top &&
@@ -106,13 +101,10 @@ class DragManager extends EventEmitter {
       // surface
       dragState.scrollPanes = scrollPanes
 
-
-      // let surface = surfaces.find((surface) => { return surface.isContainerEditor() })
-      // console.log('le surface', surface)
-
-      // TODO: Compute dropzones for multiple surfaces (container editors)
       // In an internal drag, we receive the source (= node being dragged)
-      let comp = this._getIsolatedNodeOrContainerChild(DefaultDOMElement.wrapNativeElement(event.target))
+      let comp = this._getIsolatedNodeOrContainerChild(
+        DefaultDOMElement.wrapNativeElement(event.target)
+      )
       if (comp && comp.props.node) {
         let surface = comp.context.surface
         let nodeSelection = new NodeSelection({
@@ -128,6 +120,7 @@ class DragManager extends EventEmitter {
       }
     }
 
+    console.log('setting dragState', dragState)
     this.dragState = dragState
     event.dataTransfer.effectAllowed = 'all'
     event.dataTransfer.setData('text/html', event.target.outerHTML)
@@ -140,11 +133,6 @@ class DragManager extends EventEmitter {
     if (!isSelectionDrag) {
       this.emit('dragstart', this.dragState)
     }
-  }
-
-  _onDragOver(e) { // eslint-disable-line
-    // console.log('_onDragOver', e)
-    // this._updateDrag(e)
   }
 
   _onDragEnter(e) {
@@ -186,9 +174,14 @@ class DragManager extends EventEmitter {
   }
 
   _onDragEnd(event) {
-    // console.log('_onDragEnd')
+    // console.log('_onDragEnd', event)
     try {
-      if (this.dragState.selectionDrag) {
+      if (!this.dragState) {
+        // TODO: There are cases where _onDragEnd is called manually via
+        // handleDrop and another time via the native dragend event. check
+        // why this happens and how it can be avoided
+        console.warn('Not in a valid drag state.')
+      } else if (this.dragState.selectionDrag) {
         // cut and paste to destination
         console.log('TODO: drag selection', event)
       } else {
@@ -204,15 +197,13 @@ class DragManager extends EventEmitter {
     this._onDragEnd()
   }
 
+  /*
+    Called by Dropzones component after drop received
+  */
   handleDrop(e, dragStateExtensions) {
     let dragState = Object.assign(this.dragState, dragStateExtensions)
-    // console.log('le dragstate', dragState)
-
     let i, handler
     let match = false
-
-    e.preventDefault()
-    e.stopPropagation()
 
     dragState.event = e
     dragState.data = this._getData(e)
@@ -232,6 +223,8 @@ class DragManager extends EventEmitter {
       console.error('No drop handler could be found.')
     }
 
+    // Manually call onDragEnd since Dropzones component stops further event
+    // propagation
     this._onDragEnd()
   }
 
