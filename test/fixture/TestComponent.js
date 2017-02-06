@@ -1,6 +1,5 @@
 import { spy } from 'substance-test'
 import Component from '../../ui/Component'
-import RenderingEngine from '../../ui/RenderingEngine'
 
 class TestComponent extends Component {
 

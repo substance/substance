@@ -1,12 +1,9 @@
-/* eslint-disable no-invalid-this, indent */
 import { module, spy } from 'substance-test'
 import substanceGlobals from '../util/substanceGlobals'
 import isEqual from '../util/isEqual'
 import inBrowser from '../util/inBrowser'
 import DefaultDOMElement from '../dom/DefaultDOMElement'
 import Component from '../ui/Component'
-import RenderingEngine from '../ui/RenderingEngine'
-import XNode from '../dom/XNode'
 import TestComponent from './fixture/TestComponent'
 
 const Simple = TestComponent.Simple
@@ -24,17 +21,16 @@ if (inBrowser) {
 
 function ComponentTests(debug, memory) {
 
-  const test = module('Component' + (debug ? ' [debug]' : '') + (memory ? ' [memory]' : ''))
-    .withOptions({
-      before: function(t) {
-        substanceGlobals.DEBUG_RENDERING = Boolean(debug)
-        if (memory) DefaultDOMElement._useXNode()
-        t._document = DefaultDOMElement.createDocument('html')
-      },
-      after: function(t) {
-        DefaultDOMElement._reset()
-      }
-    })
+  const test = module('Component' + (debug ? ' [debug]' : '') + (memory ? ' [memory]' : ''), {
+    before: function(t) {
+      substanceGlobals.DEBUG_RENDERING = Boolean(debug)
+      if (memory) DefaultDOMElement._useXNode()
+      t._document = DefaultDOMElement.createDocument('html')
+    },
+    after: function() {
+      DefaultDOMElement._reset()
+    }
+  })
 
   test("Throw error when render method is not returning an element", function(t) {
     class MyComponent extends TestComponent {
@@ -315,7 +311,7 @@ function ComponentTests(debug, memory) {
   })
 
   // events are not supported by cheerio
-  test.UI("Rendering an element with click handler", function(t) {
+  test("Rendering an element with click handler", function(t) {
 
     class ClickableComponent extends Component {
       constructor(...args) {
@@ -327,7 +323,7 @@ function ComponentTests(debug, memory) {
         if (this.props.method === 'instance') {
           el.on('click', this.onClick)
         } else if (this.props.method === 'anonymous') {
-          el.on('click', function() {
+          el.on('click', () => {
             this.value += 10
           })
         }
@@ -362,7 +358,7 @@ function ComponentTests(debug, memory) {
     t.end()
   })
 
-  test.UI("Rendering an element with once-click handler", function(t) {
+  test("Rendering an element with once-click handler", function(t) {
     class ClickableComponent extends Component {
       constructor(...args) {
         super(...args)
@@ -463,7 +459,7 @@ function ComponentTests(debug, memory) {
   })
 
   // didMount is only called in browser
-  test.UI("Call didMount once when mounted", function(t) {
+  test("Call didMount once when mounted", function(t) {
     class Child extends TestComponent {
       render($$) {
         if (this.props.loading) {
@@ -746,7 +742,7 @@ function ComponentTests(debug, memory) {
     t.end()
   })
 
-  test.UI("Eventlisteners on child element", function(t) {
+  test("Eventlisteners on child element", function(t) {
     class Parent extends Component {
       render($$) {
         return $$('div').append($$(Child).ref('child'))
@@ -870,7 +866,7 @@ function ComponentTests(debug, memory) {
     t.end()
   })
 
-  test.UI("didUpdate() provides old props and old state", function(t) {
+  test("didUpdate() provides old props and old state", function(t) {
     let oldProps = null
     let oldState = null
     class MyComponent extends Component {
@@ -906,7 +902,7 @@ function ComponentTests(debug, memory) {
     let comp = TestComponent.create(function($$) {
       return $$('div').append(
         $$('div').append(
-          $$('div').ref(this.props.grandChildRef)
+          $$('div').ref(this.props.grandChildRef) // eslint-disable-line no-invalid-this
         )
       )
     }, { grandChildRef: "foo"})
@@ -1030,7 +1026,7 @@ function ComponentTests(debug, memory) {
     let comp = TestComponent.create(function($$) {
       return $$('div').append(
         $$('div').append(
-          $$('div').ref(this.props.grandChildRef)
+          $$('div').ref(this.props.grandChildRef) // eslint-disable-line no-invalid-this
         )
       )
     }, { grandChildRef: "foo"})
@@ -1283,7 +1279,7 @@ function ComponentTests(debug, memory) {
     t.end()
   })
 
-  test.UI("Combine props and children via append", function(t) {
+  test("Combine props and children via append", function(t) {
     class Toolbar extends TestComponent {
       render($$) {
         let el = $$('div').append(

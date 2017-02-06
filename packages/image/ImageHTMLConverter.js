@@ -1,5 +1,3 @@
-import uuid from '../../util/uuid'
-
 /*
  * HTML converter for Paragraphs.
  */

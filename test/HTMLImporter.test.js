@@ -15,15 +15,14 @@ if (inBrowser) {
 
 function HTMLImporterTests(memory) {
 
-  const test = module('HTMLImporter' + ( memory ? ' [memory]' : ''))
-    .withOptions({
-      before: () => {
-        if (memory) DefaultDOMElement._useXNode()
-      },
-      after: () => {
-        DefaultDOMElement._reset()
-      }
-    })
+  const test = module('HTMLImporter' + ( memory ? ' [memory]' : ''), {
+    before: () => {
+      if (memory) DefaultDOMElement._useXNode()
+    },
+    after: () => {
+      DefaultDOMElement._reset()
+    }
+  })
 
   test("Importing paragraph", function(t) {
     let importer = new TestHTMLImporter('stand-alone')

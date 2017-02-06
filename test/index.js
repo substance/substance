@@ -1,7 +1,6 @@
 // model
 import "./ContainerAddress.test.js"
 import "./ContainerSelection.test.js"
-import "./copySelection.test.js"
 import "./Document.test.js"
 import "./annotationHelpers.test.js"
 import "./documentHelpers.test.js"
@@ -22,7 +21,6 @@ import "./DOMElement.test.js"
 // ui
 import "./AnnotationCommand.test.js"
 import "./Clipboard.test.js"
-import "./Component.integration.test.js"
 import "./Component.test.js"
 import "./DOMSelection.test.js"
 import "./InlineNode.test.js"

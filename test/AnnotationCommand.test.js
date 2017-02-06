@@ -6,7 +6,7 @@ import containerAnnoSample from './fixture/containerAnnoSample'
 
 const test = module('AnnotationCommand')
 
-test.UI("can 'create' property annotation", function(t) {
+test("can 'create' property annotation", function(t) {
   let { doc } = fixture(t)
   let selectionState = new SelectionState(doc)
   let cmd = new ToggleStrongCommand()
@@ -24,7 +24,7 @@ test.UI("can 'create' property annotation", function(t) {
   t.end()
 })
 
-test.UI("execute 'create' property annotation", function(t) {
+test("execute 'create' property annotation", function(t) {
   let { editorSession, doc } = fixture(t)
   let cmd = new ToggleStrongCommand()
   editorSession.setSelection({
@@ -50,7 +50,7 @@ test.UI("execute 'create' property annotation", function(t) {
   t.end()
 })
 
-test.UI("can 'delete' property annotation", function(t) {
+test("can 'delete' property annotation", function(t) {
   let { doc } = fixture(t)
   let selectionState = new SelectionState(doc)
   let cmd = new ToggleStrongCommand()
@@ -68,7 +68,7 @@ test.UI("can 'delete' property annotation", function(t) {
   t.end()
 })
 
-test.UI("execute 'delete' property annotation", function(t) {
+test("execute 'delete' property annotation", function(t) {
   let { doc } = fixture(t)
   let selectionState = new SelectionState(doc)
   let cmd = new ToggleStrongCommand()
@@ -86,7 +86,7 @@ test.UI("execute 'delete' property annotation", function(t) {
   t.end()
 })
 
-test.UI("can 'expand' property annotation", function(t) {
+test("can 'expand' property annotation", function(t) {
   let { editorSession, doc } = fixture(t)
   let cmd = new ToggleStrongCommand()
   editorSession.setSelection({

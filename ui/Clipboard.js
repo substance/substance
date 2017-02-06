@@ -147,14 +147,8 @@ class Clipboard {
     // if we have content given as HTML we let the importer assess the quality first
     // and fallback to plain text import if it's bad
     if (html) {
-      if (Clipboard.NO_CATCH) {
-        this._pasteHtml(html, plainText)
-      } else {
-        try {
-          this._pasteHtml(html, plainText)
-        } catch (err) {
-          this._pastePlainText(plainText)
-        }
+      if (!this._pasteHtml(html, plainText)) {
+        this._pastePlainText(plainText)
       }
     } else {
       this._pastePlainText(plainText)
@@ -204,6 +198,7 @@ class Clipboard {
   _pasteHtml(html, text) {
     let content = this.htmlImporter.importDocument(html)
     this.paste(content, text)
+    return true
   }
 
   /*

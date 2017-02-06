@@ -10,16 +10,14 @@ DOMElementTests('XNode')
 
 function DOMElementTests(impl) {
 
-  const test = module('DOMElement ('+impl+')')
-    .withOptions({
-      before: () => {
-        if (impl === 'XNode') DefaultDOMElement._useXNode()
-      },
-      after: () => {
-        DefaultDOMElement._reset()
-      }
-    })
-
+  const test = module('DOMElement ('+impl+')', {
+    before: () => {
+      if (impl === 'XNode') DefaultDOMElement._useXNode()
+    },
+    after: () => {
+      DefaultDOMElement._reset()
+    }
+  })
 
   test("Parsing a full HTML document", function(t) {
     var html = '<html><head><title>TEST</title></head><body>TEST</body></html>'

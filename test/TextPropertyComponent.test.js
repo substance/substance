@@ -5,7 +5,7 @@ import simple from './fixture/simple'
 
 const test = module('TextPropertyComponent')
 
-test.UI("Get coordinate of empty property", function(t) {
+test("Get coordinate of empty property", function(t) {
   var doc = fixture(simple)
   doc.create({
     type: 'paragraph',

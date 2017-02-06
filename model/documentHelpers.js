@@ -1,5 +1,7 @@
 import filter from '../util/filter'
+import flatten from '../util/flatten'
 import forEach from '../util/forEach'
+import isArray from '../util/isArray'
 import isArrayEqual from '../util/isArrayEqual'
 import DocumentIndex from './DocumentIndex'
 import ObjectOperation from './data/ObjectOperation'
@@ -235,13 +237,7 @@ function copyNode(node) {
     // or it is of type 'file'
     if ((prop.isReference() && prop.isOwned()) || (prop.type === 'file')) {
       let val = node[prop.name]
-      if (prop.isArray()) {
-        val.forEach((id) => {
-          nodes = nodes.concat(copyNode(doc.get(id)))
-        })
-      } else {
-        nodes = nodes.concat(copyNode(doc.get(val)))
-      }
+      nodes.push(_copyChildren(val))
     }
   })
   nodes.push(node.toJSON())
@@ -250,7 +246,22 @@ function copyNode(node) {
   forEach(annotations, function(anno) {
     nodes.push(anno.toJSON())
   })
-  return nodes
+  let result = flatten(nodes).filter(Boolean)
+  // console.log('copyNode()', node, result)
+  return result
+
+  function _copyChildren(val) {
+    if (!val) return null
+    if (isArray(val)) {
+      return flatten(val.map(_copyChildren))
+    } else {
+      let id = val
+      if (!id) return null
+      let child = doc.get(id)
+      if (!child) return
+      return copyNode(child)
+    }
+  }
 }
 
 /*

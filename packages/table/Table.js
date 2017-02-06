@@ -13,6 +13,14 @@ class Table extends BlockNode {
       return 0
     }
   }
+
+  getCellAt(row, col) {
+    let cellId = this.cells[row][col]
+    if (cellId) {
+      return this.document.get(cellId)
+    }
+  }
+
 }
 
 Table.schema = {

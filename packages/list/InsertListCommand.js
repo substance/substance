@@ -1,7 +1,7 @@
 import Command from '../../ui/Command'
 
 class InsertListCommand extends Command {
-  getCommandState (params) {
+  getCommandState () {
     return {}
   }
   execute (params) {

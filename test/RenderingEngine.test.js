@@ -15,12 +15,11 @@ RenderingEngineTests('debug')
 
 function RenderingEngineTests(debug) {
 
-  const test = module('RenderingEngine' + (debug ? ' [debug-mode]' : ''))
-    .withOptions({
-      before: function() {
-        substanceGlobals.DEBUG_RENDERING = Boolean(debug)
-      }
-    })
+  const test = module('RenderingEngine' + (debug ? ' [debug-mode]' : ''), {
+    before: function() {
+      substanceGlobals.DEBUG_RENDERING = Boolean(debug)
+    }
+  })
 
   // NOTE: this is a set of white-box tests for the internal implementation
   // of ui/RenderingEngine.

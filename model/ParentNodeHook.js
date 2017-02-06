@@ -59,7 +59,6 @@ class ParentNodeHook {
         }
         break
       }
-      case 'set':
       case 'update': {
         // ATTENTION: we only set parents but don't remove when they are deleted
         // assuming that if the parent gets deleted, the children get deleted too
@@ -77,6 +76,23 @@ class ParentNodeHook {
               if (update.isInsert()) {
                 _setParent(node, update.getValue())
               }
+            }
+            break
+          default:
+            //
+        }
+        break
+      }
+      case 'set': {
+        switch(node.type) {
+          case 'list':
+            if (op.path[1] === 'items') {
+              _setParent(node, op.getValue())
+            }
+            break
+          case 'table':
+            if (op.path[1] === 'cells') {
+              _setParent(node, op.getValue())
             }
             break
           default:
