@@ -1,6 +1,4 @@
 import { module } from 'substance-test'
-import Range from '../model/Range'
-import Coordinate from '../model/Coordinate'
 import ContainerSelection from '../model/ContainerSelection'
 import fixture from './fixture/createTestArticle'
 import simple from './fixture/simple'

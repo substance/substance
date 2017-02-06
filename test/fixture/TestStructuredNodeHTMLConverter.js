@@ -11,8 +11,8 @@ export default {
   },
 
   export: function(node, el, converter) {
-    var $$ = converter.$$
-    ['title', 'body', 'caption'].forEach(function(name) {
+    let $$ = converter.$$
+    ;['title', 'body', 'caption'].forEach(function(name) {
       var child = $$('span')
           .attr('property', name)
           .append(converter.annotatedText([node.id, name]))

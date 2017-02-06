@@ -1,6 +1,6 @@
 // TODO: rename this module to avoid confusion with lodash-es/merge
-import merge from 'lodash-es/merge'
-import mergeWith from 'lodash-es/mergeWith'
+import _merge from 'lodash-es/merge'
+import _mergeWith from 'lodash-es/mergeWith'
 import isArray from './isArray'
 
 /**
@@ -19,9 +19,9 @@ export default function merge(a, b, options) {
     _with = _concatArrays
   }
   if (_with) {
-    return mergeWith(a, b, _with)
+    return _mergeWith(a, b, _with)
   } else {
-    return merge(a, b)
+    return _merge(a, b)
   }
 }
 

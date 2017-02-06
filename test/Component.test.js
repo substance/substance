@@ -1,12 +1,9 @@
-/* eslint-disable no-invalid-this, indent */
 import { module, spy } from 'substance-test'
 import substanceGlobals from '../util/substanceGlobals'
 import isEqual from '../util/isEqual'
 import inBrowser from '../util/inBrowser'
 import DefaultDOMElement from '../dom/DefaultDOMElement'
 import Component from '../ui/Component'
-import RenderingEngine from '../ui/RenderingEngine'
-import XNode from '../dom/XNode'
 import TestComponent from './fixture/TestComponent'
 
 const Simple = TestComponent.Simple
@@ -30,7 +27,7 @@ function ComponentTests(debug, memory) {
       if (memory) DefaultDOMElement._useXNode()
       t._document = DefaultDOMElement.createDocument('html')
     },
-    after: function(t) {
+    after: function() {
       DefaultDOMElement._reset()
     }
   })
@@ -326,7 +323,7 @@ function ComponentTests(debug, memory) {
         if (this.props.method === 'instance') {
           el.on('click', this.onClick)
         } else if (this.props.method === 'anonymous') {
-          el.on('click', function() {
+          el.on('click', () => {
             this.value += 10
           })
         }
@@ -905,7 +902,7 @@ function ComponentTests(debug, memory) {
     let comp = TestComponent.create(function($$) {
       return $$('div').append(
         $$('div').append(
-          $$('div').ref(this.props.grandChildRef)
+          $$('div').ref(this.props.grandChildRef) // eslint-disable-line no-invalid-this
         )
       )
     }, { grandChildRef: "foo"})
@@ -1029,7 +1026,7 @@ function ComponentTests(debug, memory) {
     let comp = TestComponent.create(function($$) {
       return $$('div').append(
         $$('div').append(
-          $$('div').ref(this.props.grandChildRef)
+          $$('div').ref(this.props.grandChildRef) // eslint-disable-line no-invalid-this
         )
       )
     }, { grandChildRef: "foo"})

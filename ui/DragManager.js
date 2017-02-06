@@ -190,7 +190,7 @@ class DragManager extends EventEmitter {
     try {
       if (this.dragState.selectionDrag) {
         // cut and paste to destination
-        console.log('TODO: drag selection', event)
+        console.warn('TODO: drag selection', event)
       } else {
         this.emit('dragend')
       }

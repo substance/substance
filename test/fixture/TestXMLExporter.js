@@ -1,4 +1,3 @@
-import DefaultDOMElement from '../../dom/DefaultDOMElement'
 import XMLExporter from '../../model/XMLExporter'
 import TestXMLImporter from './TestXMLImporter'
 

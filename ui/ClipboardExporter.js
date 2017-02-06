@@ -1,4 +1,3 @@
-import inBrowser from '../util/inBrowser'
 import Document from '../model/Document'
 import HtmlExporter from '../model/HTMLExporter'
 import JSONConverter from '../model/JSONConverter'

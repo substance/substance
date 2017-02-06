@@ -56,4 +56,4 @@ export default function(tx) {
     ].join("\n")
   })
   body.show('p2')
-};
+}
