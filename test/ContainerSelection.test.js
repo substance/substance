@@ -465,50 +465,48 @@ test("containsNode: outer nodes", function(t) {
   t.end()
 })
 
-// FIXME: this is invalid as node coordinates should only be used for isolated nodes
-// test("containsNode: start/end is nodeFragment", function(t) {
-//   var doc = fixture(simple)
-//   var sel = doc.createSelection({
-//     type: 'container',
-//     containerId: 'body',
-//     startPath: ['p1'],
-//     startOffset: 0,
-//     endPath: ['p1'],
-//     endOffset: 1
-//   })
-//   t.ok(sel.containsNode('p1'), 'Should contain node.')
-//   sel = doc.createSelection({
-//     type: 'container',
-//     containerId: 'body',
-//     startPath: ['p1'],
-//     startOffset: 0,
-//     endPath: ['p2'],
-//     endOffset: 1
-//   })
-//   t.ok(sel.containsNode('p2'), 'Should contain node.')
-//   t.end()
-// })
+test("containsNode: start/end is nodeFragment", function(t) {
+  var doc = fixture(simple)
+  var sel = doc.createSelection({
+    type: 'container',
+    containerId: 'body',
+    startPath: ['p1'],
+    startOffset: 0,
+    endPath: ['p1'],
+    endOffset: 1
+  })
+  t.ok(sel.containsNode('p1'), 'Should contain node.')
+  sel = doc.createSelection({
+    type: 'container',
+    containerId: 'body',
+    startPath: ['p1'],
+    startOffset: 0,
+    endPath: ['p2'],
+    endOffset: 1
+  })
+  t.ok(sel.containsNode('p2'), 'Should contain node.')
+  t.end()
+})
 
-// FIXME: this is broken since normalization of coordinates
-// test("containsNode: with partial node fragment", function(t) {
-//   var doc = fixture(simple)
-//   var sel = doc.createSelection({
-//     type: 'container',
-//     containerId: 'body',
-//     startPath: ['p1'],
-//     startOffset: 1,
-//     endPath: ['p2'],
-//     endOffset: 1
-//   })
-//   t.notOk(sel.containsNode('p1'), 'Should not contain node.')
-//   sel = doc.createSelection({
-//     type: 'container',
-//     containerId: 'body',
-//     startPath: ['p1'],
-//     startOffset: 0,
-//     endPath: ['p2'],
-//     endOffset: 0
-//   })
-//   t.notOk(sel.containsNode('p2'), 'Should not contain node.')
-//   t.end()
-// })
+test("containsNode: with partial node fragment", function(t) {
+  var doc = fixture(simple)
+  var sel = doc.createSelection({
+    type: 'container',
+    containerId: 'body',
+    startPath: ['p1'],
+    startOffset: 1,
+    endPath: ['p2'],
+    endOffset: 1
+  })
+  t.notOk(sel.containsNode('p1'), 'Should not contain node.')
+  sel = doc.createSelection({
+    type: 'container',
+    containerId: 'body',
+    startPath: ['p1'],
+    startOffset: 0,
+    endPath: ['p2'],
+    endOffset: 0
+  })
+  t.notOk(sel.containsNode('p2'), 'Should not contain node.')
+  t.end()
+})

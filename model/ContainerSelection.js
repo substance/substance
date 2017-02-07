@@ -160,12 +160,12 @@ class ContainerSelection extends Selection {
       r2.end.isBefore(r1.end, strict));
   }
 
-  containsNodeFragment(nodeId, strict) {
+  containsNode(nodeId, strict) {
     var container = this.getContainer();
     var coor = new Coordinate([nodeId], 0);
     var address = container.getAddress(coor);
     var r = this._range(this);
-    // console.log('ContainerSelection.containsNodeFragment', address, 'is within', r.start, '->', r.end, '?');
+    // console.log('ContainerSelection.containsNode()', address, 'is within', r.start, '->', r.end, '?');
     var contained = r.start.isBefore(address, strict);
     if (contained) {
       address.offset = 1;
@@ -192,19 +192,6 @@ class ContainerSelection extends Selection {
     var r1 = this._range(this);
     var r2 = this._range(other);
     return r1.end.isEqual(r2.end);
-  }
-
-  containsNode(nodeId) {
-    var container = this.getContainer();
-    var startPos = container.getPosition(this.start.path[0]);
-    var endPos = container.getPosition(this.end.path[0]);
-    var pos = container.getPosition(nodeId);
-    if ((startPos>pos || endPos<pos) ||
-        (startPos === pos && this.start.path.length === 1 && this.start.offset > 0) ||
-        (endPos === pos && this.end.path.length === 1 && this.end.offset < 1)) {
-      return false;
-    }
-    return true;
   }
 
   /**

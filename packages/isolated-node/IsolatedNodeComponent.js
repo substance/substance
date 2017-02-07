@@ -100,7 +100,7 @@ class IsolatedNodeComponent extends AbstractIsolatedNodeComponent {
           return { mode: 'cursor', position: 'after' }
         }
       }
-      if (sel.isContainerSelection() && sel.containsNodeFragment(nodeId)) {
+      if (sel.isContainerSelection() && sel.containsNode(nodeId)) {
         return { mode: 'co-selected' }
       }
       return

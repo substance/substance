@@ -118,9 +118,45 @@ export function setCursor(tx, node, containerId, mode) {
 }
 
 export function selectNode(tx, nodeId, containerId) {
-  tx.setSelection({
-    type: 'node',
-    nodeId: nodeId,
-    containerId: containerId
-  })
+  tx.setSelection(createNodeSelection(tx, nodeId, containerId))
+}
+
+export function createNodeSelection(doc, nodeId, containerId, mode) {
+  let node = doc.get(nodeId)
+  if (!node) return Selection.nullSelection
+  node = node.getRoot()
+  if (node.isText()) {
+    return new PropertySelection({
+      path: node.getTextPath(),
+      startOffset: mode === 'after' ? node.getLength() : 0,
+      endOffset: mode === 'before' ? 0 : node.getLength(),
+      containerId: containerId
+    })
+  } else if (node.isList() && node.getLength()>0) {
+    let first = node.getFirstItem()
+    let last = node.getLastItem()
+    let start = {
+      path: first.getTextPath(),
+      offset: 0
+    }
+    let end = {
+      path: last.getTextPath(),
+      offset: last.getLength()
+    }
+    if (mode === 'after') start = end
+    else if (mode === 'before') end = start
+    return new ContainerSelection({
+      startPath: start.path,
+      startOffset: start.offset,
+      endPath: end.path,
+      endOffset: end.offset,
+      containerId: containerId
+    })
+  } else {
+    return new NodeSelection({
+      nodeId: nodeId,
+      mode: mode || 'full',
+      containerId: containerId
+    })
+  }
 }
