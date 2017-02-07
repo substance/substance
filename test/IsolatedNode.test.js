@@ -35,7 +35,6 @@ test("IsolatedNode should be 'selected' with node selection", function(t) {
   editorSession.setSelection({
     type: 'node',
     nodeId: 'c1',
-    mode: 'full',
     containerId: 'body',
     surfaceId: 'body'
   })
@@ -129,7 +128,7 @@ test("Issue #696: IsolatedNode should detect 'co-focused' robustly in presence o
     surfaceId: 'body/sn2/sn2.title'
   })
   let expected = {
-    'body/sn': null,
+    'body/sn': undefined,
     'body/sn2': 'focused',
   }
   isolatedNodes.forEach(function(isolated){

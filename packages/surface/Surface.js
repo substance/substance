@@ -99,6 +99,7 @@ class Surface extends Component {
     let el = $$(tagName)
       .addClass('sc-surface')
       .attr('tabindex', 2)
+      .attr('data-surface-id', this.id)
 
     if (!this.isDisabled()) {
       if (this.isEditable()) {

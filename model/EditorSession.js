@@ -640,7 +640,7 @@ class EditorSession extends EventEmitter {
   _deregisterObserver(observer) {
     // TODO: we should optimize this, as ATM this needs to traverse
     // a lot of registered listeners
-    forEach(this._observers, function(observers) {
+    forEach(this._observers, (observers) => {
       for (var i = 0; i < observers.length; i++) {
         var entry = observers[i]
         if (entry.context === observer) {
@@ -650,6 +650,9 @@ class EditorSession extends EventEmitter {
         }
       }
     })
+    // add this flag so that we can skip when a listener has deregistered
+    // during notification iteration
+    observer._deregistered = true
   }
 
   _notifyObservers(stage) {
@@ -659,13 +662,20 @@ class EditorSession extends EventEmitter {
     // We could optimize this by 'compiling' a list of observers for
     // each configuration, maybe lazily
     // for now we accept this circumstance
-    const observers = this._observers[stage]
-    if (!observers) return
-    observers.forEach((o) => {
+    let _observers = this._observers[stage]
+    if (!_observers) return
+    // Make a copy so that iteration does not get confused, when listeners deregister
+    // TODO: we could improve this by using a custom data structure that allows
+    // manipulation during iteration
+    let observers = _observers.slice()
+    for (let i = 0; i < observers.length; i++) {
+      let o = observers[i]
+      // an observer might have been deregistered while this iteration was going on
+      if (o._deregistered) continue
       if (!o.resource) {
         o.handler.call(o.context, this)
       } else if (o.resource === 'document') {
-        if (!this.hasDocumentChanged()) return
+        if (!this.hasDocumentChanged()) continue
         const change = this.getChange()
         const info = this.getChangeInfo()
         const path = o.options.path
@@ -675,11 +685,11 @@ class EditorSession extends EventEmitter {
           o.handler.call(o.context, change, info, this)
         }
       } else {
-        if (!this.hasChanged(o.resource)) return
+        if (!this.hasChanged(o.resource)) continue
         const resource = this.get(o.resource)
         o.handler.call(o.context, resource, this)
       }
-    })
+    }
   }
 
   _setDirty(resource) {

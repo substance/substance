@@ -1,4 +1,3 @@
-/* eslint-disable no-invalid-this, indent, no-use-before-define */
 import { module } from 'substance-test'
 import setDOMSelection from '../util/setDOMSelection'
 import EditingInterface from '../model/EditingInterface'
@@ -60,46 +59,6 @@ test.UI("Mapping a ContainerSelection from DOM to model", function(t) {
   })
   t.end()
 })
-
-// obsolete since we have removed 'brackets' for InlineNodes
-// function _issue273(doc, body) {
-//   let tx = new EditingInterface(doc)
-//   tx.create({
-//     type: 'paragraph',
-//     id: 'p',
-//     content: 'XXXXXX'
-//   })
-//   body.show('p')
-//   tx.setSelection({type: 'property', path: ['p', 'content'], startOffset: 3})
-//   tx.insertInlineNode({ type: 'test-inline-node', id: 'test', content: '[5]'})
-// }
-
-// test.UI("Issue #273: 'Could not find char position' when clicking right above an inline node", function(t) {
-//   let { editor, surface } = setupEditor(t, _issue273)
-//   let domSelection = surface.context.domSelection
-//   let node = editor.el.find('[data-id="test"]').getFirstChild()
-//   setDOMSelection(node, 0)
-//   let sel = domSelection.getSelection()
-//   t.notOk(!sel || sel.isNull(), 'Selection should not be null')
-//   checkValues(t, sel.toJSON(), {
-//     type: 'property',
-//     path: ['p', 'content'],
-//     startOffset: 3,
-//     containerId: 'body',
-//     surfaceId: 'body'
-//   })
-//   setDOMSelection(node, 1)
-//   sel = domSelection.getSelection()
-//   t.notOk(!sel || sel.isNull(), 'Selection should not be null')
-//   checkValues(t, sel.toJSON(), {
-//     type: 'property',
-//     path: ['p', 'content'],
-//     startOffset: 4,
-//     containerId: 'body',
-//     surfaceId: 'body'
-//   })
-//   t.end()
-// })
 
 test.FF("Issue #354: Wrong selection in FF when double clicking between lines", function(t) {
   let { editor, surface } = setupEditor(t, surfaceWithParagraphs)
@@ -205,21 +164,24 @@ test.UI("Rendering a ContainerSelection", function(t) {
 //   t.end()
 // })
 
-// test.UI("Setting cursor after inline node at end of property", function(t) {
-//   var el = t.sandbox.attr('contenteditable', true)
-//     .html(textWithInlines)
-//   var domSelection = new DOMSelection(new StubSurface(el))
-//   var sel = new PropertySelection(['test1', 'content'], 7, 7)
-//   var content = el.find('#test1-content')
-//   domSelection.setSelection(sel)
-//   var wSel = window.getSelection()
-//   t.equal(wSel.anchorNode, content.getNativeElement(), 'anchorNode should be after inline node.')
-//   t.equal(wSel.anchorOffset, 4, 'anchorOffset should be correct.')
-//   t.ok(wSel.focusNode === wSel.anchorNode, 'focusNode should be the same.')
-//   t.equal(wSel.focusOffset, wSel.anchorOffset, 'focusOffset should be correct.')
+// test.UI("Rendering a cursor after inline nod at the end of a property", function(t) {
+//   let { editor, doc, surface } = setupEditor(t, paragraphWithInlineNodes)
+//   let domSelection = surface.context.domSelection
+//   let sel = doc.createSelection({
+//     type: 'property',
+//     path: ['p', 'content'],
+//     startOffset: 13,
+//     containerId: 'body',
+//     surfaceId: 'body'
+//   })
+//   let {start, end} = domSelection.mapModelToDOMCoordinates(sel)
+//   let pSpan = editor.el.find('[data-path="p.content"]')
+//   t.ok(start.container === pSpan.getNativeElement(), 'anchorNode should be correct.')
+//   t.equal(start.offset, 6, 'anchorOffset should be correct.')
+//   t.ok(end.container === start.container, 'focusNode should be correct.')
+//   t.equal(end.offset, 6, 'focusOffset should be correct.')
 //   t.end()
 // })
-
 
 const P1_TEXT = 'abcdef'
 
@@ -260,18 +222,18 @@ function surfaceWithParagraphs(doc, body) {
   }))
 }
 
-// function paragraphWithInlineNodes(doc, body) {
-//   let tx = new EditingInterface(doc)
-//   body.show(tx.create({
-//     type: 'paragraph',
-//     id: 'p',
-//     content: '0123456789'
-//   }))
-//   // -> 01X234X56789
-//   tx.setSelection({type: 'property', path: ['p', 'content'], startOffset: 2})
-//   tx.insertInlineNode({ type: 'test-inline-node', id: 'in1', content: '[1]'})
-//   tx.setSelection({type: 'property', path: ['p', 'content'], startOffset: 6})
-//   tx.insertInlineNode({ type: 'test-inline-node', id: 'in2', content: '[2]'})
-//   tx.setSelection({type: 'property', path: ['p', 'content'], startOffset: 12})
-//   tx.insertInlineNode({ type: 'test-inline-node', id: 'in3', content: '[3]'})
-// }
+function paragraphWithInlineNodes(doc, body) {
+  let tx = new EditingInterface(doc)
+  body.show(tx.create({
+    type: 'paragraph',
+    id: 'p',
+    content: '0123456789'
+  }))
+  // -> 01X234X56789X
+  tx.setSelection({type: 'property', path: ['p', 'content'], startOffset: 2})
+  tx.insertInlineNode({ type: 'test-inline-node', id: 'in1', content: '[1]'})
+  tx.setSelection({type: 'property', path: ['p', 'content'], startOffset: 6})
+  tx.insertInlineNode({ type: 'test-inline-node', id: 'in2', content: '[2]'})
+  tx.setSelection({type: 'property', path: ['p', 'content'], startOffset: 12})
+  tx.insertInlineNode({ type: 'test-inline-node', id: 'in3', content: '[3]'})
+}

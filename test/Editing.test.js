@@ -1316,31 +1316,6 @@ test("[C-8] Copying a sparse table", function(t) {
   t.end()
 })
 
-// FIXME: broken since introduction of file nodes
-// test("Copying a node without properties", function(t) {
-//   var doc = fixture(simple)
-//   doc.create({
-//     type: 'image',
-//     id: 'i1',
-//     src: 'foo'
-//   })
-//   doc.get('body').show('i1', 1)
-//   var sel = doc.createSelection({
-//     type: 'container',
-//     containerId: 'body',
-//     startPath: ['i1'],
-//     startOffset: 0,
-//     endPath: ['i1'],
-//     endOffset: 1
-//   })
-//   var out = copySelection(doc, sel)
-//   var copy = out.doc
-//   var img = copy.get('i1')
-//   t.notNil(img, 'The image should be copied.')
-//   t.equal(img.src, 'foo')
-//   t.end()
-// })
-
 // NOTE: with Copy'n'Paste within the same document,
 // we must make sure to check that things are cloned correctly,
 // e.g., not that inadvertantly the copy references one of the original children

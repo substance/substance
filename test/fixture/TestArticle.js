@@ -1,9 +1,8 @@
 import Document from '../../model/Document'
-import schema from './TestSchema'
 
 class TestArticle extends Document {
 
-  constructor() {
+  constructor(schema) {
     super(schema)
 
     this.create({

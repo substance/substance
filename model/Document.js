@@ -22,7 +22,8 @@ import NodeSelection from './NodeSelection'
 import CustomSelection from './CustomSelection'
 import Coordinate from './Coordinate'
 import Range from './Range'
-import docHelpers from './documentHelpers'
+import documentHelpers from './documentHelpers'
+import { createNodeSelection } from './selectionHelpers'
 import JSONConverter from './JSONConverter'
 import ParentNodeHook from './ParentNodeHook'
 
@@ -369,10 +370,8 @@ class Document extends EventEmitter {
           }
           if (!data.hasOwnProperty('reverse')) {
             if (data.startOffset>data.endOffset) {
-              let tmp = data.startOffset
-              data.startOffset = data.endOffset
-              data.endOffset = tmp
-              data.reverse = true
+              [data.startOffset, data.endOffset] = [data.endOffset, data.startOffset]
+              data.reverse = !data.reverse
             }
           }
           // integrity checks:
@@ -383,7 +382,7 @@ class Document extends EventEmitter {
           if (data.endOffset < 0 || data.endOffset > text.length) {
             throw new Error('Invalid startOffset: target property has length '+text.length+', given endOffset is ' + data.endOffset)
           }
-          sel = new PropertySelection(data.path, data.startOffset, data.endOffset, data.reverse, data.containerId, data.surfaceId)
+          sel = new PropertySelection(data)
           break
         }
         case 'container': {
@@ -409,7 +408,7 @@ class Document extends EventEmitter {
           break
         }
         case 'node': {
-          sel = NodeSelection.fromJSON(data)
+          sel = createNodeSelection(this, data.nodeId, data.containerId, data.mode)
           break
         }
         case 'custom': {
@@ -507,8 +506,8 @@ class Document extends EventEmitter {
   }
 
   getTextForSelection(sel) {
-    console.warn('DEPRECATED: use docHelpers.getTextForSelection() instead.')
-    return docHelpers.getTextForSelection(this, sel)
+    console.warn('DEPRECATED: use documentHelpers.getTextForSelection() instead.')
+    return documentHelpers.getTextForSelection(this, sel)
   }
 
   setText(path, text, annotations) {
@@ -584,7 +583,7 @@ class Document extends EventEmitter {
   _normalizeCoor({ path, offset }) {
     // NOTE: normalizing so that a node coordinate is used only for 'isolated nodes'
     if (path.length === 1) {
-      let node = this.get(path[0])
+      let node = this.get(path[0]).getRoot()
       if (node.isText()) {
         // console.warn("DEPRECATED: don't use node coordinates for TextNodes. Use selectionHelpers instead to set cursor at first or last position conveniently.")
         return new Coordinate(node.getTextPath(), offset === 0 ? 0 : node.getLength())

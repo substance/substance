@@ -2,10 +2,9 @@ import { module } from 'substance-test'
 import inBrowser from '../util/inBrowser'
 import DefaultDOMElement from '../dom/DefaultDOMElement'
 import XNode from '../dom/XNode'
-import TestXMLExporter from './fixture/TestXMLExporter'
-import TestArticle from './fixture/TestArticle'
 import createTestArticle from './fixture/createTestArticle'
 import simple from './fixture/simple'
+import getTestConfig from './fixture/getTestConfig'
 
 const CONTENT = '0123456789'
 
@@ -113,13 +112,9 @@ function xmlExporterTests(memory) {
   // })
 
   function setup(t, fixture) {
-    let exporter = new TestXMLExporter({ elementFactory: t.elementFactory })
-    let doc
-    if (fixture) {
-      doc = createTestArticle(fixture)
-    } else {
-      doc = new TestArticle()
-    }
+    let config = getTestConfig()
+    let exporter = config.createExporter('xml', {}, { elementFactory: t.elementFactory })
+    let doc = createTestArticle(fixture)
     return { exporter, doc }
   }
 }
