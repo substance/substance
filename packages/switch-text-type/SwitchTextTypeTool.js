@@ -21,7 +21,6 @@ class SwitchTextTypeTool extends Tool {
 
   didMount(...args) {
     super.didMount(...args)
-
     this._focusToggle()
   }
 
@@ -75,7 +74,7 @@ class SwitchTextTypeTool extends Tool {
 
   _focusToggle() {
     if (this.state.open) {
-      this.refs.toggle.focus()
+      this.refs.toggle.el.focus()
     }
   }
 
