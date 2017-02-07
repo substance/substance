@@ -120,7 +120,7 @@ export function selectNode(tx, nodeId, containerId) {
   tx.setSelection(createNodeSelection(tx, nodeId, containerId))
 }
 
-export function createNodeSelection(doc, nodeId, containerId, mode) {
+export function createNodeSelection({ doc, nodeId, containerId, mode, reverse, surfaceId}) {
   let node = doc.get(nodeId)
   if (!node) return Selection.nullSelection
   node = node.getRoot()
@@ -129,7 +129,9 @@ export function createNodeSelection(doc, nodeId, containerId, mode) {
       path: node.getTextPath(),
       startOffset: mode === 'after' ? node.getLength() : 0,
       endOffset: mode === 'before' ? 0 : node.getLength(),
-      containerId: containerId
+      reverse: reverse,
+      containerId: containerId,
+      surfaceId: surfaceId
     })
   } else if (node.isList() && node.getLength()>0) {
     let first = node.getFirstItem()
@@ -149,13 +151,17 @@ export function createNodeSelection(doc, nodeId, containerId, mode) {
       startOffset: start.offset,
       endPath: end.path,
       endOffset: end.offset,
-      containerId: containerId
+      reverse: reverse,
+      containerId: containerId,
+      surfaceId: surfaceId
     })
   } else {
     return new NodeSelection({
       nodeId: nodeId,
       mode: mode || 'full',
-      containerId: containerId
+      reverse: reverse,
+      containerId: containerId,
+      surfaceId, surfaceId
     })
   }
 }

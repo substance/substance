@@ -408,7 +408,14 @@ class Document extends EventEmitter {
           break
         }
         case 'node': {
-          sel = createNodeSelection(this, data.nodeId, data.containerId, data.mode)
+          sel = createNodeSelection({
+            doc: this,
+            nodeId: data.nodeId,
+            mode: data.mode,
+            containerId: data.containerId,
+            reverse: data.reverse,
+            surfaceId: data.surfaceId
+          })
           break
         }
         case 'custom': {
