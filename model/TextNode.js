@@ -7,7 +7,8 @@ import DocumentNode from './DocumentNode'
 class TextNode extends DocumentNode {
 
   getTextPath() {
-    console.warn('DEPRECATED: use node.getPath()')
+    // TODO: deprecate this
+    // console.warn('DEPRECATED: use node.getPath()')
     return this.getPath()
   }
 
