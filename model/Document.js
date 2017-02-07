@@ -561,7 +561,9 @@ class Document extends EventEmitter {
     let inOneNode = isEqual(range.start.path, range.end.path)
     if (inOneNode) {
       if (range.start.isNodeCoordinate()) {
-        return NodeSelection._createFromRange(range)
+        // ATTENTION: we only create full NodeSelections
+        // when mapping from the DOM to Model  return new NodeSelection(range.containerId, range.start.getNodeId(), mode, range.reverse, range.surfaceId)
+        return new NodeSelection(range.containerId, range.start.getNodeId(), 'full', range.reverse, range.surfaceId)
       } else {
         return this.createSelection({
           type: 'property',
