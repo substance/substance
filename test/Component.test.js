@@ -610,7 +610,7 @@ function ComponentTests(debug, memory) {
     t.end()
   })
 
-  // FIXME: this test reveals that our rendering algorithm is not able
+  // TODO: this test reveals that our rendering algorithm is not able
   // to preserve elements when ref'd components are passed down via props.
   // In such cases, the parent already
   test("Implicit retaining in 3-level nesting situation", function(t) {

@@ -211,8 +211,6 @@ function ClipboardTests(memory) {
     clipboard.onPaste(event)
     cb1 = doc.get('cb1')
     t.notNil(cb1, "Codeblock should have been pasted.")
-    // FIXME: this is working basically also in memory just this deepEqual check is failing cause of an
-    // exported empty 'direction' property
     t.deepEqual(cb1.toJSON(), cb.toJSON(), "Codeblock should have been pasted correctly.")
     t.end()
   })
