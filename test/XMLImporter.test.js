@@ -1,14 +1,14 @@
 import { module } from 'substance-test'
 import DOMElement from '../dom/DefaultDOMElement'
-import TestXMLImporter from './fixture/TestXMLImporter'
 import checkValues from './fixture/checkValues'
+import getTestConfig from './fixture/getTestConfig'
 
 const test = module('XMLImporter')
 
 const CONTENT = '0123456789'
 
 test("Importing paragraph", function(t) {
-  let importer = new TestXMLImporter('stand-alone')
+  let importer = _setupImporter({ 'stand-alone': true })
   let xml = '<p id="p1">' + CONTENT + '</p>'
   let el = DOMElement.parseXML(xml)
   let node = importer.convertElement(el)
@@ -21,7 +21,7 @@ test("Importing paragraph", function(t) {
 })
 
 test("Importing paragraph with strong", function(t) {
-  let importer = new TestXMLImporter('stand-alone')
+  let importer = _setupImporter({ 'stand-alone': true })
   let xml = '<p id="p1">0123<strong id="s1">456</strong>789</p>'
   let el = DOMElement.parseXML(xml)
   let p1 = importer.convertElement(el)
@@ -33,7 +33,7 @@ test("Importing paragraph with strong", function(t) {
 })
 
 test("Importing h1", function(t) {
-  let importer = new TestXMLImporter('stand-alone')
+  let importer = _setupImporter({ 'stand-alone': true })
   let xml = '<h1 id="h1">' + CONTENT + '</h1>'
   let el = DOMElement.parseXML(xml)
   let node = importer.convertElement(el)
@@ -47,7 +47,7 @@ test("Importing h1", function(t) {
 })
 
 test("Importing h2", function(t) {
-  let importer = new TestXMLImporter('stand-alone')
+  let importer = _setupImporter({ 'stand-alone': true })
   let xml = '<h2 id="h2">' + CONTENT + '</h2>'
   let el = DOMElement.parseXML(xml)
   let node = importer.convertElement(el)
@@ -61,7 +61,7 @@ test("Importing h2", function(t) {
 })
 
 test("Importing meta", function(t) {
-  let importer = new TestXMLImporter('stand-alone')
+  let importer = _setupImporter({ 'stand-alone': true })
   let xml = '<meta><title>' + CONTENT + '</title></meta>'
   let el = DOMElement.parseXML(xml)
   let node = importer.convertElement(el)
@@ -74,16 +74,21 @@ test("Importing meta", function(t) {
 })
 
 // FIXME: broken since introduction of file nodes
-// test("Importing image", function(t) {
-//  let importer = new TestXMLImporter('stand-alone')
-//   let xml = '<image id="img1" src="someimage.png" preview-src="someimagepreview.png"/>'
-//   let el = DOMElement.parseXML(xml)
-//   let node = importer.convertElement(el)
-//   t.deepEqual(node.toJSON(), {
-//     id: 'img1',
-//     type: 'image',
-//     src: 'someimage.png',
-//     previewSrc: 'someimagepreview.png'
-//   })
-//   t.end()
-// })
+test("Importing image", function(t) {
+  let importer = _setupImporter({ 'stand-alone': true })
+  let xml = '<img id="img1" src="someimage.png"></img>'
+  let el = DOMElement.parseXML(xml)
+  let node = importer.convertElement(el)
+  t.equal(node.type, 'image', 'Created node should be of type "image"')
+  t.equal(node.id, 'img1', '.. with correct id')
+  let file = node.getImageFile()
+  t.notNil(file, 'A file node should have been created')
+  t.equal(file.url, 'someimage.png', '.. containing the correct URL')
+  t.end()
+})
+
+function _setupImporter(options = {}) {
+  let config = getTestConfig()
+  let importer = config.createImporter('xml', {}, options)
+  return importer
+}

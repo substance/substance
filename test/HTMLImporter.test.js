@@ -1,8 +1,8 @@
 import { module } from 'substance-test'
 import inBrowser from '../util/inBrowser'
 import DefaultDOMElement from '../dom/DefaultDOMElement'
-import TestHTMLImporter from './fixture/TestHTMLImporter'
 import checkValues from './fixture/checkValues'
+import getTestConfig from './fixture/getTestConfig'
 
 const CONTENT = '0123456789'
 
@@ -25,7 +25,7 @@ function HTMLImporterTests(memory) {
   })
 
   test("Importing paragraph", function(t) {
-    let importer = new TestHTMLImporter('stand-alone')
+    let importer = _setupImporter({ 'stand-alone': true })
     let html = '<p data-id="p1">' + CONTENT + '</p>'
     let el = DefaultDOMElement.parseHTML(html)
     let node = importer.convertElement(el)
@@ -38,7 +38,7 @@ function HTMLImporterTests(memory) {
   })
 
   test("Importing paragraph with strong", function(t) {
-    let importer = new TestHTMLImporter('stand-alone')
+    let importer = _setupImporter({ 'stand-alone': true })
     let html = '<p data-id="p1">0123<strong data-id="s1">456</strong>789</p>'
     let el = DefaultDOMElement.parseHTML(html)
     let p1 = importer.convertElement(el)
@@ -50,7 +50,7 @@ function HTMLImporterTests(memory) {
   })
 
   test("Importing h1", function(t) {
-    let importer = new TestHTMLImporter('stand-alone')
+    let importer = _setupImporter({ 'stand-alone': true })
     let html = '<h1 data-id="h1">' + CONTENT + '</h1>'
     let el = DefaultDOMElement.parseHTML(html)
     let node = importer.convertElement(el)
@@ -64,7 +64,7 @@ function HTMLImporterTests(memory) {
   })
 
   test("Importing h2", function(t) {
-    let importer = new TestHTMLImporter('stand-alone')
+    let importer = _setupImporter({ 'stand-alone': true })
     let html = '<h2 data-id="h2">' + CONTENT + '</h2>'
     let el = DefaultDOMElement.parseHTML(html)
     let node = importer.convertElement(el)
@@ -78,7 +78,7 @@ function HTMLImporterTests(memory) {
   })
 
   test("Importing an unordered list", function(t) {
-    let importer = new TestHTMLImporter('stand-alone')
+    let importer = _setupImporter({ 'stand-alone': true })
     let html = '<ul data-id="l1"><li>Foo</li><li>Bar</li></ul>'
     let el = DefaultDOMElement.parseHTML(html)
     let node = importer.convertElement(el)
@@ -94,7 +94,7 @@ function HTMLImporterTests(memory) {
   })
 
   test("Importing an ordered list", function(t) {
-    let importer = new TestHTMLImporter('stand-alone')
+    let importer = _setupImporter({ 'stand-alone': true })
     let html = '<ol data-id="l1"></ol>'
     let el = DefaultDOMElement.parseHTML(html)
     let node = importer.convertElement(el)
@@ -105,7 +105,7 @@ function HTMLImporterTests(memory) {
   })
 
   test("Importing a nested list", function(t) {
-    let importer = new TestHTMLImporter('stand-alone')
+    let importer = _setupImporter({ 'stand-alone': true })
     let html = '<ul data-id="l1"><li>Foo</li><ul><li>Bla</li><li>Blupp</li></ul><li>Bar</li></ul>'
     let el = DefaultDOMElement.parseHTML(html)
     let node = importer.convertElement(el)
@@ -118,7 +118,7 @@ function HTMLImporterTests(memory) {
   })
 
   test("Importing a nested list (bad style)", function(t) {
-    let importer = new TestHTMLImporter('stand-alone')
+    let importer = _setupImporter({ 'stand-alone': true })
     let html = '<ul data-id="l1"><li>Foo<ul><li>Bla</li><li>Blupp</li></ul></li><li>Bar</li></ul>'
     let el = DefaultDOMElement.parseHTML(html)
     let node = importer.convertElement(el)
@@ -130,4 +130,10 @@ function HTMLImporterTests(memory) {
     t.end()
   })
 
+}
+
+function _setupImporter(options = {}) {
+  let config = getTestConfig()
+  let importer = config.createImporter('html', {}, options)
+  return importer
 }

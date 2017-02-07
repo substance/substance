@@ -427,22 +427,22 @@ class Configurator {
     return doc
   }
 
-  createImporter(type, context) {
+  createImporter(type, context, options = {}) {
     var ImporterClass = this.config.importers[type]
-    var config = {
+    var config = Object.assign({
       schema: this.getSchema(),
       converters: this.getConverterRegistry().get(type),
       DocumentClass: this.config.schema.ArticleClass
-    }
+    }, options)
     return new ImporterClass(config, context)
   }
 
-  createExporter(type, context) {
+  createExporter(type, context, options = {}) {
     var ExporterClass = this.config.exporters[type]
-    var config = {
+    var config = Object.assign({
       schema: this.getSchema(),
       converters: this.getConverterRegistry().get(type)
-    }
+    }, options)
     return new ExporterClass(config, context)
   }
 

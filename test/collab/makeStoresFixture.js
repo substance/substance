@@ -1,7 +1,7 @@
 import computeSnapshot from '../../collab/computeSnapshot'
 import SnapshotStore from '../../collab/SnapshotStore'
 import ChangeStore from '../../collab/ChangeStore'
-import TestArticle from '../fixture/TestArticle'
+import createTestArticle from '../fixture/createTestArticle'
 import createChangeset from '../fixture/createChangeset'
 import twoParagraphs from '../fixture/twoParagraphs'
 
@@ -32,7 +32,7 @@ function makeStoresFixture(numChanges, snapshots) {
   for(var i=1; i < numChanges; i++) {
     changeFns.push(insertText(3, 'foo'))
   }
-  let changes = createChangeset(new TestArticle(), changeFns)
+  let changes = createChangeset(createTestArticle(), changeFns)
   let changeStore = new ChangeStore({
     'test-doc': changes
   })

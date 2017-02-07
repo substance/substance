@@ -28,6 +28,10 @@ class DOMImporter {
     if (!config.converters) {
       throw new Error('config.converters is mandatory')
     }
+    if (!config.DocumentClass) {
+      throw new Error('DocumentClass is mandatory')
+    }
+
     this.config = extend({ idAttribute: 'id' }, config)
     this.schema = config.schema
     this.state = null
