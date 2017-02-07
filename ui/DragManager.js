@@ -34,109 +34,14 @@ class DragManager extends EventEmitter {
     }
   }
 
-  _getSelection() {
-    return this.context.editorSession.getSelection()
-  }
-
   onDragStart(e) {
     // console.log('#### DragManager.onDragStart')
     this._initDrag(e, { external: false })
-  }
-
-  _isMouseInsideDOMSelection(e) {
-    let domSelection = window.getSelection()
-    if (domSelection.rangeCount === 0) {
-      return false
-    }
-    let domRange = domSelection.getRangeAt(0)
-    let selectionRect = domRange.getBoundingClientRect()
-    return e.clientX >= selectionRect.left &&
-           e.clientX <= selectionRect.right &&
-           e.clientY >= selectionRect.top &&
-           e.clientY <= selectionRect.bottom;
-  }
-
-  /*
-    Initializes dragState, which encapsulate state through the whole
-    drag + drop operation.
-
-    ATTENTION: This can not be debugged properly in Chrome
-  */
-  _initDrag(event, options) {
-    // console.log('_initDrag')
-    let sel = this._getSelection()
-    let dragState = Object.assign({}, { event, mode: 'block'}, options)
-
-    let isSelectionDrag = (sel.isPropertySelection() || sel.isContainerSelection()) && this._isMouseInsideDOMSelection(event)
-    if (isSelectionDrag) {
-      // console.log('DragManager: starting a selection drag', sel.toString())
-      dragState.selectionDrag = true
-      dragState.sourceSelection = sel
-    } else {
-      // We need to determine all ContainerEditors and their scrollPanes; those have the drop
-      // zones attached
-      let surfaces = this.context.surfaceManager.getSurfaces()
-
-      let scrollPanes = {}
-      surfaces.forEach((surface) => {
-        // Skip for everything but container editors
-        if (!surface.isContainerEditor()) return
-        let scrollPane = surface.context.scrollPane
-        let scrollPaneName = scrollPane.getName()
-        let surfaceName = surface.getName()
-
-        if (!scrollPanes[scrollPaneName]) {
-          let surfaces = {}
-          surfaces[surfaceName] = surface
-          scrollPanes[scrollPaneName] = {
-            scrollPane,
-            surfaces
-          }
-        } else {
-          scrollPanes[scrollPaneName].surfaces[surfaceName] = surface
-        }
-      })
-
-      // We store the scrollPanes in dragState so the Dropzones component
-      // can use it to compute dropzones per scrollpane for each contained
-      // surface
-      dragState.scrollPanes = scrollPanes
-
-      // In an internal drag, we receive the source (= node being dragged)
-      let comp = this._getIsolatedNodeOrContainerChild(
-        DefaultDOMElement.wrapNativeElement(event.target)
-      )
-      if (comp && comp.props.node) {
-        let surface = comp.context.surface
-        let nodeSelection = new NodeSelection({
-          containerId: surface.getContainerId(),
-          nodeId: comp.props.node.id,
-          surfaceId: surface.id
-        })
-        dragState.sourceSelection = nodeSelection
-      } else {
-        event.preventDefault()
-        event.stopPropagation()
-      }
-    }
-
-    this.dragState = dragState
-
     // Ensure we have a small dragIcon, so dragged content does not eat up
     // all screen space.
     var img = document.createElement("img")
     img.src = "data:image/gif;base64,R0lGODlhAQABAAAAACH5BAEKAAEALAAAAAABAAEAAAICTAEAOw==";
-    // This is not allowed in some browsers
-    // try {
-    //   event.dataTransfer.setDragImage(img, 0, 0)
-    // } catch(err) {
-    //   //
-    // }
-
-    // console.log('#### isSelectionDrag', isSelectionDrag)
-    if (!isSelectionDrag) {
-      this.emit('dragstart', this.dragState)
-    }
+    e.dataTransfer.setDragImage(img, 0, 0)
   }
 
   /*
@@ -146,37 +51,6 @@ class DragManager extends EventEmitter {
     if (!this.dragState) {
       // console.log('onDragEnter(e)', e)
       this._initDrag(e, {external: true})
-    }
-  }
-
-  _getComponents(targetEl) {
-    let res = []
-    let curr = targetEl
-    while (curr) {
-      let comp = Component.getComponentForDOMElement(curr)
-      if (comp) {
-        res.unshift(comp)
-        if(comp._isSurface) {
-          return res
-        }
-      }
-      curr = curr.parentNode
-    }
-    return null
-  }
-
-  _getIsolatedNodeOrContainerChild(targetEl) {
-    let parent, current
-    current = targetEl
-    parent = current.parentNode
-    while(parent) {
-      if (parent._comp && parent._comp._isContainerEditor) {
-        return current._comp
-      } else if (current._comp && current._comp._isIsolatedNode) {
-        return current._comp
-      }
-      current = parent
-      parent = current.parentNode
     }
   }
 
@@ -196,7 +70,7 @@ class DragManager extends EventEmitter {
         // cut and paste to destination
         console.warn('TODO: drag selection', event)
       } else {
-        this.emit('dragend')
+        this.emit('drag:finished')
       }
     } finally {
       this.dragState = null
@@ -243,6 +117,125 @@ class DragManager extends EventEmitter {
     // Manually call onDragEnd since Dropzones component stops further event
     // propagation
     this._onDragEnd(e)
+  }
+
+  /*
+    Initializes dragState, which encapsulate state through the whole
+    drag + drop operation.
+
+    ATTENTION: This can not be debugged properly in Chrome
+  */
+  _initDrag(event, options) {
+    // console.log('_initDrag')
+    let sel = this._getSelection()
+    let dragState = Object.assign({}, { event, mode: 'block'}, options)
+
+    let isSelectionDrag = (sel.isPropertySelection() || sel.isContainerSelection()) && this._isMouseInsideDOMSelection(event)
+    if (isSelectionDrag) {
+      // console.log('DragManager: starting a selection drag', sel.toString())
+      dragState.selectionDrag = true
+      dragState.sourceSelection = sel
+    } else {
+      // console.log('DragManager: started dragging a node or from external')
+      // We need to determine all ContainerEditors and their scrollPanes; those have the drop
+      // zones attached
+      let surfaces = this.context.surfaceManager.getSurfaces()
+      let scrollPanes = {}
+      surfaces.forEach((surface) => {
+        // Skip for everything but container editors
+        if (!surface.isContainerEditor()) return
+        let scrollPane = surface.context.scrollPane
+        let scrollPaneName = scrollPane.getName()
+        let surfaceName = surface.getName()
+
+        if (!scrollPanes[scrollPaneName]) {
+          let surfaces = {}
+          surfaces[surfaceName] = surface
+          scrollPanes[scrollPaneName] = {
+            scrollPane,
+            surfaces
+          }
+        } else {
+          scrollPanes[scrollPaneName].surfaces[surfaceName] = surface
+        }
+      })
+      // We store the scrollPanes in dragState so the Dropzones component
+      // can use it to compute dropzones per scrollpane for each contained
+      // surface
+      dragState.scrollPanes = scrollPanes
+      // In an internal drag, we receive the source (= node being dragged)
+      let comp = this._getIsolatedNodeOrContainerChild(
+        DefaultDOMElement.wrapNativeElement(event.target)
+      )
+      if (comp && comp.props.node) {
+        let surface = comp.context.surface
+        let nodeSelection = new NodeSelection({
+          nodeId: comp.props.node.id,
+          containerId: surface.getContainerId(),
+          surfaceId: surface.id
+        })
+        dragState.sourceSelection = nodeSelection
+      } else {
+        // console.log('.... NOPE')
+        event.preventDefault()
+        event.stopPropagation()
+      }
+    }
+
+    this.dragState = dragState
+
+    if (!isSelectionDrag) {
+      // console.log('... emitting dragstart for Dropzones')
+      this.emit('drag:started', this.dragState)
+    }
+  }
+
+  _getSelection() {
+    return this.context.editorSession.getSelection()
+  }
+
+  _isMouseInsideDOMSelection(e) {
+    let domSelection = window.getSelection()
+    if (domSelection.rangeCount === 0) {
+      return false
+    }
+    let domRange = domSelection.getRangeAt(0)
+    let selectionRect = domRange.getBoundingClientRect()
+    return e.clientX >= selectionRect.left &&
+           e.clientX <= selectionRect.right &&
+           e.clientY >= selectionRect.top &&
+           e.clientY <= selectionRect.bottom;
+  }
+
+  _getComponents(targetEl) {
+    let res = []
+    let curr = targetEl
+    while (curr) {
+      let comp = Component.getComponentForDOMElement(curr)
+      if (comp) {
+        res.unshift(comp)
+        if(comp._isSurface) {
+          return res
+        }
+      }
+      curr = curr.parentNode
+    }
+    return null
+  }
+
+  _getIsolatedNodeOrContainerChild(targetEl) {
+    let parent, current
+    current = targetEl
+    parent = current.parentNode
+    while(parent) {
+      if (parent._comp && parent._comp._isContainerEditor) {
+        return current._comp
+      } else if (current._comp && current._comp._isIsolatedNode) {
+        return current._comp
+      }
+      current = parent
+      parent = current.parentNode
+    }
   }
 
   /*

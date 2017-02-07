@@ -3,19 +3,123 @@ import forEach from '../../util/forEach'
 import getRelativeBoundingRect from '../../util/getRelativeBoundingRect'
 
 export default class Dropzones extends Component {
+
   didMount() {
-    this.context.dragManager.on('dragstart', this._onDragStart, this)
-    this.context.dragManager.on('dragend', this._onDragEnd, this)
+    this.context.dragManager.on('drag:started', this.onDragStarted, this)
+    this.context.dragManager.on('drag:finished', this.onDragFinished, this)
   }
 
-  _onDragEnter(e) {
-    // console.log('_onDragEnter', e.target)
+  render($$) {
+    let el = $$('div').addClass('sc-dropzones')
+
+
+    if (this.state.dropzones) {
+      el.on('dragenter', this.onDrag)
+        .on('dragover', this.onDrag)
+
+      // Dropzones are scoped by surfaceId
+      forEach(this.state.dropzones, (dropzones, surfaceId) => {
+        dropzones.forEach((dropzone, index) => {
+          let dropType = dropzone.type
+          let dropzoneEl
+          if (dropType === 'place') {
+            dropzoneEl = $$('div').addClass('se-dropzone')
+              .attr({
+                'data-dropzone-index': index,
+                'data-dropzone-surface': surfaceId
+              }).append(
+                $$('div').addClass('se-drop-teaser').css({
+                  top: dropzone.teaserPos
+                })
+              )
+          } else if (dropType === 'custom') {
+            dropzoneEl = $$('div').addClass('se-custom-dropzone').attr({
+              'data-dropzone-index': index,
+              'data-dropzone-surface': surfaceId
+            }).append(
+              // TODO: also provide se-custom-drop-teaser when custom
+              // dropzone is provided
+              $$('div').addClass('se-message').append(dropzone.message)
+            )
+          }
+          if (dropzoneEl) {
+            let shield = $$('div').addClass('se-drop-shield')
+              .on('dragenter', this.onDragEnter)
+              .on('dragleave', this.onDragLeave)
+              .on('drop', this.onDrop)
+              .on('mouseenter', this.onDragEnter)
+              .on('mouseleave', this.onDragLeave)
+              .on('mouseup', this.onDrop)
+            dropzoneEl.append(shield)
+            dropzoneEl.css({
+              position: 'absolute',
+              top: dropzone.top,
+              left: dropzone.left,
+              width: dropzone.width,
+              height: dropzone.height
+            })
+            el.append(dropzoneEl)
+          }
+        })
+      })
+    } else {
+      el.addClass('sm-hidden')
+    }
+    return el
+  }
+
+  // triggered by DragManager
+  onDragStarted(dragState) {
+    let dropzones = this._computeDropzones(dragState)
+    setTimeout(() => {
+      this.setState({
+        dropzones: dropzones
+      })
+    }, 250)
+  }
+
+  // triggered by DragManager
+  onDragFinished() {
+    this.setState({})
+  }
+
+  onDragEnter(e) {
+    // console.log('onDragEnter', e.target)
     e.target.parentNode.classList.add('sm-over')
   }
 
-  _onDragLeave(e) {
-    // console.log('_onDragLeave', e.target)
+  onDragLeave(e) {
+    // console.log('onDragLeave', e.target)
     e.target.parentNode.classList.remove('sm-over')
+  }
+
+  // just so that the teaser does not prevent dropping
+  onDrag(e) { // eslint-disable-line
+    // console.log('onDrag', e.target)
+    e.preventDefault()
+  }
+
+  onDrop(e) {
+    // console.log('onDrop', e.target)
+    e.preventDefault()
+    e.stopPropagation()
+    let dropzoneIndex = e.target.parentNode.dataset.dropzoneIndex
+    let dropzoneSurface = e.target.parentNode.dataset.dropzoneSurface
+    let dropzone = this.state.dropzones[dropzoneSurface][dropzoneIndex]
+    let dropParams = dropzone.dropParams
+    let dropType = dropzone.type
+    // Determine target surface
+    let targetSurface = this.context.surfaceManager.getSurface(dropzoneSurface)
+    // Original component (e.g. img element)
+    let component = dropzone.component
+    let dropzoneComponent = dropzone.dropzoneComponent
+    this.context.dragManager.handleDrop(e, {
+      targetSurface,
+      dropType,
+      dropParams,
+      component,
+      dropzoneComponent
+    })
   }
 
   /*
@@ -121,102 +225,6 @@ export default class Dropzones extends Component {
     return scopedDropzones
   }
 
-  render($$) {
-    let el = $$('div').addClass('sc-dropzones')
-    el.on('dragenter', this._onDrag)
-    el.on('dragover', this._onDrag)
-
-    if (this.state.dropzones) {
-      // Dropzones are scoped by surfaceId
-      forEach(this.state.dropzones, (dropzones, surfaceId) => {
-        dropzones.forEach((dropzone, index) => {
-          let dropType = dropzone.type
-          if (dropType === 'place') {
-            el.append(
-              $$('div').addClass('se-dropzone').attr({
-                'data-dropzone-index': index,
-                'data-dropzone-surface': surfaceId
-              }).css({
-                position: 'absolute',
-                top: dropzone.top,
-                left: dropzone.left,
-                width: dropzone.width,
-                height: dropzone.height
-              }).append(
-                $$('div').addClass('se-drop-teaser').css({
-                  top: dropzone.teaserPos
-                }),
-                $$('div').addClass('se-drop-shield')
-                  .on('dragenter', this._onDragEnter)
-                  .on('dragleave', this._onDragLeave)
-                  .on('drop', this._onDrop)
-              )
-            )
-          } else if (dropType === 'custom') {
-            el.append(
-              $$('div').addClass('se-custom-dropzone').attr({
-                'data-dropzone-index': index,
-                'data-dropzone-surface': surfaceId
-              }).css({
-                position: 'absolute',
-                top: dropzone.top,
-                left: dropzone.left,
-                width: dropzone.width,
-                height: dropzone.height
-              }).append(
-                // TODO: also provide se-custom-drop-teaser when custom
-                // dropzone is provided
-                $$('div').addClass('se-message').append(dropzone.message),
-                $$('div').addClass('se-drop-shield')
-                  .on('dragenter', this._onDragEnter)
-                  .on('dragleave', this._onDragLeave)
-                  .on('drop', this._onDrop)
-              )
-            )
-          }
-        })
-      })
-    } else {
-      el.addClass('sm-hidden')
-    }
-    return el
-  }
-
-  _onDragStart(dragState) {
-    let dropzones = this._computeDropzones(dragState)
-    setTimeout(() => {
-      this.setState({
-        dropzones: dropzones
-      })
-    }, 100)
-  }
-
-  _onDragEnd() {
-    this.setState({})
-  }
-
-  _onDrop(e) {
-    e.preventDefault()
-    e.stopPropagation()
-    let dropzoneIndex = e.target.parentNode.dataset.dropzoneIndex
-    let dropzoneSurface = e.target.parentNode.dataset.dropzoneSurface
-    let dropzone = this.state.dropzones[dropzoneSurface][dropzoneIndex]
-    let dropParams = dropzone.dropParams
-    let dropType = dropzone.type
-    // Determine target surface
-    let targetSurface = this.context.surfaceManager.getSurface(dropzoneSurface)
-    // Original component (e.g. img element)
-    let component = dropzone.component
-    let dropzoneComponent = dropzone.dropzoneComponent
-    this.context.dragManager.handleDrop(e, {
-      targetSurface,
-      dropType,
-      dropParams,
-      component,
-      dropzoneComponent
-    })
-  }
-
   _renderDropTeaser(hints) {
     if (hints.visible) {
       this.el.removeClass('sm-hidden')
@@ -228,6 +236,4 @@ export default class Dropzones extends Component {
     }
   }
 
-  // just so that the teaser does not prevent dropping
-  _onDrag(e) { e.preventDefault() }
 }
