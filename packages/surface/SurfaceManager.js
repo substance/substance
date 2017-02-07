@@ -41,7 +41,9 @@ class SurfaceManager {
   }
 
   getSurfaces() {
-    return Object.values(this.surfaces)
+    // HACK: not yet. we would need a polyfill
+    // return Object.values(this.surfaces)
+    return Object.keys(this.surfaces).map(key => this.surfaces[key])
   }
 
   /**

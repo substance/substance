@@ -188,7 +188,7 @@ export default class Dropzones extends Component {
       this.setState({
         dropzones: dropzones
       })
-    })
+    }, 100)
   }
 
   _onDragEnd() {
