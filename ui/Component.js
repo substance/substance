@@ -738,6 +738,12 @@ class Component extends EventEmitter {
     return this
   }
 
+  focus() {
+    if (this.el) {
+      return this.el.focus()
+    }
+  }
+
   hasClass(name) {
     if (this.el) {
       return this.el.hasClass(name)
