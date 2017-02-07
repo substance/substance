@@ -156,12 +156,6 @@ export function createNodeSelection({ doc, nodeId, containerId, mode, reverse, s
       surfaceId: surfaceId
     })
   } else {
-    return new NodeSelection({
-      nodeId: nodeId,
-      mode: mode || 'full',
-      reverse: reverse,
-      containerId: containerId,
-      surfaceId, surfaceId
-    })
+    return new NodeSelection({ nodeId, mode, reverse, containerId, surfaceId })
   }
 }

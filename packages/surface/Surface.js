@@ -416,7 +416,7 @@ class Surface extends Component {
   }
 
   onMouseUp(e) {
-    if (!this._shouldConsumeEvent(event)) return
+    if (!this._shouldConsumeEvent(e)) return
     e.stopPropagation()
     // console.log('mouseup on', this.getId());
     // ATTENTION: this delay is necessary for cases the user clicks
