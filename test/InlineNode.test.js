@@ -122,26 +122,29 @@ test("InlineNode should be 'focused' when having the selection (II)", function(t
   t.end()
 })
 
-// FIXME: broken since introduction of EditorSession/Flow
-// test("InlineNode should be 'co-focused' when a nested inline node has the selection", function(t) {
-//   let { editorSession, editor } = setupEditor(t, nestedInlineNode, t.sandbox)
-//   let nodes = editor.findAll('.sc-inline-node')
-//   editorSession.setSelection({
-//     type: 'property',
-//     path: ['sn2', 'title'],
-//     startOffset: 2,
-//     surfaceId: 'body/in1/sn1.title/in2'
-//   })
-//   var expected = {
-//     'body/in1': 'co-focused',
-//     'body/in1/sn1.title/in2': 'focused',
-//   }
-//   nodes.forEach(function(node){
-//     var id = node.getId()
-//     t.equal(node.getMode(), expected[id], "node '" + id + "' should be " + (expected[id] || 'not selected') )
-//   })
-//   t.end()
-// })
+// TODO: ids of Surfaces and IsolatedNodes are not very intuitive
+// body/in1 means parent surface of in1 is body -- while in1 is actually on p1.content, which is not a surface on its own
+// Maybe we can find a better way for the ids
+
+test("InlineNode should be 'co-focused' when a nested inline node has the selection", function(t) {
+  let { editorSession, editor } = setupEditor(t, nestedInlineNode)
+  let nodes = editor.findAll('.sc-inline-node')
+  editorSession.setSelection({
+    type: 'property',
+    path: ['sn2', 'title'],
+    startOffset: 2,
+    surfaceId: 'body/in1/sn1.title/in2'
+  })
+  var expected = {
+    'body/in1': 'co-focused',
+    'body/in1/sn1.title/in2': 'focused',
+  }
+  nodes.forEach(function(node){
+    var id = node.getId()
+    t.equal(node.getMode(), expected[id], "node '" + id + "' should be " + (expected[id] || 'not selected') )
+  })
+  t.end()
+})
 
 // fixtures
 
@@ -187,37 +190,37 @@ function paragraphsWithInlineNodes(doc) {
 
 // co-focusing an inline node is only possible, if the inline node itself contains
 // content with an inline node (or isolated node)
-// function nestedInlineNode(doc) {
-//   let tx = new EditingInterface(doc)
-//   twoParagraphs(tx)
-//   let sn1 = tx.create({
-//     type: "structured-node",
-//     id: "sn1",
-//     title: "ABCDEFG"
-//   })
-//   tx.setSelection({
-//     type: 'property',
-//     path: ['p1', 'content'],
-//     startOffset: 2
-//   })
-//   tx.insertInlineNode({
-//     type: 'inline-wrapper',
-//     id: 'in1',
-//     wrappedNode: sn1.id
-//   })
-//   let sn2 = doc.create({
-//     type: "structured-node",
-//     id: "sn2",
-//     title: "ABCDEFG"
-//   })
-//   tx.setSelection({
-//     type: 'paragraph',
-//     path: ['sn1', 'content'],
-//     startOffset: 4
-//   })
-//   tx.insertInlineNode({
-//     type: 'inline-wrapper',
-//     id: 'in2',
-//     wrappedNode: sn2.id
-//   })
-// }
+function nestedInlineNode(doc) {
+  let tx = new EditingInterface(doc)
+  twoParagraphs(tx)
+  let sn1 = tx.create({
+    type: "structured-node",
+    id: "sn1",
+    title: "ABCDEFG"
+  })
+  tx.setSelection({
+    type: 'property',
+    path: ['p1', 'content'],
+    startOffset: 2
+  })
+  tx.insertInlineNode({
+    type: 'inline-wrapper',
+    id: 'in1',
+    wrappedNode: sn1.id
+  })
+  let sn2 = doc.create({
+    type: "structured-node",
+    id: "sn2",
+    title: "ABCDEFG"
+  })
+  tx.setSelection({
+    type: 'property',
+    path: ['sn1', 'title'],
+    startOffset: 4
+  })
+  tx.insertInlineNode({
+    type: 'inline-wrapper',
+    id: 'in2',
+    wrappedNode: sn2.id
+  })
+}
