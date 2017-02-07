@@ -47,6 +47,7 @@ export { default as XMLImporter } from './model/XMLImporter'
 export { default as BasePackage } from './packages/base/BasePackage'
 export { default as BlockquotePackage } from './packages/blockquote/BlockquotePackage'
 export { default as CodePackage } from './packages/code/CodePackage'
+export { default as CodeblockPackage } from './packages/codeblock/CodeblockPackage'
 export { default as EmphasisPackage } from './packages/emphasis/EmphasisPackage'
 export { default as ImagePackage } from './packages/image/ImagePackage'
 export { default as InlineWrapperPackage } from './packages/inline-wrapper/InlineWrapperPackage'
@@ -65,9 +66,10 @@ export { default as FileNode } from './packages/file/FileNode'
 export { default as HeadingPackage } from './packages/heading/HeadingPackage'
 export { default as HeadingMacro } from './packages/heading/HeadingMacro'
 
-// base
+// switch-text-type
 export { default as SwitchTextTypeTool } from './packages/switch-text-type/SwitchTextTypeTool'
 export { default as SwitchTextTypeCommand } from './packages/switch-text-type/SwitchTextTypeCommand'
+export { default as SwitchTextTypePackage } from './packages/switch-text-type/SwitchTextTypePackage'
 
 // prose-editor
 export { default as ProseEditorPackage } from './packages/prose-editor/ProseEditorPackage'

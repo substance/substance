@@ -1,4 +1,5 @@
 import BasePackage from '../base/BasePackage'
+import SwitchTextTypePackage from '../switch-text-type/SwitchTextTypePackage'
 import ParagraphPackage from '../paragraph/ParagraphPackage'
 import HeadingPackage from '../heading/HeadingPackage'
 import CodeblockPackage from '../codeblock/CodeblockPackage'
@@ -21,6 +22,7 @@ export default {
     })
     // SwitchTextType, Undo/Redo etc.
     config.import(BasePackage)
+    config.import(SwitchTextTypePackage)
     config.import(ParagraphPackage)
     config.import(HeadingPackage)
     config.import(CodeblockPackage)
