@@ -4,6 +4,7 @@ import DragAndDropHandler from '../ui/DragAndDropHandler'
 import DefaultDOMElement from '../dom/DefaultDOMElement'
 import EventEmitter from '../util/EventEmitter'
 import inBrowser from '../util/inBrowser'
+import platform from '../util/platform'
 
 class DragManager extends EventEmitter {
 
@@ -20,10 +21,10 @@ class DragManager extends EventEmitter {
     ]
     if (inBrowser) {
       this.el = DefaultDOMElement.wrapNativeElement(document)
-      this.el.on('dragstart', this._onDragStart, this)
-      this.el.on('dragend', this._onDragEnd, this)
-      this.el.on('dragenter', this._onDragEnter, this)
-      this.el.on('dragexit', this._onDragExit, this)
+      this.el.on('dragstart', this.onDragStart, this)
+      this.el.on('dragend', this.onDragEnd, this)
+      this.el.on('dragenter', this.onDragEnter, this)
+      this.el.on('dragexit', this.onDragExit, this)
     }
   }
 
@@ -37,8 +38,8 @@ class DragManager extends EventEmitter {
     return this.context.editorSession.getSelection()
   }
 
-  _onDragStart(e) {
-    // console.log('#### DragManager._onDragStart')
+  onDragStart(e) {
+    // console.log('#### DragManager.onDragStart')
     this._initDrag(e, { external: false })
   }
 
@@ -126,8 +127,14 @@ class DragManager extends EventEmitter {
     // all screen space.
     var img = document.createElement("img")
     img.src = "data:image/gif;base64,R0lGODlhAQABAAAAACH5BAEKAAEALAAAAAABAAEAAAICTAEAOw==";
-    event.dataTransfer.setDragImage(img, 0, 0)
+    // This is not allowed in some browsers
+    // try {
+    //   event.dataTransfer.setDragImage(img, 0, 0)
+    // } catch(err) {
+    //   //
+    // }
 
+    // console.log('#### isSelectionDrag', isSelectionDrag)
     if (!isSelectionDrag) {
       this.emit('dragstart', this.dragState)
     }
@@ -136,9 +143,9 @@ class DragManager extends EventEmitter {
   /*
     When drag starts externally, e.g. draggin a file into the workspace
   */
-  _onDragEnter(e) {
-    // console.log('_onDragEnter(e)', e)
+  onDragEnter(e) {
     if (!this.dragState) {
+      // console.log('onDragEnter(e)', e)
       this._initDrag(e, {external: true})
     }
   }
@@ -174,8 +181,12 @@ class DragManager extends EventEmitter {
     }
   }
 
+  onDragEnd(event) {
+    // console.log('onDragEnd', event)
+    this._onDragEnd(event)
+  }
+
   _onDragEnd(event) {
-    // console.log('_onDragEnd', event)
     try {
       if (!this.dragState) {
         // TODO: There are cases where _onDragEnd is called manually via
@@ -193,9 +204,15 @@ class DragManager extends EventEmitter {
     }
   }
 
-  _onDragExit() {
-    // console.log('_onDragExit')
-    this._onDragEnd()
+  onDragExit(e) {
+    if (platform.isFF) {
+      // FF fires this quite rapidly
+    } else {
+      // TODO: OTOH, we need to find out if this
+      // is really necessary in the other browsers
+      // console.log('onDragExit', e)
+      this._onDragEnd(e)
+    }
   }
 
   /*
@@ -226,7 +243,7 @@ class DragManager extends EventEmitter {
 
     // Manually call onDragEnd since Dropzones component stops further event
     // propagation
-    this._onDragEnd()
+    this._onDragEnd(e)
   }
 
   /*
