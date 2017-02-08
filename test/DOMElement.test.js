@@ -196,4 +196,11 @@ function DOMElementTests(impl) {
     t.end()
   })
 
+  test("children should only include elements", function(t) {
+    let dummy = DefaultDOMElement.parseXML('<dummy>bli<bla></bla>blupp</dummy>')
+    t.equal(dummy.children.length, 1, 'Should return only elements')
+    t.equal(dummy.children[0].tagName, 'bla', 'Should be bla')
+    t.end()
+  })
+
 }

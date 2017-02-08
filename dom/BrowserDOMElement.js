@@ -233,6 +233,8 @@ class BrowserDOMElement extends DOMElement {
   }
 
   getChildren() {
+    // Some browsers don't filter elements here and also include text nodes,
+    // that why we can't use el.children
     let children = [];
     for (let node = this.el.firstChild; node; node = node.nextSibling) {
       if (node.nodeType === window.Node.ELEMENT_NODE) {
